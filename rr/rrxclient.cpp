@@ -22,7 +22,7 @@
 #include "x11err.h"
 
 RRDisplay rrdpy=NULL;
-int restart=1, ssl=0;
+int restart=1, ssl=0, quiet=0;
 pthread_mutex_t deadmutex;
 int port=-1;
 FILE *log=NULL;  char *logfile=NULL;
@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 			exit(0);
 		}
 		if(!stricmp(argv[i], "-s")) ssl=1;
+		if(!stricmp(argv[i], "-q")) quiet=1;
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
 			{port=(unsigned short)atoi(&argv[i][2]);}
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='L' && strlen(argv[i])>2)
@@ -184,7 +185,7 @@ void install_service(void)
 
 	if(!GetModuleFileName(NULL, imagePath, 512))
 	{
-		hputil_perror("Could not install service");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
 		exit(1);
 	}
 	sprintf(args, " --service -l%%systemdrive%%\\%s.log -p%d", SERVICENAME, port);
@@ -192,7 +193,7 @@ void install_service(void)
 	strcat(imagePath, args);
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
 	{
-		hputil_perror("Could not open service control manager");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
 		exit(1);
 	}
 	if(!(servicehnd=CreateService(managerhnd, SERVICENAME, SERVICEFULLNAME,
@@ -200,11 +201,11 @@ void install_service(void)
 		SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, imagePath, NULL, NULL, NULL, NULL,
 		NULL)))
 	{
-		hputil_perror("Could not install service");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
 		CloseServiceHandle(managerhnd);
 		exit(1);
 	}
-	hpprintf("Service installed successfully.\n");
+	if(!quiet) MessageBox(NULL, "Service Installed Successfully", "Success", MB_OK);
 	CloseServiceHandle(managerhnd);
 }
 
@@ -215,12 +216,12 @@ void remove_service(void)
 
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
 	{
-		hputil_perror("Could not open service control manager");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
 		exit(1);
 	}
 	if(!(servicehnd=OpenService(managerhnd, SERVICENAME, SERVICE_ALL_ACCESS)))
 	{
-		hputil_perror("Could not remove service");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
 		CloseServiceHandle(managerhnd);
 		exit(1);
 	}
@@ -242,11 +243,11 @@ void remove_service(void)
 	}
 	if(!DeleteService(servicehnd))
 	{
-		hputil_perror("Could not remove service");
+		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
 		CloseServiceHandle(managerhnd);
 		exit(1);
 	}
-	hpprintf("Service removed successfully.\n");
+	if(!quiet) MessageBox(NULL, "Service Removed Successfully", "Success", MB_OK);
 	CloseServiceHandle(managerhnd);
 }
 
