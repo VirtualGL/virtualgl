@@ -218,6 +218,7 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	if(curymcu==jpg->ymcus-1 && jpg->height%mcuh!=0) h=jpg->height%mcuh;
 
 	if(jpg->flags&HPJ_BOTTOMUP) bmpptr=bmpptr-(h-1)*jpg->pitch;
+
 	// Convert BGR to ABGR
 	if(ps==3 && flags&HPJ_BGR)
 	{
@@ -267,16 +268,18 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 			_throw("Invalid argument to mcu_color_convert()");
 	}
 
+	// Copy into temp buffer (so we can take advantage of locality)
+	if(bmpptr!=jpg->tmpbuf)
+	{
+		srcptr=bmpptr;  dstptr=jpg->tmpbuf;
+		for(j=0; j<h; j++, srcptr+=jpg->pitch, dstptr+=mcuw*ps)
+			mlib_memcpy(dstptr, srcptr, w*ps);
+		bmpptr=jpg->tmpbuf;  pitch=mcuw*ps;
+	}
+
 	// Extend to a full MCU (if necessary)
 	if(mcuw>w || mcuh>h)
 	{
-		if(bmpptr!=jpg->tmpbuf)
-		{
-			srcptr=bmpptr;  dstptr=jpg->tmpbuf;
-			for(j=0; j<h; j++, srcptr+=jpg->pitch, dstptr+=mcuw*ps)
-				mlib_memcpy(dstptr, srcptr, w*ps);
-			bmpptr=jpg->tmpbuf;  pitch=mcuw*ps;
-		}
 		if(mcuw>w)
 		{
 			for(j=0; j<h; j++)
