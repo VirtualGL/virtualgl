@@ -109,6 +109,26 @@ class tempctx
 		bool mc;
 };
 
+Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
+{
+	XVisualInfo *vis;
+	Window win;
+	XSetWindowAttributes wattrs;
+	Colormap cmap;
+
+	if((vis=_glXGetVisualFromFBConfig(dpy, config))==NULL) return 0;
+	cmap=XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual,
+		AllocNone);
+	wattrs.background_pixel = 0;
+	wattrs.border_pixel = 0;
+	wattrs.colormap = cmap;
+	wattrs.event_mask = ExposureMask | StructureNotifyMask;
+	win = XCreateWindow(dpy, RootWindow(dpy, vis->screen), 0, 0, w, h, 1,
+		vis->depth, InputOutput, vis->visual,
+		CWBackPixel | CWBorderPixel | CWEventMask | CWColormap, &wattrs);
+	XMapWindow(dpy, win);
+	return win;
+}
 
 pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 {
@@ -136,7 +156,8 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	#ifdef sun
 	tempctx tc(0, 0, 0);
 	#endif
-	d=glXCreatePbuffer(_localdpy, config, pbattribs);
+	if(fconfig.usewindow) d=create_window(_localdpy, config, w, h);
+	else d=glXCreatePbuffer(_localdpy, config, pbattribs);
 	if(!d) _throw("Could not create Pbuffer");
 }
 
@@ -147,7 +168,8 @@ pbuffer::~pbuffer(void)
 		#ifdef sun
 		tempctx tc(0, 0, 0);
 		#endif
-		glXDestroyPbuffer(_localdpy, d);
+		if(fconfig.usewindow) XDestroyWindow(_localdpy, d);
+		else glXDestroyPbuffer(_localdpy, d);
 	}
 }
 
@@ -314,12 +336,17 @@ void pbwin::readback(GLint drawbuf, bool force)
 			rrframe *b;
 			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
 			#ifdef GL_BGR_EXT
-			readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
-			b->flags=RRBMP_BGR;
-			#else
-			readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, b->bits, drawbuf, true);
-			b->flags=0;
+			if(littleendian())
+			{
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
+				b->flags=RRBMP_BGR;
+			}
+			else
 			#endif
+			{
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, b->bits, drawbuf, true);
+				b->flags=0;
+			}
 			b->h.dpynum=0;
 			if((dpystring=fconfig.client)==NULL)
 				dpystring=DisplayString(windpy);
