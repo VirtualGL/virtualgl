@@ -19,9 +19,9 @@
 #include <mlib.h>
 #include "hpjpeg.h"
 
-const char *lasterror="No error";
-const int _mcuw[NUMSUBOPT]={8, 16, 16};
-const int _mcuh[NUMSUBOPT]={8, 8, 16};
+static const char *lasterror="No error";
+static const int _mcuw[NUMSUBOPT]={8, 16, 16};
+static const int _mcuh[NUMSUBOPT]={8, 8, 16};
 
 #define checkhandle(h) jpgstruct *jpg=(jpgstruct *)h; \
 	if(!jpg) {lasterror="Invalid handle";  return -1;}
@@ -97,7 +97,7 @@ typedef struct _jpgstruct
 
 // Default quantization tables per JPEG spec
 
-const mlib_s16 lumqtable[64]=
+static const mlib_s16 lumqtable[64]=
 {
   16,  11,  10,  16,  24,  40,  51,  61,
   12,  12,  14,  19,  26,  58,  60,  55,
@@ -109,7 +109,7 @@ const mlib_s16 lumqtable[64]=
   72,  92,  95,  98, 112, 100, 103,  99
 };
 
-const mlib_s16 chromqtable[64]=
+static const mlib_s16 chromqtable[64]=
 {
   17,  18,  24,  47,  99,  99,  99,  99,
   18,  21,  26,  66,  99,  99,  99,  99,
@@ -122,32 +122,32 @@ const mlib_s16 chromqtable[64]=
 };
 
 // Huffman tables per JPEG spec
-const mlib_u8 dclumbits[16]=
+static const mlib_u8 dclumbits[16]=
 {
 	0, 1, 5, 1, 1, 1, 1, 1,
 	1, 0, 0, 0, 0, 0, 0, 0
 };
-const mlib_u8 dclumvals[]=
+static const mlib_u8 dclumvals[]=
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 };
 
-const mlib_u8 dcchrombits[16]=
+static const mlib_u8 dcchrombits[16]=
 {
 	0, 3, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 0, 0, 0, 0, 0
 };
-const mlib_u8 dcchromvals[]=
+static const mlib_u8 dcchromvals[]=
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 };
 
-const mlib_u8 aclumbits[16]=
+static const mlib_u8 aclumbits[16]=
 {
 	0, 2, 1, 3, 3, 2, 4, 3,
 	5, 5, 4, 4, 0, 0, 1, 0x7d
 };
-const mlib_u8 aclumvals[]=
+static const mlib_u8 aclumvals[]=
 {
 	0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
 	0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
@@ -172,12 +172,12 @@ const mlib_u8 aclumvals[]=
 	0xf9, 0xfa
 };
 
-const mlib_u8 acchrombits[16]=
+static const mlib_u8 acchrombits[16]=
 {
 	0, 2, 1, 2, 4, 4, 3, 4,
 	7, 5, 4, 4, 0, 1, 2, 0x77
 };
-const mlib_u8 acchromvals[]=
+static const mlib_u8 acchromvals[]=
 {
 	0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
 	0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -204,7 +204,7 @@ const mlib_u8 acchromvals[]=
 
 #include "hpjpeg-mlibhuff.c"
 
-mlib_u8 *e_preconvertline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int *ps, int flags,
+static mlib_u8 *e_preconvertline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int *ps, int flags,
 	int srcw, int dstw)
 {
 	// Convert BGR to ABGR
@@ -232,7 +232,7 @@ mlib_u8 *e_preconvertline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int *ps, int flags,
 	else return srcbuf;
 }
 
-mlib_u8 *e_extendline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int oldw, int neww, int ps)
+static mlib_u8 *e_extendline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int oldw, int neww, int ps)
 {
 	int i;
 	if(((long)srcbuf&7L)!=0L) {mlib_VectorCopy_U8(linebuf, srcbuf, oldw*ps);  srcbuf=linebuf;}
@@ -243,7 +243,7 @@ mlib_u8 *e_extendline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int oldw, int neww, int
 	return linebuf;
 }
 
-int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
+static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 	mlib_u8 *crbuf, int cw, int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2)
 {
 	int rgbstride=jpg->pitch;
@@ -354,7 +354,7 @@ int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 	return -1;
 }
 
-void QuantFwdRawTableInit(mlib_s16 *rawqtable, int quality)
+static void QuantFwdRawTableInit(mlib_s16 *rawqtable, int quality)
 {
 	int scale=quality, temp;  int i;
 	if(scale<=0) scale=1;  if(scale>100) scale=100;
@@ -369,7 +369,7 @@ void QuantFwdRawTableInit(mlib_s16 *rawqtable, int quality)
   }
 }
 
-int encode_jpeg_init(jpgstruct *jpg)
+static int encode_jpeg_init(jpgstruct *jpg)
 {
 	mlib_s16 rawqtable[64];  int i, nval, len;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
@@ -490,7 +490,7 @@ int encode_jpeg_init(jpgstruct *jpg)
 	return -1;
 }
 
-int encode_jpeg(jpgstruct *jpg)
+static int encode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
@@ -626,7 +626,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 //   DECOMPRESSOR
 //////////////////////////////////////////////////////////////////////////////
 
-int find_marker(jpgstruct *jpg, unsigned char *marker)
+static int find_marker(jpgstruct *jpg, unsigned char *marker)
 {
 	unsigned char b;
 	while(1)
@@ -644,7 +644,7 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 #define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
 	if(__b!=(b)) _throw("JPEG bitstream error");}
 
-int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
+static int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
 {
 	// Convert RGB to BGR
 	if(jpg->flags&HPJ_BGR && jpg->ps==3)
@@ -683,7 +683,7 @@ int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
 	return -1;
 }
 
-int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
+static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 	mlib_u8 *crbuf, int cw, int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2)
 {
 	int i, i2;
@@ -755,7 +755,7 @@ int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 	return -1;
 }
 
-int decode_jpeg_init(jpgstruct *jpg)
+static int decode_jpeg_init(jpgstruct *jpg)
 {
 	mlib_s16 rawqtable[64];  mlib_u8 rawhuffbits[16], rawhuffvalues[256];
 	int i;  unsigned char tempbyte, tempbyte2, marker;  unsigned short tempword, length;
@@ -907,7 +907,7 @@ int decode_jpeg_init(jpgstruct *jpg)
 	return -1;
 }
 
-int decode_jpeg(jpgstruct *jpg)
+static int decode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k, mcuw, mcuh, x, y;
 	int lastdc[3]={0, 0, 0};
