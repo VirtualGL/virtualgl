@@ -46,6 +46,7 @@ class FakerConfig
 			ssl=false;
 			port=-1;
 			glp=false;
+			usewindow=false;
 
 			// Fetch values from environment
 			getconfig("RRGLLIB", gllib);
@@ -84,6 +85,8 @@ class FakerConfig
 			getconfig("RRUSESSL", ssl);
 			getconfig("RRPORT", port, 0, 65535);
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
+			getconfig("RRWINDOW", usewindow);
+			if(glp) usewindow=false;
 		}
 
 		void setloqual(void)
@@ -113,6 +116,7 @@ class FakerConfig
 		bool spoil;
 		bool ssl;
 		bool glp;
+		bool usewindow;
 
 	private:
 
