@@ -794,26 +794,41 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 // This will fail if the server and client don't have a reasonably
 // similar set of fonts
+
+#ifdef USEGLP
+#include "xfonts.c"
+#endif
+
 void glXUseXFont(Font font, int first, int count, int list_base)
 {
 	TRY();
-	XFontStruct *fs=NULL;
-	Display *dpy;
-	errifnot(dpy=_XOpenDisplay(0));
-	errifnot(fs=XQueryFont(dpy, font));
-	char *fontname=NULL;
-	for(int i=0; i<fs->n_properties; i++)
+	#ifdef USEGLP
+	if(fconfig.glp)
 	{
-		char *atom;
-		errifnot(atom=XGetAtomName(dpy, fs->properties[i].name));
-		if(!strcmp(atom, "FONT"))
-			errifnot(fontname=XGetAtomName(dpy, fs->properties[i].card32));
+		Fake_glXUseXFont(font, first, count, list_base);
+		return;
 	}
-	errifnot(font=XLoadFont(_localdpy, fontname));
-	_glXUseXFont(font, first, count, list_base);
-	XUnloadFont(_localdpy, font);
-	XFreeFontInfo(NULL, fs, 1);
-	_XCloseDisplay(dpy);
+	else
+	#endif
+	{
+		XFontStruct *fs=NULL;
+		Display *dpy=NULL;  pbwin *pb=NULL;
+		errifnot(pb=winh.findpb(glXGetCurrentDrawable()));
+		dpy=pb->getwindpy();
+		errifnot(fs=XQueryFont(dpy, font));
+		char *fontname=NULL;
+		for(int i=0; i<fs->n_properties; i++)
+		{
+			char *atom;
+			errifnot(atom=XGetAtomName(dpy, fs->properties[i].name));
+			if(!strcmp(atom, "FONT"))
+				errifnot(fontname=XGetAtomName(dpy, fs->properties[i].card32));
+		}
+		errifnot(font=XLoadFont(_localdpy, fontname));
+		_glXUseXFont(font, first, count, list_base);
+		XUnloadFont(_localdpy, font);
+		XFreeFontInfo(NULL, fs, 1);
+	}
 	CATCH();
 }
 
