@@ -348,6 +348,12 @@ class rrfb : public rrframe
 	{
 		if(startline<0 || startline>h.winh-1 || endline<0 || endline>h.winh)
 			return;
+		if(flags&RRBMP_BOTTOMUP)
+		{
+			for(int i=startline; i<endline; i++)
+				fbx(fbx_awrite(&fb, 0, fb.height-i-1, 0, i, 0, 1));
+		}
+		else
 		fbx(fbx_awrite(&fb, 0, startline, 0, startline, 0, endline-startline));
 	}
 
