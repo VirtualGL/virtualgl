@@ -6,23 +6,31 @@ CC = cc
 CXX = c++
 AR = ar ruvs
 
-CDEFINES = -D_GNU_SOURCE
-ifeq ($(DEBUG), yes)
-CFLAGS = -MMD -O0 -g -Wall -fpic
-else
-CFLAGS = -MMD -O2 -Wall -fpic
-endif
+CFLAGS = -Wall -fpic
 
-LDFLAGS = -L$(LDIR) -O2
 ifeq ($(subplatform), 64)
-LDFLAGS := $(LDFLAGS) -L/usr/X11R6/lib64
+ARCHFLAG = -m64
+LDFLAGS = -L/usr/X11R6/lib64
+else
+ARCHFLAG =
+LDFLAGS = -L/usr/X11R6/lib
 endif
 
 ifeq ($(M32), yes)
-CFLAGS := $(CFLAGS) -m32
-LDFLAGS := $(LDFLAGS) -m32 -L/usr/lib
+ARCHFLAG = -m32
+LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
-HPULIB = -lhputil
-HPSECNETLIB = -lhpsecnet -lpthread -lssl
-FBXLIB = -L/usr/X11R6/lib -lfbx -lXext
+ifeq ($(DEBUG), yes)
+OPTFLAG = -O0 -g
+else
+OPTFLAG = -O2
+endif
+
+DEFAULTJPEGLIB = ipp
+
+SHFLAG = -shared
+DEPFLAG = -MM
+
+FBXLIB = -lfbx -lXext
+SOCKLIB = -lrrsocket -lssl -lpthread

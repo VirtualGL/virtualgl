@@ -1,0 +1,27 @@
+########################################
+# Irix 32-bit and 64-bit
+########################################
+
+CC = cc
+CXX = CC
+AR = ar ruvs
+
+ifeq ($(subplatform), 64)
+ARCHFLAG = -64
+else
+ARCHFLAG = -n32
+endif
+
+ifeq ($(DEBUG), yes)
+OPTFLAG = -O0 -g
+else
+OPTFLAG = -O2
+endif
+
+DEFAULTJPEGLIB = libjpeg
+
+SHFLAG = -shared
+DEPFLAG = -M
+
+FBXLIB = -lfbx -lX11 -lXext
+SOCKLIB = -lrrsocket -lssl -lcrypto -lpthread

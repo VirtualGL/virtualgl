@@ -19,7 +19,9 @@ ifeq ($(DEBUG), yes)
 LINK = "link" $(LFLAGS) -debug -NODEFAULTLIB:LIBCMT
 endif
 
+DEFAULTJPEGLIB = ipp
+
 XDKLIB = xlibgui.lib xlib.lib hclshm.lib
-HPULIB = hputil.lib ws2_32.lib
-HPSECNETLIB = hpsecnet.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib pthreadVC.lib
+SOCKLIB = rrsocket.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib ws2_32.lib
 FBXLIB = fbx.lib user32.lib gdi32.lib
+FBXXDKLIB = fbx-xdk.lib $(XDKLIB)

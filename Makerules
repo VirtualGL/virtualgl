@@ -12,10 +12,19 @@ ifeq ($(OS), Linux)
  endif
  ifeq ($(ARCH), x86_64)
   subplatform := 64
-  ifeq ($(M32), yes)
-   subplatform :=
-  endif
  endif
+endif
+ifeq ($(OS), IRIX64)
+ platform := irix
+ subplatform := 64
+endif
+ifeq ($(OS), SunOS)
+ platform := solaris
+ subplatform := 64
+endif
+
+ifeq ($(M32), yes)
+ subplatform :=
 endif
 
 # Macros which are common to all Unix platforms
@@ -53,23 +62,36 @@ CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__AP
 ifeq ($(DEBUG), yes)
 CDEFINES := $(CDEFINES) -D__DEBUG__
 endif
-CFLAGS := $(CFLAGS) $(CDEFINES) $(CINCLUDES)
+CFLAGS := $(CFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
+LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
 
 # Implicit rules
 $(ODIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $*.c -o $(ODIR)/$*.o
+	$(CC) $(CFLAGS) $(DEPFLAG) $*.c > $(ODIR)/$*.d
+	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
+	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
+	@rm -f $(ODIR)/$*.d.tmp
 
 $(ODIR)/%.o: %.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) -c $*.cpp -o $(ODIR)/$*.o
+	$(CXX) $(CFLAGS) $(DEPFLAG) $*.cpp > $(ODIR)/$*.d
+	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
+	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
+	@rm -f $(ODIR)/$*.d.tmp
 
 $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<
 
 $(ODIR)/%.obj: %.c
-	$(CC) $(CFLAGS) $(HPUINC) -c $< -Fo$@
+	$(CC) $(CFLAGS) -c $< -Fo$@
 
 $(ODIR)/%.obj: %.cpp
-	$(CXX) $(CFLAGS) $(HPUINC) -c $< -Fo$@
+	$(CXX) $(CFLAGS) -c $< -Fo$@
 
 $(LDIR)/%.lib: $(ODIR)/%.obj
 	$(AR) -OUT:$@ $<
