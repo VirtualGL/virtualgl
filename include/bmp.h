@@ -18,12 +18,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
  #include <io.h>
 #else
  #include <unistd.h>
 #endif
+#include "rrutil.h"
 
 #ifndef BI_BITFIELDS
 #define BI_BITFIELDS 3L
@@ -32,7 +34,7 @@
 #define BI_RGB 0L
 #endif
 
-#pragma pack (1)
+#define BMPHDRSIZE 54
 typedef struct _bmphdr
 {
 	unsigned short bfType;
@@ -52,6 +54,10 @@ typedef struct _bmphdr
 // the bitmap data in top-down, BGRA format.  If pad=1, each line in the output
 // data is padded to the nearest 32-bit boundary
 
+#define readme(fd, addr, size) \
+	if((bytesread=read(fd, addr, (size)))==-1) {errstr=strerror(errno);  goto finally;} \
+	if(bytesread!=(size)) {errstr="Read error";  goto finally;}
+
 static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h, int *d, int pad)
 {
 	int fd=-1, bytesread, width, height, depth, pitch, topdown=0, i, index, opitch;
@@ -65,8 +71,42 @@ static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h, 
 		errstr="NULL argument to loadbmp()";  goto finally;
 	}
 	if((fd=open(filename, flags))==-1) {errstr=strerror(errno);  goto finally;}
-	if((bytesread=read(fd, &bh, sizeof(bmphdr)))==-1) {errstr=strerror(errno);  goto finally;}
-	if(bytesread!=sizeof(bmphdr) || bh.bfType!=0x4d42 || bh.bfOffBits<sizeof(bmphdr)
+
+	readme(fd, &bh.bfType, sizeof(unsigned short));
+	readme(fd, &bh.bfSize, sizeof(unsigned int));
+	readme(fd, &bh.bfReserved1, sizeof(unsigned short));
+	readme(fd, &bh.bfReserved2, sizeof(unsigned short));
+	readme(fd, &bh.bfOffBits, sizeof(unsigned int));
+	readme(fd, &bh.biSize, sizeof(unsigned int));
+	readme(fd, &bh.biWidth, sizeof(int));
+	readme(fd, &bh.biHeight, sizeof(int));
+	readme(fd, &bh.biPlanes, sizeof(unsigned short));
+	readme(fd, &bh.biBitCount, sizeof(unsigned short));
+	readme(fd, &bh.biCompression, sizeof(unsigned int));
+	readme(fd, &bh.biSizeImage, sizeof(unsigned int));
+	readme(fd, &bh.biXPelsPerMeter, sizeof(int));
+	readme(fd, &bh.biYPelsPerMeter, sizeof(int));
+	readme(fd, &bh.biClrUsed, sizeof(unsigned int));
+	readme(fd, &bh.biClrImportant, sizeof(unsigned int));
+
+	if(!littleendian())
+	{
+		bh.bfType=byteswap16(bh.bfType);
+		bh.bfSize=byteswap(bh.bfSize);
+		bh.bfOffBits=byteswap(bh.bfOffBits);
+		bh.biSize=byteswap(bh.biSize);
+		bh.biWidth=byteswap(bh.biWidth);
+		bh.biHeight=byteswap(bh.biHeight);
+		bh.biPlanes=byteswap16(bh.biPlanes);
+		bh.biBitCount=byteswap16(bh.biBitCount);
+		bh.biCompression=byteswap(bh.biCompression);
+		bh.biSizeImage=byteswap(bh.biSizeImage);
+		bh.biXPelsPerMeter=byteswap(bh.biXPelsPerMeter);
+		bh.biYPelsPerMeter=byteswap(bh.biYPelsPerMeter);
+		bh.biClrUsed=byteswap(bh.biClrUsed);
+		bh.biClrImportant=byteswap(bh.biClrImportant);
+	}
+	if(bh.bfType!=0x4d42 || bh.bfOffBits<BMPHDRSIZE
 	|| bh.biWidth<1 || bh.biHeight==0)
 	{
 		errstr="Corrupt bitmap header";  goto finally;
@@ -111,6 +151,10 @@ static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h, 
 // This will save a top-down, BGRA buffer as a Windows bitmap.  If pad=1, each
 // line in the input data should be padded to the nearest 32-bit boundary
 
+#define writeme(fd, addr, size) \
+	if((byteswritten=write(fd, addr, (size)))==-1) {errstr=strerror(errno);  goto finally;} \
+	if(byteswritten!=(size)) {errstr="Write error";  goto finally;}
+
 static const char *savebmp(char *filename, unsigned char *buf, int w, int h, int d, int pad)
 {
 	int fd=-1, byteswritten, pitch, i, opitch;  int flags=O_RDWR|O_CREAT;
@@ -134,16 +178,50 @@ static const char *savebmp(char *filename, unsigned char *buf, int w, int h, int
 	opitch=pad?pitch:w*d;
 
 	bh.bfType=0x4d42;
-	bh.bfSize=sizeof(bmphdr)+pitch*h;
+	bh.bfSize=BMPHDRSIZE+pitch*h;
 	bh.bfReserved1=0;  bh.bfReserved2=0;
-	bh.bfOffBits=sizeof(bmphdr);
+	bh.bfOffBits=BMPHDRSIZE;
 	bh.biSize=40;
 	bh.biWidth=w;  bh.biHeight=h;
 	bh.biPlanes=0;  bh.biBitCount=d*8;
 	bh.biCompression=BI_RGB;  bh.biSizeImage=0;
 	bh.biXPelsPerMeter=0;  bh.biYPelsPerMeter=0;
 	bh.biClrUsed=0;  bh.biClrImportant=0;
-	if((byteswritten=write(fd, &bh, sizeof(bmphdr)))!=sizeof(bmphdr)) {errstr=strerror(errno);  goto finally;}
+
+	if(!littleendian())
+	{
+		bh.bfType=byteswap16(bh.bfType);
+		bh.bfSize=byteswap(bh.bfSize);
+		bh.bfOffBits=byteswap(bh.bfOffBits);
+		bh.biSize=byteswap(bh.biSize);
+		bh.biWidth=byteswap(bh.biWidth);
+		bh.biHeight=byteswap(bh.biHeight);
+		bh.biPlanes=byteswap16(bh.biPlanes);
+		bh.biBitCount=byteswap16(bh.biBitCount);
+		bh.biCompression=byteswap(bh.biCompression);
+		bh.biSizeImage=byteswap(bh.biSizeImage);
+		bh.biXPelsPerMeter=byteswap(bh.biXPelsPerMeter);
+		bh.biYPelsPerMeter=byteswap(bh.biYPelsPerMeter);
+		bh.biClrUsed=byteswap(bh.biClrUsed);
+		bh.biClrImportant=byteswap(bh.biClrImportant);
+	}
+
+	writeme(fd, &bh.bfType, sizeof(unsigned short));
+	writeme(fd, &bh.bfSize, sizeof(unsigned int));
+	writeme(fd, &bh.bfReserved1, sizeof(unsigned short));
+	writeme(fd, &bh.bfReserved2, sizeof(unsigned short));
+	writeme(fd, &bh.bfOffBits, sizeof(unsigned int));
+	writeme(fd, &bh.biSize, sizeof(unsigned int));
+	writeme(fd, &bh.biWidth, sizeof(int));
+	writeme(fd, &bh.biHeight, sizeof(int));
+	writeme(fd, &bh.biPlanes, sizeof(unsigned short));
+	writeme(fd, &bh.biBitCount, sizeof(unsigned short));
+	writeme(fd, &bh.biCompression, sizeof(unsigned int));
+	writeme(fd, &bh.biSizeImage, sizeof(unsigned int));
+	writeme(fd, &bh.biXPelsPerMeter, sizeof(int));
+	writeme(fd, &bh.biYPelsPerMeter, sizeof(int));
+	writeme(fd, &bh.biClrUsed, sizeof(unsigned int));
+	writeme(fd, &bh.biClrImportant, sizeof(unsigned int));
 
 	if((tempbuf=(unsigned char *)malloc(pitch*h))==NULL)
 	{
