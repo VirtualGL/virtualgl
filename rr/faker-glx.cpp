@@ -203,10 +203,11 @@ GLXContext glXGetCurrentContext(void)
 Display *glXGetCurrentDisplay(void)
 {
 	#ifdef USEGLP
-	static Display *dpy=NULL;
 	if(fconfig.glp)
 	{
-		if(!dpy) dpy=_XOpenDisplay(0);
+		Display *dpy=NULL;  pbwin *pb=NULL;
+		if((pb=winh.findpb(glXGetCurrentDrawable()))!=NULL)
+			dpy=pb->getwindpy();
 		return dpy;
 	}
 	else
