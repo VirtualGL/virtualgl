@@ -16,6 +16,9 @@
 #include <string.h>
 #include "hpjpeg.h"
 #include "bmp.h"
+#ifndef _WIN32
+#define stricmp strcasecmp
+#endif
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, hpjGetErrorStr());  exit(1);}}
 
