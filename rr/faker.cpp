@@ -29,6 +29,7 @@ FakerConfig fconfig;
 #include "faker-vishash.h"
 #include "faker-pmhash.h"
 #include "faker-sym.h"
+#include "glxvisual.h"
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
@@ -482,30 +483,17 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
-	XVisualInfo *v=NULL, *_localv=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL, vtemp;  int n=0;
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
-			glXConfigClass(config), &vtemp)) return NULL;
-		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
-		vish.add(dpy, v, config);
-	}
-	else
-	#endif
-	{
-		if((_localv=_glXGetVisualFromFBConfig(_localdpy, config))==NULL)
-			return NULL;
-		if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), _localv->depth, _localv->c_class, &vtemp)) {XFree(_localv);  return NULL;}
-		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) {XFree(_localv);  return NULL;}
-		vish.add(dpy, v, _localv);
-	}
+	if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
+		glXConfigClass(config), &vtemp)) return NULL;
+	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	vish.add(dpy, v, config);
 	CATCH();
 	return v;
 }
@@ -513,32 +501,6 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 XVisualInfo *glXGetVisualFromFBConfigSGIX(Display *dpy, GLXFBConfigSGIX config)
 {
 	return glXGetVisualFromFBConfig(dpy, config);
-}
-
-GLXFBConfig remotevis2localpbconfig(Display *dpy, XVisualInfo *vis)
-{
-	GLXFBConfig c=0;
-	#ifdef USEGLP
-	if(fconfig.glp) return _MatchConfig(dpy, vis);
-	else
-	#endif
-	if(!(c=vish.getpbconfig(dpy, vis)))
-	{
-		// Visual was not obtained from glXChooseVisual(), so all we can do is
-		// match it to a visual on the rendering server with like depth and class
-		// and hope for the best
-		{
-			XVisualInfo *v;
-			if((v=_GetVisual(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class))==NULL
-			&& (v=_GetVisual(_localdpy, DefaultScreen(_localdpy), 24, TrueColor))==NULL)
-				return 0;
-			glxvisual *glxv=new glxvisual(v);
-			if(!glxv) return NULL;
-			c=glxv->getpbconfig();
-			delete glxv;
-		}	
-	}	
-	return c;
 }
 
 GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_list, Bool direct)
@@ -551,8 +513,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	////////////////////
 
 	GLXFBConfig c;
-	if(!(c=remotevis2localpbconfig(dpy, vis)))
-		_throw("Could not obtain Pbuffer visual");
+	if(!(c=_MatchConfig(dpy, vis)))
+	_throw("Could not obtain Pbuffer visual");
 	int render_type=GLX_RGBA_BIT;
 	glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type);
 	#ifdef USEGLP
@@ -638,30 +600,26 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 
 GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type, GLXContext share_list, Bool direct)
 {
-	GLXContext ctx=0;  GLXFBConfig c;
+	GLXContext ctx=0;
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
-	glxvisual *glxv;
-	if(!(glxv=new glxvisual(config))) return NULL;
-	if(!(c=glxv->getpbconfig())) {delete glxv;  return NULL;}
-	delete glxv;
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!(ctx=glPCreateNewContext(c, render_type, share_list)))
+		if(!(ctx=glPCreateNewContext(config, render_type, share_list)))
 			return NULL;
 	}
 	else
 	#endif
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, c, render_type, share_list, True)))
+		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
 			return NULL;
 	}
-	ctxh.add(ctx, c);
+	ctxh.add(ctx, config);
 	CATCH();
 	return ctx;
 }
@@ -769,7 +727,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
 	TRY();
-	GLXFBConfig c=remotevis2localpbconfig(dpy, vi);
+	GLXFBConfig c=_MatchConfig(dpy, vi);
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
