@@ -1,4 +1,4 @@
-/* Copyright (C)2004 Landmark Graphics
+ /* Copyright (C)2004 Landmark Graphics
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -26,6 +26,28 @@
 #include <string.h>
 
 static int jpegsub[RR_SUBSAMP]={HPJ_444, HPJ_422, HPJ_411};
+
+// Header contained in all image structures
+#pragma pack(1)
+typedef struct _rrframeheader
+{
+	unsigned int size;       // For JPEG images, this contains the size (in bytes)
+                           // of the compressed images.  For uncompressed images,
+                           // it should be 0.
+	unsigned int winid;      // Usually the X-Window ID, but can be used for other purposes
+	unsigned short winw;     // The width of the source window
+	unsigned short winh;     // The height of the source window
+	unsigned short bmpw;     // The width of the source bitmap
+	unsigned short bmph;     // The height of the source bitmap
+	unsigned short bmpx;     // The X offset of the bitmap within the window
+	unsigned short bmpy;     // The Y offset of the bitmap within the window
+	unsigned char qual;      // Quality of destination JPEG (0-100)
+	unsigned char subsamp;   // Subsampling of destination JPEG
+                           // (RR_411, RR_422, or RR_444)
+	unsigned char eof;       // 1 if this is the last (or only) packet in the frame
+	unsigned char dpynum;    // Display number on the client machine
+} rrframeheader;
+#pragma pack()
 
 // Bitmap flags
 #define RRBMP_BOTTOMUP 1  // Bottom-up bitmap (as opposed to top-down)
