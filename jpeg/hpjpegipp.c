@@ -119,7 +119,6 @@ static __inline void _cpuid(int *flags, int *flags2)
 
 static __inline IppCpuType AutoDetect(void)
 {	
-	static int first=1;
 	int flags=0, flags2=0;  IppCpuType cpu=ippCpuUnknown;
 	_cpuid(&flags, &flags2);
 	if(flags2&SSE3MASK) cpu=ippCpuEM64T;
