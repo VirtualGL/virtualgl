@@ -15,6 +15,13 @@
 
 #ifdef _WIN32
  #include <windows.h>
+ #if defined(_X86_) || defined(_AMD64_)
+ #define USECPUID
+ #endif
+#else
+ #if defined(__i386__) || defined(__x86_64__)
+ #define USECPUID
+ #endif
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +64,69 @@ typedef struct _jpgstruct
 	Ipp8u __mcubuf[384*2+CACHE_LINE-1];  Ipp16s *mcubuf;
 	int initc, initd;
 } jpgstruct;
+
+// If IPP CPU type is unknown (i.e. non-Intel), use CPUID instruction to figure
+// out what type of vector code is supported
+#define MMXMASK (1<<23)
+#define SSEMASK (1<<25)
+#define SSE2MASK (1<<26)
+#define SSE3MASK 1
+
+static __inline void _cpuid(int *flags, int *flags2)
+{
+	int a=0, c=0, d=0;
+	#ifdef USECPUID
+
+	#ifdef _WIN32
+	__asm {
+		xor eax, eax
+		cpuid
+		mov a, eax
+	}
+	if(a<1) return;
+	__asm {
+		mov eax, 1
+		cpuid
+		mov c, ecx
+		mov d, edx
+	}
+	#else
+	__asm__ __volatile__ (
+		#ifdef __i386__
+		"pushl %%ebx\n"
+		#endif
+		"cpuid\n"
+		#ifdef __i386__
+		"popl %%ebx\n"
+		#endif
+			: "=a" (a) : "a" (0) : "bx");
+	if(a<1) return;
+	__asm__ __volatile__ (
+		#ifdef __i386__
+		"pushl %%ebx\n"
+		#endif
+		"cpuid\n"
+		#ifdef __i386__
+		"popl %%ebx\n"
+		#endif
+			: "=c" (c), "=d" (d) : "a" (1) : "bx"
+	);
+	#endif
+	*flags=d;  *flags2=c;
+
+	#endif
+}
+
+static __inline IppCpuType AutoDetect(void)
+{	
+	int flags=0, flags2=0;  IppCpuType cpu=ippCpuUnknown;
+	_cpuid(&flags, &flags2);
+	if(flags2&SSE3MASK) cpu=ippCpuEM64T;
+	else if(flags&SSE2MASK) cpu=ippCpuP4;
+	else if(flags&SSEMASK) cpu=ippCpuPIII;
+	else if(flags&MMXMASK) cpu=ippCpuPII;
+	return cpu;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -469,7 +539,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		ippStaticInitBest();  ippstaticinitcalled=1;
+		IppCpuType cpu=ippCoreGetCpuType();
+		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		else ippStaticInitBest();  ippstaticinitcalled=1;
 	}
 
 	_ippn(ippiEncodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -515,7 +587,6 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
@@ -848,7 +919,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		ippStaticInitBest();  ippstaticinitcalled=1;
+		IppCpuType cpu=ippCoreGetCpuType();
+		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		else ippStaticInitBest();  ippstaticinitcalled=1;
 	}
 
 	_ippn(ippiDecodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -909,7 +982,6 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
