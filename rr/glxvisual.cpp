@@ -110,7 +110,7 @@ void glxvisual::init(Display *dpy, GLXFBConfig config)
 
 GLXFBConfig glxvisual::getpbconfig(void)
 {
-	int nelements;  GLXFBConfig *fbconfigs;
+	int nelements;  GLXFBConfig *fbconfigs, c=0;
 	int fbattribs[]={
 		GLX_BUFFER_SIZE, buffer_size,
 		GLX_LEVEL, level,
@@ -134,12 +134,14 @@ GLXFBConfig glxvisual::getpbconfig(void)
 	errifnot(dpy);
 	fbconfigs=_glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
-	return fbconfigs[0];
+	c=fbconfigs[0];
+	XFree(fbconfigs);
+	return c;
 }
 
 GLXFBConfig glxvisual::getfbconfig(void)
 {
-	int nelements;  GLXFBConfig *fbconfigs;
+	int nelements;  GLXFBConfig *fbconfigs, c=0;
 	int fbattribs[]={
 		GLX_BUFFER_SIZE, buffer_size,
 		GLX_LEVEL, level,
@@ -162,7 +164,9 @@ GLXFBConfig glxvisual::getfbconfig(void)
 	errifnot(dpy);
 	fbconfigs=_glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
-	return fbconfigs[0];
+	c=fbconfigs[0];
+	XFree(fbconfigs);
+	return c;
 }
 
 XVisualInfo *glxvisual::getvisual(void)
