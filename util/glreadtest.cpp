@@ -85,33 +85,26 @@ void pbufferinit(Display *dpy, Window win)
 	int fbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 		GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
-	int attribList[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None};
 	GLXFBConfig *fbconfigs;  int nelements;
-	XWindowAttributes xwa;  int winw, winh;
 	GLXPbuffer pbuffer=0;
 	GLXContext ctx=0;
-	XVisualInfo *v=NULL;
 
 	try {
 
 	errifnot(win);  errifnot(dpy);
-	errifnot(XGetWindowAttributes(dpy, win, &xwa));
-	winw=DisplayWidth(dpy, DefaultScreen(dpy));
-	winh=DisplayHeight(dpy, DefaultScreen(dpy));
-	winw=min(xwa.width, winw);  winh=min(xwa.height, winh);
 	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
-	errifnot(nelements);  errifnot(fbconfigs);
-	pbattribs[1]=winw;  pbattribs[3]=winh;
-	errifnot(pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs));
-	v=glXChooseVisual(dpy, DefaultScreen(dpy), attribList);
-	errifnot(v);
-	errifnot(ctx=glXCreateContext(dpy, v, NULL, true));
-	glXMakeCurrent(dpy, pbuffer, ctx);
+	if(!nelements || !fbconfigs) _throw("Pbuffers not supported on the target display");
+	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
+	if(!(ctx=glXCreateNewContext(dpy, fbconfigs[0], GLX_RGBA_TYPE, NULL, True)))
+		_throw("Could not create GLX context");
+	if(!(pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs)))
+		_throw("Could not create Pbuffer");
+	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
 
 	} catch(...)
 	{
 		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
-		if(ctx) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);}
+		if(ctx) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);}
 		throw;
 	}
 }
@@ -305,10 +298,15 @@ int main(int argc, char **argv)
 	XSetErrorHandler(xhandler);
 	if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
 
+	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
+	{
+		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
+		exit(1);
+	}
+
 	errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
-		0, 0, WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+		0, 0, 1, 1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 		BlackPixel(dpy, DefaultScreen(dpy))));
-	errifnot(XMapRaised(dpy, win));
 	XSync(dpy, False);
 	pbufferinit(dpy, win);
 	display();
