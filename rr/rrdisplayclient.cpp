@@ -48,7 +48,7 @@ void rrdisplayclient::run(void)
 	while(!deadyet)
 	{
 		rrframe *b=NULL;
-		q.get((void **)&b);  if(deadyet) return;
+		q.get((void **)&b);  if(deadyet) break;
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
 		if(np>1)
