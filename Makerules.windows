@@ -21,7 +21,7 @@ endif
 
 DEFAULTJPEGLIB = ipp
 
-XDKLIB = xlibgui.lib xlib.lib hclshm.lib
+XDKLIB = xlib.lib hclshm.lib
 SOCKLIB = rrsocket.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib ws2_32.lib
 FBXLIB = fbx.lib user32.lib gdi32.lib
 FBXXDKLIB = fbx-xdk.lib $(XDKLIB)
