@@ -55,9 +55,6 @@ ifeq ($(prefix),)
 prefix=/usr/local
 endif
 
-ifeq ($(cfgdir),)
-cfgdir=/etc
-endif
 lib64dir=lib64
 ifeq ($(platform), solaris)
 lib64dir=lib/sparcv9
@@ -83,13 +80,9 @@ else
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
-	if [ ! -d $(cfgdir) ]; then mkdir -p $(cfgdir); fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
 	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
-	$(INSTALL) -m 644 rr/rrcert.cnf $(cfgdir)/vglcert.cnf
-	$(INSTALL) -m 644 util/nettest.pem $(cfgdir)/nettest.pem
-	$(INSTALL) -m 755 rr/newrrcert $(prefix)/bin/newvglcert
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/lib/libhpjpeg.$(SHEXT)
@@ -112,9 +105,6 @@ uninstall:
 	$(RM) $(prefix)/bin/vglclient_daemon
 	$(RM) $(prefix)/bin/vglclient_ssldaemon
 	$(RM) $(prefix)/bin/vglclient_config
-	$(RM) $(cfgdir)/vglcert.cnf
-	$(RM) $(cfgdir)/nettest.pem
-	$(RM) $(prefix)/bin/newvglcert
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/lib/libhpjpeg.$(SHEXT)
@@ -164,7 +154,7 @@ sunpkg: rr diags
 	cp rr$(subplatform).proto $(BLDDIR)
 	cat pkginfo$(subplatform).tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) cfgdir=$(BLDDIR)/pkgbuild/$(PKGDIR)/etc install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr$(subplatform).proto; \
 	rm rr$(subplatform).proto copyright depend pkginfo; \
