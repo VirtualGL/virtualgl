@@ -72,19 +72,19 @@ class rrframe
 		if(bits && primary) delete [] bits;
 	}
 
-	void init(rrframeheader *hnew, int pixelsize, int flags=RRBMP_BGR)
+	void init(rrframeheader *hnew, int ps, int fl=RRBMP_BGR)
 	{
 		if(!hnew) throw(rrerror("rrframe::init", "Invalid argument"));
-		this->flags=flags;
-		hnew->size=hnew->winw*hnew->winh*pixelsize;
+		flags=fl;
+		hnew->size=hnew->winw*hnew->winh*ps;
 		checkheader(hnew);
-		if(pixelsize<3 || pixelsize>4) _throw("Only true color bitmaps are supported");
-		if(hnew->winw!=h.winw || hnew->winh!=h.winh || this->pixelsize!=pixelsize
+		if(ps<3 || ps>4) _throw("Only true color bitmaps are supported");
+		if(hnew->winw!=h.winw || hnew->winh!=h.winh || pixelsize!=ps
 		|| !bits)
 		{
 			if(bits) delete [] bits;
-			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*pixelsize+1]);
-			this->pixelsize=pixelsize;  pitch=pixelsize*hnew->winw;
+			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*ps+1]);
+			pixelsize=ps;  pitch=ps*hnew->winw;
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
@@ -152,25 +152,25 @@ class rrframe
 
 	protected:
 
-	void dumpheader(rrframeheader *h)
+	void dumpheader(rrframeheader *hdr)
 	{
-		rrout.print("h->size    = %lu\n", h->size);
-		rrout.print("h->winid   = 0x%.8x\n", h->winid);
-		rrout.print("h->winw    = %d\n", h->winw);
-		rrout.print("h->winh    = %d\n", h->winh);
-		rrout.print("h->bmpw    = %d\n", h->bmpw);
-		rrout.print("h->bmph    = %d\n", h->bmph);
-		rrout.print("h->bmpx    = %d\n", h->bmpx);
-		rrout.print("h->bmpy    = %d\n", h->bmpy);
-		rrout.print("h->qual    = %d\n", h->qual);
-		rrout.print("h->subsamp = %d\n", h->subsamp);
-		rrout.print("h->eof     = %d\n", h->eof);
+		rrout.print("h->size    = %lu\n", hdr->size);
+		rrout.print("h->winid   = 0x%.8x\n", hdr->winid);
+		rrout.print("h->winw    = %d\n", hdr->winw);
+		rrout.print("h->winh    = %d\n", hdr->winh);
+		rrout.print("h->bmpw    = %d\n", hdr->bmpw);
+		rrout.print("h->bmph    = %d\n", hdr->bmph);
+		rrout.print("h->bmpx    = %d\n", hdr->bmpx);
+		rrout.print("h->bmpy    = %d\n", hdr->bmpy);
+		rrout.print("h->qual    = %d\n", hdr->qual);
+		rrout.print("h->subsamp = %d\n", hdr->subsamp);
+		rrout.print("h->eof     = %d\n", hdr->eof);
 	}
 
-	void checkheader(rrframeheader *h)
+	void checkheader(rrframeheader *hdr)
 	{
-		if(!h || h->winw<1 || h->winh<1 || h->bmpw<1 || h->bmph<1
-		|| h->bmpx+h->bmpw>h->winw || h->bmpy+h->bmph>h->winh)
+		if(!hdr || hdr->winw<1 || hdr->winh<1 || hdr->bmpw<1 || hdr->bmph<1
+		|| hdr->bmpx+hdr->bmpw>hdr->winw || hdr->bmpy+hdr->bmph>hdr->winh)
 			throw(rrerror("rrframe::checkheader", "Invalid header"));
 	}
 
@@ -214,7 +214,7 @@ class rrjpeg : public rrframe
 		return *this;
 	}
 
-	void init(rrframeheader *hnew, int pixelsize)
+	void init(rrframeheader *hnew, int ps)
 	{
 		init(hnew);
 	}
