@@ -14,56 +14,61 @@
 #ifndef __RRDISPLAYSERVER_H
 #define __RRDISPLAYSERVER_H
 
-#include "rrlistener.h"
+#include "rrsocket.h"
 #include "rrframe.h"
 #include "rrcwin.h"
 
-class rrdisplayserver : rrlistener
+#define MAXWIN 1024
+
+class rrdisplayserver : public Runnable
 {
 	public:
 
-	rrdisplayserver(unsigned short port, bool dossl)
-		: rrlistener(port, dossl, true)
-	{
-		hptimer_init();
-		clientthreadptr=clientthread;
-	}
+	rrdisplayserver(unsigned short, bool);
+	virtual ~rrdisplayserver(void);
 
 	private:
 
-	void receive(rrconn *) {}
-	static void *clientthread(void *);
+	void run(void);
+
+	rrsocket *listensd;
+	Thread *t;
+	bool deadyet;
 };
 
-class rrclient
+class rrserver : public Runnable
 {
 	public:
 
-	rrclient(void)
+	rrserver(rrsocket *_sd) : windows(0), sd(_sd), t(NULL)
 	{
 		memset(rrw, 0, sizeof(rrcwin *)*MAXWIN);
-		windows=0;
-		tryunix(pthread_mutex_init(&winmutex, NULL));
+		errifnot(t=new Thread(this));
+		t->start();
 	}
 
-	~rrclient(void)
+	virtual ~rrserver(void)
 	{
 		int i;
-		pthread_mutex_lock(&winmutex);
+		winmutex.lock(false);
 		for(i=0; i<windows; i++) {if(rrw[i]) {delete rrw[i];  rrw[i]=NULL;}}
 		windows=0;
-		pthread_mutex_unlock(&winmutex);  pthread_mutex_destroy(&winmutex);
+		winmutex.unlock(false);
+		rrout.println("-- Disconnecting %s", sd->remotename());
+		if(sd) {delete sd;  sd=NULL;}
 	}
 
 	private:
 
-	friend class rrdisplayserver;
+	void run(void);
+
 	rrcwin *rrw[MAXWIN];
 	int windows;
 	rrcwin *addwindow(int, Window);
 	void delwindow(rrcwin *w);
-	void receive(rrconn *c);
-	pthread_mutex_t winmutex;
+	rrcs winmutex;
+	rrsocket *sd;
+	Thread *t;
 };
 
 #endif

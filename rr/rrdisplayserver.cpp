@@ -11,50 +11,143 @@
  * wxWindows Library License for more details.
  */
 
+#ifdef _WIN32
+#include <io.h>
+#define access(a,b) _access(a,b)
+#define F_OK 0
+#endif
 #include "rrdisplayserver.h"
 
-void rrclient::receive(rrconn *c)
+#define CERTF "rrcert.pem"
+
+#ifdef _WIN32
+	#define DIRSEP "\\"
+	#define ALTDIR "."
+#else
+	#include <pwd.h>
+	#define DIRSEP "/"
+	#define ALTDIR "/etc"
+#endif
+
+char *gethomedir(void)
+{
+	#ifdef _WIN32
+	return getenv("USERPROFILE");
+	#else
+	char *homedir=NULL;  struct passwd *pw;
+	if((homedir=getenv("HOME"))!=NULL) return homedir;
+	if((pw=getpwuid(getuid()))==NULL) return NULL;
+	return pw->pw_dir;
+	#endif
+}
+
+rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl) :
+	listensd(NULL), t(NULL), deadyet(false)
+{
+	char temppath[1024];  temppath[0]=0;
+
+	if(dossl)
+	{
+		strncpy(temppath, gethomedir(), 1024);  temppath[1024]=0;
+		strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
+		if(access(temppath, F_OK)!=0)
+		{
+			#ifdef _WIN32
+			if(GetModuleFileName(NULL, temppath, 1024))
+			{
+				char *ptr;
+				if((ptr=strrchr(temppath, '\\'))!=NULL) *ptr='\0';
+			}
+			else
+			#endif
+			strncpy(temppath, ALTDIR, 1024);
+			strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
+		}
+		rrout.println("Using certificate file %s\n", temppath);
+	}
+
+	errifnot(listensd=new rrsocket(dossl));
+	listensd->listen(port==0?RR_DEFAULTPORT:port, temppath, temppath);
+	errifnot(t=new Thread(this));
+	t->start();
+}
+
+rrdisplayserver::~rrdisplayserver(void)
+{
+	deadyet=true;
+	if(listensd) listensd->close();
+	if(t) {t->stop();  t=NULL;}
+}
+
+void rrdisplayserver::run(void)
+{
+	rrsocket *sd;  rrserver *s;
+
+	while(!deadyet)
+	{
+		try
+		{
+			s=NULL;  sd=NULL;
+			sd=listensd->accept();  if(deadyet) break;
+			rrout.println("++ Connection from %s.", sd->remotename());
+			s=new rrserver(sd);
+			continue;
+		}
+		catch(rrerror &e)
+		{
+			if(!deadyet)
+			{
+				rrout.println("%s:\n%s", e.getMethod(), e.getMessage());
+				if(s) delete s;  if(sd) delete sd;
+				continue;
+			}
+		}
+	}
+	rrout.println("Listener exiting ...");
+	if(listensd) {delete listensd;  listensd=NULL;}
+}
+
+void rrserver::run(void)
 {
 	rrcwin *w=NULL;
 	rrjpeg *j;
 	rrframeheader h;
 
-	do
+	try
 	{
-		c->recv((char *)&h, sizeof(rrframeheader));
-		errifnot(w=addwindow(h.dpynum, h.winid));
-
-		try
+		while(1)
 		{
-			j=w->getFrame();
-		}
-		catch (...) {if(w) delwindow(w);  throw;}
+			do
+			{
+				sd->recv((char *)&h, sizeof(rrframeheader));
+				errifnot(w=addwindow(h.dpynum, h.winid));
 
-		j->init(&h);
-		if(!h.eof)
-		{
-			c->recv((char *)j->bits, h.size);
-		}
+				try {j=w->getFrame();}
+				catch (...) {if(w) delwindow(w);  throw;}
 
-		try
-		{
-			w->drawFrame(j);
-		}
-		catch (...) {if(w) delwindow(w);  throw;}
+				j->init(&h);
+				if(!h.eof) {sd->recv((char *)j->bits, h.size);}
 
-		if(j->h.eof) break;
+				try {w->drawFrame(j);}
+				catch (...) {if(w) delwindow(w);  throw;}
+			} while(!(j && j->h.eof));
+
+			char cts=1;
+			sd->send(&cts, 1);
+		}
 	}
-	while(1);
-
-	char cts=1;
-	c->send(&cts, 1);
+	catch(rrerror &e)
+	{
+		rrout.println("Server error in %s\n%s", e.getMethod(), e.getMessage());
+	}
+	if(t) delete t;
+	delete this;
 }
 
-
-void rrclient::delwindow(rrcwin *w)
+void rrserver::delwindow(rrcwin *w)
 {
 	int i, j;
-	rrlock l(winmutex);
+	rrcs::safelock l(winmutex);
 	if(windows>0)
 		for(i=0; i<windows; i++)
 			if(rrw[i]==w)
@@ -65,11 +158,10 @@ void rrclient::delwindow(rrcwin *w)
 			}
 }
 
-
 // Register a new window with this server
-rrcwin *rrclient::addwindow(int dpynum, Window win)
+rrcwin *rrserver::addwindow(int dpynum, Window win)
 {
-	rrlock l(winmutex);
+	rrcs::safelock l(winmutex);
 	int winid=windows;
 	if(windows>0)
 	{
@@ -79,36 +171,8 @@ rrcwin *rrclient::addwindow(int dpynum, Window win)
 	if(windows>=MAXWIN) _throw("No free window ID's");
 	if(dpynum<0 || dpynum>255 || win==None) _throw("Invalid argument");
 	rrw[winid]=new rrcwin(dpynum, win);
+
 	if(!rrw[winid]) _throw("Could not create window instance");
 	windows++;
 	return rrw[winid];
-}
-
-
-void *rrdisplayserver::clientthread(void *param)
-{
-	rrltparam *tp=(rrltparam *)param;
-	rrdisplayserver *rrl=(rrdisplayserver *)tp->rrl;
-	rrconn *c=tp->c;
-	int clientrank=tp->clientrank;
-	delete tp;
-
-	rrclient *rrc=new rrclient;
-
-	try
-	{
-		if(!rrc) _throw("Could not create client instance");
-		while(!rrl->deadyet) rrc->receive(c);
-	}
-	catch(RRError e)
-	{
-		if(!rrl->deadyet)
-		{
-			hpprintf("Client %d- %s (%d):\n%s\n", clientrank, e.file, e.line, e.message);
-			if(rrc) {delete rrc;  rrc=NULL;}
-			rrl->removeclient(c, false);
-		}
-	}
-	if(rrc) delete rrc;
-	return 0;
 }
