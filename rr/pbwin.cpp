@@ -52,6 +52,8 @@ int glerror(void)
 // drawable and then "pop the stack" after we're done with it.  It does nothing
 // unless there is already a valid context established
 
+#define EXISTING_DRAWABLE (GLXDrawable)-1
+
 class tempctx
 {
 	public:
@@ -62,7 +64,8 @@ class tempctx
 			mc(false)
 		{
 			if(!_dpy || !_ctx || (!_read && !_draw)) return;
-			if(read==-1) read=_read;  if(draw==-1) draw=_draw;
+			if(read==EXISTING_DRAWABLE) read=_read;
+			if(draw==EXISTING_DRAWABLE) draw=_draw;
 			if(_read!=read || _draw!=draw || _ctx!=ctx)
 			{
 				_glXMakeContextCurrent(_dpy, draw, read, ctx);
@@ -355,7 +358,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
-	tempctx tc(-1, glXGetCurrentDrawable());
+	tempctx tc(EXISTING_DRAWABLE, glXGetCurrentDrawable());
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
