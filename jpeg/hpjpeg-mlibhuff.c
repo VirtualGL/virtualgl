@@ -12,7 +12,7 @@
 #include <string.h>
 
 
-const int jpeg_natural_order[64+16] =
+static const int jpeg_natural_order[64+16] =
 {
 	 0,  1,  8, 16,  9,  2,  3, 10,
 	17, 24, 32, 25, 18, 11,  4,  5,
@@ -39,7 +39,7 @@ static int bits_needed_init = 0;
  * Note this is also used by jcphuff.c.
  */
 
-int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, c_derived_tbl *dtbl)
+static int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, c_derived_tbl *dtbl)
 {
 	int p, i, l, lastp, si, maxsymbol;
 	char huffsize[257];
@@ -151,7 +151,7 @@ int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, 
 
 /* Encode a single block's worth of coefficients */
 
-int encode_one_block (jpgstruct *jpg, mlib_s16 *block,
+static int encode_one_block (jpgstruct *jpg, mlib_s16 *block,
 	int *last_dc_val, c_derived_tbl *dctbl, c_derived_tbl *actbl)
 {
 	register int temp, temp2;
@@ -244,7 +244,7 @@ int encode_one_block (jpgstruct *jpg, mlib_s16 *block,
 }
 
 
-int flush_bits (jpgstruct *jpg)
+static int flush_bits (jpgstruct *jpg)
 {
 	register int huffbuf = jpg->huffbuf;
 	register int put_bits = jpg->huffbits;
@@ -264,7 +264,7 @@ int flush_bits (jpgstruct *jpg)
  * This routine also performs some validation checks on the table.
  *
  */
-int jpeg_make_d_derived_tbl(mlib_u8 *bits, mlib_u8 *vals, int isDC, d_derived_tbl *dtbl)
+static int jpeg_make_d_derived_tbl(mlib_u8 *bits, mlib_u8 *vals, int isDC, d_derived_tbl *dtbl)
 {
 	int p, i, l, si, numsymbols;
 	int lookbits, ctr;
@@ -411,7 +411,7 @@ typedef struct
 #define MIN_GET_BITS  (BIT_BUF_SIZE-7)
 
 /* Load up the bit buffer to a depth of at least nbits */
-int jpeg_fill_bit_buffer (bitread_working_state * state, register int get_buffer,
+static int jpeg_fill_bit_buffer (bitread_working_state * state, register int get_buffer,
 	register int bits_left, int nbits)
 {
 	register mlib_u8 * next_input_byte = state->next_input_byte;
@@ -549,7 +549,7 @@ int jpeg_fill_bit_buffer (bitread_working_state * state, register int get_buffer
  * See jdhuff.h for info about usage.
  */
 
-int jpeg_huff_decode (bitread_working_state * state, register int get_buffer,
+static int jpeg_huff_decode (bitread_working_state * state, register int get_buffer,
 	register int bits_left, d_derived_tbl *htbl, int min_bits)
 {
 	register int l = min_bits;
@@ -660,7 +660,7 @@ static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
 
 /* Decode a single block's worth of coefficients */
 
-int decode_one_block (jpgstruct *jpg, mlib_s16 *block,
+static int decode_one_block (jpgstruct *jpg, mlib_s16 *block,
 	int *last_dc_val, d_derived_tbl *dctbl, d_derived_tbl *actbl)
 {
 	register int get_buffer, bits_left, s, k, r;
