@@ -35,7 +35,7 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 	static int testnum=1;
 	int pitch=((w*ps)+3)&(~3);
 
-	if((jpegbuf=(unsigned char *)malloc(w*h*3)) == NULL
+	if((jpegbuf=(unsigned char *)malloc(HPJBUFSIZE(w, h))) == NULL
 	|| (rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL
 	|| (compstripsize=(unsigned long *)malloc(sizeof(unsigned long)*h)) == NULL)
 	{
