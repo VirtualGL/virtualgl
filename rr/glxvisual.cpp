@@ -18,7 +18,7 @@
 // This class attempts to manage visual properties across Windows and Pbuffers
 // and across GLX 1.0 and 1.3 in a sane manner
 
-#include "rrcommon.h"
+#include "rrerror.h"
 
 #define _case(ec) case ec: return "GLX Error: "#ec;
 static const char *glxerr(int glxerror)
