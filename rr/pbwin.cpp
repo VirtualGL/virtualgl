@@ -69,7 +69,7 @@ class tempctx
 			if(!_ctx || (!_read && !_draw)) return;
 			if(!fconfig.glp)
 			{
-				_dpy=_glXGetCurrentDisplay();  if(!_dpy) return;
+				_dpy=glXGetCurrentDisplay();  if(!_dpy) return;
 			}
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;

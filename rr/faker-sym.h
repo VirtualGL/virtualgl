@@ -110,9 +110,11 @@ funcdef2(void, glXDestroyContext, Display *, dpy, GLXContext, ctx,);
 
 funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 
+#ifdef USEGLP
 funcdef0(GLXContext, glXGetCurrentContext, return);
 
 funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
+#endif
 
 funcdef2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx, return);
 
@@ -162,9 +164,11 @@ funcdef2(void, glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap,);
 
 funcdef2(void, glXDestroyWindow, Display *, dpy, GLXWindow, win,);
 
+#ifdef USEGLP
 funcdef0(GLXDrawable, glXGetCurrentReadDrawable, return);
 
 funcdef0(Display*, glXGetCurrentDisplay, return);
+#endif
 
 funcdef4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
 	int, attribute, int *, value, return);

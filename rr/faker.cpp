@@ -54,9 +54,9 @@ void _fprintf (FILE *f, const char *format, ...)
 Display *_localdpy=NULL;
 #ifdef USEGLP
 GLPDevice _localdev=-1;
-#define _localdisplayiscurrent() ((fconfig.glp && glPGetCurrentDevice()==_localdev) || (!fconfig.glp && _glXGetCurrentDisplay()==_localdpy))
+#define _localdisplayiscurrent() ((fconfig.glp && glPGetCurrentDevice()==_localdev) || (!fconfig.glp && glXGetCurrentDisplay()==_localdpy))
 #else
-#define _localdisplayiscurrent() (_glXGetCurrentDisplay()==_localdpy)
+#define _localdisplayiscurrent() (glXGetCurrentDisplay()==_localdpy)
 #endif
 #define _isremote(dpy) (fconfig.glp || (_localdpy && dpy!=_localdpy))
 
@@ -881,7 +881,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	GLXDrawable draw=glXGetCurrentDrawable();
 	GLXDrawable read=glXGetCurrentReadDrawable();
 	Display *dpy=NULL;
-	if(!fconfig.glp) dpy=_glXGetCurrentDisplay();
+	if(!fconfig.glp) dpy=glXGetCurrentDisplay();
 	if((dpy || fconfig.glp) && (draw || read) && ctx)
 	{
 		GLXDrawable newread=read, newdraw=draw;

@@ -191,18 +191,16 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	return GLX_BAD_ATTRIBUTE;
 }
 
+#ifdef USEGLP
 GLXContext glXGetCurrentContext(void)
 {
-	#ifdef USEGLP
 	if(fconfig.glp) return glPGetCurrentContext();
 	else
-	#endif
 	return _glXGetCurrentContext();
 }
 
 Display *glXGetCurrentDisplay(void)
 {
-	#ifdef USEGLP
 	if(fconfig.glp)
 	{
 		Display *dpy=NULL;  pbwin *pb=NULL;
@@ -211,27 +209,23 @@ Display *glXGetCurrentDisplay(void)
 		return dpy;
 	}
 	else
-	#endif
 	return _glXGetCurrentDisplay();
 }
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	#ifdef USEGLP
 	if(fconfig.glp) return glPGetCurrentBuffer();
 	else
-	#endif
 	return _glXGetCurrentDrawable();
 }
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	#ifdef USEGLP
 	if(fconfig.glp) return glPGetCurrentReadBuffer();
 	else
-	#endif
 	return _glXGetCurrentReadDrawable();
 }
+#endif
 
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *value)
 {
