@@ -178,7 +178,13 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	switch(attrib)
 	{
 		case GLX_USE_GL:
-			if(value) {*value=1;  return 0;}
+			if(value)
+			{
+				if(vis->depth>=24 && (vis->c_class==TrueColor || vis->c_class==DirectColor))
+					*value=1;
+				else *value=0;
+				return 0;
+			}
 			else return GLX_BAD_VALUE;
 		case GLX_RGBA:
 			if((err=glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &glxvalue))!=0)
