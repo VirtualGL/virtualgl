@@ -493,11 +493,10 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 }
 
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
-	unsigned char *srcbuf, int width, int height, int ps,
+	unsigned char *srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsub, int qual, int flags)
 {
-	int pitch;
 	checkhandle(h);
 
 	if(srcbuf==NULL || width<=0 || height<=0
@@ -508,8 +507,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
 
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
+	if(pitch==0) pitch=width*ps;
 
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
@@ -863,10 +861,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
-	unsigned char *dstbuf, int width, int height, int ps,
+	unsigned char *dstbuf, int width, int pitch, int height, int ps,
 	int flags)
 {
-	int pitch;
 	checkhandle(h);
 
 	if(srcbuf==NULL || size<=0
@@ -876,8 +873,7 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
 
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
+	if(pitch==0) pitch=width*ps;
 
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
