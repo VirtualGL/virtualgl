@@ -13,7 +13,7 @@
 
 #define __case(m) case m:  return #m;
 
-static char *x11error(int code)
+static const char *x11error(int code)
 {
 	if(code>=FirstExtensionError && code<=LastExtensionError)
 		return "Extension error";

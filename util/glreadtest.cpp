@@ -36,7 +36,7 @@ typedef struct _pixelformat
 	int pixelsize;
 	int glformat;
 	int bgr;
-	char *name;
+	const char *name;
 } pixelformat;
 
 #if defined(GL_BGRA_EXT) && defined(GL_BGR_EXT)
@@ -120,7 +120,7 @@ void pbufferinit(Display *dpy, Window win)
 // Useful functions
 //////////////////////////////////////////////////////////////////////
 
-static int check_errors(char * tag)
+static int check_errors(const char * tag)
 {
 	int i, ret;  char *s;
 	ret=0;

@@ -18,10 +18,10 @@
 #include "fakerconfig.h"
 extern FakerConfig fconfig;
 
-void *loadsym(void *dllhnd, char *symbol, int quiet)
+void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
-	sym=dlsym(dllhnd, symbol);
+	sym=dlsym(dllhnd, (char *)symbol);
 	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);  return NULL;}
 	return sym;
 }

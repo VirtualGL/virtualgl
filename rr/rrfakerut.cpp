@@ -20,7 +20,7 @@
 
 #define NUMWINDOWS 2
 
-static int check_errors(char * tag)
+static int check_errors(const char * tag)
 {
 	int i;
 	int ret;

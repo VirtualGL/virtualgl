@@ -46,7 +46,7 @@ class FakerConfig
 			gllib=NULL;
 			x11lib=NULL;
 			client=NULL;
-			localdpystring=":0";
+			localdpystring=(char *)":0";
 			loqual=90;
 			losubsamp=RR_411;
 			hiqual=95;

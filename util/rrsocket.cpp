@@ -55,7 +55,7 @@ rrsocket::rrsocket(bool _dossl=false) : dossl(_dossl)
 	if(!sslinit && dossl)
 	{
 		#if defined(sun)||defined(sgi)
-		char *buf="ajsdluasdb5nq457q67na867qm8v67vq4865j7bnq5q867n";
+		const char *buf="ajsdluasdb5nq457q67na867qm8v67vq4865j7bnq5q867n";
 		#endif
 		SSL_library_init();
 		#if defined(sun)||defined(sgi)
