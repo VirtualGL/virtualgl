@@ -45,10 +45,9 @@ int main(int argc, char **argv)
 
 	rrdisplayclient rrdpy(servername, port, false);
 	int w, h, d=3;
-	const char *err;
-	if((err=loadbmp(argv[1], &buf, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
-	if((err=loadbmp(argv[1], &buf2, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
-	if((err=loadbmp(argv[1], &buf3, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
+	if(loadbmp(argv[1], &buf, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf2, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf3, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
 	printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
 
 	if(servername)
