@@ -226,14 +226,13 @@ class rrbitmap : public rrframe
 			XSync(wh.dpy, False);
 			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
 		}
-		if(fb.ps<3 || fb.ps>4) _throw("Display must be 24-bit or 32-bit true color");
 		memcpy(&h, hnew, sizeof(rrframeheader));
 		if(h.winw>fb.width) h.winw=fb.width;
 		if(h.winh>fb.height) h.winh=fb.height;
-		pixelsize=fb.ps;  pitch=fb.xi->bytes_per_line;  bits=(unsigned char *)fb.bits;
+		pixelsize=fbx_ps[fb.format];  pitch=fb.pitch;  bits=(unsigned char *)fb.bits;
 		flags=0;
-		if(fb.bgr) flags|=RRBMP_BGR;
-		if(fb.xi->bytes_per_line!=fb.width*fb.ps) flags|=RRBMP_EOLPAD;
+		if(fbx_bgr[fb.format]) flags|=RRBMP_BGR;
+		if(fbx_alphafirst[fb.format]) flags|=RRBMP_ALPHAFIRST;
 	}
 
 	rrbitmap& operator= (rrjpeg& f)
@@ -243,7 +242,8 @@ class rrbitmap : public rrframe
 			_throw("JPEG not initialized");
 		init(&f.h);
 		if(!fb.xi) _throw("Bitmap not initialized");
-		if(fb.bgr) hpjflags|=HPJ_BGR;
+		if(fbx_bgr[fb.format]) hpjflags|=HPJ_BGR;
+		if(fbx_alphafirst[fb.format]) hpjflags|=HPJ_ALPHAFIRST;
 		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
 		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
 		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
@@ -252,15 +252,22 @@ class rrbitmap : public rrframe
 			{
 				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
 			}
-			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy+f.h.bmpx*fb.ps],
-				bmpw, fb.xi->bytes_per_line, bmph, fb.ps, hpjflags));
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.pitch*f.h.bmpy+f.h.bmpx*fbx_ps[fb.format]],
+				bmpw, fb.pitch, bmph, fbx_ps[fb.format], hpjflags));
 		}
 		return *this;
 	}
 
 	void redraw(void)
 	{
-		fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
+		if(flags&RRBMP_BOTTOMUP)
+		{
+			for(int i=0; i<fb.height; i++)
+				fbx(fbx_awrite(&fb, 0, fb.height-i-1, 0, i, 0, 1));
+			fbx(fbx_sync(&fb));
+		}
+		else
+			fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 	}
 
 	void draw(void)
