@@ -24,7 +24,7 @@ void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 		_i, j;
 	if(flags&HPJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
 	memset(buf, 0, w*h*ps);
-	for(_i=0; _i<h/2; _i++)
+	for(_i=0; _i<16; _i++)
 	{
 		if(flags&HPJ_BOTTOMUP) i=h-_i-1;  else i=_i;
 		for(j=0; j<w; j++)
@@ -37,7 +37,7 @@ void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 			}
 		}
 	}
-	for(_i=h/2; _i<h; _i++)
+	for(_i=16; _i<h; _i++)
 	{
 		if(flags&HPJ_BOTTOMUP) i=h-_i-1;  else i=_i;
 		for(j=0; j<w; j++)
@@ -56,7 +56,7 @@ int checkbuf(unsigned char *buf, int w, int h, int ps, int flags)
 	int roffset=(flags&HPJ_BGR)?2:0, goffset=1, boffset=(flags&HPJ_BGR)?0:2, i,
 		_i, j;
 	if(flags&HPJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
-	for(_i=0; _i<h/2; _i++)
+	for(_i=0; _i<16; _i++)
 	{
 		if(flags&HPJ_BOTTOMUP) i=h-_i-1;  else i=_i;
 		for(j=0; j<w; j++)
@@ -74,7 +74,7 @@ int checkbuf(unsigned char *buf, int w, int h, int ps, int flags)
 			}
 		}
 	}
-	for(_i=h/2; _i<h; _i++)
+	for(_i=16; _i<h; _i++)
 	{
 		if(flags&HPJ_BOTTOMUP) i=h-_i-1;  else i=_i;
 		for(j=0; j<w; j++)
@@ -197,6 +197,7 @@ void dotest(int w, int h, int ps, char *basefilename)
 		{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  goto finally;}
 	if((dhnd=hpjInitDecompress())==NULL)
 		{printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());  goto finally;}
+
 	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, HPJ_444, 100, 0);
 	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, HPJ_444, 100, 0);
 
@@ -245,7 +246,7 @@ void dotest1(void)
 		for(i=1; i<MAXLENGTH; i++)
 		{
 			if(i%100==0) printf("%.4d x %.4d\b\b\b\b\b\b\b\b\b\b\b", i, j);
-			if((bmpbuf=(unsigned char *)malloc(i*j*4))==NULL			
+			if((bmpbuf=(unsigned char *)malloc(i*j*4))==NULL
 			|| (jpgbuf=(unsigned char *)malloc(HPJBUFSIZE(i, j)))==NULL)
 			{
 				printf("Memory allocation failure\n");  goto finally;
@@ -259,7 +260,7 @@ void dotest1(void)
 				jpgbuf, &size, HPJ_444, 100, HPJ_BGR));
 			free(bmpbuf);  bmpbuf=NULL;  free(jpgbuf);  jpgbuf=NULL;
 
-			if((bmpbuf=(unsigned char *)malloc(j*i*4))==NULL			
+			if((bmpbuf=(unsigned char *)malloc(j*i*4))==NULL
 			|| (jpgbuf=(unsigned char *)malloc(HPJBUFSIZE(j, i)))==NULL)
 			{
 				printf("Memory allocation failure\n");  goto finally;
@@ -283,8 +284,8 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
-	dotest(32, 32, 3, "test");
-	dotest(32, 32, 4, "test");
+	dotest(36, 36, 3, "test");
+	dotest(36, 36, 4, "test");
 	dotest1();
 
 	return 0;
