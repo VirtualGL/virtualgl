@@ -3,7 +3,8 @@
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
- * The contents of this file were shamelessly borrowed from libjpeg v6b.
+ * The contents of this file were shamelessly borrowed from libjpeg v6b
+ * with optimizations from jpeg-mmx (http://mjpeg.sourceforge.net/)
  * It contains only the routines necessary to implement Huffman encoding and
  * decoding for the Sun MediaLib JPEG codec for VirtualGL.
  */
@@ -25,6 +26,11 @@ const int jpeg_natural_order[64+16] =
 	63, 63, 63, 63, 63, 63, 63, 63
 };
 
+static unsigned char lookup_bits_needed[256];
+static int bits_needed_init = 0;
+
+#define bits_needed(val) ((val&(~0xFF))? 8+lookup_bits_needed[val>>8]:lookup_bits_needed[val])
+
 
 /*
  * Compute the derived values for a Huffman table.
@@ -39,6 +45,21 @@ int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, 
 	char huffsize[257];
 	unsigned int huffcode[257];
 	unsigned int code;
+
+	if( !bits_needed_init )
+	{
+		int i;
+		int temp;
+		unsigned int nbits;
+		for(i = 0; i < 256; ++i )
+		{
+			nbits = 1;
+			temp = i;
+			while ((temp >>= 1)) ++nbits;
+			lookup_bits_needed[i] = (unsigned char)nbits;
+		}
+		bits_needed_init = 1;
+	}
 
 	/* Figure C.1: make table of Huffman code length for each symbol */
 	p = 0;
@@ -98,6 +119,9 @@ int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, 
 		dtbl->ehufsi[i] = huffsize[p];
 	}
 	return 0;
+
+	bailout:
+	return -1;
 }
 
 
@@ -109,43 +133,21 @@ int jpeg_make_c_derived_tbl(const mlib_u8 *bits, const mlib_u8 *vals, int isDC, 
  * between calls, so 24 bits are sufficient.
  */
 
-inline int emit_bits (jpgstruct *jpg, unsigned int code, int size)
-/* Emit some bits; return TRUE if successful, FALSE if must suspend */
-{
-	/* This routine is heavily used, so it's worth coding tightly. */
-	register int put_buffer = (int) code;
-	register int put_bits = jpg->huffbits;
-
-	/* if size is 0, caller used an invalid Huffman table entry */
-	if (size == 0) _throw("Invalid Huffman table");
-
-	put_buffer &= (((int) 1)<<size) - 1; /* mask off any extra bits in code */
-
-	put_bits += size;		/* new number of bits in buffer */
-
-	put_buffer <<= 24 - put_bits; /* align incoming bits */
-
-	put_buffer |= jpg->huffbuf; /* and merge with old buffer contents */
-
-	while (put_bits >= 8)
-	{
-		int c = (int) ((put_buffer >> 16) & 0xFF);
-
-		write_byte(jpg, c);
-		if (c == 0xFF)
-		{		/* need to stuff a zero byte? */
-			write_byte(jpg, 0);
-		}
-		put_buffer <<= 8;
-		put_bits -= 8;
-	}
-
-	jpg->huffbuf = put_buffer; /* update state variables */
-	jpg->huffbits = put_bits;
-
-	return 0;
+#define emit_bits(code, size) {  \
+	register int put_buffer = (int) code;  \
+	put_bits += size;  /* new number of bits in buffer */  \
+	put_buffer <<= 24 - put_bits;  /* align incoming bits */  \
+	put_buffer |= huffbuf;  /* and merge with old buffer contents */  \
+	while (put_bits >= 8)  {  \
+		*jpgptr = put_buffer >> 16;  bytes++;  \
+		if (*(jpgptr++) == 0xFF) {  /* need to stuff a zero byte? */  \
+			*(jpgptr++)=0;  bytes++;  \
+		}  \
+		put_buffer <<= 8;  \
+		put_bits -= 8;  \
+	}  \
+	huffbuf = put_buffer;  \
 }
-
 
 /* Encode a single block's worth of coefficients */
 
@@ -154,7 +156,11 @@ int encode_one_block (jpgstruct *jpg, mlib_s16 *block,
 {
 	register int temp, temp2;
 	register int nbits;
-	register int k, r, i;
+	register int k, r, i, index;
+	register int huffbuf = jpg->huffbuf;
+	register int put_bits = jpg->huffbits;
+	register mlib_u8 *jpgptr=jpg->jpgptr;
+	register long bytes=0;
 
 	/* Encode the DC coefficient difference per section F.1.2.1 */
 	temp = temp2 = block[0] - *last_dc_val;
@@ -168,81 +174,87 @@ int encode_one_block (jpgstruct *jpg, mlib_s16 *block,
 	}
 
 	/* Find the number of bits needed for the magnitude of the coefficient */
-	nbits = 0;
-	while (temp)
-	{
-		nbits++;
-		temp >>= 1;
-	}
+	nbits = bits_needed(temp);
+	nbits = !temp ? 0 : nbits;
+
 	/* Check for out-of-range coefficient values.
 	 * Since we're encoding a difference, the range limit is twice as much.
 	 */
 	if (nbits > 10+1) _throw("Bad DCT coefficient");
 
 	/* Emit the Huffman-coded symbol for the number of bits */
-	_catch( emit_bits(jpg, dctbl->ehufco[nbits], dctbl->ehufsi[nbits]) );
+	emit_bits(dctbl->ehufco[nbits], dctbl->ehufsi[nbits]);
 
 	/* Emit that number of bits of the value, if positive, */
 	/* or the complement of its magnitude, if negative. */
-	if (nbits)			/* emit_bits rejects calls with size 0 */
-		_catch( emit_bits(jpg, (unsigned int) temp2, nbits) );
+	temp2 &= (((int) 1)<<nbits) - 1;  /* mask off any extra bits in code */
+ 	if (nbits)			/* emit_bits rejects calls with size 0 */
+		emit_bits((unsigned int) temp2, nbits);
 
 	/* Encode the AC coefficients per section F.1.2.2 */
 	r = 0;			/* r = run length of zeros */
+	k = 1;
+	index = jpeg_natural_order[1];
 
-	for (k = 1; k < 64; k++)
+	while( k < 64 )
 	{
-		if ((temp = block[jpeg_natural_order[k]]) == 0) r++;
-		else
+		temp = block[index];  ++k;
+		if (temp == 0) ++r;
+		else 
 		{
 			/* if run length > 15, must emit special run-length-16 codes (0xF0) */
 			while (r > 15)
 			{
-				_catch( emit_bits(jpg, actbl->ehufco[0xF0], actbl->ehufsi[0xF0]) );
+				emit_bits(actbl->ehufco[0xF0], actbl->ehufsi[0xF0]);
 				r -= 16;
 			}
-
-			temp2 = temp;
-			if (temp < 0)
-			{
-				temp = -temp;		/* temp is abs value of input */
-				/* This code assumes we are on a two's complement machine */
-				temp2--;
-			}
+			temp2 = (temp < 0) ? temp-1 : temp;
+			temp  = (temp < 0) ? -temp : temp;
 
 			/* Find the number of bits needed for the magnitude of the coefficient */
-			nbits = 1;		/* there must be at least one 1 bit */
-			while ((temp >>= 1)) nbits++;
-
-			/* Check for out-of-range coefficient values */
-			if (nbits > 10) _throw("Bad DCT coefficient");
+			nbits = bits_needed(temp);
 
 			/* Emit Huffman symbol for run length / number of bits */
 			i = (r << 4) + nbits;
-			_catch( emit_bits(jpg, actbl->ehufco[i], actbl->ehufsi[i]) );
+			emit_bits(actbl->ehufco[i], actbl->ehufsi[i]);
 
 			/* Emit that number of bits of the value, if positive, */
 			/* or the complement of its magnitude, if negative. */
-			_catch( emit_bits(jpg, (unsigned int) temp2, nbits) );
+			temp2 &= (((int) 1)<<nbits) - 1;  /* mask off any extra bits in code */
+			emit_bits((unsigned int) temp2, nbits);
 
 			r = 0;
 		}
+		index = jpeg_natural_order[k];
 	}
 
 	/* If the last coef(s) were zero, emit an end-of-block code */
 	if (r > 0)
-		_catch( emit_bits(jpg, actbl->ehufco[0], actbl->ehufsi[0]) );
+		emit_bits(actbl->ehufco[0], actbl->ehufsi[0]);
 
+	jpg->huffbuf = huffbuf; /* update state variables */
+	jpg->huffbits = put_bits;
+	jpg->jpgptr = jpgptr;
+	jpg->bytesprocessed += bytes;  jpg->bytesleft -= bytes;
 	*last_dc_val=block[0];
 	return 0;
+
+	bailout:
+	return -1;
 }
 
 
 int flush_bits (jpgstruct *jpg)
 {
-	_catch( emit_bits(jpg, 0x7F, 7) ); /* fill any partial byte with ones */
+	register int huffbuf = jpg->huffbuf;
+	register int put_bits = jpg->huffbits;
+	register mlib_u8 *jpgptr = jpg->jpgptr;
+	register long bytes = 0;
+	emit_bits(0x7F, 7); /* fill any partial byte with ones */
 	jpg->huffbuf = 0;	/* and reset bit-buffer to empty */
 	jpg->huffbits = 0;
+	jpg->jpgptr = jpgptr;
+	jpg->bytesprocessed += bytes;  jpg->bytesleft -= bytes;
 	return 0;
 }
 
@@ -357,6 +369,9 @@ int jpeg_make_d_derived_tbl(mlib_u8 *bits, mlib_u8 *vals, int isDC, d_derived_tb
 	memcpy(dtbl->huffval, vals, numsymbols);
 
 	return 0;
+
+	bailout:
+	return -1;
 }
 
 
@@ -489,6 +504,9 @@ int jpeg_fill_bit_buffer (bitread_working_state * state, register int get_buffer
 	state->bits_left = bits_left;
 
   return 0;
+
+	bailout:
+	return -1;
 }
 
 
@@ -564,6 +582,9 @@ int jpeg_huff_decode (bitread_working_state * state, register int get_buffer,
 	}
 
 	return htbl->huffval[ (int) (code + htbl->valoffset[l]) ];
+
+	bailout:
+	return -1;
 }
 
 
@@ -710,4 +731,7 @@ int decode_one_block (jpgstruct *jpg, mlib_s16 *block,
 	*last_dc_val = lastdc;
 
 	return 0;
+
+	bailout:
+	return -1;
 }
