@@ -38,10 +38,12 @@
 void usage(void)
 {
 	printf("\nUSAGE: %s [-h|-?] -t<seconds> -s<samples per second>\n", program_name);
+	printf("       -wh<window handle in hex>\n");
 	printf("       -x<x offset> -y<y offset>\n\n");
 	printf("-h or -? = This help screen\n");
 	printf("-t = Run the benchmark for this many seconds\n");
 	printf("-s = Sample the window this many times per second\n");
+	printf("-wh = Explicitly specify a window (if auto-detect fails)\n");
 	printf("-x = x coordinate (relative to window) of the sampling block\n");
 	printf("-y = y coordinate (relative to window) of the sampling block\n");
 	exit(1);
@@ -55,6 +57,7 @@ int main(int argc, char **argv)
 	int samplerate=50, xcoord=-1, ycoord=-1;
 
 	program_name=argv[0];
+	memset(&wh, 0, sizeof(wh));
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
@@ -68,11 +71,22 @@ int main(int argc, char **argv)
 		  (temp=atoi(&argv[i][2]))>0) xcoord=temp;
 		if(!strnicmp(argv[i], "-y", 2) && strlen(argv[i])>2 &&
 		  (temp=atoi(&argv[i][2]))>0) ycoord=temp;
+		if(!strnicmp(argv[i], "-wh", 3) && strlen(argv[i])>3)
+		{
+			fbx_wh temp;
+			memset(&temp, 0, sizeof(temp));
+			#ifdef _WIN32
+			if(sscanf(&argv[i][3], "%x", &temp)==1) wh=temp;
+			#else
+			if(sscanf(&argv[i][3], "%x", &temp.win)==1) wh.win=temp.win;
+			#endif
+		}
 	}
 
 	printf("\nThin Client Benchmark\n");
 
 	#ifdef _WIN32
+	if(!wh) {
 	printf("Click the mouse in the window that you wish to monitor ... ");
 	wh=GetForegroundWindow();
 	double tStart, tElapsed;  int t, oldt=-1;
@@ -87,15 +101,18 @@ int main(int argc, char **argv)
 	wh=GetForegroundWindow();
 	FlashWindow(wh, TRUE);
 	printf("  \n");
+	}
 	char temps[1024];
 	GetWindowText(wh, temps, 1024);
 	printf("Monitoring window 0x%.8x (%s)\n", wh, temps);
 	#else
 	if(!XInitThreads()) {fprintf(stderr, "XInitThreads() failed\n");  exit(1);}
 	if(!(wh.dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
+	if(!wh.win) {
 	printf("Click the mouse in the window that you wish to monitor ...\n");
 	wh.win=Select_Window(wh.dpy);
 	XSetInputFocus(wh.dpy, wh.win, RevertToNone, CurrentTime);
+	}
 	#endif
 
 	fbx_struct fb;
