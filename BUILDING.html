@@ -83,7 +83,7 @@ margin-right: 3px;
 .top {
 text-align: right;
 }
-  </style></head>  
+  </style></head>
 <body><h1>How to build VirtualGL in 9043 easy steps</h1>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Linux</span></h2>
@@ -165,15 +165,11 @@ perform the following additional step:</p>
   <h4><span style="font-weight: 400;">If present, VirtualGL will use the 
   following dynamically linked versions of OpenSSL (in the following order) to 
   satisfy compile time and run time dependencies:</span></h4>
-<ul>
-  <li>
-  
-        <h4><span style="font-weight: 400;">Solaris 10 version of OpenSSL (contained in <span class="monospace">/usr/sfw</span>)</span></h4>
-      </li>
-      <li>
-        <h4><span style="font-weight: 400;">Blastwave (<a href="http://www.blastwave.org">http://www.blastwave.org</a>) 
+<ul><li><h4><span style="font-weight: 400;">Blastwave (<a href="http://www.blastwave.org">http://www.blastwave.org</a>) 
   version of OpenSSL (contained in <span class="monospace">/opt/csw</span>) -- recommended for Solaris 8 
-  and 9 systems.<span style="font-weight: bold;"></span></span></h4>
+  and 9 systems.</span></h4></li><li>
+  
+        <h4><span style="font-weight: 400;">Solaris 10 version of OpenSSL (contained in <span class="monospace">/usr/sfw</span>.)&nbsp; VirtualGL tries to use this if Blastwave is not installed.</span></h4>
       </li>
 </ul>
     <h4><span style="font-weight: 400;"><span style="font-weight: bold;"></span>Building against either version of OpenSSL 
