@@ -1,36 +1,116 @@
-<style>
-<!--
-h1           { font-family: Arial; font-size: 24pt; font-weight: bold }
-h2           { font-family: Arial; text-decoration: underline; font-size: 18pt; font-style: 
-               italic }
-h3           { font-family: Arial; font-size: 14pt }
--->
-</style>
-<h1>How to build VirtualGL in 9043 easy steps</h1>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><style type="text/css">
+body {
+background-color: rgb(255, 255, 255);
+font-family: Arial,Helvetica,sans-serif;
+}
+a {
+text-decoration: none;
+}
+dt {
+font-weight: bold;
+margin-left: 25px;
+margin-top: 20px;
+}
+.valid {
+border-width: 0px;
+}
+pre {
+border: 1px solid rgb(0, 0, 255);
+padding: 4px;
+font-family: courier,monospace;
+font-size: 14px;
+background-color: rgb(238, 238, 255);
+margin-left: 25px;
+margin-right: 25px;
+}
+tr {
+background-color: rgb(238, 238, 255);
+color: rgb(32, 32, 32);
+text-align: left;
+}
+th {
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+text-align: left;
+}
+td {
+vertical-align: top;
+text-align: left;
+}
+.colorheader {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.newwin {
+border-width: 0px;
+}
+.tip {
+border: 1px solid rgb(0, 0, 0);
+padding: 1px 5px;
+font-weight: bold;
+background-color: rgb(255, 255, 0);
+margin-right: 10px;
+}
+.note {
+border: 1px solid rgb(0, 0, 0);
+padding: 2px;
+font-weight: bold;
+background-color: blue;
+color: rgb(255, 255, 255);
+}
+.monospace {
+font-family: monospace
+}
+hr {
+margin-bottom: 7px;
+}
+h2 {
+padding: 5px;
+color: rgb(255, 255, 255);
+background-color: rgb(25, 25, 112);
+}
+h3 {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.top {
+text-align: right;
+}
+  </style></head>  
+<body><h1>How to build VirtualGL in 9043 easy steps</h1>
 <hr>
-<h2><span style="font-weight: 400">Prerequisites - Linux</span></h2>
-<h3><span style="font-weight: 400">OpenSSL headers and link libraries</span></h3>
+<h2><span style="font-weight: 400;">Prerequisites - Linux</span></h2>
+
+<h3><span style="font-weight: 400;">OpenSSL headers and link libraries</span></h3>
 <ul>
   <li>
-  <h4><span style="font-weight: 400">On most Linux variants, these can be found in the openssl-devel 
+  <h4><span style="font-weight: 400;">On most Linux variants, these can be found in the <span class="monospace">openssl-devel</span> 
   package included with the distribution.&nbsp; If your Linux distribution does 
   not contain a pre-packaged version of OpenSSL,
    you will need to build and install the toolkit from source.&nbsp; The source code
    can be obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.</span></h4>
   </li>
 </ul>
-<h3><span style="font-weight: 400">GCC and G++ (tested with v2.96 and v3.2)</span></h3>
-<h3><span style="font-weight: 400">X11 dev. kit</span></h3>
+<h3><span style="font-weight: 400;">GCC and G++ (tested with v2.96 and v3.2)</span></h3>
+<h3><span style="font-weight: 400;">X11 dev. kit</span></h3>
 <ul>
-  <li>On most Linux variants, this can be found in the XFree86-devel or 
-  xorg-x11-devel package</li>
+  <li>On most Linux variants, this can be found in the <span class="monospace">XFree86-devel</span> or 
+  <span class="monospace">xorg-x11-devel</span> package</li>
 </ul>
-<h3><span style="font-weight: 400">GNU Make v3.7 or later</span></h3>
-<h3><span style="font-weight: 400">Intel Integrated 
-Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></span></h3>
+<h3><span style="font-weight: 400;">GNU Make v3.7 or later</span></h3>
+<h3><span style="font-weight: 400;">Intel Integrated 
+Performance Primitives (IPP)<font color="#ff0000"> </font> <i>
+<font color="#ffff00">[recommended]</font></i></span></h3>
 <ul>
   <li>
-  <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
+  <h4><span style="font-weight: 400;">VirtualGL includes a completely free version of libjpeg v6b which will
    produce correct, albeit slow, behavior.&nbsp; In order to get optimal
    performance out of VirtualGL, however, it is necessary to build VirtualGL 
   against the Intel 
@@ -38,24 +118,24 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
   faster than libjpeg.</span></h4>
   </li>
   <li>
-  <h4><span style="font-weight: 400">Single developer licenses for IPP can be obtained
+  <h4><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
    directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
    distributed royalty-free.</span></h4>
   </li>
 </ul>
 <hr>
-<h2><span style="font-weight: 400">Prerequisites - x86-64 Linux</span></h2>
+<h2><span style="font-weight: 400;">Prerequisites - x86-64 Linux</span></h2>
 <p>Not all x86-64 Linux systems contain the necessary 32-bit packages to build 
 and run VirtualGL.&nbsp; To build VirtualGL on an x86-64 Linux system, you will 
 need at minimum the following 32-bit packages:</p>
 <ul>
   <li>glibc development libraries<ul>
-    <li>Usually contained in the glibc-devel package (iX86)</li>
+    <li>Usually contained in the <span class="monospace">glibc-devel</span> package (iX86)</li>
     <li>Usually installed by default on x86-64 Linux systems</li>
   </ul>
   </li>
   <li>X11 dev. kit<ul>
-    <li>Usually contained in the XFree86-devel or xorg-x11-devel package (iX86)</li>
+    <li>Usually contained in the <span class="monospace">XFree86-devel</span> or <span class="monospace">xorg-x11-devel</span> package (iX86)</li>
     <li>Not always installed by default but usually contained on the CD</li>
     <li>Earlier RedHat/Whitebox Enterprise 3 releases do not contain the 32-bit 
     version of the package on the CD, but you can grab it from a 32-bit CD, from 
@@ -63,9 +143,9 @@ need at minimum the following 32-bit packages:</p>
   </ul>
   </li>
   <li>OpenSSL runtime<ul>
-    <li>Usually contained in the openssl package (iX86)</li>
+    <li>Usually contained in the <span class="monospace">openssl</span> package (iX86)</li>
     <li>Not always installed by default but usually contained on the CD</li>
-    <li>May also require 32-bit krb5-libs package</li>
+    <li>May also require 32-bit <span class="monospace">krb5-libs</span> package</li>
     <li>Earlier RedHat/Whitebox Enterprise 3 releases do not contain the 32-bit 
     version of the package on the CD, but you can grab it from a 32-bit CD, from 
     the RedHat Network, or from the Whitebox web-site.</li>
@@ -74,143 +154,131 @@ need at minimum the following 32-bit packages:</p>
 </ul>
 <p>Prior to building 32-bit VirtualGL for the first time, you will need to 
 perform the following additional step:</p>
-<blockquote>
-<p><font face="Courier New">cd /usr/lib<br>
-ln -fs /lib/libssl.so.? libssl.so</font></p>
-</blockquote>
+<pre>cd /usr/lib<br>ln -fs /lib/libssl.so.? libssl.so</pre>
 <p>This creates a development stub for the 32-bit OpenSSL library, since a 
-32-bit openssl-devel package doesn't exist.</p>
+32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
 <hr>
-<h2><span style="font-weight: 400">Prerequisites - Solaris</span></h2>
-<h3><span style="font-weight: 400">OpenSSL headers and link libraries</span></h3>
+<h2><span style="font-weight: 400;">Prerequisites - Solaris</span></h2>
+<h3><span style="font-weight: 400;">OpenSSL headers and link libraries</span></h3>
 <ul>
   <li>
-  <h4><span style="font-weight: 400">Solaris 10 users can use the version of 
-  OpenSSL included with that platform (contained in <i>/usr/sfw</i>.)&nbsp; 
-  However, be aware that this introduces run-time dependencies on <i>
-  libssl.so</i> and <i>libcrypto.so</i> and will produce a version of VirtualGL 
-  that is incompatible with prior Solaris versions.</span></h4>
-  </li>
+  <h4><span style="font-weight: 400;">If present, VirtualGL will use the 
+  following dynamically linked versions of OpenSSL (in the following order) to 
+  satisfy compile time and run time dependencies:</span></h4>
+<ul>
   <li>
-  <h4><span style="font-weight: 400">If you are using a version of Solaris prior 
-  to 10 or you wish to build a backward-compatible version of VirtualGL, you 
-  will need to build OpenSSL from source.&nbsp; The source code can be obtained 
-  from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.&nbsp; 
-  Untar the source, then move the openssl build directory to <i>openssl.solaris
-  </i>(for a 32-bit build), <i>openssl.solaris64 </i>(for a 64-bit build), or <i>
-  openssl.solx86 </i>(for an x86 build.)&nbsp; VirtualGL will look for this 
-  directory one level up from its own build directory, for example:<br>
-  <br>
-  <font face="Courier New">ls -l ~/src<BR>drwx------ 12 drc staff Jan 20 12:17
-	.<BR>drwx------ 59 drc staff Jan 20 13:43 ..<BR>drwx------ 21 drc staff Dec 20 12:17 openssl.solaris<br>
-  drwx------ 21 drc staff 
-	Dec 13 13:40 openssl.solaris64<br>
-  drwx------ 21 drc staff Feb 12 11:03 openssl.solx86<br>
-  drwx------ 14 drc staff 
-	Jan 20 12:17 vgl<br>
-  <br>
-  </font>CD to the appropriate directory and build OpenSSL using the 
-  instructions provided in the OpenSSL source distribution.<br>
-  <br>
-  </span><i>NOTE:</i><span style="font-weight: 400"><font face="Courier New">
-  </font>To configure OpenSSL for a 64-bit build, you will need to run<br>
-  <font face="Courier New"><br>
-  ./Configure solaris64-sparcv9-cc<br>
-  <br>
-  </font>Rather than just running <font face="Courier New">config</font>.</span></h4>
+  
+        <h4><span style="font-weight: 400;">Solaris 10 version of OpenSSL (contained in <span class="monospace">/usr/sfw</span>)</span></h4>
+      </li>
+      <li>
+        <h4><span style="font-weight: 400;">Blastwave (<a href="http://www.blastwave.org">http://www.blastwave.org</a>) 
+  version of OpenSSL (contained in <span class="monospace">/opt/csw</span>) -- recommended for Solaris 8 
+  and 9 systems.<span style="font-weight: bold;"></span></span></h4>
+      </li>
+</ul>
+    <h4><span style="font-weight: 400;"><span style="font-weight: bold;"></span>Building against either version of OpenSSL 
+  will introduce run-time dependencies on <span class="monospace">libssl.so</span> and <span class="monospace">
+  libcrypto.so</span>, so these dynamic libraries must be present on any system 
+  that will run VirtualGL in SSL mode.&nbsp; They need not be present if SSL 
+  mode is not used.&nbsp; Thus, any Solaris machine (client or server) that will 
+  use VirtualGL's SSL mode of operation will need to have either Solaris 10 
+  OpenSSL or Blastwave OpenSSL installed.</span></h4>
+</li>
+  <li>
+  If you so choose, you can also create a custom build of OpenSSL using the source code obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.  Untar the source, then move the <span class="monospace">openssl</span> build directory to <span class="monospace">openssl.solaris</span> (for a 32-bit build), <span class="monospace">openssl.solaris64</span> (for a 64-bit build), or <span class="monospace">openssl.solx86</span> (for an x86 build.)  VirtualGL will look for this directory one level up from its own build directory, for example:
+
+<pre>ls -l ~/src<br>drwx------ 12 drc staff Jan 20 12:17 .<br>drwx------ 59 drc staff Jan 20 13:43 ..<br>drwx------ 21 drc staff Dec 20 12:17 openssl.solaris<br>drwx------ 21 drc staff Dec 13 13:40 openssl.solaris64<br>drwx------ 21 drc staff Feb 12 11:03 openssl.solx86<br>drwx------ 14 drc staff Jan 20 12:17 vgl<br></pre>
+<span style="font-weight: 400;">CD to the appropriate directory and build OpenSSL using the instructions provided in the OpenSSL source distribution.<br>
+    <br>
+</span><span class="note">Note:</span><span style="font-weight: 400;">&nbsp; To build a 64-bit version of OpenSSL, you will need to configure it using:<br>
+<pre>./Configure solaris64-sparcv9-cc</pre>rather than just running <span class="monospace">config</span>.&nbsp; To configure OpenSSL for use with GCC, you will need to run<pre>./Configure solaris64-sparcv9-gcc shared</pre>
+or<br>
+<pre>./Configure solaris-sparcv9-gcc shared<br></pre>or<pre>./Configure solaris-x86-gcc shared</pre>as
+appropriate. The "shared" flag is necessary in order to build OpenSSL
+with position-independent code, but it has the side effect of
+generating both a static and dynamic library.&nbsp; If you would prefer
+to link OpenSSL statically, just delete <span class="monospace">libssl.so</span> and <span class="monospace">libcrypto.so</span> from your OpenSSL build directory prior to building VirtualGL.</span>
   </li>
 </ul>
-<h3><span style="font-weight: 400">Sun Workshop Pro Compiler</span></h3>
+<h3><span style="font-weight: 400;">Sun Workshop Pro Compiler</span></h3>
 <ul>
   <li>Tested with v5.5</li>
   <li>See <a href="http://www.sun.com/software/products/studio/">
   http://www.sun.com/software/products/studio/</a></li>
 </ul>
-<H3><span style="font-weight: 400">... or ...</span></H3>
-<H3><span style="font-weight: 400">GCC</span></H3>
+<h3><span style="font-weight: 400;">... or ...</span></h3>
+<h3><span style="font-weight: 400;">GCC</span></h3>
 <ul>
   <li>Tested with v3.3 and v2.95</li>
-  <li>Available on the Solaris 9 &amp; 10 Companion CD's (<a href="http://www.sun.com/software/solaris/freeware/">http://www.sun.com/software/solaris/freeware/</a>) 
-  or at <a href="http://www.sunfreeware.com/">http://www.sunfreeware.com/</a>.</li>
-  <li>If building OpenSSL from source (see above), configure it using<br>
-  <br>
-  <font face="Courier New">./Configure solaris64-sparcv9-gcc shared</font><br>
-  or<br>
-  <font face="Courier New">./Configure solaris-sparcv9-gcc shared<br>
-  </font>or<br>
-  <font face="Courier New">./Configure solaris-x86-gcc shared<br>
-  <br>
-  </font>This is mainly necessary in order to get the compiler to generate 
-  position-independent code.&nbsp; If you still want to link OpenSSL statically, 
-  just delete <i>libssl.so</i> and <i>libcrypto.so</i> from your OpenSSL 
-  build directory prior to building VirtualGL.</li>
-  <li>Build using<br>
-  <br>
-  <font face="Courier New">gmake CC=gcc</font></li>
+  <li>Available from the Solaris 9 &amp; 10 Companion CD's (<a href="http://www.sun.com/software/solaris/freeware/">http://www.sun.com/software/solaris/freeware/</a>), 
+  Blastwave (<a href="http://www.blastwave.org">http://www.blastwave.org</a>), 
+  or SunFreeware (<a href="http://www.sunfreeware.com/">http://www.sunfreeware.com/</a>.)</li>
+  <li>Build VirtualGL using<br><pre>gmake CC=gcc</pre></li>
 </ul>
-<H3><span style="font-weight: 400"><i>SOLARIS 8 ONLY:</i>&nbsp;  Linker
+<h3><span style="font-weight: 400;"><i>SOLARIS 8 ONLY:</i>&nbsp;  Linker
 patch 109147-32 must be
-installed</span></H3>
-<UL>
-	<LI><H4><span style="font-weight: 400">See
-    <a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">
-    http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage</a></span></H4>
-</UL>
-<h3><span style="font-weight: 400">Sun OpenGL</span></h3>
+installed</span></h3>
 <ul>
+	<li><h4><span style="font-weight: 400;">See
+    <a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">
+    http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage</a></span></h4>
+</li></ul>
+<h3><span style="font-weight: 400;">Sun OpenGL</span></h3>
+<ul>
+  <li>Requires v1.3 or later</li>
   <li>See <a href="http://www.sun.com/software/graphics/opengl/">
   http://www.sun.com/software/graphics/opengl/</a></li>
+  <li>If building against a version of OpenGL that lacks GLP support (pre 1.5), 
+  build VirtualGL using<br>
+  <pre>gmake USEGLP=no</pre></li>
 </ul>
-<H3><span style="font-weight: 400">GNU Make v3.7 or later</span></H3>
+<h3><span style="font-weight: 400;">GNU Make v3.7 or later</span></h3>
 <ul>
-  <li>This can be obtained from the Solaris Companion Software CD's for Solaris 
-  9 and 10 (see <a href="http://www.sun.com/software/solaris/freeware/">
-  http://www.sun.com/software/solaris/freeware/</a>.)&nbsp; GNU Make is 
-  contained in the SFWgmake package.</li>
-  <li><a href="http://www.sunfreeware.com/">http://www.sunfreeware.com/</a> also 
-  contains binary packages of GNU make for all versions of Solaris back to v2.5.</li>
+  <li>Available from the Solaris 9 &amp; 10 Companion CD's (<a href="http://www.sun.com/software/solaris/freeware/">http://www.sun.com/software/solaris/freeware/</a>), 
+  Blastwave (<a href="http://www.blastwave.org">http://www.blastwave.org</a>), 
+  or SunFreeware (<a href="http://www.sunfreeware.com/">http://www.sunfreeware.com/</a>.)</li>
 </ul>
-<H3><span style="font-weight: 400">Sun MediaLib <i><font color="#0000FF">
-[recommended]</font></i></span></H3>
-<UL>
-	<LI><H4><span style="font-weight: 400">VirtualGL includes a
+<h3><span style="font-weight: 400;">Sun MediaLib <i style="color: rgb(255, 255, 0);">
+[recommended]</i></span></h3>
+<ul>
+	<li><h4><span style="font-weight: 400;">VirtualGL includes a
 	version of libjpeg v6b which will produce correct, albeit slow,
 	behavior.&nbsp; In order to get optimal performance out of VirtualGL
 	on Solaris, it is necessary to use the MediaLib codec, which is
-	capable of compressing JPEG images 3-4x faster than libjpeg.</span></H4>
-	<LI>MediaLib can be obtained for free from
+	capable of compressing JPEG images 3-4x faster than libjpeg.</span></h4>
+	</li><li>MediaLib can be obtained for free from
     <a href="http://www.sun.com/processors/vis/mlib.html">
-    http://www.sun.com/processors/vis/mlib.html</a></UL>
+    http://www.sun.com/processors/vis/mlib.html</a></li></ul>
 <hr>
-<h2><span style="font-weight: 400">Prerequisites - Win32</span></h2>
-<h3><span style="font-weight: 400">OpenSSL headers and link libraries</span></h3>
+<h2><span style="font-weight: 400;">Prerequisites - Win32</span></h2>
+<h3><span style="font-weight: 400;">OpenSSL headers and link libraries</span></h3>
 <ul>
   <li>
   Download the latest Win32 OpenSSL installer from
   <a href="http://www.slproweb.com/products/Win32OpenSSL.html">
   http://www.slproweb.com/products/Win32OpenSSL.html</a>.&nbsp; Install it into
-  <span style="font-style: italic;">c:\openssl</span>.<br>
+  <span class="monospace">c:\openssl</span>.<br>
   <br>
-  <span style="font-style: italic; font-weight: bold;">NOTE:</span>&nbsp; This is 
+  <span class="note">Note:</span>&nbsp; This is 
   only necessary on the build machine.&nbsp; The VirtualGL build system will copy the 
   necessary DLL's into the VirtualGL release package.
   </li>
 </ul>
-<h3><span style="font-weight: 400">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
+<h3><span style="font-weight: 400;">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
 <ul>
-  <li><span style="font-weight: 400">If you don't own Visual C++, download the free Visual C++ Toolkit from
+  <li><span style="font-weight: 400;">If you don't own Visual C++, download the free Visual C++ Toolkit from
    <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/">http://msdn.microsoft.com/visualc/vctoolkit2003/</a>.&nbsp; You will also need the Core Platform SDK (<a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">http://www.microsoft.com/msdownload/platformsdk/sdkupdate/</a>.)&nbsp; 
   You may optionally want to install the free Debugging Tools for Windows (<a href="http://www.microsoft.com/whdc/devtools/debugging/default.mspx">http://www.microsoft.com/whdc/devtools/debugging/default.mspx</a>.)</span></li>
 </ul>
-<h3><span style="font-weight: 400">Hummingbird Exceed XDK v8.0 or later</span></h3>
+<h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8.0 or v9.0</span></h3>
 <ul>
   <li>This can be purchased directly from Hummingbird (<a href="http://www.hummingbird.com">http://www.hummingbird.com</a>.)</li>
-  <li>Add the XDK include and lib paths to your system INCLUDE and LIB variables 
+  <li>Add the XDK include and lib paths to your system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables 
   prior to building VirtualGL</li>
-  <li>See install notes on the VirtualGL web-site regarding patching Exceed to 
-  eliminate a bug in the MIT-SHM extension</li>
+  <li>See install notes in the VirtualGL Windows documentation regarding patching Exceed to 
+  eliminate a bug in the MIT-SHM extension.</li>
 </ul>
-<h3><span style="font-weight: 400">MSYS or Cygwin</span></h3>
+<h3><span style="font-weight: 400;">MSYS or Cygwin</span></h3>
 <ul>
   <li>VirtualGL's make system is written to take advantage of GNU-specific make 
   semantics and relies upon several 
@@ -220,11 +288,11 @@ installed</span></H3>
   <li>Cygwin can be downloaded from <a href="http://www.cygwin.com/">
   http://www.cygwin.com/</a>.</li>
 </ul>
-<h3><span style="font-weight: 400">Intel Integrated 
-Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></span></h3>
+<h3><span style="font-weight: 400;">Intel Integrated 
+Performance Primitives (IPP) <i style="color: rgb(255, 255, 0);">[recommended]</i></span></h3>
 <ul>
   <li>
-  <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
+  <h4><span style="font-weight: 400;">VirtualGL includes a completely free version of libjpeg v6b which will
    produce correct, albeit slow, behavior.&nbsp; In order to get optimal
    performance out of VirtualGL, however, it is necessary to build VirtualGL 
   against the Intel 
@@ -232,81 +300,92 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
   faster than libjpeg.</span></h4>
   </li>
   <li>
-  <h4><span style="font-weight: 400">Single developer licenses for IPP can be obtained
+  <h4><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
    directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
    distributed royalty-free.</span></h4>
   </li>
   <li>On Windows, make sure that the IPP include and lib paths are added to your 
-  system INCLUDE and LIB variables.</li>
+  system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables.</li>
 </ul>
 <hr>
-<h2><span style="font-weight: 400">Building</span></h2>
+<h2><span style="font-weight: 400;">Building</span></h2>
 <p>Assuming all of the above is set up correctly, you should be able to just 
-type &quot;make&quot;.</p>
+type</p>
+<pre>make</pre>
+<p>On Solaris, type</p>
+<pre>gmake</pre>
+<p>instead.</p>
+
 <hr>
-<h2><span style="font-weight: 400">Makefile Options</span></h2>
-<p><span style="font-weight: 400">Each of these options can be passed as an argument to "make".</span></p>
-<h3><span style="font-weight: 400">DEBUG = yes</span></h3>
+<h2><span style="font-weight: 400;">Makefile Options</span></h2>
+<p><span style="font-weight: 400;">Each of these options can be passed as an argument to <span class="monospace">make</span> or <span class="monospace">gmake</span>.</span></p>
+<h3><span style="font-weight: 400;">DEBUG = yes</span></h3>
 <blockquote>
 <p>Build a version of VirtualGL with debugging symbols and no optimization.&nbsp; 
-The debug version will reside in ${platform}/dbg/lib and ${platform}/dbg/bin, whereas 
-the release version will reside in ${platform}/lib and ${platform}/bin, so these 
+The debug version will reside in <span class="monospace">${platform}/dbg/lib</span> and <span class="monospace">${platform}/dbg/bin</span>, whereas 
+the release version will reside in <span class="monospace">${platform}/lib</span> and <span class="monospace">${platform}/bin</span>, so these 
 two versions can be built independently of one another.</p>
 </blockquote>
-<h3><span style="font-weight: 400">JPEGLIB = &lt; libjpeg | pegasus &gt;<libjpeg|pegasus></libjpeg|pegasus></span></h3>
+<h3><span style="font-weight: 400;">JPEGLIB = &lt; libjpeg | pegasus &gt;<libjpeg |pegasus=""></libjpeg></span></h3>
 <blockquote>
-  <p><span style="font-weight: 400">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
-               This custom libjpeg code is included in the <i>jpeg/jpeg-6b</i>
+  <p><span style="font-weight: 400;">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
+               This custom libjpeg code is included in the <span class="monospace">jpeg/jpeg-6b</span>
                directory and differs from the IJG release (see
                <a href="http://www.ijg.org">http://www.ijg.org</a>) only in its support of 
   little endian 
   and 32-bit pixel formats (both of which are necessary to allow for 
   decompressing directly into X11 shared memory.)</span></p>
-  <p><span style="font-weight: 400">pegasus = Use the PICTools RapidVue codec from Pegasus Imaging
+  <p><span style="font-weight: 400;">pegasus = Use the PICTools RapidVue codec from Pegasus Imaging
                (<a href="http://www.jpg.com">http://www.jpg.com</a>.)&nbsp; The VirtualGL build environment looks for
-               PICTools in a directory called "pictools" located one level up
+               PICTools in a directory called <span class="monospace">pictools</span> located one level up
                from the build directory.&nbsp; You can override this by passing
-               an additional argument of PEGDIR={location of pictools directory}.</span></p>
+               an additional argument of <span class="monospace">PEGDIR={location of pictools directory}</span>.</span></p>
 </blockquote>
-<h3><span style="font-weight: 400">IPPDIR = {location of Intel Performance Primitives 
+<h3><span style="font-weight: 400;">IPPDIR = {location of Intel Performance Primitives 
 directory}</span></h3>
 <blockquote>
-  <p><span style="font-weight: 400">On Linux builds, this allows you to override 
-  the default location of /opt/intel/ipp41, for instance to use an earlier or 
+  <p><span style="font-weight: 400;">On Linux builds, this allows you to override 
+  the default location of <span class="monospace">/opt/intel/ipp41</span>, for instance to use an earlier or 
   later version of IPP.</span></p>
 </blockquote>
-<h3><span style="font-weight: 400">M32 = yes</span></h3>
+<h3><span style="font-weight: 400;">M32 = yes</span></h3>
 <blockquote>
-  <p><span style="font-weight: 400">On 64-bit systems (except Itanium), this cross-compiles a 32-bit version of VirtualGL.&nbsp; The default on  64-bit systems is to build a 
-  64-bit &quot;supplemental&quot; package which contains only the 64-bit 
-  server-side components for VirtualGL.&nbsp; 
-  The 32-bit client can be used by both 64-bit and 32-bit systems, so it is only 
-  necessary to build the faker library using 64-bit code (so that it 
-  can be inserted into 64-bit apps.)</span></p>
+  <p><span style="font-weight: 400;">On 64-bit systems
+(except Itanium), this cross-compiles a 32-bit version of
+VirtualGL.&nbsp; The default on 64-bit systems is to build a 64-bit
+"supplemental" package which contains only the 64-bit server-side
+components for VirtualGL.&nbsp; The 32-bit client can be used by both
+64-bit and 32-bit systems, so it is only necessary to build the faker
+library using 64-bit code (so that it can be inserted into 64-bit apps.)</span></p>
 </blockquote>
-  <h3><span style="font-weight: 400">CC = gcc</span></h3>
+  <h3><span style="font-weight: 400;">CC = gcc</span></h3>
 <blockquote>
   <p>On Solaris, this builds VirtualGL using the GCC compiler rather than the 
-  default (Sun WS Pro) compiler.&nbsp; <i>gcc</i> and <i>g++</i> should be in 
-  your PATH.</p>
+  default (Sun WS Pro) compiler.&nbsp; <span class="monospace">gcc</span> and <span class="monospace">g++</span> should be in 
+  your <span class="monospace">PATH</span>.</p>
+</blockquote>
+  <h3><span style="font-weight: 400;">USEGLP = no</span></h3>
+<blockquote>
+  <p>On Solaris, this builds VirtualGL without GLP extension code.&nbsp; This is 
+  necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.</p>
 </blockquote>
 <hr>
-<h2><span style="font-weight: 400">Installing / Distributing</span></h2>
+<h2><span style="font-weight: 400;">Installing / Distributing</span></h2>
 <p>On Unix systems, you can type</p>
-<h3><span style="font-weight: 400">make install [prefix={install prefix}] [cfgdir={directory 
-for system-wide config files}]</span></h3>
-<p>&quot;prefix&quot; defaults to <i>/usr/local</i> but can be changed to 
-something else (e.g. <i>/usr</i>) if you prefer.&nbsp; Executables will be 
-installed to <i>$prefix/bin</i>, and libraries will be installed to <i>
-$prefix/lib</i> (or <i>$prefix/lib/sparcv9</i> or <i>$prefix/lib64</i> as 
-appropriate.)&nbsp; System-wide configuration files will be installed into <i>
-/etc </i>unless <b>cfgdir</b> is specified.</p>
+<pre><span style="font-weight: 400;">make install [prefix={install prefix}]</span></pre>
+
+<p><span class="monospace">prefix</span> defaults to <span class="monospace">/usr/local</span> but can be changed to 
+something else (e.g. <span class="monospace">/usr</span>) if you prefer.&nbsp; Executables will be 
+installed to <span class="monospace">$prefix/bin</span>, and libraries will be installed to <span class="monospace">
+$prefix/lib</span> (or <span class="monospace">$prefix/lib/sparcv9</span> or <span class="monospace">$prefix/lib64</span> as 
+appropriate.)</p>
 <p>To build a redistributable package, type</p>
-<h3><span style="font-weight: 400">make dist</span></h3>
+<pre><span style="font-weight: 400;">make dist</span></pre>
+
 <ul>
   <li>On Linux, this requires RPM v4 or later</li>
-  <li>On Solaris, this requires <font face="Courier New">pkgmk</font>,
-  <font face="Courier New">pkgtrans</font>, and <font face="Courier New">bzip2</font></li>
+  <li>On Solaris, this requires <span class="monospace">pkgmk</span>,
+  <span class="monospace">pkgtrans</span>, and <span class="monospace">bzip2</span></li>
   <li>On Windows, this requires the Nullsoft Install System (<a href="http://nsis.sourceforge.net/">http://nsis.sourceforge.net/</a>.)&nbsp; 
-  makensis.exe should be in your path.</li>
-</ul>
+  <span class="monospace">makensis.exe</span> should be in your <span class="monospace">PATH</span>.</li>
+</ul></body></html>
