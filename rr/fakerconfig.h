@@ -21,6 +21,18 @@
 #include "rrutil.h"
 #include <stdio.h>
 
+#define getconfigstr(envvar, string) {  \
+	getconfig("RR"envvar, string);  \
+	getconfig("VGL_"envvar, string);}
+
+#define getconfigint(envvar, val, min, max) { \
+	getconfig("RR"envvar, val, min, max);  \
+	getconfig("VGL_"envvar, val, min, max);}
+
+#define getconfigbool(envvar, val) {  \
+	getconfig("RR"envvar, val);  \
+	getconfig("VGL_"envvar, val);}
+
 // Compression types
 enum {RRCOMP_NONE=0, RRCOMP_MJPEG};
 
@@ -49,24 +61,24 @@ class FakerConfig
 			usewindow=false;
 
 			// Fetch values from environment
-			getconfig("RRGLLIB", gllib);
-			getconfig("RRX11LIB", x11lib);
-			getconfig("RRCLIENT", client);
-			getconfig("RRDISPLAY", localdpystring);
+			getconfigstr("GLLIB", gllib);
+			getconfigstr("X11LIB", x11lib);
+			getconfigstr("CLIENT", client);
+			getconfigstr("DISPLAY", localdpystring);
 			#ifdef USEGLP
 			if(localdpystring[0]=='/' || !stricmp(localdpystring, "GLP"))
 				glp=true;
 			#endif
-			getconfig("RRLOQUAL", loqual, 1, 100);
-			getconfig("RRLOSUBSAMP", losubsamp, 411, 444);
+			getconfigint("LOQUAL", loqual, 1, 100);
+			getconfigint("LOSUBSAMP", losubsamp, 411, 444);
 			switch(losubsamp)
 			{
 				case 411:  losubsamp=RR_411;  break;
 				case 422:  losubsamp=RR_422;  break;
 				case 444:  losubsamp=RR_444;  break;
 			}
-			getconfig("RRQUAL", hiqual, 1, 100);
-			getconfig("RRSUBSAMP", hisubsamp, 411, 444);
+			getconfigint("QUAL", hiqual, 1, 100);
+			getconfigint("SUBSAMP", hisubsamp, 411, 444);
 			switch(hisubsamp)
 			{
 				case 411:  hisubsamp=RR_411;  break;
@@ -75,17 +87,18 @@ class FakerConfig
 			}
 			sethiqual();
 			bool temp=false;
-			getconfig("RRNOSPOIL", temp);
+			getconfigbool("NOSPOIL", temp);
 			if(temp) spoil=false;
 			temp=false;
-			getconfig("RRNOCOMPRESS", temp);
+			getconfigbool("NOCOMPRESS", temp);
 			if(temp) compress=RRCOMP_NONE;
-			getconfig("RRSPOIL", spoil);
-			getconfig("RRCOMPRESS", compress, RRCOMP_NONE, RRCOMP_MJPEG);
+			getconfigbool("SPOIL", spoil);
+			getconfigint("COMPRESS", compress, RRCOMP_NONE, RRCOMP_MJPEG);
 			getconfig("RRUSESSL", ssl);
-			getconfig("RRPORT", port, 0, 65535);
+			getconfig("VGL_SSL", ssl);
+			getconfigint("PORT", port, 0, 65535);
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
-			getconfig("RRWINDOW", usewindow);
+			getconfigbool("WINDOW", usewindow);
 			if(glp) usewindow=false;
 		}
 
