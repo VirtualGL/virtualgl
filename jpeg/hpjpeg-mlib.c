@@ -28,8 +28,7 @@ const int _mcuh[NUMSUBOPT]={8, 8, 16};
 
 #define _throw(c) {printf("%s (%d):\n", __FILE__, __LINE__);  lasterror=c;  return -1;}
 #define _mlib(a) {mlib_status __err;  if((__err=(a))!=MLIB_SUCCESS) _throw("MLIB failure in "#a"()");}
-#define _mlibn(a) {if(!(a)) {lasterror="Failure in "#a"()"; return NULL;}}
-#define _catch(a) {if((a)==-1) {printf("Caught in %s (%d)\n", __FILE__, __LINE__);  return -1;}}
+#define _catch(a) {if((a)==-1) return -1;}
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -76,6 +75,9 @@ typedef struct
 
 typedef struct _jpgstruct
 {
+	mlib_d64 chromqtable[64], lumqtable[64];
+	mlib_d64 _mcubuf8[384/8], _mcubuf[384/4];
+
 	mlib_u8 *bmpbuf, *bmpptr, *jpgbuf, *jpgptr;
 	int xmcus, ymcus, width, height, pitch, ps, subsamp, qual, flags;
 	unsigned long bytesprocessed, bytesleft;
@@ -83,8 +85,7 @@ typedef struct _jpgstruct
 	int huffbits, huffbuf, unread_marker, insufficient_data;
 	c_derived_tbl *e_dclumtable, *e_aclumtable, *e_dcchromtable, *e_acchromtable;
 	d_derived_tbl *d_dclumtable, *d_aclumtable, *d_dcchromtable, *d_acchromtable;
-	mlib_d64 *chromqtable, *lumqtable;
-	mlib_u8 *mcubuf8, *tmpbuf;  mlib_s16 *mcubuf;
+	mlib_u8 *mcubuf8;  mlib_s16 *mcubuf;
 	int initc, initd;
 } jpgstruct;
 
@@ -204,7 +205,9 @@ const mlib_u8 acchromvals[]=
 
 int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 {
-	mlib_u8 *srcptr, *dstptr, *bmpptr=jpg->bmpptr, *mcuptr;
+	mlib_d64 _tmpbuf[1024/8];  // 16x16 for 4:2:0 encoding * 4 bytes
+	mlib_u8 *srcptr, *dstptr, *bmpptr=jpg->bmpptr, *mcuptr,
+		*tmpbuf=(mlib_u8 *)_tmpbuf;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, mlib_u8 *, mlib_u8 *,
 		const mlib_u8 *, mlib_s32);
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, mlib_u8 *, mlib_u8 *,
@@ -222,23 +225,23 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	// Convert BGR to ABGR
 	if(ps==3 && flags&HPJ_BGR)
 	{
-		mlib_VideoColorBGRint_to_ABGRint((mlib_u32 *)jpg->tmpbuf, bmpptr, NULL,
+		mlib_VideoColorBGRint_to_ABGRint((mlib_u32 *)tmpbuf, bmpptr, NULL,
 			0, w, h, mcuw*4, jpg->pitch, 0);
-		ps=4; flags|=HPJ_ALPHAFIRST;  bmpptr=jpg->tmpbuf;  pitch=mcuw*4;
+		ps=4; flags|=HPJ_ALPHAFIRST;  bmpptr=tmpbuf;  pitch=mcuw*4;
 	}
 	// Convert BGRA to ABGR
 	else if(ps==4 && flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST))
 	{
-		mlib_VideoColorBGRAint_to_ABGRint((mlib_u32 *)jpg->tmpbuf, (mlib_u32 *)bmpptr,
+		mlib_VideoColorBGRAint_to_ABGRint((mlib_u32 *)tmpbuf, (mlib_u32 *)bmpptr,
 			w, h, mcuw*4, jpg->pitch);
-		flags|=HPJ_ALPHAFIRST;  bmpptr=jpg->tmpbuf;  pitch=mcuw*4;
+		flags|=HPJ_ALPHAFIRST;  bmpptr=tmpbuf;  pitch=mcuw*4;
 	}
 	// Convert RGBA to ABGR
 	else if(ps==4 && !(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST))
 	{
-		mlib_VideoColorRGBAint_to_ARGBint((mlib_u32 *)jpg->tmpbuf, (mlib_u32 *)bmpptr,
+		mlib_VideoColorRGBAint_to_ARGBint((mlib_u32 *)tmpbuf, (mlib_u32 *)bmpptr,
 			w, h, mcuw*4, jpg->pitch);
-		flags|=HPJ_ALPHAFIRST;  bmpptr=jpg->tmpbuf;  pitch=mcuw*4;
+		flags|=HPJ_ALPHAFIRST;  bmpptr=tmpbuf;  pitch=mcuw*4;
 	}
 
 	switch(jpg->subsamp)
@@ -269,12 +272,12 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	}
 
 	// Copy into temp buffer (so we can take advantage of locality)
-	if(bmpptr!=jpg->tmpbuf)
+	if(bmpptr!=tmpbuf)
 	{
-		srcptr=bmpptr;  dstptr=jpg->tmpbuf;
+		srcptr=bmpptr;  dstptr=tmpbuf;
 		for(j=0; j<h; j++, srcptr+=jpg->pitch, dstptr+=mcuw*ps)
 			mlib_memcpy(dstptr, srcptr, w*ps);
-		bmpptr=jpg->tmpbuf;  pitch=mcuw*ps;
+		bmpptr=tmpbuf;  pitch=mcuw*ps;
 	}
 
 	// Extend to a full MCU (if necessary)
@@ -284,17 +287,17 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 		{
 			for(j=0; j<h; j++)
 			{
-				srcptr=&jpg->tmpbuf[j*mcuw*ps];
+				srcptr=&tmpbuf[j*mcuw*ps];
 				for(i=w; i<mcuw; i++)
 					mlib_memcpy(&srcptr[i*ps], &srcptr[(w-1)*ps], ps);
 			}
 		}
 		if(mcuh>h)
 		{
-			srcptr=&jpg->tmpbuf[(h-1)*mcuw*ps];
+			srcptr=&tmpbuf[(h-1)*mcuw*ps];
 			for(j=h; j<mcuh; j++)
 			{
-				dstptr=&jpg->tmpbuf[j*mcuw*ps];
+				dstptr=&tmpbuf[j*mcuw*ps];
 				mlib_memcpy(dstptr, srcptr, mcuw*ps);
 			}
 		}
@@ -534,24 +537,24 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 {
 	jpgstruct *jpg;  int huffbufsize;
 
-	if((jpg=(jpgstruct *)malloc(sizeof(jpgstruct)))==NULL)
+	if((jpg=(jpgstruct *)mlib_malloc(sizeof(jpgstruct)))==NULL)
 		{lasterror="Memory allocation failure";  return NULL;}
 	memset(jpg, 0, sizeof(jpgstruct));
 
-	_mlibn(jpg->lumqtable=(mlib_d64 *)mlib_malloc(64*sizeof(mlib_d64)));
-	_mlibn(jpg->chromqtable=(mlib_d64 *)mlib_malloc(64*sizeof(mlib_d64)));
-	_mlibn(jpg->mcubuf8=(mlib_u8 *)mlib_malloc(384*sizeof(mlib_u8)));
-	_mlibn(jpg->mcubuf=(mlib_s16 *)mlib_malloc(384*sizeof(mlib_s16)));
-	_mlibn(jpg->tmpbuf=(mlib_u8 *)mlib_malloc(16*16*4*sizeof(mlib_u8)));
+	jpg->mcubuf8=(mlib_u8 *)jpg->_mcubuf8;
+	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
 	if((jpg->e_dclumtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
 	|| (jpg->e_aclumtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
 	|| (jpg->e_dcchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
 	|| (jpg->e_acchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL)
-		{lasterror="Memory Allocation failure";  return NULL;}
+	{
+		lasterror="Memory Allocation failure";
+		if(jpg) {jpg->initc=1;  hpjDestroy(jpg);}
+		return NULL;
+	}
 
 	jpg->initc=1;
-
 	return (hpjhandle)jpg;
 }
 
@@ -613,8 +616,9 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 
 int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 {
-	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr, *srcptr, *tmpptr,
-		*tmpptr2=&jpg->tmpbuf[16*16*4];
+	mlib_d64 _tmpbuf[1024/8], _tmpbuf2[1024/8];  // 16x16 for 4:2:0 encoding * 4 bytes
+	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr, *srcptr, *tmpptr=(mlib_u8 *)_tmpbuf,
+		*tmpptr2=(mlib_u8 *)_tmpbuf2;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, const mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, mlib_s32);
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
@@ -628,7 +632,7 @@ int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	if(curymcu==jpg->ymcus-1 && jpg->height%mcuh!=0) h=jpg->height%mcuh;
 
 	if(jpg->flags&HPJ_BOTTOMUP) bmpptr=bmpptr-(h-1)*jpg->pitch;
-	tmpptr=jpg->tmpbuf;  tmppitch=mcuw*ps;
+	tmppitch=mcuw*ps;
 
 	switch(jpg->subsamp)
 	{
@@ -947,21 +951,22 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 {
 	jpgstruct *jpg;  int huffbufsize;
 
-	if((jpg=(jpgstruct *)malloc(sizeof(jpgstruct)))==NULL)
+	if((jpg=(jpgstruct *)mlib_malloc(sizeof(jpgstruct)))==NULL)
 		{lasterror="Memory allocation failure";  return NULL;}
 	memset(jpg, 0, sizeof(jpgstruct));
 
-	_mlibn(jpg->lumqtable=(mlib_d64 *)mlib_malloc(64*sizeof(mlib_d64)));
-	_mlibn(jpg->chromqtable=(mlib_d64 *)mlib_malloc(64*sizeof(mlib_d64)));
-	_mlibn(jpg->mcubuf8=(mlib_u8 *)mlib_malloc(384*sizeof(mlib_u8)));
-	_mlibn(jpg->mcubuf=(mlib_s16 *)mlib_malloc(384*sizeof(mlib_s16)));
-	_mlibn(jpg->tmpbuf=(mlib_u8 *)mlib_malloc(16*16*4*2*sizeof(mlib_u8)));
+	jpg->mcubuf8=(mlib_u8 *)jpg->_mcubuf8;
+	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
 	if((jpg->d_dclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
 	|| (jpg->d_aclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
 	|| (jpg->d_dcchromtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
 	|| (jpg->d_acchromtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL)
-		{lasterror="Memory Allocation failure";  return NULL;}
+	{
+		lasterror="Memory Allocation failure";
+		if(jpg) {jpg->initd=1;  hpjDestroy(jpg);}
+		return NULL;
+	}
 
 	jpg->initd=1;
 	return (hpjhandle)jpg;
@@ -1028,12 +1033,6 @@ DLLEXPORT char* DLLCALL hpjGetErrorStr(void)
 DLLEXPORT int DLLCALL hpjDestroy(hpjhandle h)
 {
 	checkhandle(h);
-
-	if(jpg->mcubuf8) mlib_free(jpg->mcubuf8);
-	if(jpg->mcubuf) mlib_free(jpg->mcubuf);
-	if(jpg->tmpbuf) mlib_free(jpg->tmpbuf);
-	if(jpg->lumqtable) mlib_free(jpg->lumqtable);
-	if(jpg->chromqtable) mlib_free(jpg->chromqtable);
 
 	if(jpg->initc)
 	{
