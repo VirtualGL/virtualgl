@@ -108,7 +108,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	s->height=bminfo.bmi.bmiHeader.biHeight;
 	s->pitch=BMPPAD(s->width*s->ps);  // Windoze bitmaps are always padded
 
-	if(s->ps<24)
+	if(s->ps<3)
 	{
 		// Make the buffer BGRA
 		bminfo.bmi.bmiHeader.biCompression=BI_BITFIELDS;
