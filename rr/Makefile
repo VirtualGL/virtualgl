@@ -102,7 +102,7 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) -lpthread
 
 $(EDIR)/$(RRLAUNCH): $(RRLAUNCH)
 	cp $(RRLAUNCH) $@; chmod 755 $@
