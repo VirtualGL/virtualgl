@@ -35,7 +35,6 @@ class genericQ
 		~genericQ(void);
 		void add(void *);
 		void get(void **);
-		char *getErrorStr(void);
 		void release(void);
 		int items(void);
 	private:
