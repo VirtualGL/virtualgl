@@ -68,6 +68,7 @@ _DUMMY2 := $(shell mkdir -p $(LDIR))
 _DUMMY3 := $(shell mkdir -p $(ODIR))
 
 RM = rm -f
+INSTALL = install
 
 # System-specific macros
 include $(TOPDIR)/Makerules.$(platform)

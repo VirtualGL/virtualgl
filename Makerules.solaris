@@ -5,6 +5,7 @@
 CC = cc
 CXX = CC
 AR = ar ruvs
+INSTALL = /usr/ucb/install
 
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
