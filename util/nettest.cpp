@@ -69,11 +69,14 @@ int main(int argc, char **argv)
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
 		{printf("Buffer allocation error.\n");  exit(1);}
 
-	#if defined(THREADS)
-	printf("OpenSSL threads supported\n");
-	#else
-	printf("OpenSSL threads not supported\n");
-	#endif
+	if(dossl)
+	{
+		#if defined(OPENSSL_THREADS)
+		printf("OpenSSL threads supported\n");
+		#else
+		printf("OpenSSL threads not supported\n");
+		#endif
+	}
 
 	if(server)
 	{
@@ -84,11 +87,6 @@ int main(int argc, char **argv)
 		clientsd=sd.accept();
 
 		printf("Accepted TCP connection from %s\n", clientsd->remotename());
-		#if defined(OPENSSL_THREADS)
-		printf("OpenSSL threads supported\n");
-		#else
-		printf("OpenSSL threads not supported\n");
-		#endif
 
 		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
 		{
