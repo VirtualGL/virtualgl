@@ -28,8 +28,8 @@ int service=0;
 void start(int, char **);
 
 #ifdef _WIN32
-#define _SERVICENAME "RRXClient"
-#define _SSLSERVICENAME "RRXClient_SSL"
+#define _SERVICENAME "VGLClient"
+#define _SSLSERVICENAME "VGLClient_SSL"
 #define SERVICENAME (ssl? _SSLSERVICENAME:_SERVICENAME)
 #define _SERVICEFULLNAME __APPNAME" Client"
 #define _SSLSERVICEFULLNAME __APPNAME" Secure Client"

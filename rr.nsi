@@ -13,10 +13,10 @@ UninstPage instfiles
 Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
-	File "${BLDDIR}\bin\rrxclient.exe"
+	File "${BLDDIR}\bin\vglclient.exe"
 	File "${BLDDIR}\bin\hpjpeg.dll"
-	File "rr\newrrcert.bat"
-	File "rr\rrcert.cnf"
+	File /oname=newvglcert.bat "rr\newrrcert.bat"
+	File /oname=vglcert.cnf "rr\rrcert.cnf"
 	File "${BLDDIR}\bin\openssl.exe"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
@@ -36,34 +36,34 @@ Section "Start Menu Shortcuts (required)"
 	SetShellVarContext all
 	CreateDirectory "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Uninstall ${APPNAME} Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Install ${APPNAME} Client as a Service.lnk" "$INSTDIR\rrxclient.exe" "-install"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Client Service.lnk" "$INSTDIR\rrxclient.exe" "-remove"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Install ${APPNAME} Secure Client as a Service.lnk" "$INSTDIR\rrxclient.exe" "-s -install"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Secure Client Service.lnk" "$INSTDIR\rrxclient.exe" "-s -remove"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\rrxclient.exe"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\rrxclient.exe" "-s"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (this user only).lnk" "$INSTDIR\newrrcert.bat"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (all users).lnk" "$INSTDIR\newrrcert.bat" "root"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Install ${APPNAME} Client as a Service.lnk" "$INSTDIR\vglclient.exe" "-install"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Client Service.lnk" "$INSTDIR\vglclient.exe" "-remove"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Install ${APPNAME} Secure Client as a Service.lnk" "$INSTDIR\vglclient.exe" "-s -install"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Secure Client Service.lnk" "$INSTDIR\vglclient.exe" "-s -remove"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\vglclient.exe"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\vglclient.exe" "-s"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (this user only).lnk" "$INSTDIR\newvglcert.bat"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (all users).lnk" "$INSTDIR\newvglcert.bat" "root"
 
 SectionEnd
 
 Section "Uninstall"
 
 	SetShellVarContext all
-	ExecWait "$INSTDIR\rrxclient.exe -q -remove"
-	ExecWait "$INSTDIR\rrxclient.exe -q -s -remove"
+	ExecWait "$INSTDIR\vglclient.exe -q -remove"
+	ExecWait "$INSTDIR\vglclient.exe -q -s -remove"
 
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}"
 
-	Delete $INSTDIR\rrxclient.exe
+	Delete $INSTDIR\vglclient.exe
 	Delete $INSTDIR\hpjpeg.dll
-	Delete $INSTDIR\newrrcert.bat
-	Delete $INSTDIR\rrcert.cnf
+	Delete $INSTDIR\newvglcert.bat
+	Delete $INSTDIR\vglcert.cnf
 	Delete $INSTDIR\openssl.exe
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
-	Delete $INSTDIR\rrcert.pem
+	Delete $INSTDIR\vglcert.pem
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
 	Delete $INSTDIR\nettest.pem

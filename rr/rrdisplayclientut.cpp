@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 		printf("USAGE: %s <bitmap file> <subsamp> <qual> <server> [striph]\n", argv[0]);
 		printf("subsamp = 0=none, 1=4:2:2, 2=4:1:1\n");
 		printf("qual = 0-100 inclusive\n");
-		printf("server = machine where RRXClient is running (0=local test only)\n");
+		printf("server = machine where client is running (0=local test only)\n");
 		printf("striph = height of each inter-frame difference tile\n");
 		exit(1);
 	}
