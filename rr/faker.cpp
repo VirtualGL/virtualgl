@@ -391,16 +391,28 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	GLXDrawable oldread=glXGetCurrentReadDrawable();
 	GLXDrawable olddraw=glXGetCurrentDrawable();
 	GLXContext ctx=glXGetCurrentContext();
-	Display *olddpy=glXGetCurrentDisplay();
-	if(!ctx || !olddpy) return 0;  // Does ... not ... compute
+	Display *olddpy=NULL;
+	if(!ctx || (!fconfig.glp && !(olddpy=glXGetCurrentDisplay())))
+		return 0;  // Does ... not ... compute
 
 	// Intentionally call the faked function so it will map a PB if src or dst is a window
 	glXMakeContextCurrent(dpy, draw, read, ctx);
 
 	unsigned int srch, dsth, dstw;
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
+	#ifdef USEGLP
+	if(fconfig.glp)
+	{
+		glPQueryBuffer(glPGetCurrentBuffer(), GLP_WIDTH, &dstw);
+		glPQueryBuffer(glPGetCurrentBuffer(), GLP_HEIGHT, &dsth);
+		glPQueryBuffer(glPGetCurrentReadBuffer(), GLP_HEIGHT, &srch);
+	}
+	else
+	#endif
+	{
+		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
+		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
+		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
+	}
 
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -430,6 +442,10 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	glPopAttrib();
 	glPopClientAttrib();
 
+	#ifdef USEGLP
+	if(fconfig.glp) glPMakeContextCurrent(olddraw, oldread, ctx);
+	else
+	#endif
 	_glXMakeContextCurrent(olddpy, olddraw, oldread, ctx);
 
 	CATCH();
@@ -446,33 +462,19 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 // It returns the 2D visual so that it can be used in subsequent X11 calls.
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
-	XVisualInfo *v=NULL, *_localv=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL, vtemp;  int n=0;
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		GLPFBConfig c;  int depth, c_class, i;
-		if(!(c=glPConfigFromVisAttribs(_localdev, attrib_list))) return NULL;
-		if(!XMatchVisualInfo(dpy, screen, glPConfigDepth(c), glPConfigClass(c),
-			&vtemp)) return NULL;
-		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
-		vish.add(dpy, v, c);
-	}
-	else
-	#endif
-	{
-		if((_localv=_glXChooseVisual(_localdpy, DefaultScreen(_localdpy), attrib_list))==NULL)
-			return NULL;
-		if(!XMatchVisualInfo(dpy, screen, _localv->depth, _localv->c_class, &vtemp)) {XFree(_localv);  return NULL;}
-		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) {XFree(_localv);  return NULL;}
-		vish.add(dpy, v, _localv);
-		XFree(_localv);
-	}
+	GLXFBConfig c;
+	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
+	if(!XMatchVisualInfo(dpy, screen, glXConfigDepth(c), glXConfigClass(c),
+		&vtemp)) return NULL;
+	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	vish.add(dpy, v, c);
 
 	CATCH();
 	return v;
@@ -490,8 +492,8 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glPConfigDepth(config),
-			glPConfigClass(config), &vtemp)) return NULL;
+		if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
+			glXConfigClass(config), &vtemp)) return NULL;
 		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
 		vish.add(dpy, v, config);
 	}
@@ -503,7 +505,6 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), _localv->depth, _localv->c_class, &vtemp)) {XFree(_localv);  return NULL;}
 		if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) {XFree(_localv);  return NULL;}
 		vish.add(dpy, v, _localv);
-		XFree(_localv);
 	}
 	CATCH();
 	return v;
@@ -532,7 +533,6 @@ GLXFBConfig remotevis2localpbconfig(Display *dpy, XVisualInfo *vis)
 			&& (v=_GetVisual(_localdpy, DefaultScreen(_localdpy), 24, TrueColor))==NULL)
 				return 0;
 			glxvisual *glxv=new glxvisual(v);
-			XFree(v);
 			if(!glxv) return NULL;
 			c=glxv->getpbconfig();
 			delete glxv;
@@ -734,18 +734,14 @@ GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, 
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const int *attrib_list)
 {
 	TRY();
-	pbwin *pbw;  GLXFBConfig c=0;
+	pbwin *pbw;
 	XSync(dpy, False);
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
-	glxvisual *glxv;
-	errifnot(glxv=new glxvisual(config));
-	errifnot(c=glxv->getpbconfig());
-	errifnot(pbw=winh.setpb(dpy, win, c));
-	delete glxv;
+	errifnot(pbw=winh.setpb(dpy, win, config));
 	CATCH();
 	return win;  // Make the client store the original window handle, which we use
                // to find the Pbuffer in the hash
@@ -800,19 +796,14 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int *attribs)
 {
 	TRY();
-	GLXFBConfig c=0;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
 
-	glxvisual *glxv;
-	errifnot(glxv=new glxvisual(config));
-	errifnot(c=glxv->getpbconfig());
-	delete glxv;
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	pbuffer *pb=new pbuffer(w, h, c);
+	pbuffer *pb=new pbuffer(w, h, config);
 	if(pb)
 	{
 		pmh.add(dpy, pm, pb);
