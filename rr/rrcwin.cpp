@@ -21,7 +21,7 @@ rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false), profile(fal
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
-	sprintf(dpystr, ":%d.0", dpynum);
+	sprintf(dpystr, "localhost:%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
 	char *ev=NULL;
 	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
