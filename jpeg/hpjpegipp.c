@@ -503,6 +503,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
 		_throw("Invalid argument in hpjCompress()");
+	if(qual<1) qual=1;
 	if(!jpg->initc) _throw("Instance has not been initialized for compression");
 
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
