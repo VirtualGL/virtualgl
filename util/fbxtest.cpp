@@ -53,9 +53,10 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define MIN_SCREEN_HEIGHT 768
 #define WIDTH             701
 #define HEIGHT            701
-#define N                 5
+#define N                 2
 
 int width, height;
+int checkdb=0;
 fbx_wh wh;
 rrtimer timer;
 #ifdef WIN32
@@ -151,6 +152,13 @@ void nativewrite(int useshm)
 		timer.start();
 		for (i=0; i<n; i++)
 		{
+			if(checkdb)
+			{
+				memset(s.bits, 255, s.pitch*s.height);
+				for(int j=0; j<height; j++)
+					fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
+				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
+			}
 			for(int j=0; j<height; j++)
 				fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
 			fbx_sync(&s);
@@ -171,6 +179,12 @@ void nativewrite(int useshm)
 		timer.start();
 		for (i=0; i<n; i++)
 		{
+			if(checkdb)
+			{
+				memset(s.bits, 255, s.pitch*s.height);
+				fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
+				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
+			}
 			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
 		}
 		rbtime=timer.elapsed();
@@ -452,7 +466,19 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 //////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+	int i;
+
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
+
+	if(argc>1) for(i=1; i<argc; i++)
+	{
+		if(!stricmp(argv[i], "-checkdb"))
+		{
+			checkdb=1;
+			fprintf(stderr, "Checking double buffering.  Watch for flashing to indicate that it is\n");
+			fprintf(stderr, "not enabled.  Performance will be sub-optimal.\n");
+		}
+	}
 
 	try {
 
