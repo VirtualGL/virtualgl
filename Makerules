@@ -98,7 +98,7 @@ $(ODIR)/%.obj: %.c
 	$(CC) $(CFLAGS) -c $< -Fo$@
 
 $(ODIR)/%.obj: %.cpp
-	$(CXX) $(CFLAGS) -c $< -Fo$@
+	$(CXX) $(CXXFLAGS) -c $< -Fo$@
 
 $(LDIR)/%.lib: $(ODIR)/%.obj
 	$(AR) -OUT:$@ $<
