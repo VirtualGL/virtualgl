@@ -39,10 +39,10 @@ int main(int argc, char **argv)
 {
 	int server;  char *servername=NULL;
 	char *buf;  int i, j;
-	bool dossl=false;  char *keyfile=NULL;
+	bool dossl=false;
 	rrtimer timer;
 
-	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl <keyfile>]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
+	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
 
 	if(argc<2) usage();
 	if(!stricmp(argv[1], "-client"))
@@ -56,9 +56,8 @@ int main(int argc, char **argv)
 		server=1;
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
-			dossl=true;  if(argc<4) {printf("ERROR: key file must be specified.\n");  exit(1);}
+			dossl=true;
 			puts("Using SSL ...");
-			keyfile=argv[3];
 		}
 	}
 	else usage();
@@ -83,7 +82,7 @@ int main(int argc, char **argv)
 		rrsocket *clientsd=NULL;
 
 		printf("Listening on TCP port %d\n", PORT);
-		sd.listen(PORT, keyfile, keyfile);
+		sd.listen(PORT);
 		clientsd=sd.accept();
 
 		printf("Accepted TCP connection from %s\n", clientsd->remotename());

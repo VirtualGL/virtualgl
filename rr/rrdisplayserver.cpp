@@ -29,66 +29,11 @@
 		h.bmpx=byteswap16(h.bmpx);  \
 		h.bmpy=byteswap16(h.bmpy);}}
 
-#define CERTF "vglcert.pem"
-
-#ifdef _WIN32
-	#define DIRSEP "\\"
-	#define ALTDIR "."
-#else
-	#include <pwd.h>
-	#define DIRSEP "/"
-	#define ALTDIR "/etc"
-	#ifdef sun
-	#define ALTDIR2 "/opt/SUNWvgl/etc"
-	#endif
-#endif
-
-char *gethomedir(void)
-{
-	#ifdef _WIN32
-	return getenv("USERPROFILE");
-	#else
-	char *homedir=NULL;  struct passwd *pw;
-	if((homedir=getenv("HOME"))!=NULL) return homedir;
-	if((pw=getpwuid(getuid()))==NULL) return NULL;
-	return pw->pw_dir;
-	#endif
-}
-
 rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl) :
 	listensd(NULL), t(NULL), deadyet(false)
 {
-	char temppath[1024];  temppath[0]=0;
-
-	if(dossl)
-	{
-		strncpy(temppath, gethomedir(), 1024);  temppath[1024]=0;
-		strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
-		if(access(temppath, F_OK)!=0)
-		{
-			#ifdef _WIN32
-			if(GetModuleFileName(NULL, temppath, 1024))
-			{
-				char *ptr;
-				if((ptr=strrchr(temppath, '\\'))!=NULL) *ptr='\0';
-			}
-			else
-			#endif
-			strncpy(temppath, ALTDIR, 1024);
-			strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
-			#ifdef sun
-			if(access(temppath, F_OK)!=0)
-			{
-				strncpy(temppath, ALTDIR2, 1024);
-				strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
-			}
-			#endif
-		}
-		rrout.println("Using certificate file %s\n", temppath);
-	}
-
 	errifnot(listensd=new rrsocket(dossl));
-	listensd->listen(port==0?RR_DEFAULTPORT:port, temppath, temppath);
+	listensd->listen(port==0?RR_DEFAULTPORT:port);
 	errifnot(t=new Thread(this));
 	t->start();
 }
