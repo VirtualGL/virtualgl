@@ -80,8 +80,8 @@ GLPFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 			_throw("Could not find appropriate visual on server's display");
 		c=configs[0];
 	}
-	return c;
 	CATCH();
+	return c;
 }
 #endif
 

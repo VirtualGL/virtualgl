@@ -2,36 +2,61 @@
 # Solaris 32-bit and 64-bit
 ########################################
 
+ARCHFLAG =
+
+ifeq ($(CC), gcc)
+
+CXX = g++
+CFLAGS = -Wall -fpic
+CDEFINES = -D_GNU_SOURCE
+
+ifeq ($(subplatform), 64)
+ARCHFLAG = -m64
+endif
+ifeq ($(DEBUG), yes)
+OPTFLAG = -O0 -ggdb
+else
+OPTFLAG = -O2
+endif
+SHFLAG = -shared
+DEPFLAG = -MM
+
+else
+
 CC = cc
 CXX = CC
-AR = ar ruvs
-INSTALL = /usr/ucb/install
-
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
-CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
-CDEFINES = -DUSEGLP
 
-LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
-LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS) -R/opt/SUNWvgl/lib/sparcv9
-else
-ARCHFLAG =
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 endif
-
 ifeq ($(DEBUG), yes)
 OPTFLAG = -g
 else
 OPTFLAG = -fast
 endif
+SHFLAG = -G -lCrun
+DEPFLAG = -xM1
+
+endif
+
+AR = ar ruvs
+INSTALL = /usr/ucb/install
+
+CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CDEFINES := $(CDEFINES) -DUSEGLP
+
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+ifeq ($(subplatform), 64)
+LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS) -R/opt/SUNWvgl/lib/sparcv9
+else
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+endif
 
 DEFAULTJPEGLIB = medialib
 
-SHFLAG = -G -lCrun
 SHEXT = so
-DEPFLAG = -xM1
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto

@@ -168,7 +168,7 @@ void rrsocket::listen(unsigned short port, char *certfile, char *privkeyfile)
 	}
 }
 
-#if (defined(__GLIBC__)&&(__GLIBC__>1))
+#if (defined(__GLIBC__)&&(__GLIBC__>1)||defined(sun))
 typedef socklen_t SOCKLEN_T;
 #else
 typedef int SOCKLEN_T;
