@@ -69,7 +69,7 @@ int isdead(void)
 void safeexit(int retcode)
 {
 	int shutdown;
-	globalmutex.lock();
+	globalmutex.lock(false);
 	shutdown=__shutdown;
 	if(!__shutdown)
 	{
@@ -80,7 +80,7 @@ void safeexit(int retcode)
 		if(_dpyh) _dpyh->killhash();
 		if(_winh) _winh->killhash();
 	}
-	globalmutex.unlock();
+	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
 }
@@ -114,7 +114,11 @@ void fakerinit(void)
 	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
-	printf("Attach GDB to process %d and press any key ...\n", getpid());  getchar();
+	if(getenv("RRDEBUGPAUSE"))
+	{
+		printf("Attach GDB to process %d ...\n", getpid());
+		sleep(30);
+	}
 	#if 0
 	XSetErrorHandler(xhandler);
 	#endif
