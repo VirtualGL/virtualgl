@@ -51,6 +51,14 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 }
 
 
+/* Quicktime seems to use the output buffer for temporary MCU storage
+   and thus requires 384 bytes per 8x8 block */
+DLLEXPORT unsigned long DLLCALL HPJBUFSIZE(int width, int height)
+{
+	return ((width/8+1) * (height/8+1) * 384 + 2048);
+}
+
+
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	unsigned char *srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,

@@ -49,6 +49,11 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 	return (hpjhandle)1;
 }
 
+DLLEXPORT unsigned long DLLCALL HPJBUFSIZE(int width, int height)
+{
+	return (max((max(width,16))*(max(height,16))*3,2048));
+}
+
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	unsigned char *_srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,

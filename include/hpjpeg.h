@@ -44,13 +44,7 @@ typedef void* hpjhandle;
 #ifndef max
  #define max(a,b) ((a)>(b)?(a):(b))
 #endif
-#if JPEGLIB==quicktime
-/* Quicktime seems to use the output buffer for temporary MCU storage
-   and thus requires 384 bytes per 8x8 block */
-#define HPJBUFSIZE(width,height) ( (width/8+1) * (height/8+1) * 384 + 2048 )
-#else
-#define HPJBUFSIZE(width,height) (max((max(width,16))*(max(height,16))*3,2048))
-#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -130,6 +124,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle j,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsubsamp, int jpegqual, int flags);
 
+DLLEXPORT unsigned long DLLCALL HPJBUFSIZE(int width, int height);
 
 /*
   hpjhandle hpjInitDecompress(void)
