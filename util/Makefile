@@ -61,7 +61,8 @@ TARGETS = $(LDIR)/librrutil.a \
           $(LDIR)/libfbx.a \
           $(EDIR)/fbxtest \
           $(EDIR)/nettest \
-          $(EDIR)/threadtest
+          $(EDIR)/threadtest \
+          $(EDIR)/glreadtest
 
 OBJS = $(ODIR)/rrlog.o \
        $(ODIR)/genericQ.o \
@@ -69,7 +70,8 @@ OBJS = $(ODIR)/rrlog.o \
        $(ODIR)/fbx.o \
        $(ODIR)/fbxtest.o \
        $(ODIR)/nettest.o \
-       $(ODIR)/threadtest.o
+       $(ODIR)/threadtest.o \
+       $(ODIR)/glreadtest.o
 
 all: $(TARGETS)
 
@@ -89,6 +91,9 @@ $(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a
 
 $(EDIR)/threadtest: $(ODIR)/threadtest.o
 	$(CXX) $(LDFLAGS) $< -o $@ -lpthread
+
+$(EDIR)/glreadtest: $(ODIR)/glreadtest.o
+	$(CXX) $(LDFLAGS) $< -o $@ -lGL -lGLU -lX11
 
 ##########################################################################
 endif
