@@ -21,48 +21,23 @@
 // This attempts to look up a visual in the hash or match it using 2D functions
 // if (for some reason) it wasn't obtained with glXChooseVisual()
 
-XVisualInfo *_GetVisual(Display *dpy, int screen, int depth, int c_class)
-{
-	XVisualInfo vtemp, *v=NULL;  int n;
-	if(!XMatchVisualInfo(dpy, screen, depth, c_class, &vtemp)) return NULL;
-	if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n)
-		return NULL;
-	int supportsgl=0;
-	_glXGetConfig(_localdpy, v, GLX_USE_GL, &supportsgl);
-	if(!supportsgl) return NULL;
-	return v;
-}
+#define _DefaultScreen(d) ((!fconfig.glp && d) ? DefaultScreen(d):0)
 
-XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
+GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
-	XVisualInfo *v=NULL;
-	if(!dpy || !vis) return NULL;
-	TRY();
-	if(!(v=vish.matchvisual(dpy, vis)))
-	{
-		if((v=_GetVisual(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class))==NULL
-		&& (v=_GetVisual(_localdpy, DefaultScreen(_localdpy), 24, TrueColor))==NULL)
-			_throw("Could not find appropriate visual on server's display");
-		vish.add(dpy, vis, v);
-	}
-	CATCH();
-	return v;
-}
-
-#ifdef USEGLP
-GLPFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
-{
-	GLPFBConfig c=0, *configs=NULL;  int n=0;
+	GLXFBConfig c=0, *configs=NULL;  int n=0;
 	if(!dpy || !vis) return 0;
-	TRY();
 	if(!(c=vish.getpbconfig(dpy, vis)))
 	{
-		int defattribs[]={GLP_DOUBLEBUFFER, 1, GLP_RED_SIZE, 8, GLP_GREEN_SIZE, 8,
-			GLP_BLUE_SIZE, 8, GLP_RENDER_TYPE, GLP_RGBA_BIT, None};
-		int rgbattribs[]={GLP_DOUBLEBUFFER, 1, GLP_RED_SIZE, 8, GLP_GREEN_SIZE, 8,
-			GLP_BLUE_SIZE, 8, GLP_RENDER_TYPE, GLP_RGBA_BIT, None};
-		int ciattribs[]={GLP_DOUBLEBUFFER, 1, GLP_BUFFER_SIZE, 8,
-			GLP_RENDER_TYPE, GLP_COLOR_INDEX_BIT, None};
+		int defattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
+		int rgbattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
+		int ciattribs[]={GLX_DOUBLEBUFFER, 1, GLX_BUFFER_SIZE, 8,
+			GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
 		int *attribs=rgbattribs;
 		if(vis->c_class!=TrueColor && vis->c_class!=DirectColor)
 		{
@@ -75,15 +50,14 @@ GLPFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 			else if(vis->depth<16) attribs[3]=attribs[5]=attribs[7]=2;
 			else if(vis->depth<24) attribs[3]=attribs[5]=attribs[7]=4;
 		}
-		if(((configs=glPChooseFBConfig(_localdev, attribs, &n))==NULL || n<1)
-			&& ((configs=glPChooseFBConfig(_localdev, defattribs, &n))==NULL || n<1))
-			_throw("Could not find appropriate visual on server's display");
+		if(((configs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), attribs, &n))==NULL || n<1)
+			&& ((configs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), defattribs, &n))==NULL || n<1))
+			return 0;
 		c=configs[0];
+		if(c) vish.add(dpy, vis, c);
 	}
-	CATCH();
 	return c;
 }
-#endif
 
 extern "C" {
 
@@ -199,36 +173,22 @@ const char *glXGetClientString(Display *dpy, int name)
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
 	TRY();
-	#ifdef USEGLP
-	if(fconfig.glp)
+	GLXFBConfig c;  int glxvalue, err;
+	errifnot(c=_MatchConfig(dpy, vis));
+	switch(attrib)
 	{
-		GLPFBConfig c;  int glpvalue, err;
-		errifnot(c=_MatchConfig(dpy, vis));
-		switch(attrib)
-		{
-			case GLX_USE_GL:
-				if(value) {*value=1;  return 0;}
-				else return GLX_BAD_VALUE;
-			case GLX_RGBA:
-				if((err=glPGetFBConfigAttrib(c, GLP_RENDER_TYPE, &glpvalue))!=0)
-					return err;
-				*value=glpvalue==GLP_RGBA_BIT? 1:0;  return 0;
-			default:
-				return glPGetFBConfigAttrib(c, attrib, value);
-		}
-	}
-	else
-	#endif
-	if(dpy!=_localdpy)
-	{
-		if(vis)
-		{
-			XVisualInfo *_localvis=_MatchVisual(dpy, vis);
-			if(_localvis) vis=_localvis;
-		}
+		case GLX_USE_GL:
+			if(value) {*value=1;  return 0;}
+			else return GLX_BAD_VALUE;
+		case GLX_RGBA:
+			if((err=glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &glxvalue))!=0)
+				return err;
+			*value=glxvalue==GLX_RGBA_BIT? 1:0;  return 0;
+		default:
+			return glXGetFBConfigAttrib(_localdpy, c, attrib, value);
 	}
 	CATCH();
-	return _glXGetConfig(_localdpy, vis, attrib, value);
+	return GLX_BAD_ATTRIBUTE;
 }
 
 GLXContext glXGetCurrentContext(void)
@@ -292,21 +252,7 @@ int glXGetFBConfigAttribSGIX(Display *dpy, GLXFBConfigSGIX config, int attribute
 
 GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
 {
-	TRY();
-	#ifdef USEGLP
-	if(fconfig.glp) return _MatchConfig(dpy, vis);
-	else
-	#endif
-	if(dpy!=_localdpy)
-	{
-		if(vis)
-		{
-			XVisualInfo *_localvis=_MatchVisual(dpy, vis);
-			if(_localvis) vis=_localvis;
-		}
-	}
-	CATCH();
-	return _glXGetFBConfigFromVisualSGIX(_localdpy, vis);
+	return _MatchConfig(dpy, vis);
 }
 
 GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)

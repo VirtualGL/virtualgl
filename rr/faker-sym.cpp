@@ -33,7 +33,7 @@ void *loadsym(void *dllhnd, char *symbol, int quiet)
 void loadsymbols(void)
 {
 	void *dllhnd;
-	const char *err=dlerror();  // Clear error state
+	dlerror();  // Clear error state
 
 	if(fconfig.gllib)
 	{
@@ -53,7 +53,6 @@ void loadsymbols(void)
 	lsym(glXCreateGLXPixmap)
 	lsym(glXDestroyContext)
 	lsym(glXDestroyGLXPixmap)
-	lsym(glXGetConfig)
 	lsym(glXGetCurrentContext)
 	lsym(glXGetCurrentDrawable)
 	lsym(glXIsDirect)
@@ -100,7 +99,6 @@ void loadsymbols(void)
 
 	lsymopt(glXGetFBConfigAttribSGIX)
 	lsymopt(glXChooseFBConfigSGIX)
-	lsymopt(glXGetFBConfigFromVisualSGIX)
 
 	lsymopt(glXCreateGLXPbufferSGIX)
 	lsymopt(glXDestroyGLXPbufferSGIX)

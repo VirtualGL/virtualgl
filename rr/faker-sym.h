@@ -110,9 +110,6 @@ funcdef2(void, glXDestroyContext, Display *, dpy, GLXContext, ctx,);
 
 funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 
-funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
-	int *, value, return);
-
 funcdef0(GLXContext, glXGetCurrentContext, return);
 
 funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
@@ -232,9 +229,6 @@ funcdef4(int, glXGetFBConfigAttribSGIX, Display *, dpy, GLXFBConfigSGIX, config,
 
 funcdef4(GLXFBConfigSGIX *, glXChooseFBConfigSGIX, Display *, dpy, int, screen,
 	const int *, attrib_list, int *, nelements, return);
-
-funcdef2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
-	XVisualInfo *, vis, return);
 
 
 // SGIX_pbuffer

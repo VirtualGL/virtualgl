@@ -13,22 +13,6 @@
 
 #include "faker-sym.h"
 
-class glxvisual
-{
-	public:
-
-		glxvisual(GLXFBConfig);
-		glxvisual(XVisualInfo *);
-		~glxvisual(void);
-		GLXFBConfig getpbconfig(void);
-		XVisualInfo *getvisual(void);
-
-	private:
-
-		GLXFBConfig config;
-		XVisualInfo *vis;
-};
-
 int glXConfigDepth(GLXFBConfig);
 int glXConfigClass(GLXFBConfig);
 GLXFBConfig glXConfigFromVisAttribs(int attribs[]);
