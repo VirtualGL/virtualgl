@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 	double tstart, elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;  int dpynum=0;
+	bool usessl=false;  int i;
 
 	try {
 
@@ -27,21 +28,24 @@ int main(int argc, char **argv)
 	if(argc<5 || (qual=atoi(argv[3]))<0 || qual>100 || (subsamp=atoi(argv[2]))<0
 		|| subsamp>RR_SUBSAMP)
 	{
-		printf("USAGE: %s <bitmap file> <subsamp> <qual> <server> [striph]\n", argv[0]);
+		printf("USAGE: %s <bitmap file> <subsamp> <qual> <server> [striph] [-ssl]\n", argv[0]);
 		printf("subsamp = 0=none, 1=4:2:2, 2=4:1:1\n");
 		printf("qual = 0-100 inclusive\n");
 		printf("server = machine where RRXClient is running\n");
 		printf("striph = height of each inter-frame difference tile\n");
+		printf("-ssl = use SSL tunnel\n");
 		exit(1);
 	}
+
+	for(i=0; i<argc; i++) if(!stricmp(argv[i], "-ssl")) usessl=true;
 
 	int striph=64, temp;
 	if(argc>5 && (temp=atoi(argv[5]))>0) striph=temp;
 	printf("Strip height = %d pixels\n", striph);
 	char *servername=argv[4];
-	unsigned short port=RR_DEFAULTPORT;
+	unsigned short port=usessl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
 
-	rrdisplayclient rrdpy(servername, port, false);
+	rrdisplayclient rrdpy(servername, port, usessl);
 	int w, h, d;
 	const char *err;
 	if((err=loadbmp(argv[1], &buf, &w, &h, &d, 0))!=NULL) _throw(err);
