@@ -154,7 +154,7 @@ void start(int argc, char **argv)
 	start:
 	if(!(rrdpy=RRInitDisplay(port, ssl)))
 	{
-		hpprintf("Could not initialize listener:\n%s\n", RRGetError());
+		hpprintf("Could not initialize listener:\n%s (%d)\n%s\n", RRGetError().file, RRGetError().line, RRGetError().message);
 		return;
 	}
 	hpprintf("Listener active on port %d\n", port);
