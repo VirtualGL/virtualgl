@@ -156,6 +156,7 @@ class rrframe
 	{
 		rrout.print("h->size    = %lu\n", hdr->size);
 		rrout.print("h->winid   = 0x%.8x\n", hdr->winid);
+		rrout.print("h->dpynum  = %d\n", hdr->dpynum);
 		rrout.print("h->winw    = %d\n", hdr->winw);
 		rrout.print("h->winh    = %d\n", hdr->winh);
 		rrout.print("h->bmpw    = %d\n", hdr->bmpw);

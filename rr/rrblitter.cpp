@@ -47,6 +47,7 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 	b=bmp[bmpi];  bmpi=(bmpi+1)%NB;
 	bmpmutex.unlock();
 	rrframeheader hdr;
+	memset(&hdr, 0, sizeof(hdr));
 	hdr.bmph=hdr.winh=h;
 	hdr.bmpw=hdr.winw=w;
 	hdr.bmpx=hdr.bmpy=0;
