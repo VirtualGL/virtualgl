@@ -126,6 +126,25 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
   <li>See <a href="http://www.sun.com/software/products/studio/">
   http://www.sun.com/software/products/studio/</a></li>
 </ul>
+<H3><span style="font-weight: 400">... or ...</span></H3>
+<H3><span style="font-weight: 400">GCC</span></H3>
+<ul>
+  <li>Tested with v3.3 and v2.95</li>
+  <li>Available on the Solaris 9 &amp; 10 Companion CD's (<a href="http://www.sun.com/software/solaris/freeware/">http://www.sun.com/software/solaris/freeware/</a>) 
+  or at <a href="http://www.sunfreeware.com/">http://www.sunfreeware.com/</a>.</li>
+  <li>If building OpenSSL from source (see above), configure it using<br>
+  <br>
+  <font face="Courier New">./Configure solaris64-sparcv9-gcc shared</font><br>
+  or<br>
+  <font face="Courier New">./Configure solaris-sparcv9-gcc shared<br>
+  </font>or<br>
+  <font face="Courier New">./Configure solaris-x86-gcc shared/<br>
+  <br>
+  </font>This is mainly necessary in order to get the compiler to generate 
+  position-independent code.&nbsp; If you still want to link OpenSSL statically, 
+  just delete <i>libssl.so</i> and <i>libcrypto.so</i> from your OpenSSL 
+  build directory prior to building VirtualGL.</li>
+</ul>
 <H3><span style="font-weight: 400"><i>SOLARIS 8 ONLY:</i>&nbsp;  Linker
 patch 109147-32 must be
 installed</span></H3>
@@ -258,6 +277,12 @@ directory}</span></h3>
   The 32-bit client can be used by both 64-bit and 32-bit systems, so it is only 
   necessary to build the faker library using 64-bit code (so that it 
   can be inserted into 64-bit apps.)</span></p>
+</blockquote>
+  <h3><span style="font-weight: 400">CC = gcc</span></h3>
+<blockquote>
+  <p>On Solaris, this builds VirtualGL using the GCC compiler rather than the 
+  default (Sun WS Pro) compiler.&nbsp; <i>gcc</i> and <i>g++</i> should be in 
+  your PATH.</p>
 </blockquote>
 <hr>
 <h2><span style="font-weight: 400">Installing / Distributing</span></h2>
