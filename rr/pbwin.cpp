@@ -314,7 +314,7 @@ void pbwin::readback(bool force)
 	readback(drawbuf, force);
 }
 
-void pbwin::readback(GLint drawbuf, bool force)
+void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	rrdisplayclient *rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
@@ -323,6 +323,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 	rrcs::safelock l(mutex);
 
 	if(this->force) {force=true;  this->force=false;}
+	if(sync) {compress=RRCOMP_NONE;  force=true;}
 	int pbw=pb->width(), pbh=pb->height();
 	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
@@ -371,7 +372,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 		{
 			rrfb *b;
 			if(!blitter) errifnot(blitter=new rrblitter());
-			if(fconfig.spoil && !blitter->frameready()) return;
+			if(fconfig.spoil && !blitter->frameready() && !force) return;
 			errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
 			b->flags|=RRBMP_BOTTOMUP;
 			int format= (b->pixelsize==3?GL_RGB:GL_RGBA);
@@ -392,7 +393,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 				#endif
 			}
 			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, bits, drawbuf, true);
-			blitter->sendframe(b);
+			blitter->sendframe(b, sync);
 			break;
 		}
 	}

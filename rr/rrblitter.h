@@ -29,6 +29,7 @@ class rrblitter : public Runnable
 		errifnot(t=new Thread(this));
 		t->start();
 		prof_blit.setname("Blit");
+		_lastb=NULL;
 	}
 
 	virtual ~rrblitter(void)
@@ -39,7 +40,7 @@ class rrblitter : public Runnable
 	}
 
 	bool frameready(void);
-	void sendframe(rrfb *);
+	void sendframe(rrfb *, bool sync=false);
 	void run(void);
 	rrfb *getbitmap(Display *, Window, int, int);
 
@@ -52,6 +53,7 @@ class rrblitter : public Runnable
 	void blitdiff(rrfb *, rrfb *);
 	Thread *t;  bool deadyet;
 	rrprofiler prof_blit;
+	rrfb *_lastb;
 };
 
 #endif

@@ -130,6 +130,8 @@ funcdef2(void, glXSwapBuffers, Display *, dpy, GLXDrawable, drawable,);
 
 funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int, list_base,);
 
+funcdef0(void, glXWaitGL,);
+
 
 // GLX 1.1 functions
 

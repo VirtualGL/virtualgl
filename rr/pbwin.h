@@ -58,7 +58,7 @@ class pbwin
 		Display *getwindpy(void);
 		Window getwin(void);
 		void readback(bool);
-		void readback(GLint, bool);
+		void readback(GLint, bool, bool sync=false);
 		void swapbuffers(void);
 		void forcenextframe(void) {force=true;}
 

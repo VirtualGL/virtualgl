@@ -827,7 +827,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	CATCH();
 }
 
-void _doGLreadback(bool force)
+void _doGLreadback(bool force, bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
@@ -838,7 +838,7 @@ void _doGLreadback(bool force)
 	if((drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK)
 	&& (pbw=winh.findpb(drawable))!=NULL)
 	{
-		pbw->readback(GL_FRONT, force);
+		pbw->readback(GL_FRONT, force, sync);
 	}
 }
 
@@ -854,7 +854,21 @@ void glFinish(void)
 {
 	TRY();
 	_glFinish();
-	_doGLreadback(false);
+	if(fconfig.sync) _doGLreadback(true, true);
+	else _doGLreadback(false);
+	CATCH();
+}
+
+void glXWaitGL(void)
+{
+	TRY();
+	#ifdef sun
+	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
+	#else
+	_glXWaitGL();
+	#endif
+	if(fconfig.sync) _doGLreadback(true, true);
+	else _doGLreadback(false);
 	CATCH();
 }
 

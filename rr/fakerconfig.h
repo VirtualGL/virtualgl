@@ -59,6 +59,7 @@ class FakerConfig
 			port=-1;
 			glp=false;
 			usewindow=false;
+			sync=false;
 
 			// Fetch values from environment
 			getconfigstr("GLLIB", gllib);
@@ -108,6 +109,7 @@ class FakerConfig
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
 			getconfigbool("WINDOW", usewindow);
 			if(glp) usewindow=false;
+			getconfigbool("SYNC", sync);
 		}
 
 		void setloqual(void)
@@ -138,6 +140,7 @@ class FakerConfig
 		bool ssl;
 		bool glp;
 		bool usewindow;
+		bool sync;
 
 	private:
 

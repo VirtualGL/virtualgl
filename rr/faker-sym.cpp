@@ -63,6 +63,7 @@ void loadsymbols(void)
 	lsym(glXQueryVersion)
 	lsym(glXSwapBuffers)
 	lsym(glXUseXFont)
+	lsym(glXWaitGL)
 
 	lsym(glXGetClientString)
 	lsym(glXQueryServerString)
