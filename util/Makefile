@@ -31,7 +31,7 @@ clean:
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
-$(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj
+$(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj $(ODIR)/bmp.obj
 	$(AR) -OUT:$@ $^
 
 $(ODIR)/fbx-xdk.obj: fbx.c
@@ -80,7 +80,7 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-$(LDIR)/librrutil.a: $(ODIR)/rrlog.o $(ODIR)/genericQ.o
+$(LDIR)/librrutil.a: $(ODIR)/rrlog.o $(ODIR)/genericQ.o $(ODIR)/bmp.o
 	$(AR) $@ $^
 
 $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a

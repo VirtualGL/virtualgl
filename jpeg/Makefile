@@ -83,8 +83,8 @@ endif
 $(EDIR)/hpjpeg.dll $(LDIR)/hpjpeg.lib: $(ODIR)/hpjpeg.obj $(JPEGDEP)
 	$(LINK) -dll -out:$(EDIR)/hpjpeg.dll -implib:$(LDIR)/hpjpeg.lib $< $(JPEGLINK)
 
-$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hpjpeg.lib
-	$(LINK) $< -OUT:$@ hpjpeg.lib
+$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hpjpeg.lib $(LDIR)/rrutil.lib
+	$(LINK) $< -OUT:$@ hpjpeg.lib rrutil.lib
 
 $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/hpjpeg.lib
 	$(LINK) $< -OUT:$@ hpjpeg.lib
@@ -195,8 +195,8 @@ endif
 $(LDIR)/libhpjpeg.$(SHEXT): $(ODIR)/hpjpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT)
-	$(CXX) $(LDFLAGS) $< -o $@ -lhpjpeg
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrutil.$(SHEXT)
+	$(CXX) $(LDFLAGS) $< -o $@ -lhpjpeg -lrrutil
 
 $(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.$(SHEXT)
 	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
