@@ -115,7 +115,6 @@ GLXFBConfig glxvisual::getpbconfig(void)
 		GLX_BUFFER_SIZE, buffer_size,
 		GLX_LEVEL, level,
 		GLX_DOUBLEBUFFER, doublebuffer,
-		GLX_STEREO, stereo,
 		GLX_AUX_BUFFERS, aux_buffers,
 		GLX_RED_SIZE, red_size,
 		GLX_GREEN_SIZE, green_size,
@@ -130,8 +129,11 @@ GLXFBConfig glxvisual::getpbconfig(void)
 		GLX_RENDER_TYPE, render_type,
 		GLX_X_VISUAL_TYPE, x_visual_type,
 		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-		None};
+		None, None, None};
 	errifnot(dpy);
+	#ifndef sun
+	fbattribs[34]=GLX_STEREO;  fbattribs[35]=stereo;  // No stereo?  Denied!
+	#endif
 	fbconfigs=_glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
 	return fbconfigs[0];
