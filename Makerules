@@ -65,7 +65,11 @@ CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__AP
 ifeq ($(DEBUG), yes)
 CDEFINES := $(CDEFINES) -D__DEBUG__
 endif
+ifeq ($(CXXFLAGS),)
+CXXFLAGS := $(CFLAGS)
+endif
 CFLAGS := $(CFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
+CXXFLAGS := $(CXXFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
 LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
 
 # Implicit rules
@@ -79,8 +83,8 @@ $(ODIR)/%.o: %.c
 	@rm -f $(ODIR)/$*.d.tmp
 
 $(ODIR)/%.o: %.cpp
-	$(CXX) $(CFLAGS) -c $*.cpp -o $(ODIR)/$*.o
-	$(CXX) $(CFLAGS) $(DEPFLAG) $*.cpp > $(ODIR)/$*.d
+	$(CXX) $(CXXFLAGS) -c $*.cpp -o $(ODIR)/$*.o
+	$(CXX) $(CXXFLAGS) $(DEPFLAG) $*.cpp > $(ODIR)/$*.d
 	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
 	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \

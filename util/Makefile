@@ -38,7 +38,7 @@ $(ODIR)/fbx-xdk.obj: fbx.c
 	$(CC) $(CFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
 
 $(ODIR)/fbxtest-xdk.obj: fbxtest.cpp
-	$(CXX) $(CFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
+	$(CXX) $(CXXFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
 
 $(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/rrsocket.lib
 	$(LINK) $< -out:$@ $(SOCKLIB)
