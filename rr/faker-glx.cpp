@@ -25,6 +25,7 @@ XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
 {
 	XVisualInfo *v=NULL;
 	if(!dpy || !vis) return NULL;
+	TRY();
 	if(!(v=vish.matchvisual(dpy, vis)))
 	{
 		XVisualInfo vtemp;  int n;
@@ -32,6 +33,7 @@ XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
 		if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n) return NULL;
 		vish.add(dpy, vis, _localdpy, v);
 	}
+	CATCH();
 	return v;
 }
 
