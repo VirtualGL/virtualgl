@@ -445,6 +445,35 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 	_glXSelectEventSGIX(_localdpy, drawable, mask);
 }
 
+#ifdef sun
+int glXVideoResizeSUN(Display *display, GLXDrawable window, float factor)
+{
+	#ifdef USEGLP
+	if(fconfig.glp) return 0;
+	else
+	#endif
+	return _glXVideoResizeSUN(_localdpy, window, factor);
+}
+
+int glXGetVideoResizeSUN(Display *display, GLXDrawable window, float *factor)
+{
+	#ifdef USEGLP
+	if(fconfig.glp) return 0;
+	else
+	#endif
+	return _glXGetVideoResizeSUN(_localdpy, window, factor);
+}
+
+int glXDisableXineramaSUN(Display *dpy)
+{
+	#ifdef USEGLP
+	if(fconfig.glp) return 0;
+	else
+	#endif
+	return _glXDisableXineramaSUN(_localdpy);
+}
+#endif
+
 shimfuncdpy3(Bool, glXJoinSwapGroupNV, Display*, dpy, GLXDrawable, drawable, GLuint, group, return );
 shimfuncdpy3(Bool, glXBindSwapBarrierNV, Display*, dpy, GLuint, group, GLuint, barrier, return );
 shimfuncdpy4(Bool, glXQuerySwapGroupNV, Display*, dpy, GLXDrawable, drawable, GLuint*, group, GLuint*, barrier, return );

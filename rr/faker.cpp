@@ -715,6 +715,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	return retval;
 }
 
+Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx)
+{
+	return glXMakeContextCurrent(dpy, draw, read, ctx);
+}
+
 ///////////////////////////////////
 // SGIX_fbconfig Context management
 ///////////////////////////////////

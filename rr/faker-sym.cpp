@@ -107,6 +107,12 @@ void loadsymbols(void)
 	lsymopt(glXSelectEventSGIX)
 	lsymopt(glXGetSelectedEventSGIX)
 
+	#ifdef sun
+	lsymopt(glXVideoResizeSUN)
+	lsymopt(glXGetVideoResizeSUN)
+	lsymopt(glXDisableXineramaSUN)
+	#endif
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)

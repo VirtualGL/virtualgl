@@ -255,6 +255,19 @@ funcdef3(void, glXGetSelectedEventSGIX, Display *, dpy, GLXDrawable, drawable,
 	unsigned long *, mask,);
 
 
+// SUN-specific
+
+#ifdef sun
+funcdef3(int, glXVideoResizeSUN, Display *, display, GLXDrawable, window,
+	float, factor, return);
+
+funcdef3(int, glXGetVideoResizeSUN, Display *,display, GLXDrawable, window,
+	float *, factor, return);
+
+funcdef1(int, glXDisableXineramaSUN, Display *, dpy, return);
+#endif
+
+
 // GL functions
 
 funcdef0(void, glFinish,);
