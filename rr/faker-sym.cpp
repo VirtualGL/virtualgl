@@ -18,28 +18,32 @@
 #include "fakerconfig.h"
 extern FakerConfig fconfig;
 
-void *loadsym(void *dllhnd, char *symbol)
+void *loadsym(void *dllhnd, char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	sym=dlsym(dllhnd, symbol);
-	err=dlerror();	if(err) {fprintf(stderr, "%s\n", err);  return NULL;}
+	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);  return NULL;}
 	return sym;
 }
 
-#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s);  if(!__##s) {  \
+#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
 	fprintf(stderr, "Could not load symbol %s\n", #s);  safeexit(1);}
-#define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s);
+#define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 void loadsymbols(void)
 {
 	void *dllhnd;
 
-	dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
-	if(!dllhnd)
+	if(fconfig.gllib)
 	{
-		fprintf(stderr, "Could not open %s\n%s\n", fconfig.gllib, dlerror());
-		safeexit(1);
+		dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
+		if(!dllhnd)
+		{
+			fprintf(stderr, "Could not open %s\n%s\n", fconfig.gllib, dlerror());
+			safeexit(1);
+		}
 	}
+	else dllhnd=RTLD_NEXT;
 
 	// GLX symbols
 	lsym(glXChooseVisual)
@@ -104,15 +108,20 @@ void loadsymbols(void)
 	lsym(glFlush)
 	lsym(glViewport)
 
-	dlclose(dllhnd);
+	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 
 	// X11 symbols
-	dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
-	if(!dllhnd)
+	if(fconfig.x11lib)
 	{
-		fprintf(stderr, "Could not open %s\n%s\n", fconfig.x11lib, dlerror());
-		safeexit(1);
+		dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
+		if(!dllhnd)
+		{
+			fprintf(stderr, "Could not open %s\n%s\n", fconfig.x11lib, dlerror());
+			safeexit(1);
+		}
 	}
+	else dllhnd=RTLD_NEXT;
+
 	lsym(XCheckMaskEvent);
 	lsym(XCheckTypedEvent);
 	lsym(XCheckTypedWindowEvent);
@@ -130,5 +139,5 @@ void loadsymbols(void)
 	lsym(XResizeWindow);
 	lsym(XWindowEvent);
 
-	dlclose(dllhnd);
+	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 }
