@@ -27,7 +27,7 @@ else
 OPTFLAG = -O3 -funroll-loops -fexpensive-optimizations -maltivec -mabi=altivec
 endif
 
-DEFAULTJPEGLIB = libjpeg
+DEFAULTJPEGLIB = quicktime
 
 SHFLAG = -dynamiclib
 SHEXT = dylib
