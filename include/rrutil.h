@@ -40,7 +40,7 @@
 #endif
 
 #ifdef sun
-#define __inline static
+#define __inline inline
 #endif
 
 __inline int numprocs(void)

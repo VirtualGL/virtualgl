@@ -81,7 +81,7 @@ class rrtimer
 
 #include <windows.h>
 
-inline double rrtime(void)
+__inline double rrtime(void)
 {
 	LARGE_INTEGER Frequency, Time;
 	if(QueryPerformanceFrequency(&Frequency)!=0)
@@ -96,7 +96,11 @@ inline double rrtime(void)
 
 #include <sys/time.h>
 
-inline double rrtime(void)
+#ifdef sun
+#define __inline inline
+#endif
+
+__inline double rrtime(void)
 {
 	struct timeval __tv;
 	gettimeofday(&__tv, (struct timezone *)NULL);
