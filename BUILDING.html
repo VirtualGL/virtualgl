@@ -96,7 +96,7 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
   to 10 or you wish to build a backward-compatible version of VirtualGL, you 
   will need to build OpenSSL from source.&nbsp; The source code can be obtained 
   from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.&nbsp; 
-  Untar the source, then move the openssl build directory to <i>openssl..solaris
+  Untar the source, then move the openssl build directory to <i>openssl.solaris
   </i>(for a 32-bit build), <i>openssl.solaris64 </i>(for a 64-bit build), or <i>
   openssl.solx86 </i>(for an x86 build.)&nbsp; VirtualGL will look for this 
   directory one level up from its own build directory, for example:<br>
@@ -110,7 +110,7 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
 	Jan 20 12:17 vgl<br>
   <br>
   </font>CD to the appropriate directory and build OpenSSL using the 
-  instructions it provides.<br>
+  instructions provided in the OpenSSL source distribution.<br>
   <br>
   </span><i>NOTE:</i><span style="font-weight: 400"><font face="Courier New">
   </font>To configure OpenSSL for a 64-bit build, you will need to run<br>
@@ -267,9 +267,9 @@ for system-wide config files}]</span></h3>
 <p>&quot;prefix&quot; defaults to <i>/usr/local</i> but can be changed to 
 something else (e.g. <i>/usr</i>) if you prefer.&nbsp; Executables will be 
 installed to <i>$prefix/bin</i>, and libraries will be installed to <i>
-$prefix/lib</i> (or <i>$prefix/lib/sparcv9</i> if you are building 64-bit 
-VirtualGL on Solaris.)&nbsp; System-wide configuration files will be installed 
-into <i>/etc </i>unless <b>cfgdir</b> is specified.</p>
+$prefix/lib</i> (or <i>$prefix/lib/sparcv9</i> of <i>$prefix/lib64</i> as 
+appropriate.)&nbsp; System-wide configuration files will be installed into <i>
+/etc </i>unless <b>cfgdir</b> is specified.</p>
 <p>To build a redistributable package, type</p>
 <h3><span style="font-weight: 400">make dist</span></h3>
 <ul>
