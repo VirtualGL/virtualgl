@@ -3,32 +3,51 @@
 # 64-bit not yet supported...
 ########################################
 
+ARCHFLAG =
+
+ifeq ($(CC), gcc)
+
+CXX = g++
+CFLAGS = -Wall -fpic
+CDEFINES = -D_GNU_SOURCE
+
+ifeq ($(DEBUG), yes)
+OPTFLAG = -O0 -ggdb
+else
+OPTFLAG = -O2
+endif
+SHFLAG = -shared
+DEPFLAG = -MM
+
+else
+
 CC = cc
 CXX = CC
-AR = ar ruvs
-INSTALL = /usr/ucb/install
-
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
-CINCLUDES =  -I/usr/X/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
-CDEFINES = -DUSEGLP
-
-LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
-
-ARCHFLAG =
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 
 ifeq ($(DEBUG), yes)
 OPTFLAG = -g
 else
 OPTFLAG = -fast
 endif
+SHFLAG = -G -lCrun
+DEPFLAG = -xM1
+
+endif
+
+AR = ar ruvs
+INSTALL = /usr/ucb/install
+
+CINCLUDES =  -I/usr/X/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CDEFINES := $(CDEFINES) -DUSEGLP
+
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 
 DEFAULTJPEGLIB = medialib
 
-SHFLAG = -G -lCrun
 SHEXT = so
-DEPFLAG = -xM1
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
