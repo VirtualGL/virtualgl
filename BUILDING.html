@@ -138,12 +138,15 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
   or<br>
   <font face="Courier New">./Configure solaris-sparcv9-gcc shared<br>
   </font>or<br>
-  <font face="Courier New">./Configure solaris-x86-gcc shared/<br>
+  <font face="Courier New">./Configure solaris-x86-gcc shared<br>
   <br>
   </font>This is mainly necessary in order to get the compiler to generate 
   position-independent code.&nbsp; If you still want to link OpenSSL statically, 
   just delete <i>libssl.so</i> and <i>libcrypto.so</i> from your OpenSSL 
   build directory prior to building VirtualGL.</li>
+  <li>Build using<br>
+  <br>
+  <font face="Courier New">gmake CC=gcc</font></li>
 </ul>
 <H3><span style="font-weight: 400"><i>SOLARIS 8 ONLY:</i>&nbsp;  Linker
 patch 109147-32 must be
