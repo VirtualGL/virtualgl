@@ -22,20 +22,32 @@ class rrprofiler
 {
 	public:
 
-	rrprofiler(const char *_name="Profiler", double _interval=2.0) : name(_name),
+	rrprofiler(const char *_name="Profiler", double _interval=2.0) :
 		interval(_interval), mbytes(0.0), mpixels(0.0), totaltime(0.0), start(0.0),
 		frames(0)
 	{
 		profile=false;  char *ev=NULL;
+		setname(_name);  freestr=false;
 		if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
 			profile=true;
 		if((ev=getenv("VGL_PROFILE"))!=NULL && !strncmp(ev, "1", 1))
 			profile=true;
+		rrout.logto(stdout);
+	}
+
+	~rrprofiler(void)
+	{
+		if(name && freestr) free(name);
+	}
+
+	void setname(char *_name)
+	{
+		if(_name) {name=strdup(_name);  freestr=true;}
 	}
 
 	void setname(const char *_name)
 	{
-		if(_name) name=_name;
+		if(_name) name=(char *)_name;
 	}
 
 	void startframe(void)
@@ -67,11 +79,12 @@ class rrprofiler
 
 	private:
 
-	const char *name;
+	char *name;
 	double interval;
 	double mbytes, mpixels, totaltime, start, frames;
 	bool profile;
 	rrtimer timer;
+	bool freestr;
 };
 
 #endif
