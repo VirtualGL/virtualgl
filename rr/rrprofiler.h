@@ -15,6 +15,9 @@
 #define __RRPROFILER_H__
 
 #include <stdlib.h>
+#ifdef _WIN32
+#define strdup _strdup
+#endif
 #include "rrtimer.h"
 #include "rrlog.h"
 

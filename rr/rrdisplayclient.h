@@ -20,7 +20,9 @@
 #include "rrframe.h"
 #include "genericQ.h"
 #include "rrprofiler.h"
-
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 #define MAXPROCS 4
 
 class rrdisplayclient : public Runnable

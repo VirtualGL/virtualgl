@@ -36,7 +36,7 @@ $(OBJS): $(HDRS)
 
 
 $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
-	$(LINK) $(COBJS) -OUT:$@ $(RRLIB)
+	$(LINK) $(COBJS) -OUT:$@ $(RRLIB) advapi32.lib
 
 # Unit tests
 

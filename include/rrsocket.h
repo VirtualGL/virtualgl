@@ -15,6 +15,9 @@
 #define __RRSOCKET_H__
 
 #define OPENSSL_NO_KRB5
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -95,7 +98,7 @@ class rrsocket
 		~rrsocket(void);
 		void close(void);
 		void connect(char *, unsigned short);
-		void listen(unsigned short, char *, char *);
+		void listen(unsigned short);
 		rrsocket *accept(void);
 		void send(char *, int);
 		void recv(char *, int);
