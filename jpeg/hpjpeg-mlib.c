@@ -606,17 +606,16 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 #define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
 	if(__b!=(b)) _throw("JPEG bitstream error");}
 
-#include "hpjpeg-mlibcolor.c"
-
 int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 {
-	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr;
+	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr, *srcptr, *tmpptr,
+		*tmpptr2=&jpg->tmpbuf[16*16*4];
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, const mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, mlib_s32);
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32);
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], w, h;
-	int flags=jpg->flags, ps=jpg->ps, pitch=jpg->pitch;
+	int flags=jpg->flags, ps=jpg->ps, tmppitch=jpg->pitch;
 	int yindex, cbindex, crindex, ystride, cstride, j, i;
 
 	w=mcuw;  h=mcuh;
@@ -624,57 +623,33 @@ int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	if(curymcu==jpg->ymcus-1 && jpg->height%mcuh!=0) h=jpg->height%mcuh;
 
 	if(jpg->flags&HPJ_BOTTOMUP) bmpptr=bmpptr-(h-1)*jpg->pitch;
+	tmpptr=jpg->tmpbuf;  tmppitch=mcuw*ps;
 
 	switch(jpg->subsamp)
 	{
 		case HPJ_411:
-			if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4)  // ABGR
-				ccfct420=mlib_VideoColorJFIFYCC2ABGR420;
-			else if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4)  // ARGB
-				ccfct420=mlib_VideoColorJFIFYCC2ARGB420;
-			else if(!(flags&HPJ_BGR) && ps==3)  // RGB
-				ccfct420=mlib_VideoColorJFIFYCC2RGB420_Nearest;
-			else if(flags&HPJ_BGR && ps==3)  // BGR
-				ccfct420=mlib_VideoColorJFIFYCC2BGR420;
-			else if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4)  // RGBA
-				ccfct420=mlib_VideoColorJFIFYCC2RGBA420;
-			else if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4)  // BGRA
-				ccfct420=mlib_VideoColorJFIFYCC2BGRA420;
+			ccfct420=mlib_VideoColorJFIFYCC2RGB420_Nearest;
 			break;
 		case HPJ_422:
-			if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4)  // ABGR
-				ccfct=mlib_VideoColorJFIFYCC2ABGR422;
-			else if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4)  // ARGB
-				ccfct=mlib_VideoColorJFIFYCC2ARGB422;
-			else if(!(flags&HPJ_BGR) && ps==3)  // RGB
-				ccfct=mlib_VideoColorJFIFYCC2RGB422_Nearest;
-			else if(flags&HPJ_BGR && ps==3)  // BGR
-				ccfct=mlib_VideoColorJFIFYCC2BGR422;
-			else if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4)  // RGBA
-				ccfct=mlib_VideoColorJFIFYCC2RGBA422;
-			else if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4)  // BGRA
-				ccfct=mlib_VideoColorJFIFYCC2BGRA422;
+			ccfct=mlib_VideoColorJFIFYCC2RGB422_Nearest;
 			break;
 		case HPJ_444:
-			if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4)  // ABGR
-				ccfct=mlib_VideoColorJFIFYCC2ABGR444;
-			else if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4)  // ARGB
+			ccfct=mlib_VideoColorJFIFYCC2RGB444;
+			if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4)  // ARGB
 				ccfct=mlib_VideoColorJFIFYCC2ARGB444;
-			else if(!(flags&HPJ_BGR) && ps==3)  // RGB
-				ccfct=mlib_VideoColorJFIFYCC2RGB444;
-			else if(flags&HPJ_BGR && ps==3)  // BGR
-				ccfct=mlib_VideoColorJFIFYCC2BGR444;
-			else if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4)  // RGBA
-				ccfct=mlib_VideoColorJFIFYCC2RGBA444;
-			else if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4)  // BGRA
-				ccfct=mlib_VideoColorJFIFYCC2BGRA444;
+			if(!(flags&HPJ_BGR) && ps==3)  // RGB
+			{
+				// Note: for some odd reason, it's faster to avoid
+				// the temp. buffer only when converting 4:4:4 to RGB
+				tmpptr=bmpptr;  tmppitch=jpg->pitch;
+			}
 			break;
 		default:
 			_throw("Invalid argument to mcu_color_convert()");
 	}
 
 	// Do color conversion
-	dstptr=bmpptr;
+	dstptr=tmpptr;
 	yindex=0;  cbindex=mcuw*mcuh;  crindex=mcuw*mcuh+8*8;  ystride=mcuw;  cstride=8;
 	if(flags&HPJ_BOTTOMUP)
 	{
@@ -683,20 +658,67 @@ int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	}
 	if(jpg->subsamp==HPJ_411)
 	{
-		mlib_u8 dummyline[16*4+7], *dummyptr=(mlib_u8 *)(((unsigned long)dummyline+7L)&(~7L));
-		for(j=0; j<h; j+=2, dstptr+=pitch*2, yindex+=ystride*2, cbindex+=cstride, crindex+=cstride)
+		for(j=0; j<h; j+=2, dstptr+=tmppitch*2, yindex+=ystride*2, cbindex+=cstride, crindex+=cstride)
 		{
-			_mlib(ccfct420(dstptr, j+1>=h?dummyptr:dstptr+pitch, &jpg->mcubuf8[yindex], &jpg->mcubuf8[yindex+ystride],
+			_mlib(ccfct420(dstptr, dstptr+tmppitch, &jpg->mcubuf8[yindex], &jpg->mcubuf8[yindex+ystride],
 				&jpg->mcubuf8[cbindex], &jpg->mcubuf8[crindex], w));
 		}
 	}
 	else
 	{
-		for(j=0; j<h; j++, dstptr+=pitch, yindex+=ystride, cbindex+=cstride, crindex+=cstride)
+		for(j=0; j<h; j++, dstptr+=tmppitch, yindex+=ystride, cbindex+=cstride, crindex+=cstride)
 		{
 			_mlib(ccfct(dstptr, &jpg->mcubuf8[yindex], &jpg->mcubuf8[cbindex],
 				&jpg->mcubuf8[crindex], w));
 		}
+	}
+
+	// Convert RGB to BGR
+	if(flags&HPJ_BGR && ps==3)
+	{
+		for(j=0; j<h; j++)
+			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr[j*tmppitch], w, 3));
+		tmpptr=bmpptr;
+	}
+	// Convert RGB to ABGR
+	if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4)
+	{
+		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)bmpptr, tmpptr, NULL, 0, w, h,
+			jpg->pitch, tmppitch, 0);
+		tmpptr=bmpptr;
+	}
+	// Convert RGB to ARGB
+	if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4 &&
+		jpg->subsamp!=HPJ_444)
+	{
+		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)bmpptr, tmpptr, NULL, 0, w, h,
+			jpg->pitch, tmppitch, 0);
+		tmpptr=bmpptr;
+	}
+	// Convert RGB to BGRA
+	if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4)
+	{
+		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)tmpptr2, tmpptr, NULL, 0, w, h,
+			mcuw*4, tmppitch, 0);
+		for(j=0; j<h; j++)
+			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr2[j*mcuw*4], w, 4));
+		tmpptr=bmpptr;
+	}
+	// Convert RGB to RGBA
+	if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4)
+	{
+		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)tmpptr2, tmpptr, NULL, 0, w, h,
+			mcuw*4, tmppitch, 0);
+		for(j=0; j<h; j++)
+			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr2[j*mcuw*4], w, 4));
+		tmpptr=bmpptr;
+	}
+
+	if(tmpptr!=bmpptr)
+	{
+		srcptr=tmpptr;  dstptr=bmpptr;
+		for(j=0; j<h; j++, srcptr+=tmppitch, dstptr+=jpg->pitch)
+			mlib_memcpy(dstptr, srcptr, w*ps);
 	}
 
 	if(curxmcu==jpg->xmcus-1)
@@ -928,7 +950,7 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 	_mlibn(jpg->chromqtable=(mlib_d64 *)mlib_malloc(64*sizeof(mlib_d64)));
 	_mlibn(jpg->mcubuf8=(mlib_u8 *)mlib_malloc(384*sizeof(mlib_u8)));
 	_mlibn(jpg->mcubuf=(mlib_s16 *)mlib_malloc(384*sizeof(mlib_s16)));
-	_mlibn(jpg->tmpbuf=(mlib_u8 *)mlib_malloc(16*16*4*sizeof(mlib_u8)));
+	_mlibn(jpg->tmpbuf=(mlib_u8 *)mlib_malloc(16*16*4*2*sizeof(mlib_u8)));
 
 	if((jpg->d_dclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
 	|| (jpg->d_aclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
