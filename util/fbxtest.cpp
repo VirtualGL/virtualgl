@@ -137,12 +137,33 @@ void nativewrite(int useshm)
 	fprintf(stderr, "\n");
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native write test\n");
+
 	clearfb();
 	initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
 	if(useshm)
-		fprintf(stderr, "FB write (O/S Native SHM):      ");
+		fprintf(stderr, "FBX bottom-up write [SHM]:        ");
 	else
-		fprintf(stderr, "FB write (O/S Native):          ");
+		fprintf(stderr, "FBX bottom-up write:              ");
+	n=N;
+	do
+	{
+		n+=n;
+		timer.start();
+		for (i=0; i<n; i++)
+		{
+			for(int j=0; j<height; j++)
+				fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
+			fbx_sync(&s);
+		}
+		rbtime=timer.elapsed();
+	} while(rbtime<2.);
+	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+
+	clearfb();
+	if(useshm)
+		fprintf(stderr, "FBX top-down write [SHM]:         ");
+	else
+		fprintf(stderr, "FBX top-down write:               ");
 	n=N;
 	do
 	{
@@ -175,9 +196,9 @@ void nativeread(int useshm)
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native read test\n");
 	if(useshm)
-		fprintf(stderr, "FB read (O/S Native SHM):       ");
+		fprintf(stderr, "FBX read [SHM]:                   ");
 	else
-		fprintf(stderr, "FB read (O/S Native):           ");
+		fprintf(stderr, "FBX read:                         ");
 	memset(s.bits, 0, width*height*ps);
 	n=N;
 	do
@@ -299,9 +320,9 @@ void nativestress(int useshm)
 
 	clearfb();
 	if(useshm)
-		fprintf(stderr, "FB write (4 bmps, 4 blits SHM): ");
+		fprintf(stderr, "FBX write [4 bmps, 4 blits SHM]:  ");
 	else
-		fprintf(stderr, "FB write (4 bmps, 4 blits):     ");
+		fprintf(stderr, "FBX write [4 bmps, 4 blits]:      ");
 	n=N;
 	do
 	{
@@ -326,9 +347,9 @@ void nativestress(int useshm)
 	try {
 
 	if(useshm)
-		fprintf(stderr, "FB read (4 bmps, 4 blits SHM):  ");
+		fprintf(stderr, "FBX read [4 bmps, 4 blits SHM]:   ");
 	else
-		fprintf(stderr, "FB read (4 bmps, 4 blits):      ");
+		fprintf(stderr, "FBX read [4 bmps, 4 blits]:       ");
 	n=N;
 	do
 	{
@@ -354,9 +375,9 @@ void nativestress(int useshm)
 
 	clearfb();
 	if(useshm)
-		fprintf(stderr, "FB write (1 bmp, 4 blits SHM):  ");
+		fprintf(stderr, "FBX write [1 bmp, 4 blits SHM]:   ");
 	else
-		fprintf(stderr, "FB write (1 bmp, 4 blits):      ");
+		fprintf(stderr, "FBX write [1 bmp, 4 blits]:       ");
 	memset(&stressfb0, 0, sizeof(stressfb0));
 	fbx(fbx_init(&stressfb0, wh, width, height, useshm));
 	if(useshm && !stressfb0.shm) _throw("MIT-SHM not supported");
