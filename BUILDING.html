@@ -32,7 +32,8 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
   <li>
   <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
    produce correct, albeit slow, behavior.&nbsp; In order to get optimal
-   performance out of VirtualGL, however, it is necessary to use the Intel 
+   performance out of VirtualGL, however, it is necessary to build VirtualGL 
+  against the Intel 
   Performance Primitives, which are capable of compressing JPEG images 3-4x 
   faster than libjpeg.</span></h4>
   </li>
@@ -145,7 +146,8 @@ two versions can be built independently of one another.</p>
   <p><span style="font-weight: 400">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
                This custom libjpeg code is included in the <i>jpeg/jpeg-6b</i>
                directory and differs from the IJG release (see
-               <a href="http://www.ijg.org">http://www.ijg.org</a>) only in its support of BGR 
+               <a href="http://www.ijg.org">http://www.ijg.org</a>) only in its support of 
+  little endian 
   and 32-bit pixel formats (both of which are necessary to allow for 
   decompressing directly into X11 shared memory.)</span></p>
   <p><span style="font-weight: 400">pegasus = Use the PICTools RapidVue codec from Pegasus Imaging
