@@ -142,6 +142,51 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 	return (hpjhandle)1;
 }
 
+DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height)
+{
+	PIC_PARM PicParm;
+
+	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
+		_throw("Invalid argument in hpjDecompressHeader()");
+
+	// general PIC_PARM initialization for all operations
+	memset(&PicParm, 0, sizeof(PicParm));
+	PicParm.ParmSize     = sizeof(PicParm);
+	PicParm.ParmVer      = CURRENT_PARMVER; // #define’d in PIC.H
+	PicParm.ParmVerMinor = 1; // a magic number for the current version
+
+	// initialize input buffer pointers
+	PicParm.Get.Start  = srcbuf;
+	PicParm.Get.End    = srcbuf + size;
+	PicParm.Get.Front  = PicParm.Get.Start;
+	PicParm.Get.Rear   = PicParm.Get.End;
+	PicParm.Get.QFlags = Q_EOF;
+
+	PicParm.Op = OP_S2D;
+
+	PicParm.Put.Start = NULL;
+	PicParm.Put.End   = NULL;
+	PicParm.Put.Front = PicParm.Put.Rear = PicParm.Put.Start;
+	PicParm.Put.QFlags = 0;
+
+	_peg(PicParm, REQ_INIT);
+	{
+		RESPONSE __res;
+		if((__res=Pegasus(&PicParm, REQ_EXEC))!=RES_PUT_NEED_SPACE)
+		{
+			sprintf(lasterror, "Error #%ld returned from Pegasus(REQ_EXEC)\n", PicParm.Status);
+			return -1;
+		}
+	}
+	_peg(PicParm, REQ_TERM);
+
+	*width=PicParm.Head.biWidth;  *height=PicParm.Head.biHeight;
+	if(*width<1 || *height<1) _throw("Invalid data returned in header");
+	return 0;
+}
+
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
 	unsigned char *_dstbuf, int width, int pitch, int height, int ps,
