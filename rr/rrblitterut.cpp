@@ -12,15 +12,17 @@
  */
 
 #include "rrblitter.h"
-#include "rrtimer.h"
+#include "hputil.h"
 
 #define WIDTH 700
 #define HEIGHT 700
 
 int main(void)
 {
-	rrblitter blitter;  rrtimer t;  double elapsed;
+	rrblitter blitter;  double start, elapsed;
 	Display *dpy;  Window win;
+
+	hputil_log(1, 0);
 
 	try {
 
@@ -31,11 +33,11 @@ int main(void)
 		BlackPixel(dpy, DefaultScreen(dpy))))) _throw("Could not create window");
 	errifnot(XMapRaised(dpy, win));
 
-	rrfb *b;
+	rrbitmap *b;
 
 	fprintf(stderr, "\nTesting full-frame blits ...\n");
 
-	int fill=0, frames=0;  t.start();
+	int fill=0, frames=0;  start=hptime();
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
@@ -43,13 +45,13 @@ int main(void)
 		fill=1-fill;
 		blitter.sendframe(b);
 		frames++;
-	} while((elapsed=t.elapsed())<2.);
+	} while((elapsed=hptime()-start)<2.);
 
 	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
 	fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
 
-	fill=0, frames=0;  int clientframes=0;  t.start();
+	fill=0, frames=0;  int clientframes=0;  start=hptime();
 	do
 	{
 		if(!blitter.frameready())
@@ -63,14 +65,14 @@ int main(void)
 		fill=1-fill;
 		blitter.sendframe(b);
 		clientframes++;  frames++;
-	} while((elapsed=t.elapsed())<2.);
+	} while((elapsed=hptime()-start)<2.);
 
 	fprintf(stderr, "%f Megapixels/sec (server)\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 	fprintf(stderr, "%f Megapixels/sec (client)\n", (double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
 
 	fprintf(stderr, "\nTesting half-frame blits ...\n");
 
-	fill=0, frames=0;  t.start();
+	fill=0, frames=0;  start=hptime();
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
@@ -79,20 +81,20 @@ int main(void)
 		fill=1-fill;
 		blitter.sendframe(b);
 		frames++;
-	} while((elapsed=t.elapsed())<2.);
+	} while((elapsed=hptime()-start)<2.);
 
 	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
 	fprintf(stderr, "\nTesting zero-frame blits ...\n");
 
-	frames=0;  t.start();
+	frames=0;  start=hptime();
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		memset(b->bits, 0xff, b->pitch*HEIGHT);
 		blitter.sendframe(b);
 		frames++;
-	} while((elapsed=t.elapsed())<2.);
+	} while((elapsed=hptime()-start)<2.);
 
 	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 

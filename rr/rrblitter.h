@@ -14,41 +14,47 @@
 #ifndef __RRBLITTER_H
 #define __RRBLITTER_H
 
-#include "rrthread.h"
+#include "pthread.h"
 #include "rrframe.h"
+#include "rrerror.h"
 #include "genericQ.h"
 
-class rrblitter : public Runnable
+class rrblitter
 {
 	public:
 
-	rrblitter(void) : bmpi(0), t(NULL), deadyet(false)
+	rrblitter(void) : bmpi(0), thnd(0), deadyet(false)
 	{
 		for(int i=0; i<NB; i++) bmp[i]=NULL;
-		errifnot(t=new Thread(this));
-		t->start();
+		pthread_mutex_init(&ready, NULL);
+		pthread_mutex_init(&bmpmutex, NULL);
+		tryunix(pthread_create(&thnd, NULL, run, this));
 	}
 
 	virtual ~rrblitter(void)
 	{
 		deadyet=true;  q.release();
-		if(t) {t->stop();  delete t;  t=NULL;}
+		if(thnd) {pthread_join(thnd, NULL);  thnd=0;}
 		for(int i=0; i<NB; i++) {if(bmp[i]) delete bmp[i];  bmp[i]=NULL;}
+		pthread_mutex_unlock(&ready);  pthread_mutex_destroy(&ready);
+		pthread_mutex_unlock(&bmpmutex);  pthread_mutex_destroy(&bmpmutex);
 	}
 
 	bool frameready(void);
-	void sendframe(rrfb *);
-	void run(void);
-	rrfb *getbitmap(Display *, Window, int, int);
+	void sendframe(rrbitmap *);
+	static void *run(void *);
+	rrbitmap *getbitmap(Display *, Window, int, int);
 
 	private:
 
-	static const int NB=3;
-	rrcs bmpmutex;  rrfb *bmp[NB];  int bmpi;
-	rrmutex ready;
+	void checkerror(void);
+	rrerror lasterror;
+	static const int NB=2;
+	pthread_mutex_t bmpmutex;  rrbitmap *bmp[NB];  int bmpi;
+	pthread_mutex_t ready;
 	genericQ q;
-	void blitdiff(rrfb *, rrfb *);
-	Thread *t;  bool deadyet;
+	void blitdiff(rrbitmap *, rrbitmap *);
+	pthread_t thnd;  bool deadyet;
 };
 
 #endif

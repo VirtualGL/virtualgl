@@ -13,31 +13,33 @@
 
 //#define RRPROFILE
 #include "rrblitter.h"
-#include "rrtimer.h"
+#include "hputil.h"
 
 #define STRIPH 64
 
-void rrblitter::run(void)
+void *rrblitter::run(void *param)
 {
-	rrfb *lastb=NULL;
+	rrblitter *rrb=(rrblitter *)param;
 	#ifdef RRPROFILE
-	double mpixels=0., comptime=0.;  rrtimer timer;
+	double mpixels=0., tstart=0., comptime=0.;
 	#endif
+
+	hptimer_init();
 
 	try {
  
-	while(!deadyet)
+	while(!rrb->deadyet)
 	{
-		rrfb *b=NULL;
-		q.get((void **)&b);  if(deadyet) return;
+		rrbitmap *b=NULL;
+		rrb->q.get((void **)&b);  if(rrb->deadyet) break;
 		if(!b) _throw("Queue has been shut down");
-		ready.unlock();
+		pthread_mutex_unlock(&rrb->ready);
 		#ifdef RRPROFILE
-		timer.start();
+		tstart=hptime();
 		#endif
-		blitdiff(b, lastb);
+		b->redraw();
 		#ifdef RRPROFILE
-		comptime+=timer.elapsed();
+		comptime+=hptime()-tstart;
 		mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
 		if(comptime>1.)
 		{
@@ -46,21 +48,26 @@ void rrblitter::run(void)
 			comptime=0.;  mpixels=0.;
 		}
 		#endif
-		lastb=b;
 	}
 
-	} catch(...) {ready.unlock();  throw;}
+	} catch(rrerror &e) {rrb->lasterror=e;  pthread_mutex_unlock(&rrb->ready);}
+	return 0;
 }
 
-rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
+void rrblitter::checkerror(void)
 {
-	rrfb *b=NULL;
-	ready.lock();
-	if(t) t->checkerror();
-	bmpmutex.lock();
-	if(!bmp[bmpi]) errifnot(bmp[bmpi]=new rrfb(dpy, win));
+	if(lasterror) throw lasterror;
+}
+
+rrbitmap *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
+{
+	rrbitmap *b=NULL;
+	pthread_mutex_lock(&ready);
+	checkerror();
+	pthread_mutex_lock(&bmpmutex);
+	if(!bmp[bmpi]) errifnot(bmp[bmpi]=new rrbitmap(dpy, win));
 	b=bmp[bmpi];  bmpi=(bmpi+1)%NB;
-	bmpmutex.unlock();
+	pthread_mutex_unlock(&bmpmutex);
 	rrframeheader hdr;
 	hdr.bmph=hdr.winh=h;
 	hdr.bmpw=hdr.winw=w;
@@ -71,40 +78,12 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 
 bool rrblitter::frameready(void)
 {
-	if(t) t->checkerror();
+	checkerror();
 	return(q.items()<=0);
 }
 
-void rrblitter::sendframe(rrfb *bmp)
+void rrblitter::sendframe(rrbitmap *bmp)
 {
-	if(t) t->checkerror();
+	checkerror();
 	q.add((void *)bmp);
-}
-
-void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
-{
-	int endline, i;  int startline;  bool needsync=false;
-	bool bu=false;
-	if(b->flags&RRBMP_BOTTOMUP) bu=true;
-
-	for(i=0; i<b->h.bmph; i+=STRIPH)
-	{
-		if(bu)
-		{
-			startline=b->h.bmph-i-STRIPH;
-			if(startline<0) startline=0;
-			endline=startline+min(b->h.bmph-i, STRIPH);
-			if(b->h.bmph-i<2*STRIPH) {startline=0;  i+=STRIPH;}
-		}
-		else
-		{
-			startline=i;
-			endline=startline+min(b->h.bmph-i, STRIPH);
-			if(b->h.bmph-i<2*STRIPH) {endline=b->h.bmph;  i+=STRIPH;}
-		}
-		if(b->stripequals(lastb, startline, endline)) continue;
-		b->drawstrip(startline, endline);  needsync=true;
-	}
-
-	if(needsync) b->sync();
 }
