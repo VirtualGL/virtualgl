@@ -19,8 +19,12 @@ ifeq ($(OS), IRIX64)
  subplatform := 64
 endif
 ifeq ($(OS), SunOS)
- platform := solaris
- subplatform := 64
+ ifeq ($(ARCH), i86pc)
+  platform := solx86
+ else
+  platform := solaris
+  subplatform := 64
+ endif
 endif
 ifeq ($(OS), Darwin)
  platform := osx

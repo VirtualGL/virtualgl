@@ -1,0 +1,32 @@
+########################################
+# Solaris x86 32-bit
+# 64-bit not yet supported...
+########################################
+
+CC = cc
+CXX = CC
+AR = ar ruvs
+
+CFLAGS = -xCC -Kpic -mt
+CXXFLAGS = -Kpic -mt
+CINCLUDES =  -I/usr/X/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+
+ARCHFLAG =
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS)
+
+ifeq ($(DEBUG), yes)
+OPTFLAG = -g
+else
+OPTFLAG = -fast
+endif
+
+DEFAULTJPEGLIB = medialib
+
+SHFLAG = -G -lCrun
+SHEXT = so
+DEPFLAG = -xM1
+
+FBXLIB = -lfbx -lX11 -lXext
+SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
