@@ -48,12 +48,14 @@ mkdir -p $RPM_BUILD_ROOT/opt/%{package}/bin
 
 %ifarch x86_64
 install -m 755 %{_curdir}/%{_bindir}/vglrun64 $RPM_BUILD_ROOT/usr/bin/vglrun64
+install -m 755 %{_curdir}/%{_bindir}/vglrun64 $RPM_BUILD_ROOT/usr/bin/rrlaunch64
 %else
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_curdir}/%{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_curdir}/%{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
+install -m 755 %{_curdir}/%{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
 install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
@@ -95,6 +97,7 @@ fi
 
 %ifarch x86_64
 /usr/bin/vglrun64
+/usr/bin/rrlaunch64
 
 %else
 /usr/bin/vglclient
@@ -102,6 +105,7 @@ fi
 %{_DAEMONSSL}
 /usr/bin/vglclient_config
 /usr/bin/vglrun
+/usr/bin/rrlaunch
 
 /opt/%{package}/bin/tcbench
 
