@@ -27,6 +27,7 @@ else
 WEDIR := $(platform)$(subplatform)\\bin
 endif
 
+.PHONY: dist
 dist: rr diags
 	$(RM) $(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
@@ -54,6 +55,7 @@ ifeq ($(subplatform), 64)
 PACKAGENAME = $(APPNAME)64
 endif
 
+.PHONY: install uninstall
 ifeq ($(subplatform), 64)
 install: rr
 	mkdir -p $(prefix)/bin
@@ -100,16 +102,18 @@ uninstall:
 	echo Uninstall complete.
 endif
 
+.PHONY: dist
 dist: rr diags rpms/BUILD rpms/RPMS
 	rm $(PACKAGENAME).$(RPMARCH).rpm; \
-	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
+	rpmbuild -bb --define "_topdir `pwd`/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
 		rr.spec; \
 	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
 
 rpms/BUILD:
-	mkdir -p rpms/BUILD
+	rm -rf rpms/BUILD
+	ln -fs `pwd` rpms/BUILD
 
 rpms/RPMS:
 	mkdir -p rpms/RPMS

@@ -18,7 +18,7 @@ Vendor: The VirtualGL Project
 Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
-BuildRoot: %{_curdir}/%{name}-buildroot
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prereq: /sbin/ldconfig, /usr/bin/perl
 Provides: %{name} = %{version}-%{release}
 
@@ -47,26 +47,28 @@ mkdir -p $RPM_BUILD_ROOT%{usrlib}
 mkdir -p $RPM_BUILD_ROOT/opt/%{package}/bin
 
 %ifarch x86_64
-install -m 755 %{_curdir}/%{_bindir}/rrlaunch64 $RPM_BUILD_ROOT/usr/bin/rrlaunch64
+install -m 755 %{_bindir}/rrlaunch64 $RPM_BUILD_ROOT/usr/bin/rrlaunch64
 %else
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
-install -m 755 %{_curdir}/%{_bindir}/rrxclient $RPM_BUILD_ROOT/usr/bin/rrxclient
-install -m 755 %{_curdir}/%{_bindir}/rrlaunch $RPM_BUILD_ROOT/usr/bin/rrlaunch
-install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
-install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
-install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
+install -m 755 %{_bindir}/rrxclient $RPM_BUILD_ROOT/usr/bin/rrxclient
+install -m 755 %{_bindir}/rrlaunch $RPM_BUILD_ROOT/usr/bin/rrlaunch
+install -m 755 rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
+install -m 755 rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
+install -m 755 rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
 
-install -m 755 %{_curdir}/%{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{package}/bin/tcbench
+install -m 755 %{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{package}/bin/tcbench
 
 %endif
 
-install -m 755 %{_curdir}/%{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
-install -m 755 %{_curdir}/%{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
+install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
+install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
-install -m 755 %{_curdir}/%{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
-install -m 755 %{_curdir}/%{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
+install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
+install -m 755 %{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
+
+chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -92,6 +94,7 @@ fi
 
 %files -n %{package}
 %defattr(-,root,root)
+%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
 
 %ifarch x86_64
 /usr/bin/rrlaunch64
