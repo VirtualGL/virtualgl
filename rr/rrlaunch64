@@ -20,8 +20,7 @@ usage()
 	echo "  -samp <s>   : specify YCbCr subsampling (444, 422, 411)"
 	echo
 	echo "VirtualGL miscellaneous options"
-	echo "  +/-profile  : Enable/disable profiling"
-	echo "  +debug      : Enable debugging"
+	echo "  +/-profile  : Enable/disable performance profiling (default = disabled)"
 	echo
 	exit $1
 }
@@ -38,19 +37,20 @@ fi
 while [ $# -gt 0 ]
 do
 	case "$1" in
-	+sp*)       RRSPOIL=1       ; export RRSPOIL    ;;
-	-sp*)       RRSPOIL=0       ; export RRSPOIL    ;;
-	-sa*)       RRSUBSAMP=$2    ; export RRSUBSAMP  ; shift     ;;
-	-s*)        RRUSESSL=0      ; export RRUSESSL   ;;
-	+s*)        RRUSESSL=1      ; export RRUSESSL   ;;
-	-pr*)       RRPROFILE=0     ; export RRPROFILE  ;;
-	+pr*)       RRPROFILE=1     ; export RRPROFILE  ;;
-	-q*)        RRQUAL=$2       ; export RRQUAL     ; shift     ;;
-	+de*)       RRDEBUGPAUSE=1  ; export RRDEBUGPAUSE ;;
-	-d*)        RRDISPLAY=$2    ; export RRDISPLAY  ; shift     ;;
-	-cl*)       RRCLIENT=$2     ; export RRCLIENT   ; shift     ;;
-	-p*)        RRPORT=$2       ; export RRPORT     ; shift     ;;
-	-c*)        RRCOMPRESS=$2   ; export RRCOMPRESS ; shift     ;;
+	+sp*)       VGL_SPOIL=1       ; export VGL_SPOIL    ;;
+	-sp*)       VGL_SPOIL=0       ; export VGL_SPOIL    ;;
+	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;
+	-s*)        VGL_SSL=0         ; export VGL_SSL      ;;
+	+s*)        VGL_SSL=1         ; export VGL_SSL      ;;
+	-pr*)       VGL_PROFILE=0     ; export VGL_PROFILE  ;;
+	+pr*)       VGL_PROFILE=1     ; export VGL_PROFILE  ;;
+	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
+	+de*)       VGL_DEBUG=1       ; export VGL_DEBUG    ;;
+	-de*)       VGL_DEBUG=0       ; export VGL_DEBUG    ;;
+	-d*)        VGL_DISPLAY=$2    ; export VGL_DISPLAY  ; shift     ;;
+	-cl*)       VGL_CLIENT=$2     ; export VGL_CLIENT   ; shift     ;;
+	-p*)        VGL_PORT=$2       ; export VGL_PORT     ; shift     ;;
+	-c*)        VGL_COMPRESS=$2   ; export VGL_COMPRESS ; shift     ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-h)         usage 0 ;;

@@ -123,7 +123,7 @@ void fakerinit(void)
 	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
-	if(getenv("RRDEBUGPAUSE"))
+	if(getenv("VGL_DEBUG"))
 	{
 		printf("Attach debugger to process %d ...\n", getpid());
 		sleep(30);

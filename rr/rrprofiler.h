@@ -29,6 +29,8 @@ class rrprofiler
 		profile=false;  char *ev=NULL;
 		if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
 			profile=true;
+		if((ev=getenv("VGL_PROFILE"))!=NULL && !strncmp(ev, "1", 1))
+			profile=true;
 	}
 
 	void setname(const char *_name)
