@@ -50,18 +50,21 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 }
 
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
-	unsigned char *srcbuf, int width, int pitch, int height, int ps,
+	unsigned char *_srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsub, int qual, int flags)
 {
 	PIC_PARM PicParm;
 	BITMAPINFOHEADER bmih;
+	unsigned char *srcbuf=_srcbuf;
 
 	if(srcbuf==NULL || width<=0 || pitch<0 || height<=0
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
 		_throw("Invalid argument in hpjCompress()");
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
+
+	if(flags&HPJ_ALPHAFIRST) srcbuf=&_srcbuf[1];
 
 	// general PIC_PARM initialization for all operations
 	memset(&PicParm, 0, sizeof(PicParm));
@@ -141,16 +144,19 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
-	unsigned char *dstbuf, int width, int pitch, int height, int ps,
+	unsigned char *_dstbuf, int width, int pitch, int height, int ps,
 	int flags)
 {
 	PIC_PARM PicParm;
 	BITMAPINFOHEADER bmih;
+	unsigned char *dstbuf=_dstbuf;
 
 	if(srcbuf==NULL || size<=0
 		|| dstbuf==NULL || width<=0 || pitch<0 || height<=0)
 		_throw("Invalid argument in hpjDecompress()");
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
+
+	if(flags&HPJ_ALPHAFIRST) dstbuf=&_dstbuf[1];
 
 	// general PIC_PARM initialization for all operations
 	memset(&PicParm, 0, sizeof(PicParm));

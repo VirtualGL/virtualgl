@@ -125,6 +125,10 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	j->cinfo.rgb_green = 1;
 	if(flags&HPJ_BGR) {j->cinfo.rgb_red = 2;  j->cinfo.rgb_blue = 0;}
 	else {j->cinfo.rgb_red = 0;  j->cinfo.rgb_blue = 2;}
+	if(flags&HPJ_ALPHAFIRST)
+	{
+		j->cinfo.rgb_red++;  j->cinfo.rgb_green++;  j->cinfo.rgb_blue++;
+	}
 
 	j->cinfo.image_width = width;
 	j->cinfo.image_height = height;
@@ -241,6 +245,10 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	j->dinfo.rgb_green=1;
 	if(flags&HPJ_BGR) {j->dinfo.rgb_red=2;  j->dinfo.rgb_blue=0;}
 	else {j->dinfo.rgb_red=0;  j->dinfo.rgb_blue=2;}
+	if(flags&HPJ_ALPHAFIRST)
+	{
+		j->dinfo.rgb_red++;  j->dinfo.rgb_green++;  j->dinfo.rgb_blue++;
+	}
 
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error

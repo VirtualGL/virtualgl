@@ -503,6 +503,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
 		_throw("Invalid argument in hpjCompress()");
+	if(qual<1) qual=1;
 	if(!jpg->initc) _throw("Instance has not been initialized for compression");
 
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
@@ -514,7 +515,9 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
 
-	jpg->bmpbuf=srcbuf;
+	if(flags&HPJ_ALPHAFIRST) jpg->bmpbuf=&srcbuf[1];
+	else jpg->bmpbuf=srcbuf;
+
 	jpg->jpgbuf=dstbuf;
 	jpg->width=width;  jpg->height=height;  jpg->pitch=pitch;
 	jpg->ps=ps;  jpg->subsamp=jpegsub;  jpg->qual=qual;  jpg->flags=flags;
@@ -880,7 +883,9 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
 
-	jpg->bmpbuf=dstbuf;
+	if(flags&HPJ_ALPHAFIRST) jpg->bmpbuf=&dstbuf[1];
+	else jpg->bmpbuf=dstbuf;
+
 	jpg->jpgbuf=srcbuf;
 	jpg->width=width;  jpg->height=height;  jpg->pitch=pitch;
 	jpg->ps=ps;  jpg->flags=flags;
