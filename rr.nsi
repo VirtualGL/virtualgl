@@ -18,7 +18,6 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "rr\newrrcert.bat"
 	File "rr\rrcert.cnf"
 	File "${EDIR}\openssl.exe"
-	File "${EDIR}\pthreadVC.dll"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
@@ -57,7 +56,6 @@ Section "Uninstall"
 	Delete $INSTDIR\newrrcert.bat
 	Delete $INSTDIR\rrcert.cnf
 	Delete $INSTDIR\openssl.exe
-	Delete $INSTDIR\pthreadVC.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\rrcert.pem
