@@ -119,8 +119,8 @@ MakePbuffer( Display *dpy, int screen, int width, int height )
    int pbAttribs[] = {
       GLX_LARGEST_PBUFFER, True,
       GLX_PRESERVED_CONTENTS, False,
-      GLX_PBUFFER_WIDTH, width,
-      GLX_PBUFFER_HEIGHT, height,
+      GLX_PBUFFER_WIDTH, 0,
+      GLX_PBUFFER_HEIGHT, 0,
       None
    };
    GLXFBConfig *fbConfigs;
@@ -128,6 +128,9 @@ MakePbuffer( Display *dpy, int screen, int width, int height )
    int nConfigs;
    int i;
    int attempt;
+
+   pbAttribs[5]=width;
+   pbAttribs[7]=height;
 
    for (attempt=0; attempt<NUM_FB_CONFIGS; attempt++) {
 
