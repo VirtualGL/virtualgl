@@ -199,7 +199,7 @@ void gentestbmp(hpjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 void dotest(int w, int h, int ps, char *basefilename)
 {
 	hpjhandle hnd=NULL, dhnd=NULL;  unsigned char *jpegbuf=NULL;
-	unsigned long size;  double t;
+	unsigned long size;
 
 	if((jpegbuf=(unsigned char *)malloc(HPJBUFSIZE(w, h))) == NULL)
 	{
