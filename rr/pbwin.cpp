@@ -98,10 +98,12 @@ pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 	if(!dpy || !config || w<1 || h<1) _throw("Invalid argument");
 
 	cleared=false;
+	#ifndef sun
 	const char *glxext=NULL;
 	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
 	if(!glxext || !strstr(glxext, "GLX_SGIX_pbuffer"))
 		_throw("Pbuffer extension not supported on rendering display");
+	#endif
 
 	this->dpy=dpy;
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
