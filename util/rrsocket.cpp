@@ -163,13 +163,15 @@ void rrsocket::listen(unsigned short port, char *certfile, char *privkeyfile)
 	}
 }
 
-#if !defined(linux)&&!defined(sun)
-typedef int socklen_t;
+#if (defined(__GLIBC__)&&(__GLIBC__>1))
+typedef socklen_t SOCKLEN_T;
+#else
+typedef int SOCKLEN_T;
 #endif
 
 rrsocket *rrsocket::accept(void)
 {
-	int sd_client, m=1;  struct sockaddr_in remoteaddr;  socklen_t addrlen;
+	int sd_client, m=1;  struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen;
 	addrlen=sizeof(remoteaddr);
 
 	if(sd==INVALID_SOCKET) _throw("Not connected");
@@ -192,7 +194,7 @@ rrsocket *rrsocket::accept(void)
 
 char *rrsocket::remotename(void)
 {
-	struct sockaddr_in remoteaddr;  socklen_t addrlen=sizeof(remoteaddr);
+	struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen=sizeof(remoteaddr);
 	char *remotename=NULL;
 	trysock( getpeername(sd, (struct sockaddr *)&remoteaddr, &addrlen) );
 	remotename=inet_ntoa(remoteaddr.sin_addr);
