@@ -56,27 +56,40 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
 <hr>
 <h2><span style="font-weight: 400">Prerequisites - x86-64 Linux</span></h2>
 <p>Not all x86-64 Linux systems contain the necessary 32-bit packages to build 
-and run VirtualGL.&nbsp; In general, you will need the following 32-bit 
-packages:</p>
+and run VirtualGL.&nbsp; To build VirtualGL on an x86-64 Linux system, you will 
+need at minimum the following 32-bit packages:</p>
 <ul>
-  <li>GLIBC</li>
-  <li>X11 dev. kit</li>
-  <li>OpenSSL runtime</li>
-  <li>libstdc++</li>
+  <li>glibc development libraries<ul>
+    <li>Usually contained in the glibc-devel package (iX86)</li>
+    <li>Usually installed by default on x86-64 Linux systems</li>
+  </ul>
+  </li>
+  <li>X11 dev. kit<ul>
+    <li>Usually contained in the XFree86-devel or xorg-x11-devel package (iX86)</li>
+    <li>Not always installed by default but usually contained on the CD</li>
+    <li>Earlier RedHat/Whitebox Enterprise 3 releases do not contain the 32-bit 
+    version of the package on the CD, but you can grab it from a 32-bit CD, from 
+    the RedHat Network, or from the Whitebox web-site.</li>
+  </ul>
+  </li>
+  <li>OpenSSL runtime<ul>
+    <li>Usually contained in the openssl package (iX86)</li>
+    <li>Not always installed by default but usually contained on the CD</li>
+    <li>May also require 32-bit krb5-libs package</li>
+    <li>Earlier RedHat/Whitebox Enterprise 3 releases do not contain the 32-bit 
+    version of the package on the CD, but you can grab it from a 32-bit CD, from 
+    the RedHat Network, or from the Whitebox web-site.</li>
+  </ul>
+  </li>
 </ul>
-<p>and the various dependencies thereof.&nbsp; On most x86-64 Linux systems, the 
-32-bit GLIBC and libstdc++ are installed by default, but you will need to 
-manually install the 32-bit X11 dev. kit (XFree86-devel or xorg-x11-devel) and 
-OpenSSL runtime from the CD.&nbsp; Some earlier RedHat/Whitebox Enterprise 3 
-releases do not contain the 32-bit X11 dev. kit or 32-bit OpenSSL runtime on the 
-CD, and in this case you can grab those packages from a 32-bit distribution or 
-from the RedHat Network or the Whitebox web-site.</p>
-<p>To link against the 32-bit OpenSSL runtime, you will need to perform the 
-following additional step:</p>
+<p>Prior to building 32-bit VirtualGL for the first time, you will need to 
+perform the following additional step:</p>
 <blockquote>
 <p><font face="Courier New">cd /usr/lib<br>
 ln -fs /lib/libssl.so.? libssl.so</font></p>
 </blockquote>
+<p>This creates a development stub for the 32-bit OpenSSL library, since a 
+32-bit openssl-devel package doesn't exist.</p>
 <hr>
 <h2><span style="font-weight: 400">Prerequisites - Win32</span></h2>
 <h3><span style="font-weight: 400">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
