@@ -21,6 +21,7 @@ usage()
 	echo
 	echo "VirtualGL miscellaneous options"
 	echo "  +/-profile  : Enable/disable profiling"
+	echo "  +debug      : Enable debugging"
 	echo
 	exit $1
 }
@@ -45,6 +46,7 @@ do
 	-pr*)       RRPROFILE=0     ; export RRPROFILE  ;;
 	+pr*)       RRPROFILE=1     ; export RRPROFILE  ;;
 	-q*)        RRQUAL=$2       ; export RRQUAL     ; shift     ;;
+	+de*)       RRDEBUGPAUSE=1  ; export RRDEBUGPAUSE ;;
 	-d*)        RRDISPLAY=$2    ; export RRDISPLAY  ; shift     ;;
 	-cl*)       RRCLIENT=$2     ; export RRCLIENT   ; shift     ;;
 	-p*)        RRPORT=$2       ; export RRPORT     ; shift     ;;
