@@ -8,6 +8,12 @@ AR = ar ruvs
 
 CFLAGS = -Wall -fpic
 
+ifeq ($(subplatform), ia64)
+CC = icc
+CXX = icpc
+CFLAGS = -fpic
+endif
+
 ifeq ($(subplatform), 64)
 ARCHFLAG = -m64
 LDFLAGS = -L/usr/X11R6/lib64
@@ -22,7 +28,7 @@ LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
 ifeq ($(DEBUG), yes)
-OPTFLAG = -O0 -g
+OPTFLAG = -O0 -ggdb
 else
 OPTFLAG = -O2
 endif
