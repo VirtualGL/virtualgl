@@ -489,7 +489,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	if(dpy==_localdpy) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
 
-	c=remotevis2localpbconfig(dpy, vis);
+	if(!(c=remotevis2localpbconfig(dpy, vis)))
+		_throw("Could not obtain Pbuffer visual");
 	int render_type=GLX_RGBA_BIT;
 	_glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type);
 	if(!(ctx=_glXCreateNewContext(_localdpy, c,
