@@ -1,5 +1,5 @@
 Name ${APPNAME}
-OutFile ${APPNAME}.exe
+OutFile ${BLDDIR}\${APPNAME}.exe
 InstallDir $PROGRAMFILES\${APPNAME}-${VERSION}-${BUILD}
 
 SetCompressor bzip2
@@ -13,13 +13,13 @@ UninstPage instfiles
 Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
-	File "${EDIR}\rrxclient.exe"
-	File "${EDIR}\hpjpeg.dll"
+	File "${BLDDIR}\bin\rrxclient.exe"
+	File "${BLDDIR}\bin\hpjpeg.dll"
 	File "rr\newrrcert.bat"
 	File "rr\rrcert.cnf"
-	File "${EDIR}\openssl.exe"
-	File "${EDIR}\tcbench.exe"
-	File "${EDIR}\nettest.exe"
+	File "${BLDDIR}\bin\openssl.exe"
+	File "${BLDDIR}\bin\tcbench.exe"
+	File "${BLDDIR}\bin\nettest.exe"
 	File "util\nettest.pem"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
