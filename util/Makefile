@@ -13,7 +13,8 @@ TARGETS = $(LDIR)/rrutil.lib \
           $(LDIR)/fbx-xdk.lib \
           $(EDIR)/fbxtest-xdk.exe
 
-OBJS = $(ODIR)/rrlog.obj \
+OBJS = $(ODIR)/bmp.obj \
+       $(ODIR)/rrlog.obj \
        $(ODIR)/genericQ.obj \
        $(ODIR)/rrsocket.obj \
        $(ODIR)/fbx.obj \
@@ -64,7 +65,8 @@ TARGETS = $(LDIR)/librrutil.a \
           $(EDIR)/threadtest \
           $(EDIR)/glreadtest
 
-OBJS = $(ODIR)/rrlog.o \
+OBJS = $(ODIR)/bmp.o \
+       $(ODIR)/rrlog.o \
        $(ODIR)/genericQ.o \
        $(ODIR)/rrsocket.o \
        $(ODIR)/fbx.o \
