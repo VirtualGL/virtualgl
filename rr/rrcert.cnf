@@ -21,7 +21,7 @@ localityName                    = Locality Name (eg, city)
 localityName_default            = Austin
 
 0.organizationName              = Organization Name (eg, company)
-0.organizationName_default      = Landmark Graphics
+0.organizationName_default      = The VirtualGL Project
 
 organizationalUnitName          = Organizational Unit Name (eg, section)
 organizationalUnitName_default  = Visualization Development
