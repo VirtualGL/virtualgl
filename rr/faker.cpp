@@ -169,7 +169,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	TRY();
 	if(!(win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes))) return 0;
-	winh.add(dpy, win);
+	if(_localdpy && dpy!=_localdpy) winh.add(dpy, win);
 	CATCH();
 	return win;
 }
