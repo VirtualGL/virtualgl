@@ -16,12 +16,12 @@
 #include <errno.h>
 #include "genericQ.h"
 #include "rrcommon.h"
+#include "rrerror.h"
 
 
 genericQ::genericQ(void)
 {
 	startptr=NULL;  endptr=NULL;
-	lasterror="No Error";
 	sem_init(&qhasitem, 0, 0);
 	pthread_mutex_init(&qmutex, NULL);
 	deadyet=0;
@@ -51,12 +51,12 @@ void genericQ::release(void)
 }
 
 
-int genericQ::add(void *myval)
+void genericQ::add(void *myval)
 {
-	if(deadyet) return GENQ_SUCCESS;
+	if(deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::add()");
 	rrlock l(qmutex);
-	if(deadyet) return GENQ_SUCCESS;
+	if(deadyet) return;
 	qstruct *temp=new qstruct;
 	if(temp==NULL) _throw("Alloc error");
 	if(startptr==NULL) startptr=temp;
@@ -64,26 +64,24 @@ int genericQ::add(void *myval)
 	temp->value=myval;  temp->next=NULL;
 	endptr=temp;
 	sem_post(&qhasitem);
-	return GENQ_SUCCESS;
 }
 
 
 // This will block until there is something in the queue
-int genericQ::get(void **myval)
+void genericQ::get(void **myval)
 {
-	if(deadyet) return GENQ_SUCCESS;
+	if(deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::get()");
 	tryunix(sem_wait(&qhasitem));
 	if(!deadyet)
 	{
 		rrlock l(qmutex);
-		if(deadyet) return GENQ_SUCCESS;
+		if(deadyet) return;
 		if(startptr==NULL) _throw("Nothing in the queue");
 		*myval=startptr->value;
 		qstruct *temp=startptr->next;
 		delete startptr;  startptr=temp;
 	}
-	return GENQ_SUCCESS;
 }
 
 
@@ -92,10 +90,4 @@ int genericQ::items(void)
 	int retval=0;
 	tryunix(sem_getvalue(&qhasitem, &retval));
 	return retval;
-}
-
-
-char *genericQ::getErrorStr(void)
-{
-	return lasterror;
 }

@@ -72,7 +72,7 @@ class dpyhash : public _dpyhash
 				*ptr='\0';
 			if(!strlen(dpystring)) {free(dpystring);  dpystring=strdup("localhost");}
 			if(!(rrdpy=RROpenDisplay(dpystring, fconfig.port, fconfig.ssl)))
-			throw(RRGetError());
+			throw(rrerror(RRErrorLocation(), RRErrorString()));
 			free(dpystring);
 			return rrdpy;
 		}

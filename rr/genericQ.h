@@ -34,13 +34,11 @@ class genericQ
 	public:
 		genericQ(void);
 		~genericQ(void);
-		int add(void *);
-		int get(void **);
-		char *getErrorStr(void);
+		void add(void *);
+		void get(void **);
 		void release(void);
 		int items(void);
 	private:
-		char *lasterror;
 		qstruct *startptr, *endptr;
 		sem_t qhasitem;
 		pthread_mutex_t qmutex;

@@ -16,6 +16,7 @@
 #include <pthread.h>
 
 #include "rrcommon.h"
+#include "rrerror.h"
 
 typedef struct __hashclassstruct
 {

@@ -28,7 +28,6 @@ FakerConfig fconfig;
 #include "faker-vishash.h"
 #include "faker-pmhash.h"
 #include "faker-sym.h"
-#undef errifnot
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
@@ -89,14 +88,12 @@ void safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,l,m) {if(!isdead()) fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  safeexit(1);}
+#define _die(f,m) {if(!isdead()) fprintf(stderr, "%s--\n%s\n", f, m);  safeexit(1);}
 
 #define TRY() try {
-#define CATCH() } catch(RRError e) {_die(e.file, e.line, e.message);}
+#define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
 #include "faker-glx.cpp"
-
-#define errifnot(f) {if(!(f)) _die(__FILE__, __LINE__, "Unexpected NULL condition");}
 
 #if 0
 // Used during debug so we can get a stack trace from an X11 protocol error
@@ -120,7 +117,11 @@ void fakerinit(void)
 	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
-	printf("Attach GDB to process %d and press any key ...\n", getpid());  getchar();
+	if(getenv("RRDEBUGPAUSE"))
+	{
+		printf("Attach GDB to process %d ...\n", getpid());
+		sleep(30);
+	}
 	#if 0
 	XSetErrorHandler(xhandler);
 	#endif
