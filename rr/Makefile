@@ -84,7 +84,7 @@ TARGETS = $(LDIR)/librrfaker.so \
 
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so $(LDIR)/librrsocket.a
-RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB) $(THREADLIB)
+RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB)
 RRLAUNCH = rrlaunch
 ifeq ($(subplatform), 64)
 RRLAUNCH = rrlaunch64
