@@ -1,17 +1,18 @@
-all: rr mesademos
+all: rr mesademos diags
 
-.PHONY: rr util jpeg mesademos clean
+.PHONY: rr util jpeg mesademos diags clean
 
 rr: util jpeg
 
-rr util jpeg mesademos:
+rr util jpeg mesademos diags:
 	cd $@; $(MAKE); cd ..
 
 clean:
 	cd rr; $(MAKE) clean; cd ..; \
 	cd util; $(MAKE) clean; cd ..; \
 	cd jpeg; $(MAKE) clean; cd ..; \
-	cd mesademos; $(MAKE) clean; cd ..
+	cd mesademos; $(MAKE) clean; cd ..; \
+	cd diags; $(MAKE) clean; cd ..
 
 TOPDIR=.
 include Makerules
@@ -26,11 +27,13 @@ else
 WEDIR := $(platform)$(subplatform)\\bin
 endif
 
-dist: rr
+dist: rr diags
 	$(RM) $(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
 		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rr.nsi
-
+	$(RM) $(APPNAME)-diags.exe
+	makensis //DAPPNAME=$(APPNAME)-diags //DVERSION=$(VERSION) \
+		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rrdiags.nsi
 
 ##########################################################################
 else
@@ -75,13 +78,18 @@ uninstall:
 	$(RM) $(prefix)/lib/librrfaker.so
 	echo Uninstall complete.
 
-dist: rr rpms/BUILD rpms/RPMS
+dist: rr diags rpms/BUILD rpms/RPMS
 	rm $(PACKAGENAME).$(RPMARCH).rpm; \
 	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
-		rr.spec; \
+		rr.spec
 	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
+	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
+		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
+		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
+		rrdiags.spec
+	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-diags-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME)-diags.$(RPMARCH).rpm
 
 rpms/BUILD:
 	mkdir -p rpms/BUILD
