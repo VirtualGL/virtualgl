@@ -97,26 +97,30 @@ void rrdisplayclient::compresssend(rrbmp *b, rrbmp *lastb)
 	for(i=0; i<b->h.bmph; i+=b->strip_height)
 	{
 		unsigned char eof=0;
+		int bufstartline;
 		if(bu)
 		{
 			startline=b->h.bmph-i-b->strip_height;
 			if(startline<0) startline=0;
 			endline=startline+min(b->h.bmph-i, b->strip_height);
 			if(b->h.bmph-i<2*b->strip_height) {startline=0;  i+=b->strip_height;  eof=1;}
+			bufstartline=b->h.bmph-endline;
 		}
 		else
 		{
 			startline=i;
 			endline=startline+min(b->h.bmph-i, b->strip_height);
 			if(b->h.bmph-i<2*b->strip_height) {endline=b->h.bmph;  i+=b->strip_height;  eof=1;}
+			bufstartline=startline;
 		}
+
 		if(lastb && b->h.bmpw==lastb->h.bmpw && b->h.bmph==lastb->h.bmph
 		&& b->h.winw==lastb->h.winw && b->h.winh==lastb->h.winh
 		&& b->h.qual==lastb->h.qual && b->h.subsamp==lastb->h.subsamp
 		&& b->pixelsize==lastb->pixelsize && b->h.winid==lastb->h.winid
 		&& b->h.dpynum==lastb->h.dpynum && b->bits
-		&& lastb->bits && !memcmp(&b->bits[pitch*(bu? b->h.bmph-endline:startline)],
-			&lastb->bits[pitch*(bu? b->h.bmph-endline:startline)],
+		&& lastb->bits && !memcmp(&b->bits[pitch*bufstartline],
+			&lastb->bits[pitch*bufstartline],
 			pitch*(endline-startline)))
 			continue;
 		rrbmp rrb;
@@ -125,7 +129,7 @@ void rrdisplayclient::compresssend(rrbmp *b, rrbmp *lastb)
 		rrb.h.bmpy+=startline;
 		rrb.pixelsize=b->pixelsize;
 		rrb.flags=b->flags;
-		rrb.bits=&b->bits[pitch*(bu? b->h.bmph-endline:startline)];
+		rrb.bits=&b->bits[pitch*bufstartline];
 		j=rrb;
 		j.h.eof=0;
 		send((char *)&j.h, sizeof(rrframeheader));
