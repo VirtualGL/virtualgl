@@ -18,6 +18,17 @@
 #endif
 #include "rrdisplayserver.h"
 
+#define endianize(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.winw=byteswap16(h.winw);  \
+		h.winh=byteswap16(h.winh);  \
+		h.bmpw=byteswap16(h.bmpw);  \
+		h.bmph=byteswap16(h.bmph);  \
+		h.bmpx=byteswap16(h.bmpx);  \
+		h.bmpy=byteswap16(h.bmpy);}}
+
 #define CERTF "rrcert.pem"
 
 #ifdef _WIN32
@@ -120,6 +131,7 @@ void rrserver::run(void)
 			do
 			{
 				sd->recv((char *)&h, sizeof(rrframeheader));
+				endianize(h);
 				errifnot(w=addwindow(h.dpynum, h.winid));
 
 				try {j=w->getFrame();}
