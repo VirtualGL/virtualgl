@@ -44,7 +44,7 @@ void _fprintf (FILE *f, const char *format, ...)
 	va_list arglist;
 	va_start(arglist, format);
 	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx\n - ", (unsigned long)rrthread_id(), timer.time(),
-		(unsigned long)glXGetCurrentContext(), glXGetCurrentDrawable(), glXGetCurrentReadDrawable());
+		(unsigned long)glXGetCurrentContext(), GetCurrentDrawable(), GetCurrentReadDrawable());
 	vfprintf(f, format, arglist);
 	fflush(f);
 	va_end(arglist);
@@ -54,9 +54,9 @@ void _fprintf (FILE *f, const char *format, ...)
 Display *_localdpy=NULL;
 #ifdef USEGLP
 GLPDevice _localdev=-1;
-#define _localdisplayiscurrent() ((fconfig.glp && glPGetCurrentDevice()==_localdev) || (!fconfig.glp && glXGetCurrentDisplay()==_localdpy))
+#define _localdisplayiscurrent() ((fconfig.glp && glPGetCurrentDevice()==_localdev) || (!fconfig.glp && GetCurrentDisplay()==_localdpy))
 #else
-#define _localdisplayiscurrent() (glXGetCurrentDisplay()==_localdpy)
+#define _localdisplayiscurrent() (GetCurrentDisplay()==_localdpy)
 #endif
 #define _isremote(dpy) (fconfig.glp || (_localdpy && dpy!=_localdpy))
 
@@ -389,11 +389,11 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 	if(!srcpm && !dstpm) return _XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
 
-	GLXDrawable oldread=glXGetCurrentReadDrawable();
-	GLXDrawable olddraw=glXGetCurrentDrawable();
+	GLXDrawable oldread=GetCurrentReadDrawable();
+	GLXDrawable olddraw=GetCurrentDrawable();
 	GLXContext ctx=glXGetCurrentContext();
 	Display *olddpy=NULL;
-	if(!ctx || (!fconfig.glp && !(olddpy=glXGetCurrentDisplay())))
+	if(!ctx || (!fconfig.glp && !(olddpy=GetCurrentDisplay())))
 		return 0;  // Does ... not ... compute
 
 	// Intentionally call the faked function so it will map a PB if src or dst is a window
@@ -410,9 +410,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	else
 	#endif
 	{
-		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
-		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
-		_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
+		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
+		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
+		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
 	}
 
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -546,7 +546,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	////////////////////
 
 	// Equivalent of a glFlush()
-	GLXDrawable curdraw=glXGetCurrentDrawable();
+	GLXDrawable curdraw=GetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
 	{
@@ -639,7 +639,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	////////////////////
 
 	// Equivalent of a glFlush()
-	GLXDrawable curdraw=glXGetCurrentDrawable();
+	GLXDrawable curdraw=GetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
 	{
@@ -831,7 +831,7 @@ void _doGLreadback(bool force, bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
-	drawable=glXGetCurrentDrawable();
+	drawable=GetCurrentDrawable();
 	if(!drawable) return;
 	GLint drawbuf=GL_BACK;
 	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
@@ -879,10 +879,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	TRY();
 	GLXContext ctx=glXGetCurrentContext();
-	GLXDrawable draw=glXGetCurrentDrawable();
-	GLXDrawable read=glXGetCurrentReadDrawable();
+	GLXDrawable draw=GetCurrentDrawable();
+	GLXDrawable read=GetCurrentReadDrawable();
 	Display *dpy=NULL;
-	if(!fconfig.glp) dpy=glXGetCurrentDisplay();
+	if(!fconfig.glp) dpy=GetCurrentDisplay();
 	if((dpy || fconfig.glp) && (draw || read) && ctx)
 	{
 		GLXDrawable newread=read, newdraw=draw;
