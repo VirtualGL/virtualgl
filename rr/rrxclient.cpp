@@ -71,10 +71,11 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 void usage(char *progname)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-v] [-s] [-p<port>] [-d<display>]\n", progname);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-p<port>] [-s] [-v]\n", progname);
 	fprintf(stderr, "-h or -? = This help screen\n");
+	fprintf(stderr, "-p = Specify which port the client should listen on (default is %d)\n", RR_DEFAULTPORT);
 	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
-	fprintf(stderr, "-p = Set base port for listener (default is %d)\n", RR_DEFAULTPORT);
+	fprintf(stderr, "-v = Display version information\n");
 	#ifdef _WIN32
 	fprintf(stderr, "-install = Install %s client as a service\n", __APPNAME);
 	fprintf(stderr, "-remove = Remove %s client service\n", __APPNAME);
