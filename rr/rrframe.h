@@ -39,7 +39,7 @@ class rrframe
 		bits=NULL;
 		tryunix(pthread_mutex_init(&_ready, NULL));  tryunix(pthread_mutex_lock(&_ready));
 		tryunix(pthread_mutex_init(&_complete, NULL));
-		pixelsize=0;
+		pixelsize=0;  pitch=0;  flags=0;
 	}
 
 	virtual ~rrframe(void)
@@ -49,26 +49,27 @@ class rrframe
 		if(bits) delete [] bits;
 	}
 
-	void init(rrframeheader *hnew, int pixelsize)
+	void init(rrframeheader *hnew, int pixelsize, int flags=RRBMP_BGR)
 	{
-		if(!hnew) _throw("Invalid argument to rrframe::init()");
+		if(!hnew) throw(rrerror("rrframe::init", "Invalid argument"));
+		this->flags=flags;
 		hnew->size=hnew->winw*hnew->winh*pixelsize;
-		if(!checkheader(hnew, pixelsize)) _throw("Invalid argument to rrframe::init()");
+		checkheader(hnew);
 		if(pixelsize<3 || pixelsize>4) _throw("Only true color bitmaps are supported");
 		if(hnew->winw!=h.winw || hnew->winh!=h.winh || this->pixelsize!=pixelsize
 		|| !bits)
 		{
 			if(bits) delete [] bits;
 			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*pixelsize]);
-			this->pixelsize=pixelsize;
+			this->pixelsize=pixelsize;  pitch=pixelsize*hnew->winw;
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
 
 	void zero(void)
 	{
-		if(!h.winw || !h.winh || !pixelsize) return;
-		memset(bits, 0, h.winw*h.winh*pixelsize);
+		if(!h.winh || !pitch) return;
+		memset(bits, 0, pitch*h.winh);
 	}
 
 	void ready(void) {pthread_mutex_unlock(&_ready);}
@@ -91,6 +92,7 @@ class rrframe
 
 	rrframeheader h;
 	unsigned char *bits;
+	int pitch, pixelsize, flags;
 
 	protected:
 
@@ -109,16 +111,13 @@ class rrframe
 		hpprintf("h->eof     = %d\n", h->eof);
 	}
 
-	int pixelsize;
-
-	int checkheader(rrframeheader *h, int pixelsize)
+	void checkheader(rrframeheader *h)
 	{
-		if((h->size<1 && !h->eof)
+		if(!h
 		|| h->winw<1 || h->winh<1 || h->bmpw<1 || h->bmph<1
-		|| h->bmpx+h->bmpw>h->winw || h->bmpy+h->bmph>h->winh
-		|| h->qual>100 || h->subsamp>RR_SUBSAMP-1)
-			return 0;
-		return 1;
+		|| h->bmpx+h->bmpw>h->winw || h->bmpy+h->bmph>h->winh)
+			throw(rrerror("rrframe::checkheader", "Invalid header"));
+
 	}
 
 	pthread_mutex_t _ready;
@@ -131,7 +130,7 @@ class rrjpeg : public rrframe
 {
 	public:
 
-	rrjpeg(void) : rrframe()
+	rrjpeg(void) : rrframe(), hpjhnd(NULL)
 	{
 		if(!(hpjhnd=hpjInitCompress())) _throw(hpjGetErrorStr());
 		pixelsize=3;
@@ -139,7 +138,7 @@ class rrjpeg : public rrframe
 
 	~rrjpeg(void)
 	{
-		hpjDestroy(hpjhnd);
+		if(hpjhnd) hpjDestroy(hpjhnd);
 	}
 
 	rrjpeg& operator= (rrbmp& b)
@@ -147,7 +146,8 @@ class rrjpeg : public rrframe
 		int hpjflags=0;
 		if(!b.bits) _throw("Bitmap not initialized");
 		if(b.pixelsize<3 || b.pixelsize>4) _throw("Only true color bitmaps are supported");
-		b.h.size=b.h.winw*b.h.winh*b.pixelsize;
+		if(b.h.qual>100 || b.h.subsamp>RR_SUBSAMP-1)
+			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(&b.h);
 		int pitch=b.h.bmpw*b.pixelsize;
 		if(b.flags&RRBMP_EOLPAD) pitch=HPJPAD(pitch);
@@ -167,12 +167,10 @@ class rrjpeg : public rrframe
 
 	void init(rrframeheader *hnew)
 	{
-		if(!hnew || !checkheader(hnew, pixelsize)) _throw("Invalid argument to rrjpeg::init()");
+		checkheader(hnew);
 		if(hnew->winw!=h.winw || hnew->winh!=h.winh || !bits)
 		{
 			if(bits) delete [] bits;
-			// Dest. buffer for IJL must be big enough to hold 16 x 16 x 3 MCU, and I
-			// like to give it a wide berth
 			errifnot(bits=new unsigned char[HPJBUFSIZE(hnew->winw, hnew->winh)]);
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
@@ -184,13 +182,6 @@ class rrjpeg : public rrframe
 	friend class rrbitmap;
 };
 
-//#ifdef _WIN32
-//#define fblock() rrlock l(mutex)
-//#else
-#define fblock()
-//#endif
-#define fbunlock()
-
 // Bitmap created from shared graphics memory
 
 class rrbitmap : public rrframe
@@ -199,7 +190,7 @@ class rrbitmap : public rrframe
 
 	rrbitmap(Display *dpy, Window win) : rrframe()
 	{
-		if(!dpy || !win) _throw("Invalid argument to rrbitmap constructor");
+		if(!dpy || !win) throw(rrerror("rrbitmap::rrbitmap", "Invalid argument"));
 		XFlush(dpy);
 		init(DisplayString(dpy), win);
 	}
@@ -211,34 +202,36 @@ class rrbitmap : public rrframe
 
 	void init(char *dpystring, Window win)
 	{
-		if(!dpystring || !win) _throw("Invalid argument to rrbitmap constructor");
-		wh.dpy=XOpenDisplay(dpystring);  wh.win=win;
+		if(!dpystring || !win) throw(rrerror("rrfb::init", "Invalid argument"));
+		if(!(wh.dpy=XOpenDisplay(dpystring)))
+			throw(rrerror("rrfb::init", "Could not open display"));
+		wh.win=win;
+		hpjhnd=NULL;
 		memset(&fb, 0, sizeof(fbx_struct));
-		if(!(hpjhnd=hpjInitDecompress())) _throw(hpjGetErrorStr());
-//		#ifdef _WIN32
-//		if(!mutexinit) {tryunix(pthread_mutex_init(&mutex, NULL));  mutexinit=true;}
-//		#endif
 	}
 
 	~rrbitmap(void)
 	{
-		fblock();
-		if(fb.bits) fbx_term(&fb);
-		hpjDestroy(hpjhnd);
+		if(fb.bits) fbx_term(&fb);  if(bits) bits=NULL;
+		if(hpjhnd) hpjDestroy(hpjhnd);
 		if(wh.dpy) XCloseDisplay(wh.dpy);
 	}
 
 	void init(rrframeheader *hnew)
 	{
-		if(!hnew || !checkheader(hnew)) _throw("Invalid argument to rrbitmap::init()");
-		fblock();
+		checkheader(hnew);
 		fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
 		if(hnew->winw>fb.width || hnew->winh>fb.height)
 		{
 			XSync(wh.dpy, False);
 			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
 		}
+		if(fb.ps<3 || fb.ps>4) _throw("Display must be 24-bit or 32-bit true color");
 		memcpy(&h, hnew, sizeof(rrframeheader));
+		pixelsize=fb.ps;  pitch=fb.xi->bytes_per_line;  bits=(unsigned char *)fb.bits;
+		flags=0;
+		if(fb.bgr) flags|=RRBMP_BGR;
+		if(fb.xi->bytes_per_line!=fb.width*fb.ps) flags|=RRBMP_EOLPAD;
 	}
 
 	rrbitmap& operator= (rrjpeg& f)
@@ -248,12 +241,15 @@ class rrbitmap : public rrframe
 			_throw("JPEG not initialized");
 		init(&f.h);
 		if(!fb.xi) _throw("Bitmap not initialized");
-		fblock();
 		if(fb.bgr) hpjflags|=HPJ_BGR;
 		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
 		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
 		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
 		{
+			if(!hpjhnd)
+			{
+				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
+			}
 			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy+f.h.bmpx*fb.ps],
 				bmpw, fb.xi->bytes_per_line, bmph, fb.ps, hpjflags));
 		}
@@ -262,14 +258,12 @@ class rrbitmap : public rrframe
 
 	void redraw(void)
 	{
-		fblock();
 		fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 	}
 
 	void draw(void)
 	{
 		int _w=h.bmpw, _h=h.bmph;
-		fblock();
 		XWindowAttributes xwa;
 		if(!XGetWindowAttributes(wh.dpy, wh.win, &xwa))
 		{
@@ -288,19 +282,6 @@ class rrbitmap : public rrframe
 	}
 
 	private:
-
-	int checkheader(rrframeheader *h)
-	{
-		if(h->winw<1 || h->winh<1 || h->bmpw<1 || h->bmph<1
-		|| h->bmpx+h->bmpw>h->winw || h->bmpy+h->bmph>h->winh
-		|| h->qual>100 || h->subsamp>RR_SUBSAMP-1)
-			return 0;
-		return 1;
-	}
-
-//	#ifdef _WIN32
-//	static pthread_mutex_t mutex;  static bool mutexinit;
-//	#endif
 
 	fbx_wh wh;
 	fbx_struct fb;
