@@ -19,7 +19,7 @@
 
 void rrblitter::run(void)
 {
-	rrfb *lastb=NULL;
+//	rrfb *lastb=NULL;
 	#ifdef RRPROFILE
 	double mpixels=0., comptime=0.;  rrtimer timer;
 	#endif
@@ -35,7 +35,7 @@ void rrblitter::run(void)
 		#ifdef RRPROFILE
 		timer.start();
 		#endif
-		blitdiff(b, lastb);
+		b->redraw();
 		#ifdef RRPROFILE
 		comptime+=timer.elapsed();
 		mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
@@ -46,7 +46,7 @@ void rrblitter::run(void)
 			comptime=0.;  mpixels=0.;
 		}
 		#endif
-		lastb=b;
+//		lastb=b;
 	}
 
 	} catch(...) {ready.unlock();  throw;}
