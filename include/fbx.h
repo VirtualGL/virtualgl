@@ -49,17 +49,17 @@
 #define FBX_FORMATS 6
 enum {FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB};  // pixel formats
 
-const int fbx_ps[FBX_FORMATS]=
+static const int fbx_ps[FBX_FORMATS]=
 	{3, 4, 3, 4, 4, 4};
-const int fbx_bgr[FBX_FORMATS]=
+static const int fbx_bgr[FBX_FORMATS]=
 	{0, 0, 1, 1, 1, 0};
-const int fbx_alphafirst[FBX_FORMATS]=
+static const int fbx_alphafirst[FBX_FORMATS]=
 	{0, 0, 0, 0, 1, 1};
-const int fbx_roffset[FBX_FORMATS]=
+static const int fbx_roffset[FBX_FORMATS]=
 	{0, 0, 2, 2, 3, 1};
-const int fbx_goffset[FBX_FORMATS]=
+static const int fbx_goffset[FBX_FORMATS]=
 	{1, 1, 1, 1, 2, 2};
-const int fbx_boffset[FBX_FORMATS]=
+static const int fbx_boffset[FBX_FORMATS]=
 	{2, 2, 0, 0, 1, 3};
 
 typedef struct _fbx_struct
@@ -111,12 +111,10 @@ extern "C" {
 
   On return, fbx_init() fills in the following relevant information in the fbx_struct that you
   passed to it:
-  s->ps = pixel size of buffer in bytes
-  s->bgr = 1 if the buffer uses BGRA pixel ordering or 0 otherwise
-  s->rmask = bitmask used to obtain red component from a pixel
-  s->gmask = bitmask used to obtain green component from a pixel
-  s->bmask = bitmask used to obtain blue component from a pixel
+  s->format = pixel format of the buffer (one of FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR,
+              or FBX_ARGB)
   s->width, s->height = dimensions of the buffer
+  s->pitch = bytes in each scanline of the buffer
   s->bits = address of the start of the buffer
 */
 int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm);
