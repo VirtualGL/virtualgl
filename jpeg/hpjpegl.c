@@ -104,23 +104,22 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 }
 
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
-	unsigned char *srcbuf, int width, int height, int ps,
+	unsigned char *srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsub, int qual, int flags)
 {
-	int i, pitch;  JSAMPROW *row_pointer=NULL;
+	int i;  JSAMPROW *row_pointer=NULL;
 
 	checkhandle(h);
 
-	if(srcbuf==NULL || width<=0 || height<=0
+	if(srcbuf==NULL || width<=0 || pitch<0 || height<=0
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
 		_throw("Invalid argument in hpjCompress()");
 	if(ps!=3 && ps!=4) _throw("This compressor can only take 24-bit or 32-bit RGB input");
 	if(!j->initc) _throw("Instance has not been initialized for compression");
 
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
+	if(pitch==0) pitch=width*ps;
 
 	j->cinfo.rgb_pixelsize = ps;
 	j->cinfo.rgb_green = 1;
@@ -223,21 +222,20 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
-	unsigned char *dstbuf, int width, int height, int ps,
+	unsigned char *dstbuf, int width, int pitch, int height, int ps,
 	int flags)
 {
-	int i, pitch;  JSAMPROW *row_pointer=NULL;
+	int i;  JSAMPROW *row_pointer=NULL;
 
 	checkhandle(h);
 
 	if(srcbuf==NULL || size<=0
-		|| dstbuf==NULL || width<=0 || height<=0)
+		|| dstbuf==NULL || width<=0 || pitch<0 || height<=0)
 		_throw("Invalid argument in hpjDecompress()");
 	if(ps!=3 && ps!=4) _throw("This compressor can only take 24-bit or 32-bit RGB input");
 	if(!j->initd) _throw("Instance has not been initialized for decompression");
 
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
+	if(pitch==0) pitch=width*ps;
 
 	j->dinfo.rgb_pixelsize=ps;
 	j->dinfo.rgb_green=1;

@@ -50,15 +50,14 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 }
 
 DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
-	unsigned char *srcbuf, int width, int height, int ps,
+	unsigned char *srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsub, int qual, int flags)
 {
 	PIC_PARM PicParm;
 	BITMAPINFOHEADER bmih;
-	int pitch;
 
-	if(srcbuf==NULL || width<=0 || height<=0
+	if(srcbuf==NULL || width<=0 || pitch<0 || height<=0
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
 		_throw("Invalid argument in hpjCompress()");
@@ -72,8 +71,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 	// initialize input buffer pointers
 	PicParm.Get.Start  = srcbuf;
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
+	if(pitch==0) pitch=width*ps;
 	PicParm.Get.End    = srcbuf + pitch*(jpegsub==HPJ_444? max(height,8):max(height,16));
 	PicParm.Get.QFlags = Q_EOF;
 	if(flags&HPJ_BOTTOMUP)
@@ -107,7 +105,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	PicParm.u.D2S.ChromFactor = qtop(qual);
 	PicParm.u.D2S.SubSampling = hpjsub[jpegsub];
 	PicParm.u.D2S.JpegType = JT_RAW;
-	if(flags&HPJ_EOLPAD)
+	if(pitch!=width*ps)
 	{
 		PicParm.u.D2S.PicFlags |= PF_WidthPadKnown;
 		PicParm.u.D2S.WidthPad = pitch;
@@ -143,15 +141,14 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
-	unsigned char *dstbuf, int width, int height, int ps,
+	unsigned char *dstbuf, int width, int pitch, int height, int ps,
 	int flags)
 {
 	PIC_PARM PicParm;
 	BITMAPINFOHEADER bmih;
-	int pitch;
 
 	if(srcbuf==NULL || size<=0
-		|| dstbuf==NULL || width<=0 || height<=0)
+		|| dstbuf==NULL || width<=0 || pitch<0 || height<=0)
 		_throw("Invalid argument in hpjDecompress()");
 	if(ps!=3 && ps!=4) _throw("This JPEG codec supports only 24-bit or 32-bit true color");
 
@@ -181,9 +178,8 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	PicParm.Op = OP_S2D;
 
 	memset(&PicParm.u.S2D, 0, sizeof(PicParm.u.S2D));
-	if(flags&HPJ_EOLPAD) pitch=((width*ps)+3)&(~3);
-	else pitch=width*ps;
-	if(flags&HPJ_EOLPAD)
+	if(pitch==0) pitch=width*ps;
+	if(pitch!=width*ps)
 	{
 		PicParm.u.S2D.PicFlags |= PF_WidthPadKnown;
 		PicParm.u.S2D.WidthPad = pitch;

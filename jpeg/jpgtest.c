@@ -50,8 +50,8 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 		memcpy(rgbbuf, srcbuf, pitch*h);
 		if((hnd=hpjInitCompress())==NULL)
 			{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjCompress(hnd, rgbbuf, w, striph, ps,
-			jpegbuf, &compstripsize[0], jpegsub, qual, HPJ_BGR|HPJ_EOLPAD
+		_catch(hpjCompress(hnd, rgbbuf, w, HPJPAD(w*ps), striph, ps,
+			jpegbuf, &compstripsize[0], jpegsub, qual, HPJ_BGR
 			|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
 		ITER=5;
 		do
@@ -65,8 +65,8 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 				do
 				{
 					if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-					_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, temph, ps,
-						&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, HPJ_BGR|HPJ_EOLPAD
+					_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps,
+						&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, HPJ_BGR
 						|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
 					jpgbufsize+=compstripsize[j];
 					j+=temph;
@@ -99,7 +99,7 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 		}
 		if((hnd=hpjInitDecompress())==NULL)
 			{printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, striph, ps, HPJ_BGR|HPJ_EOLPAD
+		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, HPJPAD(w*ps), striph, ps, HPJ_BGR
 			|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
 		ITER=5;
 		do
@@ -113,7 +113,7 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 				{
 					if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
 					_catch(hpjDecompress(hnd, &jpegbuf[w*3*j], compstripsize[j],
-						&rgbbuf[pitch*j], w, temph, ps, HPJ_BGR|HPJ_EOLPAD
+						&rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps, HPJ_BGR
 						|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
 					j+=temph;
 				} while(j<h);
