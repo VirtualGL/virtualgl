@@ -28,7 +28,11 @@
 void rrdisplayclient::run(void)
 {
 	rrframe *lastb=NULL;
-	int np=numprocs(), i;
+	int np=1, i;
+
+	char *temp=NULL;
+	if((temp=getenv("VGL_MT"))!=NULL && strlen(temp)>0 && !strncmp(temp, "1", 1))
+		np=numprocs();
 
 	try {
 
