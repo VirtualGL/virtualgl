@@ -55,7 +55,7 @@ class Thread
 			#else
 			int err=0;
 			if((err=pthread_create(&handle, NULL, threadfunc, obj))!=0)
-				throw (rrerror("Thread::start()", strerror(err)));
+				throw (rrerror("Thread::start()", strerror(err==-1?errno:err)));
 			#endif
 		}
 
