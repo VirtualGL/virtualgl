@@ -135,11 +135,20 @@ JPEGDEP = $(LDIR)/libjpeg.a
 else
 
 ifeq ($(IPPDIR),)
-IPPDIR = /opt/intel/ipp40
+IPPDIR = /opt/intel/ipp41/ia32_itanium
+ifeq ($(subplatform), 64)
+IPPDIR = /opt/intel/ipp41/em64t
+endif
 endif
 IPPLINK = -L$(IPPDIR)/lib -lippcore \
         -lippjemerged -lippiemerged -lippsemerged \
         -lippjmerged -lippimerged -lippsmerged
+ifeq ($(subplatform), 64)
+IPPLINK = -L$(IPPDIR)/lib \
+        -lippjemergedem64t -lippjmergedem64t -lippiemergedem64t \
+        -lippimergedem64t -lippsemergedem64t -lippsmergedem64t \
+        -lippcoreem64t
+endif
 
 $(ODIR)/hpjpeg.o: hpjpegipp.c
 	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
