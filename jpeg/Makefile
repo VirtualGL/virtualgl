@@ -7,13 +7,11 @@ ifeq ($(platform), windows)
 TARGETS = $(EDIR)/hpjpeg.dll \
           $(LDIR)/hpjpeg.lib \
           $(EDIR)/jpgtest.exe \
-          $(EDIR)/jpegut.exe \
-          $(EDIR)/24to32.exe
+          $(EDIR)/jpegut.exe
 
 OBJS = $(ODIR)/hpjpeg.obj \
        $(ODIR)/jpgtest.obj \
-       $(ODIR)/jpegut.obj \
-       $(ODIR)/24to32.obj
+       $(ODIR)/jpegut.obj
 
 ifeq ($(JPEGLIB),)
 JPEGLIB = $(DEFAULTJPEGLIB)
@@ -91,22 +89,17 @@ $(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hpjpeg.lib
 $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/hpjpeg.lib
 	$(LINK) $< -OUT:$@ hpjpeg.lib
 
-$(EDIR)/24to32.exe: $(ODIR)/24to32.obj
-	$(LINK) $< -OUT:$@
-
 ##########################################################################
 else
 ##########################################################################
 
 TARGETS = $(LDIR)/libhpjpeg.$(SHEXT) \
           $(EDIR)/jpgtest \
-          $(EDIR)/jpegut \
-          $(EDIR)/24to32
+          $(EDIR)/jpegut
 
 OBJS = $(ODIR)/hpjpeg.o \
        $(ODIR)/jpgtest.o \
-       $(ODIR)/jpegut.o \
-       $(ODIR)/24to32.o
+       $(ODIR)/jpegut.o
 
 ifeq ($(JPEGLIB),)
 JPEGLIB = $(DEFAULTJPEGLIB)
@@ -192,7 +185,7 @@ endif
 
 ifeq ($(JPEGLIB), medialib)
 
-$(ODIR)/hpjpeg.o: hpjpeg-mlib.c hpjpeg-mlibhuff.c hpjpeg-mlibcolor.c
+$(ODIR)/hpjpeg.o: hpjpeg-mlib.c hpjpeg-mlibhuff.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 JPEGLINK = -lmlib
@@ -207,9 +200,6 @@ $(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT)
 
 $(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.$(SHEXT)
 	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
-
-$(EDIR)/24to32: $(ODIR)/24to32.o
-	$(CC) $(LDFLAGS) $< -o $@
 
 ##########################################################################
 endif
