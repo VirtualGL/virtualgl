@@ -57,7 +57,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	unsigned long *compstripsize;
 	int flags=(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0);
 	int ps=_ps[pf];
-	int pitch=HPJPAD(w*ps);
+	int pitch=w*ps;
 
 	flags |= _flags[pf];
 	if(bu) flags |= HPJ_BOTTOMUP;
@@ -79,10 +79,10 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		striph*=2;  if(striph>h) striph=h;
 		if(quiet) printf("%s\t%s\t%s\t%d\t",  _pfname[pf], bu?"BU":"TD",
 			jpegsub==HPJ_411?"4:1:1":jpegsub==HPJ_422?"4:2:2":"4:4:4", qual);
-		memcpy(rgbbuf, srcbuf, pitch*h);
+		for(i=0; i<h; i++) memcpy(&rgbbuf[pitch*i], &srcbuf[w*ps*i], w*ps);
 		if((hnd=hpjInitCompress())==NULL)
 			{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjCompress(hnd, rgbbuf, w, HPJPAD(w*ps), striph, ps,
+		_catch(hpjCompress(hnd, rgbbuf, w, pitch, striph, ps,
 			jpegbuf, &compstripsize[0], jpegsub, qual, flags));
 		ITER=0;
 		timer.start();
@@ -93,7 +93,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			do
 			{
 				if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-				_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps,
+				_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, pitch, temph, ps,
 					&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, flags));
 				jpgbufsize+=compstripsize[j];
 				j+=temph;
@@ -135,9 +135,10 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			fclose(outfile);
 			if(!quiet) printf("Reference image written to %s\n", tempstr);
 		}
+		memset(rgbbuf, 127, pitch*h);  // Grey image means decompressor did nothing
 		if((hnd=hpjInitDecompress())==NULL)
 			{printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, HPJPAD(w*ps),
+		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, pitch,
 			striph, ps, flags));
 		ITER=0;
 		timer.start();
@@ -148,7 +149,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			{
 				if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
 				_catch(hpjDecompress(hnd, &jpegbuf[w*3*j], compstripsize[j],
-					&rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps, flags));
+					&rgbbuf[pitch*j], w, pitch, temph, ps, flags));
 				j+=temph;
 			} while(j<h);
 			ITER++;
@@ -175,8 +176,8 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 		sprintf(strrchr(tempstr, '.'), "-err.%s", useppm?"ppm":"bmp");
 		if(!quiet) printf("Computing compression error and saving to %s.\n", tempstr);
-		for(j=0; j<h; j++) for(i=0; i<pitch; i++)
-			rgbbuf[pitch*j+i]=abs(rgbbuf[pitch*j+i]-srcbuf[pitch*j+i]);
+		for(j=0; j<h; j++) for(i=0; i<w*ps; i++)
+			rgbbuf[pitch*j+i]=abs(rgbbuf[pitch*j+i]-srcbuf[w*ps*j+i]);
 		if(savebmp(tempstr, rgbbuf, w, h, pf, pitch, bu)==-1)
 		{
 			printf("ERROR saving bitmap: %s\n", bmpgeterr());  exit(1);
@@ -254,7 +255,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if(loadbmp(argv[1], &bmpbuf, &w, &h, pf, 4, bu)==-1)
+	if(loadbmp(argv[1], &bmpbuf, &w, &h, pf, 1, bu)==-1)
 	{
 		printf("ERROR loading bitmap: %s\n", bmpgeterr());  exit(1);
 	}
