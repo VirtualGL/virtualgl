@@ -35,9 +35,9 @@
 #define CACHE_LINE 32
 
 static const char *lasterror="No error";
-const int _mcuw[NUMSUBOPT]={8, 16, 16};
-const int _mcuh[NUMSUBOPT]={8, 8, 16};
-int ippstaticinitcalled=0;
+static const int _mcuw[NUMSUBOPT]={8, 16, 16};
+static const int _mcuh[NUMSUBOPT]={8, 8, 16};
+static int ippstaticinitcalled=0;
 
 #define checkhandle(h) jpgstruct *jpg=(jpgstruct *)h; \
 	if(!jpg) {lasterror="Invalid handle";  return -1;}
@@ -134,7 +134,7 @@ static __inline IppCpuType AutoDetect(void)
 //////////////////////////////////////////////////////////////////////////////
 
 // Default quantization tables per JPEG spec
-const Ipp8u lumqtable[64]=
+static const Ipp8u lumqtable[64]=
 {
 	16,  11,  12,  14,  12,  10,  16,  14,
 	13,  14,  18,  17,  16,  19,  24,  40,
@@ -146,7 +146,7 @@ const Ipp8u lumqtable[64]=
 	121, 112, 100, 120, 92,  101, 103, 99
 };
 
-const Ipp8u chromqtable[64]=
+static const Ipp8u chromqtable[64]=
 {
 	17, 18, 18, 24, 21, 24, 47, 26,
 	26, 47, 99, 66, 56, 66, 99, 99,
@@ -159,32 +159,32 @@ const Ipp8u chromqtable[64]=
 };
 
 // Huffman tables per JPEG spec
-const Ipp8u dclumbits[16]=
+static const Ipp8u dclumbits[16]=
 {
 	0, 1, 5, 1, 1, 1, 1, 1,
 	1, 0, 0, 0, 0, 0, 0, 0
 };
-const Ipp8u dclumvals[]=
+static const Ipp8u dclumvals[]=
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 };
 
-const Ipp8u dcchrombits[16]=
+static const Ipp8u dcchrombits[16]=
 {
 	0, 3, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 0, 0, 0, 0, 0
 };
-const Ipp8u dcchromvals[]=
+static const Ipp8u dcchromvals[]=
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 };
 
-const Ipp8u aclumbits[16]=
+static const Ipp8u aclumbits[16]=
 {
 	0, 2, 1, 3, 3, 2, 4, 3,
 	5, 5, 4, 4, 0, 0, 1, 0x7d
 };
-const Ipp8u aclumvals[]=
+static const Ipp8u aclumvals[]=
 {
 	0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
 	0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
@@ -209,12 +209,12 @@ const Ipp8u aclumvals[]=
 	0xf9, 0xfa
 };
 
-const Ipp8u acchrombits[16]=
+static const Ipp8u acchrombits[16]=
 {
 	0, 2, 1, 2, 4, 4, 3, 4,
 	7, 5, 4, 4, 0, 1, 2, 0x77
 };
-const Ipp8u acchromvals[]=
+static const Ipp8u acchromvals[]=
 {
 	0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
 	0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -239,7 +239,7 @@ const Ipp8u acchromvals[]=
 	0xf9, 0xfa
 };
 
-int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
+static int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 {
 	Ipp8u __tmpbuf[16*16*3+CACHE_LINE-1];
 	Ipp8u *tmpbuf, *srcptr, *dstptr, *bmpptr=jpg->bmpptr;
@@ -347,7 +347,7 @@ int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	*j->jpgptr=b;  j->jpgptr++;  j->bytesprocessed++;  j->bytesleft--;}
 #define write_word(j, w) {write_byte(j, (w>>8)&0xff);  write_byte(j, w&0xff);}
 
-int encode_jpeg_init(jpgstruct *jpg)
+static int encode_jpeg_init(jpgstruct *jpg)
 {
 	Ipp8u rawqtable[64];  int i, nval, len;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
@@ -468,7 +468,7 @@ int encode_jpeg_init(jpgstruct *jpg)
 	return 0;
 }
 
-int encode_jpeg(jpgstruct *jpg)
+static int encode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k, pos;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
@@ -615,7 +615,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 #define read_word(j, w) {Ipp8u __b;  read_byte(j, __b);  w=(__b<<8);  \
 	read_byte(j, __b);  w|=(__b&0xff);}
 
-int find_marker(jpgstruct *jpg, unsigned char *marker)
+static int find_marker(jpgstruct *jpg, unsigned char *marker)
 {
 	unsigned char b;
 	while(1)
@@ -631,7 +631,7 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 #define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
 	if(__b!=(b)) _throw("JPEG bitstream error");}
 
-int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
+static int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 {
 	Ipp8u __tmpbuf[16*16*3+CACHE_LINE-1];
 	Ipp8u *tmpbuf, *bmpptr=jpg->bmpptr;
@@ -707,7 +707,7 @@ int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	return 0;
 }
 
-int decode_jpeg_init(jpgstruct *jpg)
+static int decode_jpeg_init(jpgstruct *jpg)
 {
 	Ipp8u rawqtable[64], rawhuffbits[16], rawhuffvalues[256];
 	int i;  unsigned char tempbyte, marker;  unsigned short tempword, length;
@@ -848,7 +848,7 @@ int decode_jpeg_init(jpgstruct *jpg)
 	return 0;
 }
 
-int decode_jpeg(jpgstruct *jpg)
+static int decode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k, pos, mcuw, mcuh, mcusize, marker;
 	Ipp16s lastdc[3]={0, 0, 0};
