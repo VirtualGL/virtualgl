@@ -55,11 +55,13 @@ rrsocket::rrsocket(bool _dossl=false) : dossl(_dossl)
 	if(!sslinit && dossl)
 	{
 		#if defined(sun)||defined(sgi)
-		const char *buf="ajsdluasdb5nq457q67na867qm8v67vq4865j7bnq5q867n";
+		char buf[128];  int i;
+		srandom(getpid());
+		for(i=0; i<128; i++) buf[i]=(char)((double)random()/(double)RAND_MAX*254.+1.0);
 		#endif
 		SSL_library_init();
 		#if defined(sun)||defined(sgi)
-		RAND_seed(buf, strlen(buf));
+		RAND_seed(buf, 128);
 		#endif
 		OpenSSL_add_all_algorithms();
 		SSL_load_error_strings();
