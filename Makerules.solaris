@@ -22,10 +22,10 @@ endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -g
 else
-OPTFLAG = -O
+OPTFLAG = -fast
 endif
 
-DEFAULTJPEGLIB = libjpeg
+DEFAULTJPEGLIB = medialib
 
 SHFLAG = -G -lCrun
 SHEXT = so
