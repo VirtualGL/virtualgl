@@ -21,14 +21,10 @@ ifeq ($(platform), windows)
 ##########################################################################
 
 dist: rr
-	$(RM) $(EDIR)/$(APPNAME).zip
-	zip $(EDIR)/$(APPNAME).zip -j \
-		$(EDIR)/rrxclient.exe \
-		$(EDIR)/hpjpeg.dll \
-		rr/newrrcert.bat \
-		rr/rrcert.cnf \
-		$(EDIR)/openssl.exe \
-		$(EDIR)/pthreadVC.dll
+	$(RM) $(APPNAME).exe
+	makensis //DAPPNAME=$(APPNAME) //DMAJVER=$(MAJVER) \
+		//DMINVER=$(MINVER) //DEDIR=$(platform)$(subplatform)\\bin rr.nsi
+
 
 ##########################################################################
 else
@@ -74,7 +70,7 @@ uninstall:
 	echo Uninstall complete.
 
 dist: rr rpms/BUILD rpms/RPMS
-	rm $(EDIR)/$(PACKAGENAME).$(RPMARCH).rpm; \
+	rm $(PACKAGENAME).$(RPMARCH).rpm; \
 	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
 		--define "_majver $(MAJVER)" --define "_minver $(MINVER)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
