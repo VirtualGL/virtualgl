@@ -22,7 +22,7 @@ ifeq ($(platform), windows)
 ##########################################################################
 
 ifeq ($(DEBUG), yes)
-WEDIR := $(platform)$(subplatform)\\bind
+WEDIR := $(platform)$(subplatform)\\dbg\\bin
 else
 WEDIR := $(platform)$(subplatform)\\bin
 endif
@@ -30,7 +30,9 @@ endif
 dist: rr diags
 	$(RM) $(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rr.nsi
+		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rr.nsi || \
+	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
+		/DBUILD=$(BUILD) /DEDIR=$(WEDIR) rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
