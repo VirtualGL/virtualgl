@@ -21,12 +21,12 @@
 #include "errors.h"
 #include "hpjpeg.h"
 
-const int hpjsub[NUMSUBOPT]={SS_111, SS_211, SS_411};
+static const int hpjsub[NUMSUBOPT]={SS_111, SS_211, SS_411};
 static char lasterror[100]="No error";
 #define _throw(c) {sprintf(lasterror, "%s", c);  return -1;}
 
 
-LONG DeferFn(PIC_PARM* p, RESPONSE res)
+static LONG DeferFn(PIC_PARM* p, RESPONSE res)
 {
     return ( 0 );   /* OK to continue */
 }
