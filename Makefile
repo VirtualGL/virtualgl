@@ -62,9 +62,10 @@ install: rr
 	echo Install complete.
 
 uninstall:
-	/etc/rc.d/init.d/rrxclient stop
-	chkconfig --del rrxclient
+	/etc/rc.d/init.d/rrxclient stop || echo RRXClient not installed
+	chkconfig --del rrxclient || echo RRXClient service not registered
 	$(RM) /etc/rc.d/init.d/rrxclient
+	$(RM) /etc/rrcert.cnf
 	$(RM) $(prefix)/bin/newrrcert
 	$(RM) $(prefix)/bin/$(RRLAUNCH)
 	$(RM) $(prefix)/bin/rrxclient
