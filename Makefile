@@ -31,9 +31,7 @@ dist: rr diags
 	$(RM) $(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
 		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rr.nsi
-	$(RM) $(APPNAME)-diags.exe
-	makensis //DAPPNAME=$(APPNAME)-diags //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rrdiags.nsi
+
 
 ##########################################################################
 else
@@ -105,13 +103,8 @@ dist: rr diags rpms/BUILD rpms/RPMS
 	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
-		rr.spec
+		rr.spec; \
 	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
-	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
-		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
-		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
-		rrdiags.spec
-	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-diags-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME)-diags.$(RPMARCH).rpm
 
 rpms/BUILD:
 	mkdir -p rpms/BUILD

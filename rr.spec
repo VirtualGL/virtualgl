@@ -44,6 +44,7 @@ Ertl 2000.)
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/bin
 mkdir -p $RPM_BUILD_ROOT%{usrlib}
+mkdir -p $RPM_BUILD_ROOT/opt/%{package}/bin
 
 %ifarch x86_64
 install -m 755 %{_curdir}/%{_bindir}/rrlaunch64 $RPM_BUILD_ROOT/usr/bin/rrlaunch64
@@ -58,7 +59,14 @@ install -m 644 %{_curdir}/rr/rrcert.cnf $RPM_BUILD_ROOT/etc/rrcert.cnf
 install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
 install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
+
+install -m 755 %{_curdir}/%{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{package}/bin/tcbench
+
 %endif
+
+install -m 644 %{_curdir}/util/nettest.pem $RPM_BUILD_ROOT/opt/%{package}/nettest.pem
+install -m 755 %{_curdir}/%{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
+install -m 755 %{_curdir}/%{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
 install -m 755 %{_curdir}/%{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
 install -m 755 %{_curdir}/%{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
@@ -100,7 +108,13 @@ fi
 /usr/bin/rrxclient_config
 /usr/bin/rrlaunch
 
+/opt/%{package}/bin/tcbench
+
 %endif
+
+/opt/%{package}/nettest.pem
+/opt/%{package}/bin/nettest
+/opt/%{package}/bin/cpustat
 
 %{usrlib}/librrfaker.so
 %{usrlib}/libhpjpeg.so
