@@ -4,17 +4,23 @@ include ../Makerules
 ifeq ($(platform), windows)
 ##########################################################################
 
-TARGETS = $(LDIR)/hputil.lib \
-          $(LDIR)/hpsecnet.lib \
+TARGETS = $(LDIR)/rrutil.lib \
+          $(LDIR)/rrsocket.lib \
           $(LDIR)/fbx.lib \
+          $(EDIR)/fbxtest.exe \
           $(EDIR)/nettest.exe \
-          $(LDIR)/fbx-xdk.lib
+          $(EDIR)/threadtest.exe \
+          $(LDIR)/fbx-xdk.lib \
+          $(EDIR)/fbxtest-xdk.exe
 
-OBJS = $(ODIR)/hputil.obj \
-       $(ODIR)/hpsecnet.obj \
+OBJS = $(ODIR)/rrlog.obj \
+       $(ODIR)/rrsocket.obj \
        $(ODIR)/fbx.obj \
+       $(ODIR)/fbxtest.obj \
        $(ODIR)/nettest.obj \
-       $(ODIR)/fbx-xdk.obj
+       $(ODIR)/threadtest.obj \
+       $(ODIR)/fbx-xdk.obj \
+       $(ODIR)/fbxtest-xdk.obj
 
 all: $(TARGETS)
 
@@ -24,28 +30,44 @@ clean:
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
+$(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj
+	$(AR) -OUT:$@ $^
+
 $(ODIR)/fbx-xdk.obj: fbx.c
 	$(CC) $(CFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
 
-$(ODIR)/nettest.obj: nettest.c
-	$(CC) $(CFLAGS) -DSECNET -c $< -Fo$@
+$(ODIR)/fbxtest-xdk.obj: fbxtest.cpp
+	$(CXX) $(CFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
 
-$(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/hputil.lib $(LDIR)/hpsecnet.lib
-	$(LINK) $< -OUT:$@ $(HPULIB) $(HPSECNETLIB)
+$(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/rrsocket.lib
+	$(LINK) $< -out:$@ $(SOCKLIB)
+
+$(EDIR)/fbxtest-xdk.exe: $(ODIR)/fbxtest-xdk.obj $(LDIR)/fbx-xdk.lib
+	$(LINK) $< -out:$@ $(FBXXDKLIB)
+
+$(EDIR)/fbxtest.exe: $(ODIR)/fbxtest.obj $(LDIR)/fbx.lib
+	$(LINK) $< -out:$@ $(FBXLIB)
+
+$(EDIR)/threadtest.exe :$(ODIR)/threadtest.obj
+	$(LINK) $< -out:$@
 
 ##########################################################################
 else
 ##########################################################################
 
-TARGETS = $(LDIR)/libhputil.a \
-          $(LDIR)/libhpsecnet.a \
+TARGETS = $(LDIR)/librrutil.a \
+          $(LDIR)/librrsocket.a \
           $(LDIR)/libfbx.a \
-          $(EDIR)/nettest
+          $(EDIR)/fbxtest \
+          $(EDIR)/nettest \
+          $(EDIR)/threadtest
 
-OBJS = $(ODIR)/hputil.o \
-       $(ODIR)/hpsecnet.o \
+OBJS = $(ODIR)/rrlog.o \
+       $(ODIR)/rrsocket.o \
        $(ODIR)/fbx.o \
-       $(ODIR)/nettest.o
+       $(ODIR)/fbxtest.o \
+       $(ODIR)/nettest.o \
+       $(ODIR)/threadtest.o
 
 all: $(TARGETS)
 
@@ -54,11 +76,17 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-$(ODIR)/nettest.o: nettest.c
-	$(CC) $(CFLAGS) -DSECNET -c $< -o $@
+$(LDIR)/librrutil.a: $(ODIR)/rrlog.o
+	$(AR) $@ $^
 
-$(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a
-	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lhpsecnet -lpthread -lssl
+$(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a
+	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB)
+
+$(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a
+	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB) -lpthread
+
+$(EDIR)/threadtest: $(ODIR)/threadtest.o
+	$(CXX) $(LDFLAGS) $< -o $@ -lpthread
 
 ##########################################################################
 endif
