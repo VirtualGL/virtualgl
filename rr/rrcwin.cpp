@@ -15,7 +15,7 @@
 #include "rrerror.h"
 #include "rrprofiler.h"
 
-rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false), profile(false),
+rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false),
 	t(NULL)
 {
 	char dpystr[80];
@@ -23,9 +23,6 @@ rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false), profile(fal
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	sprintf(dpystr, "localhost:%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
-	char *ev=NULL;
-	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
-		{profile=true;}
 	b=new rrfb(dpystr, window);
 	errifnot(b);
 	errifnot(t=new Thread(this));

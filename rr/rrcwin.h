@@ -38,7 +38,6 @@ class rrcwin : public Runnable
 	void showprofile(rrframeheader *, int);
 	bool deadyet;
 	int dpynum;  Window window;
-	bool profile;
 	void run(void);
 	Thread *t;
 	rrmutex frameready;
