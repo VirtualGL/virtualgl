@@ -1,3 +1,16 @@
+/* Copyright (C)2004 Landmark Graphics
+ *
+ * This library is free software and may be redistributed and/or modified under
+ * the terms of the wxWindows Library License, Version 3 or (at your option)
+ * any later version.  The full license is in the LICENSE.txt file included
+ * with this distribution.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * wxWindows Library License for more details.
+ */
+
 #if defined(__APPLE__)
 #include <ApplicationServices/ApplicationServices.h>
 #include <QuickTime/ImageCompression.h>
@@ -212,6 +225,86 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 	return (hpjhandle)1;
 }
 
+typedef struct
+{
+	unsigned long bytesleft, bytesprocessed;
+	unsigned char *jpgptr;
+} jpgstruct;
+
+#define read_byte(j, b) {if((j)->bytesleft<=0) _throw("Unexpected end of image");  \
+	b=*(j)->jpgptr;  (j)->jpgptr++;  (j)->bytesleft--;  (j)->bytesprocessed++;}
+#define read_word(j, w) {unsigned char __b;  read_byte(j, __b);  w=(__b<<8);  \
+	read_byte(j, __b);  w|=(__b&0xff);}
+
+int find_marker(jpgstruct *jpg, unsigned char *marker)
+{
+	unsigned char b;
+	while(1)
+	{
+		do {read_byte(jpg, b);} while(b!=0xff);
+		read_byte(jpg, b);
+		if(b!=0 && b!=0xff) {*marker=b;  return 0;}
+		else {jpg->jpgptr--;  jpg->bytesleft++;  jpg->bytesprocessed--;}
+	}
+	return 0;
+
+	bail:
+	return -1;
+}
+
+#define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
+	if(__b!=(b)) _throw("JPEG bitstream error");}
+
+DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height)
+{
+	int i;  unsigned char tempbyte, marker;  unsigned short tempword, length;
+	int markerread=0;  jpgstruct j;
+
+	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
+		_throw("Invalid argument in hpjDecompressHeader()");
+
+	// This is nasty, but I don't know of another way
+	j.bytesprocessed=0;  j.bytesleft=size;  j.jpgptr=srcbuf;
+	*width=*height=0;
+
+	check_byte(&j, 0xff);  check_byte(&j, 0xd8);  // SOI
+
+	while(1)
+	{
+		if(find_marker(&j, &marker)==-1) goto bail;
+
+		switch(marker)
+		{
+			case 0xe0:  // JFIF
+				read_word(&j, length);
+				if(length<8) _throw("JPEG bitstream error");
+				check_byte(&j, 'J');  check_byte(&j, 'F');
+				check_byte(&j, 'I');  check_byte(&j, 'F');  check_byte(&j, 0);
+				for(i=7; i<length; i++) read_byte(&j, tempbyte) // We don't care about the rest
+				markerread+=1;
+				break;
+			case 0xc0:  // SOF
+				read_word(&j, length);
+				if(length<11) _throw("JPEG bitstream error");
+				read_byte(&j, tempbyte);  // precision
+				read_word(&j, tempword);  // height
+				if(tempword) *height=(int)tempword;
+				read_word(&j, tempword);  // width
+				if(tempword) *width=(int)tempword;
+				goto done;
+				break;
+		}
+	}
+
+	done:
+	if(*width<1 || *height<1) _throw("Invalid data returned in header");
+	return 0;
+
+	bail:
+	return -1;
+}
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
