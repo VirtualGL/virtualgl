@@ -132,7 +132,6 @@ void nativewrite(int useshm)
 	try {
 
 	fbx(fbx_init(&s, wh, 0, 0, useshm));
-	int ps=fbx_ps[s.format];
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
 	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname(s.format));
 	fprintf(stderr, "\n");
@@ -360,7 +359,6 @@ void nativestress(int useshm)
 		fprintf(stderr, "FB write (1 bmp, 4 blits):      ");
 	memset(&stressfb0, 0, sizeof(stressfb0));
 	fbx(fbx_init(&stressfb0, wh, width, height, useshm));
-	int ps=fbx_ps[stressfb0.format];
 	if(useshm && !stressfb0.shm) _throw("MIT-SHM not supported");
 	initbuf(0, 0, width, stressfb0.pitch, height, stressfb0.format, (unsigned char *)stressfb0.bits);
 	n=N;
