@@ -157,7 +157,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 
 int main(int argc, char *argv[])
 {
-	unsigned char *bmpbuf=NULL;  int w, h, psize, i, j;
+	unsigned char *bmpbuf=NULL;  int w, h, i;
 	int qual, dostrip=0;
 	const char *error=NULL;  char *temp;
 	BMPPIXELFORMAT pf=BMP_BGR;
