@@ -19,10 +19,11 @@
 #include "hpsecnet.h"
 #include <pthread.h>
 #include <errno.h>
-#define INVALID_SOCKET -1
 #ifdef _WIN32
+ #include <windows.h>
  #define badarg() SetLastError(ERROR_INVALID_PARAMETER)
 #else
+ #define INVALID_SOCKET -1
  #define badarg() errno=EINVAL
 #endif
 
@@ -40,6 +41,41 @@ unsigned long thread_id(void)
 	return (unsigned long)pthread_self();
 }
 
+#define _errorcase(t) case t:  lasterr=#t;  break;
+
+static void sslerror(SSL *ssl, int ret)
+{
+	switch(SSL_get_error(ssl, ret))
+	{
+		_errorcase(SSL_ERROR_NONE)
+		_errorcase(SSL_ERROR_ZERO_RETURN)
+		_errorcase(SSL_ERROR_WANT_READ)
+		_errorcase(SSL_ERROR_WANT_WRITE)
+		_errorcase(SSL_ERROR_WANT_CONNECT)
+		#ifdef SSL_ERROR_WANT_ACCEPT
+		_errorcase(SSL_ERROR_WANT_ACCEPT)
+		#endif
+		_errorcase(SSL_ERROR_WANT_X509_LOOKUP)
+		case SSL_ERROR_SYSCALL:
+			#ifdef _WIN32
+			if(ret==-1)
+			{
+				if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM
+					|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, WSAGetLastError(),
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lasterr, 0, NULL))
+					lasterr="Error in FormatMessage()";
+				return;
+			}
+			#else
+			if(ret==-1) lasterr=strerror(errno);
+			#endif
+			else if(ret==0) lasterr="SSL_ERROR_SYSCALL (abnormal termination)";
+			else lasterr="SSL_ERROR_SYSCALL";  break;
+		case SSL_ERROR_SSL:
+			lasterr=ERR_error_string(ERR_get_error(), NULL);  return;
+	}
+};
+	
 
 /*******************************************************************
  Secure network routines
@@ -68,7 +104,7 @@ SSL_CTX *hpsecnet_serverinit(char *certfile, char *privkeyfile)
 	}
 	CRYPTO_set_id_callback(thread_id);
 	CRYPTO_set_locking_callback(locking_callback);
-	if((sslctx=SSL_CTX_new(TLSv1_server_method()))==NULL)
+	if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL)
 	{
 		lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
 	}
@@ -90,7 +126,7 @@ SSL_CTX *hpsecnet_serverinit(char *certfile, char *privkeyfile)
 
 SSL *hpsecnet_accept(int socket, SSL_CTX *sslctx)
 {
-	SSL *tempssl;
+	SSL *tempssl;  int ret;
 	if(socket==INVALID_SOCKET || !sslctx)
 	{
 		lasterr="Invalid argument";  return NULL;
@@ -103,9 +139,9 @@ SSL *hpsecnet_accept(int socket, SSL_CTX *sslctx)
 	{
 		SSL_free(tempssl);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
 	}
-	if(SSL_accept(tempssl)!=1)
+	if((ret=SSL_accept(tempssl))!=1)
 	{
-		SSL_free(tempssl);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
+		SSL_free(tempssl);  sslerror(tempssl, ret);  return NULL;
 	}
 	SSL_set_accept_state(tempssl);
 	return tempssl;
@@ -163,7 +199,7 @@ SSL_CTX *hpsecnet_clientinit(void)
 
 SSL *hpsecnet_connect(int socket, SSL_CTX *sslctx)
 {
-	SSL *tempssl;
+	SSL *tempssl;  int ret;
 	if(socket==INVALID_SOCKET || !sslctx)
 	{
 		lasterr="Invalid argument";  return NULL;
@@ -176,9 +212,9 @@ SSL *hpsecnet_connect(int socket, SSL_CTX *sslctx)
 	{
 		SSL_free(tempssl);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
 	}
-	if(SSL_connect(tempssl)!=1)
+	if((ret=SSL_connect(tempssl))!=1)
 	{
-		SSL_free(tempssl);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
+		SSL_free(tempssl);  sslerror(tempssl, ret);  return NULL;
 	}
 	SSL_set_connect_state(tempssl);
 	return tempssl;
@@ -195,7 +231,7 @@ int hpsecnet_send(SSL *ssl, char *buf, int len)
 //		sendsize=min(len-bytessent, SSLMTU);
 		sendsize=len-bytessent;
 		retval=SSL_write(ssl, &buf[bytessent], len);
-		if(retval<=0) {lasterr=ERR_error_string(ERR_get_error(), NULL);  return retval;}
+		if(retval<=0) {sslerror(ssl, retval);  return retval;}
 		bytessent+=retval;
 	}
 	return bytessent;
@@ -210,7 +246,7 @@ int hpsecnet_recv(SSL *ssl, char *buf, int len)
 //		readsize=min(len-bytesrecd, SSLMTU);
 		readsize=len-bytesrecd;
 		retval=SSL_read(ssl, &buf[bytesrecd], len);
-		if(retval<=0) {lasterr=ERR_error_string(ERR_get_error(), NULL);  return retval;}
+		if(retval<=0) {sslerror(ssl, retval);  return retval;}
 		bytesrecd+=retval;
 	}
 	return bytesrecd;
