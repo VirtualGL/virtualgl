@@ -51,3 +51,8 @@ fi
 
 $OPENSSL req -new -x509 -days 365 -nodes -config $CERTCNF -out $CERTFILE -keyout $CERTFILE
 $OPENSSL x509 -subject -dates -fingerprint -noout -in $CERTFILE
+
+if [ $1 = global ]
+then
+	chmod 644 $CERTFILE
+fi
