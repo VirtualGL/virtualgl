@@ -14,13 +14,11 @@
 #include "rrblitter.h"
 #include "hputil.h"
 
-#define WIDTH 700
-#define HEIGHT 700
-
 int main(void)
 {
 	rrblitter blitter;  double start, elapsed;
 	Display *dpy;  Window win;
+	int WIDTH=700, HEIGHT=700;
 
 	hputil_log(1, 0);
 
@@ -41,6 +39,7 @@ int main(void)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		WIDTH=b->h.winw;  HEIGHT=b->h.winh;
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
 		fill=1-fill;
 		blitter.sendframe(b);
@@ -61,6 +60,7 @@ int main(void)
 			frames++;  continue;
 		}
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		WIDTH=b->h.winw;  HEIGHT=b->h.winh;
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
 		fill=1-fill;
 		blitter.sendframe(b);
@@ -76,6 +76,7 @@ int main(void)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		WIDTH=b->h.winw;  HEIGHT=b->h.winh;
 		memset(b->bits, 0, b->pitch*HEIGHT);
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT/2);
 		fill=1-fill;
@@ -91,6 +92,7 @@ int main(void)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		WIDTH=b->h.winw;  HEIGHT=b->h.winh;
 		memset(b->bits, 0xff, b->pitch*HEIGHT);
 		blitter.sendframe(b);
 		frames++;
