@@ -6,10 +6,14 @@ ifeq ($(platform), windows)
 
 TARGETS = $(EDIR)/hpjpeg.dll \
           $(LDIR)/hpjpeg.lib \
-          $(EDIR)/jpgtest.exe
+          $(EDIR)/jpgtest.exe \
+          $(EDIR)/jpegut.exe \
+          $(EDIR)/24to32.exe
 
 OBJS = $(ODIR)/hpjpeg.obj \
-       $(ODIR)/jpgtest.obj
+       $(ODIR)/jpgtest.obj \
+       $(ODIR)/jpegut.obj \
+       $(ODIR)/24to32.obj
 
 ifeq ($(JPEGLIB), libjpeg)
 TARGETS := libjpeg $(TARGETS)
@@ -70,15 +74,25 @@ $(EDIR)/hpjpeg.dll $(LDIR)/hpjpeg.lib: $(ODIR)/hpjpeg.obj $(JPEGDEP)
 $(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hputil.lib $(LDIR)/hpjpeg.lib
 	$(LINK) $< -OUT:$@ $(HPULIB) hpjpeg.lib
 
+$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/hpjpeg.lib
+	$(LINK) $< -OUT:$@ hpjpeg.lib
+
+$(EDIR)/24to32.exe: $(ODIR)/24to32.obj
+	$(LINK) $< -OUT:$@
+
 ##########################################################################
 else
 ##########################################################################
 
 TARGETS = $(LDIR)/libhpjpeg.so \
-          $(EDIR)/jpgtest
+          $(EDIR)/jpgtest \
+          $(EDIR)/jpegut \
+          $(EDIR)/24to32
 
 OBJS = $(ODIR)/hpjpeg.o \
-       $(ODIR)/jpgtest.o
+       $(ODIR)/jpgtest.o \
+       $(ODIR)/jpegut.o \
+       $(ODIR)/24to32.o
 
 ifeq ($(JPEGLIB), libjpeg)
 TARGETS := libjpeg $(TARGETS)
@@ -140,6 +154,12 @@ $(LDIR)/libhpjpeg.so: $(ODIR)/hpjpeg.o $(JPEGDEP)
 
 $(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDIR)/libhpjpeg.so
 	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lhpjpeg
+
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.so
+	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
+
+$(EDIR)/24to32: $(ODIR)/24to32.o
+	$(CC) $(LDFLAGS) $< -o $@
 
 ##########################################################################
 endif
