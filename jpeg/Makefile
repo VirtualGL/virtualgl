@@ -181,6 +181,15 @@ JPEGLINK = $(IPPLINK)
 
 endif
 
+ifeq ($(JPEGLIB), quicktime)
+
+$(ODIR)/hpjpeg.o: hpjpegqt.c
+	$(CC)  $(CFLAGS) -c $< -o $@
+
+JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime
+
+endif
+
 $(LDIR)/libhpjpeg.$(SHEXT): $(ODIR)/hpjpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
