@@ -513,8 +513,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	////////////////////
 
 	GLXFBConfig c;
-	if(!(c=_MatchConfig(dpy, vis)))
-	_throw("Could not obtain Pbuffer visual");
+	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
 	int render_type=GLX_RGBA_BIT;
 	glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type);
 	#ifdef USEGLP
@@ -727,7 +726,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
 	TRY();
-	GLXFBConfig c=_MatchConfig(dpy, vi);
+	GLXFBConfig c;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
@@ -735,6 +734,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
+	errifnot(c=_MatchConfig(dpy, vi));
 	pbuffer *pb=new pbuffer(w, h, c);
 	if(pb)
 	{
