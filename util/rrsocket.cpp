@@ -34,16 +34,21 @@
 
 bool rrsocket::sslinit=false;
 rrcs rrsocket::mutex, rrsocket::cryptolock[CRYPTO_NUM_LOCKS];
+int rrsocket::instancecount=0;
 
 rrsocket::rrsocket(bool _dossl=false) : dossl(_dossl)
 {
 	rrcs::safelock l(mutex);
 	#ifdef _WIN32
-	WSADATA wsaData;
-	if(WSAStartup(MAKEWORD(2,2), &wsaData)!=0)
-		throw(rrerror("rrsocket::rrsocket()", "Winsock initialization failed"));
-	if(LOBYTE(wsaData.wVersion)!=2 || HIBYTE(wsaData.wVersion)!=2)
-		throw(rrerror("rrsocket::rrsocket()", "Wrong Winsock version"));
+	if(instancecount==0)
+	{
+		WSADATA wsaData;
+		if(WSAStartup(MAKEWORD(2,2), &wsaData)!=0)
+			throw(rrerror("rrsocket::rrsocket()", "Winsock initialization failed"));
+		if(LOBYTE(wsaData.wVersion)!=2 || HIBYTE(wsaData.wVersion)!=2)
+			throw(rrerror("rrsocket::rrsocket()", "Wrong Winsock version"));
+	}
+	instancecount++;
 	#else
 	if(signal(SIGPIPE, SIG_IGN)==SIG_ERR) _throwunix();
 	#endif
@@ -77,7 +82,7 @@ rrsocket::~rrsocket(void)
 	close();
 	#ifdef _WIN32
 	mutex.lock(false);
-	WSACleanup();
+	instancecount--;  if(instancecount==0) WSACleanup();
 	mutex.unlock(false);
 	#endif
 }
