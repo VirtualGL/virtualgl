@@ -14,10 +14,10 @@ CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
-LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS) -R/opt/SUNWvgl/lib/sparcv9
 else
 ARCHFLAG =
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 endif
 
 ifeq ($(DEBUG), yes)
