@@ -15,7 +15,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hputil.h"
+
+#ifdef sun
+#define GL_BGR_EXT GL_RGB
+#define GL_BGRA_EXT GL_RGBA
+#endif
 
 extern void _fprintf (FILE *f, const char *format, ...);
 
@@ -28,10 +32,7 @@ extern dpyhash *_dpyh;
 
 extern Display *_localdpy;
 
-#include "rrcommon.h"
-
 #define checkgl(m) if(glerror()) _throw("Could not "m);
-#define rrtry(f) {if((f)==-1) throw(RRGetError());}
 
 // Generic OpenGL error checker (0 = no errors)
 int glerror(void)
@@ -50,8 +51,6 @@ int glerror(void)
 #ifndef min
  #define min(a,b) ((a)<(b)?(a):(b))
 #endif
-
-#define STRIPH 64
 
 
 pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
@@ -147,18 +146,16 @@ pbwin::pbwin(Display *windpy, Window win, Display *pbdpy)
 	this->windpy=windpy;  this->pbdpy=pbdpy;  this->win=win;
 	force=false;
 	oldpb=pb=NULL;  neww=newh=-1;
-	pthread_mutexattr_t ma;
-	pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&mutex, &ma);
-	memset(&fb, 0, sizeof(fbx_struct));
+	blitter=NULL;
 }
 
 pbwin::~pbwin(void)
 {
-	rrlock l(mutex);
+	mutex.lock(false);
 	if(pb) {delete pb;  pb=NULL;}
 	if(oldpb) {delete oldpb;  oldpb=NULL;}
-	fbx_term(&fb);
+	if(blitter) {delete blitter;  blitter=NULL;}
+	mutex.unlock(false);
 }
 
 void pbwin::init(int w, int h, GLXFBConfig config)
@@ -169,7 +166,7 @@ void pbwin::init(int w, int h, GLXFBConfig config)
 	int dh=DisplayHeight(pbdpy, DefaultScreen(pbdpy));
 	w=min(w, dw);  h=min(h, dh);
 
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(pb && pb->width()==w && pb->height()==h) return;
 	if((pb=new pbuffer(pbdpy, w, h, config))==NULL)
 		_throw("Could not create Pbuffer");
@@ -183,7 +180,7 @@ void pbwin::init(int w, int h, GLXFBConfig config)
 
 void pbwin::resize(int w, int h)
 {
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(w==0 && pb) w=pb->width();
 	if(h==0 && pb) h=pb->height();
 	if(pb && pb->width()==w && pb->height()==h) return;
@@ -192,13 +189,13 @@ void pbwin::resize(int w, int h)
 
 void pbwin::clear(void)
 {
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(pb) pb->clear();
 }
 
 void pbwin::cleanup(void)
 {
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(oldpb) {delete oldpb;  oldpb=NULL;}
 }
 
@@ -215,7 +212,7 @@ void pbwin::initfromwindow(GLXFBConfig config)
 GLXDrawable pbwin::getdrawable(void)
 {
 	GLXDrawable retval=0;
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	retval=pb->drawable();
 	return retval;
 }
@@ -225,7 +222,7 @@ GLXDrawable pbwin::getdrawable(void)
 GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(neww>0 && newh>0)
 	{
 		oldpb=pb;
@@ -253,7 +250,7 @@ Window pbwin::getwin(void)
 
 void pbwin::swapbuffers(void)
 {
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 	if(pb) pb->swap();
 }
 
@@ -267,91 +264,50 @@ void pbwin::readback(bool force)
 
 void pbwin::readback(GLint drawbuf, bool force)
 {
-	rrbmp *b;  RRDisplay rrdpy=NULL;
+	rrdisplayclient *rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
 
-	rrlock l(mutex);
+	rrcs::safelock l(mutex);
 
 	if(fconfig.compress!=RRCOMP_NONE) errifnot(rrdpy=dpyh.findrrdpy(windpy));
 	if(this->force) {force=true;  this->force=false;}
-	int frameready=0;
-	rrtry(frameready=RRFrameReady(rrdpy));
-	if(fconfig.spoil && rrdpy && !frameready && !force)
+	if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
 		return;
 
 	int pbw=pb->width(), pbh=pb->height();
-	if(fconfig.compress==RRCOMP_NONE || pbw*pbh<1000)
-	{
-		blit(drawbuf);  return;
-	}
-	b=RRGetBitmap(rrdpy, pbw, pbh, 3);
-	if(b==NULL) throw(RRGetError());
 
-	readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, false);
-
-	b->h.dpynum=0;
+	rrframeheader h;
+	h.winid=win;
+	h.winw=h.bmpw=pbw;
+	h.winh=h.bmph=pbh;
+	h.bmpx=0;
+	h.bmpy=0;
+	h.qual=fconfig.currentqual;
+	h.subsamp=fconfig.currentsubsamp;
+	h.dpynum=0;
 	if((dpystring=fconfig.client)==NULL)
 		dpystring=DisplayString(windpy);
 	if((ptr=strchr(dpystring, ':'))!=NULL)
 	{
-		if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
+		if(strlen(ptr)>1) h.dpynum=atoi(ptr+1);
 	}
 
-	b->h.winid=win;
-	b->h.winw=b->h.bmpw;
-	b->h.winh=b->h.bmph;
-	b->h.bmpx=0;
-	b->h.bmpy=0;
-	b->h.qual=fconfig.currentqual;
-	b->h.subsamp=fconfig.currentsubsamp;
-	b->flags=RRBMP_BGR|RRBMP_BOTTOMUP;
-	b->strip_height=STRIPH;
-	rrtry(RRSendFrame(rrdpy, b));
-}
-
-void pbwin::blit(GLint drawbuf)
-{
-	fbx_wh wh;  GLenum format;
-	wh.dpy=windpy;  wh.win=win;
-
-//	errifnot(fb=new fbx_struct);
-//	memset(fb, 0, sizeof(fbx_struct));
-//	XSync(windpy, False);
-	fbx(fbx_init(&fb, wh, 0, 0, 1));
-	if(fb.ps!=3 && fb.ps!=4) _throw("X server not 24-bit or 32-bit");
-
-	format= fb.bgr? (fb.ps==3?GL_BGR_EXT:GL_BGRA_EXT) : (fb.ps==3?GL_RGB:GL_RGBA);
-
-	int pbw=pb->width(), pbh=pb->height();
-	if(pbw!=fb.width || pbh!=fb.height) return;
-	readpixels(0, 0, pbw, fb.xi->bytes_per_line, pbh, format,
-		(unsigned char *)fb.bits, drawbuf, true);
-
-	fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
-
-	#if 0
-	int endline, i;  int startline;
-	for(i=0; i<fb->height; i+=STRIPH)
+	if(fconfig.compress==RRCOMP_NONE || pbw*pbh<1000)
 	{
-		startline=i;
-		endline=startline+min(fb->height-i, STRIPH);
-		if(fb->height-i<2*STRIPH) {endline=fb->height;  i+=STRIPH;}
-
-		if(lastfb && fb->width==lastfb->width && fb->height==lastfb->height
-		&& fb->ps==lastfb->ps && fb->xi->bytes_per_line==lastfb->xi->bytes_per_line
-		&& fb->bgr==lastfb->bgr && !memcmp(&fb->bits[fb->xi->bytes_per_line*startline],
-			&lastfb->bits[fb->xi->bytes_per_line*startline], fb->xi->bytes_per_line*(endline-startline)))
-			continue;
-
-		fbx(fbx_write(fb, 0, startline, 0, startline, fb->width, endline-startline));
+		rrfb *b;
+		if(!blitter) errifnot(blitter=new rrblitter());
+		errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
+		int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
+		readpixels(0, 0, pbw, b->pitch, pbh, format, b->bits, drawbuf, false);
+		blitter->sendframe(b);
 	}
-
-	if(lastfb)
+	else
 	{
-		fbx_term(lastfb);  delete lastfb;
+		rrframe *b;
+		errifnot(b=new rrframe());  b->init(&h, 3);
+		readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, false);
+		rrdpy->sendframe(b);
 	}
-	lastfb=fb;
-	#endif
 }
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum format, GLubyte *bits, GLint buf, bool bottomup)
@@ -364,20 +320,15 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	if(bottomup)
+	for(int i=0; i<h; i++)
 	{
-		for(int i=0; i<h; i++)
-		{
-			int _y=h-1-i-y;
-			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
-		}
+		int _y= bottomup? i+y: h-1-i-y;
+		glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
 	}
-	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();

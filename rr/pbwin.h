@@ -15,7 +15,8 @@
 #define __PBWIN_H__
 
 #include "faker-sym.h"
-#include <pthread.h>
+#include "rrmutex.h"
+#include "rrblitter.h"
 #include "fbx.h"
 
 // A container class for the actual Pbuffer
@@ -67,11 +68,11 @@ class pbwin
 			GLint, bool);
 
 		bool force;
-		fbx_struct fb;
-		pthread_mutex_t mutex;
+		rrcs mutex;
 		Display *pbdpy, *windpy;  Window win;
 		pbuffer *oldpb, *pb;  GLXFBConfig config;
 		int neww, newh;
+		rrblitter *blitter;
 };
 
 #endif
