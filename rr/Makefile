@@ -103,13 +103,11 @@ $(EDIR)/rrxclient: $(ODIR)/rrxclient.o $(RRDEP)
 
 # Unit tests
 
-$(EDIR)/rrlistenerut: $(ODIR)/rrlistenerut.o $(ODIR)/rrlistener.o $(ODIR)/rrconn.o \
-	$(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a
-	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrlistenerut.o $(ODIR)/rrlistener.o $(ODIR)/rrconn.o \
-		$(HPULIB) $(HPSECNETLIB)
+$(EDIR)/rrlistenerut: $(ODIR)/rrlistenerut.o $(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
-$(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(LDIR)/libhputil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so
-	$(CXX) $(LDFLAGS) -o $@ $< $(HPULIB) $(FBXLIB) -lhpjpeg -lpthread
+$(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -L/usr/X11R6/lib -lX11
