@@ -66,7 +66,9 @@ case `uname -s` in
 
 Linux)
 
-LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
+LD_PRELOAD=librrfaker.so:libGL.so.1
+export LD_PRELOAD
+exec ${1+"$@"}
 
 ;;
 
@@ -83,7 +85,9 @@ if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
 then
 	FAKERLIB=/opt/SUNWvgl/lib/sparcv9/librrfaker.so
 fi
-LD_PRELOAD_64=$FAKERLIB ${1+"$@"}
+LD_PRELOAD_64=$FAKERLIB
+export LD_PRELOAD_64
+exec ${1+"$@"}
 
 ;;
 
