@@ -73,6 +73,7 @@ install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/vglrun64
+	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/rrlaunch64
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	echo Install complete.
@@ -84,6 +85,7 @@ install: rr
 	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
+	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/lib/libhpjpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
@@ -95,6 +97,7 @@ endif
 ifeq ($(subplatform), 64)
 uninstall:
 	$(RM) $(prefix)/bin/vglrun64
+	$(RM) $(prefix)/bin/rrlaunch64
 	$(RM) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	echo Uninstall complete.
@@ -106,6 +109,7 @@ uninstall:
 	$(RM) $(prefix)/bin/vglclient_ssldaemon
 	$(RM) $(prefix)/bin/vglclient_config
 	$(RM) $(prefix)/bin/vglrun
+	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/lib/libhpjpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)

@@ -5,6 +5,7 @@ d none SUNWvgl 0755 root bin
 d none SUNWvgl/bin 0755 root bin
 f none SUNWvgl/bin/vglclient 0755 root bin
 f none SUNWvgl/bin/vglrun 0755 root bin
+f none SUNWvgl/bin/rrlaunch 0755 root bin
 f none SUNWvgl/bin/tcbench 0755 root bin
 f none SUNWvgl/bin/nettest 0755 root bin
 d none SUNWvgl/lib 0755 root bin
