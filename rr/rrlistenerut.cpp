@@ -34,7 +34,7 @@ class myrrconn : public rraconn
 		int i;
 		packetno++;
 		recv(buf, PACKETSIZE);
-		for(i=0; i<PACKETSIZE; i++) if(buf[i]!=(char)i) throw("Recv error");
+		for(i=0; i<PACKETSIZE; i++) if(buf[i]!=(char)i) _throw("Recv error");
 		send(buf, PACKETSIZE);
 		if(packetno>=ITER) hpprintf("%d packets received from %s on %d & sent back\n", ITER, getremotename(), getsd());
 	}
@@ -69,7 +69,7 @@ class myrrlistener : public rrlistener
 			{
 				packetno++;
 				c->recv(buf, PACKETSIZE);
-				for(i=0; i<PACKETSIZE; i++) if(buf[i]!=(char)i) throw("Recv error");
+				for(i=0; i<PACKETSIZE; i++) if(buf[i]!=(char)i) _throw("Recv error");
 				hpprintf("Packet %d received by listener from %s on %d\n", packetno, c->getremotename(), c->getsd());
 			}
 		}

@@ -23,7 +23,7 @@ void rrdisplayclient::dispatch(void)
 
 	rrbmp *b=NULL;
 	q.get((void **)&b);  if(deadyet) return;
-	if(!b) throw("Queue has been shut down");
+	if(!b) _throw("Queue has been shut down");
 	pthread_mutex_unlock(&ready);
 	#ifdef RRPROFILE
 	tstart=hptime();
@@ -50,7 +50,7 @@ void rrdisplayclient::dispatch(void)
 void rrdisplayclient::allocbmp(rrbmp *bmp, int w, int h, int pixelsize)
 {
 	if(!bmp || w<1 || h<1 || pixelsize<3 || pixelsize>4)
-		throw("Invalid argument to rrdisplayclient::allocbmp()");
+		_throw("Invalid argument to rrdisplayclient::allocbmp()");
 	if(bmp->h.bmpw==w && bmp->h.bmph==h && bmp->pixelsize==pixelsize
 		&& bmp->bits) return;
 	if(bmp->bits) delete [] bmp->bits;
@@ -83,7 +83,7 @@ bool rrdisplayclient::frameready(void)
 void rrdisplayclient::sendframe(rrbmp *bmp)
 {
 	RRError _lasterror;
-	if(sd==INVALID_SOCKET) throw("Not connected");
+	if(sd==INVALID_SOCKET) _throw("Not connected");
 	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
 	q.add((void *)bmp);
 }
@@ -141,5 +141,5 @@ void rrdisplayclient::compresssend(rrbmp *b, rrbmp *lastb)
 	send((char *)&h, sizeof(rrframeheader));
 
 	char cts=0;
-	recv(&cts, 1);  if(cts!=1) throw("CTS error");
+	recv(&cts, 1);  if(cts!=1) _throw("CTS error");
 }
