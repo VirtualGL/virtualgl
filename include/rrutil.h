@@ -43,7 +43,7 @@
 #define __inline inline
 #endif
 
-__inline int numprocs(void)
+static __inline int numprocs(void)
 {
 	#ifdef _WIN32
 	DWORD ProcAff, SysAff, i;  int count=0;
@@ -69,7 +69,7 @@ __inline int numprocs(void)
 	(((i) & 0xff00) >> 8) | \
 	(((i) & 0x00ff) << 8) )
 
-__inline int littleendian(void)
+static __inline int littleendian(void)
 {
 	unsigned int value=1;
 	unsigned char *ptr=(unsigned char *)(&value);
