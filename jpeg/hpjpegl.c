@@ -224,6 +224,34 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 }
 
 
+DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height)
+{
+	checkhandle(h);
+
+	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
+		_throw("Invalid argument in hpjDecompressHeader()");
+	if(!j->initd) _throw("Instance has not been initialized for decompression");
+
+	if(setjmp(j->jerr.jb))
+	{  // this will execute if LIBJPEG has an error
+		return -1;
+	}
+
+	j->jsms.bytes_in_buffer = size;
+	j->jsms.next_input_byte = srcbuf;
+
+	jpeg_read_header(&j->dinfo, TRUE);
+
+	*width=j->dinfo.image_width;  *height=j->dinfo.image_height;
+
+	jpeg_abort_decompress(&j->dinfo);
+
+	return 0;
+}
+
+
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	unsigned char *srcbuf, unsigned long size,
 	unsigned char *dstbuf, int width, int pitch, int height, int ps,

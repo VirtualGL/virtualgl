@@ -638,11 +638,7 @@ int decode_jpeg_init(jpgstruct *jpg)
 	int markerread=0;  unsigned char compid[3];
 
 	jpg->bytesprocessed=0;
-	if(jpg->flags&HPJ_BOTTOMUP) jpg->bmpptr=&jpg->bmpbuf[jpg->pitch*(jpg->height-1)];
-	else jpg->bmpptr=jpg->bmpbuf;
 	jpg->jpgptr=jpg->jpgbuf;
-
-	_ipp(ippiDecodeHuffmanStateInit_JPEG_8u(jpg->d_huffstate));
 
 	check_byte(jpg, 0xff);  check_byte(jpg, 0xd8);  // SOI
 
@@ -736,8 +732,10 @@ int decode_jpeg_init(jpgstruct *jpg)
 				read_byte(jpg, tempbyte);  // precision
 				if(tempbyte!=8) _throw("Only 8-bit-per-component JPEGs are supported");
 				read_word(jpg, tempword);  // height
+				if(!jpg->height) jpg->height=tempword;
 				if(tempword!=jpg->height) _throw("Height mismatch between JPEG and bitmap");
 				read_word(jpg, tempword);  // width
+				if(!jpg->width) jpg->width=tempword;
 				if(tempword!=jpg->width) _throw("Width mismatch between JPEG and bitmap");
 				read_byte(jpg, tempbyte);  // Number of components
 				if(tempbyte!=3 || length<17) _throw("Only YCbCr JPEG's are supported");
@@ -778,6 +776,11 @@ int decode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k, pos, mcuw, mcuh, mcusize, marker;
 	Ipp16s lastdc[3]={0, 0, 0};
+
+	if(jpg->flags&HPJ_BOTTOMUP) jpg->bmpptr=&jpg->bmpbuf[jpg->pitch*(jpg->height-1)];
+	else jpg->bmpptr=jpg->bmpbuf;
+
+	_ipp(ippiDecodeHuffmanStateInit_JPEG_8u(jpg->d_huffstate));
 
 	_catch(decode_jpeg_init(jpg));
 
@@ -860,6 +863,27 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 	jpg->initd=1;
 	return (hpjhandle)jpg;
+}
+
+DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height)
+{
+	checkhandle(h);
+
+	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
+		_throw("Invalid argument in hpjDecompressHeader()");
+	if(!jpg->initd) _throw("Instance has not been initialized for decompression");
+
+	jpg->jpgbuf=srcbuf;
+	jpg->bytesleft=size;
+
+	jpg->width=jpg->height=0;
+
+	_catch(decode_jpeg_init(jpg));
+	*width=jpg->width;  *height=jpg->height;
+
+	return 0;
 }
 
 DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
