@@ -12,9 +12,6 @@
  */
 
 #include "faker-sym.h"
-#ifdef USEGLP
-#include <GL/glp.h>
-#endif
 
 class glxvisual
 {
@@ -23,34 +20,15 @@ class glxvisual
 		glxvisual(GLXFBConfig);
 		glxvisual(XVisualInfo *);
 		~glxvisual(void);
-		void init(GLXFBConfig);
-		void init(XVisualInfo *);
 		GLXFBConfig getpbconfig(void);
 		XVisualInfo *getvisual(void);
 
 	private:
 
-		int buffer_size;
-		int level;
-		int doublebuffer;
-		int stereo;
-		int aux_buffers;
-		int red_size;
-		int green_size;
-		int blue_size;
-		int alpha_size;
-		int depth_size;
-		int stencil_size;
-		int accum_red_size;
-		int accum_green_size;
-		int accum_blue_size;
-		int accum_alpha_size;
-		int render_type;
-		int x_visual_type;
+		GLXFBConfig config;
+		XVisualInfo *vis;
 };
 
-#ifdef USEGLP
-int glPConfigDepth(GLPFBConfig);
-int glPConfigClass(GLPFBConfig);
-GLPFBConfig glPConfigFromVisAttribs(GLPDevice, int attribs[]);
-#endif
+int glXConfigDepth(GLXFBConfig);
+int glXConfigClass(GLXFBConfig);
+GLXFBConfig glXConfigFromVisAttribs(int attribs[]);

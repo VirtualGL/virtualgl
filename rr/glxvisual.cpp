@@ -22,9 +22,6 @@
 #include "fakerconfig.h"
 
 extern Display *_localdpy;
-#ifdef USEGLP
-extern GLPDevice _localdev;
-#endif
 extern FakerConfig fconfig;
 
 #define _case(ec) case ec: return "GLX Error: "#ec;
@@ -45,250 +42,187 @@ static const char *glxerr(int glxerror)
 static int __glxerr=0;
 #define glx(f) {if((__glxerr=(f))!=None) _throw(glxerr(__glxerr));}
 
-glxvisual::glxvisual(XVisualInfo *vis)
+glxvisual::glxvisual(XVisualInfo *visual)
 {
-	init(vis);
+	vis=visual;  config=0;
 }
 
-glxvisual::glxvisual(GLXFBConfig config)
+glxvisual::glxvisual(GLXFBConfig cfg)
 {
-	init(config);
+	config=cfg;  vis=NULL;
 }
 
-glxvisual::~glxvisual(void) {}
-
-void glxvisual::init(XVisualInfo *vis)
+glxvisual::~glxvisual(void)
 {
-	if(!vis) _throw("Invalid argument");
-	glx(_glXGetConfig(_localdpy, vis, GLX_BUFFER_SIZE, &buffer_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_LEVEL, &level));
-	glx(_glXGetConfig(_localdpy, vis, GLX_DOUBLEBUFFER, &doublebuffer));
-	glx(_glXGetConfig(_localdpy, vis, GLX_STEREO, &stereo));
-	glx(_glXGetConfig(_localdpy, vis, GLX_AUX_BUFFERS, &aux_buffers));
-	glx(_glXGetConfig(_localdpy, vis, GLX_RED_SIZE, &red_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_GREEN_SIZE, &green_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_BLUE_SIZE, &blue_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_ALPHA_SIZE, &alpha_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_DEPTH_SIZE, &depth_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_STENCIL_SIZE, &stencil_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_RED_SIZE, &accum_red_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_GREEN_SIZE, &accum_green_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_BLUE_SIZE, &accum_blue_size));
-	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_ALPHA_SIZE, &accum_alpha_size));
-	int rgba;  render_type=GLX_RGBA_BIT;
-	glx(_glXGetConfig(_localdpy, vis, GLX_RGBA, &rgba));
-	if(!rgba) render_type=GLX_COLOR_INDEX_BIT;
-	switch(vis->c_class)
-	{
-		case StaticGray:  x_visual_type=GLX_STATIC_GRAY;  break;
-		case GrayScale:   x_visual_type=GLX_GRAY_SCALE;  break;
-		case StaticColor: x_visual_type=GLX_STATIC_COLOR;  break;
-		case PseudoColor: x_visual_type=GLX_PSEUDO_COLOR;  break;
-		case TrueColor:   x_visual_type=GLX_TRUE_COLOR;  break;
-		case DirectColor: x_visual_type=GLX_DIRECT_COLOR;  break;
-	}
-}
-
-void glxvisual::init(GLXFBConfig config)
-{
-	if(!config) _throw("Invalid argument");
-	// Note: calling faked functions so GLP will work
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_BUFFER_SIZE, &buffer_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_LEVEL, &level));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_DOUBLEBUFFER, &doublebuffer));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_AUX_BUFFERS, &aux_buffers));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_RED_SIZE, &red_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_GREEN_SIZE, &green_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_BLUE_SIZE, &blue_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ALPHA_SIZE, &alpha_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_DEPTH_SIZE, &depth_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_STENCIL_SIZE, &stencil_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_RED_SIZE, &accum_red_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_GREEN_SIZE, &accum_green_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_BLUE_SIZE, &accum_blue_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_ALPHA_SIZE, &accum_alpha_size));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_RENDER_TYPE, &render_type));
-	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_X_VISUAL_TYPE, &x_visual_type));
+	if(vis) XFree(vis);
 }
 
 GLXFBConfig glxvisual::getpbconfig(void)
 {
 	int nelements;  GLXFBConfig *fbconfigs;
 	int fbattribs[]={
-		GLX_BUFFER_SIZE, buffer_size,
-		GLX_LEVEL, level,
-		GLX_DOUBLEBUFFER, doublebuffer,
-		GLX_AUX_BUFFERS, aux_buffers,
-		GLX_RED_SIZE, red_size,
-		GLX_GREEN_SIZE, green_size,
-		GLX_BLUE_SIZE, blue_size,
-		GLX_ALPHA_SIZE, alpha_size,
-		GLX_DEPTH_SIZE, depth_size,
-		GLX_STENCIL_SIZE, stencil_size,
-		GLX_ACCUM_RED_SIZE, accum_red_size,
-		GLX_ACCUM_GREEN_SIZE, accum_green_size,
-		GLX_ACCUM_BLUE_SIZE, accum_blue_size,
-		GLX_ACCUM_ALPHA_SIZE, accum_alpha_size,
-		GLX_RENDER_TYPE, render_type,
-		GLX_X_VISUAL_TYPE, x_visual_type,
+		GLX_BUFFER_SIZE, 1,
+		GLX_LEVEL, 0,
+		GLX_DOUBLEBUFFER, 1,
+		GLX_AUX_BUFFERS, 0,
+		GLX_RED_SIZE, 1,
+		GLX_GREEN_SIZE, 1,
+		GLX_BLUE_SIZE, 1,
+		GLX_ALPHA_SIZE, 1,
+		GLX_DEPTH_SIZE, 1,
+		GLX_STENCIL_SIZE, 0,
+		GLX_ACCUM_RED_SIZE, 0,
+		GLX_ACCUM_GREEN_SIZE, 0,
+		GLX_ACCUM_BLUE_SIZE, 0,
+		GLX_ACCUM_ALPHA_SIZE, 0,
+		GLX_RENDER_TYPE, GLX_RGBA_BIT,
+		GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
 		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
 		None, None, None};
-	#ifndef sun
-	fbattribs[34]=GLX_STEREO;  fbattribs[35]=stereo;  // No stereo?  Denied!
-	#endif
-	#ifdef USEGLP
-	if(fconfig.glp)
-		fbconfigs=glPChooseFBConfig(_localdev, fbattribs, &nelements);
-	else
-	#endif
+	if(config) return config;
+	if(!vis) _throw("glxvisual not properly initialized");
+	glx(_glXGetConfig(_localdpy, vis, GLX_BUFFER_SIZE, &fbattribs[1]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_LEVEL, &fbattribs[3]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_DOUBLEBUFFER, &fbattribs[5]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_AUX_BUFFERS, &fbattribs[7]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_RED_SIZE, &fbattribs[9]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_GREEN_SIZE, &fbattribs[11]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_BLUE_SIZE, &fbattribs[13]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_ALPHA_SIZE, &fbattribs[15]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_DEPTH_SIZE, &fbattribs[17]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_STENCIL_SIZE, &fbattribs[19]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_RED_SIZE, &fbattribs[21]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_GREEN_SIZE, &fbattribs[23]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_BLUE_SIZE, &fbattribs[25]));
+	glx(_glXGetConfig(_localdpy, vis, GLX_ACCUM_ALPHA_SIZE, &fbattribs[27]));
+	int rgba;  fbattribs[29]=GLX_RGBA_BIT;
+	glx(_glXGetConfig(_localdpy, vis, GLX_RGBA, &rgba));
+	if(!rgba) fbattribs[29]=GLX_COLOR_INDEX_BIT;
+	switch(vis->c_class)
 	{
-		errifnot(_localdpy);
-		fbconfigs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), fbattribs, &nelements);
+		case StaticGray:  fbattribs[31]=GLX_STATIC_GRAY;  break;
+		case GrayScale:   fbattribs[31]=GLX_GRAY_SCALE;  break;
+		case StaticColor: fbattribs[31]=GLX_STATIC_COLOR;  break;
+		case PseudoColor: fbattribs[31]=GLX_PSEUDO_COLOR;  break;
+		case TrueColor:   fbattribs[31]=GLX_TRUE_COLOR;  break;
+		case DirectColor: fbattribs[31]=GLX_DIRECT_COLOR;  break;
 	}
-
+	#ifndef sun
+	fbattribs[34]=GLX_STEREO;  // No stereo?  Denied!
+	glx(_glXGetConfig(_localdpy, vis, GLX_STEREO, &fbattribs[35]));
+	#endif
+	int screen=(_localdpy && !fconfig.glp)? DefaultScreen(_localdpy):0;
+	fbconfigs=glXChooseFBConfig(_localdpy, screen, fbattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
+	config=fbconfigs[0];
 	return fbconfigs[0];
 }
 
 XVisualInfo *glxvisual::getvisual(void)
 {
-	int i;  XVisualInfo *v;
+	int i, doublebuffer=1, stereo=0, render_type=GLX_RGBA_BIT;
+	XVisualInfo *v;
 	int attribs[]={
-		GLX_BUFFER_SIZE, buffer_size,
-		GLX_LEVEL, level,
-		GLX_AUX_BUFFERS, aux_buffers,
-		GLX_RED_SIZE, red_size,
-		GLX_GREEN_SIZE, green_size,
-		GLX_BLUE_SIZE, blue_size,
-		GLX_ALPHA_SIZE, alpha_size,
-		GLX_DEPTH_SIZE, depth_size,
-		GLX_STENCIL_SIZE, stencil_size,
-		GLX_ACCUM_RED_SIZE, accum_red_size,
-		GLX_ACCUM_GREEN_SIZE, accum_green_size,
-		GLX_ACCUM_BLUE_SIZE, accum_blue_size,
-		GLX_ACCUM_ALPHA_SIZE, accum_alpha_size,
+		GLX_BUFFER_SIZE, 1,
+		GLX_LEVEL, 0,
+		GLX_AUX_BUFFERS, 0,
+		GLX_RED_SIZE, 1,
+		GLX_GREEN_SIZE, 1,
+		GLX_BLUE_SIZE, 1,
+		GLX_ALPHA_SIZE, 1,
+		GLX_DEPTH_SIZE, 1,
+		GLX_STENCIL_SIZE, 0,
+		GLX_ACCUM_RED_SIZE, 0,
+		GLX_ACCUM_GREEN_SIZE, 0,
+		GLX_ACCUM_BLUE_SIZE, 0,
+		GLX_ACCUM_ALPHA_SIZE, 0,
 		None, None, None,
 		None};
+	if(vis) return vis;
+	if(!config) _throw("glxvisual not properly initialized");
+	// Note: calling faked functions so GLP will work
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_BUFFER_SIZE, &attribs[1]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_LEVEL, &attribs[3]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_DOUBLEBUFFER, &doublebuffer));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_AUX_BUFFERS, &attribs[5]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_RED_SIZE, &attribs[7]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_GREEN_SIZE, &attribs[9]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_BLUE_SIZE, &attribs[11]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ALPHA_SIZE, &attribs[13]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_DEPTH_SIZE, &attribs[15]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_STENCIL_SIZE, &attribs[17]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_RED_SIZE, &attribs[19]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_GREEN_SIZE, &attribs[21]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_BLUE_SIZE, &attribs[23]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_ACCUM_ALPHA_SIZE, &attribs[25]));
+	glx(glXGetFBConfigAttrib(_localdpy, config, GLX_RENDER_TYPE, &render_type));
 	errifnot(_localdpy);
 	i=26;
 	if(doublebuffer) attribs[i++]=GLX_DOUBLEBUFFER;
 	if(stereo) attribs[i++]=GLX_STEREO;
 	if(render_type==GLX_RGBA_BIT) attribs[i++]=GLX_RGBA;
+	errifnot(_localdpy);
 	v=_glXChooseVisual(_localdpy, DefaultScreen(_localdpy), attribs);
+	if(v) vis=v;
 	return v;
 }
 
-#ifdef USEGLP
-
-GLPFBConfig glPConfigFromVisAttribs(GLPDevice dev, int attribs[])
+GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 {
-	int i=0, glpattribs[40], nelements;  GLPFBConfig *fbconfigs;
-	int buffer_size=-1, level=-1, doublebuffer=0, render_type=GLP_COLOR_INDEX_BIT,
-		stereo=0, aux_buffers=-1, red_size=-1, green_size=-1, blue_size=-1,
-		alpha_size=-1, depth_size=-1, stencil_size=-1, accum_red_size=-1,
-		accum_green_size=-1, accum_blue_size=-1, accum_alpha_size=-1;
+	int glxattribs[257], j=0, nelements;  GLXFBConfig *fbconfigs;
+	int doublebuffer=0, render_type=GLX_COLOR_INDEX_BIT, stereo=0;
 
-	while(attribs[i]!=None)
+	for(int i=0; attribs[i]!=None && i<=254; i++)
 	{
-		if(attribs[i]==GLX_BUFFER_SIZE && attribs[++i]!=None)
-			buffer_size=attribs[i];
-		else if(attribs[i]==GLX_LEVEL && attribs[++i]!=None)
-			level=attribs[i];
-		else if(attribs[i]==GLX_DOUBLEBUFFER) doublebuffer=1;
-		else if(attribs[i]==GLX_RGBA) render_type=GLP_RGBA_BIT;
+		if(attribs[i]==GLX_DOUBLEBUFFER) doublebuffer=1;
+		else if(attribs[i]==GLX_RGBA) render_type=GLX_RGBA_BIT;
 		else if(attribs[i]==GLX_STEREO) stereo=1;
-		else if(attribs[i]==GLX_AUX_BUFFERS && attribs[++i]!=None)
-			aux_buffers=attribs[i];
-		else if(attribs[i]==GLX_RED_SIZE && attribs[++i]!=None)
-			red_size=attribs[i];
-		else if(attribs[i]==GLX_GREEN_SIZE && attribs[++i]!=None)
-			green_size=attribs[i];
-		else if(attribs[i]==GLX_BLUE_SIZE && attribs[++i]!=None)
-			blue_size=attribs[i];
-		else if(attribs[i]==GLX_ALPHA_SIZE && attribs[++i]!=None)
-			alpha_size=attribs[i];
-		else if(attribs[i]==GLX_DEPTH_SIZE && attribs[++i]!=None)
-			depth_size=attribs[i];
-		else if(attribs[i]==GLX_STENCIL_SIZE && attribs[++i]!=None)
-			stencil_size=attribs[i];
-		else if(attribs[i]==GLX_ACCUM_RED_SIZE && attribs[++i]!=None)
-			accum_red_size=attribs[i];
-		else if(attribs[i]==GLX_ACCUM_GREEN_SIZE && attribs[++i]!=None)
-			accum_green_size=attribs[i];
-		else if(attribs[i]==GLX_ACCUM_BLUE_SIZE && attribs[++i]!=None)
-			accum_blue_size=attribs[i];
-		else if(attribs[i]==GLX_ACCUM_ALPHA_SIZE && attribs[++i]!=None)
-			accum_alpha_size=attribs[i];
-		i++;
+		else
+		{
+			glxattribs[j++]=attribs[i];  glxattribs[j++]=attribs[i+1];
+			i++;
+		}
 	}
-
-	i=0;
-	if(buffer_size>=0)
-		{glpattribs[i++]=GLP_BUFFER_SIZE;  glpattribs[i++]=buffer_size;}
-	if(level>=0)
-		{glpattribs[i++]=GLP_LEVEL;  glpattribs[i++]=level;}
-	glpattribs[i++]=GLP_DOUBLEBUFFER;  glpattribs[i++]=doublebuffer;
-	glpattribs[i++]=GLP_RENDER_TYPE;  glpattribs[i++]=render_type;
+	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
+	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=render_type;
 	#ifndef sun
-	glpattribs[i++]=GLP_STEREO;  glpattribs[i++]=stereo;
+	glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	#endif
-	if(aux_buffers>=0)
-		{glpattribs[i++]=GLP_AUX_BUFFERS;  glpattribs[i++]=aux_buffers;}
-	if(red_size>=0)
-		{glpattribs[i++]=GLP_RED_SIZE;  glpattribs[i++]=red_size;}
-	if(green_size>=0)
-		{glpattribs[i++]=GLP_GREEN_SIZE;  glpattribs[i++]=green_size;}
-	if(blue_size>=0)
-		{glpattribs[i++]=GLP_BLUE_SIZE;  glpattribs[i++]=blue_size;}
-	if(alpha_size>=0)
-		{glpattribs[i++]=GLP_ALPHA_SIZE;  glpattribs[i++]=alpha_size;}
-	if(depth_size>=0)
-		{glpattribs[i++]=GLP_DEPTH_SIZE;  glpattribs[i++]=depth_size;}
-	if(stencil_size>=0)
-		{glpattribs[i++]=GLP_STENCIL_SIZE;  glpattribs[i++]=stencil_size;}
-	if(accum_red_size>=0)
-		{glpattribs[i++]=GLP_ACCUM_RED_SIZE;  glpattribs[i++]=accum_red_size;}
-	if(accum_green_size>=0)
-		{glpattribs[i++]=GLP_ACCUM_GREEN_SIZE;  glpattribs[i++]=accum_green_size;}
-	if(accum_blue_size>=0)
-		{glpattribs[i++]=GLP_ACCUM_BLUE_SIZE;  glpattribs[i++]=accum_blue_size;}
-	if(accum_alpha_size>=0)
-		{glpattribs[i++]=GLP_ACCUM_ALPHA_SIZE;  glpattribs[i++]=accum_alpha_size;}
-	glpattribs[i]=None;
+	glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
+	glxattribs[j]=None;
 
-	fbconfigs=glPChooseFBConfig(_localdev, glpattribs, &nelements);
+	int screen=(_localdpy && !fconfig.glp)? DefaultScreen(_localdpy):0;
+	fbconfigs=glXChooseFBConfig(_localdpy, screen, glxattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
 	return fbconfigs[0];
 }
 
-int glPConfigDepth(GLPFBConfig c)
+int glXConfigDepth(GLXFBConfig c)
 {
 	int depth, render_type, r, g, b;
 	errifnot(c);
-	glx(glPGetFBConfigAttrib(c, GLP_RENDER_TYPE, &render_type));
-	if(render_type==GLP_RGBA_BIT)
+	glx(glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type));
+	if(render_type==GLX_RGBA_BIT)
 	{
-		glx(glPGetFBConfigAttrib(c, GLP_RED_SIZE, &r));
-		glx(glPGetFBConfigAttrib(c, GLP_GREEN_SIZE, &g));
-		glx(glPGetFBConfigAttrib(c, GLP_BLUE_SIZE, &b));
+		glx(glXGetFBConfigAttrib(_localdpy, c, GLX_RED_SIZE, &r));
+		glx(glXGetFBConfigAttrib(_localdpy, c, GLX_GREEN_SIZE, &g));
+		glx(glXGetFBConfigAttrib(_localdpy, c, GLX_BLUE_SIZE, &b));
 		depth=r+g+b;
 		if(depth<8) depth=1;  // Monochrome
 	}
 	else
 	{
-		glx(glPGetFBConfigAttrib(c, GLP_BUFFER_SIZE, &depth));
+		glx(glXGetFBConfigAttrib(_localdpy, c, GLX_BUFFER_SIZE, &depth));
 	}
 	return depth;
 }
 
-int glPConfigClass(GLPFBConfig c)
+int glXConfigClass(GLXFBConfig c)
 {
 	int rendertype;
 	errifnot(c);
-	glx(glPGetFBConfigAttrib(c, GLP_RENDER_TYPE, &rendertype));
-	if(rendertype==GLP_RGBA_BIT) return TrueColor;
+	glx(glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &rendertype));
+	if(rendertype==GLX_RGBA_BIT) return TrueColor;
 	else return PseudoColor;
 }
-
-#endif
