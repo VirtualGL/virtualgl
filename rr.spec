@@ -54,8 +54,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_curdir}/%{_bindir}/rrxclient $RPM_BUILD_ROOT/usr/bin/rrxclient
 install -m 755 %{_curdir}/%{_bindir}/rrlaunch $RPM_BUILD_ROOT/usr/bin/rrlaunch
-install -m 755 %{_curdir}/rr/newrrcert $RPM_BUILD_ROOT/usr/bin/newrrcert
-install -m 644 %{_curdir}/rr/rrcert.cnf $RPM_BUILD_ROOT/etc/rrcert.cnf
 install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
 install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
@@ -64,7 +62,6 @@ install -m 755 %{_curdir}/%{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{package}/bin/
 
 %endif
 
-install -m 644 %{_curdir}/util/nettest.pem $RPM_BUILD_ROOT/opt/%{package}/nettest.pem
 install -m 755 %{_curdir}/%{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
 install -m 755 %{_curdir}/%{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
@@ -101,8 +98,6 @@ fi
 
 %else
 /usr/bin/rrxclient
-/usr/bin/newrrcert
-/etc/rrcert.cnf
 %{_DAEMON}
 %{_DAEMONSSL}
 /usr/bin/rrxclient_config
@@ -112,7 +107,6 @@ fi
 
 %endif
 
-/opt/%{package}/nettest.pem
 /opt/%{package}/bin/nettest
 /opt/%{package}/bin/cpustat
 
