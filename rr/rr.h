@@ -66,8 +66,7 @@ typedef struct _rrbmp
 #define RRBMP_BOTTOMUP 1  // Bottom-up bitmap (as opposed to top-down)
 #define RRBMP_BGR      2  // BGR or BGRA pixel order
 #define RRBMP_EOLPAD   4  // Each input scanline is padded to the next 32-bit boundary
-#define RRBMP_FORCE    8  // Send this frame, even if identical to last.  Normally,
-                          // only a refresh packet is sent for identical frames
+#define RRBMP_ALPHAFIRST 8  // BGR buffer is really ABGR, and RGB buffer is really ARGB
 
 // Subsampling options
 #define RR_SUBSAMP  3

@@ -53,7 +53,7 @@ void rrdisplayclient::allocbmp(rrbmp *bmp, int w, int h, int pixelsize)
 	if(bmp->h.bmpw==w && bmp->h.bmph==h && bmp->pixelsize==pixelsize
 		&& bmp->bits) return;
 	if(bmp->bits) delete [] bmp->bits;
-	errifnot(bmp->bits=new unsigned char[w*h*pixelsize]);
+	errifnot(bmp->bits=new unsigned char[w*h*pixelsize+1]);
 	bmp->h.bmpw=w;  bmp->h.bmph=h;
 	bmp->pixelsize=pixelsize;
 }
