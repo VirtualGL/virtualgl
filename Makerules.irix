@@ -18,6 +18,9 @@ else
 OPTFLAG = -O2
 endif
 
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform)
+CINCLUDES = -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+
 DEFAULTJPEGLIB = libjpeg
 
 SHFLAG = -shared
