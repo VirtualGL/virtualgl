@@ -48,10 +48,14 @@ void rrdisplayclient::run(void)
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
 		if(np>1)
-			for(i=1; i<np; i++) c[i]->go(b, lastb);
+			for(i=1; i<np; i++) {
+				ct[i]->checkerror();  c[i]->go(b, lastb);
+			}
 		c[0]->compresssend(b, lastb);
 		if(np>1)
-			for(i=1; i<np; i++) {c[i]->stop();  c[i]->send();}
+			for(i=1; i<np; i++) {
+				c[i]->stop();  ct[i]->checkerror();  c[i]->send();
+			}
 		rrframeheader h;
 		memcpy(&h, &b->h, sizeof(rrframeheader));
 		h.eof=1;
