@@ -16,7 +16,7 @@
 #include <string.h>
 #include "hpjpeg.h"
 
-#define _catch(f) {if((f)==-1) {printf("HPJPEG: %s\n", #f, hpjGetErrorStr());  goto finally;}}
+#define _catch(f) {if((f)==-1) {printf("HPJPEG: %s\n", hpjGetErrorStr());  goto finally;}}
 
 void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 {
@@ -132,12 +132,12 @@ void gentestjpeg(hpjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	printf("%s %s -> %s Q%d ... ", pixformat, (flags&HPJ_BOTTOMUP)?"Bottom-Up":"Top-Down ",
 		subsamp==HPJ_444?"4:4:4":subsamp==HPJ_422?"4:2:2":"4:1:1", qual);
 
-	if((bmpbuf=(unsigned char *)malloc(w*h*ps))==NULL)
+	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
 		printf("ERROR: Could not allocate buffer\n");  goto finally;
 	}
-
 	initbuf(bmpbuf, w, h, ps, flags);
+	memset(jpegbuf, 0, HPJBUFSIZE(w, h));
 
 	_catch(hpjCompress(hnd, bmpbuf, w, 0, h, ps, jpegbuf, size, subsamp, qual, flags));
 
@@ -168,7 +168,7 @@ void gentestbmp(hpjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	}
 	printf("JPEG -> %s %s ... ", pixformat, (flags&HPJ_BOTTOMUP)?"Bottom-Up":"Top-Down ");
 
-	if((bmpbuf=(unsigned char *)malloc(w*h*ps))==NULL)
+	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
 		printf("ERROR: Could not allocate buffer\n");  goto finally;
 	}
