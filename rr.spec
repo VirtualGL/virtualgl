@@ -5,10 +5,10 @@
 %define usrlib /usr/lib
 %define package %{_appname}
 %endif
-%define _XINIT /etc/X11/xinit/xinitrc.d/rrxclient
-%define _XINITSSL /etc/X11/xinit/xinitrc.d/rrxclient_ssl
-%define _DAEMON /usr/bin/rrxclient_daemon
-%define _DAEMONSSL /usr/bin/rrxclient_ssldaemon
+%define _XINIT /etc/X11/xinit/xinitrc.d/vglclient
+%define _XINITSSL /etc/X11/xinit/xinitrc.d/vglclient_ssl
+%define _DAEMON /usr/bin/vglclient_daemon
+%define _DAEMONSSL /usr/bin/vglclient_ssldaemon
 %define _POSTSESSION /etc/X11/gdm/PostSession/Default
 
 Summary: A non-intrusive remote rendering package
@@ -47,18 +47,18 @@ mkdir -p $RPM_BUILD_ROOT%{usrlib}
 mkdir -p $RPM_BUILD_ROOT/opt/%{package}/bin
 
 %ifarch x86_64
-install -m 755 %{_curdir}/%{_bindir}/rrlaunch64 $RPM_BUILD_ROOT/usr/bin/rrlaunch64
+install -m 755 %{_curdir}/%{_bindir}/vglrun64 $RPM_BUILD_ROOT/usr/bin/vglrun64
 %else
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
-install -m 755 %{_curdir}/%{_bindir}/rrxclient $RPM_BUILD_ROOT/usr/bin/rrxclient
-install -m 755 %{_curdir}/%{_bindir}/rrlaunch $RPM_BUILD_ROOT/usr/bin/rrlaunch
-install -m 755 %{_curdir}/rr/newrrcert $RPM_BUILD_ROOT/usr/bin/newrrcert
-install -m 644 %{_curdir}/rr/rrcert.cnf $RPM_BUILD_ROOT/etc/rrcert.cnf
+install -m 755 %{_curdir}/%{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
+install -m 755 %{_curdir}/%{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
+install -m 755 %{_curdir}/rr/newrrcert $RPM_BUILD_ROOT/usr/bin/newvglcert
+install -m 644 %{_curdir}/rr/rrcert.cnf $RPM_BUILD_ROOT/etc/vglcert.cnf
 install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
-install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
+install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
 
 install -m 755 %{_curdir}/%{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{package}/bin/tcbench
 
@@ -97,16 +97,16 @@ fi
 %defattr(-,root,root)
 
 %ifarch x86_64
-/usr/bin/rrlaunch64
+/usr/bin/vglrun64
 
 %else
-/usr/bin/rrxclient
-/usr/bin/newrrcert
-/etc/rrcert.cnf
+/usr/bin/vglclient
+/usr/bin/newvglcert
+/etc/vglcert.cnf
 %{_DAEMON}
 %{_DAEMONSSL}
-/usr/bin/rrxclient_config
-/usr/bin/rrlaunch
+/usr/bin/vglclient_config
+/usr/bin/vglrun
 
 /opt/%{package}/bin/tcbench
 
