@@ -14,17 +14,17 @@
 #ifndef __RRCWIN_H
 #define __RRCWIN_H
 
-#include "hputil.h"
 #include <X11/X.h>
 #include "rrframe.h"
+#include "rrthread.h"
 #include "genericQ.h"
 
-class rrcwin
+class rrcwin : public Runnable
 {
 	public:
 
 	rrcwin(int, Window);
-	~rrcwin(void);
+	virtual ~rrcwin(void);
 	rrjpeg *getFrame(void);
 	void drawFrame(rrjpeg *);
 	void redrawFrame(rrjpeg *);
@@ -32,32 +32,17 @@ class rrcwin
 
 	private:
 
-	void setlasterror(RRError e)
-	{
-		rrlock l(lemutex);
-		lasterror=e;
-	}
-
-	RRError getlasterror(void)
-	{
-		const RRError noerror={0, 0, 0};
-		RRError retval;  retval.message=NULL;
-		rrlock l(lemutex);
-		retval=lasterror;
-		if(lasterror.message) lasterror=noerror;
-		return retval;
-	}
-
-	RRError lasterror;
-	rrbitmap *b;
+	static const int NB=2;
+	rrfb *b;  rrjpeg jpg[NB];  int jpgi;
 	genericQ q;
 	void showprofile(rrframeheader *, int);
 	bool deadyet;
 	int dpynum;  Window window;
 	bool profile;
-	pthread_t displaythnd;
-	static void *displayer(void *);
-	pthread_mutex_t frameready, lemutex;
+	void run(void);
+	Thread *t;
+	rrmutex frameready;
+	rrcs jpgmutex;
 };
 
 #endif

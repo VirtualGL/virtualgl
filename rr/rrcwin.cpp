@@ -11,71 +11,68 @@
  * wxWindows Library License for more details.
  */
 
-//#define RRPROFILE
 #include "rrcwin.h"
+#include "rrerror.h"
+#include "rrtimer.h"
 
-
-rrcwin::rrcwin(int dpynum, Window window)
+rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false), profile(false),
+	t(NULL)
 {
-	const RRError noerror={0, 0, 0};
 	char dpystr[80];
-	if(dpynum<0 || dpynum>255 || !window) _throw("Invalid argument to rrcwin constructor");
+	if(dpynum<0 || dpynum>255 || !window)
+		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	sprintf(dpystr, ":%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
-	tryunix(pthread_mutex_init(&frameready, NULL));
-	tryunix(pthread_mutex_init(&lemutex, NULL));
-	profile=false;  char *ev=NULL;
-	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1)) {profile=true;  hptimer_init();}
-	b=new rrbitmap(dpystr, window);
+	char *ev=NULL;
+	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
+		{profile=true;}
+	b=new rrfb(dpystr, window);
 	errifnot(b);
-	deadyet=false;  displaythnd=0;  lasterror=noerror;
-	tryunix(pthread_create(&displaythnd, NULL, displayer, (void *)this));
+	errifnot(t=new Thread(this));
+	t->start();
 }
-
 
 rrcwin::~rrcwin(void)
 {
 	deadyet=true;
 	q.release();
-	pthread_mutex_unlock(&frameready);
-	if(displaythnd) {pthread_join(displaythnd, NULL);  displaythnd=0;}
+	frameready.unlock();
+	if(t) t->stop();
 	delete b;
 }
-
 
 int rrcwin::match(int dpynum, Window window)
 {
 	return (this->dpynum==dpynum && this->window==window);
 }
 
-
 rrjpeg *rrcwin::getFrame(void)
 {
-	tryunix(pthread_mutex_lock(&frameready));
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
-	rrjpeg *j=new rrjpeg;
-	if(!j) _throw("Could not allocate receive buffer");
+	rrjpeg *j=NULL;
+	if(t) t->checkerror();
+	frameready.lock();
+	if(t) t->checkerror();
+	jpgmutex.lock();
+	j=&jpg[jpgi];  jpgi=(jpgi+1)%NB;
+	jpgmutex.unlock();
 	return j;
 }
 
-
 void rrcwin::drawFrame(rrjpeg *f)
 {
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	if(t) t->checkerror();
 	q.add(f);
 }
 
-
 void rrcwin::showprofile(rrframeheader *h, int size)
 {
+	static rrtimer timer;
 	static double tstart=0., mpixels=0., displaytime=0., mbits=0., frames=0.;
 	if(profile)
 	{
 		if(tstart)
 		{
-			displaytime+=hptime()-tstart;
+			displaytime+=timer.time()-tstart;
 			if(!h->eof)
 			{
 				mpixels+=(double)h->bmpw*(double)h->bmph/1000000.;
@@ -85,41 +82,32 @@ void rrcwin::showprofile(rrframeheader *h, int size)
 		}
 		if(displaytime>1.)
 		{
-			hpprintf("%.2f Mpixels/sec - %.2f fps - %.2f Mbps\n", mpixels/displaytime,
+			rrout.PRINT("%.2f Mpixels/sec - %.2f fps - %.2f Mbps\n", mpixels/displaytime,
 				frames/displaytime, mbits/displaytime);
 			displaytime=0.;  mpixels=0.;  frames=0;  mbits=0.;
 		}
-		tstart=hptime();
+		tstart=timer.time();
 	}
 }
 
-
-void *rrcwin::displayer(void *param)
+void rrcwin::run(void)
 {
-	rrcwin *rrw=(rrcwin *)param;
+	try {
 
-	try
+	while(!deadyet)
 	{
-		while(!rrw->deadyet)
+		rrjpeg *j=NULL;
+		q.get((void **)&j);  if(deadyet) break;
+		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
+		frameready.unlock();
+		if(j->h.eof)
 		{
-			rrjpeg *j=NULL;
-			rrw->q.get((void **)&j);  if(rrw->deadyet) break;
-			if(!j) _throw("Invalid image received from queue");
-			pthread_mutex_unlock(&rrw->frameready);
-			if(j->h.eof)
-			{
-				rrw->b->init(&j->h);
-				rrw->b->redraw();
-			}
-			else *rrw->b=*j;
-			rrw->showprofile(&rrw->b->h, j->h.size);
-			delete j;
+			b->init(&j->h);
+			b->redraw();
 		}
+		else *b=*j;
+		showprofile(&b->h, j->h.size);
 	}
-	catch(RRError e)
-	{
-		if(!rrw->deadyet) rrw->setlasterror(e);
-		pthread_mutex_unlock(&rrw->frameready);
-	}
-	return 0;
+
+	} catch(...) {frameready.unlock();  throw;}
 }
