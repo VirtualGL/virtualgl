@@ -30,4 +30,3 @@ DEPFLAG = -xM1
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet -lssl -lcrypto
-THREADLIB = -lpthread
