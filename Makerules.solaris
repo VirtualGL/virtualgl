@@ -2,11 +2,11 @@
 # Solaris 32-bit and 64-bit
 ########################################
 
-CC = cc -xCC
+CC = cc
 CXX = CC
 AR = ar ruvs
 
-CFLAGS = -Kpic
+CFLAGS = -xCC -Kpic
 CINCLUDES = -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -lrt
