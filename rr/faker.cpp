@@ -43,7 +43,7 @@ void _fprintf (FILE *f, const char *format, ...)
 	rrcs::safelock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
-	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx - ", (unsigned long)rrthread_id(), timer.time(),
+	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx\n - ", (unsigned long)rrthread_id(), timer.time(),
 		(unsigned long)glXGetCurrentContext(), glXGetCurrentDrawable(), glXGetCurrentReadDrawable());
 	vfprintf(f, format, arglist);
 	fflush(f);
@@ -545,6 +545,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(!_isremote(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
 	////////////////////
 
+	// Equivalent of a glFlush()
 	GLXDrawable curdraw=glXGetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
@@ -565,7 +566,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		errifnot(config=ctxh.findconfig(ctx));
 		pbw=winh.setpb(dpy, drawable, config);
-		if(pbw) drawable=pbw->updatedrawable();
+		if(pbw)
+		{
+			drawable=pbw->updatedrawable();
+			if(drawable!=curdraw) pbw->forcenextframe();
+		}
 	}
 
 	#ifdef USEGLP
@@ -633,6 +638,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	if(!_isremote(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	////////////////////
 
+	// Equivalent of a glFlush()
 	GLXDrawable curdraw=glXGetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
@@ -655,7 +661,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		errifnot(config=ctxh.findconfig(ctx));
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
-		if(drawpbw) draw=drawpbw->updatedrawable();
+		if(drawpbw)
+		{
+			draw=drawpbw->updatedrawable();
+			if(draw!=curdraw) drawpbw->forcenextframe();
+		}
 		if(readpbw) read=readpbw->updatedrawable();
 	}
 	#ifdef USEGLP
