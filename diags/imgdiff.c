@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	unsigned char *bmp1=NULL, *bmp2=NULL, *bmpdiff=NULL;
 	unsigned char diff, diffmax, max[4]={0, 0, 0, 0}, min[4]={255, 255, 255, 255};
 	double avg[4]={0., 0., 0., 0.};
-	int w1, h1, d1, w2, h2, d2, w, h, i, j, k, mag=0;
+	int w1, h1, d1=3, w2, h2, d2=3, w, h, i, j, k, mag=0;
 	const char *err="No error";
 
 	if(argc<3)
@@ -59,18 +59,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if((err=loadbmp(argv[1], &bmp1, &w1, &h1, &d1, 0))!=NULL)
+	if((err=loadbmp(argv[1], &bmp1, &w1, &h1, BMP_BGR, 1, 0))!=NULL)
 	{
 		puts(err);  exit(1);
 	}
-	if((err=loadbmp(argv[2], &bmp2, &w2, &h2, &d2, 0))!=NULL)
+	if((err=loadbmp(argv[2], &bmp2, &w2, &h2, BMP_BGR, 1, 0))!=NULL)
 	{
 		puts(err);  exit(1);
-	}
-	if(d1!=d2)
-	{
-		printf("Bitmap 1 is %d-bit and bitmap 2 is %d-bit\n", d1*8, d2*8);
-		exit(1);
 	}
 	w=min(w1, w2);  h=min(h1, h2);
 
@@ -101,7 +96,7 @@ int main(int argc, char **argv)
 	for(k=0; k<d1; k++)
 		avg[k]/=((double)h*(double)w);
 
-	if((err=savebmp("diff.bmp", bmpdiff, w, h, d1, 0))!=NULL)
+	if((err=savebmp("diff.bmp", bmpdiff, w, h, BMP_BGR, 0, 0))!=NULL)
 	{
 		puts(err);  exit(1);
 	}
