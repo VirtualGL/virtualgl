@@ -118,7 +118,11 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, const int *att
 	return _glXChooseFBConfigSGIX(_localdpy, screen, attrib_list, nelements);
 }
 
+#ifdef sun
+void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned int mask)
+#else
 void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long mask)
+#endif
 {
 	#ifdef USEGLP
 	if(fconfig.glp) glPCopyContext(src, dst, mask);
@@ -136,7 +140,7 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_
 	return _glXCreatePbuffer(_localdpy, config, attrib_list);
 }
 
-GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfig config, unsigned int width, unsigned int height, const int *attrib_list)
+GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigned int width, unsigned int height, int *attrib_list)
 {
 	#ifdef USEGLP
 	if(fconfig.glp)
