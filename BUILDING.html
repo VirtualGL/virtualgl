@@ -95,6 +95,13 @@ type &quot;make&quot;.</p>
 <h2><span style="font-weight: 400">MAKEFILE OPTIONS</span></h2>
 <hr>
 <p><span style="font-weight: 400">Each of these options can be passed as an argument to "make".</span></p>
+<h3><span style="font-weight: 400">DEBUG = yes</span></h3>
+<blockquote>
+<p>Build a version of VirtualGL with debugging symbols and no optimization.&nbsp; 
+The debug version will reside in ${platform}/libd and ${platform}/bind, whereas 
+the release version will reside in ${platform}/lib and ${platform}/bin, so these 
+two versions can be built independently of one another.</p>
+</blockquote>
 <h3><span style="font-weight: 400">JPEGLIB = &lt; libjpeg | pegasus &gt;<libjpeg|pegasus></libjpeg|pegasus></span></h3>
 <blockquote>
   <p><span style="font-weight: 400">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
