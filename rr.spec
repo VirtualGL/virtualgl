@@ -14,11 +14,11 @@
 Summary: A non-intrusive remote rendering package
 Name: %{package}
 Version: %{_version}
-Vendor: Landmark Graphics
+Vendor: The VirtualGL Project
 Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
-BuildRoot: %{_curdir}/%{name}-buildroot
+BuildRoot: %{_blddir}/%{name}-buildroot
 Prereq: /sbin/ldconfig, /usr/bin/perl
 Provides: %{name} = %{version}-%{release}
 
