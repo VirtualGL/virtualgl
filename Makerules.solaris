@@ -7,8 +7,9 @@ CXX = CC
 AR = ar ruvs
 
 CFLAGS = -Kpic
+CINCLUDES = -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 
-LDFLAGS = -lrt
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -lrt
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
 LDFLAGS := -L/usr/X/lib/sparcv9 $(LDFLAGS)
