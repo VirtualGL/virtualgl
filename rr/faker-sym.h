@@ -16,6 +16,9 @@
 
 #include <stdio.h>
 #include "glx.h"
+#ifdef USEGLP
+#include <GL/glp.h>
+#endif
 
 extern void safeexit(int);
 
@@ -110,6 +113,10 @@ funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
 	int *, value, return);
 
+funcdef0(GLXContext, glXGetCurrentContext, return);
+
+funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
+
 funcdef2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx, return);
 
 funcdef3(Bool, glXMakeCurrent, Display *, dpy, GLXDrawable, drawable,
@@ -157,6 +164,10 @@ funcdef2(void, glXDestroyPbuffer, Display *, dpy, GLXPbuffer, pbuf,);
 funcdef2(void, glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap,);
 
 funcdef2(void, glXDestroyWindow, Display *, dpy, GLXWindow, win,);
+
+funcdef0(GLXDrawable, glXGetCurrentReadDrawable, return);
+
+funcdef0(Display*, glXGetCurrentDisplay, return);
 
 funcdef4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
 	int, attribute, int *, value, return);

@@ -29,8 +29,6 @@
 
 // This maps a window ID to a Pbuffer instance
 
-extern Display *_localdpy;
-
 class winhash : public _winhash
 {
 	public:
@@ -54,6 +52,12 @@ class winhash : public _winhash
 			return _winhash::find(DisplayString(dpy), d);
 		}
 
+		pbwin *findpb(GLXDrawable d)
+		{
+			if(!d) return NULL;
+			return _winhash::find(NULL, d);
+		}
+
 		pbwin *setpb(Display *dpy, Window win, GLXFBConfig config)
 		{
 			if(!dpy || !win || !config) _throw("Invalid argument");
@@ -63,7 +67,7 @@ class winhash : public _winhash
 			{
 				if(!ptr->value)
 				{
-					errifnot(ptr->value=new pbwin(dpy, win, _localdpy));
+					errifnot(ptr->value=new pbwin(dpy, win));
 					pbwin *pb=(pbwin *)ptr->value;
 					pb->initfromwindow(config);
 				}
@@ -92,8 +96,8 @@ class winhash : public _winhash
 		{
 			pbwin *pb=h->value;
 			return (
-				(pb && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
-				(pb && !strcasecmp(DisplayString(pb->getpbdpy()), key1) && key2==pb->getdrawable()) ||
+				(pb && key1 && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
+				(pb && key1==NULL && key2==pb->getdrawable()) ||
 				(!strcasecmp(key1, h->key1) && key2==h->key2)
 			);
 		}

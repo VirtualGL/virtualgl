@@ -39,22 +39,24 @@ class vishash : public _vishash
 			_vishash::killhash();
 		}
 
-		void add(Display *dpy, XVisualInfo *vis, Display *_localdpy, XVisualInfo *_localvis)
+		void add(Display *dpy, XVisualInfo *vis, GLXFBConfig _localc)
 		{
-			if(!dpy || !vis || !_localdpy || !_localvis) _throw("Invalid argument");
-			glxvisual *glxv=new glxvisual(_localdpy, _localvis);
+			if(!dpy || !vis || !_localc) _throw("Invalid argument");
+			glxvisual *glxv=new glxvisual(_localc);
 			errifnot(glxv);
 			char *dpystring=strdup(DisplayString(dpy));
 			if(!_vishash::add(dpystring, vis, glxv))
 				free(dpystring);
 		}
 
-		GLXFBConfig getfbconfig(Display *dpy, XVisualInfo *vis)
+		void add(Display *dpy, XVisualInfo *vis, XVisualInfo *_localvis)
 		{
-			if(!dpy || !vis) _throw("Invalid argument");
-			glxvisual *glxv=_vishash::find(DisplayString(dpy), vis);
-			if(glxv) return(glxv->getfbconfig());
-			else return NULL;
+			if(!dpy || !vis || !_localvis) _throw("Invalid argument");
+			glxvisual *glxv=new glxvisual(_localvis);
+			errifnot(glxv);
+			char *dpystring=strdup(DisplayString(dpy));
+			if(!_vishash::add(dpystring, vis, glxv))
+				free(dpystring);
 		}
 
 		GLXFBConfig getpbconfig(Display *dpy, XVisualInfo *vis)

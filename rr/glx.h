@@ -1,5 +1,5 @@
-#ifndef __glx_h__
-#define __glx_h__
+#ifndef __GLX_glx_h__
+#define __GLX_glx_h__
 
 /*
 ** The contents of this file are subject to the GLX Public License Version 1.0
@@ -19,7 +19,7 @@
 ** Those portions of the Subject Software created by Silicon Graphics, Inc.
 ** are Copyright (c) 1991-9 Silicon Graphics, Inc. All Rights Reserved.
 **
-** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.1 2004-08-24 20:15:46 dcommander Exp $
+** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.2 2005-02-10 21:48:04 dcommander Exp $
 */
 
 #include <X11/Xlib.h>
@@ -307,4 +307,4 @@ typedef union __GLXEvent {
 }
 #endif
 
-#endif /* !__glx_h__ */
+#endif /* !__GLX_glx_h__ */
