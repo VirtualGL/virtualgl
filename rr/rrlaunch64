@@ -6,21 +6,22 @@ usage()
 	echo "Usage: `basename $0` [options] [--] <OpenGL app> [OpenGL app arguments]"
 	echo
 	echo "VirtualGL display options"
-	echo "  +/-spoil    : Turn on/off frame spoiling (default = on)"
-	echo "  -d <d>      : set the display on which 3D rendering is done (default = :0.0)"
-	echo "  -client <d> : set the client display (default = DISPLAY enviroment)"
+	echo "  +/-spoil    : Turn on/off frame spoiling"
+	echo "  -d <d>      : set the display or GLP device on which 3D rendering is done"
+	echo "  -client <d> : set the client display"
 	echo
 	echo "VirtualGL network options"
-	echo "  +/-s        : Enable/disable use of SSL (default = disabled)"
-	echo "  -p <p>      : TCP port to use when connecting to client (default = 4242)"
+	echo "  +/-s        : Enable/disable use of SSL"
+	echo "  -p <p>      : TCP port to use when connecting to client"
 	echo
 	echo "VirtualGL compression options"
 	echo "  -c <c>      : specify compression type (0=none, 1=motion JPEG)"
-	echo "  -q <q>      : specify a quality value in the range [1-100]"
-	echo "  -samp <s>   : specify YCbCr subsampling (444, 422, 411)"
+	echo "  -q <q>      : specify a JPEG quality value in the range [1-100]"
+	echo "  -samp <s>   : specify JPEG YCbCr subsampling (444, 422, 411)"
 	echo
 	echo "VirtualGL miscellaneous options"
-	echo "  +/-profile  : Enable/disable performance profiling (default = disabled)"
+	echo "  +/-profile  : Enable/disable performance profiling"
+	echo "  +/-mt       : Enable/disable multi-threaded compression"
 	echo
 	exit $1
 }
@@ -51,6 +52,8 @@ do
 	-cl*)       VGL_CLIENT=$2     ; export VGL_CLIENT   ; shift     ;;
 	-p*)        VGL_PORT=$2       ; export VGL_PORT     ; shift     ;;
 	-c*)        VGL_COMPRESS=$2   ; export VGL_COMPRESS ; shift     ;;
+	-mt*)       VGL_MT=0          ; export VGL_MT       ;;
+	+mt*)       VGL_MT=1          ; export VGL_MT       ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-h)         usage 0 ;;
