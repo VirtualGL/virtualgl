@@ -1,0 +1,25 @@
+########################################
+# Windows NT (GMAKE)
+########################################
+
+CC = "cl"
+CXX = "cl" -GX
+AR = "link" -lib -NOLOGO
+
+CDEFINES = -D_WIN32_WINNT=0x0500 -DWIN32
+ifeq ($(DEBUG), yes)
+CFLAGS = -nologo -Od -G6 -MTd -W4 -Zi
+else
+CFLAGS = -nologo -O2 -G6 -MT -W3
+endif
+
+LFLAGS = -nologo -OPT:REF -NODEFAULTLIB:LIBC -NODEFAULTLIB:msvcrt -LIBPATH:$(LDIR)
+LINK = "link" $(LFLAGS)
+ifeq ($(DEBUG), yes)
+LINK = "link" $(LFLAGS) -debug -NODEFAULTLIB:LIBCMT
+endif
+
+XDKLIB = xlibgui.lib xlib.lib hclshm.lib
+HPULIB = hputil.lib ws2_32.lib
+HPSECNETLIB = hpsecnet.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib pthreadVC.lib
+FBXLIB = fbx.lib user32.lib gdi32.lib

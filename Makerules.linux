@@ -1,0 +1,28 @@
+########################################
+# Linux 32-bit and 64-bit
+########################################
+
+CC = cc
+CXX = c++
+AR = ar ruvs
+
+CDEFINES = -D_GNU_SOURCE
+ifeq ($(DEBUG), yes)
+CFLAGS = -MMD -O0 -g -Wall -fpic
+else
+CFLAGS = -MMD -O2 -Wall -fpic
+endif
+
+LDFLAGS = -L$(LDIR) -O2
+ifeq ($(subplatform), 64)
+LDFLAGS := $(LDFLAGS) -L/usr/X11R6/lib64
+endif
+
+ifeq ($(M32), yes)
+CFLAGS := $(CFLAGS) -m32
+LDFLAGS := $(LDFLAGS) -m32 -L/usr/lib
+endif
+
+HPULIB = -lhputil
+HPSECNETLIB = -lhpsecnet -lpthread -lssl
+FBXLIB = -L/usr/X11R6/lib -lfbx -lXext
