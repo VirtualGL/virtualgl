@@ -32,14 +32,14 @@ typedef struct _error_mgr
 	jmp_buf jb;
 } error_mgr;
 
-void my_error_exit(j_common_ptr cinfo)
+static void my_error_exit(j_common_ptr cinfo)
 {
 	error_mgr *myerr = (error_mgr *)cinfo->err;
 	(*cinfo->err->output_message)(cinfo);
 	longjmp(myerr->jb, 1);
 }
 
-void my_output_message(j_common_ptr cinfo)
+static void my_output_message(j_common_ptr cinfo)
 {
 	(*cinfo->err->format_message)(cinfo, lasterror);
 }
@@ -57,8 +57,8 @@ typedef struct _jpgstruct
 	int initc, initd;
 } jpgstruct;
 
-const int hsampfactor[NUMSUBOPT]={1, 2, 2};
-const int vsampfactor[NUMSUBOPT]={1, 1, 2};
+static const int hsampfactor[NUMSUBOPT]={1, 2, 2};
+static const int vsampfactor[NUMSUBOPT]={1, 1, 2};
 
 #define _throw(c) {sprintf(lasterror, "%s", c);  return -1;}
 #define _catch(f) {if((f)==-1) return -1;}
@@ -68,13 +68,13 @@ const int vsampfactor[NUMSUBOPT]={1, 1, 2};
 
 // CO
 
-boolean empty_output_buffer(struct jpeg_compress_struct *cinfo)
+static boolean empty_output_buffer(struct jpeg_compress_struct *cinfo)
 {
 	ERREXIT(cinfo, JERR_BUFFER_SIZE);
 	return TRUE;
 }
 
-void destination_noop(struct jpeg_compress_struct *cinfo)
+static void destination_noop(struct jpeg_compress_struct *cinfo)
 {
 }
 
@@ -185,19 +185,19 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 // DEC
 
-boolean fill_input_buffer (struct jpeg_decompress_struct *dinfo)
+static boolean fill_input_buffer (struct jpeg_decompress_struct *dinfo)
 {
 	ERREXIT(dinfo, JERR_BUFFER_SIZE);
 	return TRUE;
 }
 
-void skip_input_data (struct jpeg_decompress_struct *dinfo, long num_bytes)
+static void skip_input_data (struct jpeg_decompress_struct *dinfo, long num_bytes)
 {
 	dinfo->src->next_input_byte += (size_t) num_bytes;
 	dinfo->src->bytes_in_buffer -= (size_t) num_bytes;
 }
 
-void source_noop (struct jpeg_decompress_struct *dinfo)
+static void source_noop (struct jpeg_decompress_struct *dinfo)
 {
 }
 
