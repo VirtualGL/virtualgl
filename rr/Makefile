@@ -78,12 +78,12 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrfakerut \
             $(EDIR)/rrframeut \
 
-TARGETS = $(LDIR)/librrfaker.so \
+TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
           $(EDIR)/rrxclient \
           $(UNITTESTS)
 
 
-RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so $(LDIR)/librrsocket.a
+RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrsocket.a
 RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB)
 RRLAUNCH = rrlaunch
 ifeq ($(subplatform), 64)
@@ -101,7 +101,7 @@ clean:
 
 # Server
 
-$(LDIR)/librrfaker.so: $(FOBJS) $(RRDEP)
+$(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
 
 $(EDIR)/$(RRLAUNCH): $(RRLAUNCH)

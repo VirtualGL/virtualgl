@@ -89,7 +89,7 @@ $(EDIR)/24to32.exe: $(ODIR)/24to32.obj
 else
 ##########################################################################
 
-TARGETS = $(LDIR)/libhpjpeg.so \
+TARGETS = $(LDIR)/libhpjpeg.$(SHEXT) \
           $(EDIR)/jpgtest \
           $(EDIR)/jpegut \
           $(EDIR)/24to32
@@ -172,13 +172,13 @@ JPEGLINK = $(IPPLINK)
 
 endif
 
-$(LDIR)/libhpjpeg.so: $(ODIR)/hpjpeg.o $(JPEGDEP)
+$(LDIR)/libhpjpeg.$(SHEXT): $(ODIR)/hpjpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.so
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT)
 	$(CXX) $(LDFLAGS) $< -o $@ -lhpjpeg
 
-$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.so
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.$(SHEXT)
 	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
 
 $(EDIR)/24to32: $(ODIR)/24to32.o
