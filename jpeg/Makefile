@@ -146,11 +146,24 @@ endif
 ifeq ($(JPEGLIB), ipp)
 
 ifeq ($(IPPDIR),)
-IPPDIR = /opt/intel/ipp40
+IPPDIR = /opt/intel/ipp41/ia32_itanium
+ifeq ($(subplatform), 64)
+IPPDIR = /opt/intel/ipp41/em64t
+endif
 endif
 IPPLINK = -L$(IPPDIR)/lib -lippcore \
         -lippjemerged -lippiemerged -lippsemerged \
         -lippjmerged -lippimerged -lippsmerged
+ifeq ($(subplatform), 64)
+IPPLINK = -L$(IPPDIR)/lib \
+        -lippjemergedem64t -lippjmergedem64t -lippiemergedem64t \
+        -lippimergedem64t -lippsemergedem64t -lippsmergedem64t \
+        -lippcoreem64t
+endif
+ifeq ($(subplatform), ia64)
+IPPLINK = -L$(IPPDIR)/lib \
+        -lippji7 -lippii7 -lippsi7 -lippcore64
+endif
 
 $(ODIR)/hpjpeg.o: hpjpegipp.c ../include/hpjpeg.h
 	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
