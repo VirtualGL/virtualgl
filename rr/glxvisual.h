@@ -12,18 +12,20 @@
  */
 
 #include "faker-sym.h"
+#ifdef USEGLP
+#include <GL/glp.h>
+#endif
 
 class glxvisual
 {
 	public:
 
-		glxvisual(Display *, GLXFBConfig);
-		glxvisual(Display *, XVisualInfo *);
+		glxvisual(GLXFBConfig);
+		glxvisual(XVisualInfo *);
 		~glxvisual(void);
-		void init(Display *, GLXFBConfig);
-		void init(Display *, XVisualInfo *);
+		void init(GLXFBConfig);
+		void init(XVisualInfo *);
 		GLXFBConfig getpbconfig(void);
-		GLXFBConfig getfbconfig(void);
 		XVisualInfo *getvisual(void);
 
 	private:
@@ -45,5 +47,10 @@ class glxvisual
 		int accum_alpha_size;
 		int render_type;
 		int x_visual_type;
-		Display *dpy;
 };
+
+#ifdef USEGLP
+int glPConfigDepth(GLPFBConfig);
+int glPConfigClass(GLPFBConfig);
+GLPFBConfig glPConfigFromVisAttribs(GLPDevice, int attribs[]);
+#endif

@@ -18,10 +18,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include "rr.h"
+#include "rrutil.h"
 #include <stdio.h>
 
 // Compression types
-enum {RRCOMP_NONE=0, RRCOMP_MJPEG, RRCOMP_ANDRES};
+enum {RRCOMP_NONE=0, RRCOMP_MJPEG};
 
 class FakerConfig
 {
@@ -44,12 +45,17 @@ class FakerConfig
 			spoil=true;
 			ssl=false;
 			port=-1;
+			glp=false;
 
 			// Fetch values from environment
 			getconfig("RRGLLIB", gllib);
 			getconfig("RRX11LIB", x11lib);
 			getconfig("RRCLIENT", client);
 			getconfig("RRDISPLAY", localdpystring);
+			#ifdef USEGLP
+			if(localdpystring[0]=='/' || !stricmp(localdpystring, "GLP"))
+				glp=true;
+			#endif
 			getconfig("RRLOQUAL", loqual, 1, 100);
 			getconfig("RRLOSUBSAMP", losubsamp, 411, 444);
 			switch(losubsamp)
@@ -74,7 +80,7 @@ class FakerConfig
 			getconfig("RRNOCOMPRESS", temp);
 			if(temp) compress=RRCOMP_NONE;
 			getconfig("RRSPOIL", spoil);
-			getconfig("RRCOMPRESS", compress, RRCOMP_NONE, RRCOMP_ANDRES);
+			getconfig("RRCOMPRESS", compress, RRCOMP_NONE, RRCOMP_MJPEG);
 			getconfig("RRUSESSL", ssl);
 			getconfig("RRPORT", port, 0, 65535);
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
@@ -106,6 +112,7 @@ class FakerConfig
 
 		bool spoil;
 		bool ssl;
+		bool glp;
 
 	private:
 

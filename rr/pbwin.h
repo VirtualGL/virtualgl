@@ -18,6 +18,9 @@
 #include "rrmutex.h"
 #include "rrblitter.h"
 #include "fbx.h"
+#ifdef USEGLP
+#include <GL/glp.h>
+#endif
 
 // A container class for the actual Pbuffer
 
@@ -25,11 +28,11 @@ class pbuffer
 {
 	public:
 
-		pbuffer(Display *, int, int, GLXFBConfig);
+		pbuffer(int, int, GLXFBConfig);
 		GLXDrawable drawable(void) {return d;}
 		~pbuffer(void);
-		int width(void) {return w;}
-		int height(void) {return h;}
+		int width(void) {return _w;}
+		int height(void) {return _h;}
 		void clear(void);
 		void swap(void);
 
@@ -37,15 +40,14 @@ class pbuffer
 
 		bool cleared;
 		GLXPbuffer d;
-		Display *dpy;
-		int w, h;
+		int _w, _h;
 };
 
 class pbwin
 {
 	public:
 
-		pbwin(Display *dpy, Window win, Display *);
+		pbwin(Display *dpy, Window win);
 		~pbwin(void);
 		void clear(void);
 		void cleanup(void);
@@ -54,7 +56,6 @@ class pbwin
 		void resize(int, int);
 		void initfromwindow(GLXFBConfig config);
 		Display *getwindpy(void);
-		Display *getpbdpy(void);
 		Window getwin(void);
 		void readback(bool);
 		void readback(GLint, bool);
@@ -69,7 +70,7 @@ class pbwin
 
 		bool force;
 		rrcs mutex;
-		Display *pbdpy, *windpy;  Window win;
+		Display *windpy;  Window win;
 		pbuffer *oldpb, *pb;  GLXFBConfig config;
 		int neww, newh;
 		rrblitter *blitter;

@@ -26,6 +26,9 @@ extern dpyhash *_dpyh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 
 extern Display *_localdpy;
+#ifdef USEGLP
+extern GLPDevice _localdev;
+#endif
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
@@ -59,24 +62,38 @@ class tempctx
 	public:
 
 		tempctx(GLXDrawable draw, GLXDrawable read, GLXContext ctx=glXGetCurrentContext()) :
-			_dpy(glXGetCurrentDisplay()), _ctx(glXGetCurrentContext()),
+			_ctx(glXGetCurrentContext()),
 			_read(glXGetCurrentReadDrawable()), _draw(glXGetCurrentDrawable()),
 			mc(false)
 		{
-			if(!_dpy || !_ctx || (!_read && !_draw)) return;
+			if(!_ctx || (!_read && !_draw)) return;
+			if(!fconfig.glp)
+			{
+				_dpy=_glXGetCurrentDisplay();  if(!_dpy) return;
+			}
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;
 			if(_read!=read || _draw!=draw || _ctx!=ctx)
 			{
-				_glXMakeContextCurrent(_dpy, draw, read, ctx);
+				#ifdef USEGLP
+				if(fconfig.glp) glPMakeContextCurrent(draw, read, ctx);
+				else
+				#endif
+					_glXMakeContextCurrent(_dpy, draw, read, ctx);
 				mc=true;
 			}
 		}
 
 		void restore(void)
 		{
-			if(mc && _ctx && _dpy && (_read || _draw))
-				_glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
+			if(mc && _ctx && (_read || _draw))
+			{
+				#ifdef USEGLP
+				if(fconfig.glp) glPMakeContextCurrent(_draw, _read, _ctx);
+				else
+				#endif
+				if(_dpy) _glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
+			}
 		}
 
 		~tempctx(void)
@@ -93,9 +110,9 @@ class tempctx
 };
 
 
-pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
+pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 {
-	if(!dpy || !config || w<1 || h<1) _throw("Invalid argument");
+	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	cleared=false;
 	#if 0
@@ -105,29 +122,32 @@ pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 		_throw("Pbuffer extension not supported on rendering display");
 	#endif
 
-	this->dpy=dpy;
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
-	int dw=DisplayWidth(dpy, DefaultScreen(dpy));
-	int dh=DisplayHeight(dpy, DefaultScreen(dpy));
-	w=min(w, dw);  h=min(h, dh);
-	this->w=w;  this->h=h;
+
+	if(!fconfig.glp)
+	{
+		int dw=DisplayWidth(_localdpy, DefaultScreen(_localdpy));
+		int dh=DisplayHeight(_localdpy, DefaultScreen(_localdpy));
+		w=min(w, dw);  h=min(h, dh);
+	}
+	_w=w;  _h=h;
 	pbattribs[1]=w;  pbattribs[3]=h;
 	#ifdef sun
 	tempctx tc(0, 0, 0);
 	#endif
-	d=_glXCreatePbuffer(dpy, config, pbattribs);
+	d=glXCreatePbuffer(_localdpy, config, pbattribs);
 	if(!d) _throw("Could not create Pbuffer");
 }
 
 pbuffer::~pbuffer(void)
 {
-	if(d && dpy)
+	if(d)
 	{
 		#ifdef sun
 		tempctx tc(0, 0, 0);
 		#endif
-		_glXDestroyPbuffer(dpy, d);
+		glXDestroyPbuffer(_localdpy, d);
 	}
 }
 
@@ -144,17 +164,17 @@ void pbuffer::clear(void)
 
 void pbuffer::swap(void)
 {
-	_glXSwapBuffers(dpy, d);
+	if(!fconfig.glp) _glXSwapBuffers(_localdpy, d);
 }
 
 
 // This class encapsulates the Pbuffer, its most recent ancestor, and
 // information specific to its corresponding X window
 
-pbwin::pbwin(Display *windpy, Window win, Display *pbdpy)
+pbwin::pbwin(Display *windpy, Window win)
 {
-	if(!windpy || !win || !pbdpy) _throw("Invalid argument");
-	this->windpy=windpy;  this->pbdpy=pbdpy;  this->win=win;
+	if(!windpy || !win) _throw("Invalid argument");
+	this->windpy=windpy;  this->win=win;
 	force=false;
 	oldpb=pb=NULL;  neww=newh=-1;
 	blitter=NULL;
@@ -174,15 +194,17 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
-	int dw=DisplayWidth(pbdpy, DefaultScreen(pbdpy));
-	int dh=DisplayHeight(pbdpy, DefaultScreen(pbdpy));
-	w=min(w, dw);  h=min(h, dh);
+	if(!fconfig.glp)
+	{
+		int dw=DisplayWidth(_localdpy, DefaultScreen(_localdpy));
+		int dh=DisplayHeight(_localdpy, DefaultScreen(_localdpy));
+		w=min(w, dw);  h=min(h, dh);
+	}
 
 	rrcs::safelock l(mutex);
 	if(pb && pb->width()==w && pb->height()==h) return 0;
-	if((pb=new pbuffer(pbdpy, w, h, config))==NULL)
-		_throw("Could not create Pbuffer");
-
+	if((pb=new pbuffer(w, h, config))==NULL)
+			_throw("Could not create Pbuffer");
 	this->config=config;
 	force=true;
 	return 1;
@@ -249,11 +271,6 @@ GLXDrawable pbwin::updatedrawable(void)
 Display *pbwin::getwindpy(void)
 {
 	return windpy;
-}
-
-Display *pbwin::getpbdpy(void)
-{
-	return pbdpy;
 }
 
 Window pbwin::getwin(void)

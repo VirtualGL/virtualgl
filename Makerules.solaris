@@ -10,6 +10,7 @@ INSTALL = /usr/ucb/install
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
 CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CDEFINES = -DUSEGLP
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
