@@ -33,7 +33,7 @@ int main(void)
 
 	rrfb *b;
 
-	printf("\nTesting full-frame blits ...\n");
+	fprintf(stderr, "\nTesting full-frame blits ...\n");
 
 	int fill=0, frames=0;  t.start();
 	do
@@ -45,9 +45,9 @@ int main(void)
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
-	printf("\nTesting full-frame blits (spoiling) ...\n");
+	fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
 
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
@@ -65,10 +65,10 @@ int main(void)
 		clientframes++;  frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec (server)\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-	printf("%f Megapixels/sec (client)\n", (double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
+	fprintf(stderr, "%f Megapixels/sec (server)\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+	fprintf(stderr, "%f Megapixels/sec (client)\n", (double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
 
-	printf("\nTesting half-frame blits ...\n");
+	fprintf(stderr, "\nTesting half-frame blits ...\n");
 
 	fill=0, frames=0;  t.start();
 	do
@@ -81,9 +81,9 @@ int main(void)
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
-	printf("\nTesting zero-frame blits ...\n");
+	fprintf(stderr, "\nTesting zero-frame blits ...\n");
 
 	frames=0;  t.start();
 	do
@@ -94,7 +94,7 @@ int main(void)
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
-	} catch(rrerror &e) {printf("%s--\n%s\n", e.getMethod(), e.getMessage());}
+	} catch(rrerror &e) {fprintf(stderr, "%s--\n%s\n", e.getMethod(), e.getMessage());}
 }
