@@ -65,6 +65,7 @@ pixelformat pix[FORMATS]={
 
 Display *dpy=NULL;  Window win=0;
 rrtimer timer;
+int usewindow=0;
 
 //////////////////////////////////////////////////////////////////////
 // Error handling
@@ -92,14 +93,20 @@ void pbufferinit(Display *dpy, Window win)
 	try {
 
 	errifnot(win);  errifnot(dpy);
+	if(usewindow) fbattribs[9]=GLX_WINDOW_BIT;
 	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
-	if(!nelements || !fbconfigs) _throw("Pbuffers not supported on the target display");
+	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
 	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
 	if(!(ctx=glXCreateNewContext(dpy, fbconfigs[0], GLX_RGBA_TYPE, NULL, True)))
 		_throw("Could not create GLX context");
-	if(!(pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs)))
-		_throw("Could not create Pbuffer");
-	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
+	if(usewindow)
+		glXMakeContextCurrent(dpy, win, win, ctx);
+	else
+	{
+		if(!(pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs)))
+			_throw("Could not create Pbuffer");
+		glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
+	}
 
 	} catch(...)
 	{
@@ -313,6 +320,8 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
 
+	if(argc>1 && !stricmp(argv[1], "-window")) usewindow=1;
+
 	try {
 
 	XSetErrorHandler(xhandler);
@@ -325,8 +334,9 @@ int main(int argc, char **argv)
 	}
 
 	errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
-		0, 0, 1, 1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+		0, 0, usewindow?WIDTH:1, usewindow?HEIGHT:1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 		BlackPixel(dpy, DefaultScreen(dpy))));
+	if(usewindow) XMapWindow(dpy, win);
 	XSync(dpy, False);
 	pbufferinit(dpy, win);
 	display();
