@@ -21,6 +21,13 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${BLDDIR}\bin\xlib.dll"
 	File "$%systemroot%\system32\libeay32.dll"
 	File "$%systemroot%\system32\ssleay32.dll"
+	File "doc\winug.html"
+	File /r /x CVS "doc\winug"
+	File "doc\config.html"
+	File /r /x CVS "doc\config"
+	File "LGPL.txt"
+	File "LICENSE.txt"
+	File "LICENSE-OpenSSL.txt"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
@@ -42,6 +49,8 @@ Section "Start Menu Shortcuts (required)"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Secure Client Service.lnk" "$INSTDIR\vglclient.exe" "-s -remove"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\vglclient.exe"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\vglclient.exe" "-s"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} User's Guide.lnk" "$INSTDIR\winug.html"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} Configuration Guide.lnk" "$INSTDIR\config.html"
 
 SectionEnd
 
@@ -60,10 +69,19 @@ Section "Uninstall"
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
-	Delete $INSTDIR\hclshm.dll"
-	Delete $INSTDIR\xlib.dll"
-	Delete $INSTDIR\libeay32.dll"
-	Delete $INSTDIR\ssleay32.dll"
+	Delete $INSTDIR\hclshm.dll
+	Delete $INSTDIR\xlib.dll
+	Delete $INSTDIR\libeay32.dll
+	Delete $INSTDIR\ssleay32.dll
+	Delete $INSTDIR\winug.html
+	Delete $INSTDIR\winug\*.*
+	RMDir $INSTDIR\winug
+	Delete $INSTDIR\config.html
+	Delete $INSTDIR\config\*.*
+	RMDir $INSTDIR\config
+	Delete $INSTDIR\LGPL.txt
+	Delete $INSTDIR\LICENSE.txt
+	Delete $INSTDIR\LICENSE-OpenSSL.txt
 
 	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"
 	RMDir "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
