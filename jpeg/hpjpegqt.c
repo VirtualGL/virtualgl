@@ -3,6 +3,7 @@
 #include <QuickTime/ImageCompression.h>
 #include <QuickTime/QuickTimeComponents.h>
 #include <mach/mach.h>
+#define STRIDE_BOUNDARY 16384
 #else
 #include <ImageCompression.h>
 #include <QuickTimeComponents.h>
@@ -116,12 +117,15 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 			/* 
 			 * Use the mach kernel to execute a copy-on-write operation.
-			 * Since we're only going to be reading from the buffer this
-			 * should be *far* less expensive than memcpy.
+			 * Since we're only going to be reading from the buffer, this
+			 * should be *far* less expensive than memcpy, if that copy
+			 * is large (>16 Kbytes)
 			 */
 
-			vm_copy(mach_task_self(), (vm_address_t)srcptr, pitch, (vm_address_t)rowptr);
-
+			if(pitch > STRIDE_BOUNDARY)
+				vm_copy(mach_task_self(), (vm_address_t)srcptr, pitch,
+					(vm_address_t)rowptr);
+		    else
 			#else
 			memcpy(rowptr, srcptr, pitch); 
 			#endif
@@ -271,8 +275,8 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	SetGWorld(worldPtr, NULL);
 
-	tryqt( DecompressImage( (Ptr)srcbuf, myDesc, pixMapHandle, &rect, &rect, srcCopy,
-		NULL ) );
+	tryqt( FDecompressImage( (Ptr)srcbuf, myDesc, pixMapHandle, &rect, NULL, srcCopy,
+		NULL, NULL, NULL, codecLowQuality, bestSpeedCodec, 0, NULL, NULL) );
 
 	fastpath = 0;
 	switch((**pixMapHandle).pixelFormat)
@@ -320,12 +324,15 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 			/* 
 			 * Use the mach kernel to execute a copy-on-write operation.
-			 * Since we're only going to be reading from the buffer this
-			 * should be *far* less expensive than memcpy.
+			 * Since we're only going to be reading from the buffer, this
+			 * should be *far* less expensive than memcpy, if that copy 
+		     * is large (>16 Kbytes)
 			 */
 
-			vm_copy(mach_task_self(), (vm_address_t)rowptr, pitch, (vm_address_t)dstptr);
-
+			if(pitch > STRIDE_BOUNDARY)
+				vm_copy(mach_task_self(), (vm_address_t)rowptr, pitch,
+					(vm_address_t)dstptr);
+			else
 			#else
 			memcpy(dstptr, rowptr, pitch); 
 			#endif
