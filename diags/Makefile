@@ -15,8 +15,8 @@ all: $(TARGETS)
 clean:
 	-$(RM) $(TARGETS) $(OBJS)
 
-$(EDIR)/tcbench.exe: $(ODIR)/tcbench.obj $(LDIR)/fbx.lib
-	$(LINK) $^ -OUT:$@ $(FBXLIB) user32.lib
+$(EDIR)/tcbench.exe: $(ODIR)/tcbench.obj $(LDIR)/fbx.lib $(LDIR)/hputil.lib
+	$(LINK) $^ -OUT:$@ $(FBXLIB) user32.lib $(HPULIB)
 	
 $(EDIR)/imgdiff.exe: $(ODIR)/imgdiff.obj
 	$(LINK) $^ -OUT:$@
@@ -41,8 +41,8 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-$(EDIR)/tcbench: $(ODIR)/tcbench.o $(ODIR)/dsimple.o $(LDIR)/libfbx.a
-	$(CXX) $(LDFLAGS) $(ODIR)/tcbench.o $(ODIR)/dsimple.o -o $@ $(FBXLIB)
+$(EDIR)/tcbench: $(ODIR)/tcbench.o $(ODIR)/dsimple.o $(LDIR)/libfbx.a $(LDIR)/libhputil.a
+	$(CXX) $(LDFLAGS) $(ODIR)/tcbench.o $(ODIR)/dsimple.o -o $@ $(FBXLIB) $(HPULIB)
 
 $(EDIR)/cpustat: $(ODIR)/cpustat.o
 	$(CC) $(LDFLAGS) $< -o $@

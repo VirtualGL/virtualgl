@@ -15,8 +15,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "hputil.h"
 #include "fbx.h"
 #ifdef _WIN32
  char *program_name;
@@ -53,7 +52,7 @@ void usage(void)
 int main(int argc, char **argv)
 {
 	int i;  fbx_wh wh;
-	double benchtime=30.0, benchstart=0., benchend;  rrtimer timer;
+	double benchtime=30.0, benchstart=0., benchend;
 	int samplerate=50, xcoord=-1, ycoord=-1;
 
 	program_name=argv[0];
@@ -90,10 +89,10 @@ int main(int argc, char **argv)
 	printf("Click the mouse in the window that you wish to monitor ... ");
 	wh=GetForegroundWindow();
 	double tStart, tElapsed;  int t, oldt=-1;
-	tStart=timer.time();
+	tStart=hptime();
 	do
 	{
-		tElapsed=timer.time()-tStart;
+		tElapsed=hptime()-tStart;
 		t=(int)(10.-tElapsed);
 		if(t!=oldt) {oldt=t;  printf("%.2d\b\b", t);}
 		Sleep(50);
@@ -129,7 +128,7 @@ int main(int argc, char **argv)
 	printf("Sample block location: %d, %d\n", xcoord, ycoord);
 	unsigned char buf[32*32*4];
 	int first=1;
-	benchend=timer.time();
+	benchend=hptime();
 	do
 	{
 		fbx(fbx_read(&fb, xcoord, ycoord));
@@ -137,16 +136,16 @@ int main(int argc, char **argv)
 		if(first)
 		{
 			first=0;
-			benchstart=timer.time();
+			benchstart=hptime();
 		}
 		else
 		{
 			if(memcmp(buf, fb.bits, fbx_ps[fb.format]*32*32)) frames++;
 		}
 		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
-		int sleeptime=(int)(1000000.*(1./(float)samplerate-(timer.time()-benchend)));
+		int sleeptime=(int)(1000000.*(1./(float)samplerate-(hptime()-benchend)));
 		if(sleeptime>0) usleep(sleeptime);
-	} while((benchend=timer.time())-benchstart<benchtime);
+	} while((benchend=hptime())-benchstart<benchtime);
 	printf("Samples: %d  Time: %f s  Frames/sec: %f\n", samples, benchend-benchstart, (double)frames/(benchend-benchstart));
 	return 0;
 }
