@@ -851,8 +851,13 @@ void _doGLreadback(bool force)
 	GLXDrawable drawable;
 	drawable=glXGetCurrentDrawable();
 	if(!drawable) return;
-	if((pbw=winh.findpb(drawable))!=NULL)
+	GLint drawbuf=GL_BACK;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	if((drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK)
+	&& (pbw=winh.findpb(drawable))!=NULL)
+	{
 		pbw->readback(GL_FRONT, force);
+	}
 }
 
 void glFlush(void)
