@@ -29,7 +29,7 @@
 		h.bmpx=byteswap16(h.bmpx);  \
 		h.bmpy=byteswap16(h.bmpy);}}
 
-#define CERTF "rrcert.pem"
+#define CERTF "vglcert.pem"
 
 #ifdef _WIN32
 	#define DIRSEP "\\"
@@ -38,6 +38,9 @@
 	#include <pwd.h>
 	#define DIRSEP "/"
 	#define ALTDIR "/etc"
+	#ifdef sun
+	#define ALTDIR2 "/opt/SUNWvgl/etc"
+	#endif
 #endif
 
 char *gethomedir(void)
@@ -73,6 +76,13 @@ rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl) :
 			#endif
 			strncpy(temppath, ALTDIR, 1024);
 			strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
+			#ifdef sun
+			if(access(temppath, F_OK)!=0)
+			{
+				strncpy(temppath, ALTDIR2, 1024);
+				strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
+			}
+			#endif
 		}
 		rrout.println("Using certificate file %s\n", temppath);
 	}
