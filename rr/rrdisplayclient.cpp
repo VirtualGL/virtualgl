@@ -11,7 +11,6 @@
  * wxWindows Library License for more details.
  */
 
-//#define RRPROFILE
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 
@@ -28,9 +27,6 @@
 
 void rrdisplayclient::run(void)
 {
-	#ifdef RRPROFILE
-	double mpixels=0., comptime=0.;  rrtimer timer;
-	#endif
 	rrframe *lastb=NULL;
 	int np=numprocs(), i;
 
@@ -51,24 +47,11 @@ void rrdisplayclient::run(void)
 		q.get((void **)&b);  if(deadyet) return;
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
-		#ifdef RRPROFILE
-		timer.start();
-		#endif
 		if(np>1)
 			for(i=1; i<np; i++) c[i]->go(b, lastb);
 		c[0]->compresssend(b, lastb);
 		if(np>1)
 			for(i=1; i<np; i++) {c[i]->stop();  c[i]->send();}
-		#ifdef RRPROFILE
-		comptime+=timer.elapsed();
-		mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
-		if(comptime>1.)
-		{
-			printf("Compress/Send:         %f Mpixels/s\n", mpixels/comptime);
-			fflush(stdout);
-			comptime=0.;  mpixels=0.;
-		}
-		#endif
 		rrframeheader h;
 		memcpy(&h, &b->h, sizeof(rrframeheader));
 		h.eof=1;
@@ -77,6 +60,8 @@ void rrdisplayclient::run(void)
 
 		char cts=0;
 		if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
+		prof_total.endframe(b->h.bmpw*b->h.bmph, 0, 1);
+		prof_total.startframe();
 
 		lastb=b;
 	}
@@ -148,7 +133,9 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		}
 		if(b->stripequals(lastb, startline, endline)) continue;
 		rrframe *rrb=b->getstrip(startline, endline);
+		prof_comp.startframe();
 		j=*rrb;
+		prof_comp.endframe(j.h.bmpw*j.h.bmph, j.h.size, 0);
 		delete rrb;
 		j.h.eof=0;
 		unsigned int size=j.h.size;

@@ -19,6 +19,7 @@
 #include "rr.h"
 #include "rrframe.h"
 #include "genericQ.h"
+#include "rrprofiler.h"
 
 #define MAXPROCS 4
 
@@ -34,6 +35,7 @@ class rrdisplayclient : public Runnable
 			errifnot(sd=new rrsocket(dossl));
 			sd->connect(servername, port);
 		}
+		prof_total.setname("Total");
 		errifnot(t=new Thread(this));
 		t->start();
 	}
@@ -58,6 +60,7 @@ class rrdisplayclient : public Runnable
 	genericQ q;
 	Thread *t;  bool deadyet;
 	rrsocket *sd;
+	rrprofiler prof_total;
 };
 
 class rrcompressor : public Runnable
@@ -69,6 +72,7 @@ class rrcompressor : public Runnable
 	{
 		ready.lock();  complete.lock();
 		sendbuf=NULL;  bufsize=0;
+		prof_comp.setname("Compress");
 	}
 
 	virtual ~rrcompressor(void)
@@ -126,6 +130,7 @@ class rrcompressor : public Runnable
 	rrsocket *sd;
 	rrmutex ready, complete;  bool deadyet;
 	rrcs mutex;
+	rrprofiler prof_comp;
 };
 
 #endif
