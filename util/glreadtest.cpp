@@ -32,29 +32,47 @@
 
 typedef struct _pixelformat
 {
-	unsigned long rmask, gmask, bmask, amask;
+	unsigned long roffset, goffset, boffset;
 	int pixelsize;
 	int glformat;
 	int bgr;
 	const char *name;
 } pixelformat;
 
-#if defined(GL_BGRA_EXT) && defined(GL_BGR_EXT)
- #define FORMATS 4
-#elif defined(GL_BGRA_EXT) || defined(GL_BGR_EXT)
- #define FORMATS 3
-#else
- #define FORMATS 2
-#endif
-pixelformat pix[FORMATS]={
+static const int FORMATS=2
+ #ifdef GL_BGRA_EXT
+ +1
+ #endif
+ #ifdef GL_BGR_EXT
+ +1
+ #endif
+ #ifdef GL_ABGR_EXT
+ +1
+ #endif
+ ;
+
+pixelformat pix[2
+ #ifdef GL_BGRA_EXT
+ +1
+ #endif
+ #ifdef GL_BGR_EXT
+ +1
+ #endif
+ #ifdef GL_ABGR_EXT
+ +1
+ #endif
+ ]={
 	#ifdef GL_BGRA_EXT
-	{0xFF0000, 0xFF00, 0xFF, 0xFF000000, 4, GL_BGRA_EXT, 1, "BGRA"},
+	{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
+	#endif
+	#ifdef GL_ABGR_EXT
+	{3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"},
 	#endif
 	#ifdef GL_BGR_EXT
-	{0xFF0000, 0xFF00, 0xFF, 0, 3, GL_BGR_EXT, 1, "BGR"},
+	{2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"},
 	#endif
-	{0xFF, 0xFF00, 0xFF0000, 0xFF000000, 4, GL_RGBA, 0, "RGBA"},
-	{0xFF, 0xFF00, 0xFF0000, 0, 3, GL_RGB, 0, "RGB"},
+	{0, 1, 2, 4, GL_RGBA, 0, "RGBA"},
+	{0, 1, 2, 3, GL_RGB, 0, "RGB"},
 };
 
 #define bench_name		"GLreadtest"
@@ -139,45 +157,31 @@ static int check_errors(const char * tag)
 //////////////////////////////////////////////////////////////////////
 // Buffer initialization and checking
 //////////////////////////////////////////////////////////////////////
-void initbuf(int x, int y, int w, int h, int pixsize, unsigned char *buf, int bassackwards, int pad)
+void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 {
-	int i, j, k, l, pitch;
-	if(pad) pitch=BMPPAD(w*pixsize);
-	else pitch=w*pixsize;
+	int i, j, ps=pix[format].pixelsize;
 	for(i=0; i<h; i++)
 	{
-		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			for(k=0; k<pixsize; k++)
-			{
-				buf[i*pitch+j*pixsize+k]=((l+y)*(j+x)*(k+1))%256;
-			}
+			buf[(i*w+j)*ps+pix[format].roffset]=((i+y)*(j+x))%256;
+			buf[(i*w+j)*ps+pix[format].goffset]=((i+y)*(j+x)*2)%256;
+			buf[(i*w+j)*ps+pix[format].boffset]=((i+y)*(j+x)*3)%256;
 		}
 	}
 }
 
-int cmpbuf(int x, int y, int w, int h, int ps, unsigned char *buf, int bassackwards, int byteswap, int pad)
+int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassackwards)
 {
-	int i, j, k, l, pitch;
-	if(pad) pitch=BMPPAD(w*ps);
-	else pitch=w*ps;
+	int i, j, l, ps=pix[format].pixelsize;
 	for(i=0; i<h; i++)
 	{
 		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			for(k=0; k<ps; k++)
-			{
-				if(!littleendian() && byteswap)
-				{
-					if(buf[i*pitch+j*ps+(ps-k-1)]!=((l+y)*(j+x)*(k+1))%256 && k!=3) return 0;
-				}
-				else
-				{
-					if(buf[i*pitch+j*ps+k]!=((l+y)*(j+x)*(k+1))%256 && k!=3) return 0;
-				}
-			}
+			if(buf[(l*w+j)*ps+pix[format].roffset]!=((i+y)*(j+x))%256) return 0;
+			if(buf[(l*w+j)*ps+pix[format].goffset]!=((i+y)*(j+x)*2)%256) return 0;
+			if(buf[(l*w+j)*ps+pix[format].boffset]!=((i+y)*(j+x)*3)%256) return 0;
 		}
 	}
 	return 1;
@@ -223,7 +227,7 @@ void glwrite(int format)
 	clearfb();
 	if((rgbaBuffer=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
 		_throw("Could not allocate buffer");
-	initbuf(0, 0, WIDTH, HEIGHT, ps, rgbaBuffer, 1, 0);
+	initbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer);
 	n=N;
 	do
 	{
@@ -267,7 +271,7 @@ void glread(int format)
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		}
 		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, WIDTH, HEIGHT, ps, rgbaBuffer, 1, 0, 0))
+		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
 			_throw("ERROR: Bogus data read back.");
 	} while (rbtime<2. && !check_errors("frame buffer read"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
@@ -288,7 +292,7 @@ void glread(int format)
 				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[WIDTH*ps*j]);
 		}
 		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, WIDTH, HEIGHT, ps, rgbaBuffer, 0, 0, 0))
+		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
 			_throw("ERROR: Bogus data read back.");
 	} while (rbtime<2. && !check_errors("frame buffer read"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
