@@ -11,9 +11,9 @@
  * wxWindows Library License for more details.
  */
 
+#include "bmp.h"
 #include "rrdisplayclient.h"
 #include "hputil.h"
-#include "bmp.h"
 
 int main(int argc, char **argv)
 {
