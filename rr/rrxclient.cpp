@@ -78,10 +78,9 @@ void usage(char *progname)
 	hpprintf("-h or -? = This help screen\n");
 	hpprintf("-s = Use Secure Sockets Layer\n");
 	hpprintf("-p = Set base port for listener (default is %d)\n", RR_DEFAULTPORT);
-	hpprintf("-v = Print version\n");
 	#ifdef _WIN32
-	hpprintf("-install = Install RRXClient as a service\n");
-	hpprintf("-remove = Remove RRXClient service\n");
+	hpprintf("-install = Install %s client as a service\n", __APPNAME);
+	hpprintf("-remove = Remove %s client service\n", __APPNAME);
 	#endif
 }
 
@@ -97,11 +96,6 @@ int main(int argc, char *argv[])
 	{
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
 			{usage(argv[0]);  exit(1);}
-		if(!stricmp(argv[i], "-v"))
-		{
-			hpprintf("%s Display Server v%s.%s\n", __APPNAME, __MAJVER, __MINVER);
-			exit(0);
-		}
 		if(!stricmp(argv[i], "-s")) ssl=1;
 		if(!stricmp(argv[i], "-q")) quiet=1;
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
@@ -123,6 +117,8 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-install")) {install_service();  exit(0);}
 		if(!stricmp(argv[i], "-remove")) {remove_service();  exit(0);}
 	}
+
+	hpprintf("\n%s Client v%s (Build %s)\n", __APPNAME, __VERSION, __BUILD);
 
 	if(service)
 	{
@@ -158,10 +154,10 @@ void start(int argc, char **argv)
 	start:
 	if(!(rrdpy=RRInitDisplay(port, ssl)))
 	{
-		hpprintf("Could not initialize display server:\n%s\n", RRGetError());
+		hpprintf("Could not initialize listener:\n%s\n", RRGetError());
 		return;
 	}
-	hpprintf("Server active on port %d\n", port);
+	hpprintf("Listener active on port %d\n", port);
 	#ifdef _WIN32
 	if(service)
 	{
