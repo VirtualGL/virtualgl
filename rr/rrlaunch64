@@ -21,7 +21,7 @@ LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
 
 IRIX*)
 
-RRGLLIB=/usr/lib64/libGL.so RRX11LIB=/usr/lib64/libX11.so.1 _RLD64_LIST=librrfaker.so:libGL.so:libpthread.so:DEFAULT ${1+"$@"}
+RRGLLIB=/usr/lib64/libGL.so RRX11LIB=/usr/lib64/libX11.so.1 _RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
 
 ;;
 
