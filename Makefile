@@ -72,15 +72,22 @@ ifeq ($(subplatform), 64)
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
+	if [ ! -d $(prefix)/doc/VirtualGL64 ]; then mkdir -p $(prefix)/doc/VirtualGL64; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/vglrun64
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/rrlaunch64
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/VirtualGL64
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/VirtualGL64
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/VirtualGL64
+	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/VirtualGL64
+	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/VirtualGL64
 	echo Install complete.
 else
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
+	if [ ! -d $(prefix)/doc/VirtualGL ]; then mkdir -p $(prefix)/doc/VirtualGL; fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
 	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
@@ -91,6 +98,11 @@ install: rr
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/VirtualGL
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/VirtualGL
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/VirtualGL
+	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/VirtualGL
+	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/VirtualGL
 	echo Install complete.
 endif
 
@@ -100,6 +112,9 @@ uninstall:
 	$(RM) $(prefix)/bin/rrlaunch64
 	$(RM) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
+	$(RM) $(prefix)/doc/VirtualGL64/*
+	rmdir $(prefix)/doc/VirtualGL64
+	rmdir $(prefix)/doc
 	echo Uninstall complete.
 else
 uninstall:
@@ -115,24 +130,25 @@ uninstall:
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest
+	$(RM) $(prefix)/doc/VirtualGL/*
+	rmdir $(prefix)/doc/VirtualGL
+	rmdir $(prefix)/doc
 	echo Uninstall complete.
 endif
 
 ifeq ($(platform), linux)
 
-dist: rr diags $(BLDDIR)/rpms/BUILD $(BLDDIR)/rpms/RPMS
+dist: rr diags
+	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
+	mkdir -p $(BLDDIR)/rpms/RPMS
+	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
 	rm -f $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm; \
-	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_curdir `pwd`" --define "_topdir $(BLDDIR)/rpms" \
+	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_topdir $(BLDDIR)/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
 		rr.spec; \
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm
-
-$(BLDDIR)/rpms/BUILD:
-	mkdir -p $@
-
-$(BLDDIR)/rpms/RPMS:
-	mkdir -p $@
+	rm -rf $(BLDDIR)/rpms
 
 endif
 
