@@ -22,6 +22,9 @@ ifeq ($(OS), SunOS)
  platform := solaris
  subplatform := 64
 endif
+ifeq ($(OS), Darwin)
+ platform := osx
+endif
 
 ifeq ($(M32), yes)
  subplatform :=
