@@ -105,7 +105,7 @@ $(LDIR)/librrfaker.so: $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
 
 $(EDIR)/$(RRLAUNCH): $(RRLAUNCH)
-	install -m 755 $(RRLAUNCH) $@
+	cp $(RRLAUNCH) $@; chmod 755 $@
 
 # Client
 
