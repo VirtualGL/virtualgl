@@ -46,15 +46,29 @@
 
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
-enum {FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA};  // pixel formats
+#define FBX_FORMATS 6
+enum {FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB};  // pixel formats
+
+const int fbx_ps[FBX_FORMATS]=
+	{3, 4, 3, 4, 4, 4};
+const int fbx_bgr[FBX_FORMATS]=
+	{0, 0, 1, 1, 1, 0};
+const int fbx_alphafirst[FBX_FORMATS]=
+	{0, 0, 0, 0, 1, 1};
+const int fbx_roffset[FBX_FORMATS]=
+	{0, 0, 2, 2, 3, 1};
+const int fbx_goffset[FBX_FORMATS]=
+	{1, 1, 1, 1, 2, 2};
+const int fbx_boffset[FBX_FORMATS]=
+	{2, 2, 0, 0, 1, 3};
+const char *fbx_formatname[FBX_FORMATS]=
+	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
 
 typedef struct _fbx_struct
 {
-	int ps;  // pixel size in bytes
 	int width, height, pitch;
-	int bgr; // 1 = BGR/BGRA, 0=RGB/RGBA
 	char *bits;
-	unsigned long rmask, gmask, bmask;
+	int format;
 	fbx_wh wh;
 	int shm;
 
