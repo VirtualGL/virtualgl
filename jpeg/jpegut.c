@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hpjpeg.h"
+#include "rrtimer.h"
 
 #define _catch(f) {if((f)==-1) {printf("HPJPEG: %s\n", hpjGetErrorStr());  goto finally;}}
 
@@ -117,7 +118,7 @@ void gentestjpeg(hpjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	int w, int h, int ps, char *basefilename, int subsamp, int qual, int flags)
 {
 	char tempstr[1024];  unsigned char *bmpbuf=NULL;
-	const char *pixformat;
+	const char *pixformat;  double t;
 
 	if(flags&HPJ_BGR)
 	{
@@ -139,12 +140,14 @@ void gentestjpeg(hpjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	initbuf(bmpbuf, w, h, ps, flags);
 	memset(jpegbuf, 0, HPJBUFSIZE(w, h));
 
+	t=rrtime();
 	_catch(hpjCompress(hnd, bmpbuf, w, 0, h, ps, jpegbuf, size, subsamp, qual, flags));
+	t=rrtime()-t;
 
 	sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat, (flags&HPJ_BOTTOMUP)?
 		"BU":"TD", subsamp==HPJ_444?"444":subsamp==HPJ_422?"422":"411", qual);
 	writejpeg(jpegbuf, *size, tempstr);
-	printf("Done.  Result in %s\n", tempstr);
+	printf("Done.  %f ms\n  Result in %s\n", t*1000., tempstr);
 
 	finally:
 	if(bmpbuf) free(bmpbuf);
@@ -154,7 +157,7 @@ void gentestbmp(hpjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	int w, int h, int ps, char *basefilename, int subsamp, int qual, int flags)
 {
 	unsigned char *bmpbuf=NULL;
-	const char *pixformat;
+	const char *pixformat;  int _w=0, _h=0;  double t;
 
 	if(flags&HPJ_BGR)
 	{
@@ -168,16 +171,26 @@ void gentestbmp(hpjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	}
 	printf("JPEG -> %s %s ... ", pixformat, (flags&HPJ_BOTTOMUP)?"Bottom-Up":"Top-Down ");
 
+	_catch(hpjDecompressHeader(hnd, jpegbuf, jpegsize, &_w, &_h));
+	if(_w!=w || _h!=h)
+	{
+		printf("Incorrect JPEG header\n");  goto finally;
+	}
+
 	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
 		printf("ERROR: Could not allocate buffer\n");  goto finally;
 	}
 	memset(bmpbuf, 0, w*ps*h);
 
+	t=rrtime();
 	_catch(hpjDecompress(hnd, jpegbuf, jpegsize, bmpbuf, w, w*ps, h, ps, flags));
+	t=rrtime()-t;
 
-	if(checkbuf(bmpbuf, w, h, ps, flags)) printf("Passed.\n");
-	else printf("FAILED!\n");
+	if(checkbuf(bmpbuf, w, h, ps, flags)) printf("Passed.");
+	else printf("FAILED!");
+
+	printf("  %f ms\n\n", t*1000.);
 
 	finally:
 	if(bmpbuf) free(bmpbuf);
@@ -186,7 +199,7 @@ void gentestbmp(hpjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 void dotest(int w, int h, int ps, char *basefilename)
 {
 	hpjhandle hnd=NULL, dhnd=NULL;  unsigned char *jpegbuf=NULL;
-	unsigned long size;
+	unsigned long size;  double t;
 
 	if((jpegbuf=(unsigned char *)malloc(HPJBUFSIZE(w, h))) == NULL)
 	{
