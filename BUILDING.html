@@ -1,0 +1,144 @@
+<h2><span style="font-weight: 400"><font size="6">How to build VirtualGL in 9043 easy steps</font></span></h2>
+<p>&nbsp;</p>
+<hr>
+<h2><span style="font-weight: 400">PREREQUISITES: ALL PLATFORMS</span></h2>
+<hr>
+<h3><span style="font-weight: 400">OpenSSL headers and link libraries</span></h3>
+<ul>
+  <li>
+  <h4><span style="font-weight: 400">On RedHat Linux, these can be found in the openssl-devel package.&nbsp;  Otherwise,
+   you will need to build and install the toolkit from source.&nbsp; The source code
+   can be obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.</span></h4>
+  </li>
+  <li>
+  <h4><span style="font-weight: 400">OpenSSL Binaries and headers for Win32 are included in the VirtualGL build
+   environment.&nbsp;  Per the terms of the OpenSSL license, the <i>LICENSE-OpenSSL.txt</i>
+   file in the root of the repository contains all required notices and disclaimers
+   relating to this binary distribution.&nbsp; These binaries were built 
+  directly from unmodified source.</span></h4>
+  </li>
+</ul>
+<h3><span style="font-weight: 400"><i>RECOMMENDED: </i>&nbsp;Intel Integrated 
+Performance Primitives (IPP)</span></h3>
+<ul>
+  <li>
+  <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
+   produce correct, albeit slow, behavior.&nbsp; In order to get optimal
+   performance out of VirtualGL, however, it is necessary to use the Intel 
+  Performance Primitives, which are capable of compressing JPEG images 3-4x 
+  faster than libjpeg.</span></h4>
+  </li>
+  <li>
+  <h4><span style="font-weight: 400">Single developer licenses for IPP can be obtained
+   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
+   distributed royalty-free.</span></h4>
+  </li>
+  <li>On Windows, make sure that the IPP include and lib paths are added to your 
+  system INCLUDE and LIB variables.</li>
+</ul>
+<p>&nbsp;</p>
+<hr>
+<h2><span style="font-weight: 400">PREREQUISITES: LINUX-SPECIFIC</span></h2>
+<hr>
+<h3><span style="font-weight: 400">GCC and G++ (tested with v2.96 and v3.2)</span></h3>
+<h3><span style="font-weight: 400">X11 dev. kit</span></h3>
+<ul>
+  <li>On RedHat Linux, this can be found in the XFree86-devel package</li>
+</ul>
+<h3><span style="font-weight: 400">GNU Make v3.7 or later</span></h3>
+<p>&nbsp;</p>
+<hr>
+<h2><span style="font-weight: 400">PREREQUISITES: WIN32-SPECIFIC</span></h2>
+<hr>
+<h3><span style="font-weight: 400">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
+<ul>
+  <li><span style="font-weight: 400">If you don't own Visual C++, download the free Visual C++ Toolkit from
+   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/">http://msdn.microsoft.com/visualc/vctoolkit2003/</a>.&nbsp; You will also need the Core Platform SDK (<a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">http://www.microsoft.com/msdownload/platformsdk/sdkupdate/</a>.)&nbsp; 
+  You may optionally want to install the free Debugging Tools for Windows (<a href="http://www.microsoft.com/whdc/devtools/debugging/default.mspx">http://www.microsoft.com/whdc/devtools/debugging/default.mspx</a>.)</span></li>
+</ul>
+<h3><span style="font-weight: 400">Hummingbird Exceed XDK v8.0 or later</span></h3>
+<ul>
+  <li>This can be purchased directly from Hummingbird (<a href="http://www.hummingbird.com">http://www.hummingbird.com</a>.)</li>
+  <li>Add the XDK include and lib paths to your system INCLUDE and LIB variables 
+  prior to building VirtualGL</li>
+  <li>See install notes on the VirtualGL web-site regarding patching Exceed to 
+  eliminate a bug in the MIT-SHM extension</li>
+</ul>
+<h3><span style="font-weight: 400">MSYS or Cygwin</span></h3>
+<ul>
+  <li>VirtualGL's make system is written to take advantage of GNU-specific make 
+  semantics and relies upon several 
+  Unix-ish shell commands</li>
+  <li>MSYS can be downloaded from <a href="http://www.mingw.org/download.shtml">
+  http://www.mingw.org/download.shtml</a>.</li>
+  <li>Cygwin can be downloaded from <a href="http://www.cygwin.com/">
+  http://www.cygwin.com/</a>.</li>
+</ul>
+<h3><span style="font-weight: 400">PThreads for Win32</span></h3>
+<ul>
+  <li>This release of VirtualGL requires the open source PThreads-Win32 package.&nbsp; 
+  The 9-18-2003 binary is included in the repository for convenience, as this 
+  version has been thoroughly tested and found to be stable with VirtualGL.&nbsp; This 
+  binary can also be downloaded from here:
+  <a href="http://sources.redhat.com/pthreads-win32/">
+  http://sources.redhat.com/pthreads-win32/</a>, along with its associated 
+  source code.</li>
+</ul>
+<p>&nbsp;</p>
+<hr>
+<h2><span style="font-weight: 400">BUILDING</span></h2>
+<hr>
+<p>Assuming all of the above is set up correctly, you should be able to just 
+type &quot;make&quot;.</p>
+<p>&nbsp;</p>
+<hr>
+<h2><span style="font-weight: 400">MAKEFILE OPTIONS</span></h2>
+<hr>
+<p><span style="font-weight: 400">Each of these options can be passed as an argument to "make".</span></p>
+<h3><span style="font-weight: 400">JPEGLIB = &lt; libjpeg | pegasus &gt;<libjpeg|pegasus></libjpeg|pegasus></span></h3>
+<blockquote>
+  <p><span style="font-weight: 400">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
+               This custom libjpeg code is included in the <i>jpeg/jpeg-6b</i>
+               directory and differs from the IJG release (see
+               <a href="http://www.ijg.org">http://www.ijg.org</a>) only in its support of BGR 
+  and 32-bit pixel formats (both of which are necessary to allow for 
+  decompressing directly into X11 shared memory.)</span></p>
+  <p><span style="font-weight: 400">pegasus = Use the PICTools RapidVue codec from Pegasus Imaging
+               (<a href="http://www.jpg.com">http://www.jpg.com</a>.)&nbsp; The VirtualGL build environment looks for
+               PICTools in a directory called "pictools" located one level up
+               from the build directory.&nbsp; You can override this by passing
+               an additional argument of PEGDIR={location of pictools directory}.</span></p>
+</blockquote>
+<h3><span style="font-weight: 400">IPPDIR={location of Intel Performance Primitives 
+directory}</span></h3>
+<blockquote>
+  <p><span style="font-weight: 400">On Linux builds, this allows you to override 
+  the default location of /opt/intel/ipp40, for instance to use an earlier or 
+  later version of IPP.</span></p>
+</blockquote>
+<h3><span style="font-weight: 400">M32=yes</span></h3>
+<blockquote>
+  <p><span style="font-weight: 400">On x86_64 systems, this cross-compiles a 32-bit 
+  (x86) version of VirtualGL.&nbsp; The default on x86_64 systems is to build a 
+  64-bit &quot;supplemental&quot; package which contains only the 64-bit faker library.&nbsp; 
+  The 32-bit x86 client can be used by both x86_64 and x86 systems, so it is 
+  only necessary to build the server-side faker using 64-bit code (so that it 
+  can be inserted into 64-bit apps.)</span></p>
+  <p>&nbsp;</p>
+</blockquote>
+<hr>
+<h2><span style="font-weight: 400">INSTALLING / DISTRIBUTING</span></h2>
+<hr>
+<p>On Linux, you can type</p>
+<h3><span style="font-weight: 400">make install [prefix={install prefix}]</span></h3>
+<p>&quot;prefix&quot; defaults to <i>/usr/local</i> but can be changed to 
+something else (e.g. <i>/usr</i>) if 
+you prefer.&nbsp; Executables will be installed to $prefix/bin, and libraries 
+will be installed to $prefix/lib.</p>
+<p>To build a redistributable package, type</p>
+<h3><span style="font-weight: 400">make dist</span></h3>
+<ul>
+  <li>On Linux, this requires RPM v4 or later</li>
+  <li>On Windows, this requires the Nullsoft Install System (<a href="http://nsis.sourceforge.net/">http://nsis.sourceforge.net/</a>.)&nbsp; 
+  makensis.exe should be in your path.</li>
+</ul>
