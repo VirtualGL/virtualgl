@@ -1,12 +1,20 @@
-<h2><span style="font-weight: 400"><font size="6">How to build VirtualGL in 9043 easy steps</font></span></h2>
-<p>&nbsp;</p>
+<style>
+<!--
+h1           { font-family: Arial; font-size: 24pt; font-weight: bold }
+h2           { font-family: Arial; text-decoration: underline; font-size: 18pt; font-style: 
+               italic }
+h3           { font-family: Arial; font-size: 14pt }
+-->
+</style>
+<h1>How to build VirtualGL in 9043 easy steps</h1>
 <hr>
-<h2><span style="font-weight: 400">PREREQUISITES: ALL PLATFORMS</span></h2>
-<hr>
+<h2><span style="font-weight: 400">Prerequisites - All Platforms</span></h2>
 <h3><span style="font-weight: 400">OpenSSL headers and link libraries</span></h3>
 <ul>
   <li>
-  <h4><span style="font-weight: 400">On RedHat Linux, these can be found in the openssl-devel package.&nbsp;  Otherwise,
+  <h4><span style="font-weight: 400">On most Linux variants, these can be found in the openssl-devel 
+  package included with the distribution.&nbsp; If your Linux distribution does 
+  not contain a pre-packaged version of OpenSSL,
    you will need to build and install the toolkit from source.&nbsp; The source code
    can be obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.</span></h4>
   </li>
@@ -18,8 +26,8 @@
   directly from unmodified source.</span></h4>
   </li>
 </ul>
-<h3><span style="font-weight: 400"><i>RECOMMENDED: </i>&nbsp;Intel Integrated 
-Performance Primitives (IPP)</span></h3>
+<h3><span style="font-weight: 400">Intel Integrated 
+Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></span></h3>
 <ul>
   <li>
   <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
@@ -36,20 +44,41 @@ Performance Primitives (IPP)</span></h3>
   <li>On Windows, make sure that the IPP include and lib paths are added to your 
   system INCLUDE and LIB variables.</li>
 </ul>
-<p>&nbsp;</p>
 <hr>
-<h2><span style="font-weight: 400">PREREQUISITES: LINUX-SPECIFIC</span></h2>
-<hr>
+<h2><span style="font-weight: 400">Prerequisites - Linux</span></h2>
 <h3><span style="font-weight: 400">GCC and G++ (tested with v2.96 and v3.2)</span></h3>
 <h3><span style="font-weight: 400">X11 dev. kit</span></h3>
 <ul>
-  <li>On RedHat Linux, this can be found in the XFree86-devel package</li>
+  <li>On most Linux variants, this can be found in the XFree86-devel or 
+  xorg-x11-devel package</li>
 </ul>
 <h3><span style="font-weight: 400">GNU Make v3.7 or later</span></h3>
-<p>&nbsp;</p>
 <hr>
-<h2><span style="font-weight: 400">PREREQUISITES: WIN32-SPECIFIC</span></h2>
+<h2><span style="font-weight: 400">Prerequisites - x86-64 Linux</span></h2>
+<p>Not all x86-64 Linux systems contain the necessary 32-bit packages to build 
+and run VirtualGL.&nbsp; In general, you will need the following 32-bit 
+packages:</p>
+<ul>
+  <li>GLIBC</li>
+  <li>X11 dev. kit</li>
+  <li>OpenSSL runtime</li>
+  <li>libstdc++</li>
+</ul>
+<p>and the various dependencies thereof.&nbsp; On most x86-64 Linux systems, the 
+32-bit GLIBC and libstdc++ are installed by default, but you will need to 
+manually install the 32-bit X11 dev. kit (XFree86-devel or xorg-x11-devel) and 
+OpenSSL runtime from the CD.&nbsp; Some earlier RedHat/Whitebox Enterprise 3 
+releases do not contain the 32-bit X11 dev. kit or 32-bit OpenSSL runtime on the 
+CD, and in this case you can grab those packages from a 32-bit distribution or 
+from the RedHat Network or the Whitebox web-site.</p>
+<p>To link against the 32-bit OpenSSL runtime, you will need to perform the 
+following additional step:</p>
+<blockquote>
+<p><font face="Courier New">cd /usr/lib<br>
+ln -fs /lib/libssl.so.? libssl.so</font></p>
+</blockquote>
 <hr>
+<h2><span style="font-weight: 400">Prerequisites - Win32</span></h2>
 <h3><span style="font-weight: 400">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
 <ul>
   <li><span style="font-weight: 400">If you don't own Visual C++, download the free Visual C++ Toolkit from
@@ -84,21 +113,17 @@ Performance Primitives (IPP)</span></h3>
   http://sources.redhat.com/pthreads-win32/</a>, along with its associated 
   source code.</li>
 </ul>
-<p>&nbsp;</p>
 <hr>
-<h2><span style="font-weight: 400">BUILDING</span></h2>
-<hr>
+<h2><span style="font-weight: 400">Building</span></h2>
 <p>Assuming all of the above is set up correctly, you should be able to just 
 type &quot;make&quot;.</p>
-<p>&nbsp;</p>
 <hr>
-<h2><span style="font-weight: 400">MAKEFILE OPTIONS</span></h2>
-<hr>
+<h2><span style="font-weight: 400">Makefile Options</span></h2>
 <p><span style="font-weight: 400">Each of these options can be passed as an argument to "make".</span></p>
 <h3><span style="font-weight: 400">DEBUG = yes</span></h3>
 <blockquote>
 <p>Build a version of VirtualGL with debugging symbols and no optimization.&nbsp; 
-The debug version will reside in ${platform}/libd and ${platform}/bind, whereas 
+The debug version will reside in ${platform}/dbg/lib and ${platform}/dbg/bin, whereas 
 the release version will reside in ${platform}/lib and ${platform}/bin, so these 
 two versions can be built independently of one another.</p>
 </blockquote>
@@ -116,14 +141,14 @@ two versions can be built independently of one another.</p>
                from the build directory.&nbsp; You can override this by passing
                an additional argument of PEGDIR={location of pictools directory}.</span></p>
 </blockquote>
-<h3><span style="font-weight: 400">IPPDIR={location of Intel Performance Primitives 
+<h3><span style="font-weight: 400">IPPDIR = {location of Intel Performance Primitives 
 directory}</span></h3>
 <blockquote>
   <p><span style="font-weight: 400">On Linux builds, this allows you to override 
-  the default location of /opt/intel/ipp40, for instance to use an earlier or 
+  the default location of /opt/intel/ipp41, for instance to use an earlier or 
   later version of IPP.</span></p>
 </blockquote>
-<h3><span style="font-weight: 400">M32=yes</span></h3>
+<h3><span style="font-weight: 400">M32 = yes</span></h3>
 <blockquote>
   <p><span style="font-weight: 400">On x86_64 systems, this cross-compiles a 32-bit 
   (x86) version of VirtualGL.&nbsp; The default on x86_64 systems is to build a 
@@ -131,11 +156,9 @@ directory}</span></h3>
   The 32-bit x86 client can be used by both x86_64 and x86 systems, so it is 
   only necessary to build the server-side faker using 64-bit code (so that it 
   can be inserted into 64-bit apps.)</span></p>
-  <p>&nbsp;</p>
 </blockquote>
 <hr>
-<h2><span style="font-weight: 400">INSTALLING / DISTRIBUTING</span></h2>
-<hr>
+<h2><span style="font-weight: 400">Installing / Distributing</span></h2>
 <p>On Linux, you can type</p>
 <h3><span style="font-weight: 400">make install [prefix={install prefix}]</span></h3>
 <p>&quot;prefix&quot; defaults to <i>/usr/local</i> but can be changed to 
