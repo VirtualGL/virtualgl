@@ -92,8 +92,6 @@ void safeexit(int retcode)
 
 #include "faker-glx.cpp"
 
-#define errifnot(f) {if(!(f)) _die(__FILE__, __LINE__, "Unexpected NULL condition");}
-
 #if 0
 // Used during debug so we can get a stack trace from an X11 protocol error
 #ifdef __DEBUG__

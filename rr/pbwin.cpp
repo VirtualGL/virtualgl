@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef sun
+#if defined(sun)||defined(sgi)
 #define GL_BGR_EXT GL_RGB
 #define GL_BGRA_EXT GL_RGBA
 #endif
