@@ -94,6 +94,7 @@ class winhash : public _winhash
 			return (
 				(pb && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
 				(pb && !strcasecmp(DisplayString(pb->getpbdpy()), key1) && key2==pb->getdrawable()) ||
+				(pb && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getdrawable()) ||
 				(!strcasecmp(key1, h->key1) && key2==h->key2)
 			);
 		}
