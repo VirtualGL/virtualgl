@@ -45,7 +45,10 @@ AR = ar ruvs
 INSTALL = /usr/ucb/install
 
 CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+
+ifneq ($(USEGLP), no)
 CDEFINES := $(CDEFINES) -DUSEGLP
+endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
