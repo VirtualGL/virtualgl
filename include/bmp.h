@@ -51,8 +51,9 @@ typedef struct _bmphdr
 } bmphdr;
 
 // This will load a Windows bitmap from a file and return a buffer containing
-// the bitmap data in top-down, BGRA format.  If pad=1, each line in the output
-// data is padded to the nearest 32-bit boundary
+// the bitmap data in top-down, BGR(A) format.  If pad=1, each line in the output
+// data is padded to the nearest 32-bit boundary.  The width, height, and depth
+// (in bytes per pixel) are returned in w, h, and d.
 
 #define readme(fd, addr, size) \
 	if((bytesread=read(fd, addr, (size)))==-1) {errstr=strerror(errno);  goto finally;} \
@@ -148,8 +149,9 @@ static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h, 
 	return errstr;
 }
 
-// This will save a top-down, BGRA buffer as a Windows bitmap.  If pad=1, each
-// line in the input data should be padded to the nearest 32-bit boundary
+// This will save a top-down, BGR(A) buffer as a Windows bitmap.  If pad=1, each
+// line in the input data should be padded to the nearest 32-bit boundary.
+// d represents the image depth in bytes per pixel.
 
 #define writeme(fd, addr, size) \
 	if((byteswritten=write(fd, addr, (size)))==-1) {errstr=strerror(errno);  goto finally;} \
