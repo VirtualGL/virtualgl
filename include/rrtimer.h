@@ -14,6 +14,8 @@
 #ifndef __RRTIMER_H__
 #define __RRTIMER_H__
 
+#ifdef __cplusplus
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -72,6 +74,36 @@ class rrtimer
 		#endif
 		double t1;
 };
+
+#endif  // __cplusplus
+
+#ifdef _WIN32
+
+#include <windows.h>
+
+inline double rrtime(void)
+{
+	LARGE_INTEGER Frequency, Time;
+	if(QueryPerformanceFrequency(&Frequency)!=0)
+	{
+		QueryPerformanceCounter(&Time);
+		return (double)Time.QuadPart/(double)Frequency.QuadPart;
+	}
+	else return (double)GetTickCount()*0.001;
+}
+
+#else
+
+#include <sys/time.h>
+
+inline double rrtime(void)
+{
+	struct timeval __tv;
+	gettimeofday(&__tv, (struct timezone *)NULL);
+	return((double)__tv.tv_sec+(double)__tv.tv_usec*0.000001);
+}
+
+#endif
 
 #endif
 
