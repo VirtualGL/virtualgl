@@ -98,19 +98,21 @@ uninstall:
 	echo Uninstall complete.
 endif
 
-dist: rr diags rpms/BUILD rpms/RPMS
-	rm $(PACKAGENAME).$(RPMARCH).rpm; \
-	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
+ALL: dist mesademos
+
+dist: rr diags $(BLDDIR)/rpms/BUILD $(BLDDIR)/rpms/RPMS
+	rm -f $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm; \
+	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_curdir `pwd`" --define "_topdir $(BLDDIR)/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
 		rr.spec; \
-	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm
 
-rpms/BUILD:
-	mkdir -p rpms/BUILD
+$(BLDDIR)/rpms/BUILD:
+	mkdir -p $@
 
-rpms/RPMS:
-	mkdir -p rpms/RPMS
+$(BLDDIR)/rpms/RPMS:
+	mkdir -p $@
 
 ##########################################################################
 endif

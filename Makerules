@@ -41,15 +41,23 @@ ifeq ($(TOPDIR),)
 TOPDIR = ..
 endif
 
-ifeq ($(DEBUG), yes)
-EDIR := $(TOPDIR)/$(platform)$(subplatform)/bind
-LDIR := $(TOPDIR)/$(platform)$(subplatform)/libd
-ODIR := $(TOPDIR)/$(platform)$(subplatform)/objd
+ifneq ($(DISTRO),)
+BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
 else
-EDIR := $(TOPDIR)/$(platform)$(subplatform)/bin
-LDIR := $(TOPDIR)/$(platform)$(subplatform)/lib
-ODIR := $(TOPDIR)/$(platform)$(subplatform)/obj
+BLDDIR = $(TOPDIR)/$(platform)$(subplatform)
 endif
+
+ifeq ($(DEBUG), yes)
+BLDDIR := $(BLDDIR)/dbg
+endif
+
+ENAME = bin
+LNAME = lib
+ONAME = obj
+
+EDIR := $(BLDDIR)/$(ENAME)
+LDIR := $(BLDDIR)/$(LNAME)
+ODIR := $(BLDDIR)/$(ONAME)
 
 _DUMMY := $(shell mkdir -p $(EDIR))
 _DUMMY2 := $(shell mkdir -p $(LDIR))
