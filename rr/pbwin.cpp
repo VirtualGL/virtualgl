@@ -48,6 +48,48 @@ int glerror(void)
 #endif
 
 
+// This is a container class which allows us to temporarily swap in a new
+// drawable and then "pop the stack" after we're done with it.  It does nothing
+// unless there is already a valid context established
+
+class tempctx
+{
+	public:
+
+		tempctx(GLXDrawable draw, GLXDrawable read, GLXContext ctx=glXGetCurrentContext()) :
+			_dpy(glXGetCurrentDisplay()), _ctx(glXGetCurrentContext()),
+			_read(glXGetCurrentReadDrawable()), _draw(glXGetCurrentDrawable()),
+			mc(false)
+		{
+			if(!_dpy || !_ctx || (!_read && !_draw)) return;
+			if(read==-1) read=_read;  if(draw==-1) draw=_draw;
+			if(_read!=read || _draw!=draw || _ctx!=ctx)
+			{
+				_glXMakeContextCurrent(_dpy, draw, read, ctx);
+				mc=true;
+			}
+		}
+
+		void restore(void)
+		{
+			if(mc && _ctx && _dpy && (_read || _draw))
+				_glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
+		}
+
+		~tempctx(void)
+		{
+			restore();
+		}
+
+	private:
+
+		Display *_dpy;
+		GLXContext _ctx;
+		GLXDrawable _read, _draw;
+		bool mc;
+};
+
+
 pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 {
 	if(!dpy || !config || w<1 || h<1) _throw("Invalid argument");
@@ -66,6 +108,9 @@ pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 	w=min(w, dw);  h=min(h, dh);
 	this->w=w;  this->h=h;
 	pbattribs[1]=w;  pbattribs[3]=h;
+	#ifdef sun
+	tempctx tc(0, 0, 0);
+	#endif
 	d=_glXCreatePbuffer(dpy, config, pbattribs);
 	if(!d) _throw("Could not create Pbuffer");
 }
@@ -73,7 +118,12 @@ pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 pbuffer::~pbuffer(void)
 {
 	if(d && dpy)
+	{
+		#ifdef sun
+		tempctx tc(0, 0, 0);
+		#endif
 		_glXDestroyPbuffer(dpy, d);
+	}
 }
 
 void pbuffer::clear(void)
@@ -91,45 +141,6 @@ void pbuffer::swap(void)
 {
 	_glXSwapBuffers(dpy, d);
 }
-
-
-// This is a container class which allows us to temporarily swap in a new
-// drawable and then "pop the stack" after we're done with it.  It does nothing
-// unless there is already a valid context established
-
-class tempctx
-{
-	public:
-
-		tempctx(GLXDrawable draw, GLXDrawable read)
-		{
-			_read=_draw=0;  _ctx=0;  _dpy=NULL;  mc=false;
-			if(!read && !draw) return;
-			if((_ctx=glXGetCurrentContext())==0) return;
-			if((_dpy=glXGetCurrentDisplay())==NULL) return;
-			_read=glXGetCurrentReadDrawable();
-			_draw=glXGetCurrentDrawable();
-			if(!read) read=_read;  if(!draw) draw=_draw;
-			if(_read!=read || _draw!=draw)
-			{
-				_glXMakeContextCurrent(_dpy, draw, read, _ctx);
-				mc=true;
-			}
-		}
-
-		~tempctx(void)
-		{
-			if(mc && _ctx && _dpy)
-				_glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
-		}
-
-	private:
-
-		Display *_dpy;
-		GLXContext _ctx;
-		GLXDrawable _read, _draw;
-		bool mc;
-};
 
 
 // This class encapsulates the Pbuffer, its most recent ancestor, and
@@ -344,8 +355,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
-	tempctx *tc=NULL;
-	errifnot((tc=new tempctx(0, glXGetCurrentDrawable())));
+	tempctx tc(-1, glXGetCurrentDrawable());
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -371,6 +381,6 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();
-	if(tc) delete tc;
+	tc.restore();
 	glReadBuffer(readbuf);
 }
