@@ -183,6 +183,16 @@ sunpkg: rr diags
 	rm -rf $(BLDDIR)/pkgbuild
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
+.PHONY: tarball
+tarball: rr diags
+	rm -rf $(BLDDIR)/fakeroot
+	rm -f $(BLDDIR)/$(PACKAGENAME).tar.gz
+	$(MAKE) prefix=$(BLDDIR)/fakeroot install
+	cd $(BLDDIR)/fakeroot; \
+	tar cf ../$(PACKAGENAME).tar *
+	gzip $(BLDDIR)/$(PACKAGENAME).tar
+	rm -rf $(BLDDIR)/fakeroot
+
 ##########################################################################
 endif
 ##########################################################################
