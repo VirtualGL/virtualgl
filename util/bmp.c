@@ -258,7 +258,8 @@ int saveppm(char *filename, unsigned char *buf, int w, int h,
 
 	if((fs=fopen(filename, "wb"))==NULL) _throw(strerror(errno));
 	if(fprintf(fs, "P6\n")<1) _throw("Write error");
-	if(fprintf(fs, "%d %d 255\n", w, h)<1) _throw("Write error");
+	if(fprintf(fs, "%d %d\n", w, h)<1) _throw("Write error");
+	if(fprintf(fs, "255\n")<1) _throw("Write error");
 
 	if((tempbuf=(unsigned char *)malloc(w*h*3))==NULL)
 		_throw("Memory allocation error");
@@ -279,12 +280,8 @@ int savebmp(char *filename, unsigned char *buf, int w, int h,
 {
 	int fd=-1, byteswritten, dstpitch, retcode=0;
 	int flags=O_RDWR|O_CREAT|O_TRUNC;
-	unsigned char *tempbuf=NULL, *temp;
+	unsigned char *tempbuf=NULL;  char *temp;
 	bmphdr bh;  int mode;
-	const int ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
-	const int roffset[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
-	const int goffset[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
-	const int boffset[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 
 	#ifdef _WIN32
 	flags|=O_BINARY;  mode=_S_IREAD|_S_IWRITE;
