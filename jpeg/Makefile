@@ -195,7 +195,7 @@ endif
 $(LDIR)/libhpjpeg.$(SHEXT): $(ODIR)/hpjpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrutil.$(SHEXT)
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrutil.a
 	$(CXX) $(LDFLAGS) $< -o $@ -lhpjpeg -lrrutil
 
 $(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.$(SHEXT)
