@@ -1,0 +1,567 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <title>VirtualGL User's Guide (Linux)</title>
+
+
+  <style type="text/css">
+body {
+background-color: rgb(255, 255, 255);
+font-family: Arial,Helvetica,sans-serif;
+}
+a {
+text-decoration: none;
+}
+dt {
+font-weight: bold;
+margin-left: 25px;
+margin-top: 20px;
+}
+.valid {
+border-width: 0px;
+}
+pre {
+border: 1px solid rgb(0, 0, 255);
+padding: 4px;
+font-family: courier,monospace;
+font-size: 14px;
+background-color: rgb(238, 238, 255);
+margin-left: 25px;
+margin-right: 25px;
+}
+tr {
+background-color: rgb(238, 238, 255);
+color: rgb(32, 32, 32);
+text-align: left;
+}
+th {
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+text-align: left;
+}
+td {
+vertical-align: top;
+text-align: left;
+}
+.colorheader {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.newwin {
+border-width: 0px;
+}
+.tip {
+border: 1px solid rgb(0, 0, 0);
+padding: 1px 5px;
+font-weight: bold;
+background-color: rgb(255, 255, 0);
+margin-right: 10px;
+}
+.note {
+border: 1px solid rgb(0, 0, 0);
+padding: 2px;
+font-weight: bold;
+background-color: blue;
+color: rgb(255, 255, 255);
+}
+.monospace {
+font-family: monospace
+}
+hr {
+margin-bottom: 7px;
+}
+h2 {
+padding: 5px;
+color: rgb(255, 255, 255);
+background-color: rgb(25, 25, 112);
+}
+h3 {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.top {
+text-align: right;
+}
+  </style></head>
+<body>
+<h1>VirtualGL
+0.9.3 User's Guide
+(Linux)</h1>
+
+<h2>Contents</h2>
+
+<ul>
+
+<li><a href="#legalinfo">Legal Information</a></li>
+<li><a href="#requirements">System Requirements</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#basicusage">Basic Usage</a></li>
+<li><a href="#secureusage">Secure Usage</a></li>
+</ul>
+
+<hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
+
+<h2>Legal Information</h2>
+
+This
+product includes software developed
+by the OpenSSL Project for use in the OpenSSL Toolkit (<a href="http://www.openssl.org/">http://www.openssl.org/</a>.)&nbsp;
+Further information is contained in <a href="LICENSE-OpenSSL.txt"><span class="monospace">LICENSE-OpenSSL.txt</span></a>,
+which can be found
+in the same directory as this documentation.<br>
+
+<span class="monospace"></span><br>
+
+All
+other components of VirtualGL fall under the scope of the <a href="LICENSE.txt">wxWindows Library License, v3</a>,
+a derivative of
+the <a href="LGPL.txt">LGPL</a>.<br>
+
+<br>
+
+<div style="text-align: right;"><a href="#" target="_top">top</a>
+</div>
+
+<hr><a name="requirements"></a>
+<h2>System Requirements</h2>
+
+<h3>Server (32-bit)</h3>
+
+<ul>
+
+<li>dual Pentium 4, 1.7 GHz or faster (or equivalent)</li>
+<ul>
+<li>For optimal performance, the processor should support SSE2 extensions</li>
+</ul>
+<li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
+<li>RedHat Linux 7.2 or newer (or equivalent)</li>
+<li>X server configured for true color (24/32-bit)</li>
+</ul>
+
+<h3>Server (64-bit)</h3>
+
+<ul>
+
+<li>Processor</li>
+<ul>
+<li>dual P4/Xeon with EM64T, or</li>
+<li>dual Itanium-2, 1.4 GHz or faster <span style="color: rgb(255, 0, 0);">*</span>, or</li>
+<li>dual Opteron or Athlon64, 1.8 GHz or faster</li>
+<ul>
+<li>For optimal performance with
+VirtualGL64, the processor should support SSE3 extensions.&nbsp;
+Only newer AMD 64-bit processors support SSE3.</li>
+</ul>
+</ul>
+<li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
+<li>RedHat Enterprise Linux 3.0 (64-bit) or equivalent (Works with
+<a href="http://fedora.redhat.com/">Fedora</a> and
+<a href="http://whiteboxlinux.net/">WhiteBox</a>)</li>
+<li>X server configured for true color (24/32-bit)</li>
+</ul>
+
+<h3>Client</h3>
+
+<ul>
+
+<li>Processor</li>
+<ul>
+<li>single PIII or P4, 1.0 GHz or faster (or equivalent), or</li>
+<li>single Itanium-2, 900 MHz or faster <span style="color: rgb(255, 0, 0);">*</span><br>
+</li>
+</ul>
+<li>graphics card with decent 2D performance</li>
+<li>RedHat Linux 7.2 or newer (or equivalent)</li>
+<li>X server configured for true color (24/32-bit)</li>
+</ul>
+
+<span style="color: rgb(255, 0, 0);">*
+The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
+of development equipment.&nbsp; We are looking for volunteers to continue this
+effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> if you're interested.&nbsp;</span>
+<div class="top"><a href="#" target="_top">top</a></div>
+
+<hr>
+<a name="installation"></a>
+<h2>Installation</h2>
+
+<ol>
+
+  <li>Obtain the latest VirtualGL RPM package from the files
+area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
+<br>
+<span class="note">Note:</span>&nbsp; .tgz packages are provided for users of non-RedHat platforms.&nbsp; You can use <a href="http://www.kitenet.net/programs/alien/">alien</a> to convert these into .deb packages if you prefer.&nbsp; These packages have not been thoroughly tested.<br>
+<br>The "glibc22" or "rh7"
+packages are built on RedHat Enterprise Linux 2.1, but they should
+theoretically work on any RPM-based system that has GLIBC 2.2 and
+libstdc++ 2.96, including RedHat Linux 7.2 and 7.3 (and maybe 7.1 if
+patched.)<br>
+    <br>
+The "glibc23" or "rh8" packages are built on Whitebox Enterprise Linux
+3.0, but they should theoretically work on any RPM-based system that
+has GLIBC 2.3 and libstdc++ 3.2 or 3.3, including RedHat
+Linux 8 (patched), RedHat Linux 9, RedHat Enterprise Linux 3, Fedora
+Core 1 and 2, and SuSE 8.2 or newer.<br>
+<br>
+  </li>
+
+<li>Log in as root, cd to the directory
+where you downloaded the RPM package, and issue the following
+command:<br>
+<pre>rpm -Uvh {RPM package name}</pre>
+</li>
+</ol>
+
+<span class="note">Note:</span>&nbsp;
+For x86-64 systems, the VirtualGL64 package contains the server
+components for use with 64-bit apps.&nbsp; To install the client or
+the 32-bit server components, install the 32-bit VirtualGL package.<br>
+<h3>Display Configuration (Server Only)</h3>
+<p>VirtualGL requires access to display
+:0 (or to the display specified in the <span class="monospace">RRDISPLAY</span> environment variable)
+so that it can create and render to off-screen Pbuffers on the server's
+3D graphics card.&nbsp; Normally, this is only possible if someone has
+logged into the server locally and explicitly granted this permission
+by issuing</p>
+<pre>xhost +localhost</pre>
+
+<p>However, it is possible to configure the server such that this permission is 
+automatically granted regardless of whether anyone is logged in locally.</p>
+
+<ol>
+  <li>If the server machine is configured to boot into runlevel 5 (graphical 
+  login), then temporarily shut down its X server by issuing<br>
+    <pre>init 3</pre>
+ as root</li>
+
+  <li>
+  If the server machine is configured to boot into runlevel 3 (text login), 
+  then configure it to boot into a graphical login by changing the first line of
+  <span class="monospace">/etc/inittab</span> from<br>
+  <br>
+
+  <span class="monospace">id:3:initdefault:</span><br class="monospace">
+
+  <br>
+to<br>
+  <span class="monospace"><br>
+id:5:initdefault:<br>
+&nbsp;</span>
+  </li>
+
+  <li>If the server is running the NVidia accelerated GLX drivers, follow the 
+  instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span> regarding setting 
+  the appropriate permissions for  <span class="monospace">/dev/nvidia*</span>.&nbsp; Usually, this 
+  involves commenting out any lines containing 
+  <span class="monospace">&lt;dri&gt;</span> from
+   <span class="monospace">/etc/security/console.perms</span>, 
+  changing the mode of  <span class="monospace">/dev/nvidia*</span> to 0666, and changing the owner of
+   <span class="monospace">
+  /dev/nvidia*</span> to root.</li>
+
+  <li> Edit <span class="monospace">/etc/X11/xdm/Xsetup_0</span> (replace "0" with the display number of 
+  the X server you are configuring.)&nbsp; Add the line<br>
+
+  
+    <pre>xhost +localhost</pre>
+
+  
+  to the tail end of this file.</li>
+
+  <li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; In
+   <span class="monospace">/etc/X11/gdm/gdm.conf</span>, look 
+  for any line containing a command line such as 
+  <span class="monospace">/usr/X11/bin/X</span> 
+  or  <span class="monospace">/usr/X11R6/bin/X</span>.&nbsp; Add an argument of
+  <span class="monospace">-tst</span> to these command lines.&nbsp; Disabling 
+  XTEST eliminates a potential security loophole opened up by Step 4, whereby an 
+  authenticated user on the server could theoretically send key/mouse events 
+  into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
+  server's local display logged out when not in use.</li>
+
+  <li>Restart the X server by issuing<br>
+    <pre>init 5</pre>
+ as root.</li>
+
+  <li>You can check your work by running<br>
+    <pre>xdpyinfo -display :0</pre>
+ In particular, make sure that 
+  XTEST doesn't show up in the list of extensions if you disabled it above.&nbsp; 
+  If <span class="monospace">xdpyinfo</span> fails to run, then the permissions 
+  on Display :0 are probably still too restrictive, meaning that the change in 
+  Step 4 didn't take for some reason.</li>
+
+</ol>
+
+<h3><a name="installsvc"></a>Installing the Linux Client
+as a Service<br>
+</h3>
+
+You can set up the Linux client as a user mode daemon by running<br>
+<pre>rrxclient_config</pre>
+as root.&nbsp; Select either 
+option 1 or 2, depending on whether you want to install the standard or the 
+secure version of the client.
+<br>
+<br>
+This script creates a link in  <span class="monospace">/etc/X11/xinit/xinitrc.d</span> 
+so that the client will be automatically started in user mode whenever an X session is started.&nbsp; It 
+also adds a line to <span class="monospace">/etc/X11/gdm/PostSession/Default</span> to terminate the 
+client whenever the X session terminates.&nbsp;&nbsp; It may or may not work on non-RedHat platforms.<br>
+<br>
+If additional X11 displays are started by the same user (:1, :2, etc.), this 
+will not cause additional VirtualGL client instances to start.&nbsp; Only one 
+VirtualGL client instance is needed to talk to all active displays.&nbsp; 
+However, it is important to note that all active displays on the client 
+workstation need to be running under the same user privileges in order for the 
+same VirtualGL client to communicate with all of them.<br>
+<br>
+If you wish to change the default port that the client listens on, you will 
+need to edit <span class="monospace">/usr/bin/rrxclient_daemon</span> or 
+<span class="monospace">/usr/bin/rrxclient_ssldaemon</span> and pass the appropriate argument 
+on the <span class="monospace">rrxclient</span> command line located in that file.&nbsp; By default, the client will use port 4242 for 
+non-SSL communications and port 4243 for SSL-encrypted communications.
+<h3>Removing the Linux Client and Server</h3>
+<p>As root, issue the following command:</p>
+
+<pre>rpm -e VirtualGL</pre>
+
+<p>To remove the 64-bit server components on an x86-64 machine, additionally 
+issue the following command:</p>
+
+<pre>rpm -e VirtualGL64</pre>
+<p style="text-align: right;"><a href="#" target="_top">top</a></p>
+
+<hr><a name="basicusage"></a>
+<h2>Basic Usage</h2>
+  
+<ol>
+  <li>If you have never made X11 connections between your client machine and the
+    application server before, then you will need to grant the application server
+    permission to use your X display.&nbsp; You can do this by typing:<br>
+    <pre>xhost +{server_machine_name_or_IP}</pre>
+
+    inside a shell.<br>
+    
+    <br>
+    <span class="note">Note:</span>&nbsp; You only need to do this once, 
+  not every time you use VirtualGL.<br>
+&nbsp;</li>
+
+  
+  <li>If you have not installed the VirtualGL client as a service, then you 
+  will need to start the client manually.&nbsp; To do this, run<br>
+
+  
+    <pre>rrxclient</pre>
+  </li>
+  <li>Open a Secure Shell (SSh) session into the 
+  application server:<br>
+
+  
+    <pre>ssh -l {your_user_name} {server_machine_name_or_IP}</pre>
+
+  </li>
+
+  <li>In the SSh session, set the <span class="monospace">DISPLAY</span> environment variable on the server to
+    point back to the client machine:<br>
+    
+    <pre>export DISPLAY={client_machine_name_or_IP}:0.0</pre>
+
+    or<br>
+    <pre>setenv DISPLAY {client_machine_name_or_IP}:0.0</pre>
+  </li>
+  <li>In the SSh session, launch your 3D application:<br>
+    
+    <pre>rrlaunch {application_executable_or_script} {arguments}</pre>
+  </li>
+
+</ol>
+<div style="text-align: right;"><a href="#" target="_top">top</a></div>
+
+<ol>
+
+</ol>
+
+<hr style="width: 100%; height: 2px;"><a name="secureusage"></a><br>
+
+<h2>Secure
+Usage</h2>
+
+<h3>SSL Tunneling of the Video
+Stream</h3>
+
+<p>VirtualGL has built-in
+support for encrypting its compressed image stream inside a
+Secure Socket Layer (SSL.)&nbsp; For performance reasons, this
+feature is not
+enabled by default, but it can be easily enabled:</p>
+
+<p style="font-weight: bold;">Client:</p>
+
+<ul>
+<li>Start the secure
+client from the command line by issuing<br>
+<pre>rrxclient -s</pre>
+</li>
+<li>... or ... Install the
+secure client as a service using instructions in the <a href="#installsvc">previous section</a>.<br>
+</li>
+</ul>
+
+<span style="font-weight: bold;">Server:</span><br style="font-weight: bold;">
+
+Set the environment variable <span style="font-family: monospace;">RRUSESSL</span>
+to <span style="font-family: monospace;">1</span>
+prior to launching the application.<br>
+
+<h3>SSh Tunneling of the X11
+Protocol Stream</h3>
+
+Secure
+Shell (SSh) has built-in support
+for tunneling the X11 protocol stream
+through the SSh connection.&nbsp; Tunneling the X11 protocol stream
+has
+several
+advantages:<br>
+
+<ul>
+
+<li>No one can snoop your X11
+connection.</li>
+<li>You don't have to explicitly
+grant the remote host permission to
+use your X display.</li>
+<li>You can take advantage of
+SSh's compression features (for
+low-bandwidth connections.)</li>
+</ul>
+
+<p>The main disadvantage is
+performance.&nbsp; On a LAN, tunneling the
+X11
+protocol stream through SSh will probably slow things down, but on a
+lower-bandwidth connection, it may
+actually speed things up, especially if you enable compression.</p>
+
+<h4>Enabling X11 Tunneling from a Linux Client</h4>
+After opening an SSh connection into the application server, don't set the
+    <span class="monospace">DISPLAY</span> environment.&nbsp; Instead, set the environment variable
+  <span class="monospace">RRCLIENT</span> to the client display, e.g.<br>
+
+  <br>
+<pre>export RRCLIENT={my_client_machine}:0.0
+</pre>
+
+<p>That's it!&nbsp; The Linux SSh client enables X11 forwarding by default, so
+unless you explicitly override it by setting the <span class="monospace">DISPLAY</span> environment variable,
+it will be enabled.</p>
+
+<p><span class="tip">Tip:</span>&nbsp;
+If your connection to the
+server is low-bandwidth, you may wish
+to pass a <span class="monospace">-C</span>
+argument to ssh when
+establishing the connection.&nbsp; This will enable SSh protocol
+compression and may speed things up.&nbsp; Don't use protocol compression when
+connecting over a LAN or other high-speed network.</p>
+<h3>A More Complex Scenario</h3>
+
+<p>So what if your only path into
+the network is through SSh, perhaps
+through a single "gateway" machine.&nbsp; No problem, because SSh
+allows you to tunnel both incoming and outgoing TCP/IP connections on
+any port from one machine to another.&nbsp; Tunneling the compressed image
+stream through SSh will not be as fast as using the built-in SSL
+capabilities of VirtualGL, but sometimes it's the only option available.</p>
+
+<p>Let's assume the following
+configuration:</p>
+
+<p><img style="width: 384px; height: 133px;" alt="" src="winug/sshtunnel.png"><br>
+</p>
+
+<p>What we want to do is tunnel
+both the
+X11 protocol stream and VirtualGL's compressed image stream through
+SSh.&nbsp;
+Here's one way to do it:</p>
+
+<ol>
+
+<li>Start the VirtualGL client
+(the standard version, not the secure version)</li>
+<li><pre>ssh -X -R 4242:localhost:4242 username@ssh_gateway_machine</pre>
+This tells SSh to tunnel all
+X11 traffic from your session on <span class="monospace">ssh_gateway_machine</span>
+to your client's display, and additionally it will tunnel all outbound
+traffic to port 4242 on <span class="monospace">ssh_gateway_machine</span>
+to inbound port 4242 on your client machine.<br>
+&nbsp;</li><li>Now you should have a
+terminal session open into <span class="monospace">ssh_gateway_machine</span>.&nbsp;
+Inside this
+session, issue the following command:<br>
+<pre>ssh -X -R 4242:localhost:4242 username@app_server_machine</pre>
+This tells SSh to tunnel all
+X11 traffic from your session on <span class="monospace">app_server_machine</span>
+to your session on <span class="monospace">ssh_gateway_machine</span>,
+where it will be re-tunneled to the client display.&nbsp;
+Additionally,
+all outbound traffic to port 4242 on <span class="monospace">app_server_machine</span>
+will be tunneled to port 4242 on <span class="monospace">ssh_gateway_machine</span>,
+which will then re-tunnel the traffic to inbound port 4242 on your
+client machine.<br>
+<br>
+  </li>
+
+<li>You should now have a
+terminal session open into <span class="monospace">app_server_machine</span>.&nbsp;
+Inside that
+session, set the environment variable <span class="monospace">RRCLIENT</span>
+to <span class="monospace">localhost:0.0</span>.<br>
+<br>
+<span class="note">Note:</span>&nbsp;
+Replace 0.0 with the
+display number of your client's X server.<br>
+<br>
+</li>
+<li><span class="monospace">rrlaunch</span>
+your application.</li>
+</ol>
+
+<p>You can of course replace port
+4242 in all of the steps above with
+whatever port you choose, but make sure that if you change the port,
+you configure both the client and server to talk on the port you choose
+(using the
+<span class="monospace">-p</span>
+argument to <span class="monospace">rrxclient</span>
+as well as the <span class="monospace">RRPORT</span>
+environment
+variable on the server.)</p>
+
+<p><span class="tip">Tip:</span>&nbsp;
+This same procedure would also
+work if you needed to connect directly to app_server_machine and tunnel
+everything over SSh.&nbsp; In that case, simply leave out Step 4.<br>
+&nbsp;</p>
+
+<p><span class="tip">Tip:</span>&nbsp;
+You might also want to try
+enabling SSh compression for the first stage of the trip, from your
+client to the SSh gateway.&nbsp; This could improve performance if
+the
+WAN connection is low-bandwidth.</p>
+
+<div style="text-align: right;"><a href="#" target="_top">top</a><br>
+<div style="text-align: left;">
+<hr style="width: 100%; height: 2px;"></div>
+</div>
+
+</body></html>
