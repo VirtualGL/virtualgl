@@ -19,7 +19,7 @@ ifeq ($(OS), Linux)
 endif
 
 # Macros which are common to all Unix platforms
-VERSION := 0.9.2
+VERSION := 0.9.3
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
 BUILD := $(BUILD)d
