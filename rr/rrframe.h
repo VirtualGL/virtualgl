@@ -236,8 +236,6 @@ class rrbitmap : public rrframe
 		{
 			XSync(wh.dpy, False);
 			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
-			if(hnew->winw>fb.width || hnew->winh>fb.height)
-				hpprintf("Window size mismatch.  Server=%dx%d  Client=%dx%d\n", hnew->winw, hnew->winh, fb.width, fb.height);
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
@@ -251,10 +249,12 @@ class rrbitmap : public rrframe
 		if(!fb.xi) _throw("Bitmap not initialized");
 		fblock();
 		if(fb.bgr) hpjflags|=HPJ_BGR;
-		if(f.h.bmpw<=fb.width && f.h.bmpy+f.h.bmph<=fb.height)
+		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
+		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
+		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
 		{
-		hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy],
-			f.h.bmpw, fb.xi->bytes_per_line, f.h.bmph, fb.ps, hpjflags));
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy+f.h.bmpx*fb.ps],
+				bmpw, fb.xi->bytes_per_line, bmph, fb.ps, hpjflags));
 		}
 		return *this;
 	}
