@@ -188,7 +188,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		{
 			useshm=0;  goto noshm;
 		}
-		if((s->shminfo.shmid=shmget(IPC_PRIVATE, s->xi->bytes_per_line*s->xi->height, IPC_CREAT|0777))==-1)
+		if((s->shminfo.shmid=shmget(IPC_PRIVATE, s->xi->bytes_per_line*s->xi->height+1, IPC_CREAT|0777))==-1)
 		{
 			useshm=0;  XDestroyImage(s->xi);  goto noshm;
 		}
@@ -225,7 +225,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		}
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
-		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height))==NULL)
+		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))==NULL)
 			_throw("Memory allocation error");
 	}
 	ps=s->xi->bits_per_pixel/8;
