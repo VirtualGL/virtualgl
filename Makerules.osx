@@ -24,7 +24,7 @@ endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
-OPTFLAG = -O3 -funroll-loops -fexpensive-optimizations -maltivec -mabi=altivec
+OPTFLAG = -fast -faltivec
 endif
 
 DEFAULTJPEGLIB = quicktime
