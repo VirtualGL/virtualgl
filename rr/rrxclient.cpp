@@ -16,16 +16,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-#include "hputil.h"
-#include <pthread.h>
-#include "rr.h"
+#include "rrdisplayserver.h"
 #include "x11err.h"
 
-RRDisplay rrdpy=NULL;
-int restart=1, ssl=0, quiet=0;
-pthread_mutex_t deadmutex;
+rrdisplayserver *rrdpy=NULL;
+bool restart=true, ssl=false, quiet=false;
+rrmutex deadmutex;
 int port=-1;
-FILE *log=NULL;  char *logfile=NULL;
 int service=0;
 
 void start(int, char **);
@@ -57,8 +54,8 @@ SERVICE_TABLE_ENTRY servicetable[] =
 
 void handler(int type)
 {
-	restart=0;
-	pthread_mutex_unlock(&deadmutex);
+	restart=false;
+	deadmutex.unlock();
 }
 
 
@@ -67,20 +64,20 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	char *temp=NULL;
 	if((temp=x11error(xe->error_code))!=NULL && stricmp(temp, "Unknown error code"))
-		hpprintf("X11 Error: %s\n", temp);
+		rrout.println("X11 Error: %s", temp);
 	return 0;
 }
 
 
 void usage(char *progname)
 {
-	hpprintf("\nUSAGE: %s [-h|-?] [-v] [-s] [-p<port>] [-d<display>]\n", progname);
-	hpprintf("-h or -? = This help screen\n");
-	hpprintf("-s = Use Secure Sockets Layer\n");
-	hpprintf("-p = Set base port for listener (default is %d)\n", RR_DEFAULTPORT);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-v] [-s] [-p<port>] [-d<display>]\n", progname);
+	fprintf(stderr, "-h or -? = This help screen\n");
+	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
+	fprintf(stderr, "-p = Set base port for listener (default is %d)\n", RR_DEFAULTPORT);
 	#ifdef _WIN32
-	hpprintf("-install = Install %s client as a service\n", __APPNAME);
-	hpprintf("-remove = Remove %s client service\n", __APPNAME);
+	fprintf(stderr, "-install = Install %s client as a service\n", __APPNAME);
+	fprintf(stderr, "-remove = Remove %s client service\n", __APPNAME);
 	#endif
 }
 
@@ -89,24 +86,18 @@ int main(int argc, char *argv[])
 {
 	int i;
 
-	hputil_log(1, 0);
-	hputil_logto(stderr);
+	try {
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
 			{usage(argv[0]);  exit(1);}
-		if(!stricmp(argv[i], "-s")) ssl=1;
-		if(!stricmp(argv[i], "-q")) quiet=1;
+		if(!stricmp(argv[i], "-s")) ssl=true;
+		if(!stricmp(argv[i], "-q")) quiet=true;
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
 			{port=(unsigned short)atoi(&argv[i][2]);}
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='L' && strlen(argv[i])>2)
-		{
-			if((log=fopen(&argv[i][2], "wb"))!=NULL)
-			{
-				hputil_logto(log);  logfile=&argv[i][2];
-			}
-		}
+			rrout.logto(&argv[i][2]);
 		if(!stricmp(argv[i], "--service")) service=1;
 	}
 	if(port<0) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
@@ -118,7 +109,7 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-remove")) {remove_service();  exit(0);}
 	}
 
-	hpprintf("\n%s Client v%s (Build %s)\n", __APPNAME, __VERSION, __BUILD);
+	rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
 
 	if(service)
 	{
@@ -138,26 +129,30 @@ int main(int argc, char *argv[])
 
 	start(argc, argv);
 
+	}
+	catch(rrerror &e)
+	{
+		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());  exit(1);
+	}
 	return 0;
 }
 
 
 void start(int argc, char **argv)
 {
-	if(!XInitThreads()) {hpprintf("XInitThreads() failed\n");  return;}
+	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
 	signal(SIGINT, handler);
 	XSetErrorHandler(xhandler);
 
-	if(pthread_mutex_init(&deadmutex, NULL)==-1) {perror("Could not create mutex");  return;}
-	if(pthread_mutex_lock(&deadmutex)==-1) {perror("Could not lock mutex");  return;}
+	try {
+
+	deadmutex.lock();
 
 	start:
-	if(!(rrdpy=RRInitDisplay(port, ssl)))
-	{
-		hpprintf("Could not initialize listener:\n%s\n", RRGetError());
-		return;
-	}
-	hpprintf("Listener active on port %d\n", port);
+
+	if(!(rrdpy=new rrdisplayserver(port, ssl)))
+		_throw("Could not initialize listener");
+	rrout.println("Listener active on port %d", port);
 	#ifdef _WIN32
 	if(service)
 	{
@@ -167,84 +162,87 @@ void start(int argc, char **argv)
 			EventLog("Could not set service status", 1);
 	}
 	#endif
-	if(pthread_mutex_lock(&deadmutex)==-1) {perror("Could not lock mutex");  return;}
-	if(rrdpy) {RRTerminateDisplay(rrdpy);  rrdpy=0;}
+	deadmutex.lock();
+	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
 	if(restart) goto start;
+
+	} catch(rrerror &e)
+	{
+		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());
+	}
 }
 
 
 #ifdef _WIN32
 void install_service(void)
 {
-	SC_HANDLE servicehnd, managerhnd;
+	SC_HANDLE servicehnd, managerhnd=NULL;
 	char imagePath[512], args[512];
 
+	try {
+
 	if(!GetModuleFileName(NULL, imagePath, 512))
-	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
-		exit(1);
-	}
+		_throww32();
 	sprintf(args, " --service -l%%systemdrive%%\\%s.log -p%d", SERVICENAME, port);
 	if(ssl) strcat(args, " -s");
 	strcat(imagePath, args);
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
-	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
-		exit(1);
-	}
+		_throww32();
 	if(!(servicehnd=CreateService(managerhnd, SERVICENAME, SERVICEFULLNAME,
 		SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,
 		SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, imagePath, NULL, NULL, NULL, NULL,
 		NULL)))
+		_throww32();
+	if(!quiet) MessageBox(NULL, "Service Installed Successfully", "Success", MB_OK);
+
+	} catch (rrerror &e)
 	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Install Error", MB_OK|MB_ICONERROR);
-		CloseServiceHandle(managerhnd);
+		if(!quiet) MessageBox(NULL, e.getMessage(), "Service Install Error", MB_OK|MB_ICONERROR);
 		exit(1);
 	}
-	if(!quiet) MessageBox(NULL, "Service Installed Successfully", "Success", MB_OK);
-	CloseServiceHandle(managerhnd);
+
+	if(managerhnd) CloseServiceHandle(managerhnd);
 }
 
 
 void remove_service(void)
 {
-	SC_HANDLE servicehnd, managerhnd;
+	SC_HANDLE servicehnd, managerhnd=NULL;
+
+	try {
 
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
-	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
-		exit(1);
-	}
+		_throww32();
+
 	if(!(servicehnd=OpenService(managerhnd, SERVICENAME, SERVICE_ALL_ACCESS)))
-	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
-		CloseServiceHandle(managerhnd);
-		exit(1);
-	}
+		_throww32();
 	if(ControlService(servicehnd, SERVICE_CONTROL_STOP, &status))
 	{
-		hpprintf("Stopping service ...\n");
+		rrout.println("Stopping service ...");
 		Sleep(1000);
 		while(QueryServiceStatus(servicehnd, &status))
 		{
 			if(status.dwCurrentState==SERVICE_STOP_PENDING)
 			{
-				hpprintf(".");
+				rrout.print(".");
 				Sleep(1000);
 			}
 			else break;
-			if(status.dwCurrentState==SERVICE_STOPPED) hpprintf(" Done.\n");
-			else hpprintf(" Could not stop service.\n");
+			if(status.dwCurrentState==SERVICE_STOPPED) rrout.println(" Done.");
+			else rrout.println(" Could not stop service.");
 		}
 	}
 	if(!DeleteService(servicehnd))
+		_throww32();
+	if(!quiet) MessageBox(NULL, "Service Removed Successfully", "Success", MB_OK);
+
+	} catch (rrerror &e)
 	{
-		if(!quiet) MessageBox(NULL, hputil_strerror(), "Service Remove Error", MB_OK|MB_ICONERROR);
-		CloseServiceHandle(managerhnd);
+		if(!quiet) MessageBox(NULL, e.getMessage(), "Service Install Error", MB_OK|MB_ICONERROR);
 		exit(1);
 	}
-	if(!quiet) MessageBox(NULL, "Service Removed Successfully", "Success", MB_OK);
-	CloseServiceHandle(managerhnd);
+
+	if(managerhnd) CloseServiceHandle(managerhnd);
 }
 
 
@@ -279,8 +277,8 @@ void WINAPI control_service(DWORD code)
 		status.dwControlsAccepted=0;
 		if(!SetServiceStatus(statushnd, &status))
 			EventLog("Could not set service status", 1);
-		restart=0;
-		pthread_mutex_unlock(&deadmutex);
+		restart=false;
+		deadmutex.unlock();
 	}
 }
 
