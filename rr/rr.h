@@ -21,4 +21,6 @@ enum {RR_444=0, RR_422, RR_411};
 // Other
 #define RR_DEFAULTPORT	4242
 
+#define RR_DEFAULTSTRIPHEIGHT 64
+
 #endif
