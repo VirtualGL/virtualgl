@@ -2,6 +2,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include <QuickTime/ImageCompression.h>
 #include <QuickTime/QuickTimeComponents.h>
+#include <mach/mach.h>
 #else
 #include <ImageCompression.h>
 #include <QuickTimeComponents.h>
@@ -44,7 +45,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	ImageDescriptionHandle myDesc = NULL;
 	Rect                   rect;
 	GWorldPtr              worldPtr = NULL;
-  PixMapHandle           pixMapHandle = NULL;
+	PixMapHandle           pixMapHandle = NULL;
 	unsigned char          *rowptr;
 	CodecQ myCodecQ;
 	long needSize;
@@ -111,7 +112,19 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 		if(flags&HPJ_BOTTOMUP) {srcptr=&srcbuf[pitch*(height-1)];  srcstride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
+			#if defined(__APPLE__)
+
+			/* 
+			 * Use the mach kernel to execute a copy-on-write operation.
+			 * Since we're only going to be reading from the buffer this
+			 * should be *far* less expensive than memcpy.
+			 */
+
+			vm_copy(mach_task_self(), (vm_address_t)srcptr, pitch, (vm_address_t)rowptr);
+
+			#else
 			memcpy(rowptr, srcptr, pitch); 
+			#endif
 			rowptr += rowbytes;
 			srcptr += srcstride;
 		}
@@ -204,7 +217,7 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	ImageDescriptionHandle myDesc = NULL;
 	Rect                   rect;
 	GWorldPtr              worldPtr = NULL;
-  PixMapHandle           pixMapHandle = NULL;
+	PixMapHandle           pixMapHandle = NULL;
 	unsigned char          *rowptr;
 	int rowbytes, fastpath, qt_roffset, qt_goffset, qt_boffset;
 
@@ -303,7 +316,19 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 		if(flags&HPJ_BOTTOMUP) {dstptr=&dstbuf[pitch*(height-1)];  dststride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
+			#if defined (__APPLE__)	
+
+			/* 
+			 * Use the mach kernel to execute a copy-on-write operation.
+			 * Since we're only going to be reading from the buffer this
+			 * should be *far* less expensive than memcpy.
+			 */
+
+			vm_copy(mach_task_self(), (vm_address_t)rowptr, pitch, (vm_address_t)dstptr);
+
+			#else
 			memcpy(dstptr, rowptr, pitch); 
+			#endif
 			rowptr += rowbytes;
 			dstptr += dststride;
 		}
