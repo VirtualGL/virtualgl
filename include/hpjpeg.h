@@ -146,6 +146,26 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void);
 
 
 /*
+  int hpjDecompressHeader(hpjhandle j,
+     unsigned char *srcbuf, unsigned long size,
+     int *width, int *height)
+
+  [INPUT] j = instance handle previously returned from a call to
+     hpjInitDecompress()
+  [INPUT] srcbuf = pointer to a user-allocated buffer containing the JPEG image
+     to decompress
+  [INPUT] size = size of the JPEG image buffer (in bytes)
+  [OUTPUT] width = width (in pixels) of the JPEG image
+  [OUTPUT] height = height (in pixels) of the JPEG image
+
+  RETURNS: 0 on success, -1 on error
+*/
+DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle j,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height);
+
+
+/*
   int hpjDecompress(hpjhandle j,
      unsigned char *srcbuf, unsigned long size,
      unsigned char *dstbuf, int width, int pitch, int height, int pixelsize,
