@@ -13,35 +13,9 @@
 
 #include "rrlistener.h"
 
-#define CERTF "rrcert.pem"
-
-#ifdef _WIN32
-	#define DIRSEP "\\"
-	#define ALTDIR "."
-#else
-	#include <pwd.h>
-	#define DIRSEP "/"
-	#define ALTDIR "/etc"
-#endif
-
-
-char *gethomedir(void)
-{
-	#ifdef _WIN32
-	return getenv("USERPROFILE");
-	#else
-	char *homedir=NULL;  struct passwd *pw;
-	if((homedir=getenv("HOME"))!=NULL) return homedir;
-	if((pw=getpwuid(getuid()))==NULL) return NULL;
-	return pw->pw_dir;
-	#endif
-}
-
 
 rrlistener::rrlistener(unsigned short port, bool dossl, bool dorecv)
 {
-	char temppath[1025];
-
 	this->dossl=false;  if(dossl) this->dossl=true;
 	this->dorecv=false;  if(dorecv) this->dorecv=true;
 	sslctx=NULL;
@@ -53,25 +27,7 @@ rrlistener::rrlistener(unsigned short port, bool dossl, bool dorecv)
 
 	if(dossl)
 	{
-		strncpy(temppath, gethomedir(), 1024);  temppath[1024]=0;
-		strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
-		hpprintf("Using certificate file %s\n", temppath);
-		if((sslctx=hpsecnet_serverinit(temppath, temppath))==NULL)
-		{
-			hpprintf("%s\n", hpsecnet_strerror());
-			#ifdef _WIN32
-			if(GetModuleFileName(NULL, temppath, 1024))
-			{
-				char *ptr;
-				if((ptr=strrchr(temppath, '\\'))!=NULL) *ptr='\0';
-			}
-			else
-			#endif
-			strncpy(temppath, ALTDIR, 1024);  temppath[1024]=0;
-			strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
-			hpprintf("Using certificate file %s\n", temppath);
-			tryssl(sslctx=hpsecnet_serverinit(temppath, temppath));
-		}
+		if((sslctx=hpsecnet_serverinit())==NULL) _throw(hpsecnet_strerror());
 	}
 	sock(listen_socket=hpnet_createServer(port==0?RR_DEFAULTPORT:port, MAXCONN, SOCK_STREAM));
 
