@@ -43,7 +43,7 @@ typedef void* hpjhandle;
 #ifndef max
  #define max(a,b) ((a)>(b)?(a):(b))
 #endif
-#define HPJBUFSIZE(width,height) (max((width)*(height)*3,2048))
+#define HPJBUFSIZE(width,height) (max((max(width,16))*(max(height,16))*3,2048))
 #ifdef __cplusplus
 extern "C" {
 #endif
