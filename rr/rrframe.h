@@ -50,11 +50,9 @@ typedef struct _rrframeheader
 #pragma pack()
 
 // Bitmap flags
-#define RRBMP_BOTTOMUP 1  // Bottom-up bitmap (as opposed to top-down)
-#define RRBMP_BGR      2  // BGR or BGRA pixel order
-#define RRBMP_EOLPAD   4  // Each input scanline is padded to the next 32-bit boundary
-#define RRBMP_FORCE    8  // Send this frame, even if identical to last.  Normally,
-                          // only a refresh packet is sent for identical frames
+#define RRBMP_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
+#define RRBMP_BGR        2  // BGR or BGRA pixel order
+#define RRBMP_ALPHAFIRST 4  // BGR buffer is really ABGR, and RGB buffer is really ARGB
 
 // Uncompressed bitmap
 
@@ -85,7 +83,7 @@ class rrframe
 		|| !bits)
 		{
 			if(bits) delete [] bits;
-			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*pixelsize]);
+			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*pixelsize+1]);
 			this->pixelsize=pixelsize;  pitch=pixelsize*hnew->winw;
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
@@ -207,12 +205,10 @@ class rrjpeg : public rrframe
 		if(b.h.qual>100 || b.h.subsamp>RR_SUBSAMP-1)
 			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(&b.h);
-		int pitch=b.h.bmpw*b.pixelsize;
-		if(b.flags&RRBMP_EOLPAD) pitch=HPJPAD(pitch);
 		if(b.flags&RRBMP_BOTTOMUP) hpjflags|=HPJ_BOTTOMUP;
 		if(b.flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
 		unsigned long size;
-		hpj(hpjCompress(hpjhnd, b.bits, b.h.bmpw, pitch, b.h.bmph, b.pixelsize,
+		hpj(hpjCompress(hpjhnd, b.bits, b.h.bmpw, b.pitch, b.h.bmph, b.pixelsize,
 			bits, &size, jpegsub[b.h.subsamp], b.h.qual, hpjflags));
 		h.size=(unsigned int)size;
 		return *this;
@@ -284,14 +280,13 @@ class rrfb : public rrframe
 			XSync(wh.dpy, False);
 			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
 		}
-		if(fb.ps<3 || fb.ps>4) _throw("Display must be 24-bit or 32-bit true color");
 		memcpy(&h, hnew, sizeof(rrframeheader));
 		if(h.winw>fb.width) h.winw=fb.width;
 		if(h.winh>fb.height) h.winh=fb.height;
-		pixelsize=fb.ps;  pitch=fb.xi->bytes_per_line;  bits=(unsigned char *)fb.bits;
+		pixelsize=fbx_ps[fb.format];  pitch=fb.pitch;  bits=(unsigned char *)fb.bits;
 		flags=0;
-		if(fb.bgr) flags|=RRBMP_BGR;
-		if(fb.xi->bytes_per_line!=fb.width*fb.ps) flags|=RRBMP_EOLPAD;
+		if(fbx_bgr[fb.format]) flags|=RRBMP_BGR;
+		if(fbx_alphafirst[fb.format]) flags|=RRBMP_ALPHAFIRST;
 	}
 
 	rrfb& operator= (rrjpeg& f)
@@ -301,7 +296,8 @@ class rrfb : public rrframe
 			_throw("JPEG not initialized");
 		init(&f.h);
 		if(!fb.xi) _throw("Bitmap not initialized");
-		if(fb.bgr) hpjflags|=HPJ_BGR;
+		if(fbx_bgr[fb.format]) hpjflags|=HPJ_BGR;
+		if(fbx_alphafirst[fb.format]) hpjflags|=HPJ_ALPHAFIRST;
 		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
 		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
 		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
@@ -310,8 +306,8 @@ class rrfb : public rrframe
 			{
 				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
 			}
-			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy+f.h.bmpx*fb.ps],
-				bmpw, fb.xi->bytes_per_line, bmph, fb.ps, hpjflags));
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.pitch*f.h.bmpy+f.h.bmpx*fbx_ps[fb.format]],
+				bmpw, fb.pitch, bmph, fbx_ps[fb.format], hpjflags));
 		}
 		return *this;
 	}
