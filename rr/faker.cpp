@@ -879,11 +879,10 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 void _doGLreadback(bool force)
 {
 	pbwin *pbw;
-	Display *dpy;  GLXDrawable drawable;
-	dpy=glXGetCurrentDisplay();
+	GLXDrawable drawable;
 	drawable=glXGetCurrentDrawable();
-	if(!dpy || !drawable) return;
-	if((pbw=winh.findpb(dpy, drawable))!=NULL)
+	if(!drawable) return;
+	if((pbw=winh.findpb(drawable))!=NULL)
 		pbw->readback(GL_FRONT, force);
 }
 
