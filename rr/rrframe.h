@@ -1,4 +1,4 @@
- /* Copyright (C)2004 Landmark Graphics
+/* Copyright (C)2004 Landmark Graphics
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -63,7 +63,7 @@ class rrframe
 	public:
 
 	rrframe(bool _primary=true) : bits(NULL), pitch(0), pixelsize(0), flags(0),
-		primary(_primary)
+		strip_height(RR_DEFAULTSTRIPHEIGHT), primary(_primary)
 	{
 		memset(&h, 0, sizeof(rrframeheader));
 		_ready.lock();
@@ -150,7 +150,7 @@ class rrframe
 
 	rrframeheader h;
 	unsigned char *bits;
-	int pitch, pixelsize, flags;
+	int pitch, pixelsize, flags, strip_height;
 
 	protected:
 
@@ -229,8 +229,6 @@ class rrjpeg : public rrframe
 		if(hnew->winw!=h.winw || hnew->winh!=h.winh || !bits)
 		{
 			if(bits) delete [] bits;
-			// Dest. buffer must be big enough to hold JPEG headers, quant. tables,
-			// etc., and I like to give it a wide berth
 			errifnot(bits=new unsigned char[HPJBUFSIZE(hnew->winw, hnew->winh)]);
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
@@ -285,12 +283,13 @@ class rrfb : public rrframe
 		{
 			XSync(wh.dpy, False);
 			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
-			if(hnew->winw>fb.width || hnew->winh>fb.height)
-				rrout.print("Window size mismatch.  Server=%dx%d  Client=%dx%d\n", hnew->winw, hnew->winh, fb.width, fb.height);
 		}
 		if(fb.ps<3 || fb.ps>4) _throw("Display must be 24-bit or 32-bit true color");
 		memcpy(&h, hnew, sizeof(rrframeheader));
+		if(h.winw>fb.width) h.winw=fb.width;
+		if(h.winh>fb.height) h.winh=fb.height;
 		pixelsize=fb.ps;  pitch=fb.xi->bytes_per_line;  bits=(unsigned char *)fb.bits;
+		flags=0;
 		if(fb.bgr) flags|=RRBMP_BGR;
 		if(fb.xi->bytes_per_line!=fb.width*fb.ps) flags|=RRBMP_EOLPAD;
 	}
@@ -303,14 +302,16 @@ class rrfb : public rrframe
 		init(&f.h);
 		if(!fb.xi) _throw("Bitmap not initialized");
 		if(fb.bgr) hpjflags|=HPJ_BGR;
-		if(f.h.bmpw<=fb.width && f.h.bmpy+f.h.bmph<=fb.height)
+		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
+		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
+		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
 		{
 			if(!hpjhnd)
 			{
 				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
 			}
-			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy],
-				f.h.bmpw, fb.xi->bytes_per_line, f.h.bmph, fb.ps, hpjflags));
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy+f.h.bmpx*fb.ps],
+				bmpw, fb.xi->bytes_per_line, bmph, fb.ps, hpjflags));
 		}
 		return *this;
 	}

@@ -158,7 +158,7 @@ pbwin::~pbwin(void)
 	mutex.unlock(false);
 }
 
-void pbwin::init(int w, int h, GLXFBConfig config)
+int pbwin::init(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
@@ -167,12 +167,13 @@ void pbwin::init(int w, int h, GLXFBConfig config)
 	w=min(w, dw);  h=min(h, dh);
 
 	rrcs::safelock l(mutex);
-	if(pb && pb->width()==w && pb->height()==h) return;
+	if(pb && pb->width()==w && pb->height()==h) return 0;
 	if((pb=new pbuffer(pbdpy, w, h, config))==NULL)
 		_throw("Could not create Pbuffer");
 
 	this->config=config;
 	force=true;
+	return 1;
 }
 
 // The resize doesn't actually occur until the next time updatedrawable() is
@@ -225,8 +226,8 @@ GLXDrawable pbwin::updatedrawable(void)
 	rrcs::safelock l(mutex);
 	if(neww>0 && newh>0)
 	{
-		oldpb=pb;
-		init(neww, newh, config);
+		pbuffer *_oldpb=pb;
+		if(init(neww, newh, config)) oldpb=_oldpb;
 		neww=newh=-1;
 	}
 	retval=pb->drawable();
@@ -266,48 +267,57 @@ void pbwin::readback(GLint drawbuf, bool force)
 {
 	rrdisplayclient *rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
+	int compress=fconfig.compress;
 
 	rrcs::safelock l(mutex);
 
-	if(fconfig.compress!=RRCOMP_NONE) errifnot(rrdpy=dpyh.findrrdpy(windpy));
 	if(this->force) {force=true;  this->force=false;}
-	if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
-		return;
-
 	int pbw=pb->width(), pbh=pb->height();
+	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
-	rrframeheader h;
-	h.winid=win;
-	h.winw=h.bmpw=pbw;
-	h.winh=h.bmph=pbh;
-	h.bmpx=0;
-	h.bmpy=0;
-	h.qual=fconfig.currentqual;
-	h.subsamp=fconfig.currentsubsamp;
-	h.dpynum=0;
-	if((dpystring=fconfig.client)==NULL)
-		dpystring=DisplayString(windpy);
-	if((ptr=strchr(dpystring, ':'))!=NULL)
+	switch(compress)
 	{
-		if(strlen(ptr)>1) h.dpynum=atoi(ptr+1);
+		case RRCOMP_MJPEG:
+		{
+			errifnot(rrdpy=dpyh.findrrdpy(windpy));
+			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
+				return;
+			rrframe *b;
+			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
+			readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
+			b->h.dpynum=0;
+			if((dpystring=fconfig.client)==NULL)
+				dpystring=DisplayString(windpy);
+			if((ptr=strchr(dpystring, ':'))!=NULL)
+			{
+				if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
+			}
+			b->h.winid=win;
+			b->h.winw=b->h.bmpw;
+			b->h.winh=b->h.bmph;
+			b->h.bmpx=0;
+			b->h.bmpy=0;
+			b->h.qual=fconfig.currentqual;
+			b->h.subsamp=fconfig.currentsubsamp;
+			b->flags=RRBMP_BGR|RRBMP_BOTTOMUP;
+			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
+			rrdpy->sendframe(b);
+			break;
+		}
+
+		case RRCOMP_NONE:
+		{
+			rrfb *b;
+			if(!blitter) errifnot(blitter=new rrblitter());
+			if(fconfig.spoil && !blitter->frameready()) return;
+			errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
+			int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
+			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, b->bits, drawbuf, false);
+			blitter->sendframe(b);
+			break;
+		}
 	}
 
-	if(fconfig.compress==RRCOMP_NONE || pbw*pbh<1000)
-	{
-		rrfb *b;
-		if(!blitter) errifnot(blitter=new rrblitter());
-		errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
-		int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
-		readpixels(0, 0, pbw, b->pitch, pbh, format, b->bits, drawbuf, false);
-		blitter->sendframe(b);
-	}
-	else
-	{
-		rrframe *b;
-		errifnot(b=new rrframe());  b->init(&h, 3);
-		readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, false);
-		rrdpy->sendframe(b);
-	}
 }
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum format, GLubyte *bits, GLint buf, bool bottomup)
@@ -320,15 +330,23 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	if(pitch%8==0) glPixelStorei(GL_PACK_ALIGNMENT, 8);
+	else if(pitch%4==0) glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
+	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	for(int i=0; i<h; i++)
+	if(!bottomup)
 	{
-		int _y= bottomup? i+y: h-1-i-y;
-		glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
+		for(int i=0; i<h; i++)
+		{
+			int _y=h-1-i-y;
+			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
+		}
 	}
+	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();

@@ -30,6 +30,7 @@ SectionEnd
 
 Section "Start Menu Shortcuts (required)"
 
+	SetShellVarContext all
 	CreateDirectory "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Uninstall ${APPNAME} Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Install ${APPNAME} Client as a Service.lnk" "$INSTDIR\rrxclient.exe" "-install"
@@ -45,6 +46,7 @@ SectionEnd
 
 Section "Uninstall"
 
+	SetShellVarContext all
 	ExecWait "$INSTDIR\rrxclient.exe -q -remove"
 	ExecWait "$INSTDIR\rrxclient.exe -q -s -remove"
 
