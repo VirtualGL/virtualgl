@@ -18,6 +18,7 @@
 #include "rrframe.h"
 #include "rrerror.h"
 #include "genericQ.h"
+#include "rrprofiler.h"
 
 class rrblitter
 {
@@ -28,6 +29,7 @@ class rrblitter
 		for(int i=0; i<NB; i++) bmp[i]=NULL;
 		pthread_mutex_init(&ready, NULL);
 		pthread_mutex_init(&bmpmutex, NULL);
+		prof_blit.setname("Blit");
 		tryunix(pthread_create(&thnd, NULL, run, this));
 	}
 
@@ -55,6 +57,7 @@ class rrblitter
 	genericQ q;
 	void blitdiff(rrbitmap *, rrbitmap *);
 	pthread_t thnd;  bool deadyet;
+	rrprofiler prof_blit;
 };
 
 #endif

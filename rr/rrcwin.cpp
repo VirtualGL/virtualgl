@@ -11,7 +11,7 @@
  * wxWindows Library License for more details.
  */
 
-//#define RRPROFILE
+#include "rrprofiler.h"
 #include "rrcwin.h"
 
 
@@ -22,8 +22,6 @@ rrcwin::rrcwin(int dpynum, Window window)
 	sprintf(dpystr, "localhost:%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
 	tryunix(pthread_mutex_init(&frameready, NULL));
-	profile=false;  char *ev=NULL;
-	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1)) {profile=true;  hptimer_init();}
 	b=new rrbitmap(dpystr, window);
 	errifnot(b);
 	deadyet=false;  displaythnd=0;
@@ -64,34 +62,9 @@ void rrcwin::drawFrame(rrjpeg *f)
 }
 
 
-void rrcwin::showprofile(rrframeheader *h, int size)
-{
-	static double tstart=0., mpixels=0., displaytime=0., mbits=0., frames=0.;
-	if(profile)
-	{
-		if(tstart)
-		{
-			displaytime+=hptime()-tstart;
-			if(!h->eof)
-			{
-				mpixels+=(double)h->bmpw*(double)h->bmph/1000000.;
-				mbits+=(double)size*8./1000000.;
-				frames+=(double)(h->bmpw*h->bmph)/(double)(h->winw*h->winh);
-			}
-		}
-		if(displaytime>1.)
-		{
-			hpprintf("%.2f Mpixels/sec - %.2f fps - %.2f Mbps\n", mpixels/displaytime,
-				frames/displaytime, mbits/displaytime);
-			displaytime=0.;  mpixels=0.;  frames=0;  mbits=0.;
-		}
-		tstart=hptime();
-	}
-}
-
-
 void *rrcwin::displayer(void *param)
 {
+	rrprofiler pt("Total"), pb("Blit"), pd("Decompress");
 	rrcwin *rrw=(rrcwin *)param;
 
 	try
@@ -104,11 +77,20 @@ void *rrcwin::displayer(void *param)
 			pthread_mutex_unlock(&rrw->frameready);
 			if(j->h.eof)
 			{
+				pb.startframe();
 				rrw->b->init(&j->h);
 				rrw->b->redraw();
+				pb.endframe(rrw->b->h.winw*rrw->b->h.winh, 0, 1);
+				pt.endframe(rrw->b->h.winw*rrw->b->h.winh, 0, 1);
+				pt.startframe();
 			}
-			else *rrw->b=*j;
-			rrw->showprofile(&rrw->b->h, j->h.size);
+			else
+			{
+				pd.startframe();
+				*rrw->b=*j;
+				pd.endframe(j->h.bmpw*j->h.bmph, j->h.size, (double)(j->h.bmpw*j->h.bmph)/
+					(double)(j->h.winw*j->h.winh));
+			}
 			delete j;
 		}
 	}

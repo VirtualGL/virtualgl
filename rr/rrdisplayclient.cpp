@@ -11,35 +11,20 @@
  * wxWindows Library License for more details.
  */
 
-//#define RRPROFILE
 #include "rrdisplayclient.h"
 
 // This gets called by the parent class
 void rrdisplayclient::dispatch(void)
 {
-	#ifdef RRPROFILE
-	double mpixels=0., tstart, comptime=0.;
-	#endif
-
 	try {
 
 	rrbmp *b=NULL;
 	q.get((void **)&b);  if(deadyet) return;
 	if(!b) _throw("Queue has been shut down");
 	pthread_mutex_unlock(&ready);
-	#ifdef RRPROFILE
-	tstart=hptime();
-	#endif
 	compresssend(b, lastb);
-	#ifdef RRPROFILE
-	comptime+=hptime()-tstart;
-	mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
-	if(comptime>1.)
-	{
-		hpprintf("Compess/Send:          %f Mpixels/s\n", mpixels/comptime);
-		comptime=0.;  mpixels=0.;
-	}
-	#endif
+	prof_total.endframe(b->h.bmpw*b->h.bmph, 0, 1);
+	prof_total.startframe();
 	lastb=b;
 
 	} catch(...) {pthread_mutex_unlock(&ready);  throw;}
@@ -130,7 +115,9 @@ void rrdisplayclient::compresssend(rrbmp *b, rrbmp *lastb)
 		rrb.pixelsize=b->pixelsize;
 		rrb.flags=b->flags;
 		rrb.bits=&b->bits[pitch*bufstartline];
+		prof_comp.startframe();
 		j=rrb;
+		prof_comp.endframe(j.h.bmpw*j.h.bmph, j.h.size, 0);
 		j.h.eof=0;
 		send((char *)&j.h, sizeof(rrframeheader));
 		send((char *)j.bits, (int)j.h.size);

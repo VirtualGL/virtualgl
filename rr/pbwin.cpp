@@ -151,6 +151,7 @@ pbwin::pbwin(Display *windpy, Window win, Display *pbdpy)
 	pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &ma);
 	blitter=NULL;
+	prof_rb.setname("Readback");
 }
 
 pbwin::~pbwin(void)
@@ -343,6 +344,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+	prof_rb.startframe();
 	if(!bottomup)
 	{
 		for(int i=0; i<h; i++)
@@ -352,6 +354,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
+	prof_rb.endframe(w*h, 0, 1);
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();

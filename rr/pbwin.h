@@ -17,6 +17,7 @@
 #include "faker-sym.h"
 #include <pthread.h>
 #include "rrblitter.h"
+#include "rrprofiler.h"
 
 // A container class for the actual Pbuffer
 
@@ -72,6 +73,7 @@ class pbwin
 		pbuffer *oldpb, *pb;  GLXFBConfig config;
 		int neww, newh;
 		rrblitter *blitter;
+		rrprofiler prof_rb;
 };
 
 #endif

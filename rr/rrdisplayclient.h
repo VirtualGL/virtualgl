@@ -18,6 +18,7 @@
 #include "rr.h"
 #include "rrframe.h"
 #include "genericQ.h"
+#include "rrprofiler.h"
 
 class rrdisplayclient : rraconn
 {
@@ -31,6 +32,8 @@ class rrdisplayclient : rraconn
 		tryunix(pthread_mutex_init(&bmpmutex, NULL));
 		lastb=NULL;  bmpi=0;
 		for(int i=0; i<NB; i++) memset(&bmp[i], 0, sizeof(rrbmp));
+		prof_total.setname("Total");
+		prof_comp.setname("Compress");
 		connect(servername, port, dossl);
 	}
 
@@ -57,6 +60,7 @@ class rrdisplayclient : rraconn
 	void compresssend(rrbmp *, rrbmp *);
 	void dispatch(void);
 	void allocbmp(rrbmp *, int, int, int);
+	rrprofiler prof_total, prof_comp;
 };
 
 #endif
