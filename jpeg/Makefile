@@ -190,6 +190,15 @@ JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework C
 
 endif
 
+ifeq ($(JPEGLIB), medialib)
+
+$(ODIR)/hpjpeg.o: hpjpeg-mlib.c hpjpeg-mlibhuff.c hpjpeg-mlibcolor.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+JPEGLINK = -lmlib
+
+endif
+
 $(LDIR)/libhpjpeg.$(SHEXT): $(ODIR)/hpjpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
