@@ -8,10 +8,10 @@
 
 Summary: A non-intrusive remote rendering package
 Name: %{package}
-Version: %{_majver}
+Version: %{_version}
 Vendor: Landmark Graphics
 Group: Applications/Graphics
-Release: %{_minver}
+Release: %{_build}
 License: wxWindows Library License, v3
 BuildRoot: %{_curdir}/%{name}-buildroot
 Prereq: /sbin/ldconfig

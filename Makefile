@@ -22,8 +22,8 @@ ifeq ($(platform), windows)
 
 dist: rr
 	$(RM) $(APPNAME).exe
-	makensis //DAPPNAME=$(APPNAME) //DMAJVER=$(MAJVER) \
-		//DMINVER=$(MINVER) //DEDIR=$(platform)$(subplatform)\\bin rr.nsi
+	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
+		//DBUILD=$(BUILD) //DEDIR=$(platform)$(subplatform)\\bin rr.nsi
 
 
 ##########################################################################
@@ -72,10 +72,10 @@ uninstall:
 dist: rr rpms/BUILD rpms/RPMS
 	rm $(PACKAGENAME).$(RPMARCH).rpm; \
 	rpmbuild -bb --define "_curdir `pwd`" --define "_topdir `pwd`/rpms" \
-		--define "_majver $(MAJVER)" --define "_minver $(MINVER)" --define "_bindir $(EDIR)" \
+		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
 		rr.spec; \
-	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(MAJVER)-$(MINVER).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
+	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
 
 rpms/BUILD:
 	mkdir -p rpms/BUILD
