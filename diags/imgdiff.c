@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include "rrutil.h"
 #include "bmp.h"
 
 #ifndef min

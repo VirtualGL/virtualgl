@@ -980,6 +980,7 @@ DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
 	_catch(decode_jpeg_init(jpg));
 	*width=jpg->width;  *height=jpg->height;
 
+	if(*width<1 || *height<1) _throw("Invalid data returned in header");
 	return 0;
 }
 
