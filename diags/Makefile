@@ -17,7 +17,7 @@ clean:
 
 $(EDIR)/tcbench.exe: $(ODIR)/tcbench.obj $(LDIR)/fbx.lib
 	$(LINK) $^ -OUT:$@ $(FBXLIB) user32.lib
-	
+
 $(EDIR)/imgdiff.exe: $(ODIR)/imgdiff.obj $(LDIR)/rrutil.lib
 	$(LINK) $^ -OUT:$@ rrutil.lib
 
@@ -48,7 +48,7 @@ $(EDIR)/cpustat: $(ODIR)/cpustat.o
 	$(CC) $(LDFLAGS) $< -o $@
 
 $(EDIR)/imgdiff: $(ODIR)/imgdiff.o $(LDIR)/librrutil.a
-	$(CC) $(LDFLAGS) $< -o $@ -lrrutil
+	$(CC) $(LDFLAGS) $< -o $@ -lrrutil -lm
 
 ##########################################################################
 endif
