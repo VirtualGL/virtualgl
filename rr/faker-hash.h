@@ -15,7 +15,7 @@
 
 #include <pthread.h>
 
-#include "rrcommon.h"
+#include "rrmutex.h"
 
 typedef struct __hashclassstruct
 {
@@ -32,9 +32,6 @@ class _hashclass
 		_hashclass(void)
 		{
 			start=end=NULL;
-			pthread_mutexattr_t ma;
-			pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-			pthread_mutex_init(&mutex, &ma);
 			entries=0;
 		}
 
@@ -45,7 +42,7 @@ class _hashclass
 
 		void killhash(void)
 		{
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			while(start!=NULL) killentry(start);
 		}
 
@@ -53,7 +50,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(value) ptr->value=value;  return 0;
@@ -72,7 +69,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(!ptr->value) ptr->value=attach(key1, key2);
@@ -85,7 +82,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 				killentry(ptr);
 		}
@@ -98,7 +95,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			ptr=start;
 			while(ptr!=NULL)
 			{
@@ -113,7 +110,7 @@ class _hashclass
 
 		void killentry(_hashclassstruct *ptr)
 		{
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			if(ptr->prev) ptr->prev->next=ptr->next;
 			if(ptr->next) ptr->next->prev=ptr->prev;
 			if(ptr==start) start=ptr->next;
@@ -129,5 +126,5 @@ class _hashclass
 		virtual void detach(_hashclassstruct *h)=0;
 		virtual bool compare(_hashkeytype1, _hashkeytype2, _hashclassstruct *h)=0;
 		_hashclassstruct *start, *end;
-		pthread_mutex_t mutex;
+		rrcs mutex;
 };

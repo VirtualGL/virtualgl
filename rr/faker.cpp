@@ -14,10 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/signal.h>
-#include <pthread.h>
 #include <string.h>
-#include "rr.h"
-#include "hputil.h"
+#include "rrutil.h"
+#include "rrtimer.h"
+#include "rrthread.h"
+#include "rrmutex.h"
 #include "fakerconfig.h"
 
 FakerConfig fconfig;
@@ -28,25 +29,20 @@ FakerConfig fconfig;
 #include "faker-vishash.h"
 #include "faker-pmhash.h"
 #include "faker-sym.h"
-#undef errifnot
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
 #include "x11err.h"
 #endif
-	
-#ifndef max
- #define max(a,b) ((a)>(b)?(a):(b))
-#endif
 
 // Did I mention that debugging real-time systems is hell?
 void _fprintf (FILE *f, const char *format, ...)
 {
-	static pthread_mutex_t mutex=PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-	rrlock l(mutex);
+	static rrcs mutex;  static rrtimer timer;
+	rrcs::safelock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
-	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx - ", (unsigned long)pthread_self(), hptime(),
+	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx - ", (unsigned long)rrthread_id(), timer.time(),
 		(unsigned long)glXGetCurrentContext(), glXGetCurrentDrawable(), glXGetCurrentReadDrawable());
 	vfprintf(f, format, arglist);
 	fflush(f);
@@ -55,7 +51,7 @@ void _fprintf (FILE *f, const char *format, ...)
 
 // Globals
 Display *_localdpy=NULL;
-static pthread_mutex_t globalmutex=PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+static rrcs globalmutex;
 winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
@@ -65,7 +61,7 @@ static int __shutdown=0;
 int isdead(void)
 {
 	int retval=0;
-	rrlock l(globalmutex);
+	rrcs::safelock l(globalmutex);
 	retval=__shutdown;
 	return retval;
 }
@@ -73,7 +69,7 @@ int isdead(void)
 void safeexit(int retcode)
 {
 	int shutdown;
-	pthread_mutex_lock(&globalmutex);
+	globalmutex.lock();
 	shutdown=__shutdown;
 	if(!__shutdown)
 	{
@@ -84,15 +80,15 @@ void safeexit(int retcode)
 		if(_dpyh) _dpyh->killhash();
 		if(_winh) _winh->killhash();
 	}
-	pthread_mutex_unlock(&globalmutex);
+	globalmutex.unlock();
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
 }
 
-#define _die(f,l,m) {if(!isdead()) fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  safeexit(1);}
+#define _die(f,m) {if(!isdead()) fprintf(stderr, "%s--\n%s\n", f, m);  safeexit(1);}
 
 #define TRY() try {
-#define CATCH() } catch(RRError e) {_die(e.file, e.line, e.message);}
+#define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
 #include "faker-glx.cpp"
 
@@ -113,7 +109,7 @@ void fakerinit(void)
 {
 	static int init=0;
 
-	rrlock l(globalmutex);
+	rrcs::safelock l(globalmutex);
 	if(init) return;
 	init=1;
 
@@ -658,7 +654,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 {
 	TRY();
 	// Prevent recursion
-	if(dpy==_localdpy) return _glXDestroyWindow(dpy, win);
+	if(dpy==_localdpy) {_glXDestroyWindow(dpy, win);  return;}
 	////////////////////
 
 	winh.remove(dpy, win);
@@ -693,7 +689,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 	// Prevent recursion
-	if(dpy==_localdpy) return _glXDestroyGLXPixmap(dpy, pix);
+	if(dpy==_localdpy) {_glXDestroyGLXPixmap(dpy, pix);  return;}
 	////////////////////
 
 	pmh.remove(dpy, pix);
@@ -734,7 +730,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 	// Prevent recursion
-	if(dpy==_localdpy) return _glXDestroyPixmap(dpy, pix);
+	if(dpy==_localdpy) {_glXDestroyPixmap(dpy, pix);  return;}
 	////////////////////
 
 	pmh.remove(dpy, pix);

@@ -58,7 +58,7 @@ class winhash : public _winhash
 		{
 			if(!dpy || !win || !config) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL;
-			rrlock l(mutex);
+			rrcs::safelock l(mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
 				if(!ptr->value)
