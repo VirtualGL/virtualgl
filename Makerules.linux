@@ -7,6 +7,7 @@ CXX = c++
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
+CDEFINES = -D_GNU_SOURCE
 
 ifeq ($(subplatform), ia64)
 CC = icc

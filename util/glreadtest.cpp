@@ -20,7 +20,7 @@
 #include "rrtimer.h"
 #include "rrerror.h"
 #include <errno.h>
-#include <GL/glx.h>
+#include "../rr/glx.h"
 #include <GL/glu.h>
 #include "x11err.h"
 
