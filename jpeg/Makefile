@@ -6,10 +6,18 @@ ifeq ($(platform), windows)
 
 TARGETS = $(EDIR)/hpjpeg.dll \
           $(LDIR)/hpjpeg.lib \
-          $(EDIR)/jpgtest.exe
+          $(EDIR)/jpgtest.exe \
+          $(EDIR)/jpegut.exe \
+          $(EDIR)/24to32.exe
 
 OBJS = $(ODIR)/hpjpeg.obj \
-       $(ODIR)/jpgtest.obj
+       $(ODIR)/jpgtest.obj \
+       $(ODIR)/jpegut.obj \
+       $(ODIR)/24to32.obj
+
+ifeq ($(JPEGLIB),)
+JPEGLIB = $(DEFAULTJPEGLIB)
+endif
 
 ifeq ($(JPEGLIB), libjpeg)
 TARGETS := libjpeg $(TARGETS)
@@ -41,7 +49,7 @@ $(ODIR)/hpjpeg.obj: hpjpegp.c
 
 JPEGLINK = -libpath:$(PEGDIR)/lib picnm.lib
 
-else
+endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
@@ -51,7 +59,9 @@ $(ODIR)/hpjpeg.obj: hpjpegl.c
 JPEGLINK = $(LDIR)/libjpeg.lib
 JPEGDEP = $(LDIR)/libjpeg.lib
 
-else
+endif
+
+ifeq ($(JPEGLIB), ipp)
 
 IPPLINK = ippjmerged.lib ippimerged.lib ippsmerged.lib ippjemerged.lib \
 	ippiemerged.lib ippsemerged.lib ippcorel.lib
@@ -62,23 +72,36 @@ $(ODIR)/hpjpeg.obj: hpjpegipp.c
 JPEGLINK = $(IPPLINK)
 
 endif
-endif
 
 $(EDIR)/hpjpeg.dll $(LDIR)/hpjpeg.lib: $(ODIR)/hpjpeg.obj $(JPEGDEP)
 	$(LINK) -dll -out:$(EDIR)/hpjpeg.dll -implib:$(LDIR)/hpjpeg.lib $< $(JPEGLINK)
 
-$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hputil.lib $(LDIR)/hpjpeg.lib
-	$(LINK) $< -OUT:$@ $(HPULIB) hpjpeg.lib
+$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hpjpeg.lib
+	$(LINK) $< -OUT:$@ hpjpeg.lib
+
+$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/hpjpeg.lib
+	$(LINK) $< -OUT:$@ hpjpeg.lib
+
+$(EDIR)/24to32.exe: $(ODIR)/24to32.obj
+	$(LINK) $< -OUT:$@
 
 ##########################################################################
 else
 ##########################################################################
 
 TARGETS = $(LDIR)/libhpjpeg.so \
-          $(EDIR)/jpgtest
+          $(EDIR)/jpgtest \
+          $(EDIR)/jpegut \
+          $(EDIR)/24to32
 
 OBJS = $(ODIR)/hpjpeg.o \
-       $(ODIR)/jpgtest.o
+       $(ODIR)/jpgtest.o \
+       $(ODIR)/jpegut.o \
+       $(ODIR)/24to32.o
+
+ifeq ($(JPEGLIB),)
+JPEGLIB = $(DEFAULTJPEGLIB)
+endif
 
 ifeq ($(JPEGLIB), libjpeg)
 TARGETS := libjpeg $(TARGETS)
@@ -103,22 +126,24 @@ ifeq ($(JPEGLIB), pegasus)
 
 PEGDIR = ../../pictools
 
-$(ODIR)/hpjpeg.o: hpjpegp.c
+$(ODIR)/hpjpeg.o: hpjpegp.c ../include/hpjpeg.h
 	$(CC) $(CFLAGS) -I$(PEGDIR)/include -c $< -o $@
 
 JPEGLINK = -L$(PEGDIR)/lib -lpicl20
 
-else
+endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
-$(ODIR)/hpjpeg.o: hpjpegl.c
+$(ODIR)/hpjpeg.o: hpjpegl.c ../include/hpjpeg.h
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -o $@
 
 JPEGLINK = $(LDIR)/libjpeg.a
 JPEGDEP = $(LDIR)/libjpeg.a
 
-else
+endif
+
+ifeq ($(JPEGLIB), ipp)
 
 ifeq ($(IPPDIR),)
 IPPDIR = /opt/intel/ipp40
@@ -127,19 +152,24 @@ IPPLINK = -L$(IPPDIR)/lib -lippcore \
         -lippjemerged -lippiemerged -lippsemerged \
         -lippjmerged -lippimerged -lippsmerged
 
-$(ODIR)/hpjpeg.o: hpjpegipp.c
+$(ODIR)/hpjpeg.o: hpjpegipp.c ../include/hpjpeg.h
 	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
 
 JPEGLINK = $(IPPLINK)
 
 endif
-endif
 
 $(LDIR)/libhpjpeg.so: $(ODIR)/hpjpeg.o $(JPEGDEP)
-	$(CC) $(LDFLAGS) -shared $< -o $@ $(JPEGLINK)
+	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDIR)/libhpjpeg.so
-	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lhpjpeg
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhpjpeg.so
+	$(CXX) $(LDFLAGS) $< -o $@ -lhpjpeg
+
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.so
+	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
+
+$(EDIR)/24to32: $(ODIR)/24to32.o
+	$(CC) $(LDFLAGS) $< -o $@
 
 ##########################################################################
 endif
