@@ -31,7 +31,7 @@ extern Display *_localdpy;
 #include "rrcommon.h"
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
-#define rrtry(f) {if((f)==-1) throw(RRGetError());}
+#define rrtry(f) {if((f)==-1) throw(rrerror(RRErrorLocation(), RRErrorString()));}
 
 // Generic OpenGL error checker (0 = no errors)
 int glerror(void)
@@ -274,10 +274,12 @@ void pbwin::readback(GLint drawbuf, bool force)
 
 	if(fconfig.compress!=RRCOMP_NONE) errifnot(rrdpy=dpyh.findrrdpy(windpy));
 	if(this->force) {force=true;  this->force=false;}
+	if(fconfig.compress!=RRCOMP_NONE) {
 	int frameready=0;
 	rrtry(frameready=RRFrameReady(rrdpy));
 	if(fconfig.spoil && rrdpy && !frameready && !force)
 		return;
+	}
 
 	int pbw=pb->width(), pbh=pb->height();
 	if(fconfig.compress==RRCOMP_NONE || pbw*pbh<1000)
@@ -285,7 +287,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 		blit(drawbuf);  return;
 	}
 	b=RRGetBitmap(rrdpy, pbw, pbh, 3);
-	if(b==NULL) throw(RRGetError());
+	if(b==NULL) throw(rrerror(RRErrorLocation(), RRErrorString()));
 
 	readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, false);
 
@@ -304,7 +306,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 	b->h.bmpy=0;
 	b->h.qual=fconfig.currentqual;
 	b->h.subsamp=fconfig.currentsubsamp;
-	b->flags=RRBMP_BGR|RRBMP_BOTTOMUP;
+	b->flags=RRBMP_BGR;
 	b->strip_height=STRIPH;
 	rrtry(RRSendFrame(rrdpy, b));
 }
@@ -323,9 +325,8 @@ void pbwin::blit(GLint drawbuf)
 	format= fb.bgr? (fb.ps==3?GL_BGR_EXT:GL_BGRA_EXT) : (fb.ps==3?GL_RGB:GL_RGBA);
 
 	int pbw=pb->width(), pbh=pb->height();
-	if(pbw!=fb.width || pbh!=fb.height) return;
-	readpixels(0, 0, pbw, fb.xi->bytes_per_line, pbh, format,
-		(unsigned char *)fb.bits, drawbuf, true);
+	readpixels(0, 0, min(pbw, fb.width), fb.xi->bytes_per_line, min(pbh, fb.height), format,
+		(unsigned char *)fb.bits, drawbuf, false);
 
 	fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
 
@@ -364,20 +365,15 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	if(bottomup)
+	for(int i=0; i<h; i++)
 	{
-		for(int i=0; i<h; i++)
-		{
-			int _y=h-1-i-y;
-			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
-		}
+		int _y= bottomup? i+y: h-1-i-y;
+		glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
 	}
-	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();
