@@ -22,6 +22,13 @@
 
 static int __line=-1;
 
+const int fbx_rmask[FBX_FORMATS]=
+	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000};
+const int fbx_gmask[FBX_FORMATS]=
+	{0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00};
+const int fbx_bmask[FBX_FORMATS]=
+	{0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF};
+
 #ifdef WIN32
 
  static char __lasterror[1024]="No error";
@@ -69,10 +76,11 @@ int fbx_geterrline(void)
 int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 {
 	int w, h;
+	int rmask, gmask, bmask, ps, i;
 	#ifdef WIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
-	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1;
+	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1, alphafirst;
 	#endif
 
 	if(!s) _throw("Invalid argument");
@@ -101,39 +109,44 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	w32(GetDIBits(s->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
 	w32(GetDIBits(s->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
 	w32(DeleteObject(hmembmp));  hmembmp=0;  // We only needed it to get the screen properties
-	s->ps=bminfo.bmi.bmiHeader.biBitCount/8;
+	ps=bminfo.bmi.bmiHeader.biBitCount/8;
 	if(width>0) bminfo.bmi.bmiHeader.biWidth=width;
 	if(height>0) bminfo.bmi.bmiHeader.biHeight=height;
 	s->width=bminfo.bmi.bmiHeader.biWidth;
 	s->height=bminfo.bmi.bmiHeader.biHeight;
 
-	if(s->ps<3)
+	if(ps<3)
 	{
 		// Make the buffer BGRA
 		bminfo.bmi.bmiHeader.biCompression=BI_BITFIELDS;
 		bminfo.bmi.bmiHeader.biBitCount=32;
-		s->ps=4;
+		ps=4;
 		(*(DWORD *)&bminfo.bmi.bmiColors[0])=0xFF0000;
 		(*(DWORD *)&bminfo.bmi.bmiColors[1])=0xFF00;
 		(*(DWORD *)&bminfo.bmi.bmiColors[2])=0xFF;
 	}
 
-	s->pitch=BMPPAD(s->width*s->ps);  // Windoze bitmaps are always padded
+	s->pitch=BMPPAD(s->width*ps);  // Windoze bitmaps are always padded
 
 	if(bminfo.bmi.bmiHeader.biCompression==BI_BITFIELDS)
 	{
-		s->rmask=(*(DWORD *)&bminfo.bmi.bmiColors[0]);
-		s->gmask=(*(DWORD *)&bminfo.bmi.bmiColors[1]);
-		s->bmask=(*(DWORD *)&bminfo.bmi.bmiColors[2]);
+		rmask=(*(DWORD *)&bminfo.bmi.bmiColors[0]);
+		gmask=(*(DWORD *)&bminfo.bmi.bmiColors[1]);
+		bmask=(*(DWORD *)&bminfo.bmi.bmiColors[2]);
 	}
 	else
 	{
-		s->rmask=0xFF;
-		s->gmask=0xFF00;
-		s->bmask=0xFF0000;
+		rmask=0xFF;
+		gmask=0xFF00;
+		bmask=0xFF0000;
 	}
 
-	if(s->rmask>s->bmask) s->bgr=1;  else s->bgr=0;
+	s->format=-1;
+	for(i=0; i<FBX_FORMATS; i++)
+		if(rmask==fbx_rmask[i] && gmask==fbx_gmask[i] && bmask==fbx_bmask[i]
+			&& ps==fbx_ps[i] && fbx_alphafirst[i]==0) s->format=i;
+	if(s->format==-1) _throw("Display has unsupported pixel format");
+
 	bminfo.bmi.bmiHeader.biHeight=-bminfo.bmi.bmiHeader.biHeight;  // Our convention is top down
 	w32(s->hdib=CreateDIBSection(hdc, &bminfo.bmi, DIB_RGB_COLORS, (void **)&s->bits, NULL, 0));
 	w32(SelectObject(s->hmdc, s->hdib));
@@ -207,15 +220,25 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height))==NULL)
 			_throw("Memory allocation error");
 	}
-	s->ps=s->xi->bits_per_pixel/8;
+	ps=s->xi->bits_per_pixel/8;
 	s->width=s->xi->width;
 	s->height=s->xi->height;
 	s->pitch=s->xi->bytes_per_line;
 	if(s->width!=w || s->height!=h) _throw("Bitmap returned does not match requested size");
-	s->rmask=s->xi->red_mask;  s->gmask=s->xi->green_mask;  s->bmask=s->xi->blue_mask;
-	if((s->rmask&0x01 && s->xi->byte_order==MSBFirst) || 
-	   (s->bmask&0x01 && s->xi->byte_order==LSBFirst)) s->bgr=1;
-	else s->bgr=0;
+	rmask=s->xi->red_mask;  gmask=s->xi->green_mask;  bmask=s->xi->blue_mask;
+	alphafirst=0;
+	if(s->xi->byte_order==MSBFirst)
+	{
+		if(ps<4) {rmask=s->xi->blue_mask;  gmask=s->xi->green_mask;  bmask=s->xi->red_mask;}
+		else alphafirst=1;
+	}
+
+	s->format=-1;
+	for(i=0; i<FBX_FORMATS; i++)
+		if(rmask==fbx_rmask[i] && gmask==fbx_gmask[i] && bmask==fbx_bmask[i]
+			&& ps==fbx_ps[i] && fbx_alphafirst[i]==alphafirst) s->format=i;
+	if(s->format==-1) _throw("Display has unsupported pixel format");
+
 	s->bits=s->xi->data;
 	x11(s->xgc=XCreateGC(s->wh.dpy, s->bb? s->bb:s->wh.win, 0, NULL));
 	return 0;
@@ -305,16 +328,16 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
-	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits || !s->ps) _throw("Not initialized");
+	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits) _throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
 	bmi.bmiHeader.biWidth=s->width;
 	bmi.bmiHeader.biHeight=-s->height;
 	bmi.bmiHeader.biPlanes=1;
-	bmi.bmiHeader.biBitCount=s->ps*8;
+	bmi.bmiHeader.biBitCount=fbx_ps[s->format]*8;
 	bmi.bmiHeader.biCompression=BI_RGB;
 	w32(gc=GetDC(s->wh));
-	w32(SetDIBitsToDevice(gc, wx, wy, bw, bh, bx, 0, 0, bh, &s->bits[by*s->ps*s->width], &bmi,
+	w32(SetDIBitsToDevice(gc, wx, wy, bw, bh, bx, 0, 0, bh, &s->bits[by*s->pitch], &bmi,
 		DIB_RGB_COLORS));
 	w32(ReleaseDC(s->wh, gc));
 	return 0;

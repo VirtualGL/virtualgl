@@ -69,45 +69,32 @@ void nativeread(int), nativewrite(int);
 //////////////////////////////////////////////////////////////////////
 // Buffer initialization and checking
 //////////////////////////////////////////////////////////////////////
-void initbuf(int x, int y, int w, int h, int pixsize, unsigned char *buf, int bassackwards, int pad)
+
+void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
 {
-	int i, j, k, l, pitch;
-	if(pad) pitch=BMPPAD(w*pixsize);
-	else pitch=w*pixsize;
+	int i, j, ps=fbx_ps[format];
 	for(i=0; i<h; i++)
 	{
-		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			for(k=0; k<pixsize; k++)
-			{
-				buf[i*pitch+j*pixsize+k]=((l+y)*(j+x)*(k+1))%256;
-			}
+			memset(&buf[i*pitch+j*ps], 0, fbx_ps[format]);
+			buf[i*pitch+j*ps+fbx_roffset[format]]=255;
+			buf[i*pitch+j*ps+fbx_goffset[format]]=(j+x)%256;
+			buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y)%256;
 		}
 	}
 }
 
-int cmpbuf(int x, int y, int w, int h, int ps, unsigned char *buf, int bassackwards, int byteswap, int pad)
+int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
 {
-	int i, j, k, l, pitch;
-	if(pad) pitch=BMPPAD(w*ps);
-	else pitch=w*ps;
+	int i, j, ps=fbx_ps[format];
 	for(i=0; i<h; i++)
 	{
-		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			for(k=0; k<ps; k++)
-			{
-				if(!littleendian() && byteswap)
-				{
-					if(buf[i*pitch+j*ps+(ps-k-1)]!=((l+y)*(j+x)*(k+1))%256 && k!=3) return 0;
-				}
-				else
-				{
-					if(buf[i*pitch+j*ps+k]!=((l+y)*(j+x)*(k+1))%256 && k!=3) return 0;
-				}
-			}
+			if(buf[i*pitch+j*ps+fbx_roffset[format]]!=255) return 0;
+			if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(j+x)%256) return 0;
+			if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y)%256) return 0;
 		}
 	}
 	return 1;
@@ -145,18 +132,14 @@ void nativewrite(int useshm)
 	try {
 
 	fbx(fbx_init(&s, wh, 0, 0, useshm));
+	int ps=fbx_ps[s.format];
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
-	fprintf(stderr, "Native Pixel Format:  %d-bit ", s.ps*8);
-	for(i=0; i<s.ps*8; i++)
-	{
-		if(s.rmask&(1<<i)) fprintf(stderr, "R");  else if(s.gmask&(1<<i)) fprintf(stderr, "G");
-		else if(s.bmask&(1<<i)) fprintf(stderr, "B");
-	}
+	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname[s.format]);
 	fprintf(stderr, "\n");
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native write test\n");
 	clearfb();
-	initbuf(0, 0, width, height, s.ps, (unsigned char *)s.bits, 0, s.width*s.ps!=s.pitch);
+	initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
 	if(useshm)
 		fprintf(stderr, "FB write (O/S Native SHM):      ");
 	else
@@ -188,6 +171,7 @@ void nativeread(int useshm)
 	try {
 
 	fbx(fbx_init(&s, wh, 0, 0, useshm));
+	int ps=fbx_ps[s.format];
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native read test\n");
@@ -195,7 +179,7 @@ void nativeread(int useshm)
 		fprintf(stderr, "FB read (O/S Native SHM):       ");
 	else
 		fprintf(stderr, "FB read (O/S Native):           ");
-	memset(s.bits, 0, width*height*s.ps);
+	memset(s.bits, 0, width*height*ps);
 	n=N;
 	do
 	{
@@ -206,7 +190,7 @@ void nativeread(int useshm)
 			fbx(fbx_read(&s, 0, 0));
 		}
 		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, width, height, s.ps, (unsigned char *)s.bits, 0, littleendian(), s.width*s.ps!=s.pitch))
+		if(!cmpbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits))
 			_throw("ERROR: Bogus data read back.");
 	} while (rbtime<2.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
@@ -237,8 +221,7 @@ class writethread : public Runnable
 			else {myheight=height-height/2;  myy=height/2;}
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
-			initbuf(myx, myy, mywidth, myheight, stressfb.ps, (unsigned char *)stressfb.bits, 0,
-				stressfb.width*stressfb.ps!=stressfb.pitch);
+			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format, (unsigned char *)stressfb.bits);
 			for (i=0; i<iter; i++)
 				fbx(fbx_write(&stressfb, 0, 0, myx, myy, mywidth, myheight));
 
@@ -292,11 +275,11 @@ class readthread : public Runnable
 			else {myheight=height-height/2;  myy=height/2;}
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
-			memset(stressfb.bits, 0, mywidth*myheight*stressfb.ps);
+			int ps=fbx_ps[stressfb.format];
+			memset(stressfb.bits, 0, mywidth*myheight*ps);
 			for(i=0; i<iter; i++)
 				fbx(fbx_read(&stressfb, myx, myy));
-			if(!cmpbuf(myx, myy, mywidth, myheight, stressfb.ps, (unsigned char *)stressfb.bits, 0, littleendian(),
-				stressfb.width*stressfb.ps!=stressfb.pitch))
+			if(!cmpbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format, (unsigned char *)stressfb.bits))
 				_throw("ERROR: Bogus data read back.");
 
 			} catch(...) {fbx_term(&stressfb);  throw;}
@@ -377,9 +360,9 @@ void nativestress(int useshm)
 		fprintf(stderr, "FB write (1 bmp, 4 blits):      ");
 	memset(&stressfb0, 0, sizeof(stressfb0));
 	fbx(fbx_init(&stressfb0, wh, width, height, useshm));
+	int ps=fbx_ps[stressfb0.format];
 	if(useshm && !stressfb0.shm) _throw("MIT-SHM not supported");
-	initbuf(0, 0, width, height, stressfb0.ps, (unsigned char *)stressfb0.bits, 0,
-		stressfb0.width*stressfb0.ps!=stressfb0.pitch);
+	initbuf(0, 0, width, stressfb0.pitch, height, stressfb0.format, (unsigned char *)stressfb0.bits);
 	n=N;
 	do
 	{
