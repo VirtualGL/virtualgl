@@ -202,9 +202,9 @@ class rrbitmap : public rrframe
 
 	void init(char *dpystring, Window win)
 	{
-		if(!dpystring || !win) throw(rrerror("rrfb::init", "Invalid argument"));
+		if(!dpystring || !win) throw(rrerror("rrbitmap::init", "Invalid argument"));
 		if(!(wh.dpy=XOpenDisplay(dpystring)))
-			throw(rrerror("rrfb::init", "Could not open display"));
+			throw(rrerror("rrbitmap::init", "Could not open display"));
 		wh.win=win;
 		hpjhnd=NULL;
 		memset(&fb, 0, sizeof(fbx_struct));
