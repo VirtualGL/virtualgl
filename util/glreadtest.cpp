@@ -210,7 +210,7 @@ void glwrite(int format)
 
 	try {
 
-	fprintf(stderr, "FB write (glDrawPixels):        ");
+	fprintf(stderr, "glDrawPixels():               ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
 	clearfb();
@@ -243,7 +243,7 @@ void glread(int format)
 
 	try {
 
-	fprintf(stderr, "FB read (glReadPixels):         ");
+	fprintf(stderr, "glReadPixels() [bottom-up]:   ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
 	glReadBuffer(GL_FRONT);
@@ -261,6 +261,27 @@ void glread(int format)
 		}
 		rbtime=timer.elapsed();
 		if(!cmpbuf(0, 0, WIDTH, HEIGHT, ps, rgbaBuffer, 1, 0, 0))
+			_throw("ERROR: Bogus data read back.");
+	} while (rbtime<2. && !check_errors("frame buffer read"));
+	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
+
+	fprintf(stderr, "glReadPixels() [top-down]:    ");
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
+	glReadBuffer(GL_FRONT);
+	memset(rgbaBuffer, 0, WIDTH*HEIGHT*ps);
+	n=N;
+	do
+	{
+		n+=n;
+		timer.start();
+		for (i=0; i<n; i++)
+		{
+			for(int j=0; j<HEIGHT; j++)
+				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[WIDTH*ps*j]);
+		}
+		rbtime=timer.elapsed();
+		if(!cmpbuf(0, 0, WIDTH, HEIGHT, ps, rgbaBuffer, 0, 0, 0))
 			_throw("ERROR: Bogus data read back.");
 	} while (rbtime<2. && !check_errors("frame buffer read"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
