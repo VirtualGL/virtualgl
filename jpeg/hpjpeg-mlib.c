@@ -235,6 +235,7 @@ mlib_u8 *e_preconvertline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int *ps, int flags,
 mlib_u8 *e_extendline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int oldw, int neww, int ps)
 {
 	int i;
+	if(((long)srcbuf&7L)!=0L) {mlib_VectorCopy_U8(linebuf, srcbuf, oldw*ps);  srcbuf=linebuf;}
 	if(oldw==neww) return srcbuf;
 	if(srcbuf!=linebuf) mlib_VectorCopy_U8(linebuf, srcbuf, oldw*ps);
 	for(i=oldw; i<neww; i++)
