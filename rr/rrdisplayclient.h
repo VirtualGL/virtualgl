@@ -72,7 +72,9 @@ class rrcompressor : public Runnable
 	{
 		ready.lock();  complete.lock();
 		sendbuf=NULL;  bufsize=0;
-		prof_comp.setname("Compress");
+		char temps[20];
+		snprintf(temps, 19, "Compress %d", myrank);
+		prof_comp.setname(temps);
 	}
 
 	virtual ~rrcompressor(void)
