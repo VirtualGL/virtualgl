@@ -1,8 +1,53 @@
-#/bin/bash
-CERTFILE=~/rrcert.pem
-if [ -n "$1" ]
+#/bin/sh
+
+uid() {
+    id | cut -f2 -d = | cut -f1 -d \(;
+}
+
+OPENSSL=openssl
+if [ -x /usr/sfw/bin/openssl ]
 then
-	CERTFILE=$1
+	OPENSSL=/usr/sfw/bin/openssl
+else
+	if [ -x /usr/local/ssl/bin/openssl ]
+	then
+		OPENSSL=/usr/local/ssl/bin/openssl
+	fi
 fi
-openssl req -new -x509 -days 365 -nodes -config /etc/rrcert.cnf -out $CERTFILE -keyout $CERTFILE
-openssl x509 -subject -dates -fingerprint -noout -in $CERTFILE
+if [ $OPENSSL = openssl ]
+then
+	if [ ! -x `which $OPENSSL` ]
+	then
+		echo Cannot find OpenSSL
+		exit 0
+	fi
+fi
+
+if [ -f /opt/SUNWvgl/etc/vglcert.cnf ]
+then
+	CERTCNF=/opt/SUNWvgl/etc/vglcert.cnf
+else
+	CERTCNF=/etc/vglcert.cnf
+fi
+
+if [ $1 = global ]
+then
+	if [ ! `uid` -eq 0 ]; then echo Only root can do that!; exit 0; fi
+	if [ -f /opt/SUNWvgl/etc/vglcert.cnf ]
+	then
+		CERTFILE=/opt/SUNWvgl/etc/vglcert.pem
+	else
+		CERTFILE=/etc/vglcert.pem
+	fi
+else
+	if [ $1 = user ]
+	then
+		CERTFILE=$HOME/vglcert.pem
+	else
+		echo USAGE: $0 {global\|user}
+		exit 0
+	fi
+fi
+
+$OPENSSL req -new -x509 -days 365 -nodes -config $CERTCNF -out $CERTFILE -keyout $CERTFILE
+$OPENSSL x509 -subject -dates -fingerprint -noout -in $CERTFILE
