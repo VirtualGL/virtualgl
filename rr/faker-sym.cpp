@@ -1,0 +1,134 @@
+/* Copyright (C)2004 Landmark Graphics
+ *
+ * This library is free software and may be redistributed and/or modified under
+ * the terms of the wxWindows Library License, Version 3 or (at your option)
+ * any later version.  The full license is in the LICENSE.txt file included
+ * with this distribution.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * wxWindows Library License for more details.
+ */
+
+#define __LOCALSYM__
+#include "faker-sym.h"
+#include <dlfcn.h>
+
+#include "fakerconfig.h"
+extern FakerConfig fconfig;
+
+void *loadsym(void *dllhnd, char *symbol)
+{
+	void *sym;  const char *err;
+	sym=dlsym(dllhnd, symbol);
+	err=dlerror();	if(err) {fprintf(stderr, "%s\n", err);  return NULL;}
+	return sym;
+}
+
+#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s);  if(!__##s) {  \
+	fprintf(stderr, "Could not load symbol %s\n", #s);  safeexit(1);}
+#define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s);
+
+void loadsymbols(void)
+{
+	void *dllhnd;
+
+	dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
+	if(!dllhnd)
+	{
+		fprintf(stderr, "Could not open %s\n%s\n", fconfig.gllib, dlerror());
+		safeexit(1);
+	}
+
+	// GLX symbols
+	lsym(glXChooseVisual)
+	lsym(glXCopyContext)
+	lsym(glXCreateContext)
+	lsym(glXCreateGLXPixmap)
+	lsym(glXDestroyContext)
+	lsym(glXDestroyGLXPixmap)
+	lsym(glXGetConfig)
+	lsym(glXIsDirect)
+	lsym(glXMakeCurrent);
+	lsym(glXQueryExtension)
+	lsym(glXQueryVersion)
+	lsym(glXSwapBuffers)
+	lsym(glXUseXFont)
+
+	lsym(glXGetClientString)
+	lsym(glXQueryServerString)
+	lsym(glXQueryExtensionsString)
+
+	lsym(glXChooseFBConfig)
+	lsym(glXCreateNewContext)
+	lsym(glXCreatePbuffer)
+	lsym(glXCreatePixmap)
+	lsym(glXCreateWindow)
+	lsym(glXDestroyPbuffer)
+	lsym(glXDestroyPixmap)
+	lsym(glXDestroyWindow)
+	lsym(glXGetFBConfigAttrib)
+	lsym(glXGetFBConfigs)
+	lsym(glXGetSelectedEvent)
+	lsym(glXGetVisualFromFBConfig)
+	lsym(glXMakeContextCurrent);
+	lsym(glXQueryContext)
+	lsym(glXQueryDrawable)
+	lsym(glXSelectEvent)
+
+	// Optional extensions.  We fake these if they exist
+	lsymopt(glXFreeContextEXT)
+	lsymopt(glXImportContextEXT)
+	lsymopt(glXQueryContextInfoEXT)
+
+	lsymopt(glXJoinSwapGroupNV)
+	lsymopt(glXBindSwapBarrierNV)
+	lsymopt(glXQuerySwapGroupNV)
+	lsymopt(glXQueryMaxSwapGroupsNV)
+	lsymopt(glXQueryFrameCountNV)
+	lsymopt(glXResetFrameCountNV)
+
+	lsymopt(glXGetFBConfigAttribSGIX)
+	lsymopt(glXChooseFBConfigSGIX)
+	lsymopt(glXGetFBConfigFromVisualSGIX)
+
+	lsymopt(glXCreateGLXPbufferSGIX)
+	lsymopt(glXDestroyGLXPbufferSGIX)
+	lsymopt(glXQueryGLXPbufferSGIX)
+	lsymopt(glXSelectEventSGIX)
+	lsymopt(glXGetSelectedEventSGIX)
+
+	// GL symbols
+	lsym(glFinish)
+	lsym(glFlush)
+	lsym(glViewport)
+
+	dlclose(dllhnd);
+
+	// X11 symbols
+	dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
+	if(!dllhnd)
+	{
+		fprintf(stderr, "Could not open %s\n%s\n", fconfig.x11lib, dlerror());
+		safeexit(1);
+	}
+	lsym(XCheckMaskEvent);
+	lsym(XCheckTypedEvent);
+	lsym(XCheckTypedWindowEvent);
+	lsym(XCheckWindowEvent);
+	lsym(XCloseDisplay);
+	lsym(XConfigureWindow);
+	lsym(XCopyArea);
+	lsym(XCreateWindow);
+	lsym(XCreateSimpleWindow);
+	lsym(XDestroyWindow);
+	lsym(XMaskEvent);
+	lsym(XMoveResizeWindow);
+	lsym(XNextEvent);
+	lsym(XOpenDisplay);
+	lsym(XResizeWindow);
+	lsym(XWindowEvent);
+
+	dlclose(dllhnd);
+}

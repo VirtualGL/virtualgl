@@ -89,12 +89,12 @@ all: $(TARGETS)
 
 .PHONY: libjpeg
 libjpeg:
-	cd jpeg-6b; configure CC=$(CC); $(MAKE); cd ..
+	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
 
 clean:
 	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
 	cd jpeg-6b; \
-	$(MAKE) clean || (configure CC=$(CC); $(MAKE) clean); cd ..
+	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
 
 -include $(OBJS:.o=.d)
 

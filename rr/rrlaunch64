@@ -1,0 +1,11 @@
+#!/bin/sh
+export GEOPROBE_USEGLX=1
+export PROMAGIC_USEGLX=1
+if [ -e /usr/lib64/tls/libGL.so.1 ]
+then
+     export RRGLLIB=/usr/lib64/tls/libGL.so.1
+else
+     export RRGLLIB=/usr/lib64/libGL.so.1
+fi
+export RRX11LIB=/usr/X11R6/lib64/libX11.so.6
+LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
