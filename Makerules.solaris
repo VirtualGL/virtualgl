@@ -2,11 +2,11 @@
 # Solaris 32-bit and 64-bit
 ########################################
 
-CC = cc
+CC = cc -xCC
 CXX = CC
 AR = ar ruvs
 
-CFLAGS = -xCC -Kpic
+CFLAGS = -Kpic
 
 LDFLAGS = -lrt
 ifeq ($(subplatform), 64)

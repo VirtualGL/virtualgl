@@ -265,7 +265,9 @@ class rrfb : public rrframe
 		hpjhnd=NULL;
 		memset(&fb, 0, sizeof(fbx_struct));
 		if(!dpystring || !win) throw(rrerror("rrfb::init", "Invalid argument"));
-		wh.dpy=XOpenDisplay(dpystring);  wh.win=win;
+		if(!(wh.dpy=XOpenDisplay(dpystring)))
+			throw(rrerror("rrfb::init", "Could not open display"));
+		wh.win=win;
 	}
 
 	~rrfb(void)

@@ -1,6 +1,13 @@
 #!/bin/sh
-export GEOPROBE_USEGLX=1
-export PROMAGIC_USEGLX=1
+GEOPROBE_USEGLX=1
+export GEOPROBE_USEGLX
+PROMAGIC_USEGLX=1
+export PROMAGIC_USEGLX
+
+case `uname -s` in
+
+Linux)
+
 if [ -e /usr/lib64/tls/libGL.so.1 ]
 then
      export RRGLLIB=/usr/lib64/tls/libGL.so.1
@@ -9,3 +16,19 @@ else
 fi
 export RRX11LIB=/usr/X11R6/lib64/libX11.so.6
 LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
+
+;;
+
+IRIX*)
+
+RRGLLIB=/usr/lib64/libGL.so RRX11LIB=/usr/lib64/libX11.so.1 _RLD64_LIST=librrfaker.so:libGL.so:libpthread.so:DEFAULT ${1+"$@"}
+
+;;
+
+SunOS)
+
+RRGLLIB=/usr/lib/sparcv9/libGL.so RRX11LIB=/usr/X/lib/sparcv9/libX11.so LD_PRELOAD=librrfaker.so:libGL.so ${1+"$@"}
+
+;;
+
+esac
