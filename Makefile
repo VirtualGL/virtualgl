@@ -112,6 +112,7 @@ dist: rr diags rpms/BUILD rpms/RPMS
 	mv rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(PACKAGENAME).$(RPMARCH).rpm
 
 rpms/BUILD:
+	mkdir -p rpms
 	rm -rf rpms/BUILD
 	ln -fs `pwd` rpms/BUILD
 
