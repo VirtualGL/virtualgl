@@ -228,6 +228,8 @@ class rrbitmap : public rrframe
 		}
 		if(fb.ps<3 || fb.ps>4) _throw("Display must be 24-bit or 32-bit true color");
 		memcpy(&h, hnew, sizeof(rrframeheader));
+		if(h.winw>fb.width) h.winw=fb.width;
+		if(h.winh>fb.height) h.winh=fb.height;
 		pixelsize=fb.ps;  pitch=fb.xi->bytes_per_line;  bits=(unsigned char *)fb.bits;
 		flags=0;
 		if(fb.bgr) flags|=RRBMP_BGR;

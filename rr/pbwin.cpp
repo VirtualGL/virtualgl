@@ -161,7 +161,7 @@ pbwin::~pbwin(void)
 	if(blitter) {delete blitter;  blitter=NULL;}
 }
 
-void pbwin::init(int w, int h, GLXFBConfig config)
+int pbwin::init(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
@@ -170,12 +170,13 @@ void pbwin::init(int w, int h, GLXFBConfig config)
 	w=min(w, dw);  h=min(h, dh);
 
 	rrlock l(mutex);
-	if(pb && pb->width()==w && pb->height()==h) return;
+	if(pb && pb->width()==w && pb->height()==h) return 0;
 	if((pb=new pbuffer(pbdpy, w, h, config))==NULL)
 		_throw("Could not create Pbuffer");
 
 	this->config=config;
 	force=true;
+	return 1;
 }
 
 // The resize doesn't actually occur until the next time updatedrawable() is
@@ -228,8 +229,8 @@ GLXDrawable pbwin::updatedrawable(void)
 	rrlock l(mutex);
 	if(neww>0 && newh>0)
 	{
-		oldpb=pb;
-		init(neww, newh, config);
+		pbuffer *_oldpb=pb;
+		if(init(neww, newh, config)) oldpb=_oldpb;
 		neww=newh=-1;
 	}
 	retval=pb->drawable();
@@ -318,7 +319,7 @@ void pbwin::blit(GLint drawbuf)
 	if(!blitter) errifnot(blitter=new rrblitter());
 	errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
 	int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
-	readpixels(0, 0, b->h.bmpw, b->pitch, b->h.bmph, format, b->bits, drawbuf, false);
+	readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, b->bits, drawbuf, false);
 	blitter->sendframe(b);
 }
 

@@ -61,7 +61,7 @@ class pbwin
 
 	private:
 
-		void init(int, int, GLXFBConfig);
+		int init(int, int, GLXFBConfig);
 		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, GLubyte *,
 			GLint, bool);
