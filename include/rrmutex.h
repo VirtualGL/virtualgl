@@ -164,6 +164,11 @@ class rrsem
 		{
 			#ifdef _WIN32
 			sem=CreateSemaphore(NULL, initialCount, MAXLONG, NULL);
+			#elif defined (__APPLE__)
+			sem_name = tmpnam(0);
+			int oflag = O_CREAT | O_EXCL;
+			mode_t mode = 0644;
+			sem = sem_open(sem_name, oflag, mode, (unsigned int)initialCount);
 			#else
 			sem_init(&sem, 0, (int)initialCount);
 			#endif
@@ -173,6 +178,10 @@ class rrsem
 		{
 			#ifdef _WIN32
 			if(sem) CloseHandle(sem);
+			#elif defined (__APPLE__)
+			int ret=0, err=0;
+			do {ret=sem_close(sem);  err=errno;  sem_post(sem);}
+				while(ret==-1 && err==EBUSY);
 			#else
 			int ret=0, err=0;
 			do {ret=sem_destroy(&sem);  err=errno;  sem_post(&sem);}
@@ -185,6 +194,8 @@ class rrsem
 			#ifdef _WIN32
 			if(WaitForSingleObject(sem, INFINITE)==WAIT_FAILED)
 				throw(w32error("rrsem::wait()"));
+			#elif defined (__APPLE__)
+			if(sem_wait(sem)==-1) throw(unixerror("rrsem::wait()"));
 			#else
 			if(sem_wait(&sem)==-1) throw(unixerror("rrsem::wait()"));
 			#endif
@@ -194,6 +205,8 @@ class rrsem
 		{
 			#ifdef _WIN32
 			if(!ReleaseSemaphore(sem, 1, NULL)) throw(w32error("rrsem::post()"));
+			#elif defined (__APPLE__)
+			if(sem_post(sem)==-1) throw(unixerror("rrsem::post()"));
 			#else
 			if(sem_post(&sem)==-1) throw(unixerror("rrsem::post()"));
 			#endif
@@ -208,6 +221,9 @@ class rrsem
 				ReleaseSemaphore(sem, 1, &count);
 				count++;
 			}
+			#elif defined (__APPLE__)
+			int count=0;
+			sem_getvalue(sem, &count);
 			#else
 			int count=0;
 			sem_getvalue(&sem, &count);
@@ -219,6 +235,9 @@ class rrsem
 
 		#ifdef _WIN32
 		HANDLE sem;
+		#elif defined(__APPLE__)
+		char *sem_name;
+		sem_t *sem;
 		#else
 		sem_t sem;
 		#endif

@@ -50,6 +50,8 @@ __inline int numprocs(void)
 	if(!GetProcessAffinityMask(GetCurrentProcess(), &ProcAff, &SysAff)) return(1);
 	for(i=0; i<32; i++) if(ProcAff&(1<<i)) count++;
 	return(count);
+	#elif defined (__APPLE__)
+	return(1);
 	#else
 	long count=1;
 	if((count=sysconf(_SC_NPROCESSORS_CONF))!=-1) return((int)count);
