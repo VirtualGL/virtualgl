@@ -85,12 +85,8 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void);
   [INPUT] pixelsize = size (in bytes) of each pixel in the source image
      RGBA and BGRA: 4, RGB and BGR: 3
   [INPUT] dstbuf = pointer to user-allocated image buffer which will receive
-     the JPEG image.  This buffer should be allocated to be 3*width*height
-     bytes in size, although not all of it will be used.  For extremely small
-     images (32x32 or smaller), 3*width*height might not be enough buffer
-     space to hold an entire MCU, so allocate the larger of 3*width*height or
-     2048 bytes, just to be safe.  The macro HPJBUFSIZE(width, height) can be
-     used to automatically give the proper buffer size.
+     the JPEG image.  Use the macro HPJBUFSIZE(width, height) to determine
+     the appropriate size for this buffer based on the image width and height.
   [OUTPUT] size = pointer to unsigned long which receives the size (in bytes)
      of the compressed image
   [INPUT] jpegsubsamp = Specifies either 4:1:1, 4:2:2, or 4:4:4 subsampling.
@@ -154,8 +150,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void);
      to decompress
   [INPUT] size = size of the JPEG image buffer (in bytes)
   [INPUT] dstbuf = pointer to user-allocated image buffer which will receive
-     the bitmap image.  This buffer should be (width*pixelsize+pad)*height
-     bytes in size.
+     the bitmap image.  This buffer should normally be pitch*height
+     bytes in size, although this pointer may also be used to decompress into
+     a specific region of a larger buffer.
   [INPUT] width =  width (in pixels) of the destination image
   [INPUT] pitch = bytes per line of the destination image (width*pixelsize if the
      bitmap is unpadded, else HPJPAD(width*pixelsize) if each line of the bitmap
