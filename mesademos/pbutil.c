@@ -25,12 +25,14 @@ int
 QueryPbuffers(Display *dpy, int screen)
 {
 #if defined(GLX_SGIX_pbuffer)
+/*
    char *extensions;
 
    extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
    if (!strstr(extensions,"GLX_SGIX_pbuffer")) {
       return 0;
    }
+*/
    return 1;
 #else
    return 0;
