@@ -62,7 +62,7 @@ enum BMPPIXELFORMAT {BMP_RGB=0, BMP_RGBA, BMP_BGR, BMP_BGRA, BMP_ABGR, BMP_ARGB}
 	if(bytesread!=(size)) {errstr="Read error";  goto finally;}
 
 static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h,
-	BMPPIXELFORMAT f, int align, int dstbottomup)
+	enum BMPPIXELFORMAT f, int align, int dstbottomup)
 {
 	int fd=-1, bytesread, width, height, srcpitch, srcbottomup=1,
 		i, j, srcps, dstpitch;
@@ -82,7 +82,7 @@ static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 	{
 		errstr="invalid argument to loadbmp()";  goto finally;
 	}
-	if(align&(align-1)!=0)
+	if((align&(align-1))!=0)
 	{
 		errstr="Alignment must be a power of 2";  goto finally;
 	}
@@ -181,7 +181,7 @@ static const char *loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 	if(byteswritten!=(size)) {errstr="Write error";  goto finally;}
 
 static const char *savebmp(char *filename, unsigned char *buf, int w, int h,
-	BMPPIXELFORMAT f, int srcpitch, int srcbottomup)
+	enum BMPPIXELFORMAT f, int srcpitch, int srcbottomup)
 {
 	int fd=-1, byteswritten, dstpitch, i, j;  int flags=O_RDWR|O_CREAT|O_TRUNC;
 	unsigned char *tempbuf=NULL, *srcptr, *srcptr0, *dstptr, *dstptr0;
@@ -197,12 +197,13 @@ static const char *savebmp(char *filename, unsigned char *buf, int w, int h,
 	#else
 	mode=S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
 	#endif
-	if(!filename || !buf || w<1 || h<1 || f<0 || f>BMPPIXELFORMATS-1 || srcpitch<1)
+	if(!filename || !buf || w<1 || h<1 || f<0 || f>BMPPIXELFORMATS-1 || srcpitch<0)
 	{
 		errstr="bad argument to savebmp()";  goto finally;
 	}
 	if((fd=open(filename, flags, mode))==-1) {errstr=strerror(errno);  goto finally;}
 	dstpitch=((w*3)+3)&(~3);
+	if(srcpitch==0) srcpitch=w*ps[f];
 
 	bh.bfType=0x4d42;
 	bh.bfSize=BMPHDRSIZE+dstpitch*h;
