@@ -4,6 +4,14 @@ export GEOPROBE_USEGLX
 PROMAGIC_USEGLX=1
 export PROMAGIC_USEGLX
 
+if [ $LD_LIBRARY_PATH ]
+then
+	LD_LIBRARY_PATH=`dirname $0`/../lib:$LD_LIBRARY_PATH
+else
+	LD_LIBRARY_PATH=`dirname $0`/../lib
+fi
+export LD_LIBRARY_PATH
+
 case `uname -s` in
 
 Linux)
@@ -20,6 +28,8 @@ _RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
 
 SunOS)
 
+LD_LIBRARY_PATH=`dirname $0`/../lib/sparcv9:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
 LD_PRELOAD=librrfaker.so:libGL.so ${1+"$@"}
 
 ;;
