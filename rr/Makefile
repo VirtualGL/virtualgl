@@ -4,79 +4,93 @@ include ../Makerules
 ifeq ($(platform), windows)
 ##########################################################################
 
-SOBJS = $(ODIR)/rrconn.obj \
-        $(ODIR)/rrlistener.obj \
-        $(ODIR)/rrcwin.obj \
+COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
-        $(ODIR)/rrdscwrap.obj \
-        $(ODIR)/genericQ.obj
+        $(ODIR)/rrxclient.obj
 
-OBJS = $(SOBJS) $(ODIR)/rrxclient.obj $(ODIR)/rrlistenerut.obj $(ODIR)/rrframeut.obj
+TOBJS = $(ODIR)/rrblitter.obj \
+        $(ODIR)/rrblitterut.obj \
+        $(ODIR)/rrdisplayclient.obj \
+        $(ODIR)/rrdisplayclientut.obj \
+        $(ODIR)/rrframeut.obj
 
-TARGETS = $(LDIR)/rr.lib \
-          $(EDIR)/rrxclient.exe \
-          $(EDIR)/rrlistenerut.exe \
-          $(EDIR)/rrframeut.exe
+OBJS = $(COBJS) $(TOBJS)
 
-RRDEP = $(LDIR)/rr.lib $(LDIR)/hputil.lib $(LDIR)/hpsecnet.lib $(LDIR)/fbx-xdk.lib $(LDIR)/hpjpeg.lib
-RRLIB = $(LDIR)/rr.lib $(HPULIB) $(HPSECNETLIB) $(LDIR)/fbx-xdk.lib $(XDKLIB) \
-	$(LDIR)/hpjpeg.lib
+UNITTESTS = $(EDIR)/rrblitterut.exe \
+            $(EDIR)/rrdisplayclientut.exe \
+            $(EDIR)/rrframeut.exe
+
+TARGETS = $(EDIR)/rrxclient.exe \
+          $(UNITTESTS)
+
+RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-xdk.lib $(LDIR)/hpjpeg.lib $(LDIR)/rrsocket.lib
+RRLIB = rrutil.lib $(FBXXDKLIB) hpjpeg.lib $(SOCKLIB)
 
 all: $(TARGETS)
 
 clean:
 	-$(RM) $(TARGETS) $(OBJS)
 
-HDRS := $(wildcard *.h) $(wildcard faker-*.c*) $(wildcard ../include/*.h)
+HDRS := $(wildcard *.h) $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
-$(LDIR)/rr.lib: $(SOBJS)
-	$(AR) -OUT:$@ $^
 
-$(EDIR)/rrxclient.exe: $(ODIR)/rrxclient.obj $(RRDEP)
-	$(LINK) $< -OUT:$@ $(RRLIB)
+$(EDIR)/rrxclient.exe: $(COBJS) $(RRDEP)
+	$(LINK) $(COBJS) -OUT:$@ $(RRLIB)
 
-$(EDIR)/rrlistenerut.exe: $(ODIR)/rrlistenerut.obj $(RRDEP)
-	$(LINK) $< -OUT:$@ $(RRLIB)
+# Unit tests
 
 $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
 	$(LINK) $< -OUT:$@ $(RRLIB)
+
+$(EDIR)/rrblitterut.exe: $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj $(RRDEP)
+	$(LINK) $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj -OUT:$@ $(RRLIB)
+
+$(EDIR)/rrdisplayclientut.exe: $(ODIR)/rrdisplayclientut.obj \
+	$(ODIR)/rrdisplayclient.obj $(RRDEP)
+	$(LINK) $(ODIR)/rrdisplayclientut.obj $(ODIR)/rrdisplayclient.obj \
+		-OUT:$@ $(RRLIB)
 
 ##########################################################################
 else
 ##########################################################################
 
-SOBJS = $(ODIR)/rrconn.o \
-        $(ODIR)/rrlistener.o \
-        $(ODIR)/rrcwin.o \
+COBJS = $(ODIR)/rrcwin.o \
         $(ODIR)/rrdisplayserver.o \
-        $(ODIR)/rrdisplayclient.o \
-        $(ODIR)/rrdscwrap.o \
-        $(ODIR)/rrdccwrap.o \
-        $(ODIR)/genericQ.o
+        $(ODIR)/rrxclient.o
 
 FOBJS = $(ODIR)/faker.o \
         $(ODIR)/faker-sym.o \
         $(ODIR)/pbwin.o \
         $(ODIR)/glxvisual.o \
+        $(ODIR)/rrblitter.o \
+        $(ODIR)/rrdisplayclient.o
 
-OBJS = $(SOBJS) $(FOBJS) $(ODIR)/rrxclient.o $(ODIR)/rrlistenerut.o $(ODIR)/rrframeut.o $(ODIR)/rrfakerut.o
+TOBJS = $(ODIR)/rrblitterut.o \
+        $(ODIR)/rrdisplayclientut.o \
+        $(ODIR)/rrfakerut.o \
+        $(ODIR)/rrframeut.o
 
+OBJS = $(COBJS) $(FOBJS) $(TOBJS)
+
+UNITTESTS = $(EDIR)/rrblitterut \
+            $(EDIR)/rrdisplayclientut \
+            $(EDIR)/rrfakerut \
+            $(EDIR)/rrframeut \
+
+TARGETS = $(LDIR)/librrfaker.so \
+          $(EDIR)/rrxclient \
+          $(UNITTESTS)
+
+
+RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so $(LDIR)/librrsocket.a
+RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB) $(THREADLIB)
 RRLAUNCH = rrlaunch
 ifeq ($(subplatform), 64)
 RRLAUNCH = rrlaunch64
 endif
 
-TARGETS = $(LDIR)/librr.a \
-          $(LDIR)/librrfaker.so \
-          $(EDIR)/rrxclient \
-          $(EDIR)/rrlistenerut \
-          $(EDIR)/rrframeut \
-          $(EDIR)/rrfakerut \
-          $(EDIR)/$(RRLAUNCH)
-
-RRDEP = $(LDIR)/librr.a $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so
-RRLIB = -lrr $(HPULIB) $(HPSECNETLIB) $(FBXLIB) -lhpjpeg
+TARGETS := $(TARGETS) $(EDIR)/$(RRLAUNCH)
 
 all: $(TARGETS)
 
@@ -87,32 +101,32 @@ clean:
 
 # Server
 
-$(LDIR)/librr.a: $(SOBJS)
-	$(AR) $@ $^
-
 $(LDIR)/librrfaker.so: $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) -shared -o $@ $(FOBJS) $(RRLIB)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
 
 $(EDIR)/$(RRLAUNCH): $(RRLAUNCH)
 	install -m 755 $(RRLAUNCH) $@
 
 # Client
 
-$(EDIR)/rrxclient: $(ODIR)/rrxclient.o $(RRDEP)
-	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB)
+$(EDIR)/rrxclient: $(COBJS) $(RRDEP)
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB)
 
 # Unit tests
 
-$(EDIR)/rrlistenerut: $(ODIR)/rrlistenerut.o $(ODIR)/rrlistener.o $(ODIR)/rrconn.o \
-	$(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a
-	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrlistenerut.o $(ODIR)/rrlistener.o $(ODIR)/rrconn.o \
-		$(HPULIB) $(HPSECNETLIB)
-
-$(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(LDIR)/libhputil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so
-	$(CXX) $(LDFLAGS) -o $@ $< $(HPULIB) $(FBXLIB) -lhpjpeg -lpthread
+$(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -L/usr/X11R6/lib -lX11
+	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU
+
+$(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
+
+$(EDIR)/rrdisplayclientut: $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
+	$(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
+		$(RRLIB)
 
 ##########################################################################
 endif
