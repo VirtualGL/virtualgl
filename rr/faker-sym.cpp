@@ -33,6 +33,7 @@ void *loadsym(void *dllhnd, char *symbol, int quiet)
 void loadsymbols(void)
 {
 	void *dllhnd;
+	const char *err=dlerror();  // Clear error state
 
 	if(fconfig.gllib)
 	{

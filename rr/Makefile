@@ -103,7 +103,7 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK)
 
 ifeq ($(subplatform), 64)
 $(EDIR)/vglrun64: rrlaunch64

@@ -51,3 +51,6 @@ SHEXT = so
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
+
+# Have to explicitly link libXm before libGL so Java apps don't barf
+FAKERLINK = -lXm -lGL

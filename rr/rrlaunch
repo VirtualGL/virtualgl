@@ -88,7 +88,7 @@ if [ -f /opt/SUNWvgl/lib/librrfaker.so ]
 then
 	FAKERLIB32=/opt/SUNWvgl/lib/librrfaker.so
 fi
-LD_PRELOAD_32=$FAKERLIB32:libGL.so LD_PRELOAD_64=$FAKERLIB:libGL.so ${1+"$@"}
+LD_PRELOAD_32=$FAKERLIB32 LD_PRELOAD_64=$FAKERLIB ${1+"$@"}
 
 ;;
 
