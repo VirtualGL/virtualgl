@@ -19,6 +19,9 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "rr\rrcert.cnf"
 	File "${EDIR}\openssl.exe"
 	File "${EDIR}\pthreadVC.dll"
+  File "${EDIR}\tcbench.exe"
+  File "${EDIR}\nettest.exe"
+
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
@@ -63,6 +66,8 @@ Section "Uninstall"
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\rrcert.pem
+  Delete $INSTDIR\tcbench.exe
+  Delete $INSTDIR\nettest.exe
 
 	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"
 	RMDir "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
