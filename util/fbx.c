@@ -292,19 +292,18 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
-	int bx, by, wx, wy, bw, bh;
 	#ifdef WIN32
+	int bx, by, wx, wy, bw, bh;
 	BITMAPINFO bmi;  fbx_gc gc;
-	#else
-	XdbeSwapInfo si;
 	#endif
+	if(!s) _throw("Invalid argument");
 
+	#ifdef WIN32
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
-	#ifdef WIN32
 	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits || !s->ps) _throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
@@ -319,8 +318,24 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	w32(ReleaseDC(s->wh, gc));
 	return 0;
 	#else
-	si.swap_window=s->wh.win;
-	si.swap_action=XdbeUndefined;
+	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
+	if(fbx_sync(s)==-1) return -1;
+	return 0;
+	#endif
+
+	finally:
+	return -1;
+}
+
+#ifndef WIN32
+int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
+{
+	int bx, by, wx, wy, bw, bh;
+	if(!s) _throw("Invalid argument");
+	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
+	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
+	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
+	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 	if(!s->wh.dpy || !s->wh.win || !s->xi || !s->bits) _throw("Not initialized");
 	#ifdef USESHM
 	if(s->shm)
@@ -331,6 +346,18 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	else
 	#endif
 	XPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
+	return 0;
+
+	finally:
+	return -1;
+}
+
+int fbx_sync(fbx_struct *s)
+{
+	XdbeSwapInfo si;
+	if(!s) _throw("Invalid argument");
+	si.swap_window=s->wh.win;
+	si.swap_action=XdbeUndefined;
 	if(s->bb)
 	{
 		XdbeBeginIdiom(s->wh.dpy);
@@ -340,11 +367,11 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
 	return 0;
-	#endif
 
 	finally:
 	return -1;
 }
+#endif
 
 int fbx_term(fbx_struct *s)
 {

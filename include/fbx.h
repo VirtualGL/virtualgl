@@ -15,6 +15,9 @@
 // This library is designed to facilitate transferring pixels to/from the framebuffer using fast
 // 2D O/S-native methods that do not rely on OpenGL acceleration
 
+#ifndef __FBX_H__
+#define __FBX_H__
+
 #define USESHM
 #ifdef XDK
  #undef WIN32
@@ -139,6 +142,31 @@ int fbx_read(fbx_struct *s, int x, int y);
 int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
 
 /*
+  fbx_awrite
+  (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
+
+  Same as fbx_write, but asynchronous.  The write isn't guaranteed to complete
+  until fbx_sync() is called.  On Windows, fbx_awrite is the same as fbx_write.
+*/
+#ifdef WIN32
+#define fbx_awrite fbx_write
+#else
+int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
+#endif
+
+/*
+  fbx_sync
+  (fbx_struct *s)
+
+  Complete a previous asynchronous write.  On Windows, this does nothing.
+*/
+#ifdef WIN32
+#define fbx_sync(s)
+#else
+int fbx_sync (fbx_struct *s);
+#endif
+
+/*
   fbx_term
   (fbx_struct *s)
 
@@ -165,3 +193,5 @@ int fbx_geterrline(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // __FBX_H__
