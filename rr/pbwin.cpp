@@ -319,8 +319,9 @@ void pbwin::blit(GLint drawbuf)
 	if(!blitter) errifnot(blitter=new rrblitter());
 	if(fconfig.spoil && !blitter->frameready()) return;
 	errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
+	b->flags|=RRBMP_BOTTOMUP;
 	int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
-	readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, b->bits, drawbuf, false);
+	readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, (b->flags&RRBMP_ALPHAFIRST)?b->bits+1:b->bits, drawbuf, true);
 	blitter->sendframe(b);
 }
 
