@@ -15,8 +15,6 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 
-#define STRIPH 64
-
 #define endianize(h) { \
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
@@ -126,6 +124,7 @@ void rrdisplayclient::sendframe(rrframe *bmp)
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
 	int endline, startline;
+	int STRIPH=b->strip_height;
 	bool bu=false;  rrjpeg j;
 	if(!b) return;
 	if(b->flags&RRBMP_BOTTOMUP) bu=true;
