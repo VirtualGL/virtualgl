@@ -141,9 +141,9 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			if(memcmp(buf, fb.bits, fb.ps*32*32)) frames++;
+			if(memcmp(buf, fb.bits, fbx_ps[fb.format]*32*32)) frames++;
 		}
-		memcpy(buf, fb.bits, fb.ps*32*32);
+		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
 		int sleeptime=(int)(1000000.*(1./(float)samplerate-(timer.time()-benchend)));
 		if(sleeptime>0) usleep(sleeptime);
 	} while((benchend=timer.time())-benchstart<benchtime);
