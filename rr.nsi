@@ -15,13 +15,13 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SetOutPath $INSTDIR
 	File "${EDIR}\rrxclient.exe"
 	File "${EDIR}\hpjpeg.dll"
-	File "rr\newrrcert.bat"
-	File "rr\rrcert.cnf"
-	File "${EDIR}\openssl.exe"
 	File "${EDIR}\pthreadVC.dll"
 	File "${EDIR}\tcbench.exe"
 	File "${EDIR}\nettest.exe"
-	File "util\nettest.pem"
+	File "${EDIR}\hclshm.dll"
+	File "${EDIR}\xlib.dll"
+	File "$%systemroot%\system32\libeay32.dll"
+	File "$%systemroot%\system32\ssleay32.dll"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
@@ -43,8 +43,6 @@ Section "Start Menu Shortcuts (required)"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Secure Client Service.lnk" "$INSTDIR\rrxclient.exe" "-s -remove"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\rrxclient.exe"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\rrxclient.exe" "-s"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (this user only).lnk" "$INSTDIR\newrrcert.bat"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (all users).lnk" "$INSTDIR\newrrcert.bat" "root"
 
 SectionEnd
 
@@ -59,16 +57,15 @@ Section "Uninstall"
 
 	Delete $INSTDIR\rrxclient.exe
 	Delete $INSTDIR\hpjpeg.dll
-	Delete $INSTDIR\newrrcert.bat
-	Delete $INSTDIR\rrcert.cnf
-	Delete $INSTDIR\openssl.exe
 	Delete $INSTDIR\pthreadVC.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
-	Delete $INSTDIR\rrcert.pem
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
-	Delete $INSTDIR\nettest.pem
+	Delete $INSTDIR\hclshm.dll"
+	Delete $INSTDIR\xlib.dll"
+	Delete $INSTDIR\libeay32.dll"
+	Delete $INSTDIR\ssleay32.dll"
 
 	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"
 	RMDir "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
