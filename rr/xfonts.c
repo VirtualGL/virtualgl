@@ -122,7 +122,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
 	try {
 
-	errifnot(pb = winh.findpb(glXGetCurrentDrawable()));
+	errifnot(pb = winh.findpb(GetCurrentDrawable()));
 	errifnot(dpy = pb->getwindpy());
 	errifnot(win = pb->getwin());
 

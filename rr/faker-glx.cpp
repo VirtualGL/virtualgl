@@ -14,14 +14,19 @@
 #include "faker-sym.h"
 #include "faker-macros.h"
 
-// This file contains stubs for GLX functions which are faked simply by remapping
-// their display handle and/or X Visual handle to the server's display
+#define _DefaultScreen(d) ((!fconfig.glp && d) ? DefaultScreen(d):0)
 
+// Map a client-side drawable to a server-side drawable
+
+GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
+{
+	pbwin *pb=NULL;
+	if((pb=winh.findpb(dpy, draw))!=NULL) return pb->getdrawable();
+	else return draw;
+}
 
 // This attempts to look up a visual in the hash or match it using 2D functions
 // if (for some reason) it wasn't obtained with glXChooseVisual()
-
-#define _DefaultScreen(d) ((!fconfig.glp && d) ? DefaultScreen(d):0)
 
 GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
@@ -204,34 +209,31 @@ GLXContext glXGetCurrentContext(void)
 	else
 	return _glXGetCurrentContext();
 }
+#endif
 
 Display *glXGetCurrentDisplay(void)
 {
-	if(fconfig.glp)
-	{
-		Display *dpy=NULL;  pbwin *pb=NULL;
-		if((pb=winh.findpb(glXGetCurrentDrawable()))!=NULL)
-			dpy=pb->getwindpy();
-		return dpy;
-	}
-	else
-	return _glXGetCurrentDisplay();
+	Display *dpy=NULL;  pbwin *pb=NULL;
+	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
+		dpy=pb->getwindpy();
+	return dpy;
 }
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	if(fconfig.glp) return glPGetCurrentBuffer();
-	else
-	return _glXGetCurrentDrawable();
+	pbwin *pb=NULL;  GLXDrawable draw=0;
+	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
+		draw=pb->getwin();
+	return draw;
 }
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	if(fconfig.glp) return glPGetCurrentReadBuffer();
-	else
-	return _glXGetCurrentReadDrawable();
+	pbwin *pb=NULL;  GLXDrawable read=0;
+	if((pb=winh.findpb(GetCurrentReadDrawable()))!=NULL)
+		read=pb->getwin();
+	return read;
 }
-#endif
 
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *value)
 {
@@ -271,7 +273,7 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_ma
 	if(fconfig.glp) return;
 	else
 	#endif
-	_glXGetSelectedEvent(_localdpy, draw, event_mask);
+	_glXGetSelectedEvent(_localdpy, ServerDrawable(dpy, draw), event_mask);
 }
 
 void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long *mask)
@@ -280,7 +282,7 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long *
 	if(fconfig.glp) return;
 	else
 	#endif
-	_glXGetSelectedEventSGIX(_localdpy, drawable, mask);
+	_glXGetSelectedEventSGIX(_localdpy, ServerDrawable(dpy, drawable), mask);
 }
 
 GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
@@ -322,10 +324,10 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *val
 void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned int *value)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryBuffer(draw, attribute, value);
+	if(fconfig.glp) return glPQueryBuffer(ServerDrawable(dpy, draw), attribute, value);
 	else
 	#endif
-	return _glXQueryDrawable(_localdpy, draw, attribute, value);
+	return _glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
 }
 
 Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
@@ -380,7 +382,7 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 	if(fconfig.glp) return;
 	else
 	#endif
-	_glXSelectEvent(_localdpy, draw, event_mask);
+	_glXSelectEvent(_localdpy, ServerDrawable(dpy, draw), event_mask);
 }
 
 void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
@@ -389,7 +391,7 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 	if(fconfig.glp) return;
 	else
 	#endif
-	_glXSelectEventSGIX(_localdpy, drawable, mask);
+	_glXSelectEventSGIX(_localdpy, ServerDrawable(dpy, drawable), mask);
 }
 
 #ifdef sun
@@ -399,7 +401,7 @@ int glXVideoResizeSUN(Display *display, GLXDrawable window, float factor)
 	if(fconfig.glp) return 0;
 	else
 	#endif
-	return _glXVideoResizeSUN(_localdpy, window, factor);
+	return _glXVideoResizeSUN(_localdpy, ServerDrawable(display, window), factor);
 }
 
 int glXGetVideoResizeSUN(Display *display, GLXDrawable window, float *factor)
@@ -408,7 +410,7 @@ int glXGetVideoResizeSUN(Display *display, GLXDrawable window, float *factor)
 	if(fconfig.glp) return 0;
 	else
 	#endif
-	return _glXGetVideoResizeSUN(_localdpy, window, factor);
+	return _glXGetVideoResizeSUN(_localdpy, ServerDrawable(display, window), factor);
 }
 
 int glXDisableXineramaSUN(Display *dpy)
@@ -421,9 +423,18 @@ int glXDisableXineramaSUN(Display *dpy)
 }
 #endif
 
-shimfuncdpy3(Bool, glXJoinSwapGroupNV, Display*, dpy, GLXDrawable, drawable, GLuint, group, return );
+Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
+{
+	return _glXJoinSwapGroupNV(_localdpy, ServerDrawable(dpy, drawable), group);
+}
+
 shimfuncdpy3(Bool, glXBindSwapBarrierNV, Display*, dpy, GLuint, group, GLuint, barrier, return );
-shimfuncdpy4(Bool, glXQuerySwapGroupNV, Display*, dpy, GLXDrawable, drawable, GLuint*, group, GLuint*, barrier, return );
+
+Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group, GLuint *barrier)
+{
+	return _glXQuerySwapGroupNV(_localdpy, ServerDrawable(dpy, drawable), group, barrier);
+}
+
 shimfuncdpy4(Bool, glXQueryMaxSwapGroupsNV, Display*, dpy, int, screen, GLuint*, maxGroups, GLuint*, maxBarriers, return );
 shimfuncdpy3(Bool, glXQueryFrameCountNV, Display*, dpy, int, screen, GLuint*, count, return );
 shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );

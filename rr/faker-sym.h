@@ -87,6 +87,17 @@ extern void safeexit(int);
 	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);}
 
 
+#ifdef USEGLP
+#define GetCurrentDrawable() (fconfig.glp ? glPGetCurrentBuffer():_glXGetCurrentDrawable())
+#define GetCurrentReadDrawable() (fconfig.glp ? glPGetCurrentReadBuffer():_glXGetCurrentReadDrawable())
+#define GetCurrentDisplay() (fconfig.glp ? NULL:_glXGetCurrentDisplay())
+#else
+#define GetCurrentDrawable() _glXGetCurrentDrawable()
+#define GetCurrentReadDrawable() _glXGetCurrentReadDrawable()
+#define GetCurrentDisplay() _glXGetCurrentDisplay()
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -112,9 +123,9 @@ funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 
 #ifdef USEGLP
 funcdef0(GLXContext, glXGetCurrentContext, return);
+#endif
 
 funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
-#endif
 
 funcdef2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx, return);
 
@@ -166,11 +177,9 @@ funcdef2(void, glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap,);
 
 funcdef2(void, glXDestroyWindow, Display *, dpy, GLXWindow, win,);
 
-#ifdef USEGLP
 funcdef0(GLXDrawable, glXGetCurrentReadDrawable, return);
 
 funcdef0(Display*, glXGetCurrentDisplay, return);
-#endif
 
 funcdef4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
 	int, attribute, int *, value, return);

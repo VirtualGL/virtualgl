@@ -55,8 +55,8 @@ void loadsymbols(void)
 	lsym(glXDestroyGLXPixmap)
 	#ifdef USEGLP
 	lsym(glXGetCurrentContext)
-	lsym(glXGetCurrentDrawable)
 	#endif
+	lsym(glXGetCurrentDrawable)
 	lsym(glXIsDirect)
 	lsym(glXMakeCurrent);
 	lsym(glXQueryExtension)
@@ -77,10 +77,8 @@ void loadsymbols(void)
 	lsym(glXDestroyPbuffer)
 	lsym(glXDestroyPixmap)
 	lsym(glXDestroyWindow)
-	#ifdef USEGLP
 	lsym(glXGetCurrentDisplay)
 	lsym(glXGetCurrentReadDrawable)
-	#endif
 	lsym(glXGetFBConfigAttrib)
 	lsym(glXGetFBConfigs)
 	lsym(glXGetSelectedEvent)

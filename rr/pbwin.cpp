@@ -63,13 +63,13 @@ class tempctx
 
 		tempctx(GLXDrawable draw, GLXDrawable read, GLXContext ctx=glXGetCurrentContext()) :
 			_ctx(glXGetCurrentContext()),
-			_read(glXGetCurrentReadDrawable()), _draw(glXGetCurrentDrawable()),
+			_read(GetCurrentReadDrawable()), _draw(GetCurrentDrawable()),
 			mc(false)
 		{
 			if(!_ctx || (!_read && !_draw)) return;
 			if(!fconfig.glp)
 			{
-				_dpy=glXGetCurrentDisplay();  if(!_dpy) return;
+				_dpy=GetCurrentDisplay();  if(!_dpy) return;
 			}
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;
@@ -405,7 +405,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
-	tempctx tc(EXISTING_DRAWABLE, glXGetCurrentDrawable());
+	tempctx tc(EXISTING_DRAWABLE, GetCurrentDrawable());
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
