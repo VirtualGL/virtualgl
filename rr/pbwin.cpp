@@ -98,7 +98,7 @@ pbuffer::pbuffer(Display *dpy, int w, int h, GLXFBConfig config)
 	if(!dpy || !config || w<1 || h<1) _throw("Invalid argument");
 
 	cleared=false;
-	#ifndef sun
+	#if 0
 	const char *glxext=NULL;
 	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
 	if(!glxext || !strstr(glxext, "GLX_SGIX_pbuffer"))
