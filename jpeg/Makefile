@@ -73,6 +73,15 @@ JPEGLINK = $(IPPLINK)
 
 endif
 
+ifeq ($(JPEGLIB), quicktime)
+
+$(ODIR)/hpjpeg.obj: hpjpegqt.c
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+
+JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
+
+endif
+
 $(EDIR)/hpjpeg.dll $(LDIR)/hpjpeg.lib: $(ODIR)/hpjpeg.obj $(JPEGDEP)
 	$(LINK) -dll -out:$(EDIR)/hpjpeg.dll -implib:$(LDIR)/hpjpeg.lib $< $(JPEGLINK)
 
