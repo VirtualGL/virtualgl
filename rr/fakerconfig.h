@@ -66,8 +66,16 @@ class FakerConfig
 			getconfigstr("CLIENT", client);
 			getconfigstr("DISPLAY", localdpystring);
 			#ifdef USEGLP
-			if(localdpystring[0]=='/' || !stricmp(localdpystring, "GLP"))
-				glp=true;
+			char *temps=strdup(localdpystring), *ptr=NULL;
+			if((ptr=strtok(temps, " \t"))!=NULL)
+			{
+				if(ptr[0]=='/' || !stricmp(ptr, "GLP"))
+				{
+					glp=true;
+					strcpy(localdpystring, ptr);
+				}
+			}
+			if(temps) free(temps);
 			#endif
 			getconfigint("LOQUAL", loqual, 1, 100);
 			getconfigint("LOSUBSAMP", losubsamp, 411, 444);
