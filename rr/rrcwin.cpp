@@ -20,7 +20,7 @@ rrcwin::rrcwin(int dpynum, Window window)
 	const RRError noerror={0, 0, 0};
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window) _throw("Invalid argument to rrcwin constructor");
-	sprintf(dpystr, ":%d.0", dpynum);
+	sprintf(dpystr, "localhost:%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
 	tryunix(pthread_mutex_init(&frameready, NULL));
 	tryunix(pthread_mutex_init(&lemutex, NULL));
