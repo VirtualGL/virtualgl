@@ -1,11 +1,17 @@
 #!/bin/sh
 
-_GLOBALCERT=/etc/rrcert.pem
-_XINIT=/etc/X11/xinit/xinitrc.d/rrxclient
-_XINITSSL=/etc/X11/xinit/xinitrc.d/rrxclient_ssl
-_DAEMON=/usr/bin/rrxclient_daemon
-_DAEMONSSL=/usr/bin/rrxclient_ssldaemon
+uid() {
+    id | cut -f2 -d = | cut -f1 -d \(;
+}
+
+_XINIT=/etc/X11/xinit/xinitrc.d/vglclient
+_XINITSSL=/etc/X11/xinit/xinitrc.d/vglclient_ssl
+_DAEMON=/usr/bin/vglclient_daemon
+_DAEMONSSL=/usr/bin/vglclient_ssldaemon
 _POSTSESSION=/etc/X11/gdm/PostSession/Default
+
+WHICH0=`which $0`
+BINDIR=`dirname $WHICH0`
 
 while [ 1 ]
 do
@@ -22,14 +28,15 @@ do
 	read _CHOICE
 
 	case $_CHOICE in
-	1) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
-		newrrcert $_GLOBALCERT
+	1) $BINDIR/newvglcert global
 		continue
 		;;
-	2) newrrcert
+	2) $BINDIR/newvglcert user
 		continue
 		;;
-	3) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+	3) if [ ! `uid` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ ! -d /etc/X11/xinit/xinitrc.d ]; then echo Not supported on this platform; continue; fi
+		if [ ! -e $_POSTSESSION ]; then echo Not supported on this platform; continue; fi
 		echo $_DAEMON start >$_XINIT
 		chmod 755 $_XINIT
 		if [ -x $_POSTSESSION ]; then
@@ -39,7 +46,9 @@ do
 		echo Done!  Restart your X session to activate.
 		continue
 		;;
-	4) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+	4) if [ ! `uid` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ ! -d /etc/X11/xinit/xinitrc.d ]; then echo Not supported on this platform; continue; fi
+		if [ ! -e $_POSTSESSION ]; then echo Not supported on this platform; continue; fi
 		echo $_DAEMONSSL start >$_XINITSSL
 		chmod 755 $_XINITSSL
 		if [ -x $_POSTSESSION ]; then
@@ -49,14 +58,18 @@ do
 		echo Done!  Restart your X session to activate.
 		continue
 		;;
-	5) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+	5) if [ ! `uid` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ ! -d /etc/X11/xinit/xinitrc.d ]; then echo Not supported on this platform; continue; fi
+		if [ ! -e $_POSTSESSION ]; then echo Not supported on this platform; continue; fi
 		if [ -x $_XINIT ]; then rm $_XINIT; fi
 		if [ -x $_POSTSESSION ]; then
 			perl -i -p -e "s:$_DAEMON stop\n::g;" $_POSTSESSION
 		fi
 		continue
 		;;
-	6) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+	6) if [ ! `uid` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ ! -d /etc/X11/xinit/xinitrc.d ]; then echo Not supported on this platform; continue; fi
+		if [ ! -e $_POSTSESSION ]; then echo Not supported on this platform; continue; fi
 		if [ -x $_XINITSSL ]; then rm $_XINITSSL; fi
 		if [ -x $_POSTSESSION ]; then
 			perl -i -p -e "s:$_DAEMONSSL stop\n::g;" $_POSTSESSION
