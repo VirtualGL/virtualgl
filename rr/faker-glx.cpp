@@ -90,7 +90,20 @@ extern "C" {
 GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list, int *nelements)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) return glPChooseFBConfig(_localdev, attrib_list, nelements);
+	if(fconfig.glp)
+	{
+		// Argh!
+		int glpattribs[257], j=0;
+		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		{
+			if(attrib_list[i]!=GLX_DRAWABLE_TYPE)
+			{
+				glpattribs[j++]=attrib_list[i];  glpattribs[j++]=attrib_list[i+1];
+			}
+		}
+		glpattribs[j]=None;
+		return glPChooseFBConfig(_localdev, glpattribs, nelements);
+	}
 	else
 	#endif
 	return _glXChooseFBConfig(_localdpy, screen, attrib_list, nelements);
@@ -128,15 +141,15 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfig config, unsigned in
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		int i=0, n=0, *glpattribs;  GLPBuffer pb;
-		for(i=0; attrib_list[i]!=None; i+=2) n+=2;
-		n+=5;
-		if(!(glpattribs=(int *)malloc(sizeof(int)*n))) return 0;
-		for(i=0; i<n-5; i++) glpattribs[i]=attrib_list[i];
-		glpattribs[i++]=GLP_PBUFFER_WIDTH;  glpattribs[i++]=width;
-		glpattribs[i++]=GLP_PBUFFER_HEIGHT;  glpattribs[i++]=height;
-		pb=glPCreateBuffer(config, glpattribs);
-		free(glpattribs);  return pb;
+		int glpattribs[257], j=0;
+		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		{
+			glpattribs[j++]=attrib_list[i];  glpattribs[j++]=attrib_list[i+1];
+		}
+		glpattribs[j++]=GLP_PBUFFER_WIDTH;  glpattribs[j++]=width;
+		glpattribs[j++]=GLP_PBUFFER_HEIGHT;  glpattribs[j++]=height;
+		glpattribs[j]=None;
+		return glPCreateBuffer(config, glpattribs);
 	}
 	#endif
 	return _glXCreateGLXPbufferSGIX(_localdpy, config, width, height, attrib_list);
