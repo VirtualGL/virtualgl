@@ -16,20 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef GL_BGR_EXT
-#define PIXELFORMAT3 GL_BGR_EXT
-#define BGRFLAG3 RRBMP_BGR
-#else
-#define PIXELFORMAT3 GL_RGB
-#define BGRFLAG3 0
-#endif
-
-#ifdef GL_BGRA_EXT
-#define PIXELFORMAT4 GL_BGRA_EXT
-#else
-#define PIXELFORMAT4 GL_RGBA
-#endif
-
 extern void _fprintf (FILE *f, const char *format, ...);
 
 #include "fakerconfig.h"
@@ -293,7 +279,13 @@ void pbwin::readback(GLint drawbuf, bool force)
 				return;
 			rrframe *b;
 			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
-			readpixels(0, 0, pbw, pbw*3, pbh, PIXELFORMAT3, b->bits, drawbuf, true);
+			#ifdef GL_BGR_EXT
+			readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
+			b->flags=RRBMP_BGR;
+			#else
+			readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, b->bits, drawbuf, true);
+			b->flags=0;
+			#endif
 			b->h.dpynum=0;
 			if((dpystring=fconfig.client)==NULL)
 				dpystring=DisplayString(windpy);
@@ -308,7 +300,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 			b->h.bmpy=0;
 			b->h.qual=fconfig.currentqual;
 			b->h.subsamp=fconfig.currentsubsamp;
-			b->flags=BGRFLAG3|RRBMP_BOTTOMUP;
+			b->flags|=RRBMP_BOTTOMUP;
 			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
 			rrdpy->sendframe(b);
 			break;
@@ -320,8 +312,24 @@ void pbwin::readback(GLint drawbuf, bool force)
 			if(!blitter) errifnot(blitter=new rrblitter());
 			if(fconfig.spoil && !blitter->frameready()) return;
 			errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
-			int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?PIXELFORMAT3:PIXELFORMAT4) : (b->pixelsize==3?GL_RGB:GL_RGBA);
-			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, (b->flags&RRBMP_ALPHAFIRST)?b->bits+1:b->bits, drawbuf, false);
+			int format= (b->pixelsize==3?GL_RGB:GL_RGBA);
+			unsigned char *bits=b->bits;
+			#ifdef GL_BGR_EXT
+			if(b->flags&RRBMP_BGR && b->pixelsize==3) format=GL_BGR_EXT;
+			#endif
+			#ifdef GL_BGRA_EXT
+			if(b->flags&RRBMP_BGR && b->pixelsize==4 && !(b->flags&RRBMP_ALPHAFIRST))
+				format=GL_BGRA_EXT;
+			#endif
+			if(b->flags&RRBMP_BGR && b->pixelsize==4 && b->flags&RRBMP_ALPHAFIRST)
+			{
+				#ifdef GL_ABGR_EXT
+				format=GL_ABGR_EXT;
+				#elif defined(GL_BGRA_EXT)
+				format=GL_BGRA_EXT;  bits=b->bits+1;
+				#endif
+			}
+			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, bits, drawbuf, false);
 			blitter->sendframe(b);
 			break;
 		}
