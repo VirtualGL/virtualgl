@@ -44,11 +44,11 @@ int main(int argc, char **argv)
 	if(servername) port=RR_DEFAULTPORT;
 
 	rrdisplayclient rrdpy(servername, port, false);
-	int w, h, d;
+	int w, h, d=3;
 	const char *err;
-	if((err=loadbmp(argv[1], &buf, &w, &h, &d, 0))!=NULL) _throw(err);
-	if((err=loadbmp(argv[1], &buf2, &w, &h, &d, 0))!=NULL) _throw(err);
-	if((err=loadbmp(argv[1], &buf3, &w, &h, &d, 0))!=NULL) _throw(err);
+	if((err=loadbmp(argv[1], &buf, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
+	if((err=loadbmp(argv[1], &buf2, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
+	if((err=loadbmp(argv[1], &buf3, &w, &h, BMP_BGR, 1, 0))!=NULL) _throw(err);
 	printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
 
 	if(servername)
