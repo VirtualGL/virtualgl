@@ -149,6 +149,10 @@ IPPLINK = -L$(IPPDIR)/lib \
         -lippimergedem64t -lippsemergedem64t -lippsmergedem64t \
         -lippcoreem64t
 endif
+ifeq ($(subplatform), ia64)
+IPPLINK = -L$(IPPDIR)/lib \
+        -lippji7 -lippii7 -lippsi7 -lippcore64
+endif
 
 $(ODIR)/hpjpeg.o: hpjpegipp.c
 	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
