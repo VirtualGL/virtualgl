@@ -141,7 +141,7 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void);
 /*
   int hpjDecompress(hpjhandle j,
      unsigned char *srcbuf, unsigned long size,
-     unsigned char *dstbuf, int width, int height, int pixelsize, int pad,
+     unsigned char *dstbuf, int width, int pitch, int height, int pixelsize,
      int flags)
 
   [INPUT] j = instance handle previously returned from a call to
