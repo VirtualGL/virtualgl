@@ -34,7 +34,7 @@
 #define BI_RGB 0L
 #endif
 
-#pragma pack (1)
+#pragma pack(1)
 typedef struct _bmphdr
 {
 	unsigned short bfType;
@@ -49,6 +49,7 @@ typedef struct _bmphdr
 	int biXPelsPerMeter, biYPelsPerMeter;
 	unsigned int biClrUsed, biClrImportant;
 } bmphdr;
+#pragma pack()
 
 // This will load a Windows bitmap from a file and return a buffer containing
 // the bitmap data in top-down, BGRA format.  If pad=1, each line in the output
