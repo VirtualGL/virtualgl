@@ -40,7 +40,7 @@ char *gethomedir(void)
 
 rrlistener::rrlistener(unsigned short port, bool dossl, bool dorecv)
 {
-	char temppath[1024];
+	char temppath[1025];
 
 	this->dossl=false;  if(dossl) this->dossl=true;
 	this->dorecv=false;  if(dorecv) this->dorecv=true;
@@ -67,8 +67,8 @@ rrlistener::rrlistener(unsigned short port, bool dossl, bool dorecv)
 			}
 			else
 			#endif
-			strcpy(temppath, ALTDIR);
-			strcat(temppath, DIRSEP CERTF);
+			strncpy(temppath, ALTDIR, 1024);  temppath[1024]=0;
+			strncat(temppath, DIRSEP CERTF, 1024-strlen(temppath));
 			hpprintf("Using certificate file %s\n", temppath);
 			tryssl(sslctx=hpsecnet_serverinit(temppath, temppath));
 		}
