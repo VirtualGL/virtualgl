@@ -115,6 +115,52 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, char *basefilename)
 	if(jpegbuf) free(jpegbuf);
 }
 
+#define MAXLENGTH 2048
+
+void dotest1(void)
+{
+	int i, j, i2;  unsigned char *bmpbuf, *jpgbuf;
+	hpjhandle hnd;  unsigned long size;
+	if((hnd=hpjInitCompress())==NULL)
+		{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  exit(1);}
+	printf("Buffer size regression test\n");
+	for(j=1; j<16; j++)
+	{
+		for(i=1; i<MAXLENGTH; i++)
+		{
+			if(i%100==0) printf("%.4d x %.4d\b\b\b\b\b\b\b\b\b\b\b", i, j);
+			if((bmpbuf=(unsigned char *)malloc(i*j*4))==NULL			
+			|| (jpgbuf=(unsigned char *)malloc(HPJBUFSIZE(i, j)))==NULL)
+			{
+				printf("Memory allocation failure\n");  exit(1);
+			}
+			for(i2=0; i2<i*j; i2++)
+			{
+				if(i2%2==0) memset(&bmpbuf[i2*4], 0xFF, 4);
+				else memset(&bmpbuf[i2*4], 0, 4);
+			}
+			_catch(hpjCompress(hnd, bmpbuf, i, i*4, j, 4,
+				jpgbuf, &size, HPJ_444, 100, HPJ_BGR));
+			free(bmpbuf);  free(jpgbuf);
+
+			if((bmpbuf=(unsigned char *)malloc(j*i*4))==NULL			
+			|| (jpgbuf=(unsigned char *)malloc(HPJBUFSIZE(j, i)))==NULL)
+			{
+				printf("Memory allocation failure\n");  exit(1);
+			}
+			for(i2=0; i2<j*i; i2++)
+			{
+				if(i2%2==0) memset(&bmpbuf[i2*4], 0xFF, 4);
+				else memset(&bmpbuf[i2*4], 0, 4);
+			}
+			_catch(hpjCompress(hnd, bmpbuf, j, j*4, i, 4,
+				jpgbuf, &size, HPJ_444, 100, HPJ_BGR));
+			free(bmpbuf);  free(jpgbuf);
+		}
+	}
+	printf("Done.      \n");
+	hpjDestroy(hnd);
+}
 
 int main(int argc, char *argv[])
 {
@@ -126,8 +172,12 @@ int main(int argc, char *argv[])
 	if(argc<2)
 	{
 		printf("USAGE: %s <Inputfile (BMP)>\n", argv[0]);
+		printf("       %s -bufsize\n", argv[0]);
+		printf("-bufsize = runs buffer size regression test for small JPEGs\n");
 		exit(1);
 	}
+
+	if(!stricmp(argv[1], "-bufsize")) {dotest1();  exit(0);}
 
 	if((error=loadbmp(argv[1], &bmpbuf, &w, &h, &psize, 1))!=NULL)
 	{
