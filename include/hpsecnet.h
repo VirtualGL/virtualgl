@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-SSL_CTX *hpsecnet_serverinit(char *certfile, char *privkeyfile);
+SSL_CTX *hpsecnet_serverinit(void);
 SSL *hpsecnet_accept(int socket, SSL_CTX *sslctx);
 void hpsecnet_disconnect(SSL *ssl);
 SSL_CTX *hpsecnet_clientinit(void);

@@ -16,9 +16,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "hpsecnet.h"
-#include <pthread.h>
-#include <errno.h>
 #ifdef _WIN32
  #include <windows.h>
  #define badarg() SetLastError(ERROR_INVALID_PARAMETER)
@@ -26,6 +23,9 @@
  #define INVALID_SOCKET -1
  #define badarg() errno=EINVAL
 #endif
+#include "hpsecnet.h"
+#include <pthread.h>
+#include <errno.h>
 
 static pthread_mutex_t mutex[CRYPTO_NUM_LOCKS];
 static char *lasterr="No Error";
@@ -76,21 +76,78 @@ static void sslerror(SSL *ssl, int ret)
 	}
 };
 	
+#define _throwssl() {lasterr=ERR_error_string(ERR_get_error(), NULL);  goto bailout;}
 
 /*******************************************************************
  Secure network routines
  *******************************************************************/
 
-SSL_CTX *hpsecnet_serverinit(char *certfile, char *privkeyfile)
+static void progress_callback(int p, int n, void *arg)
 {
-	SSL_CTX *sslctx;  int i;
+}
+
+static EVP_PKEY *newprivkey(int bits)
+{
+	EVP_PKEY *pk=NULL;
+	if(!(pk=EVP_PKEY_new())) _throwssl();
+	if(!EVP_PKEY_assign_RSA(pk, RSA_generate_key(bits, 0x10001,
+		progress_callback, NULL))) _throwssl();
+	return pk;
+
+	bailout:
+	if(pk) EVP_PKEY_free(pk);
+	return NULL;
+}
+
+static X509 *newcert(EVP_PKEY *priv)
+{
+	X509 *cert=NULL;  X509_NAME *name=NULL;  int nid=NID_undef;
+	X509_PUBKEY *pub=NULL;  EVP_PKEY *pk=NULL;
+
+	if((cert=X509_new())==NULL) _throwssl();
+	if(!X509_set_version(cert, 2)) _throwssl();
+	ASN1_INTEGER_set(X509_get_serialNumber(cert), 0L);
+
+	if((name=X509_NAME_new())==NULL) _throwssl();
+	if((nid=OBJ_txt2nid("organizationName"))==NID_undef) _throwssl();
+	if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC, (char *)"VirtualGL",
+		-1, -1, 0)) _throwssl();
+	if((nid=OBJ_txt2nid("commonName"))==NID_undef) _throwssl();
+	if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC, (char *)"localhost",
+		-1, -1, 0)) _throwssl();
+	if(!X509_set_subject_name(cert, name)) _throwssl();
+	if(!X509_set_issuer_name(cert, name)) _throwssl();
+	X509_NAME_free(name);  name=NULL;
+
+	X509_gmtime_adj(X509_get_notBefore(cert), 0);
+	X509_gmtime_adj(X509_get_notAfter(cert), (long)60*60*24*365);
+
+	if((pub=X509_PUBKEY_new())==NULL) _throwssl();
+	X509_PUBKEY_set(&pub, priv);
+	if((pk=X509_PUBKEY_get(pub))==NULL) _throwssl();
+	X509_set_pubkey(cert, pk);
+	EVP_PKEY_free(pk);  pk=NULL;
+	X509_PUBKEY_free(pub);  pub=NULL;
+	if(X509_sign(cert, priv, EVP_md5())<=0) _throwssl();
+
+	return cert;
+	
+	bailout:
+	if(pub) X509_PUBKEY_free(pub);
+	if(pk) EVP_PKEY_free(pk);
+	if(name) X509_NAME_free(name);
+	if(cert) X509_free(cert);
+	return NULL;
+}
+
+
+SSL_CTX *hpsecnet_serverinit(void)
+{
+	SSL_CTX *sslctx=NULL;  int i;
+	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
 	#if defined(SOLARIS)||defined(sgi)
 	char *buf="ajsdluasdb5nq457q67na867qm8v67vq4865j7bnq5q867n";
 	#endif
-	if(!certfile || !privkeyfile)
-	{
-		lasterr="Invalid argument";  return NULL;
-	}
 	SSL_library_init();
 	#if defined(SOLARIS)||defined(sgi)
 	RAND_seed(buf, strlen(buf));
@@ -100,27 +157,25 @@ SSL_CTX *hpsecnet_serverinit(char *certfile, char *privkeyfile)
 	ERR_load_crypto_strings();
 	for(i=0; i<CRYPTO_NUM_LOCKS; i++)
 	{
-		if(pthread_mutex_init(&mutex[i], NULL)==-1) {lasterr=strerror(errno);  return NULL;}
+		if(pthread_mutex_init(&mutex[i], NULL)==-1) {lasterr=strerror(errno);  goto bailout;}
 	}
 	CRYPTO_set_id_callback(thread_id);
 	CRYPTO_set_locking_callback(locking_callback);
-	if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL)
-	{
-		lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
-	}
-	if(SSL_CTX_use_certificate_file(sslctx, certfile, SSL_FILETYPE_PEM)<=0)
-	{
-		SSL_CTX_free(sslctx);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
-	}
-	if(SSL_CTX_use_PrivateKey_file(sslctx, privkeyfile, SSL_FILETYPE_PEM)<=0)
-	{
-		SSL_CTX_free(sslctx);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
-	}
-	if(!SSL_CTX_check_private_key(sslctx))
-	{
-		SSL_CTX_free(sslctx);  lasterr=ERR_error_string(ERR_get_error(), NULL);  return NULL;
-	}
+	if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL) _throwssl();
+	if((priv=newprivkey(1024))==NULL) goto bailout;
+	if((cert=newcert(priv))==NULL) goto bailout;
+	if(SSL_CTX_use_certificate(sslctx, cert)<=0) _throwssl();
+	if(SSL_CTX_use_PrivateKey(sslctx, priv)<=0) _throwssl();
+	if(!SSL_CTX_check_private_key(sslctx)) _throwssl();
+	if(priv) EVP_PKEY_free(priv);
+	if(cert) X509_free(cert);
 	return sslctx;
+
+	bailout:
+	if(priv) EVP_PKEY_free(priv);
+	if(cert) X509_free(cert);
+	if(sslctx) SSL_CTX_free(sslctx);
+	return NULL;
 }
 
 

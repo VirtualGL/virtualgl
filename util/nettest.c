@@ -63,11 +63,11 @@ int main(int argc, char **argv)
 	int server;  char *servername=NULL;
 	char *buf;  int i, j;
 	#ifdef SECNET
-	int dossl=0;  char *keyfile=NULL;
+	int dossl=0;
 	#endif
 
 	#ifdef SECNET
-	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl <keyfile>]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
+	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
 	#else
 	#define usage() {printf("USAGE: %s -client <server name or IP>\n or    %s -server\n", argv[0], argv[0]);  exit(1);}
 	#endif
@@ -86,9 +86,8 @@ int main(int argc, char **argv)
 		#ifdef SECNET
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
-			dossl=1;  if(argc<4) {printf("ERROR: key file must be specified.\n");  exit(1);}
+			dossl=1;
 			puts("Using SSL ...");
-			keyfile=argv[3];
 		}
 		#endif
 	}
@@ -108,7 +107,7 @@ int main(int argc, char **argv)
 
 		printf("Listening on TCP port %d\n", PORT);
 		#ifdef SECNET
-		if(dossl) tryssl(sslctx=hpsecnet_serverinit(keyfile, keyfile));
+		if(dossl) tryssl(sslctx=hpsecnet_serverinit());
 		#endif
 		sock(sd=hpnet_createServer(PORT, MAXCONN, SOCK_STREAM));
 		sock(clientsd=hpnet_waitForConnection(sd, &clientaddr));
