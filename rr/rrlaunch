@@ -8,23 +8,19 @@ case `uname -s` in
 
 Linux)
 
-if [ -e /usr/lib/tls/libGL.so.1 ]
-then
-    export RRGLLIB=/usr/lib/tls/libGL.so.1
-fi
 LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
 
 ;;
 
 IRIX*)
 
-RRGLLIB=/usr/lib/libGL.so RRX11LIB=/usr/lib/libX11.so.1 _RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
+_RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
 
 ;;
 
 SunOS)
 
-RRGLLIB=/usr/lib/libGL.so RRX11LIB=/usr/X/lib/libX11.so LD_PRELOAD=librrfaker.so:libGL.so ${1+"$@"}
+LD_PRELOAD=librrfaker.so:libGL.so ${1+"$@"}
 
 ;;
 
