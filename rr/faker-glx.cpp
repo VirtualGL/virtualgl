@@ -21,6 +21,18 @@
 // This attempts to look up a visual in the hash or match it using 2D functions
 // if (for some reason) it wasn't obtained with glXChooseVisual()
 
+XVisualInfo *_GetVisual(Display *dpy, int screen, int depth, int c_class)
+{
+	XVisualInfo vtemp, *v=NULL;  int n;
+	if(!XMatchVisualInfo(dpy, screen, depth, c_class, &vtemp)) return NULL;
+	if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n)
+		return NULL;
+	int supportsgl=0;
+	_glXGetConfig(_localdpy, v, GLX_USE_GL, &supportsgl);
+	if(!supportsgl) return NULL;
+	return v;
+}
+
 XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
 {
 	XVisualInfo *v=NULL;
@@ -28,9 +40,9 @@ XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
 	TRY();
 	if(!(v=vish.matchvisual(dpy, vis)))
 	{
-		XVisualInfo vtemp;  int n;
-		if(!XMatchVisualInfo(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class, &vtemp)) return NULL;
-		if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n) return NULL;
+		if((v=_GetVisual(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class))==NULL
+		&& (v=_GetVisual(_localdpy, DefaultScreen(_localdpy), 24, TrueColor))==NULL)
+			_throw("Could not find appropriate visual on server's display");
 		vish.add(dpy, vis, _localdpy, v);
 	}
 	CATCH();
