@@ -11,12 +11,12 @@
  * wxWindows Library License for more details.
  */
 
-#include "rr.h"
+#include "rrdisplayclient.h"
 
 #define _hashclass _dpyhash
 #define _hashkeytype1 char*
 #define _hashkeytype2 void*
-#define _hashvaluetype RRDisplay
+#define _hashvaluetype rrdisplayclient*
 #define _hashclassstruct _dpyhashstruct
 #define __hashclassstruct __dpyhashstruct
 #include "faker-hash.h"
@@ -46,7 +46,7 @@ class dpyhash : public _dpyhash
 				free(dpystring);
 		}
 
-		RRDisplay findrrdpy(Display *dpy)
+		rrdisplayclient *findrrdpy(Display *dpy)
 		{
 			if(!dpy) _throw("Invalid argument");
 			return _dpyhash::find(DisplayString(dpy), NULL);
@@ -60,9 +60,9 @@ class dpyhash : public _dpyhash
 
 	private:
 
-		RRDisplay attach(char *key, void *key2)
+		rrdisplayclient *attach(char *key, void *key2)
 		{
-			RRDisplay rrdpy=NULL;
+			rrdisplayclient *rrdpy=NULL;
 			char *dpystring=NULL, *ptr=NULL;
 
 			if(fconfig.client) dpystring=strdup(fconfig.client);
@@ -71,8 +71,7 @@ class dpyhash : public _dpyhash
 			if((ptr=strchr(dpystring, ':'))!=NULL)
 				*ptr='\0';
 			if(!strlen(dpystring)) {free(dpystring);  dpystring=strdup("localhost");}
-			if(!(rrdpy=RROpenDisplay(dpystring, fconfig.port, fconfig.ssl)))
-			throw(RRGetError());
+			errifnot(rrdpy=new rrdisplayclient(dpystring, fconfig.port, fconfig.ssl));
 			free(dpystring);
 			return rrdpy;
 		}
@@ -80,7 +79,7 @@ class dpyhash : public _dpyhash
 		void detach(_dpyhashstruct *h)
 		{
 			if(h && h->key1) free(h->key1);
-			if(h && h->value) RRCloseDisplay(h->value);
+			if(h && h->value) delete((rrdisplayclient *)h->value);
 		}
 
 		// We can't compare display handles, because the program may open
