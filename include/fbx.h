@@ -61,8 +61,6 @@ const int fbx_goffset[FBX_FORMATS]=
 	{1, 1, 1, 1, 2, 2};
 const int fbx_boffset[FBX_FORMATS]=
 	{2, 2, 0, 0, 1, 3};
-const char *fbx_formatname[FBX_FORMATS]=
-	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
 
 typedef struct _fbx_struct
 {
@@ -203,6 +201,14 @@ char *fbx_geterrmsg(void);
   This returns the line (within fbx.c) of the last failure
 */
 int fbx_geterrline(void);
+
+/*
+  fbx_formatname
+
+  Returns a character string describing the pixel format specified in the
+  format parameter
+*/
+const char *fbx_formatname(int format);
 
 #ifdef __cplusplus
 }

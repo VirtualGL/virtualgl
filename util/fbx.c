@@ -28,6 +28,8 @@ const int fbx_gmask[FBX_FORMATS]=
 	{0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00};
 const int fbx_bmask[FBX_FORMATS]=
 	{0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF};
+const char *_fbx_formatname[FBX_FORMATS]=
+	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
 
 #ifdef WIN32
 
@@ -71,6 +73,12 @@ char *fbx_geterrmsg(void)
 int fbx_geterrline(void)
 {
 	return __line;
+}
+
+const char *fbx_formatname(int format)
+{
+	if(format>=0 && format<=FBX_FORMATS-1) return _fbx_formatname[format];
+	else return "Invalid format";
 }
 
 int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)

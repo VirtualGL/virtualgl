@@ -134,7 +134,7 @@ void nativewrite(int useshm)
 	fbx(fbx_init(&s, wh, 0, 0, useshm));
 	int ps=fbx_ps[s.format];
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
-	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname[s.format]);
+	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname(s.format));
 	fprintf(stderr, "\n");
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native write test\n");
