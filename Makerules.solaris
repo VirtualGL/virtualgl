@@ -6,10 +6,11 @@ CC = cc
 CXX = CC
 AR = ar ruvs
 
-CFLAGS = -xCC -Kpic
+CFLAGS = -xCC -Kpic -mt
+CXXFLAGS = -Kpic -mt
 CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 
-LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -lrt
+LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
 LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS)
