@@ -7,15 +7,15 @@ CXX = CC
 AR = ar ruvs
 
 CFLAGS = -xCC -Kpic
-CINCLUDES = -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CINCLUDES =  -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -lrt
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
-LDFLAGS := -L/usr/X/lib/sparcv9 $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 $(LDFLAGS)
 else
 ARCHFLAG =
-LDFLAGS := -L/usr/X/lib $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS)
 endif
 
 ifeq ($(DEBUG), yes)
@@ -31,4 +31,4 @@ SHEXT = so
 DEPFLAG = -xM1
 
 FBXLIB = -lfbx -lX11 -lXext
-SOCKLIB = -lrrsocket -lsocket -lxnet -lssl -lcrypto
+SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
