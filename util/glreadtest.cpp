@@ -294,7 +294,6 @@ int main(int argc, char **argv)
 
 	try {
 
-	if(!XInitThreads()) {fprintf(stderr, "ERROR: Could not initialize Xlib thread safety\n");  exit(1);}
 	XSetErrorHandler(xhandler);
 	if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
 
