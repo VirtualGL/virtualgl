@@ -16,7 +16,6 @@
 
 int main(int argc, char **argv)
 {
-	FILE infile, outfile;
 	unsigned char *inbuf, *outbuf;  const char *error=NULL;
 	int w, h, d, i, j;
 	if(argc<3)
