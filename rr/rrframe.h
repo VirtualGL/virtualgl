@@ -148,11 +148,12 @@ class rrjpeg : public rrframe
 		if(b.pixelsize<3 || b.pixelsize>4) _throw("Only true color bitmaps are supported");
 		b.h.size=b.h.winw*b.h.winh*b.pixelsize;
 		init(&b.h);
-		if(b.flags&RRBMP_EOLPAD) hpjflags|=HPJ_EOLPAD;
+		int pitch=b.h.bmpw*b.pixelsize;
+		if(b.flags&RRBMP_EOLPAD) pitch=HPJPAD(pitch);
 		if(b.flags&RRBMP_BOTTOMUP) hpjflags|=HPJ_BOTTOMUP;
 		if(b.flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
 		unsigned long size;
-		hpj(hpjCompress(hpjhnd, b.bits, b.h.bmpw, b.h.bmph, b.pixelsize,
+		hpj(hpjCompress(hpjhnd, b.bits, b.h.bmpw, pitch, b.h.bmph, b.pixelsize,
 			bits, &size, jpegsub[b.h.subsamp], b.h.qual, hpjflags));
 		h.size=(unsigned int)size;
 		return *this;
@@ -249,12 +250,11 @@ class rrbitmap : public rrframe
 		init(&f.h);
 		if(!fb.xi) _throw("Bitmap not initialized");
 		fblock();
-		if(fb.xi->bytes_per_line%fb.width!=0) hpjflags|=HPJ_EOLPAD;
 		if(fb.bgr) hpjflags|=HPJ_BGR;
 		if(f.h.bmpw<=fb.width && f.h.bmpy+f.h.bmph<=fb.height)
 		{
 		hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.xi->bytes_per_line*f.h.bmpy],
-			f.h.bmpw, f.h.bmph, fb.ps, hpjflags));
+			f.h.bmpw, fb.xi->bytes_per_line, f.h.bmph, fb.ps, hpjflags));
 		}
 		return *this;
 	}
