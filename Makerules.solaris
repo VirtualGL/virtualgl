@@ -27,6 +27,7 @@ endif
 DEFAULTJPEGLIB = libjpeg
 
 SHFLAG = -G
+SHEXT = so
 DEPFLAG = -xM1
 
 FBXLIB = -lfbx -lX11 -lXext

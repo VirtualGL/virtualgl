@@ -1,12 +1,12 @@
 ########################################
-# Linux 32-bit and 64-bit
+# OS X 32-bit 
 ########################################
 
-CC = cc
-CXX = c++
+CC = gcc
+CXX = g++
 AR = ar ruvs
 
-CFLAGS = -Wall -fpic
+CFLAGS = -Wall -fPIC -I/usr/X11R6/include
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -m64
@@ -24,14 +24,14 @@ endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
-OPTFLAG = -O2
+OPTFLAG = -O3 -funroll-loops -fexpensive-optimizations -maltivec -mabi=altivec
 endif
 
-DEFAULTJPEGLIB = ipp
+DEFAULTJPEGLIB = libjpeg
 
-SHFLAG = -shared
-SHEXT = so
+SHFLAG = -dynamiclib
+SHEXT = dylib
 DEPFLAG = -MM
 
-FBXLIB = -lfbx -lXext
-SOCKLIB = -lrrsocket -lssl -lpthread
+FBXLIB = -lfbx -lXext -lX11
+SOCKLIB = -lrrsocket -lssl -lpthread -lcrypto.0.9.7 -lX11 -lGL

@@ -24,6 +24,7 @@ CINCLUDES = -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 DEFAULTJPEGLIB = libjpeg
 
 SHFLAG = -shared
+SHEXT = so
 DEPFLAG = -M
 
 FBXLIB = -lfbx -lX11 -lXext
