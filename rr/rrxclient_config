@@ -1,0 +1,71 @@
+#!/bin/sh
+
+_GLOBALCERT=/etc/rrcert.pem
+_XINIT=/etc/X11/xinit/xinitrc.d/rrxclient
+_XINITSSL=/etc/X11/xinit/xinitrc.d/rrxclient_ssl
+_DAEMON=/usr/bin/rrxclient_daemon
+_DAEMONSSL=/usr/bin/rrxclient_ssldaemon
+_POSTSESSION=/etc/X11/gdm/PostSession/Default
+
+while [ 1 ]
+do
+	echo
+	echo "1) Create Client SSL Certificate (all users)"
+	echo "2) Create Client SSL Certificate (this user only)"
+	echo "3) Install VirtualGL Client as a Service"
+	echo "4) Install VirtualGL Secure Client as a Service"
+	echo "5) Remove VirtualGL Client Service"
+	echo "6) Remove VirtualGL Secure Client Service"
+	echo "X) Exit"
+	echo
+	echo Choose:
+	read _CHOICE
+
+	case $_CHOICE in
+	1) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+		newrrcert $_GLOBALCERT
+		continue
+		;;
+	2) newrrcert
+		continue
+		;;
+	3) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+		echo $_DAEMON start >$_XINIT
+		chmod 755 $_XINIT
+		if [ -x $_POSTSESSION ]; then
+			perl -i -p -e "s:$_DAEMON stop\n::g;" $_POSTSESSION
+			echo -e "1a\n$_DAEMON stop\n.\nwq" | ed $_POSTSESSION
+		fi
+		echo Done!  Restart your X session to activate.
+		continue
+		;;
+	4) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+		echo $_DAEMONSSL start >$_XINITSSL
+		chmod 755 $_XINITSSL
+		if [ -x $_POSTSESSION ]; then
+			perl -i -p -e "s:$_DAEMONSSL stop\n::g;" $_POSTSESSION
+			echo -e "1a\n$_DAEMONSSL stop\n.\nwq" | ed $_POSTSESSION
+		fi
+		echo Done!  Restart your X session to activate.
+		continue
+		;;
+	5) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ -x $_XINIT ]; then rm $_XINIT; fi
+		if [ -x $_POSTSESSION ]; then
+			perl -i -p -e "s:$_DAEMON stop\n::g;" $_POSTSESSION
+		fi
+		continue
+		;;
+	6) if [ ! `id -u` -eq 0 ]; then echo Only root can do that!; continue; fi
+		if [ -x $_XINITSSL ]; then rm $_XINITSSL; fi
+		if [ -x $_POSTSESSION ]; then
+			perl -i -p -e "s:$_DAEMONSSL stop\n::g;" $_POSTSESSION
+		fi
+		continue
+		;;
+	X) break
+		;;
+	x) break
+		;;
+	    esac
+done
