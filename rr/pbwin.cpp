@@ -344,7 +344,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
-	tempctx *tc;
+	tempctx *tc=NULL;
 	errifnot((tc=new tempctx(0, glXGetCurrentDrawable())));
 
 	glReadBuffer(buf);
@@ -371,6 +371,6 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();
-	delete tc;
+	if(tc) delete tc;
 	glReadBuffer(readbuf);
 }

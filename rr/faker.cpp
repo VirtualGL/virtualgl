@@ -116,7 +116,7 @@ void fakerinit(void)
 	#ifdef __DEBUG__
 	if(getenv("RRDEBUGPAUSE"))
 	{
-		printf("Attach GDB to process %d ...\n", getpid());
+		printf("Attach debugger to process %d ...\n", getpid());
 		sleep(30);
 	}
 	#if 0
