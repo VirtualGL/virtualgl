@@ -21,6 +21,9 @@ endif
 # Macros which are common to all Unix platforms
 VERSION := 0.9
 BUILD := $(shell date +%Y%m%d)
+ifeq ($(DEBUG), yes)
+BUILD := $(BUILD)d
+endif
 
 ifeq ($(TOPDIR),)
 TOPDIR = ..
@@ -46,10 +49,9 @@ RM = rm -f
 include $(TOPDIR)/Makerules.$(platform)
 
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include -I$(TOPDIR)/include -I.
-ifeq ($(DEBUG), yes)
-CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)d\" -D__APPNAME=\"$(APPNAME)\" -D__DEBUG__
-else
 CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__APPNAME=\"$(APPNAME)\"
+ifeq ($(DEBUG), yes)
+CDEFINES := $(CDEFINES) -D__DEBUG__
 endif
 CFLAGS := $(CFLAGS) $(CDEFINES) $(CINCLUDES)
 

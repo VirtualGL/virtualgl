@@ -20,10 +20,16 @@ include Makerules
 ifeq ($(platform), windows)
 ##########################################################################
 
+ifeq ($(DEBUG), yes)
+WEDIR := $(platform)$(subplatform)\\bind
+else
+WEDIR := $(platform)$(subplatform)\\bin
+endif
+
 dist: rr
 	$(RM) $(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DEDIR=$(platform)$(subplatform)\\bin rr.nsi
+		//DBUILD=$(BUILD) //DEDIR=$(WEDIR) rr.nsi
 
 
 ##########################################################################
