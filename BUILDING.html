@@ -22,7 +22,8 @@ h3           { font-family: Arial; font-size: 14pt }
 <h3><span style="font-weight: 400">GCC and G++ (tested with v2.96 and v3.2)</span></h3>
 <h3><span style="font-weight: 400">X11 dev. kit</span></h3>
 <ul>
-  <li>On RedHat Linux, this can be found in the XFree86-devel package</li>
+  <li>On most Linux variants, this can be found in the XFree86-devel or 
+  xorg-x11-devel package</li>
 </ul>
 <h3><span style="font-weight: 400">GNU Make v3.7 or later</span></h3>
 <h3><span style="font-weight: 400">Intel Integrated 
@@ -31,7 +32,8 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
   <li>
   <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
    produce correct, albeit slow, behavior.&nbsp; In order to get optimal
-   performance out of VirtualGL, however, it is necessary to use the Intel 
+   performance out of VirtualGL, however, it is necessary to build VirtualGL 
+  against the Intel 
   Performance Primitives, which are capable of compressing JPEG images 3-4x 
   faster than libjpeg.</span></h4>
   </li>
@@ -91,8 +93,9 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
   </li>
   <li>
   <h4><span style="font-weight: 400">If you are using a version of Solaris prior 
-  to 10, you will need to build OpenSSL from source.&nbsp; The source code can 
-  be obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.&nbsp; 
+  to 10 or you wish to build a backward-compatible version of VirtualGL, you 
+  will need to build OpenSSL from source.&nbsp; The source code can be obtained 
+  from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.&nbsp; 
   Untar the source, then move the openssl build directory to <i>openssl..solaris
   </i>(for a 32-bit build), <i>openssl.solaris64 </i>(for a 64-bit build), or <i>
   openssl.solx86 </i>(for an x86 build.)&nbsp; VirtualGL will look for this 
@@ -106,32 +109,36 @@ ln -fs /lib/libssl.so.? libssl.so</font></p>
   drwx------ 14 drc staff 
 	Jan 20 12:17 vgl<br>
   <br>
-  </font></span><i>NOTE:</i><span style="font-weight: 400"><font face="Courier New">
+  </font>CD to the appropriate directory and build OpenSSL using the 
+  instructions it provides.<br>
+  <br>
+  </span><i>NOTE:</i><span style="font-weight: 400"><font face="Courier New">
   </font>To configure OpenSSL for a 64-bit build, you will need to run<br>
   <font face="Courier New"><br>
   ./Configure solaris64-sparcv9-cc<br>
   <br>
   </font>Rather than just running <font face="Courier New">config</font>.</span></h4>
   </li>
-  <li>
-  <h4><span style="font-weight: 400">OpenSSL Binaries and headers for Win32 are 
-  included in the VirtualGL build environment.&nbsp; Per the terms of the 
-  OpenSSL license, the <i>LICENSE-OpenSSL.txt</i> file in the root of the 
-  repository contains all required notices and disclaimers relating to this 
-  binary distribution.&nbsp; These binaries were built directly from unmodified 
-  source.</span></h4>
-  </li>
 </ul>
 <h3><span style="font-weight: 400">Sun Workshop Pro Compiler</span></h3>
 <ul>
   <li>Tested with v5.5</li>
+  <li>See <a href="http://www.sun.com/software/products/studio/">
+  http://www.sun.com/software/products/studio/</a></li>
 </ul>
 <H3><span style="font-weight: 400"><i>SOLARIS 8 ONLY:</i>&nbsp;  Linker
 patch 109147-32 must be
 installed</span></H3>
 <UL>
-	<LI><H4><span style="font-weight: 400">See <A HREF="http://www.sun.com/software/sundev/suncc/patches.html">http://www.sun.com/software/sundev/suncc/patches.html</A></span></H4>
+	<LI><H4><span style="font-weight: 400">See
+    <a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">
+    http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage</a></span></H4>
 </UL>
+<h3><span style="font-weight: 400">Sun OpenGL</span></h3>
+<ul>
+  <li>See <a href="http://www.sun.com/software/graphics/opengl/">
+  http://www.sun.com/software/graphics/opengl/</a></li>
+</ul>
 <H3><span style="font-weight: 400">GNU Make v3.7 or later</span></H3>
 <ul>
   <li>This can be obtained from the Solaris Companion Software CD's for Solaris 
@@ -194,7 +201,8 @@ Performance Primitives (IPP) <i><font color="#0000FF">[recommended]</font></i></
   <li>
   <h4><span style="font-weight: 400">VirtualGL includes a completely free version of libjpeg v6b which will
    produce correct, albeit slow, behavior.&nbsp; In order to get optimal
-   performance out of VirtualGL, however, it is necessary to use the Intel 
+   performance out of VirtualGL, however, it is necessary to build VirtualGL 
+  against the Intel 
   Performance Primitives, which are capable of compressing JPEG images 3-4x 
   faster than libjpeg.</span></h4>
   </li>
@@ -216,7 +224,7 @@ type &quot;make&quot;.</p>
 <h3><span style="font-weight: 400">DEBUG = yes</span></h3>
 <blockquote>
 <p>Build a version of VirtualGL with debugging symbols and no optimization.&nbsp; 
-The debug version will reside in ${platform}/libd and ${platform}/bind, whereas 
+The debug version will reside in ${platform}/dbg/lib and ${platform}/dbg/bin, whereas 
 the release version will reside in ${platform}/lib and ${platform}/bin, so these 
 two versions can be built independently of one another.</p>
 </blockquote>
@@ -239,7 +247,7 @@ two versions can be built independently of one another.</p>
 directory}</span></h3>
 <blockquote>
   <p><span style="font-weight: 400">On Linux builds, this allows you to override 
-  the default location of /opt/intel/ipp40, for instance to use an earlier or 
+  the default location of /opt/intel/ipp41, for instance to use an earlier or 
   later version of IPP.</span></p>
 </blockquote>
 <h3><span style="font-weight: 400">M32 = yes</span></h3>
@@ -266,7 +274,8 @@ into <i>/etc </i>unless <b>cfgdir</b> is specified.</p>
 <h3><span style="font-weight: 400">make dist</span></h3>
 <ul>
   <li>On Linux, this requires RPM v4 or later</li>
-  <li>On Solaris, this requires <font face="Courier New">pkgadd</font>.</li>
+  <li>On Solaris, this requires <font face="Courier New">pkgmk</font>,
+  <font face="Courier New">pkgtrans</font>, and <font face="Courier New">bzip2</font></li>
   <li>On Windows, this requires the Nullsoft Install System (<a href="http://nsis.sourceforge.net/">http://nsis.sourceforge.net/</a>.)&nbsp; 
   makensis.exe should be in your path.</li>
 </ul>
