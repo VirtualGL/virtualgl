@@ -36,7 +36,7 @@ $(LDIR)/rr.lib: $(SOBJS)
 	$(AR) -OUT:$@ $^
 
 $(EDIR)/rrxclient.exe: $(ODIR)/rrxclient.obj $(RRDEP)
-	$(LINK) $< -OUT:$@ $(RRLIB)
+	$(LINK) $< -OUT:$@ $(RRLIB) advapi32.lib
 
 $(EDIR)/rrlistenerut.exe: $(ODIR)/rrlistenerut.obj $(RRDEP)
 	$(LINK) $< -OUT:$@ $(RRLIB)
