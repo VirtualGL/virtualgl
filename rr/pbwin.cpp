@@ -142,6 +142,7 @@ pbwin::pbwin(Display *windpy, Window win, Display *pbdpy)
 	force=false;
 	oldpb=pb=NULL;  neww=newh=-1;
 	blitter=NULL;
+	prof_rb.setname("Readback");
 }
 
 pbwin::~pbwin(void)
@@ -312,6 +313,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 			if(!blitter) errifnot(blitter=new rrblitter());
 			if(fconfig.spoil && !blitter->frameready()) return;
 			errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
+			b->flags|=RRBMP_BOTTOMUP;
 			int format= (b->pixelsize==3?GL_RGB:GL_RGBA);
 			unsigned char *bits=b->bits;
 			#ifdef GL_BGR_EXT
@@ -329,7 +331,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 				format=GL_BGRA_EXT;  bits=b->bits+1;
 				#endif
 			}
-			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, bits, drawbuf, false);
+			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, bits, drawbuf, true);
 			blitter->sendframe(b);
 			break;
 		}
@@ -355,6 +357,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+	prof_rb.startframe();
 	if(!bottomup)
 	{
 		for(int i=0; i<h; i++)
@@ -364,6 +367,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
+	prof_rb.endframe(w*h, 0, 1);
 	checkgl("Read Pixels");
 
 	glPopClientAttrib();
