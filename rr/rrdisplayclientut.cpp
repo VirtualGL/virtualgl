@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 	rrtimer t;  double elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;  int dpynum=0;
+	int bgr=littleendian();
 
 	try {
 
@@ -45,9 +46,9 @@ int main(int argc, char **argv)
 
 	rrdisplayclient rrdpy(servername, port, false);
 	int w, h, d=3;
-	if(loadbmp(argv[1], &buf, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
-	if(loadbmp(argv[1], &buf2, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
-	if(loadbmp(argv[1], &buf3, &w, &h, BMP_BGR, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf2, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf3, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
 	printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
 
 	if(servername)
@@ -82,6 +83,7 @@ int main(int argc, char **argv)
 		b->h.qual=qual;  b->h.subsamp=subsamp;
 		b->h.dpynum=dpynum;  b->h.winid=win;
 		b->strip_height=striph;
+		if(b->flags&RRBMP_BGR && !bgr) b->flags&=(~RRBMP_BGR);
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
