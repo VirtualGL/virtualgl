@@ -5,6 +5,11 @@
 %define usrlib /usr/lib
 %define package %{_appname}
 %endif
+%define _XINIT /etc/X11/xinit/xinitrc.d/rrxclient
+%define _XINITSSL /etc/X11/xinit/xinitrc.d/rrxclient_ssl
+%define _DAEMON /usr/bin/rrxclient_daemon
+%define _DAEMONSSL /usr/bin/rrxclient_ssldaemon
+%define _POSTSESSION /etc/X11/gdm/PostSession/Default
 
 Summary: A non-intrusive remote rendering package
 Name: %{package}
@@ -14,7 +19,7 @@ Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
 BuildRoot: %{_curdir}/%{name}-buildroot
-Prereq: /sbin/ldconfig
+Prereq: /sbin/ldconfig, /usr/bin/perl
 Provides: %{name} = %{version}-%{release}
 
 %description
@@ -48,9 +53,11 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_curdir}/%{_bindir}/rrxclient $RPM_BUILD_ROOT/usr/bin/rrxclient
 install -m 755 %{_curdir}/%{_bindir}/rrlaunch $RPM_BUILD_ROOT/usr/bin/rrlaunch
-install -m 755 %{_curdir}/rr/newrrcert $RPM_BUILD_ROOT/usr/bin/newcert
+install -m 755 %{_curdir}/rr/newrrcert $RPM_BUILD_ROOT/usr/bin/newrrcert
 install -m 644 %{_curdir}/rr/rrcert.cnf $RPM_BUILD_ROOT/etc/rrcert.cnf
-install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT/etc/rc.d/init.d/rrxclient
+install -m 755 %{_curdir}/rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
+install -m 755 %{_curdir}/rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
+install -m 755 %{_curdir}/rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/rrxclient_config
 %endif
 
 install -m 755 %{_curdir}/%{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
@@ -68,8 +75,14 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch x86_64
 %else
 %preun
-service rrxclient stop
-/sbin/chkconfig --del rrxclient
+%{_DAEMON} stop
+%{_DAEMONSSL} stop
+if [ -x %{_XINIT} ]; then rm %{_XINIT}; fi
+if [ -x %{_XINITSSL} ]; then rm %{_XINITSSL}; fi
+if [ -x %{_POSTSESSION} ]; then
+	/usr/bin/perl -i -p -e "s:%{_DAEMON} stop\n::g;" %{_POSTSESSION}
+	/usr/bin/perl -i -p -e "s:%{_DAEMONSSL} stop\n::g;" %{_POSTSESSION}
+fi
 %endif
 
 %files -n %{package}
@@ -80,9 +93,11 @@ service rrxclient stop
 
 %else
 /usr/bin/rrxclient
-/usr/bin/newcert
+/usr/bin/newrrcert
 /etc/rrcert.cnf
-/etc/rc.d/init.d/rrxclient
+%{_DAEMON}
+%{_DAEMONSSL}
+/usr/bin/rrxclient_config
 /usr/bin/rrlaunch
 
 %endif
