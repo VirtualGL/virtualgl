@@ -13,133 +13,156 @@
 
 //#define RRPROFILE
 #include "rrdisplayclient.h"
+#include "rrtimer.h"
 
-// This gets called by the parent class
-void rrdisplayclient::dispatch(void)
+#define STRIPH 64
+
+#define endianize(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.winw=byteswap16(h.winw);  \
+		h.winh=byteswap16(h.winh);  \
+		h.bmpw=byteswap16(h.bmpw);  \
+		h.bmph=byteswap16(h.bmph);  \
+		h.bmpx=byteswap16(h.bmpx);  \
+		h.bmpy=byteswap16(h.bmpy);}}
+
+void rrdisplayclient::run(void)
 {
 	#ifdef RRPROFILE
-	double mpixels=0., tstart, comptime=0.;
+	double mpixels=0., comptime=0.;  rrtimer timer;
 	#endif
+	rrframe *lastb=NULL;
+	int np=numprocs(), i;
 
-	rrbmp *b=NULL;
-	q.get((void **)&b);  if(deadyet) return;
-	if(!b) throw("Queue has been shut down");
-	pthread_mutex_unlock(&ready);
-	#ifdef RRPROFILE
-	tstart=hptime();
-	#endif
-	compresssend(b, lastb);
-	#ifdef RRPROFILE
-	comptime+=hptime()-tstart;
-	mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
-	if(comptime>1.)
+	try {
+
+	rrcompressor *c[MAXPROCS];  Thread *ct[MAXPROCS];
+	for(i=0; i<np; i++)
+		errifnot(c[i]=new rrcompressor(i, np, sd));
+	if(np>1) for(i=1; i<np; i++)
 	{
-		hpprintf("Compess/Send:          %f Mpixels/s\n", mpixels/comptime);
-		comptime=0.;  mpixels=0.;
+		errifnot(ct[i]=new Thread(c[i]));
+		ct[i]->start();
 	}
-	#endif
-	if(lastb)
+
+	while(!deadyet)
 	{
-		if(lastb->bits) delete [] lastb->bits;
-		delete lastb;
+		rrframe *b=NULL;
+		q.get((void **)&b);  if(deadyet) return;
+		if(!b) _throw("Queue has been shut down");
+		ready.unlock();
+		#ifdef RRPROFILE
+		timer.start();
+		#endif
+		if(np>1)
+			for(i=1; i<np; i++) c[i]->go(b, lastb);
+		c[0]->compresssend(b, lastb);
+		if(np>1)
+			for(i=1; i<np; i++) {c[i]->stop();  c[i]->send();}
+		#ifdef RRPROFILE
+		comptime+=timer.elapsed();
+		mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
+		if(comptime>1.)
+		{
+			printf("Compress/Send:         %f Mpixels/s\n", mpixels/comptime);
+			fflush(stdout);
+			comptime=0.;  mpixels=0.;
+		}
+		#endif
+		rrframeheader h;
+		memcpy(&h, &b->h, sizeof(rrframeheader));
+		h.eof=1;
+		endianize(h);
+		if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+
+		char cts=0;
+		if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
+
+		lastb=b;
 	}
-	lastb=b;
+
+	for(i=0; i<np; i++) c[i]->shutdown();
+	if(np>1) for(i=1; i<np; i++)
+	{
+		ct[i]->stop();
+		ct[i]->checkerror();
+		delete ct[i];
+	}
+	for(i=0; i<np; i++) delete c[i];
+
+	} catch(...) {ready.unlock();  throw;}
 }
 
-
-void rrdisplayclient::allocbmp(rrbmp *bmp, int w, int h, int pixelsize)
+rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 {
-	if(!bmp || w<1 || h<1 || pixelsize<3 || pixelsize>4)
-		throw("Invalid argument to rrdisplayclient::allocbmp()");
-	if(bmp->h.bmpw==w && bmp->h.bmph==h && bmp->pixelsize==pixelsize
-		&& bmp->bits) return;
-	if(bmp->bits) delete [] bmp->bits;
-	errifnot(bmp->bits=new unsigned char[w*h*pixelsize]);
-	bmp->h.bmpw=w;  bmp->h.bmph=h;
-	bmp->pixelsize=pixelsize;
+	rrframe *b=NULL;
+	ready.lock();  if(deadyet) return NULL;
+	if(t) t->checkerror();
+	bmpmutex.lock();
+	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
+	bmpmutex.unlock();
+	rrframeheader hdr;
+	hdr.bmph=hdr.winh=h;
+	hdr.bmpw=hdr.winw=w;
+	hdr.bmpx=hdr.bmpy=0;
+	b->init(&hdr, ps);
+	return b;
 }
-
-
-rrbmp *rrdisplayclient::getbitmap(int w, int h, int pixelsize)
-{
-	rrbmp *bmp=NULL;  RRError _lasterror;
-	tryunix(pthread_mutex_lock(&ready));  if(deadyet) return NULL;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
-	errifnot(bmp=new rrbmp);
-	memset(bmp, 0, sizeof(rrbmp));
-	allocbmp(bmp, w, h, pixelsize);
-	return bmp;
-}
-
 
 bool rrdisplayclient::frameready(void)
 {
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	if(t) t->checkerror();
 	return(q.items()<=0);
 }
 
-
-void rrdisplayclient::sendframe(rrbmp *bmp)
+void rrdisplayclient::sendframe(rrframe *bmp)
 {
-	RRError _lasterror;
-	if(sd==INVALID_SOCKET) throw("Not connected");
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	if(t) t->checkerror();
 	q.add((void *)bmp);
 }
 
-
-void rrdisplayclient::compresssend(rrbmp *b, rrbmp *lastb)
+void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
-	int endline, i;  int startline;
-	rrjpeg j;
-	bool bu=false;
+	int endline, startline;
+	bool bu=false;  rrjpeg j;
+	if(!b) return;
 	if(b->flags&RRBMP_BOTTOMUP) bu=true;
-	int pitch=b->h.bmpw*b->pixelsize;
 
-	for(i=0; i<b->h.bmph; i+=b->strip_height)
+	int nstrips=(b->h.bmph+STRIPH-1)/STRIPH;
+
+	for(int strip=0; strip<nstrips; strip++)
 	{
-		unsigned char eof=0;
+		if(strip%np!=myrank) continue;
+		int i=strip*STRIPH;
 		if(bu)
 		{
-			startline=b->h.bmph-i-b->strip_height;
+			startline=b->h.bmph-i-STRIPH;
 			if(startline<0) startline=0;
-			endline=startline+min(b->h.bmph-i, b->strip_height);
-			if(b->h.bmph-i<2*b->strip_height) {startline=0;  i+=b->strip_height;  eof=1;}
+			endline=startline+min(b->h.bmph-i, STRIPH);
 		}
 		else
 		{
 			startline=i;
-			endline=startline+min(b->h.bmph-i, b->strip_height);
-			if(b->h.bmph-i<2*b->strip_height) {endline=b->h.bmph;  i+=b->strip_height;  eof=1;}
+			endline=startline+min(b->h.bmph-i, STRIPH);
 		}
-		if(lastb && b->h.bmpw==lastb->h.bmpw && b->h.bmph==lastb->h.bmph
-		&& b->h.winw==lastb->h.winw && b->h.winh==lastb->h.winh
-		&& b->h.qual==lastb->h.qual && b->h.subsamp==lastb->h.subsamp
-		&& b->pixelsize==lastb->pixelsize && b->h.winid==lastb->h.winid
-		&& b->h.dpynum==lastb->h.dpynum && b->bits
-		&& lastb->bits && !memcmp(&b->bits[pitch*(bu? b->h.bmph-endline:startline)],
-			&lastb->bits[pitch*(bu? b->h.bmph-endline:startline)],
-			pitch*(endline-startline)))
-			continue;
-		rrbmp rrb;
-		memcpy(&rrb.h, &b->h, sizeof(rrframeheader));
-		rrb.h.bmph=endline-startline;
-		rrb.h.bmpy+=startline;
-		rrb.pixelsize=b->pixelsize;
-		rrb.flags=b->flags;
-		rrb.bits=&b->bits[pitch*(bu? b->h.bmph-endline:startline)];
-		j=rrb;
+		if(b->stripequals(lastb, startline, endline)) continue;
+		rrframe *rrb=b->getstrip(startline, endline);
+		j=*rrb;
+		delete rrb;
 		j.h.eof=0;
-		send((char *)&j.h, sizeof(rrframeheader));
-		send((char *)j.bits, (int)j.h.size);
+		unsigned int size=j.h.size;
+		endianize(j.h);
+		if(myrank==0)
+		{
+			if(sd) sd->send((char *)&j.h, sizeof(rrframeheader));
+			if(sd) sd->send((char *)j.bits, (int)size);
+		}
+		else
+		{
+			store((char *)&j.h, sizeof(rrframeheader));
+			store((char *)j.bits, (int)size);
+		}
 	}
-
-	rrframeheader h;
-	memcpy(&h, &b->h, sizeof(rrframeheader));
-	h.eof=1;
-	send((char *)&h, sizeof(rrframeheader));
-
-	char cts=0;
-	recv(&cts, 1);  if(cts!=1) throw("CTS error");
 }

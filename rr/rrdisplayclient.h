@@ -14,44 +14,118 @@
 #ifndef __RRDISPLAYCLIENT_H
 #define __RRDISPLAYCLIENT_H
 
-#include "rrconn.h"
+#include "rrsocket.h"
+#include "rrthread.h"
 #include "rr.h"
 #include "rrframe.h"
 #include "genericQ.h"
 
-class rrdisplayclient : rraconn
-{
+#define MAXPROCS 4
 
+class rrdisplayclient : public Runnable
+{
 	public:
 
 	rrdisplayclient(char *servername, unsigned short port, bool dossl)
-		: rraconn()
+		: bmpi(0), t(NULL), deadyet(false), sd(NULL)
 	{
-		tryunix(pthread_mutex_init(&ready, NULL));
-		lastb=NULL;
-		connect(servername, port, dossl);
+		if(servername && port>0)
+		{
+			errifnot(sd=new rrsocket(dossl));
+			sd->connect(servername, port);
+		}
+		errifnot(t=new Thread(this));
+		t->start();
 	}
 
-	~rrdisplayclient(void)
+	virtual ~rrdisplayclient(void)
 	{
-		deadyet=1;
-		q.release();
-		pthread_mutex_unlock(&ready);
-		rraconn::disconnect();
+		deadyet=true;  q.release();
+		if(t) {t->stop();  delete t;  t=NULL;}
+		if(sd) {delete sd;  sd=NULL;}
 	}
 
-	rrbmp *getbitmap(int, int, int);
+	rrframe *getbitmap(int, int, int);
 	bool frameready(void);
-	void sendframe(rrbmp *);
+	void sendframe(rrframe *);
+	void run(void);
 
 	private:
 
-	rrbmp *lastb;
-	pthread_mutex_t ready, complete;
+	static const int NB=3;
+	rrcs bmpmutex;  rrframe bmp[NB];  int bmpi;
+	rrmutex ready;
 	genericQ q;
-	void compresssend(rrbmp *, rrbmp *);
-	void dispatch(void);
-	void allocbmp(rrbmp *, int, int, int);
+	Thread *t;  bool deadyet;
+	rrsocket *sd;
+};
+
+class rrcompressor : public Runnable
+{
+	public:
+
+	rrcompressor(int _myrank, int _np, rrsocket *_sd) :
+		_b(NULL), _lastb(NULL), myrank(_myrank), np(_np), sd(_sd), deadyet(false)
+	{
+		ready.lock();  complete.lock();
+		sendbuf=NULL;  bufsize=0;
+	}
+
+	virtual ~rrcompressor(void)
+	{
+		shutdown();
+		if(sendbuf) {free(sendbuf);  sendbuf=NULL;  bufsize=0;}
+	}
+
+	void run(void)
+	{
+		while(!deadyet)
+		{
+			try {
+
+			ready.lock();  if(deadyet) break;
+			compresssend(_b, _lastb);
+			complete.unlock();
+
+			} catch (...) {complete.unlock();  throw;}
+		}
+	}
+
+	void go(rrframe *b, rrframe *lastb)
+	{
+		_b=b;  _lastb=lastb;
+		ready.unlock();
+	}
+
+	void stop(void)
+	{
+		complete.lock();
+	}
+
+	void shutdown(void) {deadyet=true;  ready.unlock();}
+	void compresssend(rrframe *, rrframe *);
+
+	void send(void)
+	{
+		if(sd && sendbuf && bufsize) sd->send(sendbuf, bufsize);
+		if(sendbuf) {free(sendbuf);  sendbuf=NULL;  bufsize=0;}
+	}
+
+	private:
+
+	void store(char *buf, int size)
+	{
+		if(!(sendbuf=(char *)realloc(sendbuf, bufsize+size))) _throw("Memory allocation error");
+		memcpy(&sendbuf[bufsize], buf, size);
+		bufsize+=size;
+	}
+
+	int bufsize;  char *sendbuf;
+	rrframe *_b, *_lastb;
+	int myrank, np;
+	rrsocket *sd;
+	rrmutex ready, complete;  bool deadyet;
+	rrcs mutex;
 };
 
 #endif
