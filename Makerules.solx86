@@ -15,7 +15,7 @@ CINCLUDES =  -I/usr/X/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platfo
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 
 ARCHFLAG =
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 
 ifeq ($(DEBUG), yes)
 OPTFLAG = -g
