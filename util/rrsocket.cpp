@@ -32,6 +32,74 @@
  #define INADDR_NONE ((in_addr_t) 0xffffffff)
 #endif
 
+static void progress_callback(int p, int n, void *arg)
+{
+}
+
+static EVP_PKEY *newprivkey(int bits)
+{
+	EVP_PKEY *pk=NULL;
+	try
+	{
+		if(!(pk=EVP_PKEY_new())) _throwssl();
+		if(!EVP_PKEY_assign_RSA(pk, RSA_generate_key(bits, 0x10001,
+			progress_callback, NULL))) _throwssl();
+		return pk;
+	}
+	catch (...)
+	{
+		if(pk) EVP_PKEY_free(pk);
+		throw;
+	}
+	return NULL;
+}
+
+static X509 *newcert(EVP_PKEY *priv)
+{
+	X509 *cert=NULL;  X509_NAME *name=NULL;  int nid=NID_undef;
+	X509_PUBKEY *pub=NULL;  EVP_PKEY *pk=NULL;
+
+	try
+	{
+		if((cert=X509_new())==NULL) _throwssl();
+		if(!X509_set_version(cert, 2)) _throwssl();
+		ASN1_INTEGER_set(X509_get_serialNumber(cert), 0L);
+
+		if((name=X509_NAME_new())==NULL) _throwssl();
+		if((nid=OBJ_txt2nid("organizationName"))==NID_undef) _throwssl();
+		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
+			(unsigned char *)"VirtualGL", -1, -1, 0)) _throwssl();
+		if((nid=OBJ_txt2nid("commonName"))==NID_undef) _throwssl();
+		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
+			(unsigned char *)"localhost", -1, -1, 0)) _throwssl();
+		if(!X509_set_subject_name(cert, name)) _throwssl();
+		if(!X509_set_issuer_name(cert, name)) _throwssl();
+		X509_NAME_free(name);  name=NULL;
+
+		X509_gmtime_adj(X509_get_notBefore(cert), 0);
+		X509_gmtime_adj(X509_get_notAfter(cert), (long)60*60*24*365);
+
+		if((pub=X509_PUBKEY_new())==NULL) _throwssl();
+		X509_PUBKEY_set(&pub, priv);
+		if((pk=X509_PUBKEY_get(pub))==NULL) _throwssl();
+		X509_set_pubkey(cert, pk);
+		EVP_PKEY_free(pk);  pk=NULL;
+		X509_PUBKEY_free(pub);  pub=NULL;
+		if(X509_sign(cert, priv, EVP_md5())<=0) _throwssl();
+
+		return cert;
+	}
+	catch(...)
+	{
+		if(pub) X509_PUBKEY_free(pub);
+		if(pk) EVP_PKEY_free(pk);
+		if(name) X509_NAME_free(name);
+		if(cert) X509_free(cert);
+		throw;
+	}
+	return NULL;
+}
+
 bool rrsocket::sslinit=false;
 rrcs rrsocket::mutex, rrsocket::cryptolock[CRYPTO_NUM_LOCKS];
 int rrsocket::instancecount=0;
@@ -140,8 +208,10 @@ void rrsocket::connect(char *servername, unsigned short port)
 	}
 }
 
-void rrsocket::listen(unsigned short port, char *certfile, char *privkeyfile)
+void rrsocket::listen(unsigned short port)
 {
+	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
+
 	int m=1;  struct sockaddr_in myaddr;
 
 	if(sd!=INVALID_SOCKET) _throw("Already connected");
@@ -161,12 +231,23 @@ void rrsocket::listen(unsigned short port, char *certfile, char *privkeyfile)
 
 	if(dossl)
 	{
+		try {
 		if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL) _throwssl();
-		if(SSL_CTX_use_certificate_file(sslctx, certfile, SSL_FILETYPE_PEM)<=0)
+		errifnot(priv=newprivkey(1024));
+		errifnot(cert=newcert(priv));
+		if(SSL_CTX_use_certificate(sslctx, cert)<=0)
 			_throwssl();
-		if(SSL_CTX_use_PrivateKey_file(sslctx, privkeyfile, SSL_FILETYPE_PEM)<=0)
+		if(SSL_CTX_use_PrivateKey(sslctx, priv)<=0)
 			_throwssl();
 		if(!SSL_CTX_check_private_key(sslctx)) _throwssl();
+		if(priv) EVP_PKEY_free(priv);
+		if(cert) X509_free(cert);
+		} catch (...)
+		{
+			if(priv) EVP_PKEY_free(priv);
+			if(cert) X509_free(cert);
+			throw;
+		}
 	}
 }
 
