@@ -664,7 +664,6 @@ int decode_one_block (jpgstruct *jpg, mlib_s16 *block,
 	int *last_dc_val, d_derived_tbl *dctbl, d_derived_tbl *actbl)
 {
 	register int get_buffer, bits_left, s, k, r;
-	static int output=0;
 	bitread_working_state br_state;  int lastdc=*last_dc_val;
 
 	/* If we've run out of data, just leave the MCU set to zeroes.

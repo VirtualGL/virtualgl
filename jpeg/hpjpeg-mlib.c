@@ -247,10 +247,10 @@ int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 {
 	int rgbstride=jpg->pitch;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, mlib_u8 *, mlib_u8 *,
-		const mlib_u8 *, mlib_s32);
+		const mlib_u8 *, mlib_s32)=NULL;
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, mlib_u8 *, mlib_u8 *,
-		const mlib_u8 *, const mlib_u8 *, mlib_s32);
-	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], h, i, j;
+		const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
+	int mcuh=_mcuh[jpg->subsamp], h, j;
 
 	h=mcuh;
 	if(startline+mcuh-1>jpg->height) h=jpg->height-startline;
@@ -496,7 +496,6 @@ int encode_jpeg(jpgstruct *jpg)
 {
 	int i, j, k;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
-	int mcusize=mcuw*mcuh+128;
 	int lastdc[3]={0, 0, 0};
 	int x,y;
 	mlib_u8 *ybuf=NULL, *cbbuf, *crbuf, *linebuf=NULL;
@@ -654,12 +653,12 @@ int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr, *srcptr, *tmpptr=(mlib_u8 *)_tmpbuf,
 		*tmpptr2=(mlib_u8 *)_tmpbuf2;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, const mlib_u8 *, const mlib_u8 *,
-		const mlib_u8 *, mlib_s32);
+		const mlib_u8 *, mlib_s32)=NULL;
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
-		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32);
+		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], w, h;
 	int flags=jpg->flags, ps=jpg->ps, tmppitch=jpg->pitch;
-	int yindex, cbindex, crindex, ystride, cstride, j, i;
+	int yindex, cbindex, crindex, ystride, cstride, j;
 
 	w=mcuw;  h=mcuh;
 	if(curxmcu==jpg->xmcus-1 && jpg->width%mcuw!=0) w=jpg->width%mcuw;
@@ -931,7 +930,7 @@ int decode_jpeg_init(jpgstruct *jpg)
 
 int decode_jpeg(jpgstruct *jpg)
 {
-	int i, j, k, mcuw, mcuh, mcusize, marker, x, y;
+	int i, j, k, mcuw, mcuh, mcusize, x, y;
 	int lastdc[3]={0, 0, 0};
 
 	_catch(decode_jpeg_init(jpg));
@@ -1101,7 +1100,4 @@ DLLEXPORT int DLLCALL hpjDestroy(hpjhandle h)
 
 	free(jpg);
 	return 0;
-
-	bailout:
-	return -1;
 }
