@@ -40,11 +40,6 @@ void rrdisplayclient::dispatch(void)
 		comptime=0.;  mpixels=0.;
 	}
 	#endif
-	if(lastb)
-	{
-		if(lastb->bits) delete [] lastb->bits;
-		delete lastb;
-	}
 	lastb=b;
 
 	} catch(...) {pthread_mutex_unlock(&ready);  throw;}
@@ -66,13 +61,14 @@ void rrdisplayclient::allocbmp(rrbmp *bmp, int w, int h, int pixelsize)
 
 rrbmp *rrdisplayclient::getbitmap(int w, int h, int pixelsize)
 {
-	rrbmp *bmp=NULL;
+	rrbmp *b=NULL;
 	tryunix(pthread_mutex_lock(&ready));  if(deadyet) return NULL;
 	checkerror();
-	errifnot(bmp=new rrbmp);
-	memset(bmp, 0, sizeof(rrbmp));
-	allocbmp(bmp, w, h, pixelsize);
-	return bmp;
+	tryunix(pthread_mutex_lock(&bmpmutex));
+	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
+	tryunix(pthread_mutex_unlock(&bmpmutex));
+	allocbmp(b, w, h, pixelsize);
+	return b;
 }
 
 

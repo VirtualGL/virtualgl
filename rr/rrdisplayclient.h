@@ -28,7 +28,9 @@ class rrdisplayclient : rraconn
 		: rraconn()
 	{
 		tryunix(pthread_mutex_init(&ready, NULL));
-		lastb=NULL;
+		tryunix(pthread_mutex_init(&bmpmutex, NULL));
+		lastb=NULL;  bmpi=0;
+		for(int i=0; i<NB; i++) memset(&bmp[i], 0, sizeof(rrbmp));
 		connect(servername, port, dossl);
 	}
 
@@ -38,6 +40,7 @@ class rrdisplayclient : rraconn
 		q.release();
 		pthread_mutex_unlock(&ready);
 		rraconn::disconnect();
+		for(int i=0; i<NB; i++) if(bmp[i].bits) delete [] bmp[i].bits;
 	}
 
 	rrbmp *getbitmap(int, int, int);
@@ -46,8 +49,10 @@ class rrdisplayclient : rraconn
 
 	private:
 
+	static const int NB=3;
+	rrbmp bmp[NB];  int bmpi;
 	rrbmp *lastb;
-	pthread_mutex_t ready, complete;
+	pthread_mutex_t ready, bmpmutex;
 	genericQ q;
 	void compresssend(rrbmp *, rrbmp *);
 	void dispatch(void);
