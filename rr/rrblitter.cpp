@@ -11,7 +11,6 @@
  * wxWindows Library License for more details.
  */
 
-//#define RRPROFILE
 #include "rrblitter.h"
 #include "rrtimer.h"
 
@@ -20,9 +19,6 @@
 void rrblitter::run(void)
 {
 //	rrfb *lastb=NULL;
-	#ifdef RRPROFILE
-	double mpixels=0., comptime=0.;  rrtimer timer;
-	#endif
 
 	try {
  
@@ -32,20 +28,9 @@ void rrblitter::run(void)
 		q.get((void **)&b);  if(deadyet) return;
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
-		#ifdef RRPROFILE
-		timer.start();
-		#endif
+		prof_blit.startframe();
 		b->redraw();
-		#ifdef RRPROFILE
-		comptime+=timer.elapsed();
-		mpixels+=(double)b->h.bmpw*(double)b->h.bmph/1000000.;
-		if(comptime>1.)
-		{
-			printf("Blit:                  %f Mpixels/s\n", mpixels/comptime);
-			fflush(stdout);
-			comptime=0.;  mpixels=0.;
-		}
-		#endif
+		prof_blit.endframe(b->h.bmpw*b->h.bmph, 0, 1);
 //		lastb=b;
 	}
 

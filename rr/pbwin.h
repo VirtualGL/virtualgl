@@ -73,6 +73,7 @@ class pbwin
 		pbuffer *oldpb, *pb;  GLXFBConfig config;
 		int neww, newh;
 		rrblitter *blitter;
+		rrprofiler prof_rb;
 };
 
 #endif

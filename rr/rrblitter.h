@@ -17,6 +17,7 @@
 #include "rrthread.h"
 #include "rrframe.h"
 #include "genericQ.h"
+#include "rrprofiler.h"
 
 class rrblitter : public Runnable
 {
@@ -27,6 +28,7 @@ class rrblitter : public Runnable
 		for(int i=0; i<NB; i++) bmp[i]=NULL;
 		errifnot(t=new Thread(this));
 		t->start();
+		prof_blit.setname("Blit");
 	}
 
 	virtual ~rrblitter(void)
@@ -49,6 +51,7 @@ class rrblitter : public Runnable
 	genericQ q;
 	void blitdiff(rrfb *, rrfb *);
 	Thread *t;  bool deadyet;
+	rrprofiler prof_blit;
 };
 
 #endif

@@ -13,7 +13,7 @@
 
 #include "rrcwin.h"
 #include "rrerror.h"
-#include "rrtimer.h"
+#include "rrprofiler.h"
 
 rrcwin::rrcwin(int dpynum, Window window) : jpgi(0), deadyet(false), profile(false),
 	t(NULL)
@@ -64,34 +64,11 @@ void rrcwin::drawFrame(rrjpeg *f)
 	q.add(f);
 }
 
-void rrcwin::showprofile(rrframeheader *h, int size)
-{
-	static rrtimer timer;
-	static double tstart=0., mpixels=0., displaytime=0., mbits=0., frames=0.;
-	if(profile)
-	{
-		if(tstart)
-		{
-			displaytime+=timer.time()-tstart;
-			if(!h->eof)
-			{
-				mpixels+=(double)h->bmpw*(double)h->bmph/1000000.;
-				mbits+=(double)size*8./1000000.;
-				frames+=(double)(h->bmpw*h->bmph)/(double)(h->winw*h->winh);
-			}
-		}
-		if(displaytime>1.)
-		{
-			rrout.PRINT("%.2f Mpixels/sec - %.2f fps - %.2f Mbps\n", mpixels/displaytime,
-				frames/displaytime, mbits/displaytime);
-			displaytime=0.;  mpixels=0.;  frames=0;  mbits=0.;
-		}
-		tstart=timer.time();
-	}
-}
 
 void rrcwin::run(void)
 {
+	rrprofiler pt("Total"), pb("Blit"), pd("Decompress");
+
 	try {
 
 	while(!deadyet)
@@ -102,11 +79,20 @@ void rrcwin::run(void)
 		frameready.unlock();
 		if(j->h.eof)
 		{
+			pb.startframe();
 			b->init(&j->h);
 			b->redraw();
+			pb.endframe(b->h.winw*b->h.winh, 0, 1);
+			pt.endframe(b->h.winw*b->h.winh, 0, 1);
+			pt.startframe();
 		}
-		else *b=*j;
-		showprofile(&b->h, j->h.size);
+		else
+		{
+			pd.startframe();
+			*b=*j;
+			pd.endframe(j->h.bmpw*j->h.bmph, j->h.size, (double)(j->h.bmpw*j->h.bmph)/
+				(double)(j->h.winw*j->h.winh));
+		}
 	}
 
 	} catch(...) {frameready.unlock();  throw;}
