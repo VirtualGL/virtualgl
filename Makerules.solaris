@@ -26,7 +26,7 @@ endif
 
 DEFAULTJPEGLIB = libjpeg
 
-SHFLAG = -G
+SHFLAG = -G -lCrun
 SHEXT = so
 DEPFLAG = -xM1
 
