@@ -30,9 +30,9 @@ TOPDIR = ..
 endif
 
 ifeq ($(DEBUG), yes)
-EDIR := $(TOPDIR)/$(platform)$(subplatform)/bind
-LDIR := $(TOPDIR)/$(platform)$(subplatform)/libd
-ODIR := $(TOPDIR)/$(platform)$(subplatform)/objd
+EDIR := $(TOPDIR)/$(platform)$(subplatform)/dbg/bin
+LDIR := $(TOPDIR)/$(platform)$(subplatform)/dbg/lib
+ODIR := $(TOPDIR)/$(platform)$(subplatform)/dbg/obj
 else
 EDIR := $(TOPDIR)/$(platform)$(subplatform)/bin
 LDIR := $(TOPDIR)/$(platform)$(subplatform)/lib
