@@ -4,6 +4,7 @@ ALL: dist mesademos
 .PHONY: rr util jpeg mesademos diags clean dist
 
 rr: util jpeg
+jpeg: util
 
 rr util jpeg mesademos diags:
 	cd $@; $(MAKE); cd ..
