@@ -24,11 +24,11 @@ unsigned char rct[256], gct[256], bct[256];
 
 int main(int argc, char **argv)
 {
-	unsigned char *bmp1=NULL, *bmp2=NULL, *bmpdiff=NULL;
+	unsigned char *bmp1=NULL, *bmp2=NULL, *bmpdiff=NULL;  int useppm=0;
 	unsigned char diff, diffmax, max[4]={0, 0, 0, 0}, min[4]={255, 255, 255, 255};
-	double avg[4]={0., 0., 0., 0.};
+	double avg[4]={0., 0., 0., 0.}, ssq[4]={0., 0., 0., 0.};
 	int w1, h1, d1=3, w2, h2, d2=3, w, h, i, j, k, mag=0;
-	const char *err="No error";
+	char *temp;
 
 	if(argc<3)
 	{
@@ -38,6 +38,8 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	if(argc>3 && !strcmp(argv[3], "-mag")) mag=1;
+
+	if((temp=strrchr(argv[1], '.'))!=NULL && !stricmp(temp, ".ppm")) useppm=1;
 
 	if(mag)
 	{
@@ -59,13 +61,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if((err=loadbmp(argv[1], &bmp1, &w1, &h1, BMP_BGR, 1, 0))!=NULL)
+	if(loadbmp(argv[1], &bmp1, &w1, &h1, BMP_BGR, 1, 0)==-1)
 	{
-		puts(err);  exit(1);
+		puts(bmpgeterr());  exit(1);
 	}
-	if((err=loadbmp(argv[2], &bmp2, &w2, &h2, BMP_BGR, 1, 0))!=NULL)
+	if(loadbmp(argv[2], &bmp2, &w2, &h2, BMP_BGR, 1, 0)==-1)
 	{
-		puts(err);  exit(1);
+		puts(bmpgeterr());  exit(1);
 	}
 	w=min(w1, w2);  h=min(h1, h2);
 
@@ -83,7 +85,7 @@ int main(int argc, char **argv)
 				diff=(unsigned char)abs((int)bmp2[(w2*i+j)*d2+k]-(int)bmp1[(w1*i+j)*d1+k]);
 				if(diff>diffmax) diffmax=diff;
 				if(diff>max[k]) max[k]=diff;  if(diff<min[k]) min[k]=diff;
-				avg[k]+=diff;
+				avg[k]+=diff;  ssq[k]+=diff*diff;
 				if(!mag) bmpdiff[(w*i+j)*d1+k]=diff;
 			}
 			if(mag)
@@ -94,14 +96,19 @@ int main(int argc, char **argv)
 			}
 		}
 	for(k=0; k<d1; k++)
-		avg[k]/=((double)h*(double)w);
-
-	if((err=savebmp("diff.bmp", bmpdiff, w, h, BMP_BGR, 0, 0))!=NULL)
 	{
-		puts(err);  exit(1);
+		avg[k]/=((double)h*(double)w);
+		ssq[k]/=((double)h*(double)w);
+		ssq[k]=sqrt(ssq[k]);
+	}
+
+	if(savebmp(useppm?"diff.ppm":"diff.bmp", bmpdiff, w, h, BMP_BGR, 0, 0)==-1)
+	{
+		puts(bmpgeterr());  exit(1);
 	}
 	free(bmpdiff);
 	for(k=0; k<d1; k++)
-		printf("%s: min err.= %d  max err.= %d  average err.= %f\n", k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k]);
+		printf("%s: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
+		k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k], ssq[k], 20.*log10(255./ssq[k]));
 	return 0;
 }
