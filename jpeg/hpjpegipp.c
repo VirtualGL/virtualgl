@@ -509,10 +509,10 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
+	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 
 	jpg->bmpbuf=srcbuf;
 	jpg->jpgbuf=dstbuf;
@@ -875,10 +875,10 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
+	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(ippCpuP4);
 
 	jpg->bmpbuf=dstbuf;
 	jpg->jpgbuf=srcbuf;
