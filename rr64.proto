@@ -9,6 +9,7 @@ d none SUNWvgl/lib 0755 root bin
 d none SUNWvgl/lib/sparcv9 0755 root bin
 f none SUNWvgl/lib/sparcv9/librrfaker.so 0755 root bin
 f none SUNWvgl/lib/sparcv9/libhpjpeg.so 0755 root bin
+d none SUNWvgl/doc 0755 root bin
 d none SUNWvgl/doc/VirtualGL64 0755 root bin
 f none SUNWvgl/doc/VirtualGL64/LGPL.txt 0644 root bin
 f none SUNWvgl/doc/VirtualGL64/LICENSE.txt 0644 root bin
