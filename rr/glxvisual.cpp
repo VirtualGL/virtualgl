@@ -46,7 +46,7 @@ static int __glxerr=0;
 
 GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 {
-	int glxattribs[257], j=0, nelements;  GLXFBConfig *fbconfigs;
+	int glxattribs[257], j=0, nelements;  GLXFBConfig *fbconfigs, c=0;
 	int doublebuffer=0, render_type=GLX_COLOR_INDEX_BIT, stereo=0;
 
 	for(int i=0; attribs[i]!=None && i<=254; i++)
@@ -69,7 +69,9 @@ GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 	glxattribs[j]=None;
 	fbconfigs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), glxattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
-	return fbconfigs[0];
+	c=fbconfigs[0];
+	XFree(fbconfigs);
+	return c;
 }
 
 int glXConfigDepth(GLXFBConfig c)

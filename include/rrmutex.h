@@ -102,6 +102,7 @@ class rrcs
 			pthread_mutexattr_init(&ma);
 			pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
 			pthread_mutex_init(&cs, &ma);
+			pthread_mutexattr_destroy(&ma);
 			#endif
 		}
 
