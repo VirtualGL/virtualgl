@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 // Compression types
-enum {RRCOMP_NONE=0, RRCOMP_MJPEG, RRCOMP_ANDRES};
+enum {RRCOMP_NONE=0, RRCOMP_MJPEG};
 
 class FakerConfig
 {
@@ -74,7 +74,7 @@ class FakerConfig
 			getconfig("RRNOCOMPRESS", temp);
 			if(temp) compress=RRCOMP_NONE;
 			getconfig("RRSPOIL", spoil);
-			getconfig("RRCOMPRESS", compress, RRCOMP_NONE, RRCOMP_ANDRES);
+			getconfig("RRCOMPRESS", compress, RRCOMP_NONE, RRCOMP_MJPEG);
 			getconfig("RRUSESSL", ssl);
 			getconfig("RRPORT", port, 0, 65535);
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
