@@ -14,7 +14,7 @@
 Summary: A non-intrusive remote rendering package
 Name: %{package}
 Version: %{_version}
-Vendor: Landmark Graphics
+Vendor: The VirtualGL Project
 Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
