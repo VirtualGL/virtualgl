@@ -314,7 +314,14 @@ class rrfb : public rrframe
 
 	void redraw(void)
 	{
-		fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
+		if(flags&RRBMP_BOTTOMUP)
+		{
+			for(int i=0; i<fb.height; i++)
+				fbx(fbx_awrite(&fb, 0, fb.height-i-1, 0, i, 0, 1));
+			fbx(fbx_sync(&fb));
+		}
+		else
+			fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 	}
 
 	void draw(void)
