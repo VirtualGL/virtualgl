@@ -23,9 +23,6 @@
 // Compression types
 enum {RRCOMP_NONE=0, RRCOMP_MJPEG, RRCOMP_ANDRES};
 
-#define DEFGLLIB "/usr/lib/libGL.so.1"
-#define DEFX11LIB "/usr/X11R6/lib/libX11.so.6"
-
 class FakerConfig
 {
 	public:
@@ -33,8 +30,8 @@ class FakerConfig
 		FakerConfig(void)
 		{
 			// Defaults
-			gllib=DEFGLLIB;
-			x11lib=DEFX11LIB;
+			gllib=NULL;
+			x11lib=NULL;
 			client=NULL;
 			localdpystring=":0";
 			loqual=90;
