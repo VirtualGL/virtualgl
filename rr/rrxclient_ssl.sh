@@ -9,14 +9,14 @@ RETVAL=0
 LOGPATH=/var/log/
 
 start() {
-	echo -n $"Starting Client Daemon: "
-	daemon /usr/bin/rrxclient --service -l$LOGPATH/rrxclient.log && success || failure
+	echo -n $"Starting Secure Client Daemon: "
+	daemon /usr/bin/rrxclient --service -s -l$LOGPATH/rrxclient_ssl.log && success || failure
 	echo
 	if [ ! $? -eq 0 ]; then RETVAL=$?; fi
 }
 
 stop() {
-	echo -n $"Shutting down Client Daemon: "
+	echo -n $"Shutting down Secure Client Daemon: "
 	killproc rrxclient
 	echo
 }
