@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	}
 	w=min(w1, w2);  h=min(h1, h2);
 
-	if((bmpdiff=(char *)malloc(w*h*d1))==NULL)
+	if((bmpdiff=(unsigned char *)malloc(w*h*d1))==NULL)
 	{
 		puts("Could not allocate memory");  exit(1);
 	}
