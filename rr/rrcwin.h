@@ -32,23 +32,12 @@ class rrcwin
 
 	private:
 
-	void setlasterror(RRError e)
+	void checkerror(void)
 	{
-		rrlock l(lemutex);
-		lasterror=e;
+		if(lasterror) throw lasterror;
 	}
 
-	RRError getlasterror(void)
-	{
-		const RRError noerror={0, 0, 0};
-		RRError retval;  retval.message=NULL;
-		rrlock l(lemutex);
-		retval=lasterror;
-		if(lasterror.message) lasterror=noerror;
-		return retval;
-	}
-
-	RRError lasterror;
+	rrerror lasterror;
 	rrbitmap *b;
 	genericQ q;
 	void showprofile(rrframeheader *, int);
