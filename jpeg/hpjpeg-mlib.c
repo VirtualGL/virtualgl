@@ -77,16 +77,16 @@ typedef struct
 typedef struct _jpgstruct
 {
 	mlib_d64 chromqtable[64], lumqtable[64];
-	mlib_d64 _mcubuf8[384/8], _mcubuf[384/4];
+	mlib_d64 _mcubuf[384/4];
 
 	mlib_u8 *bmpbuf, *bmpptr, *jpgbuf, *jpgptr;
-	int xmcus, ymcus, width, height, pitch, ps, subsamp, qual, flags;
+	int width, height, pitch, ps, subsamp, qual, flags;
 	unsigned long bytesprocessed, bytesleft;
 
 	int huffbits, huffbuf, unread_marker, insufficient_data;
 	c_derived_tbl *e_dclumtable, *e_aclumtable, *e_dcchromtable, *e_acchromtable;
 	d_derived_tbl *d_dclumtable, *d_aclumtable, *d_dcchromtable, *d_acchromtable;
-	mlib_u8 *mcubuf8;  mlib_s16 *mcubuf;
+	mlib_s16 *mcubuf;
 	int initc, initd;
 } jpgstruct;
 
@@ -374,9 +374,6 @@ int encode_jpeg_init(jpgstruct *jpg)
 	mlib_s16 rawqtable[64];  int i, nval, len;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
 
-	jpg->xmcus=(jpg->width+mcuw-1)/mcuw;
-	jpg->ymcus=(jpg->height+mcuh-1)/mcuh;
-
 	jpg->bytesprocessed=0;
 	jpg->huffbits = jpg->huffbuf = jpg->unread_marker = jpg->insufficient_data = 0;
 
@@ -569,7 +566,6 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 		_throw("Memory allocation failure");
 	memset(jpg, 0, sizeof(jpgstruct));
 
-	jpg->mcubuf8=(mlib_u8 *)jpg->_mcubuf8;
 	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
 	if((jpg->e_dclumtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
@@ -648,128 +644,110 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 #define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
 	if(__b!=(b)) _throw("JPEG bitstream error");}
 
-int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
+int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
 {
-	mlib_d64 _tmpbuf[1024/8], _tmpbuf2[1024/8];  // 16x16 for 4:2:0 encoding * 4 bytes
-	mlib_u8 *bmpptr=jpg->bmpptr, *dstptr, *srcptr, *tmpptr=(mlib_u8 *)_tmpbuf,
-		*tmpptr2=(mlib_u8 *)_tmpbuf2;
+	// Convert RGB to BGR
+	if(jpg->flags&HPJ_BGR && jpg->ps==3)
+	{
+		_mlib(mlib_VectorReverseByteOrder(dstbuf, linebuf, jpg->width, 3));
+	}
+	// Convert RGB to ABGR
+	else if(jpg->flags&HPJ_BGR && jpg->flags&HPJ_ALPHAFIRST && jpg->ps==4)
+		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)dstbuf, linebuf, NULL, 0, jpg->width, 1,
+			jpg->pitch, jpg->width*3, 0);
+	// Convert RGB to ARGB
+	else if(!(jpg->flags&HPJ_BGR) && jpg->flags&HPJ_ALPHAFIRST && jpg->ps==4)
+		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)dstbuf, linebuf, NULL, 0, jpg->width, 1,
+			jpg->pitch, jpg->width*3, 0);
+	// Convert RGB to BGRA
+	else if(jpg->flags&HPJ_BGR && !(jpg->flags&HPJ_ALPHAFIRST) && jpg->ps==4)
+	{
+		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)dstbuf, linebuf, NULL, 0, jpg->width, 1,
+			jpg->pitch, jpg->width*3, 0);
+		_mlib(mlib_VectorReverseByteOrder_Inp(dstbuf, jpg->width, 4));
+	}
+	// Convert RGB to RGBA
+	else if(!(jpg->flags&HPJ_BGR) && !(jpg->flags&HPJ_ALPHAFIRST) && jpg->ps==4)
+	{
+		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)dstbuf, linebuf, NULL, 0, jpg->width, 1,
+			jpg->pitch, jpg->width*3, 0);
+		_mlib(mlib_VectorReverseByteOrder_Inp(dstbuf, jpg->width, 4));
+	}
+	else if(linebuf!=dstbuf)
+	{
+		_mlib(mlib_VectorCopy_U8(dstbuf, linebuf, jpg->width*jpg->ps));
+	}
+	return 0;
+
+	bailout:
+	return -1;
+}
+
+int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
+	mlib_u8 *crbuf, int cw, int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2)
+{
+	int i, i2;
+	int rgbstride=jpg->pitch;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, const mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, mlib_s32)=NULL;
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
-	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], w, h;
-	int flags=jpg->flags, ps=jpg->ps, tmppitch=jpg->pitch;
-	int yindex, cbindex, crindex, ystride, cstride, j;
+	int mcuh=_mcuh[jpg->subsamp], h, j, convreq=0;
 
-	w=mcuw;  h=mcuh;
-	if(curxmcu==jpg->xmcus-1 && jpg->width%mcuw!=0) w=jpg->width%mcuw;
-	if(curymcu==jpg->ymcus-1 && jpg->height%mcuh!=0) h=jpg->height%mcuh;
-
-	if(jpg->flags&HPJ_BOTTOMUP) bmpptr=bmpptr-(h-1)*jpg->pitch;
-	tmppitch=mcuw*ps;
+	h=mcuh;
+	if(startline+mcuh-1>jpg->height) h=jpg->height-startline;
 
 	switch(jpg->subsamp)
 	{
 		case HPJ_411:
 			ccfct420=mlib_VideoColorJFIFYCC2RGB420_Nearest;
+			if(jpg->flags&HPJ_BGR || jpg->ps!=3) convreq=1;
 			break;
 		case HPJ_422:
 			ccfct=mlib_VideoColorJFIFYCC2RGB422_Nearest;
+			if(jpg->flags&HPJ_BGR || jpg->ps!=3) convreq=1;
 			break;
 		case HPJ_444:
 			ccfct=mlib_VideoColorJFIFYCC2RGB444;
-			if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4)  // ARGB
+			if(!(jpg->flags&HPJ_BGR) && jpg->flags&HPJ_ALPHAFIRST && jpg->ps==4)  // ARGB
 				ccfct=mlib_VideoColorJFIFYCC2ARGB444;
-			if(!(flags&HPJ_BGR) && ps==3)  // RGB
-			{
-				// Note: for some odd reason, it's faster to avoid
-				// the temp. buffer only when converting 4:4:4 to RGB
-				tmpptr=bmpptr;  tmppitch=jpg->pitch;
-			}
+			else if(jpg->flags&HPJ_BGR && jpg->flags&HPJ_ALPHAFIRST && jpg->ps==4)  // ABGR
+				ccfct=mlib_VideoColorJFIFYCC2ABGR444;
+			else if(jpg->flags&HPJ_BGR || jpg->ps!=3) convreq=1;
 			break;
 		default:
-			_throw("Invalid argument to mcu_color_convert()");
+			_throw("Invalid argument to d_mcu_color_convert()");
 	}
 
 	// Do color conversion
-	dstptr=tmpptr;
-	yindex=0;  cbindex=mcuw*mcuh;  crindex=mcuw*mcuh+8*8;  ystride=mcuw;  cstride=8;
-	if(flags&HPJ_BOTTOMUP)
-	{
-		yindex+=(h-1)*mcuw;  cbindex+=(8-1)*8;  crindex+=(8-1)*8;
-		ystride=-ystride;  cstride=-cstride;
-	}
+	rgbstride=jpg->pitch;
+	if(jpg->flags&HPJ_BOTTOMUP) rgbstride=-jpg->pitch;
+
 	if(jpg->subsamp==HPJ_411)
 	{
-		for(j=0; j<h; j+=2, dstptr+=tmppitch*2, yindex+=ystride*2, cbindex+=cstride, crindex+=cstride)
+		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr, *tmpptr2;
+		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=yw*2, cb+=cw, cr+=cw)
 		{
-			_mlib(ccfct420(dstptr, dstptr+tmppitch, &jpg->mcubuf8[yindex], &jpg->mcubuf8[yindex+ystride],
-				&jpg->mcubuf8[cbindex], &jpg->mcubuf8[crindex], w));
+			tmpptr=jpg->bmpptr;  tmpptr2=jpg->bmpptr+rgbstride;
+			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
+			if(convreq || ((long)tmpptr2&7L)!=0L || j>=h-1) tmpptr2=linebuf2;
+			_mlib(ccfct420(tmpptr, tmpptr2, y, y+yw, cb, cr, jpg->width));
+			if(tmpptr!=jpg->bmpptr) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+			if(j<h-1 && tmpptr2!=jpg->bmpptr+rgbstride)
+				{_catch(d_postconvertline(tmpptr2, jpg->bmpptr+rgbstride, jpg));}
 		}
 	}
 	else
 	{
-		for(j=0; j<h; j++, dstptr+=tmppitch, yindex+=ystride, cbindex+=cstride, crindex+=cstride)
+		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr;
+		for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
 		{
-			_mlib(ccfct(dstptr, &jpg->mcubuf8[yindex], &jpg->mcubuf8[cbindex],
-				&jpg->mcubuf8[crindex], w));
+			tmpptr=jpg->bmpptr;
+			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
+			_mlib(ccfct(tmpptr, y, cb, cr, jpg->width));
+			if(tmpptr!=jpg->bmpptr) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
 		}
 	}
-
-	// Convert RGB to BGR
-	if(flags&HPJ_BGR && ps==3)
-	{
-		for(j=0; j<h; j++)
-			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr[j*tmppitch], w, 3));
-		tmpptr=bmpptr;
-	}
-	// Convert RGB to ABGR
-	if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4)
-	{
-		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)bmpptr, tmpptr, NULL, 0, w, h,
-			jpg->pitch, tmppitch, 0);
-		tmpptr=bmpptr;
-	}
-	// Convert RGB to ARGB
-	if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4 &&
-		jpg->subsamp!=HPJ_444)
-	{
-		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)bmpptr, tmpptr, NULL, 0, w, h,
-			jpg->pitch, tmppitch, 0);
-		tmpptr=bmpptr;
-	}
-	// Convert RGB to BGRA
-	if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4)
-	{
-		mlib_VideoColorRGBint_to_ARGBint((mlib_u32 *)tmpptr2, tmpptr, NULL, 0, w, h,
-			mcuw*4, tmppitch, 0);
-		for(j=0; j<h; j++)
-			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr2[j*mcuw*4], w, 4));
-		tmpptr=bmpptr;
-	}
-	// Convert RGB to RGBA
-	if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4)
-	{
-		mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)tmpptr2, tmpptr, NULL, 0, w, h,
-			mcuw*4, tmppitch, 0);
-		for(j=0; j<h; j++)
-			_mlib(mlib_VectorReverseByteOrder(&bmpptr[j*jpg->pitch], &tmpptr2[j*mcuw*4], w, 4));
-		tmpptr=bmpptr;
-	}
-
-	if(tmpptr!=bmpptr)
-	{
-		srcptr=tmpptr;  dstptr=bmpptr;
-		for(j=0; j<h; j++, srcptr+=tmppitch, dstptr+=jpg->pitch)
-			mlib_memcpy(dstptr, srcptr, w*ps);
-	}
-
-	if(curxmcu==jpg->xmcus-1)
-	{
-		if(jpg->flags&HPJ_BOTTOMUP) jpg->bmpptr=&jpg->bmpbuf[(jpg->height-1-mcuh*(curymcu+1))*jpg->pitch];
-		else jpg->bmpptr=&jpg->bmpbuf[mcuh*(curymcu+1)*jpg->pitch];
-	}
-	else jpg->bmpptr+=mcuw*jpg->ps;
 
 	return 0;
 
@@ -931,62 +909,63 @@ int decode_jpeg_init(jpgstruct *jpg)
 
 int decode_jpeg(jpgstruct *jpg)
 {
-	int i, j, k, mcuw, mcuh, mcusize, x, y;
+	int i, j, k, mcuw, mcuh, x, y;
 	int lastdc[3]={0, 0, 0};
+	mlib_u8 *ybuf=NULL, *cbbuf, *crbuf, *linebuf=NULL;
+	int yw, cw;
 
 	_catch(decode_jpeg_init(jpg));
 
 	mcuw=_mcuw[jpg->subsamp];  mcuh=_mcuh[jpg->subsamp];
-	jpg->xmcus=(jpg->width+mcuw-1)/mcuw;
-	jpg->ymcus=(jpg->height+mcuh-1)/mcuh;
-	mcusize=mcuw*mcuh+128;
+	yw=(jpg->width+mcuw-1)&(~(mcuw-1));
+	cw=yw*8/mcuw;
 
-	for(j=0; j<jpg->ymcus; j++)
+	_mlibn(ybuf=(mlib_u8 *)mlib_malloc(yw*mcuh + cw*8*2));
+	_mlibn(linebuf=(mlib_u8 *)mlib_malloc(yw*4*2));
+	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
+
+	for(j=0; j<jpg->height; j+=mcuh)
 	{
-		for(i=0; i<jpg->xmcus; i++)
+		
+		for(i=0; i<yw; i+=mcuw)
 		{
-
-			for(k=0; k<mcuw*mcuh; k+=64)  // Huffman decode the luminance blocks
-			{
-				_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[0],
-					jpg->d_dclumtable, jpg->d_aclumtable) );
-			}
-
-			// Huffman decode the Cb block
-			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
-				jpg->d_dcchromtable, jpg->d_acchromtable) );
-			k+=64;
-
-			// Huffman decode the Cr block
-			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
-				jpg->d_dcchromtable, jpg->d_acchromtable) );
-
-			for(k=0; k<mcuw*mcuh; k+=64)  // Un-quantize the luminance blocks
-				_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->lumqtable));
-			for(k=mcuw*mcuh; k<mcusize; k+=64)  // Un-quantize the chrominance blocks
-				_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
-
-			k=0;    // Perform inverse DCT on all luminance blocks
+			k=0;    // luminance blocks
 			for(y=0; y<mcuh; y+=8)
 				for(x=0; x<mcuw; x+=8)
 				{
+					_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[0],
+						jpg->d_dclumtable, jpg->d_aclumtable) );
+					_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->lumqtable));
 					jpg->mcubuf[k]+=1024;
-					_mlib(mlib_VideoIDCT8x8_U8_S16(&jpg->mcubuf8[y*mcuw+x], &jpg->mcubuf[k], mcuw));
+					_mlib(mlib_VideoIDCT8x8_U8_S16(&ybuf[i+y*yw+x], &jpg->mcubuf[k], yw));
 					k+=64;
 				}
-			for(k=mcuw*mcuh; k<mcusize; k+=64)  // Perform inverse DCT on all chrominance blocks
-			{
-				jpg->mcubuf[k]+=1024;
-				_mlib(mlib_VideoIDCT8x8_U8_S16(&jpg->mcubuf8[k], &jpg->mcubuf[k], 8));
-			}
 
-			_catch(d_mcu_color_convert(jpg, i, j));
+			// Cb block
+			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
+				jpg->d_dcchromtable, jpg->d_acchromtable) );
+			_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+			jpg->mcubuf[k]+=1024;
+			_mlib(mlib_VideoIDCT8x8_U8_S16(&cbbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
+			k+=64;
+
+			// Cr block
+			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
+				jpg->d_dcchromtable, jpg->d_acchromtable) );
+			_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+			jpg->mcubuf[k]+=1024;
+			_mlib(mlib_VideoIDCT8x8_U8_S16(&crbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
 		}
+		_catch(d_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
 	}
 
+	if(ybuf) mlib_free(ybuf);
+	if(linebuf) mlib_free(linebuf);
 	return 0;
 
 	bailout:
+	if(ybuf) mlib_free(ybuf);
+	if(linebuf) mlib_free(linebuf);
 	return -1;
 }
 
@@ -998,7 +977,6 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 		_throw("Memory allocation failure");
 	memset(jpg, 0, sizeof(jpgstruct));
 
-	jpg->mcubuf8=(mlib_u8 *)jpg->_mcubuf8;
 	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
 	if((jpg->d_dclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
