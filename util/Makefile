@@ -14,6 +14,7 @@ TARGETS = $(LDIR)/rrutil.lib \
           $(EDIR)/fbxtest-xdk.exe
 
 OBJS = $(ODIR)/rrlog.obj \
+       $(ODIR)/genericQ.obj \
        $(ODIR)/rrsocket.obj \
        $(ODIR)/fbx.obj \
        $(ODIR)/fbxtest.obj \
@@ -30,7 +31,7 @@ clean:
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
-$(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj
+$(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj
 	$(AR) -OUT:$@ $^
 
 $(ODIR)/fbx-xdk.obj: fbx.c
@@ -63,6 +64,7 @@ TARGETS = $(LDIR)/librrutil.a \
           $(EDIR)/threadtest
 
 OBJS = $(ODIR)/rrlog.o \
+       $(ODIR)/genericQ.o \
        $(ODIR)/rrsocket.o \
        $(ODIR)/fbx.o \
        $(ODIR)/fbxtest.o \
@@ -76,7 +78,7 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-$(LDIR)/librrutil.a: $(ODIR)/rrlog.o
+$(LDIR)/librrutil.a: $(ODIR)/rrlog.o $(ODIR)/genericQ.o
 	$(AR) $@ $^
 
 $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a
