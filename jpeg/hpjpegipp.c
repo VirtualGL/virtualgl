@@ -539,7 +539,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		ippStaticInitBest();  ippstaticinitcalled=1;
+		IppCpuType cpu=ippCoreGetCpuType();
+		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		else ippStaticInitBest();  ippstaticinitcalled=1;
 	}
 
 	_ippn(ippiEncodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -580,7 +582,6 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(AutoDetect());
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
@@ -910,7 +911,9 @@ DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		ippStaticInitBest();  ippstaticinitcalled=1;
+		IppCpuType cpu=ippCoreGetCpuType();
+		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		else ippStaticInitBest();  ippstaticinitcalled=1;
 	}
 
 	_ippn(ippiDecodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -948,7 +951,6 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(ippCoreGetCpuType()==ippCpuUnknown) ippStaticInitCpu(AutoDetect());
 	if(flags&HPJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
 	if(flags&HPJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
 	if(flags&HPJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
