@@ -15,12 +15,12 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
 	File "${BLDDIR}\bin\hpjpeg.dll"
-	File /oname=newvglcert.bat "rr\newrrcert.bat"
-	File /oname=vglcert.cnf "rr\rrcert.cnf"
-	File "${BLDDIR}\bin\openssl.exe"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
-	File "util\nettest.pem"
+	File "${BLDDIR}\bin\hclshm.dll"
+	File "${BLDDIR}\bin\xlib.dll"
+	File "$%systemroot%\system32\libeay32.dll"
+	File "$%systemroot%\system32\ssleay32.dll"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
@@ -42,8 +42,6 @@ Section "Start Menu Shortcuts (required)"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Remove ${APPNAME} Secure Client Service.lnk" "$INSTDIR\vglclient.exe" "-s -remove"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\vglclient.exe"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\vglclient.exe" "-s"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (this user only).lnk" "$INSTDIR\newvglcert.bat"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Create Client SSL Certificate (all users).lnk" "$INSTDIR\newvglcert.bat" "root"
 
 SectionEnd
 
@@ -58,15 +56,14 @@ Section "Uninstall"
 
 	Delete $INSTDIR\vglclient.exe
 	Delete $INSTDIR\hpjpeg.dll
-	Delete $INSTDIR\newvglcert.bat
-	Delete $INSTDIR\vglcert.cnf
-	Delete $INSTDIR\openssl.exe
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
-	Delete $INSTDIR\vglcert.pem
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
-	Delete $INSTDIR\nettest.pem
+	Delete $INSTDIR\hclshm.dll"
+	Delete $INSTDIR\xlib.dll"
+	Delete $INSTDIR\libeay32.dll"
+	Delete $INSTDIR\ssleay32.dll"
 
 	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"
 	RMDir "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
