@@ -40,10 +40,10 @@ $(ODIR)/nettest.obj: nettest.c
 $(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/hputil.lib $(LDIR)/hpsecnet.lib
 	$(LINK) $< -OUT:$@ $(HPULIB) $(HPSECNETLIB)
 
-$(EDIR)/fbxtest-xdk.exe: $(ODIR)/fbxtest-xdk.obj $(LDIR)/fbx-xdk.lib
+$(EDIR)/fbxtest-xdk.exe: $(ODIR)/fbxtest-xdk.obj $(LDIR)/fbx-xdk.lib $(LDIR)/hputil.lib
 	$(LINK) $< -out:$@ fbx-xdk.lib $(XDKLIB) pthreadVC.lib $(HPULIB)
 
-$(EDIR)/fbxtest.exe: $(ODIR)/fbxtest.obj $(LDIR)/fbx.lib
+$(EDIR)/fbxtest.exe: $(ODIR)/fbxtest.obj $(LDIR)/fbx.lib $(LDIR)/hputil.lib
 	$(LINK) $< -out:$@ $(FBXLIB) pthreadVC.lib $(HPULIB)
 
 ##########################################################################
@@ -75,7 +75,7 @@ $(ODIR)/nettest.o: nettest.c
 $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a
 	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lhpsecnet -lpthread -lssl
 
-$(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a
+$(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a $(LDIR)/libhputil.a
 	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB) -lpthread $(HPULIB)
 
 ##########################################################################
