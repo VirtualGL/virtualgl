@@ -18,13 +18,11 @@
 #define checkhandle(h,s) rrdisplayserver *rrs;  if((rrs=(rrdisplayserver *)h)==NULL) \
 	{_throwlasterror("Invalid handle in "s);  return RR_ERROR;}
 
-#define _setlasterror(f,l,m) {__lasterror.file=f;  __lasterror.line=l;  \
-	__lasterror.message=m;}
-#define _throwlasterror(m) _setlasterror(__FILE__, __LINE__, m)
+#define _throwlasterror(m) __lasterror.init(__FILE__, m, __LINE__);
 
-#define _catch() catch(RRError e) {__lasterror=e;}
+#define _catch() catch(rrerror &e) {__lasterror=e;}
 
-RRError __lasterror={"No File", 0, "No Error"};
+rrerror __lasterror;
 
 extern "C" {
 
@@ -54,10 +52,16 @@ DLLEXPORT int DLLCALL
 	return RR_ERROR;
 }
 
-DLLEXPORT RRError DLLCALL
-	RRGetError(void)
+DLLEXPORT char * DLLCALL
+	RRErrorString(void)
 {
-	return __lasterror;
+	return __lasterror? __lasterror.getMessage():(char *)"No Error";
+}
+
+DLLEXPORT const char * DLLCALL
+	RRErrorLocation(void)
+{
+	return __lasterror? __lasterror.getMethod():"(Unknown error location)";
 }
 
 }

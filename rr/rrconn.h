@@ -18,6 +18,8 @@
 #include "hpsecnet.h"
 #include <pthread.h>
 #include "rrcommon.h"
+#include "rrerror.h"
+
 #include <string.h>
 #ifndef _WIN32
  #include <sys/socket.h>
@@ -182,41 +184,27 @@ class rraconn : public rrconn
 
 	void init(void)
 	{
-		const RRError noerror={0, 0, 0};
 		rrconn::init();
-		dispatchthnd=0;  deadyet=1;  lasterror=noerror;
+		dispatchthnd=0;  deadyet=1;
 	}
 
 	void startdispatcher(void)
 	{
 		deadyet=0;
-		tryunix(pthread_mutex_init(&lemutex, NULL));
 		if(!dispatchthnd)
 			tryunix(pthread_create(&dispatchthnd, NULL, dispatcher, (void *)this));
 	}
 
-	void setlasterror(RRError e)
+	void checkerror(void)
 	{
-		rrlock l(lemutex);
-		lasterror=e;
-	}
-
-	RRError getlasterror(void)
-	{
-		const RRError noerror={0, 0, 0};
-		RRError retval;  retval.message=NULL;
-		rrlock l(lemutex);
-		retval=lasterror;
-		if(lasterror.message) lasterror=noerror;
-		return retval;
+		if(lasterror) throw lasterror;
 	}
 
 	// Override me!
 	virtual void dispatch(void)=0;
 
 	int deadyet;
-	RRError lasterror;
-	pthread_mutex_t lemutex;
+	rrerror lasterror;
 	static void *dispatcher(void *);
 	pthread_t dispatchthnd;
 };	

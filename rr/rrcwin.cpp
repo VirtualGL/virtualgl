@@ -17,18 +17,16 @@
 
 rrcwin::rrcwin(int dpynum, Window window)
 {
-	const RRError noerror={0, 0, 0};
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window) _throw("Invalid argument to rrcwin constructor");
 	sprintf(dpystr, "localhost:%d.0", dpynum);
 	this->dpynum=dpynum;  this->window=window;
 	tryunix(pthread_mutex_init(&frameready, NULL));
-	tryunix(pthread_mutex_init(&lemutex, NULL));
 	profile=false;  char *ev=NULL;
 	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1)) {profile=true;  hptimer_init();}
 	b=new rrbitmap(dpystr, window);
 	errifnot(b);
-	deadyet=false;  displaythnd=0;  lasterror=noerror;
+	deadyet=false;  displaythnd=0;
 	tryunix(pthread_create(&displaythnd, NULL, displayer, (void *)this));
 }
 
@@ -52,8 +50,7 @@ int rrcwin::match(int dpynum, Window window)
 rrjpeg *rrcwin::getFrame(void)
 {
 	tryunix(pthread_mutex_lock(&frameready));
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	checkerror();
 	rrjpeg *j=new rrjpeg;
 	if(!j) _throw("Could not allocate receive buffer");
 	return j;
@@ -62,8 +59,7 @@ rrjpeg *rrcwin::getFrame(void)
 
 void rrcwin::drawFrame(rrjpeg *f)
 {
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	checkerror();
 	q.add(f);
 }
 
@@ -116,9 +112,9 @@ void *rrcwin::displayer(void *param)
 			delete j;
 		}
 	}
-	catch(RRError e)
+	catch(rrerror &e)
 	{
-		if(!rrw->deadyet) rrw->setlasterror(e);
+		if(!rrw->deadyet) rrw->lasterror=e;
 		pthread_mutex_unlock(&rrw->frameready);
 	}
 	return 0;

@@ -18,13 +18,11 @@
 #define checkhandle(h,s) rrdisplayclient *rrc;  if((rrc=(rrdisplayclient *)h)==NULL) \
 	{_throwlasterror("Invalid handle in "s);  return RR_ERROR;}
 
-#define _setlasterror(f,l,m) {__lasterror.file=f;  __lasterror.line=l;  \
-	__lasterror.message=m;}
-#define _throwlasterror(m) _setlasterror(__FILE__, __LINE__, m)
+#define _throwlasterror(m) __lasterror.init(__FILE__, m, __LINE__);
 
-#define _catch() catch(RRError e) {__lasterror=e;}
+#define _catch() catch(rrerror &e) {__lasterror=e;}
 
-extern RRError __lasterror;
+extern rrerror __lasterror;
 
 extern "C" {
 

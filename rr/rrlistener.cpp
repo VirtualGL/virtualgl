@@ -180,11 +180,11 @@ void *rrlistener::clientthread(void *param)
 	{
 		while(!rrl->deadyet) rrl->receive(c);
 	}
-	catch(RRError e)
+	catch(rrerror &e)
 	{
 		if(!rrl->deadyet)
 		{
-			hpprintf("Client %d- %s (%d):\n%s\n", clientrank, e.file, e.line, e.message);
+			hpprintf("Client %d: %s--\n%s\n", clientrank, e.getMethod(), e.getMessage());
 			rrl->removeclient(c, false);
 		}
 	}
@@ -206,11 +206,11 @@ void *rrlistener::listener(void *param)
 			rrl->addclient(c);
 			continue;
 		}
-		catch(RRError e)
+		catch(rrerror &e)
 		{
 			if(!rrl->deadyet)
 			{
-				hpprintf("Listener- %s (%d):\n%s\n", e.file, e.line, e.message);
+				hpprintf("Listener: %s--\n%s\n", e.getMethod(), e.getMessage());
 				delete c;
 				continue;
 			}

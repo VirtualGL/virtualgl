@@ -20,9 +20,9 @@ void *rraconn::dispatcher(void *param)
 	{
 		while(!rrc->deadyet) rrc->dispatch();
 	}
-	catch(RRError e)
+	catch(rrerror &e)
 	{
-		if(!rrc->deadyet) rrc->setlasterror(e);
+		if(!rrc->deadyet) rrc->lasterror=e;
 	}
 	return 0;
 }

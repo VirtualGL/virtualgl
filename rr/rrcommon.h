@@ -20,14 +20,8 @@
 
 #define MAXWIN 1024
 
-#define __throw(f,l,m) {RRError e;  e.file=f;  e.line=l;  e.message=(char *)m;  throw(e);}
-#define _throw(c) __throw(__FILE__, __LINE__, c)
-#define errifnot(f) {if(!(f)) _throw("Unexpected NULL condition");}
-#define hpj(f) {if((f)==-1) _throw(hpjGetErrorStr());}
-#define fbx(f) {if((f)==-1) __throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
 #define sock(f) {if((f)==SOCKET_ERROR) _throw(hpnet_strerror());}
 #define tryssl(f) {if(!(f)) _throw(hpsecnet_strerror());}
-#define tryunix(f) {if((f)==-1) _throw(strerror(errno));}
 
 #include <pthread.h>
 

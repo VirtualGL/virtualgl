@@ -81,14 +81,6 @@ typedef void * RRDisplay;
 #define RR_SUCCESS 0
 #define RR_ERROR   -1
 
-// Error handling
-typedef struct _RRError
-{
-	const char *file;
-	int line;
-	char *message;
-} RRError;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -112,8 +104,10 @@ DLLEXPORT int DLLCALL
 	RRCloseDisplay(RRDisplay rrdpy);
 
 // Other functions
-DLLEXPORT RRError DLLCALL
-	RRGetError(void);
+DLLEXPORT char * DLLCALL
+	RRErrorString(void);
+DLLEXPORT const char * DLLCALL
+	RRErrorLocation(void);
 
 #ifdef __cplusplus
 }

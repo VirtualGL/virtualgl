@@ -73,11 +73,11 @@ class myrrlistener : public rrlistener
 				hpprintf("Packet %d received by listener from %s on %d\n", packetno, c->getremotename(), c->getsd());
 			}
 		}
-		catch(RRError e)
+		catch(rrerror &e)
 		{
 			if(!rrl->deadyet)
 			{
-				hpprintf("Client %d- %s (%d):\n%s\n", clientrank, e.file, e.line, e.message);
+				hpprintf("Client %d: %s--:\n%s\n", clientrank, e.getMethod(), e.getMessage());
 				rrl->removeclient(c, false);
 			}
 		}
@@ -153,9 +153,9 @@ int main(int argc, char **argv)
 		}
 		hpprintf("Exiting ...\n");
 	}
-	catch(RRError e)
+	catch(rrerror &e)
 	{
-		fprintf(stderr, "Main- %s (%d):\n%s\n", e.file, e.line, e.message);
+		hpprintf("%s--\n%s\n", e.getMethod(), e.getMessage());
 		exit(1);
 	}
 	return 0;

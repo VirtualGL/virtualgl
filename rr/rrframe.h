@@ -21,6 +21,7 @@
 #endif
 #include "fbx.h"
 #include "hpjpeg.h"
+#include "rrerror.h"
 #include <string.h>
 #include <pthread.h>
 

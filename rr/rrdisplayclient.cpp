@@ -21,6 +21,8 @@ void rrdisplayclient::dispatch(void)
 	double mpixels=0., tstart, comptime=0.;
 	#endif
 
+	try {
+
 	rrbmp *b=NULL;
 	q.get((void **)&b);  if(deadyet) return;
 	if(!b) _throw("Queue has been shut down");
@@ -44,6 +46,8 @@ void rrdisplayclient::dispatch(void)
 		delete lastb;
 	}
 	lastb=b;
+
+	} catch(...) {pthread_mutex_unlock(&ready);  throw;}
 }
 
 
@@ -62,9 +66,9 @@ void rrdisplayclient::allocbmp(rrbmp *bmp, int w, int h, int pixelsize)
 
 rrbmp *rrdisplayclient::getbitmap(int w, int h, int pixelsize)
 {
-	rrbmp *bmp=NULL;  RRError _lasterror;
+	rrbmp *bmp=NULL;
 	tryunix(pthread_mutex_lock(&ready));  if(deadyet) return NULL;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	checkerror();
 	errifnot(bmp=new rrbmp);
 	memset(bmp, 0, sizeof(rrbmp));
 	allocbmp(bmp, w, h, pixelsize);
@@ -74,17 +78,14 @@ rrbmp *rrdisplayclient::getbitmap(int w, int h, int pixelsize)
 
 bool rrdisplayclient::frameready(void)
 {
-	RRError _lasterror;
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	checkerror();
 	return(q.items()<=0);
 }
 
 
 void rrdisplayclient::sendframe(rrbmp *bmp)
 {
-	RRError _lasterror;
-	if(sd==INVALID_SOCKET) _throw("Not connected");
-	if((_lasterror=getlasterror()).message!=NULL) throw(_lasterror);
+	checkerror();
 	q.add((void *)bmp);
 }
 

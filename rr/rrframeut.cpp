@@ -90,7 +90,7 @@ class rrframeut
 	void allocbmp(int buf, int w, int h, int pixelsize)
 	{
 		if(buf<0 || buf>NB-1 || w<1 || h<1 || pixelsize<3 || pixelsize>4)
-			throw("Invalid argument to allocbmp()");
+			throw(rrerror("rrframeut::allocbmp", "Invalid argument"));
 		if(bmp[buf].h.bmpw==w && bmp[buf].h.bmph==h && bmp[buf].pixelsize==pixelsize
 			&& bmp[buf].bits) return;
 		if(bmp[buf].bits) {free(bmp[buf].bits);  memset(&bmp[buf], 0, sizeof(rrbmp));}
@@ -160,8 +160,7 @@ void *compressor(void *p)
 			test->j[buf].ready();
 		}
 	}
-	catch (char *e) {hpprintf("Compressor- %s\n", e);  test->cthnd=0;  exit(1);}
-	catch (const char *e) {hpprintf("Compressor- %s\n", e);  test->cthnd=0;  exit(1);}
+	catch (rrerror &e) {hpprintf("Compressor: %s--\n%s\n", e.getMethod(), e.getMessage());  test->cthnd=0;  exit(1);}
 	hpprintf("Compressor exiting ...\n");
 	return 0;
 }
@@ -196,8 +195,7 @@ void *decompressor(void *p)
 			test->b[buf]->ready();
 		}
 	}
-	catch (char *e) {hpprintf("Decompressor- %s\n", e);  test->dthnd=0;  exit(1);}
-	catch (const char *e) {hpprintf("Decompressor- %s\n", e);  test->dthnd=0;  exit(1);}
+	catch (rrerror &e) {hpprintf("Decompressor: %s--\n%s\n", e.getMethod(), e.getMessage());  test->dthnd=0;  exit(1);}
 	hpprintf("Decompressor exiting ...\n");
 	return 0;
 }
@@ -207,7 +205,6 @@ void *blitter(void *p)
 	rrframeut *test=(rrframeut *)p;
 	hptimer_init();
 	double mpixels=0., totaltime=0.;
-	int iter=0;
 	int buf=1;
 	try
 	{
@@ -223,8 +220,7 @@ void *blitter(void *p)
 		}
 		hpprintf("Average blitter performance = %f Mpixels/sec\n", mpixels/totaltime);
 	}
-	catch (char *e) {hpprintf("Blitter- %s\n", e);  test->bthnd=0;  exit(1);}
-	catch (const char *e) {hpprintf("Blitter- %s\n", e);  test->bthnd=0;  exit(1);}
+	catch (rrerror &e) {hpprintf("Blitter: %s--\n%s\n", e.getMethod(), e.getMessage());  test->bthnd=0;  exit(1);}
 	hpprintf("Blitter exiting ...\n");
 	return 0;
 }
@@ -263,7 +259,6 @@ int main(void)
 			delete test[i];
 		}
 	}
-	catch (char *e) {hpprintf("Main- %s\n", e);  exit(1);}	
-	catch (const char *e) {hpprintf("Main- %s\n", e);  exit(1);}	
+	catch (rrerror &e) {hpprintf("Main: %s--\n%s\n", e.getMethod(), e.getMessage());  exit(1);}
 	return 0;
 }

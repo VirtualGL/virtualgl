@@ -100,11 +100,11 @@ void *rrdisplayserver::clientthread(void *param)
 		if(!rrc) _throw("Could not create client instance");
 		while(!rrl->deadyet) rrc->receive(c);
 	}
-	catch(RRError e)
+	catch(rrerror &e)
 	{
 		if(!rrl->deadyet)
 		{
-			hpprintf("Client %d- %s (%d):\n%s\n", clientrank, e.file, e.line, e.message);
+			hpprintf("Client %d: %s--\n%s\n", clientrank, e.getMethod(), e.getMessage());
 			if(rrc) {delete rrc;  rrc=NULL;}
 			rrl->removeclient(c, false);
 		}
