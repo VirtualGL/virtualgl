@@ -3,21 +3,21 @@
 
 . /etc/rc.d/init.d/functions
 
-[ -x /usr/bin/rrxclient ] || exit 0
+[ -x /usr/bin/vglclient ] || exit 0
 
 RETVAL=0
 LOGPATH=/var/log/
 
 start() {
 	echo -n $"Starting Secure Client Daemon: "
-	daemon /usr/bin/rrxclient --service -s -l$LOGPATH/rrxclient_ssl.log && success || failure
+	daemon /usr/bin/vglclient --service -s -l$LOGPATH/vglclient_ssl.log && success || failure
 	echo
 	if [ ! $? -eq 0 ]; then RETVAL=$?; fi
 }
 
 stop() {
 	echo -n $"Shutting down Secure Client Daemon: "
-	killproc rrxclient
+	killproc vglclient
 	echo
 }
 

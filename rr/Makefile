@@ -20,7 +20,7 @@ UNITTESTS = $(EDIR)/rrblitterut.exe \
             $(EDIR)/rrdisplayclientut.exe \
             $(EDIR)/rrframeut.exe
 
-TARGETS = $(EDIR)/rrxclient.exe \
+TARGETS = $(EDIR)/vglclient.exe \
           $(UNITTESTS)
 
 RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-xdk.lib $(LDIR)/hpjpeg.lib $(LDIR)/rrsocket.lib
@@ -35,7 +35,7 @@ HDRS := $(wildcard *.h) $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
 
-$(EDIR)/rrxclient.exe: $(COBJS) $(RRDEP)
+$(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
 	$(LINK) $(COBJS) -OUT:$@ $(RRLIB)
 
 # Unit tests
@@ -79,18 +79,19 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrframeut \
 
 TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
-          $(EDIR)/rrxclient \
+          $(EDIR)/vglclient \
           $(UNITTESTS)
 
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrsocket.a
 RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB)
-RRLAUNCH = rrlaunch
+
 ifeq ($(subplatform), 64)
-RRLAUNCH = rrlaunch64
+TARGETS := $(TARGETS) $(EDIR)/vglrun64
+else
+TARGETS := $(TARGETS) $(EDIR)/vglrun
 endif
 
-TARGETS := $(TARGETS) $(EDIR)/$(RRLAUNCH)
 
 all: $(TARGETS)
 
@@ -104,12 +105,17 @@ clean:
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB)
 
-$(EDIR)/$(RRLAUNCH): $(RRLAUNCH)
-	cp $(RRLAUNCH) $@; chmod 755 $@
+ifeq ($(subplatform), 64)
+$(EDIR)/vglrun64: rrlaunch64
+	$(INSTALL) -m 755 $< $@
+else
+$(EDIR)/vglrun: rrlaunch
+	$(INSTALL) -m 755 $< $@
+endif
 
 # Client
 
-$(EDIR)/rrxclient: $(COBJS) $(RRDEP)
+$(EDIR)/vglclient: $(COBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB)
 
 # Unit tests
