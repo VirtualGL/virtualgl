@@ -69,6 +69,11 @@ class Thread
 			handle=0;
 		}
 
+		void seterror(rrerror &e)
+		{
+			if(obj) obj->lasterror=e;
+		}
+
 		void checkerror(void)
 		{
 			if(obj && obj->lasterror) throw obj->lasterror;

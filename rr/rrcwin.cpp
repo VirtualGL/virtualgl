@@ -92,5 +92,8 @@ void rrcwin::run(void)
 		}
 	}
 
-	} catch(...) {frameready.unlock();  throw;}
+	} catch(rrerror &e)
+	{
+		if(t) t->seterror(e);  frameready.unlock();  throw;
+	}
 }
