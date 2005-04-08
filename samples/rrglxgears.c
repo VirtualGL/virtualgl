@@ -479,7 +479,7 @@ make_window( Display *dpy, const char *name,
       the server's display to establish the context using the FB config
       we just created */
 
-   ctx = glXCreateNewContext( serverdpy, fbcfg, GLX_RGBA_BIT, NULL, True );
+   ctx = glXCreateNewContext( serverdpy, fbcfg, GLX_RGBA_TYPE, NULL, True );
    if (!ctx) {
       printf("Error: glXCreateNewContext failed\n");
       _die(1);
@@ -608,7 +608,7 @@ main(int argc, char *argv[])
    char *clidpyName = NULL;
    GLboolean printInfo = GL_FALSE;
    int i;
-   unsigned short port = RR_DEFAULTPORT;
+   unsigned short port = 0;
 
 
    for (i = 1; i < argc; i++) {
@@ -659,13 +659,14 @@ main(int argc, char *argv[])
          printf("        (default: %d for non-SSL or %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
          printf("-q    = Set compression quality [1-100] (default: %d)\n", DEFAULTQUAL);
          printf("-samp = Set YUV subsampling [411, 422, or 444] (default: %s)\n", DEFAULTSUBSAMP==RR_444?"444":(DEFAULTSUBSAMP==RR_422?"422":"411"));
-         printf("-s    = Communicate with the client using an SSL tunnel\n");
+         printf("-ssl  = Communicate with the client using an SSL tunnel\n");
          printf("-sp   = Turn on frame spoiling\n");
          printf("-info = Print OpenGL info\n");
          printf("\n");
          return 0;
       }
    }
+   if(port==0) port=ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 
 
    /****************************** RRlib ******************************/
