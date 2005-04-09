@@ -566,9 +566,9 @@ event_loop(Display *dpy, Window win)
             printf("End of file.  Restarting\n");
             lseek(movfile, 0, SEEK_SET);  continue;
          }
-         if(h.winw!=playbackwidth || h.winh!=playbackheight) {
-            XResizeWindow(dpy, win, h.winw, h.winh);
-            playbackwidth=h.winw;  playbackheight=h.winh;
+         if(h.framew!=playbackwidth || h.frameh!=playbackheight) {
+            XResizeWindow(dpy, win, h.framew, h.frameh);
+            playbackwidth=h.framew;  playbackheight=h.frameh;
          }
          if ((bits=(unsigned char *)realloc(bits, h.size))==NULL) {
             printf("Error: Could not allocate buffer\n");  _die(1);
