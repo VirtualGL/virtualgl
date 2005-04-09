@@ -33,9 +33,6 @@
 	getconfig("RR"envvar, val);  \
 	getconfig("VGL_"envvar, val);}
 
-// Compression types
-enum {RRCOMP_NONE=0, RRCOMP_MJPEG};
-
 class FakerConfig
 {
 	public:
@@ -60,6 +57,7 @@ class FakerConfig
 			glp=false;
 			usewindow=false;
 			sync=false;
+			mt=false;
 
 			// Fetch values from environment
 			getconfigstr("GLLIB", gllib);
@@ -110,6 +108,7 @@ class FakerConfig
 			getconfigbool("WINDOW", usewindow);
 			if(glp) usewindow=false;
 			getconfigbool("SYNC", sync);
+			getconfigbool("MT", sync);
 		}
 
 		void setloqual(void)
@@ -141,6 +140,7 @@ class FakerConfig
 		bool glp;
 		bool usewindow;
 		bool sync;
+		bool mt;
 
 	private:
 
