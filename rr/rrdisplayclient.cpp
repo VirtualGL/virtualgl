@@ -18,21 +18,17 @@
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
 		h.winid=byteswap(h.winid);  \
-		h.winw=byteswap16(h.winw);  \
-		h.winh=byteswap16(h.winh);  \
-		h.bmpw=byteswap16(h.bmpw);  \
-		h.bmph=byteswap16(h.bmph);  \
-		h.bmpx=byteswap16(h.bmpx);  \
-		h.bmpy=byteswap16(h.bmpy);}}
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);}}
 
 void rrdisplayclient::run(void)
 {
 	rrframe *lastb=NULL;
-	int np=1, i;
-
-	char *temp=NULL;
-	if((temp=getenv("VGL_MT"))!=NULL && strlen(temp)>0 && !strncmp(temp, "1", 1))
-		np=numprocs();
+	int np=mt? numprocs():1, i;
 
 	try {
 
@@ -68,7 +64,7 @@ void rrdisplayclient::run(void)
 
 		char cts=0;
 		if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
-		prof_total.endframe(b->h.bmpw*b->h.bmph, 0, 1);
+		prof_total.endframe(b->h.width*b->h.height, 0, 1);
 		prof_total.startframe();
 
 		lastb=b;
@@ -95,9 +91,9 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
 	bmpmutex.unlock();
 	rrframeheader hdr;
-	hdr.bmph=hdr.winh=h;
-	hdr.bmpw=hdr.winw=w;
-	hdr.bmpx=hdr.bmpy=0;
+	hdr.height=hdr.frameh=h;
+	hdr.width=hdr.framew=w;
+	hdr.x=hdr.y=0;
 	b->init(&hdr, ps);
 	return b;
 }
@@ -114,6 +110,21 @@ void rrdisplayclient::sendframe(rrframe *bmp)
 	q.add((void *)bmp);
 }
 
+void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *bits)
+{
+	rrframeheader h=horig;
+	h.eof=0;
+	endianize(h);
+	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+	if(sd) sd->send((char *)bits, horig.size);
+	h=horig;
+	h.eof=1;
+	endianize(h);
+	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+	char cts=0;
+	if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
+}
+
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
 	int endline, startline;
@@ -122,7 +133,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 	if(!b) return;
 	if(b->flags&RRBMP_BOTTOMUP) bu=true;
 
-	int nstrips=(b->h.bmph+STRIPH-1)/STRIPH;
+	int nstrips=(b->h.height+STRIPH-1)/STRIPH;
 
 	for(int strip=0; strip<nstrips; strip++)
 	{
@@ -130,20 +141,20 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		int i=strip*STRIPH;
 		if(bu)
 		{
-			startline=b->h.bmph-i-STRIPH;
+			startline=b->h.height-i-STRIPH;
 			if(startline<0) startline=0;
-			endline=startline+min(b->h.bmph-i, STRIPH);
+			endline=startline+min(b->h.height-i, STRIPH);
 		}
 		else
 		{
 			startline=i;
-			endline=startline+min(b->h.bmph-i, STRIPH);
+			endline=startline+min(b->h.height-i, STRIPH);
 		}
 		if(b->stripequals(lastb, startline, endline)) continue;
 		rrframe *rrb=b->getstrip(startline, endline);
 		prof_comp.startframe();
 		j=*rrb;
-		prof_comp.endframe(j.h.bmpw*j.h.bmph, j.h.size, 0);
+		prof_comp.endframe(j.h.width*j.h.height, j.h.size, 0);
 		delete rrb;
 		j.h.eof=0;
 		unsigned int size=j.h.size;
