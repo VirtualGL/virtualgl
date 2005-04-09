@@ -1,12 +1,13 @@
-all: rr mesademos diags
+all: rr mesademos diags samples
 ALL: dist mesademos
 
-.PHONY: rr util jpeg mesademos diags clean dist
+.PHONY: rr util jpeg mesademos diags clean dist samples
 
 rr: util jpeg
 jpeg: util
+samples: rr
 
-rr util jpeg mesademos diags:
+rr util jpeg mesademos diags samples:
 	cd $@; $(MAKE); cd ..
 
 clean:
@@ -15,6 +16,7 @@ clean:
 	cd jpeg; $(MAKE) clean; cd ..; \
 	cd mesademos; $(MAKE) clean; cd ..; \
 	cd diags; $(MAKE) clean; cd ..
+	cd samples; $(MAKE) clean; cd ..; \
 
 TOPDIR=.
 include Makerules
