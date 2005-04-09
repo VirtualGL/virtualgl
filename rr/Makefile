@@ -71,7 +71,7 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o
 
-OBJS = $(COBJS) $(FOBJS) $(TOBJS)
+OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
@@ -79,6 +79,7 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrframeut \
 
 TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
+          $(LDIR)/librr.$(SHEXT) \
           $(EDIR)/vglclient \
           $(UNITTESTS)
 
@@ -104,6 +105,9 @@ clean:
 
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK)
+
+$(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
 
 ifeq ($(subplatform), 64)
 $(EDIR)/vglrun64: rrlaunch64
