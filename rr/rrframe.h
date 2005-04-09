@@ -25,29 +25,7 @@
 #include "rrutil.h"
 #include <string.h>
 
-static int jpegsub[RR_SUBSAMP]={HPJ_444, HPJ_422, HPJ_411};
-
-// Header contained in all image structures
-#pragma pack(1)
-typedef struct _rrframeheader
-{
-	unsigned int size;       // For JPEG images, this contains the size (in bytes)
-                           // of the compressed images.  For uncompressed images,
-                           // it should be 0.
-	unsigned int winid;      // Usually the X-Window ID, but can be used for other purposes
-	unsigned short winw;     // The width of the source window
-	unsigned short winh;     // The height of the source window
-	unsigned short bmpw;     // The width of the source bitmap
-	unsigned short bmph;     // The height of the source bitmap
-	unsigned short bmpx;     // The X offset of the bitmap within the window
-	unsigned short bmpy;     // The Y offset of the bitmap within the window
-	unsigned char qual;      // Quality of destination JPEG (0-100)
-	unsigned char subsamp;   // Subsampling of destination JPEG
-                           // (RR_411, RR_422, or RR_444)
-	unsigned char eof;       // 1 if this is the last (or only) packet in the frame
-	unsigned char dpynum;    // Display number on the client machine
-} rrframeheader;
-#pragma pack()
+static int jpegsub[RR_SUBSAMPOPT]={HPJ_444, HPJ_422, HPJ_411};
 
 // Bitmap flags
 #define RRBMP_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
@@ -76,15 +54,15 @@ class rrframe
 	{
 		if(!hnew) throw(rrerror("rrframe::init", "Invalid argument"));
 		flags=fl;
-		hnew->size=hnew->winw*hnew->winh*ps;
+		hnew->size=hnew->framew*hnew->frameh*ps;
 		checkheader(hnew);
 		if(ps<3 || ps>4) _throw("Only true color bitmaps are supported");
-		if(hnew->winw!=h.winw || hnew->winh!=h.winh || pixelsize!=ps
+		if(hnew->framew!=h.framew || hnew->frameh!=h.frameh || pixelsize!=ps
 		|| !bits)
 		{
 			if(bits) delete [] bits;
-			errifnot(bits=new unsigned char[hnew->winw*hnew->winh*ps+1]);
-			pixelsize=ps;  pitch=ps*hnew->winw;
+			errifnot(bits=new unsigned char[hnew->framew*hnew->frameh*ps+1]);
+			pixelsize=ps;  pitch=ps*hnew->framew;
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
@@ -93,37 +71,37 @@ class rrframe
 	{
 		rrframe *f;
 		if(!bits || !pitch || !pixelsize) _throw("Frame not initialized");
-		if(startline<0 || startline>h.bmph-1 || endline<=0 || endline>h.bmph)
+		if(startline<0 || startline>h.height-1 || endline<=0 || endline>h.height)
 			_throw("Invalid argument");
 		errifnot(f=new rrframe(false));
 		f->h=h;
-		f->h.bmph=endline-startline;
-		f->h.bmpy+=startline;
+		f->h.height=endline-startline;
+		f->h.y+=startline;
 		f->pixelsize=pixelsize;
 		f->flags=flags;
 		f->pitch=pitch;
 		bool bu=(flags&RRBMP_BOTTOMUP);
-		f->bits=&bits[pitch*(bu? h.bmph-endline:startline)];
+		f->bits=&bits[pitch*(bu? h.height-endline:startline)];
 		return f;
 	}
 
 	void zero(void)
 	{
-		if(!h.winh || !pitch) return;
-		memset(bits, 0, pitch*h.winh);
+		if(!h.frameh || !pitch) return;
+		memset(bits, 0, pitch*h.frameh);
 	}
 
 	bool stripequals(rrframe *last, int startline, int endline)
 	{
 		bool bu=(flags&RRBMP_BOTTOMUP);
-		if(last && h.bmpw==last->h.bmpw && h.bmph==last->h.bmph
-		&& h.winw==last->h.winw && h.winh==last->h.winh
+		if(last && h.width==last->h.width && h.height==last->h.height
+		&& h.framew==last->h.framew && h.frameh==last->h.frameh
 		&& h.qual==last->h.qual && h.subsamp==last->h.subsamp
 		&& pixelsize==last->pixelsize && h.winid==last->h.winid
 		&& h.dpynum==last->h.dpynum && bits && last->pitch==pitch
-		&& startline>=0 && startline<=h.bmph-1 && endline>0 && endline<=h.bmph
-		&& last->bits && !memcmp(&bits[pitch*(bu? h.bmph-endline:startline)],
-			&last->bits[pitch*(bu? h.bmph-endline:startline)],
+		&& startline>=0 && startline<=h.height-1 && endline>0 && endline<=h.height
+		&& last->bits && !memcmp(&bits[pitch*(bu? h.height-endline:startline)],
+			&last->bits[pitch*(bu? h.height-endline:startline)],
 			pitch*(endline-startline))) return true;
 		return false;
 	}
@@ -140,7 +118,7 @@ class rrframe
 			if(f.bits)
 			{
 				init(&f.h, f.pixelsize);
-				memcpy(bits, f.bits, f.h.winw*f.h.winh*f.pixelsize);
+				memcpy(bits, f.bits, f.h.framew*f.h.frameh*f.pixelsize);
 			}
 		}
 		return *this;
@@ -157,12 +135,12 @@ class rrframe
 		rrout.print("h->size    = %lu\n", hdr->size);
 		rrout.print("h->winid   = 0x%.8x\n", hdr->winid);
 		rrout.print("h->dpynum  = %d\n", hdr->dpynum);
-		rrout.print("h->winw    = %d\n", hdr->winw);
-		rrout.print("h->winh    = %d\n", hdr->winh);
-		rrout.print("h->bmpw    = %d\n", hdr->bmpw);
-		rrout.print("h->bmph    = %d\n", hdr->bmph);
-		rrout.print("h->bmpx    = %d\n", hdr->bmpx);
-		rrout.print("h->bmpy    = %d\n", hdr->bmpy);
+		rrout.print("h->framew  = %d\n", hdr->framew);
+		rrout.print("h->frameh  = %d\n", hdr->frameh);
+		rrout.print("h->width   = %d\n", hdr->width);
+		rrout.print("h->height  = %d\n", hdr->height);
+		rrout.print("h->x       = %d\n", hdr->x);
+		rrout.print("h->y       = %d\n", hdr->y);
 		rrout.print("h->qual    = %d\n", hdr->qual);
 		rrout.print("h->subsamp = %d\n", hdr->subsamp);
 		rrout.print("h->eof     = %d\n", hdr->eof);
@@ -170,8 +148,8 @@ class rrframe
 
 	void checkheader(rrframeheader *hdr)
 	{
-		if(!hdr || hdr->winw<1 || hdr->winh<1 || hdr->bmpw<1 || hdr->bmph<1
-		|| hdr->bmpx+hdr->bmpw>hdr->winw || hdr->bmpy+hdr->bmph>hdr->winh)
+		if(!hdr || hdr->framew<1 || hdr->frameh<1 || hdr->width<1 || hdr->height<1
+		|| hdr->x+hdr->width>hdr->framew || hdr->y+hdr->height>hdr->frameh)
 			throw(rrerror("rrframe::checkheader", "Invalid header"));
 	}
 
@@ -203,13 +181,13 @@ class rrjpeg : public rrframe
 		int hpjflags=0;
 		if(!b.bits) _throw("Bitmap not initialized");
 		if(b.pixelsize<3 || b.pixelsize>4) _throw("Only true color bitmaps are supported");
-		if(b.h.qual>100 || b.h.subsamp>RR_SUBSAMP-1)
+		if(b.h.qual>100 || b.h.subsamp>RR_SUBSAMPOPT-1)
 			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(&b.h);
 		if(b.flags&RRBMP_BOTTOMUP) hpjflags|=HPJ_BOTTOMUP;
 		if(b.flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
 		unsigned long size;
-		hpj(hpjCompress(hpjhnd, b.bits, b.h.bmpw, b.pitch, b.h.bmph, b.pixelsize,
+		hpj(hpjCompress(hpjhnd, b.bits, b.h.width, b.pitch, b.h.height, b.pixelsize,
 			bits, &size, jpegsub[b.h.subsamp], b.h.qual, hpjflags));
 		h.size=(unsigned int)size;
 		return *this;
@@ -223,10 +201,10 @@ class rrjpeg : public rrframe
 	void init(rrframeheader *hnew)
 	{
 		checkheader(hnew);
-		if(hnew->winw!=h.winw || hnew->winh!=h.winh || !bits)
+		if(hnew->framew!=h.framew || hnew->frameh!=h.frameh || !bits)
 		{
 			if(bits) delete [] bits;
-			errifnot(bits=new unsigned char[HPJBUFSIZE(hnew->winw, hnew->winh)]);
+			errifnot(bits=new unsigned char[HPJBUFSIZE(hnew->framew, hnew->frameh)]);
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
@@ -275,15 +253,15 @@ class rrfb : public rrframe
 	void init(rrframeheader *hnew)
 	{
 		checkheader(hnew);
-		fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
-		if(hnew->winw>fb.width || hnew->winh>fb.height)
+		fbx(fbx_init(&fb, wh, hnew->framew, hnew->frameh, 1));
+		if(hnew->framew>fb.width || hnew->frameh>fb.height)
 		{
 			XSync(wh.dpy, False);
-			fbx(fbx_init(&fb, wh, hnew->winw, hnew->winh, 1));
+			fbx(fbx_init(&fb, wh, hnew->framew, hnew->frameh, 1));
 		}
 		memcpy(&h, hnew, sizeof(rrframeheader));
-		if(h.winw>fb.width) h.winw=fb.width;
-		if(h.winh>fb.height) h.winh=fb.height;
+		if(h.framew>fb.width) h.framew=fb.width;
+		if(h.frameh>fb.height) h.frameh=fb.height;
 		pixelsize=fbx_ps[fb.format];  pitch=fb.pitch;  bits=(unsigned char *)fb.bits;
 		flags=0;
 		if(fbx_bgr[fb.format]) flags|=RRBMP_BGR;
@@ -299,16 +277,16 @@ class rrfb : public rrframe
 		if(!fb.xi) _throw("Bitmap not initialized");
 		if(fbx_bgr[fb.format]) hpjflags|=HPJ_BGR;
 		if(fbx_alphafirst[fb.format]) hpjflags|=HPJ_ALPHAFIRST;
-		int bmpw=min(f.h.bmpw, fb.width-f.h.bmpx);
-		int bmph=min(f.h.bmph, fb.height-f.h.bmpy);
-		if(bmpw>0 && bmph>0 && f.h.bmpw<=bmpw && f.h.bmph<=bmph)
+		int width=min(f.h.width, fb.width-f.h.x);
+		int height=min(f.h.height, fb.height-f.h.y);
+		if(width>0 && height>0 && f.h.width<=width && f.h.height<=height)
 		{
 			if(!hpjhnd)
 			{
 				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
 			}
-			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.pitch*f.h.bmpy+f.h.bmpx*fbx_ps[fb.format]],
-				bmpw, fb.pitch, bmph, fbx_ps[fb.format], hpjflags));
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&fb.bits[fb.pitch*f.h.y+f.h.x*fbx_ps[fb.format]],
+				width, fb.pitch, height, fbx_ps[fb.format], hpjflags));
 		}
 		return *this;
 	}
@@ -327,27 +305,27 @@ class rrfb : public rrframe
 
 	void draw(void)
 	{
-		int _w=h.bmpw, _h=h.bmph;
+		int _w=h.width, _h=h.height;
 		XWindowAttributes xwa;
 		if(!XGetWindowAttributes(wh.dpy, wh.win, &xwa))
 		{
 			rrout.print("Failed to get window attributes\n");
 			return;
 		}
-		if(h.bmpx+h.bmpw>xwa.width || h.bmpy+h.bmph>xwa.height)
+		if(h.x+h.width>xwa.width || h.y+h.height>xwa.height)
 		{
 			rrout.print("WARNING: bitmap (%d,%d) at (%d,%d) extends beyond window (%d,%d)\n",
-				h.bmpw, h.bmph, h.bmpx, h.bmpy, xwa.width, xwa.height);
-			_w=min(h.bmpw, xwa.width-h.bmpx);
-			_h=min(h.bmph, xwa.height-h.bmpy);
+				h.width, h.height, h.x, h.y, xwa.width, xwa.height);
+			_w=min(h.width, xwa.width-h.x);
+			_h=min(h.height, xwa.height-h.y);
 		}
-		if(h.bmpx+h.bmpw<=fb.width && h.bmpy+h.bmph<=fb.height)
-		fbx(fbx_write(&fb, h.bmpx, h.bmpy, h.bmpx, h.bmpy, _w, _h));
+		if(h.x+h.width<=fb.width && h.y+h.height<=fb.height)
+		fbx(fbx_write(&fb, h.x, h.y, h.x, h.y, _w, _h));
 	}
 
 	void drawstrip(int startline, int endline)
 	{
-		if(startline<0 || startline>h.winh-1 || endline<0 || endline>h.winh)
+		if(startline<0 || startline>h.frameh-1 || endline<0 || endline>h.frameh)
 			return;
 		if(flags&RRBMP_BOTTOMUP)
 		{

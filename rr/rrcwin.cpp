@@ -79,16 +79,16 @@ void rrcwin::run(void)
 			pb.startframe();
 			b->init(&j->h);
 			b->redraw();
-			pb.endframe(b->h.winw*b->h.winh, 0, 1);
-			pt.endframe(b->h.winw*b->h.winh, 0, 1);
+			pb.endframe(b->h.framew*b->h.frameh, 0, 1);
+			pt.endframe(b->h.framew*b->h.frameh, 0, 1);
 			pt.startframe();
 		}
 		else
 		{
 			pd.startframe();
 			*b=*j;
-			pd.endframe(j->h.bmpw*j->h.bmph, j->h.size, (double)(j->h.bmpw*j->h.bmph)/
-				(double)(j->h.winw*j->h.winh));
+			pd.endframe(j->h.width*j->h.height, j->h.size, (double)(j->h.width*j->h.height)/
+				(double)(j->h.framew*j->h.frameh));
 		}
 	}
 

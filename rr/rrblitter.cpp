@@ -30,7 +30,7 @@ void rrblitter::run(void)
 		ready.unlock();
 		prof_blit.startframe();
 		b->redraw();
-		prof_blit.endframe(b->h.bmpw*b->h.bmph, 0, 1);
+		prof_blit.endframe(b->h.width*b->h.height, 0, 1);
 //		lastb=b;
 	}
 
@@ -48,9 +48,9 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 	bmpmutex.unlock();
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
-	hdr.bmph=hdr.winh=h;
-	hdr.bmpw=hdr.winw=w;
-	hdr.bmpx=hdr.bmpy=0;
+	hdr.height=hdr.frameh=h;
+	hdr.width=hdr.framew=w;
+	hdr.x=hdr.y=0;
 	b->init(&hdr);
 	return b;
 }
@@ -68,7 +68,7 @@ void rrblitter::sendframe(rrfb *bmp, bool sync)
 	{
 		prof_blit.startframe();
 		blitdiff(bmp, _lastb);
-		prof_blit.endframe(bmp->h.bmpw*bmp->h.bmph, 0, 1);
+		prof_blit.endframe(bmp->h.width*bmp->h.height, 0, 1);
 		_lastb=bmp;
 		ready.unlock();
 	}
@@ -81,20 +81,20 @@ void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
 	bool bu=false;
 	if(b->flags&RRBMP_BOTTOMUP) bu=true;
 
-	for(i=0; i<b->h.bmph; i+=STRIPH)
+	for(i=0; i<b->h.height; i+=STRIPH)
 	{
 		if(bu)
 		{
-			startline=b->h.bmph-i-STRIPH;
+			startline=b->h.height-i-STRIPH;
 			if(startline<0) startline=0;
-			endline=startline+min(b->h.bmph-i, STRIPH);
-			if(b->h.bmph-i<2*STRIPH) {startline=0;  i+=STRIPH;}
+			endline=startline+min(b->h.height-i, STRIPH);
+			if(b->h.height-i<2*STRIPH) {startline=0;  i+=STRIPH;}
 		}
 		else
 		{
 			startline=i;
-			endline=startline+min(b->h.bmph-i, STRIPH);
-			if(b->h.bmph-i<2*STRIPH) {endline=b->h.bmph;  i+=STRIPH;}
+			endline=startline+min(b->h.height-i, STRIPH);
+			if(b->h.height-i<2*STRIPH) {endline=b->h.height;  i+=STRIPH;}
 		}
 		if(b->stripequals(lastb, startline, endline)) continue;
 		b->drawstrip(startline, endline);  needsync=true;

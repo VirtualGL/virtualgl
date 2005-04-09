@@ -356,10 +356,10 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
 			}
 			b->h.winid=win;
-			b->h.winw=b->h.bmpw;
-			b->h.winh=b->h.bmph;
-			b->h.bmpx=0;
-			b->h.bmpy=0;
+			b->h.framew=b->h.width;
+			b->h.frameh=b->h.height;
+			b->h.x=0;
+			b->h.y=0;
 			b->h.qual=fconfig.currentqual;
 			b->h.subsamp=fconfig.currentsubsamp;
 			b->flags|=RRBMP_BOTTOMUP;
@@ -392,7 +392,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				format=GL_BGRA_EXT;  bits=b->bits+1;
 				#endif
 			}
-			readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, bits, drawbuf, true);
+			readpixels(0, 0, min(pbw, b->h.framew), b->pitch, min(pbh, b->h.frameh), format, bits, drawbuf, true);
 			blitter->sendframe(b, sync);
 			break;
 		}

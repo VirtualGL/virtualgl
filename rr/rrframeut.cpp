@@ -77,7 +77,7 @@ class blitter : public Runnable
 				b->waituntilready();  if(deadyet) break;
 				timer.start();
 				b->redraw();
-				mpixels+=(double)(b->h.bmpw*b->h.bmph)/1000000.;
+				mpixels+=(double)(b->h.width*b->h.height)/1000000.;
 				totaltime+=timer.elapsed();
 				b->complete();
 			}
@@ -145,7 +145,7 @@ class decompressor : public Runnable
 				j.waituntilready();  if(deadyet) break;
 				b=bobj->get();  if(deadyet) break;
 				XWindowAttributes xwa;
-				int w=j.h.bmpw, h=j.h.bmph;
+				int w=j.h.width, h=j.h.height;
 				XGetWindowAttributes(dpy, win, &xwa);
 				if(w!=xwa.width || h!=xwa.height)
 				{
@@ -199,9 +199,9 @@ class compressor : public Runnable
 		rrframe &f=bmp[indx];  indx=(indx+1)%NB;
 		if(t) t->checkerror();  f.waituntilcomplete();  if(t) t->checkerror();
 		rrframeheader hdr;
-		hdr.winw=hdr.bmpw=w+BORDER;
-		hdr.winh=hdr.bmph=h+BORDER;
-		hdr.bmpx=hdr.bmpy=BORDER;
+		hdr.framew=hdr.width=w+BORDER;
+		hdr.frameh=hdr.height=h+BORDER;
+		hdr.x=hdr.y=BORDER;
 		hdr.qual=80;
 		hdr.subsamp=RR_422;
 		f.init(&hdr, 3);
@@ -283,9 +283,9 @@ class rrframeut
 	void initbmp(rrframe &f)
 	{
 		int i, j, pitch=f.pitch;
-		for(i=0; i<f.h.bmph; i++)
+		for(i=0; i<f.h.height; i++)
 		{
-			for(j=0; j<f.h.bmpw; j++)
+			for(j=0; j<f.h.width; j++)
 			{
 				f.bits[i*pitch+j*f.pixelsize]=i%256;
 				f.bits[i*pitch+j*f.pixelsize+1]=j%256;

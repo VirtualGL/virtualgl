@@ -11,23 +11,18 @@
  * wxWindows Library License for more details.
  */
 
-#ifdef _WIN32
-#include <io.h>
-#define access(a,b) _access(a,b)
-#define F_OK 0
-#endif
 #include "rrdisplayserver.h"
 
 #define endianize(h) { \
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
 		h.winid=byteswap(h.winid);  \
-		h.winw=byteswap16(h.winw);  \
-		h.winh=byteswap16(h.winh);  \
-		h.bmpw=byteswap16(h.bmpw);  \
-		h.bmph=byteswap16(h.bmph);  \
-		h.bmpx=byteswap16(h.bmpx);  \
-		h.bmpy=byteswap16(h.bmpy);}}
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);}}
 
 rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl) :
 	listensd(NULL), t(NULL), deadyet(false)
