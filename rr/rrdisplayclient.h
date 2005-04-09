@@ -29,8 +29,8 @@ class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(char *servername, unsigned short port, bool dossl)
-		: bmpi(0), t(NULL), deadyet(false), sd(NULL)
+	rrdisplayclient(char *servername, unsigned short port, bool dossl, bool domt=false)
+		: sd(NULL), bmpi(0), t(NULL), deadyet(false), mt(domt)
 	{
 		if(servername && port>0)
 		{
@@ -52,7 +52,11 @@ class rrdisplayclient : public Runnable
 	rrframe *getbitmap(int, int, int);
 	bool frameready(void);
 	void sendframe(rrframe *);
+	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
+	void release(void) {ready.unlock();}
+
+	rrsocket *sd;
 
 	private:
 
@@ -61,8 +65,8 @@ class rrdisplayclient : public Runnable
 	rrmutex ready;
 	genericQ q;
 	Thread *t;  bool deadyet;
-	rrsocket *sd;
 	rrprofiler prof_total;
+	bool mt;
 };
 
 class rrcompressor : public Runnable
