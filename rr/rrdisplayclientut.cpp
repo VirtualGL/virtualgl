@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
 	int qual, subsamp;
 	if(argc<5 || (qual=atoi(argv[3]))<0 || qual>100 || (subsamp=atoi(argv[2]))<0
-		|| subsamp>RR_SUBSAMP)
+		|| subsamp>RR_SUBSAMPOPT)
 	{
 		printf("USAGE: %s <bitmap file> <subsamp> <qual> <server> [striph] [-ssl]\n", argv[0]);
 		printf("subsamp = 0=none, 1=4:2:2, 2=4:1:1\n");

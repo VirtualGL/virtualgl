@@ -71,7 +71,7 @@ class dpyhash : public _dpyhash
 			if((ptr=strchr(dpystring, ':'))!=NULL)
 				*ptr='\0';
 			if(!strlen(dpystring)) {free(dpystring);  dpystring=strdup("localhost");}
-			errifnot(rrdpy=new rrdisplayclient(dpystring, fconfig.port, fconfig.ssl));
+			errifnot(rrdpy=new rrdisplayclient(dpystring, fconfig.port, fconfig.ssl, fconfig.mt));
 			free(dpystring);
 			return rrdpy;
 		}
