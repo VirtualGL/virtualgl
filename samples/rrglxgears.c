@@ -41,6 +41,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/gl.h>
@@ -99,18 +101,27 @@ static GLfloat angle = 0.0;
 #define DEFAULTSERVERDPY ":0.0"
 #define DEFAULTQUAL 95
 #define DEFAULTSUBSAMP RR_444
+#define DEFAULTMOVFILE "glxgears.vgl"
 
 RRDisplay rrdpy=0;
 Display *serverdpy=NULL;
 GLXPbuffer pbuffer=0;
 GLXFBConfig fbcfg=0;
 int pbwidth=-1, pbheight=-1;
-int spoil=0, ssl=0, qual=DEFAULTQUAL, subsamp=DEFAULTSUBSAMP, dpynum=0;
+int spoil=0, ssl=0, qual=DEFAULTQUAL, subsamp=DEFAULTSUBSAMP, dpynum=0,
+	multithread=0, record=0, playback=0;
 GLXContext ctx=0;
+int movfile=-1;
 
 #define rrtrap(f) { \
    if((f)==RR_ERROR) { \
       printf("%s--\n%s\n", RRErrorLocation(), RRErrorString()); \
+      _die(1); \
+   }}
+
+#define unixtrap(f) { \
+   if((f)==-1) { \
+      printf("Error: %s\n", strerror(errno)); \
       _die(1); \
    }}
 
@@ -498,7 +509,8 @@ make_window( Display *dpy, const char *name,
 static void
 event_loop(Display *dpy, Window win)
 {
-   int ready=0;  RRFrame frame;
+   int ready=0;  RRFrame frame;  unsigned char *bits = NULL;
+   int playbackwidth=-1, playbackheight=-1;
 
    while (1) {
       while (XPending(dpy) > 0) {
@@ -540,6 +552,41 @@ event_loop(Display *dpy, Window win)
          }
       }
 
+
+      /****************************** RRlib ******************************/
+
+      /* Play back the stored movie */
+
+      if (playback) {
+         int bytesread;  rrframeheader h;
+         if(movfile==-1)
+            unixtrap(movfile=open(DEFAULTMOVFILE, O_RDONLY));
+         unixtrap(bytesread=read(movfile, &h, sizeof(rrframeheader)));
+         if(bytesread!=sizeof(rrframeheader)) {
+            printf("End of file.  Restarting\n");
+            lseek(movfile, 0, SEEK_SET);  continue;
+         }
+         if(h.winw!=playbackwidth || h.winh!=playbackheight) {
+            XResizeWindow(dpy, win, h.winw, h.winh);
+            playbackwidth=h.winw;  playbackheight=h.winh;
+         }
+         if ((bits=(unsigned char *)realloc(bits, h.size))==NULL) {
+            printf("Error: Could not allocate buffer\n");  _die(1);
+         }
+         unixtrap(bytesread=read(movfile, bits, h.size));
+         if(bytesread!=h.size) {
+            printf("End of file.  Restarting\n");
+            lseek(movfile, 0, SEEK_SET);  continue;
+         }
+         h.dpynum=dpynum;
+         h.winid=win;
+         rrtrap(RRSendRawFrame(rrdpy, &h, bits));
+         goto benchmark;
+      }
+
+      /**************************** end RRlib ****************************/
+
+
       /* next frame */
       angle += 2.0;
 
@@ -559,15 +606,36 @@ event_loop(Display *dpy, Window win)
          glReadPixels(0, 0, pbwidth, pbheight, GL_RGB, GL_UNSIGNED_BYTE,
             frame.bits);
 
+         frame.h.qual=qual;
+         frame.h.subsamp=subsamp;
+
+      /* Use RRCompressFrame() to compress the frame for storage.  We'll
+         go ahead and send it now as well, just so we can monitor the record
+         process. */
+
+         if (record) {
+            int byteswritten;
+            rrtrap(RRCompressFrame(rrdpy, &frame));
+            if(movfile==-1)
+               unixtrap(movfile=open(DEFAULTMOVFILE, O_WRONLY|O_CREAT|O_TRUNC,
+                  0666));
+            unixtrap(byteswritten=write(movfile, &frame.h, sizeof(rrframeheader)));
+            if(byteswritten!=sizeof(rrframeheader)) {
+               printf("Error: write truncated\n");  _die(1);
+            }
+            unixtrap(byteswritten=write(movfile, frame.bits, frame.h.size));
+            if(byteswritten!=frame.h.size) {
+               printf("Error: write truncated\n");  _die(1);
+            }
+         }
+
       /* Populate the header, then call RRSendFrame to add the frame to
-         the outgoing queue.  The frame cannot be used again after it is
-         sent. */
+         the outgoing queue (or send it directly if it has already been
+         compressed.)  Sending the frame releases it as well. */
 
          frame.h.dpynum=dpynum;
          frame.h.winid=win;
-         frame.h.qual=qual;
-         frame.h.subsamp=subsamp;
-         RRSendFrame(rrdpy, &frame);
+         rrtrap(RRSendFrame(rrdpy, &frame));
       }
 
       /**************************** end RRlib ****************************/
@@ -575,6 +643,7 @@ event_loop(Display *dpy, Window win)
 
       glXSwapBuffers(serverdpy, pbuffer);
 
+      benchmark:
       /* calc framerate */
       {
          static int t0 = -1;
@@ -629,6 +698,15 @@ main(int argc, char *argv[])
       else if (strncasecmp(argv[i], "-sp", 3) == 0) {
          spoil = 1;
       }
+      else if (strncasecmp(argv[i], "-mt", 3) == 0) {
+         multithread = 1;
+      }
+      else if (strncasecmp(argv[i], "-play", 5) == 0) {
+         playback = 1;
+      }
+      else if (strncasecmp(argv[i], "-rec", 4) == 0) {
+         record = 1;
+      }
       else if (strncasecmp(argv[i], "-p", 2) == 0 && i+1<argc) {
          port = atoi(argv[i+1]);
          i++;
@@ -651,7 +729,8 @@ main(int argc, char *argv[])
          || strncasecmp(argv[i], "-\?", 2) == 0) {
          printf("\nUSAGE: %s\n", argv[0]);
          printf("       [-d <hostname:x.x>] [-cl <hostname:x.x>] [-p <xxxx>]\n");
-         printf("       [-q <1-100>] [-samp <411|422|444>] [-sp] [-ssl] [-info]\n\n");
+         printf("       [-q <1-100>] [-samp <411|422|444>] [-sp] [-ssl] [-mt]\n");
+         printf("       [-rec] [-play] [-info]\n\n");
          printf("-d    = Set display where 3D rendering will occur (default: %s)\n", DEFAULTSERVERDPY);
          printf("-cl   = Set display where the client is running\n");
          printf("        (default: read from DISPLAY environment)\n");
@@ -659,8 +738,11 @@ main(int argc, char *argv[])
          printf("        (default: %d for non-SSL or %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
          printf("-q    = Set compression quality [1-100] (default: %d)\n", DEFAULTQUAL);
          printf("-samp = Set YUV subsampling [411, 422, or 444] (default: %s)\n", DEFAULTSUBSAMP==RR_444?"444":(DEFAULTSUBSAMP==RR_422?"422":"411"));
-         printf("-ssl  = Communicate with the client using an SSL tunnel\n");
          printf("-sp   = Turn on frame spoiling\n");
+         printf("-ssl  = Communicate with the client using an SSL tunnel\n");
+         printf("-mt   = Enable multi-threaded compression\n");
+         printf("-rec  = Record movie (will be stored in a file named %s)\n", DEFAULTMOVFILE);
+         printf("-play = Playback movie (from file %s)\n", DEFAULTMOVFILE);
          printf("-info = Print OpenGL info\n");
          printf("\n");
          return 0;
@@ -690,9 +772,12 @@ main(int argc, char *argv[])
    /* Open a connection to the VirtualGL client, which is usually
       running on the same machine as the client X display.  Store
       the X display number for further use (dpynum is obtained by
-      parsing clidpyName) */
+      parsing clidpyName)
 
-   rrdpy = RROpenDisplay(clidpyName, port, ssl, &dpynum);
+      NOTE: clidpyName can be NULL if all you want to do is compress
+      images without sending them. */
+
+   rrdpy = RROpenDisplay(clidpyName, port, ssl, multithread, &dpynum);
    if (!rrdpy) {
       printf("Error: could not open connection to client\n");
       printf("%s--\n%s\n", RRErrorLocation(), RRErrorString());
