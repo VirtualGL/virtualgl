@@ -35,7 +35,11 @@ rrfb *b=NULL;
 //		lastb=b;
 	}
 
-	} catch(...) {if(b) b->complete();  throw;}
+	} catch(rrerror &e)
+	{
+		if(t) t->seterror(e);
+		if(b) b->complete();  throw;
+	}
 }
 
 rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
