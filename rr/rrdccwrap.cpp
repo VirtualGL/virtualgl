@@ -136,9 +136,9 @@ DLLEXPORT int DLLCALL
 		if(!j) _throw("Could not allocate compressed image structure");
 		f->h=frame->h;
 		*j=*f;
+		rrc->release(f);
 		setframe(frame, j);
 		frame->compressed=1;
-		rrc->release();
 		return RR_SUCCESS;
 	}
 	_catch();
@@ -153,7 +153,7 @@ DLLEXPORT int DLLCALL
 	try
 	{
 		if(frame->compressed) {if(j) delete j;}
-		else rrc->release();
+		else rrc->release(f);
 		memset(frame, 0, sizeof(RRFrame));
 		return RR_SUCCESS;
 	}
