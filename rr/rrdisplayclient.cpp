@@ -14,20 +14,10 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 
-#define endianize(h) { \
-	if(!littleendian()) {  \
-		h.size=byteswap(h.size);  \
-		h.winid=byteswap(h.winid);  \
-		h.framew=byteswap16(h.framew);  \
-		h.frameh=byteswap16(h.frameh);  \
-		h.width=byteswap16(h.width);  \
-		h.height=byteswap16(h.height);  \
-		h.x=byteswap16(h.x);  \
-		h.y=byteswap16(h.y);}}
-
 void rrdisplayclient::run(void)
 {
-	rrframe *lastb=NULL;
+	rrframe *lastb=NULL, *b=NULL;
+
 	int np=mt? numprocs():1, i;
 
 	try {
@@ -43,10 +33,9 @@ void rrdisplayclient::run(void)
 
 	while(!deadyet)
 	{
-		rrframe *b=NULL;
+		b=NULL;
 		q.get((void **)&b);  if(deadyet) break;
 		if(!b) _throw("Queue has been shut down");
-		ready.unlock();
 		if(np>1)
 			for(i=1; i<np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
@@ -67,6 +56,7 @@ void rrdisplayclient::run(void)
 		prof_total.endframe(b->h.width*b->h.height, 0, 1);
 		prof_total.startframe();
 
+		if(lastb) lastb->complete();
 		lastb=b;
 	}
 
@@ -79,17 +69,23 @@ void rrdisplayclient::run(void)
 	}
 	for(i=0; i<np; i++) delete c[i];
 
-	} catch(...) {ready.unlock();  throw;}
+	} catch(rrerror &e)
+	{
+		if(t) t->seterror(e);
+		if(lastb) lastb->complete();  if(b) b->complete();
+		throw;
+	}
 }
 
 rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 {
 	rrframe *b=NULL;
-	ready.lock();  if(deadyet) return NULL;
 	if(t) t->checkerror();
 	bmpmutex.lock();
 	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
 	bmpmutex.unlock();
+	b->waituntilcomplete();  if(deadyet) return NULL;
+	if(t) t->checkerror();
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
@@ -129,7 +125,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
 	int endline, startline;
 	int STRIPH=b->strip_height;
-	bool bu=false;  rrjpeg j;
+	bool bu=false;  rrjpeg jpg;
 	if(!b) return;
 	if(b->flags&RRBMP_BOTTOMUP) bu=true;
 
@@ -153,21 +149,23 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		if(b->stripequals(lastb, startline, endline)) continue;
 		rrframe *rrb=b->getstrip(startline, endline);
 		prof_comp.startframe();
-		j=*rrb;
-		prof_comp.endframe(j.h.width*j.h.height, j.h.size, 0);
+		rrjpeg *j=NULL;
+		if(myrank>0) {errifnot(j=new rrjpeg());}
+		else j=&jpg;
+		*j=*rrb;
+		prof_comp.endframe(j->h.width*j->h.height, j->h.size, 0);
 		delete rrb;
-		j.h.eof=0;
-		unsigned int size=j.h.size;
-		endianize(j.h);
+		j->h.eof=0;
 		if(myrank==0)
 		{
-			if(sd) sd->send((char *)&j.h, sizeof(rrframeheader));
-			if(sd) sd->send((char *)j.bits, (int)size);
+			unsigned int size=j->h.size;
+			endianize(j->h);
+			if(sd) sd->send((char *)&j->h, sizeof(rrframeheader));
+			if(sd) sd->send((char *)j->bits, (int)size);
 		}
 		else
 		{
-			store((char *)&j.h, sizeof(rrframeheader));
-			store((char *)j.bits, (int)size);
+			store(j);
 		}
 	}
 }

@@ -54,7 +54,7 @@ class rrdisplayclient : public Runnable
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(void) {ready.unlock();}
+	void release(rrframe *bmp) {if(bmp) bmp->complete();}
 
 	rrsocket *sd;
 
@@ -62,22 +62,32 @@ class rrdisplayclient : public Runnable
 
 	static const int NB=3;
 	rrcs bmpmutex;  rrframe bmp[NB];  int bmpi;
-	rrmutex ready;
 	genericQ q;
 	Thread *t;  bool deadyet;
 	rrprofiler prof_total;
 	bool mt;
 };
 
+#define endianize(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);}}
+
 class rrcompressor : public Runnable
 {
 	public:
 
 	rrcompressor(int _myrank, int _np, rrsocket *_sd) :
-		_b(NULL), _lastb(NULL), myrank(_myrank), np(_np), sd(_sd), deadyet(false)
+		storedframes(0), frame(NULL), _b(NULL), _lastb(NULL), myrank(_myrank), np(_np),
+		sd(_sd), deadyet(false)
 	{
 		ready.lock();  complete.lock();
-		sendbuf=NULL;  bufsize=0;
 		char temps[20];
 		snprintf(temps, 19, "Compress %d", myrank);
 		prof_comp.setname(temps);
@@ -86,7 +96,7 @@ class rrcompressor : public Runnable
 	virtual ~rrcompressor(void)
 	{
 		shutdown();
-		if(sendbuf) {free(sendbuf);  sendbuf=NULL;  bufsize=0;}
+		if(frame) {free(frame);  frame=NULL;}
 	}
 
 	void run(void)
@@ -119,20 +129,30 @@ class rrcompressor : public Runnable
 
 	void send(void)
 	{
-		if(sd && sendbuf && bufsize) sd->send(sendbuf, bufsize);
-		if(sendbuf) {free(sendbuf);  sendbuf=NULL;  bufsize=0;}
+		for(int i=0; i<storedframes; i++)
+		{
+			rrjpeg *j=frame[i];
+			errifnot(j);
+			unsigned int size=j->h.size;
+			endianize(j->h);
+			if(sd) sd->send((char *)&j->h, sizeof(rrframeheader));
+			if(sd) sd->send((char *)j->bits, size);
+			delete j;		
+		}
+		storedframes=0;
 	}
 
 	private:
 
-	void store(char *buf, int size)
+	void store(rrjpeg *j)
 	{
-		if(!(sendbuf=(char *)realloc(sendbuf, bufsize+size))) _throw("Memory allocation error");
-		memcpy(&sendbuf[bufsize], buf, size);
-		bufsize+=size;
+		storedframes++;
+		if(!(frame=(rrjpeg **)realloc(frame, sizeof(rrjpeg *)*storedframes)))
+			_throw("Memory allocation error");
+		frame[storedframes-1]=j;
 	}
 
-	int bufsize;  char *sendbuf;
+	int storedframes;  rrjpeg **frame;
 	rrframe *_b, *_lastb;
 	int myrank, np;
 	rrsocket *sd;
