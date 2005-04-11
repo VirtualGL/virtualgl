@@ -33,9 +33,9 @@ rrcwin::~rrcwin(void)
 {
 	deadyet=true;
 	q.release();
-	frameready.unlock();
 	if(t) t->stop();
 	delete b;
+	for(int i=0; i<NB; i++) jpg[i].complete();
 }
 
 int rrcwin::match(int dpynum, Window window)
@@ -47,11 +47,11 @@ rrjpeg *rrcwin::getFrame(void)
 {
 	rrjpeg *j=NULL;
 	if(t) t->checkerror();
-	frameready.lock();
-	if(t) t->checkerror();
 	jpgmutex.lock();
 	j=&jpg[jpgi];  jpgi=(jpgi+1)%NB;
 	jpgmutex.unlock();
+	j->waituntilcomplete();
+	if(t) t->checkerror();
 	return j;
 }
 
@@ -65,15 +65,15 @@ void rrcwin::drawFrame(rrjpeg *f)
 void rrcwin::run(void)
 {
 	rrprofiler pt("Total"), pb("Blit"), pd("Decompress");
+	rrjpeg *j=NULL;
 
 	try {
 
 	while(!deadyet)
 	{
-		rrjpeg *j=NULL;
+		j=NULL;
 		q.get((void **)&j);  if(deadyet) break;
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
-		frameready.unlock();
 		if(j->h.eof)
 		{
 			pb.startframe();
@@ -90,10 +90,11 @@ void rrcwin::run(void)
 			pd.endframe(j->h.width*j->h.height, j->h.size, (double)(j->h.width*j->h.height)/
 				(double)(j->h.framew*j->h.frameh));
 		}
+		j->complete();
 	}
 
 	} catch(rrerror &e)
 	{
-		if(t) t->seterror(e);  frameready.unlock();  throw;
+		if(t) t->seterror(e);  if(j) j->complete();  throw;
 	}
 }

@@ -40,7 +40,6 @@ class rrcwin : public Runnable
 	int dpynum;  Window window;
 	void run(void);
 	Thread *t;
-	rrmutex frameready;
 	rrcs jpgmutex;
 };
 
