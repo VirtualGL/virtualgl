@@ -14,11 +14,14 @@
 #include "rrblitter.h"
 #include "rrtimer.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
 	rrblitter blitter;  rrtimer t;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
+	bool dosync=false;
+
+	if(argc>1 && !stricmp(argv[1], "-sync")) dosync=true;
 
 	try {
 
@@ -40,7 +43,7 @@ int main(void)
 		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
 		fill=1-fill;
-		blitter.sendframe(b);
+		blitter.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -61,7 +64,7 @@ int main(void)
 		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
 		fill=1-fill;
-		blitter.sendframe(b);
+		blitter.sendframe(b, dosync);
 		clientframes++;  frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -78,7 +81,7 @@ int main(void)
 		memset(b->bits, 0, b->pitch*HEIGHT);
 		memset(b->bits, fill*0xff, b->pitch*HEIGHT/2);
 		fill=1-fill;
-		blitter.sendframe(b);
+		blitter.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -92,7 +95,7 @@ int main(void)
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
 		memset(b->bits, 0xff, b->pitch*HEIGHT);
-		blitter.sendframe(b);
+		blitter.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
