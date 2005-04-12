@@ -14,6 +14,12 @@ OBJS = $(ODIR)/rrglxgears.o
 
 TARGETS = $(EDIR)/rrglxgears
 
+ifneq ($(USEGLP), no)
+OBJS := $(OBJS) $(ODIR)/rrglpgears.o
+
+TARGETS := $(TARGETS) $(EDIR)/rrglpgears
+endif
+
 all: $(TARGETS)
 
 clean:
@@ -21,10 +27,16 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-$(ODIR)/rrglxgears.o: rrglxgears.c
+$(ODIR)/rrglxgears.o: rrglxgears.c ../rr/rr.h
 	$(CC) $(CFLAGS) -c -o $@ $< -I../rr
 
 $(EDIR)/rrglxgears: $(ODIR)/rrglxgears.o $(LDIR)/librr.$(SHEXT)
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr
+
+$(ODIR)/rrglpgears.o: rrglpgears.c ../rr/rr.h
+	$(CC) $(CFLAGS) -c -o $@ $< -I../rr
+
+$(EDIR)/rrglpgears: $(ODIR)/rrglpgears.o $(LDIR)/librr.$(SHEXT)
 	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr
 
 ##########################################################################
