@@ -39,11 +39,14 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES =  -I/usr/X/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+
+ifneq ($(USEGLP), no)
 CDEFINES := $(CDEFINES) -DUSEGLP
+endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+LDFLAGS := -L/usr/X/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
 
 DEFAULTJPEGLIB = medialib
 
