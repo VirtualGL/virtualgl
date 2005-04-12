@@ -14,7 +14,7 @@ OBJS = $(ODIR)/rrglxgears.o
 
 TARGETS = $(EDIR)/rrglxgears
 
-ifneq ($(USEGLP), no)
+ifeq ($(USEGLP), yes)
 OBJS := $(OBJS) $(ODIR)/rrglpgears.o
 
 TARGETS := $(TARGETS) $(EDIR)/rrglpgears
