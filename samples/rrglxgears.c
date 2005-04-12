@@ -756,7 +756,7 @@ main(int argc, char *argv[])
 
    dpy = XOpenDisplay(NULL);
    if (!dpy) {
-      printf("Error: couldn't open display %s\n", dpyName);
+      printf("Error: couldn't open display\n");
       return -1;
    }
    if (!clidpyName) clidpyName=DisplayString(dpy);
@@ -764,7 +764,7 @@ main(int argc, char *argv[])
    /* Open a connection to the server display to use for 3D rendering */
 
    serverdpy = XOpenDisplay(dpyName);
-   if (!dpy) {
+   if (!serverdpy) {
       printf("Error: couldn't open display %s\n", dpyName);
       return -1;
    }
@@ -810,6 +810,7 @@ main(int argc, char *argv[])
    if(rrdpy) RRCloseDisplay(rrdpy);  /***** RRlib *****/
    XDestroyWindow(dpy, win);
    XCloseDisplay(dpy);
+   XCloseDisplay(serverdpy);
 
    return 0;
 }
