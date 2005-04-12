@@ -45,6 +45,8 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/bin
 mkdir -p $RPM_BUILD_ROOT%{usrlib}
 mkdir -p $RPM_BUILD_ROOT/opt/%{package}/bin
+mkdir -p $RPM_BUILD_ROOT/opt/%{package}/include
+mkdir -p $RPM_BUILD_ROOT/opt/%{package}/samples
 
 %ifarch x86_64
 install -m 755 %{_bindir}/vglrun64 $RPM_BUILD_ROOT/usr/bin/vglrun64
@@ -69,6 +71,11 @@ install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
 install -m 755 %{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
+install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT%{usrlib}/librr.so
+
+install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{package}/include
+install -m 644 samples/rrglxgears.c  $RPM_BUILD_ROOT/opt/%{package}/samples
+install -m 644 samples/Makefile.linuxdist  $RPM_BUILD_ROOT/opt/%{package}/samples/Makefile
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
 
@@ -98,6 +105,11 @@ fi
 %defattr(-,root,root)
 %doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
 
+%dir /opt/%{package}
+%dir /opt/%{package}/bin
+%dir /opt/%{package}/include
+%dir /opt/%{package}/samples
+
 %ifarch x86_64
 /usr/bin/vglrun64
 /usr/bin/rrlaunch64
@@ -113,11 +125,15 @@ fi
 /opt/%{package}/bin/tcbench
 
 %endif
-
 /opt/%{package}/bin/nettest
 /opt/%{package}/bin/cpustat
 
+/opt/%{package}/include/rr.h
+/opt/%{package}/samples/rrglxgears.c
+/opt/%{package}/samples/Makefile
+
 %{usrlib}/librrfaker.so
 %{usrlib}/libhpjpeg.so
+%{usrlib}/librr.so
 
 %changelog
