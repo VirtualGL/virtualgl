@@ -41,7 +41,7 @@ INSTALL = /usr/ucb/install
 
 CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
 
-ifneq ($(USEGLP), no)
+ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
 endif
 
