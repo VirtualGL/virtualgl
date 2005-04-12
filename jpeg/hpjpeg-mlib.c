@@ -673,10 +673,6 @@ static int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
 			jpg->pitch, jpg->width*3, 0);
 		_mlib(mlib_VectorReverseByteOrder_Inp(dstbuf, jpg->width, 4));
 	}
-	else if(linebuf!=dstbuf)
-	{
-		_mlib(mlib_VectorCopy_U8(dstbuf, linebuf, jpg->width*jpg->ps));
-	}
 	return 0;
 
 	bailout:
@@ -745,7 +741,11 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			tmpptr=jpg->bmpptr;
 			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
 			_mlib(ccfct(tmpptr, y, cb, cr, jpg->width));
-			if(tmpptr!=jpg->bmpptr) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+			if(tmpptr!=jpg->bmpptr)
+			{
+				if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+				else {_mlib(mlib_VectorCopy_U8(jpg->bmpptr, tmpptr, jpg->width*jpg->ps));}
+			}
 		}
 	}
 
