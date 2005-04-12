@@ -297,8 +297,8 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
-	dotest(36, 36, 3, "test");
-	dotest(36, 36, 4, "test");
+	dotest(35, 35, 3, "test");
+	dotest(35, 35, 4, "test");
 	dotest1();
 
 	return 0;
