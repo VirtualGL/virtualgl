@@ -28,5 +28,9 @@ f none SUNWvgl/doc/VirtualGL/sshtunnel.png 0644 root bin
 d none SUNWvgl/doc/VirtualGL/samples 0755 root bin
 f none SUNWvgl/doc/VirtualGL/samples/rrglxgears.c 0644 root bin
 f none SUNWvgl/doc/VirtualGL/samples/Makefile 0644 root bin
+d none SUNWvgl/doc/VirtualGL64 0755 root bin
+d none SUNWvgl/doc/VirtualGL64/samples 0755 root bin
+f none SUNWvgl/doc/VirtualGL64/samples/rrglxgears.c 0644 root bin
+f none SUNWvgl/doc/VirtualGL64/samples/Makefile 0644 root bin
 d none SUNWvgl/include 0755 root bin
 f none SUNWvgl/include/rr.h 0644 root bin
