@@ -15,8 +15,8 @@ clean:
 	cd util; $(MAKE) clean; cd ..; \
 	cd jpeg; $(MAKE) clean; cd ..; \
 	cd mesademos; $(MAKE) clean; cd ..; \
-	cd diags; $(MAKE) clean; cd ..
-	cd samples; $(MAKE) clean; cd ..; \
+	cd diags; $(MAKE) clean; cd ..; \
+	cd samples; $(MAKE) clean; cd ..
 
 TOPDIR=.
 include Makerules
@@ -74,22 +74,28 @@ ifeq ($(subplatform), 64)
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
-	if [ ! -d $(prefix)/doc/VirtualGL64 ]; then mkdir -p $(prefix)/doc/VirtualGL64; fi
+	if [ ! -d $(prefix)/doc/$(PACKAGENAME)/samples ]; then mkdir -p $(prefix)/doc/$(PACKAGENAME)/samples; fi
+	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/vglrun64
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/rrlaunch64
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/VirtualGL64
-	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/VirtualGL64
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/VirtualGL64
-	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/VirtualGL64
-	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/VirtualGL64
+	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/$(lib64dir)/librr.$(SHEXT)
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
+	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
+	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
 	echo Install complete.
 else
-install: rr
+install: rr diags
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
-	if [ ! -d $(prefix)/doc/VirtualGL ]; then mkdir -p $(prefix)/doc/VirtualGL; fi
+	if [ ! -d $(prefix)/doc/$(PACKAGENAME)/samples ]; then mkdir -p $(prefix)/doc/$(PACKAGENAME)/samples; fi
+	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
 	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
@@ -98,13 +104,17 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/lib/libhpjpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/VirtualGL
-	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/VirtualGL
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/VirtualGL
-	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/VirtualGL
-	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/VirtualGL
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
+	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
+	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
 	echo Install complete.
 endif
 
@@ -114,9 +124,12 @@ uninstall:
 	$(RM) $(prefix)/bin/rrlaunch64
 	$(RM) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(RM) $(prefix)/doc/VirtualGL64/*
-	rmdir $(prefix)/doc/VirtualGL64
-	rmdir $(prefix)/doc
+	$(RM) $(prefix)/$(lib64dir)/librr.$(SHEXT)
+	$(RM) $(prefix)/doc/$(PACKAGENAME)/samples/*
+	rmdir $(prefix)/doc/$(PACKAGENAME)/samples
+	$(RM) $(prefix)/doc/$(PACKAGENAME)/*
+	rmdir $(prefix)/doc/$(PACKAGENAME)
+	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 else
 uninstall:
@@ -130,11 +143,14 @@ uninstall:
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/lib/libhpjpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
+	$(RM) $(prefix)/lib/librr.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest
-	$(RM) $(prefix)/doc/VirtualGL/*
-	rmdir $(prefix)/doc/VirtualGL
-	rmdir $(prefix)/doc
+	$(RM) $(prefix)/doc/$(PACKAGENAME)/samples/*
+	rmdir $(prefix)/doc/$(PACKAGENAME)/samples
+	$(RM) $(prefix)/doc/$(PACKAGENAME)/*
+	rmdir $(prefix)/doc/$(PACKAGENAME)
+	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 endif
 
@@ -162,7 +178,7 @@ dist: sunpkg
 endif
 
 PKGDIR = SUNWvgl
-PKGNAME = $(PKGDIR)$(subplatform)
+PKGNAME = $(PKGDIR)
 
 .PHONY: sunpkg
 sunpkg: rr diags
@@ -174,9 +190,10 @@ sunpkg: rr diags
 	cp copyright $(BLDDIR)
 	cp depend $(BLDDIR)
 	cp rr$(subplatform).proto $(BLDDIR)
-	cat pkginfo$(subplatform).tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
+	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr$(subplatform).proto; \
 	rm rr$(subplatform).proto copyright depend pkginfo; \
