@@ -44,7 +44,7 @@ typedef struct _rrframeheader
 	unsigned char qual;      /* Quality of destination JPEG (1-100) */
 	unsigned char subsamp;   /* YUV subsampling of destination JPEG
 	                            (RR_411, RR_422, or RR_444) */
-	unsigned char eof;       /* 1 if this is the last (or only) packet in the
+	unsigned char eof;       /* 1 if this is the last (or only) tile in the
 	                            frame */
 	unsigned char dpynum;    /* Display number on the client machine that
 	                            contains the window into which this frame will be
@@ -101,7 +101,8 @@ DLLEXPORT RRDisplay DLLCALL
                displayname is NULL.
    ssl (IN) = 1 to use an SSL tunnel or 0 to use a standard TCP socket.  This
 	            is ignored if displayname is NULL.
-   multithread (IN) = 1 to enable multi-threaded compression or 0 to disable it
+   multithread (IN) = 1 to enable multi-threaded compression or 0 to disable
+                      it.  This has no effect on uniprocessor systems.
    displaynum (OUT) = display number corresponding to the display name you
                       entered as an argument above.  RROpenDisplay() returns
                       the display number to you as a convenience, so you can
@@ -287,8 +288,8 @@ DLLEXPORT int DLLCALL
                         h->size = size of compressed data (in bytes)
                         h->framew, h->frameh = frame dimensions
                         h->width, h->height = tile dimensions
-                        h->x, h->y = tile offset or 0 if the tile
-                                     occupies the entire frame
+                        h->x, h->y = tile offset (0 if the tile
+                                     occupies the entire frame)
 
    bits (IN) = pointer to compressed data buffer.  It should contain h->size
                bytes of data
