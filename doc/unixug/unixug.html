@@ -1,9 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
-  <title>VirtualGL User's Guide (Linux)</title>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+
+  
 
 
-  <style type="text/css">
+  <title>VirtualGL User's Guide (Unix/Linux)</title><style type="text/css">
 body {
 background-color: rgb(255, 255, 255);
 font-family: Arial,Helvetica,sans-serif;
@@ -89,17 +91,17 @@ text-align: right;
 }
   </style></head>
 <body>
-<h1>VirtualGL
-0.9.3 User's Guide
-(Linux)</h1>
+<h1>VirtualGL 2.0 User's Guide
+(Unix/Linux)</h1>
 
 <h2>Contents</h2>
 
 <ul>
 
 <li><a href="#legalinfo">Legal Information</a></li>
-<li><a href="#requirements">System Requirements</a></li>
-<li><a href="#installation">Installation</a></li>
+<li><a href="#requirements">System Recommendations</a></li>
+<li><a href="#linuxinstallation">Installation (Linux)</a></li><li><a href="#solarisinstallation">Installation (Solaris)</a></li>
+
 <li><a href="#basicusage">Basic Usage</a></li>
 <li><a href="#secureusage">Secure Usage</a></li>
 </ul>
@@ -128,9 +130,9 @@ the <a href="LGPL.txt">LGPL</a>.<br>
 </div>
 
 <hr><a name="requirements"></a>
-<h2>System Requirements</h2>
+<h2>System Recommendations</h2>
 
-<h3>Server (32-bit)</h3>
+<h3>Server (32-bit Linux)</h3>
 
 <ul>
 
@@ -143,14 +145,14 @@ the <a href="LGPL.txt">LGPL</a>.<br>
 <li>X server configured for true color (24/32-bit)</li>
 </ul>
 
-<h3>Server (64-bit)</h3>
+<h3>Server (64-bit Linux)</h3>
 
 <ul>
 
 <li>Processor</li>
 <ul>
 <li>dual P4/Xeon with EM64T, or</li>
-<li>dual Itanium-2, 1.4 GHz or faster <span style="color: rgb(255, 0, 0);">*</span>, or</li>
+
 <li>dual Opteron or Athlon64, 1.8 GHz or faster</li>
 <ul>
 <li>For optimal performance with
@@ -162,33 +164,52 @@ Only newer AMD 64-bit processors support SSE3.</li>
 <li>RedHat Enterprise Linux 3.0 (64-bit) or equivalent (Works with
 <a href="http://fedora.redhat.com/">Fedora</a> and
 <a href="http://whiteboxlinux.net/">WhiteBox</a>)</li>
-<li>X server configured for true color (24/32-bit)</li>
-</ul>
+<li>X server configured for true color (24/32-bit)</li></ul>
+<h3>Client (Linux)<br>
+</h3>
 
-<h3>Client</h3>
 
 <ul>
-
-<li>Processor</li>
+<li>single PIII or P4, 1.0 GHz or faster (or equivalent)<br>
+  </li><li>graphics card with decent 2D performance</li><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li>
+</ul>
 <ul>
-<li>single PIII or P4, 1.0 GHz or faster (or equivalent), or</li>
-<li>single Itanium-2, 900 MHz or faster <span style="color: rgb(255, 0, 0);">*</span><br>
-</li>
-</ul>
-<li>graphics card with decent 2D performance</li>
-<li>RedHat Linux 7.2 or newer (or equivalent)</li>
-<li>X server configured for true color (24/32-bit)</li>
-</ul>
 
-<span style="color: rgb(255, 0, 0);">*
-The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
+</ul>
+<h3>Server (Sparc/Solaris)</h3>
+<ul>
+  <li>dual UltraSPARC III 900 MHz or faster</li>
+  <li>decent 3D graphics accelerator (tested with XVR-1200)</li>
+  <li>Solaris 8 or higher</li>
+  <li>Sun OpenGL 1.3 or later (see <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a>)&nbsp; OpenGL 1.5 or later required for GLP support<br>
+  </li>
+  <li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+  <li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
+Blastwave OpenSSL is required.&nbsp; Download and install the package
+from <a href="http://www.blastwave.org">http://www.blastwave.org</a></li>
+</ul>
+<h3>Client (Sparc/Solaris)</h3>
+<ul>
+  <li>single UltraSPARC III 900 MHz or faster</li>
+  <li>graphics card with decent 2D performance<br>
+  </li>
+  <li>Solaris 8 or higher</li>
+  <li>Sun OpenGL 1.3 or later (see <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a>)&nbsp; OpenGL 1.5 or later required for GLP support.<br>
+  </li>
+  <li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+  <li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
+Blastwave OpenSSL is required.&nbsp; Download and install the package from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+</ul>
+<h3 style="color: rgb(255, 255, 255);">Note to Itanium users</h3>
+<span style="color: rgb(0, 0, 0);">The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
 of development equipment.&nbsp; We are looking for volunteers to continue this
 effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> if you're interested.&nbsp;</span>
 <div class="top"><a href="#" target="_top">top</a></div>
 
 <hr>
-<a name="installation"></a>
-<h2>Installation</h2>
+<a name="linuxinstallation"></a>
+<h2>Installation (Linux)<br>
+</h2>
 
 <ol>
 
@@ -223,7 +244,7 @@ components for use with 64-bit apps.&nbsp; To install the client or
 the 32-bit server components, install the 32-bit VirtualGL package.<br>
 <h3>Display Configuration (Server Only)</h3>
 <p>VirtualGL requires access to display
-:0 (or to the display specified in the <span class="monospace">RRDISPLAY</span> environment variable)
+:0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span> environment variable)
 so that it can create and render to off-screen Pbuffers on the server's
 3D graphics card.&nbsp; Normally, this is only possible if someone has
 logged into the server locally and explicitly granted this permission
@@ -239,7 +260,7 @@ automatically granted regardless of whether anyone is logged in locally.</p>
     <pre>init 3</pre>
  as root</li>
 
-  <li>
+  <li>Log in as root from the text console.</li><li>
   If the server machine is configured to boot into runlevel 3 (text login), 
   then configure it to boot into a graphical login by changing the first line of
   <span class="monospace">/etc/inittab</span> from<br>
@@ -253,6 +274,7 @@ to<br>
 id:5:initdefault:<br>
 &nbsp;</span>
   </li>
+
 
   <li>If the server is running the NVidia accelerated GLX drivers, follow the 
   instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span> regarding setting 
@@ -278,11 +300,15 @@ id:5:initdefault:<br>
   for any line containing a command line such as 
   <span class="monospace">/usr/X11/bin/X</span> 
   or  <span class="monospace">/usr/X11R6/bin/X</span>.&nbsp; Add an argument of
-  <span class="monospace">-tst</span> to these command lines.&nbsp; Disabling 
-  XTEST eliminates a potential security loophole opened up by Step 4, whereby an 
+  <span class="monospace">-tst</span> to these command lines.<br>
+    <br>
+    <span class="note">Note:</span>&nbsp; Disabling 
+  XTEST eliminates a potential security loophole opened up by Step 5, whereby an 
   authenticated user on the server could theoretically send key/mouse events 
   into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
-  server's local display logged out when not in use.</li>
+  server's local display logged out when not in use.<br>
+&nbsp;</li>
+
 
   <li>Restart the X server by issuing<br>
     <pre>init 5</pre>
@@ -294,7 +320,7 @@ id:5:initdefault:<br>
   XTEST doesn't show up in the list of extensions if you disabled it above.&nbsp; 
   If <span class="monospace">xdpyinfo</span> fails to run, then the permissions 
   on Display :0 are probably still too restrictive, meaning that the change in 
-  Step 4 didn't take for some reason.</li>
+  Step 5 didn't take for some reason.</li>
 
 </ol>
 
@@ -303,7 +329,7 @@ as a Service<br>
 </h3>
 
 You can set up the Linux client as a user mode daemon by running<br>
-<pre>rrxclient_config</pre>
+<pre>vglclient_config</pre>
 as root.&nbsp; Select either 
 option 1 or 2, depending on whether you want to install the standard or the 
 secure version of the client.
@@ -311,8 +337,10 @@ secure version of the client.
 <br>
 This script creates a link in  <span class="monospace">/etc/X11/xinit/xinitrc.d</span> 
 so that the client will be automatically started in user mode whenever an X session is started.&nbsp; It 
-also adds a line to <span class="monospace">/etc/X11/gdm/PostSession/Default</span> to terminate the 
-client whenever the X session terminates.&nbsp;&nbsp; It may or may not work on non-RedHat platforms.<br>
+also adds a line to <span class="monospace">/etc/X11/gdm/PostSession/Default</span>
+to terminate the client whenever the X session terminates.&nbsp;&nbsp;
+Installing the client as a service may or may not work on non-RedHat
+platforms.<br>
 <br>
 If additional X11 displays are started by the same user (:1, :2, etc.), this 
 will not cause additional VirtualGL client instances to start.&nbsp; Only one 
@@ -322,9 +350,9 @@ workstation need to be running under the same user privileges in order for the
 same VirtualGL client to communicate with all of them.<br>
 <br>
 If you wish to change the default port that the client listens on, you will 
-need to edit <span class="monospace">/usr/bin/rrxclient_daemon</span> or 
-<span class="monospace">/usr/bin/rrxclient_ssldaemon</span> and pass the appropriate argument 
-on the <span class="monospace">rrxclient</span> command line located in that file.&nbsp; By default, the client will use port 4242 for 
+need to edit <span class="monospace">/usr/bin/vglclient_daemon</span> or 
+<span class="monospace">/usr/bin/vglclient_ssldaemon</span> and pass the appropriate <span class="monospace">-p</span> argument 
+on the <span class="monospace">vglclient</span> command line located in that file.&nbsp; By default, the client will use port 4242 for 
 non-SSL communications and port 4243 for SSL-encrypted communications.
 <h3>Removing the Linux Client and Server</h3>
 <p>As root, issue the following command:</p>
@@ -337,10 +365,110 @@ issue the following command:</p>
 <pre>rpm -e VirtualGL64</pre>
 <p style="text-align: right;"><a href="#" target="_top">top</a></p>
 
-<hr><a name="basicusage"></a>
+<hr><a name="solarisinstallation"></a>
+<h2>Installation (Solaris)<br>
+</h2>
+
+
+<ol>
+<li>Obtain the latest VirtualGL package from the files
+area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
+<br>
+  </li><li>Log in as root, cd to the directory
+where you downloaded the package, and issue the following
+commands:<br>
+    <pre>bzip2 -d SUNWvgl.pkg.bz2<br>pkgadd -d SUNWvgl.pkg</pre>
+</li><li>Select the <span class="monospace">SUNWvgl</span> package (usually option 1) from the menu.</li>
+</ol>
+<span class="note">Note:</span>&nbsp; VirtualGL for Solaris installs into <span class="monospace">/opt/SUNWvgl</span>.<span style="font-weight: bold;"><br>
+</span>
+<h3>Display Configuration (Server Only)</h3>
+<p><span class="note">Note:</span>&nbsp; If you plan to use VirtualGL only in GLP mode, you can skip this section.</p>
+<p>When VirtualGL is being used in GLX mode, it requires access to display
+:0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span> environment variable)
+so that it can create and render to off-screen Pbuffers on the server's
+3D graphics card.&nbsp; Normally, this is only possible if someone has
+logged into the server locally and explicitly granted this permission
+by issuing</p>
+
+<pre>xhost +localhost</pre>
+
+
+<p>However, it is possible to configure the server such that this permission is 
+automatically granted regardless of whether anyone is logged in locally.</p>
+
+
+<ol>
+<li>Log in as root.</li><li>Temporarily shut down the X server by issuing<br>
+    <pre>/etc/init.d/dtlogin stop</pre>
+  </li>
+<li>Edit <span class="monospace">/etc/logindevperm</span> and change the mode for the <span class="monospace">/dev/mouse</span>, <span class="monospace">/dev/kbd</span>, <span class="monospace">/dev/sound/*</span>, and <span class="monospace">/dev/fbs/*</span> entries to <span class="monospace">0666</span>.&nbsp; e.g.:<br>
+    <pre>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/mouse:/dev/kbd<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/sound/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # audio devices<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # frame buffers</pre>
+</li><li>Issue the following commands:<br>
+    <pre>chmod 666 /dev/mouse /dev/kbd /dev/fbs/*<br>chmod 666 /dev/sound/*</pre>
+    <span class="note">Note:</span>&nbsp; <span class="monospace">/dev/sound/*</span> may not exist if there are no sound drivers on your system.<br>
+&nbsp;</li>
+  <li>If <span class="monospace">/etc/dt/config/Xsetup</span> does not exist, then copy the default <span class="monospace">Xsetup</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
+    <pre>cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup</pre>
+  </li>
+  <li>Edit <span class="monospace">/etc/dt/config/Xsetup</span>, and add the following lines to the bottom of the file:<br>
+
+  
+    <pre>xhost +localhost<br>xhost +`hostname`</pre></li>
+  <li>If <span class="monospace">/etc/dt/config/Xconfig</span> does not exist, then copy the default <span class="monospace">Xconfig</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
+  <pre>cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig</pre>
+  </li>
+  <li>Edit <span class="monospace">/etc/dt/config/Xconfig</span>, and add (or uncomment) the following line:<br>
+
+
+  
+    
+    <pre>Dtlogin*grabServer:        False<br></pre>
+&nbsp;<br>
+  </li>
+  <li>Unless you know that you absolutely need it, disable the XTEST extension.</li>
+  <ol style="list-style-type: lower-alpha;">
+    <li>If <span class="monospace">/etc/dt/config/Xservers</span> does not exist, then copy the default <span class="monospace">Xservers</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
+      <pre>cp /usr/dt/config/Xservers /etc/dt/config/Xservers</pre>
+    </li>
+    <li>Edit <span class="monospace">/etc/dt/config/Xservers</span> and add an argument of <span class="monospace">-tst</span> after <span class="monospace">Xsun</span> on all lines in the file.<br>
+      <br>
+      <span class="note">Note:</span>&nbsp; Disabling 
+  XTEST eliminates a potential security loophole opened up by Step 6, whereby an 
+  authenticated user on the server could theoretically send key/mouse events 
+  into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
+  server's local display logged out when not in use.<br>
+&nbsp;</li>
+  </ol>
+  <li>Restart the X server by issuing<br>
+    <pre>/etc/init.d/dtlogin start</pre>
+  </li>
+  <li>You can check your work by running
+    <pre>/usr/openwin/bin/xdpyinfo -display :0</pre>
+ In particular, make sure that 
+  XTEST doesn't show up in the list of extensions if you disabled it above.&nbsp; 
+  If <span class="monospace">xdpyinfo</span> fails to run, then the permissions 
+  on Display :0 are probably still too restrictive, meaning that the change in 
+  Step 6 didn't take for some reason.</li>
+</ol>
+
+
+
+<h3>Removing the Solaris Client and Server</h3>
+
+<p>As root, issue the following command:</p>
+
+
+<pre>pkgrm SUNWvgl</pre>
+Answer "yes" when prompted.<br>
+<div style="text-align: right;"><a href="unixug.html#" target="_top">top</a><br>
+</div>
+<hr style="width: 100%; height: 2px;"><a name="basicusage"></a>
 <h2>Basic Usage</h2>
+
   
 <ol>
+
   <li>If you have never made X11 connections between your client machine and the
     application server before, then you will need to grant the application server
     permission to use your X display.&nbsp; You can do this by typing:<br>
@@ -354,11 +482,14 @@ issue the following command:</p>
 &nbsp;</li>
 
   
-  <li>If you have not installed the VirtualGL client as a service, then you 
+  <li>If you have not installed the VirtualGL client as a service or if your client is a Solaris machine, then you 
   will need to start the client manually.&nbsp; To do this, run<br>
 
   
-    <pre>rrxclient</pre>
+    <pre>vglclient<br></pre>on Linux or<br>
+    <pre>/opt/SUNWvgl/bin/vglclient<br></pre>
+on Solaris.<br>
+&nbsp;<br>
   </li>
   <li>Open a Secure Shell (SSh) session into the 
   application server:<br>
@@ -368,6 +499,7 @@ issue the following command:</p>
 
   </li>
 
+
   <li>In the SSh session, set the <span class="monospace">DISPLAY</span> environment variable on the server to
     point back to the client machine:<br>
     
@@ -376,12 +508,16 @@ issue the following command:</p>
     or<br>
     <pre>setenv DISPLAY {client_machine_name_or_IP}:0.0</pre>
   </li>
-  <li>In the SSh session, launch your 3D application:<br>
+  <li>In the SSh session, launch your 3D application using:<br>
     
-    <pre>rrlaunch {application_executable_or_script} {arguments}</pre>
-  </li>
-
+    <pre>vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>on Linux or<br>
+    <pre>/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>
+on Solaris.<br>
+    <br>
+Consult the <a href="config.html">VirtualGL Configuration Guide</a> for more information on <span class="monospace">vglrun</span> command line options
+</li>
 </ol>
+<br>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 
 <ol>
@@ -407,18 +543,18 @@ enabled by default, but it can be easily enabled:</p>
 <ul>
 <li>Start the secure
 client from the command line by issuing<br>
-<pre>rrxclient -s</pre>
+<pre>vglclient -s</pre>
 </li>
-<li>... or ... Install the
+<li>... or ... On Linux systems, you can install the
 secure client as a service using instructions in the <a href="#installsvc">previous section</a>.<br>
 </li>
 </ul>
 
 <span style="font-weight: bold;">Server:</span><br style="font-weight: bold;">
 
-Set the environment variable <span style="font-family: monospace;">RRUSESSL</span>
+Set the environment variable <span style="font-family: monospace;">VGL_USESSL</span>
 to <span style="font-family: monospace;">1</span>
-prior to launching the application.<br>
+prior to launching the application or pass an argument of <span class="monospace">+s</span> to <span class="monospace">vglrun</span>.<br>
 
 <h3>SSh Tunneling of the X11
 Protocol Stream</h3>
@@ -450,21 +586,18 @@ protocol stream through SSh will probably slow things down, but on a
 lower-bandwidth connection, it may
 actually speed things up, especially if you enable compression.</p>
 
-<h4>Enabling X11 Tunneling from a Linux Client</h4>
-After opening an SSh connection into the application server, don't set the
-    <span class="monospace">DISPLAY</span> environment.&nbsp; Instead, set the environment variable
-  <span class="monospace">RRCLIENT</span> to the client display, e.g.<br>
+<h4>Enabling X11 Tunneling</h4>Pass a <span class="monospace">-X</span> argument to ssh when connecting to the application server, e.g.:<br>
+<pre>ssh -X -l {your_user_name} {server_machine_name_or_IP}</pre>
+After opening the SSh connection into the application server, don't set the
+    <span class="monospace">DISPLAY</span> environment.&nbsp; Instead, set the environment variable <span class="monospace">VGL_CLIENT</span> to the client display, e.g.
+<pre>export VGL_CLIENT={my_client_machine}:0.0<br></pre>
 
-  <br>
-<pre>export RRCLIENT={my_client_machine}:0.0
-</pre>
-
-<p>That's it!&nbsp; The Linux SSh client enables X11 forwarding by default, so
-unless you explicitly override it by setting the <span class="monospace">DISPLAY</span> environment variable,
-it will be enabled.</p>
-
-<p><span class="tip">Tip:</span>&nbsp;
-If your connection to the
+<p><span class="note">Note:</span>&nbsp; Whether or not this works will
+of course depend on whether the SSh server has the X11 tunneling
+feature enabled.&nbsp;&nbsp; It is almost always enabled on Linux but
+may not be enabled on all Solaris servers.<br>
+</p>
+<p><span class="tip">Tip:</span> If your connection to the
 server is low-bandwidth, you may wish
 to pass a <span class="monospace">-C</span>
 argument to ssh when
@@ -484,7 +617,7 @@ capabilities of VirtualGL, but sometimes it's the only option available.</p>
 <p>Let's assume the following
 configuration:</p>
 
-<p><img alt="" src="sshtunnel.png?rev=HEAD&cvsroot=virtualgl"><br>
+<p><img alt="" src="sshtunnel.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
 </p>
 
 <p>What we want to do is tunnel
@@ -523,7 +656,7 @@ client machine.<br>
 <li>You should now have a
 terminal session open into <span class="monospace">app_server_machine</span>.&nbsp;
 Inside that
-session, set the environment variable <span class="monospace">RRCLIENT</span>
+session, set the environment variable <span class="monospace">VGL_CLIENT</span>
 to <span class="monospace">localhost:0.0</span>.<br>
 <br>
 <span class="note">Note:</span>&nbsp;
@@ -531,7 +664,7 @@ Replace 0.0 with the
 display number of your client's X server.<br>
 <br>
 </li>
-<li><span class="monospace">rrlaunch</span>
+<li><span class="monospace">vglrun</span>
 your application.</li>
 </ol>
 
@@ -541,15 +674,15 @@ whatever port you choose, but make sure that if you change the port,
 you configure both the client and server to talk on the port you choose
 (using the
 <span class="monospace">-p</span>
-argument to <span class="monospace">rrxclient</span>
-as well as the <span class="monospace">RRPORT</span>
+argument to <span class="monospace">vglclient</span>
+as well as the <span class="monospace">VGL_PORT</span>
 environment
 variable on the server.)</p>
 
 <p><span class="tip">Tip:</span>&nbsp;
 This same procedure would also
-work if you needed to connect directly to app_server_machine and tunnel
-everything over SSh.&nbsp; In that case, simply leave out Step 4.<br>
+work if you needed to connect directly to <span class="monospace">app_server_machine</span> and tunnel
+everything over SSh.&nbsp; In that case, simply leave out Step 2.<br>
 &nbsp;</p>
 
 <p><span class="tip">Tip:</span>&nbsp;
