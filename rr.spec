@@ -75,7 +75,11 @@ install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT%{usrlib}/librr.so
 
 install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{package}/include
 install -m 644 samples/rrglxgears.c  $RPM_BUILD_ROOT/opt/%{package}/samples
-install -m 644 samples/Makefile.linuxdist  $RPM_BUILD_ROOT/opt/%{package}/samples/Makefile
+%ifarch x86_64
+install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{package}/samples/Makefile
+%else
+install -m 644 samples/Makefile.linux $RPM_BUILD_ROOT/opt/%{package}/samples/Makefile
+%endif
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
 
