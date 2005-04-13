@@ -11,6 +11,7 @@ f none SUNWvgl/bin/nettest 0755 root bin
 d none SUNWvgl/lib 0755 root bin
 f none SUNWvgl/lib/librrfaker.so 0755 root bin
 f none SUNWvgl/lib/libhpjpeg.so 0755 root bin
+f none SUNWvgl/lib/librr.so 0755 root bin
 d none SUNWvgl/doc 0755 root bin
 d none SUNWvgl/doc/VirtualGL 0755 root bin
 f none SUNWvgl/doc/VirtualGL/LGPL.txt 0644 root bin
@@ -18,3 +19,8 @@ f none SUNWvgl/doc/VirtualGL/LICENSE.txt 0644 root bin
 f none SUNWvgl/doc/VirtualGL/LICENSE-OpenSSL.txt 0644 root bin
 f none SUNWvgl/doc/VirtualGL/unixug.html 0644 root bin
 f none SUNWvgl/doc/VirtualGL/sshtunnel.png 0644 root bin
+d none SUNWvgl/doc/VirtualGL/samples 0755 root bin
+f none SUNWvgl/doc/VirtualGL/samples/rrglxgears.c 0644 root bin
+f none SUNWvgl/doc/VirtualGL/samples/Makefile 0644 root bin
+d none SUNWvgl/include 0755 root bin
+f none SUNWvgl/include/rr.h 0644 root bin
