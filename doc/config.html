@@ -86,7 +86,6 @@ margin-right: 3px;
 text-align: right;
 }
   </style></head>
-
 <body>
 <h1>VirtualGL 2.0 Configuration
 Guide<br>
@@ -103,12 +102,10 @@ previous method:</p></font>
   <li>Setting a configuration environment variable globally (e.g. in <span class="monospace">/etc/profile</span>)</li>
   <li>Setting a configuration environment variable on a per-user basis (e.g. in <span class="monospace">~/.bashrc</span>)</li>
   <li>Setting a configuration environment variable only for the current shell session (e.g. <span class="monospace">export VGL_XXX={whatever}</span>)</li>
-  <li>Passing a configuration option as an argument to <span class="monospace">vglrun</span>.&nbsp; This effectively overrides any environment variables corresponding to that configuration option.<br>
+  <li>Passing a configuration option as an argument to <span class="monospace">vglrun</span>.&nbsp; This effectively overrides any previous environment variable setting corresponding to that configuration option.<br>
   </li>
 </ol>
-<font face="Arial, Helvetica"></font><p align="left"><span class="note">Note:</span>&nbsp;
-Most of these are
-read only once during execution, when the application faker initializes.</p>
+<font face="Arial, Helvetica"></font><p align="left"><span class="note">Note:</span>&nbsp; Most configuration parameters are read only once during execution, when the application faker initializes.</p>
 <br>
 <table style="width: 100%;" cellpadding="5" cellspacing="3">
   <tbody>
@@ -207,8 +204,8 @@ not available.<br>
       <td style="font-weight: bold;">444</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_SPOIL<br>
-=&lt;0, 1&gt;<br>
+      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_SPOIL=1<br>
+VGL_SPOIL=0<br>
       </td>
       <td><span style="font-weight: bold;" class="monospace">+spoil</span><br style="font-weight: bold;">
 or<br style="font-weight: bold;">
@@ -230,20 +227,20 @@ seen.&nbsp; With frame spoiling turned off, the rendering
 pipeline behaves as if it's fill-rate limited to about 30 or 40
 Megapixels/second, the maximum throughput of the VirtualGL system on
 current CPU's.</td>
-      <td style="font-weight: bold;">1
-(spoiling enabled)</td>
+      <td style="font-weight: bold;">Spoiling enabled</td>
     </tr>
     <tr>
       <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_GLLIB<br>
       </td>
-      <td>none</td>
+      <td><br>
+</td>
 <td valign="top" width="100%"><span style="font-weight: bold;">the
 location of an
-alternate OpenGL .so</span><br style="font-weight: bold;">
-Normally, VirtualGL loads the first OpenGL .so that it finds in the
-dynamic linker path (usually the one found in <span class="monospace">/usr/lib</span>, <span class="monospace">/usr/lib64</span>, <span class="monospace">/usr/openwin/lib</span>, or <span class="monospace">/usr/openwin/lib/sparcv9</span>.)&nbsp;
+alternate OpenGL library</span><br style="font-weight: bold;">
+Normally, VirtualGL loads the first OpenGL dynamic library that it finds in the
+dynamic linker path (usually <span class="monospace">/usr/lib/libGL.so.1</span>, <span class="monospace">/usr/lib64/libGL.so.1<span style="font-family: Arial,Helvetica,sans-serif;"></span></span>,&nbsp; or <span class="monospace">/usr/lib/64/libGL.so.1</span><span class="monospace"></span>.)&nbsp;
 You can
-use this setting to explicitly specify another OpenGL .so to use.<br>
+use this setting to explicitly specify another OpenGL dynamic library to use.<br>
       <br>
 Normally, you shouldn't need to muck with this unless something doesn't
 work.</td>
@@ -252,14 +249,15 @@ work.</td>
     <tr>
       <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_X11LIB<br>
       </td>
-      <td>none</td>
+      <td><br>
+</td>
 <td valign="top" width="100%"><span style="font-weight: bold;">the
 location of an
-alternate X11 .so<br>
+alternate X11 library<br>
       </span>Normally, VirtualGL
-loads the first X11 .so that it finds in the dynamic linker path
-(usually the one found in <span class="monospace">/usr/X11R6/lib</span>, <span class="monospace">/usr/X11R6/lib64</span>, <span class="monospace">/usr/openwin/lib</span>, or <span class="monospace">/usr/openwin/lib/sparcv9</span>.)&nbsp;
-You can use this setting to explicitly specify another X11 .so to
+loads the first X11 dynamic library that it finds in the dynamic linker path
+(usually <span class="monospace">/usr/lib/libX11.so.?</span>, <span class="monospace">/usr/lib/64/libX11.so.?</span>, <span class="monospace">/usr/X11R6/lib/libX11.so.?</span>, or <span class="monospace">/usr/X11R6/lib64/libX11.so.?</span>.)&nbsp;
+You can use this setting to explicitly specify another X11 dynamic library to
 use.<br>
       <br>
 Normally, you shouldn't need to muck with this unless something doesn't
@@ -280,7 +278,12 @@ whatever.&nbsp; This could be used, for instance, to support many
 app instances on a beefy server with multiple 3D graphics cards.<br>
       <br>
       <span style="font-weight: bold;">GLP mode:</span><br>
-Setting this option to<span class="monospace"></span> <span class="monospace">GLP</span> will enable GLP mode and select the first available GLP device for rendering.&nbsp; You can also set the option to<span class="monospace"></span> the pathname of a specific GLP device (e.g. <span class="monospace">/dev/fbs/jfb0</span>.)</td>
+Setting this option to<span class="monospace"></span> <span class="monospace">GLP</span> will enable GLP mode and select the first available GLP device for rendering.&nbsp; You can also set the option to<span class="monospace"></span> the pathname of a specific GLP device (e.g. <span class="monospace">/dev/fbs/jfb0</span>.)&nbsp;
+GLP is a special feature developed by Sun which allows an application
+to render into Pbuffers on the graphics card even when there is no X
+display running on the server.&nbsp; See the section in the VirtualGL
+Unix/Linux User's Guide for more details.<br>
+</td>
       <td style="font-weight: bold;">:0</td>
     </tr>
     <tr>
@@ -318,8 +321,8 @@ connecting to the client</span></td>
 for non-SSL,&nbsp; 4243 for SSL</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_USESSL<br>
-=&lt;0, 1&gt;<br>
+      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_USESSL=0<br>
+VGL_USESSL=1<br>
       </td>
       <td><span style="font-weight: bold;" class="monospace">+s</span><br class="monospace">
 or<br>
@@ -331,32 +334,33 @@ compressed image stream inside a secure socket layer</span><br style="font-weigh
       <span class="note">Note:</span>&nbsp;
 You must be running the secure client for this to work.&nbsp; See
 the VirtualGL User's Guide for more details. </td>
-      <td style="font-weight: bold;">0
-(SSL disabled)</td>
+      <td style="font-weight: bold;">SSL disabled</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_COMPRESS<br>
-=&lt;0, 1&gt;<br>
+      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_COMPRESS=0<br>
+VGL_COMPRESS=1<br>
+<br>
       </td>
       <td><span style="font-weight: bold;" class="monospace">-c &lt;0, 1&gt;</span></td>
 <td valign="top" width="100%"><span style="font-weight: bold;">Enable/disable image
-compression</span><br style="font-weight: bold;">
-When image compression is disabled, VirtualGL will bypass its
+compression</span><br style="font-weight: bold;">When
+image compression is disabled, VirtualGL will bypass its
 compressed image delivery system and instead use X11 image drawing
 commands
-to composite the 3D area of the window back into the window.&nbsp; This
+to composite the pixels from the 3D rendering back into the
+window.&nbsp; This
 is primarily useful in conjunction with VNC, Citrix for Unix, or
 another remote display mechanism that performs X11 rendering on the
 server and contains its own image compression and delivery
-mechanisms.&nbsp; Performing uncompressed X11 blits to an X server
-running elsewhere on the network is not typically going to be a very
-high-performance option.</td>
+mechanisms.&nbsp; Disabling compression outside of a VNC (or similar)
+session is not advisable, since it will result in uncompressed images
+being sent over the network to the client.</td>
       <td style="font-weight: bold;">1
-(image compression enabled)</td>
+(JPEG compression enabled)</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_PROFILE<br>
-=&lt;0, 1&gt;<br>
+      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_PROFILE=0<br>
+VGL_PROFILE=1<br>
       </td>
       <td><span style="font-weight: bold;" class="monospace">+profile</span><br>
 or<br>
@@ -366,16 +370,16 @@ output</span><br style="font-weight: bold;">
 If enabled, this will cause the server to continuously measure and
 display the pixel throughput of the overall pipeline and of the
 readback and compression stages.</td>
-      <td style="font-weight: bold;">0
-(profiling disabled)</td>
+      <td style="font-weight: bold;">Profiling disabled</td>
     </tr><tr>
-      <td><span style="font-weight: bold;" class="monospace">VGL_SYNC<br>
-=&lt;0, 1&gt;</span></td>
+      <td><span style="font-weight: bold;" class="monospace">VGL_SYNC=0<br>
+VGL_SYNC=1<br>
+</span></td>
       <td>none</td>
       <td><span style="font-weight: bold;">Enable/disable strict 2D/3D synchronization (necessary to pass GLX conformance tests)<br>
       </span>Normally, VirtualGL's operation is asynchronous from the
 point of view of the application.&nbsp; The application swaps the
-buffers or calls glFInish() or glFlush() or glXWaitGL(), and VirtualGL
+buffers or calls glFinish() or glFlush() or glXWaitGL(), and VirtualGL
 reads back the framebuffer and sends the pixels to the client's display
 ... eventually.&nbsp; This will work fine for a vast majority of
 applications, but it is not strictly conformant.&nbsp; Rarely, an
@@ -384,24 +388,29 @@ immediately access the resulting pixels using X11 functions such as
 XGetImage().&nbsp; Enabling <span class="monospace">VGL_SYNC</span> is
 a somewhat extreme measure that may be needed to get such applications
 to work properly.&nbsp; It was developed as a way to pass the GLX
-conformance suite (conformx, specifically.)&nbsp; When <span class="monospace">VGL_SYNC</span> is enabled, every call to glFinish() or glXWaitGL() will cause the contents of the server's framebuffer to be read back and <span style="font-style: italic;">synchronously</span> drawn into the client's window <span style="font-style: italic;">without frame spoiling</span>.&nbsp;
+conformance suite (conformx, specifically.)&nbsp; When <span class="monospace">VGL_SYNC</span> is enabled, every call to glFinish() or glXWaitGL() will cause the contents of the server's framebuffer to be read back and <span style="font-style: italic;">synchronously</span> drawn into the client's window <span style="font-style: italic;">without compression or frame spoiling</span>.&nbsp;
 The call to glFinish() or glXWaitGL() does not return until the pixels
-have been delivered into the client's window, thus enabling this mode
+have been delivered into the client's window, and as such, enabling this mode
 can have potentially dire effects on performance.<span style="font-weight: bold;"></span></td>
-      <td><span style="font-weight: bold;">0 (synchronization disabled)</span></td>
+      <td><span style="font-weight: bold;">Synchronization disabled</span></td>
     </tr>
     <tr>
-      <td><span style="font-weight: bold;" class="monospace">VGL_MT<br>
-=&lt;0, 1&gt;</span></td>
+      <td><span style="font-weight: bold;" class="monospace">VGL_MT=0<br>
+VGL_MT=1<br>
+</span></td>
       <td><span style="font-weight: bold;" class="monospace">+mt</span><br>
 or<br>
       <span style="font-weight: bold;" class="monospace">-mt</span></td>
-      <td><span style="font-weight: bold;">Enable/disable multi-threaded compression</span><br>
-If enabled, the server will divide the task of compressing the frame
-among all of the available processors, which might speed up the overall
-throughput if the server's JPEG codec is slow.&nbsp; Enabling
-multi-threaded compression has no effect on a uniprocessor system.</td>
-      <td><span style="font-weight: bold;">0 (multi-threaded compression disabled)</span></td>
+      <td><span style="font-weight: bold;">Enable/disable multi-threaded compression</span><br>If
+enabled, the server will divide the task of compressing the frame
+among all of the available server processors, which might speed up the
+overall
+throughput if the compression stage of the pipeline is the primary
+bottleneck.&nbsp; Often, the VirtualGL pipeline is more limited by the
+performance of the client and other factors, so this setting may not
+have much of an effect on overall performance.&nbsp; Enabling
+multi-threaded compression has no effect on a uniprocessor server.</td>
+      <td><span style="font-weight: bold;">Multi-threaded compression disabled</span></td>
     </tr>
 
   </tbody>
@@ -421,16 +430,15 @@ Name</td>
 Value</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_PROFILE<br>
+      <td style="font-weight: bold;" class="monospace" valign="baseline" width="42">VGL_PROFILE=0<br>
+VGL_PROFILE=1<br>
       </td>
-      <td style="width: 100%; vertical-align: top;"><span style="font-weight: bold;">1
-to turn on profiling
+      <td style="width: 100%; vertical-align: top;"><span style="font-weight: bold;">Enable/disable profiling
 output</span><br style="font-weight: bold;">
 If enabled, this will cause the client to continuously measure and
 display the pixel throughput of the overall pipeline and of the
 decompression and blitting stages.</td>
-      <td style="font-weight: bold;">0
-(profiling disabled)</td>
+      <td style="font-weight: bold;">Profiling disabled</td>
     </tr>
   </tbody>
 </table>

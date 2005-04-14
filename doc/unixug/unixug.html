@@ -102,11 +102,9 @@ text-align: right;
 <li><a href="#requirements">System Recommendations</a></li>
 <li><a href="#linuxinstallation">Installation (Linux)</a></li><li><a href="#solarisinstallation">Installation (Solaris)</a></li>
 
-<li><a href="#basicusage">Basic Usage</a></li>
-<li><a href="#secureusage">Secure Usage</a></li>
-</ul>
-
-<hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
+<li><a href="#basicusage">Basic Usage</a></li><li><a href="#glpusage">GLP Usage</a></li>
+  <li><a href="#secureusage">Secure Usage</a></li>
+</ul><hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
 
 <h2>Legal Information</h2>
 
@@ -518,9 +516,37 @@ Consult the <a href="config.html">VirtualGL Configuration Guide</a> for more inf
 </li>
 </ol>
 <br>
-<div style="text-align: right;"><a href="#" target="_top">top</a></div>
-
-<ol>
+<div style="text-align: right;"><a href="#" target="_top">top</a><br>
+<hr style="width: 100%; height: 2px;"><br>
+<div style="text-align: left;"><a name="glpusage"></a>
+</div>
+<h2 style="text-align: left;">GLP Usage</h2>
+<div style="text-align: left;">Sun Microsystems has developed an
+extension to OpenGL called GLP which allows an application to directly
+access the rendering capabilities of a 3D graphics card even if there
+is no X display running on the server.&nbsp; Apart from greatly
+simplifying the process of setting up VirtualGL on a server, GLP also
+greatly improves the security model, since it is no longer necessary to
+grant every user access to display :0.<br>
+<br>
+Version 2.0 of VirtualGL for Sparc/Solaris supports using GLP if it is
+available.&nbsp; Currently, this feature is available only on a select
+few graphics devices using version 1.5 of Sun OpenGL, which is not yet
+generally available.&nbsp; But Sun is actively promoting the GLP spec
+as a possible cross-platform industry standard OpenGL extension, so
+watch this space.<br>
+<br>
+See <a href="http://www.opengl.org/about/arb/notes/glP_presentation.pdf">http://www.opengl.org/about/arb/notes/glP_presentation.pdf</a> for more details on GLP.<br>
+<br>
+If GLP is supported on your application server, it can be enabled by passing an argument of <span class="monospace">-d GLP</span> to <span class="monospace">vglrun</span>, e.g.:<br>
+<pre>/opt/SUNWvgl/bin/vglrun -d GLP {application_executable_or_script} {arguments}<br></pre>
+This will tell the VirtualGL faker to enable GLP mode and select the first available GLP device.&nbsp; You can also set the <span class="monospace">VGL_DISPLAY</span> environment variable to GLP to achieve the same effect:<br>
+<pre>export VGL_DISPLAY=GLP<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
+Additionally, you can specify a specific GLP device to use for rendering:<br>
+<pre>export VGL_DISPLAY=/dev/fbs/jfb0<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
+</div>
+<div style="text-align: right;"><a href="unixug.html#" target="_top">top</a></div>
+</div><ol>
 
 </ol>
 
