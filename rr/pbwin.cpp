@@ -201,6 +201,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	oldpb=pb=NULL;  neww=newh=-1;
 	blitter=NULL;
 	prof_rb.setname("Readback");
+	syncdpy=false;
 }
 
 pbwin::~pbwin(void)
@@ -364,6 +365,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->h.subsamp=fconfig.currentsubsamp;
 			b->flags|=RRBMP_BOTTOMUP;
 			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
+			if(!syncdpy) {XSync(windpy, False);  syncdpy=true;}
 			rrdpy->sendframe(b);
 			break;
 		}

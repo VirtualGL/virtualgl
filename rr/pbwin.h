@@ -76,6 +76,7 @@ class pbwin
 		int neww, newh;
 		rrblitter *blitter;
 		rrprofiler prof_rb;
+		bool syncdpy;
 };
 
 #endif
