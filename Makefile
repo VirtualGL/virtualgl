@@ -84,6 +84,8 @@ install: rr
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/config/config.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/config/*.gif $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
@@ -110,6 +112,8 @@ install: rr diags
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/config/config.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/config/*.gif $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
