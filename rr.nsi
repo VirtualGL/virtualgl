@@ -22,8 +22,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "$%systemroot%\system32\libeay32.dll"
 	File "$%systemroot%\system32\ssleay32.dll"
 	File "doc\winug.html"
-	File /r /x CVS "doc\winug"
-	File "doc\config.html"
+	File /r /x CVS "doc\winug" 
 	File /r /x CVS "doc\config"
 	File "LGPL.txt"
 	File "LICENSE.txt"
@@ -50,7 +49,7 @@ Section "Start Menu Shortcuts (required)"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\vglclient.exe"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Secure Client.lnk" "$INSTDIR\vglclient.exe" "-s"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} User's Guide.lnk" "$INSTDIR\winug.html"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} Configuration Guide.lnk" "$INSTDIR\config.html"
+	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} Configuration Guide.lnk" "$INSTDIR\config\config.html"
 
 SectionEnd
 
@@ -76,7 +75,6 @@ Section "Uninstall"
 	Delete $INSTDIR\winug.html
 	Delete $INSTDIR\winug\*.*
 	RMDir $INSTDIR\winug
-	Delete $INSTDIR\config.html
 	Delete $INSTDIR\config\*.*
 	RMDir $INSTDIR\config
 	Delete $INSTDIR\LGPL.txt
