@@ -1,5 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><style type="text/css">
+<html><head>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+<style type="text/css">
 body {
 background-color: rgb(255, 255, 255);
 font-family: Arial,Helvetica,sans-serif;
@@ -83,7 +85,9 @@ margin-right: 3px;
 .top {
 text-align: right;
 }
-  </style></head>
+  </style>
+  <title>Building VirtualGL</title>
+</head>
 <body><h1>How to build VirtualGL in 9043 easy steps</h1>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Linux</span></h2>
@@ -156,6 +160,12 @@ need at minimum the following 32-bit packages:</p>
 perform the following additional step:</p>
 <pre>cd /usr/lib<br>ln -fs /lib/libssl.so.? libssl.so</pre>
 <p>This creates a development stub for the 32-bit OpenSSL library, since a 
+32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
+<p>On Enterprise Linux 4.0 or Fedora, you may additionally need to do the 
+following:</p>
+
+<pre>cd /usr/include/openssl<br>ln -fs opensslconf-x86_64.h opensslconf-i386.h<br></pre>
+<p>This creates an appropriate i386 header file for OpenSSL, since  a 
 32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Solaris</span></h2>

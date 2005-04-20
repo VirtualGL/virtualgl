@@ -63,10 +63,11 @@ margin-right: 10px;
 }
 .note {
 border: 1px solid rgb(0, 0, 0);
-padding: 2px;
+padding: 1px 5px;
 font-weight: bold;
 background-color: blue;
 color: rgb(255, 255, 255);
+margin-right: 10px;
 }
 .monospace {
 font-family: monospace
@@ -159,9 +160,9 @@ Only newer AMD 64-bit processors support SSE3.</li>
 </ul>
 </ul>
 <li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
-<li>RedHat Enterprise Linux 3.0 (64-bit) or equivalent (Works with
-<a href="http://fedora.redhat.com/">Fedora</a> and
-<a href="http://whiteboxlinux.net/">WhiteBox</a>)</li>
+<li>RedHat Enterprise Linux 3.0 or 4.0 (64-bit) or equivalent (Should work with
+<a href="http://fedora.redhat.com/">Fedora</a>,
+<a href="http://www.whiteboxlinux.org">WhiteBox</a>, and <a href="http://www.centos.org/">CentOS</a>)<br></li>
 <li>X server configured for true color (24/32-bit)</li></ul>
 <h3>Client (Linux)<br>
 </h3>
@@ -192,8 +193,6 @@ from <a href="http://www.blastwave.org">http://www.blastwave.org</a></li>
   <li>graphics card with decent 2D performance<br>
   </li>
   <li>Solaris 8 or higher</li>
-  <li>Sun OpenGL 1.3 or later (see <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a>)&nbsp; OpenGL 1.5 or later required for GLP support.<br>
-  </li>
   <li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
   <li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the package from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
@@ -214,7 +213,7 @@ effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> 
   <li>Obtain the latest VirtualGL RPM package from the files
 area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
 <br>
-<span class="note">Note:</span>&nbsp; .tgz packages are provided for users of non-RedHat platforms.&nbsp; You can use <a href="http://www.kitenet.net/programs/alien/">alien</a> to convert these into .deb packages if you prefer.&nbsp; These packages have not been thoroughly tested.<br>
+<span class="note">Note:</span>.tgz packages are provided for users of non-RedHat platforms.&nbsp; You can use <a href="http://www.kitenet.net/programs/alien/">alien</a> to convert these into .deb packages if you prefer.&nbsp; These packages have not been thoroughly tested.<br>
 <br>The "glibc22" or "rh7"
 packages are built on RedHat Enterprise Linux 2.1, but they should
 theoretically work on any RPM-based system that has GLIBC 2.2 and
@@ -224,8 +223,11 @@ patched.)<br>
 The "glibc23" or "rh8" packages are built on Whitebox Enterprise Linux
 3.0, but they should theoretically work on any RPM-based system that
 has GLIBC 2.3 and libstdc++ 3.2 or 3.3, including RedHat
-Linux 8 (patched), RedHat Linux 9, RedHat Enterprise Linux 3, Fedora
-Core 1 and 2, and SuSE 8.2 or newer.<br>
+Linux 8 (patched), RedHat Linux 9, RedHat or CentOS Enterprise Linux 3,
+Fedora
+Core 1 and 2, and SuSE 8.2 or newer.&nbsp; The "glibc23" packages will
+also work on RedHat or CentOS Enterprise Linux&nbsp; 4.0 or on Fedora
+Core 3 if the <span class="monospace">compat-libstdc++-33</span> package is installed.<br>
 <br>
   </li>
 
@@ -236,8 +238,7 @@ command:<br>
 </li>
 </ol>
 
-<span class="note">Note:</span>&nbsp;
-For x86-64 systems, the VirtualGL64 package contains the server
+<span class="note">Note:</span>For x86-64 systems, the VirtualGL64 package contains the server
 components for use with 64-bit apps.&nbsp; To install the client or
 the 32-bit server components, install the 32-bit VirtualGL package.<br>
 <h3>Display Configuration (Server Only)</h3>
@@ -293,6 +294,14 @@ id:5:initdefault:<br>
   
   to the tail end of this file.</li>
 
+<li>If the server is running Enterprise Linux 4.0 or Fedora Core 3, you may
+need to switch from gdm to kdm to get access to display :0.&nbsp; Later
+versions of gdm do not seem to work with the technique in Step 5.&nbsp; You
+can select kdm by changing<br>
+    <pre>preferred=</pre>
+to<br>
+    <pre>preferred=kdm</pre>
+in <span class="monospace">/etc/X11/prefdm</span>.</li>
   <li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; In
    <span class="monospace">/etc/X11/gdm/gdm.conf</span>, look 
   for any line containing a command line such as 
@@ -300,7 +309,7 @@ id:5:initdefault:<br>
   or  <span class="monospace">/usr/X11R6/bin/X</span>.&nbsp; Add an argument of
   <span class="monospace">-tst</span> to these command lines.<br>
     <br>
-    <span class="note">Note:</span>&nbsp; Disabling 
+    <span class="note">Note:</span>Disabling
   XTEST eliminates a potential security loophole opened up by Step 5, whereby an 
   authenticated user on the server could theoretically send key/mouse events 
   into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
@@ -378,10 +387,11 @@ commands:<br>
     <pre>bzip2 -d SUNWvgl.pkg.bz2<br>pkgadd -d SUNWvgl.pkg</pre>
 </li><li>Select the <span class="monospace">SUNWvgl</span> package (usually option 1) from the menu.</li>
 </ol>
-<span class="note">Note:</span>&nbsp; VirtualGL for Solaris installs into <span class="monospace">/opt/SUNWvgl</span>.<span style="font-weight: bold;"><br>
+<span class="note">Note:</span>VirtualGL for Solaris installs into <span class="monospace">/opt/SUNWvgl</span>.<span style="font-weight: bold;"><br>
 </span>
 <h3>Display Configuration (Server Only)</h3>
-<p><span class="note">Note:</span>&nbsp; If you plan to use VirtualGL only in GLP mode, you can skip this section.</p>
+<p><span class="note">Note:</span>If you plan to use VirtualGL only in GLP mode, you can skip this section.</p>
+
 <p>When VirtualGL is being used in GLX mode, it requires access to display
 :0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span> environment variable)
 so that it can create and render to off-screen Pbuffers on the server's
@@ -404,7 +414,7 @@ automatically granted regardless of whether anyone is logged in locally.</p>
     <pre>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/mouse:/dev/kbd<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/sound/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # audio devices<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # frame buffers</pre>
 </li><li>Issue the following commands:<br>
     <pre>chmod 666 /dev/mouse /dev/kbd /dev/fbs/*<br>chmod 666 /dev/sound/*</pre>
-    <span class="note">Note:</span>&nbsp; <span class="monospace">/dev/sound/*</span> may not exist if there are no sound drivers on your system.<br>
+    <span class="note">Note:</span><span class="monospace">/dev/sound/*</span> may not exist if there are no sound drivers on your system.<br>
 &nbsp;</li>
   <li>If <span class="monospace">/etc/dt/config/Xsetup</span> does not exist, then copy the default <span class="monospace">Xsetup</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
     <pre>cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup</pre>
@@ -431,7 +441,7 @@ automatically granted regardless of whether anyone is logged in locally.</p>
     </li>
     <li>Edit <span class="monospace">/etc/dt/config/Xservers</span> and add an argument of <span class="monospace">-tst</span> after <span class="monospace">Xsun</span> on all lines in the file.<br>
       <br>
-      <span class="note">Note:</span>&nbsp; Disabling 
+      <span class="note">Note:</span>Disabling 
   XTEST eliminates a potential security loophole opened up by Step 6, whereby an 
   authenticated user on the server could theoretically send key/mouse events 
   into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
@@ -459,7 +469,7 @@ automatically granted regardless of whether anyone is logged in locally.</p>
 
 <pre>pkgrm SUNWvgl</pre>
 Answer "yes" when prompted.<br>
-<div style="text-align: right;"><a href="unixug.html#" target="_top">top</a><br>
+<div style="text-align: right;"><a href="#" target="_top">top</a><br>
 </div>
 <hr style="width: 100%; height: 2px;"><a name="basicusage"></a>
 <h2>Basic Usage</h2>
@@ -475,7 +485,7 @@ Answer "yes" when prompted.<br>
     inside a shell.<br>
     
     <br>
-    <span class="note">Note:</span>&nbsp; You only need to do this once, 
+    <span class="note">Note:</span>You only need to do this once, 
   not every time you use VirtualGL.<br>
 &nbsp;</li>
 
@@ -545,7 +555,7 @@ This will tell the VirtualGL faker to enable GLP mode and select the first avail
 Additionally, you can specify a specific GLP device to use for rendering:<br>
 <pre>export VGL_DISPLAY=/dev/fbs/jfb0<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
 </div>
-<div style="text-align: right;"><a href="unixug.html#" target="_top">top</a></div>
+<div style="text-align: right;"><a href="#" target="_top">top</a></div>
 </div><ol>
 
 </ol>
@@ -618,12 +628,12 @@ After opening the SSh connection into the application server, don't set the
     <span class="monospace">DISPLAY</span> environment.&nbsp; Instead, set the environment variable <span class="monospace">VGL_CLIENT</span> to the client display, e.g.
 <pre>export VGL_CLIENT={my_client_machine}:0.0<br></pre>
 
-<p><span class="note">Note:</span>&nbsp; Whether or not this works will
+<p><span class="note">Note:</span>Whether or not this works will
 of course depend on whether the SSh server has the X11 tunneling
 feature enabled.&nbsp;&nbsp; It is almost always enabled on Linux but
 may not be enabled on all Solaris servers.<br>
 </p>
-<p><span class="tip">Tip:</span> If your connection to the
+<p><span class="tip">Tip:</span>If your connection to the
 server is low-bandwidth, you may wish
 to pass a <span class="monospace">-C</span>
 argument to ssh when
@@ -685,8 +695,7 @@ Inside that
 session, set the environment variable <span class="monospace">VGL_CLIENT</span>
 to <span class="monospace">localhost:0.0</span>.<br>
 <br>
-<span class="note">Note:</span>&nbsp;
-Replace 0.0 with the
+<span class="note">Note:</span>Replace 0.0 with the
 display number of your client's X server.<br>
 <br>
 </li>
@@ -705,14 +714,12 @@ as well as the <span class="monospace">VGL_PORT</span>
 environment
 variable on the server.)</p>
 
-<p><span class="tip">Tip:</span>&nbsp;
-This same procedure would also
+<p><span class="tip">Tip:</span>This same procedure would also
 work if you needed to connect directly to <span class="monospace">app_server_machine</span> and tunnel
 everything over SSh.&nbsp; In that case, simply leave out Step 2.<br>
 &nbsp;</p>
 
-<p><span class="tip">Tip:</span>&nbsp;
-You might also want to try
+<p><span class="tip">Tip:</span>You might also want to try
 enabling SSh compression for the first stage of the trip, from your
 client to the SSh gateway.&nbsp; This could improve performance if
 the
