@@ -22,7 +22,8 @@ void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	sym=dlsym(dllhnd, (char *)symbol);
-	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);  return NULL;}
+	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_SELF, (char *)symbol);}
+	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);}
 	return sym;
 }
 
