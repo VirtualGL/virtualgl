@@ -22,6 +22,7 @@ usage()
 	echo "VirtualGL miscellaneous options"
 	echo "  +/-profile  : Enable/disable performance profiling"
 	echo "  +/-mt       : Enable/disable multi-threaded compression"
+	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
 	echo
 	exit $1
 }
@@ -38,6 +39,8 @@ fi
 while [ $# -gt 0 ]
 do
 	case "$1" in
+	+sy*)       VGL_SYNC=1        ; export VGL_SYNC     ;;
+	-sy*)       VGL_SYNC=0        ; export VGL_SYNC     ;;
 	+sp*)       VGL_SPOIL=1       ; export VGL_SPOIL    ;;
 	-sp*)       VGL_SPOIL=0       ; export VGL_SPOIL    ;;
 	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;
