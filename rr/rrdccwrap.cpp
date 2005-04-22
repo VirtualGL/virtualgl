@@ -12,6 +12,9 @@
  */
 
 #include "rrdisplayclient.h"
+#include "fakerconfig.h"
+
+static FakerConfig rrfconfig;
 
 // C wrappers
 
@@ -206,6 +209,26 @@ DLLEXPORT int DLLCALL
 	{
 		if(!h || !bits) _throw("Invalid argument");
 		rrc->sendcompressedframe(*h, bits);
+		return RR_SUCCESS;
+	}
+	_catch()
+	return RR_ERROR;
+}
+
+DLLEXPORT int DLLCALL
+	RRGetFakerConfig(fakerconfig *fc)
+{
+	try
+	{
+		if(!fc) _throw("Invalid argument");
+		fc->client=rrfconfig.client;
+		fc->server=rrfconfig.localdpystring;
+		fc->qual=rrfconfig.currentqual;
+		fc->subsamp=rrfconfig.currentsubsamp;
+		fc->port=rrfconfig.port;
+		fc->spoil=rrfconfig.spoil;
+		fc->ssl=rrfconfig.ssl;
+		fc->multithread=rrfconfig.mt;
 		return RR_SUCCESS;
 	}
 	_catch()

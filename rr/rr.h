@@ -82,6 +82,19 @@ typedef void * RRDisplay;
 #define RR_SUCCESS 0
 #define RR_ERROR   -1
 
+/* Faker Config structure (populated by RRGetFakerConfig() */
+typedef struct _fakerconfig
+{
+	char *client;
+	char *server;
+	int qual;
+	int subsamp;
+	unsigned short port;
+	int spoil;
+	int ssl;
+	int multithread;
+} fakerconfig;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -293,6 +306,26 @@ DLLEXPORT int DLLCALL
 
    bits (IN) = pointer to compressed data buffer.  It should contain h->size
                bytes of data
+
+   RETURN VALUE:
+   If successful, RR_SUCCESS is returned.  Otherwise, RR_ERROR is returned and
+   the reason for the failure can be queried with RRErrorString() and
+   RRErrorLocation().
+*/
+
+
+DLLEXPORT int DLLCALL
+	RRGetFakerConfig(fakerconfig *fc);
+/*
+   This function populates a structure with parameters from the VirtualGL
+   faker configuration, which is read either from the environment or
+   from configuration files.  The values returned in the structure can be
+   subsequently passed to RROpenDisplay(), RRSendFrame(), etc.
+
+   PARAMETERS:
+   fc (IN) = address of previously allocated fakerconfig structure.  This will
+             be populated with the current faker config when this function
+             successfully returns.
 
    RETURN VALUE:
    If successful, RR_SUCCESS is returned.  Otherwise, RR_ERROR is returned and
