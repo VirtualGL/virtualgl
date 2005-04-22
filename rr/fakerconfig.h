@@ -104,11 +104,11 @@ class FakerConfig
 			getconfig("RRUSESSL", ssl);
 			getconfig("VGL_SSL", ssl);
 			getconfigint("PORT", port, 0, 65535);
-			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
+			if(port==-1) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 			getconfigbool("WINDOW", usewindow);
 			if(glp) usewindow=false;
 			getconfigbool("SYNC", sync);
-			getconfigbool("MT", sync);
+			getconfigbool("MT", mt);
 		}
 
 		void setloqual(void)
