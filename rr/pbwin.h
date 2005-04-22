@@ -61,6 +61,7 @@ class pbwin
 		void readback(GLint, bool, bool sync=false);
 		void swapbuffers(void);
 		void forcenextframe(void) {force=true;}
+		bool dirty;
 
 	private:
 

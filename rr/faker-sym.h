@@ -285,6 +285,8 @@ funcdef0(void, glFlush,);
 
 funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,);
 
+funcdef1(void, glDrawBuffer, GLenum, drawbuf,);
+
 
 // X11 functions
 

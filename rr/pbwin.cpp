@@ -202,6 +202,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	blitter=NULL;
 	prof_rb.setname("Readback");
 	syncdpy=false;
+	dirty=false;
 }
 
 pbwin::~pbwin(void)
@@ -323,6 +324,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	rrcs::safelock l(mutex);
 
+	dirty=false;
 	if(this->force) {force=true;  this->force=false;}
 	if(sync) {compress=RRCOMP_NONE;  force=true;}
 	int pbw=pb->width(), pbh=pb->height();

@@ -120,6 +120,7 @@ void loadsymbols(void)
 	lsym(glFinish)
 	lsym(glFlush)
 	lsym(glViewport)
+	lsym(glDrawBuffer)
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 

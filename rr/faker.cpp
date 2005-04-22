@@ -59,7 +59,14 @@ GLPDevice _localdev=-1;
 #define _localdisplayiscurrent() (GetCurrentDisplay()==_localdpy)
 #endif
 #define _isremote(dpy) (fconfig.glp || (_localdpy && dpy!=_localdpy))
+#define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT)
 
+static inline int _drawingtofront(void)
+{
+	GLint drawbuf=GL_BACK;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return _isfront(drawbuf);
+}
 
 static rrcs globalmutex;
 winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;
@@ -554,9 +561,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(drawable==0 || (newpbw=winh.findpb(dpy, drawable))==NULL
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			GLint drawbuf=GL_BACK;
-			glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-			if(drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK) pbw->readback(true);
+			if(_drawingtofront()) pbw->readback(true);
 		}
 	}
 
@@ -647,9 +652,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		if(draw==0 || (newpbw=winh.findpb(dpy, draw))==NULL
 			|| newpbw->getdrawable()!=curdraw)
 		{
-			GLint drawbuf=GL_BACK;
-			glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-			if(drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK) pbw->readback(true);
+			if(_drawingtofront()) pbw->readback(true);
 		}
 	}
 
@@ -833,12 +836,12 @@ void _doGLreadback(bool force, bool sync=false)
 	GLXDrawable drawable;
 	drawable=GetCurrentDrawable();
 	if(!drawable) return;
-	GLint drawbuf=GL_BACK;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	if((drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK)
-	&& (pbw=winh.findpb(drawable))!=NULL)
+	if((pbw=winh.findpb(drawable))!=NULL)
 	{
-		pbw->readback(GL_FRONT, force, sync);
+		if(_drawingtofront() || pbw->dirty)
+		{
+			pbw->readback(GL_FRONT, force, sync);
+		}
 	}
 }
 
@@ -872,6 +875,19 @@ void glXWaitGL(void)
 	CATCH();
 }
 
+// If the application switches the draw buffer before calling glFlush(), we
+// set a lazy readback trigger
+void glDrawBuffer(GLenum mode)
+{
+	TRY();
+	pbwin *pbw=NULL;
+	GLXDrawable drawable=GetCurrentDrawable();
+	if(drawable && (pbw=winh.findpb(drawable))!=NULL && _drawingtofront())
+		pbw->dirty=true;
+	_glDrawBuffer(mode);
+	CATCH();
+}
+	
 // Sometimes XNextEvent() is called from a thread other than the
 // rendering thread, so we wait until glViewport() is called and
 // take that opportunity to resize the Pbuffer
