@@ -98,8 +98,8 @@ static GLfloat angle = 0.0;
 
 /****************************** RRlib ******************************/
 
-#define DEFAULTQUAL 95
-#define DEFAULTSUBSAMP RR_444
+fakerconfig config;
+
 #define DEFAULTMOVFILE "glpgears.vgl"
 
 RRDisplay rrdpy=0;
@@ -107,8 +107,7 @@ GLPDevice serverdev=-1;
 GLPBuffer pbuffer=0;
 GLPFBConfig fbcfg=0;
 int pbwidth=-1, pbheight=-1;
-int spoil=0, ssl=0, qual=DEFAULTQUAL, subsamp=DEFAULTSUBSAMP, dpynum=0,
-	multithread=0, record=0, playback=0;
+int dpynum=0, record=0, playback=0;
 GLPContext ctx=0;
 int movfile=-1;
 
@@ -598,14 +597,14 @@ event_loop(Display *dpy, Window win)
          contents of the back framebuffer. */
 
       rrtrap(ready=RRFrameReady(rrdpy));
-      if (!spoil || ready) {
+      if (!config.spoil || ready) {
          rrtrap(RRGetFrame(rrdpy, pbwidth, pbheight, RR_RGB, 1, &frame));
          glPixelStorei(GL_PACK_ALIGNMENT, 1);
          glReadPixels(0, 0, pbwidth, pbheight, GL_RGB, GL_UNSIGNED_BYTE,
             frame.bits);
 
-         frame.h.qual=qual;
-         frame.h.subsamp=subsamp;
+         frame.h.qual=config.qual;
+         frame.h.subsamp=config.subsamp;
 
       /* Use RRCompressFrame() to compress the frame for storage.  We'll
          go ahead and send it now as well, just so we can monitor the record
@@ -672,33 +671,41 @@ main(int argc, char *argv[])
 {
    Display *dpy;
    Window win;
-   char *devName = NULL, **devices = NULL;  int ndevices = 0;
-   char *clidpyName = NULL;
+   char **devices = NULL;  int ndevices = 0;
    GLboolean printInfo = GL_FALSE;
    int i;
-   unsigned short port = 0;
 
+   rrtrap(RRGetFakerConfig(&config));
 
    for (i = 1; i < argc; i++) {
       if (strncasecmp(argv[i], "-d", 2) == 0 && i+1<argc) {
-         devName = argv[i+1];
+         config.server = argv[i+1];
          i++;
       }
       else if (strncasecmp(argv[i], "-cl", 3) == 0 && i+1<argc) {
-         clidpyName = argv[i+1];
+         config.client = argv[i+1];
          i++;
       }
       else if (strcasecmp(argv[i], "-info") == 0) {
          printInfo = GL_TRUE;
       }
       else if (strncasecmp(argv[i], "-ssl", 4) == 0) {
-         ssl = 1;
+         config.ssl = 0;
+      }
+      else if (strncasecmp(argv[i], "+ssl", 4) == 0) {
+         config.ssl = 1;
       }
       else if (strncasecmp(argv[i], "-sp", 3) == 0) {
-         spoil = 1;
+         config.spoil = 0;
+      }
+      else if (strncasecmp(argv[i], "+sp", 3) == 0) {
+         config.spoil = 1;
       }
       else if (strncasecmp(argv[i], "-mt", 3) == 0) {
-         multithread = 1;
+         config.multithread = 0;
+      }
+      else if (strncasecmp(argv[i], "+mt", 3) == 0) {
+         config.multithread = 1;
       }
       else if (strncasecmp(argv[i], "-play", 5) == 0) {
          playback = 1;
@@ -707,47 +714,47 @@ main(int argc, char *argv[])
          record = 1;
       }
       else if (strncasecmp(argv[i], "-p", 2) == 0 && i+1<argc) {
-         port = atoi(argv[i+1]);
+         config.port = atoi(argv[i+1]);
          i++;
       }
       else if (strncasecmp(argv[i], "-sa", 3) == 0 && i+1<argc) {
          int temp = atoi(argv[i+1]);
          switch (temp) {
-            case 411: subsamp=RR_411;  break;
-            case 422: subsamp=RR_422;  break;
-            case 444: subsamp=RR_444;  break;
+            case 411: config.subsamp=RR_411;  break;
+            case 422: config.subsamp=RR_422;  break;
+            case 444: config.subsamp=RR_444;  break;
          }
          i++;
       }
       else if (strncasecmp(argv[i], "-q", 2) == 0 && i+1<argc) {
          int temp = atoi(argv[i+1]);
-         if(temp>=1 && temp<=100) qual=temp;
+         if(temp>=1 && temp<=100) config.qual=temp;
          i++;
       }
       else if (strncasecmp(argv[i], "-h", 2) == 0
          || strncasecmp(argv[i], "-\?", 2) == 0) {
          printf("\nUSAGE: %s\n", argv[0]);
          printf("       [-d </dev/fbs/xxx>] [-cl <hostname:x.x>] [-p <xxxx>]\n");
-         printf("       [-q <1-100>] [-samp <411|422|444>] [-sp] [-ssl] [-mt]\n");
+         printf("       [-q <1-100>] [-samp <411|422|444>] [+/-sp] [+/-ssl] [+/-mt]\n");
          printf("       [-rec] [-play] [-info]\n\n");
-         printf("-d    = Set GLP device where 3D rendering will occur\n");
-         printf("-cl   = Set display where the client is running\n");
-         printf("        (default: read from DISPLAY environment)\n");
-         printf("-p    = Set port to use when connecting to the client\n");
-         printf("        (default: %d for non-SSL or %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
-         printf("-q    = Set compression quality [1-100] (default: %d)\n", DEFAULTQUAL);
-         printf("-samp = Set YUV subsampling [411, 422, or 444] (default: %s)\n", DEFAULTSUBSAMP==RR_444?"444":(DEFAULTSUBSAMP==RR_422?"422":"411"));
-         printf("-sp   = Turn on frame spoiling\n");
-         printf("-ssl  = Communicate with the client using an SSL tunnel\n");
-         printf("-mt   = Enable multi-threaded compression\n");
-         printf("-rec  = Record movie (will be stored in a file named %s)\n", DEFAULTMOVFILE);
-         printf("-play = Playback movie (from file %s)\n", DEFAULTMOVFILE);
-         printf("-info = Print OpenGL info\n");
+         printf("-d     = Set GLP device where 3D rendering will occur\n");
+         printf("         (default: %s)\n", config.server);
+         printf("-cl    = Set display where the client is running\n");
+         printf("         (default: %s)\n", config.client?config.client:"read from DISPLAY environment");
+         printf("-p     = Set port to use when connecting to the client\n");
+         printf("         (default: %d)\n", config.port);
+         printf("-q     = Set compression quality [1-100] (default: %d)\n", config.qual);
+         printf("-samp  = Set YUV subsampling [411, 422, or 444] (default: %s)\n", config.subsamp==RR_444?"444":(config.subsamp==RR_422?"422":"411"));
+         printf("+/-sp  = Enable/disable frame spoiling (default: %s)\n", config.spoil?"enabled":"disabled");
+         printf("+/-ssl = Enable/disable SSL tunneling (default: %s)\n", config.ssl?"enabled":"disabled");
+         printf("+/-mt  = Enable/disable multi-threaded compression (default: %s)\n", config.multithread?"enabled":"disabled");
+         printf("-rec   = Record movie (will be stored in a file named %s)\n", DEFAULTMOVFILE);
+         printf("-play  = Playback movie (from file %s)\n", DEFAULTMOVFILE);
+         printf("-info  = Print OpenGL info\n");
          printf("\n");
          return 0;
       }
    }
-   if(port==0) port=ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 
 
    /****************************** RRlib ******************************/
@@ -758,7 +765,7 @@ main(int argc, char *argv[])
       printf("Error: couldn't open display\n");
       return -1;
    }
-   if (!clidpyName) clidpyName=DisplayString(dpy);
+   if (!config.client) config.client=DisplayString(dpy);
 
    /* Open a connection to the server display to use for 3D rendering */
 
@@ -767,7 +774,9 @@ main(int argc, char *argv[])
       return -1;
    }
 
-   serverdev = glPOpenDevice(devName);
+   if(!strcasecmp(config.server, "GLP") || config.server[0]!='/')
+      config.server=NULL;
+   serverdev = glPOpenDevice(config.server);
    if (serverdev < 0) {
       printf("Error: couldn't open device\n");
       return -1;
@@ -781,7 +790,7 @@ main(int argc, char *argv[])
       NOTE: clidpyName can be NULL if all you want to do is compress
       images without sending them. */
 
-   rrdpy = RROpenDisplay(clidpyName, port, ssl, multithread, &dpynum);
+   rrdpy = RROpenDisplay(config.client, config.port, config.ssl, config.multithread, &dpynum);
    if (!rrdpy) {
       printf("Error: could not open connection to client\n");
       printf("%s--\n%s\n", RRErrorLocation(), RRErrorString());
