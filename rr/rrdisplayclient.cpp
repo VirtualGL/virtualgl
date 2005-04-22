@@ -36,6 +36,7 @@ void rrdisplayclient::run(void)
 		b=NULL;
 		q.get((void **)&b);  if(deadyet) break;
 		if(!b) _throw("Queue has been shut down");
+		ready.unlock();
 		if(np>1)
 			for(i=1; i<np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
@@ -56,7 +57,6 @@ void rrdisplayclient::run(void)
 		prof_total.endframe(b->h.width*b->h.height, 0, 1);
 		prof_total.startframe();
 
-		if(lastb) lastb->complete();
 		lastb=b;
 	}
 
@@ -72,20 +72,19 @@ void rrdisplayclient::run(void)
 	} catch(rrerror &e)
 	{
 		if(t) t->seterror(e);
-		if(lastb) lastb->complete();  if(b) b->complete();
-		throw;
+		ready.unlock();
+ 		throw;
 	}
 }
 
 rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 {
 	rrframe *b=NULL;
+	ready.lock();  if(deadyet) return NULL;
 	if(t) t->checkerror();
 	bmpmutex.lock();
 	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
 	bmpmutex.unlock();
-	b->waituntilcomplete();  if(deadyet) return NULL;
-	if(t) t->checkerror();
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;

@@ -54,7 +54,7 @@ class rrdisplayclient : public Runnable
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(rrframe *bmp) {if(bmp) bmp->complete();}
+	void release(rrframe *bmp) {ready.unlock();}
 
 	rrsocket *sd;
 
@@ -62,6 +62,7 @@ class rrdisplayclient : public Runnable
 
 	static const int NB=3;
 	rrcs bmpmutex;  rrframe bmp[NB];  int bmpi;
+	rrmutex ready;
 	genericQ q;
 	Thread *t;  bool deadyet;
 	rrprofiler prof_total;
