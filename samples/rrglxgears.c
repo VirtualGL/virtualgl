@@ -49,6 +49,18 @@
 #include <GL/glx.h>
 #include <rr.h>
 
+#ifndef GLX_RGBA_BIT
+#define GLX_RGBA_BIT 0x00000001
+#endif
+#ifndef GLX_RGBA_TYPE
+#define GLX_RGBA_TYPE 0x8014
+#endif
+#ifndef GLX_PBUFFER_WIDTH
+#define GLX_PBUFFER_WIDTH 0x8041
+#endif
+#ifndef GLX_PBUFFER_HEIGHT
+#define GLX_PBUFFER_HEIGHT 0x8040
+#endif
 
 #define BENCHMARK
 
