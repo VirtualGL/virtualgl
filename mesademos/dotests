@@ -1,0 +1,93 @@
+#/bin/sh
+
+err()
+{
+	echo Test status was non-zero.  Continue tests? [Y\/n]
+	read _CHOICE
+	if [ "$_CHOICE" = "n" ]; then exit -1; fi
+	if [ "$_CHOICE" = "N" ]; then exit -1; fi
+}
+
+dotest()
+{
+	echo $VGLRUN $BINPATH/glthreads -n 30
+	$VGLRUN $BINPATH/glthreads -n 30 || err
+	echo $VGLRUN $BINPATH/glxdemo
+	$VGLRUN $BINPATH/glxdemo || err
+	echo $VGLRUN $BINPATH/glxgears
+	$VGLRUN $BINPATH/glxgears || err
+	echo $VGLRUN $BINPATH/glxheads
+	$VGLRUN $BINPATH/glxheads $DISPLAY $DISPLAY $DISPLAY $DISPLAY $DISPLAY || err
+	echo $VGLRUN $BINPATH/glxinfo
+	$VGLRUN $BINPATH/glxinfo || err
+	echo $VGLRUN $BINPATH/glxpixmap
+	$VGLRUN $BINPATH/glxpixmap || err
+	echo $VGLRUN $BINPATH/manywin -s 30
+	$VGLRUN $BINPATH/manywin -s 30 || err
+	echo $VGLRUN $BINPATH/offset
+	$VGLRUN $BINPATH/offset || err
+	echo $VGLRUN $BINPATH/pbdemo 1024 768 /tmp/pbdemo.ppm
+	rm /tmp/pbdemo.ppm
+	$VGLRUN $BINPATH/pbdemo 1024 768 /tmp/pbdemo.ppm || err
+	$XV /tmp/pbdemo.ppm
+	rm /tmp/pbdemo.ppm
+	echo $VGLRUN $BINPATH/shape
+	$BINPATH/shape || err
+	echo $VGLRUN $BINPATH/testgl5
+	$VGLRUN -sp $BINPATH/testgl5 || err
+	echo $VGLRUN $BINPATH/testgl5 -i
+	$VGLRUN -sp $BINPATH/testgl5 -i || err
+	echo $VGLRUN $BINPATH/wincopy
+	$VGLRUN $BINPATH/wincopy || err
+	echo $VGLRUN $BINPATH/xfont
+	$VGLRUN $BINPATH/xfont || err
+}
+
+usage()
+{
+	echo USAGE: $0 {binary path} {platform} [subplatform] [GLP]
+	exit 0
+}
+
+testglp=0
+
+if [ -z $1 ]; then usage; fi
+if [ -z $2 ]; then usage; fi
+if [ -z $3 ]; then
+	subplatform=32
+else
+	if [ "$3" = "GLP" ]; then
+		testglp=1;
+	fi
+fi
+if [ ! -z $4 ]; then
+	if [ "$4" = "GLP" ]; then
+		testglp=1;
+	fi
+fi
+
+BINPATH=$1
+platform=$2
+subplatform=$3
+
+VGLRUN0=$BINPATH/vglrun
+if [ "$subplatform" = "64" ]; then
+	VGLRUN0=$BINPATH/vglrun64
+fi
+XV=xv
+
+if [ "$platform" = "solaris" ]; then
+	testglp=1
+fi
+
+if [ "$platform" = "linux" ]; then
+	XV=kview
+fi
+
+VGLRUN=$VGLRUN0
+dotest
+
+if [ $testglp -eq 1 ]; then
+	VGLRUN=$VGLRUN0' -d GLP'
+	dotest
+fi

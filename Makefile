@@ -1,7 +1,7 @@
 all: rr mesademos diags samples
 ALL: dist mesademos
 
-.PHONY: rr util jpeg mesademos diags clean dist samples
+.PHONY: rr util jpeg mesademos diags clean dist samples test
 
 rr: util jpeg
 jpeg: util
@@ -20,6 +20,16 @@ clean:
 
 TOPDIR=.
 include Makerules
+
+ifeq ($(USEGLP), yes)
+test: rr mesademos
+	chmod u+x mesademos/dotests ;\
+	exec mesademos/dotests $(EDIR) $(platform) $(subplatform) GLP
+else
+test: rr mesademos
+	chmod u+x mesademos/dotests ;\
+	exec mesademos/dotests $(EDIR) $(platform) $(subplatform)
+endif
 
 ##########################################################################
 ifeq ($(platform), windows)
