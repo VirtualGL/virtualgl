@@ -227,7 +227,7 @@ Linux 8 (patched), RedHat Linux 9, RedHat or CentOS Enterprise Linux 3,
 Fedora
 Core 1 and 2, and SuSE 8.2 or newer.&nbsp; The "glibc23" packages will
 also work on RedHat or CentOS Enterprise Linux&nbsp; 4.0 or on Fedora
-Core 3 if the <span class="monospace">compat-libstdc++-33</span> package is installed.<br>
+Core 3 if the <span class="monospace">compat-libstdc++-33</span> or <span class="monospace">compat-libstdc++-8</span> package is installed.<br>
 <br>
   </li>
 
@@ -244,13 +244,13 @@ the 32-bit server components, install the 32-bit VirtualGL package.<br>
 <br>
 <h3>Installing on SuSE/United Linux</h3>
 The VirtualGL glibc23 RPM's can be installed and used on a SuSE Linux
-or similar system provided that the following additional steps are
+or equivalent system provided that the following additional steps are
 taken:<br>
 <ul>
-  <li>Pass an argument of <span class="monospace">--nodeps </span>to the rpm command line when installing the package, e.g.:<br>
+  <li>Pass an argument of <span class="monospace">--nodeps </span>to rpm when installing the package, e.g.:<br>
     <pre>rpm -Uvh {RPM package name} --nodeps</pre>
   </li>
-  <li>Link <span class="monospace">/usr/lib/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span> (or <span class="monospace">/usr/lib64/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span>) to the location of your OpenSSL libraries, e.g.:<br>
+  <li>Link <span class="monospace">/usr/lib/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span> (or <span class="monospace">/usr/lib64/libssl.so.4</span> and <span class="monospace">/usr/lib64/libcrypto.so.4</span>) to the location of your OpenSSL libraries, e.g.:<br>
     <pre>ln -fs /usr/lib/libssl.so.0 /usr/lib/libssl.so.4<br>ln -fs /usr/lib/libcrypto.so.0 /usr/lib/libcrypto.so.4</pre>
   </li>
 </ul>
@@ -271,9 +271,11 @@ automatically granted regardless of whether anyone is logged in locally.</p>
   <li>If the server machine is configured to boot into runlevel 5 (graphical 
   login), then temporarily shut down its X server by issuing<br>
     <pre>init 3</pre>
- as root</li>
+ as root<br>
+&nbsp;</li>
 
-  <li>Log in as root from the text console.</li><li>
+  <li>Log in as root from the text console.<br>
+&nbsp;</li><li>
   If the server machine is configured to boot into runlevel 3 (text login), 
   then configure it to boot into a graphical login by changing the first line of
   <span class="monospace">/etc/inittab</span> from<br>
@@ -291,49 +293,111 @@ id:5:initdefault:<br>
 
   <li>If the server is running the NVidia accelerated GLX drivers, follow the 
   instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span> regarding setting 
-  the appropriate permissions for  <span class="monospace">/dev/nvidia*</span>.&nbsp; Usually, this 
-  involves commenting out any lines containing 
-  <span class="monospace">&lt;dri&gt;</span> from
-   <span class="monospace">/etc/security/console.perms</span>, 
-  changing the mode of  <span class="monospace">/dev/nvidia*</span> to 0666, and changing the owner of
-   <span class="monospace">
-  /dev/nvidia*</span> to root.</li>
+  the appropriate permissions for  <span class="monospace">/dev/nvidia*</span>.<br>
+&nbsp;</li>
 
-  <li> Edit <span class="monospace">/etc/X11/xdm/Xsetup_0</span> (replace "0" with the display number of 
-  the X server you are configuring.)&nbsp; Add the line<br>
-
-  
+  <li>Add<br>
     <pre>xhost +localhost</pre>
+to the tail end of the X11 setup file.&nbsp; The location of the X11
+setup file varies depending on the particular Linux distribution and
+display manager being used.&nbsp; The following table lists some common
+locations for this file:<br>
+    <br>
+    <table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+      <tbody>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader"></td>
+          <td style="font-weight: bold;" class="colorheader">xdm or kdm</td>
+          <td style="font-weight: bold;" class="colorheader">gdm<small><br>
+(default on most Linux systems)</small></td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">RedHat (or equivalent)</td>
+          <td><span class="monospace">/etc/X11/xdm/Xsetup_0<br>
+          </span><br>
+(replace 0 with the display number of the X server you are configuring)</td>
+          <td><span class="monospace">/etc/X11/gdm/Init/Default<br>
+          </span><br>
+(usually this is just symlinked to <span class="monospace">/etc/X11/xdm/Xsetup_0</span>)</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">SuSE/United Linux</td>
+          <td><span class="monospace">/etc/X11/xdm/Xsetup</span></td>
+          <td><span class="monospace">/etc/opt/gnome/gdm/Init/Default</span></td>
+        </tr>
+      </tbody>
+    </table>
+&nbsp;</li>
 
-  
-  to the tail end of this file.</li>
 
 <li>If the server is running Enterprise Linux 4.0 or Fedora Core 3, you may
 need to switch from gdm to kdm to get access to display :0.&nbsp; Later
-versions of gdm do not seem to work with the technique in Step 5.&nbsp; You
-can select kdm by changing<br>
+versions of gdm do not seem to allow access to display :0 even when
+configured using the instructions in Step 5.&nbsp; On these platforms,
+you can switch from gdm to kdm by changing<br>
     <pre>preferred=</pre>
 to<br>
     <pre>preferred=kdm</pre>
-in <span class="monospace">/etc/X11/prefdm</span>.</li>
-  <li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; In
-   <span class="monospace">/etc/X11/gdm/gdm.conf</span>, look 
-  for any line containing a command line such as 
-  <span class="monospace">/usr/X11/bin/X</span> 
-  or  <span class="monospace">/usr/X11R6/bin/X</span>.&nbsp; Add an argument of
-  <span class="monospace">-tst</span> to these command lines.<br>
-    <br>
-    <span class="note">Note:</span>Disabling
+in <span class="monospace">/etc/X11/prefdm</span>.<br>
+&nbsp;</li>
+  <li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; Disabling
   XTEST eliminates a potential security loophole opened up by Step 5, whereby an 
   authenticated user on the server could theoretically send key/mouse events 
   into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
   server's local display logged out when not in use.<br>
-&nbsp;</li>
+    <br>
+Disabling XTEST is accomplished by passing an argument of <span class="monospace">-tst</span>
+on the command line used to launch the X server.&nbsp; The location of
+this command line varies depending on the particular Linux
+distribution and display manager being used.&nbsp;&nbsp; The following
+table lists some common locations:<br>
+    <br>
+    <table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader"></td>
+      <td style="font-weight: bold;" class="colorheader">xdm <br>
+</td>
+      <td style="font-weight: bold;" class="colorheader">gdm<br>
+          <small>(default on most Linux systems)</small><br>
+</td><td style="font-weight: bold;" class="colorheader">kdm</td>
+
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">RedHat (or equivalent)</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span><br>
+</td>
+      <td><span class="monospace">/etc/X11/gdm/gdm.conf</span><br>
+</td><td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">SuSE/United Linux</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+      <td><span class="monospace">/etc/opt/gnome/gdm/gdm.conf</span></td><td><span class="monospace">/etc/opt/kde3/share/config/kdm/Xservers</span></td>
+
+    </tr>
+  </tbody>
+    </table>
+    <br>
+    <br>
+For xdm-style configuration files, add <span class="monospace">-tst</span> to the line corresponding to the display number you are configuring, e.g.:
+    <pre>:0 local /usr/X11R6/bin/X :0 vt07 -tst<br></pre>
+For gdm-style configuration files, add <span class="monospace">-tst</span> to all lines that appear to be X server command lines, e.g.:<br>
+    <pre>StandardXServer=/usr/X11R6/bin/X -tst</pre>
+    <pre>[server-Standard]<br>command=/usr/X11R6/bin/X -tst -audit 0</pre>
+    <pre>[server-Terminal]<br>command=/usr/X11R6/bin/X -tst -audit 0 -terminate</pre>
+    <pre>[server-Chooser]<br>command=/usr/X11R6/bin/X -tst -audit 0<br></pre>
+&nbsp;<br>
+  </li>
+
 
 
   <li>Restart the X server by issuing<br>
     <pre>init 5</pre>
- as root.</li>
+ as root.<br>
+&nbsp;</li>
 
   <li>You can check your work by running<br>
     <pre>xdpyinfo -display :0</pre>
@@ -341,7 +405,9 @@ in <span class="monospace">/etc/X11/prefdm</span>.</li>
   XTEST doesn't show up in the list of extensions if you disabled it above.&nbsp; 
   If <span class="monospace">xdpyinfo</span> fails to run, then the permissions 
   on Display :0 are probably still too restrictive, meaning that the change in 
-  Step 5 didn't take for some reason.</li>
+  Step 5 didn't take for some reason.</li><br>
+  <br>
+
 
 </ol>
 
@@ -446,21 +512,21 @@ automatically granted regardless of whether anyone is logged in locally.</p>
   
     
     <pre>Dtlogin*grabServer:        False<br></pre>
-&nbsp;<br>
+
   </li>
-  <li>Unless you know that you absolutely need it, disable the XTEST extension.</li>
-  <ol style="list-style-type: lower-alpha;">
-    <li>If <span class="monospace">/etc/dt/config/Xservers</span> does not exist, then copy the default <span class="monospace">Xservers</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
-      <pre>cp /usr/dt/config/Xservers /etc/dt/config/Xservers</pre>
-    </li>
-    <li>Edit <span class="monospace">/etc/dt/config/Xservers</span> and add an argument of <span class="monospace">-tst</span> after <span class="monospace">Xsun</span> on all lines in the file.<br>
-      <br>
-      <span class="note">Note:</span>Disabling 
+  <li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; Disabling 
   XTEST eliminates a potential security loophole opened up by Step 6, whereby an 
   authenticated user on the server could theoretically send key/mouse events 
   into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
   server's local display logged out when not in use.<br>
 &nbsp;</li>
+  <ol style="list-style-type: lower-alpha;">
+    <li>If <span class="monospace">/etc/dt/config/Xservers</span> does not exist, then copy the default <span class="monospace">Xservers</span> file from <span class="monospace">/usr/dt/config</span> to that location:<br>
+      <pre>cp /usr/dt/config/Xservers /etc/dt/config/Xservers</pre>
+    </li>
+    <li>Edit <span class="monospace">/etc/dt/config/Xservers</span> and add an argument of <span class="monospace">-tst</span> <span class="monospace"></span>to the line corresponding to the display number you are configuring, e.g.:<br>
+      <pre>:0&nbsp; Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst<br></pre>
+</li>
   </ol>
   <li>Restart the X server by issuing<br>
     <pre>/etc/init.d/dtlogin start</pre>
@@ -532,9 +598,9 @@ on Solaris.<br>
   </li>
   <li>In the SSh session, launch your 3D application using:<br>
     
-    <pre>vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>on Linux or<br>
-    <pre>/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>
-on Solaris.<br>
+    <pre>vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>if the application server is running Linux or<br>
+    <pre>/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>&nbsp;
+if the application server is running Solaris.<br>
     <br>
 Consult the <a href="config.html">VirtualGL Configuration Guide</a> for more information on <span class="monospace">vglrun</span> command line options
 </li>
@@ -660,7 +726,7 @@ connecting over a LAN or other high-speed network.</p>
 the network is through SSh, perhaps
 through a single "gateway" machine.&nbsp; No problem, because SSh
 allows you to tunnel both incoming and outgoing TCP/IP connections on
-any port from one machine to another.&nbsp; Tunneling the compressed image
+any port from one machine to another.&nbsp; Tunneling VirtualGL's video
 stream through SSh will not be as fast as using the built-in SSL
 capabilities of VirtualGL, but sometimes it's the only option available.</p>
 
@@ -672,7 +738,7 @@ configuration:</p>
 
 <p>What we want to do is tunnel
 both the
-X11 protocol stream and VirtualGL's compressed image stream through
+X11 protocol stream and VirtualGL's video stream through
 SSh.&nbsp;
 Here's one way to do it:</p>
 
