@@ -228,7 +228,7 @@ on the Exceed taskbar icon, then select "Tools--&gt;Configuration.")</li>
 <li>Open the "X Server Protocol"
 applet in XConfig.<br>
 <br>
-<span class="note">Note:</span>If you are using the "Classic View" mode of XConfig, open the "Protocol" applet instead.<br>
+    <span class="tip">Tip:</span>If you are using the "Classic View" mode of XConfig, open the "Protocol" applet instead.<br>
 &nbsp; </li>
 <li>In the "X Server Protocol"
 applet, select the "Protocol" tab and make sure that "Use 32 bits per
@@ -252,7 +252,7 @@ server reset, click
 <li>Open the "Other Server
 Settings" applet in XConfig.<br>
 <br>
-<span class="note">Note:</span>If you are using the "Classic View" mode of XConfig, open the "Performance" applet instead.<br>
+    <span class="tip">Tip:</span>If you are using the "Classic View" mode of XConfig, open the "Performance" applet instead.<br>
 &nbsp;<br>
 </li>
 <li>Select the "Performance" tab
@@ -274,7 +274,7 @@ It is recommended that you use SSh (Secure Shell) to log in to the
 application server and launch applications.&nbsp; Some servers are
 configured to allow
 telnet and RSh access, but telnet and RSh both send passwords
-unencrypted over the network and are thus being phased out by
+unencrypted over the network and are thus being phased out in favor of
 SSh.&nbsp; If you already have <a href="http://www.cygwin.com">CygWin</a>
 installed on your
 Windows machine, then you can use the SSh client included in that
@@ -441,7 +441,7 @@ See <a href="http://www.opengl.org/about/arb/notes/glP_presentation.pdf">http://
 <br>
 If GLP is supported on your application server, it can be enabled by passing an argument of <span class="monospace">-d GLP</span> to <span class="monospace">vglrun</span>, e.g.:<br>
 <pre>/opt/SUNWvgl/bin/vglrun -d GLP {application_executable_or_script} {arguments}<br></pre>
-This will tell the VirtualGL faker to enable GLP mode and select the first available GLP device.&nbsp; You can also set the <span class="monospace">VGL_DISPLAY</span> environment variable to GLP to achieve the same effect:<br>
+This will tell the VirtualGL faker to enable GLP mode and select the first available GLP device.&nbsp; You can also set the <span class="monospace">VGL_DISPLAY</span> environment variable to <span class="monospace">GLP</span> to achieve the same effect:<br>
 <pre>export VGL_DISPLAY=GLP<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
 Additionally, you can specify a specific GLP device to use for rendering:<br>
 <pre>export VGL_DISPLAY=/dev/fbs/jfb0<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
@@ -555,7 +555,7 @@ PuTTY</h4>
 
 <li>Launch PuTTY.</li>
 <li>Select the
-Connection--&gt;SSH--&gt;Tunnels category.</li>
+    <span style="font-style: italic;">Connection--&gt;SSH--&gt;Tunnels</span> category.</li>
 <li>Check "Enable X11 forwarding"
 and
 set the "X display location" to
@@ -567,7 +567,7 @@ display Exceed is parking on.</li>
 server is
 low-bandwidth, you may wish to enable SSh protocol compression when
 establishing the connection.&nbsp; To do this, select the
-Connection--&gt;SSH category in PuTTY and check "Enable
+<span style="font-style: italic;">Connection--&gt;SSH</span> category in PuTTY and check "Enable
 compression."&nbsp; Don't use protocol compression when
 connecting over a LAN or other high-speed network.
 
@@ -595,8 +595,7 @@ would normally.<br>
 the network is through SSh, perhaps
 through a single "gateway" machine.&nbsp; No problem, because SSh
 allows you to tunnel both incoming and outgoing TCP/IP connections on
-any port from one machine to another.&nbsp; Tunneling the
-motion-JPEG
+any port from one machine to another.&nbsp; Tunneling VirtualGL's video
 stream through SSh will not be as fast as using the built-in SSL
 capabilities of VirtualGL, but sometimes it's the only option available.</p>
 
@@ -608,7 +607,7 @@ configuration:</p>
 
 <p>What we want to do is tunnel
 both the
-X11 protocol stream and VirtualGL's motion-JPEG stream through
+X11 protocol stream and VirtualGL's video stream through
 SSh.&nbsp;
 Here's one way to do it:</p>
 

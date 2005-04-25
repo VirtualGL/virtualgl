@@ -281,8 +281,8 @@ app instances on a beefy server with multiple 3D graphics cards.<br>
 Setting this option to<span class="monospace"></span> <span class="monospace">GLP</span> will enable GLP mode and select the first available GLP device for rendering.&nbsp; You can also set the option to<span class="monospace"></span> the pathname of a specific GLP device (e.g. <span class="monospace">/dev/fbs/jfb0</span>.)&nbsp;
 GLP is a special feature developed by Sun which allows an application
 to render into Pbuffers on the graphics card even when there is no X
-display running on the server.&nbsp; See the section in the VirtualGL
-Unix/Linux User's Guide for more details.<br>
+display running on the server.&nbsp; See the "GLP Usage" section in the VirtualGL
+User's Guide for more details.<br>
 </td>
       <td style="font-weight: bold;">:0</td>
     </tr>
@@ -329,7 +329,7 @@ or<br>
       <span style="font-weight: bold;" class="monospace">-s</span></td>
 <td valign="top" width="100%"><span style="font-weight: bold;">tunnel
 the VirtualGL
-compressed image stream inside a secure socket layer</span><br style="font-weight: bold;">
+video stream inside a secure socket layer</span><br style="font-weight: bold;">
       <br>
       <span class="note">Note:</span>&nbsp;
 You must be running the secure client for this to work.&nbsp; See
@@ -412,8 +412,7 @@ overall
 throughput if the compression stage of the pipeline is the primary
 bottleneck.&nbsp; Often, the VirtualGL pipeline is more limited by the
 performance of the client and other factors, so this setting may not
-have much of an effect on overall performance.&nbsp; Enabling
-multi-threaded compression has no effect on a uniprocessor server.</td>
+have much of an effect on overall performance.&nbsp; If the server does not have multiple processors, this setting is ignored.</td>
       <td><span style="font-weight: bold;">Multi-threaded compression disabled</span></td>
     </tr>
 
