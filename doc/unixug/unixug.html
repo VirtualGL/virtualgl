@@ -241,6 +241,20 @@ command:<br>
 <span class="note">Note:</span>For x86-64 systems, the VirtualGL64 package contains the server
 components for use with 64-bit apps.&nbsp; To install the client or
 the 32-bit server components, install the 32-bit VirtualGL package.<br>
+<br>
+<h3>Installing on SuSE/United Linux</h3>
+The VirtualGL glibc23 RPM's can be installed and used on a SuSE Linux
+or similar system provided that the following additional steps are
+taken:<br>
+<ul>
+  <li>Pass an argument of <span class="monospace">--nodeps </span>to the rpm command line when installing the package, e.g.:<br>
+    <pre>rpm -Uvh {RPM package name} --nodeps</pre>
+  </li>
+  <li>Link <span class="monospace">/usr/lib/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span> (or <span class="monospace">/usr/lib64/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span>) to the location of your OpenSSL libraries, e.g.:<br>
+    <pre>ln -fs /usr/lib/libssl.so.0 /usr/lib/libssl.so.4<br>ln -fs /usr/lib/libcrypto.so.0 /usr/lib/libcrypto.so.4</pre>
+  </li>
+</ul>
+<span class="note">Note:</span>Installing the client as a service does not currently work on SuSE/United Linux platforms.
 <h3>Display Configuration (Server Only)</h3>
 <p>VirtualGL requires access to display
 :0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span> environment variable)
