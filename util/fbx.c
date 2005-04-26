@@ -373,7 +373,7 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 	if(s->shm)
 	{
 		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
-		x11(XShmPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, True));
+		x11(XShmPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
 	}
 	else
 	#endif
