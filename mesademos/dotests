@@ -58,17 +58,17 @@ if [ -z $3 ]; then
 else
 	if [ "$3" = "GLP" ]; then
 		testglp=1;
+		subplatform=32
+	else
+		subplatform=$3
 	fi
 fi
-if [ ! -z $4 ]; then
-	if [ "$4" = "GLP" ]; then
-		testglp=1;
-	fi
+if [ "$4" = "GLP" ]; then
+	testglp=1;
 fi
 
 BINPATH=$1
 platform=$2
-subplatform=$3
 
 VGLRUN0=$BINPATH/vglrun
 if [ "$subplatform" = "64" ]; then
