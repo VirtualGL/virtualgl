@@ -36,7 +36,7 @@ class rrblitter : public Runnable
 	{
 		deadyet=true;  q.release();
 		if(t) {t->stop();  delete t;  t=NULL;}
-		for(int i=0; i<NB; i++) {if(bmp[i]) {bmp[i]->complete();  delete bmp[i];  bmp[i]=NULL;}}
+		for(int i=0; i<NB; i++) {if(bmp[i]) delete bmp[i];  bmp[i]=NULL;}
 	}
 
 	bool frameready(void);
@@ -46,8 +46,9 @@ class rrblitter : public Runnable
 
 	private:
 
-	static const int NB=3;
+	static const int NB=2;
 	rrcs bmpmutex;  rrfb *bmp[NB];  int bmpi;
+	rrmutex ready;
 	genericQ q;
 	void blitdiff(rrfb *, rrfb *);
 	Thread *t;  bool deadyet;
