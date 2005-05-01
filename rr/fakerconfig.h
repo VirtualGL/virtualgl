@@ -58,7 +58,12 @@ class FakerConfig
 			usewindow=false;
 			sync=false;
 			mt=false;
+			autotest=false;
+			reloadenv();
+		}
 
+		void reloadenv(void)
+		{
 			// Fetch values from environment
 			getconfigstr("GLLIB", gllib);
 			getconfigstr("X11LIB", x11lib);
@@ -109,6 +114,7 @@ class FakerConfig
 			if(glp) usewindow=false;
 			getconfigbool("SYNC", sync);
 			getconfigbool("MT", mt);
+			getconfigbool("AUTOTEST", autotest);
 		}
 
 		void setloqual(void)
@@ -141,6 +147,7 @@ class FakerConfig
 		bool usewindow;
 		bool sync;
 		bool mt;
+		bool autotest;
 
 	private:
 

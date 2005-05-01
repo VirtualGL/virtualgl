@@ -30,6 +30,9 @@ extern Display *_localdpy;
 extern GLPDevice _localdev;
 #endif
 
+static char __autotestclr[40], __autotestframe[40];
+static int __autotestframecount=0;
+
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
 // Generic OpenGL error checker (0 = no errors)
@@ -320,6 +323,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	rrdisplayclient *rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
+	fconfig.reloadenv();
 	int compress=fconfig.compress;
 
 	rrcs::safelock l(mutex);
@@ -342,13 +346,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			#ifdef GL_BGR_EXT
 			if(littleendian())
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true);
 				b->flags=RRBMP_BGR;
 			}
 			else
 			#endif
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, b->bits, drawbuf, true);
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true);
 				b->flags=0;
 			}
 			b->h.dpynum=0;
@@ -396,16 +400,17 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				format=GL_BGRA_EXT;  bits=b->bits+1;
 				#endif
 			}
-			readpixels(0, 0, min(pbw, b->h.framew), b->pitch, min(pbh, b->h.frameh), format, bits, drawbuf, true);
+			readpixels(0, 0, min(pbw, b->h.framew), b->pitch, min(pbh, b->h.frameh), format, b->pixelsize, bits, drawbuf, true);
 			blitter->sendframe(b, sync);
 			break;
 		}
 	}
-
 }
 
-void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum format, GLubyte *bits, GLint buf, bool bottomup)
+void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
+	GLenum format, int ps, GLubyte *bits, GLint buf, bool bottomup)
 {
+
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
@@ -433,6 +438,32 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	prof_rb.endframe(w*h, 0, 1);
 	checkgl("Read Pixels");
+
+	// If automatic faker testing is enabled, store the FB color in an
+	// environment variable so the test program can verify it
+	if(fconfig.autotest)
+	{
+		unsigned char *rowptr, *pixel;  int match=1;
+		int color=-1, i, j, k;
+		color=-1;
+		__autotestframecount++;
+		for(j=0, rowptr=bits; j<h; j++, rowptr+=pitch)
+			for(i=1, pixel=&rowptr[ps]; i<w; i++, pixel+=ps)
+				for(k=0; k<ps; k++)
+				{
+					if(pixel[k]!=rowptr[k]) {match=0;  break;}
+				}
+		if(match)
+		{
+			unsigned char rgb[3];
+			glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
+		}
+		snprintf(__autotestclr, 39, "__VGL_AUTOTESTCLR=%d", color);
+		putenv(__autotestclr);
+		snprintf(__autotestframe, 39, "__VGL_AUTOTESTFRAME=%d", __autotestframecount);
+		putenv(__autotestframe);
+	}
 
 	glPopClientAttrib();
 	tc.restore();

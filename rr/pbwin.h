@@ -67,7 +67,7 @@ class pbwin
 
 		int init(int, int, GLXFBConfig);
 		void blit(GLint);
-		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, GLubyte *,
+		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
 
 		bool force;
