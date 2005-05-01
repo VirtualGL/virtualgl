@@ -128,6 +128,8 @@ void fakerinit(void)
 	if(init) return;
 	init=1;
 
+	fconfig.reloadenv();
+
 	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
@@ -561,7 +563,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(drawable==0 || (newpbw=winh.findpb(dpy, drawable))==NULL
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront()) pbw->readback(true);
+			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -652,7 +654,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		if(draw==0 || (newpbw=winh.findpb(dpy, draw))==NULL
 			|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront()) pbw->readback(true);
+			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -823,7 +825,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && (pbw=winh.findpb(dpy, drawable))!=NULL)
 	{
-		pbw->readback(false);
+		pbw->readback(GL_BACK, false);
 		pbw->swapbuffers();
 	}
 	else _glXSwapBuffers(_localdpy, drawable);
