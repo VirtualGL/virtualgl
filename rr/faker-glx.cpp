@@ -59,6 +59,7 @@ GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 			&& ((configs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), defattribs, &n))==NULL || n<1))
 			return 0;
 		c=configs[0];
+		XFree(configs);
 		if(c) vish.add(dpy, vis, c);
 	}
 	return c;
