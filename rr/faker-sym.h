@@ -20,10 +20,10 @@
 #include <GL/glp.h>
 #endif
 
-extern void safeexit(int);
+extern void __vgl_safeexit(int);
 
 #define checksym(s) {if(!__##s) { \
-	fprintf(stderr, #s" symbol not loaded\n");  fflush(stderr);  safeexit(1);}}
+	fprintf(stderr, #s" symbol not loaded\n");  fflush(stderr);  __vgl_safeexit(1);}}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
@@ -340,6 +340,6 @@ funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 }
 #endif
 
-void loadsymbols(void);
+void __vgl_loadsymbols(void);
 
 #endif

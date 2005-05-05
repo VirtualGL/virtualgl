@@ -18,7 +18,7 @@
 #include "fakerconfig.h"
 extern FakerConfig fconfig;
 
-void *loadsym(void *dllhnd, const char *symbol, int quiet)
+static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	sym=dlsym(dllhnd, (char *)symbol);
@@ -28,10 +28,10 @@ void *loadsym(void *dllhnd, const char *symbol, int quiet)
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	fprintf(stderr, "Could not load symbol %s\n", #s);  safeexit(1);}
+	fprintf(stderr, "Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
-void loadsymbols(void)
+void __vgl_loadsymbols(void)
 {
 	void *dllhnd;
 	dlerror();  // Clear error state
@@ -42,7 +42,7 @@ void loadsymbols(void)
 		if(!dllhnd)
 		{
 			fprintf(stderr, "Could not open %s\n%s\n", fconfig.gllib, dlerror());
-			safeexit(1);
+			__vgl_safeexit(1);
 		}
 	}
 	else dllhnd=RTLD_NEXT;
@@ -131,7 +131,7 @@ void loadsymbols(void)
 		if(!dllhnd)
 		{
 			fprintf(stderr, "Could not open %s\n%s\n", fconfig.x11lib, dlerror());
-			safeexit(1);
+			__vgl_safeexit(1);
 		}
 	}
 	else dllhnd=RTLD_NEXT;

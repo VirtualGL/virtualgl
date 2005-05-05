@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern void _fprintf (FILE *f, const char *format, ...);
+extern void _vglprintf (FILE *f, const char *format, ...);
 
 #include "fakerconfig.h"
 extern FakerConfig fconfig;

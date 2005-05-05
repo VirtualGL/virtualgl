@@ -37,7 +37,7 @@ FakerConfig fconfig;
 #endif
 
 // Did I mention that debugging real-time systems is hell?
-void _fprintf (FILE *f, const char *format, ...)
+void _vglprintf (FILE *f, const char *format, ...)
 {
 	static rrcs mutex;  static rrtimer timer;
 	rrcs::safelock l(mutex);
@@ -75,7 +75,7 @@ winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash
 
 static int __shutdown=0;
 
-int isdead(void)
+static inline int isdead(void)
 {
 	int retval=0;
 	rrcs::safelock l(globalmutex);
@@ -83,7 +83,7 @@ int isdead(void)
 	return retval;
 }
 
-void safeexit(int retcode)
+void __vgl_safeexit(int retcode)
 {
 	int shutdown;
 	globalmutex.lock(false);
@@ -102,7 +102,7 @@ void safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,m) {if(!isdead()) fprintf(stderr, "%s--\n%s\n", f, m);  safeexit(1);}
+#define _die(f,m) {if(!isdead()) fprintf(stderr, "%s--\n%s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
@@ -120,7 +120,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #endif
 #endif
 
-void fakerinit(void)
+static void fakerinit(void)
 {
 	static int init=0;
 
@@ -143,7 +143,7 @@ void fakerinit(void)
 	#endif
 	#endif
 
-	loadsymbols();
+	__vgl_loadsymbols();
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
@@ -157,7 +157,7 @@ void fakerinit(void)
 			if((_localdev=glPOpenDevice(device))<0)
 			{
 				fprintf(stderr, "Could not open device %s.\n", fconfig.localdpystring);
-				safeexit(1);
+				__vgl_safeexit(1);
 			}
 		}
 	}
@@ -168,7 +168,7 @@ void fakerinit(void)
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
 			fprintf(stderr, "Could not open display %s.\n", fconfig.localdpystring);
-			safeexit(1);
+			__vgl_safeexit(1);
 		}
 	}
 }
@@ -251,7 +251,7 @@ void SetQualRecursive(Display *dpy, Window start, int qual, int subsamp, bool re
 	pbw=winh.findpb(dpy, start);
 	if(pbw)
 	{
-		_fprintf(stdout, "SQR: Setting qual\n");
+		_vglprintf(stdout, "SQR: Setting qual\n");
 		pbw->setqual(qual, subsamp, readback);
 	}
 	XQueryTree(dpy, start, &root, &parent, &children, &nchildren);
@@ -260,7 +260,7 @@ void SetQualRecursive(Display *dpy, Window start, int qual, int subsamp, bool re
 }
 #endif
 
-void _HandleEvent(Display *dpy, XEvent *xe)
+static void _HandleEvent(Display *dpy, XEvent *xe)
 {
 	pbwin *pbw=NULL;
 	if(xe && xe->type==ConfigureNotify)
@@ -482,7 +482,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	GLXFBConfig c;
 	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
 	if(!XMatchVisualInfo(dpy, screen, glXConfigDepth(c), glXConfigClass(c),
-		&vtemp)) return NULL;
+		&vtemp)
+	&& !XMatchVisualInfo(dpy, screen, 24, TrueColor, &vtemp)) return NULL;
 	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
 	vish.add(dpy, v, c);
 
@@ -500,7 +501,9 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	////////////////////
 
 	if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
-		glXConfigClass(config), &vtemp)) return NULL;
+		glXConfigClass(config), &vtemp)
+	&& !XMatchVisualInfo(dpy, DefaultScreen(dpy), 24, TrueColor, &vtemp))
+		return NULL;
 	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
 	vish.add(dpy, v, config);
 	CATCH();
@@ -832,7 +835,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	CATCH();
 }
 
-void _doGLreadback(bool force, bool sync=false)
+static void _doGLreadback(bool force, bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
