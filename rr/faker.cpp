@@ -153,7 +153,7 @@ static void fakerinit(void)
 			if((devices=glPGetDeviceNames(&ndevices))==NULL || ndevices<1)
 				_throw("No GLP devices are registered");
 			device=fconfig.localdpystring;
-			if(!stricmp(device, "GLP")) device=NULL;
+			if(!strnicmp(device, "GLP", 3)) device=NULL;
 			if((_localdev=glPOpenDevice(device))<0)
 			{
 				fprintf(stderr, "Could not open device %s.\n", fconfig.localdpystring);
@@ -192,6 +192,9 @@ Display *XOpenDisplay(_Xconst char* name)
 
 int XCloseDisplay(Display *dpy)
 {
+	TRY();
+	dpyh.remove(dpy);
+	CATCH();
 	return _XCloseDisplay(dpy);
 }
 
