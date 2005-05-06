@@ -296,6 +296,20 @@ int rbtest(void)
 			&& checkwindowcolor(dbworking? 0x0000ff:0x00ff00)) printf("SUCCESS\n");
 		}
 
+		printf("glPopAttrib() [f]:             ");
+		glDrawBuffer(GL_BACK);  glFinish();
+		if(checkframe(1))
+		{
+			glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
+			glPopAttrib();  // Back buffer should now be current again & dirty flag should be set
+			glClearBuffer(GL_BACK, 0., 0., 1., 0.);
+			glReadBuffer(GL_BACK);
+			glFinish();  glFinish();
+			if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
+			&& checkwindowcolor(dbworking? 0x00ffff:0xff0000)) printf("SUCCESS\n");
+		}	
+
 		printf("glXMakeCurrent() [f]:          ");
 		glClearBuffer(GL_FRONT, 0., 1., 1., 0.);
 		glClearBuffer(GL_BACK, 1., 0., 1., 0.);
@@ -345,8 +359,7 @@ int rbtest(void)
 
 		printf("glXMakeCurrent() [f&b]:        ");
 		glClearBuffer(GL_FRONT_AND_BACK, 0., 0., 1., 0.);
-		glXMakeCurrent(dpy, win1, ctx0);  // readback should occur
-		glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
+		glXMakeCurrent(dpy, win0, ctx0);  // readback should occur
 		glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 		if(checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0) && checkframe(1)
 		&& checkwindowcolor(0xff0000)) printf("SUCCESS\n");

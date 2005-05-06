@@ -888,14 +888,34 @@ void glXWaitGL(void)
 void glDrawBuffer(GLenum mode)
 {
 	TRY();
-	pbwin *pbw=NULL;
+	pbwin *pbw=NULL;  int before=-1, after=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
-	if(drawable && (pbw=winh.findpb(drawable))!=NULL && _drawingtofront())
-		pbw->dirty=true;
-	_glDrawBuffer(mode);
+	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
+	{
+		before=_drawingtofront();
+		_glDrawBuffer(mode);
+		after=_drawingtofront();
+		if(before && !after) pbw->dirty=true;
+	}
 	CATCH();
 }
-	
+
+// glPopAttrib() can change the draw buffer state as well :/
+void glPopAttrib(void)
+{
+	TRY();
+	pbwin *pbw=NULL;  int before=-1, after=-1;
+	GLXDrawable drawable=GetCurrentDrawable();
+	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
+	{
+		before=_drawingtofront();
+		_glPopAttrib();
+		after=_drawingtofront();
+		if(before && !after) pbw->dirty=true;
+	}
+	CATCH();
+}
+
 // Sometimes XNextEvent() is called from a thread other than the
 // rendering thread, so we wait until glViewport() is called and
 // take that opportunity to resize the Pbuffer

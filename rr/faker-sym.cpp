@@ -121,6 +121,7 @@ void __vgl_loadsymbols(void)
 	lsym(glFlush)
 	lsym(glViewport)
 	lsym(glDrawBuffer)
+	lsym(glPopAttrib)
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 

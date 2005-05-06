@@ -287,6 +287,8 @@ funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,)
 
 funcdef1(void, glDrawBuffer, GLenum, drawbuf,);
 
+funcdef0(void, glPopAttrib,);
+
 
 // X11 functions
 
