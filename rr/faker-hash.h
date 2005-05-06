@@ -22,6 +22,7 @@ typedef struct __hashclassstruct
 	_hashkeytype1 key1;
 	_hashkeytype2 key2;
 	_hashvaluetype value;
+	int refcount;
 	struct __hashclassstruct *prev, *next;
 } _hashclassstruct;
 
@@ -65,26 +66,33 @@ class _hashclass
 			return 1;
 		}
 
-		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2)
+		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2, bool useref=false)
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
 			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
-				if(!ptr->value) ptr->value=attach(key1, key2);
+				if(!ptr->value)
+				{
+					ptr->value=attach(key1, key2);
+					if(useref) ptr->refcount++;
+				}
 				return ptr->value;
 			}
 			return (_hashvaluetype)0;
 		}
 
-		void remove(_hashkeytype1 key1, _hashkeytype2 key2)
+		void remove(_hashkeytype1 key1, _hashkeytype2 key2, bool useref=false)
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
 			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
-				killentry(ptr);
+			{
+				if(useref && ptr->refcount>0) ptr->refcount--;
+				if(!useref || ptr->refcount<=0) killentry(ptr);
+			}
 		}
 
 		int numEntries(void) {return entries;}
