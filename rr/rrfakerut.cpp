@@ -570,6 +570,7 @@ int vistest(void)
 
 		for(i=0; i<n; i++)
 		{
+			if(!configs[i]) continue;
 			fbcid=cfgid(dpy, configs[i]);
 			if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
 			{
@@ -581,6 +582,7 @@ int vistest(void)
 		for(i=0; i<n; i++)
 		{
 			XVisualInfo *v1=NULL;
+			if(!configs[i]) continue;
 			try
 			{
 				fbcid=cfgid(dpy, configs[i]);
