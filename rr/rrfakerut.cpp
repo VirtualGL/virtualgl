@@ -17,7 +17,11 @@
 #include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#include <dlfcn.h>
 #include "rrerror.h"
+
+
+int usingglp=0;
 
 
 #define glClearBuffer(buffer, r, g, b, a) { \
@@ -49,17 +53,17 @@ unsigned int checkbuffercolor(void)
 	{
 		vp[0]=vp[1]=vp[2]=vp[3]=0;
 		glGetIntegerv(GL_VIEWPORT, vp);
-		if(vp[2]<1 || vp[3]<1) throw("Invalid viewport dimensions");
+		if(vp[2]<1 || vp[3]<1) _throw("Invalid viewport dimensions");
 
 		if((buf=(unsigned char *)malloc(vp[2]*vp[3]*3))==NULL)
-			throw("Could not allocate buffer");
+			_throw("Could not allocate buffer");
 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, vp[2], vp[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
 		for(i=3; i<vp[2]*vp[3]*3; i+=3)
 		{
 			if(buf[i]!=buf[0] || buf[i+1]!=buf[1] || buf[i+2]!=buf[2])
-				throw("Bogus data read back from framebuffer");
+				_throw("Bogus data read back from framebuffer");
 		}
 		ret=buf[2]|(buf[1]<<8)|(buf[0]<<16);
 		free(buf);
@@ -100,7 +104,7 @@ int checkframe(int desiredreadbacks)
 	{
 		printf("Failed! (Can't communicate w/ faker)\n");  return 0;
 	}
-	if(frame-lastframe!=desiredreadbacks)
+	if(frame-lastframe!=desiredreadbacks && desiredreadbacks>=0)
 	{
 		printf("Failed! (Expected %d readback%s, not %d)\n", desiredreadbacks,
 			desiredreadbacks==1?"":"s", frame-lastframe);  ret=0;
@@ -349,6 +353,7 @@ int rbtest(void)
 
 		if(ctx0 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0=0;}
 		if(ctx1 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
+		checkframe(-1);
 		if(win0) {XDestroyWindow(dpy, win0);  win0=0;}
 		if(win1) {XDestroyWindow(dpy, win1);  win1=0;}
 		if(v0) {XFree(v0);  v0=NULL;}
@@ -357,8 +362,9 @@ int rbtest(void)
 		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 		return 1;
 	}
-	catch(...)
+	catch(rrerror &e)
 	{
+		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
 		if(ctx0 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0=0;}
 		if(ctx1 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
 		if(win0) {XDestroyWindow(dpy, win0);  win0=0;}
@@ -367,7 +373,278 @@ int rbtest(void)
 		if(v1) {XFree(v1);  v1=NULL;}
 		if(configs) {XFree(configs);  configs=NULL;}
 		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	}
+	return 0;
+}
+
+
+#define getcfgattrib(c, attrib, ctemp) { \
+	ctemp=-10; \
+	glXGetFBConfigAttrib(dpy, c, attrib, &ctemp); \
+	if(ctemp==-10) throw(#attrib" cfg attrib not supported"); \
+}
+
+#define getvisattrib(v, attrib, vtemp) { \
+	vtemp=-20; \
+	glXGetConfig(dpy, v, attrib, &vtemp); \
+	if(vtemp==-20) throw(#attrib" vis attrib not supported"); \
+}
+
+#define compareattrib(c, v, attrib, ctemp) { \
+	getcfgattrib(c, attrib, ctemp); \
+	getvisattrib(v, attrib, vtemp); \
+	if(ctemp!=vtemp) throw(#attrib" mismatch w/ X visual"); \
+}
+
+
+void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
+{
+	int ctemp, vtemp, r, g, b, bs;
+	if(!dpy) throw("Invalid display handle");
+	if(!c) throw("Invalid FB config");
+	if(!v) throw("Invalid visual pointer");
+	getcfgattrib(c, GLX_RENDER_TYPE, ctemp);
+	getvisattrib(v, GLX_RGBA, vtemp);
+	if((ctemp==GLX_RGBA_BIT)!=(vtemp==1))
+		throw("GLX_RGBA mismatch w/ X visual");
+	compareattrib(c, v, GLX_BUFFER_SIZE, bs);
+	compareattrib(c, v, GLX_LEVEL, ctemp);
+	compareattrib(c, v, GLX_DOUBLEBUFFER, ctemp);
+	compareattrib(c, v, GLX_STEREO, ctemp);
+	compareattrib(c, v, GLX_AUX_BUFFERS, ctemp);
+	compareattrib(c, v, GLX_RED_SIZE, r);
+	compareattrib(c, v, GLX_GREEN_SIZE, g);
+	compareattrib(c, v, GLX_BLUE_SIZE, b);
+	compareattrib(c, v, GLX_ALPHA_SIZE, ctemp);
+	compareattrib(c, v, GLX_DEPTH_SIZE, ctemp);
+	compareattrib(c, v, GLX_STENCIL_SIZE, ctemp);
+	compareattrib(c, v, GLX_ACCUM_RED_SIZE, ctemp);
+	compareattrib(c, v, GLX_ACCUM_GREEN_SIZE, ctemp);
+	compareattrib(c, v, GLX_ACCUM_BLUE_SIZE, ctemp);
+	compareattrib(c, v, GLX_ACCUM_ALPHA_SIZE, ctemp);
+	#ifdef GLX_SAMPLE_BUFFERS_ARB
+	compareattrib(c, v, GLX_SAMPLE_BUFFERS_ARB, ctemp);
+	#endif
+	#ifdef GLX_SAMPLES_ARB
+	compareattrib(c, v, GLX_SAMPLES_ARB, ctemp);
+	#endif
+	if(!usingglp)
+	{
+		#ifdef GLX_X_VISUAL_TYPE_EXT
+		compareattrib(c, v, GLX_X_VISUAL_TYPE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_TYPE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_TYPE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_INDEX_VALUE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_INDEX_VALUE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_RED_VALUE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_RED_VALUE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_GREEN_VALUE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_GREEN_VALUE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_BLUE_VALUE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_BLUE_VALUE_EXT, ctemp);
+		#endif
+		#ifdef GLX_TRANSPARENT_ALPHA_VALUE_EXT
+		compareattrib(c, v, GLX_TRANSPARENT_ALPHA_VALUE_EXT, ctemp);
+		#endif
+		#ifdef GLX_VIDEO_RESIZE_SUN
+		compareattrib(c, v, GLX_VIDEO_RESIZE_SUN, ctemp);
+		#endif
+		#ifdef GLX_VIDEO_REFRESH_TIME_SUN
+		compareattrib(c, v, GLX_VIDEO_REFRESH_TIME_SUN, ctemp);
+		#endif
+		#ifdef GLX_GAMMA_VALUE_SUN
+		compareattrib(c, v, GLX_GAMMA_VALUE_SUN, ctemp);
+		#endif
+	}
+}
+
+
+int cfgid(Display *dpy, GLXFBConfig c)
+{
+	int temp;
+	if(!c || !dpy) throw("Invalid argument to cfgid()");
+	getcfgattrib(c, GLX_FBCONFIG_ID, temp);
+	return temp;
+}
+
+
+void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
+{
+	GLXContext ctx=0;  int render_type, fbcid, temp;
+	if(usingglp) return;
+	try
+	{
+		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
+		render_type=(render_type==GLX_COLOR_INDEX_BIT)? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE;
+		fbcid=cfgid(dpy, c);
+
+		if(!(ctx=glXCreateNewContext(dpy, c, render_type, NULL, True)))
+			throw("glXCreateNewContext");
+		temp=-20;
+		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
+		if(temp!=fbcid) throw("glXQueryContext FB cfg ID");
+		#ifndef sun
+		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
+		#endif
+		temp=-20;
+		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
+		if(temp!=render_type) throw("glXQueryContext render type");
+		glXDestroyContext(dpy, ctx);  ctx=0;
+
+		if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
+			throw("glXCreateNewContext");
+		temp=-20;
+		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
+		if(temp!=fbcid) throw("glXQueryContext FB cfg ID");
+		temp=-20;
+		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
+		if(temp!=render_type) throw("glXQueryContext render type");
+		glXDestroyContext(dpy, ctx);  ctx=0;
+	}
+	catch(...)
+	{
+		if(ctx) {glXDestroyContext(dpy, ctx);  ctx=0;}
 		throw;
+	}
+}
+
+
+#ifdef sun
+#define glXGetFBConfigFromVisual glXGetFBConfigFromVisualSGIX
+#else
+GLXFBConfig glXGetFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
+{
+	GLXContext ctx=0;  int temp, fbcid=0, n=0;  GLXFBConfig *configs=NULL, c=0;
+	try
+	{
+		if(!(ctx=glXCreateContext(dpy, vis, NULL, True)))
+			throw("glXCreateNewContext");
+		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &fbcid);
+		glXDestroyContext(dpy, ctx);  ctx=0;
+		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
+			throw("Cannot map visual to FB config");
+		for(int i=0; i<n; i++)
+		{
+			temp=cfgid(dpy, configs[i]);
+			if(temp==fbcid) {c=configs[i];  break;}
+		}
+		XFree(configs);  configs=NULL;
+		if(!c) throw("Cannot map visual to FB config");
+		return c;
+	}
+	catch(...)
+	{
+		if(ctx) {glXDestroyContext(dpy, ctx);  ctx=0;}
+		if(configs) {XFree(configs);  configs=NULL;}
+		throw;
+	}
+	return 0;
+}
+#endif
+
+
+// This tests the faker's client/server visual matching heuristics
+int vistest(void)
+{
+	Display *dpy=NULL;
+	XVisualInfo **v=NULL, *v0=NULL, vtemp;
+	GLXFBConfig c=0, *configs=NULL;  int n=0, i;
+
+	printf("Visual matching heuristics test\n\n");
+
+	try
+	{
+		if(!(dpy=XOpenDisplay(0))) throw("Could not open display");
+		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
+			throw("No FB configs found");
+
+		int fbcid=0;
+		if(!(v=(XVisualInfo **)malloc(sizeof(XVisualInfo *)*n)))
+			throw("Memory allocation error");
+		memset(v, 0, sizeof(XVisualInfo *)*n);
+
+		for(i=0; i<n; i++)
+		{
+			fbcid=cfgid(dpy, configs[i]);
+			if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
+			{
+				printf("CFG ID 0x%.2x:  ", fbcid);
+				throw("No matching X visual for CFG");
+			}
+		}
+
+		for(i=0; i<n; i++)
+		{
+			XVisualInfo *v1=NULL;
+			try
+			{
+				fbcid=cfgid(dpy, configs[i]);
+				printf("CFG ID 0x%.2x:  ", fbcid);
+				if(!(v1=glXGetVisualFromFBConfig(dpy, configs[i])))
+					throw("No matching X visual for CFG");
+
+				configvsvisual(dpy, configs[i], v[i]);
+				configvsvisual(dpy, configs[i], v1);
+				queryctxtest(dpy, v[i], configs[i]);
+				queryctxtest(dpy, v1, configs[i]);
+				
+				c=glXGetFBConfigFromVisual(dpy, v[i]);
+				if(!c || cfgid(dpy, c)!=fbcid) throw("glXGetFBConfigFromVisual");
+				c=glXGetFBConfigFromVisual(dpy, v1);
+				if(!c || cfgid(dpy, c)!=fbcid) throw("glXGetFBConfigFromVisual");
+
+				printf("SUCCESS!\n");
+			}
+			catch(const char *e)
+			{
+				printf("Failed! (%s)\n", e);
+			}
+			if(v1) {XFree(v1);  v1=NULL;}
+		}
+
+		XFree(configs);  configs=NULL;
+		for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;  n=0;
+
+		if(!(v0=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n)) || n==0)
+			throw("No X Visuals found");
+		printf("\n");
+
+		for(int i=0; i<n; i++)
+		{
+			XVisualInfo *v2=NULL;
+			try
+			{
+				printf("Vis ID 0x%.2x:  ", (int)v0[i].visualid);
+				if(!(c=glXGetFBConfigFromVisual(dpy, &v0[i])))
+					throw("No matching CFG for X Visual");
+				configvsvisual(dpy, c, &v0[i]);
+				v2=glXGetVisualFromFBConfig(dpy, c);
+				configvsvisual(dpy, c, v2);
+
+				printf("SUCCESS!\n");
+			}
+			catch(const char *e)
+			{
+				printf("Failed! (%s)\n", e);
+			}
+			if(v2) {XFree(v2);  v2=NULL;}
+		}
+		XFree(v0);  v0=NULL;
+		XCloseDisplay(dpy);  dpy=NULL;
+		return 1;
+	}
+	catch(const char *e)
+	{
+		printf("Failed! (%s)\n", e);
+		if(v && n) {for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;}
+		if(v0) {XFree(v0);  v0=NULL;}
+		if(configs) {XFree(configs);  configs=NULL;}
+		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 	}
 	return 0;
 }
@@ -397,19 +674,32 @@ static int check_errors(const char * tag)
 
 int main(int argc, char **argv)
 {
+	int ret=0;
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
 	{
 		printf("putenv() failed!\n");  return -1;
 	}
+	#ifdef USEGLP
+	char *temp=NULL;
+	if((temp=getenv("VGL_DISPLAY"))!=NULL && strlen(temp)>0)
+	{
+		for(int i=0; i<strlen(temp); i++)
+			if(temp[i]!=' ' && temp[i]!='\t')
+			{
+				temp=&temp[i];  break;
+			}
+		if(temp[0]=='/' || !strncmp(temp, "GLP", 3)) usingglp=1;
+	}
+	#endif
 
-	try
-	{
-		if(!rbtest()) printf("Readback test failed!\n");
-	}
-	catch(rrerror &e)
-	{
-		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
-		return -1;
-	}
+	// Intentionally leave a pending dlerror()
+	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat");
+	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat2");
+
+	if(!rbtest()) ret=-1;
+	printf("\n");
+	if(!vistest()) ret=-1;
+	printf("\n");
+	return ret;
 }
