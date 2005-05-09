@@ -76,7 +76,7 @@ OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
             $(EDIR)/rrfakerut \
-            $(EDIR)/rrframeut \
+            $(EDIR)/rrframeut
 
 TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
           $(LDIR)/librr.$(SHEXT) \
@@ -128,7 +128,7 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -lX11
+	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -lX11 -ldl
 
 $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
