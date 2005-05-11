@@ -123,7 +123,7 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -L/usr/X11R6/lib -lX11
+	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -L/usr/X11R6/lib -lX11 -lpthread
 
 $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
