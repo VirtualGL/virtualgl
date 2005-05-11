@@ -22,6 +22,7 @@ void *loadsym(void *dllhnd, char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	sym=dlsym(dllhnd, symbol);
+	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_DEFAULT, symbol);}
 	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);  return NULL;}
 	return sym;
 }
@@ -33,7 +34,7 @@ void *loadsym(void *dllhnd, char *symbol, int quiet)
 void loadsymbols(void)
 {
 	void *dllhnd;
-	const char *err=dlerror();  // Clear error state
+	dlerror();  // Clear error state
 
 	if(fconfig.gllib)
 	{
@@ -54,12 +55,14 @@ void loadsymbols(void)
 	lsym(glXDestroyContext)
 	lsym(glXDestroyGLXPixmap)
 	lsym(glXGetConfig)
+	lsym(glXGetCurrentDrawable)
 	lsym(glXIsDirect)
 	lsym(glXMakeCurrent);
 	lsym(glXQueryExtension)
 	lsym(glXQueryVersion)
 	lsym(glXSwapBuffers)
 	lsym(glXUseXFont)
+	lsym(glXWaitGL)
 
 	lsym(glXGetClientString)
 	lsym(glXQueryServerString)
@@ -73,6 +76,8 @@ void loadsymbols(void)
 	lsym(glXDestroyPbuffer)
 	lsym(glXDestroyPixmap)
 	lsym(glXDestroyWindow)
+	lsym(glXGetCurrentDisplay)
+	lsym(glXGetCurrentReadDrawable)
 	lsym(glXGetFBConfigAttrib)
 	lsym(glXGetFBConfigs)
 	lsym(glXGetSelectedEvent)
@@ -108,6 +113,8 @@ void loadsymbols(void)
 	lsym(glFinish)
 	lsym(glFlush)
 	lsym(glViewport)
+	lsym(glDrawBuffer)
+	lsym(glPopAttrib)
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 

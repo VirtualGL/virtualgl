@@ -46,6 +46,31 @@ shimfuncdpy2( void, glXDestroyPbuffer, Display*, dpy, GLXPbuffer, pbuf );
 shimfuncdpy2( void, glXFreeContextEXT, Display*, dpy, GLXContext, ctx );
 shimfuncdpy2( const char*, glXGetClientString, Display*, dpy, int, name );
 shimfuncdpyvis4( int, glXGetConfig, Display*, dpy, XVisualInfo*, vis, int, attrib, int*, value );
+
+Display *glXGetCurrentDisplay(void)
+{
+	Display *dpy=NULL;  pbwin *pb=NULL;
+	if((pb=winh.findpb(_localdpy, _glXGetCurrentDrawable()))!=NULL)
+		dpy=pb->getwindpy();
+	return dpy;
+}
+
+GLXDrawable glXGetCurrentDrawable(void)
+{
+	pbwin *pb=NULL;  GLXDrawable draw=0;
+	if((pb=winh.findpb(_localdpy, _glXGetCurrentDrawable()))!=NULL)
+		draw=pb->getwin();
+	return draw;
+}
+
+GLXDrawable glXGetCurrentReadDrawable(void)
+{
+	pbwin *pb=NULL;  GLXDrawable read=0;
+	if((pb=winh.findpb(_localdpy, _glXGetCurrentReadDrawable()))!=NULL)
+		read=pb->getwin();
+	return read;
+}
+
 shimfuncdpy4( int, glXGetFBConfigAttrib, Display*, dpy, GLXFBConfig, config, int, attribute, int*, value );
 shimfuncdpy3( GLXFBConfig*, glXGetFBConfigs, Display*, dpy, int, screen, int*, nelements );
 shimfuncdpy3( void, glXGetSelectedEvent, Display*, dpy, GLXDrawable, draw, unsigned long*, event_mask );

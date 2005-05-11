@@ -46,7 +46,7 @@ void _fprintf (FILE *f, const char *format, ...)
 	va_list arglist;
 	va_start(arglist, format);
 	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx - ", (unsigned long)pthread_self(), hptime(),
-		(unsigned long)glXGetCurrentContext(), glXGetCurrentDrawable(), glXGetCurrentReadDrawable());
+		(unsigned long)glXGetCurrentContext(), _glXGetCurrentDrawable(), _glXGetCurrentReadDrawable());
 	vfprintf(f, format, arglist);
 	fflush(f);
 	va_end(arglist);
@@ -55,6 +55,15 @@ void _fprintf (FILE *f, const char *format, ...)
 // Globals
 Display *_localdpy=NULL;
 static pthread_mutex_t globalmutex=PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+
+#define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT)
+static inline int _drawingtofront(void)
+{
+	GLint drawbuf=GL_BACK;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return _isfront(drawbuf);
+}
+
 winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
@@ -106,13 +115,15 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #endif
 #endif
 
-void fakerinit(void)
+static void fakerinit(void)
 {
 	static int init=0;
 
 	rrlock l(globalmutex);
 	if(init) return;
 	init=1;
+
+	fconfig.reloadenv();
 
 	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
@@ -157,6 +168,9 @@ Display *XOpenDisplay(_Xconst char* name)
 
 int XCloseDisplay(Display *dpy)
 {
+	TRY();
+	dpyh.remove(dpy);
+	CATCH();
 	return _XCloseDisplay(dpy);
 }
 
@@ -182,7 +196,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	TRY();
 	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background))) return 0;
-	winh.add(dpy, win);
+	if(_localdpy && dpy!=_localdpy) winh.add(dpy, win);
 	CATCH();
 	return win;
 }
@@ -225,7 +239,7 @@ void SetQualRecursive(Display *dpy, Window start, int qual, int subsamp, bool re
 }
 #endif
 
-void _HandleEvent(Display *dpy, XEvent *xe)
+static void _HandleEvent(Display *dpy, XEvent *xe)
 {
 	pbwin *pbw=NULL;
 	if(xe && xe->type==ConfigureNotify)
@@ -363,19 +377,19 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 	if(!srcpm && !dstpm) return _XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
 
-	GLXDrawable oldread=glXGetCurrentReadDrawable();
-	GLXDrawable olddraw=glXGetCurrentDrawable();
+	GLXDrawable oldread=_glXGetCurrentReadDrawable();
+	GLXDrawable olddraw=_glXGetCurrentDrawable();
 	GLXContext ctx=glXGetCurrentContext();
-	Display *olddpy=glXGetCurrentDisplay();
+	Display *olddpy=_glXGetCurrentDisplay();
 	if(!ctx || !olddpy) return 0;  // Does ... not ... compute
 
 	// Intentionally call the faked function so it will map a PB if src or dst is a window
 	glXMakeContextCurrent(dpy, draw, read, ctx);
 
 	unsigned int srch, dsth, dstw;
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
-	_glXQueryDrawable(glXGetCurrentDisplay(), glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
 
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -514,17 +528,15 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(dpy==_localdpy) return _glXMakeCurrent(dpy, drawable, ctx);
 	////////////////////
 
-	GLXDrawable curdraw=glXGetCurrentDrawable();
-	if(glXGetCurrentContext() && glXGetCurrentDisplay()==_localdpy
+	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	if(glXGetCurrentContext() && _glXGetCurrentDisplay()==_localdpy
 	&& curdraw && (pbw=winh.findpb(_localdpy, curdraw))!=NULL)
 	{
 		pbwin *newpbw;
 		if(drawable==0 || (newpbw=winh.findpb(dpy, drawable))==NULL
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			GLint drawbuf=GL_BACK;
-			glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-			if(drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK) pbw->readback(true);
+			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -586,17 +598,15 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	if(dpy==_localdpy) return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	////////////////////
 
-	GLXDrawable curdraw=glXGetCurrentDrawable();
-	if(glXGetCurrentContext() && glXGetCurrentDisplay()==_localdpy
+	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	if(glXGetCurrentContext() && _glXGetCurrentDisplay()==_localdpy
 	&& curdraw && (pbw=winh.findpb(_localdpy, curdraw))!=NULL)
 	{
 		pbwin *newpbw;
 		if(draw==0 || (newpbw=winh.findpb(dpy, draw))==NULL
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			GLint drawbuf=GL_BACK;
-			glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-			if(drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK) pbw->readback(true);
+			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -774,7 +784,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	pbwin *pbw=NULL;
 	if(dpy!=_localdpy && (pbw=winh.findpb(dpy, drawable))!=NULL)
 	{
-		pbw->readback(false);
+		pbw->readback(GL_BACK, false);
 		pbw->swapbuffers();
 	}
 	else _glXSwapBuffers(_localdpy, drawable);
@@ -785,11 +795,16 @@ void _doGLreadback(bool force)
 {
 	pbwin *pbw;
 	Display *dpy;  GLXDrawable drawable;
-	dpy=glXGetCurrentDisplay();
-	drawable=glXGetCurrentDrawable();
+	dpy=_glXGetCurrentDisplay();
+	drawable=_glXGetCurrentDrawable();
 	if(!dpy || !drawable) return;
 	if((pbw=winh.findpb(dpy, drawable))!=NULL)
-		pbw->readback(GL_FRONT, force);
+	{
+		if(_drawingtofront() || pbw->dirty)
+		{
+			pbw->readback(GL_FRONT, force);
+		}
+	}
 }
 
 void glFlush(void)
@@ -808,16 +823,59 @@ void glFinish(void)
 	CATCH();
 }
 
+void glXWaitGL(void)
+{
+	TRY();
+	_glXWaitGL();
+	_doGLreadback(false);
+	CATCH();
+}
+
+// If the application switches the draw buffer before calling glFlush(), we
+// set a lazy readback trigger
+void glDrawBuffer(GLenum mode)
+{
+	TRY();
+	pbwin *pbw=NULL;  int before=-1, after=-1;
+	Display *dpy=_glXGetCurrentDisplay();
+	GLXDrawable drawable=_glXGetCurrentDrawable();
+	if(dpy && drawable && (pbw=winh.findpb(dpy, drawable))!=NULL)
+	{
+		before=_drawingtofront();
+		_glDrawBuffer(mode);
+		after=_drawingtofront();
+		if(before && !after) pbw->dirty=true;
+	}
+	CATCH();
+}
+
+// glPopAttrib() can change the draw buffer state as well :/
+void glPopAttrib(void)
+{
+	TRY();
+	pbwin *pbw=NULL;  int before=-1, after=-1;
+	Display *dpy=_glXGetCurrentDisplay();
+	GLXDrawable drawable=_glXGetCurrentDrawable();
+	if(dpy && drawable && (pbw=winh.findpb(dpy, drawable))!=NULL)
+	{
+		before=_drawingtofront();
+		_glPopAttrib();
+		after=_drawingtofront();
+		if(before && !after) pbw->dirty=true;
+	}
+	CATCH();
+}
+
 // Sometimes XNextEvent() is called from a thread other than the
 // rendering thread, so we wait until glViewport() is called and
 // take that opportunity to resize the Pbuffer
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	TRY();
-	Display *dpy=glXGetCurrentDisplay();
+	Display *dpy=_glXGetCurrentDisplay();
 	GLXContext ctx=glXGetCurrentContext();
-	GLXDrawable draw=glXGetCurrentDrawable();
-	GLXDrawable read=glXGetCurrentReadDrawable();
+	GLXDrawable draw=_glXGetCurrentDrawable();
+	GLXDrawable read=_glXGetCurrentReadDrawable();
 	if(dpy && (draw || read) && ctx)
 	{
 		GLXDrawable newread=read, newdraw=draw;

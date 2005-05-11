@@ -49,13 +49,13 @@ class dpyhash : public _dpyhash
 		RRDisplay findrrdpy(Display *dpy)
 		{
 			if(!dpy) _throw("Invalid argument");
-			return _dpyhash::find(DisplayString(dpy), NULL);
+			return _dpyhash::find(DisplayString(dpy), NULL, true);
 		}
 
 		void remove(Display *dpy)
 		{
 			if(!dpy) _throw("Invalid argument");
-			_dpyhash::remove(DisplayString(dpy), NULL);
+			_dpyhash::remove(DisplayString(dpy), NULL, true);
 		}
 
 	private:

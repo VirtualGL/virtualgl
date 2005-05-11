@@ -110,6 +110,8 @@ funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix);
 funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
 	int *, value);
 
+funcdef0(GLXDrawable, glXGetCurrentDrawable);
+
 funcdef2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx);
 
 funcdef3(Bool, glXMakeCurrent, Display *, dpy, GLXDrawable, drawable,
@@ -123,6 +125,8 @@ funcdef3(Bool, glXQueryVersion, Display *, dpy, int *, major, int *, minor);
 funcdef2(void, glXSwapBuffers, Display *, dpy, GLXDrawable, drawable);
 
 funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int, list_base);
+
+funcdef0(void, glXWaitGL);
 
 
 // GLX 1.1 functions
@@ -157,6 +161,10 @@ funcdef2(void, glXDestroyPbuffer, Display *, dpy, GLXPbuffer, pbuf);
 funcdef2(void, glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap);
 
 funcdef2(void, glXDestroyWindow, Display *, dpy, GLXWindow, win);
+
+funcdef0(GLXDrawable, glXGetCurrentReadDrawable);
+
+funcdef0(Display*, glXGetCurrentDisplay);
 
 funcdef4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
 	int, attribute, int *, value);
@@ -251,6 +259,10 @@ funcdef0(void, glFinish);
 funcdef0(void, glFlush);
 
 funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height);
+
+funcdef1(void, glDrawBuffer, GLenum, drawbuf);
+
+funcdef0(void, glPopAttrib);
 
 
 // X11 functions
