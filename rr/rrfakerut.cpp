@@ -448,19 +448,19 @@ int rbtest(void)
 #define getcfgattrib(c, attrib, ctemp) { \
 	ctemp=-10; \
 	glXGetFBConfigAttrib(dpy, c, attrib, &ctemp); \
-	if(ctemp==-10) throw(#attrib" cfg attrib not supported"); \
+	if(ctemp==-10) _error(#attrib" cfg attrib not supported"); \
 }
 
 #define getvisattrib(v, attrib, vtemp) { \
 	vtemp=-20; \
 	glXGetConfig(dpy, v, attrib, &vtemp); \
-	if(vtemp==-20) throw(#attrib" vis attrib not supported"); \
+	if(vtemp==-20) _error(#attrib" vis attrib not supported"); \
 }
 
 #define compareattrib(c, v, attrib, ctemp) { \
 	getcfgattrib(c, attrib, ctemp); \
 	getvisattrib(v, attrib, vtemp); \
-	if(ctemp!=vtemp) throw(#attrib" mismatch w/ X visual"); \
+	if(ctemp!=vtemp) _prerror("%s=%d in cfg & %d in X vis", #attrib, ctemp, vtemp); \
 }
 
 
@@ -533,7 +533,7 @@ void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 
 int cfgid(Display *dpy, GLXFBConfig c)
 {
-	int temp;
+	int temp=0;
 	if(!c || !dpy) _error("Invalid argument to cfgid()");
 	getcfgattrib(c, GLX_FBCONFIG_ID, temp);
 	return temp;
@@ -638,11 +638,18 @@ int vistest(void)
 		for(i=0; i<n; i++)
 		{
 			if(!configs[i]) continue;
-			fbcid=cfgid(dpy, configs[i]);
-			if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
+			try
 			{
-				printf("CFG ID 0x%.2x:  ", fbcid);
-				_error("No matching X visual for CFG");
+				fbcid=cfgid(dpy, configs[i]);
+				if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
+				{
+					printf("CFG ID 0x%.2x:  ", fbcid);
+					_error("No matching X visual for CFG");
+				}
+			}
+			catch(rrerror &e)
+			{
+				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
 		}
 
