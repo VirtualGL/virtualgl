@@ -960,8 +960,8 @@ int main(int argc, char **argv)
 
 	if(!rbtest()) ret=-1;
 	printf("\n");
-//	if(!vistest()) ret=-1;
-//	printf("\n");
+	if(!vistest()) ret=-1;
+	printf("\n");
 	if(!mttest()) ret=-1;
 	printf("\n");
 	return ret;
