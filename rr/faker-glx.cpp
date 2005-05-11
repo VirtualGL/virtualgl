@@ -21,20 +21,41 @@
 // This attempts to look up a visual in the hash or match it using 2D functions
 // if (for some reason) it wasn't obtained with glXChooseVisual()
 
-XVisualInfo *_MatchVisual(Display *dpy, XVisualInfo *vis)
+GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
-	XVisualInfo *v=NULL;
-	if(!dpy || !vis) return NULL;
-	TRY();
-	if(!(v=vish.matchvisual(dpy, vis)))
+	GLXFBConfig c=0, *configs=NULL;  int n=0;
+	if(!dpy || !vis) return 0;
+	if(!(c=vish.getpbconfig(dpy, vis)))
 	{
-		XVisualInfo vtemp;  int n;
-		if(!XMatchVisualInfo(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class, &vtemp)) return NULL;
-		if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n) return NULL;
-		vish.add(dpy, vis, _localdpy, v);
+		int defattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
+		int rgbattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
+		int ciattribs[]={GLX_DOUBLEBUFFER, 1, GLX_BUFFER_SIZE, 8,
+			GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE,
+			GLX_PBUFFER_BIT, None};
+		int *attribs=rgbattribs;
+		if(vis->c_class!=TrueColor && vis->c_class!=DirectColor)
+		{
+			attribs=ciattribs;
+			attribs[3]=vis->depth;
+		}
+		else
+		{
+			if(vis->depth<8) attribs[3]=attribs[5]=attribs[7]=1;
+			else if(vis->depth<16) attribs[3]=attribs[5]=attribs[7]=2;
+			else if(vis->depth<24) attribs[3]=attribs[5]=attribs[7]=4;
+		}
+		if(((configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n))==NULL || n<1)
+			&& ((configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), defattribs, &n))==NULL || n<1))
+			return 0;
+		c=configs[0];
+		XFree(configs);
+		if(c) vish.add(dpy, vis, c);
 	}
-	CATCH();
-	return v;
+	return c;
 }
 
 extern "C" {
@@ -45,7 +66,34 @@ shimfuncdpy3( GLXPbuffer, glXCreatePbuffer, Display*, dpy, GLXFBConfig, config, 
 shimfuncdpy2( void, glXDestroyPbuffer, Display*, dpy, GLXPbuffer, pbuf );
 shimfuncdpy2( void, glXFreeContextEXT, Display*, dpy, GLXContext, ctx );
 shimfuncdpy2( const char*, glXGetClientString, Display*, dpy, int, name );
-shimfuncdpyvis4( int, glXGetConfig, Display*, dpy, XVisualInfo*, vis, int, attrib, int*, value );
+
+int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
+{
+	TRY();
+	GLXFBConfig c;  int glxvalue, err;
+	errifnot(c=_MatchConfig(dpy, vis));
+	switch(attrib)
+	{
+		case GLX_USE_GL:
+			if(value)
+			{
+				if(vis->depth>=24 && (vis->c_class==TrueColor || vis->c_class==DirectColor))
+					*value=1;
+				else *value=0;
+				return 0;
+			}
+			else return GLX_BAD_VALUE;
+		case GLX_RGBA:
+			if((err=glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &glxvalue))!=0)
+				return err;
+			*value=glxvalue==GLX_RGBA_BIT? 1:0;  return 0;
+		default:
+			return glXGetFBConfigAttrib(_localdpy, c, attrib, value);
+	}
+	CATCH();
+	return GLX_BAD_ATTRIBUTE;
+}
+
 
 Display *glXGetCurrentDisplay(void)
 {
@@ -87,7 +135,11 @@ shimfuncdpy3( void, glXSelectEvent, Display*, dpy, GLXDrawable, draw, unsigned l
 
 shimfuncdpy4( int, glXGetFBConfigAttribSGIX, Display*, dpy, GLXFBConfigSGIX, config, int, attribute, int*, value_return );
 shimfuncdpy4( GLXFBConfigSGIX*, glXChooseFBConfigSGIX, Display*, dpy, int, screen, const int*, attrib_list, int*, nelements );
-shimfuncdpyvis2( GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display*, dpy, XVisualInfo*, vis );
+
+GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
+{
+	return _MatchConfig(dpy, vis);
+}
 
 shimfuncdpy5( GLXPbuffer, glXCreateGLXPbufferSGIX, Display*, dpy, GLXFBConfig, config, unsigned int, width, unsigned int, height, const int*, attrib_list );
 shimfuncdpy2( void, glXDestroyGLXPbufferSGIX, Display*, dpy, GLXPbuffer, pbuf );

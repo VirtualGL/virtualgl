@@ -28,6 +28,7 @@ FakerConfig fconfig;
 #include "faker-vishash.h"
 #include "faker-pmhash.h"
 #include "faker-sym.h"
+#include "glxvisual.h"
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
@@ -435,19 +436,20 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 // It returns the 2D visual so that it can be used in subsequent X11 calls.
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
-	XVisualInfo *v=NULL, *_localv=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL, vtemp;  int n=0;
 	TRY();
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
-	if((_localv=_glXChooseVisual(_localdpy, DefaultScreen(_localdpy), attrib_list))==NULL)
-		return NULL;
-	if(!XMatchVisualInfo(dpy, screen, _localv->depth, _localv->c_class, &vtemp)) {XFree(_localv);  return NULL;}
-	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) {XFree(_localv);  return NULL;}
-	vish.add(dpy, v, _localdpy, _localv);
-	XFree(_localv);
+	GLXFBConfig c;
+	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
+	if(!XMatchVisualInfo(dpy, screen, glXConfigDepth(c), glXConfigClass(c),
+		&vtemp)
+	&& !XMatchVisualInfo(dpy, screen, 24, TrueColor, &vtemp)) return NULL;
+	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	vish.add(dpy, v, c);
 
 	CATCH();
 	return v;
@@ -455,19 +457,19 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
-	XVisualInfo *v=NULL, *_localv=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL, vtemp;  int n=0;
 	TRY();
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-	if((_localv=_glXGetVisualFromFBConfig(_localdpy, config))==NULL)
+	if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
+		glXConfigClass(config), &vtemp)
+	&& !XMatchVisualInfo(dpy, DefaultScreen(dpy), 24, TrueColor, &vtemp))
 		return NULL;
-	if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), _localv->depth, _localv->c_class, &vtemp)) {XFree(_localv);  return NULL;}
-	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) {XFree(_localv);  return NULL;}
-	vish.add(dpy, v, _localdpy, _localv);
-	XFree(_localv);
+	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	vish.add(dpy, v, config);
 	CATCH();
 	return v;
 }
@@ -475,26 +477,6 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 XVisualInfo *glXGetVisualFromFBConfigSGIX(Display *dpy, GLXFBConfigSGIX config)
 {
 	return glXGetVisualFromFBConfig(dpy, config);
-}
-
-GLXFBConfig remotevis2localpbconfig(Display *dpy, XVisualInfo *vis)
-{
-	GLXFBConfig c=0;
-	if(!(c=vish.getpbconfig(dpy, vis)))
-	{
-		// Visual was not obtained from glXChooseVisual(), so all we can do is
-		// match it to a visual on the rendering server with like depth and class
-		// and hope for the best
-		XVisualInfo vtemp, *v;  int n;
-		if(!XMatchVisualInfo(_localdpy, DefaultScreen(_localdpy), vis->depth, vis->c_class, &vtemp)) return NULL;
-		if(!(v=XGetVisualInfo(_localdpy, VisualIDMask, &vtemp, &n)) || !n) return NULL;
-		glxvisual *glxv=new glxvisual(_localdpy, v);
-		if(!glxv) {XFree(v);  return NULL;}
-		c=glxv->getpbconfig();
-		delete glxv;
-		XFree(v);
-	}
-	return c;
 }
 
 GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_list, Bool direct)
@@ -506,8 +488,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	if(dpy==_localdpy) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
 
-	if(!(c=remotevis2localpbconfig(dpy, vis)))
-		_throw("Could not match visual to appropriate framebuffer config");
+	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
 	int render_type=GLX_RGBA_BIT;
 	_glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type);
 	if(!(ctx=_glXCreateNewContext(_localdpy, c,
@@ -570,20 +551,16 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 
 GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type, GLXContext share_list, Bool direct)
 {
-	GLXContext ctx=0;  GLXFBConfig c;
+	GLXContext ctx=0;
 	TRY();
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
-	glxvisual *glxv;
-	if(!(glxv=new glxvisual(_localdpy, config))) return NULL;
-	if(!(c=glxv->getpbconfig())) {delete glxv;  return NULL;}
-	delete glxv;
-	if(!(ctx=_glXCreateNewContext(_localdpy, c, render_type, share_list, True)))
+	if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
 		return NULL;
-	ctxh.add(ctx, c);
+	ctxh.add(ctx, config);
 	CATCH();
 	return ctx;
 }
@@ -649,18 +626,14 @@ GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, 
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const int *attrib_list)
 {
 	TRY();
-	pbwin *pbw;  GLXFBConfig c=0;
+	pbwin *pbw;
 	XSync(dpy, False);
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
-	glxvisual *glxv;
-	errifnot(glxv=new glxvisual(_localdpy, config));
-	errifnot(c=glxv->getpbconfig());
-	errifnot(pbw=winh.setpb(dpy, win, c));
-	delete glxv;
+	errifnot(pbw=winh.setpb(dpy, win, config));
 	CATCH();
 	return win;  // Make the client store the original window handle, which we use
                // to find the Pbuffer in the hash
@@ -683,7 +656,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
 	TRY();
-	GLXFBConfig c=remotevis2localpbconfig(dpy, vi);
+	GLXFBConfig c;
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXCreateGLXPixmap(dpy, vi, pm);
@@ -691,6 +664,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
+	errifnot(c=_MatchConfig(dpy, vi));
 	pbuffer *pb=new pbuffer(_localdpy, w, h, c);
 	if(pb)
 	{
@@ -715,19 +689,14 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int *attribs)
 {
 	TRY();
-	GLXFBConfig c=0;
 
 	// Prevent recursion
 	if(dpy==_localdpy) return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
 
-	glxvisual *glxv;
-	errifnot(glxv=new glxvisual(_localdpy, config));
-	errifnot(c=glxv->getpbconfig());
-	delete glxv;
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	pbuffer *pb=new pbuffer(_localdpy, w, h, c);
+	pbuffer *pb=new pbuffer(_localdpy, w, h, config);
 	if(pb)
 	{
 		pmh.add(dpy, pm, pb);

@@ -13,37 +13,6 @@
 
 #include "faker-sym.h"
 
-class glxvisual
-{
-	public:
-
-		glxvisual(Display *, GLXFBConfig);
-		glxvisual(Display *, XVisualInfo *);
-		~glxvisual(void);
-		void init(Display *, GLXFBConfig);
-		void init(Display *, XVisualInfo *);
-		GLXFBConfig getpbconfig(void);
-		GLXFBConfig getfbconfig(void);
-		XVisualInfo *getvisual(void);
-
-	private:
-
-		int buffer_size;
-		int level;
-		int doublebuffer;
-		int stereo;
-		int aux_buffers;
-		int red_size;
-		int green_size;
-		int blue_size;
-		int alpha_size;
-		int depth_size;
-		int stencil_size;
-		int accum_red_size;
-		int accum_green_size;
-		int accum_blue_size;
-		int accum_alpha_size;
-		int render_type;
-		int x_visual_type;
-		Display *dpy;
-};
+int glXConfigDepth(GLXFBConfig);
+int glXConfigClass(GLXFBConfig);
+GLXFBConfig glXConfigFromVisAttribs(int attribs[]);
