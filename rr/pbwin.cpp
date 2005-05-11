@@ -30,9 +30,6 @@ extern Display *_localdpy;
 extern GLPDevice _localdev;
 #endif
 
-static char __autotestclr[40], __autotestframe[40];
-static int __autotestframecount=0;
-
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
 // Generic OpenGL error checker (0 = no errors)
@@ -206,6 +203,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	prof_rb.setname("Readback");
 	syncdpy=false;
 	dirty=false;
+	__autotestframecount=0;
 }
 
 pbwin::~pbwin(void)
@@ -459,9 +457,9 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
 			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 		}
-		snprintf(__autotestclr, 39, "__VGL_AUTOTESTCLR=%d", color);
+		snprintf(__autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)win, color);
 		putenv(__autotestclr);
-		snprintf(__autotestframe, 39, "__VGL_AUTOTESTFRAME=%d", __autotestframecount);
+		snprintf(__autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)win, __autotestframecount);
 		putenv(__autotestframe);
 	}
 

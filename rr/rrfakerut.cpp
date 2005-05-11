@@ -18,7 +18,9 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include "rrerror.h"
+#include "rrthread.h"
 
 
 #ifndef GLX_RGBA_BIT
@@ -51,6 +53,14 @@ void clicktocontinue(Display *dpy)
 }
 #endif
 
+// Same as _throw but without the line number
+#define _error(m) throw(rrerror(__FUNCTION__, m, 0))
+
+#define _prerror(m, ...) { \
+	char temps[256]; \
+	snprintf(temps, 255, m, __VA_ARGS__); \
+	throw(rrerror(__FUNCTION__, temps, 0));  \
+}
 
 unsigned int checkbuffercolor(void)
 {
@@ -85,78 +95,54 @@ unsigned int checkbuffercolor(void)
 }
 
 
-int checkwindowcolor(unsigned int color)
+void checkwindowcolor(Window win, unsigned int color)
 {
-	char *e=NULL;  int fakerclr;
-	if((e=getenv("__VGL_AUTOTESTCLR"))==NULL)
-	{
-		printf("Failed! (Can't communicate w/ faker)\n");  return 0;
-	}
+	char *e=NULL, temps[80];  int fakerclr;
+	snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
+	if((e=getenv(temps))==NULL)
+		_error("Can't communicate w/ faker");
 	if((fakerclr=atoi(e))<0 || fakerclr>0xffffff)
-	{
-		printf("Failed! (Bogus data read back)\n");  return 0;
-	}
+		_error("Bogus data read back");
 	if((unsigned int)fakerclr!=color)
-	{
-		printf("Failed! (Color is 0x%.6x, should be 0x%.6x)\n", fakerclr, color);
-		return 0;
-	}
-	return 1;
+		_prerror("Color is 0x%.6x, should be 0x%.6x", fakerclr, color)
 }
 
 
-int checkframe(int desiredreadbacks)
+void checkframe(Window win, int desiredreadbacks, int &lastframe)
 {
-	char *e=NULL;  int frame, ret=1;  static int lastframe=0;
-	if((e=getenv("__VGL_AUTOTESTFRAME"))==NULL || (frame=atoi(e))<1)
-	{
-		printf("Failed! (Can't communicate w/ faker)\n");  return 0;
-	}
+	char *e=NULL, temps[80];  int frame;
+	snprintf(temps, 79, "__VGL_AUTOTESTFRAME%x", (unsigned int)win);
+	if((e=getenv(temps))==NULL || (frame=atoi(e))<1)
+		_error("Can't communicate w/ faker");
 	if(frame-lastframe!=desiredreadbacks && desiredreadbacks>=0)
-	{
-		printf("Failed! (Expected %d readback%s, not %d)\n", desiredreadbacks,
-			desiredreadbacks==1?"":"s", frame-lastframe);  ret=0;
-	}
+		_prerror("Expected %d readback%s, not %d", desiredreadbacks,
+			desiredreadbacks==1?"":"s", frame-lastframe);
 	lastframe=frame;
-	return ret;
 }
 
 
 void checkcurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx)
 {
-	if(glXGetCurrentDisplay()!=dpy) printf("glXGetCurrentDisplay() failed!\n");
-	if(glXGetCurrentDrawable()!=draw) printf("glXGetCurrentDrawable() failed!\n");
-	if(glXGetCurrentReadDrawable()!=read) printf("glXGetCurrentReadDrawable() failed!\n");
-	if(glXGetCurrentContext()!=ctx) printf("glXGetCurrentContext() failed!\n");
+	if(glXGetCurrentDisplay()!=dpy) _throw("glXGetCurrentDisplay() returned incorrect value");
+	if(glXGetCurrentDrawable()!=draw) _throw("glXGetCurrentDrawable() returned incorrect value");
+	if(glXGetCurrentReadDrawable()!=read) _throw("glXGetCurrentReadDrawable() returned incorrect value");
+	if(glXGetCurrentContext()!=ctx) _throw("glXGetCurrentContext() returned incorrect value");
 }
 
 
-int checkreadbackstate(int oldreadbuf, Display *dpy, GLXDrawable draw,
+void checkreadbackstate(int oldreadbuf, Display *dpy, GLXDrawable draw,
 	GLXDrawable read, GLXContext ctx)
 {
 	if(glXGetCurrentDisplay()!=dpy)
-	{
-		printf("Failed! (Current display changed)\n");
-		return 0;
-	}
+		_error("Current display changed");
 	if(glXGetCurrentDrawable()!=draw || glXGetCurrentReadDrawable()!=read)
-	{
-		printf("Failed! (Current drawable changed\n");
-		return 0;
-	}
+		_error("Current drawable changed");
 	if(glXGetCurrentContext()!=ctx)
-	{
-		printf("Failed! (Context changed)\n");
-		return 0;
-	}
+		_error("Context changed");
 	int readbuf=-1;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 	if(readbuf!=oldreadbuf)
-	{
-		printf("Failed! (Read buffer changed)\n");
-		return 0;
-	}
-	return 1;
+		_error("Read buffer changed");
 }
 
 
@@ -185,7 +171,7 @@ int dbtest(void)
 int rbtest(void)
 {
 	Display *dpy=NULL;  Window win0=0, win1=0;
-	int dpyw, dpyh;
+	int dpyw, dpyh, lastframe0=0, lastframe1=0, retval=1;
 	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, None};
 	int glxattrib13[]={GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
@@ -212,21 +198,19 @@ int rbtest(void)
 		Window root=RootWindow(dpy, DefaultScreen(dpy));
 		swa.colormap=XCreateColormap(dpy, root, v0->visual, AllocNone);
 		swa.border_pixel=0;
-		swa.event_mask=KeyPressMask | ButtonPressMask;
+		swa.event_mask=0;
 		if((win0=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0, v0->depth,
 			InputOutput, v0->visual, CWBorderPixel|CWColormap|CWEventMask,
 			&swa))==0)
 			_throw("Could not create window");
-		XMapWindow(dpy, win0);
 		if(!(v1=glXGetVisualFromFBConfig(dpy, c)))
-			_throw("glXGetVisualFromFBConfig() failed");
+			_throw("glXGetVisualFromFBConfig()");
 		swa.colormap=XCreateColormap(dpy, root, v1->visual, AllocNone);
 		if((win1=XCreateWindow(dpy, root, dpyw/2, 0, dpyw/2, dpyh/2, 0, v1->depth,
 			InputOutput, v1->visual, CWBorderPixel|CWColormap|CWEventMask,
 			&swa))==0)
 			_throw("Could not create window");
 		XFree(v1);  v1=NULL;
-		XMapWindow(dpy, win1);
 
 		if((ctx0=glXCreateContext(dpy, v0, 0, True))==NULL)
 			_throw("Could not establish GLX context");
@@ -249,153 +233,215 @@ int rbtest(void)
 			_throw("Could not make context current");
 		checkcurrent(dpy, win1, win0, ctx1);
 
+		XMapWindow(dpy, win0);
+		XMapWindow(dpy, win1);
+
 		// Faker should readback back buffer on a call to glXSwapBuffers()
-		printf("glXSwapBuffers() [b]:          ");
-		glClearBuffer(GL_BACK, 1., 0., 0., 0.);
-		glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
-		glReadBuffer(GL_FRONT);
-		glXSwapBuffers(dpy, win1);
-		if(checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1) && checkframe(1)
-		&& checkwindowcolor(dbworking? 0x0000ff:0x00ff00)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXSwapBuffers() [b]:          ");
+			glClearBuffer(GL_BACK, 1., 0., 0., 0.);
+			glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
+			glReadBuffer(GL_FRONT);
+			glXSwapBuffers(dpy, win1);
+			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0x0000ff:0x00ff00);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
 		// Faker should readback front buffer on glFlush(), glFinish(), and
 		// glXWaitGL()
-		printf("glFlush() [f]:                 ");
-		glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
-		glClearBuffer(GL_BACK, 0., 1., 1., 0.);
-		glReadBuffer(GL_BACK);
-		glFlush();  glFlush();
-		if(checkframe(1))
+		try
 		{
+			printf("glFlush() [f]:                 ");
+			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
+			glClearBuffer(GL_BACK, 0., 1., 1., 0.);
+			glReadBuffer(GL_BACK);
+			glFlush();  glFlush();
+			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glFlush();
-			if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-			&& checkwindowcolor(dbworking? 0xff00ff:0xffff00)) printf("SUCCESS\n");
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0xff00ff:0xffff00);
+			printf("SUCCESS\n");
 		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glFinish() [f]:                ");
-		glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
-		glClearBuffer(GL_BACK, 0., 0., 1., 0.);
-		glReadBuffer(GL_BACK);
-		glFinish();  glFinish();
-		if(checkframe(1))
+		try
 		{
+			printf("glFinish() [f]:                ");
+			glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
+			glClearBuffer(GL_BACK, 0., 0., 1., 0.);
+			glReadBuffer(GL_BACK);
+			glFinish();  glFinish();
+			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glFinish();
-			if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-			&& checkwindowcolor(dbworking? 0x00ffff:0xff0000)) printf("SUCCESS\n");
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0x00ffff:0xff0000);
+			printf("SUCCESS\n");
 		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXWaitGL() [f]:               ");
-		glClearBuffer(GL_FRONT, 1., 0., 0., 0.);
-		glClearBuffer(GL_BACK, 0., 1., 0., 0.);
-		glReadBuffer(GL_BACK);
-		glXWaitGL();  glXWaitGL();
-		if(checkframe(1))
+		try
 		{
+			printf("glXWaitGL() [f]:               ");
+			glClearBuffer(GL_FRONT, 1., 0., 0., 0.);
+			glClearBuffer(GL_BACK, 0., 1., 0., 0.);
+			glReadBuffer(GL_BACK);
+			glXWaitGL();  glXWaitGL();
+			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glXWaitGL();
-			if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-			&& checkwindowcolor(dbworking? 0x0000ff:0x00ff00)) printf("SUCCESS\n");
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0x0000ff:0x00ff00);
+			printf("SUCCESS\n");
 		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glPopAttrib() [f]:             ");
-		glDrawBuffer(GL_BACK);  glFinish();
-		if(checkframe(1))
+		try
 		{
+			printf("glPopAttrib() [f]:             ");
+			glDrawBuffer(GL_BACK);  glFinish();
+			checkframe(win1, 1, lastframe1);
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
 			glPopAttrib();  // Back buffer should now be current again & dirty flag should be set
 			glClearBuffer(GL_BACK, 0., 0., 1., 0.);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
-			if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-			&& checkwindowcolor(dbworking? 0x00ffff:0xff0000)) printf("SUCCESS\n");
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0x00ffff:0xff0000);
+			printf("SUCCESS\n");
 		}	
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXMakeCurrent() [f]:          ");
-		glClearBuffer(GL_FRONT, 0., 1., 1., 0.);
-		glClearBuffer(GL_BACK, 1., 0., 1., 0.);
-		glXMakeCurrent(dpy, win1, ctx0);  // readback should occur
-		glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
-		glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
-		if(checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0) && checkframe(1)
-		&& checkwindowcolor(dbworking? 0xffff00:0xff00ff)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXMakeCurrent() [f]:          ");
+			glClearBuffer(GL_FRONT, 0., 1., 1., 0.);
+			glClearBuffer(GL_BACK, 1., 0., 1., 0.);
+			glXMakeCurrent(dpy, win1, ctx0);  // readback should occur
+			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
+			glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
+			checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? 0xffff00:0xff00ff);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXMakeContextCurrent() [f]:   ");
-		glClearBuffer(GL_FRONT, 0., 0., 1., 0.);
-		glClearBuffer(GL_BACK, 1., 1., 0., 0.);
-		glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
-		glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
-		glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
-		if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-		&& checkwindowcolor(dbworking? 0xff0000:0x00ffff)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXMakeContextCurrent() [f]:   ");
+			glClearBuffer(GL_FRONT, 0., 0., 1., 0.);
+			glClearBuffer(GL_BACK, 1., 1., 0., 0.);
+			glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
+			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
+			glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win0, 1, lastframe0);
+			checkwindowcolor(win0, dbworking? 0xff0000:0x00ffff);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
 		// Test for proper handling of GL_FRONT_AND_BACK
-		printf("glXSwapBuffers() [f&b]:        ");
-		glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 0., 0.);
-		glReadBuffer(GL_FRONT);
-		glXSwapBuffers(dpy, win1);
-		if(checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1) && checkframe(1)
-		&& checkwindowcolor(0x0000ff)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXSwapBuffers() [f&b]:        ");
+			glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 0., 0.);
+			glReadBuffer(GL_FRONT);
+			glXSwapBuffers(dpy, win1);
+			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, 0x0000ff);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glFlush() [f&b]:               ");
-		glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 0., 0.);
-		glReadBuffer(GL_BACK);
-		glFlush();  glFlush();
-		if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(2)
-		&& checkwindowcolor(0x00ff00)) printf("SUCCESS\n");
+		try
+		{
+			printf("glFlush() [f&b]:               ");
+			glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 0., 0.);
+			glReadBuffer(GL_BACK);
+			glFlush();  glFlush();
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 2, lastframe1);
+			checkwindowcolor(win1, 0x00ff00);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glFinish() [f&b]:              ");
-		glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 1., 0.);
-		glReadBuffer(GL_BACK);
-		glFinish();  glFinish();
-		if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(2)
-		&& checkwindowcolor(0xffff00)) printf("SUCCESS\n");
+		try
+		{
+			printf("glFinish() [f&b]:              ");
+			glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 1., 0.);
+			glReadBuffer(GL_BACK);
+			glFinish();  glFinish();
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 2, lastframe1);
+			checkwindowcolor(win1, 0xffff00);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXWaitGL() [f&b]:             ");
-		glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 1., 0.);
-		glReadBuffer(GL_BACK);
-		glXWaitGL();  glXWaitGL();
-		if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(2)
-		&& checkwindowcolor(0xff00ff)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXWaitGL() [f&b]:             ");
+			glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 1., 0.);
+			glReadBuffer(GL_BACK);
+			glXWaitGL();  glXWaitGL();
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win1, 2, lastframe1);
+			checkwindowcolor(win1, 0xff00ff);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXMakeCurrent() [f&b]:        ");
-		glClearBuffer(GL_FRONT_AND_BACK, 0., 0., 1., 0.);
-		glXMakeCurrent(dpy, win0, ctx0);  // readback should occur
-		glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
-		if(checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0) && checkframe(1)
-		&& checkwindowcolor(0xff0000)) printf("SUCCESS\n");
+		try
+		{
+			printf("glXMakeCurrent() [f&b]:        ");
+			glClearBuffer(GL_FRONT_AND_BACK, 0., 0., 1., 0.);
+			glXMakeCurrent(dpy, win0, ctx0);  // readback should occur
+			glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
+			checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, 0xff0000);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 
-		printf("glXMakeContextCurrent() [f&b]: ");
-		glClearBuffer(GL_FRONT_AND_BACK, 1., 1., 0., 0.);
-		glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
-		glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
-		glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
-		if(checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1) && checkframe(1)
-		&& checkwindowcolor(0x00ffff)) printf("SUCCESS\n");
-
-		if(ctx0 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0=0;}
-		if(ctx1 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
-		checkframe(-1);
-		if(win0) {XDestroyWindow(dpy, win0);  win0=0;}
-		if(win1) {XDestroyWindow(dpy, win1);  win1=0;}
-		if(v0) {XFree(v0);  v0=NULL;}
-		if(v1) {XFree(v1);  v1=NULL;}
-		if(configs) {XFree(configs);  configs=NULL;}
-		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
-		return 1;
+		try
+		{
+			printf("glXMakeContextCurrent() [f&b]: ");
+			glClearBuffer(GL_FRONT_AND_BACK, 1., 1., 0., 0.);
+			glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
+			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
+			glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
+			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
+			checkframe(win0, 1, lastframe0);
+			checkwindowcolor(win0, 0x00ffff);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 	}
 	catch(rrerror &e)
 	{
-		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
-		if(ctx0 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0=0;}
-		if(ctx1 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
-		if(win0) {XDestroyWindow(dpy, win0);  win0=0;}
-		if(win1) {XDestroyWindow(dpy, win1);  win1=0;}
-		if(v0) {XFree(v0);  v0=NULL;}
-		if(v1) {XFree(v1);  v1=NULL;}
-		if(configs) {XFree(configs);  configs=NULL;}
-		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
-	return 0;
+	if(ctx0 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx0);  ctx0=0;}
+	if(ctx1 && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
+	if(win0) {XDestroyWindow(dpy, win0);  win0=0;}
+	if(win1) {XDestroyWindow(dpy, win1);  win1=0;}
+	if(v0) {XFree(v0);  v0=NULL;}
+	if(v1) {XFree(v1);  v1=NULL;}
+	if(configs) {XFree(configs);  configs=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
 }
 
 
@@ -421,13 +467,13 @@ int rbtest(void)
 void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 {
 	int ctemp, vtemp, r, g, b, bs;
-	if(!dpy) throw("Invalid display handle");
-	if(!c) throw("Invalid FB config");
-	if(!v) throw("Invalid visual pointer");
+	if(!dpy) _error("Invalid display handle");
+	if(!c) _error("Invalid FB config");
+	if(!v) _error("Invalid visual pointer");
 	getcfgattrib(c, GLX_RENDER_TYPE, ctemp);
 	getvisattrib(v, GLX_RGBA, vtemp);
 	if((ctemp==GLX_RGBA_BIT)!=(vtemp==1))
-		throw("GLX_RGBA mismatch w/ X visual");
+		_error("GLX_RGBA mismatch w/ X visual");
 	compareattrib(c, v, GLX_BUFFER_SIZE, bs);
 	compareattrib(c, v, GLX_LEVEL, ctemp);
 	compareattrib(c, v, GLX_DOUBLEBUFFER, ctemp);
@@ -488,7 +534,7 @@ void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 int cfgid(Display *dpy, GLXFBConfig c)
 {
 	int temp;
-	if(!c || !dpy) throw("Invalid argument to cfgid()");
+	if(!c || !dpy) _error("Invalid argument to cfgid()");
 	getcfgattrib(c, GLX_FBCONFIG_ID, temp);
 	return temp;
 }
@@ -505,26 +551,26 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 		fbcid=cfgid(dpy, c);
 
 		if(!(ctx=glXCreateNewContext(dpy, c, render_type, NULL, True)))
-			throw("glXCreateNewContext");
+			_error("glXCreateNewContext");
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
-		if(temp!=fbcid) throw("glXQueryContext FB cfg ID");
+		if(temp!=fbcid) _error("glXQueryContext FB cfg ID");
 		#ifndef sun
 		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
 		#endif
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
-		if(temp!=render_type) throw("glXQueryContext render type");
+		if(temp!=render_type) _error("glXQueryContext render type");
 		glXDestroyContext(dpy, ctx);  ctx=0;
 
 		if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
-			throw("glXCreateNewContext");
+			_error("glXCreateNewContext");
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
-		if(temp!=fbcid) throw("glXQueryContext FB cfg ID");
+		if(temp!=fbcid) _error("glXQueryContext FB cfg ID");
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
-		if(temp!=render_type) throw("glXQueryContext render type");
+		if(temp!=render_type) _error("glXQueryContext render type");
 		glXDestroyContext(dpy, ctx);  ctx=0;
 	}
 	catch(...)
@@ -544,18 +590,18 @@ GLXFBConfig glXGetFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 	try
 	{
 		if(!(ctx=glXCreateContext(dpy, vis, NULL, True)))
-			throw("glXCreateNewContext");
+			_error("glXCreateNewContext");
 		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &fbcid);
 		glXDestroyContext(dpy, ctx);  ctx=0;
 		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
-			throw("Cannot map visual to FB config");
+			_error("Cannot map visual to FB config");
 		for(int i=0; i<n; i++)
 		{
 			temp=cfgid(dpy, configs[i]);
 			if(temp==fbcid) {c=configs[i];  break;}
 		}
 		XFree(configs);  configs=NULL;
-		if(!c) throw("Cannot map visual to FB config");
+		if(!c) _error("Cannot map visual to FB config");
 		return c;
 	}
 	catch(...)
@@ -574,19 +620,19 @@ int vistest(void)
 {
 	Display *dpy=NULL;
 	XVisualInfo **v=NULL, *v0=NULL, vtemp;
-	GLXFBConfig c=0, *configs=NULL;  int n=0, i;
+	GLXFBConfig c=0, *configs=NULL;  int n=0, i, retval=1;
 
 	printf("Visual matching heuristics test\n\n");
 
 	try
 	{
-		if(!(dpy=XOpenDisplay(0))) throw("Could not open display");
+		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
 		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
-			throw("No FB configs found");
+			_throw("No FB configs found");
 
 		int fbcid=0;
 		if(!(v=(XVisualInfo **)malloc(sizeof(XVisualInfo *)*n)))
-			throw("Memory allocation error");
+			_throw("Memory allocation error");
 		memset(v, 0, sizeof(XVisualInfo *)*n);
 
 		for(i=0; i<n; i++)
@@ -596,7 +642,7 @@ int vistest(void)
 			if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
 			{
 				printf("CFG ID 0x%.2x:  ", fbcid);
-				throw("No matching X visual for CFG");
+				_error("No matching X visual for CFG");
 			}
 		}
 
@@ -609,7 +655,7 @@ int vistest(void)
 				fbcid=cfgid(dpy, configs[i]);
 				printf("CFG ID 0x%.2x:  ", fbcid);
 				if(!(v1=glXGetVisualFromFBConfig(dpy, configs[i])))
-					throw("No matching X visual for CFG");
+					_error("No matching X visual for CFG");
 
 				configvsvisual(dpy, configs[i], v[i]);
 				configvsvisual(dpy, configs[i], v1);
@@ -617,15 +663,15 @@ int vistest(void)
 				queryctxtest(dpy, v1, configs[i]);
 				
 				c=glXGetFBConfigFromVisual(dpy, v[i]);
-				if(!c || cfgid(dpy, c)!=fbcid) throw("glXGetFBConfigFromVisual");
+				if(!c || cfgid(dpy, c)!=fbcid) _error("glXGetFBConfigFromVisual");
 				c=glXGetFBConfigFromVisual(dpy, v1);
-				if(!c || cfgid(dpy, c)!=fbcid) throw("glXGetFBConfigFromVisual");
+				if(!c || cfgid(dpy, c)!=fbcid) _error("glXGetFBConfigFromVisual");
 
 				printf("SUCCESS!\n");
 			}
-			catch(const char *e)
+			catch(rrerror &e)
 			{
-				printf("Failed! (%s)\n", e);
+				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
 			if(v1) {XFree(v1);  v1=NULL;}
 		}
@@ -634,7 +680,7 @@ int vistest(void)
 		for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;  n=0;
 
 		if(!(v0=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n)) || n==0)
-			throw("No X Visuals found");
+			_throw("No X Visuals found");
 		printf("\n");
 
 		for(int i=0; i<n; i++)
@@ -644,32 +690,217 @@ int vistest(void)
 			{
 				printf("Vis ID 0x%.2x:  ", (int)v0[i].visualid);
 				if(!(c=glXGetFBConfigFromVisual(dpy, &v0[i])))
-					throw("No matching CFG for X Visual");
+					_error("No matching CFG for X Visual");
 				configvsvisual(dpy, c, &v0[i]);
 				v2=glXGetVisualFromFBConfig(dpy, c);
 				configvsvisual(dpy, c, v2);
 
 				printf("SUCCESS!\n");
 			}
-			catch(const char *e)
+			catch(rrerror &e)
 			{
-				printf("Failed! (%s)\n", e);
+				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
 			if(v2) {XFree(v2);  v2=NULL;}
 		}
-		XFree(v0);  v0=NULL;
-		XCloseDisplay(dpy);  dpy=NULL;
-		return 1;
 	}
-	catch(const char *e)
+	catch(rrerror &e)
 	{
-		printf("Failed! (%s)\n", e);
-		if(v && n) {for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;}
-		if(v0) {XFree(v0);  v0=NULL;}
-		if(configs) {XFree(configs);  configs=NULL;}
-		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
-	return 0;
+	if(v && n) {for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;}
+	if(v0) {XFree(v0);  v0=NULL;}
+	if(configs) {XFree(configs);  configs=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
+typedef struct _testcolor
+{
+	GLfloat r, g, b;
+	unsigned int bits;
+} testcolor;
+
+#define NC 6
+testcolor tc[NC]=
+{
+	{1., 0., 0., 0x0000ff},
+	{0., 1., 0., 0x00ff00},
+	{0., 0., 1., 0xff0000},
+	{1., 1., 0., 0x00ffff},
+	{1., 0., 1., 0xff00ff},
+	{0., 1., 1., 0xffff00}
+};
+
+
+#define NTHR 30
+bool deadyet=false;
+
+class mttestthread : public Runnable
+{
+	public:
+
+		mttestthread(int _myrank, Display *_dpy, Window _win, GLXContext _ctx)
+		: myrank(_myrank), dpy(_dpy), win(_win), ctx(_ctx), doresize(false)
+		{
+		}
+
+		void run(void)
+		{
+			int clr=myrank%NC, lastframe=0;
+			if(!(glXMakeCurrent(dpy, win, ctx)))
+				_error("Could not make context current");
+			while(!deadyet)
+			{
+				if(doresize)
+				{
+					glViewport(0, 0, w, h);
+					doresize=false;
+				}
+				glClearColor(tc[clr].r, tc[clr].g, tc[clr].b, 0.);
+				glClear(GL_COLOR_BUFFER_BIT);
+				glReadBuffer(GL_FRONT);
+				glXSwapBuffers(dpy, win);
+				checkreadbackstate(GL_FRONT, dpy, win, win, ctx);
+				checkframe(win, 1, lastframe);
+				checkwindowcolor(win, tc[clr].bits);
+				clr=(clr+1)%NC;
+			}
+		}
+
+		void resize(int _w, int _h)
+		{
+			w=_w;  h=_h;
+			doresize=true;
+		}
+
+	private:
+
+		int myrank;
+		Display *dpy;
+		Window win;
+		GLXContext ctx;
+		bool doresize;
+		int w, h;
+};
+
+
+int mttest(void)
+{
+	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		GLX_BLUE_SIZE, 8, None};
+	XVisualInfo *v=NULL;
+	Display *dpy=NULL;  Window win[NTHR];
+	GLXContext ctx[NTHR];
+	mttestthread *mt[NTHR];  Thread *t[NTHR];
+	XSetWindowAttributes swa;
+	int dpyw, dpyh, i, retval=1;
+	for(i=0; i<NTHR; i++)
+	{
+		win[0]=0;  ctx[0]=0;  mt[0]=NULL;  t[0]=NULL;
+	}
+
+	printf("Multi-threaded rendering test\n\n");
+
+	try
+	{
+		if(!XInitThreads()) _throw("XInitThreads() failed");
+		#ifdef sun
+		if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
+		#endif
+		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
+		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
+			_throw("Could not find a suitable visual");
+		Window root=RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+		swa.border_pixel=0;
+		swa.event_mask=StructureNotifyMask|ExposureMask;
+		for(i=0; i<NTHR; i++)
+		{
+			int winx=(i%10)*100, winy=(i/10)*120;
+			if((win[i]=XCreateWindow(dpy, root, winx, winy, 100, 100, 0, v->depth,
+				InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+				&swa))==0)
+				_throw("Could not create window");
+			XMapWindow(dpy, win[i]);
+			if(!(ctx[i]=glXCreateContext(dpy, v, NULL, True)))
+				_throw("Could not establish GLX context");
+			XMoveResizeWindow(dpy, win[i], winx, winy, 100, 100);
+		}
+		XSync(dpy, False);
+		XFree(v);  v=NULL;
+
+		for(i=0; i<NTHR; i++)
+		{
+			mt[i]=new mttestthread(i, dpy, win[i], ctx[i]);
+			t[i]=new Thread(mt[i]);
+			if(!mt[i] || !t[i]) _prerror("Could not create thread %d", i);
+			t[i]->start();
+		}
+		printf("Phase 1\n");
+		for(i=0; i<NTHR; i++)
+		{
+			int winx=(i%10)*100, winy=i/10*120;
+			XMoveResizeWindow(dpy, win[i], winx, winy, 200, 200);
+			mt[i]->resize(200, 200);
+			if(i<5) usleep(0);
+			XResizeWindow(dpy, win[i], 100, 100);
+			mt[i]->resize(100, 100);
+		}
+		XSync(dpy, False);
+		printf("Phase 2\n");
+		for(i=0; i<NTHR; i++)
+		{
+			XWindowChanges xwc;
+			xwc.width=xwc.height=200;
+			XConfigureWindow(dpy, win[i], CWWidth|CWHeight, &xwc);
+			mt[i]->resize(200, 200);
+		}
+		XSync(dpy, False);
+		printf("Phase 3\n");
+		for(i=0; i<NTHR; i++)
+		{
+			XResizeWindow(dpy, win[i], 100, 100);
+			mt[i]->resize(100, 100);
+		}
+		XSync(dpy, False);
+		deadyet=true;
+		for(i=0; i<NTHR; i++) t[i]->stop();
+		for(i=0; i<NTHR; i++)
+		{
+			try
+			{
+				t[i]->checkerror();
+			}
+			catch(rrerror &e)
+			{
+				printf("Thread %d failed! (%s)\n", i, e.getMessage());  retval=0;
+			}
+		}
+		if(retval==1) printf("SUCCESS!\n");
+	}
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+
+	for(i=0; i<NTHR; i++) {if(t[i]) {delete t[i];  t[i]=NULL;}}
+	for(i=0; i<NTHR; i++) {if(mt[i]) {delete mt[i];  mt[i]=NULL;}}
+	if(v) {XFree(v);  v=NULL;}
+	for(i=0; i<NTHR; i++)
+	{
+		if(dpy && ctx[i])
+		{
+			glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx[i]);  ctx[i]=0;
+		}
+	}
+	for(i=0; i<NTHR; i++) {if(dpy && win[i]) {XDestroyWindow(dpy, win[i]);  win[i]=0;}}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
 }
 
 
@@ -723,6 +954,8 @@ int main(int argc, char **argv)
 	if(!rbtest()) ret=-1;
 	printf("\n");
 	if(!vistest()) ret=-1;
+	printf("\n");
+	if(!mttest()) ret=-1;
 	printf("\n");
 	return ret;
 }
