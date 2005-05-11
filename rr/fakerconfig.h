@@ -44,7 +44,11 @@ class FakerConfig
 			spoil=true;
 			ssl=false;
 			port=-1;
+			reloadenv();
+		}
 
+		void reloadenv(void)
+		{
 			// Fetch values from environment
 			getconfig("RRGLLIB", gllib);
 			getconfig("RRX11LIB", x11lib);
@@ -78,6 +82,7 @@ class FakerConfig
 			getconfig("RRUSESSL", ssl);
 			getconfig("RRPORT", port, 0, 65535);
 			if(port==-1) port=ssl?RR_DEFAULTPORT+1:RR_DEFAULTPORT;
+			getconfig("RRAUTOTEST", autotest);
 		}
 
 		void setloqual(void)
@@ -106,6 +111,7 @@ class FakerConfig
 
 		bool spoil;
 		bool ssl;
+		bool autotest;
 
 	private:
 
