@@ -59,6 +59,10 @@
 #define GL_MAX_RECTANGLE_TEXTURE_SIZE_NV  0x84F8
 #endif
 
+#ifndef GLX_RGBA_BIT
+#define GLX_RGBA_BIT 0x00000001
+#endif
+
 Bool fbConfigs = False;
 
 typedef enum
@@ -378,11 +382,11 @@ static void
 get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
                    struct visual_attribs *attribs)
 {
+   int temp;
    const char *ext = glXQueryExtensionsString(dpy, DefaultScreen(dpy));
 
    memset(attribs, 0, sizeof(struct visual_attribs));
 
-   int temp;
    glXGetFBConfigAttrib(dpy, cfg, GLX_FBCONFIG_ID, &attribs->id);
    glXGetFBConfigAttrib(dpy, cfg, GLX_X_VISUAL_TYPE, &temp);
    switch(temp) {
