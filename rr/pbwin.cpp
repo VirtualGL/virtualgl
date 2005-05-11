@@ -114,9 +114,9 @@ class tempctx
 			_read=_draw=0;  _ctx=0;  _dpy=NULL;  mc=false;
 			if(!read && !draw) return;
 			if((_ctx=glXGetCurrentContext())==0) return;
-			if((_dpy=glXGetCurrentDisplay())==NULL) return;
-			_read=glXGetCurrentReadDrawable();
-			_draw=glXGetCurrentDrawable();
+			if((_dpy=_glXGetCurrentDisplay())==NULL) return;
+			_read=_glXGetCurrentReadDrawable();
+			_draw=_glXGetCurrentDrawable();
 			if(!read) read=_read;  if(!draw) draw=_draw;
 			if(_read!=read || _draw!=draw)
 			{
@@ -154,6 +154,9 @@ pbwin::pbwin(Display *windpy, Window win, Display *pbdpy)
 	pthread_mutex_init(&mutex, &ma);
 	blitter=NULL;
 	prof_rb.setname("Readback");
+	syncdpy=false;
+	dirty=false;
+	__autotestframecount=0;
 }
 
 pbwin::~pbwin(void)
@@ -273,9 +276,11 @@ void pbwin::readback(GLint drawbuf, bool force)
 {
 	rrbmp *b;  RRDisplay rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
+	fconfig.reloadenv();
 
 	rrlock l(mutex);
 
+	dirty=false;
 	if(fconfig.compress!=RRCOMP_NONE) errifnot(rrdpy=dpyh.findrrdpy(windpy));
 	if(this->force) {force=true;  this->force=false;}
 	if(fconfig.compress!=RRCOMP_NONE) {
@@ -293,7 +298,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 	b=RRGetBitmap(rrdpy, pbw, pbh, 3);
 	if(b==NULL) throw(rrerror(RRErrorLocation(), RRErrorString()));
 
-	readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, b->bits, drawbuf, true);
+	readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true);
 
 	b->h.dpynum=0;
 	if((dpystring=fconfig.client)==NULL)
@@ -312,6 +317,7 @@ void pbwin::readback(GLint drawbuf, bool force)
 	b->h.subsamp=fconfig.currentsubsamp;
 	b->flags=RRBMP_BGR|RRBMP_BOTTOMUP;
 	b->strip_height=STRIPH;
+	if(!syncdpy) {XSync(windpy, False);  syncdpy=true;}
 	rrtry(RRSendFrame(rrdpy, b));
 }
 
@@ -324,17 +330,18 @@ void pbwin::blit(GLint drawbuf)
 	errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
 	b->flags|=RRBMP_BOTTOMUP;
 	int format= (b->flags&RRBMP_BGR)? (b->pixelsize==3?GL_BGR_EXT:GL_BGRA_EXT) : (b->pixelsize==3?GL_RGB:GL_RGBA);
-	readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, (b->flags&RRBMP_ALPHAFIRST)?b->bits+1:b->bits, drawbuf, true);
+	readpixels(0, 0, min(pbw, b->h.winw), b->pitch, min(pbh, b->h.winh), format, b->pixelsize, (b->flags&RRBMP_ALPHAFIRST)?b->bits+1:b->bits, drawbuf, true);
 	blitter->sendframe(b);
 }
 
-void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum format, GLubyte *bits, GLint buf, bool bottomup)
+void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
+	GLenum format, int ps, GLubyte *bits, GLint buf, bool bottomup)
 {
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
 	tempctx *tc;
-	errifnot((tc=new tempctx(0, glXGetCurrentDrawable())));
+	errifnot((tc=new tempctx(0, _glXGetCurrentDrawable())));
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -358,6 +365,32 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h, GLenum f
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	prof_rb.endframe(w*h, 0, 1);
 	checkgl("Read Pixels");
+
+	// If automatic faker testing is enabled, store the FB color in an
+	// environment variable so the test program can verify it
+	if(fconfig.autotest)
+	{
+		unsigned char *rowptr, *pixel;  int match=1;
+		int color=-1, i, j, k;
+		color=-1;
+		__autotestframecount++;
+		for(j=0, rowptr=bits; j<h; j++, rowptr+=pitch)
+			for(i=1, pixel=&rowptr[ps]; i<w; i++, pixel+=ps)
+				for(k=0; k<ps; k++)
+				{
+					if(pixel[k]!=rowptr[k]) {match=0;  break;}
+				}
+		if(match)
+		{
+			unsigned char rgb[3];
+			glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
+		}
+		snprintf(__autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)win, color);
+		putenv(__autotestclr);
+		snprintf(__autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)win, __autotestframecount);
+		putenv(__autotestframe);
+	}
 
 	glPopClientAttrib();
 	delete tc;

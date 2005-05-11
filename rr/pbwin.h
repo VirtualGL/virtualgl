@@ -59,12 +59,13 @@ class pbwin
 		void readback(bool);
 		void readback(GLint, bool);
 		void swapbuffers(void);
+		bool dirty;
 
 	private:
 
 		int init(int, int, GLXFBConfig);
 		void blit(GLint);
-		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, GLubyte *,
+		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
 
 		bool force;
@@ -74,6 +75,9 @@ class pbwin
 		int neww, newh;
 		rrblitter *blitter;
 		rrprofiler prof_rb;
+		bool syncdpy;
+		char __autotestclr[80], __autotestframe[80];
+		int __autotestframecount;
 };
 
 #endif
