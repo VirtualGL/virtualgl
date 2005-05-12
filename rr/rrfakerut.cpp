@@ -56,9 +56,21 @@ void clicktocontinue(Display *dpy)
 // Same as _throw but without the line number
 #define _error(m) throw(rrerror(__FUNCTION__, m, 0))
 
-#define _prerror(m, ...) { \
+#define _prerror1(m, a1) { \
 	char temps[256]; \
-	snprintf(temps, 255, m, __VA_ARGS__); \
+	snprintf(temps, 255, m, a1); \
+	throw(rrerror(__FUNCTION__, temps, 0));  \
+}
+
+#define _prerror2(m, a1, a2) { \
+	char temps[256]; \
+	snprintf(temps, 255, m, a1, a2); \
+	throw(rrerror(__FUNCTION__, temps, 0));  \
+}
+
+#define _prerror3(m, a1, a2, a3) { \
+	char temps[256]; \
+	snprintf(temps, 255, m, a1, a2, a3); \
 	throw(rrerror(__FUNCTION__, temps, 0));  \
 }
 
@@ -104,7 +116,7 @@ void checkwindowcolor(Window win, unsigned int color)
 	if((fakerclr=atoi(e))<0 || fakerclr>0xffffff)
 		_error("Bogus data read back");
 	if((unsigned int)fakerclr!=color)
-		_prerror("Color is 0x%.6x, should be 0x%.6x", fakerclr, color)
+		_prerror2("Color is 0x%.6x, should be 0x%.6x", fakerclr, color)
 }
 
 
@@ -115,7 +127,7 @@ void checkframe(Window win, int desiredreadbacks, int &lastframe)
 	if((e=getenv(temps))==NULL || (frame=atoi(e))<1)
 		_error("Can't communicate w/ faker");
 	if(frame-lastframe!=desiredreadbacks && desiredreadbacks>=0)
-		_prerror("Expected %d readback%s, not %d", desiredreadbacks,
+		_prerror3("Expected %d readback%s, not %d", desiredreadbacks,
 			desiredreadbacks==1?"":"s", frame-lastframe);
 	lastframe=frame;
 }
@@ -460,7 +472,7 @@ int rbtest(void)
 #define compareattrib(c, v, attrib, ctemp) { \
 	getcfgattrib(c, attrib, ctemp); \
 	getvisattrib(v, attrib, vtemp); \
-	if(ctemp!=vtemp) _prerror("%s=%d in cfg & %d in X vis", #attrib, ctemp, vtemp); \
+	if(ctemp!=vtemp) _prerror3("%s=%d in cfg & %d in X vis", #attrib, ctemp, vtemp); \
 }
 
 
@@ -845,7 +857,7 @@ int mttest(void)
 		{
 			mt[i]=new mttestthread(i, dpy, win[i], ctx[i]);
 			t[i]=new Thread(mt[i]);
-			if(!mt[i] || !t[i]) _prerror("Could not create thread %d", i);
+			if(!mt[i] || !t[i]) _prerror1("Could not create thread %d", i);
 			t[i]->start();
 		}
 		printf("Phase 1\n");
