@@ -113,15 +113,19 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long 
 
 GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_list)
 {
+	GLXPbuffer pb=0;
 	#ifdef USEGLP
-	if(fconfig.glp) return glPCreateBuffer(config, attrib_list);
+	if(fconfig.glp) pb=glPCreateBuffer(config, attrib_list);
 	else
 	#endif
-	return _glXCreatePbuffer(_localdpy, config, attrib_list);
+	pb=_glXCreatePbuffer(_localdpy, config, attrib_list);
+	if(dpy && pb) glxdh.add(pb, dpy);
+	return pb;
 }
 
 GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigned int width, unsigned int height, int *attrib_list)
 {
+	GLXPbuffer pb=0;
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
@@ -133,10 +137,12 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigne
 		glpattribs[j++]=GLP_PBUFFER_WIDTH;  glpattribs[j++]=width;
 		glpattribs[j++]=GLP_PBUFFER_HEIGHT;  glpattribs[j++]=height;
 		glpattribs[j]=None;
-		return glPCreateBuffer(config, glpattribs);
+		pb=glPCreateBuffer(config, glpattribs);
 	}
 	#endif
-	return _glXCreateGLXPbufferSGIX(_localdpy, config, width, height, attrib_list);
+	pb=_glXCreateGLXPbufferSGIX(_localdpy, config, width, height, attrib_list);
+	if(dpy && pb) glxdh.add(pb, dpy);
+	return pb;
 }
 
 void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
@@ -146,6 +152,7 @@ void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 	else
 	#endif
 	_glXDestroyGLXPbufferSGIX(_localdpy, pbuf);
+	if(pbuf) glxdh.remove(pbuf);
 }
 
 void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
@@ -155,6 +162,7 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 	else
 	#endif
 	_glXDestroyPbuffer(_localdpy, pbuf);
+	if(pbuf) glxdh.remove(pbuf);
 }
 
 void glXFreeContextEXT(Display *dpy, GLXContext ctx)
@@ -217,21 +225,22 @@ Display *glXGetCurrentDisplay(void)
 	Display *dpy=NULL;  pbwin *pb=NULL;
 	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
 		dpy=pb->getwindpy();
+	else dpy=glxdh.getcurrentdpy(GetCurrentDrawable());
 	return dpy;
 }
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	pbwin *pb=NULL;  GLXDrawable draw=0;
-	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
+	pbwin *pb=NULL;  GLXDrawable draw=GetCurrentDrawable();
+	if((pb=winh.findpb(draw))!=NULL)
 		draw=pb->getwin();
 	return draw;
 }
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	pbwin *pb=NULL;  GLXDrawable read=0;
-	if((pb=winh.findpb(GetCurrentReadDrawable()))!=NULL)
+	pbwin *pb=NULL;  GLXDrawable read=GetCurrentReadDrawable();
+	if((pb=winh.findpb(read))!=NULL)
 		read=pb->getwin();
 	return read;
 }
