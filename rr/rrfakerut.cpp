@@ -29,6 +29,21 @@
 #ifndef GLX_RGBA_TYPE
 #define GLX_RGBA_TYPE 0x8014
 #endif
+#ifndef GLX_LARGEST_PBUFFER
+#define GLX_LARGEST_PBUFFER 0x801C
+#endif
+#ifndef GLX_PBUFFER_WIDTH
+#define GLX_PBUFFER_WIDTH 0x8041
+#endif
+#ifndef GLX_PBUFFER_HEIGHT
+#define GLX_PBUFFER_HEIGHT 0x8040
+#endif
+#ifndef GLX_WIDTH
+#define GLX_WIDTH 0x801D
+#endif
+#ifndef GLX_HEIGHT
+#define GLX_HEIGHT 0x801E
+#endif
 
 
 int usingglp=0;
