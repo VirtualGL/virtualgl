@@ -27,6 +27,7 @@ FakerConfig fconfig;
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
 #include "faker-pmhash.h"
+#include "faker-glxdhash.h"
 #include "faker-sym.h"
 #include "glxvisual.h"
 #include <sys/types.h>
@@ -65,7 +66,7 @@ static inline int _drawingtofront(void)
 	return _isfront(drawbuf);
 }
 
-winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;
+winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;  glxdhash glxdh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
 
@@ -90,6 +91,7 @@ void safeexit(int retcode)
 		pmh.killhash();
 		vish.killhash();
 		ctxh.killhash();
+		glxdh.killhash();
 		if(_dpyh) _dpyh->killhash();
 		if(_winh) _winh->killhash();
 	}
@@ -393,7 +395,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
 
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPushAttrib(GL_VIEWPORT_BIT);
+	glPushAttrib(GL_VIEWPORT_BIT|GL_COLOR_BUFFER_BIT|GL_PIXEL_MODE_BIT);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	_glViewport(0, 0, dstw, dsth);
@@ -406,6 +408,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	glPushMatrix();
 	glLoadIdentity();
 
+	_glDrawBuffer(GL_FRONT_AND_BACK);
+	glReadBuffer(GL_FRONT);
 	for(unsigned int i=0; i<h; i++)
 	{
 		glRasterPos2i(dest_x, dsth-dest_y-i-1);
@@ -417,7 +421,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
-	glPopAttrib();
+	_glPopAttrib();
 	glPopClientAttrib();
 
 	_glXMakeContextCurrent(olddpy, olddraw, oldread, ctx);
@@ -669,6 +673,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	if(pb)
 	{
 		pmh.add(dpy, pm, pb);
+		glxdh.add(pb->drawable(), dpy);
 		return pb->drawable();
 	}
 	CATCH();
@@ -682,6 +687,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	if(dpy==_localdpy) return _glXDestroyGLXPixmap(dpy, pix);
 	////////////////////
 
+	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
 	CATCH();
 }
@@ -700,6 +706,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 	if(pb)
 	{
 		pmh.add(dpy, pm, pb);
+		glxdh.add(pb->drawable(), dpy);
 		return pb->drawable();
 	}
 	CATCH();
@@ -718,6 +725,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	if(dpy==_localdpy) return _glXDestroyPixmap(dpy, pix);
 	////////////////////
 
+	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
 	CATCH();
 }
@@ -815,6 +823,7 @@ void glDrawBuffer(GLenum mode)
 		after=_drawingtofront();
 		if(before && !after) pbw->dirty=true;
 	}
+	else _glDrawBuffer(mode);
 	CATCH();
 }
 
@@ -832,6 +841,7 @@ void glPopAttrib(void)
 		after=_drawingtofront();
 		if(before && !after) pbw->dirty=true;
 	}
+	else _glPopAttrib();
 	CATCH();
 }
 
