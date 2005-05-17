@@ -11,7 +11,6 @@
  * wxWindows Library License for more details.
  */
 
-#include <GL/glx.h>
 #include <X11/Xlib.h>
 
 #define _hashclass _glxdhash
