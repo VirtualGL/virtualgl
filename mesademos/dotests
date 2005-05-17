@@ -32,11 +32,11 @@ dotest()
 	$XV /tmp/pbdemo.ppm
 	rm /tmp/pbdemo.ppm
 	echo $VGLRUN $BINPATH/shape
-	$BINPATH/shape || err
+	$VGLRUN $BINPATH/shape || err
 	echo $VGLRUN $BINPATH/testgl5
-	$VGLRUN -sp $BINPATH/testgl5 || err
+	RRSPOIL=0 $VGLRUN $BINPATH/testgl5 || err
 	echo $VGLRUN $BINPATH/testgl5 -i
-	$VGLRUN -sp $BINPATH/testgl5 -i || err
+	RRSPOIL=0 $VGLRUN $BINPATH/testgl5 -i || err
 	echo $VGLRUN $BINPATH/wincopy
 	$VGLRUN $BINPATH/wincopy || err
 	echo $VGLRUN $BINPATH/xfont
@@ -70,9 +70,9 @@ fi
 BINPATH=$1
 platform=$2
 
-VGLRUN0=$BINPATH/vglrun
+VGLRUN0=$BINPATH/rrlaunch
 if [ "$subplatform" = "64" ]; then
-	VGLRUN0=$BINPATH/vglrun64
+	VGLRUN0=$BINPATH/rrlaunch64
 fi
 XV=xv
 
