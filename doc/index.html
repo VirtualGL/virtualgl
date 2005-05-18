@@ -1,0 +1,1801 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+  
+
+
+  <title>VirtualGL User's Guide</title><style type="text/css">
+body {
+background-color: rgb(255, 255, 255);
+font-family: Arial,Helvetica,sans-serif;
+}
+a {
+text-decoration: none;
+}
+dt {
+font-weight: bold;
+margin-left: 25px;
+margin-top: 20px;
+}
+.valid {
+border-width: 0px;
+}
+pre {
+border: 1px solid rgb(0, 0, 255);
+padding: 4px;
+font-family: courier,monospace;
+font-size: 14px;
+background-color: rgb(238, 238, 255);
+margin-left: 25px;
+margin-right: 25px;
+}
+tr {
+background-color: rgb(238, 238, 255);
+color: rgb(32, 32, 32);
+text-align: left;
+}
+th {
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+text-align: left;
+}
+td {
+vertical-align: top;
+text-align: left;
+}
+.colorheader {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.newwin {
+border-width: 0px;
+}
+.tip {
+border: 1px solid rgb(0, 0, 0);
+padding: 1px 5px;
+font-weight: bold;
+background-color: rgb(255, 255, 0);
+margin-right: 10px;
+}
+.note {
+border: 1px solid rgb(0, 0, 0);
+padding: 1px 5px;
+font-weight: bold;
+background-color: blue;
+margin-right: 10px;
+color: rgb(255, 255, 255);
+}
+.monospace {
+font-family: monospace
+}
+hr {
+margin-bottom: 7px;
+}
+h2 {
+padding: 5px;
+color: rgb(255, 255, 255);
+background-color: rgb(25, 25, 112);
+}
+h3 {
+padding: 2px;
+background-color: rgb(0, 0, 0);
+color: rgb(255, 255, 255);
+margin-left: 3px;
+margin-right: 3px;
+}
+.top {
+text-align: right;
+}
+  </style></head>
+<body>
+<h1>VirtualGL 1.0 User's Guide</h1>
+
+<h2>Contents</h2>
+
+<ul>
+
+<li><a href="#legalinfo">Legal Information</a></li>
+<li><a href="#requirements">System Requirements</a></li>
+<li><a href="#linuxinstall">Installation (Linux)</a></li>
+<li><a href="#windowsinstall">Installation (Windows)</a></li>
+<li><a href="#basicusagelinux">Basic Usage (Linux Client)</a></li>
+<li><a href="#basicusagewindows">Basic Usage (Windows Client)</a></li>
+<li><a href="#secureusage">Secure Usage</a></li>
+<li><a href="#vnc">Usage with VNC</a></li>
+<li><a href="#perf">Performance Measurement</a></li>
+<li><a href="#config">Advanced Configuration</a></li>
+</ul>
+
+<hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
+
+<h2>Legal Information</h2>
+
+This
+product includes software developed
+by the OpenSSL Project for use in the OpenSSL Toolkit (<a href="http://www.openssl.org/">http://www.openssl.org/</a>.)&nbsp;
+Further information is contained in <a href="LICENSE-OpenSSL.txt"><span class="monospace">LICENSE-OpenSSL.txt</span></a>,
+which can be found
+in the same directory as this documentation.
+<p><span class="monospace">hclshm.dll </span>and
+<span class="monospace">xlib.dll</span>
+are freely redistributable components of the <a href="http://www.hummingbird.com">Hummingbird</a>
+Exceed XDK v9.0 and
+are included under the terms of that license and with the express
+consent of Hummingbird, Ltd.
+</p>
+
+<p>
+All
+other components of VirtualGL fall under the scope of the <a href="LICENSE.txt">wxWindows Library License, v3</a>,
+a derivative of
+the <a href="LGPL.txt">LGPL</a>.
+</p>
+
+<p class="top">
+<a href="#" target="_top">top</a></p>
+
+<hr class="top"><a name="requirements"></a>
+<h2>System Requirements</h2>
+
+<h3>Server (Linux 32-bit)</h3>
+
+<ul>
+
+<li>dual Pentium 4, 1.7 GHz or
+faster (or equivalent)</li>
+<ul>
+<li>For optimal performance,
+the processor should support SSE2 extensions</li>
+</ul>
+<li>decent 3D graphics
+accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
+<li>RedHat Linux 7.2 or newer
+(or equivalent)</li>
+<li>X server configured for true
+color (24/32-bit)</li>
+</ul>
+
+<h3>Server (Linux 64-bit)</h3>
+
+<ul>
+
+<li>Processor</li>
+<ul>
+<li>dual P4/Xeon with EM64T, or</li>
+<li>dual Itanium-2, 1.4 GHz or
+faster <span style="color: rgb(255, 0, 0);">*</span>,
+or</li>
+<li>dual Opteron or Athlon64,
+1.8 GHz or faster</li>
+<ul>
+<li>For optimal performance
+with
+VirtualGL64, the processor should support SSE3 extensions.&nbsp;
+Only newer AMD 64-bit processors support SSE3.</li>
+</ul>
+</ul>
+<li>decent 3D graphics
+accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
+<li>RedHat Enterprise Linux 3.0
+(64-bit) or equivalent (Works with <a href="http://fedora.redhat.com/">Fedora</a>,&nbsp;<a href="http://whiteboxlinux.org">WhiteBox</a>,
+and <a href="http://www.centos.org">CentOS</a>)</li>
+<li>X server configured for true
+color (24/32-bit)</li>
+</ul><span style="color: rgb(255, 0, 0);">*
+The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
+of development equipment.&nbsp; We are looking for volunteers to
+continue this
+effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact
+us</a> if you're interested.</span>
+
+<h3>Client (Linux)</h3>
+
+<ul>
+
+<li>Processor</li>
+<ul>
+<li>single PIII or P4, 1.0 GHz
+or faster (or equivalent), or</li>
+<li>single Itanium-2, 900 MHz
+or faster <span style="color: rgb(255, 0, 0);">*</span><br>
+</li>
+</ul>
+<li>graphics card with decent 2D
+performance</li>
+<li>RedHat Linux 7.2 or newer
+(or equivalent)</li>
+<li>X server configured for true
+color (24/32-bit)</li>
+</ul>
+
+<span style="color: rgb(255, 0, 0);">*
+The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
+of development equipment.&nbsp; We are looking for volunteers to
+continue this
+effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact
+us</a> if you're interested.</span><br>
+
+<h3>Client (Windows)</h3>
+
+<ul>
+
+<li>Single Pentium III or
+Pentium 4, 1.0 GHz or faster</li>
+<li>Graphics card with decent 2D
+performance</li>
+<li>Windows 2000 or XP with <a href="http://www.hummingbird.com">Hummingbird</a>
+Exceed 8.0 or 9.0<br>
+<br>
+<span class="note">Note:</span>Contact
+Gary Romualdez of
+Hummingbird Ltd. [tel. (416) 496-6393 or
+<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
+for Exceed pricing information.<br>
+<br>
+</li>
+<li>Client desktop currently
+needs to be true color (24 or 32-bit)</li>
+</ul>
+
+<div class="top"><a href="#" target="_top">top</a></div>
+
+<hr>
+<a name="linuxinstall"></a>
+<h2>Installation (Linux)</h2>
+
+<ol>
+
+<li>Obtain the latest VirtualGL
+RPM package from the files
+area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
+<br>
+<span class="note">Note:</span>.tgz
+packages are provided for users of non-RedHat platforms.&nbsp;
+You can use <a href="http://www.kitenet.net/programs/alien/">alien</a>
+to convert these into .deb packages if you prefer.&nbsp; These
+packages have not been thoroughly tested.<br>
+<br>
+The "glibc22" or "rh7"
+packages are built on RedHat Enterprise Linux 2.1, but they should
+theoretically work on any RPM-based system that has GLIBC 2.2 and
+libstdc++ 2.96, including&nbsp;RedHat Linux 7.2 and 7.3 (maybe 7.1 if
+patched) and CentOS Enterprise Linux 2.1.<br>
+<br>
+The "glibc23" or "rh8" packages are built on RedHat Enterprise Linux
+3.0, but they should theoretically work on any RPM-based system that
+has GLIBC 2.3 and libstdc++ 3.2 or 3.3, including RedHat
+Linux 8 (patched), RedHat Linux 9, CentOS or Whitebox Enterprise Linux 3, Fedora
+Core 1 and 2, and SuSE 8.2 or newer. &nbsp;The "glibc23" packages will
+also work on RedHat or CentOS Enterprise Linux&nbsp; 4.0&nbsp;if the <span class="monospace">compat-libstdc++-33</span> package is installed or on Fedora
+Core 3&nbsp; if the <span class="monospace">compat-libstdc++-8</span> package is installed.<br>
+<br>
+</li>
+<li>Log in as root, cd to the
+directory
+where you downloaded the RPM package, and issue the following
+command:<br>
+<pre>rpm -Uvh {RPM package name}</pre>
+</li>
+</ol>
+
+<span class="note">Note:</span>For
+x86-64 systems, there is a separate package called "VirtualGL64" which
+contains the server
+components for use with 64-bit apps. &nbsp;If you want to use VirtualGL
+to&nbsp; run both 32-bit and 64-bit applications on an x86-64 machine,
+you will need to install both the "VirtualGL" and "VirtualGL64"
+packages. &nbsp;Since there is no need for a 64-bit client, the client
+is only available in the "VirtualGL" package.<br>
+<h3>Installing on SuSE/United Linux</h3>
+
+The VirtualGL glibc23 RPM's can be installed and used on a SuSE Linux
+or equivalent system provided that the following additional steps are
+taken:<br>
+
+<ul>
+<li>Pass an argument of <span class="monospace">--nodeps </span>to rpm when installing the package, e.g.:<br>
+    <pre>rpm -Uvh {RPM package name} --nodeps</pre>
+  </li><li>Link <span class="monospace">/usr/lib/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span> (or <span class="monospace">/usr/lib64/libssl.so.4</span> and <span class="monospace">/usr/lib64/libcrypto.so.4</span>) to the location of your OpenSSL libraries, e.g.:<br>
+    <pre>ln -fs /usr/lib/libssl.so.0 /usr/lib/libssl.so.4<br>ln -fs /usr/lib/libcrypto.so.0 /usr/lib/libcrypto.so.4</pre>
+  </li>
+</ul>
+
+<span class="note">Note:</span>Installing the client as a service does not currently work on SuSE/United Linux platforms.<br>
+
+<h3>Display Configuration (Server
+Only)</h3>
+
+<p>VirtualGL requires access to display
+:0 (or to the display specified in the <span class="monospace">RRDISPLAY</span> environment variable)
+so that it can create and render to off-screen Pbuffers on the server's
+3D graphics card.&nbsp; Normally, this is only possible if someone has
+logged into the server locally and explicitly granted this permission
+by issuing</p>
+
+<pre>xhost +localhost</pre>
+
+
+<p>However, it is possible to configure the server such that this permission is 
+automatically granted regardless of whether anyone is logged in locally.</p>
+
+
+<ol>
+<li>If the server machine is configured to boot into runlevel 5 (graphical 
+  login), then temporarily shut down its X server by issuing<br>
+    <pre>init 3</pre>
+ as root<br>
+&nbsp;</li><li>Log in as root from the text console.<br>
+&nbsp;</li><li>
+  If the server machine is configured to boot into runlevel 3 (text login), 
+  then configure it to boot into a graphical login by changing the first line of
+  <span class="monospace">/etc/inittab</span> from<br>
+  <br>
+
+  <span class="monospace">id:3:initdefault:</span><br class="monospace">
+
+  <br>
+to<br>
+  <span class="monospace"><br>
+id:5:initdefault:<br>
+&nbsp;</span>
+  </li><li>If the server is running the NVidia accelerated GLX drivers, follow the 
+  instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span> regarding setting 
+  the appropriate permissions for  <span class="monospace">/dev/nvidia*</span>.<br>
+&nbsp;</li><li>Add<br>
+    <pre>xhost +localhost</pre>to
+the tail end of the display manager's client startup script.&nbsp; The
+location of this script varies depending on the particular Linux
+distribution and
+display manager being used.&nbsp; The following table lists some common
+locations for this file:<br>
+    <br>
+    <table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+      <tbody>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader"></td>
+          <td style="font-weight: bold;" class="colorheader">xdm or kdm</td>
+          <td style="font-weight: bold;" class="colorheader">gdm<br>
+<small>(gdm is the&nbsp;default display manager on most LInux systems)<br>
+</small></td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">RedHat 7/8/9<br>
+Enterprise Linux 2.1/3</td>
+          <td><span class="monospace">/etc/X11/xdm/Xsetup_0<br>
+          </span><br>
+(replace 0 with the display number of the X server you are configuring)</td>
+          <td><span class="monospace">/etc/X11/gdm/Init/Default<br>
+          </span><br>
+(usually this is just symlinked to<span class="monospace"> /etc/X11/xdm/Xsetup_0</span>)</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">Enterprise Linux 4<br>
+Fedora Core 1/2/3</td>
+          <td><span class="monospace">/etc/X11/xdm/Xsetup_0<br>
+          </span><br>
+
+(replace 0 with the display number of the X server you are configuring)</td>
+          <td><span class="monospace">/etc/X11/gdm/Init/:0<br>
+          </span><br>
+
+
+(usually this is just symlinked to<span class="monospace"> /etc/X11/xdm/Xsetup_0</span>)</td>
+        </tr>
+<tr>
+          <td style="font-weight: bold;" class="colorheader">SuSE/United Linux</td>
+          <td><span class="monospace">/etc/X11/xdm/Xsetup</span></td>
+          <td><span class="monospace">/etc/opt/gnome/gdm/Init/Default</span></td>
+        </tr>
+      </tbody>
+    </table>
+&nbsp;&nbsp;</li><li>If the server is running gdm (<span class="monospace"></span><span class="monospace"></span>the
+factory default on&nbsp;most Linux systems), then you'll need to set up
+gdm to allow TCP connections to the X server. &nbsp;To do this, edit
+the <span class="monospace">gdm.conf</span> file and add the following line under the <span class="monospace">[security]</span> section (or change it if it already exists):<br>
+    <pre>DisallowTCP=false</pre>
+See the table below for the location of <span class="monospace">gdm.conf</span> on various systems.<br>
+&nbsp;&nbsp;</li>
+<li>Unless you know that you absolutely need it, disable the XTEST extension.&nbsp; Disabling
+  XTEST eliminates a potential security loophole opened up by Step 5, whereby an 
+  authenticated user on the server could theoretically send key/mouse events 
+  into the server's local display.&nbsp; Even with XTEST disabled, it is generally a good idea to leave the 
+  server's local display logged out when not in use.<br>
+    <br>
+Disabling XTEST is accomplished by passing an argument of <span class="monospace">-tst</span>
+on the command line used to launch the X server.&nbsp; The location of
+this command line varies depending on the particular Linux
+distribution and display manager being used.&nbsp;&nbsp; The following
+table lists some common locations:<br>
+    <br>
+    <table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader"></td>
+      <td style="font-weight: bold;" class="colorheader">xdm <br>
+</td>
+      <td style="font-weight: bold;" class="colorheader">gdm<br>
+          <small>(default on most Linux systems)</small><br>
+</td><td style="font-weight: bold;" class="colorheader">kdm</td>
+
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">RedHat (or equivalent)</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span><br>
+</td>
+      <td><span class="monospace">/etc/X11/gdm/gdm.conf</span><br>
+</td><td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">SuSE/United Linux</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+      <td><span class="monospace">/etc/opt/gnome/gdm/gdm.conf</span></td><td><span class="monospace">/etc/opt/kde3/share/config/kdm/Xservers</span></td>
+
+    </tr>
+  </tbody>
+    </table>
+    <br>
+For xdm-style configuration files, add <span class="monospace">-tst</span> to the line corresponding to the display number you are configuring, e.g.:
+    <pre>:0 local /usr/X11R6/bin/X :0 vt07 -tst<br></pre>
+For gdm-style configuration files, add <span class="monospace">-tst</span> to all lines that appear to be X server command lines, e.g.:<br>
+    <pre>StandardXServer=/usr/X11R6/bin/X -tst</pre>
+    <pre>[server-Standard]<br>command=/usr/X11R6/bin/X -tst -audit 0</pre>
+    <pre>[server-Terminal]<br>command=/usr/X11R6/bin/X -tst -audit 0 -terminate</pre>
+    <pre>[server-Chooser]<br>command=/usr/X11R6/bin/X -tst -audit 0<br></pre>
+&nbsp;<br>
+  </li><li>Restart the X server by issuing<br>
+    <pre>init 5</pre>
+ as root.<br>
+&nbsp;</li><li>You can check your work by running<br>
+    <pre>xdpyinfo -display :0</pre>
+ In particular, make sure that 
+  XTEST doesn't show up in the list of extensions if you disabled it above.&nbsp; 
+  If <span class="monospace">xdpyinfo</span> fails to run, then the permissions 
+  on Display :0 are probably still too restrictive, meaning that the change in 
+  Step 5 didn't take for some reason.</li>
+</ol>
+<h3>Installing
+the Linux Client
+as a Service<br>
+</h3>
+
+You can set up the Linux client as a user mode daemon by running<br>
+
+<pre>rrxclient_config</pre>
+
+as root.&nbsp; Select either option 1 or 2, depending on whether
+you
+want to install the standard or the secure version of the client.
+<br>
+
+<br>
+
+This script creates a link in <span class="monospace">/etc/X11/xinit/xinitrc.d</span>
+so that the client will be automatically started in user mode whenever
+an X session is started.&nbsp; It also adds a line to <span class="monospace">/etc/X11/gdm/PostSession/Default</span>
+to terminate the client whenever the X session
+terminates. &nbsp;This probably only works on RedHat-compatible platforms that use gdm.<br>
+
+<br>
+
+If additional X11 displays are started by the same user (:1, :2, etc.),
+this will not cause additional VirtualGL client instances to
+start.&nbsp; Only one VirtualGL client instance is needed to talk
+to
+all active displays.&nbsp; However, it is important to note that
+all
+active displays on the client machine need to be running under the
+same user privileges in order for the same VirtualGL client to
+communicate with all of them.<br>
+
+<br>
+
+If you wish to change the default port that the client listens on, you
+will need to edit <span class="monospace">/usr/bin/rrxclient_daemon</span>
+or <span class="monospace">/usr/bin/rrxclient_ssldaemon</span>
+and pass the appropriate argument (<span class="monospace">-p&lt;port number&gt;</span>) on the <span class="monospace">rrxclient</span>
+command line located in that file.&nbsp; By default, the client
+will
+use port 4242 for non-encrypted communication and port 4243 for
+SSL-encrypted communication.
+<h3>Removing the Linux Client and
+Server</h3>
+
+<p>As root, issue the following
+command:</p>
+
+<pre>rpm -e VirtualGL</pre>
+
+<p>To remove the 64-bit server
+components on an x86-64 machine, additionally issue the following
+command:</p>
+
+<pre>rpm -e VirtualGL64</pre>
+
+<p style="text-align: right;"><a href="#" target="_top">top</a><br>
+</p>
+
+<hr style="width: 100%; height: 2px;"><a name="windowsinstall"></a>
+<h2>Installation (Windows)</h2>
+
+<ol>
+
+<li>Download the latest
+VirtualGL installer package from the files
+area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.
+The installer will usually be named <span class="monospace">VirtualGL-{version}.exe</span>.<br>
+</li>
+<li>Run the VirtualGL
+installer.&nbsp;
+The installation of VirtualGL should be
+self-explanatory.&nbsp; The only configuration option is the
+directory in
+which you want the files to be installed. </li>
+<li>Install Hummingbird Exceed
+8.0 or 9.0 if it isn't already
+installed. </li>
+<li>Exceed must be updated to
+one of the following revisions in order
+to work properly with VirtualGL:<br>
+<br>
+<table cellpadding="3">
+<tbody>
+<tr>
+<th>Product</th>
+<th><span class="monospace">exceed.exe</span>
+Version</th>
+<th>How to Obtain</th>
+</tr>
+<tr>
+<td>Hummingbird Exceed
+8.0</td>
+<td>8.0.0.28 or higher</td>
+<td>Download the <span class="monospace">exceed.exe</span> patch from:<br>
+<a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
+<br>
+<span class="note">Note:</span>Hummingbird
+WebSupport
+account required </td>
+</tr>
+<tr>
+<td>Hummingbird Exceed
+9.0</td>
+<td>9.0.0.9 or higher</td>
+<td>Run Hummingbird
+Update</td>
+</tr>
+</tbody>
+</table>
+<br>
+</li>
+<li>Add the Exceed path (usually
+<span class="monospace">C:\Program
+Files\Hummingbird\Connectivity\8.00\Exceed</span>
+or <span class="monospace">C:\Program
+Files\Hummingbird\Connectivity\9.00\Exceed</span>)
+to your system <span class="monospace">PATH</span>
+environment if it
+isn't already there. </li>
+<li>Load Exceed XConfig
+(right-click
+on the Exceed taskbar icon, then select "Tools--&gt;Configuration.")</li>
+<li>Open the "X Server Protocol"
+applet in XConfig.<br>
+<br>
+<span class="tip">Tip:</span>If
+you are using the "Classic View" mode of XConfig, open the
+"Protocol" applet instead.<br>
+&nbsp; </li>
+<li>In the "X Server Protocol"
+applet, select the "Protocol" tab and make sure that "Use 32 bits per
+pixel
+for true color" is <i>not</i>
+checked.<br>
+<br>
+<img alt="" src="exceed1.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>Select the "Extensions" tab
+and make sure that "MIT-SHM" is checked.<br>
+<br>
+<img alt="" src="exceed2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>Click "Validate and Apply
+Changes."&nbsp; If XConfig asks whether you want to perform a
+server reset, click
+"Yes." </li>
+<li>Open the "Other Server
+Settings" applet in XConfig.<br>
+<br>
+<span class="note">Note:</span>If
+you are using the "Classic View" mode of XConfig, open the
+"Performance" applet instead.<br>
+&nbsp;<br>
+</li>
+<li>Select the "Performance" tab
+and make sure that "Default Backing
+Store" is set to "None."<br>
+<br>
+<img alt="" src="exceed3.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>Click "Validate and Apply
+Changes."&nbsp; If XConfig asks whether you want to perform a
+server reset, click
+"Yes." </li>
+</ol>
+
+<h3>Secure Shell</h3>
+
+It is recommended that you use SSh (Secure Shell) to log in to the
+application server and launch applications.&nbsp; Some servers are
+configured to allow
+telnet and RSh access, but telnet and RSh both send passwords
+unencrypted over the network and are thus being phased out by
+SSh.&nbsp; If you already have <a href="http://www.cygwin.com">CygWin</a>
+installed on your
+Windows machine, then you can use the SSh client included in that
+package.&nbsp; Otherwise, download and install <a href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/">PuTTY</a>.<br>
+
+<h3><a name="installsvc"></a>Installing
+the Windows Client
+as a Service</h3>
+
+<p>The standard and SSL versions
+of the VirtualGL Windows Client can be installed as Windows services (and
+subsequently removed) using the links provided in the "VirtualGL
+Client" start menu group.&nbsp; Once installed, the services can be
+started from the Services control panel applet or from the command line
+by issuing</p>
+
+<pre>net start rrxclient</pre>
+
+<p style="margin-left: 40px;">or</p>
+
+<pre>net start rrxclient_ssl</pre>
+
+<p>The services can be
+subsequently stopped by issuing</p>
+
+<pre>net stop rrxclient</pre>
+
+<p style="margin-left: 40px;">or</p>
+
+<pre>net stop rrxclient_ssl</pre>
+
+<p>If you wish to install the
+client as a service and have it
+listen on a port other than the default (4242 for the non-encrypted client
+or 4243 for the SSL client), then you will need to install the service
+manually from the command line.</p>
+
+<pre>rrxclient -?</pre>
+
+<p> gives a list of the relevant
+command-line options.</p>
+
+<p style="text-align: right;"><a href="#" target="_top">top</a></p>
+
+<hr><a name="basicusagelinux"></a>
+<h2>Basic Usage (Linux Client)</h2>
+
+<ol>
+
+<li>If you have never made X11
+connections between your client machine and the
+application server before, then you will need to grant the application
+server
+permission to use your X display.&nbsp; You can do this by typing:<br>
+<pre>xhost +{server_machine_name_or_IP}</pre>
+inside a shell.<br>
+<br>
+<span class="note">Note:</span>You
+only need to do this once, not every time you use VirtualGL.<br>
+&nbsp;</li>
+<li>If
+you have not installed the VirtualGL client as a service, then you will
+need to start the client manually.&nbsp; To do this, run<br>
+<pre>rrxclient</pre>
+</li>
+<li>Open a Secure Shell (SSh)
+session into the application server:<br>
+<pre>ssh -l {your_user_name} {server_machine_name_or_IP}</pre>
+</li>
+<li>In the SSh session, set the <span class="monospace">DISPLAY</span>
+environment variable on the server to
+point back to the client machine:<br>
+<pre>export DISPLAY={client_machine_name_or_IP}:0.0</pre>
+or<br>
+<pre>setenv DISPLAY {client_machine_name_or_IP}:0.0</pre>
+</li>
+<li>In the SSh session, launch
+your 3D application:<br>
+<pre>rrlaunch {application_executable_or_script} {arguments}</pre>
+</li>
+</ol>
+
+<div style="text-align: right;"><a href="#" target="_top">top</a></div>
+
+<hr style="width: 100%; height: 2px;"><a name="basicusagewindows"></a>
+<h2>Basic Usage (Windows Client)</h2>
+
+<ol>
+
+<li>If you have not installed
+the VirtualGL client as a service, then you will need to start the
+client manually.&nbsp; To do this, use the link provided in the
+VirtualGL Client start menu group.</li>
+<li>Make sure that Exceed is
+running.</li>
+<li>If you have never made X11
+connections between your client machine and the application server
+before, you will need to grant the application server permission to use
+your X display.
+<ol style="list-style-type: lower-alpha;">
+<li>Launch Exceed XConfig
+(right-click on the Exceed taskbar icon, then select
+"Tools--&gt;Configuration.")</li>
+<li>Open the "Security,
+Access Control, and System Administration" applet in XConfig.<br>
+        <br>
+        <span class="tip">Tip:</span>If
+you are using the "Classic View" mode of XConfig, open the
+"Security" applet instead.<br>
+&nbsp;</li>
+<li>To have Exceed prompt
+you each time a host tries to connect, set "Host Access Control List"
+to "Enabled."<br>
+<br>
+<img alt="" src="exceed4.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>To allow only the hosts
+you specify to connect, set "Host Access Control List" to "File" and
+click "Edit" to edit the file and add entries to it.&nbsp; You
+should add the name or IP address of the application server to this
+file, save the file, then exit the editor.<br>
+<br>
+<img alt="" src="exceed5.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li type="a">Click
+"Validate and Apply Changes."&nbsp; If XConfig asks whether you
+want to perform a server reset, click
+"Yes."</li>
+</ol>
+<p> <span class="note">Note:</span>You
+need only perform Step 3 once, not every time you launch the
+client. </p>
+</li>
+<li>Open a Secure Shell (SSh)
+connection to the application server: <br>
+<span style="font-weight: bold;"><br>
+CygWin users:</span><br>
+Open a new command prompt and type:<br>
+<pre>ssh -l {your_user_name} {server_machine_name_or_IP}</pre>
+<span style="font-weight: bold;">PuTTY
+users:&nbsp;</span></li>
+<ol style="list-style-type: lower-alpha;">
+<li>Launch PuTTY.</li>
+<li>Select the "Session"
+category.</li>
+<li>Set the "Protocol"
+to "SSH," then enter the host name or IP address of the application
+server. <br>
+<br>
+<img alt="" src="putty1.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>Click "Open"<br>
+<br>
+</li>
+</ol>
+<li>In the remote shell session,
+set the <span class="monospace">DISPLAY</span>
+environment variable on
+the server to point back to the
+client machine:<br>
+<pre>export DISPLAY={client_machine_name_or_IP}:0.0<br></pre>
+or<br>
+<pre>setenv DISPLAY {client_machine_name_or_IP}:0.0<br></pre>
+<br>
+</li>
+<li>In the SSh session, launch
+your 3D application:
+<pre>rrlaunch {application_executable_or_script} {arguments}</pre>
+</li>
+</ol>
+
+<div class="top" style=""><a href="#" target="_top">top</a></div>
+
+<ol>
+
+</ol>
+
+<hr style="width: 100%; height: 2px;"><a name="secureusage"></a><br>
+
+<h2>Secure
+Usage</h2>
+
+<h3>SSL Tunneling of the Video
+Stream</h3>
+
+<p>VirtualGL has built-in
+support for encrypting its compressed image stream inside a
+Secure Socket Layer (SSL.)&nbsp; For performance reasons, this
+feature is not
+enabled by default, but it can be easily enabled:</p>
+
+<p style="font-weight: bold;">Client:</p>
+
+<ul>
+
+<li>When starting the Windows
+client,
+use the "Start VirtualGL Secure Client" link provided in the "VirtualGL
+Client" start menu group<br>
+</li>
+<li>... or ... Start the secure
+client from the command line by issuing<br>
+<pre>rrxclient -s</pre>
+</li>
+<li>... or ... Install the
+secure client as a service using the instructions provided in the Installation
+sections<br>
+</li>
+</ul>
+
+<span style="font-weight: bold;">Server:</span><br style="font-weight: bold;">
+
+Set the environment variable <span style="font-family: monospace;">RRUSESSL</span>
+to <span style="font-family: monospace;">1</span>
+prior to launching the application.<br>
+
+<h3>SSh Tunneling of the X11
+Protocol Stream</h3>
+
+Secure
+Shell (SSh) has built-in support
+for tunneling the X11 protocol stream
+through the SSh connection.&nbsp; Tunneling the X11 protocol stream
+has
+several
+advantages:<br>
+
+<ul>
+
+<li>No one can snoop your X11
+connection.</li>
+<li>You don't have to explicitly
+grant the remote host permission to
+use your X display.</li>
+<li>You can take advantage of
+SSh's compression features (for
+low-bandwidth connections.)</li>
+</ul>
+
+<p>The main disadvantage is
+performance.&nbsp; On a LAN, tunneling the
+X11
+protocol stream through SSh will probably slow things down, but on a
+lower-bandwidth connection, it may
+actually speed things up, especially if you enable compression.</p>
+
+<h4>Enabling X11 Tunneling from a
+Linux Client</h4>Pass a <span class="monospace">-X</span> argument to ssh when connecting to the application server, e.g.:<br>
+
+<pre>ssh -X -l {your_user_name} {server_machine_name_or_IP}</pre>
+
+
+After opening an SSh connection into the application server, don't set
+the
+<span class="monospace">DISPLAY</span>
+environment.&nbsp; Instead, set the environment variable
+<span class="monospace">RRCLIENT</span>
+to the client display, e.g.<br>
+
+<pre>export RRCLIENT={my_client_machine}:0.0<br></pre>
+
+
+
+<p><span class="tip">Tip:</span>If
+your connection to the
+server is low-bandwidth, you may wish
+to pass a <span class="monospace">-C</span>
+argument to ssh when
+establishing the connection.&nbsp; This will enable SSh protocol
+compression and may speed things up.&nbsp; Don't use protocol
+compression when
+connecting over a LAN or other high-speed network.</p>
+
+<h4>Enabling X11 Tunneling from a
+Windows Client (CygWin)</h4>
+
+<ol>
+
+<li>Prior to opening the SSh
+connection
+into the application server, set the <span class="monospace">DISPLAY</span>
+environment on the client machine to point to whichever display Exceed
+is parking on:<br>
+<br>
+Example:<br>
+<pre>set DISPLAY=localhost:0.0</pre>
+The
+"localhost" part is important.&nbsp;
+If you don't anticipate needing to launch multiple Exceed sessions, you
+can set this environment variable globally (Control
+Panel--&gt;System--&gt;Advanced.)<br>
+&nbsp;</li>
+<li>Pass a <span class="monospace">-X</span>
+argument to ssh when
+connecting to the server.&nbsp; Example:<br>
+    <pre>ssh -X -l {your_user_name} {server_machine_name_or_IP}</pre>
+</li></ol><span class="tip">Tip:</span>If your connection to the
+server is low-bandwidth, you may additionally wish
+to pass a <span class="monospace">-C</span>
+argument to ssh when
+establishing the connection.&nbsp; This will enable SSh protocol
+compression and may speed things up. &nbsp;Don't
+use protocol compression when
+connecting over a LAN or other high-speed network.
+<ol>
+
+</ol>
+
+
+<h4>Enabling X11 Tunneling from a
+Windows Client (PuTTY)</h4>
+
+<ol>
+
+<li>Launch PuTTY.</li>
+<li>Select the
+Connection--&gt;SSH--&gt;Tunnels category.</li>
+
+  <li>Check "Enable X11
+forwarding"
+and
+set the "X display location" to <span class="monospace">localhost:0.0</span>
+or
+whichever
+display Exceed is parking on.</li>
+
+</ol><span class="tip">Tip:</span>If your connection to the
+server is
+low-bandwidth, you may wish to enable SSh protocol compression when
+establishing the connection.&nbsp; To do this, select the
+Connection--&gt;SSH category in PuTTY and check "Enable
+compression." &nbsp;Don't
+use protocol compression when
+connecting over a LAN or other high-speed network.
+
+<h4>Launching the Application</h4>
+
+After opening an SSh connection into the application server, don't set
+the <span class="monospace">DISPLAY</span>
+environment.&nbsp; Instead,
+set the environment variable <span class="monospace">RRCLIENT</span>
+to the client display.<br>
+
+<br>
+
+Example:<br>
+
+<pre>export RRCLIENT={my_client_machine}:0.0<br></pre>
+
+Then <span class="monospace">rrlaunch</span>
+the application as you
+would normally.<br>
+
+<h3>A More Complex Scenario</h3>
+
+<p>So what if your only path into
+the network is through SSh, perhaps
+through a single "gateway" machine.&nbsp; No problem, because SSh
+allows you to tunnel both incoming and outgoing TCP/IP connections on
+any port from one machine to another.&nbsp; Tunneling VirtualGL's compressed image
+stream through SSh will not be as fast as using the built-in SSL
+capabilities of VirtualGL, but sometimes it's the only option available.</p>
+
+<p>Let's assume the following
+configuration:</p>
+
+<p><img alt="" src="sshtunnel.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+</p>
+
+<p>What we want to do is tunnel
+both the
+X11 protocol stream and VirtualGL's compressed image stream through
+SSh.&nbsp;
+Here's one way to do it:</p>
+
+<ol>
+
+<li>Start the VirtualGL client
+(the standard version, not the secure version)</li>
+<li>If the Client machine is
+running Windows:</li>
+<ol style="list-style-type: lower-alpha;">
+<li>Start Exceed</li>
+<li>
+<pre>set DISPLAY=localhost:0.0</pre>
+(or whatever display number Exceed is parking on.)</li>
+</ol>
+<li>
+<pre>ssh -X -R 4242:localhost:4242 username@ssh_gateway_machine</pre>
+This tells SSh to tunnel all
+X11 traffic from your session on <span class="monospace">ssh_gateway_machine</span>
+to your client's display, and additionally it will tunnel all outbound
+traffic to port 4242 on <span class="monospace">ssh_gateway_machine</span>
+to inbound port 4242 on your client machine.<br>
+<br>
+<span class="tip">Tip:</span>This
+command line also works
+with PuTTY.&nbsp; Just replace "ssh" with the path to the PuTTY
+executable.&nbsp; You can also configure the same thing through the
+PuTTY GUI as follows:<br>
+<br>
+<img alt="" src="putty2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<br>
+</li>
+<li>Now you should have a
+terminal session open into <span class="monospace">ssh_gateway_machine</span>.&nbsp;
+Inside this
+session, issue the following command:<br>
+<pre>ssh -X -R 4242:localhost:4242 username@app_server_machine</pre>
+This tells SSh to tunnel all
+X11 traffic from your session on <span class="monospace">app_server_machine</span>
+to your session on <span class="monospace">ssh_gateway_machine</span>,
+where it will be re-tunneled to the client display.&nbsp;
+Additionally,
+all outbound traffic to port 4242 on <span class="monospace">app_server_machine</span>
+will be tunneled to port 4242 on <span class="monospace">ssh_gateway_machine</span>,
+which will then re-tunnel the traffic to inbound port 4242 on your
+client machine.<br>
+<br>
+</li>
+<li>You should now have a
+terminal session open into <span class="monospace">app_server_machine</span>.&nbsp;
+Inside that
+session, set the environment variable <span class="monospace">RRCLIENT</span>
+to <span class="monospace">localhost:n.0</span>,
+where <span class="monospace">n
+</span>is the display number of
+the X server running on the Client machine.<br>
+<br>
+</li>
+<li><span class="monospace">rrlaunch</span>
+your application.</li>
+</ol>
+
+<p>You can of course replace port
+4242 in all of the steps above with
+whatever port you choose, but make sure that if you change the port,
+you configure both the client and server to talk on the port you choose
+(using the
+<span class="monospace">-p</span>
+argument to <span class="monospace">rrxclient</span>
+as well as the <span class="monospace">RRPORT</span>
+environment
+variable on the server.)</p>
+
+<p><span class="tip">Tip:</span>This
+same procedure would also
+work if you needed to connect directly to app_server_machine and tunnel
+everything over SSh.&nbsp; In that case, simply leave out Step 3.
+</p>
+
+<p><span class="tip">Tip:</span>You
+might also want to try
+enabling SSh compression for the first stage of the trip, from your
+client to the SSh gateway.&nbsp; This could improve performance if
+the
+WAN connection is low-bandwidth.</p>
+
+<div class="top" style=""><a href="#" target="_top">top</a></div>
+
+<br>
+
+<hr style="width: 100%; height: 2px;"><a name="vnc"></a><br>
+
+<h2>Usage with VNC</h2>
+
+<p>VirtualGL's
+default mode of operation, and its fastest mode of operation in a LAN
+environment, is to use its own built-in high-speed image compressors to
+send the rendered pixels from a 3D window over the network to the
+client.&nbsp; A process running on the client machine then
+decompresses
+the images and re-composites them into the appropriate X window.<br>
+</p>
+
+<div style="text-align: center;">
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL's
+Architecture</span></p>
+</div>
+
+<div style="text-align: center;"><img alt="VirtualGL's Architecture" src="virtualgl.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+</div>
+
+<p>However, VirtualGL has a second
+mode
+of operation, a "compression-less" mode, which allows it to work in
+concert with VNC or other 3rd party X11 proxies.&nbsp; In this
+mode, VirtualGL essentially bypasses its own image compressor and
+allows VNC to do the job of compressing and delivering images to the
+client(s).<br>
+</p>
+
+<div style="text-align: center;">
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL's
+Architecture with VNC</span></p>
+</div>
+
+<div style="text-align: center;">
+<p><img alt="Ideal X11 Proxy" src="idealx11proxy.png?rev=HEAD&amp;cvsroot=virtualgl"></p>
+</div>
+
+<font style="font-weight: bold;">
+<p>Advantages of using VirtualGL
+with VNC:<br>
+</p>
+</font>
+<ul>
+
+<li>The VNC protocol performs
+much better than X11 over high-latency
+or low-bandwidth connections. &nbsp;The application GUI will load
+and
+render much faster with VNC than with X11 on such network connections.</li>
+<li>VNC
+provides rudimentary collaboration capabilities. &nbsp;Multiple VNC
+clients can simultaneously view the same VNC server session and pass around control
+of the keyboard and mouse.</li>
+<li>The VNC client is stateless.
+&nbsp;If the network hiccups or the
+client is otherwise disconnected, the session remains running on
+the server and can be rejoined from any machine on the network.</li>
+<li>VNC clients are available
+for a variety of platforms (including PDA's) that VirtualGL doesn't
+support.</li>
+<li>No X server is required on
+the client machine. &nbsp;This reduces the deployment cost and complexity for Windows clients.</li>
+</ul>
+
+<span style="font-weight: bold;">Disadvantages
+of using VirtualGL with VNC:</span>
+<ul>
+
+<li>On a high-bandwidth,
+low-latency network,&nbsp;the combination of
+VirtualGL and VNC will perform slower than VirtualGL alone.
+&nbsp;On a
+typical 100 Mbit LAN, TurboVNC (see below) can deliver images to the client with about 80% of
+the&nbsp;performance of VirtualGL, but other VNC implementations
+will
+perform much worse, since their image codecs are tuned for low-speed
+connections.</li>
+<li>VNC does not provide
+seamless windows. &nbsp;Rather than each
+application window appearing as a separate client window, the entire
+server desktop appears in a single client window.</li>
+<li>VNC requires more server
+resources, both because it has to
+compress more pixels (an entire desktop rather than a single window)
+and because 2D (X11) rendering occurs on the server rather than the
+client.</li>
+</ul>
+
+<p>When a VNC session is started
+on the server, VNC chooses a unique display number (such as :1, :2,
+etc.) and starts a&nbsp;customized X
+server on that display number.&nbsp; This
+customized X server renders all graphical output from the
+application into a bitmap in memory, which it then&nbsp;compresses and
+sends&nbsp;to the client(s). &nbsp;VNC's X
+server does not implement the GLX extension at all, and thus it can't
+be used as-is to run 3D applications.&nbsp; But since VirtualGL
+is designed to intercept and hand off all GLX commands to the
+hardware-accelerated root display (usually display :0), VirtualGL can
+be used
+as a "3D to 2D converter" to allow 3D apps to run within VNC or another
+X11 proxy that doesn't natively support GLX.&nbsp; When used in
+"compression-less" mode, VirtualGL bypasses its compressed image
+delivery system and instead composites the 3D drawing
+area&nbsp;back
+into the window directly using X-Windows blits.&nbsp; These blits
+can
+be performed very quickly through shared memory, since the X server
+(VNC) and the application are
+residing on the same machine.<br>
+</p>
+
+<h3>TurboVNC</h3>
+
+<p>TurboVNC&nbsp;is
+essentially just a version of <a href="http://www.tightvnc.com/">TightVNC</a>
+with
+optimizations to make it perform at peak efficiency on high-speed networks. &nbsp;These
+optimizations include:<br>
+</p>
+
+<ul>
+
+<li>
+<p>Using VirtualGL's
+high-performance JPEG codec to handle tight JPEG encoding</p>
+</li>
+<li>
+<p>Using
+only JPEG and Full color encoding (mono, gradient, and indexed encoding
+are disabled.) &nbsp;High-performance JPEG encoding is used in all
+cases except for very small image tiles for which using full color
+(raw) encoding is more efficient due to JPEG's overhead.</p>
+</li>
+<li>
+<p>Using the optimized tight
+protocol whenever possible. &nbsp;Other VNC protocols (ZRLE,
+Hextile, etc.) are supported on the server so that it can talk to
+non-TurboVNC clients. &nbsp;But if a TurboVNC client connects to a
+TurboVNC server, they will both use optimized tight encoding at all
+times.</p>
+</li>
+</ul>
+
+<p>Other notable differences
+between TurboVNC and TightVNC:<br>
+</p>
+
+<ul>
+
+<li>
+<p>The
+compression level and quality parameters have been changed as follows:<br>
+<br>
+Compression Level = 0 for 4:4:4 subsampling, 1 for 4:1:1 subsampling,
+or 2 for 4:2:2 subsampling<br>
+Quality = 0 to 100 (JPEG quality level)</p>
+</li>
+<li>The
+TurboVNC client supports double buffering. &nbsp;This is enabled by
+default but can be disabled by passing an argument of <span class="monospace">-singlebuffer</span>
+to vncviewer.<br>
+</li>
+</ul>
+
+<p>On a high-bandwidth, low-latency network,
+TurboVNC will be able to deliver frames to the client at about 80-90%
+of the rate of VirtualGL's image delivery system. &nbsp;Using
+VirtualGL by itself&nbsp;is&nbsp;preferable if seamless windows are a
+requirement and if performance is
+critical. &nbsp;But if a bit of performance can be sacrificed and if
+collaboration and a stateless client are more important features than
+seamless windows, then VirtualGL+TurboVNC would be the appropriate
+solution.
+&nbsp;In the long term, we'd love to combine the best of both
+worlds, but to do so would involve opening the Pandora's box of
+maintaining our own X server code base.<br>
+</p>
+
+<p>TurboVNC
+also allows VirtualGL to be used with respectable performance over
+low-bandwidth/high-latency networks, such as broadband or satellite. &nbsp;As with
+VirtualGL, the quality and subsampling can be adjusted to reduce the
+size of the compressed image stream without reducing the number of
+image colors. &nbsp;But if it is acceptable to
+sacrifice color gamut in favor of performance, then using a RealVNC
+client with Hextile or ZRLE compression and a reduced color depth might
+provide better performance on low-speed connections than a TurboVNC client. &nbsp;If a true color image is always required,
+then the TurboVNC client&nbsp;should always be used. &nbsp;
+</p>
+
+<p>For instructions on the usage
+of TurboVNC, please refer to the TightVNC documentation:</p>
+
+<p><a href="http://www.tightvnc.com/docs.html">http://www.tightvnc.com/docs.html</a></p>
+
+<h3>Enabling Compression-Less Mode</h3>
+
+<p>To use VirtualGL's
+compression-less mode, first set the environment variable
+<span class="monospace">RRCOMPRESS</span>
+to 0 on the server, then use <span class="monospace">rrlaunch</span>
+to launch the app as you would normally.&nbsp; You should also make
+sure that the
+<span class="monospace">DISPLAY</span>
+variable points to whatever display number that VNC is occupying (such as :1, :2, etc.)</p>
+
+<div class="top" style=""><a href="#" target="_top">top</a></div>
+
+<hr class="top" style="width: 100%; height: 2px;"><a name="perf"></a><br>
+
+<h2>Performance Measurement</h2>
+
+<h3>VirtualGL's Built-In Profiling
+System<br>
+</h3>
+
+<p>The easiest way to uncover
+bottlenecks in the VirtualGL pipeline is to set the <span class="monospace">RRPROFILE</span>
+environment variable to 1 on both server and client.&nbsp; This
+will cause VirtualGL to measure and report the throughput of the
+various stages in its pipeline.&nbsp; For example, here are some
+measurements from a dual P4 server communicating with a PIII client on
+a 100 Mbit LAN</p>
+
+<p style="margin-left: 40px;"><b>Server:</b></p>
+
+<pre>Total - 8.02 Mpixels/sec- 6.41 frames/sec<br>Readback - 43.27 Mpixels/sec- 34.60 frames/sec<br>Compress - 33.56 Mpixels/sec- 34.17 Mbits/sec</pre>
+
+<p style="margin-left: 40px;"><b>Client:</b></p>
+
+<pre>Total - 8.00 Mpixels/sec- 6.40 frames/sec<br>Blit - 35.75 Mpixels/sec- 28.59 frames/sec<br>Decompress - 10.35 Mpixels/sec- 10.18 Mbits/sec- 8.28 frames/sec</pre>
+
+<p>The
+total throughput of the pipeline is 8.0 Mpixels/sec, or 6.4 frames/sec,
+indicating that our frame is 8.0 / 6.4 = 1.25 Megapixels in size (a
+little less than 1280 x 1024 pixels.)&nbsp; The readback and
+compress stages, which occur in parallel on the server, are obviously
+not slowing things down.&nbsp; We look to the client and discover
+that its slow decompression speed is the primary bottleneck.<br>
+</p>
+
+<h3>Frame Spoiling</h3>
+
+<p>By default, VirtualGL will only
+send a frame to the client if the client is ready to receive it.
+&nbsp;If a rendered frame arrives at the server's queue and a previous frame
+is still being processed, the new frame is dropped ("spoiled.")
+&nbsp;This prevents a backlog of frames on the server, which would
+cause a perceptible delay in the responsiveness of interactive
+applications. &nbsp;But when running non-interactive applications,
+particularly benchmarks, it may be desirable to disable frame spoiling.
+&nbsp; With frame spoiling disabled, the server will render frames
+only as quickly as the VirtualGL pipeline can receive them, which will
+conserve server resources as well as allow OpenGL benchmarks to
+accurately measure the throughput of the VirtualGL pipeline.
+&nbsp;With frame spoiling enabled, these benchmarks will report
+meaningless data, since they're measuring the server's rendering rate,
+and that rendering rate is decoupled from the overall&nbsp;throughput of VirtualGL.<br>
+</p>
+
+<h3>VirtualGL Diagnostic Tools</h3>
+
+<p>VirtualGL includes several
+tools which can be useful in diagnosing performance problems with the
+system.<br>
+</p>
+
+<h4>nettest</h4>
+
+nettest is a low-level network benchmark that uses the same network
+routines as VirtualGL. &nbsp;It can be used to test the latency and
+throughput of any TCP/IP connection, with or without SSL encryption.
+&nbsp;The 32-bit VirtualGL Linux package installs nettest in <span class="monospace">/opt/VirtualGL/bin</span>.
+&nbsp;The 64-bit VirtualGL Linux package installs it in <span class="monospace">/opt/VirtualGL64/bin</span>.
+&nbsp;The Windows installer installs it in <span class="monospace">c:\program
+files\VirtualGL-{version}-{build}</span>
+by default.
+<p>To use nettest, first start up
+the nettest server on one end of the connection:<br>
+</p>
+
+<pre>nettest -server [-ssl]</pre>
+
+<p>(use <span class="monospace">-ssl</span>
+if you want to test
+the performance of SSL encryption over this particular connection.)</p>
+
+<p>Next, start the client on the
+other end of the connection:<br>
+</p>
+
+<pre>nettest -client {server_name} [-ssl]</pre>
+
+<p>(<span class="monospace">server_name</span>
+is the hostname or IP address of the machine where the nettest server
+is running. &nbsp;Use <span class="monospace">-ssl</span>
+if&nbsp;the nettest server is running in SSL mode.)</p>
+
+<p>The nettest client will produce
+output similar to the following:</p>
+
+<pre>TCP transfer performance between localhost and {server}:<br><br>Transfer size&nbsp; 1/2 Round-Trip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Throughput<br>(bytes)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (msec)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (MB/sec)<br>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.176896&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.005391<br>2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.179391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.010632<br>4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.181600&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.021006<br>8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.181292&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.042083<br>16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.181694&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.083981<br>32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.181690&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.167965<br>64&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.182010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.335339<br>128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.182197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.669991<br>256&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.183593&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.329795<br>512&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.183800&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.656586<br>1024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.186189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.245015<br>2048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.379702&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.143834<br>4096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.546805&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7.143778<br>8192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.908712&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8.597335<br>16384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.643810&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9.505359<br>32768&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.961701&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.551368<br>65536&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.769007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10.833754<br>131072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.313003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.049232<br>262144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22.412990&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.154246<br>524288&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44.760510&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.170561<br>1048576&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 89.294810&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.198859<br>2097152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 178.426602&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.209091<br>4194304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 356.547194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11.218711</pre>
+
+<p>We can see that the throughput
+peaks out at about 11.2 MB/sec. &nbsp;1 MB = 1048576 bytes, so 11.2
+MB/sec = 94 million bits per second, which is pretty good for a 100
+Mbit connection. &nbsp;We can also see that as the transfer size
+decreases, the round-trip time becomes dominated by latency.
+&nbsp;The latency is the same thing as the 1/2 round-trip time for
+a zero-byte packet, which is about 0.18 ms in this case.</p>
+
+<h4>cpustat</h4>
+
+<p>cpustat is available only in
+the VirtualGL Linux packages and is located in the same place as
+nettest (<span class="monospace">/opt/VirtualGL/bin</span>
+or <span class="monospace">/opt/VirtualGL64/bin</span>.)
+&nbsp;It measures the average, minimum, and peak CPU usage for all
+processors combined and for each processor individually. &nbsp;On
+Windows, this same functionality is provided in the Windows Performance
+Monitor, which is part of the operating system.</p>
+
+cpustat measures the CPU usage over a given sample period (a few
+seconds) and continuously reports how much the CPU was utilized since
+the last sample period. &nbsp;Output for a particular sample looks
+something like this:
+<pre>ALL :&nbsp; 51.0 (Usr= 47.5 Nice=&nbsp; 0.0 Sys=&nbsp; 3.5) / Min= 47.4 Max= 52.8 Avg= 50.8<br>cpu0:&nbsp; 20.5 (Usr= 19.5 Nice=&nbsp; 0.0 Sys=&nbsp; 1.0) / Min= 19.4 Max= 88.6 Avg= 45.7<br>cpu1:&nbsp; 81.5 (Usr= 75.5 Nice=&nbsp; 0.0 Sys=&nbsp; 6.0) / Min= 16.6 Max= 83.5 Avg= 56.3</pre>
+
+<p>The first column indicates what
+percentage of time the CPU was active since the last sample period
+(this is then broken down into what percentage of time the CPU spent
+running user, nice, and system/kernel code.) &nbsp;"ALL" indicates
+the average utilization across all CPU's since the last sample period.&nbsp; "Min", "Max", and
+"Avg" indicate a running&nbsp;minimum, maximum, and average of all
+samples since cpustat was started.</p>
+
+<p>Generally, if an application's
+CPU usage is fairly steady, you can run cpustat for a bit and wait for
+the Max. and Avg. for the "ALL" category to stabilize, then that will
+tell you what the application's peak and average % CPU utilization is.</p>
+
+<h4>tcbench</h4>
+
+tcbench was borne out of the need to compare VirtualGL's performance to
+other thin client packages, some of which had frame spoiling features
+that couldn't be disabled. &nbsp;tcbench measures the frame rate of
+a thin client system
+as seen from the client's point of view. &nbsp;It does this by
+attaching to one of the client windows and continuously reading back a
+small area at the center of the window. &nbsp;While this may seem
+to be a somewhat non-rigorous test, experiments have shown that if care
+is taken to make sure that the application is updating the center of
+the window on every frame (such as in a spin animation), tcbench can
+produce quite accurate results. &nbsp;It has been sanity checked
+with VirtualGL's internal profiling mechanism and with a variety of
+system-specific techniques, such as monitoring redraw events on the
+client's windowing system.<br>
+
+<p>The 32-bit VirtualGL Linux
+package installs tcbench in <span class="monospace">/opt/VirtualGL/bin</span>.
+&nbsp;<span class="monospace"></span>The Windows installer installs it in <span class="monospace">c:\program
+files\VirtualGL-{version}-{build}</span>
+by default. &nbsp;Run <span class="monospace">tcbench</span>
+from the command line, and it will prompt you to click in the window
+you want to measure. &nbsp; That window should already
+have&nbsp;an automated animation of some sort running before you
+launch tcbench</p>
+
+<p>tcbench can also be used to
+measure the frame rate of applications that are running on the local
+console, although for extremely fast applications (those that exceed 40
+fps on the local console), you may need to increase the sampling rate
+of tcbench to get accurate results. &nbsp;The default sampling rate
+of 50 samples/sec should be fine for measuring the throughput of
+VirtualGL and other thin client systems.</p>
+
+<pre>tcbench -?</pre>
+
+<p>gives the relevant command line
+switches that can be used to adjust the benchmark time, the sampling
+rate, and the x and y offset of the sampling area within the window..</p>
+
+<p style="text-align: right;"><a href="#" target="_top">top</a><br>
+</p>
+
+<hr style="width: 100%; height: 2px;">
+<p><a name="config"></a><br>
+</p>
+
+<h2>Advanced Configuration<br>
+</h2>
+
+<h3>Server Settings</h3>
+
+<p align="left">You can
+control the operation of the VirtualGL server via. the following
+environment variable settings.</p>
+
+<p align="left"><span class="note">Note:</span>Most of these are
+read only once during execution, when the application faker initializes.</p>
+
+<br>
+
+<table style="width: 100%;" cellpadding="5" cellspacing="3">
+
+<tbody>
+<tr>
+<td style="font-weight: bold;" class="colorheader">Environment<br>
+Variable<br>
+Name</td>
+<td style="font-weight: bold;" class="colorheader">Description</td>
+<td style="font-weight: bold;" class="colorheader">Default<br>
+Value</td>
+</tr>
+<tr>
+<td class="monospace" style="width: 42px; vertical-align: baseline; font-weight: bold;">RRQUAL<br>
+</td>
+<td style="width: 100%; vertical-align: top;"><span style="font-weight: bold;">an
+integer between 1 and 100 (inclusive)</span><br style="font-weight: bold;">
+This allows you to manually specify the quality of the JPEG
+compression.&nbsp; Lower is faster but also grainier.&nbsp; The
+default
+setting should produce visually lossless performance.<br>
+</td>
+<td style="font-weight: bold;">95</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRSUBSAMP<br>
+</td>
+<td style="width: 100%; vertical-align: top;"><span style="font-weight: bold;">411,
+422, or 444</span><br style="font-weight: bold;">
+This allows you to manually specify the level of chrominance
+subsampling in the JPEG compressor.
+<p>By default, VirtualGL
+uses no chrominance subsampling (AKA "4:4:4 subsampling") when it
+compresses images for delivery to the client.&nbsp; Subsampling is
+premised on the fact that the
+human eye is more sensitive to changes in brightness than to changes in
+color.&nbsp; Since the JPEG image format uses a colorspace in which
+brightness (luminance) and color (chrominance) are separated into
+different channels, one can sample the brightness for every pixel and
+the color for every other pixel and produce visually a 16-million color
+image using on average only 16 bits per pixel instead of 24.&nbsp;
+This is called "4:2:2 subsampling", since for every 4 pixels of
+luminance, there are only 2 pixels of each chrominance
+component.&nbsp; Likewise, one can sample every fourth chrominance
+component to produce a 16-million color image with only 12 bits per
+pixel.&nbsp; The latter is called "4:1:1 subsampling."&nbsp;
+Subsampling increases the performance and reduces the network usage,
+since there is less data to move around, but it can produce some
+visible artifacts.&nbsp; Subsampling artifacts are rarely observed
+with volume data, since it usually only contains 256 colors to begin
+with.&nbsp; But narrow, aliased lines and other sharp features on a
+black background will tend to produce subsampling artifacts.<br>
+<br>
+<span style="font-weight: bold;">The
+Axis Indicator from a
+Popular Visualization App<br>
+</span><br style="font-weight: bold;">
+<table style="border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>
+<p align="center">4:4:4<br>
+Q95</p>
+</td>
+<td>
+<p align="center">4:2:2<br>
+Q95</p>
+</td>
+<td>
+<p align="center">4:1:1<br>
+Q95</p>
+</td>
+</tr>
+<tr>
+<td><img style="border: 0px solid ;" alt="" src="444.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
+<td><img style="border: 0px solid ;" alt="" src="422.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
+<td><img style="border: 0px solid ;" alt="" src="411.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
+</tr>
+</tbody>
+</table>
+<br>
+</p>
+</td>
+<td style="font-weight: bold;">444</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRSPOIL<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">0
+to turn off frame
+spoiling</span><br>
+By default, VirtualGL will drop frames so as not to slow down the
+rendering rate of the server's graphics engine.&nbsp; This should
+produce the
+best results with interactive applications, but it may be desirable to
+turn off frame spoiling when running benchmarks or other
+non-interactive applications.&nbsp; Turning off frame spoiling will
+force one frame to be read back and
+sent on each buffer swap, thus allowing benchmarks to accurately
+measure the frame rate of the entire VirtualGL pipeline.&nbsp;
+Disabling frame spoiling will also prevent non-interactive applications
+from wasting graphics resources by rendering frames that will never be
+seen.&nbsp; With frame spoiling turned off, the rendering
+pipeline behaves as if it's fill-rate limited to about 30 or 40
+Megapixels/second, the maximum throughput of the VirtualGL system on
+current CPU's.</td>
+<td style="font-weight: bold;">1
+(spoiling enabled)</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRGLLIB<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">the
+location of an
+alternate OpenGL .so</span><br style="font-weight: bold;">
+Normally, VirtualGL loads the first OpenGL .so that it finds in the
+dynamic linker path (usually the one found in <span class="monospace">/usr/lib</span>
+or <span class="monospace">/usr/lib64</span>.)&nbsp;
+You can
+use this setting to explicitly specify another OpenGL .so to use.<br>
+<br>
+Normally, you shouldn't need to muck with this unless something doesn't
+work.</td>
+<td style="font-weight: bold;"></td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRX11LIB<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">the
+location of an
+alternate X11 .so<br>
+</span>Normally, VirtualGL
+loads the first X11 .so that it finds in the dynamic linker path
+(usually the one found in <span class="monospace">/usr/X11R6/lib</span>
+or <span class="monospace">/usr/X11R6/lib64</span>.)&nbsp;
+You can use this setting to explicitly specify another X11 .so to
+use.<br>
+<br>
+Normally, you shouldn't need to muck with this unless something doesn't
+work.</td>
+<td style="font-weight: bold;"></td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRDISPLAY<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">the
+display on which 3D
+rendering is done</span><br>
+If you have a multi-pipe server configuration and want the OpenGL
+rendering to be done on a display other than :0, set this to :1 or
+whatever.&nbsp; This could be used, for instance, to support many
+app instances on a beefy server with multiple 3D graphics cards.</td>
+<td style="font-weight: bold;">:0</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRCLIENT<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">the
+display on which the
+client software is running</span><br style="font-weight: bold;">
+VirtualGL uses a dedicated TCP/IP connection to transmit compressed
+images of
+the OpenGL rendering area from the server to the client.&nbsp;
+Thus, the server needs to know on which machine the client software is
+running.&nbsp; It normally can surmise this from the <span class="monospace">DISPLAY</span>
+environment variable.&nbsp; But in cases where X11 is tunneled
+through a Low-Bandwidth X (LBX) or SSh proxy, the <span class="monospace">DISPLAY</span>
+environment
+variable on the server may not point to the client machine.&nbsp;
+In these cases, set <span class="monospace">RRCLIENT</span>
+to the
+display where the application's GUI
+will end up.</td>
+<td style="font-weight: bold;">read
+from the <span class="monospace">DISPLAY</span>
+environment</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRPORT<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">the
+TCP port to use when
+connecting to the client</span></td>
+<td style="font-weight: bold;">4242
+for non-SSL,&nbsp; 4243 for SSL</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRUSESSL<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">tunnel
+the VirtualGL
+compressed image stream inside a secure socket layer</span><br style="font-weight: bold;">
+<br>
+<span class="note">Note:</span>You
+must be running the secure client for this to work.&nbsp; See
+the <a href="#secureusage">Secure
+Usage</a> section for more details. </td>
+<td style="font-weight: bold;">0
+(SSL disabled)</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRCOMPRESS<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">0
+to disable image
+compression</span><br style="font-weight: bold;">
+When image compression is disabled, VirtualGL will bypass its
+compressed image delivery system and instead use X11 image drawing
+commands
+to composite the 3D area of the window back into the window.&nbsp;
+This
+is primarily useful in conjunction with VNC, Citrix for Unix, or
+another remote display mechanism that performs X11 rendering on the
+server and contains its own image compression and delivery
+mechanisms.&nbsp; Performing uncompressed X11 blits to an X server
+running elsewhere on the network is not typically going to be a very
+high-performance option.</td>
+<td style="font-weight: bold;">1
+(image compression enabled)</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRPROFILE<br>
+</td>
+<td valign="top" width="100%"><span style="font-weight: bold;">1
+to turn on profiling
+output</span><br style="font-weight: bold;">
+If enabled, this will cause the server to continuously measure and
+display the pixel throughput of the overall pipeline and of the
+readback and compression stages.</td>
+<td style="font-weight: bold;">0
+(profiling disabled)</td>
+</tr>
+</tbody>
+</table>
+
+<br>
+
+<h3>Client
+Settings</h3>
+
+<table style="width: 100%;" cellpadding="5" cellspacing="3">
+
+<tbody>
+<tr>
+<td style="font-weight: bold;" class="colorheader">Environment<br>
+Variable<br>
+Name</td>
+<td style="font-weight: bold;" class="colorheader">Description</td>
+<td style="font-weight: bold;" class="colorheader">Default<br>
+Value</td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="monospace" valign="baseline" width="42">RRPROFILE<br>
+</td>
+<td style="width: 100%; vertical-align: top;"><span style="font-weight: bold;">1
+to turn on profiling
+output</span><br style="font-weight: bold;">
+If enabled, this will cause the client to continuously measure and
+display the pixel throughput of the overall pipeline and of the
+decompression and blitting stages.</td>
+<td style="font-weight: bold;">0
+(profiling disabled)</td>
+</tr>
+</tbody>
+</table>
+
+<br>
+
+<h4>Other Client Settings</h4>
+
+<ul>
+
+<li>Invoking the client with<br>
+<pre>rrxclient -p&lt;port number&gt;<br></pre>
+will cause the client to listen on a TCP port other than the default
+(4242 for non-SSL or 4243 for SSL.)&nbsp; Use this in conjunction
+with the <span class="monospace">RRPORT</span>
+environment variable on the server.</li>
+</ul>
+
+<ul>
+
+<li>Invoking the client with<br>
+<pre>rrxclient -s</pre>
+will cause it to accept only SSL connections from the server.&nbsp;
+Use this in conjunction with the <span class="monospace">RRUSESSL</span>
+environment variable on the server.</li>
+</ul>
+
+<div class="top" style=""><a href="#" target="_top">top</a></div>
+
+</body></html>
