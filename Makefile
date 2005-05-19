@@ -1,6 +1,6 @@
 all: rr mesademos diags
 
-.PHONY: rr util jpeg mesademos diags clean
+.PHONY: rr util jpeg mesademos diags clean test
 
 rr: util jpeg
 
@@ -16,6 +16,10 @@ clean:
 
 TOPDIR=.
 include Makerules
+
+test: rr mesademos
+	chmod u+x mesademos/dotests ;\
+	exec mesademos/dotests $(EDIR) $(platform) $(subplatform)
 
 ##########################################################################
 ifeq ($(platform), windows)
