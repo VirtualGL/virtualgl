@@ -140,7 +140,7 @@ the <a href="LGPL.txt">LGPL</a>.
 <hr class="top"><a name="requirements"></a>
 <h2>System Requirements</h2>
 
-<h3>Server (Linux 32-bit)</h3>
+<h3>Server (32-bit Linux)</h3>
 
 <ul>
 
@@ -158,16 +158,14 @@ accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
 color (24/32-bit)</li>
 </ul>
 
-<h3>Server (Linux 64-bit)</h3>
+<h3>Server (64-bit Linux)</h3>
 
 <ul>
 
 <li>Processor</li>
 <ul>
 <li>dual P4/Xeon with EM64T, or</li>
-<li>dual Itanium-2, 1.4 GHz or
-faster <span style="color: rgb(255, 0, 0);">*</span>,
-or</li>
+
 <li>dual Opteron or Athlon64,
 1.8 GHz or faster</li>
 <ul>
@@ -180,30 +178,17 @@ Only newer AMD 64-bit processors support SSE3.</li>
 <li>decent 3D graphics
 accelerator (tested with various nVidia Quadro and ATI Radeon models)</li>
 <li>RedHat Enterprise Linux 3.0
-(64-bit) or equivalent (Works with <a href="http://fedora.redhat.com/">Fedora</a>,&nbsp;<a href="http://whiteboxlinux.org">WhiteBox</a>,
+or 4.0 (64-bit) or equivalent (Works with <a href="http://fedora.redhat.com/">Fedora</a>,&nbsp;<a href="http://whiteboxlinux.org">WhiteBox</a>,
 and <a href="http://www.centos.org">CentOS</a>)</li>
 <li>X server configured for true
 color (24/32-bit)</li>
-</ul><span style="color: rgb(255, 0, 0);">*
-The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
-of development equipment.&nbsp; We are looking for volunteers to
-continue this
-effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact
-us</a> if you're interested.</span>
+</ul><span style="color: rgb(255, 0, 0);"></span>
 
 <h3>Client (Linux)</h3>
 
 <ul>
 
-<li>Processor</li>
-<ul>
-<li>single PIII or P4, 1.0 GHz
-or faster (or equivalent), or</li>
-<li>single Itanium-2, 900 MHz
-or faster <span style="color: rgb(255, 0, 0);">*</span><br>
-</li>
-</ul>
-<li>graphics card with decent 2D
+<li>single PIII or P4, 1.0 GHz or faster (or equivalent)</li><li>graphics card with decent 2D
 performance</li>
 <li>RedHat Linux 7.2 or newer
 (or equivalent)</li>
@@ -211,12 +196,7 @@ performance</li>
 color (24/32-bit)</li>
 </ul>
 
-<span style="color: rgb(255, 0, 0);">*
-The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
-of development equipment.&nbsp; We are looking for volunteers to
-continue this
-effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact
-us</a> if you're interested.</span><br>
+<span style="color: rgb(255, 0, 0);"></span>
 
 <h3>Client (Windows)</h3>
 
@@ -239,6 +219,16 @@ for Exceed pricing information.<br>
 <li>Client desktop currently
 needs to be true color (24 or 32-bit)</li>
 </ul>
+<h3 style="color: rgb(255, 255, 255);">Note to Itanium users</h3>
+
+
+
+
+
+
+<span style="color: rgb(0, 0, 0);">The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
+of development equipment.&nbsp; We are looking for volunteers to continue this
+effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> if you're interested.&nbsp;</span>
 
 <div class="top"><a href="#" target="_top">top</a></div>
 
@@ -612,7 +602,7 @@ server reset, click
 <li>Open the "Other Server
 Settings" applet in XConfig.<br>
 <br>
-<span class="note">Note:</span>If
+    <span class="tip">Tip:</span>If
 you are using the "Classic View" mode of XConfig, open the
 "Performance" applet instead.<br>
 &nbsp;<br>
@@ -636,13 +626,13 @@ It is recommended that you use SSh (Secure Shell) to log in to the
 application server and launch applications.&nbsp; Some servers are
 configured to allow
 telnet and RSh access, but telnet and RSh both send passwords
-unencrypted over the network and are thus being phased out by
+unencrypted over the network and are thus being phased out in favor of
 SSh.&nbsp; If you already have <a href="http://www.cygwin.com">CygWin</a>
 installed on your
 Windows machine, then you can use the SSh client included in that
 package.&nbsp; Otherwise, download and install <a href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/">PuTTY</a>.<br>
 
-<h3><a name="installsvc"></a>Installing
+<h3>Installing
 the Windows Client
 as a Service</h3>
 
@@ -670,7 +660,7 @@ subsequently stopped by issuing</p>
 
 <p>If you wish to install the
 client as a service and have it
-listen on a port other than the default (4242 for the non-encrypted client
+listen on a port other than the default (4242 for the standard client
 or 4243 for the SSL client), then you will need to install the service
 manually from the command line.</p>
 
@@ -1362,8 +1352,10 @@ conserve server resources as well as allow OpenGL benchmarks to
 accurately measure the throughput of the VirtualGL pipeline.
 &nbsp;With frame spoiling enabled, these benchmarks will report
 meaningless data, since they're measuring the server's rendering rate,
-and that rendering rate is decoupled from the overall&nbsp;throughput of VirtualGL.<br>
+and that rendering rate is decoupled from the overall&nbsp;throughput of VirtualGL.</p>
+<p>To disable frame spoiling, set the <span class="monospace">RRSPOIL</span> environment variable to 0 on the server prior to launching the application. &nbsp;See <a href="#config">Advanced Configuration</a> for more details.
 </p>
+
 
 <h3>VirtualGL Diagnostic Tools</h3>
 
@@ -1586,9 +1578,16 @@ Q95</p>
 <td><img style="border: 0px solid ;" alt="" src="411.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
 </tr>
 </tbody>
-</table>
-<br>
-</p>
+</table></p>
+      <p><span class="note">Note:</span>&nbsp;If you select
+4:1:1 subsampling, VirtualGL will in fact try to use 4:2:0
+instead.&nbsp; 4:2:0 samples every other pixel both horizontally and
+vertically rather than sampling every fourth pixel horizontally.&nbsp;
+But not all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is
+not available.
+
+      </p>
+
 </td>
 <td style="font-weight: bold;">444</td>
 </tr>
@@ -1716,14 +1715,16 @@ compression</span><br style="font-weight: bold;">
 When image compression is disabled, VirtualGL will bypass its
 compressed image delivery system and instead use X11 image drawing
 commands
-to composite the 3D area of the window back into the window.&nbsp;
+to composite the 3D drawing area&nbsp;back into its original window.&nbsp;
 This
 is primarily useful in conjunction with VNC, Citrix for Unix, or
 another remote display mechanism that performs X11 rendering on the
 server and contains its own image compression and delivery
-mechanisms.&nbsp; Performing uncompressed X11 blits to an X server
-running elsewhere on the network is not typically going to be a very
-high-performance option.</td>
+mechanisms.&nbsp; Disabling compression outside of a VNC (or similar)
+session is not advisable, since it will result in uncompressed images
+being sent over the network to the client.<br>
+      <p>See the <a href="#vnc">VNC Usage</a> section for more details.</p>
+</td>
 <td style="font-weight: bold;">1
 (image compression enabled)</td>
 </tr>
