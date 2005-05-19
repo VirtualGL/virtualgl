@@ -94,10 +94,9 @@ install: rr
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/config/config.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/config/*.gif $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/index.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/*.png $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
@@ -122,10 +121,9 @@ install: rr diags
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/config/config.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/config/*.gif $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/unixug/unixug.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/unixug/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/index.html $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 doc/*.png $(prefix)/doc/$(PACKAGENAME)
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
