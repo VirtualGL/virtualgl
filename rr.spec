@@ -68,7 +68,7 @@ install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
 install -m 755 %{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
 
-chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
+chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -94,7 +94,7 @@ fi
 
 %files -n %{package}
 %defattr(-,root,root)
-%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/unixug/unixug.html doc/unixug/*.png
+%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
 %ifarch x86_64
 /usr/bin/rrlaunch64
