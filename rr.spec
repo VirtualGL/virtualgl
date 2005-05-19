@@ -81,7 +81,7 @@ install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{package}/samples/M
 install -m 644 samples/Makefile.linux $RPM_BUILD_ROOT/opt/%{package}/samples/Makefile
 %endif
 
-chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/config/config.html doc/config/*.gif doc/unixug/unixug.html doc/unixug/*.png
+chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -107,7 +107,7 @@ fi
 
 %files -n %{package}
 %defattr(-,root,root)
-%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/config/config.html doc/config/*.gif doc/unixug/unixug.html doc/unixug/*.png
+%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
 %dir /opt/%{package}
 %dir /opt/%{package}/bin
