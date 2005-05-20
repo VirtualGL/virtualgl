@@ -23,6 +23,7 @@ usage()
 	echo "  +/-profile  : Enable/disable performance profiling"
 	echo "  +/-mt       : Enable/disable multi-threaded compression"
 	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
+	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
 	echo
 	exit $1
 }
@@ -57,6 +58,8 @@ do
 	-c*)        VGL_COMPRESS=$2   ; export VGL_COMPRESS ; shift     ;;
 	-mt*)       VGL_MT=0          ; export VGL_MT       ;;
 	+mt*)       VGL_MT=1          ; export VGL_MT       ;;
+	-g*)        VGL_GAMMA=0       ; export VGL_GAMMA    ;;
+	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-h)         usage 0 ;;

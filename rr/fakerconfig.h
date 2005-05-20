@@ -59,6 +59,7 @@ class FakerConfig
 			sync=false;
 			mt=false;
 			autotest=false;
+			gamma=true;
 			reloadenv();
 		}
 
@@ -112,6 +113,7 @@ class FakerConfig
 			getconfigbool("SYNC", sync);
 			getconfigbool("MT", mt);
 			getconfigbool("AUTOTEST", autotest);
+			getconfigbool("GAMMA", gamma);
 		}
 
 		void setloqual(void)
@@ -145,6 +147,7 @@ class FakerConfig
 		bool sync;
 		bool mt;
 		bool autotest;
+		bool gamma;
 
 	private:
 
