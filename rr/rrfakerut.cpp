@@ -1219,7 +1219,7 @@ static int check_errors(const char * tag)
 
 
 // Put the display hash through its paces
-#define NDPY 30
+#define NDPY 15
 int dpyhashtest(void)
 {
 	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
@@ -1280,8 +1280,8 @@ int dpyhashtest(void)
 			glXMakeCurrent(dpy, 0, 0);
 			glXDestroyContext(dpy, ctx);  ctx=0;
 			XDestroyWindow(dpy, win);  win=0;
-			XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;
 		}
+		for(i=3; i<5; i++) {XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;}
 
 		printf("SUCCESS!\n");
 	}	
