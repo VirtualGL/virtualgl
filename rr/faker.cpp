@@ -14,6 +14,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/signal.h>
+#ifdef sun
+#include <X11/Xmu/XmuSolaris.h>
+#endif
 #include <string.h>
 #include "rrutil.h"
 #include "rrtimer.h"
@@ -473,13 +476,41 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 // GLX 1.0 Context management
 /////////////////////////////
 
+static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
+{
+	XVisualInfo *_v=NULL, vtemp;  int n=0;
+	if(!dpy || !c) return NULL;
+	vtemp.depth=glXConfigDepth(c);  vtemp.c_class=glXConfigClass(c);
+	if(!(_v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)))
+	{
+		vtemp.depth=24;  vtemp.c_class=TrueColor;
+		if(!(_v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)))
+			return NULL;
+	}
+	vtemp.visualid=_v[0].visualid;
+	#ifdef sun
+	int i=0;
+	for(i=0; i<n; i++)
+	{
+		double gamma=0.;
+		XSolarisGetVisualGamma(dpy, screen, _v[i].visual, &gamma);
+		if(fconfig.gamma && gamma==1.0)
+			{vtemp.visualid=_v[i].visualid;  break;}
+		else if(!fconfig.gamma && gamma!=1.0)
+			{vtemp.visualid=_v[i].visualid;  break;}
+	}
+	#endif
+	XFree(_v);
+	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
+}
+
 // This calls glXChooseVisual() on the rendering server to obtain an appropriate
 // visual for rendering, then it matches the visual across to the 2D client
 // using X11 functions and hashes the two together for future reference.
 // It returns the 2D visual so that it can be used in subsequent X11 calls.
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
-	XVisualInfo *v=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL;
 	TRY();
 
 	// Prevent recursion
@@ -488,10 +519,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	GLXFBConfig c;
 	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
-	if(!XMatchVisualInfo(dpy, screen, glXConfigDepth(c), glXConfigClass(c),
-		&vtemp)
-	&& !XMatchVisualInfo(dpy, screen, 24, TrueColor, &vtemp)) return NULL;
-	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	if(!(v=_MatchVisual(dpy, screen, c))) return NULL;
 	vish.add(dpy, v, c);
 
 	CATCH();
@@ -500,18 +528,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
-	XVisualInfo *v=NULL, vtemp;  int n=0;
+	XVisualInfo *v=NULL;
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-	if(!XMatchVisualInfo(dpy, DefaultScreen(dpy), glXConfigDepth(config),
-		glXConfigClass(config), &vtemp)
-	&& !XMatchVisualInfo(dpy, DefaultScreen(dpy), 24, TrueColor, &vtemp))
-		return NULL;
-	if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n))) return NULL;
+	if(!(v=_MatchVisual(dpy, DefaultScreen(dpy), config))) return NULL;
 	vish.add(dpy, v, config);
 	CATCH();
 	return v;
