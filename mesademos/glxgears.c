@@ -316,7 +316,7 @@ init(void)
 static void
 make_window( Display *dpy, const char *name,
              int x, int y, int width, int height,
-             Window *winRet, GLXContext *ctxRet)
+             Window *winRet, GLXContext *ctxRet, int gamma)
 {
    int attrib[] = { GLX_RGBA,
 		    GLX_RED_SIZE, 1,
@@ -324,6 +324,7 @@ make_window( Display *dpy, const char *name,
 		    GLX_BLUE_SIZE, 1,
 		    GLX_DOUBLEBUFFER,
 		    GLX_DEPTH_SIZE, 1,
+		    None, None,
 		    None };
    int scrnum;
    XSetWindowAttributes attr;
@@ -336,11 +337,24 @@ make_window( Display *dpy, const char *name,
    scrnum = DefaultScreen( dpy );
    root = RootWindow( dpy, scrnum );
 
+   if(gamma != -1) {
+      #ifdef sun
+      attrib[10] = GLX_GAMMA_VALUE_SUN;
+      attrib[11] = gamma;
+      #endif
+      printf("Setting gamma to %d%%\n", gamma);
+   }
    visinfo = glXChooseVisual( dpy, scrnum, attrib );
    if (!visinfo) {
       printf("Error: couldn't get an RGB, Double-buffered visual\n");
       exit(1);
    }
+   printf("Visual ID: 0x%.2x\n", (unsigned int)visinfo->visualid);
+   #ifdef sun
+   gamma = -1;
+   glXGetConfig(dpy, visinfo, GLX_GAMMA_VALUE_SUN, &gamma);
+   printf("Gamma: %d\n", gamma);
+   #endif
 
    /* window attributes */
    attr.background_pixel = 0;
@@ -460,7 +474,7 @@ main(int argc, char *argv[])
    GLXContext ctx;
    char *dpyName = NULL;
    GLboolean printInfo = GL_FALSE;
-   int i;
+   int i, gamma=-1;
 
    for (i = 1; i < argc; i++) {
       if (strcmp(argv[i], "-display") == 0) {
@@ -470,6 +484,11 @@ main(int argc, char *argv[])
       else if (strcmp(argv[i], "-info") == 0) {
          printInfo = GL_TRUE;
       }
+      else if (strcmp(argv[i], "-gamma") == 0 && i < argc-1) {
+         gamma = atoi(argv[i+1]);
+         if(gamma < 0) gamma = -1;
+         i++;
+      }
    }
 
    dpy = XOpenDisplay(dpyName);
@@ -478,7 +497,7 @@ main(int argc, char *argv[])
       return -1;
    }
 
-   make_window(dpy, "glxgears", 0, 0, 300, 300, &win, &ctx);
+   make_window(dpy, "glxgears", 0, 0, 300, 300, &win, &ctx, gamma);
    XMapWindow(dpy, win);
    glXMakeCurrent(dpy, win, ctx);
 
