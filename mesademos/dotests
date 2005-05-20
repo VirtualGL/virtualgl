@@ -32,7 +32,7 @@ dotest()
 	$XV /tmp/pbdemo.ppm
 	rm /tmp/pbdemo.ppm
 	echo $VGLRUN $BINPATH/shape
-	$BINPATH/shape || err
+	$VGLRUN $BINPATH/shape || err
 	echo $VGLRUN $BINPATH/testgl5
 	$VGLRUN -sp $BINPATH/testgl5 || err
 	echo $VGLRUN $BINPATH/testgl5 -i
