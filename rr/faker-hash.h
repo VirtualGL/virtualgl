@@ -51,14 +51,15 @@ class _hashclass
 			while(start!=NULL) killentry(start);
 		}
 
-		int add(_hashkeytype1 key1, _hashkeytype2 key2, _hashvaluetype value)
+		int add(_hashkeytype1 key1, _hashkeytype2 key2, _hashvaluetype value, bool useref=false)
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
 			rrlock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
-				if(value) ptr->value=value;  return 0;
+				if(value) ptr->value=value;
+				if(useref) ptr->refcount++;  return 0;
 			}
 			errifnot(ptr=new _hashclassstruct);
 			memset(ptr, 0, sizeof(_hashclassstruct));
@@ -66,22 +67,19 @@ class _hashclass
 			if(!start) start=ptr;
 			end=ptr;
 			end->key1=key1;  end->key2=key2;  end->value=value;
+			if(useref) end->refcount=1;
 			entries++;
 			return 1;
 		}
 
-		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2, bool useref=false)
+		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2)
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
 			rrlock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
-				if(!ptr->value)
-				{
-					ptr->value=attach(key1, key2);
-					if(useref) ptr->refcount++;
-				}
+				if(!ptr->value) ptr->value=attach(key1, key2);
 				return ptr->value;
 			}
 			return (_hashvaluetype)0;

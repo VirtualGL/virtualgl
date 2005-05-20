@@ -42,14 +42,14 @@ class dpyhash : public _dpyhash
 		{
 			if(!dpy) _throw("Invalid argument");
 			char *dpystring=strdup(DisplayString(dpy));
-			if(!_dpyhash::add(dpystring, NULL, NULL))
+			if(!_dpyhash::add(dpystring, NULL, NULL, true))
 				free(dpystring);
 		}
 
 		RRDisplay findrrdpy(Display *dpy)
 		{
 			if(!dpy) _throw("Invalid argument");
-			return _dpyhash::find(DisplayString(dpy), NULL, true);
+			return _dpyhash::find(DisplayString(dpy), NULL);
 		}
 
 		void remove(Display *dpy)
