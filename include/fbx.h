@@ -32,6 +32,15 @@
  #ifdef USESHM
  #ifdef XDK
  #include <X11/hclshm.h>
+ // Exceed likes to redefine stdio, so we un-redefine it :/
+ #undef fprintf
+ #undef printf
+ #undef putchar
+ #undef putc
+ #undef puts
+ #undef fputc
+ #undef fputs
+ #undef perror
  #else
  #include <sys/ipc.h>
  #include <sys/shm.h>
