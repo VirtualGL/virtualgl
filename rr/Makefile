@@ -120,7 +120,7 @@ endif
 # Client
 
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB)
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) -lGL
 
 # Unit tests
 

@@ -15,15 +15,20 @@
 #define __RRCWIN_H
 
 #include <X11/X.h>
+#ifndef _WIN32
+#define USEGL 1
+#endif
 #include "rrframe.h"
 #include "rrthread.h"
 #include "genericQ.h"
+
+enum {RR_DRAWAUTO=0, RR_DRAWX11, RR_DRAWOGL};
 
 class rrcwin : public Runnable
 {
 	public:
 
-	rrcwin(int, Window);
+	rrcwin(int, Window, int _drawmethod);
 	virtual ~rrcwin(void);
 	rrjpeg *getFrame(void);
 	void drawFrame(rrjpeg *);
@@ -32,8 +37,12 @@ class rrcwin : public Runnable
 
 	private:
 
+	int drawmethod;
 	static const int NB=2;
 	rrfb *b;  rrjpeg jpg[NB];  int jpgi;
+	#ifdef USEGL
+	rrglframe *glf;
+	#endif
 	genericQ q;
 	void showprofile(rrframeheader *, int);
 	bool deadyet;
