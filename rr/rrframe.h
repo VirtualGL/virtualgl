@@ -345,4 +345,103 @@ class rrfb : public rrframe
 	hpjhandle hpjhnd;
 };
 
+// Bitmap drawn using OpenGL
+
+#ifdef USEGL
+#include <GL/glx.h>
+
+class rrglframe : public rrframe
+{
+	public:
+
+	rrglframe(char *dpystring, Window _win) : rrframe(), madecurrent(false),
+		win(_win), hpjhnd(NULL)
+	{
+		XVisualInfo *v=NULL;
+		try
+		{
+			if(!dpystring || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
+			if(!(dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
+			pixelsize=3;
+			XWindowAttributes xwa;
+			XGetWindowAttributes(dpy, win, &xwa);
+			XVisualInfo vtemp;  int n=0;
+			vtemp.visualid=xwa.visual->visualid;
+			if(!(v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n)) || n==0)
+				_throw("Could not obtain visual");
+			if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
+				_throw("Could not create GLX context");
+			XFree(v);  v=NULL;
+		}
+		catch(...)
+		{
+			if(v) XFree(v);
+			throw;
+		}
+	}
+
+	~rrglframe(void)
+	{
+		if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
+		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+		if(hpjhnd) {hpjDestroy(hpjhnd);  hpjhnd=NULL;}
+	}
+
+	void init(rrframeheader *hnew)
+	{
+		int flags=RRBMP_BOTTOMUP;
+		#ifdef GL_BGR_EXT
+		if(littleendian()) flags=RRBMP_BGR;
+		#endif
+		rrframe::init(hnew, 3, flags);
+	}
+
+	rrglframe& operator= (rrjpeg& f)
+	{
+		int hpjflags=HPJ_BOTTOMUP;
+		if(!f.bits || f.h.size<1) _throw("JPEG not initialized");
+		init(&f.h);
+		if(!bits) _throw("Bitmap not initialized");
+		if(flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
+		int width=min(f.h.width, h.framew-f.h.x);
+		int height=min(f.h.height, h.frameh-f.h.y);
+		if(width>0 && height>0 && f.h.width<=width && f.h.height<=height)
+		{
+			if(!hpjhnd)
+			{
+				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", hpjGetErrorStr()));
+			}
+			int y=max(0, h.frameh-f.h.y-height);
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&bits[pitch*y+f.h.x*pixelsize],
+				width, pitch, height, pixelsize, hpjflags));
+		}
+		return *this;
+	}
+
+	void redraw(void)
+	{
+		int format=GL_RGB;
+		#ifdef GL_BGR_EXT
+		if(littleendian()) format=GL_BGR_EXT;
+		#endif
+		if(!madecurrent)
+		{
+			if(!glXMakeCurrent(dpy, win, ctx))
+				_throw("Could not make context current");
+			madecurrent=true;
+		}
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glDrawPixels(h.framew, h.frameh, format, GL_UNSIGNED_BYTE, bits);
+		glXSwapBuffers(dpy, win);
+	}
+
+	private:
+
+	bool madecurrent;
+	Display *dpy;  Window win;
+	GLXContext ctx;
+	hpjhandle hpjhnd;
+};
+#endif
+
 #endif

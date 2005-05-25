@@ -15,7 +15,6 @@
 #define __RRDISPLAYSERVER_H
 
 #include "rrsocket.h"
-#include "rrframe.h"
 #include "rrcwin.h"
 
 #define MAXWIN 1024
@@ -24,13 +23,14 @@ class rrdisplayserver : public Runnable
 {
 	public:
 
-	rrdisplayserver(unsigned short, bool);
+	rrdisplayserver(unsigned short, bool, int _drawmethod);
 	virtual ~rrdisplayserver(void);
 
 	private:
 
 	void run(void);
 
+	int drawmethod;
 	rrsocket *listensd;
 	Thread *t;
 	bool deadyet;
@@ -40,7 +40,8 @@ class rrserver : public Runnable
 {
 	public:
 
-	rrserver(rrsocket *_sd) : windows(0), sd(_sd), t(NULL)
+	rrserver(rrsocket *_sd, int _drawmethod) : drawmethod(_drawmethod),
+		windows(0), sd(_sd), t(NULL)
 	{
 		memset(rrw, 0, sizeof(rrcwin *)*MAXWIN);
 		errifnot(t=new Thread(this));
@@ -62,6 +63,7 @@ class rrserver : public Runnable
 
 	void run(void);
 
+	int drawmethod;
 	rrcwin *rrw[MAXWIN];
 	int windows;
 	rrcwin *addwindow(int, Window);

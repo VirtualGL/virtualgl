@@ -24,8 +24,8 @@
 		h.x=byteswap16(h.x);  \
 		h.y=byteswap16(h.y);}}
 
-rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl) :
-	listensd(NULL), t(NULL), deadyet(false)
+rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl, int _drawmethod) :
+	drawmethod(_drawmethod), listensd(NULL), t(NULL), deadyet(false)
 {
 	errifnot(listensd=new rrsocket(dossl));
 	listensd->listen(port==0?RR_DEFAULTPORT:port);
@@ -51,7 +51,7 @@ void rrdisplayserver::run(void)
 			s=NULL;  sd=NULL;
 			sd=listensd->accept();  if(deadyet) break;
 			rrout.println("++ Connection from %s.", sd->remotename());
-			s=new rrserver(sd);
+			s=new rrserver(sd, drawmethod);
 			continue;
 		}
 		catch(rrerror &e)
@@ -132,7 +132,7 @@ rrcwin *rrserver::addwindow(int dpynum, Window win)
 	}
 	if(windows>=MAXWIN) _throw("No free window ID's");
 	if(dpynum<0 || dpynum>255 || win==None) _throw("Invalid argument");
-	rrw[winid]=new rrcwin(dpynum, win);
+	rrw[winid]=new rrcwin(dpynum, win, drawmethod);
 
 	if(!rrw[winid]) _throw("Could not create window instance");
 	windows++;
