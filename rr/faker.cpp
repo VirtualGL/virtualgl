@@ -16,6 +16,8 @@
 #include <sys/signal.h>
 #ifdef sun
 #include <X11/Xmu/XmuSolaris.h>
+#else
+#include "gamma.c"
 #endif
 #include <string.h>
 #include "rrutil.h"
@@ -488,7 +490,6 @@ static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
 			return NULL;
 	}
 	vtemp.visualid=_v[0].visualid;
-	#ifdef sun
 	int i=0;
 	for(i=0; i<n; i++)
 	{
@@ -499,7 +500,6 @@ static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
 		else if(!fconfig.gamma && gamma!=1.0)
 			{vtemp.visualid=_v[i].visualid;  break;}
 	}
-	#endif
 	XFree(_v);
 	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
 }
