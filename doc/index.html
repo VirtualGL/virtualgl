@@ -1792,9 +1792,9 @@ assigned with <span class="monospace">fbconfig</span>. &nbsp;If the gamma correc
 When an OpenGL application is being remotely displayed onto a Solaris
 client using VirtualGL, VirtualGL tries to emulate the behavior of the
 Solaris client machine by forcing the application to use a
-gamma-corrected visual. &nbsp;But setting <span class="monospace">VGL_GAMMA</span> to 0 (or passing <span class="monospace">-g</span> to <span class="monospace">vglrun</span>) overrides that behavior and forces the application to use an uncorrected visual.<br>
+gamma-corrected visual. &nbsp;But setting <span class="monospace">VGL_GAMMA</span> to 0 on the server (or passing <span class="monospace">-g</span> to <span class="monospace">vglrun</span>) overrides that behavior and forces the application to use an uncorrected visual.<br>
       <br>
-This setting has no effect on non-Solaris clients.<br>
+This setting has no effect if the client machine is not running Solaris.<br>
 </td><td><span style="font-weight: bold;">Gamma correction enabled</span></td></tr>
 
 </tbody>
