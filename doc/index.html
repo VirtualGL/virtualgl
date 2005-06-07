@@ -1777,7 +1777,26 @@ performance of the client and other factors, so this setting may not
 have much of an effect on overall performance.&nbsp; If the server
 does not have multiple processors, this setting is ignored.</td>
 <td><span style="font-weight: bold;">Multi-threaded compression disabled</span></td>
-</tr>
+</tr><tr>
+<td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
+VGL_GAMMA=1<br>
+</span></td><td><span style="font-weight: bold;" class="monospace">+g</span><br>
+or<br>
+<span style="font-weight: bold;" class="monospace">-g</span></td><td><span style="font-weight: bold;">Enable/disable gamma correction (Solaris clients only)</span><br>On
+Solaris, an OpenGL application will run under a gamma-corrected X
+visual (Solaris calls these "linear visuals") unless the application
+takes special measures to circumvent this behavior.
+&nbsp;Gamma-corrected visuals are subject to the gamma correction value
+assigned with <span class="monospace">fbconfig</span>. &nbsp;If the gamma correction value is set to 1.0, then corrected visuals will look the same as uncorrected visuals.<br>
+      <br>
+When an OpenGL application is being remotely displayed onto a Solaris
+client using VirtualGL, VirtualGL tries to emulate the behavior of the
+Solaris client machine by forcing the application to use a
+gamma-corrected visual. &nbsp;But setting <span class="monospace">VGL_GAMMA</span> to 0 (or passing <span class="monospace">-g</span> to <span class="monospace">vglrun</span>) overrides that behavior and forces the application to use an uncorrected visual.<br>
+      <br>
+This setting has no effect on non-Solaris clients.<br>
+</td><td><span style="font-weight: bold;">Gamma correction enabled</span></td></tr>
+
 </tbody>
 </table>
 <br>
