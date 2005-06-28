@@ -16,7 +16,11 @@
 #include "rrprofiler.h"
 
 rrcwin::rrcwin(int dpynum, Window window, int _drawmethod) : drawmethod(_drawmethod),
-	b(NULL), jpgi(0), glf(NULL), deadyet(false), t(NULL)
+	b(NULL), jpgi(0),
+	#ifdef USEGL
+	glf(NULL),
+	#endif
+	deadyet(false), t(NULL)
 {
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
