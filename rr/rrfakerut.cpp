@@ -841,10 +841,6 @@ int mttest(void)
 
 	try
 	{
-		if(!XInitThreads()) _throw("XInitThreads() failed");
-		#ifdef sun
-		if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
-		#endif
 		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
 		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
@@ -1297,6 +1293,32 @@ int dpyhashtest(void)
 }
 
 
+int querytest(void)
+{
+	Display *dpy=NULL;  int retval=1;
+	int dummy1=-1, dummy2=-1, dummy3=-1;
+
+	printf("Extension query test:\n\n");
+
+	try
+	{
+		if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
+		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
+		|| dummy1<0 || dummy2<0 || dummy3<0)
+			_throw("GLX Extension not reported as present");
+		printf("GLX:  Opcode=%d  First event=%d  First error=%d\n", dummy1,
+			dummy2, dummy3);
+		printf("SUCCESS!\n");
+	}	
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
 int main(int argc, char **argv)
 {
 	int ret=0;
@@ -1322,6 +1344,12 @@ int main(int argc, char **argv)
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat");
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat2");
 
+	if(!XInitThreads()) _throw("XInitThreads() failed");
+	#ifdef sun
+	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
+	#endif
+	if(!querytest()) ret=-1;
+	printf("\n");
 	if(!rbtest()) ret=-1;
 	printf("\n");
 	if(!vistest()) ret=-1;
