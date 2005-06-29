@@ -35,10 +35,10 @@ class pbuffer
 		int height(void) {return _h;}
 		void clear(void);
 		void swap(void);
-
+		bool stereo(void) {return isstereo;}
 	private:
 
-		bool cleared;
+		bool cleared, isstereo;
 		GLXPbuffer d;
 		int _w, _h;
 };
@@ -57,11 +57,11 @@ class pbwin
 		void initfromwindow(GLXFBConfig config);
 		Display *getwindpy(void);
 		Window getwin(void);
-		void readback(bool);
 		void readback(GLint, bool, bool sync=false);
 		void swapbuffers(void);
 		void forcenextframe(void) {force=true;}
-		bool dirty;
+		bool stereo(void);
+		bool dirty, rdirty;
 
 	private:
 

@@ -30,7 +30,7 @@ class rrdisplayclient : public Runnable
 	public:
 
 	rrdisplayclient(char *servername, unsigned short port, bool dossl, bool domt=false)
-		: sd(NULL), bmpi(0), t(NULL), deadyet(false), mt(domt)
+		: sd(NULL), bmpi(0), t(NULL), deadyet(false), mt(domt), stereo(true)
 	{
 		if(servername && port>0)
 		{
@@ -55,6 +55,7 @@ class rrdisplayclient : public Runnable
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
 	void release(rrframe *bmp) {ready.unlock();}
+	bool stereoenabled(void) {return stereo;}
 
 	rrsocket *sd;
 
@@ -66,7 +67,7 @@ class rrdisplayclient : public Runnable
 	genericQ q;
 	Thread *t;  bool deadyet;
 	rrprofiler prof_total;
-	bool mt;
+	bool mt, stereo;
 };
 
 #define endianize(h) { \

@@ -28,12 +28,13 @@ class rrcwin : public Runnable
 {
 	public:
 
-	rrcwin(int, Window, int _drawmethod);
+	rrcwin(int, Window, int _drawmethod, bool);
 	virtual ~rrcwin(void);
 	rrjpeg *getFrame(void);
 	void drawFrame(rrjpeg *);
 	void redrawFrame(rrjpeg *);
 	int match(int, Window);
+	bool stereoenabled(void) {return stereo;}
 
 	private:
 
@@ -42,6 +43,7 @@ class rrcwin : public Runnable
 	rrfb *b;  rrjpeg jpg[NB];  int jpgi;
 	#ifdef USEGL
 	rrglframe *glf;
+	void initgl(void);
 	#endif
 	genericQ q;
 	void showprofile(rrframeheader *, int);
@@ -50,6 +52,7 @@ class rrcwin : public Runnable
 	void run(void);
 	Thread *t;
 	rrcs jpgmutex;
+	bool stereo;
 };
 
 #endif

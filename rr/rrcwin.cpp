@@ -15,12 +15,12 @@
 #include "rrerror.h"
 #include "rrprofiler.h"
 
-rrcwin::rrcwin(int dpynum, Window window, int _drawmethod) : drawmethod(_drawmethod),
-	b(NULL), jpgi(0),
+rrcwin::rrcwin(int dpynum, Window window, int _drawmethod, bool _stereo) :
+	drawmethod(_drawmethod), b(NULL), jpgi(0),
 	#ifdef USEGL
 	glf(NULL),
 	#endif
-	deadyet(false), t(NULL)
+	deadyet(false), t(NULL), stereo(_stereo)
 {
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
@@ -30,25 +30,10 @@ rrcwin::rrcwin(int dpynum, Window window, int _drawmethod) : drawmethod(_drawmet
 	b=new rrfb(dpystr, window);
 	if(!b) _throw("Could not allocate class instance");
 	#ifdef USEGL
-	if(drawmethod==RR_DRAWAUTO || drawmethod==RR_DRAWOGL)
-	{
-		try
-		{
-			glf=new rrglframe(dpystr, window);
-			if(!glf) _throw("Could not allocate class instance");
-		}
-		catch(rrerror &e)
-		{
-			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
-				e.getMessage());
-			if(glf) {delete glf;  glf=NULL;}
-			drawmethod=RR_DRAWX11;
-		}
-	}
-	if(drawmethod==RR_DRAWOGL)
-	{
-		delete b;  b=NULL;
-	}
+	if(stereo) drawmethod=RR_DRAWOGL;
+	initgl();
+	#else
+	stereo=false;
 	#endif
 	errifnot(t=new Thread(this));
 	t->start();
@@ -65,6 +50,35 @@ rrcwin::~rrcwin(void)
 	#endif
 	for(int i=0; i<NB; i++) jpg[i].complete();
 }
+
+#ifdef USEGL
+void rrcwin::initgl(void)
+{
+	char dpystr[80];
+	sprintf(dpystr, "localhost:%d.0", dpynum);
+	if(drawmethod==RR_DRAWAUTO || drawmethod==RR_DRAWOGL)
+	{
+		try
+		{
+			glf=new rrglframe(dpystr, window);
+			if(!glf) _throw("Could not allocate class instance");
+		}
+		catch(rrerror &e)
+		{
+			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
+				e.getMessage());
+			if(glf) {delete glf;  glf=NULL;}
+			drawmethod=RR_DRAWX11;
+			rrout.println("Stereo requires OpenGL drawing.  Disabling stereo.");
+			stereo=false;
+		}
+	}
+	if(drawmethod==RR_DRAWOGL)
+	{
+		delete b;  b=NULL;
+	}
+}
+#endif
 
 int rrcwin::match(int dpynum, Window window)
 {
@@ -86,6 +100,13 @@ rrjpeg *rrcwin::getFrame(void)
 void rrcwin::drawFrame(rrjpeg *f)
 {
 	if(t) t->checkerror();
+	#ifdef USEGL
+	if((f->flags==RR_RIGHT || f->flags==RR_LEFT) && (!stereo || drawmethod!=RR_DRAWOGL))
+	{
+		stereo=true;  drawmethod=RR_DRAWOGL;
+		initgl();
+	}
+	#endif
 	q.add(f);
 }
 
@@ -105,7 +126,7 @@ void rrcwin::run(void)
 		j=NULL;
 		q.get((void **)&j);  if(deadyet) break;
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
-		if(j->h.eof)
+		if(j->h.flags==RR_EOF)
 		{
 			pb.startframe();
 			if(dobenchmark) t1=rrtime();

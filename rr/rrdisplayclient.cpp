@@ -37,6 +37,7 @@ void rrdisplayclient::run(void)
 		q.get((void **)&b);  if(deadyet) break;
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
+		if(b->h.flags==RR_RIGHT && !stereo) continue;
 		if(np>1)
 			for(i=1; i<np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
@@ -48,12 +49,21 @@ void rrdisplayclient::run(void)
 			}
 		rrframeheader h;
 		memcpy(&h, &b->h, sizeof(rrframeheader));
-		h.eof=1;
+		h.flags=RR_EOF;
 		endianize(h);
 		if(sd) sd->send((char *)&h, sizeof(rrframeheader));
 
 		char cts=0;
-		if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
+		if(sd)
+		{
+			sd->recv(&cts, 1);
+			if(cts<1 || cts>2) _throw("CTS error");
+			if(stereo && cts!=2)
+			{
+				rrout.println("Disabling stereo because client doesn't support it");
+				stereo=false;
+			}
+		}
 		prof_total.endframe(b->h.width*b->h.height, 0, 1);
 		prof_total.startframe();
 
@@ -108,12 +118,11 @@ void rrdisplayclient::sendframe(rrframe *bmp)
 void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *bits)
 {
 	rrframeheader h=horig;
-	h.eof=0;
 	endianize(h);
 	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
 	if(sd) sd->send((char *)bits, horig.size);
 	h=horig;
-	h.eof=1;
+	h.flags=RR_EOF;
 	endianize(h);
 	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
 	char cts=0;
@@ -154,7 +163,6 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		*j=*rrb;
 		prof_comp.endframe(j->h.width*j->h.height, j->h.size, 0);
 		delete rrb;
-		j->h.eof=0;
 		if(myrank==0)
 		{
 			unsigned int size=j->h.size;

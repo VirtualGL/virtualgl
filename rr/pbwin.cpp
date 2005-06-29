@@ -32,6 +32,17 @@ extern GLPDevice _localdev;
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
+#define _isright(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_BACK \
+	|| drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
+	|| drawbuf==GL_BACK_RIGHT)
+
+static inline int _drawingtoright(void)
+{
+	GLint drawbuf=GL_LEFT;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return _isright(drawbuf);
+}
+
 // Generic OpenGL error checker (0 = no errors)
 int glerror(void)
 {
@@ -134,7 +145,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
-	cleared=false;
+	cleared=false;  isstereo=false;
 	#if 0
 	const char *glxext=NULL;
 	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
@@ -158,6 +169,9 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	#endif
 	if(fconfig.usewindow) d=create_window(_localdpy, config, w, h);
 	else d=glXCreatePbuffer(_localdpy, config, pbattribs);
+	int stereo=-1;
+	glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo);
+	if(stereo==1) isstereo=true;
 	if(!d) _throw("Could not create Pbuffer");
 }
 
@@ -309,20 +323,12 @@ void pbwin::swapbuffers(void)
 	if(pb) pb->swap();
 }
 
-void pbwin::readback(bool force)
-{
-	GLint drawbuf=GL_BACK;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	if(drawbuf==GL_FRONT_AND_BACK) drawbuf=GL_FRONT;
-	readback(drawbuf, force);
-}
-
 void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	rrdisplayclient *rrdpy=NULL;
 	char *ptr=NULL, *dpystring;
 	fconfig.reloadenv();
-	int compress=fconfig.compress;
+	int compress=fconfig.compress;  bool dostereo=false;
 
 	rrcs::safelock l(mutex);
 
@@ -332,6 +338,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	int pbw=pb->width(), pbh=pb->height();
 	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
+	if(stereo())
+	{
+		if(_drawingtoright() || rdirty) dostereo=true;
+		rdirty=false;
+		compress=RRCOMP_MJPEG;
+	}
+
 	switch(compress)
 	{
 		case RRCOMP_MJPEG:
@@ -339,6 +352,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			errifnot(rrdpy=dpyh.findrrdpy(windpy));
 			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
 				return;
+			if(!rrdpy->stereoenabled()) dostereo=false;
 			rrframe *b;
 			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
 			#ifdef GL_BGR_EXT
@@ -367,10 +381,49 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->h.y=0;
 			b->h.qual=fconfig.currentqual;
 			b->h.subsamp=fconfig.currentsubsamp;
+			b->h.flags=dostereo? RR_LEFT:0;
 			b->flags|=RRBMP_BOTTOMUP;
 			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
 			if(!syncdpy) {XSync(windpy, False);  syncdpy=true;}
 			rrdpy->sendframe(b);
+
+			if(dostereo)
+			{
+				errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
+				if(drawbuf==GL_FRONT) drawbuf=GL_FRONT_RIGHT;
+				else if(drawbuf==GL_BACK) drawbuf=GL_BACK_RIGHT;
+				#ifdef GL_BGR_EXT
+				if(littleendian())
+				{
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true);
+					b->flags=RRBMP_BGR;
+				}
+				else
+				#endif
+				{
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true);
+					b->flags=0;
+				}
+				b->h.dpynum=0;
+				if((dpystring=fconfig.client)==NULL)
+					dpystring=DisplayString(windpy);
+				if((ptr=strchr(dpystring, ':'))!=NULL)
+				{
+					if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
+				}
+				b->h.winid=win;
+				b->h.framew=b->h.width;
+				b->h.frameh=b->h.height;
+				b->h.x=0;
+				b->h.y=0;
+				b->h.qual=fconfig.currentqual;
+				b->h.subsamp=fconfig.currentsubsamp;
+				b->h.flags=RR_RIGHT;
+				b->flags|=RRBMP_BOTTOMUP;
+				b->strip_height=RR_DEFAULTSTRIPHEIGHT;
+				rrdpy->sendframe(b);
+			}
+
 			break;
 		}
 
@@ -466,4 +519,9 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	glPopClientAttrib();
 	tc.restore();
 	glReadBuffer(readbuf);
+}
+
+bool pbwin::stereo(void)
+{
+	return (pb && pb->stereo());
 }
