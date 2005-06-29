@@ -44,13 +44,20 @@ typedef struct _rrframeheader
 	unsigned char qual;      /* Quality of destination JPEG (1-100) */
 	unsigned char subsamp;   /* YUV subsampling of destination JPEG
 	                            (RR_411, RR_422, or RR_444) */
-	unsigned char eof;       /* 1 if this is the last (or only) tile in the
-	                            frame */
+	unsigned char flags;     /* See enum below */
 	unsigned char dpynum;    /* Display number on the client machine that
 	                            contains the window into which this frame will be
 	                            drawn */
 } rrframeheader;
 #pragma pack()
+
+/* Header flags */
+enum {
+	RR_EOF=1, /* this tile is an End-of-Frame marker and contains no real
+               image data */
+	RR_LEFT,  /* this tile goes to the left buffer of a stereo frame */
+	RR_RIGHT  /* this tile goes to the right buffer of a stereo frame */
+};
 
 typedef struct _RRFrame
 {
