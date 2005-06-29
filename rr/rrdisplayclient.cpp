@@ -58,7 +58,7 @@ void rrdisplayclient::run(void)
 		{
 			sd->recv(&cts, 1);
 			if(cts<1 || cts>2) _throw("CTS error");
-			if(stereo && cts!=2)
+			if(stereo && (b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT) && cts!=2)
 			{
 				rrout.println("Disabling stereo because client doesn't support it");
 				stereo=false;

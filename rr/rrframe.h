@@ -391,9 +391,9 @@ class rrglframe : public rrframe
 
 	void init(rrframeheader *hnew)
 	{
-		int flags=RRBMP_BOTTOMUP;
+		flags=RRBMP_BOTTOMUP;
 		#ifdef GL_BGR_EXT
-		if(littleendian()) flags=RRBMP_BGR;
+		if(littleendian()) flags|=RRBMP_BGR;
 		#endif
 		if(!hnew) throw(rrerror("rrglframe::init", "Invalid argument"));
 		pixelsize=3;  pitch=pixelsize*hnew->framew;
