@@ -37,7 +37,7 @@ class FakerConfig
 {
 	public:
 
-		FakerConfig(void)
+		FakerConfig(void) : currentqual(hiqual), currentsubsamp(hisubsamp)
 		{
 			// Defaults
 			gllib=NULL;
@@ -135,8 +135,8 @@ class FakerConfig
 		int losubsamp;
 		int hiqual;
 		int hisubsamp;
-		int currentqual;
-		int currentsubsamp;
+		int &currentqual;
+		int &currentsubsamp;
 		int compress;
 		int port;
 
