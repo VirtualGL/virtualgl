@@ -65,13 +65,25 @@ GLPDevice _localdev=-1;
 #define _localdisplayiscurrent() (GetCurrentDisplay()==_localdpy)
 #endif
 #define _isremote(dpy) (fconfig.glp || (_localdpy && dpy!=_localdpy))
-#define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT)
+#define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
+	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
+	|| drawbuf==GL_RIGHT)
+#define _isright(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_BACK \
+	|| drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
+	|| drawbuf==GL_BACK_RIGHT)
 
 static inline int _drawingtofront(void)
 {
 	GLint drawbuf=GL_BACK;
 	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return _isfront(drawbuf);
+}
+
+static inline int _drawingtoright(void)
+{
+	GLint drawbuf=GL_LEFT;
+	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	return _isright(drawbuf);
 }
 
 static rrcs globalmutex;
@@ -480,9 +492,12 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 
 static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
 {
-	XVisualInfo *_v=NULL, vtemp;  int n=0;
+	XVisualInfo *_v=NULL, vtemp;
+	int i, n=0, maj_opcode=-1, first_event=-1, first_error=-1, clientglx=0;
 	if(!dpy || !c) return NULL;
 	vtemp.depth=glXConfigDepth(c);  vtemp.c_class=glXConfigClass(c);
+	int svrstereo=0;
+	glXGetFBConfigAttrib(_localdpy, c, GLX_STEREO, &svrstereo);
 	if(!(_v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)))
 	{
 		vtemp.depth=24;  vtemp.c_class=TrueColor;
@@ -490,16 +505,55 @@ static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
 			return NULL;
 	}
 	vtemp.visualid=_v[0].visualid;
-	int i=0;
+	if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
+	&& maj_opcode>=0 && first_event>=0 && first_error>=0)
+		clientglx=1;
+	else if(svrstereo)
+	{
+		rrout.println("GLX not available on client.  Stereo disabled.");
+		svrstereo=0;
+	}
+	for(i=0; i<n; i++)
+	{
+		double gamma=0.;  int clistereo=0;
+		XSolarisGetVisualGamma(dpy, screen, _v[i].visual, &gamma);
+		if(clientglx && svrstereo)
+		{
+			int clidb=0;
+			_glXGetConfig(dpy, &_v[i], GLX_DOUBLEBUFFER, &clidb);
+			_glXGetConfig(dpy, &_v[i], GLX_STEREO, &clistereo);
+			if(!clidb) clistereo=0;
+		}
+		if(fconfig.gamma && gamma==1.0 && svrstereo==clistereo)
+			{vtemp.visualid=_v[i].visualid; goto found;}
+		else if(!fconfig.gamma && gamma!=1.0 && svrstereo==clistereo)
+			{vtemp.visualid=_v[i].visualid; goto found;}
+	}
+	// Try again without gamma restriction
+	if(svrstereo) for(i=0; i<n; i++)
+	{
+		int clistereo=0;
+		if(clientglx)
+		{
+			int clidb=0;
+			_glXGetConfig(dpy, &_v[i], GLX_DOUBLEBUFFER, &clidb);
+			_glXGetConfig(dpy, &_v[i], GLX_STEREO, &clistereo);
+			if(!clidb) clistereo=0;
+		}
+		if(svrstereo==clistereo)
+			{vtemp.visualid=_v[i].visualid; goto found;}
+	}
+	// Try again without stereo restriction
 	for(i=0; i<n; i++)
 	{
 		double gamma=0.;
 		XSolarisGetVisualGamma(dpy, screen, _v[i].visual, &gamma);
 		if(fconfig.gamma && gamma==1.0)
-			{vtemp.visualid=_v[i].visualid;  break;}
+			{vtemp.visualid=_v[i].visualid; goto found;}
 		else if(!fconfig.gamma && gamma!=1.0)
-			{vtemp.visualid=_v[i].visualid;  break;}
+			{vtemp.visualid=_v[i].visualid; goto found;}
 	}
+	found:
 	XFree(_v);
 	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
 }
@@ -920,14 +974,17 @@ void glXWaitGL(void)
 void glDrawBuffer(GLenum mode)
 {
 	TRY();
-	pbwin *pbw=NULL;  int before=-1, after=-1;
+	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
 	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
 	{
 		before=_drawingtofront();
+		rbefore=_drawingtoright();
 		_glDrawBuffer(mode);
 		after=_drawingtofront();
+		rafter=_drawingtoright();
 		if(before && !after) pbw->dirty=true;
+		if(rbefore && !rafter && pbw->stereo()) pbw->rdirty=true;
 	}
 	else _glDrawBuffer(mode);
 	CATCH();
@@ -937,14 +994,17 @@ void glDrawBuffer(GLenum mode)
 void glPopAttrib(void)
 {
 	TRY();
-	pbwin *pbw=NULL;  int before=-1, after=-1;
+	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
 	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
 	{
 		before=_drawingtofront();
+		rbefore=_drawingtoright();
 		_glPopAttrib();
 		after=_drawingtofront();
+		rafter=_drawingtoright();
 		if(before && !after) pbw->dirty=true;
+		if(rbefore && !rafter && pbw->stereo()) pbw->rdirty=true;
 	}
 	else _glPopAttrib();
 	CATCH();

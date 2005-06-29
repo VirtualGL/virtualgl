@@ -121,6 +121,9 @@ funcdef2(void, glXDestroyContext, Display *, dpy, GLXContext, ctx,);
 
 funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 
+funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
+	int *, value, return);
+
 #ifdef USEGLP
 funcdef0(GLXContext, glXGetCurrentContext, return);
 #endif
