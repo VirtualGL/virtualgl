@@ -45,7 +45,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#ifdef sun
+#include <X11/Xmu/XmuSolaris.h>
+#endif
 
 #ifndef GLX_NONE_EXT
 #define GLX_NONE_EXT  0x8000
@@ -123,6 +125,9 @@ struct visual_attribs
    int accumRedSize, accumGreenSize, accumBlueSize, accumAlphaSize;
    int numSamples, numMultisample;
    int visualCaveat;
+   #ifdef sun
+   double gamma;
+   #endif
 };
 
    
@@ -547,14 +552,23 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
 #else
    attribs->visualCaveat = 0;
 #endif
+
+#ifdef sun
+   XSolarisGetVisualGamma(dpy, vInfo->screen, vInfo->visual, &attribs->gamma);
+#endif
 }
 
 
 static void
 print_visual_attribs_verbose(const struct visual_attribs *attribs)
 {
-   printf("Visual ID: %x  depth=%d  class=%s\n",
+   printf("Visual ID: %x  depth=%d  class=%s",
           attribs->id, attribs->depth, visual_class_name(attribs->klass));
+   #ifdef sun
+   printf("  gamma=%f\n", attribs->gamma);
+   #else
+   printf("\n");
+   #endif
    printf("    bufferSize=%d level=%d renderType=%s doubleBuffer=%d stereo=%d\n",
           attribs->bufferSize, attribs->level, attribs->rgba ? "rgba" : "ci",
           attribs->doubleBuffer, attribs->stereo);
@@ -591,9 +605,24 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs)
 static void
 print_visual_attribs_short_header(void)
 {
- printf("   visual  x  bf lv rg d st colorbuffer ax dp st accumbuffer  ms  cav\n");
- printf(" id dep cl sp sz l  ci b ro  r  g  b  a bf th cl  r  g  b  a ns b eat\n");
- printf("----------------------------------------------------------------------\n");
+ printf("   visual  x  bf lv rg d st colorbuffer ax dp st accumbuffer  ms  cav");
+ #ifdef sun
+ printf("  gam\n");
+ #else
+ printf("\n");
+ #endif
+ printf(" id dep cl sp sz l  ci b ro  r  g  b  a bf th cl  r  g  b  a ns b eat");
+ #ifdef sun
+ printf("  ma\n");
+ #else
+ printf("\n");
+ #endif
+ printf("----------------------------------------------------------------------");
+ #ifdef sun
+ printf("-----\n");
+ #else
+ printf("\n");
+ #endif
 }
 
 
@@ -631,12 +660,18 @@ print_visual_attribs_short(const struct visual_attribs *attribs)
           attribs->stencilSize
           );
 
-   printf(" %2d %2d %2d %2d %2d %1d %s\n",
+   printf(" %2d %2d %2d %2d %2d %1d %s",
           attribs->accumRedSize, attribs->accumGreenSize,
           attribs->accumBlueSize, attribs->accumAlphaSize,
           attribs->numSamples, attribs->numMultisample,
           caveat
           );
+
+  #ifdef sun
+  printf(" %4.2f\n", attribs->gamma);
+  #else
+  printf("\n");
+  #endif
 }
 
 
@@ -644,8 +679,18 @@ static void
 print_visual_attribs_long_header(void)
 {
  printf("Vis  Vis   Visual Trans  buff lev render DB ste  r   g   b   a  aux dep ste  accum buffers  MS   MS\n");
- printf(" ID Depth   Type  parent size el   type     reo sz  sz  sz  sz  buf th  ncl  r   g   b   a  num bufs\n");
- printf("----------------------------------------------------------------------------------------------------\n");
+ printf(" ID Depth   Type  parent size el   type     reo sz  sz  sz  sz  buf th  ncl  r   g   b   a  num bufs");
+ #ifdef sun
+ printf(" Gamma\n");
+ #else
+ printf("\n");
+ #endif
+ printf("----------------------------------------------------------------------------------------------------");
+ #ifdef sun
+ printf("------\n");
+ #else
+ printf("\n");
+ #endif
 }
 
 
@@ -666,7 +711,7 @@ print_visual_attribs_long(const struct visual_attribs *attribs)
           attribs->blueSize, attribs->alphaSize
           );
 
-   printf(" %3d %4d %2d %3d %3d %3d %3d  %2d  %2d\n",
+   printf(" %3d %4d %2d %3d %3d %3d %3d  %2d  %2d",
           attribs->auxBuffers,
           attribs->depthSize,
           attribs->stencilSize,
@@ -674,6 +719,12 @@ print_visual_attribs_long(const struct visual_attribs *attribs)
           attribs->accumBlueSize, attribs->accumAlphaSize,
           attribs->numSamples, attribs->numMultisample
           );
+
+  #ifdef sun
+  printf("   %4.2f\n", attribs->gamma);
+  #else
+  printf("\n");
+  #endif
 }
 
 

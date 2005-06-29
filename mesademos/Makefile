@@ -45,7 +45,19 @@ $(EDIR)/glthreads \
 $(EDIR)/glthreadsint: $(EDIR)/%: $(ODIR)/%.o
 	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lpthread -lm
 
-$(EDIR)/glxinfo \
+ifeq ($(platform), solaris)
+$(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm -lXmu
+else
+ifeq ($(platform), solx86)
+$(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm -lXmu
+else
+$(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm
+endif
+endif
+
 $(EDIR)/offset: $(EDIR)/%: $(ODIR)/%.o
 	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm
 
