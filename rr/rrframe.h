@@ -100,6 +100,7 @@ class rrframe
 		&& pixelsize==last->pixelsize && h.winid==last->h.winid
 		&& h.dpynum==last->h.dpynum && bits && last->pitch==pitch
 		&& startline>=0 && startline<=h.height-1 && endline>0 && endline<=h.height
+		&& h.flags==last->h.flags  // left & right eye can't be compared
 		&& last->bits && !memcmp(&bits[pitch*(bu? h.height-endline:startline)],
 			&last->bits[pitch*(bu? h.height-endline:startline)],
 			pitch*(endline-startline))) return true;
@@ -143,7 +144,7 @@ class rrframe
 		rrout.print("h->y       = %d\n", hdr->y);
 		rrout.print("h->qual    = %d\n", hdr->qual);
 		rrout.print("h->subsamp = %d\n", hdr->subsamp);
-		rrout.print("h->eof     = %d\n", hdr->eof);
+		rrout.print("h->flags   = %d\n", hdr->flags);
 	}
 
 	void checkheader(rrframeheader *hdr)
@@ -354,8 +355,8 @@ class rrglframe : public rrframe
 {
 	public:
 
-	rrglframe(char *dpystring, Window _win) : rrframe(), madecurrent(false),
-		win(_win), hpjhnd(NULL)
+	rrglframe(char *dpystring, Window _win) : rrframe(), rbits(NULL),
+		madecurrent(false), stereo(false), win(_win), hpjhnd(NULL)
 	{
 		XVisualInfo *v=NULL;
 		try
@@ -385,6 +386,7 @@ class rrglframe : public rrframe
 		if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
 		if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 		if(hpjhnd) {hpjDestroy(hpjhnd);  hpjhnd=NULL;}
+		if(rbits) {delete [] rbits;  rbits=NULL;}
 	}
 
 	void init(rrframeheader *hnew)
@@ -393,7 +395,21 @@ class rrglframe : public rrframe
 		#ifdef GL_BGR_EXT
 		if(littleendian()) flags=RRBMP_BGR;
 		#endif
-		rrframe::init(hnew, 3, flags);
+		if(!hnew) throw(rrerror("rrglframe::init", "Invalid argument"));
+		pixelsize=3;  pitch=pixelsize*hnew->framew;
+		hnew->size=hnew->framew*hnew->frameh*pixelsize;
+		checkheader(hnew);
+		if(hnew->framew!=h.framew || hnew->frameh!=h.frameh)
+		{
+			if(bits) delete [] bits;
+			errifnot(bits=new unsigned char[pitch*hnew->frameh+1]);
+			if(hnew->flags==RR_LEFT || hnew->flags==RR_RIGHT)
+			{
+				if(rbits) delete [] rbits;
+				errifnot(rbits=new unsigned char[pitch*hnew->frameh+1]);
+			}
+		}
+		memcpy(&h, hnew, sizeof(rrframeheader));
 	}
 
 	rrglframe& operator= (rrjpeg& f)
@@ -412,7 +428,12 @@ class rrglframe : public rrframe
 				if((hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", hpjGetErrorStr()));
 			}
 			int y=max(0, h.frameh-f.h.y-height);
-			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&bits[pitch*y+f.h.x*pixelsize],
+			unsigned char *dstbuf=bits;
+			if(f.h.flags==RR_RIGHT)
+			{
+				stereo=true;  dstbuf=rbits;
+			}
+			hpj(hpjDecompress(hpjhnd, f.bits, f.h.size, (unsigned char *)&dstbuf[pitch*y+f.h.x*pixelsize],
 				width, pitch, height, pixelsize, hpjflags));
 		}
 		return *this;
@@ -431,13 +452,25 @@ class rrglframe : public rrframe
 			madecurrent=true;
 		}
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		int oldbuf=-1;
+		glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
+		if(stereo) glDrawBuffer(GL_BACK_LEFT);
 		glDrawPixels(h.framew, h.frameh, format, GL_UNSIGNED_BYTE, bits);
+		if(stereo)
+		{
+			glDrawBuffer(GL_BACK_RIGHT);
+			glDrawPixels(h.framew, h.frameh, format, GL_UNSIGNED_BYTE, rbits);
+			glDrawBuffer(oldbuf);
+			stereo=false;
+		}
 		glXSwapBuffers(dpy, win);
 	}
 
+	unsigned char *rbits;
+
 	private:
 
-	bool madecurrent;
+	bool madecurrent, stereo;
 	Display *dpy;  Window win;
 	GLXContext ctx;
 	hpjhandle hpjhnd;

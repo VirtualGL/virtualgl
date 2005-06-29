@@ -66,7 +66,7 @@ class rrserver : public Runnable
 	int drawmethod;
 	rrcwin *rrw[MAXWIN];
 	int windows;
-	rrcwin *addwindow(int, Window);
+	rrcwin *addwindow(int, Window, bool stereo=false);
 	void delwindow(rrcwin *w);
 	rrcs winmutex;
 	rrsocket *sd;

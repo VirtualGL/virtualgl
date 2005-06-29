@@ -82,19 +82,22 @@ void rrserver::run(void)
 			{
 				sd->recv((char *)&h, sizeof(rrframeheader));
 				endianize(h);
-				errifnot(w=addwindow(h.dpynum, h.winid));
+				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
 
 				try {j=w->getFrame();}
 				catch (...) {if(w) delwindow(w);  throw;}
 
 				j->init(&h);
-				if(!h.eof) {sd->recv((char *)j->bits, h.size);}
+				if(h.flags!=RR_EOF) {sd->recv((char *)j->bits, h.size);}
 
 				try {w->drawFrame(j);}
 				catch (...) {if(w) delwindow(w);  throw;}
-			} while(!(j && j->h.eof));
+			} while(!(j && j->h.flags==RR_EOF));
 
 			char cts=1;
+			// NOTE: Unless the client passes back 2 here, the server won't send
+			// any more stereo frames
+			if(w && w->stereoenabled()) cts=2;
 			sd->send(&cts, 1);
 		}
 	}
@@ -121,7 +124,7 @@ void rrserver::delwindow(rrcwin *w)
 }
 
 // Register a new window with this server
-rrcwin *rrserver::addwindow(int dpynum, Window win)
+rrcwin *rrserver::addwindow(int dpynum, Window win, bool stereo)
 {
 	rrcs::safelock l(winmutex);
 	int winid=windows;
@@ -132,7 +135,7 @@ rrcwin *rrserver::addwindow(int dpynum, Window win)
 	}
 	if(windows>=MAXWIN) _throw("No free window ID's");
 	if(dpynum<0 || dpynum>255 || win==None) _throw("Invalid argument");
-	rrw[winid]=new rrcwin(dpynum, win, drawmethod);
+	rrw[winid]=new rrcwin(dpynum, win, drawmethod, stereo);
 
 	if(!rrw[winid]) _throw("Could not create window instance");
 	windows++;
