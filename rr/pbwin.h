@@ -78,7 +78,7 @@ class pbwin
 		rrblitter *blitter;
 		rrprofiler prof_rb;
 		bool syncdpy;
-		char __autotestclr[80], __autotestframe[80];
+		char __autotestclr[80], __autotestrclr[80], __autotestframe[80];
 		int __autotestframecount;
 };
 

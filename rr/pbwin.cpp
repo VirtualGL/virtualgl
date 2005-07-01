@@ -352,7 +352,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			errifnot(rrdpy=dpyh.findrrdpy(windpy));
 			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
 				return;
-			if(!rrdpy->stereoenabled()) dostereo=false;
+			if(!rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
 			rrframe *b;
 			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
 			#ifdef GL_BGR_EXT
@@ -497,7 +497,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		unsigned char *rowptr, *pixel;  int match=1;
 		int color=-1, i, j, k;
 		color=-1;
-		__autotestframecount++;
+		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT) __autotestframecount++;
 		for(j=0, rowptr=bits; j<h; j++, rowptr+=pitch)
 			for(i=1, pixel=&rowptr[ps]; i<w; i++, pixel+=ps)
 				for(k=0; k<ps; k++)
@@ -510,8 +510,16 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
 			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 		}
-		snprintf(__autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)win, color);
-		putenv(__autotestclr);
+		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
+		{
+			snprintf(__autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d", (unsigned int)win, color);
+			putenv(__autotestrclr);
+		}
+		else
+		{
+			snprintf(__autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)win, color);
+			putenv(__autotestclr);
+		}
 		snprintf(__autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)win, __autotestframecount);
 		putenv(__autotestframe);
 	}

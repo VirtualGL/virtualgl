@@ -54,6 +54,10 @@ int usingglp=0;
 	glClearColor(r, g, b, a); \
 	glClear(GL_COLOR_BUFFER_BIT);}
 
+#define glClearBufferTC(buffer, clr) { \
+	glClearBuffer(buffer, clr.r(), clr.g(), clr.b(), 0.); \
+	clr.next();}
+
 
 #if 0
 void clicktocontinue(Display *dpy)
@@ -122,16 +126,24 @@ unsigned int checkbuffercolor(void)
 }
 
 
-void checkwindowcolor(Window win, unsigned int color)
+void checkwindowcolor(Window win, unsigned int color, bool right=false)
 {
 	char *e=NULL, temps[80];  int fakerclr;
-	snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
+	if(right)
+		snprintf(temps, 79, "__VGL_AUTOTESTRCLR%x", (unsigned int)win);
+	else
+		snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
 	if((e=getenv(temps))==NULL)
 		_error("Can't communicate w/ faker");
 	if((fakerclr=atoi(e))<0 || fakerclr>0xffffff)
 		_error("Bogus data read back");
 	if((unsigned int)fakerclr!=color)
-		_prerror2("Color is 0x%.6x, should be 0x%.6x", fakerclr, color)
+	{
+		if(right)
+			_prerror2("R.buf is 0x%.6x, should be 0x%.6x", fakerclr, color)
+		else
+			_prerror2("Color is 0x%.6x, should be 0x%.6x", fakerclr, color)
+	}
 }
 
 
@@ -194,20 +206,86 @@ int dbtest(void)
 }
 
 
-// This tests the faker's readback heuristics
-int rbtest(void)
+// Check whether stereo works properly
+int stereotest(void)
 {
+	unsigned int rcolor=0, lcolor=0;
+	int oldreadbuf=GL_BACK, olddrawbuf=GL_BACK;
+	glGetIntegerv(GL_READ_BUFFER, &oldreadbuf);
+	glGetIntegerv(GL_DRAW_BUFFER, &olddrawbuf);
+	glClearBuffer(GL_FRONT_AND_BACK, 0., 0., 0., 0.);
+	glClearBuffer(GL_RIGHT, 1., 1., 1., 0.);
+	glClearBuffer(GL_LEFT, 1., 0., 1., 0.);
+	glReadBuffer(GL_RIGHT);
+	rcolor=checkbuffercolor();
+	glReadBuffer(GL_LEFT);
+	lcolor=checkbuffercolor();
+	glReadBuffer(oldreadbuf);
+	glDrawBuffer(olddrawbuf);
+	if(rcolor==0xffffff && lcolor==0xff00ff) return true;
+	else return false;
+}
+
+
+struct _testcolor
+{
+	GLfloat r, g, b;
+	unsigned int bits;
+};
+
+#define NC 6
+static struct _testcolor tc[NC]=
+{
+	{1., 0., 0., 0x0000ff},
+	{0., 1., 0., 0x00ff00},
+	{0., 0., 1., 0xff0000},
+	{0., 1., 1., 0xffff00},
+	{1., 0., 1., 0xff00ff},
+	{1., 1., 0., 0x00ffff}
+};
+
+class testcolor
+{
+	public:
+
+		testcolor(int _index=0) : index(_index%NC)
+		{
+		}
+
+		GLfloat& r(int rel=0) {return tc[(index+rel+NC)%NC].r;}
+		GLfloat& g(int rel=0) {return tc[(index+rel+NC)%NC].g;}
+		GLfloat& b(int rel=0) {return tc[(index+rel+NC)%NC].b;}
+		unsigned int& bits(int rel=0) {return tc[(index+rel+NC)%NC].bits;}
+		void next(void) {index=(index+1)%NC;}
+
+	private:
+
+		int index;
+};
+
+
+// This tests the faker's readback heuristics
+int rbtest(bool stereo=false)
+{
+	testcolor clr, sclr(3);
 	Display *dpy=NULL;  Window win0=0, win1=0;
 	int dpyw, dpyh, lastframe0=0, lastframe1=0, retval=1;
 	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, None};
+		GLX_BLUE_SIZE, 8, None, None};
 	int glxattrib13[]={GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-		GLX_WINDOW_BIT, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None};
+		GLX_WINDOW_BIT, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None, None};
 	XVisualInfo *v0=NULL, *v1=NULL;  GLXFBConfig c=0, *configs=NULL;  int n=0;
 	GLXContext ctx0=0, ctx1=0;
 	XSetWindowAttributes swa;
 
-	printf("Readback heuristics test\n\n");
+	if(stereo)
+	{
+		glxattrib[8]=glxattrib13[12]=GLX_STEREO;  glxattrib13[13]=1;
+	}
+
+	printf("Readback heuristics test");
+	if(stereo) printf(" (stereo)");
+	printf("\n\n");
 
 	try
 	{
@@ -248,6 +326,10 @@ int rbtest(void)
 		if(!glXMakeCurrent(dpy, win1, ctx0))
 			_throw("Could not make context current");
 		checkcurrent(dpy, win1, win1, ctx0);
+		if(stereo && !stereotest())
+		{
+			_throw("Stereo is not available or is not properly implemented");
+		}
 		int dbworking=dbtest();
 		if(!dbworking)
 		{
@@ -267,15 +349,18 @@ int rbtest(void)
 		try
 		{
 			printf("glXSwapBuffers() [b]:          ");
-			glClearBuffer(GL_BACK, 1., 0., 0., 0.);
-			glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
 			glReadBuffer(GL_FRONT);
 			// Intentionally leave a pending GL error (VirtualGL should clear the error state prior to readback)
 			glReadPixels(0, 0, 0, 0, 0, 0, 0);
 			glXSwapBuffers(dpy, win1);
 			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0x0000ff:0x00ff00);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -285,15 +370,18 @@ int rbtest(void)
 		try
 		{
 			printf("glFlush() [f]:                 ");
-			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
-			glClearBuffer(GL_BACK, 0., 1., 1., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glFlush();  glFlush();
 			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glFlush();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0xff00ff:0xffff00);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -301,15 +389,18 @@ int rbtest(void)
 		try
 		{
 			printf("glFinish() [f]:                ");
-			glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
-			glClearBuffer(GL_BACK, 0., 0., 1., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glFinish();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0x00ffff:0xff0000);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -317,15 +408,18 @@ int rbtest(void)
 		try
 		{
 			printf("glXWaitGL() [f]:               ");
-			glClearBuffer(GL_FRONT, 1., 0., 0., 0.);
-			glClearBuffer(GL_BACK, 0., 1., 0., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glXWaitGL();  glXWaitGL();
 			checkframe(win1, 1, lastframe1);
 			glDrawBuffer(GL_FRONT);  glXWaitGL();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0x0000ff:0x00ff00);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -336,14 +430,17 @@ int rbtest(void)
 			glDrawBuffer(GL_BACK);  glFinish();
 			checkframe(win1, 1, lastframe1);
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
-			glClearBuffer(GL_FRONT, 1., 1., 0., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
 			glPopAttrib();  // Back buffer should now be current again & dirty flag should be set
-			glClearBuffer(GL_BACK, 0., 0., 1., 0.);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0x00ffff:0xff0000);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}	
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -351,14 +448,17 @@ int rbtest(void)
 		try
 		{
 			printf("glXMakeCurrent() [f]:          ");
-			glClearBuffer(GL_FRONT, 0., 1., 1., 0.);
-			glClearBuffer(GL_BACK, 1., 0., 1., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glXMakeCurrent(dpy, win1, ctx0);  // readback should occur
 			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 			glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 			checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? 0xffff00:0xff00ff);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -366,14 +466,17 @@ int rbtest(void)
 		try
 		{
 			printf("glXMakeContextCurrent() [f]:   ");
-			glClearBuffer(GL_FRONT, 0., 0., 1., 0.);
-			glClearBuffer(GL_BACK, 1., 1., 0., 0.);
+			glClearBufferTC(GL_FRONT, clr);
+			if(stereo) glClearBufferTC(GL_FRONT_RIGHT, sclr);
+			glClearBufferTC(GL_BACK, clr);
+			if(stereo) glClearBufferTC(GL_BACK_RIGHT, sclr);
 			glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
 			glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win0, 1, lastframe0);
-			checkwindowcolor(win0, dbworking? 0xff0000:0x00ffff);
+			checkwindowcolor(win0, dbworking? clr.bits(-2):clr.bits(-1));
+			if(stereo) checkwindowcolor(win0, dbworking? sclr.bits(-2):sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -382,12 +485,14 @@ int rbtest(void)
 		try
 		{
 			printf("glXSwapBuffers() [f&b]:        ");
-			glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 0., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glReadBuffer(GL_FRONT);
 			glXSwapBuffers(dpy, win1);
 			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, 0x0000ff);
+			checkwindowcolor(win1, clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -395,12 +500,14 @@ int rbtest(void)
 		try
 		{
 			printf("glFlush() [f&b]:               ");
-			glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 0., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glFlush();  glFlush();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 2, lastframe1);
-			checkwindowcolor(win1, 0x00ff00);
+			checkwindowcolor(win1, clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -408,12 +515,14 @@ int rbtest(void)
 		try
 		{
 			printf("glFinish() [f&b]:              ");
-			glClearBuffer(GL_FRONT_AND_BACK, 0., 1., 1., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glFinish();  glFinish();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 2, lastframe1);
-			checkwindowcolor(win1, 0xffff00);
+			checkwindowcolor(win1, clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -421,12 +530,14 @@ int rbtest(void)
 		try
 		{
 			printf("glXWaitGL() [f&b]:             ");
-			glClearBuffer(GL_FRONT_AND_BACK, 1., 0., 1., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glReadBuffer(GL_BACK);
 			glXWaitGL();  glXWaitGL();
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win1, 2, lastframe1);
-			checkwindowcolor(win1, 0xff00ff);
+			checkwindowcolor(win1, clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -434,12 +545,14 @@ int rbtest(void)
 		try
 		{
 			printf("glXMakeCurrent() [f&b]:        ");
-			glClearBuffer(GL_FRONT_AND_BACK, 0., 0., 1., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glXMakeCurrent(dpy, win0, ctx0);  // readback should occur
 			glDrawBuffer(GL_FRONT);  glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 			checkreadbackstate(GL_BACK, dpy, win0, win0, ctx0);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, 0xff0000);
+			checkwindowcolor(win1, clr.bits(-1));
+			if(stereo) checkwindowcolor(win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -447,13 +560,15 @@ int rbtest(void)
 		try
 		{
 			printf("glXMakeContextCurrent() [f&b]: ");
-			glClearBuffer(GL_FRONT_AND_BACK, 1., 1., 0., 0.);
+			glClearBufferTC(GL_FRONT_AND_BACK, clr);
+			if(stereo) glClearBufferTC(GL_RIGHT, sclr);
 			glXMakeContextCurrent(dpy, win0, win0, ctx1);  // No readback should occur
 			glXMakeContextCurrent(dpy, win1, win0, ctx1);  // readback should occur
 			glDrawBuffer(GL_FRONT);  glXMakeContextCurrent(dpy, win1, win0, ctx1);  // No readback should occur
 			checkreadbackstate(GL_BACK, dpy, win1, win0, ctx1);
 			checkframe(win0, 1, lastframe0);
-			checkwindowcolor(win0, 0x00ffff);
+			checkwindowcolor(win0, clr.bits(-1));
+			if(stereo) checkwindowcolor(win0, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
@@ -750,24 +865,6 @@ int vistest(void)
 	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 	return retval;
 }
-
-
-typedef struct _testcolor
-{
-	GLfloat r, g, b;
-	unsigned int bits;
-} testcolor;
-
-#define NC 6
-testcolor tc[NC]=
-{
-	{1., 0., 0., 0x0000ff},
-	{0., 1., 0., 0x00ff00},
-	{0., 0., 1., 0xff0000},
-	{1., 1., 0., 0x00ffff},
-	{1., 0., 1., 0xff00ff},
-	{0., 1., 1., 0xffff00}
-};
 
 
 #define NTHR 30
@@ -1351,6 +1448,8 @@ int main(int argc, char **argv)
 	if(!querytest()) ret=-1;
 	printf("\n");
 	if(!rbtest()) ret=-1;
+	printf("\n");
+	rbtest(true);
 	printf("\n");
 	if(!vistest()) ret=-1;
 	printf("\n");
