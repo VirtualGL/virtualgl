@@ -156,11 +156,19 @@ endif
 IPPLINK = -L$(IPPDIR)/lib -lippcore \
         -lippjemerged -lippiemerged -lippsemerged \
         -lippjmerged -lippimerged -lippsmerged
+ifeq ($(IPPSHARED), yes)
+IPPLINK = -L$(IPPDIR)/sharedlib \
+        -lippj -lippi -lipps -lippcore
+endif
 ifeq ($(subplatform), 64)
 IPPLINK = -L$(IPPDIR)/lib \
         -lippjemergedem64t -lippjmergedem64t -lippiemergedem64t \
         -lippimergedem64t -lippsemergedem64t -lippsmergedem64t \
         -lippcoreem64t
+ifeq ($(IPPSHARED), yes)
+IPPLINK = -L$(IPPDIR)/sharedlib \
+        -lippjem64t -lippiem64t -lippsem64t -lippcoreem64t
+endif
 endif
 ifeq ($(subplatform), ia64)
 IPPLINK = -L$(IPPDIR)/lib \
