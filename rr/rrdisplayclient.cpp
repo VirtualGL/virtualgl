@@ -17,6 +17,7 @@
 void rrdisplayclient::run(void)
 {
 	rrframe *lastb=NULL, *b=NULL;
+	rrprofiler prof_comp("Compress");  long bytes=0;
 
 	int np=mt? numprocs():1, i;
 
@@ -38,33 +39,44 @@ void rrdisplayclient::run(void)
 		if(!b) _throw("Queue has been shut down");
 		ready.unlock();
 		if(b->h.flags==RR_RIGHT && !stereo) continue;
+		prof_comp.startframe();
 		if(np>1)
 			for(i=1; i<np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
 			}
 		c[0]->compresssend(b, lastb);
+		bytes+=c[0]->bytes;
 		if(np>1)
 			for(i=1; i<np; i++) {
 				c[i]->stop();  ct[i]->checkerror();  c[i]->send();
+				bytes+=c[i]->bytes;
 			}
-		rrframeheader h;
-		memcpy(&h, &b->h, sizeof(rrframeheader));
-		h.flags=RR_EOF;
-		endianize(h);
-		if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+		prof_comp.endframe(b->h.framew*b->h.frameh, 0,
+			b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT? 0.5 : 1);
 
-		char cts=0;
-		if(sd)
+		if(b->h.flags!=RR_LEFT)
 		{
-			sd->recv(&cts, 1);
-			if(cts<1 || cts>2) _throw("CTS error");
-			if(stereo && (b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT) && cts!=2)
+			rrframeheader h;
+			memcpy(&h, &b->h, sizeof(rrframeheader));
+			h.flags=RR_EOF;
+			endianize(h);
+			if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+
+			char cts=0;
+			if(sd)
 			{
-				rrout.println("Disabling stereo because client doesn't support it");
-				stereo=false;
+				sd->recv(&cts, 1);
+				if(cts<1 || cts>2) _throw("CTS error");
+				if(stereo && (b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT) && cts!=2)
+				{
+					rrout.println("[VGL] Disabling stereo because client doesn't support it");
+					stereo=false;
+				}
 			}
 		}
-		prof_total.endframe(b->h.width*b->h.height, 0, 1);
+		prof_total.endframe(b->h.width*b->h.height, bytes,
+			b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT? 0.5 : 1);
+		bytes=0;
 		prof_total.startframe();
 
 		lastb=b;
@@ -139,6 +151,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 
 	int nstrips=(b->h.height+STRIPH-1)/STRIPH;
 
+	bytes=0;
 	for(int strip=0; strip<nstrips; strip++)
 	{
 		if(strip%np!=myrank) continue;
@@ -156,12 +169,11 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		}
 		if(b->stripequals(lastb, startline, endline)) continue;
 		rrframe *rrb=b->getstrip(startline, endline);
-		prof_comp.startframe();
 		rrjpeg *j=NULL;
 		if(myrank>0) {errifnot(j=new rrjpeg());}
 		else j=&jpg;
 		*j=*rrb;
-		prof_comp.endframe(j->h.width*j->h.height, j->h.size, 0);
+		bytes+=j->h.size;
 		delete rrb;
 		if(myrank==0)
 		{
