@@ -99,7 +99,11 @@ static __inline void _cpuid(int *flags, int *flags2)
 		#ifdef __i386__
 		"popl %%ebx\n"
 		#endif
-			: "=a" (a) : "a" (0) : "bx");
+			: "=a" (a) : "a" (0)
+		#ifndef __i386__
+			: "bx"
+		#endif
+	);
 	if(a<1) return;
 	__asm__ __volatile__ (
 		#ifdef __i386__
@@ -109,7 +113,10 @@ static __inline void _cpuid(int *flags, int *flags2)
 		#ifdef __i386__
 		"popl %%ebx\n"
 		#endif
-			: "=c" (c), "=d" (d) : "a" (1) : "bx"
+			: "=c" (c), "=d" (d) : "a" (1)
+		#ifndef __i386__
+			: "bx"
+		#endif
 	);
 	#endif
 	*flags=d;  *flags2=c;
