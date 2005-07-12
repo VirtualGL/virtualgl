@@ -47,6 +47,7 @@
 #include <X11/keysym.h>
 #include <GL/gl.h>
 #include <GL/glp.h>
+#include "glpweak.h"
 #include <rr.h>
 
 

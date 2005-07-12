@@ -18,6 +18,7 @@
 #include "glx.h"
 #ifdef USEGLP
 #include <GL/glp.h>
+#include "glpweak.h"
 #endif
 
 extern void __vgl_safeexit(int);

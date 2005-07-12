@@ -20,6 +20,7 @@
 #include "fbx.h"
 #ifdef USEGLP
 #include <GL/glp.h>
+#include "glpweak.h"
 #endif
 
 // A container class for the actual Pbuffer
