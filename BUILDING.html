@@ -354,6 +354,21 @@ directory}</span></h3>
   the default location of <span class="monospace">/opt/intel/ipp41</span>, for instance to use an earlier or 
   later version of IPP.</span></p>
 </blockquote>
+<h3><span style="font-weight: 400;">IPPSHARED = yes</span><br>
+</h3>
+<blockquote>
+<span style="font-weight: 400;">Link
+against the IPP shared libraries rather than the static (merged)
+libraries. Using this option has the following ramifications:</span><br>
+<span style="font-weight: 400;"></span></div>
+<ul>
+  <li><span style="font-weight: 400;">The IPP run-time RPM must be installed on the build machine</span></li>
+  <li>The IPP run-time RPM must be installed on any machine that will run VirtualGL</li>
+  <li>The CPU autodetection mechanism for non-Intel CPU's will no
+longer work, and it is likely that the non-optimal (MMX) code path will
+be selected for non-Intel CPU's at run time</li>
+</ul>
+</blockquote>
 <h3><span style="font-weight: 400;">M32 = yes</span></h3>
 <blockquote>
   <p><span style="font-weight: 400;">On 64-bit systems
