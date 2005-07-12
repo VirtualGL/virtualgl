@@ -121,7 +121,7 @@ void __vgl_safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,m) {if(!isdead()) fprintf(stderr, "%s--\n%s\n", f, m);  __vgl_safeexit(1);}
+#define _die(f,m) {if(!isdead()) fprintf(stderr, "[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
@@ -133,7 +133,7 @@ void __vgl_safeexit(int retcode)
 #ifdef __DEBUG__
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	fprintf(stderr, "X11 Error: %s\n", x11error(xe->error_code));  fflush(stderr);
+	fprintf(stderr, "[VGL] X11 Error--\n[VGL] %s\n", x11error(xe->error_code));  fflush(stderr);
 	return 0;
 }
 #endif
@@ -154,7 +154,7 @@ static void fakerinit(void)
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
 	{
-		printf("Attach debugger to process %d ...\n", getpid());
+		printf("[VGL] Attach debugger to process %d ...\n", getpid());
 		sleep(30);
 	}
 	#if 0
@@ -175,7 +175,7 @@ static void fakerinit(void)
 			if(!strnicmp(device, "GLP", 3)) device=NULL;
 			if((_localdev=glPOpenDevice(device))<0)
 			{
-				fprintf(stderr, "Could not open device %s.\n", fconfig.localdpystring);
+				fprintf(stderr, "[VGL] Could not open device %s.\n", fconfig.localdpystring);
 				__vgl_safeexit(1);
 			}
 		}
@@ -186,7 +186,7 @@ static void fakerinit(void)
 	{
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			fprintf(stderr, "Could not open display %s.\n", fconfig.localdpystring);
+			fprintf(stderr, "[VGL] Could not open display %s.\n", fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}
 	}
@@ -510,7 +510,7 @@ static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
 		clientglx=1;
 	else if(svrstereo)
 	{
-		rrout.println("GLX not available on client.  Stereo disabled.");
+		rrout.println("[VGL] GLX not available on client.  Stereo disabled.");
 		svrstereo=0;
 	}
 	for(i=0; i<n; i++)

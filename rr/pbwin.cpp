@@ -51,7 +51,7 @@ int glerror(void)
 	while(i!=GL_NO_ERROR)
 	{
 		ret=1;
-		fprintf(stderr, "OpenGL error #%d\n", i);
+		fprintf(stderr, "[VGL] OpenGL error #%d\n", i);
 		i=glGetError();
 	}
 	return ret;

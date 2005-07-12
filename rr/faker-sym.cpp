@@ -23,12 +23,12 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 	void *sym;  const char *err;
 	sym=dlsym(dllhnd, (char *)symbol);
 	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_DEFAULT, (char *)symbol);}
-	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "%s\n", err);}
+	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "[VGL] %s\n", err);}
 	return sym;
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	fprintf(stderr, "Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
+	fprintf(stderr, "[VGL] Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 void __vgl_loadsymbols(void)
@@ -41,7 +41,7 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			fprintf(stderr, "Could not open %s\n%s\n", fconfig.gllib, dlerror());
+			fprintf(stderr, "[VGL] Could not open %s\n[VGL] %s\n", fconfig.gllib, dlerror());
 			__vgl_safeexit(1);
 		}
 	}
@@ -132,7 +132,7 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			fprintf(stderr, "Could not open %s\n%s\n", fconfig.x11lib, dlerror());
+			fprintf(stderr, "[VGL] Could not open %s\n[VGL] %s\n", fconfig.x11lib, dlerror());
 			__vgl_safeexit(1);
 		}
 	}
