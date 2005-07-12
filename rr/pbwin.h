@@ -69,7 +69,7 @@ class pbwin
 		int init(int, int, GLXFBConfig);
 		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
-			GLint, bool);
+			GLint, bool, bool stereo=false);
 
 		bool force;
 		rrcs mutex;

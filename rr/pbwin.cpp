@@ -358,13 +358,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			#ifdef GL_BGR_EXT
 			if(littleendian())
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true);
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true, dostereo);
 				b->flags=RRBMP_BGR;
 			}
 			else
 			#endif
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true);
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 				b->flags=0;
 			}
 			b->h.dpynum=0;
@@ -395,13 +395,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				#ifdef GL_BGR_EXT
 				if(littleendian())
 				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true);
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true, dostereo);
 					b->flags=RRBMP_BGR;
 				}
 				else
 				#endif
 				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true);
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 					b->flags=0;
 				}
 				b->h.dpynum=0;
@@ -459,7 +459,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 }
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
-	GLenum format, int ps, GLubyte *bits, GLint buf, bool bottomup)
+	GLenum format, int ps, GLubyte *bits, GLint buf, bool bottomup, bool stereo)
 {
 
 	GLint readbuf=GL_BACK;
@@ -487,7 +487,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
-	prof_rb.endframe(w*h, 0, 1);
+	prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 
 	// If automatic faker testing is enabled, store the FB color in an

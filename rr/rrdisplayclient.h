@@ -37,7 +37,7 @@ class rrdisplayclient : public Runnable
 			errifnot(sd=new rrsocket(dossl));
 			sd->connect(servername, port);
 		}
-		prof_total.setname("Total");
+		prof_total.setname("Total   ");
 		errifnot(t=new Thread(this));
 		t->start();
 	}
@@ -85,14 +85,11 @@ class rrcompressor : public Runnable
 {
 	public:
 
-	rrcompressor(int _myrank, int _np, rrsocket *_sd) :
+	rrcompressor(int _myrank, int _np, rrsocket *_sd) : bytes(0),
 		storedframes(0), frame(NULL), _b(NULL), _lastb(NULL), myrank(_myrank), np(_np),
 		sd(_sd), deadyet(false)
 	{
 		ready.lock();  complete.lock();
-		char temps[20];
-		snprintf(temps, 19, "Compress %d", myrank);
-		prof_comp.setname(temps);
 	}
 
 	virtual ~rrcompressor(void)
@@ -144,6 +141,8 @@ class rrcompressor : public Runnable
 		storedframes=0;
 	}
 
+	long bytes;
+
 	private:
 
 	void store(rrjpeg *j)
@@ -160,7 +159,6 @@ class rrcompressor : public Runnable
 	rrsocket *sd;
 	rrmutex ready, complete;  bool deadyet;
 	rrcs mutex;
-	rrprofiler prof_comp;
 };
 
 #endif

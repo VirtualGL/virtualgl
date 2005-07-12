@@ -72,9 +72,9 @@ class rrprofiler
 		if(totaltime>interval)
 		{
 			rrout.print("%s  ", name);
-			if(mpixels) rrout.print("- %.2f Mpixels/sec", mpixels/totaltime);
-			if(mbytes) rrout.print("- %.2f Mbits/sec", mbytes*8.0/totaltime);
-			if(frames) rrout.print("- %.2f frames/sec", frames/totaltime);
+			if(mpixels) rrout.print("- %7.2f Mpixels/sec", mpixels/totaltime);
+			if(frames) rrout.print("- %7.2f frames/sec", frames/totaltime);
+			if(mbytes) rrout.print("- %7.2f Mbits/sec", mbytes*8.0/totaltime);
 			rrout.PRINT("\n");
 			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;
 		}
