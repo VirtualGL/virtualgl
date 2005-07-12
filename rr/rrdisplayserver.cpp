@@ -31,7 +31,7 @@ void rrclient::receive(rrconn *c)
 		catch (...) {if(w) delwindow(w);  throw;}
 
 		j->init(&h);
-		if(!h.eof)
+		if(h.eof!=1)
 		{
 			c->recv((char *)j->bits, h.size);
 		}
@@ -42,7 +42,7 @@ void rrclient::receive(rrconn *c)
 		}
 		catch (...) {if(w) delwindow(w);  throw;}
 
-		if(j->h.eof) break;
+		if(j->h.eof==1) break;
 	}
 	while(1);
 
