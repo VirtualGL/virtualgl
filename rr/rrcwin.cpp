@@ -113,8 +113,8 @@ void rrcwin::drawFrame(rrjpeg *f)
 
 void rrcwin::run(void)
 {
-	rrprofiler pt("Total"), pb("Blit"), pd("Decompress");
-	rrjpeg *j=NULL;
+	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
+	rrjpeg *j=NULL;  long bytes=0;
 	double xtime=0., gltime=0., t1=0.;
 	bool dobenchmark=false;
 	bool firstframe=(drawmethod==RR_DRAWAUTO)? true:false;
@@ -128,6 +128,7 @@ void rrcwin::run(void)
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
 		if(j->h.flags==RR_EOF)
 		{
+			bool stereo=false;
 			pb.startframe();
 			if(dobenchmark) t1=rrtime();
 			if(b)
@@ -140,6 +141,7 @@ void rrcwin::run(void)
 			if(dobenchmark) t1=rrtime();
 			if(glf)
 			{
+				if(glf->h.flags==RR_LEFT || glf->h.flags==RR_RIGHT) stereo=true;
 				glf->init(&j->h);
 				glf->redraw();
 			}
@@ -161,15 +163,16 @@ void rrcwin::run(void)
 			#endif
 			if(b)
 			{
-				pb.endframe(b->h.framew*b->h.frameh, 0, 1);
-				pt.endframe(b->h.framew*b->h.frameh, 0, 1);
+				pb.endframe(b->h.framew*b->h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(b->h.framew*b->h.frameh* (stereo? 2:1), bytes, 1);
 			}
 			#ifdef USEGL
 			if(glf)
 			{
-				pb.endframe(glf->h.framew*glf->h.frameh, 0, 1);
-				pt.endframe(glf->h.framew*glf->h.frameh, 0, 1);
+				pb.endframe(glf->h.framew*glf->h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(glf->h.framew*glf->h.frameh* (stereo? 2:1), bytes, 1);
 			}
+			bytes=0;
 			#endif
 			pt.startframe();
 		}
@@ -184,8 +187,10 @@ void rrcwin::run(void)
 			if(glf) *glf=*j;
 			if(dobenchmark) gltime+=rrtime()-t1;
 			#endif
-			pd.endframe(j->h.width*j->h.height, j->h.size, (double)(j->h.width*j->h.height)/
-				(double)(j->h.framew*j->h.frameh));
+			bool stereo=j->h.flags==RR_LEFT || j->h.flags==RR_RIGHT;
+			pd.endframe(j->h.width*j->h.height, 0, (double)(j->h.width*j->h.height)/
+				(double)(j->h.framew*j->h.frameh) * (stereo? 0.5:1.0));
+			bytes+=j->h.size;
 		}
 		j->complete();
 	}

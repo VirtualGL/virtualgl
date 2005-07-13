@@ -397,7 +397,6 @@ class rrglframe : public rrframe
 		#endif
 		if(!hnew) throw(rrerror("rrglframe::init", "Invalid argument"));
 		pixelsize=3;  pitch=pixelsize*hnew->framew;
-		hnew->size=hnew->framew*hnew->frameh*pixelsize;
 		checkheader(hnew);
 		if(hnew->framew!=h.framew || hnew->frameh!=h.frameh)
 		{
