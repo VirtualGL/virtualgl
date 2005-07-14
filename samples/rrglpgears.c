@@ -108,7 +108,7 @@ GLPDevice serverdev=-1;
 GLPBuffer pbuffer=0;
 GLPFBConfig fbcfg=0;
 int pbwidth=-1, pbheight=-1;
-int dpynum=0, record=0, playback=0;
+int record=0, playback=0;
 GLPContext ctx=0;
 int movfile=-1;
 
@@ -576,7 +576,6 @@ event_loop(Display *dpy, Window win)
             printf("End of file.  Restarting\n");
             lseek(movfile, 0, SEEK_SET);  continue;
          }
-         h.dpynum=dpynum;
          h.winid=win;
          rrtrap(RRSendRawFrame(rrdpy, &h, bits));
          goto benchmark;
@@ -631,7 +630,6 @@ event_loop(Display *dpy, Window win)
          the outgoing queue (or send it directly if it has already been
          compressed.)  Sending the frame releases it as well. */
 
-         frame.h.dpynum=dpynum;
          frame.h.winid=win;
          rrtrap(RRSendFrame(rrdpy, &frame));
       }
@@ -702,11 +700,8 @@ main(int argc, char *argv[])
       else if (strncasecmp(argv[i], "+sp", 3) == 0) {
          config.spoil = 1;
       }
-      else if (strncasecmp(argv[i], "-mt", 3) == 0) {
-         config.multithread = 0;
-      }
-      else if (strncasecmp(argv[i], "+mt", 3) == 0) {
-         config.multithread = 1;
+      else if (strncasecmp(argv[i], "-np", 3) == 0 && i<argc-1) {
+         config.numprocs = atoi(argv[++i]);
       }
       else if (strncasecmp(argv[i], "-play", 5) == 0) {
          playback = 1;
@@ -736,7 +731,7 @@ main(int argc, char *argv[])
          || strncasecmp(argv[i], "-\?", 2) == 0) {
          printf("\nUSAGE: %s\n", argv[0]);
          printf("       [-d </dev/fbs/xxx>] [-cl <hostname:x.x>] [-p <xxxx>]\n");
-         printf("       [-q <1-100>] [-samp <411|422|444>] [+/-sp] [+/-ssl] [+/-mt]\n");
+         printf("       [-q <1-100>] [-samp <411|422|444>] [+/-sp] [+/-ssl] [-np <n>]\n");
          printf("       [-rec] [-play] [-info]\n\n");
          printf("-d     = Set GLP device where 3D rendering will occur\n");
          printf("         (default: %s)\n", config.server);
@@ -748,7 +743,7 @@ main(int argc, char *argv[])
          printf("-samp  = Set YUV subsampling [411, 422, or 444] (default: %s)\n", config.subsamp==RR_444?"444":(config.subsamp==RR_422?"422":"411"));
          printf("+/-sp  = Enable/disable frame spoiling (default: %s)\n", config.spoil?"enabled":"disabled");
          printf("+/-ssl = Enable/disable SSL tunneling (default: %s)\n", config.ssl?"enabled":"disabled");
-         printf("+/-mt  = Enable/disable multi-threaded compression (default: %s)\n", config.multithread?"enabled":"disabled");
+         printf("-np <n>= Number of CPUs to use for compression (default: %d)\n", config.numprocs);
          printf("-rec   = Record movie (will be stored in a file named %s)\n", DEFAULTMOVFILE);
          printf("-play  = Playback movie (from file %s)\n", DEFAULTMOVFILE);
          printf("-info  = Print OpenGL info\n");
@@ -784,14 +779,12 @@ main(int argc, char *argv[])
    }
 
    /* Open a connection to the VirtualGL client, which is usually
-      running on the same machine as the client X display.  Store
-      the X display number for further use (dpynum is obtained by
-      parsing clidpyName)
+      running on the same machine as the client X display.
 
       NOTE: clidpyName can be NULL if all you want to do is compress
       images without sending them. */
 
-   rrdpy = RROpenDisplay(config.client, config.port, config.ssl, config.multithread, &dpynum);
+   rrdpy = RROpenDisplay(config.client, config.port, config.ssl, config.numprocs);
    if (!rrdpy) {
       printf("Error: could not open connection to client\n");
       printf("%s--\n%s\n", RRErrorLocation(), RRErrorString());

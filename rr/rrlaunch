@@ -21,7 +21,7 @@ usage()
 	echo
 	echo "VirtualGL miscellaneous options"
 	echo "  +/-profile  : Enable/disable performance profiling"
-	echo "  +/-mt       : Enable/disable multi-threaded compression"
+	echo "  -np <n>     : Number of CPUs to use for compression"
 	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
 	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
 	echo
@@ -56,8 +56,7 @@ do
 	-cl*)       VGL_CLIENT=$2     ; export VGL_CLIENT   ; shift     ;;
 	-p*)        VGL_PORT=$2       ; export VGL_PORT     ; shift     ;;
 	-c*)        VGL_COMPRESS=$2   ; export VGL_COMPRESS ; shift     ;;
-	-mt*)       VGL_MT=0          ; export VGL_MT       ;;
-	+mt*)       VGL_MT=1          ; export VGL_MT       ;;
+	-np*)       VGL_NPROCS=$2     ; export VGL_NPROCS   ; shift     ;;
 	-g*)        VGL_GAMMA=0       ; export VGL_GAMMA    ;;
 	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
