@@ -49,36 +49,19 @@ rrerror __lasterror;
 extern "C" {
 
 DLLEXPORT RRDisplay DLLCALL
-	RROpenDisplay(char *displayname, unsigned short port, int ssl, int multithread,
-		int *dpynum)
+	RROpenDisplay(char *displayname, unsigned short port, int ssl, int numprocs)
 {
-	char *dpystring=NULL;  rrdisplayclient *rrc=NULL;
+	rrdisplayclient *rrc=NULL;
 	try
 	{
-		if(!dpynum) _throw("Invalid argument");
-		*dpynum=0;
-		if(displayname)
-		{
-			char *ptr=NULL;
-			dpystring=strdup(displayname);
-			if((ptr=strchr(dpystring, ':'))!=NULL)
-			{
-				if(strlen(ptr)>1) *dpynum=atoi(ptr+1);
-				if(*dpynum<0 || *dpynum>255) *dpynum=0;
-				*ptr='\0';
-			}
-			if(!strlen(dpystring)) {free(dpystring);  dpystring=strdup("localhost");}
-		}
-		rrc=new rrdisplayclient(dpystring, port, ssl, multithread);
+		rrc=new rrdisplayclient(displayname, port, ssl, numprocs);
 		if(!rrc) _throw("Could not allocate memory for class");
-		if(dpystring) free(dpystring);
 		return (RRDisplay)rrc;
 	}
 	catch(rrerror &e)
 	{
 		__lasterror=e;
 		if(rrc) delete rrc;
-		if(dpystring) free(dpystring);
 	}
 	return NULL;
 }
@@ -228,7 +211,7 @@ DLLEXPORT int DLLCALL
 		fc->port=rrfconfig.port;
 		fc->spoil=rrfconfig.spoil;
 		fc->ssl=rrfconfig.ssl;
-		fc->multithread=rrfconfig.mt;
+		fc->numprocs=rrfconfig.np;
 		return RR_SUCCESS;
 	}
 	_catch()

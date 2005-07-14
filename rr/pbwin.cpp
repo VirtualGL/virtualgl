@@ -326,7 +326,6 @@ void pbwin::swapbuffers(void)
 void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	rrdisplayclient *rrdpy=NULL;
-	char *ptr=NULL, *dpystring;
 	fconfig.reloadenv();
 	int compress=fconfig.compress;  bool dostereo=false;
 
@@ -367,13 +366,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 				b->flags=0;
 			}
-			b->h.dpynum=0;
-			if((dpystring=fconfig.client)==NULL)
-				dpystring=DisplayString(windpy);
-			if((ptr=strchr(dpystring, ':'))!=NULL)
-			{
-				if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
-			}
 			b->h.winid=win;
 			b->h.framew=b->h.width;
 			b->h.frameh=b->h.height;
@@ -403,13 +395,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				{
 					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 					b->flags=0;
-				}
-				b->h.dpynum=0;
-				if((dpystring=fconfig.client)==NULL)
-					dpystring=DisplayString(windpy);
-				if((ptr=strchr(dpystring, ':'))!=NULL)
-				{
-					if(strlen(ptr)>1) b->h.dpynum=atoi(ptr+1);
 				}
 				b->h.winid=win;
 				b->h.framew=b->h.width;
