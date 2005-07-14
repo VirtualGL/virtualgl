@@ -23,23 +23,46 @@
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
-#define MAXPROCS 4
 
 class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(char *servername, unsigned short port, bool dossl, bool domt=false)
-		: sd(NULL), bmpi(0), t(NULL), deadyet(false), mt(domt), stereo(true)
+	rrdisplayclient(char *displayname, unsigned short port, bool dossl,
+		int nprocs=1) : sd(NULL), bmpi(0), t(NULL), deadyet(false), np(nprocs),
+		dpynum(0), stereo(true)
 	{
-		if(servername && port>0)
+		np=min(np, min(numprocs(), MAXPROCS));
+		if(np<1) {np=min(numprocs(), MAXPROCS);  if(np>1) np--;}
+		rrout.println("[VGL] Using %d / %d CPU's for compression", np, numprocs());
+		char *servername=NULL;
+		try
 		{
-			errifnot(sd=new rrsocket(dossl));
-			sd->connect(servername, port);
+			if(displayname)
+			{
+				char *ptr=NULL;  servername=strdup(displayname);
+				if((ptr=strchr(servername, ':'))!=NULL)
+				{
+					if(strlen(ptr)>1) dpynum=atoi(ptr+1);
+					if(dpynum<0 || dpynum>255) dpynum=0;
+					*ptr='\0';
+				}
+				if(!strlen(servername)) {free(servername);  servername=strdup("localhost");}
+			}
+			if(servername && port>0)
+			{
+				errifnot(sd=new rrsocket(dossl));
+				sd->connect(servername, port);
+			}
+			prof_total.setname("Total   ");
+			errifnot(t=new Thread(this));
+			t->start();
 		}
-		prof_total.setname("Total   ");
-		errifnot(t=new Thread(this));
-		t->start();
+		catch(...)
+		{
+			if(servername) free(servername);
+		}
+		if(servername) free(servername);
 	}
 
 	virtual ~rrdisplayclient(void)
@@ -54,7 +77,7 @@ class rrdisplayclient : public Runnable
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(rrframe *bmp) {ready.unlock();}
+	void release(rrframe *b) {ready.unlock();}
 	bool stereoenabled(void) {return stereo;}
 
 	rrsocket *sd;
@@ -67,7 +90,8 @@ class rrdisplayclient : public Runnable
 	genericQ q;
 	Thread *t;  bool deadyet;
 	rrprofiler prof_total;
-	bool mt, stereo;
+	int np, dpynum;
+	bool stereo;
 };
 
 #define endianize(h) { \

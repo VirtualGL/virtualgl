@@ -99,8 +99,12 @@ typedef struct _fakerconfig
 	unsigned short port;
 	int spoil;
 	int ssl;
-	int multithread;
+	int numprocs;
 } fakerconfig;
+
+/* Maximum CPUs that be can be used for parallel image compression */
+/* (the algorithms don't scale beyond 3) */
+#define MAXPROCS 4
 
 #ifdef __cplusplus
 extern "C" {
@@ -109,7 +113,7 @@ extern "C" {
 
 DLLEXPORT RRDisplay DLLCALL
 	RROpenDisplay (char *displayname, unsigned short port, int ssl,
-		int multithread, int *displaynum);
+		int numprocs);
 /*
    Open a display connection to a VirtualGL client
 
@@ -121,12 +125,13 @@ DLLEXPORT RRDisplay DLLCALL
                displayname is NULL.
    ssl (IN) = 1 to use an SSL tunnel or 0 to use a standard TCP socket.  This
 	            is ignored if displayname is NULL.
-   multithread (IN) = 1 to enable multi-threaded compression or 0 to disable
-                      it.  This has no effect on uniprocessor systems.
-   displaynum (OUT) = display number corresponding to the display name you
-                      entered as an argument above.  RROpenDisplay() returns
-                      the display number to you as a convenience, so you can
-                      later use it in the frame header structure.
+   numprocs (IN) = number of CPUs to use for compression (maximum is the number
+                   of CPUs in the system or 4, whichever is lower.)  Entering 0
+                   for this parameter will tell VirtualGL to automatically
+                   determine the number of CPUs to use.  VirtualGL's default
+                   behavior on a multiprocessor system is to use all but one
+                   CPU to do compression, up to a maximum of 3 CPUs (the
+                   compression algorithms don't scale well beyond 3 CPUs.)
 
    RETURN VALUE:
    If successful, a valid display connection handle is returned.  Otherwise,

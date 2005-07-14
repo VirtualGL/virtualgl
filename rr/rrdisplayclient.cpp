@@ -19,7 +19,7 @@ void rrdisplayclient::run(void)
 	rrframe *lastb=NULL, *b=NULL;
 	rrprofiler prof_comp("Compress");  long bytes=0;
 
-	int np=mt? numprocs():1, i;
+	int i;
 
 	try {
 
@@ -121,10 +121,11 @@ bool rrdisplayclient::frameready(void)
 	return(q.items()<=0);
 }
 
-void rrdisplayclient::sendframe(rrframe *bmp)
+void rrdisplayclient::sendframe(rrframe *b)
 {
 	if(t) t->checkerror();
-	q.add((void *)bmp);
+	b->h.dpynum=dpynum;
+	q.add((void *)b);
 }
 
 void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *bits)
@@ -135,6 +136,7 @@ void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *b
 	if(sd) sd->send((char *)bits, horig.size);
 	h=horig;
 	h.flags=RR_EOF;
+	h.dpynum=dpynum;
 	endianize(h);
 	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
 	char cts=0;
