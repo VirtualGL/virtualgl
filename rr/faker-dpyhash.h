@@ -63,16 +63,8 @@ class dpyhash : public _dpyhash
 		rrdisplayclient *attach(char *key, void *key2)
 		{
 			rrdisplayclient *rrdpy=NULL;
-			char *dpystring=NULL, *ptr=NULL;
-
-			if(fconfig.client) dpystring=strdup(fconfig.client);
-			else dpystring=strdup(key);
-
-			if((ptr=strchr(dpystring, ':'))!=NULL)
-				*ptr='\0';
-			if(!strlen(dpystring)) {free(dpystring);  dpystring=strdup("localhost");}
-			errifnot(rrdpy=new rrdisplayclient(dpystring, fconfig.port, fconfig.ssl, fconfig.mt));
-			free(dpystring);
+			errifnot(rrdpy=new rrdisplayclient(fconfig.client? fconfig.client:key,
+				fconfig.port, fconfig.ssl, fconfig.np));
 			return rrdpy;
 		}
 
