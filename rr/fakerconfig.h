@@ -57,7 +57,7 @@ class FakerConfig
 			glp=false;
 			usewindow=false;
 			sync=false;
-			mt=false;
+			np=min(numprocs(), MAXPROCS);  if(np>1) np--;
 			autotest=false;
 			gamma=true;
 			reloadenv();
@@ -111,7 +111,12 @@ class FakerConfig
 			getconfigbool("WINDOW", usewindow);
 			if(glp) usewindow=false;
 			getconfigbool("SYNC", sync);
-			getconfigbool("MT", mt);
+			getconfigint("NPROCS", np, 0, 1024);
+			np=min(np, min(numprocs(), MAXPROCS));
+			if(np==0)
+			{
+				np=min(numprocs(), MAXPROCS);	 if(np>1) np--;
+			}
 			getconfigbool("AUTOTEST", autotest);
 			getconfigbool("GAMMA", gamma);
 		}
@@ -145,7 +150,7 @@ class FakerConfig
 		bool glp;
 		bool usewindow;
 		bool sync;
-		bool mt;
+		int np;
 		bool autotest;
 		bool gamma;
 
