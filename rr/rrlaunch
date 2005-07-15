@@ -88,15 +88,19 @@ _RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
 
 SunOS)
 
+if [ -z "$FAKERLIB" ]; then
 FAKERLIB=librrfaker.so
-FAKERLIB32=librrfaker.so
 if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
 then
 	FAKERLIB=/opt/SUNWvgl/lib/sparcv9/librrfaker.so
 fi
+fi
+if [ -z "$FAKERLIB32" ]; then
+FAKERLIB32=librrfaker.so
 if [ -f /opt/SUNWvgl/lib/librrfaker.so ]
 then
 	FAKERLIB32=/opt/SUNWvgl/lib/librrfaker.so
+fi
 fi
 LD_PRELOAD_32=$FAKERLIB32
 LD_PRELOAD_64=$FAKERLIB
