@@ -1760,23 +1760,29 @@ can have potentially dire effects on performance.<span style="font-weight: bold;
 <td><span style="font-weight: bold;">Synchronization disabled</span></td>
 </tr>
 <tr>
-<td><span style="font-weight: bold;" class="monospace">VGL_MT=0<br>
-VGL_MT=1<br>
+<td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
+<br>
 </span></td>
-<td><span style="font-weight: bold;" class="monospace">+mt</span><br>
+<td><span style="font-weight: bold;" class="monospace">-np &lt;# of CPUs&gt;</span><br>
 or<br>
-<span style="font-weight: bold;" class="monospace">-mt</span></td>
-<td><span style="font-weight: bold;">Enable/disable multi-threaded compression</span><br>If
-enabled, the server will divide the task of compressing the frame
+<span style="font-weight: bold;" class="monospace">-np 0</span><br>
+(automatically determine the optimal&nbsp; number of CPUs to use)<br></td>
+<td><span style="font-weight: bold;">Specify the number of CPUs to use for multi-threaded compression</span><br>VirtualGL
+has the ability to divide the task of compressing a frame
 among all of the available server processors, which might speed up the
 overall
 throughput if the compression stage of the pipeline is the primary
-bottleneck.&nbsp; Often, the VirtualGL pipeline is more limited by
-the
-performance of the client and other factors, so this setting may not
-have much of an effect on overall performance.&nbsp; If the server
-does not have multiple processors, this setting is ignored.</td>
-<td><span style="font-weight: bold;">Multi-threaded compression disabled</span></td>
+bottleneck. &nbsp;The default behavior (equivalent to setting
+VGL_NPROCS=0) is to use all but one of the available CPUs, up to a
+maximum of 3 total. &nbsp;On a large multiprocessor system, the speedup
+is almost linear up to 3 processors, but&nbsp;the algorithm scales very
+little past that point. &nbsp;VirtualGL will not allow more than 4
+processors total to be used for compression.</td>
+<td><span style="font-weight: bold;">1P system: 1</span><br style="font-weight: bold;">
+      <span style="font-weight: bold;">2P system: 1</span><br style="font-weight: bold;">
+      <span style="font-weight: bold;">3P system: 2</span><br style="font-weight: bold;">
+      <span style="font-weight: bold;">4P &amp; larger: 3</span><br>
+      <span style="font-weight: bold;"></span></td>
 </tr><tr>
 <td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
 VGL_GAMMA=1<br>
