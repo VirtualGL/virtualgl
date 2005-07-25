@@ -88,7 +88,7 @@ _RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
 
 SunOS)
 
-if [ -z $FAKERLIB ]; then
+if [ -z "$FAKERLIB" ]; then
 FAKERLIB=librrfaker.so
 if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
 then
