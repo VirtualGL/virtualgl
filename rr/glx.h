@@ -22,7 +22,7 @@
 ** Those portions of the Subject Software created by Silicon Graphics, Inc.
 ** are Copyright (c) 1991-9 Silicon Graphics, Inc. All Rights Reserved.
 **
-** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.4 2005-07-26 20:57:08 dcommander Exp $
+** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.5 2005-07-26 21:22:29 dcommander Exp $
 */
 
 #include <X11/Xlib.h>
@@ -334,7 +334,7 @@ typedef union __GLXEvent {
 } GLXEvent;
 
 #ifndef GLX_GLXEXT_LEGACY
-#include <GL/glxext.h>
+#include "glxext.h"
 #endif
 
 #ifdef __cplusplus
