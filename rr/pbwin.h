@@ -81,6 +81,9 @@ class pbwin
 		bool syncdpy;
 		char __autotestclr[80], __autotestrclr[80], __autotestframe[80];
 		int __autotestframecount;
+		#ifdef sun
+		void *sunrayhandle;
+		#endif
 };
 
 #endif

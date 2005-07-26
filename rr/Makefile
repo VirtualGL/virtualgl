@@ -71,6 +71,13 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o
 
+ifeq ($(platform), solaris)
+FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
+endif
+ifeq ($(platform), solx86)
+FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
+endif
+
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
