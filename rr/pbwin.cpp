@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef sun
+#include "rrsunray.h"
+#endif
 
 extern void _vglprintf (FILE *f, const char *format, ...);
 
@@ -218,6 +221,10 @@ pbwin::pbwin(Display *windpy, Window win)
 	syncdpy=false;
 	dirty=false;
 	__autotestframecount=0;
+	#ifdef sun
+	sunrayhandle=RRSunRayInit(windpy, win);
+	#endif
+
 }
 
 pbwin::~pbwin(void)
@@ -343,6 +350,31 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		rdirty=false;
 		compress=RRCOMP_MJPEG;
 	}
+
+	#ifdef sun
+	// If this is a SunRay session, then use the SunRay compressor to send data
+	if(sunrayhandle)
+	{
+		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
+		if(!(bitmap=RRSunRayGetFrame(sunrayhandle, pbw, pbh, &pitch, &format,
+			&bottomup))) _throw(RRSunRayGetError());
+		int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
+		#ifdef GL_BGR_EXT
+		if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
+		#endif
+		#ifdef GL_BGRA_EXT
+		if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
+		#endif
+		#ifdef GL_ABGR_EXT
+		if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
+		#endif
+		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
+			drawbuf, bottomup);
+		if(RRSunRaySendFrame(sunrayhandle, bitmap, pbw, pbh, pitch, format,
+			bottomup)==-1) _throw(RRSunRayGetError());
+		return;
+	}
+	#endif
 
 	switch(compress)
 	{
