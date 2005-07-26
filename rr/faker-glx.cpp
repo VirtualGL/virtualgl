@@ -98,11 +98,7 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, const int *att
 	return _glXChooseFBConfigSGIX(_localdpy, screen, attrib_list, nelements);
 }
 
-#ifdef sun
 void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned int mask)
-#else
-void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long mask)
-#endif
 {
 	#ifdef USEGLP
 	if(fconfig.glp) glPCopyContext(src, dst, mask);
