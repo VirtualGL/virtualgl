@@ -54,7 +54,7 @@ typedef int (*_RRSunRaySendFrameType)(void *, unsigned char *, int, int, int,
 	int, int);
 static _RRSunRaySendFrameType _RRSunRaySendFrame=NULL;
 
-typedef const char* (*_RRSunRayGetErrorType)(void);
+typedef const char* (*_RRSunRayGetErrorType)(void *);
 static _RRSunRayGetErrorType _RRSunRayGetError=NULL;
 
 // 1=success, 0=failure
@@ -101,14 +101,14 @@ int RRSunRaySendFrame(void *handle, unsigned char *bitmap, int width,
 		bottomup);
 }
 
-const char *RRSunRayGetError(void)
+const char *RRSunRayGetError(void *handle)
 {
 	if(!_RRSunRayGetError)
 	{
 		if(!loadsunraysymbols(true))
 			return "SunRay plugin not properly initialized";
 	}
-	return _RRSunRayGetError();
+	return _RRSunRayGetError(handle);
 }
 
 }

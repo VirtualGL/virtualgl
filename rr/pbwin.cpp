@@ -357,7 +357,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 		if(!(bitmap=RRSunRayGetFrame(sunrayhandle, pbw, pbh, &pitch, &format,
-			&bottomup))) _throw(RRSunRayGetError());
+			&bottomup))) _throw(RRSunRayGetError(sunrayhandle));
 		int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
 		#ifdef GL_BGR_EXT
 		if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
@@ -371,7 +371,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
 			drawbuf, bottomup);
 		if(RRSunRaySendFrame(sunrayhandle, bitmap, pbw, pbh, pitch, format,
-			bottomup)==-1) _throw(RRSunRayGetError());
+			bottomup)==-1) _throw(RRSunRayGetError(sunrayhandle));
 		return;
 	}
 	#endif

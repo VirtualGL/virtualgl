@@ -95,9 +95,13 @@ int
 */
 
 const char *
-	RRSunRayGetError(void);
+	RRSunRayGetError(void *handle);
 /*
    Return an error string describing why the last command failed
+
+   PARAMETERS:
+   handle (IN) = instance handle (returned from a previous call to
+                 RRSunRayInit())
 */
 
 #ifdef __cplusplus
