@@ -60,7 +60,7 @@ class rrdisplayclient : public Runnable
 		}
 		catch(...)
 		{
-			if(servername) free(servername);
+			if(servername) free(servername);  throw;
 		}
 		if(servername) free(servername);
 	}
