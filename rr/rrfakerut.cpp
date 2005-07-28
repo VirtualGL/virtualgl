@@ -725,7 +725,7 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 }
 
 
-#ifdef sun
+#ifdef SUNOGL
 #define glXGetFBConfigFromVisual glXGetFBConfigFromVisualSGIX
 #else
 GLXFBConfig glXGetFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
@@ -1442,7 +1442,7 @@ int main(int argc, char **argv)
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat2");
 
 	if(!XInitThreads()) _throw("XInitThreads() failed");
-	#ifdef sun
+	#ifdef SUNOGL
 	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
 	#endif
 	if(!querytest()) ret=-1;

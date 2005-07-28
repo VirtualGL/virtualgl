@@ -371,7 +371,7 @@ main(int argc, char *argv[])
       printf("XInitThreads() returned 0 (failure- this program may fail)\n");
    }
 
-   #ifdef sun
+   #ifdef SUNOGL
    if (!glXInitThreadsSUN()) {
       printf("glXInitThreadsSUN() returned 0 (failure- this program may fail)\n");
    }

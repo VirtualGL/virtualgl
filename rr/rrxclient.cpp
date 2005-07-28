@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 void start(int argc, char **argv)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
-	#ifdef sun
+	#ifdef SUNOGL
 	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
 	#endif
 

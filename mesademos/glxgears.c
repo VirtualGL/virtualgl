@@ -338,7 +338,7 @@ make_window( Display *dpy, const char *name,
    root = RootWindow( dpy, scrnum );
 
    if(gamma != -1) {
-      #ifdef sun
+      #ifdef SUNOGL
       attrib[10] = GLX_GAMMA_VALUE_SUN;
       attrib[11] = gamma;
       #endif
@@ -350,7 +350,7 @@ make_window( Display *dpy, const char *name,
       exit(1);
    }
    printf("Visual ID: 0x%.2x\n", (unsigned int)visinfo->visualid);
-   #ifdef sun
+   #ifdef SUNOGL
    gamma = -1;
    glXGetConfig(dpy, visinfo, GLX_GAMMA_VALUE_SUN, &gamma);
    printf("Gamma: %d\n", gamma);
