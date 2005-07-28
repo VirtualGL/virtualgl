@@ -98,7 +98,7 @@ void usage(char *progname)
 
 int main(int argc, char *argv[])
 {
-	int i;
+	int i;  bool printversion=false;
 
 	try {
 
@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 			{usage(argv[0]);  exit(1);}
 		if(!stricmp(argv[i], "-s")) ssl=true;
 		if(!stricmp(argv[i], "-q")) quiet=true;
+		if(!stricmp(argv[i], "-v")) printversion=true;
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
 			{port=(unsigned short)atoi(&argv[i][2]);}
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='L' && strlen(argv[i])>2)
@@ -126,9 +127,12 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-install")) {install_service();  exit(0);}
 		if(!stricmp(argv[i], "-remove")) {remove_service();  exit(0);}
 	}
+	#endif
 
 	rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
+	if(printversion) return 0;
 
+	#ifdef _WIN32
 	if(service)
 	{
 		servicetable[0].lpServiceName=SERVICENAME;
@@ -159,6 +163,10 @@ int main(int argc, char *argv[])
 void start(int argc, char **argv)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
+	#ifdef sun
+	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
+	#endif
+
 	signal(SIGINT, handler);
 	XSetErrorHandler(xhandler);
 
