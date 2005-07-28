@@ -16,7 +16,7 @@
 
 #define _hashclass _vishash
 #define _hashkeytype1 char*
-#define _hashkeytype2 XVisualInfo*
+#define _hashkeytype2 VisualID
 #define _hashvaluetype GLXFBConfig
 #define _hashclassstruct _vishashstruct
 #define __hashclassstruct __vishashstruct
@@ -43,27 +43,27 @@ class vishash : public _vishash
 		{
 			if(!dpy || !vis || !_localc) _throw("Invalid argument");
 			char *dpystring=strdup(DisplayString(dpy));
-			if(!_vishash::add(dpystring, vis, _localc))
+			if(!_vishash::add(dpystring, vis->visualid, _localc))
 				free(dpystring);
 		}
 
 		GLXFBConfig getpbconfig(Display *dpy, XVisualInfo *vis)
 		{
 			if(!dpy || !vis) _throw("Invalid argument");
-			return vishash::find(DisplayString(dpy), vis);
+			return vishash::find(DisplayString(dpy), vis->visualid);
 		}
 
 		void remove(Display *dpy, XVisualInfo *vis)
 		{
 			if(!dpy || !vis) _throw("Invalid argument");
-			_vishash::remove(DisplayString(dpy), vis);
+			_vishash::remove(DisplayString(dpy), vis->visualid);
 		}
 
 	private:
 
-		GLXFBConfig attach(char *key1, XVisualInfo *key2) {return NULL;}
+		GLXFBConfig attach(char *key1, VisualID key2) {return NULL;}
 
-		bool compare(char *key1, XVisualInfo *key2, _vishashstruct *h)
+		bool compare(char *key1, VisualID key2, _vishashstruct *h)
 		{
 			return(key2==h->key2 && !strcasecmp(key1, h->key1));
 		}
