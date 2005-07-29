@@ -86,8 +86,7 @@ margin-right: 3px;
 text-align: right;
 }
   </style>
-  <title>Building VirtualGL</title>
-</head>
+  <title>Building VirtualGL</title></head>
 <body><h1>How to build VirtualGL in 9043 easy steps</h1>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Linux</span></h2>
@@ -169,7 +168,13 @@ following:</p>
 32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Solaris</span></h2>
+<h3><span style="font-weight: 400;">Solaris 8 or newer (Sparc) or Solaris/OpenSolaris 10 or newer (x86)</span></h3>
+
+
+
+  
 <h3><span style="font-weight: 400;">OpenSSL headers and link libraries</span></h3>
+
 <ul>
   <li>
   <h4><span style="font-weight: 400;">If present, VirtualGL will use the 
@@ -191,24 +196,54 @@ following:</p>
   OpenSSL or Blastwave OpenSSL installed.</span></h4>
 </li>
   <li>
-  If you so choose, you can also create a custom build of OpenSSL using the source code obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.  Untar the source, then move the <span class="monospace">openssl</span> build directory to <span class="monospace">openssl.solaris</span> (for a 32-bit build), <span class="monospace">openssl.solaris64</span> (for a 64-bit build), or <span class="monospace">openssl.solx86</span> (for an x86 build.)  VirtualGL will look for this directory one level up from its own build directory, for example:
+  If you so choose, you can also create a custom build of OpenSSL using the source code obtained from <a href="http://www.openssl.org/">http://www.openssl.org/</a>.  Untar the source, then move the <span class="monospace">openssl</span> build directory to <span class="monospace">openssl.solaris</span> (for a 32-bit Sparc build), <span class="monospace">openssl.solaris64</span> (for a 64-bit Sparc build),&nbsp;<span class="monospace">openssl.solx86</span> (for an x86 build), or&nbsp;<span class="monospace">openssl.solx8664</span> (for an x86-64 build.)  VirtualGL will look for this directory one level up from its own build directory, for example:
 
-<pre>ls -l ~/src<br>drwx------ 12 drc staff Jan 20 12:17 .<br>drwx------ 59 drc staff Jan 20 13:43 ..<br>drwx------ 21 drc staff Dec 20 12:17 openssl.solaris<br>drwx------ 21 drc staff Dec 13 13:40 openssl.solaris64<br>drwx------ 21 drc staff Feb 12 11:03 openssl.solx86<br>drwx------ 14 drc staff Jan 20 12:17 vgl<br></pre>
+<pre>ls -l ~/src<br>drwx------ 12 drc staff Jan 20 12:17 .<br>drwx------ 59 drc staff Jan 20 13:43 ..<br>drwx------ 21 drc staff Dec 20 12:17 openssl.solaris<br>drwx------ 21 drc staff Dec 13 13:40 openssl.solaris64<br>drwx------ 21 drc staff Feb 12 11:03 openssl.solx86<br>drwx------ 21 drc staff Feb 12 11:08 openssl.solx8664<br>drwx------ 14 drc staff Jan 20 12:17 vgl<br></pre>
 <span style="font-weight: 400;">CD to the appropriate directory and build OpenSSL using the instructions provided in the OpenSSL source distribution.<br>
     <br>
-</span><span class="note">Note:</span><span style="font-weight: 400;">&nbsp; To build a 64-bit version of OpenSSL, you will need to configure it using:<br>
-<pre>./Configure solaris64-sparcv9-cc</pre>rather than just running <span class="monospace">config</span>.&nbsp; To configure OpenSSL for use with GCC, you will need to run<pre>./Configure solaris64-sparcv9-gcc shared</pre>
-or<br>
-<pre>./Configure solaris-sparcv9-gcc shared<br></pre>or<pre>./Configure solaris-x86-gcc shared</pre>as
-appropriate. The "shared" flag is necessary in order to build OpenSSL
+</span><span class="note">Note:</span><span style="font-weight: 400;">&nbsp; To configure the OpenSSL build for a specific processor type and compiler, refer to the following table:<br>
+    <br>
+    </span>
+    <table style="text-align: left;" border="0" cellpadding="3" cellspacing="3">
+      <tbody>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader"></td>
+          <td style="font-weight: bold;" class="colorheader">Sun Studio/Workshop Pro</td>
+          <td style="font-weight: bold;" class="colorheader">GCC</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">Sparc (32-bit)</td>
+          <td class="monospace">./config</td>
+          <td class="monospace"><span style="font-weight: 400;"></span>./Configure solaris-sparcv9-gcc shared</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">Sparc (64-bit)</td>
+          <td class="monospace">./Configure solaris64-sparcv9-cc</td>
+          <td class="monospace">./Configure solaris64-sparcv9-gcc shared</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">x86</td>
+          <td class="monospace">./Configure solaris-x86-cc</td>
+          <td class="monospace">./Configure solaris-x86-gcc shared</td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;" class="colorheader">x86-64</td>
+          <td class="monospace">./config</td>
+          <td class="monospace">./Configure solaris64-x86_64-gcc shared</td>
+        </tr>
+      </tbody>
+    </table>
+    <span style="font-weight: 400;"><br>
+    </span><span style="font-weight: 400;">Using the "shared" flag with GCC is necessary in order to build OpenSSL
 with position-independent code, but it has the side effect of
 generating both a static and dynamic library.&nbsp; If you would prefer
 to link OpenSSL statically, just delete <span class="monospace">libssl.so</span> and <span class="monospace">libcrypto.so</span> from your OpenSSL build directory prior to building VirtualGL.</span>
   </li>
+
 </ul>
-<h3><span style="font-weight: 400;">Sun Workshop Pro Compiler</span></h3>
+<h3><span style="font-weight: 400;">Sun Studio/Workshop Pro Compiler</span></h3>
 <ul>
-  <li>Tested with v5.5</li>
+  <li>Tested with v5.5 (Sparc) and Sun Studio 10/v5.7 (x86)</li>
   <li>See <a href="http://www.sun.com/software/products/studio/">
   http://www.sun.com/software/products/studio/</a></li>
 </ul>
@@ -360,7 +395,7 @@ directory}</span></h3>
 <span style="font-weight: 400;">Link
 against the IPP shared libraries rather than the static (merged)
 libraries. Using this option has the following ramifications:</span><br>
-<span style="font-weight: 400;"></span></div>
+<span style="font-weight: 400;"></span>
 <ul>
   <li><span style="font-weight: 400;">The IPP run-time RPM must be installed on the build machine</span></li>
   <li>The IPP run-time RPM must be installed on any machine that will run VirtualGL</li>
