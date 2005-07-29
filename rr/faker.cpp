@@ -651,7 +651,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(drawable==0 || (newpbw=winh.findpb(dpy, drawable))==NULL
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
+			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -742,7 +742,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		if(draw==0 || (newpbw=winh.findpb(dpy, draw))==NULL
 			|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->dirty) pbw->readback(GL_FRONT, true);
+			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
 		}
 	}
 
@@ -932,7 +932,7 @@ static void _doGLreadback(bool force, bool sync=false)
 	if(!drawable) return;
 	if((pbw=winh.findpb(drawable))!=NULL)
 	{
-		if(_drawingtofront() || pbw->dirty)
+		if(_drawingtofront() || pbw->_dirty)
 		{
 			pbw->readback(GL_FRONT, force, sync);
 		}
@@ -983,8 +983,8 @@ void glDrawBuffer(GLenum mode)
 		_glDrawBuffer(mode);
 		after=_drawingtofront();
 		rafter=_drawingtoright();
-		if(before && !after) pbw->dirty=true;
-		if(rbefore && !rafter && pbw->stereo()) pbw->rdirty=true;
+		if(before && !after) pbw->_dirty=true;
+		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
 	}
 	else _glDrawBuffer(mode);
 	CATCH();
@@ -1003,8 +1003,8 @@ void glPopAttrib(void)
 		_glPopAttrib();
 		after=_drawingtofront();
 		rafter=_drawingtoright();
-		if(before && !after) pbw->dirty=true;
-		if(rbefore && !rafter && pbw->stereo()) pbw->rdirty=true;
+		if(before && !after) pbw->_dirty=true;
+		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
 	}
 	else _glPopAttrib();
 	CATCH();

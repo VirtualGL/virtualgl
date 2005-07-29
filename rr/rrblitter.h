@@ -23,20 +23,20 @@ class rrblitter : public Runnable
 {
 	public:
 
-	rrblitter(void) : bmpi(0), t(NULL), deadyet(false)
+	rrblitter(void) : _bmpi(0), _t(NULL), _deadyet(false)
 	{
-		for(int i=0; i<NB; i++) bmp[i]=NULL;
-		errifnot(t=new Thread(this));
-		t->start();
-		prof_blit.setname("Blit");
+		for(int i=0; i<NB; i++) _bmp[i]=NULL;
+		errifnot(_t=new Thread(this));
+		_t->start();
+		_prof_blit.setname("Blit");
 		_lastb=NULL;
 	}
 
 	virtual ~rrblitter(void)
 	{
-		deadyet=true;  q.release();
-		if(t) {t->stop();  delete t;  t=NULL;}
-		for(int i=0; i<NB; i++) {if(bmp[i]) delete bmp[i];  bmp[i]=NULL;}
+		_deadyet=true;  _q.release();
+		if(_t) {_t->stop();  delete _t;  _t=NULL;}
+		for(int i=0; i<NB; i++) {if(_bmp[i]) delete _bmp[i];  _bmp[i]=NULL;}
 	}
 
 	bool frameready(void);
@@ -47,12 +47,12 @@ class rrblitter : public Runnable
 	private:
 
 	static const int NB=2;
-	rrcs bmpmutex;  rrfb *bmp[NB];  int bmpi;
-	rrmutex ready;
-	genericQ q;
+	rrcs _bmpmutex;  rrfb *_bmp[NB];  int _bmpi;
+	rrmutex _ready;
+	genericQ _q;
 	void blitdiff(rrfb *, rrfb *);
-	Thread *t;  bool deadyet;
-	rrprofiler prof_blit;
+	Thread *_t;  bool _deadyet;
+	rrprofiler _prof_blit;
 	rrfb *_lastb;
 };
 

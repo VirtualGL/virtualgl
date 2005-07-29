@@ -22,34 +22,34 @@ void rrblitter::run(void)
 
 	try {
  
-	while(!deadyet)
+	while(!_deadyet)
 	{
 		rrfb *b=NULL;
-		q.get((void **)&b);  if(deadyet) return;
+		_q.get((void **)&b);  if(_deadyet) return;
 		if(!b) _throw("Queue has been shut down");
-		ready.unlock();
-		prof_blit.startframe();
+		_ready.unlock();
+		_prof_blit.startframe();
 		b->redraw();
-		prof_blit.endframe(b->h.width*b->h.height, 0, 1);
+		_prof_blit.endframe(b->h.width*b->h.height, 0, 1);
 //		lastb=b;
 	}
 
 	} catch(rrerror &e)
 	{
-		if(t) t->seterror(e);
-		ready.unlock();  throw;
+		if(_t) _t->seterror(e);
+		_ready.unlock();  throw;
 	}
 }
 
 rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 {
 	rrfb *b=NULL;
-	ready.lock();
-	if(t) t->checkerror();
-	bmpmutex.lock();
-	if(!bmp[bmpi]) errifnot(bmp[bmpi]=new rrfb(dpy, win));
-	b=bmp[bmpi];  bmpi=(bmpi+1)%NB;
-	bmpmutex.unlock();
+	_ready.lock();
+	if(_t) _t->checkerror();
+	_bmpmutex.lock();
+	if(!_bmp[_bmpi]) errifnot(_bmp[_bmpi]=new rrfb(dpy, win));
+	b=_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;
+	_bmpmutex.unlock();
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
 	hdr.height=hdr.frameh=h;
@@ -61,22 +61,22 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 
 bool rrblitter::frameready(void)
 {
-	if(t) t->checkerror();
-	return(q.items()<=0);
+	if(_t) _t->checkerror();
+	return(_q.items()<=0);
 }
 
 void rrblitter::sendframe(rrfb *b, bool sync)
 {
-	if(t) t->checkerror();
+	if(_t) _t->checkerror();
 	if(sync) 
 	{
-		prof_blit.startframe();
+		_prof_blit.startframe();
 		blitdiff(b, _lastb);
-		prof_blit.endframe(b->h.width*b->h.height, 0, 1);
+		_prof_blit.endframe(b->h.width*b->h.height, 0, 1);
 		_lastb=b;
-		ready.unlock();
+		_ready.unlock();
 	}
-	else q.add((void *)b);
+	else _q.add((void *)b);
 }
 
 void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
