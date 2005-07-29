@@ -72,7 +72,7 @@ ifeq ($(platform), solaris)
 lib64dir=lib/sparcv9
 endif
 ifeq ($(platform), solx86)
-lib64dir=lib/sparcv9
+lib64dir=lib/64
 endif
 
 PACKAGENAME = $(APPNAME)
@@ -191,6 +191,10 @@ endif
 
 PKGDIR = SUNWvgl
 PKGNAME = $(PKGDIR)
+PKGARCH = sparc
+ifeq ($(platform), solx86)
+PKGARCH = i386
+endif
 
 .PHONY: sunpkg
 sunpkg: rr diags
@@ -200,15 +204,16 @@ sunpkg: rr diags
 	mkdir -p $(BLDDIR)/pkgbuild/$(PKGDIR)
 	mkdir -p $(BLDDIR)/$(PKGNAME)
 	cp copyright $(BLDDIR)
-	cp depend $(BLDDIR)
-	cp rr$(subplatform).proto $(BLDDIR)
+	cp depend.$(platform) $(BLDDIR)/depend
+	cp rr.proto.$(platform)$(subplatform) $(BLDDIR)/rr.proto
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
-		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo
+		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo \
+		| sed s/{__PKGARCH}/$(PKGARCH)/g
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
 	cd $(BLDDIR); \
-	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr$(subplatform).proto; \
-	rm rr$(subplatform).proto copyright depend pkginfo; \
+	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
+	rm rr.proto copyright depend pkginfo; \
 	pkgtrans -s `pwd` `pwd`/$(PKGNAME).pkg $(PKGNAME)
 	bzip2 $(BLDDIR)/$(PKGNAME).pkg
 	rm -rf $(BLDDIR)/pkgbuild

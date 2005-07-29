@@ -21,6 +21,7 @@ endif
 ifeq ($(OS), SunOS)
  ifeq ($(ARCH), i86pc)
   platform := solx86
+  subplatform := 64
  else
   platform := solaris
   subplatform := 64

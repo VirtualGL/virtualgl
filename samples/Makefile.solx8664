@@ -1,0 +1,17 @@
+all: rrglxgears
+
+clean:
+	rm -f rrglxgears rrglxgears.o
+
+CFLAGS = -O -xtarget=opteron -xarch=amd64
+
+CINCLUDES =	-I../../../include -I/opt/SUNWvgl/include
+
+LDFLAGS = -L../../../lib/64 -R../../../lib/64 \
+	-L/opt/SUNWvgl/lib/64 -R/opt/SUNWvgl/lib/64
+
+rrglxgears.o: rrglxgears.c
+	$(CC) $(CFLAGS) $(CINCLUDES) -c -o $@ $^
+
+rrglxgears: rrglxgears.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -lGL -lX11 -lXext -lm -lrr

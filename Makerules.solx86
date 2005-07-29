@@ -1,6 +1,5 @@
 ########################################
-# Solaris x86 32-bit
-# 64-bit not yet supported...
+# Solaris x86 32-bit and 64-bit
 ########################################
 
 ARCHFLAG =
@@ -11,6 +10,9 @@ CXX = g++
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE
 
+ifeq ($(subplatform), 64)
+ARCHFLAG = -m64
+endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -ggdb
 else
@@ -26,10 +28,13 @@ CXX = CC
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
 
+ifeq ($(subplatform), 64)
+ARCHFLAG = -xtarget=opteron -xarch=amd64
+endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -g
 else
-OPTFLAG = -fast
+OPTFLAG = -O
 endif
 SHFLAG = -G -lCrun
 DEPFLAG = -xM1
@@ -46,7 +51,11 @@ CDEFINES := $(CDEFINES) -DUSEGLP
 endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+ifeq ($(subplatform), 64)
+LDFLAGS := -L/usr/X/lib/64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 $(LDFLAGS) -R/opt/SUNWvgl/lib/64
+else
 LDFLAGS := -L/usr/X/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+endif
 
 DEFAULTJPEGLIB = medialib
 
