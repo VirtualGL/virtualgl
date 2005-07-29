@@ -148,7 +148,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
-	cleared=false;  isstereo=false;
+	_cleared=false;  _stereo=false;
 	#if 0
 	const char *glxext=NULL;
 	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
@@ -170,30 +170,30 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	#ifdef sun
 	tempctx tc(0, 0, 0);
 	#endif
-	if(fconfig.usewindow) d=create_window(_localdpy, config, w, h);
-	else d=glXCreatePbuffer(_localdpy, config, pbattribs);
+	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
+	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
 	int stereo=-1;
 	glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo);
-	if(stereo==1) isstereo=true;
-	if(!d) _throw("Could not create Pbuffer");
+	if(stereo==1) _stereo=true;
+	if(!_drawable) _throw("Could not create Pbuffer");
 }
 
 pbuffer::~pbuffer(void)
 {
-	if(d)
+	if(_drawable)
 	{
 		#ifdef sun
 		tempctx tc(0, 0, 0);
 		#endif
-		if(fconfig.usewindow) XDestroyWindow(_localdpy, d);
-		else glXDestroyPbuffer(_localdpy, d);
+		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
+		else glXDestroyPbuffer(_localdpy, _drawable);
 	}
 }
 
 void pbuffer::clear(void)
 {
-	if(cleared) return;
-	cleared=true;
+	if(_cleared) return;
+	_cleared=true;
 	GLfloat params[4];
 	glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
 	glClearColor(0, 0, 0, 0);
@@ -203,7 +203,7 @@ void pbuffer::clear(void)
 
 void pbuffer::swap(void)
 {
-	if(!fconfig.glp) _glXSwapBuffers(_localdpy, d);
+	if(!fconfig.glp) _glXSwapBuffers(_localdpy, _drawable);
 }
 
 
@@ -213,27 +213,27 @@ void pbuffer::swap(void)
 pbwin::pbwin(Display *windpy, Window win)
 {
 	if(!windpy || !win) _throw("Invalid argument");
-	this->windpy=windpy;  this->win=win;
-	force=false;
-	oldpb=pb=NULL;  neww=newh=-1;
-	blitter=NULL;
-	prof_rb.setname("Readback");
-	syncdpy=false;
-	dirty=false;
-	__autotestframecount=0;
+	_windpy=windpy;  _win=win;
+	_force=false;
+	_oldpb=_pb=NULL;  _neww=_newh=-1;
+	_blitter=NULL;
+	_prof_rb.setname("Readback");
+	_syncdpy=false;
+	_dirty=false;
+	_autotestframecount=0;
 	#ifdef sun
-	sunrayhandle=RRSunRayInit(windpy, win);
+	_sunrayhandle=RRSunRayInit(windpy, win);
 	#endif
 
 }
 
 pbwin::~pbwin(void)
 {
-	mutex.lock(false);
-	if(pb) {delete pb;  pb=NULL;}
-	if(oldpb) {delete oldpb;  oldpb=NULL;}
-	if(blitter) {delete blitter;  blitter=NULL;}
-	mutex.unlock(false);
+	_mutex.lock(false);
+	if(_pb) {delete _pb;  _pb=NULL;}
+	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
+	if(_blitter) {delete _blitter;  _blitter=NULL;}
+	_mutex.unlock(false);
 }
 
 int pbwin::init(int w, int h, GLXFBConfig config)
@@ -247,12 +247,12 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 		w=min(w, dw);  h=min(h, dh);
 	}
 
-	rrcs::safelock l(mutex);
-	if(pb && pb->width()==w && pb->height()==h) return 0;
-	if((pb=new pbuffer(w, h, config))==NULL)
+	rrcs::safelock l(_mutex);
+	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
+	if((_pb=new pbuffer(w, h, config))==NULL)
 			_throw("Could not create Pbuffer");
-	this->config=config;
-	force=true;
+	_config=config;
+	_force=true;
 	return 1;
 }
 
@@ -261,30 +261,30 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 
 void pbwin::resize(int w, int h)
 {
-	rrcs::safelock l(mutex);
-	if(w==0 && pb) w=pb->width();
-	if(h==0 && pb) h=pb->height();
-	if(pb && pb->width()==w && pb->height()==h) return;
-	neww=w;  newh=h;
+	rrcs::safelock l(_mutex);
+	if(w==0 && _pb) w=_pb->width();
+	if(h==0 && _pb) h=_pb->height();
+	if(_pb && _pb->width()==w && _pb->height()==h) return;
+	_neww=w;  _newh=h;
 }
 
 void pbwin::clear(void)
 {
-	rrcs::safelock l(mutex);
-	if(pb) pb->clear();
+	rrcs::safelock l(_mutex);
+	if(_pb) _pb->clear();
 }
 
 void pbwin::cleanup(void)
 {
-	rrcs::safelock l(mutex);
-	if(oldpb) {delete oldpb;  oldpb=NULL;}
+	rrcs::safelock l(_mutex);
+	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 }
 
 void pbwin::initfromwindow(GLXFBConfig config)
 {
-	XSync(windpy, False);
+	XSync(_windpy, False);
 	XWindowAttributes xwa;
-	XGetWindowAttributes(windpy, win, &xwa);
+	XGetWindowAttributes(_windpy, _win, &xwa);
 	init(xwa.width, xwa.height, config);
 }
 
@@ -293,8 +293,8 @@ void pbwin::initfromwindow(GLXFBConfig config)
 GLXDrawable pbwin::getdrawable(void)
 {
 	GLXDrawable retval=0;
-	rrcs::safelock l(mutex);
-	retval=pb->drawable();
+	rrcs::safelock l(_mutex);
+	retval=_pb->drawable();
 	return retval;
 }
 
@@ -303,31 +303,31 @@ GLXDrawable pbwin::getdrawable(void)
 GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
-	rrcs::safelock l(mutex);
-	if(neww>0 && newh>0)
+	rrcs::safelock l(_mutex);
+	if(_neww>0 && _newh>0)
 	{
-		pbuffer *_oldpb=pb;
-		if(init(neww, newh, config)) oldpb=_oldpb;
-		neww=newh=-1;
+		pbuffer *oldpb=_pb;
+		if(init(_neww, _newh, _config)) _oldpb=oldpb;
+		_neww=_newh=-1;
 	}
-	retval=pb->drawable();
+	retval=_pb->drawable();
 	return retval;
 }
 
 Display *pbwin::getwindpy(void)
 {
-	return windpy;
+	return _windpy;
 }
 
 Window pbwin::getwin(void)
 {
-	return win;
+	return _win;
 }
 
 void pbwin::swapbuffers(void)
 {
-	rrcs::safelock l(mutex);
-	if(pb) pb->swap();
+	rrcs::safelock l(_mutex);
+	if(_pb) _pb->swap();
 }
 
 void pbwin::readback(GLint drawbuf, bool force, bool sync)
@@ -336,28 +336,28 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	fconfig.reloadenv();
 	int compress=fconfig.compress;  bool dostereo=false;
 
-	rrcs::safelock l(mutex);
+	rrcs::safelock l(_mutex);
 
-	dirty=false;
-	if(this->force) {force=true;  this->force=false;}
+	_dirty=false;
+	if(_force) {force=true;  _force=false;}
 	if(sync) {compress=RRCOMP_NONE;  force=true;}
-	int pbw=pb->width(), pbh=pb->height();
+	int pbw=_pb->width(), pbh=_pb->height();
 	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
 	if(stereo())
 	{
-		if(_drawingtoright() || rdirty) dostereo=true;
-		rdirty=false;
+		if(_drawingtoright() || _rdirty) dostereo=true;
+		_rdirty=false;
 		compress=RRCOMP_MJPEG;
 	}
 
 	#ifdef sun
 	// If this is a SunRay session, then use the SunRay compressor to send data
-	if(sunrayhandle)
+	if(_sunrayhandle)
 	{
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
-		if(!(bitmap=RRSunRayGetFrame(sunrayhandle, pbw, pbh, &pitch, &format,
-			&bottomup))) _throw(RRSunRayGetError(sunrayhandle));
+		if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
+			&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
 		int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
 		#ifdef GL_BGR_EXT
 		if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
@@ -370,8 +370,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		#endif
 		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
 			drawbuf, bottomup);
-		if(RRSunRaySendFrame(sunrayhandle, bitmap, pbw, pbh, pitch, format,
-			bottomup)==-1) _throw(RRSunRayGetError(sunrayhandle));
+		if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
+			bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
 		return;
 	}
 	#endif
@@ -380,7 +380,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		case RRCOMP_MJPEG:
 		{
-			errifnot(rrdpy=dpyh.findrrdpy(windpy));
+			errifnot(rrdpy=dpyh.findrrdpy(_windpy));
 			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
 				return;
 			if(!rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
@@ -398,7 +398,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 				b->flags=0;
 			}
-			b->h.winid=win;
+			b->h.winid=_win;
 			b->h.framew=b->h.width;
 			b->h.frameh=b->h.height;
 			b->h.x=0;
@@ -408,7 +408,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->h.flags=dostereo? RR_LEFT:0;
 			b->flags|=RRBMP_BOTTOMUP;
 			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
-			if(!syncdpy) {XSync(windpy, False);  syncdpy=true;}
+			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 			rrdpy->sendframe(b);
 
 			if(dostereo)
@@ -428,7 +428,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
 					b->flags=0;
 				}
-				b->h.winid=win;
+				b->h.winid=_win;
 				b->h.framew=b->h.width;
 				b->h.frameh=b->h.height;
 				b->h.x=0;
@@ -447,9 +447,9 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		case RRCOMP_NONE:
 		{
 			rrfb *b;
-			if(!blitter) errifnot(blitter=new rrblitter());
-			if(fconfig.spoil && !blitter->frameready() && !force) return;
-			errifnot(b=blitter->getbitmap(windpy, win, pbw, pbh));
+			if(!_blitter) errifnot(_blitter=new rrblitter());
+			if(fconfig.spoil && !_blitter->frameready() && !force) return;
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 			b->flags|=RRBMP_BOTTOMUP;
 			int format= (b->pixelsize==3?GL_RGB:GL_RGBA);
 			unsigned char *bits=b->bits;
@@ -469,7 +469,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				#endif
 			}
 			readpixels(0, 0, min(pbw, b->h.framew), b->pitch, min(pbh, b->h.frameh), format, b->pixelsize, bits, drawbuf, true);
-			blitter->sendframe(b, sync);
+			_blitter->sendframe(b, sync);
 			break;
 		}
 	}
@@ -494,7 +494,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	prof_rb.startframe();
+	_prof_rb.startframe();
 	if(!bottomup)
 	{
 		for(int i=0; i<h; i++)
@@ -504,7 +504,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
-	prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
+	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 
 	// If automatic faker testing is enabled, store the FB color in an
@@ -514,7 +514,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		unsigned char *rowptr, *pixel;  int match=1;
 		int color=-1, i, j, k;
 		color=-1;
-		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT) __autotestframecount++;
+		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT) _autotestframecount++;
 		for(j=0, rowptr=bits; j<h; j++, rowptr+=pitch)
 			for(i=1, pixel=&rowptr[ps]; i<w; i++, pixel+=ps)
 				for(k=0; k<ps; k++)
@@ -529,16 +529,16 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
 		{
-			snprintf(__autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d", (unsigned int)win, color);
-			putenv(__autotestrclr);
+			snprintf(_autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d", (unsigned int)_win, color);
+			putenv(_autotestrclr);
 		}
 		else
 		{
-			snprintf(__autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)win, color);
-			putenv(__autotestclr);
+			snprintf(_autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)_win, color);
+			putenv(_autotestclr);
 		}
-		snprintf(__autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)win, __autotestframecount);
-		putenv(__autotestframe);
+		snprintf(_autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)_win, _autotestframecount);
+		putenv(_autotestframe);
 	}
 
 	glPopClientAttrib();
@@ -548,5 +548,5 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 bool pbwin::stereo(void)
 {
-	return (pb && pb->stereo());
+	return (_pb && _pb->stereo());
 }

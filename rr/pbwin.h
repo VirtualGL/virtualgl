@@ -30,17 +30,17 @@ class pbuffer
 	public:
 
 		pbuffer(int, int, GLXFBConfig);
-		GLXDrawable drawable(void) {return d;}
+		GLXDrawable drawable(void) {return _drawable;}
 		~pbuffer(void);
 		int width(void) {return _w;}
 		int height(void) {return _h;}
 		void clear(void);
 		void swap(void);
-		bool stereo(void) {return isstereo;}
+		bool stereo(void) {return _stereo;}
 	private:
 
-		bool cleared, isstereo;
-		GLXPbuffer d;
+		bool _cleared, _stereo;
+		GLXPbuffer _drawable;
 		int _w, _h;
 };
 
@@ -48,21 +48,21 @@ class pbwin
 {
 	public:
 
-		pbwin(Display *dpy, Window win);
+		pbwin(Display *, Window);
 		~pbwin(void);
 		void clear(void);
 		void cleanup(void);
 		GLXDrawable getdrawable(void);
 		GLXDrawable updatedrawable(void);
 		void resize(int, int);
-		void initfromwindow(GLXFBConfig config);
+		void initfromwindow(GLXFBConfig);
 		Display *getwindpy(void);
 		Window getwin(void);
 		void readback(GLint, bool, bool sync=false);
 		void swapbuffers(void);
-		void forcenextframe(void) {force=true;}
+		void forcenextframe(void) {_force=true;}
 		bool stereo(void);
-		bool dirty, rdirty;
+		bool _dirty, _rdirty;
 
 	private:
 
@@ -71,18 +71,18 @@ class pbwin
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo=false);
 
-		bool force;
-		rrcs mutex;
-		Display *windpy;  Window win;
-		pbuffer *oldpb, *pb;  GLXFBConfig config;
-		int neww, newh;
-		rrblitter *blitter;
-		rrprofiler prof_rb;
-		bool syncdpy;
-		char __autotestclr[80], __autotestrclr[80], __autotestframe[80];
-		int __autotestframecount;
+		bool _force;
+		rrcs _mutex;
+		Display *_windpy;  Window _win;
+		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
+		int _neww, _newh;
+		rrblitter *_blitter;
+		rrprofiler _prof_rb;
+		bool _syncdpy;
+		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
+		int _autotestframecount;
 		#ifdef sun
-		void *sunrayhandle;
+		void *_sunrayhandle;
 		#endif
 };
 
