@@ -94,6 +94,10 @@ if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
 then
 	FAKERLIB=/opt/SUNWvgl/lib/sparcv9/librrfaker.so
 fi
+if [ -f /opt/SUNWvgl/lib/64/librrfaker.so ]
+then
+	FAKERLIB=/opt/SUNWvgl/lib/64/librrfaker.so
+fi
 fi
 if [ -z "$FAKERLIB32" ]; then
 FAKERLIB32=librrfaker.so

@@ -94,6 +94,10 @@ if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
 then
 	FAKERLIB=/opt/SUNWvgl/lib/sparcv9/librrfaker.so
 fi
+if [ -f /opt/SUNWvgl/lib/64/librrfaker.so ]
+then
+	FAKERLIB=/opt/SUNWvgl/lib/64/librrfaker.so
+fi
 fi
 LD_PRELOAD_64=$FAKERLIB
 export LD_PRELOAD_64
