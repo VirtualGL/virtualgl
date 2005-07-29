@@ -96,7 +96,7 @@ unsigned char *RRSunRayGetFrame(void *handle, int width, int height,
 int RRSunRaySendFrame(void *handle, unsigned char *bitmap, int width,
 	int height, int pitch, int format, int bottomup)
 {
-	if(!_RRSunRaySendFrame) {if(!loadsunraysymbols(true)) return NULL;}
+	if(!_RRSunRaySendFrame) {if(!loadsunraysymbols(true)) return -1;}
 	return _RRSunRaySendFrame(handle, bitmap, width, height, pitch, format,
 		bottomup);
 }
