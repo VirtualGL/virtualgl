@@ -15,99 +15,99 @@
 #include "rrerror.h"
 #include "rrprofiler.h"
 
-rrcwin::rrcwin(int dpynum, Window window, int _drawmethod, bool _stereo) :
-	drawmethod(_drawmethod), b(NULL), jpgi(0),
+rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
+	_drawmethod(drawmethod), _b(NULL), _jpgi(0),
 	#ifdef USEGL
-	glf(NULL),
+	_glf(NULL),
 	#endif
-	deadyet(false), t(NULL), stereo(_stereo)
+	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	sprintf(dpystr, "localhost:%d.0", dpynum);
-	this->dpynum=dpynum;  this->window=window;
-	b=new rrfb(dpystr, window);
-	if(!b) _throw("Could not allocate class instance");
+	_dpynum=dpynum;  _window=window;
+	_b=new rrfb(dpystr, window);
+	if(!_b) _throw("Could not allocate class instance");
 	#ifdef USEGL
-	if(stereo) drawmethod=RR_DRAWOGL;
+	if(_stereo) _drawmethod=RR_DRAWOGL;
 	initgl();
 	#else
-	stereo=false;
+	_stereo=false;
 	#endif
-	errifnot(t=new Thread(this));
-	t->start();
+	errifnot(_t=new Thread(this));
+	_t->start();
 }
 
 rrcwin::~rrcwin(void)
 {
-	deadyet=true;
-	q.release();
-	if(t) t->stop();
-	if(b) delete b;
+	_deadyet=true;
+	_q.release();
+	if(_t) _t->stop();
+	if(_b) delete _b;
 	#ifdef USEGL
-	if(glf) delete glf;
+	if(_glf) delete _glf;
 	#endif
-	for(int i=0; i<NB; i++) jpg[i].complete();
+	for(int i=0; i<NB; i++) _jpg[i].complete();
 }
 
 #ifdef USEGL
 void rrcwin::initgl(void)
 {
 	char dpystr[80];
-	sprintf(dpystr, "localhost:%d.0", dpynum);
-	if(drawmethod==RR_DRAWAUTO || drawmethod==RR_DRAWOGL)
+	sprintf(dpystr, "localhost:%d.0", _dpynum);
+	if(_drawmethod==RR_DRAWAUTO || _drawmethod==RR_DRAWOGL)
 	{
 		try
 		{
-			glf=new rrglframe(dpystr, window);
-			if(!glf) _throw("Could not allocate class instance");
+			_glf=new rrglframe(dpystr, _window);
+			if(!_glf) _throw("Could not allocate class instance");
 		}
 		catch(rrerror &e)
 		{
 			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
 				e.getMessage());
-			if(glf) {delete glf;  glf=NULL;}
-			drawmethod=RR_DRAWX11;
+			if(_glf) {delete _glf;  _glf=NULL;}
+			_drawmethod=RR_DRAWX11;
 			rrout.println("Stereo requires OpenGL drawing.  Disabling stereo.");
-			stereo=false;
+			_stereo=false;
 		}
 	}
-	if(drawmethod==RR_DRAWOGL)
+	if(_drawmethod==RR_DRAWOGL)
 	{
-		delete b;  b=NULL;
+		delete _b;  _b=NULL;
 	}
 }
 #endif
 
 int rrcwin::match(int dpynum, Window window)
 {
-	return (this->dpynum==dpynum && this->window==window);
+	return (_dpynum==dpynum && _window==window);
 }
 
 rrjpeg *rrcwin::getFrame(void)
 {
 	rrjpeg *j=NULL;
-	if(t) t->checkerror();
-	jpgmutex.lock();
-	j=&jpg[jpgi];  jpgi=(jpgi+1)%NB;
-	jpgmutex.unlock();
+	if(_t) _t->checkerror();
+	_jpgmutex.lock();
+	j=&_jpg[_jpgi];  _jpgi=(_jpgi+1)%NB;
+	_jpgmutex.unlock();
 	j->waituntilcomplete();
-	if(t) t->checkerror();
+	if(_t) _t->checkerror();
 	return j;
 }
 
 void rrcwin::drawFrame(rrjpeg *f)
 {
-	if(t) t->checkerror();
+	if(_t) _t->checkerror();
 	#ifdef USEGL
-	if((f->flags==RR_RIGHT || f->flags==RR_LEFT) && (!stereo || drawmethod!=RR_DRAWOGL))
+	if((f->flags==RR_RIGHT || f->flags==RR_LEFT) && (!_stereo || _drawmethod!=RR_DRAWOGL))
 	{
-		stereo=true;  drawmethod=RR_DRAWOGL;
+		_stereo=true;  _drawmethod=RR_DRAWOGL;
 		initgl();
 	}
 	#endif
-	q.add(f);
+	_q.add(f);
 }
 
 
@@ -117,33 +117,33 @@ void rrcwin::run(void)
 	rrjpeg *j=NULL;  long bytes=0;
 	double xtime=0., gltime=0., t1=0.;
 	bool dobenchmark=false;
-	bool firstframe=(drawmethod==RR_DRAWAUTO)? true:false;
+	bool firstframe=(_drawmethod==RR_DRAWAUTO)? true:false;
 
 	try {
 
-	while(!deadyet)
+	while(!_deadyet)
 	{
 		j=NULL;
-		q.get((void **)&j);  if(deadyet) break;
+		_q.get((void **)&j);  if(_deadyet) break;
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
 		if(j->h.flags==RR_EOF)
 		{
 			bool stereo=false;
 			pb.startframe();
 			if(dobenchmark) t1=rrtime();
-			if(b)
+			if(_b)
 			{
-				b->init(&j->h);
-				b->redraw();
+				_b->init(&j->h);
+				_b->redraw();
 			}
 			if(dobenchmark) xtime+=rrtime()-t1;
 			#ifdef USEGL
 			if(dobenchmark) t1=rrtime();
-			if(glf)
+			if(_glf)
 			{
-				if(glf->h.flags==RR_LEFT || glf->h.flags==RR_RIGHT) stereo=true;
-				glf->init(&j->h);
-				glf->redraw();
+				if(_glf->h.flags==RR_LEFT || _glf->h.flags==RR_RIGHT) stereo=true;
+				_glf->init(&j->h);
+				_glf->redraw();
 			}
 			if(dobenchmark) gltime+=rrtime()-t1;
 			if(dobenchmark && (xtime>0.25 || gltime>0.25))
@@ -151,26 +151,26 @@ void rrcwin::run(void)
 				rrout.print("X11: %.3f ms  OGL: %.3f ms  ", xtime*1000., gltime*1000.);
 				if(gltime<0.95*xtime)
 				{
-					delete b;  b=NULL;  rrout.println("Using OpenGL");
+					delete _b;  _b=NULL;  rrout.println("Using OpenGL");
 				}
 				else
 				{
-					delete glf;  glf=NULL;  rrout.println("Using X11");
+					delete _glf;  _glf=NULL;  rrout.println("Using X11");
 				}
 				dobenchmark=false;
 			}
 			if(firstframe) {dobenchmark=true;  firstframe=false;}
 			#endif
-			if(b)
+			if(_b)
 			{
-				pb.endframe(b->h.framew*b->h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(b->h.framew*b->h.frameh* (stereo? 2:1), bytes, 1);
+				pb.endframe(_b->h.framew*_b->h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(_b->h.framew*_b->h.frameh* (stereo? 2:1), bytes, 1);
 			}
 			#ifdef USEGL
-			if(glf)
+			if(_glf)
 			{
-				pb.endframe(glf->h.framew*glf->h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(glf->h.framew*glf->h.frameh* (stereo? 2:1), bytes, 1);
+				pb.endframe(_glf->h.framew*_glf->h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(_glf->h.framew*_glf->h.frameh* (stereo? 2:1), bytes, 1);
 			}
 			bytes=0;
 			#endif
@@ -180,11 +180,11 @@ void rrcwin::run(void)
 		{
 			pd.startframe();
 			if(dobenchmark) t1=rrtime();
-			if(b) *b=*j;
+			if(_b) *_b=*j;
 			if(dobenchmark) xtime+=rrtime()-t1;
 			#ifdef USEGL
 			if(dobenchmark) t1=rrtime();
-			if(glf) *glf=*j;
+			if(_glf) *_glf=*j;
 			if(dobenchmark) gltime+=rrtime()-t1;
 			#endif
 			bool stereo=j->h.flags==RR_LEFT || j->h.flags==RR_RIGHT;
@@ -197,6 +197,6 @@ void rrcwin::run(void)
 
 	} catch(rrerror &e)
 	{
-		if(t) t->seterror(e);  if(j) j->complete();  throw;
+		if(_t) _t->seterror(e);  if(j) j->complete();  throw;
 	}
 }

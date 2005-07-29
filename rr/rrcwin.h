@@ -28,31 +28,31 @@ class rrcwin : public Runnable
 {
 	public:
 
-	rrcwin(int, Window, int _drawmethod, bool);
+	rrcwin(int, Window, int, bool);
 	virtual ~rrcwin(void);
 	rrjpeg *getFrame(void);
 	void drawFrame(rrjpeg *);
 	void redrawFrame(rrjpeg *);
 	int match(int, Window);
-	bool stereoenabled(void) {return stereo;}
+	bool stereoenabled(void) {return _stereo;}
 
 	private:
 
-	int drawmethod;
+	int _drawmethod;
 	static const int NB=2;
-	rrfb *b;  rrjpeg jpg[NB];  int jpgi;
+	rrfb *_b;  rrjpeg _jpg[NB];  int _jpgi;
 	#ifdef USEGL
-	rrglframe *glf;
+	rrglframe *_glf;
 	void initgl(void);
 	#endif
-	genericQ q;
+	genericQ _q;
 	void showprofile(rrframeheader *, int);
-	bool deadyet;
-	int dpynum;  Window window;
+	bool _deadyet;
+	int _dpynum;  Window _window;
 	void run(void);
-	Thread *t;
-	rrcs jpgmutex;
-	bool stereo;
+	Thread *_t;
+	rrcs _jpgmutex;
+	bool _stereo;
 };
 
 #endif
