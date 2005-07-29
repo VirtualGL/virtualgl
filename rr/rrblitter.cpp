@@ -65,18 +65,18 @@ bool rrblitter::frameready(void)
 	return(q.items()<=0);
 }
 
-void rrblitter::sendframe(rrfb *bmp, bool sync)
+void rrblitter::sendframe(rrfb *b, bool sync)
 {
 	if(t) t->checkerror();
 	if(sync) 
 	{
 		prof_blit.startframe();
-		blitdiff(bmp, _lastb);
-		prof_blit.endframe(bmp->h.width*bmp->h.height, 0, 1);
-		_lastb=bmp;
+		blitdiff(b, _lastb);
+		prof_blit.endframe(b->h.width*b->h.height, 0, 1);
+		_lastb=b;
 		ready.unlock();
 	}
-	else q.add((void *)bmp);
+	else q.add((void *)b);
 }
 
 void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
