@@ -77,6 +77,9 @@ endif
 ifeq ($(platform), solx86)
 FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
 endif
+ifeq ($(platform), linux)
+FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
+endif
 
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 
