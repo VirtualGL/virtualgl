@@ -35,8 +35,8 @@ static FakerConfig rrfconfig;
 
 #define setframe(frame, f) { \
 	frame->_opaque=(void *)f; \
-	frame->h=f->h; \
-	frame->bits=f->bits;}
+	frame->h=f->_h; \
+	frame->bits=f->_bits;}
 
 #define _throwlasterror(m) __lasterror.init(__FILE__, (char *)m, __LINE__);
 
@@ -102,7 +102,7 @@ DLLEXPORT int DLLCALL
 		memset(frame, 0, sizeof(RRFrame));
 		errifnot(f=rrc->getbitmap(width, height, pixelsize));
 		if(bottomup) flags|=RRBMP_BOTTOMUP;
-		f->flags=flags;
+		f->_flags=flags;
 		setframe(frame, f);
 		return RR_SUCCESS;
 	}
@@ -120,7 +120,7 @@ DLLEXPORT int DLLCALL
 	{
 		j=new rrjpeg();
 		if(!j) _throw("Could not allocate compressed image structure");
-		f->h=frame->h;
+		f->_h=frame->h;
 		*j=*f;
 		rrc->release(f);
 		setframe(frame, j);
@@ -168,13 +168,13 @@ DLLEXPORT int DLLCALL
 	{
 		if(frame->compressed)
 		{
-			j->h=frame->h;
+			j->_h=frame->h;
 			rrc->sendcompressedframe(frame->h, frame->bits);
 			delete j;
 		}
 		else
 		{
-			f->h=frame->h;
+			f->_h=frame->h;
 			rrc->sendframe(f);
 		}
 		memset(frame, 0, sizeof(RRFrame));

@@ -389,25 +389,25 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			#ifdef GL_BGR_EXT
 			if(littleendian())
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true, dostereo);
-				b->flags=RRBMP_BGR;
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->_bits, drawbuf, true, dostereo);
+				b->_flags=RRBMP_BGR;
 			}
 			else
 			#endif
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
-				b->flags=0;
+				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->_bits, drawbuf, true, dostereo);
+				b->_flags=0;
 			}
-			b->h.winid=_win;
-			b->h.framew=b->h.width;
-			b->h.frameh=b->h.height;
-			b->h.x=0;
-			b->h.y=0;
-			b->h.qual=fconfig.currentqual;
-			b->h.subsamp=fconfig.currentsubsamp;
-			b->h.flags=dostereo? RR_LEFT:0;
-			b->flags|=RRBMP_BOTTOMUP;
-			b->strip_height=RR_DEFAULTSTRIPHEIGHT;
+			b->_h.winid=_win;
+			b->_h.framew=b->_h.width;
+			b->_h.frameh=b->_h.height;
+			b->_h.x=0;
+			b->_h.y=0;
+			b->_h.qual=fconfig.currentqual;
+			b->_h.subsamp=fconfig.currentsubsamp;
+			b->_h.flags=dostereo? RR_LEFT:0;
+			b->_flags|=RRBMP_BOTTOMUP;
+			b->_strip_height=RR_DEFAULTSTRIPHEIGHT;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 			rrdpy->sendframe(b);
 
@@ -419,25 +419,25 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				#ifdef GL_BGR_EXT
 				if(littleendian())
 				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->bits, drawbuf, true, dostereo);
-					b->flags=RRBMP_BGR;
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->_bits, drawbuf, true, dostereo);
+					b->_flags=RRBMP_BGR;
 				}
 				else
 				#endif
 				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->bits, drawbuf, true, dostereo);
-					b->flags=0;
+					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->_bits, drawbuf, true, dostereo);
+					b->_flags=0;
 				}
-				b->h.winid=_win;
-				b->h.framew=b->h.width;
-				b->h.frameh=b->h.height;
-				b->h.x=0;
-				b->h.y=0;
-				b->h.qual=fconfig.currentqual;
-				b->h.subsamp=fconfig.currentsubsamp;
-				b->h.flags=RR_RIGHT;
-				b->flags|=RRBMP_BOTTOMUP;
-				b->strip_height=RR_DEFAULTSTRIPHEIGHT;
+				b->_h.winid=_win;
+				b->_h.framew=b->_h.width;
+				b->_h.frameh=b->_h.height;
+				b->_h.x=0;
+				b->_h.y=0;
+				b->_h.qual=fconfig.currentqual;
+				b->_h.subsamp=fconfig.currentsubsamp;
+				b->_h.flags=RR_RIGHT;
+				b->_flags|=RRBMP_BOTTOMUP;
+				b->_strip_height=RR_DEFAULTSTRIPHEIGHT;
 				rrdpy->sendframe(b);
 			}
 
@@ -450,25 +450,25 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			if(!_blitter) errifnot(_blitter=new rrblitter());
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
 			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
-			b->flags|=RRBMP_BOTTOMUP;
-			int format= (b->pixelsize==3?GL_RGB:GL_RGBA);
-			unsigned char *bits=b->bits;
+			b->_flags|=RRBMP_BOTTOMUP;
+			int format= (b->_pixelsize==3?GL_RGB:GL_RGBA);
+			unsigned char *bits=b->_bits;
 			#ifdef GL_BGR_EXT
-			if(b->flags&RRBMP_BGR && b->pixelsize==3) format=GL_BGR_EXT;
+			if(b->_flags&RRBMP_BGR && b->_pixelsize==3) format=GL_BGR_EXT;
 			#endif
 			#ifdef GL_BGRA_EXT
-			if(b->flags&RRBMP_BGR && b->pixelsize==4 && !(b->flags&RRBMP_ALPHAFIRST))
+			if(b->_flags&RRBMP_BGR && b->_pixelsize==4 && !(b->_flags&RRBMP_ALPHAFIRST))
 				format=GL_BGRA_EXT;
 			#endif
-			if(b->flags&RRBMP_BGR && b->pixelsize==4 && b->flags&RRBMP_ALPHAFIRST)
+			if(b->_flags&RRBMP_BGR && b->_pixelsize==4 && b->_flags&RRBMP_ALPHAFIRST)
 			{
 				#ifdef GL_ABGR_EXT
 				format=GL_ABGR_EXT;
 				#elif defined(GL_BGRA_EXT)
-				format=GL_BGRA_EXT;  bits=b->bits+1;
+				format=GL_BGRA_EXT;  bits=b->_bits+1;
 				#endif
 			}
-			readpixels(0, 0, min(pbw, b->h.framew), b->pitch, min(pbh, b->h.frameh), format, b->pixelsize, bits, drawbuf, true);
+			readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch, min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			_blitter->sendframe(b, sync);
 			break;
 		}
@@ -499,8 +499,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	{
 		for(int i=0; i<h; i++)
 		{
-			int _y=h-1-i-y;
-			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*_y]);
+			int yr=h-1-i-y;
+			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*yr]);
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
