@@ -25,8 +25,8 @@ else
 
 CC = cc
 CXX = CC
-CFLAGS = -xCC -Kpic -mt
-CXXFLAGS = -Kpic -mt
+CFLAGS = -xCC -Kpic -mt -features=no%extinl
+CXXFLAGS = -Kpic -mt -features=no%extinl
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=opteron -xarch=amd64
