@@ -24,77 +24,77 @@ void rrdisplayclient::run(void)
 	try {
 
 	rrcompressor *c[MAXPROCS];  Thread *ct[MAXPROCS];
-	for(i=0; i<np; i++)
-		errifnot(c[i]=new rrcompressor(i, np, sd));
-	if(np>1) for(i=1; i<np; i++)
+	for(i=0; i<_np; i++)
+		errifnot(c[i]=new rrcompressor(i, _np, _sd));
+	if(_np>1) for(i=1; i<_np; i++)
 	{
 		errifnot(ct[i]=new Thread(c[i]));
 		ct[i]->start();
 	}
 
-	while(!deadyet)
+	while(!_deadyet)
 	{
 		b=NULL;
-		q.get((void **)&b);  if(deadyet) break;
+		_q.get((void **)&b);  if(_deadyet) break;
 		if(!b) _throw("Queue has been shut down");
-		ready.unlock();
-		if(b->h.flags==RR_RIGHT && !stereo) continue;
+		_ready.unlock();
+		if(b->_h.flags==RR_RIGHT && !_stereo) continue;
 		prof_comp.startframe();
-		if(np>1)
-			for(i=1; i<np; i++) {
+		if(_np>1)
+			for(i=1; i<_np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
 			}
 		c[0]->compresssend(b, lastb);
-		bytes+=c[0]->bytes;
-		if(np>1)
-			for(i=1; i<np; i++) {
+		bytes+=c[0]->_bytes;
+		if(_np>1)
+			for(i=1; i<_np; i++) {
 				c[i]->stop();  ct[i]->checkerror();  c[i]->send();
-				bytes+=c[i]->bytes;
+				bytes+=c[i]->_bytes;
 			}
-		prof_comp.endframe(b->h.framew*b->h.frameh, 0,
-			b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT? 0.5 : 1);
+		prof_comp.endframe(b->_h.framew*b->_h.frameh, 0,
+			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 
-		if(b->h.flags!=RR_LEFT)
+		if(b->_h.flags!=RR_LEFT)
 		{
 			rrframeheader h;
-			memcpy(&h, &b->h, sizeof(rrframeheader));
+			memcpy(&h, &b->_h, sizeof(rrframeheader));
 			h.flags=RR_EOF;
 			endianize(h);
-			if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+			if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
 
 			char cts=0;
-			if(sd)
+			if(_sd)
 			{
-				sd->recv(&cts, 1);
+				_sd->recv(&cts, 1);
 				if(cts<1 || cts>2) _throw("CTS error");
-				if(stereo && (b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT) && cts!=2)
+				if(_stereo && (b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT) && cts!=2)
 				{
 					rrout.println("[VGL] Disabling stereo because client doesn't support it");
-					stereo=false;
+					_stereo=false;
 				}
 			}
 		}
-		prof_total.endframe(b->h.width*b->h.height, bytes,
-			b->h.flags==RR_LEFT || b->h.flags==RR_RIGHT? 0.5 : 1);
+		_prof_total.endframe(b->_h.width*b->_h.height, bytes,
+			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 		bytes=0;
-		prof_total.startframe();
+		_prof_total.startframe();
 
 		lastb=b;
 	}
 
-	for(i=0; i<np; i++) c[i]->shutdown();
-	if(np>1) for(i=1; i<np; i++)
+	for(i=0; i<_np; i++) c[i]->shutdown();
+	if(_np>1) for(i=1; i<_np; i++)
 	{
 		ct[i]->stop();
 		ct[i]->checkerror();
 		delete ct[i];
 	}
-	for(i=0; i<np; i++) delete c[i];
+	for(i=0; i<_np; i++) delete c[i];
 
 	} catch(rrerror &e)
 	{
-		if(t) t->seterror(e);
-		ready.unlock();
+		if(_t) _t->seterror(e);
+		_ready.unlock();
  		throw;
 	}
 }
@@ -102,11 +102,11 @@ void rrdisplayclient::run(void)
 rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 {
 	rrframe *b=NULL;
-	ready.lock();  if(deadyet) return NULL;
-	if(t) t->checkerror();
-	bmpmutex.lock();
-	b=&bmp[bmpi];  bmpi=(bmpi+1)%NB;
-	bmpmutex.unlock();
+	_ready.lock();  if(_deadyet) return NULL;
+	if(_t) _t->checkerror();
+	_bmpmutex.lock();
+	b=&_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;
+	_bmpmutex.unlock();
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
@@ -117,72 +117,72 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 
 bool rrdisplayclient::frameready(void)
 {
-	if(t) t->checkerror();
-	return(q.items()<=0);
+	if(_t) _t->checkerror();
+	return(_q.items()<=0);
 }
 
 void rrdisplayclient::sendframe(rrframe *b)
 {
-	if(t) t->checkerror();
-	b->h.dpynum=dpynum;
-	q.add((void *)b);
+	if(_t) _t->checkerror();
+	b->_h.dpynum=_dpynum;
+	_q.add((void *)b);
 }
 
 void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *bits)
 {
 	rrframeheader h=horig;
 	endianize(h);
-	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
-	if(sd) sd->send((char *)bits, horig.size);
+	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
+	if(_sd) _sd->send((char *)bits, horig.size);
 	h=horig;
 	h.flags=RR_EOF;
-	h.dpynum=dpynum;
+	h.dpynum=_dpynum;
 	endianize(h);
-	if(sd) sd->send((char *)&h, sizeof(rrframeheader));
+	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
 	char cts=0;
-	if(sd) {sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
+	if(_sd) {_sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
 }
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
 	int endline, startline;
-	int STRIPH=b->strip_height;
+	int STRIPH=b->_strip_height;
 	bool bu=false;  rrjpeg jpg;
 	if(!b) return;
-	if(b->flags&RRBMP_BOTTOMUP) bu=true;
+	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
 
-	int nstrips=(b->h.height+STRIPH-1)/STRIPH;
+	int nstrips=(b->_h.height+STRIPH-1)/STRIPH;
 
-	bytes=0;
+	_bytes=0;
 	for(int strip=0; strip<nstrips; strip++)
 	{
-		if(strip%np!=myrank) continue;
+		if(strip%_np!=_myrank) continue;
 		int i=strip*STRIPH;
 		if(bu)
 		{
-			startline=b->h.height-i-STRIPH;
+			startline=b->_h.height-i-STRIPH;
 			if(startline<0) startline=0;
-			endline=startline+min(b->h.height-i, STRIPH);
+			endline=startline+min(b->_h.height-i, STRIPH);
 		}
 		else
 		{
 			startline=i;
-			endline=startline+min(b->h.height-i, STRIPH);
+			endline=startline+min(b->_h.height-i, STRIPH);
 		}
 		if(b->stripequals(lastb, startline, endline)) continue;
 		rrframe *rrb=b->getstrip(startline, endline);
 		rrjpeg *j=NULL;
-		if(myrank>0) {errifnot(j=new rrjpeg());}
+		if(_myrank>0) {errifnot(j=new rrjpeg());}
 		else j=&jpg;
 		*j=*rrb;
-		bytes+=j->h.size;
+		_bytes+=j->_h.size;
 		delete rrb;
-		if(myrank==0)
+		if(_myrank==0)
 		{
-			unsigned int size=j->h.size;
-			endianize(j->h);
-			if(sd) sd->send((char *)&j->h, sizeof(rrframeheader));
-			if(sd) sd->send((char *)j->bits, (int)size);
+			unsigned int size=j->_h.size;
+			endianize(j->_h);
+			if(_sd) _sd->send((char *)&j->_h, sizeof(rrframeheader));
+			if(_sd) _sd->send((char *)j->_bits, (int)size);
 		}
 		else
 		{

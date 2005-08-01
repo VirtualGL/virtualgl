@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
-		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
+		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
+		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		frames++;
@@ -56,13 +56,13 @@ int main(int argc, char **argv)
 	{
 		if(!blitter.frameready())
 		{
-			memset(b->bits, fill*0xff, b->pitch*HEIGHT);
+			memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
 			fill=1-fill;
 			frames++;  continue;
 		}
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
-		memset(b->bits, fill*0xff, b->pitch*HEIGHT);
+		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
+		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		clientframes++;  frames++;
@@ -77,9 +77,9 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
-		memset(b->bits, 0, b->pitch*HEIGHT);
-		memset(b->bits, fill*0xff, b->pitch*HEIGHT/2);
+		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
+		memset(b->_bits, 0, b->_pitch*HEIGHT);
+		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT/2);
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		frames++;
@@ -93,8 +93,8 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->h.framew;  HEIGHT=b->h.frameh;
-		memset(b->bits, 0xff, b->pitch*HEIGHT);
+		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
+		memset(b->_bits, 0xff, b->_pitch*HEIGHT);
 		blitter.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

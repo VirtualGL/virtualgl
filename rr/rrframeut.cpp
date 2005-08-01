@@ -26,40 +26,40 @@ class blitter : public Runnable
 {
 	public:
 
-	blitter(Display *_dpy, Window _win) : indx(0), deadyet(false), dpy(_dpy),
-		win(_win), t(NULL)
+	blitter(Display *dpy, Window win) : _indx(0), _deadyet(false), _dpy(dpy),
+		_win(win), _t(NULL)
 	{
-		for(int i=0; i<NB; i++) errifnot(fb[i]=new rrfb(dpy, win));
-		errifnot(t=new Thread(this));
-		t->start();
+		for(int i=0; i<NB; i++) errifnot(_fb[i]=new rrfb(_dpy, _win));
+		errifnot(_t=new Thread(this));
+		_t->start();
 	}
 
 	virtual ~blitter(void)
 	{
 		shutdown();
-		for(int i=0; i<NB; i++) {if(fb[i]) {delete fb[i];  fb[i]=NULL;}}
+		for(int i=0; i<NB; i++) {if(_fb[i]) {delete _fb[i];  _fb[i]=NULL;}}
 	}
 
 	rrfb *get(void)
 	{
-		rrfb *b=fb[indx];  indx=(indx+1)%NB;
-		if(t) t->checkerror();  b->waituntilcomplete();  if(t) t->checkerror();
+		rrfb *b=_fb[_indx];  _indx=(_indx+1)%NB;
+		if(_t) _t->checkerror();  b->waituntilcomplete();  if(_t) _t->checkerror();
 		return b;
 	}
 
 	void put(rrfb *b)
 	{
-		if(t) t->checkerror();
+		if(_t) _t->checkerror();
 		b->ready();
 	}
 
 	void shutdown(void)
 	{
-		deadyet=true;
+		_deadyet=true;
 		int i;
-		for(i=0; i<NB; i++) fb[i]->ready();  // Release my thread
-		if(t) {t->stop();  delete t;  t=NULL;}
-		for(i=0; i<NB; i++) fb[i]->complete();  // Release decompressor
+		for(i=0; i<NB; i++) _fb[i]->ready();  // Release my thread
+		if(_t) {_t->stop();  delete _t;  _t=NULL;}
+		for(i=0; i<NB; i++) _fb[i]->complete();  // Release decompressor
 	}
 
 	private:
@@ -71,13 +71,13 @@ class blitter : public Runnable
 		int buf=0;  rrfb *b;
 		try
 		{
-			while(!deadyet)
+			while(!_deadyet)
 			{
-				b=fb[buf];  buf=(buf+1)%NB;
-				b->waituntilready();  if(deadyet) break;
+				b=_fb[buf];  buf=(buf+1)%NB;
+				b->waituntilready();  if(_deadyet) break;
 				timer.start();
 				b->redraw();
-				mpixels+=(double)(b->h.width*b->h.height)/1000000.;
+				mpixels+=(double)(b->_h.width*b->_h.height)/1000000.;
 				totaltime+=timer.elapsed();
 				b->complete();
 			}
@@ -85,51 +85,51 @@ class blitter : public Runnable
 		}
 		catch (...)
 		{
-			for(int i=0; i<NB; i++) if(fb[i]) fb[i]->complete();  throw;
+			for(int i=0; i<NB; i++) if(_fb[i]) _fb[i]->complete();  throw;
 		}
 		fprintf(stderr, "Blitter exiting ...\n");
 	}
 
-	int indx;  bool deadyet;  
-	rrfb *fb[NB];
-	Display *dpy;  Window win;
-	Thread *t;
+	int _indx;  bool _deadyet;  
+	rrfb *_fb[NB];
+	Display *_dpy;  Window _win;
+	Thread *_t;
 };
 
 class decompressor : public Runnable
 {
 	public:
 
-	decompressor(blitter *_bobj, Display *_dpy, Window _win, int _myid) : bobj(_bobj),
-		indx(0), deadyet(false), dpy(_dpy), win(_win), myid(_myid), t(NULL)
+	decompressor(blitter *bobj, Display *dpy, Window win, int myid) : _bobj(bobj),
+		_indx(0), _deadyet(false), _dpy(dpy), _win(win), _myid(myid), _t(NULL)
 	{
-		errifnot(t=new Thread(this));
-		t->start();
+		errifnot(_t=new Thread(this));
+		_t->start();
 	}
 
 	virtual ~decompressor(void) {shutdown();}
 
 	rrjpeg &get(void)
 	{
-		rrjpeg &j=jpg[indx];  indx=(indx+1)%NB;
-		if(deadyet) return j;
-		if(t) t->checkerror();  j.waituntilcomplete();  if(t) t->checkerror();
+		rrjpeg &j=_jpg[_indx];  _indx=(_indx+1)%NB;
+		if(_deadyet) return j;
+		if(_t) _t->checkerror();  j.waituntilcomplete();  if(_t) _t->checkerror();
 		return j;
 	}
 
 	void put(rrjpeg &j)
 	{
-		if(t) t->checkerror();
+		if(_t) _t->checkerror();
 		j.ready();
 	}
 
 	void shutdown(void)
 	{
-		deadyet=true;
+		_deadyet=true;
 		int i;
-		for(i=0; i<NB; i++) jpg[i].ready();  // Release my thread
-		if(t) {t->stop();  delete t;  t=NULL;}
-		for(i=0; i<NB; i++) jpg[i].complete();  // Release compressor
+		for(i=0; i<NB; i++) _jpg[i].ready();  // Release my thread
+		if(_t) {_t->stop();  delete _t;  _t=NULL;}
+		for(i=0; i<NB; i++) _jpg[i].complete();  // Release compressor
 	}
 
 	private:
@@ -139,65 +139,65 @@ class decompressor : public Runnable
 		int buf=0;  rrfb *b=NULL;
 		try
 		{
-			while(!deadyet)
+			while(!_deadyet)
 			{
-				rrjpeg &j=jpg[buf];  buf=(buf+1)%NB;
-				j.waituntilready();  if(deadyet) break;
-				b=bobj->get();  if(deadyet) break;
+				rrjpeg &j=_jpg[buf];  buf=(buf+1)%NB;
+				j.waituntilready();  if(_deadyet) break;
+				b=_bobj->get();  if(_deadyet) break;
 				XWindowAttributes xwa;
-				int w=j.h.width, h=j.h.height;
-				XGetWindowAttributes(dpy, win, &xwa);
+				int w=j._h.width, h=j._h.height;
+				XGetWindowAttributes(_dpy, _win, &xwa);
 				if(w!=xwa.width || h!=xwa.height)
 				{
-					XLockDisplay(dpy);
+					XLockDisplay(_dpy);
 					XWindowChanges xwc;
 					xwc.width=w;  xwc.height=h;
-					xwc.x=(w+BORDER*2)*myid;  xwc.y=0;
-					XConfigureWindow(dpy, win, CWWidth|CWHeight|CWX|CWY, &xwc);
-					XFlush(dpy);
-					XSync(dpy, False);
+					xwc.x=(w+BORDER*2)*_myid;  xwc.y=0;
+					XConfigureWindow(_dpy, _win, CWWidth|CWHeight|CWX|CWY, &xwc);
+					XFlush(_dpy);
+					XSync(_dpy, False);
 					XWindowAttributes xwa;
-					do XGetWindowAttributes(dpy, win, &xwa); while(xwa.width<w || xwa.height<h);
-					XUnlockDisplay(dpy);
+					do XGetWindowAttributes(_dpy, _win, &xwa); while(xwa.width<w || xwa.height<h);
+					XUnlockDisplay(_dpy);
 				}
 				(*b)=j;
-				bobj->put(b);
+				_bobj->put(b);
 				j.complete();
 			}
 		}
 		catch (...)
 		{
-			for(int i=0; i<NB; i++) jpg[i].complete();  throw;
+			for(int i=0; i<NB; i++) _jpg[i].complete();  throw;
 		}
 		fprintf(stderr, "Decompressor exiting ...\n");
 	}
 
-	blitter *bobj;
-	int indx;  bool deadyet;
-	Display *dpy;  Window win;
-	rrjpeg jpg[NB];
-	int myid;  Thread *t;
+	blitter *_bobj;
+	int _indx;  bool _deadyet;
+	Display *_dpy;  Window _win;
+	rrjpeg _jpg[NB];
+	int _myid;  Thread *_t;
 };
 
 class compressor : public Runnable
 {
 	public:
 
-	compressor(decompressor *_dobj) : indx(0), deadyet(false), t(NULL), dobj(_dobj)
+	compressor(decompressor *dobj) : _indx(0), _deadyet(false), _t(NULL), _dobj(dobj)
 	{
-		errifnot(t=new Thread(this));
-		t->start();
+		errifnot(_t=new Thread(this));
+		_t->start();
 	}
 
 	virtual ~compressor(void)
 	{
-		if(t) t->stop();
+		if(_t) _t->stop();
 	}
 
 	rrframe &get(int w, int h)
 	{
-		rrframe &f=bmp[indx];  indx=(indx+1)%NB;
-		if(t) t->checkerror();  f.waituntilcomplete();  if(t) t->checkerror();
+		rrframe &f=_bmp[_indx];  _indx=(_indx+1)%NB;
+		if(_t) _t->checkerror();  f.waituntilcomplete();  if(_t) _t->checkerror();
 		rrframeheader hdr;
 		hdr.framew=hdr.width=w+BORDER;
 		hdr.frameh=hdr.height=h+BORDER;
@@ -210,17 +210,17 @@ class compressor : public Runnable
 
 	void put(rrframe &f)
 	{
-		if(t) t->checkerror();
+		if(_t) _t->checkerror();
 		f.ready();
 	}
 
 	void shutdown(void)
 	{
-		deadyet=true;
+		_deadyet=true;
 		int i;
-		for(i=0; i<NB; i++) bmp[i].ready();  // Release my thread
-		if(t) {t->stop();  delete t;  t=NULL;}
-		for(i=0; i<NB; i++) bmp[i].complete();  // Release main thread
+		for(i=0; i<NB; i++) _bmp[i].ready();  // Release my thread
+		if(_t) {_t->stop();  delete _t;  _t=NULL;}
+		for(i=0; i<NB; i++) _bmp[i].complete();  // Release main thread
 	}
 
 	private:
@@ -230,27 +230,27 @@ class compressor : public Runnable
 		int buf=0;
 		try
 		{
-			while(!deadyet)
+			while(!_deadyet)
 			{
-				rrframe &f=bmp[buf];  buf=(buf+1)%NB;
-				f.waituntilready();  if(deadyet) break;
-				rrjpeg &j=dobj->get();  if(deadyet) break;
+				rrframe &f=_bmp[buf];  buf=(buf+1)%NB;
+				f.waituntilready();  if(_deadyet) break;
+				rrjpeg &j=_dobj->get();  if(_deadyet) break;
 				j=f;
-				dobj->put(j);
+				_dobj->put(j);
 				f.complete();
 			}
 		}
 		catch (...)
 		{
-			for(int i=0; i<NB; i++) bmp[i].complete();  throw;
+			for(int i=0; i<NB; i++) _bmp[i].complete();  throw;
 		}
 		fprintf(stderr, "Compressor exiting ...\n");
 	}
 
-	int indx;  bool deadyet;
-	Thread *t;
-	rrframe bmp[NB];
-	decompressor *dobj;
+	int _indx;  bool _deadyet;
+	Thread *_t;
+	rrframe _bmp[NB];
+	decompressor *_dobj;
 };
 
 class rrframeut
@@ -282,14 +282,14 @@ class rrframeut
 
 	void initbmp(rrframe &f)
 	{
-		int i, j, pitch=f.pitch;
-		for(i=0; i<f.h.height; i++)
+		int i, j, pitch=f._pitch;
+		for(i=0; i<f._h.height; i++)
 		{
-			for(j=0; j<f.h.width; j++)
+			for(j=0; j<f._h.width; j++)
 			{
-				f.bits[i*pitch+j*f.pixelsize]=i%256;
-				f.bits[i*pitch+j*f.pixelsize+1]=j%256;
-				f.bits[i*pitch+j*f.pixelsize+2]=(i+j)%256;
+				f._bits[i*pitch+j*f._pixelsize]=i%256;
+				f._bits[i*pitch+j*f._pixelsize+1]=j%256;
+				f._bits[i*pitch+j*f._pixelsize+2]=(i+j)%256;
 			}	
 		}
 	}

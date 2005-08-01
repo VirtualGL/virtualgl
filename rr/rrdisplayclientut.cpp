@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 		if((win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			w, h, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 			BlackPixel(dpy, DefaultScreen(dpy))))==0) _throw("Could not create window");
-		printf("Creating window %d\n", win);
+		printf("Creating window %lu\n", (unsigned long)win);
 		errifnot(XMapRaised(dpy, win));
 		XSync(dpy, False);
 		dpynum=0;  char *dpystring=NULL, *ptr=NULL;
@@ -87,12 +87,12 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=rrdpy.getbitmap(w, h, d));
-		if(fill) memcpy(b->bits, buf, w*h*d);
-		else memcpy(b->bits, buf2, w*h*d);
-		b->h.qual=qual;  b->h.subsamp=subsamp;
-		b->h.dpynum=dpynum;  b->h.winid=win;
-		b->strip_height=striph;
-		if(b->flags&RRBMP_BGR && !bgr) b->flags&=(~RRBMP_BGR);
+		if(fill) memcpy(b->_bits, buf, w*h*d);
+		else memcpy(b->_bits, buf2, w*h*d);
+		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.dpynum=dpynum;  b->_h.winid=win;
+		b->_strip_height=striph;
+		if(b->_flags&RRBMP_BGR && !bgr) b->_flags&=(~RRBMP_BGR);
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -107,16 +107,16 @@ int main(int argc, char **argv)
 	{
 		if(!rrdpy.frameready())
 		{
-			if(fill) memcpy(b->bits, buf, w*h*d);
-			else memcpy(b->bits, buf2, w*h*d);
+			if(fill) memcpy(b->_bits, buf, w*h*d);
+			else memcpy(b->_bits, buf2, w*h*d);
 			frames++;  continue;
 		}
 		errifnot(b=rrdpy.getbitmap(w, h, d));
-		if(fill) memcpy(b->bits, buf, w*h*d);
-		else memcpy(b->bits, buf2, w*h*d);
-		b->h.qual=qual;  b->h.subsamp=subsamp;
-		b->h.dpynum=dpynum;  b->h.winid=win;
-		b->strip_height=striph;
+		if(fill) memcpy(b->_bits, buf, w*h*d);
+		else memcpy(b->_bits, buf2, w*h*d);
+		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.dpynum=dpynum;  b->_h.winid=win;
+		b->_strip_height=striph;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		clientframes++;  frames++;
@@ -131,11 +131,11 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=rrdpy.getbitmap(w, h, d));
-		if(fill) memcpy(b->bits, buf, w*h*d);
-		else memcpy(b->bits, buf3, w*h*d);
-		b->h.qual=qual;  b->h.subsamp=subsamp;
-		b->h.dpynum=dpynum;  b->h.winid=win;
-		b->strip_height=striph;
+		if(fill) memcpy(b->_bits, buf, w*h*d);
+		else memcpy(b->_bits, buf3, w*h*d);
+		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.dpynum=dpynum;  b->_h.winid=win;
+		b->_strip_height=striph;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -149,10 +149,10 @@ int main(int argc, char **argv)
 	do
 	{
 		errifnot(b=rrdpy.getbitmap(w, h, d));
-		memcpy(b->bits, buf, w*h*d);
-		b->h.qual=qual;  b->h.subsamp=subsamp;
-		b->h.dpynum=dpynum;  b->h.winid=win;
-		b->strip_height=striph;
+		memcpy(b->_bits, buf, w*h*d);
+		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.dpynum=dpynum;  b->_h.winid=win;
+		b->_strip_height=striph;
 		rrdpy.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

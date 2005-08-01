@@ -97,17 +97,17 @@ rrjpeg *rrcwin::getFrame(void)
 	return j;
 }
 
-void rrcwin::drawFrame(rrjpeg *f)
+void rrcwin::drawFrame(rrjpeg *j)
 {
 	if(_t) _t->checkerror();
 	#ifdef USEGL
-	if((f->flags==RR_RIGHT || f->flags==RR_LEFT) && (!_stereo || _drawmethod!=RR_DRAWOGL))
+	if((j->_flags==RR_RIGHT || j->_flags==RR_LEFT) && (!_stereo || _drawmethod!=RR_DRAWOGL))
 	{
 		_stereo=true;  _drawmethod=RR_DRAWOGL;
 		initgl();
 	}
 	#endif
-	_q.add(f);
+	_q.add(j);
 }
 
 
@@ -126,14 +126,14 @@ void rrcwin::run(void)
 		j=NULL;
 		_q.get((void **)&j);  if(_deadyet) break;
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
-		if(j->h.flags==RR_EOF)
+		if(j->_h.flags==RR_EOF)
 		{
 			bool stereo=false;
 			pb.startframe();
 			if(dobenchmark) t1=rrtime();
 			if(_b)
 			{
-				_b->init(&j->h);
+				_b->init(&j->_h);
 				_b->redraw();
 			}
 			if(dobenchmark) xtime+=rrtime()-t1;
@@ -141,8 +141,8 @@ void rrcwin::run(void)
 			if(dobenchmark) t1=rrtime();
 			if(_glf)
 			{
-				if(_glf->h.flags==RR_LEFT || _glf->h.flags==RR_RIGHT) stereo=true;
-				_glf->init(&j->h);
+				if(_glf->_h.flags==RR_LEFT || _glf->_h.flags==RR_RIGHT) stereo=true;
+				_glf->init(&j->_h);
 				_glf->redraw();
 			}
 			if(dobenchmark) gltime+=rrtime()-t1;
@@ -163,14 +163,14 @@ void rrcwin::run(void)
 			#endif
 			if(_b)
 			{
-				pb.endframe(_b->h.framew*_b->h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(_b->h.framew*_b->h.frameh* (stereo? 2:1), bytes, 1);
+				pb.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), bytes, 1);
 			}
 			#ifdef USEGL
 			if(_glf)
 			{
-				pb.endframe(_glf->h.framew*_glf->h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(_glf->h.framew*_glf->h.frameh* (stereo? 2:1), bytes, 1);
+				pb.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), 0, 1);
+				pt.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), bytes, 1);
 			}
 			bytes=0;
 			#endif
@@ -187,10 +187,10 @@ void rrcwin::run(void)
 			if(_glf) *_glf=*j;
 			if(dobenchmark) gltime+=rrtime()-t1;
 			#endif
-			bool stereo=j->h.flags==RR_LEFT || j->h.flags==RR_RIGHT;
-			pd.endframe(j->h.width*j->h.height, 0, (double)(j->h.width*j->h.height)/
-				(double)(j->h.framew*j->h.frameh) * (stereo? 0.5:1.0));
-			bytes+=j->h.size;
+			bool stereo=j->_h.flags==RR_LEFT || j->_h.flags==RR_RIGHT;
+			pd.endframe(j->_h.width*j->_h.height, 0, (double)(j->_h.width*j->_h.height)/
+				(double)(j->_h.framew*j->_h.frameh) * (stereo? 0.5:1.0));
+			bytes+=j->_h.size;
 		}
 		j->complete();
 	}

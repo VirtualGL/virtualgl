@@ -29,12 +29,12 @@ class rrdisplayclient : public Runnable
 	public:
 
 	rrdisplayclient(char *displayname, unsigned short port, bool dossl,
-		int nprocs=1) : sd(NULL), bmpi(0), t(NULL), deadyet(false), np(nprocs),
-		dpynum(0), stereo(true)
+		int nprocs=1) : _sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _np(nprocs),
+		_dpynum(0), _stereo(true)
 	{
-		np=min(np, min(numprocs(), MAXPROCS));
-		if(np<1) {np=min(numprocs(), MAXPROCS);  if(np>1) np--;}
-		rrout.println("[VGL] Using %d / %d CPU's for compression", np, numprocs());
+		_np=min(_np, min(numprocs(), MAXPROCS));
+		if(_np<1) {_np=min(numprocs(), MAXPROCS);  if(_np>1) _np--;}
+		rrout.println("[VGL] Using %d / %d CPU's for compression", _np, numprocs());
 		char *servername=NULL;
 		try
 		{
@@ -43,20 +43,20 @@ class rrdisplayclient : public Runnable
 				char *ptr=NULL;  servername=strdup(displayname);
 				if((ptr=strchr(servername, ':'))!=NULL)
 				{
-					if(strlen(ptr)>1) dpynum=atoi(ptr+1);
-					if(dpynum<0 || dpynum>255) dpynum=0;
+					if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
+					if(_dpynum<0 || _dpynum>255) _dpynum=0;
 					*ptr='\0';
 				}
 				if(!strlen(servername)) {free(servername);  servername=strdup("localhost");}
 			}
 			if(servername && port>0)
 			{
-				errifnot(sd=new rrsocket(dossl));
-				sd->connect(servername, port);
+				errifnot(_sd=new rrsocket(dossl));
+				_sd->connect(servername, port);
 			}
-			prof_total.setname("Total   ");
-			errifnot(t=new Thread(this));
-			t->start();
+			_prof_total.setname("Total   ");
+			errifnot(_t=new Thread(this));
+			_t->start();
 		}
 		catch(...)
 		{
@@ -67,9 +67,9 @@ class rrdisplayclient : public Runnable
 
 	virtual ~rrdisplayclient(void)
 	{
-		deadyet=true;  q.release();
-		if(t) {t->stop();  delete t;  t=NULL;}
-		if(sd) {delete sd;  sd=NULL;}
+		_deadyet=true;  _q.release();
+		if(_t) {_t->stop();  delete _t;  _t=NULL;}
+		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
 	rrframe *getbitmap(int, int, int);
@@ -77,21 +77,21 @@ class rrdisplayclient : public Runnable
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(rrframe *b) {ready.unlock();}
-	bool stereoenabled(void) {return stereo;}
+	void release(rrframe *b) {_ready.unlock();}
+	bool stereoenabled(void) {return _stereo;}
 
-	rrsocket *sd;
+	rrsocket *_sd;
 
 	private:
 
 	static const int NB=3;
-	rrcs bmpmutex;  rrframe bmp[NB];  int bmpi;
-	rrmutex ready;
-	genericQ q;
-	Thread *t;  bool deadyet;
-	rrprofiler prof_total;
-	int np, dpynum;
-	bool stereo;
+	rrcs _bmpmutex;  rrframe _bmp[NB];  int _bmpi;
+	rrmutex _ready;
+	genericQ _q;
+	Thread *_t;  bool _deadyet;
+	rrprofiler _prof_total;
+	int _np, _dpynum;
+	bool _stereo;
 };
 
 #define endianize(h) { \
@@ -109,80 +109,80 @@ class rrcompressor : public Runnable
 {
 	public:
 
-	rrcompressor(int _myrank, int _np, rrsocket *_sd) : bytes(0),
-		storedframes(0), frame(NULL), _b(NULL), _lastb(NULL), myrank(_myrank), np(_np),
-		sd(_sd), deadyet(false)
+	rrcompressor(int myrank, int np, rrsocket *sd) : _bytes(0),
+		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank), _np(np),
+		_sd(sd), _deadyet(false)
 	{
-		ready.lock();  complete.lock();
+		_ready.lock();  _complete.lock();
 	}
 
 	virtual ~rrcompressor(void)
 	{
 		shutdown();
-		if(frame) {free(frame);  frame=NULL;}
+		if(_frame) {free(_frame);  _frame=NULL;}
 	}
 
 	void run(void)
 	{
-		while(!deadyet)
+		while(!_deadyet)
 		{
 			try {
 
-			ready.lock();  if(deadyet) break;
+			_ready.lock();  if(_deadyet) break;
 			compresssend(_b, _lastb);
-			complete.unlock();
+			_complete.unlock();
 
-			} catch (...) {complete.unlock();  throw;}
+			} catch (...) {_complete.unlock();  throw;}
 		}
 	}
 
 	void go(rrframe *b, rrframe *lastb)
 	{
 		_b=b;  _lastb=lastb;
-		ready.unlock();
+		_ready.unlock();
 	}
 
 	void stop(void)
 	{
-		complete.lock();
+		_complete.lock();
 	}
 
-	void shutdown(void) {deadyet=true;  ready.unlock();}
+	void shutdown(void) {_deadyet=true;  _ready.unlock();}
 	void compresssend(rrframe *, rrframe *);
 
 	void send(void)
 	{
-		for(int i=0; i<storedframes; i++)
+		for(int i=0; i<_storedframes; i++)
 		{
-			rrjpeg *j=frame[i];
+			rrjpeg *j=_frame[i];
 			errifnot(j);
-			unsigned int size=j->h.size;
-			endianize(j->h);
-			if(sd) sd->send((char *)&j->h, sizeof(rrframeheader));
-			if(sd) sd->send((char *)j->bits, size);
+			unsigned int size=j->_h.size;
+			endianize(j->_h);
+			if(_sd) _sd->send((char *)&j->_h, sizeof(rrframeheader));
+			if(_sd) _sd->send((char *)j->_bits, size);
 			delete j;		
 		}
-		storedframes=0;
+		_storedframes=0;
 	}
 
-	long bytes;
+	long _bytes;
 
 	private:
 
 	void store(rrjpeg *j)
 	{
-		storedframes++;
-		if(!(frame=(rrjpeg **)realloc(frame, sizeof(rrjpeg *)*storedframes)))
+		_storedframes++;
+		if(!(_frame=(rrjpeg **)realloc(_frame, sizeof(rrjpeg *)*_storedframes)))
 			_throw("Memory allocation error");
-		frame[storedframes-1]=j;
+		_frame[_storedframes-1]=j;
 	}
 
-	int storedframes;  rrjpeg **frame;
+	int _storedframes;  rrjpeg **_frame;
 	rrframe *_b, *_lastb;
-	int myrank, np;
-	rrsocket *sd;
-	rrmutex ready, complete;  bool deadyet;
-	rrcs mutex;
+	int _myrank, _np;
+	rrsocket *_sd;
+	rrmutex _ready, _complete;  bool _deadyet;
+	rrcs _mutex;
 };
 
 #endif

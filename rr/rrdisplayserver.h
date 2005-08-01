@@ -30,47 +30,47 @@ class rrdisplayserver : public Runnable
 
 	void run(void);
 
-	int drawmethod;
-	rrsocket *listensd;
-	Thread *t;
-	bool deadyet;
+	int _drawmethod;
+	rrsocket *_listensd;
+	Thread *_t;
+	bool _deadyet;
 };
 
 class rrserver : public Runnable
 {
 	public:
 
-	rrserver(rrsocket *_sd, int _drawmethod) : drawmethod(_drawmethod),
-		windows(0), sd(_sd), t(NULL)
+	rrserver(rrsocket *sd, int drawmethod) : _drawmethod(drawmethod),
+		_windows(0), _sd(sd), _t(NULL)
 	{
-		memset(rrw, 0, sizeof(rrcwin *)*MAXWIN);
-		errifnot(t=new Thread(this));
-		t->start();
+		memset(_rrw, 0, sizeof(rrcwin *)*MAXWIN);
+		errifnot(_t=new Thread(this));
+		_t->start();
 	}
 
 	virtual ~rrserver(void)
 	{
 		int i;
-		winmutex.lock(false);
-		for(i=0; i<windows; i++) {if(rrw[i]) {delete rrw[i];  rrw[i]=NULL;}}
-		windows=0;
-		winmutex.unlock(false);
-		rrout.println("-- Disconnecting %s", sd->remotename());
-		if(sd) {delete sd;  sd=NULL;}
+		_winmutex.lock(false);
+		for(i=0; i<_windows; i++) {if(_rrw[i]) {delete _rrw[i];  _rrw[i]=NULL;}}
+		_windows=0;
+		_winmutex.unlock(false);
+		rrout.println("-- Disconnecting %s", _sd->remotename());
+		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
 	private:
 
 	void run(void);
 
-	int drawmethod;
-	rrcwin *rrw[MAXWIN];
-	int windows;
+	int _drawmethod;
+	rrcwin *_rrw[MAXWIN];
+	int _windows;
 	rrcwin *addwindow(int, Window, bool stereo=false);
 	void delwindow(rrcwin *w);
-	rrcs winmutex;
-	rrsocket *sd;
-	Thread *t;
+	rrcs _winmutex;
+	rrsocket *_sd;
+	Thread *_t;
 };
 
 #endif
