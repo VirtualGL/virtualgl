@@ -100,7 +100,7 @@ __inline double rrtime(void)
 #define __inline inline
 #endif
 
-__inline double rrtime(void)
+static __inline double rrtime(void)
 {
 	struct timeval __tv;
 	gettimeofday(&__tv, (struct timezone *)NULL);
