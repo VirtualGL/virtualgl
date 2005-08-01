@@ -26,8 +26,8 @@ else
 
 CC = cc
 CXX = CC
-CFLAGS = -xCC -KPIC -mt
-CXXFLAGS = -KPIC -mt
+CFLAGS = -xCC -KPIC -mt -features=no%extinl
+CXXFLAGS = -KPIC -mt -features=no%extinl
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
