@@ -35,8 +35,7 @@ extern GLPDevice _localdev;
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
-#define _isright(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_BACK \
-	|| drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
+#define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
 
 static inline int _drawingtoright(void)

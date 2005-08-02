@@ -68,8 +68,7 @@ GLPDevice _localdev=-1;
 #define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
 	|| drawbuf==GL_RIGHT)
-#define _isright(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_BACK \
-	|| drawbuf==GL_FRONT_AND_BACK || drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
+#define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
 
 static inline int _drawingtofront(void)
