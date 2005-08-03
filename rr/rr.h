@@ -81,7 +81,11 @@ enum {RR_RGB, RR_RGBA, RR_BGR, RR_BGRA, RR_ABGR, RR_ARGB};
 
 /* Other */
 #define RR_DEFAULTPORT        4242
+#ifdef USESSL
 #define RR_DEFAULTSSLPORT     4243
+#else
+#define RR_DEFAULTSSLPORT     RR_DEFAULTPORT
+#endif
 #define RR_DEFAULTSTRIPHEIGHT 64
 typedef void * RRDisplay;
 

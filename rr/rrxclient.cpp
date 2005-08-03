@@ -76,15 +76,20 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 void usage(char *progname)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-p<port>] [-s] [-v]", progname);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-p<port>] [-v]", progname);
+	#ifdef USESSL
+	fprintf(stderr, " [-s]");
+	#endif
 	#ifdef USEGL
 	fprintf(stderr, " [-x] [-gl]");
 	#endif
 	fprintf(stderr, "\n\n-h or -? = This help screen\n");
 	fprintf(stderr, "-p = Specify which port the client should listen on\n");
 	fprintf(stderr, "     (default is %d for unencrypted and %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
-	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
 	fprintf(stderr, "-v = Display version information\n");
+	#ifdef USESSL
+	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
+	#endif
 	#ifdef USEGL
 	fprintf(stderr, "-x = Use X11 drawing\n     (default is to auto-select the fastest drawing method)\n");
 	fprintf(stderr, "-gl = Use OpenGL drawing\n      (default is to auto-select the fastest drawing method)\n");
@@ -106,7 +111,9 @@ int main(int argc, char *argv[])
 	{
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
 			{usage(argv[0]);  exit(1);}
+		#ifdef USESSL
 		if(!stricmp(argv[i], "-s")) ssl=true;
+		#endif
 		if(!stricmp(argv[i], "-q")) quiet=true;
 		if(!stricmp(argv[i], "-v")) printversion=true;
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
