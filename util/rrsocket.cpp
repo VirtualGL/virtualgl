@@ -105,7 +105,6 @@ static X509 *newcert(EVP_PKEY *priv)
 
 bool rrsocket::_Sslinit=false;
 rrcs rrsocket::_Cryptolock[CRYPTO_NUM_LOCKS];
-int rrsocket::_Instancecount=0;
 #endif
 rrcs rrsocket::_Mutex;
 int rrsocket::_Instancecount=0;
