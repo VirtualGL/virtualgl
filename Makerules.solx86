@@ -49,6 +49,9 @@ CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I/usr/sfw/include -I$(TOPDIR)/
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
 endif
+ifneq ($(USESSL), no)
+CDEFINES := $(CDEFINES) -DUSESSL
+endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
@@ -62,7 +65,10 @@ DEFAULTJPEGLIB = medialib
 SHEXT = so
 
 FBXLIB = -lfbx -lX11 -lXext
-SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
+SOCKLIB = -lrrsocket -lsocket -lxnet
+ifneq ($(USESSL), no)
+SOCKLIB := $(SOCKLIB) -z lazyload -lssl -z lazyload -lcrypto
+endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 FAKERLINK = -lXm -lGL
