@@ -7,6 +7,9 @@ CXX = "cl" -GX
 AR = "link" -lib -NOLOGO
 
 CDEFINES = -D_WIN32_WINNT=0x0500 -DWIN32
+ifneq ($(USESSL), no)
+CDEFINES := $(CDEFINES) -DUSESSL
+endif
 ifeq ($(DEBUG), yes)
 CFLAGS = -nologo -Od -G6 -MTd -W4 -Zi
 else
@@ -22,6 +25,9 @@ endif
 DEFAULTJPEGLIB = ipp
 
 XDKLIB = xlib.lib hclshm.lib
-SOCKLIB = rrsocket.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib ws2_32.lib
+SOCKLIB = rrsocket.lib user32.lib gdi32.lib ws2_32.lib
+ifneq ($(USESSL), no)
+SOCKLIB := $(SOCKLIB) ssleay32.lib libeay32.lib
+endif
 FBXLIB = fbx.lib user32.lib gdi32.lib
 FBXXDKLIB = fbx-xdk.lib $(XDKLIB)
