@@ -10,6 +10,9 @@ ifeq ($(CC), gcc)
 CXX = g++
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE -DSUNOGL
+ifneq ($(USESSL), no)
+CDEFINES := $(CDEFINES) -DUSESSL
+endif
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -m64
@@ -63,7 +66,10 @@ DEFAULTJPEGLIB = medialib
 SHEXT = so
 
 FBXLIB = -lfbx -lX11 -lXext
-SOCKLIB = -lrrsocket -lsocket -lxnet -z lazyload -lssl -lcrypto
+SOCKLIB = -lrrsocket -lsocket -lxnet
+ifneq ($(USESSL), no)
+SOCKLIB := $(SOCKLIB) -z lazyload -lssl -z lazyload -lcrypto
+endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 FAKERLINK = -lXm -lGL
