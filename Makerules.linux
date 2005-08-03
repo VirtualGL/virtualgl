@@ -8,6 +8,9 @@ AR = ar ruvs
 
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE
+ifneq ($(USESSL), no)
+CDEFINES := $(CDEFINES) -DUSESSL
+endif
 
 ifeq ($(subplatform), ia64)
 CC = icc
@@ -41,4 +44,7 @@ SHEXT = so
 DEPFLAG = -MM
 
 FBXLIB = -lfbx -lXext
-SOCKLIB = -lrrsocket -lssl -lpthread
+SOCKLIB = -lrrsocket -lpthread
+ifneq ($(USESSL), no)
+SOCKLIB := $(SOCKLIB) -lssl
+endif

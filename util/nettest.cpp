@@ -42,23 +42,31 @@ int main(int argc, char **argv)
 	bool dossl=false;
 	rrtimer timer;
 
+	#ifdef USESSL
 	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
+	#else
+	#define usage() {printf("USAGE: %s -client <server name or IP>\n or    %s -server\n", argv[0], argv[0]);  exit(1);}
+	#endif
 
 	if(argc<2) usage();
 	if(!stricmp(argv[1], "-client"))
 	{
 		if(argc<3) usage();
 		server=0;  servername=argv[2];
+		#ifdef USESSL
 		if(argc>3 && !stricmp(argv[3], "-ssl")) {puts("Using SSL ...");  dossl=true;}
+		#endif
 	}
 	else if(!stricmp(argv[1], "-server"))
 	{
 		server=1;
+		#ifdef USESSL
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
 			dossl=true;
 			puts("Using SSL ...");
 		}
+		#endif
 	}
 	else usage();
 
@@ -68,6 +76,7 @@ int main(int argc, char **argv)
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
 		{printf("Buffer allocation error.\n");  exit(1);}
 
+	#ifdef USESSL
 	if(dossl)
 	{
 		#if defined(OPENSSL_THREADS)
@@ -76,6 +85,7 @@ int main(int argc, char **argv)
 		printf("OpenSSL threads not supported\n");
 		#endif
 	}
+	#endif
 
 	if(server)
 	{
