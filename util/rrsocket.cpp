@@ -158,11 +158,20 @@ rrsocket::rrsocket(int sd, SSL *ssl)
 	: _sslctx(NULL), _ssl(ssl), _sd(sd)
 {
 	if(_ssl) _dossl=true;  else _dossl=false;
+	#ifdef _WIN32
+	rrcs::safelock l(_Mutex);
+	_Instancecount++;
+	#endif
 }
 #else
 rrsocket::rrsocket(int sd)
 	: _sd(sd)
-{}
+{
+	#ifdef _WIN32
+	rrcs::safelock l(_Mutex);
+	_Instancecount++;
+	#endif
+}
 #endif
 
 rrsocket::~rrsocket(void)
