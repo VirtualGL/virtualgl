@@ -14,12 +14,14 @@
 #ifndef __RRSOCKET_H__
 #define __RRSOCKET_H__
 
+#ifdef USESSL
 #define OPENSSL_NO_KRB5
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#endif
 
 #include "rrerror.h"
 #include "rrmutex.h"
@@ -43,6 +45,7 @@ class sockerror : public rrerror
 #define _throwsock() throw(sockerror(__FUNCTION__, __LINE__))
 #define trysock(f) {if((f)==SOCKET_ERROR) _throwsock();}
 
+#ifdef USESSL
 class sslerror : public rrerror
 {
 	public:
@@ -88,13 +91,18 @@ class sslerror : public rrerror
 };
 
 #define _throwssl() throw(sslerror(__FUNCTION__, __LINE__))
+#endif
 
 class rrsocket
 {
 	public:
 
 		rrsocket(bool);
+		#ifdef USESSL
 		rrsocket(int, SSL *);
+		#else
+		rrsocket(int);
+		#endif
 		~rrsocket(void);
 		void close(void);
 		void connect(char *, unsigned short);
@@ -106,6 +114,7 @@ class rrsocket
 
 	private:
 
+		#ifdef USESSL
 		static unsigned long thread_id(void)
 		{
 			#ifdef _WIN32
@@ -117,15 +126,19 @@ class rrsocket
 
 		static void locking_callback(int mode, int type, const char *file, int line)
 		{
-			if(mode&CRYPTO_LOCK) cryptolock[type].lock();
-			else cryptolock[type].unlock();
+			if(mode&CRYPTO_LOCK) _Cryptolock[type].lock();
+			else _Cryptolock[type].unlock();
 		}
 
+		static bool _Sslinit;
+		static rrcs _Cryptolock[CRYPTO_NUM_LOCKS];
+		bool _dossl;  SSL_CTX *_sslctx;  SSL *_ssl;
+		#endif
+
 		static const int MAXCONN=1024;
-		static int instancecount;  static bool sslinit;
-		static rrcs mutex, cryptolock[CRYPTO_NUM_LOCKS];
-		int sd;
-		bool dossl;  SSL_CTX *sslctx;  SSL *ssl;
+		static int _Instancecount;  
+		static rrcs _Mutex;
+		int _sd;
 };
 
 #endif
