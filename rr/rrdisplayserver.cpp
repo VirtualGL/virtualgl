@@ -105,7 +105,7 @@ void rrserver::run(void)
 	{
 		rrout.println("Server error in %s\n%s", e.getMethod(), e.getMessage());
 	}
-	if(_t) delete _t;
+	if(_t) {_t->detach();  delete _t;}
 	delete this;
 }
 
