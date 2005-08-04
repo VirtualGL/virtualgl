@@ -68,6 +68,7 @@ FOBJS = $(ODIR)/faker.o \
 
 TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayclientut.o \
+        $(ODIR)/rrdisplayserverut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o
 
@@ -85,6 +86,7 @@ OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
+            $(EDIR)/rrdisplayserverut \
             $(EDIR)/rrfakerut \
             $(EDIR)/rrframeut
 
@@ -146,6 +148,11 @@ $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 $(EDIR)/rrdisplayclientut: $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
 	$(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
+		$(RRLIB)
+
+$(EDIR)/rrdisplayserverut: $(ODIR)/rrdisplayserverut.o $(ODIR)/rrdisplayclient.o \
+	$(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrdisplayserverut.o $(ODIR)/rrdisplayclient.o \
 		$(RRLIB)
 
 ##########################################################################
