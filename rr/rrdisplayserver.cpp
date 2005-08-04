@@ -110,5 +110,6 @@ void *rrdisplayserver::clientthread(void *param)
 		}
 	}
 	if(rrc) delete rrc;
+	pthread_detach(pthread_self());
 	return 0;
 }
