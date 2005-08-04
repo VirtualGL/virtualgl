@@ -43,7 +43,7 @@ class Thread
 {
 	public:
 
-		Thread(Runnable *r) : _obj(r), _handle(0) {}
+		Thread(Runnable *r) : _obj(r), _handle(0), _detached(false) {}
 
 		void start(void)
 		{
@@ -64,9 +64,18 @@ class Thread
 			#ifdef _WIN32
 			if(_handle) {WaitForSingleObject(_handle, INFINITE);  CloseHandle(_handle);}
 			#else
-			if(_handle) pthread_join(_handle, NULL);
+			if(_handle && !_detached) pthread_join(_handle, NULL);
 			#endif
 			_handle=0;
+		}
+
+		// This allows a Unix thread to kill itself.  It has no effect on Windows.
+		void detach(void)
+		{
+			#ifndef _WIN32
+			pthread_detach(_handle);
+			_detached=true;
+			#endif
 		}
 
 		void seterror(rrerror &e)
@@ -105,6 +114,7 @@ class Thread
 		#else
 		pthread_t _handle;
 		#endif
+		bool _detached;
 };
 
 #endif
