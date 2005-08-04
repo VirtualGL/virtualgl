@@ -49,6 +49,7 @@ rrcwin::~rrcwin(void)
 	if(_glf) delete _glf;
 	#endif
 	for(int i=0; i<NB; i++) _jpg[i].complete();
+	if(_t) {delete _t;  _t=NULL;}
 }
 
 #ifdef USEGL
