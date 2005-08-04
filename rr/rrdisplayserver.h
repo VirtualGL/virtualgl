@@ -41,9 +41,10 @@ class rrserver : public Runnable
 	public:
 
 	rrserver(rrsocket *sd, int drawmethod) : _drawmethod(drawmethod),
-		_windows(0), _sd(sd), _t(NULL)
+		_windows(0), _sd(sd), _t(NULL), _remotename(NULL)
 	{
 		memset(_rrw, 0, sizeof(rrcwin *)*MAXWIN);
+		if(_sd) _remotename=_sd->remotename();
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
@@ -55,7 +56,8 @@ class rrserver : public Runnable
 		for(i=0; i<_windows; i++) {if(_rrw[i]) {delete _rrw[i];  _rrw[i]=NULL;}}
 		_windows=0;
 		_winmutex.unlock(false);
-		rrout.println("-- Disconnecting %s", _sd->remotename());
+		if(!_remotename) rrout.println("-- Disconnecting\n");
+		else rrout.println("-- Disconnecting %s", _remotename);
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
@@ -71,6 +73,7 @@ class rrserver : public Runnable
 	rrcs _winmutex;
 	rrsocket *_sd;
 	Thread *_t;
+	char *_remotename;
 };
 
 #endif
