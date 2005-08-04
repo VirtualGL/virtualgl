@@ -108,6 +108,7 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 	b=&_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;
 	_bmpmutex.unlock();
 	rrframeheader hdr;
+	memset(&hdr, 0, sizeof(rrframeheader));
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
