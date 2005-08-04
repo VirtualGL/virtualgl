@@ -356,7 +356,8 @@ class rrglframe : public rrframe
 	public:
 
 	rrglframe(char *dpystring, Window win) : rrframe(), _rbits(NULL),
-		_madecurrent(false), _stereo(false), _win(win), _hpjhnd(NULL)
+		_madecurrent(false), _stereo(false), _dpy(NULL), _win(win), _ctx(0),
+		_hpjhnd(NULL)
 	{
 		XVisualInfo *v=NULL;
 		try
@@ -368,6 +369,10 @@ class rrglframe : public rrframe
 			XGetWindowAttributes(_dpy, _win, &xwa);
 			XVisualInfo vtemp;  int n=0;
 			vtemp.visualid=xwa.visual->visualid;
+			int maj_opcode=-1, first_event=-1, first_error=-1;
+			if(!XQueryExtension(_dpy, "GLX", &maj_opcode, &first_event, &first_error)
+			|| maj_opcode<0 || first_event<0 || first_error<0)
+				_throw("GLX extension not available");
 			if(!(v=XGetVisualInfo(_dpy, VisualIDMask, &vtemp, &n)) || n==0)
 				_throw("Could not obtain visual");
 			if(!(_ctx=glXCreateContext(_dpy, v, NULL, True)))
@@ -376,7 +381,9 @@ class rrglframe : public rrframe
 		}
 		catch(...)
 		{
+			if(_dpy && _ctx) {glXMakeCurrent(_dpy, 0, 0);  glXDestroyContext(_dpy, _ctx);  _ctx=0;}
 			if(v) XFree(v);
+			if(_dpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
 			throw;
 		}
 	}
