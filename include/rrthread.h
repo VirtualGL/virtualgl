@@ -43,18 +43,18 @@ class Thread
 {
 	public:
 
-		Thread(Runnable *r) : obj(r), handle(0) {}
+		Thread(Runnable *r) : _obj(r), _handle(0) {}
 
 		void start(void)
 		{
-			if(!obj) throw (rrerror("Thread::start()", "Unexpected NULL pointer"));
+			if(!_obj) throw (rrerror("Thread::start()", "Unexpected NULL pointer"));
 			#ifdef _WIN32
 			DWORD tid;
-			if((handle=CreateThread(NULL, 0, threadfunc, obj, 0, &tid))==NULL)
+			if((_handle=CreateThread(NULL, 0, threadfunc, _obj, 0, &tid))==NULL)
 				throw (w32error("Thread::start()"));
 			#else
 			int err=0;
-			if((err=pthread_create(&handle, NULL, threadfunc, obj))!=0)
+			if((err=pthread_create(&_handle, NULL, threadfunc, _obj))!=0)
 				throw (rrerror("Thread::start()", strerror(err==-1?errno:err)));
 			#endif
 		}
@@ -62,26 +62,26 @@ class Thread
 		void stop(void)
 		{
 			#ifdef _WIN32
-			if(handle) {WaitForSingleObject(handle, INFINITE);  CloseHandle(handle);}
+			if(_handle) {WaitForSingleObject(_handle, INFINITE);  CloseHandle(_handle);}
 			#else
-			if(handle) pthread_join(handle, NULL);
+			if(_handle) pthread_join(_handle, NULL);
 			#endif
-			handle=0;
+			_handle=0;
 		}
 
 		void seterror(rrerror &e)
 		{
-			if(obj) obj->lasterror=e;
+			if(_obj) _obj->lasterror=e;
 		}
 
 		void checkerror(void)
 		{
-			if(obj && obj->lasterror) throw obj->lasterror;
+			if(_obj && _obj->lasterror) throw _obj->lasterror;
 		}
 
 	protected:
 
-		Runnable *obj;
+		Runnable *_obj;
 
 		#ifdef _WIN32
 		static DWORD WINAPI threadfunc(void *param)
@@ -101,9 +101,9 @@ class Thread
 		}
 
 		#ifdef _WIN32
-		HANDLE handle;
+		HANDLE _handle;
 		#else
-		pthread_t handle;
+		pthread_t _handle;
 		#endif
 };
 
