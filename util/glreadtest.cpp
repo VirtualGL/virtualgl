@@ -24,6 +24,8 @@
 #include <GL/glu.h>
 #include "x11err.h"
 
+static int ALIGN=1;
+#define PAD(w) (((w)+(ALIGN-1))&(~(ALIGN-1)))
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
 //////////////////////////////////////////////////////////////////////
@@ -179,9 +181,9 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassa
 		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			if(buf[(l*w+j)*ps+pix[format].roffset]!=((i+y)*(j+x))%256) return 0;
-			if(buf[(l*w+j)*ps+pix[format].goffset]!=((i+y)*(j+x)*2)%256) return 0;
-			if(buf[(l*w+j)*ps+pix[format].boffset]!=((i+y)*(j+x)*3)%256) return 0;
+			if(buf[l*PAD(w*ps)+j*ps+pix[format].roffset]!=((i+y)*(j+x))%256) return 0;
+			if(buf[l*PAD(w*ps)+j*ps+pix[format].goffset]!=((i+y)*(j+x)*2)%256) return 0;
+			if(buf[l*PAD(w*ps)+j*ps+pix[format].boffset]!=((i+y)*(j+x)*3)%256) return 0;
 		}
 	}
 	return 1;
@@ -255,12 +257,12 @@ void glread(int format)
 	try {
 
 	fprintf(stderr, "glReadPixels() [bottom-up]:   ");
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
+	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN);
 	glReadBuffer(GL_FRONT);
-	if((rgbaBuffer=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
+	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
-	memset(rgbaBuffer, 0, WIDTH*HEIGHT*ps);
+	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
 	n=N;
 	do
 	{
@@ -277,10 +279,10 @@ void glread(int format)
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	fprintf(stderr, "glReadPixels() [top-down]:    ");
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
+	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN); 
 	glReadBuffer(GL_FRONT);
-	memset(rgbaBuffer, 0, WIDTH*HEIGHT*ps);
+	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
 	n=N;
 	do
 	{
@@ -289,7 +291,7 @@ void glread(int format)
 		for (i=0; i<n; i++)
 		{
 			for(int j=0; j<HEIGHT; j++)
-				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[WIDTH*ps*j]);
+				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
 		}
 		rbtime=timer.elapsed();
 		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
@@ -324,7 +326,17 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
 
-	if(argc>1 && !stricmp(argv[1], "-window")) usewindow=1;
+	for(int i=0; i<argc; i++)
+	{
+		if(!stricmp(argv[i], "-window")) usewindow=1;
+		if(!stricmp(argv[i], "-align") && i<argc-1)
+		{
+			int temp=atoi(argv[i+1]);  i++;
+			if(temp>=1 && (temp&(temp-1))==0) ALIGN=temp;
+		}
+	}
+
+	fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
 	try {
 
