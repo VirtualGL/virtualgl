@@ -9,7 +9,7 @@ ifeq ($(CC), gcc)
 
 CXX = g++
 CFLAGS = -Wall -fpic
-CDEFINES = -D_GNU_SOURCE -DSUNOGL
+CDEFINES = -D_GNU_SOURCE
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -m64
@@ -53,6 +53,7 @@ endif
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
+CDEFINES := $(CDEFINES) -DSUNOGL
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
