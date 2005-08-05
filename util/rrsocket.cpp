@@ -24,11 +24,6 @@
  #include <netinet/tcp.h>
  #define SOCKET_ERROR -1
  #define INVALID_SOCKET -1
- #ifdef USESSL
- #if defined(sun)||defined(sgi)
- #include <openssl/rand.h>
- #endif
- #endif
 #endif
 #ifndef INADDR_NONE
  #define INADDR_NONE ((in_addr_t) 0xffffffff)

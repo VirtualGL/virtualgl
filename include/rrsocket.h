@@ -21,6 +21,64 @@
 #endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#if defined(sun)||defined(sgi)
+#include <openssl/rand.h>
+#endif
+#ifndef _WIN32
+#pragma weak ASN1_INTEGER_set
+#pragma weak CRYPTO_set_id_callback
+#pragma weak CRYPTO_set_locking_callback
+#pragma weak ERR_error_string_n
+#pragma weak ERR_get_error
+#pragma weak ERR_load_crypto_strings
+#pragma weak EVP_md5
+#pragma weak EVP_PKEY_assign
+#pragma weak EVP_PKEY_free
+#pragma weak EVP_PKEY_new
+#pragma weak OBJ_txt2nid
+#pragma weak OPENSSL_add_all_algorithms_conf
+#pragma weak OPENSSL_add_all_algorithms_noconf
+#if defined(sun)||defined(sgi)
+#pragma weak RAND_seed
+#endif
+#pragma weak RSA_generate_key
+#pragma weak SSL_accept
+#pragma weak SSL_connect
+#pragma weak SSL_CTX_check_private_key
+#pragma weak SSL_CTX_free
+#pragma weak SSL_CTX_new
+#pragma weak SSL_CTX_use_certificate
+#pragma weak SSL_CTX_use_PrivateKey
+#pragma weak SSL_free
+#pragma weak SSL_get_error
+#pragma weak SSL_library_init
+#pragma weak SSL_load_error_strings
+#pragma weak SSL_new
+#pragma weak SSL_read
+#pragma weak SSL_set_accept_state
+#pragma weak SSL_set_connect_state
+#pragma weak SSL_set_fd
+#pragma weak SSL_shutdown
+#pragma weak SSL_write
+#pragma weak SSLv23_client_method
+#pragma weak SSLv23_server_method
+#pragma weak X509_free
+#pragma weak X509_get_serialNumber
+#pragma weak X509_gmtime_adj
+#pragma weak X509_NAME_add_entry_by_NID
+#pragma weak X509_NAME_free
+#pragma weak X509_NAME_new
+#pragma weak X509_new
+#pragma weak X509_PUBKEY_free
+#pragma weak X509_PUBKEY_get
+#pragma weak X509_PUBKEY_new
+#pragma weak X509_PUBKEY_set
+#pragma weak X509_set_issuer_name
+#pragma weak X509_set_pubkey
+#pragma weak X509_set_subject_name
+#pragma weak X509_set_version
+#pragma weak X509_sign
+#endif
 #endif
 
 #include "rrerror.h"
