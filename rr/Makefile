@@ -140,7 +140,7 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -lGL -lGLU -lX11 -ldl -lpthread
+	$(CXX) $(LDFLAGS) -o $@ $< -z now -lGL -lGLU -z now -lX11 -ldl -lpthread
 
 $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
