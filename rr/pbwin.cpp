@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef sun
+#if defined(sun)||defined(linux)
 #include "rrsunray.h"
 #endif
 
@@ -220,7 +220,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_syncdpy=false;
 	_dirty=false;
 	_autotestframecount=0;
-	#ifdef sun
+	#if defined(sun)||defined(linux)
 	_sunrayhandle=RRSunRayInit(windpy, win);
 	#endif
 
@@ -350,7 +350,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		compress=RRCOMP_MJPEG;
 	}
 
-	#ifdef sun
+	#if defined(sun)||defined(linux)
 	// If this is a SunRay session, then use the SunRay compressor to send data
 	if(_sunrayhandle)
 	{
