@@ -682,7 +682,6 @@ static int d_postconvertline(mlib_u8 *linebuf, mlib_u8 *dstbuf, jpgstruct *jpg)
 static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
 	mlib_u8 *crbuf, int cw, int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2)
 {
-	int i, i2;
 	int rgbstride=jpg->pitch;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, const mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, mlib_s32)=NULL;
