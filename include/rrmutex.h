@@ -196,9 +196,13 @@ class rrsem
 			if(WaitForSingleObject(sem, INFINITE)==WAIT_FAILED)
 				throw(w32error("rrsem::wait()"));
 			#elif defined (__APPLE__)
-			if(sem_wait(sem)==-1) throw(unixerror("rrsem::wait()"));
+			int err=0;
+			do {err=sem_wait(sem);} while(err<0 && errno==EINTR);
+			if(err<0) throw(unixerror("rrsem::wait()"));
 			#else
-			if(sem_wait(&sem)==-1) throw(unixerror("rrsem::wait()"));
+			int err=0;
+			do {err=sem_wait(&sem);} while(err<0 && errno==EINTR);
+			if(err<0) throw(unixerror("rrsem::wait()"));
 			#endif
 		}
 
