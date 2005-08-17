@@ -21,9 +21,10 @@ extern FakerConfig fconfig;
 static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
+	dlerror();  // Clear error state
 	sym=dlsym(dllhnd, (char *)symbol);
 	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_DEFAULT, (char *)symbol);}
-	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "[VGL] %s\n", err);}
+	err=dlerror();	if(err) {if(!quiet) fprintf(stderr, "[VGL] Error loading %s:\n[VGL] %s\n", symbol, err);}
 	return sym;
 }
 
