@@ -21,6 +21,9 @@
 #include "rrerror.h"
 #include <errno.h>
 #include "../rr/glx.h"
+#ifdef USEGLP
+#include <GL/glp.h>
+#endif
 #include <GL/glu.h>
 #include "x11err.h"
 
@@ -79,12 +82,17 @@ pixelformat pix[2
 
 #define bench_name		"GLreadtest"
 
-#define WIDTH             701
-#define HEIGHT            701
+#define _WIDTH            701
+#define _HEIGHT           701
 #define N                 5
 
+int WIDTH=_WIDTH, HEIGHT=_HEIGHT;
 Display *dpy=NULL;  Window win=0;
 rrtimer timer;
+int useglp=0;
+#ifdef USEGLP
+int glpdevice=-1;
+#endif
 int usewindow=0;
 
 //////////////////////////////////////////////////////////////////////
@@ -106,32 +114,98 @@ void pbufferinit(Display *dpy, Window win)
 	int fbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 		GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
-	GLXFBConfig *fbconfigs;  int nelements;
+	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
 	GLXPbuffer pbuffer=0;
 	GLXContext ctx=0;
 
+	// Use GLX 1.1 functions here in case we're remotely displaying to
+	// something that doesn't support GLX 1.3
+	if(usewindow)
+	{
+		XVisualInfo *v=NULL;
+
+		try {
+
+		int fbattribsold[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+			GLX_BLUE_SIZE, 8, None};
+		if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), fbattribsold)))
+			_throw("Could not obtain Visual");
+		if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
+			_throw("Could not create GL context");
+		XFree(v);
+		glXMakeCurrent(dpy, win, ctx);
+		return;
+
+		} catch(...)
+		{
+			if(ctx) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);}
+			if(v) XFree(v);
+			throw;
+		}
+	}
+
 	try {
 
-	errifnot(win);  errifnot(dpy);
-	if(usewindow) fbattribs[9]=GLX_WINDOW_BIT;
+	if(!useglp) {errifnot(win);  errifnot(dpy);}
+
+	#ifdef USEGLP
+	if(useglp)
+	{
+		fbattribs[6]=None;
+		fbconfigs=glPChooseFBConfig(glpdevice, fbattribs, &nelements);
+	}
+	else
+	#endif
 	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), fbattribs, &nelements);
 	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
-	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
-	if(!(ctx=glXCreateNewContext(dpy, fbconfigs[0], GLX_RGBA_TYPE, NULL, True)))
-		_throw("Could not create GLX context");
-	if(usewindow)
-		glXMakeContextCurrent(dpy, win, win, ctx);
+
+	#ifdef USEGLP
+	if(useglp)
+		ctx=glPCreateNewContext(fbconfigs[0], GLX_RGBA_TYPE, NULL);
 	else
-	{
-		if(!(pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs)))
-			_throw("Could not create Pbuffer");
-		glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
-	}
+	#endif
+	ctx=glXCreateNewContext(dpy, fbconfigs[0], GLX_RGBA_TYPE, NULL, True);
+	if(!ctx)	_throw("Could not create GL context");
+
+	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
+	#ifdef USEGLP
+	if(useglp)
+		pbuffer=glPCreateBuffer(fbconfigs[0], pbattribs);
+	else
+	#endif
+	pbuffer=glXCreatePbuffer(dpy, fbconfigs[0], pbattribs);
+	if(!pbuffer) _throw("Could not create Pbuffer");
+
+	#ifdef USEGLP
+	if(useglp)
+		glPMakeContextCurrent(pbuffer, pbuffer, ctx);
+	else
+	#endif
+	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
 
 	} catch(...)
 	{
-		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
-		if(ctx) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);}
+		if(pbuffer)
+		{
+			#ifdef USEGLP
+			if(useglp) glPDestroyBuffer(pbuffer);
+			else
+			#endif
+			glXDestroyPbuffer(dpy, pbuffer);
+		}
+		if(ctx)
+		{
+			#ifdef USEGLP
+			if(useglp)
+			{
+				glPMakeContextCurrent(0, 0, 0);  glPDestroyContext(ctx);
+			}
+			else
+			#endif
+			{
+				glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);
+			}
+		}
 		throw;
 	}
 }
@@ -240,7 +314,7 @@ void glwrite(int format)
 			glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		}
 		rbtime=timer.elapsed();
-	} while(rbtime<2. && !check_errors("frame buffer write"));
+	} while(rbtime<1. && !check_errors("frame buffer write"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -275,7 +349,7 @@ void glread(int format)
 		rbtime=timer.elapsed();
 		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
 			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<2. && !check_errors("frame buffer read"));
+	} while (rbtime<1. && !check_errors("frame buffer read"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	fprintf(stderr, "glReadPixels() [top-down]:    ");
@@ -296,7 +370,7 @@ void glread(int format)
 		rbtime=timer.elapsed();
 		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
 			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<2. && !check_errors("frame buffer read"));
+	} while (rbtime<1. && !check_errors("frame buffer read"));
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -319,41 +393,106 @@ void display(void)
 	exit(0);
 }
 
+void usage(char **argv)
+{
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window]\n", argv[0]);
+	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>]\n");
+	#ifdef USEGLP
+	fprintf(stderr, "       [-device <GLP device>]\n");
+	#endif
+	fprintf(stderr, "\n-h or -? = This screen\n");
+	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
+	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", _WIDTH);
+	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
+	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
+	#ifdef USEGLP
+	fprintf(stderr, "-device = Set GLP device to use for rendering (default: Use GLX)\n");
+	#endif
+	fprintf(stderr, "\n");
+	exit(0);
+}
+
 //////////////////////////////////////////////////////////////////////
 // Main
 //////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+	#ifdef USEGLP
+	char *device=NULL;
+	#endif
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
 
 	for(int i=0; i<argc; i++)
 	{
+		if(!stricmp(argv[i], "-h")) usage(argv);
+		if(!stricmp(argv[i], "-?")) usage(argv);
 		if(!stricmp(argv[i], "-window")) usewindow=1;
 		if(!stricmp(argv[i], "-align") && i<argc-1)
 		{
 			int temp=atoi(argv[i+1]);  i++;
 			if(temp>=1 && (temp&(temp-1))==0) ALIGN=temp;
 		}
+		if(!stricmp(argv[i], "-width") && i<argc-1)
+		{
+			int temp=atoi(argv[i+1]);  i++;
+			if(temp>=1) WIDTH=temp;
+		}
+		if(!stricmp(argv[i], "-height") && i<argc-1)
+		{
+			int temp=atoi(argv[i+1]);  i++;
+			if(temp>=1) HEIGHT=temp;
+		}
+		#ifdef USEGLP
+		if(!strnicmp(argv[i], "-d", 2) && i<argc-1)
+		{
+			char **devices=NULL;  int ndevices=0;
+			if((devices=glPGetDeviceNames(&ndevices))==NULL || ndevices<1)
+			{
+				fprintf(stderr, "ERROR: No GLP devices are registered.\n");
+				exit(1);
+			}
+			if(!strnicmp(argv[i+1], "GLP", 3)) device=NULL;
+			else device=argv[i+1];
+			if((glpdevice=glPOpenDevice(device))<0)
+			{
+				fprintf(stderr, "ERROR: Could not open GLP device %s.\n", device);
+				exit(1);
+			}
+			if(!device) device=devices[0];
+			useglp=1;
+		}
+		#endif
 	}
-
-	fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
 	try {
 
-	XSetErrorHandler(xhandler);
-	if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
+	if(usewindow && useglp)
+		_throw("ERROR: Cannot render to a window if GLP mode is enabled.");
+	if(argc<2) fprintf(stderr, "\n%s -h for advanced usage.\n", argv[0]);
+	#ifdef USEGLP
+	if(useglp) fprintf(stderr, "\nRendering to Pbuffer using GLP on device %s\n", device);
+	#endif
 
-	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
+	if(!useglp)
 	{
-		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
-		exit(1);
-	}
+		XSetErrorHandler(xhandler);
+		if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
+		fprintf(stderr, "\nRendering to %s using GLX on display %s\n", usewindow?"window":"Pbuffer", DisplayString(dpy));
 
-	errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
-		0, 0, usewindow?WIDTH:1, usewindow?HEIGHT:1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-		BlackPixel(dpy, DefaultScreen(dpy))));
-	if(usewindow) XMapWindow(dpy, win);
-	XSync(dpy, False);
+		if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
+		{
+			fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
+			exit(1);
+		}
+
+		errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
+			0, 0, usewindow?WIDTH:1, usewindow?HEIGHT:1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+			BlackPixel(dpy, DefaultScreen(dpy))));
+		if(usewindow) XMapWindow(dpy, win);
+		XSync(dpy, False);
+	}
+	fprintf(stderr, "Drawable size = %d x %d pixels\n", WIDTH, HEIGHT);
+	fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 	pbufferinit(dpy, win);
 	display();
 	return 0;
