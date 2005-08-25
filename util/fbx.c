@@ -23,13 +23,13 @@
 static int __line=-1;
 
 const int fbx_rmask[FBX_FORMATS]=
-	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000};
+	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0};
 const int fbx_gmask[FBX_FORMATS]=
-	{0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00};
+	{0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0};
 const int fbx_bmask[FBX_FORMATS]=
-	{0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF};
+	{0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF, 0};
 const char *_fbx_formatname[FBX_FORMATS]=
-	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
+	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX"};
 
 #ifdef WIN32
 
@@ -283,7 +283,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	#endif
 
 	x11(XGetWindowAttributes(s->wh.dpy, s->wh.win, &xwinattrib));
-	if(s->wh.win!=xwinattrib.root)
+	if(s->wh.win!=xwinattrib.root && s->format!=FBX_INDEX)
 	{
 		x11(XGetWindowAttributes(s->wh.dpy, xwinattrib.root, &rwinattrib));
 		XTranslateCoordinates(s->wh.dpy, s->wh.win, xwinattrib.root, 0, 0, &x, &y, &dummy);
@@ -307,12 +307,12 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 		#ifdef USESHM
 		if(s->shm)
 		{
-			x11(XShmGetImage(s->wh.dpy, xwinattrib.root, s->xi, wx, wy, AllPlanes));
+			x11(XShmGetImage(s->wh.dpy, s->wh.win, s->xi, wx, wy, AllPlanes));
 		}
 		else
 		#endif
 		{
-			x11(XGetSubImage(s->wh.dpy, xwinattrib.root, wx, wy, s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
+			x11(XGetSubImage(s->wh.dpy, s->wh.win, wx, wy, s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
 		}
 	}
 	return 0;

@@ -79,9 +79,14 @@ void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *b
 		for(j=0; j<w; j++)
 		{
 			memset(&buf[i*pitch+j*ps], 0, fbx_ps[format]);
-			buf[i*pitch+j*ps+fbx_roffset[format]]=255;
-			buf[i*pitch+j*ps+fbx_goffset[format]]=(j+x)%256;
-			buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y)%256;
+			if(format==FBX_INDEX)
+				buf[i*pitch+j]=(j+x+i+y)%256;
+			else
+			{
+				buf[i*pitch+j*ps+fbx_roffset[format]]=255;
+				buf[i*pitch+j*ps+fbx_goffset[format]]=(j+x)%256;
+				buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y)%256;
+			}
 		}
 	}
 }
@@ -93,9 +98,16 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf
 	{
 		for(j=0; j<w; j++)
 		{
-			if(buf[i*pitch+j*ps+fbx_roffset[format]]!=255) return 0;
-			if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(j+x)%256) return 0;
-			if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y)%256) return 0;
+			if(format==FBX_INDEX)
+			{
+				if(buf[i*pitch+j]!=(j+x+i+y)%256) return 0;
+			}
+			else
+			{
+				if(buf[i*pitch+j*ps+fbx_roffset[format]]!=255) return 0;
+				if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(j+x)%256) return 0;
+				if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y)%256) return 0;
+			}
 		}
 	}
 	return 1;
@@ -164,7 +176,7 @@ void nativewrite(int useshm)
 			fbx_sync(&s);
 		}
 		rbtime=timer.elapsed();
-	} while(rbtime<2.);
+	} while(rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	clearfb();
@@ -188,7 +200,7 @@ void nativewrite(int useshm)
 			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
 		}
 		rbtime=timer.elapsed();
-	} while(rbtime<2.);
+	} while(rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -226,7 +238,7 @@ void nativeread(int useshm)
 		rbtime=timer.elapsed();
 		if(!cmpbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits))
 			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<2.);
+	} while (rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -353,7 +365,7 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) t[i]->checkerror();
 		for(i=0; i<4; i++) {delete t[i];  delete wt[i];}
 		rbtime=timer.elapsed();
-	} while (rbtime<2.);
+	} while (rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -380,7 +392,7 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) t[i]->checkerror();
 		for(i=0; i<4; i++) {delete t[i];  delete rt[i];}
 		rbtime=timer.elapsed();
-	} while (rbtime<2.);
+	} while (rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -412,7 +424,7 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) t[i]->checkerror();
 		for(i=0; i<4; i++) {delete t[i];  delete wt1[i];}
 		rbtime=timer.elapsed();
-	} while (rbtime<2.);
+	} while (rbtime<1.);
 	fbx_term(&stressfb0);
 	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
 
@@ -439,8 +451,6 @@ void display(void)
 	#endif
 	fg();  nativestress(0);
 	fprintf(stderr, "\n");
-
-	exit(0);
 }
 
 #ifdef WIN32
@@ -468,7 +478,7 @@ int main(int argc, char **argv)
 {
 	int i;
 
-	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
+	fprintf(stderr, "\n%s v%s (Build %s)\n\n", bench_name, __VERSION, __BUILD);
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
@@ -539,12 +549,56 @@ int main(int argc, char **argv)
 
 	#else
 
-	errifnot(wh.win=XCreateSimpleWindow(wh.dpy, DefaultRootWindow(wh.dpy),
-		0, 0, width, height, 0, WhitePixel(wh.dpy, DefaultScreen(wh.dpy)),
-		BlackPixel(wh.dpy, DefaultScreen(wh.dpy))));
-	errifnot(XMapRaised(wh.dpy, wh.win));
-	XSync(wh.dpy, False);
-	display();
+	XVisualInfo vtemp, *v=NULL;  int n=0;
+	XSetWindowAttributes swa;
+	Window root=DefaultRootWindow(wh.dpy);
+
+	vtemp.depth=24;  vtemp.c_class=TrueColor;
+	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
+	{
+		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
+		swa.border_pixel=0;
+		swa.event_mask=0;
+		errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+			v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+			&swa));
+		errifnot(XMapRaised(wh.dpy, wh.win));
+		XSync(wh.dpy, False);
+		display();
+		XDestroyWindow(wh.dpy, wh.win);
+		XFree(v);  v=NULL;
+	}
+	else fprintf(stderr, "No RGB visuals available.  Skipping those tests.\n\n");
+
+	vtemp.depth=8;  vtemp.c_class=PseudoColor;
+	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
+	{
+		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocAll);
+		swa.border_pixel=0;
+		swa.event_mask=0;
+    XColor xc[256];  int i;
+		errifnot(v->colormap_size==256);
+		for(i=0; i<256; i++)
+		{
+			xc[i].red=(i<128? i*2:255)<<8;
+			xc[i].green=(i<128? i*2:255-(i-128)*2)<<8;
+			xc[i].blue=(i<128? 255:255-(i-128)*2)<<8;
+			xc[i].flags = DoRed | DoGreen | DoBlue;
+			xc[i].pixel=i;
+		}
+		XStoreColors(wh.dpy, swa.colormap, xc, 256);
+		errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+			v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+			&swa));
+		errifnot(XMapRaised(wh.dpy, wh.win));
+		XSync(wh.dpy, False);
+		display();
+		XDestroyWindow(wh.dpy, wh.win);
+		XFreeColormap(wh.dpy, swa.colormap);
+		XFree(v);  v=NULL;
+	}
+	else fprintf(stderr, "No Pseudocolor visuals available.  Skipping those tests.\n\n");
+
 	return 0;
 
 	#endif
