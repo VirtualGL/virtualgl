@@ -62,9 +62,7 @@ GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=render_type;
-	#ifndef sun
 	glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
-	#endif
 	glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
 	glxattribs[j]=None;
 	fbconfigs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), glxattribs, &nelements);
