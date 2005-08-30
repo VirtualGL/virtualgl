@@ -62,7 +62,14 @@ GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=render_type;
+	// GLP won't grok GLX_STEREO, even if it's set to False
+	#ifdef USEGLP
+	if(!fconfig.glp) {
+	#endif
 	glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
+	#ifdef USEGLP
+	}
+	#endif
 	glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
 	glxattribs[j]=None;
 	fbconfigs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), glxattribs, &nelements);
