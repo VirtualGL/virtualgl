@@ -368,6 +368,7 @@ class rrglframe : public rrframe
 			XWindowAttributes xwa;
 			XGetWindowAttributes(_dpy, _win, &xwa);
 			XVisualInfo vtemp;  int n=0;
+			if(!xwa.visual) _throw("Could not get window attributes");
 			vtemp.visualid=xwa.visual->visualid;
 			int maj_opcode=-1, first_event=-1, first_error=-1;
 			if(!XQueryExtension(_dpy, "GLX", &maj_opcode, &first_event, &first_error)
