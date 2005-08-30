@@ -261,6 +261,16 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	if(fconfig.glp)
 	{
 		if(attribute==GLX_X_VISUAL_TYPE) {*value=GLX_TRUE_COLOR;  return 0;}
+		else if(attribute==GLX_STEREO) {*value=0;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_TYPE) {*value=GLX_NONE;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_INDEX_VALUE) {*value=0;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_RED_VALUE) {*value=0;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_GREEN_VALUE) {*value=0;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_BLUE_VALUE) {*value=0;  return 0;}
+		else if(attribute==GLX_TRANSPARENT_ALPHA_VALUE) {*value=0;  return 0;}
+		else if(attribute==GLX_VIDEO_RESIZE_SUN) {*value=0;  return 0;}
+		else if(attribute==GLX_VIDEO_REFRESH_TIME_SUN) {*value=0;  return 0;}
+		else if(attribute==GLX_GAMMA_VALUE_SUN) {*value=100;  return 0;}
 		else return glPGetFBConfigAttrib(config, attribute, value);
 	}
 	else
