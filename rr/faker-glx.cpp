@@ -115,7 +115,9 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_
 	else
 	#endif
 	pb=_glXCreatePbuffer(_localdpy, config, attrib_list);
+	TRY();
 	if(dpy && pb) glxdh.add(pb, dpy);
+	CATCH();
 	return pb;
 }
 
@@ -137,7 +139,9 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigne
 	}
 	#endif
 	pb=_glXCreateGLXPbufferSGIX(_localdpy, config, width, height, attrib_list);
+	TRY();
 	if(dpy && pb) glxdh.add(pb, dpy);
+	CATCH();
 	return pb;
 }
 
@@ -148,7 +152,9 @@ void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 	else
 	#endif
 	_glXDestroyGLXPbufferSGIX(_localdpy, pbuf);
+	TRY();
 	if(pbuf) glxdh.remove(pbuf);
+	CATCH();
 }
 
 void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
@@ -158,7 +164,9 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 	else
 	#endif
 	_glXDestroyPbuffer(_localdpy, pbuf);
+	TRY();
 	if(pbuf) glxdh.remove(pbuf);
+	CATCH();
 }
 
 void glXFreeContextEXT(Display *dpy, GLXContext ctx)
@@ -219,25 +227,31 @@ GLXContext glXGetCurrentContext(void)
 Display *glXGetCurrentDisplay(void)
 {
 	Display *dpy=NULL;  pbwin *pb=NULL;
+	TRY();
 	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
 		dpy=pb->getwindpy();
 	else dpy=glxdh.getcurrentdpy(GetCurrentDrawable());
+	CATCH();
 	return dpy;
 }
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
 	pbwin *pb=NULL;  GLXDrawable draw=GetCurrentDrawable();
+	TRY();
 	if((pb=winh.findpb(draw))!=NULL)
 		draw=pb->getwin();
+	CATCH();
 	return draw;
 }
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	pbwin *pb=NULL;  GLXDrawable read=GetCurrentReadDrawable();
+	TRY();
 	if((pb=winh.findpb(read))!=NULL)
 		read=pb->getwin();
+	CATCH();
 	return read;
 }
 
