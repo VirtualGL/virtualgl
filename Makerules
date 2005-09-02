@@ -105,6 +105,14 @@ $(ODIR)/%.o: %.cpp
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
 	@rm -f $(ODIR)/$*.d.tmp
 
+$(ODIR)/%.E: %.c
+	@rm -f $@
+	$(CC) $(CFLAGS) -E $*.c > $@
+
+$(ODIR)/%.E: %.cpp
+	@rm -f $@
+	$(CXX) $(CXXFLAGS) -E $*.cpp > $@ 
+
 $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<
 
