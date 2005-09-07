@@ -220,10 +220,13 @@ pbwin::pbwin(Display *windpy, Window win)
 	_syncdpy=false;
 	_dirty=false;
 	_autotestframecount=0;
+	_truecolor=true;
 	#if defined(sun)||defined(linux)
 	_sunrayhandle=RRSunRayInit(windpy, win);
 	#endif
-
+	XWindowAttributes xwa;
+	XGetWindowAttributes(windpy, win, &xwa);
+	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
 }
 
 pbwin::~pbwin(void)
@@ -375,6 +378,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	}
 	#endif
 
+	if(!_truecolor) compress=RRCOMP_NONE;
+
 	switch(compress)
 	{
 		case RRCOMP_MJPEG:
@@ -450,22 +455,34 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
 			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 			b->_flags|=RRBMP_BOTTOMUP;
-			int format= (b->_pixelsize==3?GL_RGB:GL_RGBA);
+			int format;
 			unsigned char *bits=b->_bits;
-			#ifdef GL_BGR_EXT
-			if(b->_flags&RRBMP_BGR && b->_pixelsize==3) format=GL_BGR_EXT;
-			#endif
-			#ifdef GL_BGRA_EXT
-			if(b->_flags&RRBMP_BGR && b->_pixelsize==4 && !(b->_flags&RRBMP_ALPHAFIRST))
-				format=GL_BGRA_EXT;
-			#endif
-			if(b->_flags&RRBMP_BGR && b->_pixelsize==4 && b->_flags&RRBMP_ALPHAFIRST)
+			switch(b->_pixelsize)
 			{
-				#ifdef GL_ABGR_EXT
-				format=GL_ABGR_EXT;
-				#elif defined(GL_BGRA_EXT)
-				format=GL_BGRA_EXT;  bits=b->_bits+1;
-				#endif
+				case 1:  format=GL_COLOR_INDEX;  break;
+				case 3:
+					format=GL_RGB;
+					#ifdef GL_BGR_EXT
+					if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
+					#endif
+					break;
+				case 4:
+					format=GL_RGBA;
+					#ifdef GL_BGRA_EXT
+					if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
+						format=GL_BGRA_EXT;
+					#endif
+					if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
+					{
+						#ifdef GL_ABGR_EXT
+						format=GL_ABGR_EXT;
+						#elif defined(GL_BGRA_EXT)
+						format=GL_BGRA_EXT;  bits=b->_bits+1;
+						#endif
+					}
+					break;
+				default:
+					_throw("Unsupported pixel format");
 			}
 			readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch, min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			_blitter->sendframe(b, sync);

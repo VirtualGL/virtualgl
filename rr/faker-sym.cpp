@@ -124,6 +124,11 @@ void __vgl_loadsymbols(void)
 	lsym(glViewport)
 	lsym(glDrawBuffer)
 	lsym(glPopAttrib)
+	lsym(glReadPixels)
+	lsym(glDrawPixels)
+	#ifdef SUNOGL
+	lsym(glBegin)
+	#endif
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 

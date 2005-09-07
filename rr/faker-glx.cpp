@@ -373,7 +373,7 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) return "GLX_SGIX_fbconfig GLX_SGIX_pbuffer";
+	if(fconfig.glp) return "GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_EXT_visual_info";
 	else
 	#endif
 	return _glXQueryExtensionsString(_localdpy, screen);
@@ -452,6 +452,17 @@ int glXDisableXineramaSUN(Display *dpy)
 	return _glXDisableXineramaSUN(_localdpy);
 }
 #endif
+
+GLboolean glXGetTransparentIndexSUN(Display *dpy, Window overlay,
+	Window underlay, unsigned int *transparentIndex)
+{
+	if(fconfig.transpixel>=0)
+	{
+		*transparentIndex=(unsigned int)fconfig.transpixel;  return True;
+	}
+	if(!__glXGetTransparentIndexSUN) return False;
+	return _glXGetTransparentIndexSUN(dpy, overlay, underlay, transparentIndex);
+}
 
 Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
 {

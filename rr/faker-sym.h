@@ -268,6 +268,12 @@ funcdef3(void, glXGetSelectedEventSGIX, Display *, dpy, GLXDrawable, drawable,
 	unsigned long *, mask,);
 
 
+// GLX_SUN_get_transparent_index
+
+funcdef4(GLboolean, glXGetTransparentIndexSUN, Display *, dpy, Window, overlay,
+	Window, underlay, unsigned int *, transparentIndex, return);
+
+
 // SUN-specific
 
 #ifdef sun
@@ -292,6 +298,16 @@ funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,)
 funcdef1(void, glDrawBuffer, GLenum, drawbuf,);
 
 funcdef0(void, glPopAttrib,);
+
+funcdef7(void, glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
+	GLenum, format, GLenum, type, GLvoid*, pixels,);
+
+funcdef5(void, glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
+	GLenum, type, const GLvoid*, pixels,);
+
+#ifdef SUNOGL
+funcdef1(void, glBegin, GLenum, mode,);
+#endif
 
 
 // X11 functions

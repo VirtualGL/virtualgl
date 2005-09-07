@@ -60,6 +60,7 @@ class FakerConfig
 			np=min(numprocs(), MAXPROCS);  if(np>1) np--;
 			autotest=false;
 			gamma=true;
+			transpixel=-1;
 			reloadenv();
 		}
 
@@ -119,6 +120,7 @@ class FakerConfig
 			}
 			getconfigbool("AUTOTEST", autotest);
 			getconfigbool("GAMMA", gamma);
+			getconfigint("TRANSPIXEL", transpixel, 0, 255);
 		}
 
 		void setloqual(void)
@@ -144,6 +146,7 @@ class FakerConfig
 		int &currentsubsamp;
 		int compress;
 		int port;
+		int transpixel;
 
 		bool spoil;
 		bool ssl;

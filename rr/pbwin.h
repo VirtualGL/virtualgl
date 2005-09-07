@@ -84,6 +84,7 @@ class pbwin
 		#if defined(sun)||defined(linux)
 		void *_sunrayhandle;
 		#endif
+		bool _truecolor;
 };
 
 #endif

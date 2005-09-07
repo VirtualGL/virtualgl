@@ -42,6 +42,21 @@ FakerConfig fconfig;
 #include "x11err.h"
 #endif
 
+#ifdef SUNOGL
+extern "C" {
+static GLvoid r_glIndexd(OglContextPtr, GLdouble);
+static GLvoid r_glIndexf(OglContextPtr, GLfloat);
+static GLvoid r_glIndexi(OglContextPtr, GLint);
+static GLvoid r_glIndexs(OglContextPtr, GLshort);
+static GLvoid r_glIndexub(OglContextPtr, GLubyte);
+static GLvoid r_glIndexdv(OglContextPtr, const GLdouble *);
+static GLvoid r_glIndexfv(OglContextPtr, const GLfloat *);
+static GLvoid r_glIndexiv(OglContextPtr, const GLint *);
+static GLvoid r_glIndexsv(OglContextPtr, const GLshort *);
+static GLvoid r_glIndexubv(OglContextPtr, const GLubyte *);
+}
+#endif
+
 // Did I mention that debugging real-time systems is hell?
 void _vglprintf (FILE *f, const char *format, ...)
 {
@@ -154,7 +169,7 @@ static void fakerinit(void)
 	if(getenv("VGL_DEBUG"))
 	{
 		printf("[VGL] Attach debugger to process %d ...\n", getpid());
-		sleep(30);
+		char c=fgetc(stdin);
 	}
 	#if 0
 	XSetErrorHandler(xhandler);
@@ -489,71 +504,96 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 // GLX 1.0 Context management
 /////////////////////////////
 
-static XVisualInfo *_MatchVisual(Display *dpy, int screen, GLXFBConfig c)
+static XVisualInfo *_MatchVisual(Display *dpy, int screen,
+	int depth, int c_class, int level, int stereo, int trans)
 {
-	XVisualInfo *_v=NULL, vtemp;
+	XVisualInfo *visuals=NULL, vtemp;
 	int i, n=0, maj_opcode=-1, first_event=-1, first_error=-1, clientglx=0;
-	if(!dpy || !c) return NULL;
-	vtemp.depth=glXConfigDepth(c);  vtemp.c_class=glXConfigClass(c);
-	int svrstereo=0;
-	glXGetFBConfigAttrib(_localdpy, c, GLX_STEREO, &svrstereo);
-	if(!(_v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)))
+	if(!dpy) return NULL;
+	struct visattribs
 	{
-		vtemp.depth=24;  vtemp.c_class=TrueColor;
-		if(!(_v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)))
-			return NULL;
-	}
-	vtemp.visualid=_v[0].visualid;
+		int db, gl, level, stereo, transtype;  double gamma;
+	};
+	struct visattribs *va=NULL;
+
+	if(!dpy) return NULL;
+
+	vtemp.depth=depth;  vtemp.c_class=c_class;
+	if(!(visuals=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)) || n==0)
+		return NULL;
+
 	if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
 	&& maj_opcode>=0 && first_event>=0 && first_error>=0)
 		clientglx=1;
-	else if(svrstereo)
-	{
-		rrout.println("[VGL] GLX not available on client.  Stereo disabled.");
-		svrstereo=0;
-	}
+
+	if((va=(visattribs *)malloc(sizeof(visattribs)*n))==NULL)
+		{XFree(visuals);  return NULL;}
+	memset(va, 0, sizeof(visattribs)*n);
+
 	for(i=0; i<n; i++)
 	{
-		double gamma=0.;  int clistereo=0;
-		XSolarisGetVisualGamma(dpy, screen, _v[i].visual, &gamma);
-		if(clientglx && svrstereo)
-		{
-			int clidb=0;
-			_glXGetConfig(dpy, &_v[i], GLX_DOUBLEBUFFER, &clidb);
-			_glXGetConfig(dpy, &_v[i], GLX_STEREO, &clistereo);
-			if(!clidb) clistereo=0;
-		}
-		if(fconfig.gamma && gamma==1.0 && svrstereo==clistereo)
-			{vtemp.visualid=_v[i].visualid; goto found;}
-		else if(!fconfig.gamma && gamma!=1.0 && svrstereo==clistereo)
-			{vtemp.visualid=_v[i].visualid; goto found;}
-	}
-	// Try again without gamma restriction
-	if(svrstereo) for(i=0; i<n; i++)
-	{
-		int clistereo=0;
+		XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &va[i].gamma);
 		if(clientglx)
 		{
-			int clidb=0;
-			_glXGetConfig(dpy, &_v[i], GLX_DOUBLEBUFFER, &clidb);
-			_glXGetConfig(dpy, &_v[i], GLX_STEREO, &clistereo);
-			if(!clidb) clistereo=0;
+			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &va[i].db);
+			_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].gl);
+			_glXGetConfig(dpy, &visuals[i], GLX_LEVEL, &va[i].level);
+			_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].stereo);
+			_glXGetConfig(dpy, &visuals[i], GLX_TRANSPARENT_TYPE, &va[i].transtype);
 		}
-		if(svrstereo==clistereo)
-			{vtemp.visualid=_v[i].visualid; goto found;}
 	}
-	// Try again without stereo restriction
+
+	// Try to find an exact match
 	for(i=0; i<n; i++)
 	{
-		double gamma=0.;
-		XSolarisGetVisualGamma(dpy, screen, _v[i].visual, &gamma);
-		if(fconfig.gamma && gamma==1.0)
-			{vtemp.visualid=_v[i].visualid; goto found;}
-		else if(!fconfig.gamma && gamma!=1.0)
-			{vtemp.visualid=_v[i].visualid; goto found;}
+		int match=1;
+		if(fconfig.gamma && va[i].gamma!=1.0) match=0;
+		if(!fconfig.gamma && va[i].gamma==1.0) match=0;
+		if(stereo!=va[i].stereo) match=0;
+		if(stereo && !va[i].db) match=0;
+		if(stereo && !va[i].gl) match=0;
+		if(level!=va[i].level) match=0;
+		if(trans && va[i].transtype==GLX_NONE) match=0;
+		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
 	}
+
+	// Try again, without gamma restriction
+	for(i=0; i<n; i++)
+	{
+		int match=1;
+		if(stereo!=va[i].stereo) match=0;
+		if(stereo && !va[i].db) match=0;
+		if(stereo && !va[i].gl) match=0;
+		if(level!=va[i].level) match=0;
+		if(trans && va[i].transtype==GLX_NONE) match=0;
+		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
+	}
+
+	// Try again, without stereo restriction
+	for(i=0; i<n; i++)
+	{
+		int match=1;
+		if(fconfig.gamma && va[i].gamma!=1.0) match=0;
+		if(!fconfig.gamma && va[i].gamma==1.0) match=0;
+		if(level!=va[i].level) match=0;
+		if(trans && va[i].transtype==GLX_NONE) match=0;
+		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
+	}
+
+	// Try again, without either restriction
+	for(i=0; i<n; i++)
+	{
+		int match=1;
+		if(level!=va[i].level) match=0;
+		if(trans && va[i].transtype==GLX_NONE) match=0;
+		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
+	}
+
+	XFree(visuals);  free(va);
+	return NULL;
+
 	found:
-	XFree(_v);
+	XFree(visuals);  free(va);
 	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
 }
 
@@ -570,9 +610,22 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
+	int i=0;
 	GLXFBConfig c;
+	if(attrib_list==NULL) return NULL;
 	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
-	if(!(v=_MatchVisual(dpy, screen, c))) return NULL;
+	int depth=8, c_class=PseudoColor, stereo=0, level=0, trans=0;
+	for(i=0; attrib_list[i]!=None; i+=2)
+	{
+		if(attrib_list[i]==GLX_USE_GL) i--;
+		if(attrib_list[i]==GLX_RGBA) {depth=24;  c_class=TrueColor;  i--;}
+		if(attrib_list[i]==GLX_STEREO) {stereo=1;  i--;}
+		if(attrib_list[i]==GLX_LEVEL) level=attrib_list[i+1];
+		if(attrib_list[i]==GLX_TRANSPARENT_TYPE && attrib_list[i+1]!=GLX_NONE)
+			trans=1;
+	}
+	v=_MatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
+	if(!v) return NULL;
 	vish.add(dpy, v, c);
 
 	CATCH();
@@ -588,7 +641,13 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-	if(!(v=_MatchVisual(dpy, DefaultScreen(dpy), config))) return NULL;
+	int stereo=0, level=0, trans=0;
+	glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo);
+	glXGetFBConfigAttrib(_localdpy, config, GLX_LEVEL, &level);
+	glXGetFBConfigAttrib(_localdpy, config, GLX_TRANSPARENT_TYPE, &trans);
+	if(trans==GLX_NONE) trans=0;  else trans=1;
+	if(!(v=_MatchVisual(dpy, DefaultScreen(dpy), glXConfigDepth(config),
+		glXConfigClass(config), level, stereo, trans))) return NULL;
 	vish.add(dpy, v, config);
 	CATCH();
 	return v;
@@ -676,6 +735,18 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if((pbw=winh.findpb(drawable))!=NULL) {pbw->clear();  pbw->cleanup();}
 	pbuffer *pb;
 	if((pb=pmh.find(dpy, drawable))!=NULL) pb->clear();
+	#ifdef SUNOGL
+	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
+	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
+	sunOglCurPrimTablePtr->oglIndexi=r_glIndexi;
+	sunOglCurPrimTablePtr->oglIndexs=r_glIndexs;
+	sunOglCurPrimTablePtr->oglIndexub=r_glIndexub;
+	sunOglCurPrimTablePtr->oglIndexdv=r_glIndexdv;
+	sunOglCurPrimTablePtr->oglIndexfv=r_glIndexfv;
+	sunOglCurPrimTablePtr->oglIndexiv=r_glIndexiv;
+	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
+	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
+	#endif
 	CATCH();
 	return retval;
 }
@@ -770,6 +841,18 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	if((readpbw=winh.findpb(read))!=NULL) readpbw->cleanup();
 	pbuffer *pb;
 	if((pb=pmh.find(dpy, draw))!=NULL) pb->clear();
+	#ifdef SUNOGL
+	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
+	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
+	sunOglCurPrimTablePtr->oglIndexi=r_glIndexi;
+	sunOglCurPrimTablePtr->oglIndexs=r_glIndexs;
+	sunOglCurPrimTablePtr->oglIndexub=r_glIndexub;
+	sunOglCurPrimTablePtr->oglIndexdv=r_glIndexdv;
+	sunOglCurPrimTablePtr->oglIndexfv=r_glIndexfv;
+	sunOglCurPrimTablePtr->oglIndexiv=r_glIndexiv;
+	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
+	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
+	#endif
 	CATCH();
 	return retval;
 }
@@ -958,7 +1041,7 @@ void glFinish(void)
 void glXWaitGL(void)
 {
 	TRY();
-	#ifdef sun
+	#ifdef SUNOGL
 	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
 	#else
 	_glXWaitGL();
@@ -1040,6 +1123,131 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	}
 	_glViewport(x, y, width, height);
 	CATCH();
+}
+
+// The following nastiness is necessary to make color index rendering work,
+// since most platforms don't support color index Pbuffers
+
+/*
+glGet GL_CURRENT_INDEX
+glIndexPointer
+*/
+
+#ifdef SUNOGL
+
+static GLvoid r_glIndexd(OglContextPtr ctx, GLdouble c)
+	{glColor3d(c/255., 0.0, 0.0);  return;}
+static GLvoid r_glIndexf(OglContextPtr ctx, GLfloat c)
+	{glColor3f(c/255., 0., 0.);  return;}
+static GLvoid r_glIndexi(OglContextPtr ctx, GLint c)
+	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+static GLvoid r_glIndexs(OglContextPtr ctx, GLshort c)
+	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+static GLvoid r_glIndexub(OglContextPtr ctx, GLubyte c)
+	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+
+static GLvoid r_glIndexdv(OglContextPtr ctx, const GLdouble *c)
+{
+	GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
+	glColor3dv(c? v:NULL);  return;
+}
+
+static GLvoid r_glIndexfv(OglContextPtr ctx, const GLfloat *c)
+{
+	GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+static GLvoid r_glIndexiv(OglContextPtr ctx, const GLint *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+static GLvoid r_glIndexsv(OglContextPtr ctx, const GLshort *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+static GLvoid r_glIndexubv(OglContextPtr ctx, const GLubyte *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+void glBegin(GLenum mode)
+{
+	_glBegin(mode);
+	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
+	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
+	sunOglCurPrimTablePtr->oglIndexi=r_glIndexi;
+	sunOglCurPrimTablePtr->oglIndexs=r_glIndexs;
+	sunOglCurPrimTablePtr->oglIndexub=r_glIndexub;
+	sunOglCurPrimTablePtr->oglIndexdv=r_glIndexdv;
+	sunOglCurPrimTablePtr->oglIndexfv=r_glIndexfv;
+	sunOglCurPrimTablePtr->oglIndexiv=r_glIndexiv;
+	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
+	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
+}
+
+#else
+
+void glIndexd(GLdouble c) {glColor3d(c/255., 0.0, 0.0);  return;}
+void glIndexf(GLfloat c) {glColor3f(c/255., 0., 0.);  return;}
+void glIndexi(GLint c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
+void glIndexs(GLshort c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
+void glIndexub(GLubyte c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
+
+void glIndexdv(const GLdouble *c)
+{
+	GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
+	glColor3dv(c? v:NULL);  return;
+}
+
+void glIndexfv(const GLfloat *c)
+{
+	GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+void glIndexiv(const GLint *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+void glIndexsv(const GLshort *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+void glIndexubv(const GLubyte *c)
+{
+	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+	glColor3fv(c? v:NULL);  return;
+}
+
+#endif
+
+void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
+	GLenum format, GLenum type, GLvoid *pixels)
+{
+	if(format==GL_COLOR_INDEX) format=GL_RED;
+	return _glReadPixels(x, y, width, height, format, type, pixels);
+}
+
+void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
+	const GLvoid *pixels)
+{
+	if(format==GL_COLOR_INDEX) format=GL_RED;
+	return _glDrawPixels(width, height, format, type, pixels);
+}
+
+void glClearIndex(GLfloat c)
+{
+	glClearColor(c, 0., 0., 0.);
 }
 
 } // extern "C"

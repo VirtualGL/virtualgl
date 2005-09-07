@@ -47,13 +47,37 @@ static int __glxerr=0;
 GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 {
 	int glxattribs[257], j=0, nelements;  GLXFBConfig *fbconfigs, c=0;
-	int doublebuffer=0, render_type=GLX_COLOR_INDEX_BIT, stereo=0;
+	int doublebuffer=0, stereo=0, buffersize=-1, redsize=-1, greensize=-1,
+		bluesize=-1;
 
 	for(int i=0; attribs[i]!=None && i<=254; i++)
 	{
 		if(attribs[i]==GLX_DOUBLEBUFFER) doublebuffer=1;
-		else if(attribs[i]==GLX_RGBA) render_type=GLX_RGBA_BIT;
+		else if(attribs[i]==GLX_RGBA) continue;
+		else if(attribs[i]==GLX_BUFFER_SIZE)
+		{
+			buffersize=attribs[i+1];  i++;
+		}
+		else if(attribs[i]==GLX_LEVEL) i++;
 		else if(attribs[i]==GLX_STEREO) stereo=1;
+		else if(attribs[i]==GLX_RED_SIZE)
+		{
+			redsize=attribs[i+1];  i++;
+		}
+		else if(attribs[i]==GLX_GREEN_SIZE)
+		{
+			greensize=attribs[i+1];  i++;
+		}
+		else if(attribs[i]==GLX_BLUE_SIZE)
+		{
+			bluesize=attribs[i+1];  i++;
+		}
+		else if(attribs[i]==GLX_TRANSPARENT_TYPE) i++;
+		else if(attribs[i]==GLX_TRANSPARENT_INDEX_VALUE) i++;
+		else if(attribs[i]==GLX_TRANSPARENT_RED_VALUE) i++;
+		else if(attribs[i]==GLX_TRANSPARENT_GREEN_VALUE) i++;
+		else if(attribs[i]==GLX_TRANSPARENT_BLUE_VALUE) i++;
+		else if(attribs[i]==GLX_TRANSPARENT_ALPHA_VALUE) i++;
 		else if(attribs[i]!=GLX_USE_GL)
 		{
 			glxattribs[j++]=attribs[i];  glxattribs[j++]=attribs[i+1];
@@ -61,7 +85,13 @@ GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 		}
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
-	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=render_type;
+	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
+	if(buffersize>=0)
+	{
+		if(redsize<0) {glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=buffersize;}
+		if(greensize<0) {glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=buffersize;}
+		if(bluesize<0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=buffersize;}
+	}
 	// GLP won't grok GLX_STEREO, even if it's set to False
 	#ifdef USEGLP
 	if(!fconfig.glp) {
@@ -70,7 +100,10 @@ GLXFBConfig glXConfigFromVisAttribs(int attribs[])
 	#ifdef USEGLP
 	}
 	#endif
-	glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
+	if(!fconfig.usewindow)
+	{
+		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
+	}
 	glxattribs[j]=None;
 	fbconfigs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), glxattribs, &nelements);
 	if(!nelements || !fbconfigs) return 0;
