@@ -80,7 +80,7 @@ void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *b
 		{
 			memset(&buf[i*pitch+j*ps], 0, fbx_ps[format]);
 			if(format==FBX_INDEX)
-				buf[i*pitch+j]=(j+x+i+y)%256;
+				buf[i*pitch+j]=(j+x+i+y)%32;
 			else
 			{
 				buf[i*pitch+j*ps+fbx_roffset[format]]=255;
@@ -100,7 +100,7 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf
 		{
 			if(format==FBX_INDEX)
 			{
-				if(buf[i*pitch+j]!=(j+x+i+y)%256) return 0;
+				if(buf[i*pitch+j]!=(j+x+i+y)%32) return 0;
 			}
 			else
 			{
@@ -576,17 +576,17 @@ int main(int argc, char **argv)
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocAll);
 		swa.border_pixel=0;
 		swa.event_mask=0;
-    XColor xc[256];  int i;
+    XColor xc[32];  int i;
 		errifnot(v->colormap_size==256);
-		for(i=0; i<256; i++)
+		for(i=0; i<32; i++)
 		{
-			xc[i].red=(i<128? i*2:255)<<8;
-			xc[i].green=(i<128? i*2:255-(i-128)*2)<<8;
-			xc[i].blue=(i<128? 255:255-(i-128)*2)<<8;
+			xc[i].red=(i<16? i*16:255)<<8;
+			xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
+			xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
 			xc[i].flags = DoRed | DoGreen | DoBlue;
 			xc[i].pixel=i;
 		}
-		XStoreColors(wh.dpy, swa.colormap, xc, 256);
+		XStoreColors(wh.dpy, swa.colormap, xc, 32);
 		errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
 			v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
 			&swa));
