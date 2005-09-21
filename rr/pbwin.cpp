@@ -280,25 +280,15 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	rrdisplayclient *rrdpy=NULL;
 	fconfig.reloadenv();
 	int compress=fconfig.compress;  bool dostereo=false;
+	int pbw=_pb->width(), pbh=_pb->height();
 
 	rrcs::safelock l(_mutex);
 
 	_dirty=false;
-	if(_force) {force=true;  _force=false;}
-	if(sync) {compress=RRCOMP_NONE;  force=true;}
-	int pbw=_pb->width(), pbh=_pb->height();
-	if(pbw*pbh<1000) compress=RRCOMP_NONE;
-
-	if(stereo())
-	{
-		if(_drawingtoright() || _rdirty) dostereo=true;
-		_rdirty=false;
-		compress=RRCOMP_MJPEG;
-	}
 
 	#if defined(sun)||defined(linux)
 	// If this is a SunRay session, then use the SunRay compressor to send data
-	if(_sunrayhandle)
+	if(_sunrayhandle && fconfig.compress==RRCOMP_DEFAULT)
 	{
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 		if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
@@ -321,11 +311,24 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	}
 	#endif
 
+	if(compress==RRCOMP_DEFAULT) compress=RRCOMP_JPEG;
+
+	if(_force) {force=true;  _force=false;}
+	if(sync) {compress=RRCOMP_NONE;  force=true;}
+	if(pbw*pbh<1000) compress=RRCOMP_NONE;
+
+	if(stereo())
+	{
+		if(_drawingtoright() || _rdirty) dostereo=true;
+		_rdirty=false;
+		compress=RRCOMP_JPEG;
+	}
+
 	if(!_truecolor) compress=RRCOMP_NONE;
 
 	switch(compress)
 	{
-		case RRCOMP_MJPEG:
+		case RRCOMP_JPEG:
 		{
 			errifnot(rrdpy=dpyh.findrrdpy(_windpy));
 			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)

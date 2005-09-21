@@ -69,7 +69,7 @@ typedef struct _RRFrame
 
 /* Compression types */
 #define RR_COMPRESSOPT  2
-enum {RRCOMP_NONE=0, RRCOMP_MJPEG};
+enum {RRCOMP_DEFAULT=-1, RRCOMP_NONE=0, RRCOMP_JPEG};
 
 /* Subsampling options */
 #define RR_SUBSAMPOPT   3

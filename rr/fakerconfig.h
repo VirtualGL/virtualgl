@@ -50,7 +50,7 @@ class FakerConfig
 			hisubsamp=RR_444;
 			currentqual=hiqual;
 			currentsubsamp=hisubsamp;
-			compress=RRCOMP_MJPEG;
+			compress=RRCOMP_DEFAULT;
 			spoil=true;
 			ssl=false;
 			port=-1;
@@ -104,7 +104,15 @@ class FakerConfig
 			getconfigbool("NOCOMPRESS", temp);
 			if(temp) compress=RRCOMP_NONE;
 			getconfigbool("SPOIL", spoil);
-			getconfigint("COMPRESS", compress, RRCOMP_NONE, RRCOMP_MJPEG);
+			getconfigint("COMPRESS", compress, RRCOMP_NONE, RRCOMP_JPEG);
+			if(compress==RRCOMP_DEFAULT)
+			{
+				char *temps=NULL;
+				getconfigstr("COMPRESS", temps);
+				if(temps && !stricmp(temps, "raw")) compress=RRCOMP_NONE;
+				else if(temps && !stricmp(temps, "none")) compress=RRCOMP_NONE;
+				else if(temps && !stricmp(temps, "jpeg")) compress=RRCOMP_JPEG;
+			}
 			getconfig("RRUSESSL", ssl);
 			getconfig("VGL_SSL", ssl);
 			getconfigint("PORT", port, 0, 65535);
@@ -171,8 +179,8 @@ class FakerConfig
 			char *temp=NULL;
 			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
 			{
-				int itemp;
-				if((itemp=atoi(temp))>=min && itemp<=max) val=itemp;
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp && itemp>=min && itemp<=max) val=itemp;
 			}
 		}
 
