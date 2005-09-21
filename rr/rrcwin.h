@@ -19,6 +19,8 @@
 #define USEGL 1
 #endif
 #include "rrframe.h"
+#undef USEGLP
+#include "rrglframe.h"
 #include "rrthread.h"
 #include "genericQ.h"
 
