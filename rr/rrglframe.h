@@ -47,7 +47,7 @@ class rrglframe : public rrframe
 
 	rrglframe(char *dpystring, Window win) : rrframe(), _rbits(NULL),
 		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _hpjhnd(NULL),
-		_newdpy(false), _overlay(false)
+		_newdpy(false)
 	{
 		if(!dpystring || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
 		if(!(_dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
@@ -57,7 +57,7 @@ class rrglframe : public rrframe
 
 	rrglframe(Display *dpy, Window win) : rrframe(), _rbits(NULL),
 		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _hpjhnd(NULL),
-		_newdpy(false), _overlay(false)
+		_newdpy(false)
 	{
 		if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
 		_dpy=dpy;
