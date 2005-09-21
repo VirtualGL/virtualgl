@@ -93,7 +93,7 @@ int useglp=0;
 #ifdef USEGLP
 int glpdevice=-1;
 #endif
-int usewindow=0, useci=0, useoverlay=0;
+int usewindow=0, useci=0, useoverlay=0, visualid=0;
 
 //////////////////////////////////////////////////////////////////////
 // Error handling
@@ -123,6 +123,15 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 	{
 		try
 		{
+			if(visualid)
+			{
+				XVisualInfo vtemp;  int n=0;
+				vtemp.visualid=visualid;
+				v=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
+				if(!v || !n) _throw("Could not obtain visual");
+				printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
+				return;
+			}
 			fbattribs[6]=GLX_RGBA;  fbattribs[7]=None;
 			fbattribsci[2]=None;
 			if(useoverlay)
@@ -452,7 +461,7 @@ void display(void)
 void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-index] [-overlay]\n", argv[0]);
-	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>]\n");
+	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>]\n");
 	#ifdef USEGLP
 	fprintf(stderr, "       [-device <GLP device>]\n");
 	#endif
@@ -463,6 +472,7 @@ void usage(char **argv)
 	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", _WIDTH);
 	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
 	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
+	fprintf(stderr, "-visualid = Ignore visual selection and use this visual ID (hex) instead\n");
 	#ifdef USEGLP
 	fprintf(stderr, "-device = Set GLP device to use for rendering (default: Use GLX)\n");
 	#endif
@@ -491,6 +501,12 @@ int main(int argc, char **argv)
 		{
 			int temp=atoi(argv[i+1]);  i++;
 			if(temp>=1 && (temp&(temp-1))==0) ALIGN=temp;
+		}
+		if(!stricmp(argv[i], "-visualid") && i<argc-1)
+		{
+			int temp=0;
+			sscanf(argv[i+1], "%x", &temp);
+			if(temp>0) visualid=temp;  i++;
 		}
 		if(!stricmp(argv[i], "-width") && i<argc-1)
 		{
