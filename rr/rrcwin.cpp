@@ -173,8 +173,8 @@ void rrcwin::run(void)
 				pb.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), 0, 1);
 				pt.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), bytes, 1);
 			}
-			bytes=0;
 			#endif
+			bytes=0;
 			pt.startframe();
 		}
 		else
