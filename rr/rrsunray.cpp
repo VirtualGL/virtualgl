@@ -71,7 +71,13 @@ static int loadsunraysymbols(bool fatal)
 			err=dlerror();  if(err) _throw(err);
 			else _throw("Could not find SunRay plugin");
 		}
-		else return 0;
+		else
+		{
+			#ifdef __DEBUG__
+			err=dlerror();  if(err) fprintf(stderr, "[VGL] %s\n", err);
+			#endif
+			return 0;
+		}
 	}
 	lsym(RRSunRayInit)
 	lsym(RRSunRayGetFrame)
