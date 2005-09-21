@@ -21,6 +21,8 @@
 
 extern void _vglprintf (FILE *f, const char *format, ...);
 
+#define INFAKER
+#include "tempctx.h"
 #include "fakerconfig.h"
 extern FakerConfig fconfig;
 
@@ -46,7 +48,7 @@ static inline int _drawingtoright(void)
 }
 
 // Generic OpenGL error checker (0 = no errors)
-int glerror(void)
+static int glerror(void)
 {
 	int i, ret=0;
 	i=glGetError();
@@ -62,65 +64,6 @@ int glerror(void)
 #ifndef min
  #define min(a,b) ((a)<(b)?(a):(b))
 #endif
-
-
-// This is a container class which allows us to temporarily swap in a new
-// drawable and then "pop the stack" after we're done with it.  It does nothing
-// unless there is already a valid context established
-
-#define EXISTING_DRAWABLE (GLXDrawable)-1
-
-class tempctx
-{
-	public:
-
-		tempctx(GLXDrawable draw, GLXDrawable read, GLXContext ctx=glXGetCurrentContext()) :
-			_ctx(glXGetCurrentContext()),
-			_read(GetCurrentReadDrawable()), _draw(GetCurrentDrawable()),
-			mc(false)
-		{
-			if(!_ctx || (!_read && !_draw)) return;
-			if(!fconfig.glp)
-			{
-				_dpy=GetCurrentDisplay();  if(!_dpy) return;
-			}
-			if(read==EXISTING_DRAWABLE) read=_read;
-			if(draw==EXISTING_DRAWABLE) draw=_draw;
-			if(_read!=read || _draw!=draw || _ctx!=ctx)
-			{
-				#ifdef USEGLP
-				if(fconfig.glp) glPMakeContextCurrent(draw, read, ctx);
-				else
-				#endif
-					_glXMakeContextCurrent(_dpy, draw, read, ctx);
-				mc=true;
-			}
-		}
-
-		void restore(void)
-		{
-			if(mc && _ctx && (_read || _draw))
-			{
-				#ifdef USEGLP
-				if(fconfig.glp) glPMakeContextCurrent(_draw, _read, _ctx);
-				else
-				#endif
-				if(_dpy) _glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
-			}
-		}
-
-		~tempctx(void)
-		{
-			restore();
-		}
-
-	private:
-
-		Display *_dpy;
-		GLXContext _ctx;
-		GLXDrawable _read, _draw;
-		bool mc;
-};
 
 Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
 {
@@ -167,7 +110,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	_w=w;  _h=h;
 	pbattribs[1]=w;  pbattribs[3]=h;
 	#ifdef sun
-	tempctx tc(0, 0, 0);
+	tempctx tc(_localdpy, 0, 0, 0);
 	#endif
 	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
 	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
@@ -182,7 +125,7 @@ pbuffer::~pbuffer(void)
 	if(_drawable)
 	{
 		#ifdef sun
-		tempctx tc(0, 0, 0);
+		tempctx tc(_localdpy, 0, 0, 0);
 		#endif
 		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
 		else glXDestroyPbuffer(_localdpy, _drawable);
@@ -498,7 +441,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLint readbuf=GL_BACK;
 	glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
-	tempctx tc(EXISTING_DRAWABLE, GetCurrentDrawable());
+	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
 	glReadBuffer(buf);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
