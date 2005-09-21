@@ -764,7 +764,7 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
             get_visual_attribs13(dpy, configs[i], &attribs);
          else
             get_visual_attribs(dpy, &visuals[i], &attribs);
-         print_visual_attribs_short(&attribs);
+         if(attribs.supportsGL) print_visual_attribs_short(&attribs);
       }
    }
    else if (mode == Wide) {
@@ -775,7 +775,7 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
             get_visual_attribs13(dpy, configs[i], &attribs);
          else
             get_visual_attribs(dpy, &visuals[i], &attribs);
-         print_visual_attribs_long(&attribs);
+         if(attribs.supportsGL) print_visual_attribs_long(&attribs);
       }
    }
 
