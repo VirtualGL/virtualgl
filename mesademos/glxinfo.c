@@ -128,6 +128,15 @@ struct visual_attribs
    #ifdef sun
    double gamma;
    #endif
+   #ifdef GLX_VIDEO_RESIZE_SUN
+   int videoResize;
+   #endif
+   #ifdef GLX_VIDEO_REFRESH_TIME_SUN
+   int videoRefreshTime;
+   #endif
+   #ifdef GLX_GAMMA_VALUE_SUN
+   int gammaValue;
+   #endif
 };
 
    
@@ -422,7 +431,7 @@ get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
       case GLX_GRAY_SCALE:    attribs->klass = GrayScale;  break;
       case GLX_STATIC_GRAY:   attribs->klass = StaticGray;  break;
    }
-   glXGetFBConfigAttrib(dpy, cfg, GLX_USE_GL, &attribs->supportsGL);
+   attribs->supportsGL=1;
    glXGetFBConfigAttrib(dpy, cfg, GLX_BUFFER_SIZE, &attribs->bufferSize);
    glXGetFBConfigAttrib(dpy, cfg, GLX_LEVEL, &attribs->level);
    glXGetFBConfigAttrib(dpy, cfg, GLX_RENDER_TYPE, &attribs->rgba);
@@ -465,16 +474,17 @@ get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
       attribs->numMultisample = 0;
    }
 
-#if defined(GLX_EXT_visual_rating)
-   if (ext && strstr(ext, "GLX_EXT_visual_rating")) {
-      glXGetFBConfigAttrib(dpy, cfg, GLX_VISUAL_CAVEAT_EXT, &attribs->visualCaveat);
-   }
-   else {
-      attribs->visualCaveat = GLX_NONE_EXT;
-   }
-#else
-   attribs->visualCaveat = 0;
+#ifdef GLX_VIDEO_RESIZE_SUN
+   glXGetFBConfigAttrib(dpy, cfg, GLX_VIDEO_RESIZE_SUN, &attribs->videoResize);
 #endif
+#ifdef GLX_VIDEO_REFRESH_TIME_SUN
+   glXGetFBConfigAttrib(dpy, cfg, GLX_VIDEO_REFRESH_TIME_SUN, &attribs->videoRefreshTime);
+#endif
+#ifdef GLX_GAMMA_VALUE_SUN
+   glXGetFBConfigAttrib(dpy, cfg, GLX_GAMMA_VALUE_SUN, &attribs->gammaValue);
+#endif
+
+   glXGetFBConfigAttrib(dpy, cfg, GLX_CONFIG_CAVEAT, &attribs->visualCaveat);
 }
 
 
@@ -542,6 +552,16 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
       attribs->numMultisample = 0;
    }
 
+#ifdef GLX_VIDEO_RESIZE_SUN
+   glXGetConfig(dpy, vInfo, GLX_VIDEO_RESIZE_SUN, &attribs->videoResize);
+#endif
+#ifdef GLX_VIDEO_REFRESH_TIME_SUN
+   glXGetConfig(dpy, vInfo, GLX_VIDEO_REFRESH_TIME_SUN, &attribs->videoRefreshTime);
+#endif
+#ifdef GLX_GAMMA_VALUE_SUN
+   glXGetConfig(dpy, vInfo, GLX_GAMMA_VALUE_SUN, &attribs->gammaValue);
+#endif
+
 #if defined(GLX_EXT_visual_rating)
    if (ext && strstr(ext, "GLX_EXT_visual_rating")) {
       glXGetConfig(dpy, vInfo, GLX_VISUAL_CAVEAT_EXT, &attribs->visualCaveat);
@@ -599,6 +619,19 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs)
    else if (attribs->transparentType == GLX_TRANSPARENT_INDEX) {
      printf("    Transparent index=%d\n",attribs->transparentIndexValue);
    }
+#if defined(GLX_GAMMA_VALUE_SUN)||defined(GLX_VIDEO_REFRESH_TIME_SUN)||defined(GLX_VIDEO_RESIZE_SUN)
+   printf("    ");
+#ifdef GLX_VIDEO_RESIZE_SUN
+   printf("videoResize=%d  ", attribs->videoResize);
+#endif
+#ifdef GLX_VIDEO_REFRESH_TIME_SUN
+   printf("videoRefreshTime=%d  ", attribs->videoRefreshTime);
+#endif
+#ifdef GLX_GAMMA_VALUE_SUN
+   printf("gammaValue=%d", attribs->gammaValue);
+#endif
+   printf("\n");
+#endif
 }
 
 
