@@ -573,16 +573,19 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
+	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!(ctx=glPCreateNewContext(c, GLP_RGBA_TYPE, share_list)))
+		if(!(ctx=glPCreateNewContext(c,
+			render_type==GLP_COLOR_INDEX_BIT?GLP_COLOR_INDEX_TYPE:GLP_RGBA_TYPE, share_list)))
 		return NULL;
 	}
 	else
 	#endif
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, True)))
+		if(!(ctx=_glXCreateNewContext(_localdpy, c,
+			render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
 			return NULL;
 	}
 	ctxh.add(ctx, c);
@@ -679,13 +682,13 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!(ctx=glPCreateNewContext(config, GLX_RGBA_TYPE, share_list)))
+		if(!(ctx=glPCreateNewContext(config, render_type, share_list)))
 			return NULL;
 	}
 	else
 	#endif
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, config, GLX_RGBA_TYPE, share_list, True)))
+		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
 			return NULL;
 	}
 	ctxh.add(ctx, config);

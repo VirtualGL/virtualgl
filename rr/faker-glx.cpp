@@ -90,8 +90,11 @@ extern "C" {
 GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list, int *nelements)
 {
 	GLXFBConfig *configs=NULL;
-
 	TRY();
+
+	// Prevent recursion
+	if(!_isremote(dpy)) return _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+	////////////////////
 
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!attrib_list || !nelements) return NULL;
@@ -107,7 +110,6 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	}
 
 	CATCH();
-
 	return configs;
 }
 
@@ -209,12 +211,21 @@ const char *glXGetClientString(Display *dpy, int name)
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
 	GLXFBConfig c;
-
 	TRY();
+
+	// Prevent recursion
+	if(!_isremote(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
+	////////////////////
 
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 	errifnot(c=_MatchConfig(dpy, vis));
 
+	if(attrib==GLX_USE_GL)
+	{
+		if(vis->c_class==TrueColor || vis->c_class==PseudoColor) *value=1;
+		else *value=0;
+		return 0;
+	}
 	if(vis->c_class==PseudoColor && (attrib==GLX_RED_SIZE || attrib==GLX_GREEN_SIZE
 		|| attrib==GLX_BLUE_SIZE || attrib==GLX_ALPHA_SIZE
 		|| attrib==GLX_ACCUM_RED_SIZE || attrib==GLX_ACCUM_GREEN_SIZE
@@ -311,8 +322,11 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *value)
 {
 	VisualID vid=0;
-
 	TRY();
+
+	// Prevent recursion
+	if(!_isremote(dpy)) return _glXGetFBConfigAttrib(dpy, config, attribute, value);
+	////////////////////
 
 	if(!dpy || !value) throw rrerror("glXGetFBConfigAttrib", "Invalid argument");
 	int screen=DefaultScreen(dpy);

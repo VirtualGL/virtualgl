@@ -254,19 +254,19 @@ class testcolor
 {
 	public:
 
-		testcolor(int _index=0) : index(_index%NC)
+		testcolor(int index=0) : _index(index%NC)
 		{
 		}
 
-		GLfloat& r(int rel=0) {return tc[(index+rel+NC)%NC].r;}
-		GLfloat& g(int rel=0) {return tc[(index+rel+NC)%NC].g;}
-		GLfloat& b(int rel=0) {return tc[(index+rel+NC)%NC].b;}
-		unsigned int& bits(int rel=0) {return tc[(index+rel+NC)%NC].bits;}
-		void next(void) {index=(index+1)%NC;}
+		GLfloat& r(int rel=0) {return tc[(_index+rel+NC)%NC].r;}
+		GLfloat& g(int rel=0) {return tc[(_index+rel+NC)%NC].g;}
+		GLfloat& b(int rel=0) {return tc[(_index+rel+NC)%NC].b;}
+		unsigned int& bits(int rel=0) {return tc[(_index+rel+NC)%NC].bits;}
+		void next(void) {_index=(_index+1)%NC;}
 
 	private:
 
-		int index;
+		int _index;
 };
 
 
@@ -648,39 +648,36 @@ void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 	#ifdef GLX_SAMPLES_ARB
 	compareattrib(c, v, GLX_SAMPLES_ARB, ctemp);
 	#endif
-	if(!usingglp)
-	{
-		#ifdef GLX_X_VISUAL_TYPE_EXT
-		compareattrib(c, v, GLX_X_VISUAL_TYPE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_TYPE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_TYPE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_INDEX_VALUE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_INDEX_VALUE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_RED_VALUE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_RED_VALUE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_GREEN_VALUE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_GREEN_VALUE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_BLUE_VALUE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_BLUE_VALUE_EXT, ctemp);
-		#endif
-		#ifdef GLX_TRANSPARENT_ALPHA_VALUE_EXT
-		compareattrib(c, v, GLX_TRANSPARENT_ALPHA_VALUE_EXT, ctemp);
-		#endif
-		#ifdef GLX_VIDEO_RESIZE_SUN
-		compareattrib(c, v, GLX_VIDEO_RESIZE_SUN, ctemp);
-		#endif
-		#ifdef GLX_VIDEO_REFRESH_TIME_SUN
-		compareattrib(c, v, GLX_VIDEO_REFRESH_TIME_SUN, ctemp);
-		#endif
-		#ifdef GLX_GAMMA_VALUE_SUN
-		compareattrib(c, v, GLX_GAMMA_VALUE_SUN, ctemp);
-		#endif
-	}
+	#ifdef GLX_X_VISUAL_TYPE_EXT
+	compareattrib(c, v, GLX_X_VISUAL_TYPE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_TYPE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_TYPE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_INDEX_VALUE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_INDEX_VALUE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_RED_VALUE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_RED_VALUE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_GREEN_VALUE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_GREEN_VALUE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_BLUE_VALUE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_BLUE_VALUE_EXT, ctemp);
+	#endif
+	#ifdef GLX_TRANSPARENT_ALPHA_VALUE_EXT
+	compareattrib(c, v, GLX_TRANSPARENT_ALPHA_VALUE_EXT, ctemp);
+	#endif
+	#ifdef GLX_VIDEO_RESIZE_SUN
+	compareattrib(c, v, GLX_VIDEO_RESIZE_SUN, ctemp);
+	#endif
+	#ifdef GLX_VIDEO_REFRESH_TIME_SUN
+	compareattrib(c, v, GLX_VIDEO_REFRESH_TIME_SUN, ctemp);
+	#endif
+	#ifdef GLX_GAMMA_VALUE_SUN
+	compareattrib(c, v, GLX_GAMMA_VALUE_SUN, ctemp);
+	#endif
 }
 
 
@@ -829,10 +826,10 @@ int vistest(void)
 											rgbattrib13[27]=rgbattrib[23]=samples? 1:0;
 
 											if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-												rgbattrib13, &n)) || n==0) && !stereo)
+												rgbattrib13, &n)) || n==0) && !stereo && !samples && !aux && !accum)
 												_throw("No FB configs found");
 											if(!(v0=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattrib))
-												&& !stereo)
+												&& !stereo && !samples && !aux && !accum)
 												_throw("Could not find visual");
 											if(v0 && configs)
 											{
@@ -860,19 +857,20 @@ int vistest(void)
 
 			// Iterate through color index attributes
 			int ciattrib[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
-				GLX_STENCIL_SIZE, 0, None, None, None};
+				GLX_STENCIL_SIZE, 0, GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0,
+				None, None, None};
 			int ciattrib13[]={GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1, GLX_BUFFER_SIZE, 8,
 				GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0, GLX_RENDER_TYPE,
-				GLX_COLOR_INDEX_BIT, None};
+				GLX_COLOR_INDEX_BIT, GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0, None};
 
 			for(int db=0; db<=1; db++)
 			{
 				ciattrib13[1]=db;
-				ciattrib[8]=db? GLX_DOUBLEBUFFER:0;
+				ciattrib[12]=db? GLX_DOUBLEBUFFER:0;
 				for(int stereo=0; stereo<=1; stereo++)
 				{
 					ciattrib13[3]=stereo;
-					ciattrib[9]=stereo? GLX_STEREO:0;
+					ciattrib[db? 13:12]=stereo? GLX_STEREO:0;
 					for(int depth=0; depth<=1; depth++)
 					{
 						ciattrib13[7]=ciattrib[3]=depth;
@@ -882,17 +880,22 @@ int vistest(void)
 							for(int stencil=0; stencil<=1; stencil++)
 							{
 								ciattrib13[11]=ciattrib[7]=stencil;
-
-								if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-									ciattrib13, &n)) || n==0) && !stereo)
-									_throw("No FB configs found");
-								if(!(v0=glXChooseVisual(dpy, DefaultScreen(dpy), ciattrib))
-									&& !stereo)
-									_throw("Could not find visual");
-								if(v0 && configs)
+								for(int level=0; level<=1; level++)
 								{
-									configvsvisual(dpy, configs[0], v0);
-									XFree(v0);  XFree(configs);
+									ciattrib13[17]=ciattrib[11]=level;
+									ciattrib13[15]=ciattrib[9]=level? GLX_TRANSPARENT_INDEX:GLX_NONE;
+
+									if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+										ciattrib13, &n)) || n==0) && !stereo && !aux && !level)
+										_throw("No FB configs found");
+									if(!(v0=glXChooseVisual(dpy, DefaultScreen(dpy), ciattrib))
+										&& !stereo && !aux && !level)
+										_throw("Could not find visual");
+									if(v0 && configs)
+									{
+										configvsvisual(dpy, configs[0], v0);
+										XFree(v0);  XFree(configs);
+									}
 								}
 							}
 						}
@@ -1569,7 +1572,7 @@ int main(int argc, char **argv)
 			{
 				temp=&temp[i];  break;
 			}
-		if(temp[0]=='/' || !strncmp(temp, "GLP", 3)) usingglp=1;
+		if(temp[0]=='/' || !strncasecmp(temp, "GLP", 3)) usingglp=1;
 	}
 	#endif
 

@@ -24,6 +24,9 @@
 #include "faker-sym.h"
 
 extern Display *_localdpy;
+#ifdef USEGLP
+extern GLPDevice _localdev;
+#endif
 extern FakerConfig fconfig;
 
 #define _case(ec) case ec: return "GLX Error: "#ec;
@@ -302,7 +305,7 @@ int __vglServerVisualAttrib(GLXFBConfig c, int attribute)
 {
 	int value=0;
 	#ifdef USEGLP
-	if(fconfig.useglp)
+	if(fconfig.glp)
 		glPGetFBConfigAttrib(c, attribute, &value);
 	else
 	#endif
