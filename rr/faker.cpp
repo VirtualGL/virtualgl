@@ -14,11 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/signal.h>
-#ifdef sparc
-#include <X11/Xmu/XmuSolaris.h>
-#else
-#include "gamma.c"
-#endif
 #include <string.h>
 #include "rrutil.h"
 #include "rrtimer.h"
@@ -32,6 +27,7 @@ FakerConfig fconfig;
 #include "faker-winhash.h"
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
+#include "faker-cfghash.h"
 #include "faker-pmhash.h"
 #include "faker-glxdhash.h"
 #include "faker-sym.h"
@@ -101,7 +97,7 @@ static inline int _drawingtoright(void)
 }
 
 static rrcs globalmutex;
-winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  pmhash pmh;  glxdhash glxdh;
+winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  cfghash cfgh;  pmhash pmh;  glxdhash glxdh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
 
@@ -125,6 +121,7 @@ void __vgl_safeexit(int retcode)
 		__shutdown=1;
 		pmh.killhash();
 		vish.killhash();
+		cfgh.killhash();
 		ctxh.killhash();
 		glxdh.killhash();
 		if(_dpyh) _dpyh->killhash();
@@ -169,7 +166,7 @@ static void fakerinit(void)
 	if(getenv("VGL_DEBUG"))
 	{
 		printf("[VGL] Attach debugger to process %d ...\n", getpid());
-		char c=fgetc(stdin);
+		fgetc(stdin);
 	}
 	#if 0
 	XSetErrorHandler(xhandler);
@@ -500,107 +497,20 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	return 0;
 }
 
+int XFree(void *data)
+{
+	int ret=0;
+	TRY();
+	ret=_XFree(data);
+	if(data) vish.remove(NULL, (XVisualInfo *)data);
+	CATCH();
+	return ret;
+}
+
 /////////////////////////////
 // GLX 1.0 Context management
 /////////////////////////////
 
-static XVisualInfo *_MatchVisual(Display *dpy, int screen,
-	int depth, int c_class, int level, int stereo, int trans)
-{
-	XVisualInfo *visuals=NULL, vtemp;
-	int i, n=0, maj_opcode=-1, first_event=-1, first_error=-1, clientglx=0;
-	if(!dpy) return NULL;
-	struct visattribs
-	{
-		int db, gl, level, stereo, transtype;  double gamma;
-	};
-	struct visattribs *va=NULL;
-
-	if(!dpy) return NULL;
-
-	vtemp.depth=depth;  vtemp.c_class=c_class;
-	if(!(visuals=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n)) || n==0)
-		return NULL;
-
-	if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
-	&& maj_opcode>=0 && first_event>=0 && first_error>=0)
-		clientglx=1;
-
-	if((va=(visattribs *)malloc(sizeof(visattribs)*n))==NULL)
-		{XFree(visuals);  return NULL;}
-	memset(va, 0, sizeof(visattribs)*n);
-
-	for(i=0; i<n; i++)
-	{
-		XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &va[i].gamma);
-		if(clientglx)
-		{
-			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &va[i].db);
-			_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].gl);
-			_glXGetConfig(dpy, &visuals[i], GLX_LEVEL, &va[i].level);
-			_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].stereo);
-			_glXGetConfig(dpy, &visuals[i], GLX_TRANSPARENT_TYPE, &va[i].transtype);
-		}
-	}
-
-	// Try to find an exact match
-	for(i=0; i<n; i++)
-	{
-		int match=1;
-		if(fconfig.gamma && va[i].gamma!=1.0) match=0;
-		if(!fconfig.gamma && va[i].gamma==1.0) match=0;
-		if(stereo!=va[i].stereo) match=0;
-		if(stereo && !va[i].db) match=0;
-		if(stereo && !va[i].gl) match=0;
-		if(level!=va[i].level) match=0;
-		if(trans && va[i].transtype==GLX_NONE) match=0;
-		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
-	}
-
-	// Try again, without gamma restriction
-	for(i=0; i<n; i++)
-	{
-		int match=1;
-		if(stereo!=va[i].stereo) match=0;
-		if(stereo && !va[i].db) match=0;
-		if(stereo && !va[i].gl) match=0;
-		if(level!=va[i].level) match=0;
-		if(trans && va[i].transtype==GLX_NONE) match=0;
-		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
-	}
-
-	// Try again, without stereo restriction
-	for(i=0; i<n; i++)
-	{
-		int match=1;
-		if(fconfig.gamma && va[i].gamma!=1.0) match=0;
-		if(!fconfig.gamma && va[i].gamma==1.0) match=0;
-		if(level!=va[i].level) match=0;
-		if(trans && va[i].transtype==GLX_NONE) match=0;
-		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
-	}
-
-	// Try again, without either restriction
-	for(i=0; i<n; i++)
-	{
-		int match=1;
-		if(level!=va[i].level) match=0;
-		if(trans && va[i].transtype==GLX_NONE) match=0;
-		if(match) {vtemp.visualid=visuals[i].visualid;  goto found;}
-	}
-
-	XFree(visuals);  free(va);
-	return NULL;
-
-	found:
-	XFree(visuals);  free(va);
-	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
-}
-
-// This calls glXChooseVisual() on the rendering server to obtain an appropriate
-// visual for rendering, then it matches the visual across to the 2D client
-// using X11 functions and hashes the two together for future reference.
-// It returns the 2D visual so that it can be used in subsequent X11 calls.
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
 	XVisualInfo *v=NULL;
@@ -610,21 +520,16 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
-	int i=0;
-	GLXFBConfig c;
-	if(attrib_list==NULL) return NULL;
-	if(!(c=glXConfigFromVisAttribs(attrib_list))) return NULL;
-	int depth=8, c_class=PseudoColor, stereo=0, level=0, trans=0;
-	for(i=0; attrib_list[i]!=None; i+=2)
-	{
-		if(attrib_list[i]==GLX_USE_GL) i--;
-		if(attrib_list[i]==GLX_RGBA) {depth=24;  c_class=TrueColor;  i--;}
-		if(attrib_list[i]==GLX_STEREO) {stereo=1;  i--;}
-		if(attrib_list[i]==GLX_LEVEL) level=attrib_list[i+1];
-		if(attrib_list[i]==GLX_TRANSPARENT_TYPE && attrib_list[i+1]!=GLX_NONE)
-			trans=1;
-	}
-	v=_MatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
+	GLXFBConfig *configs=NULL, c=0;  int n;
+	if(!dpy || !attrib_list) return NULL;
+	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
+	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, screen, depth, c_class,
+		level, stereo, trans, n)) || n<1) return NULL;
+	c=configs[0];
+	XFree(configs);
+	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
+	if(!vid) return NULL;
+	v=__vglVisualFromVisualID(dpy, vid);
 	if(!v) return NULL;
 	vish.add(dpy, v, c);
 
@@ -641,13 +546,12 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-	int stereo=0, level=0, trans=0;
-	glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo);
-	glXGetFBConfigAttrib(_localdpy, config, GLX_LEVEL, &level);
-	glXGetFBConfigAttrib(_localdpy, config, GLX_TRANSPARENT_TYPE, &trans);
-	if(trans==GLX_NONE) trans=0;  else trans=1;
-	if(!(v=_MatchVisual(dpy, DefaultScreen(dpy), glXConfigDepth(config),
-		glXConfigClass(config), level, stereo, trans))) return NULL;
+	VisualID vid=0;
+	if(!dpy || !config) return NULL;
+	vid=_MatchVisual(dpy, config);
+	if(!vid) return NULL;
+	v=__vglVisualFromVisualID(dpy, vid);
+	if(!v) return NULL;
 	vish.add(dpy, v, config);
 	CATCH();
 	return v;
@@ -669,20 +573,16 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
-	int render_type=GLX_RGBA_BIT;
-	glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &render_type);
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!(ctx=glPCreateNewContext(c,
-			render_type==GLP_COLOR_INDEX_BIT?GLP_COLOR_INDEX_TYPE:GLP_RGBA_TYPE, share_list)))
+		if(!(ctx=glPCreateNewContext(c, GLP_RGBA_TYPE, share_list)))
 		return NULL;
 	}
 	else
 	#endif
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, c,
-			render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
+		if(!(ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, True)))
 			return NULL;
 	}
 	ctxh.add(ctx, c);
@@ -779,13 +679,13 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(!(ctx=glPCreateNewContext(config, render_type, share_list)))
+		if(!(ctx=glPCreateNewContext(config, GLX_RGBA_TYPE, share_list)))
 			return NULL;
 	}
 	else
 	#endif
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
+		if(!(ctx=_glXCreateNewContext(_localdpy, config, GLX_RGBA_TYPE, share_list, True)))
 			return NULL;
 	}
 	ctxh.add(ctx, config);

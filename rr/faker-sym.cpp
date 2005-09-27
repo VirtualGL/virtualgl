@@ -113,8 +113,6 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXGetSelectedEventSGIX)
 
 	#ifdef sun
-	lsymopt(glXVideoResizeSUN)
-	lsymopt(glXGetVideoResizeSUN)
 	lsymopt(glXDisableXineramaSUN)
 	#endif
 
@@ -154,6 +152,7 @@ void __vgl_loadsymbols(void)
 	lsym(XCreateWindow);
 	lsym(XCreateSimpleWindow);
 	lsym(XDestroyWindow);
+	lsym(XFree);
 	lsym(XMaskEvent);
 	lsym(XMoveResizeWindow);
 	lsym(XNextEvent);

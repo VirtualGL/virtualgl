@@ -18,6 +18,7 @@
 #if defined(sun)||defined(linux)
 #include "rrsunray.h"
 #endif
+#include "glxvisual.h"
 
 extern void _vglprintf (FILE *f, const char *format, ...);
 
@@ -114,9 +115,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	#endif
 	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
 	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
-	int stereo=-1;
-	glXGetFBConfigAttrib(_localdpy, config, GLX_STEREO, &stereo);
-	if(stereo==1) _stereo=true;
+	if(__vglServerVisualAttrib(config, GLX_STEREO)) _stereo=true;
 	if(!_drawable) _throw("Could not create Pbuffer");
 }
 

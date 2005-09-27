@@ -14,8 +14,6 @@
 #include "faker-sym.h"
 #include "faker-macros.h"
 
-#define _DefaultScreen(d) ((!fconfig.glp && d) ? DefaultScreen(d):0)
-
 // Map a client-side drawable to a server-side drawable
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
@@ -25,29 +23,38 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 	else return draw;
 }
 
-// This attempts to look up a visual in the hash or match it using 2D functions
-// if (for some reason) it wasn't obtained with glXChooseVisual()
+static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
+{
+	VisualID vid=0;
+	if(!dpy || !config) return 0;
+	int screen=DefaultScreen(dpy);
+	if(!(vid=cfgh.getvisual(dpy, config)))
+	{
+		vid=__vglMatchVisual(dpy, screen, __vglConfigDepth(config),
+				__vglConfigClass(config),
+				__vglServerVisualAttrib(config, GLX_LEVEL),
+				__vglServerVisualAttrib(config, GLX_STEREO),
+				__vglServerVisualAttrib(config, GLX_TRANSPARENT_TYPE)!=GLX_NONE);
+		if(!vid) 
+			vid=__vglMatchVisual(dpy, screen, 24, TrueColor, 0, 0, 0);
+	}
+	if(vid) cfgh.add(dpy, config, vid);
+	return vid;
+}
 
-GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
+static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
 	GLXFBConfig c=0, *configs=NULL;  int n=0;
 	if(!dpy || !vis) return 0;
 	if(!(c=vish.getpbconfig(dpy, vis)))
 	{
-		int defattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		// Punt.  We can't figure out where the visual came from
+		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
 			GLX_PBUFFER_BIT, None};
-		int rgbattribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-			GLX_PBUFFER_BIT, None};
-		int ciattribs[]={GLX_DOUBLEBUFFER, 1, GLX_BUFFER_SIZE, 8,
-			GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE,
-			GLX_PBUFFER_BIT, None};
-		int *attribs=rgbattribs;
 		if(vis->c_class!=TrueColor && vis->c_class!=DirectColor)
 		{
-			attribs=ciattribs;
-			attribs[3]=vis->depth;
+			attribs[3]=attribs[5]=attribs[7]=vis->depth;
 		}
 		else
 		{
@@ -55,12 +62,25 @@ GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 			else if(vis->depth<16) attribs[3]=attribs[5]=attribs[7]=2;
 			else if(vis->depth<24) attribs[3]=attribs[5]=attribs[7]=4;
 		}
-		if(((configs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), attribs, &n))==NULL || n<1)
-			&& ((configs=glXChooseFBConfig(_localdpy, _DefaultScreen(_localdpy), defattribs, &n))==NULL || n<1))
+		#ifdef USEGLP
+		if(fconfig.glp)
+		{
+			attribs[10]=attribs[11]=None;
+			if((configs=glPChooseFBConfig(_localdev, attribs, &n))==NULL || n<1)
+				return 0;
+		}
+		else
+		#endif
+		if((configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n))==NULL
+			|| n<1)
 			return 0;
 		c=configs[0];
 		XFree(configs);
-		if(c) vish.add(dpy, vis, c);
+		if(c)
+		{
+			vish.add(dpy, vis, c);
+			cfgh.add(dpy, c, vis->visualid);
+		}
 	}
 	return c;
 }
@@ -69,33 +89,31 @@ extern "C" {
 
 GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list, int *nelements)
 {
-	#ifdef USEGLP
-	if(fconfig.glp)
+	GLXFBConfig *configs=NULL;
+
+	TRY();
+
+	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
+	if(!attrib_list || !nelements) return NULL;
+	*nelements=0;
+	configs=__vglConfigsFromVisAttribs(attrib_list, screen, depth, c_class, level,
+		stereo, trans, *nelements, true);
+	if(configs && *nelements)
 	{
-		// Argh!
-		int glpattribs[257], j=0;
-		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
-		{
-			if(attrib_list[i]!=GLX_DRAWABLE_TYPE)
-			{
-				glpattribs[j++]=attrib_list[i];  glpattribs[j++]=attrib_list[i+1];
-			}
-		}
-		glpattribs[j]=None;
-		return glPChooseFBConfig(_localdev, glpattribs, nelements);
+		VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo,
+			trans);
+		if(vid) for(int i=0; i<*nelements; i++) cfgh.add(dpy, configs[i], vid);
+		else {XFree(configs);  return NULL;}
 	}
-	else
-	#endif
-	return _glXChooseFBConfig(_localdpy, screen, attrib_list, nelements);
+
+	CATCH();
+
+	return configs;
 }
 
 GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, const int *attrib_list, int *nelements)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) return glPChooseFBConfig(_localdev, attrib_list, nelements);
-	else
-	#endif
-	return _glXChooseFBConfigSGIX(_localdpy, screen, attrib_list, nelements);
+	return glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 }
 
 void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned int mask)
@@ -190,27 +208,62 @@ const char *glXGetClientString(Display *dpy, int name)
 
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
+	GLXFBConfig c;
+
 	TRY();
-	GLXFBConfig c;  int glxvalue, err;
+
+	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 	errifnot(c=_MatchConfig(dpy, vis));
-	switch(attrib)
+
+	if(vis->c_class==PseudoColor && (attrib==GLX_RED_SIZE || attrib==GLX_GREEN_SIZE
+		|| attrib==GLX_BLUE_SIZE || attrib==GLX_ALPHA_SIZE
+		|| attrib==GLX_ACCUM_RED_SIZE || attrib==GLX_ACCUM_GREEN_SIZE
+		|| attrib==GLX_ACCUM_BLUE_SIZE || attrib==GLX_ACCUM_ALPHA_SIZE))
 	{
-		case GLX_USE_GL:
-			if(value)
-			{
-				if(vis->depth>=24 && (vis->c_class==TrueColor || vis->c_class==DirectColor))
-					*value=1;
-				else *value=0;
-				return 0;
-			}
-			else return GLX_BAD_VALUE;
-		case GLX_RGBA:
-			if((err=glXGetFBConfigAttrib(_localdpy, c, GLX_RENDER_TYPE, &glxvalue))!=0)
-				return err;
-			*value=glxvalue==GLX_RGBA_BIT? 1:0;  return 0;
-		default:
-			return glXGetFBConfigAttrib(_localdpy, c, attrib, value);
+		*value=0;  return 0;
 	}
+	if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor)
+		attrib=GLX_RED_SIZE;
+	if(attrib==GLX_LEVEL || attrib==GLX_TRANSPARENT_TYPE
+		|| attrib==GLX_TRANSPARENT_INDEX_VALUE
+		|| attrib==GLX_TRANSPARENT_RED_VALUE
+		|| attrib==GLX_TRANSPARENT_GREEN_VALUE
+		|| attrib==GLX_TRANSPARENT_BLUE_VALUE
+		|| attrib==GLX_TRANSPARENT_ALPHA_VALUE)
+	{
+		*value=__vglClientVisualAttrib(dpy, vis->screen, vis->visualid, attrib);
+		return 0;
+	}
+
+	if(attrib==GLX_RGBA)
+	{
+		int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
+		*value=(render_type==GLX_RGBA_BIT? 1:0);  return 0;
+	}
+	if(attrib==GLX_STEREO)
+	{
+		*value= (__vglClientVisualAttrib(dpy, vis->screen, vis->visualid, GLX_STEREO)
+			&& __vglServerVisualAttrib(c, GLX_STEREO));  return 0;
+	}
+	if(attrib==GLX_X_VISUAL_TYPE)
+	{
+		if(vis->c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
+		else *value=GLX_TRUE_COLOR;
+		return 0;
+	}
+
+	#ifdef USEGLP
+	if(fconfig.glp)
+	{
+		if(attrib==GLX_VIDEO_RESIZE_SUN) {*value=0;  return 0;}
+		else if(attrib==GLX_VIDEO_REFRESH_TIME_SUN) {*value=0;  return 0;}
+		else if(attrib==GLX_GAMMA_VALUE_SUN) {*value=100;  return 0;}
+		return glPGetFBConfigAttrib(c, attrib, value);
+	}
+	else
+	#endif
+	return _glXGetFBConfigAttrib(_localdpy, c, attrib, value);
+
 	CATCH();
 	return GLX_BAD_ATTRIBUTE;
 }
@@ -257,18 +310,52 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *value)
 {
+	VisualID vid=0;
+
+	TRY();
+
+	if(!dpy || !value) throw rrerror("glXGetFBConfigAttrib", "Invalid argument");
+	int screen=DefaultScreen(dpy);
+
+	if(!(vid=_MatchVisual(dpy, config)))
+		throw rrerror("glXGetFBConfigAttrib", "Invalid FB config");
+
+	int c_class=__vglVisualClass(dpy, screen, vid);
+	if(c_class==PseudoColor && (attribute==GLX_RED_SIZE || attribute==GLX_GREEN_SIZE
+		|| attribute==GLX_BLUE_SIZE || attribute==GLX_ALPHA_SIZE
+		|| attribute==GLX_ACCUM_RED_SIZE || attribute==GLX_ACCUM_GREEN_SIZE
+		|| attribute==GLX_ACCUM_BLUE_SIZE || attribute==GLX_ACCUM_ALPHA_SIZE))
+	{
+		*value=0;  return 0;
+	}
+	if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor)
+		attribute=GLX_RED_SIZE;
+	if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
+		|| attribute==GLX_TRANSPARENT_INDEX_VALUE
+		|| attribute==GLX_TRANSPARENT_RED_VALUE
+		|| attribute==GLX_TRANSPARENT_GREEN_VALUE
+		|| attribute==GLX_TRANSPARENT_BLUE_VALUE
+		|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
+	{
+		*value=__vglClientVisualAttrib(dpy, screen, vid, attribute);  return 0;
+	}
+
+	if(attribute==GLX_STEREO)
+	{
+		*value= (__vglClientVisualAttrib(dpy, screen, vid, GLX_STEREO)
+			&& __vglServerVisualAttrib(config, GLX_STEREO));  return 0;
+	}
+	if(attribute==GLX_X_VISUAL_TYPE)
+	{
+		if(c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
+		else *value=GLX_TRUE_COLOR;
+		return 0;
+	}
+
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
-		if(attribute==GLX_X_VISUAL_TYPE) {*value=GLX_TRUE_COLOR;  return 0;}
-		else if(attribute==GLX_STEREO) {*value=0;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_TYPE) {*value=GLX_NONE;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_INDEX_VALUE) {*value=0;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_RED_VALUE) {*value=0;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_GREEN_VALUE) {*value=0;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_BLUE_VALUE) {*value=0;  return 0;}
-		else if(attribute==GLX_TRANSPARENT_ALPHA_VALUE) {*value=0;  return 0;}
-		else if(attribute==GLX_VIDEO_RESIZE_SUN) {*value=0;  return 0;}
+		if(attribute==GLX_VIDEO_RESIZE_SUN) {*value=0;  return 0;}
 		else if(attribute==GLX_VIDEO_REFRESH_TIME_SUN) {*value=0;  return 0;}
 		else if(attribute==GLX_GAMMA_VALUE_SUN) {*value=100;  return 0;}
 		else return glPGetFBConfigAttrib(config, attribute, value);
@@ -276,6 +363,9 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	else
 	#endif
 	return _glXGetFBConfigAttrib(_localdpy, config, attribute, value);
+
+	CATCH();
+	return GLX_BAD_ATTRIBUTE;
 }
 
 int glXGetFBConfigAttribSGIX(Display *dpy, GLXFBConfigSGIX config, int attribute, int *value_return)
@@ -425,24 +515,6 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 }
 
 #ifdef sun
-int glXVideoResizeSUN(Display *display, GLXDrawable window, float factor)
-{
-	#ifdef USEGLP
-	if(fconfig.glp) return 0;
-	else
-	#endif
-	return _glXVideoResizeSUN(_localdpy, ServerDrawable(display, window), factor);
-}
-
-int glXGetVideoResizeSUN(Display *display, GLXDrawable window, float *factor)
-{
-	#ifdef USEGLP
-	if(fconfig.glp) return 0;
-	else
-	#endif
-	return _glXGetVideoResizeSUN(_localdpy, ServerDrawable(display, window), factor);
-}
-
 int glXDisableXineramaSUN(Display *dpy)
 {
 	#ifdef USEGLP
@@ -456,12 +528,17 @@ int glXDisableXineramaSUN(Display *dpy)
 GLboolean glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 	Window underlay, unsigned int *transparentIndex)
 {
+	XWindowAttributes xwa;
+	if(!transparentIndex) return False;
 	if(fconfig.transpixel>=0)
 	{
 		*transparentIndex=(unsigned int)fconfig.transpixel;  return True;
 	}
-	if(!__glXGetTransparentIndexSUN) return False;
-	return _glXGetTransparentIndexSUN(dpy, overlay, underlay, transparentIndex);
+	if(!dpy || !overlay) return False;
+	XGetWindowAttributes(dpy, overlay, &xwa);
+	*transparentIndex=__vglClientVisualAttrib(dpy, DefaultScreen(dpy),
+		xwa.visual->visualid, GLX_TRANSPARENT_INDEX_VALUE);
+	return True;
 }
 
 Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)

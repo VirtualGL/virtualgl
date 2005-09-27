@@ -11,8 +11,30 @@
  * wxWindows Library License for more details.
  */
 
+#ifndef __GLXVISUAL_H__
+#define __GLXVISUAL_H__
+
 #include "faker-sym.h"
 
-int glXConfigDepth(GLXFBConfig);
-int glXConfigClass(GLXFBConfig);
-GLXFBConfig glXConfigFromVisAttribs(int attribs[]);
+int __vglConfigDepth(GLXFBConfig);
+
+int __vglConfigClass(GLXFBConfig);
+
+GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int,
+	int &, int &, int &, int &, int &, int &, bool glx13=false);
+
+int __vglClientVisualAttrib(Display *, int, VisualID, int);
+
+int __vglServerVisualAttrib(GLXFBConfig, int);
+
+int __vglVisualDepth(Display *, int, VisualID);
+
+int __vglVisualClass(Display *, int, VisualID);
+
+VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
+
+XVisualInfo *__vglVisualFromVisualID(Display *, VisualID);
+
+#define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
+
+#endif

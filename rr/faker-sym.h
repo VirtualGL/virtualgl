@@ -268,21 +268,9 @@ funcdef3(void, glXGetSelectedEventSGIX, Display *, dpy, GLXDrawable, drawable,
 	unsigned long *, mask,);
 
 
-// GLX_SUN_get_transparent_index
-
-funcdef4(GLboolean, glXGetTransparentIndexSUN, Display *, dpy, Window, overlay,
-	Window, underlay, unsigned int *, transparentIndex, return);
-
-
 // SUN-specific
 
 #ifdef sun
-funcdef3(int, glXVideoResizeSUN, Display *, display, GLXDrawable, window,
-	float, factor, return);
-
-funcdef3(int, glXGetVideoResizeSUN, Display *,display, GLXDrawable, window,
-	float *, factor, return);
-
 funcdef1(int, glXDisableXineramaSUN, Display *, dpy, return);
 #endif
 
@@ -341,6 +329,8 @@ funcdef12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int, y,
 	XSetWindowAttributes *, attributes, return);
 
 funcdef2(int, XDestroyWindow, Display *, dpy, Window, win, return);
+
+funcdef1(int, XFree, void *, data, return);
 
 funcdef3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe, return);
 
