@@ -84,7 +84,7 @@ class _hashclass
 		void remove(_hashkeytype1 key1, _hashkeytype2 key2, bool useref=false)
 		{
 			_hashclassstruct *ptr=NULL;
-			if(!key1) _throw("Invalid argument");
+//			if(!key1) _throw("Invalid argument");
 			rrcs::safelock l(mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
