@@ -16,7 +16,7 @@
 
 #define DEFAULT_GAMMA 2.22
 
-unsigned short nextitem(unsigned char **ptr, unsigned long *n)
+static unsigned short nextitem(unsigned char **ptr, unsigned long *n)
 {
 	unsigned short value=*(unsigned short *)(*ptr);
 	(*ptr)+=2;  (*n)--;  return value;
@@ -35,11 +35,11 @@ unsigned short nextitem(unsigned char **ptr, unsigned long *n)
    Other hints were obtained from xcmsdb.c, part of the X.org source tree
 */
 
-Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
+static Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
 	double *gamma)
 {
 	Atom atom=0, actualtype=0;
-	long len=1;
+	long len=10000;
 	unsigned long n=0, bytesleft=0;
 	int actualformat=0;
 	unsigned char *prop=NULL, *ptr=NULL;
