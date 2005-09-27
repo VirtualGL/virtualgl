@@ -93,6 +93,12 @@ void clicktocontinue(Display *dpy)
 	throw(rrerror(__FUNCTION__, temps, 0));  \
 }
 
+#define _prerror5(m, a1, a2, a3, a4, a5) { \
+	char temps[256]; \
+	snprintf(temps, 255, m, a1, a2, a3, a4, a5); \
+	throw(rrerror(__FUNCTION__, temps, 0));  \
+}
+
 unsigned int checkbuffercolor(void)
 {
 	int i, vp[4];  unsigned int ret=0;
@@ -589,6 +595,9 @@ int rbtest(bool stereo=false)
 }
 
 
+int cfgid(Display *dpy, GLXFBConfig c);
+
+
 #define getcfgattrib(c, attrib, ctemp) { \
 	ctemp=-10; \
 	glXGetFBConfigAttrib(dpy, c, attrib, &ctemp); \
@@ -604,7 +613,7 @@ int rbtest(bool stereo=false)
 #define compareattrib(c, v, attrib, ctemp) { \
 	getcfgattrib(c, attrib, ctemp); \
 	getvisattrib(v, attrib, vtemp); \
-	if(ctemp!=vtemp) _prerror3("%s=%d in cfg & %d in X vis", #attrib, ctemp, vtemp); \
+	if(ctemp!=vtemp) _prerror5("%s=%d in C%.2x & %d in V%.2x", #attrib, ctemp, cfgid(dpy, c), vtemp, v?(unsigned int)v->visualid:0); \
 }
 
 
@@ -678,7 +687,8 @@ void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 int cfgid(Display *dpy, GLXFBConfig c)
 {
 	int temp=0;
-	if(!c || !dpy) _error("Invalid argument to cfgid()");
+	if(!c) _error("config==NULL in cfgid()");
+	if(!dpy) _error("display==NULL in cfgid()");
 	getcfgattrib(c, GLX_FBCONFIG_ID, temp);
 	return temp;
 }
@@ -771,6 +781,132 @@ int vistest(void)
 	try
 	{
 		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
+
+		try
+		{
+			printf("RGBA:   ");
+
+			// Iterate through RGBA attributes
+			int rgbattrib[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+				GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
+				GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
+				GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0,
+				GLX_SAMPLES, 1, GLX_RGBA, None, None, None};
+			int rgbattrib13[]={GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1, GLX_RED_SIZE, 8,
+				GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0,
+				GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0,
+				GLX_ACCUM_GREEN_SIZE, 0, GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0,
+				GLX_SAMPLE_BUFFERS, 0, GLX_SAMPLES, 1, None};
+
+			for(int db=0; db<=1; db++)
+			{
+				rgbattrib13[1]=db;
+				rgbattrib[27]=db? GLX_DOUBLEBUFFER:0;
+				for(int stereo=0; stereo<=1; stereo++)
+				{
+					rgbattrib13[3]=stereo;
+					rgbattrib[db? 28:27]=stereo? GLX_STEREO:0;
+					for(int alpha=0; alpha<=1; alpha++)
+					{
+						rgbattrib13[11]=rgbattrib[7]=alpha;
+						for(int depth=0; depth<=1; depth++)
+						{
+							rgbattrib13[13]=rgbattrib[9]=depth;
+							for(int aux=0; aux<=1; aux++)
+							{
+								rgbattrib13[15]=rgbattrib[11]=aux;
+								for(int stencil=0; stencil<=1; stencil++)
+								{
+									rgbattrib13[17]=rgbattrib[13]=stencil;
+									for(int accum=0; accum<=1; accum++)
+									{
+										rgbattrib13[19]=rgbattrib13[21]=rgbattrib13[23]=accum;
+										rgbattrib[15]=rgbattrib[17]=rgbattrib[19]=accum;
+										if(alpha) {rgbattrib13[25]=rgbattrib[21]=accum;}
+										for(int samples=0; samples<=16; samples==0? samples=1:samples*=2)
+										{
+											rgbattrib13[29]=rgbattrib[25]=samples;
+											rgbattrib13[27]=rgbattrib[23]=samples? 1:0;
+
+											if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+												rgbattrib13, &n)) || n==0) && !stereo)
+												_throw("No FB configs found");
+											if(!(v0=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattrib))
+												&& !stereo)
+												_throw("Could not find visual");
+											if(v0 && configs)
+											{
+												configvsvisual(dpy, configs[0], v0);
+												XFree(v0);  XFree(configs);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			printf("SUCCESS!\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+
+		try
+		{
+			printf("INDEX:  ");
+
+			// Iterate through color index attributes
+			int ciattrib[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
+				GLX_STENCIL_SIZE, 0, None, None, None};
+			int ciattrib13[]={GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1, GLX_BUFFER_SIZE, 8,
+				GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0, GLX_RENDER_TYPE,
+				GLX_COLOR_INDEX_BIT, None};
+
+			for(int db=0; db<=1; db++)
+			{
+				ciattrib13[1]=db;
+				ciattrib[8]=db? GLX_DOUBLEBUFFER:0;
+				for(int stereo=0; stereo<=1; stereo++)
+				{
+					ciattrib13[3]=stereo;
+					ciattrib[9]=stereo? GLX_STEREO:0;
+					for(int depth=0; depth<=1; depth++)
+					{
+						ciattrib13[7]=ciattrib[3]=depth;
+						for(int aux=0; aux<=1; aux++)
+						{
+							ciattrib13[9]=ciattrib[5]=aux;
+							for(int stencil=0; stencil<=1; stencil++)
+							{
+								ciattrib13[11]=ciattrib[7]=stencil;
+
+								if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+									ciattrib13, &n)) || n==0) && !stereo)
+									_throw("No FB configs found");
+								if(!(v0=glXChooseVisual(dpy, DefaultScreen(dpy), ciattrib))
+									&& !stereo)
+									_throw("Could not find visual");
+								if(v0 && configs)
+								{
+									configvsvisual(dpy, configs[0], v0);
+									XFree(v0);  XFree(configs);
+								}
+							}
+						}
+					}
+				}
+			}
+			printf("SUCCESS!\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+
+		printf("\n");
 		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
 			_throw("No FB configs found");
 
@@ -787,7 +923,7 @@ int vistest(void)
 				fbcid=cfgid(dpy, configs[i]);
 				if(!(v[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
 				{
-					printf("CFG ID 0x%.2x:  ", fbcid);
+					printf("CFG 0x%.2x:  ", fbcid);
 					_error("No matching X visual for CFG");
 				}
 			}
@@ -804,7 +940,7 @@ int vistest(void)
 			try
 			{
 				fbcid=cfgid(dpy, configs[i]);
-				printf("CFG ID 0x%.2x:  ", fbcid);
+				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(v1=glXGetVisualFromFBConfig(dpy, configs[i])))
 					_error("No matching X visual for CFG");
 
@@ -839,7 +975,7 @@ int vistest(void)
 			XVisualInfo *v2=NULL;
 			try
 			{
-				printf("Vis ID 0x%.2x:  ", (int)v0[i].visualid);
+				printf("Vis 0x%.2x:  ", (int)v0[i].visualid);
 				if(!(c=glXGetFBConfigFromVisual(dpy, &v0[i])))
 					_error("No matching CFG for X Visual");
 				configvsvisual(dpy, c, &v0[i]);
