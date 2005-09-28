@@ -45,15 +45,16 @@ class tempctx
 	public:
 
 		tempctx(Display *dpy, GLXDrawable draw, GLXDrawable read,
-			GLXContext ctx=glXGetCurrentContext()) :
+			GLXContext ctx=glXGetCurrentContext(), bool glx11=false) :
 			_dpy(glXGetCurrentDisplay()), _ctx(glXGetCurrentContext()),
 			_read(glXGetCurrentReadDrawable()), _draw(glXGetCurrentDrawable()),
-			_mc(false)
+			_mc(false), _glx11(glx11)
 		{
+			if(!_ctx || (!_read && !_draw)) return;
 			#ifdef USEGLP
-			if(!fconfig.glp && !dpy) return;
+			if(!fconfig.glp && (!dpy || !_dpy)) return;
 			#else
-			if(!dpy) return;
+			if(!dpy || !_dpy) return;
 			#endif
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;
@@ -70,7 +71,7 @@ class tempctx
 				else
 				#endif
 				{
-					if(draw==read) glXMakeCurrent(dpy, draw, ctx);
+					if(glx11) glXMakeCurrent(dpy, draw, ctx);
 					else glXMakeContextCurrent(dpy, draw, read, ctx);
 				}
 				_mc=true;
@@ -87,7 +88,7 @@ class tempctx
 				#endif
 				if(_dpy)
 				{
-					if(_draw==_read) glXMakeCurrent(_dpy, _draw, _ctx);
+					if(_glx11) glXMakeCurrent(_dpy, _draw, _ctx);
 					else glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
 				}
 			}
@@ -103,7 +104,7 @@ class tempctx
 		Display *_dpy;
 		GLXContext _ctx;
 		GLXDrawable _read, _draw;
-		bool _mc;
+		bool _mc, _glx11;
 };
 
 #ifdef INFAKER

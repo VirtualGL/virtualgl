@@ -159,7 +159,7 @@ class rrglframe : public rrframe
 		#endif
 		if(_pixelsize==1) format=GL_COLOR_INDEX;
 		
-		tempctx tc(_dpy, _win, _win, _ctx);
+		tempctx tc(_dpy, _win, _win, _ctx, true);
 
 		int e=glGetError();
 		while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
