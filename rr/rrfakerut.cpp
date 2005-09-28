@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/glx.h>
+#include "glx.h"
 #include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
