@@ -51,17 +51,9 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		// Punt.  We can't figure out where the visual came from
 		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-			GLX_PBUFFER_BIT, None};
-		if(vis->c_class!=TrueColor && vis->c_class!=DirectColor)
-		{
-			attribs[3]=attribs[5]=attribs[7]=vis->depth;
-		}
-		else
-		{
-			if(vis->depth<8) attribs[3]=attribs[5]=attribs[7]=1;
-			else if(vis->depth<16) attribs[3]=attribs[5]=attribs[7]=2;
-			else if(vis->depth<24) attribs[3]=attribs[5]=attribs[7]=4;
-		}
+			GLX_PBUFFER_BIT, GLX_STEREO, 0, None};
+		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
+			attribs[13]=1;
 		#ifdef USEGLP
 		if(fconfig.glp)
 		{
