@@ -239,12 +239,19 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int screen,
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
-	if(buffersize>=0)
+	if(buffersize>=0 && redsize<0 && greensize<0 && bluesize<0)
 	{
-		if(redsize<0) {glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=buffersize;}
-		if(greensize<0) {glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=buffersize;}
-		if(bluesize<0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=buffersize;}
+		glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=buffersize;
+		glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=buffersize;
+		glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=buffersize;
 	}
+	else
+	{
+		if(redsize>=0) {glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;}
+		if(greensize>=0) {glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;}
+		if(bluesize>=0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;}
+	}
+
 	// GLP won't grok GLX_STEREO, even if it's set to False
 	#ifdef USEGLP
 	if(!fconfig.glp) {
