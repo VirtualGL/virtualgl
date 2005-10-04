@@ -50,11 +50,10 @@ class tempctx
 			_read(glXGetCurrentReadDrawable()), _draw(glXGetCurrentDrawable()),
 			_mc(false), _glx11(glx11)
 		{
-			if(!_ctx || (!_read && !_draw)) return;
 			#ifdef USEGLP
-			if(!fconfig.glp && (!dpy || !_dpy)) return;
+			if(!fconfig.glp && !dpy) return;
 			#else
-			if(!dpy || !_dpy) return;
+			if(!dpy) return;
 			#endif
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;
@@ -80,7 +79,7 @@ class tempctx
 
 		void restore(void)
 		{
-			if(_mc)
+			if(_mc && _ctx && (_draw || _read))
 			{
 				#ifdef USEGLP
 				if(fconfig.glp) glPMakeContextCurrent(_draw, _read, _ctx);

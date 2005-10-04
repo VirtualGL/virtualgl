@@ -71,6 +71,7 @@ class rrglframe : public rrframe
 		{
 			_pixelsize=3;
 			XWindowAttributes xwa;
+			memset(&xwa, 0, sizeof(xwa));
 			XGetWindowAttributes(_dpy, _win, &xwa);
 			XVisualInfo vtemp;  int n=0;
 			if(!xwa.visual) _throw("Could not get window attributes");
