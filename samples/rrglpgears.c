@@ -99,7 +99,7 @@ static GLfloat angle = 0.0;
 
 /****************************** RRlib ******************************/
 
-fakerconfig config;
+rrconfig config;
 
 #define DEFAULTMOVFILE "glpgears.vgl"
 
@@ -674,7 +674,7 @@ main(int argc, char *argv[])
    GLboolean printInfo = GL_FALSE;
    int i;
 
-   rrtrap(RRGetFakerConfig(&config));
+   rrtrap(RRGetConfig(&config));
 
    for (i = 1; i < argc; i++) {
       if (strncasecmp(argv[i], "-d", 2) == 0 && i+1<argc) {
@@ -752,6 +752,7 @@ main(int argc, char *argv[])
       }
    }
 
+   rrtrap(RRSetConfig(&config));
 
    /****************************** RRlib ******************************/
    /* Open a connection to the client display to use for 2D rendering */
@@ -784,7 +785,7 @@ main(int argc, char *argv[])
       NOTE: clidpyName can be NULL if all you want to do is compress
       images without sending them. */
 
-   rrdpy = RROpenDisplay(config.client, config.port, config.ssl, config.numprocs);
+   rrdpy = RROpenDisplay(config.client);
    if (!rrdpy) {
       printf("Error: could not open connection to client\n");
       printf("%s--\n%s\n", RRErrorLocation(), RRErrorString());
