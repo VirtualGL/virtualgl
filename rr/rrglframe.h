@@ -168,6 +168,7 @@ class rrglframe : public rrframe
 		int oldbuf=-1;
 		glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
 		if(_stereo) glDrawBuffer(GL_BACK_LEFT);
+		glViewport(0, 0, _h.framew, _h.frameh);
 		glDrawPixels(_h.framew, _h.frameh, format, GL_UNSIGNED_BYTE, _bits);
 		if(_stereo)
 		{
