@@ -356,7 +356,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->_h.subsamp=fconfig.currentsubsamp;
 			b->_h.flags=dostereo? RR_LEFT:0;
 			b->_flags|=RRBMP_BOTTOMUP;
-			b->_strip_height=RR_DEFAULTSTRIPHEIGHT;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 			rrdpy->sendframe(b);
 
@@ -386,7 +385,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				b->_h.subsamp=fconfig.currentsubsamp;
 				b->_h.flags=RR_RIGHT;
 				b->_flags|=RRBMP_BOTTOMUP;
-				b->_strip_height=RR_DEFAULTSTRIPHEIGHT;
 				rrdpy->sendframe(b);
 			}
 

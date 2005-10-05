@@ -28,42 +28,7 @@ class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(char *displayname, unsigned short port, bool dossl,
-		int nprocs=1) : _sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _np(nprocs),
-		_dpynum(0), _stereo(true)
-	{
-		_np=min(_np, min(numprocs(), MAXPROCS));
-		if(_np<1) {_np=min(numprocs(), MAXPROCS);  if(_np>1) _np--;}
-		rrout.println("[VGL] Using %d / %d CPU's for compression", _np, numprocs());
-		char *servername=NULL;
-		try
-		{
-			if(displayname)
-			{
-				char *ptr=NULL;  servername=strdup(displayname);
-				if((ptr=strchr(servername, ':'))!=NULL)
-				{
-					if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
-					if(_dpynum<0 || _dpynum>255) _dpynum=0;
-					*ptr='\0';
-				}
-				if(!strlen(servername)) {free(servername);  servername=strdup("localhost");}
-			}
-			if(servername && port>0)
-			{
-				errifnot(_sd=new rrsocket(dossl));
-				_sd->connect(servername, port);
-			}
-			_prof_total.setname("Total   ");
-			errifnot(_t=new Thread(this));
-			_t->start();
-		}
-		catch(...)
-		{
-			if(servername) free(servername);  throw;
-		}
-		if(servername) free(servername);
-	}
+	rrdisplayclient(char *);
 
 	virtual ~rrdisplayclient(void)
 	{

@@ -86,15 +86,15 @@ enum {RR_RGB, RR_RGBA, RR_BGR, RR_BGRA, RR_ABGR, RR_ARGB};
 #else
 #define RR_DEFAULTSSLPORT     RR_DEFAULTPORT
 #endif
-#define RR_DEFAULTSTRIPHEIGHT 64
+#define RR_DEFAULTTILESIZE    256
 typedef void * RRDisplay;
 
 /* Return codes */
 #define RR_SUCCESS 0
 #define RR_ERROR   -1
 
-/* Faker Config structure (populated by RRGetFakerConfig() */
-typedef struct _fakerconfig
+/* Global config structure (populated by RRGetConfig() */
+typedef struct _rrconfig
 {
 	char *client;
 	char *server;
@@ -104,7 +104,7 @@ typedef struct _fakerconfig
 	int spoil;
 	int ssl;
 	int numprocs;
-} fakerconfig;
+} rrconfig;
 
 /* Maximum CPUs that be can be used for parallel image compression */
 /* (the algorithms don't scale beyond 3) */
@@ -116,26 +116,17 @@ extern "C" {
 
 
 DLLEXPORT RRDisplay DLLCALL
-	RROpenDisplay (char *displayname, unsigned short port, int ssl,
-		int numprocs);
+	RROpenDisplay (char *displayname);
 /*
-   Open a display connection to a VirtualGL client
+   Open a display connection to a VirtualGL client.  The TCP port, SSL,
+   and multi-thread options are read from VGL's global configuration,
+   which can be set either through environment variables or through
+   RRSetConfig().
 
    PARAMETERS:
    displayname (IN) = X display name (e.g. "mymachine:0.0") on which the client
                       is running.  Setting this to NULL will allow you to
                       compress frames offline for later transmission.
-   port (IN) = TCP port on which the client is listening.  This is ignored if
-               displayname is NULL.
-   ssl (IN) = 1 to use an SSL tunnel or 0 to use a standard TCP socket.  This
-	            is ignored if displayname is NULL.
-   numprocs (IN) = number of CPUs to use for compression (maximum is the number
-                   of CPUs in the system or 4, whichever is lower.)  Entering 0
-                   for this parameter will tell VirtualGL to automatically
-                   determine the number of CPUs to use.  VirtualGL's default
-                   behavior on a multiprocessor system is to use all but one
-                   CPU to do compression, up to a maximum of 3 CPUs (the
-                   compression algorithms don't scale well beyond 3 CPUs.)
 
    RETURN VALUE:
    If successful, a valid display connection handle is returned.  Otherwise,
@@ -331,17 +322,18 @@ DLLEXPORT int DLLCALL
 
 
 DLLEXPORT int DLLCALL
-	RRGetFakerConfig(fakerconfig *fc);
+	RRGetConfig(rrconfig *fc);
 /*
    This function populates a structure with parameters from the VirtualGL
-   faker configuration, which is read either from the environment or
-   from configuration files.  The values returned in the structure can be
-   subsequently passed to RROpenDisplay(), RRSendFrame(), etc.
+   global configuration, which is read from the environment during
+   initialization.  The values returned in this structure can be modified
+   and then passed back into RRSetConfig() to alter the global configuration,
+   or they can be used as parameters to RRSendFrame(), etc.
 
    PARAMETERS:
-   fc (IN) = address of previously allocated fakerconfig structure.  This will
-             be populated with the current faker config when this function
-             successfully returns.
+   fc (IN) = address of previously allocated rrconfig structure.  This will
+             be populated with values from the global configuration when this
+             function successfully returns.
 
    RETURN VALUE:
    If successful, RR_SUCCESS is returned.  Otherwise, RR_ERROR is returned and
@@ -349,6 +341,22 @@ DLLEXPORT int DLLCALL
    RRErrorLocation().
 */
 
+
+DLLEXPORT int DLLCALL
+	RRSetConfig(rrconfig *fc);
+/*
+   This function alters the VirtualGL global configuration with the
+   corresponding parameters in fc.  Parameters which are out of range or NULL
+   will be ignored.
+
+   PARAMETERS:
+   fc (IN) = address of previously allocated rrconfig structure.
+
+   RETURN VALUE:
+   If successful, RR_SUCCESS is returned.  Otherwise, RR_ERROR is returned and
+   the reason for the failure can be queried with RRErrorString() and
+   RRErrorLocation().
+*/
 
 DLLEXPORT char * DLLCALL
 	RRErrorString(void);

@@ -13,6 +13,43 @@
 
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
+#include "fakerconfig.h"
+
+extern FakerConfig fconfig;
+
+rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
+	_t(NULL), _deadyet(false), _np(fconfig.np), _dpynum(0), _stereo(true)
+{
+	rrout.println("[VGL] Using %d / %d CPU's for compression", fconfig.np, numprocs());
+	char *servername=NULL;
+	try
+	{
+		if(displayname)
+		{
+			char *ptr=NULL;  servername=strdup(displayname);
+			if((ptr=strchr(servername, ':'))!=NULL)
+			{
+				if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
+				if(_dpynum<0 || _dpynum>255) _dpynum=0;
+				*ptr='\0';
+			}
+			if(!strlen(servername)) {free(servername);  servername=strdup("localhost");}
+		}
+		if(servername)
+		{
+			errifnot(_sd=new rrsocket(fconfig.ssl));
+			_sd->connect(servername, fconfig.port);
+		}
+		_prof_total.setname("Total   ");
+		errifnot(_t=new Thread(this));
+		_t->start();
+	}
+	catch(...)
+	{
+		if(servername) free(servername);  throw;
+	}
+	if(servername) free(servername);
+}
 
 void rrdisplayclient::run(void)
 {
@@ -146,48 +183,43 @@ void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *b
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
-	int endline, startline;
-	int STRIPH=b->_strip_height;
 	bool bu=false;  rrjpeg jpg;
 	if(!b) return;
 	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
-
-	int nstrips=(b->_h.height+STRIPH-1)/STRIPH;
+	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.height;
+	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.width;
+	int i, j, n=0;
 
 	_bytes=0;
-	for(int strip=0; strip<nstrips; strip++)
+	for(i=0; i<b->_h.height; i+=tilesizey)
 	{
-		if(strip%_np!=_myrank) continue;
-		int i=strip*STRIPH;
-		if(bu)
+		int h=tilesizey, y=i;
+		if(b->_h.height-i<(3*tilesizey/2)) {h=b->_h.height-i;  i+=tilesizey;}
+		for(j=0; j<b->_h.width; j+=tilesizex)
 		{
-			startline=b->_h.height-i-STRIPH;
-			if(startline<0) startline=0;
-			endline=startline+min(b->_h.height-i, STRIPH);
-		}
-		else
-		{
-			startline=i;
-			endline=startline+min(b->_h.height-i, STRIPH);
-		}
-		if(b->stripequals(lastb, startline, endline)) continue;
-		rrframe *rrb=b->getstrip(startline, endline);
-		rrjpeg *j=NULL;
-		if(_myrank>0) {errifnot(j=new rrjpeg());}
-		else j=&jpg;
-		*j=*rrb;
-		_bytes+=j->_h.size;
-		delete rrb;
-		if(_myrank==0)
-		{
-			unsigned int size=j->_h.size;
-			endianize(j->_h);
-			if(_sd) _sd->send((char *)&j->_h, sizeof(rrframeheader));
-			if(_sd) _sd->send((char *)j->_bits, (int)size);
-		}
-		else
-		{
-			store(j);
+			int w=tilesizex, x=j;
+			if(n%_np!=_myrank) continue;
+			if(b->_h.width-j<(3*tilesizex/2)) {w=b->_h.width-j;  j+=tilesizex;}
+			if(b->tileequals(lastb, x, y, w, h)) continue;
+			rrframe *rrb=b->gettile(x, y, w, h);
+			rrjpeg *jptr=NULL;
+			if(_myrank>0) {errifnot(jptr=new rrjpeg());}
+			else jptr=&jpg;
+			*jptr=*rrb;
+			_bytes+=jptr->_h.size;
+			delete rrb;
+			if(_myrank==0)
+			{
+				unsigned int size=jptr->_h.size;
+				endianize(jptr->_h);
+				if(_sd) _sd->send((char *)&jptr->_h, sizeof(rrframeheader));
+				if(_sd) _sd->send((char *)jptr->_bits, (int)size);
+			}
+			else
+			{	
+				store(jptr);
+			}
+			n++;
 		}
 	}
 }

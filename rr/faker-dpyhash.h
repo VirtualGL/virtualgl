@@ -63,8 +63,7 @@ class dpyhash : public _dpyhash
 		rrdisplayclient *attach(char *key, void *key2)
 		{
 			rrdisplayclient *rrdpy=NULL;
-			errifnot(rrdpy=new rrdisplayclient(fconfig.client? fconfig.client:key,
-				fconfig.port, fconfig.ssl, fconfig.np));
+			errifnot(rrdpy=new rrdisplayclient(fconfig.client? fconfig.client:key));
 			return rrdpy;
 		}
 

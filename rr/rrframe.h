@@ -38,8 +38,8 @@ class rrframe
 {
 	public:
 
-	rrframe(bool primary=true) : _bits(NULL), _pitch(0), _pixelsize(0), _flags(0),
-		_strip_height(RR_DEFAULTSTRIPHEIGHT), _primary(primary)
+	rrframe(bool primary=true) : _bits(NULL), _pitch(0), _pixelsize(0),
+		_flags(0), _primary(primary)
 	{
 		memset(&_h, 0, sizeof(rrframeheader));
 		_ready.lock();
@@ -67,21 +67,23 @@ class rrframe
 		memcpy(&_h, h, sizeof(rrframeheader));
 	}
 
-	rrframe *getstrip(int startline, int endline)
+	rrframe *gettile(int x, int y, int w, int h)
 	{
 		rrframe *f;
 		if(!_bits || !_pitch || !_pixelsize) _throw("Frame not initialized");
-		if(startline<0 || startline>_h.height-1 || endline<=0 || endline>_h.height)
-			_throw("Invalid argument");
+		if(x<0 || y<0 || w<1 || h<1 || (x+w)>_h.width || (y+h)>_h.height)
+			throw rrerror("rrframe::gettile", "Argument out of range");
 		errifnot(f=new rrframe(false));
 		f->_h=_h;
-		f->_h.height=endline-startline;
-		f->_h.y+=startline;
+		f->_h.height=h;
+		f->_h.width=w;
+		f->_h.y=y;
+		f->_h.x=x;
 		f->_pixelsize=_pixelsize;
 		f->_flags=_flags;
 		f->_pitch=_pitch;
 		bool bu=(_flags&RRBMP_BOTTOMUP);
-		f->_bits=&_bits[_pitch*(bu? _h.height-endline:startline)];
+		f->_bits=&_bits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
 		return f;
 	}
 
@@ -91,19 +93,28 @@ class rrframe
 		memset(_bits, 0, _pitch*_h.frameh);
 	}
 
-	bool stripequals(rrframe *last, int startline, int endline)
+	bool tileequals(rrframe *last, int x, int y, int w, int h)
 	{
 		bool bu=(_flags&RRBMP_BOTTOMUP);
+		if(x<0 || y<0 || w<1 || h<1 || (x+w)>_h.width || (y+h)>_h.height)
+			throw rrerror("rrframe::tileequals", "Argument out of range");
 		if(last && _h.width==last->_h.width && _h.height==last->_h.height
 		&& _h.framew==last->_h.framew && _h.frameh==last->_h.frameh
 		&& _h.qual==last->_h.qual && _h.subsamp==last->_h.subsamp
 		&& _pixelsize==last->_pixelsize && _h.winid==last->_h.winid
-		&& _h.dpynum==last->_h.dpynum && _bits && last->_pitch==_pitch
-		&& startline>=0 && startline<=_h.height-1 && endline>0 && endline<=_h.height
+		&& _h.dpynum==last->_h.dpynum && _bits
 		&& _h.flags==last->_h.flags  // left & right eye can't be compared
-		&& last->_bits && !memcmp(&_bits[_pitch*(bu? _h.height-endline:startline)],
-			&last->_bits[_pitch*(bu? _h.height-endline:startline)],
-			_pitch*(endline-startline))) return true;
+		&& last->_bits)
+		{
+			unsigned char *newbits=&_bits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+			unsigned char *oldbits=&last->_bits[last->_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+			for(int i=0; i<h; i++)
+			{
+				if(memcmp(&newbits[_pitch*i], &oldbits[last->_pitch*i], _pixelsize*w))
+					return false;
+			}
+			return true;
+		}
 		return false;
 	}
 
@@ -127,7 +138,7 @@ class rrframe
 
 	rrframeheader _h;
 	unsigned char *_bits;
-	int _pitch, _pixelsize, _flags, _strip_height;
+	int _pitch, _pixelsize, _flags;
 
 	protected:
 
@@ -324,17 +335,17 @@ class rrfb : public rrframe
 		fbx(fbx_write(&_fb, _h.x, _h.y, _h.x, _h.y, w, h));
 	}
 
-	void drawstrip(int startline, int endline)
+	void drawtile(int x, int y, int w, int h)
 	{
-		if(startline<0 || startline>_h.frameh-1 || endline<0 || endline>_h.frameh)
+		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
 		if(_flags&RRBMP_BOTTOMUP)
 		{
-			for(int i=startline; i<endline; i++)
-				fbx(fbx_awrite(&_fb, 0, _fb.height-i-1, 0, i, 0, 1));
+			for(int i=0; i<h; i++)
+				fbx(fbx_awrite(&_fb, x, _fb.height-i-y-1, x, i+y, w, 1));
 		}
 		else
-		fbx(fbx_awrite(&_fb, 0, startline, 0, startline, 0, endline-startline));
+		fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
 	}
 
 	void sync(void) {fbx(fbx_sync(&_fb));}

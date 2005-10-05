@@ -520,7 +520,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
-	GLXFBConfig *configs=NULL, c=0;  int n;
+	GLXFBConfig *configs=NULL, c=0;  int n=0;
 	if(!dpy || !attrib_list) return NULL;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, screen, depth, c_class,

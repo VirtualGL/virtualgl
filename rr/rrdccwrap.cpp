@@ -14,7 +14,7 @@
 #include "rrdisplayclient.h"
 #include "fakerconfig.h"
 
-static FakerConfig rrfconfig;
+FakerConfig fconfig;
 
 // C wrappers
 
@@ -49,12 +49,12 @@ rrerror __lasterror;
 extern "C" {
 
 DLLEXPORT RRDisplay DLLCALL
-	RROpenDisplay(char *displayname, unsigned short port, int ssl, int numprocs)
+	RROpenDisplay(char *displayname)
 {
 	rrdisplayclient *rrc=NULL;
 	try
 	{
-		rrc=new rrdisplayclient(displayname, port, ssl, numprocs);
+		rrc=new rrdisplayclient(displayname);
 		if(!rrc) _throw("Could not allocate memory for class");
 		return (RRDisplay)rrc;
 	}
@@ -199,19 +199,40 @@ DLLEXPORT int DLLCALL
 }
 
 DLLEXPORT int DLLCALL
-	RRGetFakerConfig(fakerconfig *fc)
+	RRGetConfig(rrconfig *fc)
 {
 	try
 	{
 		if(!fc) _throw("Invalid argument");
-		fc->client=rrfconfig.client;
-		fc->server=rrfconfig.localdpystring;
-		fc->qual=rrfconfig.currentqual;
-		fc->subsamp=rrfconfig.currentsubsamp;
-		fc->port=rrfconfig.port;
-		fc->spoil=rrfconfig.spoil;
-		fc->ssl=rrfconfig.ssl;
-		fc->numprocs=rrfconfig.np;
+		fc->client=fconfig.client;
+		fc->server=fconfig.localdpystring;
+		fc->qual=fconfig.currentqual;
+		fc->subsamp=fconfig.currentsubsamp;
+		fc->port=fconfig.port;
+		fc->spoil=fconfig.spoil;
+		fc->ssl=fconfig.ssl;
+		fc->numprocs=fconfig.np;
+		return RR_SUCCESS;
+	}
+	_catch()
+	return RR_ERROR;
+}
+
+DLLEXPORT int DLLCALL
+	RRSetConfig(rrconfig *fc)
+{
+	try
+	{
+		if(!fc) _throw("Invalid argument");
+		if(fc->client) fconfig.client=fc->client;
+		if(fc->server) fconfig.localdpystring=fc->server;
+		if(fc->qual>0 && fc->qual<=100) fconfig.currentqual=fc->qual;
+		if(fc->subsamp>=0 && fc->subsamp<RR_SUBSAMPOPT) fconfig.currentsubsamp=fc->subsamp;
+		if(fc->port>0) fconfig.port=fc->port;
+		if(fc->spoil==0 || fc->spoil==1) fconfig.spoil=fc->spoil;
+		if(fc->ssl==0 || fc->ssl==1) fconfig.ssl=fc->ssl;
+		if(fc->numprocs>=0) fconfig.np=fc->numprocs;
+		fconfig.sanitycheck();
 		return RR_SUCCESS;
 	}
 	_catch()

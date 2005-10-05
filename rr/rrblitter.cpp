@@ -13,8 +13,9 @@
 
 #include "rrblitter.h"
 #include "rrtimer.h"
+#include "fakerconfig.h"
 
-#define STRIPH 64
+extern FakerConfig fconfig;
 
 void rrblitter::run(void)
 {
@@ -81,27 +82,23 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 
 void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
 {
-	int endline, i;  int startline;  bool needsync=false;
+	int i, j;  bool needsync=false;
 	bool bu=false;
 	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
+	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.height;
+	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.width;
 
-	for(i=0; i<b->_h.height; i+=STRIPH)
+	for(i=0; i<b->_h.height; i+=tilesizey)
 	{
-		if(bu)
+		int h=tilesizey, y=i;
+		if(b->_h.height-i<(3*tilesizey/2)) {h=b->_h.height-i;  i+=tilesizey;}
+		for(j=0; j<b->_h.width; j+=tilesizex)
 		{
-			startline=b->_h.height-i-STRIPH;
-			if(startline<0) startline=0;
-			endline=startline+min(b->_h.height-i, STRIPH);
-			if(b->_h.height-i<2*STRIPH) {startline=0;  i+=STRIPH;}
+			int w=tilesizex, x=j;
+			if(b->_h.width-j<(3*tilesizex/2)) {w=b->_h.width-j;  j+=tilesizex;}
+			if(b->tileequals(lastb, x, y, w, h)) continue;
+			b->drawtile(x, y, w, h);  needsync=true;
 		}
-		else
-		{
-			startline=i;
-			endline=startline+min(b->_h.height-i, STRIPH);
-			if(b->_h.height-i<2*STRIPH) {endline=b->_h.height;  i+=STRIPH;}
-		}
-		if(b->stripequals(lastb, startline, endline)) continue;
-		b->drawstrip(startline, endline);  needsync=true;
 	}
 
 	if(needsync) b->sync();

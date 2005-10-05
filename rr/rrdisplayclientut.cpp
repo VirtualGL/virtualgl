@@ -14,25 +14,24 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 #include "bmp.h"
+#include "fakerconfig.h"
 
-#define DEFQUAL 95
-#define DEFSAMP 444
-#define DEFNP   1
+FakerConfig fconfig;
 
 void usage(char **argv)
 {
 	printf("\nUSAGE: %s <bitmap file>\n", argv[0]);
 	printf("       [-client <machine:x.x>] [-samp <n>] [-qual <n>]\n");
-	printf("       [-striph <n>] [-ssl] [-np <n>]\n\n");
+	printf("       [-tilesize <n>] [-ssl] [-np <n>]\n\n");
 	printf("-client = X Display where the video should be sent (VGL client must be running\n");
 	printf("          on that machine) or 0 for local test only\n");
-	printf("          [default = read from DISPLAY environment]\n");
-	printf("-samp = JPEG YCbCr subsampling: 411, 422, or 444 [default = %d]\n", DEFSAMP);
-	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", DEFQUAL);
-	printf("-striph = height of each inter-frame difference tile [default = %d pixels]\n",
-		RR_DEFAULTSTRIPHEIGHT);
-	printf("-ssl = use SSL tunnel\n");
-	printf("-np <n> = number of processors to use for compression [default = %d]\n", DEFNP);
+	printf("          [default = %s]\n", fconfig.client? fconfig.client:"read from DISPLAY environment");
+	printf("-samp = JPEG YCbCr subsampling: 411, 422, or 444 [default = %d]\n", fconfig.currentsubsamp);
+	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", fconfig.currentqual);
+	printf("-tilesize = width/height of each inter-frame difference tile\n");
+	printf("            [default = %d x %d pixels]\n", fconfig.tilesize, fconfig.tilesize);
+	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
+	printf("-np <n> = number of processors to use for compression [default = %d]\n", fconfig.np);
 	printf("\n");
 	exit(1);
 }
@@ -42,51 +41,47 @@ int main(int argc, char **argv)
 	rrtimer t;  double elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;
-	bool usessl=false;  int i;  int bgr=littleendian();
+	int i;  int bgr=littleendian();
 
 	try {
 
-	int qual=DEFQUAL, subsamp=DEFSAMP, striph=RR_DEFAULTSTRIPHEIGHT, np=DEFNP;
-	char *clientname=NULL;  bool localtest=false;
+	bool localtest=false;
 	if(argc<2) usage(argv);
 
 	for(i=0; i<argc; i++)
 	{
-		if(!stricmp(argv[i], "-ssl")) usessl=true;
+		if(!stricmp(argv[i], "-ssl")) fconfig.ssl=true;
 		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
 		{
-			clientname=argv[i+1];  i++;
-			if(!stricmp(clientname, "0")) {localtest=true;  clientname=NULL;}
+			fconfig.client=argv[i+1];  i++;
+			if(!stricmp(fconfig.client, "0")) {localtest=true;  fconfig.client=NULL;}
 		}
 		if(!strnicmp(argv[i], "-sa", 3) && i<argc-1)
 		{
-			subsamp=atoi(argv[i+1]);  i++;
-			if(subsamp!=411 && subsamp!=422 && subsamp!=444) usage(argv);
+			int subsamp=atoi(argv[i+1]);  i++;
+			switch(subsamp)
+			{
+				case 411: fconfig.currentsubsamp=RR_411;  break;
+				case 422: fconfig.currentsubsamp=RR_422;  break;
+				case 444: fconfig.currentsubsamp=RR_444;  break;
+				default: usage(argv);
+			}
 		}
 		if(!strnicmp(argv[i], "-q", 2) && i<argc-1)
 		{
-			qual=atoi(argv[i+1]);  i++;
-			if(qual<1 || qual>100) usage(argv);
+			fconfig.currentqual=atoi(argv[i+1]);  i++;
 		}
-		if(!stricmp(argv[i], "-striph") && i<argc-1)
+		if(!stricmp(argv[i], "-tilesize") && i<argc-1)
 		{
-			striph=atoi(argv[i+1]);  i++;
-			if(striph<1) usage(argv);
+			fconfig.tilesize=atoi(argv[i+1]);  i++;
 		}
 		if(!stricmp(argv[i], "-np") && i<argc-1)
 		{
-			np=atoi(argv[i+1]);  i++;
-			if(np<0) usage(argv);
+			fconfig.np=atoi(argv[i+1]);  i++;
 		}
 	}
+	fconfig.sanitycheck();
 
-	switch(subsamp)
-	{
-		case 444: subsamp=RR_444;  break;
-		case 422: subsamp=RR_422;  break;
-		case 411: subsamp=RR_411;  break;
-	}
-	unsigned short port=0;
 	int w, h, d=3;
 
 	if(loadbmp(argv[1], &buf, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
@@ -104,13 +99,12 @@ int main(int argc, char **argv)
 		printf("Creating window %lu\n", (unsigned long)win);
 		errifnot(XMapRaised(dpy, win));
 		XSync(dpy, False);
-		port=usessl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
-		if(!clientname) clientname=DisplayString(dpy);
+		if(!fconfig.client) fconfig.client=DisplayString(dpy);
 	}
 
-	printf("Strip height = %d pixels\n", striph);
+	printf("Tile size = %d x %d pixels\n", fconfig.tilesize, fconfig.tilesize);
 
-	rrdisplayclient rrdpy(clientname, port, usessl, np);
+	rrdisplayclient rrdpy(fconfig.client);
 
 	int i;
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];
@@ -126,9 +120,8 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;
-		b->_strip_height=striph;
 		if(b->_flags&RRBMP_BGR && !bgr) b->_flags&=(~RRBMP_BGR);
 		fill=1-fill;
 		rrdpy.sendframe(b);
@@ -146,14 +139,14 @@ int main(int argc, char **argv)
 		{
 			if(fill) memcpy(b->_bits, buf, w*h*d);
 			else memcpy(b->_bits, buf2, w*h*d);
+			fill=1-fill;
 			frames++;  continue;
 		}
 		errifnot(b=rrdpy.getbitmap(w, h, d));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;
-		b->_strip_height=striph;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		clientframes++;  frames++;
@@ -170,9 +163,8 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
-		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;
-		b->_strip_height=striph;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -187,9 +179,8 @@ int main(int argc, char **argv)
 	{
 		errifnot(b=rrdpy.getbitmap(w, h, d));
 		memcpy(b->_bits, buf, w*h*d);
-		b->_h.qual=qual;  b->_h.subsamp=subsamp;
+		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;
-		b->_strip_height=striph;
 		rrdpy.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

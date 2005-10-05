@@ -13,17 +13,57 @@
 
 #include "rrblitter.h"
 #include "rrtimer.h"
+#include "fakerconfig.h"
+
+FakerConfig fconfig;
+
+void usage(char **argv)
+{
+	printf("\nUSAGE: %s [-tilesize <n>] [-sync] [-bottomup]\n", argv[0]);
+	printf("\n");
+	printf("-tilesize = width/height of each inter-frame difference tile\n");
+	printf("            [default = %d x %d pixels]\n", fconfig.tilesize, fconfig.tilesize);
+	printf("-sync = Test synchronous blitting code\n");
+	printf("-bottomup = Test bottom-up blitting code\n");
+	printf("\n");
+	exit(1);
+}
+
+void fillbmp(unsigned char *buf, int w, int pitch, int h, int ps, int on)
+{
+	unsigned char *ptr;  unsigned char pixel[3];
+	ptr=buf;
+	for(int i=0; i<h; i++, ptr+=pitch)
+	{
+		if(on) {pixel[0]=pixel[2]=i%256;  pixel[1]=255-(i%256);}
+		else {pixel[0]=i%256;  pixel[1]=0;  pixel[2]=255-(i%256);}
+		for(int j=0; j<w; j++) memcpy(&ptr[ps*j], pixel, 3);
+	}
+}
 
 int main(int argc, char **argv)
 {
 	rrblitter blitter;  rrtimer t;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
-	bool dosync=false;
-
-	if(argc>1 && !stricmp(argv[1], "-sync")) dosync=true;
+	bool dosync=false, bottomup=false;
 
 	try {
+
+	if(argc>1)
+	{
+		for(int i=1; i<argc; i++)
+		{
+			if(!stricmp(argv[i], "-h")) usage(argv);
+			if(!stricmp(argv[i], "-sync")) dosync=true;
+			if(!stricmp(argv[i], "-bottomup")) bottomup=true;
+			if(!stricmp(argv[i], "-tilesize") && i<argc-1)
+			{
+				fconfig.tilesize=atoi(argv[i+1]);  i++;
+			}
+		}
+		fconfig.sanitycheck();
+	}
 
 	if(!XInitThreads()) _throw("XInitThreads failed");
 	if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
@@ -41,7 +81,8 @@ int main(int argc, char **argv)
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
+		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
+		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		frames++;
@@ -56,13 +97,14 @@ int main(int argc, char **argv)
 	{
 		if(!blitter.frameready())
 		{
-			memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
+			fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 			fill=1-fill;
 			frames++;  continue;
 		}
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT);
+		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
+		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		clientframes++;  frames++;
@@ -79,7 +121,8 @@ int main(int argc, char **argv)
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		memset(b->_bits, 0, b->_pitch*HEIGHT);
-		memset(b->_bits, fill*0xff, b->_pitch*HEIGHT/2);
+		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
+		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
 		blitter.sendframe(b, dosync);
 		frames++;
@@ -94,7 +137,8 @@ int main(int argc, char **argv)
 	{
 		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		memset(b->_bits, 0xff, b->_pitch*HEIGHT);
+		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
+		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		blitter.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

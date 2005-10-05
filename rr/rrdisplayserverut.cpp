@@ -12,6 +12,9 @@
  */
 
 #include "rrdisplayclient.h"
+#include "fakerconfig.h"
+
+FakerConfig fconfig;
 
 #define WIDTH 301
 #define HEIGHT 301
@@ -24,7 +27,6 @@ int main(int argc, char **argv)
 
 	try {
 
-	char *clientname=NULL;
 	if(argc<3 || (iter=atoi(argv[1]))<1 || (frames=atoi(argv[2]))<1)
 	{
 		printf("USAGE: %s <iterations> <frames> [-client <machine:0.0>] [-ssl]\n", argv[0]);
@@ -40,12 +42,10 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-ssl")) usessl=true;
 		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
 		{
-			clientname=argv[i+1];  i++;
+			fconfig.client=argv[i+1];  i++;
 		}
 	}
-
-	unsigned short port=0;
-	port=usessl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
+	fconfig.sanitycheck();
 
 	if(!XInitThreads()) _throw("Could not initialize X threads");
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	printf("Creating window %lu\n", (unsigned long)win);
 	errifnot(XMapRaised(dpy, win));
 	XSync(dpy, False);
-	if(!clientname) clientname=DisplayString(dpy);
+	if(!fconfig.client) fconfig.client=DisplayString(dpy);
 
 	rrframe *b;
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	for(int i=0; i<iter; i++)
 	{
 		rrdisplayclient *rrdpy=NULL;
-		errifnot(rrdpy=new rrdisplayclient(clientname, port, usessl));
+		errifnot(rrdpy=new rrdisplayclient(fconfig.client));
 		for(int f=0; f<frames; f++)
 		{
 			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3));
@@ -73,7 +73,6 @@ int main(int argc, char **argv)
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=RR_411;
 			b->_h.winid=win;
-			b->_strip_height=RR_DEFAULTSTRIPHEIGHT;
 			rrdpy->sendframe(b);
 		}
 		delete rrdpy;

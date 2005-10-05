@@ -33,6 +33,11 @@
 	getconfig("RR"envvar, val);  \
 	getconfig("VGL_"envvar, val);}
 
+#define DEFLOQUAL 90
+#define DEFHIQUAL 95
+#define DEFLOSUBSAMP RR_411
+#define DEFHISUBSAMP RR_444
+
 class FakerConfig
 {
 	public:
@@ -44,10 +49,10 @@ class FakerConfig
 			x11lib=NULL;
 			client=NULL;
 			localdpystring=(char *)":0";
-			loqual=90;
-			losubsamp=RR_411;
-			hiqual=95;
-			hisubsamp=RR_444;
+			loqual=DEFLOQUAL;
+			losubsamp=DEFLOSUBSAMP;
+			hiqual=DEFHIQUAL;
+			hisubsamp=DEFHISUBSAMP;
 			currentqual=hiqual;
 			currentsubsamp=hisubsamp;
 			compress=RRCOMP_DEFAULT;
@@ -61,6 +66,7 @@ class FakerConfig
 			autotest=false;
 			gamma=true;
 			transpixel=-1;
+			tilesize=RR_DEFAULTTILESIZE;
 			reloadenv();
 		}
 
@@ -121,14 +127,28 @@ class FakerConfig
 			if(glp) usewindow=false;
 			getconfigbool("SYNC", sync);
 			getconfigint("NPROCS", np, 0, 1024);
+			getconfigbool("AUTOTEST", autotest);
+			getconfigbool("GAMMA", gamma);
+			getconfigint("TRANSPIXEL", transpixel, 0, 255);
+			getconfigint("TILESIZE", tilesize, 8, 1024);
+			sanitycheck();
+		}
+
+		void sanitycheck(void)
+		{
 			np=min(np, min(numprocs(), MAXPROCS));
 			if(np==0)
 			{
 				np=min(numprocs(), MAXPROCS);	 if(np>1) np--;
 			}
-			getconfigbool("AUTOTEST", autotest);
-			getconfigbool("GAMMA", gamma);
-			getconfigint("TRANSPIXEL", transpixel, 0, 255);
+			if(hiqual<1 || hiqual>100) hiqual=DEFHIQUAL;
+			if(loqual<1 || loqual>100) loqual=DEFLOQUAL;
+			if(hisubsamp<0 || hisubsamp>=RR_SUBSAMPOPT) hisubsamp=DEFHISUBSAMP;
+			if(losubsamp<0 || losubsamp>=RR_SUBSAMPOPT) losubsamp=DEFLOSUBSAMP;
+			if(port==0) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
+			if(compress<0 || compress>=RR_COMPRESSOPT) compress=RRCOMP_DEFAULT;
+			if(transpixel<0 || transpixel>255) transpixel=-1;
+			if(tilesize<8 || tilesize>1024) tilesize=RR_DEFAULTTILESIZE;
 		}
 
 		void setloqual(void)
@@ -155,13 +175,14 @@ class FakerConfig
 		int compress;
 		int port;
 		int transpixel;
+		int np;
+		int tilesize;
 
 		bool spoil;
 		bool ssl;
 		bool glp;
 		bool usewindow;
 		bool sync;
-		int np;
 		bool autotest;
 		bool gamma;
 
