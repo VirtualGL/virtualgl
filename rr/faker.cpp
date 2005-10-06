@@ -137,6 +137,44 @@ void __vgl_safeexit(int retcode)
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
+#define prargs(a) fprintf(stderr, "%s=%s ", #a, a?a:"NULL")
+#define prargx(a) fprintf(stderr, "%s=0x%.8lx ", #a, (unsigned long)a)
+#define prargi(a) fprintf(stderr, "%s=%d ", #a, a)
+#define prargv(a) fprintf(stderr, "%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
+#define prargc(a) fprintf(stderr, "%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
+#define prargal11(a) if(a) {  \
+	fprintf(stderr, "attrib_list=[");  \
+	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
+		fprintf(stderr, "0x%.4x", attrib_list[__an]);  \
+		if(attrib_list[__an]!=GLX_USE_GL && attrib_list[__an]!=GLX_DOUBLEBUFFER  \
+			&& attrib_list[__an]!=GLX_STEREO && attrib_list[__an]!=GLX_RGBA)  \
+			fprintf(stderr, "=0x%.4x", attrib_list[++__an]);  \
+		fprintf(stderr, " ");  \
+	}  fprintf(stderr, "] ");}
+#define prargal13(a) if(a) {  \
+	fprintf(stderr, "attrib_list=[");  \
+	for(int __an=0; attrib_list[__an]!=None; __an+=2) {  \
+		fprintf(stderr, "0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
+	}  fprintf(stderr, "] ");}
+
+#define opentrace(f)  \
+	double __vgltracetime=0.;  \
+	if(fconfig.trace) {  \
+		fprintf(stderr, "[VGL] %s (", #f);  \
+
+#define starttrace()  \
+		__vgltracetime=rrtime();  \
+	}
+
+#define stoptrace()  \
+	if(fconfig.trace) {  \
+		__vgltracetime=rrtime()-__vgltracetime;
+
+#define closetrace()  \
+		fprintf(stderr, ") %f ms\n", __vgltracetime*1000.);  \
+		fflush(stderr);  \
+	}
+
 #include "faker-glx.cpp"
 
 #if 0
@@ -213,19 +251,33 @@ Display *XOpenDisplay(_Xconst char* name)
 {
 	Display *dpy=NULL;
 	TRY();
+
+		opentrace(XOpenDisplay);  prargs(name);  starttrace();
+
 	fakerinit();
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
 	dpyh.add(dpy);
+
+		stoptrace();  prargx(dpy);  closetrace();
+
 	CATCH();
 	return dpy;
 }
 
 int XCloseDisplay(Display *dpy)
 {
+	int retval=0;
 	TRY();
+
+		opentrace(XCloseDisplay);  prargx(dpy);  starttrace();
+
 	dpyh.remove(dpy);
+	retval=_XCloseDisplay(dpy);
+
+		stoptrace();  closetrace();
+
 	CATCH();
-	return _XCloseDisplay(dpy);
+	return retval;
 }
 
 Window XCreateWindow(Display *dpy, Window parent, int x, int y,
@@ -235,9 +287,17 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 {
 	Window win=0;
 	TRY();
+
+		opentrace(XCreateWindow);  prargx(dpy);  prargx(parent);  prargi(x);
+		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
+		prargi(c_class);  prargv(visual);  starttrace();
+
 	if(!(win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+
+		stoptrace();  prargx(win);  closetrace();
+
 	CATCH();
 	return win;
 }
@@ -248,19 +308,34 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 {
 	Window win=0;
 	TRY();
+
+		opentrace(XCreateSimpleWindow);  prargx(dpy);  prargx(parent);  prargi(x);
+		prargi(y);  prargi(width);  prargi(height);  starttrace();
+
 	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+
+		stoptrace();  prargx(win);  closetrace();
+
 	CATCH();
 	return win;
 }
 
 int XDestroyWindow(Display *dpy, Window win)
 {
+	int retval=0;
 	TRY();
+
+		opentrace(XDestroyWindow);  prargx(dpy);  prargx(win);  starttrace();
+
 	winh.remove(dpy, win);
+	retval=_XDestroyWindow(dpy, win);
+
+		stoptrace();  closetrace();
+
 	CATCH();
-	return _XDestroyWindow(dpy, win);
+	return retval;
 }
 
 #if 0
@@ -299,7 +374,15 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 	if(xe && xe->type==ConfigureNotify)
 	{
 		pbw=winh.findpb(dpy, xe->xconfigure.window);
-		if(pbw) pbw->resize(xe->xconfigure.width, xe->xconfigure.height);
+		if(pbw)
+		{
+				opentrace(_HandleEvent);  prargi(xe->xconfigure.width);
+				prargi(xe->xconfigure.height);  starttrace();
+
+			pbw->resize(xe->xconfigure.width, xe->xconfigure.height);
+
+				stoptrace();  closetrace();
+		}
 	}
 	#if 0
 	else if(xe && xe->type==ButtonPress)
@@ -389,33 +472,61 @@ Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type, XEvent *xe
 
 int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask, XWindowChanges *values)
 {
+	int retval=0;
 	TRY();
+
+		opentrace(XConfigureWindow);  prargx(dpy);  prargx(win);
+		if(values && (value_mask&CWWidth)) {prargi(values->width);}
+		if(values && (value_mask&CWHeight)) {prargi(values->height);}  starttrace();
+
 	pbwin *pbw=NULL;
 	pbw=winh.findpb(dpy, win);
 	if(pbw && values)
 		pbw->resize(value_mask&CWWidth?values->width:0, value_mask&CWHeight?values->height:0);
+	retval=_XConfigureWindow(dpy, win, value_mask, values);
+
+		stoptrace();  closetrace();
+
 	CATCH();
-	return _XConfigureWindow(dpy, win, value_mask, values);
+	return retval;
 }
 
 int XResizeWindow(Display *dpy, Window win, unsigned int width, unsigned int height)
 {
+	int retval=0;
 	TRY();
+
+		opentrace(XResizeWindow);  prargx(dpy);  prargx(win);  prargi(width);
+		prargi(height);  starttrace();
+
 	pbwin *pbw=NULL;
 	pbw=winh.findpb(dpy, win);
 	if(pbw) pbw->resize(width, height);
+	retval=_XResizeWindow(dpy, win, width, height);
+
+		stoptrace();  closetrace();
+
 	CATCH();
-	return _XResizeWindow(dpy, win, width, height);
+	return retval;
 }
 
 int XMoveResizeWindow(Display *dpy, Window win, int x, int y, unsigned int width, unsigned int height)
 {
+	int retval=0;
 	TRY();
+
+		opentrace(XMoveResizeWindow);  prargx(dpy);  prargx(win);  prargi(x);
+		prargi(y);  prargi(width);  prargi(height);  starttrace();
+
 	pbwin *pbw=NULL;
 	pbw=winh.findpb(dpy, win);
 	if(pbw) pbw->resize(width, height);
+	retval=_XMoveResizeWindow(dpy, win, x, y, width, height);
+
+		stoptrace();  closetrace();
+
 	CATCH();
-	return _XMoveResizeWindow(dpy, win, x, y, width, height);
+	return retval;
 }
 
 // We have to trap any attempts to copy from/to a GLXPixmap (ugh)
@@ -430,6 +541,10 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 	if(!srcpm && !dstpm) return _XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
+
+		opentrace(XCopyArea);  prargx(dpy);  prargx(src);  prargx(dst);  prargx(gc);
+		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
+		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
 
 	GLXDrawable oldread=GetCurrentReadDrawable();
 	GLXDrawable olddraw=GetCurrentDrawable();
@@ -493,6 +608,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	#endif
 	_glXMakeContextCurrent(olddpy, olddraw, oldread, ctx);
 
+		stoptrace();  closetrace();
+
 	CATCH();
 	return 0;
 }
@@ -520,6 +637,9 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
+		opentrace(glXChooseVisual);  prargx(dpy);  prargi(screen);
+		prargal11(attrib_list);  starttrace();
+
 	GLXFBConfig *configs=NULL, c=0;  int n=0;
 	if(!dpy || !attrib_list) return NULL;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
@@ -532,6 +652,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	v=__vglVisualFromVisualID(dpy, vid);
 	if(!v) return NULL;
 	vish.add(dpy, v, c);
+
+		stoptrace();  prargv(v);  prargc(c);  closetrace();
 
 	CATCH();
 	return v;
@@ -546,6 +668,9 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
+		opentrace(glXGetVisualFromFBConfig);  prargx(dpy);  prargc(config);
+		starttrace();
+
 	VisualID vid=0;
 	if(!dpy || !config) return NULL;
 	vid=_MatchVisual(dpy, config);
@@ -553,6 +678,9 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	v=__vglVisualFromVisualID(dpy, vid);
 	if(!v) return NULL;
 	vish.add(dpy, v, config);
+
+		stoptrace();  prargv(v);  closetrace();
+
 	CATCH();
 	return v;
 }
@@ -570,6 +698,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
+
+		opentrace(glXCreateContext);  prargx(dpy);  prargv(vis);
+		prargi(direct);  starttrace();
 
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
@@ -589,6 +720,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 			return NULL;
 	}
 	ctxh.add(ctx, c);
+
+		stoptrace();  prargc(c);  prargx(ctx);  closetrace();
+
 	CATCH();
 	return ctx;
 }
@@ -602,6 +736,9 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
 	////////////////////
+
+		opentrace(glXMakeCurrent);  prargx(dpy);  prargx(drawable);  prargx(ctx);
+		starttrace();
 
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
@@ -650,6 +787,9 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
 	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
 	#endif
+
+		stoptrace();  prargc(config);  prargx(drawable);  closetrace();
+
 	CATCH();
 	return retval;
 }
@@ -657,12 +797,18 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
 	TRY();
+
+		opentrace(glXDestroyContext);  prargx(dpy);  prargx(ctx);  starttrace();
+
 	ctxh.remove(ctx);
 	#ifdef USEGLP
 	if(fconfig.glp)	glPDestroyContext(ctx);
 	else
 	#endif
 	_glXDestroyContext(_localdpy, ctx);
+
+		stoptrace();  closetrace();
+
 	CATCH();
 }
 
@@ -679,6 +825,9 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	if(!_isremote(dpy)) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
+		opentrace(glXCreateNewContext);  prargx(dpy);  prargc(config);
+		prargi(render_type);  prargi(direct);  starttrace();
+
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
@@ -692,6 +841,9 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 			return NULL;
 	}
 	ctxh.add(ctx, config);
+
+		stoptrace();  prargx(ctx);  closetrace();
+
 	CATCH();
 	return ctx;
 }
@@ -705,6 +857,9 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	////////////////////
+
+		opentrace(glXMakeContextCurrent);  prargx(dpy);  prargx(draw);
+		prargx(read);  prargx(ctx);  starttrace();
 
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
@@ -756,6 +911,9 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
 	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
 	#endif
+
+		stoptrace();  prargc(config);  prargx(draw);  prargx(read);  closetrace();
+
 	CATCH();
 	return retval;
 }
@@ -791,7 +949,13 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const in
 	if(!_isremote(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
+		opentrace(glXCreateWindow);  prargx(dpy);  prargc(config);  prargx(win);
+		starttrace();
+
 	errifnot(pbw=winh.setpb(dpy, win, config));
+
+		stoptrace();  if(pbw) {prargx(pbw->getdrawable());}  closetrace();
+
 	CATCH();
 	return win;  // Make the client store the original window handle, which we use
                // to find the Pbuffer in the hash
@@ -804,7 +968,12 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 	if(!_isremote(dpy)) {_glXDestroyWindow(dpy, win);  return;}
 	////////////////////
 
+		opentrace(glXDestroyWindow);  prargx(dpy);  prargx(win);  starttrace();
+
 	winh.remove(dpy, win);
+
+		stoptrace();  closetrace();
+
 	CATCH();
 }
 
@@ -813,12 +982,16 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
+	GLXPixmap drawable=0;
 	TRY();
 	GLXFBConfig c;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
 	////////////////////
+
+		opentrace(glXCreateGLXPixmap);  prargx(dpy);  prargv(vi);  prargx(pm);
+		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
@@ -828,10 +1001,14 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	{
 		pmh.add(dpy, pm, pb);
 		glxdh.add(pb->drawable(), dpy);
-		return pb->drawable();
+		drawable=pb->drawable();
 	}
+
+		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
+		prargi(d);  prargc(c);  prargx(drawable);  closetrace();
+
 	CATCH();
-	return 0;
+	return drawable;
 }
 
 void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
@@ -841,18 +1018,27 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	if(!_isremote(dpy)) {_glXDestroyGLXPixmap(dpy, pix);  return;}
 	////////////////////
 
+		opentrace(glXDestroyGLXPixmap);  prargx(dpy);  prargx(pix);  starttrace();
+
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
+
+		stoptrace();  closetrace();
+
 	CATCH();
 }
 
 GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int *attribs)
 {
+	GLXPixmap drawable=0;
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
+
+		opentrace(glXCreatePixmap);  prargx(dpy);  prargc(config);  prargx(pm);
+		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
@@ -861,10 +1047,14 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 	{
 		pmh.add(dpy, pm, pb);
 		glxdh.add(pb->drawable(), dpy);
-		return pb->drawable();
+		drawable=pb->drawable();
 	}
+
+		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
+		prargi(d);  prargx(drawable);  closetrace();
+
 	CATCH();
-	return 0;
+	return drawable;
 }
 
 GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, Pixmap pixmap)
@@ -879,8 +1069,13 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	if(!_isremote(dpy)) {_glXDestroyPixmap(dpy, pix);  return;}
 	////////////////////
 
+		opentrace(glXDestroyPixmap);  prargx(dpy);  prargx(pix);  starttrace();
+
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
+
+		stoptrace();  closetrace();
+
 	CATCH();
 }
 
@@ -891,7 +1086,14 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 void glXUseXFont(Font font, int first, int count, int list_base)
 {
 	TRY();
+
+		opentrace(glXUseXFont);  prargx(font);  prargi(first);  prargi(count);
+		prargi(list_base);  starttrace();
+
 	Fake_glXUseXFont(font, first, count, list_base);
+
+		stoptrace();  closetrace();
+
 	return;
 	CATCH();
 }
@@ -899,6 +1101,9 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
 	TRY();
+
+		opentrace(glXSwapBuffers);  prargx(dpy);  prargx(drawable);  starttrace();
+
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && (pbw=winh.findpb(dpy, drawable))!=NULL)
 	{
@@ -906,6 +1111,10 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 		pbw->swapbuffers();
 	}
 	else {if(!fconfig.glp) _glXSwapBuffers(_localdpy, drawable);}
+
+		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getdrawable());}
+		closetrace();  
+
 	CATCH();
 }
 
@@ -919,7 +1128,12 @@ static void _doGLreadback(bool force, bool sync=false)
 	{
 		if(_drawingtofront() || pbw->_dirty)
 		{
+				opentrace(_doGLreadback);  prargx(pbw->getdrawable());  prargi(sync);
+				prargi(force);  starttrace();
+
 			pbw->readback(GL_FRONT, force, sync);
+
+				stoptrace();  closetrace();
 		}
 	}
 }
@@ -927,6 +1141,9 @@ static void _doGLreadback(bool force, bool sync=false)
 void glFlush(void)
 {
 	TRY();
+
+		if(fconfig.trace) fprintf(stderr, "[VGL] glFlush()\n");
+
 	_glFlush();
 	_doGLreadback(false);
 	CATCH();
@@ -935,6 +1152,9 @@ void glFlush(void)
 void glFinish(void)
 {
 	TRY();
+
+		if(fconfig.trace) fprintf(stderr, "[VGL] glFinish()\n");
+
 	_glFinish();
 	if(fconfig.sync) _doGLreadback(true, true);
 	else _doGLreadback(false);
@@ -944,6 +1164,9 @@ void glFinish(void)
 void glXWaitGL(void)
 {
 	TRY();
+
+		if(fconfig.trace) fprintf(stderr, "[VGL] glXWaitGL()\n");
+
 	#ifdef SUNOGL
 	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
 	#else
@@ -959,6 +1182,9 @@ void glXWaitGL(void)
 void glDrawBuffer(GLenum mode)
 {
 	TRY();
+
+		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
+
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
 	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
@@ -972,6 +1198,10 @@ void glDrawBuffer(GLenum mode)
 		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
 	}
 	else _glDrawBuffer(mode);
+
+		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
+		prargi(pbw->_rdirty);  prargx(pbw->getdrawable());}  closetrace();
+
 	CATCH();
 }
 
@@ -979,6 +1209,9 @@ void glDrawBuffer(GLenum mode)
 void glPopAttrib(void)
 {
 	TRY();
+
+		opentrace(glPopAttrib);  starttrace();
+
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
 	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
@@ -992,6 +1225,10 @@ void glPopAttrib(void)
 		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
 	}
 	else _glPopAttrib();
+
+		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
+		prargi(pbw->_rdirty);  prargx(pbw->getdrawable());}  closetrace();
+
 	CATCH();
 }
 
@@ -1001,14 +1238,19 @@ void glPopAttrib(void)
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	TRY();
+
+		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
+		prargi(height);  starttrace();
+
 	GLXContext ctx=glXGetCurrentContext();
 	GLXDrawable draw=GetCurrentDrawable();
 	GLXDrawable read=GetCurrentReadDrawable();
 	Display *dpy=NULL;
 	if(!fconfig.glp) dpy=GetCurrentDisplay();
+	GLXDrawable newread=0, newdraw=0;
 	if((dpy || fconfig.glp) && (draw || read) && ctx)
 	{
-		GLXDrawable newread=read, newdraw=draw;
+		newread=read, newdraw=draw;
 		pbwin *drawpbw=winh.findpb(draw);
 		pbwin *readpbw=winh.findpb(read);
 		if(drawpbw) newdraw=drawpbw->updatedrawable();
@@ -1025,6 +1267,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		}
 	}
 	_glViewport(x, y, width, height);
+
+		stoptrace();  if(draw!=newdraw) {prargx(draw);  prargx(newdraw);}
+		if(read!=newread) {prargx(read);  prargx(newread);}  closetrace();
+
 	CATCH();
 }
 
