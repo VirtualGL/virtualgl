@@ -195,7 +195,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 	{
 		int h=tilesizey, y=i;
 		if(b->_h.height-i<(3*tilesizey/2)) {h=b->_h.height-i;  i+=tilesizey;}
-		for(j=0; j<b->_h.width; j+=tilesizex)
+		for(j=0; j<b->_h.width; j+=tilesizex, n++)
 		{
 			int w=tilesizex, x=j;
 			if(n%_np!=_myrank) continue;
@@ -219,7 +219,6 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			{	
 				store(jptr);
 			}
-			n++;
 		}
 	}
 }
