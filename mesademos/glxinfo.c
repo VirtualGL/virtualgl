@@ -774,10 +774,18 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
    /* get list of all visuals on this screen */
    theTemplate.screen = scrnum;
    mask = VisualScreenMask;
-   if(fbConfigs)
+   if(fbConfigs) {
       configs = glXGetFBConfigs(dpy, DefaultScreen(dpy), &numVisuals);
-   else
+      if (!configs) {
+         printf("No FB configs found!\n");  exit(1);
+      }
+   }
+   else {
       visuals = XGetVisualInfo(dpy, mask, &theTemplate, &numVisuals);
+      if (!visuals) {
+         printf("No Visuals found!\n");  exit(1);
+      }
+   }
 
    if (mode == Verbose) {
       for (i = 0; i < numVisuals; i++) {
