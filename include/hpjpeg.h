@@ -25,8 +25,6 @@
 
 /* Subsampling */
 #define NUMSUBOPT 3
-#define HPJ_MINWIDTH 32
-#define HPJ_MINHEIGHT 16
 
 enum {HPJ_444=0, HPJ_422, HPJ_411};
 
