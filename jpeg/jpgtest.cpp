@@ -20,7 +20,7 @@
 #include "rrtimer.h"
 #include "hpjpeg.h"
 
-#define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, hpjGetErrorStr());  exit(1);}}
+#define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, hpjGetErrorStr());  goto bailout;}}
 
 int forcemmx=0, forcesse=0, forcesse2=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
@@ -47,14 +47,14 @@ void printsigfig(double val, int figs)
 }
 
 void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
-	int jpegsub, int qual, char *filename, int dostrip, int useppm, int quiet)
+	int jpegsub, int qual, char *filename, int dotile, int useppm, int quiet)
 {
 	char tempstr[1024];
 	FILE *outfile;  hpjhandle hnd;
-	unsigned char *jpegbuf, *rgbbuf;
+	unsigned char **jpegbuf=NULL, *rgbbuf=NULL;
 	rrtimer timer; double elapsed;
-	int jpgbufsize=0, i, j, striph, ITER=5, temph;
-	unsigned long *compstripsize;
+	int jpgbufsize=0, i, j, tilesizex, tilesizey, numtilesx, numtilesy, ITER;
+	unsigned long *comptilesize=NULL;
 	int flags=(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0);
 	int ps=_ps[pf];
 	int pitch=w*ps;
@@ -62,48 +62,73 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	flags |= _flags[pf];
 	if(bu) flags |= HPJ_BOTTOMUP;
 
-	if((jpegbuf=(unsigned char *)malloc(HPJBUFSIZE(w, h))) == NULL
-	|| (rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL
-	|| (compstripsize=(unsigned long *)malloc(sizeof(unsigned long)*h)) == NULL)
+	if((rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL)
 	{
-		puts("ERROR: Could not allocate image buffers.");
+		puts("ERROR: Could not allocate image buffer.");
 		exit(1);
 	}
 
 	if(!quiet) printf("\n>>>>>  %s (%s) <--> JPEG %s Q%d  <<<<<\n", _pfname[pf],
 		bu?"Bottom-up":"Top-down",
 		jpegsub==HPJ_411?"4:1:1":jpegsub==HPJ_422?"4:2:2":"4:4:4", qual);
-	if(dostrip) striph=8;  else striph=h;
+	if(dotile) {tilesizex=tilesizey=4;}  else {tilesizex=w;  tilesizey=h;}
+
 	do
 	{
-		striph*=2;  if(striph>h) striph=h;
+		tilesizex*=2;  if(tilesizex>w) tilesizex=w;
+		tilesizey*=2;  if(tilesizey>h) tilesizey=h;
+		numtilesx=(w+tilesizex-1)/tilesizex;
+		numtilesy=(h+tilesizey-1)/tilesizey;
+		if((comptilesize=(unsigned long *)malloc(sizeof(unsigned long)*numtilesx*numtilesy)) == NULL
+		|| (jpegbuf=(unsigned char **)malloc(sizeof(unsigned char *)*numtilesx*numtilesy)) == NULL)
+		{
+			puts("ERROR: Could not allocate image buffers.");
+			goto bailout;
+		}
+		memset(jpegbuf, 0, sizeof(unsigned char *)*numtilesx*numtilesy);
+		for(i=0; i<numtilesx*numtilesy; i++)
+		{
+			if((jpegbuf[i]=(unsigned char *)malloc(HPJBUFSIZE(tilesizex, tilesizey))) == NULL)
+			{
+				puts("ERROR: Could not allocate image buffers.");
+				goto bailout;
+			}
+		}
+
+		// Compression test
 		if(quiet) printf("%s\t%s\t%s\t%d\t",  _pfname[pf], bu?"BU":"TD",
 			jpegsub==HPJ_411?"4:1:1":jpegsub==HPJ_422?"4:2:2":"4:4:4", qual);
 		for(i=0; i<h; i++) memcpy(&rgbbuf[pitch*i], &srcbuf[w*ps*i], w*ps);
 		if((hnd=hpjInitCompress())==NULL)
-			{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjCompress(hnd, rgbbuf, w, pitch, striph, ps,
-			jpegbuf, &compstripsize[0], jpegsub, qual, flags));
+		{
+			printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());
+			goto bailout;
+		}
+		_catch(hpjCompress(hnd, rgbbuf, tilesizex, pitch, tilesizey, ps,
+			jpegbuf[0], &comptilesize[0], jpegsub, qual, flags));
 		ITER=0;
 		timer.start();
 		do
 		{
-			jpgbufsize=0;
-			j=0;
-			do
+			jpgbufsize=0;  int tilen=0;
+			for(i=0; i<h; i+=tilesizey)
 			{
-				if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-				_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, pitch, temph, ps,
-					&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, flags));
-				jpgbufsize+=compstripsize[j];
-				j+=temph;
-			} while(j<h);
+				for(j=0; j<w; j+=tilesizex)
+				{
+					int tempw=min(tilesizex, w-j), temph=min(tilesizey, h-i);
+					_catch(hpjCompress(hnd, &rgbbuf[pitch*i+j*ps], tempw, pitch,
+						temph, ps, jpegbuf[tilen], &comptilesize[tilen], jpegsub, qual,
+						flags));
+					jpgbufsize+=comptilesize[tilen];
+					tilen++;
+				}
+			}
 			ITER++;
-		} while((elapsed=timer.elapsed())<2.);
+		} while((elapsed=timer.elapsed())<1.);
 		_catch(hpjDestroy(hnd));
 		if(quiet)
 		{
-			if(striph==h) printf("Full\t");  else printf("%d\t", striph);
+			if(tilesizex==w && tilesizey==h) printf("Full     \t");  else printf("%-4d %-4d\t", tilesizex, tilesizey);
 			printsigfig((double)(w*h)/1000000.*(double)ITER/elapsed, 4);
 			printf("\t");
 			printsigfig((double)(w*h*ps)/(double)jpgbufsize, 4);
@@ -111,14 +136,14 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 		else
 		{
-			if(striph==h) printf("\nFull image\n");  else printf("\nStrip size: %d x %d\n", w, striph);
+			if(tilesizex==w && tilesizey==h) printf("\nFull image\n");  else printf("\nTile size: %d x %d\n", tilesizex, tilesizey);
 			printf("C--> Frame rate:           %f fps\n", (double)ITER/elapsed);
 			printf("     Output image size:    %d bytes\n", jpgbufsize);
 			printf("     Compression ratio:    %f:1\n", (double)(w*h*ps)/(double)jpgbufsize);
 			printf("     Source throughput:    %f Megapixels/sec\n", (double)(w*h)/1000000.*(double)ITER/elapsed);
 			printf("     Output bit stream:    %f Megabits/sec\n", (double)jpgbufsize*8./1000000.*(double)ITER/elapsed);
 		}
-		if(striph==h)
+		if(tilesizex==w && tilesizey==h)
 		{
 			sprintf(tempstr, "%s_%dQ%d.jpg", filename, jpegsub==HPJ_444?444:
 				jpegsub==HPJ_422?422:411, qual);
@@ -127,7 +152,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 				puts("ERROR: Could not open reference image");
 				exit(1);
 			}
-			if(fwrite(jpegbuf, jpgbufsize, 1, outfile)!=1)
+			if(fwrite(jpegbuf[0], jpgbufsize, 1, outfile)!=1)
 			{
 				puts("ERROR: Could not write reference image");
 				exit(1);
@@ -135,25 +160,33 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			fclose(outfile);
 			if(!quiet) printf("Reference image written to %s\n", tempstr);
 		}
+
+		// Decompression test
 		memset(rgbbuf, 127, pitch*h);  // Grey image means decompressor did nothing
 		if((hnd=hpjInitDecompress())==NULL)
-			{printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, pitch,
-			striph, ps, flags));
+		{
+			printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());
+			goto bailout;
+		}
+		_catch(hpjDecompress(hnd, jpegbuf[0], jpgbufsize, rgbbuf, tilesizex, pitch,
+			tilesizey, ps, flags));
 		ITER=0;
 		timer.start();
 		do
 		{
-			j=0;
-			do
+			int tilen=0;
+			for(i=0; i<h; i+=tilesizey)
 			{
-				if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-				_catch(hpjDecompress(hnd, &jpegbuf[w*3*j], compstripsize[j],
-					&rgbbuf[pitch*j], w, pitch, temph, ps, flags));
-				j+=temph;
-			} while(j<h);
+				for(j=0; j<w; j+=tilesizex)
+				{
+					int tempw=min(tilesizex, w-j), temph=min(tilesizey, h-i);
+					_catch(hpjDecompress(hnd, jpegbuf[tilen], comptilesize[tilen],
+						&rgbbuf[pitch*i+ps*j], tempw, pitch, temph, ps, flags));
+					tilen++;
+				}
+			}
 			ITER++;
-		}	while((elapsed=timer.elapsed())<2.);
+		}	while((elapsed=timer.elapsed())<1.);
 		_catch(hpjDestroy(hnd));
 		if(quiet)
 		{
@@ -165,14 +198,14 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			printf("D--> Frame rate:           %f fps\n", (double)ITER/elapsed);
 			printf("     Dest. throughput:     %f Megapixels/sec\n", (double)(w*h)/1000000.*(double)ITER/elapsed);
 		}
-		if(striph==h) sprintf(tempstr, "%s_%dQ%d_full.%s", filename,
+		if(tilesizex==w && tilesizey==h) sprintf(tempstr, "%s_%dQ%d_full.%s", filename,
 				jpegsub==HPJ_444?444:jpegsub==HPJ_422?422:411, qual, useppm?"ppm":"bmp");
-		else sprintf(tempstr, "%s_%dQ%d_%d.%s", filename, jpegsub==HPJ_444?444:
-				jpegsub==HPJ_422?422:411, qual, striph, useppm?"ppm":"bmp");
+		else sprintf(tempstr, "%s_%dQ%d_%dx%d.%s", filename, jpegsub==HPJ_444?444:
+				jpegsub==HPJ_422?422:411, qual, tilesizex, tilesizey, useppm?"ppm":"bmp");
 		if(savebmp(tempstr, rgbbuf, w, h, pf, pitch, bu)==-1)
 		{
-			printf("ERROR saving bitmap: %s\n", bmpgeterr());  exit(1);
-			free(jpegbuf);  free(rgbbuf);  free(compstripsize);
+			printf("ERROR saving bitmap: %s\n", bmpgeterr());
+			goto bailout;
 		}
 		sprintf(strrchr(tempstr, '.'), "-err.%s", useppm?"ppm":"bmp");
 		if(!quiet) printf("Computing compression error and saving to %s.\n", tempstr);
@@ -180,19 +213,40 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			rgbbuf[pitch*j+i]=abs(rgbbuf[pitch*j+i]-srcbuf[w*ps*j+i]);
 		if(savebmp(tempstr, rgbbuf, w, h, pf, pitch, bu)==-1)
 		{
-			printf("ERROR saving bitmap: %s\n", bmpgeterr());  exit(1);
-			free(jpegbuf);  free(rgbbuf);  free(compstripsize);
+			printf("ERROR saving bitmap: %s\n", bmpgeterr());
+			goto bailout;
 		}
-	} while(striph<h);
 
-	free(jpegbuf);  free(rgbbuf);  free(compstripsize);
+		// Cleanup
+		if(jpegbuf && tilesizex && tilesizey)
+		{
+			for(i=0; i<numtilesx*numtilesy; i++)
+				{if(jpegbuf[i]) free(jpegbuf[i]);  jpegbuf[i]=NULL;}
+			free(jpegbuf);  jpegbuf=NULL;
+		}
+		if(comptilesize) {free(comptilesize);  comptilesize=NULL;}
+	} while(tilesizex<w || tilesizey<h);
+
+	if(rgbbuf) {free(rgbbuf);  rgbbuf=NULL;}
+	return;
+
+	bailout:
+	if(jpegbuf && tilesizex && tilesizey)
+	{
+		for(i=0; i<tilesizex*tilesizey; i++)
+			{if(jpegbuf[i]) free(jpegbuf[i]);  jpegbuf[i]=NULL;}
+		free(jpegbuf);  jpegbuf=NULL;
+	}
+	if(comptilesize) {free(comptilesize);  comptilesize=NULL;}
+	if(rgbbuf) {free(rgbbuf);  rgbbuf=NULL;}
+	exit(1);
 }
 
 
 int main(int argc, char *argv[])
 {
 	unsigned char *bmpbuf=NULL;  int w, h, i, useppm=0;
-	int qual, dostrip=0, quiet=0, hiqual=-1;  char *temp;
+	int qual, dotile=0, quiet=0, hiqual=-1;  char *temp;
 	BMPPIXELFORMAT pf=BMP_BGR;
 	int bu=0;
 
@@ -201,9 +255,9 @@ int main(int argc, char *argv[])
 	if(argc<3)
 	{
 		printf("USAGE: %s <Inputfile (BMP|PPM)> <%% Quality>\n\n", argv[0]);
-		printf("       [-strip]\n");
+		printf("       [-tile]\n");
 		printf("       Test performance of the codec when the image is encoded\n");
-		printf("       as separate strips of varying sizes.\n\n");
+		printf("       as separate tiles of varying sizes.\n\n");
 		printf("       [-forcemmx] [-forcesse] [-forcesse2]\n");
 		printf("       Force MMX, SSE, or SSE2 code paths in Intel codec\n\n");
 		printf("       [-rgb | -bgr | -rgba | -bgra | -abgr | -argb]\n");
@@ -228,7 +282,7 @@ int main(int argc, char *argv[])
 	{
 		for(i=3; i<argc; i++)
 		{
-			if(!stricmp(argv[i], "-strip")) dostrip=1;
+			if(!stricmp(argv[i], "-tile")) dotile=1;
 			if(!stricmp(argv[i], "-forcesse2"))
 			{
 				printf("Using SSE2 code in Intel compressor\n");
@@ -270,18 +324,18 @@ int main(int argc, char *argv[])
 	if(quiet)
 	{
 		printf("All performance values in Mpixels/sec\n\n");
-		printf("Bitmap\tBitmap\tJPEG\tJPEG\tStrip\tCompr\tCompr\tDecomp\n");
-		printf("Format\tOrder\tFormat\tQual\tSize\tPerf\tRatio\tPerf\n\n");
+		printf("Bitmap\tBitmap\tJPEG\tJPEG\tTile Size\tCompr\tCompr\tDecomp\n");
+		printf("Format\tOrder\tFormat\tQual\t X    Y  \tPerf \tRatio\tPerf\n\n");
 	}
 
 	for(i=hiqual; i>=qual; i--)
-		dotest(bmpbuf, w, h, pf, bu, HPJ_411, i, argv[1], dostrip, useppm, quiet);
+		dotest(bmpbuf, w, h, pf, bu, HPJ_411, i, argv[1], dotile, useppm, quiet);
 	if(quiet) printf("\n");
 	for(i=hiqual; i>=qual; i--)
-		dotest(bmpbuf, w, h, pf, bu, HPJ_422, i, argv[1], dostrip, useppm, quiet);
+		dotest(bmpbuf, w, h, pf, bu, HPJ_422, i, argv[1], dotile, useppm, quiet);
 	if(quiet) printf("\n");
 	for(i=hiqual; i>=qual; i--)
-		dotest(bmpbuf, w, h, pf, bu, HPJ_444, i, argv[1], dostrip, useppm, quiet);
+		dotest(bmpbuf, w, h, pf, bu, HPJ_444, i, argv[1], dotile, useppm, quiet);
 
 	if(bmpbuf) free(bmpbuf);
 	return 0;
