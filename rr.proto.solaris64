@@ -12,11 +12,11 @@ f none SUNWvgl/bin/tcbench 0755 root bin
 f none SUNWvgl/bin/nettest 0755 root bin
 d none SUNWvgl/lib 0755 root bin
 f none SUNWvgl/lib/librrfaker.so 0755 root bin
-f none SUNWvgl/lib/libhpjpeg.so 0755 root bin
+f none SUNWvgl/lib/libturbojpeg.so 0755 root bin
 f none SUNWvgl/lib/librr.so 0755 root bin
 d none SUNWvgl/lib/sparcv9 0755 root bin
 f none SUNWvgl/lib/sparcv9/librrfaker.so 0755 root bin
-f none SUNWvgl/lib/sparcv9/libhpjpeg.so 0755 root bin
+f none SUNWvgl/lib/sparcv9/libturbojpeg.so 0755 root bin
 f none SUNWvgl/lib/sparcv9/librr.so 0755 root bin
 d none SUNWvgl/doc 0755 root bin
 d none SUNWvgl/doc/VirtualGL 0755 root bin

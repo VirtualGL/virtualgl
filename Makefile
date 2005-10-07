@@ -88,7 +88,7 @@ install: rr
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/vglrun64
 	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/rrlaunch64
-	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/$(lib64dir)/librr.$(SHEXT)
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
@@ -113,7 +113,7 @@ install: rr diags
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
-	$(INSTALL) -m 755 $(LDIR)/libhpjpeg.$(SHEXT) $(prefix)/lib/libhpjpeg.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
@@ -134,7 +134,7 @@ ifeq ($(subplatform), 64)
 uninstall:
 	$(RM) $(prefix)/bin/vglrun64
 	$(RM) $(prefix)/bin/rrlaunch64
-	$(RM) $(prefix)/$(lib64dir)/libhpjpeg.$(SHEXT)
+	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librr.$(SHEXT)
 	$(RM) $(prefix)/doc/$(PACKAGENAME)/samples/*
@@ -153,7 +153,7 @@ uninstall:
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/bin/vglclient
-	$(RM) $(prefix)/lib/libhpjpeg.$(SHEXT)
+	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/lib/librr.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
