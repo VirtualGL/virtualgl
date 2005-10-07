@@ -93,9 +93,17 @@ $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/turbojpeg.lib
 else
 ##########################################################################
 
-TARGETS = $(LDIR)/libturbojpeg.$(SHEXT) \
-          $(EDIR)/jpgtest \
+LTARGET = $(LDIR)/libturbojpeg.$(SHEXT)
+
+TARGETS = $(EDIR)/jpgtest \
           $(EDIR)/jpegut
+
+ifeq ($(platform), linux)
+LDEP =
+else
+TARGETS := $(TARGETS) $(LTARGET)
+LDEP := $(LTARGET)
+endif
 
 OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpgtest.o \
@@ -111,13 +119,14 @@ endif
 
 
 all: $(TARGETS)
+lib: $(LTARGET)
 
 .PHONY: libjpeg
 libjpeg:
 	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
 
 clean:
-	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
+	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
 	cd jpeg-6b; \
 	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
 
@@ -203,10 +212,10 @@ endif
 $(LDIR)/libturbojpeg.$(SHEXT): $(ODIR)/turbojpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libturbojpeg.$(SHEXT) $(LDIR)/librrutil.a
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDEP) $(LDIR)/librrutil.a
 	$(CXX) $(LDFLAGS) $< -o $@ -lturbojpeg -lrrutil
 
-$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libturbojpeg.$(SHEXT)
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDEP)
 	$(CC) $(LDFLAGS) $< -o $@ -lturbojpeg
 
 ifeq ($(platform), linux)
@@ -215,7 +224,7 @@ ifeq ($(subplatform),)
 RPMARCH = i386
 EDIR32 := $(EDIR)
 LDIR32 := $(LDIR)
-all32:
+lib32:
 else
 RPMARCH = $(ARCH)
 ifneq ($(DISTRO),)
@@ -225,8 +234,8 @@ else
 EDIR32 := $(TOPDIR)/$(platform)/bin
 LDIR32 := $(TOPDIR)/$(platform)/lib
 endif
-all32:
-	$(MAKE) M32=yes
+lib32:
+	$(MAKE) M32=yes lib
 endif
 
 TJPEGBUILD = 1
@@ -237,7 +246,7 @@ ifeq ($(JPEGLIB), pegasus)
 TJPEGBUILD = 1peg
 endif
 
-dist: all all32
+dist: lib lib32
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
