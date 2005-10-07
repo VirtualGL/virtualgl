@@ -84,10 +84,18 @@ $(EDIR)/24to32.exe: $(ODIR)/24to32.obj
 else
 ##########################################################################
 
-TARGETS = $(LDIR)/libturbojpeg.so \
-          $(EDIR)/jpgtest \
+LTARGET = $(LDIR)/libturbojpeg.so
+
+TARGETS = $(EDIR)/jpgtest \
           $(EDIR)/jpegut \
           $(EDIR)/24to32
+
+ifeq ($(platform), linux)
+LDEP =
+else
+TARGETS := $(TARGETS) $(LTARGET)
+LDEP := $(LTARGET)
+endif
 
 OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpgtest.o \
@@ -100,13 +108,14 @@ endif
 
 
 all: $(TARGETS)
+lib: $(LTARGET)
 
 .PHONY: libjpeg
 libjpeg:
 	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
 
 clean:
-	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
+	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
 	cd jpeg-6b; \
 	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
 
@@ -173,14 +182,45 @@ endif
 $(LDIR)/libturbojpeg.so: $(ODIR)/turbojpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) -shared $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDIR)/libturbojpeg.so
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDEP)
 	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lturbojpeg
 
-$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libturbojpeg.so
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDEP)
 	$(CC) $(LDFLAGS) $< -o $@ -lturbojpeg
 
 $(EDIR)/24to32: $(ODIR)/24to32.o
 	$(CC) $(LDFLAGS) $< -o $@
+
+ifeq ($(platform), linux)
+
+ifeq ($(subplatform),)
+lib32:
+else
+lib32:
+	$(MAKE) M32=yes lib
+endif
+
+TJPEGBUILD = 1
+ifeq ($(JPEGLIB), ipp)
+TJPEGBUILD = 1ipp
+endif
+ifeq ($(JPEGLIB), pegasus)
+TJPEGBUILD = 1peg
+endif
+
+dist: lib lib32
+	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
+	mkdir -p $(BLDDIR)/rpms/RPMS
+	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
+	rm -f $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm; \
+	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_topdir $(BLDDIR)/rpms" \
+		--define "_bindir $(EDIR)" --define "_bindir32 $(EDIR32)" --define "_build $(TJPEGBUILD)" \
+		--define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" --target $(RPMARCH) \
+		turbojpeg.spec; \
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/turbojpeg-1.0-$(TJPEGBUILD).$(RPMARCH).rpm $(BLDDIR)
+	rm -rf $(BLDDIR)/rpms
+
+endif
 
 ##########################################################################
 endif
