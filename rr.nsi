@@ -14,7 +14,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
 	File "${EDIR}\rrxclient.exe"
-	File "${EDIR}\hpjpeg.dll"
+	File "${EDIR}\turbojpeg.dll"
 	File "${EDIR}\pthreadVC.dll"
 	File "${EDIR}\tcbench.exe"
 	File "${EDIR}\nettest.exe"
@@ -61,7 +61,7 @@ Section "Uninstall"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}"
 
 	Delete $INSTDIR\rrxclient.exe
-	Delete $INSTDIR\hpjpeg.dll
+	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\pthreadVC.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
