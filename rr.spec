@@ -15,6 +15,7 @@ Summary: A non-intrusive remote rendering package
 Name: %{package}
 Version: %{_version}
 Vendor: The VirtualGL Project
+URL: http://virtualgl.sourceforge.net
 Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
@@ -70,7 +71,7 @@ install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
 install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
-install -m 755 %{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
+install -m 755 %{_libdir}/libturbojpeg.so $RPM_BUILD_ROOT%{usrlib}/libturbojpeg.so
 install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT%{usrlib}/librr.so
 
 install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{package}/include
@@ -137,7 +138,7 @@ fi
 /opt/%{package}/samples/Makefile
 
 %{usrlib}/librrfaker.so
-%{usrlib}/libhpjpeg.so
+%{usrlib}/libturbojpeg.so
 %{usrlib}/librr.so
 
 %changelog
