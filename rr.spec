@@ -20,7 +20,7 @@ Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License, v3
 BuildRoot: %{_blddir}/%{name}-buildroot
-Prereq: /sbin/ldconfig, /usr/bin/perl
+Prereq: /sbin/ldconfig, /usr/bin/perl, turbojpeg >= 1.0
 Provides: %{name} = %{version}-%{release}
 
 %description
@@ -71,7 +71,6 @@ install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
 install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
-install -m 755 %{_libdir}/libturbojpeg.so $RPM_BUILD_ROOT%{usrlib}/libturbojpeg.so
 install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT%{usrlib}/librr.so
 
 install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{package}/include
@@ -138,7 +137,6 @@ fi
 /opt/%{package}/samples/Makefile
 
 %{usrlib}/librrfaker.so
-%{usrlib}/libturbojpeg.so
 %{usrlib}/librr.so
 
 %changelog
