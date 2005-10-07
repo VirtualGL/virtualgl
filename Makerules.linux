@@ -26,3 +26,9 @@ endif
 HPULIB = -lhputil
 HPSECNETLIB = -lhpsecnet -lpthread -lssl
 FBXLIB = -L/usr/X11R6/lib -lfbx -lXext
+
+ifeq ($(subplatform),)
+RPMARCH = i386
+else
+RPMARCH = $(ARCH)
+endif
