@@ -28,7 +28,7 @@
 #define GetPixRowBytes QTGetPixMapHandleRowBytes
 #endif
 
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 
 static char lasterror[96]="No error";
 
@@ -42,24 +42,24 @@ static char lasterror[96]="No error";
  ******************************************************************/
 
 
-DLLEXPORT hpjhandle DLLCALL hpjInitCompress(void)
+DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 {
 	#ifdef _WIN32
 	InitializeQTML(0);
 	#endif
-	return (hpjhandle)1;
+	return (tjhandle)1;
 }
 
 
 /* Quicktime seems to use the output buffer for temporary MCU storage
    and thus requires 384 bytes per 8x8 block */
-DLLEXPORT unsigned long DLLCALL HPJBUFSIZE(int width, int height)
+DLLEXPORT unsigned long DLLCALL TJBUFSIZE(int width, int height)
 {
 	return ((width/8+1) * (height/8+1) * 384 + 2048);
 }
 
 
-DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
+DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	unsigned char *srcbuf, int width, int pitch, int height, int ps,
 	unsigned char *dstbuf, unsigned long *size,
 	int jpegsub, int qual, int flags)
@@ -76,7 +76,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	if(srcbuf==NULL || width<=0 || pitch<0 || height<=0
 		|| dstbuf==NULL || size==NULL
 		|| jpegsub<0 || jpegsub>=NUMSUBOPT || qual<0 || qual>100)
-		_throw("Invalid argument in hpjCompress()");
+		_throw("Invalid argument in tjCompress()");
 	if(ps!=3 && ps!=4) _throw("This compressor can only take 24-bit or 32-bit RGB input");
 
 	if(pitch==0) pitch=width*ps;
@@ -96,27 +96,27 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	switch((**pixMapHandle).pixelFormat)
 	{
 		case k24RGBPixelFormat:
-			if(!(flags&HPJ_BGR) && ps==3) fastpath=1;
+			if(!(flags&TJ_BGR) && ps==3) fastpath=1;
 			qt_roffset=0;  qt_goffset=1;  qt_boffset=2;
 			break;
 		case k32RGBAPixelFormat:
-			if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4) fastpath=1;
+			if(!(flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST) && ps==4) fastpath=1;
 			qt_roffset=0;  qt_goffset=1;  qt_boffset=2;
 			break;
 		case k24BGRPixelFormat:
-			if(flags&HPJ_BGR && ps==3) fastpath=1;
+			if(flags&TJ_BGR && ps==3) fastpath=1;
 			qt_roffset=2;  qt_goffset=1;  qt_boffset=0;
 			break;
 		case k32BGRAPixelFormat:
-			if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4) fastpath=1;
+			if(flags&TJ_BGR && !(flags&TJ_ALPHAFIRST) && ps==4) fastpath=1;
 			qt_roffset=2;  qt_goffset=1;  qt_boffset=0;
 			break;
 		case k32ABGRPixelFormat:
-			if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4) fastpath=1;
+			if(flags&TJ_BGR && flags&TJ_ALPHAFIRST && ps==4) fastpath=1;
 			qt_roffset=3;  qt_goffset=2;  qt_boffset=1;
 			break;
 		case k32ARGBPixelFormat:
-			if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4) fastpath=1;
+			if(!(flags&TJ_BGR) && flags&TJ_ALPHAFIRST && ps==4) fastpath=1;
 			qt_roffset=1;  qt_goffset=2;  qt_boffset=3;
 			break;
 		default:
@@ -131,7 +131,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	{
 		int i, srcstride=pitch;
 		unsigned char *srcptr=srcbuf;
-		if(flags&HPJ_BOTTOMUP) {srcptr=&srcbuf[pitch*(height-1)];  srcstride=-pitch;}
+		if(flags&TJ_BOTTOMUP) {srcptr=&srcbuf[pitch*(height-1)];  srcstride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
 			#if defined(__APPLE__)
@@ -161,9 +161,9 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 		unsigned char *srcptr=srcbuf;
 		int rowps=(**pixMapHandle).pixelSize/8;
 
-		if(flags&HPJ_BGR) {roffset=2;  goffset=1;  boffset=0;}
-		if(flags&HPJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
-		if(flags&HPJ_BOTTOMUP) {srcptr=&srcbuf[pitch*(height-1)];  srcstride=-pitch;}
+		if(flags&TJ_BGR) {roffset=2;  goffset=1;  boffset=0;}
+		if(flags&TJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
+		if(flags&TJ_BOTTOMUP) {srcptr=&srcbuf[pitch*(height-1)];  srcstride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
 			for(j=0; j<width; ++j)
@@ -195,7 +195,7 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
 	GetMaxCompressionSize(pixMapHandle, &rect, (**pixMapHandle).pixelSize,
 		myCodecQ, kJPEGCodecType, bestSpeedCodec, &needSize);
 
-	if(needSize > (long)HPJBUFSIZE(width, height))
+	if(needSize > (long)TJBUFSIZE(width, height))
 	{
 		sprintf(lasterror, "Output buffer needs to be %d bytes", needSize);
 		goto bail;
@@ -225,12 +225,12 @@ DLLEXPORT int DLLCALL hpjCompress(hpjhandle h,
  ******************************************************************/
 
 
-DLLEXPORT hpjhandle DLLCALL hpjInitDecompress(void) 
+DLLEXPORT tjhandle DLLCALL tjInitDecompress(void) 
 {
 	#ifdef _WIN32
 	InitializeQTML(0);
 	#endif
-	return (hpjhandle)1;
+	return (tjhandle)1;
 }
 
 typedef struct
@@ -263,7 +263,7 @@ int find_marker(jpgstruct *jpg, unsigned char *marker)
 #define check_byte(j, b) {unsigned char __b;  read_byte(j, __b);  \
 	if(__b!=(b)) _throw("JPEG bitstream error");}
 
-DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
+DLLEXPORT int DLLCALL tjDecompressHeader(tjhandle h,
 	unsigned char *srcbuf, unsigned long size,
 	int *width, int *height)
 {
@@ -271,7 +271,7 @@ DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
 	int markerread=0;  jpgstruct j;
 
 	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
-		_throw("Invalid argument in hpjDecompressHeader()");
+		_throw("Invalid argument in tjDecompressHeader()");
 
 	// This is nasty, but I don't know of another way
 	j.bytesprocessed=0;  j.bytesleft=size;  j.jpgptr=srcbuf;
@@ -314,7 +314,7 @@ DLLEXPORT int DLLCALL hpjDecompressHeader(hpjhandle h,
 	return -1;
 }
 
-DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
+DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 	unsigned char *srcbuf, unsigned long size,
 	unsigned char *dstbuf, int width, int pitch, int height, int ps,
 	int flags)
@@ -328,7 +328,7 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 
 	if(srcbuf==NULL || size<=0
 		|| dstbuf==NULL || width<=0 || pitch<0 || height<=0)
-		_throw("Invalid argument in hpjDecompress()");
+		_throw("Invalid argument in tjDecompress()");
 	if(ps!=3 && ps!=4) _throw("This decompressor can only take 24-bit or 32-bit RGB input");
 
 	if(pitch==0) pitch = width * ps;
@@ -383,27 +383,27 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	switch((**pixMapHandle).pixelFormat)
 	{
 		case k24RGBPixelFormat:
-			if(!(flags&HPJ_BGR) && ps==3) fastpath=1;
+			if(!(flags&TJ_BGR) && ps==3) fastpath=1;
 			qt_roffset=0;  qt_goffset=1;  qt_boffset=2;
 			break;
 		case k32RGBAPixelFormat:
-			if(!(flags&HPJ_BGR) && !(flags&HPJ_ALPHAFIRST) && ps==4) fastpath=1;
+			if(!(flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST) && ps==4) fastpath=1;
 			qt_roffset=0;  qt_goffset=1;  qt_boffset=2;
 			break;
 		case k24BGRPixelFormat:
-			if(flags&HPJ_BGR && ps==3) fastpath=1;
+			if(flags&TJ_BGR && ps==3) fastpath=1;
 			qt_roffset=2;  qt_goffset=1;  qt_boffset=0;
 			break;
 		case k32BGRAPixelFormat:
-			if(flags&HPJ_BGR && !(flags&HPJ_ALPHAFIRST) && ps==4) fastpath=1;
+			if(flags&TJ_BGR && !(flags&TJ_ALPHAFIRST) && ps==4) fastpath=1;
 			qt_roffset=2;  qt_goffset=1;  qt_boffset=0;
 			break;
 		case k32ABGRPixelFormat:
-			if(flags&HPJ_BGR && flags&HPJ_ALPHAFIRST && ps==4) fastpath=1;
+			if(flags&TJ_BGR && flags&TJ_ALPHAFIRST && ps==4) fastpath=1;
 			qt_roffset=3;  qt_goffset=2;  qt_boffset=1;
 			break;
 		case k32ARGBPixelFormat:
-			if(!(flags&HPJ_BGR) && flags&HPJ_ALPHAFIRST && ps==4) fastpath=1;
+			if(!(flags&TJ_BGR) && flags&TJ_ALPHAFIRST && ps==4) fastpath=1;
 			qt_roffset=1;  qt_goffset=2;  qt_boffset=3;
 			break;
 		default:
@@ -418,7 +418,7 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 	{
 		int i, dststride=pitch;
 		unsigned char *dstptr=dstbuf;
-		if(flags&HPJ_BOTTOMUP) {dstptr=&dstbuf[pitch*(height-1)];  dststride=-pitch;}
+		if(flags&TJ_BOTTOMUP) {dstptr=&dstbuf[pitch*(height-1)];  dststride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
 			#if defined (__APPLE__)	
@@ -448,9 +448,9 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
 		unsigned char *dstptr=dstbuf;
 		int rowps=(**pixMapHandle).pixelSize/8;
 
-		if(flags&HPJ_BGR) {roffset=2;  goffset=1;  boffset=0;}
-		if(flags&HPJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
-		if(flags&HPJ_BOTTOMUP) {dstptr=&dstbuf[pitch*(height-1)];  dststride=-pitch;}
+		if(flags&TJ_BGR) {roffset=2;  goffset=1;  boffset=0;}
+		if(flags&TJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
+		if(flags&TJ_BOTTOMUP) {dstptr=&dstbuf[pitch*(height-1)];  dststride=-pitch;}
 		for(i=0; i<height; ++i)
 		{
 			for(j=0; j<width; ++j)
@@ -485,12 +485,12 @@ DLLEXPORT int DLLCALL hpjDecompress(hpjhandle h,
     
 }
 
-DLLEXPORT int DLLCALL hpjDestroy(hpjhandle h)
+DLLEXPORT int DLLCALL tjDestroy(tjhandle h)
 {
 	return 0;
 }
 
-DLLEXPORT char* DLLCALL hpjGetErrorStr(void) 
+DLLEXPORT char* DLLCALL tjGetErrorStr(void) 
 {
 	return lasterror;
 }
