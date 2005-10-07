@@ -19,13 +19,13 @@
 #define XDK
 #endif
 #include "fbx.h"
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 #include "rrmutex.h"
 #include "rrlog.h"
 #include "rrutil.h"
 #include <string.h>
 
-static int jpegsub[RR_SUBSAMPOPT]={HPJ_444, HPJ_422, HPJ_411};
+static int jpegsub[RR_SUBSAMPOPT]={TJ_444, TJ_422, TJ_411};
 
 // Bitmap flags
 #define RRBMP_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
@@ -177,30 +177,30 @@ class rrjpeg : public rrframe
 {
 	public:
 
-	rrjpeg(void) : rrframe(), _hpjhnd(NULL)
+	rrjpeg(void) : rrframe(), _tjhnd(NULL)
 	{
-		if(!(_hpjhnd=hpjInitCompress())) _throw(hpjGetErrorStr());
+		if(!(_tjhnd=tjInitCompress())) _throw(tjGetErrorStr());
 		_pixelsize=3;
 	}
 
 	~rrjpeg(void)
 	{
-		if(_hpjhnd) hpjDestroy(_hpjhnd);
+		if(_tjhnd) tjDestroy(_tjhnd);
 	}
 
 	rrjpeg& operator= (rrframe& b)
 	{
-		int hpjflags=0;
+		int tjflags=0;
 		if(!b._bits) _throw("Bitmap not initialized");
 		if(b._pixelsize<3 || b._pixelsize>4) _throw("Only true color bitmaps are supported");
 		if(b._h.qual>100 || b._h.subsamp>RR_SUBSAMPOPT-1)
 			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(&b._h);
-		if(b._flags&RRBMP_BOTTOMUP) hpjflags|=HPJ_BOTTOMUP;
-		if(b._flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
+		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
+		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
 		unsigned long size;
-		hpj(hpjCompress(_hpjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
-			_bits, &size, jpegsub[b._h.subsamp], b._h.qual, hpjflags));
+		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
+			_bits, &size, jpegsub[b._h.subsamp], b._h.qual, tjflags));
 		_h.size=(unsigned int)size;
 		return *this;
 	}
@@ -216,14 +216,14 @@ class rrjpeg : public rrframe
 		if(h->framew!=_h.framew || h->frameh!=_h.frameh || !_bits)
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[HPJBUFSIZE(h->framew, h->frameh)]);
+			errifnot(_bits=new unsigned char[TJBUFSIZE(h->framew, h->frameh)]);
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
 	}
 
 	private:
 
-	hpjhandle _hpjhnd;
+	tjhandle _tjhnd;
 	friend class rrfb;
 };
 
@@ -247,7 +247,7 @@ class rrfb : public rrframe
 
 	void init(char *dpystring, Window win)
 	{
-		_hpjhnd=NULL;
+		_tjhnd=NULL;
 		memset(&_fb, 0, sizeof(fbx_struct));
 		if(!dpystring || !win) throw(rrerror("rrfb::init", "Invalid argument"));
 		if(!(_wh.dpy=XOpenDisplay(dpystring)))
@@ -258,7 +258,7 @@ class rrfb : public rrframe
 	~rrfb(void)
 	{
 		if(_fb.bits) fbx_term(&_fb);  if(_bits) _bits=NULL;
-		if(_hpjhnd) hpjDestroy(_hpjhnd);
+		if(_tjhnd) tjDestroy(_tjhnd);
 		if(_wh.dpy) XCloseDisplay(_wh.dpy);
 	}
 
@@ -282,23 +282,23 @@ class rrfb : public rrframe
 
 	rrfb& operator= (rrjpeg& f)
 	{
-		int hpjflags=0;
+		int tjflags=0;
 		if(!f._bits || f._h.size<1)
 			_throw("JPEG not initialized");
 		init(&f._h);
 		if(!_fb.xi) _throw("Bitmap not initialized");
-		if(fbx_bgr[_fb.format]) hpjflags|=HPJ_BGR;
-		if(fbx_alphafirst[_fb.format]) hpjflags|=HPJ_ALPHAFIRST;
+		if(fbx_bgr[_fb.format]) tjflags|=TJ_BGR;
+		if(fbx_alphafirst[_fb.format]) tjflags|=TJ_ALPHAFIRST;
 		int width=min(f._h.width, _fb.width-f._h.x);
 		int height=min(f._h.height, _fb.height-f._h.y);
 		if(width>0 && height>0 && f._h.width<=width && f._h.height<=height)
 		{
-			if(!_hpjhnd)
+			if(!_tjhnd)
 			{
-				if((_hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", hpjGetErrorStr()));
+				if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", tjGetErrorStr()));
 			}
-			hpj(hpjDecompress(_hpjhnd, f._bits, f._h.size, (unsigned char *)&_fb.bits[_fb.pitch*f._h.y+f._h.x*fbx_ps[_fb.format]],
-				width, _fb.pitch, height, fbx_ps[_fb.format], hpjflags));
+			tj(tjDecompress(_tjhnd, f._bits, f._h.size, (unsigned char *)&_fb.bits[_fb.pitch*f._h.y+f._h.x*fbx_ps[_fb.format]],
+				width, _fb.pitch, height, fbx_ps[_fb.format], tjflags));
 		}
 		return *this;
 	}
@@ -354,7 +354,7 @@ class rrfb : public rrframe
 
 	fbx_wh _wh;
 	fbx_struct _fb;
-	hpjhandle _hpjhnd;
+	tjhandle _tjhnd;
 };
 
 #endif

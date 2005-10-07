@@ -31,13 +31,13 @@ $(ODIR)/rrglxgears.o: rrglxgears.c ../rr/rr.h
 	$(CC) $(CFLAGS) -c -o $@ $< -I../rr
 
 $(EDIR)/rrglxgears: $(ODIR)/rrglxgears.o $(LDIR)/librr.$(SHEXT)
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr -lhpjpeg
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr -lturbojpeg
 
 $(ODIR)/rrglpgears.o: rrglpgears.c ../rr/rr.h
 	$(CC) $(CFLAGS) -c -o $@ $< -I../rr
 
 $(EDIR)/rrglpgears: $(ODIR)/rrglpgears.o $(LDIR)/librr.$(SHEXT)
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr -lhpjpeg
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm -lrr -lturbojpeg
 
 ##########################################################################
 endif

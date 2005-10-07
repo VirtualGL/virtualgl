@@ -46,7 +46,7 @@ class rrglframe : public rrframe
 	public:
 
 	rrglframe(char *dpystring, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _hpjhnd(NULL),
+		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _tjhnd(NULL),
 		_newdpy(false)
 	{
 		if(!dpystring || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
@@ -56,7 +56,7 @@ class rrglframe : public rrframe
 	}
 
 	rrglframe(Display *dpy, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _hpjhnd(NULL),
+		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _tjhnd(NULL),
 		_newdpy(false)
 	{
 		if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
@@ -99,7 +99,7 @@ class rrglframe : public rrframe
 	{
 		if(_ctx && _dpy) {glXMakeCurrent(_dpy, 0, 0);  glXDestroyContext(_dpy, _ctx);  _ctx=0;}
 		if(_dpy && _newdpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
-		if(_hpjhnd) {hpjDestroy(_hpjhnd);  _hpjhnd=NULL;}
+		if(_tjhnd) {tjDestroy(_tjhnd);  _tjhnd=NULL;}
 		if(_rbits) {delete [] _rbits;  _rbits=NULL;}
 	}
 
@@ -127,18 +127,18 @@ class rrglframe : public rrframe
 
 	rrglframe& operator= (rrjpeg& f)
 	{
-		int hpjflags=HPJ_BOTTOMUP;
+		int tjflags=TJ_BOTTOMUP;
 		if(!f._bits || f._h.size<1) _throw("JPEG not initialized");
 		init(&f._h);
 		if(!_bits) _throw("Bitmap not initialized");
-		if(_flags&RRBMP_BGR) hpjflags|=HPJ_BGR;
+		if(_flags&RRBMP_BGR) tjflags|=TJ_BGR;
 		int width=min(f._h.width, _h.framew-f._h.x);
 		int height=min(f._h.height, _h.frameh-f._h.y);
 		if(width>0 && height>0 && f._h.width<=width && f._h.height<=height)
 		{
-			if(!_hpjhnd)
+			if(!_tjhnd)
 			{
-				if((_hpjhnd=hpjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", hpjGetErrorStr()));
+				if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", tjGetErrorStr()));
 			}
 			int y=max(0, _h.frameh-f._h.y-height);
 			unsigned char *dstbuf=_bits;
@@ -146,8 +146,8 @@ class rrglframe : public rrframe
 			{
 				_stereo=true;  dstbuf=_rbits;
 			}
-			hpj(hpjDecompress(_hpjhnd, f._bits, f._h.size, (unsigned char *)&dstbuf[_pitch*y+f._h.x*_pixelsize],
-				width, _pitch, height, _pixelsize, hpjflags));
+			tj(tjDecompress(_tjhnd, f._bits, f._h.size, (unsigned char *)&dstbuf[_pitch*y+f._h.x*_pixelsize],
+				width, _pitch, height, _pixelsize, tjflags));
 		}
 		return *this;
 	}
@@ -202,7 +202,7 @@ class rrglframe : public rrframe
 	bool _stereo;
 	Display *_dpy;  Window _win;
 	GLXContext _ctx;
-	hpjhandle _hpjhnd;
+	tjhandle _tjhnd;
 	bool _newdpy;
 };
 

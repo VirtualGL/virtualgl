@@ -23,8 +23,8 @@ UNITTESTS = $(EDIR)/rrblitterut.exe \
 TARGETS = $(EDIR)/vglclient.exe \
           $(UNITTESTS)
 
-RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-xdk.lib $(LDIR)/hpjpeg.lib $(LDIR)/rrsocket.lib
-RRLIB = rrutil.lib $(FBXXDKLIB) hpjpeg.lib $(SOCKLIB)
+RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-xdk.lib $(LDIR)/turbojpeg.lib $(LDIR)/rrsocket.lib
+RRLIB = rrutil.lib $(FBXXDKLIB) turbojpeg.lib $(SOCKLIB)
 
 all: $(TARGETS)
 
@@ -96,8 +96,8 @@ TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
           $(UNITTESTS)
 
 
-RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.$(SHEXT) $(LDIR)/librrsocket.a
-RRLIB = -lrrutil $(FBXLIB) -lhpjpeg $(SOCKLIB)
+RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libturbojpeg.$(SHEXT) $(LDIR)/librrsocket.a
+RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB)
 
 ifeq ($(subplatform), 64)
 TARGETS := $(TARGETS) $(EDIR)/vglrun64
