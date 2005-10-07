@@ -73,11 +73,6 @@ FOBJS = $(ODIR)/faker.o \
 
 OBJS = $(SOBJS) $(FOBJS) $(ODIR)/rrxclient.o $(ODIR)/rrblitterut.o $(ODIR)/rrdisplayclientut.o $(ODIR)/rrlistenerut.o $(ODIR)/rrframeut.o $(ODIR)/rrfakerut.o
 
-RRLAUNCH = rrlaunch
-ifeq ($(subplatform), 64)
-RRLAUNCH = rrlaunch64
-endif
-
 TARGETS = $(LDIR)/librr.a \
           $(LDIR)/librrfaker.so \
           $(EDIR)/rrxclient \
@@ -86,9 +81,12 @@ TARGETS = $(LDIR)/librr.a \
           $(EDIR)/rrfakerut \
           $(EDIR)/rrblitterut \
           $(EDIR)/rrdisplayclientut \
-          $(EDIR)/$(RRLAUNCH)
+          $(EDIR)/rrlaunch
 
-RRDEP = $(LDIR)/librr.a $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a $(LDIR)/libfbx.a $(LDIR)/libturbojpeg.so
+RRDEP = $(LDIR)/librr.a $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a $(LDIR)/libfbx.a
+ifneq ($(platform), linux)
+RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.so
+endif
 RRLIB = -lrr $(HPULIB) $(HPSECNETLIB) $(FBXLIB) -lturbojpeg
 
 all: $(TARGETS)
@@ -106,8 +104,8 @@ $(LDIR)/librr.a: $(SOBJS)
 $(LDIR)/librrfaker.so: $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) -shared -o $@ $(FOBJS) $(RRLIB)
 
-$(EDIR)/$(RRLAUNCH): $(RRLAUNCH)
-	install -m 755 $(RRLAUNCH) $@
+$(EDIR)/rrlaunch: rrlaunch
+	install -m 755 rrlaunch $@
 
 # Client
 
