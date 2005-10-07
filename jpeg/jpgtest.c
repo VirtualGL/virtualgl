@@ -16,9 +16,9 @@
 #include <string.h>
 #include "bmp.h"
 #include "hputil.h"
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 
-#define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, hpjGetErrorStr());  exit(1);}}
+#define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  exit(1);}}
 
 int forcemmx=0, forcesse=0, forcesse2=0;
 
@@ -26,7 +26,7 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 	char *descr, char *basefilename, int dostrip)
 {
 	char tempstr[1024];  const char *error=NULL;
-	FILE *outfile;  hpjhandle hnd;
+	FILE *outfile;  tjhandle hnd;
 	unsigned char *jpegbuf, *rgbbuf;
 	double start, elapsed;
 	int jpgbufsize=0, i, j, striph, ITER=5, temph;
@@ -34,7 +34,7 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 	static int testnum=1;
 	int pitch=((w*ps)+3)&(~3);
 
-	if((jpegbuf=(unsigned char *)malloc(HPJBUFSIZE(w, h))) == NULL
+	if((jpegbuf=(unsigned char *)malloc(TJBUFSIZE(w, h))) == NULL
 	|| (rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL
 	|| (compstripsize=(unsigned long *)malloc(sizeof(unsigned long)*h)) == NULL)
 	{
@@ -48,11 +48,11 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 	{
 		striph*=2;  if(striph>h) striph=h;
 		memcpy(rgbbuf, srcbuf, pitch*h);
-		if((hnd=hpjInitCompress())==NULL)
-			{printf("Error in hpjInitCompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjCompress(hnd, rgbbuf, w, HPJPAD(w*ps), striph, ps,
-			jpegbuf, &compstripsize[0], jpegsub, qual, HPJ_BGR
-			|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
+		if((hnd=tjInitCompress())==NULL)
+			{printf("Error in tjInitCompress():\n%s\n", tjGetErrorStr());  exit(1);}
+		_catch(tjCompress(hnd, rgbbuf, w, TJPAD(w*ps), striph, ps,
+			jpegbuf, &compstripsize[0], jpegsub, qual, TJ_BGR
+			|(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)));
 		ITER=5;
 		do
 		{
@@ -64,17 +64,17 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 				j=0;
 				do
 				{
-					if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-					_catch(hpjCompress(hnd, &rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps,
-						&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, HPJ_BGR
-						|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
+					temph=min(striph, h-j);
+					_catch(tjCompress(hnd, &rgbbuf[pitch*j], w, TJPAD(w*ps), temph, ps,
+						&jpegbuf[w*3*j], &compstripsize[j], jpegsub, qual, TJ_BGR
+						|(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)));
 					jpgbufsize+=compstripsize[j];
 					j+=temph;
 				} while(j<h);
 			}
 			elapsed=hptime()-start;
 		} while(elapsed<2.);
-		_catch(hpjDestroy(hnd));
+		_catch(tjDestroy(hnd));
 		if(striph==h) printf("\nFull image\n");  else printf("\nStrip size: %d x %d\n", w, striph);
 		printf("C--> Frame rate:           %f fps\n", (double)ITER/elapsed);
 		printf("     Output image size:    %d bytes\n", jpgbufsize);
@@ -97,10 +97,10 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 			fclose(outfile);
 			printf("Reference image written to %s\n", tempstr);
 		}
-		if((hnd=hpjInitDecompress())==NULL)
-			{printf("Error in hpjInitDecompress():\n%s\n", hpjGetErrorStr());  exit(1);}
-		_catch(hpjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, HPJPAD(w*ps), striph, ps, HPJ_BGR
-			|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
+		if((hnd=tjInitDecompress())==NULL)
+			{printf("Error in tjInitDecompress():\n%s\n", tjGetErrorStr());  exit(1);}
+		_catch(tjDecompress(hnd, jpegbuf, jpgbufsize, rgbbuf, w, TJPAD(w*ps), striph, ps, TJ_BGR
+			|(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)));
 		ITER=5;
 		do
 		{
@@ -111,16 +111,16 @@ void dotest(unsigned char *srcbuf, int w, int h, int ps, int jpegsub, int qual,
 				j=0;
 				do
 				{
-					if(h-j>striph && h-j<striph+HPJ_MINHEIGHT) temph=h-j;  else temph=min(striph, h-j);
-					_catch(hpjDecompress(hnd, &jpegbuf[w*3*j], compstripsize[j],
-						&rgbbuf[pitch*j], w, HPJPAD(w*ps), temph, ps, HPJ_BGR
-						|(forcemmx?HPJ_FORCEMMX:0)|(forcesse?HPJ_FORCESSE:0)|(forcesse2?HPJ_FORCESSE2:0)));
+					temph=min(striph, h-j);
+					_catch(tjDecompress(hnd, &jpegbuf[w*3*j], compstripsize[j],
+						&rgbbuf[pitch*j], w, TJPAD(w*ps), temph, ps, TJ_BGR
+						|(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)));
 					j+=temph;
 				} while(j<h);
 			}
 			elapsed=hptime()-start;
 		} while(elapsed<2.);
-		_catch(hpjDestroy(hnd));
+		_catch(tjDestroy(hnd));
 		printf("D--> Frame rate:           %f fps\n", (double)ITER/elapsed);
 		printf("     Dest. throughput:     %f Megapixels/sec\n", (double)(w*h)/1000000.*(double)ITER/elapsed);
 		if(striph==h) sprintf(tempstr, "%s_%d_full.bmp", basefilename, testnum);
@@ -196,9 +196,9 @@ int main(int argc, char *argv[])
 	temp=strrchr(argv[1], '.');
 	if(temp!=NULL) *temp='\0';
 
-	dotest(bmpbuf, w, h, psize, HPJ_411, qual, "RGB <-> YUV 4:1:1", argv[1], dostrip);
-	dotest(bmpbuf, w, h, psize, HPJ_422, qual, "RGB <-> YUV 4:2:2", argv[1], dostrip);
-	dotest(bmpbuf, w, h, psize, HPJ_444, qual, "RGB <-> YUV 4:4:4", argv[1], dostrip);
+	dotest(bmpbuf, w, h, psize, TJ_411, qual, "RGB <-> YUV 4:1:1", argv[1], dostrip);
+	dotest(bmpbuf, w, h, psize, TJ_422, qual, "RGB <-> YUV 4:2:2", argv[1], dostrip);
+	dotest(bmpbuf, w, h, psize, TJ_444, qual, "RGB <-> YUV 4:4:4", argv[1], dostrip);
 
 	if(bmpbuf) free(bmpbuf);
 	return 0;

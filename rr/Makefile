@@ -20,9 +20,9 @@ TARGETS = $(LDIR)/rr.lib \
           $(EDIR)/rrblitterut.exe \
           $(EDIR)/rrdisplayclientut.exe
 
-RRDEP = $(LDIR)/rr.lib $(LDIR)/hputil.lib $(LDIR)/hpsecnet.lib $(LDIR)/fbx-xdk.lib $(LDIR)/hpjpeg.lib
+RRDEP = $(LDIR)/rr.lib $(LDIR)/hputil.lib $(LDIR)/hpsecnet.lib $(LDIR)/fbx-xdk.lib $(LDIR)/turbojpeg.lib
 RRLIB = $(LDIR)/rr.lib $(HPULIB) $(HPSECNETLIB) $(LDIR)/fbx-xdk.lib $(XDKLIB) \
-	$(LDIR)/hpjpeg.lib
+	$(LDIR)/turbojpeg.lib
 
 all: $(TARGETS)
 
@@ -88,8 +88,8 @@ TARGETS = $(LDIR)/librr.a \
           $(EDIR)/rrdisplayclientut \
           $(EDIR)/$(RRLAUNCH)
 
-RRDEP = $(LDIR)/librr.a $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a $(LDIR)/libfbx.a $(LDIR)/libhpjpeg.so
-RRLIB = -lrr $(HPULIB) $(HPSECNETLIB) $(FBXLIB) -lhpjpeg
+RRDEP = $(LDIR)/librr.a $(LDIR)/libhputil.a $(LDIR)/libhpsecnet.a $(LDIR)/libfbx.a $(LDIR)/libturbojpeg.so
+RRLIB = -lrr $(HPULIB) $(HPSECNETLIB) $(FBXLIB) -lturbojpeg
 
 all: $(TARGETS)
 

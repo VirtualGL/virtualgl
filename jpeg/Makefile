@@ -4,13 +4,13 @@ include ../Makerules
 ifeq ($(platform), windows)
 ##########################################################################
 
-TARGETS = $(EDIR)/hpjpeg.dll \
-          $(LDIR)/hpjpeg.lib \
+TARGETS = $(EDIR)/turbojpeg.dll \
+          $(LDIR)/turbojpeg.lib \
           $(EDIR)/jpgtest.exe \
           $(EDIR)/jpegut.exe \
           $(EDIR)/24to32.exe
 
-OBJS = $(ODIR)/hpjpeg.obj \
+OBJS = $(ODIR)/turbojpeg.obj \
        $(ODIR)/jpgtest.obj \
        $(ODIR)/jpegut.obj \
        $(ODIR)/24to32.obj
@@ -40,7 +40,7 @@ ifeq ($(JPEGLIB), pegasus)
 
 PEGDIR = ../../pictools
 
-$(ODIR)/hpjpeg.obj: hpjpegp.c
+$(ODIR)/turbojpeg.obj: turbojpegp.c
 	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -Fo$@
 
 JPEGLINK = -libpath:$(PEGDIR)/lib picnm.lib
@@ -49,7 +49,7 @@ else
 
 ifeq ($(JPEGLIB), libjpeg)
 
-$(ODIR)/hpjpeg.obj: hpjpegl.c
+$(ODIR)/turbojpeg.obj: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
 JPEGLINK = $(LDIR)/libjpeg.lib
@@ -60,7 +60,7 @@ else
 IPPLINK = ippjmerged.lib ippimerged.lib ippsmerged.lib ippjemerged.lib \
 	ippiemerged.lib ippsemerged.lib ippcorel.lib
 
-$(ODIR)/hpjpeg.obj: hpjpegipp.c
+$(ODIR)/turbojpeg.obj: turbojpegipp.c
 	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
 JPEGLINK = $(IPPLINK)
@@ -68,14 +68,14 @@ JPEGLINK = $(IPPLINK)
 endif
 endif
 
-$(EDIR)/hpjpeg.dll $(LDIR)/hpjpeg.lib: $(ODIR)/hpjpeg.obj $(JPEGDEP)
-	$(LINK) -dll -out:$(EDIR)/hpjpeg.dll -implib:$(LDIR)/hpjpeg.lib $< $(JPEGLINK)
+$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
+	$(LINK) -dll -out:$(EDIR)/turbojpeg.dll -implib:$(LDIR)/turbojpeg.lib $< $(JPEGLINK)
 
-$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hputil.lib $(LDIR)/hpjpeg.lib
-	$(LINK) $< -OUT:$@ $(HPULIB) hpjpeg.lib
+$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/hputil.lib $(LDIR)/turbojpeg.lib
+	$(LINK) $< -OUT:$@ $(HPULIB) turbojpeg.lib
 
-$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/hpjpeg.lib
-	$(LINK) $< -OUT:$@ hpjpeg.lib
+$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/turbojpeg.lib
+	$(LINK) $< -OUT:$@ turbojpeg.lib
 
 $(EDIR)/24to32.exe: $(ODIR)/24to32.obj
 	$(LINK) $< -OUT:$@
@@ -84,12 +84,12 @@ $(EDIR)/24to32.exe: $(ODIR)/24to32.obj
 else
 ##########################################################################
 
-TARGETS = $(LDIR)/libhpjpeg.so \
+TARGETS = $(LDIR)/libturbojpeg.so \
           $(EDIR)/jpgtest \
           $(EDIR)/jpegut \
           $(EDIR)/24to32
 
-OBJS = $(ODIR)/hpjpeg.o \
+OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpgtest.o \
        $(ODIR)/jpegut.o \
        $(ODIR)/24to32.o
@@ -117,7 +117,7 @@ ifeq ($(JPEGLIB), pegasus)
 
 PEGDIR = ../../pictools
 
-$(ODIR)/hpjpeg.o: hpjpegp.c
+$(ODIR)/turbojpeg.o: turbojpegp.c
 	$(CC) $(CFLAGS) -I$(PEGDIR)/include -c $< -o $@
 
 JPEGLINK = -L$(PEGDIR)/lib -lpicl20
@@ -126,7 +126,7 @@ else
 
 ifeq ($(JPEGLIB), libjpeg)
 
-$(ODIR)/hpjpeg.o: hpjpegl.c
+$(ODIR)/turbojpeg.o: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -o $@
 
 JPEGLINK = $(LDIR)/libjpeg.a
@@ -162,7 +162,7 @@ IPPLINK = -L$(IPPDIR)/lib \
         -lippji7 -lippii7 -lippsi7 -lippcore64
 endif
 
-$(ODIR)/hpjpeg.o: hpjpegipp.c
+$(ODIR)/turbojpeg.o: turbojpegipp.c
 	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
 
 JPEGLINK = $(IPPLINK)
@@ -170,14 +170,14 @@ JPEGLINK = $(IPPLINK)
 endif
 endif
 
-$(LDIR)/libhpjpeg.so: $(ODIR)/hpjpeg.o $(JPEGDEP)
+$(LDIR)/libturbojpeg.so: $(ODIR)/turbojpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) -shared $< -o $@ $(JPEGLINK)
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDIR)/libhpjpeg.so
-	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lhpjpeg
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDIR)/libhputil.a $(LDIR)/libturbojpeg.so
+	$(CC) $(LDFLAGS) $< -o $@ -lhputil -lturbojpeg
 
-$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libhpjpeg.so
-	$(CC) $(LDFLAGS) $< -o $@ -lhpjpeg
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDIR)/libturbojpeg.so
+	$(CC) $(LDFLAGS) $< -o $@ -lturbojpeg
 
 $(EDIR)/24to32: $(ODIR)/24to32.o
 	$(CC) $(LDFLAGS) $< -o $@
