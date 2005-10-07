@@ -66,7 +66,7 @@ install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{package}/bin/nettest
 install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{package}/bin/cpustat
 
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT%{usrlib}/librrfaker.so
-install -m 755 %{_libdir}/libhpjpeg.so $RPM_BUILD_ROOT%{usrlib}/libhpjpeg.so
+install -m 755 %{_libdir}/libturbojpeg.so $RPM_BUILD_ROOT%{usrlib}/libturbojpeg.so
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
@@ -114,6 +114,6 @@ fi
 /opt/%{package}/bin/cpustat
 
 %{usrlib}/librrfaker.so
-%{usrlib}/libhpjpeg.so
+%{usrlib}/libturbojpeg.so
 
 %changelog
