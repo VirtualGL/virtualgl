@@ -14,7 +14,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
-	File "${BLDDIR}\bin\hpjpeg.dll"
+	File "${BLDDIR}\bin\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
 	File "${BLDDIR}\bin\hclshm.dll"
@@ -60,7 +60,7 @@ Section "Uninstall"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}"
 
 	Delete $INSTDIR\vglclient.exe
-	Delete $INSTDIR\hpjpeg.dll
+	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\tcbench.exe
