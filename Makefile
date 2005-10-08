@@ -54,7 +54,6 @@ install: rr
 	mkdir -p $(prefix)/bin
 	mkdir -p $(prefix)/lib64
 	install -m 755 $(EDIR)/rrlaunch $(prefix)/bin/rrlaunch
-	install -m 755 $(LDIR)/libturbojpeg.so $(prefix)/lib64/libturbojpeg.so
 	install -m 755 $(LDIR)/librrfaker.so $(prefix)/lib64/librrfaker.so
 	echo Install complete.
 else
@@ -66,7 +65,6 @@ install: rr
 	install -m 755 rr/rrxclient_config $(prefix)/bin/rrxclient_config
 	install -m 755 $(EDIR)/rrlaunch $(prefix)/bin/rrlaunch
 	install -m 755 $(EDIR)/rrxclient $(prefix)/bin/rrxclient
-	install -m 755 $(LDIR)/libturbojpeg.so $(prefix)/lib/libturbojpeg.so
 	install -m 755 $(LDIR)/librrfaker.so $(prefix)/lib/librrfaker.so
 	echo Install complete.
 endif
@@ -74,7 +72,6 @@ endif
 ifeq ($(subplatform), 64)
 uninstall:
 	$(RM) $(prefix)/bin/rrlaunch
-	$(RM) $(prefix)/lib64/libturbojpeg.so
 	$(RM) $(prefix)/lib64/librrfaker.so
 	echo Uninstall complete.
 else
@@ -86,7 +83,6 @@ uninstall:
 	$(RM) $(prefix)/bin/rrxclient_config
 	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/bin/rrxclient
-	$(RM) $(prefix)/lib/libturbojpeg.so
 	$(RM) $(prefix)/lib/librrfaker.so
 	echo Uninstall complete.
 endif
@@ -114,6 +110,19 @@ dist: rr rr32 diags32
 		--target $(RPMARCH) \
 		rr.spec; \
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
+	rm -rf $(BLDDIR)/rpms
+
+RPMBUILD = 1
+
+srpm:
+	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
+	mkdir -p $(BLDDIR)/rpms/RPMS
+	mkdir -p $(BLDDIR)/rpms/BUILD
+	mkdir -p $(BLDDIR)/rpms/SOURCES
+	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
+	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) virtualgl.spec
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(RPMBUILD).$(RPMARCH).rpm $(BLDDIR)
+	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(RPMBUILD).src.rpm $(BLDDIR)
 	rm -rf $(BLDDIR)/rpms
 
 ##########################################################################
