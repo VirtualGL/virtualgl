@@ -72,8 +72,6 @@ rm -rf $RPM_BUILD_ROOT
 %postun
 /sbin/ldconfig
 
-%ifarch x86_64
-%else
 %preun
 %{_DAEMON} stop
 %{_DAEMONSSL} stop
@@ -83,7 +81,6 @@ if [ -x %{_POSTSESSION} ]; then
 	/usr/bin/perl -i -p -e "s:%{_DAEMON} stop\n::g;" %{_POSTSESSION}
 	/usr/bin/perl -i -p -e "s:%{_DAEMONSSL} stop\n::g;" %{_POSTSESSION}
 fi
-%endif
 
 %files -n %{name}
 %defattr(-,root,root)
