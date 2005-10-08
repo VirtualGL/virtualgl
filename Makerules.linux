@@ -16,6 +16,8 @@ endif
 LDFLAGS = -L$(LDIR) -O2
 ifeq ($(subplatform), 64)
 LDFLAGS := $(LDFLAGS) -L/usr/X11R6/lib64
+else
+LDFLAGS := $(LDFLAGS) -L/usr/X11R6/lib
 endif
 
 ifeq ($(M32), yes)

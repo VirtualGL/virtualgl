@@ -43,11 +43,11 @@ $(ODIR)/glthreadsint.o: $(ODIR)/%.o: %.c
 
 $(EDIR)/glthreads \
 $(EDIR)/glthreadsint: $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lpthread -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lpthread -lm
 
 $(EDIR)/glxinfo \
 $(EDIR)/offset: $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lGLU -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm
 
 $(EDIR)/glxgears \
 $(EDIR)/glxdemo \
@@ -58,11 +58,11 @@ $(EDIR)/shape \
 $(EDIR)/testgl5 \
 $(EDIR)/wincopy \
 $(EDIR)/xfont : $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm
 
 $(EDIR)/pbdemo \
 $(EDIR)/pbinfo: $(EDIR)/%: $(ODIR)/%.o $(ODIR)/pbutil.o
-	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lm
+	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lX11 -lm
 
 ##########################################################################
 endif
