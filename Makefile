@@ -117,6 +117,7 @@ RPMBUILD = 1
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
+	mkdir -p $(BLDDIR)/rpms/SRPMS
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
 	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
