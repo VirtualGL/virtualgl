@@ -96,7 +96,10 @@ TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
           $(UNITTESTS)
 
 
-RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/libturbojpeg.$(SHEXT) $(LDIR)/librrsocket.a
+RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
+ifneq ($(platform), linux)
+RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
+endif
 RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB)
 
 ifeq ($(subplatform), 64)
