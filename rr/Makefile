@@ -102,7 +102,7 @@ $(LDIR)/librr.a: $(SOBJS)
 	$(AR) $@ $^
 
 $(LDIR)/librrfaker.so: $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) -shared -o $@ $(FOBJS) $(RRLIB)
+	$(CXX) $(LDFLAGS) -shared -o $@ $(FOBJS) $(RRLIB) -lGL
 
 $(EDIR)/rrlaunch: rrlaunch
 	install -m 755 rrlaunch $@

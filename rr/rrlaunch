@@ -3,4 +3,4 @@ GEOPROBE_USEGLX=1
 export GEOPROBE_USEGLX
 PROMAGIC_USEGLX=1
 export PROMAGIC_USEGLX
-LD_PRELOAD=librrfaker.so:libGL.so.1 ${1+"$@"}
+LD_PRELOAD=librrfaker.so ${1+"$@"}
