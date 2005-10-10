@@ -203,7 +203,7 @@ color (24/32-bit)</li>
 <ul>
 
 <li>Single Pentium III or
-Pentium 4, 1.0 GHz or faster</li>
+Pentium 4, 1.0 GHz or faster (or equivalent)</li>
 <li>Graphics card with decent 2D
 performance</li>
 <li>Windows 2000 or XP with <a href="http://www.hummingbird.com">Hummingbird</a>
@@ -249,7 +249,7 @@ command:<br>
 <pre>rpm -Uvh turbojpeg*.rpm<br></pre></li></ol><h4>Installing VirtualGL</h4><ol><li>If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4, obtain one of the pre-built RPMs from the files area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br><br>The Enterprise Linux 2.1 RPM should (theoretically) also work on&nbsp;RedHat Linux 7.2 and 7.3 (and maybe 7.1 if
 patched.)<br>The Enterprise Linux 3 RPM should (theoretically) also work on&nbsp;RedHat
 Linux 8 (patched), RedHat Linux 9, and Fedora
-Core 1 &amp; 2.<br>The Enterprise Linux 4 RPM should theoretically also work on Fedora Core 3 &amp; 4.<br>&nbsp;</li>
+Core 1 &amp; 2.<br>The Enterprise Linux 4 RPM should (theoretically) also work on Fedora Core 3 &amp; 4.<br>&nbsp;</li>
 <li>Log in as root, cd to the
 directory
 where you downloaded the RPM package, and issue the following
@@ -260,7 +260,7 @@ family, then you will probably need to rebuild VirtualGL from the SRPM.<br><ol><
 directory
 where you downloaded the SRPM, and issue the following
 commands:<br>
-<pre>rpm -i VirtualGL*.src.rpm<br>cd /usr/src/redhat/SPECS<br>rpmbuild -ba virtualgl.spec</pre></li><li>Sit back and watch the fun</li><li>If the build completes successfully, it will produce a binary package in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{arch}</span></span> which you can install using the instructions from the previous section</li></ol>Otherwise, download the source tarball, uncompress it, <span class="monospace" style="font-family: monospace;">cd vgl</span>,&nbsp;and type <span class="monospace" style="font-family: monospace;">make</span>. &nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span> in the source directory for further instructions. 
+<pre>rpm -i VirtualGL*.src.rpm<br>cd /usr/src/redhat/SPECS<br>rpmbuild -ba virtualgl.spec</pre></li><li>Sit back and watch the fun</li><li>If the build completes successfully, it will produce a binary RPM in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span> which you can install using the instructions from the previous section</li></ol>Otherwise, log in as root, download the source tarball, uncompress it, <span class="monospace" style="font-family: monospace;">cd vgl</span>,&nbsp;and type <span class="monospace" style="font-family: monospace;">make</span><span class="monospace"> install</span>. &nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span> in the&nbsp;source distribution for further details. 
 
 <h3>Display Configuration (Server
 Only)</h3>
