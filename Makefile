@@ -121,6 +121,10 @@ srpm:
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
 	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
+	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(RPMBUILD)/g \
+		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
+		| sed s/%{_bindir}/linux\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
+		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >virtualgl.spec
 	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) virtualgl.spec
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(RPMBUILD).$(RPMARCH).rpm $(BLDDIR)
 	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(RPMBUILD).src.rpm $(BLDDIR)

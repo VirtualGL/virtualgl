@@ -17,9 +17,11 @@ Version: %{_version}
 Vendor: The VirtualGL Project
 URL: http://virtualgl.sourceforge.net
 Group: Applications/Graphics
+#-->Source0: http://prdownloads.sourceforge.net/virtualgl/VirtualGL-%{version}.tar.gz
 Release: %{_build}
 License: wxWindows Library License, v3
-BuildRoot: %{_blddir}/%{name}-buildroot
+BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
+BuildPrereq: openssl-devel, turbojpeg
 Prereq: /sbin/ldconfig, /usr/bin/perl, turbojpeg >= 1.0
 Provides: %{name} = %{version}-%{release}
 
@@ -42,6 +44,15 @@ this topic, including "A Generic Solution for Hardware-Accelerated Remote
 Visualization" (Stegmaier, Magallon, Ertl 2002) and "A Framework for
 Interactive Hardware Accelerated Remote 3D-Visualization" (Engel, Sommer,
 Ertl 2000.)
+
+#-->%prep
+#-->%setup -q -n vgl
+
+#-->%build
+#-->make
+#-->%ifarch x86_64
+#-->make M32=yes
+#-->%endif
 
 %install
 
