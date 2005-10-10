@@ -226,9 +226,7 @@ needs to be true color (24 or 32-bit)</li>
 
 
 
-<span style="color: rgb(0, 0, 0);">The development of VirtualGL for Itanium ceased with v0.9.2 due to lack
-of development equipment.&nbsp; We are looking for volunteers to continue this
-effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> if you're interested.&nbsp;</span>
+<span style="color: rgb(0, 0, 0);">VirtualGL should build and run on Itanium Linux, but it has not been thoroughly tested. &nbsp;<a href="https://sourceforge.net/users/dcommander">Contact us</a> if you encounter any difficulties.</span>
 
 <div class="top"><a href="#" target="_top">top</a></div>
 
@@ -236,64 +234,33 @@ effort.&nbsp; <a href="https://sourceforge.net/users/dcommander">Contact us</a> 
 <a name="linuxinstall"></a>
 <h2>Installation (Linux)</h2>
 
-<ol>
+<h4>Installing TurboJPEG</h4><ol>
 
-<li>Obtain the latest VirtualGL
-RPM package from the files
+<li>Obtain the latest TurboJPEG RPM from the files
 area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
 <br>
 <span class="note">Note:</span>.tgz
-packages are provided for users of non-RedHat platforms.&nbsp;
+packages are provided for users of non-RPM platforms.&nbsp;
 You can use <a href="http://www.kitenet.net/programs/alien/">alien</a>
-to convert these into .deb packages if you prefer.&nbsp; These
-packages have not been thoroughly tested.<br>
-<br>
-The "glibc22" or "rh7"
-packages are built on RedHat Enterprise Linux 2.1, but they should
-theoretically work on any RPM-based system that has GLIBC 2.2 and
-libstdc++ 2.96, including&nbsp;RedHat Linux 7.2 and 7.3 (maybe 7.1 if
-patched) and CentOS Enterprise Linux 2.1.<br>
-<br>
-The "glibc23" or "rh8" packages are built on RedHat Enterprise Linux
-3.0, but they should theoretically work on any RPM-based system that
-has GLIBC 2.3 and libstdc++ 3.2 or 3.3, including RedHat
-Linux 8 (patched), RedHat Linux 9, CentOS or Whitebox Enterprise Linux 3, Fedora
-Core 1 and 2, and SuSE 8.2 or newer. &nbsp;The "glibc23" packages will
-also work on RedHat or CentOS Enterprise Linux&nbsp; 4.0&nbsp;if the <span class="monospace">compat-libstdc++-33</span> package is installed or on Fedora
-Core 3&nbsp; if the <span class="monospace">compat-libstdc++-8</span> package is installed.<br>
-<br>
-</li>
+to convert these into .deb packages if you prefer.<br>&nbsp;</li><li>Log in as root, cd to the
+directory
+where you downloaded the RPM package, and issue the following
+command:<br>
+<pre>rpm -Uvh turbojpeg*.rpm<br></pre></li></ol><h4>Installing VirtualGL</h4><ol><li>If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4, obtain one of the pre-built RPMs from the files area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br><br>The Enterprise Linux 2.1 RPM should (theoretically) also work on&nbsp;RedHat Linux 7.2 and 7.3 (and maybe 7.1 if
+patched.)<br>The Enterprise Linux 3 RPM should (theoretically) also work on&nbsp;RedHat
+Linux 8 (patched), RedHat Linux 9, and Fedora
+Core 1 &amp; 2.<br>The Enterprise Linux 4 RPM should theoretically also work on Fedora Core 3 &amp; 4.<br>&nbsp;</li>
 <li>Log in as root, cd to the
 directory
 where you downloaded the RPM package, and issue the following
 command:<br>
-<pre>rpm -Uvh {RPM package name}</pre>
-</li>
-</ol>
-
-<span class="note">Note:</span>For
-x86-64 systems, there is a separate package called "VirtualGL64" which
-contains the server
-components for use with 64-bit apps. &nbsp;If you want to use VirtualGL
-to&nbsp; run both 32-bit and 64-bit applications on an x86-64 machine,
-you will need to install both the "VirtualGL" and "VirtualGL64"
-packages. &nbsp;Since there is no need for a 64-bit client, the client
-is only available in the "VirtualGL" package.<br>
-<h3>Installing on SuSE/United Linux</h3>
-
-The VirtualGL glibc23 RPM's can be installed and used on a SuSE Linux
-or equivalent system provided that the following additional steps are
-taken:<br>
-
-<ul>
-<li>Pass an argument of <span class="monospace">--nodeps </span>to rpm when installing the package, e.g.:<br>
-    <pre>rpm -Uvh {RPM package name} --nodeps</pre>
-  </li><li>Link <span class="monospace">/usr/lib/libssl.so.4</span> and <span class="monospace">/usr/lib/libcrypto.so.4</span> (or <span class="monospace">/usr/lib64/libssl.so.4</span> and <span class="monospace">/usr/lib64/libcrypto.so.4</span>) to the location of your OpenSSL libraries, e.g.:<br>
-    <pre>ln -fs /usr/lib/libssl.so.0 /usr/lib/libssl.so.4<br>ln -fs /usr/lib/libcrypto.so.0 /usr/lib/libcrypto.so.4</pre>
-  </li>
-</ul>
-
-<span class="note">Note:</span>Installing the client as a service does not currently work on SuSE/United Linux platforms.<br>
+<pre>rpm -Uvh VirtualGL*.rpm</pre></li></ol><h4>Installing VirtualGL from Source</h4>If
+you are using an RPM-based system that isn't in the Fedora or RedHat
+family, then you will probably need to rebuild VirtualGL from the SRPM.<br><ol><li>Obtain the VirtualGL SRPM from the files area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br></li><li>Log in as root, cd to the
+directory
+where you downloaded the SRPM, and issue the following
+commands:<br>
+<pre>rpm -i VirtualGL*.src.rpm<br>cd /usr/src/redhat/SPECS<br>rpmbuild -ba virtualgl.spec</pre></li><li>Sit back and watch the fun</li><li>If the build completes successfully, it will produce a binary package in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{arch}</span></span> which you can install using the instructions from the previous section</li></ol>Otherwise, download the source tarball, uncompress it, <span class="monospace" style="font-family: monospace;">cd vgl</span>,&nbsp;and type <span class="monospace" style="font-family: monospace;">make</span>. &nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span> in the source directory for further instructions. 
 
 <h3>Display Configuration (Server
 Only)</h3>
@@ -453,7 +420,7 @@ the Linux Client
 as a Service<br>
 </h3>
 
-You can set up the Linux client as a user mode daemon by running<br>
+<span class="note">Note:</span>Installing the Linux client as a service does not work on SuSE/United Linux platforms.<br><br>You can set up the Linux client as a user mode daemon by running<br>
 
 <pre>rrxclient_config</pre>
 
