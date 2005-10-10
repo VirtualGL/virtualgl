@@ -7,7 +7,7 @@
 # This is a hack to prevent the RPM from depending on libGLcore.so.1 and
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
 # drivers installed.  The custom find-requires script is created during
-# %install and removed during %clean
+# install and removed during clean
 
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 

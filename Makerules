@@ -30,7 +30,11 @@ TOPDIR = ..
 endif
 
 BLDDIR = $(TOPDIR)/$(platform)$(subplatform)
+ifeq ($(subplatform), 64)
 BLDDIR32 = $(TOPDIR)/$(platform)
+else
+BLDDIR32 = $(BLDDIR)
+endif
 
 ifeq ($(DEBUG), yes)
 BLDDIR := $(BLDDIR)/dbg
