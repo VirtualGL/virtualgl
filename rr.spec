@@ -4,6 +4,13 @@
 %define _DAEMONSSL /usr/bin/rrxclient_ssldaemon
 %define _POSTSESSION /etc/X11/gdm/PostSession/Default
 
+# This is a hack to prevent the RPM from depending on libGLcore.so.1 and
+# libnvidia-tls.so.1 if it was built on a system that has the NVidia
+# drivers installed.  The custom find-requires script is created during
+# %install and removed during %clean
+
+%define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
+
 Summary: A framework for displaying OpenGL applications to thin clients
 Name: VirtualGL
 Version: %{_version}
@@ -63,8 +70,12 @@ install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
+echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
+chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
+
 %clean
 rm -rf $RPM_BUILD_ROOT
+rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %post
 /sbin/ldconfig
