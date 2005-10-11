@@ -171,7 +171,7 @@ color (24/32-bit)</li>
 <ul>
 <li>For optimal performance
 with
-VirtualGL64, the processor should support SSE3 extensions.&nbsp;
+64-bit VirtualGL, the processor should support SSE3 extensions.&nbsp;
 Only newer AMD 64-bit processors support SSE3.</li>
 </ul>
 </ul>
@@ -465,15 +465,7 @@ Server</h3>
 <p>As root, issue the following
 command:</p>
 
-<pre>rpm -e VirtualGL</pre>
-
-<p>To remove the 64-bit server
-components on an x86-64 machine, additionally issue the following
-command:</p>
-
-<pre>rpm -e VirtualGL64</pre>
-
-<p style="text-align: right;"><a href="#" target="_top">top</a><br>
+<pre>rpm -e VirtualGL</pre><p style="text-align: right;"><a href="#" target="_top">top</a><br>
 </p>
 
 <hr style="width: 100%; height: 2px;"><a name="windowsinstall"></a>
@@ -1336,8 +1328,7 @@ system.<br>
 nettest is a low-level network benchmark that uses the same network
 routines as VirtualGL. &nbsp;It can be used to test the latency and
 throughput of any TCP/IP connection, with or without SSL encryption.
-&nbsp;The 32-bit VirtualGL Linux package installs nettest in <span class="monospace">/opt/VirtualGL/bin</span>.
-&nbsp;The 64-bit VirtualGL Linux package installs it in <span class="monospace">/opt/VirtualGL64/bin</span>.
+&nbsp;The&nbsp;Linux package installs nettest in <span class="monospace">/opt/VirtualGL/bin</span>.
 &nbsp;The Windows installer installs it in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
 by default.
@@ -1379,8 +1370,7 @@ a zero-byte packet, which is about 0.18 ms in this case.</p>
 
 <p>cpustat is available only in
 the VirtualGL Linux packages and is located in the same place as
-nettest (<span class="monospace">/opt/VirtualGL/bin</span>
-or <span class="monospace">/opt/VirtualGL64/bin</span>.)
+nettest (<span class="monospace">/opt/VirtualGL/bin</span><span class="monospace"></span>.)
 &nbsp;It measures the average, minimum, and peak CPU usage for all
 processors combined and for each processor individually. &nbsp;On
 Windows, this same functionality is provided in the Windows Performance
@@ -1422,7 +1412,7 @@ with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the
 client's windowing system.<br>
 
-<p>The 32-bit VirtualGL Linux
+<p>The VirtualGL Linux
 package installs tcbench in <span class="monospace">/opt/VirtualGL/bin</span>.
 &nbsp;<span class="monospace"></span>The Windows installer installs it in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
