@@ -103,7 +103,7 @@ OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/24to32.o
 
 ifeq ($(JPEGLIB), libjpeg)
-TARGETS := libjpeg $(TARGETS)
+LTARGET := libjpeg $(LTARGET)
 endif
 
 
@@ -200,9 +200,9 @@ lib32:
 	$(MAKE) M32=yes lib
 endif
 
-TJPEGBUILD = 1
-ifeq ($(JPEGLIB), ipp)
 TJPEGBUILD = 1ipp
+ifeq ($(JPEGLIB), libjpeg)
+TJPEGBUILD = 1
 endif
 ifeq ($(JPEGLIB), pegasus)
 TJPEGBUILD = 1peg
