@@ -531,8 +531,12 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		errifnot(config=ctxh.findconfig(ctx));
 		pbw=winh.setpb(dpy, drawable, config);
-		if(pbw) drawable=pbw->updatedrawable();
-	}
+		if(pbw)
+		{
+			drawable=pbw->updatedrawable();
+			if(drawable!=curdraw) pbw->forcenextframe();
+		}
+}
 	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
 	if((pbw=winh.findpb(_localdpy, drawable))!=NULL) {pbw->clear();  pbw->cleanup();}
 	pbuffer *pb;
@@ -599,7 +603,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		errifnot(config=ctxh.findconfig(ctx));
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
-		if(drawpbw) draw=drawpbw->updatedrawable();
+		if(drawpbw)
+		{
+			draw=drawpbw->updatedrawable();
+			if(draw!=curdraw) drawpbw->forcenextframe();
+		}
 		if(readpbw) read=readpbw->updatedrawable();
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
