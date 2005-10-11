@@ -1,5 +1,5 @@
-%define _XINIT /etc/X11/xinit/xinitrc.d/rrxclient
-%define _XINITSSL /etc/X11/xinit/xinitrc.d/rrxclient_ssl
+%define _XINIT /etc/X11/xinit/xinitrc.d/rrxclient.sh
+%define _XINITSSL /etc/X11/xinit/xinitrc.d/rrxclient_ssl.sh
 %define _DAEMON /usr/bin/rrxclient_daemon
 %define _DAEMONSSL /usr/bin/rrxclient_ssldaemon
 %define _POSTSESSION /etc/X11/gdm/PostSession/Default
