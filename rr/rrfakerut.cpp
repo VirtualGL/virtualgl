@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
 #include <GL/glu.h>
 #include <X11/Xlib.h>
