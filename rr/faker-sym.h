@@ -252,6 +252,18 @@ funcdef3(void, glXGetSelectedEventSGIX, Display *, dpy, GLXDrawable, drawable,
 	unsigned long *, mask);
 
 
+// GLX_ARB_get_proc_address
+
+#ifdef GLX_ARB_get_proc_address
+typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
+symdef(glXGetProcAddressARB);
+static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
+{
+	checksym(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
+}
+#endif
+
+
 // GL functions
 
 funcdef0(void, glFinish);

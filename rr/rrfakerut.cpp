@@ -1297,6 +1297,39 @@ int dpyhashtest(void)
 }
 
 
+#ifdef GLX_ARB_get_proc_address
+
+#define testprocsym(f) \
+	if((sym=(void *)glXGetProcAddressARB((const GLubyte *)#f))==NULL) \
+		_throw("glXGetProcAddressARB(\""#f"\") returned NULL"); \
+	else if(sym!=(void *)f) \
+		_throw("glXGetProcAddressARB(\""#f"\")!="#f);
+
+int procaddrtest(void)
+{
+	int retval=1;  void *sym=NULL;
+
+	printf("glXGetProcAddressARB test:\n\n");
+
+	try
+	{
+		testprocsym(glXChooseVisual)
+		testprocsym(glXCreateContext)
+		testprocsym(glXMakeCurrent)
+		testprocsym(glXChooseFBConfig)
+		testprocsym(glXCreateNewContext)
+		testprocsym(glXMakeContextCurrent)
+		printf("SUCCESS!\n");
+	}	
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	return retval;
+}
+#endif
+
+
 int main(int argc, char **argv)
 {
 	int ret=0;
@@ -1322,6 +1355,10 @@ int main(int argc, char **argv)
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat");
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat2");
 
+	#ifdef GLX_ARB_get_proc_address
+	if(!procaddrtest()) ret=-1;
+	printf("\n");
+	#endif
 	if(!rbtest()) ret=-1;
 	printf("\n");
 	if(!vistest()) ret=-1;

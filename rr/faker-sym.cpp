@@ -109,6 +109,10 @@ void loadsymbols(void)
 	lsymopt(glXSelectEventSGIX)
 	lsymopt(glXGetSelectedEventSGIX)
 
+	#ifdef GLX_ARB_get_proc_address
+	lsymopt(glXGetProcAddressARB)
+	#endif
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)

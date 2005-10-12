@@ -219,4 +219,84 @@ shimfuncdpy4(Bool, glXQueryMaxSwapGroupsNV, Display*, dpy, int, screen, GLuint*,
 shimfuncdpy3(Bool, glXQueryFrameCountNV, Display*, dpy, int, screen, GLuint*, count );
 shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen );
 
+#ifdef GLX_ARB_get_proc_address
+
+#define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
+
+void (*glXGetProcAddressARB(const GLubyte *procName))(void)
+{
+	void (*retval)(void)=NULL;
+	if(procName)
+	{
+		checkfaked(glXChooseVisual)
+		checkfaked(glXCopyContext)
+		checkfaked(glXCreateContext)
+		checkfaked(glXCreateGLXPixmap)
+		checkfaked(glXDestroyContext)
+		checkfaked(glXDestroyGLXPixmap)
+		checkfaked(glXGetConfig)
+		checkfaked(glXGetCurrentDrawable)
+		checkfaked(glXIsDirect)
+		checkfaked(glXMakeCurrent);
+		checkfaked(glXQueryExtension)
+		checkfaked(glXQueryVersion)
+		checkfaked(glXSwapBuffers)
+		checkfaked(glXUseXFont)
+		checkfaked(glXWaitGL)
+
+		checkfaked(glXGetClientString)
+		checkfaked(glXQueryServerString)
+		checkfaked(glXQueryExtensionsString)
+
+		checkfaked(glXChooseFBConfig)
+		checkfaked(glXCreateNewContext)
+		checkfaked(glXCreatePbuffer)
+		checkfaked(glXCreatePixmap)
+		checkfaked(glXCreateWindow)
+		checkfaked(glXDestroyPbuffer)
+		checkfaked(glXDestroyPixmap)
+		checkfaked(glXDestroyWindow)
+		checkfaked(glXGetCurrentDisplay)
+		checkfaked(glXGetCurrentReadDrawable)
+		checkfaked(glXGetFBConfigAttrib)
+		checkfaked(glXGetFBConfigs)
+		checkfaked(glXGetSelectedEvent)
+		checkfaked(glXGetVisualFromFBConfig)
+		checkfaked(glXMakeContextCurrent);
+		checkfaked(glXQueryContext)
+		checkfaked(glXQueryDrawable)
+		checkfaked(glXSelectEvent)
+
+		checkfaked(glXFreeContextEXT)
+		checkfaked(glXImportContextEXT)
+		checkfaked(glXQueryContextInfoEXT)
+
+		checkfaked(glXJoinSwapGroupNV)
+		checkfaked(glXBindSwapBarrierNV)
+		checkfaked(glXQuerySwapGroupNV)
+		checkfaked(glXQueryMaxSwapGroupsNV)
+		checkfaked(glXQueryFrameCountNV)
+		checkfaked(glXResetFrameCountNV)
+
+		checkfaked(glXGetFBConfigAttribSGIX)
+		checkfaked(glXChooseFBConfigSGIX)
+		checkfaked(glXGetFBConfigFromVisualSGIX)
+
+		checkfaked(glXCreateGLXPbufferSGIX)
+		checkfaked(glXDestroyGLXPbufferSGIX)
+		checkfaked(glXQueryGLXPbufferSGIX)
+		checkfaked(glXSelectEventSGIX)
+		checkfaked(glXGetSelectedEventSGIX)
+
+		checkfaked(glFinish)
+		checkfaked(glFlush)
+		checkfaked(glViewport)
+		checkfaked(glDrawBuffer)
+		checkfaked(glPopAttrib)
+	}
+	if(!retval) retval=_glXGetProcAddressARB(procName);
+	return retval;
+}
+#endif
+
 }
