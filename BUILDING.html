@@ -108,31 +108,15 @@ text-align: right;
   <span class="monospace">xorg-x11-devel</span> package</li>
 </ul>
 <h3><span style="font-weight: 400;">GNU Make v3.7 or later</span></h3>
-<h3><span style="font-weight: 400;">Intel Integrated 
-Performance Primitives (IPP)<font color="#ff0000"> </font> <i>
-<font color="#ffff00">[recommended]</font></i></span></h3>
-<ul>
-  <li>
-  <h4><span style="font-weight: 400;">VirtualGL includes a completely free version of libjpeg v6b which will
-   produce correct, albeit slow, behavior.&nbsp; In order to get optimal
-   performance out of VirtualGL, however, it is necessary to build VirtualGL 
-  against the Intel 
-  Performance Primitives, which are capable of compressing JPEG images 3-4x 
-  faster than libjpeg.</span></h4>
-  </li>
-  <li>
-  <h4><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
-   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
-   distributed royalty-free.</span></h4>
-  </li>
-</ul>
-<hr>
-<h2><span style="font-weight: 400;">Prerequisites - x86-64 Linux</span></h2>
-<p>Not all x86-64 Linux systems contain the necessary 32-bit packages to build 
-and run VirtualGL.&nbsp; To build VirtualGL on an x86-64 Linux system, you will 
-need at minimum the following 32-bit packages:</p>
-<ul>
-  <li>glibc development libraries<ul>
+<h3 style="font-weight: normal;">TurboJPEG</h3><ul><li>Download
+and install the appropriate TurboJPEG binary&nbsp;for your Linux
+distribution. &nbsp;TurboJPEG binaries can be found at <a href="https://sourceforge.net/project/showfiles.php?group_id=117509&amp;package_id=166100">https://sourceforge.net/project/showfiles.php?group_id=117509&amp;package_id=166100</a>. &nbsp;These binaries should work on all GLIBC 2.2 and newer systems</li><li>Normally, you should not need to rebuild TurboJPEG from source. &nbsp;But if you do, see the notes below</li></ul><h2><span style="font-weight: 400;">Prerequisites - x86-64 Linux</span></h2>
+<p>Building a redistributable VirtualGL package for x86-64  requires
+building both 32-bit and 64-bit versions of the VirtualGL libraries.
+&nbsp;But not all x86-64 Linux systems contain the 32-bit
+packages necessary  to rebuild a 32-bit version of VirtualGL.&nbsp; To build
+32-bit VirtualGL on an x86-64 Linux system, you will need at minimum
+the following 32-bit packages:</p><ul><li>glibc development libraries<ul>
     <li>Usually contained in the <span class="monospace">glibc-devel</span> package (iX86)</li>
     <li>Usually installed by default on x86-64 Linux systems</li>
   </ul>
@@ -159,14 +143,57 @@ need at minimum the following 32-bit packages:</p>
 perform the following additional step:</p>
 <pre>cd /usr/lib<br>ln -fs /lib/libssl.so.? libssl.so</pre>
 <p>This creates a development stub for the 32-bit OpenSSL library, since a 
-32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
+32-bit <span class="monospace">openssl-devel</span> package doesn't exist. &nbsp;If you&nbsp;have more than one 32-bit
+version of libssl installed, then replace ? in the above command line
+with the version you wish to link against.</p>
 <p>On Enterprise Linux 4.0 or Fedora, you may additionally need to do the 
 following:</p>
 
 <pre>cd /usr/include/openssl<br>ln -fs opensslconf-x86_64.h opensslconf-i386.h<br></pre>
 <p>This creates an appropriate i386 header file for OpenSSL, since  a 
-32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p>
-<hr>
+32-bit <span class="monospace">openssl-devel</span> package doesn't exist.</p><hr style="width: 100%; height: 2px;"><h2 style="font-weight: normal;">Rebuilding TurboJPEG on Linux</h2><p>TurboJPEG
+is a simple but fast JPEG codec that VirtualGL uses as its default
+method of image compression. &nbsp;TurboJPEG abstracts a variety of
+hardware-specific JPEG compression technologies, some of them closed
+source, into a single API that VirtualGL can use across all of the
+platforms it supports. &nbsp;The Linux version of TurboJPEG currently
+relies on the Intel Integrated Performance Primitives, a proprietary
+set of libraries, to achieve the levels of performance necessary to
+support VirtualGL. &nbsp;Normally, the TurboJPEG library is built as
+part of the VirtualGL build process, but on Linux it was necessary to
+split TurboJPEG into a separate RPM so that end users could easily
+rebuild VirtualGL from source when needed (such as to install on a
+distribution for which no VirtualGL binaries are available.)</p><p>The
+source code for TurboJPEG is contained within the VirtualGL build tree
+under the&nbsp;<span class="monospace">jpeg/</span> directory. &nbsp;To rebuild the TurboJPEG library, <span style="font-family: monospace;">cd jpeg</span> and type <span style="font-family: monospace;">make lib</span>. &nbsp;You can then rebuild the TurboJPEG RPM by typing <span style="font-family: monospace;">make dist</span>. &nbsp;Rebuilding TurboJPEG from source requires one of the following:</p><ul><li> 
+<span style="font-weight: bold;">Intel Integrated 
+Performance Primitives (IPP)</span><br style="font-weight: bold;"><br>
+  <span style="font-weight: normal;"></span><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
+   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
+   distributed royalty-free.<br><br>Building TurboJPEG against IPP is the default if</span> the <span style="font-family: monospace;">JPEGLIB</span> makefile option is not specified<br>&nbsp;</li><li><span style="font-weight: bold;">Pegasus Imaging PicTools RapidVue</span><br style="font-weight: bold;"><span style="font-family: monospace;"><br></span>Passing an argument of <span class="monospace">JPEGLIB=pegasus</span> to the makefile will build TurboJPEG against the PicTools RapidVue codec from Pegasus Imaging&nbsp;<span style="font-weight: 400;">(<a href="http://www.jpg.com/">http://www.jpg.com</a>.)<br></span><br><span style="font-family: monospace;">make JPEGLIB=pegasus lib</span><span style="font-family: monospace;"><br>make JPEGLIB=pegasus dist<br><br></span><span style="font-weight: 400;"> </span><span style="font-weight: 400;">The TurboJPEG build environment looks for
+               PICTools in a directory called <span class="monospace">pictools</span> located one level up
+               from the top directory of the VirtualGL build.&nbsp; You can override this by passing
+               an additional argument of <span class="monospace">PEGDIR={location of pictools directory}</span> to the makefile.</span><br><span style="font-family: monospace;">&nbsp;</span></li><li><span style="font-weight: bold;">libjpeg v6b</span><br style="font-weight: bold;"><span style="font-family: monospace;"><br></span><span style="font-weight: normal;">TurboJPEG can be built against</span><span style="font-weight: 400;"> a completely free (as in freedom) version of libjpeg v6b which will
+   produce correct, albeit slow, behavior. &nbsp; </span>Pass an argument of <span class="monospace">JPEGLIB=libjpeg</span> to the makefile to build a&nbsp;version of TurboJPEG based on 100% open source technology.<br><br><span style="font-family: monospace;">make JPEGLIB=libjpeg lib</span><br style="font-family: monospace;"><span style="font-family: monospace;">make JPEGLIB=libjpeg dist</span><br style="font-family: monospace;"><span style="font-weight: 400;"><br>The custom libjpeg code is included in the <span class="monospace">jpeg/jpeg-6b</span>
+               directory of the VGL build and differs from the IJG release (see
+               <a href="http://www.ijg.org/">http://www.ijg.org</a>) only in its support of 
+  little endian 
+  and 32-bit pixel formats (both of which are necessary to allow for 
+  decompressing directly into X11 shared memory.)</span></li></ul><h3 style="font-weight: normal;">TurboJPEG Makefile Options</h3><span style="font-weight: 400;">Each of these options can be passed as an argument to "make".<br></span><br><big><span style="font-weight: 400;">IPPDIR = {location of Intel Performance Primitives directory}</span></big>
+<blockquote>
+  <p><span style="font-weight: 400;">This allows you to override 
+  the default location of <span class="monospace">/opt/intel/ipp41</span>, for instance to use an earlier or 
+  later version of IPP.</span></p>
+</blockquote>
+<big><span style="font-weight: 400;">IPPSHARED = yes</span></big>
+<blockquote>
+<span style="font-weight: 400;">Link
+against the IPP shared libraries rather than the static (merged)
+libraries. Using this option has the following ramifications:</span><br>
+<span style="font-weight: 400;"></span>
+<ul><li><span style="font-weight: 400;">The IPP run-time RPM must be installed on the build machine</span></li><li>The IPP run-time RPM must be installed on any machine that will use TurboJPEG</li><li>TurboJPEG's CPU autodetection mechanism for non-Intel CPU's will no
+longer work, and it is likely that the non-optimal (MMX) code path will
+be selected for non-Intel CPU's at run time</li></ul></blockquote>See the "Makefile Options" section below for other makefile options that may affect the TurboJPEG build.<hr>
 <h2><span style="font-weight: 400;">Prerequisites - Solaris</span></h2>
 <h3><span style="font-weight: 400;">Solaris 8 or newer (Sparc) or Solaris/OpenSolaris 10 or newer (x86)</span></h3>
 
@@ -313,8 +340,11 @@ installed</span></h3>
 </ul>
 <h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8.0 or v9.0</span></h3>
 <ul>
-  <li>This can be purchased directly from Hummingbird (<a href="http://www.hummingbird.com">http://www.hummingbird.com</a>.)</li>
-  <li>Add the XDK include and lib paths to your system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables 
+  <li>Contact
+Gary Romualdez of
+Hummingbird Ltd. [tel. (416) 496-6393 or
+<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
+for Exceed pricing information</li><li>Add the XDK include and lib paths to your system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables 
   prior to building VirtualGL</li>
   <li>See install notes in the VirtualGL Windows documentation regarding patching Exceed to 
   eliminate a bug in the MIT-SHM extension.</li>
@@ -360,14 +390,14 @@ type</p>
 <hr>
 <h2><span style="font-weight: 400;">Makefile Options</span></h2>
 <p><span style="font-weight: 400;">Each of these options can be passed as an argument to <span class="monospace">make</span> or <span class="monospace">gmake</span>.</span></p>
-<h3><span style="font-weight: 400;">DEBUG = yes</span></h3>
+<big style="font-weight: bold;">DEBUG = yes</big>
 <blockquote>
 <p>Build a version of VirtualGL with debugging symbols and no optimization.&nbsp; 
 The debug version will reside in <span class="monospace">${platform}/dbg/lib</span> and <span class="monospace">${platform}/dbg/bin</span>, whereas 
 the release version will reside in <span class="monospace">${platform}/lib</span> and <span class="monospace">${platform}/bin</span>, so these 
 two versions can be built independently of one another.</p>
 </blockquote>
-<h3><span style="font-weight: 400;">JPEGLIB = &lt; libjpeg | pegasus &gt;<libjpeg |pegasus=""></libjpeg></span></h3>
+<span style="font-weight: 400;"><big style="font-weight: bold;">JPEGLIB = &lt; libjpeg | pegasus &gt;</big><libjpeg |pegasus=""></libjpeg></span>
 <blockquote>
   <p><span style="font-weight: 400;">libjpeg = Build VirtualGL using a custom version of libjpeg v6b.&nbsp;
                This custom libjpeg code is included in the <span class="monospace">jpeg/jpeg-6b</span>
@@ -381,50 +411,21 @@ two versions can be built independently of one another.</p>
                PICTools in a directory called <span class="monospace">pictools</span> located one level up
                from the build directory.&nbsp; You can override this by passing
                an additional argument of <span class="monospace">PEGDIR={location of pictools directory}</span>.</span></p>
-</blockquote>
-<h3><span style="font-weight: 400;">IPPDIR = {location of Intel Performance Primitives 
-directory}</span></h3>
+</blockquote><big style="font-weight: bold;">M32 = yes</big>
 <blockquote>
-  <p><span style="font-weight: 400;">On Linux builds, this allows you to override 
-  the default location of <span class="monospace">/opt/intel/ipp41</span>, for instance to use an earlier or 
-  later version of IPP.</span></p>
-</blockquote>
-<h3><span style="font-weight: 400;">IPPSHARED = yes</span><br>
-</h3>
-<blockquote>
-<span style="font-weight: 400;">Link
-against the IPP shared libraries rather than the static (merged)
-libraries. Using this option has the following ramifications:</span><br>
-<span style="font-weight: 400;"></span>
-<ul>
-  <li><span style="font-weight: 400;">The IPP run-time RPM must be installed on the build machine</span></li>
-  <li>The IPP run-time RPM must be installed on any machine that will run VirtualGL</li>
-  <li>The CPU autodetection mechanism for non-Intel CPU's will no
-longer work, and it is likely that the non-optimal (MMX) code path will
-be selected for non-Intel CPU's at run time</li>
-</ul>
-</blockquote>
-<h3><span style="font-weight: 400;">M32 = yes</span></h3>
-<blockquote>
-  <p><span style="font-weight: 400;">On 64-bit systems
-(except Itanium), this cross-compiles a 32-bit version of
-VirtualGL.&nbsp; The default on 64-bit systems is to build a 64-bit
-"supplemental" package which contains only the 64-bit server-side
-components for VirtualGL.&nbsp; The 32-bit client can be used by both
-64-bit and 32-bit systems, so it is only necessary to build the faker
-library using 64-bit code (so that it can be inserted into 64-bit apps.)</span></p>
-</blockquote>
-  <h3><span style="font-weight: 400;">CC = gcc</span></h3>
+  <p><span style="font-weight: 400;">On x86-64 systems, this cross-compiles a 32-bit (x86) version of
+VirtualGL.</span></p></blockquote>
+  <big style="font-weight: bold;">CC = gcc</big>
 <blockquote>
   <p>On Solaris, this builds VirtualGL using the GCC compiler rather than the 
   default (Sun WS Pro) compiler.&nbsp; <span class="monospace">gcc</span> and <span class="monospace">g++</span> should be in 
   your <span class="monospace">PATH</span>.</p>
 </blockquote>
-  <h3><span style="font-weight: 400;">USEGLP = no</span></h3>
+  <big style="font-weight: bold;">USEGLP = no</big>
 <blockquote>
   <p>On Solaris, this builds VirtualGL without GLP extension code.&nbsp; This is 
   necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.</p></blockquote>
-<h3><span style="font-weight: 400;">USESSL = no</span></h3>
+<big style="font-weight: bold;">USESSL = no</big>
 
 <blockquote>
   <p>Build VirtualGL without SSL support.</p>
