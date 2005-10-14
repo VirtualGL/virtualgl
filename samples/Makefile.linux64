@@ -3,9 +3,9 @@ all: rrglxgears
 clean:
 	rm -f rrglxgears rrglxgears.o
 
-CFLAGS = -O2 -I../../../include -I../include -I/opt/VirtualGL64/include
+CFLAGS = -O2 -I../../include -I../include -I/opt/VirtualGL/include
 
-LDFLAGS = -L/usr/X11R6/lib64 -L../../../lib64 -Xlinker -rpath -Xlinker ../../../lib64
+LDFLAGS = -L/usr/X11R6/lib64 -L../../lib64 -Xlinker -rpath -Xlinker ../../lib64
 
 rrglxgears.o: rrglxgears.c
 	$(CC) $(CFLAGS) -c -o $@ $^

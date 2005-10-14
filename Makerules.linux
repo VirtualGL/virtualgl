@@ -48,3 +48,11 @@ SOCKLIB = -lrrsocket -lpthread
 ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl
 endif
+
+FAKERLINK = -lGL
+
+ifeq ($(subplatform),)
+RPMARCH = i386
+else
+RPMARCH = $(ARCH)
+endif

@@ -57,12 +57,6 @@ dist: rr diags
 else
 ##########################################################################
 
-ifeq ($(subplatform),)
-RPMARCH = i386
-else
-RPMARCH = $(ARCH)
-endif
-
 ifeq ($(prefix),)
 prefix=/usr/local
 endif
@@ -75,37 +69,32 @@ ifeq ($(platform), solx86)
 lib64dir=lib/64
 endif
 
-PACKAGENAME = $(APPNAME)
-ifeq ($(subplatform), 64)
-PACKAGENAME = $(APPNAME)64
-endif
-
 ifeq ($(subplatform), 64)
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
-	if [ ! -d $(prefix)/doc/$(PACKAGENAME)/samples ]; then mkdir -p $(prefix)/doc/$(PACKAGENAME)/samples; fi
+	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
-	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/vglrun64
-	$(INSTALL) -m 755 $(EDIR)/vglrun64 $(prefix)/bin/rrlaunch64
-	$(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
+	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
+	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
+	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/$(lib64dir)/librr.$(SHEXT)
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/index.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
+	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
-	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
-	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
+	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
+	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
 	echo Install complete.
 else
 install: rr diags
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
-	if [ ! -d $(prefix)/doc/$(PACKAGENAME)/samples ]; then mkdir -p $(prefix)/doc/$(PACKAGENAME)/samples; fi
+	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
 	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
@@ -113,34 +102,34 @@ install: rr diags
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
-	$(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT)
+	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/index.html $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc/$(PACKAGENAME)
-	$(INSTALL) -m 644 doc/*.png $(prefix)/doc/$(PACKAGENAME)
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
+	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
-	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/$(PACKAGENAME)/samples/rrglxgears.c
-	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/$(PACKAGENAME)/samples/Makefile
+	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
+	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
 	echo Install complete.
 endif
 
 ifeq ($(subplatform), 64)
 uninstall:
-	$(RM) $(prefix)/bin/vglrun64
-	$(RM) $(prefix)/bin/rrlaunch64
+	$(RM) $(prefix)/bin/vglrun
+	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librr.$(SHEXT)
-	$(RM) $(prefix)/doc/$(PACKAGENAME)/samples/*
-	rmdir $(prefix)/doc/$(PACKAGENAME)/samples
-	$(RM) $(prefix)/doc/$(PACKAGENAME)/*
-	rmdir $(prefix)/doc/$(PACKAGENAME)
+	$(RM) $(prefix)/doc/samples/*
+	if [ -d $(prefix)/doc/samples ]; then rmdir $(prefix)/doc/samples; fi
+	$(RM) $(prefix)/doc/*
+	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
 	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 else
@@ -158,26 +147,56 @@ uninstall:
 	$(RM) $(prefix)/lib/librr.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest
-	$(RM) $(prefix)/doc/$(PACKAGENAME)/samples/*
-	rmdir $(prefix)/doc/$(PACKAGENAME)/samples
-	$(RM) $(prefix)/doc/$(PACKAGENAME)/*
-	rmdir $(prefix)/doc/$(PACKAGENAME)
+	$(RM) $(prefix)/doc/samples/*
+	if [ -d $(prefix)/doc/samples ]; then rmdir $(prefix)/doc/samples; fi
+	$(RM) $(prefix)/doc/*
+	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
 	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 endif
 
 ifeq ($(platform), linux)
 
-dist: rr diags
+.PHONY: rr32 diags32
+ifeq ($(subplatform),)
+rr32: rr
+diags32: diags
+else
+rr32:
+	$(MAKE) M32=yes rr
+diags32:
+	$(MAKE) M32=yes diags
+endif
+
+dist: rr rr32 diags32
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
-	rm -f $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm; \
+	rm -f $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_topdir $(BLDDIR)/rpms" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
-		--define "_libdir $(LDIR)" --define "_appname $(APPNAME)" --target $(RPMARCH) \
+		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" \
+		--target $(RPMARCH) \
 		rr.spec; \
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(PACKAGENAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(PACKAGENAME).$(RPMARCH).rpm
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
+	rm -rf $(BLDDIR)/rpms
+
+RPMBUILD = 1
+
+srpm:
+	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
+	mkdir -p $(BLDDIR)/rpms/RPMS
+	mkdir -p $(BLDDIR)/rpms/SRPMS
+	mkdir -p $(BLDDIR)/rpms/BUILD
+	mkdir -p $(BLDDIR)/rpms/SOURCES
+	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
+	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(RPMBUILD)/g \
+		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
+		| sed s/%{_bindir}/linux\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
+		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >virtualgl.spec
+	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) virtualgl.spec
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(RPMBUILD).$(RPMARCH).rpm $(BLDDIR)
+	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(RPMBUILD).src.rpm $(BLDDIR)
 	rm -rf $(BLDDIR)/rpms
 
 endif
@@ -222,11 +241,11 @@ sunpkg: rr diags
 .PHONY: tarball
 tarball: rr diags
 	rm -rf $(BLDDIR)/fakeroot
-	rm -f $(BLDDIR)/$(PACKAGENAME).tar.gz
+	rm -f $(BLDDIR)/$(APPNAME).tar.gz
 	$(MAKE) prefix=$(BLDDIR)/fakeroot install
 	cd $(BLDDIR)/fakeroot; \
-	tar cf ../$(PACKAGENAME).tar *
-	gzip $(BLDDIR)/$(PACKAGENAME).tar
+	tar cf ../$(APPNAME).tar *
+	gzip $(BLDDIR)/$(APPNAME).tar
 	rm -rf $(BLDDIR)/fakeroot
 
 ##########################################################################

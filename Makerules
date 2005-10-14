@@ -48,12 +48,15 @@ endif
 
 ifneq ($(DISTRO),)
 BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
+BLDDIR32 = $(TOPDIR)/$(platform)/$(DISTRO)
 else
 BLDDIR = $(TOPDIR)/$(platform)$(subplatform)
+BLDDIR32 = $(TOPDIR)/$(platform)
 endif
 
 ifeq ($(DEBUG), yes)
 BLDDIR := $(BLDDIR)/dbg
+BLDDIR32 := $(BLDDIR32)/dbg
 endif
 
 ENAME = bin
@@ -61,8 +64,11 @@ LNAME = lib
 ONAME = obj
 
 EDIR := $(BLDDIR)/$(ENAME)
+EDIR32 := $(BLDDIR32)/$(ENAME)
 LDIR := $(BLDDIR)/$(LNAME)
+LDIR32 := $(BLDDIR32)/$(LNAME)
 ODIR := $(BLDDIR)/$(ONAME)
+ODIR32 := $(BLDDIR32)/$(ONAME)
 
 _DUMMY := $(shell mkdir -p $(EDIR))
 _DUMMY2 := $(shell mkdir -p $(LDIR))
