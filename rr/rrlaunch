@@ -24,7 +24,8 @@ usage()
 	echo "  -np <n>     : Number of CPUs to use for compression"
 	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
 	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
-	echo
+	echo "  -64         : (Solaris only) Preload VirtualGL only into 64-bit apps"
+	echo "  -32         : (Solaris only) Preload VirtualGL only into 32-bit apps"
 	exit $1
 }
 
@@ -61,6 +62,8 @@ do
 	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
+	-64)        __VGL_64=1        ;;
+	-32)        __VGL_32=1        ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;
 	--)         shift   ; break ;;
@@ -71,20 +74,6 @@ do
 done
 
 case `uname -s` in
-
-Linux)
-
-LD_PRELOAD=librrfaker.so:libGL.so.1
-export LD_PRELOAD
-exec ${1+"$@"}
-
-;;
-
-IRIX*)
-
-_RLD_LIST=librrfaker.so:libGL.so:libC.so:libpthread.so:DEFAULT ${1+"$@"}
-
-;;
 
 SunOS)
 
@@ -106,10 +95,22 @@ then
 	FAKERLIB32=/opt/SUNWvgl/lib/librrfaker.so
 fi
 fi
-LD_PRELOAD_32=$FAKERLIB32
-LD_PRELOAD_64=$FAKERLIB
-export LD_PRELOAD_32
-export LD_PRELOAD_64
+if [ -z "$__VGL_64" ]; then
+	LD_PRELOAD_32=$FAKERLIB32
+	export LD_PRELOAD_32
+fi
+if [ -z "$__VGL_32" ]; then
+	LD_PRELOAD_64=$FAKERLIB
+	export LD_PRELOAD_64
+fi
+exec ${1+"$@"}
+
+;;
+
+*)
+
+LD_PRELOAD=librrfaker.so
+export LD_PRELOAD
 exec ${1+"$@"}
 
 ;;
