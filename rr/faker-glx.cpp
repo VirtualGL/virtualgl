@@ -313,10 +313,17 @@ GLXContext glXGetCurrentContext(void)
 Display *glXGetCurrentDisplay(void)
 {
 	Display *dpy=NULL;  pbwin *pb=NULL;
+
 	TRY();
+
+		opentrace(glXGetCurrentDisplay);  starttrace();
+
 	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
 		dpy=pb->getwindpy();
 	else dpy=glxdh.getcurrentdpy(GetCurrentDrawable());
+
+		stoptrace();  prargx(dpy);  closetrace();
+
 	CATCH();
 	return dpy;
 }
@@ -325,8 +332,14 @@ GLXDrawable glXGetCurrentDrawable(void)
 {
 	pbwin *pb=NULL;  GLXDrawable draw=GetCurrentDrawable();
 	TRY();
+
+		opentrace(glXGetCurrentDrawable);  starttrace();
+
 	if((pb=winh.findpb(draw))!=NULL)
 		draw=pb->getwin();
+
+		stoptrace();  prargx(draw);  closetrace();
+
 	CATCH();
 	return draw;
 }
@@ -335,8 +348,14 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	pbwin *pb=NULL;  GLXDrawable read=GetCurrentReadDrawable();
 	TRY();
+
+		opentrace(glXGetCurrentReadDrawable);  starttrace();
+
 	if((pb=winh.findpb(read))!=NULL)
 		read=pb->getwin();
+
+		stoptrace();  prargx(read);  closetrace();
+
 	CATCH();
 	return read;
 }
@@ -480,11 +499,21 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *val
 
 void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned int *value)
 {
+	TRY();
+
+		opentrace(glXQueryDrawable);  prargx(dpy);  prargx(draw);  prargi(attribute);
+		starttrace();
+
 	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryBuffer(ServerDrawable(dpy, draw), attribute, value);
+	if(fconfig.glp) glPQueryBuffer(ServerDrawable(dpy, draw), attribute, value);
 	else
 	#endif
-	return _glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
+	_glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
+
+		stoptrace();  prargx(ServerDrawable(dpy, draw));  if(value) {prargi(*value);}
+		closetrace();
+
+	CATCH();
 }
 
 Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
@@ -601,5 +630,103 @@ Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group, GLui
 shimfuncdpy4(Bool, glXQueryMaxSwapGroupsNV, Display*, dpy, int, screen, GLuint*, maxGroups, GLuint*, maxBarriers, return );
 shimfuncdpy3(Bool, glXQueryFrameCountNV, Display*, dpy, int, screen, GLuint*, count, return );
 shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );
+
+#ifdef GLX_ARB_get_proc_address
+
+#define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
+
+void (*glXGetProcAddressARB(const GLubyte *procName))(void)
+{
+	void (*retval)(void)=NULL;
+
+		opentrace(glXGetProcAddressARB);  prargs((char *)procName);  starttrace();
+
+	if(procName)
+	{
+		checkfaked(glXChooseVisual)
+		checkfaked(glXCopyContext)
+		checkfaked(glXCreateContext)
+		checkfaked(glXCreateGLXPixmap)
+		checkfaked(glXDestroyContext)
+		checkfaked(glXDestroyGLXPixmap)
+		checkfaked(glXGetConfig)
+		#ifdef USEGLP
+		checkfaked(glXGetCurrentContext)
+		#endif
+		checkfaked(glXGetCurrentDrawable)
+		checkfaked(glXIsDirect)
+		checkfaked(glXMakeCurrent);
+		checkfaked(glXQueryExtension)
+		checkfaked(glXQueryVersion)
+		checkfaked(glXSwapBuffers)
+		checkfaked(glXUseXFont)
+		checkfaked(glXWaitGL)
+
+		checkfaked(glXGetClientString)
+		checkfaked(glXQueryServerString)
+		checkfaked(glXQueryExtensionsString)
+
+		checkfaked(glXChooseFBConfig)
+		checkfaked(glXCreateNewContext)
+		checkfaked(glXCreatePbuffer)
+		checkfaked(glXCreatePixmap)
+		checkfaked(glXCreateWindow)
+		checkfaked(glXDestroyPbuffer)
+		checkfaked(glXDestroyPixmap)
+		checkfaked(glXDestroyWindow)
+		checkfaked(glXGetCurrentDisplay)
+		checkfaked(glXGetCurrentReadDrawable)
+		checkfaked(glXGetFBConfigAttrib)
+		checkfaked(glXGetFBConfigs)
+		checkfaked(glXGetSelectedEvent)
+		checkfaked(glXGetVisualFromFBConfig)
+		checkfaked(glXMakeContextCurrent);
+		checkfaked(glXQueryContext)
+		checkfaked(glXQueryDrawable)
+		checkfaked(glXSelectEvent)
+
+		checkfaked(glXFreeContextEXT)
+		checkfaked(glXImportContextEXT)
+		checkfaked(glXQueryContextInfoEXT)
+
+		checkfaked(glXJoinSwapGroupNV)
+		checkfaked(glXBindSwapBarrierNV)
+		checkfaked(glXQuerySwapGroupNV)
+		checkfaked(glXQueryMaxSwapGroupsNV)
+		checkfaked(glXQueryFrameCountNV)
+		checkfaked(glXResetFrameCountNV)
+
+		checkfaked(glXGetFBConfigAttribSGIX)
+		checkfaked(glXChooseFBConfigSGIX)
+
+		checkfaked(glXCreateGLXPbufferSGIX)
+		checkfaked(glXDestroyGLXPbufferSGIX)
+		checkfaked(glXQueryGLXPbufferSGIX)
+		checkfaked(glXSelectEventSGIX)
+		checkfaked(glXGetSelectedEventSGIX)
+
+		#ifdef sun
+		checkfaked(glXDisableXineramaSUN)
+		#endif
+
+		checkfaked(glFinish)
+		checkfaked(glFlush)
+		checkfaked(glViewport)
+		checkfaked(glDrawBuffer)
+		checkfaked(glPopAttrib)
+		checkfaked(glReadPixels)
+		checkfaked(glDrawPixels)
+		#ifdef SUNOGL
+		checkfaked(glBegin)
+		#endif
+	}
+	if(!retval) retval=_glXGetProcAddressARB(procName);
+
+		stoptrace();  closetrace();
+
+	return retval;
+}
+
+#endif
 
 }

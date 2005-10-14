@@ -116,6 +116,10 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXDisableXineramaSUN)
 	#endif
 
+	#ifdef GLX_ARB_get_proc_address
+	lsymopt(glXGetProcAddressARB)
+	#endif
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)
