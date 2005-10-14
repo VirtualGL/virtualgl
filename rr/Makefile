@@ -124,13 +124,8 @@ $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 $(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
 
-ifeq ($(subplatform), 64)
-$(EDIR)/vglrun64: rrlaunch64
-	$(INSTALL) -m 755 $< $@
-else
 $(EDIR)/vglrun: rrlaunch
 	$(INSTALL) -m 755 $< $@
-endif
 
 # Client
 
