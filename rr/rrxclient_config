@@ -4,8 +4,8 @@ uid() {
     id | cut -f2 -d = | cut -f1 -d \(;
 }
 
-_XINIT=/etc/X11/xinit/xinitrc.d/vglclient
-_XINITSSL=/etc/X11/xinit/xinitrc.d/vglclient_ssl
+_XINIT=/etc/X11/xinit/xinitrc.d/vglclient.sh
+_XINITSSL=/etc/X11/xinit/xinitrc.d/vglclient_ssl.sh
 _DAEMON=/usr/bin/vglclient_daemon
 _DAEMONSSL=/usr/bin/vglclient_ssldaemon
 _POSTSESSION=/etc/X11/gdm/PostSession/Default
