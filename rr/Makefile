@@ -102,11 +102,7 @@ RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
 endif
 RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB)
 
-ifeq ($(subplatform), 64)
-TARGETS := $(TARGETS) $(EDIR)/vglrun64
-else
 TARGETS := $(TARGETS) $(EDIR)/vglrun
-endif
 
 
 all: $(TARGETS)
