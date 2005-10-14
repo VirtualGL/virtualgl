@@ -114,7 +114,7 @@ JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
 ifeq ($(JPEGLIB), libjpeg)
-TARGETS := libjpeg $(TARGETS)
+LTARGET := libjpeg $(LTARGET)
 endif
 
 
@@ -221,19 +221,8 @@ $(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDEP)
 ifeq ($(platform), linux)
 
 ifeq ($(subplatform),)
-RPMARCH = i386
-EDIR32 := $(EDIR)
-LDIR32 := $(LDIR)
 lib32:
 else
-RPMARCH = $(ARCH)
-ifneq ($(DISTRO),)
-EDIR32 := $(TOPDIR)/$(platform)/$(DISTRO)/bin
-LDIR32 := $(TOPDIR)/$(platform)/$(DISTRO)/lib
-else
-EDIR32 := $(TOPDIR)/$(platform)/bin
-LDIR32 := $(TOPDIR)/$(platform)/lib
-endif
 lib32:
 	$(MAKE) M32=yes lib
 endif
