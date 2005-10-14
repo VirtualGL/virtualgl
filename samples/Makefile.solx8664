@@ -5,9 +5,9 @@ clean:
 
 CFLAGS = -O -xtarget=opteron -xarch=amd64
 
-CINCLUDES =	-I../../../include -I/opt/SUNWvgl/include
+CINCLUDES =	-I../../include -I/opt/SUNWvgl/include
 
-LDFLAGS = -L../../../lib/64 -R../../../lib/64 \
+LDFLAGS = -L../../lib/64 -R../../lib/64 \
 	-L/opt/SUNWvgl/lib/64 -R/opt/SUNWvgl/lib/64
 
 rrglxgears.o: rrglxgears.c

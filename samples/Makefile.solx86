@@ -5,9 +5,9 @@ clean:
 
 CFLAGS = -O
 
-CINCLUDES = -I../../../include -I/opt/SUNWvgl/include -I/usr/openwin/include
+CINCLUDES = -I../../include -I/opt/SUNWvgl/include -I/usr/openwin/include
 
-LDFLAGS = -L../../../lib -R../../../lib \
+LDFLAGS = -L../../lib -R../../lib \
 	-L/opt/SUNWvgl/lib -R/opt/SUNWvgl/lib
 
 rrglxgears.o: rrglxgears.c
