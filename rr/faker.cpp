@@ -137,30 +137,30 @@ void __vgl_safeexit(int retcode)
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
-#define prargs(a) fprintf(stderr, "%s=%s ", #a, a?a:"NULL")
-#define prargx(a) fprintf(stderr, "%s=0x%.8lx ", #a, (unsigned long)a)
-#define prargi(a) fprintf(stderr, "%s=%d ", #a, a)
-#define prargv(a) fprintf(stderr, "%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
-#define prargc(a) fprintf(stderr, "%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
+#define prargs(a) printf("%s=%s ", #a, a?a:"NULL")
+#define prargx(a) printf("%s=0x%.8lx ", #a, (unsigned long)a)
+#define prargi(a) printf("%s=%d ", #a, a)
+#define prargv(a) printf("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
+#define prargc(a) printf("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
 #define prargal11(a) if(a) {  \
-	fprintf(stderr, "attrib_list=[");  \
+	printf("attrib_list=[");  \
 	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
-		fprintf(stderr, "0x%.4x", attrib_list[__an]);  \
+		printf("0x%.4x", attrib_list[__an]);  \
 		if(attrib_list[__an]!=GLX_USE_GL && attrib_list[__an]!=GLX_DOUBLEBUFFER  \
 			&& attrib_list[__an]!=GLX_STEREO && attrib_list[__an]!=GLX_RGBA)  \
-			fprintf(stderr, "=0x%.4x", attrib_list[++__an]);  \
-		fprintf(stderr, " ");  \
-	}  fprintf(stderr, "] ");}
+			printf("=0x%.4x", attrib_list[++__an]);  \
+		printf(" ");  \
+	}  printf("] ");}
 #define prargal13(a) if(a) {  \
-	fprintf(stderr, "attrib_list=[");  \
+	printf("attrib_list=[");  \
 	for(int __an=0; attrib_list[__an]!=None; __an+=2) {  \
-		fprintf(stderr, "0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
-	}  fprintf(stderr, "] ");}
+		printf("0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
+	}  printf("] ");}
 
 #define opentrace(f)  \
 	double __vgltracetime=0.;  \
 	if(fconfig.trace) {  \
-		fprintf(stderr, "[VGL] %s (", #f);  \
+		printf("[VGL] %s (", #f);  \
 
 #define starttrace()  \
 		__vgltracetime=rrtime();  \
@@ -171,8 +171,8 @@ void __vgl_safeexit(int retcode)
 		__vgltracetime=rrtime()-__vgltracetime;
 
 #define closetrace()  \
-		fprintf(stderr, ") %f ms\n", __vgltracetime*1000.);  \
-		fflush(stderr);  \
+		printf(") %f ms\n", __vgltracetime*1000.);  \
+		fflush(stdout);  \
 	}
 
 #include "faker-glx.cpp"
