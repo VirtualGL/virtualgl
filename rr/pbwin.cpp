@@ -423,6 +423,10 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 						format=GL_BGRA_EXT;  bits=b->_bits+1;
 						#endif
 					}
+					if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
+					{
+						format=GL_RGBA;  bits=b->_bits+1;
+					}
 					break;
 				default:
 					_throw("Unsupported pixel format");
