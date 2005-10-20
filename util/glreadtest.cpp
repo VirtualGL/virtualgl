@@ -354,7 +354,7 @@ void clearfb(int format)
 // Generic GL write test
 void glwrite(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int i, n, ps=pix[format].pixelsize;
+	unsigned char *rgbaBuffer=NULL;  int i, n=1, ps=pix[format].pixelsize;
 	double rbtime;
 
 	try {
@@ -369,18 +369,23 @@ void glwrite(int format)
 	if((rgbaBuffer=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
 		_throw("Could not allocate buffer");
 	initbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer);
-	n=N;
-	do
+	timer.start();
+	glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
+	glFinish();
+	rbtime=timer.elapsed();
+	if(rbtime<2.)
 	{
-		n+=n;
+		n=(int)(2./rbtime);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
 			glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		}
+		glFinish();
 		rbtime=timer.elapsed();
-	} while(rbtime<1. && !check_errors("frame buffer write"));
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
+	}
+	if(!check_errors("frame buffer write"));
+		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -390,7 +395,7 @@ void glwrite(int format)
 // Generic OpenGL readback test
 void glread(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int i, n, ps=pix[format].pixelsize;
+	unsigned char *rgbaBuffer=NULL;  int i, n=1, ps=pix[format].pixelsize;
 	double rbtime;
 
 	try {
@@ -402,30 +407,36 @@ void glread(int format)
 	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	n=N;
-	do
+	timer.start();
+	glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
+	rbtime=timer.elapsed();
+	if(rbtime<2.)
 	{
-		n+=n;
+		n=(int)(2./rbtime);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		}
 		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
-			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<1. && !check_errors("frame buffer read"));
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
+	}
+	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
+		_throw("ERROR: Bogus data read back.");
+	if(!check_errors("frame buffer read"))
+		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	fprintf(stderr, "glReadPixels() [top-down]:    ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
 	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN); 
 	glReadBuffer(GL_FRONT);
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	n=N;
-	do
+	timer.start();
+	for(int j=0; j<HEIGHT; j++)
+		glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
+	rbtime=timer.elapsed();
+	if(rbtime<2.)
 	{
-		n+=n;
+		n=(int)(2./rbtime);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
@@ -433,10 +444,11 @@ void glread(int format)
 				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
 		}
 		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
-			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<1. && !check_errors("frame buffer read"));
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
+	}
+	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
+		_throw("ERROR: Bogus data read back.");
+	if(!check_errors("frame buffer read"));
+		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
