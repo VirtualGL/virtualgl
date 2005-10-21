@@ -101,7 +101,7 @@ text-align: right;
 <li><a href="#requirements">System Requirements</a></li>
 <li><a href="#linuxinstall">Installation (Linux)</a></li><li><a href="#solarisinstall">Installation (Solaris)</a></li>
 <li><a href="#windowsinstall">Installation (Windows)</a></li>
-<li><a href="#basicusageunix">Basic Usage (Linux/Solaris Client)</a></li><li><a href="#basicusagewindows">Basic Usage (Windows Client)</a></li>
+<li><a href="#basicusageunix">Basic Usage (Linux/Solaris Client)</a></li><li><a href="#basicusagewindows">Basic Usage (Windows Client)</a></li><li><a href="#solarisscripts">vglrun and Solaris Shell Scripts</a></li>
 <li><a href="#glpusage">GLP Usage</a></li>
 <li><a href="#secureusage">Secure Usage</a></li><li><a href="#vnc">Usage with VNC</a></li>
 <li><a href="#perf">Performance Measurement</a></li>
@@ -814,14 +814,57 @@ Consult the <a href="#config">Advanced Configuration</a> section for more inform
 </li>
 </ol>
 
-<div style="text-align: right;"><a href="#" target="_top">top</a></div>
+<div style="text-align: right;"><a href="#" target="_top">top</a><br>
+</div>
 
 <ol>
 
 </ol>
 
-<hr style="width: 100%; height: 2px;"><br>
+<hr style="width: 100%; height: 2px;"><a name="solarisscripts"></a><br>
+<h2>vglrun and Solaris Shell Scripts</h2>
+<span class="monospace">vglrun</span>&nbsp;can be used to launch either binary executables or shell scripts, but there are a few things to keep in mind when using <span class="monospace">vglrun</span>
+to launch a shell script on Solaris. &nbsp;When you vglrun a shell
+script, the VirtualGL faker library will be preloaded into every
+executable that the script launches. &nbsp;Normally this is innocuous,
+but if the script calls any executables that are setuid root, then
+Solaris will refuse to load those executables because you are
+attempting to preload a library (VirtualGL) that is not in a "secure
+path." &nbsp;Solaris keeps a tight lid on what goes into <span class="monospace">/usr/lib</span> and <span class="monospace">/lib</span>,
+and by default, it will only allow libraries in those paths to be
+preloaded into an executable that is setuid root. &nbsp;Generally, 3rd
+party packages are verboden from installing anything into <span class="monospace">/usr/lib</span> or <span class="monospace">/lib</span>. &nbsp;But you can use the <span class="monospace">crle</span>
+utility to add other directories to the operating system's list of
+secure paths. &nbsp;In the case of VirtualGL, you would issue (as root):<br>
+<pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/sparcv9
+</pre>
+Or on Solaris/x86:<br>
+<pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/64<br></pre>
+But please be aware of the security ramifications of this before you do
+it. &nbsp;You are essentially telling Solaris that you trust the
+security and stability of the VirtualGL code as much as you trust the
+security and stability of the operating system. &nbsp;And while we're
+flattered, we're not sure that we're necessarily deserving of that
+accolade, so if you are in a security critical environment, apply the
+appropriate level of paranoia here.<br>
+<br>
+An easier and perhaps more secure approach is to simply edit the application script and have it issue <span class="monospace">vglrun</span>
+only for the executables that you wish to run in the VirtualGL
+environment. &nbsp;But sometimes that is not an option.<br>
+<br>
+<span class="monospace">vglrun</span> on Solaris has two&nbsp;options that are relevant to launching scripts:<br>
+<pre>vglrun -32 {script}</pre>
+will preload VirtualGL only into 32-bit executables called by a script, whereas<br>
+<pre>vglrun -64 {script}</pre>
+will preload VirtualGL only into 64-bit executables.<br>
+<br>
+<div style="text-align: right;"><a href="index.html#" target="_top">top</a><br>
+</div>
 
+
+
+
+<hr style="width: 100%; height: 2px;">
 <div style="text-align: left;"><a name="glpusage"></a>
 </div>
 
