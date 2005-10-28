@@ -114,8 +114,8 @@ int main(int argc, char **argv)
 		sd.connect(servername, PORT);
 
 		printf("TCP transfer performance between localhost and %s:\n\n", sd.remotename());
-		printf("Transfer size  1/2 Round-Trip      Throughput\n");
-		printf("(bytes)                (msec)        (MB/sec)\n");
+		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
+		printf("(bytes)                (msec)        (MB/sec)     (Mbits/sec)\n");
 		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
 		{
 			initbuf(buf, i);
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 			}
 			elapsed=timer.elapsed();
 			if(!cmpbuf(buf, i)) {printf("DATA ERROR\n");  exit(1);}
-			printf("%-13d  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)ITER, (double)i*(double)ITER/1048576./(elapsed/2.));
+			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)ITER, (double)i*(double)ITER/1048576./(elapsed/2.), (double)i*(double)ITER/125000./(elapsed/2.));
 		}
 	}
 
