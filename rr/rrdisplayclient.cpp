@@ -95,21 +95,9 @@ void rrdisplayclient::run(void)
 		{
 			rrframeheader h;
 			memcpy(&h, &b->_h, sizeof(rrframeheader));
-			h.flags=RR_EOF;
+			h.flags=RR_EOF|RR_NOCTS;
 			endianize(h);
 			if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
-
-			char cts=0;
-			if(_sd)
-			{
-				_sd->recv(&cts, 1);
-				if(cts<1 || cts>2) _throw("CTS error");
-				if(_stereo && (b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT) && cts!=2)
-				{
-					rrout.println("[VGL] Disabling stereo because client doesn't support it");
-					_stereo=false;
-				}
-			}
 		}
 		_prof_total.endframe(b->_h.width*b->_h.height, bytes,
 			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
@@ -173,12 +161,10 @@ void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *b
 	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
 	if(_sd) _sd->send((char *)bits, horig.size);
 	h=horig;
-	h.flags=RR_EOF;
+	h.flags=RR_EOF|RR_NOCTS;
 	h.dpynum=_dpynum;
 	endianize(h);
 	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
-	char cts=0;
-	if(_sd) {_sd->recv(&cts, 1);  if(cts!=1) _throw("CTS error");}
 }
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)

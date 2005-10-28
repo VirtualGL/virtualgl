@@ -73,6 +73,7 @@ void rrserver::run(void)
 	rrcwin *w=NULL;
 	rrjpeg *j;
 	rrframeheader h;
+	bool ctsreq=false;
 
 	try
 	{
@@ -82,6 +83,8 @@ void rrserver::run(void)
 			{
 				_sd->recv((char *)&h, sizeof(rrframeheader));
 				endianize(h);
+				if(h.flags==RR_EOF|RR_NOCTS) {h.flags=RR_EOF;  ctsreq=false;}
+				else if(h.flags==RR_EOF) ctsreq=true;
 				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
 
 				try {j=w->getFrame();}
@@ -94,11 +97,11 @@ void rrserver::run(void)
 				catch (...) {if(w) delwindow(w);  throw;}
 			} while(!(j && j->_h.flags==RR_EOF));
 
-			char cts=1;
-			// NOTE: Unless the client passes back 2 here, the server won't send
-			// any more stereo frames
-			if(w && w->stereoenabled()) cts=2;
-			_sd->send(&cts, 1);
+			if(ctsreq)
+			{
+				char cts=1;
+				_sd->send(&cts, 1);
+			}
 		}
 	}
 	catch(rrerror &e)

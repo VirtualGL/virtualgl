@@ -56,7 +56,8 @@ enum {
 	RR_EOF=1, /* this tile is an End-of-Frame marker and contains no real
                image data */
 	RR_LEFT,  /* this tile goes to the left buffer of a stereo frame */
-	RR_RIGHT  /* this tile goes to the right buffer of a stereo frame */
+	RR_RIGHT,  /* this tile goes to the right buffer of a stereo frame */
+	RR_NOCTS=128  /* The server uses a later version of the protocol and doesn't require a CTS */
 };
 
 typedef struct _RRFrame
