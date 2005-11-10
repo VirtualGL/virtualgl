@@ -83,7 +83,7 @@ void rrserver::run(void)
 			{
 				_sd->recv((char *)&h, sizeof(rrframeheader));
 				endianize(h);
-				if(h.flags==RR_EOF|RR_NOCTS) {h.flags=RR_EOF;  ctsreq=false;}
+				if(h.flags==(RR_EOF|RR_NOCTS)) {h.flags=RR_EOF;  ctsreq=false;}
 				else if(h.flags==RR_EOF) ctsreq=true;
 				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
 
