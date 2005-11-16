@@ -254,7 +254,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	int mcuh=_mcuh[jpg->subsamp], h, j;
 
 	h=mcuh;
-	if(startline+mcuh-1>jpg->height) h=jpg->height-startline;
+	if(startline+mcuh>jpg->height) h=jpg->height-startline;
 
 	switch(jpg->subsamp)
 	{
@@ -690,7 +690,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	int mcuh=_mcuh[jpg->subsamp], h, j, convreq=0;
 
 	h=mcuh;
-	if(startline+mcuh-1>jpg->height) h=jpg->height-startline;
+	if(startline+mcuh>jpg->height) h=jpg->height-startline;
 
 	switch(jpg->subsamp)
 	{
