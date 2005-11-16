@@ -22,7 +22,7 @@
 ** Those portions of the Subject Software created by Silicon Graphics, Inc.
 ** are Copyright (c) 1991-9 Silicon Graphics, Inc. All Rights Reserved.
 **
-** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.5 2005-07-26 21:22:29 dcommander Exp $
+** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.6 2005-11-16 18:23:30 dcommander Exp $
 */
 
 #include <X11/Xlib.h>
@@ -166,7 +166,7 @@ extern XVisualInfo* glXChooseVisual(Display *dpy, int screen,
                                     int *attrib_list);
 
 extern void glXCopyContext(Display *dpy, GLXContext src,
-                           GLXContext dst, unsigned int mask);
+                           GLXContext dst, unsigned long mask);
 
 extern GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
                                    GLXContext share_list, Bool direct);
