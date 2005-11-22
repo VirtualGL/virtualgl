@@ -383,9 +383,13 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 	finally:
 	return -1;
 }
+#endif
 
 int fbx_sync(fbx_struct *s)
 {
+	#ifdef _WIN32
+	return 0;
+	#else
 	XdbeSwapInfo si;
 	if(!s) _throw("Invalid argument");
 	si.swap_window=s->wh.win;
@@ -402,8 +406,8 @@ int fbx_sync(fbx_struct *s)
 
 	finally:
 	return -1;
+	#endif
 }
-#endif
 
 int fbx_term(fbx_struct *s)
 {

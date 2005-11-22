@@ -179,11 +179,7 @@ int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, in
 
   Complete a previous asynchronous write.  On Windows, this does nothing.
 */
-#ifdef WIN32
-#define fbx_sync(s)
-#else
 int fbx_sync (fbx_struct *s);
-#endif
 
 /*
   fbx_term
