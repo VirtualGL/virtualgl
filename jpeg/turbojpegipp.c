@@ -42,6 +42,12 @@ static int ippstaticinitcalled=0;
 #define checkhandle(h) jpgstruct *jpg=(jpgstruct *)h; \
 	if(!jpg) {lasterror="Invalid handle";  return -1;}
 
+#if IPP_VERSION_MAJOR>=5
+#define ippCoreGetStatusString ippGetStatusString
+#define ippCoreGetCpuType ippGetCpuType
+#define ippStaticInitBest ippStaticInit
+#endif
+
 #define _throw(c) {lasterror=c;  return -1;}
 #define _ipp(a) {IppStatus __err;  if((__err=(a))<ippStsNoErr) _throw(ippCoreGetStatusString(__err));}
 #define _ippn(a) {IppStatus __err;  if((__err=(a))<ippStsNoErr) {lasterror=ippCoreGetStatusString(__err); return NULL;}}
