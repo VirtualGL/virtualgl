@@ -1538,12 +1538,18 @@ int querytest(void)
 
 	try
 	{
+		int major=-1, minor=-1;
 		if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
 		|| dummy1<0 || dummy2<0 || dummy3<0)
 			_throw("GLX Extension not reported as present");
 		printf("GLX:  Opcode=%d  First event=%d  First error=%d\n", dummy1,
 			dummy2, dummy3);
+		glXQueryVersion(dpy, &major, &minor);
+		printf("glXQueryVersion(): %d.%d\n", major, minor);
+		printf("glXGetClientString(): %s\n", glXGetClientString(dpy, GLX_VERSION));
+		if(major<1 || minor<3)
+			_throw("glXQueryVersion() reports version < 1.3");
 		printf("SUCCESS!\n");
 	}	
 	catch(rrerror &e)

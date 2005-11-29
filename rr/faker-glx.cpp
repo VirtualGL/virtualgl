@@ -228,7 +228,11 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 const char *glXGetClientString(Display *dpy, int name)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) return glPGetLibraryString(name);
+	if(fconfig.glp)
+	{
+		if(name==GLX_VERSION) return "1.3";
+		else return glPGetLibraryString(name);
+	}
 	else
 	#endif
 	return _glXGetClientString(_localdpy, name);
@@ -560,7 +564,7 @@ void glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsign
 Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryVersion(major, minor);
+	if(fconfig.glp) {*major=1;  *minor=3;  return True;}
 	else
 	#endif
 	return _glXQueryVersion(_localdpy, major, minor);
