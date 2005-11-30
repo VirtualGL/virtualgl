@@ -409,6 +409,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		if(c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
 		else *value=GLX_TRUE_COLOR;
 	}
+	else if(attribute==GLX_VISUAL_ID)
+		*value=vid;
 	else
 	{
 		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor)

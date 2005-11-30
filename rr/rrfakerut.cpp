@@ -623,6 +623,9 @@ void configvsvisual(Display *dpy, GLXFBConfig c, XVisualInfo *v)
 	if(!dpy) _error("Invalid display handle");
 	if(!c) _error("Invalid FB config");
 	if(!v) _error("Invalid visual pointer");
+	getcfgattrib(c, GLX_VISUAL_ID, ctemp);
+	if(ctemp!=(int)v->visualid)
+		_error("Visual ID mismatch");
 	getcfgattrib(c, GLX_RENDER_TYPE, ctemp);
 	getvisattrib(v, GLX_RGBA, vtemp);
 	if((ctemp==GLX_RGBA_BIT)!=(vtemp==1))
