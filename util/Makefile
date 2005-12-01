@@ -10,8 +10,9 @@ TARGETS = $(LDIR)/rrutil.lib \
           $(EDIR)/fbxtest.exe \
           $(EDIR)/nettest.exe \
           $(EDIR)/threadtest.exe \
-          $(LDIR)/fbx-xdk.lib \
-          $(EDIR)/fbxtest-xdk.exe
+          $(LDIR)/fbx-x11.lib \
+          $(EDIR)/fbxtest-x11.exe \
+          $(EDIR)/glreadtest.exe
 
 OBJS = $(ODIR)/bmp.obj \
        $(ODIR)/rrlog.obj \
@@ -21,8 +22,9 @@ OBJS = $(ODIR)/bmp.obj \
        $(ODIR)/fbxtest.obj \
        $(ODIR)/nettest.obj \
        $(ODIR)/threadtest.obj \
-       $(ODIR)/fbx-xdk.obj \
-       $(ODIR)/fbxtest-xdk.obj
+       $(ODIR)/fbx-x11.obj \
+       $(ODIR)/fbxtest-x11.obj \
+       $(ODIR)/glreadtest.obj \
 
 all: $(TARGETS)
 
@@ -33,25 +35,28 @@ HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
 $(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj $(ODIR)/bmp.obj
-	$(AR) -OUT:$@ $^
+	$(AR) $@ $^
 
-$(ODIR)/fbx-xdk.obj: fbx.c
-	$(CC) $(CFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
+$(ODIR)/fbx-x11.obj: fbx.c
+	$(CC) $(CFLAGS) $(X11INC) -DXDK -UWIN32 -c $< -o $@
 
-$(ODIR)/fbxtest-xdk.obj: fbxtest.cpp
-	$(CXX) $(CXXFLAGS) $(XDKINC) -DXDK -UWIN32 -c $< -Fo$@
+$(ODIR)/fbxtest-x11.obj: fbxtest.cpp
+	$(CXX) $(CXXFLAGS) $(X11INC) -DXDK -UWIN32 -c $< -o $@
 
 $(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/rrsocket.lib
-	$(LINK) $< -out:$@ $(SOCKLIB)
+	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB)
 
-$(EDIR)/fbxtest-xdk.exe: $(ODIR)/fbxtest-xdk.obj $(LDIR)/fbx-xdk.lib
-	$(LINK) $< -out:$@ $(FBXXDKLIB)
+$(EDIR)/fbxtest-x11.exe: $(ODIR)/fbxtest-x11.obj $(LDIR)/fbx-x11.lib
+	$(CXX) $(LDFLAGS) $< -o $@ $(FBXX11LIB)
+
+$(EDIR)/glreadtest.exe: $(ODIR)/glreadtest.obj
+	$(CXX) $(LDFLAGS) $< -o $@ $(GLXLIB) $(X11LIB) $(GLULIB)
 
 $(EDIR)/fbxtest.exe: $(ODIR)/fbxtest.obj $(LDIR)/fbx.lib
-	$(LINK) $< -out:$@ $(FBXLIB)
+	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB)
 
 $(EDIR)/threadtest.exe :$(ODIR)/threadtest.obj
-	$(LINK) $< -out:$@
+	$(CXX) $(LDFLAGS) $< -o $@
 
 ##########################################################################
 else
