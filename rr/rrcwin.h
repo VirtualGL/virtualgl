@@ -14,10 +14,11 @@
 #ifndef __RRCWIN_H
 #define __RRCWIN_H
 
-#include <X11/X.h>
-#ifndef _WIN32
-#define USEGL 1
+#ifdef _WIN32
+#include <windows.h>
 #endif
+#include <X11/X.h>
+#define USEGL 1
 #include "rrframe.h"
 #undef USEGLP
 #include "rrglframe.h"
