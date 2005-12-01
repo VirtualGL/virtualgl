@@ -73,8 +73,8 @@ class rrprofiler
 		{
 			rrout.print("%s  ", name);
 			if(mpixels) rrout.print("- %7.2f Mpixels/sec", mpixels/totaltime);
-			if(frames) rrout.print("- %7.2f frames/sec", frames/totaltime);
-			if(mbytes) rrout.print("- %7.2f Mbits/sec", mbytes*8.0/totaltime);
+			if(frames) rrout.print("- %7.2f fps", frames/totaltime);
+			if(mbytes) rrout.print("- %7.2f Mbits/sec (%.1f:1)", mbytes*8.0/totaltime, mpixels*3./mbytes);
 			rrout.PRINT("\n");
 			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;
 		}
