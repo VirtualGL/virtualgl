@@ -43,16 +43,16 @@ ifeq ($(JPEGLIB), pegasus)
 PEGDIR = ../../pictools
 
 $(ODIR)/turbojpeg.obj: turbojpegp.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -Fo$@
+	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -o $@
 
-JPEGLINK = -libpath:$(PEGDIR)/lib picnm.lib
+JPEGLINK = -L$(PEGDIR)/lib -lpicnm
 
 endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
 $(ODIR)/turbojpeg.obj: turbojpegl.c
-	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -o $@
 
 JPEGLINK = $(LDIR)/libjpeg.lib
 JPEGDEP = $(LDIR)/libjpeg.lib
@@ -61,11 +61,11 @@ endif
 
 ifeq ($(JPEGLIB), ipp)
 
-IPPLINK = ippjmerged.lib ippimerged.lib ippsmerged.lib ippjemerged.lib \
-	ippiemerged.lib ippsemerged.lib ippcorel.lib
+IPPLINK = -lippjemerged	-lippiemerged -lippsemerged \
+	-lippjmerged -lippimerged -lippsmerged -lippcorel
 
 $(ODIR)/turbojpeg.obj: turbojpegipp.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -o $@
 
 JPEGLINK = $(IPPLINK)
 
@@ -74,20 +74,20 @@ endif
 ifeq ($(JPEGLIB), quicktime)
 
 $(ODIR)/turbojpeg.obj: turbojpegqt.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -o $@
 
 JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
 
 endif
 
 $(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
-	$(LINK) -dll -out:$(EDIR)/turbojpeg.dll -implib:$(LDIR)/turbojpeg.lib $< $(JPEGLINK)
+	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib $(JPEGLINK)
 
 $(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/turbojpeg.lib $(LDIR)/rrutil.lib
-	$(LINK) $< -OUT:$@ turbojpeg.lib rrutil.lib
+	$(CXX) $(LDFLAGS) $< -o $@ -lturbojpeg -lrrutil
 
 $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/turbojpeg.lib
-	$(LINK) $< -OUT:$@ turbojpeg.lib
+	$(CC) $(LDFLAGS) $< -o  $@ -lturbojpeg
 
 ##########################################################################
 else

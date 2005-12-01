@@ -83,20 +83,6 @@ static __inline void _cpuid(int *flags, int *flags2)
 	int a=0, c=0, d=0;
 	#ifdef USECPUID
 
-	#ifdef _WIN32
-	__asm {
-		xor eax, eax
-		cpuid
-		mov a, eax
-	}
-	if(a<1) return;
-	__asm {
-		mov eax, 1
-		cpuid
-		mov c, ecx
-		mov d, edx
-	}
-	#else
 	__asm__ __volatile__ (
 		#ifdef __i386__
 		"pushl %%ebx\n"
@@ -124,7 +110,6 @@ static __inline void _cpuid(int *flags, int *flags2)
 			: "bx"
 		#endif
 	);
-	#endif
 	*flags=d;  *flags2=c;
 
 	#endif
@@ -257,7 +242,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	Ipp8u __tmpbuf[16*16*3+CACHE_LINE-1];
 	Ipp8u *tmpbuf, *srcptr, *dstptr, *bmpptr=jpg->bmpptr;
 	Ipp16s *mcuptr[3];
-	IppStatus (DLLCALL *ccfct)(const Ipp8u *, int, Ipp16s *[3]);
+	IppStatus (__STDCALL *ccfct)(const Ipp8u *, int, Ipp16s *[3]);
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], w, h, i, j;
 	IppiSize imgsize;
 
@@ -649,7 +634,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, int curxmcu, int curymcu)
 	Ipp8u __tmpbuf[16*16*3+CACHE_LINE-1];
 	Ipp8u *tmpbuf, *bmpptr=jpg->bmpptr;
 	const Ipp16s *mcuptr[3];
-	IppStatus (DLLCALL *ccfct)(const Ipp16s *[3], Ipp8u *, int);
+	IppStatus (__STDCALL *ccfct)(const Ipp16s *[3], Ipp8u *, int);
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp], w, h;
 	IppiSize imgsize;
 
