@@ -1,4 +1,4 @@
-#ifdef SUNOGL
+#if defined(SUNOGL) || defined(_WIN32)
 #include <GL/glx.h>
 #else
 #ifndef __glx_h__
@@ -22,7 +22,7 @@
 ** Those portions of the Subject Software created by Silicon Graphics, Inc.
 ** are Copyright (c) 1991-9 Silicon Graphics, Inc. All Rights Reserved.
 **
-** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.7 2005-11-16 18:24:17 dcommander Exp $
+** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.8 2005-12-01 21:50:15 dcommander Exp $
 */
 
 #include <X11/Xlib.h>
