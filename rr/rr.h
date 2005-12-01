@@ -14,17 +14,13 @@
 #ifndef __RR_H
 #define __RR_H
 
-#if defined(_MSC_VER) && defined(_WIN32) && defined(DLLDEFINE)
+#if (defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__)) && defined(_WIN32) && defined(DLLDEFINE)
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
 
-#if defined(_MSC_VER) && defined(_WIN32)
-#define DLLCALL __stdcall
-#else
 #define DLLCALL
-#endif
 
 /* Header contained in all image structures */
 #pragma pack(1)

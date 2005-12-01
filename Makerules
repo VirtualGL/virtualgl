@@ -123,13 +123,13 @@ $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<
 
 $(ODIR)/%.obj: %.c
-	$(CC) $(CFLAGS) -c $< -Fo$@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(ODIR)/%.obj: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -Fo$@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(LDIR)/%.lib: $(ODIR)/%.obj
-	$(AR) -OUT:$@ $<
+	$(AR) $@ $<
 
 # This assures that the "clean" command runs even if there is a file called
 # "clean" in the current directory

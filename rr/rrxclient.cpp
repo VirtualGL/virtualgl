@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 	#ifdef _WIN32
 	if(service)
 	{
-		servicetable[0].lpServiceName=SERVICENAME;
+		servicetable[0].lpServiceName=(char *)SERVICENAME;
 		if(!StartServiceCtrlDispatcher(servicetable))
 			EventLog("Could not start service", 1);
 		exit(0);

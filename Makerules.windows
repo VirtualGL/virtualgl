@@ -2,32 +2,30 @@
 # Windows NT (GMAKE)
 ########################################
 
-CC = "cl"
-CXX = "cl" -GX
-AR = "link" -lib -NOLOGO
+CC = gcc -mno-cygwin
+CXX = g++ -mno-cygwin
+AR = ar ruvs
 
-CDEFINES = -D_WIN32_WINNT=0x0500 -DWIN32
+CDEFINES = -DWIN32
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 ifeq ($(DEBUG), yes)
-CFLAGS = -nologo -Od -G6 -MTd -W4 -Zi
+OPTFLAG = -O0 -g
 else
-CFLAGS = -nologo -O2 -G6 -MT -W3
+OPTFLAG = -O2
 endif
 
-LFLAGS = -nologo -OPT:REF -NODEFAULTLIB:LIBC -NODEFAULTLIB:msvcrt -LIBPATH:$(LDIR)
-LINK = "link" $(LFLAGS)
-ifeq ($(DEBUG), yes)
-LINK = "link" $(LFLAGS) -debug -NODEFAULTLIB:LIBCMT
-endif
+DEPFLAG = -MM
 
 DEFAULTJPEGLIB = ipp
 
-XDKLIB = xlib.lib hclshm.lib
-SOCKLIB = rrsocket.lib user32.lib gdi32.lib ws2_32.lib
+X11LIB = -lxlib -lhclshm
+GLXLIB = -lhclglx
+GLULIB = -lhclglu
+SOCKLIB = -lrrsocket -lwsock32
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) ssleay32.lib libeay32.lib
+SOCKLIB := $(SOCKLIB) -llibeay32 -lssleay32
 endif
-FBXLIB = fbx.lib user32.lib gdi32.lib
-FBXXDKLIB = fbx-xdk.lib $(XDKLIB)
+FBXLIB = -lfbx -lgdi32
+FBXX11LIB = -lfbx-x11 $(X11LIB)
