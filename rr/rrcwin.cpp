@@ -25,7 +25,11 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
-	sprintf(dpystr, "localhost:%d.0", dpynum);
+	#ifdef _WIN32
+	sprintf(dpystr, "LOCALPC:%d.0", dpynum);
+	#else
+	sprintf(dpystr, ":%d.0", dpynum);
+	#endif
 	_dpynum=dpynum;  _window=window;
 	_b=new rrfb(dpystr, window);
 	if(!_b) _throw("Could not allocate class instance");

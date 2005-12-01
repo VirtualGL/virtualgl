@@ -17,7 +17,9 @@
 #ifdef USEGL
 
 #include "rrframe.h"
+#define GLX11
 #include "tempctx.h"
+#undef GLX11
 
 // Bitmap drawn using OpenGL
 
@@ -190,12 +192,12 @@ class rrglframe : public rrframe
 	{
 		int i, ret=0;
 		i=glGetError();
-		while(i!=GL_NO_ERROR)
+		if(i!=GL_NO_ERROR)
 		{
 			ret=1;
 			fprintf(stderr, "[VGL] OpenGL error 0x%.4x\n", i);
-			i=glGetError();
 		}
+		while(i!=GL_NO_ERROR) i=glGetError();
 		return ret;
 	}
 
