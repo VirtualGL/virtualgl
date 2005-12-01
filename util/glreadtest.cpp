@@ -80,6 +80,47 @@ pixelformat pix[2
 	{0, 1, 2, 3, GL_RGB, 0, "RGB"},
 };
 
+#ifdef _WIN32
+// Exceed likes to redefine stdio, so we un-redefine it :/
+#undef fprintf
+#undef printf
+#undef putchar
+#undef putc
+#undef puts
+#undef fputc
+#undef fputs
+#undef perror
+typedef int GLXFBConfig;
+typedef int GLXPbuffer;
+#endif
+#ifndef GLX_X_VISUAL_TYPE
+#define GLX_X_VISUAL_TYPE 0x22
+#endif
+#ifndef GLX_TRUE_COLOR
+#define GLX_TRUE_COLOR 0x8002
+#endif
+#ifndef GLX_PSEUDO_COLOR
+#define GLX_PSEUDO_COLOR 0x8004
+#endif
+#ifndef GLX_DRAWABLE_TYPE
+#define GLX_DRAWABLE_TYPE 0x8010
+#endif
+#ifndef GLX_PBUFFER_BIT
+#define GLX_PBUFFER_BIT 0x00000004
+#endif
+#ifndef GLX_TRANSPARENT_TYPE
+#define GLX_TRANSPARENT_TYPE 0x23
+#endif
+#ifndef GLX_TRANSPARENT_INDEX
+#define GLX_TRANSPARENT_INDEX           0x8009
+#endif
+#ifndef GLX_PBUFFER_HEIGHT
+#define GLX_PBUFFER_HEIGHT 0x8040
+#endif
+#ifndef GLX_PBUFFER_WIDTH
+#define GLX_PBUFFER_WIDTH 0x8041
+#endif
+
 #define bench_name		"GLreadtest"
 
 #define _WIDTH            701
@@ -152,6 +193,7 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 		}
 	}
 
+	#ifndef _WIN32
 	#ifdef USEGLP
 	if(useglp)
 	{
@@ -173,6 +215,7 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 	#endif
 		glXGetFBConfigAttrib(dpy, c, GLX_FBCONFIG_ID, &fbcid);
 	printf("FB Config = 0x%.2x\n", fbcid);
+	#endif
 }
 
 void pbufferinit(Display *dpy, Window win, XVisualInfo *v, GLXFBConfig c)
@@ -199,6 +242,7 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v, GLXFBConfig c)
 		}
 	}
 
+	#ifndef _WIN32
 	try {
 
 	if(!useglp) {if(usewindow) {errifnot(win);}  errifnot(dpy);}
@@ -253,6 +297,7 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v, GLXFBConfig c)
 		}
 		throw;
 	}
+	#endif
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -384,7 +429,7 @@ void glwrite(int format)
 		glFinish();
 		rbtime=timer.elapsed();
 	}
-	if(!check_errors("frame buffer write"));
+	if(!check_errors("frame buffer write"))
 		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
@@ -447,7 +492,7 @@ void glread(int format)
 	}
 	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
 		_throw("ERROR: Bogus data read back.");
-	if(!check_errors("frame buffer read"));
+	if(!check_errors("frame buffer read"))
 		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
