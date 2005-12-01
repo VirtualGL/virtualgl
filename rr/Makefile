@@ -23,8 +23,8 @@ UNITTESTS = $(EDIR)/rrblitterut.exe \
 TARGETS = $(EDIR)/vglclient.exe \
           $(UNITTESTS)
 
-RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-xdk.lib $(LDIR)/turbojpeg.lib $(LDIR)/rrsocket.lib
-RRLIB = rrutil.lib $(FBXXDKLIB) turbojpeg.lib $(SOCKLIB)
+RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/turbojpeg.lib $(LDIR)/rrsocket.lib
+RRLIB = -lrrutil $(FBXX11LIB) $(GLXLIB) -lturbojpeg $(SOCKLIB)
 
 all: $(TARGETS)
 
@@ -36,20 +36,20 @@ $(OBJS): $(HDRS)
 
 
 $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
-	$(LINK) $(COBJS) -OUT:$@ $(RRLIB) advapi32.lib
+	$(CXX) $(LDFLAGS) $(COBJS) -o  $@ $(RRLIB)
 
 # Unit tests
 
 $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
-	$(LINK) $< -OUT:$@ $(RRLIB)
+	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB)
 
 $(EDIR)/rrblitterut.exe: $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj $(RRDEP)
-	$(LINK) $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj -OUT:$@ $(RRLIB)
+	$(CXX) $(LDFLAGS) $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj -o $@ $(RRLIB)
 
 $(EDIR)/rrdisplayclientut.exe: $(ODIR)/rrdisplayclientut.obj \
 	$(ODIR)/rrdisplayclient.obj $(RRDEP)
-	$(LINK) $(ODIR)/rrdisplayclientut.obj $(ODIR)/rrdisplayclient.obj \
-		-OUT:$@ $(RRLIB)
+	$(CXX) $(LDFLAGS) $(ODIR)/rrdisplayclientut.obj $(ODIR)/rrdisplayclient.obj \
+		-o $@ $(RRLIB)
 
 ##########################################################################
 else

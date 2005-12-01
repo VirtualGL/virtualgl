@@ -11,17 +11,13 @@
  * wxWindows Library License for more details.
  */
 
-#if defined(_MSC_VER) && defined(_WIN32) && defined(DLLDEFINE)
+#if (defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__)) && defined(_WIN32) && defined(DLLDEFINE)
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
 
-#if defined(_MSC_VER) && defined(_WIN32)
-#define DLLCALL __stdcall
-#else
 #define DLLCALL
-#endif
 
 /* Subsampling */
 #define NUMSUBOPT 3

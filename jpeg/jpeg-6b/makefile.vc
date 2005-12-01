@@ -82,22 +82,22 @@ all: $(LDIR)/libjpeg.lib $(EDIR)/cjpeg.exe $(EDIR)/djpeg.exe $(EDIR)/jpegtran.ex
 
 $(LDIR)/libjpeg.lib: $(LIBOBJECTS)
 	$(RM) $(LDIR)/libjpeg.lib
-	$(AR) -out:$(LDIR)/libjpeg.lib  $(LIBOBJECTS)
+	$(AR) $(LDIR)/libjpeg.lib  $(LIBOBJECTS)
 
 $(EDIR)/cjpeg.exe: $(COBJECTS) $(LDIR)/libjpeg.lib
-	$(LINK) -out:$(EDIR)/cjpeg.exe $(COBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(EDIR)/cjpeg.exe $(COBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
 
 $(EDIR)/djpeg.exe: $(DOBJECTS) $(LDIR)/libjpeg.lib
-	$(LINK) -out:$(EDIR)/djpeg.exe $(DOBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(EDIR)/djpeg.exe $(DOBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
 
 $(EDIR)/jpegtran.exe: $(TROBJECTS) $(LDIR)/libjpeg.lib
-	$(LINK) -out:$(EDIR)/jpegtran.exe $(TROBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(EDIR)/jpegtran.exe $(TROBJECTS) $(LDIR)/libjpeg.lib $(LDLIBS)
 
 $(EDIR)/rdjpgcom.exe: $(ODIR)/rdjpgcom.obj
-	$(LINK) -out:$(EDIR)/rdjpgcom.exe $(ODIR)/rdjpgcom.obj $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(EDIR)/rdjpgcom.exe $(ODIR)/rdjpgcom.obj $(LDLIBS)
 
 $(EDIR)/wrjpgcom.exe: $(ODIR)/wrjpgcom.obj
-	$(LINK) -out:$(EDIR)/wrjpgcom.exe $(ODIR)/wrjpgcom.obj $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $(EDIR)/wrjpgcom.exe $(ODIR)/wrjpgcom.obj $(LDLIBS)
 
 
 clean:
