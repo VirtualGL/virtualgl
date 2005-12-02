@@ -226,6 +226,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int screen,
 		}
 		else if(attribs[i]==GLX_DRAWABLE_TYPE) i++;
 		else if(attribs[i]==GLX_X_VISUAL_TYPE) i++;
+		else if(attribs[i]==GLX_X_RENDERABLE) i++;
 		else if(attribs[i]==GLX_TRANSPARENT_INDEX_VALUE) i++;
 		else if(attribs[i]==GLX_TRANSPARENT_RED_VALUE) i++;
 		else if(attribs[i]==GLX_TRANSPARENT_GREEN_VALUE) i++;
