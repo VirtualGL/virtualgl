@@ -196,7 +196,11 @@ class rrsocket
 		static const int MAXCONN=1024;
 		static int _Instancecount;  
 		static rrcs _Mutex;
+		#ifdef _WIN32
+		SOCKET _sd;
+		#else
 		int _sd;
+		#endif
 };
 
 #endif

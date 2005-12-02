@@ -42,7 +42,7 @@ rrdisplayserver::~rrdisplayserver(void)
 
 void rrdisplayserver::run(void)
 {
-	rrsocket *sd;  rrserver *s;
+	rrsocket *sd=NULL;  rrserver *s=NULL;
 
 	while(!_deadyet)
 	{

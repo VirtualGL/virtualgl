@@ -219,7 +219,7 @@ void rrsocket::connect(char *servername, unsigned short port)
 		memcpy(&(servaddr.sin_addr), hent->h_addr_list[0], hent->h_length);
 	}
 
-	trysock( _sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) );
+	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET) _throwsock();
 	trysock( ::connect(_sd, (struct sockaddr *)&servaddr, sizeof(servaddr)) );
 	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char*)&m, sizeof(int)) );
 
@@ -249,7 +249,7 @@ void rrsocket::listen(unsigned short port)
 	if(_ssl && _sslctx && _dossl) _throw("SSL already connected");
 	#endif
 
-	trysock( _sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) );
+	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET) _throwsock();
 	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)) );
 	trysock( setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m, sizeof(int)) );
 
