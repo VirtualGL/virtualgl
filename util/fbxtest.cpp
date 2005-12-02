@@ -56,7 +56,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define N                 2
 
 int width, height;
-int checkdb=0;
+int checkdb=0, doshm=1;
 fbx_wh wh;
 rrtimer timer;
 #ifdef WIN32
@@ -439,15 +439,21 @@ void nativestress(int useshm)
 void display(void)
 {
 	#ifndef WIN32
-	fg();  nativewrite(1);
-	fg();  nativeread(1);
+	if(doshm)
+	{
+		fg();  nativewrite(1);
+		fg();  nativeread(1);
+	}
 	#endif
 	fg();  nativewrite(0);
 	fg();  nativeread(0);
 	fprintf(stderr, "\n");
 
 	#ifndef WIN32
-	fg();  nativestress(1);
+	if(doshm)
+	{
+		fg();  nativestress(1);
+	}
 	#endif
 	fg();  nativestress(0);
 	fprintf(stderr, "\n");
@@ -487,6 +493,10 @@ int main(int argc, char **argv)
 			checkdb=1;
 			fprintf(stderr, "Checking double buffering.  Watch for flashing to indicate that it is\n");
 			fprintf(stderr, "not enabled.  Performance will be sub-optimal.\n");
+		}
+		if(!stricmp(argv[i], "-noshm"))
+		{
+			doshm=0;
 		}
 	}
 
@@ -533,7 +543,7 @@ int main(int argc, char **argv)
 
 	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
-	tryw32(wh=CreateWindowEx(NULL, bench_name, bench_name, WS_OVERLAPPED |
+	tryw32(wh=CreateWindowEx(0, bench_name, bench_name, WS_OVERLAPPED |
 		WS_SYSMENU | WS_CAPTION | WS_VISIBLE, 0,  0, width+bw, height+bh, NULL,
 		NULL, GetModuleHandle(NULL), NULL));
 	UpdateWindow(wh);
