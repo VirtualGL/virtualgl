@@ -15,9 +15,6 @@
 #define __RRFRAME_H
 
 #include "rr.h"
-#ifdef _WIN32
-#define XDK
-#endif
 #include "fbx.h"
 #include "turbojpeg.h"
 #include "rrmutex.h"

@@ -80,7 +80,7 @@ pixelformat pix[2
 	{0, 1, 2, 3, GL_RGB, 0, "RGB"},
 };
 
-#ifdef _WIN32
+#ifdef XDK
 // Exceed likes to redefine stdio, so we un-redefine it :/
 #undef fprintf
 #undef printf
@@ -90,8 +90,7 @@ pixelformat pix[2
 #undef fputc
 #undef fputs
 #undef perror
-typedef int GLXFBConfig;
-typedef int GLXPbuffer;
+#define GLX11
 #endif
 #ifndef GLX_X_VISUAL_TYPE
 #define GLX_X_VISUAL_TYPE 0x22
@@ -112,7 +111,7 @@ typedef int GLXPbuffer;
 #define GLX_TRANSPARENT_TYPE 0x23
 #endif
 #ifndef GLX_TRANSPARENT_INDEX
-#define GLX_TRANSPARENT_INDEX           0x8009
+#define GLX_TRANSPARENT_INDEX 0x8009
 #endif
 #ifndef GLX_PBUFFER_HEIGHT
 #define GLX_PBUFFER_HEIGHT 0x8040
@@ -150,13 +149,24 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 // Pbuffer setup
 //////////////////////////////////////////////////////////////////////
 
-void findvisual(XVisualInfo* &v, GLXFBConfig &c)
+void findvisual(XVisualInfo* &v
+#ifndef GLX11
+, GLXFBConfig &c
+#endif
+)
 {
 	int fbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 		GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	int fbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_X_VISUAL_TYPE, GLX_PSEUDO_COLOR,
 		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+	int fbdbattribs[]={GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		GLX_BLUE_SIZE, 8, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE,
+		GLX_PBUFFER_BIT, None};
+	int fbdbattribsci[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, GLX_X_VISUAL_TYPE,
+		GLX_PSEUDO_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+	#ifndef GLX11
 	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
+	#endif
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
@@ -175,14 +185,21 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 			}
 			fbattribs[6]=GLX_RGBA;  fbattribs[7]=None;
 			fbattribsci[2]=None;
+			fbdbattribs[7]=GLX_RGBA;  fbdbattribs[8]=None;
+			fbdbattribsci[3]=None;
 			if(useoverlay)
 			{
 				fbattribsci[2]=GLX_LEVEL;  fbattribsci[3]=1;
 				fbattribsci[4]=GLX_TRANSPARENT_TYPE;
 				fbattribsci[5]=GLX_TRANSPARENT_INDEX;
+				fbdbattribsci[3]=GLX_LEVEL;  fbdbattribsci[4]=1;
+				fbdbattribsci[5]=GLX_TRANSPARENT_TYPE;
+				fbdbattribsci[6]=GLX_TRANSPARENT_INDEX;
 			};
 			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
-				fbattribsci:fbattribs)))
+				fbattribsci:fbattribs))
+				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
+				fbdbattribsci:fbdbattribs)))
 				_throw("Could not obtain Visual");
 			printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 			return;
@@ -193,18 +210,25 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 		}
 	}
 
-	#ifndef _WIN32
+	#ifndef GLX11
 	#ifdef USEGLP
 	if(useglp)
 	{
 		fbattribs[6]=None;  fbattribsci[2]=None;
+		fbdbattribs[7]=None;  fbdbattribsci[3]=None;
 		fbconfigs=glPChooseFBConfig(glpdevice, useci? fbattribsci:fbattribs,
 			&nelements);
+		if(!fbconfigs) fbconfigs=glPChooseFBConfig(glpdevice,
+			useci? fbdbattribsci:fbdbattribs, &nelements);
 	}
 	else
 	#endif
-	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
-		fbattribsci:fbattribs, &nelements);
+	{
+		fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
+			fbattribsci:fbattribs, &nelements);
+		if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+			useci?fbdbattribsci:fbdbattribs, &nelements);
+	}
 	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
 	c=fbconfigs[0];  XFree(fbconfigs);
 
@@ -218,11 +242,17 @@ void findvisual(XVisualInfo* &v, GLXFBConfig &c)
 	#endif
 }
 
-void pbufferinit(Display *dpy, Window win, XVisualInfo *v, GLXFBConfig c)
+void pbufferinit(Display *dpy, Window win, XVisualInfo *v
+#ifndef GLX11
+, GLXFBConfig c
+#endif
+)
 {
+	#ifndef	GLX11
 	GLXPbuffer pbuffer=0;
-	GLXContext ctx=0;
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
+	#endif
+	GLXContext ctx=0;
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
@@ -242,7 +272,7 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v, GLXFBConfig c)
 		}
 	}
 
-	#ifndef _WIN32
+	#ifndef GLX11
 	try {
 
 	if(!useglp) {if(usewindow) {errifnot(win);}  errifnot(dpy);}
@@ -629,8 +659,14 @@ int main(int argc, char **argv)
 		pix[0].name="INDEX";
 	}
 
-	XVisualInfo *v=NULL;  GLXFBConfig c=0;
+	XVisualInfo *v=NULL;
+	#ifndef GLX11
+	GLXFBConfig c=0;
 	findvisual(v, c);
+	#else
+	usewindow=1;
+	findvisual(v);
+	#endif
 
 	if(usewindow)
 	{
@@ -673,7 +709,12 @@ int main(int argc, char **argv)
 	}
 	fprintf(stderr, "Drawable size = %d x %d pixels\n", WIDTH, HEIGHT);
 	fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
-	pbufferinit(dpy, win, v, c);
+	pbufferinit(dpy, win, v
+	#ifndef GLX11
+	, c
+	#endif
+	);
+
 	if(v) XFree(v);
 	display();
 	return 0;

@@ -25,7 +25,7 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	char dpystr[80];
 	if(dpynum<0 || dpynum>255 || !window)
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
-	#ifdef _WIN32
+	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", dpynum);
 	#else
 	sprintf(dpystr, ":%d.0", dpynum);
@@ -60,7 +60,11 @@ rrcwin::~rrcwin(void)
 void rrcwin::initgl(void)
 {
 	char dpystr[80];
+	#ifdef XDK
+	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
+	#else
 	sprintf(dpystr, "localhost:%d.0", _dpynum);
+	#endif
 	if(_drawmethod==RR_DRAWAUTO || _drawmethod==RR_DRAWOGL)
 	{
 		try
