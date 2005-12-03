@@ -19,7 +19,7 @@
 #define __FBX_H__
 
 #define USESHM
-#if defined(XDK) || defined(XWIN32)
+#ifdef FBXX11
  #undef WIN32
 #endif
 

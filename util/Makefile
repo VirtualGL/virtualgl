@@ -38,10 +38,10 @@ $(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj $(ODIR)/bmp.obj
 	$(AR) $@ $^
 
 $(ODIR)/fbx-x11.obj: fbx.c
-	$(CC) $(CFLAGS) -UWIN32 -c $< -o $@
+	$(CC) $(CFLAGS) -DFBXX11 -UWIN32 -c $< -o $@
 
 $(ODIR)/fbxtest-x11.obj: fbxtest.cpp
-	$(CXX) $(CXXFLAGS) -UWIN32 -c $< -o $@
+	$(CXX) $(CXXFLAGS) -DFBXX11 -UWIN32 -c $< -o $@
 
 $(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/rrsocket.lib
 	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB)

@@ -48,9 +48,9 @@ endif
 dist: rr diags
 	$(RM) $(WBLDDIR)\$(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DMINGWDIR=c:\\mingw rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DMINGWDIR=c:\\cygwin rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
