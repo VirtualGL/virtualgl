@@ -1,17 +1,18 @@
 ########################################
-# Windows NT (GMAKE)
+# Windows NT (MinGW/Cygwin)
 ########################################
 
 CC = gcc -mno-cygwin
-CXX = g++ -mno-cygwin
+CXX = g++ -mno-cygwin -mthreads
 AR = ar ruvs
 
+CFLAGS = -Wall
 CDEFINES = -DWIN32
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 ifeq ($(DEBUG), yes)
-OPTFLAG = -O0 -g
+OPTFLAG = -O0 -ggdb
 else
 OPTFLAG = -O2
 endif
@@ -20,9 +21,18 @@ DEPFLAG = -MM
 
 DEFAULTJPEGLIB = ipp
 
-X11LIB = -lxlib -lhclshm
-GLXLIB = -lhclglx
+ifeq ($(XWIN32), yes)
+CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/x11
+CDEFINES := $(CDEFINES) -DXWIN32
+X11LIB = -lX11 -lXext -lwsock32
+GLXLIB = -lglx -lGL -lX11 -lXext -lwsock32
+GLULIB = -lGLU
+else
+CDEFINES := $(CDEFINES) -DXDK
+X11LIB = -lxlib -lhclshm 
+GLXLIB = -lhclglx -lxlib
 GLULIB = -lhclglu
+endif
 SOCKLIB = -lrrsocket -lwsock32
 ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -llibeay32 -lssleay32
