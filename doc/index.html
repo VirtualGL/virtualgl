@@ -197,7 +197,7 @@ Blastwave OpenSSL is required.&nbsp; Download and install the package from <a hr
 <li>Single Pentium III or
 Pentium 4, 1.0 GHz or faster</li><li>Graphics card with decent 2D
 performance</li><li>Windows 2000 or XP with <a href="http://www.hummingbird.com/">Hummingbird</a>
-Exceed 8.0 or 9.0<br>
+Exceed 8 or newer<br>
 <br>
 <span class="note">Note:</span>Contact Gary Romualdez of
 Hummingbird Ltd. [tel. (416) 496-6393 or
@@ -538,47 +538,12 @@ The installation of VirtualGL should be
 self-explanatory.&nbsp; The only configuration option is the
 directory in
 which you want the files to be installed. </li>
-<li>Install Hummingbird Exceed
-8.0 or 9.0 if it isn't already
+<li>Install Hummingbird Exceed if it isn't already
 installed. </li>
-<li>Exceed must be updated to
-one of the following revisions in order
-to work properly with VirtualGL:<br>
-<br>
-<table cellpadding="3">
-<tbody>
-<tr>
-<th>Product</th>
-<th><span class="monospace">exceed.exe</span>
-Version</th>
-<th>How to Obtain</th>
-</tr>
-<tr>
-<td>Hummingbird Exceed
-8.0</td>
-<td>8.0.0.28 or higher</td>
-<td>Download the <span class="monospace">exceed.exe</span> patch from:<br>
-<a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
-<br>
-<span class="note">Note:</span>Hummingbird WebSupport
-account required </td>
-</tr>
-<tr>
-<td>Hummingbird Exceed
-9.0</td>
-<td>9.0.0.9 or higher</td>
-<td>Run Hummingbird
-Update</td>
-</tr>
-</tbody>
-</table>
-<br>
-</li>
-<li>Add the Exceed path (usually
+
+<li>Add the Exceed path (e.g.
 <span class="monospace">C:\Program
-Files\Hummingbird\Connectivity\8.00\Exceed</span>
-or <span class="monospace">C:\Program
-Files\Hummingbird\Connectivity\9.00\Exceed</span>)
+Files\Hummingbird\Connectivity\9.00\Exceed</span>)<span class="monospace"></span>
 to your system <span class="monospace">PATH</span>
 environment if it
 isn't already there. </li>
@@ -590,6 +555,7 @@ applet in XConfig.<br>
 <br>
 <span class="tip">Tip:</span>If you are using the "Classic View" mode of XConfig, open the "Protocol" applet instead.<br>
 &nbsp; </li>
+
 <li>In the "X Server Protocol"
 applet, select the "Protocol" tab and make sure that "Use 32 bits per
 pixel
@@ -597,13 +563,7 @@ for true color" is <i>not</i>
 checked.<br>
 <br>
 <img alt="" src="exceed1.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
-<br>
-</li>
-<li>Select the "Extensions" tab
-and make sure that "MIT-SHM" is checked.<br>
-<br>
-<img alt="" src="exceed2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
-<br>
+&nbsp;<br>
 </li>
 <li>Click "Validate and Apply
 Changes."&nbsp; If XConfig asks whether you want to perform a
@@ -620,16 +580,86 @@ and make sure that "Default Backing
 Store" is set to "None."<br>
 <br>
 <img alt="" src="exceed3.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
-<br>
+&nbsp;<br>
 </li>
 <li>Click "Validate and Apply
 Changes."&nbsp; If XConfig asks whether you want to perform a
 server reset, click
 "Yes." </li>
 </ol>
+<h3>Obtaining Optimal Performance with Exceed</h3>
+VirtualGL has the ability to take advantage of the MIT-SHM extension in
+Hummingbird Exceed to accelerate image drawing on Windows. &nbsp;This
+can improve the overall performance of the VirtualGL pipeline by as
+much as 20% in some cases.<br>
+<br>
+The bad news is that this extension has some issues in earlier versions
+of Exceed. &nbsp;If you are using Exceed 8 or 9, you will need to
+obtain the following patches from the Hummingbird support site:<br>
+<br>
 
+<table cellpadding="3">
+
+<tbody>
+<tr>
+<th>Product</th>
+<th><span class="monospace"></span>Patches Required</th>
+<th>How to Obtain</th>
+</tr>
+<tr>
+<td>Hummingbird Exceed
+8.0</td>
+<td><span class="monospace">hclshm.dll</span> v9.0.0.1 (or higher)<br>
+      <span class="monospace">xlib.dll</span> v9.0.0.3 (or higher)<br>
+      <span class="monospace">exceed.exe</span> 8.0.0.28 (or higher)</td>
+<td>Download all<span class="monospace"></span> patches from:<br>
+<a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
+<br>
+<span class="note">Note:</span>Hummingbird WebSupport
+account required </td>
+</tr>
+<tr>
+<td>Hummingbird Exceed
+9.0</td>
+<td><span class="monospace">hclshm.dll</span> v9.0.0.1 (or higher)<br>
+      <span class="monospace">
+xlib.dll</span> v9.0.0.3 (or higher)<br>
+      <span class="monospace">exceed.exe</span> 9.0.0.9 or higher</td>
+<td><span class="monospace">exceed.exe</span> can be patched by running Hummingbird Update<br>
+      <br>
+All other patches must be downloaded from:<br>
+
+      <a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
+
+      <br>
+
+      <span class="note">Note:</span>Hummingbird WebSupport
+account required<br>
+</td></tr></tbody>
+</table>
+<br>
+No patches should be necessary for Exceed 10 and above.<br>
+<br>
+Next, you need to enable the MIT-SHM extension in Exceed:<br>
+<ol>
+<li>Load Exceed XConfig
+(right-click
+on the Exceed taskbar icon, then select "Tools--&gt;Configuration.")</li><li>Open the "X Server Protocol"
+applet in XConfig.<br>
+<br>
+<span class="tip">Tip:</span>If you are using the "Classic View" mode of XConfig, open the "Protocol" applet instead.<br>
+&nbsp;</li><li>Select the "Extensions" tab
+and make sure that "MIT-SHM" is checked.<br>
+    <br>
+    <img alt="" src="exceed2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+&nbsp;</li>
+  <li>Click "Validate and Apply
+Changes."&nbsp; If XConfig asks whether you want to perform a
+server reset, click
+"Yes."<br>
+  </li>
+</ol>
 <h3>Secure Shell</h3>
-
 It is recommended that you use SSh (Secure Shell) to log in to the
 application server and launch applications.&nbsp; Some servers are
 configured to allow
@@ -639,6 +669,7 @@ SSh.&nbsp; If you already have <a href="http://www.cygwin.com">CygWin</a>
 installed on your
 Windows machine, then you can use the SSh client included in that
 package.&nbsp; Otherwise, download and install <a href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/">PuTTY</a>.<br>
+
 
 <h3><a name="installsvc"></a>Installing the Windows Client
 as a Service</h3>
@@ -836,8 +867,7 @@ preloaded into an executable that is setuid root. &nbsp;Generally, 3rd
 party packages are verboden from installing anything into <span class="monospace">/usr/lib</span> or <span class="monospace">/lib</span>. &nbsp;But you can use the <span class="monospace">crle</span>
 utility to add other directories to the operating system's list of
 secure paths. &nbsp;In the case of VirtualGL, you would issue (as root):<br>
-<pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/sparcv9
-</pre>
+<pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/sparcv9<br></pre>
 Or on Solaris/x86:<br>
 <pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/64<br></pre>
 But please be aware of the security ramifications of this before you do
