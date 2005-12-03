@@ -19,7 +19,7 @@
 #define __FBX_H__
 
 #define USESHM
-#ifdef XDK
+#if defined(XDK) || defined(XWIN32)
  #undef WIN32
 #endif
 
@@ -28,6 +28,10 @@
  typedef HDC fbx_gc;
  typedef HWND fbx_wh;
 #else
+ #ifdef XWIN32
+ #include <X11/Xwindows.h>
+ #undef WIN32
+ #endif
  #include <X11/Xlib.h>
  #ifdef USESHM
  #ifdef XDK
@@ -41,7 +45,7 @@
  #undef fputc
  #undef fputs
  #undef perror
- #else
+ #elif !defined(XWIN32)
  #include <sys/ipc.h>
  #include <sys/shm.h>
  #endif
@@ -83,6 +87,9 @@ typedef struct _fbx_struct
 	HDC hmdc;  HBITMAP hdib;
 	#else
 	#ifdef USESHM
+	#ifdef XWIN32
+	HANDLE filemap;
+	#endif
 	XShmSegmentInfo shminfo;  int xattach;
 	#endif
 	GC xgc;
