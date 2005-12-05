@@ -471,6 +471,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		case WM_PAINT:
 			display();
+			PostQuitMessage(0);
 	}
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
