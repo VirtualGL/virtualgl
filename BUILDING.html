@@ -319,7 +319,34 @@ installed</span></h3>
     http://www.sun.com/processors/vis/mlib.html</a></li></ul>
 <hr>
 <h2><span style="font-weight: 400;">Prerequisites - Win32</span></h2>
+<h3><span style="font-weight: 400;">MinGW &amp; MSYS</span></h3>
+
+<ul>
+  <li>MinGW and MSYS can be downloaded from <a href="http://www.mingw.org/download.shtml">
+  http://www.mingw.org/download.shtml</a>.</li>
+</ul>
+<h3>... or ...<br>
+<span style="font-weight: 400;"></span></h3>
+<h3>Cygwin<br>
+<span style="font-weight: 400;"></span></h3>
+<ul>
+  <li>Cygwin can be downloaded from <a href="http://www.cygwin.com/">
+  http://www.cygwin.com/</a>.</li>
+  <li>At minimum, the following Cygwin packages need to be installed:<br>
+    <span class="monospace">coreutils</span><br class="monospace">
+    <span class="monospace">gcc</span><br class="monospace">
+    <span class="monospace">gcc-core</span><br class="monospace">
+    <span class="monospace">gcc-g++</span><br class="monospace">
+    <span class="monospace">gcc-mingw</span><br class="monospace">
+    <span class="monospace">gcc-mingw-core</span><br class="monospace">
+    <span class="monospace">gcc-mingw-g++</span><br class="monospace">
+    <span class="monospace">make</span></li>
+</ul>
+
+
+<span style="font-weight: 400;"></span>
 <h3><span style="font-weight: 400;">OpenSSL headers and link libraries</span></h3>
+
 <ul>
   <li>
   Download the latest Win32 OpenSSL installer from
@@ -331,35 +358,17 @@ installed</span></h3>
   only necessary on the build machine.&nbsp; The VirtualGL build system will copy the 
   necessary DLL's into the VirtualGL release package.
   </li>
-</ul>
-<h3><span style="font-weight: 400;">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
-<ul>
-  <li><span style="font-weight: 400;">If you don't own Visual C++, download the free Visual C++ Toolkit from
-   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/">http://msdn.microsoft.com/visualc/vctoolkit2003/</a>.&nbsp; You will also need the Core Platform SDK (<a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">http://www.microsoft.com/msdownload/platformsdk/sdkupdate/</a>.)&nbsp; 
-  You may optionally want to install the free Debugging Tools for Windows (<a href="http://www.microsoft.com/whdc/devtools/debugging/default.mspx">http://www.microsoft.com/whdc/devtools/debugging/default.mspx</a>.)</span></li>
-</ul>
-<h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8.0 or v9.0</span></h3>
+</ul><h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8 or later</span></h3>
 <ul>
   <li>Contact
 Gary Romualdez of
 Hummingbird Ltd. [tel. (416) 496-6393 or
 <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
-for Exceed pricing information</li><li>Add the XDK include and lib paths to your system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables 
-  prior to building VirtualGL</li>
+for Exceed pricing information</li><li>Add the XDK include and lib paths (in Cygwin or MinGW format) to your system <span class="monospace">CPATH</span> and <span class="monospace">LIBRARY_PATH</span> variables 
+  prior to building VirtualGL (see below for examples)</li>
   <li>See install notes in the VirtualGL Windows documentation regarding patching Exceed to 
   eliminate a bug in the MIT-SHM extension.</li>
-</ul>
-<h3><span style="font-weight: 400;">MSYS or Cygwin</span></h3>
-<ul>
-  <li>VirtualGL's make system is written to take advantage of GNU-specific make 
-  semantics and relies upon several 
-  Unix-ish shell commands</li>
-  <li>MSYS can be downloaded from <a href="http://www.mingw.org/download.shtml">
-  http://www.mingw.org/download.shtml</a>.</li>
-  <li>Cygwin can be downloaded from <a href="http://www.cygwin.com/">
-  http://www.cygwin.com/</a>.</li>
-</ul>
-<h3><span style="font-weight: 400;">Intel Integrated 
+</ul><h3><span style="font-weight: 400;">Intel Integrated 
 Performance Primitives (IPP) <i style="color: rgb(255, 255, 0);">[recommended]</i></span></h3>
 <ul>
   <li>
@@ -376,9 +385,36 @@ Performance Primitives (IPP) <i style="color: rgb(255, 255, 0);">[recommended]</
    distributed royalty-free.</span></h4>
   </li>
   <li>On Windows, make sure that the IPP include and lib paths are added to your 
-  system <span class="monospace">INCLUDE</span> and <span class="monospace">LIB</span> variables.</li>
+  system <span class="monospace">CPATH</span> and <span class="monospace">LIBRARY_PATH</span> variables (see below for examples.)</li>
 </ul>
-<hr>
+<h3><span style="font-weight: 400;">Environment Variables</span></h3>
+GCC uses the <span class="monospace">CPATH</span> and <span class="monospace">LIBRARY_PATH</span>
+variables to determine where to look for headers and link libraries.
+&nbsp;The VirtualGL build system on Windows assumes that the include
+and lib directories for OpenSSL, the Exceed XDK, and the Intel
+Performance Primitives have been added to the <span class="monospace">CPATH</span> and <span class="monospace">LIBRARY_PATH</span> variables. &nbsp;For example:<br>
+<br>
+<span class="monospace">CPATH=/cygdrive/c/Program
+Files/Hummingbird/Connectivity/9.00/Exceed/XDK/Include:/cygdrive/c/OpenSSL/include:/cygdrive/c/Program
+Files/Intel/IPP41/ia32_itanium/include<br>
+<br>
+LIBRARY_PATH=/cygdrive/c/Program
+Files/Intel/IPP41/ia32_itanium/lib:/cygdrive/c/Program
+Files/Hummingbird/Connectivity/9.00/Exceed/XDK/Lib:/cygdrive/c/OpenSSL/lib/VC<br>
+<br>
+</span>for Cygwin, or<br>
+<br>
+<span class="monospace">CPATH=/c/Program
+Files/Hummingbird/Connectivity/9.00/Exceed/XDK/Include:/c/OpenSSL/include:/c/Program
+Files/Intel/IPP41/ia32_itanium/include<br>
+<br>
+LIBRARY_PATH=/c/Program
+Files/Intel/IPP41/ia32_itanium/lib:/c/Program
+Files/Hummingbird/Connectivity/9.00/Exceed/XDK/Lib:/c/OpenSSL/lib/VC<br>
+</span><br>
+for MinGW. &nbsp;You should of course modify these, as appropriate, for building against a different version of the XDK or IPP.<br>
+<br>
+<span style="font-weight: bold;"></span><hr>
 <h2><span style="font-weight: 400;">Building</span></h2>
 <p>Assuming all of the above is set up correctly, you should be able to just 
 type</p>
