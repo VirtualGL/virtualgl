@@ -438,6 +438,7 @@ void nativestress(int useshm)
 
 void display(void)
 {
+	fprintf(stderr, "-- Performance tests --\n");
 	#ifndef WIN32
 	if(doshm)
 	{
@@ -449,6 +450,7 @@ void display(void)
 	fg();  nativeread(0);
 	fprintf(stderr, "\n");
 
+	fprintf(stderr, "-- Stress tests --\n");
 	#ifndef WIN32
 	if(doshm)
 	{
