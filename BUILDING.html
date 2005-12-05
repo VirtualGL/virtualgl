@@ -169,8 +169,10 @@ under the&nbsp;<span class="monospace">jpeg/</span> directory. &nbsp;To rebuild 
 <span style="font-weight: bold;">Intel Integrated 
 Performance Primitives (IPP)</span><br style="font-weight: bold;"><br>
   <span style="font-weight: normal;"></span><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
-   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
-   distributed royalty-free.<br><br>Building TurboJPEG against IPP is the default if</span> the <span style="font-family: monospace;">JPEGLIB</span> makefile option is not specified<br>&nbsp;</li><li><span style="font-weight: bold;">Pegasus Imaging PicTools RapidVue</span><br style="font-weight: bold;"><span style="font-family: monospace;"><br></span>Passing an argument of <span class="monospace">JPEGLIB=pegasus</span> to the makefile will build TurboJPEG against the PicTools RapidVue codec from Pegasus Imaging&nbsp;<span style="font-weight: 400;">(<a href="http://www.jpg.com/">http://www.jpg.com</a>.)<br></span><br><span style="font-family: monospace;">make JPEGLIB=pegasus lib</span><span style="font-family: monospace;"><br>make JPEGLIB=pegasus dist<br><br></span><span style="font-weight: 400;"> </span><span style="font-weight: 400;">The TurboJPEG build environment looks for
+   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)
+&nbsp;Licenses are free for non-commercial use and inexpensive for
+commercial use. &nbsp; The IPP license entitles the license holder to
+distribute any binaries built with the IPP freely and without royalties.</span><span style="font-weight: 400;"><br><br>Building TurboJPEG against IPP is the default if</span> the <span style="font-family: monospace;">JPEGLIB</span> makefile option is not specified<br>&nbsp;</li><li><span style="font-weight: bold;">Pegasus Imaging PicTools RapidVue</span><br style="font-weight: bold;"><span style="font-family: monospace;"><br></span>Passing an argument of <span class="monospace">JPEGLIB=pegasus</span> to the makefile will build TurboJPEG against the PicTools RapidVue codec from Pegasus Imaging&nbsp;<span style="font-weight: 400;">(<a href="http://www.jpg.com/">http://www.jpg.com</a>.)<br></span><br><span style="font-family: monospace;">make JPEGLIB=pegasus lib</span><span style="font-family: monospace;"><br>make JPEGLIB=pegasus dist<br><br></span><span style="font-weight: 400;"> </span><span style="font-weight: 400;">The TurboJPEG build environment looks for
                PICTools in a directory called <span class="monospace">pictools</span> located one level up
                from the top directory of the VirtualGL build.&nbsp; You can override this by passing
                an additional argument of <span class="monospace">PEGDIR={location of pictools directory}</span> to the makefile.</span><br><span style="font-family: monospace;">&nbsp;</span></li><li><span style="font-weight: bold;">libjpeg v6b</span><br style="font-weight: bold;"><span style="font-family: monospace;"><br></span><span style="font-weight: normal;">TurboJPEG can be built against</span><span style="font-weight: 400;"> a completely free (as in freedom) version of libjpeg v6b which will
@@ -381,10 +383,11 @@ Performance Primitives (IPP) <i style="color: rgb(255, 255, 0);">[recommended]</
   </li>
   <li>
   <h4><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
-   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
-   distributed royalty-free.</span></h4>
-  </li>
-  <li>On Windows, make sure that the IPP include and lib paths are added to your 
+   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; </span><span style="font-weight: 400;">Licenses
+are free for non-commercial
+use and inexpensive for commercial use.&nbsp; The IPP license entitles
+the license holder to distribute any binaries built with the IPP freely
+and without royalties.</span></h4></li><li>On Windows, make sure that the IPP include and lib paths are added to your 
   system <span class="monospace">CPATH</span> and <span class="monospace">LIBRARY_PATH</span> variables (see below for examples.)</li>
 </ul>
 <h3><span style="font-weight: 400;">Environment Variables</span></h3>
