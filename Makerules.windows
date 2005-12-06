@@ -38,4 +38,4 @@ ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -llibeay32 -lssleay32
 endif
 FBXLIB = -lfbx -lgdi32
-FBXX11LIB = -lfbx-x11 $(X11LIB)
+FBXX11LIB = -lfbx-x11 -lversion $(X11LIB)
