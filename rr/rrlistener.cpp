@@ -29,8 +29,9 @@ rrlistener::rrlistener(unsigned short port, bool dossl, bool dorecv)
 	{
 		if((sslctx=hpsecnet_serverinit())==NULL) _throw(hpsecnet_strerror());
 	}
-	sock(listen_socket=hpnet_createServer(port==0?RR_DEFAULTPORT:port, MAXCONN, SOCK_STREAM));
-
+	if((listen_socket=hpnet_createServer(port==0?RR_DEFAULTPORT:port, MAXCONN, SOCK_STREAM))
+		==INVALID_SOCKET)
+		_throw(hpnet_strerror());
 	memset(cli, 0, sizeof(rrconn*)*MAXCONN);
 	memset(clithnd, 0, sizeof(pthread_t)*MAXCONN);
 	tryunix(sem_init(&clientsem, 0, 0));

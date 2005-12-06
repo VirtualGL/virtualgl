@@ -32,7 +32,7 @@ class rrlistener
 	protected:
 
 	virtual void receive(rrconn *)=0;
-	int listen_socket;
+	SOCKET listen_socket;
 	bool dossl, dorecv;  SSL_CTX *sslctx;
 	rrconn *cli[MAXCONN];
 	pthread_t listenthnd, clithnd[MAXCONN];

@@ -93,7 +93,8 @@ void *rrdisplayserver::clientthread(void *param)
 	int clientrank=tp->clientrank;
 	delete tp;
 
-	rrclient *rrc=new rrclient;
+	rrclient *rrc=NULL;
+	rrc=new rrclient;
 
 	try
 	{

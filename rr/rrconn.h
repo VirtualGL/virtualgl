@@ -25,6 +25,7 @@
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <arpa/inet.h>
+ typedef int SOCKET;
 #endif
 
 #define MAXERRORS 10
@@ -40,7 +41,8 @@ class rrconn
 
 	void listen(int listen_socket, SSL_CTX *sslctx)
 	{
-		sock(sd=hpnet_waitForConnection(listen_socket, &sin));
+		if((sd=hpnet_waitForConnection(listen_socket, &sin))==INVALID_SOCKET)
+			_throw(hpnet_strerror());
 		if(sslctx)
 		{
 			dossl=true;
@@ -53,7 +55,8 @@ class rrconn
 	{
 		if(!servername) _throw("Invalid argument to connect()");
 		if(sd!=INVALID_SOCKET) _throw("Already connected");
-		sock(sd=hpnet_connect(servername, port, &sin, SOCK_STREAM));
+		if((sd=hpnet_connect(servername, port, &sin, SOCK_STREAM))==INVALID_SOCKET)
+			_throw(hpnet_strerror());
 		if(dossl)
 		{
 			this->dossl=true;
@@ -139,7 +142,7 @@ class rrconn
 	}
 
 	bool dossl;
-	int sd;
+	SOCKET sd;
 	SSL *ssl;  SSL_CTX *clientctx;
 	struct sockaddr_in sin;
 };
