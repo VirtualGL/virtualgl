@@ -546,7 +546,7 @@ int main(int argc, char **argv)
 
 	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
-	tryw32(wh=CreateWindowEx(NULL, bench_name, bench_name, WS_OVERLAPPED |
+	tryw32(wh=CreateWindowEx(0, bench_name, bench_name, WS_OVERLAPPED |
 		WS_SYSMENU | WS_CAPTION | WS_VISIBLE, 0,  0, width+bw, height+bh, NULL,
 		NULL, GetModuleHandle(NULL), NULL));
 	UpdateWindow(wh);
