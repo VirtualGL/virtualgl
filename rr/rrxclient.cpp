@@ -39,7 +39,7 @@ void start(int, char **);
 #define SERVICEFULLNAME (ssl? _SSLSERVICEFULLNAME:_SERVICEFULLNAME)
 
 SERVICE_STATUS status;
-SERVICE_STATUS_HANDLE statushnd=NULL;
+SERVICE_STATUS_HANDLE statushnd=0;
 
 void install_service(void);
 void remove_service(void);
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
 	if(service)
 	{
-		servicetable[0].lpServiceName=SERVICENAME;
+		servicetable[0].lpServiceName=(char *)SERVICENAME;
 		if(!StartServiceCtrlDispatcher(servicetable))
 			EventLog("Could not start service", 1);
 		exit(0);

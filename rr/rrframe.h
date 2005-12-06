@@ -25,6 +25,10 @@
 #include <string.h>
 #include <pthread.h>
 
+#ifndef min
+ #define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
 static int jpegsub[RR_SUBSAMP]={TJ_444, TJ_422, TJ_411};
 
 // Uncompressed bitmap
