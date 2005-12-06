@@ -28,8 +28,8 @@
  typedef HDC fbx_gc;
  typedef HWND fbx_wh;
 #else
- #ifdef XWIN32
- #include <X11/Xwindows.h>
+ #ifdef FBXX11
+ #include <Xwindows.h>
  #undef WIN32
  #endif
  #include <X11/Xlib.h>

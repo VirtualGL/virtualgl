@@ -58,6 +58,11 @@ const char *_fbx_formatname[FBX_FORMATS]=
  #include "x11err.h"
 
  #ifdef USESHM
+ #ifdef XDK
+ static int fbx_checkdlls(void);
+ static int fbx_checkdll(char *, int *, int *, int *, int *);
+ #endif
+
  unsigned long serial=0;  int __shmok=1;
  XErrorHandler prevhandler=NULL;
 
@@ -98,9 +103,9 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
 	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1, alphafirst;
-	#endif
 	#ifdef XWIN32
 	static int seqnum=1;  char temps[80];
+	#endif
 	#endif
 
 	if(!s) _throw("Invalid argument");
@@ -192,6 +197,9 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	s->wh.dpy=wh.dpy;  s->wh.win=wh.win;
 
 	#ifdef USESHM
+	#ifdef XDK
+	if(!fbx_checkdlls()) useshm=0;
+	#endif
 	if(useshm && XShmQueryExtension(s->wh.dpy))
 	{
 		s->shminfo.shmid=-1;
@@ -475,3 +483,83 @@ int fbx_term(fbx_struct *s)
 	finally:
 	return -1;
 }
+
+#if defined(XDK) && defined(USESHM) && !defined(WIN32)
+static int fbx_checkdlls(void)
+{
+	int retval=1, v1, v2, v3, v4;
+	static int alreadywarned=0;
+	if(fbx_checkdll("hclshm.dll", &v1, &v2, &v3, &v4))
+	{
+		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<1))
+		{
+			if(!alreadywarned)
+				fprintf(stderr, "** hclshm.dll >=9.0.0.1 is required for accelerated drawing **\n");
+			retval=0;
+		}
+	}
+	if(fbx_checkdll("xlib.dll", &v1, &v2, &v3, &v4))
+	{
+		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<3))
+		{
+			if(!alreadywarned)
+				fprintf(stderr, "** xlib.dll >=9.0.0.3 is required for accelerated drawing **\n");
+			retval=0;
+		}
+	}
+	if(fbx_checkdll("exceed.exe", &v1, &v2, &v3, &v4))
+	{
+		if(v1<8 || (v1==8 && v2==0 && v3==0 && v4<28))
+		{
+			if(!alreadywarned)
+				fprintf(stderr, "** exceed.exe v8.0.0.28 is required for accelerated drawing **\n");
+			retval=0;
+		}
+		if(v1==9 && v2==0 && v3==0 && v4<9)
+		{
+			if(!alreadywarned)
+				fprintf(stderr, "** exceed.exe v9.0.0.9 is required for accelerated drawing **\n");
+			retval=0;
+		}
+	}
+	if(!retval && !alreadywarned)
+		fprintf(stderr, "** Exceed patches not installed.  Disabling accelerated drawing **\n");
+	if(!alreadywarned) alreadywarned=1;
+	return retval;
+}
+
+static int fbx_checkdll(char *filename, int *v1, int *v2, int *v3, int *v4)
+{
+	unsigned long vinfolen, vinfohnd=0;
+	char *vinfo=NULL, temps[256], *p;
+	void *buf=NULL;
+	unsigned int len;
+	int retval=1;
+
+	vinfolen=GetFileVersionInfoSize(filename, &vinfohnd);
+	if(!vinfolen) {retval=0;  goto ret;}
+	if((vinfo=(char *)malloc(vinfolen))==NULL) {retval=0;  goto ret;}
+	if(!GetFileVersionInfo(filename, vinfohnd, vinfolen, vinfo))
+		{retval=0;  goto ret;}
+	if(VerQueryValue(vinfo, "\\VarFileInfo\\Translation", &buf, &len)
+		&& len==4)
+	{
+		p=(char *)buf;
+		sprintf(temps, "\\StringFileInfo\\%04X%04X\\FileVersion",
+			*((WORD *)p), *((WORD *)&p[2]));
+	}
+	else sprintf(temps, "\\StringFileInfo\\%04X04B0\\FileVersion",
+		GetUserDefaultLangID());
+	if(VerQueryValue(vinfo, temps, &buf, &len) && len>0)
+	{
+		if(sscanf((char *)buf, "%d.%d.%d.%d", v1, v2, v3, v4)!=4)
+			retval=0;
+		else retval=1;
+	}
+	else retval=0;
+
+	ret:
+	if(vinfo) free(vinfo);
+	return retval;
+}
+#endif
