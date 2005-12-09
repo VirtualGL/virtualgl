@@ -81,7 +81,8 @@ JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
 endif
 
 $(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
-	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib $(JPEGLINK)
+	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
+		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
 
 $(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/turbojpeg.lib $(LDIR)/rrutil.lib
 	$(CXX) $(LDFLAGS) $< -o $@ -lturbojpeg -lrrutil
