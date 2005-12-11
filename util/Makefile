@@ -14,6 +14,12 @@ TARGETS = $(LDIR)/rrutil.lib \
           $(EDIR)/fbxtest-x11.exe \
           $(EDIR)/glreadtest.exe
 
+ifeq ($(VNC), yes)
+TARGETS = $(LDIR)/rrutil.lib \
+          $(LDIR)/fbx.lib \
+          $(EDIR)/fbxtest.exe
+endif
+
 OBJS = $(ODIR)/bmp.obj \
        $(ODIR)/rrlog.obj \
        $(ODIR)/genericQ.obj \

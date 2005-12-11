@@ -3,6 +3,9 @@ ALL: dist mesademos
 
 .PHONY: rr util jpeg mesademos diags clean dist samples test
 
+vnc:
+	$(MAKE) DISTRO=vnc VNC=yes jpeg
+
 rr: util jpeg
 jpeg: util
 samples: rr
