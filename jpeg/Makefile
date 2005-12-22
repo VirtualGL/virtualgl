@@ -245,7 +245,7 @@ dist: lib lib32
 		--define "_bindir $(EDIR)" --define "_bindir32 $(EDIR32)" --define "_build $(TJPEGBUILD)" \
 		--define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" --target $(RPMARCH) \
 		turbojpeg.spec; \
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/turbojpeg-1.0-$(TJPEGBUILD).$(RPMARCH).rpm $(BLDDIR)
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/turbojpeg-1.01-$(TJPEGBUILD).$(RPMARCH).rpm $(BLDDIR)
 	rm -rf $(BLDDIR)/rpms
 
 endif
