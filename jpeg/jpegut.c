@@ -254,9 +254,9 @@ void dotest1(void)
 	if((hnd=tjInitCompress())==NULL)
 		{printf("Error in tjInitCompress():\n%s\n", tjGetErrorStr());  goto finally;}
 	printf("Buffer size regression test\n");
-	for(j=1; j<16; j++)
+	for(j=1; j<48; j++)
 	{
-		for(i=1; i<MAXLENGTH; i++)
+		for(i=1; i<(j==1?MAXLENGTH:48); i++)
 		{
 			if(i%100==0) printf("%.4d x %.4d\b\b\b\b\b\b\b\b\b\b\b", i, j);
 			if((bmpbuf=(unsigned char *)malloc(i*j*4))==NULL
@@ -264,10 +264,10 @@ void dotest1(void)
 			{
 				printf("Memory allocation failure\n");  goto finally;
 			}
-			for(i2=0; i2<i*j; i2++)
+			for(i2=0; i2<i*j*4; i2++)
 			{
-				if(i2%2==0) memset(&bmpbuf[i2*4], 0xFF, 4);
-				else memset(&bmpbuf[i2*4], 0, 4);
+				if(i2%2==0) bmpbuf[i2]=0xFF;
+				else bmpbuf[i2]=0;
 			}
 			_catch(tjCompress(hnd, bmpbuf, i, i*4, j, 4,
 				jpgbuf, &size, TJ_444, 100, TJ_BGR));
@@ -278,10 +278,10 @@ void dotest1(void)
 			{
 				printf("Memory allocation failure\n");  goto finally;
 			}
-			for(i2=0; i2<j*i; i2++)
+			for(i2=0; i2<j*i*4; i2++)
 			{
-				if(i2%2==0) memset(&bmpbuf[i2*4], 0xFF, 4);
-				else memset(&bmpbuf[i2*4], 0, 4);
+				if(i2%2==0) bmpbuf[i2]=0xFF;
+				else bmpbuf[i2]=0;
 			}
 			_catch(tjCompress(hnd, bmpbuf, j, j*4, i, 4,
 				jpgbuf, &size, TJ_444, 100, TJ_BGR));
