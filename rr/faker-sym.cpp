@@ -131,6 +131,17 @@ void __vgl_loadsymbols(void)
 	#ifdef SUNOGL
 	lsym(glBegin)
 	#endif
+	lsym(glIndexd)
+	lsym(glIndexf)
+	lsym(glIndexi)
+	lsym(glIndexs)
+	lsym(glIndexub)
+	lsym(glIndexdv)
+	lsym(glIndexfv)
+	lsym(glIndexiv)
+	lsym(glIndexsv)
+	lsym(glIndexubv)
+	lsym(glClearIndex)
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
 

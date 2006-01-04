@@ -28,6 +28,7 @@ FakerConfig fconfig;
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
 #include "faker-cfghash.h"
+#include "faker-rcfghash.h"
 #include "faker-pmhash.h"
 #include "faker-glxdhash.h"
 #include "faker-sym.h"
@@ -97,7 +98,8 @@ static inline int _drawingtoright(void)
 }
 
 static rrcs globalmutex;
-winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;  cfghash cfgh;  pmhash pmh;  glxdhash glxdh;
+winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;
+	cfghash cfgh;  rcfghash rcfgh;  pmhash pmh;  glxdhash glxdh;
 #define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
 
@@ -122,6 +124,7 @@ void __vgl_safeexit(int retcode)
 		pmh.killhash();
 		vish.killhash();
 		cfgh.killhash();
+		rcfgh.killhash();
 		ctxh.killhash();
 		glxdh.killhash();
 		if(_dpyh) _dpyh->killhash();
@@ -637,6 +640,23 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
+	if(attrib_list)
+	{
+		bool overlayreq=false;
+		for(int i=0; attrib_list[i]!=None && i<=254; i++)
+		{
+			if(attrib_list[i]==GLX_DOUBLEBUFFER || attrib_list[i]==GLX_RGBA
+				|| attrib_list[i]==GLX_STEREO || attrib_list[i]==GLX_USE_GL)
+				continue;
+			else if(attrib_list[i]==GLX_LEVEL && attrib_list[i+1]==1)
+			{
+				overlayreq=true;  i++;
+			}
+			else i++;
+		}
+		if(overlayreq) return _glXChooseVisual(dpy, screen, attrib_list);
+	}
+
 		opentrace(glXChooseVisual);  prargx(dpy);  prargi(screen);
 		prargal11(attrib_list);  starttrace();
 
@@ -664,8 +684,9 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	XVisualInfo *v=NULL;
 	TRY();
 
-	// Prevent recursion
-	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
+	// Prevent recursion & handle overlay configs
+	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+		return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
 		opentrace(glXGetVisualFromFBConfig);  prargx(dpy);  prargc(config);
@@ -698,6 +719,20 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
+
+	if(vis)
+	{
+		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_LEVEL);
+		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+		if(level && trans)
+		{
+			ctx=_glXCreateContext(dpy, vis, share_list, direct);
+			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+			return ctx;
+		}
+	}
 
 		opentrace(glXCreateContext);  prargx(dpy);  prargv(vis);
 		prargi(direct);  starttrace();
@@ -740,6 +775,9 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		opentrace(glXMakeCurrent);  prargx(dpy);  prargx(drawable);  prargx(ctx);
 		starttrace();
 
+	if(ctx) config=ctxh.findconfig(ctx);
+	if(config==(GLXFBConfig)-1) return _glXMakeCurrent(dpy, drawable, ctx);
+
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
@@ -757,7 +795,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// map it to a Pbuffer
 	if(dpy && drawable && ctx)
 	{
-		errifnot(config=ctxh.findconfig(ctx));
+		errifnot(config);
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 		{
@@ -825,6 +863,13 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	if(!_isremote(dpy)) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
+	if(rcfgh.isoverlay(dpy, config)) // Overlay config
+	{
+		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
+		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+		return ctx;
+	}
+
 		opentrace(glXCreateNewContext);  prargx(dpy);  prargc(config);
 		prargi(render_type);  prargi(direct);  starttrace();
 
@@ -861,6 +906,9 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		opentrace(glXMakeContextCurrent);  prargx(dpy);  prargx(draw);
 		prargx(read);  prargx(ctx);  starttrace();
 
+	if(ctx) config=ctxh.findconfig(ctx);
+	if(config==(GLXFBConfig)-1) return _glXMakeContextCurrent(dpy, draw, read, ctx);
+
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
@@ -879,7 +927,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	pbwin *drawpbw, *readpbw;
 	if(dpy && (draw || read) && ctx)
 	{
-		errifnot(config=ctxh.findconfig(ctx));
+		errifnot(config);
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		if(drawpbw)
@@ -945,8 +993,9 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const in
 	pbwin *pbw;
 	XSync(dpy, False);
 
-	// Prevent recursion
-	if(!_isremote(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
+	// Prevent recursion & handle overlay configs
+	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+		return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
 		opentrace(glXCreateWindow);  prargx(dpy);  prargc(config);  prargx(win);
@@ -989,6 +1038,16 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
 	////////////////////
+
+	if(vi)
+	{
+		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vi->visualid,
+			GLX_LEVEL);
+		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vi->visualid,
+			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+		if(level && trans)
+			return _glXCreateGLXPixmap(dpy, vi, pm);
+	}
 
 		opentrace(glXCreateGLXPixmap);  prargx(dpy);  prargv(vi);  prargx(pm);
 		starttrace();
@@ -1033,8 +1092,9 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 	GLXPixmap drawable=0;
 	TRY();
 
-	// Prevent recursion
-	if(!_isremote(dpy)) return _glXCreatePixmap(dpy, config, pm, attribs);
+	// Prevent recursion && handle overlay configs
+	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+		return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
 
 		opentrace(glXCreatePixmap);  prargx(dpy);  prargc(config);  prargx(pm);
@@ -1100,6 +1160,13 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
+	GLXFBConfig c=0;
+	if((c=ctxh.findconfig(glXGetCurrentContext()))==(GLXFBConfig)-1)
+	{
+		_glXSwapBuffers(dpy, drawable);
+		return;
+	}
+
 	TRY();
 
 		opentrace(glXSwapBuffers);  prargx(dpy);  prargx(drawable);  starttrace();
@@ -1122,6 +1189,9 @@ static void _doGLreadback(bool force, bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
+	GLXFBConfig c=0;
+	if((c=ctxh.findconfig(glXGetCurrentContext()))==(GLXFBConfig)-1)
+		return;
 	drawable=GetCurrentDrawable();
 	if(!drawable) return;
 	if((pbw=winh.findpb(drawable))!=NULL)
@@ -1285,44 +1355,93 @@ glIndexPointer
 #ifdef SUNOGL
 
 static GLvoid r_glIndexd(OglContextPtr ctx, GLdouble c)
-	{glColor3d(c/255., 0.0, 0.0);  return;}
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexd(c);
+	else glColor3d(c/255., 0.0, 0.0);
+}
+
 static GLvoid r_glIndexf(OglContextPtr ctx, GLfloat c)
-	{glColor3f(c/255., 0., 0.);  return;}
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexf(c);
+	else glColor3f(c/255., 0., 0.);
+}
+
 static GLvoid r_glIndexi(OglContextPtr ctx, GLint c)
-	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexi(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
+
 static GLvoid r_glIndexs(OglContextPtr ctx, GLshort c)
-	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexs(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
+
 static GLvoid r_glIndexub(OglContextPtr ctx, GLubyte c)
-	{glColor3f((GLfloat)c/255., 0, 0);  return;}
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexub(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
 
 static GLvoid r_glIndexdv(OglContextPtr ctx, const GLdouble *c)
 {
-	GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
-	glColor3dv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexdv(c);
+	else
+	{
+		GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
+		glColor3dv(c? v:NULL);  return;
+	}
 }
 
 static GLvoid r_glIndexfv(OglContextPtr ctx, const GLfloat *c)
 {
-	GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexfv(c);
+	else
+	{
+		GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 static GLvoid r_glIndexiv(OglContextPtr ctx, const GLint *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexiv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 static GLvoid r_glIndexsv(OglContextPtr ctx, const GLshort *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexsv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 static GLvoid r_glIndexubv(OglContextPtr ctx, const GLubyte *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexubv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 void glBegin(GLenum mode)
@@ -1342,40 +1461,94 @@ void glBegin(GLenum mode)
 
 #else
 
-void glIndexd(GLdouble c) {glColor3d(c/255., 0.0, 0.0);  return;}
-void glIndexf(GLfloat c) {glColor3f(c/255., 0., 0.);  return;}
-void glIndexi(GLint c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
-void glIndexs(GLshort c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
-void glIndexub(GLubyte c) {glColor3f((GLfloat)c/255., 0, 0);  return;}
+void glIndexd(GLdouble c)
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexd(c);
+	else glColor3d(c/255., 0.0, 0.0);
+}
+
+void glIndexf(GLfloat c)
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexf(c);
+	else glColor3f(c/255., 0., 0.);
+}
+
+void glIndexi(GLint c)
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexi(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
+
+void glIndexs(GLshort c)
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexs(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
+
+void glIndexub(GLubyte c)
+{
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexub(c);
+	else glColor3f((GLfloat)c/255., 0, 0);
+}
 
 void glIndexdv(const GLdouble *c)
 {
-	GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
-	glColor3dv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexdv(c);
+	else
+	{
+		GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
+		glColor3dv(c? v:NULL);
+	}
 }
 
 void glIndexfv(const GLfloat *c)
 {
-	GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexfv(c);
+	else
+	{
+		GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 void glIndexiv(const GLint *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexiv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 void glIndexsv(const GLshort *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexsv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 void glIndexubv(const GLubyte *c)
 {
-	GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-	glColor3fv(c? v:NULL);  return;
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glIndexubv(c);
+	else
+	{
+		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
+		glColor3fv(c? v:NULL);  return;
+	}
 }
 
 #endif
@@ -1383,20 +1556,26 @@ void glIndexubv(const GLubyte *c)
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
-	if(format==GL_COLOR_INDEX) format=GL_RED;
+	if(format==GL_COLOR_INDEX
+		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1)
+		format=GL_RED;
 	return _glReadPixels(x, y, width, height, format, type, pixels);
 }
 
 void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 	const GLvoid *pixels)
 {
-	if(format==GL_COLOR_INDEX) format=GL_RED;
+	if(format==GL_COLOR_INDEX
+		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1)
+		format=GL_RED;
 	return _glDrawPixels(width, height, format, type, pixels);
 }
 
 void glClearIndex(GLfloat c)
 {
-	glClearColor(c, 0., 0., 0.);
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+		_glClearIndex(c);
+	else glClearColor(c, 0., 0., 0.);
 }
 
 } // extern "C"

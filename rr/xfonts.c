@@ -122,10 +122,17 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
 	try {
 
-	errifnot(pb = winh.findpb(GetCurrentDrawable()));
-	errifnot(dpy = pb->getwindpy());
-	errifnot(win = pb->getwin());
-
+	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	{
+		dpy=_glXGetCurrentDisplay();
+		win=_glXGetCurrentDrawable();
+	}
+	else
+	{
+		errifnot(pb = winh.findpb(GetCurrentDrawable()));
+		errifnot(dpy = pb->getwindpy());
+		errifnot(win = pb->getwin());
+	}
 	fs = XQueryFont(dpy, font);
 	if(!fs) _throw("Couldn't get font structure information");
 

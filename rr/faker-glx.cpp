@@ -58,14 +58,35 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		if(fconfig.glp)
 		{
 			attribs[10]=attribs[11]=None;
-			if((configs=glPChooseFBConfig(_localdev, attribs, &n))==NULL || n<1)
-				return 0;
+			configs=glPChooseFBConfig(_localdev, attribs, &n);
+			if((!configs || n<1) && attribs[13])
+			{
+				attribs[13]=0;
+				configs=glPChooseFBConfig(_localdev, attribs, &n);
+			}
+			if((!configs || n<1) && attribs[0])
+			{
+				attribs[0]=0;
+				configs=glPChooseFBConfig(_localdev, attribs, &n);
+			}
+			if(!configs || n<1) return 0;
 		}
 		else
 		#endif
-		if((configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n))==NULL
-			|| n<1)
-			return 0;
+		{
+			configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+			if((!configs || n<1) && attribs[13])
+			{
+				attribs[13]=0;
+				configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+			}
+			if((!configs || n<1) && attribs[0])
+			{
+				attribs[0]=0;
+				configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+			}
+			if(!configs || n<1) return 0;
+		}
 		c=configs[0];
 		XFree(configs);
 		if(c)
@@ -87,6 +108,25 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 	////////////////////
+
+	if(attrib_list)
+	{
+		bool overlayreq=false;
+		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		{
+			if(attrib_list[i]==GLX_LEVEL && attrib_list[i+1]==1)
+				overlayreq=true;
+		}
+		if(overlayreq)
+		{
+			configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+			if(configs && nelements && *nelements)
+			{
+				for(int i=0; i<*nelements; i++) rcfgh.add(dpy, configs[i]);
+			}
+			return configs;
+		}
+	}
 
 		opentrace(glXChooseFBConfig);  prargx(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
@@ -247,6 +287,16 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	if(!_isremote(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
 	////////////////////
 
+	if(vis)
+	{
+		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_LEVEL);
+		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+		if(level && trans)
+			return _glXGetConfig(dpy, vis, attrib, value);
+	}
+
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 
 		opentrace(glXGetConfig);  prargx(dpy);  prargv(vis);  prargx(attrib);
@@ -373,8 +423,9 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	VisualID vid=0;  int retval=0;
 	TRY();
 
-	// Prevent recursion
-	if(!_isremote(dpy)) return _glXGetFBConfigAttrib(dpy, config, attribute, value);
+	// Prevent recursion && handle overlay configs
+	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 	////////////////////
 
 	if(!dpy || !value) throw rrerror("glXGetFBConfigAttrib", "Invalid argument");

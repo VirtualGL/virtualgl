@@ -309,6 +309,28 @@ funcdef5(void, glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
 funcdef1(void, glBegin, GLenum, mode,);
 #endif
 
+funcdef1(void, glIndexd, GLdouble, c,);
+
+funcdef1(void, glIndexf, GLfloat, c,);
+
+funcdef1(void, glIndexi, GLint, c,);
+
+funcdef1(void, glIndexs, GLshort, c,);
+
+funcdef1(void, glIndexub, GLubyte, c,);
+
+funcdef1(void, glIndexdv, const GLdouble*, c,);
+
+funcdef1(void, glIndexfv, const GLfloat*, c,);
+
+funcdef1(void, glIndexiv, const GLint*, c,);
+
+funcdef1(void, glIndexsv, const GLshort*, c,);
+
+funcdef1(void, glIndexubv, const GLubyte*, c,);
+
+funcdef1(void, glClearIndex, GLfloat, c,);
+
 
 // X11 functions
 
