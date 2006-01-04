@@ -53,6 +53,8 @@ do
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
 	+de*)       VGL_DEBUG=1       ; export VGL_DEBUG    ;;
 	-de*)       VGL_DEBUG=0       ; export VGL_DEBUG    ;;
+	+tr*)       VGL_TRACE=1       ; export VGL_TRACE    ;;
+	-tr*)       VGL_TRACE=0       ; export VGL_TRACE    ;;
 	-d*)        VGL_DISPLAY=$2    ; export VGL_DISPLAY  ; shift     ;;
 	-cl*)       VGL_CLIENT=$2     ; export VGL_CLIENT   ; shift     ;;
 	-p*)        VGL_PORT=$2       ; export VGL_PORT     ; shift     ;;
