@@ -338,9 +338,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	}
 	else
 	{
-		#ifdef USEGLP
 		if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor)
 			attrib=GLX_RED_SIZE;
+		#ifdef USEGLP
 		if(fconfig.glp)
 		{
 			if(attrib==GLX_VIDEO_RESIZE_SUN) *value=0;
