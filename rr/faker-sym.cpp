@@ -130,7 +130,7 @@ void __vgl_loadsymbols(void)
 	lsym(glDrawPixels)
 	#ifdef SUNOGL
 	lsym(glBegin)
-	#endif
+	#else
 	lsym(glIndexd)
 	lsym(glIndexf)
 	lsym(glIndexi)
@@ -141,6 +141,7 @@ void __vgl_loadsymbols(void)
 	lsym(glIndexiv)
 	lsym(glIndexsv)
 	lsym(glIndexubv)
+	#endif
 	lsym(glClearIndex)
 
 	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
