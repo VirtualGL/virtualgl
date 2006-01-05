@@ -486,9 +486,18 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 				}
 		if(match)
 		{
-			unsigned char rgb[3];
-			glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
-			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
+			if(format==GL_COLOR_INDEX)
+			{
+				unsigned char index;
+				glReadPixels(0, 0, 1, 1, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, &index);
+				color=index;
+			}
+			else
+			{
+				unsigned char rgb[3];
+				glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+				color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
+			}
 		}
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
 		{
