@@ -32,7 +32,7 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 	{
 		vid=__vglMatchVisual(dpy, screen, __vglConfigDepth(config),
 				__vglConfigClass(config),
-				__vglServerVisualAttrib(config, GLX_LEVEL),
+				0,
 				__vglServerVisualAttrib(config, GLX_STEREO),
 				__vglServerVisualAttrib(config, GLX_TRANSPARENT_TYPE)!=GLX_NONE);
 		if(!vid) 
@@ -338,7 +338,8 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	}
 	else
 	{
-		if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor)
+		if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor
+			&& __vglServerVisualAttrib(c, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
 			attrib=GLX_RED_SIZE;
 		#ifdef USEGLP
 		if(fconfig.glp)
@@ -464,7 +465,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		*value=vid;
 	else
 	{
-		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor)
+		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
+			&& __vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
 			attribute=GLX_RED_SIZE;
 		#ifdef USEGLP
 		if(fconfig.glp)
