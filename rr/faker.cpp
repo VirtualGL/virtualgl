@@ -140,6 +140,7 @@ void __vgl_safeexit(int retcode)
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
+#define prargd(a) printf("%s=0x%.8lx(%s) ", #a, (unsigned long)a, a?DisplayString(a):"NULL")
 #define prargs(a) printf("%s=%s ", #a, a?a:"NULL")
 #define prargx(a) printf("%s=0x%.8lx ", #a, (unsigned long)a)
 #define prargi(a) printf("%s=%d ", #a, a)
@@ -261,7 +262,7 @@ Display *XOpenDisplay(_Xconst char* name)
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
 	dpyh.add(dpy);
 
-		stoptrace();  prargx(dpy);  closetrace();
+		stoptrace();  prargd(dpy);  closetrace();
 
 	CATCH();
 	return dpy;
@@ -272,7 +273,7 @@ int XCloseDisplay(Display *dpy)
 	int retval=0;
 	TRY();
 
-		opentrace(XCloseDisplay);  prargx(dpy);  starttrace();
+		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
 
 	dpyh.remove(dpy);
 	retval=_XCloseDisplay(dpy);
@@ -291,7 +292,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	Window win=0;
 	TRY();
 
-		opentrace(XCreateWindow);  prargx(dpy);  prargx(parent);  prargi(x);
+		opentrace(XCreateWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
 		prargi(c_class);  prargv(visual);  starttrace();
 
@@ -312,7 +313,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	Window win=0;
 	TRY();
 
-		opentrace(XCreateSimpleWindow);  prargx(dpy);  prargx(parent);  prargi(x);
+		opentrace(XCreateSimpleWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
 	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
@@ -330,7 +331,7 @@ int XDestroyWindow(Display *dpy, Window win)
 	int retval=0;
 	TRY();
 
-		opentrace(XDestroyWindow);  prargx(dpy);  prargx(win);  starttrace();
+		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
 	winh.remove(dpy, win);
 	retval=_XDestroyWindow(dpy, win);
@@ -478,7 +479,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask, XWindowC
 	int retval=0;
 	TRY();
 
-		opentrace(XConfigureWindow);  prargx(dpy);  prargx(win);
+		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
 		if(values && (value_mask&CWWidth)) {prargi(values->width);}
 		if(values && (value_mask&CWHeight)) {prargi(values->height);}  starttrace();
 
@@ -499,7 +500,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width, unsigned int hei
 	int retval=0;
 	TRY();
 
-		opentrace(XResizeWindow);  prargx(dpy);  prargx(win);  prargi(width);
+		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
 		prargi(height);  starttrace();
 
 	pbwin *pbw=NULL;
@@ -518,7 +519,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y, unsigned int width
 	int retval=0;
 	TRY();
 
-		opentrace(XMoveResizeWindow);  prargx(dpy);  prargx(win);  prargi(x);
+		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
 	pbwin *pbw=NULL;
@@ -545,7 +546,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 	if(!srcpm && !dstpm) return _XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
 
-		opentrace(XCopyArea);  prargx(dpy);  prargx(src);  prargx(dst);  prargx(gc);
+		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);  prargx(gc);
 		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
 		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
 
@@ -657,7 +658,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		if(overlayreq) return _glXChooseVisual(dpy, screen, attrib_list);
 	}
 
-		opentrace(glXChooseVisual);  prargx(dpy);  prargi(screen);
+		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
 		prargal11(attrib_list);  starttrace();
 
 	GLXFBConfig *configs=NULL, c=0;  int n=0;
@@ -689,7 +690,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
-		opentrace(glXGetVisualFromFBConfig);  prargx(dpy);  prargc(config);
+		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
 
 	VisualID vid=0;
@@ -734,7 +735,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 		}
 	}
 
-		opentrace(glXCreateContext);  prargx(dpy);  prargv(vis);
+		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
 		prargi(direct);  starttrace();
 
 	GLXFBConfig c;
@@ -772,7 +773,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(!_isremote(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
 	////////////////////
 
-		opentrace(glXMakeCurrent);  prargx(dpy);  prargx(drawable);  prargx(ctx);
+		opentrace(glXMakeCurrent);  prargd(dpy);  prargx(drawable);  prargx(ctx);
 		starttrace();
 
 	if(ctx) config=ctxh.findconfig(ctx);
@@ -836,7 +837,7 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
 	TRY();
 
-		opentrace(glXDestroyContext);  prargx(dpy);  prargx(ctx);  starttrace();
+		opentrace(glXDestroyContext);  prargd(dpy);  prargx(ctx);  starttrace();
 
 	ctxh.remove(ctx);
 	#ifdef USEGLP
@@ -870,7 +871,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 		return ctx;
 	}
 
-		opentrace(glXCreateNewContext);  prargx(dpy);  prargc(config);
+		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
 		prargi(render_type);  prargi(direct);  starttrace();
 
 	#ifdef USEGLP
@@ -903,7 +904,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	if(!_isremote(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	////////////////////
 
-		opentrace(glXMakeContextCurrent);  prargx(dpy);  prargx(draw);
+		opentrace(glXMakeContextCurrent);  prargd(dpy);  prargx(draw);
 		prargx(read);  prargx(ctx);  starttrace();
 
 	if(ctx) config=ctxh.findconfig(ctx);
@@ -998,7 +999,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const in
 		return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
-		opentrace(glXCreateWindow);  prargx(dpy);  prargc(config);  prargx(win);
+		opentrace(glXCreateWindow);  prargd(dpy);  prargc(config);  prargx(win);
 		starttrace();
 
 	errifnot(pbw=winh.setpb(dpy, win, config));
@@ -1017,7 +1018,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 	if(!_isremote(dpy)) {_glXDestroyWindow(dpy, win);  return;}
 	////////////////////
 
-		opentrace(glXDestroyWindow);  prargx(dpy);  prargx(win);  starttrace();
+		opentrace(glXDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
 	winh.remove(dpy, win);
 
@@ -1049,7 +1050,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 			return _glXCreateGLXPixmap(dpy, vi, pm);
 	}
 
-		opentrace(glXCreateGLXPixmap);  prargx(dpy);  prargv(vi);  prargx(pm);
+		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vi);  prargx(pm);
 		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
@@ -1077,7 +1078,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	if(!_isremote(dpy)) {_glXDestroyGLXPixmap(dpy, pix);  return;}
 	////////////////////
 
-		opentrace(glXDestroyGLXPixmap);  prargx(dpy);  prargx(pix);  starttrace();
+		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
@@ -1097,7 +1098,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 		return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
 
-		opentrace(glXCreatePixmap);  prargx(dpy);  prargc(config);  prargx(pm);
+		opentrace(glXCreatePixmap);  prargd(dpy);  prargc(config);  prargx(pm);
 		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
@@ -1129,7 +1130,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	if(!_isremote(dpy)) {_glXDestroyPixmap(dpy, pix);  return;}
 	////////////////////
 
-		opentrace(glXDestroyPixmap);  prargx(dpy);  prargx(pix);  starttrace();
+		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
@@ -1169,7 +1170,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 	TRY();
 
-		opentrace(glXSwapBuffers);  prargx(dpy);  prargx(drawable);  starttrace();
+		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
 
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && (pbw=winh.findpb(dpy, drawable))!=NULL)

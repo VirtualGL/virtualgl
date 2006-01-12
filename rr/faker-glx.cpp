@@ -128,7 +128,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 		}
 	}
 
-		opentrace(glXChooseFBConfig);  prargx(dpy);  prargi(screen);
+		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
 
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
@@ -173,7 +173,7 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_
 {
 	GLXPbuffer pb=0;
 
-		opentrace(glXCreatePbuffer);  prargx(dpy);  prargc(config);
+		opentrace(glXCreatePbuffer);  prargd(dpy);  prargc(config);
 		prargal13(attrib_list);  starttrace();
 
 	#ifdef USEGLP
@@ -194,7 +194,7 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigne
 {
 	GLXPbuffer pb=0;
 
-		opentrace(glXCreateGLXPbufferSGIX);  prargx(dpy);  prargc(config);
+		opentrace(glXCreateGLXPbufferSGIX);  prargd(dpy);  prargc(config);
 		prargi(width);  prargi(height);  prargal13(attrib_list);
 		starttrace();
 
@@ -225,7 +225,7 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigne
 void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 {
 
-		opentrace(glXDestroyGLXPbufferSGIX);  prargx(dpy);  prargx(pbuf);  starttrace();
+		opentrace(glXDestroyGLXPbufferSGIX);  prargd(dpy);  prargx(pbuf);  starttrace();
 
 	#ifdef USEGLP
 	if(fconfig.glp) glPDestroyBuffer(pbuf);
@@ -241,7 +241,7 @@ void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 
 void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 {
-		opentrace(glXDestroyPbuffer);  prargx(dpy);  prargx(pbuf);  starttrace();
+		opentrace(glXDestroyPbuffer);  prargd(dpy);  prargx(pbuf);  starttrace();
 
 	#ifdef USEGLP
 	if(fconfig.glp) glPDestroyBuffer(pbuf);
@@ -299,7 +299,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 
-		opentrace(glXGetConfig);  prargx(dpy);  prargv(vis);  prargx(attrib);
+		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
 		starttrace();
 
 	errifnot(c=_MatchConfig(dpy, vis));
@@ -381,7 +381,7 @@ Display *glXGetCurrentDisplay(void)
 		dpy=pb->getwindpy();
 	else dpy=glxdh.getcurrentdpy(GetCurrentDrawable());
 
-		stoptrace();  prargx(dpy);  closetrace();
+		stoptrace();  prargd(dpy);  closetrace();
 
 	CATCH();
 	return dpy;
@@ -432,7 +432,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	if(!dpy || !value) throw rrerror("glXGetFBConfigAttrib", "Invalid argument");
 	int screen=DefaultScreen(dpy);
 
-		opentrace(glXGetFBConfigAttrib);  prargx(dpy);  prargc(config);
+		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargi(attribute);  starttrace();
 
 	if(!(vid=_MatchVisual(dpy, config)))
@@ -564,7 +564,7 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned in
 {
 	TRY();
 
-		opentrace(glXQueryDrawable);  prargx(dpy);  prargx(draw);  prargi(attribute);
+		opentrace(glXQueryDrawable);  prargd(dpy);  prargx(draw);  prargi(attribute);
 		starttrace();
 
 	#ifdef USEGLP
@@ -660,7 +660,7 @@ GLboolean glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 	XWindowAttributes xwa;
 	if(!transparentIndex) return False;
 
-		opentrace(glXGetTransparentIndexSUN);  prargx(dpy);  prargx(overlay);
+		opentrace(glXGetTransparentIndexSUN);  prargd(dpy);  prargx(overlay);
 		prargx(underlay);  starttrace();
 
 	if(fconfig.transpixel>=0)
