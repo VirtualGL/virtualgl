@@ -156,6 +156,7 @@ class rrglframe : public rrframe
 
 	void redraw(void)
 	{
+		extern int _Xerror;  extern rrcs _Errmutex;
 		int format=GL_RGB;
 		#ifdef GL_BGR_EXT
 		if(littleendian()) format=GL_BGR_EXT;
@@ -163,9 +164,13 @@ class rrglframe : public rrframe
 		if(_pixelsize==1) format=GL_COLOR_INDEX;
 		
 		tempctx tc(_dpy, _win, _win, _ctx, true);
+		{rrcs::safelock l(_Errmutex);  if(_Xerror) {_throw("X11 Error");}}
 
-		int e=glGetError();
+		int e;
+		e=glGetError();
+		#ifndef _WIN32
 		while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+		#endif
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		int oldbuf=-1;
 		glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
@@ -179,8 +184,10 @@ class rrglframe : public rrframe
 			glDrawBuffer(oldbuf);
 			_stereo=false;
 		}
+
 		if(glerror()) _throw("Could not draw pixels");
 		glXSwapBuffers(_dpy, _win);
+		{rrcs::safelock l(_Errmutex);  if(_Xerror) {_throw("X11 Error");}}
 	}
 
 	unsigned char *_rbits;
@@ -197,7 +204,9 @@ class rrglframe : public rrframe
 			ret=1;
 			fprintf(stderr, "[VGL] OpenGL error 0x%.4x\n", i);
 		}
+		#ifndef _WIN32
 		while(i!=GL_NO_ERROR) i=glGetError();
+		#endif
 		return ret;
 	}
 

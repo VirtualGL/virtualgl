@@ -65,12 +65,22 @@ void handler(int type)
 
 
 // This does nothing except prevent Xlib from exiting the program so we can trap X11 errors
+int _Xerror=0;
+rrcs _Errmutex;
+
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	const char *temp=NULL;
+	const char *temp=NULL;  char errmsg[257];
+	errmsg[0]=0;
+	XGetErrorText(dpy, xe->error_code, errmsg, 256);
+	rrout.print("X11 Error: ");
 	if((temp=x11error(xe->error_code))!=NULL && stricmp(temp, "Unknown error code"))
-		rrout.println("X11 Error: %s", temp);
-	return 0;
+		rrout.print("%s ", temp);
+	rrout.println("%s", errmsg);
+	_Errmutex.lock(false);
+	if(!_Xerror) _Xerror=1;
+	_Errmutex.unlock(false);
+	return 1;
 }
 
 

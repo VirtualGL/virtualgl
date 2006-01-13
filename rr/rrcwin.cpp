@@ -206,6 +206,9 @@ void rrcwin::run(void)
 
 	} catch(rrerror &e)
 	{
-		if(_t) _t->seterror(e);  if(j) j->complete();  throw;
+		extern rrcs _Errmutex;  extern int _Xerror;
+		if(_t) _t->seterror(e);  if(j) j->complete();
+		_Errmutex.lock(false);  _Xerror=0;  _Errmutex.unlock(false);
+		throw;
 	}
 }
