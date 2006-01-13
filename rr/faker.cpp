@@ -803,6 +803,22 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			drawable=pbw->updatedrawable();
 			if(drawable!=curdraw) pbw->forcenextframe();
 		}
+		else if(!glxdh.getcurrentdpy(drawable))
+		{
+			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+			// that was created in another application.  This code is necessary
+			// to make CRUT (Chromium Utility Toolkit) applications work.
+			if(_isremote(dpy))
+			{
+				winh.add(dpy, drawable);
+				pbw=winh.setpb(dpy, drawable, config);
+				if(pbw)
+				{
+					drawable=pbw->updatedrawable();
+					if(drawable!=curdraw) pbw->forcenextframe();
+				}
+			}
+		}
 	}
 
 	#ifdef USEGLP
