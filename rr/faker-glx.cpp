@@ -293,7 +293,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 			GLX_LEVEL);
 		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
-		if(level && trans)
+		if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
 			return _glXGetConfig(dpy, vis, attrib, value);
 	}
 
