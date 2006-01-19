@@ -102,12 +102,6 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
 
-	if(!fconfig.glp)
-	{
-		int dw=DisplayWidth(_localdpy, DefaultScreen(_localdpy));
-		int dh=DisplayHeight(_localdpy, DefaultScreen(_localdpy));
-		w=min(w, dw);  h=min(h, dh);
-	}
 	_w=w;  _h=h;
 	pbattribs[1]=w;  pbattribs[3]=h;
 	#ifdef sun
@@ -183,13 +177,6 @@ pbwin::~pbwin(void)
 int pbwin::init(int w, int h, GLXFBConfig config)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
-
-	if(!fconfig.glp)
-	{
-		int dw=DisplayWidth(_localdpy, DefaultScreen(_localdpy));
-		int dh=DisplayHeight(_localdpy, DefaultScreen(_localdpy));
-		w=min(w, dw);  h=min(h, dh);
-	}
 
 	rrcs::safelock l(_mutex);
 	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
