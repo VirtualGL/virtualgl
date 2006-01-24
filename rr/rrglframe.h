@@ -14,8 +14,6 @@
 #ifndef __RRGLFRAME_H
 #define __RRGLFRAME_H
 
-#ifdef USEGL
-
 #include "rrframe.h"
 #define GLX11
 #include "tempctx.h"
@@ -39,6 +37,7 @@
 #define glXSwapBuffers _glXSwapBuffers
 #define glDrawBuffer _glDrawBuffer
 #define glDrawPixels _glDrawPixels
+#define glFinish _glFinish
 #endif
 
 #include <GL/glx.h>
@@ -54,6 +53,7 @@ class rrglframe : public rrframe
 		if(!dpystring || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
 		if(!(_dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
 		_newdpy=true;
+		_isgl=true;
 		init(_dpy, win);
 	}
 
@@ -63,6 +63,7 @@ class rrglframe : public rrframe
 	{
 		if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
 		_dpy=dpy;
+		_isgl=true;
 		init(_dpy, win);
 	}
 
@@ -114,11 +115,12 @@ class rrglframe : public rrframe
 		if(!h) throw(rrerror("rrglframe::init", "Invalid argument"));
 		_pixelsize=truecolor? 3:1;  _pitch=_pixelsize*h->framew;
 		checkheader(h);
-		if(h->framew!=_h.framew || h->frameh!=_h.frameh)
+		bool stereo=h->flags==RR_LEFT || h->flags==RR_RIGHT;
+		if(h->framew!=_h.framew || h->frameh!=_h.frameh || (stereo && !_rbits))
 		{
 			if(_bits) delete [] _bits;
 			errifnot(_bits=new unsigned char[_pitch*h->frameh+1]);
-			if(h->flags==RR_LEFT || h->flags==RR_RIGHT)
+			if(stereo)
 			{
 				if(_rbits) delete [] _rbits;
 				errifnot(_rbits=new unsigned char[_pitch*h->frameh+1]);
@@ -156,7 +158,14 @@ class rrglframe : public rrframe
 
 	void redraw(void)
 	{
-		extern int _Xerror;  extern rrcs _Errmutex;
+		drawtile(0, 0, _h.framew, _h.frameh);
+		sync();
+	}
+
+	void drawtile(int x, int y, int w, int h)
+	{
+		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
+			return;
 		int format=GL_RGB;
 		#ifdef GL_BGR_EXT
 		if(littleendian()) format=GL_BGR_EXT;
@@ -164,7 +173,6 @@ class rrglframe : public rrframe
 		if(_pixelsize==1) format=GL_COLOR_INDEX;
 		
 		tempctx tc(_dpy, _win, _win, _ctx, true);
-		{rrcs::safelock l(_Errmutex);  if(_Xerror) {_throw("X11 Error");}}
 
 		int e;
 		e=glGetError();
@@ -172,22 +180,29 @@ class rrglframe : public rrframe
 		while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 		#endif
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, _pitch/_pixelsize);
 		int oldbuf=-1;
 		glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
 		if(_stereo) glDrawBuffer(GL_BACK_LEFT);
 		glViewport(0, 0, _h.framew, _h.frameh);
-		glDrawPixels(_h.framew, _h.frameh, format, GL_UNSIGNED_BYTE, _bits);
+		glRasterPos2f(((float)x/(float)_h.framew)*2.-1., ((float)y/(float)_h.frameh)*2.-1.);
+		glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &_bits[_pitch*y+x*_pixelsize]);
 		if(_stereo)
 		{
 			glDrawBuffer(GL_BACK_RIGHT);
-			glDrawPixels(_h.framew, _h.frameh, format, GL_UNSIGNED_BYTE, _rbits);
+			glRasterPos2f(((float)x/(float)_h.framew)*2.-1., ((float)y/(float)_h.frameh)*2.-1.);
+			glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &_rbits[_pitch*y+x*_pixelsize]);
 			glDrawBuffer(oldbuf);
 			_stereo=false;
 		}
 
 		if(glerror()) _throw("Could not draw pixels");
+	}
+
+	void sync(void)
+	{
+		glFinish();
 		glXSwapBuffers(_dpy, _win);
-		{rrcs::safelock l(_Errmutex);  if(_Xerror) {_throw("X11 Error");}}
 	}
 
 	unsigned char *_rbits;
@@ -232,8 +247,7 @@ class rrglframe : public rrframe
 #undef glXSwapBuffers
 #undef glDrawBuffer
 #undef glDrawPixels
+#undef glFinish
 #endif
-
-#endif // USEGL
 
 #endif // __RRGLFRAME_H
