@@ -6,6 +6,7 @@ ifeq ($(platform), windows)
 
 TARGETS = $(EDIR)/turbojpeg.dll \
           $(LDIR)/turbojpeg.lib \
+          $(LDIR)/turbojpeg.def \
           $(EDIR)/jpgtest.exe \
           $(EDIR)/jpegut.exe
 
@@ -80,7 +81,7 @@ JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
 
 endif
 
-$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
+$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbojpeg.obj $(JPEGDEP)
 	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
 		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
 
