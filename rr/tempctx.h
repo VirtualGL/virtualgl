@@ -70,16 +70,18 @@ class tempctx
 			#endif
 			)
 			{
+				Bool ret=True;
 				#ifdef USEGLP
-				if(fconfig.glp) glPMakeContextCurrent(draw, read, ctx);
+				if(fconfig.glp) ret=glPMakeContextCurrent(draw, read, ctx);
 				else
 				#endif
 				{
-					if(glx11) glXMakeCurrent(dpy, draw, ctx);
+					if(glx11) ret=glXMakeCurrent(dpy, draw, ctx);
 					#ifndef GLX11
-					else glXMakeContextCurrent(dpy, draw, read, ctx);
+					else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
 					#endif
 				}
+				if(!ret) _throw("Could not swap in GLX context");
 				_mc=true;
 			}
 		}
