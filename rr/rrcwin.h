@@ -18,14 +18,12 @@
 #include <windows.h>
 #endif
 #include <X11/X.h>
-#define USEGL 1
 #include "rrframe.h"
 #undef USEGLP
-#include "rrglframe.h"
 #include "rrthread.h"
 #include "genericQ.h"
 
-enum {RR_DRAWAUTO=0, RR_DRAWX11, RR_DRAWOGL};
+enum {RR_DRAWX11=0, RR_DRAWOGL};
 
 class rrcwin : public Runnable
 {
@@ -41,13 +39,11 @@ class rrcwin : public Runnable
 
 	private:
 
-	int _drawmethod;
+	int _drawmethod, _reqdrawmethod;
 	static const int NB=2;
-	rrfb *_b;  rrjpeg _jpg[NB];  int _jpgi;
-	#ifdef USEGL
-	rrglframe *_glf;
+	rrframe *_b;  rrjpeg _jpg[NB];  int _jpgi;
 	void initgl(void);
-	#endif
+	void initx11(void);
 	genericQ _q;
 	void showprofile(rrframeheader *, int);
 	bool _deadyet;

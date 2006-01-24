@@ -24,8 +24,9 @@ bool restart=true, ssl=false, quiet=false;
 rrmutex deadmutex;
 int port=-1;
 int service=0;
-#ifdef USEGL
-int drawmethod=RR_DRAWAUTO;
+#ifdef SUNOGL
+#include <GL/glx.h>
+int drawmethod=RR_DRAWOGL;
 #else
 int drawmethod=RR_DRAWX11;
 #endif
@@ -65,9 +66,6 @@ void handler(int type)
 
 
 // This does nothing except prevent Xlib from exiting the program so we can trap X11 errors
-int _Xerror=0;
-rrcs _Errmutex;
-
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	const char *temp=NULL;  char errmsg[257];
@@ -77,9 +75,6 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	if((temp=x11error(xe->error_code))!=NULL && stricmp(temp, "Unknown error code"))
 		rrout.print("%s ", temp);
 	rrout.println("%s", errmsg);
-	_Errmutex.lock(false);
-	if(!_Xerror) _Xerror=1;
-	_Errmutex.unlock(false);
 	return 1;
 }
 
@@ -90,20 +85,16 @@ void usage(char *progname)
 	#ifdef USESSL
 	fprintf(stderr, " [-s]");
 	#endif
-	#ifdef USEGL
 	fprintf(stderr, " [-x] [-gl]");
-	#endif
 	fprintf(stderr, "\n\n-h or -? = This help screen\n");
-	fprintf(stderr, "-p = Specify which port the client should listen on\n");
+	fprintf(stderr, "-p = Specify the port on which the client should listen\n");
 	fprintf(stderr, "     (default is %d for unencrypted and %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
 	fprintf(stderr, "-v = Display version information\n");
 	#ifdef USESSL
 	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
 	#endif
-	#ifdef USEGL
-	fprintf(stderr, "-x = Use X11 drawing\n     (default is to auto-select the fastest drawing method)\n");
-	fprintf(stderr, "-gl = Use OpenGL drawing\n      (default is to auto-select the fastest drawing method)\n");
-	#endif
+	fprintf(stderr, "-x = Use X11 drawing  %s\n", drawmethod==RR_DRAWX11?"(default)":" ");
+	fprintf(stderr, "-gl = Use OpenGL drawing  %s\n", drawmethod==RR_DRAWOGL?"(default)":" ");
 	#ifdef _WIN32
 	fprintf(stderr, "-install = Install %s client as a service\n", __APPNAME);
 	fprintf(stderr, "-remove = Remove %s client service\n", __APPNAME);
@@ -131,10 +122,8 @@ int main(int argc, char *argv[])
 		if(argv[i][0]=='-' && toupper(argv[i][1])=='L' && strlen(argv[i])>2)
 			rrout.logto(&argv[i][2]);
 		if(!stricmp(argv[i], "--service")) service=1;
-		#ifdef USEGL
 		if(!stricmp(argv[i], "-x")) drawmethod=RR_DRAWX11;
 		if(!stricmp(argv[i], "-gl")) drawmethod=RR_DRAWOGL;
-		#endif
 	}
 	if(port<0) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 

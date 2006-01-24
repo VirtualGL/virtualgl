@@ -39,7 +39,7 @@ class rrframe
 	public:
 
 	rrframe(bool primary=true) : _bits(NULL), _pitch(0), _pixelsize(0),
-		_flags(0), _primary(primary)
+		_flags(0), _isgl(false), _primary(primary)
 	{
 		memset(&_h, 0, sizeof(rrframeheader));
 		_ready.lock();
@@ -139,6 +139,7 @@ class rrframe
 	rrframeheader _h;
 	unsigned char *_bits;
 	int _pitch, _pixelsize, _flags;
+	bool _isgl;
 
 	protected:
 

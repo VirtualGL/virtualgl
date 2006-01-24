@@ -14,12 +14,10 @@
 #include "rrcwin.h"
 #include "rrerror.h"
 #include "rrprofiler.h"
+#include "rrglframe.h"
 
 rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
-	_drawmethod(drawmethod), _b(NULL), _jpgi(0),
-	#ifdef USEGL
-	_glf(NULL),
-	#endif
+	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _jpgi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	char dpystr[80];
@@ -31,14 +29,11 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	sprintf(dpystr, ":%d.0", dpynum);
 	#endif
 	_dpynum=dpynum;  _window=window;
-	_b=new rrfb(dpystr, window);
-	if(!_b) _throw("Could not allocate class instance");
-	#ifdef USEGL
+
 	if(_stereo) _drawmethod=RR_DRAWOGL;
 	initgl();
-	#else
-	_stereo=false;
-	#endif
+	initx11();
+
 	errifnot(_t=new Thread(this));
 	_t->start();
 }
@@ -49,45 +44,64 @@ rrcwin::~rrcwin(void)
 	_q.release();
 	if(_t) _t->stop();
 	if(_b) delete _b;
-	#ifdef USEGL
-	if(_glf) delete _glf;
-	#endif
 	for(int i=0; i<NB; i++) _jpg[i].complete();
 	if(_t) {delete _t;  _t=NULL;}
 }
 
-#ifdef USEGL
 void rrcwin::initgl(void)
 {
+	rrframe *b=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
 	#else
 	sprintf(dpystr, "localhost:%d.0", _dpynum);
 	#endif
-	if(_drawmethod==RR_DRAWAUTO || _drawmethod==RR_DRAWOGL)
+	if(_drawmethod==RR_DRAWOGL)
 	{
 		try
 		{
-			_glf=new rrglframe(dpystr, _window);
-			if(!_glf) _throw("Could not allocate class instance");
+			b=new rrglframe(dpystr, _window);
+			if(!b) _throw("Could not allocate class instance");
 		}
 		catch(rrerror &e)
 		{
 			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
 				e.getMessage());
-			if(_glf) {delete _glf;  _glf=NULL;}
+			if(b) {delete b;  b=NULL;}
 			_drawmethod=RR_DRAWX11;
 			rrout.println("Stereo requires OpenGL drawing.  Disabling stereo.");
 			_stereo=false;
+			return;
 		}
 	}
-	if(_drawmethod==RR_DRAWOGL)
-	{
-		delete _b;  _b=NULL;
-	}
+	if(b) {if(_b) delete _b;  _b=b;}
 }
-#endif
+
+void rrcwin::initx11(void)
+{
+	rrframe *b=NULL;
+	char dpystr[80];
+	#ifdef XDK
+	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
+	#else
+	sprintf(dpystr, "localhost:%d.0", _dpynum);
+	#endif
+	if(_drawmethod==RR_DRAWX11)
+	{
+		try
+		{
+			b=new rrfb(dpystr, _window);
+			if(!b) _throw("Could not allocate class instance");
+		}
+		catch(rrerror &e)
+		{
+			if(b) {delete b;  b=NULL;}
+			throw;
+		}
+	}
+	if(b) {if(_b) delete _b;  _b=b;}
+}
 
 int rrcwin::match(int dpynum, Window window)
 {
@@ -109,13 +123,21 @@ rrjpeg *rrcwin::getFrame(void)
 void rrcwin::drawFrame(rrjpeg *j)
 {
 	if(_t) _t->checkerror();
-	#ifdef USEGL
-	if((j->_flags==RR_RIGHT || j->_flags==RR_LEFT) && (!_stereo || _drawmethod!=RR_DRAWOGL))
+	if((j->_h.flags==RR_RIGHT || j->_h.flags==RR_LEFT) && !_stereo)
 	{
-		_stereo=true;  _drawmethod=RR_DRAWOGL;
-		initgl();
+		_stereo=true;
+		if(_drawmethod!=RR_DRAWOGL)
+		{
+			_drawmethod=RR_DRAWOGL;
+			initgl();
+		}
 	}
-	#endif
+	if((j->_h.flags==0) && _stereo)
+	{
+		_stereo=false;
+		_drawmethod=_reqdrawmethod;
+		initx11();
+	}
 	_q.add(j);
 }
 
@@ -124,9 +146,6 @@ void rrcwin::run(void)
 {
 	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
 	rrjpeg *j=NULL;  long bytes=0;
-	double xtime=0., gltime=0., t1=0.;
-	bool dobenchmark=false;
-	bool firstframe=(_drawmethod==RR_DRAWAUTO)? true:false;
 
 	try {
 
@@ -137,65 +156,22 @@ void rrcwin::run(void)
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
 		if(j->_h.flags==RR_EOF)
 		{
-			bool stereo=false;
 			pb.startframe();
-			if(dobenchmark) t1=rrtime();
-			if(_b)
-			{
-				_b->init(&j->_h);
-				_b->redraw();
-			}
-			if(dobenchmark) xtime+=rrtime()-t1;
-			#ifdef USEGL
-			if(dobenchmark) t1=rrtime();
-			if(_glf)
-			{
-				if(_glf->_h.flags==RR_LEFT || _glf->_h.flags==RR_RIGHT) stereo=true;
-				_glf->init(&j->_h);
-				_glf->redraw();
-			}
-			if(dobenchmark) gltime+=rrtime()-t1;
-			if(dobenchmark && (xtime>0.25 || gltime>0.25))
-			{
-				rrout.print("X11: %.3f ms  OGL: %.3f ms  ", xtime*1000., gltime*1000.);
-				if(gltime<0.95*xtime)
-				{
-					delete _b;  _b=NULL;  rrout.println("Using OpenGL");
-				}
-				else
-				{
-					delete _glf;  _glf=NULL;  rrout.println("Using X11");
-				}
-				dobenchmark=false;
-			}
-			if(firstframe) {dobenchmark=true;  firstframe=false;}
-			#endif
-			if(_b)
-			{
-				pb.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), bytes, 1);
-			}
-			#ifdef USEGL
-			if(_glf)
-			{
-				pb.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), 0, 1);
-				pt.endframe(_glf->_h.framew*_glf->_h.frameh* (stereo? 2:1), bytes, 1);
-			}
-			#endif
+			if(_b->_isgl) ((rrglframe *)_b)->init(&j->_h);
+			else ((rrfb *)_b)->init(&j->_h);
+			if(_b->_isgl) ((rrglframe *)_b)->redraw();
+			else ((rrfb *)_b)->redraw();
+			bool stereo=_b->_h.flags==RR_LEFT || _b->_h.flags==RR_RIGHT;
+			pb.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), 0, 1);
+			pt.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), bytes, 1);
 			bytes=0;
 			pt.startframe();
 		}
 		else
 		{
 			pd.startframe();
-			if(dobenchmark) t1=rrtime();
-			if(_b) *_b=*j;
-			if(dobenchmark) xtime+=rrtime()-t1;
-			#ifdef USEGL
-			if(dobenchmark) t1=rrtime();
-			if(_glf) *_glf=*j;
-			if(dobenchmark) gltime+=rrtime()-t1;
-			#endif
+			if(_b->_isgl) *((rrglframe *)_b)=*j;
+			else *((rrfb *)_b)=*j;
 			bool stereo=j->_h.flags==RR_LEFT || j->_h.flags==RR_RIGHT;
 			pd.endframe(j->_h.width*j->_h.height, 0, (double)(j->_h.width*j->_h.height)/
 				(double)(j->_h.framew*j->_h.frameh) * (stereo? 0.5:1.0));
@@ -206,9 +182,7 @@ void rrcwin::run(void)
 
 	} catch(rrerror &e)
 	{
-		extern rrcs _Errmutex;  extern int _Xerror;
 		if(_t) _t->seterror(e);  if(j) j->complete();
-		_Errmutex.lock(false);  _Xerror=0;  _Errmutex.unlock(false);
 		throw;
 	}
 }
