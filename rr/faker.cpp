@@ -853,6 +853,9 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
 	TRY();
 
+	if(ctx && ctxh.findconfig(ctx)==(GLXFBConfig)-1)
+		{_glXDestroyContext(dpy, ctx);  return;}
+
 		opentrace(glXDestroyContext);  prargd(dpy);  prargx(ctx);  starttrace();
 
 	ctxh.remove(ctx);
