@@ -106,9 +106,7 @@ void rrserver::run(void)
 	}
 	catch(rrerror &e)
 	{
-		extern rrcs _Errmutex;  extern int _Xerror;
 		rrout.println("Server error in %s\n%s", e.getMethod(), e.getMessage());
-		_Errmutex.lock(false);  _Xerror=0;  _Errmutex.unlock(false);
 	}
 	if(_t) {_t->detach();  delete _t;}
 	delete this;
