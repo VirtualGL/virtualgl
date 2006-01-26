@@ -48,7 +48,7 @@ class rrblitter : public Runnable
 
 	static const int NB=2;
 	rrcs _bmpmutex;  rrfb *_bmp[NB];  int _bmpi;
-	rrmutex _ready;
+	rrevent _ready;
 	genericQ _q;
 	void blitdiff(rrfb *, rrfb *);
 	Thread *_t;  bool _deadyet;

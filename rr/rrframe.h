@@ -42,7 +42,7 @@ class rrframe
 		_flags(0), _isgl(false), _primary(primary)
 	{
 		memset(&_h, 0, sizeof(rrframeheader));
-		_ready.lock();
+		_ready.wait();
 	}
 
 	virtual ~rrframe(void)
@@ -118,10 +118,10 @@ class rrframe
 		return false;
 	}
 
-	void ready(void) {_ready.unlock();}
-	void waituntilready(void) {_ready.lock();}
-	void complete(void) {_complete.unlock();}
-	void waituntilcomplete(void) {_complete.lock();}
+	void ready(void) {_ready.signal();}
+	void waituntilready(void) {_ready.wait();}
+	void complete(void) {_complete.signal();}
+	void waituntilcomplete(void) {_complete.wait();}
 
 	rrframe& operator= (rrframe& f)
 	{
@@ -166,8 +166,8 @@ class rrframe
 			throw(rrerror("rrframe::checkheader", "Invalid header"));
 	}
 
-	rrmutex _ready;
-	rrmutex _complete;
+	rrevent _ready;
+	rrevent _complete;
 	friend class rrjpeg;
 	bool _primary;
 };

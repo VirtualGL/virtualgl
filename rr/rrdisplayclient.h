@@ -42,7 +42,7 @@ class rrdisplayclient : public Runnable
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(rrframe *b) {_ready.unlock();}
+	void release(rrframe *b) {_ready.signal();}
 	bool stereoenabled(void) {return _stereo;}
 
 	rrsocket *_sd;
@@ -51,7 +51,7 @@ class rrdisplayclient : public Runnable
 
 	static const int NB=3;
 	rrcs _bmpmutex;  rrframe _bmp[NB];  int _bmpi;
-	rrmutex _ready;
+	rrevent _ready;
 	genericQ _q;
 	Thread *_t;  bool _deadyet;
 	rrprofiler _prof_total;
@@ -78,7 +78,7 @@ class rrcompressor : public Runnable
 		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank), _np(np),
 		_sd(sd), _deadyet(false)
 	{
-		_ready.lock();  _complete.lock();
+		_ready.wait();  _complete.wait();
 	}
 
 	virtual ~rrcompressor(void)
@@ -93,26 +93,26 @@ class rrcompressor : public Runnable
 		{
 			try {
 
-			_ready.lock();  if(_deadyet) break;
+			_ready.wait();  if(_deadyet) break;
 			compresssend(_b, _lastb);
-			_complete.unlock();
+			_complete.signal();
 
-			} catch (...) {_complete.unlock();  throw;}
+			} catch (...) {_complete.signal();  throw;}
 		}
 	}
 
 	void go(rrframe *b, rrframe *lastb)
 	{
 		_b=b;  _lastb=lastb;
-		_ready.unlock();
+		_ready.signal();
 	}
 
 	void stop(void)
 	{
-		_complete.lock();
+		_complete.wait();
 	}
 
-	void shutdown(void) {_deadyet=true;  _ready.unlock();}
+	void shutdown(void) {_deadyet=true;  _ready.signal();}
 	void compresssend(rrframe *, rrframe *);
 
 	void send(void)
@@ -146,7 +146,7 @@ class rrcompressor : public Runnable
 	rrframe *_b, *_lastb;
 	int _myrank, _np;
 	rrsocket *_sd;
-	rrmutex _ready, _complete;  bool _deadyet;
+	rrevent _ready, _complete;  bool _deadyet;
 	rrcs _mutex;
 };
 

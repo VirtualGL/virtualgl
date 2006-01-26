@@ -23,67 +23,79 @@
 #endif
 #include "rrerror.h"
 
-class rrmutex
+class rrevent
 {
 	public:
 
-		rrmutex(void)
+		rrevent(void)
 		{
 			#ifdef _WIN32
-			mutex=CreateEvent(NULL, FALSE, TRUE, NULL);
+			event=CreateEvent(NULL, FALSE, TRUE, NULL);
 			#else
-			pthread_mutex_init(&mutex, NULL);
+			_ready=true;  _deadyet=false;
+			pthread_mutex_init(&event, NULL);
+			pthread_cond_init(&cond, NULL);
 			#endif
 		}
 
-		~rrmutex(void)
+		~rrevent(void)
 		{
 			#ifdef _WIN32
-			if(mutex) {SetEvent(mutex);  CloseHandle(mutex);  mutex=NULL;}
+			if(event) {SetEvent(event);  CloseHandle(event);  event=NULL;}
 			#else
-			pthread_mutex_unlock(&mutex);
-			pthread_mutex_destroy(&mutex);
+			pthread_mutex_lock(&event);
+			_ready=true;  _deadyet=true;
+			pthread_mutex_unlock(&event);
+			pthread_cond_signal(&cond);
+			pthread_mutex_destroy(&event);
 			#endif
 		}
 
-		void lock(void)
+		void wait(void)
 		{
 			#ifdef _WIN32
-			if(WaitForSingleObject(mutex, INFINITE)==WAIT_FAILED)
-				throw(w32error("rrmutex::lock()"));
-			#else
-			int ret;
-			if((ret=pthread_mutex_lock(&mutex))!=0)
-				throw(rrerror("rrmutex::lock()", strerror(ret)));
-			#endif
-		}
-
-		void unlock(void)
-		{
-			#ifdef _WIN32
-			if(!SetEvent(mutex)) throw(w32error("rrmutex::unlock()"));
+			if(WaitForSingleObject(event, INFINITE)==WAIT_FAILED)
+				throw(w32error("rrevent::wait()"));
 			#else
 			int ret;
-			if((ret=pthread_mutex_unlock(&mutex))!=0)
-				throw(rrerror("rrmutex::unlock()", strerror(ret)));
+			if((ret=pthread_mutex_lock(&event))!=0)
+				throw(rrerror("rrevent::wait()", strerror(ret)));
+			while(!_ready && !_deadyet)
+				if((ret=pthread_cond_wait(&cond, &event))!=0)
+				{
+					pthread_mutex_unlock(&event);
+					throw(rrerror("rrevent::wait()", strerror(ret)));
+				}
+			_ready=false;
+			if((ret=pthread_mutex_unlock(&event))!=0)
+				throw(rrerror("rrevent::wait()", strerror(ret)));
 			#endif
 		}
 
-		class safelock
+		void signal(void)
 		{
-			public:
-				safelock(rrmutex &mutex) : _mutex(mutex) {mutex.lock();}
-				~safelock() {_mutex.unlock();}
-			private:
-				rrmutex &_mutex;
-		};
+			#ifdef _WIN32
+			if(!SetEvent(event)) throw(w32error("rrevent::signal()"));
+			#else
+			int ret;
+			if((ret=pthread_mutex_lock(&event))!=0)
+				throw(rrerror("rrevent::signal()", strerror(ret)));
+			_ready=true;
+			if((ret=pthread_mutex_unlock(&event))!=0)
+				throw(rrerror("rrevent::signal()", strerror(ret)));
+			if((ret=pthread_cond_signal(&cond))!=0)
+				throw(rrerror("rrevent::signal()", strerror(ret)));
+			#endif
+		}
 
 	private:
 
 		#ifdef _WIN32
-		HANDLE mutex;
+		HANDLE event;
 		#else
-		pthread_mutex_t mutex;
+		pthread_mutex_t event;
+		pthread_cond_t cond;
+		bool _ready, _deadyet;
 		#endif
 };
 

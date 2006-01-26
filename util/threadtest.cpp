@@ -17,7 +17,7 @@
 #include "rrthread.h"
 #include "rrmutex.h"
 
-rrmutex mutex;
+rrevent event;
 rrsem sem;
 
 class testthread : public Runnable
@@ -36,14 +36,14 @@ class testthread : public Runnable
 					printf("Unlocking thread 2\n");
 					fflush(stdout);
 					sleep(2);
-					mutex.unlock();
+					event.signal();
 					break;
 				case 2:
-					mutex.lock();
+					event.wait();
 					printf("\nThread 2 unlocked\n");
 					printf("Greetings from thread %d (ID %lu)\n", _myrank, _threadId);
 					fflush(stdout);
-					mutex.unlock();
+					event.signal();
 					sleep(2);
 					printf("\n2: Releasing two threads.\n");
 					fflush(stdout);
@@ -82,7 +82,7 @@ int main(void)
 	printf("Number of CPU's in this system:  %d\n", numprocs());
 	printf("Word size = %d-bit\n", (int)sizeof(long)*8);
 
-	mutex.lock();
+	event.wait();
 
 	for(i=0; i<5; i++)
 	{

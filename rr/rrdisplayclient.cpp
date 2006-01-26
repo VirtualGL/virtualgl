@@ -74,7 +74,7 @@ void rrdisplayclient::run(void)
 		b=NULL;
 		_q.get((void **)&b);  if(_deadyet) break;
 		if(!b) _throw("Queue has been shut down");
-		_ready.unlock();
+		_ready.signal();
 		if(b->_h.flags==RR_RIGHT && !_stereo) continue;
 		prof_comp.startframe();
 		if(_np>1)
@@ -119,7 +119,7 @@ void rrdisplayclient::run(void)
 	} catch(rrerror &e)
 	{
 		if(_t) _t->seterror(e);
-		_ready.unlock();
+		_ready.signal();
  		throw;
 	}
 }
@@ -127,7 +127,7 @@ void rrdisplayclient::run(void)
 rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 {
 	rrframe *b=NULL;
-	_ready.lock();  if(_deadyet) return NULL;
+	_ready.wait();  if(_deadyet) return NULL;
 	if(_t) _t->checkerror();
 	_bmpmutex.lock();
 	b=&_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;

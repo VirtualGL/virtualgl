@@ -21,7 +21,7 @@
 
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, ssl=false, quiet=false;
-rrmutex deadmutex;
+rrevent death;
 int port=-1;
 int service=0;
 #ifdef SUNOGL
@@ -61,7 +61,7 @@ SERVICE_TABLE_ENTRY servicetable[] =
 void handler(int type)
 {
 	restart=false;
-	deadmutex.unlock();
+	death.signal();
 }
 
 
@@ -178,7 +178,7 @@ void start(int argc, char **argv)
 
 	try {
 
-	deadmutex.lock();
+	death.wait();
 
 	start:
 
@@ -194,7 +194,7 @@ void start(int argc, char **argv)
 			EventLog("Could not set service status", 1);
 	}
 	#endif
-	deadmutex.lock();
+	death.wait();
 	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
 	if(restart) goto start;
 
@@ -310,7 +310,7 @@ void WINAPI control_service(DWORD code)
 		if(!SetServiceStatus(statushnd, &status))
 			EventLog("Could not set service status", 1);
 		restart=false;
-		deadmutex.unlock();
+		death.signal();
 	}
 }
 

@@ -28,7 +28,7 @@ void rrblitter::run(void)
 		rrfb *b=NULL;
 		_q.get((void **)&b);  if(_deadyet) return;
 		if(!b) _throw("Queue has been shut down");
-		_ready.unlock();
+		_ready.signal();
 		_prof_blit.startframe();
 		b->redraw();
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
@@ -38,14 +38,14 @@ void rrblitter::run(void)
 	} catch(rrerror &e)
 	{
 		if(_t) _t->seterror(e);
-		_ready.unlock();  throw;
+		_ready.signal();  throw;
 	}
 }
 
 rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 {
 	rrfb *b=NULL;
-	_ready.lock();
+	_ready.wait();
 	if(_t) _t->checkerror();
 	_bmpmutex.lock();
 	if(!_bmp[_bmpi]) errifnot(_bmp[_bmpi]=new rrfb(dpy, win));
@@ -75,7 +75,7 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 		blitdiff(b, _lastb);
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
 		_lastb=b;
-		_ready.unlock();
+		_ready.signal();
 	}
 	else _q.add((void *)b);
 }
