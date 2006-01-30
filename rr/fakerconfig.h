@@ -83,6 +83,14 @@ class FakerConfig
 				{
 					localdpystring=&localdpystring[i];  break;
 				}
+			if(strlen(localdpystring)>0)
+			{
+				int i;
+				for(i=0; i<(int)strlen(localdpystring); i++)
+					if(localdpystring[i]==' ' || localdpystring[i]=='\t')
+						break;
+				localdpystring[i]='\0';
+			}
 			#ifdef USEGLP
 			if(localdpystring[0]=='/' || !strnicmp(localdpystring, "GLP", 3))
 				glp=true;
