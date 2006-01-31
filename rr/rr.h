@@ -22,6 +22,9 @@
 
 #define DLLCALL
 
+#define RR_MAJOR_VERSION 2
+#define RR_MINOR_VERSION 0
+
 /* Header contained in all image structures */
 #pragma pack(1)
 typedef struct _rrframeheader
@@ -41,10 +44,42 @@ typedef struct _rrframeheader
 	unsigned char subsamp;   /* YUV subsampling of destination JPEG
 	                            (RR_411, RR_422, or RR_444) */
 	unsigned char flags;     /* See enum below */
-	unsigned char dpynum;    /* Display number on the client machine that
+	unsigned char unused;
+	unsigned short dpynum;   /* Display number on the client machine that
 	                            contains the window into which this frame will be
 	                            drawn */
 } rrframeheader;
+
+typedef struct _rrversion
+{
+	char id[3];
+	unsigned char major;
+	unsigned char minor;
+} rrversion;
+
+// Header from version 1 of the VirtualGL protocol (used to communicate with
+// older clients
+typedef struct _rrframeheader_v1
+{
+	unsigned int size;       /* If this frame is compressed, the size (in bytes)
+	                            of the compressed image that represents it */
+	unsigned int winid;      /* The ID of the window on the client into which
+	                            this frame should be drawn (usually this is the
+	                            X11 Window handle) */
+	unsigned short framew;   /* The width of the entire frame (in pixels) */
+	unsigned short frameh;   /* The height of the entire frame (in pixels) */
+	unsigned short width;    /* The width of this tile (in pixels) */
+	unsigned short height;   /* The height of this tile (in pixels) */
+	unsigned short x;        /* The X offset of this tile within the frame */
+	unsigned short y;        /* The Y offset of this tile within the frame */
+	unsigned char qual;      /* Quality of destination JPEG (1-100) */
+	unsigned char subsamp;   /* YUV subsampling of destination JPEG
+	                            (RR_411, RR_422, or RR_444) */
+	unsigned char flags;     /* See enum below */
+	unsigned char dpynum;    /* Display number on the client machine that
+	                            contains the window into which this frame will be
+	                            drawn */
+} rrframeheader_v1;
 #pragma pack()
 
 /* Header flags */
@@ -52,8 +87,7 @@ enum {
 	RR_EOF=1, /* this tile is an End-of-Frame marker and contains no real
                image data */
 	RR_LEFT,  /* this tile goes to the left buffer of a stereo frame */
-	RR_RIGHT,  /* this tile goes to the right buffer of a stereo frame */
-	RR_NOCTS=128  /* The server uses a later version of the protocol and doesn't require a CTS */
+	RR_RIGHT  /* this tile goes to the right buffer of a stereo frame */
 };
 
 typedef struct _RRFrame

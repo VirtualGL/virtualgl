@@ -17,6 +17,62 @@
 
 extern FakerConfig fconfig;
 
+static rrversion _v={{0, 0, 0}, 0, 0};
+
+static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
+{
+	if(_v.major==0 && _v.minor==0)
+	{
+		// Fake up an old (protocol v1.0) EOF packet and see if the client sends
+		// back a CTS signal.  If so, it needs protocol 1.0
+		rrframeheader_v1 h1;  char reply=0;
+		cvthdr_v1(h, h1);
+		h1.flags=RR_EOF;
+		endianize_v1(h1);
+		if(_sd)
+		{
+			_sd->send((char *)&h1, sizeof(rrframeheader_v1));
+			_sd->recv(&reply, 1);
+			if(reply==1) {_v.major=1;  _v.minor=0;}
+			else if(reply=='V')
+			{
+				rrversion v;
+				_v.id[0]=reply;
+				_sd->recv((char *)&_v.id[1], sizeof(rrversion)-1);
+				if(strncmp(_v.id, "VGL", 3) || _v.major<1)
+					_throw("Error reading client version");
+				v=_v;
+				v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
+				_sd->send((char *)&v, sizeof(rrversion));
+			}
+			rrout.println("Client version: %d.%d", _v.major, _v.minor);
+		}
+	}
+	if(eof) h.flags=RR_EOF;  else h.flags=0;
+	if(_v.major==1 && _v.minor==0)
+	{
+		rrframeheader_v1 h1;
+		cvthdr_v1(h, h1);
+		endianize_v1(h1);
+		if(_sd)
+		{
+			_sd->send((char *)&h1, sizeof(rrframeheader_v1));
+			if(eof)
+			{
+				char cts=0;
+				_sd->recv(&cts, 1);
+				if(cts<1 || cts>2) _throw("CTS Error");
+			}
+		}
+	}
+	else
+	{
+		endianize(h);
+		if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
+	}
+}
+
+
 rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
 	_t(NULL), _deadyet(false), _np(fconfig.np), _dpynum(0), _stereo(true)
 {
@@ -91,14 +147,8 @@ void rrdisplayclient::run(void)
 		prof_comp.endframe(b->_h.framew*b->_h.frameh, 0,
 			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 
-		if(b->_h.flags!=RR_LEFT)
-		{
-			rrframeheader h;
-			memcpy(&h, &b->_h, sizeof(rrframeheader));
-			h.flags=RR_EOF|RR_NOCTS;
-			endianize(h);
-			if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
-		}
+		if(b->_h.flags!=RR_LEFT) sendheader(_sd, b->_h, true);
+
 		_prof_total.endframe(b->_h.width*b->_h.height, bytes,
 			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 		bytes=0;
@@ -154,17 +204,12 @@ void rrdisplayclient::sendframe(rrframe *b)
 	_q.add((void *)b);
 }
 
-void rrdisplayclient::sendcompressedframe(rrframeheader &horig, unsigned char *bits)
+void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)
 {
-	rrframeheader h=horig;
-	endianize(h);
-	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
-	if(_sd) _sd->send((char *)bits, horig.size);
-	h=horig;
-	h.flags=RR_EOF|RR_NOCTS;
 	h.dpynum=_dpynum;
-	endianize(h);
-	if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
+	sendheader(_sd, h);
+	if(_sd) _sd->send((char *)bits, h.size);
+	sendheader(_sd, h, true);
 }
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
@@ -196,10 +241,8 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			delete rrb;
 			if(_myrank==0)
 			{
-				unsigned int size=jptr->_h.size;
-				endianize(jptr->_h);
-				if(_sd) _sd->send((char *)&jptr->_h, sizeof(rrframeheader));
-				if(_sd) _sd->send((char *)jptr->_bits, (int)size);
+				sendheader(_sd, jptr->_h);
+				if(_sd) _sd->send((char *)jptr->_bits, jptr->_h.size);
 			}
 			else
 			{	
@@ -207,4 +250,17 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			}
 		}
 	}
+}
+
+void rrcompressor::send(void)
+{
+	for(int i=0; i<_storedframes; i++)
+	{
+		rrjpeg *j=_frame[i];
+		errifnot(j);
+		sendheader(_sd, j->_h);
+		if(_sd) _sd->send((char *)j->_bits, j->_h.size);
+		delete j;		
+	}
+	_storedframes=0;
 }

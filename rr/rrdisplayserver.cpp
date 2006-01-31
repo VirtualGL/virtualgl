@@ -22,7 +22,33 @@
 		h.width=byteswap16(h.width);  \
 		h.height=byteswap16(h.height);  \
 		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);  \
+		h.dpynum=byteswap16(h.dpynum);}}
+
+#define endianize_v1(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
 		h.y=byteswap16(h.y);}}
+
+#define cvthdr_v1(h1, h) {  \
+	h.size=h1.size;  \
+	h.winid=h1.winid;  \
+	h.framew=h1.framew;  \
+	h.frameh=h1.frameh;  \
+	h.width=h1.width;  \
+	h.height=h1.height;  \
+	h.x=h1.x;  \
+	h.y=h1.y;  \
+	h.qual=h1.qual;  \
+	h.subsamp=h1.subsamp;  \
+	h.flags=h1.flags;  \
+	h.dpynum=(unsigned short)h1.dpynum;}
 
 rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl, int drawmethod) :
 	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false)
@@ -72,19 +98,41 @@ void rrserver::run(void)
 {
 	rrcwin *w=NULL;
 	rrjpeg *j;
-	rrframeheader h;
-	bool ctsreq=false;
+	rrframeheader h;  rrframeheader_v1 h1;
+	rrversion v;
 
 	try
 	{
+		_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
+		endianize(h1);
+		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
+			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
+			{v.major=1;  v.minor=0;}
+		else
+		{
+			strncpy(v.id, "VGL", 3);  v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
+			_sd->send((char *)&v, sizeof(rrversion));
+			_sd->recv((char *)&v, sizeof(rrversion));
+			if(strncmp(v.id, "VGL", 3) || v.major<1)
+				_throw("Error reading server version");
+		}
+		rrout.println("Server version: %d.%d", v.major, v.minor);
+
 		while(1)
 		{
 			do
 			{
-				_sd->recv((char *)&h, sizeof(rrframeheader));
-				endianize(h);
-				if(h.flags==(RR_EOF|RR_NOCTS)) {h.flags=RR_EOF;  ctsreq=false;}
-				else if(h.flags==RR_EOF) ctsreq=true;
+				if(v.major==1 && v.minor==0)
+				{
+					_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
+					endianize_v1(h1);
+					cvthdr_v1(h1, h);
+				}
+				else
+				{
+					_sd->recv((char *)&h, sizeof(rrframeheader));
+					endianize(h);
+				}
 				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
 
 				try {j=w->getFrame();}
@@ -97,7 +145,7 @@ void rrserver::run(void)
 				catch (...) {if(w) delwindow(w);  throw;}
 			} while(!(j && j->_h.flags==RR_EOF));
 
-			if(ctsreq)
+			if(v.major==1 && v.minor==0)
 			{
 				char cts=1;
 				_sd->send(&cts, 1);
