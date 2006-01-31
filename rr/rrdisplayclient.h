@@ -94,8 +94,7 @@ class rrdisplayclient : public Runnable
 	h1.qual=h.qual;  \
 	h1.subsamp=h.subsamp;  \
 	h1.flags=h.flags;  \
-	h1.dpynum=(unsigned char)h.dpynum;  \
-	if(h.dpynum>255) _throw("Display number out of range for v1.0 client");}
+	h1.dpynum=(unsigned char)h.dpynum;}
 
 class rrcompressor : public Runnable
 {

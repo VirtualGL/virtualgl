@@ -52,6 +52,7 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 	if(_v.major==1 && _v.minor==0)
 	{
 		rrframeheader_v1 h1;
+		if(h.dpynum>255) _throw("Display number out of range for v1.0 client");
 		cvthdr_v1(h, h1);
 		endianize_v1(h1);
 		if(_sd)
@@ -86,10 +87,11 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
 			if((ptr=strchr(servername, ':'))!=NULL)
 			{
 				if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
-				if(_dpynum<0 || _dpynum>255) _dpynum=0;
+				if(_dpynum<0 || _dpynum>65535) _dpynum=0;
 				*ptr='\0';
 			}
-			if(!strlen(servername)) {free(servername);  servername=strdup("localhost");}
+			if(!strlen(servername) || !strcmp(servername, "unix"))
+				{free(servername);  servername=strdup("localhost");}
 		}
 		if(servername)
 		{

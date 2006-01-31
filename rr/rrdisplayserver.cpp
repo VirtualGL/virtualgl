@@ -189,7 +189,7 @@ rrcwin *rrserver::addwindow(int dpynum, Window win, bool stereo)
 			if(_rrw[winid] && _rrw[winid]->match(dpynum, win)) return _rrw[winid];
 	}
 	if(_windows>=MAXWIN) _throw("No free window ID's");
-	if(dpynum<0 || dpynum>255 || win==None) _throw("Invalid argument");
+	if(dpynum<0 || dpynum>65535 || win==None) _throw("Invalid argument");
 	_rrw[winid]=new rrcwin(dpynum, win, _drawmethod, stereo);
 
 	if(!_rrw[winid]) _throw("Could not create window instance");

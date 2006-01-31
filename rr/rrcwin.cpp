@@ -21,11 +21,12 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	char dpystr[80];
-	if(dpynum<0 || dpynum>255 || !window)
+	if(dpynum<0 || dpynum>65535 || !window)
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", dpynum);
 	#else
+	printf("Opening :%d.0\n", dpynum);
 	sprintf(dpystr, ":%d.0", dpynum);
 	#endif
 	_dpynum=dpynum;  _window=window;
