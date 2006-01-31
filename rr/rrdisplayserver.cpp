@@ -98,7 +98,7 @@ void rrserver::run(void)
 {
 	rrcwin *w=NULL;
 	rrjpeg *j;
-	rrframeheader h;  rrframeheader_v1 h1;
+	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
 
 	try
@@ -107,7 +107,7 @@ void rrserver::run(void)
 		endianize(h1);
 		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
 			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
-			{v.major=1;  v.minor=0;}
+			{v.major=1;  v.minor=0;  haveheader=true;}
 		else
 		{
 			strncpy(v.id, "VGL", 3);  v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
@@ -124,8 +124,12 @@ void rrserver::run(void)
 			{
 				if(v.major==1 && v.minor==0)
 				{
-					_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
-					endianize_v1(h1);
+					if(!haveheader)
+					{
+						_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
+						endianize_v1(h1);
+					}
+					haveheader=false;
 					cvthdr_v1(h1, h);
 				}
 				else
