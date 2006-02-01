@@ -342,6 +342,30 @@ int XDestroyWindow(Display *dpy, Window win)
 	return retval;
 }
 
+Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
+	int *y, unsigned int *width, unsigned int *height,
+	unsigned int *border_width, unsigned int *depth)
+{
+	Status ret=0;
+
+		opentrace(XGetGeometry);  prargx(display);  prargx(drawable);
+		starttrace();
+
+	ret=_XGetGeometry(display, drawable, root, x, y, width, height, border_width,
+		depth);
+	pbwin *pbw=NULL;
+	if((pbw=winh.findpb(display, drawable))!=NULL && width && height
+		&& *width>0 && *height>0)
+		pbw->resize(*width, *height);
+
+		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
+		if(width) prargi(*width);  if(height) prargi(*height);
+		if(border_width) prargi(*border_width);  if(depth) prargi(*depth);
+		closetrace();
+
+	return ret;
+}
+
 #if 0
 Window FindTopLevelWindow(Display *dpy, Window win)
 {
@@ -1232,7 +1256,7 @@ void glFlush(void)
 {
 	TRY();
 
-		if(fconfig.trace) fprintf(stderr, "[VGL] glFlush()\n");
+		if(fconfig.trace) printf("[VGL] glFlush()\n");
 
 	_glFlush();
 	_doGLreadback(false);
@@ -1243,7 +1267,7 @@ void glFinish(void)
 {
 	TRY();
 
-		if(fconfig.trace) fprintf(stderr, "[VGL] glFinish()\n");
+		if(fconfig.trace) printf("[VGL] glFinish()\n");
 
 	_glFinish();
 	if(fconfig.sync) _doGLreadback(true, true);
@@ -1255,7 +1279,7 @@ void glXWaitGL(void)
 {
 	TRY();
 
-		if(fconfig.trace) fprintf(stderr, "[VGL] glXWaitGL()\n");
+		if(fconfig.trace) printf("[VGL] glXWaitGL()\n");
 
 	#ifdef SUNOGL
 	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
