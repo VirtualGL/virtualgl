@@ -51,6 +51,8 @@
  #endif
  #include <X11/extensions/XShm.h>
  #endif
+ #include <X11/Xproto.h>
+ #define NEED_DBE_PROTOCOL
  #include <X11/extensions/Xdbe.h>
  #include <X11/Xutil.h>
  typedef GC fbx_gc;

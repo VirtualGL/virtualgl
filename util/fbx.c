@@ -63,14 +63,15 @@ const char *_fbx_formatname[FBX_FORMATS]=
  static int fbx_checkdll(char *, int *, int *, int *, int *);
  #endif
 
- unsigned long serial=0;  int __shmok=1;
+ unsigned long serial=0;  int __extok=1;
  XErrorHandler prevhandler=NULL;
 
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
-	if(e->serial==serial && e->minor_code==X_ShmAttach && e->error_code==BadAccess)
+	if(e->serial==serial && ((e->minor_code==X_ShmAttach && e->error_code==BadAccess)
+		|| (e->minor_code==X_DbeAllocateBackBufferName && e->error_code==BadMatch)))
 	{
-		__shmok=0;  return 0;
+		__extok=0;  return 0;
 	}
 	if(prevhandler && prevhandler!=_fbx_xhandler) return prevhandler(dpy, e);
 	else return 0;
@@ -234,12 +235,12 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		XLockDisplay(s->wh.dpy);
 		XSync(s->wh.dpy, False);
 		prevhandler=XSetErrorHandler(_fbx_xhandler);
-		__shmok=1;
+		__extok=1;
 		serial=NextRequest(s->wh.dpy);
 		XShmAttach(s->wh.dpy, &s->shminfo);
 		XSync(s->wh.dpy, False);
 		XSetErrorHandler(prevhandler);
-		shmok=__shmok;
+		shmok=__extok;
 		XUnlockDisplay(s->wh.dpy);
 		#ifdef XWIN32
 		if(!shmok)
@@ -261,7 +262,16 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	{
 		if(XdbeQueryExtension(s->wh.dpy, &dummy1, &dummy2))
 		{
+			XLockDisplay(s->wh.dpy);
+			XSync(s->wh.dpy, False);
+			prevhandler=XSetErrorHandler(_fbx_xhandler);
+			__extok=1;
+			serial=NextRequest(s->wh.dpy);
 			s->bb=XdbeAllocateBackBufferName(s->wh.dpy, s->wh.win, XdbeUndefined);
+			XSync(s->wh.dpy, False);
+			XSetErrorHandler(prevhandler);
+			if(!__extok) s->bb=0;
+			XUnlockDisplay(s->wh.dpy);
 		}
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
