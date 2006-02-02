@@ -14,7 +14,6 @@
 // This library abstracts fast frame buffer access
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "fbx.h"
 
 #define MINWIDTH  160

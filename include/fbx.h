@@ -23,6 +23,7 @@
  #undef WIN32
 #endif
 
+#include <stdio.h>
 #ifdef WIN32
  #include <windows.h>
  typedef HDC fbx_gc;
