@@ -66,6 +66,10 @@ const char *_fbx_formatname[FBX_FORMATS]=
  unsigned long serial=0;  int __extok=1;
  XErrorHandler prevhandler=NULL;
 
+ #ifndef X_DbeAllocateBackBufferName
+ #define X_DbeAllocateBackBufferName 1
+ #endif
+
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
 	if(e->serial==serial && ((e->minor_code==X_ShmAttach && e->error_code==BadAccess)
