@@ -21,6 +21,7 @@
 #define MINHEIGHT 24
 
 static int __line=-1;
+static int __verbose=0;
 
 const int fbx_rmask[FBX_FORMATS]=
 	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0};
@@ -92,6 +93,12 @@ char *fbx_geterrmsg(void)
 int fbx_geterrline(void)
 {
 	return __line;
+}
+
+void fbx_verbosity(int on)
+{
+	if(on) __verbose=1;
+	else __verbose=0;
 }
 
 const char *fbx_formatname(int format)
@@ -207,6 +214,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	#endif
 	if(useshm && XShmQueryExtension(s->wh.dpy))
 	{
+		static int alreadywarned=0;
 		s->shminfo.shmid=-1;
 		if(!(s->xi=XShmCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, NULL,
 			&s->shminfo, w, h)))
@@ -245,6 +253,12 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		XSync(s->wh.dpy, False);
 		XSetErrorHandler(prevhandler);
 		shmok=__extok;
+		if(!alreadywarned && !shmok && __verbose)
+		{
+			fprintf(stderr, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
+			fprintf(stderr, "[FBX]   connection.)  Will try to use DOUBLE-BUFFER extension instead.\n");
+			alreadywarned=1;
+		}
 		XUnlockDisplay(s->wh.dpy);
 		#ifdef XWIN32
 		if(!shmok)
@@ -274,7 +288,17 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			s->bb=XdbeAllocateBackBufferName(s->wh.dpy, s->wh.win, XdbeUndefined);
 			XSync(s->wh.dpy, False);
 			XSetErrorHandler(prevhandler);
-			if(!__extok) s->bb=0;
+			if(!__extok)
+			{
+				static int alreadywarned=0;
+				s->bb=0;
+				if(!alreadywarned && __verbose)
+				{
+					fprintf(stderr, "[FBX] DOUBLE-BUFFER extension failed to initialize.  Falling back to\n");
+					fprintf(stderr, "[FBX]   single-buffered drawing.\n");
+					alreadywarned=1;
+				}
+			}
 			XUnlockDisplay(s->wh.dpy);
 		}
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
@@ -507,8 +531,12 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<1))
 		{
-			if(!alreadywarned)
-				fprintf(stderr, "** hclshm.dll >=9.0.0.1 is required for accelerated drawing **\n");
+			if(!alreadywarned && __verbose)
+			{
+				fprintf(stderr, "[FBX] Installed version of hclshm.dll is %d.%d.%d.%d.\n",
+					v1, v2, v3, v4);
+				fprintf(stderr, "[FBX]   Need version >= 9.0.0.1 for shared memory drawing\n");
+			}
 			retval=0;
 		}
 	}
@@ -516,8 +544,12 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<3))
 		{
-			if(!alreadywarned)
-				fprintf(stderr, "** xlib.dll >=9.0.0.3 is required for accelerated drawing **\n");
+			if(!alreadywarned && __verbose)
+			{
+				fprintf(stderr, "[FBX] Installed version of xlib.dll is %d.%d.%d.%d.\n",
+					v1, v2, v3, v4);
+				fprintf(stderr, "[FBX]   Need version >= 9.0.0.3 for shared memory drawing\n");
+			}
 			retval=0;
 		}
 	}
@@ -525,19 +557,27 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<8 || (v1==8 && v2==0 && v3==0 && v4<28))
 		{
-			if(!alreadywarned)
-				fprintf(stderr, "** exceed.exe v8.0.0.28 is required for accelerated drawing **\n");
+			if(!alreadywarned && __verbose)
+			{
+				fprintf(stderr, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+					v1, v2, v3, v4);
+				fprintf(stderr, "[FBX]   Need version >= 8.0.0.28 for shared memory drawing\n");
+			}
 			retval=0;
 		}
 		if(v1==9 && v2==0 && v3==0 && v4<9)
 		{
-			if(!alreadywarned)
-				fprintf(stderr, "** exceed.exe v9.0.0.9 is required for accelerated drawing **\n");
+			if(!alreadywarned && __verbose)
+			{
+				fprintf(stderr, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+					v1, v2, v3, v4);
+				fprintf(stderr, "[FBX]   Need version >= 9.0.0.9 for shared memory drawing\n");
+			}
 			retval=0;
 		}
 	}
-	if(!retval && !alreadywarned)
-		fprintf(stderr, "** Exceed patches not installed.  Disabling accelerated drawing **\n");
+	if(!retval && !alreadywarned && __verbose)
+		fprintf(stderr, "[FBX] Exceed patches not installed.  Disabling shared memory drawing\n");
 	if(!alreadywarned) alreadywarned=1;
 	return retval;
 }

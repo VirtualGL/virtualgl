@@ -501,6 +501,10 @@ int main(int argc, char **argv)
 		{
 			doshm=0;
 		}
+		if(!stricmp(argv[i], "-verbose"))
+		{
+			fbx_verbosity(1);
+		}
 	}
 
 	try {

@@ -220,6 +220,16 @@ int fbx_geterrline(void);
 */
 const char *fbx_formatname(int format);
 
+/*
+  fbx_verbosity
+  (int on)
+
+  fbx_verbosity(1) enables warning messages from the library, which may be
+  useful in diagnosing performance issues.  fbx_verbosity(0) disables the
+  messages.  Warning messages are disabled by default.
+*/
+void fbx_verbosity(int on);
+
 #ifdef __cplusplus
 }
 #endif
