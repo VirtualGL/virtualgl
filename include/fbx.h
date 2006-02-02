@@ -221,14 +221,18 @@ int fbx_geterrline(void);
 const char *fbx_formatname(int format);
 
 /*
-  fbx_verbosity
-  (int on)
+  fbx_printwarnings
+  (FILE *output_stream)
 
-  fbx_verbosity(1) enables warning messages from the library, which may be
-  useful in diagnosing performance issues.  fbx_verbosity(0) disables the
-  messages.  Warning messages are disabled by default.
+  By default, FBX will not print warning messages (such as messages related to
+  its automatic selection of a particular drawing method.)  These messages are
+  sometimes useful when diagnosing performance issues.  Passing a stream
+  pointer (such as stdout, stderr, or a pointer returned from a previous call
+  to fopen()) to this function will enable warning messages and will cause them
+  to be printed to the specified stream.  Passing an argument of NULL to this
+  function will disable warnings.
 */
-void fbx_verbosity(int on);
+void fbx_printwarnings(FILE *output_stream);
 
 #ifdef __cplusplus
 }

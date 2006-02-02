@@ -503,7 +503,7 @@ int main(int argc, char **argv)
 		}
 		if(!stricmp(argv[i], "-verbose"))
 		{
-			fbx_verbosity(1);
+			fbx_printwarnings(stderr);
 		}
 	}
 

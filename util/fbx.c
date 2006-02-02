@@ -21,7 +21,7 @@
 #define MINHEIGHT 24
 
 static int __line=-1;
-static int __verbose=0;
+FILE *__warningfile=NULL;
 
 const int fbx_rmask[FBX_FORMATS]=
 	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0};
@@ -95,10 +95,9 @@ int fbx_geterrline(void)
 	return __line;
 }
 
-void fbx_verbosity(int on)
+void fbx_printwarnings(FILE *stream)
 {
-	if(on) __verbose=1;
-	else __verbose=0;
+	__warningfile=stream;
 }
 
 const char *fbx_formatname(int format)
@@ -253,10 +252,10 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		XSync(s->wh.dpy, False);
 		XSetErrorHandler(prevhandler);
 		shmok=__extok;
-		if(!alreadywarned && !shmok && __verbose)
+		if(!alreadywarned && !shmok && __warningfile)
 		{
-			fprintf(stderr, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
-			fprintf(stderr, "[FBX]   connection.)  Will try to use DOUBLE-BUFFER extension instead.\n");
+			fprintf(__warningfile, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
+			fprintf(__warningfile, "[FBX]   connection.)  Will try to use DOUBLE-BUFFER extension instead.\n");
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
@@ -273,7 +272,17 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		#endif
 		s->xattach=1;  s->shm=1;
 	}
-	else useshm=0;
+	else if(useshm)
+	{
+		static int alreadywarned=0;
+		if(!alreadywarned && __warningfile)
+		{
+			fprintf(__warningfile, "[FBX] MIT-SHM extension not available.  Will try to use DOUBLE-BUFFER\n");
+			fprintf(__warningfile, "[FBX]   extension instead.\n");
+			alreadywarned=1;
+		}
+		useshm=0;
+	}
 	noshm:
 	if(!useshm)
 	#endif
@@ -292,14 +301,24 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			{
 				static int alreadywarned=0;
 				s->bb=0;
-				if(!alreadywarned && __verbose)
+				if(!alreadywarned && __warningfile)
 				{
-					fprintf(stderr, "[FBX] DOUBLE-BUFFER extension failed to initialize.  Falling back to\n");
-					fprintf(stderr, "[FBX]   single-buffered drawing.\n");
+					fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension failed to initialize.  Falling back to\n");
+					fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
 					alreadywarned=1;
 				}
 			}
 			XUnlockDisplay(s->wh.dpy);
+		}
+		else
+		{
+			static int alreadywarned=0;
+			if(!alreadywarned && __warningfile)
+			{
+				fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension not available.  Falling back to\n");
+				fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
+				alreadywarned=1;
+			}
 		}
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
@@ -531,11 +550,11 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<1))
 		{
-			if(!alreadywarned && __verbose)
+			if(!alreadywarned && __warningfile)
 			{
-				fprintf(stderr, "[FBX] Installed version of hclshm.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] Installed version of hclshm.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(stderr, "[FBX]   Need version >= 9.0.0.1 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.1 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -544,11 +563,11 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<3))
 		{
-			if(!alreadywarned && __verbose)
+			if(!alreadywarned && __warningfile)
 			{
-				fprintf(stderr, "[FBX] Installed version of xlib.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] Installed version of xlib.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(stderr, "[FBX]   Need version >= 9.0.0.3 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.3 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -557,27 +576,27 @@ static int fbx_checkdlls(void)
 	{
 		if(v1<8 || (v1==8 && v2==0 && v3==0 && v4<28))
 		{
-			if(!alreadywarned && __verbose)
+			if(!alreadywarned && __warningfile)
 			{
-				fprintf(stderr, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(stderr, "[FBX]   Need version >= 8.0.0.28 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]   Need version >= 8.0.0.28 for shared memory drawing\n");
 			}
 			retval=0;
 		}
 		if(v1==9 && v2==0 && v3==0 && v4<9)
 		{
-			if(!alreadywarned && __verbose)
+			if(!alreadywarned && __warningfile)
 			{
-				fprintf(stderr, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(stderr, "[FBX]   Need version >= 9.0.0.9 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.9 for shared memory drawing\n");
 			}
 			retval=0;
 		}
 	}
-	if(!retval && !alreadywarned && __verbose)
-		fprintf(stderr, "[FBX] Exceed patches not installed.  Disabling shared memory drawing\n");
+	if(!retval && !alreadywarned && __warningfile)
+		fprintf(__warningfile, "[FBX] Exceed patches not installed.  Disabling shared memory drawing\n");
 	if(!alreadywarned) alreadywarned=1;
 	return retval;
 }
