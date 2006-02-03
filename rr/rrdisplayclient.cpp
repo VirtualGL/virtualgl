@@ -31,19 +31,19 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 		endianize_v1(h1);
 		if(_sd)
 		{
-			_sd->send((char *)&h1, sizeof(rrframeheader_v1));
+			_sd->send((char *)&h1, sizeof_rrframeheader_v1);
 			_sd->recv(&reply, 1);
 			if(reply==1) {_v.major=1;  _v.minor=0;}
 			else if(reply=='V')
 			{
 				rrversion v;
 				_v.id[0]=reply;
-				_sd->recv((char *)&_v.id[1], sizeof(rrversion)-1);
+				_sd->recv((char *)&_v.id[1], sizeof_rrversion-1);
 				if(strncmp(_v.id, "VGL", 3) || _v.major<1)
 					_throw("Error reading client version");
 				v=_v;
 				v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
-				_sd->send((char *)&v, sizeof(rrversion));
+				_sd->send((char *)&v, sizeof_rrversion);
 			}
 			rrout.println("Client version: %d.%d", _v.major, _v.minor);
 		}
@@ -57,7 +57,7 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 		endianize_v1(h1);
 		if(_sd)
 		{
-			_sd->send((char *)&h1, sizeof(rrframeheader_v1));
+			_sd->send((char *)&h1, sizeof_rrframeheader_v1);
 			if(eof)
 			{
 				char cts=0;
@@ -69,7 +69,7 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 	else
 	{
 		endianize(h);
-		if(_sd) _sd->send((char *)&h, sizeof(rrframeheader));
+		if(_sd) _sd->send((char *)&h, sizeof_rrframeheader);
 	}
 }
 

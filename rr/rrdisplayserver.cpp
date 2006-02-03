@@ -103,7 +103,7 @@ void rrserver::run(void)
 
 	try
 	{
-		_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
+		_sd->recv((char *)&h1, sizeof_rrframeheader_v1);
 		endianize(h1);
 		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
 			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
@@ -111,8 +111,8 @@ void rrserver::run(void)
 		else
 		{
 			strncpy(v.id, "VGL", 3);  v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
-			_sd->send((char *)&v, sizeof(rrversion));
-			_sd->recv((char *)&v, sizeof(rrversion));
+			_sd->send((char *)&v, sizeof_rrversion);
+			_sd->recv((char *)&v, sizeof_rrversion);
 			if(strncmp(v.id, "VGL", 3) || v.major<1)
 				_throw("Error reading server version");
 		}
@@ -126,7 +126,7 @@ void rrserver::run(void)
 				{
 					if(!haveheader)
 					{
-						_sd->recv((char *)&h1, sizeof(rrframeheader_v1));
+						_sd->recv((char *)&h1, sizeof_rrframeheader_v1);
 						endianize_v1(h1);
 					}
 					haveheader=false;
@@ -134,7 +134,7 @@ void rrserver::run(void)
 				}
 				else
 				{
-					_sd->recv((char *)&h, sizeof(rrframeheader));
+					_sd->recv((char *)&h, sizeof_rrframeheader);
 					endianize(h);
 				}
 				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));

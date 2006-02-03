@@ -25,8 +25,12 @@
 #define RR_MAJOR_VERSION 2
 #define RR_MINOR_VERSION 0
 
-/* Header contained in all image structures */
+// Argh!
+#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
 #pragma pack(1)
+#endif
+
+/* Header contained in all image structures */
 typedef struct _rrframeheader
 {
 	unsigned int size;       /* If this frame is compressed, the size (in bytes)
@@ -49,6 +53,7 @@ typedef struct _rrframeheader
 	                            contains the window into which this frame will be
 	                            drawn */
 } rrframeheader;
+#define sizeof_rrframeheader 26
 
 typedef struct _rrversion
 {
@@ -56,6 +61,7 @@ typedef struct _rrversion
 	unsigned char major;
 	unsigned char minor;
 } rrversion;
+#define sizeof_rrversion 5
 
 // Header from version 1 of the VirtualGL protocol (used to communicate with
 // older clients
@@ -80,7 +86,11 @@ typedef struct _rrframeheader_v1
 	                            contains the window into which this frame will be
 	                            drawn */
 } rrframeheader_v1;
+#define sizeof_rrframeheader_v1 24
+
+#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
 #pragma pack()
+#endif
 
 /* Header flags */
 enum {
