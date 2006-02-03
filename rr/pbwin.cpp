@@ -268,6 +268,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	int compress=fconfig.compress;  bool dostereo=false;
 	int pbw=_pb->width(), pbh=_pb->height();
 
+	if(!fconfig.readback) return;
+
 	rrcs::safelock l(_mutex);
 
 	_dirty=false;

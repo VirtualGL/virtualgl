@@ -68,6 +68,7 @@ class FakerConfig
 			transpixel=-1;
 			tilesize=RR_DEFAULTTILESIZE;
 			trace=false;
+			readback=true;
 			reloadenv();
 		}
 
@@ -140,6 +141,7 @@ class FakerConfig
 			getconfigint("TRANSPIXEL", transpixel, 0, 255);
 			getconfigint("TILESIZE", tilesize, 8, 1024);
 			getconfigbool("TRACE", trace);
+			getconfigbool("READBACK", readback);
 			sanitycheck();
 		}
 
@@ -195,6 +197,7 @@ class FakerConfig
 		bool autotest;
 		bool gamma;
 		bool trace;
+		bool readback;
 
 	private:
 
