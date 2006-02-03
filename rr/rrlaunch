@@ -9,6 +9,8 @@ usage()
 	echo "  +/-spoil    : Turn on/off frame spoiling"
 	echo "  -d <d>      : set the display or GLP device on which 3D rendering is done"
 	echo "  -client <d> : set the client display"
+	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
+	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
 	echo
 	echo "VirtualGL network options"
 	echo "  +/-s        : Enable/disable use of SSL"
@@ -18,12 +20,10 @@ usage()
 	echo "  -c <c>      : specify compression type (0=none, 1=motion JPEG)"
 	echo "  -q <q>      : specify a JPEG quality value in the range [1-100]"
 	echo "  -samp <s>   : specify JPEG YCbCr subsampling (444, 422, 411)"
+	echo "  -np <n>     : Number of CPUs to use for compression"
 	echo
 	echo "VirtualGL miscellaneous options"
 	echo "  +/-profile  : Enable/disable performance profiling"
-	echo "  -np <n>     : Number of CPUs to use for compression"
-	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
-	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
 	echo "  -64         : (Solaris only) Preload VirtualGL only into 64-bit apps"
 	echo "  -32         : (Solaris only) Preload VirtualGL only into 32-bit apps"
 	exit $1
