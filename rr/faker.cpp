@@ -54,20 +54,6 @@ static GLvoid r_glIndexubv(OglContextPtr, const GLubyte *);
 }
 #endif
 
-// Did I mention that debugging real-time systems is hell?
-void _vglprintf (FILE *f, const char *format, ...)
-{
-	static rrcs mutex;  static rrtimer timer;
-	rrcs::safelock l(mutex);
-	va_list arglist;
-	va_start(arglist, format);
-	fprintf(f, "T0x%.8lx %.6f C0x%.8lx D0x%.8lx R0x%.8lx\n - ", (unsigned long)rrthread_id(), timer.time(),
-		(unsigned long)glXGetCurrentContext(), GetCurrentDrawable(), GetCurrentReadDrawable());
-	vfprintf(f, format, arglist);
-	fflush(f);
-	va_end(arglist);
-}
-
 // Globals
 Display *_localdpy=NULL;
 #ifdef USEGLP
@@ -135,36 +121,36 @@ void __vgl_safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,m) {if(!isdead()) fprintf(stderr, "[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
+#define _die(f,m) {if(!isdead()) rrout.print("[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
-#define prargd(a) printf("%s=0x%.8lx(%s) ", #a, (unsigned long)a, a?DisplayString(a):"NULL")
-#define prargs(a) printf("%s=%s ", #a, a?a:"NULL")
-#define prargx(a) printf("%s=0x%.8lx ", #a, (unsigned long)a)
-#define prargi(a) printf("%s=%d ", #a, a)
-#define prargv(a) printf("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
-#define prargc(a) printf("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
+#define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a, a?DisplayString(a):"NULL")
+#define prargs(a) rrout.print("%s=%s ", #a, a?a:"NULL")
+#define prargx(a) rrout.print("%s=0x%.8lx ", #a, (unsigned long)a)
+#define prargi(a) rrout.print("%s=%d ", #a, a)
+#define prargv(a) rrout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
+#define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
 #define prargal11(a) if(a) {  \
-	printf("attrib_list=[");  \
+	rrout.print("attrib_list=[");  \
 	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
-		printf("0x%.4x", attrib_list[__an]);  \
+		rrout.print("0x%.4x", attrib_list[__an]);  \
 		if(attrib_list[__an]!=GLX_USE_GL && attrib_list[__an]!=GLX_DOUBLEBUFFER  \
 			&& attrib_list[__an]!=GLX_STEREO && attrib_list[__an]!=GLX_RGBA)  \
-			printf("=0x%.4x", attrib_list[++__an]);  \
-		printf(" ");  \
-	}  printf("] ");}
+			rrout.print("=0x%.4x", attrib_list[++__an]);  \
+		rrout.print(" ");  \
+	}  rrout.print("] ");}
 #define prargal13(a) if(a) {  \
-	printf("attrib_list=[");  \
+	rrout.print("attrib_list=[");  \
 	for(int __an=0; attrib_list[__an]!=None; __an+=2) {  \
-		printf("0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
-	}  printf("] ");}
+		rrout.print("0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
+	}  rrout.print("] ");}
 
 #define opentrace(f)  \
 	double __vgltracetime=0.;  \
 	if(fconfig.trace) {  \
-		printf("[VGL] %s (", #f);  \
+		rrout.print("[VGL] %s (", #f);  \
 
 #define starttrace()  \
 		__vgltracetime=rrtime();  \
@@ -175,7 +161,7 @@ void __vgl_safeexit(int retcode)
 		__vgltracetime=rrtime()-__vgltracetime;
 
 #define closetrace()  \
-		printf(") %f ms\n", __vgltracetime*1000.);  \
+		rrout.print(") %f ms\n", __vgltracetime*1000.);  \
 		fflush(stdout);  \
 	}
 
@@ -186,7 +172,7 @@ void __vgl_safeexit(int retcode)
 #ifdef __DEBUG__
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	fprintf(stderr, "[VGL] X11 Error--\n[VGL] %s\n", x11error(xe->error_code));  fflush(stderr);
+	rrout.PRINT("[VGL] X11 Error--\n[VGL] %s\n", x11error(xe->error_code));
 	return 0;
 }
 #endif
@@ -207,7 +193,7 @@ static void fakerinit(void)
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
 	{
-		printf("[VGL] Attach debugger to process %d ...\n", getpid());
+		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
 		fgetc(stdin);
 	}
 	#if 0
@@ -226,9 +212,11 @@ static void fakerinit(void)
 				_throw("No GLP devices are registered");
 			device=fconfig.localdpystring;
 			if(!strnicmp(device, "GLP", 3)) device=NULL;
+			if(fconfig.verbose) rrout.println("[VGL] Opening GLP device %s",
+				device?device:"(default)");
 			if((_localdev=glPOpenDevice(device))<0)
 			{
-				fprintf(stderr, "[VGL] Could not open device %s.\n", fconfig.localdpystring);
+				rrout.print("[VGL] Could not open device %s.\n", fconfig.localdpystring);
 				__vgl_safeexit(1);
 			}
 		}
@@ -237,9 +225,11 @@ static void fakerinit(void)
 	#endif
 	if(!_localdpy)
 	{
+		if(fconfig.verbose) rrout.println("[VGL] Opening local display %s",
+			fconfig.localdpystring?fconfig.localdpystring:"(default)");
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			fprintf(stderr, "[VGL] Could not open display %s.\n", fconfig.localdpystring);
+			rrout.print("[VGL] Could not open display %s.\n", fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}
 	}
@@ -1256,7 +1246,7 @@ void glFlush(void)
 {
 	TRY();
 
-		if(fconfig.trace) printf("[VGL] glFlush()\n");
+		if(fconfig.trace) rrout.print("[VGL] glFlush()\n");
 
 	_glFlush();
 	_doGLreadback(false);
@@ -1267,7 +1257,7 @@ void glFinish(void)
 {
 	TRY();
 
-		if(fconfig.trace) printf("[VGL] glFinish()\n");
+		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
 
 	_glFinish();
 	if(fconfig.sync) _doGLreadback(true, true);
@@ -1279,7 +1269,7 @@ void glXWaitGL(void)
 {
 	TRY();
 
-		if(fconfig.trace) printf("[VGL] glXWaitGL()\n");
+		if(fconfig.trace) rrout.print("[VGL] glXWaitGL()\n");
 
 	#ifdef SUNOGL
 	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
