@@ -15,6 +15,10 @@
 #include "rrsunray.h"
 #include "rrmutex.h"
 #include "rrerror.h"
+#include "fakerconfig.h"
+#include "rrlog.h"
+
+extern FakerConfig fconfig;
 
 static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 {
@@ -73,9 +77,10 @@ static int loadsunraysymbols(bool fatal)
 		}
 		else
 		{
-			#ifdef __DEBUG__
-			err=dlerror();  if(err) fprintf(stderr, "[VGL] %s\n", err);
-			#endif
+			if(fconfig.verbose)
+			{
+				err=dlerror();  if(err) rrout.print("[VGL] %s\n", err);
+			}
 			return 0;
 		}
 	}
