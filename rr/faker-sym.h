@@ -20,11 +20,12 @@
 #include <GL/glp.h>
 #include "glpweak.h"
 #endif
+#include "rrlog.h"
 
 extern void __vgl_safeexit(int);
 
 #define checksym(s) {if(!__##s) { \
-	fprintf(stderr, "[VGL] "#s" symbol not loaded\n");  fflush(stderr);  __vgl_safeexit(1);}}
+	rrout.PRINT("[VGL] "#s" symbol not loaded\n");  __vgl_safeexit(1);}}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
