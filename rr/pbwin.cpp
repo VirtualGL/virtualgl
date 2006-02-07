@@ -20,8 +20,6 @@
 #endif
 #include "glxvisual.h"
 
-extern void _vglprintf (FILE *f, const char *format, ...);
-
 #define INFAKER
 #include "tempctx.h"
 #include "fakerconfig.h"
@@ -56,7 +54,7 @@ static int glerror(void)
 	while(i!=GL_NO_ERROR)
 	{
 		ret=1;
-		fprintf(stderr, "[VGL] OpenGL error 0x%.4x\n", i);
+		rrout.print("[VGL] OpenGL error 0x%.4x\n", i);
 		i=glGetError();
 	}
 	return ret;
