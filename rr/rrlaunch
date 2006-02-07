@@ -62,6 +62,8 @@ do
 	-np*)       VGL_NPROCS=$2     ; export VGL_NPROCS   ; shift     ;;
 	-g*)        VGL_GAMMA=0       ; export VGL_GAMMA    ;;
 	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
+	-v*)        VGL_VERBOSE=0     : export VGL_VERBOSE  ;;
+	+v*)        VGL_VERBOSE=1     : export VGL_VERBOSE  ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-64)        __VGL_64=1        ;;

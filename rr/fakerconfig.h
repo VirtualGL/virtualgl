@@ -69,6 +69,7 @@ class FakerConfig
 			tilesize=RR_DEFAULTTILESIZE;
 			trace=false;
 			readback=true;
+			verbose=false;
 			reloadenv();
 		}
 
@@ -142,6 +143,7 @@ class FakerConfig
 			getconfigint("TILESIZE", tilesize, 8, 1024);
 			getconfigbool("TRACE", trace);
 			getconfigbool("READBACK", readback);
+			getconfigbool("VERBOSE", verbose);
 			sanitycheck();
 		}
 
@@ -198,6 +200,7 @@ class FakerConfig
 		bool gamma;
 		bool trace;
 		bool readback;
+		bool verbose;
 
 	private:
 

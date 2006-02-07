@@ -96,6 +96,8 @@ class rrlog
 
 		void flush(void) {fflush(logfile);}
 
+		FILE *getfile(void) {return logfile;}
+
 	private:
 
 		rrlog() {logfile=stderr;  newfile=false;}

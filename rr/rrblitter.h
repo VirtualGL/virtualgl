@@ -23,14 +23,7 @@ class rrblitter : public Runnable
 {
 	public:
 
-	rrblitter(void) : _bmpi(0), _t(NULL), _deadyet(false)
-	{
-		for(int i=0; i<NB; i++) _bmp[i]=NULL;
-		errifnot(_t=new Thread(this));
-		_t->start();
-		_prof_blit.setname("Blit");
-		_lastb=NULL;
-	}
+	rrblitter(void);
 
 	virtual ~rrblitter(void)
 	{
