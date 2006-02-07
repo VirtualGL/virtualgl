@@ -24,89 +24,89 @@ class rrlog
 
 		static rrlog *instance(void)
 		{
-			if(instanceptr==NULL)
+			if(_instanceptr==NULL)
 			{
-				rrcs::safelock l(mutex);
-				if(instanceptr==NULL) instanceptr=new rrlog;
+				rrcs::safelock l(_mutex);
+				if(_instanceptr==NULL) _instanceptr=new rrlog;
 			}
-			return instanceptr;
+			return _instanceptr;
 		}
 
 		void logto(FILE *log)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if(log)
 			{
-				if(newfile) {fclose(logfile);  newfile=false;}
-				logfile=log;
+				if(_newfile) {fclose(_logfile);  _newfile=false;}
+				_logfile=log;
 			}
 		}
 
 		void logto(char *logfilename)
 		{
 			FILE *log=NULL;
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if(logfilename)
 			{
-				if(newfile) {fclose(logfile);  newfile=false;}
-				if((log=fopen(logfilename, "w"))!=NULL) {logfile=log;  newfile=true;}
+				if(_newfile) {fclose(_logfile);  _newfile=false;}
+				if((log=fopen(logfilename, "w"))!=NULL) {_logfile=log;  _newfile=true;}
 			}
 		}
 
 		void print(const char *format, ...)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			va_list arglist;
 			va_start(arglist, format);
-			vfprintf(logfile, format, arglist);
+			vfprintf(_logfile, format, arglist);
 			va_end(arglist);
 		}
 
 		// This class assumes that if you yell, you want it now
 		void PRINT(const char *format, ...)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			va_list arglist;
 			va_start(arglist, format);
-			vfprintf(logfile, format, arglist);
+			vfprintf(_logfile, format, arglist);
 			va_end(arglist);
 			flush();
 		}
 
 		void println(const char *format, ...)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			va_list arglist;
 			va_start(arglist, format);
-			vfprintf(logfile, format, arglist);
+			vfprintf(_logfile, format, arglist);
 			va_end(arglist);
-			fprintf(logfile, "\n");
+			fprintf(_logfile, "\n");
 		}
 
 		void PRINTLN(const char *format, ...)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			va_list arglist;
 			va_start(arglist, format);
-			vfprintf(logfile, format, arglist);
+			vfprintf(_logfile, format, arglist);
 			va_end(arglist);
-			fprintf(logfile, "\n");
+			fprintf(_logfile, "\n");
 			flush();
 		}
 
-		void flush(void) {fflush(logfile);}
+		void flush(void) {fflush(_logfile);}
 
-		FILE *getfile(void) {return logfile;}
+		FILE *getfile(void) {return _logfile;}
 
 	private:
 
-		rrlog() {logfile=stderr;  newfile=false;}
+		rrlog() {_logfile=stderr;  _newfile=false;}
 		~rrlog() {}
 
-		static rrlog *instanceptr;
-		static rrcs mutex;
-		FILE *logfile;
-		bool newfile;
+		static rrlog *_instanceptr;
+		static rrcs _mutex;
+		FILE *_logfile;
+		bool _newfile;
 };
 
 #define rrout (*(rrlog::instance()))

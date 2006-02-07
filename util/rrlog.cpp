@@ -13,5 +13,5 @@
 
 #include "rrlog.h"
 
-rrlog *rrlog::instanceptr=NULL;
-rrcs rrlog::mutex;
+rrlog *rrlog::_instanceptr=NULL;
+rrcs rrlog::_mutex;
