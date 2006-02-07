@@ -26,7 +26,6 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", dpynum);
 	#else
-	printf("Opening :%d.0\n", dpynum);
 	sprintf(dpystr, ":%d.0", dpynum);
 	#endif
 	_dpynum=dpynum;  _window=window;
