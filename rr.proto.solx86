@@ -8,6 +8,8 @@ f none SUNWvgl/bin/vglrun 0755 root bin
 f none SUNWvgl/bin/rrlaunch 0755 root bin
 f none SUNWvgl/bin/tcbench 0755 root bin
 f none SUNWvgl/bin/nettest 0755 root bin
+d none SUNWvgl/fakelib 0755 root bin
+s none SUNWvgl/fakelib/libGL.so=../lib/librrfaker.so
 d none SUNWvgl/lib 0755 root bin
 f none SUNWvgl/lib/librrfaker.so 0755 root bin
 f none SUNWvgl/lib/libturbojpeg.so 0755 root bin
