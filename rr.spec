@@ -65,6 +65,9 @@ mkdir -p $RPM_BUILD_ROOT/usr/lib64
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib
+%ifarch x86_64
+mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib64
+%endif
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/samples
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
@@ -89,6 +92,7 @@ install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT/usr/lib64/librr.so
 install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{name}/samples/
 %endif
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib/libGL.so
+ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib64/libGL.so
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
@@ -123,6 +127,9 @@ fi
 %dir /opt/%{name}/bin
 %dir /opt/%{name}/include
 %dir /opt/%{name}/lib
+%ifarch x86_64
+%dir /opt/%{name}/lib64
+%endif
 %dir /opt/%{name}/samples
 
 /usr/bin/vglclient
@@ -144,6 +151,9 @@ fi
 %endif
 
 /opt/%{name}/lib/libGL.so
+%ifarch x86_64
+/opt/%{name}/lib64/libGL.so
+%endif
 
 /usr/lib/librrfaker.so
 /usr/lib/librr.so
