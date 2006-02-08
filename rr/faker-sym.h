@@ -392,5 +392,6 @@ funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 #endif
 
 void __vgl_loadsymbols(void);
+void __vgl_unloadsymbols(void);
 
 #endif

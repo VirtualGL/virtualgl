@@ -32,6 +32,9 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 	rrout.print("[VGL] Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
+static void *gldllhnd=NULL;
+static void *x11dllhnd=NULL;
+
 void __vgl_loadsymbols(void)
 {
 	void *dllhnd;
@@ -45,6 +48,7 @@ void __vgl_loadsymbols(void)
 			rrout.print("[VGL] Could not open %s\n[VGL] %s\n", fconfig.gllib, dlerror());
 			__vgl_safeexit(1);
 		}
+		else gldllhnd=dllhnd;
 	}
 	else dllhnd=RTLD_NEXT;
 
@@ -144,8 +148,6 @@ void __vgl_loadsymbols(void)
 	#endif
 	lsym(glClearIndex)
 
-	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
-
 	// X11 symbols
 	if(fconfig.x11lib)
 	{
@@ -155,6 +157,7 @@ void __vgl_loadsymbols(void)
 			rrout.print("[VGL] Could not open %s\n[VGL] %s\n", fconfig.x11lib, dlerror());
 			__vgl_safeexit(1);
 		}
+		else x11dllhnd=dllhnd;
 	}
 	else dllhnd=RTLD_NEXT;
 
@@ -176,6 +179,10 @@ void __vgl_loadsymbols(void)
 	lsym(XOpenDisplay);
 	lsym(XResizeWindow);
 	lsym(XWindowEvent);
+}
 
-	if(dllhnd!=RTLD_NEXT) dlclose(dllhnd);
+void __vgl_unloadsymbols(void)
+{
+	if(gldllhnd) dlclose(gldllhnd);
+	if(x11dllhnd) dlclose(x11dllhnd);
 }
