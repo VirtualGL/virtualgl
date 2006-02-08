@@ -698,9 +698,13 @@ shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );
 
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
 
+extern void __vgl_fakerinit(void);
+
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	void (*retval)(void)=NULL;
+
+	__vgl_fakerinit();
 
 		opentrace(glXGetProcAddressARB);  prargs((char *)procName);  starttrace();
 

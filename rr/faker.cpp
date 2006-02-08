@@ -116,6 +116,7 @@ void __vgl_safeexit(int retcode)
 		if(_dpyh) _dpyh->killhash();
 		if(_winh) _winh->killhash();
 	}
+	__vgl_unloadsymbols();
 	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
@@ -178,7 +179,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #endif
 #endif
 
-static void fakerinit(void)
+void __vgl_fakerinit(void)
 {
 	static int init=0;
 
@@ -248,7 +249,7 @@ Display *XOpenDisplay(_Xconst char* name)
 
 		opentrace(XOpenDisplay);  prargs(name);  starttrace();
 
-	fakerinit();
+	__vgl_fakerinit();
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
 	dpyh.add(dpy);
 
