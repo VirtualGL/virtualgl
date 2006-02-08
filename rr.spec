@@ -92,7 +92,9 @@ install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT/usr/lib64/librr.so
 install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{name}/samples/
 %endif
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib/libGL.so
+%ifarch x86_64
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib64/libGL.so
+%endif
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif
 
