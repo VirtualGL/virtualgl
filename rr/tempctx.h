@@ -21,23 +21,30 @@
 #define EXISTING_DRAWABLE (GLXDrawable)-1
 
 #ifdef INFAKER
-#include "faker-sym.h"
-#define glXGetCurrentDisplay GetCurrentDisplay
-#define glXGetCurrentDrawable GetCurrentDrawable
-#define glXGetCurrentReadDrawable GetCurrentReadDrawable
-#define glXMakeCurrent _glXMakeCurrent
-#define glXMakeContextCurrent _glXMakeContextCurrent
+ #include "faker-sym.h"
+ #ifdef USEGLP
+  #define glXGetCurrentContext _glXGetCurrentContext
+ #endif
+ #define glXGetCurrentDisplay GetCurrentDisplay
+ #define glXGetCurrentDrawable GetCurrentDrawable
+ #define glXGetCurrentReadDrawable GetCurrentReadDrawable
+ #define glXMakeCurrent _glXMakeCurrent
+ #define glXMakeContextCurrent _glXMakeContextCurrent
+#elif defined(XDK)
+ #include "xdk-sym.h"
+ #define glXGetCurrentContext _glXGetCurrentContext
+ #define glXGetCurrentDisplayEXT _glXGetCurrentDisplayEXT
+ #define glXGetCurrentDrawable _glXGetCurrentDrawable
+ #define glXMakeCurrent _glXMakeCurrent
 #else
-#ifdef USEGLP
-#include <GL/glp.h>
-#include "glpweak.h"
-#endif
-#include <GL/glx.h>
+ #include <GL/glx.h>
 #endif
 
 #ifdef USEGLP
-#include "fakerconfig.h"
-extern FakerConfig fconfig;
+ #include <GL/glp.h>
+ #include "glpweak.h"
+ #include "fakerconfig.h"
+ extern FakerConfig fconfig;
 #endif
 
 class tempctx
@@ -117,12 +124,15 @@ class tempctx
 		bool _mc, _glx11;
 };
 
-#ifdef INFAKER
-#undef glXGetCurrentDisplay
-#undef glXGetCurrentDrawable
-#undef glXGetCurrentReadDrawable
-#undef glXMakeCurrent
-#undef glXMakeContextCurrent
+#if defined(INFAKER)||defined(XDK)
+ #ifdef glXGetCurrentContext
+  #undef glXGetCurrentContext
+ #endif
+ #undef glXGetCurrentDisplay
+ #undef glXGetCurrentDrawable
+ #undef glXGetCurrentReadDrawable
+ #undef glXMakeCurrent
+ #undef glXMakeContextCurrent
 #endif
 
 #endif // __TEMPCTX_H

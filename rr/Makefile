@@ -7,6 +7,9 @@ ifeq ($(platform), windows)
 COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
         $(ODIR)/rrxclient.obj
+ifneq ($(XWIN32), yes)
+COBJS := $(COBJS) $(ODIR)/xdk-sym.obj
+endif
 
 TOBJS = $(ODIR)/rrblitter.obj \
         $(ODIR)/rrblitterut.obj \
@@ -24,7 +27,7 @@ TARGETS = $(EDIR)/vglclient.exe \
           $(UNITTESTS)
 
 RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/turbojpeg.lib $(LDIR)/rrsocket.lib
-RRLIB = -lrrutil $(FBXX11LIB) $(GLXLIB) -lturbojpeg $(SOCKLIB)
+RRLIB = -lrrutil $(FBXX11LIB) $(FAKEGLXLIB) -lturbojpeg $(SOCKLIB)
 
 all: $(TARGETS)
 

@@ -18,6 +18,7 @@
 #include <signal.h>
 #include "rrdisplayserver.h"
 #include "x11err.h"
+#include "xdk-sym.h"
 
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, ssl=false, quiet=false;
@@ -162,6 +163,9 @@ int main(int argc, char *argv[])
 	{
 		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());  exit(1);
 	}
+	#ifdef XDK
+	__vgl_unloadsymbols();
+	#endif
 	return 0;
 }
 

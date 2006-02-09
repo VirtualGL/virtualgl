@@ -26,11 +26,13 @@ CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/x11
 CDEFINES := $(CDEFINES) -DXWIN32
 X11LIB = -lX11 -lXext -lwsock32
 GLXLIB = -lglx -lGL -lX11 -lXext -lwsock32
+FAKEGLXLIB = $(GLXLIB)
 GLULIB = -lGLU
 else
 CDEFINES := $(CDEFINES) -DXDK
 X11LIB = -lxlib -lhclshm 
-GLXLIB = -lhclglx -lxlib
+FAKEGLXLIB = -lxlib
+GLXLIB = $(FAKEGLXLIB) -lhclglx
 GLULIB = -lhclglu
 endif
 SOCKLIB = -lrrsocket -lwsock32

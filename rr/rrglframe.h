@@ -22,25 +22,29 @@
 // Bitmap drawn using OpenGL
 
 #ifdef INFAKER
-#include "faker-sym.h"
-#define XCloseDisplay _XCloseDisplay
-#define XOpenDisplay _XOpenDisplay
-#define glXCreateContext _glXCreateContext
-#define glXDestroyContext _glXDestroyContext
-#ifdef USEGLP
-#define glXGetCurrentContext _glXGetCurrentContext
-#endif
-#define glXGetCurrentDisplay _glXGetCurrentDisplay
-#define glXGetCurrentDrawable _glXGetCurrentDrawable
-#define glXGetCurrentReadDrawable _glXGetCurrentReadDrawable
-#define glXMakeCurrent _glXMakeCurrent
-#define glXSwapBuffers _glXSwapBuffers
-#define glDrawBuffer _glDrawBuffer
-#define glDrawPixels _glDrawPixels
-#define glFinish _glFinish
+ #include "faker-sym.h"
+ #define XCloseDisplay _XCloseDisplay
+ #define XOpenDisplay _XOpenDisplay
+#elif defined(XDK)
+ #include "xdk-sym.h"
+ #define glGetError _glGetError
+ #define glGetIntegerv _glGetIntegerv
+ #define glPixelStorei _glPixelStorei
+ #define glRasterPos2f _glRasterPos2f
+ #define glViewport _glViewport
+#else
+ #include <GL/glx.h>
 #endif
 
-#include <GL/glx.h>
+#if defined(INFAKER)||defined(XDK)
+ #define glXCreateContext _glXCreateContext
+ #define glXDestroyContext _glXDestroyContext
+ #define glXMakeCurrent _glXMakeCurrent
+ #define glXSwapBuffers _glXSwapBuffers
+ #define glDrawBuffer _glDrawBuffer
+ #define glDrawPixels _glDrawPixels
+ #define glFinish _glFinish
+#endif
 
 class rrglframe : public rrframe
 {
@@ -54,6 +58,9 @@ class rrglframe : public rrframe
 		if(!(_dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
 		_newdpy=true;
 		_isgl=true;
+		#ifdef XDK
+		__vgl_loadsymbols();
+		#endif
 		init(_dpy, win);
 	}
 
@@ -64,6 +71,9 @@ class rrglframe : public rrframe
 		if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
 		_dpy=dpy;
 		_isgl=true;
+		#ifdef XDK
+		__vgl_loadsymbols();
+		#endif
 		init(_dpy, win);
 	}
 
@@ -233,21 +243,24 @@ class rrglframe : public rrframe
 };
 
 #ifdef INFAKER
-#undef XCloseDisplay
-#undef XOpenDisplay
-#undef glXCreateContext
-#undef glXDestroyContext
-#ifdef USEGLP
-#undef glXGetCurrentContext
+ #undef XCloseDisplay
+ #undef XOpenDisplay
+#elif defined(XDK)
+ #undef glGetError
+ #undef glGetIntegerv
+ #undef glPixelStorei
+ #undef glRasterPos2f
+ #undef glViewport
 #endif
-#undef glXGetCurrentDisplay
-#undef glXGetCurrentDrawable
-#undef glXGetCurrentReadDrawable
-#undef glXMakeCurrent
-#undef glXSwapBuffers
-#undef glDrawBuffer
-#undef glDrawPixels
-#undef glFinish
+
+#if defined(INFAKER)||defined(XDK)
+ #undef glXCreateContext
+ #undef glXDestroyContext
+ #undef glXMakeCurrent
+ #undef glXSwapBuffers
+ #undef glDrawBuffer
+ #undef glDrawPixels
+ #undef glFinish
 #endif
 
 #endif // __RRGLFRAME_H
