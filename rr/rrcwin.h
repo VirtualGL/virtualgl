@@ -17,7 +17,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include <X11/X.h>
 #include "rrframe.h"
 #undef USEGLP
 #include "rrthread.h"

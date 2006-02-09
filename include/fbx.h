@@ -30,27 +30,30 @@
  typedef HWND fbx_wh;
 #else
  #ifdef FBXX11
- #include <Xwindows.h>
- #undef WIN32
+  #include <Xwindows.h>
+  #undef WIN32
+ #endif
+ #ifdef XDK
+  #define NOREDIRECT
  #endif
  #include <X11/Xlib.h>
  #ifdef USESHM
- #ifdef XDK
- #include <X11/hclshm.h>
- // Exceed likes to redefine stdio, so we un-redefine it :/
- #undef fprintf
- #undef printf
- #undef putchar
- #undef putc
- #undef puts
- #undef fputc
- #undef fputs
- #undef perror
- #elif !defined(XWIN32)
- #include <sys/ipc.h>
- #include <sys/shm.h>
- #endif
- #include <X11/extensions/XShm.h>
+  #ifdef XDK
+   #include <X11/hclshm.h>
+   // Exceed likes to redefine stdio, so we un-redefine it :/
+   #undef fprintf
+   #undef printf
+   #undef putchar
+   #undef putc
+   #undef puts
+   #undef fputc
+   #undef fputs
+   #undef perror
+  #elif !defined(XWIN32)
+   #include <sys/ipc.h>
+   #include <sys/shm.h>
+  #endif
+  #include <X11/extensions/XShm.h>
  #endif
  #include <X11/extensions/Xdbe.h>
  #include <X11/Xutil.h>
