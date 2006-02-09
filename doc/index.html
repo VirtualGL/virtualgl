@@ -140,90 +140,210 @@ the <a href="LGPL.txt">LGPL</a>.<br>
 
 <hr><h2><a name="requirements"></a>System Requirements</h2>
 
-<h3>Server (32-bit Linux)</h3>
+<h3>Linux/x86</h3>
+<table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
 
-<ul>
+<tbody>
+<tr>
+<td style="font-weight: bold;" class="colorheader"></td>
+<td style="font-weight: bold;" class="colorheader">Server (32-bit)</td>
+<td style="font-weight: bold;" class="colorheader">Server (64-bit)</td><td class="colorheader" style="font-weight: bold;">Client (32-bit)</td>
 
-<li>Pentium 4, 1.7 GHz or faster (or equivalent)</li><ul><li>For optimal performance, the processor should support SSE2 extensions</li><li>Dual processors recommended</li></ul><li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li>
-</ul>
-
-<h3>Server (64-bit Linux)</h3>
-
-<ul>
-
-<li>Processor</li><ul><li>dual P4/Xeon with EM64T, or</li><li>dual Opteron or Athlon64, 1.8 GHz or faster</li><ul><li>For optimal performance with
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">CPU<br>
+</td>
+<td>Pentium 4, 1.7 GHz or faster (or equivalent)<br>
+      <ul>
+        <li>For optimal performance, the processor should support SSE2 extensions</li>
+      </ul>
+Dual processors recommended</td>
+<td>Pentium 4/Xeon with EM64T, or<br>
+AMD Opteron or Athlon64, 1.8 GHz or faster
+      <ul>
+        <li>For optimal performance with
 64-bit VirtualGL, the processor should support SSE3 extensions.&nbsp;
-Only newer AMD 64-bit processors support SSE3.</li></ul></ul><li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li><li>RedHat Enterprise Linux 3.0 or 4.0 (64-bit) or equivalent (Works with
-<a href="http://fedora.redhat.com/">Fedora</a>,
-<a href="http://www.whiteboxlinux.org/">WhiteBox</a>, and <a href="http://www.centos.org/">CentOS</a>)<br></li><li>X server configured for true color (24/32-bit)</li>
-</ul>
+Only newer AMD 64-bit processors (mid-2005 and later) support SSE3</li>
+      </ul>
+Dual processors recommended</td><td>Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent)</td>
 
-<h3>Client (Linux)<br>
-</h3>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">Graphics<br>
+</td><td>Decent 3D graphics accelerator<br>
+      <ul>
+        <li>Tested with various nVidia Quadro and ATI Radeon models</li>
+      </ul>
+</td><td>Decent 3D graphics accelerator<br>
 
-<ul>
-
-<li>single PIII or P4, 1.0 GHz or faster (or equivalent)<br>
-</li><li>graphics card with decent 2D performance</li><ul><li>For
+      <ul>
+<li>Tested with various nVidia Quadro and ATI Radeon models</li>
+      </ul>
+</td><td>Graphics card with decent 2D performance<br>
+      <ul>
+        <li>For
 applications that use stereo or transparent&nbsp;overlays, a high-end
-3D accelerator such as the NVidia Quadro is required on the client</li></ul><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li><ul>
+3D accelerator such as the nVidia Quadro is required on the client</li>
+      </ul>
+      </td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">O/S<br>
+</td>
+<td>RedHat Linux 7.2 or newer (or equivalent)</td>
+<td>RedHat Enterprise Linux 3.0 or 4.0 (64-bit) or equivalent (Works with
+      <a href="http://fedora.redhat.com/">Fedora</a>,
+      <a href="http://www.whiteboxlinux.org/">WhiteBox</a>, and <a href="http://www.centos.org/">CentOS</a>)</td><td>RedHat Linux 7.2 or newer (or equivalent)</td>
+
+</tr><tr>
+      <td style="font-weight: bold;" class="colorheader">Other Software<br>
+      </td>
+      <td>X server configured for true color (24/32-bit)</td>
+      <td>X server configured for true color (24/32-bit)</td>
+      <td>X server configured for true color (24/32-bit)</td>
+    </tr>
+
+</tbody>
+</table>
+<ul><ul>
 </ul></ul>
 
-<h3>Server (Sparc/Solaris)</h3>
+<h3 style="color: rgb(255, 255, 255);">Linux/Itanium</h3>
 
-<ul>
-
-<li>dual UltraSPARC III 900 MHz or faster</li><li>decent 3D graphics accelerator (tested with XVR-1200 and XVR-2500)</li><li>Solaris 8 or higher</li><li>Sun OpenGL 1.3 (<a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">patches</a> 113886-31 and 113887-31 recommended) or Sun OpenGL 1.5.&nbsp; See <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a> for downloads.&nbsp; OpenGL 1.5 or later required for GLP support
-</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
-Blastwave OpenSSL is required.&nbsp; Download and install the package
-from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
-</ul>
-
-<h3>Client (Sparc/Solaris)</h3>
-
-<ul>
-
-<li>single UltraSPARC III 900 MHz or faster</li><li>graphics card with decent 2D performance</li><ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
-accelerator such&nbsp;as the XVR-1200 or XVR-2500 is required on the client</li></ul><li>Solaris 8 or higher</li><li>The
-VirtualGL client will use OpenGL if installed. &nbsp;This may produce
-better performance on some graphics cards, such as the XVR-1200.</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
-Blastwave OpenSSL is required.&nbsp; Download and install the package from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
-</ul>
-
-<h3 style="color: rgb(255, 255, 255);">Client (Windows)<br>
-</h3>
-
-<ul>
-
-<li>Single Pentium III or
-Pentium 4, 1.0 GHz or faster (or equivalent)</li><li>Graphics card with decent 2D
-performance</li><ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
-accelerator such as the NVidia Quadro is required on the client</li></ul><li>Windows 2000 or XP with <a href="http://www.hummingbird.com/">Hummingbird</a>
-Exceed 8 or newer<br>
-<br>
-<span class="note">Note:</span>Contact Gary Romualdez of
-Hummingbird Ltd. [tel. (416) 496-6393 or
-<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
-for Exceed pricing information.<br>&nbsp;<br>
-</li><ul><li>For applications that use stereo or transparent overlays, Exceed 3D is required on the client</li></ul><li>Client desktop currently
-needs to be true color (24 or 32-bit)</li>
-</ul>
-
-<span style="color: rgb(0, 0, 0);"></span>
-<h3 style="color: rgb(255, 255, 255);">Note to Itanium users</h3>
 
 <span style="color: rgb(0, 0, 0);">VirtualGL should build and run on Itanium Linux, but it has not been thoroughly tested. &nbsp;<a href="https://sourceforge.net/users/dcommander">Contact us</a> if you encounter any difficulties.<br>
 </span><span style="color: rgb(0, 0, 0);"></span>
-<h3>Note to Solaris/x86 users</h3>
+<h3>Solaris/Sparc</h3>
+<table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+
+
+<tbody>
+<tr>
+<td style="font-weight: bold;" class="colorheader"></td>
+<td style="font-weight: bold;" class="colorheader">Server (32/64-bit)</td>
+<td class="colorheader" style="font-weight: bold;">Client (32-bit)</td>
+
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">CPU<br>
+</td>
+<td>UltraSPARC III 900 MHz or faster<br>
+Dual processors recommended</td>
+<td>UltraSPARC III 900 MHz or faster</td>
+
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">Graphics<br>
+</td><td>Decent 3D graphics accelerator<br>
+      <ul><li>Tested with XVR-1200 and XVR-2500</li></ul>
+</td><td>Graphics card with decent 2D performance<br>
+      <ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
+accelerator such&nbsp;as the XVR-1200 or XVR-2500 is required on the client</li></ul>
+      </td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">O/S<br>
+</td>
+<td>Solaris 8 or higher</td>
+<td>Solaris 8 or higher</td>
+
+</tr><tr>
+      <td style="font-weight: bold;" class="colorheader">Other Software<br>
+      </td>
+      <td>
+      <ul>
+<li>Sun OpenGL 1.3 (<a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">patches</a> 113886-31 and 113887-31 recommended) or Sun OpenGL 1.5.&nbsp; See <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a> for downloads.&nbsp; OpenGL 1.5 or later required for GLP support
+</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
+Blastwave OpenSSL is required.&nbsp; Download and install the package
+from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+      </ul>
+</td>
+      
+      <td>
+      <ul>
+<li>The
+VirtualGL client will use OpenGL if installed. &nbsp;This may produce
+better performance on some graphics cards, such as the XVR-1200.</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
+Blastwave OpenSSL is required.&nbsp; Download and install the package from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+      </ul>
+</td>
+    </tr>
+
+</tbody>
+</table>
+<h3>Solaris/x86</h3>
+
 
 <p>A Solaris/x86 package is provided for VirtualGL 2.0, and it behaves
 identically to its Solaris/Sparc counterpart. &nbsp;But the Solaris/x86
 version of VirtualGL currently uses a software JPEG codec and thus will
 perform quite a bit slower than the Solaris/Sparc and Linux versions of
-VirtualGL.</p>
+VirtualGL. &nbsp;The Solaris/x86 version of VirtualGL requires Solaris
+10 or later, and the VirtualGL server components for Solaris/x86 are
+only known to work with nVidia hardware and drivers.</p>
+
 
 <span style="color: rgb(0, 0, 0);"></span><span style="color: rgb(0, 0, 0);"></span><span style="color: rgb(0, 0, 0);"></span>
-<div class="top"><a href="#" target="_top"><span style="color: rgb(0, 0, 0);"></span><span style="color: rgb(0, 0, 0);"></span>top</a></div>
+<a href="index.html#" target="_top"><span style="color: rgb(0, 0, 0);"></span></a><a href="index.html#" target="_top"><span style="color: rgb(0, 0, 0);"></span></a>
+<h3 style="color: rgb(255, 255, 255);">Windows</h3>
+
+
+<table style="text-align: left;" border="0" cellpadding="5" cellspacing="3">
+
+
+
+<tbody>
+<tr>
+<td style="font-weight: bold;" class="colorheader"></td>
+
+<td class="colorheader" style="font-weight: bold;">Client (32-bit)</td>
+
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">CPU<br>
+</td>
+
+<td>Pentium III or
+Pentium 4, 1.0 GHz or faster (or equivalent)</td>
+
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">Graphics<br>
+</td><td>Graphics card with decent 2D performance<br>
+      <ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
+accelerator such&nbsp;as the nVidia Quadro is required on the client</li></ul>
+      </td>
+</tr>
+<tr>
+<td style="font-weight: bold;" class="colorheader">O/S<br>
+</td>
+
+<td>Windows 2000 or XP</td>
+
+</tr><tr>
+      <td style="font-weight: bold;" class="colorheader">Other Software<br>
+      </td>
+      
+      
+      <td>
+      <ul>
+<li><a href="http://www.hummingbird.com/">Hummingbird</a>
+Exceed 8 or newer (Exceed 2006 or newer recommended)<br>
+<br>
+<span class="note">Note:</span>Contact Gary Romualdez of
+Hummingbird Ltd. [tel. (416) 496-6393 or
+<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
+for Exceed pricing information.<br>&nbsp;<br>
+</li><li>For applications that use stereo or transparent overlays, Exceed 3D is required on the client</li>
+<li>Client desktop currently
+needs to be true color (24 or 32-bit)</li>
+      </ul>
+</td></tr></tbody>
+</table>
+<ul></ul>
+
+<span style="color: rgb(0, 0, 0);"></span><div class="top"><a href="#" target="_top">top</a></div>
 
 <hr>
 <h2><a name="linuxinstall"></a>Installation (Linux)<br>
@@ -1399,7 +1519,7 @@ mechanism for loading a substitute OpenGL library allows VirtualGL to intercept
 the GLX and OpenGL calls.</p>
 <p>The <a href="http://virtualgl.sourceforge.net">VirtualGL web-site</a> contains specific recipes for getting a variety of games and other applications to work.</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
-<hr style="width: 100%; height: 2px;"><h2><a name="chromium"></a>Usage with Chromium and ModViz</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="chromium"></a>Usage with Chromium and ModViz VGP<sup>TM</sup></h2>
 <p>Chromium is a powerful
 framework for performing various types of parallel OpenGL rendering.
 &nbsp;It is usually used on clusters of commodity
