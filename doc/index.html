@@ -107,7 +107,7 @@ and GLX, and X windows.
 <li><a href="#basicusageunix">Basic Usage (Linux/Solaris Client)</a></li><li><a href="#basicusagewindows">Basic Usage (Windows Client)</a></li><li><a href="#solarisscripts">vglrun and Solaris Shell Scripts</a></li>
 <li><a href="#glpusage">GLP Usage</a></li>
 <li><a href="#secureusage">Secure Usage</a></li><li><a href="#vnc">Usage with VNC</a></li><li><a href="#dynamicgl">Usage with Applications That Manually Load OpenGL</a></li>
-<li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li><li><a href="advancedopengl">Advanced OpenGL Features</a></li>
+<li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li><li><a href="#advancedopengl">Advanced OpenGL Features</a></li>
 <li><a href="#perf">Performance Measurement</a></li>
 <li><a href="#config">Advanced Configuration</a></li>
 </ul>
@@ -115,7 +115,7 @@ and GLX, and X windows.
 <hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
 
 <h2>Legal Information</h2>
-<a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" src="http://creativecommons.org/images/public/somerights20.png" border="0"></a>
+<a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" src="somerights20.png?rev=HEAD&amp;cvsroot=virtualgl" border="0"></a>
 <p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/2.5/">Creative Commons Attribution 2.5 License</a>.
 &nbsp;Any works which contain material derived from this document must cite The
 VirtualGL Project as the source of the material and include a link to
@@ -587,7 +587,7 @@ pixel
 for true color" is <i>not</i>
 checked.<br>
 <br>
-<img alt="" src="exceed1.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="exceed1.png?rev=HEAD&amp;root=VirtualGL"><br>
 &nbsp;<br>
 </li>
 <li>Click "Validate and Apply
@@ -604,7 +604,7 @@ Settings" applet in XConfig.<br>
 and make sure that "Default Backing
 Store" is set to "None."<br>
 <br>
-<img alt="" src="exceed3.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="exceed3.png?rev=HEAD&amp;root=VirtualGL"><br>
 &nbsp;<br>
 </li>
 <li>Click "Validate and Apply
@@ -684,7 +684,7 @@ applet in XConfig.<br>
 &nbsp;</li><li>Select the "Extensions" tab
 and make sure that "MIT-SHM" is checked.<br>
 <br>
-<img alt="" src="exceed2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="exceed2.png?rev=HEAD&amp;root=VirtualGL"><br>
 &nbsp;</li>
 <li>Click "Validate and Apply
 Changes."&nbsp; If XConfig asks whether you want to perform a
@@ -814,7 +814,7 @@ you are using the "Classic View" mode of XConfig, open the
 you each time a host tries to connect, set "Host Access Control List"
 to "Enabled."<br>
 <br>
-<img alt="" src="exceed4.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="exceed4.png?rev=HEAD&amp;root=VirtualGL"><br>
 <br>
 </li>
 <li>To allow only the hosts
@@ -823,7 +823,7 @@ click "Edit" to edit the file and add entries to it.&nbsp; You
 should add the name or IP address of the application server to this
 file, save the file, then exit the editor.<br>
 <br>
-<img alt="" src="exceed5.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="exceed5.png?rev=HEAD&amp;root=VirtualGL"><br>
 <br>
 </li>
 <li type="a">Click
@@ -851,7 +851,7 @@ to "SSH," then enter the host name or IP address of the application
 server.
 <br>
 <br>
-<img alt="" src="putty1.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="putty1.png?rev=HEAD&amp;root=VirtualGL"><br>
 <br>
 </li>
 <li>Click "Open"<br>
@@ -1151,7 +1151,7 @@ capabilities of VirtualGL, but sometimes it's the only option available.</p>
 <p>Let's assume the following
 configuration:</p>
 
-<p><img alt="" src="sshtunnel.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<p><img alt="" src="sshtunnel.png?rev=HEAD&amp;root=VirtualGL"><br>
 </p>
 
 <p>What we want to do is tunnel
@@ -1183,7 +1183,7 @@ with PuTTY.&nbsp; Just replace "ssh" with the path to the PuTTY
 executable.&nbsp; You can also configure the same thing through the
 PuTTY GUI as follows:<br>
 <br>
-<img alt="" src="putty2.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<img alt="" src="putty2.png?rev=HEAD&amp;root=VirtualGL"><br>
 <br>
 </li>
 <li>Now you should have a
@@ -1253,7 +1253,7 @@ the images and re-composites them into the appropriate X window.<br>
 <p><span style="font-weight: bold;" class="colorheader">VirtualGL's
 Architecture</span></p>
 </div>
-<div style="text-align: center;"><img alt="VirtualGL's Architecture" src="virtualgl.png?rev=HEAD&amp;cvsroot=virtualgl"><br>
+<div style="text-align: center;"><img alt="VirtualGL's Architecture" src="virtualgl.png?rev=HEAD&amp;root=VirtualGL"><br>
 </div>
 <p>However, VirtualGL has a second
 mode
@@ -1268,7 +1268,7 @@ client(s).<br>
 Architecture with VNC</span></p>
 </div>
 <div style="text-align: center;">
-<p><img alt="Ideal X11 Proxy" src="idealx11proxy.png?rev=HEAD&amp;cvsroot=virtualgl"></p>
+<p><img alt="Ideal X11 Proxy" src="idealx11proxy.png?rev=HEAD&amp;root=VirtualGL"></p>
 </div>
 <font style="font-weight: bold;">
 <p>Advantages of using VirtualGL
@@ -1455,7 +1455,7 @@ configurations:</p>
 <div style="text-align: left;">
 <h3>Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h3>
 </div><div style="text-align: center;">
-<p><img style="width: 700px; height: 337px;" alt="Configuration 1 - Sort-First Rendering (Image-Space Decomposition) with a Display Wall" src="chromium-displaywall.png"></p>
+<p><img style="width: 700px; height: 337px;" alt="" src="chromium-displaywall.png?rev=HEAD&amp;root=VirtualGL"></p>
 <p style="text-align: left;">Sort-First Rendering (Image-Space
 Decomposition) is used to overcome
 the fill-rate limitations of individual graphics cards. &nbsp;When
@@ -1485,7 +1485,7 @@ multi-screen configuration, and VirtualGL would have to be made DMX-aware
 for it to perform the same job. &nbsp;Maybe at some point in the future ... &nbsp;If you have a need for such a configuration, <a href="https://sourceforge.net/users/dcommander">let us know</a>.</p>
 <h3 style="text-align: left;"><span style="font-weight: bold;">Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</span></h3>
 </div><div style="text-align: center;">
-<p><span style="font-weight: bold;"></span><span style="font-weight: bold;" class="colorheader"><img style="width: 476px; height: 340px;" alt="Configuration 2 - Sort-First Rendering (Image-Space Decomposition) with a Single Display" src="chromium-sortfirst.png"></span></p>
+<p><span style="font-weight: bold;"></span><span style="font-weight: bold;" class="colorheader"><img style="width: 476px; height: 340px;" alt="" src="chromium-sortfirst.png?rev=HEAD&amp;root=VirtualGL"></span></p>
 <div style="text-align: left;">Configuration
 2 uses the same sort-first principle as Configuration 1, except that
 each tile is
@@ -1579,7 +1579,7 @@ Again, it's always a good idea to make sure this works without VirtualGL before 
 </div>
 </div>
 <div style="text-align: center;">
-<p><img style="width: 700px; height: 345px;" alt="Configuration 3 - Sort-Last Rendering (Object-Space Decomposition)" src="chromium-sortlast.png"></p>
+<p><img style="width: 700px; height: 345px;" alt="" src="chromium-sortlast.png?rev=HEAD&amp;root=VirtualGL"></p>
 </div>
 <p>Sort-Last Rendering is used when the scene contains a huge number of polygons and the
 rendering bottleneck is&nbsp;processing all of that geometry on a single
@@ -1677,7 +1677,7 @@ will probably work as well, but they have not been tested. &nbsp;Use <span class
 to verify whether your client's display supports overlays and whether
 they are enabled. &nbsp;In Exceed 3D, make sure that the "Overlay
 Support" option is checked in the "Exceed 3D and GLX" applet:</p>
-<p><img style="width: 354px; height: 278px;" alt="[Enabling overlays in Exceed 3D]" src="exceed6.png"></p>
+<p><img style="width: 354px; height: 278px;" alt="" src="exceed6.png?rev=HEAD&amp;root=VirtualGL"></p>
 <p>As with stereo, overlays do not work inside a VNC session.</p>
 <h3>Indexed (PseudoColor) Rendering</h3>
 <p>In a PseudoColor visual, each pixel is represented by an index which
@@ -1956,9 +1956,9 @@ Q95</p>
 </td>
 </tr>
 <tr>
-<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="444.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
-<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="422.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
-<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="411.gif?rev=HEAD&amp;cvsroot=virtualgl"></td>
+<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="444.gif?rev=HEAD&amp;root=VirtualGL"></td>
+<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="422.gif?rev=HEAD&amp;root=VirtualGL"></td>
+<td><img style="border: 0px solid ; width: 70px; height: 80px;" alt="" src="411.gif?rev=HEAD&amp;root=VirtualGL"></td>
 </tr>
 </tbody>
 </table></p>
