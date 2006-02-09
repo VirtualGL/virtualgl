@@ -112,13 +112,11 @@ and GLX, and X windows.
 <li><a href="#config">Advanced Configuration</a></li>
 </ul>
 
-<hr style="width: 100%; height: 2px;"><a name="legalinfo"></a><br>
-
-<h2>Legal Information</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="legalinfo"></a>Legal Information</h2>
 <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img alt="Creative Commons License" src="somerights20.png?rev=HEAD&amp;root=VirtualGL" border="0"></a>
-<p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/2.5/">Creative Commons Attribution 2.5 License</a>.
+<p>This document is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/2.5/">Creative Commons Attribution 2.5 License</a>.
 &nbsp;Any works which contain material derived from this document must cite The
-VirtualGL Project as the source of the material and include a link to
+VirtualGL Project as the source of the material and list the current URL for
 the VirtualGL web-site.</p>
 
 
@@ -131,17 +129,7 @@ in the same directory as this documentation.<br>
 
 <br>
 
-<span class="monospace">hclshm.dll</span>
-and <span class="monospace">xlib.dll</span>
-are freely redistributable components of the <a href="http://www.hummingbird.com">Hummingbird</a>
-Exceed XDK v9.0 and
-are included under the terms of that license and with the express
-consent of Hummingbird, Ltd.<br>
-
-<br>
-
-All
-other components of VirtualGL fall under the scope of the <a href="LICENSE.txt">wxWindows Library License, v3</a>,
+<span class="monospace"></span>VirtualGL is licensed under the&nbsp;<a href="LICENSE.txt">wxWindows Library License, v3</a>,
 a derivative of
 the <a href="LGPL.txt">LGPL</a>.<br>
 
@@ -150,14 +138,13 @@ the <a href="LGPL.txt">LGPL</a>.<br>
 <div style="text-align: right;"><a href="#" target="_top">top</a>
 </div>
 
-<hr><a name="requirements"></a>
-<h2>System Requirements</h2>
+<hr><h2><a name="requirements"></a>System Requirements</h2>
 
 <h3>Server (32-bit Linux)</h3>
 
 <ul>
 
-<li>dual Pentium 4, 1.7 GHz or faster (or equivalent)</li><ul><li>For optimal performance, the processor should support SSE2 extensions</li></ul><li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li>
+<li>Pentium 4, 1.7 GHz or faster (or equivalent)</li><ul><li>For optimal performance, the processor should support SSE2 extensions</li><li>Dual processors recommended</li></ul><li>decent 3D graphics accelerator (tested with various nVidia Quadro and ATI Radeon models)</li><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li>
 </ul>
 
 <h3>Server (64-bit Linux)</h3>
@@ -177,14 +164,16 @@ Only newer AMD 64-bit processors support SSE3.</li></ul></ul><li>decent 3D graph
 <ul>
 
 <li>single PIII or P4, 1.0 GHz or faster (or equivalent)<br>
-</li><li>graphics card with decent 2D performance</li><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li>
-</ul>
+</li><li>graphics card with decent 2D performance</li><ul><li>For
+applications that use stereo or transparent&nbsp;overlays, a high-end
+3D accelerator such as the NVidia Quadro is required on the client</li></ul><li>RedHat Linux 7.2 or newer (or equivalent)</li><li>X server configured for true color (24/32-bit)</li><ul>
+</ul></ul>
 
 <h3>Server (Sparc/Solaris)</h3>
 
 <ul>
 
-<li>dual UltraSPARC III 900 MHz or faster</li><li>decent 3D graphics accelerator (tested with XVR-1200)</li><li>Solaris 8 or higher</li><li>Sun OpenGL 1.3 (<a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">patches</a> 113886-31 and 113887-31 recommended) or Sun OpenGL 1.5.&nbsp; See <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a> for downloads.&nbsp; OpenGL 1.5 or later required for GLP support
+<li>dual UltraSPARC III 900 MHz or faster</li><li>decent 3D graphics accelerator (tested with XVR-1200 and XVR-2500)</li><li>Solaris 8 or higher</li><li>Sun OpenGL 1.3 (<a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">patches</a> 113886-31 and 113887-31 recommended) or Sun OpenGL 1.5.&nbsp; See <a href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a> for downloads.&nbsp; OpenGL 1.5 or later required for GLP support
 </li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
@@ -194,8 +183,10 @@ from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
 
 <ul>
 
-<li>single UltraSPARC III 900 MHz or faster</li><li>graphics card with decent 2D performance<br>
-</li><li>Solaris 8 or higher</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
+<li>single UltraSPARC III 900 MHz or faster</li><li>graphics card with decent 2D performance</li><ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
+accelerator such&nbsp;as the XVR-1200 or XVR-2500 is required on the client</li></ul><li>Solaris 8 or higher</li><li>The
+VirtualGL client will use OpenGL if installed. &nbsp;This may produce
+better performance on some graphics cards, such as the XVR-1200.</li><li>Sun MediaLib (see <a href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li><li>In order to use the SSL features of VirtualGL on Solaris 8 or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the package from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
 </ul>
 
@@ -206,15 +197,15 @@ Blastwave OpenSSL is required.&nbsp; Download and install the package from <a hr
 
 <li>Single Pentium III or
 Pentium 4, 1.0 GHz or faster (or equivalent)</li><li>Graphics card with decent 2D
-performance</li><li>Windows 2000 or XP with <a href="http://www.hummingbird.com/">Hummingbird</a>
+performance</li><ul><li>For applications that use stereo or transparent&nbsp;overlays, a high-end 3D
+accelerator such as the NVidia Quadro is required on the client</li></ul><li>Windows 2000 or XP with <a href="http://www.hummingbird.com/">Hummingbird</a>
 Exceed 8 or newer<br>
 <br>
 <span class="note">Note:</span>Contact Gary Romualdez of
 Hummingbird Ltd. [tel. (416) 496-6393 or
 <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
-for Exceed pricing information.<br>
-<br>
-</li><li>Client desktop currently
+for Exceed pricing information.<br>&nbsp;<br>
+</li><ul><li>For applications that use stereo or transparent overlays, Exceed 3D is required on the client</li></ul><li>Client desktop currently
 needs to be true color (24 or 32-bit)</li>
 </ul>
 
@@ -235,9 +226,7 @@ VirtualGL.</p>
 <div class="top"><a href="#" target="_top"><span style="color: rgb(0, 0, 0);"></span><span style="color: rgb(0, 0, 0);"></span>top</a></div>
 
 <hr>
-<a name="linuxinstall"></a><br>
-
-<h2>Installation (Linux)<br>
+<h2><a name="linuxinstall"></a>Installation (Linux)<br>
 </h2>
 
 <h4>Installing TurboJPEG</h4>
@@ -261,7 +250,7 @@ command:<br>
 
 <ol>
 
-<li>If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4, obtain one of the pre-built RPMs from the files area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br><br>The Enterprise Linux 2.1 RPM should (theoretically) also work on&nbsp;RedHat Linux 7.2 and 7.3 (and maybe 7.1 if
+<li>If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4, obtain one of the pre-built VirtualGL RPMs from the files area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br><br>The Enterprise Linux 2.1 RPM should (theoretically) also work on&nbsp;RedHat Linux 7.2 and 7.3 (and maybe 7.1 if
 patched.)<br>The Enterprise Linux 3 RPM should (theoretically) also work on&nbsp;RedHat
 Linux 8 (patched), RedHat Linux 9, and Fedora
 Core 1 &amp; 2.<br>The Enterprise Linux 4 RPM should (theoretically) also work on Fedora Core 3 &amp; 4.<br>&nbsp;</li><li>Log in as root, cd to the
@@ -468,8 +457,7 @@ SSL-encrypted communication.
 <pre>rpm -e VirtualGL</pre>
 <p style="text-align: right;"><a href="#" target="_top">top</a></p>
 
-<hr><a name="solarisinstall"></a>
-<h2>Installation (Solaris)<br>
+<hr><h2><a name="solarisinstall"></a>Installation (Solaris)<br>
 </h2>
 
 <ol>
@@ -550,8 +538,7 @@ Answer "yes" when prompted.<br>
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
 </div>
 
-<hr style="width: 100%; height: 2px;"><a name="windowsinstall"></a>
-<h2>Installation (Windows)</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="windowsinstall"></a>Installation (Windows)</h2>
 
 <ol>
 
@@ -743,9 +730,7 @@ command-line options.</p>
 
 <p style="text-align: right;"><a href="#" target="_top">top</a></p>
 
-<hr><a name="basicusageunix"></a><br>
-
-<h2>Basic Usage (Linux/Solaris Client)</h2>
+<hr><h2><a name="basicusageunix"></a>Basic Usage (Linux/Solaris Client)</h2>
 
 <ol>
 
@@ -784,8 +769,7 @@ Consult the <a href="#config">Advanced Configuration</a> section for more inform
 
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 
-<hr style="width: 100%; height: 2px;"><a name="basicusagewindows"></a>
-<h2>Basic Usage (Windows Client)</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="basicusagewindows"></a>Basic Usage (Windows Client)</h2>
 
 <ol>
 
@@ -886,9 +870,7 @@ Consult the <a href="#config">Advanced Configuration</a> section for more inform
 
 </ol>
 
-<hr style="width: 100%; height: 2px;"><a name="solarisscripts"></a><br>
-
-<h2>vglrun and Solaris Shell Scripts</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="solarisscripts"></a>vglrun and Solaris Shell Scripts</h2>
 
 <span class="monospace">vglrun</span>&nbsp;can
 be used to launch either binary executables or shell scripts, but there
@@ -944,41 +926,31 @@ will preload VirtualGL only into 64-bit executables.<br>
 </div>
 
 <hr style="width: 100%; height: 2px;">
-<div style="text-align: left;"><a name="glpusage"></a>
-</div>
 
-<h2 style="text-align: left;">GLP Usage</h2>
 
-<div style="text-align: left;">Sun Microsystems has developed an
+<div style="text-align: left;"><h2><a name="glpusage"></a>GLP Usage</h2></div>
+
+<div style="text-align: left;">
+<p>Sun Microsystems has developed an
 extension to OpenGL called GLP which allows an application to directly
 access the rendering capabilities of a 3D graphics card even if there
-is no X display running on the server.&nbsp; Apart from greatly
+is no X display running on the card.&nbsp; Apart from greatly
 simplifying the process of setting up VirtualGL on a server, GLP also
-greatly improves the security model, since it is no longer necessary to
-grant every user access to display :0.<br>
-<br>
-Version 2.0 of VirtualGL for Sparc/Solaris supports using GLP if it is
-available.&nbsp; Currently, this feature is available only on a select
-few graphics devices using version 1.5 of Sun OpenGL, which is not yet
-generally available.&nbsp; But Sun is actively promoting the GLP spec
-as a possible cross-platform industry standard OpenGL extension, so
-watch this space.<br>
-<br>
-See <a href="http://www.opengl.org/about/arb/notes/glP_presentation.pdf">http://www.opengl.org/about/arb/notes/glP_presentation.pdf</a> for more details on GLP.<br>
-<br>
-If GLP is supported on your application server, it can be enabled by passing an argument of <span class="monospace">-d GLP</span> to <span class="monospace">vglrun</span>, e.g.:<br>
-<pre>/opt/SUNWvgl/bin/vglrun -d glp {application_executable_or_script} {arguments}<br></pre>
-This will tell the VirtualGL faker to enable GLP mode and select the first available GLP device.&nbsp; You can also set the <span class="monospace">VGL_DISPLAY</span> environment variable to <span class="monospace">glp</span> to achieve the same effect:<br>
-<pre>export VGL_DISPLAY=glp<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
-Additionally, you can specify a specific GLP device to use for rendering:<br>
+greatly improves&nbsp;the overall security of VirtualGL servers, since
+it is no longer necessary to
+grant every user access to display :0. &nbsp;In addition,
+GLP&nbsp;makes it quite simple to assign VirtualGL jobs to any graphics
+pipe in a multi-pipe system.<br></p><p>Version 2.0 of VirtualGL for Sparc/Solaris supports using GLP if it is
+available.&nbsp; Currently, GLP is available only in Sun OpenGL 1.5 for Sparc/Solaris.</p><p>See <a href="http://www.opengl.org/about/arb/notes/glP_presentation.pdf">http://www.opengl.org/about/arb/notes/glP_presentation.pdf</a> for more details on GLP.</p><p>If GLP is supported on your application server, it can be enabled by passing an argument of <span class="monospace">-d glp</span> to <span class="monospace">vglrun</span>, e.g.:</p><pre>/opt/SUNWvgl/bin/vglrun -d glp {application_executable_or_script} {arguments}<br></pre>
+<p>
+This will tell the VirtualGL faker to enable GLP mode and select the first available GLP device.&nbsp; You can also set the <span class="monospace">VGL_DISPLAY</span> environment variable to <span class="monospace">glp</span> to achieve the same effect:</p><pre>export VGL_DISPLAY=glp<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre><p>
+Additionally, you can specify a specific GLP device to use for rendering:</p>
 <pre>export VGL_DISPLAY=/dev/fbs/jfb0<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
 </div>
 
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 
-<hr style="width: 100%; height: 2px;"><a name="secureusage"></a><br>
-
-<h2>Secure
+<hr style="width: 100%; height: 2px;"><h2><a name="secureusage"></a>Secure
 Usage</h2>
 
 <h3>SSL Tunneling of the Video
@@ -1009,9 +981,9 @@ secure client as a service using the instructions provided in the Installation s
 
 <span style="font-weight: bold;">Server:</span><br style="font-weight: bold;">
 
-Set the environment variable <span style="font-family: monospace;">VGL_USESSL</span>
+Set the environment variable <span style="font-family: monospace;">VGL_SSL</span>
 to <span style="font-family: monospace;">1</span>
-prior to launching the application.<br>
+prior to launching the application or pass an argument of <span class="monospace">+s</span> to <span class="monospace">vglrun</span>.<br>
 
 <h3>SSh Tunneling of the X11
 Protocol Stream</h3>
@@ -1163,7 +1135,7 @@ Here's one way to do it:</p>
 <ol>
 
 <li>Start the VirtualGL client
-(the standard version, not the secure version)</li>
+(the regular version, not the secure version)</li>
 <li>If the client machine is running Windows</li>
 <ol style="list-style-type: lower-alpha;">
 <li>Start Exceed</li>
@@ -1239,33 +1211,30 @@ WAN connection is low-bandwidth.</p>
 
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
-<hr style="width: 100%; height: 2px;"><a name="vnc"></a><br>
-<h2>Usage with VNC</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="vnc"></a>Usage with VNC</h2>
 <p>VirtualGL's
 default mode of operation, and its fastest mode of operation in a LAN
-environment, is to use its own built-in high-speed image compressors to
+environment, is "direct mode." &nbsp;In direct mode, VirtualGL uses its own built-in high-speed image compressors to
 send the rendered pixels from a 3D window over the network to the
 client.&nbsp; A process running on the client machine then
 decompresses
 the images and re-composites them into the appropriate X window.<br>
 </p>
 <div style="text-align: center;">
-<p><span style="font-weight: bold;" class="colorheader">VirtualGL's
-Architecture</span></p>
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL in Direct Mode</span></p>
 </div>
 <div style="text-align: center;"><img alt="VirtualGL's Architecture" src="virtualgl.png?rev=HEAD&amp;root=VirtualGL"><br>
 </div>
 <p>However, VirtualGL has a second
 mode
-of operation, a "raw" or&nbsp;"compression-less" mode, which allows it to work in
-concert with VNC or other 3rd party X11 proxies.&nbsp; In this
-mode, VirtualGL essentially bypasses its own image compressor and
+of operation,&nbsp;"raw mode", which allows it to work in
+concert with VNC or other 3rd party X11 proxies.&nbsp; In raw
+mode, VirtualGL&nbsp;bypasses its own image compressor and
 allows VNC to do the job of compressing and delivering images to the
 client(s).<br>
 </p>
 <div style="text-align: center;">
-<p><span style="font-weight: bold;" class="colorheader">VirtualGL's
-Architecture with VNC</span></p>
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL in Raw Mode</span></p>
 </div>
 <div style="text-align: center;">
 <p><img alt="Ideal X11 Proxy" src="idealx11proxy.png?rev=HEAD&amp;root=VirtualGL"></p>
@@ -1295,11 +1264,10 @@ the client machine. &nbsp;This reduces the deployment cost and complexity for Wi
 of using VirtualGL with VNC:</span>
 <ul>
 <li>On a high-bandwidth,
-low-latency network,&nbsp;the combination of
-VirtualGL and VNC will perform slower than VirtualGL alone.
+low-latency network, running VirtualGL in raw mode with VNC will perform more slowly than running VirtualGL in direct mode.
 &nbsp;On a
 typical 100 Mbit LAN, TurboVNC (see below) can deliver images to the client with about 80% of
-the&nbsp;performance of VirtualGL, but other VNC implementations
+the&nbsp;performance of VirtualGL's direct mode, but other VNC implementations
 will
 perform much worse, since their image codecs are tuned for low-speed
 connections.</li><li>VNC does not provide
@@ -1309,16 +1277,14 @@ server desktop appears in a single client window.</li><li>VNC requires more serv
 resources, both because it has to
 compress more pixels (an entire desktop rather than a single window)
 and because 2D (X11) rendering occurs on the server rather than the
-client.</li><li>VNC cannot be used with <a href="#advancedopengl">advanced OpenGL features</a>, such as stereo or overlays.</li>
+client.</li><li>VNC's compression engine is not pipelined or multi-threaded. &nbsp;VirtualGL's compression engine is.</li><li>VNC cannot be used with <a href="#advancedopengl">advanced OpenGL features</a>, such as stereo or overlays.</li>
 </ul>
 <p>When a VNC session is started
 on the server, VNC chooses a unique display number (such as :1, :2,
-etc.) and starts a&nbsp;customized X
-server on that display number.&nbsp; This
-customized X server renders all graphical output from the
+etc.) and starts a customized X
+server (Xvnc) on that display number.&nbsp; Xvnc renders all graphical output from the
 application into a bitmap in memory, which it then&nbsp;compresses and
-sends&nbsp;to the client(s). &nbsp;VNC's X
-server does not implement the GLX extension at all, and thus it can't
+sends&nbsp;to the client(s). &nbsp;Xvnc does not implement the GLX extension at all, and thus it can't
 be used as-is to run 3D applications.&nbsp; But since VirtualGL
 is designed to intercept and hand off all GLX commands to the
 hardware-accelerated root display (usually display :0), VirtualGL can
@@ -1328,17 +1294,16 @@ X11 proxy that doesn't natively support GLX.&nbsp; When used in
 "raw" mode, VirtualGL bypasses its compressed image
 delivery system and instead composites the 3D drawing
 area&nbsp;back
-into the window directly using X-Windows blits.&nbsp; These blits
-can
-be performed very quickly through shared memory, since the X server
-(VNC) and the application are
-residing on the same machine.<br>
-</p>
-<h3>TurboVNC</h3>
+into the window&nbsp;using standrard
+X11 image drawing commands.&nbsp; VirtualGL can pass these commands to
+Xvnc very quickly using shared memory if both Xvnc and VirtualGL
+are running on the same machine.</p><h3>TurboVNC</h3>
 <p>TurboVNC&nbsp;is
 essentially just a version of <a href="http://www.tightvnc.com/">TightVNC</a>
 with
-optimizations to make it perform at peak efficiency on high-speed networks. &nbsp;These
+optimizations to make it perform at peak efficiency with full-screen
+video workloads (which is, in a nutshell, what VirtualGL produces.)
+&nbsp;These
 optimizations include:<br>
 </p>
 <ul>
@@ -1357,8 +1322,9 @@ protocol whenever possible. &nbsp;Other VNC protocols (ZRLE,
 Hextile, etc.) are supported on the server so that it can talk to
 non-TurboVNC clients. &nbsp;But if a TurboVNC client connects to a
 TurboVNC server, they will both use optimized tight encoding at all
-times.</p>
-</li>
+times.</p></li><li>Protocol tweaks to allow some stages of the VNC pipeline to occur in
+parallel. &nbsp;This particularly improves performance on
+low-bandwidth (broadband) connections.</li>
 </ul>
 <p>Other notable differences
 between TurboVNC and TightVNC:<br>
@@ -1377,49 +1343,44 @@ default but can be disabled by passing an argument of <span class="monospace">-s
 to vncviewer.</li>
 </ul>
 <p>On a high-bandwidth, low-latency network,
-TurboVNC will be able to deliver frames to the client at about 80-90%
-of the rate of VirtualGL's image delivery system. &nbsp;Using
-VirtualGL by itself&nbsp;is&nbsp;preferable if seamless windows are a
+VirtualGL in raw mode with TurboVNC will be able to deliver frames to
+the client at about 80%
+of the rate of VirtualGL in direct mode. &nbsp;Using
+VirtualGL in direct mode&nbsp;is&nbsp;preferable if seamless windows
+are a
 requirement and if performance is
 critical. &nbsp;But if a bit of performance can be sacrificed and if
 collaboration and a stateless client are more important features than
 seamless windows, then VirtualGL+TurboVNC would be the appropriate
 solution.
-&nbsp;In the long term, we'd love to combine the best of both
-worlds, but to do so would involve opening the Pandora's box of
-maintaining our own X server code base.<br>
-</p>
-<p>TurboVNC
+&nbsp;In the long term, we are looking for a way to combine the best of
+both solutions into one. &nbsp;But such is not an easy&nbsp;problem ...</p><p>TurboVNC
 also allows VirtualGL to be used with respectable performance over
-low-bandwidth/high-latency networks, such as broadband or satellite. &nbsp;As with
-VirtualGL, the quality and subsampling can be adjusted to reduce the
-size of the compressed image stream without reducing the number of
-image colors. &nbsp;But if it is acceptable to
-sacrifice color gamut in favor of performance, then using a RealVNC
-client with Hextile or ZRLE compression and a reduced color depth might
-provide better performance on low-speed connections than a TurboVNC client. &nbsp;If a true color image is always required,
-then the TurboVNC client&nbsp;should always be used. &nbsp;
-</p>
+low-bandwidth/high-latency networks, such as broadband or satellite.
+&nbsp;As with VirtualGL's direct mode, the quality and subsampling of
+TurboVNC's JPEG image stream can be adjusted to reduce the
+size of the&nbsp;image stream without reducing the number of
+image colors. &nbsp;TurboVNC provides a preset mode for "broadband"
+quality, which sets the quality to a low level that is noticeably lossy
+but still usable.</p>
 <p>For instructions on the usage
-of TurboVNC, please refer to the TurboVNC man pages:</p>
+of TurboVNC, please refer to the TurboVNC man pages:</p><p>On Linux:</p>
 <pre>man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
-<p>on Linux, or</p>
-<pre>man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
-<p>on Solaris. &nbsp;On Windows, use the embedded help feature (the question mark button in the upper right of the window.)</p>
+<p>On Solaris:</p><pre>man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
+<p>On Windows, use the embedded help feature (the question mark button in the upper right of the window.)</p>
 <p>The TightVNC documentation:</p>
 <p><a href="http://www.tightvnc.com/docs.html">http://www.tightvnc.com/docs.html</a></p>
 <p>might also be helpful, since TurboVNC is based on TightVNC and shares many of its features.</p>
 <h3>Enabling Raw Mode</h3>
-<p>To use VirtualGL's
-raw (compression-less) mode,&nbsp;set the environment variable <span class="monospace">VGL_COMPRESS</span>
-to 0 on the server or pass an argument of <span class="monospace">-c 0</span> to vglrun (see <a href="#config">Advanced Configuration</a> for more details.)&nbsp; You should also make
+<p>To enable VirtualGL's
+raw&nbsp;mode,&nbsp;set the environment variable <span class="monospace">VGL_COMPRESS</span>
+to 0 on the server or pass an argument of <span class="monospace">-c 0</span> to <span class="monospace">vglrun</span> (see <a href="#config">Advanced Configuration</a> for more details.)&nbsp; You should also make
 sure that the
 <span class="monospace">DISPLAY</span>
 variable points to whatever display number that VNC is occupying (such as :1, :2, etc.)</p>
 <div class="top" style=""><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
-<hr style="width: 100%; height: 2px;"><a name="dynamicgl"></a><br>
-<h2>Usage with Applications That Manually Load OpenGL</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="dynamicgl"></a>Usage with Applications That Manually Load OpenGL</h2>
 <p>The lion's share of OpenGL applications are dynamically linked against
 <span class="monospace">libGL.so</span>, and thus <span class="monospace">libGL.so</span> is automatically loaded whenever the application
 loads. &nbsp;Whenever <span class="monospace">vglrun</span> is used to launch such&nbsp;applications, VirtualGL is loaded ahead of <span class="monospace">libGL.so</span>, meaning that&nbsp;OpenGL and GLX symbols are resolved from VirtualGL first and the "real" OpenGL library second.</p>
@@ -1438,8 +1399,7 @@ mechanism for loading a substitute OpenGL library allows VirtualGL to intercept
 the GLX and OpenGL calls.</p>
 <p>The <a href="http://virtualgl.sourceforge.net">VirtualGL web-site</a> contains specific recipes for getting a variety of games and other applications to work.</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
-<hr style="width: 100%; height: 2px;"><a name="chromium"></a><br>
-<h2>Usage with Chromium and ModViz</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="chromium"></a>Usage with Chromium and ModViz</h2>
 <p>Chromium is a powerful
 framework for performing various types of parallel OpenGL rendering.
 &nbsp;It is usually used on clusters of commodity
@@ -1630,8 +1590,7 @@ application.)</p>
 </div>
 </div>
 </div>
-<hr class="top" style="width: 100%; height: 2px;"><a name="advancedopengl"></a>
-<h2>Advanced OpenGL Features</h2>
+<hr class="top" style="width: 100%; height: 2px;"><h2><a name="advancedopengl"></a>Advanced OpenGL Features</h2>
 <h3>Stereo</h3>
 <p>The general idea behind VirtualGL is to offload as much of the
 rendering work to the server as possible and pass only 2D&nbsp;commands
@@ -1719,9 +1678,7 @@ that VNC cannot provide both PseudoColor and TrueColor visuals at the
 same time.<br>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a>&nbsp;</div>
-<hr style="width: 100%; height: 2px;"><br>
-<a name="perf"></a><br>
-<h2>Performance Measurement</h2>
+<hr style="width: 100%; height: 2px;"><h2><a name="perf"></a>Performance Measurement</h2>
 <h3>VirtualGL's Built-In Profiling
 System<br>
 </h3>
@@ -1862,8 +1819,7 @@ rate, and the x and y offset of the sampling area within the window.</p>
 <p style="text-align: right;"><a href="#" target="_top">top</a><br>
 </p>
 <hr style="width: 100%; height: 2px;">
-<a name="config"></a>
-<h2>Advanced Configuration<br>
+<h2><a name="config"></a>Advanced Configuration<br>
 </h2>
 <div style="text-align: left;">
 <h3>Server Settings</h3>
