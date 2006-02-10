@@ -159,9 +159,12 @@ endif
 ifeq ($(JPEGLIB), ipp)
 
 ifeq ($(IPPDIR),)
-IPPDIR = /opt/intel/ipp41/ia32_itanium
+IPPDIR = /opt/intel/ipp/5.0/ia32
 ifeq ($(subplatform), 64)
-IPPDIR = /opt/intel/ipp41/em64t
+IPPDIR = /opt/intel/ipp/5.0/em64t
+endif
+ifeq ($(subplatform), ia64)
+IPPDIR = /opt/intel/ipp/5.0/itanium
 endif
 endif
 IPPLINK = -L$(IPPDIR)/lib -lippcore \
