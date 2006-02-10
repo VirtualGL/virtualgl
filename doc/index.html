@@ -1402,7 +1402,8 @@ own built-in high-speed image compressors to
 send the rendered pixels from a 3D window over the network to the
 client.&nbsp; A process running on the client machine then
 decompresses
-the images and re-composites them into the appropriate X window.<br>
+the compressed pixels and re-composites them into the appropriate X
+window.<br>
 </p>
 <div style="text-align: center;">
 <p><span style="font-weight: bold;" class="colorheader">VirtualGL in
@@ -1477,8 +1478,6 @@ resources, both because it has to
 compress more pixels (an entire desktop rather than a single window)
 and because 2D (X11) rendering occurs on the server rather than the
 client.</li>
-  <li>VNC's compression engine is not pipelined or multi-threaded.
-&nbsp;VirtualGL's compression engine is.</li>
   <li>VNC cannot be used with <a href="#advancedopengl">advanced
 OpenGL features</a>, such as stereo or overlays.</li>
 </ul>
@@ -1499,10 +1498,10 @@ X11 proxy that doesn't natively support GLX.&nbsp; When used in
 "raw" mode, VirtualGL bypasses its compressed image
 delivery system and instead composites the 3D drawing
 area&nbsp;back
-into the window&nbsp;using standrard
-X11 image drawing commands.&nbsp; VirtualGL can pass these commands to
-Xvnc very quickly using shared memory if both Xvnc and VirtualGL
-are running on the same machine.</p>
+into the window&nbsp;using standard
+X11 image drawing commands.&nbsp; Normally, VirtualGL and Xvnc are
+running on the same machine, so VirtualGL can pass drawing commands to
+Xvnc very quickly using shared memory.</p>
 <h3>TurboVNC</h3>
 <p>TurboVNC&nbsp;is
 essentially just a version of <a href="http://www.tightvnc.com/">TightVNC</a>
@@ -1527,7 +1526,7 @@ cases except for very small image tiles for which using full color
   <li>
     <p>Using the optimized tight
 protocol whenever possible. &nbsp;Other VNC protocols (ZRLE,
-Hextile, etc.) are supported on the server so that it can talk to
+Hextile, etc.) are available on the server so that it can talk to
 non-TurboVNC clients. &nbsp;But if a TurboVNC client connects to a
 TurboVNC server, they will both use optimized tight encoding at all
 times.</p>
@@ -1555,10 +1554,7 @@ default but can be disabled by passing an argument of <span
  class="monospace">-singlebuffer</span>
 to vncviewer.</li>
 </ul>
-<p>On a high-bandwidth, low-latency network,
-VirtualGL in raw mode with TurboVNC will be able to deliver frames to
-the client at about 80%
-of the rate of VirtualGL in direct mode. &nbsp;Using
+<p>Using
 VirtualGL in direct mode&nbsp;is&nbsp;preferable if seamless windows
 are a
 requirement and if performance is
@@ -1567,17 +1563,21 @@ collaboration and a stateless client are more important features than
 seamless windows, then VirtualGL+TurboVNC would be the appropriate
 solution.
 &nbsp;In the long term, we are looking for a way to combine the best of
-both solutions into one. &nbsp;But such is not an easy&nbsp;problem ...</p>
-<p>TurboVNC
-also allows VirtualGL to be used with respectable performance over
+both solutions into one. &nbsp;But such is not an easy&nbsp;problem to
+solve ...</p>
+<p>TurboVNC&nbsp;allows VirtualGL to be used with respectable
+performance over
 low-bandwidth/high-latency networks, such as broadband or satellite.
 &nbsp;As with VirtualGL's direct mode, the quality and subsampling of
 TurboVNC's JPEG image stream can be adjusted to reduce the
 size of the&nbsp;image stream without reducing the number of
-image colors. &nbsp;TurboVNC provides a preset mode for "broadband"
-quality, which sets the quality to a low level that is noticeably lossy
-but still usable.</p>
-<p>For instructions on the usage
+image colors. &nbsp;TurboVNC provides a preset mode for&nbsp;broadband
+connections, which sets the quality to a low level that is noticeably
+lossy
+but still quite usable. &nbsp;It should be possible to redraw a
+1280x1024 window at greater than 10 frames/second&nbsp;on a standard
+cable modem connection using this preset mode.</p>
+<p>For&nbsp;instructions on the usage
 of TurboVNC, please refer to the TurboVNC man pages:</p>
 <p>On Linux:</p>
 <pre>man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
@@ -1631,7 +1631,7 @@ game Foo Wars from the Internet, and (for whatever reason) you want to
 run the game in a VNC session. &nbsp; The game provides a command line
 switch <span class="monospace">-g</span> which can be used to specify
 an OpenGL library to load other than <span class="monospace">libGL.so</span>.
-&nbsp;You could launch the game using a command line such as this:</p>
+&nbsp;You would launch the game using a command line such as this:</p>
 <pre>vglrun -c 0 foowars -g /usr/lib/librrfaker.so</pre>
 <p>You still need to use <span class="monospace">vglrun</span> to
 launch the game, because VirtualGL must also intercept a handful of X11
@@ -1673,24 +1673,25 @@ visible in a particular section of the final image. &nbsp;It then
 instructs each node of the cluster to render only the polygons that are
 necessary to
 generate the image section ("tile") for that node. &nbsp;This is
-primary used&nbsp;to drive high-resolution displays that would be
+primarily used&nbsp;to drive high-resolution displays that would be
 impractical to
 drive from a single graphics card due to limitations in the card's
 framebuffer memory, processing power, or both. &nbsp;Configuration 1
 could be used, for instance, to drive a CAVE, video wall, or even an
 extremely high-resolution monitor. &nbsp;In this configuration, each
 Chromium node&nbsp;generally uses all of its screen real
-estate to render a section of the overall image.</p>
+estate to render a section of the&nbsp;multi-screen image.</p>
 <p style="text-align: left;">VirtualGL is generally not very useful
 with Configuration 1. &nbsp;You
 could theoretically&nbsp;install a separate copy of VirtualGL on each
 display node and use it to redirect the output of each <span
  class="monospace">crserver</span>
 instance to
-a bank of displays running elsewhere on the network, but there
-would be no way to&nbsp;synchronize the displays&nbsp;on the
+a multi-screen X server running elsewhere on the network. &nbsp;But
+there
+would be no way to&nbsp;synchronize the screens&nbsp;on the
 remote
-end. &nbsp;Chromium uses DMX to synchronize the displays in a
+end. &nbsp;Chromium uses DMX to synchronize the screens in a
 multi-screen configuration, and VirtualGL would have to be made
 DMX-aware
 for it to perform the same job. &nbsp;Maybe at some point in the future
@@ -1712,7 +1713,7 @@ single window on&nbsp;Node 0. &nbsp;This
 configuration is perhaps the least often used of the three, but it is
 useful in cases where the scene contains a large amount of textures
 (such as in volume rendering) and thus rendering the whole scene on a
-single node would exceed that node's fill-rate limitations.</div>
+single node would be prohibitively slow due to fill-rate limitations.</div>
 <p style="text-align: left;">In
 this configuration, the application is allowed to choose a visual,
 create an X window, and manage the window as it would normally do.
@@ -1736,21 +1737,22 @@ server is a VNC server or otherwise does not provide GLX.)
 &nbsp;VirtualGL must be inserted into the CrServer process on Node 0 to
 prevent it from sending <span class="monospace">glDrawPixels()</span>
 calls to the X
-server. &nbsp;Instead, VirtualGL forces CrServer to draw into a
+server (which would effectively send uncompressed images over the
+network.) &nbsp;Instead, VirtualGL forces CrServer to draw into a
 Pbuffer, and VGL takes charge of transmitting those pixels to
 the destination X server in the most efficient way possible.</p>
 <p style="text-align: left;">Since
 Chromium uses <span class="monospace">dlopen()</span> to load the
 system's OpenGL library,&nbsp;preloading VirtualGL into the CrAppFaker
 and CrServer processes using <span class="monospace">vglrun</span> is
-not sufficient to make them work in concert.
+not sufficient.
 &nbsp;Fortunately, Chromium provides an environment variable, <span
  class="monospace">CR_SYSTEM_GL_PATH</span>,
 which allows one to specify an alternate path in which it will search
 for the system's <span class="monospace">libGL.so</span>.
 &nbsp;The VirtualGL packages for Linux and Solaris include a
 symbolic link named <span class="monospace">libGL.so</span> which
-really points to the VirtualGL faker (<span class="monospace">librrfaker.so</span>)
+really points to the VirtualGL faker library (<span class="monospace">librrfaker.so</span>)
 instead. This symbolic link is located in its own isolated directory,
 so that directory can be passed to Chromium in the <span
  class="monospace">CR_SYSTEM_GL_PATH</span>
@@ -1790,8 +1792,8 @@ Applications<br>
     </tr>
   </tbody>
 </table>
-<p style="text-align: left;">Running the CrServer is simply a matter of
-setting this environment variable and then invoking <span
+<p style="text-align: left;">Running the CrServer in VirtualGL is
+simply a matter of setting this environment variable and then invoking <span
  class="monospace">crserver</span> with <span class="monospace">vglrun</span>,
 e.g.:</p>
 <div style="text-align: left;">
@@ -1860,13 +1862,17 @@ polygons and the
 rendering bottleneck is&nbsp;processing all of that geometry on a
 single
 graphics card. &nbsp;In this case, each node runs a separate copy of
-the application, and the application has to be at least partly aware
+the application, and for best results, the application needs to be at
+least partly aware
 that it's running in a parallel environment so that it can give
 Chromium hints as to how to distribute the various objects to be
-rendered. &nbsp;The resulting pixels from each node, along with their
-associated Z-buffer data, can be used to&nbsp;composite the images from
-each node into a final
-image. &nbsp;This is often done using a "binary swap", whereby the
+rendered. &nbsp;Each node generates an image of a particular portion of
+the object space, and these images must be composited in such a way
+that the front-to-back ordering of pixels is maintained. &nbsp;This is
+generally done by collecting Z buffer data from each node to determine
+whether a particular pixel on a particular node is visible in the final
+image. &nbsp;The&nbsp;rendered images from each node are often
+composited&nbsp;using a "binary swap", whereby the
 nodes combine their images in a cascading tree so that the overall
 compositing time is proportional to log<sub>2</sub>(N) rather than N.</p>
 <p>To make this configuration work with VirtualGL:</p>
@@ -1905,7 +1911,8 @@ and VirtualGL</span></h3>
 <p>ModViz Virtual Graphics Platform<sup>TM</sup>
 is a polished commercial clustered rendering framework for Linux which
 supports all three of the rendering modes described above and
-provides a much more straightforward interface to the user.</p>
+provides a much more straightforward&nbsp;interface to configure and
+run these types of parallel rendering jobs.</p>
 <p>All VGP jobs, regardless of configuration, are all spawned through <span
  class="monospace">vglauncher</span>, a front-end program which
 automatically takes care of starting the appropriate processes on the
@@ -1920,7 +1927,8 @@ intercepts the OpenGL calls from the application.</p>
 <p>So our strategy here is similar
 to our strategy for loading the Chromium App Faker. &nbsp;We want
 to insert VirtualGL between VGP and the real system OpenGL library, so
-that VGP will call VirtualGL and VirtualGL will call libGL.
+that VGP will call VirtualGL and VirtualGL will call <span
+ class="monospace">libGL.so</span>.
 &nbsp;Achieving this with VGP is relatively simple:</p>
 <pre>export VGP_BACKING_GL_LIB=librrfaker.so<br>vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}</pre>
 <p>Replace <span class="monospace">/usr/lib/libGL.so</span> with the
@@ -1947,15 +1955,16 @@ so, whether it has&nbsp;stereo visuals available. &nbsp;VirtualGL then
 checks the server's display to see whether it has stereo visuals
 available as well. &nbsp;If both are true, then VirtualGL will return a
 stereo visual to the application. &nbsp;If, for any given frame,
-VirtualGL detects&nbsp;thatthe application has drawn something to one
+VirtualGL detects&nbsp;that the application has drawn something to one
 of the&nbsp;right eye
 buffers, it will send a stereo image pair to the VirtualGL client.
 &nbsp;The VGL client then decodes the stereo image pair as a single
-frame and drawsit to the client's display using OpenGL drawing
+frame and draws it to the client's display using OpenGL drawing
 commands. </p>
 <p>The upshot of this is that, in order to use stereo in VirtualGL, the
 client machine must support OpenGL and GLX (Exceed 3D is required for
-Windows clients) and must have a graphics card (such as NVidia Quadro,
+Windows clients) and must have a graphics card (such as the nVidia
+Quadro,
 etc.) which is capable of drawing in stereo. &nbsp;It is usually
 necessary to explicitly enable stereo visuals in the graphics card
 configuration for both the client and server machines. &nbsp;Use <span
@@ -1970,7 +1979,7 @@ session.</p>
 sends the commands associated with rendering transparent overlays
 directly to the client machine. &nbsp;The underlay is still rendered on
 the server, as always. &nbsp;This approach is unfortunately necessary,
-because there is no reliable way to draw to an overlay using 2D
+because there is no reliable way to draw to an overlay using 2D (X11)
 functions, nor is there a reasonable way to composite the overlay and
 underlay on the server side. &nbsp;So VirtualGL again relies on the
 client's software and hardware to do this job.</p>
@@ -1978,7 +1987,7 @@ client's software and hardware to do this job.</p>
 graphics card configuration. &nbsp;In the case of overlays, however,
 they need only be supported and enabled on the client machine.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to
-work with NVidia Quadro hardware. &nbsp;True color (24-bit) overlays
+work with nVidia Quadro hardware. &nbsp;True color (24-bit) overlays
 will probably work as well, but they have not been tested. &nbsp;Use <span
  class="monospace">glxinfo</span>
 to verify whether your client's display supports overlays and whether
@@ -2000,23 +2009,26 @@ between indices and actual colors. &nbsp;As far as OpenGL is concerned,
 each&nbsp;color index value is just a meaningless number, and it is
 only when the final image is drawn by the X server that these numbers
 take on meaning. &nbsp;As a result, many pieces of OpenGL's core
-functionality, such as lighting and shading, are either undefined or do
+functionality, such as lighting and shading, either have undefined
+behavior or do
 not work at all with PseudoColor rendering. &nbsp;PseudoColor rendering
 used to be a common technique to visualize scientific data, because
-such data often only contained 8 bits per sample to begin with, and the
-application could manipulate the color table&nbsp;to allow the user to
+such data often only contained 8 bits per sample to begin with.
+&nbsp;Applications could manipulate the color table&nbsp;to allow the
+user to
 dynamically control the relationship between sample values and colors.
 &nbsp;As more and more graphics cards drop support for PseudoColor
-rendering, however, applications are becoming less and less dependent
-on it.</p>
+rendering, however, the applications which use it are a vanishing breed.</p>
 VirtualGL supports PseudoColor rendering if a PseudoColor visual is
 available on the client's display. &nbsp;A PseudoColor visual need not
 be present on the server. &nbsp;On the server, VirtualGL uses the red
 channel of a standard&nbsp;RGB Pbuffer to store the color index.
-&nbsp;On an end of frame event, VirtualGL reads back the red channel of
+&nbsp;Upon receiving an end of frame trigger, VirtualGL reads back the
+red channel of
 the Pbuffer and uses XPutImage() to draw it into the appropriate
 window. &nbsp;The upshot of this is that&nbsp;there is no
-compression&nbsp;with PseudoColor rendering. &nbsp;However, since there
+compression&nbsp;with PseudoColor rendering in VirtualGL.
+&nbsp;However, since there
 is only 1 byte per pixel in this mode, the images can still be sent to
 the client reasonably quickly even though they are uncompressed.<br>
 <br>
@@ -2069,7 +2081,7 @@ only as quickly as the VirtualGL pipeline can receive them, which will
 conserve server resources as well as allow OpenGL benchmarks to
 accurately measure the throughput of the VirtualGL pipeline.
 &nbsp;With frame spoiling enabled, these benchmarks will report
-meaningless data, since they're measuring the server's rendering rate,
+meaningless data, since they are measuring the server's rendering rate,
 and that rendering rate is decoupled from the overall&nbsp;throughput
 of VirtualGL.</p>
 <p>To disable frame spoiling, set the <span class="monospace">VGL_SPOIL</span>
@@ -2084,10 +2096,11 @@ system.<br>
 </p>
 <h4>nettest</h4>
 nettest is a low-level network benchmark that uses the same network
-routines as VirtualGL. &nbsp;It can be used to test the latency and
+classes as VirtualGL. &nbsp;It can be used to test the latency and
 throughput of any TCP/IP connection, with or without SSL encryption.
 &nbsp;The&nbsp;VirtualGL Linux package installs nettest in <span
- class="monospace">/opt/VirtualGL/bin</span>.
+ class="monospace">/opt/VirtualGL/bin</span>. &nbsp;The VirtualGL
+Solaris package installs it in <span class="monospace">/opt/SUNWvgl/bin</span>.
 &nbsp;The Windows installer installs it in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
 by default.
@@ -2159,6 +2172,8 @@ system-specific techniques, such as monitoring redraw events on the
 client's windowing system.<br>
 <p>The&nbsp;VirtualGL Linux
 package installs tcbench in <span class="monospace">/opt/VirtualGL/bin</span>.
+&nbsp;The VirtualGL Solaris package installs tcbench in <span
+ class="monospace">/opt/SUNWvgl/bin</span>.
 &nbsp;<span class="monospace"></span>The Windows installer installs it
 in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
