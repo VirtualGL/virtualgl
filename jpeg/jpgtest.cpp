@@ -22,7 +22,7 @@
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  goto bailout;}}
 
-int forcemmx=0, forcesse=0, forcesse2=0;
+int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 const int _flags[BMPPIXELFORMATS]={0, 0, TJ_BGR, TJ_BGR,
 	TJ_BGR|TJ_ALPHAFIRST, TJ_ALPHAFIRST};
@@ -55,7 +55,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	rrtimer timer; double elapsed;
 	int jpgbufsize=0, i, j, tilesizex, tilesizey, numtilesx, numtilesy, ITER;
 	unsigned long *comptilesize=NULL;
-	int flags=(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0);
+	int flags=(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)|(forcesse3?TJ_FORCESSE3:0);
 	int ps=_ps[pf];
 	int pitch=w*ps;
 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 		printf("       [-tile]\n");
 		printf("       Test performance of the codec when the image is encoded\n");
 		printf("       as separate tiles of varying sizes.\n\n");
-		printf("       [-forcemmx] [-forcesse] [-forcesse2]\n");
+		printf("       [-forcemmx] [-forcesse] [-forcesse2] [-forcesse3]\n");
 		printf("       Force MMX, SSE, or SSE2 code paths in Intel codec\n\n");
 		printf("       [-rgb | -bgr | -rgba | -bgra | -abgr | -argb]\n");
 		printf("       Test the specified color conversion path in the codec (default: BGR)\n\n");
@@ -283,6 +283,11 @@ int main(int argc, char *argv[])
 		for(i=3; i<argc; i++)
 		{
 			if(!stricmp(argv[i], "-tile")) dotile=1;
+			if(!stricmp(argv[i], "-forcesse3"))
+			{
+				printf("Using SSE3 code in Intel compressor\n");
+				forcesse3=1;
+			}
 			if(!stricmp(argv[i], "-forcesse2"))
 			{
 				printf("Using SSE2 code in Intel compressor\n");

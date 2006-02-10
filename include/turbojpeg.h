@@ -31,6 +31,7 @@ enum {TJ_444=0, TJ_422, TJ_411};
 #define TJ_FORCESSE  16  /* Force IPP to use SSE1 code even if SSE2 available */
 #define TJ_FORCESSE2 32  /* Force IPP to use SSE2 code (useful if auto-detect is not working properly) */
 #define TJ_ALPHAFIRST 64 /* BGR buffer is ABGR and RGB buffer is ARGB */
+#define TJ_FORCESSE3 128 /* Force IPP to use SSE3 code (useful if auto-detect is not working properly) */
 
 typedef void* tjhandle;
 
