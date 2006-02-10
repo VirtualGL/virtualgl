@@ -68,6 +68,7 @@ typedef struct _jpgstruct
 	IppiDecodeHuffmanSpec *d_dclumtable, *d_aclumtable, *d_dcchromtable, *d_acchromtable;
 	Ipp16u __chromqtable[64+7], __lumqtable[64+7], *chromqtable, *lumqtable;
 	Ipp8u __mcubuf[384*2+CACHE_LINE-1];  Ipp16s *mcubuf;
+	IppCpuType cpu;
 	int initc, initd;
 } jpgstruct;
 
@@ -126,6 +127,16 @@ static __inline IppCpuType AutoDetect(void)
 	return cpu;
 }
 
+#define forcecpu(c) { \
+	char *env=NULL; \
+	if(jpg->cpu!=c) \
+	{ \
+		ippStaticInitCpu(c); \
+		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0 \
+			&& !strncmp(env, "1", 1)) \
+			fprintf(stderr, "[TurboJPEG] Forcing CPU type to %d\n", c); \
+		jpg->cpu=c; \
+	}}
 
 //////////////////////////////////////////////////////////////////////////////
 //    COMPRESSOR
@@ -537,9 +548,16 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		IppCpuType cpu=ippCoreGetCpuType();
-		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		char *env=NULL;
+		jpg->cpu=ippCoreGetCpuType();
+		if(jpg->cpu==ippCpuUnknown) {jpg->cpu=AutoDetect();  ippStaticInitCpu(jpg->cpu);}
+		#if IPP_VERSION_MAJOR>=5
+		else if(jpg->cpu==ippCpuX8664) {jpg->cpu=AutoDetect();  ippStaticInitCpu(jpg->cpu);}
+		#endif
 		else ippStaticInitBest();  ippstaticinitcalled=1;
+		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+			&& !strncmp(env, "1", 1))
+			fprintf(stderr, "[TurboJPEG] Detected CPU type %d\n", jpg->cpu);
 	}
 
 	_ippn(ippiEncodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -586,9 +604,10 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(flags&TJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
-	if(flags&TJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
-	if(flags&TJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
+	if(flags&TJ_FORCEMMX) forcecpu(ippCpuPII);
+	if(flags&TJ_FORCESSE) forcecpu(ippCpuPIII);
+	if(flags&TJ_FORCESSE2) forcecpu(ippCpuP4);
+	if(flags&TJ_FORCESSE3) forcecpu(ippCpuEM64T);
 
 	if(flags&TJ_ALPHAFIRST) jpg->bmpbuf=&srcbuf[1];
 	else jpg->bmpbuf=srcbuf;
@@ -918,9 +937,16 @@ DLLEXPORT tjhandle DLLCALL tjInitDecompress(void)
 
 	if(!ippstaticinitcalled)
 	{
-		IppCpuType cpu=ippCoreGetCpuType();
-		if(cpu==ippCpuUnknown) {cpu=AutoDetect();  ippStaticInitCpu(cpu);}
+		char *env=NULL;
+		jpg->cpu=ippCoreGetCpuType();
+		if(jpg->cpu==ippCpuUnknown) {jpg->cpu=AutoDetect();  ippStaticInitCpu(jpg->cpu);}
+		#if IPP_VERSION_MAJOR>=5
+		else if(jpg->cpu==ippCpuX8664) {jpg->cpu=AutoDetect();  ippStaticInitCpu(jpg->cpu);}
+		#endif
 		else ippStaticInitBest();  ippstaticinitcalled=1;
+		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+			&& !strncmp(env, "1", 1))
+			fprintf(stderr, "[TurboJPEG] Detected CPU type %d\n", jpg->cpu);
 	}
 
 	_ippn(ippiDecodeHuffmanStateGetBufSize_JPEG_8u(&huffbufsize));
@@ -981,9 +1007,10 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(flags&TJ_FORCEMMX) ippStaticInitCpu(ippCpuPII);
-	if(flags&TJ_FORCESSE) ippStaticInitCpu(ippCpuPIII);
-	if(flags&TJ_FORCESSE2) ippStaticInitCpu(ippCpuP4);
+	if(flags&TJ_FORCEMMX) forcecpu(ippCpuPII);
+	if(flags&TJ_FORCESSE) forcecpu(ippCpuPIII);
+	if(flags&TJ_FORCESSE2) forcecpu(ippCpuP4);
+	if(flags&TJ_FORCESSE3) forcecpu(ippCpuEM64T); 
 
 	if(flags&TJ_ALPHAFIRST) jpg->bmpbuf=&dstbuf[1];
 	else jpg->bmpbuf=dstbuf;
