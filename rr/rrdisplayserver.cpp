@@ -55,6 +55,9 @@ rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl, int drawmethod
 {
 	errifnot(_listensd=new rrsocket(dossl));
 	_listensd->listen(port==0?RR_DEFAULTPORT:port);
+	char *env=NULL;
+	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+		&& !strncmp(env, "1", 1)) fbx_printwarnings(rrout.getfile());
 	errifnot(_t=new Thread(this));
 	_t->start();
 }
