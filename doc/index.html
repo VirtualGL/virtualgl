@@ -182,12 +182,19 @@ Dual processors recommended</td>
       </td>
       <td>Decent 3D graphics accelerator<br>
       <ul>
-        <li>Tested with various nVidia Quadro and ATI Radeon models</li>
+        <li>nVidia strongly recommended</li>
+        <li>If using ATI,&nbsp;driver v8.14 or older recommended.
+&nbsp;Newer ATI drivers have known issues which may prevent them from
+working with VirtualGL</li>
       </ul>
       </td>
       <td>Decent 3D graphics accelerator<br>
       <ul>
-        <li>Tested with various nVidia Quadro and ATI Radeon models</li>
+        <li>nVidia strongly recommended</li>
+        <li>If using ATI,&nbsp;driver v8.14 or older recommended.
+&nbsp;Newer ATI
+drivers have known issues which may prevent them from working with
+VirtualGL</li>
       </ul>
       </td>
       <td>Graphics card with decent 2D performance<br>
@@ -276,8 +283,7 @@ client</li>
  href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">patches</a>
 113886-31 and 113887-31 recommended) or Sun OpenGL 1.5.&nbsp; See <a
  href="http://www.sun.com/software/graphics/opengl/">http://www.sun.com/software/graphics/opengl/</a>
-for downloads.&nbsp; OpenGL 1.5 or later required for GLP support
-        </li>
+for downloads.&nbsp; OpenGL 1.5 or later required for GLP support </li>
         <li>Sun MediaLib (see <a
  href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
         <li>In order to use the SSL features of VirtualGL on Solaris 8
@@ -461,8 +467,7 @@ as root<br>
 &nbsp;</li>
   <li>If the server machine is configured to boot into runlevel 3 (text
 login), then configure it to boot into a graphical login by changing
-the first line of
-    <span class="monospace">/etc/inittab</span> from<br>
+the first line of <span class="monospace">/etc/inittab</span> from<br>
     <br>
     <span class="monospace">id:3:initdefault:</span><br
  class="monospace">
@@ -470,8 +475,7 @@ the first line of
 to<br>
     <span class="monospace"><br>
 id:5:initdefault:<br>
-&nbsp;</span>
-  </li>
+&nbsp;</span> </li>
   <li>If the server is running the NVidia accelerated GLX drivers,
 follow the instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span>
 regarding setting the appropriate permissions for <span
@@ -768,8 +772,7 @@ directory in
 which you want the files to be installed. </li>
   <li>Install Hummingbird Exceed if it isn't already
 installed. </li>
-  <li>Add the Exceed path (e.g.
-    <span class="monospace">C:\Program
+  <li>Add the Exceed path (e.g. <span class="monospace">C:\Program
 Files\Hummingbird\Connectivity\9.00\Exceed</span>)<span
  class="monospace"></span>
 to your system <span class="monospace">PATH</span>
@@ -850,8 +853,7 @@ account required </td>
       <td>Hummingbird Exceed
 9.0</td>
       <td><span class="monospace">hclshm.dll</span> v9.0.0.1 (or higher)<br>
-      <span class="monospace">
-xlib.dll</span> v9.0.0.3 (or higher)<br>
+      <span class="monospace">xlib.dll</span> v9.0.0.3 (or higher)<br>
       <span class="monospace">exceed.exe</span> 9.0.0.9 or higher</td>
       <td><span class="monospace">exceed.exe</span> can be patched by
 running Hummingbird Update<br>
@@ -971,8 +973,7 @@ if the application server is running Solaris.<br>
     <br>
 Consult the <a href="#config">Advanced Configuration</a> section for
 more information on <span class="monospace">vglrun</span> command line
-options
-  </li>
+options </li>
 </ol>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
@@ -1026,8 +1027,7 @@ once, not every time you launch the
 client. </p>
   </li>
   <li>Open a Secure Shell (SSh)
-connection to the application server:
-    <br>
+connection to the application server: <br>
     <span style="font-weight: bold;"><br>
 CygWin users:</span><br>
 Open a new command prompt and type:<br>
@@ -1039,8 +1039,7 @@ Open a new command prompt and type:<br>
 category.</li>
     <li>Set the "Protocol"
 to "SSH," then enter the host name or IP address of the application
-server.
-      <br>
+server. <br>
       <br>
       <img alt="" src="putty1.png?rev=HEAD&amp;root=VirtualGL"><br>
       <br>
@@ -1068,8 +1067,7 @@ if the application server is running Solaris.<br>
     <br>
 Consult the <a href="#config">Advanced Configuration</a> section for
 more information on <span class="monospace">vglrun</span> command line
-options
-  </li>
+options </li>
 </ol>
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
 </div>
@@ -1270,13 +1268,12 @@ connecting over a LAN or other high-speed network.
 <h4>Enabling X11 Tunneling from a Windows Client (PuTTY)</h4>
 <ol>
   <li>Launch PuTTY.</li>
-  <li>Select the
-    <span style="font-style: italic;">Connection--&gt;SSH--&gt;Tunnels</span>
+  <li>Select the <span style="font-style: italic;">Connection--&gt;SSH--&gt;Tunnels</span>
 category.</li>
   <li>Check "Enable X11 forwarding"
 and
-set the "X display location" to
-    <span class="monospace">localhost:0.0</span> or
+set the "X display location" to <span class="monospace">localhost:0.0</span>
+or
 whichever
 display Exceed is parking on.</li>
 </ol>
@@ -1365,8 +1362,7 @@ terminal session open into <span class="monospace">app_server_machine</span>.&nb
 Inside that
 session, set the environment variable <span class="monospace">VGL_CLIENT</span>
 to <span class="monospace">localhost:n.0</span>,
-where <span class="monospace">n
-    </span>is the display number of
+where <span class="monospace">n </span>is the display number of
 the X server running on the Client machine.<br>
 &nbsp;</li>
   <li><span class="monospace">vglrun</span>
@@ -1702,9 +1698,8 @@ for it to perform the same job. &nbsp;Maybe at some point in the future
 </div>
 <div style="text-align: center;">
 <p><span style="font-weight: bold;"></span><span
- style="font-weight: bold;" class="colorheader"><img
- style="width: 476px; height: 340px;" alt=""
- src="chromium-sortfirst.png?rev=HEAD&amp;root=VirtualGL"></span></p>
+ style="font-weight: bold;"><img style="width: 476px; height: 340px;"
+ alt="" src="chromium-sortfirst.png?rev=HEAD&amp;root=VirtualGL"></span></p>
 <div style="text-align: left;">Configuration
 2 uses the same sort-first principle as Configuration 1, except that
 each tile is
@@ -1767,8 +1762,7 @@ setting required to use VirtualGL with Chromium</span></p>
     <tr>
       <td style="font-weight: bold;" class="colorheader"></td>
       <td style="font-weight: bold;" class="colorheader">32-bit
-Applications
-      </td>
+Applications </td>
       <td style="font-weight: bold;" class="colorheader">64-bit
 Applications<br>
       </td>
@@ -1848,7 +1842,16 @@ location of the "real" libGL, e.g. <span class="monospace">/usr/lib/libGL.so.1</
 not use <span class="monospace">vglrun</span> here)</li>
 </ol>
 Again, it's always a good idea to make sure this works without
-VirtualGL before adding VirtualGL into the mix.
+VirtualGL before adding VirtualGL into the mix.<br>
+<br>
+<span class="note">Note:</span>When using VirtualGL with this mode,
+resizing the application window may not work properly. &nbsp;This is
+because the resize event is sent to the application process, and
+therefore the CrServer process that's actually drawing the pixels has
+no way of knowing that a window resize has occurred. &nbsp;A possible
+fix&nbsp;is to modify Chromium such that it propagates the resize event
+down the render chain so that all of the CrServer processes are aware
+that a resize event occurred.
 <h3><span style="font-weight: bold;" class="colorheader">Configuration
 3: Sort-Last Rendering (Object-Space Decomposition)</span></h3>
 </div>
