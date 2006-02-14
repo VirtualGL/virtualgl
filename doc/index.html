@@ -1908,7 +1908,17 @@ to the appropriate value for the operating system and application type
 (see table in the previous section)</li>
   <li>On Node 0, <span class="monospace">vglrun crutserver &amp;</span></li>
   <li>On Node 0, <span class="monospace">vglrun crserver</span></li>
+  <span style="font-family: monospace;"></span>
 </ol>
+<h3><span style="font-weight: bold;" class="colorheader">A Note About
+Performance</span></h3>
+Chromium's use of X11 is generally not very optimal. &nbsp;It assumes a
+very fast connection between the X server and the Chromium
+Server. &nbsp;In certain modes, Chromium polls the X server on
+every frame to determine whether windows have been resized, etc.
+&nbsp;Thus, we have observed that Chromium tends to perform much better
+with VirtualGL running in a&nbsp;TurboVNC session as opposed to
+VirtualGL running in direct mode.<br>
 <h3><span style="font-weight: bold;" class="colorheader">ModViz VGP<sup>TM</sup>
 and VirtualGL</span></h3>
 <p>ModViz Virtual Graphics Platform<sup>TM</sup>
