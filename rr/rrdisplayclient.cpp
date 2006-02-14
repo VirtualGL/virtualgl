@@ -231,8 +231,8 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		for(j=0; j<b->_h.width; j+=tilesizex, n++)
 		{
 			int w=tilesizex, x=j;
-			if(n%_np!=_myrank) continue;
 			if(b->_h.width-j<(3*tilesizex/2)) {w=b->_h.width-j;  j+=tilesizex;}
+			if(n%_np!=_myrank) continue;
 			if(b->tileequals(lastb, x, y, w, h)) continue;
 			rrframe *rrb=b->gettile(x, y, w, h);
 			rrjpeg *jptr=NULL;
