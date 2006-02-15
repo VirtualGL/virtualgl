@@ -100,7 +100,6 @@ install: rr diags
 	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
-	$(INSTALL) -m 755 rr/rrxclient_ssl.sh $(prefix)/bin/vglclient_ssldaemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
@@ -138,9 +137,7 @@ uninstall:
 else
 uninstall:
 	$(prefix)/bin/vglclient_daemon stop || echo Client not installed as a service
-	$(prefix)/bin/vglclient_ssldaemon stop || echo Secure client not installed as a service
 	$(RM) $(prefix)/bin/vglclient_daemon
-	$(RM) $(prefix)/bin/vglclient_ssldaemon
 	$(RM) $(prefix)/bin/vglclient_config
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/rrlaunch
