@@ -1,8 +1,4 @@
-%define _XINIT /etc/X11/xinit/xinitrc.d/vglclient.sh
-%define _XINITSSL /etc/X11/xinit/xinitrc.d/vglclient_ssl.sh
 %define _DAEMON /usr/bin/vglclient_daemon
-%define _DAEMONSSL /usr/bin/vglclient_ssldaemon
-%define _POSTSESSION /etc/X11/gdm/PostSession/Default
 
 # This is a hack to prevent the RPM from depending on libGLcore.so.1 and
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
@@ -76,7 +72,6 @@ install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
-install -m 755 rr/rrxclient_ssl.sh $RPM_BUILD_ROOT%{_DAEMONSSL}
 install -m 755 rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
@@ -113,13 +108,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %preun
 %{_DAEMON} stop
-%{_DAEMONSSL} stop
-if [ -x %{_XINIT} ]; then rm %{_XINIT}; fi
-if [ -x %{_XINITSSL} ]; then rm %{_XINITSSL}; fi
-if [ -x %{_POSTSESSION} ]; then
-	/usr/bin/perl -i -p -e "s:%{_DAEMON} stop\n::g;" %{_POSTSESSION}
-	/usr/bin/perl -i -p -e "s:%{_DAEMONSSL} stop\n::g;" %{_POSTSESSION}
-fi
+/usr/bin/vglclient_config -remove
 
 %files -n %{name}
 %defattr(-,root,root)
@@ -136,7 +125,6 @@ fi
 
 /usr/bin/vglclient
 %{_DAEMON}
-%{_DAEMONSSL}
 /usr/bin/vglclient_config
 /usr/bin/vglrun
 /usr/bin/rrlaunch
