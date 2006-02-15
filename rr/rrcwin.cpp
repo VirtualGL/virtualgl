@@ -70,7 +70,7 @@ void rrcwin::initgl(void)
 				e.getMessage());
 			if(b) {delete b;  b=NULL;}
 			_drawmethod=RR_DRAWX11;
-			rrout.println("Stereo requires OpenGL drawing.  Disabling stereo.");
+			rrout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
 			_stereo=false;
 			return;
 		}

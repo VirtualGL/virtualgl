@@ -215,6 +215,7 @@ void start(int argc, char **argv)
 			_throw("Could not initialize listener");
 		rrout.println("Listening for unencrypted connections on port %d", port);
 	}
+	rrout.flush();
 	#ifdef _WIN32
 	if(service)
 	{
@@ -257,7 +258,8 @@ void install_service(void)
 		SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, imagePath, NULL, NULL, NULL, NULL,
 		NULL)))
 		_throww32();
-	if(!quiet) MessageBox(NULL, "Service Installed Successfully", "Success", MB_OK);
+	if(!quiet) MessageBox(NULL, "Service Installed Successfully.  Use the Services applet in the Administrative Tools section of the Control Panel to start the service, or type \"net start "SERVICENAME"\" from a command prompt",
+		"Success", MB_OK);
 
 	} catch (rrerror &e)
 	{

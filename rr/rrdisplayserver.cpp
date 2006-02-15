@@ -120,6 +120,7 @@ void rrserver::run(void)
 				_throw("Error reading server version");
 		}
 		rrout.println("Server version: %d.%d", v.major, v.minor);
+		rrout.flush();
 
 		while(1)
 		{

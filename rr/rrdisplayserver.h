@@ -56,8 +56,8 @@ class rrserver : public Runnable
 		for(i=0; i<_windows; i++) {if(_rrw[i]) {delete _rrw[i];  _rrw[i]=NULL;}}
 		_windows=0;
 		_winmutex.unlock(false);
-		if(!_remotename) rrout.println("-- Disconnecting\n");
-		else rrout.println("-- Disconnecting %s", _remotename);
+		if(!_remotename) rrout.PRINTLN("-- Disconnecting\n");
+		else rrout.PRINTLN("-- Disconnecting %s", _remotename);
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
