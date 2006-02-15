@@ -35,7 +35,6 @@ class rrprofiler
 			profile=true;
 		if((ev=getenv("VGL_PROFILE"))!=NULL && !strncmp(ev, "1", 1))
 			profile=true;
-		rrout.logto(stdout);
 	}
 
 	~rrprofiler(void)
