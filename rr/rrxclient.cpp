@@ -249,8 +249,11 @@ void install_service(void)
 
 	if(!GetModuleFileName(NULL, imagePath, 512))
 		_throww32();
-	sprintf(args, " --service -l %%systemdrive%%\\%s.log -p %d", SERVICENAME, port);
-	strcat(imagePath, args);
+	snprintf(args, 511, " --service -l %%systemdrive%%\\%s.log -port %d", SERVICENAME, port);
+	#ifdef USESSL	
+	snprintf(&args[strlen(args)], 511-strlen(args), " -sslport %d", sslport);
+	#endif
+	strncat(imagePath, args, 511-strlen(imagePath));
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
 		_throww32();
 	if(!(servicehnd=CreateService(managerhnd, SERVICENAME, SERVICEFULLNAME,
