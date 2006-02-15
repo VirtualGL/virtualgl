@@ -21,9 +21,14 @@
 #include "xdk-sym.h"
 
 rrdisplayserver *rrdpy=NULL;
-bool restart=true, ssl=false, quiet=false;
+bool restart=true, quiet=false;
 rrevent death;
 int port=-1;
+#ifdef USESSL
+rrdisplayserver *rrssldpy=NULL;
+int sslport=-1;
+bool ssl=true, nonssl=true;
+#endif
 int service=0;
 #ifdef SUNOGL
 #include <GL/glx.h>
@@ -35,12 +40,8 @@ int drawmethod=RR_DRAWX11;
 void start(int, char **);
 
 #ifdef _WIN32
-#define _SERVICENAME "VGLClient"
-#define _SSLSERVICENAME "VGLClient_SSL"
-#define SERVICENAME (ssl? _SSLSERVICENAME:_SERVICENAME)
-#define _SERVICEFULLNAME __APPNAME" Client"
-#define _SSLSERVICEFULLNAME __APPNAME" Secure Client"
-#define SERVICEFULLNAME (ssl? _SSLSERVICEFULLNAME:_SERVICEFULLNAME)
+#define SERVICENAME "VGLClient"
+#define SERVICEFULLNAME __APPNAME" Client"
 
 SERVICE_STATUS status;
 SERVICE_STATUS_HANDLE statushnd=0;
@@ -82,18 +83,20 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 void usage(char *progname)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-p<port>] [-v]", progname);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-port <port>] [-l <file>] [-v]", progname);
 	#ifdef USESSL
-	fprintf(stderr, " [-s]");
+	fprintf(stderr, "\n       [-sslport <port>] [-sslonly] [-nossl]");
 	#endif
 	fprintf(stderr, " [-x] [-gl]");
 	fprintf(stderr, "\n\n-h or -? = This help screen\n");
-	fprintf(stderr, "-p = Specify the port on which the client should listen\n");
-	fprintf(stderr, "     (default is %d for unencrypted and %d for SSL)\n", RR_DEFAULTPORT, RR_DEFAULTSSLPORT);
-	fprintf(stderr, "-v = Display version information\n");
+	fprintf(stderr, "-port = TCP port to use for unencrypted connections (default = %d)\n", RR_DEFAULTPORT);
 	#ifdef USESSL
-	fprintf(stderr, "-s = Use Secure Sockets Layer\n");
+	fprintf(stderr, "-sslport = TCP port to use for encrypted connections (default = %d)\n", RR_DEFAULTSSLPORT);
+	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
+	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
+	fprintf(stderr, "-l = Redirect all output to <file>\n");
+	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing  %s\n", drawmethod==RR_DRAWX11?"(default)":" ");
 	fprintf(stderr, "-gl = Use OpenGL drawing  %s\n", drawmethod==RR_DRAWOGL?"(default)":" ");
 	#ifdef _WIN32
@@ -114,19 +117,31 @@ int main(int argc, char *argv[])
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
 			{usage(argv[0]);  exit(1);}
 		#ifdef USESSL
-		if(!stricmp(argv[i], "-s")) ssl=true;
+		if(!stricmp(argv[i], "-sslonly")) {ssl=true;  nonssl=false;}
+		if(!stricmp(argv[i], "-nossl")) {ssl=false;  nonssl=true;}
+		if(!stricmp(argv[i], "-sslport"))
+		{
+			if(i<argc-1) sslport=(unsigned short)atoi(argv[++i]);
+		}
 		#endif
 		if(!stricmp(argv[i], "-q")) quiet=true;
 		if(!stricmp(argv[i], "-v")) printversion=true;
-		if(argv[i][0]=='-' && toupper(argv[i][1])=='P' && strlen(argv[i])>2)
-			{port=(unsigned short)atoi(&argv[i][2]);}
-		if(argv[i][0]=='-' && toupper(argv[i][1])=='L' && strlen(argv[i])>2)
-			rrout.logto(&argv[i][2]);
+		if(!stricmp(argv[i], "-port"))
+		{
+			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
+		}
+		if(!stricmp(argv[i], "-l"))
+		{
+			if(i<argc-1) rrout.logto(argv[++i]);
+		}
 		if(!stricmp(argv[i], "--service")) service=1;
 		if(!stricmp(argv[i], "-x")) drawmethod=RR_DRAWX11;
 		if(!stricmp(argv[i], "-gl")) drawmethod=RR_DRAWOGL;
 	}
-	if(port<0) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
+	if(port<0) port=RR_DEFAULTPORT;
+	#ifdef USESSL
+	if(sslport<0) sslport=RR_DEFAULTSSLPORT;
+	#endif
 
 	#ifdef _WIN32
 	if(argc>1) for(i=1; i<argc; i++)
@@ -186,9 +201,20 @@ void start(int argc, char **argv)
 
 	start:
 
-	if(!(rrdpy=new rrdisplayserver(port, ssl, drawmethod)))
-		_throw("Could not initialize listener");
-	rrout.println("Listener active on port %d", port);
+	#ifdef USESSL
+	if(ssl)
+	{
+		if(!(rrssldpy=new rrdisplayserver(sslport, true, drawmethod)))
+			_throw("Could not initialize listener");
+		rrout.println("Listening for SSL connections on port %d", sslport);
+	}
+	if(nonssl)
+	#endif
+	{
+		if(!(rrdpy=new rrdisplayserver(port, false, drawmethod)))
+			_throw("Could not initialize listener");
+		rrout.println("Listening for unencrypted connections on port %d", port);
+	}
 	#ifdef _WIN32
 	if(service)
 	{
@@ -200,6 +226,9 @@ void start(int argc, char **argv)
 	#endif
 	death.wait();
 	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
+	#ifdef USESSL
+	if(rrssldpy) {delete rrssldpy;  rrssldpy=NULL;}
+	#endif
 	if(restart) goto start;
 
 	} catch(rrerror &e)
@@ -219,8 +248,7 @@ void install_service(void)
 
 	if(!GetModuleFileName(NULL, imagePath, 512))
 		_throww32();
-	sprintf(args, " --service -l%%systemdrive%%\\%s.log -p%d", SERVICENAME, port);
-	if(ssl) strcat(args, " -s");
+	sprintf(args, " --service -l %%systemdrive%%\\%s.log -p %d", SERVICENAME, port);
 	strcat(imagePath, args);
 	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
 		_throww32();
