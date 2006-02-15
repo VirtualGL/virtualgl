@@ -34,6 +34,7 @@ class rrdisplayserver : public Runnable
 	rrsocket *_listensd;
 	Thread *_t;
 	bool _deadyet;
+	bool _dossl;
 };
 
 class rrserver : public Runnable

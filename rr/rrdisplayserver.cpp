@@ -51,7 +51,8 @@
 	h.dpynum=(unsigned short)h1.dpynum;}
 
 rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl, int drawmethod) :
-	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false)
+	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false),
+	_dossl(dossl)
 {
 	errifnot(_listensd=new rrsocket(dossl));
 	_listensd->listen(port==0?RR_DEFAULTPORT:port);
@@ -79,7 +80,7 @@ void rrdisplayserver::run(void)
 		{
 			s=NULL;  sd=NULL;
 			sd=_listensd->accept();  if(_deadyet) break;
-			rrout.println("++ Connection from %s.", sd->remotename());
+			rrout.println("++ %sConnection from %s.", _dossl?"SSL ":"", sd->remotename());
 			s=new rrserver(sd, _drawmethod);
 			continue;
 		}
