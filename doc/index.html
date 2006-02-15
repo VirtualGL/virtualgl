@@ -93,10 +93,12 @@ text-align: right;
 <body>
 <h1>VirtualGL
 2.0 User's Guide</h1>
-<span style="font-style: italic;">Intended audience:</span>
+<p><span style="font-style: italic;">Intended
+audience:</span>
 System Administrators, Graphics Programmers,&nbsp;Researchers, and
 others with knowledge of the Linux or Solaris operating systems, OpenGL
 and GLX, and X windows.
+</p>
 <h2>Contents</h2>
 <ul>
   <li><a href="#legalinfo">Legal Information</a></li>
@@ -104,13 +106,16 @@ and GLX, and X windows.
   <li><a href="#linuxinstall">Installation (Linux)</a></li>
   <li><a href="#solarisinstall">Installation (Solaris)</a></li>
   <li><a href="#windowsinstall">Installation (Windows)</a></li>
-  <li><a href="#basicusageunix">Basic Usage (Linux/Solaris Client)</a></li>
+  <li><a href="#basicusageunix">Basic Usage (Linux/Solaris
+Client)</a></li>
   <li><a href="#basicusagewindows">Basic Usage (Windows Client)</a></li>
-  <li><a href="#solarisscripts">vglrun and Solaris Shell Scripts</a></li>
+  <li><a href="#solarisscripts">vglrun and Solaris Shell
+Scripts</a></li>
   <li><a href="#glpusage">GLP Usage</a></li>
   <li><a href="#secureusage">Secure Usage</a></li>
   <li><a href="#vnc">Usage with VNC</a></li>
-  <li><a href="#dynamicgl">Usage with Applications That Manually Load
+  <li><a href="#dynamicgl">Usage with Applications That
+Manually Load
 OpenGL</a></li>
   <li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li>
   <li><a href="#advancedopengl">Advanced OpenGL Features</a></li>
@@ -118,14 +123,17 @@ OpenGL</a></li>
   <li><a href="#config">Advanced Configuration</a></li>
 </ul>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="legalinfo"></a>Legal Information</h2>
+<h2><a name="legalinfo"></a>Legal
+Information</h2>
 <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img
  alt="Creative Commons License"
  src="somerights20.png?rev=HEAD&amp;root=VirtualGL" border="0"></a>
-<p>This document is licensed under a <a rel="license"
- href="http://creativecommons.org/licenses/by/2.5/">Creative Commons
+<p>This document is licensed under
+a <a rel="license" href="http://creativecommons.org/licenses/by/2.5/">Creative
+Commons
 Attribution 2.5 License</a>.
-&nbsp;Any works which contain material derived from this document must
+&nbsp;Any works which contain material derived from this document
+must
 cite The
 VirtualGL Project as the source of the material and list the current
 URL for
@@ -139,15 +147,17 @@ Further information is contained in <a href="LICENSE-OpenSSL.txt"><span
 which can be found
 in the same directory as this documentation.<br>
 <br>
-<span class="monospace"></span>VirtualGL is licensed under the&nbsp;<a
- href="LICENSE.txt">wxWindows Library License, v3</a>,
+<span class="monospace"></span>VirtualGL
+is licensed under the&nbsp;<a href="LICENSE.txt">wxWindows Library
+License, v3</a>,
 a derivative of
 the <a href="LGPL.txt">LGPL</a>.<br>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a>
 </div>
 <hr>
-<h2><a name="requirements"></a>System Requirements</h2>
+<h2><a name="requirements"></a>System
+Requirements</h2>
 <h3>Linux/x86</h3>
 <table style="text-align: left;" border="0" cellpadding="5"
  cellspacing="3">
@@ -161,46 +171,61 @@ the <a href="LGPL.txt">LGPL</a>.<br>
     <tr>
       <td style="font-weight: bold;" class="colorheader">CPU<br>
       </td>
-      <td>Pentium 4, 1.7 GHz or faster (or equivalent)<br>
+      <td>Pentium 4, 1.7 GHz or
+faster (or equivalent)<br>
       <ul>
-        <li>For optimal performance, the processor should support SSE2
+        <li>For optimal
+performance, the processor should support SSE2
 extensions</li>
       </ul>
 Dual processors recommended</td>
-      <td>Pentium 4/Xeon with EM64T, or<br>
+      <td>Pentium 4/Xeon with
+EM64T, or<br>
 AMD Opteron or Athlon64, 1.8 GHz or faster
       <ul>
-        <li>For optimal performance with
-64-bit VirtualGL, the processor should support SSE3 extensions.&nbsp;
+        <li>For optimal
+performance with
+64-bit VirtualGL, the processor should support SSE3
+extensions.&nbsp;
 Only newer AMD 64-bit processors (mid-2005 and later) support SSE3</li>
       </ul>
 Dual processors recommended</td>
-      <td>Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent)</td>
+      <td>Pentium III or Pentium
+4, 1.0 GHz or faster (or equivalent)</td>
     </tr>
     <tr>
       <td style="font-weight: bold;" class="colorheader">Graphics<br>
       </td>
-      <td>Decent 3D graphics accelerator<br>
+      <td>Decent 3D graphics
+accelerator<br>
       <ul>
-        <li>nVidia strongly recommended</li>
-        <li>If using ATI,&nbsp;driver v8.14 or older recommended.
-&nbsp;Newer ATI drivers have known issues which may prevent them from
+        <li>nVidia strongly
+recommended</li>
+        <li>If using
+ATI,&nbsp;driver v8.14 or older recommended.
+&nbsp;Newer ATI drivers have known issues which may prevent them
+from
 working with VirtualGL</li>
       </ul>
       </td>
-      <td>Decent 3D graphics accelerator<br>
+      <td>Decent 3D graphics
+accelerator<br>
       <ul>
-        <li>nVidia strongly recommended</li>
-        <li>If using ATI,&nbsp;driver v8.14 or older recommended.
+        <li>nVidia strongly
+recommended</li>
+        <li>If using
+ATI,&nbsp;driver v8.14 or older recommended.
 &nbsp;Newer ATI
 drivers have known issues which may prevent them from working with
 VirtualGL</li>
       </ul>
       </td>
-      <td>Graphics card with decent 2D performance<br>
+      <td>Graphics card with
+decent 2D performance<br>
       <ul>
         <li>For
-applications that use stereo or transparent&nbsp;overlays, a high-end
+applications that use stereo or transparent&nbsp;overlays, a
+high-end
 3D accelerator such as the nVidia Quadro is required on the client</li>
       </ul>
       </td>
@@ -208,19 +233,40 @@ applications that use stereo or transparent&nbsp;overlays, a high-end
     <tr>
       <td style="font-weight: bold;" class="colorheader">O/S<br>
       </td>
-      <td>RedHat Linux 7.2 or newer (or equivalent)</td>
-      <td>RedHat Enterprise Linux 3.0 or 4.0 (64-bit) or equivalent
+      <td>
+      <ul>
+        <li>RedHat Linux 7.2 or
+newer (or equivalent)</li>
+        <li>SuSE Linux 9 or newer</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>RedHat Enterprise
+Linux 3.0 or 4.0 (64-bit) or equivalent
 (Works with <a href="http://fedora.redhat.com/">Fedora</a>, <a
- href="http://www.whiteboxlinux.org/">WhiteBox</a>, and <a
- href="http://www.centos.org/">CentOS</a>)</td>
-      <td>RedHat Linux 7.2 or newer (or equivalent)</td>
+ href="http://www.whiteboxlinux.org/">WhiteBox</a>,
+and <a href="http://www.centos.org/">CentOS</a>)</li>
+        <li>SuSE Linux 9 or newer</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>RedHat Linux 7.2 or
+newer (or equivalent)</li>
+        <li>SuSE Linux 9 or newer</li>
+      </ul>
+      </td>
     </tr>
     <tr>
       <td style="font-weight: bold;" class="colorheader">Other Software<br>
       </td>
-      <td>X server configured for true color (24/32-bit)</td>
-      <td>X server configured for true color (24/32-bit)</td>
-      <td>X server configured for true color (24/32-bit)</td>
+      <td>X server configured for
+true color (24/32-bit)</td>
+      <td>X server configured for
+true color (24/32-bit)</td>
+      <td>X server configured for
+true color (24/32-bit)</td>
     </tr>
   </tbody>
 </table>
@@ -229,9 +275,11 @@ applications that use stereo or transparent&nbsp;overlays, a high-end
   </ul>
 </ul>
 <h3 style="color: rgb(255, 255, 255);">Linux/Itanium</h3>
-<span style="color: rgb(0, 0, 0);">VirtualGL should build and run on
+<span style="color: rgb(0, 0, 0);">VirtualGL
+should build and run on
 Itanium Linux, but it has not been thoroughly tested. &nbsp;<a
- href="https://sourceforge.net/users/dcommander">Contact us</a> if you
+ href="https://sourceforge.net/users/dcommander">Contact
+us</a> if you
 encounter any difficulties.<br>
 </span><span style="color: rgb(0, 0, 0);"></span>
 <h3>Solaris/Sparc</h3>
@@ -247,23 +295,30 @@ encounter any difficulties.<br>
     <tr>
       <td style="font-weight: bold;" class="colorheader">CPU<br>
       </td>
-      <td>UltraSPARC III 900 MHz or faster<br>
+      <td>UltraSPARC III 900 MHz
+or faster<br>
 Dual processors recommended</td>
-      <td>UltraSPARC III 900 MHz or faster</td>
+      <td>UltraSPARC III 900 MHz
+or faster</td>
     </tr>
     <tr>
       <td style="font-weight: bold;" class="colorheader">Graphics<br>
       </td>
-      <td>Decent 3D graphics accelerator<br>
+      <td>Decent 3D graphics
+accelerator<br>
       <ul>
-        <li>Tested with XVR-1200 and XVR-2500</li>
+        <li>Tested with XVR-1200
+and XVR-2500</li>
       </ul>
       </td>
-      <td>Graphics card with decent 2D performance<br>
+      <td>Graphics card with
+decent 2D performance<br>
       <ul>
-        <li>For applications that use stereo or
+        <li>For applications that
+use stereo or
 transparent&nbsp;overlays, a high-end 3D
-accelerator such&nbsp;as the XVR-1200 or XVR-2500 is required on the
+accelerator such&nbsp;as the XVR-1200 or XVR-2500 is required on
+the
 client</li>
       </ul>
       </td>
@@ -286,22 +341,27 @@ client</li>
 for downloads.&nbsp; OpenGL 1.5 or later required for GLP support </li>
         <li>Sun MediaLib (see <a
  href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
-        <li>In order to use the SSL features of VirtualGL on Solaris 8
+        <li>In order to use the
+SSL features of VirtualGL on Solaris 8
 or 9,
-Blastwave OpenSSL is required.&nbsp; Download and install the package
+Blastwave OpenSSL is required.&nbsp; Download and install the
+package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
       </ul>
       </td>
       <td>
       <ul>
         <li>The
-VirtualGL client will use OpenGL if installed. &nbsp;This may produce
+VirtualGL client will use OpenGL if installed. &nbsp;This may
+produce
 better performance on some graphics cards, such as the XVR-1200.</li>
         <li>Sun MediaLib (see <a
  href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
-        <li>In order to use the SSL features of VirtualGL on Solaris 8
+        <li>In order to use the
+SSL features of VirtualGL on Solaris 8
 or 9,
-Blastwave OpenSSL is required.&nbsp; Download and install the package
+Blastwave OpenSSL is required.&nbsp; Download and install the
+package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
       </ul>
       </td>
@@ -309,11 +369,14 @@ from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
   </tbody>
 </table>
 <h3>Solaris/x86</h3>
-<p>A Solaris/x86 package is provided for VirtualGL 2.0, and it behaves
-identically to its Solaris/Sparc counterpart. &nbsp;But the Solaris/x86
+<p>A Solaris/x86 package is
+provided for VirtualGL 2.0, and it behaves
+identically to its Solaris/Sparc counterpart. &nbsp;But the
+Solaris/x86
 version of VirtualGL currently uses a software JPEG codec and thus will
 perform quite a bit slower than the Solaris/Sparc and Linux versions of
-VirtualGL. &nbsp;The Solaris/x86 version of VirtualGL requires Solaris
+VirtualGL. &nbsp;The Solaris/x86 version of VirtualGL requires
+Solaris
 10 or later, and the VirtualGL server components for Solaris/x86 are
 only known to work with nVidia hardware and drivers.</p>
 <span style="color: rgb(0, 0, 0);"></span><span
@@ -337,9 +400,11 @@ Pentium 4, 1.0 GHz or faster (or equivalent)</td>
     <tr>
       <td style="font-weight: bold;" class="colorheader">Graphics<br>
       </td>
-      <td>Graphics card with decent 2D performance<br>
+      <td>Graphics card with
+decent 2D performance<br>
       <ul>
-        <li>For applications that use stereo or
+        <li>For applications that
+use stereo or
 transparent&nbsp;overlays, a high-end 3D
 accelerator such&nbsp;as the nVidia Quadro is required on the client</li>
       </ul>
@@ -358,15 +423,18 @@ accelerator such&nbsp;as the nVidia Quadro is required on the client</li>
         <li><a href="http://www.hummingbird.com/">Hummingbird</a>
 Exceed 8 or newer (Exceed 2006 or newer recommended)<br>
           <br>
-          <span class="note">Note:</span>Contact Gary Romualdez of
-Hummingbird Ltd. [tel. (416) 496-6393 or
-          <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
+          <span class="note">Note:</span>Contact
+Gary Romualdez of
+Hummingbird Ltd. [tel. (416) 496-6393 or 
+<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
 for Exceed pricing information.<br>
 &nbsp;<br>
         </li>
-        <li>For applications that use stereo or transparent overlays,
+        <li>For applications that
+use stereo or transparent overlays,
 Exceed 3D is required on the client</li>
-        <li>Client desktop currently
+        <li>Client desktop
+currently
 needs to be true color (24 or 32-bit)</li>
       </ul>
       </td>
@@ -378,11 +446,13 @@ needs to be true color (24 or 32-bit)</li>
 <span style="color: rgb(0, 0, 0);"></span>
 <div class="top"><a href="#" target="_top">top</a></div>
 <hr>
-<h2><a name="linuxinstall"></a>Installation (Linux)<br>
+<h2><a name="linuxinstall"></a>Installation
+(Linux)<br>
 </h2>
 <h4>Installing TurboJPEG</h4>
 <ol>
-  <li>Obtain the latest TurboJPEG RPM from the files
+  <li>Obtain the latest TurboJPEG
+RPM from the files
 area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
     <br>
     <span class="note">Note:</span>.tgz
@@ -399,7 +469,8 @@ command:<br>
 </ol>
 <h4>Installing VirtualGL</h4>
 <ol>
-  <li>If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4,
+  <li>If you are using
+RedHat/CentOS Enterprise Linux 2.1, 3, or 4,
 obtain one of the pre-built VirtualGL RPMs from the files area of <a
  href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
     <br>
@@ -420,12 +491,14 @@ command:<br>
     <pre>rpm -Uvh VirtualGL*.rpm</pre>
   </li>
 </ol>
-<h4>Installing VirtualGL from Source</h4>
-If
-you are using an RPM-based system that isn't in the Fedora or RedHat
-family, then you will probably need to rebuild VirtualGL from the SRPM.<br>
+<h4>Installing VirtualGL from
+Source</h4>
+If you are using an RPM-based distribution of Linux but there isn't a
+pre-built VirtualGL RPM that matches your distribution, then you can
+build your own RPM using the VirtualGL Source RPM (SRPM.)<br>
 <ol>
-  <li>Obtain the VirtualGL SRPM from the files area of <a
+  <li>Obtain the VirtualGL SRPM
+from the files area of <a
  href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
   </li>
   <li>Log in as root, cd to the
@@ -435,39 +508,49 @@ commands:<br>
     <pre>rpm -i VirtualGL*.src.rpm<br>cd /usr/src/redhat/SPECS<br>rpmbuild -ba virtualgl.spec</pre>
   </li>
   <li>Sit back and watch the fun</li>
-  <li>If the build completes successfully, it will produce a binary RPM
+  <li>If the build completes
+successfully, it will produce a binary RPM
 in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span>
 which you can install using the instructions from the previous section</li>
 </ol>
 Otherwise, log in as root, download the source tarball, uncompress it, <span
- class="monospace" style="font-family: monospace;">cd vgl</span>,&nbsp;and
+ class="monospace" style="font-family: monospace;">cd
+vgl</span>,&nbsp;and
 type <span class="monospace" style="font-family: monospace;">make</span><span
- class="monospace"> install</span>. &nbsp;Refer to <span
- class="monospace" style="font-family: monospace;">BUILDING.html</span>
+ class="monospace"> install</span>.
+&nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span>
 in the&nbsp;source distribution for further details.<br>
-<h3>Display Configuration (Server Only)</h3>
-<p>VirtualGL requires access to display
+<h3>Display Configuration (Server
+Only)</h3>
+<p>VirtualGL requires access to
+display
 :0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span>
 environment variable)
 so that it can create and render to off-screen Pbuffers on the server's
-3D graphics card.&nbsp; Normally, this is only possible if someone has
+3D graphics card.&nbsp; Normally, this is only possible if someone
+has
 logged into the server locally and explicitly granted this permission
 by issuing</p>
 <pre>xhost +localhost</pre>
-<p>However, it is possible to configure the server such that this
+<p>However, it is possible to
+configure the server such that this
 permission is automatically granted regardless of whether anyone is
 logged in locally.</p>
 <ol>
-  <li>If the server machine is configured to boot into runlevel 5
+  <li>If the server machine is
+configured to boot into runlevel 5
 (graphical login), then temporarily shut down its X server by issuing<br>
     <pre>init 3</pre>
 as root<br>
 &nbsp;</li>
-  <li>Log in as root from the text console.<br>
+  <li>Log in as root from the text
+console.<br>
 &nbsp;</li>
-  <li>If the server machine is configured to boot into runlevel 3 (text
+  <li>If the server machine is
+configured to boot into runlevel 3 (text
 login), then configure it to boot into a graphical login by changing
-the first line of <span class="monospace">/etc/inittab</span> from<br>
+the first line of <span class="monospace">/etc/inittab</span>
+from<br>
     <br>
     <span class="monospace">id:3:initdefault:</span><br
  class="monospace">
@@ -476,7 +559,8 @@ to<br>
     <span class="monospace"><br>
 id:5:initdefault:<br>
 &nbsp;</span> </li>
-  <li>If the server is running the NVidia accelerated GLX drivers,
+  <li>If the server is running the
+NVidia accelerated GLX drivers,
 follow the instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span>
 regarding setting the appropriate permissions for <span
  class="monospace">/dev/nvidia*</span>.<br>
@@ -484,10 +568,12 @@ regarding setting the appropriate permissions for <span
   <li>Add<br>
     <pre>xhost +localhost</pre>
 to
-the tail end of the display manager's client startup script.&nbsp; The
+the tail end of the display manager's client startup script.&nbsp;
+The
 location of this script varies depending on the particular Linux
 distribution and
-display manager being used.&nbsp; The following table lists some common
+display manager being used.&nbsp; The following table lists some
+common
 locations for this file:<br>
     <br>
     <table style="text-align: left;" border="0" cellpadding="5"
@@ -531,30 +617,38 @@ Linux</td>
       </tbody>
     </table>
 &nbsp;</li>
-  <li>If the server is running gdm (<span class="monospace"></span><span
- class="monospace"></span>the
-factory default on&nbsp;most Linux systems), then you'll need to set up
-gdm to allow TCP connections to the X server. &nbsp;To do this, edit
-the <span class="monospace">gdm.conf</span> file and add the following
-line under the <span class="monospace">[security]</span> section (or
+  <li>If the server is running gdm
+(<span class="monospace"></span><span class="monospace"></span>the
+factory default on&nbsp;most Linux systems), then you'll need to
+set up
+gdm to allow TCP connections to the X server. &nbsp;To do this,
+edit
+the <span class="monospace">gdm.conf</span>
+file and add the following
+line under the <span class="monospace">[security]</span>
+section (or
 change it if it already exists):<br>
     <pre>DisallowTCP=false</pre>
 See the table below for the location of <span class="monospace">gdm.conf</span>
 on various systems.<br>
 &nbsp;&nbsp;</li>
-  <li>Unless you know that you absolutely need it, disable the XTEST
+  <li>Unless you know that you
+absolutely need it, disable the XTEST
 extension.&nbsp; Disabling
 XTEST eliminates a potential security loophole opened up by Step 5,
 whereby an authenticated user on the server could theoretically send
-key/mouse events into the server's local display.&nbsp; Even with XTEST
+key/mouse events into the server's local display.&nbsp; Even with
+XTEST
 disabled, it is generally a good idea to leave the server's local
 display logged out when not in use.<br>
     <br>
 Disabling XTEST is accomplished by passing an argument of <span
  class="monospace">-tst</span>
-on the command line used to launch the X server.&nbsp; The location of
+on the command line used to launch the X server.&nbsp; The location
+of
 this command line varies depending on the particular Linux
-distribution and display manager being used.&nbsp;&nbsp; The following
+distribution and display manager being used.&nbsp;&nbsp; The
+following
 table lists some common locations:<br>
     <br>
     <table style="text-align: left;" border="0" cellpadding="5"
@@ -565,7 +659,8 @@ table lists some common locations:<br>
           <td style="font-weight: bold;" class="colorheader">xdm <br>
           </td>
           <td style="font-weight: bold;" class="colorheader">gdm<br>
-          <small>(default on most Linux systems)</small><br>
+          <small>(default on most
+Linux systems)</small><br>
           </td>
           <td style="font-weight: bold;" class="colorheader">kdm</td>
         </tr>
@@ -600,11 +695,13 @@ to all lines that appear to be X server command lines, e.g.:<br>
     <pre>[server-Chooser]<br>command=/usr/X11R6/bin/X -tst -audit 0<br></pre>
 &nbsp;<br>
   </li>
-  <li>Restart the X server by issuing<br>
+  <li>Restart the X server by
+issuing<br>
     <pre>init 5</pre>
 as root.<br>
 &nbsp;</li>
-  <li>You can check your work by running<br>
+  <li>You can check your work by
+running<br>
     <pre>xdpyinfo -display :0</pre>
 In particular, make sure that XTEST doesn't show up in the list of
 extensions if you disabled it above.&nbsp; If <span class="monospace">xdpyinfo</span>
@@ -612,86 +709,134 @@ fails to run, then the permissions on Display :0 are probably still too
 restrictive, meaning that the change in Step 5 didn't take for some
 reason.</li>
 </ol>
-<h3>Installing the Linux Client
-as a Service<br>
+<h3>Automatically Starting the
+Linux Client<br>
 </h3>
-<span class="note">Note:</span>Installing the Linux client as a service
-does not work on SuSE/United Linux platforms.<br>
-<br>
-You can set up the Linux client as a user mode daemon by running<br>
-<pre>vglclient_config</pre>
-as root.&nbsp; Select either option 1 or 2, depending on whether you
-want to install the standard or the secure version of the client.<br>
-<p>This script creates a link in <span class="monospace">/etc/X11/xinit/xinitrc.d</span>
-so that the client will be automatically started in user mode whenever
-an X session is started.&nbsp; It also adds a line to <span
- class="monospace">/etc/X11/gdm/PostSession/Default</span>
-to terminate the client whenever the X session terminates.&nbsp;&nbsp;
-This probably only works on RedHat-compatible platforms that use gdm.</p>
-<p>If additional X11 displays are started by the same user (:1, :2,
+The VirtualGL Linux client can be configured to start automatically
+whenever an X Windows session starts. &nbsp;To do this, run<br>
+<pre>vglclient_config -install</pre>
+as root.<br>
+<p>Depending on your system
+configuration, this script will either tweak the <span
+ class="monospace">/etc/X11/xinit/xinitrc</span>
+file&nbsp;or create a link in <span class="monospace">/etc/X11/xinit/xinitrc.d</span>
+so that the&nbsp;VirtualGL client will be automatically started
+whenever any X Windows session is started. &nbsp;Running <span
+ class="monospace">vglclient_config -install</span>
+also adds a line to <span class="monospace">/etc/X11/gdm/PostSession/Default</span>
+(or the equivalent for your system) to terminate the client whenever
+you log out of the X Windows session. &nbsp;This is known to work
+on RedHat- and SuSE-compatible platforms that use the Gnome Display
+Manager (gdm.) &nbsp;It&nbsp;probably won't work
+on&nbsp;other distributions and display managers.</p>
+<p>To remove the auto-start
+feature, run</p>
+<pre>vglclient_config -remove</pre>
+<p>as root.</p>
+<p>If <span class="monospace">vglclient_config</span>
+doesn't work on your system, then you can edit the appropriate X11
+session files so that</p>
+<pre>/usr/bin/vglclient_daemon start</pre>
+<p>runs whenever an X session
+starts and</p>
+<pre>/usr/bin/vglclient_daemon stop</pre>
+<p>runs whenever the session
+terminates.</p>
+<p><span class="monospace">vglclient_daemon</span>
+will only start <span class="monospace">vglclient</span>
+if it is not already running, so starting the client in this manner
+guarantees that there will never be more than one copy of it running on
+the system. &nbsp;<span class="monospace">vglclient_daemon</span>
+should work on any Linux platform that conforms to the Linux Standard
+Base (LSB.)</p>
+<p>If additional X displays are
+started by the same user (:1, :2,
 etc.), this will not cause additional VirtualGL client instances to
-start.&nbsp; Only one VirtualGL client instance is needed to talk to
-all active displays.&nbsp; However, it is important to note that all
+start.&nbsp; Only one VirtualGL client instance is needed to talk
+to
+all active displays.&nbsp; However, it is important to note that
+all
 active displays on the client machine need to be running under the same
-user privileges in order for the same VirtualGL client to communicate
-with all of them.</p>
+user privileges as the VirtualGL client, or they need to grant
+permissions to localhost (<span class="monospace">xhost +localhost</span>)
+so that the VirtualGL client can access them.</p>
 If you wish to change the default port that the client listens on, you
-will need to edit <span class="monospace">/usr/bin/vglclient_daemon</span>
-or <span class="monospace">/usr/bin/vglclient_ssldaemon</span> and
-pass the appropriate<span class="monospace"></span> argument (<span
- class="monospace">-p&lt;port number&gt;</span>) on the <span
- class="monospace">vglclient</span>
-command line located in that file.&nbsp; By default, the client will
-use port 4242 for non-encrypted communication and port 4243 for
-SSL-encrypted communication.
-<h3>Removing the Linux Client and Server</h3>
-<p>As root, issue the following command:</p>
+will need to edit <span class="monospace">/usr/bin/vglclient_daemon</span><span
+ class="monospace"></span>
+and
+pass the appropriate<span class="monospace"></span>
+argument (<span class="monospace">-port
+&lt;port number&gt;</span>
+or <span class="monospace">-sslport
+&lt;port number&gt;</span>)
+on the <span class="monospace">vglclient</span>
+command line located in that file.&nbsp; By default, the client
+will
+listen on port 4242 for unencrypted connections and port 4243 for
+SSL connections.
+<h3>Removing the Linux Client and
+Server</h3>
+<p>As root, issue the following
+command:</p>
 <pre>rpm -e VirtualGL</pre>
 <p style="text-align: right;"><a href="#" target="_top">top</a></p>
 <hr>
-<h2><a name="solarisinstall"></a>Installation (Solaris)<br>
+<h2><a name="solarisinstall"></a>Installation
+(Solaris)<br>
 </h2>
 <ol>
-  <li>Obtain the latest VirtualGL package from the files
+  <li>Obtain the latest VirtualGL
+package from the files
 area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
     <br>
   </li>
-  <li>Log in as root, cd to the directory
+  <li>Log in as root, cd to the
+directory
 where you downloaded the package, and issue the following
 commands:<br>
     <pre>bzip2 -d SUNWvgl-{version}.pkg.bz2<br>pkgadd -d SUNWvgl-{version}.pkg</pre>
   </li>
-  <li>Select the <span class="monospace">SUNWvgl</span> package
+  <li>Select the <span class="monospace">SUNWvgl</span>
+package
 (usually option 1) from the menu.</li>
 </ol>
-<span class="note">Note:</span>VirtualGL for Solaris installs into <span
- class="monospace">/opt/SUNWvgl</span>.<span style="font-weight: bold;"><br>
+<span class="note">Note:</span>VirtualGL
+for Solaris installs into <span class="monospace">/opt/SUNWvgl</span>.<span
+ style="font-weight: bold;"><br>
 </span>
-<h3>Display Configuration (Server Only)</h3>
-<p><span class="note">Note:</span>If you plan to use VirtualGL only in <a
- href="#glpusage">GLP mode</a>, you can skip this section.</p>
-<p>When VirtualGL is being used in GLX mode, it requires access to
+<h3>Display Configuration (Server
+Only)</h3>
+<p><span class="note">Note:</span>If
+you plan to use VirtualGL only in <a href="#glpusage">GLP mode</a>,
+you can skip this section.</p>
+<p>When VirtualGL is being used in
+GLX mode, it requires access to
 display
 :0 (or to the display specified in the <span class="monospace">VGL_DISPLAY</span>
 environment variable)
 so that it can create and render to off-screen Pbuffers on the server's
-3D graphics card.&nbsp; Normally, this is only possible if someone has
+3D graphics card.&nbsp; Normally, this is only possible if someone
+has
 logged into the server locally and explicitly granted this permission
 by issuing</p>
 <pre>xhost +localhost</pre>
-<p>However, it is possible to configure the server such that this
+<p>However, it is possible to
+configure the server such that this
 permission is automatically granted regardless of whether anyone is
 logged in locally.</p>
 <ol>
   <li>Log in as root.</li>
-  <li>Temporarily shut down the X server by issuing<br>
+  <li>Temporarily shut down the X
+server by issuing<br>
     <pre>/etc/init.d/dtlogin stop</pre>
   </li>
-  <li>Edit <span class="monospace">/etc/logindevperm</span> and change
+  <li>Edit <span class="monospace">/etc/logindevperm</span>
+and change
 the mode for the <span class="monospace">/dev/mouse</span>, <span
  class="monospace">/dev/kbd</span>, <span class="monospace">/dev/sound/*</span>,
-and <span class="monospace">/dev/fbs/*</span> entries to <span
- class="monospace">0666</span>.&nbsp; e.g.:<br>
+and <span class="monospace">/dev/fbs/*</span>
+entries to <span class="monospace">0666</span>.&nbsp;
+e.g.:<br>
     <pre>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/mouse:/dev/kbd<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/sound/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # audio devices<br>/dev/console&nbsp;&nbsp;&nbsp; 0666&nbsp;&nbsp;&nbsp; /dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # frame buffers</pre>
   </li>
   <li>Issue the following commands:<br>
@@ -699,51 +844,64 @@ and <span class="monospace">/dev/fbs/*</span> entries to <span
     <span class="note">Note:</span><span class="monospace">/dev/sound/*</span>
 may not exist if there are no sound drivers on your system.<br>
 &nbsp;</li>
-  <li>If <span class="monospace">/etc/dt/config/Xsetup</span> does not
+  <li>If <span class="monospace">/etc/dt/config/Xsetup</span>
+does not
 exist, then copy the default <span class="monospace">Xsetup</span>
-file from <span class="monospace">/usr/dt/config</span> to that
+file from <span class="monospace">/usr/dt/config</span>
+to that
 location:<br>
     <pre>cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup</pre>
   </li>
-  <li>Edit <span class="monospace">/etc/dt/config/Xsetup</span>, and
+  <li>Edit <span class="monospace">/etc/dt/config/Xsetup</span>,
+and
 add the following lines to the bottom of the file:<br>
     <pre>xhost +localhost<br>xhost +`hostname`</pre>
   </li>
-  <li>If <span class="monospace">/etc/dt/config/Xconfig</span> does
+  <li>If <span class="monospace">/etc/dt/config/Xconfig</span>
+does
 not exist, then copy the default <span class="monospace">Xconfig</span>
-file from <span class="monospace">/usr/dt/config</span> to that
+file from <span class="monospace">/usr/dt/config</span>
+to that
 location:<br>
     <pre>cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig</pre>
   </li>
-  <li>Edit <span class="monospace">/etc/dt/config/Xconfig</span>, and
+  <li>Edit <span class="monospace">/etc/dt/config/Xconfig</span>,
+and
 add (or uncomment) the following line:<br>
     <pre>Dtlogin*grabServer: False<br></pre>
   </li>
-  <li>Unless you know that you absolutely need it, disable the XTEST
+  <li>Unless you know that you
+absolutely need it, disable the XTEST
 extension.&nbsp; Disabling XTEST eliminates a potential security
 loophole opened up by Step 6, whereby an authenticated user on the
 server could theoretically send key/mouse events into the server's
-local display.&nbsp; Even with XTEST disabled, it is generally a good
+local display.&nbsp; Even with XTEST disabled, it is generally a
+good
 idea to leave the server's local display logged out when not in use.<br>
 &nbsp;</li>
   <ol style="list-style-type: lower-alpha;">
-    <li>If <span class="monospace">/etc/dt/config/Xservers</span> does
+    <li>If <span class="monospace">/etc/dt/config/Xservers</span>
+does
 not exist, then copy the default <span class="monospace">Xservers</span>
-file from <span class="monospace">/usr/dt/config</span> to that
+file from <span class="monospace">/usr/dt/config</span>
+to that
 location:<br>
       <pre>cp /usr/dt/config/Xservers /etc/dt/config/Xservers</pre>
     </li>
     <li>Edit <span class="monospace">/etc/dt/config/Xservers</span>
 and add an argument of <span class="monospace">-tst</span> <span
- class="monospace"></span>to the line corresponding to the display
+ class="monospace"></span>to
+the line corresponding to the display
 number you are configuring, e.g.:<br>
       <pre>:0&nbsp; Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst<br></pre>
     </li>
   </ol>
-  <li>Restart the X server by issuing<br>
+  <li>Restart the X server by
+issuing<br>
     <pre>/etc/init.d/dtlogin start</pre>
   </li>
-  <li>You can check your work by running
+  <li>You can check your work by
+running
     <pre>/usr/openwin/bin/xdpyinfo -display :0</pre>
 In particular, make sure that XTEST doesn't show up in the list of
 extensions if you disabled it above.&nbsp; If <span class="monospace">xdpyinfo</span>
@@ -751,26 +909,31 @@ fails to run, then the permissions on Display :0 are probably still too
 restrictive, meaning that the change in Step 6 didn't take for some
 reason.</li>
 </ol>
-<h3>Removing the Solaris Client and Server</h3>
-<p>As root, issue the following command:</p>
+<h3>Removing the Solaris Client
+and Server</h3>
+<p>As root, issue the following
+command:</p>
 <pre>pkgrm SUNWvgl</pre>
 Answer "yes" when prompted.<br>
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
 </div>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="windowsinstall"></a>Installation (Windows)</h2>
+<h2><a name="windowsinstall"></a>Installation
+(Windows)</h2>
 <ol>
   <li>Download the latest
 VirtualGL installer package from the files
 area of <a href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.
 The installer will usually be named <span class="monospace">VirtualGL-{version}.exe</span>.<br>
   </li>
-  <li>Run the VirtualGL installer.&nbsp;
+  <li>Run the VirtualGL
+installer.&nbsp;
 The installation of VirtualGL should be
 self-explanatory.&nbsp; The only configuration option is the
 directory in
 which you want the files to be installed. </li>
-  <li>Install Hummingbird Exceed if it isn't already
+  <li>Install Hummingbird Exceed
+if it isn't already
 installed. </li>
   <li>Add the Exceed path (e.g. <span class="monospace">C:\Program
 Files\Hummingbird\Connectivity\9.00\Exceed</span>)<span
@@ -784,7 +947,8 @@ on the Exceed taskbar icon, then select "Tools--&gt;Configuration.")</li>
   <li>Open the "X Server Protocol"
 applet in XConfig.<br>
     <br>
-    <span class="tip">Tip:</span>If you are using the "Classic View"
+    <span class="tip">Tip:</span>If
+you are using the "Classic View"
 mode of XConfig, open the "Protocol" applet instead.<br>
 &nbsp; </li>
   <li>In the "X Server Protocol"
@@ -803,7 +967,8 @@ server reset, click
   <li>Open the "Other Server
 Settings" applet in XConfig.<br>
     <br>
-    <span class="tip">Tip:</span>If you are using the "Classic View"
+    <span class="tip">Tip:</span>If
+you are using the "Classic View"
 mode of XConfig, open the "Performance" applet instead.<br>
 &nbsp;<br>
   </li>
@@ -819,9 +984,11 @@ Changes."&nbsp; If XConfig asks whether you want to perform a
 server reset, click
 "Yes." </li>
 </ol>
-<h3>Obtaining Optimal Performance with Exceed</h3>
+<h3>Obtaining Optimal Performance
+with Exceed</h3>
 VirtualGL has the ability to take advantage of the MIT-SHM extension in
-Hummingbird Exceed to accelerate image drawing on Windows. &nbsp;This
+Hummingbird Exceed to accelerate image drawing on Windows.
+&nbsp;This
 can improve the overall performance of the VirtualGL pipeline by as
 much as 20% in some cases.<br>
 <br>
@@ -833,36 +1000,47 @@ obtain the following patches from the Hummingbird support site:<br>
   <tbody>
     <tr>
       <th>Product</th>
-      <th><span class="monospace"></span>Patches Required</th>
+      <th><span class="monospace"></span>Patches
+Required</th>
       <th>How to Obtain</th>
     </tr>
     <tr>
       <td>Hummingbird Exceed
 8.0</td>
-      <td><span class="monospace">hclshm.dll</span> v9.0.0.1 (or higher)<br>
-      <span class="monospace">xlib.dll</span> v9.0.0.3 (or higher)<br>
-      <span class="monospace">exceed.exe</span> 8.0.0.28 (or higher)</td>
-      <td>Download all<span class="monospace"></span> patches from:<br>
+      <td><span class="monospace">hclshm.dll</span>
+v9.0.0.1 (or higher)<br>
+      <span class="monospace">xlib.dll</span>
+v9.0.0.3 (or higher)<br>
+      <span class="monospace">exceed.exe</span>
+8.0.0.28 (or higher)</td>
+      <td>Download all<span class="monospace"></span>
+patches from:<br>
       <a
  href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
       <br>
-      <span class="note">Note:</span>Hummingbird WebSupport
+      <span class="note">Note:</span>Hummingbird
+WebSupport
 account required </td>
     </tr>
     <tr>
       <td>Hummingbird Exceed
 9.0</td>
-      <td><span class="monospace">hclshm.dll</span> v9.0.0.1 (or higher)<br>
-      <span class="monospace">xlib.dll</span> v9.0.0.3 (or higher)<br>
-      <span class="monospace">exceed.exe</span> 9.0.0.9 or higher</td>
-      <td><span class="monospace">exceed.exe</span> can be patched by
+      <td><span class="monospace">hclshm.dll</span>
+v9.0.0.1 (or higher)<br>
+      <span class="monospace">xlib.dll</span>
+v9.0.0.3 (or higher)<br>
+      <span class="monospace">exceed.exe</span>
+9.0.0.9 or higher</td>
+      <td><span class="monospace">exceed.exe</span>
+can be patched by
 running Hummingbird Update<br>
       <br>
 All other patches must be downloaded from:<br>
       <a
  href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html">http://connectivity.hummingbird.com/support/nc/exceed_patches.html</a><br>
       <br>
-      <span class="note">Note:</span>Hummingbird WebSupport
+      <span class="note">Note:</span>Hummingbird
+WebSupport
 account required<br>
       </td>
     </tr>
@@ -879,7 +1057,8 @@ on the Exceed taskbar icon, then select "Tools--&gt;Configuration.")</li>
   <li>Open the "X Server Protocol"
 applet in XConfig.<br>
     <br>
-    <span class="tip">Tip:</span>If you are using the "Classic View"
+    <span class="tip">Tip:</span>If
+you are using the "Classic View"
 mode of XConfig, open the "Protocol" applet instead.<br>
 &nbsp;</li>
   <li>Select the "Extensions" tab
@@ -904,36 +1083,37 @@ installed on your
 Windows machine, then you can use the SSh client included in that
 package.&nbsp; Otherwise, download and install <a
  href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/">PuTTY</a>.<br>
-<h3><a name="installsvc"></a>Installing the Windows Client
+<h3><a name="installsvc"></a>Installing
+the Windows Client
 as a Service</h3>
-<p>The standard and SSL versions
-of the VirtualGL Windows Client can be installed as Windows services
+<p>The&nbsp;VirtualGL Windows
+Client can be installed as a Windows service
 (and
 subsequently removed) using the links provided in the "VirtualGL
-Client" start menu group.&nbsp; Once installed, the services can be
-started from the Services control panel applet or from the command line
-by issuing</p>
+Client" start menu group.&nbsp; Once installed, the service can be
+started from the Services applet in the Control Panel (located under
+"Administrative Tools") or by invoking</p>
 <pre>net start vglclient</pre>
-<p style="margin-left: 40px;">or</p>
-<pre>net start vglclient_ssl</pre>
-<p>The services can be
-subsequently stopped by issuing</p>
+<p>from a command prompt.
+&nbsp;The service can be
+subsequently stopped by invoking</p>
 <pre>net stop vglclient</pre>
-<p style="margin-left: 40px;">or</p>
-<pre>net stop vglclient_ssl</pre>
 <p>If you wish to install the
 client as a service and have it
-listen on a port other than the default (4242 for the standard client
-or 4243 for the SSL client), then you will need to install the service
+listen on a port other than the default (4242 for unencrypted
+connections or 4243 for&nbsp;SSL connections), then you will need
+to install the service
 manually from the command line.</p>
 <pre>vglclient -?</pre>
 <p> gives a list of the relevant
 command-line options.</p>
 <p style="text-align: right;"><a href="#" target="_top">top</a></p>
 <hr>
-<h2><a name="basicusageunix"></a>Basic Usage (Linux/Solaris Client)</h2>
+<h2><a name="basicusageunix"></a>Basic
+Usage (Linux/Solaris Client)</h2>
 <ol>
-  <li>If you have never made X11 connections between your client
+  <li>If you have never made X11
+connections between your client
 machine and the
 application server before, then you will need to grant the application
 server
@@ -941,7 +1121,8 @@ permission to use your X display.&nbsp; You can do this by typing:<br>
     <pre>xhost +{server_machine_name_or_IP}</pre>
 inside a shell.<br>
     <br>
-    <span class="note">Note:</span>You only need to do this once, not
+    <span class="note">Note:</span>You
+only need to do this once, not
 every time you use VirtualGL.<br>
 &nbsp;</li>
   <li>If
@@ -954,7 +1135,8 @@ on Linux or<br>
 on Solaris.<br>
 &nbsp;<br>
   </li>
-  <li>Open a Secure Shell (SSh) session into the application server:<br>
+  <li>Open a Secure Shell (SSh)
+session into the application server:<br>
     <pre>ssh -l {your_user_name} {server_machine_name_or_IP}</pre>
   </li>
   <li>In the SSh session, set the <span class="monospace">DISPLAY</span>
@@ -964,21 +1146,25 @@ point back to the client machine:<br>
 or<br>
     <pre>setenv DISPLAY {client_machine_name_or_IP}:0.0</pre>
   </li>
-  <li>In the SSh session, launch your 3D application using:<br>
+  <li>In the SSh session, launch
+your 3D application using:<br>
     <pre>vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>
 if the application server is running Linux or<br>
     <pre>/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>
 &nbsp;
 if the application server is running Solaris.<br>
     <br>
-Consult the <a href="#config">Advanced Configuration</a> section for
-more information on <span class="monospace">vglrun</span> command line
+Consult the <a href="#config">Advanced
+Configuration</a> section for
+more information on <span class="monospace">vglrun</span>
+command line
 options </li>
 </ol>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="basicusagewindows"></a>Basic Usage (Windows Client)</h2>
+<h2><a name="basicusagewindows"></a>Basic
+Usage (Windows Client)</h2>
 <ol>
   <li>If you have not installed
 the VirtualGL client as a service, then you will need to start the
@@ -1022,7 +1208,8 @@ file, save the file, then exit the editor.<br>
 want to perform a server reset, click
 "Yes."</li>
     </ol>
-    <p> <span class="note">Note:</span>You need only perform Step 3
+    <p> <span class="note">Note:</span>You
+need only perform Step 3
 once, not every time you launch the
 client. </p>
   </li>
@@ -1032,7 +1219,8 @@ connection to the application server: <br>
 CygWin users:</span><br>
 Open a new command prompt and type:<br>
     <pre>ssh -l {your_user_name} {server_machine_name_or_IP}</pre>
-    <span style="font-weight: bold;">PuTTY users:&nbsp;</span></li>
+    <span style="font-weight: bold;">PuTTY
+users:&nbsp;</span></li>
   <ol style="list-style-type: lower-alpha;">
     <li>Launch PuTTY.</li>
     <li>Select the "Session"
@@ -1065,8 +1253,10 @@ if the application server is running Linux or<br>
     <pre>/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}<br></pre>
 if the application server is running Solaris.<br>
     <br>
-Consult the <a href="#config">Advanced Configuration</a> section for
-more information on <span class="monospace">vglrun</span> command line
+Consult the <a href="#config">Advanced
+Configuration</a> section for
+more information on <span class="monospace">vglrun</span>
+command line
 options </li>
 </ol>
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
@@ -1074,32 +1264,39 @@ options </li>
 <ol>
 </ol>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="solarisscripts"></a>vglrun and Solaris Shell Scripts</h2>
+<h2><a name="solarisscripts"></a>vglrun
+and Solaris Shell Scripts</h2>
 <span class="monospace">vglrun</span>&nbsp;can
 be used to launch either binary executables or shell scripts, but there
 are a few things to keep in mind when using <span class="monospace">vglrun</span>
 to launch a shell script on Solaris. &nbsp;When you vglrun a shell
 script, the VirtualGL faker library will be preloaded into every
-executable that the script launches. &nbsp;Normally this is innocuous,
+executable that the script launches. &nbsp;Normally this is
+innocuous,
 but if the script calls any executables that are setuid root, then
 Solaris will refuse to load those executables because you are
 attempting to preload a library (VirtualGL) that is not in a "secure
 path." &nbsp;Solaris keeps a tight lid on what goes into <span
- class="monospace">/usr/lib</span> and <span class="monospace">/lib</span>,
+ class="monospace">/usr/lib</span>
+and <span class="monospace">/lib</span>,
 and by default, it will only allow libraries in those paths to be
-preloaded into an executable that is setuid root. &nbsp;Generally, 3rd
+preloaded into an executable that is setuid root. &nbsp;Generally,
+3rd
 party packages are verboden from installing anything into <span
- class="monospace">/usr/lib</span> or <span class="monospace">/lib</span>.
+ class="monospace">/usr/lib</span>
+or <span class="monospace">/lib</span>.
 &nbsp;But you can use the <span class="monospace">crle</span>
 utility to add other directories to the operating system's list of
-secure paths. &nbsp;In the case of VirtualGL, you would issue (as root):<br>
+secure paths. &nbsp;In the case of VirtualGL, you would issue (as
+root):<br>
 <pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/sparcv9<br></pre>
 Or on Solaris/x86:<br>
 <pre>crle -u -s /opt/SUNWvgl/lib<br>crle -64 -u -s /opt/SUNWvgl/lib/64<br></pre>
 But please be aware of the security ramifications of this before you do
 it. &nbsp;You are essentially telling Solaris that you trust the
 security and stability of the VirtualGL code as much as you trust the
-security and stability of the operating system. &nbsp;And while we're
+security and stability of the operating system. &nbsp;And while
+we're
 flattered, we're not sure that we're necessarily deserving of that
 accolade, so if you are in a security critical environment, apply the
 appropriate level of paranoia here.<br>
@@ -1109,7 +1306,8 @@ application script and have it issue <span class="monospace">vglrun</span>
 only for the executables that you wish to run in the VirtualGL
 environment. &nbsp;But sometimes that is not an option.<br>
 <br>
-<span class="monospace">vglrun</span> on Solaris has two&nbsp;options
+<span class="monospace">vglrun</span>
+on Solaris has two&nbsp;options
 that are relevant to launching scripts:<br>
 <pre>vglrun -32 {script}</pre>
 will preload VirtualGL only into 32-bit executables called by a script,
@@ -1121,38 +1319,48 @@ will preload VirtualGL only into 64-bit executables.<br>
 </div>
 <hr style="width: 100%; height: 2px;">
 <div style="text-align: left;">
-<h2><a name="glpusage"></a>GLP Usage</h2>
+<h2><a name="glpusage"></a>GLP
+Usage</h2>
 </div>
 <div style="text-align: left;">
-<p>Sun Microsystems has developed an
+<p>Sun Microsystems has developed
+an
 extension to OpenGL called GLP which allows an application to directly
 access the rendering capabilities of a 3D graphics card even if there
 is no X display running on the card.&nbsp; Apart from greatly
 simplifying the process of setting up VirtualGL on a server, GLP also
-greatly improves&nbsp;the overall security of VirtualGL servers, since
+greatly improves&nbsp;the overall security of VirtualGL servers,
+since
 it is no longer necessary to
 grant every user access to display :0. &nbsp;In addition,
-GLP&nbsp;makes it quite simple to assign VirtualGL jobs to any graphics
+GLP&nbsp;makes it quite simple to assign VirtualGL jobs to any
+graphics
 pipe in a multi-pipe system.<br>
 </p>
-<p>Version 2.0 of VirtualGL for Sparc/Solaris supports using GLP if it
+<p>Version 2.0 of VirtualGL for
+Sparc/Solaris supports using GLP if it
 is
-available.&nbsp; Currently, GLP is available only in Sun OpenGL 1.5 for
+available.&nbsp; Currently, GLP is available only in Sun OpenGL 1.5
+for
 Sparc/Solaris.</p>
 <p>See <a
  href="http://www.opengl.org/about/arb/notes/glP_presentation.pdf">http://www.opengl.org/about/arb/notes/glP_presentation.pdf</a>
 for more details on GLP.</p>
-<p>If GLP is supported on your application server, it can be enabled by
-passing an argument of <span class="monospace">-d glp</span> to <span
- class="monospace">vglrun</span>, e.g.:</p>
+<p>If GLP is supported on your
+application server, it can be enabled by
+passing an argument of <span class="monospace">-d glp</span>
+to <span class="monospace">vglrun</span>,
+e.g.:</p>
 <pre>/opt/SUNWvgl/bin/vglrun -d glp {application_executable_or_script} {arguments}<br></pre>
 <p>
 This will tell the VirtualGL faker to enable GLP mode and select the
 first available GLP device.&nbsp; You can also set the <span
- class="monospace">VGL_DISPLAY</span> environment variable to <span
- class="monospace">glp</span> to achieve the same effect:</p>
+ class="monospace">VGL_DISPLAY</span>
+environment variable to <span class="monospace">glp</span>
+to achieve the same effect:</p>
 <pre>export VGL_DISPLAY=glp<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
-<p>Additionally, you can specify a specific GLP device to use for
+<p>Additionally, you can specify a
+specific GLP device to use for
 rendering:</p>
 <pre>export VGL_DISPLAY=/dev/fbs/jfb0<br>/opt/SUNWvgl/bin/vglrun {application_executable_or_script} {arguments}<br></pre>
 </div>
@@ -1166,28 +1374,18 @@ Stream</h3>
 support for encrypting its compressed image stream inside a
 Secure Socket Layer (SSL.)&nbsp; For performance reasons, this
 feature is not
-enabled by default, but it can be easily enabled:</p>
-<p style="font-weight: bold;">Client:</p>
-<ul>
-  <li>When starting the Windows client,
-use the "Start VirtualGL Secure Client" link provided in the "VirtualGL
-Client" start menu group<br>
-  </li>
-  <li>... or ... Start the secure
-client from the command line by issuing<br>
-    <pre>vglclient -s</pre>
-  </li>
-  <li>... or ... Install the
-secure client as a service using the instructions provided in the
-Installation sections<br>
-  </li>
-</ul>
-<span style="font-weight: bold;">Server:</span><br
- style="font-weight: bold;">
-Set the environment variable <span style="font-family: monospace;">VGL_SSL</span>
+enabled by default, but it can easily be&nbsp;enabled. &nbsp;On
+the server,&nbsp;set&nbsp;the environment variable <span
+ style="font-family: monospace;">VGL_SSL</span>
 to <span style="font-family: monospace;">1</span>
-prior to launching the application or pass an argument of <span
- class="monospace">+s</span> to <span class="monospace">vglrun</span>.<br>
+prior to launching the application, or pass an argument of <span
+ class="monospace">+s</span>
+to <span class="monospace">vglrun</span>.
+&nbsp;No action is required on the client. &nbsp;The client
+will automatically accept SSL or unencrypted connections, unless you
+have configured it otherwise (see <a href="index.html#config">Advanced
+Configuration</a>
+for more details.)</p>
 <h3>SSh Tunneling of the X11
 Protocol Stream</h3>
 Secure
@@ -1213,22 +1411,29 @@ X11
 protocol stream through SSh will probably slow things down, but on a
 lower-bandwidth connection, it may
 actually speed things up, especially if you enable compression.</p>
-<h4>Enabling X11 Tunneling from a Linux/Solaris Client</h4>
-Pass a <span class="monospace">-X</span> argument to ssh when
+<h4>Enabling X11 Tunneling from a
+Linux/Solaris Client</h4>
+Pass a <span class="monospace">-X</span>
+argument to ssh when
 connecting to the application server, e.g.:<br>
 <pre>ssh -X -l {your_user_name} {server_machine_name_or_IP}</pre>
 After opening the SSh connection into the application server, don't set
 the
-<span class="monospace">DISPLAY</span> environment.&nbsp; Instead, set
-the environment variable <span class="monospace">VGL_CLIENT</span> to
+<span class="monospace">DISPLAY</span>
+environment.&nbsp; Instead, set
+the environment variable <span class="monospace">VGL_CLIENT</span>
+to
 the client display, e.g.
 <pre>export VGL_CLIENT={my_client_machine}:0.0<br></pre>
-<p><span class="note">Note:</span>Whether or not this works will
+<p><span class="note">Note:</span>Whether
+or not this works will
 of course depend on whether the SSh server has the X11 tunneling
-feature enabled.&nbsp;&nbsp; It is almost always enabled on Linux but
+feature enabled.&nbsp;&nbsp; It is almost always enabled on
+Linux but
 may not be enabled on all Solaris servers.<br>
 </p>
-<p><span class="tip">Tip:</span>If your connection to the
+<p><span class="tip">Tip:</span>If
+your connection to the
 server is low-bandwidth, you may wish
 to pass a <span class="monospace">-C</span>
 argument to ssh when
@@ -1236,7 +1441,8 @@ establishing the connection.&nbsp; This will enable SSh protocol
 compression and may speed things up.&nbsp; Don't use protocol
 compression when
 connecting over a LAN or other high-speed network.</p>
-<h4>Enabling X11 Tunneling from a Windows Client (CygWin)</h4>
+<h4>Enabling X11 Tunneling from a
+Windows Client (CygWin)</h4>
 <ol>
   <li>Prior to opening the SSh
 connection
@@ -1257,7 +1463,8 @@ connecting to the server.&nbsp; Example:<br>
     <pre>ssh -X -l {your_user_name} {server_machine_name_or_IP}</pre>
   </li>
 </ol>
-<span class="tip">Tip:</span>If your connection to the
+<span class="tip">Tip:</span>If
+your connection to the
 server is low-bandwidth, you may additionally wish
 to pass a <span class="monospace">-C</span>
 argument to ssh when
@@ -1265,23 +1472,27 @@ establishing the connection.&nbsp; This will enable SSh protocol
 compression and may speed things up.&nbsp; Don't use protocol
 compression when
 connecting over a LAN or other high-speed network.
-<h4>Enabling X11 Tunneling from a Windows Client (PuTTY)</h4>
+<h4>Enabling X11 Tunneling from a
+Windows Client (PuTTY)</h4>
 <ol>
   <li>Launch PuTTY.</li>
   <li>Select the <span style="font-style: italic;">Connection--&gt;SSH--&gt;Tunnels</span>
 category.</li>
-  <li>Check "Enable X11 forwarding"
+  <li>Check "Enable X11
+forwarding"
 and
 set the "X display location" to <span class="monospace">localhost:0.0</span>
 or
 whichever
 display Exceed is parking on.</li>
 </ol>
-<span class="tip">Tip:</span>If your connection to the
+<span class="tip">Tip:</span>If
+your connection to the
 server is
 low-bandwidth, you may wish to enable SSh protocol compression when
 establishing the connection.&nbsp; To do this, select the
-<span style="font-style: italic;">Connection--&gt;SSH</span> category
+<span style="font-style: italic;">Connection--&gt;SSH</span>
+category
 in PuTTY and check "Enable
 compression."&nbsp; Don't use protocol compression when
 connecting over a LAN or other high-speed network.
@@ -1316,9 +1527,9 @@ X11 protocol stream and VirtualGL's compressed image stream through
 SSh.&nbsp;
 Here's one way to do it:</p>
 <ol>
-  <li>Start the VirtualGL client
-(the regular version, not the secure version)</li>
-  <li>If the client machine is running Windows</li>
+  <li>Start the VirtualGL client</li>
+  <li>If the client machine is
+running Windows</li>
   <ol style="list-style-type: lower-alpha;">
     <li>Start Exceed</li>
     <li>
@@ -1333,7 +1544,8 @@ to your client's display, and additionally it will tunnel all outbound
 traffic to port 4242 on <span class="monospace">ssh_gateway_machine</span>
 to inbound port 4242 on your client machine.<br>
     <br>
-    <span class="tip">Tip:</span>This command line also works
+    <span class="tip">Tip:</span>This
+command line also works
 with PuTTY.&nbsp; Just replace "ssh" with the path to the PuTTY
 executable.&nbsp; You can also configure the same thing through the
 PuTTY GUI as follows:<br>
@@ -1373,16 +1585,18 @@ your application.</li>
 whatever port you choose, but make sure that if you change the port,
 you configure both the client and server to talk on the port you choose
 (using the
-<span class="monospace">-p</span>
+<span class="monospace">-port</span>
 argument to <span class="monospace">vglclient</span>
 as well as the <span class="monospace">VGL_PORT</span>
 environment
 variable on the server.)</p>
-<p><span class="tip">Tip:</span>This same procedure would also
+<p><span class="tip">Tip:</span>This
+same procedure would also
 work if you needed to connect directly to app_server_machine and tunnel
 everything over SSh.&nbsp; In that case, simply leave out Step 3.
 </p>
-<p><span class="tip">Tip:</span>You might also want to try
+<p><span class="tip">Tip:</span>You
+might also want to try
 enabling SSh compression for the first stage of the trip, from your
 client to the SSh gateway.&nbsp; This could improve performance if
 the
@@ -1390,10 +1604,12 @@ WAN connection is low-bandwidth.</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
 <hr style="width: 100%; height: 2px;">
-<h2><a name="vnc"></a>Usage with VNC</h2>
+<h2><a name="vnc"></a>Usage
+with VNC</h2>
 <p>VirtualGL's
 default mode of operation, and its fastest mode of operation in a LAN
-environment, is "direct mode." &nbsp;In direct mode, VirtualGL uses its
+environment, is "direct mode." &nbsp;In direct mode, VirtualGL uses
+its
 own built-in high-speed image compressors to
 send the rendered pixels from a 3D window over the network to the
 client.&nbsp; A process running on the client machine then
@@ -1402,7 +1618,8 @@ the compressed pixels and re-composites them into the appropriate X
 window.<br>
 </p>
 <div style="text-align: center;">
-<p><span style="font-weight: bold;" class="colorheader">VirtualGL in
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL
+in
 Direct Mode</span></p>
 </div>
 <div style="text-align: center;"><img alt="VirtualGL's Architecture"
@@ -1417,7 +1634,8 @@ allows VNC to do the job of compressing and delivering images to the
 client(s).<br>
 </p>
 <div style="text-align: center;">
-<p><span style="font-weight: bold;" class="colorheader">VirtualGL in
+<p><span style="font-weight: bold;" class="colorheader">VirtualGL
+in
 Raw Mode</span></p>
 </div>
 <div style="text-align: center;">
@@ -1475,15 +1693,19 @@ compress more pixels (an entire desktop rather than a single window)
 and because 2D (X11) rendering occurs on the server rather than the
 client.</li>
   <li>VNC cannot be used with <a href="#advancedopengl">advanced
-OpenGL features</a>, such as stereo or overlays.</li>
+OpenGL features</a>, such as stereo
+or overlays.</li>
 </ul>
 <p>When a VNC session is started
 on the server, VNC chooses a unique display number (such as :1, :2,
 etc.) and starts a customized X
-server (Xvnc) on that display number.&nbsp; Xvnc renders all graphical
+server (Xvnc) on that display number.&nbsp; Xvnc renders all
+graphical
 output from the
-application into a bitmap in memory, which it then&nbsp;compresses and
-sends&nbsp;to the client(s). &nbsp;Xvnc does not implement the GLX
+application into a bitmap in memory, which it then&nbsp;compresses
+and
+sends&nbsp;to the client(s). &nbsp;Xvnc does not implement the
+GLX
 extension at all, and thus it can't
 be used as-is to run 3D applications.&nbsp; But since VirtualGL
 is designed to intercept and hand off all GLX commands to the
@@ -1527,7 +1749,8 @@ non-TurboVNC clients. &nbsp;But if a TurboVNC client connects to a
 TurboVNC server, they will both use optimized tight encoding at all
 times.</p>
   </li>
-  <li>Protocol tweaks to allow some stages of the VNC pipeline to occur
+  <li>Protocol tweaks to allow
+some stages of the VNC pipeline to occur
 in
 parallel. &nbsp;This particularly improves performance on
 low-bandwidth (broadband) connections.</li>
@@ -1551,47 +1774,60 @@ default but can be disabled by passing an argument of <span
 to vncviewer.</li>
 </ul>
 <p>Using
-VirtualGL in direct mode&nbsp;is&nbsp;preferable if seamless windows
+VirtualGL in direct mode&nbsp;is&nbsp;preferable if seamless
+windows
 are a
 requirement and if performance is
-critical. &nbsp;But if a bit of performance can be sacrificed and if
+critical. &nbsp;But if a bit of performance can be sacrificed and
+if
 collaboration and a stateless client are more important features than
 seamless windows, then VirtualGL+TurboVNC would be the appropriate
 solution.
-&nbsp;In the long term, we are looking for a way to combine the best of
-both solutions into one. &nbsp;But such is not an easy&nbsp;problem to
+&nbsp;In the long term, we are looking for a way to combine the
+best of
+both solutions into one. &nbsp;But such is not an
+easy&nbsp;problem to
 solve ...</p>
-<p>TurboVNC&nbsp;allows VirtualGL to be used with respectable
+<p>TurboVNC&nbsp;allows
+VirtualGL to be used with respectable
 performance over
 low-bandwidth/high-latency networks, such as broadband or satellite.
-&nbsp;As with VirtualGL's direct mode, the quality and subsampling of
+&nbsp;As with VirtualGL's direct mode, the quality and subsampling
+of
 TurboVNC's JPEG image stream can be adjusted to reduce the
 size of the&nbsp;image stream without reducing the number of
-image colors. &nbsp;TurboVNC provides a preset mode for&nbsp;broadband
+image colors. &nbsp;TurboVNC provides a preset mode
+for&nbsp;broadband
 connections, which sets the quality to a low level that is noticeably
 lossy
 but still quite usable. &nbsp;It should be possible to redraw a
-1280x1024 window at greater than 10 frames/second&nbsp;on a standard
+1280x1024 window at greater than 10 frames/second&nbsp;on a
+standard
 cable modem connection using this preset mode.</p>
-<p>For&nbsp;instructions on the usage
+<p>For&nbsp;instructions on
+the usage
 of TurboVNC, please refer to the TurboVNC man pages:</p>
 <p>On Linux:</p>
 <pre>man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
 <p>On Solaris:</p>
 <pre>man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}</pre>
-<p>On Windows, use the embedded help feature (the question mark button
+<p>On Windows, use the embedded
+help feature (the question mark button
 in the upper right of the window.)</p>
 <p>The TightVNC documentation:</p>
 <p><a href="http://www.tightvnc.com/docs.html">http://www.tightvnc.com/docs.html</a></p>
-<p>might also be helpful, since TurboVNC is based on TightVNC and
+<p>might also be helpful, since
+TurboVNC is based on TightVNC and
 shares many of its features.</p>
 <h3>Enabling Raw Mode</h3>
 <p>To enable VirtualGL's
 raw&nbsp;mode,&nbsp;set the environment variable <span
  class="monospace">VGL_COMPRESS</span>
 to 0 on the server or pass an argument of <span class="monospace">-c 0</span>
-to <span class="monospace">vglrun</span> (see <a href="#config">Advanced
-Configuration</a> for more details.)&nbsp; You should also make
+to <span class="monospace">vglrun</span>
+(see <a href="#config">Advanced
+Configuration</a> for more
+details.)&nbsp; You should also make
 sure that the
 <span class="monospace">DISPLAY</span>
 variable points to whatever display number that VNC is occupying (such
@@ -1599,49 +1835,63 @@ as :1, :2, etc.)</p>
 <div class="top" style=""><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
 <hr style="width: 100%; height: 2px;">
-<h2><a name="dynamicgl"></a>Usage with Applications That Manually Load
+<h2><a name="dynamicgl"></a>Usage
+with Applications That Manually Load
 OpenGL</h2>
-<p>The lion's share of OpenGL applications are dynamically linked
+<p>The lion's share of OpenGL
+applications are dynamically linked
 against
-<span class="monospace">libGL.so</span>, and thus <span
- class="monospace">libGL.so</span> is automatically loaded whenever the
+<span class="monospace">libGL.so</span>,
+and thus <span class="monospace">libGL.so</span>
+is automatically loaded whenever the
 application
-loads. &nbsp;Whenever <span class="monospace">vglrun</span> is used to
+loads. &nbsp;Whenever <span class="monospace">vglrun</span>
+is used to
 launch such&nbsp;applications, VirtualGL is loaded ahead of <span
- class="monospace">libGL.so</span>, meaning that&nbsp;OpenGL and GLX
+ class="monospace">libGL.so</span>,
+meaning that&nbsp;OpenGL and GLX
 symbols are resolved from VirtualGL first and the "real" OpenGL library
 second.</p>
-<p>However, some applications (particularly games) are not dynamically
-linked against <span class="monospace">libGL.so</span>. &nbsp;These
+<p>However, some applications
+(particularly games) are not dynamically
+linked against <span class="monospace">libGL.so</span>.
+&nbsp;These
 applications typically call <span class="monospace">dlopen()</span>
 and <span class="monospace">dlsym()</span>
 later on in the program's execution to manually load OpenGL and GLX
-symbols from <span class="monospace">libGL.so</span>. &nbsp;Such
+symbols from <span class="monospace">libGL.so</span>.
+&nbsp;Such
 applications also generally provide a
 mechanism (usually either an environment variable or a command line
 argument) which allows the user to specify a library that can be loaded
 instead of <span class="monospace">libGL.so</span>.</p>
-<p>So let's assume that you just downloaded the latest version of the
+<p>So let's assume that you just
+downloaded the latest version of the
 Linux
 game Foo Wars from the Internet, and (for whatever reason) you want to
-run the game in a VNC session. &nbsp; The game provides a command line
-switch <span class="monospace">-g</span> which can be used to specify
+run the game in a VNC session. &nbsp; The game provides a command
+line
+switch <span class="monospace">-g</span>
+which can be used to specify
 an OpenGL library to load other than <span class="monospace">libGL.so</span>.
 &nbsp;You would launch the game using a command line such as this:</p>
 <pre>vglrun -c 0 foowars -g /usr/lib/librrfaker.so</pre>
-<p>You still need to use <span class="monospace">vglrun</span> to
+<p>You still need to use <span class="monospace">vglrun</span>
+to
 launch the game, because VirtualGL must also intercept a handful of X11
 calls. &nbsp;Using <span class="monospace">vglrun</span>
 allows VGL to intercept these calls, whereas using the game's built-in
 mechanism for loading a substitute OpenGL library allows VirtualGL to
 intercept
 the GLX and OpenGL calls.</p>
-<p>The <a href="http://virtualgl.sourceforge.net">VirtualGL web-site</a>
+<p>The <a href="http://virtualgl.sourceforge.net">VirtualGL
+web-site</a>
 contains specific recipes for getting a variety of games and other
 applications to work.</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="chromium"></a>Usage with Chromium and ModViz VGP<sup>TM</sup></h2>
+<h2><a name="chromium"></a>Usage
+with Chromium and ModViz VGP<sup>TM</sup></h2>
 <p>Chromium is a powerful
 framework for performing various types of parallel OpenGL rendering.
 &nbsp;It is usually used on clusters of commodity
@@ -1650,17 +1900,22 @@ geometries or large pixel counts (such as when driving a display wall.)
 &nbsp;Chromium is most often used in one of three
 configurations:</p>
 <ol>
-  <li>Sort-First Rendering (Image-Space Decomposition)</li>
-  <li>Sort-First Rendering (Image-Space Decomposition) with Readback</li>
-  <li>Sort-Last Rendering (Object-Space Decomposition)</li>
+  <li>Sort-First Rendering
+(Image-Space Decomposition)</li>
+  <li>Sort-First Rendering
+(Image-Space Decomposition) with Readback</li>
+  <li>Sort-Last Rendering
+(Object-Space Decomposition)</li>
 </ol>
 <div style="text-align: left;">
-<h3>Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h3>
+<h3>Configuration 1: Sort-First
+Rendering (Image-Space Decomposition)</h3>
 </div>
 <div style="text-align: center;">
 <p><img style="width: 700px; height: 337px;" alt=""
  src="chromium-displaywall.png?rev=HEAD&amp;root=VirtualGL"></p>
-<p style="text-align: left;">Sort-First Rendering (Image-Space
+<p style="text-align: left;">Sort-First
+Rendering (Image-Space
 Decomposition) is used to overcome
 the fill-rate limitations of individual graphics cards. &nbsp;When
 configured to use sort-first rendering, Chromium divides up the scene
@@ -1672,14 +1927,18 @@ generate the image section ("tile") for that node. &nbsp;This is
 primarily used&nbsp;to drive high-resolution displays that would be
 impractical to
 drive from a single graphics card due to limitations in the card's
-framebuffer memory, processing power, or both. &nbsp;Configuration 1
+framebuffer memory, processing power, or both. &nbsp;Configuration
+1
 could be used, for instance, to drive a CAVE, video wall, or even an
-extremely high-resolution monitor. &nbsp;In this configuration, each
+extremely high-resolution monitor. &nbsp;In this configuration,
+each
 Chromium node&nbsp;generally uses all of its screen real
 estate to render a section of the&nbsp;multi-screen image.</p>
-<p style="text-align: left;">VirtualGL is generally not very useful
+<p style="text-align: left;">VirtualGL
+is generally not very useful
 with Configuration 1. &nbsp;You
-could theoretically&nbsp;install a separate copy of VirtualGL on each
+could theoretically&nbsp;install a separate copy of VirtualGL on
+each
 display node and use it to redirect the output of each <span
  class="monospace">crserver</span>
 instance to
@@ -1690,9 +1949,11 @@ remote
 end. &nbsp;Chromium uses DMX to synchronize the screens in a
 multi-screen configuration, and VirtualGL would have to be made
 DMX-aware
-for it to perform the same job. &nbsp;Maybe at some point in the future
+for it to perform the same job. &nbsp;Maybe at some point in the
+future
 ... &nbsp;If you have a need for such a configuration, <a
- href="https://sourceforge.net/users/dcommander">let us know</a>.</p>
+ href="https://sourceforge.net/users/dcommander">let
+us know</a>.</p>
 <h3 style="text-align: left;"><span style="font-weight: bold;">Configuration
 2: Sort-First Rendering (Image-Space Decomposition) with Readback</span></h3>
 </div>
@@ -1726,10 +1987,12 @@ it
 work without VirtualGL and then insert VirtualGL only into the
 processes that run on Node 0. &nbsp;VirtualGL must be inserted into
 the CrAppFaker process&nbsp;to prevent CrAppFaker from sending
-<span class="monospace">glXChooseVisual()</span> calls to the X server
+<span class="monospace">glXChooseVisual()</span>
+calls to the X server
 (which would fail if the X
 server is a VNC server or otherwise does not provide GLX.)
-&nbsp;VirtualGL must be inserted into the CrServer process on Node 0 to
+&nbsp;VirtualGL must be inserted into the CrServer process on Node
+0 to
 prevent it from sending <span class="monospace">glDrawPixels()</span>
 calls to the X
 server (which would effectively send uncompressed images over the
@@ -1737,16 +2000,20 @@ network.) &nbsp;Instead, VirtualGL forces CrServer to draw into a
 Pbuffer, and VGL takes charge of transmitting those pixels to
 the destination X server in the most efficient way possible.</p>
 <p style="text-align: left;">Since
-Chromium uses <span class="monospace">dlopen()</span> to load the
-system's OpenGL library,&nbsp;preloading VirtualGL into the CrAppFaker
-and CrServer processes using <span class="monospace">vglrun</span> is
+Chromium uses <span class="monospace">dlopen()</span>
+to load the
+system's OpenGL library,&nbsp;preloading VirtualGL into the
+CrAppFaker
+and CrServer processes using <span class="monospace">vglrun</span>
+is
 not sufficient.
 &nbsp;Fortunately, Chromium provides an environment variable, <span
  class="monospace">CR_SYSTEM_GL_PATH</span>,
 which allows one to specify an alternate path in which it will search
 for the system's <span class="monospace">libGL.so</span>.
 &nbsp;The VirtualGL packages for Linux and Solaris include a
-symbolic link named <span class="monospace">libGL.so</span> which
+symbolic link named <span class="monospace">libGL.so</span>
+which
 really points to the VirtualGL faker library (<span class="monospace">librrfaker.so</span>)
 instead. This symbolic link is located in its own isolated directory,
 so that directory can be passed to Chromium in the <span
@@ -1786,70 +2053,94 @@ Applications<br>
     </tr>
   </tbody>
 </table>
-<p style="text-align: left;">Running the CrServer in VirtualGL is
+<p style="text-align: left;">Running
+the CrServer in VirtualGL is
 simply a matter of setting this environment variable and then invoking <span
- class="monospace">crserver</span> with <span class="monospace">vglrun</span>,
+ class="monospace">crserver</span>
+with <span class="monospace">vglrun</span>,
 e.g.:</p>
 <div style="text-align: left;">
 <pre>export CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib<br>vglrun crserver</pre>
 </div>
-<p style="text-align: left;">In the case of CrAppFaker, it is also
-necessary to set <span class="monospace">VGL_GLLIB</span> to the
+<p style="text-align: left;">In
+the case of CrAppFaker, it is also
+necessary to set <span class="monospace">VGL_GLLIB</span>
+to the
 location of the "real" OpenGL library, e.g. <span class="monospace">/usr/lib/libGL.so.1</span>.
 &nbsp;CrAppFaker creates its own fake version of <span
- class="monospace">libGL.so</span> which is really just a copy of
-Chromium's <span class="monospace">libcrfaker.so</span>. &nbsp;So
+ class="monospace">libGL.so</span>
+which is really just a copy of
+Chromium's <span class="monospace">libcrfaker.so</span>.
+&nbsp;So
 VirtualGL, if left to its own devices, will unwittingly try to load <span
- class="monospace">libcrfaker.so</span> instead of the "real" OpenGL
+ class="monospace">libcrfaker.so</span>
+instead of the "real" OpenGL
 library. &nbsp;Chromium's <span class="monospace">libcrfaker.so</span>
 will in turn try to load VirtualGL again, and an endless loop will
 occur.</p>
-<p style="text-align: left;">So what we want to do is something like
+<p style="text-align: left;">So
+what we want to do is something like
 this:</p>
 <div style="text-align: left;">
 <pre>export CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib<br>export VGL_GLLIB=/usr/lib/libGL.so.1<br>crappfaker</pre>
 </div>
 <div style="text-align: left;">
-<p>CrAppFaker will copy the application to a temp directory and
-then&nbsp;copy&nbsp;<span class="monospace">libcrfaker.so</span> to
+<p>CrAppFaker will copy the
+application to a temp directory and
+then&nbsp;copy&nbsp;<span class="monospace">libcrfaker.so</span>
+to
 that same directory, renaming it as <span class="monospace">libGL.so</span>.
 &nbsp;So when the application is started, it loads <span
- class="monospace">libcrfaker.so</span> instead of <span
- class="monospace">libGL.so</span>. &nbsp;<span class="monospace">libcrfaker.so</span>
+ class="monospace">libcrfaker.so</span>
+instead of <span class="monospace">libGL.so</span>.
+&nbsp;<span class="monospace">libcrfaker.so</span>
 will then load VirtualGL instead of the "real" libGL, because we've
-overridden <span class="monospace">CR_SYSTEM_GL_PATH</span> to make
+overridden <span class="monospace">CR_SYSTEM_GL_PATH</span>
+to make
 Chromium find VirtualGL's&nbsp;fake <span class="monospace">libGL.so</span>
 first. &nbsp;VirtualGL will then use the library specified in <span
- class="monospace">VGL_GLLIB</span> to make any "real" OpenGL calls
+ class="monospace">VGL_GLLIB</span>
+to make any "real" OpenGL calls
 that it needs to make.</p>
-<p>Note that <span class="monospace">crappfaker</span> should not be
-invoked with <span class="monospace">vglrun</span>. </p>
+<p>Note that <span class="monospace">crappfaker</span>
+should not be
+invoked with <span class="monospace">vglrun</span>.
+</p>
 <p>So, putting this all together,
 here is an example of how you might start a sort-first rendering job
 using Chromium and VirtualGL:</p>
 <ol>
-  <li>Start the mothership on Node 0 with an appropriate configuration
+  <li>Start the mothership on Node
+0 with an appropriate configuration
 for performing sort-first rendering with readback</li>
-  <li>Start <span class="monospace">crserver</span> on each of the
+  <li>Start <span class="monospace">crserver</span>
+on each of the
 rendering nodes</li>
   <li>On Node 0, set <span class="monospace">CR_SYSTEM_GL_PATH</span>
 to the appropriate value for the operating system and application type
 (see table above)</li>
   <li>On Node 0, <span class="monospace">vglrun crserver &amp;</span></li>
-  <li>On Node 0, set <span class="monospace">VGL_GLLIB</span> to the
+  <li>On Node 0, set <span class="monospace">VGL_GLLIB</span>
+to the
 location of the "real" libGL, e.g. <span class="monospace">/usr/lib/libGL.so.1</span></li>
-  <li>On Node 0, launch <span class="monospace">crappfaker</span> (do
-not use <span class="monospace">vglrun</span> here)</li>
+  <li>On Node 0, launch <span class="monospace">crappfaker</span>
+(do
+not use <span class="monospace">vglrun</span>
+here)</li>
 </ol>
 Again, it's always a good idea to make sure this works without
 VirtualGL before adding VirtualGL into the mix.<br>
 <br>
-<span class="note">Note:</span>When using VirtualGL with this mode,
-resizing the application window may not work properly. &nbsp;This is
+<span class="note">Note:</span>When
+using VirtualGL with this mode,
+resizing the application window may not work properly. &nbsp;This
+is
 because the resize event is sent to the application process, and
 therefore the CrServer process that's actually drawing the pixels has
-no way of knowing that a window resize has occurred. &nbsp;A possible
-fix&nbsp;is to modify Chromium such that it propagates the resize event
+no way of knowing that a window resize has occurred. &nbsp;A
+possible
+fix&nbsp;is to modify Chromium such that it propagates the resize
+event
 down the render chain so that all of the CrServer processes are aware
 that a resize event occurred.
 <h3><span style="font-weight: bold;" class="colorheader">Configuration
@@ -1860,29 +2151,37 @@ that a resize event occurred.
 <p><img style="width: 700px; height: 345px;" alt=""
  src="chromium-sortlast.png?rev=HEAD&amp;root=VirtualGL"></p>
 </div>
-<p>Sort-Last Rendering is used when the scene contains a huge number of
+<p>Sort-Last Rendering is used
+when the scene contains a huge number of
 polygons and the
 rendering bottleneck is&nbsp;processing all of that geometry on a
 single
-graphics card. &nbsp;In this case, each node runs a separate copy of
+graphics card. &nbsp;In this case, each node runs a separate copy
+of
 the application, and for best results, the application needs to be at
 least partly aware
 that it's running in a parallel environment so that it can give
 Chromium hints as to how to distribute the various objects to be
-rendered. &nbsp;Each node generates an image of a particular portion of
+rendered. &nbsp;Each node generates an image of a particular
+portion of
 the object space, and these images must be composited in such a way
-that the front-to-back ordering of pixels is maintained. &nbsp;This is
+that the front-to-back ordering of pixels is maintained. &nbsp;This
+is
 generally done by collecting Z buffer data from each node to determine
 whether a particular pixel on a particular node is visible in the final
 image. &nbsp;The&nbsp;rendered images from each node are often
 composited&nbsp;using a "binary swap", whereby the
 nodes combine their images in a cascading tree so that the overall
-compositing time is proportional to log<sub>2</sub>(N) rather than N.</p>
-<p>To make this configuration work with VirtualGL:</p>
+compositing time is proportional to log<sub>2</sub>(N)
+rather than N.</p>
+<p>To make this configuration work
+with VirtualGL:</p>
 <ol>
-  <li>Start the mothership on Node 0 with an appropriate configuration
+  <li>Start the mothership on Node
+0 with an appropriate configuration
 for performing sort-last rendering</li>
-  <li>Start <span class="monospace">crappfaker</span> on each of the
+  <li>Start <span class="monospace">crappfaker</span>
+on each of the
 rendering nodes</li>
   <li>On Node 0, set <span class="monospace">CR_SYSTEM_GL_PATH</span>
 to the appropriate value for the operating system and application type
@@ -1892,16 +2191,20 @@ to the appropriate value for the operating system and application type
 <h4>CRUT</h4>
 <p>The Chromium Utility Toolkit
 provides a convenient way for graphics applications
-to&nbsp;specifically take advantage of Chromium's sort-last rendering
+to&nbsp;specifically take advantage of Chromium's sort-last
+rendering
 capabilities. &nbsp;Such applications can use CRUT to explicitly
 specify how their object space should be decomposed. &nbsp;CRUT
 applications require an additional piece of software, <span
- class="monospace">crutserver</span>, to be running on Node 0. &nbsp;So
+ class="monospace">crutserver</span>,
+to be running on Node 0. &nbsp;So
 to make such applications work with VirtualGL:</p>
 <ol>
-  <li>Start the mothership on Node 0 with an appropriate configuration
+  <li>Start the mothership on Node
+0 with an appropriate configuration
 for performing sort-last rendering</li>
-  <li>Start <span class="monospace">crappfaker</span> on each of the
+  <li>Start <span class="monospace">crappfaker</span>
+on each of the
 rendering nodes</li>
   <li>On Node 0, set <span class="monospace">CR_SYSTEM_GL_PATH</span>
 to the appropriate value for the operating system and application type
@@ -1910,32 +2213,41 @@ to the appropriate value for the operating system and application type
   <li>On Node 0, <span class="monospace">vglrun crserver</span></li>
   <span style="font-family: monospace;"></span>
 </ol>
-<h3><span style="font-weight: bold;" class="colorheader">A Note About
+<h3><span style="font-weight: bold;" class="colorheader">A
+Note About
 Performance</span></h3>
-Chromium's use of X11 is generally not very optimal. &nbsp;It assumes a
+Chromium's use of X11 is generally not very optimal. &nbsp;It
+assumes a
 very fast connection between the X server and the Chromium
 Server. &nbsp;In certain modes, Chromium polls the X server on
 every frame to determine whether windows have been resized, etc.
-&nbsp;Thus, we have observed that Chromium tends to perform much better
+&nbsp;Thus, we have observed that Chromium tends to perform much
+better
 with VirtualGL running in a&nbsp;TurboVNC session as opposed to
 VirtualGL running in direct mode.<br>
-<h3><span style="font-weight: bold;" class="colorheader">ModViz VGP<sup>TM</sup>
+<h3><span style="font-weight: bold;" class="colorheader">ModViz
+VGP<sup>TM</sup>
 and VirtualGL</span></h3>
 <p>ModViz Virtual Graphics Platform<sup>TM</sup>
 is a polished commercial clustered rendering framework for Linux which
 supports all three of the rendering modes described above and
-provides a much more straightforward&nbsp;interface to configure and
+provides a much more straightforward&nbsp;interface to configure
+and
 run these types of parallel rendering jobs.</p>
-<p>All VGP jobs, regardless of configuration, are all spawned through <span
- class="monospace">vglauncher</span>, a front-end program which
+<p>All VGP jobs, regardless of
+configuration, are all spawned through <span class="monospace">vglauncher</span>,
+a front-end program which
 automatically takes care of starting the appropriate processes on the
 rendering nodes,
 intercepting OpenGL calls from the application instance(s), sending
 rendered images back to Node 0, and compositing the images as
 appropriate. &nbsp;In a similar manner to VirtualGL's <span
- class="monospace">vglrun</span>, VGP's<span class="monospace">
-vglauncher</span>&nbsp;preloads a library (<span class="monospace">libVGP.so</span>)
-in place of <span class="monospace">libGL.so</span>, and this library
+ class="monospace">vglrun</span>,
+VGP's<span class="monospace">
+vglauncher</span>&nbsp;preloads
+a library (<span class="monospace">libVGP.so</span>)
+in place of <span class="monospace">libGL.so</span>,
+and this library
 intercepts the OpenGL calls from the application.</p>
 <p>So our strategy here is similar
 to our strategy for loading the Chromium App Faker. &nbsp;We want
@@ -1944,9 +2256,11 @@ that VGP will call VirtualGL and VirtualGL will call <span
  class="monospace">libGL.so</span>.
 &nbsp;Achieving this with VGP is relatively simple:</p>
 <pre>export VGP_BACKING_GL_LIB=librrfaker.so<br>vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}</pre>
-<p>Replace <span class="monospace">/usr/lib/libGL.so</span> with the
+<p>Replace <span class="monospace">/usr/lib/libGL.so</span>
+with the
 full path of your system's
-OpenGL library (<span class="monospace">/usr/lib64/libGL.so</span> if
+OpenGL library (<span class="monospace">/usr/lib64/libGL.so</span>
+if
 you are launching a 64-bit
 application.)</p>
 <div style="text-align: right;"><a href="#">top</a><br>
@@ -1954,27 +2268,37 @@ application.)</p>
 </div>
 </div>
 <hr class="top" style="width: 100%; height: 2px;">
-<h2><a name="advancedopengl"></a>Advanced OpenGL Features</h2>
+<h2><a name="advancedopengl"></a>Advanced
+OpenGL Features</h2>
 <h3>Stereo</h3>
-<p>The general idea behind VirtualGL is to offload as much of the
-rendering work to the server as possible and pass only 2D&nbsp;commands
-to the client. &nbsp;But there are some cases in which VirtualGL must
+<p>The general idea behind
+VirtualGL is to offload as much of the
+rendering work to the server as possible and pass only
+2D&nbsp;commands
+to the client. &nbsp;But there are some cases in which VirtualGL
+must
 rely on the client to do some of the 3D rendering work as well.</p>
-<p>There is no way to draw stereo images using regular 2D (X11)
+<p>There is no way to draw stereo
+images using regular 2D (X11)
 commands, so the VirtualGL client must use OpenGL to do this kind of
-drawing. &nbsp;When an application requests a stereo visual, VirtualGL
+drawing. &nbsp;When an application requests a stereo visual,
+VirtualGL
 will attempt to ascertain whether the client supports OpenGL and, if
-so, whether it has&nbsp;stereo visuals available. &nbsp;VirtualGL then
+so, whether it has&nbsp;stereo visuals available.
+&nbsp;VirtualGL then
 checks the server's display to see whether it has stereo visuals
-available as well. &nbsp;If both are true, then VirtualGL will return a
+available as well. &nbsp;If both are true, then VirtualGL will
+return a
 stereo visual to the application. &nbsp;If, for any given frame,
-VirtualGL detects&nbsp;that the application has drawn something to one
+VirtualGL detects&nbsp;that the application has drawn something to
+one
 of the&nbsp;right eye
 buffers, it will send a stereo image pair to the VirtualGL client.
 &nbsp;The VGL client then decodes the stereo image pair as a single
 frame and draws it to the client's display using OpenGL drawing
 commands. </p>
-<p>The upshot of this is that, in order to use stereo in VirtualGL, the
+<p>The upshot of this is that, in
+order to use stereo in VirtualGL, the
 client machine must support OpenGL and GLX (Exceed 3D is required for
 Windows clients) and must have a graphics card (such as the nVidia
 Quadro,
@@ -1984,59 +2308,79 @@ configuration for both the client and server machines. &nbsp;Use <span
  class="monospace">glxinfo</span>
 to verify whether or not stereo visuals are enabled on both client and
 server before attempting to run VirtualGL with a stereo application.</p>
-<p>It goes without saying that stereo does not work inside a VNC
+<p>It goes without saying that
+stereo does not work inside a VNC
 session.</p>
 <h3>Transparent Overlays</h3>
-<p>Transparent overlays have similar requirements and restrictions.
-&nbsp;In this case, VirtualGL completely bypasses its own GLX faker and
+<p>Transparent overlays have
+similar requirements and restrictions.
+&nbsp;In this case, VirtualGL completely bypasses its own GLX faker
+and
 sends the commands associated with rendering transparent overlays
-directly to the client machine. &nbsp;The underlay is still rendered on
-the server, as always. &nbsp;This approach is unfortunately necessary,
+directly to the client machine. &nbsp;The underlay is still
+rendered on
+the server, as always. &nbsp;This approach is unfortunately
+necessary,
 because there is no reliable way to draw to an overlay using 2D (X11)
 functions, nor is there a reasonable way to composite the overlay and
 underlay on the server side. &nbsp;So VirtualGL again relies on the
 client's software and hardware to do this job.</p>
-<p>As with stereo, overlays often must be explicitly enabled in the
-graphics card configuration. &nbsp;In the case of overlays, however,
+<p>As with stereo, overlays often
+must be explicitly enabled in the
+graphics card configuration. &nbsp;In the case of overlays,
+however,
 they need only be supported and enabled on the client machine.</p>
-<p>Indexed color (8-bit) overlays have been tested and are known to
-work with nVidia Quadro hardware. &nbsp;True color (24-bit) overlays
-will probably work as well, but they have not been tested. &nbsp;Use <span
- class="monospace">glxinfo</span>
+<p>Indexed color (8-bit) overlays
+have been tested and are known to
+work with nVidia Quadro hardware. &nbsp;True color (24-bit)
+overlays
+will probably work as well, but they have not been tested.
+&nbsp;Use <span class="monospace">glxinfo</span>
 to verify whether your client's display supports overlays and whether
 they are enabled. &nbsp;In Exceed 3D, make sure that the "Overlay
 Support" option is checked in the "Exceed 3D and GLX" applet:</p>
 <p><img style="width: 354px; height: 278px;" alt=""
  src="exceed6.png?rev=HEAD&amp;root=VirtualGL"></p>
-<p>As with stereo, overlays do not work inside a VNC session.</p>
+<p>As with stereo, overlays do not
+work inside a VNC session.</p>
 <h3>Indexed (PseudoColor) Rendering</h3>
-<p>In a PseudoColor visual, each pixel is represented by an index which
-refers to a location in a color table. &nbsp;The color table stores the
+<p>In a PseudoColor visual, each
+pixel is represented by an index which
+refers to a location in a color table. &nbsp;The color table stores
+the
 actual color values (256 of them in the case of 8-bit PseudoColor)
-which correspond to each index. &nbsp;An application merely tells the X
+which correspond to each index. &nbsp;An application merely tells
+the X
 server which color index to use when drawing, and the X server takes
 care of mapping that index to an actual color from the color table.
-&nbsp;OpenGL&nbsp;allows for rendering to Pseudocolor visuals, and it
+&nbsp;OpenGL&nbsp;allows for rendering to Pseudocolor visuals,
+and it
 does so by being intentionally ignorant&nbsp;of the relationship
-between indices and actual colors. &nbsp;As far as OpenGL is concerned,
+between indices and actual colors. &nbsp;As far as OpenGL is
+concerned,
 each&nbsp;color index value is just a meaningless number, and it is
 only when the final image is drawn by the X server that these numbers
 take on meaning. &nbsp;As a result, many pieces of OpenGL's core
 functionality, such as lighting and shading, either have undefined
 behavior or do
-not work at all with PseudoColor rendering. &nbsp;PseudoColor rendering
+not work at all with PseudoColor rendering. &nbsp;PseudoColor
+rendering
 used to be a common technique to visualize scientific data, because
 such data often only contained 8 bits per sample to begin with.
-&nbsp;Applications could manipulate the color table&nbsp;to allow the
+&nbsp;Applications could manipulate the color table&nbsp;to
+allow the
 user to
 dynamically control the relationship between sample values and colors.
 &nbsp;As more and more graphics cards drop support for PseudoColor
 rendering, however, the applications which use it are a vanishing breed.</p>
 VirtualGL supports PseudoColor rendering if a PseudoColor visual is
-available on the client's display. &nbsp;A PseudoColor visual need not
-be present on the server. &nbsp;On the server, VirtualGL uses the red
+available on the client's display. &nbsp;A PseudoColor visual need
+not
+be present on the server. &nbsp;On the server, VirtualGL uses the
+red
 channel of a standard&nbsp;RGB Pbuffer to store the color index.
-&nbsp;Upon receiving an end of frame trigger, VirtualGL reads back the
+&nbsp;Upon receiving an end of frame trigger, VirtualGL reads back
+the
 red channel of
 the Pbuffer and uses XPutImage() to draw it into the appropriate
 window. &nbsp;The upshot of this is that&nbsp;there is no
@@ -2046,14 +2390,17 @@ is only 1 byte per pixel in this mode, the images can still be sent to
 the client reasonably quickly even though they are uncompressed.<br>
 <br>
 PseudoColor rendering should work in VNC, provided that the VNC server
-is configured for 8-bit Pseudocolor. &nbsp;TurboVNC does not support
-PseudoColor, but RealVNC and other VNC flavors do. &nbsp;Note, however,
+is configured for 8-bit Pseudocolor. &nbsp;TurboVNC does not
+support
+PseudoColor, but RealVNC and other VNC flavors do. &nbsp;Note,
+however,
 that VNC cannot provide both PseudoColor and TrueColor visuals at the
 same time.<br>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a>&nbsp;</div>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="perf"></a>Performance Measurement</h2>
+<h2><a name="perf"></a>Performance
+Measurement</h2>
 <h3>VirtualGL's Built-In Profiling
 System<br>
 </h3>
@@ -2061,7 +2408,8 @@ System<br>
 bottlenecks in the VirtualGL pipeline is to set the <span
  class="monospace">VGL_PROFILE</span>
 environment variable to 1 on both server and client (passing an
-argument of <span class="monospace">+pr</span> to vglrun on the server
+argument of <span class="monospace">+pr</span>
+to vglrun on the server
 has the same effect.)&nbsp; This
 will cause VirtualGL to measure and report the throughput of the
 various stages in its pipeline.&nbsp; For example, here are some
@@ -2082,7 +2430,8 @@ that its slow decompression speed is the primary bottleneck.<br>
 <h3>Frame Spoiling</h3>
 <p>By default, VirtualGL will only
 send a frame to the client if the client is ready to receive it.
-&nbsp;If a rendered frame arrives at the server's queue and a previous
+&nbsp;If a rendered frame arrives at the server's queue and a
+previous
 frame
 is still being processed, the new frame is dropped ("spoiled.")
 &nbsp;This prevents a backlog of frames on the server, which would
@@ -2095,11 +2444,14 @@ conserve server resources as well as allow OpenGL benchmarks to
 accurately measure the throughput of the VirtualGL pipeline.
 &nbsp;With frame spoiling enabled, these benchmarks will report
 meaningless data, since they are measuring the server's rendering rate,
-and that rendering rate is decoupled from the overall&nbsp;throughput
+and that rendering rate is decoupled from the
+overall&nbsp;throughput
 of VirtualGL.</p>
-<p>To disable frame spoiling, set the <span class="monospace">VGL_SPOIL</span>
+<p>To disable frame spoiling, set
+the <span class="monospace">VGL_SPOIL</span>
 environment variable to 0 on the server or pass an argument of <span
- class="monospace">-sp</span> to vglrun. &nbsp;See <a href="#config">Advanced
+ class="monospace">-sp</span>
+to vglrun. &nbsp;See <a href="#config">Advanced
 Configuration</a> for more details.<br>
 </p>
 <h3>VirtualGL Diagnostic Tools</h3>
@@ -2112,7 +2464,8 @@ nettest is a low-level network benchmark that uses the same network
 classes as VirtualGL. &nbsp;It can be used to test the latency and
 throughput of any TCP/IP connection, with or without SSL encryption.
 &nbsp;The&nbsp;VirtualGL Linux package installs nettest in <span
- class="monospace">/opt/VirtualGL/bin</span>. &nbsp;The VirtualGL
+ class="monospace">/opt/VirtualGL/bin</span>.
+&nbsp;The VirtualGL
 Solaris package installs it in <span class="monospace">/opt/SUNWvgl/bin</span>.
 &nbsp;The Windows installer installs it in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
@@ -2187,7 +2540,8 @@ client's windowing system.<br>
 package installs tcbench in <span class="monospace">/opt/VirtualGL/bin</span>.
 &nbsp;The VirtualGL Solaris package installs tcbench in <span
  class="monospace">/opt/SUNWvgl/bin</span>.
-&nbsp;<span class="monospace"></span>The Windows installer installs it
+&nbsp;<span class="monospace"></span>The
+Windows installer installs it
 in <span class="monospace">c:\program
 files\VirtualGL-{version}-{build}</span>
 by default. &nbsp;Run <span class="monospace">tcbench</span>
@@ -2209,34 +2563,35 @@ rate, and the x and y offset of the sampling area within the window.</p>
 <p style="text-align: right;"><a href="#" target="_top">top</a><br>
 </p>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="config"></a>Advanced Configuration<br>
+<h2><a name="config"></a>Advanced
+Configuration<br>
 </h2>
 <div style="text-align: left;">
 <h3>Server Settings</h3>
 </div>
 <font face="Arial, Helvetica">
 <p align="left">You can
-control the operation of the VirtualGL server in four different
+control the operation of the VirtualGL faker in four different
 ways.&nbsp; Each method of configuration takes precedence over the
 previous method:</p>
 </font>
 <ol>
-  <li>Setting a configuration environment variable globally (e.g. in <span
- class="monospace">/etc/profile</span>)</li>
-  <li>Setting a configuration environment variable on a per-user basis
+  <li>Setting a configuration
+environment variable globally (e.g. in <span class="monospace">/etc/profile</span>)</li>
+  <li>Setting a configuration
+environment variable on a per-user basis
 (e.g. in <span class="monospace">~/.bashrc</span>)</li>
-  <li>Setting a configuration environment variable only for the current
-shell session (e.g. <span class="monospace">export VGL_XXX={whatever}</span>)</li>
-  <li>Passing a configuration option as an argument to <span
- class="monospace">vglrun</span>.&nbsp; This effectively overrides any
+  <li>Setting a configuration
+environment variable only for the current
+shell session (e.g. <span class="monospace">export
+VGL_XXX={whatever}</span>)</li>
+  <li>Passing a configuration
+option as an argument to <span class="monospace">vglrun</span>.&nbsp;
+This effectively overrides any
 previous environment variable setting corresponding to that
 configuration option.<br>
   </li>
 </ol>
-<p align="left"><span class="note">Note:</span>Most configuration
-parameters are read only once during execution, when the application
-faker initializes.</p>
-<br>
 <table style="width: 100%;" cellpadding="5" cellspacing="3">
   <tbody>
     <tr>
@@ -2255,30 +2610,341 @@ Value</td>
     </tr>
     <tr>
       <td class="monospace"
- style="width: 42px; vertical-align: baseline; font-weight: bold;">VGL_QUAL<br>
+ style="vertical-align: baseline; font-weight: bold;">VGL_CLIENT<br>
+      <br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">-client
+&lt;client display&gt;</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">The
+X display where VirtualGL should send its image stream</span><br
+ style="font-weight: bold;">
+VirtualGL uses a dedicated TCP/IP connection to transmit compressed
+images of an application's OpenGL rendering area from the application
+server to the
+client display.&nbsp;
+Thus, the server needs to know on which machine the VirtualGL client
+software is
+running, and it needs to know which X display on that machine will be
+used to draw the application's windows and other 2D GUI
+elements.&nbsp;
+VirtualGL can normally surmise this by reading the server's <span
+ class="monospace">DISPLAY</span>
+environment variable.&nbsp; But in cases where X11 is tunneled
+through SSh or another type of proxy, the <span class="monospace">DISPLAY</span>
+environment
+variable on the server may not point to the client machine.&nbsp;
+In these cases, set <span class="monospace">VGL_CLIENT</span>
+to the
+display where the application's GUI
+will end up, e.g.<br>
+      <pre>export VGL_CLIENT=my_client_machine:0.0</pre>
+      </td>
+      <td style="font-weight: bold;">Read
+from the <span class="monospace">DISPLAY</span>
+environment</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_COMPRESS=0<br>
+VGL_COMPRESS=1<br>
+      <br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">-c
+&lt;0,
+1&gt;</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
+image
+compression</span><br style="font-weight: bold;">
+When
+image compression is disabled, VirtualGL will bypass its
+compressed image delivery system and instead use <span
+ class="monospace">XPutImage()</span> to composite the OpenGL-rendered
+pixels into the appropriate place in the application window.&nbsp; This
+is primarily useful in conjunction with VNC, Citrix for Unix, or other
+remote display software that performs X11 rendering on the
+server and uses its own internal mechanism for compressing and
+transmitting images to the client.&nbsp; Disabling compression
+outside of a
+VNC (or similar)
+session is not advisable, since it will result in uncompressed images
+being sent over the network to the client.<br>
+      <p>See the <a href="#vnc">VNC Usage</a>
+section for more details.</p>
+      </td>
+      <td style="font-weight: bold;">1
+(JPEG compression enabled)</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_DISPLAY<br>
+      <br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">-d
+&lt;display or GLP device&gt;</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">The
+display or GLP device to use for 3D
+rendering</span><br>
+If your server has multiple 3D graphics cards and you want the OpenGL
+rendering to be redirected to a display other than :0, set <span
+ class="monospace">VGL_DISPLAY=:1.0</span> or
+whatever.&nbsp; This could be used, for instance, to support many
+application instances on a beefy multi-pipe graphics server.<br>
+      <br>
+      <span style="font-weight: bold;">GLP
+mode (Solaris/Sparc only):</span><br>
+Setting this option to<span class="monospace"></span> <span
+ class="monospace">GLP</span>
+will enable GLP mode and select the first
+available GLP device for rendering.&nbsp; You can also set this
+option to<span class="monospace"></span>
+the pathname of a specific GLP device (e.g. <span class="monospace">/dev/fbs/jfb0</span>.)&nbsp;
+GLP is a special feature of Sun's OpenGL library which allows an
+application
+to render into Pbuffers on a graphics card even if there is no X
+display running on that graphics card.&nbsp; See the&nbsp;<a
+ href="#glpusage">GLP
+Usage</a> section&nbsp;for more
+details.<br>
+      </td>
+      <td style="font-weight: bold;">:0</td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
+VGL_GAMMA=1<br>
+      </span></td>
+      <td><span style="font-weight: bold;" class="monospace">+g</span><br>
+or<br>
+      <span style="font-weight: bold;" class="monospace">-g</span><span
+ style="font-weight: bold;" class="monospace"></span></td>
+      <td><span style="font-weight: bold;">Enable/disable gamma
+correction (Solaris/Sparc clients only)</span><br>
+On
+Solaris/Sparc, when an OpenGL application requests an X visual, it will
+be given a gamma-corrected&nbsp;visual (Solaris calls these "linear
+visuals") unless it specifically requests otherwise.
+&nbsp;Gamma-corrected visuals are subject to the gamma correction
+value
+assigned with <span class="monospace">fbconfig</span>.
+&nbsp;If the
+gamma correction value is set to 1.0, then corrected visuals will look
+the same as uncorrected visuals.<br>
+      <br>
+When an OpenGL application is being remotely displayed onto a
+Solaris/Sparc
+client using VirtualGL, VirtualGL tries to emulate the behavior of the
+Solaris/Sparc client machine by forcing the application to use a
+gamma-corrected visual. &nbsp;But setting <span class="monospace">VGL_GAMMA=0</span>
+on the server (or passing <span class="monospace">-g</span>
+to <span class="monospace">vglrun</span>)
+overrides that behavior and forces
+the application to use an uncorrected visual.<br>
+      <br>
+This setting has no effect if the client machine is not running
+Solaris/Sparc.<br>
+      </td>
+      <td><span style="font-weight: bold;">Gamma correction enabled</span></td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_GLLIB<br>
+      </td>
+      <td><br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">The
+location of an
+alternate OpenGL library</span><br style="font-weight: bold;">
+Normally, VirtualGL loads the first OpenGL dynamic library that it
+finds in the
+dynamic linker path (usually <span class="monospace">/usr/lib/libGL.so.1</span>,
+      <span class="monospace">/usr/lib64/libGL.so.1<span
+ style="font-family: Arial,Helvetica,sans-serif;"></span></span>,&nbsp;
+or <span class="monospace">/usr/lib/64/libGL.so.1</span><span
+ class="monospace"></span>.)&nbsp;
+You can
+use this setting to explicitly specify another OpenGL dynamic library
+to use.<br>
+      <br>
+Normally, you shouldn't need to muck with this unless something doesn't
+work.</td>
+      <td style="font-weight: bold;"></td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
+      <br>
+      </span></td>
+      <td><span style="font-weight: bold;" class="monospace">-np
+&lt;#
+of CPUs&gt;</span><br>
+or<br>
+      <span style="font-weight: bold;" class="monospace">-np 0</span><br>
+(automatically determine the optimal&nbsp; number of CPUs to use)<br>
+      </td>
+      <td><span style="font-weight: bold;">Specify the number of CPUs
+to use for multi-threaded compression</span><br>
+VirtualGL can divide the task of compressing each frame
+among multiple server CPUs. &nbsp;This might speed up the
+overall
+throughput if the compression stage of the pipeline is the primary
+bottleneck. &nbsp;The default behavior (equivalent to setting <span
+ class="monospace">VGL_NPROCS=0</span>)
+is to use all but one of the available CPUs, up to a
+maximum of 3 total. &nbsp;On a large multiprocessor system, the
+speedup
+is almost linear up to 3 processors, but&nbsp;the algorithm scales
+very
+little past that point. &nbsp;VirtualGL will not
+allow&nbsp;more than 4
+processors total to be used for compression, nor will it allow you to
+assign more processors than are available in the system.</td>
+      <td><span style="font-weight: bold;">1P system: 1</span><br
+ style="font-weight: bold;">
+      <span style="font-weight: bold;">2P&nbsp;system:
+1</span><br style="font-weight: bold;">
+      <span style="font-weight: bold;">3P
+system: 2</span><br style="font-weight: bold;">
+      <span style="font-weight: bold;">4P
+&amp; larger: 3</span><br>
+      <span style="font-weight: bold;"></span></td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_PORT<br>
+      <br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">-p
+&lt;port&gt;</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">The
+TCP port to use when
+connecting to the client<br>
+      <span style="font-weight: bold;"></span></span></td>
+      <td style="font-weight: bold;">4242
+for unencrypted connections,&nbsp; 4243 for SSL connections</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_PROFILE=0<br>
+VGL_PROFILE=1<br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">+profile</span><br>
+or<br>
+      <span style="font-weight: bold;" class="monospace">-profile</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
+profiling
+output</span><br style="font-weight: bold;">
+If enabled, this will cause the VirtualGL faker to continuously
+benchmark itself and periodically print out the&nbsp;throughput of
+reading back, compressing, and
+sending pixels to the client.<br>
+      </td>
+      <td style="font-weight: bold;">Profiling
+disabled</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_QUAL<br>
       <br>
       </td>
       <td><span class="monospace" style="font-weight: bold;">-q
 &lt;1-100&gt;</span></td>
-      <td style="width: 100%; vertical-align: top;"><span
- style="font-weight: bold;">an
+      <td style="vertical-align: top;"><span style="font-weight: bold;">An
 integer between 1 and 100 (inclusive)</span><br
  style="font-weight: bold;">
-This allows you to manually specify the quality of the JPEG
-compression.&nbsp; Lower is faster but also grainier.&nbsp; The default
+This setting allows you to&nbsp;specify the quality of the JPEG
+compression.&nbsp; Lower is faster but also grainier.&nbsp; The
+default
 setting should produce visually lossless performance.<br>
       </td>
       <td style="font-weight: bold;">95</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_SUBSAMP<br>
+      <td><span style="font-weight: bold;" class="monospace">VGL_READBACK=0</span><br
+ style="font-weight: bold;" class="monospace">
+      <span style="font-weight: bold;" class="monospace">VGL_READBACK=1</span></td>
+      <td></td>
+      <td><span style="font-weight: bold;">Enable/disable readback</span><br
+ style="font-weight: bold;">
+On rare occasions, it might be desirable to have VirtualGL
+redirect&nbsp;OpenGL rendering from an application into a Pbuffer
+but not
+automatically read back and send the rendered pixels. &nbsp;Some
+applications&nbsp;have their own mechanisms for reading back
+the&nbsp;buffer, so disabling VirtualGL's readback mechanism prevents
+duplication of effort.<br>
+      <br>
+This feature was developed initially to support running <a
+ href="http://www.paraview.org/">ParaView</a>
+in parallel using MPI. &nbsp; ParaView MPI normally uses MPI processes
+1 through
+N as rendering servers, each drawing a portion of the geometry into a
+separate window running on a separate X display.
+&nbsp;ParaView&nbsp;reads back
+these server windows and composites the pixels into the main
+application window, which is controlled by MPI process
+0.&nbsp;&nbsp;By creating
+a script which passes a different value of <span class="monospace">VGL_DISPLAY</span>
+and <span class="monospace">VGL_READBACK</span>
+to each MPI process, it is possible to make all of the ParaView server
+processes render&nbsp;to off-screen buffers on different graphics cards
+while preventing VirtualGL from displaying any pixels except those
+generated by process 0.<br>
+      </td>
+      <td><span style="font-weight: bold;">Readback enabled</span></td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_SPOIL=1<br>
+VGL_SPOIL=0<br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">+spoil</span><br
+ style="font-weight: bold;">
+or<br style="font-weight: bold;">
+      <span style="font-weight: bold;" class="monospace">-spoil</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
+frame
+spoiling</span><br>
+By default, VirtualGL will drop frames so as not to slow down the
+rendering rate of the server's graphics engine.&nbsp; This should
+produce the
+best results with interactive applications, but it may be desirable to
+turn off frame spoiling when running benchmarks or other
+non-interactive applications.&nbsp; Turning off frame spoiling will
+force one frame to be read back and
+sent on each buffer swap, thus allowing benchmarks to accurately
+measure the frame rate of the entire VirtualGL pipeline.&nbsp;
+Disabling frame spoiling will also prevent non-interactive applications
+from wasting graphics resources by rendering frames that will never be
+seen.&nbsp; With frame spoiling turned off, the rendering
+pipeline behaves as if it's fill-rate limited to about 30 or 40
+Megapixels/second, the maximum throughput of the VirtualGL system on
+current CPU's.</td>
+      <td style="font-weight: bold;">Spoiling
+enabled</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_SSL=0<br>
+VGL_SSL=1<br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">+s</span><br
+ class="monospace">
+or<br>
+      <span style="font-weight: bold;" class="monospace">-s</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Tunnel
+the VirtualGL compressed image stream inside a secure socket layer</span><br
+ style="font-weight: bold;">
+      <br>
+      </td>
+      <td style="font-weight: bold;">SSL
+disabled</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_SUBSAMP<br>
       <br>
       </td>
       <td><span class="monospace" style="font-weight: bold;">-samp
 &lt;411|422|444&gt;</span></td>
-      <td style="width: 100%; vertical-align: top;"><span
- style="font-weight: bold;">411,
+      <td style="vertical-align: top;"><span style="font-weight: bold;">411,
 422, or 444</span><br style="font-weight: bold;">
 This allows you to manually specify the level of chrominance
 subsampling in the JPEG compressor.
@@ -2304,7 +2970,8 @@ with volume data, since it usually only contains 256 colors to begin
 with.&nbsp; But narrow, aliased lines and other sharp features on a
 black background will tend to produce subsampling artifacts.<br>
       <br>
-      <span style="font-weight: bold;">The Axis Indicator from a
+      <span style="font-weight: bold;">The
+Axis Indicator from a
 Popular Visualization App<br>
       </span><br style="font-weight: bold;">
       <table style="border-collapse: collapse;" border="0"
@@ -2338,222 +3005,18 @@ Q95</p>
         </tbody>
       </table>
       </p>
-      <p><span class="note">Note:</span>&nbsp;If you select
+      <p><span class="note">Note:</span>&nbsp;If
+you select
 4:1:1 subsampling, VirtualGL will in fact try to use 4:2:0
-instead.&nbsp; 4:2:0 samples every other pixel both horizontally and
-vertically rather than sampling every fourth pixel horizontally.&nbsp;
+instead.&nbsp; 4:2:0 samples every other pixel both horizontally
+and
+vertically rather than sampling every fourth pixel
+horizontally.&nbsp;
 But not all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is
 not available.<br>
       </p>
       </td>
       <td style="font-weight: bold;">444</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_SPOIL=1<br>
-VGL_SPOIL=0<br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">+spoil</span><br
- style="font-weight: bold;">
-or<br style="font-weight: bold;">
-      <span style="font-weight: bold;" class="monospace">-spoil</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">Enable/disable
-frame
-spoiling</span><br>
-By default, VirtualGL will drop frames so as not to slow down the
-rendering rate of the server's graphics engine.&nbsp; This should
-produce the
-best results with interactive applications, but it may be desirable to
-turn off frame spoiling when running benchmarks or other
-non-interactive applications.&nbsp; Turning off frame spoiling will
-force one frame to be read back and
-sent on each buffer swap, thus allowing benchmarks to accurately
-measure the frame rate of the entire VirtualGL pipeline.&nbsp;
-Disabling frame spoiling will also prevent non-interactive applications
-from wasting graphics resources by rendering frames that will never be
-seen.&nbsp; With frame spoiling turned off, the rendering
-pipeline behaves as if it's fill-rate limited to about 30 or 40
-Megapixels/second, the maximum throughput of the VirtualGL system on
-current CPU's.</td>
-      <td style="font-weight: bold;">Spoiling enabled</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_GLLIB<br>
-      </td>
-      <td><br>
-      </td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">the
-location of an
-alternate OpenGL library</span><br style="font-weight: bold;">
-Normally, VirtualGL loads the first OpenGL dynamic library that it
-finds in the
-dynamic linker path (usually <span class="monospace">/usr/lib/libGL.so.1</span>,
-      <span class="monospace">/usr/lib64/libGL.so.1<span
- style="font-family: Arial,Helvetica,sans-serif;"></span></span>,&nbsp;
-or <span class="monospace">/usr/lib/64/libGL.so.1</span><span
- class="monospace"></span>.)&nbsp;
-You can
-use this setting to explicitly specify another OpenGL dynamic library
-to use.<br>
-      <br>
-Normally, you shouldn't need to muck with this unless something doesn't
-work.</td>
-      <td style="font-weight: bold;"></td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_X11LIB<br>
-      </td>
-      <td><br>
-      </td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">the
-location of an
-alternate X11 library<br>
-      </span>Normally, VirtualGL
-loads the first X11 dynamic library that it finds in the dynamic linker
-path
-(usually <span class="monospace">/usr/lib/libX11.so.?</span>, <span
- class="monospace">/usr/lib/64/libX11.so.?</span>, <span
- class="monospace">/usr/X11R6/lib/libX11.so.?</span>, or <span
- class="monospace">/usr/X11R6/lib64/libX11.so.?</span>.)&nbsp;
-You can use this setting to explicitly specify another X11 dynamic
-library to
-use.<br>
-      <br>
-Normally, you shouldn't need to muck with this unless something doesn't
-work.</td>
-      <td style="font-weight: bold;"></td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_DISPLAY<br>
-      <br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">-d
-&lt;display or GLP device&gt;</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">the
-display or GLP device on which 3D
-rendering is done</span><br>
-If you have a multi-pipe server configuration and want the OpenGL
-rendering to be done on a display other than :0, set this to :1 or
-whatever.&nbsp; This could be used, for instance, to support many
-app instances on a beefy server with multiple 3D graphics cards.<br>
-      <br>
-      <span style="font-weight: bold;">GLP mode:</span><br>
-Setting this option to<span class="monospace"></span> <span
- class="monospace">GLP</span> will enable GLP mode and select the first
-available GLP device for rendering.&nbsp; You can also set the option to<span
- class="monospace"></span> the pathname of a specific GLP device (e.g. <span
- class="monospace">/dev/fbs/jfb0</span>.)&nbsp;
-GLP is a special feature developed by Sun which allows an application
-to render into Pbuffers on the graphics card even when there is no X
-display running on the server.&nbsp; See the&nbsp;<a href="#glpusage">GLP
-Usage</a> section&nbsp;for more details.<br>
-      </td>
-      <td style="font-weight: bold;">:0</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_CLIENT<br>
-      <br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">-client
-&lt;client display&gt;</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">the
-display on which the
-client software is running</span><br style="font-weight: bold;">
-VirtualGL uses a dedicated TCP/IP connection to transmit compressed
-images of
-the OpenGL rendering area from the server to the client.&nbsp;
-Thus, the server needs to know on which machine the client software is
-running.&nbsp; It normally can surmise this from the <span
- class="monospace">DISPLAY</span>
-environment variable.&nbsp; But in cases where X11 is tunneled
-through a Low-Bandwidth X (LBX) or SSh proxy, the <span
- class="monospace">DISPLAY</span> environment
-variable on the server may not point to the client machine.&nbsp;
-In these cases, set <span class="monospace">VGL_CLIENT</span> to the
-display where the application's GUI
-will end up.</td>
-      <td style="font-weight: bold;">read
-from the <span class="monospace">DISPLAY</span>
-environment</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_PORT<br>
-      <br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">-p
-&lt;port&gt;</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">the
-TCP port to use when
-connecting to the client</span></td>
-      <td style="font-weight: bold;">4242
-for non-SSL,&nbsp; 4243 for SSL</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_USESSL=0<br>
-VGL_USESSL=1<br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">+s</span><br
- class="monospace">
-or<br>
-      <span style="font-weight: bold;" class="monospace">-s</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">tunnel
-the VirtualGL compressed image stream inside a secure socket layer</span><br
- style="font-weight: bold;">
-      <br>
-      <span class="note">Note:</span>You must be running the secure
-client for this to work.&nbsp; See
-the <a href="#secureusage">Secure Usage</a> section for more details. </td>
-      <td style="font-weight: bold;">SSL disabled</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_COMPRESS=0<br>
-VGL_COMPRESS=1<br>
-      <br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">-c &lt;0,
-1&gt;</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">Enable/disable
-image
-compression</span><br style="font-weight: bold;">
-When
-image compression is disabled, VirtualGL will bypass its
-compressed image delivery system and instead use X11 image drawing
-commands
-to composite the&nbsp;3D drawing area back into its original
-window.&nbsp; This
-is primarily useful in conjunction with VNC, Citrix for Unix, or
-another remote display mechanism that performs X11 rendering on the
-server and contains its own image compression and delivery
-mechanisms.&nbsp; Disabling compression outside of a VNC (or similar)
-session is not advisable, since it will result in uncompressed images
-being sent over the network to the client.<br>
-      <p>See the <a href="#vnc">VNC Usage</a> section for more details.</p>
-      </td>
-      <td style="font-weight: bold;">1
-(JPEG compression enabled)</td>
-    </tr>
-    <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_PROFILE=0<br>
-VGL_PROFILE=1<br>
-      </td>
-      <td><span style="font-weight: bold;" class="monospace">+profile</span><br>
-or<br>
-      <span style="font-weight: bold;" class="monospace">-profile</span></td>
-      <td valign="top" width="100%"><span style="font-weight: bold;">Enable/disable
-profiling
-output</span><br style="font-weight: bold;">
-If enabled, this will cause the server to continuously measure and
-display the pixel throughput of the overall pipeline and of the
-readback and compression stages.</td>
-      <td style="font-weight: bold;">Profiling disabled</td>
     </tr>
     <tr>
       <td><span style="font-weight: bold;" class="monospace">VGL_SYNC=0<br>
@@ -2562,100 +3025,176 @@ VGL_SYNC=1<br>
       <td><span style="font-weight: bold;" class="monospace">+sync</span><br>
 or<br>
       <span style="font-weight: bold;" class="monospace">-sync</span></td>
-      <td><span style="font-weight: bold;">Enable/disable strict 2D/3D
+      <td><span style="font-weight: bold;">Enable/disable strict
+2D/3D
 synchronization (necessary to pass GLX conformance tests)<br>
-      </span>Normally, VirtualGL's operation is asynchronous from the
+      </span>Normally, VirtualGL's
+operation is asynchronous from the
 point of view of the application.&nbsp; The application swaps the
-buffers or calls glFinish() or glFlush() or glXWaitGL(), and VirtualGL
+buffers or calls <span class="monospace">glFinish()</span> or <span
+ class="monospace">glFlush()</span> or <span class="monospace">glXWaitGL()</span>,
+and VirtualGL
 reads back the framebuffer and sends the pixels to the client's display
-... eventually.&nbsp; This will work fine for a vast majority of
-applications, but it is not strictly conformant.&nbsp; Rarely, an
-application may call glXWaitGL() or glFinish() and expect to be able to
-immediately access the resulting pixels using X11 functions such as
-XGetImage().&nbsp; Enabling <span class="monospace">VGL_SYNC</span> is
+... eventually.&nbsp; This will work fine for the vast majority of
+applications, but it is not strictly conformant.&nbsp; Technically
+speaking, when an
+application&nbsp;calls <span class="monospace">glXWaitGL()</span> or <span
+ class="monospace">glFinish()</span>, it is well within its rights to
+expect the OpenGL-rendered pixels to be immediately available in the X
+window. &nbsp;Fortunately, very few applications actually do expect
+this, but on rare occasions, an application may try to use <span
+ class="monospace">XGetImage()</span> or other X11 functions to obtain
+a bitmap of the pixels that were rendered by OpenGL. &nbsp;Enabling <span
+ class="monospace">VGL_SYNC</span>
+is
 a somewhat extreme measure that may be needed to get such applications
-to work properly.&nbsp; It was developed as a way to pass the GLX
-conformance suite (conformx, specifically.)&nbsp; When <span
- class="monospace">VGL_SYNC</span> is enabled, every call to glFinish()
-or glXWaitGL() will cause the contents of the server's framebuffer to
+to work properly.&nbsp; It was developed primarily as a way to pass the
+GLX
+conformance suite (<span class="monospace">conformx</span>,
+specifically.)&nbsp; When <span class="monospace">VGL_SYNC</span>
+is enabled, every call to <span class="monospace">glFinish()</span>
+or <span class="monospace">glXWaitGL()</span> will cause the contents
+of the server's framebuffer to
 be read back and <span style="font-style: italic;">synchronously</span>
 drawn into the client's window <span style="font-style: italic;">without
 compression or frame spoiling</span>.&nbsp;
-The call to glFinish() or glXWaitGL() does not return until the pixels
-have been delivered into the client's window, and as such, enabling
+The call to <span class="monospace">glFinish()</span> or <span
+ class="monospace">glXWaitGL()</span> will not return until VirtualGL
+has verified that the pixels
+have been delivered into the client's window. &nbsp;As such,
+enabling
 this mode
 can have potentially dire effects on performance.<span
  style="font-weight: bold;"></span></td>
       <td><span style="font-weight: bold;">Synchronization disabled</span></td>
     </tr>
     <tr>
-      <td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
+      <td><span style="font-weight: bold;" class="monospace">VGL_TILESIZE</span></td>
+      <td></td>
+      <td><span style="font-weight: bold;">A number between 8 and
+1024 (inclusive)<br>
+      </span>Normally, VirtualGL
+will divide an OpenGL window into tiles of
+256x256 pixels, compare each tile vs. the previous frame, and only
+compress &amp; send the tiles which have changed. &nbsp;It will
+also divide
+up the task of compressing these tiles among the available CPUs in a
+round robin fashion. &nbsp;There are several tradeoffs that must be
+considered when choosing a tile size:<br>
       <br>
-      </span></td>
-      <td><span style="font-weight: bold;" class="monospace">-np &lt;#
-of CPUs&gt;</span><br>
-or<br>
-      <span style="font-weight: bold;" class="monospace">-np 0</span><br>
-(automatically determine the optimal&nbsp; number of CPUs to use)<br>
+      <table style="text-align: left;" border="1" cellpadding="2"
+ cellspacing="2">
+        <tbody>
+          <tr>
+            <td></td>
+            <td style="font-weight: bold;">Parallel<br>
+Scalability</td>
+            <td style="font-weight: bold;">Compression<br>
+Efficiency</td>
+            <td style="font-weight: bold;">Inter-frame<br>
+Optimization</td>
+            <td style="font-weight: bold;">Network<br>
+Efficiency</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Smaller
+tile sizes</td>
+            <td>Better</td>
+            <td>Worse</td>
+            <td>Better</td>
+            <td>Worse</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Larger
+tile sizes</td>
+            <td>Worse</td>
+            <td>Better</td>
+            <td>Worse</td>
+            <td>Better</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+Smaller tiles can more easily be divided up among multiple CPUs, but
+they compress less efficiently (and less quickly) on an individual
+basis. &nbsp;Using larger tiles can reduce traffic to the client by
+allowing
+the server to send only one frame update instead of many. &nbsp;But
+on the
+flip side, using larger tiles decreases the chance that a tile will be
+unchanged from the previous frame. &nbsp;Thus, the server may only
+send one
+or two packets per frame, but the cumulative size of those packets may
+be much larger than if a smaller tile size was used.<br>
+      <br>
+256x256 was chosen as the default because it provides the best balance
+between scalability and efficiency on the platforms that VirtualGL
+supports.<br>
       </td>
-      <td><span style="font-weight: bold;">Specify the number of CPUs
-to use for multi-threaded compression</span><br>
-VirtualGL
-has the ability to divide the task of compressing a frame
-among all of the available server processors, which might speed up the
-overall
-throughput if the compression stage of the pipeline is the primary
-bottleneck. &nbsp;The default behavior (equivalent to setting
-VGL_NPROCS=0) is to use all but one of the available CPUs, up to a
-maximum of 3 total. &nbsp;On a large multiprocessor system, the speedup
-is almost linear up to 3 processors, but&nbsp;the algorithm scales very
-little past that point. &nbsp;VirtualGL will not allow&nbsp;more than 4
-processors total to be used for compression, nor will it allow you to
-assign more processors than are available in the system.</td>
-      <td><span style="font-weight: bold;">1P system: 1</span><br
- style="font-weight: bold;">
-      <span style="font-weight: bold;">2P system: 1</span><br
- style="font-weight: bold;">
-      <span style="font-weight: bold;">3P system: 2</span><br
- style="font-weight: bold;">
-      <span style="font-weight: bold;">4P &amp; larger: 3</span><br>
-      <span style="font-weight: bold;"></span></td>
+      <td><span style="font-weight: bold;">256</span></td>
     </tr>
     <tr>
-      <td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
-VGL_GAMMA=1<br>
-      </span></td>
-      <td><span style="font-weight: bold;" class="monospace">+g</span><br>
+      <td><span style="font-weight: bold;" class="monospace">VGL_TRACE=0</span><br
+ style="font-weight: bold;" class="monospace">
+      <span style="font-weight: bold;" class="monospace">VGL_TRACE=1</span></td>
+      <td><span style="font-weight: bold;" class="monospace">+tr</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-g</span></td>
-      <td><span style="font-weight: bold;">Enable/disable gamma
-correction (Solaris clients only)</span><br>
-On
-Solaris, an OpenGL application will run under a gamma-corrected X
-visual (Solaris calls these "linear visuals") unless the application
-takes special measures to circumvent this behavior.
-&nbsp;Gamma-corrected visuals are subject to the gamma correction value
-assigned with <span class="monospace">fbconfig</span>. &nbsp;If the
-gamma correction value is set to 1.0, then corrected visuals will look
-the same as uncorrected visuals.<br>
-      <br>
-When an OpenGL application is being remotely displayed onto a Solaris
-client using VirtualGL, VirtualGL tries to emulate the behavior of the
-Solaris client machine by forcing the application to use a
-gamma-corrected visual. &nbsp;But setting <span class="monospace">VGL_GAMMA</span>
-to 0 on the server (or passing <span class="monospace">-g</span> to <span
- class="monospace">vglrun</span>) overrides that behavior and forces
-the application to use an uncorrected visual.<br>
-      <br>
-This setting has no effect if the client machine is not running Solaris.<br>
+      <span style="font-weight: bold;" class="monospace">-tr</span></td>
+      <td><span style="font-weight: bold;">Enable/disable tracing</span><br
+ style="font-weight: bold;">
+When tracing is enabled, VirtualGL will log all calls to
+the GLX and X11 functions it is intercepting, as well as the arguments
+and return values for those functions. &nbsp;This is useful when
+diagnosing interaction problems between VirtualGL and a particular
+OpenGL application.</td>
+      <td><span style="font-weight: bold;">Tracing disabled</span></td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace">VGL_VERBOSE=0</span><br
+ style="font-weight: bold;" class="monospace">
+      <span style="font-weight: bold;" class="monospace">VGL_VERBOSE=1</span></td>
+      <td><span style="font-weight: bold;" class="monospace">+v</span><br>
+or<br>
+      <span style="font-weight: bold;" class="monospace">-v</span></td>
+      <td><span style="font-weight: bold;">Enable/disable verbosity</span><br
+ style="font-weight: bold;">
+When in verbose mode, VirtualGL will reveal some of the decisions it
+makes behind the scenes, such as which code path it is using to
+compress JPEG images, which type of X11 drawing it is using, etc.
+&nbsp;This can be helpful when diagnosing performance problems.<br>
       </td>
-      <td><span style="font-weight: bold;">Gamma correction enabled</span></td>
+      <td><span style="font-weight: bold;">Verbosity disabled</span></td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_X11LIB<br>
+      </td>
+      <td><br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">the
+location of an
+alternate X11 library<br>
+      </span>Normally, VirtualGL
+loads the first X11 dynamic library that it finds in the dynamic linker
+path
+(usually <span class="monospace">/usr/lib/libX11.so.?</span>, <span
+ class="monospace">/usr/lib/64/libX11.so.?</span>, <span
+ class="monospace">/usr/X11R6/lib/libX11.so.?</span>,
+or <span class="monospace">/usr/X11R6/lib64/libX11.so.?</span>.)&nbsp;
+You can use this setting to explicitly specify another X11 dynamic
+library to
+use.<br>
+      <br>
+Normally, you shouldn't need to muck with this unless something doesn't
+work.</td>
+      <td style="font-weight: bold;"></td>
     </tr>
   </tbody>
 </table>
 <br>
 <h3>Client
 Settings</h3>
+<h4>Environment Variables</h4>
 <table style="width: 100%;" cellpadding="5" cellspacing="3">
   <tbody>
     <tr>
@@ -2667,38 +3206,101 @@ Name</td>
 Value</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;" class="monospace" valign="baseline"
- width="42">VGL_PROFILE=0<br>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_PROFILE=0<br>
 VGL_PROFILE=1<br>
       </td>
-      <td style="width: 100%; vertical-align: top;"><span
- style="font-weight: bold;">Enable/disable profiling
-output</span><br style="font-weight: bold;">
-If enabled, this will cause the client to continuously measure and
-display the pixel throughput of the overall pipeline and of the
-decompression and blitting stages.</td>
-      <td style="font-weight: bold;">Profiling disabled</td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
+profiling
+output<br>
+      </span>If enabled, this will cause the VirtualGL client to
+continuously
+benchmark itself and periodically print out the&nbsp;throughput of
+decompressing and drawing pixels into the application window<br>
+      </td>
+      <td style="font-weight: bold;">Profiling
+disabled</td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace">VGL_VERBOSE=0</span><br
+ style="font-weight: bold;" class="monospace">
+      <span style="font-weight: bold;" class="monospace">VGL_VERBOSE=1</span></td>
+      <td><span style="font-weight: bold;">Enable/disable verbosity</span><br
+ style="font-weight: bold;">
+When in verbose mode, VirtualGL will reveal some of the decisions it
+makes behind the scenes, such as which code path it is using to
+compress JPEG images, which type of X11 drawing it is using, etc.
+&nbsp;This can be helpful when diagnosing performance problems.<br>
+      </td>
+      <td><span style="font-weight: bold;">Verbosity disabled</span></td>
     </tr>
   </tbody>
 </table>
-<br>
-<h4>Other Client Settings</h4>
+<h4><span class="monospace">vglclient</span> Command-Line Arguments</h4>
+<table style="width: 100%;" cellpadding="5" cellspacing="3">
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader"><span
+ class="monospace">vglclient</span><br class="monospace">
+Argument </td>
+      <td style="font-weight: bold;" class="colorheader">Description</td>
+      <td style="font-weight: bold;" class="colorheader">Default </td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">-port &lt;port
+number&gt;<br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;"></span>Causes
+the client to listen for unencrypted connections on the
+specified&nbsp;TCP port</td>
+      <td style="font-weight: bold;">4242</td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace"></span><span
+ style="font-weight: bold;" class="monospace">-sslport &lt;port
+number&gt;<br>
+      </span></td>
+      <td><span style="font-weight: bold;"></span>Causes the client to
+listen for SSL connections on the specified TCP port<br>
+      </td>
+      <td><span style="font-weight: bold;">4243</span></td>
+    </tr>
+    <tr>
+      <td><span class="monospace" style="font-weight: bold;">-sslonly</span></td>
+      <td>Causes the client to reject all unencrypted connections</td>
+      <td><span style="font-weight: bold;">Accept both SSL and
+unencrypted connections</span></td>
+    </tr>
+    <tr>
+      <td><span class="monospace" style="font-weight: bold;">-nossl</span></td>
+      <td>Causes the client to reject all SSL connections</td>
+      <td><span style="font-weight: bold;">Accept both SSL and
+unencrypted connections</span></td>
+    </tr>
+    <tr>
+      <td><span class="monospace" style="font-weight: bold;">-l &lt;log
+file&gt;</span></td>
+      <td>Redirect all output from the client to the specified file</td>
+      <td><span style="font-weight: bold;">Output goes to stderr</span></td>
+    </tr>
+    <tr>
+      <td><span class="monospace" style="font-weight: bold;">-x</span></td>
+      <td>Use X11 functions to draw pixels into the application window</td>
+      <td><span style="font-weight: bold;">Use OpenGL on Solaris/Sparc
+or if stereo is enabled; use X11 otherwise</span></td>
+    </tr>
+    <tr>
+      <td><span class="monospace" style="font-weight: bold;">-gl</span></td>
+      <td>Use OpenGL functions to draw pixels into the application
+window</td>
+      <td style="font-weight: bold;">Use OpenGL on Solaris/Sparc or if
+stereo is enabled; use X11 otherwise</td>
+    </tr>
+  </tbody>
+</table>
 <ul>
-  <li>Invoking the client with<br>
-    <pre>vglclient -p&lt;port number&gt;<br></pre>
-will cause the client to listen on a TCP port other than the default
-(4242 for non-SSL or 4243 for SSL.)&nbsp; Use this in conjunction
-with the <span class="monospace">VGL_PORT</span>
-environment variable on the server.</li>
 </ul>
-<ul>
-  <li>Invoking the client with<br>
-    <pre>vglclient -s</pre>
-will cause it to accept only SSL connections from the server.&nbsp;
-Use this in conjunction with the <span class="monospace">VGL_USESSL</span>
-environment variable on the server.</li>
-</ul>
-<div style="text-align: right;"><a href="#" target="_top">top</a></div>
 </div>
 </div>
 </body>
