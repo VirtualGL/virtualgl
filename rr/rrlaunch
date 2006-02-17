@@ -34,6 +34,13 @@ export GEOPROBE_USEGLX
 PROMAGIC_USEGLX=1
 export PROMAGIC_USEGLX
 
+if [ "$OPENGL_DEVICE" != "" ]; then
+	echo [VGL] WARNING: The OPENGL_DEVICE environment variable is incompatible
+	echo [VGL] with	VirtualGL.  Temporarily unsetting this environment variable.
+fi
+unset OPENGL_DEVICE
+export OPENGL_DEVICE
+
 if [ $# -eq 0 ]
 then
 	usage 0
