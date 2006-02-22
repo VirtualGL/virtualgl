@@ -332,6 +332,16 @@ funcdef1(void, glIndexubv, const GLubyte*, c,);
 
 funcdef1(void, glClearIndex, GLfloat, c,);
 
+funcdef2(void, glGetDoublev, GLenum, pname, GLdouble *, params,);
+
+funcdef2(void, glGetFloatv, GLenum, pname, GLfloat *, params,);
+
+funcdef2(void, glGetIntegerv, GLenum, pname, GLint *, params,);
+
+funcdef2(void, glPixelTransferf, GLenum, pname, GLfloat, param,);
+
+funcdef2(void, glPixelTransferi, GLenum, pname, GLint, param,);
+
 
 // X11 functions
 

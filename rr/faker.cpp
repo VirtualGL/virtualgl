@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sys/signal.h>
 #include <string.h>
+#include <math.h>
 #include "rrutil.h"
 #include "rrtimer.h"
 #include "rrthread.h"
@@ -72,14 +73,14 @@ GLPDevice _localdev=-1;
 static inline int _drawingtofront(void)
 {
 	GLint drawbuf=GL_BACK;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return _isfront(drawbuf);
 }
 
 static inline int _drawingtoright(void)
 {
 	GLint drawbuf=GL_LEFT;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return _isright(drawbuf);
 }
 
@@ -1382,11 +1383,6 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 // The following nastiness is necessary to make color index rendering work,
 // since most platforms don't support color index Pbuffers
 
-/*
-glGet GL_CURRENT_INDEX
-glIndexPointer
-*/
-
 #ifdef SUNOGL
 
 static GLvoid r_glIndexd(OglContextPtr ctx, GLdouble c)
@@ -1611,22 +1607,209 @@ void glIndexubv(const GLubyte *c)
 
 #endif
 
+#define __round(f) ((f)>=0?(long)((f)+0.5):(long)((f)-0.5))
+
+void glGetDoublev(GLenum pname, GLdouble *params)
+{
+	if(pname==GL_CURRENT_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_COLOR, c);
+		if(params) *params=(GLdouble)__round(c[0]*255.);
+	}
+	else if(pname==GL_CURRENT_RASTER_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+		if(params) *params=(GLdouble)__round(c[0]*255.);
+	}
+	else if(pname==GL_INDEX_SHIFT)
+	{
+		_glGetDoublev(GL_RED_SCALE, params);
+		if(params) *params=(GLdouble)__round(log(*params)/log(2.));
+	}
+	else if(pname==GL_INDEX_OFFSET)
+	{
+		_glGetDoublev(GL_RED_BIAS, params);
+		if(params) *params=(GLdouble)__round((*params)*255.);
+	}
+	else _glGetDoublev(pname, params);
+}
+
+void glGetFloatv(GLenum pname, GLfloat *params)
+{
+	if(pname==GL_CURRENT_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_COLOR, c);
+		if(params) *params=(GLfloat)__round(c[0]*255.);
+	}
+	else if(pname==GL_CURRENT_RASTER_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+		if(params) *params=(GLfloat)__round(c[0]*255.);
+	}
+	else if(pname==GL_INDEX_SHIFT)
+	{
+		GLdouble d;
+		_glGetDoublev(GL_RED_SCALE, &d);
+		if(params) *params=(GLfloat)__round(log(d)/log(2.));
+	}
+	else if(pname==GL_INDEX_OFFSET)
+	{
+		GLdouble d;
+		_glGetDoublev(GL_RED_BIAS, &d);
+		if(params) *params=(GLfloat)__round(d*255.);
+	}
+	else _glGetFloatv(pname, params);
+}
+
+void glGetIntegerv(GLenum pname, GLint *params)
+{
+	if(pname==GL_CURRENT_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_COLOR, c);
+		if(params) *params=(GLint)__round(c[0]*255.);
+	}
+	else if(pname==GL_CURRENT_RASTER_INDEX)
+	{
+		GLdouble c[4];
+		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+		if(params) *params=(GLint)__round(c[0]*255.);
+	}
+	else if(pname==GL_INDEX_SHIFT)
+	{
+		double d;
+		_glGetDoublev(GL_RED_SCALE, &d);
+		if(params) *params=(GLint)__round(log(d)/log(2.));
+	}
+	else if(pname==GL_INDEX_OFFSET)
+	{
+		double d;
+		_glGetDoublev(GL_RED_BIAS, &d);
+		if(params) *params=(GLint)__round(d*255.);
+	}
+	else _glGetIntegerv(pname, params);
+}
+
+void glPixelTransferf(GLenum pname, GLfloat param)
+{
+	if(pname==GL_INDEX_SHIFT)
+	{
+		_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+	}
+	else if(pname==GL_INDEX_OFFSET)
+	{
+		_glPixelTransferf(GL_RED_BIAS, param/255.);
+	}
+	else _glPixelTransferf(pname, param);
+}
+
+void glPixelTransferi(GLenum pname, GLint param)
+{
+	if(pname==GL_INDEX_SHIFT)
+	{
+		_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+	}
+	else if(pname==GL_INDEX_OFFSET)
+	{
+		_glPixelTransferf(GL_RED_BIAS, (GLfloat)param/255.);
+	}
+	else _glPixelTransferi(pname, param);
+}
+
+#define _rpixelconvert(ctype, gltype, size)  \
+	if(type==gltype) {  \
+		unsigned char *p=(unsigned char *)pixels;  \
+		unsigned char *b=buf;  \
+		int w=(rowlen>0? rowlen:width)*size;  \
+		if(size<align) w=(w+align-1)&(~(align-1));  \
+		for(int i=0; i<height; i++, p+=w, b+=width) {  \
+			ctype *p2=(ctype *)p;  \
+			for(int j=0; j<width; j++) p2[j]=(ctype)b[j];  \
+		}}
+
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
+	TRY();
 	if(format==GL_COLOR_INDEX
-		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1)
+		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1
+		&& type!=GL_BITMAP)
+	{
 		format=GL_RED;
-	return _glReadPixels(x, y, width, height, format, type, pixels);
+		if(type==GL_BYTE || type==GL_UNSIGNED_BYTE) type=GL_UNSIGNED_BYTE;
+		else
+		{
+			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
+			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
+			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
+			if((buf=new unsigned char[width*height])==NULL)
+				_throw("Memory allocation error");
+			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
+			if(type==GL_INT) type=GL_UNSIGNED_INT;
+			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+			_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE, buf);
+			glPopClientAttrib();
+			_rpixelconvert(unsigned short, GL_UNSIGNED_SHORT, 2)
+			_rpixelconvert(unsigned int, GL_UNSIGNED_INT, 4)
+			_rpixelconvert(float, GL_FLOAT, 4)
+			delete [] buf;
+			return;
+		}
+	}
+	_glReadPixels(x, y, width, height, format, type, pixels);
+	CATCH();
 }
+
+#define _dpixelconvert(ctype, gltype, size)  \
+	if(type==gltype) {  \
+		unsigned char *p=(unsigned char *)pixels;  \
+		unsigned char *b=buf;  \
+		int w=(rowlen>0? rowlen:width)*size;  \
+		if(size<align) w=(w+align-1)&(~(align-1));  \
+		for(int i=0; i<height; i++, p+=w, b+=width) {  \
+			ctype *p2=(ctype *)p;  \
+			for(int j=0; j<width; j++) b[j]=(unsigned char)p2[j];  \
+		}}
 
 void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 	const GLvoid *pixels)
 {
+	TRY();
 	if(format==GL_COLOR_INDEX
-		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1)
+		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1
+		&& type!=GL_BITMAP)
+	{
 		format=GL_RED;
-	return _glDrawPixels(width, height, format, type, pixels);
+		if(type==GL_BYTE || type==GL_UNSIGNED_BYTE) type=GL_UNSIGNED_BYTE;
+		else
+		{
+			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
+			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
+			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
+			if((buf=new unsigned char[width*height])==NULL)
+				_throw("Memory allocation error");
+			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
+			if(type==GL_INT) type=GL_UNSIGNED_INT;
+			_dpixelconvert(unsigned short, GL_UNSIGNED_SHORT, 2)
+			_dpixelconvert(unsigned int, GL_UNSIGNED_INT, 4)
+			_dpixelconvert(float, GL_FLOAT, 4)
+			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+			_glDrawPixels(width, height, format, GL_UNSIGNED_BYTE, buf);
+			glPopClientAttrib();
+			delete [] buf;
+			return;
+		}
+	}
+	_glDrawPixels(width, height, format, type, pixels);
+	CATCH();
 }
 
 void glClearIndex(GLfloat c)

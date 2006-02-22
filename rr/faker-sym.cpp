@@ -147,6 +147,11 @@ void __vgl_loadsymbols(void)
 	lsym(glIndexubv)
 	#endif
 	lsym(glClearIndex)
+	lsym(glGetDoublev)
+	lsym(glGetFloatv)
+	lsym(glGetIntegerv)
+	lsym(glPixelTransferf)
+	lsym(glPixelTransferi)
 
 	// X11 symbols
 	if(fconfig.x11lib)
