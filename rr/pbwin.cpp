@@ -42,7 +42,7 @@ extern GLPDevice _localdev;
 static inline int _drawingtoright(void)
 {
 	GLint drawbuf=GL_LEFT;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	return _isright(drawbuf);
 }
 
@@ -128,7 +128,7 @@ void pbuffer::clear(void)
 	if(_cleared) return;
 	_cleared=true;
 	GLfloat params[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
+	_glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(params[0], params[1], params[2], params[3]);
@@ -430,7 +430,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 {
 
 	GLint readbuf=GL_BACK;
-	glGetIntegerv(GL_READ_BUFFER, &readbuf);
+	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
@@ -465,8 +465,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		int color=-1, i, j, k;
 		color=-1;
 		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT) _autotestframecount++;
-		for(j=0, rowptr=bits; j<h; j++, rowptr+=pitch)
-			for(i=1, pixel=&rowptr[ps]; i<w; i++, pixel+=ps)
+		for(j=0, rowptr=bits; j<h && match; j++, rowptr+=pitch)
+			for(i=1, pixel=&rowptr[ps]; i<w && match; i++, pixel+=ps)
 				for(k=0; k<ps; k++)
 				{
 					if(pixel[k]!=rowptr[k]) {match=0;  break;}

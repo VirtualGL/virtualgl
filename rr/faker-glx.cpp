@@ -323,8 +323,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		*value=__vglClientVisualAttrib(dpy, vis->screen, vis->visualid, attrib);
 	else if(attrib==GLX_RGBA)
 	{
-		int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-		*value=(render_type==GLX_RGBA_BIT? 1:0);
+		if(vis->c_class==PseudoColor) *value=0;  else *value=1;
 	}
 	else if(attrib==GLX_STEREO)
 	{
