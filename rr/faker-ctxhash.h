@@ -49,6 +49,17 @@ class ctxhash : public _ctxhash
 			return _ctxhash::find(ctx, NULL);
 		}
 
+		bool isoverlay(GLXContext ctx)
+		{
+			if(ctx && findconfig(ctx)==(GLXFBConfig)-1) return true;
+			return false;
+		}
+
+		bool overlaycurrent(void)
+		{
+			return isoverlay(_glXGetCurrentContext());
+		}
+
 		void remove(GLXContext ctx)
 		{
 			if(!ctx) _throw("Invalid argument");
