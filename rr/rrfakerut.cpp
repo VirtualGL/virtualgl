@@ -1072,6 +1072,7 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 		if(temp!=fbcid) _error("glXQueryContext FB cfg ID");
 		#ifndef sun
 		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
+		render_type=(render_type==GLX_COLOR_INDEX_BIT)? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE;
 		#endif
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);

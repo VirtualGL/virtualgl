@@ -582,6 +582,24 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
 	if(ctxh.isoverlay(ctx)) return _glXQueryContext(dpy, ctx, attribute, value);
 
+	if(attribute==GLX_RENDER_TYPE)
+	{
+		int retval=0, fbcid=-1;
+		#ifdef USEGLP
+		if(fconfig.glp) retval=glPQueryContext(ctx, GLX_FBCONFIG_ID, &fbcid);
+		else
+		#endif
+		retval=_glXQueryContext(_localdpy, ctx, GLX_FBCONFIG_ID, &fbcid);
+		if(fbcid>0)
+		{
+			VisualID vid=cfgh.getvisual(dpy, fbcid);
+			if(vid && __vglVisualClass(dpy, DefaultScreen(dpy), vid)==PseudoColor
+				&& value) *value=GLX_COLOR_INDEX_TYPE;
+			else if(value) *value=GLX_RGBA_TYPE;
+		}
+		return retval;
+	}
+
 	#ifdef USEGLP
 	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
 	else

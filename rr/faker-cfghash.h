@@ -54,6 +54,12 @@ class cfghash : public _cfghash
 			return cfghash::find(DisplayString(dpy), _FBCID(c));
 		}
 
+		VisualID getvisual(Display *dpy, int fbcid)
+		{
+			if(!dpy || !fbcid) _throw("Invalid argument");
+			return cfghash::find(DisplayString(dpy), fbcid);
+		}
+
 		void remove(Display *dpy, GLXFBConfig c)
 		{
 			if(!dpy || !c) _throw("Invalid argument");
