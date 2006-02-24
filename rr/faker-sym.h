@@ -90,10 +90,12 @@ extern void __vgl_safeexit(int);
 
 
 #ifdef USEGLP
+#define GetCurrentContext() (fconfig.glp ? glPGetCurrentContext():_glXGetCurrentContext())
 #define GetCurrentDrawable() (fconfig.glp ? glPGetCurrentBuffer():_glXGetCurrentDrawable())
 #define GetCurrentReadDrawable() (fconfig.glp ? glPGetCurrentReadBuffer():_glXGetCurrentReadDrawable())
 #define GetCurrentDisplay() (fconfig.glp ? NULL:_glXGetCurrentDisplay())
 #else
+#define GetCurrentContext() _glXGetCurrentContext()
 #define GetCurrentDrawable() _glXGetCurrentDrawable()
 #define GetCurrentReadDrawable() _glXGetCurrentReadDrawable()
 #define GetCurrentDisplay() _glXGetCurrentDisplay()
@@ -126,9 +128,7 @@ funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
 	int *, value, return);
 
-#ifdef USEGLP
 funcdef0(GLXContext, glXGetCurrentContext, return);
-#endif
 
 funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
 

@@ -46,16 +46,31 @@ class winhash : public _winhash
 				free(dpystring);
 		}
 
-		pbwin *findpb(Display *dpy, GLXDrawable d)
+		bool findpb(Display *dpy, GLXDrawable d, pbwin* &pbw)
 		{
-			if(!dpy || !d) return NULL;
-			return _winhash::find(DisplayString(dpy), d);
+			pbwin *p;
+			if(!dpy || !d) return false;
+			p=_winhash::find(DisplayString(dpy), d);
+			if(p==NULL || p==(pbwin *)-1) return false;
+			else {pbw=p;  return true;}
 		}
 
-		pbwin *findpb(GLXDrawable d)
+		bool isoverlay(Display *dpy, GLXDrawable d)
 		{
-			if(!d) return NULL;
-			return _winhash::find(NULL, d);
+			pbwin *p;
+			if(!dpy || !d) return false;
+			p=_winhash::find(DisplayString(dpy), d);
+			if(p==(pbwin *)-1) return true;
+			return false;
+		}
+
+		bool findpb(GLXDrawable d, pbwin* &pbw)
+		{
+			pbwin *p;
+			if(!d) return false;
+			p=_winhash::find(NULL, d);
+			if(p==NULL || p==(pbwin *)-1) return false;
+			else {pbw=p;  return true;}
 		}
 
 		pbwin *setpb(Display *dpy, Window win, GLXFBConfig config)
@@ -74,6 +89,17 @@ class winhash : public _winhash
 				return (pbwin *)ptr->value;
 			}
 			return NULL;
+		}
+
+		void setoverlay(Display *dpy, Window win)
+		{
+			if(!dpy || !win) _throw("Invalid argument");
+			_winhashstruct *ptr=NULL;
+			rrcs::safelock l(mutex);
+			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
+			{
+				if(!ptr->value) ptr->value=(pbwin *)-1;
+			}
 		}
 
 		void remove(Display *dpy, GLXDrawable d)

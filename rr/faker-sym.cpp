@@ -60,9 +60,7 @@ void __vgl_loadsymbols(void)
 	lsym(glXDestroyContext)
 	lsym(glXDestroyGLXPixmap)
 	lsym(glXGetConfig)
-	#ifdef USEGLP
 	lsym(glXGetCurrentContext)
-	#endif
 	lsym(glXGetCurrentDrawable)
 	lsym(glXIsDirect)
 	lsym(glXMakeCurrent);
