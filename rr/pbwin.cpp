@@ -150,7 +150,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
-	_prof_rb.setname("Readback");
+	_prof_rb.setname("Readback  ");
 	_syncdpy=false;
 	_dirty=false;
 	_autotestframecount=0;
