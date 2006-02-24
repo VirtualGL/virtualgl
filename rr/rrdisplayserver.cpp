@@ -120,7 +120,11 @@ void rrserver::run(void)
 			if(strncmp(v.id, "VGL", 3) || v.major<1)
 				_throw("Error reading server version");
 		}
-		rrout.println("Server version: %d.%d", v.major, v.minor);
+
+		char *env=NULL;
+		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+			&& !strncmp(env, "1", 1))
+			rrout.println("Server version: %d.%d", v.major, v.minor);
 		rrout.flush();
 
 		while(1)
