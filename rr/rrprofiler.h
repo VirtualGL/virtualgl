@@ -27,7 +27,7 @@ class rrprofiler
 
 	rrprofiler(const char *_name="Profiler", double _interval=2.0) :
 		interval(_interval), mbytes(0.0), mpixels(0.0), totaltime(0.0), start(0.0),
-		frames(0)
+		frames(0), lastframe(0.0)
 	{
 		profile=false;  char *ev=NULL;
 		setname(_name);  freestr=false;
@@ -61,21 +61,23 @@ class rrprofiler
 	void endframe(long pixels, long bytes, double incframes)
 	{
 		if(!profile) return;
-		if(start)
+		double now=timer.time();
+		if(start!=0.0)
 		{
-			totaltime+=timer.time()-start;
+			totaltime+=now-start;
 			if(pixels) mpixels+=(double)pixels/1000000.;
 			if(bytes) mbytes+=(double)bytes/1000000.;
-			if(incframes) frames+=incframes;
+			if(incframes!=0.0) frames+=incframes;
 		}
-		if(totaltime>interval)
+		if(lastframe==0.0) lastframe=now;
+		if(totaltime>interval || (now-lastframe)>interval)
 		{
 			rrout.print("%s  ", name);
 			if(mpixels) rrout.print("- %7.2f Mpixels/sec", mpixels/totaltime);
 			if(frames) rrout.print("- %7.2f fps", frames/totaltime);
 			if(mbytes) rrout.print("- %7.2f Mbits/sec (%.1f:1)", mbytes*8.0/totaltime, mpixels*3./mbytes);
 			rrout.PRINT("\n");
-			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;
+			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;  lastframe=now;
 		}
 	}
 
@@ -83,7 +85,7 @@ class rrprofiler
 
 	char *name;
 	double interval;
-	double mbytes, mpixels, totaltime, start, frames;
+	double mbytes, mpixels, totaltime, start, frames, lastframe;
 	bool profile;
 	rrtimer timer;
 	bool freestr;
