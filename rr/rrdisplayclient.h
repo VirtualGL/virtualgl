@@ -44,8 +44,10 @@ class rrdisplayclient : public Runnable
 	void run(void);
 	void release(rrframe *b) {_ready.signal();}
 	bool stereoenabled(void) {return _stereo;}
+	void sendheader(rrframeheader h, bool eof);
 
 	rrsocket *_sd;
+	int _np;
 
 	private:
 
@@ -55,8 +57,9 @@ class rrdisplayclient : public Runnable
 	genericQ _q;
 	Thread *_t;  bool _deadyet;
 	rrprofiler _prof_total;
-	int _np, _dpynum;
+	int _dpynum;
 	bool _stereo;
+	rrversion _v;
 };
 
 #define endianize(h) { \
@@ -100,11 +103,15 @@ class rrcompressor : public Runnable
 {
 	public:
 
-	rrcompressor(int myrank, int np, rrsocket *sd) : _bytes(0),
-		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank), _np(np),
-		_sd(sd), _deadyet(false)
+	rrcompressor(int myrank, rrdisplayclient *parent) : _bytes(0),
+		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank),
+		_deadyet(false), _parent(parent)
 	{
+		if(parent) {_np=parent->_np;  _sd=parent->_sd;}
 		_ready.wait();  _complete.wait();
+		char temps[20];
+		snprintf(temps, 19, "Compress %d", myrank);
+		_prof_comp.setname(temps);
 	}
 
 	virtual ~rrcompressor(void)
@@ -160,6 +167,8 @@ class rrcompressor : public Runnable
 	rrsocket *_sd;
 	rrevent _ready, _complete;  bool _deadyet;
 	rrcs _mutex;
+	rrprofiler _prof_comp;
+	rrdisplayclient *_parent;
 };
 
 #endif
