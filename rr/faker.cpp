@@ -346,7 +346,7 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 	ret=_XGetGeometry(display, drawable, root, x, y, width, height, border_width,
 		depth);
 	pbwin *pbw=NULL;
-	if((pbw=winh.findpb(display, drawable))!=NULL && width && height
+	if(winh.findpb(display, drawable, pbw) && width && height
 		&& *width>0 && *height>0)
 		pbw->resize(*width, *height);
 
@@ -358,43 +358,12 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 	return ret;
 }
 
-#if 0
-Window FindTopLevelWindow(Display *dpy, Window win)
-{
-	Window w=win, root, parent, *children;  unsigned int nchildren;
-	for(;;)
-	{
-		XQueryTree(dpy, w, &root, &parent, &children, &nchildren);
-		if(parent==root) break;
-		else w=parent;
-	}
-	return w;
-}
-
-// Walk the window tree, notifying any GL windows belonging to the same TLW
-void SetQualRecursive(Display *dpy, Window start, int qual, int subsamp, bool readback)
-{
-	Window root, parent, *children;  unsigned int nchildren;
-	unsigned int i;  pbwin *pbw=NULL;
-	pbw=winh.findpb(dpy, start);
-	if(pbw)
-	{
-		_vglprintf(stdout, "SQR: Setting qual\n");
-		pbw->setqual(qual, subsamp, readback);
-	}
-	XQueryTree(dpy, start, &root, &parent, &children, &nchildren);
-	if(nchildren==0) return;
-	for(i=0; i<nchildren; i++) SetQualRecursive(dpy, children[i], qual, subsamp, readback);
-}
-#endif
-
 static void _HandleEvent(Display *dpy, XEvent *xe)
 {
 	pbwin *pbw=NULL;
 	if(xe && xe->type==ConfigureNotify)
 	{
-		pbw=winh.findpb(dpy, xe->xconfigure.window);
-		if(pbw)
+		if(winh.findpb(dpy, xe->xconfigure.window, pbw))
 		{
 				opentrace(_HandleEvent);  prargi(xe->xconfigure.width);
 				prargi(xe->xconfigure.height);  starttrace();
@@ -404,20 +373,6 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 				stoptrace();  closetrace();
 		}
 	}
-	#if 0
-	else if(xe && xe->type==ButtonPress)
-	{
-		fconfig.setloqual();
-//		Window start=FindTopLevelWindow(dpy, xe->xbutton.window);
-//		SetQualRecursive(dpy, start, fconfig.loqual, fconfig.losubsamp, false);
-	}
-	else if(xe && xe->type==ButtonRelease)
-	{
-		fconfig.sethiqual();
-//		Window start=FindTopLevelWindow(dpy, xe->xbutton.window);
-//		SetQualRecursive(dpy, start, fconfig.hiqual, fconfig.hisubsamp, false);
-	}
-	#endif
 }
 
 int XNextEvent(Display *dpy, XEvent *xe)
@@ -500,8 +455,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask, XWindowC
 		if(values && (value_mask&CWHeight)) {prargi(values->height);}  starttrace();
 
 	pbwin *pbw=NULL;
-	pbw=winh.findpb(dpy, win);
-	if(pbw && values)
+	if(winh.findpb(dpy, win, pbw) && values)
 		pbw->resize(value_mask&CWWidth?values->width:0, value_mask&CWHeight?values->height:0);
 	retval=_XConfigureWindow(dpy, win, value_mask, values);
 
@@ -520,8 +474,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width, unsigned int hei
 		prargi(height);  starttrace();
 
 	pbwin *pbw=NULL;
-	pbw=winh.findpb(dpy, win);
-	if(pbw) pbw->resize(width, height);
+	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XResizeWindow(dpy, win, width, height);
 
 		stoptrace();  closetrace();
@@ -539,8 +492,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y, unsigned int width
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
 	pbwin *pbw=NULL;
-	pbw=winh.findpb(dpy, win);
-	if(pbw) pbw->resize(width, height);
+	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		stoptrace();  closetrace();
@@ -558,20 +510,30 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	TRY();
 	pbuffer *pb;
 	GLXDrawable read=src, draw=dst;  bool srcpm=false, dstpm=false;
-	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
-	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
-	if(!srcpm && !dstpm) return _XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
 
 		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);  prargx(gc);
 		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
 		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
 
+	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
+	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
+
+	if(!srcpm && !dstpm)
+	{
+		int retval=_XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
+		stoptrace();  closetrace();
+		return retval;
+	}
+
 	GLXDrawable oldread=GetCurrentReadDrawable();
 	GLXDrawable olddraw=GetCurrentDrawable();
-	GLXContext ctx=glXGetCurrentContext();
+	GLXContext ctx=GetCurrentContext();
 	Display *olddpy=NULL;
 	if(!ctx || (!fconfig.glp && !(olddpy=GetCurrentDisplay())))
+	{
+		stoptrace();  closetrace();
 		return 0;  // Does ... not ... compute
+	}
 
 	// Intentionally call the faked function so it will map a PB if src or dst is a window
 	glXMakeContextCurrent(dpy, draw, read, ctx);
@@ -657,6 +619,10 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
+		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
+		prargal11(attrib_list);  starttrace();
+
+
 	if(attrib_list)
 	{
 		bool overlayreq=false;
@@ -671,11 +637,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 			}
 			else i++;
 		}
-		if(overlayreq) return _glXChooseVisual(dpy, screen, attrib_list);
+		if(overlayreq)
+		{
+			v=_glXChooseVisual(dpy, screen, attrib_list);
+			stoptrace();  prargv(v);  closetrace();
+			return v;
+		}
 	}
 
-		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
-		prargal11(attrib_list);  starttrace();
 
 	GLXFBConfig *configs=NULL, c=0;  int n=0;
 	if(!dpy || !attrib_list) return NULL;
@@ -701,13 +670,19 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	XVisualInfo *v=NULL;
 	TRY();
 
-	// Prevent recursion & handle overlay configs
-	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
-		return _glXGetVisualFromFBConfig(dpy, config);
+	// Prevent recursion
+	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
+
+	if(rcfgh.isoverlay(dpy, config))
+	{
+		v=_glXGetVisualFromFBConfig(dpy, config);
+		stoptrace();  prargv(v);  closetrace();
+		return v;
+	}
 
 	VisualID vid=0;
 	if(!dpy || !config) return NULL;
@@ -737,6 +712,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	if(!_isremote(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
 
+		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
+		prargi(direct);  starttrace();
+
 	if(vis)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -747,12 +725,10 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 		{
 			ctx=_glXCreateContext(dpy, vis, share_list, direct);
 			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+			stoptrace();  prargx(ctx);  closetrace();
 			return ctx;
 		}
 	}
-
-		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
-		prargi(direct);  starttrace();
 
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
@@ -793,15 +769,21 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		starttrace();
 
 	if(ctx) config=ctxh.findconfig(ctx);
-	if(config==(GLXFBConfig)-1) return _glXMakeCurrent(dpy, drawable, ctx);
+	if(config==(GLXFBConfig)-1)
+	{
+		retval=_glXMakeCurrent(dpy, drawable, ctx);
+		winh.setoverlay(dpy, drawable);
+		stoptrace();  closetrace();
+		return retval;
+	}
 
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
-	if(glXGetCurrentContext() && _localdisplayiscurrent()
-	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
+	if(GetCurrentContext() && _localdisplayiscurrent()
+	&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
-		if(drawable==0 || (newpbw=winh.findpb(dpy, drawable))==NULL
+		if(drawable==0 || !winh.findpb(dpy, drawable, newpbw)
 		|| newpbw->getdrawable()!=curdraw)
 		{
 			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
@@ -843,7 +825,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	else
 	#endif
 		retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
-	if((pbw=winh.findpb(drawable))!=NULL) {pbw->clear();  pbw->cleanup();}
+	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbuffer *pb;
 	if((pb=pmh.find(dpy, drawable))!=NULL) pb->clear();
 	#ifdef SUNOGL
@@ -869,10 +851,14 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
 	TRY();
 
-	if(ctx && ctxh.findconfig(ctx)==(GLXFBConfig)-1)
-		{_glXDestroyContext(dpy, ctx);  return;}
-
 		opentrace(glXDestroyContext);  prargd(dpy);  prargx(ctx);  starttrace();
+
+	if(ctxh.isoverlay(ctx))
+	{
+		_glXDestroyContext(dpy, ctx);
+		stoptrace();  closetrace();
+		return;
+	}
 
 	ctxh.remove(ctx);
 	#ifdef USEGLP
@@ -899,15 +885,16 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	if(!_isremote(dpy)) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
+		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
+		prargi(render_type);  prargi(direct);  starttrace();
+
 	if(rcfgh.isoverlay(dpy, config)) // Overlay config
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
 		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+		stoptrace();  prargx(ctx);  closetrace();
 		return ctx;
 	}
-
-		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
-		prargi(render_type);  prargi(direct);  starttrace();
 
 	#ifdef USEGLP
 	if(fconfig.glp)
@@ -943,15 +930,22 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		prargx(read);  prargx(ctx);  starttrace();
 
 	if(ctx) config=ctxh.findconfig(ctx);
-	if(config==(GLXFBConfig)-1) return _glXMakeContextCurrent(dpy, draw, read, ctx);
+	if(config==(GLXFBConfig)-1)
+	{
+		retval=_glXMakeContextCurrent(dpy, draw, read, ctx);
+		winh.setoverlay(dpy, draw);
+		winh.setoverlay(dpy, read);
+		stoptrace();  closetrace();
+		return retval;
+	}
 
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
-	if(glXGetCurrentContext() && _localdisplayiscurrent()
-	&& curdraw && (pbw=winh.findpb(curdraw))!=NULL)
+	if(GetCurrentContext() && _localdisplayiscurrent()
+	&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
-		if(draw==0 || (newpbw=winh.findpb(dpy, draw))==NULL
+		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
 			|| newpbw->getdrawable()!=curdraw)
 		{
 			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
@@ -979,8 +973,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	else
 	#endif
 		retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
-	if((drawpbw=winh.findpb(draw))!=NULL) {drawpbw->clear();  drawpbw->cleanup();}
-	if((readpbw=winh.findpb(read))!=NULL) readpbw->cleanup();
+	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
+	if(winh.findpb(read, readpbw)) readpbw->cleanup();
 	pbuffer *pb;
 	if((pb=pmh.find(dpy, draw))!=NULL) pb->clear();
 	#ifdef SUNOGL
@@ -1025,19 +1019,26 @@ GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, 
 // but really it's getting a Pbuffer drawable
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const int *attrib_list)
 {
-	TRY();
-	pbwin *pbw;
-	XSync(dpy, False);
-
-	// Prevent recursion & handle overlay configs
-	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
-		return _glXCreateWindow(dpy, config, win, attrib_list);
+	// Prevent recursion
+	if(!_isremote(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
+
+	TRY();
 
 		opentrace(glXCreateWindow);  prargd(dpy);  prargc(config);  prargx(win);
 		starttrace();
 
-	errifnot(pbw=winh.setpb(dpy, win, config));
+	pbwin *pbw=NULL;
+	if(rcfgh.isoverlay(dpy, config))
+	{
+		GLXWindow glxw=_glXCreateWindow(dpy, config, win, attrib_list);
+		winh.setoverlay(dpy, glxw);
+	}
+	else
+	{
+		XSync(dpy, False);
+		errifnot(pbw=winh.setpb(dpy, win, config));
+	}
 
 		stoptrace();  if(pbw) {prargx(pbw->getdrawable());}  closetrace();
 
@@ -1055,6 +1056,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 
 		opentrace(glXDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
+	if(winh.isoverlay(dpy, win)) _glXDestroyWindow(dpy, win);  
 	winh.remove(dpy, win);
 
 		stoptrace();  closetrace();
@@ -1075,6 +1077,9 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
 	////////////////////
 
+		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vi);  prargx(pm);
+		starttrace();
+
 	if(vi)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vi->visualid,
@@ -1082,11 +1087,12 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vi->visualid,
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
 		if(level && trans)
-			return _glXCreateGLXPixmap(dpy, vi, pm);
+		{
+			drawable=_glXCreateGLXPixmap(dpy, vi, pm);
+			stoptrace();  prargx(drawable);  closetrace();
+			return drawable;
+		}
 	}
-
-		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vi);  prargx(pm);
-		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
@@ -1186,7 +1192,8 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 		opentrace(glXUseXFont);  prargx(font);  prargi(first);  prargi(count);
 		prargi(list_base);  starttrace();
 
-	Fake_glXUseXFont(font, first, count, list_base);
+	if(ctxh.overlaycurrent()) _glXUseXFont(font, first, count, list_base);
+	else Fake_glXUseXFont(font, first, count, list_base);
 
 		stoptrace();  closetrace();
 
@@ -1196,19 +1203,19 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
-	GLXFBConfig c=0;
-	if((c=ctxh.findconfig(glXGetCurrentContext()))==(GLXFBConfig)-1)
-	{
-		_glXSwapBuffers(dpy, drawable);
-		return;
-	}
-
 	TRY();
 
 		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
 
+	if(winh.isoverlay(dpy, drawable))
+	{
+		_glXSwapBuffers(dpy, drawable);
+		stoptrace();  closetrace();  
+		return;
+	}
+
 	pbwin *pbw=NULL;
-	if(_isremote(dpy) && (pbw=winh.findpb(dpy, drawable))!=NULL)
+	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
 		pbw->readback(GL_BACK, false);
 		pbw->swapbuffers();
@@ -1225,12 +1232,10 @@ static void _doGLreadback(bool force, bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
-	GLXFBConfig c=0;
-	if((c=ctxh.findconfig(glXGetCurrentContext()))==(GLXFBConfig)-1)
-		return;
+	if(ctxh.overlaycurrent()) return;
 	drawable=GetCurrentDrawable();
 	if(!drawable) return;
-	if((pbw=winh.findpb(drawable))!=NULL)
+	if(winh.findpb(drawable, pbw))
 	{
 		if(_drawingtofront() || pbw->_dirty)
 		{
@@ -1274,10 +1279,11 @@ void glXWaitGL(void)
 		if(fconfig.trace) rrout.print("[VGL] glXWaitGL()\n");
 
 	#ifdef SUNOGL
-	_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
-	#else
-	_glXWaitGL();
+	if(!ctxh.overlaycurrent())
+		_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
+	else
 	#endif
+	_glXWaitGL();
 	if(fconfig.sync) _doGLreadback(true, true);
 	else _doGLreadback(false);
 	CATCH();
@@ -1289,11 +1295,13 @@ void glDrawBuffer(GLenum mode)
 {
 	TRY();
 
+	if(ctxh.overlaycurrent()) {_glDrawBuffer(mode);  return;}
+
 		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
 
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
-	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
+	if(drawable && winh.findpb(drawable, pbw))
 	{
 		before=_drawingtofront();
 		rbefore=_drawingtoright();
@@ -1316,11 +1324,13 @@ void glPopAttrib(void)
 {
 	TRY();
 
+	if(ctxh.overlaycurrent()) {_glPopAttrib();  return;}
+
 		opentrace(glPopAttrib);  starttrace();
 
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=GetCurrentDrawable();
-	if(drawable && (pbw=winh.findpb(drawable))!=NULL)
+	if(drawable && winh.findpb(drawable, pbw))
 	{
 		before=_drawingtofront();
 		rbefore=_drawingtoright();
@@ -1345,10 +1355,12 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	TRY();
 
+	if(ctxh.overlaycurrent()) {_glViewport(x, y, width, height);  return;}
+
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();
 
-	GLXContext ctx=glXGetCurrentContext();
+	GLXContext ctx=GetCurrentContext();
 	GLXDrawable draw=GetCurrentDrawable();
 	GLXDrawable read=GetCurrentReadDrawable();
 	Display *dpy=NULL;
@@ -1357,8 +1369,9 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	if((dpy || fconfig.glp) && (draw || read) && ctx)
 	{
 		newread=read, newdraw=draw;
-		pbwin *drawpbw=winh.findpb(draw);
-		pbwin *readpbw=winh.findpb(read);
+		pbwin *drawpbw=NULL, *readpbw=NULL;
+		winh.findpb(draw, drawpbw);
+		winh.findpb(read, readpbw);
 		if(drawpbw) newdraw=drawpbw->updatedrawable();
 		if(readpbw) newread=readpbw->updatedrawable();
 		if(newread!=read || newdraw!=draw)
@@ -1388,7 +1401,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 static GLvoid r_glIndexd(OglContextPtr ctx, GLdouble c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexd() called on overlay context.");
 	else glColor3d(c/255., 0.0, 0.0);
 	CATCH();
@@ -1397,7 +1410,7 @@ static GLvoid r_glIndexd(OglContextPtr ctx, GLdouble c)
 static GLvoid r_glIndexf(OglContextPtr ctx, GLfloat c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexf() called on overlay context.");
 	else glColor3f(c/255., 0., 0.);
 	CATCH();
@@ -1406,7 +1419,7 @@ static GLvoid r_glIndexf(OglContextPtr ctx, GLfloat c)
 static GLvoid r_glIndexi(OglContextPtr ctx, GLint c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexi() called on overlay context.");
 	else glColor3f((GLfloat)c/255., 0, 0);
 	CATCH();
@@ -1415,7 +1428,7 @@ static GLvoid r_glIndexi(OglContextPtr ctx, GLint c)
 static GLvoid r_glIndexs(OglContextPtr ctx, GLshort c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexs() called on overlay context.");
 	else glColor3f((GLfloat)c/255., 0, 0);
 	CATCH();
@@ -1424,7 +1437,7 @@ static GLvoid r_glIndexs(OglContextPtr ctx, GLshort c)
 static GLvoid r_glIndexub(OglContextPtr ctx, GLubyte c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexub() called on overlay context.");
 	else glColor3f((GLfloat)c/255., 0, 0);
 	CATCH();
@@ -1433,7 +1446,7 @@ static GLvoid r_glIndexub(OglContextPtr ctx, GLubyte c)
 static GLvoid r_glIndexdv(OglContextPtr ctx, const GLdouble *c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexdv() called on overlay context.");
 	else
 	{
@@ -1446,7 +1459,7 @@ static GLvoid r_glIndexdv(OglContextPtr ctx, const GLdouble *c)
 static GLvoid r_glIndexfv(OglContextPtr ctx, const GLfloat *c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexfv() called on overlay context.");
 	else
 	{
@@ -1459,7 +1472,7 @@ static GLvoid r_glIndexfv(OglContextPtr ctx, const GLfloat *c)
 static GLvoid r_glIndexiv(OglContextPtr ctx, const GLint *c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexiv() called on overlay context.");
 	else
 	{
@@ -1472,7 +1485,7 @@ static GLvoid r_glIndexiv(OglContextPtr ctx, const GLint *c)
 static GLvoid r_glIndexsv(OglContextPtr ctx, const GLshort *c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexsv() called on overlay context.");
 	else
 	{
@@ -1485,7 +1498,7 @@ static GLvoid r_glIndexsv(OglContextPtr ctx, const GLshort *c)
 static GLvoid r_glIndexubv(OglContextPtr ctx, const GLubyte *c)
 {
 	TRY();
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
+	if(ctxh.overlaycurrent())
 		_throw("r_glIndexubv() called on overlay context.");
 	else
 	{
@@ -1498,7 +1511,7 @@ static GLvoid r_glIndexubv(OglContextPtr ctx, const GLubyte *c)
 void glBegin(GLenum mode)
 {
 	_glBegin(mode);
-	if(ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1)
+	if(!ctxh.overlaycurrent())
 	{
 		sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
 		sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
@@ -1517,43 +1530,37 @@ void glBegin(GLenum mode)
 
 void glIndexd(GLdouble c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexd(c);
+	if(ctxh.overlaycurrent()) _glIndexd(c);
 	else glColor3d(c/255., 0.0, 0.0);
 }
 
 void glIndexf(GLfloat c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexf(c);
+	if(ctxh.overlaycurrent()) _glIndexf(c);
 	else glColor3f(c/255., 0., 0.);
 }
 
 void glIndexi(GLint c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexi(c);
+	if(ctxh.overlaycurrent()) _glIndexi(c);
 	else glColor3f((GLfloat)c/255., 0, 0);
 }
 
 void glIndexs(GLshort c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexs(c);
+	if(ctxh.overlaycurrent()) _glIndexs(c);
 	else glColor3f((GLfloat)c/255., 0, 0);
 }
 
 void glIndexub(GLubyte c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexub(c);
+	if(ctxh.overlaycurrent()) _glIndexub(c);
 	else glColor3f((GLfloat)c/255., 0, 0);
 }
 
 void glIndexdv(const GLdouble *c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexdv(c);
+	if(ctxh.overlaycurrent()) _glIndexdv(c);
 	else
 	{
 		GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
@@ -1563,8 +1570,7 @@ void glIndexdv(const GLdouble *c)
 
 void glIndexfv(const GLfloat *c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexfv(c);
+	if(ctxh.overlaycurrent()) _glIndexfv(c);
 	else
 	{
 		GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
@@ -1574,8 +1580,7 @@ void glIndexfv(const GLfloat *c)
 
 void glIndexiv(const GLint *c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexiv(c);
+	if(ctxh.overlaycurrent()) _glIndexiv(c);
 	else
 	{
 		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
@@ -1585,8 +1590,7 @@ void glIndexiv(const GLint *c)
 
 void glIndexsv(const GLshort *c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexsv(c);
+	if(ctxh.overlaycurrent()) _glIndexsv(c);
 	else
 	{
 		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
@@ -1596,8 +1600,7 @@ void glIndexsv(const GLshort *c)
 
 void glIndexubv(const GLubyte *c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glIndexubv(c);
+	if(ctxh.overlaycurrent()) _glIndexubv(c);
 	else
 	{
 		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
@@ -1611,113 +1614,144 @@ void glIndexubv(const GLubyte *c)
 
 void glGetDoublev(GLenum pname, GLdouble *params)
 {
-	if(pname==GL_CURRENT_INDEX)
+	if(!ctxh.overlaycurrent())
 	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_COLOR, c);
-		if(params) *params=(GLdouble)__round(c[0]*255.);
+		if(pname==GL_CURRENT_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_COLOR, c);
+			if(params) *params=(GLdouble)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_CURRENT_RASTER_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+			if(params) *params=(GLdouble)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_INDEX_SHIFT)
+		{
+			_glGetDoublev(GL_RED_SCALE, params);
+			if(params) *params=(GLdouble)__round(log(*params)/log(2.));
+			return;
+		}
+		else if(pname==GL_INDEX_OFFSET)
+		{
+			_glGetDoublev(GL_RED_BIAS, params);
+			if(params) *params=(GLdouble)__round((*params)*255.);
+			return;
+		}
 	}
-	else if(pname==GL_CURRENT_RASTER_INDEX)
-	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-		if(params) *params=(GLdouble)__round(c[0]*255.);
-	}
-	else if(pname==GL_INDEX_SHIFT)
-	{
-		_glGetDoublev(GL_RED_SCALE, params);
-		if(params) *params=(GLdouble)__round(log(*params)/log(2.));
-	}
-	else if(pname==GL_INDEX_OFFSET)
-	{
-		_glGetDoublev(GL_RED_BIAS, params);
-		if(params) *params=(GLdouble)__round((*params)*255.);
-	}
-	else _glGetDoublev(pname, params);
+	_glGetDoublev(pname, params);
 }
 
 void glGetFloatv(GLenum pname, GLfloat *params)
 {
-	if(pname==GL_CURRENT_INDEX)
+	if(!ctxh.overlaycurrent())
 	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_COLOR, c);
-		if(params) *params=(GLfloat)__round(c[0]*255.);
+		if(pname==GL_CURRENT_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_COLOR, c);
+			if(params) *params=(GLfloat)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_CURRENT_RASTER_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+			if(params) *params=(GLfloat)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_INDEX_SHIFT)
+		{
+			GLdouble d;
+			_glGetDoublev(GL_RED_SCALE, &d);
+			if(params) *params=(GLfloat)__round(log(d)/log(2.));
+			return;
+		}
+		else if(pname==GL_INDEX_OFFSET)
+		{
+			GLdouble d;
+			_glGetDoublev(GL_RED_BIAS, &d);
+			if(params) *params=(GLfloat)__round(d*255.);
+			return;
+		}
 	}
-	else if(pname==GL_CURRENT_RASTER_INDEX)
-	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-		if(params) *params=(GLfloat)__round(c[0]*255.);
-	}
-	else if(pname==GL_INDEX_SHIFT)
-	{
-		GLdouble d;
-		_glGetDoublev(GL_RED_SCALE, &d);
-		if(params) *params=(GLfloat)__round(log(d)/log(2.));
-	}
-	else if(pname==GL_INDEX_OFFSET)
-	{
-		GLdouble d;
-		_glGetDoublev(GL_RED_BIAS, &d);
-		if(params) *params=(GLfloat)__round(d*255.);
-	}
-	else _glGetFloatv(pname, params);
+	_glGetFloatv(pname, params);
 }
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
-	if(pname==GL_CURRENT_INDEX)
+	if(!ctxh.overlaycurrent())
 	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_COLOR, c);
-		if(params) *params=(GLint)__round(c[0]*255.);
+		if(pname==GL_CURRENT_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_COLOR, c);
+			if(params) *params=(GLint)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_CURRENT_RASTER_INDEX)
+		{
+			GLdouble c[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
+			if(params) *params=(GLint)__round(c[0]*255.);
+			return;
+		}
+		else if(pname==GL_INDEX_SHIFT)
+		{
+			double d;
+			_glGetDoublev(GL_RED_SCALE, &d);
+			if(params) *params=(GLint)__round(log(d)/log(2.));
+			return;
+		}
+		else if(pname==GL_INDEX_OFFSET)
+		{
+			double d;
+			_glGetDoublev(GL_RED_BIAS, &d);
+			if(params) *params=(GLint)__round(d*255.);
+			return;
+		}
 	}
-	else if(pname==GL_CURRENT_RASTER_INDEX)
-	{
-		GLdouble c[4];
-		_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-		if(params) *params=(GLint)__round(c[0]*255.);
-	}
-	else if(pname==GL_INDEX_SHIFT)
-	{
-		double d;
-		_glGetDoublev(GL_RED_SCALE, &d);
-		if(params) *params=(GLint)__round(log(d)/log(2.));
-	}
-	else if(pname==GL_INDEX_OFFSET)
-	{
-		double d;
-		_glGetDoublev(GL_RED_BIAS, &d);
-		if(params) *params=(GLint)__round(d*255.);
-	}
-	else _glGetIntegerv(pname, params);
+	_glGetIntegerv(pname, params);
 }
 
 void glPixelTransferf(GLenum pname, GLfloat param)
 {
-	if(pname==GL_INDEX_SHIFT)
+	if(!ctxh.overlaycurrent())
 	{
-		_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+		if(pname==GL_INDEX_SHIFT)
+		{
+			_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+			return;
+		}
+		else if(pname==GL_INDEX_OFFSET)
+		{
+			_glPixelTransferf(GL_RED_BIAS, param/255.);
+			return;
+		}
 	}
-	else if(pname==GL_INDEX_OFFSET)
-	{
-		_glPixelTransferf(GL_RED_BIAS, param/255.);
-	}
-	else _glPixelTransferf(pname, param);
+	_glPixelTransferf(pname, param);
 }
 
 void glPixelTransferi(GLenum pname, GLint param)
 {
-	if(pname==GL_INDEX_SHIFT)
+	if(!ctxh.overlaycurrent())
 	{
-		_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+		if(pname==GL_INDEX_SHIFT)
+		{
+			_glPixelTransferf(GL_RED_SCALE, pow(2., (double)param));
+			return;
+		}
+		else if(pname==GL_INDEX_OFFSET)
+		{
+			_glPixelTransferf(GL_RED_BIAS, (GLfloat)param/255.);
+			return;
+		}
 	}
-	else if(pname==GL_INDEX_OFFSET)
-	{
-		_glPixelTransferf(GL_RED_BIAS, (GLfloat)param/255.);
-	}
-	else _glPixelTransferi(pname, param);
+	_glPixelTransferi(pname, param);
 }
 
 #define _rpixelconvert(ctype, gltype, size)  \
@@ -1735,9 +1769,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
 	TRY();
-	if(format==GL_COLOR_INDEX
-		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1
-		&& type!=GL_BITMAP)
+	if(format==GL_COLOR_INDEX && !ctxh.overlaycurrent() && type!=GL_BITMAP)
 	{
 		format=GL_RED;
 		if(type==GL_BYTE || type==GL_UNSIGNED_BYTE) type=GL_UNSIGNED_BYTE;
@@ -1781,9 +1813,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 	const GLvoid *pixels)
 {
 	TRY();
-	if(format==GL_COLOR_INDEX
-		&& ctxh.findconfig(glXGetCurrentContext())!=(GLXFBConfig)-1
-		&& type!=GL_BITMAP)
+	if(format==GL_COLOR_INDEX && !ctxh.overlaycurrent() && type!=GL_BITMAP)
 	{
 		format=GL_RED;
 		if(type==GL_BYTE || type==GL_UNSIGNED_BYTE) type=GL_UNSIGNED_BYTE;
@@ -1814,8 +1844,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 
 void glClearIndex(GLfloat c)
 {
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-		_glClearIndex(c);
+	if(ctxh.overlaycurrent()) _glClearIndex(c);
 	else glClearColor(c/255., 0., 0., 0.);
 }
 

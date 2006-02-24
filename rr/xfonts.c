@@ -113,7 +113,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	unsigned int max_width, max_height, max_bm_width, max_bm_height;
 	GLubyte *bm=NULL;
 	int i;
-	pbwin *pb;
+	pbwin *pbw;
 	typedef struct {
 		int bm_width, bm_height, width, height, valid;
 		GLfloat x0, y0, dx, dy;
@@ -122,17 +122,9 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
 	try {
 
-	if(ctxh.findconfig(glXGetCurrentContext())==(GLXFBConfig)-1)
-	{
-		dpy=_glXGetCurrentDisplay();
-		win=_glXGetCurrentDrawable();
-	}
-	else
-	{
-		errifnot(pb = winh.findpb(GetCurrentDrawable()));
-		errifnot(dpy = pb->getwindpy());
-		errifnot(win = pb->getwin());
-	}
+	errifnot(winh.findpb(GetCurrentDrawable(), pbw));
+	errifnot(dpy = pbw->getwindpy());
+	errifnot(win = pbw->getwin());
 	fs = XQueryFont(dpy, font);
 	if(!fs) _throw("Couldn't get font structure information");
 
@@ -153,12 +145,12 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	}
 
 	/* Save the current packing mode for bitmaps.  */
-	glGetIntegerv(GL_UNPACK_SWAP_BYTES, &swapbytes);
-	glGetIntegerv(GL_UNPACK_LSB_FIRST, &lsbfirst);
-	glGetIntegerv(GL_UNPACK_ROW_LENGTH, &rowlength);
-	glGetIntegerv(GL_UNPACK_SKIP_ROWS, &skiprows);
-	glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &skippixels);
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
+	_glGetIntegerv(GL_UNPACK_SWAP_BYTES, &swapbytes);
+	_glGetIntegerv(GL_UNPACK_LSB_FIRST, &lsbfirst);
+	_glGetIntegerv(GL_UNPACK_ROW_LENGTH, &rowlength);
+	_glGetIntegerv(GL_UNPACK_SKIP_ROWS, &skiprows);
+	_glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &skippixels);
+	_glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
 
 	/* Enforce a standard packing mode which is compatible with
 	   fill_bitmap() from above.  This is actually the default mode,
