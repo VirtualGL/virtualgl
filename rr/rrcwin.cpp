@@ -161,9 +161,8 @@ void rrcwin::run(void)
 			else ((rrfb *)_b)->init(&j->_h);
 			if(_b->_isgl) ((rrglframe *)_b)->redraw();
 			else ((rrfb *)_b)->redraw();
-			bool stereo=_b->_h.flags==RR_LEFT || _b->_h.flags==RR_RIGHT;
-			pb.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), 0, 1);
-			pt.endframe(_b->_h.framew*_b->_h.frameh* (stereo? 2:1), bytes, 1);
+			pb.endframe(_b->_h.framew*_b->_h.frameh* (_stereo? 2:1), 0, 1);
+			pt.endframe(_b->_h.framew*_b->_h.frameh* (_stereo? 2:1), bytes, 1);
 			bytes=0;
 			pt.startframe();
 		}
