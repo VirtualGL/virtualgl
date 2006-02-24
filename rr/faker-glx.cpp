@@ -18,8 +18,8 @@
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
-	pbwin *pb=NULL;
-	if((pb=winh.findpb(dpy, draw))!=NULL) return pb->getdrawable();
+	pbwin *pbw=NULL;
+	if(winh.findpb(dpy, draw, pbw)) return pbw->getdrawable();
 	else return draw;
 }
 
@@ -109,6 +109,9 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	if(!_isremote(dpy)) return _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 	////////////////////
 
+		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
+		prargal13(attrib_list);  starttrace();
+
 	if(attrib_list)
 	{
 		bool overlayreq=false;
@@ -124,12 +127,11 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 			{
 				for(int i=0; i<*nelements; i++) rcfgh.add(dpy, configs[i]);
 			}
+			stoptrace();  if(configs) {prargc(configs[0]);}
+			if(nelements) {prargi(*nelements);}	 closetrace();
 			return configs;
 		}
 	}
-
-		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
-		prargal13(attrib_list);  starttrace();
 
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!attrib_list || !nelements) return NULL;
@@ -162,11 +164,20 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned int m
 void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long mask)
 #endif
 {
+	TRY();
+	bool srcoverlay=false, dstoverlay=false;
+	if(ctxh.isoverlay(src)) srcoverlay=true;
+	if(ctxh.isoverlay(dst)) dstoverlay=true;
+	if(srcoverlay && dstoverlay)
+		{_glXCopyContext(dpy, src, dst, mask);  return;}
+	else if(srcoverlay!=dstoverlay)
+		_throw("glXCopyContext() cannot copy between overlay and non-overlay contexts");
 	#ifdef USEGLP
 	if(fconfig.glp) glPCopyContext(src, dst, mask);
 	else
 	#endif
 	_glXCopyContext(_localdpy, src, dst, mask);
+	CATCH();
 }
 
 GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_list)
@@ -257,6 +268,7 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 
 void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 {
+	if(ctxh.isoverlay(ctx)) {_glXFreeContextEXT(dpy, ctx);  return;}
 	#ifdef USEGLP
 	// Tell me about the rabbits, George ...
 	if(fconfig.glp) return;
@@ -287,6 +299,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	if(!_isremote(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
 	////////////////////
 
+		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
+		starttrace();
+
 	if(vis)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -294,13 +309,13 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
 		if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
+		{
+			stoptrace();  if(value) {prargi(*value);}  closetrace();
 			return _glXGetConfig(dpy, vis, attrib, value);
+		}
 	}
 
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
-
-		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
-		starttrace();
 
 	errifnot(c=_MatchConfig(dpy, vis));
 
@@ -359,26 +374,31 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	return retval;
 }
 
-#ifdef USEGLP
 GLXContext glXGetCurrentContext(void)
 {
-	if(fconfig.glp) return glPGetCurrentContext();
-	else
-	return _glXGetCurrentContext();
+	GLXContext ctx=_glXGetCurrentContext();
+	#ifdef USEGLP
+	if(fconfig.glp && !ctxh.isoverlay(ctx)) ctx=glPGetCurrentContext();
+	#endif
+	return ctx;
 }
-#endif
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy=NULL;  pbwin *pb=NULL;
+	Display *dpy=NULL;  pbwin *pbw=NULL;
+
+	if(ctxh.overlaycurrent()) return _glXGetCurrentDisplay();
 
 	TRY();
 
 		opentrace(glXGetCurrentDisplay);  starttrace();
 
-	if((pb=winh.findpb(GetCurrentDrawable()))!=NULL)
-		dpy=pb->getwindpy();
-	else dpy=glxdh.getcurrentdpy(GetCurrentDrawable());
+	GLXDrawable curdraw=GetCurrentDrawable();
+	if(winh.findpb(curdraw, pbw)) dpy=pbw->getwindpy();
+	else
+	{
+		if(curdraw) dpy=glxdh.getcurrentdpy(curdraw);
+	}
 
 		stoptrace();  prargd(dpy);  closetrace();
 
@@ -388,13 +408,15 @@ Display *glXGetCurrentDisplay(void)
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	pbwin *pb=NULL;  GLXDrawable draw=GetCurrentDrawable();
+	if(ctxh.overlaycurrent()) return _glXGetCurrentDrawable();
+
+	pbwin *pbw=NULL;  GLXDrawable draw=GetCurrentDrawable();
+
 	TRY();
 
 		opentrace(glXGetCurrentDrawable);  starttrace();
 
-	if((pb=winh.findpb(draw))!=NULL)
-		draw=pb->getwin();
+	if(winh.findpb(draw, pbw)) draw=pbw->getwin();
 
 		stoptrace();  prargx(draw);  closetrace();
 
@@ -404,13 +426,15 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	pbwin *pb=NULL;  GLXDrawable read=GetCurrentReadDrawable();
+	if(ctxh.overlaycurrent()) return _glXGetCurrentReadDrawable();
+
+	pbwin *pbw=NULL;  GLXDrawable read=GetCurrentReadDrawable();
+
 	TRY();
 
 		opentrace(glXGetCurrentReadDrawable);  starttrace();
 
-	if((pb=winh.findpb(read))!=NULL)
-		read=pb->getwin();
+	if(winh.findpb(read, pbw)) read=pbw->getwin();
 
 		stoptrace();  prargx(read);  closetrace();
 
@@ -450,6 +474,11 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		|| attribute==GLX_TRANSPARENT_BLUE_VALUE
 		|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
 		*value=__vglClientVisualAttrib(dpy, screen, vid, attribute);
+	else if(attribute==GLX_RENDER_TYPE)
+	{
+		if(c_class==PseudoColor) *value=GLX_COLOR_INDEX_BIT;
+		else *value=GLX_RGBA_BIT;
+	}
 	else if(attribute==GLX_STEREO)
 	{
 		*value= (__vglClientVisualAttrib(dpy, screen, vid, GLX_STEREO)
@@ -507,6 +536,9 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 
 void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_mask)
 {
+	if(winh.isoverlay(dpy, draw))
+		return _glXGetSelectedEvent(dpy, draw, event_mask);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return;
 	else
@@ -516,6 +548,9 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_ma
 
 void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long *mask)
 {
+	if(winh.isoverlay(dpy, drawable))
+		return _glXGetSelectedEventSGIX(dpy, drawable, mask);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return;
 	else
@@ -532,8 +567,10 @@ GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
 	return _glXImportContextEXT(_localdpy, contextID);
 }
 
-Bool glXIsDirect (Display *dpy, GLXContext ctx)
+Bool glXIsDirect(Display *dpy, GLXContext ctx)
 {
+	if(ctxh.isoverlay(ctx)) return _glXIsDirect(dpy, ctx);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return True;
 	else
@@ -543,6 +580,8 @@ Bool glXIsDirect (Display *dpy, GLXContext ctx)
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
+	if(ctxh.isoverlay(ctx)) return _glXQueryContext(dpy, ctx, attribute, value);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
 	else
@@ -552,6 +591,9 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 
 int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
+	if(ctxh.isoverlay(ctx))
+		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
 	else
@@ -565,6 +607,13 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned in
 
 		opentrace(glXQueryDrawable);  prargd(dpy);  prargx(draw);  prargi(attribute);
 		starttrace();
+
+	if(winh.isoverlay(dpy, draw))
+	{
+		_glXQueryDrawable(dpy, draw, attribute, value);
+		stoptrace(); if(value) {prargi(*value);}  closetrace();
+		return;
+	}
 
 	#ifdef USEGLP
 	if(fconfig.glp) glPQueryBuffer(ServerDrawable(dpy, draw), attribute, value);
@@ -626,6 +675,8 @@ Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 
 void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 {
+	if(winh.isoverlay(dpy, draw)) return _glXSelectEvent(dpy, draw, event_mask);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return;
 	else
@@ -635,6 +686,9 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 
 void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 {
+	if(winh.isoverlay(dpy, drawable))
+		return _glXSelectEventSGIX(dpy, drawable, mask);
+
 	#ifdef USEGLP
 	if(fconfig.glp) return;
 	else
@@ -716,9 +770,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXDestroyContext)
 		checkfaked(glXDestroyGLXPixmap)
 		checkfaked(glXGetConfig)
-		#ifdef USEGLP
 		checkfaked(glXGetCurrentContext)
-		#endif
 		checkfaked(glXGetCurrentDrawable)
 		checkfaked(glXIsDirect)
 		checkfaked(glXMakeCurrent);
@@ -785,6 +837,22 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		#ifdef SUNOGL
 		checkfaked(glBegin)
 		#endif
+		checkfaked(glIndexd)
+		checkfaked(glIndexf)
+		checkfaked(glIndexi)
+		checkfaked(glIndexs)
+		checkfaked(glIndexub)
+		checkfaked(glIndexdv)
+		checkfaked(glIndexfv)
+		checkfaked(glIndexiv)
+		checkfaked(glIndexsv)
+		checkfaked(glIndexubv)
+		checkfaked(glClearIndex)
+		checkfaked(glGetDoublev)
+		checkfaked(glGetFloatv)
+		checkfaked(glGetIntegerv)
+		checkfaked(glPixelTransferf)
+		checkfaked(glPixelTransferi)
 	}
 	if(!retval) retval=_glXGetProcAddressARB(procName);
 
