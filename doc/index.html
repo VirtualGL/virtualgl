@@ -128,7 +128,7 @@ Information</h2>
 <a rel="license" href="http://creativecommons.org/licenses/by/2.5/"><img
  alt="Creative Commons License"
  src="somerights20.png?rev=HEAD&amp;root=VirtualGL" border="0"></a>
-<p>This document is licensed under
+<p>This document and all associated illustrations are licensed under
 a <a rel="license" href="http://creativecommons.org/licenses/by/2.5/">Creative
 Commons
 Attribution 2.5 License</a>.
@@ -808,7 +808,7 @@ for Solaris installs into <span class="monospace">/opt/SUNWvgl</span>.<span
 Only)</h3>
 <p><span class="note">Note:</span>If
 you plan to use VirtualGL only in <a href="#glpusage">GLP mode</a>,
-you can skip this section.</p>
+then you need only perform steps 3 and 4 of the following.</p>
 <p>When VirtualGL is being used in
 GLX mode, it requires access to
 display
@@ -2409,23 +2409,28 @@ bottlenecks in the VirtualGL pipeline is to set the <span
  class="monospace">VGL_PROFILE</span>
 environment variable to 1 on both server and client (passing an
 argument of <span class="monospace">+pr</span>
-to vglrun on the server
+to <span class="monospace">vglrun</span> on the server
 has the same effect.)&nbsp; This
 will cause VirtualGL to measure and report the throughput of the
 various stages in its pipeline.&nbsp; For example, here are some
 measurements from a dual P4 server communicating with a PIII client on
 a 100 Mbit LAN</p>
 <p style="margin-left: 40px;"><b>Server:</b></p>
-<pre>Total - 8.02 Mpixels/sec- 6.41 frames/sec<br>Readback - 43.27 Mpixels/sec- 34.60 frames/sec<br>Compress - 33.56 Mpixels/sec- 34.17 Mbits/sec</pre>
+<pre>Readback    -  43.27 Mpixels/sec  -  34.60 fps<br>Compress 0  -  33.56 Mpixels/sec  -  26.84 fps<br>Total       -   8.02 Mpixels/sec  -   6.41 fps  -  10.19 Mbits/sec (18.9:1)</pre>
 <p style="margin-left: 40px;"><b>Client:</b></p>
-<pre>Total - 8.00 Mpixels/sec- 6.40 frames/sec<br>Blit - 35.75 Mpixels/sec- 28.59 frames/sec<br>Decompress - 10.35 Mpixels/sec- 10.18 Mbits/sec- 8.28 frames/sec</pre>
+<pre>Decompress  -  10.35 Mpixels/sec  -   8.28 fps<br>Blit        -  35.75 Mpixels/sec  -  28.59 fps<br>Total       -   8.00 Mpixels/sec  -   6.40 fps  -  10.18 Mbits/sec (18.9:1)</pre>
 <p>The
 total throughput of the pipeline is 8.0 Mpixels/sec, or 6.4 frames/sec,
 indicating that our frame is 8.0 / 6.4 = 1.25 Megapixels in size (a
 little less than 1280 x 1024 pixels.)&nbsp; The readback and
 compress stages, which occur in parallel on the server, are obviously
-not slowing things down.&nbsp; We look to the client and discover
-that its slow decompression speed is the primary bottleneck.<br>
+not slowing things down.&nbsp; And we're only using 1/10 of our
+available network bandwidth. &nbsp;So we look to the client and
+discover
+that its slow decompression speed is the primary bottleneck.
+&nbsp;Decompression and blitting on the client do not occur in
+parallel, so the aggregate performance is the harmonic mean of the two
+rates: [1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec.<br>
 </p>
 <h3>Frame Spoiling</h3>
 <p>By default, VirtualGL will only
