@@ -22,9 +22,7 @@
 
 #ifdef INFAKER
  #include "faker-sym.h"
- #ifdef USEGLP
-  #define glXGetCurrentContext _glXGetCurrentContext
- #endif
+ #define glXGetCurrentContext GetCurrentContext
  #define glXGetCurrentDisplay GetCurrentDisplay
  #define glXGetCurrentDrawable GetCurrentDrawable
  #define glXGetCurrentReadDrawable GetCurrentReadDrawable
@@ -125,9 +123,7 @@ class tempctx
 };
 
 #if defined(INFAKER)||defined(XDK)
- #ifdef glXGetCurrentContext
-  #undef glXGetCurrentContext
- #endif
+ #undef glXGetCurrentContext
  #undef glXGetCurrentDisplay
  #undef glXGetCurrentDrawable
  #undef glXGetCurrentReadDrawable
