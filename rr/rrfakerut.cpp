@@ -661,6 +661,301 @@ int rbtest(bool stereo, bool ci)
 }
 
 
+// This tests the faker's ability to do indexed rendering in the red channel of
+// an RGBA Pbuffer
+
+#define drawquad() {  \
+	glBegin(GL_QUADS);  glVertex3f(-1., -1., 0.);  glVertex3f(-1., 1., 0.);  \
+	glVertex3f(1., 1., 0.);  glVertex3f(1., -1., 0.);  glEnd();}  \
+
+#define _citest(id, type) {  \
+	unsigned int c=clr.bits();  glIndex##id((type)c);  \
+	GLfloat f=-1.;  glGetFloatv(GL_CURRENT_INDEX, &f);  \
+	if(c!=(unsigned int)f)  \
+		_prerror2("Index should be %u, not %u", c, (unsigned int)f);  \
+	GLdouble d=-1.;  glGetDoublev(GL_CURRENT_INDEX, &d);  \
+	if(c!=(unsigned int)d)  \
+		_prerror2("Index should be %u, not %u", c, (unsigned int)d);  \
+	drawquad();  \
+	glXSwapBuffers(dpy, win);  \
+	checkwindowcolor(win, clr.bits(), true);  \
+	clr.next();  \
+	c=clr.bits();  \
+	type cv=(type)c;  glIndex##id##v(&cv);  \
+	GLint i=-1;  glGetIntegerv(GL_CURRENT_INDEX, &i);  \
+	if(c!=(unsigned int)i)  \
+		_prerror2("Index should be %u, not %u", c, (unsigned int)i);  \
+	drawquad();  \
+	glXSwapBuffers(dpy, win);  \
+	checkwindowcolor(win, clr.bits(), true);  \
+	clr.next();}
+
+#include "rrtimer.h"
+
+#define _cidrawtest(type, gltype) {  \
+	type *ptr=(type *)bits;  \
+	for(int i=0; i<w*h; i++) ptr[i]=(type)clr.bits();  \
+	glDrawPixels(w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	glXSwapBuffers(dpy, win);  \
+	checkwindowcolor(win, clr.bits(), true);  clr.next();}
+
+#define _cireadtest(type, gltype) {  \
+	type *ptr=(type *)bits;  \
+	memset(ptr, 0, sizeof(type)*w*h);  \
+	glReadPixels(0, 0, w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	for(int i=0; i<w*h; i++)  \
+		if((unsigned int)ptr[i]!=clr.bits())  \
+			_prerror2("Index should be %u, not %u", clr.bits(), (unsigned int)ptr[i]);}
+
+#define _cidtranstest(type, gltype) {  \
+	type *ptr=(type *)bits;  \
+	glPushAttrib(GL_PIXEL_MODE_BIT);  \
+	glPixelTransferi(GL_INDEX_SHIFT, 2);  \
+	glPixelTransferi(GL_INDEX_OFFSET, -3);  \
+	double tempd;  \
+	glGetDoublev(GL_INDEX_SHIFT, &tempd);  \
+	if(tempd!=2.) _prerror1("glGetDoublev(GL_INDEX_SHIFT)=%f", tempd);  \
+	glGetDoublev(GL_INDEX_OFFSET, &tempd);  \
+	if(tempd!=-3.) _prerror1("glGetDoublev(GL_INDEX_OFFSET)=%f", tempd);  \
+	for(int i=0; i<w*h; i++) ptr[i]=(type)4;  \
+	glDrawPixels(w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	glPopAttrib();  \
+	glXSwapBuffers(dpy, win);  \
+	checkwindowcolor(win, 13, true);  \
+	glPushAttrib(GL_PIXEL_MODE_BIT);  \
+	glPixelTransferf(GL_INDEX_SHIFT, -2.);  \
+	glPixelTransferf(GL_INDEX_OFFSET, 1.);  \
+	int temp=0;  \
+	glGetIntegerv(GL_INDEX_SHIFT, &temp);  \
+	if(temp!=-2) _prerror1("glGetIntegerv(GL_INDEX_SHIFT)=%d", temp);  \
+	glGetIntegerv(GL_INDEX_OFFSET, &temp);  \
+	if(temp!=1) _prerror1("glGetIntegerv(GL_INDEX_OFFSET)=%d", temp);  \
+	for(int i=0; i<w*h; i++) ptr[i]=(type)8;  \
+	glDrawPixels(w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	glPopAttrib();  \
+	glXSwapBuffers(dpy, win);  \
+	checkwindowcolor(win, 3, true);}
+
+#define _cirtranstest(type, gltype) {  \
+	memset(bits, 4, w*h);  \
+	glDrawPixels(w, h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, bits);  \
+	glXSwapBuffers(dpy, win);  \
+	type *ptr=(type *)bits;  \
+	glPushAttrib(GL_PIXEL_MODE_BIT);  \
+	glPixelTransferi(GL_INDEX_SHIFT, 2);  \
+	glPixelTransferi(GL_INDEX_OFFSET, -3);  \
+	int temp=0;  \
+	glGetIntegerv(GL_INDEX_SHIFT, &temp);  \
+	if(temp!=2) _prerror1("glGetIntegerv(GL_INDEX_SHIFT)=%d", temp);  \
+	glGetIntegerv(GL_INDEX_OFFSET, &temp);  \
+	if(temp!=-3) _prerror1("glGetIntegerv(GL_INDEX_OFFSET)=%d", temp);  \
+	glReadPixels(0, 0, w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	glPopAttrib();  \
+	for(int i=0; i<w*h; i++)  \
+		if((unsigned int)ptr[i]!=13)  \
+			_prerror1("Index should be 13, not %u", (unsigned int)ptr[i]);  \
+	glPushAttrib(GL_PIXEL_MODE_BIT);  \
+	glPixelTransferf(GL_INDEX_SHIFT, -1.);  \
+	glPixelTransferf(GL_INDEX_OFFSET, 1.);  \
+	float tempf;  \
+	glGetFloatv(GL_INDEX_SHIFT, &tempf);  \
+	if(tempf!=-1.) _prerror1("glGetFloatv(GL_INDEX_SHIFT)=%f", tempf);  \
+	glGetFloatv(GL_INDEX_OFFSET, &tempf);  \
+	if(tempf!=1.) _prerror1("glGetFloatv(GL_INDEX_OFFSET)=%f", tempf);  \
+	glReadPixels(0, 0, w, h, GL_COLOR_INDEX, gltype, ptr);  \
+	glPopAttrib();  \
+	for(int i=0; i<w*h; i++)  \
+		if((unsigned int)ptr[i]!=3)  \
+			_prerror1("Index should be 3, not %u", (unsigned int)ptr[i]);}
+
+int citest(void)
+{
+	testcolor clr(true, 0);
+	Display *dpy=NULL;  Window win=0;
+	int dpyw, dpyh, retval=1;
+	int ciattrib[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, None, None};
+	XVisualInfo *v=NULL;  GLXContext ctx=0;
+	XSetWindowAttributes swa;
+	unsigned char *bits=NULL;
+
+	printf("Color Index rendering test ");
+	printf("\n\n");
+
+	try
+	{
+		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
+		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+		int w=dpyw/2, h=dpyh/2;
+
+		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), ciattrib))==NULL)
+			_throw("Could not find a suitable visual");
+
+		Window root=RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
+		XColor xc[32];  int i;
+		if(v->colormap_size<32) _throw("Color map is not large enough");
+		for(i=0; i<32; i++)
+		{
+			xc[i].red=(i<16? i*16:255)<<8;
+			xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
+			xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
+			xc[i].flags = DoRed | DoGreen | DoBlue;
+			xc[i].pixel=i;
+		}
+		XStoreColors(dpy, swa.colormap, xc, 32);
+		swa.border_pixel=0;
+		swa.event_mask=0;
+		if((win=XCreateWindow(dpy, root, 0, 0, w, h, 0, v->depth,
+			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+			&swa))==0)
+			_throw("Could not create window");
+
+		if((ctx=glXCreateContext(dpy, v, 0, True))==NULL)
+			_throw("Could not establish GLX context");
+		XFree(v);  v=NULL;
+		if(!glXMakeCurrent(dpy, win, ctx))
+			_throw("Could not make context current");
+		checkcurrent(dpy, win, win, ctx);
+
+		glDrawBuffer(GL_BACK);
+		XMapWindow(dpy, win);
+
+		try
+		{
+			// There must be fifty ways to change your index
+			printf("glIndex*()                 : ");
+			_citest(d, GLdouble);
+			_citest(f, GLfloat);
+			_citest(i, GLint);
+			_citest(s, GLshort);
+			_citest(ub, GLubyte);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+
+		try
+		{
+			printf("glDrawPixels()             : ");
+			bits=new unsigned char[w*h*4];
+			if(!bits) _throw("Could not allocate buffer");
+			_cidrawtest(unsigned char, GL_UNSIGNED_BYTE);
+			_cidrawtest(char, GL_BYTE);
+			_cidrawtest(unsigned short, GL_UNSIGNED_SHORT);
+			_cidrawtest(short, GL_SHORT);
+			_cidrawtest(unsigned int, GL_UNSIGNED_INT);
+			_cidrawtest(int, GL_INT);
+			_cidrawtest(float, GL_FLOAT);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		if(bits) {delete [] bits;  bits=NULL;}
+
+		try
+		{
+			printf("glBitmap()                 : ");
+			bits=new unsigned char[(w*h)/8+1];
+			if(!bits) _throw("Could not allocate buffer");
+			memset(bits, 0xAA, (w*h)/8+1);
+			glIndexi((GLint)clr.bits());
+			glRasterPos2f(-1., -1.);
+			GLint i=-1;  glGetIntegerv(GL_CURRENT_RASTER_INDEX, &i);
+			if((unsigned int)i!=clr.bits())
+				_prerror2("Index should be %u, not %u", clr.bits(), (unsigned int)i);
+			GLfloat f=-1;  glGetFloatv(GL_CURRENT_RASTER_INDEX, &f);
+			if((unsigned int)f!=clr.bits())
+				_prerror2("Index should be %u, not %u", clr.bits(), (unsigned int)f);
+			GLdouble d=-1;  glGetDoublev(GL_CURRENT_RASTER_INDEX, &d);
+			if((unsigned int)d!=clr.bits())
+				_prerror2("Index should be %u, not %u", clr.bits(), (unsigned int)d);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glBitmap(w, h, 0, 0, 0, 0, bits);
+			memset(bits, 0x55, (w*h)/8+1);
+			glBitmap(w, h, 0, 0, 0, 0, bits);
+			glXSwapBuffers(dpy, win);
+			checkwindowcolor(win, clr.bits(), true);  clr.next();
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		if(bits) {delete [] bits;  bits=NULL;}
+
+		try
+		{
+			printf("glReadPixels()             : ");
+			bits=new unsigned char[w*h*4];
+			if(!bits) _throw("Could not allocate buffer");
+			for(int i=0; i<w*h; i++) bits[i]=clr.bits();
+			glDrawPixels(w, h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, bits);
+			glXSwapBuffers(dpy, win);
+			checkwindowcolor(win, clr.bits(), true);
+			glReadBuffer(GL_FRONT);
+			_cireadtest(char, GL_BYTE);
+			_cireadtest(unsigned short, GL_UNSIGNED_SHORT);
+			_cireadtest(short, GL_SHORT);
+			_cireadtest(unsigned int, GL_UNSIGNED_INT);
+			_cireadtest(int, GL_INT);
+			_cireadtest(float, GL_FLOAT);
+			clr.next();
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		if(bits) {delete [] bits;  bits=NULL;}
+
+		try
+		{
+			printf("glDrawPixels() (shift)     : ");
+			bits=new unsigned char[w*h*4];
+			if(!bits) _throw("Could not allocate buffer");
+			glPushAttrib(GL_PIXEL_MODE_BIT);
+			_cidtranstest(unsigned char, GL_UNSIGNED_BYTE);
+			_cidtranstest(char, GL_BYTE);
+			_cidtranstest(unsigned short, GL_UNSIGNED_SHORT);
+			_cidtranstest(short, GL_SHORT);
+			_cidtranstest(unsigned int, GL_UNSIGNED_INT);
+			_cidtranstest(int, GL_INT);
+			_cidtranstest(float, GL_FLOAT);
+			glPopAttrib();
+			clr.next();
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		if(bits) {delete [] bits;  bits=NULL;}
+
+		try
+		{
+			printf("glReadPixels() (shift)     : ");
+			bits=new unsigned char[w*h*4];
+			if(!bits) _throw("Could not allocate buffer");
+			glPushAttrib(GL_PIXEL_MODE_BIT);
+			glReadBuffer(GL_FRONT);
+			_cirtranstest(unsigned char, GL_UNSIGNED_BYTE);
+			_cirtranstest(char, GL_BYTE);
+			_cirtranstest(unsigned short, GL_UNSIGNED_SHORT);
+			_cirtranstest(short, GL_SHORT);
+			_cirtranstest(unsigned int, GL_UNSIGNED_INT);
+			_cirtranstest(int, GL_INT);
+			_cirtranstest(float, GL_FLOAT);
+			glPopAttrib();
+			clr.next();
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		if(bits) {delete [] bits;  bits=NULL;}
+
+	}
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	if(bits) delete [] bits;
+	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
+	if(win) {XDestroyWindow(dpy, win);  win=0;}
+	if(v) {XFree(v);  v=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
 int cfgid(Display *dpy, GLXFBConfig c);
 
 
@@ -1614,11 +1909,18 @@ int querytest(void)
 		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
 		|| dummy1<0 || dummy2<0 || dummy3<0)
 			_throw("GLX Extension not reported as present");
-		printf("GLX:  Opcode=%d  First event=%d  First error=%d\n", dummy1,
+		printf("XQueryExtension():  Opcode=%d  First event=%d  First error=%d\n", dummy1,
 			dummy2, dummy3);
 		glXQueryVersion(dpy, &major, &minor);
-		printf("glXQueryVersion(): %d.%d\n", major, minor);
-		printf("glXGetClientString(): %s\n", glXGetClientString(dpy, GLX_VERSION));
+		printf("glXQueryVersion():  %d.%d\n", major, minor);
+		printf("glXGetClientString():\n");
+		printf("  Version=%s\n", glXGetClientString(dpy, GLX_VERSION));
+		printf("  Vendor=%s\n", glXGetClientString(dpy, GLX_VENDOR));
+		printf("  Extensions=%s\n", glXGetClientString(dpy, GLX_EXTENSIONS));
+		printf("glXQueryServerString():\n");
+		printf("  Version=%s\n", glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VERSION));
+		printf("  Vendor=%s\n", glXQueryServerString(dpy, DefaultScreen(dpy), GLX_VENDOR));
+		printf("  Extensions=%s\n", glXQueryServerString(dpy, DefaultScreen(dpy), GLX_EXTENSIONS));
 		if(major<1 || minor<3)
 			_throw("glXQueryVersion() reports version < 1.3");
 		printf("SUCCESS!\n");
@@ -1707,6 +2009,8 @@ int main(int argc, char **argv)
 	rbtest(false, true);
 	printf("\n");
 	rbtest(true, true);
+	printf("\n");
+	citest();
 	printf("\n");
 	if(!vistest()) ret=-1;
 	printf("\n");
