@@ -17,9 +17,7 @@
 
 extern FakerConfig fconfig;
 
-static rrversion _v={{0, 0, 0}, 0, 0};
-
-static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
+void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 {
 	if(_v.major==0 && _v.minor==0)
 	{
@@ -45,10 +43,11 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 				v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
 				_sd->send((char *)&v, sizeof_rrversion);
 			}
-			rrout.println("Client version: %d.%d", _v.major, _v.minor);
+			if(fconfig.verbose)
+				rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
 		}
 	}
-	if(eof) h.flags=RR_EOF;  else h.flags=0;
+	if(eof) h.flags=RR_EOF;
 	if(_v.major==1 && _v.minor==0)
 	{
 		rrframeheader_v1 h1;
@@ -74,10 +73,13 @@ static void sendheader(rrsocket *_sd, rrframeheader h, bool eof=false)
 }
 
 
-rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
-	_t(NULL), _deadyet(false), _np(fconfig.np), _dpynum(0), _stereo(true)
+rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL),
+	_np(fconfig.np), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0),
+	_stereo(true)
 {
-	rrout.println("[VGL] Using %d / %d CPU's for compression", fconfig.np, numprocs());
+	memset(&_v, 0, sizeof(rrversion));
+	if(fconfig.verbose)
+		rrout.println("[VGL] Using %d / %d CPU's for compression", fconfig.np, numprocs());
 	char *servername=NULL;
 	try
 	{
@@ -98,7 +100,7 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
 			errifnot(_sd=new rrsocket(fconfig.ssl));
 			_sd->connect(servername, fconfig.port);
 		}
-		_prof_total.setname("Total   ");
+		_prof_total.setname("Total     ");
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
@@ -112,7 +114,7 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL), _bmpi(0),
 void rrdisplayclient::run(void)
 {
 	rrframe *lastb=NULL, *b=NULL;
-	rrprofiler prof_comp("Compress");  long bytes=0;
+	long bytes=0;
 
 	int i;
 
@@ -120,7 +122,7 @@ void rrdisplayclient::run(void)
 
 	rrcompressor *c[MAXPROCS];  Thread *ct[MAXPROCS];
 	for(i=0; i<_np; i++)
-		errifnot(c[i]=new rrcompressor(i, _np, _sd));
+		errifnot(c[i]=new rrcompressor(i, this));
 	if(_np>1) for(i=1; i<_np; i++)
 	{
 		errifnot(ct[i]=new Thread(c[i]));
@@ -134,7 +136,6 @@ void rrdisplayclient::run(void)
 		if(!b) _throw("Queue has been shut down");
 		_ready.signal();
 		if(b->_h.flags==RR_RIGHT && !_stereo) continue;
-		prof_comp.startframe();
 		if(_np>1)
 			for(i=1; i<_np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
@@ -146,10 +147,8 @@ void rrdisplayclient::run(void)
 				c[i]->stop();  ct[i]->checkerror();  c[i]->send();
 				bytes+=c[i]->_bytes;
 			}
-		prof_comp.endframe(b->_h.framew*b->_h.frameh, 0,
-			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 
-		if(b->_h.flags!=RR_LEFT) sendheader(_sd, b->_h, true);
+		if(b->_h.flags!=RR_LEFT) sendheader(b->_h, true);
 
 		_prof_total.endframe(b->_h.width*b->_h.height, bytes,
 			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
@@ -209,9 +208,9 @@ void rrdisplayclient::sendframe(rrframe *b)
 void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)
 {
 	h.dpynum=_dpynum;
-	sendheader(_sd, h);
+	sendheader(h);
 	if(_sd) _sd->send((char *)bits, h.size);
-	sendheader(_sd, h, true);
+	sendheader(h, true);
 }
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
@@ -238,12 +237,17 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			rrjpeg *jptr=NULL;
 			if(_myrank>0) {errifnot(jptr=new rrjpeg());}
 			else jptr=&jpg;
+			_prof_comp.startframe();
 			*jptr=*rrb;
+			double frames=(double)(rrb->_h.width*rrb->_h.height)
+				/(double)(rrb->_h.framew*rrb->_h.frameh);
+			if(b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT) frames/=2.;
+			_prof_comp.endframe(rrb->_h.width*rrb->_h.height, 0, frames);
 			_bytes+=jptr->_h.size;
 			delete rrb;
 			if(_myrank==0)
 			{
-				sendheader(_sd, jptr->_h);
+				_parent->sendheader(jptr->_h);
 				if(_sd) _sd->send((char *)jptr->_bits, jptr->_h.size);
 			}
 			else
@@ -260,7 +264,7 @@ void rrcompressor::send(void)
 	{
 		rrjpeg *j=_frame[i];
 		errifnot(j);
-		sendheader(_sd, j->_h);
+		_parent->sendheader(j->_h);
 		if(_sd) _sd->send((char *)j->_bits, j->_h.size);
 		delete j;		
 	}
