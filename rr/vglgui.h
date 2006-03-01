@@ -35,7 +35,6 @@ class vglgui : public Runnable
 		void run(void)
 		{
 			if(_appctx) XtAppMainLoop(_appctx);
-			printf("GUI thread exiting ...\n");
 		}
 
 	private:
