@@ -24,7 +24,7 @@
 
 extern FakerConfig fconfig;
 
-static char *fallback_resources[]=
+static const char *fallback_resources[]=
 {
 	"*quallabel.label: JPEG Quality",
 	"*qualslider.length: 100",
@@ -67,7 +67,7 @@ static void Die(Widget w, XEvent *event, String *params, Cardinal *num_params)
 
 static XtActionsRec actions[]=
 {
-	{"Die", Die}
+	{(char *)"Die", Die}
 };
 
 void vglgui::destroy(void)
@@ -96,14 +96,14 @@ void vglgui::destroy(void)
 
 void vglgui::popup(Display *dpy)
 {
-	int argc=1;  char *argv[2]={"VirtualGL", NULL};
+	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
 
 	if(!dpy) _throw("Invalid argument");
 	rrcs::safelock l(_Popupmutex);
 	if(_toplevel) return;
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
-	XtAppSetFallbackResources(_appctx, fallback_resources);
+	XtAppSetFallbackResources(_appctx, (char **)fallback_resources);
 	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(dpy), "VirtualGL",
 		"dialog", NULL, 0, &argc, argv));
 	errifnot(_toplevel=XtVaAppCreateShell("VirtualGL", "dialog",
@@ -204,11 +204,15 @@ void vglgui::UpdateQual(void)
 	  float f=(float)fconfig.currentqual/100.;
 		XtArgVal *p=(XtArgVal *)&f;  Arg args[1];
 		if(f>0.99) f=0.99;
+		#ifdef sun
+		XawScrollbarSetThumb(_qualslider, f, 0.0);
+		#else
 		if(sizeof(float)>sizeof(XtArgVal))
 			XtSetArg(args[0], XtNtopOfThumb, &f);
 		else
 			XtSetArg(args[0], XtNtopOfThumb, *p);
 		XtSetValues(_qualslider, args, 1);
+		#endif
 	}
 	if(_qualtext)
 	{
@@ -251,7 +255,7 @@ void vglgui::UpdateQual(void)
 void vglgui::qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	float	size, val;  int qual, pos=(int)p;
+	float	size, val;  int qual;  long pos=(long)p;
 	XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, 0);
 	if(pos<0) val-=.1;  else val+=.1;
 	if(val>1.0) val=1.0;  if(val<0.0) val=0.0;
@@ -298,7 +302,7 @@ void vglgui::quitProc(Widget w, XtPointer client, XtPointer p)
 void vglgui::subsamp411Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((int)p==1)
+	if((long)p==1)
 	{
 		fconfig.currentsubsamp=RR_411;
 		fconfig.sanitycheck();
@@ -309,7 +313,7 @@ void vglgui::subsamp411Proc(Widget w, XtPointer client, XtPointer p)
 void vglgui::subsamp422Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((int)p==1)
+	if((long)p==1)
 	{
 		fconfig.currentsubsamp=RR_422;
 		fconfig.sanitycheck();
@@ -320,7 +324,7 @@ void vglgui::subsamp422Proc(Widget w, XtPointer client, XtPointer p)
 void vglgui::subsamp444Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((int)p==1)
+	if((long)p==1)
 	{
 		fconfig.currentsubsamp=RR_444;
 		fconfig.sanitycheck();
@@ -331,8 +335,8 @@ void vglgui::subsamp444Proc(Widget w, XtPointer client, XtPointer p)
 void vglgui::spoilProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((int)p==1) fconfig.spoil=true;
-	else if((int)p==0) fconfig.spoil=false;
+	if((long)p==1) fconfig.spoil=true;
+	else if((long)p==0) fconfig.spoil=false;
 	fconfig.sanitycheck();
 	if(that) that->UpdateQual();
 }
