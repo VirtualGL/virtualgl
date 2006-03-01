@@ -34,6 +34,7 @@ FakerConfig fconfig;
 #include "faker-glxdhash.h"
 #include "faker-sym.h"
 #include "glxvisual.h"
+#include "vglgui.h"
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
@@ -372,6 +373,14 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 
 				stoptrace();  closetrace();
 		}
+	}
+	else if(xe && xe->type==KeyPress)
+	{
+		unsigned int state2;
+		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=Mod1Mask;  state2|=Mod2Mask;}
+		if(fconfig.gui && XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
+			&& (xe->xkey.state==fconfig.guimod || xe->xkey.state==state2))
+			vglpopup(dpy);
 	}
 }
 

@@ -20,6 +20,8 @@
 #include "rr.h"
 #include "rrutil.h"
 #include <stdio.h>
+#include <X11/X.h>
+#include <X11/keysym.h>
 
 #define getconfigstr(envvar, string) {  \
 	getconfig("RR"envvar, string);  \
@@ -70,6 +72,9 @@ class FakerConfig
 			trace=false;
 			readback=true;
 			verbose=false;
+			gui=true;
+			guikey=XK_F8;
+			guimod=ShiftMask|ControlMask;
 			reloadenv();
 		}
 
@@ -144,6 +149,35 @@ class FakerConfig
 			getconfigbool("TRACE", trace);
 			getconfigbool("READBACK", readback);
 			getconfigbool("VERBOSE", verbose);
+			char *guikeyseq=NULL;
+			getconfigstr("GUI", guikeyseq);
+			if(guikeyseq && strlen(guikeyseq)>0)
+			{
+				if(!stricmp(guikeyseq, "none")) gui=false;
+				else
+				{
+					unsigned int mod=0, key=0;
+					for(unsigned int i=0; i<strlen(guikeyseq); i++)
+						guikeyseq[i]=tolower(guikeyseq[i]);
+					if(strstr(guikeyseq, "ctrl")) mod|=ControlMask;
+					if(strstr(guikeyseq, "alt")) mod|=Mod1Mask;
+					if(strstr(guikeyseq, "shift")) mod|=ShiftMask;
+					if(strstr(guikeyseq, "f10")) key=XK_F10;
+					else if(strstr(guikeyseq, "f11")) key=XK_F11;
+					else if(strstr(guikeyseq, "f12")) key=XK_F12;
+					else if(strstr(guikeyseq, "f1")) key=XK_F1;
+					else if(strstr(guikeyseq, "f2")) key=XK_F2;
+					else if(strstr(guikeyseq, "f3")) key=XK_F3;
+					else if(strstr(guikeyseq, "f4")) key=XK_F4;
+					else if(strstr(guikeyseq, "f5")) key=XK_F5;
+					else if(strstr(guikeyseq, "f6")) key=XK_F6;
+					else if(strstr(guikeyseq, "f7")) key=XK_F7;
+					else if(strstr(guikeyseq, "f8")) key=XK_F8;
+					else if(strstr(guikeyseq, "f9")) key=XK_F9;
+					if(key) guikey=key;  guimod=mod;
+					gui=true;
+				}
+			}
 			sanitycheck();
 		}
 
@@ -201,6 +235,10 @@ class FakerConfig
 		bool trace;
 		bool readback;
 		bool verbose;
+		bool gui;
+
+		unsigned int guikey;
+		unsigned int guimod;
 
 	private:
 

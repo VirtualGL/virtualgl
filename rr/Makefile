@@ -67,7 +67,8 @@ FOBJS = $(ODIR)/faker.o \
         $(ODIR)/pbwin.o \
         $(ODIR)/glxvisual.o \
         $(ODIR)/rrblitter.o \
-        $(ODIR)/rrdisplayclient.o
+        $(ODIR)/rrdisplayclient.o \
+        $(ODIR)/vglgui.o
 
 TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayclientut.o \
@@ -118,7 +119,7 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -lXt -lXaw
 
 $(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
