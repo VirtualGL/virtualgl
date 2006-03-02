@@ -1,4 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics
+ * Copyright (C)2005, 2006 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -86,7 +87,7 @@ class tempctx
 					else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
 					#endif
 				}
-				if(!ret) _throw("Could not swap in GLX context");
+				if(!ret) _throw("Could not bind OpenGL context to window (window may have exited)");
 				_mc=true;
 			}
 		}
