@@ -11,6 +11,7 @@ usage()
 	echo "  -client <d> : set the client display"
 	echo "  +/-sync     : Enable/disable strict 2D/3D synchronization"
 	echo "  +/-g        : Enable/disable gamma correction for Solaris clients"
+	echo "  -fps <f>    : Limit client/server frame rate to <f> frames/sec"
 	echo
 	echo "VirtualGL network options"
 	echo "  +/-s        : Enable/disable use of SSL"
@@ -71,6 +72,7 @@ do
 	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
 	-v*)        VGL_VERBOSE=0     ; export VGL_VERBOSE  ;;
 	+v*)        VGL_VERBOSE=1     ; export VGL_VERBOSE  ;;
+	-fps)       VGL_FPS=$2        ; export VGL_FPS      ; shift     ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-64)        __VGL_64=1        ;;
@@ -107,11 +109,19 @@ then
 fi
 fi
 if [ -z "$__VGL_64" ]; then
-	LD_PRELOAD_32=$FAKERLIB32
+	if [ -z "$LD_PRELOAD_32" ]; then
+		LD_PRELOAD_32=$FAKERLIB32
+	else
+		LD_PRELOAD_32=$FAKERLIB32:$LD_PRELOAD_32
+	fi
 	export LD_PRELOAD_32
 fi
 if [ -z "$__VGL_32" ]; then
-	LD_PRELOAD_64=$FAKERLIB
+	if [ -z "$LD_PRELOAD_64" ]; then
+		LD_PRELOAD_64=$FAKERLIB
+	else
+		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
+	fi
 	export LD_PRELOAD_64
 fi
 exec ${1+"$@"}
@@ -120,7 +130,11 @@ exec ${1+"$@"}
 
 *)
 
-LD_PRELOAD=librrfaker.so
+if [ -z "$LD_PRELOAD" ]; then
+	LD_PRELOAD=librrfaker.so
+else
+	LD_PRELOAD=librrfaker.so:$LD_PRELOAD
+fi
 export LD_PRELOAD
 exec ${1+"$@"}
 
