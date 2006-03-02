@@ -22,13 +22,15 @@ rrblitter::rrblitter(void) : _bmpi(0), _t(NULL), _deadyet(false)
 	for(int i=0; i<NB; i++) _bmp[i]=NULL;
 	errifnot(_t=new Thread(this));
 	_t->start();
-	_prof_blit.setname("Blit");
+	_prof_blit.setname("Blit      ");
+	_prof_total.setname("Total     ");
 	_lastb=NULL;
 	if(fconfig.verbose) fbx_printwarnings(rrout.getfile());
 }
 
 void rrblitter::run(void)
 {
+	rrtimer t, sleept;  double err=0.;  bool first=true;
 //	rrfb *lastb=NULL;
 
 	try {
@@ -42,6 +44,28 @@ void rrblitter::run(void)
 		_prof_blit.startframe();
 		b->redraw();
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
+
+		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
+		_prof_total.startframe();
+
+		if(fconfig.fps>0.)
+		{
+			double elapsed=t.elapsed();
+			if(first) first=false;
+			else
+			{
+				if(elapsed<1./fconfig.fps)
+				{
+					sleept.start();
+					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+					if(usec>0) usleep(usec);
+					double sleeptime=sleept.elapsed();
+					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+				}
+			}
+			t.start();
+		}
+
 //		lastb=b;
 	}
 

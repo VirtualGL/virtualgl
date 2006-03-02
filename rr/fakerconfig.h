@@ -35,6 +35,10 @@
 	getconfig("RR"envvar, val);  \
 	getconfig("VGL_"envvar, val);}
 
+#define getconfigdouble(envvar, val, min, max) {  \
+	getconfig("RR"envvar, val, min, max);  \
+	getconfig("VGL_"envvar, val, min, max);}
+
 #define DEFLOQUAL 90
 #define DEFHIQUAL 95
 #define DEFLOSUBSAMP RR_411
@@ -75,6 +79,7 @@ class FakerConfig
 			gui=true;
 			guikey=XK_F8;
 			guimod=ShiftMask|ControlMask;
+			fps=-1.0;
 			reloadenv();
 		}
 
@@ -178,6 +183,7 @@ class FakerConfig
 					gui=true;
 				}
 			}
+			getconfigdouble("FPS", fps, 0.0, 1000000.0);
 			sanitycheck();
 		}
 
@@ -240,6 +246,8 @@ class FakerConfig
 		unsigned int guikey;
 		unsigned int guimod;
 
+		double fps;
+
 	private:
 
 		void getconfig(const char *envvar, char* &string)
@@ -256,6 +264,16 @@ class FakerConfig
 			{
 				char *t=NULL;  int itemp=strtol(temp, &t, 10);
 				if(t && t!=temp && itemp>=min && itemp<=max) val=itemp;
+			}
+		}
+
+		void getconfig(const char *envvar, double &val, double min, double max)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
+			{
+				char *t=NULL;  double dtemp=strtod(temp, &t);
+				if(t && t!=temp && dtemp>min && dtemp<max) val=dtemp;
 			}
 		}
 

@@ -45,7 +45,7 @@ class rrblitter : public Runnable
 	genericQ _q;
 	void blitdiff(rrfb *, rrfb *);
 	Thread *_t;  bool _deadyet;
-	rrprofiler _prof_blit;
+	rrprofiler _prof_blit, _prof_total;
 	rrfb *_lastb;
 };
 

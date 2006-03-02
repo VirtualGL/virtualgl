@@ -115,7 +115,7 @@ void rrdisplayclient::run(void)
 {
 	rrframe *lastb=NULL, *b=NULL;
 	long bytes=0;
-
+	rrtimer t, sleept;  double err=0.;  bool first=true;
 	int i;
 
 	try {
@@ -154,6 +154,24 @@ void rrdisplayclient::run(void)
 			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
 		bytes=0;
 		_prof_total.startframe();
+
+		if(fconfig.fps>0.)
+		{
+			double elapsed=t.elapsed();
+			if(first) first=false;
+			else
+			{
+				if(elapsed<1./fconfig.fps)
+				{
+					sleept.start();
+					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+					if(usec>0) usleep(usec);
+					double sleeptime=sleept.elapsed();
+					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+				}
+			}
+			t.start();
+		}
 
 		lastb=b;
 	}
