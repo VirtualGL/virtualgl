@@ -39,13 +39,13 @@ const char *_fbx_formatname[FBX_FORMATS]=
  #define w32(f) {if(!(f)) {FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
 	MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)__lasterror, 1024, NULL);  \
 	__line=__LINE__;  goto finally;}}
- #define x11(f) if(!(f)) {snprintf(__lasterror, 1023, "X11 Error");  __line=__LINE__;  goto finally;}
+ #define x11(f) if(!(f)) {snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  __line=__LINE__;  goto finally;}
 
 #else
 
  static char *__lasterror="No error";
  #define _throw(m) {__lasterror=m;  __line=__LINE__;  goto finally;}
- #define x11(f) if(!(f)) {__lasterror="X11 Error";  __line=__LINE__;  goto finally;}
+ #define x11(f) if(!(f)) {__lasterror="X11 Error (window may have disappeared)";  __line=__LINE__;  goto finally;}
 
 #endif
 
