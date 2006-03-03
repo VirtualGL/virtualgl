@@ -1925,6 +1925,8 @@ int querytest(void)
 		printf("  Extensions=%s\n", glXQueryServerString(dpy, DefaultScreen(dpy), GLX_EXTENSIONS));
 		if(major<1 || minor<3)
 			_throw("glXQueryVersion() reports version < 1.3");
+		printf("glXQueryExtensionsString():\n%s\n",
+			glXQueryExtensionsString(dpy, DefaultScreen(dpy)));
 		printf("SUCCESS!\n");
 	}	
 	catch(rrerror &e)
