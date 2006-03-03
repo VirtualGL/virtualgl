@@ -58,7 +58,7 @@ class ctxhash : public _ctxhash
 
 		bool overlaycurrent(void)
 		{
-			return isoverlay(_glXGetCurrentContext());
+			return isoverlay(GetCurrentContext());
 		}
 
 		void remove(GLXContext ctx)

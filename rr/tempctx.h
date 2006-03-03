@@ -23,7 +23,9 @@
 
 #ifdef INFAKER
  #include "faker-sym.h"
+ #ifdef USEGLP
  #define glXGetCurrentContext GetCurrentContext
+ #endif
  #define glXGetCurrentDisplay GetCurrentDisplay
  #define glXGetCurrentDrawable GetCurrentDrawable
  #define glXGetCurrentReadDrawable GetCurrentReadDrawable

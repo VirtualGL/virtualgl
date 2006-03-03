@@ -350,14 +350,14 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	return retval;
 }
 
+#ifdef USEGLP
 GLXContext glXGetCurrentContext(void)
 {
 	GLXContext ctx=_glXGetCurrentContext();
-	#ifdef USEGLP
 	if(fconfig.glp && !ctxh.isoverlay(ctx)) ctx=glPGetCurrentContext();
-	#endif
 	return ctx;
 }
+#endif
 
 Display *glXGetCurrentDisplay(void)
 {
@@ -734,6 +734,8 @@ shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );
 #endif
 
 extern void __vgl_fakerinit(void);
+
+
 
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
