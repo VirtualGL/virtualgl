@@ -227,7 +227,10 @@ class rrglframe : public rrframe
 		if(i!=GL_NO_ERROR)
 		{
 			ret=1;
-			rrout.print("[VGL] OpenGL error 0x%.4x\n", i);
+			char *env=NULL;
+			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+				&& !strncmp(env, "1", 1))
+				rrout.print("[VGL] OpenGL error 0x%.4x\n", i);
 		}
 		#ifndef _WIN32
 		while(i!=GL_NO_ERROR) i=glGetError();
