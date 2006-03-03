@@ -906,6 +906,11 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 		return ctx;
 	}
 
+	if(__vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_COLOR_INDEX_BIT)
+		render_type=GLX_COLOR_INDEX_TYPE;
+	else
+		render_type=GLX_RGBA_TYPE;
+
 	#ifdef USEGLP
 	if(fconfig.glp)
 	{
