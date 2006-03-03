@@ -168,7 +168,7 @@ void rrserver::run(void)
 	}
 	catch(rrerror &e)
 	{
-		rrout.println("Server error in %s\n%s", e.getMethod(), e.getMessage());
+		rrout.println("Exception thrown in %s\n%s", e.getMethod(), e.getMessage());
 	}
 	if(_t) {_t->detach();  delete _t;}
 	delete this;
