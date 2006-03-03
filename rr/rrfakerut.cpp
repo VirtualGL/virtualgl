@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
 #include <GL/glu.h>
 #include <X11/Xlib.h>
@@ -1624,6 +1625,11 @@ int pbtest(void)
 		if((pb=glXCreatePbuffer(dpy, c, pbattribs))==0)
 			_throw("Could not create Pbuffer");
 		checkdrawable(dpy, pb, dpyw/2, dpyh/2, 1, 0, fbcid);
+		unsigned int tempw=0, temph=0;
+		glXQueryGLXPbufferSGIX(dpy, pb, GLX_WIDTH_SGIX, &tempw);
+		glXQueryGLXPbufferSGIX(dpy, pb, GLX_HEIGHT_SGIX, &temph);
+		if(tempw!=(unsigned int)dpyw/2 || temph!=(unsigned int)dpyh/2)
+			_throw("glXQueryGLXPbufferSGIX() failed");
 
 		if(!(ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True)))
 			_throw("Could not create context");
