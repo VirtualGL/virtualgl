@@ -16,6 +16,7 @@
 #define __FAKER_SYM_H__
 
 #include <stdio.h>
+#define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
 #ifdef USEGLP
 #include <GL/glp.h>
@@ -150,16 +151,6 @@ funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int, list_base,)
 funcdef0(void, glXWaitGL,);
 
 
-// GLX 1.1 functions
-
-funcdef2(const char *, glXGetClientString, Display *, dpy, int, name, return);
-
-funcdef3(const char *, glXQueryServerString, Display *, dpy, int, screen,
-	int, name, return);
-
-funcdef2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen, return);
-
-
 // GLX 1.3 functions
 
 funcdef4(GLXFBConfig *, glXChooseFBConfig, Display *, dpy, int, screen,
@@ -243,33 +234,6 @@ funcdef3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
 funcdef2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen, return);
 
 
-// SGIX_fbconfig
-
-funcdef4(int, glXGetFBConfigAttribSGIX, Display *, dpy, GLXFBConfigSGIX, config,
-	int, attribute, int *, value_return, return);
-
-funcdef4(GLXFBConfigSGIX *, glXChooseFBConfigSGIX, Display *, dpy, int, screen,
-	const int *, attrib_list, int *, nelements, return);
-
-
-// SGIX_pbuffer
-
-funcdef5(GLXPbuffer, glXCreateGLXPbufferSGIX, Display *, dpy,
-	GLXFBConfig, config, unsigned int, width, unsigned int, height,
-	const int *, attrib_list, return);
-
-funcdef2(void, glXDestroyGLXPbufferSGIX, Display *, dpy, GLXPbuffer, pbuf,);
-
-funcdef4(void, glXQueryGLXPbufferSGIX, Display *, dpy, GLXPbuffer, pbuf,
-	int, attribute, unsigned int *, value,);
-
-funcdef3(void, glXSelectEventSGIX, Display *, dpy, GLXDrawable, drawable,
-	unsigned long, mask,);
-
-funcdef3(void, glXGetSelectedEventSGIX, Display *, dpy, GLXDrawable, drawable,
-	unsigned long *, mask,);
-
-
 // GLX_ARB_get_proc_address
 
 #ifdef GLX_ARB_get_proc_address
@@ -279,13 +243,6 @@ static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	checksym(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
 }
-#endif
-
-
-// SUN-specific
-
-#ifdef sun
-funcdef1(int, glXDisableXineramaSUN, Display *, dpy, return);
 #endif
 
 

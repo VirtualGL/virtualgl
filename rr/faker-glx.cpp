@@ -154,7 +154,11 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	return configs;
 }
 
+#ifdef SUNOGL
 GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, const int *attrib_list, int *nelements)
+#else
+GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, int *attrib_list, int *nelements)
+#endif
 {
 	return glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 }
@@ -204,51 +208,20 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_
 
 GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config, unsigned int width, unsigned int height, int *attrib_list)
 {
-	GLXPbuffer pb=0;
-
-		opentrace(glXCreateGLXPbufferSGIX);  prargd(dpy);  prargc(config);
-		prargi(width);  prargi(height);  prargal13(attrib_list);
-		starttrace();
-
-	#ifdef USEGLP
-	if(fconfig.glp)
+	int attribs[257], j=0;
+	for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
 	{
-		int glpattribs[257], j=0;
-		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
-		{
-			glpattribs[j++]=attrib_list[i];  glpattribs[j++]=attrib_list[i+1];
-		}
-		glpattribs[j++]=GLP_PBUFFER_WIDTH;  glpattribs[j++]=width;
-		glpattribs[j++]=GLP_PBUFFER_HEIGHT;  glpattribs[j++]=height;
-		glpattribs[j]=None;
-		pb=glPCreateBuffer(config, glpattribs);
+		attribs[j++]=attrib_list[i];  attribs[j++]=attrib_list[i+1];
 	}
-	#endif
-	pb=_glXCreateGLXPbufferSGIX(_localdpy, config, width, height, attrib_list);
-	TRY();
-	if(dpy && pb) glxdh.add(pb, dpy);
-	CATCH();
-
-		stoptrace();  prargx(pb);  closetrace();
-
-	return pb;
+	attribs[j++]=GLX_PBUFFER_WIDTH;  attribs[j++]=width;
+	attribs[j++]=GLX_PBUFFER_HEIGHT;  attribs[j++]=height;
+	attribs[j]=None;
+	return glXCreatePbuffer(dpy, config, attribs);
 }
 
 void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 {
-
-		opentrace(glXDestroyGLXPbufferSGIX);  prargd(dpy);  prargx(pbuf);  starttrace();
-
-	#ifdef USEGLP
-	if(fconfig.glp) glPDestroyBuffer(pbuf);
-	else
-	#endif
-	_glXDestroyGLXPbufferSGIX(_localdpy, pbuf);
-	TRY();
-	if(pbuf) glxdh.remove(pbuf);
-	CATCH();
-
-		stoptrace();  closetrace();
+	glXDestroyPbuffer(dpy, pbuf);
 }
 
 void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
@@ -278,17 +251,19 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 	_glXFreeContextEXT(_localdpy, ctx);
 }
 
+static const char *glxextensions=
+#ifdef SUNOGL
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_SUN_init_threads";
+#else
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index";
+#endif
+
 const char *glXGetClientString(Display *dpy, int name)
 {
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		if(name==GLX_VERSION) return "1.3";
-		else return glPGetLibraryString(name);
-	}
-	else
-	#endif
-	return _glXGetClientString(_localdpy, name);
+	if(name==GLX_EXTENSIONS) return glxextensions;
+	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VENDOR) return __APPNAME;
+	else return NULL;
 }
 
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
@@ -443,6 +418,11 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 	return read;
 }
 
+GLXDrawable glXGetCurrentReadDrawableSGI(void)
+{
+	return glXGetCurrentReadDrawable();
+}
+
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *value)
 {
 	VisualID vid=0;  int retval=0;
@@ -549,14 +529,7 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_ma
 
 void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long *mask)
 {
-	if(winh.isoverlay(dpy, drawable))
-		return _glXGetSelectedEventSGIX(dpy, drawable, mask);
-
-	#ifdef USEGLP
-	if(fconfig.glp) return;
-	else
-	#endif
-	_glXGetSelectedEventSGIX(_localdpy, ServerDrawable(dpy, drawable), mask);
+	glXGetSelectedEvent(dpy, drawable, mask);
 }
 
 GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
@@ -658,29 +631,27 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 
 const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) return "GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_EXT_visual_info";
-	else
-	#endif
-	return _glXQueryExtensionsString(_localdpy, screen);
+	return glxextensions;
 }
 
 const char *glXQueryServerString(Display *dpy, int screen, int name)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) return glPGetDeviceString(_localdev, name);
-	else
-	#endif
-	return _glXQueryServerString(_localdpy, screen, name);
+	if(name==GLX_EXTENSIONS) return glxextensions;
+	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VENDOR) return __APPNAME;
+	else return NULL;
 }
 
+#ifdef SUNOGL
 void glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsigned int *value)
+#else
+int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsigned int *value)
+#endif
 {
-	#ifdef USEGLP
-	if(fconfig.glp) glPQueryBuffer(pbuf, attribute, value);
-	else
+	glXQueryDrawable(dpy, pbuf, attribute, value);
+	#ifndef SUNOGL
+	return 0;
 	#endif
-	_glXQueryGLXPbufferSGIX(_localdpy, pbuf, attribute, value);
 }
 
 Bool glXQueryVersion(Display *dpy, int *major, int *minor)
@@ -705,29 +676,16 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 
 void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 {
-	if(winh.isoverlay(dpy, drawable))
-		return _glXSelectEventSGIX(dpy, drawable, mask);
-
-	#ifdef USEGLP
-	if(fconfig.glp) return;
-	else
-	#endif
-	_glXSelectEventSGIX(_localdpy, ServerDrawable(dpy, drawable), mask);
+	glXSelectEvent(dpy, drawable, mask);
 }
 
-#ifdef sun
-int glXDisableXineramaSUN(Display *dpy)
-{
-	#ifdef USEGLP
-	if(fconfig.glp) return 0;
-	else
-	#endif
-	return _glXDisableXineramaSUN(_localdpy);
-}
-#endif
-
+#ifdef SUNOGL
 GLboolean glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 	Window underlay, unsigned int *transparentIndex)
+#else
+int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
+	Window underlay, long *transparentIndex)
+#endif
 {
 	XWindowAttributes xwa;
 	if(!transparentIndex) return False;
@@ -769,6 +727,11 @@ shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );
 #ifdef GLX_ARB_get_proc_address
 
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
+#ifdef SUNOGL
+#define checkfakedidx(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))r_##f;
+#else
+#define checkfakedidx(f) checkfaked(f)
+#endif
 
 extern void __vgl_fakerinit(void);
 
@@ -782,6 +745,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	if(procName)
 	{
+		checkfaked(glXGetProcAddressARB)
+
 		checkfaked(glXChooseVisual)
 		checkfaked(glXCopyContext)
 		checkfaked(glXCreateContext)
@@ -813,11 +778,13 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXDestroyWindow)
 		checkfaked(glXGetCurrentDisplay)
 		checkfaked(glXGetCurrentReadDrawable)
+		checkfaked(glXGetCurrentReadDrawableSGI)
 		checkfaked(glXGetFBConfigAttrib)
 		checkfaked(glXGetFBConfigs)
 		checkfaked(glXGetSelectedEvent)
 		checkfaked(glXGetVisualFromFBConfig)
 		checkfaked(glXMakeContextCurrent);
+		checkfaked(glXMakeCurrentReadSGI)
 		checkfaked(glXQueryContext)
 		checkfaked(glXQueryDrawable)
 		checkfaked(glXSelectEvent)
@@ -833,18 +800,19 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXQueryFrameCountNV)
 		checkfaked(glXResetFrameCountNV)
 
-		checkfaked(glXGetFBConfigAttribSGIX)
 		checkfaked(glXChooseFBConfigSGIX)
-
+		checkfaked(glXCreateContextWithConfigSGIX)
+		checkfaked(glXCreateGLXPixmapWithConfigSGIX)
 		checkfaked(glXCreateGLXPbufferSGIX)
 		checkfaked(glXDestroyGLXPbufferSGIX)
+		checkfaked(glXGetFBConfigAttribSGIX)
+		checkfaked(glXGetFBConfigFromVisualSGIX)
+		checkfaked(glXGetVisualFromFBConfigSGIX)
 		checkfaked(glXQueryGLXPbufferSGIX)
 		checkfaked(glXSelectEventSGIX)
 		checkfaked(glXGetSelectedEventSGIX)
 
-		#ifdef sun
-		checkfaked(glXDisableXineramaSUN)
-		#endif
+		checkfaked(glXGetTransparentIndexSUN)
 
 		checkfaked(glFinish)
 		checkfaked(glFlush)
@@ -856,16 +824,16 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		#ifdef SUNOGL
 		checkfaked(glBegin)
 		#endif
-		checkfaked(glIndexd)
-		checkfaked(glIndexf)
-		checkfaked(glIndexi)
-		checkfaked(glIndexs)
-		checkfaked(glIndexub)
-		checkfaked(glIndexdv)
-		checkfaked(glIndexfv)
-		checkfaked(glIndexiv)
-		checkfaked(glIndexsv)
-		checkfaked(glIndexubv)
+		checkfakedidx(glIndexd)
+		checkfakedidx(glIndexf)
+		checkfakedidx(glIndexi)
+		checkfakedidx(glIndexs)
+		checkfakedidx(glIndexub)
+		checkfakedidx(glIndexdv)
+		checkfakedidx(glIndexfv)
+		checkfakedidx(glIndexiv)
+		checkfakedidx(glIndexsv)
+		checkfakedidx(glIndexubv)
 		checkfaked(glClearIndex)
 		checkfaked(glGetDoublev)
 		checkfaked(glGetFloatv)

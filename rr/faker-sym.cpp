@@ -71,10 +71,6 @@ void __vgl_loadsymbols(void)
 	lsym(glXUseXFont)
 	lsym(glXWaitGL)
 
-	lsym(glXGetClientString)
-	lsym(glXQueryServerString)
-	lsym(glXQueryExtensionsString)
-
 	lsym(glXChooseFBConfig)
 	lsym(glXCreateNewContext)
 	lsym(glXCreatePbuffer)
@@ -105,19 +101,6 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXQueryMaxSwapGroupsNV)
 	lsymopt(glXQueryFrameCountNV)
 	lsymopt(glXResetFrameCountNV)
-
-	lsymopt(glXGetFBConfigAttribSGIX)
-	lsymopt(glXChooseFBConfigSGIX)
-
-	lsymopt(glXCreateGLXPbufferSGIX)
-	lsymopt(glXDestroyGLXPbufferSGIX)
-	lsymopt(glXQueryGLXPbufferSGIX)
-	lsymopt(glXSelectEventSGIX)
-	lsymopt(glXGetSelectedEventSGIX)
-
-	#ifdef sun
-	lsymopt(glXDisableXineramaSUN)
-	#endif
 
 	#ifdef GLX_ARB_get_proc_address
 	lsymopt(glXGetProcAddressARB)
