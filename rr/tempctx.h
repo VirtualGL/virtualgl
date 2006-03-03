@@ -87,7 +87,7 @@ class tempctx
 					else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
 					#endif
 				}
-				if(!ret) _throw("Could not bind OpenGL context to window (window may have exited)");
+				if(!ret) _throw("Could not bind OpenGL context to window (window may have disappeared)");
 				_mc=true;
 			}
 		}
