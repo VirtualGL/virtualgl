@@ -1427,7 +1427,7 @@ class mttestthread : public Runnable
 };
 
 
-int mttest(void)
+int mttest(int nthr)
 {
 	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, None};
@@ -1437,7 +1437,8 @@ int mttest(void)
 	mttestthread *mt[NTHR];  Thread *t[NTHR];
 	XSetWindowAttributes swa;
 	int dpyw, dpyh, i, retval=1;
-	for(i=0; i<NTHR; i++)
+	if(nthr==0) return 1;
+	for(i=0; i<nthr; i++)
 	{
 		win[i]=0;  ctx[i]=0;  mt[i]=NULL;  t[i]=NULL;
 	}
@@ -1456,7 +1457,7 @@ int mttest(void)
 		swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 		swa.border_pixel=0;
 		swa.event_mask=StructureNotifyMask|ExposureMask;
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++)
 		{
 			int winx=(i%10)*100, winy=(i/10)*120;
 			if((win[i]=XCreateWindow(dpy, root, winx, winy, 100, 100, 0, v->depth,
@@ -1471,7 +1472,7 @@ int mttest(void)
 		XSync(dpy, False);
 		XFree(v);  v=NULL;
 
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++)
 		{
 			mt[i]=new mttestthread(i, dpy, win[i], ctx[i]);
 			t[i]=new Thread(mt[i]);
@@ -1479,7 +1480,7 @@ int mttest(void)
 			t[i]->start();
 		}
 		printf("Phase 1\n");
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++)
 		{
 			int winx=(i%10)*100, winy=i/10*120;
 			XMoveResizeWindow(dpy, win[i], winx, winy, 200, 200);
@@ -1490,7 +1491,7 @@ int mttest(void)
 		}
 		XSync(dpy, False);
 		printf("Phase 2\n");
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++)
 		{
 			XWindowChanges xwc;
 			xwc.width=xwc.height=200;
@@ -1499,15 +1500,15 @@ int mttest(void)
 		}
 		XSync(dpy, False);
 		printf("Phase 3\n");
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++)
 		{
 			XResizeWindow(dpy, win[i], 100, 100);
 			mt[i]->resize(100, 100);
 		}
 		XSync(dpy, False);
 		deadyet=true;
-		for(i=0; i<NTHR; i++) t[i]->stop();
-		for(i=0; i<NTHR; i++)
+		for(i=0; i<nthr; i++) t[i]->stop();
+		for(i=0; i<nthr; i++)
 		{
 			try
 			{
@@ -1525,17 +1526,17 @@ int mttest(void)
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
 
-	for(i=0; i<NTHR; i++) {if(t[i]) {delete t[i];  t[i]=NULL;}}
-	for(i=0; i<NTHR; i++) {if(mt[i]) {delete mt[i];  mt[i]=NULL;}}
+	for(i=0; i<nthr; i++) {if(t[i]) {delete t[i];  t[i]=NULL;}}
+	for(i=0; i<nthr; i++) {if(mt[i]) {delete mt[i];  mt[i]=NULL;}}
 	if(v) {XFree(v);  v=NULL;}
-	for(i=0; i<NTHR; i++)
+	for(i=0; i<nthr; i++)
 	{
 		if(dpy && ctx[i])
 		{
 			glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx[i]);  ctx[i]=0;
 		}
 	}
-	for(i=0; i<NTHR; i++) {if(dpy && win[i]) {XDestroyWindow(dpy, win[i]);  win[i]=0;}}
+	for(i=0; i<nthr; i++) {if(dpy && win[i]) {XDestroyWindow(dpy, win[i]);  win[i]=0;}}
 	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 	return retval;
 }
@@ -1979,7 +1980,8 @@ int procaddrtest(void)
 
 int main(int argc, char **argv)
 {
-	int ret=0;
+	int ret=0;  int nthr=NTHR;
+
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
 	{
@@ -1997,6 +1999,14 @@ int main(int argc, char **argv)
 		if(temp[0]=='/' || !strncasecmp(temp, "GLP", 3)) usingglp=1;
 	}
 	#endif
+
+	if(argc>1) for(int i=1; i<argc; i++)
+	{
+		if(!strcasecmp(argv[i], "-n") && i<argc-1)
+		{
+			int temp=atoi(argv[++i]);  if(temp>=0 && temp<=NTHR) nthr=temp;
+		}
+	}
 
 	// Intentionally leave a pending dlerror()
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat");
@@ -2024,7 +2034,7 @@ int main(int argc, char **argv)
 	printf("\n");
 	if(!vistest()) ret=-1;
 	printf("\n");
-	if(!mttest()) ret=-1;
+	if(!mttest(nthr)) ret=-1;
 	printf("\n");
 	if(!pbtest()) ret=-1;
 	printf("\n");
