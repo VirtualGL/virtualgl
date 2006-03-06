@@ -1293,12 +1293,9 @@ void glXWaitGL(void)
 
 		if(fconfig.trace) rrout.print("[VGL] glXWaitGL()\n");
 
-	#ifdef SUNOGL
-	if(!ctxh.overlaycurrent())
-		_glFinish();  // Sun's glXWaitGL() calls glFinish(), so we do this to avoid 2 readbacks
-	else
-	#endif
-	_glXWaitGL();
+	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
+
+	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this to avoid 2 readbacks
 	if(fconfig.sync) _doGLreadback(true, true);
 	else _doGLreadback(false);
 	CATCH();
