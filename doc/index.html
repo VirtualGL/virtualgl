@@ -844,6 +844,10 @@ e.g.:<br>
     <span class="note">Note:</span><span class="monospace">/dev/sound/*</span>
 may not exist if there are no sound drivers on your system.<br>
 &nbsp;</li>
+  <li>If the <span class="monospace">/etc/dt/config </span>directory
+does not exist, create it<br>
+    <pre>mkdir -p /etc/dt/config</pre>
+  </li>
   <li>If <span class="monospace">/etc/dt/config/Xsetup</span>
 does not
 exist, then copy the default <span class="monospace">Xsetup</span>
@@ -896,6 +900,11 @@ number you are configuring, e.g.:<br>
       <pre>:0&nbsp; Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst<br></pre>
     </li>
   </ol>
+  <li>Verify that <span class="monospace">/etc/dt/config</span> and <span
+ class="monospace">/etc/dt/config/Xsetup</span> can be executed by all
+users, and verify that <span class="monospace">/etc/dt/config/Xconfig</span>
+and <span class="monospace">/etc/dt/config/Xservers</span> can be read
+by all users</li>
   <li>Restart the X server by
 issuing<br>
     <pre>/etc/init.d/dtlogin start</pre>
