@@ -103,7 +103,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 
 	_w=w;  _h=h;
 	pbattribs[1]=w;  pbattribs[3]=h;
-	#ifdef sun
+	#ifdef SUNOGL
 	tempctx tc(_localdpy, 0, 0, 0);
 	#endif
 	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
@@ -116,7 +116,7 @@ pbuffer::~pbuffer(void)
 {
 	if(_drawable)
 	{
-		#ifdef sun
+		#ifdef SUNOGL
 		tempctx tc(_localdpy, 0, 0, 0);
 		#endif
 		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
