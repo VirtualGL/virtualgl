@@ -21,9 +21,9 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "$%systemroot%\system32\libeay32.dll"
 	File "$%systemroot%\system32\ssleay32.dll"
 	File /r /x CVS /x config /x unixug /x winug "doc"
-	File /oname="doc\LGPL.txt" "LGPL.txt"
-	File /oname="doc\LICENSE.txt" "LICENSE.txt"
-	File /oname="doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
+	File "/oname=doc\LGPL.txt" "LGPL.txt"
+	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
+	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
