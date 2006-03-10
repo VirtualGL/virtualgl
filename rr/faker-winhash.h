@@ -123,8 +123,8 @@ class winhash : public _winhash
 		{
 			pbwin *pb=h->value;
 			return (
-				(pb && key1 && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
-				(pb && key1==NULL && key2==pb->getdrawable()) ||
+				(pb && pb!=(pbwin *)-1 && key1 && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
+				(pb && pb!=(pbwin *)-1 && key1==NULL && key2==pb->getdrawable()) ||
 				(key1 && !strcasecmp(key1, h->key1) && key2==h->key2)
 			);
 		}
