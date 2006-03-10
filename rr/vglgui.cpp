@@ -62,7 +62,8 @@ rrcs vglgui::_Instancemutex, vglgui::_Popupmutex;
 static void Die(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
 	vglgui *that=vglgui::instance();
-	if(that) that->destroy();
+	XtAppContext appctx=XtWidgetToApplicationContext(w);
+	if(appctx) XtAppSetExitFlag(appctx);
 }
 
 static XtActionsRec actions[]=
@@ -79,32 +80,34 @@ void vglgui::destroy(void)
 		XtDestroyWidget(_toplevel);
 		_toplevel=_qualtext=_qualslider=_subsamp411=_subsamp422=_subsamp444=0;
 	}
-	if(_appctx)
-	{
-		XtAppSetExitFlag(_appctx);
-	}
-	if(_t) {_t->stop();  delete _t;  _t=NULL;}
-	if(_appctx)
-	{
-		XtDestroyApplicationContext(_appctx);  _appctx=0;
-	}
 	if(_dpy)
 	{
 		XtCloseDisplay(_dpy);  _dpy=NULL;
+	}
+	if(_appctx)
+	{
+		XtDestroyApplicationContext(_appctx);  _appctx=0;
 	}
 }
 
 void vglgui::popup(Display *dpy)
 {
-	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
-
 	if(!dpy) _throw("Invalid argument");
 	rrcs::safelock l(_Popupmutex);
 	if(_toplevel) return;
+	_dpy=dpy;
+	errifnot(_t=new Thread(this));
+	_t->start();
+}
+
+void vglgui::init(void)
+{
+	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
+
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
 	XtAppSetFallbackResources(_appctx, (char **)fallback_resources);
-	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(dpy), "VirtualGL",
+	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(_dpy), "VirtualGL",
 		"dialog", NULL, 0, &argc, argv));
 	errifnot(_toplevel=XtVaAppCreateShell("VirtualGL", "dialog",
 		applicationShellWidgetClass, _dpy, argv, &argc, fallback_resources,
@@ -192,8 +195,6 @@ void vglgui::popup(Display *dpy)
 	XSetWMProtocols(_dpy, XtWindow(_toplevel), &deleteatom, 1);
 	XtOverrideTranslations(_toplevel, XtParseTranslationTable ("<Message>WM_PROTOCOLS: Die()"));
 	UpdateQual();
-	errifnot(_t=new Thread(this));
-	_t->start();
 }
 
 void vglgui::UpdateQual(void)
@@ -324,7 +325,8 @@ void vglgui::hiQualProc(Widget w, XtPointer client, XtPointer p)
 void vglgui::quitProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if(that) that->destroy();
+	XtAppContext appctx=XtWidgetToApplicationContext(w);
+	if(appctx) XtAppSetExitFlag(appctx);
 }
 
 void vglgui::subsamp411Proc(Widget w, XtPointer client, XtPointer p)

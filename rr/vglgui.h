@@ -14,6 +14,7 @@
 #include <X11/IntrinsicP.h>
 #include "rrmutex.h"
 #include "rrthread.h"
+#include "rrlog.h"
 
 class vglgui : public Runnable
 {
@@ -29,12 +30,23 @@ class vglgui : public Runnable
 			return _Instanceptr;
 		}
 
+		void init(void);
 		void destroy(void);
 		void popup(Display *dpy);
 
 		void run(void)
 		{
-			if(_appctx) XtAppMainLoop(_appctx);
+			try
+			{
+				init();
+				if(_appctx) XtAppMainLoop(_appctx);
+				destroy();
+			}
+			catch(rrerror &e)
+			{
+				rrout.println("Configuration dialog error--\n%s", e.getMessage());
+			}
+			_t->detach();  delete _t;  _t=NULL;
 		}
 
 	private:
