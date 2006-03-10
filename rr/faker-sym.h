@@ -350,6 +350,9 @@ funcdef2(int, XNextEvent, Display *, dpy, XEvent *, xe, return);
 
 funcdef1(Display *, XOpenDisplay, _Xconst char*, name, return);
 
+funcdef5(Bool, XQueryExtension, Display *, dpy, _Xconst char*, name, int *,
+	major_opcode, int *, first_event, int *, first_error, return);
+
 funcdef4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height, return);
 

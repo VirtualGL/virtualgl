@@ -245,6 +245,24 @@ void __vgl_fakerinit(void)
 
 extern "C" {
 
+Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
+	int *first_event, int *first_error)
+{
+	Bool retval=True;
+
+		opentrace(XQueryExtension);  prargx(dpy);  prargs(name);  starttrace();
+
+	retval=_XQueryExtension(dpy, name, major_opcode, first_event, first_error);
+	if(!strcmp(name, "GLX")) retval=True;
+
+		stoptrace();  if(major_opcode) prargi(*major_opcode);
+		if(first_event) prargi(*first_event);
+		if(first_error) prargi(*first_error);  closetrace();
+
+ 	return retval;
+}
+
+
 Display *XOpenDisplay(_Xconst char* name)
 {
 	Display *dpy=NULL;
