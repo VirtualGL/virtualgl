@@ -100,13 +100,6 @@ LTARGET = $(LDIR)/libturbojpeg.$(SHEXT)
 TARGETS = $(EDIR)/jpgtest \
           $(EDIR)/jpegut
 
-ifeq ($(platform), linux)
-LDEP =
-else
-TARGETS := $(TARGETS) $(LTARGET)
-LDEP := $(LTARGET)
-endif
-
 OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpgtest.o \
        $(ODIR)/jpegut.o
@@ -117,6 +110,13 @@ endif
 
 ifeq ($(JPEGLIB), libjpeg)
 LTARGET := libjpeg $(LTARGET)
+endif
+
+ifeq ($(platform), linux)
+LDEP =
+else
+TARGETS := $(TARGETS) $(LTARGET)
+LDEP := $(LTARGET)
 endif
 
 
