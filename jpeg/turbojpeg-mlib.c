@@ -88,7 +88,7 @@ typedef struct _jpgstruct
 	c_derived_tbl *e_dclumtable, *e_aclumtable, *e_dcchromtable, *e_acchromtable;
 	d_derived_tbl *d_dclumtable, *d_aclumtable, *d_dcchromtable, *d_acchromtable;
 	mlib_s16 *mcubuf;
-	int initc, initd;
+	int initc, initd, isvis;
 } jpgstruct;
 
 
@@ -370,6 +370,20 @@ static void QuantFwdRawTableInit(mlib_s16 *rawqtable, int quality)
   }
 }
 
+mlib_status my_VideoQuantizeInit_S16(mlib_d64 dqtable[64],
+	const mlib_s16 iqtable[64])
+{
+	mlib_s16 *qtable=(mlib_s16 *)dqtable;
+	mlib_s32 i;
+	#pragma pipeloop(0)
+	for(i=0; i<64; i++)
+	{
+		mlib_s32 tmp=(mlib_s32)(32768.0/iqtable[i]+0.5);
+		qtable[i]=tmp-(tmp>>15);
+	}
+	return (MLIB_SUCCESS);
+}
+
 static int encode_jpeg_init(jpgstruct *jpg)
 {
 	mlib_s16 rawqtable[64];  int i, nval, len;
@@ -399,7 +413,8 @@ static int encode_jpeg_init(jpgstruct *jpg)
 	// Generate and write quant. tables
 	memcpy(rawqtable, lumqtable, 64*sizeof(mlib_s16));
 	QuantFwdRawTableInit(rawqtable, jpg->qual);
-	_mlib(mlib_VideoQuantizeInit_S16(jpg->lumqtable, rawqtable));
+	if(jpg->isvis) {_mlib(my_VideoQuantizeInit_S16(jpg->lumqtable, rawqtable));}
+	else {_mlib(mlib_VideoQuantizeInit_S16(jpg->lumqtable, rawqtable));}
 
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xdb);  // DQT marker
 	write_word(jpg, 67);  // DQT length
@@ -408,7 +423,8 @@ static int encode_jpeg_init(jpgstruct *jpg)
 
 	memcpy(rawqtable, chromqtable, 64*sizeof(mlib_s16));
 	QuantFwdRawTableInit(rawqtable, jpg->qual);
-	_mlib(mlib_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));
+	if(jpg->isvis) {_mlib(my_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
+	else {_mlib(mlib_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
 
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xdb);  // DQT marker
 	write_word(jpg, 67);  // DQT length
@@ -561,7 +577,7 @@ static int encode_jpeg(jpgstruct *jpg)
 
 DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 {
-	jpgstruct *jpg=NULL;
+	jpgstruct *jpg=NULL;  char *v=NULL;
 
 	if((jpg=(jpgstruct *)mlib_malloc(sizeof(jpgstruct)))==NULL)
 		_throw("Memory allocation failure");
@@ -574,6 +590,13 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 	|| (jpg->e_dcchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
 	|| (jpg->e_acchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL)
 		_throw("Memory allocation failure");
+
+	if((v=mlib_version())!=NULL)
+	{
+		char *ptr=NULL;
+		if((ptr=strrchr(v, ':'))!=NULL && strlen(ptr)>1 && ptr[1]=='v')
+			jpg->isvis=1;
+	}
 
 	jpg->initc=1;
 	return (tjhandle)jpg;
