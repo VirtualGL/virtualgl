@@ -80,7 +80,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	rrcs::safelock l(_vamutex);
 
 	if(dpy==_vadpy && screen==_vascreen) return;
-	if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
+	if(_XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
 		&& maj_opcode>=0 && first_event>=0 && first_error>=0)
 		clientglx=1;
 	if(!(visuals=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &nv)) || nv==0)
