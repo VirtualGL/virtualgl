@@ -262,6 +262,11 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
  	return retval;
 }
 
+char *XServerVendor(Display *dpy)
+{
+	if(fconfig.vendor) return fconfig.vendor;
+	else return _XServerVendor(dpy);
+}
 
 Display *XOpenDisplay(_Xconst char* name)
 {

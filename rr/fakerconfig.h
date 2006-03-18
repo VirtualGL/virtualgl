@@ -81,6 +81,7 @@ class FakerConfig
 			guikey=XK_F8;
 			guimod=ShiftMask|ControlMask;
 			fps=-1.0;
+			vendor=NULL;
 			reloadenv();
 		}
 
@@ -185,6 +186,7 @@ class FakerConfig
 				}
 			}
 			getconfigdouble("FPS", fps, 0.0, 1000000.0);
+			getconfigstr("XVENDOR", vendor);
 			sanitycheck();
 		}
 
@@ -219,6 +221,7 @@ class FakerConfig
 		char *x11lib;
 		char *client;
 		char *localdpystring;
+		char *vendor;
 
 		int loqual;
 		int losubsamp;

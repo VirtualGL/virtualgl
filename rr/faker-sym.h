@@ -356,6 +356,8 @@ funcdef5(Bool, XQueryExtension, Display *, dpy, _Xconst char*, name, int *,
 funcdef4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height, return);
 
+funcdef1(char *, XServerVendor, Display *, dpy, return);
+
 funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe, return);
 

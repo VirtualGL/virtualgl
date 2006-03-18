@@ -168,6 +168,7 @@ void __vgl_loadsymbols(void)
 	lsym(XOpenDisplay);
 	lsym(XQueryExtension);
 	lsym(XResizeWindow);
+	lsym(XServerVendor);
 	lsym(XWindowEvent);
 }
 
