@@ -39,7 +39,18 @@ static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 	_##s=(_##s##Type)loadsym(dllhnd, #s, fatal); \
 	if(!_##s) { \
 		if(fatal) _throw("Could not load symbol "#s); \
-		else return 0; \
+		else if(fconfig.verbose) \
+		{ \
+			rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); return 0; \
+		} \
+	} \
+}
+
+#define lsymopt(s) { \
+	_##s=(_##s##Type)loadsym(dllhnd, #s, fatal); \
+	if(!_##s && fconfig.verbose) \
+	{ \
+		rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); \
 	} \
 }
 
@@ -61,11 +72,18 @@ static _RRSunRaySendFrameType _RRSunRaySendFrame=NULL;
 typedef const char* (*_RRSunRayGetErrorType)(void *);
 static _RRSunRayGetErrorType _RRSunRayGetError=NULL;
 
+typedef int (*_RRSunRayDestroyType)(void *);
+static _RRSunRayDestroyType _RRSunRayDestroy=NULL;
+
+static bool init=false;
+
 // 1=success, 0=failure
 static int loadsunraysymbols(bool fatal)
 {
 	void *dllhnd=NULL;  const char *err=NULL;
 	rrcs::safelock l(sunraymutex);
+	if(init) return 1;
+	init=true;
 	dlerror();  // Clear error state
 	dllhnd=dlopen("librrsunray.so", RTLD_NOW);
 	if(!dllhnd)
@@ -88,6 +106,7 @@ static int loadsunraysymbols(bool fatal)
 	lsym(RRSunRayGetFrame)
 	lsym(RRSunRaySendFrame)
 	lsym(RRSunRayGetError)
+	lsymopt(RRSunRayDestroy)
 	return 1;
 }
 
@@ -120,6 +139,12 @@ const char *RRSunRayGetError(void *handle)
 			return "SunRay plugin not properly initialized";
 	}
 	return _RRSunRayGetError(handle);
+}
+
+int RRSunRayDestroy(void* handle)
+{
+	if(!_RRSunRayDestroy) {if(!loadsunraysymbols(true)) return -1;}
+	return _RRSunRayDestroy(handle);
 }
 
 }

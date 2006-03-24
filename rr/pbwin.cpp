@@ -170,6 +170,13 @@ pbwin::~pbwin(void)
 	if(_pb) {delete _pb;  _pb=NULL;}
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
+	#if defined(sun)||defined(linux)
+	if(_sunrayhandle)
+	{
+		if(RRSunRayDestroy(_sunrayhandle)==-1 && fconfig.verbose)
+			rrout.println("[VGL] %s", RRSunRayGetError(_sunrayhandle));
+	}
+	#endif 
 	_mutex.unlock(false);
 }
 
