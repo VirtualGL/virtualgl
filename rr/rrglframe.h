@@ -80,6 +80,10 @@ class rrglframe : public rrframe
 	void init(Display *dpy, Window win)
 	{
 		XVisualInfo *v=NULL;
+		#ifdef XDK
+		rrcs::safelock l(_mutex);
+		#endif
+
 		try
 		{
 			_pixelsize=3;
@@ -110,6 +114,9 @@ class rrglframe : public rrframe
 
 	~rrglframe(void)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_mutex);
+		#endif
 		if(_ctx && _dpy) {glXMakeCurrent(_dpy, 0, 0);  glXDestroyContext(_dpy, _ctx);  _ctx=0;}
 		if(_dpy && _newdpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
 		if(_tjhnd) {tjDestroy(_tjhnd);  _tjhnd=NULL;}
@@ -176,6 +183,9 @@ class rrglframe : public rrframe
 	{
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
+		#ifdef XDK
+		rrcs::safelock l(_mutex);
+		#endif
 		int format=GL_RGB;
 		#ifdef GL_BGR_EXT
 		if(littleendian()) format=GL_BGR_EXT;
@@ -211,6 +221,9 @@ class rrglframe : public rrframe
 
 	void sync(void)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_mutex);
+		#endif
 		glFinish();
 		glXSwapBuffers(_dpy, _win);
 	}
@@ -238,6 +251,9 @@ class rrglframe : public rrframe
 		return ret;
 	}
 
+	#ifdef XDK
+	static rrcs _mutex;
+	#endif
 	bool _stereo;
 	Display *_dpy;  Window _win;
 	GLXContext _ctx;

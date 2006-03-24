@@ -6,7 +6,8 @@ ifeq ($(platform), windows)
 
 COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
-        $(ODIR)/rrxclient.obj
+        $(ODIR)/rrxclient.obj \
+        $(ODIR)/rrglframe.obj
 ifneq ($(XWIN32), yes)
 COBJS := $(COBJS) $(ODIR)/xdk-sym.obj
 endif
@@ -44,7 +45,7 @@ $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
 # Unit tests
 
 $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
-	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB)
+	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB) $(ODIR)/xdk-sym.obj $(ODIR)/rrglframe.obj
 
 $(EDIR)/rrblitterut.exe: $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj $(RRDEP)
 	$(CXX) $(LDFLAGS) $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj -o $@ $(RRLIB)
@@ -135,7 +136,7 @@ $(EDIR)/vglclient: $(COBJS) $(RRDEP)
 # Unit tests
 
 $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
-	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB)
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 	$(CXX) $(LDFLAGS) -o $@ $< -z now -lGL -lGLU -z now -lX11 -ldl -lpthread

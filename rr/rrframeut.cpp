@@ -14,6 +14,8 @@
 
 #include "rrthread.h"
 #include "rrframe.h"
+#undef USEGLP
+#include "rrglframe.h"
 #include "rrtimer.h"
 
 #define ITER 50
@@ -27,10 +29,14 @@ class blitter : public Runnable
 {
 	public:
 
-	blitter(Display *dpy, Window win) : _indx(0), _deadyet(false), _dpy(dpy),
+	blitter(Display *dpy, Window win, bool usegl=false) : _indx(0), _deadyet(false), _dpy(dpy),
 		_win(win), _t(NULL)
 	{
-		for(int i=0; i<NB; i++) errifnot(_fb[i]=new rrfb(_dpy, _win));
+		for(int i=0; i<NB; i++)
+		{
+			if(usegl) {errifnot(_fb[i]=new rrglframe(_dpy, _win));}
+			else {errifnot(_fb[i]=new rrfb(_dpy, _win));}
+		}
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
@@ -38,17 +44,25 @@ class blitter : public Runnable
 	virtual ~blitter(void)
 	{
 		shutdown();
-		for(int i=0; i<NB; i++) {if(_fb[i]) {delete _fb[i];  _fb[i]=NULL;}}
+		for(int i=0; i<NB; i++)
+		{
+			if(_fb[i])
+			{
+				if(_fb[i]->_isgl) delete (rrglframe *)_fb[i];
+				else delete (rrfb *)_fb[i];
+				_fb[i]=NULL;
+			}
+		}
 	}
 
-	rrfb *get(void)
+	rrframe *get(void)
 	{
-		rrfb *b=_fb[_indx];  _indx=(_indx+1)%NB;
+		rrframe *b=_fb[_indx];  _indx=(_indx+1)%NB;
 		if(_t) _t->checkerror();  b->waituntilcomplete();  if(_t) _t->checkerror();
 		return b;
 	}
 
-	void put(rrfb *b)
+	void put(rrframe *b)
 	{
 		if(_t) _t->checkerror();
 		b->ready();
@@ -69,7 +83,7 @@ class blitter : public Runnable
 	{
 		rrtimer timer;
 		double mpixels=0., totaltime=0.;
-		int buf=0;  rrfb *b;
+		int buf=0;  rrframe *b;
 		try
 		{
 			while(!_deadyet)
@@ -77,7 +91,8 @@ class blitter : public Runnable
 				b=_fb[buf];  buf=(buf+1)%NB;
 				b->waituntilready();  if(_deadyet) break;
 				timer.start();
-				b->redraw();
+				if(b->_isgl) ((rrglframe *)b)->redraw();
+				else ((rrfb *)b)->redraw();
 				mpixels+=(double)(b->_h.width*b->_h.height)/1000000.;
 				totaltime+=timer.elapsed();
 				b->complete();
@@ -92,7 +107,7 @@ class blitter : public Runnable
 	}
 
 	int _indx;  bool _deadyet;  
-	rrfb *_fb[NB];
+	rrframe *_fb[NB];
 	Display *_dpy;  Window _win;
 	Thread *_t;
 };
@@ -137,7 +152,7 @@ class decompressor : public Runnable
 
 	void run(void)
 	{
-		int buf=0;  rrfb *b=NULL;
+		int buf=0;  rrframe *b=NULL;
 		try
 		{
 			while(!_deadyet)
@@ -157,11 +172,12 @@ class decompressor : public Runnable
 					XConfigureWindow(_dpy, _win, CWWidth|CWHeight|CWX|CWY, &xwc);
 					XFlush(_dpy);
 					XSync(_dpy, False);
-					XWindowAttributes xwa;
-					do XGetWindowAttributes(_dpy, _win, &xwa); while(xwa.width<w || xwa.height<h);
+//					XWindowAttributes xwa;
+//					do XGetWindowAttributes(_dpy, _win, &xwa); while(xwa.width<w || xwa.height<h);
 					XUnlockDisplay(_dpy);
 				}
-				(*b)=j;
+				if(b->_isgl) *((rrglframe *)b)=j;
+				else *((rrfb *)b)=j;
 				_bobj->put(b);
 				j.complete();
 			}
@@ -258,14 +274,14 @@ class rrframeut
 {
 	public:
 
-	rrframeut(Display *dpy, int myid) : c(NULL), d(NULL), b(NULL)
+	rrframeut(Display *dpy, int myid, bool usegl=false) : c(NULL), d(NULL), b(NULL)
 	{
 		Window win;
 		errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), myid*(MINW+BORDER*2), 0, MINW+BORDER, MINW+BORDER, 0,
 			WhitePixel(dpy, DefaultScreen(dpy)), BlackPixel(dpy, DefaultScreen(dpy))));
 		errifnot(XMapRaised(dpy, win));
 
-		errifnot(b=new blitter(dpy, win));
+		errifnot(b=new blitter(dpy, win, usegl));
 		errifnot(d=new decompressor(b, dpy, win, myid));
 		errifnot(c=new compressor(d));
 	}
@@ -307,20 +323,26 @@ class rrframeut
 	compressor *c;  decompressor *d;  blitter *b;
 };
 
-int main(void)
+int main(int argc, char **argv)
 {
 	Display *dpy=NULL;
 	rrframeut *test[NUMWIN];
 	int i, j, w, h;
+	bool usegl=false;
+
+	if(argc>1) for(i=1; i<argc; i++) if(!stricmp(argv[i], "-gl")) usegl=true;
 
 	try
 	{
 		errifnot(XInitThreads());
+		#ifdef SUNOGL
+		errifnot(glXInitThreadsSUN());
+		#endif
 		if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
 
 		for(i=0; i<NUMWIN; i++)
 		{
-			errifnot(test[i]=new rrframeut(dpy, i));
+			errifnot(test[i]=new rrframeut(dpy, i, usegl));
 		}
 
 		for(w=MINW; w<=MAXW; w+=33)
