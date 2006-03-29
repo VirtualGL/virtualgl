@@ -83,7 +83,6 @@ static int loadsunraysymbols(bool fatal)
 	void *dllhnd=NULL;  const char *err=NULL;
 	rrcs::safelock l(sunraymutex);
 	if(init) return 1;
-	init=true;
 	dlerror();  // Clear error state
 	dllhnd=dlopen("librrsunray.so", RTLD_NOW);
 	if(!dllhnd)
@@ -107,6 +106,7 @@ static int loadsunraysymbols(bool fatal)
 	lsym(RRSunRaySendFrame)
 	lsym(RRSunRayGetError)
 	lsymopt(RRSunRayDestroy)
+	init=true;
 	return 1;
 }
 
