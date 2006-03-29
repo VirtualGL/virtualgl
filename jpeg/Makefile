@@ -225,11 +225,11 @@ $(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDEP)
 
 ifeq ($(platform), linux)
 
-ifeq ($(subplatform),)
-lib32:
-else
+ifeq ($(subplatform), 64)
 lib32:
 	$(MAKE) M32=yes lib
+else
+lib32:
 endif
 
 TJPEGBUILD = 1
