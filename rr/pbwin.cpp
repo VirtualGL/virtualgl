@@ -151,6 +151,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
+	_rrdpy=NULL;
 	_prof_rb.setname("Readback  ");
 	_syncdpy=false;
 	_dirty=false;
@@ -170,6 +171,7 @@ pbwin::~pbwin(void)
 	if(_pb) {delete _pb;  _pb=NULL;}
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
+	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
 	#if defined(sun)||defined(linux)
 	if(_sunrayhandle)
 	{
@@ -269,7 +271,6 @@ void pbwin::swapbuffers(void)
 
 void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
-	rrdisplayclient *rrdpy=NULL;
 	fconfig.reloadenv();
 	int compress=fconfig.compress;  bool dostereo=false;
 	int pbw=_pb->width(), pbh=_pb->height();
@@ -324,12 +325,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		case RRCOMP_JPEG:
 		{
-			errifnot(rrdpy=dpyh.findrrdpy(_windpy));
-			if(fconfig.spoil && rrdpy && !rrdpy->frameready() && !force)
+			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
+				fconfig.client:DisplayString(_windpy)));
+			if(fconfig.spoil && _rrdpy && !_rrdpy->frameready() && !force)
 				return;
-			if(!rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
+			if(!_rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
 			rrframe *b;
-			errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
+			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3));
 			#ifdef GL_BGR_EXT
 			if(littleendian())
 			{
@@ -352,11 +354,11 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->_h.flags=dostereo? RR_LEFT:0;
 			b->_flags|=RRBMP_BOTTOMUP;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
-			rrdpy->sendframe(b);
+			_rrdpy->sendframe(b);
 
 			if(dostereo)
 			{
-				errifnot(b=rrdpy->getbitmap(pbw, pbh, 3));
+				errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3));
 				if(drawbuf==GL_FRONT) drawbuf=GL_FRONT_RIGHT;
 				else if(drawbuf==GL_BACK) drawbuf=GL_BACK_RIGHT;
 				#ifdef GL_BGR_EXT
@@ -380,7 +382,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				b->_h.subsamp=fconfig.currentsubsamp;
 				b->_h.flags=RR_RIGHT;
 				b->_flags|=RRBMP_BOTTOMUP;
-				rrdpy->sendframe(b);
+				_rrdpy->sendframe(b);
 			}
 
 			break;
