@@ -26,10 +26,6 @@
 #include "fakerconfig.h"
 extern FakerConfig fconfig;
 
-#include "faker-dpyhash.h"
-extern dpyhash *_dpyh;
-#define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
-
 extern Display *_localdpy;
 #ifdef USEGLP
 extern GLPDevice _localdev;

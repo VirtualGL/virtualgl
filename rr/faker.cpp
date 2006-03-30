@@ -25,7 +25,6 @@
 
 FakerConfig fconfig;
 
-#include "faker-dpyhash.h"
 #include "faker-winhash.h"
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
@@ -87,9 +86,8 @@ static inline int _drawingtoright(void)
 }
 
 static rrcs globalmutex;
-winhash *_winh=NULL;  dpyhash *_dpyh=NULL;  ctxhash ctxh;  vishash vish;
+winhash *_winh=NULL;  ctxhash ctxh;  vishash vish;
 	cfghash cfgh;  rcfghash rcfgh;  pmhash pmh;  glxdhash glxdh;
-#define dpyh (*(_dpyh?_dpyh:(_dpyh=new dpyhash())))
 #define winh (*(_winh?_winh:(_winh=new winhash())))
 
 static int __shutdown=0;
@@ -116,7 +114,6 @@ void __vgl_safeexit(int retcode)
 		rcfgh.killhash();
 		ctxh.killhash();
 		glxdh.killhash();
-		if(_dpyh) _dpyh->killhash();
 		if(_winh) _winh->killhash();
 	}
 	__vgl_unloadsymbols();
@@ -192,7 +189,6 @@ void __vgl_fakerinit(void)
 
 	fconfig.reloadenv();
 
-	if(!_dpyh) errifnot(_dpyh=new dpyhash());
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
@@ -250,7 +246,7 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval=True;
 
-		opentrace(XQueryExtension);  prargx(dpy);  prargs(name);  starttrace();
+		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
 
 	retval=_XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 	if(!strcmp(name, "GLX")) retval=True;
@@ -277,7 +273,6 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	__vgl_fakerinit();
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
-	dpyh.add(dpy);
 
 		stoptrace();  prargd(dpy);  closetrace();
 
@@ -292,7 +287,6 @@ int XCloseDisplay(Display *dpy)
 
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
 
-	dpyh.remove(dpy);
 	retval=_XCloseDisplay(dpy);
 
 		stoptrace();  closetrace();

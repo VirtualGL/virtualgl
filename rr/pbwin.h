@@ -18,6 +18,7 @@
 #include "faker-sym.h"
 #include "rrmutex.h"
 #include "rrblitter.h"
+#include "rrdisplayclient.h"
 #include "fbx.h"
 #ifdef USEGLP
 #include <GL/glp.h>
@@ -78,6 +79,7 @@ class pbwin
 		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
 		int _neww, _newh;
 		rrblitter *_blitter;
+		rrdisplayclient *_rrdpy;
 		rrprofiler _prof_rb;
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
