@@ -21,7 +21,7 @@ int __vglConfigDepth(GLXFBConfig);
 
 int __vglConfigClass(GLXFBConfig);
 
-GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int,
+GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	int &, int &, int &, int &, int &, int &, bool glx13=false);
 
 int __vglClientVisualAttrib(Display *, int, VisualID, int);

@@ -166,7 +166,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	}
 }
 
-GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int screen,
+GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	int &depth, int &c_class, int &level, int &stereo, int &trans,
 	int &nelements, bool glx13)
 {
@@ -272,7 +272,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[], int screen,
 		return glPChooseFBConfig(_localdev, glxattribs, &nelements);
 	else
 	#endif
-		return _glXChooseFBConfig(_localdpy, screen, glxattribs, &nelements);
+		return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs, &nelements);
 }
 
 int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid, int attribute)

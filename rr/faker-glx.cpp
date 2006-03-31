@@ -13,7 +13,6 @@
  */
 
 #include "faker-sym.h"
-#include "faker-macros.h"
 
 // Map a client-side drawable to a server-side drawable
 
@@ -75,16 +74,16 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		else
 		#endif
 		{
-			configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+			configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			if((!configs || n<1) && attribs[13])
 			{
 				attribs[13]=0;
-				configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if((!configs || n<1) && attribs[0])
 			{
 				attribs[0]=0;
-				configs=_glXChooseFBConfig(_localdpy, vis->screen, attribs, &n);
+				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if(!configs || n<1) return 0;
 		}
@@ -137,7 +136,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!attrib_list || !nelements) return NULL;
 	*nelements=0;
-	configs=__vglConfigsFromVisAttribs(attrib_list, screen, depth, c_class, level,
+	configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class, level,
 		stereo, trans, *nelements, true);
 	if(configs && *nelements)
 	{
@@ -512,7 +511,7 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 	if(fconfig.glp) return glPGetFBConfigs(_localdev, nelements);
 	else
 	#endif
-	return _glXGetFBConfigs(_localdpy, screen, nelements);
+	return _glXGetFBConfigs(_localdpy, DefaultScreen(_localdpy), nelements);
 }
 
 void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_mask)
@@ -713,16 +712,30 @@ Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
 	return _glXJoinSwapGroupNV(_localdpy, ServerDrawable(dpy, drawable), group);
 }
 
-shimfuncdpy3(Bool, glXBindSwapBarrierNV, Display*, dpy, GLuint, group, GLuint, barrier, return );
+Bool glXBindSwapBarrierNV(Display *dpy, GLuint group, GLuint barrier)
+{
+	return _glXBindSwapBarrierNV(_localdpy, group, barrier);
+}
 
 Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group, GLuint *barrier)
 {
 	return _glXQuerySwapGroupNV(_localdpy, ServerDrawable(dpy, drawable), group, barrier);
 }
 
-shimfuncdpy4(Bool, glXQueryMaxSwapGroupsNV, Display*, dpy, int, screen, GLuint*, maxGroups, GLuint*, maxBarriers, return );
-shimfuncdpy3(Bool, glXQueryFrameCountNV, Display*, dpy, int, screen, GLuint*, count, return );
-shimfuncdpy2(Bool, glXResetFrameCountNV, Display*, dpy, int, screen, return );
+Bool glXQueryMaxSwapGroupsNV(Display *dpy, int screen, GLuint *maxGroups, GLuint *maxBarriers)
+{
+	return _glXQueryMaxSwapGroupsNV(_localdpy, DefaultScreen(_localdpy), maxGroups, maxBarriers);
+}
+
+Bool glXQueryFrameCountNV(Display *dpy, int screen, GLuint *count)
+{
+	return _glXQueryFrameCountNV(_localdpy, DefaultScreen(_localdpy), count);
+}
+
+Bool glXResetFrameCountNV(Display *dpy, int screen)
+{
+	return _glXResetFrameCountNV(_localdpy, DefaultScreen(_localdpy));
+}
 
 #ifdef GLX_ARB_get_proc_address
 
