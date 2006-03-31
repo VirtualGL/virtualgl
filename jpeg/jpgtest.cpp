@@ -219,7 +219,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 
 		// Cleanup
-		if(jpegbuf && tilesizex && tilesizey)
+		if(jpegbuf)
 		{
 			for(i=0; i<numtilesx*numtilesy; i++)
 				{if(jpegbuf[i]) free(jpegbuf[i]);  jpegbuf[i]=NULL;}
@@ -232,15 +232,15 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	return;
 
 	bailout:
-	if(jpegbuf && tilesizex && tilesizey)
+	if(jpegbuf)
 	{
-		for(i=0; i<tilesizex*tilesizey; i++)
+		for(i=0; i<numtilesx*numtilesy; i++)
 			{if(jpegbuf[i]) free(jpegbuf[i]);  jpegbuf[i]=NULL;}
 		free(jpegbuf);  jpegbuf=NULL;
 	}
 	if(comptilesize) {free(comptilesize);  comptilesize=NULL;}
 	if(rgbbuf) {free(rgbbuf);  rgbbuf=NULL;}
-	exit(1);
+	return;
 }
 
 
