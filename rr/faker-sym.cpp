@@ -154,7 +154,6 @@ void __vgl_loadsymbols(void)
 	lsym(XCheckTypedEvent);
 	lsym(XCheckTypedWindowEvent);
 	lsym(XCheckWindowEvent);
-	lsym(XCloseDisplay);
 	lsym(XConfigureWindow);
 	lsym(XCopyArea);
 	lsym(XCreateWindow);

@@ -280,21 +280,6 @@ Display *XOpenDisplay(_Xconst char* name)
 	return dpy;
 }
 
-int XCloseDisplay(Display *dpy)
-{
-	int retval=0;
-	TRY();
-
-		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
-
-	retval=_XCloseDisplay(dpy);
-
-		stoptrace();  closetrace();
-
-	CATCH();
-	return retval;
-}
-
 Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	unsigned int width, unsigned int height, unsigned int border_width,
 	int depth, unsigned int c_class, Visual *visual, unsigned long valuemask,
@@ -538,19 +523,18 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	pbuffer *pb;
 	GLXDrawable read=src, draw=dst;  bool srcpm=false, dstpm=false;
 
-		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);  prargx(gc);
-		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
-		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
-
 	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 
 	if(!srcpm && !dstpm)
 	{
 		int retval=_XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
-		stoptrace();  closetrace();
 		return retval;
 	}
+
+		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);  prargx(gc);
+		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
+		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
 
 	GLXDrawable oldread=GetCurrentReadDrawable();
 	GLXDrawable olddraw=GetCurrentDrawable();
