@@ -25,9 +25,10 @@
 #include "rrlog.h"
 
 extern void __vgl_safeexit(int);
+extern void __vgl_fakerinit(void);
 
-#define checksym(s) {if(!__##s) { \
-	rrout.PRINT("[VGL] "#s" symbol not loaded\n");  __vgl_safeexit(1);}}
+#define checksym(s) {if(!__##s) {__vgl_fakerinit();  if(!__##s) { \
+	rrout.PRINT("[VGL] "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
@@ -314,8 +315,6 @@ funcdef4(Bool, XCheckTypedWindowEvent, Display *, dpy, Window, win,
 
 funcdef4(Bool, XCheckWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe, return);
-
-funcdef1(int, XCloseDisplay, Display *, dpy, return);
 
 funcdef4(int, XConfigureWindow, Display *, dpy, Window, win,
 	unsigned int, value_mask, XWindowChanges *, values, return);
