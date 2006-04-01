@@ -1,4 +1,15 @@
 #!/bin/sh
+# The interpreter to use:
+#$ -S /bin/sh
+#
+# Specify that this job needs a graphics device:
+#$ -l gfx=1
+#
+# Default is to use VirtualGL.
+#$ -l vgl=1
+#
+# Specify that the env var DISPLAY is to be sent to SGE:
+#$ -v DISPLAY
 
 usage()
 {
