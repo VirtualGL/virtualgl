@@ -12,7 +12,7 @@
  * wxWindows Library License for more details.
  */
 
-// This implements a JPEG compressor/decompressor using the Sun Medialib
+// This implements a JPEG compressor/decompressor using the Sun mediaLib
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -6,7 +6,7 @@
  * The contents of this file were shamelessly borrowed from libjpeg v6b
  * with optimizations from jpeg-mmx (http://mjpeg.sourceforge.net/)
  * It contains only the routines necessary to implement Huffman encoding and
- * decoding for the Sun MediaLib JPEG codec for VirtualGL.
+ * decoding for the Sun mediaLib JPEG codec for VirtualGL.
  */
 
 #include <string.h>
