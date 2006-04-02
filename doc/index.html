@@ -826,8 +826,9 @@ permission is automatically granted regardless of whether anyone is
 logged in locally.</p>
 <ol>
   <li>Log in as root.</li>
-  <li>Temporarily shut down the X
-server by issuing<br>
+  <li>
+    <p>Temporarily shut down the X
+server by issuing</p>
     <pre>/etc/init.d/dtlogin stop</pre>
   </li>
   <li>Edit <span class="monospace">/etc/logindevperm</span>
@@ -861,7 +862,8 @@ and
 add the following lines to the bottom of the file:<br>
     <pre>xhost +localhost<br>xhost +`hostname`</pre>
   </li>
-  <li>If <span class="monospace">/etc/dt/config/Xconfig</span>
+  <li><span style="font-weight: bold;"></span>If <span
+ class="monospace">/etc/dt/config/Xconfig</span>
 does
 not exist, then copy the default <span class="monospace">Xconfig</span>
 file from <span class="monospace">/usr/dt/config</span>
@@ -873,23 +875,28 @@ location:<br>
 and
 add (or uncomment) the following line:<br>
     <pre>Dtlogin*grabServer: False<br></pre>
+    <p><span class="note">Note:</span>If the system you are configuring
+as a VirtualGL server is also being used as a Sun Ray server,&nbsp;then
+edit <span class="monospace">/etc/dt/config/Xconfig.SUNWut.prototype</span>
+instead.</p>
   </li>
-  <li>Unless you know that you
+  <li>
+    <p>Unless you know that you
 absolutely need it, disable the XTEST
 extension.&nbsp; Disabling XTEST eliminates a potential security
 loophole opened up by Step 6, whereby an authenticated user on the
 server could theoretically send key/mouse events into the server's
 local display.&nbsp; Even with XTEST disabled, it is generally a
 good
-idea to leave the server's local display logged out when not in use.<br>
-&nbsp;</li>
+idea to leave the server's local display logged out when not in use.</p>
+  </li>
   <ol style="list-style-type: lower-alpha;">
     <li>If <span class="monospace">/etc/dt/config/Xservers</span>
 does
 not exist, then copy the default <span class="monospace">Xservers</span>
 file from <span class="monospace">/usr/dt/config</span>
 to that
-location:<br>
+location:
       <pre>cp /usr/dt/config/Xservers /etc/dt/config/Xservers</pre>
     </li>
     <li>Edit <span class="monospace">/etc/dt/config/Xservers</span>
@@ -898,15 +905,24 @@ and add an argument of <span class="monospace">-tst</span> <span
 the line corresponding to the display
 number you are configuring, e.g.:<br>
       <pre>:0&nbsp; Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst<br></pre>
-    </li>
+      <span class="note">Note:</span>If the system you are configuring
+as a VirtualGL server is also being used as a Sun Ray server, then copy
+      <span class="monospace">/etc/dt/config/Xservers</span> to <span
+ class="monospace">/etc/dt/config/Xservers.SUNWut.prototype</span> and
+edit <span class="monospace">/etc/dt/config/Xservers.SUNWut.prototype</span>..
+&nbsp;Do not edit <span class="monospace">/etc/dt/config/Xservers</span>,
+since it will be overwritten each time the system is restarted.</li>
   </ol>
-  <li>Verify that <span class="monospace">/etc/dt/config</span> and <span
+  <li>
+    <p>Verify that <span class="monospace">/etc/dt/config</span> and <span
  class="monospace">/etc/dt/config/Xsetup</span> can be executed by all
 users, and verify that <span class="monospace">/etc/dt/config/Xconfig</span>
 and <span class="monospace">/etc/dt/config/Xservers</span> can be read
-by all users</li>
-  <li>Restart the X server by
-issuing<br>
+by all users</p>
+  </li>
+  <li>
+    <p>Restart the X server by
+issuing</p>
     <pre>/etc/init.d/dtlogin start</pre>
   </li>
   <li>You can check your work by
