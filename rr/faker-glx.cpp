@@ -746,10 +746,6 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 #define checkfakedidx(f) checkfaked(f)
 #endif
 
-extern void __vgl_fakerinit(void);
-
-
-
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	void (*retval)(void)=NULL;
