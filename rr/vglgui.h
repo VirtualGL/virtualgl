@@ -39,7 +39,20 @@ class vglgui : public Runnable
 			try
 			{
 				init();
-				if(_appctx) XtAppMainLoop(_appctx);
+				if(_appctx)
+				{
+					while(!XtAppGetExitFlag(_appctx))
+					{
+						XEvent e;
+						XtAppNextEvent(_appctx, &e);
+						if(e.type==ClientMessage
+							&& e.xclient.message_type==XInternAtom(_dpy, "WM_PROTOCOLS", False)
+							&& e.xclient.data.l[0]==XInternAtom(_dpy, "WM_DELETE_WINDOW", False))
+							XtAppSetExitFlag(_appctx);
+						else
+							XtDispatchEvent(&e);
+					}
+				}
 				destroy();
 			}
 			catch(rrerror &e)

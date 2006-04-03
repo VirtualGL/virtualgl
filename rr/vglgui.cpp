@@ -61,7 +61,6 @@ rrcs vglgui::_Instancemutex, vglgui::_Popupmutex;
 
 static void Die(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	vglgui *that=vglgui::instance();
 	XtAppContext appctx=XtWidgetToApplicationContext(w);
 	if(appctx) XtAppSetExitFlag(appctx);
 }
@@ -104,6 +103,7 @@ void vglgui::init(void)
 {
 	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
 
+	XtToolkitThreadInitialize();
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
 	XtAppSetFallbackResources(_appctx, (char **)fallback_resources);
@@ -192,7 +192,8 @@ void vglgui::init(void)
 	XtRealizeWidget(_toplevel);
 
 	Atom deleteatom=XInternAtom(_dpy, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(_dpy, XtWindow(_toplevel), &deleteatom, 1);
+	if(!XSetWMProtocols(_dpy, XtWindow(_toplevel), &deleteatom, 1))
+		_throw("Could not set WM protocols");
 	XtOverrideTranslations(_toplevel, XtParseTranslationTable ("<Message>WM_PROTOCOLS: Die()"));
 	UpdateQual();
 }
@@ -324,7 +325,6 @@ void vglgui::hiQualProc(Widget w, XtPointer client, XtPointer p)
 
 void vglgui::quitProc(Widget w, XtPointer client, XtPointer p)
 {
-	vglgui *that=(vglgui *)client;
 	XtAppContext appctx=XtWidgetToApplicationContext(w);
 	if(appctx) XtAppSetExitFlag(appctx);
 }
