@@ -1,5 +1,5 @@
 #!/bin/sh
-# The interpreter to use:
+# The interpreter to use (if this script is submitted to N1 Grid Engine):
 #$ -S /bin/sh
 #
 # Specify that this job needs a graphics device:
