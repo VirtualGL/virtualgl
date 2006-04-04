@@ -47,7 +47,7 @@ class vglgui : public Runnable
 						XtAppNextEvent(_appctx, &e);
 						if(e.type==ClientMessage
 							&& e.xclient.message_type==XInternAtom(_dpy, "WM_PROTOCOLS", False)
-							&& e.xclient.data.l[0]==XInternAtom(_dpy, "WM_DELETE_WINDOW", False))
+							&& (Atom)e.xclient.data.l[0]==XInternAtom(_dpy, "WM_DELETE_WINDOW", False))
 							XtAppSetExitFlag(_appctx);
 						else
 							XtDispatchEvent(&e);
