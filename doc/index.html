@@ -120,6 +120,8 @@ OpenGL</a></li>
   <li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li>
   <li><a href="#advancedopengl">Advanced OpenGL Features</a></li>
   <li><a href="#perf">Performance Measurement</a></li>
+  <li><a href="#configdialog">The VirtualGL Configuration
+Dialog</a></li>
   <li><a href="#config">Advanced Configuration</a></li>
 </ul>
 <hr style="width: 100%; height: 2px;">
@@ -406,7 +408,9 @@ decent 2D performance<br>
         <li>For applications that
 use stereo or
 transparent&nbsp;overlays, a high-end 3D
-accelerator such&nbsp;as the nVidia Quadro is required on the client</li>
+accelerator such&nbsp;as the nVidia Quadro or 3DLabs Wildcat
+Realizm is
+required on the client</li>
       </ul>
       </td>
     </tr>
@@ -421,7 +425,7 @@ accelerator such&nbsp;as the nVidia Quadro is required on the client</li>
       <td>
       <ul>
         <li><a href="http://www.hummingbird.com/">Hummingbird</a>
-Exceed 8 or newer (Exceed 2006 or newer recommended)<br>
+Exceed 8 or newer<br>
           <br>
           <span class="note">Note:</span>Contact
 Gary Romualdez of
@@ -1183,8 +1187,61 @@ Consult the <a href="#config">Advanced
 Configuration</a> section for
 more information on <span class="monospace">vglrun</span>
 command line
-options </li>
+options</li>
 </ol>
+<h3>Troubleshooting</h3>
+It's generally a good idea to make sure that a regular X application
+(such as xterm) can be remotely displayed from the application server
+to your client workstation prior to &nbsp;running VirtualGL.
+&nbsp;Some
+versions of Linux (most notably SuSE) ship from the factory with the X
+server configured such that it cannot accept remote TCP connections at
+all. &nbsp;If you are using such a machine as a VirtualGL client,
+it is
+recommended that you&nbsp;tunnel X11 through SSh as a work-around
+(see
+the <a href="#secureusage">Secure
+Usage</a> section for more details
+on how to run VirtualGL in such an environment.)<br>
+<br>
+Advanced users may also wish to remove the <span class="monospace">-nolisten
+tcp</span> switch from the X server
+command line on the client machine
+and restart the X server. &nbsp;Refer to the table below for the
+location of the X server command line on various distributions and
+display managers:<br>
+<br>
+<table style="text-align: left;" border="0" cellpadding="5"
+ cellspacing="3">
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader"></td>
+      <td style="font-weight: bold;" class="colorheader">xdm <br>
+      </td>
+      <td style="font-weight: bold;" class="colorheader">gdm<br>
+      <small>(default on most
+Linux systems)</small><br>
+      </td>
+      <td style="font-weight: bold;" class="colorheader">kdm</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">RedHat (or
+equivalent)</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span><br>
+      </td>
+      <td><span class="monospace">/etc/X11/gdm/gdm.conf</span><br>
+      </td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">SuSE/United
+Linux</td>
+      <td><span class="monospace">/etc/X11/xdm/Xservers</span></td>
+      <td><span class="monospace">/etc/opt/gnome/gdm/gdm.conf</span></td>
+      <td><span class="monospace">/etc/opt/kde3/share/config/kdm/Xservers</span></td>
+    </tr>
+  </tbody>
+</table>
 <br>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 <hr style="width: 100%; height: 2px;">
@@ -2593,7 +2650,72 @@ rate, and the x and y offset of the sampling area within the window.</p>
 <p style="text-align: right;"><a href="#" target="_top">top</a><br>
 </p>
 <hr style="width: 100%; height: 2px;">
-<h2><a name="config"></a>Advanced
+<h2><a name="configdialog"></a>The VirtualGL Configuration
+Dialog<br>
+</h2>
+<p>Several of VirtualGL's
+configuration parameters can be changed on the fly once an application
+has started. &nbsp;This is accomplished by using the VirtualGL
+configuration dialog, which can be activated by holding down the <span
+ class="monospace">CTRL</span> and&nbsp;<span class="monospace">SHIFT</span>
+keys and pressing the <span class="monospace">F8</span>
+key while any one of the application's windows is active. &nbsp;This
+displays a
+dialog box similar to the following:</p>
+<p><img style="width: 210px; height: 235px;" alt=""
+ src="configdialog.gif"></p>
+<p>You can use this dialog to
+enable or disable frame spoiling or to adjust the JPEG quality and
+subsampling. &nbsp;Changes are reflected immediately in the
+application.</p>
+<p><span style="font-weight: bold;">Frame Spoiling</span>
+- &nbsp;Clicking on this button will toggle frame spoiling on and
+off. &nbsp;If the button is highlighted (black), then frame
+spoiling is enabled.<br>
+</p>
+<p><span style="font-weight: bold;">Qual Preset: Broadband/T1</span>
+- Clicking on this button will set the JPEG quality to 30 and the JPEG
+subsampling to 4:1:1, settings which will produce good performance on
+broadband connections (but at the expense of image quality.)</p>
+<p><span style="font-weight: bold;">Qual Preset: LAN</span>
+- Clicking on this button will set the JPEG quality to 95 and the JPEG
+subsampling to 4:4:4, settings which will produce visually lossless
+quality (100 Mbit/sec switched LAN recommended.)</p>
+<p><span style="font-weight: bold;">JPEG Quality</span>
+- Click and drag the slider to change the JPEG quality to an arbitrary
+value between 1 and 100.</p>
+<p><span style="font-weight: bold;">JPEG Subsampling</span>
+- Click on any of the three buttons to change the JPEG subsampling.
+&nbsp;The highlighted (black) button indicates the current value.</p>
+<p><span style="font-weight: bold;">Close Dialog</span> - Close the
+dialog (you can also use the close gadget on the dialog window)</p>
+<p><span class="note">Note:</span>The
+JPEG quality and subsampling gadgets will only be shown if VirtualGL is
+running in direct mode. &nbsp;In raw mode, the only setting that
+can be changed with this dialog is frame spoiling.</p>
+<p>The <span class="monospace">VGL_GUI </span>environment variable
+can be used to change the key sequence used to pop up the dialog box.
+&nbsp;If the default of <span class="monospace">CTRL-SHIFT-F8</span>
+is not suitable, then set <span class="monospace">VGL_GUI</span> to
+any combination of <span class="monospace">ctrl</span>, <span
+ class="monospace">shift</span>, <span class="monospace">alt</span>,
+and one of <span class="monospace">{f1, f2,..., f12}</span> (these are
+not case sensitive.) &nbsp;e.g.</p>
+<pre>export VGL_GUI=CTRL-F9</pre>
+<p>will cause the dialog box to pop up whenever <span class="monospace">CTRL-F9</span>
+is pressed.</p>
+<p>To disable the VirtualGL dialog altogether, set <span
+ class="monospace">VGL_GUI</span> to <span class="monospace">none</span>.</p>
+<p><span class="note">Note:</span>VirtualGL monitors the application's
+X event loop to determine whenever a particular key sequence has been
+pressed. &nbsp;If an application is not monitoring key press events in
+its X event loop, then the VirtualGL configuration dialog might not
+work properly.</p>
+<div style="text-align: right;">
+<p><a href="#" target="_top">top</a></p>
+<div style="text-align: left;">
+<hr style="width: 100%; height: 2px;"></div>
+<h2 style="text-align: left;"><a name="config"></a>Advanced
 Configuration<br>
 </h2>
 <div style="text-align: left;">
@@ -2739,6 +2861,30 @@ details.<br>
       <td style="font-weight: bold;">:0</td>
     </tr>
     <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_FPS<br>
+      <br>
+      </td>
+      <td><span style="font-weight: bold;" class="monospace">-fps
+&lt;floating point number greater than 0&gt;</span></td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Limit
+the client/server
+frame rate to the specified number of frames per second</span><br>
+Setting <span class="monospace">VGL_FPS</span>&nbsp;or
+passing <span class="monospace">-fps</span>
+as an argument to <span class="monospace">vglrun</span>
+will enable VirtualGL's frame rate governor. &nbsp;When enabled,
+the frame rate governor will attempt to limit the overall throughput of
+the VirtualGL pipeline to the specified number of frames/second.
+&nbsp;If frame spoiling is disabled, this effectively limits the
+server's rendering frame rate as well. &nbsp;This option applies
+regardless of whether VirtualGL is being run in direct mode (with
+compression enabled) or in raw mode (with compression disabled.)<br>
+      </td>
+      <td style="font-weight: bold;">Frame
+rate governor disabled</td>
+    </tr>
+    <tr>
       <td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
 VGL_GAMMA=1<br>
       </span></td>
@@ -2797,6 +2943,34 @@ to use.<br>
 Normally, you shouldn't need to muck with this unless something doesn't
 work.</td>
       <td style="font-weight: bold;"></td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">VGL_GUI<br>
+      </td>
+      <td><br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Key
+sequence used to
+invoke the configuration dialog<br>
+      </span>VirtualGL will normally
+monitor an application's X event queue and pop up the VirtualGL
+configuration
+dialog whenever&nbsp;<span class="monospace">CTRL-SHIFT-F8</span>&nbsp;is
+pressed. &nbsp;In the event that this interferes
+with a key sequence that the application is already using, you can
+redefine the key sequence used to pop up VGL's configuration dialog by
+setting <span class="monospace">VGL_GUI</span>
+to some combination of <span class="monospace">shift</span>, <span
+ class="monospace">ctrl</span>, <span class="monospace">alt</span>,
+and one of <span class="monospace">{f1,
+f2, ..., f12}</span>. &nbsp;You
+can also set <span class="monospace">VGL_GUI</span>
+to <span class="monospace">none</span>
+to disable the configuration dialog altogether. &nbsp;See this
+section for more details.<br>
+      </td>
+      <td style="font-weight: bold;">shift-ctrl-f8</td>
     </tr>
     <tr>
       <td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
@@ -3219,6 +3393,19 @@ Normally, you shouldn't need to muck with this unless something doesn't
 work.</td>
       <td style="font-weight: bold;"></td>
     </tr>
+    <tr>
+      <td><span style="font-weight: bold;" class="monospace">VGL_XVENDOR</span></td>
+      <td></td>
+      <td><span style="font-weight: bold;">Return&nbsp;a fake X11
+vendor string when the application&nbsp;calls XServerVendor()</span><br
+ style="font-weight: bold;">
+Some applications expect XServerVendor() to return a particular value,
+which the application (sometimes erroneously) uses to figure out
+whether&nbsp;it's running locally or remotely. &nbsp;This
+setting allows you to fool such applications into thinking they're
+running on a "local" X server rather than a remote connection.</td>
+      <td></td>
+    </tr>
   </tbody>
 </table>
 <br>
@@ -3331,6 +3518,7 @@ stereo is enabled; use X11 otherwise</td>
 </table>
 <ul>
 </ul>
+</div>
 </div>
 </div>
 </body>
