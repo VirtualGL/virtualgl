@@ -15,9 +15,6 @@
 #define __RRGLFRAME_H
 
 #include "rrframe.h"
-#define GLX11
-#include "tempctx.h"
-#undef GLX11
 
 // Bitmap drawn using OpenGL
 
@@ -51,24 +48,38 @@ class rrglframe : public rrframe
 	public:
 
 	rrglframe(char *dpystring, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _tjhnd(NULL),
-		_newdpy(false)
+		_stereo(false),
+		#ifndef XDK
+		_dpy(NULL),
+		#endif
+		 _win(win), _ctx(0), _tjhnd(NULL), _newdpy(false)
 	{
 		if(!dpystring || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		if(!_dpy)
+		#endif
 		if(!(_dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
 		_newdpy=true;
 		_isgl=true;
 		#ifdef XDK
+		_Instancecount++;
 		__vgl_loadsymbols();
 		#endif
 		init(_dpy, win);
 	}
 
 	rrglframe(Display *dpy, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false), _dpy(NULL), _win(win), _ctx(0), _tjhnd(NULL),
-		_newdpy(false)
+		_stereo(false),
+		#ifndef XDK
+		_dpy(NULL),
+		#endif
+		_win(win), _ctx(0), _tjhnd(NULL), _newdpy(false)
 	{
 		if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		_dpy=dpy;
 		_isgl=true;
 		#ifdef XDK
@@ -81,7 +92,7 @@ class rrglframe : public rrframe
 	{
 		XVisualInfo *v=NULL;
 		#ifdef XDK
-		rrcs::safelock l(_mutex);
+		rrcs::safelock l(_Mutex);
 		#endif
 
 		try
@@ -107,7 +118,9 @@ class rrglframe : public rrframe
 		{
 			if(_dpy && _ctx) {glXMakeCurrent(_dpy, 0, 0);  glXDestroyContext(_dpy, _ctx);  _ctx=0;}
 			if(v) XFree(v);
+			#ifndef XDK
 			if(_dpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
+			#endif
 			throw;
 		}
 	}
@@ -115,10 +128,16 @@ class rrglframe : public rrframe
 	~rrglframe(void)
 	{
 		#ifdef XDK
-		rrcs::safelock l(_mutex);
+		_Mutex.lock(false);
 		#endif
 		if(_ctx && _dpy) {glXMakeCurrent(_dpy, 0, 0);  glXDestroyContext(_dpy, _ctx);  _ctx=0;}
+		#ifdef XDK
+		_Instancecount--;
+		if(_Instancecount==0 && _dpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
+		_Mutex.unlock(false);
+		#else
 		if(_dpy && _newdpy) {XCloseDisplay(_dpy);  _dpy=NULL;}
+		#endif
 		if(_tjhnd) {tjDestroy(_tjhnd);  _tjhnd=NULL;}
 		if(_rbits) {delete [] _rbits;  _rbits=NULL;}
 	}
@@ -175,6 +194,9 @@ class rrglframe : public rrframe
 
 	void redraw(void)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		drawtile(0, 0, _h.framew, _h.frameh);
 		sync();
 	}
@@ -184,7 +206,7 @@ class rrglframe : public rrframe
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
 		#ifdef XDK
-		rrcs::safelock l(_mutex);
+		rrcs::safelock l(_Mutex);
 		#endif
 		int format=GL_RGB;
 		#ifdef GL_BGR_EXT
@@ -192,7 +214,8 @@ class rrglframe : public rrframe
 		#endif
 		if(_pixelsize==1) format=GL_COLOR_INDEX;
 		
-		tempctx tc(_dpy, _win, _win, _ctx, true);
+		if(!glXMakeCurrent(_dpy, _win, _ctx))
+			_throw("Could not bind OpenGL context to window (window may have disappeared)");
 
 		int e;
 		e=glGetError();
@@ -222,7 +245,7 @@ class rrglframe : public rrframe
 	void sync(void)
 	{
 		#ifdef XDK
-		rrcs::safelock l(_mutex);
+		rrcs::safelock l(_Mutex);
 		#endif
 		glFinish();
 		glXSwapBuffers(_dpy, _win);
@@ -251,10 +274,11 @@ class rrglframe : public rrframe
 		return ret;
 	}
 
-	#ifdef XDK
-	static rrcs _mutex;
-	#endif
 	bool _stereo;
+	#ifdef XDK
+	static int _Instancecount;
+	static
+	#endif
 	Display *_dpy;  Window _win;
 	GLXContext _ctx;
 	tjhandle _tjhnd;

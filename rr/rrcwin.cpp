@@ -78,7 +78,7 @@ void rrcwin::initx11(void)
 	rrframe *b=NULL;
 	char dpystr[80];
 	#ifdef XDK
-	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
+	sprintf(dpystr, "localhost:%d.0", _dpynum);
 	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
 	#endif

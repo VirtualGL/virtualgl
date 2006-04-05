@@ -167,6 +167,9 @@ class rrframe
 			throw(rrerror("rrframe::checkheader", "Invalid header"));
 	}
 
+	#ifdef XDK
+	static rrcs _Mutex;
+	#endif
 	rrevent _ready;
 	rrevent _complete;
 	friend class rrjpeg;
@@ -238,12 +241,18 @@ class rrfb : public rrframe
 	rrfb(Display *dpy, Window win) : rrframe()
 	{
 		if(!dpy || !win) throw(rrerror("rrfb::rrfb", "Invalid argument"));
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		XFlush(dpy);
 		init(DisplayString(dpy), win);
 	}
 
 	rrfb(char *dpystring, Window win) : rrframe()
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		init(dpystring, win);
 	}
 
@@ -259,13 +268,22 @@ class rrfb : public rrframe
 
 	~rrfb(void)
 	{
+		#ifdef XDK
+		_Mutex.lock(false);
+		#endif
 		if(_fb.bits) fbx_term(&_fb);  if(_bits) _bits=NULL;
 		if(_tjhnd) tjDestroy(_tjhnd);
 		if(_wh.dpy) XCloseDisplay(_wh.dpy);
+		#ifdef XDK
+		_Mutex.unlock(false);
+		#endif
 	}
 
 	void init(rrframeheader *h)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		checkheader(h);
 		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1));
 		if(h->framew>_fb.width || h->frameh>_fb.height)
@@ -307,6 +325,9 @@ class rrfb : public rrframe
 
 	void redraw(void)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		if(_flags&RRBMP_BOTTOMUP)
 		{
 			for(int i=0; i<_fb.height; i++)
@@ -319,6 +340,9 @@ class rrfb : public rrframe
 
 	void draw(void)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		int w=_h.width, h=_h.height;
 		XWindowAttributes xwa;
 		if(!XGetWindowAttributes(_wh.dpy, _wh.win, &xwa))
@@ -339,6 +363,9 @@ class rrfb : public rrframe
 
 	void drawtile(int x, int y, int w, int h)
 	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
 		if(_flags&RRBMP_BOTTOMUP)
@@ -350,7 +377,13 @@ class rrfb : public rrframe
 		fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
 	}
 
-	void sync(void) {fbx(fbx_sync(&_fb));}
+	void sync(void)
+	{
+		#ifdef XDK
+		rrcs::safelock l(_Mutex);
+		#endif
+		fbx(fbx_sync(&_fb));
+	}
 
 	private:
 

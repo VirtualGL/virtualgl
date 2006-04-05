@@ -11,9 +11,8 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrglframe.h"
+#include "rrframe.h"
 
 #ifdef XDK
-Display *rrglframe::_dpy=NULL;
-int rrglframe::_Instancecount=0;
+rrcs rrframe::_Mutex;
 #endif
