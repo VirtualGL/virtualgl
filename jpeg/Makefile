@@ -95,7 +95,12 @@ $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/turbojpeg.lib
 else
 ##########################################################################
 
+ifeq ($(platform), cygwin)
+LTARGET = $(EDIR)/turbojpeg.dll \
+          $(LDIR)/turbojpeg.lib
+else
 LTARGET = $(LDIR)/libturbojpeg.$(SHEXT)
+endif
 
 TARGETS = $(EDIR)/jpgtest \
           $(EDIR)/jpegut
@@ -213,6 +218,10 @@ $(ODIR)/turbojpeg.o: turbojpeg-mlib.c turbojpeg-mlibhuff.c
 JPEGLINK = -lmlib
 
 endif
+
+$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbojpeg.o $(JPEGDEP)
+	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
+		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
 
 $(LDIR)/libturbojpeg.$(SHEXT): $(ODIR)/turbojpeg.o $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)

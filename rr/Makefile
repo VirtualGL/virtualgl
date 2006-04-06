@@ -95,18 +95,23 @@ OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
             $(EDIR)/rrdisplayserverut \
-            $(EDIR)/rrfakerut \
             $(EDIR)/rrframeut
 
-TARGETS = $(LDIR)/librrfaker.$(SHEXT) \
-          $(LDIR)/librr.$(SHEXT) \
-          $(EDIR)/vglclient \
+TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
+ifneq ($(platform), cygwin)
+TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) $(TARGETS)
+UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut
+endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
 ifneq ($(platform), linux)
+ifeq ($(platform), cygwin)
+RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
+else
 RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
+endif
 endif
 RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB)
 
