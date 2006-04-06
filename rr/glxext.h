@@ -315,7 +315,7 @@ typedef unsigned int GLXVideoDeviceNV;
 #include <inttypes.h>
 #elif (defined(__sun__) && defined(__svr4__)) || (defined(__sun) && defined(__SVR4))
 #include <inttypes.h>
-#elif defined(__SCO__) || defined(__USLC__) || defined(__linux__)
+#elif defined(__SCO__) || defined(__USLC__) || defined(__linux__) || defined(__CYGWIN__)
 #include <stdint.h>
 #elif defined(__UNIXOS2__) || defined(__SOL64__)
 typedef long int int32_t;
