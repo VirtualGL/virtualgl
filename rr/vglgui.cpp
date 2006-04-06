@@ -110,8 +110,7 @@ void vglgui::init(void)
 	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(_dpy), "VirtualGL",
 		"dialog", NULL, 0, &argc, argv));
 	errifnot(_toplevel=XtVaAppCreateShell("VirtualGL", "dialog",
-		applicationShellWidgetClass, _dpy, argv, &argc, fallback_resources,
-		XtNborderWidth, 0, NULL));
+		applicationShellWidgetClass, _dpy, XtNborderWidth, 0, NULL));
 	Widget buttonForm=XtVaCreateManagedWidget("buttonForm", formWidgetClass,
 		_toplevel, NULL);
 	errifnot(buttonForm);
