@@ -27,7 +27,7 @@ endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
-OPTFLAG = -fast -faltivec
+OPTFLAG = -mcpu=7450 -fast
 endif
 
 DEFAULTJPEGLIB = quicktime
