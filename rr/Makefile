@@ -128,7 +128,7 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -lXt -lXaw
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl -lXt -lXaw
 
 $(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
