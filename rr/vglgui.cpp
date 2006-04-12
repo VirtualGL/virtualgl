@@ -24,37 +24,11 @@
 
 extern FakerConfig fconfig;
 
-static const char *fallback_resources[]=
-{
-	"*quallabel.label: JPEG Quality",
-	"*qualslider.length: 100",
-	"*qualslider.width: 130",
-	"*qualslider.orientation: horizontal",
-	"*qualslider.translations: #override\\n\
-		<Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-		<Btn1Motion>: MoveThumb() NotifyThumb()\\n\
-		<Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-		<Btn3Motion>: MoveThumb() NotifyThumb()",
-
-	"*qualtext.label: 000",
-
-	"*subsamplabel.label: JPEG Subsampling\\n[4:1:1 = fastest]\\n[None = best quality]",
-	"*subsamp411.label: 4:1:1",
-	"*subsamp422.label: 4:2:2",
-	"*subsamp444.label: None",
-
-	"*spoil.label: Frame Spoiling: XXX",
-
-	"*dialog.title: VirtualGL Configuration",
-	"*dialog*background: grey",
-	"*dialog.buttonForm.Label.borderWidth: 0",
-
-	"*dialog*quitbutton.label: Close dialog",
-	"*dialog*lobutton.label: Qual Preset: Broadband/T1",
-	"*dialog*hibutton.label: Qual Preset: LAN (default)",
-
-  NULL
-};
+static String qualslider_translations = "#override\n\
+		<Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
+		<Btn1Motion>: MoveThumb() NotifyThumb()\n\
+		<Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
+		<Btn3Motion>: MoveThumb() NotifyThumb()";
 
 vglgui *vglgui::_Instanceptr=NULL;
 rrcs vglgui::_Instancemutex, vglgui::_Popupmutex;
@@ -106,11 +80,11 @@ void vglgui::init(void)
 	XtToolkitThreadInitialize();
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
-	XtAppSetFallbackResources(_appctx, (char **)fallback_resources);
 	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(_dpy), "VirtualGL",
 		"dialog", NULL, 0, &argc, argv));
 	errifnot(_toplevel=XtVaAppCreateShell("VirtualGL", "dialog",
-		applicationShellWidgetClass, _dpy, XtNborderWidth, 0, NULL));
+		applicationShellWidgetClass, _dpy, XtNborderWidth, 0, 
+		XtNtitle, "VirtualGL Configuration", NULL));
 	Widget buttonForm=XtVaCreateManagedWidget("buttonForm", formWidgetClass,
 		_toplevel, NULL);
 	errifnot(buttonForm);
@@ -119,13 +93,13 @@ void vglgui::init(void)
 		buttonForm, NULL);
 	errifnot(quitbutton);
 	XtVaSetValues(quitbutton, XtNleft, XawChainLeft, XtNright, XawChainRight,
-		NULL);
+		XtNlabel, "Close dialog", NULL);
 	XtAddCallback(quitbutton, XtNcallback, quitProc, this);
 
 	errifnot(_spoil=XtCreateManagedWidget("spoil", toggleWidgetClass, buttonForm,
 		NULL, 0));
 	XtVaSetValues(_spoil, XtNfromVert, quitbutton, XtNleft, XawChainLeft,
-		XtNright, XawChainRight, NULL);
+		XtNright, XawChainRight, XtNlabel, "Frame Spoiling: XXX", NULL);
 	XtAddCallback(_spoil, XtNcallback, spoilProc, this);
 
 	if(fconfig.compress!=RRCOMP_NONE)
@@ -134,56 +108,61 @@ void vglgui::init(void)
 			buttonForm, NULL);
 		errifnot(lobutton);
 		XtVaSetValues(lobutton, XtNfromVert, _spoil, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, NULL);
+			XtNright, XawChainRight, XtNlabel, "Qual Preset: Broadband/T1", NULL);
 		XtAddCallback(lobutton, XtNcallback, loQualProc, this);
 
 		Widget hibutton=XtVaCreateManagedWidget("hibutton", commandWidgetClass,
 			buttonForm, NULL);
 		errifnot(hibutton);
 		XtVaSetValues(hibutton, XtNfromVert, lobutton, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, NULL);
+			XtNright, XawChainRight, XtNlabel, "Qual Preset: LAN (default)", NULL);
 		XtAddCallback(hibutton, XtNcallback, hiQualProc, this);
 
 		Widget quallabel=XtCreateManagedWidget("quallabel", labelWidgetClass,
 			buttonForm, NULL, 0);
 		errifnot(quallabel);
 		XtVaSetValues(quallabel, XtNfromVert, hibutton, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, NULL);
+			XtNright, XawChainRight, XtNlabel, "JPEG Quality", XtNborderWidth, 0,
+			NULL);
 
 		errifnot(_qualslider=XtCreateManagedWidget("qualslider", scrollbarWidgetClass,
 			buttonForm, NULL, 0));
 		XtVaSetValues(_qualslider, XtNfromVert, quallabel, XtNleft, XawChainLeft,
-			NULL);
+			XtNlength, 100, XtNwidth, 130, XtNorientation, XtorientHorizontal,
+			XtNtranslations, XtParseTranslationTable(qualslider_translations), 
+			XtNheight, 17, NULL);
 		XtAddCallback(_qualslider, XtNscrollProc, qualScrollProc, this);
 		XtAddCallback(_qualslider, XtNjumpProc, qualJumpProc, this);
 
 		errifnot(_qualtext=XtCreateManagedWidget("qualtext", labelWidgetClass,
 			buttonForm, NULL, 0));
 		XtVaSetValues(_qualtext, XtNfromVert, quallabel, XtNfromHoriz, _qualslider,
-			XtNright, XawChainRight, NULL);
+			XtNright, XawChainRight, XtNlabel, "000", XtNborderWidth, 0, NULL);
 
 		Widget subsamplabel=XtCreateManagedWidget("subsamplabel", labelWidgetClass,
 			buttonForm, NULL, 0);
 		errifnot(subsamplabel);
 		XtVaSetValues(subsamplabel, XtNfromVert, _qualslider, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, NULL);
+			XtNright, XawChainRight,
+			XtNlabel, "JPEG Subsampling\n[4:1:1 = fastest]\n[None = best quality]",
+			XtNborderWidth, 0, NULL);
 
 		errifnot(_subsamp411=XtCreateManagedWidget("subsamp411", toggleWidgetClass,
 			buttonForm, NULL, 0));
 		XtVaSetValues(_subsamp411, XtNfromVert, subsamplabel, XtNleft, XawChainLeft,
-			NULL);
+			XtNlabel, "4:1:1", NULL);
 		XtAddCallback(_subsamp411, XtNcallback, subsamp411Proc, this);
 
 		errifnot(_subsamp422=XtCreateManagedWidget("subsamp422", toggleWidgetClass,
 			buttonForm, NULL, 0));
 		XtVaSetValues(_subsamp422, XtNfromVert, subsamplabel, XtNfromHoriz,
-			_subsamp411, XtNradioGroup, _subsamp411, NULL);
+			_subsamp411, XtNradioGroup, _subsamp411, XtNlabel, "4:2:2", NULL);
 		XtAddCallback(_subsamp422, XtNcallback, subsamp422Proc, this);
 
 		errifnot(_subsamp444=XtCreateManagedWidget("subsamp444", toggleWidgetClass,
 			buttonForm, NULL, 0));
 		XtVaSetValues(_subsamp444, XtNfromVert, subsamplabel, XtNfromHoriz,
-			_subsamp422, XtNradioGroup, _subsamp411, NULL);
+			_subsamp422, XtNradioGroup, _subsamp411, XtNlabel, "None", NULL);
 		XtAddCallback(_subsamp444, XtNcallback, subsamp444Proc, this);
 	}
 	XtAppAddActions(_appctx, actions, XtNumber(actions));
