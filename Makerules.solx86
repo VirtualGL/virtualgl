@@ -18,7 +18,7 @@ OPTFLAG = -O0 -ggdb
 else
 OPTFLAG = -O2
 endif
-SHFLAG = -shared
+SHFLAG = -shared -lc -z defs
 DEPFLAG = -MM
 
 else
@@ -36,7 +36,7 @@ OPTFLAG = -g
 else
 OPTFLAG = -O
 endif
-SHFLAG = -G -lCrun
+SHFLAG = -G -lc -lCrun -z defs
 DEPFLAG = -xM1
 
 endif
@@ -67,8 +67,12 @@ SHEXT = so
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -z lazyload -lssl -z lazyload -lcrypto
+ifeq ($(CC), gcc)
+SOCKLIB := $(SOCKLIB) -lssl -lcrypto
+else
+SOCKLIB := $(SOCKLIB) -zlazyload -lssl -lcrypto -znolazyload
+endif
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lXm -lGL
+FAKERLINK = -lXm -lGL -lm
