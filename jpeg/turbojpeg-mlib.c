@@ -752,9 +752,16 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
 			if(convreq || ((long)tmpptr2&7L)!=0L || j>=h-1) tmpptr2=linebuf2;
 			_mlib(ccfct420(tmpptr, tmpptr2, y, y+yw, cb, cr, jpg->width));
-			if(tmpptr!=jpg->bmpptr) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+			if(tmpptr!=jpg->bmpptr)
+			{
+				if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+				else {_mlib(mlib_VectorCopy_U8(jpg->bmpptr, tmpptr, jpg->width*jpg->ps));}
+			}
 			if(j<h-1 && tmpptr2!=jpg->bmpptr+rgbstride)
-				{_catch(d_postconvertline(tmpptr2, jpg->bmpptr+rgbstride, jpg));}
+			{
+				if(convreq) {_catch(d_postconvertline(tmpptr2, jpg->bmpptr+rgbstride, jpg));}
+				else {_mlib(mlib_VectorCopy_U8(jpg->bmpptr+rgbstride, tmpptr2, jpg->width*jpg->ps));}
+			}
 		}
 	}
 	else
