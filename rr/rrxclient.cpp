@@ -33,10 +33,8 @@ bool ssl=true, nonssl=true;
 int service=0;
 #ifdef SUNOGL
 #include <GL/glx.h>
-int drawmethod=RR_DRAWOGL;
-#else
-int drawmethod=RR_DRAWX11;
 #endif
+int drawmethod=RR_DRAWAUTO;
 
 void start(int, char **);
 

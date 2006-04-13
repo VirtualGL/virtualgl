@@ -17,6 +17,44 @@
 #include "rrprofiler.h"
 #include "rrglframe.h"
 
+#ifdef SUNOGL
+static int use_ogl_as_default(int dpynum)
+{
+	int retval=0;  char dpystr[80];
+	snprintf(dpystr, 79, ":%d.0", dpynum);
+	Display *dpy=XOpenDisplay(dpystr);
+	if(dpy)
+	{
+		int maj_opcode=-1, first_event=-1, first_error=-1;
+		if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error))
+		{
+			int attribs[]={GLX_RGBA, GLX_DOUBLEBUFFER, 0};
+			int sbattribs[]={GLX_RGBA, 0};
+			XVisualInfo *vi=NULL;
+			if((vi=glXChooseVisual(dpy, DefaultScreen(dpy), attribs))!=NULL
+				|| (vi=glXChooseVisual(dpy, DefaultScreen(dpy), sbattribs))!=NULL)
+			{
+				GLXContext ctx=glXCreateContext(dpy, vi, NULL, True);
+				if(ctx)
+				{
+					if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), ctx))
+					{
+						char *renderer=(char *)glGetString(GL_RENDERER);
+						if(renderer && !strstr(renderer, "SUNWpfb")
+							&& !strstr(renderer, "software renderer")) retval=1;
+						glXMakeCurrent(dpy, 0, 0);
+					}
+					glXDestroyContext(dpy, ctx);
+				}
+				XFree(vi);
+			}
+		}
+		XCloseDisplay(dpy);
+	}
+	return retval;
+}
+#endif
+
 rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _jpgi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
@@ -25,6 +63,13 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	_dpynum=dpynum;  _window=window;
 
+	if(_drawmethod==RR_DRAWAUTO)
+	{
+		_drawmethod=RR_DRAWX11;
+		#ifdef SUNOGL
+		if(use_ogl_as_default(dpynum)) _drawmethod=RR_DRAWOGL;
+		#endif
+	}
 	if(_stereo) _drawmethod=RR_DRAWOGL;
 	initgl();
 	initx11();
