@@ -96,13 +96,15 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
             $(EDIR)/rrdisplayserverut \
             $(EDIR)/rrframeut
+ifneq ($(platform), cygwin)
+UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut
+endif
 
 TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
 TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) $(TARGETS)
-UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
