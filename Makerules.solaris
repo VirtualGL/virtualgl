@@ -28,6 +28,8 @@ CC = cc
 CXX = CC
 CFLAGS = -xCC -KPIC -mt
 CXXFLAGS = -KPIC -mt
+LAZY = -zlazyload
+NOLAZY = -znolazyload
 
 ifeq ($(subplatform), 64)
 ARCHFLAG = -xtarget=ultra -xarch=v9a
@@ -69,11 +71,7 @@ SHEXT = so
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
 ifneq ($(USESSL), no)
-ifeq ($(CC), gcc)
-SOCKLIB := $(SOCKLIB) -lssl -lcrypto
-else
-SOCKLIB := $(SOCKLIB) -zlazyload -lssl -lcrypto -znolazyload
-endif
+SOCKLIB := $(SOCKLIB) $(LAZY) -lssl -lcrypto $(NOLAZY)
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
