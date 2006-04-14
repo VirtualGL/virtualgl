@@ -34,6 +34,7 @@ static int use_ogl_as_default(int dpynum)
 			if((vi=glXChooseVisual(dpy, DefaultScreen(dpy), attribs))!=NULL
 				|| (vi=glXChooseVisual(dpy, DefaultScreen(dpy), sbattribs))!=NULL)
 			{
+				glXInitThreadsSUN();
 				GLXContext ctx=glXCreateContext(dpy, vi, NULL, True);
 				if(ctx)
 				{

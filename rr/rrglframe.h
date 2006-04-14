@@ -110,6 +110,9 @@ class rrglframe : public rrframe
 				_throw("GLX extension not available");
 			if(!(v=XGetVisualInfo(_dpy, VisualIDMask, &vtemp, &n)) || n==0)
 				_throw("Could not obtain visual");
+			#ifdef SUNOGL
+			glXInitThreadsSUN();
+			#endif
 			if(!(_ctx=glXCreateContext(_dpy, v, NULL, True)))
 				_throw("Could not create GLX context");
 			XFree(v);  v=NULL;

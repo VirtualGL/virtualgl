@@ -140,8 +140,15 @@ $(EDIR)/vglrun: rrlaunch
 
 # Client
 
+LIBGL = -zlazyload -lGL -znolazyload
+ifneq ($(platform), solaris)
+ifneq ($(platform), solx86)
+LIBGL = -lGL
+endif
+endif
+
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) -lGL
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LIBGL)
 
 # Unit tests
 

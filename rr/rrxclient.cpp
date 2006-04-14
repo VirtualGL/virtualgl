@@ -31,9 +31,6 @@ int sslport=-1;
 bool ssl=true, nonssl=true;
 #endif
 int service=0;
-#ifdef SUNOGL
-#include <GL/glx.h>
-#endif
 int drawmethod=RR_DRAWAUTO;
 
 void start(int, char **);
@@ -193,9 +190,6 @@ int main(int argc, char *argv[])
 void start(int argc, char **argv)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
-	#ifdef SUNOGL
-	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
-	#endif
 
 	signal(SIGINT, handler);
 	XSetErrorHandler(xhandler);
