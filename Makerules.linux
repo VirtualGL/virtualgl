@@ -33,7 +33,7 @@ endif
 
 DEFAULTJPEGLIB = ipp
 
-SHFLAG = -shared -z defs
+SHFLAG = -shared
 SHEXT = so
 DEPFLAG = -MM
 
