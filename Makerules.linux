@@ -33,14 +33,14 @@ endif
 
 DEFAULTJPEGLIB = ipp
 
-SHFLAG = -shared
+SHFLAG = -shared -z defs
 SHEXT = so
 DEPFLAG = -MM
 
-FBXLIB = -lfbx -lXext
+FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -lssl
+SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 
 FAKERLINK = -lGL
