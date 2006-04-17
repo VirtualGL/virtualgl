@@ -254,11 +254,13 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		if(bluesize>=0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;}
 	}
 
-	// GLP won't grok GLX_STEREO, even if it's set to False
+	if(stereo)
+	{
+		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
+	}
 	#ifdef USEGLP
 	if(!fconfig.glp) {
 	#endif
-	glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	if(!fconfig.usewindow)
 	{
 		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
