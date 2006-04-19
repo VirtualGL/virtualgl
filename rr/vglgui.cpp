@@ -268,7 +268,7 @@ void vglgui::qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
 	float	size, val;  int qual;  long pos=(long)p;
-	XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, 0);
+	XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, NULL);
 	if(pos<0) val-=.1;  else val+=.1;
 	if(val>1.0) val=1.0;  if(val<0.0) val=0.0;
 	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;

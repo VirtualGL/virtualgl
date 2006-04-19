@@ -30,24 +30,6 @@ extern GLPDevice _localdev;
 #endif
 extern FakerConfig fconfig;
 
-#define _case(ec) case ec: return "GLX Error: "#ec;
-static const char *glxerr(int glxerror)
-{
-	switch(glxerror)
-	{
-		_case(GLX_BAD_SCREEN)
-		_case(GLX_BAD_ATTRIBUTE)
-		_case(GLX_NO_EXTENSION)
-		_case(GLX_BAD_VISUAL)
-		_case(GLX_BAD_CONTEXT)
-		_case(GLX_BAD_VALUE)
-		_case(GLX_BAD_ENUM)
-		default: return "No GLX Error";
-	}
-}
-static int __glxerr=0;
-#define glx(f) {if((__glxerr=(f))!=None) _throw(glxerr(__glxerr));}
-
 struct _visattrib
 {
 	double gamma;
