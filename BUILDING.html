@@ -142,10 +142,12 @@ them) or from the RedHat/Whitebox/CentOS web-site (depending on which flavor of 
 <p>Prior to building 32-bit VirtualGL for the first time, you will need to 
 perform the following additional step:</p>
 <pre>cd /usr/lib<br>ln -fs /lib/libssl.so.? libssl.so<br>ln -fs /lib/libcrypto.so.? libcrypto.so</pre>
+<p><span class="note">Note:</span> On some SuSE systems, you may need to create a link to <span class="monospace">/usr/lib/libssl.so.?</span> and <span class="monospace">/usr/lib/libcrypto.so.?</span> instead.</p>
 <p>This creates a development stub for the 32-bit OpenSSL library, since a 
 32-bit <span class="monospace">openssl-devel</span> package doesn't exist. &nbsp;If you&nbsp;have more than one 32-bit
 version of libssl installed, then replace ? in the above command line
 with the version you wish to link against&nbsp;(usually the highest numbered one is the one you want.)</p>
+
 <p>On Enterprise Linux 4.0 or Fedora, you may additionally need to do the 
 following:</p>
 
