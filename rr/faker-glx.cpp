@@ -50,23 +50,24 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 	{
 		// Punt.  We can't figure out where the visual came from
 		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-			GLX_PBUFFER_BIT, GLX_STEREO, 0, None};
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
+			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
-			attribs[13]=1;
+			attribs[11]=1;
 		#ifdef USEGLP
 		if(fconfig.glp)
 		{
-			attribs[10]=attribs[11]=None;
+			attribs[12]=attribs[13]=None;
+			if(!attribs[11]) attribs[10]=None;
 			configs=glPChooseFBConfig(_localdev, attribs, &n);
-			if((!configs || n<1) && attribs[13])
+			if((!configs || n<1) && attribs[11])
 			{
-				attribs[13]=0;
+				attribs[10]=attribs[11]=0;
 				configs=glPChooseFBConfig(_localdev, attribs, &n);
 			}
-			if((!configs || n<1) && attribs[0])
+			if((!configs || n<1) && attribs[1])
 			{
-				attribs[0]=0;
+				attribs[1]=0;
 				configs=glPChooseFBConfig(_localdev, attribs, &n);
 			}
 			if(!configs || n<1) return 0;
@@ -75,14 +76,14 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		#endif
 		{
 			configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
-			if((!configs || n<1) && attribs[13])
+			if((!configs || n<1) && attribs[11])
 			{
-				attribs[13]=0;
+				attribs[11]=0;
 				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
-			if((!configs || n<1) && attribs[0])
+			if((!configs || n<1) && attribs[1])
 			{
-				attribs[0]=0;
+				attribs[1]=0;
 				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if(!configs || n<1) return 0;
@@ -292,7 +293,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 
-	errifnot(c=_MatchConfig(dpy, vis));
+	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 
 	if(attrib==GLX_USE_GL)
 	{
