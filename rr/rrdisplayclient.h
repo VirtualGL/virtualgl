@@ -46,12 +46,15 @@ class rrdisplayclient : public Runnable
 	void release(rrframe *b) {_ready.signal();}
 	bool stereoenabled(void) {return _stereo;}
 	void sendheader(rrframeheader h, bool eof);
+	void send(char *, int);
+	void recv(char *, int);
+	void connect(char *);
 
-	rrsocket *_sd;
 	int _np;
 
 	private:
 
+	rrsocket *_sd;
 	static const int NB=3;
 	rrcs _bmpmutex;  rrframe _bmp[NB];  int _bmpi;
 	rrevent _ready;
@@ -108,7 +111,7 @@ class rrcompressor : public Runnable
 		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank),
 		_deadyet(false), _parent(parent)
 	{
-		if(parent) {_np=parent->_np;  _sd=parent->_sd;}
+		if(parent) {_np=parent->_np;}
 		_ready.wait();  _complete.wait();
 		char temps[20];
 		snprintf(temps, 19, "Compress %d", myrank);
@@ -165,7 +168,6 @@ class rrcompressor : public Runnable
 	int _storedframes;  rrjpeg **_frame;
 	rrframe *_b, *_lastb;
 	int _myrank, _np;
-	rrsocket *_sd;
 	rrevent _ready, _complete;  bool _deadyet;
 	rrcs _mutex;
 	rrprofiler _prof_comp;

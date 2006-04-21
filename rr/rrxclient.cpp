@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 	}
 	catch(rrerror &e)
 	{
-		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());  exit(1);
+		rrout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
 	}
 	#ifdef XDK
 	__vgl_unloadsymbols();
@@ -233,7 +233,7 @@ void start(int argc, char **argv)
 
 	} catch(rrerror &e)
 	{
-		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());
+		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 }
 

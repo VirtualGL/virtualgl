@@ -30,19 +30,19 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 		endianize_v1(h1);
 		if(_sd)
 		{
-			_sd->send((char *)&h1, sizeof_rrframeheader_v1);
-			_sd->recv(&reply, 1);
+			send((char *)&h1, sizeof_rrframeheader_v1);
+			recv(&reply, 1);
 			if(reply==1) {_v.major=1;  _v.minor=0;}
 			else if(reply=='V')
 			{
 				rrversion v;
 				_v.id[0]=reply;
-				_sd->recv((char *)&_v.id[1], sizeof_rrversion-1);
+				recv((char *)&_v.id[1], sizeof_rrversion-1);
 				if(strncmp(_v.id, "VGL", 3) || _v.major<1)
 					_throw("Error reading client version");
 				v=_v;
 				v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
-				_sd->send((char *)&v, sizeof_rrversion);
+				send((char *)&v, sizeof_rrversion);
 			}
 			if(fconfig.verbose)
 				rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
@@ -57,11 +57,11 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 		endianize_v1(h1);
 		if(_sd)
 		{
-			_sd->send((char *)&h1, sizeof_rrframeheader_v1);
+			send((char *)&h1, sizeof_rrframeheader_v1);
 			if(eof)
 			{
 				char cts=0;
-				_sd->recv(&cts, 1);
+				recv(&cts, 1);
 				if(cts<1 || cts>2) _throw("CTS Error");
 			}
 		}
@@ -69,13 +69,13 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 	else
 	{
 		endianize(h);
-		if(_sd) _sd->send((char *)&h, sizeof_rrframeheader);
+		send((char *)&h, sizeof_rrframeheader);
 	}
 }
 
 
-rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL),
-	_np(fconfig.np), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0),
+rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
+	_sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0),
 	_stereo(true)
 {
 	memset(&_v, 0, sizeof(rrversion));
@@ -96,11 +96,7 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _sd(NULL),
 			if(!strlen(servername) || !strcmp(servername, "unix"))
 				{free(servername);  servername=strdup("localhost");}
 		}
-		if(servername)
-		{
-			errifnot(_sd=new rrsocket(fconfig.ssl));
-			_sd->connect(servername, fconfig.port);
-		}
+		connect(servername);
 		_prof_total.setname("Total     ");
 		errifnot(_t=new Thread(this));
 		_t->start();
@@ -228,7 +224,7 @@ void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)
 {
 	h.dpynum=_dpynum;
 	sendheader(h);
-	if(_sd) _sd->send((char *)bits, h.size);
+	send((char *)bits, h.size);
 	sendheader(h, true);
 }
 
@@ -267,12 +263,57 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			if(_myrank==0)
 			{
 				_parent->sendheader(jptr->_h);
-				if(_sd) _sd->send((char *)jptr->_bits, jptr->_h.size);
+				_parent->send((char *)jptr->_bits, jptr->_h.size);
 			}
 			else
 			{	
 				store(jptr);
 			}
+		}
+	}
+}
+
+void rrdisplayclient::send(char *buf, int len)
+{
+	try
+	{
+		if(_sd) _sd->send(buf, len);
+	}
+	catch(...)
+	{
+		rrout.println("[VGL] Error sending data to client.  Client may have disconnected.");
+		throw;
+	}
+}
+
+void rrdisplayclient::recv(char *buf, int len)
+{
+	try
+	{
+		if(_sd) _sd->recv(buf, len);
+	}
+	catch(...)
+	{
+		rrout.println("[VGL] Error receiving data from client.  Client may have disconnected.");
+		throw;
+	}
+}
+
+void rrdisplayclient::connect(char *servername)
+{
+	if(servername)
+	{
+		errifnot(_sd=new rrsocket(fconfig.ssl));
+		try
+		{
+			_sd->connect(servername, fconfig.port);
+		}
+		catch(...)
+		{
+			rrout.println("[VGL] Could not connect to VGL client.  Make sure the VGL client is running and");
+			rrout.println("[VGL]    that either the DISPLAY or VGL_CLIENT environment variable points to");
+			rrout.println("[VGL]    the machine on which it is running.");
+			throw;
 		}
 	}
 }
@@ -284,7 +325,7 @@ void rrcompressor::send(void)
 		rrjpeg *j=_frame[i];
 		errifnot(j);
 		_parent->sendheader(j->_h);
-		if(_sd) _sd->send((char *)j->_bits, j->_h.size);
+		_parent->send((char *)j->_bits, j->_h.size);
 		delete j;		
 	}
 	_storedframes=0;

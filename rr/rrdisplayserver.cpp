@@ -89,7 +89,7 @@ void rrdisplayserver::run(void)
 		{
 			if(!_deadyet)
 			{
-				rrout.println("%s:\n%s", e.getMethod(), e.getMessage());
+				rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 				if(s) delete s;  if(sd) delete sd;
 				continue;
 			}
@@ -108,7 +108,7 @@ void rrserver::run(void)
 
 	try
 	{
-		_sd->recv((char *)&h1, sizeof_rrframeheader_v1);
+		recv((char *)&h1, sizeof_rrframeheader_v1);
 		endianize(h1);
 		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
 			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
@@ -116,8 +116,8 @@ void rrserver::run(void)
 		else
 		{
 			strncpy(v.id, "VGL", 3);  v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
-			_sd->send((char *)&v, sizeof_rrversion);
-			_sd->recv((char *)&v, sizeof_rrversion);
+			send((char *)&v, sizeof_rrversion);
+			recv((char *)&v, sizeof_rrversion);
 			if(strncmp(v.id, "VGL", 3) || v.major<1)
 				_throw("Error reading server version");
 		}
@@ -136,7 +136,7 @@ void rrserver::run(void)
 				{
 					if(!haveheader)
 					{
-						_sd->recv((char *)&h1, sizeof_rrframeheader_v1);
+						recv((char *)&h1, sizeof_rrframeheader_v1);
 						endianize_v1(h1);
 					}
 					haveheader=false;
@@ -144,7 +144,7 @@ void rrserver::run(void)
 				}
 				else
 				{
-					_sd->recv((char *)&h, sizeof_rrframeheader);
+					recv((char *)&h, sizeof_rrframeheader);
 					endianize(h);
 				}
 				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
@@ -153,7 +153,7 @@ void rrserver::run(void)
 				catch (...) {if(w) delwindow(w);  throw;}
 
 				j->init(&h);
-				if(h.flags!=RR_EOF) {_sd->recv((char *)j->_bits, h.size);}
+				if(h.flags!=RR_EOF) {recv((char *)j->_bits, h.size);}
 
 				try {w->drawFrame(j);}
 				catch (...) {if(w) delwindow(w);  throw;}
@@ -162,13 +162,13 @@ void rrserver::run(void)
 			if(v.major==1 && v.minor==0)
 			{
 				char cts=1;
-				_sd->send(&cts, 1);
+				send(&cts, 1);
 			}
 		}
 	}
 	catch(rrerror &e)
 	{
-		rrout.println("Exception thrown in %s\n%s", e.getMethod(), e.getMessage());
+		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 	if(_t) {_t->detach();  delete _t;}
 	delete this;
@@ -205,4 +205,32 @@ rrcwin *rrserver::addwindow(int dpynum, Window win, bool stereo)
 	if(!_rrw[winid]) _throw("Could not create window instance");
 	_windows++;
 	return _rrw[winid];
+}
+
+void rrserver::send(char *buf, int len)
+{
+	try
+	{
+		if(_sd) _sd->send(buf, len);
+	}
+	catch(...)
+	{
+		rrout.println("Error sending data to server.  Server may have disconnected.");
+		rrout.println("   (this is normal if the application exited.)");
+		throw;
+	}
+}
+
+void rrserver::recv(char *buf, int len)
+{
+	try
+	{
+		if(_sd) _sd->recv(buf, len);
+	}
+	catch(...)
+	{
+		rrout.println("Error receiving data from server.  Server may have disconnected.");
+		rrout.println("   (this is normal if the application exited.)");
+		throw;
+	}
 }
