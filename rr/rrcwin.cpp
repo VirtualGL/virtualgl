@@ -42,6 +42,8 @@ static int use_ogl_as_default(int dpynum)
 					{
 						char *renderer=(char *)glGetString(GL_RENDERER);
 						if(renderer && !strstr(renderer, "SUNWpfb")
+							&& !strstr(renderer, "SUNWm64") && !strstr(renderer, "SUNWnfb")
+							&& !strstr(renderer, "Sun dpa")
 							&& !strstr(renderer, "software renderer")) retval=1;
 						glXMakeCurrent(dpy, 0, 0);
 					}
