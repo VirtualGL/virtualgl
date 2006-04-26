@@ -168,13 +168,11 @@ void nativewrite(int useshm)
 			if(checkdb)
 			{
 				memset(s.bits, 255, s.pitch*s.height);
-				for(int j=0; j<height; j++)
-					fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
+				fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
 				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
 			}
-			for(int j=0; j<height; j++)
-				fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
-			fbx_sync(&s);
+			fbx(fbx_flip(&s, 0, 0, 0, 0));
+			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
 		}
 		rbtime=timer.elapsed();
 	} while(rbtime<1.);

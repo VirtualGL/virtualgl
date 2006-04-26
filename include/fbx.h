@@ -186,6 +186,22 @@ int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, in
 #endif
 
 /*
+  fbx_flip
+  (fbx_struct *s, int bmpx, int bmpy, int w, int h)
+
+  This routine performs an in-place vertical flip of the region of interest specified by
+  bmpx, bmpy, w, and h in the memory buffer specified by s
+
+  s = Address of fbx_struct previously initialized by a call to fbx_init()
+      s->bits should contain the pixels you wish to flip
+  bmpx = left offset of the region you wish to flip (relative to the memory buffer)
+  bmpy = top offset of the region you wish to flip (relative to the memory buffer)
+  w = width of region you wish to flip (0 = whole bitmap)
+  h = height of region you wish to flip (0 = whole bitmap)
+*/
+int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h);
+
+/*
   fbx_sync
   (fbx_struct *s)
 

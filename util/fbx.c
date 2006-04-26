@@ -456,6 +456,35 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	return -1;
 }
 
+int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
+{
+	int i, bx, by, bw, bh, ps, pitch;
+	unsigned char *tmpbuf=NULL, *srcptr, *dstptr;
+	if(!s) _throw("Invalid argument");
+
+	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
+	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
+	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
+	ps=fbx_ps[s->format];  pitch=s->xi->bytes_per_line;
+
+	if(!(tmpbuf=(unsigned char *)malloc(bw*ps)))
+		_throw("Memory allocation error");
+	srcptr=&s->bits[pitch*by+ps*bx];
+	dstptr=&s->bits[pitch*(by+bh-1)+ps*bx];
+	for(i=0; i<bh/2; i++, srcptr+=pitch, dstptr-=pitch)
+	{
+		memcpy(tmpbuf, srcptr, bw*ps);
+		memcpy(srcptr, dstptr, bw*ps);
+		memcpy(dstptr, tmpbuf, bw*ps);
+	}
+	free(tmpbuf);
+	return 0;
+
+	finally:
+	if(tmpbuf) free(tmpbuf);
+	return -1;
+}
+
 #ifndef WIN32
 int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
