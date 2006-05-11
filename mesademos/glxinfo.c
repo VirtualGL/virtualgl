@@ -385,7 +385,7 @@ visual_class_name(int cls)
       case DirectColor:
          return "DirectColor";
       default:
-         return "";
+         return "Unknown";
    }
 }
 
@@ -407,7 +407,7 @@ visual_class_abbrev(int cls)
       case DirectColor:
          return "dc";
       default:
-         return "";
+         return "??";
    }
 }
 
@@ -416,7 +416,7 @@ static void
 get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
                    struct visual_attribs *attribs)
 {
-   int temp;
+   int temp=0;
    const char *ext = glXQueryExtensionsString(dpy, DefaultScreen(dpy));
 
    memset(attribs, 0, sizeof(struct visual_attribs));
@@ -430,6 +430,7 @@ get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
       case GLX_STATIC_COLOR:  attribs->klass = StaticColor;  break;
       case GLX_GRAY_SCALE:    attribs->klass = GrayScale;  break;
       case GLX_STATIC_GRAY:   attribs->klass = StaticGray;  break;
+      case 0:                 attribs->klass = -1;  break;
    }
    attribs->supportsGL=1;
    glXGetFBConfigAttrib(dpy, cfg, GLX_BUFFER_SIZE, &attribs->bufferSize);
@@ -562,16 +563,12 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
    glXGetConfig(dpy, vInfo, GLX_GAMMA_VALUE_SUN, &attribs->gammaValue);
 #endif
 
-#if defined(GLX_EXT_visual_rating)
    if (ext && strstr(ext, "GLX_EXT_visual_rating")) {
       glXGetConfig(dpy, vInfo, GLX_VISUAL_CAVEAT_EXT, &attribs->visualCaveat);
    }
    else {
       attribs->visualCaveat = GLX_NONE_EXT;
    }
-#else
-   attribs->visualCaveat = 0;
-#endif
 
 #ifdef sun
    XSolarisGetVisualGamma(dpy, vInfo->screen, vInfo->visual, &attribs->gamma);
@@ -602,14 +599,12 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs)
           attribs->accumBlueSize, attribs->accumAlphaSize);
    printf("    multiSample=%d  multiSampleBuffers=%d\n",
           attribs->numSamples, attribs->numMultisample);
-#ifdef GLX_EXT_visual_rating
    if (attribs->visualCaveat == GLX_NONE_EXT || attribs->visualCaveat == 0)
       printf("    visualCaveat=None\n");
    else if (attribs->visualCaveat == GLX_SLOW_VISUAL_EXT)
       printf("    visualCaveat=Slow\n");
    else if (attribs->visualCaveat == GLX_NON_CONFORMANT_VISUAL_EXT)
       printf("    visualCaveat=Nonconformant\n");
-#endif
    if (attribs->transparentType == GLX_NONE) {
      printf("    Opaque.\n");
    }
@@ -663,7 +658,6 @@ static void
 print_visual_attribs_short(const struct visual_attribs *attribs)
 {
    char *caveat = NULL;
-#ifdef GLX_EXT_visual_rating
    if (attribs->visualCaveat == GLX_NONE_EXT || attribs->visualCaveat == 0)
       caveat = "None";
    else if (attribs->visualCaveat == GLX_SLOW_VISUAL_EXT)
@@ -672,9 +666,6 @@ print_visual_attribs_short(const struct visual_attribs *attribs)
       caveat = "Ncon";
    else
       caveat = "None";
-#else
-   caveat = "None";
-#endif 
 
    printf("0x%2x %2d %2s %2d %2d %2d %1s %2s %2s %2d %2d %2d %2d %2d %2d %2d",
           attribs->id,

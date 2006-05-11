@@ -1063,6 +1063,9 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 	if(usingglp) return;
 	try
 	{
+		int visual_caveat;
+		getcfgattrib(c, GLX_CONFIG_CAVEAT, visual_caveat);
+		if(visual_caveat==GLX_NON_CONFORMANT_CONFIG) return;
 		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
 		render_type=(render_type==GLX_COLOR_INDEX_BIT)? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE;
 		fbcid=cfgid(dpy, c);
