@@ -594,8 +594,14 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 	if((v=mlib_version())!=NULL)
 	{
 		char *ptr=NULL;
-		if((ptr=strrchr(v, ':'))!=NULL && strlen(ptr)>1 && ptr[1]=='v')
-			jpg->isvis=1;
+		if((ptr=strrchr(v, ':'))!=NULL && strlen(ptr)>1)
+		{
+			ptr++;
+			if(strlen(ptr)>6 && !strncmp(ptr, "v8plus", 6) && ptr[6]>='a'
+				&& ptr[6]<='z') jpg->isvis=1;
+			else if(strlen(ptr)>2 && !strncmp(ptr, "v9", 2) && ptr[2]>='a'
+				&& ptr[2]<='z') jpg->isvis=1;
+		}
 	}
 
 	jpg->initc=1;
