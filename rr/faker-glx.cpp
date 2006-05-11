@@ -34,7 +34,7 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 				__vglConfigClass(config),
 				0,
 				__vglServerVisualAttrib(config, GLX_STEREO),
-				__vglServerVisualAttrib(config, GLX_TRANSPARENT_TYPE)!=GLX_NONE);
+				0);
 		if(!vid) 
 			vid=__vglMatchVisual(dpy, screen, 24, TrueColor, 0, 0, 0);
 	}
@@ -477,6 +477,15 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
 			&& __vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
 			attribute=GLX_RED_SIZE;
+		if(attribute==GLX_CONFIG_CAVEAT)
+		{
+			int vistype=__vglServerVisualAttrib(config, GLX_X_VISUAL_TYPE);
+			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR && !fconfig.glp)
+			{
+				*value=GLX_NON_CONFORMANT_CONFIG;
+				return retval;
+			}
+		}
 		#ifdef USEGLP
 		if(fconfig.glp)
 		{
