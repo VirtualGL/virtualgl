@@ -465,7 +465,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
-	ps=fbx_ps[s->format];  pitch=s->xi->bytes_per_line;
+	ps=fbx_ps[s->format];  pitch=s->pitch;
 
 	if(!(tmpbuf=(unsigned char *)malloc(bw*ps)))
 		_throw("Memory allocation error");
