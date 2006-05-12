@@ -1965,18 +1965,22 @@ in the upper right of the window.)</p>
 TurboVNC is based on TightVNC and
 shares many of its features.</p>
 <h3>Enabling Raw Mode</h3>
-<p>To enable VirtualGL's
-raw&nbsp;mode,&nbsp;set the environment variable <span
- class="monospace">VGL_COMPRESS</span>
-to 0 on the server or pass an argument of <span class="monospace">-c 0</span>
+<p>Raw mode is automatically enabled if VirtualGL detects that it is running on 
+the same machine as the X server, which it assumes to be the case if the display 
+name begins with a colon (&quot;:&quot;) or with &quot;<span
+ class="monospace">unix:</span>&quot;.&nbsp; In most cases, this will cause VirtualGL 
+to automatically use raw mode when it is launched in an X proxy environment such 
+as VNC or NX.&nbsp; But you can override this behavior by setting the <span
+ class="monospace">VGL_COMPRESS</span> environment variable on the server or 
+passing an argument of <span class="monospace">-c 0</span> or <span class="monospace">-c 
+1</span>
 to <span class="monospace">vglrun</span>
 (see <a href="#config">Advanced
 Configuration</a> for more
-details.)&nbsp; You should also make
+details.)&nbsp; Make
 sure that the
 <span class="monospace">DISPLAY</span>
-variable points to whatever display number that VNC is occupying (such
-as :1, :2, etc.)</p>
+variable points to whatever display number that VNC (or your X proxy of choice) is occupying (e.g. :1, :2, etc.)</p>
 <div class="top" style=""><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
 <hr style="width: 100%; height: 2px;">
@@ -2879,16 +2883,26 @@ pixels into the appropriate place in the application window.&nbsp; This
 is primarily useful in conjunction with VNC, Citrix for Unix, or other
 remote display software that performs X11 rendering on the
 server and uses its own internal mechanism for compressing and
-transmitting images to the client.&nbsp; Disabling compression
-outside of a
-VNC (or similar)
-session is not advisable, since it will result in uncompressed images
-being sent over the network to the client.<br>
+transmitting images to the client.&nbsp; Disabling compression on a remote X11 
+      connection is not advisable, since it will result in uncompressed images 
+      being sent over the network to the client machine.<br>
+      <br>
+      If <span class="monospace">VGL_COMPRESS</span> is not specified,
+VirtualGL's default behavior is to enable compression when the application is 
+      being displayed to a remote X server and to disable compression otherwise.&nbsp; 
+      VirtualGL assumes that if the <span class="monospace">DISPLAY</span> 
+      environment variable begins with a colon or with &quot;<span class="monospace">unix:</span>&quot; (e.g. "<span class="monospace">:0.0</span>", "<span class="monospace">unix:1000.0</span>",
+etc.), then the X11 connection is local and thus doesn't require image 
+      compression.&nbsp; Otherwise, it assumes that the X11 connection is remote 
+      and that compression is required. &nbsp;If the display string begins with "<span class="monospace">localhost</span>" or with the
+server's hostname, VGL assumes that the display is being tunneled through SSh, 
+      and it enables compression in this case.<p>
+<span class="note">Note:</span>Stereo frames will always be compressed, 
+      regardless of this setting.&nbsp; Raw mode cannot be used with stereo</p>
       <p>See the <a href="#vnc">VNC Usage</a>
-section for more details.</p>
-      </td>
-      <td style="font-weight: bold;">1
-(JPEG compression enabled)</td>
+section for more details.</td>
+      <td style="font-weight: bold;">Compression enabled if the application is 
+      displaying to a remote X server, disabled otherwise</td>
     </tr>
     <tr>
       <td class="monospace"
