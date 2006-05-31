@@ -4,14 +4,16 @@ include ../Makerules
 ifeq ($(platform), windows)
 ##########################################################################
 
+GLFOBJS = $(ODIR)/rrglframe.obj
+ifneq ($(XWIN32), yes)
+GLFOBJS := $(GLFOBJS) $(ODIR)/xdk-sym.obj
+endif
+
 COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
         $(ODIR)/rrxclient.obj \
         $(ODIR)/rrframe.obj \
-        $(ODIR)/rrglframe.obj
-ifneq ($(XWIN32), yes)
-COBJS := $(COBJS) $(ODIR)/xdk-sym.obj
-endif
+        $(GLFOBJS)
 
 TOBJS = $(ODIR)/rrblitter.obj \
         $(ODIR)/rrblitterut.obj \
@@ -46,7 +48,7 @@ $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
 # Unit tests
 
 $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
-	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB) $(ODIR)/xdk-sym.obj $(ODIR)/rrglframe.obj \
+	$(CXX) $(LDFLAGS) $< -o $@ $(RRLIB) $(GLFOBJS) \
 		$(ODIR)/rrframe.obj
 
 $(EDIR)/rrblitterut.exe: $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj $(RRDEP)
