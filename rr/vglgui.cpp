@@ -102,7 +102,16 @@ void vglgui::init(void)
 		XtNright, XawChainRight, XtNlabel, "Frame Spoiling: XXX", NULL);
 	XtAddCallback(_spoil, XtNcallback, spoilProc, this);
 
-	if(fconfig.compress!=RRCOMP_NONE)
+	int compress=fconfig.compress;
+	if(compress==RRCOMP_DEFAULT)
+	{
+		const char *dstr=DisplayString(_dpy);
+		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+			&& !strncasecmp(dstr, "unix", 4))) compress=RRCOMP_NONE;
+		else compress=RRCOMP_JPEG;
+	}
+
+	if(compress!=RRCOMP_NONE)
 	{
 		Widget lobutton=XtVaCreateManagedWidget("lobutton", commandWidgetClass,
 			buttonForm, NULL);
