@@ -78,7 +78,7 @@ class FakerConfig
 			readback=true;
 			verbose=false;
 			gui=true;
-			guikey=XK_F8;
+			guikey=XK_F12;
 			guimod=ShiftMask|ControlMask;
 			fps=-1.0;
 			vendor=NULL;
