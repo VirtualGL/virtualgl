@@ -197,8 +197,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(!wh.dpy || !wh.win) _throw("Invalid argument");
 	x11(XGetWindowAttributes(wh.dpy, wh.win, &xwinattrib));
-	if(width>0 && width<=xwinattrib.width) w=width;  else w=xwinattrib.width;
-	if(height>0 && height<=xwinattrib.height) h=height;  else h=xwinattrib.height;
+	if(width>0) w=width;  else w=xwinattrib.width;
+	if(height>0) h=height;  else h=xwinattrib.height;
 	if(s->wh.dpy==wh.dpy && s->wh.win==wh.win)
 	{
 		if(w==s->width && h==s->height && s->xi && s->xgc && s->bits) return 0;
