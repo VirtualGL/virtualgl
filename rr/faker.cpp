@@ -246,6 +246,11 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval=True;
 
+	// Prevent recursion
+	if(!_isremote(dpy))
+		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
+	////////////////////
+
 		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
 
 	retval=_XQueryExtension(dpy, name, major_opcode, first_event, first_error);

@@ -260,6 +260,9 @@ static const char *glxextensions=
 
 const char *glXGetClientString(Display *dpy, int name)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXGetClientString(dpy, name);
+	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
 	else if(name==GLX_VERSION) return "1.3";
 	else if(name==GLX_VENDOR) return __APPNAME;
@@ -563,11 +566,15 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
+	int retval=0;
 	if(ctxh.isoverlay(ctx)) return _glXQueryContext(dpy, ctx, attribute, value);
+
+		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargi(attribute);
+		starttrace();
 
 	if(attribute==GLX_RENDER_TYPE)
 	{
-		int retval=0, fbcid=-1;
+		int fbcid=-1;
 		#ifdef USEGLP
 		if(fconfig.glp) retval=glPQueryContext(ctx, GLX_FBCONFIG_ID, &fbcid);
 		else
@@ -580,14 +587,19 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 				&& value) *value=GLX_COLOR_INDEX_TYPE;
 			else if(value) *value=GLX_RGBA_TYPE;
 		}
-		return retval;
+	}
+	else
+	{
+		#ifdef USEGLP
+		if(fconfig.glp) retval=glPQueryContext(ctx, attribute, value);
+		else
+		#endif
+		retval=_glXQueryContext(_localdpy, ctx, attribute, value);
 	}
 
-	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
-	else
-	#endif
-	return _glXQueryContext(_localdpy, ctx, attribute, value);
+		stoptrace();  if(value) prargi(*value);  closetrace();
+
+	return retval;
 }
 
 int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *value)
@@ -640,11 +652,17 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 
 const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXQueryExtensionsString(dpy, screen);
+	////////////////////
 	return glxextensions;
 }
 
 const char *glXQueryServerString(Display *dpy, int screen, int name)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXQueryServerString(dpy, screen, name);
+	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
 	else if(name==GLX_VERSION) return "1.3";
 	else if(name==GLX_VENDOR) return __APPNAME;
