@@ -151,6 +151,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_prof_rb.setname("Readback  ");
 	_syncdpy=false;
 	_dirty=false;
+	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
 	#if defined(sun)||defined(linux)
