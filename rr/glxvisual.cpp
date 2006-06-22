@@ -345,6 +345,7 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 		if(stereo!=_va[i].stereo) match=0;
 		if(stereo && !_va[i].db) match=0;
 		if(stereo && !_va[i].gl) match=0;
+		if(stereo && _va[i].c_class!=TrueColor) match=0;
 		if(level!=_va[i].level) match=0;
 		if(trans && !_va[i].trans) match=0;
 		if(match) return _va[i].visualid;
@@ -359,6 +360,7 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 		if(stereo!=_va[i].stereo) match=0;
 		if(stereo && !_va[i].db) match=0;
 		if(stereo && !_va[i].gl) match=0;
+		if(stereo && _va[i].c_class!=TrueColor) match=0;
 		if(level!=_va[i].level) match=0;
 		if(trans && !_va[i].trans) match=0;
 		if(match) return _va[i].visualid;
