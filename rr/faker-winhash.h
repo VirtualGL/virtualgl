@@ -115,8 +115,9 @@ class winhash : public _winhash
 
 		void detach(_winhashstruct *h)
 		{
+			pbwin *pb=h->value;
 			if(h && h->key1) free(h->key1);
-			if(h && h->value) delete((pbwin *)h->value);
+			if(h && pb && pb!=(pbwin *)-1) delete pb;
 		}
 
 		bool compare(char *key1, Window key2, _winhashstruct *h)
