@@ -142,8 +142,13 @@ $(EDIR)/vglrun: rrlaunch
 
 # Client
 
+ifeq ($(platform), solaris)
+$(EDIR)/vglclient: $(COBJS) $(RRDEP)
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY) -ldl
+else
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY)
+endif
 
 # Unit tests
 
