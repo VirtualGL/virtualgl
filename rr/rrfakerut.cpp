@@ -2031,7 +2031,6 @@ int main(int argc, char **argv)
 	printf("\n");
 	rbtest(false, true);
 	printf("\n");
-	rbtest(true, true);
 	printf("\n");
 	citest();
 	printf("\n");
