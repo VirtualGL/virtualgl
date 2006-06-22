@@ -55,6 +55,19 @@ SERVICE_TABLE_ENTRY servicetable[] =
 };
 #endif
 
+#ifdef SUNOGL
+#include "dlfcn.h"
+int _glXInitThreadsSUN(void)
+{
+	int retval=1;
+	typedef int (*_glXInitThreadsSUNType)(void);
+	_glXInitThreadsSUNType __glXInitThreadsSUN=NULL;
+	if((__glXInitThreadsSUN=
+		(_glXInitThreadsSUNType)dlsym(RTLD_NEXT, "glXInitThreadsSUN"))!=NULL)
+		retval=__glXInitThreadsSUN();
+	return retval;
+}
+#endif
 
 void handler(int type)
 {
@@ -190,6 +203,9 @@ int main(int argc, char *argv[])
 void start(int argc, char **argv)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
+	#ifdef SUNOGL
+	if(!_glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
+	#endif
 
 	signal(SIGINT, handler);
 	XSetErrorHandler(xhandler);
