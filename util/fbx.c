@@ -459,7 +459,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 {
 	int i, bx, by, bw, bh, ps, pitch;
-	unsigned char *tmpbuf=NULL, *srcptr, *dstptr;
+	char *tmpbuf=NULL, *srcptr, *dstptr;
 	if(!s) _throw("Invalid argument");
 
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
@@ -467,7 +467,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 	ps=fbx_ps[s->format];  pitch=s->pitch;
 
-	if(!(tmpbuf=(unsigned char *)malloc(bw*ps)))
+	if(!(tmpbuf=(char *)malloc(bw*ps)))
 		_throw("Memory allocation error");
 	srcptr=&s->bits[pitch*by+ps*bx];
 	dstptr=&s->bits[pitch*(by+bh-1)+ps*bx];
