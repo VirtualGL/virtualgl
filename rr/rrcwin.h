@@ -52,6 +52,7 @@ class rrcwin : public Runnable
 	Thread *_t;
 	rrcs _jpgmutex;
 	bool _stereo;
+	rrcs _mutex;
 };
 
 #endif

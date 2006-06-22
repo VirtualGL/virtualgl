@@ -34,7 +34,6 @@ static int use_ogl_as_default(int dpynum)
 			if((vi=glXChooseVisual(dpy, DefaultScreen(dpy), attribs))!=NULL
 				|| (vi=glXChooseVisual(dpy, DefaultScreen(dpy), sbattribs))!=NULL)
 			{
-				glXInitThreadsSUN();
 				GLXContext ctx=glXCreateContext(dpy, vi, NULL, True);
 				if(ctx)
 				{
@@ -93,13 +92,14 @@ rrcwin::~rrcwin(void)
 
 void rrcwin::initgl(void)
 {
-	rrframe *b=NULL;
+	rrglframe *b=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
 	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
 	#endif
+	rrcs::safelock l(_mutex);
 	if(_drawmethod==RR_DRAWOGL)
 	{
 		try
@@ -118,18 +118,27 @@ void rrcwin::initgl(void)
 			return;
 		}
 	}
-	if(b) {if(_b) delete _b;  _b=b;}
+	if(b)
+	{
+		if(_b)
+		{
+			if(_b->_isgl) delete ((rrglframe *)_b);
+			else delete ((rrfb *)_b);
+		}
+		_b=(rrframe *)b;
+	}
 }
 
 void rrcwin::initx11(void)
 {
-	rrframe *b=NULL;
+	rrfb *b=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "localhost:%d.0", _dpynum);
 	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
 	#endif
+	rrcs::safelock l(_mutex);
 	if(_drawmethod==RR_DRAWX11)
 	{
 		try
@@ -143,7 +152,15 @@ void rrcwin::initx11(void)
 			throw;
 		}
 	}
-	if(b) {if(_b) delete _b;  _b=b;}
+	if(b)
+	{
+		if(_b)
+		{
+			if(_b->_isgl) {delete ((rrglframe *)_b);}
+			else delete ((rrfb *)_b);
+		}
+		_b=(rrframe *)b;
+	}
 }
 
 int rrcwin::match(int dpynum, Window window)
@@ -197,6 +214,7 @@ void rrcwin::run(void)
 		j=NULL;
 		_q.get((void **)&j);  if(_deadyet) break;
 		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
+		rrcs::safelock l(_mutex);
 		if(j->_h.flags==RR_EOF)
 		{
 			pb.startframe();
