@@ -240,7 +240,6 @@ class rrglframe : public rrframe
 		}
 
 		if(glerror()) _throw("Could not draw pixels");
-		glXMakeCurrent(_dpy, 0, 0);
 	}
 
 	void sync(void)
@@ -250,6 +249,7 @@ class rrglframe : public rrframe
 		#endif
 		glFinish();
 		glXSwapBuffers(_dpy, _win);
+		glXMakeCurrent(_dpy, 0, 0);
 	}
 
 	unsigned char *_rbits;
