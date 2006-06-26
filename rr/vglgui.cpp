@@ -77,7 +77,7 @@ void vglgui::init(void)
 {
 	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
 
-	XtToolkitThreadInitialize();
+	if(fconfig.xtthreadinit) XtToolkitThreadInitialize();
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
 	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(_dpy), "VirtualGL",

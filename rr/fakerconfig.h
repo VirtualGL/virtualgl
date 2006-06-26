@@ -82,6 +82,7 @@ class FakerConfig
 			guimod=ShiftMask|ControlMask;
 			fps=-1.0;
 			vendor=NULL;
+			xtthreadinit=true;
 			reloadenv();
 		}
 
@@ -185,6 +186,7 @@ class FakerConfig
 					gui=true;
 				}
 			}
+			getconfigbool("GUI_XTTHREADINIT", xtthreadinit);
 			getconfigdouble("FPS", fps, 0.0, 1000000.0);
 			getconfigstr("XVENDOR", vendor);
 			sanitycheck();
@@ -246,6 +248,7 @@ class FakerConfig
 		bool readback;
 		bool verbose;
 		bool gui;
+		bool xtthreadinit;
 
 		unsigned int guikey;
 		unsigned int guimod;
