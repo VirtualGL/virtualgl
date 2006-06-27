@@ -118,6 +118,7 @@ Scripts</a></li>
 Manually Load
 OpenGL</a></li>
   <li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li>
+  <li><a href="#recipes">Application Recipes</a></li>
   <li><a href="#advancedopengl">Advanced OpenGL Features</a></li>
   <li><a href="#perf">Performance Measurement</a></li>
   <li><a href="#configdialog">The VirtualGL Configuration
@@ -2416,6 +2417,112 @@ application.)</p>
 </div>
 </div>
 </div>
+<hr>
+<h2><a name="recipes"></a>Application Recipes</h2>
+<table style="text-align: left; margin-left: auto; margin-right: auto;"
+ border="0" cellpadding="5" cellspacing="3">
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">Application</td>
+      <td style="font-weight: bold;" class="colorheader">Platform</td>
+      <td style="font-weight: bold;" class="colorheader">Recipe</td>
+      <td style="font-weight: bold;" class="colorheader">Notes<br>
+      </td>
+    </tr>
+    <tr>
+      <td>Descent 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} -g /usr/lib/librrfaker.so</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Doom 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so<br>
+      </td>
+      <td>See <a href="#dynamicgl">this section</a> for more details<br>
+      </td>
+    </tr>
+    <tr>
+      <td>Enemy Territory (Return to Castle Wolfenstein)</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Heretic II</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Heavy Gear II</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} -o /usr/lib/librrfaker.so</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Pro/ENGINEER Wildfire v2.0</td>
+      <td>Solaris/Sparc</td>
+      <td><p>Add<p class="monospace">graphics opengl<p>to <i>~/config.pro</i>.&nbsp; You may also need to set the
+    <font face="Courier New">VGL_XVENDOR</font> environment variable to
+    <font face="Courier New">&quot;Sun Microsystems, Inc.&quot;</font> if you are running 
+    Pro/ENGINEER 2.0 over a remote X connection to a Linux or Windows VirtualGL 
+      client.</td>
+      <td>Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote 
+      connection to a non-Sun X server.</td>
+    </tr>
+    <tr>
+      <td>QGL (OpenGL Qt Widget)</td>
+      <td>Linux</td>
+      <td>Pass
+    <font face="Courier New">-no-dlopen-opengl</font> argument to
+      <font face="Courier New">configure </font>when building libQt</td>
+      <td>Unless Qt is configured with
+    <font face="Courier New">-no-dlopen-opengl</font>, it will use dlopen() to 
+      load libGL, thus bypassing VirtualGL's faker library.<p>Unfortunately, the 
+      version of libQt which ships with some recent Linux distributions was not 
+      configured with
+    <font face="Courier New">-no-dlopen-opengl</font>.&nbsp; For these 
+      distributions, you will have to rebuild the Qt package from the source (or 
+      source RPM) in order to make VirtualGL work with Qt OpenGL applications. </td>
+    </tr>
+    <tr>
+      <td>Quake 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Soldier of Fortune</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun {game} +set gl_driver /usr/lib/librrfaker.so</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>VisConcept</td>
+      <td>Solaris/Sparc</td>
+      <td>Set the environment variable
+    <font face="Courier New">VGL_GUI_XTTHREADINIT</font> to 0</td>
+      <td>Popping up the VirtualGL configuration dialog may cause the 
+      application to hang unless you set this environment variable.&nbsp; See
+      <a href="#config">Advanced Configuration</a> for more details</td>
+    </tr>
+  </tbody>
+</table>
+<div class="top" style="">
+<div style="text-align: left;">
+<div style="text-align: right;">&nbsp;</div>
+<div style="text-align: right;"><a href="#">top</a></div>
+</div>
+</div>
 <hr class="top" style="width: 100%; height: 2px;">
 <h2><a name="advancedopengl"></a>Advanced
 OpenGL Features</h2>
@@ -3050,6 +3157,38 @@ to disable the configuration dialog altogether. &nbsp;See <a
 section</a> for more details.<br>
       </td>
       <td style="font-weight: bold;">shift-ctrl-f12</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">
+    <font face="Courier New">VGL_GUI_XTTHREADINIT</font></td>
+      <td>&nbsp;</td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">0 to 
+      prevent VGL from calling
+      </span><b><span class="monospace">XtToolkitThreadInitialize()</span></b><span style="font-weight: bold;"><br>
+      </span>Xt &amp; Motif applications are supposed to call
+      <span class="monospace">XtToolkitThreadInitialize()</span> if they plan to 
+      access Xt functions from two or more threads simultaneously.&nbsp; But 
+      rarely, a multi-threaded Xt/Motif application may avoid calling
+      <span class="monospace">XtToolkitThreadInitialize()</span> and rely on the 
+      fact that avoiding this call disables application and process locks.&nbsp; 
+      This behavior is generally considered errant on the part of the 
+      application, but the application developers have probably figured out 
+      other ways around the potential instability that this situation creates.<p>
+      The problem arises whenever VirtualGL pops up its configuration dialog 
+      (which is written using Xt.)&nbsp; In order to create this dialog, 
+      VirtualGL creates a new Xt thread and calls<span class="monospace"> 
+      XtToolkitThreadInitialize()</span> as it is supposed to do to guarantee 
+      thread safety.&nbsp; But if the application into which VGL is loaded 
+      exhibits the errant behavior described above, suddenly enabling 
+      application and process locks may cause the application to deadlock.&nbsp; 
+      Setting <span class="monospace">VGL_GUI_XTTHREADINIT</span> to 0 will 
+      remove VGL's call to <span class="monospace">XtToolkitThreadInitialize()</span> 
+      and should thus eliminate the deadlock.</p>
+      <p>In short, if you try to pop up the VirtualGL config dialog and notice 
+      that it hangs the application, try setting <span class="monospace">
+      VGL_GUI_XTTHREADINIT</span> to 0.</td>
+      <td style="font-weight: bold;">1</td>
     </tr>
     <tr>
       <td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
