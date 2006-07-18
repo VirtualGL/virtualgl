@@ -2,14 +2,19 @@
 # The interpreter to use (if this script is submitted to N1 Grid Engine):
 #$ -S /bin/sh
 #
-# Specify that this job needs a graphics device:
+# This allocates a graphics device and passes it in the VGL_DISPLAY
+# environment:
 #$ -l gfx=1
-#
-# Default is to use VirtualGL.
 #$ -l vgl=1
 #
-# Specify that the env var DISPLAY is to be sent to SGE:
+# Specify other environment variables that N1GE should pass to this script:
 #$ -v DISPLAY
+#$ -v VGL_CLIENT
+#$ -v VGL_COMPRESS
+#$ -v VGL_PORT
+#$ -v VGL_SSL
+#$ -v VGL_GLLIB
+#$ -v VGL_X11LIB
 
 usage()
 {
