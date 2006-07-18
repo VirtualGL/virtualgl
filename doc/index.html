@@ -209,25 +209,30 @@ ATI,&nbsp;driver v8.14 or older recommended.
 &nbsp;Newer ATI drivers have known issues which may prevent them
 from
 working with VirtualGL</li>
+        <li>For applications that use stereo, a
+high-end
+3D accelerator such as the nVidia Quadro is required on the server</li>
       </ul>
       </td>
       <td>Decent 3D graphics
 accelerator<br>
       <ul>
-        <li>nVidia strongly
-recommended</li>
+        <li>nVidia strongly recommended</li>
         <li>If using
 ATI,&nbsp;driver v8.14 or older recommended.
 &nbsp;Newer ATI
 drivers have known issues which may prevent them from working with
 VirtualGL</li>
+        <li>For applications that use stereo, a
+high-end
+3D accelerator such as the nVidia Quadro is required on the server</li>
       </ul>
       </td>
       <td>Graphics card with
 decent 2D performance<br>
       <ul>
         <li>For
-applications that use stereo or transparent&nbsp;overlays, a
+applications that use stereo or transparent overlays, a
 high-end
 3D accelerator such as the nVidia Quadro is required on the client</li>
       </ul>
@@ -239,7 +244,7 @@ high-end
       <td>
       <ul>
         <li>RedHat Linux 7.2 or
-newer (or equivalent)</li>
+newer (or equivalent), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
@@ -249,14 +254,14 @@ newer (or equivalent)</li>
 Linux 3.0 or 4.0 (64-bit) or equivalent
 (Works with <a href="http://fedora.redhat.com/">Fedora</a>, <a
  href="http://www.whiteboxlinux.org/">WhiteBox</a>,
-and <a href="http://www.centos.org/">CentOS</a>)</li>
+and <a href="http://www.centos.org/">CentOS</a>), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
       <td>
       <ul>
         <li>RedHat Linux 7.2 or
-newer (or equivalent)</li>
+newer (or equivalent), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
@@ -314,6 +319,9 @@ accelerator<br>
       <ul>
         <li>Tested with XVR-1200
 and XVR-2500</li>
+        <li>For applications that use stereo, a frame buffer which supports stereo
+Pbuffers (such as the XVR-2xxx series "kfb") 
+        is required on the server</li>
       </ul>
       </td>
       <td>Graphics card with
@@ -352,6 +360,8 @@ or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the
 package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+        <li>X server configured for
+true color (24/32-bit) [if not using GLP]</li>
       </ul>
       </td>
       <td>
@@ -368,6 +378,8 @@ or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the
 package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+        <li>X server configured for
+true color (24/32-bit)</li>
       </ul>
       </td>
     </tr>
@@ -407,15 +419,23 @@ AMD Opteron or Athlon64, 1.8 GHz or faster </p>
       <td style="font-weight: bold;" class="colorheader">Graphics<br>
       </td>
       <td>nVidia 3D graphics
-accelerator<br>
+accelerator<ul>
+        <li>For applications that use stereo, a high-end 3D accelerator such as 
+        the nVidia Quadro is required on the server<br>
+        </li>
+      </ul>
       </td>
       <td>nVidia 3D graphics
-accelerator </td>
+accelerator<ul>
+        <li>For applications that use stereo, a high-end 3D accelerator such as 
+        the nVidia Quadro is required on the server</li>
+      </ul>
+      </td>
       <td>Graphics card with
 decent 2D performance<br>
       <ul>
         <li>For
-applications that use stereo or transparent&nbsp;overlays, a 3D
+applications that use stereo or transparent overlays, a high-end 3D
 accelerator such as the nVidia Quadro is required on the client</li>
       </ul>
       </td>
@@ -430,12 +450,30 @@ accelerator such as the nVidia Quadro is required on the client</li>
     <tr>
       <td style="font-weight: bold;" class="colorheader">Other Software<br>
       </td>
-      <td>Sun mediaLib 2.4 (see <a
- href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</td>
-      <td>Sun mediaLib 2.4 (see <a
- href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</td>
-      <td>Sun mediaLib 2.4 (see <a
- href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -534,7 +572,7 @@ command:<br>
 <h4>Installing VirtualGL</h4>
 <ol>
   <li>If you are using
-RedHat/CentOS Enterprise Linux 2.1, 3, or 4,
+RedHat/CentOS Enterprise Linux 2.1, 3, or 4 or SuSE Linux 9,
 obtain one of the pre-built VirtualGL RPMs from the files area of <a
  href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
     <br>
@@ -547,6 +585,7 @@ Linux 8 (patched), RedHat Linux 9, and Fedora
 Core 1 &amp; 2.<br>
 The Enterprise Linux 4 RPM should (theoretically) also work on Fedora
 Core 3 &amp; 4.<br>
+The SuSE Linux 9 RPM should (theoretically) also work on SuSE 10.<br>
 &nbsp;</li>
   <li>Log in as root, cd to the
 directory
@@ -578,17 +617,18 @@ instead. &nbsp;Some versions of SuSE symlink this to <span
   <li>Sit back and watch the fun</li>
   <li>If the build completes
 successfully, it will produce a binary RPM
-in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span>
+in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span> 
+  (or <span style="font-family: monospace;"><span class="monospace">/usr/src/packages/RPMS/{your_cpu_architecture}</span></span>),
 which you can install using the instructions from the previous section</li>
 </ol>
-Otherwise, log in as root, download the source tarball, uncompress it, <span
+If you are using a non-RPM based distribution of Linux, then log in as root, download the 
+VirtualGL source tarball, uncompress it, <span
  class="monospace" style="font-family: monospace;">cd
 vgl</span>,&nbsp;and
 type <span class="monospace" style="font-family: monospace;">make</span><span
  class="monospace"> install</span>.
 &nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span>
-in the&nbsp;source distribution for further details.<br>
-<h3>Display Configuration (Server
+in the&nbsp;source directory for further details.<h3>Display Configuration (Server
 Only)</h3>
 <p>VirtualGL requires access to
 display
@@ -635,8 +675,8 @@ regarding setting the appropriate permissions for <span
 &nbsp;</li>
   <li>Add<br>
     <pre>xhost +localhost</pre>
-to
-the tail end of the display manager's client startup script.&nbsp;
+  at
+the top of the display manager's client startup script.&nbsp;
 The
 location of this script varies depending on the particular Linux
 distribution and
