@@ -82,6 +82,7 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/$(lib64dir)/librr.$(SHEXT)
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
@@ -106,6 +107,7 @@ install: rr diags
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/lib/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
@@ -127,6 +129,7 @@ uninstall:
 	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
+	$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librr.$(SHEXT)
 	$(RM) $(prefix)/doc/samples/*
 	if [ -d $(prefix)/doc/samples ]; then rmdir $(prefix)/doc/samples; fi
@@ -144,6 +147,7 @@ uninstall:
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
+	$(RM) $(prefix)/lib/libdlfaker.$(SHEXT)
 	$(RM) $(prefix)/lib/librr.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest

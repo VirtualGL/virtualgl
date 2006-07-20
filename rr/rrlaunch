@@ -41,6 +41,7 @@ usage()
 	echo
 	echo "VirtualGL miscellaneous options"
 	echo "  +/-profile  : Enable/disable performance profiling"
+	echo "  -dl         : Force apps that dlopen() libGL to load VirtualGL instead"
 	echo "  -64         : (Solaris only) Preload VirtualGL only into 64-bit apps"
 	echo "  -32         : (Solaris only) Preload VirtualGL only into 32-bit apps"
 	exit $1
@@ -57,6 +58,10 @@ if [ "$OPENGL_DEVICE" != "" ]; then
 fi
 unset OPENGL_DEVICE
 export OPENGL_DEVICE
+
+__VGL_DL=0
+__VGL_64=0
+__VGL_32=0
 
 if [ $# -eq 0 ]
 then
@@ -77,6 +82,7 @@ do
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
 	+de*)       VGL_DEBUG=1       ; export VGL_DEBUG    ;;
 	-de*)       VGL_DEBUG=0       ; export VGL_DEBUG    ;;
+	-dl)        __VGL_DL=1        ;;
 	+tr*)       VGL_TRACE=1       ; export VGL_TRACE    ;;
 	-tr*)       VGL_TRACE=0       ; export VGL_TRACE    ;;
 	-d*)        VGL_DISPLAY=$2    ; export VGL_DISPLAY  ; shift     ;;
@@ -117,6 +123,7 @@ then
 	FAKERLIB=/opt/SUNWvgl/lib/64/librrfaker.so
 fi
 fi
+export FAKERLIB
 if [ -z "$FAKERLIB32" ]; then
 FAKERLIB32=librrfaker.so
 if [ -f /opt/SUNWvgl/lib/librrfaker.so ]
@@ -124,19 +131,41 @@ then
 	FAKERLIB32=/opt/SUNWvgl/lib/librrfaker.so
 fi
 fi
-if [ -z "$__VGL_64" ]; then
+export FAKERLIB32
+if [ $__VGL_64 -eq 0 ]; then
 	if [ -z "$LD_PRELOAD_32" ]; then
 		LD_PRELOAD_32=$FAKERLIB32
 	else
 		LD_PRELOAD_32=$FAKERLIB32:$LD_PRELOAD_32
 	fi
+	if [ $__VGL_DL -eq 1 ]; then
+		if [ -f /opt/SUNWvgl/lib/libdlfaker.so ]
+		then
+			LD_PRELOAD_32=/opt/SUNWvgl/lib/libdlfaker.so:$LD_PRELOAD_32
+		else
+			LD_PRELOAD_32=libdlfaker.so:$LD_PRELOAD_32
+		fi
+	fi
 	export LD_PRELOAD_32
 fi
-if [ -z "$__VGL_32" ]; then
+if [ $__VGL_32 -eq 0 ]; then
 	if [ -z "$LD_PRELOAD_64" ]; then
 		LD_PRELOAD_64=$FAKERLIB
 	else
 		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
+	fi
+	if [ $__VGL_DL -eq 1 ]; then
+		if [ -f /opt/SUNWvgl/lib/sparcv9/libdlfaker.so ]
+		then
+			LD_PRELOAD_64=/opt/SUNWvgl/lib/sparcv9/libdlfaker.so:$LD_PRELOAD_64
+		else
+			if [ -f /opt/SUNWvgl/lib/64/libdlfaker.so ]
+			then
+				LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libdlfaker.so:$LD_PRELOAD_64
+			else
+				LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
+			fi
+		fi
 	fi
 	export LD_PRELOAD_64
 fi
@@ -150,6 +179,9 @@ if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=librrfaker.so
 else
 	LD_PRELOAD=librrfaker.so:$LD_PRELOAD
+fi
+if [ $__VGL_DL -eq 1 ]; then
+	LD_PRELOAD=libdlfaker.so:$LD_PRELOAD
 fi
 export LD_PRELOAD
 exec ${1+"$@"}

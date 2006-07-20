@@ -80,7 +80,8 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayclientut.o \
         $(ODIR)/rrdisplayserverut.o \
         $(ODIR)/rrfakerut.o \
-        $(ODIR)/rrframeut.o
+        $(ODIR)/rrframeut.o \
+        $(ODIR)/dlfakerut.o
 
 ifeq ($(platform), solaris)
 FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
@@ -92,21 +93,22 @@ ifeq ($(platform), linux)
 FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
 endif
 
-OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o
+OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o $(ODIR)/dlfaker.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
             $(EDIR)/rrdisplayserverut \
             $(EDIR)/rrframeut
 ifneq ($(platform), cygwin)
-UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut
+UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
 endif
 
 TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
-TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) $(TARGETS)
+TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) \
+	$(LDIR)/libdlfaker.$(SHEXT) $(TARGETS)
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
@@ -134,6 +136,9 @@ clean:
 $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl -lXt -lXaw
 
+$(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
+	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
+
 $(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
 
@@ -157,6 +162,9 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 	$(CXX) $(LDFLAGS) -o $@ $< -z now -lGL -lGLU -z now -lX11 -ldl -lpthread
+
+$(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
+	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl
 
 $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)

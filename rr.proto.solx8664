@@ -14,10 +14,12 @@ d none SUNWvgl/fakelib/64 0755 root bin
 s none SUNWvgl/fakelib/64/libGL.so=../../lib/64/librrfaker.so
 d none SUNWvgl/lib 0755 root bin
 f none SUNWvgl/lib/librrfaker.so 0755 root bin
+f none SUNWvgl/lib/libdlfaker.so 0755 root bin
 f none SUNWvgl/lib/libturbojpeg.so 0755 root bin
 f none SUNWvgl/lib/librr.so 0755 root bin
 d none SUNWvgl/lib/64 0755 root bin
 f none SUNWvgl/lib/64/librrfaker.so 0755 root bin
+f none SUNWvgl/lib/64/libdlfaker.so 0755 root bin
 f none SUNWvgl/lib/64/libturbojpeg.so 0755 root bin
 f none SUNWvgl/lib/64/librr.so 0755 root bin
 d none SUNWvgl/doc 0755 root bin
