@@ -2074,10 +2074,18 @@ allows VGL to intercept these calls, whereas using the game's built-in
 mechanism for loading a substitute OpenGL library allows VirtualGL to
 intercept
 the GLX and OpenGL calls.</p>
-<p>The <a href="http://virtualgl.sourceforge.net">VirtualGL
-web-site</a>
-contains specific recipes for getting a variety of games and other
-applications to work.</p>
+<p>In some cases, the application doesn't provide an override mechanism such as 
+the above.&nbsp; In these cases, you should pass an argument of <span class="monospace">-dl</span> to <span class="monospace">vglrun</span> when 
+starting the application, e.g.:</p>
+<pre>vglrun -dl foowars2</pre>
+<p>Passing <span class="monospace">-dl</span> to <span class="monospace">vglrun</span> 
+forces another library to be 
+loaded ahead of VirtualGL and <span class="monospace">libGL.so</span>.&nbsp; 
+This new library intercepts any calls to <span class="monospace">dlopen()</span> 
+and forces the application to open VirtualGL 
+instead of <span class="monospace">libGL.so</span>.</p>
+<p><a href="#recipes">This section</a> contains specific recipes for getting a 
+variety of games and other applications to work with VirtualGL</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 <hr style="width: 100%; height: 2px;">
 <h2><a name="chromium"></a>Usage
@@ -2470,17 +2478,26 @@ application.)</p>
       </td>
     </tr>
     <tr>
+      <td>Army Ops</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun -dl armyops</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
       <td>Descent 3</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} -g /usr/lib/librrfaker.so</td>
+      <p class="monospace">vglrun descent3 -g /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl descent3</td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>Doom 3</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so<br>
+      <p class="monospace">vglrun doom3 +set r_glDriver /usr/lib/librrfaker.so<p>
+      or<p class="monospace">vglrun -dl doom3<br>
       </td>
       <td>See <a href="#dynamicgl">this section</a> for more details<br>
       </td>
@@ -2489,68 +2506,92 @@ application.)</p>
       <td>Enemy Territory (Return to Castle Wolfenstein)</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so</td>
+      <p class="monospace">vglrun et +set r_glDriver /usr/lib/librrfaker.so<p>
+      or<p class="monospace">vglrun -dl et</td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>Heretic II</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx</td>
+      <p class="monospace">vglrun heretic2 +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx<p>
+      or<p class="monospace">vglrun -dl heretic2 +set vid_ref glx</td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>Heavy Gear II</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} -o /usr/lib/librrfaker.so</td>
+      <p class="monospace">vglrun hg2 -o /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl hg2</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Java2D applications that use OpenGL</td>
+      <td>Linux, Solaris</td>
+      <td><p>Java2D will use OpenGL to perform its rendering if 
+      <span class="monospace">sun.java2d.opengl</span> is set to <span class="monospace">True</span>, e.g.:<pre>java -Dsun.java2d.opengl=True MyAppClass</pre>
+      <p>In order for this to work in VirtualGL, it is necessary to invoke 
+      <span class="monospace">vglrun</span> with the <span class="monospace">-dl</span> switch, e.g.:</p>
+      <pre>vglrun -dl java -Dsun.java2d.opengl=True MyAppClass</pre>
+      <p>If you are using Java v6 b92 or later, you can also set the environment variable
+      <span class="monospace">J2D_ALT_LIBGL_PATH</span> to the path of
+      <span class="monospace">librrfaker.so</span>, e.g.:
+      <pre>setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so
+vglrun java -Dsun.java2d.opengl=True MyAppClass</pre></td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>Pro/ENGINEER Wildfire v2.0</td>
       <td>Solaris/Sparc</td>
       <td><p>Add<p class="monospace">graphics opengl<p>to <i>~/config.pro</i>.&nbsp; You may also need to set the
-    <font face="Courier New">VGL_XVENDOR</font> environment variable to
-    <font face="Courier New">&quot;Sun Microsystems, Inc.&quot;</font> if you are running 
+    <span class="monospace">VGL_XVENDOR</span> environment variable to
+    <span class="monospace">&quot;Sun Microsystems, Inc.&quot;</span> if you are running 
     Pro/ENGINEER 2.0 over a remote X connection to a Linux or Windows VirtualGL 
       client.</td>
       <td>Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote 
       connection to a non-Sun X server.</td>
     </tr>
     <tr>
-      <td>QGL (OpenGL Qt Widget)</td>
+      <td>QGL (OpenGL Qt Widget) </td>
       <td>Linux</td>
-      <td>Pass
-    <font face="Courier New">-no-dlopen-opengl</font> argument to
-      <font face="Courier New">configure </font>when building libQt</td>
-      <td>Unless Qt is configured with
-    <font face="Courier New">-no-dlopen-opengl</font>, it will use dlopen() to 
-      load libGL, thus bypassing VirtualGL's faker library.<p>Unfortunately, the 
-      version of libQt which ships with some recent Linux distributions was not 
-      configured with
-    <font face="Courier New">-no-dlopen-opengl</font>.&nbsp; For these 
-      distributions, you will have to rebuild the Qt package from the source (or 
-      source RPM) in order to make VirtualGL work with Qt OpenGL applications. </td>
+      <td>
+      <p class="monospace">vglrun -dl {application}</td>
+      <td>
+      <p>Qt can be built such that it either resolves symbols from libGL automatically or uses<span class="monospace"> dlopen()</span> to manually 
+      resolve those symbols from libGL.&nbsp; As of Qt v3.3, the latter behavior 
+      is the default, so OpenGL programs built with later versions of libQt will 
+      not work with VirtualGL unless the <span class="monospace">-dl</span> switch is used with <span class="monospace">vglrun</span>.</p>
+      <p>See <a href="#dynamicgl">this section</a> for more details </td>
     </tr>
     <tr>
       <td>Quake 3</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} +set r_glDriver /usr/lib/librrfaker.so</td>
+      <p class="monospace">vglrun quake3 +set r_glDriver /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl quake3</td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>Soldier of Fortune</td>
       <td>Linux/x86</td>
       <td>
-      <p class="monospace">vglrun {game} +set gl_driver /usr/lib/librrfaker.so</td>
+      <p class="monospace">vglrun sof +set gl_driver /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl sof</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Unreal Tournament 2004</td>
+      <td>Linux/x86</td>
+      <td><p class="monospace">
+      vglrun -dl ut2004</td>
       <td>See <a href="#dynamicgl">this section</a> for more details</td>
     </tr>
     <tr>
       <td>VisConcept</td>
       <td>Solaris/Sparc</td>
       <td>Set the environment variable
-    <font face="Courier New">VGL_GUI_XTTHREADINIT</font> to 0</td>
+    <span class="monospace">VGL_GUI_XTTHREADINIT</span> to 0</td>
       <td>Popping up the VirtualGL configuration dialog may cause the 
       application to hang unless you set this environment variable.&nbsp; See
       <a href="#config">Advanced Configuration</a> for more details</td>
@@ -2936,12 +2977,10 @@ Configuration<br>
 <div style="text-align: left;">
 <h3>Server Settings</h3>
 </div>
-<font face="Arial, Helvetica">
 <p align="left">You can
 control the operation of the VirtualGL faker in four different
 ways.&nbsp; Each method of configuration takes precedence over the
 previous method:</p>
-</font>
 <ol>
   <li>Setting a configuration
 environment variable globally (e.g. in <span class="monospace">/etc/profile</span>)</li>
@@ -3201,7 +3240,7 @@ section</a> for more details.<br>
     <tr>
       <td class="monospace"
  style="vertical-align: baseline; font-weight: bold;">
-    <font face="Courier New">VGL_GUI_XTTHREADINIT</font></td>
+    <span class="monospace">VGL_GUI_XTTHREADINIT</span></td>
       <td>&nbsp;</td>
       <td style="vertical-align: top;"><span style="font-weight: bold;">0 to 
       prevent VGL from calling
