@@ -127,10 +127,6 @@ void unloadsymbols1(void)
 void loadsymbols2(void)
 {
 	const char *err=NULL;
-	gldllhnd=dlopen("libGL.so", RTLD_NOW);
-	err=dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libGL")
 
 	#ifdef SUNOGL
 	lsym(glXGetProcAddress);
@@ -145,11 +141,9 @@ void loadsymbols2(void)
 	lsym2(glXSwapBuffers);
 	lsym2(glClear);
 	lsym2(glClearColor);
-	dlclose(gldllhnd);
 	return;
 
 	bailout:
-	if(gldllhnd) dlclose(gldllhnd);
 	exit(1);
 }
 
@@ -212,10 +206,11 @@ int main(void)
 
 	loadsymbols1();
 	test("dlopen() test");
-	unloadsymbols1();
 
 	loadsymbols2();
 	test("glXGetProcAddressARB() test");
+
+	unloadsymbols1();
 
 	bailout:
 	return 0;
