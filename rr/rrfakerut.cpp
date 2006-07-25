@@ -450,6 +450,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		// Faker should readback front buffer on glFlush(), glFinish(), and
 		// glXWaitGL()
@@ -470,6 +471,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -488,6 +490,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -506,6 +509,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -526,6 +530,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}	
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -543,6 +548,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -560,6 +566,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		// Test for proper handling of GL_FRONT_AND_BACK
 		try
@@ -575,6 +582,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -589,6 +597,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -603,6 +612,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -617,6 +627,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -631,6 +642,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -646,6 +658,7 @@ int rbtest(bool stereo, bool ci)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 	}
 	catch(rrerror &e)
 	{
@@ -835,6 +848,7 @@ int citest(void)
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		fflush(stdout);
 
 		try
 		{
@@ -852,6 +866,7 @@ int citest(void)
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 		if(bits) {delete [] bits;  bits=NULL;}
+		fflush(stdout);
 
 		try
 		{
@@ -880,6 +895,7 @@ int citest(void)
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 		if(bits) {delete [] bits;  bits=NULL;}
+		fflush(stdout);
 
 		try
 		{
@@ -902,6 +918,7 @@ int citest(void)
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 		if(bits) {delete [] bits;  bits=NULL;}
+		fflush(stdout);
 
 		try
 		{
@@ -922,6 +939,7 @@ int citest(void)
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 		if(bits) {delete [] bits;  bits=NULL;}
+		fflush(stdout);
 
 		try
 		{
@@ -943,6 +961,7 @@ int citest(void)
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
 		if(bits) {delete [] bits;  bits=NULL;}
+		fflush(stdout);
 
 	}
 	catch(rrerror &e)
@@ -1220,6 +1239,7 @@ int vistest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		try
 		{
@@ -1277,6 +1297,7 @@ int vistest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		printf("\n");
 		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
@@ -1337,6 +1358,7 @@ int vistest(void)
 
 		XFree(configs);  configs=NULL;
 		for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;  n=0;
+		fflush(stdout);
 
 		if(!(v0=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n)) || n==0)
 			_throw("No X Visuals found");
@@ -1370,6 +1392,8 @@ int vistest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	fflush(stdout);
+
 	if(v && n) {for(i=0; i<n; i++) {if(v[i]) XFree(v[i]);}  free(v);  v=NULL;}
 	if(v0) {XFree(v0);  v0=NULL;}
 	if(configs) {XFree(configs);  configs=NULL;}
@@ -1493,6 +1517,8 @@ int mttest(int nthr)
 			mt[i]->resize(100, 100);
 		}
 		XSync(dpy, False);
+		fflush(stdout);
+
 		printf("Phase 2\n");
 		for(i=0; i<nthr; i++)
 		{
@@ -1502,6 +1528,8 @@ int mttest(int nthr)
 			mt[i]->resize(200, 200);
 		}
 		XSync(dpy, False);
+		fflush(stdout);
+
 		printf("Phase 3\n");
 		for(i=0; i<nthr; i++)
 		{
@@ -1528,6 +1556,7 @@ int mttest(int nthr)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	fflush(stdout);
 
 	for(i=0; i<nthr; i++) {if(t[i]) {delete t[i];  t[i]=NULL;}}
 	for(i=0; i<nthr; i++) {if(mt[i]) {delete mt[i];  mt[i]=NULL;}}
@@ -1684,6 +1713,7 @@ int pbtest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		try
 		{
@@ -1708,6 +1738,7 @@ int pbtest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		try
 		{
@@ -1731,6 +1762,7 @@ int pbtest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		try
 		{
@@ -1760,6 +1792,7 @@ int pbtest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 
 		try
 		{
@@ -1786,6 +1819,7 @@ int pbtest(void)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
+		fflush(stdout);
 	}
 	catch(rrerror &e)
 	{
@@ -1899,6 +1933,7 @@ int dpyhashtest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	fflush(stdout);
 	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
 	if(win && dpy) {XDestroyWindow(dpy, win);  win=0;}
 	if(v) {XFree(v);  v=NULL;}
@@ -1943,6 +1978,7 @@ int querytest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	fflush(stdout);
 	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 	return retval;
 }
@@ -1976,6 +2012,7 @@ int procaddrtest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	fflush(stdout);
 	return retval;
 }
 #endif
@@ -2030,7 +2067,6 @@ int main(int argc, char **argv)
 	rbtest(true, false);
 	printf("\n");
 	rbtest(false, true);
-	printf("\n");
 	printf("\n");
 	citest();
 	printf("\n");
