@@ -12,6 +12,10 @@ UninstPage instfiles
 
 Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
+	SetOutPath $INSTDIR\doc
+	File "doc\*.gif"
+	File "doc\*.png"
+	File "doc\*.html"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
 	File "${BLDDIR}\bin\turbojpeg.dll"
@@ -20,7 +24,6 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${MINGWDIR}\bin\mingwm10.dll"
 	File "$%systemroot%\system32\libeay32.dll"
 	File "$%systemroot%\system32\ssleay32.dll"
-	File /r /x CVS /x config /x unixug /x winug "doc"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
 	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
 	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
