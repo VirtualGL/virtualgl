@@ -22,7 +22,7 @@
 ** Those portions of the Subject Software created by Silicon Graphics, Inc.
 ** are Copyright (c) 1991-9 Silicon Graphics, Inc. All Rights Reserved.
 **
-** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.8 2005-12-01 21:50:15 dcommander Exp $
+** $Header: /home/drc/cvs/vgl/rr/glx.h,v 1.8.2.1 2006-08-21 20:50:31 dcommander Exp $
 */
 
 #include <X11/Xlib.h>
@@ -295,6 +295,8 @@ typedef void ( * PFNGLXSELECTEVENTPROC) (Display *dpy, GLXDrawable draw, unsigne
 typedef void ( * PFNGLXGETSELECTEDEVENTPROC) (Display *dpy, GLXDrawable draw, unsigned long *event_mask);
 #endif
 
+/* GLX 1.4 and later */
+extern void (*glXGetProcAddress(const GLubyte *procname))(void);
 
 /**********************************************************************/
 

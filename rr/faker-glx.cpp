@@ -264,7 +264,7 @@ const char *glXGetClientString(Display *dpy, int name)
 	if(!_isremote(dpy)) return _glXGetClientString(dpy, name);
 	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
-	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
 }
@@ -664,7 +664,7 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 	if(!_isremote(dpy)) return _glXQueryServerString(dpy, screen, name);
 	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
-	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
 }
@@ -684,7 +684,7 @@ int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsigne
 Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) {*major=1;  *minor=3;  return True;}
+	if(fconfig.glp) {*major=1;  *minor=4;  return True;}
 	else
 	#endif
 	return _glXQueryVersion(_localdpy, major, minor);
@@ -885,6 +885,11 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		stoptrace();  closetrace();
 
 	return retval;
+}
+
+void (*glXGetProcAddress(const GLubyte *procName))(void)
+{
+	return glXGetProcAddressARB(procName);
 }
 
 #endif
