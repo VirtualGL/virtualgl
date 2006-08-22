@@ -164,12 +164,12 @@ endif
 ifeq ($(JPEGLIB), ipp)
 
 ifeq ($(IPPDIR),)
-IPPDIR = /opt/intel/ipp/5.0/ia32
+IPPDIR = /opt/intel/ipp/5.1/ia32
 ifeq ($(subplatform), 64)
-IPPDIR = /opt/intel/ipp/5.0/em64t
+IPPDIR = /opt/intel/ipp/5.1/em64t
 endif
 ifeq ($(subplatform), ia64)
-IPPDIR = /opt/intel/ipp/5.0/itanium
+IPPDIR = /opt/intel/ipp/5.1/itanium
 endif
 endif
 IPPLINK = -L$(IPPDIR)/lib -lippcore \
@@ -258,7 +258,7 @@ dist: lib lib32
 		--define "_bindir $(EDIR)" --define "_bindir32 $(EDIR32)" --define "_build $(TJPEGBUILD)" \
 		--define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" --target $(RPMARCH) \
 		turbojpeg.spec; \
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/turbojpeg-1.02-$(TJPEGBUILD).$(RPMARCH).rpm $(BLDDIR)
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/turbojpeg-1.03-$(TJPEGBUILD).$(RPMARCH).rpm $(BLDDIR)
 	rm -rf $(BLDDIR)/rpms
 
 endif
