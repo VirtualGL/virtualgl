@@ -1,6 +1,6 @@
 Summary: A fast JPEG codec used by VirtualGL and TurboVNC
 Name: turbojpeg
-Version: 1.02
+Version: 1.03
 Vendor: The VirtualGL Project
 URL: http://virtualgl.sourceforge.net
 Group: System Environment/Libraries
