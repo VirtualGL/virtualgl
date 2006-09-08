@@ -86,14 +86,14 @@ void pixelconvert(unsigned char *srcbuf, enum BMPPIXELFORMAT srcformat,
 	}
 }
 
-int loadppm(int fd, unsigned char **buf, int *w, int *h,
+int loadppm(int *fd, unsigned char **buf, int *w, int *h,
 	enum BMPPIXELFORMAT f, int align, int dstbottomup, int ascii)
 {
 	FILE *fs=NULL;  int retcode=0, scalefactor, dstpitch;
 	unsigned char *tempbuf=NULL;  char temps[255], temps2[255];
 	int numread=0, totalread=0, pixel[3], i, j;
 
-	if((fs=fdopen(fd, "r"))==NULL) _throw(strerror(errno));
+	if((fs=fdopen(*fd, "r"))==NULL) _throw(strerror(errno));
 
 	do
 	{
@@ -147,7 +147,7 @@ int loadppm(int fd, unsigned char **buf, int *w, int *h,
 	}
 
 	finally:
-	if(fs) fclose(fs);
+	if(fs) {fclose(fs);  *fd=-1;}
 	if(tempbuf) free(tempbuf);
 	return retcode;
 }
@@ -176,12 +176,12 @@ int loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 
 	if(bh.bfType==0x3650)
 	{
-		_catch(loadppm(fd, buf, w, h, f, align, dstbottomup, 0));
+		_catch(loadppm(&fd, buf, w, h, f, align, dstbottomup, 0));
 		goto finally;
 	}
 	if(bh.bfType==0x3350)
 	{
-		_catch(loadppm(fd, buf, w, h, f, align, dstbottomup, 1));
+		_catch(loadppm(&fd, buf, w, h, f, align, dstbottomup, 1));
 		goto finally;
 	}
 
