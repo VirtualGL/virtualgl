@@ -146,7 +146,7 @@ void rrcwin::initx11(void)
 			b=new rrfb(dpystr, _window);
 			if(!b) _throw("Could not allocate class instance");
 		}
-		catch(rrerror &e)
+		catch(...)
 		{
 			if(b) {delete b;  b=NULL;}
 			throw;
