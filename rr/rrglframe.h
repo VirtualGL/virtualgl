@@ -14,8 +14,6 @@
 #ifndef __RRGLFRAME_H
 #define __RRGLFRAME_H
 
-#include "rrframe.h"
-
 // Bitmap drawn using OpenGL
 
 #ifdef INFAKER
@@ -42,6 +40,8 @@
  #define glDrawPixels _glDrawPixels
  #define glFinish _glFinish
 #endif
+
+#include "rrframe.h"
 
 class rrglframe : public rrframe
 {
@@ -228,12 +228,12 @@ class rrglframe : public rrframe
 		glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
 		if(_stereo) glDrawBuffer(GL_BACK_LEFT);
 		glViewport(0, 0, _h.framew, _h.frameh);
-		glRasterPos2f(((float)x/(float)_h.framew)*2.-1., ((float)y/(float)_h.frameh)*2.-1.);
+		glRasterPos2f(((float)x/(float)_h.framew)*2.0f-1.0f, ((float)y/(float)_h.frameh)*2.0f-1.0f);
 		glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &_bits[_pitch*y+x*_pixelsize]);
 		if(_stereo)
 		{
 			glDrawBuffer(GL_BACK_RIGHT);
-			glRasterPos2f(((float)x/(float)_h.framew)*2.-1., ((float)y/(float)_h.frameh)*2.-1.);
+			glRasterPos2f(((float)x/(float)_h.framew)*2.0f-1.0f, ((float)y/(float)_h.frameh)*2.0f-1.0f);
 			glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &_rbits[_pitch*y+x*_pixelsize]);
 			glDrawBuffer(oldbuf);
 			_stereo=false;

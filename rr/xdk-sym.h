@@ -20,6 +20,10 @@
 #include <GL/glx.h>
 #include "rrerror.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4297)
+#endif
+
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
 #else

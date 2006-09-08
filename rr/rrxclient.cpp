@@ -20,6 +20,9 @@
 #include "rrdisplayserver.h"
 #include "x11err.h"
 #include "xdk-sym.h"
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, quiet=false;
