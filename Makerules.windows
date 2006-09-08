@@ -1,43 +1,38 @@
 ########################################
-# Windows NT (MinGW/Cygwin)
+# Win32 (Visual C++)
 ########################################
 
-CC = gcc -mno-cygwin
-CXX = g++ -mno-cygwin -mthreads
-AR = ar ruvs
+CC = "cl" -nologo
+CXX = "cl" -EHsc -nologo
+AR = "link" -lib -nologo
+LINK = "link" -nologo
+ifeq ($(DEBUG), yes)
+LINK = "link" -nologo -debug
+endif
 
-CFLAGS = -Wall
-CDEFINES = -DWIN32
+CFLAGS = -W3 -wd4996
+CDEFINES = -DWIN32 -D_CRT_SECURE_NO_DEPRECATE
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 ifeq ($(DEBUG), yes)
-OPTFLAG = -O0 -ggdb
+OPTFLAG = -Od -MTd -Zi
 else
-OPTFLAG = -O2
+OPTFLAG = -O2 -MT
 endif
-
-DEPFLAG = -MM
 
 DEFAULTJPEGLIB = ipp
 
-ifeq ($(XWIN32), yes)
-CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/x11
-CDEFINES := $(CDEFINES) -DXWIN32
-X11LIB = -lX11 -lXext -lwsock32
-GLXLIB = -lglx -lGL -lX11 -lXext -lwsock32
-FAKEGLXLIB = $(GLXLIB)
-GLULIB = -lGLU
-else
+CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/xdk
 CDEFINES := $(CDEFINES) -DXDK
-X11LIB = -lxlib -lhclshm 
-FAKEGLXLIB = -lxlib
-GLXLIB = $(FAKEGLXLIB) -lhclglx
-GLULIB = -lhclglu
-endif
-SOCKLIB = -lrrsocket -lwsock32
+X11LIB = xlib.lib hclshm.lib 
+FAKEGLXLIB = xlib.lib
+GLXLIB = $(FAKEGLXLIB) hclglx.lib
+GLULIB = hclglu.lib
+
+SOCKLIB = rrsocket.lib wsock32.lib
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -llibeay32 -lssleay32
+SOCKLIB := $(SOCKLIB) libeay32.lib ssleay32.lib
 endif
-FBXLIB = -lfbx -lgdi32
-FBXX11LIB = -lfbx-x11 -lversion $(X11LIB)
+FBXLIB = fbx.lib gdi32.lib user32.lib
+FBXX11LIB = fbx-x11.lib version.lib $(X11LIB)
