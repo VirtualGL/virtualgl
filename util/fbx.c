@@ -32,7 +32,7 @@ const int fbx_bmask[FBX_FORMATS]=
 const char *_fbx_formatname[FBX_FORMATS]=
 	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX"};
 
-#if defined(WIN32) || defined(XWIN32)
+#if defined(FBXWIN32) || defined(XWIN32)
 
  static char __lasterror[1024]="No error";
  #define _throw(m) {strncpy(__lasterror, m, 1023);  __line=__LINE__;  goto finally;}
@@ -49,7 +49,7 @@ const char *_fbx_formatname[FBX_FORMATS]=
 
 #endif
 
-#ifdef WIN32
+#ifdef FBXWIN32
 
  typedef struct _BMINFO {BITMAPINFO bmi;  RGBQUAD cmap[256];} BMINFO;
 
@@ -110,7 +110,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 {
 	int w, h;
 	int rmask, gmask, bmask, ps, i;
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
 	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1, alphafirst;
@@ -121,7 +121,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(!s) _throw("Invalid argument");
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 
 	if(!wh) _throw("Invalid argument");
 	w32(GetClientRect(wh, &rect));
@@ -359,7 +359,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 int fbx_read(fbx_struct *s, int winx, int winy)
 {
 	int wx, wy;
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	fbx_gc gc;
 	#else
 	int x=0, y=0;  XWindowAttributes xwinattrib, rwinattrib;  Window dummy;
@@ -367,7 +367,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	if(!s) _throw("Invalid argument");
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	if(!s->hmdc || s->width<=0 || s->height<=0 || !s->bits || !s->wh) _throw("Not initialized");
 	w32(gc=GetDC(s->wh));
 	w32(BitBlt(s->hmdc, 0, 0, s->width, s->height, gc, wx, wy, SRCCOPY));
@@ -421,13 +421,13 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	int bx, by, wx, wy, bw, bh;
 	BITMAPINFO bmi;  fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
@@ -485,7 +485,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	return -1;
 }
 
-#ifndef WIN32
+#ifndef FBXWIN32
 int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
 	int bx, by, wx, wy, bw, bh;
@@ -513,7 +513,7 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 
 int fbx_sync(fbx_struct *s)
 {
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	return 0;
 	#else
 	XdbeSwapInfo si;
@@ -538,7 +538,7 @@ int fbx_sync(fbx_struct *s)
 int fbx_term(fbx_struct *s)
 {
 	if(!s) _throw("Invalid argument");
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	if(s->hdib) DeleteObject(s->hdib);
 	if(s->hmdc) DeleteDC(s->hmdc);
 	#else
@@ -570,7 +570,7 @@ int fbx_term(fbx_struct *s)
 	return -1;
 }
 
-#if defined(XDK) && defined(USESHM) && !defined(WIN32)
+#if defined(XDK) && defined(USESHM) && !defined(FBXWIN32)
 static int fbx_checkdlls(void)
 {
 	int retval=1, v1, v2, v3, v4;

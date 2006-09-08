@@ -6,7 +6,6 @@ ifeq ($(platform), windows)
 
 TARGETS = $(EDIR)/turbojpeg.dll \
           $(LDIR)/turbojpeg.lib \
-          $(LDIR)/turbojpeg.def \
           $(EDIR)/jpgtest.exe \
           $(EDIR)/jpegut.exe
 
@@ -44,16 +43,16 @@ ifeq ($(JPEGLIB), pegasus)
 PEGDIR = ../../pictools
 
 $(ODIR)/turbojpeg.obj: turbojpegp.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -o $@
+	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -Fo$@
 
-JPEGLINK = -L$(PEGDIR)/lib -lpicnm
+JPEGLINK = -LIBPATH:$(PEGDIR)/lib picnm.lib
 
 endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
 $(ODIR)/turbojpeg.obj: turbojpegl.c
-	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -o $@
+	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
 JPEGLINK = $(LDIR)/libjpeg.lib
 JPEGDEP = $(LDIR)/libjpeg.lib
@@ -62,11 +61,11 @@ endif
 
 ifeq ($(JPEGLIB), ipp)
 
-IPPLINK = -lippjemerged	-lippiemerged -lippsemerged \
-	-lippjmerged -lippimerged -lippsmerged -lippcorel
+IPPLINK = ippjemerged.lib ippiemerged.lib ippsemerged.lib \
+	ippjmerged.lib ippimerged.lib ippsmerged.lib ippcorel.lib
 
 $(ODIR)/turbojpeg.obj: turbojpegipp.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -o $@
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
 JPEGLINK = $(IPPLINK)
 
@@ -75,21 +74,21 @@ endif
 ifeq ($(JPEGLIB), quicktime)
 
 $(ODIR)/turbojpeg.obj: turbojpegqt.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -o $@
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
 JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
 
 endif
 
-$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbojpeg.obj $(JPEGDEP)
-	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
-		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
+$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
+	$(LINK) $(LDFLAGS) -dll $< -out:$(EDIR)/turbojpeg.dll \
+		-implib:$(LDIR)/turbojpeg.lib $(JPEGLINK)
 
 $(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/turbojpeg.lib $(LDIR)/rrutil.lib
-	$(CXX) $(LDFLAGS) $< -o $@ -lturbojpeg -lrrutil
+	$(LINK) $(LDFLAGS) $< -out:$@ turbojpeg.lib rrutil.lib
 
 $(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDIR)/turbojpeg.lib
-	$(CC) $(LDFLAGS) $< -o  $@ -lturbojpeg
+	$(LINK) $(LDFLAGS) $< -out:$@ turbojpeg.lib
 
 ##########################################################################
 else
