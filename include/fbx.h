@@ -20,19 +20,18 @@
 #define __FBX_H__
 
 #define USESHM
-#ifdef FBXX11
- #undef WIN32
+#if defined(_WIN32) && !defined(FBXX11)
+ #define FBXWIN32
 #endif
 
 #include <stdio.h>
-#ifdef WIN32
+#ifdef FBXWIN32
  #include <windows.h>
  typedef HDC fbx_gc;
  typedef HWND fbx_wh;
 #else
  #ifdef FBXX11
   #include <Xwindows.h>
-  #undef WIN32
  #endif
  #ifdef XDK
   #define NOREDIRECT
@@ -88,7 +87,7 @@ typedef struct _fbx_struct
 	fbx_wh wh;
 	int shm;
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	HDC hmdc;  HBITMAP hdib;
 	#else
 	#ifdef USESHM
@@ -179,7 +178,7 @@ int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
   Same as fbx_write, but asynchronous.  The write isn't guaranteed to complete
   until fbx_sync() is called.  On Windows, fbx_awrite is the same as fbx_write.
 */
-#ifdef WIN32
+#ifdef FBXWIN32
 #define fbx_awrite fbx_write
 #else
 int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
