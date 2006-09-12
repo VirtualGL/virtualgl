@@ -32,7 +32,11 @@ GLULIB = hclglu.lib
 
 SOCKLIB = rrsocket.lib wsock32.lib
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) libeay32.lib ssleay32.lib
+ifeq ($(DEBUG), yes)
+SOCKLIB := $(SOCKLIB) libeay32MTd.lib ssleay32MTd.lib
+else
+SOCKLIB := $(SOCKLIB) libeay32MT.lib ssleay32MT.lib
+endif
 endif
 FBXLIB = fbx.lib gdi32.lib user32.lib
 FBXX11LIB = fbx-x11.lib version.lib $(X11LIB)
