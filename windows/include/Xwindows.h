@@ -42,6 +42,7 @@ The Open Group.
 
 #define BOOL wBOOL
 #define INT32 wINT32
+#define INT8 wINT8
 #undef Status
 #define Status wStatus
 #define ATOM wATOM
@@ -53,6 +54,7 @@ The Open Group.
 #undef BYTE
 #undef BOOL
 #undef INT32
+#undef INT8
 #undef ATOM
 #undef FreeResource
 #undef CreateWindowA

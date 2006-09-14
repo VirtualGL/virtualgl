@@ -41,28 +41,28 @@ HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
 $(LDIR)/rrutil.lib: $(ODIR)/rrlog.obj $(ODIR)/genericQ.obj $(ODIR)/bmp.obj
-	$(AR) $@ $^
+	$(AR) -OUT:$@ $^
 
 $(ODIR)/fbx-x11.obj: fbx.c
-	$(CC) $(CFLAGS) -DFBXX11 -UWIN32 -c $< -o $@
+	$(CC) $(CFLAGS) -DFBXX11 -c $< -Fo$@
 
 $(ODIR)/fbxtest-x11.obj: fbxtest.cpp
-	$(CXX) $(CXXFLAGS) -DFBXX11 -UWIN32 -c $< -o $@
+	$(CXX) $(CXXFLAGS) -DFBXX11 -c $< -Fo$@
 
 $(EDIR)/nettest.exe: $(ODIR)/nettest.obj $(LDIR)/rrsocket.lib
-	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(SOCKLIB)
 
 $(EDIR)/fbxtest-x11.exe: $(ODIR)/fbxtest-x11.obj $(LDIR)/fbx-x11.lib
-	$(CXX) $(LDFLAGS) $< -o $@ $(FBXX11LIB)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(FBXX11LIB)
 
 $(EDIR)/glreadtest.exe: $(ODIR)/glreadtest.obj
-	$(CXX) $(LDFLAGS) $< -o $@ $(GLXLIB) $(X11LIB) $(GLULIB)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(GLXLIB) $(X11LIB) $(GLULIB)
 
 $(EDIR)/fbxtest.exe: $(ODIR)/fbxtest.obj $(LDIR)/fbx.lib
-	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(FBXLIB)
 
 $(EDIR)/threadtest.exe :$(ODIR)/threadtest.obj
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(LINK) $(LDFLAGS) $< -out:$@
 
 ##########################################################################
 else

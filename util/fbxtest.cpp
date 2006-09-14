@@ -12,10 +12,6 @@
  * wxWindows Library License for more details.
  */
 
-#ifdef XDK  // For some reason, -UWIN32 from the command line doesn't work with C++ files
- #undef WIN32
-#endif
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,7 +21,7 @@
 #include "rrutil.h"
 #include "rrtimer.h"
 #include "fbx.h"
-#ifndef WIN32
+#ifndef FBXWIN32
  #include <errno.h>
  #include "x11err.h"
 #endif
@@ -35,7 +31,7 @@
 // Error handling
 //////////////////////////////////////////////////////////////////////
 
-#ifndef WIN32
+#ifndef FBXWIN32
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	fprintf(stderr, "X11 Error: %s\n", x11error(xe->error_code));
@@ -60,7 +56,7 @@ int width, height;
 int checkdb=0, doshm=1;
 fbx_wh wh;
 rrtimer timer;
-#ifdef WIN32
+#ifdef FBXWIN32
 #define fg() SetForegroundWindow(wh)
 #else
 #define fg()
@@ -117,7 +113,7 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf
 // Makes sure the frame buffer has been cleared prior to a write
 void clearfb(void)
 {
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	if(wh)
 	{
 		HDC hdc=0;  RECT rect;
@@ -168,13 +164,11 @@ void nativewrite(int useshm)
 			if(checkdb)
 			{
 				memset(s.bits, 255, s.pitch*s.height);
-				for(int j=0; j<height; j++)
-					fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
+				fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
 				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
 			}
-			for(int j=0; j<height; j++)
-				fbx(fbx_awrite(&s, 0, j, 0, height-j-1, width, 1));
-			fbx_sync(&s);
+			fbx(fbx_flip(&s, 0, 0, 0, 0));
+			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
 		}
 		rbtime=timer.elapsed();
 	} while(rbtime<1.);
@@ -440,7 +434,7 @@ void nativestress(int useshm)
 void display(void)
 {
 	fprintf(stderr, "-- Performance tests --\n");
-	#ifndef WIN32
+	#ifndef FBXWIN32
 	if(doshm)
 	{
 		fg();  nativewrite(1);
@@ -452,7 +446,7 @@ void display(void)
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "-- Stress tests --\n");
-	#ifndef WIN32
+	#ifndef FBXWIN32
 	if(doshm)
 	{
 		fg();  nativestress(1);
@@ -462,7 +456,7 @@ void display(void)
 	fprintf(stderr, "\n");
 }
 
-#ifdef WIN32
+#ifdef FBXWIN32
 LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg)
@@ -510,7 +504,7 @@ int main(int argc, char **argv)
 
 	try {
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 
 	WNDCLASSEX wndclass;  MSG msg;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
@@ -547,7 +541,7 @@ int main(int argc, char **argv)
 	width=WIDTH;
 	height=HEIGHT;
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 
 	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
