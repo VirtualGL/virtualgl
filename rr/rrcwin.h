@@ -23,7 +23,7 @@
 #include "rrthread.h"
 #include "genericQ.h"
 
-enum {RR_DRAWX11=0, RR_DRAWOGL};
+enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
 
 class rrcwin : public Runnable
 {
@@ -52,6 +52,7 @@ class rrcwin : public Runnable
 	Thread *_t;
 	rrcs _jpgmutex;
 	bool _stereo;
+	rrcs _mutex;
 };
 
 #endif

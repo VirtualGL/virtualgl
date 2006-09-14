@@ -20,19 +20,18 @@
 #define __FBX_H__
 
 #define USESHM
-#ifdef FBXX11
- #undef WIN32
+#if defined(_WIN32) && !defined(FBXX11)
+ #define FBXWIN32
 #endif
 
 #include <stdio.h>
-#ifdef WIN32
+#ifdef FBXWIN32
  #include <windows.h>
  typedef HDC fbx_gc;
  typedef HWND fbx_wh;
 #else
  #ifdef FBXX11
   #include <Xwindows.h>
-  #undef WIN32
  #endif
  #ifdef XDK
   #define NOREDIRECT
@@ -88,7 +87,7 @@ typedef struct _fbx_struct
 	fbx_wh wh;
 	int shm;
 
-	#ifdef WIN32
+	#ifdef FBXWIN32
 	HDC hmdc;  HBITMAP hdib;
 	#else
 	#ifdef USESHM
@@ -179,11 +178,27 @@ int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
   Same as fbx_write, but asynchronous.  The write isn't guaranteed to complete
   until fbx_sync() is called.  On Windows, fbx_awrite is the same as fbx_write.
 */
-#ifdef WIN32
+#ifdef FBXWIN32
 #define fbx_awrite fbx_write
 #else
 int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
 #endif
+
+/*
+  fbx_flip
+  (fbx_struct *s, int bmpx, int bmpy, int w, int h)
+
+  This routine performs an in-place vertical flip of the region of interest specified by
+  bmpx, bmpy, w, and h in the memory buffer specified by s
+
+  s = Address of fbx_struct previously initialized by a call to fbx_init()
+      s->bits should contain the pixels you wish to flip
+  bmpx = left offset of the region you wish to flip (relative to the memory buffer)
+  bmpy = top offset of the region you wish to flip (relative to the memory buffer)
+  w = width of region you wish to flip (0 = whole bitmap)
+  h = height of region you wish to flip (0 = whole bitmap)
+*/
+int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h);
 
 /*
   fbx_sync

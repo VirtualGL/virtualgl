@@ -154,6 +154,15 @@ funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int, list_base,)
 funcdef0(void, glXWaitGL,);
 
 
+// GLX 1.1 functions
+
+funcdef2(const char *, glXGetClientString, Display *, dpy, int, name, return);
+
+funcdef3(const char *, glXQueryServerString, Display *, dpy, int, screen, int, name, return);
+
+funcdef2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen, return);
+
+
 // GLX 1.3 functions
 
 funcdef4(GLXFBConfig *, glXChooseFBConfig, Display *, dpy, int, screen,

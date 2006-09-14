@@ -30,24 +30,6 @@ extern GLPDevice _localdev;
 #endif
 extern FakerConfig fconfig;
 
-#define _case(ec) case ec: return "GLX Error: "#ec;
-static const char *glxerr(int glxerror)
-{
-	switch(glxerror)
-	{
-		_case(GLX_BAD_SCREEN)
-		_case(GLX_BAD_ATTRIBUTE)
-		_case(GLX_NO_EXTENSION)
-		_case(GLX_BAD_VISUAL)
-		_case(GLX_BAD_CONTEXT)
-		_case(GLX_BAD_VALUE)
-		_case(GLX_BAD_ENUM)
-		default: return "No GLX Error";
-	}
-}
-static int __glxerr=0;
-#define glx(f) {if((__glxerr=(f))!=None) _throw(glxerr(__glxerr));}
-
 struct _visattrib
 {
 	double gamma;
@@ -254,11 +236,13 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		if(bluesize>=0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;}
 	}
 
-	// GLP won't grok GLX_STEREO, even if it's set to False
+	if(stereo)
+	{
+		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
+	}
 	#ifdef USEGLP
 	if(!fconfig.glp) {
 	#endif
-	glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	if(!fconfig.usewindow)
 	{
 		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
@@ -361,6 +345,7 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 		if(stereo!=_va[i].stereo) match=0;
 		if(stereo && !_va[i].db) match=0;
 		if(stereo && !_va[i].gl) match=0;
+		if(stereo && _va[i].c_class!=TrueColor) match=0;
 		if(level!=_va[i].level) match=0;
 		if(trans && !_va[i].trans) match=0;
 		if(match) return _va[i].visualid;
@@ -375,6 +360,7 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 		if(stereo!=_va[i].stereo) match=0;
 		if(stereo && !_va[i].db) match=0;
 		if(stereo && !_va[i].gl) match=0;
+		if(stereo && _va[i].c_class!=TrueColor) match=0;
 		if(level!=_va[i].level) match=0;
 		if(trans && !_va[i].trans) match=0;
 		if(match) return _va[i].visualid;

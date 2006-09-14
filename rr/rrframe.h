@@ -328,14 +328,8 @@ class rrfb : public rrframe
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
-		if(_flags&RRBMP_BOTTOMUP)
-		{
-			for(int i=0; i<_fb.height; i++)
-				fbx(fbx_awrite(&_fb, 0, _fb.height-i-1, 0, i, 0, 1));
-			fbx(fbx_sync(&_fb));
-		}
-		else
-			fbx(fbx_write(&_fb, 0, 0, 0, 0, _fb.width, _fb.height));
+		if(_flags&RRBMP_BOTTOMUP) fbx(fbx_flip(&_fb, 0, 0, 0, 0));
+		fbx(fbx_write(&_fb, 0, 0, 0, 0, _fb.width, _fb.height));
 	}
 
 	void draw(void)
@@ -368,12 +362,7 @@ class rrfb : public rrframe
 		#endif
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
-		if(_flags&RRBMP_BOTTOMUP)
-		{
-			for(int i=0; i<h; i++)
-				fbx(fbx_awrite(&_fb, x, _fb.height-i-y-1, x, i+y, w, 1));
-		}
-		else
+		if(_flags&RRBMP_BOTTOMUP) fbx(fbx_flip(&_fb, x, y, w, h));
 		fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
 	}
 

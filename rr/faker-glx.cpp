@@ -34,7 +34,7 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 				__vglConfigClass(config),
 				0,
 				__vglServerVisualAttrib(config, GLX_STEREO),
-				__vglServerVisualAttrib(config, GLX_TRANSPARENT_TYPE)!=GLX_NONE);
+				0);
 		if(!vid) 
 			vid=__vglMatchVisual(dpy, screen, 24, TrueColor, 0, 0, 0);
 	}
@@ -50,23 +50,24 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 	{
 		// Punt.  We can't figure out where the visual came from
 		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-			GLX_PBUFFER_BIT, GLX_STEREO, 0, None};
+			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
+			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
-			attribs[13]=1;
+			attribs[11]=1;
 		#ifdef USEGLP
 		if(fconfig.glp)
 		{
-			attribs[10]=attribs[11]=None;
+			attribs[12]=attribs[13]=None;
+			if(!attribs[11]) attribs[10]=None;
 			configs=glPChooseFBConfig(_localdev, attribs, &n);
-			if((!configs || n<1) && attribs[13])
+			if((!configs || n<1) && attribs[11])
 			{
-				attribs[13]=0;
+				attribs[10]=attribs[11]=0;
 				configs=glPChooseFBConfig(_localdev, attribs, &n);
 			}
-			if((!configs || n<1) && attribs[0])
+			if((!configs || n<1) && attribs[1])
 			{
-				attribs[0]=0;
+				attribs[1]=0;
 				configs=glPChooseFBConfig(_localdev, attribs, &n);
 			}
 			if(!configs || n<1) return 0;
@@ -75,14 +76,14 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		#endif
 		{
 			configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
-			if((!configs || n<1) && attribs[13])
+			if((!configs || n<1) && attribs[11])
 			{
-				attribs[13]=0;
+				attribs[11]=0;
 				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
-			if((!configs || n<1) && attribs[0])
+			if((!configs || n<1) && attribs[1])
 			{
-				attribs[0]=0;
+				attribs[1]=0;
 				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if(!configs || n<1) return 0;
@@ -259,8 +260,11 @@ static const char *glxextensions=
 
 const char *glXGetClientString(Display *dpy, int name)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXGetClientString(dpy, name);
+	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
-	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
 }
@@ -292,7 +296,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
 
-	errifnot(c=_MatchConfig(dpy, vis));
+	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 
 	if(attrib==GLX_USE_GL)
 	{
@@ -476,6 +480,15 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
 			&& __vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
 			attribute=GLX_RED_SIZE;
+		if(attribute==GLX_CONFIG_CAVEAT)
+		{
+			int vistype=__vglServerVisualAttrib(config, GLX_X_VISUAL_TYPE);
+			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR && !fconfig.glp)
+			{
+				*value=GLX_NON_CONFORMANT_CONFIG;
+				return retval;
+			}
+		}
 		#ifdef USEGLP
 		if(fconfig.glp)
 		{
@@ -553,11 +566,15 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
+	int retval=0;
 	if(ctxh.isoverlay(ctx)) return _glXQueryContext(dpy, ctx, attribute, value);
+
+		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargi(attribute);
+		starttrace();
 
 	if(attribute==GLX_RENDER_TYPE)
 	{
-		int retval=0, fbcid=-1;
+		int fbcid=-1;
 		#ifdef USEGLP
 		if(fconfig.glp) retval=glPQueryContext(ctx, GLX_FBCONFIG_ID, &fbcid);
 		else
@@ -570,14 +587,19 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 				&& value) *value=GLX_COLOR_INDEX_TYPE;
 			else if(value) *value=GLX_RGBA_TYPE;
 		}
-		return retval;
+	}
+	else
+	{
+		#ifdef USEGLP
+		if(fconfig.glp) retval=glPQueryContext(ctx, attribute, value);
+		else
+		#endif
+		retval=_glXQueryContext(_localdpy, ctx, attribute, value);
 	}
 
-	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
-	else
-	#endif
-	return _glXQueryContext(_localdpy, ctx, attribute, value);
+		stoptrace();  if(value) prargi(*value);  closetrace();
+
+	return retval;
 }
 
 int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *value)
@@ -630,13 +652,19 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 
 const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXQueryExtensionsString(dpy, screen);
+	////////////////////
 	return glxextensions;
 }
 
 const char *glXQueryServerString(Display *dpy, int screen, int name)
 {
+	// If this is called internally to OpenGL, use the real function
+	if(!_isremote(dpy)) return _glXQueryServerString(dpy, screen, name);
+	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
-	else if(name==GLX_VERSION) return "1.3";
+	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
 }
@@ -656,7 +684,7 @@ int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsigne
 Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 {
 	#ifdef USEGLP
-	if(fconfig.glp) {*major=1;  *minor=3;  return True;}
+	if(fconfig.glp) {*major=1;  *minor=4;  return True;}
 	else
 	#endif
 	return _glXQueryVersion(_localdpy, major, minor);
@@ -857,6 +885,11 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		stoptrace();  closetrace();
 
 	return retval;
+}
+
+void (*glXGetProcAddress(const GLubyte *procName))(void)
+{
+	return glXGetProcAddressARB(procName);
 }
 
 #endif

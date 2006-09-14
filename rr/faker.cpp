@@ -246,6 +246,11 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval=True;
 
+	// Prevent recursion
+	if(!_isremote(dpy))
+		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
+	////////////////////
+
 		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
 
 	retval=_XQueryExtension(dpy, name, major_opcode, first_event, first_error);
@@ -742,7 +747,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	}
 
 	GLXFBConfig c;
-	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer visual");
+	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
 	#ifdef USEGLP
 	if(fconfig.glp)
@@ -1112,7 +1117,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	errifnot(c=_MatchConfig(dpy, vi));
+	if(!(c=_MatchConfig(dpy, vi))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	pbuffer *pb=new pbuffer(w, h, c);
 	if(pb)
 	{

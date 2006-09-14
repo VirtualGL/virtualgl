@@ -73,6 +73,10 @@ void __vgl_loadsymbols(void)
 	lsym(glXUseXFont)
 	lsym(glXWaitGL)
 
+	lsym(glXGetClientString)
+	lsym(glXQueryServerString)
+	lsym(glXQueryExtensionsString)
+
 	lsym(glXChooseFBConfig)
 	lsym(glXCreateNewContext)
 	lsym(glXCreatePbuffer)

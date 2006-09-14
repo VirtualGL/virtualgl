@@ -12,15 +12,17 @@ UninstPage instfiles
 
 Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SectionIn RO
+	SetOutPath $INSTDIR\doc
+	File "doc\*.gif"
+	File "doc\*.png"
+	File "doc\*.html"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
 	File "${BLDDIR}\bin\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
-	File "${MINGWDIR}\bin\mingwm10.dll"
 	File "$%systemroot%\system32\libeay32.dll"
 	File "$%systemroot%\system32\ssleay32.dll"
-	File /r /x CVS /x config /x unixug /x winug "doc"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
 	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
 	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
@@ -60,7 +62,6 @@ Section "Uninstall"
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
-	Delete $INSTDIR\mingwm10.dll
 	Delete $INSTDIR\libeay32.dll
 	Delete $INSTDIR\ssleay32.dll
 	RMDir /r $INSTDIR\doc

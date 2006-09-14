@@ -36,7 +36,7 @@ ifeq ($(M32), yes)
 endif
 
 # Macros which are common to all Unix platforms
-VERSION := 2.0beta1
+VERSION := 2.0beta3
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
 BUILD := $(BUILD)d
@@ -90,7 +90,11 @@ CXXFLAGS := $(CFLAGS)
 endif
 CFLAGS := $(CFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
 CXXFLAGS := $(CXXFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
+ifeq ($(platform), windows)
+LDFLAGS := -LIBPATH:$(LDIR) $(LDFLAGS)
+else
 LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
+endif
 
 # Implicit rules
 $(ODIR)/%.o: %.c
@@ -123,13 +127,13 @@ $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<
 
 $(ODIR)/%.obj: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -Fo$@
 
 $(ODIR)/%.obj: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -Fo$@
 
 $(LDIR)/%.lib: $(ODIR)/%.obj
-	$(AR) $@ $<
+	$(AR) -out:$@ $<
 
 # This assures that the "clean" command runs even if there is a file called
 # "clean" in the current directory

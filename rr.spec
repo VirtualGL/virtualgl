@@ -77,12 +77,14 @@ install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
 install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
+install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 install -m 755 %{_libdir32}/librr.so $RPM_BUILD_ROOT/usr/lib/librr.so
 install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{name}/include
 install -m 644 samples/rrglxgears.c  $RPM_BUILD_ROOT/opt/%{name}/samples
 install -m 644 samples/Makefile.linux $RPM_BUILD_ROOT/opt/%{name}/samples/
 %ifarch x86_64
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
+install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
 install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT/usr/lib64/librr.so
 install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{name}/samples/
 %endif
@@ -146,9 +148,11 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 
 /usr/lib/librrfaker.so
+/usr/lib/libdlfaker.so
 /usr/lib/librr.so
 %ifarch x86_64
 /usr/lib64/librrfaker.so
+/usr/lib64/libdlfaker.so
 /usr/lib64/librr.so
 %endif
 

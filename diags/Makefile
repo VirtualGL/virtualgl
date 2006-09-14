@@ -16,10 +16,10 @@ clean:
 	-$(RM) $(TARGETS) $(OBJS)
 
 $(EDIR)/tcbench.exe: $(ODIR)/tcbench.obj $(LDIR)/fbx.lib
-	$(CXX) $(LDFLAGS) $^ -o $@ $(FBXLIB)
+	$(LINK) $(LDFLAGS) $^ -out:$@ $(FBXLIB)
 
 $(EDIR)/imgdiff.exe: $(ODIR)/imgdiff.obj $(LDIR)/rrutil.lib
-	$(CC) $(LDFLAGS) $^ -o $@ -lrrutil
+	$(LINK) $(LDFLAGS) $^ -out:$@ rrutil.lib
 
 ##########################################################################
 else

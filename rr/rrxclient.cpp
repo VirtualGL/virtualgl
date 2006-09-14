@@ -20,6 +20,9 @@
 #include "rrdisplayserver.h"
 #include "x11err.h"
 #include "xdk-sym.h"
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, quiet=false;
@@ -31,12 +34,7 @@ int sslport=-1;
 bool ssl=true, nonssl=true;
 #endif
 int service=0;
-#ifdef SUNOGL
-#include <GL/glx.h>
-int drawmethod=RR_DRAWOGL;
-#else
-int drawmethod=RR_DRAWX11;
-#endif
+int drawmethod=RR_DRAWAUTO;
 
 void start(int, char **);
 
@@ -60,6 +58,19 @@ SERVICE_TABLE_ENTRY servicetable[] =
 };
 #endif
 
+#ifdef SUNOGL
+#include "dlfcn.h"
+int _glXInitThreadsSUN(void)
+{
+	int retval=1;
+	typedef int (*_glXInitThreadsSUNType)(void);
+	_glXInitThreadsSUNType __glXInitThreadsSUN=NULL;
+	if((__glXInitThreadsSUN=
+		(_glXInitThreadsSUNType)dlsym(RTLD_NEXT, "glXInitThreadsSUN"))!=NULL)
+		retval=__glXInitThreadsSUN();
+	return retval;
+}
+#endif
 
 void handler(int type)
 {
@@ -183,7 +194,7 @@ int main(int argc, char *argv[])
 	}
 	catch(rrerror &e)
 	{
-		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());  exit(1);
+		rrout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
 	}
 	#ifdef XDK
 	__vgl_unloadsymbols();
@@ -196,7 +207,7 @@ void start(int argc, char **argv)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
 	#ifdef SUNOGL
-	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
+	if(!_glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
 	#endif
 
 	signal(SIGINT, handler);
@@ -241,7 +252,7 @@ void start(int argc, char **argv)
 
 	} catch(rrerror &e)
 	{
-		rrout.println("%s--\n%s", e.getMethod(), e.getMessage());
+		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 }
 

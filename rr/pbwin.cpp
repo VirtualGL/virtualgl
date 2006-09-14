@@ -151,6 +151,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_prof_rb.setname("Readback  ");
 	_syncdpy=false;
 	_dirty=false;
+	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
 	#if defined(sun)||defined(linux)
@@ -302,7 +303,13 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	}
 	#endif
 
-	if(compress==RRCOMP_DEFAULT) compress=RRCOMP_JPEG;
+	if(compress==RRCOMP_DEFAULT)
+	{
+		const char *dstr=DisplayString(_windpy);
+		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+			&& !strncasecmp(dstr, "unix", 4))) compress=RRCOMP_NONE;
+		else compress=RRCOMP_JPEG;
+	}
 
 	if(_force) {force=true;  _force=false;}
 	if(sync) {compress=RRCOMP_NONE;  force=true;}

@@ -85,6 +85,23 @@ static __inline void _cpuid(int *flags, int *flags2)
 	int a=0, c=0, d=0;
 	#ifdef USECPUID
 
+	#ifdef _MSC_VER
+
+	__asm {
+		xor eax, eax
+		cpuid
+		mov a, eax
+	}
+	if(a<1) return; 	 
+	__asm {
+		mov eax, 1
+		cpuid
+		mov c, ecx
+		mov d, edx
+	}
+
+	#else
+
 	__asm__ __volatile__ (
 		#ifdef __i386__
 		"pushl %%ebx\n"
@@ -112,9 +129,12 @@ static __inline void _cpuid(int *flags, int *flags2)
 			: "bx"
 		#endif
 	);
+
+	#endif // _MSC_VER
+
 	*flags=d;  *flags2=c;
 
-	#endif
+	#endif // USECPUID
 }
 
 static __inline IppCpuType AutoDetect(void)

@@ -118,6 +118,7 @@ Scripts</a></li>
 Manually Load
 OpenGL</a></li>
   <li><a href="#chromium">Usage with Chromium and ModViz VGP<sup>TM</sup></a></li>
+  <li><a href="#recipes">Application Recipes</a></li>
   <li><a href="#advancedopengl">Advanced OpenGL Features</a></li>
   <li><a href="#perf">Performance Measurement</a></li>
   <li><a href="#configdialog">The VirtualGL Configuration
@@ -208,25 +209,30 @@ ATI,&nbsp;driver v8.14 or older recommended.
 &nbsp;Newer ATI drivers have known issues which may prevent them
 from
 working with VirtualGL</li>
+        <li>For applications that use stereo, a
+high-end
+3D accelerator such as the nVidia Quadro is required on the server</li>
       </ul>
       </td>
       <td>Decent 3D graphics
 accelerator<br>
       <ul>
-        <li>nVidia strongly
-recommended</li>
+        <li>nVidia strongly recommended</li>
         <li>If using
 ATI,&nbsp;driver v8.14 or older recommended.
 &nbsp;Newer ATI
 drivers have known issues which may prevent them from working with
 VirtualGL</li>
+        <li>For applications that use stereo, a
+high-end
+3D accelerator such as the nVidia Quadro is required on the server</li>
       </ul>
       </td>
       <td>Graphics card with
 decent 2D performance<br>
       <ul>
         <li>For
-applications that use stereo or transparent&nbsp;overlays, a
+applications that use stereo or transparent overlays, a
 high-end
 3D accelerator such as the nVidia Quadro is required on the client</li>
       </ul>
@@ -238,7 +244,7 @@ high-end
       <td>
       <ul>
         <li>RedHat Linux 7.2 or
-newer (or equivalent)</li>
+newer (or equivalent), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
@@ -248,14 +254,14 @@ newer (or equivalent)</li>
 Linux 3.0 or 4.0 (64-bit) or equivalent
 (Works with <a href="http://fedora.redhat.com/">Fedora</a>, <a
  href="http://www.whiteboxlinux.org/">WhiteBox</a>,
-and <a href="http://www.centos.org/">CentOS</a>)</li>
+and <a href="http://www.centos.org/">CentOS</a>), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
       <td>
       <ul>
         <li>RedHat Linux 7.2 or
-newer (or equivalent)</li>
+newer (or equivalent), or</li>
         <li>SuSE Linux 9 or newer</li>
       </ul>
       </td>
@@ -297,9 +303,11 @@ encounter any difficulties.<br>
     <tr>
       <td style="font-weight: bold;" class="colorheader">CPU<br>
       </td>
-      <td>UltraSPARC III 900 MHz
-or faster<br>
-Dual processors recommended</td>
+      <td>
+      <p>UltraSPARC III 900 MHz
+or faster</p>
+      <p>Dual processors recommended</p>
+      </td>
       <td>UltraSPARC III 900 MHz
 or faster</td>
     </tr>
@@ -311,6 +319,9 @@ accelerator<br>
       <ul>
         <li>Tested with XVR-1200
 and XVR-2500</li>
+        <li>For applications that use stereo, a frame buffer which supports stereo
+Pbuffers (such as the XVR-2xxx series "kfb") 
+        is required on the server</li>
       </ul>
       </td>
       <td>Graphics card with
@@ -349,6 +360,8 @@ or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the
 package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+        <li>X server configured for
+true color (24/32-bit) [if not using GLP]</li>
       </ul>
       </td>
       <td>
@@ -365,26 +378,113 @@ or 9,
 Blastwave OpenSSL is required.&nbsp; Download and install the
 package
 from <a href="http://www.blastwave.org/">http://www.blastwave.org</a></li>
+        <li>X server configured for
+true color (24/32-bit)</li>
       </ul>
       </td>
     </tr>
   </tbody>
 </table>
 <h3>Solaris/x86</h3>
-<p>A Solaris/x86 package is
-provided for VirtualGL 2.0, and it behaves
-identically to its Solaris/Sparc counterpart. &nbsp;But the
-Solaris/x86
-version of VirtualGL currently uses a software JPEG codec and thus will
-perform quite a bit slower than the Solaris/Sparc and Linux versions of
-VirtualGL. &nbsp;The Solaris/x86 version of VirtualGL requires
-Solaris
-10 or later, and the VirtualGL server components for Solaris/x86 are
-only known to work with nVidia hardware and drivers.</p>
-<span style="color: rgb(0, 0, 0);"></span><span
- style="color: rgb(0, 0, 0);"></span><span style="color: rgb(0, 0, 0);"></span>
-<a href="index.html#" target="_top"><span style="color: rgb(0, 0, 0);"></span></a><a
- href="index.html#" target="_top"><span style="color: rgb(0, 0, 0);"></span></a>
+<table style="text-align: left;" border="0" cellpadding="5"
+ cellspacing="3">
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader"></td>
+      <td style="font-weight: bold;" class="colorheader">Server (32-bit)</td>
+      <td style="font-weight: bold;" class="colorheader">Server (64-bit)</td>
+      <td class="colorheader" style="font-weight: bold;">Client (32-bit)</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">CPU<br>
+      </td>
+      <td>Pentium 4, 1.7 GHz or
+faster (or equivalent)<br>
+      <ul>
+        <li>For optimal
+performance, the processor should support SSE2
+extensions</li>
+      </ul>
+Dual processors recommended</td>
+      <td style="vertical-align: top;">
+      <p>Pentium 4/Xeon with
+EM64T, or<br>
+AMD Opteron or Athlon64, 1.8 GHz or faster </p>
+      <p>Dual processors recommended</p>
+      </td>
+      <td>Pentium III or Pentium
+4, 1.0 GHz or faster (or equivalent)</td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">Graphics<br>
+      </td>
+      <td>nVidia 3D graphics
+accelerator<ul>
+        <li>For applications that use stereo, a high-end 3D accelerator such as 
+        the nVidia Quadro is required on the server<br>
+        </li>
+      </ul>
+      </td>
+      <td>nVidia 3D graphics
+accelerator<ul>
+        <li>For applications that use stereo, a high-end 3D accelerator such as 
+        the nVidia Quadro is required on the server</li>
+      </ul>
+      </td>
+      <td>Graphics card with
+decent 2D performance<br>
+      <ul>
+        <li>For
+applications that use stereo or transparent overlays, a high-end 3D
+accelerator such as the nVidia Quadro is required on the client</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">O/S<br>
+      </td>
+      <td> Solaris 10 or higher </td>
+      <td> Solaris 10 or higher </td>
+      <td> Solaris 10 or higher </td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">Other Software<br>
+      </td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage">
+        Solaris Patch</a> 118345-04 (or later)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <li>Sun mediaLib 2.4 (see <a
+ href="http://www.sun.com/processors/vis/mlib.html">http://www.sun.com/processors/vis/mlib.html</a>)</li>
+        <li>X server configured for
+true color (24/32-bit)</li>
+      </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><span class="note">Note:</span>Solaris/x86 version 10 comes with
+mediaLib pre-installed, but it is strongly recommended that you upgrade
+this version of mediaLib to at least 2.4. &nbsp;This will greatly
+increase the&nbsp;JPEG decompression performance in the VirtualGL
+client as well as the JPEG compression performance for 32-bit apps on
+the VirtualGL server.</p>
 <h3 style="color: rgb(255, 255, 255);">Windows</h3>
 <table style="text-align: left;" border="0" cellpadding="5"
  cellspacing="3">
@@ -474,7 +574,7 @@ command:<br>
 <h4>Installing VirtualGL</h4>
 <ol>
   <li>If you are using
-RedHat/CentOS Enterprise Linux 2.1, 3, or 4,
+RedHat/CentOS Enterprise Linux 2.1, 3, or 4 or SuSE Linux 9,
 obtain one of the pre-built VirtualGL RPMs from the files area of <a
  href="http://sourceforge.net/projects/virtualgl">http://sourceforge.net/projects/virtualgl</a>.<br>
     <br>
@@ -487,6 +587,7 @@ Linux 8 (patched), RedHat Linux 9, and Fedora
 Core 1 &amp; 2.<br>
 The Enterprise Linux 4 RPM should (theoretically) also work on Fedora
 Core 3 &amp; 4.<br>
+The SuSE Linux 9 RPM should (theoretically) also work on SuSE 10.<br>
 &nbsp;</li>
   <li>Log in as root, cd to the
 directory
@@ -510,21 +611,26 @@ directory
 where you downloaded the SRPM, and issue the following
 commands:<br>
     <pre>rpm -i VirtualGL*.src.rpm<br>cd /usr/src/redhat/SPECS<br>rpmbuild -ba virtualgl.spec</pre>
+    <p><span class="note">Note:</span>On SuSE,
+cd to <span class="monospace">/usr/src/packages/SPECS</span>
+instead. &nbsp;Some versions of SuSE symlink this to <span
+ class="monospace">/usr/src/redhat/SPECS</span>.</p>
   </li>
   <li>Sit back and watch the fun</li>
   <li>If the build completes
 successfully, it will produce a binary RPM
-in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span>
+in <span style="font-family: monospace;"><span class="monospace">/usr/src/redhat/RPMS/{your_cpu_architecture}</span></span> 
+  (or <span style="font-family: monospace;"><span class="monospace">/usr/src/packages/RPMS/{your_cpu_architecture}</span></span>),
 which you can install using the instructions from the previous section</li>
 </ol>
-Otherwise, log in as root, download the source tarball, uncompress it, <span
+If you are using a non-RPM based distribution of Linux, then log in as root, download the 
+VirtualGL source tarball, uncompress it, <span
  class="monospace" style="font-family: monospace;">cd
 vgl</span>,&nbsp;and
 type <span class="monospace" style="font-family: monospace;">make</span><span
  class="monospace"> install</span>.
 &nbsp;Refer to <span class="monospace" style="font-family: monospace;">BUILDING.html</span>
-in the&nbsp;source distribution for further details.<br>
-<h3>Display Configuration (Server
+in the&nbsp;source directory for further details.<h3>Display Configuration (Server
 Only)</h3>
 <p>VirtualGL requires access to
 display
@@ -563,16 +669,16 @@ to<br>
     <span class="monospace"><br>
 id:5:initdefault:<br>
 &nbsp;</span> </li>
-  <li>If the server is running the
-NVidia accelerated GLX drivers,
+  <li>If the server is running version 1.0-71xx or earlier of the NVidia accelerated GLX drivers,
 follow the instructions in <span class="monospace">/usr/share/doc/NVIDIA_GLX-1.0/README</span>
 regarding setting the appropriate permissions for <span
- class="monospace">/dev/nvidia*</span>.<br>
+ class="monospace">/dev/nvidia*</span>.&nbsp; This is not necessary with more 
+  recent versions of the driver.<br>
 &nbsp;</li>
   <li>Add<br>
     <pre>xhost +localhost</pre>
-to
-the tail end of the display manager's client startup script.&nbsp;
+  at
+the top of the display manager's client startup script.&nbsp;
 The
 location of this script varies depending on the particular Linux
 distribution and
@@ -1902,18 +2008,22 @@ in the upper right of the window.)</p>
 TurboVNC is based on TightVNC and
 shares many of its features.</p>
 <h3>Enabling Raw Mode</h3>
-<p>To enable VirtualGL's
-raw&nbsp;mode,&nbsp;set the environment variable <span
- class="monospace">VGL_COMPRESS</span>
-to 0 on the server or pass an argument of <span class="monospace">-c 0</span>
+<p>Raw mode is automatically enabled if VirtualGL detects that it is running on 
+the same machine as the X server, which it assumes to be the case if the display 
+name begins with a colon (&quot;:&quot;) or with &quot;<span
+ class="monospace">unix:</span>&quot;.&nbsp; In most cases, this will cause VirtualGL 
+to automatically use raw mode when it is launched in an X proxy environment such 
+as VNC or NX.&nbsp; But you can override this behavior by setting the <span
+ class="monospace">VGL_COMPRESS</span> environment variable on the server or 
+passing an argument of <span class="monospace">-c 0</span> or <span class="monospace">-c 
+1</span>
 to <span class="monospace">vglrun</span>
 (see <a href="#config">Advanced
 Configuration</a> for more
-details.)&nbsp; You should also make
+details.)&nbsp; Make
 sure that the
 <span class="monospace">DISPLAY</span>
-variable points to whatever display number that VNC is occupying (such
-as :1, :2, etc.)</p>
+variable points to whatever display number that VNC (or your X proxy of choice) is occupying (e.g. :1, :2, etc.)</p>
 <div class="top" style=""><a href="#" target="_top">top</a><br>
 <div style="text-align: left;">
 <hr style="width: 100%; height: 2px;">
@@ -1966,10 +2076,18 @@ allows VGL to intercept these calls, whereas using the game's built-in
 mechanism for loading a substitute OpenGL library allows VirtualGL to
 intercept
 the GLX and OpenGL calls.</p>
-<p>The <a href="http://virtualgl.sourceforge.net">VirtualGL
-web-site</a>
-contains specific recipes for getting a variety of games and other
-applications to work.</p>
+<p>In some cases, the application doesn't provide an override mechanism such as 
+the above.&nbsp; In these cases, you should pass an argument of <span class="monospace">-dl</span> to <span class="monospace">vglrun</span> when 
+starting the application, e.g.:</p>
+<pre>vglrun -dl foowars2</pre>
+<p>Passing <span class="monospace">-dl</span> to <span class="monospace">vglrun</span> 
+forces another library to be 
+loaded ahead of VirtualGL and <span class="monospace">libGL.so</span>.&nbsp; 
+This new library intercepts any calls to <span class="monospace">dlopen()</span> 
+and forces the application to open VirtualGL 
+instead of <span class="monospace">libGL.so</span>.</p>
+<p><a href="#recipes">This section</a> contains specific recipes for getting a 
+variety of games and other applications to work with VirtualGL</p>
 <div style="text-align: right;"><a href="#" target="_top">top</a></div>
 <hr style="width: 100%; height: 2px;">
 <h2><a name="chromium"></a>Usage
@@ -2349,6 +2467,145 @@ application.)</p>
 </div>
 </div>
 </div>
+<hr>
+<h2><a name="recipes"></a>Application Recipes</h2>
+<table style="text-align: left; margin-left: auto; margin-right: auto;"
+ border="0" cellpadding="5" cellspacing="3">
+  <tbody>
+    <tr>
+      <td style="font-weight: bold;" class="colorheader">Application</td>
+      <td style="font-weight: bold;" class="colorheader">Platform</td>
+      <td style="font-weight: bold;" class="colorheader">Recipe</td>
+      <td style="font-weight: bold;" class="colorheader">Notes<br>
+      </td>
+    </tr>
+    <tr>
+      <td>Army Ops</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun -dl armyops</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Descent 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun descent3 -g /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl descent3</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Doom 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun doom3 +set r_glDriver /usr/lib/librrfaker.so<p>
+      or<p class="monospace">vglrun -dl doom3<br>
+      </td>
+      <td>See <a href="#dynamicgl">this section</a> for more details<br>
+      </td>
+    </tr>
+    <tr>
+      <td>Enemy Territory (Return to Castle Wolfenstein)</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun et +set r_glDriver /usr/lib/librrfaker.so<p>
+      or<p class="monospace">vglrun -dl et</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Heretic II</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun heretic2 +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx<p>
+      or<p class="monospace">vglrun -dl heretic2 +set vid_ref glx</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Heavy Gear II</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun hg2 -o /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl hg2</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Java2D applications that use OpenGL</td>
+      <td>Linux, Solaris</td>
+      <td><p>Java2D will use OpenGL to perform its rendering if 
+      <span class="monospace">sun.java2d.opengl</span> is set to <span class="monospace">True</span>, e.g.:<pre>java -Dsun.java2d.opengl=True MyAppClass</pre>
+      <p>In order for this to work in VirtualGL, it is necessary to invoke 
+      <span class="monospace">vglrun</span> with the <span class="monospace">-dl</span> switch, e.g.:</p>
+      <pre>vglrun -dl java -Dsun.java2d.opengl=True MyAppClass</pre>
+      <p>If you are using Java v6 b92 or later, you can also set the environment variable
+      <span class="monospace">J2D_ALT_LIBGL_PATH</span> to the path of
+      <span class="monospace">librrfaker.so</span>, e.g.:
+      <pre>setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so
+vglrun java -Dsun.java2d.opengl=True MyAppClass</pre></td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Pro/ENGINEER Wildfire v2.0</td>
+      <td>Solaris/Sparc</td>
+      <td><p>Add<p class="monospace">graphics opengl<p>to <i>~/config.pro</i>.&nbsp; You may also need to set the
+    <span class="monospace">VGL_XVENDOR</span> environment variable to
+    <span class="monospace">&quot;Sun Microsystems, Inc.&quot;</span> if you are running 
+    Pro/ENGINEER 2.0 over a remote X connection to a Linux or Windows VirtualGL 
+      client.</td>
+      <td>Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote 
+      connection to a non-Sun X server.</td>
+    </tr>
+    <tr>
+      <td>QGL (OpenGL Qt Widget) </td>
+      <td>Linux</td>
+      <td>
+      <p class="monospace">vglrun -dl {application}</td>
+      <td>
+      <p>Qt can be built such that it either resolves symbols from libGL automatically or uses<span class="monospace"> dlopen()</span> to manually 
+      resolve those symbols from libGL.&nbsp; As of Qt v3.3, the latter behavior 
+      is the default, so OpenGL programs built with later versions of libQt will 
+      not work with VirtualGL unless the <span class="monospace">-dl</span> switch is used with <span class="monospace">vglrun</span>.</p>
+      <p>See <a href="#dynamicgl">this section</a> for more details </td>
+    </tr>
+    <tr>
+      <td>Quake 3</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun quake3 +set r_glDriver /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl quake3</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Soldier of Fortune</td>
+      <td>Linux/x86</td>
+      <td>
+      <p class="monospace">vglrun sof +set gl_driver /usr/lib/librrfaker.so<p>or<p class="monospace">
+      vglrun -dl sof</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>Unreal Tournament 2004</td>
+      <td>Linux/x86</td>
+      <td><p class="monospace">
+      vglrun -dl ut2004</td>
+      <td>See <a href="#dynamicgl">this section</a> for more details</td>
+    </tr>
+    <tr>
+      <td>VisConcept</td>
+      <td>Solaris/Sparc</td>
+      <td>Set the environment variable
+    <span class="monospace">VGL_GUI_XTTHREADINIT</span> to 0</td>
+      <td>Popping up the VirtualGL configuration dialog may cause the 
+      application to hang unless you set this environment variable.&nbsp; See
+      <a href="#config">Advanced Configuration</a> for more details</td>
+    </tr>
+  </tbody>
+</table>
+<div class="top" style="">
+<div style="text-align: left;">
+<div style="text-align: right;">&nbsp;</div>
+<div style="text-align: right;"><a href="#">top</a></div>
+</div>
+</div>
 <hr class="top" style="width: 100%; height: 2px;">
 <h2><a name="advancedopengl"></a>Advanced
 OpenGL Features</h2>
@@ -2658,12 +2915,12 @@ configuration parameters can be changed on the fly once an application
 has started. &nbsp;This is accomplished by using the VirtualGL
 configuration dialog, which can be activated by holding down the <span
  class="monospace">CTRL</span> and&nbsp;<span class="monospace">SHIFT</span>
-keys and pressing the <span class="monospace">F8</span>
+keys and pressing the <span class="monospace">F12</span>
 key while any one of the application's windows is active. &nbsp;This
 displays a
 dialog box similar to the following:</p>
 <p><img style="width: 210px; height: 235px;" alt=""
- src="configdialog.gif?rev=HEAD&root=VirtualGL"></p>
+ src="configdialog.gif?rev=HEAD&amp;root=VirtualGL"></p>
 <p>You can use this dialog to
 enable or disable frame spoiling or to adjust the JPEG quality and
 subsampling. &nbsp;Changes are reflected immediately in the
@@ -2695,7 +2952,7 @@ running in direct mode. &nbsp;In raw mode, the only setting that
 can be changed with this dialog is frame spoiling.</p>
 <p>The <span class="monospace">VGL_GUI </span>environment variable
 can be used to change the key sequence used to pop up the dialog box.
-&nbsp;If the default of <span class="monospace">CTRL-SHIFT-F8</span>
+&nbsp;If the default of <span class="monospace">CTRL-SHIFT-F12</span>
 is not suitable, then set <span class="monospace">VGL_GUI</span> to
 any combination of <span class="monospace">ctrl</span>, <span
  class="monospace">shift</span>, <span class="monospace">alt</span>,
@@ -2722,12 +2979,10 @@ Configuration<br>
 <div style="text-align: left;">
 <h3>Server Settings</h3>
 </div>
-<font face="Arial, Helvetica">
 <p align="left">You can
 control the operation of the VirtualGL faker in four different
 ways.&nbsp; Each method of configuration takes precedence over the
 previous method:</p>
-</font>
 <ol>
   <li>Setting a configuration
 environment variable globally (e.g. in <span class="monospace">/etc/profile</span>)</li>
@@ -2816,16 +3071,26 @@ pixels into the appropriate place in the application window.&nbsp; This
 is primarily useful in conjunction with VNC, Citrix for Unix, or other
 remote display software that performs X11 rendering on the
 server and uses its own internal mechanism for compressing and
-transmitting images to the client.&nbsp; Disabling compression
-outside of a
-VNC (or similar)
-session is not advisable, since it will result in uncompressed images
-being sent over the network to the client.<br>
+transmitting images to the client.&nbsp; Disabling compression on a remote X11 
+      connection is not advisable, since it will result in uncompressed images 
+      being sent over the network to the client machine.<br>
+      <br>
+      If <span class="monospace">VGL_COMPRESS</span> is not specified,
+VirtualGL's default behavior is to enable compression when the application is 
+      being displayed to a remote X server and to disable compression otherwise.&nbsp; 
+      VirtualGL assumes that if the <span class="monospace">DISPLAY</span> 
+      environment variable begins with a colon or with &quot;<span class="monospace">unix:</span>&quot; (e.g. "<span class="monospace">:0.0</span>", "<span class="monospace">unix:1000.0</span>",
+etc.), then the X11 connection is local and thus doesn't require image 
+      compression.&nbsp; Otherwise, it assumes that the X11 connection is remote 
+      and that compression is required. &nbsp;If the display string begins with "<span class="monospace">localhost</span>" or with the
+server's hostname, VGL assumes that the display is being tunneled through SSh, 
+      and it enables compression in this case.<p>
+<span class="note">Note:</span>Stereo frames will always be compressed, 
+      regardless of this setting.&nbsp; Raw mode cannot be used with stereo</p>
       <p>See the <a href="#vnc">VNC Usage</a>
-section for more details.</p>
-      </td>
-      <td style="font-weight: bold;">1
-(JPEG compression enabled)</td>
+section for more details.</td>
+      <td style="font-weight: bold;">Compression enabled if the application is 
+      displaying to a remote X server, disabled otherwise</td>
     </tr>
     <tr>
       <td class="monospace"
@@ -2889,9 +3154,9 @@ rate governor disabled</td>
       <td><span style="font-weight: bold;" class="monospace">VGL_GAMMA=0<br>
 VGL_GAMMA=1<br>
       </span></td>
-      <td><span style="font-weight: bold;" class="monospace">+g</span><br>
+      <td><span style="font-weight: bold;" class="monospace">-g</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-g</span><span
+      <span style="font-weight: bold;" class="monospace">+g</span><span
  style="font-weight: bold;" class="monospace"></span></td>
       <td><span style="font-weight: bold;">Enable/disable gamma
 correction (Solaris/Sparc clients only)</span><br>
@@ -2957,7 +3222,7 @@ invoke the configuration dialog<br>
       </span>VirtualGL will normally
 monitor an application's X event queue and pop up the VirtualGL
 configuration
-dialog whenever&nbsp;<span class="monospace">CTRL-SHIFT-F8</span>&nbsp;is
+dialog whenever&nbsp;<span class="monospace">CTRL-SHIFT-F12</span>&nbsp;is
 pressed. &nbsp;In the event that this interferes
 with a key sequence that the application is already using, you can
 redefine the key sequence used to pop up VGL's configuration dialog by
@@ -2972,7 +3237,39 @@ to disable the configuration dialog altogether. &nbsp;See <a
  href="#configdialog">this
 section</a> for more details.<br>
       </td>
-      <td style="font-weight: bold;">shift-ctrl-f8</td>
+      <td style="font-weight: bold;">shift-ctrl-f12</td>
+    </tr>
+    <tr>
+      <td class="monospace"
+ style="vertical-align: baseline; font-weight: bold;">
+    <span class="monospace">VGL_GUI_XTTHREADINIT</span></td>
+      <td>&nbsp;</td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">0 to 
+      prevent VGL from calling
+      </span><b><span class="monospace">XtToolkitThreadInitialize()</span></b><span style="font-weight: bold;"><br>
+      </span>Xt &amp; Motif applications are supposed to call
+      <span class="monospace">XtToolkitThreadInitialize()</span> if they plan to 
+      access Xt functions from two or more threads simultaneously.&nbsp; But 
+      rarely, a multi-threaded Xt/Motif application may avoid calling
+      <span class="monospace">XtToolkitThreadInitialize()</span> and rely on the 
+      fact that avoiding this call disables application and process locks.&nbsp; 
+      This behavior is generally considered errant on the part of the 
+      application, but the application developers have probably figured out 
+      other ways around the potential instability that this situation creates.<p>
+      The problem arises whenever VirtualGL pops up its configuration dialog 
+      (which is written using Xt.)&nbsp; In order to create this dialog, 
+      VirtualGL creates a new Xt thread and calls<span class="monospace"> 
+      XtToolkitThreadInitialize()</span> as it is supposed to do to guarantee 
+      thread safety.&nbsp; But if the application into which VGL is loaded 
+      exhibits the errant behavior described above, suddenly enabling 
+      application and process locks may cause the application to deadlock.&nbsp; 
+      Setting <span class="monospace">VGL_GUI_XTTHREADINIT</span> to 0 will 
+      remove VGL's call to <span class="monospace">XtToolkitThreadInitialize()</span> 
+      and should thus eliminate the deadlock.</p>
+      <p>In short, if you try to pop up the VirtualGL config dialog and notice 
+      that it hangs the application, try setting <span class="monospace">
+      VGL_GUI_XTTHREADINIT</span> to 0.</td>
+      <td style="font-weight: bold;">1</td>
     </tr>
     <tr>
       <td><span style="font-weight: bold;" class="monospace">VGL_NPROCS<br>
@@ -3031,9 +3328,9 @@ for unencrypted connections,&nbsp; 4243 for SSL connections</td>
  style="vertical-align: baseline; font-weight: bold;">VGL_PROFILE=0<br>
 VGL_PROFILE=1<br>
       </td>
-      <td><span style="font-weight: bold;" class="monospace">+profile</span><br>
+      <td><span style="font-weight: bold;" class="monospace">-profile</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-profile</span></td>
+      <span style="font-weight: bold;" class="monospace">+profile</span></td>
       <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
 profiling
 output</span><br style="font-weight: bold;">
@@ -3098,13 +3395,13 @@ generated by process 0.<br>
     </tr>
     <tr>
       <td class="monospace"
- style="vertical-align: baseline; font-weight: bold;">VGL_SPOIL=1<br>
-VGL_SPOIL=0<br>
+ style="vertical-align: baseline; font-weight: bold;">VGL_SPOIL=0<br>
+VGL_SPOIL=1<br>
       </td>
-      <td><span style="font-weight: bold;" class="monospace">+spoil</span><br
+      <td><span style="font-weight: bold;" class="monospace">-spoil</span><br
  style="font-weight: bold;">
 or<br style="font-weight: bold;">
-      <span style="font-weight: bold;" class="monospace">-spoil</span></td>
+      <span style="font-weight: bold;" class="monospace">+spoil</span></td>
       <td style="vertical-align: top;"><span style="font-weight: bold;">Enable/disable
 frame
 spoiling</span><br>
@@ -3131,10 +3428,10 @@ enabled</td>
  style="vertical-align: baseline; font-weight: bold;">VGL_SSL=0<br>
 VGL_SSL=1<br>
       </td>
-      <td><span style="font-weight: bold;" class="monospace">+s</span><br
+      <td><span style="font-weight: bold;" class="monospace">-s</span><br
  class="monospace">
 or<br>
-      <span style="font-weight: bold;" class="monospace">-s</span></td>
+      <span style="font-weight: bold;" class="monospace">+s</span></td>
       <td style="vertical-align: top;"><span style="font-weight: bold;">Tunnel
 the VirtualGL compressed image stream inside a secure socket layer</span><br
  style="font-weight: bold;">
@@ -3228,9 +3525,9 @@ not available.<br>
       <td><span style="font-weight: bold;" class="monospace">VGL_SYNC=0<br>
 VGL_SYNC=1<br>
       </span></td>
-      <td><span style="font-weight: bold;" class="monospace">+sync</span><br>
+      <td><span style="font-weight: bold;" class="monospace">-sync</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-sync</span></td>
+      <span style="font-weight: bold;" class="monospace">+sync</span></td>
       <td><span style="font-weight: bold;">Enable/disable strict
 2D/3D
 synchronization (necessary to pass GLX conformance tests)<br>
@@ -3343,9 +3640,9 @@ supports.<br>
       <td><span style="font-weight: bold;" class="monospace">VGL_TRACE=0</span><br
  style="font-weight: bold;" class="monospace">
       <span style="font-weight: bold;" class="monospace">VGL_TRACE=1</span></td>
-      <td><span style="font-weight: bold;" class="monospace">+tr</span><br>
+      <td><span style="font-weight: bold;" class="monospace">-tr</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-tr</span></td>
+      <span style="font-weight: bold;" class="monospace">+tr</span></td>
       <td><span style="font-weight: bold;">Enable/disable tracing</span><br
  style="font-weight: bold;">
 When tracing is enabled, VirtualGL will log all calls to
@@ -3359,9 +3656,9 @@ OpenGL application.</td>
       <td><span style="font-weight: bold;" class="monospace">VGL_VERBOSE=0</span><br
  style="font-weight: bold;" class="monospace">
       <span style="font-weight: bold;" class="monospace">VGL_VERBOSE=1</span></td>
-      <td><span style="font-weight: bold;" class="monospace">+v</span><br>
+      <td><span style="font-weight: bold;" class="monospace">-v</span><br>
 or<br>
-      <span style="font-weight: bold;" class="monospace">-v</span></td>
+      <span style="font-weight: bold;" class="monospace">+v</span></td>
       <td><span style="font-weight: bold;">Enable/disable verbosity</span><br
  style="font-weight: bold;">
 When in verbose mode, VirtualGL will reveal some of the decisions it
@@ -3448,7 +3745,7 @@ disabled</td>
  style="font-weight: bold;">
 When in verbose mode, VirtualGL will reveal some of the decisions it
 makes behind the scenes, such as which code path it is using to
-compress JPEG images, which type of X11 drawing it is using, etc.
+      decompress JPEG images, which type of X11 drawing it is using, etc.
 &nbsp;This can be helpful when diagnosing performance problems.<br>
       </td>
       <td><span style="font-weight: bold;">Verbosity disabled</span></td>

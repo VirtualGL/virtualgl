@@ -63,6 +63,9 @@ class rrserver : public Runnable
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
+	void send(char *, int);
+	void recv(char *, int);
+
 	private:
 
 	void run(void);
