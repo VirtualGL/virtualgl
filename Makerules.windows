@@ -3,17 +3,17 @@
 ########################################
 
 CC = "cl"
-CXX = "cl" -GX
+CXX = "cl" -EHsc
 AR = "link" -lib -NOLOGO
 
-CDEFINES = -D_WIN32_WINNT=0x0500 -DWIN32
+CDEFINES = -D_WIN32_WINNT=0x0500 -DWIN32 -D_CRT_SECURE_NO_DEPRECATE
 ifeq ($(DEBUG), yes)
-CFLAGS = -nologo -Od -G6 -MTd -W4 -Zi
+CFLAGS = -nologo -Od -MTd -W3 -wd4996 -Zi
 else
-CFLAGS = -nologo -O2 -G6 -MT -W3
+CFLAGS = -nologo -O2 -MT -W3 -wd4996
 endif
 
-LFLAGS = -nologo -OPT:REF -NODEFAULTLIB:LIBC -NODEFAULTLIB:msvcrt -LIBPATH:$(LDIR)
+LFLAGS = -nologo -OPT:REF -LIBPATH:$(LDIR)
 LINK = "link" $(LFLAGS)
 ifeq ($(DEBUG), yes)
 LINK = "link" $(LFLAGS) -debug -NODEFAULTLIB:LIBCMT
@@ -21,5 +21,9 @@ endif
 
 XDKLIB = xlib.lib hclshm.lib
 HPULIB = hputil.lib ws2_32.lib
-HPSECNETLIB = hpsecnet.lib ssleay32.lib libeay32.lib user32.lib gdi32.lib pthreadVC.lib
+ifeq ($(DEBUG), yes)
+HPSECNETLIB = hpsecnet.lib ssleay32MTd.lib libeay32MTd.lib user32.lib gdi32.lib pthreadVC.lib
+else
+HPSECNETLIB = hpsecnet.lib ssleay32MT.lib libeay32MT.lib user32.lib gdi32.lib pthreadVC.lib
+endif
 FBXLIB = fbx.lib user32.lib gdi32.lib
