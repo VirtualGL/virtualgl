@@ -84,7 +84,13 @@ split TurboJPEG into a separate RPM so that end users could easily
 rebuild VirtualGL from source when needed (such as to install on a
 distribution for which no VirtualGL binaries are available.)</p><p>The
 source code for TurboJPEG is contained within the VirtualGL build tree
-under the&nbsp;<span style="font-style: italic;">jpeg/</span> directory. &nbsp;To rebuild the TurboJPEG library, <span style="font-family: monospace;">cd jpeg</span> and type <span style="font-family: monospace;">make lib</span>. &nbsp;You can then rebuild the TurboJPEG RPM by typing <span style="font-family: monospace;">make dist</span>. &nbsp;Rebuilding TurboJPEG from source requires one of the following:</p><ul><li>Intel Integrated Performance primitives v4.1 or later. &nbsp;This is the default if the <span style="font-family: monospace;">JPEGLIB</span> makefile option is not specified</li><li>Pegasus Imaging PicTools<br><span style="font-family: monospace;"><br>make JPEGLIB=pegasus lib</span><span style="font-family: monospace;"><br>make JPEGLIB=pegasus dist</span></li><li>libjpeg v6b<br><span style="font-family: monospace;"><br>make JPEGLIB=libjpeg lib</span><br style="font-family: monospace;"><span style="font-family: monospace;">make JPEGLIB=libjpeg dist</span><br style="font-family: monospace;"><br>This
+under the&nbsp;<span style="font-style: italic;">jpeg/</span> directory. &nbsp;To rebuild the TurboJPEG library, <span style="font-family: monospace;">cd jpeg</span> and type <span style="font-family: monospace;">make lib</span>. &nbsp;You can then rebuild the TurboJPEG RPM by typing <span style="font-family: monospace;">make dist</span>. &nbsp;Rebuilding TurboJPEG from source requires one of the following:</p><ul><li>Intel Integrated Performance Primitives v4.1 or later. &nbsp;This is the default if the <span style="font-family: monospace;">JPEGLIB</span> makefile option is not specified<br>
+    <br>
+IPP licenses are available at no charge for non-commercial use and for
+a reasonable fee for commercial use. &nbsp;Binaries built by a licensed
+IPP user can be distributed royalty-free. &nbsp;See <span style="font-weight: 400;"><a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a> for more details.<br>
+&nbsp;</span></li><li>Pegasus Imaging PicTools<br><span style="font-family: monospace;"><br>make JPEGLIB=pegasus lib</span><span style="font-family: monospace;"><br>make JPEGLIB=pegasus dist<br>
+&nbsp;</span></li><li>libjpeg v6b<br><span style="font-family: monospace;"><br>make JPEGLIB=libjpeg lib</span><br style="font-family: monospace;"><span style="font-family: monospace;">make JPEGLIB=libjpeg dist</span><br style="font-family: monospace;"><br>This
 will produce a version of TurboJPEG based on the Independent JPEG
 Group's libjpeg code. &nbsp;This codec is many times slower than
 Pegasus or IPP, but it is&nbsp;open source.</li></ul><h3 style="font-weight: normal;">TurboJPEG Makefile Options</h3><span style="font-weight: 400;">Each of these options can be passed as an argument to "make".<br></span><pre><big><span style="font-weight: 400;">IPPDIR = {location of Intel Performance Primitives directory}</span></big></pre>
@@ -113,13 +119,23 @@ be selected for non-Intel CPU's at run time</li></ul></blockquote>See the "Makef
   <br>
   <span style="font-style: italic; font-weight: bold;">NOTE:</span>&nbsp; This is 
   only necessary on the build machine.&nbsp; The VirtualGL build system will copy the 
-  necessary DLL's into the VirtualGL release package.</li></ul><h3><span style="font-weight: 400;">Visual C++ 6.0 or later or Visual C++ Toolkit 2003</span></h3>
+  necessary DLL's into the VirtualGL release package.</li>
+    <li>Add <i>c:\openssl\include</i> to your system
+    INCLUDE environment variable prior to building 
+    VirtualGL. </li>
+    <li>Add <i>c:\openssl\lib\VC</span></i> to your system
+    LIB environment variable prior to building 
+    VirtualGL.</li>
+</ul><h3><span style="font-weight: 400;">Visual C++ 2003 or later</span></h3>
 <ul>
-  <li><span style="font-weight: 400;">If you don't own Visual C++, download the free Visual C++ Toolkit from
-   <a href="http://msdn.microsoft.com/visualc/vctoolkit2003/">http://msdn.microsoft.com/visualc/vctoolkit2003/</a>.&nbsp; You will also need the Core Platform SDK (<a href="http://www.microsoft.com/msdownload/platformsdk/sdkupdate/">http://www.microsoft.com/msdownload/platformsdk/sdkupdate/</a>.)&nbsp; 
-  You may optionally want to install the free Debugging Tools for Windows (<a href="http://www.microsoft.com/whdc/devtools/debugging/default.mspx">http://www.microsoft.com/whdc/devtools/debugging/default.mspx</a>.)</span></li>
+  <li>Tested with the free Visual C++ 2005 Express Edition (<a href="http://msdn.microsoft.com/vstudio/express/visualc/">http://msdn.microsoft.com/vstudio/express/visualc/</a>)</li>
 </ul>
-<h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8.0 or v9.0</span></h3>
+<h3><span style="font-weight: 400">Microsoft Platform SDK</span></h3>
+<ul>
+  <li>See <a href="http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/">
+  http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/</a>. </li>
+</ul>
+<h3><span style="font-weight: 400;">Hummingbird Exceed XDK v8 or later</span></h3>
 <ul>
   <li><span class="note"></span>Contact
 Gary Romualdez of
@@ -127,7 +143,7 @@ Hummingbird Ltd. [tel. (416) 496-6393 or
 <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;">&#103;&#97;&#114;&#121;&#46;&#114;&#111;&#109;&#117;&#97;&#108;&#100;&#101;&#122;&#64;&#104;&#117;&#109;&#109;&#105;&#110;&#103;&#98;&#105;&#114;&#100;&#46;&#99;&#111;&#109;</a>]
 for Exceed pricing information</li><li>Add the XDK include and lib paths to your system INCLUDE and LIB variables 
   prior to building VirtualGL</li>
-  <li>See install notes in the VirtualGL documentation regarding patching Exceed to 
+  <li>See install notes in the VirtualGL documentation regarding patching Exceed 8 and 9 to 
   eliminate a bug in the MIT-SHM extension</li>
 </ul>
 <h3><span style="font-weight: 400;">MSYS or Cygwin</span></h3>
@@ -157,10 +173,10 @@ Performance Primitives (IPP) v4.1 or later <i><font color="#0000ff">[recommended
   Performance Primitives, which are capable of compressing JPEG images 3-4x 
   faster than libjpeg.</span></h4>
   </li><li>
-  <h4><span style="font-weight: 400;">Single developer licenses for IPP can be obtained
-   directly from Intel (<a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a>.)&nbsp; Binaries built by an authorized licensee of this technology can be 
-   distributed royalty-free.</span></h4>
-  </li><li>On Windows, make sure that the IPP include and lib paths are added to your 
+  <h4><span style="font-weight: 400">IPP licenses are available at no charge for non-commercial use and for
+a reasonable fee for commercial use. &nbsp;Binaries built by a licensed
+IPP user can be distributed royalty-free. &nbsp;See <a href="http://www.intel.com/software/products/ipp/index.htm">http://www.intel.com/software/products/ipp/index.htm</a> for more details.</span></h4>
+  </li><li>Make sure that the IPP include and lib paths are added to your 
   system INCLUDE and LIB variables.</li>
 </ul>
 <hr>
