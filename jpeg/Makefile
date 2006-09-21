@@ -162,6 +162,13 @@ endif
 
 ifeq ($(JPEGLIB), ipp)
 
+ifeq ($(platform), osxx86)
+IPPDIR = /Library/Frameworks/Intel_IPP.framework
+IPPLIBDIR = $(IPPDIR)/Libraries
+IPPSHLIBDIR = $(IPPDIR)/Libraries
+IPPINCDIR = $(IPPDIR)/Headers
+endif
+
 ifeq ($(IPPDIR),)
 IPPDIR = /opt/intel/ipp/5.1/ia32
 ifeq ($(subplatform), 64)
@@ -171,30 +178,43 @@ ifeq ($(subplatform), ia64)
 IPPDIR = /opt/intel/ipp/5.1/itanium
 endif
 endif
-IPPLINK = -L$(IPPDIR)/lib -lippcore \
+
+ifeq ($(IPPLIBDIR),)
+IPPLIBDIR=$(IPPDIR)/lib
+endif
+ifeq ($(IPPSHLIBDIR),)
+IPPSHLIBDIR=$(IPPDIR)/sharedlib
+endif
+ifeq ($(IPPINCDIR),)
+IPPINCDIR=$(IPPDIR)/include
+endif
+
+IPPLINK = -L$(IPPLIBDIR) -lippcore \
         -lippjemerged -lippiemerged -lippsemerged \
         -lippjmerged -lippimerged -lippsmerged
 ifeq ($(IPPSHARED), yes)
-IPPLINK = -L$(IPPDIR)/sharedlib \
+IPPLINK = -L$(IPPSHLIBDIR) \
         -lippj -lippi -lipps -lippcore
 endif
+
 ifeq ($(subplatform), 64)
-IPPLINK = -L$(IPPDIR)/lib \
+IPPLINK = -L$(IPPLIBDIR) \
         -lippjemergedem64t -lippjmergedem64t -lippiemergedem64t \
         -lippimergedem64t -lippsemergedem64t -lippsmergedem64t \
         -lippcoreem64t
 ifeq ($(IPPSHARED), yes)
-IPPLINK = -L$(IPPDIR)/sharedlib \
+IPPLINK = -L$(IPPSHLIBDIR) \
         -lippjem64t -lippiem64t -lippsem64t -lippcoreem64t
 endif
 endif
+
 ifeq ($(subplatform), ia64)
-IPPLINK = -L$(IPPDIR)/lib \
+IPPLINK = -L$(IPPLIBDIR) \
         -lippji7 -lippii7 -lippsi7 -lippcore64
 endif
 
 $(ODIR)/turbojpeg.o: turbojpegipp.c ../include/turbojpeg.h
-	$(CC) -I$(IPPDIR)/include $(CFLAGS) -c $< -o $@
+	$(CC) -I$(IPPINCDIR) $(CFLAGS) -c $< -o $@
 
 JPEGLINK = $(IPPLINK)
 

@@ -1,9 +1,9 @@
 ########################################
-# OS X 32-bit (PPC)
+# OS X 32-bit (Intel) 
 ########################################
 
-CC = gcc
-CXX = g++
+CC = icc
+CXX = icpc
 AR = ar ruvs
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
@@ -27,10 +27,10 @@ endif
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
-OPTFLAG = -mcpu=7450 -fast
+OPTFLAG = -O2
 endif
 
-DEFAULTJPEGLIB = quicktime
+DEFAULTJPEGLIB = ipp
 
 SHFLAG = -dynamiclib
 SHEXT = dylib
