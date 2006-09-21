@@ -317,8 +317,8 @@ typedef unsigned int GLXVideoDeviceNV;
 #include <inttypes.h>
 #elif defined(__SCO__) || defined(__USLC__) || defined(__linux__) || defined(__CYGWIN__)
 #include <stdint.h>
-#elif defined(__UNIXOS2__) || defined(__SOL64__)
-typedef long int int32_t;
+#elif defined(__UNIXOS2__) || defined(__SOL64__) || defined (__APPLE__)
+typedef int int32_t;
 typedef long long int int64_t;
 #else
 #error "int32_t and int64_t are undefined!"
