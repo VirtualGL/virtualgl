@@ -28,7 +28,11 @@ ifeq ($(OS), SunOS)
  endif
 endif
 ifeq ($(OS), Darwin)
- platform := osx
+ ifeq ($(ARCH), i386)
+  platform := osxx86
+ else
+  platform := osx
+ endif
 endif
 
 ifeq ($(M32), yes)
