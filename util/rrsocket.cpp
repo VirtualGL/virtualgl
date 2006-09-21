@@ -286,10 +286,10 @@ void rrsocket::listen(unsigned short port)
 	#endif
 }
 
-#if (defined(__GLIBC__)&&(__GLIBC__>1)||defined(sun))
-typedef socklen_t SOCKLEN_T;
-#else
+#ifdef _WIN32
 typedef int SOCKLEN_T;
+#else
+typedef socklen_t SOCKLEN_T;
 #endif
 
 rrsocket *rrsocket::accept(void)
