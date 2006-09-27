@@ -185,22 +185,20 @@ dist: rr rr32 diags32
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
 	rm -rf $(BLDDIR)/rpms
 
-RPMBUILD = 1
-
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	mkdir -p $(BLDDIR)/rpms/SRPMS
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
-	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
-	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(RPMBUILD)/g \
+	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
+	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(BUILD)/g \
 		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
 		| sed s/%{_bindir}/linux\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
-		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >virtualgl.spec
-	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) virtualgl.spec
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(RPMBUILD).$(RPMARCH).rpm $(BLDDIR)
-	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(RPMBUILD).src.rpm $(BLDDIR)
+		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
+	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) $(BLDDIR)/virtualgl.spec
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
+	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(BUILD).src.rpm $(BLDDIR)/$(APPNAME).src.rpm
 	rm -rf $(BLDDIR)/rpms
 
 endif
