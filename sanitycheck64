@@ -30,7 +30,13 @@ if [ -f /usr/include/openssl/opensslconf-x86_64.h ]; then
 fi
 
 _LIBSSL=`find /lib/libssl.so.? 2>/dev/null | xargs | awk '{print $NF}'`
+if [ -z "$_LIBSSL" ]; then
+	_LIBSSL=`find /usr/lib/libssl.so.? 2>/dev/null | xargs | awk '{print $NF}'`
+fi
 _LIBCRYPTO=`find /lib/libcrypto.so.? 2>/dev/null | xargs | awk '{print $NF}'`
+if [ -z "$_LIBCRYPTO" ]; then
+	_LIBCRYPTO=`find /usr/lib/libcrypto.so.? 2>/dev/null | xargs | awk '{print $NF}'`
+fi
 
 if [ -z "$_LIBSSL" -o -z "$_LIBCRYPTO" ]; then
 	echo
