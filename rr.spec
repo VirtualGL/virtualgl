@@ -22,7 +22,7 @@ Prereq: /sbin/ldconfig, /usr/bin/perl, turbojpeg >= 1.0
 Provides: %{name} = %{version}-%{release}
 
 %description
-VirtualGL is a framework which allows most Linux OpenGL applications to be
+VirtualGL is a library which allows most Linux OpenGL applications to be
 remotely displayed to a thin client without the need to alter the
 applications in any way.  VGL inserts itself into an application at run time
 and intercepts a handful of GLX calls, which it reroutes to the server's
