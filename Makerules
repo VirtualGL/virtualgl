@@ -51,10 +51,12 @@ TOPDIR = ..
 endif
 
 ifeq ($(M32), yes)
+ifeq ($(platform), linux)
 .PHONY: sanitycheck64
 all: sanitycheck64
 sanitycheck64:
 	$(TOPDIR)/sanitycheck64
+endif
 endif
 
 ifneq ($(DISTRO),)
