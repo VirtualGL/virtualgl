@@ -50,6 +50,13 @@ ifeq ($(TOPDIR),)
 TOPDIR = ..
 endif
 
+ifeq ($(M32), yes)
+.PHONY: sanitycheck64
+all: sanitycheck64
+sanitycheck64:
+	$(TOPDIR)/sanitycheck64
+endif
+
 ifneq ($(DISTRO),)
 BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
 BLDDIR32 = $(TOPDIR)/$(platform)/$(DISTRO)
