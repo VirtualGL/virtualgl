@@ -45,9 +45,9 @@ Ertl 2000.)
 #-->%setup -q -n vgl
 
 #-->%build
-#-->make
+#-->make DISTRO=
 #-->%ifarch x86_64
-#-->make M32=yes
+#-->make M32=yes DISTRO=
 #-->%endif
 
 %install
