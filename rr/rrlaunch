@@ -97,8 +97,8 @@ do
 	-fps)       VGL_FPS=$2        ; export VGL_FPS      ; shift     ;;
 	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
-	-64)        __VGL_64=1        ;;
-	-32)        __VGL_32=1        ;;
+	-64)        __VGL_64=1; __VGL_32=0        ;;
+	-32)        __VGL_32=1; __VGL_64=0        ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;
 	--)         shift   ; break ;;
