@@ -7,11 +7,11 @@
 
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
-Summary: A framework for displaying OpenGL applications to thin clients
+Summary: A toolkit for displaying OpenGL applications to thin clients
 Name: VirtualGL
 Version: %{_version}
 Vendor: The VirtualGL Project
-URL: http://virtualgl.sourceforge.net
+URL: http://www.virtualgl.org
 Group: Applications/Graphics
 #-->Source0: http://prdownloads.sourceforge.net/virtualgl/VirtualGL-%{version}.tar.gz
 Release: %{_build}

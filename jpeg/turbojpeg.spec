@@ -2,7 +2,7 @@ Summary: A fast JPEG codec used by VirtualGL and TurboVNC
 Name: turbojpeg
 Version: 1.03
 Vendor: The VirtualGL Project
-URL: http://virtualgl.sourceforge.net
+URL: http://www.virtualgl.org
 Group: System Environment/Libraries
 Release: %{_build}
 License: wxWindows Library License, v3
@@ -15,8 +15,8 @@ TurboJPEG provides a minimalistic interface for compressing true color
 bitmaps into JPEG images in memory.  It abstracts a variety of vendor-specific
 codecs from Intel, Sun, Apple, etc. into a common API that is used by
 VirtualGL and TurboVNC as the default method of image compression.  The use of
-these vendor-specific codecs allows TurboJPEG to compress HDTV resolutions
-at real-time or greater frame rates.
+these vendor-specific codecs allows TurboJPEG to compress 1-megapixel images
+at 20-30 frames/second or greater.
 
 %install
 rm -rf $RPM_BUILD_ROOT
