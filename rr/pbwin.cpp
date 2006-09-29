@@ -319,7 +319,16 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		compress=RRCOMP_JPEG;
+		if(compress!=RRCOMP_JPEG)
+		{
+			static bool message=false;
+			if(!message)
+			{
+				rrout.println("[VGL] Stereo does not work in Raw Mode.  Disabling stereo.");
+				message=true;
+			}
+			dostereo=false;
+		}
 	}
 
 	if(!_truecolor) compress=RRCOMP_NONE;
