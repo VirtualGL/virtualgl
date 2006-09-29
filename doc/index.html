@@ -3684,10 +3684,9 @@ verify whether or not stereo
 visuals are enabled on both client and server before attempting to run
 VirtualGL with a stereo application.</p>
 
-<p><span class="note">Note:</span>Stereo
-requires Direct Mode. &nbsp;If VirtualGL detects that the
-application has enabled stereo rendering, VirtualGL will try to
-automatically enable Direct Mode.</p>
+<p><span class="note">Note:</span>Stereo requires Direct Mode. &nbsp;If VirtualGL is 
+running in Raw Mode and the application renders something in stereo, only the 
+contents of the left eye buffer will be sent to the display.</p>
 
 <h3><a class="mozTocH3" name="mozTocId114736"></a>Transparent
 Overlays</h3>
@@ -4319,10 +4318,7 @@ string begins with "<code>localhost</code>" or with the
 server's hostname, VGL assumes that the display is being tunneled
 through SSh, and it enables Direct Mode in this case. </p>
 
-      <p><span class="note">Note:</span>Stereo
-frames will always be sent using Direct Mode, regardless of this
-setting.&nbsp;
-Raw mode cannot be used with stereo.</p>
+      <p><span class="note">Note:</span>Stereo does not work with Raw Mode.</p>
 
       <p>See&nbsp;<a href="#vnc">this section</a>&nbsp;for
 more details.</p>
