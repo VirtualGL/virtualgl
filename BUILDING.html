@@ -253,36 +253,14 @@ h3
 	</ol>
 
 	<p>
-	Prior to building 32-bit VirtualGL for the first time, you will need to 
-	perform the following additional step (as root):
-	</p>
-
-	<pre>cd /usr/lib<br>ln -fs /lib/libssl.so.? libssl.so<br>ln -fs /lib/libcrypto.so.? libcrypto.so</pre>
-
-	<p>
-	<span class="note">Note:</span> On some SuSE systems, you may need to create
-	a link to <span class="mono">/usr/lib/libssl.so.?</span> and
-	<span class="mono">/usr/lib/libcrypto.so.?</span> instead.
-	</p>
-
-	<p>
-	This creates a development stub for the 32-bit OpenSSL library, since a 
-	32-bit <span class="mono">openssl-devel</span> package doesn't exist.
-	If you have more than one 32-bit version of libssl installed, then
-	replace ? in the above command line with the version you wish to link against
-	(usually the highest numbered one is the one you want.)
-	</p>
-
-	<p>
-	On Enterprise Linux 4.0 or Fedora, you may additionally need to do the 
-	following (as root):
-	</p>
-
-	<pre>cd /usr/include/openssl<br>ln -fs opensslconf-x86_64.h opensslconf-i386.h</pre>
-
-	<p>
-	This creates an appropriate i386 header file for OpenSSL, since a 
-	32-bit <span class="mono">openssl-devel</span> package doesn't exist.
+	When you attempt to build 32-bit VirtualGL on a 64-bit Linux system, the
+	VirtualGL build system will run a script (<code>sanitycheck64</code>, in
+	the same directory as this document) to sanity check the 32-bit build
+	environment on your system.  This script points out any anomalies that would
+	prevent 32-bit VirtualGL from building properly and gives instructions on
+	how to fix them.  You can also run <code>sanitycheck64 -fix</code> as root to
+	automatically fix the problems.  View the contents of the script if you're
+	morbidly curious about what it's doing.
 	</p>
 
 <hr>
