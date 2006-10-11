@@ -111,10 +111,6 @@ SunOS)
 
 if [ -z "$FAKERLIB" ]; then
 FAKERLIB=librrfaker.so
-if [ -f /opt/SUNWvgl/lib/sparcv9/librrfaker.so ]
-then
-	FAKERLIB=/opt/SUNWvgl/lib/sparcv9/librrfaker.so
-fi
 if [ -f /opt/SUNWvgl/lib/64/librrfaker.so ]
 then
 	FAKERLIB=/opt/SUNWvgl/lib/64/librrfaker.so
@@ -152,16 +148,11 @@ if [ $__VGL_32 -eq 0 ]; then
 		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
 	fi
 	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/sparcv9/libdlfaker.so ]
+		if [ -f /opt/SUNWvgl/lib/64/libdlfaker.so ]
 		then
-			LD_PRELOAD_64=/opt/SUNWvgl/lib/sparcv9/libdlfaker.so:$LD_PRELOAD_64
+			LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libdlfaker.so:$LD_PRELOAD_64
 		else
-			if [ -f /opt/SUNWvgl/lib/64/libdlfaker.so ]
-			then
-				LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libdlfaker.so:$LD_PRELOAD_64
-			else
-				LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
-			fi
+			LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
 		fi
 	fi
 	export LD_PRELOAD_64
