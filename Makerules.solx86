@@ -24,7 +24,7 @@ DEPFLAG = -MM
 else
 
 CC = cc
-CXX = CC
+CXX = CC -norunpath
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
 LAZY = -zlazyload
@@ -60,10 +60,6 @@ ifeq ($(subplatform), 64)
 LDFLAGS := -L/usr/X/lib/64 -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 $(LDFLAGS) -R/opt/SUNWvgl/lib/64
 else
 LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib -R/usr/sfw/lib -L/opt/csw/lib -R/opt/csw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
-endif
-
-ifneq ($(CC), gcc)
-LDFLAGS := -norunpath $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
