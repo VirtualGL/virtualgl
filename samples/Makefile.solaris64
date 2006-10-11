@@ -7,8 +7,8 @@ CFLAGS = -O -xtarget=ultra -xarch=v9a
 
 CINCLUDES =	-I../../include -I/opt/SUNWvgl/include
 
-LDFLAGS = -L../../lib/sparcv9 -R../../lib/sparcv9 \
-	-L/opt/SUNWvgl/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9
+LDFLAGS = -L../../lib/64 -R../../lib/64 \
+	-L/opt/SUNWvgl/lib/64 -R/opt/SUNWvgl/lib/64
 
 rrglxgears.o: rrglxgears.c
 	$(CC) $(CFLAGS) $(CINCLUDES) -c -o $@ $^
