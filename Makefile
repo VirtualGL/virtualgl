@@ -69,7 +69,7 @@ ifeq ($(platform), solaris)
 lib64dir=lib/sparcv9
 endif
 ifeq ($(platform), solx86)
-lib64dir=lib/64
+lib64dir=lib/amd64
 endif
 
 ifeq ($(subplatform), 64)
