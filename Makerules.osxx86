@@ -2,8 +2,11 @@
 # OS X 32-bit (Intel) 
 ########################################
 
-CC = icc
+CC = gcc
+CXX = g++
+ifeq ($(CC), icc)
 CXX = icpc
+endif
 AR = ar ruvs
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
@@ -24,6 +27,8 @@ ARCHFLAG = -m32
 LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
+LDFLAGS := $(LDFLAGS) -flat_namespace -undefined suppress
+
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
@@ -39,5 +44,5 @@ DEPFLAG = -MM
 FBXLIB = -lfbx -lXext -lX11
 SOCKLIB = -lrrsocket -lpthread -lX11 -lGL
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -lssl -lcrypto.0.9.7
+SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
