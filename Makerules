@@ -109,6 +109,10 @@ else
 LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
 endif
 
+ifeq ($(JPEGLIB),)
+JPEGLIB = $(DEFAULTJPEGLIB)
+endif
+
 # Implicit rules
 $(ODIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $*.c -o $(ODIR)/$*.o
