@@ -48,12 +48,18 @@ ifeq ($(DEBUG), yes)
 WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
+ifeq ($(JPEGLIB), ipp)
+TJDIR=$$%systemroot%\\system32
+else
+TJDIR=$(WBLDDIR)\\bin
+endif
+
 dist: rr diags
 	$(RM) $(WBLDDIR)\$(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DTJDIR=$(TJDIR) rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DTJDIR=$(TJDIR) rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
