@@ -27,8 +27,6 @@ ARCHFLAG = -m32
 LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
-LDFLAGS := $(LDFLAGS) -flat_namespace -undefined suppress
-
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -g
 else
