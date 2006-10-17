@@ -50,3 +50,5 @@ RPMARCH = i386
 else
 RPMARCH = $(ARCH)
 endif
+
+ZNOW = -z now

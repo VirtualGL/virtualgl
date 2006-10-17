@@ -76,3 +76,5 @@ endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 FAKERLINK = -lXm -lGL -lXmu -lm
+
+ZNOW = -z now

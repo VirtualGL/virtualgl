@@ -164,7 +164,7 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -z now -lGL -lGLU -z now -lX11 -ldl -lpthread
+	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl
