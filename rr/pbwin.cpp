@@ -299,10 +299,12 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			drawbuf, bottomup);
 		if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 			bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+		fconfig.sunray=true;
 		return;
 	}
 	#endif
 
+	fconfig.sunray=false;
 	if(compress==RRCOMP_DEFAULT)
 	{
 		const char *dstr=DisplayString(_windpy);

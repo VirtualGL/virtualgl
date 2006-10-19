@@ -111,7 +111,7 @@ void vglgui::init(void)
 		else compress=RRCOMP_JPEG;
 	}
 
-	if(compress!=RRCOMP_NONE)
+	if(compress!=RRCOMP_NONE && !fconfig.sunray)
 	{
 		Widget lobutton=XtVaCreateManagedWidget("lobutton", commandWidgetClass,
 			buttonForm, NULL);
