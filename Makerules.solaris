@@ -59,9 +59,9 @@ CDEFINES := $(CDEFINES) -DSUNOGL
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/sparcv9 -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 -L/opt/csw/lib/sparcv9 -R/opt/csw/lib/sparcv9 $(LDFLAGS) -R/opt/SUNWvgl/lib/sparcv9
+LDFLAGS := -L/usr/X/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9 -L/opt/csw/lib/sparcv9 -R/opt/csw/lib/sparcv9 -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib -R/usr/sfw/lib -L/opt/csw/lib -R/opt/csw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib

@@ -57,9 +57,9 @@ endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/64 -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 $(LDFLAGS) -R/opt/SUNWvgl/lib/amd64
+LDFLAGS := -L/usr/X/lib/64 -R/opt/SUNWvgl/lib/amd64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -L/usr/sfw/lib -R/usr/sfw/lib -L/opt/csw/lib -R/opt/csw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
