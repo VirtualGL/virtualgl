@@ -35,6 +35,13 @@ ifeq ($(OS), Darwin)
  endif
 endif
 
+ifeq ($(TOPDIR),)
+TOPDIR = ..
+endif
+
+_DUMMY0 := $(shell if [ ! -f $(TOPDIR)/config ]; then touch $(TOPDIR)/config; fi)
+include $(TOPDIR)/config
+
 ifeq ($(M32), yes)
  subplatform :=
 endif
@@ -46,16 +53,13 @@ ifeq ($(DEBUG), yes)
 BUILD := $(BUILD)d
 endif
 
-ifeq ($(TOPDIR),)
-TOPDIR = ..
-endif
 
 ifeq ($(M32), yes)
 ifeq ($(platform), linux)
 .PHONY: sanitycheck64
 all: sanitycheck64
 sanitycheck64:
-	$(TOPDIR)/sanitycheck64
+	sh $(TOPDIR)/sanitycheck64
 endif
 endif
 
