@@ -70,12 +70,43 @@ ifeq ($(prefix),)
 prefix=/usr/local
 endif
 
+lib64dir=lib
+ifeq ($(subplatform), 64)
 lib64dir=lib64
 ifeq ($(platform), solaris)
 lib64dir=lib/sparcv9
 endif
 ifeq ($(platform), solx86)
 lib64dir=lib/amd64
+endif
+endif
+
+ifneq ($(USESSL), no)
+installssl: rr
+	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
+	_LIBCRYPTO=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libcrypto | awk '{print $$1}'\``; \
+	echo $$_LIBCRYPTO; if [ -f /opt/csw/$(lib64dir)/$$_LIBCRYPTO ]; then \
+		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
+	else \
+		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO ]; then \
+			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
+		fi \
+	fi
+	_LIBSSL=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libssl | awk '{print $$1}'\``; \
+	echo $$_LIBSSL; if [ -f /opt/csw/$(lib64dir)/$$_LIBSSL ]; then \
+		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBSSL $(prefix)/$(lib64dir); \
+	else \
+		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBSSL ]; then \
+			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBSSL $(prefix)/$(lib64dir); \
+		fi \
+	fi
+
+ifeq ($(platform), solaris)
+install: installssl
+endif
+ifeq ($(platform), solx86)
+install: installssl
+endif
 endif
 
 ifeq ($(subplatform), 64)
@@ -232,12 +263,12 @@ sunpkg: rr diags
 	mkdir -p $(BLDDIR)/$(PKGNAME)
 	cp copyright $(BLDDIR)
 	cp depend.$(platform) $(BLDDIR)/depend
-	cp rr.proto.$(platform)$(subplatform) $(BLDDIR)/rr.proto
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo \
 		| sed s/{__PKGARCH}/$(PKGARCH)/g
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
+	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
 	rm rr.proto copyright depend pkginfo; \
