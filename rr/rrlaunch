@@ -105,6 +105,17 @@ do
 	shift
 done
 
+if [ -r /etc/opt/VirtualGL/vgl_xauth_key ]; then
+	XAUTH=xauth
+	if [ -x /usr/X11R6/bin/xauth ]; then
+		XAUTH=/usr/X11R6/bin/xauth
+	fi
+	if [ -x /usr/openwin/bin/xauth ]; then
+		XAUTH=/usr/openwin/bin/xauth
+	fi
+	$XAUTH merge /etc/opt/VirtualGL/vgl_xauth_key
+fi
+
 case `uname -s` in
 
 SunOS)

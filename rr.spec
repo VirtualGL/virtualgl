@@ -73,6 +73,7 @@ install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
+install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
 install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
@@ -130,6 +131,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/bin/vglclient_config
 /usr/bin/vglrun
 /usr/bin/rrlaunch
+/usr/bin/vglgenkey
 
 /opt/%{name}/bin/tcbench
 /opt/%{name}/bin/nettest

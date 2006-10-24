@@ -117,6 +117,7 @@ install: rr
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
+	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
@@ -141,6 +142,7 @@ install: rr diags
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
+	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)

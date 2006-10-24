@@ -16,6 +16,7 @@ echo d none SUNWvgl/bin 0755 root bin
 echo f none SUNWvgl/bin/vglclient 0755 root bin
 echo f none SUNWvgl/bin/vglrun 0755 root bin
 echo f none SUNWvgl/bin/rrlaunch 0755 root bin
+echo f none SUNWvgl/bin/vglgenkey 0755 root bin
 echo f none SUNWvgl/bin/tcbench 0755 root bin
 echo f none SUNWvgl/bin/nettest 0755 root bin
 echo d none SUNWvgl/fakelib 0755 root bin
