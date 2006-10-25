@@ -1,0 +1,75 @@
+* Overview
+{anchor: Overview}
+
+VirtualGL is an open source package which provides hardware-accelerated 3D
+rendering capabilities to thin clients.  Normally, when you run a Unix or Linux
+OpenGL application inside a thin client environment (such as VNC, remote X11,
+NX, etc.), the 3D application either does not work at all, is forced to use a
+slow software 3D renderer, or (worse) is forced to send every 3D command and
+piece of 3D data over the network to be rendered on the client machine.
+With VirtualGL, the OpenGL commands from the application are redirected onto a
+dedicated server's 3D accelerator hardware.  The resulting rendered images are
+then read back from the 3D hardware and composited into the appropriate window
+on the user's desktop.  This produces a completely seamless shared 3D
+environment that performs fast enough to take the place of a dedicated 3D
+workstation.
+
+VirtualGL has two basic modes of operation:
+
+{anchor: Direct_Mode}
+	\1. "Direct" Mode :: Direct Mode requires an X server to be running on the
+	client machine.  This X server processes X11 commands from the application in
+	order to render the non-OpenGL (2D) elements of the application's user
+	interface.  The X server also feeds X11 input events (key, mouse, window
+	resize, etc.) back to the application.  Meanwhile, VirtualGL intercepts the
+	GLX calls from the application and modifies these calls such that they are
+	sent to the server's X server rather than the client's.  VirtualGL also
+	modifies the GLX calls such that the OpenGL contexts are created in off-
+	creen Pbuffers instead of X windows.  When an end-of-frame trigger is
+	detected (such as ''glXSwapBuffers()''), VirtualGL reads back the rendered 3D
+	images from the server's framebuffer, compresses them using a high-speed
+	image codec, and sends the compressed images on a separate socket to the
+	client.  A separate VirtualGL Client application runs on the client machine,
+ 	and this client application decompresses the image stream from the server and
+	composites it into the appropriate X window.  Direct Mode is the fastest
+	solution for running VirtualGL on a local area network, and it provides the
+	same usability as running the application locally.  Direct Mode is typically
+	used to run data-intensive OpenGL applications in a "cold room" and remotely
+	interact with these applications from a laptop or a slim PC located elsewhere
+	in the same building/campus.  Such big data applications often exceed the
+	capabilities of a single PC (particularly a 32-bit PC), and the data sizes
+	are large enough that transmitting the data across even the fastest of local
+	area networks is impractical.
+
+#IMG: virtualgl.png
+#OPT fmt=latex: w=4cm
+
+{anchor: Raw_Mode}
+	\2. "Raw" or "Proxy" Mode :: In this mode, there is no X server running on
+	the client machine.  The 2D rendering is instead performed on the server
+	machine by an "X Proxy," which can be one of any number of Unix thin client
+	applications, such as VNC.  These X proxies act as normal X servers, except
+	that they perform X11 rendering to a virtual desktop in the server's memory
+	rather than to a real framebuffer.  Changes to regions of the virtual desktop
+	are compressed as image tiles and sent to any connected clients.  As with
+	Direct Mode, VirtualGL intercepts the GLX calls from the application,
+	redirects the calls to the server's X server, and modifies them such that
+	OpenGL rendering occurs in Pbuffers instead of X windows.  VirtualGL also
+	reads back the rendered images, as with Direct Mode.  But in Raw Mode,
+	VirtualGL does not perform any image compression.  It instead draws the
+	rendered 3D images into the X proxy as uncompressed 2D bitmaps, thus relying
+	on the X proxy to compress the images and send them to the client.  Raw
+	Mode, in combination with TurboVNC, is the fastest solution for running
+	VirtualGL on a wide area network (broadband, T1, etc.), and it provides
+	rudimentary built-in collaboration capabilities.  But whereas Direct Mode can
+	mimic the behavior of running the application locally, VNC requires the user
+	to interact with the entire remote desktop in a single window and thus does
+	not provide the same user experience as running the application locally.  Raw
+	Mode is typically used to run data-intensive 3D applications in a "cold room"
+	and remotely interact with these applications from a PC located in another
+	city.
+
+#IMG: idealx11proxy.png
+#OPT fmt=latex: w=4cm
+
+----8<--------------
