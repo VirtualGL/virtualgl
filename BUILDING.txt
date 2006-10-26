@@ -67,9 +67,9 @@ If for some reason your preferred 64-bit Linux distribution does not contain
       ability to cross-compile 32-bit apps on x86-64 systems.
   2.  All x86-64 distributions of Linux have a corresponding 32-bit-only
       distribution, usually released on a separate set of discs.  On those
-			discs, you should be able to find the 32-bit versions of OpenSSL, the X11
-			dev. kit, and the GLIBC dev. kit to match the 64-bit versions that are
-			already installed on your system. You may have to use "rpm --force" to
+      discs, you should be able to find the 32-bit versions of OpenSSL, the X11
+      dev. kit, and the GLIBC dev. kit to match the 64-bit versions that are
+      already installed on your system. You may have to use "rpm --force" to
       install the 32-bit development packages, since they might contain header
       files which conflict with the 64-bit development packages that are
       already installed.  Again, complain to your distribution vendor.
@@ -235,7 +235,7 @@ VirtualGL on Cygwin, see the next section.
    * Download the latest Win32 OpenSSL installer from
      http://www.slproweb.com/products/Win32OpenSSL.html.  Install it into
      c:\openssl
-	 * Add "c:\openssl\include" to your system INCLUDE environment variable prior
+   * Add "c:\openssl\include" to your system INCLUDE environment variable prior
      to building VirtualGL.
    * Add "c:\openssl\lib\VC" to your system LIB environment variable prior to
      building VirtualGL.
@@ -248,7 +248,7 @@ VirtualGL on Cygwin, see the next section.
 -- Hummingbird Exceed XDK v8 or later
 
    * Contact Gary Romualdez of Hummingbird Ltd. [tel. (416) 496-6393 or
-	   gary.romualdez [at] hummingbird.com) for Exceed pricing information.
+     gary.romualdez [at] hummingbird.com) for Exceed pricing information.
    * Add the XDK include path (e.g.
      "c:\Program Files\Hummingbird\Connectivity\11.00\Exceed\XDK\include")
      to your system INCLUDE environment variable prior to building VirtualGL.
@@ -364,12 +364,12 @@ M32 = yes
 CC = gcc
 
   * On Solaris, this builds VirtualGL using the GCC compiler rather than the
-		default (Sun WS Pro) compiler.  gcc and g++ should be in your PATH.
+    default (Sun WS Pro) compiler.  gcc and g++ should be in your PATH.
 
 USEGLP = no
 
   * On Solaris, this builds VirtualGL without GLP extension code.  This is 
-		necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.
+    necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.
 
 USESSL = no
 
@@ -395,5 +395,5 @@ To build a redistributable package, type
 
   * On Linux, this requires RPM v4 or later.
   * On Solaris, this requires pkgmk, pkgtrans, and bzip2.
-  *	On Windows, this requires the Nullsoft Install System
+  * On Windows, this requires the Nullsoft Install System
     (http://nsis.sourceforge.net/.)  makensis.exe should be in your PATH.
