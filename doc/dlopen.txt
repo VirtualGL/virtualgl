@@ -1,0 +1,47 @@
+* Using VirtualGL with Applications That Manually Load OpenGL
+{anchor: dlopen}
+
+The lion's share of OpenGL applications are dynamically linked against
+''libGL.so'', and thus ''libGL.so'' is automatically loaded whenever the
+application loads.  Whenever ''vglrun'' is used to launch such applications,
+VirtualGL is loaded ahead of ''libGL.so'', meaning that OpenGL and GLX symbols
+are resolved from VirtualGL first and the "real" OpenGL library second.
+
+However, some applications (particularly games) are not dynamically linked
+against ''libGL.so''.  These applications typically call ''dlopen()'' and
+''dlsym()'' later on in the program's execution to manually load OpenGL and
+GLX symbols from ''libGL.so''.  Such applications also generally provide a
+mechanism (usually either an environment variable or a command line argument)
+which allows the user to specify a library that can be loaded instead of
+''libGL.so''.
+
+So let's assume that you just downloaded the latest version of the Linux game
+Foo Wars from the Internet, and (for whatever reason) you want to run the game
+in a VNC session.  The game provides a command line switch ''-g'' which can be
+used to specify an OpenGL library to load other than ''libGL.so''.  You would
+launch the game using a command line such as this:
+
+#Verb: <<---
+vglrun foowars -g /usr/lib/librrfaker.so
+---
+
+You still need to use ''vglrun'' to launch the game, because VirtualGL must
+also intercept a handful of X11 calls.  Using ''vglrun'' allows VGL to
+intercept these calls, whereas using the game's built-in mechanism for loading
+a substitute OpenGL library allows VirtualGL to intercept the GLX and OpenGL calls.
+
+In some cases, the application doesn't provide an override mechanism such as
+the above.  In these cases, you should pass an argument of ''-dl'' to
+''vglrun'' when starting the application, e.g.:
+
+#Verb: <<---
+vglrun -dl foowars
+---
+
+Passing ''-dl'' to ''vglrun'' forces another library to be loaded ahead of
+VirtualGL and ''libGL.so''.  This new library intercepts any calls to
+''dlopen()'' and forces the application to open VirtualGL instead of
+''libGL.so''.
+
+{ref prefix="Section ": Application_Recipes} contains specific recipes for
+getting a variety of games and other applications to work with VirtualGL.

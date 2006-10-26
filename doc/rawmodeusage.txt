@@ -1,0 +1,173 @@
+* Using VirtualGL in Raw Mode with VNC and Other X Proxies
+{anchor: Raw_Mode_Usage}
+
+Referring to {ref prefix="Section ": Overview}, Raw Mode is a mode in
+which VirtualGL bypasses its own image compressor and instead draws the
+rendered 3D images as uncompressed bitmaps into an X proxy.  In this mode,
+VirtualGL relies on the X proxy to do the job of compressing and delivering
+images to the client(s).
+
+#IMG: idealx11proxy.png
+
+*** Advantages of using VirtualGL with an X proxy:
+#OPT: noList! plain!
+
+	* X proxies eliminate the need to send X11 traffic over the network, thus
+		they can provide reasonable remote display performance on low-bandwidth,
+		high-latency connections (such as broadband or long-haul T1 lines.)  The
+		application GUI will load and render much faster (perhaps even orders of
+		magnitude faster) with an X proxy than with remote X11 on such connections.
+
+	* Some X proxies (such as VNC) provide rudimentary collaboration
+		capabilities.  Multiple clients can simultaneously view the same server
+		session and pass around control of the keyboard and mouse.
+
+	* The client is stateless.  If the network hiccups or the client is otherwise
+		disconnected, the session remains running on the server and can be rejoined
+		from any machine on the network.
+
+	* X proxies sometimes provide clients for platforms (such as PDA's, etc.)
+		that VirtualGL doesn't support.
+
+	* No X server is required on the client machine.  This reduces the deployment
+		cost and complexity for Windows clients.
+
+*** Disadvantages of using VirtualGL with an X proxy:
+#OPT: noList! plain!
+
+	* Performance.  Most X proxies are simply not capable of streaming
+		full-screen video at interactive frame rates, and thus on faster networks
+		they fall far short of the performance of Direct Mode.  TurboVNC (see
+		below) is meant to address this problem, at least in part.
+
+	* With the exception of TurboVNC, X proxies lack double buffering support.
+
+	* With the exception of NX, X proxies generally do not provide seamless
+		windows.  Rather than each application window appearing as a separate
+		client window, the entire server desktop appears in a single client window.
+
+	* X proxies require more server resources, both because they have to compress
+		more pixels (an entire desktop rather than a single window) and because 2D
+		(X11) rendering occurs on the server rather than the client.
+
+	* X proxies cannot be used with
+		[[advancedopengl.txt#Advanced_OpenGL][advanced OpenGL features]], such as
+		stereo or overlays.
+
+When an X proxy session is started on the server, it generally chooses a unique
+display number (such as :1, :2, etc.) and starts a customized X server on that
+display number.  This customized X server renders all graphical output from the
+application into a bitmap in memory, which it then compresses and sends to the
+client(s).  The proxy may or may not even implement the GLX extension (VNC does
+not), and thus it might not have any native ability to run OpenGL applications.
+But since VirtualGL is designed to intercept and hand off all GLX commands to
+the hardware-accelerated root display (usually display :0), VirtualGL can be
+used as a "3D to 2D converter" to allow 3D apps to run within VNC or another
+X11 proxy that doesn't natively support GLX. 
+
+** TurboVNC
+
+TurboVNC is essentially just a version of
+[[http://www.tightvnc.com/][TightVNC]] with optimizations to make it perform at
+peak efficiency with full-screen video workloads (which is, in a nutshell, what
+VirtualGL produces.)  These optimizations include:
+
+	* Using VirtualGL's high-performance JPEG codec (TurboJPEG) to handle tight
+		JPEG encoding
+
+	* Using only JPEG and Full color encoding (mono, gradient, and indexed
+		encoding are disabled.)  High-performance JPEG encoding is used in all
+		cases except for very small image tiles for which using full color (raw)
+		encoding is more efficient due to JPEG's compression overhead.
+
+	* Using the optimized tight protocol whenever possible.  Other VNC protocols
+		(ZRLE, Hextile, etc.) are available on the server so that it can talk to
+		non-TurboVNC clients.  But if a TurboVNC client connects to a TurboVNC
+		server, they will both use optimized tight encoding at all times.
+
+	* Protocol tweaks to allow some stages of the VNC pipeline to occur in
+		parallel.  This particularly improves performance on low-bandwidth
+		(broadband) connections.
+
+Other notable differences between TurboVNC and TightVNC:
+
+	* The compression level and quality parameters have been changed as follows:
+		{nl}{nl}
+		__Compression Level__ = 0 for 4:4:4 subsampling, 1 for 4:1:1 subsampling,
+		or 2 for 4:2:2 subsampling{nl}
+		__Quality__ = 0 to 100 (JPEG quality level)
+		{nl}{nl}
+
+	* The TurboVNC client supports double buffering.  This is enabled by default
+		but can be disabled by passing an argument of ''-singlebuffer'' to
+		''vncviewer'' (or selecting the corresponding option in the configuration
+		GUI.)
+		{nl}{nl}
+
+	* The TurboVNC client adds a special mode which optimizes the client/server
+		interaction to improve performance on high-latency networks.  Normally, the
+		VNC client will wait until one screen update has finished drawing before
+		requesting the next one.  Enabling TurboVNC's high-latency network mode
+		causes the client to send a request for the next frame while it is drawing
+		the current one.  This mode decreases performance on local-area networks
+		and is thus not enabled by default, but it can be enabled by passing an
+		argument of ''-wan'' to ''vncviewer'' (or selecting the corresponding
+		option in the configuration GUI.)
+
+On a local area network, TurboVNC + VirtualGL in Raw Mode can generally produce
+levels of performance within 80-90% of VirtualGL in Direct Mode.  On a
+wide-area network, TurboVNC wins hands down.  Direct Mode is still preferable
+if a seamless user experience is a requirement and if performance is critical.
+But if a bit of performance can be sacrificed and if collaboration and a
+stateless client are more important features than seamless windows, then
+VirtualGL+TurboVNC would be the appropriate solution.  In the long term, we are
+looking for a way to combine the best of both solutions into one.  But such is
+not an easy problem to solve ...
+
+TurboVNC allows VirtualGL to be used with respectable performance over
+low-bandwidth/high-latency networks, such as broadband or satellite.  As with
+VirtualGL's direct mode, the quality and subsampling of TurboVNC's JPEG image
+stream can be adjusted to reduce the size of the image stream without reducing
+the number of image colors.  TurboVNC provides a preset mode for broadband
+connections, which sets the quality to a low level that is noticeably lossy but
+still quite usable.  It should be possible to redraw a 1280x1024 window at
+greater than 10 frames/second on a standard cable modem connection using this
+preset mode.
+
+For instructions on the usage of TurboVNC, please refer to the TurboVNC man
+pages:
+
+On Linux:
+
+#Verb: <<---
+man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+---
+
+On Solaris:
+
+#Verb: <<---
+man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+---
+
+On Windows, use the embedded help feature (the question mark button in the
+upper right of the window.)
+
+The TightVNC documentation:
+
+http://www.tightvnc.com/docs.html
+
+might also be helpful, since TurboVNC is based on TightVNC and shares many of
+its features.
+
+** Enabling Raw Mode
+
+Raw mode is automatically enabled if VirtualGL detects that it is running on
+the same machine as the X server, which it assumes to be the case if the X
+display name begins with a colon (":") or with "''unix:''".  In most cases,
+this will cause VirtualGL to automatically use raw mode when it is launched in
+an X proxy environment such as VNC or NX.  But you can manually enable Raw Mode
+by setting the ''VGL_COMPRESS'' environment variable to ''0'' on the server or
+passing an argument of ''-c 0'' to ''vglrun'' (see
+{ref prefix="Section ": Advanced_Configuration} for more details.)  Make sure
+that the ''DISPLAY'' variable points to whatever display number that VNC (or
+your X proxy of choice) is occupying (e.g. :1, :2, etc.)
