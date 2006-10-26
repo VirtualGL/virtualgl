@@ -1,0 +1,199 @@
+* Performance Measurement
+{anchor: Perf_Measurement}
+
+** VirtualGL's Built-In Profiling System
+
+The easiest way to uncover bottlenecks in the VirtualGL pipeline is to set the
+''VGL_PROFILE'' environment variable to ''1'' on both server and client
+(passing an argument of ''+pr'' to ''vglrun'' on the server has the same
+effect.)  This will cause VirtualGL to measure and report the throughput of the
+various stages in its pipeline.  For example, here are some measurements from a
+dual Pentium 4 server communicating with a Pentium III client on a 100 Mbit
+LAN:
+
+	Server :: {:}
+	#Verb: <<---
+	Readback   - 43.27 Mpixels/sec - 34.60 fps
+	Compress 0 - 33.56 Mpixels/sec - 26.84 fps
+	Total      -  8.02 Mpixels/sec -  6.41 fps - 10.19 Mbits/sec (18.9:1)
+	---
+
+	Client :: {:}
+	#Verb: <<---
+	Decompress - 10.35 Mpixels/sec -  8.28 fps
+	Blit       - 35.75 Mpixels/sec - 28.59 fps
+	Total      -  8.00 Mpixels/sec -  6.40 fps - 10.18 Mbits/sec (18.9:1)
+	---
+
+The total throughput of the pipeline is 8.0 Mpixels/sec, or 6.4 frames/sec,
+indicating that our frame is 8.0 / 6.4 = 1.25 Megapixels in size (a little less
+than 1280 x 1024 pixels.)  The readback and compress stages, which occur in
+parallel on the server, are obviously not slowing things down.  And we're only
+using 1/10 of our available network bandwidth.  So we look to the client and
+discover that its slow decompression speed is the primary bottleneck.
+Decompression and blitting on the client do not occur in parallel, so the
+aggregate performance is the harmonic mean of the two rates:
+__[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.
+
+** Frame Spoiling
+
+By default, VirtualGL will only send a frame to the client if the client is
+ready to receive it.  If a rendered frame arrives at the server's queue and a
+previous frame is still being processed, the new frame is dropped ("spoiled.")
+This prevents a backlog of frames on the server, which would cause a
+perceptible delay in the responsiveness of interactive applications.  But when
+running non-interactive applications, particularly benchmarks, it may be
+desirable to disable frame spoiling.   With frame spoiling disabled, the server
+will render frames only as quickly as the VirtualGL pipeline can receive them,
+which will conserve server resources as well as allow OpenGL benchmarks to
+accurately measure the throughput of the VirtualGL pipeline.  With frame
+spoiling enabled, these benchmarks will report meaningless data, since they
+are measuring the server's rendering rate, and that rendering rate is decoupled
+from the overall throughput of VirtualGL.
+
+To disable frame spoiling, set the ''VGL_SPOIL'' environment variable to ''0''
+on the server or pass an argument of ''-sp'' to ''vglrun''.  See
+{ref prefix="Section ": VGL_SPOIL} for more details.
+
+** VirtualGL Diagnostic Tools
+
+VirtualGL includes several tools which can be useful in diagnosing performance
+problems with the system.
+
+*** NetTest
+#OPT: noList! plain!
+
+NetTest is a low-level network benchmark that uses the same network classes as
+VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
+connection, with or without SSL encryption.  The VirtualGL Linux package
+installs NetTest in ''/opt/VirtualGL/bin''.  The VirtualGL Solaris package
+installs it in ''/opt/SUNWvgl/bin''.  The Windows installer installs it in
+''c:\\program files\\VirtualGL-{version}-{build}'' by default.
+
+To use NetTest, first start up the nettest server on one end of the
+connection:
+
+#Verb: <<---
+nettest -server [-ssl]
+---
+
+(use ''-ssl'' if you want to test the performance of SSL encryption over this
+particular connection.)
+
+Next, start the client on the other end of the connection:
+
+#Verb: <<---
+nettest -client {server_name} [-ssl]
+---
+
+(''server_name'' is the hostname or IP address of the machine where the NetTest
+server is running.  Use ''-ssl'' if the NetTest server is running in SSL mode.)
+
+The nettest client will produce output similar to the following:
+
+#Verb: <<---
+TCP transfer performance between localhost and {server}:
+
+Transfer size  1/2 Round-Trip      Throughput
+(bytes)                (msec)        (MB/sec)
+1                    0.176896        0.005391
+2                    0.179391        0.010632
+4                    0.181600        0.021006
+8                    0.181292        0.042083
+16                   0.181694        0.083981
+32                   0.181690        0.167965
+64                   0.182010        0.335339
+128                  0.182197        0.669991
+256                  0.183593        1.329795
+512                  0.183800        2.656586
+1024                 0.186189        5.245015
+2048                 0.379702        5.143834
+4096                 0.546805        7.143778
+8192                 0.908712        8.597335
+16384                1.643810        9.505359
+32768                2.961701       10.551368
+65536                5.769007       10.833754
+131072              11.313003       11.049232
+262144              22.412990       11.154246
+524288              44.760510       11.170561
+1048576             89.294810       11.198859
+2097152            178.426602       11.209091
+4194304            356.547194       11.218711
+---
+
+We can see that the throughput peaks out at about 11.2 MB/sec.  1 MB =
+1048576 bytes, so 11.2 MB/sec = 94 million bits per second, which is pretty
+good for a 100 Mbit connection.  We can also see that, as the transfer size
+decreases, the round-trip time becomes dominated by latency.  The latency is
+the same thing as the 1/2 round-trip time for a zero-byte packet, which is
+about 0.18 ms in this case.
+
+*** CPUstat
+#OPT: noList! plain!
+
+CPUstat is available only in the VirtualGL Linux packages and is located in the
+same place as NetTest (''/opt/VirtualGL/bin''.)  It measures the average,
+minimum, and peak CPU usage for all processors combined and for each processor
+individually.  On Windows, this same functionality is provided in the Windows
+Performance Monitor, which is part of the operating system.
+
+CPUstat measures the CPU usage over a given sample period (a few seconds) and
+continuously reports how much the CPU was utilized since the last sample
+period.  Output for a particular sample looks something like this:
+
+#Verb: <<---
+ALL :  51.0 (Usr= 47.5 Nice=  0.0 Sys=  3.5) / Min= 47.4 Max= 52.8 Avg= 50.8
+cpu0:  20.5 (Usr= 19.5 Nice=  0.0 Sys=  1.0) / Min= 19.4 Max= 88.6 Avg= 45.7
+cpu1:  81.5 (Usr= 75.5 Nice=  0.0 Sys=  6.0) / Min= 16.6 Max= 83.5 Avg= 56.3
+---
+
+The first column indicates what percentage of time the CPU was active since the
+last sample period (this is then broken down into what percentage of time the
+CPU spent running user, nice, and system/kernel code.)  "ALL" indicates the
+average utilization across all CPU's since the last sample period.  "Min",
+"Max", and "Avg" indicate a running minimum, maximum, and average of all
+samples since cpustat was started.
+
+Generally, if an application's CPU usage is fairly steady, you can run CPUstat
+for a bit and wait for the Max. and Avg. for the "ALL" category to stabilize,
+then that will tell you what the application's peak and average % CPU
+utilization is.
+
+*** TCBench
+#OPT: noList! plain!
+
+TCBench was born out of the need to compare VirtualGL's performance to other
+thin client packages, some of which had frame spoiling features that couldn't
+be disabled.  TCBench measures the frame rate of a thin client system as seen
+from the client's point of view.  It does this by attaching to one of the
+client windows and continuously reading back a small area at the center of
+the window.  While this may seem to be a somewhat non-rigorous test,
+experiments have shown that if care is taken to make sure that the application
+is updating the center of the window on every frame (such as in a spin
+animation), TCBench can produce quite accurate results.  It has been sanity
+checked with VirtualGL's internal profiling mechanism and with a variety of
+system-specific techniques, such as monitoring redraw events on the client's
+windowing system.
+
+The VirtualGL Linux package installs TCBench in ''/opt/VirtualGL/bin''.  The
+VirtualGL Solaris package installs TCBench in ''/opt/SUNWvgl/bin''.  The
+Windows installer installs it in
+''c:\\program files\\VirtualGL-{version}-{build}'' by default.  Run ''tcbench''
+from the command line, and it will prompt you to click in the window you want
+to measure.   That window should already have an automated animation of some
+sort running before you launch TCBench.
+
+TCBench can also be used to measure the frame rate of applications that are
+running on the local console, although for extremely fast applications (those
+that exceed 40 fps on the local console), you may need to increase the sampling
+rate of TCBench to get accurate results.  The default sampling rate of 50
+samples/sec should be fine for measuring the throughput of VirtualGL and other
+thin client systems.
+
+#Verb: <<---
+tcbench -?
+---
+
+gives the relevant command line switches that can be used to adjust the
+benchmark time, the sampling rate, and the x and y offset of the sampling area
+within the window.
