@@ -128,6 +128,7 @@ install: rr
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
@@ -156,6 +157,7 @@ install: rr diags
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples

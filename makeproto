@@ -62,6 +62,7 @@ echo f none SUNWvgl/doc/LICENSE-OpenSSL.txt 0644 root bin
 for i in doc/*.gif; do echo f none SUNWvgl/$i 0644 root bin; done
 echo f none SUNWvgl/doc/index.html 0644 root bin
 for i in doc/*.png; do echo f none SUNWvgl/$i 0644 root bin; done
+for i in doc/*.css; do echo f none SUNWvgl/$i 0644 root bin; done
 echo d none SUNWvgl/doc/samples 0755 root bin
 echo f none SUNWvgl/doc/samples/rrglxgears.c 0644 root bin
 echo f none SUNWvgl/doc/samples/Makefile.$_platform 0644 root bin
