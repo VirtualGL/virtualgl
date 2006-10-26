@@ -15,6 +15,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SetOutPath $INSTDIR\doc
 	File "doc\*.gif"
 	File "doc\*.png"
+	File "doc\*.css"
 	File "doc\*.html"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
