@@ -1,0 +1,115 @@
+* Other Application Recipes
+{anchor: Application_Recipes}
+
+|| Application || Platform || Recipe || Notes ||
+| Army Ops | Linux/x86 \
+	| ''vglrun -dl armyops'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Descent 3 | Linux/x86 \
+	| ''vglrun descent3 -g /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl descent3'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Doom 3 | Linux/x86 	 \
+	| ''vglrun doom3 +set r_glDriver /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl doom3'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Enemy Territory (Return to Castle Wolfenstein) | Linux/x86 \
+	| ''vglrun et +set r_glDriver /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl et'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Heretic II | Linux/x86 \
+	| ''vglrun heretic2 +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl heretic2 +set vid_ref glx'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Heavy Gear II | Linux/x86 \
+	| ''vglrun hg2 -o /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl hg2'' \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Java2D applications that use OpenGL | Linux, Solaris \
+	| Java2D will use OpenGL to perform its rendering if ''sun.java2d.opengl'' \
+		is set to ''True'', e.g.: \
+		{nl}{nl} \
+		''java -Dsun.java2d.opengl=True MyAppClass'' \
+		{nl}{nl} \
+		In order for this to work in VirtualGL, it is necessary to invoke \
+		''vglrun'' with the ''-dl'' switch, e.g.: \
+		{nl}{nl} \
+		''vglrun -dl java -Dsun.java2d.opengl=True MyAppClass'' \
+		{nl}{nl} \
+		If you are using Java v6 b92 or later, you can also set the environment \
+		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so'', e.g.: \
+		{nl}{nl} \
+		''setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so''{nl} \
+		''vglrun java -Dsun.java2d.opengl=True MyAppClass'' \
+		{nl}{nl} \
+	| See {ref prefix="Section ": dlopen} for more details \
+	|
+| Pro/ENGINEER Wildfire v2.0 | Solaris/Sparc \
+	| Add \
+		{nl}{nl} \
+		''graphics opengl'' \
+		{nl}{nl} \
+		to ''~/config.pro''.  You may also need to set the ''VGL_XVENDOR'' \
+		environment variable to ''"Sun Microsystems, Inc."'' if you are running \
+		Pro/ENGINEER 2.0 over a remote X connection to a Linux or Windows \
+		VirtualGL client. \
+	|	Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote \
+		connection to a non-Sun X server. \
+	|
+| QGL (OpenGL Qt Widget) | Linux \
+	| ''vglrun -dl {application}'' \
+	| Qt can be built such that it either resolves symbols from libGL \
+		automatically or uses ''dlopen()'' to manually resolve those symbols \
+		from libGL.  As of Qt v3.3, the latter behavior is the default, so \
+		OpenGL programs built with later versions of libQt will not work with \
+		VirtualGL unless the ''-dl'' switch is used with ''vglrun''. \
+		{nl}{nl} \
+		See {ref prefix="Section ": dlopen} for more details \
+	|
+| Quake 3 | Linux/x86 \
+	| ''vglrun quake3 +set r_glDriver /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl quake3'' \
+	|	See {ref prefix="Section ": dlopen} for more details \
+	|
+| Soldier of Fortune | Linux/x86 \
+	| ''vglrun sof +set gl_driver /usr/lib/librrfaker.so'' \
+		{nl}{nl} \
+		or \
+		{nl}{nl} \
+		''vglrun -dl sof'' \
+	|	See {ref prefix="Section ": dlopen} for more details \
+	|
+| Unreal Tournament 2004 | Linux/x86 \
+	| ''vglrun -dl ut2004'' \
+	|	See {ref prefix="Section ": dlopen} for more details \
+	|
+| VisConcept | Solaris/Sparc \
+	| Set the environment variable ''VGL_GUI_XTTHREADINIT'' to ''0''. \
+	|	Popping up the VirtualGL configuration dialog may cause the application \
+		to hang unless you set this environment variable.  See \
+		{ref prefix="Section ": VGL_GUI_XTTHREADINIT} for more details. \
+	|
