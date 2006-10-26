@@ -1,0 +1,172 @@
+* Using VirtualGL in Direct Mode
+
+** Linux or Solaris Client
+
+	#. If you have not installed the VirtualGL client as a service or if your
+		client is a Solaris machine, then you will need to start the client
+		manually.  To do this, run
+
+		#Verb: <<---
+		vglclient
+		---
+
+		on Linux or
+
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglclient
+		---
+
+		on Solaris.
+
+	#. Open a Secure Shell (SSh) session into the application server:
+
+		#Verb: <<---
+		ssh -X -l {your_user_name} {server_machine_name_or_IP}
+		---
+
+	#. In the SSh session, set the ''VGL_CLIENT'' environment variable on the
+		server to point back to the client's X display.  e.g.:
+
+		#Verb: <<---
+		export VGL_CLIENT={client_machine_name_or_IP}:0.0
+		---
+
+		or
+
+		#Verb: <<---
+		setenv VGL_CLIENT {client_machine_name_or_IP}:0.0
+		---
+
+	#. In the SSh session, launch your 3D application using:
+
+		#Verb: <<---
+		vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+		if the application server is running Linux or
+
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+		if the application server is running Solaris.
+		{nl}{nl}
+		Consult {ref prefix="Section ": Advanced_Configuration} for more
+		information on ''vglrun'' command line options.
+
+*** Direct X11 Connections
+#OPT: noList! plain!
+
+You may have noticed that the procedure above enables forwarding of the X11
+traffic over the SSh connection.  You can also use VirtualGL with a direct X11
+connection, if you prefer, and grant the application server access to the
+client machine's X server using ''xhost'' or ''xauth''.  We have never observed
+any performance benefit or other benefit to using a direct X11 connection,
+however.  Additionally, some newer Linux distributions ship with X11 TCP
+connections disabled, and thus using direct X11 connections is not possible
+with such systems without reconfiguring them.  If you do choose to use a direct
+X11 connection, then set the ''DISPLAY'' environment variable in step 3 rather
+than ''VGL_CLIENT''.
+
+** Windows Client
+
+	#. If you have not installed the VirtualGL client as a service, then you will
+		need to start the client manually.  To do this, use the link provided in
+		the VirtualGL Client start menu group.
+
+	#. Make sure that Exceed is running.
+
+	#. Open a command prompt
+
+	#. Set the ''DISPLAY'' environment to whichever display Exceed is occupying,
+		e.g.:
+
+		#Verb: <<---
+		set DISPLAY=localhost:0.0
+		---
+
+		!!! If you don't anticipate the need to launch multiple Exceed sessions,
+		then you can set this environment variable globally
+		(__Control Panel-->System-->Advanced__.)
+ 
+	#. Open a Secure Shell (SSh) connection to the application server:
+
+		CygWin users :: Open a new command prompt and type:
+
+		#Verb: <<---
+		ssh -X -l {your_user_name} {server_machine_name_or_IP}
+		---
+
+		PuTTY users :: Open a new command prompt and type:
+
+		#Verb: <<---
+		putty -X -l {your_user_name} {server_machine_name_or_IP}
+		---
+
+		... or ...
+		{nl}{nl}
+			a. Launch PuTTY.
+
+			b. Select the __Connection-->SSH-->Tunnels__ category.
+
+			c. Check "Enable X11 forwarding" and set the "X display location" to
+				''localhost:0.0'' or to whichever display number that Exceed is
+				occupying.
+				{nl}{nl}
+				{img: putty3.png}
+
+			d. Select the "Session" category.
+
+			e. Set the "Protocol" to "SSH," then enter the host name or IP address of
+				the application server.
+				{nl}{nl}
+				{img: putty1.png}
+
+			f. Click "Open"
+
+	#. In the remote shell session, set the ''VGL_CLIENT'' environment variable
+		on the server to point back to the client machine:
+
+		#Verb: <<---
+		export VGL_CLIENT={client_machine_name_or_IP}:0.0
+		---
+
+		or
+
+		#Verb: <<---
+		setenv VGL_CLIENT {client_machine_name_or_IP}:0.0
+		---
+
+	#. In the SSh session, launch your 3D application:
+
+		#Verb: <<---
+		vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+		if the application server is running Linux or
+
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+		if the application server is running Solaris.
+		{nl}{nl}
+		Consult {ref prefix="Section ": Advanced_Configuration} for more
+		information on ''vglrun'' command line options.
+
+*** Direct X11 Connections
+#OPT: noList! plain!
+
+You may have noticed that the procedure above enables forwarding of the X11
+traffic over the SSh connection.  You can also use VirtualGL with a direct X11
+connection, if you prefer, and grant the application server access to the X
+display using the "Security" applet in Exceed XConfig.  We have never observed
+any performance benefit or other benefit to using a direct X11 connection,
+however.  If you do choose to use a direct X11 connection, then set the
+''DISPLAY'' environment variable in step 6 rather than ''VGL_CLIENT''.
+
+** Troubleshooting
+
+It is generally a good idea to make sure that a regular X application (such as
+xterm) can be remotely displayed from the application server to your client
+workstation prior to attempting to run VirtualGL.
