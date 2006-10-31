@@ -281,6 +281,42 @@ sunpkg: rr diags
 	rm -rf $(BLDDIR)/pkgbuild
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
+PACKAGEMAKER = /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
+
+ifeq ($(platform), osxx86)
+dist: macpkg
+endif
+
+macpkg: rr diags
+	if [ -d $(BLDDIR)/$(APPNAME)-$(VERSION).pkg ]; then rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg; fi
+	if [ -d $(BLDDIR)/pkgbuild ]; then sudo rm -rf $(BLDDIR)/pkgbuild; fi
+	if [ -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg ]; then rm -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg; fi
+	mkdir -p $(BLDDIR)/pkgbuild
+	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/bin
+	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/share/doc/$(APPNAME)-$(VERSION)
+	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)"
+	mkdir -p $(BLDDIR)/pkgbuild/Resources
+	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
+	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
+	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
+	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/usr/share/doc/$(APPNAME)-$(VERSION)
+	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
+	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
+	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
+	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
+	echo open /usr/share/doc/$(APPNAME)-$(VERSION)/index.html >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
+	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
+	sudo chown -R root:wheel $(BLDDIR)/pkgbuild/Package_Root/*
+	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
+	$(PACKAGEMAKER) -build -v -p $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
+	  -f $(BLDDIR)/pkgbuild/Package_Root -r $(BLDDIR)/pkgbuild/Resources \
+	  -i $(BLDDIR)/pkgbuild/Info.plist -d $(BLDDIR)/pkgbuild/$(APPNAME).info
+	sudo rm -rf $(BLDDIR)/pkgbuild
+	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
+	  -srcfolder $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
+	  $(BLDDIR)/$(APPNAME)-$(VERSION).dmg
+	rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg
+
 .PHONY: tarball
 tarball: rr diags
 	rm -rf $(BLDDIR)/fakeroot
