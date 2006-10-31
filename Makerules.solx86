@@ -24,7 +24,7 @@ DEPFLAG = -MM
 else
 
 CC = cc
-CXX = CC
+CXX = CC -norunpath
 CFLAGS = -xCC -Kpic -mt
 CXXFLAGS = -Kpic -mt
 LAZY = -zlazyload
@@ -46,7 +46,7 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include -I/usr/sfw/include 
 
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
@@ -55,11 +55,11 @@ ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 
-LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+LDFLAGS = -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 $(LDFLAGS) -R/opt/SUNWvgl/lib/64
+LDFLAGS := -L/usr/X/lib/64 -R/opt/SUNWvgl/lib/amd64 -L/opt/csw/lib/64 -R/opt/csw/lib/64 -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -R/opt/csw/lib -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
@@ -74,3 +74,5 @@ endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 FAKERLINK = -lXm -lGL -lm
+
+ZNOW = -z now

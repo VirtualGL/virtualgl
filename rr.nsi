@@ -15,10 +15,11 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	SetOutPath $INSTDIR\doc
 	File "doc\*.gif"
 	File "doc\*.png"
+	File "doc\*.css"
 	File "doc\*.html"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
-	File "${BLDDIR}\bin\turbojpeg.dll"
+	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
 	File "$%systemroot%\system32\libeay32.dll"

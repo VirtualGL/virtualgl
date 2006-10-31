@@ -78,11 +78,12 @@ class FakerConfig
 			readback=true;
 			verbose=false;
 			gui=true;
-			guikey=XK_F12;
+			guikey=XK_F9;
 			guimod=ShiftMask|ControlMask;
 			fps=-1.0;
 			vendor=NULL;
 			xtthreadinit=true;
+			sunray=false;
 			reloadenv();
 		}
 
@@ -249,6 +250,7 @@ class FakerConfig
 		bool verbose;
 		bool gui;
 		bool xtthreadinit;
+		bool sunray;
 
 		unsigned int guikey;
 		unsigned int guimod;

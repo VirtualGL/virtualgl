@@ -1,0 +1,140 @@
+* Installing the VirtualGL Direct Mode Client on Windows
+
+	!!! Installing the VirtualGL package is necessary on any Windows machine that
+	will act as a VirtualGL [[overview.txt#Direct_Mode][Direct Mode]]	client.  It
+	is not necessary to install VirtualGL on the client machine if
+	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
+
+	#. Download the latest VirtualGL installer package from the files area of
+		[[http://sourceforge.net/projects/virtualgl]].  The installer will usually
+		be named ''VirtualGL-{version}.exe''.
+
+	#. Run the VirtualGL installer.  The installation of VirtualGL should be
+		self-explanatory.  The only configuration option is the directory in which
+		you want the files to be installed.
+
+	#. Install Hummingbird Exceed if it isn't already installed.
+
+	#. Add the Exceed path (e.g. ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
+		to your system ''PATH'' environment if it isn't already there.
+
+	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
+		__Tools-->Configuration__.)
+
+	#. Open the "X Server Protocol" applet in XConfig.
+
+		!!! If you are using the "Classic View" mode of XConfig, open the
+		"Protocol" applet instead.
+
+	#. In the "X Server Protocol" applet, select the "Protocol" tab and make sure
+		that "Use 32 bits per pixel for true color" is not checked.
+		{nl}{nl}
+		{img: exceed1.png}
+
+	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
+		perform a server reset, click "Yes."
+
+	#. Open the "Other Server Settings" applet in XConfig.
+
+		!!! If you are using the "Classic View" mode of XConfig, open the
+		"Performance" applet instead. 
+
+	#. Select the "Performance" tab and make sure that "Default Backing Store" is
+		set to "None."
+		{nl}{nl}
+		{img: exceed3.png}
+
+	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
+		perform a server reset, click "Yes."
+
+** Obtaining Optimal Performance with Exceed
+
+VirtualGL has the ability to take advantage of the MIT-SHM extension in
+Hummingbird Exceed to accelerate image drawing on Windows.  This can improve
+the overall performance of the VirtualGL pipeline by as much as 20% in some
+cases.
+
+The bad news is that this extension has some issues in earlier versions of
+Exceed.  If you are using Exceed 8 or 9, you will need to obtain the following
+patches from the Hummingbird support site:
+
+|| Product || Patches Required || How to Obtain ||
+| Hummingbird Exceed 8.0 \
+| ''hclshm.dll'' v9.0.0.1 (or higher){nl} \
+	''xlib.dll'' v9.0.0.3 (or higher){nl} \
+	''exceed.exe'' v8.0.0.28 (or higher) \
+| Download all patches from the \
+	[[http://connectivity.hummingbird.com/support/nc/exceed_patches.html][Hummingbird support site]]. \
+	{nl} \
+	(__Hummingbird WebSupport account required__) \
+|
+| Hummingbird Exceed 9.0 \
+| ''hclshm.dll'' v9.0.0.1 (or higher){nl} \
+	''xlib.dll'' v9.0.0.3 (or higher){nl} \
+	''exceed.exe'' v9.0.0.9 (or higher) \
+| ''exceed.exe'' can be patched by running Hummingbird Update.{nl} \
+	{nl} \
+	All other patches must be downloaded from the \
+	[[http://connectivity.hummingbird.com/support/nc/exceed_patches.html][Hummingbird support site]]. \
+	{nl} \
+	(__Hummingbird WebSupport account required__) \
+|
+
+No patches should be necessary for Exceed 10 and above.
+
+Next, you need to enable the MIT-SHM extension in Exceed:
+
+	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
+		__Tools-->Configuration__.)
+
+	#. Open the "X Server Protocol" applet in XConfig.
+
+		!!! If you are using the "Classic View" mode of XConfig, open the
+		"Protocol" applet instead.
+
+	#. Select the "Extensions" tab and make sure that "MIT-SHM" is checked.
+		{nl}{nl}
+		{img: exceed2.png}
+
+	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
+		perform a server reset, click "Yes."
+
+** Secure Shell
+
+It is recommended that you use SSh (Secure Shell) to log in to the application
+server and launch applications.  Some servers are configured to allow telnet
+and RSh access, but telnet and RSh both send passwords unencrypted over the
+network and are thus being phased out in favor of SSh.  If
+[[http://www.cygwin.com/][Cygwin]] is already
+installed on your Windows VirtualGL client machine, then you can use the SSh
+client included in Cygwin.  Otherwise, download and install
+[[http://www.chiark.greenend.org.uk/%7Esgtatham/putty/][PuTTY]].
+
+** Installing the VirtualGL Client as a Windows Service
+
+The VirtualGL Windows Client can be installed as a Windows service (and
+subsequently removed) using the links provided in the "VirtualGL Client" start
+menu group.  Once installed, the service can be started from the Services
+applet in the Control Panel (located under "Administrative Tools") or by
+invoking
+
+#Verb: <<---
+net start vglclient
+---
+
+from a command prompt.  The service can be subsequently stopped by invoking
+
+#Verb: <<---
+net stop vglclient
+---
+
+If you wish to install the client as a service and have it listen on a port
+other than the default (4242 for unencrypted connections or 4243 for SSL
+connections), then you will need to install the service manually from the
+command line.
+
+#Verb: <<---
+vglclient -?
+---
+
+gives a list of the relevant command-line options.

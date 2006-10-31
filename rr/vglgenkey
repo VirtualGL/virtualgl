@@ -1,0 +1,13 @@
+#!/bin/sh
+XAUTH=xauth
+if [ -x /usr/X11R6/bin/xauth ]; then
+	XAUTH=/usr/X11R6/bin/xauth
+fi
+if [ -x /usr/openwin/bin/xauth ]; then
+	XAUTH=/usr/openwin/bin/xauth
+fi
+if [ ! -d /etc/opt/VirtualGL ]; then
+	mkdir -p /etc/opt/VirtualGL
+fi
+$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate :0 . trusted timeout 0
+chmod 644 /etc/opt/VirtualGL/vgl_xauth_key

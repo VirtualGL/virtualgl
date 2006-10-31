@@ -25,7 +25,7 @@ DEPFLAG = -MM
 else
 
 CC = cc
-CXX = CC
+CXX = CC -norunpath
 CFLAGS = -xCC -KPIC -mt
 CXXFLAGS = -KPIC -mt
 LAZY = -zlazyload
@@ -47,7 +47,7 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES =  -I/opt/csw/include -I/usr/sfw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include
+CINCLUDES =  -I/opt/csw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include -I/usr/sfw/include
 
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
@@ -57,11 +57,11 @@ CDEFINES := $(CDEFINES) -DUSESSL
 endif
 CDEFINES := $(CDEFINES) -DSUNOGL
 
-LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -mt -lpthread -lrt
+LDFLAGS = -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/sparcv9 -L/opt/csw/lib/sparcv9 -R/opt/csw/lib/sparcv9 -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 $(LDFLAGS) -R/opt/SUNWvgl/lib/sparcv9
+LDFLAGS := -L/usr/X/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9 -L/opt/csw/lib/sparcv9 -R/opt/csw/lib/sparcv9 -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -L/opt/csw/lib -R/opt/csw/lib -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS) -R/opt/SUNWvgl/lib
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -R/opt/csw/lib -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
@@ -76,3 +76,5 @@ endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 FAKERLINK = -lXm -lGL -lXmu -lm
+
+ZNOW = -z now

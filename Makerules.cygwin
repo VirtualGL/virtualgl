@@ -32,7 +32,7 @@ else
 OPTFLAG = -O2
 endif
 
-DEFAULTJPEGLIB = libjpeg
+DEFAULTJPEGLIB = ipp
 
 SHFLAG = -shared
 SHEXT = so

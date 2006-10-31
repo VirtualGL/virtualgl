@@ -1,0 +1,103 @@
+* Advanced OpenGL Features
+{anchor: Advanced_OpenGL}
+
+** Stereo
+
+The general idea behind VirtualGL is to offload the 3D rendering work to the
+server so that the client only needs the ability to draw 2D images.  But
+unfortunately, there is no way to draw stereo images using 2D (X11) commands,
+so the VirtualGL client must use OpenGL to draw in stereo.  When an application
+requests a stereo visual, VirtualGL will attempt to ascertain whether the
+client supports OpenGL and, if so, whether it has stereo visuals available.
+VirtualGL then checks the server's display to see whether it has stereo visuals
+available as well.  If both are true, then VirtualGL will return a stereo
+visual to the application.  If, for any given frame, VirtualGL detects that the
+application has drawn something to one of the right eye buffers, it will read
+back both eye buffers and send the contents as a pair of compressed images (one
+for each eye) to the VirtualGL client.  The VGL client then decompresses the
+stereo image pair and draws it as a single stereo frame to the client's display
+using ''glDrawPixels()''.
+
+The upshot of this is that, in order to use stereo in VirtualGL, the client
+machine must support OpenGL and GLX (Exceed 3D is required for Windows clients)
+and must have a graphics card (such as the nVidia Quadro, etc.) which is
+capable of drawing in stereo.  It is usually necessary to explicitly enable
+stereo visuals in the graphics card configuration for both the client and
+server machines.  Use ''glxinfo'' to verify whether or not stereo visuals are
+enabled on both client and server before attempting to run VirtualGL with a
+stereo application.
+
+	!!! Stereo requires Direct Mode.  If VirtualGL is running in Raw Mode and
+	the application renders something in stereo, only the contents of the left
+	eye buffer will be sent to the display.
+
+** Transparent Overlays
+
+Transparent overlays have similar requirements and restrictions to stereo.  In
+this case, VirtualGL completely bypasses its own GLX faker and uses indirect
+OpenGL rendering to render the transparent overlay on the client machine's 3D
+hardware.  The underlay is still rendered on the server, as always.  Using
+indirect rendering to render the overlay is unfortunately necessary, because
+there is no reliable way to draw to an overlay using 2D (X11) functions, there
+are severe performance issues (on some cards) with using ''glDrawPixels()'' to
+draw to the overlay, and there is no reasonable way to composite the overlay
+and underlay on the server machine.
+
+However, overlays are generally used only for drawing small, simple, static
+shapes and text, so we have found that it is usually faster to send the overlay
+geometry over to the client rather than rendering it as an image and sending
+the image.  So even if it were possible to implement overlays without using
+indirect rendering, it's likely that indirect rendering would still be the
+fastest approach.
+
+As with stereo, overlays often must be explicitly enabled in the graphics
+card's configuration.  In the case of overlays, however, they need only be
+supported and enabled on the client machine.
+
+Indexed color (8-bit) overlays have been tested and are known to work with
+nVidia Quadro hardware.  True color (24-bit) overlays will probably work as
+well, but they have not been tested.  Use ''glxinfo'' to verify whether your
+client's X display supports overlays and whether they are enabled.  In Exceed
+3D, make sure that the "Overlay Support" option is checked in the
+"Exceed 3D and GLX" applet:
+
+{img: exceed6.png}
+
+	!!! As with stereo, overlays do not work inside an X proxy session.
+	VirtualGL must be displaying to a real X server on the client machine.
+
+** Indexed (PseudoColor) Rendering
+
+In a PseudoColor visual, each pixel is represented by an index which refers to
+a location in a color table.  The color table stores the actual color values
+(256 of them in the case of 8-bit PseudoColor) which correspond to each index.
+An application merely tells the X server which color index to use when drawing,
+and the X server takes care of mapping that index to an actual color from the
+color table.  OpenGL allows for rendering to Pseudocolor visuals, and it does
+so by being intentionally ignorant of the relationship between indices and
+actual colors.  As far as OpenGL is concerned, each color index value is just
+a meaningless number, and it is only when the final image is drawn by the X
+server that these numbers take on meaning.  As a result, many pieces of
+OpenGL's core functionality, such as lighting and shading, either have
+undefined behavior or do not work at all with PseudoColor rendering.
+PseudoColor rendering used to be a common technique to visualize scientific
+data, because such data often only contained 8 bits per sample to begin with.
+Applications could manipulate the color table to allow the user to dynamically
+control the relationship between sample values and colors.  As more and more
+graphics cards drop support for PseudoColor rendering, however, the
+applications which use it are a vanishing breed.
+
+VirtualGL supports PseudoColor rendering if a PseudoColor visual is available
+on the client's display.  A PseudoColor visual need not be present on the
+server.  On the server, VirtualGL uses the red channel of a standard RGB
+Pbuffer to store the color index.  Upon receiving an end of frame trigger,
+VirtualGL reads back the red channel of the Pbuffer and uses ''XPutImage()'' to
+draw it into the appropriate window.  The upshot of this is that there is no
+compression with PseudoColor rendering in VirtualGL.  However, since there is
+only 1 byte per pixel in this mode, the images can still be sent to the client
+reasonably quickly even though they are uncompressed.
+
+PseudoColor rendering should work in VNC, provided that the VNC server is
+configured for 8-bit Pseudocolor.  TurboVNC does not support PseudoColor,
+but RealVNC and other VNC flavors do.  Note, however, that VNC cannot provide
+both PseudoColor and TrueColor visuals at the same time.

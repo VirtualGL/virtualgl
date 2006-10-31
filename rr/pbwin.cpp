@@ -299,10 +299,12 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			drawbuf, bottomup);
 		if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 			bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+		fconfig.sunray=true;
 		return;
 	}
 	#endif
 
+	fconfig.sunray=false;
 	if(compress==RRCOMP_DEFAULT)
 	{
 		const char *dstr=DisplayString(_windpy);
@@ -319,7 +321,16 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		compress=RRCOMP_JPEG;
+		if(compress!=RRCOMP_JPEG)
+		{
+			static bool message=false;
+			if(!message)
+			{
+				rrout.println("[VGL] Stereo does not work in Raw Mode.  Disabling stereo.");
+				message=true;
+			}
+			dostereo=false;
+		}
 	}
 
 	if(!_truecolor) compress=RRCOMP_NONE;

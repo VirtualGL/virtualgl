@@ -48,12 +48,18 @@ ifeq ($(DEBUG), yes)
 WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
+ifeq ($(JPEGLIB), ipp)
+TJDIR=$$%systemroot%\\system32
+else
+TJDIR=$(WBLDDIR)\\bin
+endif
+
 dist: rr diags
 	$(RM) $(WBLDDIR)\$(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DTJDIR=$(TJDIR) rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DTJDIR=$(TJDIR) rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
@@ -64,12 +70,43 @@ ifeq ($(prefix),)
 prefix=/usr/local
 endif
 
+lib64dir=lib
+ifeq ($(subplatform), 64)
 lib64dir=lib64
 ifeq ($(platform), solaris)
 lib64dir=lib/sparcv9
 endif
 ifeq ($(platform), solx86)
-lib64dir=lib/64
+lib64dir=lib/amd64
+endif
+endif
+
+ifneq ($(USESSL), no)
+installssl: rr
+	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
+	_LIBCRYPTO=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libcrypto | awk '{print $$1}'\``; \
+	echo $$_LIBCRYPTO; if [ -f /opt/csw/$(lib64dir)/$$_LIBCRYPTO ]; then \
+		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
+	else \
+		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO ]; then \
+			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
+		fi \
+	fi
+	_LIBSSL=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libssl | awk '{print $$1}'\``; \
+	echo $$_LIBSSL; if [ -f /opt/csw/$(lib64dir)/$$_LIBSSL ]; then \
+		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBSSL $(prefix)/$(lib64dir); \
+	else \
+		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBSSL ]; then \
+			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBSSL $(prefix)/$(lib64dir); \
+		fi \
+	fi
+
+ifeq ($(platform), solaris)
+install: installssl
+endif
+ifeq ($(platform), solx86)
+install: installssl
+endif
 endif
 
 ifeq ($(subplatform), 64)
@@ -80,6 +117,7 @@ install: rr
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
+	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
@@ -90,6 +128,7 @@ install: rr
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
@@ -104,6 +143,7 @@ install: rr diags
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
+	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
@@ -117,6 +157,7 @@ install: rr diags
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
@@ -185,22 +226,20 @@ dist: rr rr32 diags32
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
 	rm -rf $(BLDDIR)/rpms
 
-RPMBUILD = 1
-
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	mkdir -p $(BLDDIR)/rpms/SRPMS
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
-	cp $(APPNAME)-$(VERSION).tar.gz $(BLDDIR)/rpms/SOURCES
-	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(RPMBUILD)/g \
+	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
+	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(BUILD)/g \
 		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
 		| sed s/%{_bindir}/linux\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
-		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >virtualgl.spec
-	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) virtualgl.spec
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(RPMBUILD).$(RPMARCH).rpm $(BLDDIR)
-	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(RPMBUILD).src.rpm $(BLDDIR)
+		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
+	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) $(BLDDIR)/virtualgl.spec
+	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
+	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(BUILD).src.rpm $(BLDDIR)/$(APPNAME).src.rpm
 	rm -rf $(BLDDIR)/rpms
 
 endif
@@ -228,12 +267,12 @@ sunpkg: rr diags
 	mkdir -p $(BLDDIR)/$(PKGNAME)
 	cp copyright $(BLDDIR)
 	cp depend.$(platform) $(BLDDIR)/depend
-	cp rr.proto.$(platform)$(subplatform) $(BLDDIR)/rr.proto
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo \
 		| sed s/{__PKGARCH}/$(PKGARCH)/g
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
+	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
 	rm rr.proto copyright depend pkginfo; \

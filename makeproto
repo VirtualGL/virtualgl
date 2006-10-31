@@ -1,0 +1,73 @@
+#!/bin/sh
+_installdir=$1
+_platform=$2
+_subplatform=$3
+if [ "$_platform" = "solaris" -a "$_subplatform" = "64" ]; then
+LIB64=sparcv9
+fi
+if [ "$_platform" = "solx86" -a "$_subplatform" = "64" ]; then
+LIB64=amd64
+fi
+echo i copyright
+echo i depend
+echo i pkginfo
+echo d none SUNWvgl 0755 root bin
+echo d none SUNWvgl/bin 0755 root bin
+echo f none SUNWvgl/bin/vglclient 0755 root bin
+echo f none SUNWvgl/bin/vglrun 0755 root bin
+echo f none SUNWvgl/bin/rrlaunch 0755 root bin
+echo f none SUNWvgl/bin/vglgenkey 0755 root bin
+echo f none SUNWvgl/bin/tcbench 0755 root bin
+echo f none SUNWvgl/bin/nettest 0755 root bin
+echo d none SUNWvgl/fakelib 0755 root bin
+echo s none SUNWvgl/fakelib/libGL.so=../lib/librrfaker.so
+if [ "$_subplatform" = "64" ]; then
+echo d none SUNWvgl/fakelib/$LIB64 0755 root bin
+echo s none SUNWvgl/fakelib/$LIB64/libGL.so=../../lib/$LIB64/librrfaker.so
+echo s none SUNWvgl/fakelib/64=$LIB64
+fi
+echo d none SUNWvgl/lib 0755 root bin
+echo f none SUNWvgl/lib/librrfaker.so 0755 root bin
+echo f none SUNWvgl/lib/libdlfaker.so 0755 root bin
+echo f none SUNWvgl/lib/libturbojpeg.so 0755 root bin
+echo f none SUNWvgl/lib/librr.so 0755 root bin
+_LIBCRYPTO=`find $_installdir/lib/libcrypto.so.* 2>/dev/null | xargs | awk '{print $NF}'`
+_LIBSSL=`find $_installdir/lib/libssl.so.* 2>/dev/null | xargs | awk '{print $NF}'`
+if [ -n "$_LIBCRYPTO" ]; then
+echo f none SUNWvgl/lib/`basename $_LIBCRYPTO` 0755 root bin
+fi
+if [ -n "$_LIBSSL" ]; then
+echo f none SUNWvgl/lib/`basename $_LIBSSL` 0755 root bin
+fi
+if [ "$_subplatform" = "64" ]; then
+echo d none SUNWvgl/lib/$LIB64 0755 root bin
+echo f none SUNWvgl/lib/$LIB64/librrfaker.so 0755 root bin
+echo f none SUNWvgl/lib/$LIB64/libdlfaker.so 0755 root bin
+echo f none SUNWvgl/lib/$LIB64/libturbojpeg.so 0755 root bin
+echo f none SUNWvgl/lib/$LIB64/librr.so 0755 root bin
+_LIBCRYPTO64=`find $_installdir/lib/$LIB64/libcrypto.so.* 2>/dev/null | xargs | awk '{print $NF}'`
+_LIBSSL64=`find $_installdir/lib/$LIB64/libssl.so.* 2>/dev/null | xargs | awk '{print $NF}'`
+if [ -n "$_LIBCRYPTO64" ]; then
+echo f none SUNWvgl/lib/$LIB64/`basename $_LIBCRYPTO64` 0755 root bin
+fi
+if [ -n "$_LIBSSL64" ]; then
+echo f none SUNWvgl/lib/$LIB64/`basename $_LIBSSL64` 0755 root bin
+fi
+echo s none SUNWvgl/lib/64=$LIB64
+fi
+echo d none SUNWvgl/doc 0755 root bin
+echo f none SUNWvgl/doc/LGPL.txt 0644 root bin
+echo f none SUNWvgl/doc/LICENSE.txt 0644 root bin
+echo f none SUNWvgl/doc/LICENSE-OpenSSL.txt 0644 root bin
+for i in doc/*.gif; do echo f none SUNWvgl/$i 0644 root bin; done
+echo f none SUNWvgl/doc/index.html 0644 root bin
+for i in doc/*.png; do echo f none SUNWvgl/$i 0644 root bin; done
+for i in doc/*.css; do echo f none SUNWvgl/$i 0644 root bin; done
+echo d none SUNWvgl/doc/samples 0755 root bin
+echo f none SUNWvgl/doc/samples/rrglxgears.c 0644 root bin
+echo f none SUNWvgl/doc/samples/Makefile.$_platform 0644 root bin
+if [ "$_subplatform" = "64" ]; then
+echo f none SUNWvgl/doc/samples/Makefile.$_platform$_subplatform 0644 root bin
+fi
+echo d none SUNWvgl/include 0755 root bin
+echo f none SUNWvgl/include/rr.h 0644 root bin

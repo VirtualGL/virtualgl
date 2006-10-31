@@ -1,0 +1,302 @@
+* Installing the VirtualGL Server and Direct Mode Client on Solaris
+
+	!!! Installing the VirtualGL package is necessary on any Solaris machine that
+	will act as a VirtualGL server or as a VirtualGL
+	[[overview.txt#Direct_Mode][Direct Mode]]	client.  It is not necessary to
+	install VirtualGL on the client machine if
+	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
+
+	1. Obtain the latest VirtualGL package from the files area of
+		[[http://sourceforge.net/projects/virtualgl]].
+
+	2. Log in as root, cd to the directory where you downloaded the package, and
+		issue the following commands:
+
+		#Verb: <<---
+		bzip2 -d SUNWvgl-{version}.pkg.bz2
+		pkgadd -d SUNWvgl-{version}.pkg
+		---
+
+	3. Select the ''SUNWvgl'' package (usually option 1) from the menu.
+
+ !!! VirtualGL for Solaris installs into ''/opt/SUNWvgl''.
+
+*** Driver Permissions
+#OPT: noList! plain!
+
+	1. Edit ''/etc/logindevperm'' and change the mode for the ''/dev/mouse'',
+		''/dev/kbd'', ''/dev/sound/*'', and ''/dev/fbs/*'' entries to ''0666''.
+		e.g.:
+
+		#Verb: <<---
+		/dev/console    0666    /dev/mouse:/dev/kbd
+		/dev/console    0666    /dev/sound/*            # audio devices
+		/dev/console    0666    /dev/fbs/*              # frame buffers
+		---
+
+	2. Issue the following commands:
+
+		#Verb: <<---
+		chmod 666 /dev/mouse /dev/kbd /dev/fbs/*
+		chmod 666 /dev/sound/*
+		---
+
+		!!! ''/dev/sound/*'' may not exist if there are no sound drivers on your
+		system. 
+
+*** Other
+#OPT: noList! plain!
+
+The server's SSh daemon should have the ''X11Forwarding'' option enabled.  This
+is configured in ''sshd_config'', the location of which varies depending on
+your distribution of SSh.  Solaris 10 generally keeps this in ''/etc/ssh'',
+whereas Blastwave keeps it in ''/opt/csw/etc'' and SunFreeware keeps it in
+''/usr/local/etc''.
+
+** Granting VirtualGL Access to the Server's X Display
+
+	!!! If you plan to use VirtualGL only in [[glp.txt#GLP_Usage][GLP]] mode,
+	then you can skip this section.
+
+VirtualGL requires access to the server's 3D graphics card so that it can
+create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
+from applications into these Pbuffers.  Unfortunately, accessing a 3D
+graphics card on Solaris/x86 systems or on Solaris/Sparc systems without
+[[glp.txt#GLP_Usage][GLP]] requires going through an X server.  On such
+systems, the only way to share the server's 3D graphics resources among
+multiple users is to grant those users display access to the X server that is
+running on the shared 3D graphics card.
+
+It is important to understand the security risks associated with this.  Once
+X display access is granted to a user, there is nothing preventing that user
+from logging keystrokes or reading back images from the X display.  Using
+''xauth'', one can obtain "untrusted" X authentication keys which prevent such
+exploits, but unfortunately, those untrusted keys also disallow access to the
+3D hardware.  So it is necessary to grant full trusted X access to any users
+that will need to run VirtualGL.  Unless you fully trust the users to whom you
+are granting this access, you should avoid logging in locally to the server's
+X display as root unless absolutely necessary.  Even then, it's probably a good
+idea to make sure that there are no suspicious-looking processes running on the
+system prior to logging in.
+
+This section will explain how to configure a VirtualGL server such that select
+users can run VirtualGL, even if the server is sitting at the login prompt.
+The basic idea is to call a script (''vglgenkey'') from the display manager's
+startup script.  ''vglgenkey'' invokes ''xauth'' to generate an authorization
+key for the server's X display, and it stores this key under
+''/etc/opt/VirtualGL''.  The VirtualGL launcher script (''vglrun'') then
+attempts to read this key and merge it into the user's ''.Xauthority'' file,
+thus granting the user access to the server's X display.  Therefore, you can
+control who has access to the server's X display simply by controlling who has
+read access to the ''/etc/opt/VirtualGL'' directory.
+
+If you prefer, you can also grant access to every authenticated
+user on the server by replacing the references to ''vglgenkey'' below with
+''xhost +localhost''.
+
+*** If your system is using dtlogin as a display manager:
+#OPT: noList! plain!
+
+	#. Log in as root.
+
+	#. Create a new group called ''vglusers'' and add any users that need to
+		run VirtualGL to this group.
+
+	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
+		''vglusers'' group, e.g.:
+
+		#Verb: <<---
+		mkdir -p /etc/opt/VirtualGL
+		chgrp vglusers /etc/opt/VirtualGL
+		chmod 750 /etc/opt/VirtualGL
+		---
+
+	#. Temporarily shut down dtlogin by issuing
+
+		#Verb: <<---
+		/etc/init.d/dtlogin stop
+		---
+
+	#. If the ''/etc/dt/config'' directory does not exist, create it.
+
+		#Verb: <<---
+		mkdir -p /etc/dt/config
+		---
+
+	#. If ''/etc/dt/config/Xsetup'' does not exist, then copy the default
+		''Xsetup'' file from ''/usr/dt/config'' to that location:
+
+		#Verb: <<---
+		cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup
+		---
+
+	#. Edit ''/etc/dt/config/Xsetup'', and add the following lines to the bottom
+		of the file:
+
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglgenkey
+		---
+
+	#. If ''/etc/dt/config/Xconfig'' does not exist, then copy the default
+		''Xconfig'' file from ''/usr/dt/config'' to that location:
+
+		#Verb: <<---
+		cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig
+		---
+
+	#. Edit ''/etc/dt/config/Xconfig'', and add (or uncomment) the following line:
+
+		#Verb: <<---
+		Dtlogin*grabServer: False
+		---
+
+		Explanation :: The ''Dtlogin*grabServer'' option restricts X display
+		access to only the ''dtlogin'' process.  This is an added security measure,
+		since it prevents a user from attaching any kind of sniffer program to the
+		X display even if they have display access.  But ''Dtlogin*grabServer''
+		also prevents VirtualGL from using the X display to access the 3D graphics
+		hardware, so this option must be disabled for VirtualGL to work properly.
+
+	 !!! If the system you are configuring as a VirtualGL server is also being
+	 used as a Sun Ray server, then make these same modifications to
+	 ''/etc/dt/config/Xconfig.SUNWut.prototype''.  Otherwise, the modifications
+	 you just made to ''/etc/dt/config/Xconfig'' will be overwritten the next
+	 time the system is restarted.
+
+	#. Unless you know that you absolutely need it, disable the XTEST extension.
+		Disabling XTEST will not prevent a user from logging keystrokes or reading
+		images from the X display, but it will prevent them from inserting
+		key and mouse events and thus hijacking a local X session.
+
+		a. If ''/etc/dt/config/Xservers'' does not exist, then copy the default
+			''Xservers'' file from ''/usr/dt/config'' to that location:
+
+			#Verb: <<---
+			cp /usr/dt/config/Xservers /etc/dt/config/Xservers
+			---
+
+		b. Edit ''/etc/dt/config/Xservers'' and add an argument of ''-tst'' to the
+			line corresponding to the display number you are configuring, e.g.:
+
+			#Verb: <<---
+			:0  Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst
+			---
+
+			!!! If the system you are configuring as a VirtualGL server is also being
+			used as a Sun Ray server, then make these same modifications to
+			''/etc/dt/config/Xservers.SUNWut.prototype''.  Otherwise, the
+			modifications you just made to ''/etc/dt/config/Xservers'' will be
+			overwritten the next time the system is restarted.
+
+	#. Verify that ''/etc/dt/config'' and ''/etc/dt/config/Xsetup'' can be
+		executed by all users, and verify that ''/etc/dt/config/Xconfig'' and
+		''/etc/dt/config/Xservers'' can be read by all users.
+
+	#. Restart the X server by issuing
+
+		#Verb <<---
+		/etc/init.d/dtlogin start
+		---
+
+	#. You can check your work by running
+
+		#Verb <<---
+		/usr/openwin/bin/xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+		/usr/openwin/bin/xdpyinfo -display :0
+		---
+
+		In particular, make sure that XTEST doesn't show up in the list of
+		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
+		the permissions on Display :0 are probably still too restrictive, meaning
+		that the change in Step 7 didn't take for some reason.
+
+
+*** If your system is using gdm as a display manager (Solaris 10 or later):
+#OPT: noList! plain!
+
+	#. Log in as root.
+
+	#. Create a new group called ''vglusers'' and add any users that need to
+		run VirtualGL to this group.
+
+	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
+		''vglusers'' group, e.g.:
+
+		#Verb: <<---
+		mkdir -p /etc/opt/VirtualGL
+		chgrp vglusers /etc/opt/VirtualGL
+		chmod 750 /etc/opt/VirtualGL
+		---
+
+	#. Temporarily shut down gdm by issuing
+
+		#Verb: <<---
+		svcadm disable gdm2-login
+		---
+
+	#. Add
+
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglgenkey
+		---
+
+		to the top of the ''/etc/X11/gdm/Init/Default'' file.
+
+	#. Edit ''/etc/X11/gdm/gdm.conf'' and add the following line under the
+		''[security]'' section (or change it if it already exists):
+
+		#Verb: <<---
+		DisallowTCP=false
+		---
+
+	#. Unless you know that you absolutely need it, disable the XTEST extension.
+		Disabling XTEST will not prevent a user from logging keystrokes or reading
+		images from the X display, but it will prevent them from inserting
+		key and mouse events and thus hijacking a local X session.{nl}
+		{nl}
+		Edit ''/etc/X11/gdm/gdm.conf'' and add ''-tst'' to all lines that appear to
+		be X server command lines, e.g.:
+
+		#Verb: <<---
+		StandardXServer=/usr/X11R6/bin/Xorg -tst
+		---
+		#Verb: <<---
+		[server-Standard]
+		command=/usr/X11R6/bin/Xorg -tst -audit 0
+		---
+		#Verb: <<---
+		[server-Terminal]
+		command=/usr/X11R6/bin/Xorg -tst -audit 0 -terminate
+		---
+		#Verb: <<---
+		[server-Chooser]
+		command=/usr/X11R6/bin/Xorg -tst -audit 0
+		---
+
+	#. Restart gdm by issuing
+
+		#Verb: <<---
+		svcadm enable gdm2-login
+		---
+
+	#. You can check your work by running
+
+		#Verb: <<---
+		/usr/openwin/bin/xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+		/usr/openwin/bin/xdpyinfo -display :0
+		---
+
+		In particular, make sure that XTEST doesn't show up in the list of
+		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
+		the permissions on Display :0 are probably still too restrictive, meaning
+		that the change in Step 5 didn't take for some reason.
+
+** Uninstalling
+
+As root, issue the following command:
+
+#Verb: <<---
+pkgrm SUNWvgl
+---
+
+Answer "yes" when prompted.

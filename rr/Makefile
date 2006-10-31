@@ -30,7 +30,10 @@ UNITTESTS = $(EDIR)/rrblitterut.exe \
 TARGETS = $(EDIR)/vglclient.exe \
           $(UNITTESTS)
 
-RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/turbojpeg.lib $(LDIR)/rrsocket.lib
+RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/rrsocket.lib
+ifneq ($(JPEGLIB), ipp)
+RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
+endif
 RRLIB = rrutil.lib $(FBXX11LIB) $(FAKEGLXLIB) turbojpeg.lib $(SOCKLIB)
 
 all: $(TARGETS)
@@ -112,7 +115,7 @@ TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) \
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
-ifneq ($(platform), linux)
+ifneq ($(JPEGLIB), ipp)
 ifeq ($(platform), cygwin)
 RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
 else
@@ -161,7 +164,7 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< -z now -lGL -lGLU -z now -lX11 -ldl -lpthread
+	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl

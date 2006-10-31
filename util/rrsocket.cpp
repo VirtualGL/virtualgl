@@ -132,9 +132,6 @@ rrsocket::rrsocket(bool dossl=false)
 		char buf[128];  int i;
 		srandom(getpid());
 		for(i=0; i<128; i++) buf[i]=(char)((double)random()/(double)RAND_MAX*254.+1.0);
-		#endif
-		SSL_library_init();
-		#if defined(sun)||defined(sgi)
 		RAND_seed(buf, 128);
 		#endif
 		OpenSSL_add_all_algorithms();
@@ -142,6 +139,7 @@ rrsocket::rrsocket(bool dossl=false)
 		ERR_load_crypto_strings();
 		CRYPTO_set_id_callback(thread_id);
 		CRYPTO_set_locking_callback(locking_callback);
+		SSL_library_init();
 		_Sslinit=true;
 	}
 	_ssl=NULL;  _sslctx=NULL;
@@ -286,10 +284,10 @@ void rrsocket::listen(unsigned short port)
 	#endif
 }
 
-#if (defined(__GLIBC__)&&(__GLIBC__>1)||defined(sun))
-typedef socklen_t SOCKLEN_T;
-#else
+#ifdef _WIN32
 typedef int SOCKLEN_T;
+#else
+typedef socklen_t SOCKLEN_T;
 #endif
 
 rrsocket *rrsocket::accept(void)

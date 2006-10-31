@@ -1,0 +1,487 @@
+* Advanced Configuration
+{anchor: Advanced_Configuration}
+
+** Server Settings
+
+You can control the operation of the VirtualGL faker in four different ways.
+Each method of configuration takes precedence over the previous method:
+
+	#. Setting a configuration environment variable globally (e.g. in
+		''/etc/profile'')
+
+	#. Setting a configuration environment variable on a per-user basis (e.g. in
+		''~/.bashrc'')
+
+	#. Setting a configuration environment variable only for the current shell
+		session (e.g. ''export VGL_XXX={whatever}'')
+
+	#. Passing a configuration option as an argument to ''vglrun''.  This
+		effectively overrides any previous environment variable setting
+		corresponding to that configuration option.
+
+|| Environment Variable Name \
+	|| ''vglrun'' Command-Line Override || Description || Default Value ||
+| ''VGL_CLIENT'' | ''-cl <client''{nl}''display>'' \
+	| __The X display where VirtualGL should send its image stream__ \
+		{nl}{nl} \
+		When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection \
+		to transmit compressed images of an application's OpenGL rendering area \
+		from the application server to the client display.  Thus, the server \
+		needs to know on which machine the VirtualGL client software is running, \
+		and it needs to know which X display on that machine will be used to draw \
+		the application's GUI.  VirtualGL can normally surmise this by reading \
+		the application server's ''DISPLAY'' environment variable.  But in cases \
+		where X11 traffic is tunneled through SSh or LBX or another type of \
+		indirect X11 connection, the ''DISPLAY'' environment variable on the \
+		application server may not point to the client machine.  In these cases, \
+		set ''VGL_CLIENT'' to the display where the application's GUI will end \
+		up, e.g. \
+		{nl}{nl} \
+		''export VGL_CLIENT={my_client_machine}:0.0'' \
+		{nl}{nl} \
+		__** This option has no effect in Raw Mode. **__ \
+	|	Read from the ''DISPLAY'' environment \
+	|
+| ''VGL_COMPRESS=0''{nl}''VGL_COMPRESS=1'' | ''-c <0, 1>'' \
+	| __0 = Raw Mode (send rendered images uncompressed via. X11),__{nl} \
+		__1 = Direct Mode (compress rendered images as JPEG & send on a separate \
+			socket)__ \
+		{nl}{nl} \
+		When this option is set to 0, VirtualGL will bypass its internal image \
+		compression pipeline and instead use ''XPutImage()'' to composite the \
+		rendered 3D images into the appropriate application window.  This mode \
+		("Raw Mode") is primarily useful in conjunction with VNC, NX, or other \
+		remote display software that performs X11 rendering on the server and \
+		uses its own mechanism for compressing and transporting images to the \
+		client.  Enabling Raw Mode on a remote X11 connection is not advisable, \
+		since it will result in uncompressed images being sent over the network. \
+		{nl}{nl} \
+		If this option is not specified, then VirtualGL's default behavior is to \
+		use Direct Mode when the application is being displayed to a remote X \
+		server and to use Raw Mode otherwise.  VirtualGL assumes that if the \
+		''DISPLAY'' environment variable begins with a colon or with "''unix:''" \
+		(e.g. "'':0.0''", "''unix:1000.0''", etc.), then the X11 connection is \
+		local and thus doesn't require image compression.  Otherwise, it assumes \
+		that the X11 connection is remote and that compression is required.  If \
+		the display string begins with "''localhost''" or with the server's \
+		hostname, VGL assumes that the display is being tunneled through SSh, and \
+		it enables Direct Mode in this case. \
+		{nl}{nl} \
+		__NOTE:  Stereo does not work with Raw Mode.__ \
+		{nl}{nl} \
+		See {ref prefix="Section ": Raw_Mode_Usage} for more details. \
+	| Compression enabled ("Direct Mode") if the application is displaying to a \
+		remote X server, disabled ("Raw Mode") otherwise \
+	|
+| ''VGL_DISPLAY'' | ''-d <display or''{nl}''GLP device>'' \
+	| __The display or GLP device to use for 3D rendering__ \
+		{nl}{nl} \
+		If your server has multiple 3D graphics cards and you want the OpenGL \
+		rendering to be redirected to a display other than :0, set \
+		''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for instance, \
+		to support many application instances on a beefy multi-pipe graphics \
+		server. \
+		{nl}{nl} \
+		__GLP mode (Solaris/Sparc only):__ \
+		{nl}{nl} \
+		Setting this option to ''GLP'' will enable GLP mode and select the first \
+		available GLP device for rendering.  You can also set this option to the \
+		pathname of a specific GLP device (e.g. ''/dev/fbs/jfb0''.)  GLP is a \
+		special feature of Sun's OpenGL library which allows an application to \
+		render into Pbuffers on a graphics card even if there is no X server \
+		running on that graphics card.  See {ref prefix="Section ": GLP_Usage} \
+		for more details on GLP. \
+	|	:0 \
+	|
+| ''VGL_FPS'' | ''-fps <floating''{nl}''point number''{nl}''greater than 0>'' \
+	| __Limit the client/server frame rate to the specified number of frames \
+			per second__ \
+		{nl}{nl} \
+		Setting ''VGL_FPS'' or passing ''-fps'' as an argument to ''vglrun'' will \
+		enable VirtualGL's frame rate governor.  When enabled, the frame rate \
+		governor will attempt to limit the overall throughput of the VirtualGL \
+		pipeline to the specified number of frames/second.  If frame spoiling is \
+		disabled, this effectively limits the server's rendering frame rate as \
+		well.  This option applies regardless of whether VirtualGL is being run \
+		in Direct Mode (with compression enabled) or in Raw Mode (with \
+		compression disabled.) \
+	|	Frame rate governor disabled \
+	|
+| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1'' | ''-g''{nl}or{nl}''+g'' \
+	| __Enable/disable gamma correction (Solaris/Sparc clients only)__ \
+		{nl}{nl} \
+		On Solaris/Sparc, when an OpenGL application requests an X visual, it \
+		will be given a gamma-corrected visual (Solaris calls these "linear \
+		visuals") unless it specifically requests otherwise.  Gamma-corrected \
+		visuals are subject to the gamma correction value assigned with \
+		''fbconfig''.  If the gamma correction value is set to 1.0, then \
+		corrected visuals will look the same as uncorrected visuals. \
+		{nl}{nl} \
+		When an OpenGL application is being remotely displayed onto a \
+		Solaris/Sparc client using VirtualGL, VirtualGL tries to emulate the \
+		behavior of the Solaris/Sparc client machine by forcing the application \
+		to use a gamma-corrected visual.  But setting ''VGL_GAMMA=0'' on the \
+		server (or passing ''-g'' to ''vglrun'') overrides that behavior and \
+		forces the application to use an uncorrected visual. \
+		{nl}{nl} \
+		__** This setting has no effect if the client machine is not running \
+		Solaris/Sparc.  It also has no effect in an X proxy session. **__ \
+	| Gamma correction enabled \
+	|
+| ''VGL_GLLIB'' | {:} \
+	| __ The location of an alternate OpenGL library__ \
+		{nl}{nl} \
+		Normally, VirtualGL loads the first OpenGL dynamic library that it finds \
+		in the dynamic linker path (usually ''/usr/lib/libGL.so.1'', \
+		''/usr/lib64/libGL.so.1'',  or ''/usr/lib/64/libGL.so.1''.)  You can use \
+		this setting to explicitly specify another OpenGL dynamic library to \
+		load. \
+		{nl}{nl} \
+		Normally, you shouldn't need to muck with this unless something doesn't \
+		work.  However, this setting is necessary when using VirtualGL with \
+		[[chromium.txt#Chromium][Chromium]]. \
+	| {:} |
+| ''VGL_GUI'' | {:} \
+	| __Key sequence used to invoke the configuration dialog__ \
+		{nl}{nl} \
+		VirtualGL will normally monitor an application's X event queue and pop up \
+		the VirtualGL configuration dialog whenever ''CTRL-SHIFT-F9'' is pressed. \
+		In the event that this interferes with a key sequence that the \
+		application is already using, you can redefine the key sequence used to \
+		pop up VGL's configuration dialog by setting ''VGL_GUI'' to some \
+		combination of ''shift'', ''ctrl'', ''alt'', and one of \
+		''{f1, f2, ..., f12}''.  You can also set ''VGL_GUI'' to ''none'' to \
+		disable the configuration dialog altogether.  See \
+		{ref prefix="Section ": Config_Dialog} for more details. \
+	|	shift-ctrl-f9 \
+	|
+| {anchor: VGL_GUI_XTTHREADINIT} ''VGL_GUI_XTTHREADINIT'' | {:} \
+	| __0 to prevent VGL from calling ''XtToolkitThreadInitialize()''__ \
+		{nl}{nl} \
+		Xt & Motif applications are supposed to call \
+		''XtToolkitThreadInitialize()'' if they plan to access Xt functions from \
+		two or more threads simultaneously.  But rarely, a multi-threaded \
+		Xt/Motif application may avoid calling ''XtToolkitThreadInitialize()'' \
+		and rely on the fact that avoiding this call disables application and \
+		process locks.  This behavior is generally considered errant on the part \
+		of the application, but the application developers have probably figured \
+		out other ways around the potential instability that this situation \
+		creates. \
+		{nl}{nl} \
+		The problem arises whenever VirtualGL pops up its configuration dialog \
+		(which is written using Xt.)  In order to create this dialog, VirtualGL \
+		creates a new Xt thread and calls ''XtToolkitThreadInitialize()'' as it \
+		is supposed to do to guarantee thread safety.  But if the application \
+		into which VGL is loaded exhibits the errant behavior described above, \
+		suddenly enabling application and process locks may cause the application \
+		to deadlock.  Setting ''VGL_GUI_XTTHREADINIT'' to ''0'' will remove VGL's \
+		call to ''XtToolkitThreadInitialize()'' and should thus eliminate the \
+		deadlock.\
+		{nl}{nl} \
+		In short, if you try to pop up the VirtualGL config dialog and notice \
+		that it hangs the application, try setting ''VGL_GUI_XTTHREADINIT'' to \
+		''0''. \
+	|	1 \
+	|
+| ''VGL_NPROCS '' | ''-np <# of CPUs>''{nl}or{nl}''-np 0''{nl} \
+	(automatically determine the optimal number of CPUs to use) \
+	| __Specify the number of CPUs to use for multi-threaded compression__ \
+		{nl}{nl} \
+		VirtualGL can divide the task of compressing each frame among multiple \
+		server CPUs.  This might speed up the overall throughput if the \
+		compression stage of the pipeline is the primary bottleneck.  The default \
+		behavior (equivalent to setting ''VGL_NPROCS=0'') is to use all but one \
+		of the available CPUs, up to a maximum of 3 total.  On a large \
+		multiprocessor system, the speedup is almost linear up to 3 processors, \
+		but the algorithm scales very little past that point.  VirtualGL will not \
+		allow more than 4 processors total to be used for compression, nor will \
+		it allow you to assign more processors than are available in the system. \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	1P system: 1{nl} \
+		2P system: 1{nl} \
+		3P system: 2{nl} \
+		4P & larger: 3 \
+	|
+| ''VGL_PORT'' | ''-p <port>'' \
+	| __The TCP port to use when connecting to the client__ \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	4242 for unencrypted connections, 4243 for SSL connections \
+	|
+| ''VGL_PROFILE=0''{nl}''VGL_PROFILE=1'' | ''-pr''{nl}or{nl}''+pr'' \
+	| __Enable/disable profiling output__ \
+		{nl}{nl} \
+		If enabled, this will cause the VirtualGL faker to continuously benchmark \
+		itself and periodically print out the throughput of reading back, \
+		compressing, and sending pixels to the client. \
+		{nl}{nl} \
+		See {ref prefix="Section ": Perf_Measurement} for more details. \
+	|	Profiling disabled \
+	|
+| ''VGL_QUAL'' | ''-q <1-100>'' \
+	| __An integer between 1 and 100 (inclusive)__ \
+		{nl}{nl} \
+		This setting allows you to specify the quality of the JPEG compression. \
+		Lower is faster but also grainier.  The default setting should produce \
+		perceptually lossless performance. \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	95 \
+	|
+| ''VGL_READBACK=0''{nl}''VGL_READBACK=1'' | {:} \
+	| __Enable/disable readback__ \
+		{nl}{nl} \
+		On rare occasions, it might be desirable to have VirtualGL redirect \
+		OpenGL rendering from an application into a Pbuffer but not automatically \
+		read back and send the rendered pixels.  Some applications have their own \
+		 mechanisms for reading back the buffer, so disabling VirtualGL's \
+		readback mechanism prevents duplication of effort. \
+		{nl}{nl} \
+		This feature was developed initially to support running \
+		[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView \
+		MPI normally uses MPI processes 1 through N as rendering servers, each \
+		drawing a portion of the geometry into a separate window running on a \
+		separate X display.  ParaView reads back these server windows and \
+		composites the pixels into the main application window, which is \
+		controlled by MPI process 0.  By creating a script which passes a \
+		different value of ''VGL_DISPLAY'' and ''VGL_READBACK'' to each MPI \
+		process, it is possible to make all of the ParaView server processes \
+		render to off-screen buffers on different graphics cards while \
+		preventing VirtualGL from displaying any pixels except those generated by \
+		process 0. \
+	|	Readback enabled \
+	|
+| {anchor: VGL_SPOIL}''VGL_SPOIL=0''{nl}''VGL_SPOIL=1'' | ''-sp''{nl}or{nl}''+sp'' \
+	| __Enable/disable frame spoiling__ \
+		{nl}{nl} \
+		By default, VirtualGL will drop frames so as not to slow down the \
+		rendering rate of the server's graphics engine.  This should produce the \
+		best results with interactive applications, but it may be desirable to \
+		turn off frame spoiling when running benchmarks or other non-interactive \
+		applications.  Turning off frame spoiling will force one frame to be read \
+		back and sent on each end-of-frame event, so that the frame rate reported \
+		by OpenGL benchmarks will accurately reflect the frame rate seen by the \
+		user.  Disabling frame spoiling also prevents non-interactive \
+		applications from wasting graphics resources by rendering frames that \
+		will never be seen.  With frame spoiling turned off, the rendering \
+		pipeline behaves as if it is fill-rate limited to about 30 or 40 \
+		Megapixels/second, the maximum throughput of the VirtualGL system on \
+		current CPU's. \
+	|	Spoiling enabled \
+	|
+| ''VGL_SSL=0''{nl}''VGL_SSL=1'' | ''-s''{nl}or{nl}''+s'' \
+	| __Tunnel the VirtualGL compressed image stream inside a secure socket \
+			layer__ \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	SSL disabled \
+	|
+| ''VGL_SUBSAMP'' | ''-samp <411|422|444>'' \
+	| __411, 422, or 444__ \
+		{nl}{nl} \
+		This allows you to manually specify the level of chrominance subsampling \
+		in the JPEG compressor. \
+		{nl}{nl} \
+		By default, VirtualGL uses no chrominance subsampling (AKA "4:4:4 \
+		subsampling") when it compresses images for delivery to the client. \
+		Subsampling is premised on the fact that the human eye is more sensitive \
+		to changes in brightness than to changes in color.  Since the JPEG image \
+		format uses a colorspace in which brightness (luminance) and color \
+		(chrominance) are separated into different channels, one can sample the \
+		brightness for every pixel and the color for every other pixel and \
+		produce an image which has 16 million colors but uses an average of only \
+		16 bits per pixel instead of 24.  This is called "4:2:2 subsampling", \
+		since for every 4 pixels of luminance, there are only 2 pixels of each \
+		chrominance component.  Likewise, one can sample every fourth chrominance \
+		component to produce a 16-million color image with only 12 bits per \
+		pixel.  The latter is called "4:1:1 subsampling."  Subsampling increases \
+		the performance and reduces the network usage, since there is less data \
+		to move around, but it can produce some visible artifacts.  Subsampling \
+		artifacts are rarely observed with volume data, since it usually only \
+		contains 256 colors to begin with.  But narrow, aliased lines and other \
+		sharp features on a black background will tend to produce subsampling \
+		artifacts. \
+		{nl}{nl} \
+		The Axis Indicator from a Popular Visualization App displayed with 4:4:4, \
+		4:2:2, and 4:1:1 subsampling (respectively):{nl} \
+		{img: 444.gif}{img: 422.gif}{img: 411.gif} \
+		{nl}{nl} \
+		__NOTE:  If you select 4:1:1 subsampling, VirtualGL will in fact try to \
+		use 4:2:0 instead.  4:2:0 samples every other pixel both horizontally and \
+		vertically rather than sampling every fourth pixel horizontally.  But not \
+		all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is not \
+		available.__ \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	444 \
+	|
+| ''VGL_SYNC=0''{nl}''VGL_SYNC=1'' | ''-sync''{nl}or{nl}''+sync'' \
+	| __Enable/disable strict 2D/3D synchronization (necessary to pass GLX \
+			conformance tests)__ \
+		{nl}{nl} \
+		Normally, VirtualGL's operation is asynchronous from the point of view of \
+		the application.  The application swaps the buffers or calls \
+		''glFinish()'' or ''glFlush()'' or ''glXWaitGL()'', and VirtualGL reads \
+		back the framebuffer and sends the pixels to the client's display ... \
+		eventually.  This will work fine for the vast majority of applications, \
+		but it is not strictly conformant.  Technically speaking, when an \
+		application calls ''glXWaitGL()'' or ''glFinish()'', it is well within \
+		its rights to expect the OpenGL-rendered pixels to be immediately \
+		available in the X window.  Fortunately, very few applications actually \
+		do expect this, but on rare occasions, an application may try to use \
+		''XGetImage()'' or other X11 functions to obtain a bitmap of the pixels \
+		that were rendered by OpenGL.  Enabling ''VGL_SYNC'' is a somewhat \
+		extreme measure that may be needed to get such applications to work \
+		properly.  It was developed primarily as a way to pass the GLX \
+		conformance suite (''conformx'', specifically.)  When ''VGL_SYNC'' is \
+		enabled, every call to ''glFinish()'' or ''glXWaitGL()'' will cause the \
+		contents of the server's framebuffer to be read back and __synchronously__ \
+		drawn into the client's window __without compression or frame spoiling__. \
+		The call to ''glFinish()'' or ''glXWaitGL()'' will not return until \
+		VirtualGL has verified that the pixels have been delivered into the \
+		client's window.  As such, enabling this mode can have potentially dire \
+		effects on performance. \
+	| Synchronization disabled \
+	|
+| ''VGL_TILESIZE'' | {:} \
+	| __A number between 8 and 1024 (inclusive)__ \
+		{nl}{nl} \
+		Normally, in Direct Mode, VirtualGL will divide an OpenGL window into \
+		tiles of 256x256 pixels, compare each tile vs. the previous frame, and \
+		only compress & send the tiles which have changed.  It will also divide \
+		up the task of compressing these tiles among the available CPUs in a \
+		round robin fashion, if multi-threaded compression is enabled.  There are \
+		several tradeoffs that must be considered when choosing a tile size: \
+		{nl}{nl} \
+		Smaller tile sizes: \
+		{list: \
+			{item: Better parallel scalability} \
+			{item: Worse compression efficiency} \
+			{item: Better inter-frame optimization} \
+			{item: Worse network efficiency}} \
+		Larger tile sizes: \
+		{list: \
+			{item: Worse parallel scalability} \
+			{item: Better compression efficiency} \
+			{item: Worse inter-frame optimization} \
+			{item: Better network efficiency}} \
+		{nl} \
+		Smaller tiles can more easily be divided up among multiple CPUs, but they \
+		compress less efficiently (and less quickly) on an individual basis.  \
+		Using larger tiles can reduce traffic to the client by allowing the \
+		server to send only one frame update instead of many.  But on the flip \
+		side, using larger tiles decreases the chance that a tile will be \
+		unchanged from the previous frame.  Thus, the server may only send one or \
+		two packets per frame, but the cumulative size of those packets may be \
+		much larger than if a smaller tile size was used. \
+		{nl}{nl} \
+		256x256 was chosen as the default because, in experiments, it provided \
+		the best balance between scalability and efficiency on the platforms that \
+		VirtualGL supports. \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	|	256 \
+	|
+| ''VGL_TRACE=0''{nl}''VGL_TRACE=1'' | ''-tr''{nl}or{nl}''+tr'' \
+	| __Enable/disable tracing__ \
+		{nl}{nl} \
+		When tracing is enabled, VirtualGL will log all calls to the GLX and X11 \
+		functions it is intercepting, as well as the arguments, return values, \
+		and execution times for those functions.  This is useful when diagnosing \
+		interaction problems between VirtualGL and a particular OpenGL \
+		application. \
+	| Tracing disabled \
+	|
+| ''VGL_VERBOSE=0''{nl}''VGL_VERBOSE=1'' | ''-v''{nl}or{nl}''+v'' \
+	| __Enable/disable verbosity__ \
+		{nl}{nl} \
+		When in verbose mode, VirtualGL will reveal some of the decisions it \
+		makes behind the scenes, such as which code path it is using to compress \
+		JPEG images, which type of X11 drawing it is using, etc.  This can be \
+		helpful when diagnosing performance problems. \
+	|	Verbosity disabled \
+	|
+| ''VGL_X11LIB'' | {:} \
+	| __the location of an alternate X11 library__ \
+		{nl}{nl} \
+		Normally, VirtualGL loads the first X11 dynamic library that it finds in \
+		the dynamic linker path (usually ''/usr/lib/libX11.so.?'', \
+		''/usr/lib/64/libX11.so.?'', ''/usr/X11R6/lib/libX11.so.?'', or \
+		''/usr/X11R6/lib64/libX11.so.?''.)  You can use this setting to \
+		explicitly specify another X11 dynamic library to load. \
+		{nl}{nl} \
+		Normally, you shouldn't need to muck with this unless something doesn't \
+		work. \
+	| {:} |
+| ''VGL_XVENDOR'' | {:} \
+	| __Return a fake X11 vendor string when the application calls \
+		''XServerVendor()''__ \
+		{nl}{nl} \
+		Some applications expect ''XServerVendor()'' to return a particular \
+		value, which the application (sometimes erroneously) uses to figure out \
+		whether it's running locally or remotely.  This setting allows you to \
+		fool such applications into thinking they're running on a "local" X \
+		server rather than a remote connection. \
+	| {:} |
+
+** Client Settings
+
+*** Environment Variables
+#OPT: noList! plain!
+
+|| Environment Variable Name ||	Description || Default Value ||
+| ''VGL_PROFILE=0''{nl}''VGL_PROFILE=1'' \
+	| __Enable/disable profiling output__ \
+		{nl}{nl} \
+		If enabled, this will cause the VirtualGL client to continuously \
+		benchmark itself and periodically print out the throughput of \
+		decompressing and drawing pixels into the application window. \
+		{nl}{nl} \
+		See {ref prefix="Section ": Perf_Measurement} for more details. \
+	|	Profiling disabled \
+	|
+| ''VGL_VERBOSE=0''{nl}''VGL_VERBOSE=1'' \
+	| __Enable/disable verbosity__ \
+		{nl}{nl} \
+		When in verbose mode, VirtualGL will reveal some of the decisions it \
+		makes behind the scenes, such as which code path it is using to \
+		decompress JPEG images, which type of X11 drawing it is using, etc. \
+		This can be helpful when diagnosing performance problems. \
+	|	Verbosity disabled \
+	|
+
+*** ''vglclient'' Command-Line Arguments
+#OPT: noList! plain!
+
+|| ''vglclient'' Argument || Description || Default ||
+| ''-port <port''{nl}''number>'' \
+	|	Causes the client to listen for unencrypted connections on the specified \
+		TCP port \
+	|	4242 \
+	|
+| ''-sslport <port''{nl}''number>'' \
+	| Causes the client to listen for SSL connections on the specified TCP \
+		port \
+	|	4243 \
+	|
+| ''-sslonly'' \
+	|	Causes the client to reject all unencrypted connections \
+	|	Accept both SSL and unencrypted connections \
+	|
+| ''-nossl'' \
+	| Causes the client to reject all SSL connections \
+	|	Accept both SSL and unencrypted connections \
+	|
+| ''-l <log file>'' \
+	| Redirect all output from the client to the specified file \
+	|	Output goes to stderr \
+	|
+| ''-x'' \
+	|	Use X11 functions to draw pixels into the application window \
+	|	Use OpenGL on Solaris/Sparc or if stereo is enabled; use X11 otherwise \
+	|
+| ''-gl'' \
+	| Use OpenGL functions to draw pixels into the application window \
+	| Use OpenGL on Solaris/Sparc or if stereo is enabled; use X11 otherwise \
+	|

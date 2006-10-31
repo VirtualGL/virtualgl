@@ -1,0 +1,45 @@
+* ''vglrun'' and Solaris Shell Scripts
+
+''vglrun'' can be used to launch either binary executables or shell scripts,
+but there are a few things to keep in mind when using ''vglrun'' to launch a
+shell script on Solaris.  When you ''vglrun'' a shell script, the VirtualGL
+faker library will be preloaded into every executable that the script launches.
+Normally this is innocuous, but if the script calls any executables that are
+setuid root, then Solaris will refuse to load those executables because you are
+attempting to preload a library (VirtualGL) that is not in a "secure path."
+Solaris keeps a tight lid on what goes into ''/usr/lib'' and ''/lib'', and by
+default, it will only allow libraries in those paths to be preloaded into an
+executable that is setuid root.  Generally, 3rd party packages are verboden
+from installing anything into ''/usr/lib'' or ''/lib''.  But you can use the
+''crle'' utility to add other directories to the operating system's list of
+secure paths.  In the case of VirtualGL, you would issue (as root):
+
+#Verb: <<---
+crle -u -s /opt/SUNWvgl/lib
+crle -64 -u -s /opt/SUNWvgl/lib/64
+---
+
+But please be aware of the security ramifications of this before you do it.
+You are essentially telling Solaris that you trust the security and stability
+of the VirtualGL code as much as you trust the security and stability of the
+operating system.  And while we're flattered, we're not sure that we're
+necessarily deserving of that accolade, so if you are in a security critical
+environment, apply the appropriate level of paranoia here.
+
+An easier and perhaps more secure approach is to simply edit the application
+script and have it issue ''vglrun'' only for the executables that you wish to
+run in the VirtualGL environment.  But sometimes that is not an option.
+
+''vglrun'' on Solaris has two options that are relevant to launching scripts:
+
+#Verb: <<---
+vglrun -32 {script}
+---
+
+will preload VirtualGL only into 32-bit executables called by a script, whereas
+
+#Verb: <<---
+vglrun -64 {script}
+---
+
+will preload VirtualGL only into 64-bit executables.
