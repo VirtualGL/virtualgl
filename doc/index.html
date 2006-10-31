@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2006-10-25T21:12:38-06:00">
+<meta name="date" content="2006-10-31T15:08:35-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>VirtualGL 2.0 User&rsquo;s Guide</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1123,32 +1123,31 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
 </p></div>
 
 
-<h3 id="hd005000001">Driver Permissions</h3>
+<h3 id="hd005000001">Device Permissions</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
-        Edit <code>/etc/logindevperm</code> and change the mode for the <code>/dev/mouse</code>,
-        <code>/dev/kbd</code>, <code>/dev/sound/*</code>, and <code>/dev/fbs/*</code>
-        entries to <code>0666</code>. e.g.:
+        Edit <code>/etc/logindevperm</code> and comment out the &ldquo;frame
+        buffers&rdquo; line, e.g.:
 <pre class="verbatim">
-/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0666&nbsp;&nbsp;&nbsp;&nbsp;/dev/mouse:/dev/kbd
-/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0666&nbsp;&nbsp;&nbsp;&nbsp;/dev/sound/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;audio&nbsp;devices
-/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0666&nbsp;&nbsp;&nbsp;&nbsp;/dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;frame&nbsp;buffers
+#&nbsp;/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0600&nbsp;&nbsp;&nbsp;&nbsp;/dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;frame&nbsp;buffers
 </pre>
 
     </li>
     <li class="Ordered" value="2">
-        Issue the following commands:
+        Change the permissions and group for <code>/dev/fbs/*</code> to allow
+        write access to anyone who will need to use VirtualGL, e.g.:
 <pre class="verbatim">
-chmod&nbsp;666&nbsp;/dev/mouse&nbsp;/dev/kbd&nbsp;/dev/fbs/*
-chmod&nbsp;666&nbsp;/dev/sound/*
+chmod&nbsp;660&nbsp;/dev/fbs/*
+chown&nbsp;root&nbsp;/dev/fbs/*
+chgrp&nbsp;vglusers&nbsp;/dev/fbs/*
 </pre>
 
-        <div class="important"><p class="important">
-        <code>/dev/sound/*</code> may not exist if there are no sound drivers on your system.
-        </p></div>
     </li>
 </ol>
+<div class="important"><p class="important">
+Explanation: Normally, when someone logs into a Solaris machine, the system will automatically assign ownership of the framebuffer devices to that user and set the permissions for the framebuffer devices to those specified in <code>/etc/logindevperm</code>.  The default setting in <code>/etc/logindevperm</code> disallows anyone from using the framebuffer devices except the user that is logged in.  But in order to run VirtualGL, a user needs write access to the framebuffer devices.  So in order to make the framebuffer a shared resource, it is necessary to disable the login device permissions mechanism for the framebuffer devices and manually set the owner and group for these devices such that any VirtualGL users can write to them.
+</p></div>
 
 
 <h3 id="hd005000002">Other</h3>
