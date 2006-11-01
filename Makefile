@@ -303,9 +303,7 @@ macpkg: rr diags
 	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
 	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
 	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
-	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
-	echo open /usr/share/doc/$(APPNAME)-$(VERSION)/index.html >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
-	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) User's Guide.command"
+	sudo ln -fs /usr/share/doc/$(APPNAME)-$(VERSION) "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) Documentation"
 	sudo chown -R root:wheel $(BLDDIR)/pkgbuild/Package_Root/*
 	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
 	$(PACKAGEMAKER) -build -v -p $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
