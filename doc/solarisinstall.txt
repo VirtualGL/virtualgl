@@ -21,28 +21,34 @@
 
  !!! VirtualGL for Solaris installs into ''/opt/SUNWvgl''.
 
-*** Driver Permissions
+*** Device Permissions
 #OPT: noList! plain!
 
-	1. Edit ''/etc/logindevperm'' and change the mode for the ''/dev/mouse'',
-		''/dev/kbd'', ''/dev/sound/*'', and ''/dev/fbs/*'' entries to ''0666''.
-		e.g.:
+	1. Edit ''/etc/logindevperm'' and comment out the "frame buffers" line, e.g.:
 
 		#Verb: <<---
-		/dev/console    0666    /dev/mouse:/dev/kbd
-		/dev/console    0666    /dev/sound/*            # audio devices
-		/dev/console    0666    /dev/fbs/*              # frame buffers
+		# /dev/console    0600    /dev/fbs/*              # frame buffers
 		---
 
-	2. Issue the following commands:
+	2. Change the permissions and group for ''/dev/fbs/*'' to allow write access
+		to anyone who will need to use VirtualGL, e.g.:
 
 		#Verb: <<---
-		chmod 666 /dev/mouse /dev/kbd /dev/fbs/*
-		chmod 666 /dev/sound/*
+		chmod 660 /dev/fbs/*
+		chown root /dev/fbs/*
+		chgrp vglusers /dev/fbs/*
 		---
 
-		!!! ''/dev/sound/*'' may not exist if there are no sound drivers on your
-		system. 
+ !!! Explanation: Normally, when someone logs into a Solaris machine, the
+ system will automatically assign ownership of the framebuffer devices to
+ that user and set the permissions for the framebuffer devices to those
+ specified in ''/etc/logindevperm''.  The default setting in
+ ''/etc/logindevperm'' disallows anyone from using the framebuffer devices
+ except the user that is logged in.  But in order to run VirtualGL, a user
+ needs write access to the framebuffer devices.  So in order to make the
+ framebuffer a shared resource, it is necessary to disable the login device
+ permissions mechanism for the framebuffer devices and manually set the owner
+ and group for these devices such that any VirtualGL users can write to them.
 
 *** Other
 #OPT: noList! plain!
