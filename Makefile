@@ -293,18 +293,18 @@ macpkg: rr diags
 	if [ -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg ]; then rm -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg; fi
 	mkdir -p $(BLDDIR)/pkgbuild
 	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/bin
-	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/share/doc/$(APPNAME)-$(VERSION)
-	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)"
+	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
+	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/${APPNAME}"
 	mkdir -p $(BLDDIR)/pkgbuild/Resources
 	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
 	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
 	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
-	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/usr/share/doc/$(APPNAME)-$(VERSION)
-	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
-	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
-	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/Start $(APPNAME) Client.command"
-	sudo ln -fs /usr/share/doc/$(APPNAME)-$(VERSION) "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME) Client-$(VERSION)-$(BUILD)/$(APPNAME) Documentation"
-	sudo chown -R root:wheel $(BLDDIR)/pkgbuild/Package_Root/*
+	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
+	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
+	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
+	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
+	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/User's Guide.html"
+	sudo chown -R root:admin $(BLDDIR)/pkgbuild/Package_Root
 	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
 	$(PACKAGEMAKER) -build -v -p $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
 	  -f $(BLDDIR)/pkgbuild/Package_Root -r $(BLDDIR)/pkgbuild/Resources \
