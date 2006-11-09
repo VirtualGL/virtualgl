@@ -110,9 +110,17 @@ static int loadsunraysymbols(bool fatal)
 	return 1;
 }
 
+int RRSunRayQueryPlugin(void)
+{
+	if(!_RRSunRayInit || !_RRSunRayGetFrame || !_RRSunRaySendFrame
+		|| !_RRSunRayGetError)
+		if(!loadsunraysymbols(false)) return 0;
+	return 1;
+}
+
 void *RRSunRayInit(Display *display, Window win)
 {
-	if(!_RRSunRayInit) {if(!loadsunraysymbols(false)) return NULL;}
+	if(!_RRSunRayInit) {if(!loadsunraysymbols(true)) return NULL;}
 	return _RRSunRayInit(display, win);
 }
 

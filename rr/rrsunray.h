@@ -26,6 +26,17 @@ static const int rrsunray_ps[RRSUNRAY_FORMATOPT]={3, 4, 3, 4, 4};
 extern "C" {
 #endif
 
+int
+	RRSunRayQueryPlugin (void);
+/*
+   This function is called by VirtualGL to determine whether the plugin
+   library is installed and whether the necessary functions can be loaded from
+   it.  The plugin should not implement this function.
+
+   RETURN VALUE:
+   If successful, 1 is returned.  Else 0 is returned.
+*/
+
 void *
 	RRSunRayInit (Display *display, Window win);
 /*
