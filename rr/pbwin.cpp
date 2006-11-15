@@ -155,7 +155,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_autotestframecount=0;
 	_truecolor=true;
 	#if defined(sun)||defined(linux)
-	_sunrayloaded=RRSunRayQueryPlugin();
+	_usesunray=RRSunRayQueryDisplay(windpy);
 	_sunrayhandle=NULL;
 	#endif
 	XWindowAttributes xwa;
@@ -281,31 +281,29 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	#if defined(sun)||defined(linux)
 	// If this is a SunRay session, then use the SunRay compressor to send data
-	if(_sunrayloaded && fconfig.compress==RRCOMP_DEFAULT)
+	if(_usesunray && fconfig.compress==RRCOMP_DEFAULT)
 	{
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 		if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
-		if(_sunrayhandle)
-		{
-			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
-				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
-			int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
-			#ifdef GL_BGR_EXT
-			if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
-			#endif
-			#ifdef GL_BGRA_EXT
-			if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
-			#endif
-			#ifdef GL_ABGR_EXT
-			if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
-			#endif
-			readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-				drawbuf, bottomup);
-			if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
-				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
-			fconfig.sunray=true;
-			return;
-		}
+		if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
+		if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
+			&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
+		int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
+		#ifdef GL_BGR_EXT
+		if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
+		#endif
+		#ifdef GL_BGRA_EXT
+		if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
+		#endif
+		#ifdef GL_ABGR_EXT
+		if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
+		#endif
+		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
+			drawbuf, bottomup);
+		if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
+			bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+		fconfig.sunray=true;
+		return;
 	}
 	#endif
 

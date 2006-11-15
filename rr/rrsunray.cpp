@@ -58,6 +58,9 @@ static rrcs sunraymutex;
 
 extern "C" {
 
+typedef int (*_RRSunRayQueryDisplayType)(Display *);
+static _RRSunRayQueryDisplayType _RRSunRayQueryDisplay=NULL;
+
 typedef void* (*_RRSunRayInitType)(Display *, Window);
 static _RRSunRayInitType _RRSunRayInit=NULL;
 
@@ -101,6 +104,7 @@ static int loadsunraysymbols(bool fatal)
 			return 0;
 		}
 	}
+	lsym(RRSunRayQueryDisplay)
 	lsym(RRSunRayInit)
 	lsym(RRSunRayGetFrame)
 	lsym(RRSunRaySendFrame)
@@ -110,12 +114,10 @@ static int loadsunraysymbols(bool fatal)
 	return 1;
 }
 
-int RRSunRayQueryPlugin(void)
+int RRSunRayQueryDisplay(Display *display)
 {
-	if(!_RRSunRayInit || !_RRSunRayGetFrame || !_RRSunRaySendFrame
-		|| !_RRSunRayGetError)
-		if(!loadsunraysymbols(false)) return 0;
-	return 1;
+	if(!_RRSunRayQueryDisplay) {if(!loadsunraysymbols(false)) return 0;}
+	return _RRSunRayQueryDisplay(display);
 }
 
 void *RRSunRayInit(Display *display, Window win)

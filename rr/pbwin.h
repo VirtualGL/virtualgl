@@ -86,7 +86,7 @@ class pbwin
 		int _autotestframecount;
 		#if defined(sun)||defined(linux)
 		void *_sunrayhandle;
-		int _sunrayloaded;
+		int _usesunray;
 		#endif
 		bool _truecolor;
 };

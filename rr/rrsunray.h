@@ -27,11 +27,11 @@ extern "C" {
 #endif
 
 int
-	RRSunRayQueryPlugin (void);
+	RRSunRayQueryDisplay (Display *display);
 /*
    This function is called by VirtualGL to determine whether the plugin
-   library is installed and whether the necessary functions can be loaded from
-   it.  The plugin should not implement this function.
+   library is installed, whether the necessary functions can be loaded from
+   it, and whether the display in question is a Sun Ray display.
 
    RETURN VALUE:
    If successful, 1 is returned.  Else 0 is returned.
