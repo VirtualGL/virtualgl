@@ -121,6 +121,7 @@ extern "C" {
   width = Width of buffer (in pixels) that you wish to create.  0 = use width of window
   height = Height of buffer (in pixels) that you wish to create.  0 = use height of window
   useshm = Use MIT-SHM extension, if available (Unix only)
+  usedbe = Use DOUBLE-BUFFER extension, if available (Unix only)
 
   NOTES:
   -- fbx_init() is idempotent.  If you call it multiple times, it will re-initialize the
@@ -137,7 +138,7 @@ extern "C" {
   s->pitch = bytes in each scanline of the buffer
   s->bits = address of the start of the buffer
 */
-int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm);
+int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int usedbe);
 
 /*
   fbx_read

@@ -106,7 +106,7 @@ const char *fbx_formatname(int format)
 	else return "Invalid format";
 }
 
-int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
+int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int usedbe)
 {
 	int w, h;
 	int rmask, gmask, bmask, ps, i;
@@ -287,7 +287,13 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(!useshm)
 	#endif
 	{
-		if(XdbeQueryExtension(s->wh.dpy, &dummy1, &dummy2))
+		char *env=NULL;
+		if((env=getenv("VGL_USEDBE"))!=NULL && strlen(env)>0)
+		{
+			if(!strncmp(env, "0", 1)) usedbe=0;
+			else if(!strncmp(env, "1", 1)) usedbe=1;
+		}
+		if(XdbeQueryExtension(s->wh.dpy, &dummy1, &dummy2) && usedbe)
 		{
 			XLockDisplay(s->wh.dpy);
 			XSync(s->wh.dpy, False);

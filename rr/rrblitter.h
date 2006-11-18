@@ -36,7 +36,7 @@ class rrblitter : public Runnable
 	bool frameready(void);
 	void sendframe(rrfb *, bool sync=false);
 	void run(void);
-	rrfb *getbitmap(Display *, Window, int, int);
+	rrfb *getbitmap(Display *, Window, int, int, bool usedbe=true);
 
 	private:
 

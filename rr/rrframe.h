@@ -279,17 +279,17 @@ class rrfb : public rrframe
 		#endif
 	}
 
-	void init(rrframeheader *h)
+	void init(rrframeheader *h, bool usedbe=true)
 	{
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
 		checkheader(h);
-		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1));
+		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
 		if(h->framew>_fb.width || h->frameh>_fb.height)
 		{
 			XSync(_wh.dpy, False);
-			fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1));
+			fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
 		if(_h.framew>_fb.width) _h.framew=_fb.width;
