@@ -34,8 +34,11 @@ int
    it, and whether the display in question is a Sun Ray display.
 
    RETURN VALUE:
-   If successful, 1 is returned.  Else 0 is returned.
+   See below
 */
+
+// RRSunRayQueryDisplay() return codes
+enum {RRSUNRAY_NOT=0, RRSUNRAY_NO_ROUTE, RRSUNRAY_WITH_ROUTE};
 
 void *
 	RRSunRayInit (Display *display, Window win);

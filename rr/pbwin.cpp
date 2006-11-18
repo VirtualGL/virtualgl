@@ -281,7 +281,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	#if defined(sun)||defined(linux)
 	// If this is a SunRay session, then use the SunRay compressor to send data
-	if(_usesunray && fconfig.compress==RRCOMP_DEFAULT)
+	if(_usesunray==RRSUNRAY_WITH_ROUTE && fconfig.compress==RRCOMP_DEFAULT)
 	{
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 		if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
@@ -414,7 +414,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh,
+				_usesunray==RRSUNRAY_NOT));
 			b->_flags|=RRBMP_BOTTOMUP;
 			int format;
 			unsigned char *bits=b->_bits;
