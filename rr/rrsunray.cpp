@@ -40,9 +40,8 @@ static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 	if(!_##s) { \
 		if(fatal) _throw("Could not load symbol "#s); \
 		else if(fconfig.verbose) \
-		{ \
-			rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); return 0; \
-		} \
+			rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); \
+		return 0; \
 	} \
 }
 
