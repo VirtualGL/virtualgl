@@ -77,7 +77,8 @@ void rrblitter::run(void)
 	}
 }
 
-rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
+rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h,
+	bool usedbe)
 {
 	rrfb *b=NULL;
 	_ready.wait();
@@ -91,7 +92,7 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
-	b->init(&hdr);
+	b->init(&hdr, usedbe);
 	return b;
 }
 

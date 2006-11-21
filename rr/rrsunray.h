@@ -26,6 +26,20 @@ static const int rrsunray_ps[RRSUNRAY_FORMATOPT]={3, 4, 3, 4, 4};
 extern "C" {
 #endif
 
+int
+	RRSunRayQueryDisplay (Display *display);
+/*
+   This function is called by VirtualGL to determine whether the plugin
+   library is installed, whether the necessary functions can be loaded from
+   it, and whether the display in question is a Sun Ray display.
+
+   RETURN VALUE:
+   See below
+*/
+
+// RRSunRayQueryDisplay() return codes
+enum {RRSUNRAY_NOT=0, RRSUNRAY_NO_ROUTE, RRSUNRAY_WITH_ROUTE};
+
 void *
 	RRSunRayInit (Display *display, Window win);
 /*

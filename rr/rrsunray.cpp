@@ -40,9 +40,8 @@ static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 	if(!_##s) { \
 		if(fatal) _throw("Could not load symbol "#s); \
 		else if(fconfig.verbose) \
-		{ \
-			rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); return 0; \
-		} \
+			rrout.print("[VGL] Could not load Sun Ray plugin symbol "#s"\n"); \
+		return 0; \
 	} \
 }
 
@@ -57,6 +56,9 @@ static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 static rrcs sunraymutex;
 
 extern "C" {
+
+typedef int (*_RRSunRayQueryDisplayType)(Display *);
+static _RRSunRayQueryDisplayType _RRSunRayQueryDisplay=NULL;
 
 typedef void* (*_RRSunRayInitType)(Display *, Window);
 static _RRSunRayInitType _RRSunRayInit=NULL;
@@ -101,6 +103,7 @@ static int loadsunraysymbols(bool fatal)
 			return 0;
 		}
 	}
+	lsym(RRSunRayQueryDisplay)
 	lsym(RRSunRayInit)
 	lsym(RRSunRayGetFrame)
 	lsym(RRSunRaySendFrame)
@@ -110,9 +113,15 @@ static int loadsunraysymbols(bool fatal)
 	return 1;
 }
 
+int RRSunRayQueryDisplay(Display *display)
+{
+	if(!_RRSunRayQueryDisplay) {if(!loadsunraysymbols(false)) return 0;}
+	return _RRSunRayQueryDisplay(display);
+}
+
 void *RRSunRayInit(Display *display, Window win)
 {
-	if(!_RRSunRayInit) {if(!loadsunraysymbols(false)) return NULL;}
+	if(!_RRSunRayInit) {if(!loadsunraysymbols(true)) return NULL;}
 	return _RRSunRayInit(display, win);
 }
 

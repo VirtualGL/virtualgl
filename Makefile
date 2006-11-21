@@ -268,8 +268,8 @@ sunpkg: rr diags
 	cp copyright $(BLDDIR)
 	cp depend.$(platform) $(BLDDIR)/depend
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
-		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g >$(BLDDIR)/pkginfo \
-		| sed s/{__PKGARCH}/$(PKGARCH)/g
+		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g \
+		| sed s/{__PKGARCH}/$(PKGARCH)/g >$(BLDDIR)/pkginfo
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
 	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
