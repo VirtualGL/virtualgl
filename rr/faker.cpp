@@ -1796,8 +1796,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
 			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
 			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
-			if((buf=new unsigned char[width*height])==NULL)
-				_throw("Memory allocation error");
+			newcheck(buf=new unsigned char[width*height])
 			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
 			if(type==GL_INT) type=GL_UNSIGNED_INT;
 			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -1840,8 +1839,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
 			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
 			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
-			if((buf=new unsigned char[width*height])==NULL)
-				_throw("Memory allocation error");
+			newcheck(buf=new unsigned char[width*height])
 			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
 			if(type==GL_INT) type=GL_UNSIGNED_INT;
 			_dpixelconvert(unsigned short, GL_UNSIGNED_SHORT, 2)

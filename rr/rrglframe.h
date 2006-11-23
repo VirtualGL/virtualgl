@@ -155,11 +155,11 @@ class rrglframe : public rrframe
 		if(h->framew!=_h.framew || h->frameh!=_h.frameh || (stereo && !_rbits))
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[_pitch*h->frameh+1]);
+			newcheck(_bits=new unsigned char[_pitch*h->frameh+1]);
 			if(stereo)
 			{
 				if(_rbits) delete [] _rbits;
-				errifnot(_rbits=new unsigned char[_pitch*h->frameh+1]);
+				newcheck(_rbits=new unsigned char[_pitch*h->frameh+1]);
 			}
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
