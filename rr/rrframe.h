@@ -26,7 +26,7 @@
 #include "rrutil.h"
 #include <string.h>
 
-static int jpegsub[RR_SUBSAMPOPT]={TJ_444, TJ_422, TJ_411};
+#define jpegsub(s) (s>=4?TJ_411:s==2?TJ_422:TJ_444)
 
 // Bitmap flags
 #define RRBMP_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
@@ -62,7 +62,7 @@ class rrframe
 		|| !_bits)
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[h->framew*h->frameh*pixelsize+1]);
+			newcheck(_bits=new unsigned char[h->framew*h->frameh*pixelsize+1]);
 			_pixelsize=pixelsize;  _pitch=pixelsize*h->framew;
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
@@ -198,14 +198,14 @@ class rrjpeg : public rrframe
 		int tjflags=0;
 		if(!b._bits) _throw("Bitmap not initialized");
 		if(b._pixelsize<3 || b._pixelsize>4) _throw("Only true color bitmaps are supported");
-		if(b._h.qual>100 || b._h.subsamp>RR_SUBSAMPOPT-1)
+		if(b._h.qual>100 || b._h.subsamp>16 || !isPow2(b._h.subsamp))
 			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(&b._h);
 		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
 		unsigned long size;
 		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
-			_bits, &size, jpegsub[b._h.subsamp], b._h.qual, tjflags));
+			_bits, &size, jpegsub(b._h.subsamp), b._h.qual, tjflags));
 		_h.size=(unsigned int)size;
 		return *this;
 	}
@@ -218,10 +218,10 @@ class rrjpeg : public rrframe
 	void init(rrframeheader *h)
 	{
 		checkheader(h);
-		if(h->framew!=_h.framew || h->frameh!=_h.frameh || !_bits)
+		if(h->width!=_h.width || h->height!=_h.height || !_bits)
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[TJBUFSIZE(h->framew, h->frameh)]);
+			newcheck(_bits=new unsigned char[TJBUFSIZE(h->width, h->height)]);
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
 	}
@@ -279,17 +279,17 @@ class rrfb : public rrframe
 		#endif
 	}
 
-	void init(rrframeheader *h)
+	void init(rrframeheader *h, bool usedbe=true)
 	{
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
 		checkheader(h);
-		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1));
+		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
 		if(h->framew>_fb.width || h->frameh>_fb.height)
 		{
 			XSync(_wh.dpy, False);
-			fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1));
+			fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
 		if(_h.framew>_fb.width) _h.framew=_fb.width;
