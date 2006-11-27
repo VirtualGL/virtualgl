@@ -225,15 +225,14 @@ DLLEXPORT int DLLCALL
 	try
 	{
 		if(!fc) _throw("Invalid argument");
-		if(fc->client) fconfig.client=fc->client;
-		if(fc->server) fconfig.localdpystring=fc->server;
-		if(fc->qual>0 && fc->qual<=100) fconfig.currentqual=fc->qual;
-		if(fc->subsamp>=0 && fc->subsamp<RR_SUBSAMPOPT) fconfig.currentsubsamp=fc->subsamp;
-		if(fc->port>0) fconfig.port=fc->port;
-		if(fc->spoil==0 || fc->spoil==1) fconfig.spoil=fc->spoil;
-		if(fc->ssl==0 || fc->ssl==1) fconfig.ssl=fc->ssl;
-		if(fc->numprocs>=0) fconfig.np=fc->numprocs;
-		fconfig.sanitycheck();
+		fconfig.client=fc->client;
+		fconfig.localdpystring=fc->server;
+		fconfig.currentqual=fc->qual;
+		fconfig.currentsubsamp=fc->subsamp;
+		fconfig.port=fc->port;
+		fconfig.spoil=fc->spoil;
+		fconfig.ssl=fc->ssl;
+		fconfig.np=fc->numprocs;
 		return RR_SUCCESS;
 	}
 	_catch()

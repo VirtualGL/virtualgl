@@ -80,7 +80,8 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
-		rrout.println("[VGL] Using %d / %d CPU's for compression", fconfig.np, numprocs());
+		rrout.println("[VGL] Using %d / %d CPU's for compression",
+			(int)fconfig.np, numprocs());
 	char *servername=NULL;
 	try
 	{
