@@ -62,7 +62,7 @@ class rrframe
 		|| !_bits)
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[h->framew*h->frameh*pixelsize+1]);
+			newcheck(_bits=new unsigned char[h->framew*h->frameh*pixelsize+1]);
 			_pixelsize=pixelsize;  _pitch=pixelsize*h->framew;
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
@@ -218,10 +218,10 @@ class rrjpeg : public rrframe
 	void init(rrframeheader *h)
 	{
 		checkheader(h);
-		if(h->framew!=_h.framew || h->frameh!=_h.frameh || !_bits)
+		if(h->width!=_h.width || h->height!=_h.height || !_bits)
 		{
 			if(_bits) delete [] _bits;
-			errifnot(_bits=new unsigned char[TJBUFSIZE(h->framew, h->frameh)]);
+			newcheck(_bits=new unsigned char[TJBUFSIZE(h->width, h->height)]);
 		}
 		memcpy(&_h, h, sizeof(rrframeheader));
 	}
