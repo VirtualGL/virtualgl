@@ -84,10 +84,8 @@ class pbwin
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
-		#if defined(sun)||defined(linux)
 		void *_sunrayhandle;
-		int _sunrayloaded;
-		#endif
+		int _usesunray;
 		bool _truecolor;
 };
 

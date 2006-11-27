@@ -16,9 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(sun)||defined(linux)
 #include "rrsunray.h"
-#endif
 #include "glxvisual.h"
 
 #define INFAKER
@@ -154,10 +152,8 @@ pbwin::pbwin(Display *windpy, Window win)
 	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
-	#if defined(sun)||defined(linux)
-	_sunrayloaded=RRSunRayQueryPlugin();
+	_usesunray=RRSunRayQueryDisplay(windpy);
 	_sunrayhandle=NULL;
-	#endif
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
@@ -270,7 +266,9 @@ void pbwin::swapbuffers(void)
 void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	fconfig.reloadenv();
-	int compress=fconfig.compress;  bool dostereo=false;
+	ConfigCompress compress(_windpy, _usesunray);
+	bool dostereo=false;
+
 	int pbw=_pb->width(), pbh=_pb->height();
 
 	if(!fconfig.readback) return;
@@ -279,48 +277,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	_dirty=false;
 
-	#if defined(sun)||defined(linux)
-	// If this is a SunRay session, then use the SunRay compressor to send data
-	if(_sunrayloaded && fconfig.compress==RRCOMP_DEFAULT)
-	{
-		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
-		if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
-		if(_sunrayhandle)
-		{
-			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
-				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
-			int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
-			#ifdef GL_BGR_EXT
-			if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
-			#endif
-			#ifdef GL_BGRA_EXT
-			if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
-			#endif
-			#ifdef GL_ABGR_EXT
-			if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
-			#endif
-			readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-				drawbuf, bottomup);
-			if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
-				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
-			fconfig.sunray=true;
-			return;
-		}
-	}
-	#endif
-
-	fconfig.sunray=false;
-	if(_sunrayhandle)
-	{
-		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
-	}
-	if(compress==RRCOMP_DEFAULT)
-	{
-		const char *dstr=DisplayString(_windpy);
-		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-			&& !strncasecmp(dstr, "unix", 4))) compress=RRCOMP_NONE;
-		else compress=RRCOMP_JPEG;
-	}
 
 	if(_force) {force=true;  _force=false;}
 	if(sync) {compress=RRCOMP_NONE;  force=true;}
@@ -346,8 +302,37 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	switch(compress)
 	{
+		case RRCOMP_SUNRAY:
+		case RRCOMP_SUNRAY_LOSSLESS:
+		{
+			unsigned char *bitmap=NULL;  int pitch, bottomup, format;
+			if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
+			if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
+			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
+				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
+			int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
+			#ifdef GL_BGR_EXT
+			if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
+			#endif
+			#ifdef GL_BGRA_EXT
+			if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
+			#endif
+			#ifdef GL_ABGR_EXT
+			if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
+			#endif
+			readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
+				drawbuf, bottomup);
+			if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
+				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+			break;
+		}
 		case RRCOMP_JPEG:
 		{
+			if(_sunrayhandle)
+			{
+				RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
+			}
+
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
 				fconfig.client:DisplayString(_windpy)));
 			if(fconfig.spoil && _rrdpy && !_rrdpy->frameready() && !force)
@@ -413,10 +398,15 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 		case RRCOMP_NONE:
 		{
+			if(_sunrayhandle)
+			{
+				RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
+			}
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh,
+				_usesunray==RRSUNRAY_NOT));
 			b->_flags|=RRBMP_BOTTOMUP;
 			int format;
 			unsigned char *bits=b->_bits;
