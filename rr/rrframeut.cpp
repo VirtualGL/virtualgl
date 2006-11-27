@@ -220,7 +220,7 @@ class compressor : public Runnable
 		hdr.frameh=hdr.height=h+BORDER;
 		hdr.x=hdr.y=BORDER;
 		hdr.qual=80;
-		hdr.subsamp=RR_422;
+		hdr.subsamp=2;
 		f.init(&hdr, 3);
 		return f;
 	}

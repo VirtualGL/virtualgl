@@ -20,30 +20,321 @@
 #include <stdlib.h>
 #include "rr.h"
 #include "rrutil.h"
+#include "rrlog.h"
+#include "rrsunray.h"
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/keysym.h>
 
-#define getconfigstr(envvar, string) {  \
-	getconfig("RR"envvar, string);  \
-	getconfig("VGL_"envvar, string);}
-
-#define getconfigint(envvar, val, min, max) { \
-	getconfig("RR"envvar, val, min, max);  \
-	getconfig("VGL_"envvar, val, min, max);}
-
-#define getconfigbool(envvar, val) {  \
-	getconfig("RR"envvar, val);  \
-	getconfig("VGL_"envvar, val);}
-
-#define getconfigdouble(envvar, val, min, max) {  \
-	getconfig("RR"envvar, val, min, max);  \
-	getconfig("VGL_"envvar, val, min, max);}
-
 #define DEFLOQUAL 90
 #define DEFHIQUAL 95
-#define DEFLOSUBSAMP RR_411
-#define DEFHISUBSAMP RR_444
+#define DEFLOSUBSAMP 4
+#define DEFHISUBSAMP 1
+
+#define MAXSTR 256
+
+class Config
+{
+	public:
+
+		Config() {_set=false;  _env=NULL;}
+		~Config() {if(_env) {free(_env);  _env=NULL;}}
+		bool isset(void) {return _set;}
+
+	protected:
+
+		bool newenv(char *env)
+		{
+			if(_env)
+			{
+				if(strlen(env)==strlen(_env) && !strncmp(env, _env, strlen(env)))
+					return false;
+				free(_env);  _env=NULL;
+			}
+			_env=strdup(env);
+			return true;
+		}
+
+		bool _set;
+		char *_env;
+};
+
+class ConfigBool : public Config
+{
+	public:
+
+		ConfigBool() {_b=false;}
+		ConfigBool& operator= (bool b) {set(b);  return *this;}
+		bool operator= (ConfigBool &cb) {return cb._b;}
+		operator bool() const {return _b;}
+
+		bool get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				if(!strncmp(temp, "1", 1)) set(true);
+				else if(!strncmp(temp, "0", 1)) set(false);
+			}
+			return _b;
+		}
+
+		void set(bool b)
+		{
+			_b=b;  _set=true;
+		}
+
+	private:
+
+		bool _b;
+};
+
+
+class ConfigDouble : public Config
+{
+	public:
+
+		ConfigDouble() {_d=0.;  _usebounds=false;  _min=_max=0.;}
+		ConfigDouble& operator= (double d) {set(d);  return *this;}
+		double operator= (ConfigDouble &cd) {return cd._d;}
+		operator double() const {return _d;}
+
+		void setbounds(double min, double max)
+		{
+			_min=min;  _max=max;  _usebounds=true;
+		}
+
+		double get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  double dtemp=strtod(temp, &t);
+				if(t && t!=temp) set(dtemp);
+			}
+			return _d;
+		}
+
+		void set(double d)
+		{
+			if((d>_min && d<_max) || !_usebounds) _d=d;
+			_set=true;
+		}
+
+	private:
+
+		double _d, _min, _max;
+		bool _usebounds;
+};
+
+class ConfigInt : public Config
+{
+	public:
+
+		ConfigInt() {_i=0;  _usebounds=false;  _min=_max=0;}
+		ConfigInt& operator= (int i) {set(i);  return *this;}
+		int operator= (ConfigInt &ci) {return ci._i;}
+		operator int() const {return _i;}
+
+		void setbounds(int min, int max)
+		{
+			_min=min;  _max=max;  _usebounds=true;
+		}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp) set(itemp);
+			}
+			return _i;
+		}
+
+		void set(int i)
+		{
+			if((i>=_min && i<=_max) || !_usebounds) _i=i;
+			_set=true;
+		}
+
+	protected:
+
+		int _i, _min, _max;
+		bool _usebounds;
+};
+
+class ConfigSubsamp : public ConfigInt
+{
+	public:
+
+		ConfigSubsamp() {ConfigInt::setbounds(0, 16);}
+
+		ConfigSubsamp& operator= (int i)
+		{
+			if(isPow2(i)) set(i);  return *this;
+		}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp)
+				{
+					switch(itemp)
+					{
+						case 444: case 11: case 0: case 1:   set(1);  break;
+						case 422: case 21: case 2:           set(2);  break;
+						case 411: case 420: case 22: case 4: set(4);  break;
+						case 410: case 42: case 8:           set(8);  break;
+						case 44:  case 16:                   set(16);  break;
+					}
+				}
+			}
+			return _i;
+		}
+};
+
+class ConfigNP : public ConfigInt
+{
+	public:
+
+		ConfigNP()
+		{
+			ConfigInt::setbounds(0, 1024);
+			_i=adjust(0);
+		}
+
+		ConfigNP& operator= (int i) {set(adjust(i));  return *this;}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp && itemp>=0) set(adjust(itemp));
+			}
+			return _i;
+		}
+
+	private:
+
+		int adjust(int np)
+		{
+			np=min(np, min(numprocs(), MAXPROCS));
+			if(np==0)
+			{
+				np=min(numprocs(), MAXPROCS);	 if(np>1) np--;
+			}
+			return np;
+		}
+
+};
+
+class ConfigCompress : public ConfigInt
+{
+	public:
+
+		ConfigCompress()
+		{
+			ConfigInt::setbounds(0, RR_COMPRESSOPT-1);  reload();
+		}
+
+		ConfigCompress(Display *dpy, int issunray=-1)
+		{
+			ConfigInt::setbounds(0, RR_COMPRESSOPT-1);  reload();
+			if(issunray>=0) setdefault(dpy, issunray);
+			else setdefault(dpy);
+		}
+
+		ConfigCompress& operator= (enum rrcomp i) {set((int)i);  return *this ;}
+
+		int setdefault(Display *dpy)
+		{
+			int issunray=RRSunRayQueryDisplay(dpy);
+			return setdefault(dpy, issunray);
+		}
+
+		int setdefault(Display *dpy, int issunray)
+		{
+			if(!isset())
+			{
+				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_SUNRAY);
+				else
+				{
+					const char *dstr=DisplayString(dpy);
+					if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+						&& !strnicmp(dstr, "unix", 4))) set(RRCOMP_NONE);
+					else set(RRCOMP_JPEG);
+				}
+			}
+			return issunray;
+		}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp && itemp>=0 && itemp<RR_COMPRESSOPT) set(itemp);
+				else if(!stricmp(temp, "raw")) set(RRCOMP_NONE);
+				else if(!stricmp(temp, "none")) set(RRCOMP_NONE);
+				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
+				else if(!stricmp(temp, "sr")) set(RRCOMP_SUNRAY);
+				else if(!stricmp(temp, "srlossless")) set(RRCOMP_SUNRAY_LOSSLESS);
+			}
+			return _i;
+		}
+
+		void reload(void) {get("VGL_COMPRESS");}
+};
+
+class ConfigString : public Config
+{
+	public:
+
+		ConfigString() {_s=NULL;}
+		ConfigString& operator= (char *s) {set(s);  return *this;}
+		char* operator= (ConfigString &cs) {return cs._s;}
+		~ConfigString() {if(_s) free(_s);}
+		operator char*() const {return _s;}
+		operator bool() const {return _s!=NULL;}
+
+		char *get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				for(int i=0; i<(int)strlen(temp); i++)
+					if(temp[i]!=' ' && temp[i]!='\t')
+					{
+						temp=&temp[i];  break;
+					}
+				if(strlen(temp)>0)
+				{
+					for(int i=0; i<(int)strlen(temp); i++)
+						if(temp[i]==' ' || temp[i]=='\t')
+							{temp[i]='\0';  break;}
+					set(temp);
+				}
+			}
+			return _s;
+		}
+
+		void set(char *s)
+		{
+			if(!s) return;
+			if(_s) free(_s);  _s=strdup(s);  _set=true;
+		}
+
+	private:
+
+		char *_s;
+};
 
 class FakerConfig
 {
@@ -52,114 +343,68 @@ class FakerConfig
 		FakerConfig(void) : currentqual(hiqual), currentsubsamp(hisubsamp)
 		{
 			// Defaults
-			gllib=NULL;
-			x11lib=NULL;
 			client=NULL;
+			fps.setbounds(0.0, 1000000.0);
+			gamma=true;
+			gllib=NULL;
+			glp=false;
+			gui=true;
+			guikey=XK_F9;
+			guimod=ShiftMask|ControlMask;
 			localdpystring=(char *)":0";
+			loqual.setbounds(1, 100);
 			loqual=DEFLOQUAL;
 			losubsamp=DEFLOSUBSAMP;
+			hiqual.setbounds(1, 100);
 			hiqual=DEFHIQUAL;
 			hisubsamp=DEFHISUBSAMP;
 			currentqual=hiqual;
 			currentsubsamp=hisubsamp;
-			compress=RRCOMP_DEFAULT;
+			port.setbounds(0, 65535);
+			readback=true;
 			spoil=true;
 			ssl=false;
-			port=-1;
-			glp=false;
-			usewindow=false;
-			sync=false;
-			np=min(numprocs(), MAXPROCS);  if(np>1) np--;
-			autotest=false;
-			gamma=true;
-			transpixel=-1;
+			x11lib=NULL;
+			tilesize.setbounds(8, 1024);
 			tilesize=RR_DEFAULTTILESIZE;
-			trace=false;
-			readback=true;
-			verbose=false;
-			gui=true;
-			guikey=XK_F9;
-			guimod=ShiftMask|ControlMask;
-			fps=-1.0;
+			transpixel.setbounds(0, 255);
 			vendor=NULL;
-			xtthreadinit=true;
-			sunray=false;
 			reloadenv();
 		}
 
 		void reloadenv(void)
 		{
 			// Fetch values from environment
-			getconfigstr("GLLIB", gllib);
-			getconfigstr("X11LIB", x11lib);
-			getconfigstr("CLIENT", client);
-			getconfigstr("DISPLAY", localdpystring);
-			for(int i=0; i<(int)strlen(localdpystring); i++)
-				if(localdpystring[i]!=' ' && localdpystring[i]!='\t')
-				{
-					localdpystring=&localdpystring[i];  break;
-				}
-			if(strlen(localdpystring)>0)
-			{
-				int i;
-				for(i=0; i<(int)strlen(localdpystring); i++)
-					if(localdpystring[i]==' ' || localdpystring[i]=='\t')
-						{localdpystring[i]='\0';  break;}
-			}
+			gllib.get("VGL_GLLIB");
+			x11lib.get("VGL_X11LIB");
+			client.get("VGL_CLIENT");
+			localdpystring.get("VGL_DISPLAY");
 			#ifdef USEGLP
-			if(localdpystring[0]=='/' || !strnicmp(localdpystring, "GLP", 3))
+			if(localdpystring &&
+				(localdpystring[0]=='/' || !strnicmp(localdpystring, "GLP", 3)))
 				glp=true;
 			#endif
-			getconfigint("LOQUAL", loqual, 1, 100);
-			getconfigint("LOSUBSAMP", losubsamp, 411, 444);
-			switch(losubsamp)
-			{
-				case 411:  losubsamp=RR_411;  break;
-				case 422:  losubsamp=RR_422;  break;
-				case 444:  losubsamp=RR_444;  break;
-			}
-			getconfigint("QUAL", hiqual, 1, 100);
-			getconfigint("SUBSAMP", hisubsamp, 411, 444);
-			switch(hisubsamp)
-			{
-				case 411:  hisubsamp=RR_411;  break;
-				case 422:  hisubsamp=RR_422;  break;
-				case 444:  hisubsamp=RR_444;  break;
-			}
+			loqual.get("VGL_LOQUAL");
+			losubsamp.get("VGL_LOSUBSAMP");
+			hiqual.get("VGL_QUAL");
+			hisubsamp.get("VGL_SUBSAMP");
 			sethiqual();
-			bool temp=false;
-			getconfigbool("NOSPOIL", temp);
-			if(temp) spoil=false;
-			temp=false;
-			getconfigbool("NOCOMPRESS", temp);
-			if(temp) compress=RRCOMP_NONE;
-			getconfigbool("SPOIL", spoil);
-			getconfigint("COMPRESS", compress, RRCOMP_NONE, RRCOMP_JPEG);
-			if(compress==RRCOMP_DEFAULT)
-			{
-				char *temps=NULL;
-				getconfigstr("COMPRESS", temps);
-				if(temps && !stricmp(temps, "raw")) compress=RRCOMP_NONE;
-				else if(temps && !stricmp(temps, "none")) compress=RRCOMP_NONE;
-				else if(temps && !stricmp(temps, "jpeg")) compress=RRCOMP_JPEG;
-			}
-			getconfig("RRUSESSL", ssl);
-			getconfig("VGL_SSL", ssl);
-			getconfigint("PORT", port, 0, 65535);
-			if(port==-1) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
-			getconfigbool("WINDOW", usewindow);
+			spoil.get("VGL_SPOIL");
+			ssl.get("VGL_SSL");
+			port.get("VGL_PORT");
+			if(!port.isset()) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
+			usewindow.get("VGL_WINDOW");
 			if(glp) usewindow=false;
-			getconfigbool("SYNC", sync);
-			getconfigint("NPROCS", np, 0, 1024);
-			getconfigbool("AUTOTEST", autotest);
-			getconfigbool("GAMMA", gamma);
-			getconfigint("TRANSPIXEL", transpixel, 0, 255);
-			getconfigint("TILESIZE", tilesize, 8, 1024);
-			getconfigbool("TRACE", trace);
-			getconfigbool("READBACK", readback);
-			getconfigbool("VERBOSE", verbose);
-			char *guikeyseq=NULL;
-			getconfigstr("GUI", guikeyseq);
+			sync.get("VGL_SYNC");
+			np.get("VGL_NPROCS");
+			autotest.get("VGL_AUTOTEST");
+			gamma.get("VGL_GAMMA");
+			transpixel.get("VGL_TRANSPIXEL");
+			tilesize.get("VGL_TILESIZE");
+			trace.get("VGL_TRACE");
+			readback.get("VGL_READBACK");
+			verbose.get("VGL_VERBOSE");
+			guikeyseq.get("VGL_GUI");
 			if(guikeyseq && strlen(guikeyseq)>0)
 			{
 				if(!stricmp(guikeyseq, "none")) gui=false;
@@ -187,27 +432,8 @@ class FakerConfig
 					gui=true;
 				}
 			}
-			getconfigbool("GUI_XTTHREADINIT", xtthreadinit);
-			getconfigdouble("FPS", fps, 0.0, 1000000.0);
-			getconfigstr("XVENDOR", vendor);
-			sanitycheck();
-		}
-
-		void sanitycheck(void)
-		{
-			np=min(np, min(numprocs(), MAXPROCS));
-			if(np==0)
-			{
-				np=min(numprocs(), MAXPROCS);	 if(np>1) np--;
-			}
-			if(hiqual<1 || hiqual>100) hiqual=DEFHIQUAL;
-			if(loqual<1 || loqual>100) loqual=DEFLOQUAL;
-			if(hisubsamp<0 || hisubsamp>=RR_SUBSAMPOPT) hisubsamp=DEFHISUBSAMP;
-			if(losubsamp<0 || losubsamp>=RR_SUBSAMPOPT) losubsamp=DEFLOSUBSAMP;
-			if(port==0) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
-			if(compress<0 || compress>=RR_COMPRESSOPT) compress=RRCOMP_DEFAULT;
-			if(transpixel<0 || transpixel>255) transpixel=-1;
-			if(tilesize<8 || tilesize>1024) tilesize=RR_DEFAULTTILESIZE;
+			fps.get("VGL_FPS");
+			vendor.get("VGL_XVENDOR");
 		}
 
 		void setloqual(void)
@@ -220,82 +446,40 @@ class FakerConfig
 			currentqual=hiqual;  currentsubsamp=hisubsamp;
 		}
 
-		char *gllib;
-		char *x11lib;
-		char *client;
-		char *localdpystring;
-		char *vendor;
+		#define prconfint(i) rrout.println(#i" = %d", (int)i);
+		#define prconfstr(s) rrout.println(#s" = %s", (char *)s);
+		#define prconfdbl(d) rrout.println(#d" = %f", (double)d);
 
-		int loqual;
-		int losubsamp;
-		int hiqual;
-		int hisubsamp;
-		int &currentqual;
-		int &currentsubsamp;
-		int compress;
-		int port;
-		int transpixel;
-		int np;
-		int tilesize;
-
-		bool spoil;
-		bool ssl;
+		ConfigBool autotest;
+		ConfigString client;
+		ConfigInt &currentqual;
+		ConfigSubsamp &currentsubsamp;
+		ConfigDouble fps;
+		ConfigBool gamma;
+		ConfigString gllib;
 		bool glp;
-		bool usewindow;
-		bool sync;
-		bool autotest;
-		bool gamma;
-		bool trace;
-		bool readback;
-		bool verbose;
-		bool gui;
-		bool xtthreadinit;
-		bool sunray;
-
+		ConfigBool gui;
 		unsigned int guikey;
+		ConfigString guikeyseq;
 		unsigned int guimod;
-
-		double fps;
-
-	private:
-
-		void getconfig(const char *envvar, char* &string)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
-				string=temp;
-		}
-
-		void getconfig(const char *envvar, int &val, int min, int max)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
-			{
-				char *t=NULL;  int itemp=strtol(temp, &t, 10);
-				if(t && t!=temp && itemp>=min && itemp<=max) val=itemp;
-			}
-		}
-
-		void getconfig(const char *envvar, double &val, double min, double max)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
-			{
-				char *t=NULL;  double dtemp=strtod(temp, &t);
-				if(t && t!=temp && dtemp>min && dtemp<max) val=dtemp;
-			}
-		}
-
-		void getconfig(const char *envvar, bool &val)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
-			{
-				if(!strncmp(temp, "1", 1)) val=true;
-				else if(!strncmp(temp, "0", 1)) val=false;
-			}
-		}
-
+		ConfigInt hiqual;
+		ConfigSubsamp hisubsamp;
+		ConfigString localdpystring;
+		ConfigInt loqual;
+		ConfigSubsamp losubsamp;
+		ConfigNP np;
+		ConfigInt port;
+		ConfigBool readback;
+		ConfigBool spoil;
+		ConfigBool ssl;
+		ConfigBool sync;
+		ConfigInt tilesize;
+		ConfigBool trace;
+		ConfigInt transpixel;
+		ConfigBool usewindow;
+		ConfigString vendor;
+		ConfigBool verbose;
+		ConfigString x11lib;
 };
 
 #endif

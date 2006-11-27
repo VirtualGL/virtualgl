@@ -724,12 +724,7 @@ main(int argc, char *argv[])
          i++;
       }
       else if (strncasecmp(argv[i], "-sa", 3) == 0 && i+1<argc) {
-         int temp = atoi(argv[i+1]);
-         switch (temp) {
-            case 411: config.subsamp=RR_411;  break;
-            case 422: config.subsamp=RR_422;  break;
-            case 444: config.subsamp=RR_444;  break;
-         }
+         config.subsamp=atoi(argv[i+1]);
          i++;
       }
       else if (strncasecmp(argv[i], "-q", 2) == 0 && i+1<argc) {
@@ -750,7 +745,7 @@ main(int argc, char *argv[])
          printf("-p     = Set port to use when connecting to the client\n");
          printf("         (default: %d)\n", config.port);
          printf("-q     = Set compression quality [1-100] (default: %d)\n", config.qual);
-         printf("-samp  = Set YUV subsampling [411, 422, or 444] (default: %s)\n", config.subsamp==RR_444?"444":(config.subsamp==RR_422?"422":"411"));
+         printf("-samp  = Set chrominance subsampling factor [1, 2, or 4] (default: %d)\n", config.subsamp);
          printf("+/-sp  = Enable/disable frame spoiling (default: %s)\n", config.spoil?"enabled":"disabled");
          printf("+/-ssl = Enable/disable SSL tunneling (default: %s)\n", config.ssl?"enabled":"disabled");
          printf("-np <n>= Number of CPUs to use for compression (default: %d)\n", config.numprocs);

@@ -46,8 +46,8 @@ typedef struct _rrframeheader
 	unsigned short x;        /* The X offset of this tile within the frame */
 	unsigned short y;        /* The Y offset of this tile within the frame */
 	unsigned char qual;      /* Quality of destination JPEG (1-100) */
-	unsigned char subsamp;   /* YUV subsampling of destination JPEG
-	                            (RR_411, RR_422, or RR_444) */
+	unsigned char subsamp;   /* Chrominance subsampling of destination JPEG
+	                            1 (=4:4:4), 2 (=4:2:2), or 4 (=4:1:1 or 4:2:0) */
 	unsigned char flags;     /* See enum below */
 	unsigned char unused;
 	unsigned short dpynum;   /* Display number on the client machine that
@@ -110,16 +110,16 @@ typedef struct _RRFrame
 } RRFrame;
 
 /* Compression types */
-#define RR_COMPRESSOPT  2
-enum {RRCOMP_DEFAULT=-1, RRCOMP_NONE=0, RRCOMP_JPEG};
-
-/* Subsampling options */
-#define RR_SUBSAMPOPT   3
-enum {RR_444=0, RR_422, RR_411};
+#define RR_COMPRESSOPT  4
+enum rrcomp {RRCOMP_NONE=0, RRCOMP_JPEG, RRCOMP_SUNRAY, RRCOMP_SUNRAY_LOSSLESS};
 
 /* Pixel format options */
 #define RR_FORMATOPT    6
-enum {RR_RGB, RR_RGBA, RR_BGR, RR_BGRA, RR_ABGR, RR_ARGB};
+enum rrformat {RR_RGB, RR_RGBA, RR_BGR, RR_BGRA, RR_ABGR, RR_ARGB};
+
+/* Stereo options */
+#define RR_STEREOOPT    2
+enum rrstereo {RRSTEREO_QUADBUF=0, RRSTEREO_REDCYAN};
 
 /* Other */
 #define RR_DEFAULTPORT        4242

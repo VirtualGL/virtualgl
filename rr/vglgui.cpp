@@ -77,7 +77,7 @@ void vglgui::init(void)
 {
 	int argc=1;  char *argv[2]={(char *)"VirtualGL", NULL};
 
-	if(fconfig.xtthreadinit) XtToolkitThreadInitialize();
+	XtToolkitThreadInitialize();
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
 	errifnot(_dpy=XtOpenDisplay(_appctx, DisplayString(_dpy), "VirtualGL",
@@ -102,16 +102,8 @@ void vglgui::init(void)
 		XtNright, XawChainRight, XtNlabel, "Frame Spoiling: XXX", NULL);
 	XtAddCallback(_spoil, XtNcallback, spoilProc, this);
 
-	int compress=fconfig.compress;
-	if(compress==RRCOMP_DEFAULT)
-	{
-		const char *dstr=DisplayString(_dpy);
-		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-			&& !strncasecmp(dstr, "unix", 4))) compress=RRCOMP_NONE;
-		else compress=RRCOMP_JPEG;
-	}
-
-	if(compress!=RRCOMP_NONE && !fconfig.sunray)
+	ConfigCompress compress(_dpy);
+	if(compress==RRCOMP_JPEG)
 	{
 		Widget lobutton=XtVaCreateManagedWidget("lobutton", commandWidgetClass,
 			buttonForm, NULL);
@@ -205,24 +197,24 @@ void vglgui::UpdateQual(void)
 	}
 	if(_qualtext)
 	{
-		sprintf(text, "%d", fconfig.currentqual);
+		sprintf(text, "%d", (int)fconfig.currentqual);
 		XtVaSetValues(_qualtext, XtNlabel, text, NULL);
 	}
 	if(_subsamp411 && _subsamp422 && _subsamp444)
 	{
-		if(fconfig.currentsubsamp==RR_444)
+		if(fconfig.currentsubsamp==1)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp444, XtNstate, 1, NULL);
 		}
-		else if(fconfig.currentsubsamp==RR_411)
+		else if(fconfig.currentsubsamp==4)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 1, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp444, XtNstate, 0, NULL);
 		}
-		else if(fconfig.currentsubsamp==RR_422)
+		else if(fconfig.currentsubsamp==2)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 1, NULL);
@@ -241,38 +233,6 @@ void vglgui::UpdateQual(void)
 	}
 }
 
-#define newqual(q) {  \
-	char *env=NULL, temps[15];  \
-	fconfig.currentqual=q;  \
-	fconfig.sanitycheck();  \
-	if((env=getenv("VGL_QUAL"))!=NULL && strlen(env)>0)  \
-	{  \
-		sprintf(temps, "VGL_QUAL=%d", fconfig.currentqual);  \
-		putenv(temps);  \
-	}  \
-	if((env=getenv("RRQUAL"))!=NULL && strlen(env)>0)  \
-	{  \
-		sprintf(temps, "RRQUAL=%d", fconfig.currentqual);  \
-		putenv(temps);  \
-	}}
-
-#define newsubsamp(s) {  \
-	char *env=NULL, temps[18];  \
-	fconfig.currentsubsamp=s;  \
-	fconfig.sanitycheck();  \
-	if((env=getenv("VGL_SUBSAMP"))!=NULL && strlen(env)>0)  \
-	{  \
-		sprintf(temps, "VGL_SUBSAMP=%d", fconfig.currentsubsamp==RR_411? 411:  \
-			fconfig.currentsubsamp==RR_422? 422:444);  \
-		putenv(temps);  \
-	}  \
-	if((env=getenv("RRSUBSAMP"))!=NULL && strlen(env)>0)  \
-	{  \
-		sprintf(temps, "RRSUBSAMP=%d", fconfig.currentsubsamp==RR_411? 411:  \
-			fconfig.currentsubsamp==RR_422? 422:444);  \
-		putenv(temps);  \
-	}}
-
 void vglgui::qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
@@ -281,7 +241,7 @@ void vglgui::qualScrollProc(Widget w, XtPointer client, XtPointer p)
 	if(pos<0) val-=.1;  else val+=.1;
 	if(val>1.0) val=1.0;  if(val<0.0) val=0.0;
 	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	newqual(qual);
+	fconfig.currentqual=qual;
 	if(that) that->UpdateQual();
 }
 
@@ -290,23 +250,23 @@ void vglgui::qualJumpProc(Widget w, XtPointer client, XtPointer p)
 	vglgui *that=(vglgui *)client;
 	float val=*(float *)p;  int qual;
 	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	newqual(qual);
+	fconfig.currentqual=qual;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::loQualProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	newsubsamp(RR_411);
-	newqual(30);
+	fconfig.currentsubsamp=4;
+	fconfig.currentqual=30;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::hiQualProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	newsubsamp(RR_444);
-	newqual(95);
+	fconfig.currentsubsamp=1;
+	fconfig.currentqual=95;
 	if(that) that->UpdateQual();
 }
 
@@ -319,21 +279,21 @@ void vglgui::quitProc(Widget w, XtPointer client, XtPointer p)
 void vglgui::subsamp411Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) newsubsamp(RR_411);
+	if((long)p==1) fconfig.currentsubsamp=4;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::subsamp422Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) newsubsamp(RR_422);
+	if((long)p==1) fconfig.currentsubsamp=2;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::subsamp444Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) newsubsamp(RR_444);
+	if((long)p==1) fconfig.currentsubsamp=1;
 	if(that) that->UpdateQual();
 }
 
@@ -343,19 +303,7 @@ void vglgui::spoilProc(Widget w, XtPointer client, XtPointer p)
 	if((long)p==1 || (long)p==0)
 	{
 		int spoil=(int)((long)p);
-		char *env=NULL, temps[15];
-		if((env=getenv("VGL_SPOIL"))!=NULL && strlen(env)>0)
-		{
-			sprintf(temps, "VGL_SPOIL=%.1d", spoil);
-			putenv(temps);
-		}
-		if((env=getenv("RRSPOIL"))!=NULL && strlen(env)>0)
-		{
-			sprintf(temps, "RRSPOIL=%.1d", spoil);
-			putenv(temps);
-		}
 		fconfig.spoil=spoil? true:false;
-		fconfig.sanitycheck();
 	}
 	if(that) that->UpdateQual();
 }
