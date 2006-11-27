@@ -46,7 +46,8 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			rrout.print("[VGL] Could not open %s\n[VGL] %s\n", fconfig.gllib, dlerror());
+			rrout.print("[VGL] Could not open %s\n[VGL] %s\n",
+				(char *)fconfig.gllib, dlerror());
 			__vgl_safeexit(1);
 		}
 		else gldllhnd=dllhnd;
@@ -147,7 +148,8 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			rrout.print("[VGL] Could not open %s\n[VGL] %s\n", fconfig.x11lib, dlerror());
+			rrout.print("[VGL] Could not open %s\n[VGL] %s\n",
+				(char *)fconfig.x11lib, dlerror());
 			__vgl_safeexit(1);
 		}
 		else x11dllhnd=dllhnd;
