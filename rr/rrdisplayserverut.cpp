@@ -46,7 +46,6 @@ int main(int argc, char **argv)
 			fconfig.client=argv[i+1];  i++;
 		}
 	}
-	fconfig.sanitycheck();
 
 	if(!XInitThreads()) _throw("Could not initialize X threads");
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
@@ -72,7 +71,7 @@ int main(int argc, char **argv)
 			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3));
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
-			b->_h.qual=50;  b->_h.subsamp=RR_411;
+			b->_h.qual=50;  b->_h.subsamp=4;
 			b->_h.winid=win;
 			rrdpy->sendframe(b);
 		}

@@ -26,13 +26,13 @@ void usage(char **argv)
 	printf("       [-tilesize <n>] [-ssl] [-np <n>]\n\n");
 	printf("-client = X Display where the video should be sent (VGL client must be running\n");
 	printf("          on that machine) or 0 for local test only\n");
-	printf("          [default = %s]\n", fconfig.client? fconfig.client:"read from DISPLAY environment");
-	printf("-samp = JPEG YCbCr subsampling: 411, 422, or 444 [default = %d]\n", fconfig.currentsubsamp);
-	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", fconfig.currentqual);
+	printf("          [default = %s]\n", fconfig.client? (char *)fconfig.client:"read from DISPLAY environment");
+	printf("-samp = JPEG chrominance subsampling factor: 1, 2, or 4 [default = %d]\n", (int)fconfig.currentsubsamp);
+	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", (int)fconfig.currentqual);
 	printf("-tilesize = width/height of each inter-frame difference tile\n");
-	printf("            [default = %d x %d pixels]\n", fconfig.tilesize, fconfig.tilesize);
+	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
 	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
-	printf("-np <n> = number of processors to use for compression [default = %d]\n", fconfig.np);
+	printf("-np <n> = number of processors to use for compression [default = %d]\n", (int)fconfig.np);
 	printf("\n");
 	exit(1);
 }
@@ -59,14 +59,7 @@ int main(int argc, char **argv)
 		}
 		if(!strnicmp(argv[i], "-sa", 3) && i<argc-1)
 		{
-			int subsamp=atoi(argv[i+1]);  i++;
-			switch(subsamp)
-			{
-				case 411: fconfig.currentsubsamp=RR_411;  break;
-				case 422: fconfig.currentsubsamp=RR_422;  break;
-				case 444: fconfig.currentsubsamp=RR_444;  break;
-				default: usage(argv);
-			}
+			fconfig.currentsubsamp=atoi(argv[i+1]);  i++;
 		}
 		if(!strnicmp(argv[i], "-q", 2) && i<argc-1)
 		{
@@ -81,7 +74,6 @@ int main(int argc, char **argv)
 			fconfig.np=atoi(argv[i+1]);  i++;
 		}
 	}
-	fconfig.sanitycheck();
 
 	int w, h, d=3;
 
@@ -103,7 +95,7 @@ int main(int argc, char **argv)
 		if(!fconfig.client) fconfig.client=DisplayString(dpy);
 	}
 
-	printf("Tile size = %d x %d pixels\n", fconfig.tilesize, fconfig.tilesize);
+	printf("Tile size = %d x %d pixels\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
 
 	rrdisplayclient rrdpy(fconfig.client);
 
