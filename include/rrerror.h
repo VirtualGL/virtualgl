@@ -77,7 +77,7 @@ class rrerror
 #define errifnot(f) {if(!(f)) _throw("Unexpected NULL condition");}
 #define newcheck(f) \
 	try {if(!(f)) _throw("Memory allocation error");} \
-	catch(std::bad_alloc& e) {_throw("Out of memory");}
+	catch(std::bad_alloc& e) {_throw(e.what());}
 
 #ifdef _WIN32
 class w32error : public rrerror
