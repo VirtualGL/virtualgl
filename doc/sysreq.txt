@@ -80,21 +80,19 @@ encounter any difficulties.
 	| Decent 3D graphics accelerator \
 		{list type=ul: \
 			{item:Tested with \
+				[[http://www.sun.com/desktop/products/graphics/xvr600/][XVR-600]], \
 				[[http://www.sun.com/desktop/products/graphics/xvr1200/][XVR-1200]] \
-				("jfb") and \
+				("jfb"), and \
 				[[http://www.sun.com/desktop/products/graphics/xvr2500/][XVR-2500]] \
 				("kfb")} \
-			{item:For applications that use stereo, an XVR-2500 with OpenGL 1.5 and \
-				[[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][patches]] \
-				120812-12 (or later) and 120928-10 (or later) is required on the \
-				server.}} \
+			{item:XVR-2500 required for stereo rendering}} \
 		[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
 		{list type=ul: \
-			{item:__Minimum version:__ 1.3 (patches 113886-38 or later and \
-				113887-38 or later recommended)} \
-			{item:__Recommended version:__ 1.5 (patch 120812-12 or later \
-				recommended.)  OpenGL 1.5 is part of Solaris 10 Update 1 and is also \
-				bundled with the XVR-2500.}} \
+			{item:1.3 or later required} \
+			{item:1.5 or later required for stereo rendering or \
+				[[glp.txt#GLP_Usage][GLP]] and recommended otherwise.  OpenGL 1.5 \
+				is part of Solaris 10 Update 1 and is also bundled with the \
+				XVR-2500.}} \
 	| Graphics card with decent 2D performance \
 		{list type=ul: \
 			{item:For applications that use stereo or transparent overlays, a high-\
@@ -102,16 +100,28 @@ encounter any difficulties.
 				the client.}} \
 		[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
 		{list type=ul: \
-			{item:The VirtualGL Direct Mode client will use OpenGL if installed. \
-				This will produce better performance on some 3D accelerators, such as \
-				the XVR-1200.} \
-			{item:OpenGL required if stereo or transparent overlays are to be \
+			{item:OpenGL 1.3 or later recommended if the client has a 3D \
+				accelerator installed, such as the XVR-1200.  If available, the \
+				VirtualGL Direct Mode client will draw images using OpenGL, which \
+				improves the client's performance on some Sun 3D accelerators.} \
+			{item:OpenGL 1.3 or later required if stereo or transparent overlays are to be \
 				used.}} \
 	|
 | O/S \
 	| Solaris 8 or higher \
 	| Solaris 8 or higher \
 	|
+| [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patches]] \
+	| {list type=ul: \
+			{item:__OpenGL 1.5:__  120812-12 or 120812-14 (or later) required for \
+				stereo rendering.  Recommended otherwise} \
+			{item:__XVR-2500 ("kfb") Drivers:__ 120928-10 (or later) required for stereo \
+				rendering.  Recommended otherwise} \
+			{item:__OpenGL 1.3, 32-bit:__ 113886-38 or 113886-41 (or later) \
+				recommended} \
+			{item:__OpenGL 1.3, 64-bit:__ 113887-38 or 113887-41 (or later) \
+				recommended}} \
+	| {:} |
 | Other Software \
 	| {list type=ul: \
 			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]]} \

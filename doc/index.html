@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2006-11-30T13:50:36-06:00">
+<meta name="date" content="2006-12-01T02:17:06-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>VirtualGL 2.0 User&rsquo;s Guide</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -486,35 +486,36 @@ us</a></span><a name="idx007"></a> if you encounter any difficulties.</p>
     <td class="high standard">Graphics</td>
     <td class="standard">Decent 3D graphics accelerator <ul class="Itemize"><li>
     Tested with
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx008"></a>
-    (&ldquo;jfb&rdquo;) and
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx009"></a>
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr600/" class="remote">XVR-600</a></span><a name="idx008"></a>,
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx009"></a>
+    (&ldquo;jfb&rdquo;), and
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0010"></a>
     (&ldquo;kfb&rdquo;)
 </li>
 <li>
-    For applications that use stereo, an XVR-2500 with OpenGL 1.5 and
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">patches</a></span><a name="idx0010"></a>
-    120812-12 (or later) and 120928-10 (or later) is required on the server.
+    XVR-2500 required for stereo rendering
 </li></ul> <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun OpenGL</a></span><a name="idx0011"></a> <ul class="Itemize"><li>
-    <em>Minimum version:</em> 1.3 (patches 113886-38 or later and 113887-38
-    or later recommended)
+    1.3 or later required
 </li>
 <li>
-    <em>Recommended version:</em> 1.5 (patch 120812-12 or later recommended.)
-    OpenGL 1.5 is part of Solaris 10 Update 1 and is also bundled with
-    the XVR-2500.
+    1.5 or later required for stereo rendering or
+    <a href="#GLP_Usage">GLP</a><a name="idx0012"></a> and recommended
+    otherwise.  OpenGL 1.5 is part of Solaris 10 Update 1 and is also bundled
+    with the XVR-2500.
 </li></ul></td>
     <td class="standard">Graphics card with decent 2D performance <ul class="Itemize"><li>
     For applications that use stereo or transparent overlays, a high-end
     3D accelerator such as the XVR-1200 or XVR-2500 is required on the
     client.
-</li></ul> <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun OpenGL</a></span><a name="idx0012"></a> <ul class="Itemize"><li>
-    The VirtualGL Direct Mode client will use OpenGL if installed. This
-    will produce better performance on some 3D accelerators, such as the
-    XVR-1200.
+</li></ul> <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun OpenGL</a></span><a name="idx0013"></a> <ul class="Itemize"><li>
+    OpenGL 1.3 or later recommended if the client has a 3D accelerator
+    installed, such as the XVR-1200.  If available, the VirtualGL Direct
+    Mode client will draw images using OpenGL, which improves the client&rsquo;s
+    performance on some Sun 3D accelerators.
 </li>
 <li>
-    OpenGL required if stereo or transparent overlays are to be used.
+    OpenGL 1.3 or later required if stereo or transparent overlays are
+    to be used.
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -523,31 +524,49 @@ us</a></span><a name="idx007"></a> if you encounter any difficulties.</p>
     <td class="standard">Solaris 8 or higher</td>
   </tr>
   <tr class="standard">
+    <td class="high standard"><span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patches</a></span><a name="idx0014"></a></td>
+    <td class="standard"><ul class="Itemize"><li>
+    <em>OpenGL 1.5:</em>  120812-12 or 120812-14 (or later) required for
+    stereo rendering.  Recommended otherwise
+</li>
+<li>
+    <em>XVR-2500 (&ldquo;kfb&rdquo;) Drivers:</em> 120928-10 (or later)
+    required for stereo rendering.  Recommended otherwise
+</li>
+<li>
+    <em>OpenGL 1.3, 32-bit:</em> 113886-38 or 113886-41 (or later) recommended
+</li>
+<li>
+    <em>OpenGL 1.3, 64-bit:</em> 113887-38 or 113887-41 (or later) recommended
+</li></ul></td>
+    <td class="standard"></td>
+  </tr>
+  <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0013"></a>
+    mediaLib</a></span><a name="idx0015"></a>
 </li>
 <li>
     If your system does not ship with SSh pre-installed (older Solaris
     8 systems don&rsquo;t), then download and install an OpenSSh package
     from
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0014"></a>
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0016"></a>
     or <a href="http://www.sunfreeware.com/.">http://www.sunfreeware.com/.</a>
 </li>
 <li>
     X server configured for true color (24/32-bit) [if not using
-    <a href="#GLP_Usage">GLP</a><a name="idx0015"></a>]
+    <a href="#GLP_Usage">GLP</a><a name="idx0017"></a>]
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0016"></a>
+    mediaLib</a></span><a name="idx0018"></a>
 </li>
 <li>
     If your system does not ship with SSh pre-installed (older Solaris
     8 systems don&rsquo;t), then download and install an OpenSSh package
     from
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0017"></a>
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0019"></a>
     or <a href="http://www.sunfreeware.com/.">http://www.sunfreeware.com/.</a>
 </li>
 <li>
@@ -609,18 +628,7 @@ us</a></span><a name="idx007"></a> if you encounter any difficulties.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0018"></a> (v2.4 or higher recommended)
-</li>
-<li>
-    X server configured for true color (24/32-bit)
-</li></ul></td>
-    <td class="standard"><ul class="Itemize"><li>
-    <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0019"></a> (v2.4 or higher recommended)
-</li>
-<li>
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Solaris
-    Patch</a></span><a name="idx0020"></a> 18345-04 (or later)
+    mediaLib</a></span><a name="idx0020"></a> (v2.4 or higher recommended)
 </li>
 <li>
     X server configured for true color (24/32-bit)
@@ -628,6 +636,17 @@ us</a></span><a name="idx007"></a> if you encounter any difficulties.</p>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
     mediaLib</a></span><a name="idx0021"></a> (v2.4 or higher recommended)
+</li>
+<li>
+    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Solaris
+    Patch</a></span><a name="idx0022"></a> 18345-04 (or later)
+</li>
+<li>
+    X server configured for true color (24/32-bit)
+</li></ul></td>
+    <td class="standard"><ul class="Itemize"><li>
+    <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
+    mediaLib</a></span><a name="idx0023"></a> (v2.4 or higher recommended)
 </li>
 <li>
     X server configured for true color (24/32-bit)
@@ -672,7 +691,7 @@ Solaris 10/x86 comes with mediaLib pre-installed, but it is strongly recommended
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     If Direct Mode is to be used,
-    <span class="remote"><a href="http://www.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0022"></a>
+    <span class="remote"><a href="http://www.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0024"></a>
     Exceed 8 or newer is required on the client machine.<br /><br /> <em>Contact
     Gary Romualdez of Hummingbird Ltd. [tel. (416) 496-6393 or
     <script type="text/javascript"><!--
@@ -699,7 +718,7 @@ Solaris 10/x86 comes with mediaLib pre-installed, but it is strongly recommended
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Installing the VirtualGL Server and Direct Mode Client on Linux</h1>
 
 <div class="important"><p class="important">
-Installing the VirtualGL package is necessary on any Linux machine that will act as a VirtualGL server or as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0023"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0024"></a> is to be used.
+Installing the VirtualGL package is necessary on any Linux machine that will act as a VirtualGL server or as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0025"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0026"></a> is to be used.
 </p></div>
 
 
@@ -708,9 +727,9 @@ Installing the VirtualGL package is necessary on any Linux machine that will act
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Obtain the latest TurboJPEG RPM from the &ldquo;Files&rdquo; area of
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0025"></a>.
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0027"></a>.
         <div class="important"><p class="important">
-        .tgz packages are provided for users of non-RPM platforms.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0026"></a> to convert these into .deb packages if you prefer.
+        .tgz packages are provided for users of non-RPM platforms.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0028"></a> to convert these into .deb packages if you prefer.
         </p></div>
     </li>
     <li class="Ordered" value="2">
@@ -731,7 +750,7 @@ rpm&nbsp;-Uvh&nbsp;turbojpeg*.rpm
         If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4 or SuSE
         Linux 9, obtain one of the pre-built VirtualGL RPMs from the files
         area of
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0027"></a>.
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0029"></a>.
         <br /><br /> The Enterprise Linux 2.1 RPM should (theoretically) also
         work with RedHat Linux 7.2 and 7.3 (and maybe 7.1 if patched.)<br />
         The Enterprise Linux 3 RPM should (theoretically) also work with RedHat
@@ -760,7 +779,7 @@ can build your own RPM using the VirtualGL Source RPM (SRPM.)</p>
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Obtain the VirtualGL SRPM from the files area of
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0028"></a>.
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0030"></a>.
     </li>
     <li class="Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the SRPM,
@@ -788,7 +807,7 @@ rpmbuild&nbsp;-ba&nbsp;virtualgl.spec
 <p>If you are using a non-RPM based distribution of Linux, then log in
 as root, download the VirtualGL source tarball from the files area
 of
-<span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0029"></a>,
+<span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0031"></a>,
 uncompress it, <code>cd&nbsp;vgl</code>, and type <code>make&nbsp;install</code>.
 Refer to <code>BUILDING.txt</code> in the source directory for further
 details.</p>
@@ -1096,13 +1115,13 @@ rpm&nbsp;-e&nbsp;VirtualGL
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Installing the VirtualGL Server and Direct Mode Client on Solaris</h1>
 
 <div class="important"><p class="important">
-Installing the VirtualGL package is necessary on any Solaris machine that will act as a VirtualGL server or as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0030"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0031"></a> is to be used.
+Installing the VirtualGL package is necessary on any Solaris machine that will act as a VirtualGL server or as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0032"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0033"></a> is to be used.
 </p></div>
 
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Obtain the latest VirtualGL package from the files area of
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0032"></a>.
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0034"></a>.
     </li>
     <li class="Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package,
@@ -1162,14 +1181,14 @@ keeps it in <code>/opt/csw/etc</code> and SunFreeware keeps it in <code>/usr/loc
 <h2 id="hd005001">5.1&nbsp;Granting VirtualGL Access to the Server&rsquo;s X Display</h2>
 
 <div class="important"><p class="important">
-If you plan to use VirtualGL only in <a href="#GLP_Usage">GLP</a><a name="idx0033"></a> mode, then you can skip this section.
+If you plan to use VirtualGL only in <a href="#GLP_Usage">GLP</a><a name="idx0035"></a> mode, then you can skip this section.
 </p></div>
 
 <p>VirtualGL requires access to the server&rsquo;s 3D graphics card so
 that it can create off-screen pixel buffers (Pbuffers) and redirect
 the 3D rendering from applications into these Pbuffers.  Unfortunately,
 accessing a 3D graphics card on Solaris/x86 systems or on Solaris/Sparc
-systems without <a href="#GLP_Usage">GLP</a><a name="idx0034"></a>
+systems without <a href="#GLP_Usage">GLP</a><a name="idx0036"></a>
 requires going through an X server.  On such systems, the only way
 to share the server&rsquo;s 3D graphics resources among multiple users
 is to grant those users display access to the X server that is running
@@ -1455,14 +1474,14 @@ pkgrm&nbsp;SUNWvgl
 <h1 id="hd006"><a name="file006"></a>6&nbsp;Installing the VirtualGL Direct Mode Client on Windows</h1>
 
 <div class="important"><p class="important">
-Installing the VirtualGL package is necessary on any Windows machine that will act as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0035"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0036"></a> is to be used.
+Installing the VirtualGL package is necessary on any Windows machine that will act as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0037"></a>	client.  It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0038"></a> is to be used.
 </p></div>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
         Download the latest VirtualGL installer package from the files area
         of
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0037"></a>.
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">http://sourceforge.net/projects/virtualgl</a></span><a name="idx0039"></a>.
         The installer will usually be named <code>VirtualGL-{version}.exe</code>.
     </li>
     <li class="Ordered">
@@ -1539,12 +1558,12 @@ the following patches from the Hummingbird support site:</p>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 8.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0038"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0040"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 9.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0039"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0041"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -1584,11 +1603,11 @@ application server and launch applications.  Some servers are configured
 to allow telnet and RSh access, but telnet and RSh both send passwords
 unencrypted over the network and are thus being phased out in favor
 of SSh.  If
-<span class="remote"><a href="http://www.cygwin.com/" class="remote">Cygwin</a></span><a name="idx0040"></a>
+<span class="remote"><a href="http://www.cygwin.com/" class="remote">Cygwin</a></span><a name="idx0042"></a>
 is already installed on your Windows VirtualGL client machine, then
 you can use the SSh client included in Cygwin.  Otherwise, download
 and install
-<span class="remote"><a href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/" class="remote">PuTTY</a></span><a name="idx0041"></a>.</p>
+<span class="remote"><a href="http://www.chiark.greenend.org.uk/%7Esgtatham/putty/" class="remote">PuTTY</a></span><a name="idx0043"></a>.</p>
 
 
 <h2 id="hd006003">6.3&nbsp;Installing the VirtualGL Client as a Windows Service</h2>
@@ -2001,7 +2020,7 @@ of compressing and delivering images to the client(s).</p>
     </li>
     <li class="Itemize asterisk">
         X proxies cannot be used with <a href="#Advanced_OpenGL">advanced OpenGL
-        features</a><a name="idx0042"></a>, such as stereo or overlays.
+        features</a><a name="idx0044"></a>, such as stereo or overlays.
     </li>
 </ul>
 
@@ -2022,7 +2041,7 @@ support GLX.</p>
 <h2 id="hd009001">9.1&nbsp;TurboVNC</h2>
 
 <p>TurboVNC is essentially just a version of
-<span class="remote"><a href="http://www.tightvnc.com/" class="remote">TightVNC</a></span><a name="idx0043"></a>
+<span class="remote"><a href="http://www.tightvnc.com/" class="remote">TightVNC</a></span><a name="idx0045"></a>
 with optimizations to make it perform at peak efficiency with full-screen
 video workloads (which is, in a nutshell, what VirtualGL produces.)
 These optimizations include:</p>
@@ -2217,7 +2236,7 @@ jobs to any graphics pipe in a multi-pipe system.</p>
 <p>Version 2.0 of VirtualGL for Sparc/Solaris can use GLP if it is available.
 Currently, GLP is available only in
 <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-OpenGL</a></span><a name="idx0044"></a> 1.5 for Sparc/Solaris.</p>
+OpenGL</a></span><a name="idx0046"></a> 1.5 for Sparc/Solaris.</p>
 
 <p>See <a href="http://www.opengl.org/about/arb/meeting_notes/notes/glP_presentation.pdf">http://www.opengl.org/about/arb/meeting_notes/notes/glP_presentation.pdf</a>
 for more details on GLP.</p>
@@ -2360,7 +2379,7 @@ configuration, and VirtualGL would have to be made DMX-aware for it
 to perform the same job.  Maybe at some point in the future &hellip;
 If you have a need for such a configuration,
 <span class="remote"><a href="http://sourceforge.net/users/dcommander" class="remote">let
-us know</a></span><a name="idx0045"></a>.</p>
+us know</a></span><a name="idx0047"></a>.</p>
 
 
 <h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
@@ -3228,7 +3247,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_GLLIB</code></td>
     <td class="standard"></td>
-    <td class="standard"><em> The location of an alternate OpenGL library</em> <br /><br /> Normally, VirtualGL loads the first OpenGL dynamic library that it finds in the dynamic linker path (usually <code>/usr/lib/libGL.so.1</code>, <code>/usr/lib64/libGL.so.1</code>,  or <code>/usr/lib/64/libGL.so.1</code>.)  You can use this setting to explicitly specify another OpenGL dynamic library to load. <br /><br /> Normally, you shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t work.  However, this setting is necessary when using VirtualGL with <a href="#Chromium">Chromium</a><a name="idx0046"></a>.</td>
+    <td class="standard"><em> The location of an alternate OpenGL library</em> <br /><br /> Normally, VirtualGL loads the first OpenGL dynamic library that it finds in the dynamic linker path (usually <code>/usr/lib/libGL.so.1</code>, <code>/usr/lib64/libGL.so.1</code>,  or <code>/usr/lib/64/libGL.so.1</code>.)  You can use this setting to explicitly specify another OpenGL dynamic library to load. <br /><br /> Normally, you shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t work.  However, this setting is necessary when using VirtualGL with <a href="#Chromium">Chromium</a><a name="idx0048"></a>.</td>
     <td class="standard"></td>
   </tr>
   <tr class="standard">
@@ -3270,7 +3289,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_READBACK=0</code><br /><code>VGL_READBACK=1</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0047"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window running on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
+    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0049"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window running on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
     <td class="standard">Readback enabled</td>
   </tr>
   <tr class="standard">
