@@ -74,6 +74,8 @@ do
 	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;
 	-s*)        VGL_SSL=0         ; export VGL_SSL      ;;
 	+s*)        VGL_SSL=1         ; export VGL_SSL      ;;
+	-prog*)     VGL_PROGRESSIVE=0 ; export VGL_PROGRESSIVE  ;;
+	+prog*)     VGL_PROGRESSIVE=1 ; export VGL_PROGRESSIVE  ;;
 	-pr*)       VGL_PROFILE=0     ; export VGL_PROFILE  ;;
 	+pr*)       VGL_PROFILE=1     ; export VGL_PROFILE  ;;
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
