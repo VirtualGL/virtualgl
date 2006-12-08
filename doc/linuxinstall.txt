@@ -144,8 +144,6 @@ server by replacing the references to ''vglgenkey'' below with
 		chmod 750 /etc/opt/VirtualGL
 		---
 
-	#. Log in as root from the text console.
-
 	#. If the server machine is configured to boot into runlevel 3 (text login),
 		then configure it to boot into a graphical login by changing the first line
 		of ''/etc/inittab'' from{nl}
@@ -266,7 +264,7 @@ server by replacing the references to ''vglgenkey'' below with
 		In particular, make sure that XTEST doesn't show up in the list of
 		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
 		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 7 didn't take for some reason.
+		that the change in Step 6 didn't take for some reason.
 
 ** Automatically Starting the VirtualGL Client
 
