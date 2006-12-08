@@ -89,6 +89,7 @@ class pbwin
 		int _usesunray;
 		#endif
 		bool _truecolor;
+		bool _gammacorrectedvisual;
 };
 
 #endif

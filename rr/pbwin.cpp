@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef USEMEDIALIB
+#include <mlib.h>
+#endif
 #if defined(sun)||defined(linux)
 #include "rrsunray.h"
 #endif
@@ -161,6 +164,10 @@ pbwin::pbwin(Display *windpy, Window win)
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
+	_gammacorrectedvisual=false;
+	double gamma=__vglVisualGamma(windpy, DefaultScreen(windpy),
+		xwa.visual->visualid);
+	if(gamma==1.00) _gammacorrectedvisual=true;
 }
 
 pbwin::~pbwin(void)
@@ -492,6 +499,49 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
+
+	// Gamma correction
+	if(!_gammacorrectedvisual && fconfig.gcf!=0.0 && fconfig.gcf!=1.0
+		&& fconfig.gcf!=-1.0)
+	{
+		static bool first=true;
+		#ifdef USEMEDIALIB
+		if(first)
+		{
+			first=false;
+			if(fconfig.verbose)
+				rrout.println("Using mediaLib gamma correction (correction factor=%f)\n", fconfig.gcf);
+		}
+		mlib_image *image=NULL;
+		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
+		{
+			unsigned char *luts[3]={fconfig.lut, fconfig.lut, fconfig.lut};
+			mlib_ImageLookUp_Inp(image, (const void **)luts);
+			mlib_ImageDelete(image);
+		}
+		else
+		{
+		#endif
+		if(first)
+		{
+			first=false;
+			if(fconfig.verbose)
+				rrout.println("Using software gamma correction (correction factor=%f)\n", fconfig.gcf);
+		}
+		unsigned char *ptr1=bits;
+		for(int i=0; i<h; i++, ptr1+=pitch)
+		{
+			unsigned char *ptr2=ptr1;
+			for(int j=0; j<w*ps; j++, ptr2++)
+			{
+				*ptr2=fconfig.lut[*ptr2];
+			}
+		}
+		#ifdef USEMEDIALIB
+		}
+		#endif
+	}
+
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 

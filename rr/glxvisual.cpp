@@ -326,6 +326,16 @@ int __vglVisualClass(Display *dpy, int screen, VisualID vid)
 	return TrueColor;
 }
 
+double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
+{
+	buildVisAttribTable(dpy, screen);
+	for(int i=0; i<_vaentries; i++)
+	{
+		if(_va[i].visualid==vid) return _va[i].gamma;
+	}		
+	return 2.22;
+}
+
 VisualID __vglMatchVisual(Display *dpy, int screen,
 	int depth, int c_class, int level, int stereo, int trans)
 {
@@ -340,8 +350,8 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 		int match=1;
 		if(_va[i].c_class!=c_class) match=0;
 		if(_va[i].depth!=depth) match=0;
-		if(fconfig.gamma && _va[i].gamma!=1.0) match=0;
-		if(!fconfig.gamma && _va[i].gamma==1.0) match=0;
+		if(fconfig.usesungamma && _va[i].gamma!=1.0) match=0;
+		if(!fconfig.usesungamma && _va[i].gamma==1.0) match=0;
 		if(stereo!=_va[i].stereo) match=0;
 		if(stereo && !_va[i].db) match=0;
 		if(stereo && !_va[i].gl) match=0;

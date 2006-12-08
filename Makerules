@@ -116,6 +116,11 @@ endif
 ifeq ($(JPEGLIB),)
 JPEGLIB = $(DEFAULTJPEGLIB)
 endif
+ifeq ($(JPEGLIB), medialib)
+CFLAGS := $(CFLAGS) -DUSEMEDIALIB
+CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
+FAKERLINK := $(FAKERLINK) -lmlib
+endif
 
 # Implicit rules
 $(ODIR)/%.o: %.c
