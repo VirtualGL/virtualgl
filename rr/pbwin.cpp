@@ -515,7 +515,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		mlib_image *image=NULL;
 		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
 		{
-			unsigned char *luts[3]={fconfig.lut, fconfig.lut, fconfig.lut};
+			unsigned char *luts[4]={fconfig.lut, fconfig.lut, fconfig.lut, fconfig.lut};
 			mlib_ImageLookUp_Inp(image, (const void **)luts);
 			mlib_ImageDelete(image);
 		}
