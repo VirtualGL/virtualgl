@@ -152,6 +152,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_blitter=NULL;
 	_rrdpy=NULL;
 	_prof_rb.setname("Readback  ");
+	_prof_gamma.setname("Gamma     ");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
@@ -500,7 +501,11 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	}
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 
+	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
+	checkgl("Read Pixels");
+
 	// Gamma correction
+	_prof_gamma.startframe();
 	if(!_gammacorrectedvisual && fconfig.gcf!=0.0 && fconfig.gcf!=1.0
 		&& fconfig.gcf!=-1.0)
 	{
@@ -528,22 +533,14 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			if(fconfig.verbose)
 				rrout.println("Using software gamma correction (correction factor=%f)\n", fconfig.gcf);
 		}
-		unsigned char *ptr1=bits;
-		for(int i=0; i<h; i++, ptr1+=pitch)
-		{
-			unsigned char *ptr2=ptr1;
-			for(int j=0; j<w*ps; j++, ptr2++)
-			{
-				*ptr2=fconfig.lut[*ptr2];
-			}
-		}
+		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*h]);
+		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++) *ptr1=fconfig.lut16[*ptr1];
+		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.lut[bits[pitch*h-1]];
 		#ifdef USEMEDIALIB
 		}
 		#endif
 	}
-
-	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
-	checkgl("Read Pixels");
+	_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 
 	// If automatic faker testing is enabled, store the FB color in an
 	// environment variable so the test program can verify it

@@ -272,6 +272,7 @@ class FakerConfig
 		bool usesungamma;
 		double oldgcf, gcf;
 		unsigned char lut[256];
+		unsigned short lut16[65536];
 
 	private:
 
@@ -345,6 +346,12 @@ class FakerConfig
 					{
 						double g=gcf>0.0? 1.0/gcf : -gcf;
 						lut[i]=(unsigned char)(255.*pow((double)i/255., g)+0.5);
+					}
+					for(int i=0; i<65536; i++)
+					{
+						double g=gcf>0.0? 1.0/gcf : -gcf;
+						lut16[i]=(unsigned short)(255.*pow((double)(i/256)/255., g)+0.5)<<8;
+						lut16[i]|=(unsigned short)(255.*pow((double)(i%256)/255., g)+0.5);
 					}
 				}
 			}
