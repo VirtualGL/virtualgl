@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "rr.h"
 #include "rrutil.h"
 #include <stdio.h>
@@ -39,6 +40,10 @@
 #define getconfigdouble(envvar, val, min, max) {  \
 	getconfig("RR"envvar, val, min, max);  \
 	getconfig("VGL_"envvar, val, min, max);}
+
+#define getconfiggamma(envvar) {  \
+	getgamma("RR"envvar);  \
+	getgamma("VGL_"envvar);}
 
 #define DEFLOQUAL 90
 #define DEFHIQUAL 95
@@ -71,7 +76,14 @@ class FakerConfig
 			sync=false;
 			np=min(numprocs(), MAXPROCS);  if(np>1) np--;
 			autotest=false;
-			gamma=true;
+			oldgcf=0.0;
+			#ifdef SUNOGL
+			gcf=2.22;
+			usesungamma=true;
+			#else
+			gcf=1.0;
+			usesungamma=false;
+			#endif
 			transpixel=-1;
 			tilesize=RR_DEFAULTTILESIZE;
 			trace=false;
@@ -152,7 +164,7 @@ class FakerConfig
 			getconfigbool("SYNC", sync);
 			getconfigint("NPROCS", np, 0, 1024);
 			getconfigbool("AUTOTEST", autotest);
-			getconfigbool("GAMMA", gamma);
+			getconfiggamma("GAMMA");
 			getconfigint("TRANSPIXEL", transpixel, 0, 255);
 			getconfigint("TILESIZE", tilesize, 8, 1024);
 			getconfigbool("TRACE", trace);
@@ -208,6 +220,7 @@ class FakerConfig
 			if(compress<0 || compress>=RR_COMPRESSOPT) compress=RRCOMP_DEFAULT;
 			if(transpixel<0 || transpixel>255) transpixel=-1;
 			if(tilesize<8 || tilesize>1024) tilesize=RR_DEFAULTTILESIZE;
+			buildlut();
 		}
 
 		void setloqual(void)
@@ -244,7 +257,6 @@ class FakerConfig
 		bool usewindow;
 		bool sync;
 		bool autotest;
-		bool gamma;
 		bool trace;
 		bool readback;
 		bool verbose;
@@ -256,6 +268,10 @@ class FakerConfig
 		unsigned int guimod;
 
 		double fps;
+
+		bool usesungamma;
+		double oldgcf, gcf;
+		unsigned char lut[256];
 
 	private:
 
@@ -293,6 +309,44 @@ class FakerConfig
 			{
 				if(!strncmp(temp, "1", 1)) val=true;
 				else if(!strncmp(temp, "0", 1)) val=false;
+			}
+		}
+
+		void getgamma(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0)
+			{
+				if(!strcmp(temp, "1"))
+				{
+					usesungamma=true;  gcf=2.22;
+				}
+				else if(!strcmp(temp, "0"))
+				{
+					usesungamma=false;  gcf=1.0;
+				}
+				else
+				{
+					usesungamma=false;
+					char *t=NULL;  double dtemp=strtod(temp, &t);
+					if(t && t!=temp) gcf=dtemp;
+				}
+			}
+		}
+
+		void buildlut(void)
+		{
+			if(gcf!=oldgcf)
+			{
+				oldgcf=gcf;
+				if(gcf!=0.0 && gcf!=1.0 && gcf!=-1.0)
+				{
+					for(int i=0; i<256; i++)
+					{
+						double g=gcf>0.0? 1.0/gcf : -gcf;
+						lut[i]=(unsigned char)(255.*pow((double)i/255., g)+0.5);
+					}
+				}
 			}
 		}
 
