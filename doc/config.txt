@@ -162,7 +162,7 @@ Each method of configuration takes precedence over the previous method:
 		as the gamma correction factor.  You can also specify a negative \
 		value to apply a "de-gamma" function.  Specifying a gamma correction \
 		factor of G (where G < 0) is equivalent to specifying a gamma correction \
-		factor if -1/G. \
+		factor of -1/G. \
 	| ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, ''VGL_GAMMA=0'' otherwise \
 	|
 | ''VGL_GLLIB'' | {:} \
