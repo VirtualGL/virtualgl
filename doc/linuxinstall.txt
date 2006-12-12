@@ -82,7 +82,8 @@ If installing VirtualGL on a server which is running version 1.0-71xx or
 earlier of the NVidia accelerated GLX drivers, follow the instructions in
 ''/usr/share/doc/NVIDIA_GLX-1.0/README'' regarding setting the appropriate
 permissions for ''/dev/nvidia*''.  This is not necessary with more recent
-versions of the driver.
+versions of the driver.  ''cat /proc/driver/nvidia/version'' to determine
+which version of the NVidia driver is installed on your system.
 
 ** Granting VirtualGL Access to the Server's X Display
 

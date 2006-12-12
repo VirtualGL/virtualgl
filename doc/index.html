@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2006-12-08T14:46:03-06:00">
+<meta name="date" content="2006-12-12T14:22:16-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>VirtualGL 2.0 User&rsquo;s Guide</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -402,6 +402,10 @@ on the user&rsquo;s desktop.  This produces a completely seamless shared
 <li>
     For applications that use stereo, a high-end 3D accelerator such as
     the nVidia Quadro is required on the server.
+</li>
+<li>
+    Install the vendor drivers for your 3D accelerator of choice. Do not
+    use the drivers that ship with Linux, as these do not provide 3D acceleration.
 </li></ul></td>
     <td class="standard">Decent 3D graphics accelerator <ul class="Itemize"><li>
     nVidia strongly recommended
@@ -414,10 +418,17 @@ on the user&rsquo;s desktop.  This produces a completely seamless shared
 <li>
     For applications that use stereo, a high-end 3D accelerator such as
     the nVidia Quadro is required on the server.
+</li>
+<li>
+    Install the vendor drivers for your 3D accelerator of choice. Do not
+    use the drivers that ship with Linux, as these do not provide 3D acceleration.
 </li></ul></td>
     <td class="standard">Graphics card with decent 2D performance <ul class="Itemize"><li>
     For applications that use stereo or transparent overlays, a high-end
     3D accelerator such as the nVidia Quadro is required on the client.
+</li>
+<li>
+    If using a 3D accelarator, install the vendor drivers for that 3D accelerator.
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -819,7 +830,9 @@ details.</p>
 or earlier of the NVidia accelerated GLX drivers, follow the instructions
 in <code>/usr/share/doc/NVIDIA_GLX-1.0/README</code> regarding setting
 the appropriate permissions for <code>/dev/nvidia*</code>.  This is
-not necessary with more recent versions of the driver.</p>
+not necessary with more recent versions of the driver.  <code>cat&nbsp;/proc/driver/nvidia/version</code>
+to determine which version of the NVidia driver is installed on your
+system.</p>
 
 
 <h2 id="hd004001">4.1&nbsp;Granting VirtualGL Access to the Server&rsquo;s X Display</h2>

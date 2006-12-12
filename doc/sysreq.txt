@@ -26,7 +26,10 @@
 				than v8.14 are used.  If you encounter this problem, try driver v8.14 \
 				or older.} \
 			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.}} \
+				as the nVidia Quadro is required on the server.} \
+			{item:Install the vendor drivers for your 3D accelerator of choice. \
+				Do not use the drivers that ship with Linux, as these do not provide \
+				3D acceleration.}} \
 	| Decent 3D graphics accelerator \
 		{list type=ul: \
 			{item:nVidia strongly recommended} \
@@ -34,12 +37,17 @@
 				than v8.14 are used.  If you encounter this problem, try driver v8.14 \
 				or older.} \
 			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.}} \
+				as the nVidia Quadro is required on the server.} \
+			{item:Install the vendor drivers for your 3D accelerator of choice. \
+				Do not use the drivers that ship with Linux, as these do not provide \
+				3D acceleration.}} \
 	| Graphics card with decent 2D performance \
 		{list type=ul: \
 			{item:For applications that use stereo or transparent overlays, a \
 				high-end 3D accelerator such as the nVidia Quadro is required on the \
-				client.}} \
+				client.} \
+			{item:If using a 3D accelarator, install the vendor drivers for \
+				that 3D accelerator.}} \
 	|
 | Recommended O/S \
 	| {list type=ul: \
