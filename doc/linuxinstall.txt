@@ -82,7 +82,8 @@ If installing VirtualGL on a server which is running version 1.0-71xx or
 earlier of the NVidia accelerated GLX drivers, follow the instructions in
 ''/usr/share/doc/NVIDIA_GLX-1.0/README'' regarding setting the appropriate
 permissions for ''/dev/nvidia*''.  This is not necessary with more recent
-versions of the driver.
+versions of the driver.  ''cat /proc/driver/nvidia/version'' to determine
+which version of the NVidia driver is installed on your system.
 
 ** Granting VirtualGL Access to the Server's X Display
 
@@ -143,8 +144,6 @@ server by replacing the references to ''vglgenkey'' below with
 		chgrp vglusers /etc/opt/VirtualGL
 		chmod 750 /etc/opt/VirtualGL
 		---
-
-	#. Log in as root from the text console.
 
 	#. If the server machine is configured to boot into runlevel 3 (text login),
 		then configure it to boot into a graphical login by changing the first line
@@ -266,7 +265,7 @@ server by replacing the references to ''vglgenkey'' below with
 		In particular, make sure that XTEST doesn't show up in the list of
 		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
 		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 7 didn't take for some reason.
+		that the change in Step 6 didn't take for some reason.
 
 ** Automatically Starting the VirtualGL Client
 

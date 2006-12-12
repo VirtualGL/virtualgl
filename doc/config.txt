@@ -107,26 +107,63 @@ Each method of configuration takes precedence over the previous method:
 		compression disabled.) \
 	|	Frame rate governor disabled \
 	|
-| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1'' | ''-g''{nl}or{nl}''+g'' \
-	| __Enable/disable gamma correction (Solaris/Sparc clients only)__ \
+| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1''{nl}''VGL_GAMMA=<gamma''{nl} \
+		''correction''{nl}''factor''> \
+	| ''-g''{nl}or{nl}''+g''{nl}or{nl}''-gamma <gamma''{nl}''correction'' \
+		{nl}''factor>'' \
+	| "Gamma" refers to the relationship between the intensity of light which \
+		your computer's monitor is instructed to display and the intensity which \
+		it actually displays.  The curve is an exponential curve of the form \
+		__Y = X{^G}__, where X is between 0 and 1.  G is called the "gamma" of the \
+		monitor.  PC monitors and TV's usually have a gamma of around 2.2. \
 		{nl}{nl} \
-		On Solaris/Sparc, when an OpenGL application requests an X visual, it \
-		will be given a gamma-corrected visual (Solaris calls these "linear \
-		visuals") unless it specifically requests otherwise.  Gamma-corrected \
-		visuals are subject to the gamma correction value assigned with \
-		''fbconfig''.  If the gamma correction value is set to 1.0, then \
-		corrected visuals will look the same as uncorrected visuals. \
+		Some of the math involved in 3D rendering assumes a linear gamma \
+		(G = 1.0), so technically speaking, 3D applications will not display with \
+		mathematical correctness unless the pixels are "gamma corrected" to \
+		counterbalance the non-linear response curve of the monitor.  But some \
+		systems do not have any form of built-in gamma correction, and thus the \
+		applications developed for such systems have usually been designed to \
+		display properly without gamma correction.  Gamma correction involves \
+		passing pixels through a function of the form __X = W{^1/G}__, where G \
+		is the "gamma correction factor" and should be equal to the gamma of the \
+		monitor.  So the final output is __Y = X{^G} = (W{^1/G}){^G} = W__, which \
+		describes a linear relationship between the intensity of the pixels drawn \
+		by the application and the intensity of the pixels displayed by the \
+		monitor. \
 		{nl}{nl} \
-		When an OpenGL application is being remotely displayed onto a \
-		Solaris/Sparc client using VirtualGL, VirtualGL tries to emulate the \
-		behavior of the Solaris/Sparc client machine by forcing the application \
-		to use a gamma-corrected visual.  But setting ''VGL_GAMMA=0'' on the \
-		server (or passing ''-g'' to ''vglrun'') overrides that behavior and \
-		forces the application to use an uncorrected visual. \
+		__''VGL_GAMMA=1'' or ''vglrun +g'' : Enable gamma correction with default \
+			settings__ \
 		{nl}{nl} \
-		__** This setting has no effect if the client machine is not running \
-		Solaris/Sparc.  It also has no effect in an X proxy session. **__ \
-	| Gamma correction enabled \
+		This option tells VirtualGL to enable gamma correction using the best \
+		available method.  If VirtualGL is remotely displaying to a Solaris/Sparc \
+		X server which has gamma-corrected X visuals, then VGL will attempt to \
+		assign one of these visuals to the application.  This causes the 3D \
+		output of the application to be gamma corrected by the factor specified \
+		in ''fbconfig'' on the client machine (default: 2.22.)  Otherwise, if the \
+		X server (or proxy) does not have gamma-corrected X visuals or if the \
+		gamma-corrected visuals it has do not match the application's needs, then \
+		VirtualGL performs gamma correction internally and uses a default gamma \
+		correction factor of 2.22.  This option emulates the default behavior of \
+		OpenGL applications running locally on Sparc machines. \
+		{nl}{nl} \
+		__''VGL_GAMMA=0'' or ''vglrun -g'' : Disable gamma correction__ \
+		{nl}{nl} \
+		This option tells VGL not to use gamma-corrected visuals, even if they are \
+		available on the X server, and disables VGL's internal gamma correction \
+		system as well.  This emulates the default behavior of OpenGL \
+		applications running locally on Linux or Solaris/x86 machines. \
+		{nl}{nl} \
+		__''VGL_GAMMA={gamma correction factor}'' or ''vglrun -gamma {gamma \
+			correction factor}'' : Enable VGL's internal gamma \
+			correction system with the specified gamma correction factor__ \
+		{nl}{nl} \
+		If ''VGL_GAMMA'' is set to an arbitrary floating point value, then \
+		VirtualGL performs gamma correction internally using the specified value \
+		as the gamma correction factor.  You can also specify a negative \
+		value to apply a "de-gamma" function.  Specifying a gamma correction \
+		factor of G (where G < 0) is equivalent to specifying a gamma correction \
+		factor of -1/G. \
+	| ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, ''VGL_GAMMA=0'' otherwise \
 	|
 | ''VGL_GLLIB'' | {:} \
 	| __ The location of an alternate OpenGL library__ \
