@@ -20,6 +20,9 @@
 
 #define _catch(f) {if((f)==-1) {printf("TJPEG: %s\n", tjGetErrorStr());  goto finally;}}
 
+const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:1:1", "GRAY"};
+const char *_subnames[NUMSUBOPT]={"444", "422", "411", "GRAY"};
+
 void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 {
 	int roffset=(flags&TJ_BGR)?2:0, goffset=1, boffset=(flags&TJ_BGR)?0:2, i,
@@ -53,12 +56,12 @@ void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 	}
 }
 
-int checkbuf(unsigned char *buf, int w, int h, int ps, int flags)
+int checkbuf(unsigned char *buf, int w, int h, int ps, int subsamp, int flags)
 {
 	int roffset=(flags&TJ_BGR)?2:0, goffset=1, boffset=(flags&TJ_BGR)?0:2, i,
 		_i, j;
 	if(flags&TJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
-	if(flags&TJ_GRAYSCALE)
+	if(subsamp==TJ_GRAYSCALE)
 	{
 		for(_i=0; _i<16; _i++)
 		{
@@ -173,9 +176,8 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 		if(ps==3) pixformat="RGB";
 		else {if(flags&TJ_ALPHAFIRST) pixformat="ARGB";  else pixformat="RGBA";}
 	}
-	printf("%s %s -> %s Q%d ... ", pixformat, (flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ",
-		flags&TJ_GRAYSCALE? "GRAY":(subsamp==TJ_444? "4:4:4":(subsamp==TJ_422? "4:2:2":"4:1:1")),
-		qual);
+	printf("%s %s -> %s Q%d ... ", pixformat,
+		(flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ", _subnamel[subsamp], qual);
 
 	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
@@ -188,9 +190,8 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	_catch(tjCompress(hnd, bmpbuf, w, 0, h, ps, jpegbuf, size, subsamp, qual, flags));
 	t=rrtime()-t;
 
-	sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat, (flags&TJ_BOTTOMUP)?
-		"BU":"TD", flags&TJ_GRAYSCALE? "GRAY":(subsamp==TJ_444? "444":(subsamp==TJ_422? "422":"411")),
-		qual);
+	sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat,
+		(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp], qual);
 	writejpeg(jpegbuf, *size, tempstr);
 	printf("Done.  %f ms\n  Result in %s\n", t*1000., tempstr);
 
@@ -232,7 +233,7 @@ void gentestbmp(tjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	_catch(tjDecompress(hnd, jpegbuf, jpegsize, bmpbuf, w, w*ps, h, ps, flags));
 	t=rrtime()-t;
 
-	if(checkbuf(bmpbuf, w, h, ps, flags)) printf("Passed.");
+	if(checkbuf(bmpbuf, w, h, ps, subsamp, flags)) printf("Passed.");
 	else printf("FAILED!");
 
 	printf("  %f ms\n\n", t*1000.);
@@ -241,7 +242,7 @@ void gentestbmp(tjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	if(bmpbuf) free(bmpbuf);
 }
 
-void dotest(int w, int h, int ps, char *basefilename)
+void dotest(int w, int h, int ps, int subsamp, char *basefilename)
 {
 	tjhandle hnd=NULL, dhnd=NULL;  unsigned char *jpegbuf=NULL;
 	unsigned long size;
@@ -256,58 +257,31 @@ void dotest(int w, int h, int ps, char *basefilename)
 	if((dhnd=tjInitDecompress())==NULL)
 		{printf("Error in tjInitDecompress():\n%s\n", tjGetErrorStr());  goto finally;}
 
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, 0);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, 0);
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, 0);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, 0);
 
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_BGR);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_BGR);
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_BGR);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_BGR);
 
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_BOTTOMUP);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_BOTTOMUP);
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_BOTTOMUP);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_BOTTOMUP);
 
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_BGR|TJ_BOTTOMUP);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_BGR|TJ_BOTTOMUP);
-
-	if(ps==4)
-	{
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST);
-
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR);
-
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BOTTOMUP);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BOTTOMUP);
-
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
-	}
-
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE);
-
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR);
-
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BOTTOMUP);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BOTTOMUP);
-
-	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR|TJ_BOTTOMUP);
-	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR|TJ_BOTTOMUP);
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_BGR|TJ_BOTTOMUP);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_BGR|TJ_BOTTOMUP);
 
 	if(ps==4)
 	{
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST);
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST);
 
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR);
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BGR);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BGR);
 
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BOTTOMUP);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BOTTOMUP);
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BOTTOMUP);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BOTTOMUP);
 
-		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
-		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, subsamp, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
 	}
 
 	finally:
@@ -369,8 +343,10 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
-	dotest(35, 39, 3, "test");
-	dotest(35, 39, 4, "test");
+	dotest(35, 39, 3, TJ_444, "test");
+	dotest(35, 39, 4, TJ_444, "test");
+	dotest(35, 39, 3, TJ_GRAYSCALE, "test");
+	dotest(35, 39, 4, TJ_GRAYSCALE, "test");
 	dotest1();
 
 	return 0;
