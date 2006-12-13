@@ -23,11 +23,16 @@
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  goto bailout;}}
 
-int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, gray=0;
+int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 const int _flags[BMPPIXELFORMATS]={0, 0, TJ_BGR, TJ_BGR,
 	TJ_BGR|TJ_ALPHAFIRST, TJ_ALPHAFIRST};
+const int _rindex[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
+const int _gindex[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
+const int _bindex[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 const char *_pfname[]={"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
+const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:1:1", "GRAY"};
+const char *_subnames[NUMSUBOPT]={"444", "422", "411", "GRAY"};
 
 void printsigfig(double val, int figs)
 {
@@ -56,17 +61,13 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	rrtimer timer; double elapsed;
 	int jpgbufsize=0, i, j, tilesizex, tilesizey, numtilesx, numtilesy, ITER;
 	unsigned long *comptilesize=NULL;
-	int flags=(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)|(forcesse2?TJ_FORCESSE2:0)|(forcesse3?TJ_FORCESSE3:0);
+	int flags=(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)
+		|(forcesse2?TJ_FORCESSE2:0)|(forcesse3?TJ_FORCESSE3:0);
 	int ps=_ps[pf];
 	int pitch=w*ps;
-	const char *subid1=
-		(gray? "GRAY": (jpegsub==TJ_444?"444": jpegsub==TJ_422? "422":"411"));
-	const char *subid2=
-		(gray? "GRAY": (jpegsub==TJ_444?"4:4:4": jpegsub==TJ_422? "4:2:2":"4:1:1"));
 
 	flags |= _flags[pf];
 	if(bu) flags |= TJ_BOTTOMUP;
-	if(gray) flags |= TJ_GRAYSCALE;
 
 	if((rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL)
 	{
@@ -75,7 +76,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	}
 
 	if(!quiet) printf("\n>>>>>  %s (%s) <--> JPEG %s Q%d  <<<<<\n", _pfname[pf],
-		bu?"Bottom-up":"Top-down", subid2, qual);
+		bu?"Bottom-up":"Top-down", _subnamel[jpegsub], qual);
 	if(dotile) {tilesizex=tilesizey=4;}  else {tilesizex=w;  tilesizey=h;}
 
 	do
@@ -102,7 +103,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 
 		// Compression test
 		if(quiet) printf("%s\t%s\t%s\t%d\t",  _pfname[pf], bu?"BU":"TD",
-			subid2, qual);
+			_subnamel[jpegsub], qual);
 		for(i=0; i<h; i++) memcpy(&rgbbuf[pitch*i], &srcbuf[w*ps*i], w*ps);
 		if((hnd=tjInitCompress())==NULL)
 		{
@@ -133,7 +134,8 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		_catch(tjDestroy(hnd));
 		if(quiet)
 		{
-			if(tilesizex==w && tilesizey==h) printf("Full     \t");  else printf("%-4d %-4d\t", tilesizex, tilesizey);
+			if(tilesizex==w && tilesizey==h) printf("Full     \t");
+			else printf("%-4d %-4d\t", tilesizex, tilesizey);
 			printsigfig((double)(w*h)/1000000.*(double)ITER/elapsed, 4);
 			printf("\t");
 			printsigfig((double)(w*h*ps)/(double)jpgbufsize, 4);
@@ -141,16 +143,20 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 		else
 		{
-			if(tilesizex==w && tilesizey==h) printf("\nFull image\n");  else printf("\nTile size: %d x %d\n", tilesizex, tilesizey);
+			if(tilesizex==w && tilesizey==h) printf("\nFull image\n");
+			else printf("\nTile size: %d x %d\n", tilesizex, tilesizey);
 			printf("C--> Frame rate:           %f fps\n", (double)ITER/elapsed);
 			printf("     Output image size:    %d bytes\n", jpgbufsize);
-			printf("     Compression ratio:    %f:1\n", (double)(w*h*ps)/(double)jpgbufsize);
-			printf("     Source throughput:    %f Megapixels/sec\n", (double)(w*h)/1000000.*(double)ITER/elapsed);
-			printf("     Output bit stream:    %f Megabits/sec\n", (double)jpgbufsize*8./1000000.*(double)ITER/elapsed);
+			printf("     Compression ratio:    %f:1\n",
+				(double)(w*h*ps)/(double)jpgbufsize);
+			printf("     Source throughput:    %f Megapixels/sec\n",
+				(double)(w*h)/1000000.*(double)ITER/elapsed);
+			printf("     Output bit stream:    %f Megabits/sec\n",
+				(double)jpgbufsize*8./1000000.*(double)ITER/elapsed);
 		}
 		if(tilesizex==w && tilesizey==h)
 		{
-			sprintf(tempstr, "%s_%sQ%d.jpg", filename, subid1, qual);
+			sprintf(tempstr, "%s_%sQ%d.jpg", filename, _subnames[jpegsub], qual);
 			if((outfile=fopen(tempstr, "wb"))==NULL)
 			{
 				puts("ERROR: Could not open reference image");
@@ -200,11 +206,13 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		else
 		{
 			printf("D--> Frame rate:           %f fps\n", (double)ITER/elapsed);
-			printf("     Dest. throughput:     %f Megapixels/sec\n", (double)(w*h)/1000000.*(double)ITER/elapsed);
+			printf("     Dest. throughput:     %f Megapixels/sec\n",
+				(double)(w*h)/1000000.*(double)ITER/elapsed);
 		}
-		if(tilesizex==w && tilesizey==h) sprintf(tempstr, "%s_%sQ%d_full.%s", filename,
-			subid1, qual, useppm?"ppm":"bmp");
-		else sprintf(tempstr, "%s_%sQ%d_%dx%d.%s", filename, subid1,
+		if(tilesizex==w && tilesizey==h)
+			sprintf(tempstr, "%s_%sQ%d_full.%s", filename, _subnames[jpegsub], qual,
+				useppm?"ppm":"bmp");
+		else sprintf(tempstr, "%s_%sQ%d_%dx%d.%s", filename, _subnames[jpegsub],
 			qual, tilesizex, tilesizey, useppm?"ppm":"bmp");
 		if(savebmp(tempstr, rgbbuf, w, h, pf, pitch, bu)==-1)
 		{
@@ -212,9 +220,29 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			goto bailout;
 		}
 		sprintf(strrchr(tempstr, '.'), "-err.%s", useppm?"ppm":"bmp");
-		if(!quiet) printf("Computing compression error and saving to %s.\n", tempstr);
-		for(j=0; j<h; j++) for(i=0; i<w*ps; i++)
-			rgbbuf[pitch*j+i]=abs(rgbbuf[pitch*j+i]-srcbuf[w*ps*j+i]);
+		if(!quiet)
+			printf("Computing compression error and saving to %s.\n", tempstr);
+		if(jpegsub==TJ_GRAYSCALE)
+		{
+			for(j=0; j<h; j++)
+			{
+				for(i=0; i<w*ps; i+=ps)
+				{
+					int y=(int)((double)srcbuf[w*ps*j+i+_rindex[pf]]*0.299
+						+ (double)srcbuf[w*ps*j+i+_gindex[pf]]*0.587
+						+ (double)srcbuf[w*ps*j+i+_bindex[pf]]*0.114 + 0.5);
+					if(y>255) y=255;  if(y<0) y=0;
+					rgbbuf[pitch*j+i+_rindex[pf]]=abs(rgbbuf[pitch*j+i+_rindex[pf]]-y);
+					rgbbuf[pitch*j+i+_gindex[pf]]=abs(rgbbuf[pitch*j+i+_gindex[pf]]-y);
+					rgbbuf[pitch*j+i+_bindex[pf]]=abs(rgbbuf[pitch*j+i+_bindex[pf]]-y);
+				}
+			}
+		}		
+		else
+		{
+			for(j=0; j<h; j++) for(i=0; i<w*ps; i++)
+				rgbbuf[pitch*j+i]=abs(rgbbuf[pitch*j+i]-srcbuf[w*ps*j+i]);
+		}
 		if(savebmp(tempstr, rgbbuf, w, h, pf, pitch, bu)==-1)
 		{
 			printf("ERROR saving bitmap: %s\n", bmpgeterr());
@@ -252,7 +280,7 @@ int main(int argc, char *argv[])
 	unsigned char *bmpbuf=NULL;  int w, h, i, useppm=0;
 	int qual, dotile=0, quiet=0, hiqual=-1;  char *temp;
 	BMPPIXELFORMAT pf=BMP_BGR;
-	int bu=0;
+	int bu=0, gray=0;
 
 	printf("\n");
 
@@ -266,8 +294,6 @@ int main(int argc, char *argv[])
 		printf("       Force MMX, SSE, or SSE2 code paths in Intel codec\n\n");
 		printf("       [-rgb | -bgr | -rgba | -bgra | -abgr | -argb]\n");
 		printf("       Test the specified color conversion path in the codec (default: BGR)\n\n");
-		printf("       [-gray]\n");
-		printf("       Generate grayscale JPEG\n\n");
 		printf("       [-quiet]\n");
 		printf("       Output in tabular rather than verbose format\n\n");
 		printf("       NOTE: If the quality is specified as a range, i.e. 90-100, a separate\n");
@@ -317,7 +343,6 @@ int main(int argc, char *argv[])
 			if(!stricmp(argv[i], "-argb")) pf=BMP_ARGB;
 			if(!stricmp(argv[i], "-bottomup")) bu=1;
 			if(!stricmp(argv[i], "-quiet")) quiet=1;
-			if(!stricmp(argv[i], "-gray")) gray=1;
 		}
 	}
 
@@ -341,16 +366,17 @@ int main(int argc, char *argv[])
 	}
 
 	for(i=hiqual; i>=qual; i--)
+		dotest(bmpbuf, w, h, pf, bu, TJ_GRAYSCALE, i, argv[1], dotile, useppm, quiet);
+	if(quiet) printf("\n");
+	for(i=hiqual; i>=qual; i--)
 		dotest(bmpbuf, w, h, pf, bu, TJ_411, i, argv[1], dotile, useppm, quiet);
-	if(!gray)
-	{
-		if(quiet) printf("\n");
-		for(i=hiqual; i>=qual; i--)
-			dotest(bmpbuf, w, h, pf, bu, TJ_422, i, argv[1], dotile, useppm, quiet);
-		if(quiet) printf("\n");
-		for(i=hiqual; i>=qual; i--)
-			dotest(bmpbuf, w, h, pf, bu, TJ_444, i, argv[1], dotile, useppm, quiet);
-	}
+	if(quiet) printf("\n");
+	for(i=hiqual; i>=qual; i--)
+		dotest(bmpbuf, w, h, pf, bu, TJ_422, i, argv[1], dotile, useppm, quiet);
+	if(quiet) printf("\n");
+	for(i=hiqual; i>=qual; i--)
+		dotest(bmpbuf, w, h, pf, bu, TJ_444, i, argv[1], dotile, useppm, quiet);
+
 	if(bmpbuf) free(bmpbuf);
 	return 0;
 }
