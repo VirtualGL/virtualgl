@@ -58,39 +58,81 @@ int checkbuf(unsigned char *buf, int w, int h, int ps, int flags)
 	int roffset=(flags&TJ_BGR)?2:0, goffset=1, boffset=(flags&TJ_BGR)?0:2, i,
 		_i, j;
 	if(flags&TJ_ALPHAFIRST) {roffset++;  goffset++;  boffset++;}
-	for(_i=0; _i<16; _i++)
+	if(flags&TJ_GRAYSCALE)
 	{
-		if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
-		for(j=0; j<w; j++)
+		for(_i=0; _i<16; _i++)
 		{
-			if(buf[(w*i+j)*ps+roffset]<253) return 0;
-			if(((_i/8)+(j/8))%2==0)
+			if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
+			for(j=0; j<w; j++)
 			{
-				if(buf[(w*i+j)*ps+goffset]<253) return 0;
-				if(buf[(w*i+j)*ps+boffset]<253) return 0;
+				unsigned char r=buf[(w*i+j)*ps+roffset],
+					g=buf[(w*i+j)*ps+goffset],
+					b=buf[(w*i+j)*ps+boffset];
+				if(((_i/8)+(j/8))%2==0)
+				{
+					if(r<253 || g<253 || b<253) return 0;
+				}
+				else
+				{
+					if(r<74 || r>78 || g<74 || g>78 || b<74 || b>78) return 0;
+				}
 			}
-			else
+		}
+		for(_i=16; _i<h; _i++)
+		{
+			if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
+			for(j=0; j<w; j++)
 			{
-				if(buf[(w*i+j)*ps+goffset]>2) return 0;
-				if(buf[(w*i+j)*ps+boffset]>2) return 0;
+				unsigned char r=buf[(w*i+j)*ps+roffset],
+					g=buf[(w*i+j)*ps+goffset],
+					b=buf[(w*i+j)*ps+boffset];
+				if(((_i/8)+(j/8))%2==0)
+				{
+					if(r>2 || g>2 || b>2) return 0;
+				}
+				else
+				{
+					if(r<224 || r>228 || g<224 || g>228 || b<224 || b>228) return 0;
+				}
 			}
 		}
 	}
-	for(_i=16; _i<h; _i++)
+	else
 	{
-		if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
-		for(j=0; j<w; j++)
+		for(_i=0; _i<16; _i++)
 		{
-			if(buf[(w*i+j)*ps+boffset]>2) return 0;
-			if(((_i/8)+(j/8))%2==0)
-			{
-				if(buf[(w*i+j)*ps+roffset]>2) return 0;
-				if(buf[(w*i+j)*ps+goffset]>2) return 0;
-			}
-			else
+			if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
+			for(j=0; j<w; j++)
 			{
 				if(buf[(w*i+j)*ps+roffset]<253) return 0;
-				if(buf[(w*i+j)*ps+goffset]<253) return 0;
+				if(((_i/8)+(j/8))%2==0)
+				{
+					if(buf[(w*i+j)*ps+goffset]<253) return 0;
+					if(buf[(w*i+j)*ps+boffset]<253) return 0;
+				}
+				else
+				{
+					if(buf[(w*i+j)*ps+goffset]>2) return 0;
+					if(buf[(w*i+j)*ps+boffset]>2) return 0;
+				}
+			}
+		}
+		for(_i=16; _i<h; _i++)
+		{
+			if(flags&TJ_BOTTOMUP) i=h-_i-1;  else i=_i;
+			for(j=0; j<w; j++)
+			{
+				if(buf[(w*i+j)*ps+boffset]>2) return 0;
+				if(((_i/8)+(j/8))%2==0)
+				{
+					if(buf[(w*i+j)*ps+roffset]>2) return 0;
+					if(buf[(w*i+j)*ps+goffset]>2) return 0;
+				}
+				else
+				{
+					if(buf[(w*i+j)*ps+roffset]<253) return 0;
+					if(buf[(w*i+j)*ps+goffset]<253) return 0;
+				}
 			}
 		}
 	}
@@ -132,7 +174,8 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 		else {if(flags&TJ_ALPHAFIRST) pixformat="ARGB";  else pixformat="RGBA";}
 	}
 	printf("%s %s -> %s Q%d ... ", pixformat, (flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ",
-		subsamp==TJ_444?"4:4:4":subsamp==TJ_422?"4:2:2":"4:1:1", qual);
+		flags&TJ_GRAYSCALE? "GRAY":(subsamp==TJ_444? "4:4:4":(subsamp==TJ_422? "4:2:2":"4:1:1")),
+		qual);
 
 	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
@@ -146,7 +189,8 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	t=rrtime()-t;
 
 	sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat, (flags&TJ_BOTTOMUP)?
-		"BU":"TD", subsamp==TJ_444?"444":subsamp==TJ_422?"422":"411", qual);
+		"BU":"TD", flags&TJ_GRAYSCALE? "GRAY":(subsamp==TJ_444? "444":(subsamp==TJ_422? "422":"411")),
+		qual);
 	writejpeg(jpegbuf, *size, tempstr);
 	printf("Done.  %f ms\n  Result in %s\n", t*1000., tempstr);
 
@@ -237,6 +281,33 @@ void dotest(int w, int h, int ps, char *basefilename)
 
 		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
 		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
+	}
+
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE);
+
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR);
+
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BOTTOMUP);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BOTTOMUP);
+
+	gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR|TJ_BOTTOMUP);
+	gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_BGR|TJ_BOTTOMUP);
+
+	if(ps==4)
+	{
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST);
+
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR);
+
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BOTTOMUP);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BOTTOMUP);
+
+		gentestjpeg(hnd, jpegbuf, &size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
+		gentestbmp(dhnd, jpegbuf, size, w, h, ps, basefilename, TJ_444, 100, TJ_GRAYSCALE|TJ_ALPHAFIRST|TJ_BGR|TJ_BOTTOMUP);
 	}
 
 	finally:
