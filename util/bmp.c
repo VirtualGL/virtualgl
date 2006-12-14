@@ -292,6 +292,8 @@ int savebmp(char *filename, unsigned char *buf, int w, int h,
 	if(!filename || !buf || w<1 || h<1 || f<0 || f>BMPPIXELFORMATS-1 || srcpitch<0)
 		_throw("bad argument to savebmp()");
 
+	if(srcpitch==0) srcpitch=w*ps[f];
+
 	if((temp=strrchr(filename, '.'))!=NULL)
 	{
 		if(!stricmp(temp, ".ppm"))
@@ -300,7 +302,6 @@ int savebmp(char *filename, unsigned char *buf, int w, int h,
 
 	_unix(fd=open(filename, flags, mode));
 	dstpitch=((w*3)+3)&(~3);
-	if(srcpitch==0) srcpitch=w*ps[f];
 
 	bh.bfType=0x4d42;
 	bh.bfSize=BMPHDRSIZE+dstpitch*h;
