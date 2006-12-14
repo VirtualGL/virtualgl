@@ -21,9 +21,9 @@
 #define DLLCALL
 
 /* Subsampling */
-#define NUMSUBOPT 3
+#define NUMSUBOPT 4
 
-enum {TJ_444=0, TJ_422, TJ_411};
+enum {TJ_444=0, TJ_422, TJ_411, TJ_GRAYSCALE};
 
 /* Flags */
 #define TJ_BGR       1
@@ -33,7 +33,6 @@ enum {TJ_444=0, TJ_422, TJ_411};
 #define TJ_FORCESSE2 32  /* Force IPP to use SSE2 code (useful if auto-detect is not working properly) */
 #define TJ_ALPHAFIRST 64 /* BGR buffer is ABGR and RGB buffer is ARGB */
 #define TJ_FORCESSE3 128 /* Force IPP to use SSE3 code (useful if auto-detect is not working properly) */
-#define TJ_GRAYSCALE 256 /* Generate grayscale JPEG image */
 
 typedef void* tjhandle;
 
@@ -99,6 +98,7 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void);
      TJ_422: 4:2:2 subsampling.  Discards every other Cb, Cr pixel only in
         the horizontal direction.
      TJ_444: no subsampling.
+     TJ_GRAYSCALE: Generate grayscale JPEG image
 
   [INPUT] jpegqual = JPEG quality (an integer between 0 and 100 inclusive.)
   [INPUT] flags = the bitwise OR of one or more of the following
@@ -107,7 +107,6 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void);
         B,G,R order, not R,G,B
      TJ_BOTTOMUP: The source image is stored in bottom-up (Windows) order,
         not top-down
-     TJ_GRAYSCALE: Generate grayscale JPEG image
      TJ_FORCEMMX: Valid only for the Intel Performance Primitives implementation
         of this codec-- force IPP to use MMX code (bypass CPU auto-detection)
      TJ_FORCESSE: Valid only for the Intel Performance Primitives implementation
