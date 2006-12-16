@@ -58,8 +58,8 @@ typedef struct _jpgstruct
 	int initc, initd;
 } jpgstruct;
 
-static const int hsampfactor[NUMSUBOPT]={1, 2, 2};
-static const int vsampfactor[NUMSUBOPT]={1, 1, 2};
+static const int hsampfactor[NUMSUBOPT]={1, 2, 2, 1};
+static const int vsampfactor[NUMSUBOPT]={1, 1, 2, 1};
 
 #define _throw(c) {sprintf(lasterror, "%s", c);  return -1;}
 #define _catch(f) {if((f)==-1) return -1;}
@@ -151,7 +151,10 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	jpeg_set_defaults(&j->cinfo);
 
 	jpeg_set_quality(&j->cinfo, qual, TRUE);
-	jpeg_set_colorspace(&j->cinfo, JCS_YCbCr);
+	if(jpegsub==TJ_GRAYSCALE)
+		jpeg_set_colorspace(&j->cinfo, JCS_GRAYSCALE);
+	else
+		jpeg_set_colorspace(&j->cinfo, JCS_YCbCr);
 	j->cinfo.dct_method = JDCT_FASTEST;
 
 	j->cinfo.comp_info[0].h_samp_factor=hsampfactor[jpegsub];
@@ -304,6 +307,8 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 		if(flags&TJ_BOTTOMUP) row_pointer[i]= &dstbuf[(height-i-1)*pitch];
 		else row_pointer[i]= &dstbuf[i*pitch];
 	}
+
+	j->dinfo.out_color_space=JCS_RGB;
 
 	jpeg_start_decompress(&j->dinfo);
 	while(j->dinfo.output_scanline<j->dinfo.output_height)
