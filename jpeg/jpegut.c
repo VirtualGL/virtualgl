@@ -23,6 +23,19 @@
 const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:1:1", "GRAY"};
 const char *_subnames[NUMSUBOPT]={"444", "422", "411", "GRAY"};
 
+int pixels[9][3]=
+{
+	{0, 255, 0},
+	{255, 0, 255},
+	{255, 255, 0},
+	{0, 0, 255},
+	{0, 255, 255},
+	{255, 0, 0},
+	{255, 255, 255},
+	{0, 0, 0},
+	{255, 0, 0}
+};
+
 void initbuf(unsigned char *buf, int w, int h, int ps, int flags)
 {
 	int roffset=(flags&TJ_BGR)?2:0, goffset=1, boffset=(flags&TJ_BGR)?0:2, i,
@@ -310,10 +323,12 @@ void dotest1(void)
 			{
 				printf("Memory allocation failure\n");  goto finally;
 			}
-			for(i2=0; i2<i*j*4; i2++)
+			memset(bmpbuf, 0, i*j*4);
+			for(i2=0; i2<i*j; i2++)
 			{
-				if(i2%2==0) bmpbuf[i2]=0xFF;
-				else bmpbuf[i2]=0;
+				bmpbuf[i2*4]=pixels[i2%9][2];
+				bmpbuf[i2*4+1]=pixels[i2%9][1];
+				bmpbuf[i2*2+2]=pixels[i2%9][0];
 			}
 			_catch(tjCompress(hnd, bmpbuf, i, i*4, j, 4,
 				jpgbuf, &size, TJ_444, 100, TJ_BGR));
@@ -351,4 +366,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
