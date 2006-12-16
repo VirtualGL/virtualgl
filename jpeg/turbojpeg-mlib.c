@@ -21,8 +21,8 @@
 #include "turbojpeg.h"
 
 static const char *lasterror="No error";
-static const int _mcuw[NUMSUBOPT]={8, 16, 16};
-static const int _mcuh[NUMSUBOPT]={8, 8, 16};
+static const int _mcuw[NUMSUBOPT]={8, 16, 16, 8};
+static const int _mcuh[NUMSUBOPT]={8, 8, 16, 8};
 
 #define checkhandle(h) jpgstruct *jpg=(jpgstruct *)h; \
 	if(!jpg) {lasterror="Invalid handle";  return -1;}
@@ -203,6 +203,72 @@ static const mlib_u8 acchromvals[]=
 	0xf9, 0xfa
 };
 
+const mlib_u8 redlut[256] =
+{
+	0 , 0 , 1 , 1 , 1 , 1 , 2 , 2 , 2 , 3 , 3 , 3 , 4 , 4 , 4 , 4 ,
+	5 , 5 , 5 , 6 , 6 , 6 , 7 , 7 , 7 , 7 , 8 , 8 , 8 , 9 , 9 , 9 ,
+	10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 13, 14, 14,
+	14, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19,
+	19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 22, 23, 23, 23, 24,
+	24, 24, 25, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 28,
+	29, 29, 29, 30, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33,
+	33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 36, 37, 37, 37, 38, 38,
+	38, 39, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 42, 43,
+	43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48,
+	48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 51, 52, 52, 52,
+	53, 53, 53, 54, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57,
+	57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 60, 61, 61, 61, 62, 62,
+	62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 65, 66, 66, 66, 67,
+	67, 67, 68, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 71,
+	72, 72, 72, 73, 73, 73, 74, 74, 74, 74, 75, 75, 75, 76, 76, 76
+};
+
+const mlib_u8 greenlut[256] =
+{
+	0  , 1  , 1  , 2  , 2  , 3  , 4  , 4  , 5  , 5  , 6  , 6  ,
+	7  , 8  , 8  , 9  , 9  , 10 , 11 , 11 , 12 , 12 , 13 , 14 ,
+	14 , 15 , 15 , 16 , 16 , 17 , 18 , 18 , 19 , 19 , 20 , 21 ,
+	21 , 22 , 22 , 23 , 23 , 24 , 25 , 25 , 26 , 26 , 27 , 28 ,
+	28 , 29 , 29 , 30 , 31 , 31 , 32 , 32 , 33 , 33 , 34 , 35 ,
+	35 , 36 , 36 , 37 , 38 , 38 , 39 , 39 , 40 , 41 , 41 , 42 ,
+	42 , 43 , 43 , 44 , 45 , 45 , 46 , 46 , 47 , 48 , 48 , 49 ,
+	49 , 50 , 50 , 51 , 52 , 52 , 53 , 53 , 54 , 55 , 55 , 56 ,
+	56 , 57 , 58 , 58 , 59 , 59 , 60 , 60 , 61 , 62 , 62 , 63 ,
+	63 , 64 , 65 , 65 , 66 , 66 , 67 , 68 , 68 , 69 , 69 , 70 ,
+	70 , 71 , 72 , 72 , 73 , 73 , 74 , 75 , 75 , 76 , 76 , 77 ,
+	77 , 78 , 79 , 79 , 80 , 80 , 81 , 82 , 82 , 83 , 83 , 84 ,
+	85 , 85 , 86 , 86 , 87 , 87 , 88 , 89 , 89 , 90 , 90 , 91 ,
+	92 , 92 , 93 , 93 , 94 , 95 , 95 , 96 , 96 , 97 , 97 , 98 ,
+	99 , 99 , 100, 100, 101, 102, 102, 103, 103, 104, 104, 105,
+	106, 106, 107, 107, 108, 109, 109, 110, 110, 111, 112, 112,
+	113, 113, 114, 114, 115, 116, 116, 117, 117, 118, 119, 119,
+	120, 120, 121, 122, 122, 123, 123, 124, 124, 125, 126, 126,
+	127, 127, 128, 129, 129, 130, 130, 131, 131, 132, 133, 133,
+	134, 134, 135, 136, 136, 137, 137, 138, 139, 139, 140, 140,
+	141, 141, 142, 143, 143, 144, 144, 145, 146, 146, 147, 147,
+	148, 149, 149, 150
+};
+
+const mlib_u8 bluelut[256] =
+{
+	0 , 0 , 0 , 0 , 0 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 2 , 2 ,
+	2 , 2 , 2 , 2 , 2 , 2 , 3 , 3 , 3 , 3 , 3 , 3 , 3 , 3 , 3 , 4 ,
+	4 , 4 , 4 , 4 , 4 , 4 , 4 , 4 , 5 , 5 , 5 , 5 , 5 , 5 , 5 , 5 ,
+	5 , 6 , 6 , 6 , 6 , 6 , 6 , 6 , 6 , 6 , 7 , 7 , 7 , 7 , 7 , 7 ,
+	7 , 7 , 8 , 8 , 8 , 8 , 8 , 8 , 8 , 8 , 8 , 9 , 9 , 9 , 9 , 9 ,
+	9 , 9 , 9 , 9 , 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11,
+	11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13,
+	13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14,
+	15, 15, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16,
+	16, 17, 17, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18,
+	18, 18, 18, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20,
+	20, 20, 20, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22,
+	22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23, 23, 24,
+	24, 24, 24, 24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+	26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27,
+	27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29
+};
+
 #include "turbojpeg-mlibhuff.c"
 
 static mlib_u8 *e_preconvertline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int *ps, int flags,
@@ -252,7 +318,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 		const mlib_u8 *, mlib_s32)=NULL;
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, mlib_u8 *, mlib_u8 *,
 		const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
-	int mcuh=_mcuh[jpg->subsamp], h, j;
+	int mcuh=_mcuh[jpg->subsamp], h, j, i;
 
 	h=mcuh;
 	if(startline+mcuh>jpg->height) h=jpg->height-startline;
@@ -295,6 +361,8 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			else if(!(jpg->flags&TJ_BGR) && jpg->ps==3) ccfct=mlib_VideoColorRGB2JFIFYCC444; // RGB
 			else if(jpg->flags&TJ_BGR && jpg->ps==3) ccfct=mlib_VideoColorABGR2JFIFYCC444; // BGR
 			break;
+		case TJ_GRAYSCALE:
+			break;
 		default:
 			_throw("Invalid argument to mcu_color_convert()");
 	}
@@ -323,12 +391,41 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	else
 	{
 		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr;
-		for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
+		if(jpg->subsamp==TJ_GRAYSCALE)
 		{
-			int ps=jpg->ps;
-			tmpptr=e_preconvertline(jpg->bmpptr, linebuf, &ps, jpg->flags, jpg->width, yw);
-			tmpptr=e_extendline(tmpptr, linebuf, jpg->width, yw, ps);
-			_mlib(ccfct(y, cb, cr, tmpptr, yw));
+			int rindex=jpg->flags&TJ_BGR? 2:0, gindex=1,
+				bindex=jpg->flags&TJ_BGR? 0:2;
+			mlib_u8 *tmpptr;
+			mlib_u8 *dptr=y, *dptr2;
+
+			if(jpg->flags&TJ_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
+
+			for(j=0; j<h; j++, dptr+=yw, jpg->bmpptr+=rgbstride)
+			{
+				for(i=0, dptr2=dptr, tmpptr=jpg->bmpptr; i<jpg->width; i++, dptr2++,
+					tmpptr+=jpg->ps)
+				{
+					*dptr2=redlut[tmpptr[rindex]]+greenlut[tmpptr[gindex]]
+						+bluelut[tmpptr[bindex]];
+				}
+			}
+			if(jpg->width<yw)
+			{
+				dptr=&y[jpg->width-1];
+				for(j=0; j<h; j++, dptr+=yw)
+					for(i=jpg->width, dptr2=dptr+1; i<yw; i++, dptr2++)
+						*dptr2=*dptr;
+			}
+		}
+		else
+		{
+			for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
+			{
+				int ps=jpg->ps;
+				tmpptr=e_preconvertline(jpg->bmpptr, linebuf, &ps, jpg->flags, jpg->width, yw);
+				tmpptr=e_extendline(tmpptr, linebuf, jpg->width, yw, ps);
+				_mlib(ccfct(y, cb, cr, tmpptr, yw));
+			}
 		}
 	}
 
@@ -340,12 +437,15 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			mlib_VectorCopy_U8(&ybuf[j*yw], &ybuf[(h-1)*yw], yw);
 		}
 	}
-	if(8>(h-1)*8/mcuh+1)
+	if(jpg->subsamp!=TJ_GRAYSCALE)
 	{
-		for(j=(h-1)*8/mcuh+1; j<8; j++)
+		if(8>(h-1)*8/mcuh+1)
 		{
-			mlib_VectorCopy_U8(&cbbuf[j*cw], &cbbuf[((h-1)*8/mcuh)*cw], cw);
-			mlib_VectorCopy_U8(&crbuf[j*cw], &crbuf[((h-1)*8/mcuh)*cw], cw);
+			for(j=(h-1)*8/mcuh+1; j<8; j++)
+			{
+				mlib_VectorCopy_U8(&cbbuf[j*cw], &cbbuf[((h-1)*8/mcuh)*cw], cw);
+				mlib_VectorCopy_U8(&crbuf[j*cw], &crbuf[((h-1)*8/mcuh)*cw], cw);
+			}
 		}
 	}
 
@@ -421,15 +521,20 @@ static int encode_jpeg_init(jpgstruct *jpg)
 	write_byte(jpg, 0);  // Index for luminance
 	for(i=0; i<64; i++) write_byte(jpg, (mlib_u8)rawqtable[jpeg_natural_order[i]]);
 
-	memcpy(rawqtable, chromqtable, 64*sizeof(mlib_s16));
-	QuantFwdRawTableInit(rawqtable, jpg->qual);
-	if(jpg->isvis) {_mlib(my_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
-	else {_mlib(mlib_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
+	if(jpg->subsamp!=TJ_GRAYSCALE)
+	{
+		memcpy(rawqtable, chromqtable, 64*sizeof(mlib_s16));
+		QuantFwdRawTableInit(rawqtable, jpg->qual);
+		if(jpg->isvis)
+			{_mlib(my_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
+		else {_mlib(mlib_VideoQuantizeInit_S16(jpg->chromqtable, rawqtable));}
 
-	write_byte(jpg, 0xff);  write_byte(jpg, 0xdb);  // DQT marker
-	write_word(jpg, 67);  // DQT length
-	write_byte(jpg, 1);  // Index for chrominance
-	for(i=0; i<64; i++) write_byte(jpg, (mlib_u8)rawqtable[jpeg_natural_order[i]]);
+		write_byte(jpg, 0xff);  write_byte(jpg, 0xdb);  // DQT marker
+		write_word(jpg, 67);  // DQT length
+		write_byte(jpg, 1);  // Index for chrominance
+		for(i=0; i<64; i++)
+			write_byte(jpg, (mlib_u8)rawqtable[jpeg_natural_order[i]]);
+	}
 
 	// Write default Huffman tables
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xc4);  // DHT marker
@@ -448,51 +553,60 @@ static int encode_jpeg_init(jpgstruct *jpg)
 	for(i=0; i<16; i++) write_byte(jpg, aclumbits[i]);
 	for(i=0; i<nval; i++) write_byte(jpg, aclumvals[i]);
 
-	write_byte(jpg, 0xff);  write_byte(jpg, 0xc4);  // DHT marker
-	nval=0;  for(i=0; i<16; i++) nval+=dcchrombits[i];
-	len=19+nval;
-	write_word(jpg, len);  // DHT length
-	write_byte(jpg, 0x01);  // Huffman class
-	for(i=0; i<16; i++) write_byte(jpg, dcchrombits[i]);
-	for(i=0; i<nval; i++) write_byte(jpg, dcchromvals[i]);
+	if(jpg->subsamp!=TJ_GRAYSCALE)
+	{
+		write_byte(jpg, 0xff);  write_byte(jpg, 0xc4);  // DHT marker
+		nval=0;  for(i=0; i<16; i++) nval+=dcchrombits[i];
+		len=19+nval;
+		write_word(jpg, len);  // DHT length
+		write_byte(jpg, 0x01);  // Huffman class
+		for(i=0; i<16; i++) write_byte(jpg, dcchrombits[i]);
+		for(i=0; i<nval; i++) write_byte(jpg, dcchromvals[i]);
 
-	write_byte(jpg, 0xff);  write_byte(jpg, 0xc4);  // DHT marker
-	nval=0;  for(i=0; i<16; i++) nval+=acchrombits[i];
-	len=19+nval;
-	write_word(jpg, len);  // DHT length
-	write_byte(jpg, 0x11);  // Huffman class
-	for(i=0; i<16; i++) write_byte(jpg, acchrombits[i]);
-	for(i=0; i<nval; i++) write_byte(jpg, acchromvals[i]);
+		write_byte(jpg, 0xff);  write_byte(jpg, 0xc4);  // DHT marker
+		nval=0;  for(i=0; i<16; i++) nval+=acchrombits[i];
+		len=19+nval;
+		write_word(jpg, len);  // DHT length
+		write_byte(jpg, 0x11);  // Huffman class
+		for(i=0; i<16; i++) write_byte(jpg, acchrombits[i]);
+		for(i=0; i<nval; i++) write_byte(jpg, acchromvals[i]);
+	}
 
 	// Initialize Huffman tables
 	_catch(jpeg_make_c_derived_tbl(dclumbits, dclumvals, 1, jpg->e_dclumtable));
 	_catch(jpeg_make_c_derived_tbl(aclumbits, aclumvals, 0, jpg->e_aclumtable));
-	_catch(jpeg_make_c_derived_tbl(dcchrombits, dcchromvals, 1, jpg->e_dcchromtable));
-	_catch(jpeg_make_c_derived_tbl(acchrombits, acchromvals, 0, jpg->e_acchromtable));
+	if(jpg->subsamp!=TJ_GRAYSCALE)
+	{
+		_catch(jpeg_make_c_derived_tbl(dcchrombits, dcchromvals, 1, jpg->e_dcchromtable));
+		_catch(jpeg_make_c_derived_tbl(acchrombits, acchromvals, 0, jpg->e_acchromtable));
+	}
 
 	// Write Start Of Frame
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xc0);  // SOF marker
-	write_word(jpg, 17);  // SOF length
+	write_word(jpg, (jpg->subsamp==TJ_GRAYSCALE? 11:17));  // SOF length
 	write_byte(jpg, 8);  // precision
 	write_word(jpg, jpg->height);
 	write_word(jpg, jpg->width);
-	write_byte(jpg, 3);  // Number of components
+	write_byte(jpg, (jpg->subsamp==TJ_GRAYSCALE? 1:3));  // Number of components
 
 	write_byte(jpg, 1);  // Y Component ID
 	write_byte(jpg, ((mcuw/8)<<4)+(mcuh/8));  // Horiz. and Vert. sampling factors
 	write_byte(jpg, 0);  // Quantization table selector
-	for(i=2; i<=3; i++)
+	if(jpg->subsamp!=TJ_GRAYSCALE)
 	{
-		write_byte(jpg, i);  // Component ID
-		write_byte(jpg, 0x11);  // Horiz. and Vert. sampling factors
-		write_byte(jpg, 1);  // Quantization table selector
+		for(i=2; i<=3; i++)
+		{
+			write_byte(jpg, i);  // Component ID
+			write_byte(jpg, 0x11);  // Horiz. and Vert. sampling factors
+			write_byte(jpg, 1);  // Quantization table selector
+		}
 	}
 
 	// Write Start of Scan
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xda);  // SOS marker
-	write_word(jpg, 12);  // SOS length
-	write_byte(jpg, 3);  // Number of components
-	for(i=1; i<=3; i++)
+	write_word(jpg, (jpg->subsamp==TJ_GRAYSCALE? 8:12));  // SOS length
+	write_byte(jpg, (jpg->subsamp==TJ_GRAYSCALE? 1:3));  // Number of components
+	for(i=1; i<=(jpg->subsamp==TJ_GRAYSCALE? 1:3); i++)
 	{
 		write_byte(jpg, i);  // Component ID
 		write_byte(jpg, i==1? 0 : 0x11);  // Huffman table selector
@@ -542,20 +656,23 @@ static int encode_jpeg(jpgstruct *jpg)
 					k+=64;
 				}
 
-			// Cb block
-			_mlib(mlib_VideoDCT8x8_S16_U8(&jpg->mcubuf[k], &cbbuf[i*8/mcuw], cw));
-			jpg->mcubuf[k]-=1024;
-			_mlib(mlib_VideoQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
-			_catch( encode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
-				jpg->e_dcchromtable, jpg->e_acchromtable) );
-			k+=64;
+			if(jpg->subsamp!=TJ_GRAYSCALE)
+			{
+				// Cb block
+				_mlib(mlib_VideoDCT8x8_S16_U8(&jpg->mcubuf[k], &cbbuf[i*8/mcuw], cw));
+				jpg->mcubuf[k]-=1024;
+				_mlib(mlib_VideoQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+				_catch( encode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
+					jpg->e_dcchromtable, jpg->e_acchromtable) );
+				k+=64;
 
-			// Cr block
-			_mlib(mlib_VideoDCT8x8_S16_U8(&jpg->mcubuf[k], &crbuf[i*8/mcuw], cw));
-			jpg->mcubuf[k]-=1024;
-			_mlib(mlib_VideoQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
-			_catch( encode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
-				jpg->e_dcchromtable, jpg->e_acchromtable) );
+				// Cr block
+				_mlib(mlib_VideoDCT8x8_S16_U8(&jpg->mcubuf[k], &crbuf[i*8/mcuw], cw));
+				jpg->mcubuf[k]-=1024;
+				_mlib(mlib_VideoQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+				_catch( encode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
+					jpg->e_dcchromtable, jpg->e_acchromtable) );
+			}
 
 		} // xmcus
 	} // ymcus
@@ -718,7 +835,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 		const mlib_u8 *, mlib_s32)=NULL;
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
-	int mcuh=_mcuh[jpg->subsamp], h, j, convreq=0;
+	int mcuh=_mcuh[jpg->subsamp], h, j, convreq=0, i;
 
 	h=mcuh;
 	if(startline+mcuh>jpg->height) h=jpg->height-startline;
@@ -740,6 +857,8 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			else if(jpg->flags&TJ_BGR && jpg->flags&TJ_ALPHAFIRST && jpg->ps==4)  // ABGR
 				ccfct=mlib_VideoColorJFIFYCC2ABGR444;
 			else if(jpg->flags&TJ_BGR || jpg->ps!=3) convreq=1;
+			break;
+		case TJ_GRAYSCALE:
 			break;
 		default:
 			_throw("Invalid argument to d_mcu_color_convert()");
@@ -773,15 +892,36 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	else
 	{
 		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr;
-		for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
+		if(jpg->subsamp==TJ_GRAYSCALE)
 		{
-			tmpptr=jpg->bmpptr;
-			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
-			_mlib(ccfct(tmpptr, y, cb, cr, jpg->width));
-			if(tmpptr!=jpg->bmpptr)
+			int rindex=jpg->flags&TJ_BGR? 2:0, gindex=1,
+				bindex=jpg->flags&TJ_BGR? 0:2;
+			mlib_u8 *tmpptr;
+			mlib_u8 *sptr=y, *sptr2;
+
+			if(jpg->flags&TJ_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
+
+			for(j=0; j<h; j++, sptr+=yw, jpg->bmpptr+=rgbstride)
 			{
-				if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
-				else {_mlib(mlib_VectorCopy_U8(jpg->bmpptr, tmpptr, jpg->width*jpg->ps));}
+				for(i=0, sptr2=sptr, tmpptr=jpg->bmpptr; i<jpg->width; i++, sptr2++,
+					tmpptr+=jpg->ps)
+				{
+					tmpptr[rindex]=tmpptr[gindex]=tmpptr[bindex]=*sptr2;
+				}
+			}
+		}
+		else
+		{
+			for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
+			{
+				tmpptr=jpg->bmpptr;
+				if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
+				_mlib(ccfct(tmpptr, y, cb, cr, jpg->width));
+				if(tmpptr!=jpg->bmpptr)
+				{
+					if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
+					else {_mlib(mlib_VectorCopy_U8(jpg->bmpptr, tmpptr, jpg->width*jpg->ps));}
+				}
 			}
 		}
 	}
@@ -796,7 +936,7 @@ static int decode_jpeg_init(jpgstruct *jpg)
 {
 	mlib_s16 rawqtable[64];  mlib_u8 rawhuffbits[16], rawhuffvalues[256];
 	int i;  unsigned char tempbyte, tempbyte2, marker;  unsigned short tempword, length;
-	int markerread=0;  unsigned char compid[3];
+	int markerread=0;  unsigned char compid[3], ncomp;
 
 	jpg->bytesprocessed=0;
 	jpg->huffbits = jpg->huffbuf = jpg->unread_marker = jpg->insufficient_data = 0;
@@ -906,29 +1046,38 @@ static int decode_jpeg_init(jpgstruct *jpg)
 				read_word(jpg, tempword);  // width
 				if(!jpg->width) jpg->width=tempword;
 				if(tempword!=jpg->width) _throw("Width mismatch between JPEG and bitmap");
-				read_byte(jpg, tempbyte);  // Number of components
-				if(tempbyte!=3 || length<17) _throw("Only YCbCr JPEG's are supported");
+				read_byte(jpg, ncomp);  // Number of components
+				if(ncomp==1) jpg->subsamp=TJ_GRAYSCALE;
+				else if(ncomp!=3) _throw("Only YCbCr and grayscale JPEG's are supported");
+				if(length<(8+3*ncomp)) _throw("Invalid SOF length");
 				read_byte(jpg, compid[0]);  // Component ID
 				read_byte(jpg, tempbyte);  // Horiz. and Vert. sampling factors
-				if(tempbyte==0x11) jpg->subsamp=TJ_444;
-				else if(tempbyte==0x21) jpg->subsamp=TJ_422;
-				else if(tempbyte==0x22) jpg->subsamp=TJ_411;
-				else _throw("Unsupported subsampling type");
-				check_byte(jpg, 0);  // Luminance
-				for(i=1; i<3; i++)
+				if(ncomp==3)
 				{
-					read_byte(jpg, compid[i]);  // Component ID
-					check_byte(jpg, 0x11);  // Sampling factors
-					check_byte(jpg, 1);  // Chrominance
+					if(tempbyte==0x11) jpg->subsamp=TJ_444;
+					else if(tempbyte==0x21) jpg->subsamp=TJ_422;
+					else if(tempbyte==0x22) jpg->subsamp=TJ_411;
+					else _throw("Unsupported subsampling type");
+				}
+				check_byte(jpg, 0);  // Luminance
+				if(jpg->subsamp!=TJ_GRAYSCALE)
+				{
+					for(i=1; i<3; i++)
+					{
+						read_byte(jpg, compid[i]);  // Component ID
+						check_byte(jpg, 0x11);  // Sampling factors
+						check_byte(jpg, 1);  // Chrominance
+					}
 				}
 				markerread+=128;
 				break;
 			case 0xda:  // SOS
-				if(markerread!=255) _throw("JPEG bitstream error");
+				if(markerread!= (jpg->subsamp==TJ_GRAYSCALE? 155:255))
+					_throw("JPEG bitstream error");
 				read_word(jpg, length);
-				if(length<12) _throw("JPEG bitstream error");
-				check_byte(jpg, 3);  // Number of components
-				for(i=0; i<3; i++)
+				if(length< (jpg->subsamp==TJ_GRAYSCALE? 8:12)) _throw("JPEG bitstream error");
+				check_byte(jpg, (jpg->subsamp==TJ_GRAYSCALE? 1:3));  // Number of components
+				for(i=0; i<(jpg->subsamp==TJ_GRAYSCALE? 1:3); i++)
 				{
 					check_byte(jpg, compid[i])
 					check_byte(jpg, i==0? 0 : 0x11);  // Huffman table selector
@@ -978,20 +1127,23 @@ static int decode_jpeg(jpgstruct *jpg)
 					k+=64;
 				}
 
-			// Cb block
-			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
-				jpg->d_dcchromtable, jpg->d_acchromtable) );
-			_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
-			jpg->mcubuf[k]+=1024;
-			_mlib(mlib_VideoIDCT8x8_U8_S16(&cbbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
-			k+=64;
+			if(jpg->subsamp!=TJ_GRAYSCALE)
+			{
+				// Cb block
+				_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[1],
+					jpg->d_dcchromtable, jpg->d_acchromtable) );
+				_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+				jpg->mcubuf[k]+=1024;
+				_mlib(mlib_VideoIDCT8x8_U8_S16(&cbbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
+				k+=64;
 
-			// Cr block
-			_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
-				jpg->d_dcchromtable, jpg->d_acchromtable) );
-			_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
-			jpg->mcubuf[k]+=1024;
-			_mlib(mlib_VideoIDCT8x8_U8_S16(&crbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
+				// Cr block
+				_catch( decode_one_block(jpg, &jpg->mcubuf[k], &lastdc[2],
+					jpg->d_dcchromtable, jpg->d_acchromtable) );
+				_mlib(mlib_VideoDeQuantize_S16(&jpg->mcubuf[k], jpg->chromqtable));
+				jpg->mcubuf[k]+=1024;
+				_mlib(mlib_VideoIDCT8x8_U8_S16(&crbuf[i*8/mcuw], &jpg->mcubuf[k], cw));
+			}
 		}
 		_catch(d_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
 	}
