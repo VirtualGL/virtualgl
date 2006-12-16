@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 	unsigned char *bmpbuf=NULL;  int w, h, i, useppm=0;
 	int qual, dotile=0, quiet=0, hiqual=-1;  char *temp;
 	BMPPIXELFORMAT pf=BMP_BGR;
-	int bu=0, gray=0;
+	int bu=0;
 
 	printf("\n");
 
