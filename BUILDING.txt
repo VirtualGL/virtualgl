@@ -247,8 +247,6 @@ VirtualGL on Cygwin, see the next section.
 
 -- Hummingbird Exceed XDK v8 or later
 
-   * Contact Gary Romualdez of Hummingbird Ltd. [tel. (416) 496-6393 or
-     gary.romualdez [at] hummingbird.com) for Exceed pricing information.
    * Add the XDK include path (e.g.
      "c:\Program Files\Hummingbird\Connectivity\11.00\Exceed\XDK\include")
      to your system INCLUDE environment variable prior to building VirtualGL.

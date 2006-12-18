@@ -227,11 +227,8 @@ encounter any difficulties.
 | Other Software \
 	| {list type=ul: \
 			{item:If Direct Mode is to be used, \
-				[[http://www.hummingbird.com][Hummingbird]] Exceed 8 or newer is \
-				required on the client machine.{nl}{nl} \
-				__Contact Gary Romualdez of Hummingbird Ltd. [tel. (416) 496-6393 \
-				or mailto:gary.romualdez@hummingbird.com] for Exceed pricing \
-				information.__}{nl} \
+				[[http://connectivity.hummingbird.com][Hummingbird]] Exceed 8 or newer is \
+				required on the client machine.} \
 			{item:For applications that use stereo or transparent overlays, Exceed \
 				3D is required on the client.} \
 			{item:Client desktop needs to be configured for true color (24 or \
