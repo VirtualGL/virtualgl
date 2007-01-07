@@ -293,12 +293,18 @@ macpkg: rr diags
 	if [ -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg ]; then rm -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg; fi
 	mkdir -p $(BLDDIR)/pkgbuild
 	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/bin
+	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
+	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
 	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
 	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/${APPNAME}"
 	mkdir -p $(BLDDIR)/pkgbuild/Resources
 	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
 	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
 	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
+	install -m 755 $(EDIR)/tcbench $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
+	install -m 755 $(EDIR)/nettest $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
+	install -m 755 /usr/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
+	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/usr/bin/vglclient
 	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
 	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
 	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
