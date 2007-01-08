@@ -63,10 +63,6 @@ __VGL_DL=0
 __VGL_64=0
 __VGL_32=0
 
-if [ $# -eq 0 ]
-then
-	usage 0
-fi
 while [ $# -gt 0 ]
 do
 	case "$1" in
@@ -110,6 +106,10 @@ do
 	esac
 	shift
 done
+if [ $# -eq 0 ]
+then
+	usage 0
+fi
 
 if [ -r /etc/opt/VirtualGL/vgl_xauth_key ]; then
 	XAUTH=xauth
