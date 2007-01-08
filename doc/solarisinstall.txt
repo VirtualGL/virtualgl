@@ -53,11 +53,11 @@
 *** Other
 #OPT: noList! plain!
 
-The server's SSh daemon should have the ''X11Forwarding'' option enabled.  This
-is configured in ''sshd_config'', the location of which varies depending on
-your distribution of SSh.  Solaris 10 generally keeps this in ''/etc/ssh'',
-whereas Blastwave keeps it in ''/opt/csw/etc'' and SunFreeware keeps it in
-''/usr/local/etc''.
+The server's SSh daemon should have the ''X11Forwarding'' option enabled and
+the ''UseLogin'' option disabled.  This is configured in ''sshd_config'',
+the location of which varies depending on your distribution of SSh.  Solaris
+10 generally keeps this in ''/etc/ssh'', whereas Blastwave keeps it in
+''/opt/csw/etc'' and SunFreeware keeps it in ''/usr/local/etc''.
 
 ** Granting VirtualGL Access to the Server's X Display
 
