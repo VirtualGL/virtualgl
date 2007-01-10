@@ -271,6 +271,7 @@ reshape(int width, int height)
    glTranslatef(0.0, 0.0, -40.0);
 }
 
+int visualid = 0;
 
 static void
 init(void)
@@ -344,7 +345,12 @@ make_window( Display *dpy, const char *name,
       #endif
       printf("Setting gamma to %d%%\n", gamma);
    }
-   visinfo = glXChooseVisual( dpy, scrnum, attrib );
+   if(visualid) {
+     XVisualInfo vtemp;  int n=0;
+     vtemp.visualid=visualid;
+     visinfo=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
+   }
+   else visinfo = glXChooseVisual( dpy, scrnum, attrib );
    if (!visinfo) {
       printf("Error: couldn't get an RGB, Double-buffered visual\n");
       exit(1);
@@ -488,6 +494,9 @@ main(int argc, char *argv[])
          gamma = atoi(argv[i+1]);
          if(gamma < 0) gamma = -1;
          i++;
+      }
+      else if(!strcmp(argv[i], "-visualid")) {
+         if(i<argc-1) {sscanf(argv[i+1], "%x", &visualid);  i++;}
       }
    }
 
