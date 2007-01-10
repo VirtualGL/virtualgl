@@ -16,7 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef USEMEDIALIB
+#include <mlib.h>
+#endif
+#if defined(sun)||defined(linux)
 #include "rrsunray.h"
+#endif
 #include "glxvisual.h"
 
 #define INFAKER
@@ -147,6 +152,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_blitter=NULL;
 	_rrdpy=NULL;
 	_prof_rb.setname("Readback  ");
+	_prof_gamma.setname("Gamma     ");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
@@ -157,6 +163,10 @@ pbwin::pbwin(Display *windpy, Window win)
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
+	_gammacorrectedvisual=false;
+	double gamma=__vglVisualGamma(windpy, DefaultScreen(windpy),
+		xwa.visual->visualid);
+	if(gamma==1.00) _gammacorrectedvisual=true;
 }
 
 pbwin::~pbwin(void)
@@ -479,6 +489,48 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
+
+	// Gamma correction
+	_prof_gamma.startframe();
+	if(!_gammacorrectedvisual && fconfig.gamma!=0.0 && fconfig.gamma!=1.0
+		&& fconfig.gamma!=-1.0)
+	{
+		static bool first=true;
+		#ifdef USEMEDIALIB
+		if(first)
+		{
+			first=false;
+			if(fconfig.verbose)
+				rrout.println("Using mediaLib gamma correction (correction factor=%f)\n",
+					(double)fconfig.gamma);
+		}
+		mlib_image *image=NULL;
+		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
+		{
+			unsigned char *luts[4]={fconfig.gamma._lut, fconfig.gamma._lut,
+				fconfig.gamma._lut, fconfig.gamma._lut};
+			mlib_ImageLookUp_Inp(image, (const void **)luts);
+			mlib_ImageDelete(image);
+		}
+		else
+		{
+		#endif
+		if(first)
+		{
+			first=false;
+			if(fconfig.verbose)
+				rrout.println("Using software gamma correction (correction factor=%f)\n",
+					(double)fconfig.gamma);
+		}
+		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*h]);
+		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
+			*ptr1=fconfig.gamma._lut16[*ptr1];
+		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.gamma._lut[bits[pitch*h-1]];
+		#ifdef USEMEDIALIB
+		}
+		#endif
+	}
+	_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 
 	// If automatic faker testing is enabled, store the FB color in an
 	// environment variable so the test program can verify it

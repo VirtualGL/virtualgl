@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "rr.h"
 #include "rrutil.h"
 #include "rrlog.h"
@@ -121,7 +122,7 @@ class ConfigDouble : public Config
 			_set=true;
 		}
 
-	private:
+	protected:
 
 		double _d, _min, _max;
 		bool _usebounds;
@@ -302,7 +303,6 @@ class ConfigString : public Config
 		char* operator= (ConfigString &cs) {return cs._s;}
 		~ConfigString() {if(_s) free(_s);}
 		operator char*() const {return _s;}
-		operator bool() const {return _s!=NULL;}
 
 		char *get(const char *envvar)
 		{
@@ -336,6 +336,71 @@ class ConfigString : public Config
 		char *_s;
 };
 
+class ConfigGamma : public ConfigDouble
+{
+	public:
+
+		ConfigGamma& operator= (double d) {set(d);  return *this;}
+
+		void usesun(bool b) {_usesungamma=b;}
+		bool usesun(void) {return _usesungamma;}
+
+		double get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				if(!strcmp(temp, "1"))
+				{
+					usesun(true);  set(2.22);
+				}
+				else if(!strcmp(temp, "0"))
+				{
+					usesun(false);  set(1.0);
+				}
+				else
+				{
+					usesun(false);
+					char *t=NULL;  double dtemp=strtod(temp, &t);
+					if(t && t!=temp) set(dtemp);
+				}
+			}
+			return _d;
+		}
+
+		unsigned char _lut[256];
+		unsigned short _lut16[65536];
+
+	private:
+
+		void set(double d)
+		{
+			if(d!=_d) {_d=d;  buildlut();}
+			_set=true;
+		}
+
+		void buildlut(void)
+		{
+			if(_d!=0.0 && _d!=1.0 && _d!=-1.0)
+			{
+				for(int i=0; i<256; i++)
+				{
+					double g=_d>0.0? 1.0/_d : -_d;
+					_lut[i]=(unsigned char)(255.*pow((double)i/255., g)+0.5);
+				}
+				for(int i=0; i<65536; i++)
+				{
+					double g=_d>0.0? 1.0/_d : -_d;
+					_lut16[i]=(unsigned short)(255.*pow((double)(i/256)/255., g)+0.5)<<8;
+					_lut16[i]|=(unsigned short)(255.*pow((double)(i%256)/255., g)+0.5);
+				}
+			}
+		}
+
+		bool _usesungamma;
+		double _oldgcf;
+};
+
 class FakerConfig
 {
 	public:
@@ -345,7 +410,13 @@ class FakerConfig
 			// Defaults
 			client=NULL;
 			fps.setbounds(0.0, 1000000.0);
-			gamma=true;
+			#ifdef SUNOGL
+			gamma=2.22;
+			gamma.usesun(true);
+			#else
+			gamma=1.0;
+			gamma.usesun(false);
+			#endif
 			gllib=NULL;
 			glp=false;
 			gui=true;
@@ -455,7 +526,7 @@ class FakerConfig
 		ConfigInt &currentqual;
 		ConfigSubsamp &currentsubsamp;
 		ConfigDouble fps;
-		ConfigBool gamma;
+		ConfigGamma gamma;
 		ConfigString gllib;
 		bool glp;
 		ConfigBool gui;

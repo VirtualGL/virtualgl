@@ -122,7 +122,7 @@ else
 RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
 endif
 endif
-RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB)
+RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB) -lm
 
 TARGETS := $(TARGETS) $(EDIR)/vglrun
 

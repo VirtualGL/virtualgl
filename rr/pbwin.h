@@ -80,13 +80,14 @@ class pbwin
 		int _neww, _newh;
 		rrblitter *_blitter;
 		rrdisplayclient *_rrdpy;
-		rrprofiler _prof_rb;
+		rrprofiler _prof_rb, _prof_gamma;
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
 		void *_sunrayhandle;
 		int _usesunray;
 		bool _truecolor;
+		bool _gammacorrectedvisual;
 };
 
 #endif

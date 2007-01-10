@@ -32,6 +32,8 @@ int __vglVisualDepth(Display *, int, VisualID);
 
 int __vglVisualClass(Display *, int, VisualID);
 
+double __vglVisualGamma(Display *, int, VisualID);
+
 VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
 
 XVisualInfo *__vglVisualFromVisualID(Display *, VisualID);
