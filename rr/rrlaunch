@@ -5,7 +5,6 @@
 # This allocates a graphics device and passes it in the VGL_DISPLAY
 # environment:
 #$ -l gfx=1
-#$ -l vgl=1
 #
 # Specify other environment variables that N1GE should pass to this script:
 #$ -v DISPLAY
@@ -15,6 +14,9 @@
 #$ -v VGL_SSL
 #$ -v VGL_GLLIB
 #$ -v VGL_X11LIB
+#$ -v VGL_GAMMA
+#$ -v VGL_PROGRESSIVE
+#$ -v VGL_NPROCS
 
 usage()
 {
@@ -28,7 +30,8 @@ usage()
 	echo "  -dl       : Force apps that dlopen() libGL to load VirtualGL instead"
 	echo "  -d <d>    : <d> = the X Display or GLP device to use for 3D rendering"
 	echo "  -fps <f>  : Limit client/server frame rate to <f> frames/sec"
-	echo "  +/-g      : Enable/disable gamma correction for Solaris clients"
+	echo "  +/-g      : Enable/disable gamma correction"
+	echo "  -gamma <g>: Specify gamma correction factor (see docs)"
 	echo "  -np <n>   : Number of CPUs to use for performing image compression *"
 	echo "  -p <p>    : TCP port to use when connecting to vglclient *"
 	echo "  +/-pr     : Enable/disable performance profiling output"
@@ -60,10 +63,6 @@ __VGL_DL=0
 __VGL_64=0
 __VGL_32=0
 
-if [ $# -eq 0 ]
-then
-	usage 0
-fi
 while [ $# -gt 0 ]
 do
 	case "$1" in
@@ -89,6 +88,7 @@ do
 	-p*)        VGL_PORT=$2       ; export VGL_PORT     ; shift     ;;
 	-c*)        VGL_COMPRESS=$2   ; export VGL_COMPRESS ; shift     ;;
 	-np*)       VGL_NPROCS=$2     ; export VGL_NPROCS   ; shift     ;;
+	-gamma)     VGL_GAMMA=$2      ; export VGL_GAMMA    ; shift     ;;
 	-g*)        VGL_GAMMA=0       ; export VGL_GAMMA    ;;
 	+g*)        VGL_GAMMA=1       ; export VGL_GAMMA    ;;
 	-v*)        VGL_VERBOSE=0     ; export VGL_VERBOSE  ;;
@@ -106,6 +106,10 @@ do
 	esac
 	shift
 done
+if [ $# -eq 0 ]
+then
+	usage 0
+fi
 
 if [ -r /etc/opt/VirtualGL/vgl_xauth_key ]; then
 	XAUTH=xauth
