@@ -137,6 +137,7 @@ struct visual_attribs
    #ifdef GLX_GAMMA_VALUE_SUN
    int gammaValue;
    #endif
+   int drawableType;
 };
 
    
@@ -486,6 +487,7 @@ get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
 #endif
 
    glXGetFBConfigAttrib(dpy, cfg, GLX_CONFIG_CAVEAT, &attribs->visualCaveat);
+   glXGetFBConfigAttrib(dpy, cfg, GLX_DRAWABLE_TYPE, &attribs->drawableType);
 }
 
 
@@ -577,12 +579,14 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
 
 
 static void
-print_visual_attribs_verbose(const struct visual_attribs *attribs)
+print_visual_attribs_verbose(const struct visual_attribs *attribs,
+  Bool glx13)
 {
    printf("Visual ID: %x  depth=%d  class=%s",
           attribs->id, attribs->depth, visual_class_name(attribs->klass));
    #ifdef sun
-   printf("  gamma=%f\n", attribs->gamma);
+   if(!glx13) printf("  gamma=%f\n", attribs->gamma);
+   else
    #else
    printf("\n");
    #endif
@@ -597,14 +601,14 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs)
    printf("    accum: redSize=%d greenSize=%d blueSize=%d alphaSize=%d\n",
           attribs->accumRedSize, attribs->accumGreenSize,
           attribs->accumBlueSize, attribs->accumAlphaSize);
-   printf("    multiSample=%d  multiSampleBuffers=%d\n",
+   printf("    multiSample=%d  multiSampleBuffers=%d",
           attribs->numSamples, attribs->numMultisample);
    if (attribs->visualCaveat == GLX_NONE_EXT || attribs->visualCaveat == 0)
-      printf("    visualCaveat=None\n");
+      printf("  visualCaveat=None\n");
    else if (attribs->visualCaveat == GLX_SLOW_VISUAL_EXT)
-      printf("    visualCaveat=Slow\n");
+      printf("  visualCaveat=Slow\n");
    else if (attribs->visualCaveat == GLX_NON_CONFORMANT_VISUAL_EXT)
-      printf("    visualCaveat=Nonconformant\n");
+      printf("  visualCaveat=Nonconformant\n");
    if (attribs->transparentType == GLX_NONE) {
      printf("    Opaque.\n");
    }
@@ -627,35 +631,42 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs)
 #endif
    printf("\n");
 #endif
+   if(glx13) {
+      printf("    Drawable Types=");
+      if(attribs->drawableType&GLX_PBUFFER_BIT) printf("Pbuffer ");
+      if(attribs->drawableType&GLX_PIXMAP_BIT) printf("Pixmap ");
+      if(attribs->drawableType&GLX_WINDOW_BIT) printf("Window ");
+      printf("\n");
+   }
 }
 
 
 static void
-print_visual_attribs_short_header(void)
+print_visual_attribs_short_header(Bool glx13)
 {
  printf("   visual  x  bf lv rg d st colorbuffer ax dp st accumbuffer  ms  cav");
  #ifdef sun
- printf("  gam\n");
- #else
- printf("\n");
+ if(!glx13) printf("  gam");
  #endif
+ if(glx13) printf("  drw");
+ printf("\n");
  printf(" id dep cl sp sz l  ci b ro  r  g  b  a bf th cl  r  g  b  a ns b eat");
  #ifdef sun
- printf("  ma\n");
- #else
- printf("\n");
+ if(!glx13) printf("  ma ");
  #endif
+ if(glx13) printf("  typ");
+ printf("\n");
  printf("----------------------------------------------------------------------");
  #ifdef sun
- printf("-----\n");
- #else
- printf("\n");
+ if(!glx13) printf("-----");
  #endif
+ if(glx13) printf("----");
+ printf("\n");
 }
 
 
 static void
-print_visual_attribs_short(const struct visual_attribs *attribs)
+print_visual_attribs_short(const struct visual_attribs *attribs, Bool glx13)
 {
    char *caveat = NULL;
    if (attribs->visualCaveat == GLX_NONE_EXT || attribs->visualCaveat == 0)
@@ -692,10 +703,16 @@ print_visual_attribs_short(const struct visual_attribs *attribs)
           );
 
   #ifdef sun
-  printf(" %4.2f\n", attribs->gamma);
-  #else
-  printf("\n");
+  if(!glx13) printf(" %4.2f", attribs->gamma);
   #endif
+  if(glx13) {
+     char dtstr[4]="...";
+     if(attribs->drawableType&GLX_PBUFFER_BIT) dtstr[0]='P';
+     if(attribs->drawableType&GLX_PIXMAP_BIT) dtstr[1]='X';
+     if(attribs->drawableType&GLX_WINDOW_BIT) dtstr[2]='W';
+     printf(" %s", dtstr);
+  }
+  printf("\n");
 }
 
 
@@ -785,18 +802,19 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
             get_visual_attribs13(dpy, configs[i], &attribs);
          else
             get_visual_attribs(dpy, &visuals[i], &attribs);
-         if(attribs.supportsGL) print_visual_attribs_verbose(&attribs);
+         if(attribs.supportsGL) print_visual_attribs_verbose(&attribs, fbConfigs);
       }
    }
    else if (mode == Normal) {
-      print_visual_attribs_short_header();
+      print_visual_attribs_short_header(fbConfigs);
       for (i = 0; i < numVisuals; i++) {
          struct visual_attribs attribs;
          if(fbConfigs)
             get_visual_attribs13(dpy, configs[i], &attribs);
          else
             get_visual_attribs(dpy, &visuals[i], &attribs);
-         if(attribs.supportsGL) print_visual_attribs_short(&attribs);
+         if(attribs.supportsGL)
+            print_visual_attribs_short(&attribs, fbConfigs);
       }
    }
    else if (mode == Wide) {
