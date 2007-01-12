@@ -39,8 +39,8 @@ class rrframe
 {
 	public:
 
-	rrframe(bool primary=true) : _bits(NULL), _pitch(0), _pixelsize(0),
-		_flags(0), _isgl(false), _primary(primary)
+	rrframe(bool primary=true) : _bits(NULL), _rbits(NULL), _pitch(0),
+		_pixelsize(0), _flags(0), _isgl(false), _stereo(false), _primary(primary)
 	{
 		memset(&_h, 0, sizeof(rrframeheader));
 		_ready.wait();
@@ -51,21 +51,33 @@ class rrframe
 		if(_bits && _primary) delete [] _bits;
 	}
 
-	void init(rrframeheader *h, int pixelsize, int flags=RRBMP_BGR)
+	void init(rrframeheader &h, int pixelsize, int flags, bool stereo=false)
 	{
-		if(!h) throw(rrerror("rrframe::init", "Invalid argument"));
+		if(pixelsize<1) throw(rrerror("rrframe::init", "Invalid argument"));
 		_flags=flags;
-		h->size=h->framew*h->frameh*pixelsize;
+		h.size=h.framew*h.frameh*pixelsize;
 		checkheader(h);
-		if(pixelsize<3 || pixelsize>4) _throw("Only true color bitmaps are supported");
-		if(h->framew!=_h.framew || h->frameh!=_h.frameh || pixelsize!=_pixelsize
-		|| !_bits)
+		if(h.framew!=_h.framew || h.frameh!=_h.frameh || pixelsize!=_pixelsize
+			|| !_bits)
 		{
 			if(_bits) delete [] _bits;
-			newcheck(_bits=new unsigned char[h->framew*h->frameh*pixelsize+1]);
-			_pixelsize=pixelsize;  _pitch=pixelsize*h->framew;
+			newcheck(_bits=new unsigned char[h.framew*h.frameh*pixelsize+1]);
 		}
-		memcpy(&_h, h, sizeof(rrframeheader));
+		if(stereo)
+		{
+			if(h.framew!=_h.framew || h.frameh!=_h.frameh || pixelsize!=_pixelsize
+				|| !_rbits)
+			{
+				if(_rbits) delete [] _rbits;
+				newcheck(_rbits=new unsigned char[h.framew*h.frameh*pixelsize+1]);
+			}
+		}
+		else
+		{
+			if(_rbits) {delete [] _rbits;  _rbits=NULL;}
+		}
+		_pixelsize=pixelsize;  _pitch=pixelsize*h.framew;  _stereo=stereo;
+		_h=h;
 	}
 
 	rrframe *gettile(int x, int y, int w, int h)
@@ -83,15 +95,13 @@ class rrframe
 		f->_pixelsize=_pixelsize;
 		f->_flags=_flags;
 		f->_pitch=_pitch;
+		f->_stereo=_stereo;
+		f->_isgl=_isgl;
 		bool bu=(_flags&RRBMP_BOTTOMUP);
 		f->_bits=&_bits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+		if(_stereo && _rbits) 
+			f->_rbits=&_rbits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
 		return f;
-	}
-
-	void zero(void)
-	{
-		if(!_h.frameh || !_pitch) return;
-		memset(_bits, 0, _pitch*_h.frameh);
 	}
 
 	bool tileequals(rrframe *last, int x, int y, int w, int h)
@@ -103,16 +113,27 @@ class rrframe
 		&& _h.framew==last->_h.framew && _h.frameh==last->_h.frameh
 		&& _h.qual==last->_h.qual && _h.subsamp==last->_h.subsamp
 		&& _pixelsize==last->_pixelsize && _h.winid==last->_h.winid
-		&& _h.dpynum==last->_h.dpynum && _bits
-		&& _h.flags==last->_h.flags  // left & right eye can't be compared
-		&& last->_bits)
+		&& _h.dpynum==last->_h.dpynum)
 		{
-			unsigned char *newbits=&_bits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
-			unsigned char *oldbits=&last->_bits[last->_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
-			for(int i=0; i<h; i++)
+			if(_bits && last->_bits)
 			{
-				if(memcmp(&newbits[_pitch*i], &oldbits[last->_pitch*i], _pixelsize*w))
-					return false;
+				unsigned char *newbits=&_bits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+				unsigned char *oldbits=&last->_bits[last->_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+				for(int i=0; i<h; i++)
+				{
+					if(memcmp(&newbits[_pitch*i], &oldbits[last->_pitch*i], _pixelsize*w))
+						return false;
+				}
+			}
+			if(_stereo && _rbits && last->_rbits)
+			{
+				unsigned char *newbits=&_rbits[_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+				unsigned char *oldbits=&last->_rbits[last->_pitch*(bu? _h.height-y-h:y)+_pixelsize*x];
+				for(int i=0; i<h; i++)
+				{
+					if(memcmp(&newbits[_pitch*i], &oldbits[last->_pitch*i], _pixelsize*w))
+						return false;
+				}
 			}
 			return true;
 		}
@@ -130,7 +151,7 @@ class rrframe
 		{
 			if(f._bits)
 			{
-				init(&f._h, f._pixelsize);
+				init(f._h, f._pixelsize, f._flags, f._stereo);
 				memcpy(_bits, f._bits, f._h.framew*f._h.frameh*f._pixelsize);
 			}
 		}
@@ -139,32 +160,35 @@ class rrframe
 
 	rrframeheader _h;
 	unsigned char *_bits;
+	unsigned char *_rbits;
 	int _pitch, _pixelsize, _flags;
-	bool _isgl;
+	bool _isgl, _stereo;
 
 	protected:
 
-	void dumpheader(rrframeheader *h)
+	void dumpheader(rrframeheader &h)
 	{
-		rrout.print("h->size    = %lu\n", h->size);
-		rrout.print("h->winid   = 0x%.8x\n", h->winid);
-		rrout.print("h->dpynum  = %d\n", h->dpynum);
-		rrout.print("h->framew  = %d\n", h->framew);
-		rrout.print("h->frameh  = %d\n", h->frameh);
-		rrout.print("h->width   = %d\n", h->width);
-		rrout.print("h->height  = %d\n", h->height);
-		rrout.print("h->x       = %d\n", h->x);
-		rrout.print("h->y       = %d\n", h->y);
-		rrout.print("h->qual    = %d\n", h->qual);
-		rrout.print("h->subsamp = %d\n", h->subsamp);
-		rrout.print("h->flags   = %d\n", h->flags);
+		rrout.print("h.size    = %lu\n", h.size);
+		rrout.print("h.winid   = 0x%.8x\n", h.winid);
+		rrout.print("h.dpynum  = %d\n", h.dpynum);
+		rrout.print("h.framew  = %d\n", h.framew);
+		rrout.print("h.frameh  = %d\n", h.frameh);
+		rrout.print("h.width   = %d\n", h.width);
+		rrout.print("h.height  = %d\n", h.height);
+		rrout.print("h.x       = %d\n", h.x);
+		rrout.print("h.y       = %d\n", h.y);
+		rrout.print("h.qual    = %d\n", h.qual);
+		rrout.print("h.subsamp = %d\n", h.subsamp);
+		rrout.print("h.flags   = %d\n", h.flags);
 	}
 
-	void checkheader(rrframeheader *h)
+	void checkheader(rrframeheader &h)
 	{
-		if(!h || h->framew<1 || h->frameh<1 || h->width<1 || h->height<1
-		|| h->x+h->width>h->framew || h->y+h->height>h->frameh)
+		if(h.flags!=RR_EOF && (h.framew<1 || h.frameh<1 || h.width<1 || h.height<1
+		|| h.x+h.width>h.framew || h.y+h.height>h.frameh))
+		{
 			throw(rrerror("rrframe::checkheader", "Invalid header"));
+		}
 	}
 
 	#ifdef XDK
@@ -186,6 +210,7 @@ class rrjpeg : public rrframe
 	{
 		if(!(_tjhnd=tjInitCompress())) _throw(tjGetErrorStr());
 		_pixelsize=3;
+		memset(&_rh, 0, sizeof(rrframeheader));
 	}
 
 	~rrjpeg(void)
@@ -200,31 +225,64 @@ class rrjpeg : public rrframe
 		if(b._pixelsize<3 || b._pixelsize>4) _throw("Only true color bitmaps are supported");
 		if(b._h.qual>100 || b._h.subsamp>16 || !isPow2(b._h.subsamp))
 			throw(rrerror("JPEG compressor", "Invalid argument"));
-		init(&b._h);
+		init(b._h, b._stereo? RR_LEFT:0);
 		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
 		unsigned long size;
 		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
 			_bits, &size, jpegsub(b._h.subsamp), b._h.qual, tjflags));
 		_h.size=(unsigned int)size;
+		if(b._stereo && b._rbits)
+		{
+			init(b._h, RR_RIGHT);
+			if(_rbits)
+				tj(tjCompress(_tjhnd, b._rbits, b._h.width, b._pitch, b._h.height,
+					b._pixelsize, _rbits, &size, jpegsub(b._h.subsamp), b._h.qual,
+					tjflags));
+			_rh.size=(unsigned int)size;
+		}
 		return *this;
 	}
 
-	void init(rrframeheader *h, int pixelsize)
-	{
-		init(h);
-	}
-
-	void init(rrframeheader *h)
+	void init(rrframeheader &h, int buffer)
 	{
 		checkheader(h);
-		if(h->width!=_h.width || h->height!=_h.height || !_bits)
+		if(h.flags==RR_EOF) {_h.flags=RR_EOF;  return;}
+		switch(buffer)
 		{
-			if(_bits) delete [] _bits;
-			newcheck(_bits=new unsigned char[TJBUFSIZE(h->width, h->height)]);
+			case RR_LEFT:
+				if(h.width!=_h.width || h.height!=_h.height || !_bits)
+				{
+					if(_bits) delete [] _bits;
+					newcheck(_bits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				}
+				_h=h;  _h.flags=RR_LEFT;  _stereo=true;
+				break;
+			case RR_RIGHT:
+				if(h.width!=_rh.width || h.height!=_rh.height || !_rbits)
+				{
+					if(_rbits) delete [] _rbits;
+					newcheck(_rbits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				}
+				_rh=h;  _rh.flags=RR_RIGHT;  _stereo=true;
+				break;
+			default:
+				if(h.width!=_h.width || h.height!=_h.height || !_bits)
+				{
+					if(_bits) delete [] _bits;
+					newcheck(_bits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				}
+				_h=h;  _h.flags=0;  _stereo=false;
+				break;
 		}
-		memcpy(&_h, h, sizeof(rrframeheader));
+		if(!_stereo && _rbits)
+		{
+			delete [] _rbits;  _rbits=NULL;
+			memset(&_rh, 0, sizeof(rrframeheader));
+		}
 	}
+
+	rrframeheader _rh;
 
 	private:
 
@@ -279,19 +337,19 @@ class rrfb : public rrframe
 		#endif
 	}
 
-	void init(rrframeheader *h, bool usedbe=true)
+	void init(rrframeheader &h, bool usedbe=true)
 	{
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
 		checkheader(h);
-		fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
-		if(h->framew>_fb.width || h->frameh>_fb.height)
+		fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1, usedbe?1:0));
+		if(h.framew>_fb.width || h.frameh>_fb.height)
 		{
 			XSync(_wh.dpy, False);
-			fbx(fbx_init(&_fb, _wh, h->framew, h->frameh, 1, usedbe?1:0));
+			fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1, usedbe?1:0));
 		}
-		memcpy(&_h, h, sizeof(rrframeheader));
+		_h=h;
 		if(_h.framew>_fb.width) _h.framew=_fb.width;
 		if(_h.frameh>_fb.height) _h.frameh=_fb.height;
 		_pixelsize=fbx_ps[_fb.format];  _pitch=_fb.pitch;  _bits=(unsigned char *)_fb.bits;
@@ -305,7 +363,7 @@ class rrfb : public rrframe
 		int tjflags=0;
 		if(!f._bits || f._h.size<1)
 			_throw("JPEG not initialized");
-		init(&f._h);
+		init(f._h);
 		if(!_fb.xi) _throw("Bitmap not initialized");
 		if(fbx_bgr[_fb.format]) tjflags|=TJ_BGR;
 		if(fbx_alphafirst[_fb.format]) tjflags|=TJ_ALPHAFIRST;
