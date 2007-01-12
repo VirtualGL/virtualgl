@@ -218,12 +218,12 @@ void rrcwin::run(void)
 		if(j->_h.flags==RR_EOF)
 		{
 			pb.startframe();
-			if(_b->_isgl) ((rrglframe *)_b)->init(&j->_h);
-			else ((rrfb *)_b)->init(&j->_h);
+			if(_b->_isgl) ((rrglframe *)_b)->init(j->_h, _stereo);
+			else ((rrfb *)_b)->init(j->_h);
 			if(_b->_isgl) ((rrglframe *)_b)->redraw();
 			else ((rrfb *)_b)->redraw();
-			pb.endframe(_b->_h.framew*_b->_h.frameh* (_stereo? 2:1), 0, 1);
-			pt.endframe(_b->_h.framew*_b->_h.frameh* (_stereo? 2:1), bytes, 1);
+			pb.endframe(_b->_h.framew*_b->_h.frameh, 0, 1);
+			pt.endframe(_b->_h.framew*_b->_h.frameh, bytes, 1);
 			bytes=0;
 			pt.startframe();
 		}
@@ -232,9 +232,8 @@ void rrcwin::run(void)
 			pd.startframe();
 			if(_b->_isgl) *((rrglframe *)_b)=*j;
 			else *((rrfb *)_b)=*j;
-			bool stereo=j->_h.flags==RR_LEFT || j->_h.flags==RR_RIGHT;
 			pd.endframe(j->_h.width*j->_h.height, 0, (double)(j->_h.width*j->_h.height)/
-				(double)(j->_h.framew*j->_h.frameh) * (stereo? 0.5:1.0));
+				(double)(j->_h.framew*j->_h.frameh));
 			bytes+=j->_h.size;
 		}
 		j->complete();
