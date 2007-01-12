@@ -183,7 +183,7 @@ rrjpeg *rrcwin::getFrame(void)
 void rrcwin::drawFrame(rrjpeg *j)
 {
 	if(_t) _t->checkerror();
-	if((j->_h.flags==RR_RIGHT || j->_h.flags==RR_LEFT) && !_stereo)
+	if((j->_rh.flags==RR_RIGHT || j->_h.flags==RR_LEFT) && !_stereo)
 	{
 		_stereo=true;
 		if(_drawmethod!=RR_DRAWOGL)
