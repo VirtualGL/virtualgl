@@ -47,8 +47,7 @@ class rrglframe : public rrframe
 {
 	public:
 
-	rrglframe(char *dpystring, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false),
+	rrglframe(char *dpystring, Window win) : rrframe(),
 		#ifndef XDK
 		_dpy(NULL),
 		#endif
@@ -69,8 +68,7 @@ class rrglframe : public rrframe
 		init(_dpy, win);
 	}
 
-	rrglframe(Display *dpy, Window win) : rrframe(), _rbits(NULL),
-		_stereo(false),
+	rrglframe(Display *dpy, Window win) : rrframe(),
 		#ifndef XDK
 		_dpy(NULL),
 		#endif
@@ -142,34 +140,20 @@ class rrglframe : public rrframe
 		if(_rbits) {delete [] _rbits;  _rbits=NULL;}
 	}
 
-	void init(rrframeheader *h, bool truecolor=true)
+	void init(rrframeheader &h, bool stereo)
 	{
-		_flags=RRBMP_BOTTOMUP;
+		int flags=RRBMP_BOTTOMUP;
 		#ifdef GL_BGR_EXT
-		if(littleendian()) _flags|=RRBMP_BGR;
+		if(littleendian()) flags|=RRBMP_BGR;
 		#endif
-		if(!h) throw(rrerror("rrglframe::init", "Invalid argument"));
-		_pixelsize=truecolor? 3:1;  _pitch=_pixelsize*h->framew;
-		checkheader(h);
-		bool stereo=h->flags==RR_LEFT || h->flags==RR_RIGHT;
-		if(h->framew!=_h.framew || h->frameh!=_h.frameh || (stereo && !_rbits))
-		{
-			if(_bits) delete [] _bits;
-			newcheck(_bits=new unsigned char[_pitch*h->frameh+1]);
-			if(stereo)
-			{
-				if(_rbits) delete [] _rbits;
-				newcheck(_rbits=new unsigned char[_pitch*h->frameh+1]);
-			}
-		}
-		memcpy(&_h, h, sizeof(rrframeheader));
+		rrframe::init(h, 3, flags, stereo);
 	}
 
 	rrglframe& operator= (rrjpeg& f)
 	{
 		int tjflags=TJ_BOTTOMUP;
 		if(!f._bits || f._h.size<1) _throw("JPEG not initialized");
-		init(&f._h);
+		init(f._h, f._stereo);
 		if(!_bits) _throw("Bitmap not initialized");
 		if(_flags&RRBMP_BGR) tjflags|=TJ_BGR;
 		int width=min(f._h.width, _h.framew-f._h.x);
@@ -181,13 +165,15 @@ class rrglframe : public rrframe
 				if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", tjGetErrorStr()));
 			}
 			int y=max(0, _h.frameh-f._h.y-height);
-			unsigned char *dstbuf=_bits;
-			if(f._h.flags==RR_RIGHT)
+			tj(tjDecompress(_tjhnd, f._bits, f._h.size,
+				(unsigned char *)&_bits[_pitch*y+f._h.x*_pixelsize], width, _pitch,
+				height, _pixelsize, tjflags));
+			if(_stereo && f._rbits && _rbits)
 			{
-				_stereo=true;  dstbuf=_rbits;
+				tj(tjDecompress(_tjhnd, f._rbits, f._rh.size,
+					(unsigned char *)&_rbits[_pitch*y+f._h.x*_pixelsize],
+					width, _pitch, height, _pixelsize, tjflags));
 			}
-			tj(tjDecompress(_tjhnd, f._bits, f._h.size, (unsigned char *)&dstbuf[_pitch*y+f._h.x*_pixelsize],
-				width, _pitch, height, _pixelsize, tjflags));
 		}
 		return *this;
 	}
@@ -236,7 +222,6 @@ class rrglframe : public rrframe
 			glRasterPos2f(((float)x/(float)_h.framew)*2.0f-1.0f, ((float)y/(float)_h.frameh)*2.0f-1.0f);
 			glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &_rbits[_pitch*y+x*_pixelsize]);
 			glDrawBuffer(oldbuf);
-			_stereo=false;
 		}
 
 		if(glerror()) _throw("Could not draw pixels");
@@ -251,8 +236,6 @@ class rrglframe : public rrframe
 		glXSwapBuffers(_dpy, _win);
 		glXMakeCurrent(_dpy, 0, 0);
 	}
-
-	unsigned char *_rbits;
 
 	private:
 
@@ -275,7 +258,6 @@ class rrglframe : public rrframe
 		return ret;
 	}
 
-	bool _stereo;
 	#ifdef XDK
 	static int _Instancecount;
 	static

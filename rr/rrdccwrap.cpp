@@ -101,9 +101,8 @@ DLLEXPORT int DLLCALL
 			default: _throw("Invalid argument");
 		}
 		memset(frame, 0, sizeof(RRFrame));
-		errifnot(f=rrc->getbitmap(width, height, pixelsize));
 		if(bottomup) flags|=RRBMP_BOTTOMUP;
-		f->_flags=flags;
+		errifnot(f=rrc->getbitmap(width, height, pixelsize, flags));
 		setframe(frame, f);
 		return RR_SUCCESS;
 	}
