@@ -110,12 +110,11 @@ int main(int argc, char **argv)
 	int frames=0, fill=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d));
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;
-		if(b->_flags&RRBMP_BGR && !bgr) b->_flags&=(~RRBMP_BGR);
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -135,7 +134,7 @@ int main(int argc, char **argv)
 			fill=1-fill;
 			frames++;  continue;
 		}
-		errifnot(b=rrdpy.getbitmap(w, h, d));
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
@@ -153,7 +152,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d));
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
 		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
@@ -170,7 +169,7 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d));
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0));
 		memcpy(b->_bits, buf, w*h*d);
 		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
 		b->_h.winid=win;

@@ -221,7 +221,7 @@ class compressor : public Runnable
 		hdr.x=hdr.y=BORDER;
 		hdr.qual=80;
 		hdr.subsamp=2;
-		f.init(&hdr, 3);
+		f.init(hdr, 3, littleendian()? RRBMP_BGR:0);
 		return f;
 	}
 

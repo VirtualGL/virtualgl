@@ -68,7 +68,8 @@ int main(int argc, char **argv)
 		errifnot(rrdpy=new rrdisplayclient(fconfig.client));
 		for(int f=0; f<frames; f++)
 		{
-			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3));
+			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3,
+				littleendian()? RRBMP_BGR:0));
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=4;
