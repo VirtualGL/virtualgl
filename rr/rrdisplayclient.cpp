@@ -146,10 +146,9 @@ void rrdisplayclient::run(void)
 				bytes+=c[i]->_bytes;
 			}
 
-		if(b->_h.flags!=RR_LEFT) sendheader(b->_h, true);
+		sendheader(b->_h, true);
 
-		_prof_total.endframe(b->_h.width*b->_h.height, bytes,
-			b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT? 0.5 : 1);
+		_prof_total.endframe(b->_h.width*b->_h.height, bytes, 1);
 		bytes=0;
 		_prof_total.startframe();
 
@@ -191,7 +190,8 @@ void rrdisplayclient::run(void)
 	}
 }
 
-rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
+rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
+	bool stereo)
 {
 	rrframe *b=NULL;
 	_ready.wait();  if(_deadyet) return NULL;
@@ -204,7 +204,7 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps)
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
-	b->init(&hdr, ps);
+	b->init(hdr, ps, flags, stereo);
 	return b;
 }
 
@@ -257,14 +257,18 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			*jptr=*rrb;
 			double frames=(double)(rrb->_h.width*rrb->_h.height)
 				/(double)(rrb->_h.framew*rrb->_h.frameh);
-			if(b->_h.flags==RR_LEFT || b->_h.flags==RR_RIGHT) frames/=2.;
 			_prof_comp.endframe(rrb->_h.width*rrb->_h.height, 0, frames);
-			_bytes+=jptr->_h.size;
+			_bytes+=jptr->_h.size;  if(jptr->_stereo) _bytes+=jptr->_rh.size;
 			delete rrb;
 			if(_myrank==0)
 			{
 				_parent->sendheader(jptr->_h);
 				_parent->send((char *)jptr->_bits, jptr->_h.size);
+				if(jptr->_stereo && jptr->_rbits)
+				{
+					_parent->sendheader(jptr->_rh);
+					_parent->send((char *)jptr->_rbits, jptr->_rh.size);
+				}
 			}
 			else
 			{	
@@ -327,6 +331,11 @@ void rrcompressor::send(void)
 		errifnot(j);
 		_parent->sendheader(j->_h);
 		_parent->send((char *)j->_bits, j->_h.size);
+		if(j->_stereo && j->_rbits)
+		{
+			_parent->sendheader(j->_rh);
+			_parent->send((char *)j->_rbits, j->_rh.size);
+		}
 		delete j;		
 	}
 	_storedframes=0;

@@ -102,7 +102,7 @@ void rrdisplayserver::run(void)
 void rrserver::run(void)
 {
 	rrcwin *w=NULL;
-	rrjpeg *j;
+	rrjpeg *j=NULL;
 	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
 
@@ -147,16 +147,24 @@ void rrserver::run(void)
 					recv((char *)&h, sizeof_rrframeheader);
 					endianize(h);
 				}
-				errifnot(w=addwindow(h.dpynum, h.winid, h.flags==RR_LEFT || h.flags==RR_RIGHT));
+				bool stereo=(h.flags==RR_LEFT || h.flags==RR_RIGHT);
+				errifnot(w=addwindow(h.dpynum, h.winid, stereo));
 
-				try {j=w->getFrame();}
-				catch (...) {if(w) delwindow(w);  throw;}
+				if(!stereo || h.flags==RR_LEFT || !j)
+				{
+					try {j=w->getFrame();}
+					catch (...) {if(w) delwindow(w);  throw;}
+				}
+				j->init(h, h.flags);
+				if(h.flags!=RR_EOF)
+					recv((char *)(h.flags==RR_RIGHT? j->_rbits:j->_bits), h.size);
 
-				j->init(&h);
-				if(h.flags!=RR_EOF) {recv((char *)j->_bits, h.size);}
+				if(!stereo || h.flags!=RR_LEFT)
+				{
+					try {w->drawFrame(j);}
+					catch (...) {if(w) delwindow(w);  throw;}
+				}
 
-				try {w->drawFrame(j);}
-				catch (...) {if(w) delwindow(w);  throw;}
 			} while(!(j && j->_h.flags==RR_EOF));
 
 			if(v.major==1 && v.minor==0)

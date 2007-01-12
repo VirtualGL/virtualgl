@@ -38,7 +38,7 @@ class rrdisplayclient : public Runnable
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
-	rrframe *getbitmap(int, int, int);
+	rrframe *getbitmap(int, int, int, int, bool stereo=false);
 	bool frameready(void);
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
