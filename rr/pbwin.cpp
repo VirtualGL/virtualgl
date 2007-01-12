@@ -38,6 +38,10 @@ extern GLPDevice _localdev;
 
 #define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
+#define leye(buf) (buf==GL_BACK? GL_BACK_LEFT: \
+	(buf==GL_FRONT? GL_FRONT_LEFT:buf))
+#define reye(buf) (buf==GL_BACK? GL_BACK_RIGHT: \
+	(buf==GL_FRONT? GL_FRONT_RIGHT:buf))
 
 static inline int _drawingtoright(void)
 {
@@ -336,6 +340,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
 			break;
 		}
+
 		case RRCOMP_JPEG:
 		{
 			if(_sunrayhandle)
@@ -349,19 +354,20 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				return;
 			if(!_rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
 			rrframe *b;
-			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3));
+			int flags=RRBMP_BOTTOMUP, format=GL_RGB;
 			#ifdef GL_BGR_EXT
 			if(littleendian())
 			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->_bits, drawbuf, true, dostereo);
-				b->_flags=RRBMP_BGR;
+				format=GL_BGR_EXT;  flags|=RRBMP_BGR;
 			}
-			else
 			#endif
-			{
-				readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->_bits, drawbuf, true, dostereo);
-				b->_flags=0;
-			}
+			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags, dostereo));
+			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
+				b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf, true,
+				dostereo);
+			if(dostereo && b->_rbits)
+				readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
+					b->_pixelsize, b->_rbits, reye(drawbuf), true, dostereo);
 			b->_h.winid=_win;
 			b->_h.framew=b->_h.width;
 			b->_h.frameh=b->_h.height;
@@ -369,40 +375,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->_h.y=0;
 			b->_h.qual=fconfig.currentqual;
 			b->_h.subsamp=fconfig.currentsubsamp;
-			b->_h.flags=dostereo? RR_LEFT:0;
-			b->_flags|=RRBMP_BOTTOMUP;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 			_rrdpy->sendframe(b);
-
-			if(dostereo)
-			{
-				errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3));
-				if(drawbuf==GL_FRONT) drawbuf=GL_FRONT_RIGHT;
-				else if(drawbuf==GL_BACK) drawbuf=GL_BACK_RIGHT;
-				#ifdef GL_BGR_EXT
-				if(littleendian())
-				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_BGR_EXT, 3, b->_bits, drawbuf, true, dostereo);
-					b->_flags=RRBMP_BGR;
-				}
-				else
-				#endif
-				{
-					readpixels(0, 0, pbw, pbw*3, pbh, GL_RGB, 3, b->_bits, drawbuf, true, dostereo);
-					b->_flags=0;
-				}
-				b->_h.winid=_win;
-				b->_h.framew=b->_h.width;
-				b->_h.frameh=b->_h.height;
-				b->_h.x=0;
-				b->_h.y=0;
-				b->_h.qual=fconfig.currentqual;
-				b->_h.subsamp=fconfig.currentsubsamp;
-				b->_h.flags=RR_RIGHT;
-				b->_flags|=RRBMP_BOTTOMUP;
-				_rrdpy->sendframe(b);
-			}
-
 			break;
 		}
 
