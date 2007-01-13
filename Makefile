@@ -134,7 +134,7 @@ install: rr
 	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
 	echo Install complete.
 else
-install: rr diags
+install: rr diags mesademos
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
 	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
@@ -151,6 +151,7 @@ install: rr diags
 	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
+	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
@@ -202,18 +203,21 @@ endif
 
 ifeq ($(platform), linux)
 
-.PHONY: rr32 diags32
+.PHONY: rr32 diags32 mesademos32
 ifeq ($(subplatform),)
 rr32: rr
 diags32: diags
+mesademos32: mesademos
 else
 rr32:
 	$(MAKE) M32=yes rr
 diags32:
 	$(MAKE) M32=yes diags
+mesademos32:
+	$(MAKE) M32=yes mesademos
 endif
 
-dist: rr rr32 diags32
+dist: rr rr32 diags32 mesademos32
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
