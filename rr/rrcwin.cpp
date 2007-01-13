@@ -65,19 +65,24 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	_dpynum=dpynum;  _window=window;
 
-	if(_drawmethod==RR_DRAWAUTO)
-	{
-		_drawmethod=RR_DRAWX11;
-		#ifdef SUNOGL
-		if(use_ogl_as_default(dpynum)) _drawmethod=RR_DRAWOGL;
-		#endif
-	}
+	setdrawmethod();
 	if(_stereo) _drawmethod=RR_DRAWOGL;
 	initgl();
 	initx11();
 
 	errifnot(_t=new Thread(this));
 	_t->start();
+}
+
+void rrcwin::setdrawmethod(void)
+{
+	if(_drawmethod==RR_DRAWAUTO)
+	{
+		_drawmethod=RR_DRAWX11;
+		#ifdef SUNOGL
+		if(use_ogl_as_default(_dpynum)) _drawmethod=RR_DRAWOGL;
+		#endif
+	}
 }
 
 rrcwin::~rrcwin(void)
@@ -196,6 +201,7 @@ void rrcwin::drawFrame(rrjpeg *j)
 	{
 		_stereo=false;
 		_drawmethod=_reqdrawmethod;
+		setdrawmethod();
 		initx11();
 	}
 	_q.add(j);

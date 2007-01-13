@@ -44,6 +44,7 @@ class rrcwin : public Runnable
 	rrframe *_b;  rrjpeg _jpg[NB];  int _jpgi;
 	void initgl(void);
 	void initx11(void);
+	void setdrawmethod(void);
 	genericQ _q;
 	void showprofile(rrframeheader *, int);
 	bool _deadyet;
