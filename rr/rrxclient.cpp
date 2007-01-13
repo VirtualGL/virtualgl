@@ -72,6 +72,7 @@ int _glXInitThreadsSUN(void)
 }
 #endif
 
+extern "C" {
 void handler(int type)
 {
 	restart=false;
@@ -97,6 +98,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	}
 	return 1;
 }
+} // extern "C"
 
 
 void usage(char *progname)
