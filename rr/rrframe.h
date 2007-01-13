@@ -247,7 +247,7 @@ class rrjpeg : public rrframe
 	void init(rrframeheader &h, int buffer)
 	{
 		checkheader(h);
-		if(h.flags==RR_EOF) {_h.flags=RR_EOF;  return;}
+		if(h.flags==RR_EOF) {_h=h;  return;}
 		switch(buffer)
 		{
 			case RR_LEFT:
