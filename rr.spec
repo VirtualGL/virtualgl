@@ -77,6 +77,7 @@ install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
 install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
+install -m 755 %{_bindir32}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
 install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 install -m 755 %{_libdir32}/librr.so $RPM_BUILD_ROOT/usr/lib/librr.so
@@ -136,6 +137,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/tcbench
 /opt/%{name}/bin/nettest
 /opt/%{name}/bin/cpustat
+/opt/%{name}/bin/glxinfo
 
 /opt/%{name}/include/rr.h
 /opt/%{name}/samples/rrglxgears.c
