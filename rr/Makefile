@@ -77,7 +77,8 @@ FOBJS = $(ODIR)/faker.o \
         $(ODIR)/glxvisual.o \
         $(ODIR)/rrblitter.o \
         $(ODIR)/rrdisplayclient.o \
-        $(ODIR)/vglgui.o
+        $(ODIR)/vglgui.o \
+        $(ODIR)/rrsunray.o
 
 TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayclientut.o \
@@ -85,16 +86,6 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o \
         $(ODIR)/dlfakerut.o
-
-ifeq ($(platform), solaris)
-FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
-endif
-ifeq ($(platform), solx86)
-FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
-endif
-ifeq ($(platform), linux)
-FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
-endif
 
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o $(ODIR)/dlfaker.o
 
