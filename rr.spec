@@ -18,7 +18,7 @@ Release: %{_build}
 License: wxWindows Library License, v3
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
 BuildPrereq: openssl-devel, turbojpeg
-Prereq: /sbin/ldconfig, /usr/bin/perl, turbojpeg >= 1.04
+Prereq: /sbin/ldconfig, /usr/bin/perl, turbojpeg >= 1.10
 Provides: %{name} = %{version}-%{release}
 
 %description
