@@ -111,7 +111,7 @@ typedef struct _RRFrame
 
 /* Compression types */
 #define RR_COMPRESSOPT  4
-enum rrcomp {RRCOMP_NONE=0, RRCOMP_JPEG, RRCOMP_SUNRAY, RRCOMP_SUNRAY_LOSSLESS};
+enum rrcomp {RRCOMP_NONE=0, RRCOMP_JPEG, RRCOMP_SUNRAY_DPCM, RRCOMP_SUNRAY_RAW};
 
 /* Pixel format options */
 #define RR_FORMATOPT    6

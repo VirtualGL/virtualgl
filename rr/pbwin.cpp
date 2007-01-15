@@ -316,8 +316,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 	switch(compress)
 	{
-		case RRCOMP_SUNRAY:
-		case RRCOMP_SUNRAY_LOSSLESS:
+		case RRCOMP_SUNRAY_DPCM:
+		case RRCOMP_SUNRAY_RAW:
 		{
 			unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 			if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
