@@ -181,16 +181,22 @@ class ConfigSubsamp : public ConfigInt
 			char *temp=NULL;
 			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
 			{
-				char *t=NULL;  int itemp=strtol(temp, &t, 10);
-				if(t && t!=temp)
+				if(!stricmp(temp, "GRAY")) set(0);
+				if(!stricmp(temp, "GREY")) set(0);
+				else
 				{
-					switch(itemp)
+					char *t=NULL;  int itemp=strtol(temp, &t, 10);
+					if(t && t!=temp)
 					{
-						case 444: case 11: case 0: case 1:   set(1);  break;
-						case 422: case 21: case 2:           set(2);  break;
-						case 411: case 420: case 22: case 4: set(4);  break;
-						case 410: case 42: case 8:           set(8);  break;
-						case 44:  case 16:                   set(16);  break;
+						switch(itemp)
+						{
+							case 0:                              set(0);  break;
+							case 444: case 11: case 1:           set(1);  break;
+							case 422: case 21: case 2:           set(2);  break;
+							case 411: case 420: case 22: case 4: set(4);  break;
+							case 410: case 42: case 8:           set(8);  break;
+							case 44:  case 16:                   set(16);  break;
+						}
 					}
 				}
 			}
@@ -263,7 +269,7 @@ class ConfigCompress : public ConfigInt
 		{
 			if(!isset())
 			{
-				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_SUNRAY);
+				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_SUNRAY_DPCM);
 				else
 				{
 					const char *dstr=DisplayString(dpy);
@@ -285,8 +291,8 @@ class ConfigCompress : public ConfigInt
 				else if(!stricmp(temp, "raw")) set(RRCOMP_NONE);
 				else if(!stricmp(temp, "none")) set(RRCOMP_NONE);
 				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
-				else if(!stricmp(temp, "sr")) set(RRCOMP_SUNRAY);
-				else if(!stricmp(temp, "srlossless")) set(RRCOMP_SUNRAY_LOSSLESS);
+				else if(!stricmp(temp, "sr")) set(RRCOMP_SUNRAY_DPCM);
+				else if(!stricmp(temp, "srraw")) set(RRCOMP_SUNRAY_RAW);
 			}
 			return _i;
 		}
