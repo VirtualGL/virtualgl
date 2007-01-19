@@ -75,8 +75,7 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 
 
 rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
-	_sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0),
-	_stereo(true)
+	_sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
@@ -133,7 +132,6 @@ void rrdisplayclient::run(void)
 		_q.get((void **)&b);  if(_deadyet) break;
 		if(!b) _throw("Queue has been shut down");
 		_ready.signal();
-		if(b->_h.flags==RR_RIGHT && !_stereo) continue;
 		if(_np>1)
 			for(i=1; i<_np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);

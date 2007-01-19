@@ -44,7 +44,6 @@ class rrdisplayclient : public Runnable
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
 	void release(rrframe *b) {_ready.signal();}
-	bool stereoenabled(void) {return _stereo;}
 	void sendheader(rrframeheader h, bool eof);
 	void send(char *, int);
 	void recv(char *, int);
@@ -62,7 +61,6 @@ class rrdisplayclient : public Runnable
 	Thread *_t;  bool _deadyet;
 	rrprofiler _prof_total;
 	int _dpynum;
-	bool _stereo;
 	rrversion _v;
 };
 
