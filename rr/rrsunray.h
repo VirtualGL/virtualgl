@@ -21,6 +21,8 @@
 enum {RRSUNRAY_RGB, RRSUNRAY_RGBA, RRSUNRAY_BGR, RRSUNRAY_BGRA, RRSUNRAY_ABGR};
 
 static const int rrsunray_ps[RRSUNRAY_FORMATOPT]={3, 4, 3, 4, 4};
+static const int rrsunray_bgr[RRSUNRAY_FORMATOPT]={0, 0, 1, 1, 1};
+static const int rrsunray_afirst[RRSUNRAY_FORMATOPT]={0, 0, 0, 0, 1};
 
 #ifdef __cplusplus
 extern "C" {

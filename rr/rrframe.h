@@ -80,6 +80,20 @@ class rrframe
 		_h=h;
 	}
 
+	void init(unsigned char *bits, int w, int pitch, int h, int pixelsize,
+		int flags)
+	{
+		_bits=bits;
+		_h.framew=_h.width=w;
+		_h.frameh=_h.height=h;
+		_h.x=_h.y=0;
+		_pixelsize=pixelsize;
+		_h.size=_h.framew*_h.frameh*_pixelsize;
+		checkheader(_h);
+		_pitch=pitch;
+		_primary=false;
+	}
+
 	rrframe *gettile(int x, int y, int w, int h)
 	{
 		rrframe *f;
@@ -138,6 +152,27 @@ class rrframe
 			return true;
 		}
 		return false;
+	}
+
+	void makeanaglyph(rrframe &r, rrframe &g, rrframe &b)
+	{
+		int rindex=_flags&RRBMP_BGR? 2:0, gindex=1, bindex=_flags&RRBMP_BGR? 0:2,
+			i, j;
+		unsigned char *sr=r._bits, *sg=g._bits, *sb=b._bits,
+			*d=_bits, *dr, *dg, *db;
+
+		if(_flags&RRBMP_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
+
+		for(j=0; j<_h.frameh; j++, sr+=r._pitch, sg+=g._pitch, sb+=b._pitch,
+			d+=_pitch)
+		{
+			for(i=0, dr=&d[rindex], dg=&d[gindex],
+				db=&d[bindex]; i<_h.framew; i++, dr+=_pixelsize,
+				dg+=_pixelsize, db+=_pixelsize)
+			{
+				*dr=sr[i];  *dg=sg[i];  *db=sb[i];
+			}
+		}
 	}
 
 	void ready(void) {_ready.signal();}

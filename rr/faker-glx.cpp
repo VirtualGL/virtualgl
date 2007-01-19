@@ -46,7 +46,7 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
 	GLXFBConfig c=0, *configs=NULL;  int n=0;
 	if(!dpy || !vis) return 0;
-	if(!(c=vish.getpbconfig(dpy, vis)))
+	if(!(c=vish.getpbconfig(dpy, vis))&& !(c=vish.mostrecentcfg(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from
 		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
@@ -320,10 +320,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(vis->c_class==PseudoColor) *value=0;  else *value=1;
 	}
 	else if(attrib==GLX_STEREO)
-	{
-		*value= (__vglClientVisualAttrib(dpy, vis->screen, vis->visualid, GLX_STEREO)
-			&& __vglServerVisualAttrib(c, GLX_STEREO));
-	}
+		*value=__vglServerVisualAttrib(c, GLX_STEREO);		
 	else if(attrib==GLX_X_VISUAL_TYPE)
 	{
 		if(vis->c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;

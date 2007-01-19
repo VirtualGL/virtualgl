@@ -60,6 +60,22 @@ class vishash : public _vishash
 			_vishash::remove(dpy? DisplayString(dpy):NULL, vis);
 		}
 
+		GLXFBConfig mostrecentcfg(Display *dpy, XVisualInfo *vis)
+		{
+			if(!dpy || !vis) _throw("Invalid argument");
+			_vishashstruct *ptr=NULL;
+			rrcs::safelock l(mutex);
+			ptr=end;
+			while(ptr!=NULL)
+			{
+				if(ptr->key1 && !strcasecmp(DisplayString(dpy), ptr->key1)
+					&& ptr->key2 && vis->visualid==ptr->key2->visualid)
+					return ptr->value;
+				ptr=ptr->prev;
+			}
+			return 0;
+		}
+
 	private:
 
 		GLXFBConfig attach(char *key1, XVisualInfo *key2) {return NULL;}
