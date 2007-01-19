@@ -143,7 +143,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	_vadpy=dpy;  _vascreen=screen;
 
 	} catch(...) {
-		if(visuals) XFree(visuals);  if(_va) delete [] _va;
+		if(visuals) XFree(visuals);  if(_va) {delete [] _va;  _va=NULL;}
 		throw;
 	}
 }
@@ -339,41 +339,38 @@ double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
 VisualID __vglMatchVisual(Display *dpy, int screen,
 	int depth, int c_class, int level, int stereo, int trans)
 {
-	int i;
+	int i, trystereo, trygamma;
 	if(!dpy) return 0;
 
 	buildVisAttribTable(dpy, screen);
 
 	// Try to find an exact match
-	for(i=0; i<_vaentries; i++)
+	for(trystereo=1; trystereo>=0; trystereo--)
 	{
-		int match=1;
-		if(_va[i].c_class!=c_class) match=0;
-		if(_va[i].depth!=depth) match=0;
-		if(fconfig.gamma.usesun() && _va[i].gamma!=1.0) match=0;
-		if(!fconfig.gamma.usesun() && _va[i].gamma==1.0) match=0;
-		if(stereo!=_va[i].stereo) match=0;
-		if(stereo && !_va[i].db) match=0;
-		if(stereo && !_va[i].gl) match=0;
-		if(stereo && _va[i].c_class!=TrueColor) match=0;
-		if(level!=_va[i].level) match=0;
-		if(trans && !_va[i].trans) match=0;
-		if(match) return _va[i].visualid;
-	}
-
-	// Try again, without gamma restriction
-	for(i=0; i<_vaentries; i++)
-	{
-		int match=1;
-		if(_va[i].c_class!=c_class) match=0;
-		if(_va[i].depth!=depth) match=0;
-		if(stereo!=_va[i].stereo) match=0;
-		if(stereo && !_va[i].db) match=0;
-		if(stereo && !_va[i].gl) match=0;
-		if(stereo && _va[i].c_class!=TrueColor) match=0;
-		if(level!=_va[i].level) match=0;
-		if(trans && !_va[i].trans) match=0;
-		if(match) return _va[i].visualid;
+		for(trygamma=1; trygamma>=0; trygamma--)
+		{
+			for(i=0; i<_vaentries; i++)
+			{
+				int match=1;
+				if(_va[i].c_class!=c_class) match=0;
+				if(_va[i].depth!=depth) match=0;
+				if(trygamma)
+				{
+					if(fconfig.gamma.usesun() && _va[i].gamma!=1.0) match=0;
+					if(!fconfig.gamma.usesun() && _va[i].gamma==1.0) match=0;
+				}
+				if(fconfig.stereo==RRSTEREO_QUADBUF && trystereo)
+				{
+					if(stereo!=_va[i].stereo) match=0;
+					if(stereo && !_va[i].db) match=0;
+					if(stereo && !_va[i].gl) match=0;
+					if(stereo && _va[i].c_class!=TrueColor) match=0;
+				}
+				if(level!=_va[i].level) match=0;
+				if(trans && !_va[i].trans) match=0;
+				if(match) return _va[i].visualid;
+			}
+		}
 	}
 
 	return 0;

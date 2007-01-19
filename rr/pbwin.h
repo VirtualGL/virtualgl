@@ -71,7 +71,8 @@ class pbwin
 		int init(int, int, GLXFBConfig);
 		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
-			GLint, bool, bool stereo=false);
+			GLint, bool stereo=false);
+		void makeanaglyph(rrframe *, int);
 
 		bool _force;
 		rrcs _mutex;
@@ -80,7 +81,7 @@ class pbwin
 		int _neww, _newh;
 		rrblitter *_blitter;
 		rrdisplayclient *_rrdpy;
-		rrprofiler _prof_rb, _prof_gamma;
+		rrprofiler _prof_rb, _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
@@ -88,6 +89,8 @@ class pbwin
 		int _usesunray;
 		bool _truecolor;
 		bool _gammacorrectedvisual;
+		bool _stereovisual;
+		rrframe _r, _g, _b;
 };
 
 #endif
