@@ -45,7 +45,7 @@ typedef struct _pixelformat
 	const char *name;
 } pixelformat;
 
-static int FORMATS=2
+static int FORMATS=3
  #ifdef GL_BGRA_EXT
  +1
  #endif
@@ -57,7 +57,7 @@ static int FORMATS=2
  #endif
  ;
 
-pixelformat pix[2
+pixelformat pix[3
  #ifdef GL_BGRA_EXT
  +1
  #endif
@@ -68,6 +68,7 @@ pixelformat pix[2
  +1
  #endif
  ]={
+	{0, 0, 0, 1, GL_LUMINANCE, 0, "LUM"},
 	#ifdef GL_BGRA_EXT
 	{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
 	#endif
@@ -125,7 +126,6 @@ pixelformat pix[2
 
 #define _WIDTH            701
 #define _HEIGHT           701
-#define N                 5
 
 int WIDTH=_WIDTH, HEIGHT=_HEIGHT;
 Display *dpy=NULL;  Window win=0;
@@ -159,14 +159,14 @@ void findvisual(XVisualInfo* &v
 )
 {
 	int fbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
-		GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
-	int fbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_X_VISUAL_TYPE, GLX_PSEUDO_COLOR,
+		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+	int fbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	int fbdbattribs[]={GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DRAWABLE_TYPE,
+		GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
 		GLX_PBUFFER_BIT, None};
-	int fbdbattribsci[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, GLX_X_VISUAL_TYPE,
-		GLX_PSEUDO_COLOR, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+	int fbdbattribsci[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE,
+		GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	#ifndef GLX11
 	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
 	#endif
@@ -363,8 +363,10 @@ void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 	{
 		for(j=0; j<w; j++)
 		{
-			if(ps==1)
+			if(pix[format].glformat==GL_COLOR_INDEX)
 				buf[(i*w+j)*ps]=((i+y)*(j+x))%32;
+			else if(pix[format].glformat==GL_LUMINANCE)
+				buf[(i*w+j)*ps]=((i+y)*(j+x))%256;
 			else
 			{
 				buf[(i*w+j)*ps+pix[format].roffset]=((i+y)*(j+x))%256;
@@ -383,9 +385,13 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassa
 		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			if(ps==1)
+			if(pix[format].glformat==GL_COLOR_INDEX)
 			{
 				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%32) return 0;
+			}
+			else if(pix[format].glformat==GL_LUMINANCE)
+			{
+				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%256) return 0;
 			}
 			else
 			{
@@ -432,7 +438,7 @@ void clearfb(int format)
 // Generic GL write test
 void glwrite(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int i, n=1, ps=pix[format].pixelsize;
+	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
 	double rbtime;
 
 	try {
@@ -447,21 +453,15 @@ void glwrite(int format)
 	if((rgbaBuffer=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
 		_throw("Could not allocate buffer");
 	initbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer);
+	n=0;
 	timer.start();
-	glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
-	glFinish();
-	rbtime=timer.elapsed();
-	if(rbtime<2.)
+	do
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
-		timer.start();
-		for (i=0; i<n; i++)
-		{
-			glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
-		}
+		glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		glFinish();
-		rbtime=timer.elapsed();
-	}
+		n++;
+	} while((rbtime=timer.elapsed())<1.0 || n<2);
+
 	if(!check_errors("frame buffer write"))
 		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
 
@@ -473,7 +473,7 @@ void glwrite(int format)
 // Generic OpenGL readback test
 void glread(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int i, n=1, ps=pix[format].pixelsize;
+	unsigned char *rgbaBuffer=NULL;  int i, n, ps=pix[format].pixelsize;
 	double rbtime;
 
 	try {
@@ -485,19 +485,24 @@ void glread(int format)
 	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
+	n=0;
 	timer.start();
-	glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
-	rbtime=timer.elapsed();
-	if(rbtime<2.)
+	do
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
-		timer.start();
-		for (i=0; i<n; i++)
+		if(pix[format].glformat==GL_LUMINANCE)
 		{
-			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
+			glPushAttrib(GL_PIXEL_MODE_BIT);
+			glPixelTransferf(GL_RED_SCALE, 0.299);
+			glPixelTransferf(GL_GREEN_SCALE, 0.587);
+			glPixelTransferf(GL_BLUE_SCALE, 0.114);
 		}
-		rbtime=timer.elapsed();
-	}
+		glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
+		if(pix[format].glformat==GL_LUMINANCE)
+		{
+			glPopAttrib();
+		}
+		n++;
+	} while((rbtime=timer.elapsed())<1.0 || n<2);
 	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
 		_throw("ERROR: Bogus data read back.");
 	if(!check_errors("frame buffer read"))
@@ -508,21 +513,28 @@ void glread(int format)
 	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN); 
 	glReadBuffer(GL_FRONT);
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
+	n=0;
 	timer.start();
-	for(int j=0; j<HEIGHT; j++)
-		glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
-	rbtime=timer.elapsed();
-	if(rbtime<2.)
+	do
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
-		timer.start();
+		if(pix[format].glformat==GL_LUMINANCE)
+		{
+			glPushAttrib(GL_PIXEL_MODE_BIT);
+			glPixelTransferf(GL_RED_SCALE, 0.299);
+			glPixelTransferf(GL_GREEN_SCALE, 0.587);
+			glPixelTransferf(GL_BLUE_SCALE, 0.114);
+		}
 		for (i=0; i<n; i++)
 		{
 			for(int j=0; j<HEIGHT; j++)
 				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
 		}
-		rbtime=timer.elapsed();
-	}
+		if(pix[format].glformat==GL_LUMINANCE)
+		{
+			glPopAttrib();
+		}
+		n++;
+	} while((rbtime=timer.elapsed())<1.0 || n<2);
 	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
 		_throw("ERROR: Bogus data read back.");
 	if(!check_errors("frame buffer read"))
