@@ -299,7 +299,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	if(sync) {compress=RRCOMP_NONE;  force=true;}
 	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
-	if(stereo())
+	if(stereo() && stereomode!=RRSTEREO_NONE)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;

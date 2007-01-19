@@ -118,8 +118,8 @@ enum rrcomp {RRCOMP_NONE=0, RRCOMP_JPEG, RRCOMP_SUNRAY_DPCM, RRCOMP_SUNRAY_RAW};
 enum rrformat {RR_RGB, RR_RGBA, RR_BGR, RR_BGRA, RR_ABGR, RR_ARGB};
 
 /* Stereo options */
-#define RR_STEREOOPT    2
-enum rrstereo {RRSTEREO_QUADBUF=0, RRSTEREO_REDCYAN};
+#define RR_STEREOOPT    3
+enum rrstereo {RRSTEREO_NONE=0, RRSTEREO_QUADBUF, RRSTEREO_REDCYAN};
 
 /* Other */
 #define RR_DEFAULTPORT        4242
