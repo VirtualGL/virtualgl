@@ -116,6 +116,7 @@ struct visual_attribs
    int bufferSize;
    int level;
    int rgba;
+   int ci;
    int doubleBuffer;
    int stereo;
    int auxBuffers;
@@ -431,13 +432,14 @@ get_visual_attribs13(Display *dpy, GLXFBConfig cfg,
       case GLX_STATIC_COLOR:  attribs->klass = StaticColor;  break;
       case GLX_GRAY_SCALE:    attribs->klass = GrayScale;  break;
       case GLX_STATIC_GRAY:   attribs->klass = StaticGray;  break;
-      case 0:                 attribs->klass = -1;  break;
+      default:                attribs->klass = -1;  break;
    }
    attribs->supportsGL=1;
    glXGetFBConfigAttrib(dpy, cfg, GLX_BUFFER_SIZE, &attribs->bufferSize);
    glXGetFBConfigAttrib(dpy, cfg, GLX_LEVEL, &attribs->level);
-   glXGetFBConfigAttrib(dpy, cfg, GLX_RENDER_TYPE, &attribs->rgba);
-   if(attribs->rgba==GLX_RGBA_BIT) attribs->rgba=1;  else attribs->rgba=0;
+   glXGetFBConfigAttrib(dpy, cfg, GLX_RENDER_TYPE, &temp);
+   if(temp&GLX_RGBA_BIT) attribs->rgba=1;  else attribs->rgba=0;
+   if(temp&GLX_COLOR_INDEX_BIT) attribs->ci=1;  else attribs->ci=0;
    glXGetFBConfigAttrib(dpy, cfg, GLX_DOUBLEBUFFER, &attribs->doubleBuffer);
    glXGetFBConfigAttrib(dpy, cfg, GLX_STEREO, &attribs->stereo);
    glXGetFBConfigAttrib(dpy, cfg, GLX_AUX_BUFFERS, &attribs->auxBuffers);
@@ -517,6 +519,7 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
    glXGetConfig(dpy, vInfo, GLX_BUFFER_SIZE, &attribs->bufferSize);
    glXGetConfig(dpy, vInfo, GLX_LEVEL, &attribs->level);
    glXGetConfig(dpy, vInfo, GLX_RGBA, &attribs->rgba);
+   if(attribs->rgba) attribs->ci=0;  else attribs->ci=1;
    glXGetConfig(dpy, vInfo, GLX_DOUBLEBUFFER, &attribs->doubleBuffer);
    glXGetConfig(dpy, vInfo, GLX_STEREO, &attribs->stereo);
    glXGetConfig(dpy, vInfo, GLX_AUX_BUFFERS, &attribs->auxBuffers);
@@ -591,7 +594,7 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs,
    printf("\n");
    #endif
    printf("    bufferSize=%d level=%d renderType=%s doubleBuffer=%d stereo=%d\n",
-          attribs->bufferSize, attribs->level, attribs->rgba ? "rgba" : "ci",
+          attribs->bufferSize, attribs->level, attribs->rgba ? "rgba" : attribs->ci ? "ci" : "??",
           attribs->doubleBuffer, attribs->stereo);
    printf("    rgba: redSize=%d greenSize=%d blueSize=%d alphaSize=%d\n",
           attribs->redSize, attribs->greenSize,
@@ -678,14 +681,14 @@ print_visual_attribs_short(const struct visual_attribs *attribs, Bool glx13)
    else
       caveat = "None";
 
-   printf("0x%2x %2d %2s %2d %2d %2d %1s %2s %2s %2d %2d %2d %2d %2d %2d %2d",
+   printf("0x%2x %2d %2s %2d %2d %2d %.1s %2s %2s %2d %2d %2d %2d %2d %2d %2d",
           attribs->id,
           attribs->depth,
           visual_class_abbrev(attribs->klass),
           attribs->transparentType != GLX_NONE,
           attribs->bufferSize,
           attribs->level,
-          attribs->rgba ? "r" : "c",
+          attribs->rgba ? "r" : attribs->ci ? "c" : ".",
           attribs->doubleBuffer ? "y" : ".",
           attribs->stereo ? "y" : ".",
           attribs->redSize, attribs->greenSize,
@@ -745,7 +748,7 @@ print_visual_attribs_long(const struct visual_attribs *attribs)
           attribs->transparentType != GLX_NONE,
           attribs->bufferSize,
           attribs->level,
-          attribs->rgba ? "rgba" : "ci  ",
+          attribs->rgba ? "rgba" : attribs->ci? "ci  " : "..  ",
           attribs->doubleBuffer,
           attribs->stereo,
           attribs->redSize, attribs->greenSize,
