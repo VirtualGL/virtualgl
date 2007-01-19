@@ -157,6 +157,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_rrdpy=NULL;
 	_prof_rb.setname("Readback  ");
 	_prof_gamma.setname("Gamma     ");
+	_prof_anaglyph.setname("Anaglyph  ");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
@@ -167,10 +168,12 @@ pbwin::pbwin(Display *windpy, Window win)
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
-	_gammacorrectedvisual=false;
+	_gammacorrectedvisual=false;  _stereovisual=false;
 	double gamma=__vglVisualGamma(windpy, DefaultScreen(windpy),
 		xwa.visual->visualid);
 	if(gamma==1.00) _gammacorrectedvisual=true;
+	_stereovisual=__vglClientVisualAttrib(windpy, DefaultScreen(windpy),
+		xwa.visual->visualid, GLX_STEREO);
 }
 
 pbwin::~pbwin(void)
@@ -281,7 +284,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 {
 	fconfig.reloadenv();
 	ConfigCompress compress(_windpy, _usesunray);
-	bool dostereo=false;
+	bool dostereo=false;  int stereomode=fconfig.stereo;
 
 	int pbw=_pb->width(), pbh=_pb->height();
 
@@ -300,15 +303,28 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		if(compress!=RRCOMP_JPEG)
+		if(dostereo && compress!=RRCOMP_JPEG)
 		{
 			static bool message=false;
 			if(!message)
 			{
-				rrout.println("[VGL] Stereo does not work in Raw Mode.  Disabling stereo.");
+				rrout.println("[VGL] Quad-buffered stereo doesn't work in Raw Mode.");
+				rrout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}
-			dostereo=false;
+			stereomode=RRSTEREO_REDCYAN;				
+		}
+		else if(dostereo && !_stereovisual && stereomode==RRSTEREO_QUADBUF)
+		{
+			static bool message2=false;
+			if(!message2)
+			{
+				rrout.println("[VGL] Cannot use quad-buffered stereo because no stereo visuals are");
+				rrout.println("[VGL]    available on the client.  Using anaglyphic stereo");
+				rrout.println("[VGL]    instead.");
+				message2=true;
+			}
+			stereomode=RRSTEREO_REDCYAN;				
 		}
 	}
 
@@ -319,11 +335,16 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		case RRCOMP_SUNRAY_DPCM:
 		case RRCOMP_SUNRAY_RAW:
 		{
+			rrframe f;
 			unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 			if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
 			if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
 			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
 				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
+			f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
+				(rrsunray_bgr[format]? RRBMP_BGR:0) |
+				(rrsunray_afirst[format]? RRBMP_ALPHAFIRST:0) |
+				(bottomup? RRBMP_BOTTOMUP:0));
 			int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
 			#ifdef GL_BGR_EXT
 			if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
@@ -334,8 +355,12 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			#ifdef GL_ABGR_EXT
 			if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
 			#endif
-			readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-				drawbuf, bottomup);
+			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(&f, drawbuf);
+			else
+			{
+				readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
+					drawbuf, bottomup);
+			}
 			if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
 			break;
@@ -352,7 +377,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				fconfig.client:DisplayString(_windpy)));
 			if(fconfig.spoil && _rrdpy && !_rrdpy->frameready() && !force)
 				return;
-			if(!_rrdpy->stereoenabled() && !fconfig.autotest) dostereo=false;
 			rrframe *b;
 			int flags=RRBMP_BOTTOMUP, format=GL_RGB;
 			#ifdef GL_BGR_EXT
@@ -361,13 +385,18 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				format=GL_BGR_EXT;  flags|=RRBMP_BGR;
 			}
 			#endif
-			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags, dostereo));
-			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-				b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf, true,
-				dostereo);
-			if(dostereo && b->_rbits)
+			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags,
+				dostereo && stereomode==RRSTEREO_QUADBUF));
+			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+			else
+			{
 				readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-					b->_pixelsize, b->_rbits, reye(drawbuf), true, dostereo);
+					b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf,
+					dostereo);
+				if(dostereo && b->_rbits)
+					readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
+						b->_pixelsize, b->_rbits, reye(drawbuf), dostereo);
+			}
 			b->_h.winid=_win;
 			b->_h.framew=b->_h.width;
 			b->_h.frameh=b->_h.height;
@@ -392,48 +421,69 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh,
 				_usesunray==RRSUNRAY_NOT));
 			b->_flags|=RRBMP_BOTTOMUP;
-			int format;
-			unsigned char *bits=b->_bits;
-			switch(b->_pixelsize)
+			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+			else
 			{
-				case 1:  format=GL_COLOR_INDEX;  break;
-				case 3:
-					format=GL_RGB;
-					#ifdef GL_BGR_EXT
-					if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
-					#endif
-					break;
-				case 4:
-					format=GL_RGBA;
-					#ifdef GL_BGRA_EXT
-					if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
-						format=GL_BGRA_EXT;
-					#endif
-					if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
-					{
-						#ifdef GL_ABGR_EXT
-						format=GL_ABGR_EXT;
-						#elif defined(GL_BGRA_EXT)
-						format=GL_BGRA_EXT;  bits=b->_bits+1;
+				int format;
+				unsigned char *bits=b->_bits;
+				switch(b->_pixelsize)
+				{
+					case 1:  format=GL_COLOR_INDEX;  break;
+					case 3:
+						format=GL_RGB;
+						#ifdef GL_BGR_EXT
+						if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
 						#endif
-					}
-					if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
-					{
-						format=GL_RGBA;  bits=b->_bits+1;
-					}
-					break;
-				default:
-					_throw("Unsupported pixel format");
+						break;
+					case 4:
+						format=GL_RGBA;
+						#ifdef GL_BGRA_EXT
+						if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
+							format=GL_BGRA_EXT;
+						#endif
+						if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
+						{
+							#ifdef GL_ABGR_EXT
+							format=GL_ABGR_EXT;
+							#elif defined(GL_BGRA_EXT)
+							format=GL_BGRA_EXT;  bits=b->_bits+1;
+							#endif
+						}
+						if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
+						{
+							format=GL_RGBA;  bits=b->_bits+1;
+						}
+						break;
+					default:
+						_throw("Unsupported pixel format");
+				}
+				readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
+					min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			}
-			readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch, min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			_blitter->sendframe(b, sync);
 			break;
 		}
 	}
 }
 
+void pbwin::makeanaglyph(rrframe *b, int drawbuf)
+{
+	_r.init(b->_h, 1, b->_flags, false);
+	readpixels(0, 0, _r._h.framew, _r._pitch, _r._h.frameh, GL_RED,
+		_r._pixelsize, _r._bits, leye(drawbuf), false);
+	_g.init(b->_h, 1, b->_flags, false);
+	readpixels(0, 0, _g._h.framew, _g._pitch, _g._h.frameh, GL_GREEN,
+		_g._pixelsize, _g._bits, reye(drawbuf), false);
+	_b.init(b->_h, 1, b->_flags, false);
+	readpixels(0, 0, _b._h.framew, _b._pitch, _b._h.frameh, GL_BLUE,
+		_b._pixelsize, _b._bits, reye(drawbuf), false);
+	_prof_anaglyph.startframe();
+	b->makeanaglyph(_r, _g, _b);
+	_prof_anaglyph.endframe(b->_h.framew*b->_h.frameh, 0, 1);
+}
+
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
-	GLenum format, int ps, GLubyte *bits, GLint buf, bool bottomup, bool stereo)
+	GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
 
 	GLint readbuf=GL_BACK;
@@ -452,23 +502,15 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 	_prof_rb.startframe();
-	if(!bottomup)
-	{
-		for(int i=0; i<h; i++)
-		{
-			int yr=h-1-i-y;
-			glReadPixels(x, i+y, w, 1, format, GL_UNSIGNED_BYTE, &bits[pitch*yr]);
-		}
-	}
-	else glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
+	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 
 	// Gamma correction
-	_prof_gamma.startframe();
 	if(!_gammacorrectedvisual && fconfig.gamma!=0.0 && fconfig.gamma!=1.0
 		&& fconfig.gamma!=-1.0)
 	{
+		_prof_gamma.startframe();
 		static bool first=true;
 		#ifdef USEMEDIALIB
 		if(first)
@@ -503,8 +545,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		#ifdef USEMEDIALIB
 		}
 		#endif
+		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 	}
-	_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 
 	// If automatic faker testing is enabled, store the FB color in an
 	// environment variable so the test program can verify it
