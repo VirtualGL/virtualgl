@@ -39,6 +39,8 @@ usage()
 	echo "  +/-s      : Enable/disable SSL encryption of compressed image stream *"
 	echo "  -samp <s> : JPEG chrominance subsampling (444, 422, 411) *"
 	echo "  +/-sp     : Turn on/off frame spoiling"
+	echo "  -st <s>   : 0 = Turn off stereo rendering"
+	echo "            : rc = Use red/cyan (anaglyphic) stereo, even if quad-buffered is available"
 	echo "  +/-sync   : Enable/disable strict 2D/3D synchronization"
 	echo "  +/-tr     : Enable/disable function call tracing (generates a lot of output)"
 	echo "  +/-v      : Enable/disable verbose VirtualGL messages"
@@ -68,6 +70,7 @@ do
 	case "$1" in
 	+sy*)       VGL_SYNC=1        ; export VGL_SYNC     ;;
 	-sy*)       VGL_SYNC=0        ; export VGL_SYNC     ;;
+	-st*)       VGL_STEREO=$2     ; export VGL_STEREO   ; shift     ;;
 	+sp*)       VGL_SPOIL=1       ; export VGL_SPOIL    ;;
 	-sp*)       VGL_SPOIL=0       ; export VGL_SPOIL    ;;
 	-sa*)       VGL_SUBSAMP=$2    ; export VGL_SUBSAMP  ; shift     ;;

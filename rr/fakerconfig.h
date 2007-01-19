@@ -182,7 +182,7 @@ class ConfigSubsamp : public ConfigInt
 			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
 			{
 				if(!stricmp(temp, "GRAY")) set(0);
-				if(!stricmp(temp, "GREY")) set(0);
+				else if(!stricmp(temp, "GREY")) set(0);
 				else
 				{
 					char *t=NULL;  int itemp=strtol(temp, &t, 10);
@@ -198,6 +198,32 @@ class ConfigSubsamp : public ConfigInt
 							case 44:  case 16:                   set(16);  break;
 						}
 					}
+				}
+			}
+			return _i;
+		}
+};
+
+class ConfigStereo : public ConfigInt
+{
+	public:
+
+		ConfigStereo() {ConfigInt::setbounds(0, RR_STEREOOPT-1);}
+
+		ConfigStereo& operator= (enum rrstereo i) {set((int)i);  return *this ;}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				if(!stricmp(temp, "NONE")) set(RRSTEREO_NONE);
+				else if(!stricmp(temp, "QUAD")) set(RRSTEREO_QUADBUF);
+				else if(!stricmp(temp, "RC")) set(RRSTEREO_REDCYAN);
+				else
+				{
+					char *t=NULL;  int itemp=strtol(temp, &t, 10);
+					if(t && t!=temp) set(itemp);
 				}
 			}
 			return _i;
@@ -441,6 +467,7 @@ class FakerConfig
 			readback=true;
 			spoil=true;
 			ssl=false;
+			stereo=RRSTEREO_QUADBUF;
 			x11lib=NULL;
 			tilesize.setbounds(8, 1024);
 			tilesize=RR_DEFAULTTILESIZE;
@@ -511,6 +538,7 @@ class FakerConfig
 			}
 			fps.get("VGL_FPS");
 			vendor.get("VGL_XVENDOR");
+			stereo.get("VGL_STEREO");
 		}
 
 		void setloqual(void)
@@ -549,6 +577,7 @@ class FakerConfig
 		ConfigBool readback;
 		ConfigBool spoil;
 		ConfigBool ssl;
+		ConfigStereo stereo;
 		ConfigBool sync;
 		ConfigInt tilesize;
 		ConfigBool trace;
