@@ -28,8 +28,8 @@ unsigned char rct[256], gct[256], bct[256];
 int main(int argc, char **argv)
 {
 	unsigned char *bmp1=NULL, *bmp2=NULL, *bmpdiff=NULL;  int useppm=0;
-	unsigned char diff, diffmax, max[4]={0, 0, 0, 0}, min[4]={255, 255, 255, 255};
-	double avg[4]={0., 0., 0., 0.}, ssq[4]={0., 0., 0., 0.};
+	unsigned char diff, diffmax, max[4]={0, 0, 0, 0}, min[4]={255, 255, 255, 255}, tmax, tmin;
+	double avg[4]={0., 0., 0., 0.}, ssq[4]={0., 0., 0., 0.}, tavg=0., tssq=0.;
 	int w1, h1, d1=3, w2, h2, d2=3, w, h, i, j, k, mag=0;
 	char *temp;
 
@@ -98,12 +98,20 @@ int main(int argc, char **argv)
 				bmpdiff[(w*i+j)*d1+2]=rct[diffmax];
 			}
 		}
+	tmax=max[0];  tmin=min[0];
 	for(k=0; k<d1; k++)
 	{
+		if(min[k]<tmin) tmin=min[k];
+		if(max[k]>tmax) tmax=max[k];
+		tavg+=avg[k];
 		avg[k]/=((double)h*(double)w);
+		tssq+=ssq[k];
 		ssq[k]/=((double)h*(double)w);
 		ssq[k]=sqrt(ssq[k]);
 	}
+	tavg/=((double)h*(double)w*(double)d1);
+	tssq/=((double)h*(double)w*(double)d1);
+	tssq=sqrt(tssq);
 
 	if(savebmp(useppm?"diff.ppm":"diff.bmp", bmpdiff, w, h, BMP_BGR, 0, 0)==-1)
 	{
@@ -113,5 +121,7 @@ int main(int argc, char **argv)
 	for(k=0; k<d1; k++)
 		printf("%s: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
 		k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k], ssq[k], 20.*log10(255./ssq[k]));
+	printf("   min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
+		tmin, tmax, tavg, tssq, 20.*log10(255./tssq));
 	return 0;
 }
