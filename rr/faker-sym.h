@@ -258,6 +258,13 @@ static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 #endif
 
 
+// Exists in SUNWglrt 120812-15 and later only
+
+#ifdef USEGLP
+funcdef1(void, glPSwapBuffers, GLPBuffer, drawable,);
+#endif
+
+
 // GL functions
 
 funcdef0(void, glFinish,);

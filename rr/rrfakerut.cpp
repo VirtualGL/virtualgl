@@ -447,6 +447,14 @@ int rbtest(bool stereo, bool ci)
 			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1), ci);
 			if(stereo)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
+			// Make sure that glXSwapBuffers() actually swapped
+			glDrawBuffer(GL_FRONT);
+			glFinish();
+			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
+			checkframe(win1, 1, lastframe1);
+			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1), ci);
+			if(stereo)
+				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}

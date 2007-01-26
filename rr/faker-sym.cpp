@@ -112,6 +112,10 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXGetProcAddressARB)
 	#endif
 
+	#ifdef USEGLP
+	lsymopt(glPSwapBuffers)
+	#endif
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)
