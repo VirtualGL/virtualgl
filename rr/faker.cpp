@@ -1241,7 +1241,11 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 		pbw->readback(GL_BACK, false);
 		pbw->swapbuffers();
 	}
-	else {if(!fconfig.glp) _glXSwapBuffers(_localdpy, drawable);}
+	else
+	{
+		if(!fconfig.glp) _glXSwapBuffers(_localdpy, drawable);
+		else if(__glPSwapBuffers) _glPSwapBuffers(drawable);
+	}
 
 		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getdrawable());}
 		closetrace();  
