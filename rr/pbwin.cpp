@@ -141,7 +141,9 @@ void pbuffer::clear(void)
 void pbuffer::swap(void)
 {
 	if(!fconfig.glp) _glXSwapBuffers(_localdpy, _drawable);
+	#ifdef USEGLP
 	else if(__glPSwapBuffers) _glPSwapBuffers(_drawable);
+	#endif
 }
 
 

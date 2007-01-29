@@ -1244,7 +1244,9 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	else
 	{
 		if(!fconfig.glp) _glXSwapBuffers(_localdpy, drawable);
+		#ifdef USEGLP
 		else if(__glPSwapBuffers) _glPSwapBuffers(drawable);
+		#endif
 	}
 
 		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getdrawable());}
