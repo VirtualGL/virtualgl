@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 	for(k=0; k<d1; k++)
 		printf("%s: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
 		k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k], ssq[k], 20.*log10(255./ssq[k]));
-	printf("   min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
+	printf("T: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
 		tmin, tmax, tavg, tssq, 20.*log10(255./tssq));
 	return 0;
 }
