@@ -427,12 +427,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
-			#if defined(sun)||defined(linux)
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh,
-				_usesunray==RRSUNRAY_NOT));
-			#else
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, true));
-			#endif
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 			b->_flags|=RRBMP_BOTTOMUP;
 			int format;
 			unsigned char *bits=b->_bits;

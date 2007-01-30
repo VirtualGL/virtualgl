@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	rrblitter blitter;  rrtimer t;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
-	bool dosync=false, bottomup=false, usedbe=true;
+	bool dosync=false, bottomup=false;
 
 	try {
 
@@ -59,7 +59,6 @@ int main(int argc, char **argv)
 			if(!stricmp(argv[i], "-h")) usage(argv);
 			if(!stricmp(argv[i], "-sync")) dosync=true;
 			if(!stricmp(argv[i], "-bottomup")) bottomup=true;
-			if(!stricmp(argv[i], "-nodbe")) usedbe=false;
 			if(!stricmp(argv[i], "-tilesize") && i<argc-1)
 			{
 				fconfig.tilesize=atoi(argv[i+1]);  i++;
@@ -82,7 +81,7 @@ int main(int argc, char **argv)
 	int fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, usedbe));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -104,7 +103,7 @@ int main(int argc, char **argv)
 			fill=1-fill;
 			frames++;  continue;
 		}
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, usedbe));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -121,7 +120,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, usedbe));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		memset(b->_bits, 0, b->_pitch*HEIGHT);
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
@@ -138,7 +137,7 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, usedbe));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}

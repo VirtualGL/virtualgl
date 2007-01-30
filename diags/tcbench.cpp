@@ -117,11 +117,11 @@ int main(int argc, char **argv)
 
 	fbx_struct fb;
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 0, 0, 1, 1));
+	fbx(fbx_init(&fb, wh, 0, 0, 1));
 	int width=fb.width, height=fb.height;
 	fbx_term(&fb);
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 32, 32, 1, 1));
+	fbx(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames=0, samples=0;
 	if(xcoord<0) xcoord=width/2;
