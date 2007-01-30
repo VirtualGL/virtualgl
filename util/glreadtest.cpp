@@ -158,16 +158,25 @@ void findvisual(XVisualInfo* &v
 #endif
 )
 {
-	int fbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+	int winattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		GLX_BLUE_SIZE, 8, None};
+	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8,
+		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None};
+	int winattribsci[]={GLX_BUFFER_SIZE, 8, None, None, None, None, None, None};
+	int winattribscidb[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, None, None,
+		None, None, None, None};
+
+	#ifndef GLX11
+	int pbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
-	int fbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
-		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
-	int fbdbattribs[]={GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+	int pbattribsdb[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
 		GLX_PBUFFER_BIT, None};
-	int fbdbattribsci[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE,
-		GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
-	#ifndef GLX11
+	int pbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
+		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+	int pbattribscidb[]={GLX_DOUBLEBUFFER, 1, GLX_BUFFER_SIZE, 8,
+		GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+		None};
 	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
 	#endif
 
@@ -186,23 +195,15 @@ void findvisual(XVisualInfo* &v
 				printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 				return;
 			}
-			fbattribs[6]=GLX_RGBA;  fbattribs[7]=None;
-			fbattribsci[2]=None;
-			fbdbattribs[7]=GLX_RGBA;  fbdbattribs[8]=None;
-			fbdbattribsci[3]=None;
 			if(useoverlay)
 			{
-				fbattribsci[2]=GLX_LEVEL;  fbattribsci[3]=1;
-				fbattribsci[4]=GLX_TRANSPARENT_TYPE;
-				fbattribsci[5]=GLX_TRANSPARENT_INDEX;
-				fbdbattribsci[3]=GLX_LEVEL;  fbdbattribsci[4]=1;
-				fbdbattribsci[5]=GLX_TRANSPARENT_TYPE;
-				fbdbattribsci[6]=GLX_TRANSPARENT_INDEX;
+				winattribsci[2]=winattribscidb[3]=GLX_LEVEL;
+				winattribsci[3]=winattribscidb[4]=1;
 			};
 			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
-				fbattribsci:fbattribs))
+				winattribsci:winattribs))
 				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
-				fbdbattribsci:fbdbattribs)))
+				winattribscidb:winattribsdb)))
 				_throw("Could not obtain Visual");
 			printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 			return;
@@ -217,20 +218,22 @@ void findvisual(XVisualInfo* &v
 	#ifdef USEGLP
 	if(useglp)
 	{
-		fbattribs[6]=None;  fbattribsci[2]=None;
-		fbdbattribs[7]=None;  fbdbattribsci[3]=None;
-		fbconfigs=glPChooseFBConfig(glpdevice, useci? fbattribsci:fbattribs,
+		pbattribs[6]=pbattribsdb[8]=pbattribsci[2]=pbattribscidb[4]=None;
+		pbattribs[7]=pbattribsdb[9]=pbattribsci[3]=pbattribscidb[5]=None;
+		pbattribs[8]=pbattribsdb[10]=pbattribsci[4]=pbattribscidb[6]=None;
+		pbattribs[9]=pbattribsdb[11]=pbattribsci[5]=pbattribscidb[7]=None;
+		fbconfigs=glPChooseFBConfig(glpdevice, useci? pbattribsci:pbattribs,
 			&nelements);
 		if(!fbconfigs) fbconfigs=glPChooseFBConfig(glpdevice,
-			useci? fbdbattribsci:fbdbattribs, &nelements);
+			useci? pbattribscidb:pbattribsdb, &nelements);
 	}
 	else
 	#endif
 	{
 		fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
-			fbattribsci:fbattribs, &nelements);
+			pbattribsci:pbattribs, &nelements);
 		if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-			useci?fbdbattribsci:fbdbattribs, &nelements);
+			useci?pbattribscidb:pbattribsdb, &nelements);
 	}
 	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
 	c=fbconfigs[0];  XFree(fbconfigs);
@@ -492,9 +495,9 @@ void glread(int format)
 		if(pix[format].glformat==GL_LUMINANCE)
 		{
 			glPushAttrib(GL_PIXEL_MODE_BIT);
-			glPixelTransferf(GL_RED_SCALE, 0.299);
-			glPixelTransferf(GL_GREEN_SCALE, 0.587);
-			glPixelTransferf(GL_BLUE_SCALE, 0.114);
+			glPixelTransferf(GL_RED_SCALE, (GLfloat)0.299);
+			glPixelTransferf(GL_GREEN_SCALE, (GLfloat)0.587);
+			glPixelTransferf(GL_BLUE_SCALE, (GLfloat)0.114);
 		}
 		glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		if(pix[format].glformat==GL_LUMINANCE)
@@ -520,9 +523,9 @@ void glread(int format)
 		if(pix[format].glformat==GL_LUMINANCE)
 		{
 			glPushAttrib(GL_PIXEL_MODE_BIT);
-			glPixelTransferf(GL_RED_SCALE, 0.299);
-			glPixelTransferf(GL_GREEN_SCALE, 0.587);
-			glPixelTransferf(GL_BLUE_SCALE, 0.114);
+			glPixelTransferf(GL_RED_SCALE, (GLfloat)0.299);
+			glPixelTransferf(GL_GREEN_SCALE, (GLfloat)0.587);
+			glPixelTransferf(GL_BLUE_SCALE, (GLfloat)0.114);
 		}
 		for (i=0; i<n; i++)
 		{
@@ -552,6 +555,26 @@ void display(void)
 	for(format=0; format<FORMATS; format++)
 	{
 		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n", pix[format].name);
+
+		#if defined(GL_ABGR_EXT) || defined(GL_BGRA_EXT) || defined(GL_BGR_EXT)
+		const char *ext=(const char *)glGetString(GL_EXTENSIONS), *compext=NULL;
+		#ifdef GL_ABGR_EXT
+		if(pix[format].glformat==GL_ABGR_EXT) compext="GL_EXT_abgr";
+		#endif
+		#ifdef GL_BGRA_EXT
+		if(pix[format].glformat==GL_BGRA_EXT) compext="GL_EXT_bgra";
+		#endif
+		#ifdef GL_BGR_EXT
+		if(pix[format].glformat==GL_BGR_EXT) compext="GL_EXT_bgra";
+		#endif
+		if(compext && (!ext || !strstr(ext, compext)))
+		{
+			fprintf(stderr, "%s extension not available.  Skipping ...\n\n",
+				compext);
+			continue;
+		}
+		#endif
+
 		glwrite(format);
 		glread(format);
 		fprintf(stderr, "\n");
