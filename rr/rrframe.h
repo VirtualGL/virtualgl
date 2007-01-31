@@ -362,8 +362,12 @@ class rrfb : public rrframe
 		#endif
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
-		if(_flags&RRBMP_BOTTOMUP) fbx(fbx_flip(&_fb, x, y, w, h));
-		fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
+		if(_flags&RRBMP_BOTTOMUP)
+		{
+			fbx(fbx_flip(&_fb, x, y, w, h));
+			fbx_awrite(&_fb, x, y, x, _fb.height-y-h, w, h);
+		}
+		else fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
 	}
 
 	void sync(void)
