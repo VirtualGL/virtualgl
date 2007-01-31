@@ -67,14 +67,9 @@ const char *_fbx_formatname[FBX_FORMATS]=
  unsigned long serial=0;  int __extok=1;
  XErrorHandler prevhandler=NULL;
 
- #ifndef X_DbeAllocateBackBufferName
- #define X_DbeAllocateBackBufferName 1
- #endif
-
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
-	if(e->serial==serial && ((e->minor_code==X_ShmAttach && e->error_code==BadAccess)
-		|| (e->minor_code==X_DbeAllocateBackBufferName && e->error_code==BadMatch)))
+	if(e->serial==serial && (e->minor_code==X_ShmAttach && e->error_code==BadAccess))
 	{
 		__extok=0;  return 0;
 	}
@@ -106,14 +101,14 @@ const char *fbx_formatname(int format)
 	else return "Invalid format";
 }
 
-int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int usedbe)
+int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 {
 	int w, h;
 	int rmask, gmask, bmask, ps, i;
 	#ifdef FBXWIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
-	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1, alphafirst;
+	XWindowAttributes xwinattrib;  int shmok=1, alphafirst;
 	#ifdef XWIN32
 	static int seqnum=1;  char temps[80];
 	#endif
@@ -277,8 +272,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int us
 		static int alreadywarned=0;
 		if(!alreadywarned && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] MIT-SHM extension not available.  Will try to use DOUBLE-BUFFER\n");
-			fprintf(__warningfile, "[FBX]   extension instead.\n");
+			fprintf(__warningfile, "[FBX] MIT-SHM extension not available.  Will use X pixmap\n");
+			fprintf(__warningfile, "[FBX]   drawing instead.\n");
 			alreadywarned=1;
 		}
 		useshm=0;
@@ -287,45 +282,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int us
 	if(!useshm)
 	#endif
 	{
-		char *env=NULL;
-		if((env=getenv("VGL_USEDBE"))!=NULL && strlen(env)>0)
-		{
-			if(!strncmp(env, "0", 1)) usedbe=0;
-			else if(!strncmp(env, "1", 1)) usedbe=1;
-		}
-		if(XdbeQueryExtension(s->wh.dpy, &dummy1, &dummy2) && usedbe)
-		{
-			XLockDisplay(s->wh.dpy);
-			XSync(s->wh.dpy, False);
-			prevhandler=XSetErrorHandler(_fbx_xhandler);
-			__extok=1;
-			serial=NextRequest(s->wh.dpy);
-			s->bb=XdbeAllocateBackBufferName(s->wh.dpy, s->wh.win, XdbeUndefined);
-			XSync(s->wh.dpy, False);
-			XSetErrorHandler(prevhandler);
-			if(!__extok)
-			{
-				static int alreadywarned=0;
-				s->bb=0;
-				if(!alreadywarned && __warningfile)
-				{
-					fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension failed to initialize.  Falling back to\n");
-					fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
-					alreadywarned=1;
-				}
-			}
-			XUnlockDisplay(s->wh.dpy);
-		}
-		else
-		{
-			static int alreadywarned=0;
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension not available.  Falling back to\n");
-				fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
-				alreadywarned=1;
-			}
-		}
+		x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width, xwinattrib.height,
+			xwinattrib.depth));
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
 		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))==NULL)
@@ -351,7 +309,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm, int us
 	if(s->format==-1) _throw("Display has unsupported pixel format");
 
 	s->bits=s->xi->data;
-	x11(s->xgc=XCreateGC(s->wh.dpy, s->bb? s->bb:s->wh.win, 0, NULL));
+	x11(s->xgc=XCreateGC(s->wh.dpy, s->pm? s->pm:s->wh.win, 0, NULL));
 	return 0;
 
 	finally:
@@ -427,18 +385,18 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
-	#ifdef FBXWIN32
 	int bx, by, wx, wy, bw, bh;
+	#ifdef FBXWIN32
 	BITMAPINFO bmi;  fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	#ifdef FBXWIN32
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
+	#ifdef FBXWIN32
 	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits) _throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
@@ -454,7 +412,12 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	return 0;
 	#else
 	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
-	if(fbx_sync(s)==-1) return -1;
+	if(s->pm)
+	{
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, wx, wy, bw, bh, wx, wy);
+	}
+	XFlush(s->wh.dpy);
+	XSync(s->wh.dpy, False);
 	return 0;
 	#endif
 
@@ -505,11 +468,11 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 	if(s->shm)
 	{
 		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
-		x11(XShmPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
+		x11(XShmPutImage(s->wh.dpy, s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
 	}
 	else
 	#endif
-	XPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
+	XPutImage(s->wh.dpy, s->pm, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
 	return 0;
 
 	finally:
@@ -522,15 +485,10 @@ int fbx_sync(fbx_struct *s)
 	#ifdef FBXWIN32
 	return 0;
 	#else
-	XdbeSwapInfo si;
 	if(!s) _throw("Invalid argument");
-	si.swap_window=s->wh.win;
-	si.swap_action=XdbeUndefined;
-	if(s->bb)
+	if(s->pm)
 	{
-		XdbeBeginIdiom(s->wh.dpy);
-		XdbeSwapBuffers(s->wh.dpy, &si, 1);
-		XdbeEndIdiom(s->wh.dpy);
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, 0, 0, s->width, s->height, 0, 0);
 	}
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
@@ -548,7 +506,7 @@ int fbx_term(fbx_struct *s)
 	if(s->hdib) DeleteObject(s->hdib);
 	if(s->hmdc) DeleteDC(s->hmdc);
 	#else
-	if(s->bb) {XdbeDeallocateBackBufferName(s->wh.dpy, s->bb);  s->bb=0;}
+	if(s->pm) {XFreePixmap(s->wh.dpy, s->pm);  s->pm=0;}
 	if(s->xi) 
 	{
 		if(s->xi->data && !s->shm) {free(s->xi->data);  s->xi->data=NULL;}

@@ -143,7 +143,7 @@ void nativewrite(int useshm)
 
 	try {
 
-	fbx(fbx_init(&s, wh, 0, 0, useshm, 1));
+	fbx(fbx_init(&s, wh, 0, 0, useshm));
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
 	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname(s.format));
 	fprintf(stderr, "\n");
@@ -213,7 +213,7 @@ void nativeread(int useshm)
 
 	try {
 
-	fbx(fbx_init(&s, wh, 0, 0, useshm, 1));
+	fbx(fbx_init(&s, wh, 0, 0, useshm));
 	int ps=fbx_ps[s.format];
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
 	if(s.width!=width || s.height!=height)
@@ -262,7 +262,7 @@ class writethread : public Runnable
 			else {mywidth=width-width/2;  myx=width/2;}
 			if(myrank%2==0) {myheight=height/2;  myy=0;}
 			else {myheight=height-height/2;  myy=height/2;}
-			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm, 1));
+			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format, (unsigned char *)stressfb.bits);
 			for (i=0; i<iter; i++)
@@ -291,7 +291,7 @@ class writethread1 : public Runnable
 			if(myrank%2==0) {myheight=height/2;  myy=0;}
 			else {myheight=height-height/2;  myy=height/2;}
 			for (i=0; i<iter; i++)
-				fbx(fbx_write(&stressfb0, myx, myy, myx, myy, mywidth, myheight));
+				fbx(fbx_awrite(&stressfb0, myx, myy, myx, myy, mywidth, myheight));
 		}
 
 	private:
@@ -316,7 +316,7 @@ class readthread : public Runnable
 			else {mywidth=width-width/2;  myx=width/2;}
 			if(myrank%2==0) {myheight=height/2;  myy=0;}
 			else {myheight=height-height/2;  myy=height/2;}
-			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm, 1));
+			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			int ps=fbx_ps[stressfb.format];
 			memset(stressfb.bits, 0, mywidth*myheight*ps);
@@ -402,7 +402,7 @@ void nativestress(int useshm)
 	else
 		fprintf(stderr, "FBX write [1 bmp, 4 blits]:       ");
 	memset(&stressfb0, 0, sizeof(stressfb0));
-	fbx(fbx_init(&stressfb0, wh, width, height, useshm, 1));
+	fbx(fbx_init(&stressfb0, wh, width, height, useshm));
 	if(useshm && !stressfb0.shm) _throw("MIT-SHM not supported");
 	initbuf(0, 0, width, stressfb0.pitch, height, stressfb0.format, (unsigned char *)stressfb0.bits);
 	n=N;
@@ -420,6 +420,7 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) t[i]->stop();
 		for(i=0; i<4; i++) t[i]->checkerror();
 		for(i=0; i<4; i++) {delete t[i];  delete wt1[i];}
+		fbx_sync(&stressfb0);
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
 	fbx_term(&stressfb0);
