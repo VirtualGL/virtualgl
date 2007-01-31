@@ -372,17 +372,17 @@ class rrfb : public rrframe
 		#endif
 	}
 
-	void init(rrframeheader &h, bool usedbe=true)
+	void init(rrframeheader &h)
 	{
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
 		checkheader(h);
-		fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1, usedbe?1:0));
+		fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1));
 		if(h.framew>_fb.width || h.frameh>_fb.height)
 		{
 			XSync(_wh.dpy, False);
-			fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1, usedbe?1:0));
+			fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1));
 		}
 		_h=h;
 		if(_h.framew>_fb.width) _h.framew=_fb.width;
@@ -455,8 +455,12 @@ class rrfb : public rrframe
 		#endif
 		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 			return;
-		if(_flags&RRBMP_BOTTOMUP) fbx(fbx_flip(&_fb, x, y, w, h));
-		fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
+		if(_flags&RRBMP_BOTTOMUP)
+		{
+			fbx(fbx_flip(&_fb, x, y, w, h));
+			fbx_awrite(&_fb, x, y, x, _fb.height-y-h, w, h);
+		}
+		else fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
 	}
 
 	void sync(void)

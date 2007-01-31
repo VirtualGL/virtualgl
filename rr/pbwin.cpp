@@ -421,8 +421,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
 			if(fconfig.spoil && !_blitter->frameready() && !force) return;
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh,
-				_usesunray==RRSUNRAY_NOT));
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 			b->_flags|=RRBMP_BOTTOMUP;
 			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
 			else
