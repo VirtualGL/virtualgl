@@ -282,7 +282,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(!useshm)
 	#endif
 	{
-		x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, w, h, xwinattrib.depth));
+		x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width, xwinattrib.height,
+			xwinattrib.depth));
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
 		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))==NULL)
@@ -384,18 +385,18 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
-	#ifdef FBXWIN32
 	int bx, by, wx, wy, bw, bh;
+	#ifdef FBXWIN32
 	BITMAPINFO bmi;  fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	#ifdef FBXWIN32
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
+	#ifdef FBXWIN32
 	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits) _throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
@@ -411,7 +412,12 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	return 0;
 	#else
 	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
-	if(fbx_sync(s)==-1) return -1;
+	if(s->pm)
+	{
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, wx, wy, bw, bh, wx, wy);
+	}
+	XFlush(s->wh.dpy);
+	XSync(s->wh.dpy, False);
 	return 0;
 	#endif
 

@@ -289,7 +289,7 @@ class writethread1 : public Runnable
 			if(myrank%2==0) {myheight=height/2;  myy=0;}
 			else {myheight=height-height/2;  myy=height/2;}
 			for (i=0; i<iter; i++)
-				fbx(fbx_write(&stressfb0, myx, myy, myx, myy, mywidth, myheight));
+				fbx(fbx_awrite(&stressfb0, myx, myy, myx, myy, mywidth, myheight));
 		}
 
 	private:
@@ -418,6 +418,7 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) t[i]->stop();
 		for(i=0; i<4; i++) t[i]->checkerror();
 		for(i=0; i<4; i++) {delete t[i];  delete wt1[i];}
+		fbx_sync(&stressfb0);
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
 	fbx_term(&stressfb0);
