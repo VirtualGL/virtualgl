@@ -283,7 +283,7 @@ void pbwin::swapbuffers(void)
 	if(_pb) _pb->swap();
 }
 
-void pbwin::readback(GLint drawbuf, bool force, bool sync)
+void pbwin::readback(GLint drawbuf, bool sync)
 {
 	fconfig.reloadenv();
 	ConfigCompress compress(_windpy, _usesunray);
@@ -298,8 +298,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 	_dirty=false;
 
 
-	if(_force) {force=true;  _force=false;}
-	if(sync) {compress=RRCOMP_NONE;  force=true;}
+	if(sync) {compress=RRCOMP_NONE;}
 	if(pbw*pbh<1000) compress=RRCOMP_NONE;
 
 	if(stereo() && stereomode!=RRSTEREO_NONE)
@@ -378,8 +377,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
 				fconfig.client:DisplayString(_windpy)));
-			if(fconfig.spoil && _rrdpy && !_rrdpy->frameready() && !force)
-				return;
 			rrframe *b;
 			int flags=RRBMP_BOTTOMUP, format=GL_RGB;
 			#ifdef GL_BGR_EXT
@@ -408,7 +405,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			b->_h.qual=fconfig.currentqual;
 			b->_h.subsamp=fconfig.currentsubsamp;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
-			_rrdpy->sendframe(b);
+			_rrdpy->sendframe(b, fconfig.spoil);
 			break;
 		}
 
@@ -420,7 +417,6 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 			}
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
-			if(fconfig.spoil && !_blitter->frameready() && !force) return;
 			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 			b->_flags|=RRBMP_BOTTOMUP;
 			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
@@ -462,7 +458,7 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 				readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
 					min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			}
-			_blitter->sendframe(b, sync);
+			_blitter->sendframe(b, sync, fconfig.spoil);
 			break;
 		}
 	}

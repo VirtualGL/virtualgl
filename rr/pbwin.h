@@ -60,9 +60,8 @@ class pbwin
 		void initfromwindow(GLXFBConfig);
 		Display *getwindpy(void);
 		Window getwin(void);
-		void readback(GLint, bool, bool sync=false);
+		void readback(GLint, bool sync=false);
 		void swapbuffers(void);
-		void forcenextframe(void) {_force=true;}
 		bool stereo(void);
 		bool _dirty, _rdirty;
 

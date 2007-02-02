@@ -813,10 +813,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		errifnot(config);
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
-		{
 			drawable=pbw->updatedrawable();
-			if(drawable!=curdraw) pbw->forcenextframe();
-		}
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
@@ -827,10 +824,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 				winh.add(dpy, drawable);
 				pbw=winh.setpb(dpy, drawable, config);
 				if(pbw)
-				{
 					drawable=pbw->updatedrawable();
-					if(drawable!=curdraw) pbw->forcenextframe();
-				}
 			}
 		}
 	}
@@ -982,10 +976,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		if(drawpbw)
-		{
 			draw=drawpbw->updatedrawable();
-			if(draw!=curdraw) drawpbw->forcenextframe();
-		}
 		if(readpbw) read=readpbw->updatedrawable();
 	}
 	#ifdef USEGLP
@@ -1255,7 +1246,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	CATCH();
 }
 
-static void _doGLreadback(bool force, bool sync=false)
+static void _doGLreadback(bool sync=false)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
@@ -1267,9 +1258,9 @@ static void _doGLreadback(bool force, bool sync=false)
 		if(_drawingtofront() || pbw->_dirty)
 		{
 				opentrace(_doGLreadback);  prargx(pbw->getdrawable());  prargi(sync);
-				prargi(force);  starttrace();
+				starttrace();
 
-			pbw->readback(GL_FRONT, force, sync);
+			pbw->readback(GL_FRONT, sync);
 
 				stoptrace();  closetrace();
 		}
@@ -1294,8 +1285,7 @@ void glFinish(void)
 		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
 
 	_glFinish();
-	if(fconfig.sync) _doGLreadback(true, true);
-	else _doGLreadback(false);
+	_doGLreadback(fconfig.sync);
 	CATCH();
 }
 
@@ -1308,8 +1298,7 @@ void glXWaitGL(void)
 	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
 
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this to avoid 2 readbacks
-	if(fconfig.sync) _doGLreadback(true, true);
-	else _doGLreadback(false);
+	_doGLreadback(fconfig.sync);
 	CATCH();
 }
 

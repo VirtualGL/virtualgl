@@ -296,24 +296,6 @@ DLLEXPORT int DLLCALL
 
 
 DLLEXPORT int DLLCALL
-	RRFrameReady (RRDisplay display);
-/*
-   Poll the send queue to see whether a new frame would stall
-
-   PARAMETERS:
-   display (IN) = display connection handle returned from a previous call to
-                  RROpenDisplay()
-
-   RETURN VALUE:
-   1 if the queue is empty and a new frame can be compressed and sent
-   immediately.  0 if the queue is not empty and the current frame would stall
-   by at least one frame interval before being compressed and sent.  On
-   failure, RR_ERROR is returned and the reason for the failure can be queried
-   with RRErrorString() and RRErrorLocation().
-*/   
-
-
-DLLEXPORT int DLLCALL
 	RRSendFrame (RRDisplay display, RRFrame *frame);
 /*
    If the frame is uncompressed, this function adds it to the outgoing queue
