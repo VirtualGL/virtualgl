@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	int fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -96,13 +96,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		if(!blitter.frameready())
-		{
-			fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
-			fill=1-fill;
-			frames++;  continue;
-		}
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, true));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -119,7 +113,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		memset(b->_bits, 0, b->_pitch*HEIGHT);
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
@@ -136,7 +130,7 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}

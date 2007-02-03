@@ -89,6 +89,22 @@ class rrevent
 			#endif
 		}
 
+		bool locked(void)
+		{
+			bool islocked=true;
+			#ifdef _WIN32
+			throw("rrevent::locked() not implemented on Windows");
+			#else
+			int ret;
+			if((ret=pthread_mutex_lock(&event))!=0)
+				throw(rrerror("rrevent::locked()", strerror(ret)));
+			islocked=!_ready;
+			if((ret=pthread_mutex_unlock(&event))!=0)
+				throw(rrerror("rrevent::signal()", strerror(ret)));
+			#endif
+			return islocked;
+		}
+
 	private:
 
 		#ifdef _WIN32

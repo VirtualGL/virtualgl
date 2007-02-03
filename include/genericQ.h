@@ -28,12 +28,16 @@ typedef struct _qstruct
 } qstruct;
 
 
+typedef void (*qspoilfct)(void *);
+
+
 class genericQ
 {
 	public:
 		genericQ(void);
 		~genericQ(void);
 		void add(void *);
+		void spoil(void *, qspoilfct);
 		void get(void **);
 		void release(void);
 		int items(void);

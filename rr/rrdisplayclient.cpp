@@ -75,7 +75,7 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 
 
 rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
-	_sd(NULL), _bmpi(0), _t(NULL), _deadyet(false), _dpynum(0)
+	_sd(NULL), _t(NULL), _deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
@@ -168,6 +168,7 @@ void rrdisplayclient::run(void)
 			t.start();
 		}
 
+		if(lastb) lastb->complete();
 		lastb=b;
 	}
 
@@ -189,14 +190,18 @@ void rrdisplayclient::run(void)
 }
 
 rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
-	bool stereo)
+	bool stereo, bool spoil)
 {
 	rrframe *b=NULL;
-	_ready.wait();  if(_deadyet) return NULL;
+	if(!spoil) _ready.wait();  if(_deadyet) return NULL;
 	if(_t) _t->checkerror();
-	_bmpmutex.lock();
-	b=&_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;
-	_bmpmutex.unlock();
+	{
+	rrcs::safelock l(_bmpmutex);
+	int bmpi=-1;
+	for(int i=0; i<NB; i++) if(_bmp[i].iscomplete()) bmpi=i;
+	if(bmpi<0) _throw("No free buffers in pool");
+	b=&_bmp[bmpi];  b->waituntilcomplete();
+	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(rrframeheader));
 	hdr.height=hdr.frameh=h;
@@ -206,17 +211,16 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
 	return b;
 }
 
-bool rrdisplayclient::frameready(void)
+static void __rrdisplayclient_spoilfct(void *b)
 {
-	if(_t) _t->checkerror();
-	return(_q.items()<=0);
+	if(b) ((rrframe *)b)->complete();
 }
 
 void rrdisplayclient::sendframe(rrframe *b)
 {
 	if(_t) _t->checkerror();
 	b->_h.dpynum=_dpynum;
-	_q.add((void *)b);
+	_q.spoil((void *)b, __rrdisplayclient_spoilfct);
 }
 
 void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)

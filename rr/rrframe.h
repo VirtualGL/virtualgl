@@ -179,6 +179,7 @@ class rrframe
 	void waituntilready(void) {_ready.wait();}
 	void complete(void) {_complete.signal();}
 	void waituntilcomplete(void) {_complete.wait();}
+	bool iscomplete(void) {return !_complete.locked();}
 
 	rrframe& operator= (rrframe& f)
 	{

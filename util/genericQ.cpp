@@ -46,12 +46,25 @@ void genericQ::release(void)
 }
 
 
+void genericQ::spoil(void *myval, qspoilfct f)
+{
+	if(deadyet) return;
+	if(myval==NULL) _throw("NULL argument in genericQ::spoil()");
+	rrcs::safelock l(qmutex);
+	if(deadyet) return;
+	void *dummy;
+	for(int i=0; i<items(); i++)
+	{
+		get(&dummy);
+		f(dummy);
+	}
+	add(myval);
+}
+
 void genericQ::add(void *myval)
 {
 	if(deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::add()");
-	rrcs::safelock l(qmutex);
-	if(deadyet) return;
 	qstruct *temp=new qstruct;
 	if(temp==NULL) _throw("Alloc error");
 	if(startptr==NULL) startptr=temp;

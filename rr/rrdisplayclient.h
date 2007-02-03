@@ -38,8 +38,7 @@ class rrdisplayclient : public Runnable
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
-	rrframe *getbitmap(int, int, int, int, bool stereo=false);
-	bool frameready(void);
+	rrframe *getbitmap(int, int, int, int, bool stereo, bool spoil);
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
@@ -54,8 +53,8 @@ class rrdisplayclient : public Runnable
 	private:
 
 	rrsocket *_sd;
-	static const int NB=3;
-	rrcs _bmpmutex;  rrframe _bmp[NB];  int _bmpi;
+	static const int NB=4;
+	rrcs _bmpmutex;  rrframe _bmp[NB];
 	rrevent _ready;
 	genericQ _q;
 	Thread *_t;  bool _deadyet;

@@ -386,7 +386,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 			}
 			#endif
 			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags,
-				dostereo && stereomode==RRSTEREO_QUADBUF));
+				dostereo && stereomode==RRSTEREO_QUADBUF, fconfig.spoil));
 			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
 			else
 			{
@@ -405,7 +405,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 			b->_h.qual=fconfig.currentqual;
 			b->_h.subsamp=fconfig.currentsubsamp;
 			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
-			_rrdpy->sendframe(b, fconfig.spoil);
+			_rrdpy->sendframe(b);
 			break;
 		}
 
@@ -417,7 +417,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 			}
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
+			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
 			b->_flags|=RRBMP_BOTTOMUP;
 			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
 			else
@@ -458,7 +458,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 				readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
 					min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
 			}
-			_blitter->sendframe(b, sync, fconfig.spoil);
+			_blitter->sendframe(b, sync);
 			break;
 		}
 	}
