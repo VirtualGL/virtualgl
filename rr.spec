@@ -59,12 +59,10 @@ mkdir -p $RPM_BUILD_ROOT/usr/lib
 mkdir -p $RPM_BUILD_ROOT/usr/lib64
 %endif
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib
 %ifarch x86_64
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib64
 %endif
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/samples
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
@@ -80,15 +78,9 @@ install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
 install -m 755 %{_bindir32}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
 install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
-install -m 755 %{_libdir32}/librr.so $RPM_BUILD_ROOT/usr/lib/librr.so
-install -m 644 rr/rr.h  $RPM_BUILD_ROOT/opt/%{name}/include
-install -m 644 samples/rrglxgears.c  $RPM_BUILD_ROOT/opt/%{name}/samples
-install -m 644 samples/Makefile.linux $RPM_BUILD_ROOT/opt/%{name}/samples/
 %ifarch x86_64
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
 install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
-install -m 755 %{_libdir}/librr.so $RPM_BUILD_ROOT/usr/lib64/librr.so
-install -m 644 samples/Makefile.linux64 $RPM_BUILD_ROOT/opt/%{name}/samples/
 %endif
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib/libGL.so
 %ifarch x86_64
@@ -120,12 +112,10 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %dir /opt/%{name}
 %dir /opt/%{name}/bin
-%dir /opt/%{name}/include
 %dir /opt/%{name}/lib
 %ifarch x86_64
 %dir /opt/%{name}/lib64
 %endif
-%dir /opt/%{name}/samples
 
 /usr/bin/vglclient
 %{_DAEMON}
@@ -139,13 +129,6 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/cpustat
 /opt/%{name}/bin/glxinfo
 
-/opt/%{name}/include/rr.h
-/opt/%{name}/samples/rrglxgears.c
-/opt/%{name}/samples/Makefile.linux
-%ifarch x86_64
-/opt/%{name}/samples/Makefile.linux64
-%endif
-
 /opt/%{name}/lib/libGL.so
 %ifarch x86_64
 /opt/%{name}/lib64/libGL.so
@@ -153,11 +136,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 /usr/lib/librrfaker.so
 /usr/lib/libdlfaker.so
-/usr/lib/librr.so
 %ifarch x86_64
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
-/usr/lib64/librr.so
 %endif
 
 %changelog
