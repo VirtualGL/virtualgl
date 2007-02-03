@@ -96,7 +96,7 @@ ifeq ($(platform), linux)
 FOBJS := $(FOBJS) $(ODIR)/rrsunray.o
 endif
 
-OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/rrdccwrap.o $(ODIR)/dlfaker.o
+OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
@@ -110,7 +110,7 @@ TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
-TARGETS :=  $(LDIR)/librr.$(SHEXT) $(LDIR)/librrfaker.$(SHEXT) \
+TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
 	$(LDIR)/libdlfaker.$(SHEXT) $(TARGETS)
 endif
 
@@ -141,9 +141,6 @@ $(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
 
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
-
-$(LDIR)/librr.$(SHEXT): $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/rrdccwrap.o $(ODIR)/rrblitter.o $(ODIR)/rrdisplayclient.o $(RRLIB)
 
 $(EDIR)/vglrun: rrlaunch
 	$(INSTALL) -m 755 $< $@
