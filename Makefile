@@ -1,16 +1,15 @@
-all: rr mesademos diags samples
+all: rr mesademos diags
 ALL: dist mesademos
 
-.PHONY: rr util jpeg mesademos diags clean dist samples test
+.PHONY: rr util jpeg mesademos diags clean dist test
 
 vnc:
 	$(MAKE) DISTRO=vnc VNC=yes jpeg
 
 rr: util jpeg
 jpeg: util
-samples: rr
 
-rr util jpeg mesademos diags samples:
+rr util jpeg mesademos diags:
 	cd $@; $(MAKE); cd ..
 
 clean:
@@ -19,7 +18,6 @@ clean:
 	cd jpeg; $(MAKE) clean; cd ..; \
 	cd mesademos; $(MAKE) clean; cd ..; \
 	cd diags; $(MAKE) clean; cd ..; \
-	cd samples; $(MAKE) clean; cd ..
 
 TOPDIR=.
 include Makerules
@@ -113,15 +111,13 @@ ifeq ($(subplatform), 64)
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
-	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
-	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
+	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/$(lib64dir)/librr.$(SHEXT)
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
@@ -129,16 +125,12 @@ install: rr
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
-	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
-	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
-	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
 	echo Install complete.
 else
 install: rr diags mesademos
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
-	if [ ! -d $(prefix)/doc/samples ]; then mkdir -p $(prefix)/doc/samples; fi
-	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
+	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
 	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
 	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
@@ -148,7 +140,6 @@ install: rr diags mesademos
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/lib/libdlfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/librr.$(SHEXT) $(prefix)/lib/librr.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
 	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
@@ -159,9 +150,6 @@ install: rr diags mesademos
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
-	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
-	$(INSTALL) -m 644 samples/rrglxgears.c $(prefix)/doc/samples
-	$(INSTALL) -m 644 samples/Makefile.$(platform)$(subplatform) $(prefix)/doc/samples
 	echo Install complete.
 endif
 
@@ -172,12 +160,8 @@ uninstall:
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
-	$(RM) $(prefix)/$(lib64dir)/librr.$(SHEXT)
-	$(RM) $(prefix)/doc/samples/*
-	if [ -d $(prefix)/doc/samples ]; then rmdir $(prefix)/doc/samples; fi
 	$(RM) $(prefix)/doc/*
 	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
-	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 else
 uninstall:
@@ -190,14 +174,10 @@ uninstall:
 	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/lib/libdlfaker.$(SHEXT)
-	$(RM) $(prefix)/lib/librr.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest
-	$(RM) $(prefix)/doc/samples/*
-	if [ -d $(prefix)/doc/samples ]; then rmdir $(prefix)/doc/samples; fi
 	$(RM) $(prefix)/doc/*
 	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
-	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
 endif
 
