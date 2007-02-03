@@ -36,12 +36,12 @@ class rrblitter : public Runnable
 	bool frameready(void);
 	void sendframe(rrfb *, bool sync=false);
 	void run(void);
-	rrfb *getbitmap(Display *, Window, int, int);
+	rrfb *getbitmap(Display *, Window, int, int, bool spoil);
 
 	private:
 
-	static const int NB=2;
-	rrcs _bmpmutex;  rrfb *_bmp[NB];  int _bmpi;
+	static const int NB=3;
+	rrcs _bmpmutex;  rrfb *_bmp[NB];
 	rrevent _ready;
 	genericQ _q;
 	void blitdiff(rrfb *, rrfb *);

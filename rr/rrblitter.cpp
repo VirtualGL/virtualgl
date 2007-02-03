@@ -18,7 +18,7 @@
 
 extern FakerConfig fconfig;
 
-rrblitter::rrblitter(void) : _bmpi(0), _t(NULL), _deadyet(false)
+rrblitter::rrblitter(void) : _t(NULL), _deadyet(false)
 {
 	for(int i=0; i<NB; i++) _bmp[i]=NULL;
 	errifnot(_t=new Thread(this));
@@ -67,6 +67,7 @@ void rrblitter::run(void)
 			t.start();
 		}
 
+		b->complete();
 //		lastb=b;
 	}
 
@@ -77,15 +78,20 @@ void rrblitter::run(void)
 	}
 }
 
-rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
+rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h, bool spoil)
 {
 	rrfb *b=NULL;
-	_ready.wait();
+	if(!spoil) _ready.wait();
 	if(_t) _t->checkerror();
-	_bmpmutex.lock();
-	if(!_bmp[_bmpi]) errifnot(_bmp[_bmpi]=new rrfb(dpy, win));
-	b=_bmp[_bmpi];  _bmpi=(_bmpi+1)%NB;
-	_bmpmutex.unlock();
+	{
+	rrcs::safelock l(_bmpmutex);
+	int bmpi=-1;
+	for(int i=0; i<NB; i++)
+		if(!_bmp[i] || (_bmp[i] && _bmp[i]->iscomplete())) bmpi=i;
+	if(bmpi<0) _throw("No free buffers in pool");
+	if(!_bmp[bmpi]) errifnot(_bmp[bmpi]=new rrfb(dpy, win));
+	b=_bmp[bmpi];  b->waituntilcomplete();
+	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
 	hdr.height=hdr.frameh=h;
@@ -95,10 +101,9 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 	return b;
 }
 
-bool rrblitter::frameready(void)
+static void __rrblitter_spoilfct(void *b)
 {
-	if(_t) _t->checkerror();
-	return(_q.items()<=0);
+	if(b) ((rrfb *)b)->complete();
 }
 
 void rrblitter::sendframe(rrfb *b, bool sync)
@@ -112,7 +117,7 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 		_lastb=b;
 		_ready.signal();
 	}
-	else _q.add((void *)b);
+	else _q.spoil((void *)b, __rrblitter_spoilfct);
 }
 
 void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
