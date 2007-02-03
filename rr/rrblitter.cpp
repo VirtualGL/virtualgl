@@ -114,6 +114,7 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 		_prof_blit.startframe();
 		blitdiff(b, _lastb);
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
+		if(_lastb) _lastb->complete();
 		_lastb=b;
 		_ready.signal();
 	}
