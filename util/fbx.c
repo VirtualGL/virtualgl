@@ -250,7 +250,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		if(!alreadywarned && !shmok && __warningfile)
 		{
 			fprintf(__warningfile, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
-			fprintf(__warningfile, "[FBX]   connection.)  Will try to use DOUBLE-BUFFER extension instead.\n");
+			fprintf(__warningfile, "[FBX]   connection.)  Will use X Pixmap drawing instead.\n");
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
@@ -262,7 +262,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		#else
 		if(!shmok)
 		{
-			useshm=0;  XDestroyImage(s->xi);  shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
+			useshm=0;  XDestroyImage(s->xi);  shmdt(s->shminfo.shmaddr);
+			shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
 		#endif
 		s->xattach=1;  s->shm=1;
