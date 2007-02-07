@@ -765,8 +765,6 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 	return _glXResetFrameCountNV(_localdpy, DefaultScreen(_localdpy));
 }
 
-#ifdef GLX_ARB_get_proc_address
-
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
 #ifdef SUNOGL
 #define checkfakedidx(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))r_##f;
@@ -785,6 +783,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	if(procName)
 	{
 		checkfaked(glXGetProcAddressARB)
+		checkfaked(glXGetProcAddress)
 
 		checkfaked(glXChooseVisual)
 		checkfaked(glXCopyContext)
@@ -880,7 +879,11 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glPixelTransferf)
 		checkfaked(glPixelTransferi)
 	}
-	if(!retval) retval=_glXGetProcAddressARB(procName);
+	if(!retval)
+	{
+		if(__glXGetProcAddressARB) retval=_glXGetProcAddressARB(procName);
+		else if(__glXGetProcAddress) retval=_glXGetProcAddress(procName);
+	}
 
 		stoptrace();  closetrace();
 
@@ -891,7 +894,5 @@ void (*glXGetProcAddress(const GLubyte *procName))(void)
 {
 	return glXGetProcAddressARB(procName);
 }
-
-#endif
 
 }

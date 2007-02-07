@@ -1998,7 +1998,22 @@ int querytest(void)
 	if((sym=(void *)glXGetProcAddressARB((const GLubyte *)#f))==NULL) \
 		_throw("glXGetProcAddressARB(\""#f"\") returned NULL"); \
 	else if(sym!=(void *)f) \
-		_throw("glXGetProcAddressARB(\""#f"\")!="#f);
+		_throw("glXGetProcAddressARB(\""#f"\")!="#f); \
+	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
+		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
+	else if(sym!=(void *)f) \
+		_throw("glXGetProcAddress(\""#f"\")!="#f);
+
+#else
+
+#define testprocsym(f) \
+	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
+		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
+	else if(sym!=(void *)f) \
+		_throw("glXGetProcAddress(\""#f"\")!="#f);
+
+#endif
+
 
 int procaddrtest(void)
 {
@@ -2023,7 +2038,6 @@ int procaddrtest(void)
 	fflush(stdout);
 	return retval;
 }
-#endif
 
 
 int main(int argc, char **argv)
@@ -2066,10 +2080,8 @@ int main(int argc, char **argv)
 	#endif
 	if(!querytest()) ret=-1;
 	printf("\n");
-	#ifdef GLX_ARB_get_proc_address
 	if(!procaddrtest()) ret=-1;
 	printf("\n");
-	#endif
 	if(!rbtest(false, false)) ret=-1;
 	printf("\n");
 	rbtest(true, false);

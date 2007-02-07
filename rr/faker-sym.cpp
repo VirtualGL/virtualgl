@@ -108,9 +108,8 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXQueryFrameCountNV)
 	lsymopt(glXResetFrameCountNV)
 
-	#ifdef GLX_ARB_get_proc_address
 	lsymopt(glXGetProcAddressARB)
-	#endif
+	lsymopt(glXGetProcAddress)
 
 	#ifdef USEGLP
 	lsymopt(glPSwapBuffers)
