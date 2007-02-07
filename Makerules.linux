@@ -43,7 +43,7 @@ ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 
-FAKERLINK = -lGL
+FAKERLINK = -lGL -Wl,--version-script,$(ODIR)/faker-mapfile.E
 
 ifeq ($(subplatform),)
 RPMARCH = i386

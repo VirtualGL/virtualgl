@@ -130,13 +130,13 @@ TARGETS := $(TARGETS) $(EDIR)/vglrun
 all: $(TARGETS)
 
 clean:
-	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
+	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d) $(ODIR)/faker-mapfile.E
 
 -include $(OBJS:.o=.d)
 
 # Server
 
-$(LDIR)/librrfaker.$(SHEXT): $(FOBJS) $(RRDEP)
+$(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl -lXt -lXaw
 
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
