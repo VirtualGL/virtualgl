@@ -120,7 +120,7 @@ libjpeg:
 	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
 
 clean:
-	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
+	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d) $(ODIR)/turbojpeg-mapfile.E
 	cd jpeg-6b; \
 	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
 
@@ -170,7 +170,13 @@ $(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbo
 	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
 		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
 
-$(LDIR)/libturbojpeg.$(SHEXT): $(ODIR)/turbojpeg.o $(JPEGDEP)
+ifneq ($(platform), osx)
+ifneq ($(platform), osxx86)
+JPEGLINK := $(JPEGLINK) $(MAPFLAG)$(ODIR)/turbojpeg-mapfile.E
+endif
+endif
+
+$(LDIR)/libturbojpeg.$(SHEXT): $(ODIR)/turbojpeg.o $(ODIR)/turbojpeg-mapfile.E $(JPEGDEP)
 	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
 
 $(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDEP) $(LDIR)/librrutil.a
