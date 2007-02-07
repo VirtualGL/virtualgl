@@ -31,27 +31,11 @@ echo d none SUNWvgl/lib 0755 root bin
 echo f none SUNWvgl/lib/librrfaker.so 0755 root bin
 echo f none SUNWvgl/lib/libdlfaker.so 0755 root bin
 echo f none SUNWvgl/lib/libturbojpeg.so 0755 root bin
-_LIBCRYPTO=`find $_installdir/lib/libcrypto.so.* 2>/dev/null | xargs | awk '{print $NF}'`
-_LIBSSL=`find $_installdir/lib/libssl.so.* 2>/dev/null | xargs | awk '{print $NF}'`
-if [ -n "$_LIBCRYPTO" ]; then
-echo f none SUNWvgl/lib/`basename $_LIBCRYPTO` 0755 root bin
-fi
-if [ -n "$_LIBSSL" ]; then
-echo f none SUNWvgl/lib/`basename $_LIBSSL` 0755 root bin
-fi
 if [ "$_subplatform" = "64" ]; then
 echo d none SUNWvgl/lib/$LIB64 0755 root bin
 echo f none SUNWvgl/lib/$LIB64/librrfaker.so 0755 root bin
 echo f none SUNWvgl/lib/$LIB64/libdlfaker.so 0755 root bin
 echo f none SUNWvgl/lib/$LIB64/libturbojpeg.so 0755 root bin
-_LIBCRYPTO64=`find $_installdir/lib/$LIB64/libcrypto.so.* 2>/dev/null | xargs | awk '{print $NF}'`
-_LIBSSL64=`find $_installdir/lib/$LIB64/libssl.so.* 2>/dev/null | xargs | awk '{print $NF}'`
-if [ -n "$_LIBCRYPTO64" ]; then
-echo f none SUNWvgl/lib/$LIB64/`basename $_LIBCRYPTO64` 0755 root bin
-fi
-if [ -n "$_LIBSSL64" ]; then
-echo f none SUNWvgl/lib/$LIB64/`basename $_LIBSSL64` 0755 root bin
-fi
 echo s none SUNWvgl/lib/64=$LIB64
 fi
 echo d none SUNWvgl/doc 0755 root bin

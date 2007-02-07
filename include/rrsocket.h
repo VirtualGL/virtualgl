@@ -25,7 +25,7 @@
 #if defined(sun)||defined(sgi)
 #include <openssl/rand.h>
 #endif
-#if !defined(_WIN32) && !defined(__CYGWIN__)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(sun)
 #pragma weak ASN1_INTEGER_set
 #pragma weak CRYPTO_set_id_callback
 #pragma weak CRYPTO_set_locking_callback
