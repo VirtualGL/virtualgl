@@ -1,6 +1,3 @@
-#ifdef linux
-VERS_2.0.1
-#endif
 {
 	global:
 		glXChooseVisual;

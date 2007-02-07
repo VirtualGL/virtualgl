@@ -36,6 +36,7 @@ DEFAULTJPEGLIB = ipp
 SHFLAG = -shared
 SHEXT = so
 DEPFLAG = -MM
+MAPFLAG = -Wl,--version-script,
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
@@ -43,7 +44,7 @@ ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 
-FAKERLINK = -lGL -Wl,--version-script,$(ODIR)/faker-mapfile.E
+FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ifeq ($(subplatform),)
 RPMARCH = i386
