@@ -1,3 +1,6 @@
+#ifdef linux
+TURBOJPEG
+#endif
 {
 	global:
 		tjInitCompress;

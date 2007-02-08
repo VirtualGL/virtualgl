@@ -1,3 +1,6 @@
+#ifdef linux
+VIRTUALGL
+#endif
 {
 	global:
 		glXChooseVisual;
