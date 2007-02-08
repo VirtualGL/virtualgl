@@ -20,6 +20,7 @@ OPTFLAG = -O2
 endif
 SHFLAG = -shared -lc -z defs
 DEPFLAG = -MM
+MAPFLAG = -Wl,-M,
 
 else
 
@@ -40,6 +41,7 @@ OPTFLAG = -O
 endif
 SHFLAG = -G -lc -z direct -lCrun -z nodirect -z defs
 DEPFLAG = -xM1
+MAPFLAG = -M
 
 endif
 
@@ -70,18 +72,13 @@ FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
 ifneq ($(USESSL), no)
 ifeq ($(CC), gcc)
-SOCKLIB := $(SOCKLIB) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
+SOCKLIB := $(SOCKLIB) -ldl -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
 else
-SOCKLIB := $(SOCKLIB) -Bstatic -lssl -lcrypto -Bdynamic
+SOCKLIB := $(SOCKLIB) -ldl -Bstatic -lssl -lcrypto -Bdynamic
 endif
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lXm -lGL -lm
-ifeq ($(CC), gcc)
-FAKERLINK := $(FAKERLINK) -Xlinker -M -Xlinker $(ODIR)/faker-mapfile.E
-else
-FAKERLINK := $(FAKERLINK) -M $(ODIR)/faker-mapfile.E
-endif
+FAKERLINK = -lXm -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
