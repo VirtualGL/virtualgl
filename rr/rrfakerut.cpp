@@ -1992,34 +1992,25 @@ int querytest(void)
 }
 
 
-#ifdef GLX_ARB_get_proc_address
-
+#ifdef SUNOGL
+#define testprocsym(f) \
+	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
+		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
+	else if(sym!=(void *)f) \
+		_throw("glXGetProcAddress(\""#f"\")!="#f);
+#else
 #define testprocsym(f) \
 	if((sym=(void *)glXGetProcAddressARB((const GLubyte *)#f))==NULL) \
 		_throw("glXGetProcAddressARB(\""#f"\") returned NULL"); \
 	else if(sym!=(void *)f) \
-		_throw("glXGetProcAddressARB(\""#f"\")!="#f); \
-	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
-		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
-	else if(sym!=(void *)f) \
-		_throw("glXGetProcAddress(\""#f"\")!="#f);
-
-#else
-
-#define testprocsym(f) \
-	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
-		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
-	else if(sym!=(void *)f) \
-		_throw("glXGetProcAddress(\""#f"\")!="#f);
-
+		_throw("glXGetProcAddressARB(\""#f"\")!="#f);
 #endif
-
 
 int procaddrtest(void)
 {
 	int retval=1;  void *sym=NULL;
 
-	printf("glXGetProcAddressARB test:\n\n");
+	printf("glXGetProcAddress test:\n\n");
 
 	try
 	{
@@ -2042,7 +2033,7 @@ int procaddrtest(void)
 
 int main(int argc, char **argv)
 {
-	int ret=0;  int nthr=NTHR;
+	int ret=0;  int nthr=NTHR;  int doci=1;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
@@ -2068,6 +2059,7 @@ int main(int argc, char **argv)
 		{
 			int temp=atoi(argv[++i]);  if(temp>=0 && temp<=NTHR) nthr=temp;
 		}
+		if(!strcasecmp(argv[i], "-noci")) doci=0;
 	}
 
 	// Intentionally leave a pending dlerror()
@@ -2086,10 +2078,13 @@ int main(int argc, char **argv)
 	printf("\n");
 	rbtest(true, false);
 	printf("\n");
-	rbtest(false, true);
-	printf("\n");
-	citest();
-	printf("\n");
+	if(doci)
+	{
+		rbtest(false, true);
+		printf("\n");
+		citest();
+		printf("\n");
+	}
 	if(!vistest()) ret=-1;
 	printf("\n");
 	if(!mttest(nthr)) ret=-1;
