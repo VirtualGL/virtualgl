@@ -141,6 +141,10 @@ rrsocket::rrsocket(bool dossl=false)
 		CRYPTO_set_locking_callback(locking_callback);
 		SSL_library_init();
 		_Sslinit=true;
+		char *env=NULL;
+		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+			&& !strncmp(env, "1", 1))
+			fprintf(stderr, "[VGL] Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
 	}
 	_ssl=NULL;  _sslctx=NULL;
 	#endif
