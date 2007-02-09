@@ -107,6 +107,11 @@ VIRTUALGL
 		XServerVendor;
 		XWindowEvent;
 
+		__XFree;
+		__XGetGeometry;
+		__XNextEvent;
+		__XOpenDisplay;
+
 	local:
 		*;
 };
