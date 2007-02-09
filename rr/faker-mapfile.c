@@ -45,6 +45,19 @@ VIRTUALGL
 		glXQueryDrawable;
 		glXSelectEvent;
 
+		glXChooseFBConfigSGIX;
+		glXCreateContextWithConfigSGIX;
+		glXCreateGLXPbufferSGIX;
+		glXCreateGLXPixmapWithConfigSGIX;
+		glXDestroyGLXPbufferSGIX;
+		glXGetCurrentReadDrawableSGI;
+		glXGetFBConfigAttribSGIX;
+		glXGetSelectedEventSGIX;
+ 		glXGetVisualFromFBConfigSGIX;
+		glXMakeCurrentReadSGI;
+		glXQueryGLXPbufferSGIX;
+		glXSelectEventSGIX;
+
 		glXFreeContextEXT;
 		glXImportContextEXT;
 		glXQueryContextInfoEXT;
@@ -55,6 +68,8 @@ VIRTUALGL
 		glXQueryMaxSwapGroupsNV;
 		glXQueryFrameCountNV;
 		glXResetFrameCountNV;
+
+		glXGetTransparentIndexSUN;
 
 		glXGetProcAddressARB;
 		glXGetProcAddress;

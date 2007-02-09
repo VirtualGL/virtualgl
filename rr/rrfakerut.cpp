@@ -1630,12 +1630,12 @@ int pbtest(void)
 		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
 
-		if((configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib, &n))
+		if((configs=glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattrib, &n))
 			==NULL || n==0) _throw("Could not find a suitable FB config");
 		c=configs[0];
 		int fbcid=cfgid(dpy, c);
 		XFree(configs);  configs=NULL;
-		if((v=glXGetVisualFromFBConfig(dpy, c))==NULL)
+		if((v=glXGetVisualFromFBConfigSGIX(dpy, c))==NULL)
 			_throw("Could not find matching visual for FB config");
 
 		Window root=RootWindow(dpy, DefaultScreen(dpy));
@@ -1672,7 +1672,7 @@ int pbtest(void)
 		if(tempw!=(unsigned int)dpyw/2 || temph!=(unsigned int)dpyh/2)
 			_throw("glXQueryGLXPbufferSGIX() failed");
 
-		if(!(ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True)))
+		if(!(ctx=glXCreateContextWithConfigSGIX(dpy, c, GLX_RGBA_TYPE, NULL, True)))
 			_throw("Could not create context");
 
 		if(!glXMakeContextCurrent(dpy, glxwin, glxwin, ctx))
