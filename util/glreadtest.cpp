@@ -454,7 +454,8 @@ void glwrite(int format)
 	rbtime=timer.elapsed();
 	if(rbtime<2.)
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
+		if(rbtime==0.0) n=200;  // Work around EL3 timer resolution bug
+		else n=(int)(2./rbtime+0.5);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
@@ -491,7 +492,8 @@ void glread(int format)
 	rbtime=timer.elapsed();
 	if(rbtime<2.)
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
+		if(rbtime==0.0) n=200;  // Work around EL3 timer resolution bug
+		else n=(int)(2./rbtime+0.5);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
@@ -515,7 +517,8 @@ void glread(int format)
 	rbtime=timer.elapsed();
 	if(rbtime<2.)
 	{
-		n=(int)(2./rbtime);  if(n<1) n=1;
+		if(rbtime==0.0) n=200;  // Work around EL3 timer resolution bug
+		else n=(int)(2./rbtime+0.5);  if(n<1) n=1;
 		timer.start();
 		for (i=0; i<n; i++)
 		{
