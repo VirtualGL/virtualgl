@@ -33,11 +33,17 @@ inline unsigned long rrthread_id(void)
 
 // This class implements Java-like threads in C++
 
-struct Runnable
+class Runnable
 {
-	virtual void run()=0;
-	unsigned long _threadId;
-	rrerror lasterror;
+	public:
+		Runnable(void) {}
+		virtual ~Runnable(void) {}
+
+	protected:
+		virtual void run()=0;
+		unsigned long _threadId;
+		rrerror lasterror;
+		friend class Thread;
 };
 
 class Thread
