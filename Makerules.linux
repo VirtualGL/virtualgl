@@ -3,13 +3,14 @@
 ########################################
 
 CC = cc
-CXX = c++
+CXX = c++ -static-libgcc
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
+CINCLUDES = -I/opt/openssl-static/include
 endif
 
 ifeq ($(subplatform), 64)
@@ -25,10 +26,12 @@ ARCHFLAG = -m32
 LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
+_DUMMY4 := $(shell ln -fs `g++ $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
+
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -ggdb
 else
-OPTFLAG = -O2
+OPTFLAG = -O2 -g
 endif
 
 DEFAULTJPEGLIB = ipp
@@ -41,7 +44,7 @@ MAPFLAG = -Wl,--version-script,
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -lssl -lcrypto
+SOCKLIB := $(SOCKLIB) -L/opt/openssl-static/lib${subplatform} -ldl -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
 endif
 
 FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
