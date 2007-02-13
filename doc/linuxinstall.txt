@@ -219,17 +219,14 @@ server by replacing the references to ''vglgenkey'' below with
 		---
 		as root.
 
-	#. You can check your work by running
+	#. To check your work, log out of the server, log back in via. SSh, and
+		run
 		#Verb <<---
 		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
 		xdpyinfo -display :0
 		---
 		In particular, make sure that XTEST doesn't show up in the list of
-		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
-		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 6 didn't take for some reason.  Note that if your
-		account was just added to the ''vglusers'' group, you may need to log out
-		and back in again before the new group credentials become active.
+		extensions if you disabled it above.
 
 ** Device permissions
 
