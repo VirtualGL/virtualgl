@@ -26,8 +26,7 @@
 	2. Log in as root, cd to the directory where you downloaded the RPM package,
 		and issue the following commands:
 		#Verb <<---
-		rpm -e turbojpeg
-		rpm -i turbojpeg*.rpm
+		rpm -U turbojpeg*.rpm
 		---
 
 *** Installing VirtualGL
@@ -96,3 +95,30 @@ from the
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
 uncompress it, ''cd vgl'', and read the contents of ''BUILDING.txt'' for
 further instructions on how to build and install VirtualGL from source.
+
+** Uninstalling VirtualGL
+
+*** Linux
+#OPT: noList! plain!
+
+As root, issue the following command:
+
+#Verb: <<---
+rpm -e VirtualGL
+---
+
+*** Solaris
+#OPT: noList! plain!
+
+As root, issue the following command:
+
+#Verb: <<---
+pkgrm SUNWvgl
+---
+
+Answer "yes" when prompted.
+
+*** Windows
+#OPT: noList! plain!
+
+Use the __Add or Remove Programs__ applet in the Control Panel.
