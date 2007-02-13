@@ -1,111 +1,73 @@
-* Installing the VirtualGL Server and Direct Mode Client on Linux
+* Configuring a Linux Machine as a VirtualGL Server
 
-	!!! Installing the VirtualGL package is necessary on any Linux machine that
-	will act as a VirtualGL server or as a VirtualGL
-	[[overview.txt#Direct_Mode][Direct Mode]]	client.  It is not necessary to
-	install VirtualGL on the client machine if
-	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
+** System Requirements
 
-*** Installing TurboJPEG
-#OPT: noList! plain!
+|| || x86 || x86-64 ||
+| Recommended CPU \
+	| Pentium 4, 1.7 GHz or faster (or equivalent) \
+		{list type=ul: \
+			{item:For optimal performance, the processor should support SSE2 \
+				extensions.} \
+			{item:Dual processors recommended}} \
+	| Pentium 4/Xeon with EM64T, or...{nl} \
+		AMD Opteron or Athlon64, 1.8 GHz or faster \
+		{list type=ul: \
+			{item:For optimal performance with 64-bit VirtualGL, the processor \
+				should support SSE3 extensions.  Only newer AMD 64-bit processors \
+				(mid-2005 and later) support SSE3.} \
+			{item:Dual processors recommended}} \
+	|
+| Graphics \
+	| Decent 3D graphics accelerator \
+		{list type=ul: \
+			{item:VirtualGL should work with any 3D graphics accelerator that \
+				supports Pbuffers, but it has only been tested extensively with \
+				nVidia hardware.} \
+			{item:For applications that use stereographic rendering, the server's \
+				3D graphics card must support stereo and must be configured to export \
+				stereo visuals.} \
+			{item:Install the vendor drivers for the server's 3D graphics card. \
+				Do not use the drivers that ship with Linux, as these do not provide \
+				3D acceleration or Pbuffer support.}} \
+	| < \
+	|
+| Recommended O/S \
+	| {list type=ul: \
+			{item:RedHat Linux 7.2 or newer (or equivalent), or} \
+			{item:SuSE Linux 9 or newer}} \
+  | {list type=ul: \
+      {item:RedHat Enterprise Linux 3.0 or newer (64-bit) or equivalent (Works \
+				with [[http://www.whiteboxlinux.org][WhiteBox]], and \
+				[[http://www.centos.org][CentOS]]), or} \
+			{item:SuSE Linux 9 or newer}} \
+	|
+| Other Software \
+	| {list type=ul: \
+			{item:X server configured for true color (24/32-bit)} \
+			{item:SSh server}} \
+	| < \
+	|
+#OPT: hiCol=first
 
-	1. Obtain the latest TurboJPEG RPM from the "Files" area of
-		[[http://sourceforge.net/projects/virtualgl]].
-		!!! .tgz packages are provided for users of non-RPM platforms.  You can
-		use [[http://www.kitenet.net/programs/alien/][alien]] to convert these into
-		.deb packages if you prefer.
-
-	2. Log in as root, cd to the directory where you downloaded the RPM package,
-		and issue the following command:
-		#Verb <<---
-		rpm -Uvh turbojpeg*.rpm
-		---
-
-*** Installing VirtualGL
-#OPT: noList! plain!
-
-	1. If you are using RedHat/CentOS Enterprise Linux 2.1, 3, or 4 or SuSE
-		Linux 9, obtain one of the pre-built VirtualGL RPMs from the files area of
-		[[http://sourceforge.net/projects/virtualgl]].
-		{nl}{nl}
-		The Enterprise Linux 2.1 RPM should (theoretically) also work with RedHat
-			Linux 7.2 and 7.3 (and maybe 7.1 if patched.){nl}
-		The Enterprise Linux 3 RPM should (theoretically) also work with RedHat
-			Linux 8 (patched), RedHat Linux 9, and Fedora Core 1 & 2.{nl}
-		The Enterprise Linux 4 RPM should (theoretically) also work with Fedora
-			Core 3 & 4.{nl}
-		The SuSE Linux 9 RPM should (theoretically) also work with SuSE 10.
-
-	2. Log in as root, cd to the directory where you downloaded the RPM package,
-		and issue the following command:
-		#Verb <<---
-		rpm -Uvh VirtualGL*.rpm
-		---
-
-*** Installing VirtualGL from Source
-#OPT: noList! plain!
-
-If you are using an RPM-based distribution of Linux but there isn't a pre-built
-VirtualGL RPM that matches your distribution, then you can build your own RPM
-using the VirtualGL Source RPM (SRPM.)
-
-	1. Obtain the VirtualGL SRPM from the files area of
-		[[http://sourceforge.net/projects/virtualgl]].
-
-	2. Log in as root, cd to the directory where you downloaded the SRPM, and
-		issue the following commands:
-		#Verb <<---
-		rpm -i VirtualGL*.src.rpm
-		cd /usr/src/redhat/SPECS
-		rpmbuild -ba virtualgl.spec
-		---
-		!!! On SuSE, cd to ''/usr/src/packages/SPECS'' instead.  Some versions of
-		SuSE symlink this to ''/usr/src/redhat/SPECS''.
-
-	3. Sit back and watch the fun.
-
-	4. If the build completes successfully, it will produce a binary RPM in
-		''/usr/src/redhat/RPMS/{your_cpu_architecture}'' (or
-		''/usr/src/packages/RPMS/{your_cpu_architecture})'', which you can install
-		using the instructions from the previous section.
-
-If you are using a non-RPM based distribution of Linux, then log in as root,
-download the VirtualGL source tarball from the files area of
-[[http://sourceforge.net/projects/virtualgl]], uncompress it, ''cd vgl'', and
-type ''make install''.  Refer to ''BUILDING.txt'' in the source directory for
-further details.
-
-*** NVidia driver permissions
-#OPT: noList! plain!
-
-If installing VirtualGL on a server which is running version 1.0-71xx or
-earlier of the NVidia accelerated GLX drivers, follow the instructions in
-''/usr/share/doc/NVIDIA_GLX-1.0/README'' regarding setting the appropriate
-permissions for ''/dev/nvidia*''.  This is not necessary with more recent
-versions of the driver.  ''cat /proc/driver/nvidia/version'' to determine
-which version of the NVidia driver is installed on your system.
-
-** Granting VirtualGL Access to the Server's X Display
+** Granting Access to the Server's X Display
 
 VirtualGL requires access to the server's 3D graphics card so that it can
 create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
 from applications into these Pbuffers.  Unfortunately, accessing a 3D
 graphics card on Linux currently requires going through an X server.  So the
-only way to share the server’s 3D graphics resources among multiple users is to
-grant those users display access to the X server that is running on the shared
-3D graphics card.
+only way to share the server’s 3D graphics card among multiple users is to
+grant those users access to the X server that is running on the 3D graphics
+card.
 
 It is important to understand the security risks associated with this.  Once
-X display access is granted to a user, there is nothing preventing that user
-from logging keystrokes or reading back images from the X display.  Using
-''xauth'', one can obtain “untrusted” X authentication keys which prevent such
-exploits, but unfortunately, those untrusted keys also disallow access to the
-3D hardware.  So it is necessary to grant full trusted X access to any users
-that will need to run VirtualGL.  Unless you fully trust the users to whom you
-are granting this access, you should avoid logging in locally to the server’s
-X display as root unless absolutely necessary.  Even then, it’s probably a good
-idea to make sure that there are no suspicious-looking processes running on the
-system prior to logging in.
+X display access is granted to a user, there is nothing that would prevent
+that user from logging keystrokes or reading back images from the X display.
+Using ''xauth'', one can obtain “untrusted” X authentication keys which prevent
+such exploits, but unfortunately, those untrusted keys also disallow access to
+the 3D hardware.  So it is necessary to grant full trusted X access to any
+users that will need to run VirtualGL.  Unless you fully trust the users to
+whom you are granting this access, you should avoid logging in locally to the
+server’s X display as root unless absolutely necessary.
 
 This section will explain how to configure a VirtualGL server such that select
 users can run VirtualGL, even if the server is sitting at the login prompt.
@@ -265,77 +227,15 @@ server by replacing the references to ''vglgenkey'' below with
 		In particular, make sure that XTEST doesn't show up in the list of
 		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
 		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 6 didn't take for some reason.
+		that the change in Step 6 didn't take for some reason.  Note that if your
+		account was just added to the ''vglusers'' group, you may need to log out
+		and back in again before the new group credentials become active.
 
-** Automatically Starting the VirtualGL Client
+** Device permissions
 
-The VirtualGL Direct Mode client for Linux can be configured to start
-automatically whenever an X Windows session starts.  To do this, run
-
-#Verb: <<---
-vglclient_config -install
----
-
-as root.
-
-Depending on your system configuration, this script will either tweak the
-''/etc/X11/xinit/xinitrc'' file or create a link in
-''/etc/X11/xinit/xinitrc.d'' so that the VirtualGL client will be automatically
-started whenever any X Windows session is started.  Running
-''vglclient_config -install'' also adds a line to
-''/etc/X11/gdm/PostSession/Default'' (or the equivalent for your system) to
-terminate the client whenever you log out of the X Windows session.  This is
-known to work on RedHat- and SuSE-compatible platforms that use the Gnome
-Display Manager (gdm.)  It probably won't work on other distributions and
-display managers.
-
-To remove the auto-start feature, run
-
-#Verb: <<---
-vglclient_config -remove
----
-
-as root.
-
-If ''vglclient_config'' doesn't work on your system, then you can edit the
-appropriate X11 session files so that
-
-#Verb: <<---
-/usr/bin/vglclient_daemon start
----
-
-runs whenever an X session starts and
-
-#Verb: <<---
-/usr/bin/vglclient_daemon stop
----
-
-runs whenever the session terminates.
-
-''vglclient_daemon'' will only start ''vglclient'' if it is not already
-running, so starting the client in this manner guarantees that there will
-never be more than one copy of it running on the system.  ''vglclient_daemon''
-should work on any Linux platform that conforms to the Linux Standard Base
-(LSB.)
-
-If additional X displays are started by the same user (:1, :2, etc.), this will
-not cause additional VirtualGL client instances to start.  Only one VirtualGL
-client instance is needed to talk to all active displays.  However, it is
-important to note that all active displays on the client machine need to be
-running under the same user privileges as the VirtualGL client, or they need to
-grant permissions to localhost (''xhost +localhost'') so that the VirtualGL
-client can access them.
-
-If you wish to change the default port that the client listens on, you will
-need to edit ''/usr/bin/vglclient_daemon'' and pass the appropriate argument
-(''-port <port number>'' or ''-sslport <port number>'') on the ''vglclient''
-command line located in that file.  By default, the client will listen on port
-4242 for unencrypted connections and port 4243 for SSL connections.
-
-** Uninstalling
-
-As root, issue the following command:
-
-#Verb: <<---
-rpm -e VirtualGL
----
+If you are installing VirtualGL on a server which is running version 1.0-71xx
+or earlier of the NVidia accelerated GLX drivers, follow the instructions in
+''/usr/share/doc/NVIDIA_GLX-1.0/README'' regarding setting the appropriate
+permissions for ''/dev/nvidia*''.  This is not necessary with more recent
+versions of the driver.  ''cat /proc/driver/nvidia/version'' to determine
+which version of the NVidia driver is installed on your system.
