@@ -8,11 +8,21 @@ How to build VirtualGL in 9043 easy steps
 
 -- OpenSSL headers and link libraries
 
-   On most Linux variants, these can be found in the "openssl-devel" package
-   included with the distribution.  If your Linux distribution does not contain
-   a pre-packaged version of OpenSSL, then you will need to build and install
-   the toolkit from source.  The source code can be obtained from
-   http://www.openssl.org/.
+   In order for VirtualGL to be compatible with a variety of Linux
+   distributions, it is necessary to statically link it with OpenSSL.  Since
+   most distributions of Linux don't include the static OpenSSL link libraries,
+   the VirtualGL Project provides these in a separate RPM that can be
+   downloaded from the "Download" area of
+   http://sourceforge.net/projects/virtualgl
+   The direct link for openssl-static downloads is:
+   https://sourceforge.net/project/showfiles.php?group_id=117509&package_id=221619
+
+   Use the i386 RPM for 32-bit systems and the x86_64 RPM for 64-bit systems
+   (the x86_64 RPM contains both 64-bit and 32-bit libraries.)
+
+   Tarballs are also provided for users of non-RPM-based Linux distributions.
+   You can use alien (http://www.kitenet.net/programs/alien/) to convert these
+   into DEB packages, if you prefer.
 
 -- GCC and G++ (tested with v2.96 and v3.x)
 
@@ -25,10 +35,17 @@ How to build VirtualGL in 9043 easy steps
 
 -- TurboJPEG SDK
 
-   Download (and install) the RPM from the "Files" area of 
+   Download (and install) the RPM from the "Download" area of
    http://sourceforge.net/projects/virtualgl
    The direct link for TurboJPEG downloads is:
    http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
+
+   Use the i386 RPM for 32-bit systems and the x86_64 RPM for 64-bit systems
+   (the x86_64 RPM contains both 64-bit and 32-bit libraries.)
+
+   Tarballs are also provided for users of non-RPM-based Linux distributions.
+   You can use alien (http://www.kitenet.net/programs/alien/) to convert these
+   into DEB packages, if you prefer.
 
 
 *******************************************************************************
@@ -53,13 +70,6 @@ will need at minimum the following 32-bit packages:
    * Not always installed by default but usually available on the installation
      discs
 
--- OpenSSL runtime
-
-   * Usually contained in the "openssl" package (iX86)
-   * Not always installed by default but usually available on the installation
-     discs
-   * May also require 32-bit "krb5-libs" package
-
 If for some reason your preferred 64-bit Linux distribution does not contain
 32-bit packages for the above, then:
 
@@ -67,21 +77,12 @@ If for some reason your preferred 64-bit Linux distribution does not contain
       ability to cross-compile 32-bit apps on x86-64 systems.
   2.  All x86-64 distributions of Linux have a corresponding 32-bit-only
       distribution, usually released on a separate set of discs.  On those
-      discs, you should be able to find the 32-bit versions of OpenSSL, the X11
-      dev. kit, and the GLIBC dev. kit to match the 64-bit versions that are
-      already installed on your system. You may have to use "rpm --force" to
-      install the 32-bit development packages, since they might contain header
-      files which conflict with the 64-bit development packages that are
+      discs, you should be able to find the 32-bit versions of the X11 dev. kit
+      and the GLIBC dev. kit to match the 64-bit versions that are already
+      installed on your system. You may have to use "rpm --force" to install
+      the 32-bit development packages, since they might contain header files
+      which conflict with the 64-bit development packages that are
       already installed.  Again, complain to your distribution vendor.
-
-When you attempt to build 32-bit VirtualGL on a 64-bit Linux system, the
-VirtualGL build system will run a script ("sanitycheck64", in	the same
-directory as this document) to sanity check the 32-bit build environment on
-your system.  This script points out any anomalies that would prevent 32-bit
-VirtualGL from building properly and gives instructions on how to fix them.
-You can also run "sanitycheck64 -fix" as root to automatically fix the
-problems.  View the contents of the script if you're morbidly curious about
-what it's doing.
 
 
 *******************************************************************************
@@ -118,48 +119,6 @@ what it's doing.
 
    Download and install the latest OpenSSL package from Blastwave
    (http://www.blastwave.org.)
-
-   NOTE:  It is only necessary to install OpenSSL on the build machine.  The
-   VirtualGL build system will copy the necessary dynamic libraries into the
-   VirtualGL release package, so that OpenSSL need not be installed on every
-   Solaris machine that will run VirtualGL.
-
-   If you so choose, you can also create a custom build of OpenSSL using the
-   source code obtained from http://www.openssl.org/.  Untar the source,
-   then move the openssl build directory to "openssl.solaris" (for a 32-bit
-   Sparc build), "openssl.solaris64" (for a 64-bit Sparc build),
-   "openssl.solx86" (for an x86 build), or "openssl.solx8664" (for an x86-64
-   build.)  VirtualGL will look for this directory one level up from its own
-   build directory, for example:
-
-     ls -l ~/src
-     drwx------ 12 drc staff Jan 20 12:17 .
-     drwx------ 59 drc staff Jan 20 13:43 ..
-     drwx------ 21 drc staff Dec 20 12:17 openssl.solaris
-     drwx------ 21 drc staff Dec 13 13:40 openssl.solaris64
-     drwx------ 21 drc staff Feb 12 11:03 openssl.solx86
-     drwx------ 21 drc staff Feb 12 11:08 openssl.solx8664
-     drwx------ 14 drc staff Jan 20 12:17 vgl
-
-   CD to the appropriate directory and build OpenSSL using the instructions
-   provided in the OpenSSL source distribution.
-
-   NOTE:  To configure the OpenSSL build for a specific processor type and
-   compiler, refer to the following tables:
-
-     Sun Studio/Workshop Pro
-     -----------------------------------------------------------
-     Sparc (32-bit)  |  ./Configure solaris-sparcv9-cc shared
-     Sparc (64-bit)  |  ./Configure solaris64-sparcv9-cc shared
-     x86             |  ./Configure solaris-x86-cc shared
-     x86-64          |  ./Configure solaris64-x86_64-cc shared
-
-     GCC
-     -----------------------------------------------------------
-     Sparc (32-bit)  |  ./Configure solaris-sparcv9-gcc shared
-     Sparc (64-bit)  |  ./Configure solaris64-sparcv9-gcc shared
-     x86             |  ./Configure solaris-x86-gcc shared
-     x86-64          |  ./Configure solaris64-x86_64-gcc shared
 
 -- Sun Studio/Workshop Pro Compiler
 
