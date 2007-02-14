@@ -113,6 +113,7 @@ VIRTUALGL
 		XDestroyWindow;
 		XFree;
 		XGetGeometry;
+		XListExtensions;
 		XMaskEvent;
 		XMoveResizeWindow;
 		XNextEvent;

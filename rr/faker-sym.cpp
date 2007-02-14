@@ -168,6 +168,7 @@ void __vgl_loadsymbols(void)
 	lsym(XDestroyWindow);
 	lsym(XFree);
 	lsym(XGetGeometry);
+	lsym(XListExtensions);
 	lsym(XMaskEvent);
 	lsym(XMoveResizeWindow);
 	lsym(XNextEvent);

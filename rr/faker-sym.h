@@ -360,6 +360,8 @@ funcdef9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
 	root, int *, x, int *, y, unsigned int *, width, unsigned int *, height,
 	unsigned int *, border_width, unsigned int *, depth, return);
 
+funcdef2(char **, XListExtensions, Display *, dpy, int *, next, return);
+
 funcdef3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe, return);
 
 funcdef6(int, XMoveResizeWindow, Display *, dpy, Window, win, int, x, int, y,
