@@ -26,7 +26,7 @@ ARCHFLAG = -m32
 LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
-_DUMMY4 := $(shell ln -fs `g++ $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
+_DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
 
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -ggdb
