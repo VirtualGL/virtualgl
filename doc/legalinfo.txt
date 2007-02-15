@@ -14,4 +14,4 @@ contained in [[LICENSE-OpenSSL.txt][{code:LICENSE-OpenSSL.txt}]!], which can be
 found in the same directory as this documentation.
 
 VirtualGL is licensed under the [[LICENSE.txt][wxWindows Library License, v3]!],
-a derivative of the [[LGPL.txt][LGPL]!].
+a derivative of the [[LGPL.txt][GNU Lesser General Public License (LGPL)]!].

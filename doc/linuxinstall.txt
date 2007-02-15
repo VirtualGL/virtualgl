@@ -1,54 +1,5 @@
 * Configuring a Linux Machine as a VirtualGL Server
 
-** System Requirements
-
-|| || x86 || x86-64 ||
-| Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
-				extensions.} \
-			{item:Dual processors recommended}} \
-	| Pentium 4/Xeon with EM64T, or...{nl} \
-		AMD Opteron or Athlon64, 1.8 GHz or faster \
-		{list type=ul: \
-			{item:For optimal performance with 64-bit VirtualGL, the processor \
-				should support SSE3 extensions.  Only newer AMD 64-bit processors \
-				(mid-2005 and later) support SSE3.} \
-			{item:Dual processors recommended}} \
-	|
-| Graphics \
-	| Decent 3D graphics accelerator \
-		{list type=ul: \
-			{item:VirtualGL should work with any 3D graphics accelerator that \
-				supports Pbuffers, but it has only been tested extensively with \
-				nVidia hardware.} \
-			{item:For applications that use stereographic rendering, the server's \
-				3D graphics card must support stereo and must be configured to export \
-				stereo visuals.} \
-			{item:Install the vendor drivers for the server's 3D graphics card. \
-				Do not use the drivers that ship with Linux, as these do not provide \
-				3D acceleration or Pbuffer support.}} \
-	| < \
-	|
-| Recommended O/S \
-	| {list type=ul: \
-			{item:RedHat Linux 7.2 or newer (or equivalent), or} \
-			{item:SuSE Linux 9 or newer}} \
-  | {list type=ul: \
-      {item:RedHat Enterprise Linux 3.0 or newer (64-bit) or equivalent (Works \
-				with [[http://www.whiteboxlinux.org][WhiteBox]], and \
-				[[http://www.centos.org][CentOS]]), or} \
-			{item:SuSE Linux 9 or newer}} \
-	|
-| Other Software \
-	| {list type=ul: \
-			{item:X server configured for true color (24/32-bit)} \
-			{item:SSh server}} \
-	| < \
-	|
-#OPT: hiCol=first
-
 ** Granting Access to the Server's X Display
 
 VirtualGL requires access to the server's 3D graphics card so that it can
