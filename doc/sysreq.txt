@@ -180,8 +180,8 @@ encounter any difficulties.
 
 || || Server || Client ||
 | Linux \
-	| 3D graphics card that supports stereo (e.g. nVidia Quadro) and is \
-		configured to export stereo visuals \
+	| 3D graphics card that supports stereo (for instance, the nVidia Quadro) \
+		and is configured to export stereo visuals \
 	| < \
 	|
 | Solaris/x86 \
@@ -199,16 +199,17 @@ encounter any difficulties.
 			{item:XVR-2500 driver [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patch]] \
 				120928-10 (or later)}} \
 	| {list type=ul: \
-			{item:3D graphics card that supports stereo (e.g. XVR-1200, XVR-2500) \
-				and is configured to export stereo visuals} \
+			{item:3D graphics card that supports stereo (for instance, the XVR-1200 \
+				or XVR-2500) and is configured to export stereo visuals} \
 			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] 1.3 \
 				or later}} \
 	|
 | Windows \
 	| N/A \
 	| {list type=ul: \
-			{item:3D graphics card that supports stereo (e.g. nVidia Quadro, 3D Labs \
-				Wildcat Realizm) and is configured to export stereo pixel formats} \
+			{item:3D graphics card that supports stereo (for instance, the nVidia \
+				Quadro or 3D Labs Wildcat Realizm) and is configured to export stereo \
+				pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 3D v8 or newer}} \
 	|
@@ -218,24 +219,25 @@ encounter any difficulties.
 
 || || Client ||
 | Linux \
-	| 3D graphics card that supports transparent overlays (e.g. nVidia Quadro) \
-		and is configured to export overlay visuals \
+	| 3D graphics card that supports transparent overlays (for instance, the \
+		nVidia Quadro) and is configured to export overlay visuals \
 	|
 | Solaris/x86 \
 	| ^ \
 	|
 | Solaris/Sparc \
 	| {list type=ul: \
-			{item:3D graphics card that supports transparent overlays (e.g. \
-				XVR-1200, XVR-2500) and is configured to export overlay visuals} \
+			{item:3D graphics card that supports transparent overlays (for \
+				instance, the XVR-1200 or XVR-2500) and is configured to export \
+				overlay visuals} \
 			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] 1.3 \
 				or later}} \
 	|
 | Windows \
 	| {list type=ul: \
-			{item:3D graphics card that supports transparent overlays (e.g. nVidia \
-				Quadro, 3D Labs Wildcat Realizm) and is configured to export overlay \
-				pixel formats} \
+			{item:3D graphics card that supports transparent overlays (for instance, \
+				the nVidia Quadro or 3D Labs Wildcat Realizm) and is configured to \
+				export overlay pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 3D v8 or newer}} \
 	|
