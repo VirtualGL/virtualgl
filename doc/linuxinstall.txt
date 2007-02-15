@@ -50,8 +50,9 @@ server by replacing the references to ''vglgenkey'' below with
 		run VirtualGL to this group.
 
 	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
-		''vglusers'' group, e.g.:
-
+		''vglusers'' group.
+		{nl}{nl}
+		__Example:__
 		#Verb: <<---
 		mkdir -p /etc/opt/VirtualGL
 		chgrp vglusers /etc/opt/VirtualGL
@@ -139,15 +140,17 @@ server by replacing the references to ''vglgenkey'' below with
 		#OPT: hiCol=first, align=center
 		{nl}
 		For xdm-style configuration files, add ''-tst'' to the line corresponding to
-		the display number you are configuring, e.g.:
-	
+		the display number you are configuring.
+		{nl}{nl}
+		__Example:__	
 		#Verb <<---
 		:0 local /usr/X11R6/bin/X :0 vt07 -tst
 		---
 	
 		For gdm-style configuration files, add ''-tst'' to all lines that appear to
-		be X server command lines, e.g.:
-	
+		be X server command lines.
+		{nl}{nl}
+		__Example:__	
 		#Verb <<---
 		StandardXServer=/usr/X11R6/bin/X -tst
 		---
