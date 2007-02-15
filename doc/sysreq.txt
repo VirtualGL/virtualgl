@@ -2,7 +2,7 @@
 
 ** Linux/x86
 
-|| || Server (32-bit) || Server (64-bit) || Client ||
+|| || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
 	| Pentium 4, 1.7 GHz or faster (or equivalent) \
 		{list type=ul: \
@@ -19,53 +19,35 @@
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
 | Graphics \
-	| Decent 3D graphics accelerator \
+	| Any decent 3D graphics card that supports Pbuffers \
 		{list type=ul: \
-			{item:nVidia strongly recommended} \
-			{item:Pbuffers do not work on certain ATI adapters when drivers later \
-				than v8.14 are used.  If you encounter this problem, try driver v8.14 \
-				or older.} \
-			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.} \
-			{item:Install the vendor drivers for your 3D accelerator of choice. \
+			{item:Tested with various nVidia cards} \
+			{item:Install the vendor drivers for the server's 3D graphics card. \
 				Do not use the drivers that ship with Linux, as these do not provide \
-				3D acceleration.}} \
-	| Decent 3D graphics accelerator \
+				3D acceleration or Pbuffer support.}} \
+	| < \
+	| Any graphics card with decent 2D performance \
 		{list type=ul: \
-			{item:nVidia strongly recommended} \
-			{item:Pbuffers do not work on certain ATI adapters when drivers later \
-				than v8.14 are used.  If you encounter this problem, try driver v8.14 \
-				or older.} \
-			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.} \
-			{item:Install the vendor drivers for your 3D accelerator of choice. \
-				Do not use the drivers that ship with Linux, as these do not provide \
-				3D acceleration.}} \
-	| Graphics card with decent 2D performance \
-		{list type=ul: \
-			{item:For applications that use stereo or transparent overlays, a \
-				high-end 3D accelerator such as the nVidia Quadro is required on the \
-				client.} \
-			{item:If using a 3D accelarator, install the vendor drivers for \
-				that 3D accelerator.}} \
+			{item:If using a 3D graphics card, install the vendor drivers for \
+				that 3D graphics card.}} \
 	|
 | Recommended O/S \
 	| {list type=ul: \
-			{item:RedHat Linux 7.2 or newer (or equivalent), or} \
-			{item:SuSE Linux 9 or newer}} \
-  | {list type=ul: \
-      {item:RedHat Enterprise Linux 3.0 or 4.0 (64-bit) or equivalent (Works \
-				with [[http://www.whiteboxlinux.org][WhiteBox]], and \
-				[[http://www.centos.org][CentOS]]), or} \
-			{item:SuSE Linux 9 or newer}} \
-	| {list type=ul: \
-			{item:RedHat Linux 7.2 or newer (or equivalent), or} \
-			{item:SuSE Linux 9 or newer}} \
+			{item:Any distribution in the \
+				[[http://www.redhat.com/][RedHat]] or [[http://www.novell.com/linux/][SuSE]] \
+				families (including [[http://fedora.redhat.com/][Fedora]], \
+				[[http://www.centos.org/][CentOS]], and \
+				[[http://www.whiteboxlinux.org/][White Box]])} \
+			{item:Specifically tested with RedHat Enterprise Linux 2.1, RedHat/CentOS \
+				Enterprise Linux 3 & 4 (32-bit and 64-bit), and SuSE Linux Enterprise \
+				9 & 10 (32-bit and 64-bit)}} \
+	| < \
+	| < \
 	|
 | Other Software \
-	| X server configured for true color (24/32-bit) \
-	| X server configured for true color (24/32-bit) \
-	| X server configured for true color (24/32-bit) \
+	| X server configured to export True Color (24-bit or 32-bit) visuals \
+	| < \
+	| < \
 	|
 #OPT: hiCol=first
 
@@ -75,89 +57,10 @@ VirtualGL should build and run on Itanium Linux, but it has not been thoroughly
 tested.  [[http://sourceforge.net/users/dcommander][Contact us]] if you
 encounter any difficulties.
 
-** Solaris/Sparc
-
-|| || Server (32/64-bit) || Client ||
-| Recommended CPU \
-	| UltraSPARC III 900 MHz or faster \
-		{list type=ul: \
-			{item:Dual processors recommended}} \
-	| UltraSPARC III 900 MHz or faster \
-	|
-| Graphics \
-	| Decent 3D graphics accelerator \
-		{list type=ul: \
-			{item:Tested with \
-				[[http://www.sun.com/desktop/products/graphics/xvr600/][XVR-600]], \
-				[[http://www.sun.com/desktop/products/graphics/xvr1200/][XVR-1200]] \
-				("jfb"), and \
-				[[http://www.sun.com/desktop/products/graphics/xvr2500/][XVR-2500]] \
-				("kfb")} \
-			{item:XVR-2500 required for stereo rendering}} \
-		[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
-		{list type=ul: \
-			{item:1.3 or later required} \
-			{item:1.5 or later required for stereo rendering or \
-				[[glp.txt#GLP_Usage][GLP]] and recommended otherwise.  OpenGL 1.5 \
-				is part of Solaris 10 Update 1 and is also bundled with the \
-				XVR-2500.}} \
-	| Graphics card with decent 2D performance \
-		{list type=ul: \
-			{item:For applications that use stereo or transparent overlays, a high-\
-				end 3D accelerator such as the XVR-1200 or XVR-2500 is required on \
-				the client.}} \
-		[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
-		{list type=ul: \
-			{item:OpenGL 1.3 or later recommended if the client has a 3D \
-				accelerator installed, such as the XVR-1200.  If available, the \
-				VirtualGL Direct Mode client will draw images using OpenGL, which \
-				improves the client's performance on some Sun 3D accelerators.} \
-			{item:OpenGL 1.3 or later required if stereo or transparent overlays are to be \
-				used.}} \
-	|
-| O/S \
-	| Solaris 8 or higher \
-	| Solaris 8 or higher \
-	|
-| [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patches]] \
-	| {list type=ul: \
-			{item:__OpenGL 1.5:__  120812-12 or 120812-14 (or later) required for \
-				stereo rendering.  Recommended otherwise} \
-			{item:__XVR-2500 ("kfb") Drivers:__ 120928-10 (or later) required for stereo \
-				rendering.  Recommended otherwise} \
-			{item:__OpenGL 1.3, 32-bit:__ 113886-38 or 113886-41 (or later) \
-				recommended} \
-			{item:__OpenGL 1.3, 64-bit:__ 113887-38 or 113887-41 (or later) \
-				recommended}} \
-	| {:} |
-| Other Software \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]]} \
-			{item:If your system does not ship with SSh pre-installed (older Solaris \
-				8 systems don't), then download and install an OpenSSh package from \
-				[[http://www.blastwave.org/][Blastwave]] or \
-				http://www.sunfreeware.com/.} \
-			{item:X server configured for true color (24/32-bit) [if not using \
-				[[glp.txt#GLP_Usage][GLP]]]}} \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]]} \
-			{item:If your system does not ship with SSh pre-installed (older Solaris \
-				8 systems don't), then download and install an OpenSSh package from \
-				[[http://www.blastwave.org/][Blastwave]] or \
-				http://www.sunfreeware.com/.} \
-			{item:X server configured for true color (24/32-bit)}} \
-	|
-#OPT: hiCol=first
-
 ** Solaris/x86
 
-|| || Server (32-bit) || Server (64-bit) || Client ||
+|| || Server || Client ||
 | Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
-				extensions.} \
-			{item:Dual processors recommended}} \
 	| Pentium 4/Xeon with EM64T, or...{nl} \
 		AMD Opteron or Athlon64, 1.8 GHz or faster \
 		{list type=ul: \
@@ -165,48 +68,92 @@ encounter any difficulties.
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
 | Graphics \
-	| nVidia 3D graphics accelerator \
-		{list type=ul: \
-			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.}} \
-	| nVidia 3D graphics accelerator \
-		{list type=ul: \
-			{item:For applications that use stereo, a high-end 3D accelerator such \
-				as the nVidia Quadro is required on the server.}} \
-	| Graphics card with decent 2D performance \
-		{list type=ul: \
-			{item:For applications that use stereo or transparent overlays, a \
-				high-end 3D accelerator such as the nVidia Quadro is required on the \
-				client.}} \
+	| nVidia 3D graphics card \
+	| Any graphics card with decent 2D performance \
 	|
 | O/S \
 	| Solaris 10 or higher \
-	| Solaris 10 or higher \
-	| Solaris 10 or higher \
+	| < \
+	| < \
 	|
 | Other Software \
 	| {list type=ul: \
 			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(v2.4 or higher recommended)} \
-			{item:X server configured for true color (24/32-bit)}} \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(v2.4 or higher recommended)} \
+				(v2.4 or higher recommended *)} \
 			{item:[[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Solaris Patch]] \
-				18345-04 (or later)} \
-			{item:X server configured for true color (24/32-bit)}} \
+				118345-04 (or later)} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals}} \
 	| {list type=ul: \
 			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(v2.4 or higher recommended)} \
-			{item:X server configured for true color (24/32-bit)}} \
+				(v2.4 or higher recommended *)} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals}} \
 	|
 #OPT: hiCol=first
 
-	!!! Solaris 10/x86 comes with mediaLib pre-installed, but it is
+	!!! * Solaris 10/x86 comes with mediaLib pre-installed, but it is
 	strongly recommended that you upgrade this version of mediaLib to at least
 	2.4.  This will greatly increase the performance of Solaris/x86 VirtualGL
-	clients as well as the performance of 32-bit apps on Solaris/x86 VirtualGL
-	servers.
+	clients as well as the performance of 32-bit applications on Solaris/x86
+	VirtualGL servers.
+
+** Solaris/Sparc
+
+|| || Server || Client ||
+| Recommended CPU \
+	| UltraSPARC III 900 MHz or faster \
+		{list type=ul: \
+			{item:Dual processors recommended}} \
+	| UltraSPARC III 900 MHz or faster \
+	|
+| Graphics \
+	| Any decent 3D graphics card that supports Pbuffers \
+		{list type=ul: \
+			{item:Tested with \
+				[[http://www.sun.com/desktop/products/graphics/xvr600/][XVR-600]], \
+				[[http://www.sun.com/desktop/products/graphics/xvr1200/][XVR-1200]] \
+				("jfb"), and \
+				[[http://www.sun.com/desktop/products/graphics/xvr2500/][XVR-2500]] \
+				("kfb")}} \
+	| Any graphics card with decent 2D performance \
+	|
+| O/S \
+	| Solaris 8 or higher \
+	| < \
+	|
+| Other Software \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]]} \
+			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
+				1.3 or later (1.5 or later required for [[solarisinstall.txt#GLP_Usage][GLP]])} \
+			{item:If your system does not ship with SSh pre-installed (older Solaris \
+				8 and 9 systems don't), then download and install an OpenSSh package \
+				from [[http://www.blastwave.org/][Blastwave]] or \
+				http://www.sunfreeware.com/.} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals (if not using [[solarisinstall.txt#GLP_Usage][GLP]])}} \
+		Recommended [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patches]] \
+		{list type=ul: \
+			{item:__OpenGL 1.5__: 120812-14 (or later)} \
+			{item:__XVR-2500 driver__: 120928-10 (or later)} \
+			{item:__OpenGL 1.3, 32-bit:__ 113886-41 (or later)} \
+			{item:__OpenGL 1.3, 64-bit:__ 113887-41 (or later)}} \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]]} \
+			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
+				1.3 or later recommended if the client has a 3D graphics card \
+				installed.  If available, the VirtualGL Direct Mode client will use \
+				OpenGL to draw images, which improves the client's performance on Sun \
+				3D graphics cards.} \
+			{item:If your system does not ship with SSh pre-installed (older Solaris \
+				8 and 9 systems don't), then download and install an OpenSSh package \
+				from [[http://www.blastwave.org/][Blastwave]] or \
+				http://www.sunfreeware.com/.} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals}} \
+	|
+#OPT: hiCol=first
 
 ** Windows
 
@@ -215,23 +162,81 @@ encounter any difficulties.
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
 | Graphics \
-	| Graphics card with decent 2D performance \
-		{list type=ul: \
-			{item:For applications that use stereo or transparent overlays, a \
-				high-end 3D accelerator such as the nVidia Quadro or 3DLabs Wildcat \
-				Realizm is required on the client.}} \
+	| Any graphics card with decent 2D performance \
 	|
 | O/S \
 	| Windows 2000 or later \
 	|
 | Other Software \
 	| {list type=ul: \
-			{item:If Direct Mode is to be used, \
-				[[http://connectivity.hummingbird.com][Hummingbird]] Exceed 8 or newer is \
-				required on the client machine.} \
-			{item:For applications that use stereo or transparent overlays, Exceed \
-				3D is required on the client.} \
-			{item:Client desktop needs to be configured for true color (24 or \
-				32-bit.)}} \
+			{item:__Direct Mode Only__: [[http://connectivity.hummingbird.com][Hummingbird]] \
+				Exceed 8 or newer required} \
+			{item:Client display must have a 24-bit or 32-bit color depth \
+				(True Color.)}} \
+	|
+#OPT: hiCol=first
+
+** Additional Requirements for Stereographic rendering
+
+|| || Server || Client ||
+| Linux \
+	| 3D graphics card that supports stereo (e.g. nVidia Quadro) and is \
+		configured to export stereo visuals \
+	| < \
+	|
+| Solaris/x86 \
+	| ^ \
+	| ^ \
+	|
+| Solaris/Sparc \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/desktop/products/graphics/xvr2500/][XVR-2500]] \
+				graphics card} \
+			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] 1.5 \
+				or later} \
+			{item:OpenGL [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patch]] \
+				120812-14 (or later)} \
+			{item:XVR-2500 driver [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patch]] \
+				120928-10 (or later)}} \
+	| {list type=ul: \
+			{item:3D graphics card that supports stereo (e.g. XVR-1200, XVR-2500) \
+				and is configured to export stereo visuals} \
+			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] 1.3 \
+				or later}} \
+	|
+| Windows \
+	| N/A \
+	| {list type=ul: \
+			{item:3D graphics card that supports stereo (e.g. nVidia Quadro, 3D Labs \
+				Wildcat Realizm) and is configured to export stereo pixel formats} \
+			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
+				Exceed 3D v8 or newer}} \
+	|
+#OPT: hiCol=first
+
+** Additional Requirements for Transparent Overlays
+
+|| || Client ||
+| Linux \
+	| 3D graphics card that supports transparent overlays (e.g. nVidia Quadro) \
+		and is configured to export overlay visuals \
+	|
+| Solaris/x86 \
+	| ^ \
+	|
+| Solaris/Sparc \
+	| {list type=ul: \
+			{item:3D graphics card that supports transparent overlays (e.g. \
+				XVR-1200, XVR-2500) and is configured to export overlay visuals} \
+			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] 1.3 \
+				or later}} \
+	|
+| Windows \
+	| {list type=ul: \
+			{item:3D graphics card that supports transparent overlays (e.g. nVidia \
+				Quadro, 3D Labs Wildcat Realizm) and is configured to export overlay \
+				pixel formats} \
+			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
+				Exceed 3D v8 or newer}} \
 	|
 #OPT: hiCol=first
