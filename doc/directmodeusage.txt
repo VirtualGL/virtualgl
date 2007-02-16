@@ -107,7 +107,7 @@ Optimal
 *** Security Notes
 #OPT: noList! plain!
 
-	- Both X11 traffic and the VirtualGL image stream are unencrypted.
+	- Both the X11 traffic and the VirtualGL image stream are unencrypted.
 	- Some newer Linux and Solaris distributions ship with default settings that
 		do not allow TCP connections into the X server.  Such systems cannot be
 		used as clients with this procedure unless they are reconfigured to allow
@@ -219,8 +219,95 @@ Optimal
 	Consult {ref prefix="Section ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
-** Troubleshooting
+** Direct Mode with SSL Encryption
 
-It is generally a good idea to make sure that a regular X application (such as
-xterm) can be remotely displayed from the application server to your client
-workstation prior to attempting to run VirtualGL.
+*** Performance
+#OPT: noList! plain!
+
+On high-speed networks such as Ethernet, VirtualGL's performance is reduced by
+as much as 20% by enabling SSL encryption.
+
+*** Security Notes
+#OPT: noList! plain!
+
+	- The VirtualGL image stream is encrypted.
+	- When used in conjunction with X11 Forwarding, this provides a completely
+		secure solution.
+
+*** Procedure
+#OPT: noList! plain!
+
+Pass an argument of ''+s'' to ''vglrun'' when launching VirtualGL, or set
+the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL server.
+(see {ref prefix="Section ": Advanced_Configuration} for more details.)
+
+** Direct Mode with X11 Forwarding and SSh Tunneling
+
+*** Performance
+#OPT: noList! plain!
+
+	- On high-speed networks such as Ethernet, VirtualGL's performance is reduced
+		by as much as 20% by enabling SSh Tunneling.
+	- SSh tunneling using OpenSSH (Cygwin or SSHWindows on Windows machines)
+		generally performs about the same as VirtualGL's built-in SSL encryption.
+	- SSh tunneling using PuTTY generally performs about 30% slower than OpenSSH
+		or VirtualGL's built-in SSL encryption.
+
+*** Security Notes
+#OPT: noList! plain!
+
+	- Both the X11 traffic and the VirtualGL image stream are encrypted.
+	- Use SSh Tunneling if a firewall separates the client and server machines,
+		thus making it impossible for the VirtualGL server to make a Direct Mode
+		connection to the VirtualGL client.
+
+*** Procedure
+#OPT: noList! plain!
+
+The procedure is the same as for the X11 Forwarding case, except that the
+following additional steps need to be taken:
+
+	#. Once connected to the VirtualGL server via. SSh, execute the following
+		command:
+
+		Linux server :: {:}
+		#Verb: <<---
+		/opt/VirtualGL/bin/nettest -findport
+		---
+
+		Solaris server :: {:}
+		#Verb: <<---
+		/opt/SUNWvgl/bin/nettest -findport
+		---
+
+	This program will allocate a free TCP port number and print the number to
+	the console.  Make a note of it.
+
+	#. Close the SSh session and re-open it using the following command line:
+
+		#Verb: <<---
+		ssh -X -R {port}:localhost:4242 {user}@{server}
+		---
+
+		Replace ''{port}'' with the port number you obtained in Step 1.
+
+		!!! If you are using an OpenSSH client, you can also type the following
+		key sequence: ''<ENTER> ~ C'' (that's the Enter key, followed by a tilde,
+		followed by a capital C), which will bring up an ''ssh>'' prompt at
+		which you can enter ''-R {port}:localhost:4242''.  This allows you to set
+		up the tunnel without closing and re-opening the SSh session.
+
+	#. Once connected to the server for the second time, set the ''VGL_PORT''
+		environment variable to match the port number you obtained above.
+
+	#. When setting the ''VGL_CLIENT'' environment variable, set the client
+		hostname to ''localhost'' instead of the hostname/IP address of the client
+		machine.
+
+		!!! Explanation: When you established the SSh connection using the ''-R''
+		argument, it created a listener on the VirtualGL server.  That listener
+		will accept a connection from VirtualGL and forward the connection over
+		the SSh tunnel to port 4242 on the client machine.  Thus, you need to set
+		''VGL_PORT'' and ''VGL_CLIENT'' on the VirtualGL server to tell VirtualGL
+		to make a connection to the SSh listener rather than the "real" VirtualGL
+		client program.
