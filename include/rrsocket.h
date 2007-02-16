@@ -110,7 +110,7 @@ class rrsocket
 		~rrsocket(void);
 		void close(void);
 		void connect(char *, unsigned short);
-		void listen(unsigned short);
+		unsigned short listen(unsigned short, bool findport=false);
 		rrsocket *accept(void);
 		void send(char *, int);
 		void recv(char *, int);

@@ -239,8 +239,15 @@ void rrsocket::connect(char *servername, unsigned short port)
 	#endif
 }
 
-void rrsocket::listen(unsigned short port)
+#ifdef _WIN32
+typedef int SOCKLEN_T;
+#else
+typedef socklen_t SOCKLEN_T;
+#endif
+
+unsigned short rrsocket::listen(unsigned short port, bool findport)
 {
+	unsigned short actualport=port;
 	#ifdef USESSL
 	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
 	#endif
@@ -259,9 +266,14 @@ void rrsocket::listen(unsigned short port)
 	memset(&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family=AF_INET;
 	myaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-	myaddr.sin_port=htons(port);
+	myaddr.sin_port=(port==0)? 0:htons(port);
 
 	trysock( bind(_sd, (struct sockaddr *)&myaddr, sizeof(myaddr)) );
+	SOCKLEN_T n=sizeof(myaddr);
+	trysock(getsockname(_sd, (struct sockaddr *)&myaddr, &n));
+	actualport=ntohs(myaddr.sin_port);
+	if(findport) return actualport;
+
 	trysock( ::listen(_sd, MAXCONN) );
 
 	#ifdef USESSL
@@ -286,13 +298,9 @@ void rrsocket::listen(unsigned short port)
 		}
 	}
 	#endif
-}
 
-#ifdef _WIN32
-typedef int SOCKLEN_T;
-#else
-typedef socklen_t SOCKLEN_T;
-#endif
+	return actualport;
+}
 
 rrsocket *rrsocket::accept(void)
 {
