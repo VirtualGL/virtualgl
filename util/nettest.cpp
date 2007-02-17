@@ -55,7 +55,11 @@ int main(int argc, char **argv)
 		if(argc<3) usage();
 		server=0;  servername=argv[2];
 		#ifdef USESSL
-		if(argc>3 && !stricmp(argv[3], "-ssl")) {puts("Using SSL ...");  dossl=true;}
+		if(argc>3 && !stricmp(argv[3], "-ssl"))
+		{
+			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+			dossl=true;
+		}
 		#endif
 	}
 	else if(!stricmp(argv[1], "-server"))
@@ -65,7 +69,7 @@ int main(int argc, char **argv)
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
 			dossl=true;
-			puts("Using SSL ...");
+			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
 		}
 		#endif
 	}
