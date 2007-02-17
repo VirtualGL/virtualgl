@@ -10,7 +10,6 @@ CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
-CINCLUDES = -I/opt/openssl-static/include
 endif
 
 ifeq ($(subplatform), 64)
@@ -31,7 +30,7 @@ _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LD
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -ggdb
 else
-OPTFLAG = -O2 -g
+OPTFLAG = -O2
 endif
 
 DEFAULTJPEGLIB = ipp
@@ -43,8 +42,25 @@ MAPFLAG = -Wl,--version-script,
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
+
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) -L/opt/openssl-static/lib${subplatform} -ldl -Wl,--wrap,__ctype_b -Wl,--wrap,__ctype_tolower -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+
+ifeq ($(subplatform), 64)
+STATICSSL := $(shell if [ -f /opt/openssl-static/lib64/libssl.a -a -f /opt/openssl-static/lib64/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/openssl-static/lib64
+else
+STATICSSL := $(shell if [ -f /opt/openssl-static/lib/libssl.a -a -f /opt/openssl-static/lib/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/openssl-static/lib
+endif
+
+ifeq ($(STATICSSL), yes)
+CINCLUDES = -I/opt/openssl-static/include
+SOCKLIB := $(SOCKLIB) -ldl -L$(STATICSSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+else
+# Use dynamic libs provided by the O/S
+SOCKLIB := $(SOCKLIB) -lssl -lcrypto
+endif
+
 endif
 
 FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
