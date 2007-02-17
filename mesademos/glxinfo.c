@@ -1094,7 +1094,7 @@ main(int argc, char *argv[])
          #endif
       }
       #ifdef USEGLP
-      if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
+      else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
          glpDeviceName = argv[i + 1];
          i++;  usingglp = True;  fbConfigs = True;
       }
