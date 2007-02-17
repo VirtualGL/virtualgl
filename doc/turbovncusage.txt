@@ -313,6 +313,44 @@ performance)" connection profile sets the image quality to a very low (but
 still usable) level which will achieve interactive performance on typical
 broadband connections.
 
+** Securing a TurboVNC Connection
+
+Normally, the connection between the TurboVNC server and the TurboVNC viewer is
+completely unencrypted, but securing that connection can be easily
+accomplished by using the port forwarding feature of Secure Shell (SSh.)  After
+you have started a TurboVNC server session on the server machine, open a new
+SSh connection into the server machine using the following command line:
+
+	#Verb: <<---
+	ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
+	---
+
+	!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
+
+Replace ''{user}'' with your user account name on the TurboVNC server and
+''{server}'' with the hostname or IP address of that server.  Replace
+''n'' with the X display number of the TurboVNC server session to which you
+want to connect.
+
+For instance, if you wish to connect to display '':1'' on server ''my_server''
+using user account ''my_user'', you would type
+
+	#Verb: <<---
+	ssh -L 5901:localhost:5901 my_user@my_server
+	---
+
+After the SSh connection has been established, you can then launch the
+TurboVNC viewer and point it to ''localhost:{n}'' (''localhost:1'' in the
+above example.)
+
+*** Performance Notes
+#OPT: noList! plain!
+
+For LAN connections and other high-speed networks, tunneling the TurboVNC
+connection over SSh will reduce performance by as much as 20% (50% if using
+PuTTY.)  But for wide-area networks, broadband, etc., there is no performance
+penalty for using SSh tunneling with TurboVNC.
+
 ** Further Reading
 
 For more detailed instructions on the usage of TurboVNC:
