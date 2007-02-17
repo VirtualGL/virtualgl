@@ -1,6 +1,7 @@
 * Using VirtualGL in Direct Mode
 
 ** Direct Mode with X11 Forwarding
+{anchor: X11_Forwarding}
 
 *** Performance
 #OPT: noList! plain!
@@ -98,6 +99,7 @@ maximize performance.
 	information on ''vglrun'' command line options.
 
 ** Direct Mode with a Direct X11 Connection
+{anchor: Direct_X11_Connection}
 
 *** Performance
 #OPT: noList! plain!
@@ -264,8 +266,8 @@ the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL server.
 *** Procedure
 #OPT: noList! plain!
 
-The procedure is the same as for the X11 Forwarding case, except that the
-following additional steps need to be taken:
+The procedure is the same as for the [[#X11_Forwarding][X11 Forwarding]] case,
+except that the following additional steps need to be taken:
 
 	#. Once connected to the VirtualGL server via. SSh, execute the following
 		command:

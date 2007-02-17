@@ -33,7 +33,7 @@ the application's GUI and to provide keyboard/mouse interaction.
 
 {anchor: Direct_Mode}
 	\1. "Direct" Mode :: Direct Mode is most often used whenever the X server is
-	located across the network from the 3D server, for instance if the X server
+	located across the network from the graphics server, for instance if the X server
 	is running on the user's desktop machine.  In this case, the 3D application
 	sends X11 commands across the network to the X server in order to display
 	the application GUI, and the application receives X11 events back from the
@@ -100,7 +100,7 @@ the application's GUI and to provide keyboard/mouse interaction.
 
 #IMG: rawmodetoxproxy.png
 #OPT fmt=latex: w=4cm
-#CAP: VirtualGL in Raw Mode with an X proxy on the 3D server
+#CAP: VirtualGL in Raw Mode with an X proxy on the graphics server
 
 #IMG: rawmodeoverservernetwork.png
 #OPT fmt=latex: w=4cm

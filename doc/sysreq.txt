@@ -128,15 +128,15 @@ encounter any difficulties.
 			{item:[[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]] \
 				1.3 or later (1.5 or later required for [[solarisinstall.txt#GLP_Usage][GLP]])} \
 			{item:If your system does not ship with SSh pre-installed (older Solaris \
-				8 and 9 systems don't), then download and install an OpenSSh package \
+				8 and 9 systems don't), then download and install an OpenSSH package \
 				from [[http://www.blastwave.org/][Blastwave]] or \
 				http://www.sunfreeware.com/.} \
 			{item:X server configured to export True Color (24-bit or 32-bit) \
 				visuals (if not using [[solarisinstall.txt#GLP_Usage][GLP]])}} \
 		Recommended [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patches]] \
 		{list type=ul: \
-			{item:__OpenGL 1.5__: 120812-14 (or later)} \
-			{item:__XVR-2500 driver__: 120928-10 (or later)} \
+			{item:__OpenGL 1.5__: 120812-15 (or later)} \
+			{item:__XVR-2500 driver__: 120928-15 (or later)} \
 			{item:__OpenGL 1.3, 32-bit:__ 113886-41 (or later)} \
 			{item:__OpenGL 1.3, 64-bit:__ 113887-41 (or later)}} \
 	| {list type=ul: \
@@ -147,7 +147,7 @@ encounter any difficulties.
 				OpenGL to draw images, which improves the client's performance on Sun \
 				3D graphics cards.} \
 			{item:If your system does not ship with SSh pre-installed (older Solaris \
-				8 and 9 systems don't), then download and install an OpenSSh package \
+				8 and 9 systems don't), then download and install an OpenSSH package \
 				from [[http://www.blastwave.org/][Blastwave]] or \
 				http://www.sunfreeware.com/.} \
 			{item:X server configured to export True Color (24-bit or 32-bit) \
@@ -171,6 +171,7 @@ encounter any difficulties.
 	| {list type=ul: \
 			{item:__Direct Mode Only__: [[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 8 or newer required} \
+			{item:Secure Shell (SSh) client} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
 	|
