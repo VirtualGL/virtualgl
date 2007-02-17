@@ -140,11 +140,13 @@ int usewindow=0, useci=0, useoverlay=0, visualid=0;
 // Error handling
 //////////////////////////////////////////////////////////////////////
 
+extern "C" {
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	fprintf(stderr, "X11 Error: %s\n", x11error(xe->error_code));
 	return 0;
 }
+} // extern "C"
 
 //////////////////////////////////////////////////////////////////////
 // Pbuffer setup

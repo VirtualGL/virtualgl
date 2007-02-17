@@ -32,11 +32,13 @@
 //////////////////////////////////////////////////////////////////////
 
 #ifndef FBXWIN32
+extern "C" {
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	fprintf(stderr, "X11 Error: %s\n", x11error(xe->error_code));
 	return 0;
 }
+} // extern "C"
 #endif
 
 
