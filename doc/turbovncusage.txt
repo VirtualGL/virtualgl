@@ -1,0 +1,338 @@
+* Using VirtualGL in Raw Mode with TurboVNC
+{anchor: Raw_Mode_Usage}
+
+Referring to {ref prefix="Section ": Overview}, Raw Mode is a mode in
+which VirtualGL bypasses its internal image compressor and instead sends the
+rendered 3D images to an X server as uncompressed bitmaps.  Raw Mode is
+designed to be used with an "X Proxy", which is a virtual X server that
+intercepts X-Windows commands from an application, renders them into images,
+compresses the images, and sends them over the network to a client.
+
+Thus, in Raw Mode, VirtualGL relies on the X proxy to compress the rendered
+3D images, and since VirtualGL is sending those images to the X proxy at a
+very fast rate, the proxy must be able to compress the images very quickly in
+order to keep up.  But, unfortunately, most X proxies can't.  They simply
+aren't designed for the types of full-screen video workloads that VirtualGL
+generates.  Therefore, the VirtualGL Project provides an optimized X proxy
+known as TurboVNC, which is based on the
+[[http://www.realvnc.com/][Virtual Network Computing (VNC)]] standard (more
+specifically, on the [[http://www.tightvnc.com][TightVNC]] variant thereof.)
+
+On the surface, TurboVNC behaves very similarly to its parent project, but 
+TurboVNC has been tuned to provide interactive performance for the types of
+full-screen video workloads that VirtualGL produces.  On these types of image
+workloads, TurboVNC performs as much as an order of magnitude faster than
+TightVNC, uses more than an order of magnitude less CPU time to compress each
+frame, and it produces comparable compression ratios.  Part of this speedup
+comes from the use of TurboJPEG, the same high-speed vector-optimized JPEG
+codec used by VirtualGL.  Another large part of the speedup comes from
+bypassing the color compression features of TightVNC.  TightVNC performs very
+CPU-intensive analysis on each image tile to determine whether the tile will
+compress better using color compression or JPEG.  But for the types of images
+that a 3D application generates, it is almost never the case that color
+compression compresses better than JPEG, so TurboVNC bypasses this analysis to
+improve performance.  TurboVNC also has the ability to hide network latency by
+decompressing and drawing a frame on the client while the next frame is being
+fetched from the server, thus improving performance dramatically on high-latency
+connections.  TurboVNC additionally provides client-side double buffering, full
+support for Solaris, and other tweaks.
+
+There are several reasons why one might prefer to use Raw Mode + TurboVNC over
+Direct Mode (and several reasons why one might not.)
+
+*** Advantages of Raw Mode + TurboVNC
+#OPT: noList! plain!
+
+	* TurboVNC eliminates the need to send X11 traffic over the network, thus
+		it performs very well on low-bandwidth, high-latency connections (such as
+		broadband or long-haul T1 lines.)  The application GUI will load and render
+		much faster (perhaps even orders of magnitude faster) with TurboVNC
+		than with Direct Mode on such connections.
+
+	* TurboVNC provides rudimentary collaboration capabilities.  Multiple clients
+		can simultaneously view the same server session and pass around control of
+		the keyboard and mouse.
+
+	* The TurboVNC client is stateless.  If the network hiccups or the client is
+		otherwise disconnected, the session remains running on the server and can
+		be rejoined from any machine on the network.
+
+	* No X server is required on the client machine.  This reduces the deployment
+		cost and complexity for Windows clients.
+
+	* TurboVNC is generally easier to set up and use.
+
+*** Advantages of Direct Mode
+#OPT: noList! plain!
+
+	* Direct Mode performs significantly faster (generally about 25-30% faster)
+		than TurboVNC on local-area networks.
+
+	* Direct Mode provides seamless windows, whereby each application window
+		appears as a separate window on the user's desktop.  TurboVNC, on the other
+		hand, displays the entire virtual desktop in a single window, which does
+		not create a seamless experience.
+
+	* Direct Mode consumes fewer server CPU resources.  TurboVNC will generally
+		require about 20% more server CPU cycles to maintain the same frame rate
+		as Direct Mode, both because it has to compress more pixels in each frame
+		(an entire desktop rather than a single window) and because it has to
+		perform 2D (X11) rendering as well as 3D rendering.  In Direct Mode, the
+		2D (X11) rendering is offloaded to the client machine.
+
+	* Direct Mode supports stereographic rendering and transparent overlays.
+
+** Using Raw Mode When TurboVNC and VirtualGL Are Running on the Same Machine
+
+#IMG: rawmodetoxproxy.png
+#OPT fmt=latex: w=4cm
+
+	#. Open a new Command Prompt/terminal window on your client machine.
+
+	#. In the new Command Prompt/terminal window, open a Secure Shell (SSh)
+		session into the VirtualGL/TurboVNC server machine by typing:
+
+		#Verb: <<---
+		ssh {user}@{server}
+		---
+
+		Replace ''{user}'' with your user account name on the VirtualGL server and
+		''{server}'' with the hostname or IP address of that server.
+
+		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
+
+	#. In the SSh session, start a TurboVNC server session:
+
+		Linux server :: {:}
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncserver
+		---
+
+		Solaris server :: {:}
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vncserver
+		---
+
+	#. Make a note of the X display number that the TurboVNC server process
+		prints out, for instance:
+		{nl}{nl}
+		''New 'X' desktop is my_server:1''
+		{nl}{nl}
+		If this is the first time that a TurboVNC server session has ever been run
+		under this user account, TurboVNC will prompt for a VNC session password.
+
+	#. The SSh session can now be exited, if desired.
+
+	#. On the client machine, start the TurboVNC Viewer.
+
+		Linux clients :: {:}
+		Open a terminal and type
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncviewer
+		---
+
+		Solaris clients :: {:}
+		Open a terminal and type
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vncviewer
+		---
+
+		Windows clients :: {:}
+		Select __TurboVNC Viewer__ in the __TurboVNC__ Start Menu group.
+
+	#. A small dialog box will appear.
+		{nl}{nl}
+		|| Windows TurboVNC viewer || Linux/Solaris TurboVNC viewer ||
+		| {img:turbovnc1.png} | {img:turbovnc2.png} |
+		{nl}
+		Enter the X display name (hostname/IP address and display number) of the
+		TurboVNC server in the "VNC Server" field, then click "Connect" (Windows)
+		or press Enter (Linux/Solaris.)
+
+	#. Another dialog box appears, prompting for the VNC session password.
+		{nl}{nl}
+		|| Windows TurboVNC viewer || Linux/Solaris TurboVNC viewer ||
+		| {img:turbovnc3.png} | {img:turbovnc4.png} |
+		{nl}
+		Enter the TurboVNC session password and click "OK" (Windows) or press
+		Enter (Linux/Solaris.)
+		{nl}{nl}
+		A TurboVNC desktop window should appear on your client machine.  This
+		window contains a virtual X server with which you can interact to launch
+		X-Windows applications on the TurboVNC server machine.
+
+	#. Open a new terminal inside the TurboVNC desktop.
+
+	#. In the terminal, start the 3D application using VirtualGL:
+
+		Linux server :: {:}
+		#Verb: <<---
+		vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+		Solaris server :: {:}
+		#Verb: <<---
+		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	information on ''vglrun'' command line options.
+
+** Using Raw Mode When TurboVNC and VirtualGL Are Running on Different Machines
+
+#IMG: rawmodeoverservernetwork.png
+#OPT fmt=latex: w=4cm
+
+If TurboVNC and VirtualGL are running on different servers, then it is
+desirable to use Raw Mode to send images from the VirtualGL server to the
+TurboVNC server.  Otherwise, the images would have to be compressed by the
+VirtualGL server, decompressed by the VirtualGL client, then recompressed by
+the TurboVNC server, which is a waste of CPU resources.  However, sending
+images uncompressed over a network requires a fast network (generally, Gigabit
+Ethernet or faster.)  So there needs to be a fast link between the VirtualGL
+server and the TurboVNC server for this procedure to perform well.
+
+The procedure for using Raw Mode to transmit images from a VirtualGL server
+to a TurboVNC server is essentially the same as the procedure for using Direct
+Mode with a [[directmodeusage.txt#Direct_X11_Connection][Direct X11 Connection]]
+-- with the following notable differences:
+
+	#. The "client" in this case is really the TurboVNC server machine.
+
+	#. The "X server" is really the TurboVNC server session.
+
+	#. It is not necessary to start the VirtualGL client.
+
+	#. Once connected to the VirtualGL server via. SSh, it is necessary to either
+		set the environment variable ''VGL_COMPRESS'' to ''0'' or pass an argument
+		of ''-c 0'' to ''vglrun'' when launching VirtualGL.  Otherwise, VirtualGL
+		will detect that the connection to the X server is remote, and it will
+		automatically try to enable Direct Mode.  Setting ''VGL_COMPRESS'' to ''0''
+		forces the use of Raw Mode, regardless of whether the X server is local or
+		remote.
+
+** Disconnecting and Killing the TurboVNC Session
+
+Closing the TurboVNC viewer disconnects from the TurboVNC server session, but
+the TurboVNC server session (and any applications that you may have started in
+it) is still running on the server machine, and you can reconnect to it at any
+time.
+
+To kill a TurboVNC server session:
+
+	#. Log in to the TurboVNC server using SSh.
+
+	#. Type the following command:
+
+		Linux server :: {:}
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncserver -kill :{n}
+		---
+
+		Solaris :: {:}
+		#Verb: <<---
+		/opt/SUNWtvnc/bin/vncserver -kill :{n}
+		---
+
+	Replace ''{n}'' with the X display number of the TurboVNC server session you
+	wish to kill.
+
+To list the X display numbers and process ID's of all TurboVNC server sessions
+that are currently running under your user account on this machine, run
+
+	Linux server :: {:}
+	#Verb: <<---
+	/opt/TurboVNC/bin/vncserver -list
+	---
+
+	Solaris server :: {:}
+	#Verb: <<---
+	/opt/SUNWtvnc/bin/vncserver -list
+	---
+
+** Using TurboVNC in a Web Browser
+
+When a TurboVNC server session is created, it automatically launches a
+miniature web server that serves up a Java TurboVNC viewer applet.  This Java
+TurboVNC viewer can be used to connect to the TurboVNC server from a machine
+that does not have a native TurboVNC viewer installed (or a machine for which
+no native TurboVNC viewer is available.)  The Java viewer is significantly
+slower than the native viewer on high-speed networks, but on low-speed networks
+the Java viewer and native viewers have comparable performance.  The Java
+viewer does not currently support double buffering.
+
+To use the Java TurboVNC viewer, point your web browser to:
+
+''http://turbovnc_server:{5800+n}''
+
+where ''{turbovnc_server}'' is the hostname or IP address of the TurboVNC
+server machine, and ''n'' is the X display number of the TurboVNC server
+session to which you want to connect.
+
+__Example:__
+If the TurboVNC server is running on X display ''my_server:1'', then point
+your web browser to:
+
+''http://my_server:5801''
+
+** Connection Profiles: Optimizing TurboVNC's Performance for Different Network Types
+
+To get the peak performance out of TurboVNC, you must give it a hint about
+the type of network that separates your client machine from the TurboVNC
+server.  To do this, select a Connection Profile when launching the TurboVNC
+viewer.
+
+In the Windows TurboVNC viewer, there are three buttons in the TurboVNC
+Connection dialog box that allow you to easily select the connection profile.
+In the Java viewer, the same thing is accomplished by clicking the "Options"
+button at the top of the browser window.  With the Linux/Solaris TurboVNC
+viewer, you can either use command line options to set the connection profile
+prior to connecting, or you can press the F8 key after connecting to pop up
+a menu from which you can select the connection profile.
+
+|| || Linux/Solaris TurboVNC viewer || Windows & Java TurboVNC viewers ||
+| High-bandwidth, low-latency network \
+	| No action necessary \
+	| Select "High-Speed Network" Connection Profile. \
+	|
+| Low-bandwidth, high-latency network (favor performance over image quality) \
+	| Pass argument of ''-broadband'' to ''vncviewer'' or select \
+		"Preset: Broadband (favor performance)" from the F8 popup menu \
+	| Select "Broadband (favor performance)" Connection Profile. \
+	|
+| Low-bandwidth, high-latency network (favor image quality over performance) \
+	| Pass argument of ''-wan'' to ''vncviewer'' or select \
+		"Preset: Broadband (favor image quality)" from the F8 popup menu \
+	| Select "Broadband (favor image quality)" Connection Profile. \
+	|
+#OPT: hiCol=first
+
+The "High-Speed Network" and "Broadband (favor image quality)" connection
+profiles set the JPEG compression quality to a high enough level that the
+compression loss is not perceivable by the human eye.  The "Broadband (favor
+performance)" connection profile sets the image quality to a very low (but
+still usable) level which will achieve interactive performance on typical
+broadband connections.
+
+** Further Reading
+
+For more detailed instructions on the usage of TurboVNC:
+
+	Linux :: Refer to the TurboVNC man pages:
+	#Verb: <<---
+	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+	---
+
+	Solaris :: Refer to the TurboVNC man pages:
+	#Verb: <<---
+	man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+	---
+
+	Windows :: Use the embedded help feature (the question mark button in the
+	upper right of the TurboVNC Viewer window.)
+
+The TightVNC documentation:
+
+http://www.tightvnc.com/docs.html
+
+might also be helpful, since TurboVNC is based on TightVNC and shares many of
+its features.
