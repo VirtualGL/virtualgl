@@ -49,8 +49,6 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES =  -I/opt/csw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include -I/usr/sfw/include
-
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
 endif
@@ -61,9 +59,9 @@ CDEFINES := $(CDEFINES) -DSUNOGL
 
 LDFLAGS = -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9 -L/opt/csw/lib/sparcv9 -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
@@ -72,12 +70,39 @@ SHEXT = so
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
+
 ifneq ($(USESSL), no)
-ifeq ($(CC), gcc)
-SOCKLIB := $(SOCKLIB) -ldl -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
+
+ifeq ($(subplatform), 64)
+STATICSSL := $(shell if [ -f /opt/csw/lib/sparcv9/libssl.a -a -f /opt/csw/lib/sparcv9/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/csw/lib/sparcv9
 else
-SOCKLIB := $(SOCKLIB) -ldl -Bstatic -lssl -lcrypto -Bdynamic
+STATICSSL := $(shell if [ -f /opt/csw/lib/libssl.a -a -f /opt/csw/lib/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/csw/lib
 endif
+
+ifeq ($(STATICSSL), yes)
+
+CINCLUDES := $(CINCLUDES) -I/opt/csw/include
+ifeq ($(CC), gcc)
+SSLLIB = -ldl -L$(STATICSSLDIR) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
+else
+SSLLIB = -ldl -L$(STATICSSLDIR) -Bstatic -lssl -lcrypto -Bdynamic
+endif
+
+else
+
+CINCLUDES := $(CINCLUDES) -I/usr/sfw/include
+ifeq ($(subplatform), 64)
+SSLLIB = -L/usr/sfw/lib/sparcv9 -R/usr/sfw/lib/sparcv9 -lssl -lcrypto
+else
+SSLLIB = -L/usr/sfw/lib -R/usr/sfw/lib -lssl -lcrypto
+endif
+
+endif
+
+SOCKLIB := $(SOCKLIB) $(SSLLIB)
+
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
