@@ -1,5 +1,5 @@
 #VAR: css=virtualgl.css
-#TITLE: VirtualGL 2.0 User's Guide
+#TITLE: User's Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3
 #MAKETITLE
 __Intended audience:__ System Administrators, Graphics Programmers,
 Researchers, and others with knowledge of the Linux or Solaris operating
@@ -14,6 +14,10 @@ systems, OpenGL and GLX, and X windows.
 
 #INCLUDE: sysreq.txt
 ----8<--------------
+#INCLUDE: install.txt
+----8<--------------
+#INCLUDE: turbovncinstall.txt
+----8<--------------
 #INCLUDE: linuxinstall.txt
 ----8<--------------
 #INCLUDE: solarisinstall.txt
@@ -22,13 +26,11 @@ systems, OpenGL and GLX, and X windows.
 ----8<--------------
 #INCLUDE: directmodeusage.txt
 ----8<--------------
-#INCLUDE: securingdirectmode.txt
+#INCLUDE: turbovncusage.txt
 ----8<--------------
 #INCLUDE: rawmodeusage.txt
 ----8<--------------
 #INCLUDE: solarisshellscripts.txt
-----8<--------------
-#INCLUDE: glp.txt
 ----8<--------------
 #INCLUDE: dlopen.txt
 ----8<--------------
