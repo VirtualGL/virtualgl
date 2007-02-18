@@ -8,21 +8,24 @@ How to build VirtualGL in 9043 easy steps
 
 -- OpenSSL headers and link libraries
 
-   In order for VirtualGL to be compatible with a variety of Linux
-   distributions, it is necessary to statically link it with OpenSSL.  Since
-   most distributions of Linux don't include the static OpenSSL link libraries,
-   the VirtualGL Project provides these in a separate RPM that can be
-   downloaded from the "Download" area of
+   VirtualGL can be built using the shared OpenSSL libraries provided with
+   your Linux distribution, but this produces a version of VirtualGL that is
+   not compatible across multiple Linux platforms.  In order to build a fully
+   compatible version of VirtualGL, download and install an openssl-static
+   package from the "Download" area of:
+
    http://sourceforge.net/projects/virtualgl
+
    The direct link for openssl-static downloads is:
-   https://sourceforge.net/project/showfiles.php?group_id=117509&package_id=221619
 
-   Use the i386 RPM for 32-bit systems and the x86_64 RPM for 64-bit systems
-   (the x86_64 RPM contains both 64-bit and 32-bit libraries.)
+   http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=221619
 
-   Tarballs are also provided for users of non-RPM-based Linux distributions.
-   You can use alien (http://www.kitenet.net/programs/alien/) to convert these
-   into DEB packages, if you prefer.
+   There are three versions: one for GLIBC 2.2 systems (such as RedHat 7.x and
+   Enterprise Linux 2.1), and both 32-bit and 32/64-bit packages for GLIBC 2.3
+   (and later) systems.  Tarballs are also provided for users of non-RPM-based
+   Linux distributions.  You can use alien
+   (http://www.kitenet.net/programs/alien/) to convert these into DEB packages,
+   if you prefer.
 
 -- GCC and G++ (tested with v2.96 and v3.x)
 
@@ -33,11 +36,19 @@ How to build VirtualGL in 9043 easy steps
 
 -- GNU Make v3.7 or later
 
+-- binutils 2.12.90 or later.  This shouldn't be an issue unless you are
+   (still) running RedHat 7.x or Enterprise 2.1, in which case you can
+   download an updated bintools RPM from
+   http://mirror.atrpms.net/ccrma/mirror/7.2/
+
 -- TurboJPEG SDK
 
-   Download (and install) the RPM from the "Download" area of
+   Download (and install) a TurboJPEG RPM from the "Download" area of
+
    http://sourceforge.net/projects/virtualgl
+
    The direct link for TurboJPEG downloads is:
+
    http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
 
    Use the i386 RPM for 32-bit systems and the x86_64 RPM for 64-bit systems
@@ -99,10 +110,14 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
 -- TurboJPEG SDK (Intel Macs only)
 
-   * Download the Disk Image (DMG) from the "Files" area of 
+   * Download the TurboJPEG Disk Image (DMG) from the "Download" area of
+
      http://sourceforge.net/projects/virtualgl
+
      The direct link for TurboJPEG downloads is:
+
      http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
+
    * Open the DMG file and double-click on the package inside to install
      TurboJPEG
 
@@ -117,8 +132,11 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
 -- OpenSSL headers and link libraries
 
-   Download and install the latest OpenSSL package from Blastwave
-   (http://www.blastwave.org.)
+   VirtualGL can be built using the shared OpenSSL libraries provided with
+   Solaris 10 and later, but this produces a version of VirtualGL that is not
+   compatible across multiple Linux platforms.  In order to build a fully
+   compatible version of VirtualGL, download and install the latest OpenSSL
+   package from Blastwave (http://www.blastwave.org.)
 
 -- Sun Studio/Workshop Pro Compiler
 
@@ -145,8 +163,7 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
    * Requires v1.3 or later (1.5 or later recommended)
    * See http://www.sun.com/software/graphics/opengl/
-   * If building against a version of OpenGL that lacks GLP support (pre 1.5), 
-     build VirtualGL using
+   * If your build system has Sun OpenGL v1.3, build VirtualGL using
        gmake USEGLP=no
 
 -- GNU Make v3.7 or later
