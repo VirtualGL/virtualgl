@@ -697,7 +697,7 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs,
           attribs->id, attribs->depth, visual_class_name(attribs->klass));
    #ifdef sun
    if(!glx13) printf("  gamma=%f\n", attribs->gamma);
-   else
+   else printf("\n");
    #else
    printf("\n");
    #endif
