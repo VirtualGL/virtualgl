@@ -440,7 +440,8 @@ int rbtest(bool stereo, bool ci)
 			clr.clear(GL_FRONT);  if(stereo) sclr.clear(GL_FRONT_RIGHT);
 			glReadBuffer(GL_FRONT);
 			// Intentionally leave a pending GL error (VirtualGL should clear the error state prior to readback)
-			glReadPixels(0, 0, 0, 0, 0, 0, 0);
+			char pixel[4];
+			glReadPixels(0, 0, 1, 1, 0, GL_BYTE, pixel);
 			glXSwapBuffers(dpy, win1);
 			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
