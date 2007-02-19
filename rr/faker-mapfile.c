@@ -49,6 +49,7 @@
 		glXDestroyGLXPbufferSGIX;
 		glXGetCurrentReadDrawableSGI;
 		glXGetFBConfigAttribSGIX;
+		glXGetFBConfigFromVisualSGIX;
 		glXGetSelectedEventSGIX;
  		glXGetVisualFromFBConfigSGIX;
 		glXMakeCurrentReadSGI;
