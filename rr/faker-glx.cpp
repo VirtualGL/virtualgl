@@ -475,6 +475,10 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	}
 	else if(attribute==GLX_VISUAL_ID)
 		*value=vid;
+	else if(attribute==GLX_DRAWABLE_TYPE)
+	{
+		*value=GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT;
+	}
 	else
 	{
 		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
