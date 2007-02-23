@@ -20,6 +20,7 @@ OPTFLAG = -O2
 endif
 SHFLAG = -shared -lc -z defs
 DEPFLAG = -MM
+MAPFLAG = -Wl,-M,
 
 else
 
@@ -40,13 +41,14 @@ OPTFLAG = -O
 endif
 SHFLAG = -G -lc -z direct -lCrun -z nodirect -z defs
 DEPFLAG = -xM1
+MAPFLAG = -M
 
 endif
 
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES =  -I/usr/X/include -I/opt/csw/include -I$(TOPDIR)/../openssl.$(platform)$(subplatform)/include -I/usr/sfw/include 
+CINCLUDES = -I/usr/X/include
 
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
@@ -57,9 +59,9 @@ endif
 
 LDFLAGS = -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
-LDFLAGS := -L/usr/X/lib/64 -R/opt/SUNWvgl/lib/amd64 -L/opt/csw/lib/64 -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib/64 -R/opt/SUNWvgl/lib/amd64 $(LDFLAGS)
 else
-LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib -L/opt/csw/lib -L$(TOPDIR)/../openssl.$(platform)$(subplatform) -L/usr/sfw/lib -R/usr/sfw/lib $(LDFLAGS)
+LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib
@@ -68,11 +70,42 @@ SHEXT = so
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
+
 ifneq ($(USESSL), no)
-SOCKLIB := $(SOCKLIB) $(LAZY) -lssl -lcrypto $(NOLAZY)
+
+ifeq ($(subplatform), 64)
+STATICSSL := $(shell if [ -f /opt/csw/lib/64/libssl.a -a -f /opt/csw/lib/64/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/csw/lib/64
+else
+STATICSSL := $(shell if [ -f /opt/csw/lib/libssl.a -a -f /opt/csw/lib/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/csw/lib
+endif
+
+ifeq ($(STATICSSL), yes)
+
+CINCLUDES := $(CINCLUDES) -I/opt/csw/include
+ifeq ($(CC), gcc)
+SSLLIB = -ldl -L$(STATICSSLDIR) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
+else
+SSLLIB = -ldl -L$(STATICSSLDIR) -Bstatic -lssl -lcrypto -Bdynamic
+endif
+
+else
+
+CINCLUDES := $(CINCLUDES) -I/usr/sfw/include
+ifeq ($(subplatform), 64)
+SSLLIB = -L/usr/sfw/lib/amd64 -R/usr/sfw/lib/amd64 -lssl -lcrypto
+else
+SSLLIB = -L/usr/sfw/lib -R/usr/sfw/lib -lssl -lcrypto
+endif
+
+endif
+
+SOCKLIB := $(SOCKLIB) $(SSLLIB)
+
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lXm -lGL -lm
+FAKERLINK = -lXm -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now

@@ -53,16 +53,6 @@ ifeq ($(DEBUG), yes)
 BUILD := $(BUILD)d
 endif
 
-
-ifeq ($(M32), yes)
-ifeq ($(platform), linux)
-.PHONY: sanitycheck64
-all: sanitycheck64
-sanitycheck64:
-	sh $(TOPDIR)/sanitycheck64
-endif
-endif
-
 ifneq ($(DISTRO),)
 BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
 BLDDIR32 = $(TOPDIR)/$(platform)/$(DISTRO)

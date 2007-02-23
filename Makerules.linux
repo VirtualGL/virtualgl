@@ -3,7 +3,7 @@
 ########################################
 
 CC = cc
-CXX = c++
+CXX = c++ -static-libgcc
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
@@ -25,6 +25,8 @@ ARCHFLAG = -m32
 LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
+_DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
+
 ifeq ($(DEBUG), yes)
 OPTFLAG = -O0 -ggdb
 else
@@ -36,14 +38,32 @@ DEFAULTJPEGLIB = ipp
 SHFLAG = -shared
 SHEXT = so
 DEPFLAG = -MM
+MAPFLAG = -Wl,--version-script,
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
+
 ifneq ($(USESSL), no)
+
+ifeq ($(subplatform), 64)
+STATICSSL := $(shell if [ -f /opt/openssl-static/lib64/libssl.a -a -f /opt/openssl-static/lib64/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/openssl-static/lib64
+else
+STATICSSL := $(shell if [ -f /opt/openssl-static/lib/libssl.a -a -f /opt/openssl-static/lib/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/openssl-static/lib
+endif
+
+ifeq ($(STATICSSL), yes)
+CINCLUDES = -I/opt/openssl-static/include
+SOCKLIB := $(SOCKLIB) -ldl -L$(STATICSSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+else
+# Use dynamic libs provided by the O/S
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 
-FAKERLINK = -lGL
+endif
+
+FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ifeq ($(subplatform),)
 RPMARCH = i386

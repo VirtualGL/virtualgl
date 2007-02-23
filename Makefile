@@ -79,34 +79,6 @@ lib64dir=lib/amd64
 endif
 endif
 
-ifneq ($(USESSL), no)
-installssl: rr
-	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
-	_LIBCRYPTO=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libcrypto | awk '{print $$1}'\``; \
-	echo $$_LIBCRYPTO; if [ -f /opt/csw/$(lib64dir)/$$_LIBCRYPTO ]; then \
-		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
-	else \
-		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO ]; then \
-			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBCRYPTO $(prefix)/$(lib64dir); \
-		fi \
-	fi
-	_LIBSSL=`basename \`ldd $(LDIR)/librrfaker.$(SHEXT) | grep libssl | awk '{print $$1}'\``; \
-	echo $$_LIBSSL; if [ -f /opt/csw/$(lib64dir)/$$_LIBSSL ]; then \
-		$(INSTALL) -m 755 /opt/csw/$(lib64dir)/$$_LIBSSL $(prefix)/$(lib64dir); \
-	else \
-		if [ -f ../openssl.$(platform)$(subplatform)/$$_LIBSSL ]; then \
-			$(INSTALL) -m 755 ../openssl.$(platform)$(subplatform)/$$_LIBSSL $(prefix)/$(lib64dir); \
-		fi \
-	fi
-
-ifeq ($(platform), solaris)
-install: installssl
-endif
-ifeq ($(platform), solx86)
-install: installssl
-endif
-endif
-
 ifeq ($(subplatform), 64)
 install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
