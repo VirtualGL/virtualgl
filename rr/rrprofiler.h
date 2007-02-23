@@ -73,11 +73,12 @@ class rrprofiler
 		if(lastframe==0.0) lastframe=now;
 		if(totaltime>interval || (now-lastframe)>interval)
 		{
-			rrout.print("%s  ", name);
-			if(mpixels) rrout.print("- %7.2f Mpixels/sec", mpixels/totaltime);
-			if(frames) rrout.print("- %7.2f fps", frames/totaltime);
-			if(mbytes) rrout.print("- %7.2f Mbits/sec (%.1f:1)", mbytes*8.0/totaltime, mpixels*3./mbytes);
-			rrout.PRINT("\n");
+			char temps[256];  int i=0;
+			snprintf(&temps[i], 255-i, "%s  ", name);  i=strlen(temps);
+			if(mpixels) {snprintf(&temps[i], 255-i, "- %7.2f Mpixels/sec", mpixels/totaltime);  i=strlen(temps);}
+			if(frames) {snprintf(&temps[i], 255-i, "- %7.2f fps", frames/totaltime);  i=strlen(temps);}
+			if(mbytes) {snprintf(&temps[i], 255-i, "- %7.2f Mbits/sec (%.1f:1)", mbytes*8.0/totaltime, mpixels*3./mbytes);  i=strlen(temps);}
+			rrout.PRINT("%s\n", temps);
 			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;  lastframe=now;
 		}
 	}
