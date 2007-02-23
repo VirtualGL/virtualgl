@@ -1,22 +1,20 @@
-* Installing the VirtualGL Direct Mode Client on Windows
-
-	!!! Installing the VirtualGL package is necessary on any Windows machine that
-	will act as a VirtualGL [[overview.txt#Direct_Mode][Direct Mode]]	client.  It
-	is not necessary to install VirtualGL on the client machine if
-	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
-
-	#. Download the latest VirtualGL installer package from the files area of
-		[[http://sourceforge.net/projects/virtualgl]].  The installer will usually
-		be named ''VirtualGL-{version}.exe''.
-
-	#. Run the VirtualGL installer.  The installation of VirtualGL should be
-		self-explanatory.  The only configuration option is the directory in which
-		you want the files to be installed.
+* Configuring a Windows Machine as a VirtualGL Direct Mode Client
 
 	#. Install Hummingbird Exceed if it isn't already installed.
 
-	#. Add the Exceed path (e.g. ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
-		to your system ''PATH'' environment if it isn't already there.
+	#. Add the Exceed path (for instance, ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
+		to the system ''PATH'' environment if it isn't already there.
+
+	#. Install a Secure Shell (SSh) client.  If [[http://www.cygwin.com/][Cygwin]]
+		is already installed, then you can use the SSh client included in Cygwin.
+		Otherwise, download and install [[http://sshwindows.sourceforge.net/][SSHWindows]]
+		or [[http://www.chiark.greenend.org.uk/%7Esgtatham/putty/][PuTTY]].
+		''ssh.exe'' or ''putty.exe'' should be somewhere in your ''PATH''.
+
+** Optimizing Exceed
+
+*** Disabling Pixel Format Conversion and Backing Store
+#OPT: noList! plain!
 
 	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
 		__Tools-->Configuration__.)
@@ -47,7 +45,8 @@
 	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
 		perform a server reset, click "Yes."
 
-** Obtaining Optimal Performance with Exceed
+*** Enabling MIT-SHM
+#OPT: noList! plain!
 
 VirtualGL has the ability to take advantage of the MIT-SHM extension in
 Hummingbird Exceed to accelerate image drawing on Windows.  This can improve
@@ -98,17 +97,6 @@ Next, you need to enable the MIT-SHM extension in Exceed:
 
 	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
 		perform a server reset, click "Yes."
-
-** Secure Shell
-
-It is recommended that you use SSh (Secure Shell) to log in to the application
-server and launch applications.  Some servers are configured to allow telnet
-and RSh access, but telnet and RSh both send passwords unencrypted over the
-network and are thus being phased out in favor of SSh.  If
-[[http://www.cygwin.com/][Cygwin]] is already
-installed on your Windows VirtualGL client machine, then you can use the SSh
-client included in Cygwin.  Otherwise, download and install
-[[http://www.chiark.greenend.org.uk/%7Esgtatham/putty/][PuTTY]].
 
 ** Installing the VirtualGL Client as a Windows Service
 

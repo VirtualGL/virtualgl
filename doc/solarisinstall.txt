@@ -1,89 +1,91 @@
-* Installing the VirtualGL Server and Direct Mode Client on Solaris
+* Configuring a Solaris Machine as a VirtualGL Server
 
-	!!! Installing the VirtualGL package is necessary on any Solaris machine that
-	will act as a VirtualGL server or as a VirtualGL
-	[[overview.txt#Direct_Mode][Direct Mode]]	client.  It is not necessary to
-	install VirtualGL on the client machine if
-	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
+** GLP: Using VirtualGL Without an X Server
+{anchor: GLP_Usage}
 
-	1. Obtain the latest VirtualGL package from the files area of
-		[[http://sourceforge.net/projects/virtualgl]].
+Sun's OpenGL library for Sparc systems has a special extension called "GLP"
+which allows VirtualGL to directly access a 3D graphics card even if there is
+no X server running on the card.  Apart from greatly simplifying the process of
+configuring the VirtualGL server, GLP also greatly improves the overall
+security of the VirtualGL server, since it eliminates the need to grant X
+server access to VirtualGL users.  In addition, GLP makes it easy to assign
+VirtualGL jobs to any graphics card in a multi-card system.
 
-	2. Log in as root, cd to the directory where you downloaded the package, and
-		issue the following commands:
+If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]]
+1.5 for Sparc/Solaris, it is recommended that you configure it to use GLP:
 
-		#Verb: <<---
-		bzip2 -d SUNWvgl-{version}.pkg.bz2
-		pkgadd -d SUNWvgl-{version}.pkg
-		---
+	#. Log in as root.
 
-	3. Select the ''SUNWvgl'' package (usually option 1) from the menu.
+	#. Create a new group called ''vglusers'' and add any users that need to
+		run VirtualGL to this group.
 
- !!! VirtualGL for Solaris installs into ''/opt/SUNWvgl''.
-
-*** Device Permissions
-#OPT: noList! plain!
-
-	1. Edit ''/etc/logindevperm'' and comment out the "frame buffers" line, e.g.:
+	#. If the ''/etc/dt/config'' directory does not exist, create it.
 
 		#Verb: <<---
-		# /dev/console    0600    /dev/fbs/*              # frame buffers
+		mkdir -p /etc/dt/config
 		---
 
-	2. Change the permissions and group for ''/dev/fbs/*'' to allow write access
-		to anyone who will need to use VirtualGL, e.g.:
+		Make sure that ''/etc/dt/config'' has global read/execute permissions.
 
+	#. Create a file called ''GraphicsDevices'' under ''/etc/dt/config'' and add
+		any framebuffer device paths in your system (for instance, ''/dev/fbs/kfb0'',
+		''/dev/fbs/jfb0'', etc.) to this file, one device per line.
+		{nl}{nl}
+		__Example:__
 		#Verb: <<---
-		chmod 660 /dev/fbs/*
-		chown root /dev/fbs/*
-		chgrp vglusers /dev/fbs/*
+		touch /etc/dt/config/GraphicsDevices
+		for i in /dev/fbs/*[0-9]; do echo $i >>/etc/dt/config/GraphicsDevices; done
 		---
 
- !!! Explanation: Normally, when someone logs into a Solaris machine, the
- system will automatically assign ownership of the framebuffer devices to
- that user and set the permissions for the framebuffer devices to those
- specified in ''/etc/logindevperm''.  The default setting in
- ''/etc/logindevperm'' disallows anyone from using the framebuffer devices
- except the user that is logged in.  But in order to run VirtualGL, a user
- needs write access to the framebuffer devices.  So in order to make the
- framebuffer a shared resource, it is necessary to disable the login device
- permissions mechanism for the framebuffer devices and manually set the owner
- and group for these devices such that any VirtualGL users can write to them.
+		You can choose to include only certain framebuffer devices in this file.
+		Only the devices listed in ''GraphicsDevices'' will be available for use by
+		VirtualGL.
 
-*** Other
-#OPT: noList! plain!
+	#. Grant read access to this file for the ''vglusers'' group.
+		{nl}{nl}
+		__Example:__
+		#Verb: <<---
+		chgrp vglusers /etc/dt/config/GraphicsDevices
+		chmod 640 /etc/dt/config/GraphicsDevices
+		---
 
-The server's SSh daemon should have the ''X11Forwarding'' option enabled and
-the ''UseLogin'' option disabled.  This is configured in ''sshd_config'',
-the location of which varies depending on your distribution of SSh.  Solaris
-10 generally keeps this in ''/etc/ssh'', whereas Blastwave keeps it in
-''/opt/csw/etc'' and SunFreeware keeps it in ''/usr/local/etc''.
+If you wish to make GLP the default for all users of the system, you can add
 
-** Granting VirtualGL Access to the Server's X Display
+#Verb: <<---
+VGL_DISPLAY=glp
+export VGL_DISPLAY
+---
 
-	!!! If you plan to use VirtualGL only in [[glp.txt#GLP_Usage][GLP]] mode,
-	then you can skip this section.
+to ''/etc/profile''.  This will cause VirtualGL to use the first device
+specified in ''/etc/dt/config/GraphicsDevices'' as the default rendering
+device.  Users can override this default by setting ''VGL_DISPLAY'' in one of
+their startup scripts (such as ''~/.profile'' or ''~/.login'') or by passing an
+argument of ''-d <device>'' to ''vglrun'' when invoking VirtualGL.  See
+{ref prefix="Section ": Advanced_Configuration} for more details.
+
+** Granting Access to the Server's X Display
+
+	!!! If you plan to use VirtualGL only with [[#GLP_Usage][GLP]], then you
+	can skip this section.
 
 VirtualGL requires access to the server's 3D graphics card so that it can
 create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
 from applications into these Pbuffers.  Unfortunately, accessing a 3D
 graphics card on Solaris/x86 systems or on Solaris/Sparc systems without
-[[glp.txt#GLP_Usage][GLP]] requires going through an X server.  On such
-systems, the only way to share the server's 3D graphics resources among
-multiple users is to grant those users display access to the X server that is
-running on the shared 3D graphics card.
+[[#GLP_Usage][GLP]] requires going through an X server.  On such systems, the
+only way to share the server's 3D graphics card among multiple users is
+to grant those users access to the X server that is running on the 3D graphics
+card.
 
 It is important to understand the security risks associated with this.  Once
-X display access is granted to a user, there is nothing preventing that user
-from logging keystrokes or reading back images from the X display.  Using
-''xauth'', one can obtain "untrusted" X authentication keys which prevent such
-exploits, but unfortunately, those untrusted keys also disallow access to the
-3D hardware.  So it is necessary to grant full trusted X access to any users
-that will need to run VirtualGL.  Unless you fully trust the users to whom you
-are granting this access, you should avoid logging in locally to the server's
-X display as root unless absolutely necessary.  Even then, it's probably a good
-idea to make sure that there are no suspicious-looking processes running on the
-system prior to logging in.
+X display access is granted to a user, there is nothing that would prevent
+that user from logging keystrokes or reading back images from the X display.
+Using ''xauth'', one can obtain "untrusted" X authentication keys which prevent
+such exploits, but unfortunately, those untrusted keys also disallow access to
+the 3D hardware.  So it is necessary to grant full trusted X access to any
+users that will need to run VirtualGL.  Unless you fully trust the users to
+whom you are granting this access, you should avoid logging in locally to the
+server's X display as root unless absolutely necessary.
 
 This section will explain how to configure a VirtualGL server such that select
 users can run VirtualGL, even if the server is sitting at the login prompt.
@@ -109,18 +111,13 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		run VirtualGL to this group.
 
 	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
-		''vglusers'' group, e.g.:
-
+		''vglusers'' group.
+		{nl}{nl}
+		__Example:__
 		#Verb: <<---
 		mkdir -p /etc/opt/VirtualGL
 		chgrp vglusers /etc/opt/VirtualGL
 		chmod 750 /etc/opt/VirtualGL
-		---
-
-	#. Temporarily shut down dtlogin by issuing
-
-		#Verb: <<---
-		/etc/init.d/dtlogin stop
 		---
 
 	#. If the ''/etc/dt/config'' directory does not exist, create it.
@@ -182,8 +179,9 @@ user on the server by replacing the references to ''vglgenkey'' below with
 			---
 
 		b. Edit ''/etc/dt/config/Xservers'' and add an argument of ''-tst'' to the
-			line corresponding to the display number you are configuring, e.g.:
-
+			line corresponding to the display number you are configuring.
+			{nl}{nl}
+			__Example:__
 			#Verb: <<---
 			:0  Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst
 			---
@@ -201,10 +199,11 @@ user on the server by replacing the references to ''vglgenkey'' below with
 	#. Restart the X server by issuing
 
 		#Verb <<---
-		/etc/init.d/dtlogin start
+		/etc/init.d/dtlogin stop; /etc/init.d/dtlogin start
 		---
 
-	#. You can check your work by running
+	#. To check your work, log out of the server, log back in via. SSh, and
+		run
 
 		#Verb <<---
 		/usr/openwin/bin/xauth merge /etc/opt/VirtualGL/vgl_xauth_key
@@ -212,12 +211,11 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		---
 
 		In particular, make sure that XTEST doesn't show up in the list of
-		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
-		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 7 didn't take for some reason.
+		extensions if you disabled it above.
 
 
-*** If your system is using gdm as a display manager (Solaris 10 or later):
+*** If your system is using gdm as a display manager (gdm is available only on \
+Solaris 10 or later):
 #OPT: noList! plain!
 
 	#. Log in as root.
@@ -226,18 +224,13 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		run VirtualGL to this group.
 
 	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
-		''vglusers'' group, e.g.:
-
+		''vglusers'' group.
+		{nl}{nl}
+		__Example:__
 		#Verb: <<---
 		mkdir -p /etc/opt/VirtualGL
 		chgrp vglusers /etc/opt/VirtualGL
 		chmod 750 /etc/opt/VirtualGL
-		---
-
-	#. Temporarily shut down gdm by issuing
-
-		#Verb: <<---
-		svcadm disable gdm2-login
 		---
 
 	#. Add
@@ -261,8 +254,9 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		key and mouse events and thus hijacking a local X session.{nl}
 		{nl}
 		Edit ''/etc/X11/gdm/gdm.conf'' and add ''-tst'' to all lines that appear to
-		be X server command lines, e.g.:
-
+		be X server command lines.
+		{nl}{nl}
+		__Example:__
 		#Verb: <<---
 		StandardXServer=/usr/X11R6/bin/Xorg -tst
 		---
@@ -282,10 +276,11 @@ user on the server by replacing the references to ''vglgenkey'' below with
 	#. Restart gdm by issuing
 
 		#Verb: <<---
-		svcadm enable gdm2-login
+		svcadm disable gdm2-login; svcadm enable gdm2-login
 		---
 
-	#. You can check your work by running
+	#. To check your work, log out of the server, log back in via. SSh, and
+		run
 
 		#Verb: <<---
 		/usr/openwin/bin/xauth merge /etc/opt/VirtualGL/vgl_xauth_key
@@ -293,16 +288,46 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		---
 
 		In particular, make sure that XTEST doesn't show up in the list of
-		extensions if you disabled it above.  If ''xdpyinfo'' fails to run, then
-		the permissions on Display :0 are probably still too restrictive, meaning
-		that the change in Step 5 didn't take for some reason.
+		extensions if you disabled it above.
 
-** Uninstalling
+** Device Permissions
 
-As root, issue the following command:
+Whether the server's 3D graphics card is being accessed through GLP or through
+an X server, you must perform the following procedure to enable VirtualGL users
+to access the framebuffer device(s):
 
-#Verb: <<---
-pkgrm SUNWvgl
----
+	1. Edit ''/etc/logindevperm'' and comment out the "frame buffers" line.
+		{nl}{nl}
+		__Example:__
+		#Verb: <<---
+		# /dev/console    0600    /dev/fbs/*              # frame buffers
+		---
 
-Answer "yes" when prompted.
+	2. Change the permissions and group for ''/dev/fbs/*'' to allow write access
+		to anyone who will need to use VirtualGL.
+		{nl}{nl}
+		__Example:__
+		#Verb: <<---
+		chmod 660 /dev/fbs/*
+		chown root /dev/fbs/*
+		chgrp vglusers /dev/fbs/*
+		---
+
+ !!! Explanation: Normally, when someone logs into a Solaris machine, the
+ system will automatically assign ownership of the framebuffer devices to
+ that user and set the permissions for the framebuffer devices to those
+ specified in ''/etc/logindevperm''.  The default setting in
+ ''/etc/logindevperm'' disallows anyone from using the framebuffer devices
+ except the user that is logged in.  But in order to run VirtualGL, a user
+ needs write access to the framebuffer devices.  So in order to make the
+ framebuffer a shared resource, it is necessary to disable the login device
+ permissions mechanism for the framebuffer devices and manually set the owner
+ and group for these devices such that any VirtualGL users can write to them.
+
+** SSh Server Configuration
+
+The server's SSh daemon should have the ''X11Forwarding'' option enabled and
+the ''UseLogin'' option disabled.  This is configured in ''sshd_config'',
+the location of which varies depending on your distribution of SSh.  Solaris
+10 generally keeps this in ''/etc/ssh'', whereas Blastwave keeps it in
+''/opt/csw/etc'' and SunFreeware keeps it in ''/usr/local/etc''.

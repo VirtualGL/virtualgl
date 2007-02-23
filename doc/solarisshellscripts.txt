@@ -12,7 +12,8 @@ default, it will only allow libraries in those paths to be preloaded into an
 executable that is setuid root.  Generally, 3rd party packages are verboden
 from installing anything into ''/usr/lib'' or ''/lib''.  But you can use the
 ''crle'' utility to add other directories to the operating system's list of
-secure paths.  In the case of VirtualGL, you would issue (as root):
+secure paths.  In the case of VirtualGL, you would execute the following
+commands (as root):
 
 #Verb: <<---
 crle -u -s /opt/SUNWvgl/lib
@@ -26,9 +27,37 @@ operating system.  And while we're flattered, we're not sure that we're
 necessarily deserving of that accolade, so if you are in a security critical
 environment, apply the appropriate level of paranoia here.
 
-An easier and perhaps more secure approach is to simply edit the application
-script and have it issue ''vglrun'' only for the executables that you wish to
-run in the VirtualGL environment.  But sometimes that is not an option.
+An easier, and perhaps more secure, approach is to simply edit the application
+script and make it store the value of the ''LD_PRELOAD'' environment variables
+until right before the actual executable is run.  For instance, take the
+following application script (please):
+
+Contents of ''application.sh'':
+#Verb: <<---
+#!/bin/sh
+some_setuid_binary
+some_application_binary
+---
+
+You would modify the script as follows:
+
+Contents of ''application.sh'':
+#Verb: <<---
+#!/bin/sh
+LD_PRELOAD_32_SAVE=$LD_PRELOAD_32
+LD_PRELOAD_64_SAVE=$LD_PRELOAD_64
+LD_PRELOAD_32=
+LD_PRELOAD_64=
+export LD_PRELOAD_32 LD_PRELOAD_64
+
+some_setuid_binary
+
+LD_PRELOAD_32=$LD_PRELOAD_32_SAVE
+LD_PRELOAD_64=$LD_PRELOAD_64_SAVE
+export LD_PRELOAD_32 LD_PRELOAD_64
+
+some_application_binary
+---
 
 ''vglrun'' on Solaris has two options that are relevant to launching scripts:
 
@@ -42,4 +71,7 @@ will preload VirtualGL only into 32-bit executables called by a script, whereas
 vglrun -64 {script}
 ---
 
-will preload VirtualGL only into 64-bit executables.
+will preload VirtualGL only into 64-bit executables.  So if, for instance,
+the setuid binary that the script is calling is a 32-bit executable and the
+application is a 64-bit executable, then you could use ''vglrun -64'' to
+launch the application script.

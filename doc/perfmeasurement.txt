@@ -8,7 +8,7 @@ The easiest way to uncover bottlenecks in the VirtualGL pipeline is to set the
 (passing an argument of ''+pr'' to ''vglrun'' on the server has the same
 effect.)  This will cause VirtualGL to measure and report the throughput of the
 various stages in its pipeline.  For example, here are some measurements from a
-dual Pentium 4 server communicating with a Pentium III client on a 100 Mbit
+dual Pentium 4 server communicating with a Pentium III client on a 100 Megabit
 LAN:
 
 	Server :: {:}
@@ -25,15 +25,15 @@ LAN:
 	Total      -  8.00 Mpixels/sec -  6.40 fps - 10.18 Mbits/sec (18.9:1)
 	---
 
-The total throughput of the pipeline is 8.0 Mpixels/sec, or 6.4 frames/sec,
+The total throughput of the pipeline is 8.0 Megapixels/sec, or 6.4 frames/sec,
 indicating that our frame is 8.0 / 6.4 = 1.25 Megapixels in size (a little less
 than 1280 x 1024 pixels.)  The readback and compress stages, which occur in
 parallel on the server, are obviously not slowing things down.  And we're only
 using 1/10 of our available network bandwidth.  So we look to the client and
-discover that its slow decompression speed is the primary bottleneck.
-Decompression and blitting on the client do not occur in parallel, so the
-aggregate performance is the harmonic mean of the two rates:
-__[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.
+discover that its slow decompression speed (10.35 Megapixels/second) is the primary
+bottleneck.  Decompression and blitting on the client do not occur in parallel,
+so the aggregate performance is the harmonic mean of the decompression and
+blitting rates:  __[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.
 
 ** Frame Spoiling
 
@@ -42,14 +42,27 @@ ready to receive it.  If a rendered frame arrives at the server's queue and a
 previous frame is still being processed, the new frame is dropped ("spoiled.")
 This prevents a backlog of frames on the server, which would cause a
 perceptible delay in the responsiveness of interactive applications.  But when
-running non-interactive applications, particularly benchmarks, it may be
+running non-interactive applications, particularly benchmarks, it is
 desirable to disable frame spoiling.   With frame spoiling disabled, the server
-will render frames only as quickly as the VirtualGL pipeline can receive them,
-which will conserve server resources as well as allow OpenGL benchmarks to
-accurately measure the throughput of the VirtualGL pipeline.  With frame
+will render frames only as quickly as VirtualGL can send those frames to the
+client, which will conserve server resources as well as allow OpenGL benchmarks
+to accurately measure the frame rate of the VirtualGL system.  With frame
 spoiling enabled, these benchmarks will report meaningless data, since they
-are measuring the server's rendering rate, and that rendering rate is decoupled
-from the overall throughput of VirtualGL.
+are measuring the rate at which the server can render frames, and that frame
+rate is decoupled from the rate at which VirtualGL can send those frames to the
+client.
+
+In a VNC environment, there is another layer of frame spoiling, since the
+server only sends updates to the client when the client requests them.  So
+even if frame spoiling is disabled in VirtualGL, OpenGL benchmarks will still
+report meaningless data if they are run in a VNC session.
+
+There are only two ways to accurately benchmark an application in VirtualGL:
+
+	#. Disable frame spoiling and use Direct Mode or Raw Mode with a "real"
+		X server.
+
+	#. Use TCBench (see below.)
 
 To disable frame spoiling, set the ''VGL_SPOIL'' environment variable to ''0''
 on the server or pass an argument of ''-sp'' to ''vglrun''.  See
@@ -63,7 +76,7 @@ problems with the system.
 *** NetTest
 #OPT: noList! plain!
 
-NetTest is a low-level network benchmark that uses the same network classes as
+NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  The VirtualGL Linux package
 installs NetTest in ''/opt/VirtualGL/bin''.  The VirtualGL Solaris package
@@ -83,11 +96,12 @@ particular connection.)
 Next, start the client on the other end of the connection:
 
 #Verb: <<---
-nettest -client {server_name} [-ssl]
+nettest -client {server} [-ssl]
 ---
 
-(''server_name'' is the hostname or IP address of the machine where the NetTest
-server is running.  Use ''-ssl'' if the NetTest server is running in SSL mode.)
+Replace ''{server}'' with the hostname or IP address of the machine where the
+NetTest server is running.  Use ''-ssl'' if the NetTest server is running in
+SSL mode.)
 
 The nettest client will produce output similar to the following:
 
@@ -121,12 +135,12 @@ Transfer size  1/2 Round-Trip      Throughput
 4194304            356.547194       11.218711
 ---
 
-We can see that the throughput peaks out at about 11.2 MB/sec.  1 MB =
+We can see that the throughput peaks at about 11.2 MB/sec.  1 MB =
 1048576 bytes, so 11.2 MB/sec = 94 million bits per second, which is pretty
-good for a 100 Mbit connection.  We can also see that, as the transfer size
-decreases, the round-trip time becomes dominated by latency.  The latency is
+good for a 100 Megabit connection.  We can also see that, for small transfer
+sizes, the round-trip time is dominated by latency.  The "latency" is
 the same thing as the 1/2 round-trip time for a zero-byte packet, which is
-about 0.18 ms in this case.
+about 0.18 milliseconds in this case.
 
 *** CPUstat
 #OPT: noList! plain!
@@ -135,7 +149,8 @@ CPUstat is available only in the VirtualGL Linux packages and is located in the
 same place as NetTest (''/opt/VirtualGL/bin''.)  It measures the average,
 minimum, and peak CPU usage for all processors combined and for each processor
 individually.  On Windows, this same functionality is provided in the Windows
-Performance Monitor, which is part of the operating system.
+Performance Monitor, which is part of the operating system.  On Solaris, the
+same data can be obtained through ''vmstat''.
 
 CPUstat measures the CPU usage over a given sample period (a few seconds) and
 continuously reports how much the CPU was utilized since the last sample

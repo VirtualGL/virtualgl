@@ -2,6 +2,24 @@
 {anchor: Application_Recipes}
 
 || Application || Platform || Recipe || Notes ||
+| ANSA v12.1.0 | Linux/x86 \
+	| Add \
+		{nl}{nl} \
+		''LD_PRELOAD_SAVE=$LD_PRELOAD''{nl} \
+		''export LD_PRELOAD='' \
+		{nl}{nl} \
+		to the top of the ''ansa.sh'' script, then add \
+		{nl}{nl} \
+		''export LD_PRELOAD=$LD_PRELOAD_SAVE'' \
+		{nl}{nl} \
+		just prior to the ''${ANSA_EXEC_DIR}bin/ansa_linux${ext2}'' line. \
+	| The ANSA startup script directly invokes ''/lib/libc.so.6'' to query \
+		the glibc version.  Since the VirtualGL faker depends on libc, preloading \
+		VirtualGL when directly invoking ''libc.so.6'' creates an infinite loop. \
+		So it is necessary to disable the preloading of VirtualGL in the \
+		application script and then re-enable it prior to launching the actual \
+		application. \
+	|
 | Army Ops | Linux/x86 \
 	| ''vglrun -dl armyops'' \
 	| See {ref prefix="Section ": dlopen} for more details \
