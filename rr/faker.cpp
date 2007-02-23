@@ -263,6 +263,66 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
  	return retval;
 }
 
+char **XListExtensions(Display *dpy, int *next)
+{
+	char **list=NULL, *liststr=NULL;  int n, i;
+	int hasglx=0, listlen=0;
+
+	TRY();
+
+	// Prevent recursion
+	if(!_isremote(dpy)) return _XListExtensions(dpy, next);
+	////////////////////
+
+		opentrace(XListExtensions);  prargd(dpy);  starttrace();
+
+	list=_XListExtensions(dpy, &n);
+	if(list && n>0)
+	{
+		for(i=0; i<n; i++)
+		{
+			if(list[i])
+			{
+				listlen+=strlen(list[i])+1;
+				if(!strcmp(list[i], "GLX")) hasglx=1;
+			}
+		}
+	}
+	if(!hasglx)
+	{
+		char **newlist=NULL;  int listndx=0;
+		listlen+=4;  // "GLX" + terminating NULL
+		errifnot(newlist=(char **)malloc(sizeof(char *)*(n+1)))
+		errifnot(liststr=(char *)malloc(listlen+1))
+		memset(liststr, 0, listlen+1);
+		liststr=&liststr[1];  // For compatibility with X.org implementation
+		if(list && n>0)
+		{
+			for(i=0; i<n; i++)
+			{
+				newlist[i]=&liststr[listndx];
+				if(list[i])
+				{
+					strncpy(newlist[i], list[i], strlen(list[i]));
+					listndx+=strlen(list[i]);
+					liststr[listndx]='\0';  listndx++;
+				}
+			}
+			XFreeExtensionList(list);
+		}
+		newlist[n]=&liststr[listndx];
+		strncpy(newlist[n], "GLX", 3);  newlist[n][3]='\0';
+		list=newlist;  n++;
+	}
+
+		stoptrace();  prargi(n);  closetrace();
+
+	CATCH();
+
+	if(next) *next=n;
+ 	return list;
+}
+
 char *XServerVendor(Display *dpy)
 {
 	if(fconfig.vendor) return fconfig.vendor;
@@ -762,6 +822,13 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 		if(!(ctx=_glXCreateNewContext(_localdpy, c,
 			render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
 			return NULL;
+		if(!glXIsDirect(_localdpy, ctx))
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]     %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+			rrout.println("[VGL]     If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+			rrout.println("[VGL]     permissions may be set incorrectly.");
+		}
 	}
 	ctxh.add(ctx, c);
 

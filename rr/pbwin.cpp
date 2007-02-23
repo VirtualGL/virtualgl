@@ -515,7 +515,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		{
 			first=false;
 			if(fconfig.verbose)
-				rrout.println("Using mediaLib gamma correction (correction factor=%f)\n",
+				rrout.println("[VGL] Using mediaLib gamma correction (correction factor=%f)\n",
 					(double)fconfig.gamma);
 		}
 		mlib_image *image=NULL;
@@ -533,7 +533,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		{
 			first=false;
 			if(fconfig.verbose)
-				rrout.println("Using software gamma correction (correction factor=%f)\n",
+				rrout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
 					(double)fconfig.gamma);
 		}
 		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*h]);

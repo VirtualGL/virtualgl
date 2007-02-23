@@ -248,15 +248,19 @@ funcdef2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen, return);
 
 // GLX_ARB_get_proc_address
 
-#ifdef GLX_ARB_get_proc_address
 typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
 symdef(glXGetProcAddressARB);
 static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	checksym(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
 }
-#endif
 
+typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
+symdef(glXGetProcAddress);
+static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
+{
+	checksym(glXGetProcAddress);  return __glXGetProcAddress(procName);
+}
 
 // Exists in SUNWglrt 120812-15 and later only
 
@@ -355,6 +359,8 @@ funcdef1(int, XFree, void *, data, return);
 funcdef9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
 	root, int *, x, int *, y, unsigned int *, width, unsigned int *, height,
 	unsigned int *, border_width, unsigned int *, depth, return);
+
+funcdef2(char **, XListExtensions, Display *, dpy, int *, next, return);
 
 funcdef3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe, return);
 

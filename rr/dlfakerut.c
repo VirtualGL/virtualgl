@@ -91,7 +91,7 @@ _glClearColorType _glClearColor=NULL;
 
 void *gldllhnd=NULL;
 
-#define lsym(s) _##s=(_##s##Type)dlsym(gldllhnd, #s);  \
+#define lsym(s) dlerror(); _##s=(_##s##Type)dlsym(gldllhnd, #s);  \
 	err=dlerror();  if(err) _throw(err)  \
 	else if(!_##s) _throw("Could not load symbol "#s)
 

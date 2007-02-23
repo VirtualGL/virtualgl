@@ -109,9 +109,8 @@ void __vgl_loadsymbols(void)
 	lsymopt(glXQueryFrameCountNV)
 	lsymopt(glXResetFrameCountNV)
 
-	#ifdef GLX_ARB_get_proc_address
 	lsymopt(glXGetProcAddressARB)
-	#endif
+	lsymopt(glXGetProcAddress)
 
 	#ifdef USEGLP
 	lsymopt(glPSwapBuffers)
@@ -171,6 +170,7 @@ void __vgl_loadsymbols(void)
 	lsym(XDestroyWindow);
 	lsym(XFree);
 	lsym(XGetGeometry);
+	lsym(XListExtensions);
 	lsym(XMaskEvent);
 	lsym(XMoveResizeWindow);
 	lsym(XNextEvent);

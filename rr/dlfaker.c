@@ -37,13 +37,21 @@ static void __loadsymbol(void)
 
 void *dlopen(const char *filename, int flag)
 {
-	char *env=NULL;  const char *envname="FAKERLIB32";
+	char *env=NULL;  const char *envname="FAKERLIB32";  int verbose=0;
+	char *env2=NULL;
 	if(sizeof(long)==8) envname="FAKERLIB";
+	if((env2=getenv("VGL_VERBOSE"))!=NULL && strlen(env2)>0
+		&& !strncmp(env2, "1", 1)) verbose=1;
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="librrfaker.so";
 	__loadsymbol();
 	if(!__dlopen) return NULL;
 	if(filename && strstr(filename, "libGL"))
+	{
+		if(verbose)
+			fprintf(stderr, "[VGL] Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
+				filename, env);
 		return __dlopen(env, flag);
+	}
 	else return __dlopen(filename, flag);
 }
