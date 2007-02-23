@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-02-17T19:16:21-06:00">
+<meta name="date" content="2007-02-23T15:43:12-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3530,6 +3530,12 @@ a 64-bit application.)</p>
     <td class="standard">Linux, Solaris</td>
     <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>, e.g.: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch, e.g.: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>, e.g.: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/SUNWvgl/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
     <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Java2D applications that use OpenGL</td>
+    <td class="standard">Solaris/Sparc</td>
+    <td class="standard">When VirtualGL is used in conjunction with Java v5.0 (also known as Java 1.5.0) to remotely display Java2D applications using the OpenGL pipeline (see above), certain Java2D applications will cause the OpenGL subsystem to crash with the following error: <br /><br /> <code>thread&nbsp;tries&nbsp;to&nbsp;access&nbsp;GL&nbsp;context&nbsp;current&nbsp;to&nbsp;another&nbsp;thread</code> <br /><br /> If you encounter this error, try setting the <code>SUN_OGL_IS_MT</code> environment variable to <code>1</code> and re-running the application.</td>
+    <td class="standard">Java 5.0 should call <code>glXInitThreadsSUN()</code> since it is using multiple OpenGL threads, but it doesn&rsquo;t.  Purely by chance, this doesn&rsquo;t cause any problems when the application is displayed locally.  But VirtualGL changes things up enough that the luck runs out.  This issue does not exist in Java 6.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Pro/ENGINEER Wildfire v2.0</td>
