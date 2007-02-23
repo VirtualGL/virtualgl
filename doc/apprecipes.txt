@@ -95,6 +95,22 @@
 		{nl}{nl} \
 	| See {ref prefix="Section ": dlopen} for more details \
 	|
+| Java2D applications that use OpenGL | Solaris/Sparc \
+	| When VirtualGL is used in conjunction with Java v5.0 (also known as Java \
+		1.5.0) to remotely display Java2D applications using the OpenGL pipeline \
+		(see above), certain Java2D applications will cause the OpenGL subsystem \
+		to crash with the following error: \
+		{nl}{nl} \
+		''thread tries to access GL context current to another thread'' \
+		{nl}{nl} \
+		If you encounter this error, try setting the ''SUN_OGL_IS_MT'' environment \
+		variable to ''1'' and re-running the application. \
+	| Java 5.0 should call ''glXInitThreadsSUN()'' since it is using multiple \
+		OpenGL threads, but it doesn't.  Purely by chance, this doesn't cause any \
+		problems when the application is displayed locally.  But VirtualGL \
+		changes things up enough that the luck runs out.  This issue does not \
+		exist in Java 6. \
+	|
 | Pro/ENGINEER Wildfire v2.0 | Solaris/Sparc \
 	| Add \
 		{nl}{nl} \
