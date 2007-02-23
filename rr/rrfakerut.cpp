@@ -440,7 +440,8 @@ int rbtest(bool stereo, bool ci)
 			clr.clear(GL_FRONT);  if(stereo) sclr.clear(GL_FRONT_RIGHT);
 			glReadBuffer(GL_FRONT);
 			// Intentionally leave a pending GL error (VirtualGL should clear the error state prior to readback)
-			glReadPixels(0, 0, 0, 0, 0, 0, 0);
+			char pixel[4];
+			glReadPixels(0, 0, 1, 1, 0, GL_BYTE, pixel);
 			glXSwapBuffers(dpy, win1);
 			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
@@ -1630,12 +1631,12 @@ int pbtest(void)
 		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
 
-		if((configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib, &n))
+		if((configs=glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattrib, &n))
 			==NULL || n==0) _throw("Could not find a suitable FB config");
 		c=configs[0];
 		int fbcid=cfgid(dpy, c);
 		XFree(configs);  configs=NULL;
-		if((v=glXGetVisualFromFBConfig(dpy, c))==NULL)
+		if((v=glXGetVisualFromFBConfigSGIX(dpy, c))==NULL)
 			_throw("Could not find matching visual for FB config");
 
 		Window root=RootWindow(dpy, DefaultScreen(dpy));
@@ -1672,7 +1673,7 @@ int pbtest(void)
 		if(tempw!=(unsigned int)dpyw/2 || temph!=(unsigned int)dpyh/2)
 			_throw("glXQueryGLXPbufferSGIX() failed");
 
-		if(!(ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True)))
+		if(!(ctx=glXCreateContextWithConfigSGIX(dpy, c, GLX_RGBA_TYPE, NULL, True)))
 			_throw("Could not create context");
 
 		if(!glXMakeContextCurrent(dpy, glxwin, glxwin, ctx))
@@ -1992,19 +1993,25 @@ int querytest(void)
 }
 
 
-#ifdef GLX_ARB_get_proc_address
-
+#ifdef SUNOGL
+#define testprocsym(f) \
+	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
+		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
+	else if(sym!=(void *)f) \
+		_throw("glXGetProcAddress(\""#f"\")!="#f);
+#else
 #define testprocsym(f) \
 	if((sym=(void *)glXGetProcAddressARB((const GLubyte *)#f))==NULL) \
 		_throw("glXGetProcAddressARB(\""#f"\") returned NULL"); \
 	else if(sym!=(void *)f) \
 		_throw("glXGetProcAddressARB(\""#f"\")!="#f);
+#endif
 
 int procaddrtest(void)
 {
 	int retval=1;  void *sym=NULL;
 
-	printf("glXGetProcAddressARB test:\n\n");
+	printf("glXGetProcAddress test:\n\n");
 
 	try
 	{
@@ -2023,12 +2030,11 @@ int procaddrtest(void)
 	fflush(stdout);
 	return retval;
 }
-#endif
 
 
 int main(int argc, char **argv)
 {
-	int ret=0;  int nthr=NTHR;
+	int ret=0;  int nthr=NTHR;  int doci=1;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
@@ -2054,6 +2060,7 @@ int main(int argc, char **argv)
 		{
 			int temp=atoi(argv[++i]);  if(temp>=0 && temp<=NTHR) nthr=temp;
 		}
+		if(!strcasecmp(argv[i], "-noci")) doci=0;
 	}
 
 	// Intentionally leave a pending dlerror()
@@ -2066,18 +2073,19 @@ int main(int argc, char **argv)
 	#endif
 	if(!querytest()) ret=-1;
 	printf("\n");
-	#ifdef GLX_ARB_get_proc_address
 	if(!procaddrtest()) ret=-1;
 	printf("\n");
-	#endif
 	if(!rbtest(false, false)) ret=-1;
 	printf("\n");
 	rbtest(true, false);
 	printf("\n");
-	rbtest(false, true);
-	printf("\n");
-	citest();
-	printf("\n");
+	if(doci)
+	{
+		rbtest(false, true);
+		printf("\n");
+		citest();
+		printf("\n");
+	}
 	if(!vistest()) ret=-1;
 	printf("\n");
 	if(!mttest(nthr)) ret=-1;

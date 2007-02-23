@@ -44,9 +44,9 @@ int main(int argc, char **argv)
 	rrtimer timer;
 
 	#ifdef USESSL
-	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n\n-ssl = use secure tunnel\n", argv[0], argv[0]);  exit(1);}
+	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n or    %s -findport\n\n-ssl = use secure tunnel\n-findport = display a free TCP port number and exit\n", argv[0], argv[0], argv[0]);  exit(1);}
 	#else
-	#define usage() {printf("USAGE: %s -client <server name or IP>\n or    %s -server\n", argv[0], argv[0]);  exit(1);}
+	#define usage() {printf("USAGE: %s -client <server name or IP>\n or    %s -server\n or    %s -findport\n\n-findport = display a free TCP port number and exit\n", argv[0], argv[0], argv[0]);  exit(1);}
 	#endif
 
 	if(argc<2) usage();
@@ -55,7 +55,11 @@ int main(int argc, char **argv)
 		if(argc<3) usage();
 		server=0;  servername=argv[2];
 		#ifdef USESSL
-		if(argc>3 && !stricmp(argv[3], "-ssl")) {puts("Using SSL ...");  dossl=true;}
+		if(argc>3 && !stricmp(argv[3], "-ssl"))
+		{
+			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+			dossl=true;
+		}
 		#endif
 	}
 	else if(!stricmp(argv[1], "-server"))
@@ -65,9 +69,16 @@ int main(int argc, char **argv)
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
 			dossl=true;
-			puts("Using SSL ...");
+			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
 		}
 		#endif
+	}
+	else if(!stricmp(argv[1], "-findport"))
+	{
+		rrsocket sd(false);
+		printf("%d\n", sd.listen(0, true));
+		sd.close();
+		exit(0);
 	}
 	else usage();
 

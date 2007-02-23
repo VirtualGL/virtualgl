@@ -25,6 +25,7 @@ class rrdisplayserver : public Runnable
 	public:
 
 	rrdisplayserver(unsigned short, bool, int _drawmethod);
+	unsigned short port(void) {return _port;}
 	virtual ~rrdisplayserver(void);
 
 	private:
@@ -36,6 +37,7 @@ class rrdisplayserver : public Runnable
 	Thread *_t;
 	bool _deadyet;
 	bool _dossl;
+	unsigned short _port;
 };
 
 class rrserver : public Runnable

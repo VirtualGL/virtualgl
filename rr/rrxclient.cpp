@@ -226,14 +226,16 @@ void start(int argc, char **argv)
 	{
 		if(!(rrssldpy=new rrdisplayserver(sslport, true, drawmethod)))
 			_throw("Could not initialize listener");
-		rrout.println("Listening for SSL connections on port %d", sslport);
+		rrout.println("Listening for SSL connections on port %d",
+			rrssldpy->port());
 	}
 	if(nonssl)
 	#endif
 	{
 		if(!(rrdpy=new rrdisplayserver(port, false, drawmethod)))
 			_throw("Could not initialize listener");
-		rrout.println("Listening for unencrypted connections on port %d", port);
+		rrout.println("Listening for unencrypted connections on port %d",
+			rrdpy->port());
 	}
 	rrout.flush();
 	#ifdef _WIN32
