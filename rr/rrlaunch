@@ -53,8 +53,8 @@ PROMAGIC_USEGLX=1
 export PROMAGIC_USEGLX
 
 if [ "$OPENGL_DEVICE" != "" ]; then
-	echo [VGL] WARNING: The OPENGL_DEVICE environment variable is incompatible
-	echo [VGL] with	VirtualGL.  Temporarily unsetting this environment variable.
+	echo "[VGL]" WARNING: The OPENGL_DEVICE environment variable is incompatible
+	echo "[VGL]" with VirtualGL.  Temporarily unsetting this environment variable.
 fi
 unset OPENGL_DEVICE
 export OPENGL_DEVICE
@@ -120,6 +120,28 @@ if [ -r /etc/opt/VirtualGL/vgl_xauth_key ]; then
 		XAUTH=/usr/openwin/bin/xauth
 	fi
 	$XAUTH merge /etc/opt/VirtualGL/vgl_xauth_key
+fi
+
+SSH_IP=`echo $SSH_CLIENT | cut -d' ' -f1 | cut -d: -f4`
+if [ -z "$DISPLAY" ]; then
+  if [ ! -z "$SSH_IP" ]; then
+    DISPLAY=$SSH_IP:0.0
+    export DISPLAY
+    echo "[VGL] Setting DISPLAY=$DISPLAY based on the IP address of your"
+    echo "[VGL]    SSh client.  If this was not your intent, then set DISPLAY"
+    echo "[VGL]    environment variable to something else and re-run vglrun."
+  fi
+else
+  DISPLAYHOST=`echo $DISPLAY | cut -d: -f1`
+  if [ "$DISPLAYHOST" = "localhost" -o "$DISPLAYHOST" = "`hostname`" ]; then
+    if [ ! -z "$SSH_IP" -a -z "$VGL_CLIENT" -a -z "$RRCLIENT" ]; then
+      VGL_CLIENT=$SSH_IP:0.0
+      export VGL_CLIENT
+      echo "[VGL] Setting VGL_CLIENT=$VGL_CLIENT based on the IP address of your"
+      echo "[VGL]    SSh client.  If this was not your intent, then set VGL_CLIENT"
+      echo "[VGL]    environment variable to something else and re-run vglrun."
+    fi
+  fi
 fi
 
 case `uname -s` in
