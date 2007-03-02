@@ -1,7 +1,7 @@
 * Using VirtualGL in Raw Mode with TurboVNC
-{anchor: Raw_Mode_Usage}
+{anchor: TurboVNC_Usage}
 
-Referring to {ref prefix="Section ": Overview}, Raw Mode is a mode in
+Referring to {ref prefix="Chapter ": Overview}, Raw Mode is a mode in
 which VirtualGL bypasses its internal image compressor and instead sends the
 rendered 3D images to an X server as uncompressed bitmaps.  Raw Mode is
 designed to be used with an "X Proxy", which is a virtual X server that
@@ -174,7 +174,7 @@ Direct Mode (and several reasons why one might not.)
 		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
 ** Using Raw Mode When TurboVNC and VirtualGL Are Running on Different Machines

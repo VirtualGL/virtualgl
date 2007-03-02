@@ -59,7 +59,7 @@ specified in ''/etc/dt/config/GraphicsDevices'' as the default rendering
 device.  Users can override this default by setting ''VGL_DISPLAY'' in one of
 their startup scripts (such as ''~/.profile'' or ''~/.login'') or by passing an
 argument of ''-d <device>'' to ''vglrun'' when invoking VirtualGL.  See
-{ref prefix="Section ": Advanced_Configuration} for more details.
+{ref prefix="Chapter ": Advanced_Configuration} for more details.
 
 ** Granting Access to the Server's X Display
 

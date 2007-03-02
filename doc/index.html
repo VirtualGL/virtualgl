@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-02-23T15:43:12-06:00">
+<meta name="date" content="2007-03-02T16:58:02-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -757,7 +757,7 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
   </thead>
   <tr class="standard">
     <td class="high standard">Linux</td>
-    <td class="standard" colspan="2" rowspan="2">3D graphics card that supports stereo (for instance, the nVidia Quadro) and is configured to export stereo visuals</td>
+    <td class="standard" colspan="2" rowspan="2">3D graphics card that supports stereo (example: nVidia Quadro) and is configured to export stereo visuals</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Solaris/x86</td>
@@ -783,8 +783,8 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
     120928-10 (or later)
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li>
-    3D graphics card that supports stereo (for instance, the XVR-1200 or
-    XVR-2500) and is configured to export stereo visuals
+    3D graphics card that supports stereo (examples: XVR-1200, XVR-2500)
+    and is configured to export stereo visuals
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
@@ -795,9 +795,8 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
     <td class="high standard">Windows</td>
     <td class="standard">N/A</td>
     <td class="standard"><ul class="Itemize"><li>
-    3D graphics card that supports stereo (for instance, the nVidia Quadro
-    or 3D Labs Wildcat Realizm) and is configured to export stereo pixel
-    formats
+    3D graphics card that supports stereo (examples: nVidia Quadro, 3D
+    Labs Wildcat Realizm) and is configured to export stereo pixel formats
 </li>
 <li>
     <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0032"></a>
@@ -821,7 +820,7 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
   </thead>
   <tr class="standard">
     <td class="high standard">Linux</td>
-    <td class="standard" rowspan="2">3D graphics card that supports transparent overlays (for instance, the nVidia Quadro) and is configured to export overlay visuals</td>
+    <td class="standard" rowspan="2">3D graphics card that supports transparent overlays (example: nVidia Quadro) and is configured to export overlay visuals</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Solaris/x86</td>
@@ -829,8 +828,8 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
   <tr class="standard">
     <td class="high standard">Solaris/Sparc</td>
     <td class="standard"><ul class="Itemize"><li>
-    3D graphics card that supports transparent overlays (for instance,
-    the XVR-1200 or XVR-2500) and is configured to export overlay visuals
+    3D graphics card that supports transparent overlays (examples: XVR-1200,
+    XVR-2500) and is configured to export overlay visuals
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
@@ -840,9 +839,9 @@ us</a></span><a name="idx0010"></a> if you encounter any difficulties.</p>
   <tr class="standard">
     <td class="high standard">Windows</td>
     <td class="standard"><ul class="Itemize"><li>
-    3D graphics card that supports transparent overlays (for instance,
-    the nVidia Quadro or 3D Labs Wildcat Realizm) and is configured to
-    export overlay pixel formats
+    3D graphics card that supports transparent overlays (examples: nVidia
+    Quadro, 3D Labs Wildcat Realizm) and is configured to export overlay
+    pixel formats
 </li>
 <li>
     <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0034"></a>
@@ -1236,7 +1235,7 @@ init&nbsp;3
     </li>
     <li class="Ordered">
         Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group. <br /><br /> <em>Example:</em>
+        readable by the <code>vglusers</code> group.  For example: <br />
 <pre class="verbatim">
 mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
 chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
@@ -1336,14 +1335,14 @@ DisallowTCP=false
         </div>
         
         <br /> For xdm-style configuration files, add <code>-tst</code> to
-        the line corresponding to the display number you are configuring.
-        <br /><br /> <em>Example:</em>
+        the line corresponding to the display number you are configuring. 
+        For example: <br />
 <pre class="verbatim">
 :0&nbsp;local&nbsp;/usr/X11R6/bin/X&nbsp;:0&nbsp;vt07&nbsp;-tst
 </pre>
 
         For gdm-style configuration files, add <code>-tst</code> to all lines
-        that appear to be X server command lines. <br /><br /> <em>Example:</em>
+        that appear to be X server command lines.  For example: <br />
 <pre class="verbatim">
 StandardXServer=/usr/X11R6/bin/X&nbsp;-tst
 </pre>
@@ -1440,9 +1439,9 @@ mkdir&nbsp;-p&nbsp;/etc/dt/config
     </li>
     <li class="Ordered">
         Create a file called <code>GraphicsDevices</code> under <code>/etc/dt/config</code>
-        and add any framebuffer device paths in your system (for instance,
-        <code>/dev/fbs/kfb0</code>, <code>/dev/fbs/jfb0</code>, etc.) to this
-        file, one device per line. <br /><br /> <em>Example:</em>
+        and add any framebuffer device paths in your system (<code>/dev/fbs/kfb0</code>,
+        <code>/dev/fbs/jfb0</code>, etc.) to this file, one device per line.
+        For example: <br />
 <pre class="verbatim">
 touch&nbsp;/etc/dt/config/GraphicsDevices
 for&nbsp;i&nbsp;in&nbsp;/dev/fbs/*[0-9];&nbsp;do&nbsp;echo&nbsp;$i&nbsp;&gt;&gt;/etc/dt/config/GraphicsDevices;&nbsp;done
@@ -1454,7 +1453,7 @@ for&nbsp;i&nbsp;in&nbsp;/dev/fbs/*[0-9];&nbsp;do&nbsp;echo&nbsp;$i&nbsp;&gt;&gt;
     </li>
     <li class="Ordered">
         Grant read access to this file for the <code>vglusers</code> group.
-        <br /><br /> <em>Example:</em>
+        For example: <br />
 <pre class="verbatim">
 chgrp&nbsp;vglusers&nbsp;/etc/dt/config/GraphicsDevices
 chmod&nbsp;640&nbsp;/etc/dt/config/GraphicsDevices
@@ -1477,7 +1476,7 @@ as the default rendering device.  Users can override this default by
 setting <code>VGL_DISPLAY</code> in one of their startup scripts (such
 as <code>~/.profile</code> or <code>~/.login</code>) or by passing
 an argument of <code>-d&nbsp;&lt;device&gt;</code> to <code>vglrun</code>
-when invoking VirtualGL.  See Section
+when invoking VirtualGL.  See Chapter
 <a href="#Advanced_Configuration" class="ref">19</a> for more details.</p>
 
 
@@ -1538,7 +1537,7 @@ below with <code>xhost&nbsp;+localhost</code>.</p>
     </li>
     <li class="Ordered">
         Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group. <br /><br /> <em>Example:</em>
+        readable by the <code>vglusers</code> group.  For example: <br />
 <pre class="verbatim">
 mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
 chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
@@ -1620,7 +1619,7 @@ cp&nbsp;/usr/dt/config/Xservers&nbsp;/etc/dt/config/Xservers
             <li class="Ordered" value="2">
                 Edit <code>/etc/dt/config/Xservers</code> and add an argument of <code>-tst</code>
                 to the line corresponding to the display number you are configuring.
-                <br /><br /> <em>Example:</em>
+                For example: <br />
 <pre class="verbatim">
 :0&nbsp;&nbsp;Local&nbsp;local_uid@console&nbsp;root&nbsp;/usr/openwin/bin/Xsun&nbsp;:0&nbsp;-nobanner&nbsp;-tst
 </pre>
@@ -1669,7 +1668,7 @@ cp&nbsp;/usr/dt/config/Xservers&nbsp;/etc/dt/config/Xservers
     </li>
     <li class="Ordered">
         Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group. <br /><br /> <em>Example:</em>
+        readable by the <code>vglusers</code> group.  For example: <br />
 <pre class="verbatim">
 mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
 chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
@@ -1700,8 +1699,8 @@ DisallowTCP=false
         reading images from the X display, but it will prevent them from inserting
         key and mouse events and thus hijacking a local X session.<br />
         <br /> Edit <code>/etc/X11/gdm/gdm.conf</code> and add <code>-tst</code>
-        to all lines that appear to be X server command lines. <br /><br />
-        <em>Example:</em>
+        to all lines that appear to be X server command lines.  For example:
+        <br />
 <pre class="verbatim">
 StandardXServer=/usr/X11R6/bin/Xorg&nbsp;-tst
 </pre>
@@ -1752,7 +1751,7 @@ to enable VirtualGL users to access the framebuffer device(s):</p>
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Edit <code>/etc/logindevperm</code> and comment out the &ldquo;frame
-        buffers&rdquo; line. <br /><br /> <em>Example:</em>
+        buffers&rdquo; line.  For example: <br />
 <pre class="verbatim">
 #&nbsp;/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0600&nbsp;&nbsp;&nbsp;&nbsp;/dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;frame&nbsp;buffers
 </pre>
@@ -1760,8 +1759,8 @@ to enable VirtualGL users to access the framebuffer device(s):</p>
     </li>
     <li class="Ordered" value="2">
         Change the permissions and group for <code>/dev/fbs/*</code> to allow
-        write access to anyone who will need to use VirtualGL. <br /><br />
-        <em>Example:</em>
+        write access to anyone who will need to use VirtualGL.  For example:
+        <br />
 <pre class="verbatim">
 chmod&nbsp;660&nbsp;/dev/fbs/*
 chown&nbsp;root&nbsp;/dev/fbs/*
@@ -1794,7 +1793,7 @@ and SunFreeware keeps it in <code>/usr/local/etc</code>.</p>
         Install Hummingbird Exceed if it isn&rsquo;t already installed.
     </li>
     <li class="Ordered">
-        Add the Exceed path (for instance, <code>C:\Program&nbsp;Files\Hummingbird\Connectivity\9.00\Exceed</code>)
+        Add the Exceed path (example: <code>C:\Program&nbsp;Files\Hummingbird\Connectivity\9.00\Exceed</code>)
         to the system <code>PATH</code> environment if it isn&rsquo;t already
         there.
     </li>
@@ -1952,6 +1951,8 @@ vglclient&nbsp;-?
 
 <h1 id="hd009"><a name="file009"></a>9&nbsp;Using VirtualGL in Direct Mode</h1>
 
+<p><a name="Direct_Mode_Usage"></a></p>
+
 
 <h2 id="hd009001">9.1&nbsp;Direct Mode with X11 Forwarding</h2>
 
@@ -2046,9 +2047,10 @@ ssh&nbsp;-X&nbsp;{user}@{server}
         </p></div>
     </li>
     <li class="Ordered">
-        In the SSh session, set the <code>VGL_CLIENT</code> environment variable
-        on the VirtualGL server to point back to the client&rsquo;s X display.
-        <br /><br /> <em>Example:</em>
+        If the X server on your client machine is using a display number of
+        0 (usually the case), then you can skip this step.  Otherwise, set
+        the <code>VGL_CLIENT</code> environment variable on the VirtualGL server
+        to point to the client&rsquo;s X display: <br />
 <pre class="verbatim">
 export&nbsp;VGL_CLIENT={client}:{n}.0
 </pre>
@@ -2081,7 +2083,7 @@ vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{
 
             </dd>
         </dl>
-        Consult Section <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
@@ -2228,9 +2230,10 @@ ssh&nbsp;{user}@{server}
         </p></div>
     </li>
     <li class="Ordered">
-        In the SSh session, set the <code>DISPLAY</code> environment variable
-        on the VirtualGL server to point back to the client&rsquo;s X display.
-        <br /><br /> <em>Example:</em>
+        If the X server on your client machine is using a display number of
+        0 (usually the case), then you can skip this step.  Otherwise, set
+        the <code>DISPLAY</code> environment variable on the VirtualGL server
+        to point to the client&rsquo;s X display: <br />
 <pre class="verbatim">
 export&nbsp;DISPLAY={client}:{n}.0
 </pre>
@@ -2263,7 +2266,7 @@ vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{
 
             </dd>
         </dl>
-        Consult Section <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
@@ -2295,7 +2298,7 @@ is reduced by as much as 20% by enabling SSL encryption.</p>
 
 <p>Pass an argument of <code>+s</code> to <code>vglrun</code> when launching
 VirtualGL, or set the environment variable <code>VGL_SSL</code> to
-<code>1</code> on the VirtualGL server. (see Section
+<code>1</code> on the VirtualGL server. (see Chapter
 <a href="#Advanced_Configuration" class="ref">19</a> for more details.)</p>
 
 
@@ -2381,9 +2384,9 @@ ssh&nbsp;-X&nbsp;-R&nbsp;{port}:localhost:4242&nbsp;{user}@{server}
         environment variable to match the port number you obtained above.
     </li>
     <li class="Ordered">
-        When setting the <code>VGL_CLIENT</code> environment variable, set
-        the client hostname to <code>localhost</code> instead of the hostname/IP
-        address of the client machine.
+        Set the <code>VGL_CLIENT</code> environment variable on the VirtualGL
+        server to <code>localhost:{n}.0</code>, where <code>{n}</code> is the
+        display number of the X server running on the client machine.
         <div class="important"><p class="important">
         Explanation: When you established the SSh connection using the <code>-R</code> argument, it created a listener on the VirtualGL server.  That listener will accept a connection from VirtualGL and forward the connection over the SSh tunnel to port 4242 on the client machine.  Thus, you need to set <code>VGL_PORT</code> and <code>VGL_CLIENT</code> on the VirtualGL server to tell VirtualGL to make a connection to the SSh listener rather than the &ldquo;real&rdquo; VirtualGL client program.
         </p></div>
@@ -2394,9 +2397,9 @@ ssh&nbsp;-X&nbsp;-R&nbsp;{port}:localhost:4242&nbsp;{user}@{server}
 
 <h1 id="hd0010"><a name="file010"></a>10&nbsp;Using VirtualGL in Raw Mode with TurboVNC</h1>
 
-<p><a name="Raw_Mode_Usage"></a></p>
+<p><a name="TurboVNC_Usage"></a></p>
 
-<p>Referring to Section <a href="#Overview" class="ref">2</a>, Raw Mode
+<p>Referring to Chapter <a href="#Overview" class="ref">2</a>, Raw Mode
 is a mode in which VirtualGL bypasses its internal image compressor
 and instead sends the rendered 3D images to an X server as uncompressed
 bitmaps.  Raw Mode is designed to be used with an &ldquo;X Proxy&rdquo;,
@@ -2645,7 +2648,7 @@ vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{
 
             </dd>
         </dl>
-        Consult Section <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
@@ -2920,7 +2923,7 @@ many of its features.</p>
 
 <h3 id="hd0011000001">Other X Proxies</h3>
 
-<p>The <a href="#Raw_Mode_Usage">previous section</a><a name="idx0072"></a>
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0072"></a>
 described how to use VirtualGL in Raw Mode with TurboVNC, but much
 of this information is also applicable to other X proxies, such as
 RealVNC, NX, etc.  Generally, none of these other solutions will provide
@@ -2939,11 +2942,13 @@ of <code>-c&nbsp;0</code> to <code>vglrun</code>.</p>
 
 <h3 id="hd0011000002">Raw Mode Over a Network</h3>
 
+<p><a name="Raw_Mode_Over_Network"></a></p>
+
 <div class="figure">
 <img src="rawmodeovernetwork.png" alt="rawmodeovernetwork" class="figure" id="imgid_20" name="imgid_20"/>
 </div>
 
-<p>The <a href="#Raw_Mode_Usage">previous section</a><a name="idx0073"></a>
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0073"></a>
 described how to use Raw Mode over a server network to send uncompressed
 pixels from a VirtualGL server to a TurboVNC server.  But Raw Mode
 can also be used to send uncompressed pixels to a client machine. 
@@ -3120,8 +3125,8 @@ to intercept the GLX and OpenGL calls.</p>
 
 <p>In some cases, the application doesn&rsquo;t provide an override mechanism
 such as the above.  In these cases, you should pass an argument of
-<code>-dl</code> to <code>vglrun</code> when starting the application,
-e.g.:</p>
+<code>-dl</code> to <code>vglrun</code> when starting the application.
+For example:</p>
 
 <pre class="verbatim">
 vglrun&nbsp;-dl&nbsp;foowars
@@ -3132,7 +3137,7 @@ to be loaded ahead of VirtualGL and <code>libGL.so</code>.  This new
 library intercepts any calls to <code>dlopen()</code> and forces the
 application to open VirtualGL instead of <code>libGL.so</code>.</p>
 
-<p>Section <a href="#Application_Recipes" class="ref">15</a> contains
+<p>Chapter <a href="#Application_Recipes" class="ref">15</a> contains
 specific recipes for getting a variety of games and other applications
 to work with VirtualGL.</p>
 
@@ -3271,8 +3276,8 @@ table:</p>
 
 
 <p>Running the CrServer in VirtualGL is simply a matter of setting this
-environment variable and then invoking <code>crserver</code> with <code>vglrun</code>,
-e.g.:</p>
+environment variable and then invoking <code>crserver</code> with <code>vglrun</code>.
+For example:</p>
 
 <pre class="verbatim">
 export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
@@ -3280,13 +3285,14 @@ vglrun&nbsp;crserver
 </pre>
 
 <p>In the case of CrAppFaker, it is also necessary to set <code>VGL_GLLIB</code>
-to the location of the &ldquo;real&rdquo; OpenGL library, e.g. <code>/usr/lib/libGL.so.1</code>.
-CrAppFaker creates its own fake version of <code>libGL.so</code> which
-is really just a copy of Chromium&rsquo;s <code>libcrfaker.so</code>.
-So VirtualGL, if left to its own devices, will unwittingly try to load
-<code>libcrfaker.so</code> instead of the &ldquo;real&rdquo; OpenGL
-library.  Chromium&rsquo;s <code>libcrfaker.so</code> will in turn
-try to load VirtualGL again, and an endless loop will occur.</p>
+to the location of the &ldquo;real&rdquo; OpenGL library (example:
+<code>/usr/lib/libGL.so.1</code>.) CrAppFaker creates its own fake
+version of <code>libGL.so</code> which is really just a copy of Chromium&rsquo;s
+<code>libcrfaker.so</code>.  So VirtualGL, if left to its own devices,
+will unwittingly try to load <code>libcrfaker.so</code> instead of
+the &ldquo;real&rdquo; OpenGL library.  Chromium&rsquo;s <code>libcrfaker.so</code>
+will in turn try to load VirtualGL again, and an endless loop will
+occur.</p>
 
 <p>So what we want to do is something like this:</p>
 
@@ -3328,7 +3334,7 @@ start a sort-first rendering job using Chromium and VirtualGL:</p>
     </li>
     <li class="Ordered">
         On Node 0, set <code>VGL_GLLIB</code> to the location of the &ldquo;real&rdquo;
-        libGL, e.g. <code>/usr/lib/libGL.so.1</code> or <code>/usr/lib64/libGL.so.1</code>
+        libGL (example: <code>/usr/lib/libGL.so.1</code> or <code>/usr/lib64/libGL.so.1</code>.)
     </li>
     <li class="Ordered">
         On Node 0, launch <code>crappfaker</code> (do not use <code>vglrun</code>
@@ -3487,49 +3493,49 @@ a 64-bit application.)</p>
     <td class="standard">Army Ops</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;armyops</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Descent 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;descent3&nbsp;-g&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;descent3</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Doom 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;doom3&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;doom3</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Enemy Territory (Return to Castle Wolfenstein)</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;et&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;et</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Heretic II</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;gl_driver&nbsp;/usr/lib/librrfaker.so&nbsp;+set&nbsp;vid_ref&nbsp;glx</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Heavy Gear II</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;hg2&nbsp;-o&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;hg2</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">I-deas Master Series 9, 10, &amp; 11</td>
     <td class="standard">Solaris/Sparc</td>
     <td class="standard">When running I-deas with VirtualGL on a Solaris/Sparc server, remotely displaying to a non-Sparc client machine or to an X proxy such as VNC, it may be necessary to set the <code>SDRC_SUN_IGNORE_GAMMA</code> environment variable to <code>1</code>.</td>
-    <td class="standard">I-deas normally aborts if it detects that the X visual assigned to it is not gamma-corrected.  But gamma-corrected X visuals only exist on Solaris/Sparc X servers, so if you are displaying the application using another type of X server or X proxy which doesn&rsquo;t provide gamma-corrected X visuals, then it is necessary to override the gamma detection mechanism in I-deas.</td>
+    <td class="standard">I-deas normally aborts if it detects that the X visual assigned to it is not gamma-corrected.  But gamma-corrected X visuals only exist on Solaris/Sparc X servers, so if you are displaying the application to another type of X server or X proxy which doesn&rsquo;t provide gamma-corrected X visuals, then it is necessary to override the gamma detection mechanism in I-deas.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Java2D applications that use OpenGL</td>
     <td class="standard">Linux, Solaris</td>
-    <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>, e.g.: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch, e.g.: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>, e.g.: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/SUNWvgl/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>.  For example: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch.  For example: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>.  For example: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/SUNWvgl/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Java2D applications that use OpenGL</td>
@@ -3547,25 +3553,25 @@ a 64-bit application.)</p>
     <td class="standard">QGL (OpenGL Qt Widget)</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;{application}</code></td>
-    <td class="standard">Qt can be built such that it either resolves symbols from libGL automatically or uses <code>dlopen()</code> to manually resolve those symbols from libGL.  As of Qt v3.3, the latter behavior is the default, so OpenGL programs built with later versions of libQt will not work with VirtualGL unless the <code>-dl</code> switch is used with <code>vglrun</code>. <br /><br /> See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">Qt can be built such that it either resolves symbols from libGL automatically or uses <code>dlopen()</code> to manually resolve those symbols from libGL.  As of Qt v3.3, the latter behavior is the default, so OpenGL programs built with later versions of libQt will not work with VirtualGL unless the <code>-dl</code> switch is used with <code>vglrun</code>. <br /><br /> See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Quake 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;quake3&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;quake3</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Soldier of Fortune</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;sof&nbsp;+set&nbsp;gl_driver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;sof</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Unreal Tournament 2004</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;ut2004</code></td>
-    <td class="standard">See Section <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">VisConcept</td>
@@ -4099,7 +4105,7 @@ the key sequence used to pop up the dialog box.  If the default of
 <code>CTRL-SHIFT-F9</code> is not suitable, then set <code>VGL_GUI</code>
 to any combination of <code>ctrl</code>, <code>shift</code>, <code>alt</code>,
 and one of <code>{f1,&nbsp;f2,...,&nbsp;f12}</code> (these are not
-case sensitive.)  e.g.</p>
+case sensitive.)  For example:</p>
 
 <pre class="verbatim">
 export&nbsp;VGL_GUI=CTRL-F9
@@ -4131,15 +4137,16 @@ method:</p>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
-        Setting a configuration environment variable globally (e.g. in <code>/etc/profile</code>)
+        Setting a configuration environment variable globally (for instance,
+        in <code>/etc/profile</code>)
     </li>
     <li class="Ordered">
-        Setting a configuration environment variable on a per-user basis (e.g.
-        in <code>~/.bashrc</code>)
+        Setting a configuration environment variable on a per-user basis (for
+        instance, in <code>~/.bashrc</code>)
     </li>
     <li class="Ordered">
         Setting a configuration environment variable only for the current shell
-        session (e.g. <code>export&nbsp;VGL_XXX={whatever}</code>)
+        session (for instance, <code>export&nbsp;VGL_XXX={whatever}</code>)
     </li>
     <li class="Ordered">
         Passing a configuration option as an argument to <code>vglrun</code>.
@@ -4161,31 +4168,31 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_CLIENT</code></td>
     <td class="standard"><code>-cl&nbsp;&lt;client</code><br /><code>display&gt;</code></td>
-    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the application server to the client display.  Thus, the server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the application server&rsquo;s <code>DISPLAY</code> environment variable.  But in cases where X11 traffic is tunneled through SSh or LBX or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the application server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up, e.g. <br /><br /> <code>export&nbsp;VGL_CLIENT={my_client_machine}:0.0</code> <br /><br /> <em>** This option has no effect in Raw Mode. **</em></td>
-    <td class="standard">Read from the <code>DISPLAY</code> environment</td>
+    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the <code>DISPLAY</code> environment variable (which lists the hostname and X display where all X11 traffic will be sent.)  But in cases where X11 traffic is tunneled through SSh or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the VirtualGL server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up.  For example: <br /><br /> <code>export&nbsp;VGL_CLIENT=my_client:0.0</code> <br /><br /> If you are connecting to the VirtualGL server using SSh with X11 forwarding enabled, VirtualGL will try to guess an appropriate value for <code>VGL_CLIENT</code> based on the IP address of the SSh client, so you would only need to set <code>VGL_CLIENT</code> in this case if your configuration is unusual (such as if your client machine&rsquo;s X server is occupying a display number other than 0 or if you are trying to forward VirtualGL&rsquo;s image stream over SSh.  See Chapter <a href="#Direct_Mode_Usage" class="ref">9</a> for more details.) <br /><br /> <em>** This option has no effect in Raw Mode. **</em></td>
+    <td class="standard">If SSh X11 forwarding is being used, VirtualGL will automatically set <code>VGL_CLIENT</code> to <code>{ssh_client}:0.0</code>, where <code>{ssh_client}</code> is the IP address of the machine from which the SSh connection was initiated. Otherwise, <code>VGL_CLIENT</code> is unset, which tells VirtualGL to read the client hostname and X display from the <code>DISPLAY</code> environment variable instead.</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_COMPRESS=0</code><br /><code>VGL_COMPRESS=1</code></td>
     <td class="standard"><code>-c&nbsp;&lt;0,&nbsp;1&gt;</code></td>
-    <td class="standard"><em>0 = Raw Mode (send rendered images uncompressed via. X11),</em><br /> <em>1 = Direct Mode (compress rendered images as JPEG &amp; send on a separate socket)</em> <br /><br /> When this option is set to 0, VirtualGL will bypass its internal image compression pipeline and instead use <code>XPutImage()</code> to composite the rendered 3D images into the appropriate application window.  This mode (&ldquo;Raw Mode&rdquo;) is primarily useful in conjunction with VNC, NX, or other remote display software that performs X11 rendering on the server and uses its own mechanism for compressing and transporting images to the client.  Enabling Raw Mode on a remote X11 connection is not advisable, since it will result in uncompressed images being sent over the network. <br /><br /> If this option is not specified, then VirtualGL&rsquo;s default behavior is to use Direct Mode when the application is being displayed to a remote X server and to use Raw Mode otherwise.  VirtualGL assumes that if the <code>DISPLAY</code> environment variable begins with a colon or with &ldquo;<code>unix:</code>&rdquo; (e.g. &ldquo;<code>:0.0</code>&rdquo;, &ldquo;<code>unix:1000.0</code>&rdquo;, etc.), then the X11 connection is local and thus doesn&rsquo;t require image compression.  Otherwise, it assumes that the X11 connection is remote and that compression is required.  If the display string begins with &ldquo;<code>localhost</code>&rdquo; or with the server&rsquo;s hostname, VGL assumes that the display is being tunneled through SSh, and it enables Direct Mode in this case. <br /><br /> <em>NOTE:  Stereo does not work with Raw Mode.</em> <br /><br /> See Section <a href="#Raw_Mode_Usage" class="ref">10</a> for more details.</td>
-    <td class="standard">Compression enabled (&ldquo;Direct Mode&rdquo;) if the application is displaying to a remote X server, disabled (&ldquo;Raw Mode&rdquo;) otherwise</td>
+    <td class="standard"><em>0 = Raw Mode (send rendered images uncompressed via. X11),</em><br /> <em>1 = Direct Mode (compress rendered images as JPEG &amp; send on a separate socket)</em> <br /><br /> When this option is set to 0, VirtualGL will bypass its internal image compression pipeline and instead use <code>XPutImage()</code> to composite the rendered 3D images into the appropriate application window.  This mode (&ldquo;Raw Mode&rdquo;) is primarily useful in conjunction with VNC, NX, or other remote display software that performs X11 rendering on the server and uses its own mechanism for compressing and transporting images to the client.  Enabling Raw Mode on a remote X11 connection will result in uncompressed images being sent over the network, so it is unadvisable except on very fast networks (see Section <a href="#Raw_Mode_Over_Network" class="ref">11.0.2</a>.) <br /><br /> If this option is not specified, then VirtualGL&rsquo;s default behavior is to use Direct Mode when the application is being displayed to a remote X server and to use Raw Mode otherwise.  VirtualGL assumes that if the <code>DISPLAY</code> environment variable begins with a colon or with &ldquo;<code>unix:</code>&rdquo; (example: &ldquo;<code>:0.0</code>&rdquo;, &ldquo;<code>unix:1000.0</code>&rdquo;, etc.), then the X11 connection is local and thus doesn&rsquo;t require image compression.  Otherwise, it assumes that the X11 connection is remote and that compression is required.  If the display string begins with &ldquo;<code>localhost</code>&rdquo; or with the server&rsquo;s hostname, VGL assumes that the display is being tunneled through SSh, and its default behavior is to use Direct Mode in this case. <br /><br /> It is normally not necessary to set this configuration parameter unless you want to do something unusual (such as use Raw Mode over a remote X11 connection.) See Chapter <a href="#TurboVNC_Usage" class="ref">10</a> for more details. <br /><br /> <em>NOTE:  Stereo does not work with Raw Mode.</em> <br /><br /></td>
+    <td class="standard">Compression enabled (&ldquo;Direct Mode&rdquo;) if the application is displaying to a remote X server, disabled (&ldquo;Raw Mode&rdquo;) otherwise.</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_DISPLAY</code></td>
     <td class="standard"><code>-d&nbsp;&lt;display&nbsp;or</code><br /><code>GLP&nbsp;device&gt;</code></td>
-    <td class="standard"><em>The display or GLP device to use for 3D rendering</em> <br /><br /> If your server has multiple 3D graphics cards and you want the OpenGL rendering to be redirected to a display other than :0, set <code>VGL_DISPLAY=:1.0</code> or whatever.  This could be used, for instance, to support many application instances on a beefy multi-pipe graphics server. <br /><br /> <em>GLP mode (Solaris/Sparc only):</em> <br /><br /> Setting this option to <code>GLP</code> will enable GLP mode and select the first available GLP device for rendering.  You can also set this option to the pathname of a specific GLP device (e.g. <code>/dev/fbs/jfb0</code>.)  GLP is a special feature of Sun&rsquo;s OpenGL library which allows an application to render into Pbuffers on a graphics card even if there is no X server running on that graphics card.  See Section <a href="#GLP_Usage" class="ref">7.1</a> for more details on GLP.</td>
+    <td class="standard"><em>The display or GLP device to use for 3D rendering</em> <br /><br /> If your server has multiple 3D graphics cards and you want the OpenGL rendering to be redirected to a display other than :0, set <code>VGL_DISPLAY=:1.0</code> or whatever.  This could be used, for instance, to support many application instances on a beefy multi-pipe graphics server. <br /><br /> <em>GLP mode (Solaris/Sparc only):</em> <br /><br /> Setting this option to <code>glp</code> will enable GLP mode and use the first framebuffer device listed in <code>/etc/dt/config/GraphicsDevices</code> to perform 3D rendering.  You can also set this option to the pathname of a specific GLP device (example: <code>/dev/fbs/jfb0</code>.)  See Section <a href="#GLP_Usage" class="ref">7.1</a> for more details.</td>
     <td class="standard">:0</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_FPS</code></td>
     <td class="standard"><code>-fps&nbsp;&lt;floating</code><br /><code>point&nbsp;number</code><br /><code>greater&nbsp;than&nbsp;0&gt;</code></td>
-    <td class="standard"><em>Limit the client/server frame rate to the specified number of frames per second</em> <br /><br /> Setting <code>VGL_FPS</code> or passing <code>-fps</code> as an argument to <code>vglrun</code> will enable VirtualGL&rsquo;s frame rate governor.  When enabled, the frame rate governor will attempt to limit the overall throughput of the VirtualGL pipeline to the specified number of frames/second.  If frame spoiling is disabled, this effectively limits the server&rsquo;s rendering frame rate as well.  This option applies regardless of whether VirtualGL is being run in Direct Mode (with compression enabled) or in Raw Mode (with compression disabled.)</td>
+    <td class="standard"><em>Limit the client/server frame rate to the specified number of frames per second</em> <br /><br /> Setting <code>VGL_FPS</code> or passing <code>-fps</code> as an argument to <code>vglrun</code> will enable VirtualGL&rsquo;s frame rate governor.  When enabled, the frame rate governor will attempt to limit the overall throughput of the VirtualGL pipeline to the specified number of frames/second.  If frame spoiling is disabled, this effectively limits the server&rsquo;s 3D rendering frame rate as well.  This option works regardless of whether VirtualGL is being run in Direct Mode (with compression enabled) or in Raw Mode (with compression disabled.)</td>
     <td class="standard">Frame rate governor disabled</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_GAMMA=0</code><br /><code>VGL_GAMMA=1</code><br /><code>VGL_GAMMA=&lt;gamma</code><br /> <code>correction</code><br /><code>factor</code>&gt;</td>
     <td class="standard"><code>-g</code><br />or<br /><code>+g</code><br />or<br /><code>-gamma&nbsp;&lt;gamma</code><br /><code>correction</code> <br /><code>factor&gt;</code></td>
-    <td class="standard">&ldquo;Gamma&rdquo; refers to the relationship between the intensity of light which your computer&rsquo;s monitor is instructed to display and the intensity which it actually displays.  The curve is an exponential curve of the form <em>Y = X<sup>G</sup></em>, where X is between 0 and 1.  G is called the &ldquo;gamma&rdquo; of the monitor.  PC monitors and TV&rsquo;s usually have a gamma of around 2.2. <br /><br /> Some of the math involved in 3D rendering assumes a linear gamma (G = 1.0), so technically speaking, 3D applications will not display with mathematical correctness unless the pixels are &ldquo;gamma corrected&rdquo; to counterbalance the non-linear response curve of the monitor.  But some systems do not have any form of built-in gamma correction, and thus the applications developed for such systems have usually been designed to display properly without gamma correction.  Gamma correction involves passing pixels through a function of the form <em>X = W<sup>1/G</sup></em>, where G is the &ldquo;gamma correction factor&rdquo; and should be equal to the gamma of the monitor.  So the final output is <em>Y = X<sup>G</sup> = (W<sup>1/G</sup>)<sup>G</sup> = W</em>, which describes a linear relationship between the intensity of the pixels drawn by the application and the intensity of the pixels displayed by the monitor. <br /><br /> <em><code>VGL_GAMMA=1</code> or <code>vglrun&nbsp;+g</code> : Enable gamma correction with default settings</em> <br /><br /> This option tells VirtualGL to enable gamma correction using the best available method.  If VirtualGL is remotely displaying to a Solaris/Sparc X server which has gamma-corrected X visuals, then VGL will attempt to assign one of these visuals to the application.  This causes the 3D output of the application to be gamma corrected by the factor specified in <code>fbconfig</code> on the client machine (default: 2.22.)  Otherwise, if the X server (or proxy) does not have gamma-corrected X visuals or if the gamma-corrected visuals it has do not match the application&rsquo;s needs, then VirtualGL performs gamma correction internally and uses a default gamma correction factor of 2.22.  This option emulates the default behavior of OpenGL applications running locally on Sparc machines. <br /><br /> <em><code>VGL_GAMMA=0</code> or <code>vglrun&nbsp;-g</code> : Disable gamma correction</em> <br /><br /> This option tells VGL not to use gamma-corrected visuals, even if they are available on the X server, and disables VGL&rsquo;s internal gamma correction system as well.  This emulates the default behavior of OpenGL applications running locally on Linux or Solaris/x86 machines. <br /><br /> <em><code>VGL_GAMMA={gamma&nbsp;correction&nbsp;factor}</code> or <code>vglrun&nbsp;-gamma&nbsp;{gamma&nbsp;correction&nbsp;factor}</code> : Enable VGL&rsquo;s internal gamma correction system with the specified gamma correction factor</em> <br /><br /> If <code>VGL_GAMMA</code> is set to an arbitrary floating point value, then VirtualGL performs gamma correction internally using the specified value as the gamma correction factor.  You can also specify a negative value to apply a &ldquo;de-gamma&rdquo; function.  Specifying a gamma correction factor of G (where G &lt; 0) is equivalent to specifying a gamma correction factor of -1/G.</td>
+    <td class="standard">&ldquo;Gamma&rdquo; refers to the relationship between the intensity of light which your computer&rsquo;s monitor is instructed to display and the intensity which it actually displays.  The curve is an exponential curve of the form <em>Y = X<sup>G</sup></em>, where X is between 0 and 1.  G is called the &ldquo;gamma&rdquo; of the monitor.  PC monitors and TV&rsquo;s usually have a gamma of around 2.2. <br /><br /> Some of the math involved in 3D rendering assumes a linear gamma (G = 1.0), so technically speaking, 3D applications will not display with mathematical correctness unless the pixels are &ldquo;gamma corrected&rdquo; to counterbalance the non-linear response curve of the monitor.  But some systems do not have any form of built-in gamma correction, and thus the applications developed for such systems have usually been designed to display properly without gamma correction.  Gamma correction involves passing pixels through a function of the form <em>X = W<sup>1/G</sup></em>, where G is the &ldquo;gamma correction factor&rdquo; and should be equal to the gamma of the monitor.  So the final output is <em>Y = X<sup>G</sup> = (W<sup>1/G</sup>)<sup>G</sup> = W</em>, which describes a linear relationship between the intensity of the pixels drawn by the application and the intensity of the pixels displayed by the monitor. <br /><br /> <em><code>VGL_GAMMA=1</code> or <code>vglrun&nbsp;+g</code> : Enable gamma correction with default settings</em> <br /><br /> This option tells VirtualGL to enable gamma correction using the best available method.  If VirtualGL is remotely displaying to a Solaris/Sparc X server which has gamma-corrected X visuals, then VGL will attempt to assign one of these visuals to the application.  This causes the 3D output of the application to be gamma corrected by the factor specified in <code>fbconfig</code> on the client machine (default: 2.22.)  Otherwise, if the X server does not have gamma-corrected X visuals or if the gamma-corrected visuals it has do not match the application&rsquo;s needs, then VirtualGL performs gamma correction internally and uses a default gamma correction factor of 2.22.  This option emulates the default behavior of OpenGL applications running locally on Sparc machines. <br /><br /> <em><code>VGL_GAMMA=0</code> or <code>vglrun&nbsp;-g</code> : Disable gamma correction</em> <br /><br /> This option tells VGL not to use gamma-corrected visuals, even if they are available on the X server, and disables VGL&rsquo;s internal gamma correction system as well.  This emulates the default behavior of OpenGL applications running locally on Linux or Solaris/x86 machines. <br /><br /> <em><code>VGL_GAMMA={gamma&nbsp;correction&nbsp;factor}</code> or <code>vglrun&nbsp;-gamma&nbsp;{gamma&nbsp;correction&nbsp;factor}</code> : Enable VGL&rsquo;s internal gamma correction system with the specified gamma correction factor</em> <br /><br /> If <code>VGL_GAMMA</code> is set to an arbitrary floating point value, then VirtualGL performs gamma correction internally using the specified value as the gamma correction factor.  You can also specify a negative value to apply a &ldquo;de-gamma&rdquo; function.  Specifying a gamma correction factor of G (where G &lt; 0) is equivalent to specifying a gamma correction factor of -1/G.</td>
     <td class="standard"><code>VGL_GAMMA=1</code> on Solaris/Sparc VGL servers, <code>VGL_GAMMA=0</code> otherwise</td>
   </tr>
   <tr class="standard">
@@ -4197,7 +4204,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_GUI</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Key sequence used to invoke the configuration dialog</em> <br /><br /> VirtualGL will normally monitor an application&rsquo;s X event queue and pop up the VirtualGL configuration dialog whenever <code>CTRL-SHIFT-F9</code> is pressed. In the event that this interferes with a key sequence that the application is already using, you can redefine the key sequence used to pop up VGL&rsquo;s configuration dialog by setting <code>VGL_GUI</code> to some combination of <code>shift</code>, <code>ctrl</code>, <code>alt</code>, and one of <code>{f1,&nbsp;f2,&nbsp;...,&nbsp;f12}</code>.  You can also set <code>VGL_GUI</code> to <code>none</code> to disable the configuration dialog altogether.  See Section <a href="#Config_Dialog" class="ref">18</a> for more details.</td>
+    <td class="standard"><em>Key sequence used to invoke the configuration dialog</em> <br /><br /> VirtualGL will normally monitor an application&rsquo;s X event queue and pop up the VirtualGL configuration dialog whenever <code>CTRL-SHIFT-F9</code> is pressed. In the event that this interferes with a key sequence that the application is already using, you can redefine the key sequence used to pop up VGL&rsquo;s configuration dialog by setting <code>VGL_GUI</code> to some combination of <code>shift</code>, <code>ctrl</code>, <code>alt</code>, and one of <code>{f1,&nbsp;f2,&nbsp;...,&nbsp;f12}</code>.  You can also set <code>VGL_GUI</code> to <code>none</code> to disable the configuration dialog altogether.  See Chapter <a href="#Config_Dialog" class="ref">18</a> for more details.</td>
     <td class="standard">shift-ctrl-f9</td>
   </tr>
   <tr class="standard">
@@ -4221,25 +4228,25 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_PROFILE=0</code><br /><code>VGL_PROFILE=1</code></td>
     <td class="standard"><code>-pr</code><br />or<br /><code>+pr</code></td>
-    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL faker to continuously benchmark itself and periodically print out the throughput of reading back, compressing, and sending pixels to the client. <br /><br /> See Section <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
+    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL faker to continuously benchmark itself and periodically print out the throughput of reading back, compressing, and sending pixels to the client. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
     <td class="standard">Profiling disabled</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_QUAL</code></td>
     <td class="standard"><code>-q&nbsp;&lt;1-100&gt;</code></td>
-    <td class="standard"><em>An integer between 1 and 100 (inclusive)</em> <br /><br /> This setting allows you to specify the quality of the JPEG compression. Lower is faster but also grainier.  The default setting should produce perceptually lossless performance. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard"><em>An integer between 1 and 100 (inclusive)</em> <br /><br /> This setting allows you to specify the quality of the JPEG compression. Lower is faster but also grainier.  The default setting should produce perceptually lossless image quality. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">95</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_READBACK=0</code><br /><code>VGL_READBACK=1</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0079"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window running on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
+    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0079"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
     <td class="standard">Readback enabled</td>
   </tr>
   <tr class="standard">
     <td class="standard"><a name="VGL_SPOIL"></a><code>VGL_SPOIL=0</code><br /><code>VGL_SPOIL=1</code></td>
     <td class="standard"><code>-sp</code><br />or<br /><code>+sp</code></td>
-    <td class="standard"><em>Enable/disable frame spoiling</em> <br /><br /> By default, VirtualGL will drop frames so as not to slow down the rendering rate of the server&rsquo;s graphics engine.  This should produce the best results with interactive applications, but it may be desirable to turn off frame spoiling when running benchmarks or other non-interactive applications.  Turning off frame spoiling will force one frame to be read back and sent on each end-of-frame event, so that the frame rate reported by OpenGL benchmarks will accurately reflect the frame rate seen by the user.  Disabling frame spoiling also prevents non-interactive applications from wasting graphics resources by rendering frames that will never be seen.  With frame spoiling turned off, the rendering pipeline behaves as if it is fill-rate limited to about 30 or 40 Megapixels/second, the maximum throughput of the VirtualGL system on current CPU&rsquo;s.</td>
+    <td class="standard"><em>Enable/disable frame spoiling</em> <br /><br /> By default, VirtualGL will drop frames so as not to slow down the rendering rate of the server&rsquo;s graphics engine.  This should produce the best results with interactive applications, but it may be desirable to turn off frame spoiling when running benchmarks or other non-interactive applications.  Turning off frame spoiling will force one frame to be read back and sent on each end-of-frame event, so that the frame rate reported by OpenGL benchmarks will accurately reflect the frame rate seen by the user.  Disabling frame spoiling also prevents non-interactive applications from wasting graphics resources by rendering frames that will never be seen.  With frame spoiling turned off, the 3D rendering pipeline behaves as if it is fill-rate limited to about 30 or 40 Megapixels/second, the maximum throughput of the VirtualGL system on current CPU&rsquo;s.</td>
     <td class="standard">Spoiling enabled</td>
   </tr>
   <tr class="standard">
@@ -4251,7 +4258,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_SUBSAMP</code></td>
     <td class="standard"><code>-samp&nbsp;&lt;411|422|444&gt;</code></td>
-    <td class="standard"><em>411, 422, or 444</em> <br /><br /> This allows you to manually specify the level of chrominance subsampling in the JPEG compressor. <br /><br /> By default, VirtualGL uses no chrominance subsampling (AKA &ldquo;4:4:4 subsampling&rdquo;) when it compresses images for delivery to the client. Subsampling is premised on the fact that the human eye is more sensitive to changes in brightness than to changes in color.  Since the JPEG image format uses a colorspace in which brightness (luminance) and color (chrominance) are separated into different channels, one can sample the brightness for every pixel and the color for every other pixel and produce an image which has 16 million colors but uses an average of only 16 bits per pixel instead of 24.  This is called &ldquo;4:2:2 subsampling&rdquo;, since for every 4 pixels of luminance, there are only 2 pixels of each chrominance component.  Likewise, one can sample every fourth chrominance component to produce a 16-million color image with only 12 bits per pixel.  The latter is called &ldquo;4:1:1 subsampling.&rdquo;  Subsampling increases the performance and reduces the network usage, since there is less data to move around, but it can produce some visible artifacts.  Subsampling artifacts are rarely observed with volume data, since it usually only contains 256 colors to begin with.  But narrow, aliased lines and other sharp features on a black background will tend to produce subsampling artifacts. <br /><br /> The Axis Indicator from a Popular Visualization App displayed with 4:4:4, 4:2:2, and 4:1:1 subsampling (respectively):<br /> <img src="444.gif" alt="444" class="inline" id="imgid_11" name="imgid_11"/><img src="422.gif" alt="422" class="inline" id="imgid_12" name="imgid_12"/><img src="411.gif" alt="411" class="inline" id="imgid_13" name="imgid_13"/> <br /><br /> <em>NOTE:  If you select 4:1:1 subsampling, VirtualGL will in fact try to use 4:2:0 instead.  4:2:0 samples every other pixel both horizontally and vertically rather than sampling every fourth pixel horizontally.  But not all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is not available.</em> <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard"><em>411, 422, or 444</em> <br /><br /> This allows you to manually specify the level of chrominance subsampling in the JPEG compressor. <br /><br /> By default, VirtualGL uses no chrominance subsampling (AKA &ldquo;4:4:4 subsampling&rdquo;) when it compresses images for delivery to the client. Subsampling is premised on the fact that the human eye is more sensitive to changes in brightness than to changes in color.  Since the JPEG image format uses a colorspace in which brightness (luminance) and color (chrominance) are separated into different channels, one can sample the brightness for every pixel and the color for every other pixel and produce an image which has 16 million colors but uses an average of only 16 bits per pixel instead of 24.  This is called &ldquo;4:2:2 subsampling&rdquo;, since for every 4 pixels of luminance, there are only 2 pixels of each chrominance component.  Likewise, one can sample every fourth chrominance component to produce a 16-million color image with only 12 bits per pixel.  The latter is called &ldquo;4:1:1 subsampling.&rdquo;  Subsampling decreases the amount of image data and thus increases the performance and decreases the network bandwidth usage, but subsampling can produce some visible artifacts.  Subsampling artifacts are rarely observed with volume data, since it usually only contains 256 colors to begin with.  But narrow, aliased lines and other sharp features on a black background will tend to produce artifacts when subsampling is enabled. <br /><br /> The Axis Indicator from a Popular Visualization App displayed with 4:4:4, 4:2:2, and 4:1:1 subsampling (respectively):<br /> <img src="444.gif" alt="444" class="inline" id="imgid_11" name="imgid_11"/><img src="422.gif" alt="422" class="inline" id="imgid_12" name="imgid_12"/><img src="411.gif" alt="411" class="inline" id="imgid_13" name="imgid_13"/> <br /><br /> <em>NOTE:  If you select 4:1:1 subsampling, VirtualGL will in fact try to use 4:2:0 instead.  4:2:0 samples every other pixel both horizontally and vertically rather than sampling every fourth pixel horizontally.  But not all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is not available.</em> <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">444</td>
   </tr>
   <tr class="standard">
@@ -4333,7 +4340,7 @@ method:</p>
   </thead>
   <tr class="standard">
     <td class="standard"><code>VGL_PROFILE=0</code><br /><code>VGL_PROFILE=1</code></td>
-    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL client to continuously benchmark itself and periodically print out the throughput of decompressing and drawing pixels into the application window. <br /><br /> See Section <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
+    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL client to continuously benchmark itself and periodically print out the throughput of decompressing and drawing pixels into the application window. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
     <td class="standard">Profiling disabled</td>
   </tr>
   <tr class="standard">

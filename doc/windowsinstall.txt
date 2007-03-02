@@ -2,7 +2,7 @@
 
 	#. Install Hummingbird Exceed if it isn't already installed.
 
-	#. Add the Exceed path (for instance, ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
+	#. Add the Exceed path (example: ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
 		to the system ''PATH'' environment if it isn't already there.
 
 	#. Install a Secure Shell (SSh) client.  If [[http://www.cygwin.com/][Cygwin]]

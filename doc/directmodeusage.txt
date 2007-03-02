@@ -1,4 +1,5 @@
 * Using VirtualGL in Direct Mode
+{anchor: Direct_Mode_Usage}
 
 ** Direct Mode with X11 Forwarding
 {anchor: X11_Forwarding}
@@ -96,7 +97,7 @@ maximize performance.
 		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
 ** Direct Mode with a Direct X11 Connection
@@ -220,7 +221,7 @@ Optimal
 		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
 ** Direct Mode with SSL Encryption
@@ -243,7 +244,7 @@ as much as 20% by enabling SSL encryption.
 
 Pass an argument of ''+s'' to ''vglrun'' when launching VirtualGL, or set
 the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL server.
-(see {ref prefix="Section ": Advanced_Configuration} for more details.)
+(see {ref prefix="Chapter ": Advanced_Configuration} for more details.)
 
 ** Direct Mode with X11 Forwarding and SSh Tunneling
 
