@@ -71,24 +71,24 @@
 		variable to ''1''. \
 	| I-deas normally aborts if it detects that the X visual assigned to it is \
 		not gamma-corrected.  But gamma-corrected X visuals only exist on \
-		Solaris/Sparc X servers, so if you are displaying the application using \
+		Solaris/Sparc X servers, so if you are displaying the application to \
 		another type of X server or X proxy which doesn't provide gamma-corrected \
 		X visuals, then it is necessary to override the gamma detection mechanism \
 		in I-deas. \
 	|
 | Java2D applications that use OpenGL | Linux, Solaris \
 	| Java2D will use OpenGL to perform its rendering if ''sun.java2d.opengl'' \
-		is set to ''True'', e.g.: \
+		is set to ''True''.  For example: \
 		{nl}{nl} \
 		''java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
 		In order for this to work in VirtualGL, it is necessary to invoke \
-		''vglrun'' with the ''-dl'' switch, e.g.: \
+		''vglrun'' with the ''-dl'' switch.  For example: \
 		{nl}{nl} \
 		''vglrun -dl java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
 		If you are using Java v6 b92 or later, you can also set the environment \
-		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so'', e.g.: \
+		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so''.  For example: \
 		{nl}{nl} \
 		''setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so''{nl} \
 		''vglrun java -Dsun.java2d.opengl=True MyAppClass'' \

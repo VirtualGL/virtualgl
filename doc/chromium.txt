@@ -89,7 +89,7 @@ Refer to the following table:
 #OPT: hiCol=first note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
 
 Running the CrServer in VirtualGL is simply a matter of setting this
-environment variable and then invoking ''crserver'' with ''vglrun'', e.g.:
+environment variable and then invoking ''crserver'' with ''vglrun''.  For example:
 
 #Verb: <<---
 export CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
@@ -97,7 +97,7 @@ vglrun crserver
 ---
 
 In the case of CrAppFaker, it is also necessary to set ''VGL_GLLIB'' to the
-location of the "real" OpenGL library, e.g. ''/usr/lib/libGL.so.1''.
+location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1''.)
 CrAppFaker creates its own fake version of ''libGL.so'' which is really just a
 copy of Chromium's ''libcrfaker.so''.  So VirtualGL, if left to its own
 devices, will unwittingly try to load ''libcrfaker.so'' instead of the "real"
@@ -135,8 +135,8 @@ sort-first rendering job using Chromium and VirtualGL:
 
 	#. On Node 0, ''vglrun crserver &''
 
-	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" libGL, e.g.
-		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1''
+	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" libGL (example:
+		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1''.)
 
 	#. On Node 0, launch ''crappfaker'' (do not use ''vglrun'' here)
 
