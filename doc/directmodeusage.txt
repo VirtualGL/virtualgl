@@ -67,10 +67,11 @@ maximize performance.
 
 		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
 
-	#. In the SSh session, set the ''VGL_CLIENT'' environment variable on the
-		VirtualGL server to point back to the client's X display.
-		{nl}{nl}
-		__Example:__
+	#. If the X server on your client machine is using a display number of 0
+		(usually the case), then you can skip this step.  Otherwise, set the
+		''VGL_CLIENT'' environment variable on the VirtualGL server to point
+		to the client's X display:
+		{nl}
 		#Verb: <<---
 		export VGL_CLIENT={client}:{n}.0
 		---
@@ -191,10 +192,11 @@ Optimal
 
 		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
 
-	#. In the SSh session, set the ''DISPLAY'' environment variable on the
-		VirtualGL server to point back to the client's X display.
-		{nl}{nl}
-		__Example:__
+	#. If the X server on your client machine is using a display number of 0
+		(usually the case), then you can skip this step.  Otherwise, set the
+		''DISPLAY'' environment variable on the VirtualGL server to point to
+		the client's X display:
+		{nl}
 		#Verb: <<---
 		export DISPLAY={client}:{n}.0
 		---
@@ -302,9 +304,9 @@ except that the following additional steps need to be taken:
 	#. Once connected to the server for the second time, set the ''VGL_PORT''
 		environment variable to match the port number you obtained above.
 
-	#. When setting the ''VGL_CLIENT'' environment variable, set the client
-		hostname to ''localhost'' instead of the hostname/IP address of the client
-		machine.
+	#. Set the ''VGL_CLIENT'' environment variable on the VirtualGL server to
+		''localhost:{n}.0'', where ''{n}'' is the display number of the X server
+		running on the client machine.
 
 		!!! Explanation: When you established the SSh connection using the ''-R''
 		argument, it created a listener on the VirtualGL server.  That listener
