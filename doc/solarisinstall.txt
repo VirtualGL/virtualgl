@@ -28,10 +28,9 @@ If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun Op
 		Make sure that ''/etc/dt/config'' has global read/execute permissions.
 
 	#. Create a file called ''GraphicsDevices'' under ''/etc/dt/config'' and add
-		any framebuffer device paths in your system (for instance, ''/dev/fbs/kfb0'',
-		''/dev/fbs/jfb0'', etc.) to this file, one device per line.
-		{nl}{nl}
-		__Example:__
+		any framebuffer device paths in your system (''/dev/fbs/kfb0'',
+		''/dev/fbs/jfb0'', etc.) to this file, one device per line.  For example:
+		{nl}
 		#Verb: <<---
 		touch /etc/dt/config/GraphicsDevices
 		for i in /dev/fbs/*[0-9]; do echo $i >>/etc/dt/config/GraphicsDevices; done
@@ -41,9 +40,8 @@ If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun Op
 		Only the devices listed in ''GraphicsDevices'' will be available for use by
 		VirtualGL.
 
-	#. Grant read access to this file for the ''vglusers'' group.
-		{nl}{nl}
-		__Example:__
+	#. Grant read access to this file for the ''vglusers'' group.  For example:
+		{nl}
 		#Verb: <<---
 		chgrp vglusers /etc/dt/config/GraphicsDevices
 		chmod 640 /etc/dt/config/GraphicsDevices
@@ -111,9 +109,8 @@ user on the server by replacing the references to ''vglgenkey'' below with
 		run VirtualGL to this group.
 
 	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
-		''vglusers'' group.
-		{nl}{nl}
-		__Example:__
+		''vglusers'' group.  For example:
+		{nl}
 		#Verb: <<---
 		mkdir -p /etc/opt/VirtualGL
 		chgrp vglusers /etc/opt/VirtualGL
@@ -179,9 +176,8 @@ user on the server by replacing the references to ''vglgenkey'' below with
 			---
 
 		b. Edit ''/etc/dt/config/Xservers'' and add an argument of ''-tst'' to the
-			line corresponding to the display number you are configuring.
-			{nl}{nl}
-			__Example:__
+			line corresponding to the display number you are configuring.  For example:
+			{nl}
 			#Verb: <<---
 			:0  Local local_uid@console root /usr/openwin/bin/Xsun :0 -nobanner -tst
 			---
@@ -224,9 +220,8 @@ Solaris 10 or later):
 		run VirtualGL to this group.
 
 	#. Create a new directory ''/etc/opt/VirtualGL'' and make it readable by the
-		''vglusers'' group.
-		{nl}{nl}
-		__Example:__
+		''vglusers'' group.  For example:
+		{nl}
 		#Verb: <<---
 		mkdir -p /etc/opt/VirtualGL
 		chgrp vglusers /etc/opt/VirtualGL
@@ -254,9 +249,8 @@ Solaris 10 or later):
 		key and mouse events and thus hijacking a local X session.{nl}
 		{nl}
 		Edit ''/etc/X11/gdm/gdm.conf'' and add ''-tst'' to all lines that appear to
-		be X server command lines.
-		{nl}{nl}
-		__Example:__
+		be X server command lines.  For example:
+		{nl}
 		#Verb: <<---
 		StandardXServer=/usr/X11R6/bin/Xorg -tst
 		---
@@ -296,17 +290,15 @@ Whether the server's 3D graphics card is being accessed through GLP or through
 an X server, you must perform the following procedure to enable VirtualGL users
 to access the framebuffer device(s):
 
-	1. Edit ''/etc/logindevperm'' and comment out the "frame buffers" line.
-		{nl}{nl}
-		__Example:__
+	1. Edit ''/etc/logindevperm'' and comment out the "frame buffers" line.  For example:
+		{nl}
 		#Verb: <<---
 		# /dev/console    0600    /dev/fbs/*              # frame buffers
 		---
 
 	2. Change the permissions and group for ''/dev/fbs/*'' to allow write access
-		to anyone who will need to use VirtualGL.
-		{nl}{nl}
-		__Example:__
+		to anyone who will need to use VirtualGL.  For example:
+		{nl}
 		#Verb: <<---
 		chmod 660 /dev/fbs/*
 		chown root /dev/fbs/*
