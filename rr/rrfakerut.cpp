@@ -1965,8 +1965,9 @@ int querytest(void)
 		if(!XQueryExtension(dpy, "GLX", &dummy1, &dummy2, &dummy3)
 		|| dummy1<0 || dummy2<0 || dummy3<0)
 			_throw("GLX Extension not reported as present");
-		printf("XQueryExtension():  Opcode=%d  First event=%d  First error=%d\n", dummy1,
-			dummy2, dummy3);
+		char *vendor=XServerVendor(dpy);
+		if(!vendor || strcmp(vendor, "Spacely Sprockets, Inc."))
+			_throw("XServerVendor()");
 		glXQueryVersion(dpy, &major, &minor);
 		printf("glXQueryVersion():  %d.%d\n", major, minor);
 		printf("glXGetClientString():\n");
@@ -2037,7 +2038,8 @@ int main(int argc, char **argv)
 	int ret=0;  int nthr=NTHR;  int doci=1;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
-	|| putenv((char *)"VGL_SPOIL=0")==-1)
+	|| putenv((char *)"VGL_SPOIL=0")==-1
+	|| putenv((char *)"VGL_XVENDOR=Spacely Sprockets, Inc.")==-1)
 	{
 		printf("putenv() failed!\n");  return -1;
 	}
