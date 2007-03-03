@@ -148,7 +148,9 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 -- GCC
 
    * Tested with v2.95 and v3.x
-   * Available from the Solaris 9 & 10 Companion CD's
+   * Preferred version:
+     http://cooltools.sunsource.net/gcc/4.0.3/install.html
+     Also available from the Solaris 9 & 10 Companion CD's
      (http://www.sun.com/software/solaris/freeware/),
      Blastwave (http://www.blastwave.org), or SunFreeware
      (http://www.sunfreeware.com/)
