@@ -3,7 +3,7 @@
 *** Other X Proxies
 #OPT: noList! plain!
 
-The [[turbovncusage.txt#Raw_Mode_Usage][previous section]] described how to use
+The [[turbovncusage.txt#TurboVNC_Usage][previous chapter]] described how to use
 VirtualGL in Raw Mode with TurboVNC, but much of this information is also
 applicable to other X proxies, such as RealVNC, NX, etc.  Generally, none of
 these other solutions will provide anywhere near the performance of TurboVNC,
@@ -20,11 +20,12 @@ to ''vglrun''.
 
 *** Raw Mode Over a Network
 #OPT: noList! plain!
+{anchor: Raw_Mode_Over_Network}
 
 #IMG: rawmodeovernetwork.png
 #OPT fmt=latex: w=4cm
 
-The [[turbovncusage.txt#Raw_Mode_Usage][previous section]] described how to
+The [[turbovncusage.txt#TurboVNC_Usage][previous chapter]] described how to
 use Raw Mode over a server network to send uncompressed pixels from a VirtualGL
 server to a TurboVNC server.  But Raw Mode can also be used to send
 uncompressed pixels to a client machine.  There are two main reasons why you

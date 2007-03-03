@@ -1,4 +1,5 @@
 * Using VirtualGL in Direct Mode
+{anchor: Direct_Mode_Usage}
 
 ** Direct Mode with X11 Forwarding
 {anchor: X11_Forwarding}
@@ -67,10 +68,11 @@ maximize performance.
 
 		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
 
-	#. In the SSh session, set the ''VGL_CLIENT'' environment variable on the
-		VirtualGL server to point back to the client's X display.
-		{nl}{nl}
-		__Example:__
+	#. If the X server on your client machine is using a display number of 0
+		(usually the case), then you can skip this step.  Otherwise, set the
+		''VGL_CLIENT'' environment variable on the VirtualGL server to point
+		to the client's X display:
+		{nl}
 		#Verb: <<---
 		export VGL_CLIENT={client}:{n}.0
 		---
@@ -95,7 +97,7 @@ maximize performance.
 		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
 ** Direct Mode with a Direct X11 Connection
@@ -191,10 +193,11 @@ Optimal
 
 		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
 
-	#. In the SSh session, set the ''DISPLAY'' environment variable on the
-		VirtualGL server to point back to the client's X display.
-		{nl}{nl}
-		__Example:__
+	#. If the X server on your client machine is using a display number of 0
+		(usually the case), then you can skip this step.  Otherwise, set the
+		''DISPLAY'' environment variable on the VirtualGL server to point to
+		the client's X display:
+		{nl}
 		#Verb: <<---
 		export DISPLAY={client}:{n}.0
 		---
@@ -218,7 +221,7 @@ Optimal
 		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-	Consult {ref prefix="Section ": Advanced_Configuration} for more
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
 ** Direct Mode with SSL Encryption
@@ -241,7 +244,7 @@ as much as 20% by enabling SSL encryption.
 
 Pass an argument of ''+s'' to ''vglrun'' when launching VirtualGL, or set
 the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL server.
-(see {ref prefix="Section ": Advanced_Configuration} for more details.)
+(see {ref prefix="Chapter ": Advanced_Configuration} for more details.)
 
 ** Direct Mode with X11 Forwarding and SSh Tunneling
 
@@ -302,9 +305,9 @@ except that the following additional steps need to be taken:
 	#. Once connected to the server for the second time, set the ''VGL_PORT''
 		environment variable to match the port number you obtained above.
 
-	#. When setting the ''VGL_CLIENT'' environment variable, set the client
-		hostname to ''localhost'' instead of the hostname/IP address of the client
-		machine.
+	#. Set the ''VGL_CLIENT'' environment variable on the VirtualGL server to
+		''localhost:{n}.0'', where ''{n}'' is the display number of the X server
+		running on the client machine.
 
 		!!! Explanation: When you established the SSh connection using the ''-R''
 		argument, it created a listener on the VirtualGL server.  That listener

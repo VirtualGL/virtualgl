@@ -22,7 +22,7 @@
 	|
 | Army Ops | Linux/x86 \
 	| ''vglrun -dl armyops'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Descent 3 | Linux/x86 \
 	| ''vglrun descent3 -g /usr/lib/librrfaker.so'' \
@@ -30,7 +30,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl descent3'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Doom 3 | Linux/x86 	 \
 	| ''vglrun doom3 +set r_glDriver /usr/lib/librrfaker.so'' \
@@ -38,7 +38,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl doom3'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Enemy Territory (Return to Castle Wolfenstein) | Linux/x86 \
 	| ''vglrun et +set r_glDriver /usr/lib/librrfaker.so'' \
@@ -46,7 +46,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl et'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Heretic II | Linux/x86 \
 	| ''vglrun heretic2 +set gl_driver /usr/lib/librrfaker.so +set vid_ref glx'' \
@@ -54,7 +54,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl heretic2 +set vid_ref glx'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Heavy Gear II | Linux/x86 \
 	| ''vglrun hg2 -o /usr/lib/librrfaker.so'' \
@@ -62,7 +62,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl hg2'' \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | I-deas Master Series 9, 10, & 11 | Solaris/Sparc \
 	| When running I-deas with VirtualGL on a Solaris/Sparc server, remotely \
@@ -71,29 +71,29 @@
 		variable to ''1''. \
 	| I-deas normally aborts if it detects that the X visual assigned to it is \
 		not gamma-corrected.  But gamma-corrected X visuals only exist on \
-		Solaris/Sparc X servers, so if you are displaying the application using \
+		Solaris/Sparc X servers, so if you are displaying the application to \
 		another type of X server or X proxy which doesn't provide gamma-corrected \
 		X visuals, then it is necessary to override the gamma detection mechanism \
 		in I-deas. \
 	|
 | Java2D applications that use OpenGL | Linux, Solaris \
 	| Java2D will use OpenGL to perform its rendering if ''sun.java2d.opengl'' \
-		is set to ''True'', e.g.: \
+		is set to ''True''.  For example: \
 		{nl}{nl} \
 		''java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
 		In order for this to work in VirtualGL, it is necessary to invoke \
-		''vglrun'' with the ''-dl'' switch, e.g.: \
+		''vglrun'' with the ''-dl'' switch.  For example: \
 		{nl}{nl} \
 		''vglrun -dl java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
 		If you are using Java v6 b92 or later, you can also set the environment \
-		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so'', e.g.: \
+		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so''.  For example: \
 		{nl}{nl} \
 		''setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so''{nl} \
 		''vglrun java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
-	| See {ref prefix="Section ": dlopen} for more details \
+	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Java2D applications that use OpenGL | Solaris/Sparc \
 	| When VirtualGL is used in conjunction with Java v5.0 (also known as Java \
@@ -131,7 +131,7 @@
 		OpenGL programs built with later versions of libQt will not work with \
 		VirtualGL unless the ''-dl'' switch is used with ''vglrun''. \
 		{nl}{nl} \
-		See {ref prefix="Section ": dlopen} for more details \
+		See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Quake 3 | Linux/x86 \
 	| ''vglrun quake3 +set r_glDriver /usr/lib/librrfaker.so'' \
@@ -139,7 +139,7 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl quake3'' \
-	|	See {ref prefix="Section ": dlopen} for more details \
+	|	See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Soldier of Fortune | Linux/x86 \
 	| ''vglrun sof +set gl_driver /usr/lib/librrfaker.so'' \
@@ -147,11 +147,11 @@
 		or \
 		{nl}{nl} \
 		''vglrun -dl sof'' \
-	|	See {ref prefix="Section ": dlopen} for more details \
+	|	See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | Unreal Tournament 2004 | Linux/x86 \
 	| ''vglrun -dl ut2004'' \
-	|	See {ref prefix="Section ": dlopen} for more details \
+	|	See {ref prefix="Chapter ": dlopen} for more details \
 	|
 | VisConcept | Solaris/Sparc \
 	| Set the environment variable ''VGL_GUI_XTTHREADINIT'' to ''0''. \

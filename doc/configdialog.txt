@@ -41,7 +41,7 @@ application.
 The ''VGL_GUI'' environment variable can be used to change the key sequence
 used to pop up the dialog box.  If the default of ''CTRL-SHIFT-F9'' is not
 suitable, then set ''VGL_GUI'' to any combination of ''ctrl'', ''shift'',
-''alt'', and one of ''{f1, f2,..., f12}'' (these are not case sensitive.)  e.g.
+''alt'', and one of ''{f1, f2,..., f12}'' (these are not case sensitive.)  For example:
 
 #Verb: <<---
 export VGL_GUI=CTRL-F9

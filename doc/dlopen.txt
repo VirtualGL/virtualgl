@@ -32,7 +32,7 @@ a substitute OpenGL library allows VirtualGL to intercept the GLX and OpenGL cal
 
 In some cases, the application doesn't provide an override mechanism such as
 the above.  In these cases, you should pass an argument of ''-dl'' to
-''vglrun'' when starting the application, e.g.:
+''vglrun'' when starting the application.  For example:
 
 #Verb: <<---
 vglrun -dl foowars
@@ -43,5 +43,5 @@ VirtualGL and ''libGL.so''.  This new library intercepts any calls to
 ''dlopen()'' and forces the application to open VirtualGL instead of
 ''libGL.so''.
 
-{ref prefix="Section ": Application_Recipes} contains specific recipes for
+{ref prefix="Chapter ": Application_Recipes} contains specific recipes for
 getting a variety of games and other applications to work with VirtualGL.

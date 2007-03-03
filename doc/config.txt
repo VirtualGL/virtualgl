@@ -6,14 +6,14 @@
 You can control the operation of the VirtualGL faker in four different ways.
 Each method of configuration takes precedence over the previous method:
 
-	#. Setting a configuration environment variable globally (e.g. in
+	#. Setting a configuration environment variable globally (for instance, in
 		''/etc/profile'')
 
-	#. Setting a configuration environment variable on a per-user basis (e.g. in
+	#. Setting a configuration environment variable on a per-user basis (for instance, in
 		''~/.bashrc'')
 
 	#. Setting a configuration environment variable only for the current shell
-		session (e.g. ''export VGL_XXX={whatever}'')
+		session (for instance, ''export VGL_XXX={whatever}'')
 
 	#. Passing a configuration option as an argument to ''vglrun''.  This
 		effectively overrides any previous environment variable setting
@@ -26,21 +26,35 @@ Each method of configuration takes precedence over the previous method:
 		{nl}{nl} \
 		When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection \
 		to transmit compressed images of an application's OpenGL rendering area \
-		from the application server to the client display.  Thus, the server \
+		from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server \
 		needs to know on which machine the VirtualGL client software is running, \
 		and it needs to know which X display on that machine will be used to draw \
 		the application's GUI.  VirtualGL can normally surmise this by reading \
-		the application server's ''DISPLAY'' environment variable.  But in cases \
-		where X11 traffic is tunneled through SSh or LBX or another type of \
+		the ''DISPLAY'' environment variable (which lists the hostname and X \
+		display where all X11 traffic will be sent.)  But in cases \
+		where X11 traffic is tunneled through SSh or another type of \
 		indirect X11 connection, the ''DISPLAY'' environment variable on the \
-		application server may not point to the client machine.  In these cases, \
+		VirtualGL server may not point to the client machine.  In these cases, \
 		set ''VGL_CLIENT'' to the display where the application's GUI will end \
-		up, e.g. \
+		up.  For example: \
 		{nl}{nl} \
-		''export VGL_CLIENT={my_client_machine}:0.0'' \
+		''export VGL_CLIENT=my_client:0.0'' \
+		{nl}{nl} \
+		If you are connecting to the VirtualGL server using SSh with X11 forwarding \
+		enabled, VirtualGL will try to guess an appropriate value for ''VGL_CLIENT'' \
+		based on the IP address of the SSh client, so you would only need to set \
+		''VGL_CLIENT'' in this case if your configuration is unusual (such as if \
+		your client machine's X server is occupying a display number other than 0 \
+		or if you are trying to forward VirtualGL's image stream over SSh.  See \
+		{ref prefix="Chapter ": Direct_Mode_Usage} for more details.) \
 		{nl}{nl} \
 		__** This option has no effect in Raw Mode. **__ \
-	|	Read from the ''DISPLAY'' environment \
+	|	If SSh X11 forwarding is being used, VirtualGL will automatically set \
+		''VGL_CLIENT'' to ''{ssh_client}:0.0'', where ''{ssh_client}'' is the IP \
+		address of the machine from which the SSh connection was initiated. \
+		Otherwise, ''VGL_CLIENT'' is unset, which tells VirtualGL to read the \
+		client hostname and X display from the ''DISPLAY'' environment variable \
+		instead. \
 	|
 | ''VGL_COMPRESS=0''{nl}''VGL_COMPRESS=1'' | ''-c <0, 1>'' \
 	| __0 = Raw Mode (send rendered images uncompressed via. X11),__{nl} \
@@ -53,25 +67,29 @@ Each method of configuration takes precedence over the previous method:
 		("Raw Mode") is primarily useful in conjunction with VNC, NX, or other \
 		remote display software that performs X11 rendering on the server and \
 		uses its own mechanism for compressing and transporting images to the \
-		client.  Enabling Raw Mode on a remote X11 connection is not advisable, \
-		since it will result in uncompressed images being sent over the network. \
+		client.  Enabling Raw Mode on a remote X11 connection will result in \
+		uncompressed images being sent over the network, so it is unadvisable \
+		except on very fast networks (see {ref prefix="Section ": Raw_Mode_Over_Network}.) \
 		{nl}{nl} \
 		If this option is not specified, then VirtualGL's default behavior is to \
 		use Direct Mode when the application is being displayed to a remote X \
 		server and to use Raw Mode otherwise.  VirtualGL assumes that if the \
 		''DISPLAY'' environment variable begins with a colon or with "''unix:''" \
-		(e.g. "'':0.0''", "''unix:1000.0''", etc.), then the X11 connection is \
+		(example: "'':0.0''", "''unix:1000.0''", etc.), then the X11 connection is \
 		local and thus doesn't require image compression.  Otherwise, it assumes \
 		that the X11 connection is remote and that compression is required.  If \
 		the display string begins with "''localhost''" or with the server's \
 		hostname, VGL assumes that the display is being tunneled through SSh, and \
-		it enables Direct Mode in this case. \
+		its default behavior is to use Direct Mode in this case. \
+		{nl}{nl} \
+		It is normally not necessary to set this configuration parameter unless \
+		you want to do something unusual (such as use Raw Mode over a remote X11 \
+		connection.) See {ref prefix="Chapter ": TurboVNC_Usage} for more details. \
 		{nl}{nl} \
 		__NOTE:  Stereo does not work with Raw Mode.__ \
 		{nl}{nl} \
-		See {ref prefix="Section ": Raw_Mode_Usage} for more details. \
 	| Compression enabled ("Direct Mode") if the application is displaying to a \
-		remote X server, disabled ("Raw Mode") otherwise \
+		remote X server, disabled ("Raw Mode") otherwise. \
 	|
 | ''VGL_DISPLAY'' | ''-d <display or''{nl}''GLP device>'' \
 	| __The display or GLP device to use for 3D rendering__ \
@@ -84,13 +102,11 @@ Each method of configuration takes precedence over the previous method:
 		{nl}{nl} \
 		__GLP mode (Solaris/Sparc only):__ \
 		{nl}{nl} \
-		Setting this option to ''GLP'' will enable GLP mode and select the first \
-		available GLP device for rendering.  You can also set this option to the \
-		pathname of a specific GLP device (e.g. ''/dev/fbs/jfb0''.)  GLP is a \
-		special feature of Sun's OpenGL library which allows an application to \
-		render into Pbuffers on a graphics card even if there is no X server \
-		running on that graphics card.  See {ref prefix="Section ": GLP_Usage} \
-		for more details on GLP. \
+		Setting this option to ''glp'' will enable GLP mode and use the first \
+		framebuffer device listed in ''/etc/dt/config/GraphicsDevices'' to \
+		perform 3D rendering.  You can also set this option to the \
+		pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See \
+		{ref prefix="Section ": GLP_Usage} for more details. \
 	|	:0 \
 	|
 | ''VGL_FPS'' | ''-fps <floating''{nl}''point number''{nl}''greater than 0>'' \
@@ -101,8 +117,8 @@ Each method of configuration takes precedence over the previous method:
 		enable VirtualGL's frame rate governor.  When enabled, the frame rate \
 		governor will attempt to limit the overall throughput of the VirtualGL \
 		pipeline to the specified number of frames/second.  If frame spoiling is \
-		disabled, this effectively limits the server's rendering frame rate as \
-		well.  This option applies regardless of whether VirtualGL is being run \
+		disabled, this effectively limits the server's 3D rendering frame rate as \
+		well.  This option works regardless of whether VirtualGL is being run \
 		in Direct Mode (with compression enabled) or in Raw Mode (with \
 		compression disabled.) \
 	|	Frame rate governor disabled \
@@ -140,7 +156,7 @@ Each method of configuration takes precedence over the previous method:
 		assign one of these visuals to the application.  This causes the 3D \
 		output of the application to be gamma corrected by the factor specified \
 		in ''fbconfig'' on the client machine (default: 2.22.)  Otherwise, if the \
-		X server (or proxy) does not have gamma-corrected X visuals or if the \
+		X server does not have gamma-corrected X visuals or if the \
 		gamma-corrected visuals it has do not match the application's needs, then \
 		VirtualGL performs gamma correction internally and uses a default gamma \
 		correction factor of 2.22.  This option emulates the default behavior of \
@@ -189,7 +205,7 @@ Each method of configuration takes precedence over the previous method:
 		combination of ''shift'', ''ctrl'', ''alt'', and one of \
 		''{f1, f2, ..., f12}''.  You can also set ''VGL_GUI'' to ''none'' to \
 		disable the configuration dialog altogether.  See \
-		{ref prefix="Section ": Config_Dialog} for more details. \
+		{ref prefix="Chapter ": Config_Dialog} for more details. \
 	|	shift-ctrl-f9 \
 	|
 | {anchor: VGL_GUI_XTTHREADINIT} ''VGL_GUI_XTTHREADINIT'' | {:} \
@@ -253,7 +269,7 @@ Each method of configuration takes precedence over the previous method:
 		itself and periodically print out the throughput of reading back, \
 		compressing, and sending pixels to the client. \
 		{nl}{nl} \
-		See {ref prefix="Section ": Perf_Measurement} for more details. \
+		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
 	|	Profiling disabled \
 	|
 | ''VGL_QUAL'' | ''-q <1-100>'' \
@@ -261,7 +277,7 @@ Each method of configuration takes precedence over the previous method:
 		{nl}{nl} \
 		This setting allows you to specify the quality of the JPEG compression. \
 		Lower is faster but also grainier.  The default setting should produce \
-		perceptually lossless performance. \
+		perceptually lossless image quality. \
 		{nl}{nl} \
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	95 \
@@ -278,7 +294,7 @@ Each method of configuration takes precedence over the previous method:
 		This feature was developed initially to support running \
 		[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView \
 		MPI normally uses MPI processes 1 through N as rendering servers, each \
-		drawing a portion of the geometry into a separate window running on a \
+		drawing a portion of the geometry into a separate window on a \
 		separate X display.  ParaView reads back these server windows and \
 		composites the pixels into the main application window, which is \
 		controlled by MPI process 0.  By creating a script which passes a \
@@ -301,7 +317,7 @@ Each method of configuration takes precedence over the previous method:
 		by OpenGL benchmarks will accurately reflect the frame rate seen by the \
 		user.  Disabling frame spoiling also prevents non-interactive \
 		applications from wasting graphics resources by rendering frames that \
-		will never be seen.  With frame spoiling turned off, the rendering \
+		will never be seen.  With frame spoiling turned off, the 3D rendering \
 		pipeline behaves as if it is fill-rate limited to about 30 or 40 \
 		Megapixels/second, the maximum throughput of the VirtualGL system on \
 		current CPU's. \
@@ -332,13 +348,13 @@ Each method of configuration takes precedence over the previous method:
 		since for every 4 pixels of luminance, there are only 2 pixels of each \
 		chrominance component.  Likewise, one can sample every fourth chrominance \
 		component to produce a 16-million color image with only 12 bits per \
-		pixel.  The latter is called "4:1:1 subsampling."  Subsampling increases \
-		the performance and reduces the network usage, since there is less data \
-		to move around, but it can produce some visible artifacts.  Subsampling \
-		artifacts are rarely observed with volume data, since it usually only \
-		contains 256 colors to begin with.  But narrow, aliased lines and other \
-		sharp features on a black background will tend to produce subsampling \
-		artifacts. \
+		pixel.  The latter is called "4:1:1 subsampling."  Subsampling decreases \
+		the amount of image data and thus increases the performance and decreases \
+		the network bandwidth usage, but subsampling can produce some visible \
+		artifacts.  Subsampling artifacts are rarely observed with volume data, \
+		since it usually only contains 256 colors to begin with.  But narrow, \
+		aliased lines and other sharp features on a black background will tend to \
+		produce artifacts when subsampling is enabled. \
 		{nl}{nl} \
 		The Axis Indicator from a Popular Visualization App displayed with 4:4:4, \
 		4:2:2, and 4:1:1 subsampling (respectively):{nl} \
@@ -475,7 +491,7 @@ Each method of configuration takes precedence over the previous method:
 		benchmark itself and periodically print out the throughput of \
 		decompressing and drawing pixels into the application window. \
 		{nl}{nl} \
-		See {ref prefix="Section ": Perf_Measurement} for more details. \
+		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
 	|	Profiling disabled \
 	|
 | ''VGL_VERBOSE=0''{nl}''VGL_VERBOSE=1'' \
