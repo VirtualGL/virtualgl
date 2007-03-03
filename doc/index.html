@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-03-02T18:19:24-06:00">
+<meta name="date" content="2007-03-03T02:52:05-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1979,19 +1979,11 @@ to maximize performance.</p>
     <li class="Ordered">
         Start the VirtualGL Client program:
         <dl class="Description">
-            <dt class="Description">Linux clients</dt>
+            <dt class="Description">Linux and Solaris clients</dt>
             <dd class="Description">
                 Open a terminal window and type
 <pre class="verbatim">
-vglclient
-</pre>
-
-            </dd>
-            <dt class="Description">Solaris clients</dt>
-            <dd class="Description">
-                Open a terminal window and type
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglclient
+/opt/VirtualGL/bin/vglclient
 </pre>
 
             </dd>
@@ -2067,22 +2059,10 @@ setenv&nbsp;VGL_CLIENT&nbsp;{client}:{n}.0
     </li>
     <li class="Ordered">
         In the SSh session, start the 3D application using VirtualGL:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
-vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
+/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris server</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
-            </dd>
-        </dl>
         Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
@@ -2123,19 +2103,11 @@ vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{
     <li class="Ordered">
         Start the VirtualGL Client program:
         <dl class="Description">
-            <dt class="Description">Linux clients</dt>
+            <dt class="Description">Linux and Solaris clients</dt>
             <dd class="Description">
                 Open a terminal window and type
 <pre class="verbatim">
-vglclient
-</pre>
-
-            </dd>
-            <dt class="Description">Solaris clients</dt>
-            <dd class="Description">
-                Open a terminal window and type
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglclient
+/opt/VirtualGL/bin/vglclient
 </pre>
 
             </dd>
@@ -2250,22 +2222,10 @@ setenv&nbsp;DISPLAY&nbsp;{client}:{n}.0
     </li>
     <li class="Ordered">
         In the SSh session, start the 3D application using VirtualGL:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
-vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
+/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris server</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
-            </dd>
-        </dl>
         Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
@@ -2348,22 +2308,10 @@ additional steps need to be taken:</p>
     <li class="Ordered">
         Once connected to the VirtualGL server via. SSh, execute the following
         command:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
 /opt/VirtualGL/bin/nettest&nbsp;-findport
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris server</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWvgl/bin/nettest&nbsp;-findport
-</pre>
-
-            </dd>
-        </dl>
         This program will allocate a free TCP port number and print the number
         to the console.  Make a note of it.
     </li>
@@ -2529,22 +2477,10 @@ ssh&nbsp;{user}@{server}
     </li>
     <li class="Ordered">
         In the SSh session, start a TurboVNC server session:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncserver
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris server</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vncserver
-</pre>
-
-            </dd>
-        </dl>
     </li>
     <li class="Ordered">
         Make a note of the X display number that the TurboVNC server process
@@ -2559,19 +2495,11 @@ ssh&nbsp;{user}@{server}
     <li class="Ordered">
         On the client machine, start the TurboVNC Viewer.
         <dl class="Description">
-            <dt class="Description">Linux clients</dt>
+            <dt class="Description">Linux and Solaris clients</dt>
             <dd class="Description">
                  Open a terminal and type
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncviewer
-</pre>
-
-            </dd>
-            <dt class="Description">Solaris clients</dt>
-            <dd class="Description">
-                 Open a terminal and type
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vncviewer
 </pre>
 
             </dd>
@@ -2632,22 +2560,10 @@ ssh&nbsp;{user}@{server}
     </li>
     <li class="Ordered">
         In the terminal, start the 3D application using VirtualGL:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
-vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
+/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris server</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
-            </dd>
-        </dl>
         Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
         for more information on <code>vglrun</code> command line options.
     </li>
@@ -3255,20 +3171,13 @@ table:</p>
 <table class="standard" align="center">
   <thead class="standard">
   <tr class="head ">
-    <th class="head standard"></th>
     <th class="head standard">32-bit Applications</th>
     <th class="head standard">64-bit Applications</th>
   </tr>
   </thead>
   <tr class="standard">
-    <td class="high standard">Linux</td>
-    <td class="standard"><code>/opt/VirtualGL/lib</code></td>
-    <td class="standard"><code>/opt/VirtualGL/lib64</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Solaris</td>
-    <td class="standard"><code>/opt/SUNWvgl/fakelib</code></td>
-    <td class="standard"><code>/opt/SUNWvgl/fakelib/64</code></td>
+    <td class="standard"><code>/opt/VirtualGL/fakelib</code></td>
+    <td class="standard"><code>/opt/VirtualGL/fakelib/64</code></td>
   </tr>
 </table>
 <div class="tableNote" style="text-align=center;"><code>CR_SYSTEM_GL_PATH</code> setting required to use VirtualGL with Chromium</div>
@@ -3280,7 +3189,7 @@ environment variable and then invoking <code>crserver</code> with <code>vglrun</
 For example:</p>
 
 <pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
+export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
 vglrun&nbsp;crserver
 </pre>
 
@@ -3297,7 +3206,7 @@ occur.</p>
 <p>So what we want to do is something like this:</p>
 
 <pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
+export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
 export&nbsp;VGL_GLLIB=/usr/lib/libGL.so.1
 crappfaker
 </pre>
@@ -3534,7 +3443,7 @@ a 64-bit application.)</p>
   <tr class="standard">
     <td class="standard">Java2D applications that use OpenGL</td>
     <td class="standard">Linux, Solaris</td>
-    <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>.  For example: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch.  For example: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>.  For example: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/SUNWvgl/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
+    <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>.  For example: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch.  For example: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>.  For example: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/VirtualGL/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
     <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
@@ -3744,19 +3653,11 @@ rendering:</p>
     <dt class="Description">Solaris servers (using GLP)</dt>
     <dd class="Description">
 <pre class="verbatim">
-/opt/SUNWvgl/bin/glxinfo&nbsp;-d&nbsp;{glp_device}&nbsp;-v
+/opt/VirtualGL/bin/glxinfo&nbsp;-d&nbsp;{glp_device}&nbsp;-v
 </pre>
 
     </dd>
-    <dt class="Description">Solaris servers (not using GLP)</dt>
-    <dd class="Description">
-<pre class="verbatim">
-xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-/opt/SUNWvgl/bin/glxinfo&nbsp;-display&nbsp;:0&nbsp;-c&nbsp;-v
-</pre>
-
-    </dd>
-    <dt class="Description">Linux servers</dt>
+    <dt class="Description">Linux and Solaris servers (not using GLP)</dt>
     <dd class="Description">
 <pre class="verbatim">
 xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
@@ -3769,28 +3670,14 @@ xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
 <p>One or more of the visuals should say &ldquo;stereo=1&rdquo; and should
 list &ldquo;Pbuffer&rdquo; as one of the &ldquo;Drawable Types.&rdquo;</p>
 
-<p>Run one of the following command sequences on the VirtualGL server
-to determine whether the X display on the client has a suitable visual
-for stereographic rendering, transparent overlays, or Pseudocolor.</p>
+<p>Run the following command sequence on the VirtualGL server to determine
+whether the X display on the client has a suitable visual for stereographic
+rendering, transparent overlays, or Pseudocolor.</p>
 
-<dl class="Description">
-    <dt class="Description">Solaris servers</dt>
-    <dd class="Description">
-<pre class="verbatim">
-xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-/opt/SUNWvgl/bin/glxinfo&nbsp;-v
-</pre>
-
-    </dd>
-    <dt class="Description">Linux servers</dt>
-    <dd class="Description">
 <pre class="verbatim">
 xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
 /opt/VirtualGL/bin/glxinfo&nbsp;-v
 </pre>
-
-    </dd>
-</dl>
 
 <p>In order to use stereo, one or more of the visuals should say &ldquo;stereo=1&rdquo;.
 In order to use transparent overlays, one or more of the visuals should
@@ -3903,11 +3790,10 @@ performance problems with the system.</p>
 
 <p>NetTest is a network benchmark that uses the same network I/O classes
 as VirtualGL.  It can be used to test the latency and throughput of
-any TCP/IP connection, with or without SSL encryption.  The VirtualGL
-Linux package installs NetTest in <code>/opt/VirtualGL/bin</code>.
-The VirtualGL Solaris package installs it in <code>/opt/SUNWvgl/bin</code>.
-The Windows installer installs it in <code>c:\program&nbsp;files\VirtualGL-{version}-{build}</code>
-by default.</p>
+any TCP/IP connection, with or without SSL encryption.  <code>nettest</code>
+can be found in <code>/opt/VirtualGL/bin</code> on Linux or Solaris
+or in <code>c:\program&nbsp;files\VirtualGL-{version}-{build}</code>
+on Windows.</p>
 
 <p>To use NetTest, first start up the nettest server on one end of the
 connection:</p>
@@ -4020,10 +3906,9 @@ with VirtualGL&rsquo;s internal profiling mechanism and with a variety
 of system-specific techniques, such as monitoring redraw events on
 the client&rsquo;s windowing system.</p>
 
-<p>The VirtualGL Linux package installs TCBench in <code>/opt/VirtualGL/bin</code>.
-The VirtualGL Solaris package installs TCBench in <code>/opt/SUNWvgl/bin</code>.
-The Windows installer installs it in <code>c:\program&nbsp;files\VirtualGL-{version}-{build}</code>
-by default.  Run <code>tcbench</code> from the command line, and it
+<p>TCBench can be found in <code>/opt/VirtualGL/bin</code> on Linux or
+Solaris or in <code>c:\program&nbsp;files\VirtualGL-{version}-{build}</code>
+on Windows.  Run <code>tcbench</code> from the command line, and it
 will prompt you to click in the window you want to measure.   That
 window should already have an automated animation of some sort running
 before you launch TCBench.</p>

@@ -59,9 +59,9 @@ mkdir -p $RPM_BUILD_ROOT/usr/lib
 mkdir -p $RPM_BUILD_ROOT/usr/lib64
 %endif
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib
+mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 %ifarch x86_64
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/lib64
+mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 %endif
 mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
@@ -82,10 +82,13 @@ install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
 install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
 %endif
-ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib/libGL.so
+ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
-ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib64/libGL.so
+ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
 %endif
+ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
+ln -fs /usr/bin/vglgenkey $RPM_BUILD_ROOT/opt/%{name}/bin/vglgenkey
+ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
@@ -112,9 +115,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %dir /opt/%{name}
 %dir /opt/%{name}/bin
-%dir /opt/%{name}/lib
+%dir /opt/%{name}/fakelib
 %ifarch x86_64
-%dir /opt/%{name}/lib64
+%dir /opt/%{name}/fakelib/64
 %endif
 
 /usr/bin/vglclient
@@ -128,10 +131,13 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/nettest
 /opt/%{name}/bin/cpustat
 /opt/%{name}/bin/glxinfo
+/opt/%{name}/bin/vglclient
+/opt/%{name}/bin/vglgenkey
+/opt/%{name}/bin/vglrun
 
-/opt/%{name}/lib/libGL.so
+/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
-/opt/%{name}/lib64/libGL.so
+/opt/%{name}/fakelib/64/libGL.so
 %endif
 
 /usr/lib/librrfaker.so

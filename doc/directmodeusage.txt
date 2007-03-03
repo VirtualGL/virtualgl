@@ -22,14 +22,9 @@ maximize performance.
 
 	#. Start the VirtualGL Client program:
 
-		Linux clients :: Open a terminal window and type
+		Linux and Solaris clients :: Open a terminal window and type
 		#Verb: <<---
-		vglclient
-		---
-
-		Solaris clients :: Open a terminal window and type
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vglclient
+		/opt/VirtualGL/bin/vglclient
 		---
 
 		Windows clients :: If the VirtualGL client has not been started as a
@@ -87,14 +82,8 @@ maximize performance.
 
 	#. In the SSh session, start the 3D application using VirtualGL:
 
-		Linux server :: {:}
 		#Verb: <<---
-		vglrun [vglrun options] {application_executable_or_script} {arguments}
-		---
-
-		Solaris server :: {:}
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
@@ -124,14 +113,9 @@ Optimal
 
 	#. Start the VirtualGL Client program:
 
-		Linux clients :: Open a terminal window and type
+		Linux and Solaris clients :: Open a terminal window and type
 		#Verb: <<---
-		vglclient
-		---
-
-		Solaris clients :: Open a terminal window and type
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vglclient
+		/opt/VirtualGL/bin/vglclient
 		---
 
 		Windows clients :: If the VirtualGL client has not been started as a
@@ -212,13 +196,8 @@ Optimal
 
 	#. In the SSh session, start the 3D application using VirtualGL:
 
-		Linux server :: {:}
 		#Verb: <<---
-		vglrun [vglrun options] {application_executable_or_script} {arguments}
-		---
-		Solaris server :: {:}
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
@@ -275,14 +254,8 @@ except that the following additional steps need to be taken:
 	#. Once connected to the VirtualGL server via. SSh, execute the following
 		command:
 
-		Linux server :: {:}
 		#Verb: <<---
 		/opt/VirtualGL/bin/nettest -findport
-		---
-
-		Solaris server :: {:}
-		#Verb: <<---
-		/opt/SUNWvgl/bin/nettest -findport
 		---
 
 	This program will allocate a free TCP port number and print the number to

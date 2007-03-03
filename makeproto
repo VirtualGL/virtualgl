@@ -47,3 +47,4 @@ echo f none SUNWvgl/doc/index.html 0644 root bin
 for i in doc/*.png; do echo f none SUNWvgl/$i 0644 root bin; done
 for i in doc/*.css; do echo f none SUNWvgl/$i 0644 root bin; done
 echo d none SUNWvgl/doc 0755 root bin
+echo s none VirtualGL=SUNWvgl

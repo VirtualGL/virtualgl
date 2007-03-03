@@ -103,14 +103,8 @@ Direct Mode (and several reasons why one might not.)
 
 	#. In the SSh session, start a TurboVNC server session:
 
-		Linux server :: {:}
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncserver
-		---
-
-		Solaris server :: {:}
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vncserver
 		---
 
 	#. Make a note of the X display number that the TurboVNC server process
@@ -125,16 +119,10 @@ Direct Mode (and several reasons why one might not.)
 
 	#. On the client machine, start the TurboVNC Viewer.
 
-		Linux clients :: {:}
+		Linux and Solaris clients :: {:}
 		Open a terminal and type
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncviewer
-		---
-
-		Solaris clients :: {:}
-		Open a terminal and type
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vncviewer
 		---
 
 		Windows clients :: {:}
@@ -165,13 +153,8 @@ Direct Mode (and several reasons why one might not.)
 
 	#. In the terminal, start the 3D application using VirtualGL:
 
-		Linux server :: {:}
 		#Verb: <<---
-		vglrun [vglrun options] {application_executable_or_script} {arguments}
-		---
-		Solaris server :: {:}
-		#Verb: <<---
-		/opt/SUNWvgl/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more

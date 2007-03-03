@@ -78,10 +78,9 @@ problems with the system.
 
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
-connection, with or without SSL encryption.  The VirtualGL Linux package
-installs NetTest in ''/opt/VirtualGL/bin''.  The VirtualGL Solaris package
-installs it in ''/opt/SUNWvgl/bin''.  The Windows installer installs it in
-''c:\\program files\\VirtualGL-{version}-{build}'' by default.
+connection, with or without SSL encryption.  ''nettest'' can be found in
+''/opt/VirtualGL/bin'' on Linux or Solaris or in
+''c:\\program files\\VirtualGL-{version}-{build}'' on Windows.
 
 To use NetTest, first start up the nettest server on one end of the
 connection:
@@ -190,10 +189,8 @@ checked with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
-The VirtualGL Linux package installs TCBench in ''/opt/VirtualGL/bin''.  The
-VirtualGL Solaris package installs TCBench in ''/opt/SUNWvgl/bin''.  The
-Windows installer installs it in
-''c:\\program files\\VirtualGL-{version}-{build}'' by default.  Run ''tcbench''
+TCBench can be found in ''/opt/VirtualGL/bin'' on Linux or Solaris or in
+''c:\\program files\\VirtualGL-{version}-{build}'' on Windows.  Run ''tcbench''
 from the command line, and it will prompt you to click in the window you want
 to measure.   That window should already have an automated animation of some
 sort running before you launch TCBench.
