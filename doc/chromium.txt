@@ -83,16 +83,15 @@ causing Chromium to load VirtualGL rather than the "real" OpenGL library.
 Refer to the following table:
 
 {anchor: CR_SYSTEM_GL_PATH_Table}
-||        || 32-bit Applications     || 64-bit Applications        ||
-| Linux   | ''/opt/VirtualGL/lib''   | ''/opt/VirtualGL/lib64''    |
-| Solaris |	''/opt/SUNWvgl/fakelib'' | ''/opt/SUNWvgl/fakelib/64'' |
-#OPT: hiCol=first note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
+|| 32-bit Applications     || 64-bit Applications        ||
+| ''/opt/VirtualGL/fakelib''   | ''/opt/VirtualGL/fakelib/64''    |
+#OPT: note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
 
 Running the CrServer in VirtualGL is simply a matter of setting this
 environment variable and then invoking ''crserver'' with ''vglrun''.  For example:
 
 #Verb: <<---
-export CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
+export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
 vglrun crserver
 ---
 
@@ -107,7 +106,7 @@ VirtualGL again, and an endless loop will occur.
 So what we want to do is something like this:
 
 #Verb: <<---
-export CR_SYSTEM_GL_PATH=/opt/VirtualGL/lib
+export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
 export VGL_GLLIB=/usr/lib/libGL.so.1
 crappfaker
 ---

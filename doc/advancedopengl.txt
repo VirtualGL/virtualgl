@@ -126,16 +126,10 @@ whether the server has a suitable visual for stereographic rendering:
 
 	Solaris servers (using GLP) :: {:}
 		#Verb: <<---
-		/opt/SUNWvgl/bin/glxinfo -d {glp_device} -v
+		/opt/VirtualGL/bin/glxinfo -d {glp_device} -v
 		---
 
-	Solaris servers (not using GLP) :: {:}
-		#Verb: <<---
-		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
-		/opt/SUNWvgl/bin/glxinfo -display :0 -c -v
-		---
-
-	Linux servers :: {:}
+	Linux and Solaris servers (not using GLP) :: {:}
 		#Verb: <<---
 		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
 		/opt/VirtualGL/bin/glxinfo -display :0 -c -v
@@ -144,21 +138,14 @@ whether the server has a suitable visual for stereographic rendering:
 One or more of the visuals should say "stereo=1" and should list "Pbuffer"
 as one of the "Drawable Types."
 
-Run one of the following command sequences on the VirtualGL server to determine
+Run the following command sequence on the VirtualGL server to determine
 whether the X display on the client has a suitable visual for stereographic
 rendering, transparent overlays, or Pseudocolor.
 
-	Solaris servers :: {:}
-		#Verb: <<---
-		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
-		/opt/SUNWvgl/bin/glxinfo -v
-		---
-
-	Linux servers :: {:}
-		#Verb: <<---
-		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
-		/opt/VirtualGL/bin/glxinfo -v
-		---
+	#Verb: <<---
+	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+	/opt/VirtualGL/bin/glxinfo -v
+	---
 
 In order to use stereo, one or more of the visuals should say "stereo=1".
 In order to use transparent overlays, one or more of the visuals should say

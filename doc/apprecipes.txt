@@ -90,7 +90,7 @@
 		If you are using Java v6 b92 or later, you can also set the environment \
 		variable ''J2D_ALT_LIBGL_PATH'' to the path of ''librrfaker.so''.  For example: \
 		{nl}{nl} \
-		''setenv J2D_ALT_LIBGL_PATH /opt/SUNWvgl/lib/librrfaker.so''{nl} \
+		''setenv J2D_ALT_LIBGL_PATH /opt/VirtualGL/lib/librrfaker.so''{nl} \
 		''vglrun java -Dsun.java2d.opengl=True MyAppClass'' \
 		{nl}{nl} \
 	| See {ref prefix="Chapter ": dlopen} for more details \
