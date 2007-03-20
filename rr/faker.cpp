@@ -989,6 +989,13 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	{
 		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
 			return NULL;
+		if(!glXIsDirect(_localdpy, ctx))
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]     %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+			rrout.println("[VGL]     If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+			rrout.println("[VGL]     permissions may be set incorrectly.");
+		}
 	}
 	ctxh.add(ctx, config);
 
