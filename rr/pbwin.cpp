@@ -278,7 +278,7 @@ void pbwin::swapbuffers(void)
 	if(_pb) _pb->swap();
 }
 
-void pbwin::readback(GLint drawbuf, bool force, bool sync)
+void pbwin::readback(GLint drawbuf, bool force, bool spoillast, bool sync)
 {
 	fconfig.reloadenv();
 	int compress=fconfig.compress;  bool dostereo=false;
@@ -297,6 +297,8 @@ void pbwin::readback(GLint drawbuf, bool force, bool sync)
 		unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 		if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
 		if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
+		if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle) && !force)
+			return;
 		if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
 			&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
 		int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
