@@ -651,7 +651,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 		glRasterPos2i(dest_x, dsth-dest_y-i-1);
 		glCopyPixels(src_x, srch-src_y-i-1, w, 1, GL_COLOR);
 	}
-	glFlush();  // call faked function here, so it will perform a readback
+	glFinish();  // call faked function here, so it will perform a readback
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
@@ -869,7 +869,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(drawable==0 || !winh.findpb(dpy, drawable, newpbw)
 		|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
+			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true, false, false);
 		}
 	}
 
@@ -995,6 +995,13 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	{
 		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
 			return NULL;
+		if(!glXIsDirect(_localdpy, ctx))
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]     %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+			rrout.println("[VGL]     If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+			rrout.println("[VGL]     permissions may be set incorrectly.");
+		}
 	}
 	ctxh.add(ctx, config);
 
@@ -1036,7 +1043,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
 			|| newpbw->getdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true);
+			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, true, false, false);
 		}
 	}
 
@@ -1305,7 +1312,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
-		pbw->readback(GL_BACK, false);
+		pbw->readback(GL_BACK, false, false, false);
 		pbw->swapbuffers();
 	}
 	else
@@ -1322,7 +1329,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	CATCH();
 }
 
-static void _doGLreadback(bool force, bool sync=false)
+static void _doGLreadback(bool force, bool spoillast, bool sync)
 {
 	pbwin *pbw;
 	GLXDrawable drawable;
@@ -1334,9 +1341,9 @@ static void _doGLreadback(bool force, bool sync=false)
 		if(_drawingtofront() || pbw->_dirty)
 		{
 				opentrace(_doGLreadback);  prargx(pbw->getdrawable());  prargi(sync);
-				prargi(force);  starttrace();
+				prargi(spoillast);  prargi(force);  starttrace();
 
-			pbw->readback(GL_FRONT, force, sync);
+			pbw->readback(GL_FRONT, force, spoillast, sync);
 
 				stoptrace();  closetrace();
 		}
@@ -1350,7 +1357,7 @@ void glFlush(void)
 		if(fconfig.trace) rrout.print("[VGL] glFlush()\n");
 
 	_glFlush();
-	_doGLreadback(false);
+	_doGLreadback(false, true, false);
 	CATCH();
 }
 
@@ -1361,8 +1368,8 @@ void glFinish(void)
 		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
 
 	_glFinish();
-	if(fconfig.sync) _doGLreadback(true, true);
-	else _doGLreadback(false);
+	if(fconfig.sync) _doGLreadback(true, false, true);
+	else _doGLreadback(false, false, false);
 	CATCH();
 }
 
@@ -1375,8 +1382,8 @@ void glXWaitGL(void)
 	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
 
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this to avoid 2 readbacks
-	if(fconfig.sync) _doGLreadback(true, true);
-	else _doGLreadback(false);
+	if(fconfig.sync) _doGLreadback(true, false, true);
+	else _doGLreadback(false, false, false);
 	CATCH();
 }
 
