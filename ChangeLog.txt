@@ -1,0 +1,443 @@
+===============================================================================
+Significant changes between 2.0 final and 2.0.1
+===============================================================================
+[1]
+The Linux and Solaris versions of VirtualGL are now statically linked with
+OpenSSL.  This fixes an issue whereby a 3D application that uses OpenSSL could
+override VirtualGL's SSL bindings, thus causing VirtualGL to crash if SSL was
+enabled (VGL_SSL=1 or vglrun +s) and if the application's version of OpenSSL
+was incompatible with VirtualGL's.
+
+This, combined with [5] below, has the added benefit of allowing a single
+VirtualGL RPM to be used across multiple Linux platforms.  It is no longer
+necessary to use a separate RPM for different versions of Enterprise Linux,
+SuSE, etc.
+-------------------------------------------------------------------------------
+[2]
+librrfaker.so and libturbojpeg.so are now being linked with map files (AKA
+“anonymous version scripts” on Linux.)  This is mainly a preventative measure,
+because it hides any non-global symbols in the shared objects, thus preventing
+those symbols from accidentally interposing on a symbol in an application or
+in another shared object.  However, [2] was also necessary to prevent [1] from
+causing the opposite problem from the one it was intended to fix (without [2],
+VirtualGL could interpose on an application's SSL bindings rather than vice
+versa.)
+
+Linux users will need to upgrade to TurboJPEG 1.04.2 (or later) to get this
+fix.  For other platforms, the fix is included in the VGL 2.0.1 packages.
+-------------------------------------------------------------------------------
+[3]
+librr.so, rr.h, and the rrglxgears.c sample application have been removed from
+the distribution packages.  These demonstrated a strawman API for creating a
+VGL movie player.  The API was somewhat ill-conceived and broken, and it needs
+to be revisited.
+-------------------------------------------------------------------------------
+[4]
+VirtualGL's custom version of glxinfo is now included in the distribution
+packages, under /opt/{SUNWvgl|VirtualGL}/bin.  This version of glxinfo supports
+GLP on Sparc servers and also has the ability to query GLX FB Configs as well
+as X visuals.
+-------------------------------------------------------------------------------
+[5]
+VGL now uses direct linking to link against libCrun on Solaris and static
+linking to link against libstdc++ on Linux.  This is to prevent a problem
+similar to [1] in which an application that overrides the default C++ new and
+delete operators could force VGL to use its custom new and delete operators
+rather than the default operators provided in libCrun/libstdc++.  Specifically,
+this addresses an issue whereby Pro/E would spuriously crash on multi-processor
+Solaris/Sparc machines.
+
+libstdc++ is statically linked on Linux because Linux has no equivalent of
+Direct linking, but static linking against libstdc++ has the added benefit of
+allowing one VirtualGL RPM to be used across multiple Linux platforms.
+-------------------------------------------------------------------------------
+[6]
+Eliminated the use of the X DOUBLE-BUFFER extension in Raw Mode and replaced it
+instead with X Pixmap drawing.  Previously, VGL would try to use the MIT-SHM
+extension to draw images in Raw Mode, then it would fall back to using the X
+DOUBLE-BUFFER extension if MIT-SHM was not available or could not be used (such
+as on a remote X connection), then it would fall back to single buffered
+drawing if DOUBLE-BUFFER could not be used.  However, the DOUBLE-BUFFER
+extension crashes on some Sun Ray configurations (specifically Xinerama
+configurations), so VGL 2.0 disabled the use of DOUBLE-BUFFER on all Sun Ray
+configurations to work around this issue.  [6] replaces that hack with a more
+solid fix that ensures that Raw Mode is always double buffered, even if the X
+DOUBLE-BUFFER extension is not available or is not working.  Using pixmap
+drawing performs the same as using DOUBLE-BUFFER.
+
+This generally only affects cases in which Raw Mode is used to transmit images
+over a network.  When Raw Mode is used to transmit images to an X server on the
+same machine, it is almost always able to use the MIT-SHM X extension.
+-------------------------------------------------------------------------------
+[7]
+Numerous doc changes, including:
+  -- Restructuring docs to create a more clear delineation between what needs
+     to be done on the server and what needs to be done on the client.
+  -- (Re-)added instructions for how to use VGL with a direct X11 connection,
+     since it has become apparent that that configuration is necessary in
+     some cases.
+  -- Changed procedure for doing Direct Mode SSh tunneling.  The previous
+     procedure would not have worked if multiple users were trying to tunnel
+     Direct Mode from the same server.  The new procedure requires running a
+     program (see [8] below) which prints out an available TCP port and using
+     that port on the server end of the SSh tunnel.
+  -- Added app recipe for ANSA 12.1.0
+  -- Added procedures for using VGL with TurboVNC and for using TurboVNC in
+     general
+  -- Added information for using VGL with GLP (which, unbelievably, was never
+     really included in the VGL docs.  Major oversight on our part.)
+-------------------------------------------------------------------------------
+[8]
+Modified the 'nettest' program such that it finds a free TCP port number and
+prints out the port number to the console when you pass an argument of
+'-findport' to the program.
+-------------------------------------------------------------------------------
+[9]
+Fixed glXGetProcAddressARB() and glXGetProcAddress() on Sparc platforms.  Due
+to an erroneous #ifdef statement, these interposed functions were not getting
+compiled into VirtualGL when VirtualGL was built with Sun OpenGL on Sparc
+platforms.
+
+This, combined with [16], allows Java2D apps running in VirtualGL on Sparc
+platforms to successfully use the OpenGL pipeline to perform Java2D rendering.
+-------------------------------------------------------------------------------
+[10]
+Sun OpenGL 120812-15 (and later) now includes a SwapBuffers() command for GLP,
+which VirtualGL will now use if available.  Some applications that use front
+buffer drawing (Pro/E and UGS/NX v4, specifically) did not work properly with
+VirtualGL 2.0 in GLP mode because the back buffer in the double-buffered
+Pbuffer was not being swapped.
+-------------------------------------------------------------------------------
+[11]
+Some applications call XListExtensions() rather than XQueryExtension() to probe
+for the existence of the GLX extension.  Such applications, when displaying to
+VNC or another X server that lacks the GLX extension, would fail.  VirtualGL
+now interposes on XListExtensions() and makes sure that the GLX extension is
+always reported as present.  This fixes a specific issue with UGS/NX v4 whereby
+NX, if run with VirtualGL and TurboVNC, would refuse to use OpenGL to perform
+its 3D rendering.
+-------------------------------------------------------------------------------
+[12]
+VGL will now print a warning if the GLX context it obtains on the server's
+display is indirect.  This will occur on Solaris if the framebuffer device
+permissions do not allow read/write access for the current user.
+-------------------------------------------------------------------------------
+[13]
+Normally, if X11 drawing is the default in the VGL client (which is the case
+on non-Sparc systems, on Sparc systems with 2D framebuffers, or on any system
+if 'vglclient' is invoked with the '-x' argument), then the VGL client will
+only use OpenGL for drawing stereo frames.  [13] fixes a bug whereby the VGL
+client would not switch back to X11 drawing (if X11 drawing was the default)
+after the app ceased rendering in stereo.
+-------------------------------------------------------------------------------
+[14]
+You can now specify a listen port number of 0 to make the VGL client pick an
+available port.  This is of only marginal use at the moment, since there is
+no way to make the server automatically connect to that port.  But we got this
+for free as a result of [8].
+-------------------------------------------------------------------------------
+[15]
+Fixed an issue that was causing the multi-threaded tests in rrfakerut to crash
+some of the NVidia 7xxx series drivers.  rrfakerut should now run cleanly on
+the 7xxx series, but the multi-threaded tests still cause the 8xxx series
+drivers to crash & burn, and they cause the 9xxx series drivers to generate
+incorrect pixels.  Further investigation is needed.
+-------------------------------------------------------------------------------
+[16]
+Fixed two issues to make Java2D on Solaris/Sparc properly detect that OpenGL is
+available:
+  -- Made glXChooseFBConfig() ignore the GLX_VISUAL_ID attribute.  That
+     attribute doesn't really have any meaning in VGL, and passing it through
+     to the server's X display was causing Java2D apps to fail.
+  -- Made glXGetFBConfigAttrib(GLX_DRAWABLE_TYPE) always return
+     GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT so that Java2D apps would
+     properly detect that window rendering was available in VirtualGL.
+-------------------------------------------------------------------------------
+[17]
+vglrun will now print usage information if you fail to provide an application
+command to run.
+-------------------------------------------------------------------------------
+[18]
+Upgraded the OpenSSL DLL included with the Windows VirtualGL client to OpenSSL
+0.9.8d (previously 0.9.8c.)
+-------------------------------------------------------------------------------
+[19]
+VirtualGL now buffers the output from the profiler class so that the profiling
+output from multiple compression threads doesn't intermingle when redirected to
+a log file.
+-------------------------------------------------------------------------------
+[20]
+If the DISPLAY environment variable is unset on the VirtualGL server, vglrun
+will now set it automatically to {ssh_client}:0.0 (where {ssh_client} = the IP
+address of the SSh client.)  If DISPLAY is set to localhost:n.0 or
+`hostname`:n.0, VGL assumes that SSh X11 forwarding is in use and sets
+VGL_CLIENT={ssh_client}:0.0 instead (without modifying DISPLAY.)  vglrun prints
+a warning that it is doing this.  You must still explicitly set VGL_CLIENT or
+DISPLAY if you are doing something exotic, such as tunneling VGL's
+client/server connection through SSh or displaying to an X server with a
+display number other than 0.  But this fix should eliminate the need to set
+VGL_CLIENT and DISPLAY in most cases.  Note that the Sun Ray plugin also reads
+the VGL_CLIENT environment variable, so if you are connecting to the VirtualGL
+server from a Sun Ray server using SSh X11 forwarding, this eliminates the need
+to explicitly set VGL_CLIENT in that case as well.
+-------------------------------------------------------------------------------
+[21]
+Implement the “spoil last frame” algorithm in the Sun Ray plugin whenever VGL
+reads back/compresses/sends the framebuffer in response to a glFlush().  This
+fixes issues with slow model regeneration and zoom operations in Pro/E when
+using the Sun Ray plugin.
+
+Normally, the Sun Ray plugin uses the "spoil first frame" algorithm, which
+causes the frames in the queue to be discarded whenever a new frame is
+received.  But this algorithm requires that the framebuffer be read back for
+every frame, even if that frame is ultimately going to be spoiled.  This
+causes problems with applications (Pro/E, specifically) that call glFlush()
+frequently when doing front buffer drawing.  Each of these glFlush() calls
+triggers a framebuffer readback in VirtualGL, which can cause significant
+interaction delays in the application.  The "spoil last frame" algorithm
+discards the newest frame if the queue is currently busy, so when this
+algorithm is used, most of the duplicate frames triggered by the repeated
+glFlush() events are discarded with no framebuffer readback (and thus very
+little overhead.)
+
+This fix does not affect Direct Mode and Raw Mode, since those modes already
+use the "spoil last frame" algorithm in all cases.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 2.0beta3 and 2.0 final:
+===============================================================================
+[1]
+Included libturbojpeg.dylib in Mac package (so that installing the TurboJPEG
+package is no longer necessary unless you want to rebuild VGL from source.)
+-------------------------------------------------------------------------------
+[2]
+Included TCBench and NetTest in the Mac package
+-------------------------------------------------------------------------------
+[3]
+Internal gamma correction system added.  This was a last-minute feature
+addition to address the issue that there was no way to gamma correct
+applications that were remotely displayed to non-Sparc clients.  Sparc users
+are accustomed to OpenGL applications being gamma corrected by default, so
+VirtualGL now mimics this behavior whenever it is running on a Sparc server,
+even if the client machine is not a Sparc machine.
+
+The behavior of the VGL_GAMMA environment variable has changed as follows:
+
+VGL_GAMMA=1 (or vglrun +g):
+  Enable gamma correction using the best available method.  If displaying to a
+  Sparc X server which has gamma corrected visuals, try to use those gamma-
+  corrected visuals.  Otherwise, enable VGL's internal gamma correction system
+  with a gamma correction factor of 2.22.
+
+  This is the default when running applications on Sparc VirtualGL servers.
+
+VGL_GAMMA=0 (or vglrun -g):
+  Do not use gamma-corrected visuals (even if available on the X server) and do
+  not use VGL's internal gamma correction system.
+
+  This is the default when running applications on non-Sparc VirtualGL servers.
+
+VGL_GAMMA={f} (or vglrun -gamma {f}):
+  Do not use gamma-corrected visuals (even if available on the client), but
+  enable VGL's internal gamma correction system with a gamma correction factor
+  of {f}.
+
+The internal gamma correction system uses a few percent more CPU cycles than
+just compressing the images alone, but this has not been shown to affect the
+overall performance of VGL by a measurable amount.
+
+See the "VGL_GAMMA" entry in Chapter 18 of the docs for more info.
+-------------------------------------------------------------------------------
+[4]
+Increased the size of the TurboJPEG compression holding buffer to account for
+rare cases in which compressing very high-frequency image tiles (specifically
+parts of the 3D Studio MAX Viewperf test) with high quality levels
+(specifically Q99 or above) would produce JPEG images that are larger than the
+uncompressed input.
+
+Linux users will need to upgrade to TurboJPEG 1.04 (or later) to get this fix.
+For other platforms, the fix is included in the VGL 2.0 packages.
+-------------------------------------------------------------------------------
+[5]
+Minor documentation changes, including a change to the recommended OpenGL
+patches for Sparc VGL servers and an application recipe for SDRC I-deas Master
+Series.
+-------------------------------------------------------------------------------
+[6]
+Check for exceptions in the new operator to prevent VGL from dying ungracefully
+in out-of-memory situations.
+-------------------------------------------------------------------------------
+[7]
+Fixed a bug in the multi-threaded compression code whereby it would use too
+much memory to hold the image tiles for the second and subsequent compression
+threads.  This led to memory exhaustion if the tile size was set to a low value
+(such as 16x16 or 32x32.)
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 2.0beta2 and 2.0beta3:
+===============================================================================
+[1]
+Solaris packages now include the OpenSSL shared libraries (libssl and
+libcrypto), thus eliminating the need to install Blastwave OpenSSL on Solaris 9
+and prior.
+-------------------------------------------------------------------------------
+[2]
+Packages now include a convenience script (vglgenkey) which will generate an
+xauth key for the server's X display.  This provides a more secure way of
+granting access to the server's X display than using 'xhost +localhost'.
+-------------------------------------------------------------------------------
+[3]
+Built and packaged the VirtualGL client for Mac OS/X (Intel only.)  This
+package is currently undocumented and includes only the VGL client (no server
+components), but its usage should be self explanatory for those familiar with
+VGL on other platforms (it should work very similarly to the Linux version.)
+-------------------------------------------------------------------------------
+[4]
+Normally, when running in Raw Mode, VirtualGL will try to use the MIT-SHM X
+extension to draw images.  If MIT-SHM is not available or doesn't work (which
+would be the case if the X connection is remote), then VGL will try to use
+the X DOUBLE-BUFFER extension.  Failing that, it will fall back to single
+buffered drawing.  In a Sun Ray environment, the X DOUBLE-BUFFER extension
+is unstable when Xinerama is used.  DOUBLE-BUFFER doesn't really double buffer
+in a Sun Ray environment anyhow, so this release of VirtualGL disables the use
+of DOUBLE-BUFFER if it detects that it is running in a Sun Ray environment.
+-------------------------------------------------------------------------------
+[5]
+Reformatted documentation using Deplate (http://deplate.sourceforge.net.)
+Numerous other doc changes as well.
+-------------------------------------------------------------------------------
+[6]
+Extended VGL to support the full GLX 1.4 spec (this involved simply creating
+a function stub for glXGetProcAddress(), but it was necessary to make J2D work
+under Java 6.)
+-------------------------------------------------------------------------------
+[7]
+Changed key sequence for the popup configuration dialog (again) to
+CTRL-SHIFT-F9 to avoid a conflict with Solaris Common Desktop Environment
+-------------------------------------------------------------------------------
+[8]
+VGL no longer tries to switch to Direct Mode automatically whenever a stereo
+frame is rendered.  Instead, if running in Raw Mode, it warns that stereo
+doesn't work in Raw Mode and proceeds to send only the left eye buffer.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 2.0beta1 and 2.0beta2:
+===============================================================================
+[1]
+Added a -dl option to vglrun, which inserts a new libdlfaker.so interposer
+ahead of VirtualGL in the link order.  libdlfaker.so intercepts dlopen() calls
+from an application and, if the application is trying to dlopen() libGL,
+librrfaker.so (VirtualGL) is dlopen()ed instead.  This allows VirtualGL to be
+used seamlessly with applications that do not dynamically link against libGL
+and do not provide any sort of override mechanism.  See the documentation for a
+list of known applications that require the -dl option.
+-------------------------------------------------------------------------------
+[2]
+Bug fixed:  Lazy loading of OpenSSL on Solaris now works properly, so that
+OpenSSL doesn't have to be installed unless VirtualGL is being used in SSL
+mode.
+-------------------------------------------------------------------------------
+[3]
+Added "application recipes" section to docs
+-------------------------------------------------------------------------------
+[4]
+Tweaked FBX library to improve performance of VGL when used with NX and FreeNX.
+-------------------------------------------------------------------------------
+[5]
+Bug fixed:  TurboJPEG for Solaris did not properly handle 4:2:0 decompression
+if no pixel format conversion was required.
+-------------------------------------------------------------------------------
+[6]
+Bug fixed:  Minor (and somewhat esoteric) visual matching bug in GLP mode
+-------------------------------------------------------------------------------
+[7]
+Bug fixed:  In GLX mode, VGL did not properly handle FB configs that had no
+associated X Visual type.
+-------------------------------------------------------------------------------
+[8]
+Stereo now works on Solaris/Sparc servers using kfb framebuffers in both GLP
+and GLX modes.  Sun OpenGL patch 120812-12 (or later) and KFB driver patch
+120928-10 (or later) are required.
+-------------------------------------------------------------------------------
+[9]
+Bug fixed:  In GLX mode, some of the "real" GLX functions that VirtualGL calls
+on the server's X display will in turn call glXGetClientString(),
+glXQueryExtensions(), etc. to list extensions available on the server's
+X display.  VirtualGL interposes on these functions and returns its own
+extension strings rather than the "real" strings from the server's X display,
+and this caused problems under certain circumstances.  These interposed
+functions will now detect whether they are being called from within another
+GLX function and will return the "real" extension strings for the server's X
+display if so.
+-------------------------------------------------------------------------------
+[10]
+Generally friendlier error messages
+-------------------------------------------------------------------------------
+[11]
+Bug fixed:  Destroying an overlay window would cause VGL to seg fault.
+-------------------------------------------------------------------------------
+[12]
+Changed configuration dialog popup key sequence to CTRL-SHIFT-F12 to avoid
+conflict with KDE.
+-------------------------------------------------------------------------------
+[13]
+Added VGL_GUI_XTHREADINIT environment variable to allow one to disable VGL's
+use of XtToolkitThreadInitialize().  Rarely, a multi-threaded Motif application
+relies on its own locking mechanisms and will deadlock if Motif's built-in
+application and process locks are enabled.  Thus far, the only known
+application that this affects is VisConcept.  Set VGL_GUI_XTHREADINIT to 0 to
+prevent VisConcept from deadlocking when the VGL config dialog is activated.
+-------------------------------------------------------------------------------
+[14]
+VirtualGL will no longer allow a non-TrueColor stereo visual to be selected,
+because such visuals won't work with the VGL client.  Color index (PseudoColor)
+rendering requires Raw Mode, but stereo requires Direct Mode, and thus
+VirtualGL cannot transmit PseudoColor images in stereo.
+-------------------------------------------------------------------------------
+[15]
+VirtualGL will now automatically select Raw Mode if it detects that it is
+running on a "local" display (i.e. ":n.0", "unix:n.0", etc., but not
+"localhost:n.0")  This allows users of X proxies such as Sun Ray, TurboVNC,
+NX, etc. to run VirtualGL without having to pass an argument of -c 0 to vglrun.
+"localhost:n.0" is not considered a "local" display, and neither is
+"`hostname`:n.0", because display connections tunneled through SSh will have a
+display name that takes on one of those forms.
+-------------------------------------------------------------------------------
+[16]
+The VirtualGL client for Solaris/Sparc will now automatically detect if it
+is running on a framebuffer that uses software OpenGL and will default to using
+X11 drawing in that case.  Otherwise, if hardware-accelerated OpenGL is
+available, then the VGL client for Solaris/Sparc will try to use OpenGL as the
+default drawing method.  This improves performance on XVR-100 and its ilk as
+well as working around a bug in the OGL implementation on XVR-100 (see CR
+6408535.)  Non-Sparc clients still use X11 drawing by default, except when
+drawing stereo frames.
+-------------------------------------------------------------------------------
+[17]
+Worked around some issues in Sun OpenGL which manifested themselves in
+instability of the Sparc VirtualGL client when drawing large numbers of
+simultaneous frames from different servers.
+-------------------------------------------------------------------------------
+[18]
+Expanded N1 GridEngine hooks in vglrun so that the VGL_CLIENT, VGL_COMPRESS,
+VGL_PORT, VGL_SSL, VGL_GLLIB, and VGL_X11LIB environment variables will be
+automatically passed to vglrun by N1GE.  All other variables must be explicitly
+passed by using the -v option to qsub.
+-------------------------------------------------------------------------------
+[19]
+Bug fixed:  Lazy loading of OpenGL now works properly on Solaris clients, so
+vglclient can be run on machines that don't have OpenGL installed.
+-------------------------------------------------------------------------------
+[20]
+For some reason, popping up the VGL configuration dialog when running Java
+apps caused VGL's Xt resource string to be ignored, which would cause the
+widgets to be displayed incorrectly.  So VirtualGL now explicitly specifies the
+resources when creating each widget and doesn't rely on the use of a resource
+string.
+-------------------------------------------------------------------------------

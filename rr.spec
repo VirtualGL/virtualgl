@@ -87,7 +87,7 @@ ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib/libGL.so
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/lib64/libGL.so
 %endif
 
-chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
 echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
@@ -108,7 +108,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %files -n %{name}
 %defattr(-,root,root)
-%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
 %dir /opt/%{name}
 %dir /opt/%{name}/bin

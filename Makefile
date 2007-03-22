@@ -93,6 +93,7 @@ install: rr
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
+	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
@@ -118,6 +119,7 @@ install: rr diags mesademos
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
+	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
 	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
@@ -262,7 +264,7 @@ macpkg: rr diags mesademos
 	install -m 755 $(EDIR)/glxinfo $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
 	install -m 755 /usr/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
 	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/usr/bin/vglclient
-	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
+	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
 	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
 	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
 	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
