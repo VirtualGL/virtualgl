@@ -27,6 +27,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
 	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
 	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
+	File "/oname=doc\ChangeLog.txt" "ChangeLog.txt"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
