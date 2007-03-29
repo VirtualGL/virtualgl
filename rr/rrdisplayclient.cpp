@@ -211,6 +211,12 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
 	return b;
 }
 
+bool rrdisplayclient::frameready(void)
+{
+	if(_t) _t->checkerror();
+	return(_q.items()<=0);
+}
+
 static void __rrdisplayclient_spoilfct(void *b)
 {
 	if(b) ((rrframe *)b)->complete();

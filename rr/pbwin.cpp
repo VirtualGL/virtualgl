@@ -283,7 +283,7 @@ void pbwin::swapbuffers(void)
 	if(_pb) _pb->swap();
 }
 
-void pbwin::readback(GLint drawbuf, bool sync)
+void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 {
 	fconfig.reloadenv();
 	ConfigCompress compress(_windpy, _usesunray);
@@ -341,6 +341,8 @@ void pbwin::readback(GLint drawbuf, bool sync)
 			unsigned char *bitmap=NULL;  int pitch, bottomup, format;
 			if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
 			if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
+			if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle))
+				return;
 			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
 				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
 			f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
@@ -377,6 +379,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
 				fconfig.client:DisplayString(_windpy)));
+			if(spoillast && fconfig.spoil && !_rrdpy->frameready()) return;
 			rrframe *b;
 			int flags=RRBMP_BOTTOMUP, format=GL_RGB;
 			#ifdef GL_BGR_EXT
@@ -417,6 +420,7 @@ void pbwin::readback(GLint drawbuf, bool sync)
 			}
 			rrfb *b;
 			if(!_blitter) errifnot(_blitter=new rrblitter());
+			if(spoillast && fconfig.spoil && !_blitter->frameready()) return;
 			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
 			b->_flags|=RRBMP_BOTTOMUP;
 			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);

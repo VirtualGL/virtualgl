@@ -39,6 +39,7 @@ class rrdisplayclient : public Runnable
 	}
 
 	rrframe *getbitmap(int, int, int, int, bool stereo, bool spoil);
+	bool frameready(void);
 	void sendframe(rrframe *);
 	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);

@@ -77,6 +77,9 @@ static _RRSunRayGetErrorType _RRSunRayGetError=NULL;
 typedef int (*_RRSunRayDestroyType)(void *);
 static _RRSunRayDestroyType _RRSunRayDestroy=NULL;
 
+typedef int (*_RRSunRayFrameReadyType)(void *);
+static _RRSunRayFrameReadyType _RRSunRayFrameReady=NULL;
+
 static bool init=false;
 
 // 1=success, 0=failure
@@ -109,6 +112,7 @@ static int loadsunraysymbols(bool fatal)
 	lsym(RRSunRaySendFrame)
 	lsym(RRSunRayGetError)
 	lsymopt(RRSunRayDestroy)
+	lsymopt(RRSunRayFrameReady)
 	init=true;
 	return 1;
 }
@@ -154,6 +158,12 @@ int RRSunRayDestroy(void* handle)
 {
 	if(!_RRSunRayDestroy) {if(!loadsunraysymbols(true)) return -1;}
 	return _RRSunRayDestroy(handle);
+}
+
+int RRSunRayFrameReady(void *handle)
+{
+	if(!_RRSunRayFrameReady) return 1;
+	return _RRSunRayFrameReady(handle);
 }
 
 }

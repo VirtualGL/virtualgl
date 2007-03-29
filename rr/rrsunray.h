@@ -90,6 +90,19 @@ unsigned char *
 */
 
 int
+	RRSunRayFrameReady(void *handle);
+/*
+   Returns 1 if the plugin is ready to deliver a new frame immediately or
+   0 if it is currently processing a frame and a new frame would have to be
+   queued for transmission.  This function is used to implement the "spoil last
+   frame" spoiling algorithm.
+
+   PARAMETERS:
+   handle (IN) = instance handle (returned from a previous call to
+                 RRSunRayInit())
+*/
+
+int
 	RRSunRaySendFrame (void *handle, unsigned char *bitmap, int width,
 		int height, int pitch, int format, int bottomup);
 /*

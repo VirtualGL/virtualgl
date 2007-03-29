@@ -101,6 +101,12 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h, bool spoil)
 	return b;
 }
 
+bool rrblitter::frameready(void)
+{
+	if(_t) _t->checkerror();
+	return(_q.items()<=0);
+}
+
 static void __rrblitter_spoilfct(void *b)
 {
 	if(b) ((rrfb *)b)->complete();
