@@ -95,8 +95,9 @@ static int __shutdown=0;
 static inline int isdead(void)
 {
 	int retval=0;
-	rrcs::safelock l(globalmutex);
+	globalmutex.lock(false);
 	retval=__shutdown;
+	globalmutex.unlock(false);
 	return retval;
 }
 
