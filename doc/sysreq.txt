@@ -39,7 +39,7 @@
 				[[http://www.centos.org/][CentOS]], and \
 				[[http://www.whiteboxlinux.org/][White Box]])} \
 			{item:Specifically tested with RedHat Enterprise Linux 2.1, RedHat/CentOS \
-				Enterprise Linux 3 & 4 (32-bit and 64-bit), and SuSE Linux Enterprise \
+				Enterprise Linux 3, 4, & 5 (32-bit and 64-bit), and SuSE Linux Enterprise \
 				9 & 10 (32-bit and 64-bit)}} \
 	| < \
 	| < \

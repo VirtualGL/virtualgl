@@ -89,7 +89,7 @@ server by replacing the references to ''vglgenkey'' below with
 			{nl} \
 			(usually this is just symlinked to ''/etc/X11/xdm/Xsetup_0'') \
 		|
-		| Enterprise Linux 4{nl}Fedora Core 1/2/3 \
+		| Enterprise Linux 4{nl}Fedora 1-4 \
 		| ''/etc/X11/xdm/Xsetup_0''{nl} \
 			{nl} \
 			(replace "0" with the display number of the X server you are \
@@ -97,6 +97,13 @@ server by replacing the references to ''vglgenkey'' below with
 		| ''/etc/X11/gdm/Init/:0''{nl} \
 			{nl} \
 			(usually this is just symlinked to ''/etc/X11/xdm/Xsetup_0'') \
+		|
+		| Enterprise Linux 5{nl}Fedora 5 & 6 \
+		| ''/etc/X11/xdm/Xsetup_0''{nl} \
+			{nl} \
+			(replace "0" with the display number of the X server you are \
+			configuring) \
+		| ''/etc/gdm/Init/Default''{nl} \
 		|
 		| SuSE/United Linux \
 		| ''/etc/X11/xdm/Xsetup'' \
@@ -126,9 +133,14 @@ server by replacing the references to ''vglgenkey'' below with
 		manager being used.   The following table lists some common locations:{nl}
 		{nl}
 		|| || xdm || gdm{nl}{,(default on most Linux systems)} || kdm ||
-		| RedHat (or equivalent) \
+		| RedHat 7/8/9{nl}Enterprise Linux 2.1/3/4{nl}Fedora 1-4 \
 		| ''/etc/X11/xdm/Xservers'' \
 		| ''/etc/X11/gdm/gdm.conf'' \
+		| ''/etc/X11/xdm/Xservers'' \
+		|
+		| Enterprise Linux 5{nl}Fedora 5 & 6 \
+		| ''/etc/X11/xdm/Xservers'' \
+		| ''/etc/gdm/custom.conf'' \
 		| ''/etc/X11/xdm/Xservers'' \
 		|
 		| SuSE/United Linux \
