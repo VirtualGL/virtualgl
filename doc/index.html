@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-03-02T16:58:02-06:00">
+<meta name="date" content="2007-03-30T16:02:08-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -529,8 +529,8 @@ and to provide keyboard/mouse interaction.</p>
 </li>
 <li>
     Specifically tested with RedHat Enterprise Linux 2.1, RedHat/CentOS
-    Enterprise Linux 3 &amp; 4 (32-bit and 64-bit), and SuSE Linux Enterprise
-    9 &amp; 10 (32-bit and 64-bit)
+    Enterprise Linux 3, 4, &amp; 5 (32-bit and 64-bit), and SuSE Linux
+    Enterprise 9 &amp; 10 (32-bit and 64-bit)
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -1274,9 +1274,14 @@ vglgenkey
             <td class="standard"><code>/etc/X11/gdm/Init/Default</code><br /> <br /> (usually this is just symlinked to <code>/etc/X11/xdm/Xsetup_0</code>)</td>
           </tr>
           <tr class="standard">
-            <td class="high standard">Enterprise Linux 4<br />Fedora Core 1/2/3</td>
+            <td class="high standard">Enterprise Linux 4<br />Fedora 1-4</td>
             <td class="standard"><code>/etc/X11/xdm/Xsetup_0</code><br /> <br /> (replace &ldquo;0&rdquo; with the display number of the X server you are configuring)</td>
             <td class="standard"><code>/etc/X11/gdm/Init/:0</code><br /> <br /> (usually this is just symlinked to <code>/etc/X11/xdm/Xsetup_0</code>)</td>
+          </tr>
+          <tr class="standard">
+            <td class="high standard">Enterprise Linux 5<br />Fedora 5 &amp; 6</td>
+            <td class="standard"><code>/etc/X11/xdm/Xsetup_0</code><br /> <br /> (replace &ldquo;0&rdquo; with the display number of the X server you are configuring)</td>
+            <td class="standard"><code>/etc/gdm/Init/Default</code><br /></td>
           </tr>
           <tr class="standard">
             <td class="high standard">SuSE/United Linux</td>
@@ -1320,9 +1325,15 @@ DisallowTCP=false
           </tr>
           </thead>
           <tr class="standard">
-            <td class="high standard">RedHat (or equivalent)</td>
+            <td class="high standard">RedHat 7/8/9<br />Enterprise Linux 2.1/3/4<br />Fedora 1-4</td>
             <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
             <td class="standard"><code>/etc/X11/gdm/gdm.conf</code></td>
+            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="high standard">Enterprise Linux 5<br />Fedora 5 &amp; 6</td>
+            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
+            <td class="standard"><code>/etc/gdm/custom.conf</code></td>
             <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
           </tr>
           <tr class="standard">
