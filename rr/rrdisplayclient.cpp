@@ -48,6 +48,8 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 				rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
 		}
 	}
+	if((_v.major<2 || (_v.major==2 && _v.minor<1)) && h.compress!=RRCOMP_JPEG)
+		_throw("This compression mode requires VirtualGL Client v2.1 or later");
 	if(eof) h.flags=RR_EOF;
 	if(_v.major==1 && _v.minor==0)
 	{
@@ -239,7 +241,7 @@ void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
-	bool bu=false;  rrjpeg jpg;
+	bool bu=false;  rrcompframe cf;
 	if(!b) return;
 	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
 	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.height;
@@ -258,29 +260,29 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			if(n%_np!=_myrank) continue;
 			if(b->tileequals(lastb, x, y, w, h)) continue;
 			rrframe *rrb=b->gettile(x, y, w, h);
-			rrjpeg *jptr=NULL;
-			if(_myrank>0) {errifnot(jptr=new rrjpeg());}
-			else jptr=&jpg;
+			rrcompframe *c=NULL;
+			if(_myrank>0) {errifnot(c=new rrcompframe());}
+			else c=&cf;
 			_prof_comp.startframe();
-			*jptr=*rrb;
+			*c=*rrb;
 			double frames=(double)(rrb->_h.width*rrb->_h.height)
 				/(double)(rrb->_h.framew*rrb->_h.frameh);
 			_prof_comp.endframe(rrb->_h.width*rrb->_h.height, 0, frames);
-			_bytes+=jptr->_h.size;  if(jptr->_stereo) _bytes+=jptr->_rh.size;
+			_bytes+=c->_h.size;  if(c->_stereo) _bytes+=c->_rh.size;
 			delete rrb;
 			if(_myrank==0)
 			{
-				_parent->sendheader(jptr->_h);
-				_parent->send((char *)jptr->_bits, jptr->_h.size);
-				if(jptr->_stereo && jptr->_rbits)
+				_parent->sendheader(c->_h);
+				_parent->send((char *)c->_bits, c->_h.size);
+				if(c->_stereo && c->_rbits)
 				{
-					_parent->sendheader(jptr->_rh);
-					_parent->send((char *)jptr->_rbits, jptr->_rh.size);
+					_parent->sendheader(c->_rh);
+					_parent->send((char *)c->_rbits, c->_rh.size);
 				}
 			}
 			else
 			{	
-				store(jptr);
+				store(c);
 			}
 		}
 	}
@@ -335,16 +337,16 @@ void rrcompressor::send(void)
 {
 	for(int i=0; i<_storedframes; i++)
 	{
-		rrjpeg *j=_frame[i];
-		errifnot(j);
-		_parent->sendheader(j->_h);
-		_parent->send((char *)j->_bits, j->_h.size);
-		if(j->_stereo && j->_rbits)
+		rrcompframe *c=_frame[i];
+		errifnot(c);
+		_parent->sendheader(c->_h);
+		_parent->send((char *)c->_bits, c->_h.size);
+		if(c->_stereo && c->_rbits)
 		{
-			_parent->sendheader(j->_rh);
-			_parent->send((char *)j->_rbits, j->_rh.size);
+			_parent->sendheader(c->_rh);
+			_parent->send((char *)c->_rbits, c->_rh.size);
 		}
-		delete j;		
+		delete c;		
 	}
 	_storedframes=0;
 }

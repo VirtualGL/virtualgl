@@ -155,15 +155,15 @@ class rrcompressor : public Runnable
 
 	private:
 
-	void store(rrjpeg *j)
+	void store(rrcompframe *c)
 	{
 		_storedframes++;
-		if(!(_frame=(rrjpeg **)realloc(_frame, sizeof(rrjpeg *)*_storedframes)))
+		if(!(_frame=(rrcompframe **)realloc(_frame, sizeof(rrcompframe *)*_storedframes)))
 			_throw("Memory allocation error");
-		_frame[_storedframes-1]=j;
+		_frame[_storedframes-1]=c;
 	}
 
-	int _storedframes;  rrjpeg **_frame;
+	int _storedframes;  rrcompframe **_frame;
 	rrframe *_b, *_lastb;
 	int _myrank, _np;
 	rrevent _ready, _complete;  bool _deadyet;
