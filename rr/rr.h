@@ -16,7 +16,7 @@
 #define __RR_H
 
 #define RR_MAJOR_VERSION 2
-#define RR_MINOR_VERSION 0
+#define RR_MINOR_VERSION 1
 
 // Argh!
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
@@ -41,7 +41,7 @@ typedef struct _rrframeheader
 	unsigned char subsamp;   /* Chrominance subsampling of destination JPEG
 	                            1 (=4:4:4), 2 (=4:2:2), or 4 (=4:1:1 or 4:2:0) */
 	unsigned char flags;     /* See enum below */
-	unsigned char unused;
+	unsigned char compress;  /* Compression algorithm (see enum below) */
 	unsigned short dpynum;   /* Display number on the client machine that
 	                            contains the window into which this frame will be
 	                            drawn */
@@ -95,7 +95,7 @@ enum {
 
 /* Compression types */
 #define RR_COMPRESSOPT  4
-enum rrcomp {RRCOMP_NONE=0, RRCOMP_JPEG, RRCOMP_SUNRAY_DPCM, RRCOMP_SUNRAY_RAW};
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_DPCM, RRCOMP_RGB};
 
 /* Stereo options */
 #define RR_STEREOOPT    3

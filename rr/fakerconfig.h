@@ -295,12 +295,12 @@ class ConfigCompress : public ConfigInt
 		{
 			if(!isset())
 			{
-				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_SUNRAY_DPCM);
+				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_DPCM);
 				else
 				{
 					const char *dstr=DisplayString(dpy);
 					if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-						&& !strnicmp(dstr, "unix", 4))) set(RRCOMP_NONE);
+						&& !strnicmp(dstr, "unix", 4))) set(RRCOMP_PROXY);
 					else set(RRCOMP_JPEG);
 				}
 			}
@@ -314,11 +314,11 @@ class ConfigCompress : public ConfigInt
 			{
 				char *t=NULL;  int itemp=strtol(temp, &t, 10);
 				if(t && t!=temp && itemp>=0 && itemp<RR_COMPRESSOPT) set(itemp);
-				else if(!stricmp(temp, "raw")) set(RRCOMP_NONE);
-				else if(!stricmp(temp, "none")) set(RRCOMP_NONE);
+				else if(!stricmp(temp, "raw")) set(RRCOMP_PROXY);
+				else if(!stricmp(temp, "proxy")) set(RRCOMP_PROXY);
 				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
-				else if(!stricmp(temp, "sr")) set(RRCOMP_SUNRAY_DPCM);
-				else if(!stricmp(temp, "srraw")) set(RRCOMP_SUNRAY_RAW);
+				else if(!stricmp(temp, "dpcm")) set(RRCOMP_DPCM);
+				else if(!stricmp(temp, "rgb")) set(RRCOMP_RGB);
 			}
 			return _i;
 		}

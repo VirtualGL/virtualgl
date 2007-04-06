@@ -102,7 +102,7 @@ void rrdisplayserver::run(void)
 void rrserver::run(void)
 {
 	rrcwin *w=NULL;
-	rrjpeg *j=NULL;
+	rrcompframe *c=NULL;
 	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
 
@@ -150,22 +150,22 @@ void rrserver::run(void)
 				bool stereo=(h.flags==RR_LEFT || h.flags==RR_RIGHT);
 				errifnot(w=addwindow(h.dpynum, h.winid, stereo));
 
-				if(!stereo || h.flags==RR_LEFT || !j)
+				if(!stereo || h.flags==RR_LEFT || !c)
 				{
-					try {j=w->getFrame();}
+					try {c=w->getFrame();}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
-				j->init(h, h.flags);
+				c->init(h, h.flags);
 				if(h.flags!=RR_EOF)
-					recv((char *)(h.flags==RR_RIGHT? j->_rbits:j->_bits), h.size);
+					recv((char *)(h.flags==RR_RIGHT? c->_rbits:c->_bits), h.size);
 
 				if(!stereo || h.flags!=RR_LEFT)
 				{
-					try {w->drawFrame(j);}
+					try {w->drawFrame(c);}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
 
-			} while(!(j && j->_h.flags==RR_EOF));
+			} while(!(c && c->_h.flags==RR_EOF));
 
 			if(v.major==1 && v.minor==0)
 			{

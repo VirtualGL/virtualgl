@@ -31,9 +31,9 @@ class rrcwin : public Runnable
 
 	rrcwin(int, Window, int, bool);
 	virtual ~rrcwin(void);
-	rrjpeg *getFrame(void);
-	void drawFrame(rrjpeg *);
-	void redrawFrame(rrjpeg *);
+	rrcompframe *getFrame(void);
+	void drawFrame(rrcompframe *);
+	void redrawFrame(rrcompframe *);
 	int match(int, Window);
 	bool stereoenabled(void) {return _stereo;}
 
@@ -41,7 +41,7 @@ class rrcwin : public Runnable
 
 	int _drawmethod, _reqdrawmethod;
 	static const int NB=2;
-	rrframe *_b;  rrjpeg _jpg[NB];  int _jpgi;
+	rrframe *_b;  rrcompframe _cf[NB];  int _cfi;
 	void initgl(void);
 	void initx11(void);
 	void setdrawmethod(void);
@@ -51,7 +51,7 @@ class rrcwin : public Runnable
 	int _dpynum;  Window _window;
 	void run(void);
 	Thread *_t;
-	rrcs _jpgmutex;
+	rrcs _cfmutex;
 	bool _stereo;
 	rrcs _mutex;
 };

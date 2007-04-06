@@ -109,3 +109,4 @@ endif
 FAKERLINK = -lXm -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
+MLIB = -lmlib

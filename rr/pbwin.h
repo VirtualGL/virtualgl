@@ -39,6 +39,7 @@ class pbuffer
 		void clear(void);
 		void swap(void);
 		bool stereo(void) {return _stereo;}
+
 	private:
 
 		bool _cleared, _stereo;
@@ -72,6 +73,9 @@ class pbwin
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool stereo=false);
 		void makeanaglyph(rrframe *, int);
+		void senddirect(GLint, bool, bool, int, int);
+		void sendraw(GLint, bool, bool, bool, int);
+		void sendsr(GLint, bool, bool, int);
 
 		bool _force;
 		rrcs _mutex;

@@ -298,14 +298,14 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	_dirty=false;
 
 
-	if(sync) {compress=RRCOMP_NONE;}
-	if(pbw*pbh<1000) compress=RRCOMP_NONE;
+	if(sync) {compress=RRCOMP_PROXY;}
+	if(pbw*pbh<1000) compress=RRCOMP_PROXY;
 
 	if(stereo() && stereomode!=RRSTEREO_NONE)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		if(dostereo && compress!=RRCOMP_JPEG)
+		if(dostereo && compress==RRCOMP_PROXY && stereomode==RRSTEREO_QUADBUF)
 		{
 			static bool message=false;
 			if(!message)
@@ -330,142 +330,168 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		}
 	}
 
-	if(!_truecolor) compress=RRCOMP_NONE;
+	if(!_truecolor) compress=RRCOMP_PROXY;
 
 	switch(compress)
 	{
-		case RRCOMP_SUNRAY_DPCM:
-		case RRCOMP_SUNRAY_RAW:
-		{
-			rrframe f;
-			unsigned char *bitmap=NULL;  int pitch, bottomup, format;
-			if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
-			if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
-			if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle))
-				return;
-			if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
-				&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
-			f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
-				(rrsunray_bgr[format]? RRBMP_BGR:0) |
-				(rrsunray_afirst[format]? RRBMP_ALPHAFIRST:0) |
-				(bottomup? RRBMP_BOTTOMUP:0));
-			int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
-			#ifdef GL_BGR_EXT
-			if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
-			#endif
-			#ifdef GL_BGRA_EXT
-			if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
-			#endif
-			#ifdef GL_ABGR_EXT
-			if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
-			#endif
-			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(&f, drawbuf);
-			else
-			{
-				readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-					drawbuf, bottomup);
-			}
-			if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
-				bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+		case RRCOMP_PROXY:
+			sendraw(drawbuf, spoillast, sync, dostereo, stereomode);
 			break;
-		}
 
 		case RRCOMP_JPEG:
-		{
-			if(_sunrayhandle)
-			{
-				RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
-			}
-
-			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
-				fconfig.client:DisplayString(_windpy)));
-			if(spoillast && fconfig.spoil && !_rrdpy->frameready()) return;
-			rrframe *b;
-			int flags=RRBMP_BOTTOMUP, format=GL_RGB;
-			#ifdef GL_BGR_EXT
-			if(littleendian())
-			{
-				format=GL_BGR_EXT;  flags|=RRBMP_BGR;
-			}
-			#endif
-			errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags,
-				dostereo && stereomode==RRSTEREO_QUADBUF, fconfig.spoil));
-			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
-			else
-			{
-				readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-					b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf,
-					dostereo);
-				if(dostereo && b->_rbits)
-					readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-						b->_pixelsize, b->_rbits, reye(drawbuf), dostereo);
-			}
-			b->_h.winid=_win;
-			b->_h.framew=b->_h.width;
-			b->_h.frameh=b->_h.height;
-			b->_h.x=0;
-			b->_h.y=0;
-			b->_h.qual=fconfig.currentqual;
-			b->_h.subsamp=fconfig.currentsubsamp;
-			if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
-			_rrdpy->sendframe(b);
+			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
+				stereomode);
+			else senddirect(drawbuf, spoillast, dostereo, stereomode, (int)compress);
 			break;
-		}
 
-		case RRCOMP_NONE:
-		{
-			if(_sunrayhandle)
-			{
-				RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
-			}
-			rrfb *b;
-			if(!_blitter) errifnot(_blitter=new rrblitter());
-			if(spoillast && fconfig.spoil && !_blitter->frameready()) return;
-			errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
-			b->_flags|=RRBMP_BOTTOMUP;
-			if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
-			else
-			{
-				int format;
-				unsigned char *bits=b->_bits;
-				switch(b->_pixelsize)
-				{
-					case 1:  format=GL_COLOR_INDEX;  break;
-					case 3:
-						format=GL_RGB;
-						#ifdef GL_BGR_EXT
-						if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
-						#endif
-						break;
-					case 4:
-						format=GL_RGBA;
-						#ifdef GL_BGRA_EXT
-						if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
-							format=GL_BGRA_EXT;
-						#endif
-						if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
-						{
-							#ifdef GL_ABGR_EXT
-							format=GL_ABGR_EXT;
-							#elif defined(GL_BGRA_EXT)
-							format=GL_BGRA_EXT;  bits=b->_bits+1;
-							#endif
-						}
-						if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
-						{
-							format=GL_RGBA;  bits=b->_bits+1;
-						}
-						break;
-					default:
-						_throw("Unsupported pixel format");
-				}
-				readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
-					min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
-			}
-			_blitter->sendframe(b, sync);
+		case RRCOMP_RGB:
+			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
+				stereomode);
+			else senddirect(drawbuf, spoillast, dostereo, stereomode, (int)compress);
 			break;
-		}
+
+		case RRCOMP_DPCM:
+			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
+				stereomode);
+			break;
 	}
+}
+
+void pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
+{
+	rrframe f;
+	int pbw=_pb->width(), pbh=_pb->height();
+	unsigned char *bitmap=NULL;  int pitch, bottomup, format;
+
+	if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
+	if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
+	if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle))
+		return;
+	if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
+		&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
+	f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
+		(rrsunray_bgr[format]? RRBMP_BGR:0) |
+		(rrsunray_afirst[format]? RRBMP_ALPHAFIRST:0) |
+		(bottomup? RRBMP_BOTTOMUP:0));
+	int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
+	#ifdef GL_BGR_EXT
+	if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
+	#endif
+	#ifdef GL_BGRA_EXT
+	if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
+	#endif
+	#ifdef GL_ABGR_EXT
+	if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
+	#endif
+	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(&f, drawbuf);
+	else
+	{
+		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
+			drawbuf, bottomup);
+	}
+	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
+		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+}
+
+void pbwin::senddirect(GLint drawbuf, bool spoillast, bool dostereo,
+	int stereomode, int compress)
+{
+	int pbw=_pb->width(), pbh=_pb->height();
+
+	if(_sunrayhandle)
+	{
+		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
+	}
+
+	if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
+		fconfig.client:DisplayString(_windpy)));
+	if(spoillast && fconfig.spoil && !_rrdpy->frameready()) return;
+	rrframe *b;
+	int flags=RRBMP_BOTTOMUP, format=GL_RGB;
+	#ifdef GL_BGR_EXT
+	if(littleendian() && compress!=RRCOMP_RGB)
+	{
+		format=GL_BGR_EXT;  flags|=RRBMP_BGR;
+	}
+	#endif
+	errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags,
+		dostereo && stereomode==RRSTEREO_QUADBUF, fconfig.spoil));
+	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+	else
+	{
+		readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
+			b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf,
+			dostereo);
+		if(dostereo && b->_rbits)
+			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
+				b->_pixelsize, b->_rbits, reye(drawbuf), dostereo);
+	}
+	b->_h.winid=_win;
+	b->_h.framew=b->_h.width;
+	b->_h.frameh=b->_h.height;
+	b->_h.x=0;
+	b->_h.y=0;
+	b->_h.qual=fconfig.currentqual;
+	b->_h.subsamp=fconfig.currentsubsamp;
+	b->_h.compress=(unsigned char)((int)compress);
+	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
+	_rrdpy->sendframe(b);
+}
+
+void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
+	int stereomode)
+{
+	int pbw=_pb->width(), pbh=_pb->height();
+
+	if(_sunrayhandle)
+	{
+		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
+	}
+	rrfb *b;
+	if(!_blitter) errifnot(_blitter=new rrblitter());
+	if(spoillast && fconfig.spoil && !_blitter->frameready()) return;
+	errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
+	b->_flags|=RRBMP_BOTTOMUP;
+	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+	else
+	{
+		int format;
+		unsigned char *bits=b->_bits;
+		switch(b->_pixelsize)
+		{
+			case 1:  format=GL_COLOR_INDEX;  break;
+			case 3:
+				format=GL_RGB;
+				#ifdef GL_BGR_EXT
+				if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
+				#endif
+				break;
+			case 4:
+				format=GL_RGBA;
+				#ifdef GL_BGRA_EXT
+				if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
+					format=GL_BGRA_EXT;
+				#endif
+				if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
+				{
+					#ifdef GL_ABGR_EXT
+					format=GL_ABGR_EXT;
+					#elif defined(GL_BGRA_EXT)
+					format=GL_BGRA_EXT;  bits=b->_bits+1;
+					#endif
+				}
+				if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
+				{
+					format=GL_RGBA;  bits=b->_bits+1;
+				}
+				break;
+			default:
+				_throw("Unsupported pixel format");
+		}
+		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
+			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
+	}
+	_blitter->sendframe(b, sync);
 }
 
 void pbwin::makeanaglyph(rrframe *b, int drawbuf)

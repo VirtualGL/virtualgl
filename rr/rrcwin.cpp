@@ -58,7 +58,7 @@ static int use_ogl_as_default(int dpynum)
 #endif
 
 rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
-	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _jpgi(0),
+	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _cfi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	if(dpynum<0 || dpynum>65535 || !window)
@@ -91,7 +91,7 @@ rrcwin::~rrcwin(void)
 	_q.release();
 	if(_t) _t->stop();
 	if(_b) delete _b;
-	for(int i=0; i<NB; i++) _jpg[i].complete();
+	for(int i=0; i<NB; i++) _cf[i].complete();
 	if(_t) {delete _t;  _t=NULL;}
 }
 
@@ -173,22 +173,22 @@ int rrcwin::match(int dpynum, Window window)
 	return (_dpynum==dpynum && _window==window);
 }
 
-rrjpeg *rrcwin::getFrame(void)
+rrcompframe *rrcwin::getFrame(void)
 {
-	rrjpeg *j=NULL;
+	rrcompframe *c=NULL;
 	if(_t) _t->checkerror();
-	_jpgmutex.lock();
-	j=&_jpg[_jpgi];  _jpgi=(_jpgi+1)%NB;
-	_jpgmutex.unlock();
-	j->waituntilcomplete();
+	_cfmutex.lock();
+	c=&_cf[_cfi];  _cfi=(_cfi+1)%NB;
+	_cfmutex.unlock();
+	c->waituntilcomplete();
 	if(_t) _t->checkerror();
-	return j;
+	return c;
 }
 
-void rrcwin::drawFrame(rrjpeg *j)
+void rrcwin::drawFrame(rrcompframe *c)
 {
 	if(_t) _t->checkerror();
-	if((j->_rh.flags==RR_RIGHT || j->_h.flags==RR_LEFT) && !_stereo)
+	if((c->_rh.flags==RR_RIGHT || c->_h.flags==RR_LEFT) && !_stereo)
 	{
 		_stereo=true;
 		if(_drawmethod!=RR_DRAWOGL)
@@ -197,35 +197,35 @@ void rrcwin::drawFrame(rrjpeg *j)
 			initgl();
 		}
 	}
-	if((j->_h.flags==0) && _stereo)
+	if((c->_h.flags==0) && _stereo)
 	{
 		_stereo=false;
 		_drawmethod=_reqdrawmethod;
 		setdrawmethod();
 		initx11();
 	}
-	_q.add(j);
+	_q.add(c);
 }
 
 
 void rrcwin::run(void)
 {
 	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
-	rrjpeg *j=NULL;  long bytes=0;
+	rrcompframe *c=NULL;  long bytes=0;
 
 	try {
 
 	while(!_deadyet)
 	{
-		j=NULL;
-		_q.get((void **)&j);  if(_deadyet) break;
-		if(!j) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
+		c=NULL;
+		_q.get((void **)&c);  if(_deadyet) break;
+		if(!c) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
 		rrcs::safelock l(_mutex);
-		if(j->_h.flags==RR_EOF)
+		if(c->_h.flags==RR_EOF)
 		{
 			pb.startframe();
-			if(_b->_isgl) ((rrglframe *)_b)->init(j->_h, _stereo);
-			else ((rrfb *)_b)->init(j->_h);
+			if(_b->_isgl) ((rrglframe *)_b)->init(c->_h, _stereo);
+			else ((rrfb *)_b)->init(c->_h);
 			if(_b->_isgl) ((rrglframe *)_b)->redraw();
 			else ((rrfb *)_b)->redraw();
 			pb.endframe(_b->_h.framew*_b->_h.frameh, 0, 1);
@@ -236,18 +236,18 @@ void rrcwin::run(void)
 		else
 		{
 			pd.startframe();
-			if(_b->_isgl) *((rrglframe *)_b)=*j;
-			else *((rrfb *)_b)=*j;
-			pd.endframe(j->_h.width*j->_h.height, 0, (double)(j->_h.width*j->_h.height)/
-				(double)(j->_h.framew*j->_h.frameh));
-			bytes+=j->_h.size;
+			if(_b->_isgl) *((rrglframe *)_b)=*c;
+			else *((rrfb *)_b)=*c;
+			pd.endframe(c->_h.width*c->_h.height, 0, (double)(c->_h.width*c->_h.height)/
+				(double)(c->_h.framew*c->_h.frameh));
+			bytes+=c->_h.size;
 		}
-		j->complete();
+		c->complete();
 	}
 
 	} catch(rrerror &e)
 	{
-		if(_t) _t->seterror(e);  if(j) j->complete();
+		if(_t) _t->seterror(e);  if(c) c->complete();
 		throw;
 	}
 }
