@@ -1,5 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2005-2007 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -25,6 +25,9 @@
 #include "rrlog.h"
 #include "rrutil.h"
 #include <string.h>
+#ifdef USEMEDIALIB
+#include <mlib.h>
+#endif
 
 #define jpegsub(s) (s>=4?TJ_411:s==2?TJ_422:s==1?TJ_444:s==0?TJ_GRAYSCALE:TJ_444)
 
@@ -91,6 +94,7 @@ class rrframe
 		_h.size=_h.framew*_h.frameh*_pixelsize;
 		checkheader(_h);
 		_pitch=pitch;
+		_flags=flags;
 		_primary=false;
 	}
 
@@ -181,17 +185,78 @@ class rrframe
 	void waituntilcomplete(void) {_complete.wait();}
 	bool iscomplete(void) {return !_complete.locked();}
 
-	rrframe& operator= (rrframe& f)
+	void decompressrgb(rrframe &f, int w, int h, bool righteye)
 	{
-		if(this!=&f && f._bits)
+		if(!f._bits || f._h.size<1 || !_bits || !_h.size)
+			_throw("Frame not initialized");
+		int dstbgr=((_flags&RRBMP_BGR)!=0), dstbu=((_flags&RRBMP_BOTTOMUP)!=0),
+			dstaf=((_flags&RRBMP_ALPHAFIRST)!=0);
+
+		int i, j;
+		int srcstride=f._pitch, dststride=_pitch;
+		unsigned char *srcptr=righteye? f._rbits:f._bits,
+			*dstptr=righteye? &_rbits[_pitch*f._h.y+f._h.x*_pixelsize]:
+				&_bits[_pitch*f._h.y+f._h.x*_pixelsize];
+		unsigned char *srcptr2, *dstptr2;
+		if(!dstbu)
+			{srcptr=&srcptr[(h-1)*f._pitch];  srcstride=-srcstride;}
+
+		if(!dstbgr && _pixelsize==3)
 		{
-			if(f._bits)
+			int wps=w*_pixelsize;
+			if(dstaf) {dstptr++;  wps--;}
+			for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
 			{
-				init(f._h, f._pixelsize, f._flags, f._stereo);
-				memcpy(_bits, f._bits, f._h.framew*f._h.frameh*f._pixelsize);
+				memcpy(dstptr, srcptr, wps);
 			}
 		}
-		return *this;
+		#ifdef USEMEDIALIB
+		else if(dstaf && dstbgr && _pixelsize==4)
+		{
+			for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
+			{
+				mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)dstptr, srcptr,
+					NULL, 0, w, 1, _pitch, f._pitch, 0);
+			}
+		}
+		else if(dstaf && !dstbgr && _pixelsize==4)
+		{
+			for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
+			{
+				mlib_VideoColorBGRint_to_ABGRint((mlib_u32 *)dstptr, srcptr,
+					NULL, 0, w, 1, _pitch, f._pitch, 0);
+			}
+		}
+		#endif
+		else
+		{
+			if(dstaf) dstptr++;
+			if(!dstbgr)
+			{
+ 				for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
+				{
+					for(j=0, srcptr2=srcptr, dstptr2=dstptr; j<w; j++,
+						srcptr2+=f._pixelsize, dstptr2+=_pixelsize)
+					{
+						memcpy(dstptr2, srcptr2, 3);
+				 	}
+				}
+		 	}
+			else
+			{
+				for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
+				{
+					for(j=0, srcptr2=srcptr, dstptr2=dstptr; j<w; j++,
+						srcptr2+=f._pixelsize, dstptr2+=_pixelsize)
+					{
+						dstptr2[2]=srcptr2[0];
+						dstptr2[1]=srcptr2[1];
+						dstptr2[0]=srcptr2[2];
+				 	}
+				}
+			}
+		}
+
 	}
 
 	rrframeheader _h;
@@ -232,33 +297,45 @@ class rrframe
 	#endif
 	rrevent _ready;
 	rrevent _complete;
-	friend class rrjpeg;
+	friend class rrcompframe;
 	bool _primary;
 };
 
 // Compressed JPEG
 
-class rrjpeg : public rrframe
+class rrcompframe : public rrframe
 {
 	public:
 
-	rrjpeg(void) : rrframe(), _tjhnd(NULL)
+	rrcompframe(void) : rrframe(), _tjhnd(NULL)
 	{
 		if(!(_tjhnd=tjInitCompress())) _throw(tjGetErrorStr());
 		_pixelsize=3;
 		memset(&_rh, 0, sizeof(rrframeheader));
 	}
 
-	~rrjpeg(void)
+	~rrcompframe(void)
 	{
 		if(_tjhnd) tjDestroy(_tjhnd);
 	}
 
-	rrjpeg& operator= (rrframe& b)
+	rrcompframe& operator= (rrframe& b)
+	{
+		if(!b._bits) _throw("Bitmap not initialized");
+		if(b._pixelsize<3 || b._pixelsize>4)
+			_throw("Only true color bitmaps are supported");
+		switch(b._h.compress)
+		{
+			case RRCOMP_RGB:  compressrgb(b);  break;
+			case RRCOMP_JPEG:  compressjpeg(b);  break;
+			default:  _throw("Invalid compression type");
+		}
+		return *this;
+	}
+
+	void compressjpeg(rrframe& b)
 	{
 		int tjflags=0;
-		if(!b._bits) _throw("Bitmap not initialized");
-		if(b._pixelsize<3 || b._pixelsize>4) _throw("Only true color bitmaps are supported");
 		if(b._h.qual>100 || b._h.subsamp>16 || !isPow2(b._h.subsamp))
 			throw(rrerror("JPEG compressor", "Invalid argument"));
 		init(b._h, b._stereo? RR_LEFT:0);
@@ -277,7 +354,36 @@ class rrjpeg : public rrframe
 					tjflags));
 			_rh.size=(unsigned int)size;
 		}
-		return *this;
+	}
+
+	void compressrgb(rrframe& b)
+	{
+		int i;  unsigned char *srcptr, *dstptr;
+		int bu=(b._flags&RRBMP_BOTTOMUP)? 1:0;
+		if(b._flags&RRBMP_BGR || b._flags&RRBMP_ALPHAFIRST || b._pixelsize!=3)
+			throw(rrerror("RGB compressor", "Source bitmap is not RGB"));
+		int pitch=b._h.width*b._pixelsize;
+		int srcstride=bu? b._pitch:-b._pitch;
+
+		init(b._h, b._stereo? RR_LEFT:0);
+		srcptr=bu? b._bits:&b._bits[b._pitch*(b._h.height-1)];
+		for(i=0, dstptr=_bits; i<b._h.height; i++, srcptr+=srcstride,
+			dstptr+=pitch)
+			memcpy(dstptr, srcptr, pitch);
+		_h.size=pitch*b._h.height;
+
+		if(b._stereo && b._rbits)
+		{
+			init(b._h, RR_RIGHT);
+			if(_rbits)
+			{
+				srcptr=bu? b._rbits:&b._rbits[b._pitch*(b._h.height-1)];
+				for(i=0, dstptr=_rbits; i<b._h.height; i++, srcptr+=srcstride,
+					dstptr+=pitch)
+					memcpy(dstptr, srcptr, pitch);
+				_rh.size=pitch*b._h.height;
+			}
+		}
 	}
 
 	void init(rrframeheader &h, int buffer)
@@ -316,6 +422,7 @@ class rrjpeg : public rrframe
 			delete [] _rbits;  _rbits=NULL;
 			memset(&_rh, 0, sizeof(rrframeheader));
 		}
+		_pitch=_h.width*_pixelsize;
 	}
 
 	rrframeheader _rh;
@@ -394,7 +501,7 @@ class rrfb : public rrframe
 		if(fbx_alphafirst[_fb.format]) _flags|=RRBMP_ALPHAFIRST;
 	}
 
-	rrfb& operator= (rrjpeg& f)
+	rrfb& operator= (rrcompframe& f)
 	{
 		int tjflags=0;
 		if(!f._bits || f._h.size<1)
@@ -407,12 +514,17 @@ class rrfb : public rrframe
 		int height=min(f._h.height, _fb.height-f._h.y);
 		if(width>0 && height>0 && f._h.width<=width && f._h.height<=height)
 		{
-			if(!_tjhnd)
+			if(f._h.compress==RRCOMP_RGB) decompressrgb(f, width, height, false);
+			else
 			{
-				if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrfb::decompressor", tjGetErrorStr()));
+				if(!_tjhnd)
+				{
+					if((_tjhnd=tjInitDecompress())==NULL)
+						throw(rrerror("rrfb::decompressor", tjGetErrorStr()));
+				}
+				tj(tjDecompress(_tjhnd, f._bits, f._h.size, (unsigned char *)&_fb.bits[_fb.pitch*f._h.y+f._h.x*fbx_ps[_fb.format]],
+					width, _fb.pitch, height, fbx_ps[_fb.format], tjflags));
 			}
-			tj(tjDecompress(_tjhnd, f._bits, f._h.size, (unsigned char *)&_fb.bits[_fb.pitch*f._h.y+f._h.x*fbx_ps[_fb.format]],
-				width, _fb.pitch, height, fbx_ps[_fb.format], tjflags));
 		}
 		return *this;
 	}
