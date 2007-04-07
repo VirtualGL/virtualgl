@@ -17,6 +17,7 @@
 #undef USEGLP
 #include "rrglframe.h"
 #include "rrtimer.h"
+#include "bmp.h"
 
 #define ITER 50
 #define NB 2
@@ -125,27 +126,27 @@ class decompressor : public Runnable
 
 	virtual ~decompressor(void) {shutdown();}
 
-	rrjpeg &get(void)
+	rrcompframe &get(void)
 	{
-		rrjpeg &j=_jpg[_indx];  _indx=(_indx+1)%NB;
-		if(_deadyet) return j;
-		if(_t) _t->checkerror();  j.waituntilcomplete();  if(_t) _t->checkerror();
-		return j;
+		rrcompframe &c=_cf[_indx];  _indx=(_indx+1)%NB;
+		if(_deadyet) return c;
+		if(_t) _t->checkerror();  c.waituntilcomplete();  if(_t) _t->checkerror();
+		return c;
 	}
 
-	void put(rrjpeg &j)
+	void put(rrcompframe &c)
 	{
 		if(_t) _t->checkerror();
-		j.ready();
+		c.ready();
 	}
 
 	void shutdown(void)
 	{
 		_deadyet=true;
 		int i;
-		for(i=0; i<NB; i++) _jpg[i].ready();  // Release my thread
+		for(i=0; i<NB; i++) _cf[i].ready();  // Release my thread
 		if(_t) {_t->stop();  delete _t;  _t=NULL;}
-		for(i=0; i<NB; i++) _jpg[i].complete();  // Release compressor
+		for(i=0; i<NB; i++) _cf[i].complete();  // Release compressor
 	}
 
 	private:
@@ -157,11 +158,11 @@ class decompressor : public Runnable
 		{
 			while(!_deadyet)
 			{
-				rrjpeg &j=_jpg[buf];  buf=(buf+1)%NB;
-				j.waituntilready();  if(_deadyet) break;
+				rrcompframe &c=_cf[buf];  buf=(buf+1)%NB;
+				c.waituntilready();  if(_deadyet) break;
 				b=_bobj->get();  if(_deadyet) break;
 				XWindowAttributes xwa;
-				int w=j._h.width, h=j._h.height;
+				int w=c._h.width, h=c._h.height;
 				XGetWindowAttributes(_dpy, _win, &xwa);
 				if(w!=xwa.width || h!=xwa.height)
 				{
@@ -176,15 +177,15 @@ class decompressor : public Runnable
 //					do XGetWindowAttributes(_dpy, _win, &xwa); while(xwa.width<w || xwa.height<h);
 					XUnlockDisplay(_dpy);
 				}
-				if(b->_isgl) *((rrglframe *)b)=j;
-				else *((rrfb *)b)=j;
+				if(b->_isgl) *((rrglframe *)b)=c;
+				else *((rrfb *)b)=c;
 				_bobj->put(b);
-				j.complete();
+				c.complete();
 			}
 		}
 		catch (...)
 		{
-			for(int i=0; i<NB; i++) _jpg[i].complete();  throw;
+			for(int i=0; i<NB; i++) _cf[i].complete();  throw;
 		}
 		fprintf(stderr, "Decompressor exiting ...\n");
 	}
@@ -192,7 +193,7 @@ class decompressor : public Runnable
 	blitter *_bobj;
 	int _indx;  bool _deadyet;
 	Display *_dpy;  Window _win;
-	rrjpeg _jpg[NB];
+	rrcompframe _cf[NB];
 	int _myid;  Thread *_t;
 };
 
@@ -211,7 +212,7 @@ class compressor : public Runnable
 		if(_t) _t->stop();
 	}
 
-	rrframe &get(int w, int h)
+	rrframe &get(int w, int h, bool usergb)
 	{
 		rrframe &f=_bmp[_indx];  _indx=(_indx+1)%NB;
 		if(_t) _t->checkerror();  f.waituntilcomplete();  if(_t) _t->checkerror();
@@ -221,7 +222,8 @@ class compressor : public Runnable
 		hdr.x=hdr.y=BORDER;
 		hdr.qual=80;
 		hdr.subsamp=2;
-		f.init(hdr, 3, littleendian()? RRBMP_BGR:0);
+		hdr.compress=usergb? RRCOMP_RGB:RRCOMP_JPEG;
+		f.init(hdr, 3, (littleendian() && !usergb)? RRBMP_BGR:0);
 		return f;
 	}
 
@@ -251,9 +253,9 @@ class compressor : public Runnable
 			{
 				rrframe &f=_bmp[buf];  buf=(buf+1)%NB;
 				f.waituntilready();  if(_deadyet) break;
-				rrjpeg &j=_dobj->get();  if(_deadyet) break;
-				j=f;
-				_dobj->put(j);
+				rrcompframe &c=_dobj->get();  if(_deadyet) break;
+				c=f;
+				_dobj->put(c);
 				f.complete();
 			}
 		}
@@ -288,9 +290,9 @@ class rrframeut
 
 	~rrframeut(void) {shutdown();}
 
-	void dotest(int w, int h)
+	void dotest(int w, int h, bool usergb)
 	{
-		rrframe &f=c->get(w, h);
+		rrframe &f=c->get(w, h, usergb);
 		initbmp(f);
 		c->put(f);
 	}
@@ -323,17 +325,108 @@ class rrframeut
 	compressor *c;  decompressor *d;  blitter *b;
 };
 
+static const char *bmpformatname[BMPPIXELFORMATS]=
+	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
+static const int bmpps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
+static const int bmproff[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
+static const int bmpgoff[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
+static const int bmpboff[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
+static const int bmpflags[BMPPIXELFORMATS]=
+	{0, 0, RRBMP_BGR, RRBMP_BGR, RRBMP_ALPHAFIRST|RRBMP_BGR, RRBMP_ALPHAFIRST};
+
+int cmpframe(unsigned char *buf, int w, int h, rrframe &dst,
+	BMPPIXELFORMAT dstpf)
+{
+	int _i;  int dstbu=((dst._flags&RRBMP_BOTTOMUP)!=0);  int pitch=w*3;
+	for(int i=0; i<h; i++)
+	{
+		_i=dstbu? i:h-i-1;
+		for(int j=0; j<h; j++)
+		{
+			if((buf[pitch*_i+j*3]
+				!= dst._bits[dst._pitch*i+j*bmpps[dstpf]+bmproff[dstpf]])
+				|| (buf[pitch*_i+j*3+1]
+				!= dst._bits[dst._pitch*i+j*bmpps[dstpf]+bmpgoff[dstpf]])
+				|| (buf[pitch*_i+j*3+2]
+				!= dst._bits[dst._pitch*i+j*bmpps[dstpf]+bmpboff[dstpf]]))
+				return 1;
+		}
+ 	}
+	return 0;
+}
+
+void dopctest(char *filename)
+{
+	unsigned char *buf;  int w, h, dstbu;
+	rrcompframe src;  rrframe dst;  int dstpf;
+
+	for(dstpf=0; dstpf<BMPPIXELFORMATS; dstpf++)
+	{
+		int dstflags=bmpflags[dstpf];
+		for(dstbu=0; dstbu<2; dstbu++)
+		{
+			if(dstbu) dstflags|=RRBMP_BOTTOMUP;
+			if(loadbmp(filename, &buf, &w, &h, BMP_RGB, 1, 1)==-1)
+				_throw(bmpgeterr());
+			rrframeheader _h;
+			memset(&_h, 0, sizeof(_h));
+			_h.width=_h.framew=w;  _h.height=_h.frameh=h;  _h.x=_h.y=0;
+			_h.compress=RRCOMP_RGB;  _h.flags=0;  _h.size=w*3*h;
+			src.init(_h, _h.flags);
+			memcpy(src._bits, buf, w*3*h);
+			dst.init(_h, bmpps[dstpf], dstflags);
+			memset(dst._bits, 0, dst._pitch*dst._h.frameh);
+			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", bmpformatname[dstpf],
+				dstbu? "BOTTOM-UP":"TOP-DOWN");
+			double tstart, ttotal=0.;  int iter=0;
+			do
+			{
+				tstart=rrtime();
+				dst.decompressrgb(src, w, h, false);
+				ttotal+=rrtime()-tstart;  iter++;
+			} while(ttotal<1.);
+			fprintf(stderr, "%f Mpixels/sec - ", (double)w*(double)h
+				*(double)iter/1000000./ttotal);
+			if(cmpframe(buf, w, h, dst, (BMPPIXELFORMAT)dstpf))
+				fprintf(stderr, "FAILED!\n");
+			else fprintf(stderr, "Passed.\n");
+			free(buf);
+		}
+		fprintf(stderr, "\n");
+	}
+
+}
+
 int main(int argc, char **argv)
 {
 	Display *dpy=NULL;
 	rrframeut *test[NUMWIN];
 	int i, j, w, h;
-	bool usegl=false;
+	bool usegl=false;  bool pctest=false;  bool usergb=false;
+	char *bmpfile=NULL;
 
-	if(argc>1) for(i=1; i<argc; i++) if(!stricmp(argv[i], "-gl")) usegl=true;
+	if(argc>1)
+	{
+		for(i=1; i<argc; i++)
+		{
+			if(!stricmp(argv[i], "-gl")) usegl=true;
+			else if(!stricmp(argv[i], "-rgb")) usergb=true;
+			else if(!stricmp(argv[i], "-pc"))
+			{
+				if(i>=argc-1)
+				{
+					fprintf(stderr, "USAGE: %s -pc <filename>\n", argv[0]);
+					exit(1);
+				}
+				bmpfile=argv[++i];  pctest=true;
+			}
+		}
+	}
 
 	try
 	{
+		if(pctest) {dopctest(bmpfile);  exit(0);}
+
 		errifnot(XInitThreads());
 		#ifdef SUNOGL
 		errifnot(glXInitThreadsSUN());
@@ -352,7 +445,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
 			}
 			fprintf(stderr, "\n");
 		}
@@ -364,7 +457,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
 			}
 			fprintf(stderr, "\n");
 		}
@@ -376,7 +469,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
 			}
 			fprintf(stderr, "\n");
 		}

@@ -144,12 +144,12 @@ class rrglframe : public rrframe
 	{
 		int flags=RRBMP_BOTTOMUP;
 		#ifdef GL_BGR_EXT
-		if(littleendian()) flags|=RRBMP_BGR;
+		if(littleendian() && h.compress!=RRCOMP_RGB) flags|=RRBMP_BGR;
 		#endif
 		rrframe::init(h, 3, flags, stereo);
 	}
 
-	rrglframe& operator= (rrjpeg& f)
+	rrglframe& operator= (rrcompframe& f)
 	{
 		int tjflags=TJ_BOTTOMUP;
 		if(!f._bits || f._h.size<1) _throw("JPEG not initialized");
@@ -160,20 +160,30 @@ class rrglframe : public rrframe
 		int height=min(f._h.height, _h.frameh-f._h.y);
 		if(width>0 && height>0 && f._h.width<=width && f._h.height<=height)
 		{
-			if(!_tjhnd)
+			if(f._h.compress==RRCOMP_RGB)
 			{
-				if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", tjGetErrorStr()));
+				decompressrgb(f, width, height, false);
+				if(_stereo && f._rbits && _rbits)
+					decompressrgb(f, width, height, true);
 			}
-			int y=max(0, _h.frameh-f._h.y-height);
-			tj(tjDecompress(_tjhnd, f._bits, f._h.size,
-				(unsigned char *)&_bits[_pitch*y+f._h.x*_pixelsize], width, _pitch,
-				height, _pixelsize, tjflags));
-			if(_stereo && f._rbits && _rbits)
+			else if(f._h.compress==RRCOMP_JPEG)
 			{
-				tj(tjDecompress(_tjhnd, f._rbits, f._rh.size,
-					(unsigned char *)&_rbits[_pitch*y+f._h.x*_pixelsize],
-					width, _pitch, height, _pixelsize, tjflags));
+				if(!_tjhnd)
+				{
+					if((_tjhnd=tjInitDecompress())==NULL) throw(rrerror("rrglframe::decompressor", tjGetErrorStr()));
+				}
+				int y=max(0, _h.frameh-f._h.y-height);
+				tj(tjDecompress(_tjhnd, f._bits, f._h.size,
+					(unsigned char *)&_bits[_pitch*y+f._h.x*_pixelsize], width, _pitch,
+					height, _pixelsize, tjflags));
+				if(_stereo && f._rbits && _rbits)
+				{
+					tj(tjDecompress(_tjhnd, f._rbits, f._rh.size,
+						(unsigned char *)&_rbits[_pitch*y+f._h.x*_pixelsize],
+						width, _pitch, height, _pixelsize, tjflags));
+				}
 			}
+			else _throw("Invalid compression type");
 		}
 		return *this;
 	}
