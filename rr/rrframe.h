@@ -194,9 +194,10 @@ class rrframe
 
 		int i, j;
 		int srcstride=f._pitch, dststride=_pitch;
+		int startline=dstbu? max(0, _h.frameh-f._h.y-h) : f._h.y;
 		unsigned char *srcptr=righteye? f._rbits:f._bits,
-			*dstptr=righteye? &_rbits[_pitch*f._h.y+f._h.x*_pixelsize]:
-				&_bits[_pitch*f._h.y+f._h.x*_pixelsize];
+			*dstptr=righteye? &_rbits[_pitch*startline+f._h.x*_pixelsize]:
+				&_bits[_pitch*startline+f._h.x*_pixelsize];
 		unsigned char *srcptr2, *dstptr2;
 		if(!dstbu)
 			{srcptr=&srcptr[(h-1)*f._pitch];  srcstride=-srcstride;}
