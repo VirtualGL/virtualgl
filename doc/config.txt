@@ -48,7 +48,7 @@ Each method of configuration takes precedence over the previous method:
 		or if you are trying to forward VirtualGL's image stream over SSh.  See \
 		{ref prefix="Chapter ": Direct_Mode_Usage} for more details.) \
 		{nl}{nl} \
-		__** This option has no effect in Raw Mode. **__ \
+		__** This option has no effect in "Raw" Mode. **__ \
 	|	If SSh X11 forwarding is being used, VirtualGL will automatically set \
 		''VGL_CLIENT'' to ''{ssh_client}:0.0'', where ''{ssh_client}'' is the IP \
 		address of the machine from which the SSh connection was initiated. \
@@ -235,6 +235,22 @@ Each method of configuration takes precedence over the previous method:
 		that it hangs the application, try setting ''VGL_GUI_XTTHREADINIT'' to \
 		''0''. \
 	|	1 \
+	|
+| ''VGL_INTERFRAME'' | {:} \
+	| __Enable/disable interframe image comparison__ \
+		{nl}{nl} \
+		In Direct Mode, VGL will normally compare each image tile in the frame \
+		with the corresponding image tile in the previous frame and send only \
+		the tiles that have changed.  Setting ''VGL_INTERFRAME'' to ''0'' \
+		disables this behavior. \
+		{nl}{nl} \
+		Normally, you shouldn't need to disable interframe comparison except in \
+		rare situations.  This setting was introduced in order to work around a \
+		specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See \
+		{ref prefix="Section ": Application_Recipes} for more information. \
+		{nl}{nl} \
+		__** This option has no effect in "Raw" Mode. **__ \
+	| Inter-frame comparison enabled \
 	|
 | ''VGL_NPROCS '' | ''-np <# of CPUs>''{nl}or{nl}''-np 0''{nl} \
 	(automatically determine the optimal number of CPUs to use) \

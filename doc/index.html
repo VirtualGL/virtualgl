@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-03-30T16:28:26-06:00">
+<meta name="date" content="2007-04-10T16:09:08-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3470,6 +3470,12 @@ a 64-bit application.)</p>
     <td class="standard">Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote connection to a non-Sun X server.</td>
   </tr>
   <tr class="standard">
+    <td class="standard">Pro/ENGINEER Wildfire v3.0</td>
+    <td class="standard">Solaris/Sparc</td>
+    <td class="standard">When using Direct Mode, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching Pro/E v3.</td>
+    <td class="standard">Pro/E v3 frequently renders to the front buffer and, for unknown reasons, sends long sequences of <code>glFlush()</code> calls (particularly in wireframe mode) even if nothing new has been rendered.  This causes VGL to send long sequences of duplicate images into the Direct Mode image pipeline.  If interframe comparison is enabled, the overhead of comparing these duplicate images can lead to slow application performance when zooming in or out in Pro/E.  It&rsquo;s faster to disable interframe comparison in this case and simply let VGL&rsquo;s frame spoiling system discard any frames that it can&rsquo;t send in real time.  This results in only a few of the duplicate frames being sent to the client with no CPU time wasted on comparing the hundreds of other duplicate frames that won&rsquo;t be sent.</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">QGL (OpenGL Qt Widget)</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;{application}</code></td>
@@ -4064,7 +4070,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_CLIENT</code></td>
     <td class="standard"><code>-cl&nbsp;&lt;client</code><br /><code>display&gt;</code></td>
-    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the <code>DISPLAY</code> environment variable (which lists the hostname and X display where all X11 traffic will be sent.)  But in cases where X11 traffic is tunneled through SSh or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the VirtualGL server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up.  For example: <br /><br /> <code>export&nbsp;VGL_CLIENT=my_client:0.0</code> <br /><br /> If you are connecting to the VirtualGL server using SSh with X11 forwarding enabled, VirtualGL will try to guess an appropriate value for <code>VGL_CLIENT</code> based on the IP address of the SSh client, so you would only need to set <code>VGL_CLIENT</code> in this case if your configuration is unusual (such as if your client machine&rsquo;s X server is occupying a display number other than 0 or if you are trying to forward VirtualGL&rsquo;s image stream over SSh.  See Chapter <a href="#Direct_Mode_Usage" class="ref">9</a> for more details.) <br /><br /> <em>** This option has no effect in Raw Mode. **</em></td>
+    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the <code>DISPLAY</code> environment variable (which lists the hostname and X display where all X11 traffic will be sent.)  But in cases where X11 traffic is tunneled through SSh or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the VirtualGL server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up.  For example: <br /><br /> <code>export&nbsp;VGL_CLIENT=my_client:0.0</code> <br /><br /> If you are connecting to the VirtualGL server using SSh with X11 forwarding enabled, VirtualGL will try to guess an appropriate value for <code>VGL_CLIENT</code> based on the IP address of the SSh client, so you would only need to set <code>VGL_CLIENT</code> in this case if your configuration is unusual (such as if your client machine&rsquo;s X server is occupying a display number other than 0 or if you are trying to forward VirtualGL&rsquo;s image stream over SSh.  See Chapter <a href="#Direct_Mode_Usage" class="ref">9</a> for more details.) <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">If SSh X11 forwarding is being used, VirtualGL will automatically set <code>VGL_CLIENT</code> to <code>{ssh_client}:0.0</code>, where <code>{ssh_client}</code> is the IP address of the machine from which the SSh connection was initiated. Otherwise, <code>VGL_CLIENT</code> is unset, which tells VirtualGL to read the client hostname and X display from the <code>DISPLAY</code> environment variable instead.</td>
   </tr>
   <tr class="standard">
@@ -4108,6 +4114,12 @@ method:</p>
     <td class="standard"></td>
     <td class="standard"><em>0 to prevent VGL from calling <code>XtToolkitThreadInitialize()</code></em> <br /><br /> Xt &amp; Motif applications are supposed to call <code>XtToolkitThreadInitialize()</code> if they plan to access Xt functions from two or more threads simultaneously.  But rarely, a multi-threaded Xt/Motif application may avoid calling <code>XtToolkitThreadInitialize()</code> and rely on the fact that avoiding this call disables application and process locks.  This behavior is generally considered errant on the part of the application, but the application developers have probably figured out other ways around the potential instability that this situation creates. <br /><br /> The problem arises whenever VirtualGL pops up its configuration dialog (which is written using Xt.)  In order to create this dialog, VirtualGL creates a new Xt thread and calls <code>XtToolkitThreadInitialize()</code> as it is supposed to do to guarantee thread safety.  But if the application into which VGL is loaded exhibits the errant behavior described above, suddenly enabling application and process locks may cause the application to deadlock.  Setting <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code> will remove VGL&rsquo;s call to <code>XtToolkitThreadInitialize()</code> and should thus eliminate the deadlock.<br /><br /> In short, if you try to pop up the VirtualGL config dialog and notice that it hangs the application, try setting <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code>.</td>
     <td class="standard">1</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>VGL_INTERFRAME</code></td>
+    <td class="standard"></td>
+    <td class="standard"><em>Enable/disable interframe image comparison</em> <br /><br /> In Direct Mode, VGL will normally compare each image tile in the frame with the corresponding image tile in the previous frame and send only the tiles that have changed.  Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this behavior. <br /><br /> Normally, you shouldn&rsquo;t need to disable interframe comparison except in rare situations.  This setting was introduced in order to work around a specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See Section <a href="#Application_Recipes" class="ref">15</a> for more information. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard">Inter-frame comparison enabled</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_NPROCS&nbsp;</code></td>

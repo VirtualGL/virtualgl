@@ -123,6 +123,21 @@
 	|	Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote \
 		connection to a non-Sun X server. \
 	|
+| Pro/ENGINEER Wildfire v3.0 | Solaris/Sparc \
+	| When using Direct Mode, set the environment variable ''VGL_INTERFRAME'' \
+		to ''0'' on the VirtualGL server prior to launching Pro/E v3. \
+	| Pro/E v3 frequently renders to the front buffer and, for unknown \
+		reasons, sends long sequences of ''glFlush()'' calls (particularly in \
+		wireframe mode) even if nothing new has been rendered.  This causes \
+		VGL to send long sequences of duplicate images into the Direct Mode image \
+		pipeline.  If interframe comparison is enabled, the overhead of comparing \
+		these duplicate images can lead to slow application performance when \
+		zooming in or out in Pro/E.  It's faster to disable interframe comparison \
+		in this case and simply let VGL's frame spoiling system discard any \
+		frames that it can't send in real time.  This results in only a few of \
+		the duplicate frames being sent to the client with no CPU time wasted on \
+		comparing the hundreds of other duplicate frames that won't be sent. \
+	|
 | QGL (OpenGL Qt Widget) | Linux \
 	| ''vglrun -dl {application}'' \
 	| Qt can be built such that it either resolves symbols from libGL \
