@@ -209,6 +209,10 @@ image comparison in Direct Mode.  This is necessary to work around an
 interaction issue between VGL and Pro/E Wildfire v3 which leads to slow
 performance when zooming in or out on the Pro/E model.
 -------------------------------------------------------------------------------
+[23]
+Added VGL_LOG option, which can be used to redirect the console output from the
+VGL faker to a file instead of stderr.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
