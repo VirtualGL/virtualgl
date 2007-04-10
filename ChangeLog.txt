@@ -203,6 +203,12 @@ little overhead.)
 This fix does not affect Direct Mode and Raw Mode, since those modes already
 use the "spoil last frame" algorithm in all cases.
 -------------------------------------------------------------------------------
+[22]
+Added VGL_INTERFRAME option, which, when set to 0, will disable interframe
+image comparison in Direct Mode.  This is necessary to work around an
+interaction issue between VGL and Pro/E Wildfire v3 which leads to slow
+performance when zooming in or out on the Pro/E model.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
