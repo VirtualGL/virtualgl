@@ -97,6 +97,7 @@ class FakerConfig
 			xtthreadinit=true;
 			sunray=false;
 			interframe=true;
+			log=NULL;
 			reloadenv();
 		}
 
@@ -204,6 +205,7 @@ class FakerConfig
 			getconfigdouble("FPS", fps, 0.0, 1000000.0);
 			getconfigstr("XVENDOR", vendor);
 			getconfigbool("INTERFRAME", interframe);
+			getconfigstr("LOG", log);
 			sanitycheck();
 		}
 
@@ -239,6 +241,7 @@ class FakerConfig
 		char *x11lib;
 		char *client;
 		char *localdpystring;
+		char *log;
 		char *vendor;
 
 		int loqual;
