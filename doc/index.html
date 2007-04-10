@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-04-10T00:45:44-06:00">
+<meta name="date" content="2007-04-10T16:35:04-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4231,10 +4231,16 @@ method:</p>
     <td class="standard">1</td>
   </tr>
   <tr class="standard">
-    <td class="standard"><code>VGL_INTERFRAME</code></td>
+    <td class="standard"><code>VGL_INTERFRAME=0</code><br /><code>VGL_INTERFRAME=1</code></td>
     <td class="standard"></td>
     <td class="standard"><em>Enable/disable interframe image comparison</em> <br /><br /> In Direct Mode, VGL will normally compare each image tile in the frame with the corresponding image tile in the previous frame and send only the tiles that have changed.  Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this behavior. <br /><br /> Normally, you shouldn&rsquo;t need to disable interframe comparison except in rare situations.  This setting was introduced in order to work around a specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See Section <a href="#Application_Recipes" class="ref">15</a> for more information. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">Inter-frame comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>VGL_LOG</code></td>
+    <td class="standard"></td>
+    <td class="standard"><em>Redirect the console output from the VirtualGL faker to a log file</em> <br /><br /> Setting this environment variable to the pathname of a log file on the VirtualGL server will cause the VirtualGL faker to redirect all of its messages (including profiling and trace output) to the specified log file rather than to stderr.</td>
+    <td class="standard">Print all messages to stderr</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_NPROCS&nbsp;</code></td>
