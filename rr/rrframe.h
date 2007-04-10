@@ -58,7 +58,7 @@ class rrframe
 	{
 		if(pixelsize<1) throw(rrerror("rrframe::init", "Invalid argument"));
 		_flags=flags;
-		h.size=h.framew*h.frameh*pixelsize;
+		if(h.size==0) h.size=h.framew*h.frameh*pixelsize;
 		checkheader(h);
 		if(h.framew!=_h.framew || h.frameh!=_h.frameh || pixelsize!=_pixelsize
 			|| !_bits)
