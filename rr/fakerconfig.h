@@ -96,6 +96,7 @@ class FakerConfig
 			vendor=NULL;
 			xtthreadinit=true;
 			sunray=false;
+			interframe=true;
 			reloadenv();
 		}
 
@@ -202,6 +203,7 @@ class FakerConfig
 			getconfigbool("GUI_XTTHREADINIT", xtthreadinit);
 			getconfigdouble("FPS", fps, 0.0, 1000000.0);
 			getconfigstr("XVENDOR", vendor);
+			getconfigbool("INTERFRAME", interframe);
 			sanitycheck();
 		}
 
@@ -263,6 +265,7 @@ class FakerConfig
 		bool gui;
 		bool xtthreadinit;
 		bool sunray;
+		bool interframe;
 
 		unsigned int guikey;
 		unsigned int guimod;
