@@ -258,7 +258,10 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			int w=tilesizex, x=j;
 			if(b->_h.width-j<(3*tilesizex/2)) {w=b->_h.width-j;  j+=tilesizex;}
 			if(n%_np!=_myrank) continue;
-			if(b->tileequals(lastb, x, y, w, h)) continue;
+			if(fconfig.interframe)
+			{
+	 			if(b->tileequals(lastb, x, y, w, h)) continue;
+			}
 			rrframe *rrb=b->gettile(x, y, w, h);
 			rrcompframe *c=NULL;
 			if(_myrank>0) {errifnot(c=new rrcompframe());}

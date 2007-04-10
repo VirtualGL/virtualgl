@@ -454,6 +454,7 @@ class FakerConfig
 			gui=true;
 			guikey=XK_F9;
 			guimod=ShiftMask|ControlMask;
+			interframe=true;
 			localdpystring=(char *)":0";
 			loqual.setbounds(1, 100);
 			loqual=DEFLOQUAL;
@@ -539,6 +540,7 @@ class FakerConfig
 			fps.get("VGL_FPS");
 			vendor.get("VGL_XVENDOR");
 			stereo.get("VGL_STEREO");
+			interframe.get("VGL_INTERFRAME");
 		}
 
 		void setloqual(void)
@@ -569,6 +571,7 @@ class FakerConfig
 		unsigned int guimod;
 		ConfigInt hiqual;
 		ConfigSubsamp hisubsamp;
+		ConfigBool interframe;
 		ConfigString localdpystring;
 		ConfigInt loqual;
 		ConfigSubsamp losubsamp;
