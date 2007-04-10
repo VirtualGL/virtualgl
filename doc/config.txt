@@ -236,7 +236,7 @@ Each method of configuration takes precedence over the previous method:
 		''0''. \
 	|	1 \
 	|
-| ''VGL_INTERFRAME'' | {:} \
+| ''VGL_INTERFRAME=0''{nl}''VGL_INTERFRAME=1'' | {:} \
 	| __Enable/disable interframe image comparison__ \
 		{nl}{nl} \
 		In Direct Mode, VGL will normally compare each image tile in the frame \
@@ -251,6 +251,15 @@ Each method of configuration takes precedence over the previous method:
 		{nl}{nl} \
 		__** This option has no effect in "Raw" Mode. **__ \
 	| Inter-frame comparison enabled \
+	|
+| ''VGL_LOG'' | {:} \
+	| __Redirect the console output from the VirtualGL faker to a log file__ \
+		{nl}{nl} \
+		Setting this environment variable to the pathname of a log file on the \
+		VirtualGL server will cause the VirtualGL faker to redirect all of its \
+		messages (including profiling and trace output) to the specified log file \
+		rather than to stderr. \
+	| Print all messages to stderr \
 	|
 | ''VGL_NPROCS '' | ''-np <# of CPUs>''{nl}or{nl}''-np 0''{nl} \
 	(automatically determine the optimal number of CPUs to use) \
