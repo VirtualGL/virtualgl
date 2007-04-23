@@ -95,7 +95,7 @@ enum {
 
 /* Compression types */
 #define RR_COMPRESSOPT  4
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_DPCM, RRCOMP_RGB};
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_DPCM};
 
 /* Stereo options */
 #define RR_STEREOOPT    3

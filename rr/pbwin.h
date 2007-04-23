@@ -73,7 +73,8 @@ class pbwin
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool stereo=false);
 		void makeanaglyph(rrframe *, int);
-		void senddirect(GLint, bool, bool, int, int);
+		void senddirect(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
+			bool);
 		void sendraw(GLint, bool, bool, bool, int);
 		void sendsr(GLint, bool, bool, int);
 
@@ -83,7 +84,7 @@ class pbwin
 		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
 		int _neww, _newh;
 		rrblitter *_blitter;
-		rrdisplayclient *_rrdpy;
+		rrdisplayclient *_rrdpy, *_rrmoviedpy;
 		rrprofiler _prof_rb, _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];

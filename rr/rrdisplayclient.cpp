@@ -15,69 +15,78 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
+#include <fcntl.h>
 
 extern FakerConfig fconfig;
 
 void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 {
-	if(_v.major==0 && _v.minor==0)
+	if(_dosend)
 	{
-		// Fake up an old (protocol v1.0) EOF packet and see if the client sends
-		// back a CTS signal.  If so, it needs protocol 1.0
-		rrframeheader_v1 h1;  char reply=0;
-		cvthdr_v1(h, h1);
-		h1.flags=RR_EOF;
-		endianize_v1(h1);
-		if(_sd)
+		if(_v.major==0 && _v.minor==0)
 		{
-			send((char *)&h1, sizeof_rrframeheader_v1);
-			recv(&reply, 1);
-			if(reply==1) {_v.major=1;  _v.minor=0;}
-			else if(reply=='V')
+			// Fake up an old (protocol v1.0) EOF packet and see if the client sends
+			// back a CTS signal.  If so, it needs protocol 1.0
+			rrframeheader_v1 h1;  char reply=0;
+			cvthdr_v1(h, h1);
+			h1.flags=RR_EOF;
+			endianize_v1(h1);
+			if(_sd)
 			{
-				rrversion v;
-				_v.id[0]=reply;
-				recv((char *)&_v.id[1], sizeof_rrversion-1);
-				if(strncmp(_v.id, "VGL", 3) || _v.major<1)
-					_throw("Error reading client version");
-				v=_v;
-				v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
-				send((char *)&v, sizeof_rrversion);
+				send((char *)&h1, sizeof_rrframeheader_v1);
+				recv(&reply, 1);
+				if(reply==1) {_v.major=1;  _v.minor=0;}
+				else if(reply=='V')
+				{
+					rrversion v;
+					_v.id[0]=reply;
+					recv((char *)&_v.id[1], sizeof_rrversion-1);
+					if(strncmp(_v.id, "VGL", 3) || _v.major<1)
+						_throw("Error reading client version");
+					v=_v;
+					v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
+					send((char *)&v, sizeof_rrversion);
+				}
+				if(fconfig.verbose)
+					rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
 			}
-			if(fconfig.verbose)
-				rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
 		}
+		if((_v.major<2 || (_v.major==2 && _v.minor<1)) && h.compress!=RRCOMP_JPEG)
+			_throw("This compression mode requires VirtualGL Client v2.1 or later");
 	}
-	if((_v.major<2 || (_v.major==2 && _v.minor<1)) && h.compress!=RRCOMP_JPEG)
-		_throw("This compression mode requires VirtualGL Client v2.1 or later");
 	if(eof) h.flags=RR_EOF;
-	if(_v.major==1 && _v.minor==0)
+	if(_dosend)
 	{
-		rrframeheader_v1 h1;
-		if(h.dpynum>255) _throw("Display number out of range for v1.0 client");
-		cvthdr_v1(h, h1);
-		endianize_v1(h1);
-		if(_sd)
+		if(_v.major==1 && _v.minor==0)
 		{
-			send((char *)&h1, sizeof_rrframeheader_v1);
-			if(eof)
+			rrframeheader_v1 h1;
+			if(h.dpynum>255) _throw("Display number out of range for v1.0 client");
+			cvthdr_v1(h, h1);
+			endianize_v1(h1);
+			if(_sd)
 			{
-				char cts=0;
-				recv(&cts, 1);
-				if(cts<1 || cts>2) _throw("CTS Error");
+				send((char *)&h1, sizeof_rrframeheader_v1);
+				if(eof)
+				{
+					char cts=0;
+					recv(&cts, 1);
+					if(cts<1 || cts>2) _throw("CTS Error");
+				}
 			}
 		}
+		else
+		{
+			endianize(h);
+			send((char *)&h, sizeof_rrframeheader);
+		}
 	}
-	else
-	{
-		endianize(h);
-		send((char *)&h, sizeof_rrframeheader);
-	}
+	if(_domovie) save((char *)&h, sizeof_rrframeheader);
 }
 
 
-rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
-	_sd(NULL), _t(NULL), _deadyet(false), _dpynum(0)
+rrdisplayclient::rrdisplayclient(char *displayname, bool domovie) :
+	_np(fconfig.np), _domovie(domovie), _sd(NULL), _t(NULL), _deadyet(false),
+	_dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
@@ -97,9 +106,11 @@ rrdisplayclient::rrdisplayclient(char *displayname) : _np(fconfig.np),
 			}
 			if(!strlen(servername) || !strcmp(servername, "unix"))
 				{free(servername);  servername=strdup("localhost");}
+			connect(servername);
+			_dosend=true;
 		}
-		connect(servername);
-		_prof_total.setname("Total     ");
+		else _dosend=false;
+		_prof_total.setname(_dosend? "Total     ":"Total(mov)");
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
@@ -231,14 +242,6 @@ void rrdisplayclient::sendframe(rrframe *b)
 	_q.spoil((void *)b, __rrdisplayclient_spoilfct);
 }
 
-void rrdisplayclient::sendcompressedframe(rrframeheader &h, unsigned char *bits)
-{
-	h.dpynum=_dpynum;
-	sendheader(h);
-	send((char *)bits, h.size);
-	sendheader(h, true);
-}
-
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 {
 	bool bu=false;  rrcompframe cf;
@@ -260,7 +263,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			if(n%_np!=_myrank) continue;
 			if(fconfig.interframe)
 			{
-	 			if(b->tileequals(lastb, x, y, w, h)) continue;
+				if(b->tileequals(lastb, x, y, w, h)) continue;
 			}
 			rrframe *rrb=b->gettile(x, y, w, h);
 			rrcompframe *c=NULL;
@@ -276,11 +279,13 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			if(_myrank==0)
 			{
 				_parent->sendheader(c->_h);
-				_parent->send((char *)c->_bits, c->_h.size);
+				if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
+				if(_parent->_domovie) _parent->save((char *)c->_bits, c->_h.size);
 				if(c->_stereo && c->_rbits)
 				{
 					_parent->sendheader(c->_rh);
-					_parent->send((char *)c->_rbits, c->_rh.size);
+					if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
+					if(_parent->_domovie) _parent->save((char *)c->_rbits, c->_rh.size);
 				}
 			}
 			else
@@ -317,6 +322,32 @@ void rrdisplayclient::recv(char *buf, int len)
 	}
 }
 
+void rrdisplayclient::save(char *buf, int len)
+{
+	if(fconfig.moviefile)
+	{
+		int fd=open(fconfig.moviefile, O_CREAT|O_APPEND|O_RDWR, S_IREAD|S_IWRITE);
+		if(fd==-1)
+		{
+			rrout.println("[VGL] Could not open %s (%s.)",
+				(char *)fconfig.moviefile, strerror(errno));
+			rrout.println("[VGL]    Disabling movie creation.");
+			fconfig.moviefile=(char *)NULL;
+		}
+		else
+		{
+			if(write(fd, buf, len)==-1)
+			{
+				rrout.println("[VGL] Could not write to movie file (%s.)\n",
+					strerror(errno));
+				rrout.println("[VGL]    Disabling movie creation.");
+				fconfig.moviefile=(char *)NULL;
+			}
+			close(fd);
+		}
+	}
+}
+
 void rrdisplayclient::connect(char *servername)
 {
 	if(servername)
@@ -343,11 +374,13 @@ void rrcompressor::send(void)
 		rrcompframe *c=_frame[i];
 		errifnot(c);
 		_parent->sendheader(c->_h);
-		_parent->send((char *)c->_bits, c->_h.size);
+		if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
+		if(_parent->_domovie) _parent->save((char *)c->_bits, c->_h.size);
 		if(c->_stereo && c->_rbits)
 		{
 			_parent->sendheader(c->_rh);
-			_parent->send((char *)c->_rbits, c->_rh.size);
+			if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
+			if(_parent->_domovie) _parent->save((char *)c->_rbits, c->_rh.size);
 		}
 		delete c;		
 	}

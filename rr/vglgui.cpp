@@ -182,7 +182,7 @@ void vglgui::UpdateQual(void)
 	char text[10];
 	if(_qualslider)
 	{
-	  float f=(float)fconfig.currentqual/100.;
+	  float f=(float)fconfig.qual/100.;
 		XtArgVal *p=(XtArgVal *)&f;  Arg args[1];
 		if(f>0.99) f=0.99;
 		#ifdef sun
@@ -197,24 +197,24 @@ void vglgui::UpdateQual(void)
 	}
 	if(_qualtext)
 	{
-		sprintf(text, "%d", (int)fconfig.currentqual);
+		sprintf(text, "%d", (int)fconfig.qual);
 		XtVaSetValues(_qualtext, XtNlabel, text, NULL);
 	}
 	if(_subsamp411 && _subsamp422 && _subsamp444)
 	{
-		if(fconfig.currentsubsamp==1)
+		if(fconfig.subsamp==1)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp444, XtNstate, 1, NULL);
 		}
-		else if(fconfig.currentsubsamp==4)
+		else if(fconfig.subsamp==4)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 1, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp444, XtNstate, 0, NULL);
 		}
-		else if(fconfig.currentsubsamp==2)
+		else if(fconfig.subsamp==2)
 		{
 			XtVaSetValues(_subsamp411, XtNstate, 0, NULL);
 			XtVaSetValues(_subsamp422, XtNstate, 1, NULL);
@@ -241,7 +241,7 @@ void vglgui::qualScrollProc(Widget w, XtPointer client, XtPointer p)
 	if(pos<0) val-=.1;  else val+=.1;
 	if(val>1.0) val=1.0;  if(val<0.0) val=0.0;
 	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	fconfig.currentqual=qual;
+	fconfig.qual=qual;
 	if(that) that->UpdateQual();
 }
 
@@ -250,23 +250,23 @@ void vglgui::qualJumpProc(Widget w, XtPointer client, XtPointer p)
 	vglgui *that=(vglgui *)client;
 	float val=*(float *)p;  int qual;
 	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	fconfig.currentqual=qual;
+	fconfig.qual=qual;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::loQualProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	fconfig.currentsubsamp=4;
-	fconfig.currentqual=30;
+	fconfig.subsamp=4;
+	fconfig.qual=30;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::hiQualProc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	fconfig.currentsubsamp=1;
-	fconfig.currentqual=95;
+	fconfig.subsamp=1;
+	fconfig.qual=95;
 	if(that) that->UpdateQual();
 }
 
@@ -279,21 +279,21 @@ void vglgui::quitProc(Widget w, XtPointer client, XtPointer p)
 void vglgui::subsamp411Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) fconfig.currentsubsamp=4;
+	if((long)p==1) fconfig.subsamp=4;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::subsamp422Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) fconfig.currentsubsamp=2;
+	if((long)p==1) fconfig.subsamp=2;
 	if(that) that->UpdateQual();
 }
 
 void vglgui::subsamp444Proc(Widget w, XtPointer client, XtPointer p)
 {
 	vglgui *that=(vglgui *)client;
-	if((long)p==1) fconfig.currentsubsamp=1;
+	if((long)p==1) fconfig.subsamp=1;
 	if(that) that->UpdateQual();
 }
 

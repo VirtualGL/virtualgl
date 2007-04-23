@@ -157,7 +157,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
-	_rrdpy=NULL;
+	_rrdpy=_rrmoviedpy=NULL;
 	_prof_rb.setname("Readback  ");
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
@@ -186,6 +186,7 @@ pbwin::~pbwin(void)
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
 	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
+	if(_rrmoviedpy) {delete _rrmoviedpy;  _rrmoviedpy=NULL;}
 	#if defined(sun)||defined(linux)
 	if(_sunrayhandle)
 	{
@@ -332,6 +333,26 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	if(!_truecolor) compress=RRCOMP_PROXY;
 
+	int mcompress=compress, mqual=fconfig.qual, msubsamp=fconfig.subsamp;
+	bool sharerrdpy=false;
+	if(fconfig.moviefile)
+	{
+		if(fconfig.mcompress.isset()) mcompress=fconfig.mcompress;
+		if(fconfig.mqual.isset()) mqual=fconfig.mqual;
+		if(fconfig.msubsamp.isset()) msubsamp=fconfig.msubsamp;
+		if(mcompress!=RRCOMP_JPEG && mcompress!=RRCOMP_RGB) mcompress=RRCOMP_JPEG;
+		if(mcompress==compress && mqual==fconfig.qual && msubsamp==fconfig.subsamp
+			&& !fconfig.spoil)
+			sharerrdpy=true;
+
+		if(!sharerrdpy)
+		{
+			if(!_rrmoviedpy) errifnot(_rrmoviedpy=new rrdisplayclient(NULL, true));
+			senddirect(_rrmoviedpy, drawbuf, false, dostereo, stereomode,
+				mcompress, mqual, msubsamp, true);
+		}
+	}
+
 	switch(compress)
 	{
 		case RRCOMP_PROXY:
@@ -339,15 +360,24 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_JPEG:
-			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
-				stereomode);
-			else senddirect(drawbuf, spoillast, dostereo, stereomode, (int)compress);
+			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
+				fconfig.client:DisplayString(_windpy)));
+			_rrdpy->record(sharerrdpy);
+			senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
+				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
 
 		case RRCOMP_RGB:
 			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
 				stereomode);
-			else senddirect(drawbuf, spoillast, dostereo, stereomode, (int)compress);
+			else
+			{
+				if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
+					fconfig.client:DisplayString(_windpy)));
+				_rrdpy->record(sharerrdpy);
+				senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
+					(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
+			}
 			break;
 
 		case RRCOMP_DPCM:
@@ -393,8 +423,9 @@ void pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
 }
 
-void pbwin::senddirect(GLint drawbuf, bool spoillast, bool dostereo,
-	int stereomode, int compress)
+void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
+	bool dostereo, int stereomode, int compress, int qual, int subsamp,
+	bool domovie)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
@@ -403,9 +434,8 @@ void pbwin::senddirect(GLint drawbuf, bool spoillast, bool dostereo,
 		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
 	}
 
-	if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
-		fconfig.client:DisplayString(_windpy)));
-	if(spoillast && fconfig.spoil && !_rrdpy->frameready()) return;
+	if(spoillast && fconfig.spoil && !rrdpy->frameready() && !domovie)
+		return;
 	rrframe *b;
 	int flags=RRBMP_BOTTOMUP, format=GL_RGB;
 	#ifdef GL_BGR_EXT
@@ -414,8 +444,8 @@ void pbwin::senddirect(GLint drawbuf, bool spoillast, bool dostereo,
 		format=GL_BGR_EXT;  flags|=RRBMP_BGR;
 	}
 	#endif
-	errifnot(b=_rrdpy->getbitmap(pbw, pbh, 3, flags,
-		dostereo && stereomode==RRSTEREO_QUADBUF, fconfig.spoil));
+	errifnot(b=rrdpy->getbitmap(pbw, pbh, 3, flags,
+		dostereo && stereomode==RRSTEREO_QUADBUF, domovie? false:fconfig.spoil));
 	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
 	else
 	{
@@ -431,11 +461,11 @@ void pbwin::senddirect(GLint drawbuf, bool spoillast, bool dostereo,
 	b->_h.frameh=b->_h.height;
 	b->_h.x=0;
 	b->_h.y=0;
-	b->_h.qual=fconfig.currentqual;
-	b->_h.subsamp=fconfig.currentsubsamp;
-	b->_h.compress=(unsigned char)((int)compress);
+	b->_h.qual=qual;
+	b->_h.subsamp=subsamp;
+	b->_h.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
-	_rrdpy->sendframe(b);
+	rrdpy->sendframe(b);
 }
 
 void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,

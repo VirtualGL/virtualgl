@@ -27,10 +27,8 @@
 #include <X11/X.h>
 #include <X11/keysym.h>
 
-#define DEFLOQUAL 90
-#define DEFHIQUAL 95
-#define DEFLOSUBSAMP 4
-#define DEFHISUBSAMP 1
+#define DEFQUAL 95
+#define DEFSUBSAMP 1
 
 #define MAXSTR 256
 
@@ -326,6 +324,28 @@ class ConfigCompress : public ConfigInt
 		void reload(void) {get("VGL_COMPRESS");}
 };
 
+class ConfigMCompress : public ConfigInt
+{
+	public:
+
+		ConfigMCompress() {ConfigInt::setbounds(RRCOMP_JPEG, RRCOMP_RGB);}
+
+		ConfigMCompress& operator= (enum rrcomp i) {set((int)i);  return *this ;}
+
+		int get(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			{
+				char *t=NULL;  int itemp=strtol(temp, &t, 10);
+				if(t && t!=temp && itemp>=0 && itemp<RR_COMPRESSOPT) set(itemp);
+				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
+				else if(!stricmp(temp, "rgb")) set(RRCOMP_RGB);
+			}
+			return _i;
+		}
+};
+
 class ConfigString : public Config
 {
 	public:
@@ -359,8 +379,8 @@ class ConfigString : public Config
 
 		void set(char *s)
 		{
-			if(!s) return;
-			if(_s) free(_s);  _s=strdup(s);  _set=true;
+			if(_s) free(_s);
+			if(s) {_s=strdup(s);  _set=true;}  else {_s=NULL;  _set=false;}
 		}
 
 	private:
@@ -437,7 +457,7 @@ class FakerConfig
 {
 	public:
 
-		FakerConfig(void) : currentqual(hiqual), currentsubsamp(hisubsamp)
+		FakerConfig(void)
 		{
 			// Defaults
 			client=NULL;
@@ -456,19 +476,15 @@ class FakerConfig
 			guimod=ShiftMask|ControlMask;
 			interframe=true;
 			localdpystring=(char *)":0";
-			loqual.setbounds(1, 100);
-			loqual=DEFLOQUAL;
-			losubsamp=DEFLOSUBSAMP;
-			hiqual.setbounds(1, 100);
-			hiqual=DEFHIQUAL;
-			hisubsamp=DEFHISUBSAMP;
-			currentqual=hiqual;
-			currentsubsamp=hisubsamp;
+			mqual.setbounds(1, 100);
+			qual.setbounds(1, 100);
+			qual=DEFQUAL;
 			port.setbounds(0, 65535);
 			readback=true;
 			spoil=true;
 			ssl=false;
 			stereo=RRSTEREO_QUADBUF;
+			subsamp=DEFSUBSAMP;
 			x11lib=NULL;
 			tilesize.setbounds(8, 1024);
 			tilesize=RR_DEFAULTTILESIZE;
@@ -489,11 +505,12 @@ class FakerConfig
 				(localdpystring[0]=='/' || !strnicmp(localdpystring, "GLP", 3)))
 				glp=true;
 			#endif
-			loqual.get("VGL_LOQUAL");
-			losubsamp.get("VGL_LOSUBSAMP");
-			hiqual.get("VGL_QUAL");
-			hisubsamp.get("VGL_SUBSAMP");
-			sethiqual();
+			qual.get("VGL_QUAL");
+			subsamp.get("VGL_SUBSAMP");
+			mcompress.get("VGL_MCOMPRESS");
+			moviefile.get("VGL_MOVIE");
+			mqual.get("VGL_MQUAL");
+			msubsamp.get("VGL_MSUBSAMP");
 			spoil.get("VGL_SPOIL");
 			ssl.get("VGL_SSL");
 			port.get("VGL_PORT");
@@ -543,24 +560,12 @@ class FakerConfig
 			interframe.get("VGL_INTERFRAME");
 		}
 
-		void setloqual(void)
-		{
-			currentqual=loqual;  currentsubsamp=losubsamp;
-		}
-
-		void sethiqual(void)
-		{
-			currentqual=hiqual;  currentsubsamp=hisubsamp;
-		}
-
 		#define prconfint(i) rrout.println(#i" = %d", (int)i);
 		#define prconfstr(s) rrout.println(#s" = %s", (char *)s);
 		#define prconfdbl(d) rrout.println(#d" = %f", (double)d);
 
 		ConfigBool autotest;
 		ConfigString client;
-		ConfigInt &currentqual;
-		ConfigSubsamp &currentsubsamp;
 		ConfigDouble fps;
 		ConfigGamma gamma;
 		ConfigString gllib;
@@ -569,18 +574,20 @@ class FakerConfig
 		unsigned int guikey;
 		ConfigString guikeyseq;
 		unsigned int guimod;
-		ConfigInt hiqual;
-		ConfigSubsamp hisubsamp;
 		ConfigBool interframe;
 		ConfigString localdpystring;
-		ConfigInt loqual;
-		ConfigSubsamp losubsamp;
+		ConfigMCompress mcompress;
+		ConfigInt mqual;
+		ConfigSubsamp msubsamp;
+		ConfigString moviefile;
 		ConfigNP np;
 		ConfigInt port;
+		ConfigInt qual;
 		ConfigBool readback;
 		ConfigBool spoil;
 		ConfigBool ssl;
 		ConfigStereo stereo;
+		ConfigSubsamp subsamp;
 		ConfigBool sync;
 		ConfigInt tilesize;
 		ConfigBool trace;

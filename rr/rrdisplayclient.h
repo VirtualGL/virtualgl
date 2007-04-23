@@ -29,7 +29,7 @@ class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(char *);
+	rrdisplayclient(char *, bool domovie=false);
 
 	virtual ~rrdisplayclient(void)
 	{
@@ -41,15 +41,16 @@ class rrdisplayclient : public Runnable
 	rrframe *getbitmap(int, int, int, int, bool stereo, bool spoil);
 	bool frameready(void);
 	void sendframe(rrframe *);
-	void sendcompressedframe(rrframeheader &, unsigned char *);
 	void run(void);
-	void release(rrframe *b) {_ready.signal();}
 	void sendheader(rrframeheader h, bool eof);
 	void send(char *, int);
+	void save(char *, int);
 	void recv(char *, int);
 	void connect(char *);
+	void record(bool domovie) {_domovie=domovie;}
 
 	int _np;
+	bool _dosend, _domovie;
 
 	private:
 
@@ -112,7 +113,8 @@ class rrcompressor : public Runnable
 		if(parent) {_np=parent->_np;}
 		_ready.wait();  _complete.wait();
 		char temps[20];
-		snprintf(temps, 19, "Compress %d", myrank);
+		if(_parent->_dosend) snprintf(temps, 19, "Compress %d", myrank);
+		else snprintf(temps, 19, "Comp(mov)%d", myrank);
 		_prof_comp.setname(temps);
 	}
 

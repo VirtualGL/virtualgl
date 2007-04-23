@@ -27,8 +27,8 @@ void usage(char **argv)
 	printf("-client = X Display where the video should be sent (VGL client must be running\n");
 	printf("          on that machine) or 0 for local test only\n");
 	printf("          [default = %s]\n", fconfig.client? (char *)fconfig.client:"read from DISPLAY environment");
-	printf("-samp = JPEG chrominance subsampling factor: 1, 2, or 4 [default = %d]\n", (int)fconfig.currentsubsamp);
-	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", (int)fconfig.currentqual);
+	printf("-samp = JPEG chrominance subsampling factor: 1, 2, or 4 [default = %d]\n", (int)fconfig.subsamp);
+	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", (int)fconfig.qual);
 	printf("-tilesize = width/height of each inter-frame difference tile\n");
 	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
 	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
@@ -59,11 +59,11 @@ int main(int argc, char **argv)
 		}
 		if(!strnicmp(argv[i], "-sa", 3) && i<argc-1)
 		{
-			fconfig.currentsubsamp=atoi(argv[i+1]);  i++;
+			fconfig.subsamp=atoi(argv[i+1]);  i++;
 		}
 		if(!strnicmp(argv[i], "-q", 2) && i<argc-1)
 		{
-			fconfig.currentqual=atoi(argv[i+1]);  i++;
+			fconfig.qual=atoi(argv[i+1]);  i++;
 		}
 		if(!stricmp(argv[i], "-tilesize") && i<argc-1)
 		{
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
+		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;
 		fill=1-fill;
 		rrdpy.sendframe(b);
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, true));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
+		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;
 		fill=1-fill;
 		rrdpy.sendframe(b);
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
-		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
+		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;
 		fill=1-fill;
 		rrdpy.sendframe(b);
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 	{
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
 		memcpy(b->_bits, buf, w*h*d);
-		b->_h.qual=fconfig.currentqual;  b->_h.subsamp=fconfig.currentsubsamp;
+		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;
 		rrdpy.sendframe(b);
 		frames++;

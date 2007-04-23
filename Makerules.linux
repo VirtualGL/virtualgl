@@ -7,7 +7,7 @@ CXX = c++ -static-libgcc
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
-CDEFINES = -D_GNU_SOURCE
+CDEFINES = -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 
 ifneq ($(USESSL), no)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
