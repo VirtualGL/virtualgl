@@ -16,6 +16,7 @@
 #include "rrtimer.h"
 #include "fakerconfig.h"
 #include <fcntl.h>
+#include <sys/stat.h>
 
 extern FakerConfig fconfig;
 
