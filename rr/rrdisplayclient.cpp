@@ -15,8 +15,19 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
+#ifdef _WIN32
+#include <io.h>
+#define _POSIX_
+#endif
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#define open _open
+#define write _write
+#define close _close
+#define S_IREAD 0400
+#define S_IWRITE 0200
+#endif
 
 extern FakerConfig fconfig;
 
