@@ -519,8 +519,8 @@ static int encode_jpeg(jpgstruct *jpg)
 
 	_catch(encode_jpeg_init(jpg));
 
-	_mlibn(ybuf=(mlib_u8 *)mlib_malloc(yw*mcuh + cw*8*2));
-	_mlibn(linebuf=(mlib_u8 *)mlib_malloc(yw*4*2));
+	_mlibn(ybuf=(mlib_u8 *)memalign(8, yw*mcuh + cw*8*2));
+	_mlibn(linebuf=(mlib_u8 *)memalign(8, yw*4*2));
 	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
 
 	for(j=0; j<jpg->height; j+=mcuh)
@@ -565,13 +565,13 @@ static int encode_jpeg(jpgstruct *jpg)
 
 	write_byte(jpg, 0xff);  write_byte(jpg, 0xd9);  // EOI marker
 
-	if(ybuf) mlib_free(ybuf);
-	if(linebuf) mlib_free(linebuf);
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
 	return 0;
 
 	bailout:
-	if(ybuf) mlib_free(ybuf);
-	if(linebuf) mlib_free(linebuf);
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
 	return -1;
 }
 
@@ -579,16 +579,16 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 {
 	jpgstruct *jpg=NULL;  char *v=NULL;
 
-	if((jpg=(jpgstruct *)mlib_malloc(sizeof(jpgstruct)))==NULL)
+	if((jpg=(jpgstruct *)memalign(8, sizeof(jpgstruct)))==NULL)
 		_throw("Memory allocation failure");
 	memset(jpg, 0, sizeof(jpgstruct));
 
 	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
-	if((jpg->e_dclumtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
-	|| (jpg->e_aclumtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
-	|| (jpg->e_dcchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL
-	|| (jpg->e_acchromtable=(c_derived_tbl *)mlib_malloc(sizeof(c_derived_tbl)))==NULL)
+	if((jpg->e_dclumtable=(c_derived_tbl *)memalign(8, sizeof(c_derived_tbl)))==NULL
+	|| (jpg->e_aclumtable=(c_derived_tbl *)memalign(8, sizeof(c_derived_tbl)))==NULL
+	|| (jpg->e_dcchromtable=(c_derived_tbl *)memalign(8, sizeof(c_derived_tbl)))==NULL
+	|| (jpg->e_acchromtable=(c_derived_tbl *)memalign(8, sizeof(c_derived_tbl)))==NULL)
 		_throw("Memory allocation failure");
 
 	if((v=mlib_version())!=NULL)
@@ -957,8 +957,8 @@ static int decode_jpeg(jpgstruct *jpg)
 	yw=(jpg->width+mcuw-1)&(~(mcuw-1));
 	cw=yw*8/mcuw;
 
-	_mlibn(ybuf=(mlib_u8 *)mlib_malloc(yw*mcuh + cw*8*2));
-	_mlibn(linebuf=(mlib_u8 *)mlib_malloc(yw*4*2));
+	_mlibn(ybuf=(mlib_u8 *)memalign(8, yw*mcuh + cw*8*2));
+	_mlibn(linebuf=(mlib_u8 *)memalign(8, yw*4*2));
 	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
 
 	for(j=0; j<jpg->height; j+=mcuh)
@@ -996,13 +996,13 @@ static int decode_jpeg(jpgstruct *jpg)
 		_catch(d_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
 	}
 
-	if(ybuf) mlib_free(ybuf);
-	if(linebuf) mlib_free(linebuf);
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
 	return 0;
 
 	bailout:
-	if(ybuf) mlib_free(ybuf);
-	if(linebuf) mlib_free(linebuf);
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
 	return -1;
 }
 
@@ -1010,16 +1010,16 @@ DLLEXPORT tjhandle DLLCALL tjInitDecompress(void)
 {
 	jpgstruct *jpg=NULL;
 
-	if((jpg=(jpgstruct *)mlib_malloc(sizeof(jpgstruct)))==NULL)
+	if((jpg=(jpgstruct *)memalign(8, sizeof(jpgstruct)))==NULL)
 		_throw("Memory allocation failure");
 	memset(jpg, 0, sizeof(jpgstruct));
 
 	jpg->mcubuf=(mlib_s16 *)jpg->_mcubuf;
 
-	if((jpg->d_dclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
-	|| (jpg->d_aclumtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
-	|| (jpg->d_dcchromtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL
-	|| (jpg->d_acchromtable=(d_derived_tbl *)mlib_malloc(sizeof(d_derived_tbl)))==NULL)
+	if((jpg->d_dclumtable=(d_derived_tbl *)memalign(8, sizeof(d_derived_tbl)))==NULL
+	|| (jpg->d_aclumtable=(d_derived_tbl *)memalign(8, sizeof(d_derived_tbl)))==NULL
+	|| (jpg->d_dcchromtable=(d_derived_tbl *)memalign(8, sizeof(d_derived_tbl)))==NULL
+	|| (jpg->d_acchromtable=(d_derived_tbl *)memalign(8, sizeof(d_derived_tbl)))==NULL)
 		_throw("Memory allocation failure");
 
 	jpg->initd=1;
@@ -1100,18 +1100,18 @@ DLLEXPORT int DLLCALL tjDestroy(tjhandle h)
 
 	if(jpg->initc)
 	{
-		if(jpg->e_dclumtable) mlib_free(jpg->e_dclumtable);
-		if(jpg->e_aclumtable) mlib_free(jpg->e_aclumtable);
-		if(jpg->e_dcchromtable) mlib_free(jpg->e_dcchromtable);
-		if(jpg->e_acchromtable) mlib_free(jpg->e_acchromtable);
+		if(jpg->e_dclumtable) free(jpg->e_dclumtable);
+		if(jpg->e_aclumtable) free(jpg->e_aclumtable);
+		if(jpg->e_dcchromtable) free(jpg->e_dcchromtable);
+		if(jpg->e_acchromtable) free(jpg->e_acchromtable);
 	}
 
 	if(jpg->initd)
 	{
-		if(jpg->d_dclumtable) mlib_free(jpg->d_dclumtable);
-		if(jpg->d_aclumtable) mlib_free(jpg->d_aclumtable);
-		if(jpg->d_dcchromtable) mlib_free(jpg->d_dcchromtable);
-		if(jpg->d_acchromtable) mlib_free(jpg->d_acchromtable);
+		if(jpg->d_dclumtable) free(jpg->d_dclumtable);
+		if(jpg->d_aclumtable) free(jpg->d_aclumtable);
+		if(jpg->d_dcchromtable) free(jpg->d_dcchromtable);
+		if(jpg->d_acchromtable) free(jpg->d_acchromtable);
 	}
 
 	free(jpg);
