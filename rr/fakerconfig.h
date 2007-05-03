@@ -558,6 +558,7 @@ class FakerConfig
 			vendor.get("VGL_XVENDOR");
 			stereo.get("VGL_STEREO");
 			interframe.get("VGL_INTERFRAME");
+			log.get("VGL_LOG");
 		}
 
 		#define prconfint(i) rrout.println(#i" = %d", (int)i);
@@ -576,6 +577,7 @@ class FakerConfig
 		unsigned int guimod;
 		ConfigBool interframe;
 		ConfigString localdpystring;
+		ConfigString log;
 		ConfigMCompress mcompress;
 		ConfigInt mqual;
 		ConfigSubsamp msubsamp;

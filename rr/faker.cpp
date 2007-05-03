@@ -189,6 +189,7 @@ void __vgl_fakerinit(void)
 	init=1;
 
 	fconfig.reloadenv();
+	if(fconfig.log) rrout.logto(fconfig.log);
 
 	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
