@@ -159,7 +159,7 @@ endif
 
 ifeq ($(JPEGLIB), medialib)
 
-$(ODIR)/turbojpeg.o: turbojpeg-mlib.c turbojpeg-mlibhuff.c
+$(ODIR)/turbojpeg.o: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 JPEGLINK = -lmlib
