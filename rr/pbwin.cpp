@@ -517,12 +517,13 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			if(fconfig.verbose)
 				rrout.println("[VGL] Using mediaLib gamma correction (correction factor=%f)\n", fconfig.gcf);
 		}
-		mlib_image *image=NULL;
-		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
+		mlib_image image;
+		memset(&image, 0, sizeof(mlib_image));
+		if(mlib_ImageSetStruct(&image, MLIB_BYTE, ps, w, h, pitch, bits)
+			==MLIB_SUCCESS)
 		{
 			unsigned char *luts[4]={fconfig.lut, fconfig.lut, fconfig.lut, fconfig.lut};
-			mlib_ImageLookUp_Inp(image, (const void **)luts);
-			mlib_ImageDelete(image);
+			mlib_ImageLookUp_Inp(&image, (const void **)luts);
 		}
 		else
 		{
