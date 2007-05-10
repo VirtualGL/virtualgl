@@ -214,9 +214,11 @@ Added VGL_LOG option, which can be used to redirect the console output from the
 VGL faker to a file instead of stderr.
 -------------------------------------------------------------------------------
 [24]
-In the mediaLib implementation of TurboJPEG, use memalign()/free() instead of
-mlib_malloc()/mlib_free().  This works around an interaction issue with Pro/E
-v3.
+The mediaLib implementation of TurboJPEG and the mediaLib-accelerated gamma
+correction code have been modified slightly to avoid calls to mediaLib
+functions that wrap memalign() and free().  This works around an interaction
+issue with Pro/E v3 (and potentially with other applications that use their
+own custom memory allocators.)
 
 
 ===============================================================================
