@@ -287,10 +287,7 @@ void pbwin::swapbuffers(void)
 void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 {
 	fconfig.reloadenv();
-	ConfigCompress compress(_windpy, _usesunray);
 	bool dostereo=false;  int stereomode=fconfig.stereo;
-
-	int pbw=_pb->width(), pbh=_pb->height();
 
 	if(!fconfig.readback) return;
 
@@ -298,9 +295,15 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	_dirty=false;
 
+	fconfig.compress.setdefault(_windpy, _usesunray);
+	int compress=(int)fconfig.compress;
+	if(!fconfig.subsamp.isset())
+	{
+		if(compress==RRCOMP_DPCM) fconfig.subsamp=DEFSUBSAMPSR;
+		else fconfig.subsamp=DEFSUBSAMP;
+	}
 
 	if(sync) {compress=RRCOMP_PROXY;}
-	if(pbw*pbh<1000) compress=RRCOMP_PROXY;
 
 	if(stereo() && stereomode!=RRSTEREO_NONE)
 	{

@@ -102,8 +102,7 @@ void vglgui::init(void)
 		XtNright, XawChainRight, XtNlabel, "Frame Spoiling: XXX", NULL);
 	XtAddCallback(_spoil, XtNcallback, spoilProc, this);
 
-	ConfigCompress compress(_dpy);
-	if(compress==RRCOMP_JPEG)
+	if(fconfig.compress==RRCOMP_JPEG)
 	{
 		Widget lobutton=XtVaCreateManagedWidget("lobutton", commandWidgetClass,
 			buttonForm, NULL);

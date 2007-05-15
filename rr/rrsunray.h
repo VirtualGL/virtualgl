@@ -24,6 +24,8 @@ static const int rrsunray_ps[RRSUNRAY_FORMATOPT]={3, 4, 3, 4, 4};
 static const int rrsunray_bgr[RRSUNRAY_FORMATOPT]={0, 0, 1, 1, 1};
 static const int rrsunray_afirst[RRSUNRAY_FORMATOPT]={0, 0, 0, 0, 1};
 
+enum {RRSUNRAY_CONFIGINT, RRSUNRAY_CONFIGLONG, RRSUNRAY_CONFIGDOUBLE, RRSUNRAY_CONFIGSTR};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -121,6 +123,19 @@ int
    RETURN VALUE:
    This function returns 0 on success or -1 on failure.  RRSunRayGetError() can
    be called to determine the cause of the failure.
+*/
+
+typedef int (*_RRSunRayConfigCallbackType)(const char *name, int type, void *value);
+
+int
+	RRSunRaySetConfigCallback (_RRSunRayConfigCallbackType callback);
+/*
+   Registers a callback function with the SR plugin that, when invoked by the
+   plugin, will return parameters from VGL's configuration structure.  This
+   allows the SR plugin and VGL to share the same configuration mechanism.
+
+   PARAMETERS:
+   callback (IN) = pointer to the callback function
 */
 
 int

@@ -20,6 +20,26 @@
 
 extern FakerConfig fconfig;
 
+static int RRSunRayConfigCallback(const char *name, int type, void *value)
+{
+	if(!name || !value || type<0) return -1;
+	if(!stricmp(name, "VGL_CLIENT") && type==RRSUNRAY_CONFIGSTR)
+		{*((char **)value)=(char *)fconfig.client;  return 0;}
+	else if(!stricmp(name, "VGL_COMPRESS") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.compress;  return 0;}
+	else if(!stricmp(name, "VGL_INTERFRAME") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.interframe;  return 0;}
+	else if(!stricmp(name, "VGL_PROGRESSIVE") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.progressive;  return 0;}
+	else if(!stricmp(name, "VGL_SPOIL") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.spoil;  return 0;}
+	else if(!stricmp(name, "VGL_SUBSAMP") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.subsamp;  return 0;}
+	else if(!stricmp(name, "VGL_VERBOSE") && type==RRSUNRAY_CONFIGINT)
+		{*((int *)value)=(int)fconfig.verbose;  return 0;}
+	return -1;
+}
+
 static void *loadsym(void *dllhnd, const char *symbol, bool fatal)
 {
 	void *sym=NULL;  const char *err=NULL;
@@ -80,6 +100,9 @@ static _RRSunRayDestroyType _RRSunRayDestroy=NULL;
 typedef int (*_RRSunRayFrameReadyType)(void *);
 static _RRSunRayFrameReadyType _RRSunRayFrameReady=NULL;
 
+typedef void (*_RRSunRaySetConfigCallbackType)(_RRSunRayConfigCallbackType);
+static _RRSunRaySetConfigCallbackType _RRSunRaySetConfigCallback=NULL;
+
 static bool init=false;
 
 // 1=success, 0=failure
@@ -113,6 +136,9 @@ static int loadsunraysymbols(bool fatal)
 	lsym(RRSunRayGetError)
 	lsymopt(RRSunRayDestroy)
 	lsymopt(RRSunRayFrameReady)
+	lsymopt(RRSunRaySetConfigCallback)
+	if(_RRSunRaySetConfigCallback)
+		_RRSunRaySetConfigCallback(RRSunRayConfigCallback);
 	init=true;
 	return 1;
 }

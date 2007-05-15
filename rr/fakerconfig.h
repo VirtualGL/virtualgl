@@ -29,6 +29,7 @@
 
 #define DEFQUAL 95
 #define DEFSUBSAMP 1
+#define DEFSUBSAMPSR 16
 
 #define MAXSTR 256
 
@@ -167,7 +168,7 @@ class ConfigSubsamp : public ConfigInt
 {
 	public:
 
-		ConfigSubsamp() {ConfigInt::setbounds(0, 16);}
+		ConfigSubsamp() {ConfigInt::setbounds(-1, 16);}
 
 		ConfigSubsamp& operator= (int i)
 		{
@@ -181,6 +182,7 @@ class ConfigSubsamp : public ConfigInt
 			{
 				if(!stricmp(temp, "GRAY")) set(0);
 				else if(!stricmp(temp, "GREY")) set(0);
+				else if(!stricmp(temp, "LOSSLESS")) set(-1);
 				else
 				{
 					char *t=NULL;  int itemp=strtol(temp, &t, 10);
@@ -484,7 +486,6 @@ class FakerConfig
 			spoil=true;
 			ssl=false;
 			stereo=RRSTEREO_QUADBUF;
-			subsamp=DEFSUBSAMP;
 			x11lib=NULL;
 			tilesize.setbounds(8, 1024);
 			tilesize=RR_DEFAULTTILESIZE;
@@ -559,6 +560,9 @@ class FakerConfig
 			stereo.get("VGL_STEREO");
 			interframe.get("VGL_INTERFRAME");
 			log.get("VGL_LOG");
+			zoomx.get("VGL_ZOOM_X");
+			zoomy.get("VGL_ZOOM_Y");
+			progressive.get("VGL_PROGRESSIVE");
 		}
 
 		#define prconfint(i) rrout.println(#i" = %d", (int)i);
@@ -567,6 +571,7 @@ class FakerConfig
 
 		ConfigBool autotest;
 		ConfigString client;
+		ConfigCompress compress;
 		ConfigDouble fps;
 		ConfigGamma gamma;
 		ConfigString gllib;
@@ -584,6 +589,7 @@ class FakerConfig
 		ConfigString moviefile;
 		ConfigNP np;
 		ConfigInt port;
+		ConfigBool progressive;
 		ConfigInt qual;
 		ConfigBool readback;
 		ConfigBool spoil;
@@ -598,6 +604,7 @@ class FakerConfig
 		ConfigString vendor;
 		ConfigBool verbose;
 		ConfigString x11lib;
+		ConfigInt zoomx, zoomy;
 };
 
 #endif
