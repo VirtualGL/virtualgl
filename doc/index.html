@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-04-10T16:35:04-06:00">
+<meta name="date" content="2007-05-15T15:43:10-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.0.1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1781,7 +1781,7 @@ chgrp&nbsp;vglusers&nbsp;/dev/fbs/*
     </li>
 </ol>
 <div class="important"><p class="important">
-Explanation: Normally, when someone logs into a Solaris machine, the system will automatically assign ownership of the framebuffer devices to that user and set the permissions for the framebuffer devices to those specified in <code>/etc/logindevperm</code>.  The default setting in <code>/etc/logindevperm</code> disallows anyone from using the framebuffer devices except the user that is logged in.  But in order to run VirtualGL, a user needs write access to the framebuffer devices.  So in order to make the framebuffer a shared resource, it is necessary to disable the login device permissions mechanism for the framebuffer devices and manually set the owner and group for these devices such that any VirtualGL users can write to them.
+Explanation: Normally, when someone logs into a Solaris machine, the system will automatically assign ownership of the framebuffer devices to that user and set the permissions for the framebuffer devices to those specified in <code>/etc/logindevperm</code>.  The default setting in <code>/etc/logindevperm</code> disallows anyone from using the framebuffer devices except the user that is logged in.  But in order to run VirtualGL, a user needs write access to the framebuffer devices.  So in order to make the framebuffer a shared resource, it is necessary to disable the login device permissions mechanism for the framebuffer devices and manually set the owner and group for these devices such that any VirtualGL users can write to them. <br /><br /> Note that the framebuffer device permissions control not only remote execution of OpenGL applications but also local execution of OpenGL applications.  If it is necessary for users outside of the <code>vglusers</code> group to run OpenGL applications on the VirtualGL server, then set the permissions on <code>/dev/fbs/*</code> to <code>666</code> rather than <code>660</code>.
 </p></div>
 
 

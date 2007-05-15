@@ -315,6 +315,12 @@ to access the framebuffer device(s):
  framebuffer a shared resource, it is necessary to disable the login device
  permissions mechanism for the framebuffer devices and manually set the owner
  and group for these devices such that any VirtualGL users can write to them.
+ {nl}{nl}
+ Note that the framebuffer device permissions control not only remote execution
+ of OpenGL applications but also local execution of OpenGL applications.  If it
+ is necessary for users outside of the ''vglusers'' group to run OpenGL
+ applications on the VirtualGL server, then set the permissions on
+ ''/dev/fbs/*'' to ''666'' rather than ''660''.
 
 ** SSh Server Configuration
 
