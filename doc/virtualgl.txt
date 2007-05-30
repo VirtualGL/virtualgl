@@ -18,8 +18,6 @@ systems, OpenGL and GLX, and X windows.
 ----8<--------------
 #INCLUDE: turbovncinstall.txt
 ----8<--------------
-#INCLUDE: linuxinstall.txt
-----8<--------------
 #INCLUDE: solarisinstall.txt
 ----8<--------------
 #INCLUDE: windowsinstall.txt

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-04-10T16:09:08-06:00">
+<meta name="date" content="2007-05-30T04:06:57-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -12,20 +12,19 @@
 <link rel="chapter" href="index.html#hd003" title="3 System Requirements">
 <link rel="chapter" href="index.html#hd004" title="4 Obtaining and Installing VirtualGL">
 <link rel="chapter" href="index.html#hd005" title="5 Obtaining and Installing TurboVNC">
-<link rel="chapter" href="index.html#hd006" title="6 Configuring a Linux Machine as a VirtualGL Server">
-<link rel="chapter" href="index.html#hd007" title="7 Configuring a Solaris Machine as a VirtualGL Server">
-<link rel="chapter" href="index.html#hd008" title="8 Configuring a Windows Machine as a VirtualGL Direct Mode Client">
-<link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL in Direct Mode">
-<link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL in Raw Mode with TurboVNC">
-<link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL in Raw Mode with Other X Servers and Proxies">
-<link rel="chapter" href="index.html#hd0012" title="12 vglrun and Solaris Shell Scripts">
-<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Applications That Manually Load OpenGL">
-<link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with Chromium and ModViz VGP">
-<link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
-<link rel="chapter" href="index.html#hd0016" title="16 Advanced OpenGL Features">
-<link rel="chapter" href="index.html#hd0017" title="17 Performance Measurement">
-<link rel="chapter" href="index.html#hd0018" title="18 The VirtualGL Configuration Dialog">
-<link rel="chapter" href="index.html#hd0019" title="19 Advanced Configuration">
+<link rel="chapter" href="index.html#hd006" title="6 Configuring a Linux or Solaris Machine as a VirtualGL Server">
+<link rel="chapter" href="index.html#hd007" title="7 Configuring a Windows Machine as a VirtualGL Direct Mode Client">
+<link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL in Direct Mode">
+<link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL in Raw Mode with TurboVNC">
+<link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL in Raw Mode with Other X Servers and Proxies">
+<link rel="chapter" href="index.html#hd0011" title="11 vglrun and Solaris Shell Scripts">
+<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with Applications That Manually Load OpenGL">
+<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Chromium and ModViz VGP">
+<link rel="chapter" href="index.html#hd0014" title="14 Other Application Recipes">
+<link rel="chapter" href="index.html#hd0015" title="15 Advanced OpenGL Features">
+<link rel="chapter" href="index.html#hd0016" title="16 Performance Measurement">
+<link rel="chapter" href="index.html#hd0017" title="17 The VirtualGL Configuration Dialog">
+<link rel="chapter" href="index.html#hd0018" title="18 Advanced Configuration">
 <link rel="stylesheet" type="text/css" href="virtualgl.css" title="virtualgl">
 </head>
 <body >
@@ -119,180 +118,168 @@ systems, OpenGL and GLX, and X windows.</p>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd006" class="toc">6 Configuring a Linux Machine as a VirtualGL
-        Server</a>
+        <a href="#hd006" class="toc">6 Configuring a Linux or Solaris Machine
+        as a VirtualGL Server</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd006001" class="toc">6.1 Granting Access to the Server&rsquo;s
-                X Display</a>
-            </li>
-            <li class="toc">
-                <a href="#hd006002" class="toc">6.2 Device permissions</a>
-            </li>
-        </ul>
-    </li>
-    <li class="toc">
-        <a href="#hd007" class="toc">7 Configuring a Solaris Machine as a VirtualGL
-        Server</a>
-        <ul class="toc">
-            <li class="toc">
-                <a href="#hd007001" class="toc">7.1 GLP: Using VirtualGL Without an
+                <a href="#hd006001" class="toc">6.1 GLP: Using VirtualGL Without an
                 X Server</a>
             </li>
             <li class="toc">
-                <a href="#hd007002" class="toc">7.2 Granting Access to the Server&rsquo;s
+                <a href="#hd006002" class="toc">6.2 Granting Access to the Server&rsquo;s
                 X Display</a>
             </li>
             <li class="toc">
-                <a href="#hd007003" class="toc">7.3 Device Permissions</a>
+                <a href="#hd006003" class="toc">6.3 Device Permissions with Older NVidia
+                Drivers</a>
             </li>
             <li class="toc">
-                <a href="#hd007004" class="toc">7.4 SSh Server Configuration</a>
+                <a href="#hd006004" class="toc">6.4 SSh Server Configuration</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd008" class="toc">8 Configuring a Windows Machine as a VirtualGL
+        <a href="#hd007" class="toc">7 Configuring a Windows Machine as a VirtualGL
         Direct Mode Client</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd008001" class="toc">8.1 Optimizing Exceed</a>
+                <a href="#hd007001" class="toc">7.1 Optimizing Exceed</a>
             </li>
             <li class="toc">
-                <a href="#hd008002" class="toc">8.2 Installing the VirtualGL Client
+                <a href="#hd007002" class="toc">7.2 Installing the VirtualGL Client
                 as a Windows Service</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd009" class="toc">9 Using VirtualGL in Direct Mode</a>
+        <a href="#hd008" class="toc">8 Using VirtualGL in Direct Mode</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd009001" class="toc">9.1 Direct Mode with X11 Forwarding</a>
+                <a href="#hd008001" class="toc">8.1 Direct Mode with X11 Forwarding</a>
             </li>
             <li class="toc">
-                <a href="#hd009002" class="toc">9.2 Direct Mode with a Direct X11 Connection</a>
+                <a href="#hd008002" class="toc">8.2 Direct Mode with a Direct X11 Connection</a>
             </li>
             <li class="toc">
-                <a href="#hd009003" class="toc">9.3 Direct Mode with SSL Encryption</a>
+                <a href="#hd008003" class="toc">8.3 Direct Mode with SSL Encryption</a>
             </li>
             <li class="toc">
-                <a href="#hd009004" class="toc">9.4 Direct Mode with X11 Forwarding
+                <a href="#hd008004" class="toc">8.4 Direct Mode with X11 Forwarding
                 and SSh Tunneling</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd0010" class="toc">10 Using VirtualGL in Raw Mode with TurboVNC</a>
+        <a href="#hd009" class="toc">9 Using VirtualGL in Raw Mode with TurboVNC</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd0010001" class="toc">10.1 Using Raw Mode When TurboVNC
-                and VirtualGL Are Running on the Same Machine</a>
+                <a href="#hd009001" class="toc">9.1 Using Raw Mode When TurboVNC and
+                VirtualGL Are Running on the Same Machine</a>
             </li>
             <li class="toc">
-                <a href="#hd0010002" class="toc">10.2 Using Raw Mode When TurboVNC
-                and VirtualGL Are Running on Different Machines</a>
+                <a href="#hd009002" class="toc">9.2 Using Raw Mode When TurboVNC and
+                VirtualGL Are Running on Different Machines</a>
             </li>
             <li class="toc">
-                <a href="#hd0010003" class="toc">10.3 Disconnecting and Killing the
-                TurboVNC Session</a>
+                <a href="#hd009003" class="toc">9.3 Disconnecting and Killing the TurboVNC
+                Session</a>
             </li>
             <li class="toc">
-                <a href="#hd0010004" class="toc">10.4 Using TurboVNC in a Web Browser</a>
+                <a href="#hd009004" class="toc">9.4 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="toc">
-                <a href="#hd0010005" class="toc">10.5 Connection Profiles: Optimizing
+                <a href="#hd009005" class="toc">9.5 Connection Profiles: Optimizing
                 TurboVNC&rsquo;s Performance for Different Network Types</a>
             </li>
             <li class="toc">
-                <a href="#hd0010006" class="toc">10.6 Securing a TurboVNC Connection</a>
+                <a href="#hd009006" class="toc">9.6 Securing a TurboVNC Connection</a>
             </li>
             <li class="toc">
-                <a href="#hd0010007" class="toc">10.7 Further Reading</a>
+                <a href="#hd009007" class="toc">9.7 Further Reading</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd0011" class="toc">11 Using VirtualGL in Raw Mode with Other
+        <a href="#hd0010" class="toc">10 Using VirtualGL in Raw Mode with Other
         X Servers and Proxies</a>
     </li>
     <li class="toc">
-        <a href="#hd0012" class="toc">12 vglrun and Solaris Shell Scripts</a>
+        <a href="#hd0011" class="toc">11 vglrun and Solaris Shell Scripts</a>
     </li>
     <li class="toc">
-        <a href="#hd0013" class="toc">13 Using VirtualGL with Applications
+        <a href="#hd0012" class="toc">12 Using VirtualGL with Applications
         That Manually Load OpenGL</a>
     </li>
     <li class="toc">
-        <a href="#hd0014" class="toc">14 Using VirtualGL with Chromium and
+        <a href="#hd0013" class="toc">13 Using VirtualGL with Chromium and
         ModViz VGP</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd0014001" class="toc">14.1 Configuration 1: Sort-First Rendering
+                <a href="#hd0013001" class="toc">13.1 Configuration 1: Sort-First Rendering
                 (Image-Space Decomposition)</a>
             </li>
             <li class="toc">
-                <a href="#hd0014002" class="toc">14.2 Configuration 2: Sort-First Rendering
+                <a href="#hd0013002" class="toc">13.2 Configuration 2: Sort-First Rendering
                 (Image-Space Decomposition) with Readback</a>
             </li>
             <li class="toc">
-                <a href="#hd0014003" class="toc">14.3 Configuration 3: Sort-Last Rendering
+                <a href="#hd0013003" class="toc">13.3 Configuration 3: Sort-Last Rendering
                 (Object-Space Decomposition)</a>
             </li>
             <li class="toc">
-                <a href="#hd0014004" class="toc">14.4 A Note About Performance</a>
+                <a href="#hd0013004" class="toc">13.4 A Note About Performance</a>
             </li>
             <li class="toc">
-                <a href="#hd0014005" class="toc">14.5 ModViz VGP and VirtualGL</a>
-            </li>
-        </ul>
-    </li>
-    <li class="toc">
-        <a href="#hd0015" class="toc">15 Other Application Recipes</a>
-    </li>
-    <li class="toc">
-        <a href="#hd0016" class="toc">16 Advanced OpenGL Features</a>
-        <ul class="toc">
-            <li class="toc">
-                <a href="#hd0016001" class="toc">16.1 Stereographic Rendering</a>
-            </li>
-            <li class="toc">
-                <a href="#hd0016002" class="toc">16.2 Transparent Overlays</a>
-            </li>
-            <li class="toc">
-                <a href="#hd0016003" class="toc">16.3 Indexed (PseudoColor) Rendering</a>
-            </li>
-            <li class="toc">
-                <a href="#hd0016004" class="toc">16.4 Troubleshooting</a>
+                <a href="#hd0013005" class="toc">13.5 ModViz VGP and VirtualGL</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd0017" class="toc">17 Performance Measurement</a>
+        <a href="#hd0014" class="toc">14 Other Application Recipes</a>
+    </li>
+    <li class="toc">
+        <a href="#hd0015" class="toc">15 Advanced OpenGL Features</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd0017001" class="toc">17.1 VirtualGL&rsquo;s Built-In Profiling
+                <a href="#hd0015001" class="toc">15.1 Stereographic Rendering</a>
+            </li>
+            <li class="toc">
+                <a href="#hd0015002" class="toc">15.2 Transparent Overlays</a>
+            </li>
+            <li class="toc">
+                <a href="#hd0015003" class="toc">15.3 Indexed (PseudoColor) Rendering</a>
+            </li>
+            <li class="toc">
+                <a href="#hd0015004" class="toc">15.4 Troubleshooting</a>
+            </li>
+        </ul>
+    </li>
+    <li class="toc">
+        <a href="#hd0016" class="toc">16 Performance Measurement</a>
+        <ul class="toc">
+            <li class="toc">
+                <a href="#hd0016001" class="toc">16.1 VirtualGL&rsquo;s Built-In Profiling
                 System</a>
             </li>
             <li class="toc">
-                <a href="#hd0017002" class="toc">17.2 Frame Spoiling</a>
+                <a href="#hd0016002" class="toc">16.2 Frame Spoiling</a>
             </li>
             <li class="toc">
-                <a href="#hd0017003" class="toc">17.3 VirtualGL Diagnostic Tools</a>
+                <a href="#hd0016003" class="toc">16.3 VirtualGL Diagnostic Tools</a>
             </li>
         </ul>
     </li>
     <li class="toc">
-        <a href="#hd0018" class="toc">18 The VirtualGL Configuration Dialog</a>
+        <a href="#hd0017" class="toc">17 The VirtualGL Configuration Dialog</a>
     </li>
     <li class="toc">
-        <a href="#hd0019" class="toc">19 Advanced Configuration</a>
+        <a href="#hd0018" class="toc">18 Advanced Configuration</a>
         <ul class="toc">
             <li class="toc">
-                <a href="#hd0019001" class="toc">19.1 Server Settings</a>
+                <a href="#hd0018001" class="toc">18.1 Server Settings</a>
             </li>
             <li class="toc">
-                <a href="#hd0019002" class="toc">19.2 Client Settings</a>
+                <a href="#hd0018002" class="toc">18.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -1175,259 +1162,25 @@ pkgrm&nbsp;SUNWtvnc
 <hr class="break" />
 
 
-<h1 id="hd006"><a name="file006"></a>6&nbsp;Configuring a Linux Machine as a VirtualGL Server</h1>
+<h1 id="hd006"><a name="file006"></a>6&nbsp;Configuring a Linux or Solaris Machine as a VirtualGL Server</h1>
 
 
-<h2 id="hd006001">6.1&nbsp;Granting Access to the Server&rsquo;s X Display</h2>
-
-<p>VirtualGL requires access to the server&rsquo;s 3D graphics card so
-that it can create off-screen pixel buffers (Pbuffers) and redirect
-the 3D rendering from applications into these Pbuffers.  Unfortunately,
-accessing a 3D graphics card on Linux currently requires going through
-an X server.  So the only way to share the server’s 3D graphics card
-among multiple users is to grant those users access to the X server
-that is running on the 3D graphics card.</p>
-
-<p>It is important to understand the security risks associated with this.
-Once X display access is granted to a user, there is nothing that would
-prevent that user from logging keystrokes or reading back images from
-the X display. Using <code>xauth</code>, one can obtain “untrusted”
-X authentication keys which prevent such exploits, but unfortunately,
-those untrusted keys also disallow access to the 3D hardware.  So it
-is necessary to grant full trusted X access to any users that will
-need to run VirtualGL.  Unless you fully trust the users to whom you
-are granting this access, you should avoid logging in locally to the
-server’s X display as root unless absolutely necessary.</p>
-
-<p>This section will explain how to configure a VirtualGL server such
-that select users can run VirtualGL, even if the server is sitting
-at the login prompt. The basic idea is to call a script (<code>vglgenkey</code>)
-from the display manager&rsquo;s startup script.  <code>vglgenkey</code>
-invokes <code>xauth</code> to generate an authorization key for the
-server&rsquo;s X display, and it stores this key under <code>/etc/opt/VirtualGL</code>.
-The VirtualGL launcher script (<code>vglrun</code>) then attempts to
-read this key and merge it into the user&rsquo;s <code>.Xauthority</code>
-file, thus granting the user access to the server&rsquo;s X display.
-Therefore, you can control who has access to the server&rsquo;s X display
-simply by controlling who has read access to the <code>/etc/opt/VirtualGL</code>
-directory.</p>
-
-<p>If you prefer, you can also grant access to every authenticated user
-on the server by replacing the references to <code>vglgenkey</code>
-below with <code>xhost&nbsp;+localhost</code>.</p>
-
-<ol class="Ordered numeric">
-    <li class="Ordered">
-        If the server machine is configured to boot into runlevel 5 (graphical
-        login), then temporarily shut down its X server by issuing
-<pre class="verbatim">
-init&nbsp;3
-</pre>
-
-        as root
-    </li>
-    <li class="Ordered">
-        Log in as root from the text console.
-    </li>
-    <li class="Ordered">
-        Create a new group called <code>vglusers</code> and add any users that
-        need to run VirtualGL to this group.
-    </li>
-    <li class="Ordered">
-        Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group.  For example: <br />
-<pre class="verbatim">
-mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
-chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
-chmod&nbsp;750&nbsp;/etc/opt/VirtualGL
-</pre>
-
-    </li>
-    <li class="Ordered">
-        If the server machine is configured to boot into runlevel 3 (text login),
-        then configure it to boot into a graphical login by changing the first
-        line of <code>/etc/inittab</code> from<br /> <br />
-        <code>id:3:initdefault:</code><br /> <br /> to<br /> <br /> <code>id:5:initdefault:</code>
-    </li>
-    <li class="Ordered">
-        Add
-<pre class="verbatim">
-vglgenkey
-</pre>
-
-        at the top of the display manager&rsquo;s startup script.  The location
-        of this script varies depending on the particular Linux distribution
-        and display manager being used.  The following table lists some common
-        locations for this file: <br /><br />
-        <div class="table">
-        <table class="standard" align="center">
-          <thead class="standard">
-          <tr class="head ">
-            <th class="head standard"></th>
-            <th class="head standard">xdm or kdm</th>
-            <th class="head standard">gdm<br /><sub>(default display manager on most Linux systems)</sub></th>
-          </tr>
-          </thead>
-          <tr class="standard">
-            <td class="high standard">RedHat 7/8/9<br />Enterprise Linux 2.1/3</td>
-            <td class="standard"><code>/etc/X11/xdm/Xsetup_0</code><br /> <br /> (replace &ldquo;0&rdquo; with the display number of the X server you are configuring)</td>
-            <td class="standard"><code>/etc/X11/gdm/Init/Default</code><br /> <br /> (usually this is just symlinked to <code>/etc/X11/xdm/Xsetup_0</code>)</td>
-          </tr>
-          <tr class="standard">
-            <td class="high standard">Enterprise Linux 4<br />Fedora 1-4</td>
-            <td class="standard"><code>/etc/X11/xdm/Xsetup_0</code><br /> <br /> (replace &ldquo;0&rdquo; with the display number of the X server you are configuring)</td>
-            <td class="standard"><code>/etc/X11/gdm/Init/:0</code><br /> <br /> (usually this is just symlinked to <code>/etc/X11/xdm/Xsetup_0</code>)</td>
-          </tr>
-          <tr class="standard">
-            <td class="high standard">Enterprise Linux 5<br />Fedora 5 &amp; 6</td>
-            <td class="standard"><code>/etc/X11/xdm/Xsetup_0</code><br /> <br /> (replace &ldquo;0&rdquo; with the display number of the X server you are configuring)</td>
-            <td class="standard"><code>/etc/gdm/Init/Default</code><br /></td>
-          </tr>
-          <tr class="standard">
-            <td class="high standard">SuSE/United Linux</td>
-            <td class="standard"><code>/etc/X11/xdm/Xsetup</code></td>
-            <td class="standard"><code>/etc/opt/gnome/gdm/Init/Default</code></td>
-          </tr>
-        </table>
-        </div>
-        
-    </li>
-    <li class="Ordered">
-        If the server is running gdm (the factory default on most Linux systems),
-        then you&rsquo;ll need to set up gdm to allow TCP connections to the
-        X server. To do this, edit the <code>gdm.conf</code> file and add the
-        following line under the <code>[security]</code> section (or change
-        it if it already exists):
-<pre class="verbatim">
-DisallowTCP=false
-</pre>
-
-        See the table below for the location of gdm.conf on various systems.
-    </li>
-    <li class="Ordered">
-        Unless you know that you absolutely need it, disable the XTEST extension.
-        Disabling XTEST will not prevent a user from logging keystrokes or
-        reading images from the X display, but it will prevent them from inserting
-        key and mouse events and thus hijacking a local X session.<br />
-        <br /> Disabling XTEST is accomplished by passing an argument of <code>-tst</code>
-        on the command line used to launch the X server.  The location of this
-        command line varies depending on the particular Linux distribution
-        and display manager being used.   The following table lists some common
-        locations:<br /> <br />
-        <div class="table">
-        <table class="standard" align="center">
-          <thead class="standard">
-          <tr class="head ">
-            <th class="head standard"></th>
-            <th class="head standard">xdm</th>
-            <th class="head standard">gdm<br /><sub>(default on most Linux systems)</sub></th>
-            <th class="head standard">kdm</th>
-          </tr>
-          </thead>
-          <tr class="standard">
-            <td class="high standard">RedHat 7/8/9<br />Enterprise Linux 2.1/3/4<br />Fedora 1-4</td>
-            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
-            <td class="standard"><code>/etc/X11/gdm/gdm.conf</code></td>
-            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="high standard">Enterprise Linux 5<br />Fedora 5 &amp; 6</td>
-            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
-            <td class="standard"><code>/etc/gdm/custom.conf</code></td>
-            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="high standard">SuSE/United Linux</td>
-            <td class="standard"><code>/etc/X11/xdm/Xservers</code></td>
-            <td class="standard"><code>/etc/opt/gnome/gdm/gdm.conf</code></td>
-            <td class="standard"><code>/etc/opt/kde3/share/config/kdm/Xservers</code></td>
-          </tr>
-        </table>
-        </div>
-        
-        <br /> For xdm-style configuration files, add <code>-tst</code> to
-        the line corresponding to the display number you are configuring. 
-        For example: <br />
-<pre class="verbatim">
-:0&nbsp;local&nbsp;/usr/X11R6/bin/X&nbsp;:0&nbsp;vt07&nbsp;-tst
-</pre>
-
-        For gdm-style configuration files, add <code>-tst</code> to all lines
-        that appear to be X server command lines.  For example: <br />
-<pre class="verbatim">
-StandardXServer=/usr/X11R6/bin/X&nbsp;-tst
-</pre>
-
-<pre class="verbatim">
-[server-Standard]
-command=/usr/X11R6/bin/X&nbsp;-tst&nbsp;-audit&nbsp;0
-</pre>
-
-<pre class="verbatim">
-[server-Terminal]
-command=/usr/X11R6/bin/X&nbsp;-tst&nbsp;-audit&nbsp;0&nbsp;-terminate
-</pre>
-
-<pre class="verbatim">
-[server-Chooser]
-command=/usr/X11R6/bin/X&nbsp;-tst&nbsp;-audit&nbsp;0
-</pre>
-
-    </li>
-    <li class="Ordered">
-        Restart the X server by issuing
-<pre class="verbatim">
-init&nbsp;5
-</pre>
-
-        as root.
-    </li>
-    <li class="Ordered">
-        To check your work, log out of the server, log back in via. SSh, and
-        run
-<pre class="verbatim">
-xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-xdpyinfo&nbsp;-display&nbsp;:0
-</pre>
-
-        In particular, make sure that XTEST doesn&rsquo;t show up in the list
-        of extensions if you disabled it above.
-    </li>
-</ol>
-
-
-<h2 id="hd006002">6.2&nbsp;Device permissions</h2>
-
-<p>If you are installing VirtualGL on a server which is running version
-1.0-71xx or earlier of the NVidia accelerated GLX drivers, follow the
-instructions in <code>/usr/share/doc/NVIDIA_GLX-1.0/README</code> regarding
-setting the appropriate permissions for <code>/dev/nvidia*</code>.
-This is not necessary with more recent versions of the driver.  <code>cat&nbsp;/proc/driver/nvidia/version</code>
-to determine which version of the NVidia driver is installed on your
-system.</p>
-
-<hr class="break" />
-
-
-<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Solaris Machine as a VirtualGL Server</h1>
-
-
-<h2 id="hd007001">7.1&nbsp;GLP: Using VirtualGL Without an X Server</h2>
+<h2 id="hd006001">6.1&nbsp;GLP: Using VirtualGL Without an X Server</h2>
 
 <p><a name="GLP_Usage"></a></p>
 
-<p>Sun&rsquo;s OpenGL library for Sparc systems has a special extension
-called &ldquo;GLP&rdquo; which allows VirtualGL to directly access
-a 3D graphics card even if there is no X server running on the card.
-Apart from greatly simplifying the process of configuring the VirtualGL
-server, GLP also greatly improves the overall security of the VirtualGL
-server, since it eliminates the need to grant X server access to VirtualGL
-users.  In addition, GLP makes it easy to assign VirtualGL jobs to
-any graphics card in a multi-card system.</p>
+<p>Sun&rsquo;s OpenGL library for Solaris/Sparc systems has a special
+extension called &ldquo;GLP&rdquo; which allows VirtualGL to directly
+access a 3D graphics card even if there is no X server running on the
+card.  Apart from greatly simplifying the process of configuring the
+VirtualGL server, GLP also greatly improves the overall security of
+the VirtualGL server, since it eliminates the need to grant X server
+access to VirtualGL users.  In addition, GLP makes it easy to assign
+VirtualGL jobs to any graphics card in a multi-card system.</p>
 
 <p>If your system is running
 <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-OpenGL</a></span><a name="idx0060"></a> 1.5 for Sparc/Solaris, it is
+OpenGL</a></span><a name="idx0060"></a> 1.5 for Solaris/Sparc, it is
 recommended that you configure it to use GLP:</p>
 
 <ol class="Ordered numeric">
@@ -1435,46 +1188,49 @@ recommended that you configure it to use GLP:</p>
         Log in as root.
     </li>
     <li class="Ordered">
-        Create a new group called <code>vglusers</code> and add any users that
-        need to run VirtualGL to this group.
-    </li>
-    <li class="Ordered">
-        If the <code>/etc/dt/config</code> directory does not exist, create
-        it.
+        Run
 <pre class="verbatim">
-mkdir&nbsp;-p&nbsp;/etc/dt/config
+/opt/VirtualGL/bin/vglserver_config
 </pre>
 
-        Make sure that <code>/etc/dt/config</code> has global read/execute
-        permissions.
     </li>
     <li class="Ordered">
-        Create a file called <code>GraphicsDevices</code> under <code>/etc/dt/config</code>
-        and add any framebuffer device paths in your system (<code>/dev/fbs/kfb0</code>,
-        <code>/dev/fbs/jfb0</code>, etc.) to this file, one device per line.
-        For example: <br />
-<pre class="verbatim">
-touch&nbsp;/etc/dt/config/GraphicsDevices
-for&nbsp;i&nbsp;in&nbsp;/dev/fbs/*[0-9];&nbsp;do&nbsp;echo&nbsp;$i&nbsp;&gt;&gt;/etc/dt/config/GraphicsDevices;&nbsp;done
-</pre>
-
-        You can choose to include only certain framebuffer devices in this
-        file. Only the devices listed in <code>GraphicsDevices</code> will
-        be available for use by VirtualGL.
+        Select option 3 (<code>Configure&nbsp;server&nbsp;for&nbsp;use&nbsp;with&nbsp;VirtualGL&nbsp;in&nbsp;GLP&nbsp;mode</code>.)
     </li>
     <li class="Ordered">
-        Grant read access to this file for the <code>vglusers</code> group.
-        For example: <br />
+
 <pre class="verbatim">
-chgrp&nbsp;vglusers&nbsp;/etc/dt/config/GraphicsDevices
-chmod&nbsp;640&nbsp;/etc/dt/config/GraphicsDevices
+Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group&nbsp;(recommended)?
+[Y/n]
 </pre>
 
+        <dl class="Description">
+            <dt class="Description">Yes</dt>
+            <dd class="Description">
+                Only users in the <code>vglusers</code> group can run OpenGL applications
+                on the VirtualGL server (the configuration script will create the <code>vglusers</code>
+                group if it doesn&rsquo;t already exist.)  This limits the odds that
+                an unauthorized user could snoop the 3D framebuffer device(s) and thus
+                see (or alter) the 3D output of an application running in VirtualGL.
+            </dd>
+            <dt class="Description">No</dt>
+            <dd class="Description">
+                Any authenticated user can run OpenGL applications on the VirtualGL
+                server.  If it is necessary for users outside of the <code>vglusers</code>
+                group to log in locally to the server and run OpenGL applications,
+                then this is probably the best option.
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+        Edit the <code>/etc/dt/config/GraphicsDevices</code> file as necessary.
+        This file contains a list of paths to 3D framebuffer devices (such
+        as <code>/dev/fbs/kfb0</code>, <code>/dev/fbs/jfb0</code>, etc.) that
+        you wish to use with VirtualGL.
     </li>
 </ol>
 
-<p>If you wish to make GLP the default for all users of the system, you
-can add</p>
+<p>If you wish VirtualGL to use GLP by default, then you can add</p>
 
 <pre class="verbatim">
 VGL_DISPLAY=glp
@@ -1488,10 +1244,10 @@ setting <code>VGL_DISPLAY</code> in one of their startup scripts (such
 as <code>~/.profile</code> or <code>~/.login</code>) or by passing
 an argument of <code>-d&nbsp;&lt;device&gt;</code> to <code>vglrun</code>
 when invoking VirtualGL.  See Chapter
-<a href="#Advanced_Configuration" class="ref">19</a> for more details.</p>
+<a href="#Advanced_Configuration" class="ref">18</a> for more details.</p>
 
 
-<h2 id="hd007002">7.2&nbsp;Granting Access to the Server&rsquo;s X Display</h2>
+<h2 id="hd006002">6.2&nbsp;Granting Access to the Server&rsquo;s X Display</h2>
 
 <div class="important"><p class="important">
 If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0061"></a>, then you can skip this section.
@@ -1500,8 +1256,8 @@ If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0
 <p>VirtualGL requires access to the server&rsquo;s 3D graphics card so
 that it can create off-screen pixel buffers (Pbuffers) and redirect
 the 3D rendering from applications into these Pbuffers.  Unfortunately,
-accessing a 3D graphics card on Solaris/x86 systems or on Solaris/Sparc
-systems without <a href="#GLP_Usage">GLP</a><a name="idx0062"></a>
+accessing a 3D graphics card on Linux and Solaris/x86 systems or on
+Solaris/Sparc systems without <a href="#GLP_Usage">GLP</a><a name="idx0062"></a>
 requires going through an X server.  On such systems, the only way
 to share the server&rsquo;s 3D graphics card among multiple users is
 to grant those users access to the X server that is running on the
@@ -1519,285 +1275,203 @@ are granting this access, you should avoid logging in locally to the
 server&rsquo;s X display as root unless absolutely necessary.</p>
 
 <p>This section will explain how to configure a VirtualGL server such
-that select users can run VirtualGL, even if the server is sitting
-at the login prompt. The basic idea is to call a script (<code>vglgenkey</code>)
-from the display manager&rsquo;s startup script.  <code>vglgenkey</code>
-invokes <code>xauth</code> to generate an authorization key for the
-server&rsquo;s X display, and it stores this key under <code>/etc/opt/VirtualGL</code>.
-The VirtualGL launcher script (<code>vglrun</code>) then attempts to
-read this key and merge it into the user&rsquo;s <code>.Xauthority</code>
-file, thus granting the user access to the server&rsquo;s X display.
-Therefore, you can control who has access to the server&rsquo;s X display
-simply by controlling who has read access to the <code>/etc/opt/VirtualGL</code>
-directory.</p>
-
-<p>If you prefer, you can also grant access to every authenticated user
-on the server by replacing the references to <code>vglgenkey</code>
-below with <code>xhost&nbsp;+localhost</code>.</p>
-
-
-<h3 id="hd007002001">If your system is using dtlogin as a display manager:</h3>
+that selected users can run VirtualGL, even if the server is sitting
+at the login prompt.</p>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
-        Log in as root.
-    </li>
-    <li class="Ordered">
-        Create a new group called <code>vglusers</code> and add any users that
-        need to run VirtualGL to this group.
-    </li>
-    <li class="Ordered">
-        Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group.  For example: <br />
+        Shut down the display manager:
+        <dl class="Description">
+            <dt class="Description">Linux servers</dt>
+            <dd class="Description">
 <pre class="verbatim">
-mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
-chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
-chmod&nbsp;750&nbsp;/etc/opt/VirtualGL
+init&nbsp;3
+</pre>
+
+            </dd>
+            <dt class="Description">Solaris servers running GDM</dt>
+            <dd class="Description">
+<pre class="verbatim">
+svcadm&nbsp;disable&nbsp;gdm2-login
+</pre>
+
+            </dd>
+            <dt class="Description">Solaris servers running dtlogin</dt>
+            <dd class="Description">
+<pre class="verbatim">
+/etc/init.d/dtlogin&nbsp;stop
+</pre>
+
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+        Log in as root from the text console (or remotely via. SSh.)
+    </li>
+    <li class="Ordered">
+        Run
+<pre class="verbatim">
+/opt/VirtualGL/bin/vglserver_config
 </pre>
 
     </li>
     <li class="Ordered">
-        If the <code>/etc/dt/config</code> directory does not exist, create
-        it.
-<pre class="verbatim">
-mkdir&nbsp;-p&nbsp;/etc/dt/config
-</pre>
-
+        Select option 1 (<code>Configure&nbsp;server&nbsp;for&nbsp;use&nbsp;with&nbsp;VirtualGL&nbsp;in&nbsp;GLX&nbsp;mode</code>.)
     </li>
     <li class="Ordered">
-        If <code>/etc/dt/config/Xsetup</code> does not exist, then copy the
-        default <code>Xsetup</code> file from <code>/usr/dt/config</code> to
-        that location:
-<pre class="verbatim">
-cp&nbsp;/usr/dt/config/Xsetup&nbsp;/etc/dt/config/Xsetup
-</pre>
 
-    </li>
-    <li class="Ordered">
-        Edit <code>/etc/dt/config/Xsetup</code>, and add the following lines
-        to the bottom of the file:
 <pre class="verbatim">
-/opt/SUNWvgl/bin/vglgenkey
-</pre>
-
-    </li>
-    <li class="Ordered">
-        If <code>/etc/dt/config/Xconfig</code> does not exist, then copy the
-        default <code>Xconfig</code> file from <code>/usr/dt/config</code>
-        to that location:
-<pre class="verbatim">
-cp&nbsp;/usr/dt/config/Xconfig&nbsp;/etc/dt/config/Xconfig
-</pre>
-
-    </li>
-    <li class="Ordered">
-        Edit <code>/etc/dt/config/Xconfig</code>, and add (or uncomment) the
-        following line:
-<pre class="verbatim">
-Dtlogin*grabServer:&nbsp;False
+Restrict&nbsp;local&nbsp;X&nbsp;server&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group&nbsp;(recommended)?
+[Y/n]
 </pre>
 
         <dl class="Description">
-            <dt class="Description">Explanation</dt>
+            <dt class="Description">Yes</dt>
             <dd class="Description">
-                The <code>Dtlogin*grabServer</code> option restricts X display access
-                to only the <code>dtlogin</code> process.  This is an added security
-                measure, since it prevents a user from attaching any kind of sniffer
-                program to the X display even if they have display access.  But <code>Dtlogin*grabServer</code>
-                also prevents VirtualGL from using the X display to access the 3D graphics
-                hardware, so this option must be disabled for VirtualGL to work properly.
+                Only users in the <code>vglusers</code> group can use VirtualGL (the
+                configuration script will create the <code>vglusers</code> group if
+                it doesn&rsquo;t already exist.)  This is the most secure option, since
+                it prevents any users outside of the <code>vglusers</code> group from
+                accessing (and thus exploiting) the VirtualGL server&rsquo;s X display.
+            </dd>
+            <dt class="Description">No</dt>
+            <dd class="Description">
+                VirtualGL can be used by any user that successfully logs into the VirtualGL
+                server.  The X server can also be accessed (and potentially exploited)
+                by any user who is logged into the VirtualGL server.  If you choose
+                this option, it is recommended that you also disable the XTEST extension
+                (see below.)
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+
+<pre class="verbatim">
+Restrict&nbsp;framebuffer&nbsp;device&nbsp;access&nbsp;to&nbsp;vglusers&nbsp;group&nbsp;(recommended)?
+[Y/n]
+</pre>
+
+        <dl class="Description">
+            <dt class="Description">Yes</dt>
+            <dd class="Description">
+                Only users in the <code>vglusers</code> group can run OpenGL applications
+                on the VirtualGL server (the configuration script will create the <code>vglusers</code>
+                group if it doesn&rsquo;t already exist.)  This limits the odds that
+                an unauthorized user could snoop the 3D framebuffer device(s) and thus
+                see (or alter) the 3D output of an application running in VirtualGL.
+            </dd>
+            <dt class="Description">No</dt>
+            <dd class="Description">
+                Any authenticated user can run OpenGL applications on the VirtualGL
+                server.  If it is necessary for users outside of the <code>vglusers</code>
+                group to log in locally to the server and run OpenGL applications,
+                then this is probably the best option.
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+
+<pre class="verbatim">
+Disable&nbsp;XTEST&nbsp;extension&nbsp;(recommended)?
+[Y/n]
+</pre>
+
+        <dl class="Description">
+            <dt class="Description">Yes</dt>
+            <dd class="Description">
+                Disabling XTEST will not prevent a user from logging keystrokes or
+                reading images from the X display, but if a user has access to the
+                X display, disabling XTEST will prevent them from inserting keystrokes
+                or mouse events and thus hijacking local X sessions on that display.
+            </dd>
+            <dt class="Description">No</dt>
+            <dd class="Description">
+                VNC requires XTEST, so if you need to attach a VNC server to the VirtualGL
+                server&rsquo;s local X display, then it is necessary to select this
+                option.
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+        Restart the display manager:
+        <dl class="Description">
+            <dt class="Description">Linux servers</dt>
+            <dd class="Description">
+<pre class="verbatim">
+init&nbsp;5
+</pre>
+
+            </dd>
+            <dt class="Description">Solaris servers running GDM</dt>
+            <dd class="Description">
+<pre class="verbatim">
+svcadm&nbsp;enable&nbsp;gdm2-login
+</pre>
+
+            </dd>
+            <dt class="Description">Solaris servers running dtlogin</dt>
+            <dd class="Description">
+<pre class="verbatim">
+/etc/init.d/dtlogin&nbsp;start
+</pre>
+
+            </dd>
+        </dl>
+    </li>
+    <li class="Ordered">
+        To check your work, log out of the server, log back in via. SSh, and
+        run
+        <dl class="Description">
+            <dt class="Description">If you restricted X server access to <code>vglusers</code></dt>
+            <dd class="Description">
+<pre class="verbatim">
+xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
+xdpyinfo&nbsp;-display&nbsp;:0
+</pre>
+
+            </dd>
+            <dt class="Description">If you did not restrict X server access</dt>
+            <dd class="Description">
+<pre class="verbatim">
+xdpyinfo&nbsp;-display&nbsp;:0
+</pre>
+
             </dd>
         </dl>
         <div class="important"><p class="important">
-        If the system you are configuring as a VirtualGL server is also being used as a Sun Ray server, then make these same modifications to <code>/etc/dt/config/Xconfig.SUNWut.prototype</code>.  Otherwise, the modifications you just made to <code>/etc/dt/config/Xconfig</code> will be overwritten the next time the system is restarted.
+        NOTE: <code>xauth</code> and <code>xdpyinfo</code> are in <code>/usr/openwin/bin</code> on Solaris systems.
         </p></div>
-    </li>
-    <li class="Ordered">
-        Unless you know that you absolutely need it, disable the XTEST extension.
-        Disabling XTEST will not prevent a user from logging keystrokes or
-        reading images from the X display, but it will prevent them from inserting
-        key and mouse events and thus hijacking a local X session.
-        <ol class="Ordered alpha" type="a">
-            <li class="Ordered" value="1">
-                If <code>/etc/dt/config/Xservers</code> does not exist, then copy the
-                default <code>Xservers</code> file from <code>/usr/dt/config</code>
-                to that location:
-<pre class="verbatim">
-cp&nbsp;/usr/dt/config/Xservers&nbsp;/etc/dt/config/Xservers
-</pre>
-
-            </li>
-            <li class="Ordered" value="2">
-                Edit <code>/etc/dt/config/Xservers</code> and add an argument of <code>-tst</code>
-                to the line corresponding to the display number you are configuring.
-                For example: <br />
-<pre class="verbatim">
-:0&nbsp;&nbsp;Local&nbsp;local_uid@console&nbsp;root&nbsp;/usr/openwin/bin/Xsun&nbsp;:0&nbsp;-nobanner&nbsp;-tst
-</pre>
-
-                <div class="important"><p class="important">
-                If the system you are configuring as a VirtualGL server is also being used as a Sun Ray server, then make these same modifications to <code>/etc/dt/config/Xservers.SUNWut.prototype</code>.  Otherwise, the modifications you just made to <code>/etc/dt/config/Xservers</code> will be overwritten the next time the system is restarted.
-                </p></div>
-            </li>
-        </ol>
-    </li>
-    <li class="Ordered">
-        Verify that <code>/etc/dt/config</code> and <code>/etc/dt/config/Xsetup</code>
-        can be executed by all users, and verify that <code>/etc/dt/config/Xconfig</code>
-        and <code>/etc/dt/config/Xservers</code> can be read by all users.
-    </li>
-    <li class="Ordered">
-        Restart the X server by issuing
-<pre class="verbatim">
-/etc/init.d/dtlogin&nbsp;stop;&nbsp;/etc/init.d/dtlogin&nbsp;start
-</pre>
-
-    </li>
-    <li class="Ordered">
-        To check your work, log out of the server, log back in via. SSh, and
-        run
-<pre class="verbatim">
-/usr/openwin/bin/xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-/usr/openwin/bin/xdpyinfo&nbsp;-display&nbsp;:0
-</pre>
-
         In particular, make sure that XTEST doesn&rsquo;t show up in the list
         of extensions if you disabled it above.
     </li>
 </ol>
 
 
-<h3 id="hd007002002">If your system is using gdm as a display manager (gdm is available only on Solaris 10 or later):</h3>
+<h2 id="hd006003">6.3&nbsp;Device Permissions with Older NVidia Drivers</h2>
 
-<ol class="Ordered numeric">
-    <li class="Ordered">
-        Log in as root.
-    </li>
-    <li class="Ordered">
-        Create a new group called <code>vglusers</code> and add any users that
-        need to run VirtualGL to this group.
-    </li>
-    <li class="Ordered">
-        Create a new directory <code>/etc/opt/VirtualGL</code> and make it
-        readable by the <code>vglusers</code> group.  For example: <br />
-<pre class="verbatim">
-mkdir&nbsp;-p&nbsp;/etc/opt/VirtualGL
-chgrp&nbsp;vglusers&nbsp;/etc/opt/VirtualGL
-chmod&nbsp;750&nbsp;/etc/opt/VirtualGL
-</pre>
-
-    </li>
-    <li class="Ordered">
-        Add
-<pre class="verbatim">
-/opt/SUNWvgl/bin/vglgenkey
-</pre>
-
-        to the top of the <code>/etc/X11/gdm/Init/Default</code> file.
-    </li>
-    <li class="Ordered">
-        Edit <code>/etc/X11/gdm/gdm.conf</code> and add the following line
-        under the <code>[security]</code> section (or change it if it already
-        exists):
-<pre class="verbatim">
-DisallowTCP=false
-</pre>
-
-    </li>
-    <li class="Ordered">
-        Unless you know that you absolutely need it, disable the XTEST extension.
-        Disabling XTEST will not prevent a user from logging keystrokes or
-        reading images from the X display, but it will prevent them from inserting
-        key and mouse events and thus hijacking a local X session.<br />
-        <br /> Edit <code>/etc/X11/gdm/gdm.conf</code> and add <code>-tst</code>
-        to all lines that appear to be X server command lines.  For example:
-        <br />
-<pre class="verbatim">
-StandardXServer=/usr/X11R6/bin/Xorg&nbsp;-tst
-</pre>
-
-<pre class="verbatim">
-[server-Standard]
-command=/usr/X11R6/bin/Xorg&nbsp;-tst&nbsp;-audit&nbsp;0
-</pre>
-
-<pre class="verbatim">
-[server-Terminal]
-command=/usr/X11R6/bin/Xorg&nbsp;-tst&nbsp;-audit&nbsp;0&nbsp;-terminate
-</pre>
-
-<pre class="verbatim">
-[server-Chooser]
-command=/usr/X11R6/bin/Xorg&nbsp;-tst&nbsp;-audit&nbsp;0
-</pre>
-
-    </li>
-    <li class="Ordered">
-        Restart gdm by issuing
-<pre class="verbatim">
-svcadm&nbsp;disable&nbsp;gdm2-login;&nbsp;svcadm&nbsp;enable&nbsp;gdm2-login
-</pre>
-
-    </li>
-    <li class="Ordered">
-        To check your work, log out of the server, log back in via. SSh, and
-        run
-<pre class="verbatim">
-/usr/openwin/bin/xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
-/usr/openwin/bin/xdpyinfo&nbsp;-display&nbsp;:0
-</pre>
-
-        In particular, make sure that XTEST doesn&rsquo;t show up in the list
-        of extensions if you disabled it above.
-    </li>
-</ol>
+<p>If you are installing VirtualGL on a server which is running version
+1.0-71xx or earlier of the NVidia accelerated GLX drivers, follow the
+instructions in <code>/usr/share/doc/NVIDIA_GLX-1.0/README</code> regarding
+setting the appropriate permissions for <code>/dev/nvidia*</code>.
+This is not necessary with more recent versions of the driver.  <code>cat&nbsp;/proc/driver/nvidia/version</code>
+to determine which version of the NVidia driver is installed on your
+system.</p>
 
 
-<h2 id="hd007003">7.3&nbsp;Device Permissions</h2>
-
-<p>Whether the server&rsquo;s 3D graphics card is being accessed through
-GLP or through an X server, you must perform the following procedure
-to enable VirtualGL users to access the framebuffer device(s):</p>
-
-<ol class="Ordered numeric">
-    <li class="Ordered" value="1">
-        Edit <code>/etc/logindevperm</code> and comment out the &ldquo;frame
-        buffers&rdquo; line.  For example: <br />
-<pre class="verbatim">
-#&nbsp;/dev/console&nbsp;&nbsp;&nbsp;&nbsp;0600&nbsp;&nbsp;&nbsp;&nbsp;/dev/fbs/*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;frame&nbsp;buffers
-</pre>
-
-    </li>
-    <li class="Ordered" value="2">
-        Change the permissions and group for <code>/dev/fbs/*</code> to allow
-        write access to anyone who will need to use VirtualGL.  For example:
-        <br />
-<pre class="verbatim">
-chmod&nbsp;660&nbsp;/dev/fbs/*
-chown&nbsp;root&nbsp;/dev/fbs/*
-chgrp&nbsp;vglusers&nbsp;/dev/fbs/*
-</pre>
-
-    </li>
-</ol>
-<div class="important"><p class="important">
-Explanation: Normally, when someone logs into a Solaris machine, the system will automatically assign ownership of the framebuffer devices to that user and set the permissions for the framebuffer devices to those specified in <code>/etc/logindevperm</code>.  The default setting in <code>/etc/logindevperm</code> disallows anyone from using the framebuffer devices except the user that is logged in.  But in order to run VirtualGL, a user needs write access to the framebuffer devices.  So in order to make the framebuffer a shared resource, it is necessary to disable the login device permissions mechanism for the framebuffer devices and manually set the owner and group for these devices such that any VirtualGL users can write to them.
-</p></div>
-
-
-<h2 id="hd007004">7.4&nbsp;SSh Server Configuration</h2>
+<h2 id="hd006004">6.4&nbsp;SSh Server Configuration</h2>
 
 <p>The server&rsquo;s SSh daemon should have the <code>X11Forwarding</code>
 option enabled and the <code>UseLogin</code> option disabled.  This
 is configured in <code>sshd_config</code>, the location of which varies
-depending on your distribution of SSh.  Solaris 10 generally keeps
-this in <code>/etc/ssh</code>, whereas Blastwave keeps it in <code>/opt/csw/etc</code>
-and SunFreeware keeps it in <code>/usr/local/etc</code>.</p>
+depending on your distribution of SSh.  Linux and Solaris 10 systems
+generally keep this in <code>/etc/ssh</code>, whereas Blastwave OpenSSh
+keeps it in <code>/opt/csw/etc</code> and SunFreeware OpenSSh keeps
+it in <code>/usr/local/etc</code>.</p>
 
 <hr class="break" />
 
 
-<h1 id="hd008"><a name="file008"></a>8&nbsp;Configuring a Windows Machine as a VirtualGL Direct Mode Client</h1>
+<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Windows Machine as a VirtualGL Direct Mode Client</h1>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
@@ -1822,10 +1496,10 @@ and SunFreeware keeps it in <code>/usr/local/etc</code>.</p>
 </ol>
 
 
-<h2 id="hd008001">8.1&nbsp;Optimizing Exceed</h2>
+<h2 id="hd007001">7.1&nbsp;Optimizing Exceed</h2>
 
 
-<h3 id="hd008001001">Disabling Pixel Format Conversion and Backing Store</h3>
+<h3 id="hd007001001">Disabling Pixel Format Conversion and Backing Store</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
@@ -1866,7 +1540,7 @@ and SunFreeware keeps it in <code>/usr/local/etc</code>.</p>
 </ol>
 
 
-<h3 id="hd008001002">Enabling MIT-SHM</h3>
+<h3 id="hd007001002">Enabling MIT-SHM</h3>
 
 <p>VirtualGL has the ability to take advantage of the MIT-SHM extension
 in Hummingbird Exceed to accelerate image drawing on Windows.  This
@@ -1927,7 +1601,7 @@ the following patches from the Hummingbird support site:</p>
 </ol>
 
 
-<h2 id="hd008002">8.2&nbsp;Installing the VirtualGL Client as a Windows Service</h2>
+<h2 id="hd007002">7.2&nbsp;Installing the VirtualGL Client as a Windows Service</h2>
 
 <p>The VirtualGL Windows Client can be installed as a Windows service
 (and subsequently removed) using the links provided in the &ldquo;VirtualGL
@@ -1960,28 +1634,28 @@ vglclient&nbsp;-?
 <hr class="break" />
 
 
-<h1 id="hd009"><a name="file009"></a>9&nbsp;Using VirtualGL in Direct Mode</h1>
+<h1 id="hd008"><a name="file008"></a>8&nbsp;Using VirtualGL in Direct Mode</h1>
 
 <p><a name="Direct_Mode_Usage"></a></p>
 
 
-<h2 id="hd009001">9.1&nbsp;Direct Mode with X11 Forwarding</h2>
+<h2 id="hd008001">8.1&nbsp;Direct Mode with X11 Forwarding</h2>
 
 <p><a name="X11_Forwarding"></a></p>
 
 
-<h3 id="hd009001001">Performance</h3>
+<h3 id="hd008001001">Performance</h3>
 
 <p>Optimal</p>
 
 
-<h3 id="hd009001002">Security Notes</h3>
+<h3 id="hd008001002">Security Notes</h3>
 
 <p>X11 traffic is encrypted, but the VirtualGL image stream is left unencrypted
 to maximize performance.</p>
 
 
-<h3 id="hd009001003">Procedure</h3>
+<h3 id="hd008001003">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
@@ -2074,23 +1748,23 @@ setenv&nbsp;VGL_CLIENT&nbsp;{client}:{n}.0
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
 
 
-<h2 id="hd009002">9.2&nbsp;Direct Mode with a Direct X11 Connection</h2>
+<h2 id="hd008002">8.2&nbsp;Direct Mode with a Direct X11 Connection</h2>
 
 <p><a name="Direct_X11_Connection"></a></p>
 
 
-<h3 id="hd009002001">Performance</h3>
+<h3 id="hd008002001">Performance</h3>
 
 <p>Optimal</p>
 
 
-<h3 id="hd009002002">Security Notes</h3>
+<h3 id="hd008002002">Security Notes</h3>
 
 <ul class="Itemize">
     <li class="Itemize dash">
@@ -2105,7 +1779,7 @@ setenv&nbsp;VGL_CLIENT&nbsp;{client}:{n}.0
 </ul>
 
 
-<h3 id="hd009002003">Procedure</h3>
+<h3 id="hd008002003">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
@@ -2237,22 +1911,22 @@ setenv&nbsp;DISPLAY&nbsp;{client}:{n}.0
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
 
 
-<h2 id="hd009003">9.3&nbsp;Direct Mode with SSL Encryption</h2>
+<h2 id="hd008003">8.3&nbsp;Direct Mode with SSL Encryption</h2>
 
 
-<h3 id="hd009003001">Performance</h3>
+<h3 id="hd008003001">Performance</h3>
 
 <p>On high-speed networks such as Ethernet, VirtualGL&rsquo;s performance
 is reduced by as much as 20% by enabling SSL encryption.</p>
 
 
-<h3 id="hd009003002">Security Notes</h3>
+<h3 id="hd008003002">Security Notes</h3>
 
 <ul class="Itemize">
     <li class="Itemize dash">
@@ -2265,18 +1939,18 @@ is reduced by as much as 20% by enabling SSL encryption.</p>
 </ul>
 
 
-<h3 id="hd009003003">Procedure</h3>
+<h3 id="hd008003003">Procedure</h3>
 
 <p>Pass an argument of <code>+s</code> to <code>vglrun</code> when launching
 VirtualGL, or set the environment variable <code>VGL_SSL</code> to
 <code>1</code> on the VirtualGL server. (see Chapter
-<a href="#Advanced_Configuration" class="ref">19</a> for more details.)</p>
+<a href="#Advanced_Configuration" class="ref">18</a> for more details.)</p>
 
 
-<h2 id="hd009004">9.4&nbsp;Direct Mode with X11 Forwarding and SSh Tunneling</h2>
+<h2 id="hd008004">8.4&nbsp;Direct Mode with X11 Forwarding and SSh Tunneling</h2>
 
 
-<h3 id="hd009004001">Performance</h3>
+<h3 id="hd008004001">Performance</h3>
 
 <ul class="Itemize">
     <li class="Itemize dash">
@@ -2295,7 +1969,7 @@ VirtualGL, or set the environment variable <code>VGL_SSL</code> to
 </ul>
 
 
-<h3 id="hd009004002">Security Notes</h3>
+<h3 id="hd008004002">Security Notes</h3>
 
 <ul class="Itemize">
     <li class="Itemize dash">
@@ -2309,7 +1983,7 @@ VirtualGL, or set the environment variable <code>VGL_SSL</code> to
 </ul>
 
 
-<h3 id="hd009004003">Procedure</h3>
+<h3 id="hd008004003">Procedure</h3>
 
 <p>The procedure is the same as for the <a href="#X11_Forwarding">X11
 Forwarding</a><a name="idx0068"></a> case, except that the following
@@ -2354,7 +2028,7 @@ ssh&nbsp;-X&nbsp;-R&nbsp;{port}:localhost:4242&nbsp;{user}@{server}
 </ol>
 
 
-<h1 id="hd0010"><a name="file010"></a>10&nbsp;Using VirtualGL in Raw Mode with TurboVNC</h1>
+<h1 id="hd009"><a name="file009"></a>9&nbsp;Using VirtualGL in Raw Mode with TurboVNC</h1>
 
 <p><a name="TurboVNC_Usage"></a></p>
 
@@ -2405,7 +2079,7 @@ other tweaks.</p>
 over Direct Mode (and several reasons why one might not.)</p>
 
 
-<h3 id="hd0010000001">Advantages of Raw Mode + TurboVNC</h3>
+<h3 id="hd009000001">Advantages of Raw Mode + TurboVNC</h3>
 
 <ul class="Itemize">
     <li class="Itemize asterisk">
@@ -2435,7 +2109,7 @@ over Direct Mode (and several reasons why one might not.)</p>
 </ul>
 
 
-<h3 id="hd0010000002">Advantages of Direct Mode</h3>
+<h3 id="hd009000002">Advantages of Direct Mode</h3>
 
 <ul class="Itemize">
     <li class="Itemize asterisk">
@@ -2462,7 +2136,7 @@ over Direct Mode (and several reasons why one might not.)</p>
 </ul>
 
 
-<h2 id="hd0010001">10.1&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on the Same Machine</h2>
+<h2 id="hd009001">9.1&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on the Same Machine</h2>
 
 <div class="figure">
 <img src="rawmodetoxproxy.png" alt="rawmodetoxproxy" class="figure" id="imgid_18" name="imgid_18"/>
@@ -2575,13 +2249,13 @@ ssh&nbsp;{user}@{server}
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a>
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a>
         for more information on <code>vglrun</code> command line options.
     </li>
 </ol>
 
 
-<h2 id="hd0010002">10.2&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on Different Machines</h2>
+<h2 id="hd009002">9.2&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on Different Machines</h2>
 
 <div class="figure">
 <img src="rawmodeoverservernetwork.png" alt="rawmodeoverservernetwork" class="figure" id="imgid_19" name="imgid_19"/>
@@ -2627,7 +2301,7 @@ notable differences:</p>
 </ol>
 
 
-<h2 id="hd0010003">10.3&nbsp;Disconnecting and Killing the TurboVNC Session</h2>
+<h2 id="hd009003">9.3&nbsp;Disconnecting and Killing the TurboVNC Session</h2>
 
 <p>Closing the TurboVNC viewer disconnects from the TurboVNC server session,
 but the TurboVNC server session (and any applications that you may
@@ -2685,7 +2359,7 @@ on this machine, run</p>
 </dl>
 
 
-<h2 id="hd0010004">10.4&nbsp;Using TurboVNC in a Web Browser</h2>
+<h2 id="hd009004">9.4&nbsp;Using TurboVNC in a Web Browser</h2>
 
 <p>When a TurboVNC server session is created, it automatically launches
 a miniature web server that serves up a Java TurboVNC viewer applet.
@@ -2711,7 +2385,7 @@ then point your web browser to:</p>
 <p><code>http://my_server:5801</code></p>
 
 
-<h2 id="hd0010005">10.5&nbsp;Connection Profiles: Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
+<h2 id="hd009005">9.5&nbsp;Connection Profiles: Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
 
 <p>To get the peak performance out of TurboVNC, you must give it a hint
 about the type of network that separates your client machine from the
@@ -2764,7 +2438,7 @@ usable) level which will achieve interactive performance on typical
 broadband connections.</p>
 
 
-<h2 id="hd0010006">10.6&nbsp;Securing a TurboVNC Connection</h2>
+<h2 id="hd009006">9.6&nbsp;Securing a TurboVNC Connection</h2>
 
 <p>Normally, the connection between the TurboVNC server and the TurboVNC
 viewer is completely unencrypted, but securing that connection can
@@ -2799,7 +2473,7 @@ the TurboVNC viewer and point it to <code>localhost:{n}</code> (<code>localhost:
 in the above example.)</p>
 
 
-<h3 id="hd0010006001">Performance Notes</h3>
+<h3 id="hd009006001">Performance Notes</h3>
 
 <p>For LAN connections and other high-speed networks, tunneling the TurboVNC
 connection over SSh will reduce performance by as much as 20% (50%
@@ -2807,7 +2481,7 @@ if using PuTTY.)  But for wide-area networks, broadband, etc., there
 is no performance penalty for using SSh tunneling with TurboVNC.</p>
 
 
-<h2 id="hd0010007">10.7&nbsp;Further Reading</h2>
+<h2 id="hd009007">9.7&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -2845,10 +2519,10 @@ many of its features.</p>
 <hr class="break" />
 
 
-<h1 id="hd0011"><a name="file011"></a>11&nbsp;Using VirtualGL in Raw Mode with Other X Servers and Proxies</h1>
+<h1 id="hd0010"><a name="file010"></a>10&nbsp;Using VirtualGL in Raw Mode with Other X Servers and Proxies</h1>
 
 
-<h3 id="hd0011000001">Other X Proxies</h3>
+<h3 id="hd0010000001">Other X Proxies</h3>
 
 <p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0072"></a>
 described how to use VirtualGL in Raw Mode with TurboVNC, but much
@@ -2867,7 +2541,7 @@ it doesn&rsquo;t, then you can force the use of Raw Mode by setting
 of <code>-c&nbsp;0</code> to <code>vglrun</code>.</p>
 
 
-<h3 id="hd0011000002">Raw Mode Over a Network</h3>
+<h3 id="hd0010000002">Raw Mode Over a Network</h3>
 
 <p><a name="Raw_Mode_Over_Network"></a></p>
 
@@ -2916,7 +2590,7 @@ notable differences:</p>
 </ol>
 
 
-<h3 id="hd0011000003">WORD OF CAUTION</h3>
+<h3 id="hd0010000003">WORD OF CAUTION</h3>
 
 <p>Do not use SSh X11 tunneling with Raw Mode, as this will reduce the
 performance by 80% or more.  It is necessary to use a direct X11 connection
@@ -2925,7 +2599,7 @@ to sustain an interactive frame rate with Raw Mode on Gigabit networks.</p>
 <hr class="break" />
 
 
-<h1 id="hd0012"><a name="file012"></a>12&nbsp;<code>vglrun</code> and Solaris Shell Scripts</h1>
+<h1 id="hd0011"><a name="file011"></a>11&nbsp;<code>vglrun</code> and Solaris Shell Scripts</h1>
 
 <p><code>vglrun</code> can be used to launch either binary executables
 or shell scripts, but there are a few things to keep in mind when using
@@ -3013,7 +2687,7 @@ to launch the application script.</p>
 <hr class="break" />
 
 
-<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with Applications That Manually Load OpenGL</h1>
+<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with Applications That Manually Load OpenGL</h1>
 
 <p><a name="dlopen"></a></p>
 
@@ -3064,14 +2738,14 @@ to be loaded ahead of VirtualGL and <code>libGL.so</code>.  This new
 library intercepts any calls to <code>dlopen()</code> and forces the
 application to open VirtualGL instead of <code>libGL.so</code>.</p>
 
-<p>Chapter <a href="#Application_Recipes" class="ref">15</a> contains
+<p>Chapter <a href="#Application_Recipes" class="ref">14</a> contains
 specific recipes for getting a variety of games and other applications
 to work with VirtualGL.</p>
 
 <hr class="break" />
 
 
-<h1 id="hd0014"><a name="file014"></a>14&nbsp;Using VirtualGL with Chromium and ModViz VGP</h1>
+<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with Chromium and ModViz VGP</h1>
 
 <p><a name="Chromium"></a></p>
 
@@ -3094,7 +2768,7 @@ is most often used in one of three configurations:</p>
 </ol>
 
 
-<h2 id="hd0014001">14.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
+<h2 id="hd0013001">13.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
 
 <div class="figure">
 <img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_21" name="imgid_21"/>
@@ -3127,7 +2801,7 @@ If you have a need for such a configuration,
 us know</a></span><a name="idx0075"></a>.</p>
 
 
-<h2 id="hd0014002">14.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
+<h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
 
 <div class="figure">
 <img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_22" name="imgid_22"/>
@@ -3270,7 +2944,7 @@ When using VirtualGL with this mode, resizing the application window may not wor
 </p></div>
 
 
-<h2 id="hd0014003">14.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
+<h2 id="hd0013003">13.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
 <img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_23" name="imgid_23"/>
@@ -3305,7 +2979,7 @@ proportional to log<sub>2</sub>(N) rather than N.</p>
     <li class="Ordered">
         On Node 0, set <code>CR_SYSTEM_GL_PATH</code> to the appropriate value
         for the operating system and application type (see table in Section
-        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">14.2</a>.)
+        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
     </li>
     <li class="Ordered">
         On Node 0, <code>vglrun&nbsp;crserver</code>
@@ -3313,7 +2987,7 @@ proportional to log<sub>2</sub>(N) rather than N.</p>
 </ol>
 
 
-<h3 id="hd0014003001">CRUT</h3>
+<h3 id="hd0013003001">CRUT</h3>
 
 <p>The Chromium Utility Toolkit provides a convenient way for graphics
 applications to specifically take advantage of Chromium&rsquo;s sort-last
@@ -3333,7 +3007,7 @@ be running on Node 0.  So to make such applications work with VirtualGL:</p>
     <li class="Ordered">
         On Node 0, set <code>CR_SYSTEM_GL_PATH</code> to the appropriate value
         for the operating system and application type (see table in Section
-        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">14.2</a>.)
+        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
     </li>
     <li class="Ordered">
         On Node 0, <code>vglrun&nbsp;crutserver&nbsp;&amp;</code>
@@ -3344,7 +3018,7 @@ be running on Node 0.  So to make such applications work with VirtualGL:</p>
 </ol>
 
 
-<h2 id="hd0014004">14.4&nbsp;A Note About Performance</h2>
+<h2 id="hd0013004">13.4&nbsp;A Note About Performance</h2>
 
 <p>Chromium&rsquo;s use of X11 is generally not very optimal.  It assumes
 a very fast connection between the X server and the Chromium Server.
@@ -3355,7 +3029,7 @@ VirtualGL running in a TurboVNC session as opposed to VirtualGL running
 in Direct Mode.</p>
 
 
-<h2 id="hd0014005">14.5&nbsp;ModViz VGP and VirtualGL</h2>
+<h2 id="hd0013005">13.5&nbsp;ModViz VGP and VirtualGL</h2>
 
 <p>ModViz Virtual Graphics Platform<sup>TM</sup> is a polished commercial
 clustered rendering framework for Linux which supports all three of
@@ -3389,7 +3063,7 @@ a 64-bit application.)</p>
 <hr class="break" />
 
 
-<h1 id="hd0015"><a name="file015"></a>15&nbsp;Other Application Recipes</h1>
+<h1 id="hd0014"><a name="file014"></a>14&nbsp;Other Application Recipes</h1>
 
 <p><a name="Application_Recipes"></a></p>
 
@@ -3413,37 +3087,37 @@ a 64-bit application.)</p>
     <td class="standard">Army Ops</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;armyops</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Descent 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;descent3&nbsp;-g&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;descent3</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Doom 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;doom3&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;doom3</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Enemy Territory (Return to Castle Wolfenstein)</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;et&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;et</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Heretic II</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;gl_driver&nbsp;/usr/lib/librrfaker.so&nbsp;+set&nbsp;vid_ref&nbsp;glx</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Heavy Gear II</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;hg2&nbsp;-o&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;hg2</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">I-deas Master Series 9, 10, &amp; 11</td>
@@ -3455,7 +3129,7 @@ a 64-bit application.)</p>
     <td class="standard">Java2D applications that use OpenGL</td>
     <td class="standard">Linux, Solaris</td>
     <td class="standard">Java2D will use OpenGL to perform its rendering if <code>sun.java2d.opengl</code> is set to <code>True</code>.  For example: <br /><br /> <code>java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> In order for this to work in VirtualGL, it is necessary to invoke <code>vglrun</code> with the <code>-dl</code> switch.  For example: <br /><br /> <code>vglrun&nbsp;-dl&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /> If you are using Java v6 b92 or later, you can also set the environment variable <code>J2D_ALT_LIBGL_PATH</code> to the path of <code>librrfaker.so</code>.  For example: <br /><br /> <code>setenv&nbsp;J2D_ALT_LIBGL_PATH&nbsp;/opt/VirtualGL/lib/librrfaker.so</code><br /> <code>vglrun&nbsp;java&nbsp;-Dsun.java2d.opengl=True&nbsp;MyAppClass</code> <br /><br /></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Java2D applications that use OpenGL</td>
@@ -3479,31 +3153,31 @@ a 64-bit application.)</p>
     <td class="standard">QGL (OpenGL Qt Widget)</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;{application}</code></td>
-    <td class="standard">Qt can be built such that it either resolves symbols from libGL automatically or uses <code>dlopen()</code> to manually resolve those symbols from libGL.  As of Qt v3.3, the latter behavior is the default, so OpenGL programs built with later versions of libQt will not work with VirtualGL unless the <code>-dl</code> switch is used with <code>vglrun</code>. <br /><br /> See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">Qt can be built such that it either resolves symbols from libGL automatically or uses <code>dlopen()</code> to manually resolve those symbols from libGL.  As of Qt v3.3, the latter behavior is the default, so OpenGL programs built with later versions of libQt will not work with VirtualGL unless the <code>-dl</code> switch is used with <code>vglrun</code>. <br /><br /> See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Quake 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;quake3&nbsp;+set&nbsp;r_glDriver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;quake3</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Soldier of Fortune</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;sof&nbsp;+set&nbsp;gl_driver&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;sof</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">Unreal Tournament 2004</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;ut2004</code></td>
-    <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
+    <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
   <tr class="standard">
     <td class="standard">VisConcept</td>
     <td class="standard">Solaris/Sparc</td>
     <td class="standard">Set the environment variable <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code>.</td>
-    <td class="standard">Popping up the VirtualGL configuration dialog may cause the application to hang unless you set this environment variable.  See Section <a href="#VGL_GUI_XTTHREADINIT" class="ref">19.1</a> for more details.</td>
+    <td class="standard">Popping up the VirtualGL configuration dialog may cause the application to hang unless you set this environment variable.  See Section <a href="#VGL_GUI_XTTHREADINIT" class="ref">18.1</a> for more details.</td>
   </tr>
 </table>
 </div>
@@ -3512,12 +3186,12 @@ a 64-bit application.)</p>
 <hr class="break" />
 
 
-<h1 id="hd0016"><a name="file016"></a>16&nbsp;Advanced OpenGL Features</h1>
+<h1 id="hd0015"><a name="file015"></a>15&nbsp;Advanced OpenGL Features</h1>
 
 <p><a name="Advanced_OpenGL"></a></p>
 
 
-<h2 id="hd0016001">16.1&nbsp;Stereographic Rendering</h2>
+<h2 id="hd0015001">15.1&nbsp;Stereographic Rendering</h2>
 
 <p>The general idea behind VirtualGL is to offload the 3D rendering work
 to the server so that the client only has to draw 2D images.  Normally,
@@ -3570,7 +3244,7 @@ Stereo requires Direct Mode.  If VirtualGL is running in Raw Mode and the applic
 </p></div>
 
 
-<h2 id="hd0016002">16.2&nbsp;Transparent Overlays</h2>
+<h2 id="hd0015002">15.2&nbsp;Transparent Overlays</h2>
 
 <p>Transparent overlays have similar requirements and restrictions as
 stereo.  In this case, VirtualGL completely bypasses its own GLX faker
@@ -3612,7 +3286,7 @@ Overlays do not work with X proxies (including TurboVNC.)  VirtualGL must be dis
 </p></div>
 
 
-<h2 id="hd0016003">16.3&nbsp;Indexed (PseudoColor) Rendering</h2>
+<h2 id="hd0015003">15.3&nbsp;Indexed (PseudoColor) Rendering</h2>
 
 <p>In a PseudoColor visual, each pixel is represented by an index which
 refers to a location in a color table.  The color table stores the
@@ -3654,7 +3328,7 @@ that VNC cannot provide both PseudoColor and TrueColor visuals at the
 same time.</p>
 
 
-<h2 id="hd0016004">16.4&nbsp;Troubleshooting</h2>
+<h2 id="hd0015004">15.4&nbsp;Troubleshooting</h2>
 
 <p><a name="Troubleshooting"></a></p>
 
@@ -3707,12 +3381,12 @@ of &ldquo;PseudoColor.&rdquo;</p>
 <hr class="break" />
 
 
-<h1 id="hd0017"><a name="file017"></a>17&nbsp;Performance Measurement</h1>
+<h1 id="hd0016"><a name="file016"></a>16&nbsp;Performance Measurement</h1>
 
 <p><a name="Perf_Measurement"></a></p>
 
 
-<h2 id="hd0017001">17.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
+<h2 id="hd0016001">16.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
 
 <p>The easiest way to uncover bottlenecks in the VirtualGL pipeline is
 to set the <code>VGL_PROFILE</code> environment variable to <code>1</code>
@@ -3756,7 +3430,7 @@ so the aggregate performance is the harmonic mean of the decompression
 and blitting rates:  <em>[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec</em>.</p>
 
 
-<h2 id="hd0017002">17.2&nbsp;Frame Spoiling</h2>
+<h2 id="hd0016002">16.2&nbsp;Frame Spoiling</h2>
 
 <p>By default, VirtualGL will only send a frame to the client if the client
 is ready to receive it.  If a rendered frame arrives at the server&rsquo;s
@@ -3793,17 +3467,17 @@ will still report meaningless data if they are run in a VNC session.</p>
 
 <p>To disable frame spoiling, set the <code>VGL_SPOIL</code> environment
 variable to <code>0</code> on the server or pass an argument of <code>-sp</code>
-to <code>vglrun</code>.  See Section <a href="#VGL_SPOIL" class="ref">19.1</a>
+to <code>vglrun</code>.  See Section <a href="#VGL_SPOIL" class="ref">18.1</a>
 for more details.</p>
 
 
-<h2 id="hd0017003">17.3&nbsp;VirtualGL Diagnostic Tools</h2>
+<h2 id="hd0016003">16.3&nbsp;VirtualGL Diagnostic Tools</h2>
 
 <p>VirtualGL includes several tools which can be useful in diagnosing
 performance problems with the system.</p>
 
 
-<h3 id="hd0017003001">NetTest</h3>
+<h3 id="hd0016003001">NetTest</h3>
 
 <p>NetTest is a network benchmark that uses the same network I/O classes
 as VirtualGL.  It can be used to test the latency and throughput of
@@ -3872,7 +3546,7 @@ The &ldquo;latency&rdquo; is the same thing as the 1/2 round-trip time
 for a zero-byte packet, which is about 0.18 milliseconds in this case.</p>
 
 
-<h3 id="hd0017003002">CPUstat</h3>
+<h3 id="hd0016003002">CPUstat</h3>
 
 <p>CPUstat is available only in the VirtualGL Linux packages and is located
 in the same place as NetTest (<code>/opt/VirtualGL/bin</code>.)  It
@@ -3907,7 +3581,7 @@ category to stabilize, then that will tell you what the application&rsquo;s
 peak and average % CPU utilization is.</p>
 
 
-<h3 id="hd0017003003">TCBench</h3>
+<h3 id="hd0016003003">TCBench</h3>
 
 <p>TCBench was born out of the need to compare VirtualGL&rsquo;s performance
 to other thin client packages, some of which had frame spoiling features
@@ -3948,7 +3622,7 @@ sampling area within the window.</p>
 <hr class="break" />
 
 
-<h1 id="hd0018"><a name="file018"></a>18&nbsp;The VirtualGL Configuration Dialog</h1>
+<h1 id="hd0017"><a name="file017"></a>17&nbsp;The VirtualGL Configuration Dialog</h1>
 
 <p><a name="Config_Dialog"></a></p>
 
@@ -4026,12 +3700,12 @@ VirtualGL monitors the application&rsquo;s X event loop to determine whenever a 
 <hr class="break" />
 
 
-<h1 id="hd0019"><a name="file019"></a>19&nbsp;Advanced Configuration</h1>
+<h1 id="hd0018"><a name="file018"></a>18&nbsp;Advanced Configuration</h1>
 
 <p><a name="Advanced_Configuration"></a></p>
 
 
-<h2 id="hd0019001">19.1&nbsp;Server Settings</h2>
+<h2 id="hd0018001">18.1&nbsp;Server Settings</h2>
 
 <p>You can control the operation of the VirtualGL faker in four different
 ways. Each method of configuration takes precedence over the previous
@@ -4070,19 +3744,19 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_CLIENT</code></td>
     <td class="standard"><code>-cl&nbsp;&lt;client</code><br /><code>display&gt;</code></td>
-    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the <code>DISPLAY</code> environment variable (which lists the hostname and X display where all X11 traffic will be sent.)  But in cases where X11 traffic is tunneled through SSh or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the VirtualGL server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up.  For example: <br /><br /> <code>export&nbsp;VGL_CLIENT=my_client:0.0</code> <br /><br /> If you are connecting to the VirtualGL server using SSh with X11 forwarding enabled, VirtualGL will try to guess an appropriate value for <code>VGL_CLIENT</code> based on the IP address of the SSh client, so you would only need to set <code>VGL_CLIENT</code> in this case if your configuration is unusual (such as if your client machine&rsquo;s X server is occupying a display number other than 0 or if you are trying to forward VirtualGL&rsquo;s image stream over SSh.  See Chapter <a href="#Direct_Mode_Usage" class="ref">9</a> for more details.) <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard"><em>The X display where VirtualGL should send its image stream</em> <br /><br /> When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection to transmit compressed images of an application&rsquo;s OpenGL rendering area from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server needs to know on which machine the VirtualGL client software is running, and it needs to know which X display on that machine will be used to draw the application&rsquo;s GUI.  VirtualGL can normally surmise this by reading the <code>DISPLAY</code> environment variable (which lists the hostname and X display where all X11 traffic will be sent.)  But in cases where X11 traffic is tunneled through SSh or another type of indirect X11 connection, the <code>DISPLAY</code> environment variable on the VirtualGL server may not point to the client machine.  In these cases, set <code>VGL_CLIENT</code> to the display where the application&rsquo;s GUI will end up.  For example: <br /><br /> <code>export&nbsp;VGL_CLIENT=my_client:0.0</code> <br /><br /> If you are connecting to the VirtualGL server using SSh with X11 forwarding enabled, VirtualGL will try to guess an appropriate value for <code>VGL_CLIENT</code> based on the IP address of the SSh client, so you would only need to set <code>VGL_CLIENT</code> in this case if your configuration is unusual (such as if your client machine&rsquo;s X server is occupying a display number other than 0 or if you are trying to forward VirtualGL&rsquo;s image stream over SSh.  See Chapter <a href="#Direct_Mode_Usage" class="ref">8</a> for more details.) <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">If SSh X11 forwarding is being used, VirtualGL will automatically set <code>VGL_CLIENT</code> to <code>{ssh_client}:0.0</code>, where <code>{ssh_client}</code> is the IP address of the machine from which the SSh connection was initiated. Otherwise, <code>VGL_CLIENT</code> is unset, which tells VirtualGL to read the client hostname and X display from the <code>DISPLAY</code> environment variable instead.</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_COMPRESS=0</code><br /><code>VGL_COMPRESS=1</code></td>
     <td class="standard"><code>-c&nbsp;&lt;0,&nbsp;1&gt;</code></td>
-    <td class="standard"><em>0 = Raw Mode (send rendered images uncompressed via. X11),</em><br /> <em>1 = Direct Mode (compress rendered images as JPEG &amp; send on a separate socket)</em> <br /><br /> When this option is set to 0, VirtualGL will bypass its internal image compression pipeline and instead use <code>XPutImage()</code> to composite the rendered 3D images into the appropriate application window.  This mode (&ldquo;Raw Mode&rdquo;) is primarily useful in conjunction with VNC, NX, or other remote display software that performs X11 rendering on the server and uses its own mechanism for compressing and transporting images to the client.  Enabling Raw Mode on a remote X11 connection will result in uncompressed images being sent over the network, so it is unadvisable except on very fast networks (see Section <a href="#Raw_Mode_Over_Network" class="ref">11.0.2</a>.) <br /><br /> If this option is not specified, then VirtualGL&rsquo;s default behavior is to use Direct Mode when the application is being displayed to a remote X server and to use Raw Mode otherwise.  VirtualGL assumes that if the <code>DISPLAY</code> environment variable begins with a colon or with &ldquo;<code>unix:</code>&rdquo; (example: &ldquo;<code>:0.0</code>&rdquo;, &ldquo;<code>unix:1000.0</code>&rdquo;, etc.), then the X11 connection is local and thus doesn&rsquo;t require image compression.  Otherwise, it assumes that the X11 connection is remote and that compression is required.  If the display string begins with &ldquo;<code>localhost</code>&rdquo; or with the server&rsquo;s hostname, VGL assumes that the display is being tunneled through SSh, and its default behavior is to use Direct Mode in this case. <br /><br /> It is normally not necessary to set this configuration parameter unless you want to do something unusual (such as use Raw Mode over a remote X11 connection.) See Chapter <a href="#TurboVNC_Usage" class="ref">10</a> for more details. <br /><br /> <em>NOTE:  Stereo does not work with Raw Mode.</em> <br /><br /></td>
+    <td class="standard"><em>0 = Raw Mode (send rendered images uncompressed via. X11),</em><br /> <em>1 = Direct Mode (compress rendered images as JPEG &amp; send on a separate socket)</em> <br /><br /> When this option is set to 0, VirtualGL will bypass its internal image compression pipeline and instead use <code>XPutImage()</code> to composite the rendered 3D images into the appropriate application window.  This mode (&ldquo;Raw Mode&rdquo;) is primarily useful in conjunction with VNC, NX, or other remote display software that performs X11 rendering on the server and uses its own mechanism for compressing and transporting images to the client.  Enabling Raw Mode on a remote X11 connection will result in uncompressed images being sent over the network, so it is unadvisable except on very fast networks (see Section <a href="#Raw_Mode_Over_Network" class="ref">10.0.2</a>.) <br /><br /> If this option is not specified, then VirtualGL&rsquo;s default behavior is to use Direct Mode when the application is being displayed to a remote X server and to use Raw Mode otherwise.  VirtualGL assumes that if the <code>DISPLAY</code> environment variable begins with a colon or with &ldquo;<code>unix:</code>&rdquo; (example: &ldquo;<code>:0.0</code>&rdquo;, &ldquo;<code>unix:1000.0</code>&rdquo;, etc.), then the X11 connection is local and thus doesn&rsquo;t require image compression.  Otherwise, it assumes that the X11 connection is remote and that compression is required.  If the display string begins with &ldquo;<code>localhost</code>&rdquo; or with the server&rsquo;s hostname, VGL assumes that the display is being tunneled through SSh, and its default behavior is to use Direct Mode in this case. <br /><br /> It is normally not necessary to set this configuration parameter unless you want to do something unusual (such as use Raw Mode over a remote X11 connection.) See Chapter <a href="#TurboVNC_Usage" class="ref">9</a> for more details. <br /><br /> <em>NOTE:  Stereo does not work with Raw Mode.</em> <br /><br /></td>
     <td class="standard">Compression enabled (&ldquo;Direct Mode&rdquo;) if the application is displaying to a remote X server, disabled (&ldquo;Raw Mode&rdquo;) otherwise.</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_DISPLAY</code></td>
     <td class="standard"><code>-d&nbsp;&lt;display&nbsp;or</code><br /><code>GLP&nbsp;device&gt;</code></td>
-    <td class="standard"><em>The display or GLP device to use for 3D rendering</em> <br /><br /> If your server has multiple 3D graphics cards and you want the OpenGL rendering to be redirected to a display other than :0, set <code>VGL_DISPLAY=:1.0</code> or whatever.  This could be used, for instance, to support many application instances on a beefy multi-pipe graphics server. <br /><br /> <em>GLP mode (Solaris/Sparc only):</em> <br /><br /> Setting this option to <code>glp</code> will enable GLP mode and use the first framebuffer device listed in <code>/etc/dt/config/GraphicsDevices</code> to perform 3D rendering.  You can also set this option to the pathname of a specific GLP device (example: <code>/dev/fbs/jfb0</code>.)  See Section <a href="#GLP_Usage" class="ref">7.1</a> for more details.</td>
+    <td class="standard"><em>The display or GLP device to use for 3D rendering</em> <br /><br /> If your server has multiple 3D graphics cards and you want the OpenGL rendering to be redirected to a display other than :0, set <code>VGL_DISPLAY=:1.0</code> or whatever.  This could be used, for instance, to support many application instances on a beefy multi-pipe graphics server. <br /><br /> <em>GLP mode (Solaris/Sparc only):</em> <br /><br /> Setting this option to <code>glp</code> will enable GLP mode and use the first framebuffer device listed in <code>/etc/dt/config/GraphicsDevices</code> to perform 3D rendering.  You can also set this option to the pathname of a specific GLP device (example: <code>/dev/fbs/jfb0</code>.)  See Section <a href="#GLP_Usage" class="ref">6.1</a> for more details.</td>
     <td class="standard">:0</td>
   </tr>
   <tr class="standard">
@@ -4106,7 +3780,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_GUI</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Key sequence used to invoke the configuration dialog</em> <br /><br /> VirtualGL will normally monitor an application&rsquo;s X event queue and pop up the VirtualGL configuration dialog whenever <code>CTRL-SHIFT-F9</code> is pressed. In the event that this interferes with a key sequence that the application is already using, you can redefine the key sequence used to pop up VGL&rsquo;s configuration dialog by setting <code>VGL_GUI</code> to some combination of <code>shift</code>, <code>ctrl</code>, <code>alt</code>, and one of <code>{f1,&nbsp;f2,&nbsp;...,&nbsp;f12}</code>.  You can also set <code>VGL_GUI</code> to <code>none</code> to disable the configuration dialog altogether.  See Chapter <a href="#Config_Dialog" class="ref">18</a> for more details.</td>
+    <td class="standard"><em>Key sequence used to invoke the configuration dialog</em> <br /><br /> VirtualGL will normally monitor an application&rsquo;s X event queue and pop up the VirtualGL configuration dialog whenever <code>CTRL-SHIFT-F9</code> is pressed. In the event that this interferes with a key sequence that the application is already using, you can redefine the key sequence used to pop up VGL&rsquo;s configuration dialog by setting <code>VGL_GUI</code> to some combination of <code>shift</code>, <code>ctrl</code>, <code>alt</code>, and one of <code>{f1,&nbsp;f2,&nbsp;...,&nbsp;f12}</code>.  You can also set <code>VGL_GUI</code> to <code>none</code> to disable the configuration dialog altogether.  See Chapter <a href="#Config_Dialog" class="ref">17</a> for more details.</td>
     <td class="standard">shift-ctrl-f9</td>
   </tr>
   <tr class="standard">
@@ -4116,10 +3790,16 @@ method:</p>
     <td class="standard">1</td>
   </tr>
   <tr class="standard">
-    <td class="standard"><code>VGL_INTERFRAME</code></td>
+    <td class="standard"><code>VGL_INTERFRAME=0</code><br /><code>VGL_INTERFRAME=1</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Enable/disable interframe image comparison</em> <br /><br /> In Direct Mode, VGL will normally compare each image tile in the frame with the corresponding image tile in the previous frame and send only the tiles that have changed.  Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this behavior. <br /><br /> Normally, you shouldn&rsquo;t need to disable interframe comparison except in rare situations.  This setting was introduced in order to work around a specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See Section <a href="#Application_Recipes" class="ref">15</a> for more information. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard"><em>Enable/disable interframe image comparison</em> <br /><br /> In Direct Mode, VGL will normally compare each image tile in the frame with the corresponding image tile in the previous frame and send only the tiles that have changed.  Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this behavior. <br /><br /> Normally, you shouldn&rsquo;t need to disable interframe comparison except in rare situations.  This setting was introduced in order to work around a specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See Section <a href="#Application_Recipes" class="ref">14</a> for more information. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">Inter-frame comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>VGL_LOG</code></td>
+    <td class="standard"></td>
+    <td class="standard"><em>Redirect the console output from the VirtualGL faker to a log file</em> <br /><br /> Setting this environment variable to the pathname of a log file on the VirtualGL server will cause the VirtualGL faker to redirect all of its messages (including profiling and trace output) to the specified log file rather than to stderr.</td>
+    <td class="standard">Print all messages to stderr</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_NPROCS&nbsp;</code></td>
@@ -4136,7 +3816,7 @@ method:</p>
   <tr class="standard">
     <td class="standard"><code>VGL_PROFILE=0</code><br /><code>VGL_PROFILE=1</code></td>
     <td class="standard"><code>-pr</code><br />or<br /><code>+pr</code></td>
-    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL faker to continuously benchmark itself and periodically print out the throughput of reading back, compressing, and sending pixels to the client. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
+    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL faker to continuously benchmark itself and periodically print out the throughput of reading back, compressing, and sending pixels to the client. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">16</a> for more details.</td>
     <td class="standard">Profiling disabled</td>
   </tr>
   <tr class="standard">
@@ -4232,10 +3912,10 @@ method:</p>
 
 
 
-<h2 id="hd0019002">19.2&nbsp;Client Settings</h2>
+<h2 id="hd0018002">18.2&nbsp;Client Settings</h2>
 
 
-<h3 id="hd0019002001">Environment Variables</h3>
+<h3 id="hd0018002001">Environment Variables</h3>
 
 <div class="table">
 <table class="standard">
@@ -4248,7 +3928,7 @@ method:</p>
   </thead>
   <tr class="standard">
     <td class="standard"><code>VGL_PROFILE=0</code><br /><code>VGL_PROFILE=1</code></td>
-    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL client to continuously benchmark itself and periodically print out the throughput of decompressing and drawing pixels into the application window. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">17</a> for more details.</td>
+    <td class="standard"><em>Enable/disable profiling output</em> <br /><br /> If enabled, this will cause the VirtualGL client to continuously benchmark itself and periodically print out the throughput of decompressing and drawing pixels into the application window. <br /><br /> See Chapter <a href="#Perf_Measurement" class="ref">16</a> for more details.</td>
     <td class="standard">Profiling disabled</td>
   </tr>
   <tr class="standard">
@@ -4261,7 +3941,7 @@ method:</p>
 
 
 
-<h3 id="hd0019002002"><code>vglclient</code> Command-Line Arguments</h3>
+<h3 id="hd0018002002"><code>vglclient</code> Command-Line Arguments</h3>
 
 <div class="table">
 <table class="standard">
