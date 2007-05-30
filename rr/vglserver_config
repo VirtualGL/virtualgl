@@ -55,6 +55,16 @@ commentline() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
+addtobottom() {
+	if [ -z "$1" -o -z "$2" ]; then
+		echo USAGE: $0 {filename} {line to add}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_10`
+	cat $1 >$TMPFILE && echo $2 >>$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
 addtotop() {
 	if [ -z "$1" -o -z "$2" ]; then
 		echo USAGE: $0 {filename} {line to add}
@@ -63,7 +73,7 @@ addtotop() {
 	TMPFILE=`maketemp vglserver_config_5`
 	SCRFILE=`maketemp vglserver_config_6`
 	AWK=nawk
-	which $AWK 2>/dev/null || AWK=gawk
+	which $AWK >/dev/null 2>/dev/null || AWK=gawk
 	cat > $SCRFILE <<EOF
 BEGIN {DONE=0}
 {
@@ -98,8 +108,7 @@ backup() {
 delvglgenkey() {
 	echo ... Removing X server access from $1 script ...
 	removeline $1 vglgenkey
-	removeline $1 "xhost +localhost"
-	removeline $1 "xhost +`hostname`"
+	removeline $1 "xhost +*"
 }
 
 addvglgenkey() {
@@ -110,16 +119,19 @@ addvglgenkey() {
 		echo ... Adding xhost \+localhost to $1 script ...
 	fi
 	removeline $1 vglgenkey
-	removeline $1 "xhost +localhost"
-	removeline $1 "xhost +`hostname`"
+	removeline $1 "xhost +*"
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		if [ "$UNAME_S" = "SunOS" ]; then
-			addtotop $1 /opt/SUNWvgl/bin/vglgenkey
+			if [ "$2" = "bottom" ]; then
+				addtobottom $1 /opt/SUNWvgl/bin/vglgenkey
+			else
+				addtotop $1 /opt/SUNWvgl/bin/vglgenkey
+			fi
 		else
 			addtotop $1 vglgenkey
 		fi
 	else	
-		addtotop $1 "xhost +`hostname`"
+		addtotop $1 "xhost +\`hostname\`"
 		addtotop $1 "xhost +localhost"
 	fi
 }
@@ -354,7 +366,7 @@ configglx() {
 		else
 			backup /etc/dt/config/Xsetup
 		fi
-		addvglgenkey /etc/dt/config/Xsetup
+		addvglgenkey /etc/dt/config/Xsetup bottom
 
 		if [ ! -f /etc/dt/config/Xconfig ]; then
 			echo ... Copying /usr/dt/config/Xconfig to /etc/dt/config/Xconfig ...
