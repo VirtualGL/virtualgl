@@ -193,7 +193,7 @@ configdev() {
 		echo ... Modifying /etc/logindevperm to disable automatic permissions for ...
 		echo "...      /dev/fbs/* ..."
 		commentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
-if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
+		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 			echo ... Granting write permission to /dev/fbs/\* for vglusers group ...
 			chmod 660 /dev/fbs/*
 			chown root:vglusers /dev/fbs/*
@@ -301,6 +301,39 @@ unconfigglx() {
 	fi
 
 	unconfigdev
+}
+
+configglp() {
+	if [ "$UNAME_S" = "SunOS" ]; then
+		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+		if [ $? = 1 ]; then
+			VGLUSERSONLY=1; FBDEVVGLUSERSONLY=1;
+		else
+			VGLUSERSONLY=0; FBDEVVGLUSERSONLY=0;
+		fi
+
+		if [ "$VGLUSERSONLY" = "1" ]; then
+			echo ... Creating vglusers group ...
+			groupadd vglusers
+		fi
+
+		if [ ! -d /etc/dt/config ]; then
+			echo ... Creating /etc/dt/config/ directory ...
+			mkdir -p /etc/dt/config
+			chmod 755 /etc/dt/config
+		fi
+
+		if [ ! -f /etc/dt/config/GraphicsDevices ]; then
+			echo ... Creating /etc/dt/config/GraphicsDevices file ...
+			touch /etc/dt/config/GraphicsDevices
+			for i in /dev/fbs/*[0-9]; do echo $i >>/etc/dt/config/GraphicsDevices; done
+		fi
+		chmod 644 /etc/dt/config/GraphicsDevices
+		chown root:root /etc/dt/config/GraphicsDevices
+
+		configdev
+
+	fi
 }
 
 configglx() {
@@ -490,7 +523,7 @@ do
 		;;
 	3) if [ "$GLP" = "1" ]; then configglp; fi
 		;;
-	4) if [ "$GLP" = "1" ]; then unconfigglp; fi
+	4) if [ "$GLP" = "1" ]; then unconfigdev; fi
 		;;
 	X) break
 		;;
