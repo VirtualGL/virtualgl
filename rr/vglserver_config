@@ -1,0 +1,488 @@
+#!/bin/sh
+
+VGLUSERSONLY=1
+DISABLEXTEST=1
+FBDEVVGLUSERSONLY=1
+
+uid() {
+	id | cut -f2 -d = | cut -f1 -d \(;
+}
+
+maketemp() {
+	TMP_FILE=/tmp/$1.$RANDOM.$RANDOM.$RANDOM.$$
+	(umask 077;  touch $TMP_FILE || exit 1;)
+	echo $TMP_FILE
+}
+
+removeline() {
+	if [ -z "$1" -o -z "$2" ]; then
+		echo USAGE: $0 {filename} {pattern}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_1`
+	sed "/$2/d" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+replaceline() {
+	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
+		echo USAGE: $0 {filename} {pattern to replace} {new text}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_2`
+	sed "s/^.*$2.*$/$3/g" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+uncommentline() {
+	if [ -z "$1" -o -z "$2" ]; then
+		echo USAGE: $0 {filename} {regex of line to uncomment}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_3`
+	sed "/$2/s/^[ \t]*#*//g" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+commentline() {
+	uncommentline $1 $2
+	if [ -z "$1" -o -z "$2" ]; then
+		echo USAGE: $0 {filename} {regex of line to comment}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_4`
+	sed "/$2/s/^/#/g" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+addtotop() {
+	if [ -z "$1" -o -z "$2" ]; then
+		echo USAGE: $0 {filename} {line to add}
+		return
+	fi
+	TMPFILE=`maketemp vglserver_config_5`
+	SCRFILE=`maketemp vglserver_config_6`
+	AWK=nawk
+	which $AWK 2>/dev/null || AWK=gawk
+	cat > $SCRFILE <<EOF
+BEGIN {DONE=0}
+{
+	if (/^$|^[^#]/ && DONE==0) {
+		printf("$2");  printf("\n");
+		DONE=1;
+	}
+	print \$0
+}
+END {
+	if (DONE == 0) {
+		printf("$2");  printf("\n");
+	}
+}
+EOF
+	$AWK -f $SCRFILE $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $SCRFILE ]; then rm $SCRFILE; fi
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+backup() {
+	if [ -z "$1" ]; then
+		echo USAGE: $0 {filename}
+		return
+	fi
+	if [ ! -f $1.orig.vgl ]; then
+		cp $1 $1.orig.vgl
+		echo ... $1 has been saved as $1.orig.vgl ...
+	fi
+}
+
+delvglgenkey() {
+	echo ... Removing X server access from $1 script ...
+	removeline $1 vglgenkey
+	removeline $1 "xhost +localhost"
+	removeline $1 "xhost +`hostname`"
+}
+
+addvglgenkey() {
+	backup $1
+	if [ "$VGLUSERSONLY" = "1" ]; then
+		echo ... Adding vglgenkey to $1 script ...
+	else
+		echo ... Adding xhost \+localhost to $1 script ...
+	fi
+	removeline $1 vglgenkey
+	removeline $1 "xhost +localhost"
+	removeline $1 "xhost +`hostname`"
+	if [ "$VGLUSERSONLY" = "1" ]; then
+		if [ "$UNAME_S" = "SunOS" ]; then
+			addtotop $1 /opt/SUNWvgl/bin/vglgenkey
+		else
+			addtotop $1 vglgenkey
+		fi
+	else	
+		addtotop $1 "xhost +`hostname`"
+		addtotop $1 "xhost +localhost"
+	fi
+}
+
+disablextest() {
+	if [ -z "$1" ]; then
+		echo USAGE: $0 {filename}
+		return
+	fi
+	backup $1
+	echo ... Disabling XTEST extension in $1 ...
+	TMPFILE=`maketemp vglserver_config_7`
+	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
+		sed -e "/\/bin\/X\>/s/$/\ -tst/g" -e "/\/bin\/Xorg\>/s/$/\ -tst/g" -e "/\/bin\/Xsun\>/s/$/\ -tst/g" -e "/\/bin\/Xserver\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
+	)
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+enablextest() {
+	if [ -z "$1" ]; then
+		echo USAGE: $0 {filename}
+		return
+	fi
+	echo ... Enabling XTEST extension in $1 ...
+	TMPFILE=`maketemp vglserver_config_8`
+	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+disallowgdmtcp() {
+	echo ... Restoring default value of DisallowTCP in $1 ...
+	commentline $1 "DisallowTCP.*=.*"
+}
+
+allowgdmtcp() {
+	if [ -z "$1" ]; then
+		echo USAGE: $0 {filename}
+	return
+	fi
+	backup $1
+	echo ... Setting DisallowTCP=False in $1 ...
+	removeline $1 "DisallowTCP.*=.*"
+	TMPFILE=`maketemp vglserver_config_9`
+	sed -e "/\[security\]/a\\
+DisallowTCP=false" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+unconfigdev() {
+	if [ "$UNAME_S" = "SunOS" ]; then
+		echo ... Modifying /etc/logindevperm to enable automatic permissions for ...
+		echo "...      /dev/fbs/* ..."
+		uncommentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
+	fi
+}
+
+configdev() {
+	if [ "$UNAME_S" = "SunOS" ]; then
+		echo ... Modifying /etc/logindevperm to disable automatic permissions for ...
+		echo "...      /dev/fbs/* ..."
+		commentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
+if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
+			echo ... Granting write permission to /dev/fbs/\* for vglusers group ...
+			chmod 660 /dev/fbs/*
+			chown root:vglusers /dev/fbs/*
+		else
+			echo ... Granting write permission to /dev/fbs/\* for all users ...
+			chmod 666 /dev/fbs/*
+			chown root:root /dev/fbs/*
+		fi
+	fi
+}
+
+ynprompt() {
+	if [ "$1" = "" ]; then
+		echo USAGE: $0 {prompt}
+		return 0
+	fi
+	while [ 1 ]; do
+		echo
+		echo $1
+		echo \[Y\/n\]
+		read _CHOICE
+		if [ "$_CHOICE" = "" ]; then return 1; fi
+		case $_CHOICE in
+			[yY]*) return 1 ;;
+			[nN]*) return 0 ;;
+		esac
+	done
+}
+
+unconfigglx() {
+	echo ... Removing /etc/opt/VirtualGL directory ...
+	if [ -d /etc/opt/VirtualGL ]; then
+		rm /etc/opt/VirtualGL/* 2>/dev/null
+		rmdir /etc/opt/VirtualGL
+	fi
+
+	if [ -f /etc/X11/xdm/Xsetup_0 -a ! -h /etc/X11/xdm/Xsetup_0 ]; then
+		delvglgenkey /etc/X11/xdm/Xsetup_0
+	else
+		if [ -f /etc/X11/xdm/Xsetup -a ! -h /etc/X11/xdm/Xsetup ]; then
+			delvglgenkey /etc/X11/xdm/Xsetup
+		fi
+	fi
+	if [ -f /etc/X11/gdm/Init/:0 ]; then
+		if [ ! -h /etc/X11/gdm/Init/:0 ]; then
+			delvglgenkey /etc/X11/gdm/Init/:0
+		fi
+	else
+		if [ -f /etc/X11/gdm/Init/Default -a ! -h /etc/X11/gdm/Init/Default ]; then
+			delvglgenkey /etc/X11/gdm/Init/Default
+		fi
+	fi
+	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
+		delvglgenkey /etc/gdm/Init/Default
+	fi
+	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
+		delvglgenkey /etc/opt/gnome/gdm/Init/Default
+	fi
+
+	if [ "$UNAME_S" = "SunOS" ]; then
+		if [ -f /etc/dt/config/Xsetup ]; then
+			delvglgenkey /etc/dt/config/Xsetup
+		fi
+		if [ -f /etc/dt/config/Xconfig ]; then
+			echo ... Restoring default value of Dtlogin\*grabServer in ...
+			echo "...     /etc/dt/config/Xconfig ..."
+			commentline /etc/dt/config/Xconfig Dtlogin\\*grabServer
+		fi
+		if [ -f /etc/dt/config/Xconfig.SUNWut.prototype ]; then
+			echo ... Restoring default value of Dtlogin\*grabServer in ...
+			echo "...     /etc/dt/config/Xconfig.SUNWut.prototype ..."
+			commentline /etc/dt/config/Xconfig.SUNWut.prototype Dtlogin\\*grabServer
+		fi
+	fi
+
+	if [ -f /etc/X11/xdm/Xservers -a ! -h /etc/X11/xdm/Xservers ]; then
+		enablextest /etc/X11/xdm/Xservers
+	fi
+	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
+		enablextest /etc/X11/gdm/gdm.conf
+	fi
+	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
+		enablextest /etc/gdm/custom.conf
+	fi
+	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
+		enablextest /etc/opt/gnome/gdm/gdm.conf
+	fi
+	if [ -f /etc/opt/kde3/share/config/kdm/Xservers -a ! -h /etc/opt/kde3/share/config/kdm/Xservers ]; then
+		enablextest /etc/opt/kde3/share/config/kdm/Xservers
+	fi
+	if [ "$UNAME_S" = "SunOS" ]; then
+		if [ -f /etc/dt/config/Xservers ]; then
+			enablextest /etc/dt/config/Xservers
+		fi
+	fi
+
+	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
+		disallowgdmtcp /etc/X11/gdm/gdm.conf
+	fi
+	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
+		disallowgdmtcp /etc/gdm/custom.conf
+	fi
+	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
+		disallowgdmtcp /etc/opt/gnome/gdm/gdm.conf
+	fi
+
+	unconfigdev
+}
+
+configglx() {
+	ynprompt "Restrict local X server access to vglusers group (recommended)?"
+	if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
+
+	if [ "$UNAME_S" = "SunOS" ]; then
+		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+		if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
+	fi
+
+	ynprompt "Disable XTEST extension (recommended)?"
+	if [ $? = 1 ]; then DISABLEXTEST=1; else DISABLEXTEST=0; fi
+
+	if [ "$VGLUSERSONLY" = "1" ]; then
+		echo ... Creating vglusers group ...
+		groupadd vglusers
+
+		if [ ! -d /etc/opt/VirtualGL ]; then
+			echo ... Creating /etc/opt/VirtualGL/ ...
+			mkdir -p /etc/opt/VirtualGL
+		fi
+		echo ... Granting read permission to /etc/opt/VirtualGL/ for vglusers group ...
+		chown root:vglusers /etc/opt/VirtualGL
+		chmod 750 /etc/opt/VirtualGL
+	fi
+
+	configdev
+
+	if [ -f /etc/X11/xdm/Xsetup_0 -a ! -h /etc/X11/xdm/Xsetup_0 ]; then
+		addvglgenkey /etc/X11/xdm/Xsetup_0
+	else
+		if [ -f /etc/X11/xdm/Xsetup -a ! -h /etc/X11/xdm/Xsetup ]; then
+			addvglgenkey /etc/X11/xdm/Xsetup
+		fi
+	fi
+	if [ -f /etc/X11/gdm/Init/:0 ]; then
+		if [ ! -h /etc/X11/gdm/Init/:0 ]; then
+			addvglgenkey /etc/X11/gdm/Init/:0
+		fi
+	else
+		if [ -f /etc/X11/gdm/Init/Default -a ! -h /etc/X11/gdm/Init/Default ]; then
+			addvglgenkey /etc/X11/gdm/Init/Default
+		fi
+	fi
+	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
+		addvglgenkey /etc/gdm/Init/Default
+	fi
+	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
+		addvglgenkey /etc/opt/gnome/gdm/Init/Default
+	fi
+		
+	if [ "$UNAME_S" = "SunOS" ]; then
+		if [ ! -d /etc/dt/config ]; then
+			echo ... Creating /etc/dt/config/ directory ...
+			mkdir -p /etc/dt/config
+			chmod 755 /etc/dt/config
+		fi
+
+		if [ ! -f /etc/dt/config/Xsetup ]; then
+			echo ... Copying /usr/dt/config/Xsetup to /etc/dt/config/Xsetup ...
+			cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup
+		else
+			backup /etc/dt/config/Xsetup
+		fi
+		addvglgenkey /etc/dt/config/Xsetup
+
+		if [ ! -f /etc/dt/config/Xconfig ]; then
+			echo ... Copying /usr/dt/config/Xconfig to /etc/dt/config/Xconfig ...
+			cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig
+		else
+			backup /etc/dt/config/Xconfig
+		fi
+		echo ... Setting Dtlogin\*grabServer to False in /etc/dt/config/Xconfig ...
+		replaceline /etc/dt/config/Xconfig Dtlogin\\*grabServer "Dtlogin\*grabServer: False"
+		if [ -f /etc/dt/config/Xconfig.SUNWut.prototype ]; then
+			backup /etc/dt/config/Xconfig.SUNWut.prototype
+			echo ... Setting Dtlogin\*grabServer to False in /etc/dt/config/Xconfig.SUNWut.prototype ...
+			replaceline /etc/dt/config/Xconfig.SUNWut.prototype Dtlogin\\*grabServer "Dtlogin\*grabServer: False"
+		fi
+
+	fi
+
+	if [ -f /etc/X11/xdm/Xservers -a ! -h /etc/X11/xdm/Xservers ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/X11/xdm/Xservers
+		else
+			enablextest /etc/X11/xdm/Xservers
+		fi
+	fi
+	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/X11/gdm/gdm.conf
+		else
+			enablextest /etc/X11/gdm/gdm.conf
+		fi
+	fi
+	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/gdm/custom.conf
+		else
+			enablextest /etc/gdm/custom.conf
+		fi
+	fi
+	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/opt/gnome/gdm/gdm.conf
+		else
+			enablextest /etc/opt/gnome/gdm/gdm.conf
+		fi
+	fi
+	if [ -f /etc/opt/kde3/share/config/kdm/Xservers -a ! -h /etc/opt/kde3/share/config/kdm/Xservers ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/opt/kde3/share/config/kdm/Xservers
+		else
+			enablextest /etc/opt/kde3/share/config/kdm/Xservers
+		fi
+	fi
+	if [ "$UNAME_S" = "SunOS" ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			if [ ! -f /etc/dt/config/Xservers ]; then
+	 			echo ... Copying /usr/dt/config/Xservers to /etc/dt/config/Xservers ...
+				cp /usr/dt/config/Xservers /etc/dt/config/Xservers
+			fi
+			disablextest /etc/dt/config/Xservers
+		else
+			if [ -f /etc/dt/config/Xservers ]; then
+				enablextest /etc/dt/config/Xservers
+			fi
+		fi
+	fi
+
+	if [ "$UNAME_S" = "Linux" ]; then
+		if [ -f /etc/inittab ]; then
+			echo ... Setting default run level to 5 \(enabling graphical login prompt\) ...
+			replaceline /etc/inittab "id:[0-9]:initdefault:" "id:5:initdefault:"
+		fi
+	fi
+
+	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
+		allowgdmtcp /etc/X11/gdm/gdm.conf
+	fi
+	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
+		allowgdmtcp /etc/gdm/custom.conf
+	fi
+	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
+		allowgdmtcp /etc/opt/gnome/gdm/gdm.conf
+	fi
+}
+
+UNAME_S=`uname -s`
+UNAME_M=`uname -m`
+
+GLP=0
+if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
+	if [ -f /usr/include/GL/glp.h ]; then
+		GLP=1
+	fi
+fi
+
+WHICH0=`which $0`
+BINDIR=`dirname $WHICH0`
+
+if [ ! `uid` -eq 0 ]; then
+	echo This script can only be executed by the root user.
+	exit
+fi
+
+while [ 1 ]
+do
+	echo
+	echo "1) Configure server for use with VirtualGL in GLX mode"
+	echo "2) Unconfigure server for use with VirtualGL in GLX mode"
+	if [ "$GLP" = "1" ]; then
+		echo "3) Configure server for use with VirtualGL in GLP mode"
+		echo "4) Unconfigure server for use with VirtualGL in GLP mode"
+	fi
+	echo "X) Exit"
+	echo
+	echo Choose:
+	read _CHOICE
+
+	case $_CHOICE in
+	1) configglx
+		;;
+	2) unconfigglx
+		;;
+	3) if [ "$GLP" = "1" ]; then configglp; fi
+		;;
+	4) if [ "$GLP" = "1" ]; then unconfigglp; fi
+		;;
+	X) break
+		;;
+	x) break
+		;;
+	    esac
+done
