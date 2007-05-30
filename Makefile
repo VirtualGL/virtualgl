@@ -87,6 +87,7 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
+	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
@@ -109,6 +110,7 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
+	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
@@ -131,6 +133,7 @@ ifeq ($(subplatform), 64)
 uninstall:
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/rrlaunch
+	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
@@ -144,6 +147,7 @@ uninstall:
 	$(RM) $(prefix)/bin/vglclient_config
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/rrlaunch
+	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)

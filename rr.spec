@@ -72,6 +72,7 @@ install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
 install -m 755 rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
+install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
 install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
@@ -88,6 +89,7 @@ ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
 %endif
 ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
 ln -fs /usr/bin/vglgenkey $RPM_BUILD_ROOT/opt/%{name}/bin/vglgenkey
+ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_config
 ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
@@ -126,6 +128,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/bin/vglrun
 /usr/bin/rrlaunch
 /usr/bin/vglgenkey
+/usr/bin/vglserver_config
 
 /opt/%{name}/bin/tcbench
 /opt/%{name}/bin/nettest
@@ -133,6 +136,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/glxinfo
 /opt/%{name}/bin/vglclient
 /opt/%{name}/bin/vglgenkey
+/opt/%{name}/bin/vglserver_config
 /opt/%{name}/bin/vglrun
 
 /opt/%{name}/fakelib/libGL.so
