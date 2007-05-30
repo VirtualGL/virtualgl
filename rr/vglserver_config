@@ -494,9 +494,6 @@ if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
 	fi
 fi
 
-WHICH0=`which $0`
-BINDIR=`dirname $WHICH0`
-
 if [ ! `uid` -eq 0 ]; then
 	echo This script can only be executed by the root user.
 	exit
