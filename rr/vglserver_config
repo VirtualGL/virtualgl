@@ -73,7 +73,7 @@ addtotop() {
 	TMPFILE=`maketemp vglserver_config_5`
 	SCRFILE=`maketemp vglserver_config_6`
 	AWK=nawk
-	which $AWK >/dev/null 2>/dev/null || AWK=gawk
+	type $AWK >/dev/null 2>/dev/null || AWK=gawk
 	cat > $SCRFILE <<EOF
 BEGIN {DONE=0}
 {
@@ -301,6 +301,10 @@ unconfigglx() {
 	fi
 
 	unconfigdev
+
+	echo
+	echo Done.  You must restart the display manager for the changes to take effect.
+	echo
 }
 
 configglp() {
@@ -314,7 +318,7 @@ configglp() {
 
 		if [ "$VGLUSERSONLY" = "1" ]; then
 			echo ... Creating vglusers group ...
-			groupadd vglusers
+			groupadd vglusers >/dev/null 2>/dev/null || echo "Could not add vglusers group (probably because it already exists.)"
 		fi
 
 		if [ ! -d /etc/dt/config ]; then
@@ -350,7 +354,7 @@ configglx() {
 
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Creating vglusers group ...
-		groupadd vglusers
+		groupadd vglusers >/dev/null 2>/dev/null || echo "Could not add vglusers group (probably because it already exists.)"
 
 		if [ ! -d /etc/opt/VirtualGL ]; then
 			echo ... Creating /etc/opt/VirtualGL/ ...
@@ -482,6 +486,10 @@ configglx() {
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
 		allowgdmtcp /etc/opt/gnome/gdm/gdm.conf
 	fi
+
+	echo
+	echo Done.  You must restart the display manager for the changes to take effect.
+	echo
 }
 
 UNAME_S=`uname -s`
