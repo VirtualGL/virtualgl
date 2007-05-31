@@ -110,7 +110,7 @@ Direct Mode (and several reasons why one might not.)
 
 		Solaris server :: {:}
 		#Verb: <<---
-		/opt/SUNWvgl/bin/vncserver
+		/opt/SUNWtvnc/bin/vncserver
 		---
 
 	#. Make a note of the X display number that the TurboVNC server process
@@ -134,7 +134,7 @@ Direct Mode (and several reasons why one might not.)
 		Solaris clients :: {:}
 		Open a terminal and type
 		#Verb: <<---
-		/opt/SUNWvgl/bin/vncviewer
+		/opt/SUNWtvnc/bin/vncviewer
 		---
 
 		Windows clients :: {:}
