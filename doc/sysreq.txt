@@ -21,7 +21,6 @@
 | Graphics \
 	| Any decent 3D graphics card that supports Pbuffers \
 		{list type=ul: \
-			{item:Tested with various nVidia cards} \
 			{item:Install the vendor drivers for the server's 3D graphics card. \
 				Do not use the drivers that ship with Linux, as these do not provide \
 				3D acceleration or Pbuffer support.}} \
