@@ -21,6 +21,7 @@ TARGETS = $(EDIR)/glthreads \
           $(EDIR)/glxheads \
           $(EDIR)/glxinfo \
           $(EDIR)/glxpixmap \
+          $(EDIR)/glxspheres \
           $(EDIR)/manywin \
           $(EDIR)/offset \
           $(EDIR)/pbdemo \
@@ -75,6 +76,9 @@ $(EDIR)/xfont : $(EDIR)/%: $(ODIR)/%.o
 $(EDIR)/pbdemo \
 $(EDIR)/pbinfo: $(EDIR)/%: $(ODIR)/%.o $(ODIR)/pbutil.o
 	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lX11 -lm
+
+$(EDIR)/glxspheres: $(ODIR)/glxspheres.o
+	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lGLU -lX11 -lm
 
 ##########################################################################
 endif
