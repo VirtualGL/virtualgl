@@ -91,6 +91,7 @@ install: rr
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
@@ -118,6 +119,7 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
 	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
+	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc

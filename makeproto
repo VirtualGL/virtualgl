@@ -21,6 +21,8 @@ echo f none SUNWvgl/bin/vglserver_config 0755 root bin
 echo f none SUNWvgl/bin/tcbench 0755 root bin
 echo f none SUNWvgl/bin/nettest 0755 root bin
 echo f none SUNWvgl/bin/glxinfo 0755 root bin
+echo f none SUNWvgl/bin/glxspheres 0755 root bin
+echo f none SUNWvgl/bin/glxspheres64 0755 root bin
 echo d none SUNWvgl/fakelib 0755 root bin
 echo s none SUNWvgl/fakelib/libGL.so=../lib/librrfaker.so
 if [ "$_subplatform" = "64" ]; then
