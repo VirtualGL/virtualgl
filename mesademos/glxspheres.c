@@ -54,7 +54,7 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 Display *dpy=NULL;  Window win=0, olwin=0;
 int usestereo=0, useoverlay=0, useci=0;
-int ncolors=0;
+int ncolors=0, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
 
@@ -97,74 +97,57 @@ int setcolorscheme(Colormap c, int scheme)
 void reshape(int w, int h)
 {
 	if(w<=0) w=1;  if(h<=0) h=1;
-	GLfloat xaspect=(GLfloat)w/(GLfloat)(min(w, h));
-	GLfloat yaspect=(GLfloat)h/(GLfloat)(min(w, h));
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(-xaspect, xaspect, -yaspect, yaspect, 1.5, 40.0);
-	glMatrixMode(GL_MODELVIEW);
-	glViewport(0, 0, w, h);
 	width=w;  height=h;
 }
 
 
 void setspherecolor(float c)
 {
-	float mat[4]={spherered(c), spheregreen(c), sphereblue(c), 0.25};
-	glColor3f(spherered(c), spheregreen(c), sphereblue(c));
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat);
+	if(useci)
+	{
+		GLfloat ndx=c*(float)(ncolors-1);
+		GLfloat mat_ndxs[]={ndx*0.3, ndx*0.8, ndx};
+		glIndexf(ndx);
+		glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, mat_ndxs);
+	}
+	else
+	{
+		float mat[4]={spherered(c), spheregreen(c), sphereblue(c), 0.25};
+		glColor3f(spherered(c), spheregreen(c), sphereblue(c));
+		glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat);
+	}
 }
 
 
-int display(void)
+void renderspheres(int buf)
 {
-	static int first=1;  int i;
-	static double start=0., elapsed=0., mpixels=0.;
-	static unsigned long frames=0;
+	int i;
+	GLfloat xaspect, yaspect;
+	GLfloat stereocameraoffset=0., frustumassymetry=0.;
+	GLfloat neardist=1.5, fardist=40., zeroparallaxdist=17.;
+	glDrawBuffer(buf);
 
-	if(first)
-	{
-		GLfloat id4[]={1., 1., 1., 1.};
-		GLfloat light0_amb[]={0.3, 0.3, 0.3, 1.};
-		GLfloat light0_dif[]={0.8, 0.8, 0.8, 1.};
-		GLfloat light0_pos[]={1., 1., 1., 0.};
+	xaspect=(GLfloat)width/(GLfloat)(min(width, height));
+	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
 
-		spherelist=glGenLists(1);
-		if(!(spherequad=gluNewQuadric()))
-			_throw("Could not allocate GLU quadric object");
-		glNewList(spherelist, GL_COMPILE);
-		gluSphere(spherequad, 1.3, slices, stacks);
-		glEndList();
+	if(buf==GL_BACK_LEFT)
+		stereocameraoffset=-2.*xaspect*zeroparallaxdist/neardist*0.035;
+	else if(buf==GL_BACK_RIGHT)
+		stereocameraoffset=2.*xaspect*zeroparallaxdist/neardist*0.035;
 
-		glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
-		glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+	if(buf==GL_BACK_LEFT || buf==GL_BACK_RIGHT)
+		frustumassymetry=-stereocameraoffset*neardist/zeroparallaxdist;
 
-		glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
-		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-xaspect+frustumassymetry, xaspect+frustumassymetry,
+		-yaspect, yaspect, neardist, fardist);
+	glTranslatef(-stereocameraoffset, 0., 0.);
+	glMatrixMode(GL_MODELVIEW);
+	glViewport(0, 0, width, height);
 
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-
-		glShadeModel(GL_SMOOTH);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-
-		first=0;
-	}
-
-	z-=0.5;
-	if(z<-29.) z=-3.5;
-	outer_angle+=0.1;  if(outer_angle>360.) outer_angle-=360.;
-	middle_angle-=0.37;  if(middle_angle<-360.) middle_angle+=360.;
-	inner_angle+=0.63;  if(inner_angle>360.) inner_angle-=360.;
-	lonesphere_color+=0.005;  if(lonesphere_color>1.) lonesphere_color=1.;
-
+	// Begin rendering
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(20.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,6 +200,77 @@ int display(void)
 		glPopMatrix();
 	}
 	glPopMatrix();
+}
+
+
+int display(void)
+{
+	static int first=1;
+	static double start=0., elapsed=0., mpixels=0.;
+	static unsigned long frames=0;
+
+	if(first)
+	{
+		GLfloat id4[]={1., 1., 1., 1.};
+		GLfloat light0_amb[]={0.3, 0.3, 0.3, 1.};
+		GLfloat light0_dif[]={0.8, 0.8, 0.8, 1.};
+		GLfloat light0_pos[]={1., 1., 1., 0.};
+
+		spherelist=glGenLists(1);
+		if(!(spherequad=gluNewQuadric()))
+			_throw("Could not allocate GLU quadric object");
+		glNewList(spherelist, GL_COMPILE);
+		gluSphere(spherequad, 1.3, slices, stacks);
+		glEndList();
+
+		if(useci)
+		{
+			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+		}
+		else
+		{
+			glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
+			glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
+			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+
+			glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
+		}
+		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+
+		glShadeModel(GL_SMOOTH);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+
+		first=0;
+	}
+
+	z-=0.5;
+	if(z<-29.)
+	{
+		if(useci)
+		{
+			colorscheme=(colorscheme+1)%NSCHEMES;
+			_catch(setcolorscheme(colormap, colorscheme));
+		}
+		z=-3.5;
+	}
+	outer_angle+=0.1;  if(outer_angle>360.) outer_angle-=360.;
+	middle_angle-=0.37;  if(middle_angle<-360.) middle_angle+=360.;
+	inner_angle+=0.63;  if(inner_angle>360.) inner_angle-=360.;
+	lonesphere_color+=0.005;
+	if(lonesphere_color>1.) lonesphere_color-=1.;
+
+	if(usestereo)
+	{
+		renderspheres(GL_BACK_LEFT);  renderspheres(GL_BACK_RIGHT);
+	}
+	else renderspheres(GL_BACK);
 
 	glXSwapBuffers(dpy, win);
 
@@ -238,6 +292,7 @@ int display(void)
 	if(spherequad) gluDeleteQuadric(spherequad);
 	return -1;
 }
+
 
 int event_loop(Display *dpy, Window win)
 {
@@ -276,7 +331,11 @@ int event_loop(Display *dpy, Window win)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-index] [-overlay] [-stereo]\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-i] [-o] [-s]\n\n", argv[0]);
+	printf("-i = Use color index rendering (default is RGB)\n");
+	printf("-o = Test 8-bit transparent overlays\n");
+	printf("-s = Use stereographic rendering initially\n");
+	printf("     (this can be switched on and off in the application)\n");
 	exit(0);
 }
 
@@ -286,7 +345,7 @@ int main(int argc, char **argv)
 	int i;
 	XVisualInfo *v=NULL;
 	int rgbattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None};
+		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, GLX_STEREO, None};
 	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, 
 		None};
 	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_DOUBLEBUFFER, GLX_LEVEL, 1, None};
@@ -294,14 +353,11 @@ int main(int argc, char **argv)
 
 	for(i=0; i<argc; i++)
 	{
-		if(!stricmp(argv[i], "-h")) usage(argv);
-		if(!stricmp(argv[i], "-?")) usage(argv);
-		if(!stricmp(argv[i], "-index")) useci=1;
-		if(!stricmp(argv[i], "-overlay")) useoverlay=1;
-		if(!stricmp(argv[i], "-stereo"))
-		{
-			usestereo=1;  rgbattribs[10]=GLX_STEREO;
-		}
+		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
+		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
+		if(!strnicmp(argv[i], "-i", 2)) useci=1;
+		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
+		if(!strnicmp(argv[i], "-s", 2)) usestereo=1;
 	}
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
@@ -314,7 +370,13 @@ int main(int argc, char **argv)
 	else
 	{
 		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattribs))==NULL)
-			_throw("Could not obtain RGB visual");
+		{
+			printf("WARNING: Could not obtain stereo visual.  Trying mono.\n");
+			rgbattribs[10]=None;
+			usestereo=0;
+			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattribs))==NULL)
+				_throw("Could not obtain RGB visual");
+		}
 	}
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useoverlay? "underlay":"window",
 		(int)v->visualid);
@@ -327,7 +389,7 @@ int main(int argc, char **argv)
 		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
 		ncolors=np2(v->colormap_size);
 		if(ncolors<32) _throw("Color map is not large enough");
-		_catch(setcolorscheme(colormap, GREY));
+		_catch(setcolorscheme(colormap, colorscheme));
 	}
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 
@@ -351,7 +413,7 @@ int main(int argc, char **argv)
 		ncolors=np2(v->colormap_size);
 		if(ncolors<32) _throw("Color map is not large enough");
 
-		_catch(setcolorscheme(colormap, GREY));
+		_catch(setcolorscheme(colormap, colorscheme));
 
 		if((olwin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
