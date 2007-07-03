@@ -175,7 +175,7 @@ mesademos32:
 	$(MAKE) M32=yes mesademos
 endif
 
-dist: rr rr32 diags32 mesademos32
+dist: rr rr32 diags32 mesademos mesademos32
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
 	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
