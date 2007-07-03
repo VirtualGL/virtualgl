@@ -59,7 +59,7 @@ Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
 
 int spherelist=0;
-GLUquadric *spherequad=NULL;
+GLUquadricObj *spherequad=NULL;
 int slices=DEF_SLICES, stacks=DEF_STACKS;
 float x=0., y=0., z=-3.;
 float outer_angle=0., middle_angle=0., inner_angle=0.;
