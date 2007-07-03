@@ -1699,6 +1699,36 @@ void glIndexubv(const GLubyte *c)
 
 #endif
 
+void glMaterialfv(GLenum face, GLenum pname, const GLfloat *params)
+{
+	GLfloat mat[]={1., 1., 1., 1.};
+	if(pname==GL_COLOR_INDEXES && params)
+	{
+		mat[0]=params[0]/255.;
+		_glMaterialfv(face, GL_AMBIENT, mat);
+		mat[0]=params[1]/255.;
+		_glMaterialfv(face, GL_DIFFUSE, mat);
+		mat[0]=params[2]/255.;
+		_glMaterialfv(face, GL_SPECULAR, mat);
+	}
+	else _glMaterialfv(face, pname, params);
+}
+
+void glMaterialiv(GLenum face, GLenum pname, const GLint *params)
+{
+	GLfloat mat[]={1., 1., 1., 1.};
+	if(pname==GL_COLOR_INDEXES && params)
+	{
+		mat[0]=(GLfloat)params[0]/255.;
+		_glMaterialfv(face, GL_AMBIENT, mat);
+		mat[0]=(GLfloat)params[1]/255.;
+		_glMaterialfv(face, GL_DIFFUSE, mat);
+		mat[0]=(GLfloat)params[2]/255.;
+		_glMaterialfv(face, GL_SPECULAR, mat);
+	}
+	else _glMaterialiv(face, pname, params);
+}
+
 #define __round(f) ((f)>=0?(long)((f)+0.5):(long)((f)-0.5))
 
 void glGetDoublev(GLenum pname, GLdouble *params)

@@ -97,6 +97,8 @@
 		glGetDoublev;
 		glGetFloatv;
 		glGetIntegerv;
+		glMaterialfv;
+		glMaterialiv;
 		glPixelTransferf;
 		glPixelTransferi;
 

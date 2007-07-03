@@ -142,6 +142,8 @@ void __vgl_loadsymbols(void)
 	lsym(glGetDoublev)
 	lsym(glGetFloatv)
 	lsym(glGetIntegerv)
+	lsym(glMaterialfv)
+	lsym(glMaterialiv)
 	lsym(glPixelTransferf)
 	lsym(glPixelTransferi)
 
