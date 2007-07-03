@@ -77,11 +77,13 @@ install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
 install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
 install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
 install -m 755 %{_bindir32}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
+install -m 755 %{_bindir32}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
 install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 %ifarch x86_64
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
 install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
+install -m 755 %{_bindir}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
 %endif
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
@@ -138,6 +140,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/vglgenkey
 /opt/%{name}/bin/vglserver_config
 /opt/%{name}/bin/vglrun
+/opt/%{name}/bin/glxspheres
 
 /opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
@@ -149,6 +152,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %ifarch x86_64
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
+/opt/%{name}/bin/glxspheres64
 %endif
 
 %changelog
