@@ -223,7 +223,7 @@ PKGARCH = i386
 endif
 
 .PHONY: sunpkg
-sunpkg: rr diags
+sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/pkgbuild
 	rm -rf $(BLDDIR)/$(PKGNAME)
 	rm -f $(BLDDIR)/$(PKGNAME).pkg.bz2
