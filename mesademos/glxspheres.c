@@ -53,12 +53,12 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 
 Display *dpy=NULL;  Window win=0, olwin=0;
-int usestereo=0, useoverlay=0, useci=0;
+int usestereo=0, useoverlay=0, useci=0, useimm=0;
 int ncolors=0, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
 
-int spherelist=0;
+int spherelist=0, fontlistbase=0;
 GLUquadricObj *spherequad=NULL;
 int slices=DEF_SLICES, stacks=DEF_STACKS;
 float x=0., y=0., z=-3.;
@@ -156,7 +156,8 @@ void renderspheres(int buf)
 	glPushMatrix();
 	glTranslatef(0., 0., z);
 	setspherecolor(lonesphere_color);
-	glCallList(spherelist);
+	if(useimm) gluSphere(spherequad, 1.3, slices, stacks);
+	else glCallList(spherelist);
 	glPopMatrix();
 
 	// Outer ring
@@ -168,7 +169,8 @@ void renderspheres(int buf)
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -10.);
 		setspherecolor(f);
-		glCallList(spherelist);
+		if(useimm) gluSphere(spherequad, 1.3, slices, stacks);
+		else glCallList(spherelist);
 		glPopMatrix();
 	}
 	glPopMatrix();
@@ -182,7 +184,8 @@ void renderspheres(int buf)
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -17.);
 		setspherecolor(f);
-		glCallList(spherelist);
+		if(useimm) gluSphere(spherequad, 1.3, slices, stacks);
+		else glCallList(spherelist);
 		glPopMatrix();
 	}
 	glPopMatrix();
@@ -196,7 +199,8 @@ void renderspheres(int buf)
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -29.);
 		setspherecolor(f);
-		glCallList(spherelist);
+		if(useimm) gluSphere(spherequad, 1.3, slices, stacks);
+		else glCallList(spherelist);
 		glPopMatrix();
 	}
 	glPopMatrix();
@@ -208,6 +212,9 @@ int display(void)
 	static int first=1;
 	static double start=0., elapsed=0., mpixels=0.;
 	static unsigned long frames=0;
+	static char temps[256];
+	XFontStruct *fontinfo=NULL;  int minchar, maxchar;
+	GLfloat xaspect, yaspect;
 
 	if(first)
 	{
@@ -247,6 +254,15 @@ int display(void)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
+		if(!(fontinfo=XLoadQueryFont(dpy, "fixed")))
+			_throw("Could not load X font");
+		minchar=fontinfo->min_char_or_byte2;
+		maxchar=fontinfo->max_char_or_byte2;
+		fontlistbase=glGenLists(maxchar+1);
+		glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1, fontlistbase+minchar);
+		XFreeFont(dpy, fontinfo);  fontinfo=NULL;
+		snprintf(temps, 255, "Measuring performance ...");
+
 		first=0;
 	}
 
@@ -272,6 +288,19 @@ int display(void)
 	}
 	else renderspheres(GL_BACK);
 
+	xaspect=(GLfloat)width/(GLfloat)(min(width, height));
+	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
+	glPushAttrib(GL_CURRENT_BIT);
+	glPushAttrib(GL_LIST_BIT);
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+	glColor3f(1., 1., 1.);
+	glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5); 
+	glListBase(fontlistbase);
+	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
+	glPopAttrib();
+	glPopAttrib();
+	glPopAttrib();
 	glXSwapBuffers(dpy, win);
 
 	if(start>0.)
@@ -280,16 +309,19 @@ int display(void)
 		mpixels+=(double)width*(double)height/1000000.;
 		if(elapsed>2.)
 		{
-			printf("%f frames/sec - %f Mpixels/sec\n", (double)frames/elapsed,
-				mpixels/elapsed);
+			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
+				(double)frames/elapsed, mpixels/elapsed);
+			printf("%s\n", temps);
 			elapsed=mpixels=0.;  frames=0;
 		}
 	}
+
 	start=rrtime();
 	return 0;
 
 	bailout:
-	if(spherequad) gluDeleteQuadric(spherequad);
+	if(spherequad) {gluDeleteQuadric(spherequad);  spherequad=NULL;}
+	if(fontinfo) {XFreeFont(dpy, fontinfo);  fontinfo=NULL;}
 	return -1;
 }
 
@@ -331,8 +363,9 @@ int event_loop(Display *dpy, Window win)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-i] [-o] [-s]\n\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-i] [-m] [-o] [-s]\n\n", argv[0]);
 	printf("-i = Use color index rendering (default is RGB)\n");
+	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
@@ -345,7 +378,7 @@ int main(int argc, char **argv)
 	int i;
 	XVisualInfo *v=NULL;
 	int rgbattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, GLX_STEREO, None};
+		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None};
 	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, 
 		None};
 	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_DOUBLEBUFFER, GLX_LEVEL, 1, None};
@@ -356,8 +389,13 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-i", 2)) useci=1;
+		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
-		if(!strnicmp(argv[i], "-s", 2)) usestereo=1;
+		if(!strnicmp(argv[i], "-s", 2))
+		{
+			rgbattribs[10]=GLX_STEREO;
+			usestereo=1;
+		}
 	}
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
@@ -370,13 +408,7 @@ int main(int argc, char **argv)
 	else
 	{
 		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattribs))==NULL)
-		{
-			printf("WARNING: Could not obtain stereo visual.  Trying mono.\n");
-			rgbattribs[10]=None;
-			usestereo=0;
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattribs))==NULL)
-				_throw("Could not obtain RGB visual");
-		}
+			_throw("Could not obtain RGB visual with requested properties");
 	}
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useoverlay? "underlay":"window",
 		(int)v->visualid);
