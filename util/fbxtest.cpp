@@ -275,29 +275,6 @@ class writethread : public Runnable
 		int myrank, iter, useshm;
 };
 
-fbx_struct stressfb0;
-
-class writethread1 : public Runnable
-{
-	public:
-		writethread1(int _myrank, int _iter, int _useshm) : myrank(_myrank),
-			iter(_iter), useshm(_useshm) {}
-
-		void run(void)
-		{
-			int i, mywidth, myheight, myx=0, myy=0;
-			if(myrank<2) {mywidth=width/2;  myx=0;}
-			else {mywidth=width-width/2;  myx=width/2;}
-			if(myrank%2==0) {myheight=height/2;  myy=0;}
-			else {myheight=height-height/2;  myy=height/2;}
-			for (i=0; i<iter; i++)
-				fbx(fbx_awrite(&stressfb0, myx, myy, myx, myy, mywidth, myheight));
-		}
-
-	private:
-		int myrank, iter, useshm;
-};
-
 class readthread : public Runnable
 {
 	public:
@@ -337,15 +314,13 @@ void nativestress(int useshm)
 	int i, n;  double rbtime;
 	Thread *t[4];
 
-	memset(&stressfb0, 0, sizeof(stressfb0));
-
 	try {
 
 	clearfb();
 	if(useshm)
-		fprintf(stderr, "FBX write [4 bmps, 4 blits SHM]:  ");
+		fprintf(stderr, "FBX write [multi-threaded SHM]:   ");
 	else
-		fprintf(stderr, "FBX write [4 bmps, 4 blits]:      ");
+		fprintf(stderr, "FBX write [multi-threaded]:       ");
 	n=N;
 	do
 	{
@@ -370,9 +345,9 @@ void nativestress(int useshm)
 	try {
 
 	if(useshm)
-		fprintf(stderr, "FBX read [4 bmps, 4 blits SHM]:   ");
+		fprintf(stderr, "FBX read [multi-threaded SHM]:    ");
 	else
-		fprintf(stderr, "FBX read [4 bmps, 4 blits]:       ");
+		fprintf(stderr, "FBX read [multi-threaded]:        ");
 	n=N;
 	do
 	{
@@ -394,43 +369,6 @@ void nativestress(int useshm)
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
-	try {
-
-	clearfb();
-	if(useshm)
-		fprintf(stderr, "FBX write [1 bmp, 4 blits SHM]:   ");
-	else
-		fprintf(stderr, "FBX write [1 bmp, 4 blits]:       ");
-	memset(&stressfb0, 0, sizeof(stressfb0));
-	fbx(fbx_init(&stressfb0, wh, width, height, useshm));
-	if(useshm && !stressfb0.shm) _throw("MIT-SHM not supported");
-	initbuf(0, 0, width, stressfb0.pitch, height, stressfb0.format, (unsigned char *)stressfb0.bits);
-	n=N;
-	do
-	{
-		n+=n;
-		timer.start();
-		writethread1 *wt1[4];
-		for(i=0; i<4; i++)
-		{
-			wt1[i]=new writethread1(i, n, useshm);
-			t[i]=new Thread(wt1[i]);
-			t[i]->start();
-		}
-		for(i=0; i<4; i++) t[i]->stop();
-		for(i=0; i<4; i++) t[i]->checkerror();
-		for(i=0; i<4; i++) {delete t[i];  delete wt1[i];}
-		fbx_sync(&stressfb0);
-		rbtime=timer.elapsed();
-	} while (rbtime<1.);
-	fbx_term(&stressfb0);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
-
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
-
-	fg();  nativeread(useshm);
-
-	fbx_term(&stressfb0);
 	return;
 }
 
