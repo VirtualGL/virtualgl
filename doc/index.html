@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-06-21T13:05:28-06:00">
+<meta name="date" content="2007-07-13T17:20:22-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1558,7 +1558,7 @@ the changes will take effect.</p>
 <h2 id="hd007001">7.1&nbsp;Optimizing Exceed</h2>
 
 
-<h3 id="hd007001001">Disabling Pixel Format Conversion and Backing Store</h3>
+<h3 id="hd007001001">Disabling Pixel Format Conversion (Exceed 2006 and earlier)</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
@@ -1581,6 +1581,16 @@ the changes will take effect.</p>
         Click &ldquo;Validate and Apply Changes.&rdquo;  If XConfig asks whether
         you want to perform a server reset, click &ldquo;Yes.&rdquo;
     </li>
+</ol>
+
+
+<h3 id="hd007001002">Disabling Backing Store</h3>
+
+<ol class="Ordered numeric">
+    <li class="Ordered">
+        Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
+        <em>Tools&ndash;&gt;Configuration</em>.)
+    </li>
     <li class="Ordered">
         Open the &ldquo;Other Server Settings&rdquo; applet in XConfig.
         <div class="important"><p class="important">
@@ -1599,7 +1609,7 @@ the changes will take effect.</p>
 </ol>
 
 
-<h3 id="hd007001002">Enabling MIT-SHM</h3>
+<h3 id="hd007001003">Enabling MIT-SHM</h3>
 
 <p>VirtualGL has the ability to take advantage of the MIT-SHM extension
 in Hummingbird Exceed to accelerate image drawing on Windows.  This

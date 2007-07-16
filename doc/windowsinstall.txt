@@ -13,7 +13,7 @@
 
 ** Optimizing Exceed
 
-*** Disabling Pixel Format Conversion and Backing Store
+*** Disabling Pixel Format Conversion (Exceed 2006 and earlier)
 #OPT: noList! plain!
 
 	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
@@ -31,6 +31,12 @@
 
 	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
 		perform a server reset, click "Yes."
+
+*** Disabling Backing Store
+#OPT: noList! plain!
+
+	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
+		__Tools-->Configuration__.)
 
 	#. Open the "Other Server Settings" applet in XConfig.
 
