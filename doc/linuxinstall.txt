@@ -111,6 +111,10 @@ server by replacing the references to ''vglgenkey'' below with
 		|
 		#OPT: hiCol=first, align=center
 
+	 !!! If the system you are configuring as a VirtualGL server is also being
+	 used as a Sun Ray server, then ignore the above table and edit
+	 ''/etc/X11/gdm/SunRayInit/Default'' instead.
+
 	#. If the server is running gdm (the factory default on most Linux systems),
 		then you'll need to set up gdm to allow TCP connections to the X server.
 		To do this, edit the ''gdm.conf'' file and add the following line under the
