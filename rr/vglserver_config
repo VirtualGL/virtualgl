@@ -246,6 +246,9 @@ unconfigglx() {
 			delvglgenkey /etc/X11/gdm/Init/Default
 		fi
 	fi
+	if [ -f /etc/X11/gdm/SunRayInit/Default ]; then
+		delvglgenkey /etc/X11/gdm/SunRayInit/Default
+	fi
 	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
 		delvglgenkey /etc/gdm/Init/Default
 	fi
@@ -382,6 +385,9 @@ configglx() {
 		if [ -f /etc/X11/gdm/Init/Default -a ! -h /etc/X11/gdm/Init/Default ]; then
 			addvglgenkey /etc/X11/gdm/Init/Default
 		fi
+	fi
+	if [ -f /etc/X11/gdm/SunRayInit/Default ]; then
+		addvglgenkey /etc/X11/gdm/SunRayInit/Default
 	fi
 	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
 		addvglgenkey /etc/gdm/Init/Default
