@@ -53,7 +53,7 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 
 Display *dpy=NULL;  Window win=0, olwin=0;
-int usestereo=0, useoverlay=0, useci=0, useimm=0;
+int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0;
 int ncolors=0, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
@@ -330,6 +330,7 @@ int event_loop(Display *dpy, Window win)
 {
 	while (1)
 	{
+		int advance=0;
 		while(XPending(dpy)>0)
 		{
 			XEvent event;
@@ -350,10 +351,14 @@ int event_loop(Display *dpy, Window win)
 						case 27: case 'q': case 'Q':
 							return 0;
 					}
+					break;
 				}
+				case MotionNotify:
+					if(event.xmotion.state & Button1Mask) advance=1;
+ 					break;
 			}
 		}
-		_catch(display());
+		if(!interactive || advance) {_catch(display());}
 	}
 
 	bailout:
@@ -363,8 +368,9 @@ int event_loop(Display *dpy, Window win)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-i] [-m] [-o] [-s]\n\n", argv[0]);
-	printf("-i = Use color index rendering (default is RGB)\n");
+	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s]\n\n", argv[0]);
+	printf("-c = Use color index rendering (default is RGB)\n");
+	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-s = Use stereographic rendering initially\n");
@@ -388,7 +394,8 @@ int main(int argc, char **argv)
 	{
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
-		if(!strnicmp(argv[i], "-i", 2)) useci=1;
+		if(!strnicmp(argv[i], "-c", 2)) useci=1;
+		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
 		if(!strnicmp(argv[i], "-s", 2))
@@ -425,6 +432,7 @@ int main(int argc, char **argv)
 	}
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 
+	if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
 	if((win=XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
 		InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
 		_throw("Could not create window");
