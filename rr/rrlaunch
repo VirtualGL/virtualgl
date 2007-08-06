@@ -114,7 +114,7 @@ do
 	-mc*)       VGL_MCOMPRESS=$2  ; export VGL_MCOMPRESS; shift     ;;
 	-mq*)       VGL_MQUAL=$2      ; export VGL_MQUAL    ; shift     ;;
 	-ms*)       VGL_MSUBSAMP=$2   ; export VGL_MSUBSAMP ; shift     ;;
-	-ld)        LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH ;
+	-ld)        LD_LIBRARY_PATH=$2:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-64)        __VGL_64=1; __VGL_32=0        ;;
 	-32)        __VGL_32=1; __VGL_64=0        ;;
