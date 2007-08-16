@@ -206,14 +206,8 @@ To kill a TurboVNC server session:
 
 	#. Type the following command:
 
-		Linux server :: {:}
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncserver -kill :{n}
-		---
-
-		Solaris :: {:}
-		#Verb: <<---
-		/opt/SUNWtvnc/bin/vncserver -kill :{n}
 		---
 
 	Replace ''{n}'' with the X display number of the TurboVNC server session you
@@ -222,14 +216,8 @@ To kill a TurboVNC server session:
 To list the X display numbers and process ID's of all TurboVNC server sessions
 that are currently running under your user account on this machine, run
 
-	Linux server :: {:}
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -list
-	---
-
-	Solaris server :: {:}
-	#Verb: <<---
-	/opt/SUNWtvnc/bin/vncserver -list
 	---
 
 ** Using TurboVNC in a Web Browser
@@ -257,44 +245,98 @@ your web browser to:
 
 ''http://my_server:5801''
 
-** Connection Profiles: Optimizing TurboVNC's Performance for Different Network Types
+** Optimizing TurboVNC's Performance for Different Network Types
 
-To get the peak performance out of TurboVNC, you must give it a hint about
-the type of network that separates your client machine from the TurboVNC
-server.  To do this, select a Connection Profile when launching the TurboVNC
-viewer.
+The level of image compression in TurboVNC can be adjusted to balance the
+(sometimes conflicting) goals of high image quality and high performance.
+The more TurboVNC compresses an image, the more grainy the resulting
+image becomes.  But these lower quality levels also require less network
+bandwidth and can thus improve the overall performance of TurboVNC on slower
+networks.
 
-In the Windows TurboVNC viewer, there are three buttons in the TurboVNC
-Connection dialog box that allow you to easily select the connection profile.
+There are three options that control the level of image compression in
+TurboVNC:
+
+	Image compression type :: {:}
+		Either "JPEG" or "None (RGB)".  "None (RGB)" turns off image compression
+		altogether, which is useful when connecting to a TurboVNC server running
+		on the same machine as the viewer or to a TurboVNC server located across a
+		gigabit or faster network.  Disabling image compression greatly reduces the
+		CPU usage on the server and client, at the expense of greatly increasing
+		the network usage.
+
+	JPEG image quality :: {:}
+		Lower quality levels produce grainier JPEG images with more noticeable
+		compression artifacts, but lower quality levels also use less network
+		bandwidth and CPU power.  Refer to {ref prefix="Section ": VGL_QUAL} for
+		more details.
+
+	JPEG chrominance subsampling :: {:}
+		After converting the image from RGB to YUV, chrominance subsampling
+		discards some of the U and V (chrominance) components to save space.  1x
+		subsampling retains the chrominance components for all pixels, 2x
+		subsampling retains the chrominance components for every other pixel, 4x
+		subsampling retains the chrominance components for every fourth pixel, and
+		grayscale throws out all of the chrominance components.  Refer to
+		{ref prefix="Section ": VGL_SUBSAMP} for more details.
+
+In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
+the Options dialog box (click the "Options" button in the "TurboVNC Connection"
+dialog box or, after connecting to the server, click on the Connection Options
+button in the toolbar.)  In the Unix TurboVNC viewer, press F8 after connecting
+to bring up the options menu.  In the Java viewer, click on the Options button
+at the top of the browser window.
+
+The TurboVNC Viewer provides three "connection profiles", corresponding
+to three of the most useful levels of JPEG image compression:
+
+|| Connection profile || JPEG image quality || JPEG chrominance subsampling || Notes ||
+| "Low Quality" | 30 | 4x | \
+	This is generally about the lowest usable JPEG quality.  It produces very \
+	noticeable image compression artifacts but will allow TurboVNC to perform \
+	optimally on broadband connections.  If image quality is more critical than \
+	performance, then use one of the other connection profiles or take \
+	advantage of the "Lossless Refresh" feature. |
+| "Medium Quality" | 80 | 2x | \
+	This profile produces some minor, but generally not very noticeable, image \
+	compression artifacts.  All else being equal, this profile uses \
+	approximately twice the network bandwidth of the "Low Quality" profile and \
+	half the bandwidth of the "High Quality" profile, making it appropriate for \
+	medium-speed networks such as 10 Megabit ethernet. |
+| "High Quality" | 95 | 1x | \
+	This profile should be perceptually lossless (that is, it should produce no \
+	noticeable image compression artifacts) for most applications.  It requires \
+	a great deal of network bandwidth, however, and is generally not recommended \
+	except on 50 Megabit/second and faster networks.  |
+
+In the Windows TurboVNC Viewer, there are three buttons in the "TurboVNC
+Connection" dialog box that allow you to easily select the connection profile.
 In the Java viewer, the same thing is accomplished by clicking the "Options"
 button at the top of the browser window.  With the Linux/Solaris TurboVNC
-viewer, you can either use command line options to set the connection profile
-prior to connecting, or you can press the F8 key after connecting to pop up
-a menu from which you can select the connection profile.
+Viewer, the "High Quality" profile is the default, and you can use the
+''-lowqual'' and ''-medqual'' command line options to ''vncviewer'' to switch
+to the "Low Quality" or "Medium Quality" profiles.  You can also press the F8
+key after connecting to pop up a menu from which you can select a different
+connection profile.
 
-|| || Linux/Solaris TurboVNC viewer || Windows & Java TurboVNC viewers ||
-| High-bandwidth, low-latency network \
-	| No action necessary \
-	| Select "High-Speed Network" Connection Profile. \
-	|
-| Low-bandwidth, high-latency network (favor performance over image quality) \
-	| Pass argument of ''-broadband'' to ''vncviewer'' or select \
-		"Preset: Broadband (favor performance)" from the F8 popup menu \
-	| Select "Broadband (favor performance)" Connection Profile. \
-	|
-| Low-bandwidth, high-latency network (favor image quality over performance) \
-	| Pass argument of ''-wan'' to ''vncviewer'' or select \
-		"Preset: Broadband (favor image quality)" from the F8 popup menu \
-	| Select "Broadband (favor image quality)" Connection Profile. \
-	|
-#OPT: hiCol=first
+*** Lossless Refresh
+#OPT: noList! plain!
 
-The "High-Speed Network" and "Broadband (favor image quality)" connection
-profiles set the JPEG compression quality to a high enough level that the
-compression loss is not perceivable by the human eye.  The "Broadband (favor
-performance)" connection profile sets the image quality to a very low (but
-still usable) level which will achieve interactive performance on typical
-broadband connections.
+TurboVNC can optionally encode images as RGB, which is fully lossless and
+uncompressed, but this mode does not perform well except on extremely fast
+networks.  Another option for quality-critical applications is the "Lossless
+Refresh" feature.  Lossless Refresh causes the server to send a
+mathematically lossless (Zlib-compressed RGB) copy of the current screen to the
+viewer.  So, for instance, a user can rotate/pan/zoom an object in their
+application using a very lossy quality setting, then when that user is ready to
+interpret or analyze the object closely, they can request a lossless refresh
+of the screen.
+
+To perform a lossless refresh, press CTRL-ALT-SHIFT-L in the Windows TurboVNC
+Viewer (or click on the Lossless Refresh toolbar icon.)  In the Unix/Linux
+TurboVNC Viewer, select "Lossless Refresh" from the F8 popup menu.  In the
+Java TurboVNC Viewer, click the "Lossless Refresh" button at the top of the
+browser window.
 
 ** Securing a TurboVNC Connection
 
@@ -338,14 +380,9 @@ penalty for using SSh tunneling with TurboVNC.
 
 For more detailed instructions on the usage of TurboVNC:
 
-	Linux :: Refer to the TurboVNC man pages:
+	Linux and Solaris :: Refer to the TurboVNC man pages:
 	#Verb: <<---
 	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
-	---
-
-	Solaris :: Refer to the TurboVNC man pages:
-	#Verb: <<---
-	man -M /opt/SUNWtvnc/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
 	---
 
 	Windows :: Use the embedded help feature (the question mark button in the

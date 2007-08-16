@@ -297,7 +297,7 @@ Each method of configuration takes precedence over the previous method:
 		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
 	|	Profiling disabled \
 	|
-| ''VGL_QUAL=''{nl}''<1-100>'' | ''-q <1-100>'' \
+| {anchor: VGL_QUAL}''VGL_QUAL=''{nl}''<1-100>'' | ''-q <1-100>'' \
 	| __Fine-tune the amount of JPEG compression__ \
 		{nl}{nl} \
 		In digital images, "frequency" refers to how quickly the color changes \
@@ -382,7 +382,7 @@ Each method of configuration takes precedence over the previous method:
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	SSL disabled \
 	|
-| ''VGL_SUBSAMP=''{nl}''<1x|2x|4x|gray>'' | ''-samp <1x|2x|4x|gray>'' \
+| {anchor: VGL_SUBSAMP}''VGL_SUBSAMP=''{nl}''<1x|2x|4x|gray>'' | ''-samp <1x|2x|4x|gray>'' \
 	|	__Manually specify the level of chrominance subsampling (1x, 2x, 4x, or \
 		gray) in the JPEG compressor__ \
 		{nl}{nl} \
@@ -404,7 +404,8 @@ Each method of configuration takes precedence over the previous method:
 		pixel along the image's X direction (this is also known as "4:2:2 \
 		subsampling.")  Similarly, "4x subsampling" discards the chrominance \
 		components for every other pixel along both the X and Y directions of \
-		the image (this is also known as "4:2:0 subsampling.") \
+		the image (this is also known as "4:2:0 subsampling.") Grayscale throws \
+		out all chrominance components, leaving only luminance. \
 		{nl}{nl} \
 		All else being equal, 2x subsampling generally produces images that are \
 		about 20-25% smaller than images with no subsampling.  Thus, VirtualGL \

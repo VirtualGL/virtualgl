@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-07-13T17:20:22-06:00">
+<meta name="date" content="2007-08-16T16:41:34-06:00">
 <meta name="generator" content="deplate.rb 0.8">
-<title>User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</title>
+<title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
@@ -30,7 +30,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 2.1dev1 and TurboVNC 0.3.3</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers,
@@ -191,8 +191,8 @@ systems, OpenGL and GLX, and X windows.</p>
                 <a href="#hd009004" class="toc">9.4 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="toc">
-                <a href="#hd009005" class="toc">9.5 Connection Profiles: Optimizing
-                TurboVNC&rsquo;s Performance for Different Network Types</a>
+                <a href="#hd009005" class="toc">9.5 Optimizing TurboVNC&rsquo;s Performance
+                for Different Network Types</a>
             </li>
             <li class="toc">
                 <a href="#hd009006" class="toc">9.6 Securing a TurboVNC Connection</a>
@@ -2385,22 +2385,10 @@ can reconnect to it at any time.</p>
     </li>
     <li class="Ordered">
         Type the following command:
-        <dl class="Description">
-            <dt class="Description">Linux server</dt>
-            <dd class="Description">
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncserver&nbsp;-kill&nbsp;:{n}
 </pre>
 
-            </dd>
-            <dt class="Description">Solaris</dt>
-            <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWtvnc/bin/vncserver&nbsp;-kill&nbsp;:{n}
-</pre>
-
-            </dd>
-        </dl>
         Replace <code>{n}</code> with the X display number of the TurboVNC
         server session you wish to kill.
     </li>
@@ -2410,22 +2398,9 @@ can reconnect to it at any time.</p>
 server sessions that are currently running under your user account
 on this machine, run</p>
 
-<dl class="Description">
-    <dt class="Description">Linux server</dt>
-    <dd class="Description">
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncserver&nbsp;-list
 </pre>
-
-    </dd>
-    <dt class="Description">Solaris server</dt>
-    <dd class="Description">
-<pre class="verbatim">
-/opt/SUNWtvnc/bin/vncserver&nbsp;-list
-</pre>
-
-    </dd>
-</dl>
 
 
 <h2 id="hd009004">9.4&nbsp;Using TurboVNC in a Web Browser</h2>
@@ -2454,57 +2429,121 @@ then point your web browser to:</p>
 <p><code>http://my_server:5801</code></p>
 
 
-<h2 id="hd009005">9.5&nbsp;Connection Profiles: Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
+<h2 id="hd009005">9.5&nbsp;Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
 
-<p>To get the peak performance out of TurboVNC, you must give it a hint
-about the type of network that separates your client machine from the
-TurboVNC server.  To do this, select a Connection Profile when launching
-the TurboVNC viewer.</p>
+<p>The level of image compression in TurboVNC can be adjusted to balance
+the (sometimes conflicting) goals of high image quality and high performance.
+The more TurboVNC compresses an image, the more grainy the resulting
+image becomes.  But these lower quality levels also require less network
+bandwidth and can thus improve the overall performance of TurboVNC
+on slower networks.</p>
 
-<p>In the Windows TurboVNC viewer, there are three buttons in the TurboVNC
-Connection dialog box that allow you to easily select the connection
-profile. In the Java viewer, the same thing is accomplished by clicking
-the &ldquo;Options&rdquo; button at the top of the browser window.
-With the Linux/Solaris TurboVNC viewer, you can either use command
-line options to set the connection profile prior to connecting, or
-you can press the F8 key after connecting to pop up a menu from which
-you can select the connection profile.</p>
+<p>There are three options that control the level of image compression
+in TurboVNC:</p>
+
+<dl class="Description">
+    <dt class="Description">Image compression type</dt>
+    <dd class="Description">
+         Either &ldquo;JPEG&rdquo; or &ldquo;None (RGB)&rdquo;.  &ldquo;None
+         (RGB)&rdquo; turns off image compression altogether, which is useful
+         when connecting to a TurboVNC server running on the same machine as
+         the viewer or to a TurboVNC server located across a gigabit or faster
+         network.  Disabling image compression greatly reduces the CPU usage
+         on the server and client, at the expense of greatly increasing the
+         network usage.
+    </dd>
+    <dt class="Description">JPEG image quality</dt>
+    <dd class="Description">
+         Lower quality levels produce grainier JPEG images with more noticeable
+         compression artifacts, but lower quality levels also use less network
+         bandwidth and CPU power.  Refer to Section <a href="#VGL_QUAL" class="ref">18.1</a>
+         for more details.
+    </dd>
+    <dt class="Description">JPEG chrominance subsampling</dt>
+    <dd class="Description">
+         After converting the image from RGB to YUV, chrominance subsampling
+         discards some of the U and V (chrominance) components to save space.
+         1x subsampling retains the chrominance components for all pixels,
+         2x subsampling retains the chrominance components for every other
+         pixel, 4x subsampling retains the chrominance components for every
+         fourth pixel, and grayscale throws out all of the chrominance components.
+         Refer to Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for more
+         details.
+    </dd>
+</dl>
+
+<p>In the Windows TurboVNC Viewer, these parameters can be adjusted by
+accessing the Options dialog box (click the &ldquo;Options&rdquo; button
+in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after connecting
+to the server, click on the Connection Options button in the toolbar.)
+In the Unix TurboVNC viewer, press F8 after connecting to bring up
+the options menu.  In the Java viewer, click on the Options button
+at the top of the browser window.</p>
+
+<p>The TurboVNC Viewer provides three &ldquo;connection profiles&rdquo;,
+corresponding to three of the most useful levels of JPEG image compression:</p>
 
 <div class="table">
 <table class="standard">
   <thead class="standard">
   <tr class="head ">
-    <th class="head standard"></th>
-    <th class="head standard">Linux/Solaris TurboVNC viewer</th>
-    <th class="head standard">Windows &amp; Java TurboVNC viewers</th>
+    <th class="head standard">Connection profile</th>
+    <th class="head standard">JPEG image quality</th>
+    <th class="head standard">JPEG chrominance subsampling</th>
+    <th class="head standard">Notes</th>
   </tr>
   </thead>
   <tr class="standard">
-    <td class="high standard">High-bandwidth, low-latency network</td>
-    <td class="standard">No action necessary</td>
-    <td class="standard">Select &ldquo;High-Speed Network&rdquo; Connection Profile.</td>
+    <td class="standard">&ldquo;Low Quality&rdquo;</td>
+    <td class="standard">30</td>
+    <td class="standard">4x</td>
+    <td class="standard">This is generally about the lowest usable JPEG quality.  It produces very noticeable image compression artifacts but will allow TurboVNC to perform optimally on broadband connections.  If image quality is more critical than performance, then use one of the other connection profiles or take advantage of the &ldquo;Lossless Refresh&rdquo; feature.</td>
   </tr>
   <tr class="standard">
-    <td class="high standard">Low-bandwidth, high-latency network (favor performance over image quality)</td>
-    <td class="standard">Pass argument of <code>-broadband</code> to <code>vncviewer</code> or select &ldquo;Preset: Broadband (favor performance)&rdquo; from the F8 popup menu</td>
-    <td class="standard">Select &ldquo;Broadband (favor performance)&rdquo; Connection Profile.</td>
+    <td class="standard">&ldquo;Medium Quality&rdquo;</td>
+    <td class="standard">80</td>
+    <td class="standard">2x</td>
+    <td class="standard">This profile produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this profile uses approximately twice the network bandwidth of the &ldquo;Low Quality&rdquo; profile and half the bandwidth of the &ldquo;High Quality&rdquo; profile, making it appropriate for medium-speed networks such as 10 Megabit ethernet.</td>
   </tr>
   <tr class="standard">
-    <td class="high standard">Low-bandwidth, high-latency network (favor image quality over performance)</td>
-    <td class="standard">Pass argument of <code>-wan</code> to <code>vncviewer</code> or select &ldquo;Preset: Broadband (favor image quality)&rdquo; from the F8 popup menu</td>
-    <td class="standard">Select &ldquo;Broadband (favor image quality)&rdquo; Connection Profile.</td>
+    <td class="standard">&ldquo;High Quality&rdquo;</td>
+    <td class="standard">95</td>
+    <td class="standard">1x</td>
+    <td class="standard">This profile should be perceptually lossless (that is, it should produce no noticeable image compression artifacts) for most applications.  It requires a great deal of network bandwidth, however, and is generally not recommended except on 50 Megabit/second and faster networks.</td>
   </tr>
 </table>
 </div>
 
 
-<p>The &ldquo;High-Speed Network&rdquo; and &ldquo;Broadband (favor image
-quality)&rdquo; connection profiles set the JPEG compression quality
-to a high enough level that the compression loss is not perceivable
-by the human eye.  The &ldquo;Broadband (favor performance)&rdquo;
-connection profile sets the image quality to a very low (but still
-usable) level which will achieve interactive performance on typical
-broadband connections.</p>
+<p>In the Windows TurboVNC Viewer, there are three buttons in the &ldquo;TurboVNC
+Connection&rdquo; dialog box that allow you to easily select the connection
+profile. In the Java viewer, the same thing is accomplished by clicking
+the &ldquo;Options&rdquo; button at the top of the browser window.
+With the Linux/Solaris TurboVNC Viewer, the &ldquo;High Quality&rdquo;
+profile is the default, and you can use the <code>-lowqual</code> and
+<code>-medqual</code> command line options to <code>vncviewer</code>
+to switch to the &ldquo;Low Quality&rdquo; or &ldquo;Medium Quality&rdquo;
+profiles.  You can also press the F8 key after connecting to pop up
+a menu from which you can select a different connection profile.</p>
+
+
+<h3 id="hd009005001">Lossless Refresh</h3>
+
+<p>TurboVNC can optionally encode images as RGB, which is fully lossless
+and uncompressed, but this mode does not perform well except on extremely
+fast networks.  Another option for quality-critical applications is
+the &ldquo;Lossless Refresh&rdquo; feature.  Lossless Refresh causes
+the server to send a mathematically lossless (Zlib-compressed RGB)
+copy of the current screen to the viewer.  So, for instance, a user
+can rotate/pan/zoom an object in their application using a very lossy
+quality setting, then when that user is ready to interpret or analyze
+the object closely, they can request a lossless refresh of the screen.</p>
+
+<p>To perform a lossless refresh, press CTRL-ALT-SHIFT-L in the Windows
+TurboVNC Viewer (or click on the Lossless Refresh toolbar icon.)  In
+the Unix/Linux TurboVNC Viewer, select &ldquo;Lossless Refresh&rdquo;
+from the F8 popup menu.  In the Java TurboVNC Viewer, click the &ldquo;Lossless
+Refresh&rdquo; button at the top of the browser window.</p>
 
 
 <h2 id="hd009006">9.6&nbsp;Securing a TurboVNC Connection</h2>
@@ -2555,19 +2594,11 @@ is no performance penalty for using SSh tunneling with TurboVNC.</p>
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
 <dl class="Description">
-    <dt class="Description">Linux</dt>
+    <dt class="Description">Linux and Solaris</dt>
     <dd class="Description">
         Refer to the TurboVNC man pages:
 <pre class="verbatim">
 man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;vncviewer&nbsp;|&nbsp;vncconnect&nbsp;|&nbsp;vncpasswd}
-</pre>
-
-    </dd>
-    <dt class="Description">Solaris</dt>
-    <dd class="Description">
-        Refer to the TurboVNC man pages:
-<pre class="verbatim">
-man&nbsp;-M&nbsp;/opt/SUNWtvnc/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;vncviewer&nbsp;|&nbsp;vncconnect&nbsp;|&nbsp;vncpasswd}
 </pre>
 
     </dd>
@@ -3889,15 +3920,15 @@ method:</p>
     <td class="standard">Profiling disabled</td>
   </tr>
   <tr class="standard">
-    <td class="standard"><code>VGL_QUAL</code></td>
+    <td class="standard"><a name="VGL_QUAL"></a><code>VGL_QUAL=</code><br /><code>&lt;1-100&gt;</code></td>
     <td class="standard"><code>-q&nbsp;&lt;1-100&gt;</code></td>
-    <td class="standard"><em>An integer between 1 and 100 (inclusive)</em> <br /><br /> This setting allows you to specify the quality of the JPEG compression. Lower is faster but also grainier.  The default setting should produce perceptually lossless image quality. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard"><em>Fine-tune the amount of JPEG compression</em> <br /><br /> In digital images, &ldquo;frequency&rdquo; refers to how quickly the color changes between light and dark as you move either horizontally or vertically in the image.  Images with very sharp, bright features on a dark background, for instance, consist of both low- and high-frequency components, whereas images with smooth transitions between each pixel contain only low-frequency components.  JPEG compression works by breaking down the image into its constituent frequencies and then throwing out the highest of these frequencies.  The JPEG image &ldquo;quality&rdquo; determines which frequencies are thrown out.  A JPEG quality of 1 throws out all but the lowest frequencies and thus produces a very impressionistic, but generally not very useful, compressed image.  A JPEG quality of 100 retains all frequencies in the original image (but, due to roundoff errors, is still not completely lossless.) <br /><br /> Because the human eye usually can&rsquo;t detect the highest frequencies in the image, and often because the image lacks those high-frequency elements to begin with, a sufficiently high JPEG quality setting can produce a &ldquo;perceptually lossless&rdquo; image.  A &ldquo;perceptually lossless&rdquo; image contains a small amount of mathematical error vs. the original image, but this error is so small that the human visual system cannot distinguish it (under normal circumstances.)  The threshold quality level at which JPEG compression becomes perceptually lossless is different for each image, but experiments with various visual difference benchmarks (such as <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0079"></a>) suggest that a JPEG quality of 95 is sufficient to guarantee perceptual losslessness in the types of applications (volume visualization apps, in particular) where image quality is critical.  As with any benchmarks, Your Mileage May Vary.  If quality is of paramount concern, consider setting the JPEG quality to 100, using RGB encoding, or enabling the <code>VGL_PROGRESSIVE</code> option. <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
     <td class="standard">95</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_READBACK=0</code><br /><code>VGL_READBACK=1</code></td>
     <td class="standard"></td>
-    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0079"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
+    <td class="standard"><em>Enable/disable readback</em> <br /><br /> On rare occasions, it might be desirable to have VirtualGL redirect OpenGL rendering from an application into a Pbuffer but not automatically read back and send the rendered pixels.  Some applications have their own mechanisms for reading back the buffer, so disabling VirtualGL&rsquo;s readback mechanism prevents duplication of effort. <br /><br /> This feature was developed initially to support running <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0080"></a> in parallel using MPI.  ParaView MPI normally uses MPI processes 1 through N as rendering servers, each drawing a portion of the geometry into a separate window on a separate X display.  ParaView reads back these server windows and composites the pixels into the main application window, which is controlled by MPI process 0.  By creating a script which passes a different value of <code>VGL_DISPLAY</code> and <code>VGL_READBACK</code> to each MPI process, it is possible to make all of the ParaView server processes render to off-screen buffers on different graphics cards while preventing VirtualGL from displaying any pixels except those generated by process 0.</td>
     <td class="standard">Readback enabled</td>
   </tr>
   <tr class="standard">
@@ -3913,10 +3944,10 @@ method:</p>
     <td class="standard">SSL disabled</td>
   </tr>
   <tr class="standard">
-    <td class="standard"><code>VGL_SUBSAMP</code></td>
-    <td class="standard"><code>-samp&nbsp;&lt;411|422|444&gt;</code></td>
-    <td class="standard"><em>411, 422, or 444</em> <br /><br /> This allows you to manually specify the level of chrominance subsampling in the JPEG compressor. <br /><br /> By default, VirtualGL uses no chrominance subsampling (AKA &ldquo;4:4:4 subsampling&rdquo;) when it compresses images for delivery to the client. Subsampling is premised on the fact that the human eye is more sensitive to changes in brightness than to changes in color.  Since the JPEG image format uses a colorspace in which brightness (luminance) and color (chrominance) are separated into different channels, one can sample the brightness for every pixel and the color for every other pixel and produce an image which has 16 million colors but uses an average of only 16 bits per pixel instead of 24.  This is called &ldquo;4:2:2 subsampling&rdquo;, since for every 4 pixels of luminance, there are only 2 pixels of each chrominance component.  Likewise, one can sample every fourth chrominance component to produce a 16-million color image with only 12 bits per pixel.  The latter is called &ldquo;4:1:1 subsampling.&rdquo;  Subsampling decreases the amount of image data and thus increases the performance and decreases the network bandwidth usage, but subsampling can produce some visible artifacts.  Subsampling artifacts are rarely observed with volume data, since it usually only contains 256 colors to begin with.  But narrow, aliased lines and other sharp features on a black background will tend to produce artifacts when subsampling is enabled. <br /><br /> The Axis Indicator from a Popular Visualization App displayed with 4:4:4, 4:2:2, and 4:1:1 subsampling (respectively):<br /> <img src="444.gif" alt="444" class="inline" id="imgid_11" name="imgid_11"/><img src="422.gif" alt="422" class="inline" id="imgid_12" name="imgid_12"/><img src="411.gif" alt="411" class="inline" id="imgid_13" name="imgid_13"/> <br /><br /> <em>NOTE:  If you select 4:1:1 subsampling, VirtualGL will in fact try to use 4:2:0 instead.  4:2:0 samples every other pixel both horizontally and vertically rather than sampling every fourth pixel horizontally.  But not all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is not available.</em> <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
-    <td class="standard">444</td>
+    <td class="standard"><a name="VGL_SUBSAMP"></a><code>VGL_SUBSAMP=</code><br /><code>&lt;1x|2x|4x|gray&gt;</code></td>
+    <td class="standard"><code>-samp&nbsp;&lt;1x|2x|4x|gray&gt;</code></td>
+    <td class="standard"><em>Manually specify the level of chrominance subsampling (1x, 2x, 4x, or gray) in the JPEG compressor</em> <br /><br /> When an image is compressed as JPEG, each pixel in the image is first converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three values that specify the amounts of red, green, and blue that make up the pixel&rsquo;s color.  A YUV pixel has three values that specify the overall brightness of the pixel (Y, or &ldquo;luminance&rdquo;) and the overall color of the pixel (U and V, or &ldquo;chrominance&rdquo;.) <br /><br /> Since the human eye is less sensitive to changes in color than it is to changes in brightness, the JPEG standard allows one to throw away the chrominance components for some of the pixels.  This technique, called &ldquo;chrominance subsampling&rdquo;, significantly reduces the size of the compressed image without causing much noticeable loss in image quality. By default, VirtualGL uses no chrominance subsampling (AKA &ldquo;1x subsampling&rdquo;) when it compresses images for delivery to the client. &ldquo;2x subsampling&rdquo; discards the chrominance components for every other pixel along the image&rsquo;s X direction (this is also known as &ldquo;4:2:2 subsampling.&rdquo;)  Similarly, &ldquo;4x subsampling&rdquo; discards the chrominance components for every other pixel along both the X and Y directions of the image (this is also known as &ldquo;4:2:0 subsampling.&rdquo;) Grayscale throws out all chrominance components, leaving only luminance. <br /><br /> All else being equal, 2x subsampling generally produces images that are about 20-25% smaller than images with no subsampling.  Thus, VirtualGL will generally consume about 20-25% less network bandwidth if 2x subsampling is enabled.  Similarly, 4x subsampling will generally reduce the network usage by about 35-40%. <br /><br /> Subsampling artifacts are rarely observed with volume data, since it usually only contains 256 colors to begin with.  But narrow, aliased lines and other sharp features on a black background will tend to produce artifacts when subsampling is enabled. <br /><br /> The Axis Indicator from a Popular Visualization App displayed with 1x, 2x, and 4x subsampling (respectively):<br /> <img src="444.gif" alt="444" class="inline" id="imgid_11" name="imgid_11"/><img src="422.gif" alt="422" class="inline" id="imgid_12" name="imgid_12"/><img src="411.gif" alt="411" class="inline" id="imgid_13" name="imgid_13"/> <br /><br /> <em>** This option has no effect in &ldquo;Raw&rdquo; Mode. **</em></td>
+    <td class="standard">1x</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_SYNC=0</code><br /><code>VGL_SYNC=1</code></td>
