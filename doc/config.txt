@@ -297,13 +297,40 @@ Each method of configuration takes precedence over the previous method:
 		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
 	|	Profiling disabled \
 	|
-| ''VGL_QUAL'' | ''-q <1-100>'' \
-	| __An integer between 1 and 100 (inclusive)__ \
+| ''VGL_QUAL=''{nl}''<1-100>'' | ''-q <1-100>'' \
+	| __Fine-tune the amount of JPEG compression__ \
 		{nl}{nl} \
-		This setting allows you to specify the quality of the JPEG compression. \
-		Lower is faster but also grainier.  The default setting should produce \
-		perceptually lossless image quality. \
+		In digital images, "frequency" refers to how quickly the color changes \
+		between light and dark as you move either horizontally or vertically \
+		in the image.  Images with very sharp, bright features on a dark \
+		background, for instance, consist of both low- and high-frequency \
+		components, whereas images with smooth transitions between each pixel \
+		contain only low-frequency components.  JPEG compression works by \
+		breaking down the image into its constituent frequencies and then \
+		throwing out the highest of these frequencies.  The JPEG image "quality" \
+		determines which frequencies are thrown out.  A JPEG quality of 1 throws \
+		out all but the lowest frequencies and thus produces a very \
+		impressionistic, but generally not very useful, compressed image.  A JPEG \
+		quality of 100 retains all frequencies in the original image (but, due to \
+		roundoff errors, is still not completely lossless.) \
 		{nl}{nl} \
+		Because the human eye usually can't detect the highest frequencies in the \
+		image, and often because the image lacks those high-frequency elements to \
+		begin with, a sufficiently high JPEG quality setting can produce a \
+		"perceptually lossless" image.  A "perceptually lossless" image contains \
+		a small amount of mathematical error vs. the original image, but this \
+		error is so small that the human visual system cannot distinguish it \
+		(under normal circumstances.)  The threshold quality level at which JPEG \
+		compression becomes perceptually lossless is different for each image, \
+		but experiments with various visual difference benchmarks (such as \
+		[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that \
+		a JPEG quality of 95 is sufficient to guarantee perceptual \
+		losslessness in the types of applications (volume visualization apps, \
+		in particular) where image quality is critical.  As with any benchmarks, \
+		Your Mileage May Vary.  If quality is of paramount concern, consider \
+		setting the JPEG quality to 100, using RGB encoding, or enabling the \
+		''VGL_PROGRESSIVE'' option. \
+ 		{nl}{nl} \
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	95 \
 	|
@@ -355,44 +382,47 @@ Each method of configuration takes precedence over the previous method:
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	SSL disabled \
 	|
-| ''VGL_SUBSAMP'' | ''-samp <411|422|444>'' \
-	| __411, 422, or 444__ \
+| ''VGL_SUBSAMP=''{nl}''<1x|2x|4x|gray>'' | ''-samp <1x|2x|4x|gray>'' \
+	|	__Manually specify the level of chrominance subsampling (1x, 2x, 4x, or \
+		gray) in the JPEG compressor__ \
 		{nl}{nl} \
-		This allows you to manually specify the level of chrominance subsampling \
-		in the JPEG compressor. \
+		When an image is compressed as JPEG, each pixel in the image is first \
+		converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three \
+		values that specify the amounts of red, green, and blue that make up the \
+		pixel's color.  A YUV pixel has three values that specify the overall \
+		brightness of the pixel (Y, or "luminance") and the overall color of the \
+		pixel (U and V, or "chrominance".) \
 		{nl}{nl} \
-		By default, VirtualGL uses no chrominance subsampling (AKA "4:4:4 \
+		Since the human eye is less sensitive to changes in color than it is to \
+		changes in brightness, the JPEG standard allows one to throw away the \
+		chrominance components for some of the pixels.  This technique, called \
+		"chrominance subsampling", significantly reduces the size of the \
+		compressed image without causing much noticeable loss in image quality. \
+		By default, VirtualGL uses no chrominance subsampling (AKA "1x \
 		subsampling") when it compresses images for delivery to the client. \
-		Subsampling is premised on the fact that the human eye is more sensitive \
-		to changes in brightness than to changes in color.  Since the JPEG image \
-		format uses a colorspace in which brightness (luminance) and color \
-		(chrominance) are separated into different channels, one can sample the \
-		brightness for every pixel and the color for every other pixel and \
-		produce an image which has 16 million colors but uses an average of only \
-		16 bits per pixel instead of 24.  This is called "4:2:2 subsampling", \
-		since for every 4 pixels of luminance, there are only 2 pixels of each \
-		chrominance component.  Likewise, one can sample every fourth chrominance \
-		component to produce a 16-million color image with only 12 bits per \
-		pixel.  The latter is called "4:1:1 subsampling."  Subsampling decreases \
-		the amount of image data and thus increases the performance and decreases \
-		the network bandwidth usage, but subsampling can produce some visible \
-		artifacts.  Subsampling artifacts are rarely observed with volume data, \
+		"2x subsampling" discards the chrominance components for every other \
+		pixel along the image's X direction (this is also known as "4:2:2 \
+		subsampling.")  Similarly, "4x subsampling" discards the chrominance \
+		components for every other pixel along both the X and Y directions of \
+		the image (this is also known as "4:2:0 subsampling.") \
+		{nl}{nl} \
+		All else being equal, 2x subsampling generally produces images that are \
+		about 20-25% smaller than images with no subsampling.  Thus, VirtualGL \
+		will generally consume about 20-25% less network bandwidth if 2x \
+		subsampling is enabled.  Similarly, 4x subsampling will generally reduce \
+		the network usage by about 35-40%. \
+		{nl}{nl} \
+		Subsampling artifacts are rarely observed with volume data, \
 		since it usually only contains 256 colors to begin with.  But narrow, \
 		aliased lines and other sharp features on a black background will tend to \
 		produce artifacts when subsampling is enabled. \
 		{nl}{nl} \
-		The Axis Indicator from a Popular Visualization App displayed with 4:4:4, \
-		4:2:2, and 4:1:1 subsampling (respectively):{nl} \
+		The Axis Indicator from a Popular Visualization App displayed with 1x, \
+		2x, and 4x subsampling (respectively):{nl} \
 		{img: 444.gif}{img: 422.gif}{img: 411.gif} \
 		{nl}{nl} \
-		__NOTE:  If you select 4:1:1 subsampling, VirtualGL will in fact try to \
-		use 4:2:0 instead.  4:2:0 samples every other pixel both horizontally and \
-		vertically rather than sampling every fourth pixel horizontally.  But not \
-		all JPEG codecs support 4:2:0, so 4:1:1 is used when 4:2:0 is not \
-		available.__ \
-		{nl}{nl} \
 		__** This option has no effect in "Raw" Mode. **__ \
-	|	444 \
+	|	1x \
 	|
 | ''VGL_SYNC=0''{nl}''VGL_SYNC=1'' | ''-sync''{nl}or{nl}''+sync'' \
 	| __Enable/disable strict 2D/3D synchronization (necessary to pass GLX \
