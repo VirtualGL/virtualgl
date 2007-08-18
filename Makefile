@@ -106,8 +106,6 @@ install: rr diags mesademos
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
 	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
-	$(INSTALL) -m 755 rr/rrxclient.sh $(prefix)/bin/vglclient_daemon
-	$(INSTALL) -m 755 rr/rrxclient_config $(prefix)/bin/vglclient_config
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/rrlaunch
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
@@ -144,9 +142,6 @@ uninstall:
 	echo Uninstall complete.
 else
 uninstall:
-	$(prefix)/bin/vglclient_daemon stop || echo Client not installed as a service
-	$(RM) $(prefix)/bin/vglclient_daemon
-	$(RM) $(prefix)/bin/vglclient_config
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/rrlaunch
 	$(RM) $(prefix)/bin/vglserver_config

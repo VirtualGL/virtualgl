@@ -1,5 +1,3 @@
-%define _DAEMON /usr/bin/vglclient_daemon
-
 # This is a hack to prevent the RPM from depending on libGLcore.so.1 and
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
 # drivers installed.  The custom find-requires script is created during
@@ -69,8 +67,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
-install -m 755 rr/rrxclient.sh $RPM_BUILD_ROOT%{_DAEMON}
-install -m 755 rr/rrxclient_config $RPM_BUILD_ROOT/usr/bin/vglclient_config
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
@@ -109,10 +105,6 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %postun
 /sbin/ldconfig
 
-%preun
-%{_DAEMON} stop
-/usr/bin/vglclient_config -remove
-
 %files -n %{name}
 %defattr(-,root,root)
 %doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
@@ -125,8 +117,6 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 
 /usr/bin/vglclient
-%{_DAEMON}
-/usr/bin/vglclient_config
 /usr/bin/vglrun
 /usr/bin/rrlaunch
 /usr/bin/vglgenkey
