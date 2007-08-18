@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-08-16T16:41:34-06:00">
+<meta name="date" content="2007-08-18T01:51:46-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -147,10 +147,6 @@ systems, OpenGL and GLX, and X windows.</p>
         <ul class="toc">
             <li class="toc">
                 <a href="#hd007001" class="toc">7.1 Optimizing Exceed</a>
-            </li>
-            <li class="toc">
-                <a href="#hd007002" class="toc">7.2 Installing the VirtualGL Client
-                as a Windows Service</a>
             </li>
         </ul>
     </li>
@@ -1666,41 +1662,9 @@ the following patches from the Hummingbird support site:</p>
     <li class="Ordered">
         Click &ldquo;Validate and Apply Changes.&rdquo;  If XConfig asks whether
         you want to perform a server reset, click &ldquo;Yes.&rdquo;
+        <hr class="break" />
     </li>
 </ol>
-
-
-<h2 id="hd007002">7.2&nbsp;Installing the VirtualGL Client as a Windows Service</h2>
-
-<p>The VirtualGL Windows Client can be installed as a Windows service
-(and subsequently removed) using the links provided in the &ldquo;VirtualGL
-Client&rdquo; start menu group.  Once installed, the service can be
-started from the Services applet in the Control Panel (located under
-&ldquo;Administrative Tools&rdquo;) or by invoking</p>
-
-<pre class="verbatim">
-net&nbsp;start&nbsp;vglclient
-</pre>
-
-<p>from a command prompt.  The service can be subsequently stopped by
-invoking</p>
-
-<pre class="verbatim">
-net&nbsp;stop&nbsp;vglclient
-</pre>
-
-<p>If you wish to install the client as a service and have it listen on
-a port other than the default (4242 for unencrypted connections or
-4243 for SSL connections), then you will need to install the service
-manually from the command line.</p>
-
-<pre class="verbatim">
-vglclient&nbsp;-?
-</pre>
-
-<p>gives a list of the relevant command-line options.</p>
-
-<hr class="break" />
 
 
 <h1 id="hd008"><a name="file008"></a>8&nbsp;Using VirtualGL in Direct Mode</h1>
@@ -1743,9 +1707,8 @@ to maximize performance.</p>
             </dd>
             <dt class="Description">Windows clients</dt>
             <dd class="Description">
-                If the VirtualGL client has not been started as a service, then start
-                it manually by selecting <em>Start VirtualGL Client</em> in the <em>VirtualGL
-                Client</em> Start Menu group.
+                Select <em>Start VirtualGL Client</em> in the <em>VirtualGL Client</em>
+                Start Menu group.
             </dd>
         </dl>
     </li>
@@ -1867,9 +1830,8 @@ setenv&nbsp;VGL_CLIENT&nbsp;{client}:{n}.0
             </dd>
             <dt class="Description">Windows clients</dt>
             <dd class="Description">
-                If the VirtualGL client has not been started as a service, then start
-                it manually by selecting <em>Start VirtualGL Client</em> in the <em>VirtualGL
-                Client</em> Start Menu group.
+                Select <em>Start VirtualGL Client</em> in the <em>VirtualGL Client</em>
+                Start Menu group.
             </dd>
         </dl>
     </li>

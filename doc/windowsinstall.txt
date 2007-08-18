@@ -103,32 +103,3 @@ Next, you need to enable the MIT-SHM extension in Exceed:
 
 	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
 		perform a server reset, click "Yes."
-
-** Installing the VirtualGL Client as a Windows Service
-
-The VirtualGL Windows Client can be installed as a Windows service (and
-subsequently removed) using the links provided in the "VirtualGL Client" start
-menu group.  Once installed, the service can be started from the Services
-applet in the Control Panel (located under "Administrative Tools") or by
-invoking
-
-#Verb: <<---
-net start vglclient
----
-
-from a command prompt.  The service can be subsequently stopped by invoking
-
-#Verb: <<---
-net stop vglclient
----
-
-If you wish to install the client as a service and have it listen on a port
-other than the default (4242 for unencrypted connections or 4243 for SSL
-connections), then you will need to install the service manually from the
-command line.
-
-#Verb: <<---
-vglclient -?
----
-
-gives a list of the relevant command-line options.

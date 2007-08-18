@@ -27,9 +27,8 @@ maximize performance.
 		/opt/VirtualGL/bin/vglclient
 		---
 
-		Windows clients :: If the VirtualGL client has not been started as a
-		service, then start it manually by selecting __Start VirtualGL Client__
-		in the __VirtualGL Client__ Start Menu group.
+		Windows clients :: Select __Start VirtualGL Client__ in the
+		__VirtualGL Client__ Start Menu group.
 
 	#. Open a new Command Prompt/terminal window.
 
@@ -118,9 +117,8 @@ Optimal
 		/opt/VirtualGL/bin/vglclient
 		---
 
-		Windows clients :: If the VirtualGL client has not been started as a
-		service, then start it manually by selecting __Start VirtualGL Client__
-		in the __VirtualGL Client__ Start Menu group.
+		Windows clients :: Select __Start VirtualGL Client__ in the
+		__VirtualGL Client__ Start Menu group.
 
 	#. Open a new Command Prompt/terminal window.
 
