@@ -14,6 +14,19 @@
 
 #include "rrdisplayserver.h"
 
+extern Display *maindpy;
+
+static unsigned short DisplayNumber(Display *dpy)
+{
+	int dpynum=0;  char *ptr=NULL;
+  if((ptr=strchr(DisplayString(dpy), ':'))!=NULL)
+	{
+		if(strlen(ptr)>1) dpynum=atoi(ptr+1);
+		if(dpynum<0 || dpynum>65535) dpynum=0;
+	}
+	return (unsigned short)dpynum;
+}
+
 #define endianize(h) { \
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
@@ -148,7 +161,9 @@ void rrserver::run(void)
 					endianize(h);
 				}
 				bool stereo=(h.flags==RR_LEFT || h.flags==RR_RIGHT);
-				errifnot(w=addwindow(h.dpynum, h.winid, stereo));
+				unsigned short dpynum=(v.major<2 || (v.major==2 && v.minor<1))?
+					h.dpynum : DisplayNumber(maindpy);
+				errifnot(w=addwindow(dpynum, h.winid, stereo));
 
 				if(!stereo || h.flags==RR_LEFT || !c)
 				{

@@ -20,6 +20,7 @@
 #include "rrdisplayserver.h"
 #include "x11err.h"
 #include "xdk-sym.h"
+#include <X11/Xatom.h>
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
@@ -27,36 +28,17 @@
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, quiet=false;
 rrevent death;
-int port=-1;
+int port=0;
 #ifdef USESSL
 rrdisplayserver *rrssldpy=NULL;
-int sslport=-1;
+int sslport=0;
 bool ssl=true, nonssl=true;
 #endif
-int service=0;
 int drawmethod=RR_DRAWAUTO;
+Display *maindpy=NULL;
+bool compat=false;
 
-void start(int, char **);
-
-#ifdef _WIN32
-#define SERVICENAME "VGLClient"
-#define SERVICEFULLNAME __APPNAME" Client"
-
-SERVICE_STATUS status;
-SERVICE_STATUS_HANDLE statushnd=0;
-
-void install_service(void);
-void remove_service(void);
-void WINAPI control_service(DWORD);
-void WINAPI start_service(DWORD, LPTSTR *);
-void EventLog(char *, int);
-
-SERVICE_TABLE_ENTRY servicetable[] =
-{
-	{NULL, (LPSERVICE_MAIN_FUNCTION)start_service},
-	{NULL, NULL}
-};
-#endif
+void start(char *);
 
 #ifdef SUNOGL
 #include "dlfcn.h"
@@ -103,15 +85,22 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 void usage(char *progname)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-port <port>] [-l <file>] [-v]", progname);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-display <name>]\n", progname);
+	fprintf(stderr, "       [-port <p>] [-l <file>] [-v] [-x] [-gl]\n");
 	#ifdef USESSL
-	fprintf(stderr, "\n       [-sslport <port>] [-sslonly] [-nossl]");
+	fprintf(stderr, "       [-sslport <port>] [-sslonly] [-nossl]\n");
 	#endif
-	fprintf(stderr, " [-x] [-gl]");
-	fprintf(stderr, "\n\n-h or -? = This help screen\n");
-	fprintf(stderr, "-port = TCP port to use for unencrypted connections (default = %d)\n", RR_DEFAULTPORT);
+	fprintf(stderr, "\n-h or -? = This help screen\n");
+	fprintf(stderr, "-display = The X display to which to draw the images received from the\n");
+	fprintf(stderr, "           VirtualGL server (default = read from the DISPLAY environment\n");
+	fprintf(stderr, "           variable)\n");
+	fprintf(stderr, "-port = TCP port to use for unencrypted connections from the VirtualGL server\n");
+	fprintf(stderr, "        (default = automatically select a free port)\n");
 	#ifdef USESSL
-	fprintf(stderr, "-sslport = TCP port to use for encrypted connections (default = %d)\n", RR_DEFAULTSSLPORT);
+	fprintf(stderr, "-sslport = TCP port to use for encrypted connections from the VirtualGL server\n");
+	fprintf(stderr, "           (default = automatically select a free port)\n");
+	fprintf(stderr, "-old = equivalent to '-port 4242 -sslport 4243'.  Use then when talking to\n");
+	fprintf(stderr, "       2.0 or earlier VirtualGL servers\n");
 	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
 	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
@@ -119,16 +108,13 @@ void usage(char *progname)
 	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing  %s\n", drawmethod==RR_DRAWX11?"(default)":" ");
 	fprintf(stderr, "-gl = Use OpenGL drawing  %s\n", drawmethod==RR_DRAWOGL?"(default)":" ");
-	#ifdef _WIN32
-	fprintf(stderr, "-install = Install %s client as a service\n", __APPNAME);
-	fprintf(stderr, "-remove = Remove %s client service\n", __APPNAME);
-	#endif
 }
 
 
 int main(int argc, char *argv[])
 {
 	int i;  bool printversion=false;
+	char *displayname=NULL;
 
 	try {
 
@@ -146,6 +132,7 @@ int main(int argc, char *argv[])
 		#endif
 		if(!stricmp(argv[i], "-q")) quiet=true;
 		if(!stricmp(argv[i], "-v")) printversion=true;
+		if(!stricmp(argv[i], "-old")) compat=true;
 		if(!stricmp(argv[i], "-port"))
 		{
 			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
@@ -154,44 +141,22 @@ int main(int argc, char *argv[])
 		{
 			if(i<argc-1) rrout.logto(argv[++i]);
 		}
-		if(!stricmp(argv[i], "--service")) service=1;
 		if(!stricmp(argv[i], "-x")) drawmethod=RR_DRAWX11;
 		if(!stricmp(argv[i], "-gl")) drawmethod=RR_DRAWOGL;
+		if(!stricmp(argv[i], "-display"))
+		{
+			if(i<argc-1) displayname=argv[++i];
+		}
 	}
-	if(port<0) port=RR_DEFAULTPORT;
+	if(port<0) port=0;
 	#ifdef USESSL
-	if(sslport<0) sslport=RR_DEFAULTSSLPORT;
-	#endif
-
-	#ifdef _WIN32
-	if(argc>1) for(i=1; i<argc; i++)
-	{
-		if(!stricmp(argv[i], "-install")) {install_service();  exit(0);}
-		if(!stricmp(argv[i], "-remove")) {remove_service();  exit(0);}
-	}
+	if(sslport<0) sslport=0;
 	#endif
 
 	rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
 	if(printversion) return 0;
 
-	#ifdef _WIN32
-	if(service)
-	{
-		servicetable[0].lpServiceName=(char *)SERVICENAME;
-		if(!StartServiceCtrlDispatcher(servicetable))
-			EventLog("Could not start service", 1);
-		exit(0);
-	}
-	#else
-	if(service)
-	{
-		int err=fork();
-		if(err<0) exit(1);
-		if(err>0) exit(0);
-	}
-	#endif
-
-	start(argc, argv);
+	start(displayname);
 
 	}
 	catch(rrerror &e)
@@ -205,7 +170,7 @@ int main(int argc, char *argv[])
 }
 
 
-void start(int argc, char **argv)
+void start(char *displayname)
 {
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
 	#ifdef SUNOGL
@@ -220,38 +185,55 @@ void start(int argc, char **argv)
 	death.wait();
 
 	start:
+	if((maindpy=XOpenDisplay(displayname))==NULL)
+		_throw("Could not open display");
 
+  Atom port_atom=None;
 	#ifdef USESSL
+	Atom sslport_atom=None;
 	if(ssl)
 	{
-		if(!(rrssldpy=new rrdisplayserver(sslport, true, drawmethod)))
+		if(!(rrssldpy=new rrdisplayserver(compat? RR_DEFAULTSSLPORT:sslport,
+			true, drawmethod)))
 			_throw("Could not initialize listener");
 		rrout.println("Listening for SSL connections on port %d",
-			rrssldpy->port());
+			sslport=rrssldpy->port());
+		if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
+			_throw("Could not get _VGLCLIENT_SSLPORT property");
+		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+			sslport_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&sslport,
+			1);
 	}
 	if(nonssl)
 	#endif
 	{
-		if(!(rrdpy=new rrdisplayserver(port, false, drawmethod)))
+		if(!(rrdpy=new rrdisplayserver(compat? RR_DEFAULTPORT:port,
+			false, drawmethod)))
 			_throw("Could not initialize listener");
 		rrout.println("Listening for unencrypted connections on port %d",
-			rrdpy->port());
+			port=rrdpy->port());
+		if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
+			_throw("Could not get _VGLCLIENT_PORT property");
+		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+			port_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&port,
+			1);
 	}
+	XSync(maindpy, False);
 	rrout.flush();
-	#ifdef _WIN32
-	if(service)
-	{
-		status.dwCurrentState=SERVICE_RUNNING;
-		status.dwControlsAccepted=SERVICE_ACCEPT_STOP;
-		if(!SetServiceStatus(statushnd, &status))
-			EventLog("Could not set service status", 1);
-	}
-	#endif
+
 	death.wait();
+
 	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
 	#ifdef USESSL
 	if(rrssldpy) {delete rrssldpy;  rrssldpy=NULL;}
+	if(maindpy && sslport_atom!=None)
+		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+			sslport_atom);
 	#endif
+	if(maindpy && port_atom!=None)
+		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+			port_atom);
+	if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
 	if(restart) goto start;
 
 	} catch(rrerror &e)
@@ -259,130 +241,3 @@ void start(int argc, char **argv)
 		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 }
-
-
-#ifdef _WIN32
-void install_service(void)
-{
-	SC_HANDLE servicehnd, managerhnd=NULL;
-	char imagePath[512], args[512];
-
-	try {
-
-	if(!GetModuleFileName(NULL, imagePath, 512))
-		_throww32();
-	snprintf(args, 511, " --service -l %%systemdrive%%\\%s.log -port %d", SERVICENAME, port);
-	#ifdef USESSL	
-	snprintf(&args[strlen(args)], 511-strlen(args), " -sslport %d", sslport);
-	#endif
-	strncat(imagePath, args, 511-strlen(imagePath));
-	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
-		_throww32();
-	if(!(servicehnd=CreateService(managerhnd, SERVICENAME, SERVICEFULLNAME,
-		SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,
-		SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, imagePath, NULL, NULL, NULL, NULL,
-		NULL)))
-		_throww32();
-	if(!quiet) MessageBox(NULL, "Service Installed Successfully.  Use the Services applet in the Administrative Tools section of the Control Panel to start the service, or type \"net start "SERVICENAME"\" from a command prompt",
-		"Success", MB_OK);
-
-	} catch (rrerror &e)
-	{
-		if(!quiet) MessageBox(NULL, e.getMessage(), "Service Install Error", MB_OK|MB_ICONERROR);
-		exit(1);
-	}
-
-	if(managerhnd) CloseServiceHandle(managerhnd);
-}
-
-
-void remove_service(void)
-{
-	SC_HANDLE servicehnd, managerhnd=NULL;
-
-	try {
-
-	if(!(managerhnd=OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS)))
-		_throww32();
-
-	if(!(servicehnd=OpenService(managerhnd, SERVICENAME, SERVICE_ALL_ACCESS)))
-		_throww32();
-	if(ControlService(servicehnd, SERVICE_CONTROL_STOP, &status))
-	{
-		rrout.println("Stopping service ...");
-		Sleep(1000);
-		while(QueryServiceStatus(servicehnd, &status))
-		{
-			if(status.dwCurrentState==SERVICE_STOP_PENDING)
-			{
-				rrout.print(".");
-				Sleep(1000);
-			}
-			else break;
-			if(status.dwCurrentState==SERVICE_STOPPED) rrout.println(" Done.");
-			else rrout.println(" Could not stop service.");
-		}
-	}
-	if(!DeleteService(servicehnd))
-		_throww32();
-	if(!quiet) MessageBox(NULL, "Service Removed Successfully", "Success", MB_OK);
-
-	} catch (rrerror &e)
-	{
-		if(!quiet) MessageBox(NULL, e.getMessage(), "Service Install Error", MB_OK|MB_ICONERROR);
-		exit(1);
-	}
-
-	if(managerhnd) CloseServiceHandle(managerhnd);
-}
-
-
-void WINAPI start_service(DWORD dwArgc, LPTSTR *lpszArgv)
-{
-	memset(&status, 0, sizeof(status));
-	status.dwServiceType=SERVICE_WIN32_OWN_PROCESS;
-	status.dwCurrentState=SERVICE_START_PENDING;
-	status.dwControlsAccepted=0;
-
-	if(!(statushnd=RegisterServiceCtrlHandler(SERVICENAME, control_service)))
-		goto finally;
-	if(!SetServiceStatus(statushnd, &status))
-		EventLog("Could not set service status", 1);
-	start(dwArgc, lpszArgv);
-
-	finally:
-	if(statushnd)
-	{
-		status.dwCurrentState=SERVICE_STOPPED;
-		status.dwControlsAccepted=0;
-		SetServiceStatus(statushnd, &status);
-	}
-}
-
-
-void WINAPI control_service(DWORD code)
-{
-	if(code==SERVICE_CONTROL_STOP)
-	{
-		status.dwCurrentState=SERVICE_STOP_PENDING;
-		status.dwControlsAccepted=0;
-		if(!SetServiceStatus(statushnd, &status))
-			EventLog("Could not set service status", 1);
-		restart=false;
-		death.signal();
-	}
-}
-
-
-void EventLog(char *message, int error)
-{
-	HANDLE eventsource;
-	char *strings[1];
-	if(!(eventsource=RegisterEventSource(NULL, SERVICENAME))) return;
-	strings[0]=message;
-	ReportEvent(eventsource, error? EVENTLOG_ERROR_TYPE:EVENTLOG_INFORMATION_TYPE,
-		0, 0, NULL, 1, 0, (LPCTSTR*)strings, NULL);
-	DeregisterEventSource(eventsource);
-}
-
-#endif

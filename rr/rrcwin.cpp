@@ -17,27 +17,27 @@
 #include "rrprofiler.h"
 #include "rrglframe.h"
 
+extern Display *maindpy;
+
 #ifdef SUNOGL
-static int use_ogl_as_default(int dpynum)
+static int use_ogl_as_default(void)
 {
-	int retval=0;  char dpystr[80];
-	snprintf(dpystr, 79, ":%d.0", dpynum);
-	Display *dpy=XOpenDisplay(dpystr);
+	int retval=0;
 	if(dpy)
 	{
 		int maj_opcode=-1, first_event=-1, first_error=-1;
-		if(XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error))
+		if(XQueryExtension(maindpy, "GLX", &maj_opcode, &first_event, &first_error))
 		{
 			int attribs[]={GLX_RGBA, GLX_DOUBLEBUFFER, 0};
 			int sbattribs[]={GLX_RGBA, 0};
 			XVisualInfo *vi=NULL;
-			if((vi=glXChooseVisual(dpy, DefaultScreen(dpy), attribs))!=NULL
-				|| (vi=glXChooseVisual(dpy, DefaultScreen(dpy), sbattribs))!=NULL)
+			if((vi=glXChooseVisual(maindpy, DefaultScreen(dpy), attribs))!=NULL
+				|| (vi=glXChooseVisual(maindpy, DefaultScreen(dpy), sbattribs))!=NULL)
 			{
-				GLXContext ctx=glXCreateContext(dpy, vi, NULL, True);
+				GLXContext ctx=glXCreateContext(maindpy, vi, NULL, True);
 				if(ctx)
 				{
-					if(glXMakeCurrent(dpy, DefaultRootWindow(dpy), ctx))
+					if(glXMakeCurrent(maindpy, DefaultRootWindow(dpy), ctx))
 					{
 						char *renderer=(char *)glGetString(GL_RENDERER);
 						if(renderer && !strstr(renderer, "SUNWpfb")
@@ -46,12 +46,11 @@ static int use_ogl_as_default(int dpynum)
 							&& !strstr(renderer, "software renderer")) retval=1;
 						glXMakeCurrent(dpy, 0, 0);
 					}
-					glXDestroyContext(dpy, ctx);
+					glXDestroyContext(maindpy, ctx);
 				}
 				XFree(vi);
 			}
 		}
-		XCloseDisplay(dpy);
 	}
 	return retval;
 }
