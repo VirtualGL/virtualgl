@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 
 	printf("Tile size = %d x %d pixels\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
 
-	rrdisplayclient rrdpy(fconfig.client);
+	rrdisplayclient rrdpy(dpy, fconfig.client);
 
 	int i;
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];

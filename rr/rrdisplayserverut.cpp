@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	for(int i=0; i<iter; i++)
 	{
 		rrdisplayclient *rrdpy=NULL;
-		errifnot(rrdpy=new rrdisplayclient(fconfig.client));
+		errifnot(rrdpy=new rrdisplayclient(dpy, fconfig.client));
 		for(int f=0; f<frames; f++)
 		{
 			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3,

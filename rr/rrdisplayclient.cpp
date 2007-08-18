@@ -28,6 +28,7 @@
 #define S_IREAD 0400
 #define S_IWRITE 0200
 #endif
+#include <X11/Xatom.h>
 
 extern FakerConfig fconfig;
 
@@ -96,9 +97,9 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 }
 
 
-rrdisplayclient::rrdisplayclient(char *displayname, bool domovie) :
-	_np(fconfig.np), _domovie(domovie), _sd(NULL), _t(NULL), _deadyet(false),
-	_dpynum(0)
+rrdisplayclient::rrdisplayclient(Display *dpy, char *displayname,
+	bool domovie) : _np(fconfig.np), _domovie(domovie), _sd(NULL), _t(NULL),
+	_deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
@@ -109,6 +110,7 @@ rrdisplayclient::rrdisplayclient(char *displayname, bool domovie) :
 	{
 		if(displayname)
 		{
+			unsigned short port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 			char *ptr=NULL;  servername=strdup(displayname);
 			if((ptr=strchr(servername, ':'))!=NULL)
 			{
@@ -118,7 +120,24 @@ rrdisplayclient::rrdisplayclient(char *displayname, bool domovie) :
 			}
 			if(!strlen(servername) || !strcmp(servername, "unix"))
 				{free(servername);  servername=strdup("localhost");}
-			connect(servername);
+			if(fconfig.port.isset()) port=fconfig.port;
+			else
+			{
+				Atom atom=None;  unsigned long n=0, bytesleft=0;
+				int actualformat=0;  Atom actualtype=None;
+				unsigned short *prop=NULL;
+				if((atom=XInternAtom(dpy,
+					fconfig.ssl? "_VGLCLIENT_SSLPORT":"_VGLCLIENT_PORT", True))!=None)
+				{
+					if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom,
+						0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
+						&bytesleft, (unsigned char **)&prop)==Success && n>=1
+						&& actualformat==16 && actualtype==XA_INTEGER && prop)
+						port=*prop;
+					if(prop) XFree(prop);
+				}
+			}
+			connect(servername, port);
 			_dosend=true;
 		}
 		else _dosend=false;
@@ -360,14 +379,14 @@ void rrdisplayclient::save(char *buf, int len)
 	}
 }
 
-void rrdisplayclient::connect(char *servername)
+void rrdisplayclient::connect(char *servername, unsigned short port)
 {
 	if(servername)
 	{
 		errifnot(_sd=new rrsocket(fconfig.ssl));
 		try
 		{
-			_sd->connect(servername, fconfig.port);
+			_sd->connect(servername, port);
 		}
 		catch(...)
 		{

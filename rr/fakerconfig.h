@@ -509,7 +509,6 @@ class FakerConfig
 			spoil.get("VGL_SPOIL");
 			ssl.get("VGL_SSL");
 			port.get("VGL_PORT");
-			if(!port.isset()) port=ssl?RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 			usewindow.get("VGL_WINDOW");
 			if(glp) usewindow=false;
 			sync.get("VGL_SYNC");

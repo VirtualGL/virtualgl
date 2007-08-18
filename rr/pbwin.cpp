@@ -350,7 +350,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 		if(!sharerrdpy)
 		{
-			if(!_rrmoviedpy) errifnot(_rrmoviedpy=new rrdisplayclient(NULL, true));
+			if(!_rrmoviedpy)
+				errifnot(_rrmoviedpy=new rrdisplayclient(NULL, NULL, true));
 			senddirect(_rrmoviedpy, drawbuf, false, dostereo, stereomode,
 				mcompress, mqual, msubsamp, true);
 		}
@@ -363,8 +364,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_JPEG:
-			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
-				fconfig.client:DisplayString(_windpy)));
+			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
+				fconfig.client? fconfig.client:DisplayString(_windpy)));
 			_rrdpy->record(sharerrdpy);
 			senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
@@ -375,8 +376,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				stereomode);
 			else
 			{
-				if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(fconfig.client?
-					fconfig.client:DisplayString(_windpy)));
+				if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
+					fconfig.client? fconfig.client:DisplayString(_windpy)));
 				_rrdpy->record(sharerrdpy);
 				senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 					(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);

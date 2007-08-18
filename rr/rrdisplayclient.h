@@ -29,7 +29,7 @@ class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(char *, bool domovie=false);
+	rrdisplayclient(Display *, char *, bool domovie=false);
 
 	virtual ~rrdisplayclient(void)
 	{
@@ -46,7 +46,7 @@ class rrdisplayclient : public Runnable
 	void send(char *, int);
 	void save(char *, int);
 	void recv(char *, int);
-	void connect(char *);
+	void connect(char *, unsigned short);
 	void record(bool domovie) {_domovie=domovie;}
 
 	int _np;
