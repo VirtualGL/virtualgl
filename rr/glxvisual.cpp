@@ -87,7 +87,6 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			unsigned long visualid;
 			long transtype, transpixel, level;
 		} *olprop=NULL;
-		unsigned char *prop=NULL;
 		unsigned long nop=0, bytesleft=0;
 		int actualformat=0;
 		Atom actualtype=0;
@@ -100,7 +99,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 				(unsigned char **)&olprop)!=Success || nop<4 || actualformat!=32
 				|| actualtype!=atom) goto done;
 			len+=(bytesleft+3)/4;
-			if(bytesleft && prop) {XFree(prop);  prop=NULL;}
+			if(bytesleft && olprop) {XFree(olprop);  olprop=NULL;}
 		} while(bytesleft);
 		
 		for(unsigned long i=0; i<nop/4; i++)
@@ -126,7 +125,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		}
 
 		done:
-		if(prop) {XFree(prop);  prop=NULL;}
+		if(olprop) {XFree(olprop);  olprop=NULL;}
 	}
 
 	for(int i=0; i<nv; i++)
