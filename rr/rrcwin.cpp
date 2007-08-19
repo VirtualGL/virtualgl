@@ -23,7 +23,7 @@ extern Display *maindpy;
 static int use_ogl_as_default(void)
 {
 	int retval=0;
-	if(dpy)
+	if(maindpy)
 	{
 		int maj_opcode=-1, first_event=-1, first_error=-1;
 		if(XQueryExtension(maindpy, "GLX", &maj_opcode, &first_event, &first_error))
@@ -31,20 +31,20 @@ static int use_ogl_as_default(void)
 			int attribs[]={GLX_RGBA, GLX_DOUBLEBUFFER, 0};
 			int sbattribs[]={GLX_RGBA, 0};
 			XVisualInfo *vi=NULL;
-			if((vi=glXChooseVisual(maindpy, DefaultScreen(dpy), attribs))!=NULL
-				|| (vi=glXChooseVisual(maindpy, DefaultScreen(dpy), sbattribs))!=NULL)
+			if((vi=glXChooseVisual(maindpy, DefaultScreen(maindpy), attribs))!=NULL
+				|| (vi=glXChooseVisual(maindpy, DefaultScreen(maindpy), sbattribs))!=NULL)
 			{
 				GLXContext ctx=glXCreateContext(maindpy, vi, NULL, True);
 				if(ctx)
 				{
-					if(glXMakeCurrent(maindpy, DefaultRootWindow(dpy), ctx))
+					if(glXMakeCurrent(maindpy, DefaultRootWindow(maindpy), ctx))
 					{
 						char *renderer=(char *)glGetString(GL_RENDERER);
 						if(renderer && !strstr(renderer, "SUNWpfb")
 							&& !strstr(renderer, "SUNWm64") && !strstr(renderer, "SUNWnfb")
 							&& !strstr(renderer, "Sun dpa")
 							&& !strstr(renderer, "software renderer")) retval=1;
-						glXMakeCurrent(dpy, 0, 0);
+						glXMakeCurrent(maindpy, 0, 0);
 					}
 					glXDestroyContext(maindpy, ctx);
 				}
@@ -79,7 +79,7 @@ void rrcwin::setdrawmethod(void)
 	{
 		_drawmethod=RR_DRAWX11;
 		#ifdef SUNOGL
-		if(use_ogl_as_default(_dpynum)) _drawmethod=RR_DRAWOGL;
+		if(use_ogl_as_default()) _drawmethod=RR_DRAWOGL;
 		#endif
 	}
 }
