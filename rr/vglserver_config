@@ -182,16 +182,26 @@ DisallowTCP=false" $1 >$TMPFILE && cp $TMPFILE $1
 
 unconfigdev() {
 	if [ "$UNAME_S" = "SunOS" ]; then
-		echo ... Modifying /etc/logindevperm to enable automatic permissions for ...
-		echo "...      /dev/fbs/* ..."
+		echo ... Modifying /etc/logindevperm to enable automatic permissions for
+		echo "    /dev/fbs/* ..."
 		uncommentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
+	elif [ "$UNAME_S" = "Linux" ]; then
+		if [ -f /etc/security/console.perms ]; then
+			echo ... Modifying /etc/security/console.perms to enable automatic permissions
+			echo "    for /dev/nvidia\* ..."
+			uncommentline /etc/security/console.perms "\<dri\>"
+		elif [ -f /etc/logindevperm ]; then
+			echo ... Modifying /etc/logindevperm to enable automatic permissions for
+			echo "    /dev/nvidia\* ..."
+			uncommentline /etc/logindevperm "\/dev\/nvidia"
+		fi
 	fi
 }
 
 configdev() {
 	if [ "$UNAME_S" = "SunOS" ]; then
-		echo ... Modifying /etc/logindevperm to disable automatic permissions for ...
-		echo "...      /dev/fbs/* ..."
+		echo ... Modifying /etc/logindevperm to disable automatic permissions for
+		echo "    /dev/fbs/* ..."
 		commentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 			echo ... Granting write permission to /dev/fbs/\* for vglusers group ...
@@ -201,6 +211,25 @@ configdev() {
 			echo ... Granting write permission to /dev/fbs/\* for all users ...
 			chmod 666 /dev/fbs/*
 			chown root:root /dev/fbs/*
+		fi
+	elif [ "$UNAME_S" = "Linux" ]; then
+		if [ -f /etc/security/console.perms ]; then
+			echo ... Modifying /etc/security/console.perms to disable automatic permissions
+			echo "    for /dev/nvidia\* ..."
+			commentline /etc/security/console.perms "\<dri\>"
+		elif [ -f /etc/logindevperm ]; then
+			echo ... Modifying /etc/logindevperm to disable automatic permissions for
+			echo "    /dev/nvidia\* ..."
+			commentline /etc/logindevperm "\/dev\/nvidia"
+		fi
+		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
+			echo ... Granting write permission to /dev/nvidia\* for vglusers group ...
+			chmod 660 /dev/nvidia*
+			chown root:vglusers /dev/nvidia*
+		else
+			echo ... Granting write permission to /dev/nvidia\* for all users ...
+			chmod 666 /dev/nvidia*
+			chown root:root /dev/nvidia*
 		fi
 	fi
 }
@@ -347,10 +376,8 @@ configglx() {
 	ynprompt "Restrict local X server access to vglusers group (recommended)?"
 	if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
 
-	if [ "$UNAME_S" = "SunOS" ]; then
-		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
-		if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
-	fi
+	ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+	if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
 
 	ynprompt "Disable XTEST extension (recommended)?"
 	if [ $? = 1 ]; then DISABLEXTEST=1; else DISABLEXTEST=0; fi
