@@ -203,6 +203,7 @@ configdev() {
 		echo ... Modifying /etc/logindevperm to disable automatic permissions for
 		echo "    /dev/fbs/* ..."
 		commentline /etc/logindevperm "\/dev\/console.*\/dev\/fbs"
+		chmod 755 /dev/fbs
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 			echo ... Granting write permission to /dev/fbs/\* for vglusers group ...
 			chmod 660 /dev/fbs/*
