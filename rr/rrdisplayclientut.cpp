@@ -23,7 +23,11 @@ void usage(char **argv)
 {
 	printf("\nUSAGE: %s <bitmap file>\n", argv[0]);
 	printf("       [-client <machine:x.x>] [-samp <n>] [-qual <n>]\n");
-	printf("       [-tilesize <n>] [-ssl] [-np <n>]\n\n");
+	printf("       [-tilesize <n>] [-np <n>]");
+	#ifdef USESSL
+	printf(" [-ssl]");
+	#endif
+	printf("\n\n");
 	printf("-client = X Display where the video should be sent (VGL client must be running\n");
 	printf("          on that machine) or 0 for local test only\n");
 	printf("          [default = %s]\n", fconfig.client? (char *)fconfig.client:"read from DISPLAY environment");
@@ -31,7 +35,9 @@ void usage(char **argv)
 	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", (int)fconfig.qual);
 	printf("-tilesize = width/height of each inter-frame difference tile\n");
 	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
+	#ifdef USESSL
 	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
+	#endif
 	printf("-np <n> = number of processors to use for compression [default = %d]\n", (int)fconfig.np);
 	printf("\n");
 	exit(1);
@@ -51,7 +57,9 @@ int main(int argc, char **argv)
 
 	for(i=0; i<argc; i++)
 	{
+		#ifdef USESSL
 		if(!stricmp(argv[i], "-ssl")) fconfig.ssl=true;
+		#endif
 		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
 		{
 			fconfig.client=argv[i+1];  i++;
