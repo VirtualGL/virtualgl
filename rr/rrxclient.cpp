@@ -193,6 +193,8 @@ void start(char *displayname)
 	Atom sslport_atom=None;
 	if(ssl)
 	{
+		if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", True))!=None)
+			_throw("Another VirtualGL Client instance is already running on this X display");
 		if(!(rrssldpy=new rrdisplayserver(compat? RR_DEFAULTSSLPORT:sslport,
 			true, drawmethod)))
 			_throw("Could not initialize listener");
@@ -207,6 +209,8 @@ void start(char *displayname)
 	if(nonssl)
 	#endif
 	{
+		if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", True))!=None)
+			_throw("Another VirtualGL Client instance is already running on this X display");
 		if(!(rrdpy=new rrdisplayserver(compat? RR_DEFAULTPORT:port,
 			false, drawmethod)))
 			_throw("Could not initialize listener");
