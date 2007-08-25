@@ -77,7 +77,6 @@ FOBJS = $(ODIR)/faker.o \
         $(ODIR)/glxvisual.o \
         $(ODIR)/rrblitter.o \
         $(ODIR)/rrdisplayclient.o \
-        $(ODIR)/vglgui.o \
         $(ODIR)/rrsunray.o
 
 TOBJS = $(ODIR)/rrblitterut.o \
@@ -87,7 +86,7 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrframeut.o \
         $(ODIR)/dlfakerut.o
 
-OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o
+OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o $(ODIR)/vglconfig.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
@@ -102,7 +101,7 @@ TARGETS = $(EDIR)/vglclient \
 
 ifneq ($(platform), cygwin)
 TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
-	$(LDIR)/libdlfaker.$(SHEXT) $(TARGETS)
+	$(LDIR)/libdlfaker.$(SHEXT) $(EDIR)/vglconfig $(TARGETS)
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
@@ -128,13 +127,16 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl -lXt -lXaw
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl
 
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
 
 $(EDIR)/vglrun: rrlaunch
 	$(INSTALL) -m 755 $< $@
+
+$(EDIR)/vglconfig: $(ODIR)/vglconfig.o
+	$(CXX) $(LDFLAGS) -o $@ $< -lX11 -lXt -lXaw -lpthread -lrrutil
 
 # Client
 

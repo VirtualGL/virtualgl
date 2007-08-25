@@ -26,6 +26,11 @@
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/keysym.h>
+#ifndef _WIN32
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
+#endif
 
 #define DEFQUAL 95
 #define DEFSUBSAMP 1
@@ -451,12 +456,17 @@ class ConfigGamma : public ConfigDouble
 
 class FakerConfig
 {
+	#ifndef _WIN32
+	private:
+	#else
 	public:
+	#endif
 
 		FakerConfig(void)
 		{
 			// Defaults
 			client=NULL;
+			config=(char *)"/opt/VirtualGL/bin/vglconfig";
 			fps.setbounds(0.0, 1000000.0);
 			#ifdef SUNOGL
 			gamma=2.22;
@@ -488,12 +498,38 @@ class FakerConfig
 			reloadenv();
 		}
 
+	public:
+
+		#ifndef _WIN32
+		static FakerConfig *instance(void)
+		{
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new FakerConfig;
+			}
+			return _Instanceptr;
+		}
+
+		static void deleteinstance(void)
+		{
+			if(_Instanceptr!=NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr!=NULL) delete _Instanceptr;
+			}
+		}
+
+		static int _Shmid;
+		#endif
+
 		void reloadenv(void)
 		{
 			// Fetch values from environment
 			gllib.get("VGL_GLLIB");
 			x11lib.get("VGL_X11LIB");
 			client.get("VGL_CLIENT");
+			config.get("VGL_CONFIG");
 			localdpystring.get("VGL_DISPLAY");
 			#ifdef USEGLP
 			if(localdpystring &&
@@ -565,6 +601,7 @@ class FakerConfig
 		ConfigBool autotest;
 		ConfigString client;
 		ConfigCompress compress;
+		ConfigString config;
 		ConfigDouble fps;
 		ConfigGamma gamma;
 		ConfigString gllib;
@@ -598,6 +635,57 @@ class FakerConfig
 		ConfigBool verbose;
 		ConfigString x11lib;
 		ConfigInt zoomx, zoomy;
+
+	private:
+
+		#ifndef _WIN32
+		void *FakerConfig::operator new(size_t size)
+		{
+			void *addr=NULL;
+			if(size!=sizeof(FakerConfig))
+				_throw("Attempted to allocate config structure with incorrect size");
+			if((_Shmid=shmget(IPC_PRIVATE, sizeof(FakerConfig), IPC_CREAT|0600))==-1)
+				_throwunix();
+			if((addr=shmat(_Shmid, 0, 0))==(void *)-1) _throwunix();
+			if(!addr) _throw("Could not attach to config structure in shared memory");
+//			shmctl(_Shmid, IPC_RMID, 0);
+			char *env=NULL;
+			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+				&& !strncmp(env, "1", 1))
+				rrout.println("[VGL] Shared memory segment ID for vglconfig: %d\n",
+					_Shmid);
+			return addr;
+		}
+
+		void FakerConfig::operator delete(void *addr)
+		{
+			if(addr) shmdt((char *)addr);
+			if(_Shmid!=-1) shmctl(_Shmid, IPC_RMID, 0);
+		}
+
+		static FakerConfig *_Instanceptr;
+		static rrcs _Instancemutex;
+		#endif
 };
+
+#ifndef _WIN32
+
+#ifdef __FAKERCONFIG_STATICDEF__
+int FakerConfig::_Shmid=-1;
+FakerConfig *FakerConfig::_Instanceptr=NULL;
+rrcs FakerConfig::_Instancemutex;
+#endif
+
+#define fconfig (*(FakerConfig::instance()))
+
+#else
+
+#ifdef __FAKERCONFIG_STATICDEF__
+FakerConfig fconfig;
+#else
+extern FakerConfig fconfig;
+#endif
+
+#endif
 
 #endif

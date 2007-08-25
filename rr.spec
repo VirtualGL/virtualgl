@@ -65,6 +65,7 @@ mkdir -p $RPM_BUILD_ROOT/etc
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
+install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
@@ -86,6 +87,7 @@ ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
 %endif
 ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
+ln -fs /usr/bin/vglconfig $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig
 ln -fs /usr/bin/vglgenkey $RPM_BUILD_ROOT/opt/%{name}/bin/vglgenkey
 ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_config
 ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
@@ -117,6 +119,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 
 /usr/bin/vglclient
+/usr/bin/vglconfig
 /usr/bin/vglrun
 /usr/bin/rrlaunch
 /usr/bin/vglgenkey
@@ -127,6 +130,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/cpustat
 /opt/%{name}/bin/glxinfo
 /opt/%{name}/bin/vglclient
+/opt/%{name}/bin/vglconfig
 /opt/%{name}/bin/vglgenkey
 /opt/%{name}/bin/vglserver_config
 /opt/%{name}/bin/vglrun

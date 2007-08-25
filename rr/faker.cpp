@@ -21,10 +21,8 @@
 #include "rrtimer.h"
 #include "rrthread.h"
 #include "rrmutex.h"
+#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
-
-FakerConfig fconfig;
-
 #include "faker-winhash.h"
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
@@ -34,7 +32,8 @@ FakerConfig fconfig;
 #include "faker-glxdhash.h"
 #include "faker-sym.h"
 #include "glxvisual.h"
-#include "vglgui.h"
+#define __VGLCONFIGSTART_STATICDEF__
+#include "vglconfigstart.h"
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __DEBUG__
@@ -116,12 +115,20 @@ void __vgl_safeexit(int retcode)
 		ctxh.killhash();
 		glxdh.killhash();
 		if(_winh) _winh->killhash();
+		FakerConfig::deleteinstance();
 	}
 	__vgl_unloadsymbols();
 	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
 }
+
+class globaldtor
+{
+	public:
+		~globaldtor() {__vgl_safeexit(0);}
+};
+globaldtor gdt;
 
 #define _die(f,m) {if(!isdead()) rrout.print("[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
 
@@ -449,8 +456,9 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		unsigned int state2;
 		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=Mod1Mask;  state2|=Mod2Mask;}
 		if(fconfig.gui && XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
-			&& (xe->xkey.state==fconfig.guimod || xe->xkey.state==state2))
-			vglpopup(dpy);
+			&& (xe->xkey.state==fconfig.guimod || xe->xkey.state==state2)
+			&& FakerConfig::_Shmid!=-1)
+			vglpopup(dpy, FakerConfig::_Shmid);
 	}
 }
 

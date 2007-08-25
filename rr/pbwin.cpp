@@ -27,7 +27,6 @@
 #define INFAKER
 #include "tempctx.h"
 #include "fakerconfig.h"
-extern FakerConfig fconfig;
 
 extern Display *_localdpy;
 #ifdef USEGLP
