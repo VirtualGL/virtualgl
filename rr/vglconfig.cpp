@@ -35,7 +35,7 @@ Display *_dpy=NULL;
 FakerConfig *_fconfig=NULL;
 #define fconfig (*_fconfig)
 
-static String qualslider_translations = "#override\n\
+String qualslider_translations = "#override\n\
 		<Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
 		<Btn1Motion>: MoveThumb() NotifyThumb()\n\
 		<Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
@@ -62,7 +62,7 @@ void Die(Widget w, XEvent *event, String *params, Cardinal *num_params)
 	if(appctx) XtAppSetExitFlag(appctx);
 }
 
-static XtActionsRec actions[]=
+XtActionsRec actions[]=
 {
 	{(char *)"Die", Die}
 };
@@ -346,10 +346,10 @@ int main(int argc, char **argv)
 	}
 	catch(rrerror &e)
 	{
-		rrout.print("ERROR:\n%s\n", e.getMessage());
+		rrout.print("Error in vglconfig--\n%s\n", e.getMessage());
 		status=-1;
 	}
 	destroy();
-	if(_fconfig) shmdt(_fconfig);
+	if(_fconfig) shmdt((char *)_fconfig);
 	return status;
 }
