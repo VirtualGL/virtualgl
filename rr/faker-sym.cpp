@@ -17,7 +17,6 @@
 #include <dlfcn.h>
 
 #include "fakerconfig.h"
-extern FakerConfig fconfig;
 
 static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {

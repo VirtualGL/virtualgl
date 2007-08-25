@@ -28,7 +28,6 @@ extern Display *_localdpy;
 #ifdef USEGLP
 extern GLPDevice _localdev;
 #endif
-extern FakerConfig fconfig;
 
 struct _visattrib
 {

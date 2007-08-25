@@ -14,9 +14,8 @@
 
 #include "rrblitter.h"
 #include "rrtimer.h"
+#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
-
-FakerConfig fconfig;
 
 void usage(char **argv)
 {

@@ -13,9 +13,8 @@
  */
 
 #include "rrdisplayclient.h"
+#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
-
-FakerConfig fconfig;
 
 #define WIDTH 301
 #define HEIGHT 301
