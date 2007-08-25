@@ -30,8 +30,6 @@
 #endif
 #include <X11/Xatom.h>
 
-extern FakerConfig fconfig;
-
 void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 {
 	if(_dosend)

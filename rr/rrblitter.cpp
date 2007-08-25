@@ -16,8 +16,6 @@
 #include "rrtimer.h"
 #include "fakerconfig.h"
 
-extern FakerConfig fconfig;
-
 rrblitter::rrblitter(void) : _t(NULL), _deadyet(false)
 {
 	for(int i=0; i<NB; i++) _bmp[i]=NULL;

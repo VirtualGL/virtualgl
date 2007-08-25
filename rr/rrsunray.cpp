@@ -18,8 +18,6 @@
 #include "fakerconfig.h"
 #include "rrlog.h"
 
-extern FakerConfig fconfig;
-
 static int RRSunRayConfigCallback(const char *name, int type, void *value)
 {
 	if(!name || !value || type<0) return -1;

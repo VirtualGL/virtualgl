@@ -45,7 +45,6 @@
  #include <GL/glp.h>
  #include "glpweak.h"
  #include "fakerconfig.h"
- extern FakerConfig fconfig;
 #endif
 
 class tempctx
