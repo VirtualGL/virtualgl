@@ -208,34 +208,6 @@ Each method of configuration takes precedence over the previous method:
 		{ref prefix="Chapter ": Config_Dialog} for more details. \
 	|	shift-ctrl-f9 \
 	|
-| {anchor: VGL_GUI_XTTHREADINIT} ''VGL_GUI_XTTHREADINIT'' | {:} \
-	| __0 to prevent VGL from calling ''XtToolkitThreadInitialize()''__ \
-		{nl}{nl} \
-		Xt & Motif applications are supposed to call \
-		''XtToolkitThreadInitialize()'' if they plan to access Xt functions from \
-		two or more threads simultaneously.  But rarely, a multi-threaded \
-		Xt/Motif application may avoid calling ''XtToolkitThreadInitialize()'' \
-		and rely on the fact that avoiding this call disables application and \
-		process locks.  This behavior is generally considered errant on the part \
-		of the application, but the application developers have probably figured \
-		out other ways around the potential instability that this situation \
-		creates. \
-		{nl}{nl} \
-		The problem arises whenever VirtualGL pops up its configuration dialog \
-		(which is written using Xt.)  In order to create this dialog, VirtualGL \
-		creates a new Xt thread and calls ''XtToolkitThreadInitialize()'' as it \
-		is supposed to do to guarantee thread safety.  But if the application \
-		into which VGL is loaded exhibits the errant behavior described above, \
-		suddenly enabling application and process locks may cause the application \
-		to deadlock.  Setting ''VGL_GUI_XTTHREADINIT'' to ''0'' will remove VGL's \
-		call to ''XtToolkitThreadInitialize()'' and should thus eliminate the \
-		deadlock.\
-		{nl}{nl} \
-		In short, if you try to pop up the VirtualGL config dialog and notice \
-		that it hangs the application, try setting ''VGL_GUI_XTTHREADINIT'' to \
-		''0''. \
-	|	1 \
-	|
 | ''VGL_INTERFRAME=0''{nl}''VGL_INTERFRAME=1'' | {:} \
 	| __Enable/disable interframe image comparison__ \
 		{nl}{nl} \

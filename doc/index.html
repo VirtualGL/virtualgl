@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-08-18T01:51:46-06:00">
+<meta name="date" content="2007-08-25T03:19:26-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3235,12 +3235,6 @@ a 64-bit application.)</p>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;ut2004</code></td>
     <td class="standard">See Chapter <a href="#dlopen" class="ref">12</a> for more details</td>
   </tr>
-  <tr class="standard">
-    <td class="standard">VisConcept</td>
-    <td class="standard">Solaris/Sparc</td>
-    <td class="standard">Set the environment variable <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code>.</td>
-    <td class="standard">Popping up the VirtualGL configuration dialog may cause the application to hang unless you set this environment variable.  See Section <a href="#VGL_GUI_XTTHREADINIT" class="ref">18.1</a> for more details.</td>
-  </tr>
 </table>
 </div>
 
@@ -3844,12 +3838,6 @@ method:</p>
     <td class="standard"></td>
     <td class="standard"><em>Key sequence used to invoke the configuration dialog</em> <br /><br /> VirtualGL will normally monitor an application&rsquo;s X event queue and pop up the VirtualGL configuration dialog whenever <code>CTRL-SHIFT-F9</code> is pressed. In the event that this interferes with a key sequence that the application is already using, you can redefine the key sequence used to pop up VGL&rsquo;s configuration dialog by setting <code>VGL_GUI</code> to some combination of <code>shift</code>, <code>ctrl</code>, <code>alt</code>, and one of <code>{f1,&nbsp;f2,&nbsp;...,&nbsp;f12}</code>.  You can also set <code>VGL_GUI</code> to <code>none</code> to disable the configuration dialog altogether.  See Chapter <a href="#Config_Dialog" class="ref">17</a> for more details.</td>
     <td class="standard">shift-ctrl-f9</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard"><a name="VGL_GUI_XTTHREADINIT"></a> <code>VGL_GUI_XTTHREADINIT</code></td>
-    <td class="standard"></td>
-    <td class="standard"><em>0 to prevent VGL from calling <code>XtToolkitThreadInitialize()</code></em> <br /><br /> Xt &amp; Motif applications are supposed to call <code>XtToolkitThreadInitialize()</code> if they plan to access Xt functions from two or more threads simultaneously.  But rarely, a multi-threaded Xt/Motif application may avoid calling <code>XtToolkitThreadInitialize()</code> and rely on the fact that avoiding this call disables application and process locks.  This behavior is generally considered errant on the part of the application, but the application developers have probably figured out other ways around the potential instability that this situation creates. <br /><br /> The problem arises whenever VirtualGL pops up its configuration dialog (which is written using Xt.)  In order to create this dialog, VirtualGL creates a new Xt thread and calls <code>XtToolkitThreadInitialize()</code> as it is supposed to do to guarantee thread safety.  But if the application into which VGL is loaded exhibits the errant behavior described above, suddenly enabling application and process locks may cause the application to deadlock.  Setting <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code> will remove VGL&rsquo;s call to <code>XtToolkitThreadInitialize()</code> and should thus eliminate the deadlock.<br /><br /> In short, if you try to pop up the VirtualGL config dialog and notice that it hangs the application, try setting <code>VGL_GUI_XTTHREADINIT</code> to <code>0</code>.</td>
-    <td class="standard">1</td>
   </tr>
   <tr class="standard">
     <td class="standard"><code>VGL_INTERFRAME=0</code><br /><code>VGL_INTERFRAME=1</code></td>

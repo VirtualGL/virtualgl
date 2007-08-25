@@ -168,9 +168,3 @@
 	| ''vglrun -dl ut2004'' \
 	|	See {ref prefix="Chapter ": dlopen} for more details \
 	|
-| VisConcept | Solaris/Sparc \
-	| Set the environment variable ''VGL_GUI_XTTHREADINIT'' to ''0''. \
-	|	Popping up the VirtualGL configuration dialog may cause the application \
-		to hang unless you set this environment variable.  See \
-		{ref prefix="Section ": VGL_GUI_XTTHREADINIT} for more details. \
-	|
