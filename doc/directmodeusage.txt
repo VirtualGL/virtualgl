@@ -43,7 +43,7 @@ maximize performance.
 
 		Windows clients :: In the new Command Prompt window, type
 		#Verb: <<---
-		set DISPLAY localhost:{n}.0
+		set DISPLAY=localhost:{n}.0
 		---
 		Replace ''{n}'' with the display number that Exceed is occupying.  To
 		obtain this, hover over the Exceed icon in the taskbar and make a note of
