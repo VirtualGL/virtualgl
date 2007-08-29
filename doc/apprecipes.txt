@@ -174,3 +174,7 @@
 		to hang unless you set this environment variable.  See \
 		{ref prefix="Section ": VGL_GUI_XTTHREADINIT} for more details. \
 	|
+| Wine | Linux \
+	|	''vglrun -dl wine {windows_opengl_app.exe}'' \
+	| See {ref prefix="Chapter ": dlopen} for more details \
+	|
