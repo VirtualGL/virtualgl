@@ -211,7 +211,6 @@ void spoilProc(Widget w, XtPointer client, XtPointer p)
 
 void init(int argc, char **argv)
 {
-	XtToolkitThreadInitialize();
 	XtToolkitInitialize();
 	errifnot(_appctx=XtCreateApplicationContext());
 	errifnot(_dpy=XtOpenDisplay(_appctx, NULL, "VirtualGL", "dialog", NULL, 0,
