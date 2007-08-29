@@ -168,3 +168,7 @@
 	| ''vglrun -dl ut2004'' \
 	|	See {ref prefix="Chapter ": dlopen} for more details \
 	|
+| Wine | Linux \
+	|	''vglrun -dl wine {windows_opengl_app.exe}'' \
+	| See {ref prefix="Chapter ": dlopen} for more details \
+	|
