@@ -123,13 +123,6 @@ void __vgl_safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-class globaldtor
-{
-	public:
-		~globaldtor() {__vgl_safeexit(0);}
-};
-globaldtor gdt;
-
 #define _die(f,m) {if(!isdead()) rrout.print("[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
