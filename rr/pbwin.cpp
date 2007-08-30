@@ -371,8 +371,11 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_RGB:
-			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
-				stereomode);
+			if(_usesunray==RRSUNRAY_WITH_ROUTE)
+			{
+				if(sendsr(drawbuf, spoillast, dostereo, stereomode)==-1)
+				sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
+			}
 			else
 			{
 				if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
@@ -384,24 +387,52 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_DPCM:
-			if(_usesunray==RRSUNRAY_WITH_ROUTE) sendsr(drawbuf, spoillast, dostereo,
-				stereomode);
+			if(_usesunray==RRSUNRAY_WITH_ROUTE)
+			{
+				if(sendsr(drawbuf, spoillast, dostereo, stereomode)==-1)
+				sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
+			}
 			break;
 	}
 }
 
-void pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
+int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 {
 	rrframe f;
 	int pbw=_pb->width(), pbh=_pb->height();
 	unsigned char *bitmap=NULL;  int pitch, bottomup, format;
+	static bool sroffwarned=false, sronwarned=true;
 
 	if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
 	if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
 	if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle))
-		return;
+		return 0;
 	if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
-		&bottomup))) _throw(RRSunRayGetError(_sunrayhandle));
+		&bottomup)))
+	{
+		const char *err=RRSunRayGetError(_sunrayhandle);
+		if(err) _throw(err);
+		else
+		{
+			if(!sroffwarned)
+			{
+				rrout.println("[VGL] Could not use the Sun Ray image transport, probably because there is no");
+				rrout.println("[VGL]    network route between this server and your Sun Ray client.");
+				rrout.println("[VGL]    Temporarily switching to the X11 image transport.");
+				sroffwarned=true;  sronwarned=false;
+			}
+			return -1;
+		}
+	}
+	else
+	{
+		if(!sronwarned)
+		{
+			rrout.println("[VGL] Sun Ray image transport has been re-activated.");
+			sronwarned=true;
+		}
+		sroffwarned=false;
+	}
 	f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
 		(rrsunray_bgr[format]? RRBMP_BGR:0) |
 		(rrsunray_afirst[format]? RRBMP_ALPHAFIRST:0) |
@@ -424,6 +455,7 @@ void pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 	}
 	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
+	return 0;
 }
 
 void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
@@ -472,11 +504,11 @@ void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 }
 
 void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
-	int stereomode)
+	int stereomode, bool srfallback)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	if(_sunrayhandle)
+	if(_sunrayhandle && !srfallback)
 	{
 		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
 	}

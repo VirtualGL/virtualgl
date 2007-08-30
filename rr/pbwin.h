@@ -75,8 +75,8 @@ class pbwin
 		void makeanaglyph(rrframe *, int);
 		void senddirect(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);
-		void sendraw(GLint, bool, bool, bool, int);
-		void sendsr(GLint, bool, bool, int);
+		void sendraw(GLint, bool, bool, bool, int, bool srfallback=false);
+		int sendsr(GLint, bool, bool, int);
 
 		bool _force;
 		rrcs _mutex;
