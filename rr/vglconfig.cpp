@@ -13,303 +13,440 @@
 
 #include <sys/types.h>
 #include <sys/shm.h>
-#include <X11/IntrinsicP.h>
-#include <X11/Xaw/Form.h>
-#include <X11/Xaw/Command.h>
-#include <X11/Xaw/Toggle.h>
-#include <X11/Xaw/Box.h>
-#include <X11/Xaw/Scrollbar.h>
-#include <X11/StringDefs.h>
-#include <X11/Shell.h>
+#include <FL/Fl.H>
+#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Pack.H>
+#include <FL/Fl_Input_Choice.H>
+#include <FL/Fl_Choice.H>
+#include <FL/Fl_Light_Button.H>
+#include <FL/Fl_Value_Slider.H>
+#include <FL/Fl_Float_Input.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Group.H>
+#include <FL/Fl_Spinner.H>
 #define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
 #include "rr.h"
 #include "rrlog.h"
 
-XtAppContext _appctx=0;
-Widget _toplevel=0, _qualtext=0, _qualslider=0, _subsampgray=0, _subsamp4x=0,
-	_subsamp2x=0, _subsamp1x=0, _spoil=0;
+Fl_Double_Window *win=NULL;
+Fl_Choice *compchoice=NULL, *mcompchoice=NULL, *sampchoice=NULL,
+	*stereochoice=NULL, *msampchoice=NULL, *profchoice=NULL;
+Fl_Light_Button *progbutton=NULL, *spoilbutton=NULL, *ifbutton=NULL;
+Fl_Value_Slider *qualslider=NULL, *mqualslider=NULL;
+Fl_Float_Input *gammainput=NULL, *fpsinput;
+Fl_Input *movieinput=NULL;
+Fl_Check_Button *fpsbutton=NULL, *mcbutton=NULL;
+Fl_Group *moviebox=NULL;
 Display *_dpy=NULL;
 
 #undef fconfig
 FakerConfig *_fconfig=NULL;
 #define fconfig (*_fconfig)
 
-String qualslider_translations = "#override\n\
-		<Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
-		<Btn1Motion>: MoveThumb() NotifyThumb()\n\
-		<Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\n\
-		<Btn3Motion>: MoveThumb() NotifyThumb()";
 
-void mainloop(void)
+void SetComp(void)
 {
-	while(!XtAppGetExitFlag(_appctx))
+	int i;
+	for(i=0; i<RR_COMPRESSOPT; i++)
 	{
-		XEvent e;
-		XtAppNextEvent(_appctx, &e);
-		if(e.type==ClientMessage
-			&& e.xclient.message_type==XInternAtom(_dpy, "WM_PROTOCOLS", False)
-			&& (Atom)e.xclient.data.l[0]==XInternAtom(_dpy, "WM_DELETE_WINDOW", False))
-			XtAppSetExitFlag(_appctx);
-		else
-			XtDispatchEvent(&e);
+		if(!fconfig.transvalid[_Trans[i]]) compchoice->mode(i, FL_MENU_INACTIVE);
+		else compchoice->mode(i, 0);
+		if((int)fconfig.compress()==i) compchoice->value(i);
 	}
 }
 
-void Die(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void SetSamp(void)
 {
-	XtAppContext appctx=XtWidgetToApplicationContext(w);
-	if(appctx) XtAppSetExitFlag(appctx);
+	if(!sampchoice) return;
+	if(_Maxsubsamp[fconfig.compress()]==_Minsubsamp[fconfig.compress()])
+		sampchoice->deactivate();
+	else sampchoice->activate();
+	if(_Minsubsamp[fconfig.compress()]>0)
+		sampchoice->mode(0, FL_MENU_INACTIVE);
+	else sampchoice->mode(0, 0);
+	if(_Minsubsamp[fconfig.compress()]>1 || _Maxsubsamp[fconfig.compress()]<1)
+		sampchoice->mode(1, FL_MENU_INACTIVE);
+	else sampchoice->mode(1, 0);
+	if(_Minsubsamp[fconfig.compress()]>2 || _Maxsubsamp[fconfig.compress()]<2)
+		sampchoice->mode(2, FL_MENU_INACTIVE);
+	else sampchoice->mode(2, 0);
+	if(_Minsubsamp[fconfig.compress()]>4 || _Maxsubsamp[fconfig.compress()]<4)
+		sampchoice->mode(3, FL_MENU_INACTIVE);
+	else sampchoice->mode(3, 0);
+	if(_Minsubsamp[fconfig.compress()]>8 || _Maxsubsamp[fconfig.compress()]<8)
+		sampchoice->mode(4, FL_MENU_INACTIVE);
+	else sampchoice->mode(4, 0);
+	if(_Minsubsamp[fconfig.compress()]>16 || _Maxsubsamp[fconfig.compress()]<16)
+		sampchoice->mode(5, FL_MENU_INACTIVE);
+	else sampchoice->mode(5, 0);
+	switch(fconfig.subsamp)
+	{
+		case 0:  sampchoice->value(0);  break;
+		case 1:  sampchoice->value(1);  break;
+		case 2:  sampchoice->value(2);  break;
+		case 4:  sampchoice->value(3);  break;
+		case 8:  sampchoice->value(4);  break;
+		case 16:  sampchoice->value(5);  break;
+	}
 }
 
-XtActionsRec actions[]=
+void SetQual(void)
 {
-	{(char *)"Die", Die}
-};
-
-void destroy(void)
-{
-	if(_toplevel)
-	{
-		XtUnrealizeWidget(_toplevel);
-		XtDestroyWidget(_toplevel);
-		_toplevel=_qualtext=_qualslider=_subsampgray=_subsamp4x=_subsamp2x
-			=_subsamp1x=0;
-	}
-	if(_dpy)
-	{
-		XtCloseDisplay(_dpy);  _dpy=NULL;
-	}
-	if(_appctx)
-	{
-		XtDestroyApplicationContext(_appctx);  _appctx=0;
-	}
+	if(!qualslider) return;
+	qualslider->value(fconfig.qual);
+	if(fconfig.compress()!=RRCOMP_JPEG) qualslider->deactivate();
+	else qualslider->activate();
 }
 
-void UpdateQual(void)
+void SetProg(void)
 {
-	char text[10];
-	if(_qualslider)
+	if(!progbutton) return;
+	if(fconfig.compress()!=RRCOMP_JPEG && fconfig.compress()!=RRCOMP_SR)
+		progbutton->deactivate();
+	else progbutton->activate();
+	progbutton->value(fconfig.progressive);
+}
+
+void SetProf(void)
+{
+	if(!profchoice) return;
+	if(!fconfig.transvalid[RRTRANS_VGL])
 	{
-	  float f=(float)fconfig.qual/100.;
-		XtArgVal *p=(XtArgVal *)&f;  Arg args[1];
-		if(f>0.99) f=0.99;
-		#ifdef sun
-		XawScrollbarSetThumb(_qualslider, f, 0.0);
-		#else
-		if(sizeof(float)>sizeof(XtArgVal))
-			XtSetArg(args[0], XtNtopOfThumb, &f);
-		else
-			XtSetArg(args[0], XtNtopOfThumb, *p);
-		XtSetValues(_qualslider, args, 1);
-		#endif
-	}
-	if(_qualtext)
-	{
-		sprintf(text, "%d", (int)fconfig.qual);
-		XtVaSetValues(_qualtext, XtNlabel, text, NULL);
-	}
-	if(_subsamp4x && _subsamp2x && _subsamp1x)
-	{
-		if(fconfig.subsamp==1)
-		{
-			XtVaSetValues(_subsamp4x, XtNstate, 0, NULL);
-			XtVaSetValues(_subsamp2x, XtNstate, 0, NULL);
-			XtVaSetValues(_subsamp1x, XtNstate, 1, NULL);
-		}
-		else if(fconfig.subsamp==4)
-		{
-			XtVaSetValues(_subsamp4x, XtNstate, 1, NULL);
-			XtVaSetValues(_subsamp2x, XtNstate, 0, NULL);
-			XtVaSetValues(_subsamp1x, XtNstate, 0, NULL);
-		}
-		else if(fconfig.subsamp==2)
-		{
-			XtVaSetValues(_subsamp4x, XtNstate, 0, NULL);
-			XtVaSetValues(_subsamp2x, XtNstate, 1, NULL);
-			XtVaSetValues(_subsamp1x, XtNstate, 0, NULL);
-		}
-	}
-	if(fconfig.spoil)
-	{
-		XtVaSetValues(_spoil, XtNlabel, "Frame Spoiling: ON ", NULL);
-		XtVaSetValues(_spoil, XtNstate, 1, NULL);
+		profchoice->value(3);  profchoice->deactivate();
 	}
 	else
 	{
-		XtVaSetValues(_spoil, XtNlabel, "Frame Spoiling: off", NULL);
-		XtVaSetValues(_spoil, XtNstate, 0, NULL);
+		profchoice->activate();
+		if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==30
+			&& fconfig.subsamp==4) profchoice->value(0);
+		else if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==80
+			&& fconfig.subsamp==2) profchoice->value(1);
+		else if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==95
+			&& fconfig.subsamp==1) profchoice->value(2);
+		else profchoice->value(3);
 	}
 }
 
-void qualScrollProc(Widget w, XtPointer client, XtPointer p)
+void SetIF(void)
 {
-	float	size, val;  int qual;  long pos=(long)p;
-	XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, NULL);
-	if(pos<0) val-=.1;  else val+=.1;
-	if(val>1.0) val=1.0;  if(val<0.0) val=0.0;
-	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	fconfig.qual=qual;
-	UpdateQual();
+	if(!ifbutton) return;
+	ifbutton->value(fconfig.interframe);
+	if(fconfig.compress()!=RRCOMP_PROXY) ifbutton->activate();
+	else ifbutton->deactivate();
 }
 
-void qualJumpProc(Widget w, XtPointer client, XtPointer p)
+void SetStereo(void)
 {
-	float val=*(float *)p;  int qual;
-	qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-	fconfig.qual=qual;
-	UpdateQual();
+	int i;
+	if(!stereochoice) return;
+	if(!fconfig.transvalid[RRTRANS_VGL]) stereochoice->mode(1, FL_MENU_INACTIVE);
+	else stereochoice->mode(1, 0);
+	for(i=0; i<RR_STEREOOPT; i++)
+		if((int)fconfig.stereo==i) stereochoice->value(i);
 }
 
-void loQualProc(Widget w, XtPointer client, XtPointer p)
+void SetMovie(void)
 {
-	fconfig.subsamp=4;
-	fconfig.qual=30;
-	UpdateQual();
-}
-
-void hiQualProc(Widget w, XtPointer client, XtPointer p)
-{
-	fconfig.subsamp=1;
-	fconfig.qual=95;
-	UpdateQual();
-}
-
-void quitProc(Widget w, XtPointer client, XtPointer p)
-{
-	XtAppContext appctx=XtWidgetToApplicationContext(w);
-	if(appctx) XtAppSetExitFlag(appctx);
-}
-
-void subsamp4xProc(Widget w, XtPointer client, XtPointer p)
-{
-	if((long)p==1) fconfig.subsamp=4;
-	UpdateQual();
-}
-
-void subsamp2xProc(Widget w, XtPointer client, XtPointer p)
-{
-	if((long)p==1) fconfig.subsamp=2;
-	UpdateQual();
-}
-
-void subsamp1xProc(Widget w, XtPointer client, XtPointer p)
-{
-	if((long)p==1) fconfig.subsamp=1;
-	UpdateQual();
-}
-
-void spoilProc(Widget w, XtPointer client, XtPointer p)
-{
-	if((long)p==1 || (long)p==0)
+	if(mcompchoice)
 	{
-		int spoil=(int)((long)p);
-		fconfig.spoil=spoil? true:false;
+		if(fconfig.moviefile) mcompchoice->activate();
+		else mcompchoice->deactivate();
+		if(fconfig.mcompress==RRCOMP_JPEG) mcompchoice->value(0);
+		else if(fconfig.mcompress==RRCOMP_RGB) mcompchoice->value(1);
 	}
-	UpdateQual();
+	if(msampchoice)
+	{
+		if(_Maxsubsamp[fconfig.mcompress]==_Minsubsamp[fconfig.mcompress]
+			|| !fconfig.moviefile)
+			msampchoice->deactivate();
+		else msampchoice->activate();
+		switch(fconfig.msubsamp)
+		{
+			case 0:  msampchoice->value(0);  break;
+			case 1:  msampchoice->value(1);  break;
+			case 2:  msampchoice->value(2);  break;
+			case 4:  msampchoice->value(3);  break;
+		}
+	}
+	if(mqualslider)
+	{
+		mqualslider->value(fconfig.mqual);
+		if(fconfig.mcompress!=RRCOMP_JPEG || !fconfig.moviefile)
+			mqualslider->deactivate();
+		else mqualslider->activate();
+	}
 }
+
+
+void CompCB(Fl_Widget *w, void *data)
+{
+	if((int)data>=0 && (int)data<=RR_COMPRESSOPT-1)
+		fconfig.compress((int)data);
+	SetSamp();
+	SetQual();
+	SetProf();
+	SetProg();
+	SetIF();
+	SetStereo();
+}
+
+void SampCB(Fl_Widget *w, void *data)
+{
+	fconfig.subsamp=(int)data;
+	SetProf();
+}
+
+void QualCB(Fl_Widget *w, void *data)
+{
+	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
+	fconfig.qual=(int)slider->value();
+	SetProf();
+}
+
+void ProgCB(Fl_Widget *w, void *data)
+{
+	Fl_Check_Button *check=(Fl_Check_Button *)w;
+	fconfig.progressive=(bool)(check->value()!=0);
+}
+
+void ProfCB(Fl_Widget *w, void *data)
+{
+	if(!fconfig.transvalid[RRTRANS_VGL]) return;
+	switch((int)data)
+	{
+		case 0:
+			fconfig.compress(RRCOMP_JPEG);
+			fconfig.qual=30;  fconfig.subsamp=4;
+			break;
+		case 1:
+			fconfig.compress(RRCOMP_JPEG);
+			fconfig.qual=80;  fconfig.subsamp=2;
+			break;
+		case 2:
+			fconfig.compress(RRCOMP_JPEG);
+			fconfig.qual=95;  fconfig.subsamp=1;
+			break;
+	}
+	SetComp();
+	SetSamp();
+	SetQual();
+	SetProg();
+	SetStereo();
+}
+
+void SpoilCB(Fl_Widget *w, void *data)
+{
+	Fl_Check_Button *check=(Fl_Check_Button *)w;
+	fconfig.spoil=(bool)(check->value()!=0);
+}
+
+void GammaCB(Fl_Widget *w, void *data)
+{
+	Fl_Float_Input *input=(Fl_Float_Input *)w;
+	fconfig.gamma=(double)atof(input->value());
+	char temps[20];
+	snprintf(temps, 19, "%.2f", (double)fconfig.gamma);
+	input->value(temps);
+}
+
+void IFCB(Fl_Widget *w, void *data)
+{
+	Fl_Check_Button *check=(Fl_Check_Button *)w;
+	fconfig.interframe=(bool)(check->value()!=0);
+}
+
+void StereoCB(Fl_Widget *w, void *data)
+{
+	if((int)data>=0 && (int)data<=RR_STEREOOPT-1)
+		fconfig.stereo=(rrstereo)((int)data);
+}
+
+void FPSCB(Fl_Widget *w, void *data)
+{
+	Fl_Float_Input *input=(Fl_Float_Input *)w;
+	fconfig.fps=(double)atof(input->value());
+	char temps[20];
+	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
+	input->value(temps);
+}
+
+void MovieCB(Fl_Widget *w, void *data)
+{
+	Fl_Input *input=(Fl_Input *)w;
+	fconfig.moviefile=(char *)input->value();
+	input->value(fconfig.moviefile);
+	SetMovie();
+}
+
+void MCompCB(Fl_Widget *w, void *data)
+{
+	if((int)data>=RRCOMP_JPEG && (int)data<=RRCOMP_RGB)
+		fconfig.mcompress=(int)data;
+	SetMovie();
+}
+
+void MSampCB(Fl_Widget *w, void *data)
+{
+	fconfig.msubsamp=(int)data;
+}
+
+void MQualCB(Fl_Widget *w, void *data)
+{
+	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
+	fconfig.mqual=(int)slider->value();
+}
+
+
+Fl_Menu_Item compmenu[]=
+{
+	{"None (X11 transport)", 0, CompCB, (void *)RRCOMP_PROXY},
+	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
+	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
+	{"DPCM (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SR},
+	{"RGB (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRLOSSLESS},
+	{0, 0, 0, 0}
+};
+
+Fl_Menu_Item sampmenu[]=
+{
+	{"Grayscale", 0, SampCB, (void *)0},
+	{"1X", 0, SampCB, (void *)1},
+	{"2X", 0, SampCB, (void *)2},
+	{"4X", 0, SampCB, (void *)4},
+	{"8X", 0, SampCB, (void *)8},
+	{"16X", 0, SampCB, (void *)16},
+	{0, 0, 0, 0}
+};
+
+Fl_Menu_Item profmenu[]=
+{
+	{"Low Qual (Wide-Area Network)", 0, ProfCB, (void *)0},
+	{"Medium Qual", 0, ProfCB, (void *)1},
+	{"High Qual (High-Speed Network)", 0, ProfCB, (void *)2},
+	{"Custom", 0, 0, 0},
+	{0, 0, 0, 0}
+};
+
+Fl_Menu_Item stereomenu[]=
+{
+	{"Force Mono Rendering", 0, StereoCB, (void *)RRSTEREO_NONE},
+	{"Quad-Buffered (if available)", 0, StereoCB, (void *)RRSTEREO_QUADBUF},
+	{"Anaglyphic (Red/Cyan)", 0, StereoCB, (void *)RRSTEREO_REDCYAN},
+	{0, 0, 0, 0}
+};
+
+Fl_Menu_Item mcompmenu[]=
+{
+	{"JPEG", 0, MCompCB, (void *)RRCOMP_JPEG},
+	{"RGB", 0, MCompCB, (void *)RRCOMP_RGB},
+	{0, 0, 0, 0}
+};
+
+Fl_Menu_Item msampmenu[]=
+{
+	{"Grayscale", 0, MSampCB, (void *)0},
+	{"1X", 0, MSampCB, (void *)1},
+	{"2X", 0, MSampCB, (void *)2},
+	{"4X", 0, MSampCB, (void *)4},
+	{0, 0, 0, 0}
+};
+
 
 void init(int argc, char **argv)
 {
-	XtToolkitInitialize();
-	errifnot(_appctx=XtCreateApplicationContext());
-	errifnot(_dpy=XtOpenDisplay(_appctx, NULL, "VirtualGL", "dialog", NULL, 0,
-		&argc, argv));
-	errifnot(_toplevel=XtVaAppCreateShell("VirtualGL", "dialog",
-		applicationShellWidgetClass, _dpy, XtNborderWidth, 0, 
-		XtNtitle, "VirtualGL Configuration", NULL));
-	Widget buttonForm=XtVaCreateManagedWidget("buttonForm", formWidgetClass,
-		_toplevel, NULL);
-	errifnot(buttonForm);
+	char temps[20];
 
-	Widget quitbutton=XtVaCreateManagedWidget("quitbutton", commandWidgetClass,
-		buttonForm, NULL);
-	errifnot(quitbutton);
-	XtVaSetValues(quitbutton, XtNleft, XawChainLeft, XtNright, XawChainRight,
-		XtNlabel, "Close dialog", NULL);
-	XtAddCallback(quitbutton, XtNcallback, quitProc, NULL);
+	errifnot(win=new Fl_Double_Window(485, 615, "VirtualGL Configuration"));
 
-	errifnot(_spoil=XtCreateManagedWidget("spoil", toggleWidgetClass, buttonForm,
-		NULL, 0));
-	XtVaSetValues(_spoil, XtNfromVert, quitbutton, XtNleft, XawChainLeft,
-		XtNright, XawChainRight, XtNlabel, "Frame Spoiling: XXX", NULL);
-	XtAddCallback(_spoil, XtNcallback, spoilProc, NULL);
+	errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
+		"Image Compression (Transport): "));
+	compchoice->menu(compmenu);
+	SetComp();
 
-	if(fconfig.compress==RRCOMP_JPEG)
-	{
-		Widget lobutton=XtVaCreateManagedWidget("lobutton", commandWidgetClass,
-			buttonForm, NULL);
-		errifnot(lobutton);
-		XtVaSetValues(lobutton, XtNfromVert, _spoil, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, XtNlabel, "Qual Preset: Broadband/T1", NULL);
-		XtAddCallback(lobutton, XtNcallback, loQualProc, NULL);
+	errifnot(sampchoice=new Fl_Choice(210, 45, 100, 25,
+		"Chrominance Subsampling: "));
+	sampchoice->menu(sampmenu);
+	SetSamp();
 
-		Widget hibutton=XtVaCreateManagedWidget("hibutton", commandWidgetClass,
-			buttonForm, NULL);
-		errifnot(hibutton);
-		XtVaSetValues(hibutton, XtNfromVert, lobutton, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, XtNlabel, "Qual Preset: LAN (default)", NULL);
-		XtAddCallback(hibutton, XtNcallback, hiQualProc, NULL);
+	errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
+		"JPEG Image Quality"));
+	qualslider->callback(QualCB, 0);
+	qualslider->type(1);
+	qualslider->minimum(1);
+	qualslider->maximum(100);
+	qualslider->step(1);
+	qualslider->slider_size(0.01);
+	SetQual();
 
-		Widget quallabel=XtCreateManagedWidget("quallabel", labelWidgetClass,
-			buttonForm, NULL, 0);
-		errifnot(quallabel);
-		XtVaSetValues(quallabel, XtNfromVert, hibutton, XtNleft, XawChainLeft,
-			XtNright, XawChainRight, XtNlabel, "JPEG Quality", XtNborderWidth, 0,
-			NULL);
+	errifnot(progbutton=new Fl_Light_Button(30, 130, 340, 25,
+		"Send Lossless Frame During Periods of Inactivity"));
+	progbutton->callback(ProgCB, 0);
+	SetProg();
 
-		errifnot(_qualslider=XtCreateManagedWidget("qualslider", scrollbarWidgetClass,
-			buttonForm, NULL, 0));
-		XtVaSetValues(_qualslider, XtNfromVert, quallabel, XtNleft, XawChainLeft,
-			XtNlength, 100, XtNwidth, 130, XtNorientation, XtorientHorizontal,
-			XtNtranslations, XtParseTranslationTable(qualslider_translations), 
-			XtNheight, 17, NULL);
-		XtAddCallback(_qualslider, XtNscrollProc, qualScrollProc, NULL);
-		XtAddCallback(_qualslider, XtNjumpProc, qualJumpProc, NULL);
+	errifnot(profchoice=new Fl_Choice(157, 165, 250, 24,
+		"Connection Profile: "));
+	profchoice->menu(profmenu);
+	profchoice->mode(3, FL_MENU_INACTIVE);
+	SetProf();
 
-		errifnot(_qualtext=XtCreateManagedWidget("qualtext", labelWidgetClass,
-			buttonForm, NULL, 0));
-		XtVaSetValues(_qualtext, XtNfromVert, quallabel, XtNfromHoriz, _qualslider,
-			XtNright, XawChainRight, XtNlabel, "000", XtNborderWidth, 0, NULL);
+	errifnot(gammainput=new Fl_Float_Input(315, 200, 85, 25,
+		"Gamma Correction Factor (1.0=no correction): "));
+	gammainput->callback(GammaCB, 0);
+	snprintf(temps, 19, "%.2f", (double)fconfig.gamma);
+	gammainput->value(temps);
 
-		Widget subsamplabel=XtCreateManagedWidget("subsamplabel", labelWidgetClass,
-			buttonForm, NULL, 0);
-		errifnot(subsamplabel);
-		XtVaSetValues(subsamplabel, XtNfromVert, _qualslider, XtNleft, XawChainLeft,
-			XtNright, XawChainRight,
-			XtNlabel, "JPEG Subsampling\n[4x = fastest]\n[None = best quality]",
-			XtNborderWidth, 0, NULL);
+	errifnot(spoilbutton=new Fl_Light_Button(10, 235, 345, 25,
+		"Frame Spoiling (Do Not Use When Benchmarking)"));
+	spoilbutton->callback(SpoilCB, 0);
+	spoilbutton->value(fconfig.spoil);
 
-		errifnot(_subsamp4x=XtCreateManagedWidget("subsamp4x", toggleWidgetClass,
-			buttonForm, NULL, 0));
-		XtVaSetValues(_subsamp4x, XtNfromVert, subsamplabel, XtNleft, XawChainLeft,
-			XtNlabel, "4x", NULL);
-		XtAddCallback(_subsamp4x, XtNcallback, subsamp4xProc, NULL);
+	errifnot(ifbutton=new Fl_Light_Button(10, 270, 185, 25,
+		"Inter-Frame Comparison"));
+	ifbutton->callback(IFCB, 0);
+	SetIF();
 
-		errifnot(_subsamp2x=XtCreateManagedWidget("subsamp2x", toggleWidgetClass,
-			buttonForm, NULL, 0));
-		XtVaSetValues(_subsamp2x, XtNfromVert, subsamplabel, XtNfromHoriz,
-			_subsamp4x, XtNradioGroup, _subsamp4x, XtNlabel, "2x", NULL);
-		XtAddCallback(_subsamp2x, XtNcallback, subsamp2xProc, NULL);
+	errifnot(stereochoice=new Fl_Choice(232, 305, 220, 25,
+		"Stereographic Rendering Method: "));
+	stereochoice->menu(stereomenu);
+	SetStereo();
 
-		errifnot(_subsamp1x=XtCreateManagedWidget("subsamp1x", toggleWidgetClass,
-			buttonForm, NULL, 0));
-		XtVaSetValues(_subsamp1x, XtNfromVert, subsamplabel, XtNfromHoriz,
-			_subsamp2x, XtNradioGroup, _subsamp4x, XtNlabel, "None", NULL);
-		XtAddCallback(_subsamp1x, XtNcallback, subsamp1xProc, NULL);
-	}
-	XtAppAddActions(_appctx, actions, XtNumber(actions));
+	errifnot(fpsinput=new Fl_Float_Input(240, 340, 85, 25,
+		"Limit Frames/second (0.0=no limit): "));
+	fpsinput->callback(FPSCB, 0);
+	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
+	fpsinput->value(temps);
 
-	XtRealizeWidget(_toplevel);
+	errifnot(moviebox=new Fl_Group(10, 430, 465, 175, "Movie Recorder"));
+	moviebox->box(FL_ENGRAVED_BOX);
 
-	Atom deleteatom=XInternAtom(_dpy, "WM_DELETE_WINDOW", False);
-	if(!XSetWMProtocols(_dpy, XtWindow(_toplevel), &deleteatom, 1))
-		_throw("Could not set WM protocols");
-	XtOverrideTranslations(_toplevel, XtParseTranslationTable ("<Message>WM_PROTOCOLS: Die()"));
-	UpdateQual();
+	errifnot(movieinput=new Fl_Input(252, 445, 210, 25,
+		"Movie File (leave blank to disable): "));
+	movieinput->callback(MovieCB, 0);
+	movieinput->value(fconfig.moviefile);
+
+	errifnot(mcompchoice=new Fl_Choice(198, 480, 225, 25,
+		"Image Compression Type: "));
+	mcompchoice->menu(mcompmenu);
+
+	errifnot(msampchoice=new Fl_Choice(216, 515, 100, 25,
+		"Chrominance Subsampling: "));
+	msampchoice->menu(msampmenu);
+
+	errifnot(mqualslider=new Fl_Value_Slider(35, 550, 335, 25,
+		"JPEG Image Quality"));
+	mqualslider->type(1);
+  mqualslider->minimum(1);
+ 	mqualslider->maximum(100);
+	mqualslider->step(1);
+	mqualslider->slider_size(0.01);
+
+	SetMovie();
+
+	win->end();
+  win->show(argc, argv);
 }
-
-
 
 
 #define usage() {\
@@ -323,32 +460,52 @@ void init(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	int status=0, shmid=-1;
+	int status=0, shmid=-1;  bool test=false;
+	char *darg[2]={NULL, NULL};
 	try
 	{
-		if(argc<3) usage();
 		for(int i=0; i<argc; i++)
 		{
+			if(!stricmp(argv[i], "-display") && i<argc-1)
+			{
+				darg[0]=argv[i++];  darg[1]=argv[i];
+			}
 			if(!stricmp(argv[i], "-shmid") && i<argc-1)
 			{
 				int temp=atoi(argv[++i]);  if(temp>-1) shmid=temp;
 			}
+			if(!stricmp(argv[i], "-test")) test=true;
 		}
-		if(shmid==-1) usage();
+		if(darg[0] && darg[1]) {argv[1]=darg[0];  argv[2]=darg[1];  argc=3;}
+		else argc=1;
 
-		if((_fconfig=(FakerConfig *)shmat(shmid, 0, 0))==(FakerConfig *)-1)
-			_throwunix();
-		if(!_fconfig) _throw("Could not attached to config structure in shared memory");
+		if(test)
+		{
+			if(!(_fconfig=FakerConfig::instance()))
+				_throw("Could not allocate FakerConfig");
+			_fconfig->print();
+		}
+		else
+		{
+			if(shmid==-1) usage();
+			if((_fconfig=(FakerConfig *)shmat(shmid, 0, 0))==(FakerConfig *)-1)
+				_throwunix();
+			if(!_fconfig)
+				_throw("Could not attach to config structure in shared memory");
+		}
 
 		init(argc, argv);
-		mainloop();
+		status=Fl::run();
 	}
 	catch(rrerror &e)
 	{
 		rrout.print("Error in vglconfig--\n%s\n", e.getMessage());
 		status=-1;
 	}
-	destroy();
-	if(_fconfig) shmdt((char *)_fconfig);
+	if(_fconfig)
+	{
+		if(test) FakerConfig::deleteinstance();
+		else shmdt((char *)_fconfig);
+	}
 	return status;
 }

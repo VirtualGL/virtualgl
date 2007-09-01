@@ -33,8 +33,6 @@
 #endif
 
 #define DEFQUAL 95
-#define DEFSUBSAMP 1
-#define DEFSUBSAMPSR 16
 
 #define MAXSTR 256
 
@@ -45,6 +43,14 @@ class Config
 		Config() {_set=false;  _env=NULL;}
 		~Config() {if(_env) {free(_env);  _env=NULL;}}
 		bool isset(void) {return _set;}
+
+		char *envget(const char *envvar)
+		{
+			char *temp=NULL;
+			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+				return temp;
+			else return NULL;
+		}
 
 	protected:
 
@@ -73,15 +79,14 @@ class ConfigBool : public Config
 		bool operator= (ConfigBool &cb) {return cb._b;}
 		operator bool() const {return _b;}
 
-		bool get(const char *envvar)
+		void get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				if(!strncmp(temp, "1", 1)) set(true);
 				else if(!strncmp(temp, "0", 1)) set(false);
 			}
-			return _b;
 		}
 
 		void set(bool b)
@@ -109,21 +114,22 @@ class ConfigDouble : public Config
 			_min=min;  _max=max;  _usebounds=true;
 		}
 
-		double get(const char *envvar)
+		void get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				char *t=NULL;  double dtemp=strtod(temp, &t);
 				if(t && t!=temp) set(dtemp);
 			}
-			return _d;
 		}
 
 		void set(double d)
 		{
-			if((d>_min && d<_max) || !_usebounds) _d=d;
-			_set=true;
+			if((d>=_min && d<=_max) || !_usebounds)
+			{
+				_d=d;  _set=true;
+			}
 		}
 
 	protected:
@@ -136,7 +142,7 @@ class ConfigInt : public Config
 {
 	public:
 
-		ConfigInt() {_i=0;  _usebounds=false;  _min=_max=0;}
+		ConfigInt() {_i=0;  _usebounds=false;  _min=_max=0;  _pow2=false;}
 		ConfigInt& operator= (int i) {set(i);  return *this;}
 		int operator= (ConfigInt &ci) {return ci._i;}
 		operator int() const {return _i;}
@@ -146,93 +152,31 @@ class ConfigInt : public Config
 			_min=min;  _max=max;  _usebounds=true;
 		}
 
-		int get(const char *envvar)
+		void setpow2(void) {_pow2=true;}
+
+		void get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				char *t=NULL;  int itemp=strtol(temp, &t, 10);
 				if(t && t!=temp) set(itemp);
 			}
-			return _i;
 		}
 
 		void set(int i)
 		{
-			if((i>=_min && i<=_max) || !_usebounds) _i=i;
-			_set=true;
+			if((!_usebounds || (i>=_min && i<=_max))
+				&& (!_pow2 || isPow2(i)))
+			{
+				_i=i;  _set=true;
+			}
 		}
 
 	protected:
 
 		int _i, _min, _max;
-		bool _usebounds;
-};
-
-class ConfigSubsamp : public ConfigInt
-{
-	public:
-
-		ConfigSubsamp() {ConfigInt::setbounds(-1, 16);}
-
-		ConfigSubsamp& operator= (int i)
-		{
-			if(isPow2(i)) set(i);  return *this;
-		}
-
-		int get(const char *envvar)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
-			{
-				if(!stricmp(temp, "GRAY")) set(0);
-				else if(!stricmp(temp, "GREY")) set(0);
-				else if(!stricmp(temp, "LOSSLESS")) set(-1);
-				else
-				{
-					char *t=NULL;  int itemp=strtol(temp, &t, 10);
-					if(t && t!=temp)
-					{
-						switch(itemp)
-						{
-							case 0:                              set(0);  break;
-							case 444: case 11: case 1:           set(1);  break;
-							case 422: case 21: case 2:           set(2);  break;
-							case 411: case 420: case 22: case 4: set(4);  break;
-							case 410: case 42: case 8:           set(8);  break;
-							case 44:  case 16:                   set(16);  break;
-						}
-					}
-				}
-			}
-			return _i;
-		}
-};
-
-class ConfigStereo : public ConfigInt
-{
-	public:
-
-		ConfigStereo() {ConfigInt::setbounds(0, RR_STEREOOPT-1);}
-
-		ConfigStereo& operator= (enum rrstereo i) {set((int)i);  return *this ;}
-
-		int get(const char *envvar)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
-			{
-				if(!stricmp(temp, "NONE")) set(RRSTEREO_NONE);
-				else if(!stricmp(temp, "QUAD")) set(RRSTEREO_QUADBUF);
-				else if(!stricmp(temp, "RC")) set(RRSTEREO_REDCYAN);
-				else
-				{
-					char *t=NULL;  int itemp=strtol(temp, &t, 10);
-					if(t && t!=temp) set(itemp);
-				}
-			}
-			return _i;
-		}
+		bool _usebounds, _pow2;
 };
 
 class ConfigNP : public ConfigInt
@@ -250,7 +194,7 @@ class ConfigNP : public ConfigInt
 		int get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				char *t=NULL;  int itemp=strtol(temp, &t, 10);
 				if(t && t!=temp && itemp>=0) set(adjust(itemp));
@@ -272,87 +216,6 @@ class ConfigNP : public ConfigInt
 
 };
 
-class ConfigCompress : public ConfigInt
-{
-	public:
-
-		ConfigCompress()
-		{
-			ConfigInt::setbounds(0, RR_COMPRESSOPT-1);  reload();
-		}
-
-		ConfigCompress(Display *dpy, int issunray=-1)
-		{
-			ConfigInt::setbounds(0, RR_COMPRESSOPT-1);  reload();
-			if(issunray>=0) setdefault(dpy, issunray);
-			else setdefault(dpy);
-		}
-
-		ConfigCompress& operator= (enum rrcomp i) {set((int)i);  return *this ;}
-
-		int setdefault(Display *dpy)
-		{
-			int issunray=RRSunRayQueryDisplay(dpy);
-			return setdefault(dpy, issunray);
-		}
-
-		int setdefault(Display *dpy, int issunray)
-		{
-			if(!isset())
-			{
-				if(issunray==RRSUNRAY_WITH_ROUTE) set(RRCOMP_DPCM);
-				else
-				{
-					const char *dstr=DisplayString(dpy);
-					if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-						&& !strnicmp(dstr, "unix", 4))) set(RRCOMP_PROXY);
-					else set(RRCOMP_JPEG);
-				}
-			}
-			return issunray;
-		}
-
-		int get(const char *envvar)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
-			{
-				char *t=NULL;  int itemp=strtol(temp, &t, 10);
-				if(t && t!=temp && itemp>=0 && itemp<RR_COMPRESSOPT) set(itemp);
-				else if(!stricmp(temp, "raw")) set(RRCOMP_PROXY);
-				else if(!stricmp(temp, "proxy")) set(RRCOMP_PROXY);
-				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
-				else if(!stricmp(temp, "dpcm")) set(RRCOMP_DPCM);
-				else if(!stricmp(temp, "rgb")) set(RRCOMP_RGB);
-			}
-			return _i;
-		}
-
-		void reload(void) {get("VGL_COMPRESS");}
-};
-
-class ConfigMCompress : public ConfigInt
-{
-	public:
-
-		ConfigMCompress() {ConfigInt::setbounds(RRCOMP_JPEG, RRCOMP_RGB);}
-
-		ConfigMCompress& operator= (enum rrcomp i) {set((int)i);  return *this ;}
-
-		int get(const char *envvar)
-		{
-			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
-			{
-				char *t=NULL;  int itemp=strtol(temp, &t, 10);
-				if(t && t!=temp && itemp>=0 && itemp<RR_COMPRESSOPT) set(itemp);
-				else if(!stricmp(temp, "jpeg")) set(RRCOMP_JPEG);
-				else if(!stricmp(temp, "rgb")) set(RRCOMP_RGB);
-			}
-			return _i;
-		}
-};
-
 class ConfigString : public Config
 {
 	public:
@@ -363,10 +226,10 @@ class ConfigString : public Config
 		~ConfigString() {if(_s) free(_s);}
 		operator char*() const {return _s;}
 
-		char *get(const char *envvar)
+		void get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				for(int i=0; i<(int)strlen(temp); i++)
 					if(temp[i]!=' ' && temp[i]!='\t')
@@ -375,13 +238,12 @@ class ConfigString : public Config
 					}
 				if(strlen(temp)>0) set(temp);
 			}
-			return _s;
 		}
 
 		void set(char *s)
 		{
 			if(_s) free(_s);
-			if(s) {_s=strdup(s);  _set=true;}  else {_s=NULL;  _set=false;}
+			if(s && strlen(s)>0) {_s=strdup(s);  _set=true;}  else {_s=NULL;  _set=false;}
 		}
 
 	private:
@@ -401,7 +263,7 @@ class ConfigGamma : public ConfigDouble
 		double get(const char *envvar)
 		{
 			char *temp=NULL;
-			if((temp=getenv(envvar))!=NULL && strlen(temp)>0 && newenv(temp))
+			if((temp=envget(envvar))!=NULL)
 			{
 				if(!strcmp(temp, "1"))
 				{
@@ -451,7 +313,6 @@ class ConfigGamma : public ConfigDouble
 		}
 
 		bool _usesungamma;
-		double _oldgcf;
 };
 
 class FakerConfig
@@ -466,6 +327,7 @@ class FakerConfig
 		{
 			// Defaults
 			client=NULL;
+			_compress.setbounds(0, RR_COMPRESSOPT-1);
 			config=(char *)"/opt/VirtualGL/bin/vglconfig";
 			fps.setbounds(0.0, 1000000.0);
 			#ifdef SUNOGL
@@ -482,19 +344,31 @@ class FakerConfig
 			guimod=ShiftMask|ControlMask;
 			interframe=true;
 			localdpystring=(char *)":0";
+			mcompress.setbounds(RRCOMP_JPEG, RRCOMP_RGB);
+			mcompress=RRCOMP_JPEG;
 			mqual.setbounds(1, 100);
+			mqual=DEFQUAL;
+			msubsamp.setbounds(0, 4);
+			msubsamp.setpow2();
+			msubsamp=1;
+			port.setbounds(0, 65535);
 			qual.setbounds(1, 100);
 			qual=DEFQUAL;
-			port.setbounds(0, 65535);
 			readback=true;
 			spoil=true;
 			ssl=false;
+			stereo.setbounds(0, RR_STEREOOPT-1);
 			stereo=RRSTEREO_QUADBUF;
+			subsamp.setbounds(0, 16);
+			subsamp.setpow2();
 			x11lib=NULL;
 			tilesize.setbounds(8, 1024);
 			tilesize=RR_DEFAULTTILESIZE;
 			transpixel.setbounds(0, 255);
+			for(int i=0; i<RR_TRANSPORTOPT; i++) transvalid[i]=false;
 			vendor=NULL;
+			zoomx.setbounds(1, 2);
+			zoomy.setbounds(1, 2);
 			reloadenv();
 		}
 
@@ -525,10 +399,22 @@ class FakerConfig
 
 		void reloadenv(void)
 		{
+			char *env;
+
 			// Fetch values from environment
 			gllib.get("VGL_GLLIB");
 			x11lib.get("VGL_X11LIB");
 			client.get("VGL_CLIENT");
+			if((env=_compress.envget("VGL_COMPRESS"))!=NULL)
+			{
+				char *t=NULL;  int itemp=strtol(env, &t, 10);
+				if(t && t!=env && itemp>=0 && itemp<RR_COMPRESSOPT) compress(itemp);
+				else if(!strnicmp(env, "p", 1)) compress(RRCOMP_PROXY);
+				else if(!strnicmp(env, "j", 1)) compress(RRCOMP_JPEG);
+				else if(!strnicmp(env, "r", 1)) compress(RRCOMP_RGB);
+				else if(!stricmp(env, "sr")) compress(RRCOMP_SR);
+				else if(!strnicmp(env, "srl", 3)) compress(RRCOMP_SRLOSSLESS);
+			}
 			config.get("VGL_CONFIG");
 			localdpystring.get("VGL_DISPLAY");
 			#ifdef USEGLP
@@ -537,11 +423,54 @@ class FakerConfig
 				glp=true;
 			#endif
 			qual.get("VGL_QUAL");
-			subsamp.get("VGL_SUBSAMP");
-			mcompress.get("VGL_MCOMPRESS");
+			if((env=subsamp.envget("VGL_SUBSAMP"))!=NULL)
+			{
+				if(!strnicmp(env, "G", 1)) subsamp=0;
+				else if(!strnicmp(env, "L", 1)) compress(RRCOMP_SRLOSSLESS);
+				else
+				{
+					char *t=NULL;  int itemp=strtol(env, &t, 10);
+					if(t && t!=env)
+					{
+						switch(itemp)
+						{
+							case 0:                              subsamp=0;  break;
+							case 444: case 11: case 1:           subsamp=1;  break;
+							case 422: case 21: case 2:           subsamp=2;  break;
+							case 411: case 420: case 22: case 4: subsamp=4;  break;
+							case 410: case 42: case 8:           subsamp=8;  break;
+							case 44:  case 16:                   subsamp=16;  break;
+						}
+					}
+				}
+			}
+			if((env=mcompress.envget("VGL_MCOMPRESS"))!=NULL)
+			{
+				char *t=NULL;  int itemp=strtol(env, &t, 10);
+				if(t && t!=env && itemp>=0 && itemp<RR_COMPRESSOPT) mcompress=itemp;
+				else if(!strnicmp(env, "j", 1)) mcompress=RRCOMP_JPEG;
+				else if(!strnicmp(env, "r", 1)) mcompress=RRCOMP_RGB;
+			}
 			moviefile.get("VGL_MOVIE");
 			mqual.get("VGL_MQUAL");
-			msubsamp.get("VGL_MSUBSAMP");
+			if((env=msubsamp.envget("VGL_MSUBSAMP"))!=NULL)
+			{
+				if(!strnicmp(env, "G", 1)) msubsamp=0;
+				else
+				{
+					char *t=NULL;  int itemp=strtol(env, &t, 10);
+					if(t && t!=env)
+					{
+						switch(itemp)
+						{
+							case 0:                              msubsamp=0;  break;
+							case 444: case 11: case 1:           msubsamp=1;  break;
+							case 422: case 21: case 2:           msubsamp=2;  break;
+							case 411: case 420: case 22: case 4: msubsamp=4;  break;
+						}
+					}
+				}
+			}
 			spoil.get("VGL_SPOIL");
 			ssl.get("VGL_SSL");
 			port.get("VGL_PORT");
@@ -586,7 +515,17 @@ class FakerConfig
 			}
 			fps.get("VGL_FPS");
 			vendor.get("VGL_XVENDOR");
-			stereo.get("VGL_STEREO");
+			if((env=stereo.envget("VGL_STEREO"))!=NULL)
+			{
+				if(!strnicmp(env, "N", 1)) stereo=RRSTEREO_NONE;
+				else if(!strnicmp(env, "Q", 1)) stereo=RRSTEREO_QUADBUF;
+				else if(!strnicmp(env, "R", 1)) stereo=RRSTEREO_REDCYAN;
+				else
+				{
+					char *t=NULL;  int itemp=strtol(env, &t, 10);
+					if(t && t!=env) stereo=itemp;
+				}
+			}
 			interframe.get("VGL_INTERFRAME");
 			log.get("VGL_LOG");
 			zoomx.get("VGL_ZOOM_X");
@@ -594,13 +533,46 @@ class FakerConfig
 			progressive.get("VGL_PROGRESSIVE");
 		}
 
-		#define prconfint(i) rrout.println(#i" = %d", (int)i);
-		#define prconfstr(s) rrout.println(#s" = %s", (char *)s);
-		#define prconfdbl(d) rrout.println(#d" = %f", (double)d);
+		void compress(Display *dpy)
+		{
+			if(!_compress.isset())
+			{
+				if(RRSunRayQueryDisplay(dpy)!=RRSUNRAY_NOT) compress(RRCOMP_SR);
+				else
+				{
+					const char *dstr=DisplayString(dpy);
+					if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+						&& !strnicmp(dstr, "unix", 4))) compress(RRCOMP_PROXY);
+					else compress(RRCOMP_JPEG);
+				}
+			}
+		}
+
+		void compress(int i)
+		{
+			bool is=_compress.isset();
+			_compress=i;
+			if(!is) transvalid[_Trans[_compress]]=transvalid[RRTRANS_X11]=true;
+			if(!subsamp.isset()) subsamp.set(_Defsubsamp[_compress]);
+			if(_Minsubsamp[_compress]>=0 && _Maxsubsamp[_compress]>=0)
+			{
+				subsamp.setbounds(_Minsubsamp[_compress], _Maxsubsamp[_compress]);
+				if(subsamp<_Minsubsamp[_compress] || subsamp>_Maxsubsamp[_compress])
+					subsamp.set(_Defsubsamp[_compress]);
+			}
+		}
+
+		int compress(void) {return _compress;}
+
+		#define prconfint(i) rrout.println(#i"  =  %d", (int)i);
+		#define prconfstr(s) rrout.println(#s"  =  \"%s\"", (char *)s? (char *)s:"NULL");
+		#define prconfdbl(d) rrout.println(#d"  =  %f", (double)d);
+		#define prconfint_s(i) rrout.println(#i"  =  %d  (set = %d)", (int)i, i.isset());
+		#define prconfstr_s(s) rrout.println(#s"  =  \"%s\"  (set = %d)", (char *)s? (char *)s:"NULL", s.isset());
+		#define prconfdbl_s(d) rrout.println(#d"  =  %f  (set = %d)", (double)d, d.isset());
 
 		ConfigBool autotest;
 		ConfigString client;
-		ConfigCompress compress;
 		ConfigString config;
 		ConfigDouble fps;
 		ConfigGamma gamma;
@@ -613,9 +585,9 @@ class FakerConfig
 		ConfigBool interframe;
 		ConfigString localdpystring;
 		ConfigString log;
-		ConfigMCompress mcompress;
+		ConfigInt mcompress;
 		ConfigInt mqual;
-		ConfigSubsamp msubsamp;
+		ConfigInt msubsamp;
 		ConfigString moviefile;
 		ConfigNP np;
 		ConfigInt port;
@@ -624,17 +596,65 @@ class FakerConfig
 		ConfigBool readback;
 		ConfigBool spoil;
 		ConfigBool ssl;
-		ConfigStereo stereo;
-		ConfigSubsamp subsamp;
+		ConfigInt stereo;
+		ConfigInt subsamp;
 		ConfigBool sync;
 		ConfigInt tilesize;
 		ConfigBool trace;
 		ConfigInt transpixel;
+		bool transvalid[RR_TRANSPORTOPT];
 		ConfigBool usewindow;
 		ConfigString vendor;
 		ConfigBool verbose;
 		ConfigString x11lib;
 		ConfigInt zoomx, zoomy;
+
+		void print(void)
+		{
+			prconfint_s(autotest)
+			prconfstr_s(client)
+			prconfint(compress())
+			prconfint(_compress.isset())
+			prconfstr_s(config)
+			prconfdbl_s(fps)
+			prconfdbl_s(gamma)
+			prconfstr_s(gllib)
+			prconfint(glp)
+			prconfint_s(gui)
+			prconfint(guikey)
+			prconfstr_s(guikeyseq)
+			prconfint(guimod)
+			prconfint_s(interframe)
+			prconfstr_s(localdpystring)
+			prconfstr_s(log)
+			prconfint_s(mcompress)
+			prconfstr_s(moviefile)
+			prconfint_s(mqual)
+			prconfint_s(msubsamp)
+			prconfint_s(np)
+			prconfint_s(port)
+			prconfint_s(progressive)
+			prconfint_s(qual)
+			prconfint_s(readback)
+			prconfint_s(spoil)
+			prconfint_s(ssl)
+			prconfint_s(stereo)
+			prconfint_s(subsamp)
+			prconfint(gamma.usesun())
+			prconfint_s(sync)
+			prconfint_s(tilesize)
+			prconfint_s(trace)
+			prconfint_s(transpixel)
+			prconfint(transvalid[RRTRANS_X11])
+			prconfint(transvalid[RRTRANS_VGL])
+			prconfint(transvalid[RRTRANS_SR])
+			prconfint_s(usewindow)
+			prconfstr_s(vendor)
+			prconfint_s(verbose)
+			prconfstr_s(x11lib)
+			prconfint_s(zoomx)
+			prconfint_s(zoomy)
+		}
 
 	private:
 
@@ -666,6 +686,8 @@ class FakerConfig
 		static FakerConfig *_Instanceptr;
 		static rrcs _Instancemutex;
 		#endif
+
+		ConfigInt _compress;
 };
 
 #ifndef _WIN32
