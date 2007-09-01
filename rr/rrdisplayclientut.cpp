@@ -49,11 +49,11 @@ int main(int argc, char **argv)
 	rrtimer t;  double elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;
-	int i;  int bgr=littleendian(), compress=RRCOMP_JPEG;
+	int i;  int bgr=littleendian();
 
 	try {
 
-	if(!fconfig.subsamp.isset()) fconfig.subsamp=DEFSUBSAMP;
+	fconfig.compress(RRCOMP_JPEG);
 
 	bool localtest=false;
 	if(argc<2) usage(argv);
@@ -84,9 +84,9 @@ int main(int argc, char **argv)
 		{
 			fconfig.np=atoi(argv[i+1]);  i++;
 		}
-		if(!stricmp(argv[i], "-rgb")) compress=RRCOMP_RGB;
+		if(!stricmp(argv[i], "-rgb")) fconfig.compress(RRCOMP_RGB);
 	}
-	if(compress==RRCOMP_RGB) bgr=0;
+	if(fconfig.compress()==RRCOMP_RGB) bgr=0;
 
 	int w, h, d=3;
 
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=compress;
+		b->_h.winid=win;  b->_h.compress=fconfig.compress();
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=compress;
+		b->_h.winid=win;  b->_h.compress=fconfig.compress();
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		clientframes++;  frames++;
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=compress;
+		b->_h.winid=win;  b->_h.compress=fconfig.compress();
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
 		memcpy(b->_bits, buf, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=compress;
+		b->_h.winid=win;  b->_h.compress=fconfig.compress();
 		rrdpy.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

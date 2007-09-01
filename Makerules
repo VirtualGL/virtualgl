@@ -131,6 +131,15 @@ $(ODIR)/%.o: %.cpp
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
 	@rm -f $(ODIR)/$*.d.tmp
 
+$(ODIR)/%.o: %.cxx
+	$(CXX) $(CXXFLAGS) -c $*.cxx -o $(ODIR)/$*.o
+	$(CXX) $(CXXFLAGS) $(DEPFLAG) $*.cxx > $(ODIR)/$*.d
+	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
+	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
+	@rm -f $(ODIR)/$*.d.tmp
+
 $(ODIR)/%.E: %.c
 	@rm -f $@
 	$(CC) $(CFLAGS) -E $*.c > $@
@@ -139,6 +148,10 @@ $(ODIR)/%.E: %.cpp
 	@rm -f $@
 	$(CXX) $(CXXFLAGS) -E $*.cpp > $@ 
 
+$(ODIR)/%.E: %.cxx
+	@rm -f $@
+	$(CXX) $(CXXFLAGS) -E $*.cxx > $@ 
+
 $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<
 
@@ -146,6 +159,9 @@ $(ODIR)/%.obj: %.c
 	$(CC) $(CFLAGS) -c $< -Fo$@
 
 $(ODIR)/%.obj: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -Fo$@
+
+$(ODIR)/%.obj: %.cxx
 	$(CXX) $(CXXFLAGS) -c $< -Fo$@
 
 $(LDIR)/%.lib: $(ODIR)/%.obj
