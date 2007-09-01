@@ -182,8 +182,8 @@ void SetMovie(void)
 
 void CompCB(Fl_Widget *w, void *data)
 {
-	if((int)data>=0 && (int)data<=RR_COMPRESSOPT-1)
-		fconfig.compress((int)data);
+	int d=(int)((long)data);
+	if(d>=0 && d<=RR_COMPRESSOPT-1) fconfig.compress(d);
 	SetSamp();
 	SetQual();
 	SetProf();
@@ -194,7 +194,8 @@ void CompCB(Fl_Widget *w, void *data)
 
 void SampCB(Fl_Widget *w, void *data)
 {
-	fconfig.subsamp=(int)data;
+	int d=(int)((long)data);
+	fconfig.subsamp=d;
 	SetProf();
 }
 
@@ -213,8 +214,9 @@ void ProgCB(Fl_Widget *w, void *data)
 
 void ProfCB(Fl_Widget *w, void *data)
 {
+	int d=(int)((long)data);
 	if(!fconfig.transvalid[RRTRANS_VGL]) return;
-	switch((int)data)
+	switch(d)
 	{
 		case 0:
 			fconfig.compress(RRCOMP_JPEG);
@@ -259,8 +261,8 @@ void IFCB(Fl_Widget *w, void *data)
 
 void StereoCB(Fl_Widget *w, void *data)
 {
-	if((int)data>=0 && (int)data<=RR_STEREOOPT-1)
-		fconfig.stereo=(rrstereo)((int)data);
+	int d=(int)((long)data);
+	if(d>=0 && d<=RR_STEREOOPT-1) fconfig.stereo=d;
 }
 
 void FPSCB(Fl_Widget *w, void *data)
@@ -282,14 +284,15 @@ void MovieCB(Fl_Widget *w, void *data)
 
 void MCompCB(Fl_Widget *w, void *data)
 {
-	if((int)data>=RRCOMP_JPEG && (int)data<=RRCOMP_RGB)
-		fconfig.mcompress=(int)data;
+	int d=(int)((long)data);
+	if(d>=RRCOMP_JPEG && d<=RRCOMP_RGB) fconfig.mcompress=d;
 	SetMovie();
 }
 
 void MSampCB(Fl_Widget *w, void *data)
 {
-	fconfig.msubsamp=(int)data;
+	int d=(int)((long)data);
+	fconfig.msubsamp=d;
 }
 
 void MQualCB(Fl_Widget *w, void *data)
