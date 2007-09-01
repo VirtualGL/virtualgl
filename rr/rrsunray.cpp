@@ -24,7 +24,7 @@ static int RRSunRayConfigCallback(const char *name, int type, void *value)
 	if(!stricmp(name, "VGL_CLIENT") && type==RRSUNRAY_CONFIGSTR)
 		{*((char **)value)=(char *)fconfig.client;  return 0;}
 	else if(!stricmp(name, "VGL_COMPRESS") && type==RRSUNRAY_CONFIGINT)
-		{*((int *)value)=(int)fconfig.compress;  return 0;}
+		{*((int *)value)=(int)fconfig.compress();  return 0;}
 	else if(!stricmp(name, "VGL_INTERFRAME") && type==RRSUNRAY_CONFIGINT)
 		{*((int *)value)=(int)fconfig.interframe;  return 0;}
 	else if(!stricmp(name, "VGL_PROGRESSIVE") && type==RRSUNRAY_CONFIGINT)

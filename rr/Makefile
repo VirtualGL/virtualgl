@@ -135,8 +135,8 @@ $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 $(EDIR)/vglrun: rrlaunch
 	$(INSTALL) -m 755 $< $@
 
-$(EDIR)/vglconfig: $(ODIR)/vglconfig.o
-	$(CXX) $(LDFLAGS) -o $@ $< -lX11 -lXt -lXaw -lpthread -lrrutil
+$(EDIR)/vglconfig: $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
+	$(CXX) $(LDFLAGS) -o $@ $< -lX11 -lfltk_static -lpthread -lrrutil
 
 # Client
 
