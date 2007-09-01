@@ -165,7 +165,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
-	_usesunray=RRSunRayQueryDisplay(windpy);
+	fconfig.compress(_windpy);
 	_sunrayhandle=NULL;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
@@ -294,14 +294,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	_dirty=false;
 
-	fconfig.compress.setdefault(_windpy, _usesunray);
-	int compress=(int)fconfig.compress;
-	if(!fconfig.subsamp.isset())
-	{
-		if(compress==RRCOMP_DPCM) fconfig.subsamp=DEFSUBSAMPSR;
-		else fconfig.subsamp=DEFSUBSAMP;
-	}
-
+	int compress=(int)fconfig.compress();
 	if(sync) {compress=RRCOMP_PROXY;}
 
 	if(stereo() && stereomode!=RRSTEREO_NONE)
@@ -335,16 +328,11 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	if(!_truecolor) compress=RRCOMP_PROXY;
 
-	int mcompress=compress, mqual=fconfig.qual, msubsamp=fconfig.subsamp;
 	bool sharerrdpy=false;
 	if(fconfig.moviefile)
 	{
-		if(fconfig.mcompress.isset()) mcompress=fconfig.mcompress;
-		if(fconfig.mqual.isset()) mqual=fconfig.mqual;
-		if(fconfig.msubsamp.isset()) msubsamp=fconfig.msubsamp;
-		if(mcompress!=RRCOMP_JPEG && mcompress!=RRCOMP_RGB) mcompress=RRCOMP_JPEG;
-		if(mcompress==compress && mqual==fconfig.qual && msubsamp==fconfig.subsamp
-			&& !fconfig.spoil)
+		if(fconfig.mcompress==compress && fconfig.mqual==fconfig.qual
+			&& fconfig.msubsamp==fconfig.subsamp && !fconfig.spoil)
 			sharerrdpy=true;
 
 		if(!sharerrdpy)
@@ -352,7 +340,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			if(!_rrmoviedpy)
 				errifnot(_rrmoviedpy=new rrdisplayclient(NULL, NULL, true));
 			senddirect(_rrmoviedpy, drawbuf, false, dostereo, stereomode,
-				mcompress, mqual, msubsamp, true);
+				fconfig.mcompress, fconfig.mqual, fconfig.msubsamp, true);
 		}
 	}
 
@@ -363,6 +351,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_JPEG:
+		case RRCOMP_RGB:
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
 				fconfig.client? fconfig.client:DisplayString(_windpy)));
 			_rrdpy->record(sharerrdpy);
@@ -370,29 +359,10 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
 
-		case RRCOMP_RGB:
-			if(_usesunray==RRSUNRAY_WITH_ROUTE)
-			{
-				if(sendsr(drawbuf, spoillast, dostereo, stereomode)==-1)
-				sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
-			}
-			else
-			{
-				if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
-					fconfig.client? fconfig.client:DisplayString(_windpy)));
-				_rrdpy->record(sharerrdpy);
-				senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
-					(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
-			}
-			break;
-
-		case RRCOMP_DPCM:
-			if(_usesunray==RRSUNRAY_WITH_ROUTE)
-			{
-				if(sendsr(drawbuf, spoillast, dostereo, stereomode)==-1)
-				sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
-			}
-			break;
+		case RRCOMP_SR:
+		case RRCOMP_SRLOSSLESS:
+			if(sendsr(drawbuf, spoillast, dostereo,	stereomode)==-1)
+			sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
 	}
 }
 
