@@ -93,9 +93,33 @@ enum {
 	RR_RIGHT  /* this tile goes to the right buffer of a stereo frame */
 };
 
+/* Transport types */
+#define RR_TRANSPORTOPT 3
+enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_SR};
+
 /* Compression types */
-#define RR_COMPRESSOPT  4
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_DPCM};
+#define RR_COMPRESSOPT  5
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_SR, RRCOMP_SRLOSSLESS};
+
+static const rrtrans _Trans[RR_COMPRESSOPT]=
+{
+	RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_SR, RRTRANS_SR
+};
+
+static const int _Minsubsamp[RR_COMPRESSOPT]=
+{
+	-1, 0, -1, 1, -1
+};
+
+static const int _Defsubsamp[RR_COMPRESSOPT]=
+{
+	1, 1, 1, 16, 16
+};
+
+static const int _Maxsubsamp[RR_COMPRESSOPT]=
+{
+	-1, 4, -1, 16, -1
+};
 
 /* Stereo options */
 #define RR_STEREOOPT    3
