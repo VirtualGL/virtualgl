@@ -47,7 +47,7 @@ void rrblitter::run(void)
 		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
 		_prof_total.startframe();
 
-		if(fconfig.fps.isset())
+		if(fconfig.fps>0.)
 		{
 			double elapsed=t.elapsed();
 			if(first) first=false;
