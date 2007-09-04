@@ -207,7 +207,7 @@ void renderspheres(int buf)
 }
 
 
-int display(void)
+int display(int advance)
 {
 	static int first=1;
 	static double start=0., elapsed=0., mpixels=0.;
@@ -266,21 +266,24 @@ int display(void)
 		first=0;
 	}
 
-	z-=0.5;
-	if(z<-29.)
+	if(advance)
 	{
-		if(useci)
+		z-=0.5;
+		if(z<-29.)
 		{
-			colorscheme=(colorscheme+1)%NSCHEMES;
-			_catch(setcolorscheme(colormap, colorscheme));
+			if(useci)
+			{
+				colorscheme=(colorscheme+1)%NSCHEMES;
+				_catch(setcolorscheme(colormap, colorscheme));
+			}
+			z=-3.5;
 		}
-		z=-3.5;
+		outer_angle+=0.1;  if(outer_angle>360.) outer_angle-=360.;
+		middle_angle-=0.37;  if(middle_angle<-360.) middle_angle+=360.;
+		inner_angle+=0.63;  if(inner_angle>360.) inner_angle-=360.;
+		lonesphere_color+=0.005;
+		if(lonesphere_color>1.) lonesphere_color-=1.;
 	}
-	outer_angle+=0.1;  if(outer_angle>360.) outer_angle-=360.;
-	middle_angle-=0.37;  if(middle_angle<-360.) middle_angle+=360.;
-	inner_angle+=0.63;  if(inner_angle>360.) inner_angle-=360.;
-	lonesphere_color+=0.005;
-	if(lonesphere_color>1.) lonesphere_color-=1.;
 
 	if(usestereo)
 	{
@@ -330,7 +333,7 @@ int event_loop(Display *dpy, Window win)
 {
 	while (1)
 	{
-		int advance=0;
+		int advance=0, dodisplay=0;
 		while(XPending(dpy)>0)
 		{
 			XEvent event;
@@ -338,6 +341,7 @@ int event_loop(Display *dpy, Window win)
 			switch (event.type)
 			{
 				case Expose:
+					dodisplay=1;
 					break;
 				case ConfigureNotify:
 					reshape(event.xconfigure.width, event.xconfigure.height);
@@ -354,11 +358,12 @@ int event_loop(Display *dpy, Window win)
 					break;
 				}
 				case MotionNotify:
-					if(event.xmotion.state & Button1Mask) advance=1;
+					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
  					break;
 			}
 		}
-		if(!interactive || advance) {_catch(display());}
+		if(!interactive) {_catch(display(1));}
+		else {if(dodisplay) {_catch(display(advance));}}
 	}
 
 	bailout:
