@@ -27,7 +27,7 @@ How to build VirtualGL in 9043 easy steps
    (http://www.kitenet.net/programs/alien/) to convert these into DEB packages,
    if you prefer.
 
--- GCC and G++ (tested with v2.96 and v3.x)
+-- GCC and G++
 
 -- X11 dev. kit
 
@@ -63,10 +63,10 @@ How to build VirtualGL in 9043 easy steps
 **     Prerequisites - x86-64 Linux
 *******************************************************************************
 
-Building a redistributable VirtualGL package for x86-64 requires building	both
+Building a redistributable VirtualGL package for x86-64 requires building both
 32-bit and 64-bit versions of the VirtualGL server components.  But not all
-x86-64 Linux systems contain the 32-bit packages necessary to build a	32-bit
-version of VirtualGL.  To build 32-bit VirtualGL on an x86-64	Linux system, you
+x86-64 Linux systems contain the 32-bit packages necessary to build a 32-bit
+version of VirtualGL.  To build 32-bit VirtualGL on an x86-64 Linux system, you
 will need at minimum the following 32-bit packages:
 
 -- glibc development libraries
@@ -134,7 +134,7 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
    Solaris 10 and later, but this produces a version of VirtualGL that is not
-   compatible across multiple Linux platforms.  In order to build a fully
+   compatible with earlier Solaris platforms.  In order to build a fully
    compatible version of VirtualGL, download and install the latest OpenSSL
    package from Blastwave (http://www.blastwave.org.)
 
@@ -147,7 +147,6 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
 -- GCC
 
-   * Tested with v2.95 and v3.x
    * Preferred version:
      http://cooltools.sunsource.net/gcc/4.0.3/install.html
      Also available from the Solaris 9 & 10 Companion CD's
@@ -304,7 +303,7 @@ instead.
 Each of these options can be passed as an argument to "make" or "gmake".  You
 can also create a file called "config" in the root of the VirtualGL build
 directory and add Makefile options to that file so as to avoid having to type
-them everytime you build VirtualGL.
+them every time you build VirtualGL.
 
 DEBUG = yes
 
@@ -318,15 +317,14 @@ JPEGLIB = libjpeg
 
   * The default build of VirtualGL links against the TurboJPEG SDK, which
     embeds highly accelerated JPEG coding routines from the Intel(R) Integrated
-    Performance Primitives; or against Sun mediaLib, which contains similar
-    routines for Solaris systems.  These toolkits enable VirtualGL to compress
-    full-screen images at interactive frame rates, but they do contain some
-    closed source components.  Although the use of these closed source
+    Performance Primitives or Sun mediaLib.  TurboJPEG enables VirtualGL to
+    compress full-screen images at interactive frame rates, but it relies upon
+    closed source components to achieve this.  The use of these closed source
     components does not limit your ability to use and distribute VirtualGL
-    completely freely, some may still wish to build a 100% open source version
+    in any way, but some may still wish to build a 100% open source version
     of VirtualGL.  Thus, specifying this Makefile option will build an
     (included) version of libjpeg and link VirtualGL against it rather than the
-    accelerated JPEG codecs mentioned above.  The use of libjpeg produces
+    accelerated TurboJPEG codecs mentioned above.  The use of libjpeg produces
     correct, albeit slow, behavior.  The version of libjpeg included in the
     VirtualGL build resides in the "jpeg/jpeg-6b" directory and differs
     from the IJG release (see http://www.ijg.org) only in its support of little
