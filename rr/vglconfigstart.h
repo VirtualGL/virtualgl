@@ -46,10 +46,11 @@ class vglconfigstart : public Runnable
 			try
 			{
 				char commandline[1024];
-				sprintf(commandline, "LD_PRELOAD=; export LD_PRELOAD; LD_PRELOAD_32=; \
-export LD_PRELOAD_32; LD_PRELOAD_64=; export LD_PRELOAD_64; \
-%s -display %s -shmid %d", (char *)fconfig.config, DisplayString(_dpy),
-					_shmid);
+				unsetenv("LD_PRELOAD");
+				unsetenv("LD_PRELOAD_32");
+				unsetenv("LD_PRELOAD_64");
+				sprintf(commandline, "%s -display %s -shmid %d",
+					(char *)fconfig.config, DisplayString(_dpy), _shmid);
 				if(system(commandline)==-1) _throwunix();
 			}
 			catch(rrerror &e)
