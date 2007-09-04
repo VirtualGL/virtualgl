@@ -1,5 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics
- * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2005-2007 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -101,7 +101,7 @@ enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_SR};
 #define RR_COMPRESSOPT  5
 enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_SR, RRCOMP_SRLOSSLESS};
 
-static const rrtrans _Trans[RR_COMPRESSOPT]=
+static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {
 	RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_SR, RRTRANS_SR
 };
