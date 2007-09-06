@@ -13,6 +13,7 @@
 
 #include <sys/types.h>
 #include <sys/shm.h>
+#include <signal.h>
 #include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Pack.H>
@@ -40,6 +41,7 @@ Fl_Input *movieinput=NULL;
 Fl_Check_Button *fpsbutton=NULL, *mcbutton=NULL;
 Fl_Group *moviebox=NULL;
 Display *_dpy=NULL;
+int ppid=-1;
 
 #undef fconfig
 FakerConfig *_fconfig=NULL;
@@ -462,12 +464,23 @@ void init(int argc, char **argv)
 }
 
 
+void checkparentpid(void *data)
+{
+	if(kill(ppid, 0)==-1)
+	{
+		delete win;  win=NULL;
+	}
+}
+
+
 #define usage() {\
-	rrout.print("USAGE: %s [-display <d>] -shmid <id>\n\n", argv[0]); \
+	rrout.print("USAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n", argv[0]); \
 	rrout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n"); \
 	rrout.print("      environment variable)\n"); \
-	rrout.print("<id> = Shared memory segment ID (reported by VirtualGL when the\n"); \
-	rrout.print("       environment variable VGL_VERBOSE is set to 1)\n"); \
+	rrout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n"); \
+	rrout.print("      environment variable VGL_VERBOSE is set to 1)\n"); \
+	rrout.print("<p> = Parent process ID.  VGL Config will exit when this process\n"); \
+	rrout.print("      terminates.\n"); \
 	return -1;}
 
 
@@ -488,6 +501,10 @@ int main(int argc, char **argv)
 				int temp=atoi(argv[++i]);  if(temp>-1) shmid=temp;
 			}
 			if(!stricmp(argv[i], "-test")) test=true;
+			if(!stricmp(argv[i], "-ppid") && i<argc-1)
+			{
+				int temp=atoi(argv[++i]);  if(temp>0) ppid=temp;
+			}
 		}
 		if(darg[0] && darg[1]) {argv[1]=darg[0];  argv[2]=darg[1];  argc=3;}
 		else argc=1;
@@ -508,6 +525,7 @@ int main(int argc, char **argv)
 		}
 
 		init(argc, argv);
+		if(ppid>0) Fl::add_check(checkparentpid);		
 		status=Fl::run();
 	}
 	catch(rrerror &e)
