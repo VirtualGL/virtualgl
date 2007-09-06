@@ -669,7 +669,9 @@ class FakerConfig
 				_throwunix();
 			if((addr=shmat(_Shmid, 0, 0))==(void *)-1) _throwunix();
 			if(!addr) _throw("Could not attach to config structure in shared memory");
-//			shmctl(_Shmid, IPC_RMID, 0);
+			#ifdef linux
+			shmctl(_Shmid, IPC_RMID, 0);
+			#endif
 			char *env=NULL;
 			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 				&& !strncmp(env, "1", 1))
