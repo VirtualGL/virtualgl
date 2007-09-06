@@ -141,8 +141,8 @@ void SetStereo(void)
 {
 	int i;
 	if(!stereochoice) return;
-	if(!fconfig.transvalid[RRTRANS_VGL]) stereochoice->mode(1, FL_MENU_INACTIVE);
-	else stereochoice->mode(1, 0);
+	if(!fconfig.transvalid[RRTRANS_VGL]) stereochoice->mode(2, FL_MENU_INACTIVE);
+	else stereochoice->mode(2, 0);
 	for(i=0; i<RR_STEREOOPT; i++)
 		if((int)fconfig.stereo==i) stereochoice->value(i);
 }
@@ -334,7 +334,8 @@ Fl_Menu_Item profmenu[]=
 
 Fl_Menu_Item stereomenu[]=
 {
-	{"Force Mono Rendering", 0, StereoCB, (void *)RRSTEREO_NONE},
+	{"Send Left Eye Only", 0, StereoCB, (void *)RRSTEREO_LEYE},
+	{"Send Right Eye Only", 0, StereoCB, (void *)RRSTEREO_REYE},
 	{"Quad-Buffered (if available)", 0, StereoCB, (void *)RRSTEREO_QUADBUF},
 	{"Anaglyphic (Red/Cyan)", 0, StereoCB, (void *)RRSTEREO_REDCYAN},
 	{0, 0, 0, 0}

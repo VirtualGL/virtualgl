@@ -517,9 +517,10 @@ class FakerConfig
 			vendor.get("VGL_XVENDOR");
 			if((env=stereo.envget("VGL_STEREO"))!=NULL)
 			{
-				if(!strnicmp(env, "N", 1)) stereo=RRSTEREO_NONE;
+				if(!strnicmp(env, "L", 1)) stereo=RRSTEREO_LEYE;
+				else if(!strnicmp(env, "RC", 2)) stereo=RRSTEREO_REDCYAN;
+				else if(!strnicmp(env, "R", 1)) stereo=RRSTEREO_REYE;
 				else if(!strnicmp(env, "Q", 1)) stereo=RRSTEREO_QUADBUF;
-				else if(!strnicmp(env, "R", 1)) stereo=RRSTEREO_REDCYAN;
 				else
 				{
 					char *t=NULL;  int itemp=strtol(env, &t, 10);

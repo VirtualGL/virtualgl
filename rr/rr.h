@@ -122,8 +122,8 @@ static const int _Maxsubsamp[RR_COMPRESSOPT]=
 };
 
 /* Stereo options */
-#define RR_STEREOOPT    3
-enum rrstereo {RRSTEREO_NONE=0, RRSTEREO_QUADBUF, RRSTEREO_REDCYAN};
+#define RR_STEREOOPT    4
+enum rrstereo {RRSTEREO_LEYE=0, RRSTEREO_REYE, RRSTEREO_QUADBUF, RRSTEREO_REDCYAN};
 
 /* Other */
 #define RR_DEFAULTPORT        4242

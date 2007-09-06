@@ -297,7 +297,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	int compress=(int)fconfig.compress();
 	if(sync) {compress=RRCOMP_PROXY;}
 
-	if(stereo() && stereomode!=RRSTEREO_NONE)
+	if(stereo() && stereomode!=RRSTEREO_LEYE && stereomode!=RRSTEREO_REYE)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
@@ -339,7 +339,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		{
 			if(!_rrmoviedpy)
 				errifnot(_rrmoviedpy=new rrdisplayclient(NULL, NULL, true));
-			senddirect(_rrmoviedpy, drawbuf, false, dostereo, stereomode,
+			senddirect(_rrmoviedpy, drawbuf, false, dostereo, RRSTEREO_QUADBUF,
 				fconfig.mcompress, fconfig.mqual, fconfig.msubsamp, true);
 		}
 	}
@@ -451,12 +451,14 @@ void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	#endif
 	errifnot(b=rrdpy->getbitmap(pbw, pbh, 3, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF, domovie? false:fconfig.spoil));
-	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
 	{
+		GLint buf=drawbuf;
+		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
+		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-			b->_pixelsize, b->_bits, dostereo? leye(drawbuf):drawbuf,
-			dostereo);
+			b->_pixelsize, b->_bits, buf, dostereo);
 		if(dostereo && b->_rbits)
 			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
 				b->_pixelsize, b->_rbits, reye(drawbuf), dostereo);
