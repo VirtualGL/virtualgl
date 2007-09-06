@@ -69,6 +69,21 @@ class vglconfigstart : public Runnable
 
 		virtual ~vglconfigstart(void) {}
 
+		int unsetenv(const char *name)
+		{
+			char *str=NULL;
+			if(!name) {errno=EINVAL;  return -1;}
+			if(strlen(name)<1 || strchr(name, '='))
+				{errno=EINVAL;  return -1;}
+			if(!getenv(name)) return -1;
+			if((str=(char *)malloc(strlen(name)+2))==NULL)
+				{errno=ENOMEM;  return -1;}
+			sprintf(str, "%s=", name);
+			putenv(str);
+			strcpy(str, "=");
+			putenv(str);
+		}
+
 		static vglconfigstart *_Instanceptr;
 		static rrcs _Instancemutex;
 		static rrcs _Popupmutex;
