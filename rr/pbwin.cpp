@@ -417,11 +417,14 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 	#ifdef GL_ABGR_EXT
 	if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
 	#endif
-	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(&f, drawbuf);
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&f, drawbuf);
 	else
 	{
+		GLint buf=drawbuf;
+		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
+		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-			drawbuf, bottomup);
+			buf, bottomup);
 	}
 	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
