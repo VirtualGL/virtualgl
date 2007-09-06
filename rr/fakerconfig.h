@@ -329,6 +329,7 @@ class FakerConfig
 			client=NULL;
 			_compress.setbounds(0, RR_COMPRESSOPT-1);
 			config=(char *)"/opt/VirtualGL/bin/vglconfig";
+			config64=(char *)"/opt/VirtualGL/bin/vglconfig64";
 			fps.setbounds(0.0, 1000000.0);
 			#ifdef SUNOGL
 			gamma=2.22;
@@ -416,6 +417,7 @@ class FakerConfig
 				else if(!strnicmp(env, "srl", 3)) compress(RRCOMP_SRLOSSLESS);
 			}
 			config.get("VGL_CONFIG");
+			config64.get("VGL_CONFIG64");
 			localdpystring.get("VGL_DISPLAY");
 			#ifdef USEGLP
 			if(localdpystring &&
@@ -575,6 +577,7 @@ class FakerConfig
 		ConfigBool autotest;
 		ConfigString client;
 		ConfigString config;
+		ConfigString config64;
 		ConfigDouble fps;
 		ConfigGamma gamma;
 		ConfigString gllib;

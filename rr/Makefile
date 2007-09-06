@@ -100,8 +100,12 @@ TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
+VGLCONFIG = $(EDIR)/vglconfig
+ifeq ($(subplatform), 64)
+VGLCONFIG = $(EDIR)/vglconfig64
+endif
 TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
-	$(LDIR)/libdlfaker.$(SHEXT) $(EDIR)/vglconfig $(TARGETS)
+	$(LDIR)/libdlfaker.$(SHEXT) $(VGLCONFIG) $(TARGETS)
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
@@ -135,7 +139,7 @@ $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 $(EDIR)/vglrun: rrlaunch
 	$(INSTALL) -m 755 $< $@
 
-$(EDIR)/vglconfig: $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
+$(VGLCONFIG): $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
 	$(CXX) $(LDFLAGS) -o $@ $< -lX11 -lfltk_static -lpthread -lrrutil
 
 # Client
