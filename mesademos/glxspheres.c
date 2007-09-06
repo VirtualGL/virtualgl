@@ -124,7 +124,7 @@ void renderspheres(int buf)
 {
 	int i;
 	GLfloat xaspect, yaspect;
-	GLfloat stereocameraoffset=0., frustumassymetry=0.;
+	GLfloat stereocameraoffset=0.;
 	GLfloat neardist=1.5, fardist=40., zeroparallaxdist=17.;
 	glDrawBuffer(buf);
 
@@ -132,17 +132,13 @@ void renderspheres(int buf)
 	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
 
 	if(buf==GL_BACK_LEFT)
-		stereocameraoffset=-2.*xaspect*zeroparallaxdist/neardist*0.035;
+		stereocameraoffset=-xaspect*zeroparallaxdist/neardist*0.035;
 	else if(buf==GL_BACK_RIGHT)
-		stereocameraoffset=2.*xaspect*zeroparallaxdist/neardist*0.035;
-
-	if(buf==GL_BACK_LEFT || buf==GL_BACK_RIGHT)
-		frustumassymetry=-stereocameraoffset*neardist/zeroparallaxdist;
+		stereocameraoffset=xaspect*zeroparallaxdist/neardist*0.035;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-xaspect+frustumassymetry, xaspect+frustumassymetry,
-		-yaspect, yaspect, neardist, fardist);
+	glFrustum(-xaspect, xaspect, -yaspect, yaspect, neardist, fardist);
 	glTranslatef(-stereocameraoffset, 0., 0.);
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, width, height);
@@ -204,6 +200,10 @@ void renderspheres(int buf)
 		glPopMatrix();
 	}
 	glPopMatrix();
+
+	// Move the eye back to the middle
+	glMatrixMode(GL_PROJECTION);
+	glTranslatef(stereocameraoffset, 0., 0.);
 }
 
 
@@ -291,6 +291,7 @@ int display(int advance)
 	}
 	else renderspheres(GL_BACK);
 
+	glDrawBuffer(GL_BACK);
 	xaspect=(GLfloat)width/(GLfloat)(min(width, height));
 	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
 	glPushAttrib(GL_CURRENT_BIT);
