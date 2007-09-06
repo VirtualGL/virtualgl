@@ -103,8 +103,7 @@ void SetQual(void)
 void SetProg(void)
 {
 	if(!progbutton) return;
-	if(fconfig.compress()!=RRCOMP_JPEG && fconfig.compress()!=RRCOMP_SR)
-		progbutton->deactivate();
+	if(fconfig.compress()!=RRCOMP_SR) progbutton->deactivate();
 	else progbutton->activate();
 	progbutton->value(fconfig.progressive);
 }
@@ -145,6 +144,16 @@ void SetStereo(void)
 	else stereochoice->mode(2, 0);
 	for(i=0; i<RR_STEREOOPT; i++)
 		if((int)fconfig.stereo==i) stereochoice->value(i);
+}
+
+void SetFPS(void)
+{
+	char temps[20];
+	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
+	fpsinput->value(temps);
+	if(_Trans[fconfig.compress()]==RRTRANS_X11
+		|| _Trans[fconfig.compress()]==RRTRANS_VGL) fpsinput->activate();
+	else fpsinput->deactivate();
 }
 
 void SetMovie(void)
@@ -190,6 +199,7 @@ void CompCB(Fl_Widget *w, void *data)
 	SetProg();
 	SetIF();
 	SetStereo();
+	SetFPS();
 }
 
 void SampCB(Fl_Widget *w, void *data)
@@ -419,8 +429,7 @@ void init(int argc, char **argv)
 	errifnot(fpsinput=new Fl_Float_Input(240, 340, 85, 25,
 		"Limit Frames/second (0.0=no limit): "));
 	fpsinput->callback(FPSCB, 0);
-	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
-	fpsinput->value(temps);
+	SetFPS();
 
 	errifnot(moviebox=new Fl_Group(10, 430, 465, 175, "Movie Recorder"));
 	moviebox->box(FL_ENGRAVED_BOX);
