@@ -49,8 +49,9 @@ class vglconfigstart : public Runnable
 				unsetenv("LD_PRELOAD");
 				unsetenv("LD_PRELOAD_32");
 				unsetenv("LD_PRELOAD_64");
-				sprintf(commandline, "%s -display %s -shmid %d",
-					(char *)fconfig.config, DisplayString(_dpy), _shmid);
+				sprintf(commandline, "%s -display %s -shmid %d -ppid %d",
+					sizeof(long)==8? (char *)fconfig.config64:(char *)fconfig.config,
+					DisplayString(_dpy), _shmid, getpid());
 				if(system(commandline)==-1) _throwunix();
 			}
 			catch(rrerror &e)
@@ -82,6 +83,7 @@ class vglconfigstart : public Runnable
 			putenv(str);
 			strcpy(str, "=");
 			putenv(str);
+			return 0;
 		}
 
 		static vglconfigstart *_Instanceptr;
