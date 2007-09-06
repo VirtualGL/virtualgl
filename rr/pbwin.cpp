@@ -489,7 +489,7 @@ void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(spoillast && fconfig.spoil && !_blitter->frameready()) return;
 	errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
 	b->_flags|=RRBMP_BOTTOMUP;
-	if(dostereo && stereomode!=RRSTEREO_QUADBUF) makeanaglyph(b, drawbuf);
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
 	{
 		int format;
@@ -525,8 +525,11 @@ void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			default:
 				_throw("Unsupported pixel format");
 		}
+		GLint buf=drawbuf;
+		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
+		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
-			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, drawbuf, true);
+			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, true);
 	}
 	_blitter->sendframe(b, sync);
 }
