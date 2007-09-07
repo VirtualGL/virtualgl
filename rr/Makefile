@@ -11,7 +11,7 @@ endif
 
 COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
-        $(ODIR)/rrxclient.obj \
+        $(ODIR)/vglclient.obj \
         $(ODIR)/rrframe.obj \
         $(GLFOBJS)
 
@@ -69,7 +69,7 @@ else
 
 COBJS = $(ODIR)/rrcwin.o \
         $(ODIR)/rrdisplayserver.o \
-        $(ODIR)/rrxclient.o
+        $(ODIR)/vglclient.o
 
 FOBJS = $(ODIR)/faker.o \
         $(ODIR)/faker-sym.o \
