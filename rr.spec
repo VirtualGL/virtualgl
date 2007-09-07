@@ -67,7 +67,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
 install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
-install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
@@ -123,7 +122,6 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/bin/vglclient
 /usr/bin/vglconfig
 /usr/bin/vglrun
-/usr/bin/rrlaunch
 /usr/bin/vglgenkey
 /usr/bin/vglserver_config
 
@@ -146,6 +144,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/lib/librrfaker.so
 /usr/lib/libdlfaker.so
 %ifarch x86_64
+/usr/bin/vglconfig64
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
 /opt/%{name}/bin/glxspheres64
