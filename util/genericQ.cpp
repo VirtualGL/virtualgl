@@ -53,7 +53,7 @@ void genericQ::spoil(void *myval, qspoilfct f)
 	rrcs::safelock l(qmutex);
 	if(deadyet) return;
 	void *dummy;
-	for(int i=0; i<items(); i++)
+	if(items()>0) for(int i=0; i<items(); i++)
 	{
 		get(&dummy);
 		f(dummy);
