@@ -136,7 +136,7 @@ $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
 
-$(EDIR)/vglrun: rrlaunch
+$(EDIR)/vglrun: vglrun
 	$(INSTALL) -m 755 $< $@
 
 $(VGLCONFIG): $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
