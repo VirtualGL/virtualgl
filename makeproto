@@ -19,7 +19,6 @@ if [ "$_subplatform" = "64" ]; then
 echo f none SUNWvgl/bin/vglconfig64 0755 root bin
 fi
 echo f none SUNWvgl/bin/vglrun 0755 root bin
-echo f none SUNWvgl/bin/rrlaunch 0755 root bin
 echo f none SUNWvgl/bin/vglgenkey 0755 root bin
 echo f none SUNWvgl/bin/vglserver_config 0755 root bin
 echo f none SUNWvgl/bin/tcbench 0755 root bin
