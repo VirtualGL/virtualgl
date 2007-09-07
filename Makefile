@@ -177,17 +177,18 @@ mesademos32:
 endif
 
 dist: rr rr32 diags32 mesademos mesademos32
-	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
-	mkdir -p $(BLDDIR)/rpms/RPMS
-	ln -fs `pwd` $(BLDDIR)/rpms/BUILD
+	TMPDIR=/tmp/`mktemp vglbuild.XXXXXX`; \
+	if [ -d $$TMPDIR ]; then rm -rf $$TMPDIR; fi; \
+	mkdir -p $$TMPDIR/RPMS; \
+	ln -fs `pwd` $$TMPDIR/BUILD; \
 	rm -f $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
-	rpmbuild -bb --define "_blddir `pwd`/$(BLDDIR)" --define "_topdir $(BLDDIR)/rpms" \
+	rpmbuild -bb --define "_blddir $$TMPDIR/buildroot" --define "_topdir $$TMPDIR" \
 		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" \
 		--target $(RPMARCH) \
 		rr.spec; \
-	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
-	rm -rf $(BLDDIR)/rpms
+	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
+	rm -rf $$TMPDIR
 
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
@@ -198,7 +199,7 @@ srpm:
 	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
 	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(BUILD)/g \
 		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
-		| sed s/%{_bindir}/linux\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
+		| sed s/%{_bindir}/linux64\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
 		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
 	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) $(BLDDIR)/virtualgl.spec
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
