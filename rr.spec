@@ -81,11 +81,12 @@ install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
 install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
 install -m 755 %{_bindir}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
-install -m 755 %{_bindir}/vglconfig64 $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig64
+install -m 755 %{_bindir}/vglconfig64 $RPM_BUILD_ROOT/usr/bin/vglconfig64
 %endif
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
+ln -fs /usr/bin/vglconfig64 $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig64
 %endif
 ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
 ln -fs /usr/bin/vglconfig $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig
