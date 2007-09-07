@@ -66,8 +66,8 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
-install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
-install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
+install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
+install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/rrlaunch
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
 install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
