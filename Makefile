@@ -173,8 +173,7 @@ mesademos32:
 endif
 
 dist: rr rr32 diags32 mesademos mesademos32
-	TMPDIR=/tmp/`mktemp vglbuild.XXXXXX`; \
-	if [ -d $$TMPDIR ]; then rm -rf $$TMPDIR; fi; \
+	TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
 	mkdir -p $$TMPDIR/RPMS; \
 	ln -fs `pwd` $$TMPDIR/BUILD; \
 	rm -f $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
