@@ -28,10 +28,10 @@
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, quiet=false;
 bool deadyet;
-int port=0;
+unsigned short port=0;
 #ifdef USESSL
 rrdisplayserver *rrssldpy=NULL;
-int sslport=0;
+unsigned short sslport=0;
 bool ssl=true, nonssl=true;
 #endif
 int drawmethod=RR_DRAWAUTO;
@@ -149,10 +149,6 @@ int main(int argc, char *argv[])
 			if(i<argc-1) displayname=argv[++i];
 		}
 	}
-	if(port<0) port=0;
-	#ifdef USESSL
-	if(sslport<0) sslport=0;
-	#endif
 
 	rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
 	if(printversion) return 0;
