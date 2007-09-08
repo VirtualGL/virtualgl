@@ -27,7 +27,7 @@
 
 rrdisplayserver *rrdpy=NULL;
 bool restart=true, quiet=false;
-rrevent death;
+bool deadyet;
 int port=0;
 #ifdef USESSL
 rrdisplayserver *rrssldpy=NULL;
@@ -58,7 +58,7 @@ extern "C" {
 void handler(int type)
 {
 	restart=false;
-	death.signal();
+	deadyet=true;
 }
 
 
@@ -86,10 +86,11 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 void usage(char *progname)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-display <name>]\n", progname);
-	fprintf(stderr, "       [-port <p>] [-l <file>] [-v] [-x] [-gl]\n");
+	fprintf(stderr, "       [-port <p>] ");
 	#ifdef USESSL
-	fprintf(stderr, "       [-sslport <port>] [-sslonly] [-nossl]\n");
+	fprintf(stderr, "[-sslport <port>] [-sslonly] [-nossl]\n       ");
 	#endif
+	fprintf(stderr, "[-l <file>] [-old] [-v] [-x] [-gl]\n");
 	fprintf(stderr, "\n-h or -? = This help screen\n");
 	fprintf(stderr, "-display = The X display to which to draw the images received from the\n");
 	fprintf(stderr, "           VirtualGL server (default = read from the DISPLAY environment\n");
@@ -99,15 +100,15 @@ void usage(char *progname)
 	#ifdef USESSL
 	fprintf(stderr, "-sslport = TCP port to use for encrypted connections from the VirtualGL server\n");
 	fprintf(stderr, "           (default = automatically select a free port)\n");
-	fprintf(stderr, "-old = equivalent to '-port 4242 -sslport 4243'.  Use then when talking to\n");
-	fprintf(stderr, "       2.0 or earlier VirtualGL servers\n");
 	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
 	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
+	fprintf(stderr, "-old = equivalent to '-port 4242 -sslport 4243'.  Use this when talking to\n");
+	fprintf(stderr, "       2.0 or earlier VirtualGL servers\n");
 	fprintf(stderr, "-v = Display version information\n");
-	fprintf(stderr, "-x = Use X11 drawing  %s\n", drawmethod==RR_DRAWX11?"(default)":" ");
-	fprintf(stderr, "-gl = Use OpenGL drawing  %s\n", drawmethod==RR_DRAWOGL?"(default)":" ");
+	fprintf(stderr, "-x = Use X11 drawing (default for x86 systems)\n");
+	fprintf(stderr, "-gl = Use OpenGL drawing (default for Sparc systems with 3D accelerators)\n");
 }
 
 
@@ -182,8 +183,6 @@ void start(char *displayname)
 
 	try {
 
-	death.wait();
-
 	start:
 	if((maindpy=XOpenDisplay(displayname))==NULL)
 		_throw("Could not open display");
@@ -193,39 +192,82 @@ void start(char *displayname)
 	Atom sslport_atom=None;
 	if(ssl)
 	{
+		int oldsslport=-1;
 		if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", True))!=None)
-			_throw("Another VirtualGL Client instance is already running on this X display");
-		if(!(rrssldpy=new rrdisplayserver(compat? RR_DEFAULTSSLPORT:sslport,
-			true, drawmethod)))
-			_throw("Could not initialize listener");
-		rrout.println("Listening for SSL connections on port %d",
-			sslport=rrssldpy->port());
-		if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
-			_throw("Could not get _VGLCLIENT_SSLPORT property");
-		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			sslport_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&sslport,
-			1);
+		{
+			unsigned short *prop=NULL;  unsigned long n=0, bytesleft=0;
+			int actualformat=0;  Atom actualtype=None;
+			if(XGetWindowProperty(maindpy, DefaultRootWindow(maindpy),
+				sslport_atom, 0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
+				&bytesleft, (unsigned char **)&prop)==Success && n>=1
+				&& actualformat==16 && actualtype==XA_INTEGER && prop)
+				oldsslport=*prop;
+			if(prop) XFree(prop);
+		}
+		if(oldsslport<0)
+		{
+			if(!(rrssldpy=new rrdisplayserver(compat? RR_DEFAULTSSLPORT:sslport,
+				true, drawmethod)))
+				_throw("Could not initialize SSL listener");
+			rrout.println("Listening for SSL connections on port %d",
+				sslport=rrssldpy->port());
+			if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
+				_throw("Could not get _VGLCLIENT_SSLPORT atom");
+			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+				sslport_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&sslport,
+				1);
+		}
+		else
+		{
+			rrout.println("Another VGL client instance is already accepting SSL connections for this");
+			rrout.println("   X display on port %d", oldsslport);
+			sslport_atom=None;
+		}
 	}
 	if(nonssl)
 	#endif
 	{
+		int oldport=-1;
 		if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", True))!=None)
-			_throw("Another VirtualGL Client instance is already running on this X display");
-		if(!(rrdpy=new rrdisplayserver(compat? RR_DEFAULTPORT:port,
-			false, drawmethod)))
-			_throw("Could not initialize listener");
-		rrout.println("Listening for unencrypted connections on port %d",
-			port=rrdpy->port());
-		if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
-			_throw("Could not get _VGLCLIENT_PORT property");
-		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			port_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&port,
-			1);
+		{
+			unsigned short *prop=NULL;  unsigned long n=0, bytesleft=0;
+			int actualformat=0;  Atom actualtype=None;
+			if(XGetWindowProperty(maindpy, DefaultRootWindow(maindpy),
+				port_atom, 0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
+				&bytesleft, (unsigned char **)&prop)==Success && n>=1
+				&& actualformat==16 && actualtype==XA_INTEGER && prop)
+				oldport=*prop;
+			if(prop) XFree(prop);
+		}
+		if(oldport<0)
+		{
+			if(!(rrdpy=new rrdisplayserver(compat? RR_DEFAULTPORT:port,
+				false, drawmethod)))
+				_throw("Could not initialize listener");
+			rrout.println("Listening for unencrypted connections on port %d",
+				port=rrdpy->port());
+			if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
+				_throw("Could not get _VGLCLIENT_PORT atom");
+			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+				port_atom, XA_INTEGER, 16, PropModeReplace, (unsigned char *)&port,
+				1);
+		}
+		else
+		{
+			rrout.println("Another VGL client instance is already accepting unencrypted connections for");
+			rrout.println("   this X display on port %d", oldport);
+			port_atom=None;
+		}
 	}
 	XSync(maindpy, False);
 	rrout.flush();
+	if(port_atom==None && sslport_atom==None) {deadyet=true;  restart=false;}
 
-	death.wait();
+	while(!deadyet)
+	{
+		if(XPending(maindpy)>0) {}
+		usleep(100000);
+	}
 
 	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
 	#ifdef USESSL
