@@ -223,19 +223,21 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
-	if(buffersize>=0 && redsize<0 && greensize<0 && bluesize<0)
+	if(redsize<0)
 	{
-		glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=buffersize;
-		glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=buffersize;
-		glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=buffersize;
+		if(buffersize>=0) redsize=buffersize;  else redsize=8;
 	}
-	else
+	if(greensize<0)
 	{
-		if(redsize>=0) {glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;}
-		if(greensize>=0) {glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;}
-		if(bluesize>=0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;}
+		if(buffersize>=0) greensize=buffersize;  else greensize=8;
 	}
-
+	if(bluesize<0)
+	{
+		if(buffersize>=0) bluesize=buffersize;  else bluesize=8;
+	}
+	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
+	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
+	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;
 	if(stereo)
 	{
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
