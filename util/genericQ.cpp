@@ -53,9 +53,9 @@ void genericQ::spoil(void *myval, qspoilfct f)
 	rrcs::safelock l(qmutex);
 	if(deadyet) return;
 	void *dummy;
-	if(items()>0) for(int i=0; i<items(); i++)
+	while(1)
 	{
-		get(&dummy);
+		get(&dummy, true);   if(!dummy) break;
 		f(dummy);
 	}
 	add(myval);
@@ -78,11 +78,18 @@ void genericQ::add(void *myval)
 
 
 // This will block until there is something in the queue
-void genericQ::get(void **myval)
+void genericQ::get(void **myval, bool nonblocking)
 {
 	if(deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::get()");
-	qhasitem.wait();
+	if(nonblocking)
+	{
+		if(!qhasitem.trywait())
+		{
+			*myval=NULL;  return;
+		}
+	}
+	else qhasitem.wait();
 	if(!deadyet)
 	{
 		rrcs::safelock l(qmutex);

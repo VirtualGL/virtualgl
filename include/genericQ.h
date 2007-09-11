@@ -38,7 +38,7 @@ class genericQ
 		~genericQ(void);
 		void add(void *);
 		void spoil(void *, qspoilfct);
-		void get(void **);
+		void get(void **, bool nonblocking=false);
 		void release(void);
 		int items(void);
 	private:

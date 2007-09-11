@@ -235,6 +235,32 @@ class rrsem
 			#endif
 		}
 
+		bool trywait()
+		{
+			#ifdef _WIN32
+			DWORD err=WaitForSingleObject(sem, 0);
+			if(err==WAIT_FAILED) throw(w32error("rrsem::trywait()"));
+			else if(err==WAIT_TIMEOUT) return false;
+			#elif defined (__APPLE__)
+			int err=0;
+			do {err=sem_trywait(sem);} while(err<0 && errno==EINTR);
+			if(err<0)
+			{
+				if(errno==EAGAIN) return false;
+				else throw(unixerror("rrsem::trywait()"));
+			}
+			#else
+			int err=0;
+			do {err=sem_trywait(&sem);} while(err<0 && errno==EINTR);
+			if(err<0)
+			{
+				if(errno==EAGAIN) return false;
+				else throw(unixerror("rrsem::trywait()"));
+			}
+			#endif
+			return true;
+		}
+
 		void post(void)
 		{
 			#ifdef _WIN32
