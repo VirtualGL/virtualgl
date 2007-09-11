@@ -49,7 +49,7 @@ void *dlopen(const char *filename, int flag)
 	if(filename && strstr(filename, "libGL"))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
+			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
 				filename, env);
 		return __dlopen(env, flag);
 	}

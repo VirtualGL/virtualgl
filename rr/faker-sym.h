@@ -28,7 +28,7 @@ extern void __vgl_safeexit(int);
 extern void __vgl_fakerinit(void);
 
 #define checksym(s) {if(!__##s) {__vgl_fakerinit();  if(!__##s) { \
-	rrout.PRINT("[VGL] "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
+	rrout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL

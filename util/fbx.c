@@ -249,8 +249,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		shmok=__extok;
 		if(!alreadywarned && !shmok && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
-			fprintf(__warningfile, "[FBX]   connection.)  Will use X Pixmap drawing instead.\n");
+			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
+			fprintf(__warningfile, "[FBX]    remote connection.)  Will use X Pixmap drawing instead.\n");
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
@@ -274,8 +274,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		static int alreadywarned=0;
 		if(!alreadywarned && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] MIT-SHM extension not available.  Will use X pixmap\n");
-			fprintf(__warningfile, "[FBX]   drawing instead.\n");
+			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension not available.  Will use X pixmap\n");
+			fprintf(__warningfile, "[FBX]    drawing instead.\n");
 			alreadywarned=1;
 		}
 		useshm=0;
@@ -547,9 +547,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of hclshm.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of hclshm.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.1 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.1 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -560,9 +560,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of xlib.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of xlib.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.3 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.3 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -573,9 +573,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 8.0.0.28 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 8.0.0.28 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -583,15 +583,15 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.9 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.9 for shared memory drawing\n");
 			}
 			retval=0;
 		}
 	}
 	if(!retval && !alreadywarned && __warningfile)
-		fprintf(__warningfile, "[FBX] Exceed patches not installed.  Disabling shared memory drawing\n");
+		fprintf(__warningfile, "[FBX] WARNING: Exceed patches not installed.  Disabling shared memory drawing\n");
 	if(!alreadywarned) alreadywarned=1;
 	return retval;
 }

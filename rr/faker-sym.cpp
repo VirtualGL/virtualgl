@@ -24,12 +24,12 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 	dlerror();  // Clear error state
 	sym=dlsym(dllhnd, (char *)symbol);
 	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_DEFAULT, (char *)symbol);}
-	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] Error loading %s:\n[VGL] %s\n", symbol, err);}
+	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] ERROR: Could not load symbol %s:\n[VGL]    %s\n", symbol, err);}
 	return sym;
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	rrout.print("[VGL] Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
+	rrout.print("[VGL] ERROR: Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
@@ -45,7 +45,7 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			rrout.print("[VGL] Could not open %s\n[VGL] %s\n",
+			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
 				(char *)fconfig.gllib, dlerror());
 			__vgl_safeexit(1);
 		}
@@ -152,7 +152,7 @@ void __vgl_loadsymbols(void)
 		dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
-			rrout.print("[VGL] Could not open %s\n[VGL] %s\n",
+			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
 				(char *)fconfig.x11lib, dlerror());
 			__vgl_safeexit(1);
 		}
