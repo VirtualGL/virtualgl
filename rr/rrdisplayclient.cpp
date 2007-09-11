@@ -333,7 +333,7 @@ void rrdisplayclient::send(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("[VGL] Error sending data to client.  Client may have disconnected.");
+		rrout.println("[VGL] ERROR: Could not send data to client.  Client may have disconnected.");
 		throw;
 	}
 }
@@ -346,7 +346,7 @@ void rrdisplayclient::recv(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("[VGL] Error receiving data from client.  Client may have disconnected.");
+		rrout.println("[VGL] ERROR: Could not receive data from client.  Client may have disconnected.");
 		throw;
 	}
 }
@@ -358,7 +358,7 @@ void rrdisplayclient::save(char *buf, int len)
 		int fd=open(fconfig.moviefile, O_CREAT|O_APPEND|O_RDWR, S_IREAD|S_IWRITE);
 		if(fd==-1)
 		{
-			rrout.println("[VGL] Could not open %s (%s.)",
+			rrout.println("[VGL] WARNING: Could not open %s (%s.)",
 				(char *)fconfig.moviefile, strerror(errno));
 			rrout.println("[VGL]    Disabling movie creation.");
 			fconfig.moviefile=(char *)NULL;
@@ -367,7 +367,7 @@ void rrdisplayclient::save(char *buf, int len)
 		{
 			if(write(fd, buf, len)==-1)
 			{
-				rrout.println("[VGL] Could not write to movie file (%s.)\n",
+				rrout.println("[VGL] WARNING: Could not write to movie file (%s.)\n",
 					strerror(errno));
 				rrout.println("[VGL]    Disabling movie creation.");
 				fconfig.moviefile=(char *)NULL;
@@ -388,9 +388,9 @@ void rrdisplayclient::connect(char *servername, unsigned short port)
 		}
 		catch(...)
 		{
-			rrout.println("[VGL] Could not connect to VGL client.  Make sure the VGL client is running and");
-			rrout.println("[VGL]    that either the DISPLAY or VGL_CLIENT environment variable points to");
-			rrout.println("[VGL]    the machine on which it is running.");
+			rrout.println("[VGL] ERROR: Could not connect to VGL client.  Make sure that vglclient is");
+			rrout.println("[VGL]    running and that either the DISPLAY or VGL_CLIENT environment");
+			rrout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
 	}

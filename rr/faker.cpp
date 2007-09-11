@@ -123,7 +123,7 @@ void __vgl_safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,m) {if(!isdead()) rrout.print("[VGL] %s--\n[VGL] %s\n", f, m);  __vgl_safeexit(1);}
+#define _die(f,m) {if(!isdead()) rrout.print("[VGL] ERROR: in function %s--\n[VGL]    %s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
@@ -174,7 +174,7 @@ void __vgl_safeexit(int retcode)
 #ifdef __DEBUG__
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	rrout.PRINT("[VGL] X11 Error--\n[VGL] %s\n", x11error(xe->error_code));
+	rrout.PRINT("[VGL] ERROR: X11 error--\n[VGL]    %s\n", x11error(xe->error_code));
 	return 0;
 }
 #endif
@@ -218,7 +218,7 @@ void __vgl_fakerinit(void)
 				device?device:"(default)");
 			if((_localdev=glPOpenDevice(device))<0)
 			{
-				rrout.print("[VGL] Could not open device %s.\n", fconfig.localdpystring);
+				rrout.print("[VGL] ERROR: Could not open GLP device %s.\n", (char *)fconfig.localdpystring);
 				__vgl_safeexit(1);
 			}
 		}
@@ -231,7 +231,7 @@ void __vgl_fakerinit(void)
 			fconfig.localdpystring?(char *)fconfig.localdpystring:"(default)");
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			rrout.print("[VGL] Could not open display %s.\n", (char *)fconfig.localdpystring);
+			rrout.print("[VGL] ERROR: Could not open display %s.\n", (char *)fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}
 	}
@@ -828,9 +828,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 		if(!glXIsDirect(_localdpy, ctx))
 		{
 			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]     %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-			rrout.println("[VGL]     If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-			rrout.println("[VGL]     permissions may be set incorrectly.");
+			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+			rrout.println("[VGL]    permissions may be set incorrectly.");
 		}
 	}
 	ctxh.add(ctx, c);
@@ -995,9 +995,9 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 		if(!glXIsDirect(_localdpy, ctx))
 		{
 			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]     %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-			rrout.println("[VGL]     If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-			rrout.println("[VGL]     permissions may be set incorrectly.");
+			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+			rrout.println("[VGL]    permissions may be set incorrectly.");
 		}
 	}
 	ctxh.add(ctx, config);

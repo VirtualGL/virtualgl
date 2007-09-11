@@ -57,7 +57,7 @@ static int glerror(void)
 	while(i!=GL_NO_ERROR)
 	{
 		ret=1;
-		rrout.print("[VGL] OpenGL error 0x%.4x\n", i);
+		rrout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
 		i=glGetError();
 	}
 	return ret;
@@ -190,7 +190,7 @@ pbwin::~pbwin(void)
 	if(_sunrayhandle)
 	{
 		if(RRSunRayDestroy(_sunrayhandle)==-1 && fconfig.verbose)
-			rrout.println("[VGL] %s", RRSunRayGetError(_sunrayhandle));
+			rrout.println("[VGL] WARNING: %s", RRSunRayGetError(_sunrayhandle));
 	}
 	#endif 
 	_mutex.unlock(false);
@@ -306,7 +306,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message=false;
 			if(!message)
 			{
-				rrout.println("[VGL] Quad-buffered stereo doesn't work in Raw Mode.");
+				rrout.println("[VGL] NOTICE: Quad-buffered stereo doesn't work with the X11 image transport.");
 				rrout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}
@@ -317,9 +317,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message2=false;
 			if(!message2)
 			{
-				rrout.println("[VGL] Cannot use quad-buffered stereo because no stereo visuals are");
-				rrout.println("[VGL]    available on the client.  Using anaglyphic stereo");
-				rrout.println("[VGL]    instead.");
+				rrout.println("[VGL] NOTICE: Cannot use quad-buffered stereo because no stereo visuals are");
+				rrout.println("[VGL]    available on the client.  Using anaglyphic stereo instead.");
 				message2=true;
 			}
 			stereomode=RRSTEREO_REDCYAN;				
@@ -386,9 +385,9 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 		{
 			if(!sroffwarned)
 			{
-				rrout.println("[VGL] Could not use the Sun Ray image transport, probably because there is no");
-				rrout.println("[VGL]    network route between this server and your Sun Ray client.");
-				rrout.println("[VGL]    Temporarily switching to the X11 image transport.");
+				rrout.println("[VGL] NOTICE: Could not use the Sun Ray image transport, probably because");
+				rrout.println("[VGL]    there is no network route between this server and your Sun Ray");
+				rrout.println("[VGL]    client.  Temporarily switching to the X11 image transport.");
 				sroffwarned=true;  sronwarned=false;
 			}
 			return -1;
@@ -398,7 +397,7 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 	{
 		if(!sronwarned)
 		{
-			rrout.println("[VGL] Sun Ray image transport has been re-activated.");
+			rrout.println("[VGL] NOTICE: Sun Ray image transport has been re-activated.");
 			sronwarned=true;
 		}
 		sroffwarned=false;
