@@ -266,12 +266,12 @@ macpkg: rr diags mesademos
 	install -m 755 $(EDIR)/tcbench $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
 	install -m 755 $(EDIR)/nettest $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
 	install -m 755 $(EDIR)/glxinfo $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
+	ln -fs /usr/bin/vglclient $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin/vglclient
+	ln -fs /usr/bin/vglconnect $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin/vglconnect
 	install -m 755 /usr/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
 	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/usr/bin/vglclient
 	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
-	echo "#!/bin/sh" > "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
-	echo vglclient >> "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
-	chmod 755 "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Start $(APPNAME) Client.command"
+	install -m 644 ReadMe-MacApp.txt "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Read Me.txt"
 	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/User's Guide.html"
 	sudo chown -R root:admin $(BLDDIR)/pkgbuild/Package_Root
 	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
