@@ -93,7 +93,11 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayserverut \
             $(EDIR)/rrframeut
 ifneq ($(platform), cygwin)
+ifneq ($(platform), osx)
+ifneq ($(platform), osxx86)
 UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
+endif
+endif
 endif
 
 TARGETS = $(EDIR)/vglclient \
@@ -101,12 +105,16 @@ TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
+ifneq ($(platform), osx)
+ifneq ($(platform), osxx86)
 VGLCONFIG = $(EDIR)/vglconfig
 ifeq ($(subplatform), 64)
 VGLCONFIG = $(EDIR)/vglconfig64
 endif
 TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
 	$(LDIR)/libdlfaker.$(SHEXT) $(VGLCONFIG) $(TARGETS)
+endif
+endif
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
