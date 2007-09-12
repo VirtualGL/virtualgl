@@ -123,7 +123,7 @@ void __vgl_safeexit(int retcode)
 	else pthread_exit(0);
 }
 
-#define _die(f,m) {if(!isdead()) rrout.print("[VGL] ERROR: in function %s--\n[VGL]    %s\n", f, m);  __vgl_safeexit(1);}
+#define _die(f,m) {if(!isdead()) rrout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  __vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
