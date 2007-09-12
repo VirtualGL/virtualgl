@@ -1,0 +1,89 @@
+#!/bin/sh
+
+VGLTUNNEL=0
+X11TUNNEL=1
+FORCE=0;
+
+usage()
+{
+	echo
+	echo "USAGE: $0 [-display <d>] [-s] [-x] [-force] [user@]hostname"
+	echo "       [Additional SSh options]"
+	echo
+	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
+	echo "               (default: read from DISPLAY environment variable)"
+	echo "-s = Tunnel VGL image transport over SSh"
+	echo "-x = Do not tunnel X11 traffic over SSh"
+	echo "-force = Force a new vglclient instance (use with caution)"
+	echo
+	exit $1
+}
+
+while [ $# -gt 0 ]
+do
+	case "$1" in
+	-d*) DISPLAY=$2; shift ;;
+	-f*) FORCE=1 ;;
+	-s*) VGLTUNNEL=1 ;;
+	-x*) X11TUNNEL=0 ;;
+	*) break ;;
+	esac
+	shift
+done
+
+if [ $# -eq 0 ]; then
+	usage 0
+fi
+
+if [ "$DISPLAY" = "" ]; then
+	echo "[VGL] ERROR: An X display must be specified, either by using the -display"
+	echo "[VGL]    argument to vglconnect or by setting the DISPLAY environment variable"
+	exit -1
+fi
+
+LOGDIR=$HOME/.vgl
+if [ ! -d $LOGDIR ]; then mkdir $LOGDIR; fi
+LOGFILE=$LOGDIR/vglconnect-`hostname`-$DISPLAY.log
+
+VGLARGS="-l "$LOGFILE" -d "$DISPLAY" -detach"
+if [ "$FORCE" = "1" ]; then VGLARGS=$VGLARGS" -force"; fi
+VGLCONNECT=`which $0`
+VGLCLIENT=`dirname $VGLCONNECT`/vglclient
+if [ ! -x $VGLCLIENT ]; then
+	if [ -x /opt/SUNWvgl/bin/vglclient ]; then
+		VGLCLIENT=/opt/SUNWvgl/bin/vglclient
+	else
+		if [ -x /opt/VirtualGL/bin/vglclient ]; then
+			VGLCLIENT=/opt/VirtualGL/bin/vglclient
+		else
+			VGLCLIENT=vglclient
+		fi
+	fi
+fi
+PORT=`$VGLCLIENT $VGLARGS || echo -1`
+echo $PORT port
+if [ "$PORT" = "-1" ]; then
+	echo "[VGL] ERROR: vglclient failed to start."
+	exit -1
+fi
+if [ "$PORT" = "" ]; then
+	echo "[VGL] ERROR: vglclient failed to start.  Check $LOGFILE for errors."
+	exit -1
+fi
+echo
+
+if [ $VGLTUNNEL = 1 ]; then
+	REMOTEPORT=`ssh -X ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport || /opt/SUNWvgl/bin/nettest -findport || nettest -findport' || echo -1`
+	if [ "$REMOTEPORT" = "" -o "$REMOTEPORT" = "-1" ]; then
+		echo "[VGL] ERROR: Could not obtain a free port on the VirtualGL server.  The"
+		echo "[VGL]    server must be running VirtualGL 2.0.1 or later for this to work."
+		exit -1
+	fi
+	ssh -t -X -R$REMOTEPORT:localhost:$PORT ${1+"$@"} 'VGL_CLIENT=localhost;export VGL_CLIENT;VGL_PORT='$REMOTEPORT';export VGL_PORT;setenv VGL_CLIENT localhost;setenv VGL_PORT '$REMOTEPORT';$SHELL -l'
+	exit 0
+fi
+
+if [ $X11TUNNEL = 1 ]; then
+	ssh -X ${1+"$@"}
+	exit 0
+fi

@@ -97,6 +97,7 @@ UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
 endif
 
 TARGETS = $(EDIR)/vglclient \
+          $(EDIR)/vglconnect \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
@@ -151,6 +152,9 @@ else
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY)
 endif
+
+$(EDIR)/vglconnect: vglconnect
+	$(INSTALL) -m 755 $< $@
 
 # Unit tests
 

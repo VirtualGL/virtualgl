@@ -112,6 +112,7 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	$(INSTALL) -m 755 $(EDIR)/vglconfig $(prefix)/bin/vglconfig
+	$(INSTALL) -m 755 $(EDIR)/vglconnect $(prefix)/bin/vglconnect
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/lib/libdlfaker.$(SHEXT)
@@ -146,6 +147,7 @@ uninstall:
 	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/bin/vglclient
 	$(RM) $(prefix)/bin/vglconfig
+	$(RM) $(prefix)/bin/vglconnect
 	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
 	$(RM) $(prefix)/lib/libdlfaker.$(SHEXT)
@@ -260,6 +262,7 @@ macpkg: rr diags mesademos
 	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
 	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
 	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
+	install -m 755 $(EDIR)/vglconnect $(BLDDIR)/pkgbuild/Package_Root/usr/bin
 	install -m 755 $(EDIR)/tcbench $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
 	install -m 755 $(EDIR)/nettest $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
 	install -m 755 $(EDIR)/glxinfo $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin

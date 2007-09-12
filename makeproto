@@ -15,6 +15,7 @@ echo d none SUNWvgl 0755 root bin
 echo d none SUNWvgl/bin 0755 root bin
 echo f none SUNWvgl/bin/vglclient 0755 root bin
 echo f none SUNWvgl/bin/vglconfig 0755 root bin
+echo f none SUNWvgl/bin/vglconnect 0755 root bin
 if [ "$_subplatform" = "64" ]; then
 echo f none SUNWvgl/bin/vglconfig64 0755 root bin
 fi
