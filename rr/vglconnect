@@ -7,7 +7,8 @@ FORCE=0;
 usage()
 {
 	echo
-	echo "USAGE: $0 [-display <d>] [-s] [-x] [-force] [user@]hostname"
+	echo "USAGE: $0"
+	echo "       [-display <d>] [-s] [-x] [-force] [user@]hostname"
 	echo "       [Additional SSh options]"
 	echo
 	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
@@ -61,7 +62,6 @@ if [ ! -x $VGLCLIENT ]; then
 	fi
 fi
 PORT=`$VGLCLIENT $VGLARGS || echo -1`
-echo $PORT port
 if [ "$PORT" = "-1" ]; then
 	echo "[VGL] ERROR: vglclient failed to start."
 	exit -1
@@ -73,17 +73,17 @@ fi
 echo
 
 if [ $VGLTUNNEL = 1 ]; then
-	REMOTEPORT=`ssh -X ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport || /opt/SUNWvgl/bin/nettest -findport || nettest -findport' || echo -1`
+	REMOTEPORT=`ssh ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport || /opt/SUNWvgl/bin/nettest -findport || nettest -findport' || echo -1`
 	if [ "$REMOTEPORT" = "" -o "$REMOTEPORT" = "-1" ]; then
 		echo "[VGL] ERROR: Could not obtain a free port on the VirtualGL server.  The"
 		echo "[VGL]    server must be running VirtualGL 2.0.1 or later for this to work."
 		exit -1
 	fi
-	ssh -t -X -R$REMOTEPORT:localhost:$PORT ${1+"$@"} 'VGL_CLIENT=localhost;export VGL_CLIENT;VGL_PORT='$REMOTEPORT';export VGL_PORT;setenv VGL_CLIENT localhost;setenv VGL_PORT '$REMOTEPORT';$SHELL -l'
+	ssh -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} 'VGL_CLIENT=localhost;export VGL_CLIENT;VGL_PORT='$REMOTEPORT';export VGL_PORT;setenv VGL_CLIENT localhost;setenv VGL_PORT '$REMOTEPORT';$SHELL -l'
 	exit 0
 fi
 
 if [ $X11TUNNEL = 1 ]; then
-	ssh -X ${1+"$@"}
+	ssh -Y ${1+"$@"}
 	exit 0
 fi
