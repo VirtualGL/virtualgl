@@ -51,11 +51,11 @@ if [ "$FORCE" = "1" ]; then VGLARGS=$VGLARGS" -force"; fi
 VGLCONNECT=`which $0`
 VGLCLIENT=`dirname $VGLCONNECT`/vglclient
 if [ ! -x $VGLCLIENT ]; then
-	if [ -x /opt/SUNWvgl/bin/vglclient ]; then
-		VGLCLIENT=/opt/SUNWvgl/bin/vglclient
+	if [ -x /opt/VirtualGL/bin/vglclient ]; then
+		VGLCLIENT=/opt/VirtualGL/bin/vglclient
 	else
-		if [ -x /opt/VirtualGL/bin/vglclient ]; then
-			VGLCLIENT=/opt/VirtualGL/bin/vglclient
+		if [ -x /opt/SUNWvgl/bin/vglclient ]; then
+			VGLCLIENT=/opt/SUNWvgl/bin/vglclient
 		else
 			VGLCLIENT=vglclient
 		fi
@@ -73,13 +73,13 @@ fi
 echo
 
 if [ $VGLTUNNEL = 1 ]; then
-	REMOTEPORT=`ssh ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport || /opt/SUNWvgl/bin/nettest -findport || nettest -findport' || echo -1`
-	if [ "$REMOTEPORT" = "" -o "$REMOTEPORT" = "-1" ]; then
-		echo "[VGL] ERROR: Could not obtain a free port on the VirtualGL server.  The"
-		echo "[VGL]    server must be running VirtualGL 2.0.1 or later for this to work."
+	REMOTEPORT=`ssh ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport && /opt/VirtualGL/bin/vgllogin -check'`
+	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
+		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
+		echo "[VGL]    installed."
 		exit -1
 	fi
-	ssh -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} 'VGL_CLIENT=localhost;export VGL_CLIENT;VGL_PORT='$REMOTEPORT';export VGL_PORT;setenv VGL_CLIENT localhost;setenv VGL_PORT '$REMOTEPORT';$SHELL -l'
+	ssh -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -s '$REMOTEPORT
 	exit 0
 fi
 
@@ -87,3 +87,17 @@ if [ $X11TUNNEL = 1 ]; then
 	ssh -Y ${1+"$@"}
 	exit 0
 fi
+
+XAUTH=xauth
+if [ -x /usr/X11R6/bin/xauth ]; then
+	XAUTH=/usr/X11R6/bin/xauth
+else
+	if [ -x /usr/openwin/bin/xauth ]; then
+		XAUTH=/usr/openwin/bin/xauth
+	fi
+fi
+XAUTHFILE=`mktemp vglconnect.XXXXXX`
+$XAUTH -f $XAUTHFILE generate $DISPLAY . trusted timeout 0
+XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
+rm -f $XUTHFILE
+ssh -t -x ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
