@@ -1,0 +1,46 @@
+#!/bin/sh
+
+if [ "$1" = "-check" ]; then exit 0; fi
+
+usage()
+{
+	echo "USAGE: $0 -s <server-side port on SSh tunnel>"
+	echo "       $0 -x <DISPLAY environment from client> <xauth MIT-MAGIC-COOKIE>"
+	exit -1
+}
+
+if [ "$1" = "" ]; then usage $0; fi
+
+if [ "$1" = "-s" ]; then
+
+	if [ "$2" = ""  ]; then usage $0; fi
+	VGL_CLIENT=localhost
+	export VGL_CLIENT
+	VGL_PORT=$2
+	export VGL_PORT
+	__VGL_SSHTUNNEL=1
+	export __VGL_SSHTUNNEL
+
+elif [ "$1" = "-x" ]; then
+
+	if [ "$2" = "" -o "$3" = "" ]; then usage $0; fi
+	XAUTH=xauth
+	if [ -x /usr/X11R6/bin/xauth ]; then
+		XAUTH=/usr/X11R6/bin/xauth
+	else
+		if [ -x /usr/openwin/bin/xauth ]; then
+			XAUTH=/usr/openwin/bin/xauth
+		fi
+	fi
+	if [ -z "$DISPLAY" ]; then
+		DNUM=`echo $2 | sed 's/.*[:]//g'`
+		SSH_IP=`echo $SSH_CLIENT | sed 's/[ ].*//g' | sed 's/.*[:]//g'`
+		if [ ! -z "$SSH_IP" -a ! -z "$DNUM" ]; then
+			DISPLAY=$SSH_IP:$DNUM
+			export DISPLAY
+		fi
+	fi	
+	$XAUTH add $DISPLAY . $3
+fi
+
+exec $SHELL -l

@@ -67,6 +67,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
 install -m 755 %{_bindir32}/vglconnect $RPM_BUILD_ROOT/usr/bin/vglconnect
+install -m 755 %{_bindir32}/vgllogin $RPM_BUILD_ROOT/usr/bin/vgllogin
 install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
@@ -92,6 +93,7 @@ ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
 ln -fs /usr/bin/vglconfig $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig
 ln -fs /usr/bin/vglconnect $RPM_BUILD_ROOT/opt/%{name}/bin/vglconnect
 ln -fs /usr/bin/vglgenkey $RPM_BUILD_ROOT/opt/%{name}/bin/vglgenkey
+ln -fs /usr/bin/vgllogin $RPM_BUILD_ROOT/opt/%{name}/bin/vgllogin
 ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_config
 ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 
@@ -124,6 +126,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/bin/vglclient
 /usr/bin/vglconfig
 /usr/bin/vglconnect
+/usr/bin/vgllogin
 /usr/bin/vglrun
 /usr/bin/vglgenkey
 /usr/bin/vglserver_config
@@ -136,6 +139,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/vglconfig
 /opt/%{name}/bin/vglconnect
 /opt/%{name}/bin/vglgenkey
+/opt/%{name}/bin/vgllogin
 /opt/%{name}/bin/vglserver_config
 /opt/%{name}/bin/vglrun
 /opt/%{name}/bin/glxspheres

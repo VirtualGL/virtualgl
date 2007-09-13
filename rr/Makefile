@@ -112,7 +112,8 @@ ifeq ($(subplatform), 64)
 VGLCONFIG = $(EDIR)/vglconfig64
 endif
 TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
-	$(LDIR)/libdlfaker.$(SHEXT) $(VGLCONFIG) $(TARGETS)
+	$(LDIR)/libdlfaker.$(SHEXT) $(VGLCONFIG) $(EDIR)/vglrun \
+	$(EDIR)/vgllogin $(TARGETS)
 endif
 endif
 endif
@@ -126,8 +127,6 @@ RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
 endif
 endif
 RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB) -lm $(MLIB)
-
-TARGETS := $(TARGETS) $(EDIR)/vglrun
 
 
 all: $(TARGETS)
@@ -146,6 +145,9 @@ $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
 
 $(EDIR)/vglrun: vglrun
+	$(INSTALL) -m 755 $< $@
+
+$(EDIR)/vgllogin: vgllogin
 	$(INSTALL) -m 755 $< $@
 
 $(VGLCONFIG): $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a

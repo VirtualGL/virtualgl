@@ -85,6 +85,7 @@ install: rr
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
 	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
+	$(INSTALL) -m 755 $(EDIR)/vgllogin $(prefix)/bin/vgllogin
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
@@ -107,6 +108,7 @@ install: rr diags mesademos
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
 	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
+	$(INSTALL) -m 755 $(EDIR)/vgllogin $(prefix)/bin/vgllogin
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
@@ -133,6 +135,7 @@ endif
 
 ifeq ($(subplatform), 64)
 uninstall:
+	$(RM) $(prefix)/bin/vgllogin
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
@@ -143,6 +146,7 @@ uninstall:
 	echo Uninstall complete.
 else
 uninstall:
+	$(RM) $(prefix)/bin/vgllogin
 	$(RM) $(prefix)/bin/vglrun
 	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/bin/vglclient
