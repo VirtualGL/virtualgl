@@ -96,7 +96,7 @@ else
 		XAUTH=/usr/openwin/bin/xauth
 	fi
 fi
-XAUTHFILE=`mktemp vglconnect.XXXXXX`
+XAUTHFILE=`mktemp /tmp/vglconnect.XXXXXX`
 $XAUTH -f $XAUTHFILE generate $DISPLAY . trusted timeout 0
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XUTHFILE
