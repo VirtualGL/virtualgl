@@ -252,7 +252,7 @@ unsigned short rrsocket::listen(unsigned short port, bool findport)
 	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
 	#endif
 
-	int m=1;  struct sockaddr_in myaddr;
+	int m=1, m2=0;  struct sockaddr_in myaddr;
 
 	if(_sd!=INVALID_SOCKET) _throw("Already connected");
 	#ifdef USESSL
@@ -261,7 +261,7 @@ unsigned short rrsocket::listen(unsigned short port, bool findport)
 
 	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET) _throwsock();
 	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)) );
-	trysock( setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m, sizeof(int)) );
+	trysock( setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2, sizeof(int)) );
 
 	memset(&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family=AF_INET;
