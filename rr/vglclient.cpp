@@ -26,7 +26,7 @@
 #define snprintf _snprintf
 #endif
 
-bool restart=true;
+bool restart;
 bool deadyet;
 unsigned short port=0;
 #ifdef USESSL
@@ -35,7 +35,7 @@ bool ssl=true, nonssl=true;
 #endif
 int drawmethod=RR_DRAWAUTO;
 Display *maindpy=NULL;
-bool compat=false, detach=false, force=false;
+bool detach=false, force=false, child=false;
 char *logfile=NULL;
 
 void start(char *);
@@ -93,7 +93,7 @@ void usage(char *progname)
 	#ifdef USESSL
 	fprintf(stderr, "[-sslport <port>] [-sslonly] [-nossl]\n       ");
 	#endif
-	fprintf(stderr, "[-l <file>] [-detach] [-force] [-old] [-v] [-x] [-gl]\n");
+	fprintf(stderr, "[-l <file>] [-detach] [-force] [-v] [-x] [-gl]\n");
 	fprintf(stderr, "\n-h or -? = This help screen\n");
 	fprintf(stderr, "-display = The X display to which to draw the images received from the\n");
 	fprintf(stderr, "           VirtualGL server (default = read from the DISPLAY environment\n");
@@ -110,22 +110,19 @@ void usage(char *progname)
 	fprintf(stderr, "-force = Force VGLclient to run, even if there is already another instance\n");
 	fprintf(stderr, "         running on the same X display (use with caution)\n");
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
-	fprintf(stderr, "-old = equivalent to '-port 4242 -sslport 4243'.  Use this when talking to\n");
-	fprintf(stderr, "       2.0 or earlier VirtualGL servers\n");
 	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing (default for x86 systems)\n");
 	fprintf(stderr, "-gl = Use OpenGL drawing (default for Sparc systems with 3D accelerators)\n");
 }
 
 #ifdef _WIN32
-bool child=false;
 
 void daemonize(void)
 {
 	STARTUPINFO si={0};  PROCESS_INFORMATION pi;
 	char cl[MAX_PATH+1];
-	snprintf(cl, MAX_PATH, "%s -port %d -sslport %d -child", GetCommandLine(),
-		port, sslport);
+	snprintf(cl, MAX_PATH, "%s --child", GetCommandLine());
+	fclose(stdin);  fclose(stdout);  fclose(stderr);
 	if(!CreateProcess(NULL, cl, NULL, NULL, FALSE, 0, NULL, NULL,
 		&si, &pi)) _throww32();
 }
@@ -136,10 +133,10 @@ void daemonize(void)
 {
 	int err;
 	if(getppid()==1) return;
-	fclose(stdin);  fclose(stdout);  fclose(stderr);
 	err=fork();
 	if(err<0) exit(-1);
 	if(err>0) exit(0);
+	child=true;
 	setsid();
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGTSTP, SIG_IGN);
@@ -220,7 +217,6 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-v")) printversion=true;
 		if(!stricmp(argv[i], "-force")) force=true;
 		if(!stricmp(argv[i], "-detach")) detach=true;
-		if(!stricmp(argv[i], "-old")) compat=true;
 		if(!stricmp(argv[i], "-port"))
 		{
 			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
@@ -242,70 +238,19 @@ int main(int argc, char *argv[])
 			if(i<argc-1) displayname=argv[++i];
 		}
 		#ifdef _WIN32
-		if(!stricmp(argv[i], "-child")) {child=true;  detach=false;}
+		if(!stricmp(argv[i], "--child")) {child=true;  detach=false;}
 		#endif
+	}
+
+	if(!child)
+	{
+		rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
+		if(printversion) return 0;
+		if(detach) daemonize();
 	}
 
 	#ifdef _WIN32
-	if(!child) {
-	#endif
-
-	rrout.println("\n%s Client v%s (Build %s)", __APPNAME, __VERSION, __BUILD);
-	if(printversion) return 0;
-
-	if(!force)
-	{
-		Display *dpy=NULL;
-		if((dpy=XOpenDisplay(displayname))==NULL)
-			_throw("Could not open display");
-		unsigned short actualport=instancecheck(dpy);
-		#ifdef USESSL
-		unsigned short actualsslport=instancecheckssl(dpy);
-		#endif
-		XCloseDisplay(dpy);
-
-		if(actualport!=0
-		#ifdef USESSL
-		&& actualsslport!=0
-		#endif
-		)
-		{
-			if(detach) printf("%d\n", actualport);
-			return 0;
-		}
-	}
-
-	if(logfile)	rrout.println("Redirecting output to %s", logfile);
-
-	#ifdef USESSL
-	if(sslport==0)
-	{
-		rrsocket sd(true);
-		sslport=sd.listen(0, true);
-		sd.close();
-	}
-	#endif
-	if(port==0)
-	{
-		rrsocket sd(false);
-		port=sd.listen(0, true);
-		sd.close();
-	}
-
-	if(detach)
-	{
-		printf("%d\n", port);
-		daemonize();
-	}
-
-
-	#ifdef _WIN32
-	}
-	if(!detach)
-	{
-		if(child) FreeConsole();
-		start(displayname);
-	}
+	if(!detach) start(displayname);
 	#else
 	start(displayname);
 	#endif
@@ -331,8 +276,7 @@ void start(char *displayname)
 	rrdisplayserver *rrssldpy=NULL;
   Atom sslport_atom=None;  unsigned short actualsslport=0;
 	#endif
-
-	if(logfile) rrout.logto(logfile);
+	bool newlistener=false;
 
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
 	#ifdef SUNOGL
@@ -350,40 +294,101 @@ void start(char *displayname)
 
 	try {
 
+	restart=false;
+
 	if((maindpy=XOpenDisplay(displayname))==NULL)
 		_throw("Could not open display");
 
 	#ifdef USESSL
 	if(ssl)
 	{
-		if(!(rrssldpy=new rrdisplayserver(compat? RR_DEFAULTSSLPORT:sslport,
-			true, drawmethod)))
-			_throw("Could not initialize SSL listener");
-		rrout.println("Listening for SSL connections on port %d",
-			actualsslport=rrssldpy->port());
-		if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
-			_throw("Could not get _VGLCLIENT_SSLPORT atom");
-		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			sslport_atom, XA_INTEGER, 16, PropModeReplace,
-			(unsigned char *)&actualsslport, 1);
+		if(!force) actualsslport=instancecheckssl(maindpy);
+		if(actualsslport==0)
+		{
+			if(!(rrssldpy=new rrdisplayserver(true, drawmethod)))
+				_throw("Could not initialize SSL listener");
+			if(sslport==0)
+			{
+				bool success=false;  unsigned short i=RR_DEFAULTSSLPORT;
+				do
+				{
+					try
+					{
+						rrssldpy->listen(i);
+						success=true;
+					}
+					catch(...) {success=false;  if(i==0) throw;}
+					i++;  if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+				} while(!success);
+			}
+			else rrssldpy->listen(sslport);
+			rrout.println("Listening for SSL connections on port %d",
+				actualsslport=rrssldpy->port());
+			if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
+				_throw("Could not get _VGLCLIENT_SSLPORT atom");
+			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+				sslport_atom, XA_INTEGER, 16, PropModeReplace,
+				(unsigned char *)&actualsslport, 1);
+			newlistener=true;
+		}
 	}
 	if(nonssl)
 	#endif
 	{
-		if(!(rrdpy=new rrdisplayserver(compat? RR_DEFAULTPORT:port,
-			false, drawmethod)))
-			_throw("Could not initialize listener");
-		rrout.println("Listening for unencrypted connections on port %d",
-			actualport=rrdpy->port());
-		if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
-			_throw("Could not get _VGLCLIENT_PORT atom");
-		XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			port_atom, XA_INTEGER, 16, PropModeReplace,
-			(unsigned char *)&actualport, 1);
+		if(!force) actualport=instancecheck(maindpy);
+		if(actualport==0)
+		{
+			if(!(rrdpy=new rrdisplayserver(false, drawmethod)))
+				_throw("Could not initialize listener");
+			if(port==0)
+			{
+				bool success=false;  unsigned short i=RR_DEFAULTPORT;
+				do
+				{
+					try
+					{
+						rrdpy->listen(i);
+						success=true;
+					}
+					catch(...) {success=false;  if(i==0) throw;}
+					i++;  if(i==RR_DEFAULTSSLPORT) i++;
+					if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+				} while(!success);
+			}
+			else rrdpy->listen(port);
+			rrout.println("Listening for unencrypted connections on port %d",
+				actualport=rrdpy->port());
+			if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
+				_throw("Could not get _VGLCLIENT_PORT atom");
+			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+				port_atom, XA_INTEGER, 16, PropModeReplace,
+				(unsigned char *)&actualport, 1);
+			newlistener=true;
+		}
 	}
-	XSync(maindpy, False);
-	rrout.flush();
 
+	if(logfile && newlistener)
+	{
+		rrout.println("Redirecting output to %s", logfile);
+		rrout.logto(logfile);
+	}
+
+	if(child)
+	{
+		printf("%d\n", actualport);
+		#ifdef _WIN32
+		FreeConsole();
+		#endif
+		fclose(stdin);  fclose(stdout);  fclose(stderr);
+	}
+
+	if(!newlistener)
+	{
+		if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
+		return;
+	}
+
+	restart=true;
 	while(!deadyet)
 	{
 		if(XPending(maindpy)>0) {}
@@ -415,6 +420,6 @@ void start(char *displayname)
 
 	if(restart)
 	{
-		deadyet=restart=false;  goto start;
+		deadyet=restart=false;  actualport=actualsslport=0;  goto start;
 	}
 }
