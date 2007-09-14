@@ -64,17 +64,14 @@ static unsigned short DisplayNumber(Display *dpy)
 	h.flags=h1.flags;  \
 	h.dpynum=(unsigned short)h1.dpynum;}
 
-rrdisplayserver::rrdisplayserver(unsigned short port, bool dossl, int drawmethod) :
+rrdisplayserver::rrdisplayserver(bool dossl, int drawmethod) :
 	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false),
 	_dossl(dossl)
 {
-	errifnot(_listensd=new rrsocket(dossl));
-	_port=_listensd->listen(port);
 	char *env=NULL;
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(rrout.getfile());
 	errifnot(_t=new Thread(this));
-	_t->start();
 }
 
 rrdisplayserver::~rrdisplayserver(void)
@@ -82,6 +79,21 @@ rrdisplayserver::~rrdisplayserver(void)
 	_deadyet=true;
 	if(_listensd) _listensd->close();
 	if(_t) {_t->stop();  _t=NULL;}
+}
+
+void rrdisplayserver::listen(unsigned short port)
+{
+	try
+	{
+		errifnot(_listensd=new rrsocket(_dossl));
+		_port=_listensd->listen(port);
+	}
+	catch(...)
+	{
+		if(_listensd) {delete _listensd;  _listensd=NULL;}
+		throw;
+	}
+	_t->start();
 }
 
 void rrdisplayserver::run(void)

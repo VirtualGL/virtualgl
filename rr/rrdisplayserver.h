@@ -24,7 +24,8 @@ class rrdisplayserver : public Runnable
 {
 	public:
 
-	rrdisplayserver(unsigned short, bool, int _drawmethod);
+	rrdisplayserver(bool, int _drawmethod);
+	void listen(unsigned short);
 	unsigned short port(void) {return _port;}
 	virtual ~rrdisplayserver(void);
 
