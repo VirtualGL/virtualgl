@@ -111,6 +111,13 @@ else
 fi
 XAUTHFILE=`mktemp /tmp/vglconnect.XXXXXX`
 $XAUTH -f $XAUTHFILE generate $DISPLAY . trusted timeout 0
+if [ $? -ne 0 ]; then
+	echo "[VGL] ERROR: Could not generate xauth key, possibly because the X server does"
+	echo "[VGL]    not have the SECURITY extension (this is normal for TurboVNC) or"
+	echo "[VGL]    because the xauth command could not be found."
+	rm -f $XAUTHFILE
+	exit -1
+fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XUTHFILE
 ssh -t -x ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
