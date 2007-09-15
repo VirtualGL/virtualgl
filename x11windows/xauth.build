@@ -1,0 +1,72 @@
+#!/bin/sh
+
+case `uname -s` in
+CYGWIN_NT*) ;;
+*) echo ERROR: This script can only be run in a Cygwin environment ; exit -1 ;;
+esac
+
+CCDIR=/usr/i686-pc-mingw32
+
+pkgerr()
+{
+	echo "ERROR: You must have the following Cygwin packages installed:"
+	echo "   binutils, bison, bzip2, cvs, flex, gcc, gcc-mingw, make,"
+	echo "   mingw-runtime, tar, wget"
+	exit -1
+}
+
+BINFILES="ar.exe as.exe bison.exe cpp.exe dllwrap.exe flex.exe ld.exe nm.exe \
+ranlib.exe strip.exe windres.exe"
+
+if [ ! -d $CCDIR ]; then pkgerr; fi;
+if [ ! -h $CCDIR/bin -a ! -d $CCDIR/bin ]; then pkgerr; fi
+if [ ! -h $CCDIR/include -a ! -d $CCDIR/include ]; then pkgerr; fi
+if [ ! -h $CCDIR/lib -a ! -d $CCDIR/lib ]; then pkgerr; fi
+
+echo "#!/bin/bash" >$CCDIR/bin/cc
+echo "/usr/bin/gcc -mno-cygwin \"\$@\"" >>$CCDIR/bin/cc
+cp $CCDIR/bin/cc $CCDIR/bin/gcc
+chmod 755 $CCDIR/bin/cc $CCDIR/bin/gcc
+
+for i in $BINFILES; do
+	if [ ! -x /usr/bin/$i ]; then pkgerr; fi
+done
+
+for i in $BINFILES; do
+	ln -fs /usr/bin/$i $CCDIR/bin
+done
+
+ln -fs /usr/include/w32api $CCDIR/include
+
+if [ ! -f X11R6.9.0-src.tar.bz2 ]; then
+	which wget || pkgerr
+	wget http://xorg.freedesktop.org/releases/X11R6.9.0/src-single/X11R6.9.0-src.tar.bz2 || exit -1
+fi
+if [ -d xc ]; then
+	rm -rf xc
+fi
+tar xvfj X11R6.9.0-src.tar.bz2 || exit -1
+
+cd xc
+patch -p0 <../xauth.patch || exit -1
+
+make CROSSCOMPILEDIR=$CCDIR/bin World || exit -1
+
+cd lib/Xau
+make || exit -1
+cd ../X11
+make || exit -1
+cd ../ICE
+make || exit -1
+cd ../SM
+make || exit -1
+cd ../Xt
+make || exit -1
+cd ../Xext
+make || exit -1
+cd ../Xmu
+make || exit -1
+cd ../Xmuu
+make || exit -1
+cd ../../programs/xauth
+make || exit -1
