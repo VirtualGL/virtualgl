@@ -79,7 +79,7 @@ else
 	fi
 	PORT=`$VGLCLIENT $VGLARGS`
 	if [ $? -ne 0 -o "$PORT" = "" ]; then
-		echo "[VGL] ERROR: vglclient failed to start.  Check $LOGFILE for errors."
+		echo "[VGL] ERROR: vglclient failed to execute."
 		exit 1
 	fi
 	echo
