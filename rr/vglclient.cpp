@@ -122,7 +122,6 @@ void daemonize(void)
 	STARTUPINFO si={0};  PROCESS_INFORMATION pi;
 	char cl[MAX_PATH+1];
 	snprintf(cl, MAX_PATH, "%s --child", GetCommandLine());
-	fclose(stdin);  fclose(stdout);  fclose(stderr);
 	if(!CreateProcess(NULL, cl, NULL, NULL, FALSE, 0, NULL, NULL,
 		&si, &pi)) _throww32();
 }
