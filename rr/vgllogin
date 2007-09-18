@@ -6,7 +6,7 @@ usage()
 {
 	echo "USAGE: $0 -s <server-side port on SSh tunnel>"
 	echo "       $0 -x <DISPLAY environment from client> <xauth MIT-MAGIC-COOKIE>"
-	exit -1
+	exit 1
 }
 
 if [ "$1" = "" ]; then usage $0; fi
@@ -39,7 +39,7 @@ elif [ "$1" = "-x" ]; then
 			DISPLAY=$SSH_IP:$DNUM
 			export DISPLAY
 		fi
-	fi	
+	fi
 	$XAUTH add $DISPLAY . $3
 fi
 

@@ -39,14 +39,14 @@ fi
 if [ "$DISPLAY" = "" ]; then
 	echo "[VGL] ERROR: An X display must be specified, either by using the -display"
 	echo "[VGL]    argument to vglconnect or by setting the DISPLAY environment variable"
-	exit -1
+	exit 1
 fi
 
 SSHARG='-X'
 SSHVER=`ssh -V 2>&1 | sed 's/.*[_]//g' | sed 's/[, ].*//g'`
 if [ $? -ne 0 -o "$SSHVER" = "" ]; then
 	echo "[VGL] ERROR: Could not find ssh in your PATH."
-	exit -1
+	exit 1
 fi
 case "$SSHVER" in
 3.8*) SSHARG='-Y' ;;
@@ -80,7 +80,7 @@ else
 	PORT=`$VGLCLIENT $VGLARGS`
 	if [ $? -ne 0 -o "$PORT" = "" ]; then
 		echo "[VGL] ERROR: vglclient failed to start.  Check $LOGFILE for errors."
-		exit -1
+		exit 1
 	fi
 	echo
 fi
@@ -90,7 +90,7 @@ if [ $VGLTUNNEL = 1 ]; then
 	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
 		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
 		echo "[VGL]    installed."
-		exit -1
+		exit 1
 	fi
 	ssh -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -s '$REMOTEPORT
 	exit 0
@@ -116,7 +116,7 @@ if [ $? -ne 0 ]; then
 	echo "[VGL]    not have the SECURITY extension (this is normal for TurboVNC) or"
 	echo "[VGL]    because the xauth command could not be found."
 	rm -f $XAUTHFILE
-	exit -1
+	exit 1
 fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XUTHFILE
