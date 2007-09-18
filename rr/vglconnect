@@ -120,4 +120,4 @@ if [ $? -ne 0 ]; then
 fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XUTHFILE
-ssh -t -x ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
+ssh -t -x ${1+"$@"} 'exec /opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
