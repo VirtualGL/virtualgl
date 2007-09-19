@@ -28,6 +28,7 @@ UNITTESTS = $(EDIR)/rrblitterut.exe \
             $(EDIR)/rrframeut.exe
 
 TARGETS = $(EDIR)/vglclient.exe \
+          $(EDIR)/vglconnect.bat \
           $(UNITTESTS)
 
 RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/rrsocket.lib
@@ -48,6 +49,9 @@ $(OBJS): $(HDRS)
 $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
 	$(LINK) $(LDFLAGS) $(COBJS) -out:$@ $(RRLIB) advapi32.lib user32.lib \
 		psapi.lib
+
+$(EDIR)/vglconnect.bat: vglconnect.bat
+	cp $< $@
 
 # Unit tests
 
