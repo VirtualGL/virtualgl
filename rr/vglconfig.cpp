@@ -32,14 +32,14 @@
 #include "rrlog.h"
 
 Fl_Double_Window *win=NULL;
-Fl_Choice *compchoice=NULL, *mcompchoice=NULL, *sampchoice=NULL,
-	*stereochoice=NULL, *msampchoice=NULL, *profchoice=NULL;
+Fl_Choice *compchoice=NULL/*, *mcompchoice=NULL*/, *sampchoice=NULL,
+	*stereochoice=NULL/*, *msampchoice=NULL*/, *profchoice=NULL;
 Fl_Light_Button *progbutton=NULL, *spoilbutton=NULL, *ifbutton=NULL;
-Fl_Value_Slider *qualslider=NULL, *mqualslider=NULL;
+Fl_Value_Slider *qualslider=NULL/*, *mqualslider=NULL*/;
 Fl_Float_Input *gammainput=NULL, *fpsinput;
-Fl_Input *movieinput=NULL;
-Fl_Check_Button *fpsbutton=NULL, *mcbutton=NULL;
-Fl_Group *moviebox=NULL;
+/*Fl_Input *movieinput=NULL;*/
+Fl_Check_Button *fpsbutton=NULL/*, *mcbutton=NULL*/;
+/*Fl_Group *moviebox=NULL;*/
 Display *_dpy=NULL;
 int ppid=-1;
 
@@ -158,6 +158,7 @@ void SetFPS(void)
 	else fpsinput->deactivate();
 }
 
+#if 0
 void SetMovie(void)
 {
 	if(mcompchoice)
@@ -189,6 +190,7 @@ void SetMovie(void)
 		else mqualslider->activate();
 	}
 }
+#endif
 
 
 void CompCB(Fl_Widget *w, void *data)
@@ -286,6 +288,7 @@ void FPSCB(Fl_Widget *w, void *data)
 	input->value(temps);
 }
 
+#if 0
 void MovieCB(Fl_Widget *w, void *data)
 {
 	Fl_Input *input=(Fl_Input *)w;
@@ -312,6 +315,7 @@ void MQualCB(Fl_Widget *w, void *data)
 	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
 	fconfig.mqual=(int)slider->value();
 }
+#endif
 
 
 Fl_Menu_Item compmenu[]=
@@ -353,6 +357,7 @@ Fl_Menu_Item stereomenu[]=
 	{0, 0, 0, 0}
 };
 
+#if 0
 Fl_Menu_Item mcompmenu[]=
 {
 	{"JPEG", 0, MCompCB, (void *)RRCOMP_JPEG},
@@ -368,13 +373,14 @@ Fl_Menu_Item msampmenu[]=
 	{"4X", 0, MSampCB, (void *)4},
 	{0, 0, 0, 0}
 };
+#endif
 
 
 void init(int argc, char **argv)
 {
 	char temps[20];
 
-	errifnot(win=new Fl_Double_Window(485, 615, "VirtualGL Configuration"));
+	errifnot(win=new Fl_Double_Window(485, 375, "VirtualGL Configuration"));
 
 	errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
 		"Image Compression (Transport): "));
@@ -433,6 +439,7 @@ void init(int argc, char **argv)
 	fpsinput->callback(FPSCB, 0);
 	SetFPS();
 
+	#if 0
 	errifnot(moviebox=new Fl_Group(10, 430, 465, 175, "Movie Recorder"));
 	moviebox->box(FL_ENGRAVED_BOX);
 
@@ -458,6 +465,7 @@ void init(int argc, char **argv)
 	mqualslider->slider_size(0.01);
 
 	SetMovie();
+	#endif
 
 	win->end();
   win->show(argc, argv);
