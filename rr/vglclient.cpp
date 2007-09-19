@@ -89,6 +89,24 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	}
 	return 1;
 }
+
+#ifdef _WIN32
+BOOL consolehandler(DWORD type)
+{ 
+	switch(type)
+	{
+		case CTRL_C_EVENT: 
+		case CTRL_CLOSE_EVENT: 
+		case CTRL_BREAK_EVENT: 
+		case CTRL_LOGOFF_EVENT: 
+		case CTRL_SHUTDOWN_EVENT: 
+			restart=false;  deadyet=true;  return TRUE;
+		default: 
+			return FALSE; 
+  } 
+} 
+#endif
+ 
 } // extern "C"
 
 
@@ -120,7 +138,7 @@ void killproc(void)
 						if(strlen(ptr) && !stricmp(ptr, "vglclient.exe"))
 						{
 							rrout.println("Terminating vglclient process %d", pid[i]);
-							TerminateProcess(ph, 0);
+							TerminateProcess(ph, 0);  WaitForSingleObject(ph, INFINITE);
 						}
 					}
 				}
@@ -364,6 +382,7 @@ int main(int argc, char *argv[])
 }
 
 
+
 void start(char *displayname)
 {
 	rrdisplayserver *rrdpy=NULL;
@@ -381,7 +400,9 @@ void start(char *displayname)
 
 	signal(SIGINT, handler);
 	signal(SIGTERM, handler);
-	#ifndef _WIN32
+	#ifdef _WIN32
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)consolehandler, TRUE);
+	#else
 	signal(SIGHUP, handler);
 	#endif
 	XSetErrorHandler(xhandler);
