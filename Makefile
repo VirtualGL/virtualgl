@@ -1,15 +1,15 @@
 all: rr mesademos diags
 ALL: dist mesademos
 
-.PHONY: rr util jpeg mesademos diags clean dist test fltk
+.PHONY: rr util jpeg mesademos diags clean dist test fltk x11windows
 
 vnc:
 	$(MAKE) DISTRO=vnc VNC=yes jpeg
 
-rr: util jpeg fltk
+rr: util jpeg fltk x11windows
 jpeg: util
 
-rr util jpeg mesademos diags fltk:
+rr util jpeg mesademos diags fltk x11windows:
 	cd $@; $(MAKE); cd ..
 
 clean:
@@ -18,7 +18,8 @@ clean:
 	cd jpeg; $(MAKE) clean; cd ..; \
 	cd mesademos; $(MAKE) clean; cd ..; \
 	cd diags; $(MAKE) clean; cd ..; \
-	cd fltk; $(MAKE) clean; cd ..;
+	cd fltk; $(MAKE) clean; cd ..; \
+	cd x11windows; $(MAKE) clean; cd ..;
 
 TOPDIR=.
 include Makerules
