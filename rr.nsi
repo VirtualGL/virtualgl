@@ -19,6 +19,8 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "doc\*.html"
 	SetOutPath $INSTDIR
 	File "${BLDDIR}\bin\vglclient.exe"
+	File "${BLDDIR}\bin\vglconnect.bat"
+	File "${BLDDIR}\bin\xauth.exe"
 	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
@@ -43,7 +45,6 @@ Section "Start Menu Shortcuts (required)"
 	SetShellVarContext all
 	CreateDirectory "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Uninstall ${APPNAME} Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Start ${APPNAME} Client.lnk" "$INSTDIR\vglclient.exe"
 	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} User's Guide.lnk" "$INSTDIR\doc\index.html"
 
 SectionEnd
@@ -51,11 +52,14 @@ SectionEnd
 Section "Uninstall"
 
 	SetShellVarContext all
+	ExecWait "$INSTDIR\vglclient.exe -kill"
 
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}"
 
 	Delete $INSTDIR\vglclient.exe
+	Delete $INSTDIR\vglconnect.bat
+	Delete $INSTDIR\xauth.exe
 	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
