@@ -111,13 +111,27 @@ BOOL consolehandler(DWORD type)
 } // extern "C"
 
 
-void killproc(void)
+void killproc(bool useronly)
 {
 	#ifdef _WIN32
 	DWORD pid[1024], bytes;
 	int nps=0, nmod=0, i, j;
 	char filename[MAX_PATH], *ptr;
-	HMODULE mod[1024];  HANDLE ph=NULL;
+	HMODULE mod[1024];  HANDLE ph=NULL, token=0;
+
+	if(!useronly)
+	{
+		tryw32(OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES,
+			&token));
+		errifnot(token);
+		TOKEN_PRIVILEGES tp;  LUID luid;
+		if(!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) _throww32();
+		tp.PrivilegeCount=1;
+		tp.Privileges[0].Luid=luid;
+		tp.Privileges[0].Attributes=SE_PRIVILEGE_ENABLED;
+		if(!AdjustTokenPrivileges(token, FALSE, &tp, sizeof(TOKEN_PRIVILEGES),
+			NULL, NULL)) _throww32();
+	}
 
 	try
 	{
@@ -146,13 +160,18 @@ void killproc(void)
 			}
 			CloseHandle(ph);  ph=NULL;
 		}
+		if(token) {CloseHandle(token);  token=0;}
 	}
 	catch(...)
 	{
-		if(ph) CloseHandle(ph);  throw;
+		if(ph) CloseHandle(ph);
+		if(token) CloseHandle(token);
+		throw;
 	}
 	#else
 	DIR *procdir=NULL;  struct dirent *dent=NULL;  int fd=-1;
+
+	if(!useronly && getuid()!=0) _throw("Only root can do that");
 
 	try
 	{
@@ -166,7 +185,7 @@ void killproc(void)
 				if(pid==getpid()) continue;
 				sprintf(temps, "/proc/%s/stat", dent->d_name);
 				if((fd=open(temps, O_RDONLY))==-1) continue;
-				if(fstat(fd, &fsbuf)!=-1 && fsbuf.st_uid==getuid())
+				if(fstat(fd, &fsbuf)!=-1 && (fsbuf.st_uid==getuid() || !useronly))
 				{
 					char *ptr=NULL;  int bytes=0;
 					if((bytes=read(fd, temps, 1023))>0 && bytes<1024)
@@ -331,7 +350,8 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-v")) printversion=true;
 		if(!stricmp(argv[i], "-force")) force=true;
 		if(!stricmp(argv[i], "-detach")) detach=true;
-		if(!stricmp(argv[i], "-kill")) {killproc();  return 0;}
+		if(!stricmp(argv[i], "-kill")) {killproc(true);  return 0;}
+		if(!stricmp(argv[i], "-killall")) {killproc(false);  return 0;}
 		if(!stricmp(argv[i], "-port"))
 		{
 			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
