@@ -52,7 +52,7 @@ SectionEnd
 Section "Uninstall"
 
 	SetShellVarContext all
-	ExecWait "$INSTDIR\vglclient.exe -kill"
+	ExecWait "$INSTDIR\vglclient.exe -killall"
 
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}"
