@@ -1,24 +1,15 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set SSHPATH=
-if not "%VGLCONNECT_SSHPATH%"=="" set SSHPATH=%VGLCONNECT_SSHPATH% & goto sshfound
 for %%i in ("ssh.exe") do set SSHPATH=%%~$PATH:i
 if not "%SSHPATH%"=="" goto sshfound
-if exist c:\cygwin\bin\ssh.exe set SSHPATH=c:\cygwin\bin\ssh.exe & goto sshfound
-if exist "c:\Program Files\OpenSSH\bin\ssh.exe" set SSHPATH=c:\Program Files\OpenSSH\bin\ssh.exe & goto sshfound
 echo.
-echo [VGL] ERROR: Could not find an SSh client.  vglconnect seaches for the
-echo [VGL]    following SSh clients (in the following order)
-echo [VGL]    - Any version of ssh.exe in your PATH
-echo [VGL]    - CygWin:  c:\cygwin\bin\ssh.exe
-echo [VGL]    - SSHWindows:  c:\Program Files\OpenSSH\bin\ssh.exe
-echo [VGL]    You can specify the location of another SSh executable by setting
-echo [VGL]    the VGLCONNECT_SSHPATH environment variable.
+echo [VGL] ERROR: Could not find an SSh client.  vglconnect requires an OpenSSh-
+echo [VGL]    compatible version of SSh, such as Cygwin or SSHWindows.  The
+echo [VGL]    directory containing ssh.exe must be in your PATH.
 goto done
 
 :sshfound
-echo %SSHPATH%
 
 set VGLTUNNEL=0
 set X11TUNNEL=1
@@ -91,7 +82,7 @@ if "%VGLTUNNEL%"=="1" goto vgltunnel
 if "%X11TUNNEL%"=="1" goto x11tunnel
 
 set XAUTH=%~d0%~p0xauth.exe
-if not exist %XAUTH% set XAUTH=xauth
+if not exist "%XAUTH%" set XAUTH=xauth
 :mktemp
 if not "%TEMP%"=="" set TMPDIR=%TEMP%
 if "%TMPDIR%"=="" if not "%TMP%"=="" set TMPDIR=%TMP%
