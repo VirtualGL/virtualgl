@@ -46,7 +46,8 @@ $(OBJS): $(HDRS)
 
 
 $(EDIR)/vglclient.exe: $(COBJS) $(RRDEP)
-	$(LINK) $(LDFLAGS) $(COBJS) -out:$@ $(RRLIB) advapi32.lib user32.lib
+	$(LINK) $(LDFLAGS) $(COBJS) -out:$@ $(RRLIB) advapi32.lib user32.lib \
+		psapi.lib
 
 # Unit tests
 

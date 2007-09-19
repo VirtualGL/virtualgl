@@ -25,6 +25,12 @@
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
+#ifdef _WIN32
+#include <psapi.h>
+#else
+#include <dirent.h>
+#include <pwd.h>
+#endif
 
 bool restart;
 bool deadyet;
@@ -86,6 +92,95 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 } // extern "C"
 
 
+void killproc(void)
+{
+	#ifdef _WIN32
+	DWORD pid[1024], bytes;
+	int nps=0, nmod=0, i, j;
+	char filename[MAX_PATH], *ptr;
+	HMODULE mod[1024];  HANDLE ph=NULL;
+
+	try
+	{
+		tryw32(EnumProcesses(pid, 1024, &bytes));
+		nps=bytes/sizeof(DWORD);
+		if(nps) for(i=0; i<nps; i++)
+		{
+			if(pid[i]==GetCurrentProcessId()) continue;
+			if(!(ph=OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid[i]))) continue;
+			if(EnumProcessModules(ph, mod, 1024, &bytes))
+			{
+				nmod=bytes/sizeof(DWORD);
+				if(nmod) for(j=0; j<nmod; j++)
+				{
+					if(GetModuleFileNameEx(ph, mod[j], filename, MAX_PATH))
+					{
+						ptr=strrchr(filename, '\\');
+						if(ptr) ptr=&ptr[1];  else ptr=filename;
+						if(strlen(ptr) && !stricmp(ptr, "vglclient.exe"))
+						{
+							rrout.println("Terminating vglclient process %d", pid[i]);
+							TerminateProcess(ph, 0);
+						}
+					}
+				}
+			}
+			CloseHandle(ph);  ph=NULL;
+		}
+	}
+	catch(...)
+	{
+		if(ph) CloseHandle(ph);  throw;
+	}
+	#else
+	DIR *procdir=NULL;  struct dirent *dent=NULL;  int fd=-1;
+
+	try
+	{
+		if(!(procdir=opendir("/proc"))) _throwunix();
+		while((dent=readdir(procdir))!=NULL)
+		{
+			if(dent->d_name[0]>='1' && dent->d_name[0]<='9')
+			{
+				char temps[1024];  struct stat fsbuf;
+				int pid=atoi(dent->d_name);
+				if(pid==getpid()) continue;
+				sprintf(temps, "/proc/%s/stat", dent->d_name);
+				if((fd=open(temps, O_RDONLY))==-1) continue;
+				if(fstat(fd, &fsbuf)!=-1 && fsbuf.st_uid==getuid())
+				{
+					char *ptr=NULL;  int bytes=0;
+					if((bytes=read(fd, temps, 1023))>0 && bytes<1024)
+					{
+						temps[bytes]='\0';
+						if((ptr=strchr(temps, '('))!=NULL)
+						{
+							ptr++;  char *ptr2=strchr(ptr, ')');
+							if(ptr2)
+							{
+								*ptr2='\0';
+								if(!strcmp(ptr, "vglclient"))
+								{
+									rrout.println("Terminating vglclient process %d", pid);
+									kill(pid, SIGTERM);
+								}
+							}
+						}
+					}
+				}
+				close(fd);  fd=-1;
+			}
+		}
+		closedir(procdir);  procdir=NULL;
+	}
+	catch(...)
+	{
+		if(fd) close(fd);  if(procdir) closedir(procdir);  throw;
+	}
+	#endif
+}
+
+
 void usage(char *progname)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-display <name>]\n", progname);
@@ -109,6 +204,7 @@ void usage(char *progname)
 	fprintf(stderr, "-detach = Detach from console (used by vglconnect)\n");
 	fprintf(stderr, "-force = Force VGLclient to run, even if there is already another instance\n");
 	fprintf(stderr, "         running on the same X display (use with caution)\n");
+	fprintf(stderr, "-kill = Kill all detached VGLclient processes running under this user ID\n");
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
 	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing (default for x86 systems)\n");
@@ -216,6 +312,7 @@ int main(int argc, char *argv[])
 		if(!stricmp(argv[i], "-v")) printversion=true;
 		if(!stricmp(argv[i], "-force")) force=true;
 		if(!stricmp(argv[i], "-detach")) detach=true;
+		if(!stricmp(argv[i], "-kill")) {killproc();  return 0;}
 		if(!stricmp(argv[i], "-port"))
 		{
 			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
