@@ -4,7 +4,7 @@ all: index.html
 pdf: virtualgl.pdf
 tex: virtualgl.tex
 
-SRC := $(wildcard *.txt *.css *.rb)
+SRC := $(wildcard *.txt *.css *.rb *.png)
 index.html: $(SRC)
 virtualgl.tex: $(SRC)
 

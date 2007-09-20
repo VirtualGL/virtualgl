@@ -1,9 +1,9 @@
 * Obtaining and Installing VirtualGL
 
 	!!! VirtualGL must be installed on any machine that will act as a VirtualGL
-	server or as a VirtualGL [[overview.txt#Direct_Mode][Direct Mode]] client.
+	server or as a VirtualGL [[overview.txt#VGL_Image_Transport][Direct Mode]] client.
 	It is not necessary to install VirtualGL on the client machine if
-	[[overview.txt#Raw_Mode][Raw Mode]] is to be used.
+	[[overview.txt#X11_Image_Transport][Raw Mode]] is to be used.
 
 ** Installing VirtualGL on Linux
 
