@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-09-06T16:46:24-06:00">
+<meta name="date" content="2007-09-20T02:59:57-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -347,111 +347,134 @@ now visualize gigabytes and gigabytes of data in real time without
 needing to cache any of the data locally or sit in front of the machine
 that is rendering the data.</p>
 
-<p>VirtualGL has two basic modes of operation:  &ldquo;Direct&rdquo; Mode
-and &ldquo;Raw&rdquo; Mode.  In both modes, a separate X-Windows server
-(or X-Windows proxy) is used to display the application&rsquo;s GUI
-and to provide keyboard/mouse interaction.</p>
+<p>Normally, a 3D Unix OpenGL application would send all of its drawing
+commands and data, both 2D and 3D, to an X-Windows server, which may
+be located across the network from the application server.  VirtualGL,
+however, employs a technique called &ldquo;split rendering&rdquo; to
+force the 3D commands from the application to go to a 3D graphics card
+in the application server.  VGL accomplishes this by pre-loading a
+dynamic shared object (DSO) into the application at run time.  This
+DSO intercepts a handful of GLX, OpenGL, and X11 commands necessary
+to perform split rendering.  Whenever a window is created by the application,
+VirtualGL creates a corresponding 3D pixel buffer (&ldquo;Pbuffer&rdquo;)
+on the server&rsquo;s 3D graphics card.  Whenever the application requests
+that an OpenGL rendering context be created on the window, VirtualGL
+intercepts the request and creates the context in the Pbuffer instead.
+Whenever the application swaps or flushes the drawing buffer to indicate
+that it has completed rendering a frame, VirtualGL reads back the Pbuffer
+and sends the rendered 3D image to the client.</p>
 
-<p><a name="Direct_Mode"></a></p>
+<p>The beauty of this approach is its non-intrusiveness.  VirtualGL monitors
+a few X11 commands and events to determine when windows have been resized,
+etc., but it does not interfere in any way with the delivery of 2D
+X11 commands to the X server.  For the most part, VGL does not interfere
+with the delivery of OpenGL commands to the graphics card, either (there
+are some exceptions, such as its handling of color index rendering.)
+VGL merely forces the OpenGL commands to be delivered to a server-side
+graphics card rather than a client-side one.  Once the OpenGL rendering
+context has been established in a server-side Pbuffer, everything (including
+esoteric OpenGL extensions, fragment/vertex programs, etc.) should
+&ldquo;just work.&rdquo;  In most cases, if an application runs locally
+on a 3D server/workstation, that same application will run remotely
+from that same server/workstation using VirtualGL.  But obviously,
+if it were always as simple as that, we could all turn out the lights
+and go home.  Most of the time spent developing VirtualGL has been
+spent working around &ldquo;stupid application tricks.&rdquo;</p>
+
+<p>VirtualGL can currently use one of three &ldquo;image transports&rdquo;
+to send rendered 3D images to the client machine:</p>
+
+<p><a name="VGL_Image_Transport"></a></p>
 
 <dl class="Description">
-    <dt class="Description">1. &ldquo;Direct&rdquo; Mode</dt>
+    <dt class="Description">1. VGL Image Transport (Formerly &ldquo;Direct Mode&rdquo;)</dt>
     <dd class="Description">
-        Direct Mode is most often used whenever the X server is located across
-        the network from the graphics server, for instance if the X server
-        is running on the user&rsquo;s desktop machine.  In this case, the
-        3D application sends X11 commands across the network to the X server
-        in order to display the application GUI, and the application receives
-        X11 events back from the X server in order to respond to keyboard and
-        mouse interaction from the user. Normally, a 3D application would also
-        send GLX commands across the network to the X server in order to establish
-        an OpenGL rendering context on the client machine.  Such an &ldquo;indirect&rdquo;
-        OpenGL context could then be used to tunnel OpenGL commands and 3D
-        data inside the X-Windows protocol stream.  But VirtualGL instead intercepts
-        the GLX commands from the application so that it can force the OpenGL
-        rendering context to be established in an invisible pixel buffer (&ldquo;Pbuffer&rdquo;)
-        on a 3D graphics card in the server machine. VirtualGL also monitors
-        buffer swaps and other commands from the application in order to determine
-        when the application has finished rendering a frame. When such an end-of-frame
-        trigger is detected, VGL reads back the rendered frame from the 3D
-        graphics card, compresses it using a high-speed image codec, and sends
-        the compressed image directly to the client machine using a dedicated
-        TCP socket.  A separate VirtualGL Client application runs on the client
-        machine, and this VirtualGL Client application decompresses the compressed
-        frame and composites it into the appropriate X window.<br /> <br />
-        Direct Mode is the fastest solution for running VirtualGL on a local
-        area network, and it provides the same usability as running the 3D
-        application &ldquo;locally&rdquo; on a workstation.  Direct Mode does
-        not work particularly well on a high-latency or low-bandwidth network
-        due to its reliance on the remote X-Windows protocol for displaying
-        the application&rsquo;s GUI.  However, it works great with any modest
-        laptop and 802.11g wireless or 100 Megabit Ethernet.
+        The VGL image transport is most often used whenever the X server is
+        located across the network from the graphics server, for instance if
+        the X server is running on the user&rsquo;s desktop machine.  VirtualGL
+        uses its own protocol on a dedicated TCP socket to send the rendered
+        3D images to the client machine, and the VirtualGL Client application
+        decodes the images and composites them into the appropriate X window.
+        The VGL transport can either deliver uncompressed images (RGB encoded),
+        or it can compress images in real time using a high-speed JPEG codec.
+        It also supports the delivery of stereo image pairs, which can be reconstructed
+        into a stereo image by the VirtualGL Client.
     </dd>
 </dl>
 
 <a name="fig002001"></a>
 <div class="figure">
-<p class="caption">Figure 2.1: VirtualGL in Direct Mode</p>
-<img src="directmode.png" alt="directmode" class="figure" id="imgid_14" name="imgid_14"/>
+<p class="caption">Figure 2.1: The VGL Image Transport with a Remote X Server</p>
+<img src="vgltransport.png" alt="vgltransport" class="figure" id="imgid_14" name="imgid_14"/>
 </div>
 
-<p><a name="Raw_Mode"></a></p>
+<p><a name="X11_Image_Transport"></a></p>
 
 <dl class="Description">
-    <dt class="Description">2. &ldquo;Raw&rdquo; Mode</dt>
+    <dt class="Description">2. X11 Image Transport (Formerly &ldquo;Raw Mode&rdquo;)</dt>
     <dd class="Description">
-        In this mode, VirtualGL does not compress the rendered 3D images itself
-        but rather sends them in uncompressed form to an X server. This is
-        most useful in conjunction with an &ldquo;X Proxy&rdquo;, which can
-        be one of any number of Unix remote display applications, such as VNC.
-        These X proxies are essentially &ldquo;virtual&rdquo; X servers.  They
-        appear to the application to be a normal X server, but they perform
-        X11 rendering to a virtual framebuffer in the server machine&rsquo;s
-        memory rather than to a real hardware framebuffer. This allows the
-        X proxy to send only images to the client machine rather than chatty
-        X-Windows commands.  As with Direct Mode, VirtualGL intercepts the
-        GLX calls from the application and thus forces the application to render
-        into an OpenGL Pbuffer located on the server machine&rsquo;s graphics
-        card. VirtualGL also reads back the rendered images, as with Direct
-        Mode.  But in Raw Mode, VirtualGL draws the rendered 3D images into
-        the X server as uncompressed 2D bitmaps.  If the X server is really
-        an X proxy, then VirtualGL relies on this X proxy to compress the images
-        and send them to the client(s).  Since the use of an X proxy eliminates
-        the need to send X-Windows commands over the network, this is the best
-        means of using VirtualGL when the network has high latency or low bandwidth.
-        The VirtualGL project provides an accelerated version of VNC, called
-        &ldquo;TurboVNC&rdquo;, which is meant to be used with VirtualGL in
-        Raw Mode on such networks.  TurboVNC also provides rudimentary collaboration
-        capabilities, allowing multiple users to simultaneously interact with
-        the same 3D application.  But whereas Direct Mode produces a similar
-        user experience to running the 3D application &ldquo;locally&rdquo;,
-        VNC and most other X proxies require the user to interact with a &ldquo;desktop
-        in a window&rdquo;, which is not a completely seamless
-        experience.<br /> <br /> Raw	Mode, in conjunction with an X proxy,
-        is typically used to run data-intensive 3D applications in a &ldquo;cold
-        room&rdquo; and remotely interact with these applications from a PC
-        or laptop located in another city.  However, Raw Mode can also be used
-        to transmit images directly to the client machine, if the network is
-        sufficiently fast (Gigabit Ethernet, for instance.)
+        The X11 image transport simply draws the rendered 3D images into the
+        appropriate X window using XPutImage() and similar X-Windows commands.
+        This is most useful in conjunction with an &ldquo;X Proxy&rdquo;, which
+        can be one of any number of Unix remote display applications, such
+        as VNC.  These X proxies are essentially &ldquo;virtual&rdquo; X servers.
+        They appear to the application to be a normal X server, but they perform
+        X11 rendering to a virtual framebuffer in main memory	rather than to
+        a real framebuffer on a graphics card.  This allows the X proxy to
+        send only images to the client machine rather than chatty X-Windows
+        rendering commands.  When using the X11 transport, VirtualGL does not
+        perform any image compression or encoding itself.  It instead relies
+        upon an X proxy to encode and deliver the images to the client(s).
+        Since the use of an X proxy eliminates the need to send X-Windows commands
+        over the network, this is the best means of using VirtualGL over high-latency
+        or low-bandwidth networks. The VirtualGL Project provides an accelerated
+        version of VNC, called &ldquo;TurboVNC&rdquo;, which is meant to be
+        used with VirtualGL&rsquo;s X11 transport, and the combination of the
+        two provides a highly-performant remote 3D	solution, even on slow networks.
+        TurboVNC also provides rudimentary collaboration capabilities, allowing
+        multiple users to simultaneously interact with the same 3D application.
     </dd>
 </dl>
 
 <a name="fig002002"></a>
 <div class="figure">
-<p class="caption">Figure 2.2: VirtualGL in Raw Mode with an X proxy on the graphics server</p>
-<img src="rawmodetoxproxy.png" alt="rawmodetoxproxy" class="figure" id="imgid_15" name="imgid_15"/>
+<p class="caption">Figure 2.2: The X11 Image Transport with an X Proxy</p>
+<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_15" name="imgid_15"/>
 </div>
+
+<dl class="Description">
+    <dt class="Description">2. Sun Ray Image Transport</dt>
+    <dd class="Description">
+        The Sun Ray thin client environment from Sun Microsystems consists
+        of an X proxy (the Sun Ray Server Software) and a series of ultra-thin
+        hardware clients that connect to this proxy over a network.  It is
+        similar in concept to VNC, in that a virtual X server is created for
+        every user and that only images, not rendering commands, are sent to
+        the client.  But unlike VNC, the client is not a piece of software
+        running on a workstation or laptop.  The client is a fanless, diskless
+        little box with only a monitor port, USB ports, a network jack, and
+        a smart card slot (used for authentication.)<br /> <br /> This environment
+        presents unique challenges to VirtualGL, however.  The first challenge
+        is that the Sun Ray clients contain relatively slow CPUs, so they are
+        not fast enough to decompress JPEG in real time.  The second challenge
+        is that Sun Ray servers are generally provisioned to handle a lot of
+        simultaneous users, so using VirtualGL&rsquo;s X11 transport would
+        put undue stress on both the Sun Ray servers and the network on which
+        they reside. Thus, Sun Microsystems designed a plugin for VirtualGL
+        which allows VGL to compress images using a protocol that can be sent
+        directly to the Sun Ray hardware client without having to pass through
+        the Sun Ray server first. Since the plugin uses the proprietary Sun
+        Ray image compression technology, it is currently closed source, but
+        the binary packages can be downloaded for free as part of Sun&rsquo;s
+        Shared Visualization product, which also includes VirtualGL, TurboVNC,
+        and other goodies.
+    </dd>
+</dl>
 
 <a name="fig002003"></a>
 <div class="figure">
-<p class="caption">Figure 2.3: VirtualGL in Raw Mode with an X proxy on a different server</p>
-<img src="rawmodeoverservernetwork.png" alt="rawmodeoverservernetwork" class="figure" id="imgid_16" name="imgid_16"/>
-</div>
-
-<a name="fig002004"></a>
-<div class="figure">
-<p class="caption">Figure 2.4: VirtualGL in Raw Mode with no X proxy</p>
-<img src="rawmodeovernetwork.png" alt="rawmodeovernetwork" class="figure" id="imgid_17" name="imgid_17"/>
+<p class="caption">Figure 2.3: The Sun Ray Image Transport</p>
+<img src="sunray.png" alt="sunray" class="figure" id="imgid_16" name="imgid_16"/>
 </div>
 
 <hr class="break" />
@@ -846,7 +869,7 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a VirtualGL <a href="#Direct_Mode">Direct Mode</a><a name="idx0037"></a> client. It is not necessary to install VirtualGL on the client machine if <a href="#Raw_Mode">Raw Mode</a><a name="idx0038"></a> is to be used.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a VirtualGL <a href="#VGL_Image_Transport">Direct Mode</a><a name="idx0037"></a> client. It is not necessary to install VirtualGL on the client machine if <a href="#X11_Image_Transport">Raw Mode</a><a name="idx0038"></a> is to be used.
 </p></div>
 
 
@@ -1010,7 +1033,7 @@ pkgrm&nbsp;SUNWvgl
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Obtaining and Installing TurboVNC</h1>
 
 <div class="important"><p class="important">
-TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use VirtualGL in <a href="#Direct_Mode">Direct Mode</a><a name="idx0050"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
+TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use VirtualGL in <a href="#VGL_Image_Transport">Direct Mode</a><a name="idx0050"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
 </p></div>
 
 
@@ -2175,7 +2198,7 @@ over Direct Mode (and several reasons why one might not.)</p>
 <h2 id="hd009001">9.1&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on the Same Machine</h2>
 
 <div class="figure">
-<img src="rawmodetoxproxy.png" alt="rawmodetoxproxy" class="figure" id="imgid_18" name="imgid_18"/>
+<img src="rawmodetoxproxy.png" alt="rawmodetoxproxy" class="figure" id="imgid_17" name="imgid_17"/>
 </div>
 
 <ol class="Ordered numeric">
@@ -2294,7 +2317,7 @@ ssh&nbsp;{user}@{server}
 <h2 id="hd009002">9.2&nbsp;Using Raw Mode When TurboVNC and VirtualGL Are Running on Different Machines</h2>
 
 <div class="figure">
-<img src="rawmodeoverservernetwork.png" alt="rawmodeoverservernetwork" class="figure" id="imgid_19" name="imgid_19"/>
+<img src="rawmodeoverservernetwork.png" alt="rawmodeoverservernetwork" class="figure" id="imgid_18" name="imgid_18"/>
 </div>
 
 <p>If TurboVNC and VirtualGL are running on different servers, then it
@@ -2613,7 +2636,7 @@ of <code>-c&nbsp;0</code> to <code>vglrun</code>.</p>
 <p><a name="Raw_Mode_Over_Network"></a></p>
 
 <div class="figure">
-<img src="rawmodeovernetwork.png" alt="rawmodeovernetwork" class="figure" id="imgid_20" name="imgid_20"/>
+<img src="rawmodeovernetwork.png" alt="rawmodeovernetwork" class="figure" id="imgid_19" name="imgid_19"/>
 </div>
 
 <p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0075"></a>
@@ -2838,7 +2861,7 @@ is most often used in one of three configurations:</p>
 <h2 id="hd0013001">13.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_21" name="imgid_21"/>
+<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_20" name="imgid_20"/>
 </div>
 
 <p>Sort-First Rendering (Image-Space Decomposition) is used to overcome
@@ -2871,7 +2894,7 @@ us know</a></span><a name="idx0077"></a>.</p>
 <h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
 
 <div class="figure">
-<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_22" name="imgid_22"/>
+<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_21" name="imgid_21"/>
 </div>
 
 <p>Configuration 2 uses the same sort-first principle as Configuration
@@ -3014,7 +3037,7 @@ When using VirtualGL with this mode, resizing the application window may not wor
 <h2 id="hd0013003">13.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_23" name="imgid_23"/>
+<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_22" name="imgid_22"/>
 </div>
 
 <p>Sort-Last Rendering is used when the scene contains a huge number of
