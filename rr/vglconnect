@@ -1,5 +1,12 @@
 #!/bin/sh
 
+maketemp()
+{
+	TMP_FILE=/tmp/$1.$RANDOM.$RANDOM.$RANDOM.$$
+	(umask 077;  touch $TMP_FILE || exit 1;)
+	echo $TMP_FILE
+}
+
 VGLTUNNEL=0
 X11TUNNEL=1
 FORCE=0;
@@ -109,7 +116,7 @@ else
 		XAUTH=/usr/openwin/bin/xauth
 	fi
 fi
-XAUTHFILE=`mktemp /tmp/vglconnect.XXXXXX`
+XAUTHFILE=`maketemp vglconnect`
 $XAUTH -f $XAUTHFILE generate $DISPLAY . trusted timeout 0
 if [ $? -ne 0 ]; then
 	echo "[VGL] ERROR: Could not generate xauth key, possibly because the X server does"
