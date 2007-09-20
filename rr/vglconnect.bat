@@ -47,6 +47,7 @@ if "%DISPLAY%"=="" (
 	echo [VGL]    argument to vglconnect or by setting the DISPLAY environment variable
 	goto done
 )
+if "%DISPLAY:~0,1%"==":" set DISPLAY=localhost%DISPLAY%
 
 set SSHARG=-X
 for /f "tokens=1,*" %%i in ('""%SSHPATH%"" -V 2^>^&1') do (
