@@ -53,9 +53,9 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 
 Display *dpy=NULL;  Window win=0, olwin=0;
-int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0;
+int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1;
 int ncolors=0, colorscheme=GREY;
-Colormap colormap=0, olcolormap=0;
+Colormap colormap=0;
 GLXContext ctx=0, olctx=0;
 
 int spherelist=0, fontlistbase=0;
@@ -71,7 +71,7 @@ int width=DEF_WIDTH, height=DEF_HEIGHT;
 int setcolorscheme(Colormap c, int scheme)
 {
 	XColor xc[256];  int i;
-	if(!ncolors || !colormap) _throw("Color map not allocated");
+	if(!ncolors || !c) _throw("Color map not allocated");
 	if(scheme<0 || scheme>NSCHEMES-1 || !c) _throw("Invalid argument");
 
 	for(i=0; i<ncolors; i++)
@@ -103,7 +103,7 @@ void reshape(int w, int h)
 
 void setspherecolor(float c)
 {
-	if(useci)
+	if(useci || useoverlay)
 	{
 		GLfloat ndx=c*(float)(ncolors-1);
 		GLfloat mat_ndxs[]={ndx*0.3, ndx*0.8, ndx};
@@ -230,7 +230,7 @@ int display(int advance)
 		gluSphere(spherequad, 1.3, slices, stacks);
 		glEndList();
 
-		if(useci)
+		if(useci || useoverlay)
 		{
 			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
 		}
@@ -271,7 +271,7 @@ int display(int advance)
 		z-=0.5;
 		if(z<-29.)
 		{
-			if(useci)
+			if(useci || useoverlay)
 			{
 				colorscheme=(colorscheme+1)%NSCHEMES;
 				_catch(setcolorscheme(colormap, colorscheme));
@@ -305,7 +305,11 @@ int display(int advance)
 	glPopAttrib();
 	glPopAttrib();
 	glPopAttrib();
-	glXSwapBuffers(dpy, win);
+	if(useoverlay)
+	{
+		if(oldb) glXSwapBuffers(dpy, olwin);
+	}
+	else glXSwapBuffers(dpy, win);
 
 	if(start>0.)
 	{
@@ -330,7 +334,7 @@ int display(int advance)
 }
 
 
-int event_loop(Display *dpy, Window win)
+int event_loop(Display *dpy)
 {
 	while (1)
 	{
@@ -393,7 +397,8 @@ int main(int argc, char **argv)
 		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None};
 	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, 
 		None};
-	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_DOUBLEBUFFER, GLX_LEVEL, 1, None};
+	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
+		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None};
 	XSetWindowAttributes swa;  Window root;
 
 	for(i=0; i<argc; i++)
@@ -403,7 +408,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-c", 2)) useci=1;
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
-		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
+		if(!strnicmp(argv[i], "-o", 2)) {useoverlay=1;  useci=0;}
 		if(!strnicmp(argv[i], "-s", 2))
 		{
 			rgbattribs[10]=GLX_STEREO;
@@ -453,9 +458,14 @@ int main(int argc, char **argv)
 	if(useoverlay)
 	{
 		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), olattribs))==NULL)
-			_throw("Could not obtain overlay visual");
+		{
+			olattribs[6]=None;  oldb=0;
+			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), olattribs))==NULL)
+				_throw("Could not obtain overlay visual");
+		}
+		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n",	(int)v->visualid);
 
-		swa.colormap=olcolormap=XCreateColormap(dpy, root, v->visual, AllocAll);
+		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
 		ncolors=np2(v->colormap_size);
 		if(ncolors<32) _throw("Color map is not large enough");
 
@@ -463,7 +473,7 @@ int main(int argc, char **argv)
 
 		if((olwin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
-			_throw("Could not create window");
+			_throw("Could not create overlay window");
 		XMapWindow(dpy, olwin);
 		XSync(dpy, False);
 
@@ -476,7 +486,15 @@ int main(int argc, char **argv)
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind rendering context");
 
-	_catch(event_loop(dpy, win));
+	if(useoverlay)
+ 	{
+		glClearColor(0.5, 0., 0.5, 1.);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glXSwapBuffers(dpy, win);
+		if(!glXMakeCurrent(dpy, olwin, olctx))
+	 		_throw("Could not bind rendering context");
+	}
+	_catch(event_loop(dpy));
 
 	if(dpy && olctx) {glXDestroyContext(dpy, olctx);  olctx=0;}
 	if(dpy && olwin) {XDestroyWindow(dpy, olwin);  olwin=0;}
