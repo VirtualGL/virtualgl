@@ -462,7 +462,7 @@ static void do_ssh2_authconn(Ssh ssh, unsigned char *in, int inlen,
 
 #define SSH1_BUFFER_LIMIT 32768
 #define SSH_MAX_BACKLOG 32768
-#define OUR_V2_WINSIZE 16384
+#define OUR_V2_WINSIZE 128*1024
 #define OUR_V2_MAXPKT 0x4000UL
 
 /* Maximum length of passwords/passphrases (arbitrary) */
