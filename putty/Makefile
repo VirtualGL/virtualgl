@@ -83,7 +83,7 @@ $(ODIR)/%.obj: WINDOWS/%.C
 $(ODIR)/%.res: WINDOWS/%.RC
 	"rc" -l 0x809 -fo $@ $<
 
-CFLAGS := $(CFLAGS) -D_WINDOWS -I./WINDOWS
+CFLAGS := $(CFLAGS) -D_WINDOWS -DRELEASE=0.60-VGL -I./WINDOWS
 
 TARGETS = $(EDIR)/putty.exe \
           $(EDIR)/plink.exe
