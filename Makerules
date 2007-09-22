@@ -68,7 +68,9 @@ endif
 
 ENAME = bin
 LNAME = lib
-ONAME = obj
+ifeq ($(ONAME),)
+ONAME := obj
+endif
 
 EDIR := $(BLDDIR)/$(ENAME)
 EDIR32 := $(BLDDIR32)/$(ENAME)
