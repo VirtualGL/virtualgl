@@ -1,13 +1,23 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-for %%i in ("ssh.exe") do set SSHPATH=%%~$PATH:i
-if not "%SSHPATH%"=="" goto sshfound
+if not "%VGLCONNECT_OPENSSH%"=="1" goto useputty
+
+for %%i in ("ssh.exe") do set SSH=%%~$PATH:i
+set SSHL=%SSH%
+if not "%SSH%"=="" goto sshfound
 echo.
 echo [VGL] ERROR: Could not find an SSh client.  vglconnect requires an OpenSSh-
 echo [VGL]    compatible version of SSh, such as Cygwin or SSHWindows.  The
 echo [VGL]    directory containing ssh.exe must be in your PATH.
 goto done
+
+:useputty
+
+set SSH=%~d0%~p0putty.exe
+if not exist "%SSH%" set SSH=putty.exe
+set SSHL=%~d0%~p0plink.exe
+if not exist "%SSHL%" set SSHL=plink.exe
 
 :sshfound
 
@@ -50,11 +60,13 @@ if "%DISPLAY%"=="" (
 if "%DISPLAY:~0,1%"==":" set DISPLAY=localhost%DISPLAY%
 
 set SSHARG=-X
+if not "%VGLCONNECT_OPENSSH%"=="1" goto sshargset
 for /f "tokens=1,*" %%i in ('""%SSHPATH%"" -V 2^>^&1') do (
 	for /f "delims=_, tokens=1,2,*" %%x in ("%%i") do (
 		if /i "%%y" geq "3.8" set SSHARG=-Y
 	)
 )
+:sshargset
 
 set LOGDIR=%USERPROFILE%\.vgl
 if not exist "%LOGDIR%" md "%LOGDIR%"
@@ -94,12 +106,16 @@ if exist "%XAUTHFILE%" goto mktemp
 set XAUTHCMD="%XAUTH%" -f "%XAUTHFILE%" list
 for /f "tokens=1,2,3,*" %%i in ('"%XAUTHCMD%"') do set XAUTHCOOKIE=%%k
 del /q "%XAUTHFILE%"
-"%SSHPATH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 'exec /opt/VirtualGL/bin/vgllogin -x '%DISPLAY%' '%XAUTHCOOKIE%
-
+if "%VGLCONNECT_OPENSSH%"=="1" (
+	"%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 "exec /opt/VirtualGL/bin/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
+) else (
+	start "" "%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "exec /opt/VirtualGL/bin/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
+)
 goto done
 
 :vgltunnel
-for /f "usebackq tokens=1,*" %%i in (`""%SSHPATH%"" %1 %2 %3 %4 %5 %6 %7 %8 %9 '/opt/VirtualGL/bin/nettest -findport'`) do set REMOTEPORT=%%i
+echo Making preliminary SSh connection to find a free port on the server ...
+for /f "usebackq tokens=1,*" %%i in (`""%SSHL%"" %1 %2 %3 %4 %5 %6 %7 %8 %9 ''/opt/VirtualGL/bin/nettest -findport''`) do set REMOTEPORT=%%i
 set /a REMOTEPORTM1=REMOTEPORT-1
 if "%REMOTEPORT%"=="" (
 	echo [VGL] ERROR: Could not obtain a free port on the server.  Does the server have
@@ -111,12 +127,21 @@ if "%REMOTEPORTM1%"=="-1" (
 	echo [VGL]    VirtualGL 2.1 or later installed?
 	goto done
 )
-"%SSHPATH%" -t %SSHARG% -R%REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 '/opt/VirtualGL/bin/vgllogin -s '%REMOTEPORT%
+echo Making final SSh connection ...
+if "%VGLCONNECT_OPENSSH%"=="1" (
+	"%SSH%" -t %SSHARG% -R%REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 "/opt/VirtualGL/bin/vgllogin -s %REMOTEPORT%"
+) else (
+	start "" "%SSH%" -t %SSHARG% -R %REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "/opt/VirtualGL/bin/vgllogin -s %REMOTEPORT%"
+)
 
 goto done
 
 :x11tunnel
-"%SSHPATH%" %SSHARG% %1 %2 %3 %4 %5 %6 %7 %8 %9
+if not "%VGLCONNECT_OPENSSH%"=="1" (
+	start "" "%SSH%" %SSHARG% %1 %2 %3 %4 %5 %6 %7 %8 %9
+) else (
+	"%SSH%" %SSHARG% %1 %2 %3 %4 %5 %6 %7 %8 %9
+)
 
 goto done
 
