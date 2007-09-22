@@ -21,6 +21,8 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${BLDDIR}\bin\vglclient.exe"
 	File "${BLDDIR}\bin\vglconnect.bat"
 	File "${BLDDIR}\bin\xauth.exe"
+	File "${BLDDIR}\bin\putty.exe"
+	File "${BLDDIR}\bin\plink.exe"
 	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
@@ -60,6 +62,8 @@ Section "Uninstall"
 	Delete $INSTDIR\vglclient.exe
 	Delete $INSTDIR\vglconnect.bat
 	Delete $INSTDIR\xauth.exe
+	Delete $INSTDIR\putty.exe
+	Delete $INSTDIR\plink.exe
 	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
