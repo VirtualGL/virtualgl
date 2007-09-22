@@ -306,6 +306,16 @@ int cmdline_process_param(char *p, char *value, int need_save, Config *cfg)
 	cfg->remote_cmd_ptr2 = NULL;
 	cfg->nopty = TRUE;      /* command => no terminal */
     }
+    if (!strcmp(p, "-mc")) {
+
+	RETURN(2);
+	UNAVAILABLE_IN(TOOLTYPE_FILETRANSFER | TOOLTYPE_NONNETWORK);
+	SAVEABLE(0);
+
+	cfg->remote_cmd_ptr = value;
+	cfg->remote_cmd_ptr2 = NULL;
+	cfg->nopty = TRUE;      /* command => no terminal */
+    }
     if (!strcmp(p, "-P")) {
 	RETURN(2);
 	UNAVAILABLE_IN(TOOLTYPE_NONNETWORK);
