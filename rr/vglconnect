@@ -9,19 +9,25 @@ maketemp()
 
 VGLTUNNEL=0
 X11TUNNEL=1
-FORCE=0;
+CONNECT=1
+FORCE=0
 
 usage()
 {
 	echo
 	echo "USAGE: $0"
-	echo "       [-display <d>] [-s] [-x] [-force] [user@]hostname"
+	echo "       [-display <d>] [-s] [-x] [-k] [-force] [user@]hostname"
 	echo "       [Additional SSh options]"
 	echo
 	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
 	echo "               (default: read from DISPLAY environment variable)"
-	echo "-s = Tunnel VGL image transport over SSh"
-	echo "-x = Do not tunnel X11 traffic over SSh"
+	echo "-s = Tunnel VGL image transport and X11 through SSh (default: tunnel only X11)"
+	echo "-x = Do not tunnel X11 or the VGL image transport, but create an xauth key"
+	echo "     and add it to the VirtualGL server's keyring so that the VirtualGL"
+	echo "     server (and any that share its home directory) can use this X display"
+	echo "-k = Do not connect to server, but create an xauth key for this X display and"
+	echo "     add it to the local keyring so that any VirtualGL servers that share the"
+	echo "     same home directory as this machine can use this X display"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo
 	exit $1
@@ -32,14 +38,15 @@ do
 	case "$1" in
 	-d*) DISPLAY=$2; shift ;;
 	-f*) FORCE=1 ;;
-	-s*) VGLTUNNEL=1 ;;
-	-x*) X11TUNNEL=0 ;;
+	-s*) X11TUNNEL=1; VGLTUNNEL=1; CONNECT=1 ;;
+	-x*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=1 ;;
+	-k*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=0 ;;
 	*) break ;;
 	esac
 	shift
 done
 
-if [ $# -eq 0 ]; then
+if [ $# -eq 0 -a $CONNECT -eq 1 ]; then
 	usage 0
 fi
 
@@ -49,18 +56,20 @@ if [ "$DISPLAY" = "" ]; then
 	exit 1
 fi
 
-SSHARG='-X'
-SSHVER=`ssh -V 2>&1 | sed 's/.*[_]//g' | sed 's/[, ].*//g'`
-if [ $? -ne 0 -o "$SSHVER" = "" ]; then
-	echo "[VGL] ERROR: Could not find ssh in your PATH."
-	exit 1
+if [ "$X11TUNNEL" = "1" ]; then
+	SSHARG='-X'
+	SSHVER=`ssh -V 2>&1 | sed 's/.*[_]//g' | sed 's/[, ].*//g'`
+	if [ $? -ne 0 -o "$SSHVER" = "" ]; then
+		echo "[VGL] ERROR: Could not find ssh in your PATH."
+		exit 1
+	fi
+	case "$SSHVER" in
+	3.8*) SSHARG='-Y' ;;
+	3.9*) SSHARG='-Y' ;;
+	4*) SSHARG='-Y' ;;
+	5*) SSHARG='-Y' ;;
+	esac
 fi
-case "$SSHVER" in
-3.8*) SSHARG='-Y' ;;
-3.9*) SSHARG='-Y' ;;
-4*) SSHARG='-Y' ;;
-5*) SSHARG='-Y' ;;
-esac
 
 LOGDIR=$HOME/.vgl
 if [ ! -d $LOGDIR ]; then mkdir $LOGDIR; fi
@@ -126,4 +135,9 @@ if [ $? -ne 0 ]; then
 fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XUTHFILE
-ssh -t -x ${1+"$@"} 'exec /opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
+if [ "$CONNECT" = "1" ]; then
+	ssh -t -x ${1+"$@"} 'exec /opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
+else
+	DNUM=`echo $DISPLAY | sed 's/.*[:]//g'`
+	xauth add `hostname`":"$DNUM . $XAUTHCOOKIE
+fi
