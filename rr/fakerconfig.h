@@ -678,7 +678,7 @@ class FakerConfig
 			char *env=NULL;
 			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 				&& !strncmp(env, "1", 1))
-				rrout.println("[VGL] Shared memory segment ID for vglconfig: %d\n",
+				rrout.println("[VGL] Shared memory segment ID for vglconfig: %d",
 					_Shmid);
 			return addr;
 		}
@@ -686,7 +686,15 @@ class FakerConfig
 		void FakerConfig::operator delete(void *addr)
 		{
 			if(addr) shmdt((char *)addr);
-			if(_Shmid!=-1) shmctl(_Shmid, IPC_RMID, 0);
+			if(_Shmid!=-1)
+			{
+				int ret=shmctl(_Shmid, IPC_RMID, 0);
+				char *env=NULL;
+				if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
+					&& !strncmp(env, "1", 1) && ret!=-1)
+					rrout.println("[VGL] Removed shared memory segment %d", _Shmid);
+
+			}
 		}
 
 		static FakerConfig *_Instanceptr;
