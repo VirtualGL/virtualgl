@@ -100,6 +100,19 @@ static inline int isdead(void)
 	return retval;
 }
 
+static void __vgl_cleanup(void)
+{
+	pmh.killhash();
+	vish.killhash();
+	cfgh.killhash();
+	rcfgh.killhash();
+	ctxh.killhash();
+	glxdh.killhash();
+	if(_winh) _winh->killhash();
+	FakerConfig::deleteinstance();
+	__vgl_unloadsymbols();
+}
+
 void __vgl_safeexit(int retcode)
 {
 	int shutdown;
@@ -108,20 +121,28 @@ void __vgl_safeexit(int retcode)
 	if(!__shutdown)
 	{
 		__shutdown=1;
-		pmh.killhash();
-		vish.killhash();
-		cfgh.killhash();
-		rcfgh.killhash();
-		ctxh.killhash();
-		glxdh.killhash();
-		if(_winh) _winh->killhash();
-		FakerConfig::deleteinstance();
+		__vgl_cleanup();
 	}
-	__vgl_unloadsymbols();
 	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
 }
+
+class _globalcleanup
+{
+	public:
+		~_globalcleanup()
+		{
+			globalmutex.lock(false);
+			if(!__shutdown)
+			{
+				__shutdown=1;
+				__vgl_cleanup();
+			}
+			globalmutex.unlock(false);
+		}
+};
+_globalcleanup gdt;
 
 #define _die(f,m) {if(!isdead()) rrout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  __vgl_safeexit(1);}
 
