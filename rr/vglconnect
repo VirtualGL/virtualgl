@@ -101,12 +101,14 @@ else
 fi
 
 if [ $VGLTUNNEL = 1 ]; then
+	echo Making preliminary SSh connection to find a free port on the server ...
 	REMOTEPORT=`ssh ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport && /opt/VirtualGL/bin/vgllogin -check'`
 	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
 		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
 		echo "[VGL]    installed."
 		exit 1
 	fi
+	echo Making final SSh connection ...
 	ssh -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -s '$REMOTEPORT
 	exit 0
 fi
