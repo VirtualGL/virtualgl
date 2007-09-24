@@ -156,6 +156,22 @@ encounter any difficulties.
 	|
 #OPT: hiCol=first
 
+** Mac/x86
+
+|| || Client ||
+| Recommended CPU \
+	| Any Intel-based Mac \
+	|
+| O/S \
+	| OS X 10.4 ("Tiger") or later \
+	|
+| Other Software \
+	| {list type=ul: \
+			{item:__VGL Image Transport Only__: Mac X11 application (in the \
+				"Optional Installs" package on the OS X install discs)}} \
+	|
+#OPT: hiCol=first
+
 ** Windows
 
 || || Client ||
@@ -192,6 +208,9 @@ encounter any difficulties.
 	|
 | Solaris/x86 \
 	| ^ \
+	| ^ \
+	|
+| Mac/x86 \
 	| ^ \
 	|
 | Solaris/Sparc \
@@ -234,6 +253,9 @@ encounter any difficulties.
 		nVidia Quadro) and is configured to export overlay visuals \
 	|
 | Solaris/x86 \
+	| ^ \
+	|
+| Mac/x86 \
 	| ^ \
 	|
 | Solaris/Sparc \

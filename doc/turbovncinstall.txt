@@ -1,18 +1,18 @@
 * Obtaining and Installing TurboVNC
 
 	!!! TurboVNC must be installed on any machine that will act as a TurboVNC
-	server or client.  It is not necessary to install TurboVNC to use VirtualGL
-	in [[overview.txt#VGL_Image_Transport][Direct Mode]].  Also, TurboVNC need not
-	necessarily be installed on the same server as VirtualGL.
+	server or client.  It is not necessary to install TurboVNC to use the
+	[[overview.txt#VGL_Image_Transport][VirtualGL Image Transport]].  Also,
+	TurboVNC need not necessarily be installed on the same server as VirtualGL.
 
 ** Installing TurboVNC on Linux
 
 *** Installing TurboJPEG
 #OPT: noList! plain!
 
-	1. Download the TurboJPEG RPM package (''turbojpeg-{version}.i386.rpm'' for
-		32-bit systems and ''turbojpeg-{version}.x86_64.rpm'' for 64-bit systems)
-		from the
+	1. Download v1.10 or later of the TurboJPEG RPM package
+		(''turbojpeg-{version}.i386.rpm'' for 32-bit systems and
+		''turbojpeg-{version}.x86_64.rpm'' for 64-bit systems) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
@@ -70,6 +70,17 @@
 
  !!! TurboVNC for Solaris installs into ''/opt/SUNWtvnc''.
 
+** Installing TurboVNC on Mac (Client Only)
+
+	#. Download the TurboVNC Mac disk image
+		(''TurboVNC-{version}.dmg'') from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+
+	#. Open the disk image, then open ''TurboVNC-{version}.pkg'' inside the
+		disk image.  Follow the instructions to install the Mac client.  The Mac
+		package installs files in the same locations as the Linux RPM.
+
 ** Installing TurboVNC on Windows (Client Only)
 
 	#. Download the TurboVNC Windows installer package
@@ -114,7 +125,20 @@ pkgrm SUNWtvnc
 
 Answer "yes" when prompted.
 
+*** Mac
+#OPT: noList! plain!
+
+	* Download and install the latest version of
+		[[http://www.osxgnu.org/software/pkgdetail.html?project_id=244][OSXPM]]
+	* Launch OSXPM
+	* Click the "Delete Package" button
+	* Find ''TurboVNC-{version}.pkg'' in the list of packages and highlight it
+	* Click "Delete Selected"
+	* Enter your password if prompted
+	* Complain to Apple about the lack of a built-in package uninstaller for OS X
+
 *** Windows
 #OPT: noList! plain!
 
-Use the __Add or Remove Programs__ applet in the Control Panel.
+Use the "Add or Remove Programs" applet in the Control Panel (or the
+"Programs and Features" applet if you're running Vista.)
