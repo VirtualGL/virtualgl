@@ -10,6 +10,16 @@ overall security of the VirtualGL server, since it eliminates the need to grant
 X server access to VirtualGL users.  In addition, GLP makes it easy to assign
 VirtualGL jobs to any graphics card in a multi-card system.
 
+When using GLP, the architecture of VirtualGL changes as follows:
+
+#IMG: vgltransportglp.png
+#OPT fmt=latex: w=4cm
+#CAP: The VGL Image Transport with a Remote X Server and GLP
+
+#IMG: x11transportglp.png
+#OPT fmt=latex: w=4cm
+#CAP: The X11 Image Transport with an X Proxy and GLP
+
 If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]]
 1.5 for Solaris/Sparc, it is recommended that you configure it to use GLP:
 
@@ -45,7 +55,8 @@ If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun Op
 	#. If you chose to restrict framebuffer device access to the
 		''vglusers'' group, then edit ''/etc/group'' and add ''root'' to the
 		''vglusers'' group.  If you choose, you can also add additional users to
-		the group at this time.
+		the group at this time.  Note that any user you add to ''vglusers''	must log
+		out and back in again before their new group permissions take effect.
 
 	#. Edit the ''/etc/dt/config/GraphicsDevices'' file as necessary.  This file
 		contains a list of paths to 3D framebuffer devices (such as
@@ -194,7 +205,8 @@ prompt.
 	#. If you chose to restrict X server or framebuffer device access to the
 		''vglusers'' group, then edit ''/etc/group'' and add ''root'' to the
 		''vglusers'' group.  If you choose, you can also add additional users to
-		the group at this time.
+		the group at this time.  Note that any user you add to ''vglusers''	must log
+		out and back in again before their new group permissions take effect.
 
 	#. Restart the display manager:
 
@@ -239,15 +251,6 @@ SSh session:
 Both commands should output a list of visuals and complete with no errors.
 If you chose to disable the XTEST extension, then check the output of
 ''xdpyinfo'' to verify that ''XTEST'' does not show up in the list of extensions.
-
-** Device Permissions with Older NVidia Drivers
-
-If you are installing VirtualGL on a server which is running version 1.0-71xx
-or earlier of the NVidia accelerated GLX drivers, follow the instructions in
-''/usr/share/doc/NVIDIA_GLX-1.0/README'' regarding setting the appropriate
-permissions for ''/dev/nvidia*''.  This is not necessary with more recent
-versions of the driver.  ''cat /proc/driver/nvidia/version'' to determine
-which version of the NVidia driver is installed on your system.
 
 ** SSh Server Configuration
 
