@@ -1,85 +1,56 @@
-* Using VirtualGL in Direct Mode
-{anchor: Direct_Mode_Usage}
+* Using VirtualGL with the VGL Image Transport
+{anchor: VGL_Image_Transport_Usage}
 
-** Direct Mode with X11 Forwarding
+*** Advantages of the VGL Image Transport
+#OPT: noList! plain!
+
+	* Seamless windows; every application window appears as a separate window on
+		the user's desktop
+	* Supports stereographic and overlay rendering
+	* Built-in encryption
+	* Multi-threaded image compression
+	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
+		client
+
+*** Disadvantages of the VGL Image Transport
+#OPT: noList! plain!
+
+	* The VGL Image Transport is designed to be used with remote X servers, thus
+		it relies on the chatty remote X11 protocol to send the 2D elements of the
+		application's GUI to the user's desktop.  As a result, the VGL Image
+		Transport is not recommended for use on high-latency networks
+	* No collaboration features
+	* Requires purchasing Exceed for use with Windows clients
+	* The client is not stateless.  As with any remote X11 app, if the network
+		connection drops, then the application will exit
+
+** VGL Image Transport with X11 Forwarding
 {anchor: X11_Forwarding}
 
-*** Performance
-#OPT: noList! plain!
-
-Optimal
-
-*** Security Notes
-#OPT: noList! plain!
-
-X11 traffic is encrypted, but the VirtualGL image stream is left unencrypted to
+This mode is recommended for use on secure local-area networks.  The X11
+traffic is encrypted, but the VirtualGL image stream is left unencrypted to
 maximize performance.
 
-*** Procedure
+*** Procedure for Linux/Solaris/Mac Clients
 #OPT: noList! plain!
 
-	#. Start the X server/Exceed if it isn't started already.
+	#. Start the X server if it isn't started already (__Mac users:__ start the
+		Mac X11 application.)
 
-	#. Start the VirtualGL Client program:
+	#. Open a new terminal window (__Mac users:__ in the X11 application, start a
+		new xterm [Command-N] if one isn't already started.)
 
-		Linux and Solaris clients :: Open a terminal window and type
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglclient
-		---
-
-		Windows clients :: Select __Start VirtualGL Client__ in the
-		__VirtualGL Client__ Start Menu group.
-
-	#. Open a new Command Prompt/terminal window.
-
-	#. {:}
-		Linux and Solaris clients :: In the new terminal window, type
+	#. In the same terminal/xterm window, open a Secure Shell (SSh) session into
+		the VirtualGL server:
 
 		#Verb: <<---
-		echo $DISPLAY
-		---
-
-		and make a note of the value.
-
-		Windows clients :: In the new Command Prompt window, type
-		#Verb: <<---
-		set DISPLAY=localhost:{n}.0
-		---
-		Replace ''{n}'' with the display number that Exceed is occupying.  To
-		obtain this, hover over the Exceed icon in the taskbar and make a note of
-		the value it displays (usually '':0.0'', unless you have multiple Exceed
-		sessions running.)
-
-	#. In the same Command Prompt/terminal window, open a Secure Shell (SSh)
-		session into the VirtualGL server by typing:
-
-		#Verb: <<---
-		ssh -X {user}@{server}
+		/opt/VirtualGL/bin/vglconnect {user}@{server}
 		---
 
 		Replace ''{user}'' with your user account name on the VirtualGL server and
 		''{server}'' with the hostname or IP address of that server.
 
-		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
-
-	#. If the X server on your client machine is using a display number of 0
-		(usually the case), then you can skip this step.  Otherwise, set the
-		''VGL_CLIENT'' environment variable on the VirtualGL server to point
-		to the client's X display:
-		{nl}
-		#Verb: <<---
-		export VGL_CLIENT={client}:{n}.0
-		---
-		or
-		#Verb: <<---
-		setenv VGL_CLIENT {client}:{n}.0
-		---
-
-		Replace ''{client}'' with the hostname or IP address of your client machine
-		(''echo $SSH_CLIENT'' if you don't know this) and ''{n}'' with the display
-		number of the client machine's X display (obtained in Step 4.)
-
-	#. In the SSh session, start the 3D application using VirtualGL:
+	#. In the SSh session, start a 3D application using VirtualGL:
 
 		#Verb: <<---
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
@@ -88,202 +59,121 @@ maximize performance.
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
-** Direct Mode with a Direct X11 Connection
+*** Procedure for Windows Clients
+#OPT: noList! plain!
+
+	#. Start Exceed if it isn't already started.  Hover the mouse pointer over
+		the Exceed taskbar icon and make a note of the display number on which
+		Exceed is listening (__Example:__ "Exceed 0.0 Multiwindow Mode".)
+
+	#. Open a new Command Prompt.
+
+	#. In the same Command Prompt window, set the ''DISPLAY'' environment
+		variable to match the display on which Exceed is listening.  Example:
+
+		#Verb: <<---
+		set DISPLAY=:0.0
+		---
+
+		!!! If you only ever plan to use one Exceed session at a time, then you
+		can set the ''DISPLAY'' environment variable in your global user
+		environment (__Control Panel-->System-->Advanced-->Environment Variables__.)
+
+	#. Open a Secure Shell (SSh) session into the VirtualGL server:
+
+		#Verb: <<---
+		cd /d "c:\program files\virtualgl-{version}"
+		vglconnect {user}@{server}
+		---
+
+		Replace ''{user}'' with your user account name on the VirtualGL server and
+		''{server}'' with the hostname or IP address of that server.
+
+	#. In the SSh session, start a 3D application using VirtualGL:
+
+		#Verb: <<---
+		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
+	information on ''vglrun'' command line options.
+
+** VGL Image Transport with a Direct X11 Connection
 {anchor: Direct_X11_Connection}
 
-*** Performance
-#OPT: noList! plain!
+As with the [[#X11_Forwarding][previous mode]], this mode performs optimally on
+local-area networks.  However, it is less secure, since both the X11 traffic
+and the VGL image stream are unencrypted.  This mode is primarily useful in
+grid environments where you may not know ahead of time which server will
+execute a VirtualGL job.  It is assumed that the "submit host" (the machine
+into which you connect with SSh) and the "execute hosts" (the machines that
+will run VirtualGL jobs) share the same home directories and reside in the same
+domain.
 
-Optimal
-
-*** Security Notes
-#OPT: noList! plain!
-
-	- Both the X11 traffic and the VirtualGL image stream are unencrypted.
-	- Some newer Linux and Solaris distributions ship with default settings that
-		do not allow TCP connections into the X server.  Such systems cannot be
-		used as clients with this procedure unless they are reconfigured to allow
-		X11 TCP connections.
-
-*** Procedure
-#OPT: noList! plain!
-
-	#. Start the X server/Exceed if it isn't started already.
-
-	#. Start the VirtualGL Client program:
-
-		Linux and Solaris clients :: Open a terminal window and type
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglclient
-		---
-
-		Windows clients :: Select __Start VirtualGL Client__ in the
-		__VirtualGL Client__ Start Menu group.
-
-	#. Open a new Command Prompt/terminal window.
-
-	#. {:}
-		Linux and Solaris clients ::	In the new terminal window, type
-
-		#Verb: <<---
-		echo $DISPLAY
-		---
-
-		and make a note of the value.
-
-		Windows clients :: Hover over the Exceed icon in the taskbar, and make a
-		note of the display number that Exceed is occupying (usually '':0.0'',
-		unless you have multiple Exceed sessions running.)
-
-	#. {:}
-		Linux and Solaris clients :: In the same terminal window, type
-		#Verb: <<---
-		xhost +{server}
-		---
-		Replace ''{server}'' with the hostname or IP address of the VirtualGL
-		server.
-
-		Windows clients :: Configure Exceed to grant display access to any
-		VirtualGL servers that you plan to use.
-
-			a. Load Exceed XConfig (right-click on the Exceed taskbar icon, then
-				select __Tools-->Configuration__.)
-
-			b. In XConfig, open the "Security Access Control and System Administration"
-				applet (if using Category View) or the "Security" applet (if using
-				Classic View.)
-
-			c. Select "File" under "Host Access Control List", then click the "Edit"
-				button.  This opens ''xhost.txt'' in Notepad.
-				{img: exceed5.png}
-
-			d. Add the hostnames or IP addresses of any VirtualGL servers you plan to
-				use to this file (one per line), save the file, and exit Notepad.
-
-			e. Back in XConfig, click "Validate and Apply Changes."  If prompted to
-				reset the X server, click "Yes."
-
-	#. In the Command Prompt/terminal window, open a Secure Shell (SSh) session
-		into the VirtualGL server by typing:
-
-		#Verb: <<---
-		ssh {user}@{server}
-		---
-
-		Replace ''{user}'' with your user account name on the VirtualGL server and
-		''{server}'' with the hostname or IP address of that server.
-
-		!!! If using PuTTY, replace ''ssh'' with ''putty'' in the above example.
-
-	#. If the X server on your client machine is using a display number of 0
-		(usually the case), then you can skip this step.  Otherwise, set the
-		''DISPLAY'' environment variable on the VirtualGL server to point to
-		the client's X display:
-		{nl}
-		#Verb: <<---
-		export DISPLAY={client}:{n}.0
-		---
-		or
-		#Verb: <<---
-		setenv DISPLAY {client}:{n}.0
-		---
-
-		Replace ''{client}'' with the hostname or IP address of your client machine
-		(''echo $SSH_CLIENT'' if you don't know this) and ''{n}'' with the display
-		number of the client machine's X display (obtained in Step 4.)
-
-	#. In the SSh session, start the 3D application using VirtualGL:
-
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
-		---
-
-	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
-	information on ''vglrun'' command line options.
-
-** Direct Mode with SSL Encryption
-
-*** Performance
-#OPT: noList! plain!
-
-On high-speed networks such as Ethernet, VirtualGL's performance is reduced by
-as much as 20% by enabling SSL encryption.
-
-*** Security Notes
-#OPT: noList! plain!
-
-	- The VirtualGL image stream is encrypted.
-	- When used in conjunction with X11 Forwarding, this provides a completely
-		secure solution.
+	!!! Some newer Linux and Solaris distributions ship with default settings
+	that do not allow TCP connections into the X server.  Such systems cannot be
+	used as clients with this procedure unless they are reconfigured to allow
+	X11 TCP connections.
 
 *** Procedure
 #OPT: noList! plain!
 
-Pass an argument of ''+s'' to ''vglrun'' when launching VirtualGL, or set
-the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL server.
-(see {ref prefix="Chapter ": Advanced_Configuration} for more details.)
+The procedure for this mode is identical to the procedure for
+[[#X11_Forwarding][X11 forwarding]], except that you should pass a ''-x''
+argument to ''vglconnect'' when connecting to the server:
 
-** Direct Mode with X11 Forwarding and SSh Tunneling
+	#Verb: <<---
+	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
+	---
 
-*** Performance
-#OPT: noList! plain!
+** VGL Image Transport with SSL Encryption
 
-	- On high-speed networks such as Ethernet, VirtualGL's performance is reduced
-		by as much as 20% by enabling SSh Tunneling.
-	- SSh tunneling using OpenSSH (Cygwin or SSHWindows on Windows machines)
-		generally performs about the same as VirtualGL's built-in SSL encryption.
-	- SSh tunneling using PuTTY generally performs about 30% slower than OpenSSH
-		or VirtualGL's built-in SSL encryption.
-
-*** Security Notes
-#OPT: noList! plain!
-
-	- Both the X11 traffic and the VirtualGL image stream are encrypted.
-	- Use SSh Tunneling if a firewall separates the client and server machines,
-		thus making it impossible for the VirtualGL server to make a Direct Mode
-		connection to the VirtualGL client.
+This mode encrypts the VGL image stream and, when used in conjunction with
+[[#X11_Forwarding][X11 forwarding]], provides a completely secure solution.
+However, enabling SSL encryption can reduce VirtualGL's performance by as much
+as 20% on high-speed networks such as Ethernet.
 
 *** Procedure
 #OPT: noList! plain!
 
-The procedure is the same as for the [[#X11_Forwarding][X11 Forwarding]] case,
-except that the following additional steps need to be taken:
+The procedure for this mode is identical to the procedure for 
+[[#X11_Forwarding][X11 forwarding]], except that you should pass an argument
+of ''+s'' to ''vglrun'' when starting a 3D application using VirtualGL.  You
+can also set the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL
+server prior to invoking ''vglrun''.  (see {ref prefix="Chapter ": Advanced_Configuration}
+for more details.)
 
-	#. Once connected to the VirtualGL server via. SSh, execute the following
-		command:
+** VGL Image Transport with X11 Forwarding and SSh Tunneling
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/nettest -findport
-		---
+This mode is useful when either the VirtualGL server or the client machine
+are behind restrictive firewalls and only SSh connections are allowed through.
+Both the VGL image stream and the X11 traffic are tunneled through the SSh
+connection, and thus this mode provides a completely secure solution.  However,
+using SSh tunneling can reduce VirtualGL's performance by anywhere from 20-40%
+on high-speed networks such as Ethernet.
 
-	This program will allocate a free TCP port number and print the number to
-	the console.  Make a note of it.
+*** Procedure
+#OPT: noList! plain!
 
-	#. Close the SSh session and re-open it using the following command line:
+The procedure for this mode is identical to the procedure for
+[[#X11_Forwarding][X11 forwarding]], except that you should pass a ''-s''
+argument to ''vglconnect'' when connecting to the server:
 
-		#Verb: <<---
-		ssh -X -R {port}:localhost:4242 {user}@{server}
-		---
+	#Verb: <<---
+	/opt/VirtualGL/bin/vglconnect -s {user}@{server}
+	---
 
-		Replace ''{port}'' with the port number you obtained in Step 1.
+''vglconnect'' will make two SSh connections into the server, the first to find
+an open port on the server and the second to create the secure image tunnels
+and open the secure shell.  If you are not using an SSh agent to create
+password-less logins, then this mode will require you to enter your password
+twice.
 
-		!!! If you are using an OpenSSH client, you can also type the following
-		key sequence: ''<ENTER> ~ C'' (that's the Enter key, followed by a tilde,
-		followed by a capital C), which will bring up an ''ssh>'' prompt at
-		which you can enter ''-R {port}:localhost:4242''.  This allows you to set
-		up the tunnel without closing and re-opening the SSh session.
+''vglconnect -s'' can be used to create multi-layered SSh tunnels.  For
+instance, if the VirtualGL server is not directly accessible from the Internet,
+you can use ''vglconnect -s'' to connect to a gateway server, then use
+''vglconnect -s'' again on the gateway server to connect to the VirtualGL
+server.  Both the X11 and the VGL image traffic will be forwarded from the
+VirtualGL server through the gateway and to the client.
 
-	#. Once connected to the server for the second time, set the ''VGL_PORT''
-		environment variable to match the port number you obtained above.
-
-	#. Set the ''VGL_CLIENT'' environment variable on the VirtualGL server to
-		''localhost:{n}.0'', where ''{n}'' is the display number of the X server
-		running on the client machine.
-
-		!!! Explanation: When you established the SSh connection using the ''-R''
-		argument, it created a listener on the VirtualGL server.  That listener
-		will accept a connection from VirtualGL and forward the connection over
-		the SSh tunnel to port 4242 on the client machine.  Thus, you need to set
-		''VGL_PORT'' and ''VGL_CLIENT'' on the VirtualGL server to tell VirtualGL
-		to make a connection to the SSh listener rather than the "real" VirtualGL
-		client program.
+#IMG: sshtunnel.png

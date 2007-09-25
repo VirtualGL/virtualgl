@@ -46,7 +46,7 @@ Each method of configuration takes precedence over the previous method:
 		''VGL_CLIENT'' in this case if your configuration is unusual (such as if \
 		your client machine's X server is occupying a display number other than 0 \
 		or if you are trying to forward VirtualGL's image stream over SSh.  See \
-		{ref prefix="Chapter ": Direct_Mode_Usage} for more details.) \
+		{ref prefix="Chapter ": VGL_Image_Transport_Usage} for more details.) \
 		{nl}{nl} \
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	If SSh X11 forwarding is being used, VirtualGL will automatically set \

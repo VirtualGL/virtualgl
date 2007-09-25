@@ -1,15 +1,9 @@
-* Configuring a Windows Machine as a VirtualGL Direct Mode Client
+* Configuring a Windows Machine as a Client for the VGL Image Transport
 
 	#. Install Hummingbird Exceed if it isn't already installed.
 
 	#. Add the Exceed path (example: ''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'')
 		to the system ''PATH'' environment if it isn't already there.
-
-	#. Install a Secure Shell (SSh) client.  If [[http://www.cygwin.com/][Cygwin]]
-		is already installed, then you can use the SSh client included in Cygwin.
-		Otherwise, download and install [[http://sshwindows.sourceforge.net/][SSHWindows]]
-		or [[http://www.chiark.greenend.org.uk/%7Esgtatham/putty/][PuTTY]].
-		''ssh.exe'' or ''putty.exe'' should be somewhere in your ''PATH''.
 
 ** Optimizing Exceed
 
@@ -59,9 +53,11 @@ Hummingbird Exceed to accelerate image drawing on Windows.  This can improve
 the overall performance of the VirtualGL pipeline by as much as 20% in some
 cases.
 
-The bad news is that this extension has some issues in earlier versions of
-Exceed.  If you are using Exceed 8 or 9, you will need to obtain the following
-patches from the Hummingbird support site:
+The bad news is that this extension is not consistently implemented across
+all versions of Exceed.  In particular, Exceed 8 and 9 require patches to make
+it work properly, and as of this writing, the MIT-SHM extension in Exceed 2008
+is completely broken.  If you are using Exceed 8 or 9, you will need to obtain
+the following patches from the Hummingbird support site:
 
 || Product || Patches Required || How to Obtain ||
 | Hummingbird Exceed 8.0 \
@@ -85,7 +81,7 @@ patches from the Hummingbird support site:
 	(__Hummingbird WebSupport account required__) \
 |
 
-No patches should be necessary for Exceed 10 and above.
+No patches should be necessary for Exceed 10, 2006, or 2007.
 
 Next, you need to enable the MIT-SHM extension in Exceed:
 
