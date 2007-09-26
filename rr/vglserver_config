@@ -531,7 +531,7 @@ UNAME_M=`uname -m`
 
 GLP=0
 if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
-	if [ -f /usr/include/GL/glp.h ]; then
+	if nm -P /usr/openwin/lib/libGL.so.1 2>&1 | egrep -s glPCreateBuffer; then
 		GLP=1
 	fi
 fi
