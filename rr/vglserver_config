@@ -10,13 +10,13 @@ uid() {
 
 maketemp() {
 	TMP_FILE=/tmp/$1.$RANDOM.$RANDOM.$RANDOM.$$
-	(umask 077;  touch $TMP_FILE || exit 1;)
+	(umask 077;  touch $TMP_FILE) || exit 1
 	echo $TMP_FILE
 }
 
 removeline() {
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: $0 {filename} {pattern}
+		echo USAGE: removeline {filename} {pattern}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_1`
@@ -26,7 +26,7 @@ removeline() {
 
 replaceline() {
 	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-		echo USAGE: $0 {filename} {pattern to replace} {new text}
+		echo USAGE: replaceline {filename} {pattern to replace} {new text}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_2`
@@ -36,7 +36,7 @@ replaceline() {
 
 uncommentline() {
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: $0 {filename} {regex of line to uncomment}
+		echo USAGE: uncommentline {filename} {regex of line to uncomment}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_3`
@@ -47,7 +47,7 @@ uncommentline() {
 commentline() {
 	uncommentline $1 $2
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: $0 {filename} {regex of line to comment}
+		echo USAGE: commentline {filename} {regex of line to comment}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_4`
@@ -57,7 +57,7 @@ commentline() {
 
 addtobottom() {
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: $0 {filename} {line to add}
+		echo USAGE: addtobottom {filename} {line to add}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_10`
@@ -67,7 +67,7 @@ addtobottom() {
 
 addtotop() {
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: $0 {filename} {line to add}
+		echo USAGE: addtotop {filename} {line to add}
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_5`
@@ -96,7 +96,7 @@ EOF
 
 backup() {
 	if [ -z "$1" ]; then
-		echo USAGE: $0 {filename}
+		echo USAGE: backup {filename}
 		return
 	fi
 	if [ ! -f $1.orig.vgl ]; then
@@ -138,7 +138,7 @@ addvglgenkey() {
 
 disablextest() {
 	if [ -z "$1" ]; then
-		echo USAGE: $0 {filename}
+		echo USAGE: disablextest {filename}
 		return
 	fi
 	backup $1
@@ -152,7 +152,7 @@ disablextest() {
 
 enablextest() {
 	if [ -z "$1" ]; then
-		echo USAGE: $0 {filename}
+		echo USAGE: enablextest {filename}
 		return
 	fi
 	echo ... Enabling XTEST extension in $1 ...
@@ -168,7 +168,7 @@ disallowgdmtcp() {
 
 allowgdmtcp() {
 	if [ -z "$1" ]; then
-		echo USAGE: $0 {filename}
+		echo USAGE: allowgdmtcp {filename}
 	return
 	fi
 	backup $1
@@ -237,7 +237,7 @@ configdev() {
 
 ynprompt() {
 	if [ "$1" = "" ]; then
-		echo USAGE: $0 {prompt}
+		echo USAGE: ynprompt {prompt}
 		return 0
 	fi
 	while [ 1 ]; do
