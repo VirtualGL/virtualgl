@@ -11,8 +11,8 @@
 #OPT: noList! plain!
 
 	1. Download v1.10 or later of the TurboJPEG RPM package
-		(''turbojpeg-{version}.i386.rpm'' for 32-bit systems and
-		''turbojpeg-{version}.x86_64.rpm'' for 64-bit systems) from the
+		(''turbojpeg-''__''{version}''__''.i386.rpm'' for 32-bit systems and
+		''turbojpeg-''__''{version}''__''.x86_64.rpm'' for 64-bit systems) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
@@ -32,8 +32,8 @@
 *** Installing VirtualGL
 #OPT: noList! plain!
 
-	1. Download the VirtualGL RPM package (''VirtualGL-{version}.i386.rpm'' for
-		32-bit systems and ''VirtualGL-{version}.x86_64.rpm'' for 64-bit systems)
+	1. Download the VirtualGL RPM package (''VirtualGL-''__''{version}''__''.i386.rpm'' for
+		32-bit systems and ''VirtualGL-''__''{version}''__''.x86_64.rpm'' for 64-bit systems)
 		from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
@@ -49,8 +49,8 @@
 
 ** Installing VirtualGL on Solaris
 
-	1. Download the VirtualGL Solaris package (''SUNWvgl-{version}.pkg.bz2''
-		for Sparc and ''SUNWvgl-{version}-x86.pkg.bz2'' for x86) from the
+	1. Download the VirtualGL Solaris package (''SUNWvgl-''__''{version}''__''.pkg.bz2''
+		for Sparc and ''SUNWvgl-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
@@ -77,18 +77,18 @@
 ** Installing VirtualGL on Mac (Client Only)
 
 	#. Download the VirtualGL Mac disk image
-		(''VirtualGL-{version}.dmg'') from the
+		(''VirtualGL-''__''{version}''__''.dmg'') from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
-	#. Open the disk image, then open ''VirtualGL-{version}.pkg'' inside the
+	#. Open the disk image, then open ''VirtualGL-''__''{version}''__''.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac client.  The Mac
 		package installs files in the same locations as the Linux RPM.
 
 ** Installing VirtualGL on Windows (Client Only)
 
 	#. Download the VirtualGL Windows installer package
-		(''VirtualGL-{version}.exe'') from the
+		(''VirtualGL-''__''{version}''__''.exe'') from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
@@ -100,7 +100,7 @@
 
 If you are using a non-RPM-based distribution of Linux or another platform for
 which there is not a pre-built VirtualGL binary package available, then log in
-as root, download the VirtualGL source tarball (''VirtualGL-{version}.tar.gz'')
+as root, download the VirtualGL source tarball (''VirtualGL-''__''{version}''__''.tar.gz'')
 from the 
 [[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
@@ -136,7 +136,7 @@ Answer "yes" when prompted.
 		[[http://www.osxgnu.org/software/pkgdetail.html?project_id=244][OSXPM]]
 	* Launch OSXPM
 	* Click the "Delete Package" button
-	* Find ''VirtualGL-{version}.pkg'' in the list of packages and highlight it
+	* Find ''VirtualGL-''__''{version}''__''.pkg'' in the list of packages and highlight it
 	* Click "Delete Selected"
 	* Enter your password if prompted
 	* Complain to Apple about the lack of a built-in package uninstaller for OS X

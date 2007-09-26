@@ -47,8 +47,8 @@ maximize performance.
 		/opt/VirtualGL/bin/vglconnect {user}@{server}
 		---
 
-		Replace ''{user}'' with your user account name on the VirtualGL server and
-		''{server}'' with the hostname or IP address of that server.
+		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSh session, start a 3D application using VirtualGL:
 
@@ -86,8 +86,8 @@ maximize performance.
 		vglconnect {user}@{server}
 		---
 
-		Replace ''{user}'' with your user account name on the VirtualGL server and
-		''{server}'' with the hostname or IP address of that server.
+		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSh session, start a 3D application using VirtualGL:
 
