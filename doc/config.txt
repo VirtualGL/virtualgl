@@ -180,9 +180,9 @@ Each method of configuration takes precedence over the previous method:
 		VirtualGL will normally monitor an application's X event queue and pop up \
 		the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is pressed. \
 		In the event that this interferes with a key sequence that the \
-		application is already using, you can redefine the key sequence used to \
-		pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to some \
-		combination of ''shift'', ''ctrl'', ''alt'', and one of \
+		application is already using, then you can redefine the key sequence used \
+		to pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to \
+		some combination of ''shift'', ''ctrl'', ''alt'', and one of \
 		''f1, f2, ..., f12''.  You can also set ''VGL_GUI'' to ''none'' to \
 		disable the configuration dialog altogether.  See \
 		{ref prefix="Chapter ": Config_Dialog} for more details. \
@@ -194,8 +194,8 @@ Each method of configuration takes precedence over the previous method:
 		have changed.  Setting ''VGL_INTERFRAME'' to ''0'' disables this \
 		behavior. \
 		{nl}{nl} \
-		Normally, you shouldn't need to disable interframe comparison except in \
-		rare situations.  This setting was introduced in order to work around a \
+		You shouldn't need to disable interframe comparison except in rare \
+		situations.  This setting was introduced in order to work around a \
 		specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See \
 		{ref prefix="Section ": Application_Recipes} for more information. \
 		{nl}{nl} \
@@ -225,7 +225,7 @@ Each method of configuration takes precedence over the previous method:
 		among multiple server CPUs.  This might speed up the overall throughput \
 		if the compression stage of the pipeline is the primary bottleneck.  The \
 		default behavior (equivalent to setting ''VGL_NPROCS=0'') is to use all \
-		but one of the available CPUs, up to a maximum of 3 total: \
+		but one of the available CPUs, up to a maximum of 3 total. \
 		{nl}{nl} \
 	  On a large multiprocessor system, the speedup is almost linear up to 3 \
 		processors, but the algorithm scales very little past that point.  \
@@ -263,11 +263,17 @@ Each method of configuration takes precedence over the previous method:
 | ''VGL_PROGRESSIVE=0''{nl}''VGL_PROGRESSIVE=1'' | ''-prog''{nl}''+prog'' \
 	| When Sun Ray default compression is being used, this option causes \
 		the Sun Ray Image Transport to send a lossless (RGB) frame during periods \
-		of inactivity. \
+		of inactivity.  This is useful in environments where both image quality \
+		and performance are	critical.  You can set the image quality for the Sun \
+		Ray compressor to a fairly low value to speed up rotate/pan/zoom \
+		operations in your application, because with Progressive Mode enabled, \
+		VirtualGL will send a lossless frame as soon as you finish manipulating \
+		the 3D scene. \
 	| Progressive mode disabled \
 	|
-| {anchor: VGL_QUAL}''VGL_QUAL=''{nl}''<1-100>'' | ''-q <1-100>'' \
-	| __Fine-tune the amount of JPEG compression__ \
+| {anchor: VGL_QUAL}''VGL_QUAL=''__''{q}''__ | ''-q ''__''{q}''__ \
+	| __''{q}''__ specifies the quality of the JPEG compression, an integer \
+		between 1 and 100 (inclusive.) \
 		{nl}{nl} \
 		In digital images, "frequency" refers to how quickly the color changes \
 		between light and dark as you move either horizontally or vertically \
@@ -297,20 +303,18 @@ Each method of configuration takes precedence over the previous method:
 		losslessness in the types of applications (volume visualization apps, \
 		in particular) where image quality is critical.  As with any benchmarks, \
 		Your Mileage May Vary.  If quality is of paramount concern, consider \
-		setting the JPEG quality to 100, using RGB encoding, or enabling the \
-		''VGL_PROGRESSIVE'' option. \
+		setting the JPEG quality to 100 or using RGB encoding. \
  		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
+		__This option is available only in the VGL Image Transport__ \
 	|	95 \
 	|
 | ''VGL_READBACK=0''{nl}''VGL_READBACK=1'' | {:} \
-	| __Enable/disable readback__ \
-		{nl}{nl} \
-		On rare occasions, it might be desirable to have VirtualGL redirect \
+	| On rare occasions, it might be desirable to have VirtualGL redirect \
 		OpenGL rendering from an application into a Pbuffer but not automatically \
 		read back and send the rendered pixels.  Some applications have their own \
-		 mechanisms for reading back the buffer, so disabling VirtualGL's \
-		readback mechanism prevents duplication of effort. \
+		mechanisms for reading back the buffer, so setting ''VGL_READBACK=0'' \
+		disables VirtualGL's readback mechanism and prevents duplication of \
+		effort. \
 		{nl}{nl} \
 		This feature was developed initially to support running \
 		[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView \
@@ -326,10 +330,8 @@ Each method of configuration takes precedence over the previous method:
 		process 0. \
 	|	Readback enabled \
 	|
-| {anchor: VGL_SPOIL}''VGL_SPOIL=0''{nl}''VGL_SPOIL=1'' | ''-sp''{nl}or{nl}''+sp'' \
-	| __Enable/disable frame spoiling__ \
-		{nl}{nl} \
-		By default, VirtualGL will drop frames so as not to slow down the \
+| {anchor: VGL_SPOIL}''VGL_SPOIL=0''{nl}''VGL_SPOIL=1'' | ''-sp''{nl}''+sp'' \
+	| By default, VirtualGL will drop frames so as not to slow down the \
 		rendering rate of the server's graphics engine.  This should produce the \
 		best results with interactive applications, but it may be desirable to \
 		turn off frame spoiling when running benchmarks or other non-interactive \
@@ -344,11 +346,11 @@ Each method of configuration takes precedence over the previous method:
 		current CPU's. \
 	|	Spoiling enabled \
 	|
-| ''VGL_SSL=0''{nl}''VGL_SSL=1'' | ''-s''{nl}or{nl}''+s'' \
-	| __Tunnel the VirtualGL compressed image stream inside a secure socket \
-			layer__ \
+| ''VGL_SSL=0''{nl}''VGL_SSL=1'' | ''-s''{nl}''+s'' \
+	| Enabling this option causes the VGL Image Transport to be tunneled \
+		through a secure socket layer (SSL) (see {ref prefix="Section ": SSL_Encryption}.) \
 		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
+		__This option is available only in the VGL Image Transport__ \
 	|	SSL disabled \
 	|
 | {anchor: VGL_STEREO}''VGL_STEREO''=__''{s}''__ | | | |
