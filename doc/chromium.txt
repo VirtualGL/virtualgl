@@ -16,7 +16,7 @@ one of three configurations:
 #IMG: chromium-displaywall.png
 
 Sort-First Rendering (Image-Space Decomposition) is used to overcome the
-fill-rate limitations of individual graphics cards.  When configured to use
+fill rate limitations of individual graphics cards.  When configured to use
 sort-first rendering, Chromium divides up the scene based on which polygons
 will be visible in a particular section of the final image.  It then instructs
 each node of the cluster to render only the polygons that are necessary to
@@ -48,7 +48,7 @@ recombined into a single window on Node 0.  This configuration is perhaps the
 least often used of the three, but it is useful in cases where the scene
 contains a large amount of textures (such as in volume rendering) and thus
 rendering the whole scene on a single node would be prohibitively slow due to
-fill-rate limitations.
+fill rate limitations.
 
 In this configuration, the application is allowed to choose a visual, create an
 X window, and manage the window as it would normally do.  But all other OpenGL
@@ -212,7 +212,7 @@ connection between the X server and the Chromium Server.  In certain modes,
 Chromium polls the X server on every frame to determine whether windows have
 been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in a TurboVNC
-session as opposed to VirtualGL running in Direct Mode.
+session as opposed to using the VGL Image Transport.
 
 ** ModViz VGP and VirtualGL
 
