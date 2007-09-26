@@ -19,86 +19,72 @@ Each method of configuration takes precedence over the previous method:
 		effectively overrides any previous environment variable setting
 		corresponding to that configuration option.
 
-|| Environment Variable Name \
+|| Environment Variable \
 	|| ''vglrun'' Command-Line Override || Description || Default Value ||
-| ''VGL_CLIENT'' | ''-cl <client''{nl}''display>'' \
-	| __The X display where VirtualGL should send its image stream__ \
-		{nl}{nl} \
-		When running in Direct Mode, VirtualGL uses a dedicated TCP/IP connection \
-		to transmit compressed images of an application's OpenGL rendering area \
-		from the VirtualGL server to the VirtualGL client.  Thus, the VirtualGL server \
-		needs to know on which machine the VirtualGL client software is running, \
-		and it needs to know which X display on that machine will be used to draw \
-		the application's GUI.  VirtualGL can normally surmise this by reading \
-		the ''DISPLAY'' environment variable (which lists the hostname and X \
-		display where all X11 traffic will be sent.)  But in cases \
-		where X11 traffic is tunneled through SSh or another type of \
-		indirect X11 connection, the ''DISPLAY'' environment variable on the \
-		VirtualGL server may not point to the client machine.  In these cases, \
-		set ''VGL_CLIENT'' to the display where the application's GUI will end \
-		up.  For example: \
-		{nl}{nl} \
-		''export VGL_CLIENT=my_client:0.0'' \
-		{nl}{nl} \
-		If you are connecting to the VirtualGL server using SSh with X11 forwarding \
-		enabled, VirtualGL will try to guess an appropriate value for ''VGL_CLIENT'' \
-		based on the IP address of the SSh client, so you would only need to set \
-		''VGL_CLIENT'' in this case if your configuration is unusual (such as if \
-		your client machine's X server is occupying a display number other than 0 \
-		or if you are trying to forward VirtualGL's image stream over SSh.  See \
-		{ref prefix="Chapter ": VGL_Image_Transport_Usage} for more details.) \
-		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
-	|	If SSh X11 forwarding is being used, VirtualGL will automatically set \
-		''VGL_CLIENT'' to ''{ssh_client}:0.0'', where ''{ssh_client}'' is the IP \
-		address of the machine from which the SSh connection was initiated. \
-		Otherwise, ''VGL_CLIENT'' is unset, which tells VirtualGL to read the \
-		client hostname and X display from the ''DISPLAY'' environment variable \
-		instead. \
+| ''VGL_CLIENT=''__''{c}''__ | ''-cl ''__''{c}''__ \
+	| When using the VGL Image Transport, __''{c}''__ specifies the hostname or \
+		IP address of the machine on which ''vglclient'' is running.  When using \
+		the Sun Ray Image Transport, __''{c}''__ specifies the hostname or IP \
+		address of the Sun Ray server.  Normally, ''VGL_CLIENT'' is set \
+		automatically by the ''vglconnect'' or ''vglrun'' script, so don't \
+		override it unless you know what you're doing. \
+	|	Automatically set by ''vglconnect'' or ''vglrun'' \
 	|
-| ''VGL_COMPRESS=0''{nl}''VGL_COMPRESS=1'' | ''-c <0, 1>'' \
-	| __0 = Raw Mode (send rendered images uncompressed via. X11),__{nl} \
-		__1 = Direct Mode (compress rendered images as JPEG & send on a separate \
-			socket)__ \
+| ''VGL_COMPRESS=proxy''{nl} \
+	''VGL_COMPRESS=jpeg''{nl} \
+	''VGL_COMPRESS=rgb''{nl} \
+	''VGL_COMPRESS=sr''{nl} \
+	''VGL_COMPRESS=srrgb'' \
+	| ''-c proxy''{nl} \
+		''-c jpeg''{nl} \
+		''-c rgb''{nl} \
+		''-c sr''{nl} \
+		''-c srrgb'' \
+	| __proxy__ = Send images uncompressed using the X11 Image Transport.  This \
+			is useful when displaying to a local X server or X proxy (see \
+			{ref prefix="Section ": TurboVNC_Usage_Local}.) \
 		{nl}{nl} \
-		When this option is set to 0, VirtualGL will bypass its internal image \
-		compression pipeline and instead use ''XPutImage()'' to composite the \
-		rendered 3D images into the appropriate application window.  This mode \
-		("Raw Mode") is primarily useful in conjunction with VNC, NX, or other \
-		remote display software that performs X11 rendering on the server and \
-		uses its own mechanism for compressing and transporting images to the \
-		client.  Enabling Raw Mode on a remote X11 connection will result in \
-		uncompressed images being sent over the network, so it is unadvisable \
-		except on very fast networks (see {ref prefix="Section ": Raw_Mode_Over_Network}.) \
+		__jpeg__ = Compress images using JPEG and send using the VGL Image \
+			Transport.  This is useful when displaying to a remote X server (see \
+			{ref prefix="Chapter ": VGL_Image_Transport_Usage}.) \
 		{nl}{nl} \
-		If this option is not specified, then VirtualGL's default behavior is to \
-		use Direct Mode when the application is being displayed to a remote X \
-		server and to use Raw Mode otherwise.  VirtualGL assumes that if the \
-		''DISPLAY'' environment variable begins with a colon or with "''unix:''" \
-		(example: "'':0.0''", "''unix:1000.0''", etc.), then the X11 connection is \
-		local and thus doesn't require image compression.  Otherwise, it assumes \
-		that the X11 connection is remote and that compression is required.  If \
-		the display string begins with "''localhost''" or with the server's \
-		hostname, VGL assumes that the display is being tunneled through SSh, and \
-		its default behavior is to use Direct Mode in this case. \
+		__rgb__ = Encode images as uncompressed RGB and send using the \
+			VGL Image Transport.  This is useful when displaying to a remote X \
+			server or X proxy across a very fast network (see \
+			{ref prefix="Section ": TurboVNC_Usage_Remote}.) \
 		{nl}{nl} \
-		It is normally not necessary to set this configuration parameter unless \
-		you want to do something unusual (such as use Raw Mode over a remote X11 \
-		connection.) See {ref prefix="Chapter ": TurboVNC_Usage} for more details. \
+		__sr__ = Compress images using the Sun Ray default compression method \
+			and send using the Sun Ray Image Transport.  This requires that the \
+			proprietary Sun Ray plugin be installed on the VirtualGL server. \
+			(see {ref prefix="Chapter ": Sun_Ray_Usage}.) \
 		{nl}{nl} \
-		__NOTE:  Stereo does not work with Raw Mode.__ \
+		__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray \
+			Image Transport.  This requires that the proprietary Sun Ray plugin be \
+			installed on the VirtualGL server (see \
+			{ref prefix="Chapter ": Sun_Ray_Usage}.) \
 		{nl}{nl} \
-	| Compression enabled ("Direct Mode") if the application is displaying to a \
-		remote X server, disabled ("Raw Mode") otherwise. \
+		If this option is not specified, then the default is set as follows: \
+		{nl}{nl} \
+		If the X server is a Sun Ray server and the Sun Ray plugin is installed \
+		on the VirtualGL server, then VGL will default to using __sr__ \
+		compression.  VGL will fall back to using __proxy__ compression if, for \
+		any given frame, it is unable to send the frame using the Sun Ray Image \
+		Transport.  This could occur if, for example, the Sun Ray client is on \
+		a network that is not visible to the VirtualGL server. \
+		{nl}{nl} \
+		If the X server is not a Sun Ray server but the ''DISPLAY'' environment \
+		variable begins with '':'' or ''unix:'', then VirtualGL assumes that the \
+		X display connection is local and it defaults to using __proxy__ \
+		compression.  Otherwise, it defaults to __jpeg__ compression. \
+	| (See Description) \
 	|
-| ''VGL_DISPLAY'' | ''-d <display or''{nl}''GLP device>'' \
-	| __The display or GLP device to use for 3D rendering__ \
-		{nl}{nl} \
-		If your server has multiple 3D graphics cards and you want the OpenGL \
-		rendering to be redirected to a display other than :0, set \
-		''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for instance, \
-		to support many application instances on a beefy multi-pipe graphics \
-		server. \
+| ''VGL_DISPLAY=''__''{d}''__ | ''-d ''__''{d}''__ \
+	| __''{d}''__ specifies the X display or GLP device to use for 3D rendering. \
+		If the VirtualGL server has multiple 3D graphics cards and you want the \
+		OpenGL rendering to be redirected to a display other than :0, then you \
+		can set ''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for \
+		instance, to support many application instances on a beefy multi-pipe \
+		graphics server. \
 		{nl}{nl} \
 		__GLP mode (Solaris/Sparc only):__ \
 		{nl}{nl} \
@@ -109,24 +95,17 @@ Each method of configuration takes precedence over the previous method:
 		{ref prefix="Section ": GLP_Usage} for more details. \
 	|	:0 \
 	|
-| ''VGL_FPS'' | ''-fps <floating''{nl}''point number''{nl}''greater than 0>'' \
-	| __Limit the client/server frame rate to the specified number of frames \
-			per second__ \
+| ''VGL_FPS=''__''{f}''__ | ''-fps ''__''{f}''__ \
+	| Limit the client/server frame rate to __''{f}''__ frames/second, where \
+		__''{f}''__ is a floating point number > 0.0.  If frame spoiling is \
+		disabled, then this effectively limits the server's 3D rendering frame \
+		rate as well. \
 		{nl}{nl} \
-		Setting ''VGL_FPS'' or passing ''-fps'' as an argument to ''vglrun'' will \
-		enable VirtualGL's frame rate governor.  When enabled, the frame rate \
-		governor will attempt to limit the overall throughput of the VirtualGL \
-		pipeline to the specified number of frames/second.  If frame spoiling is \
-		disabled, this effectively limits the server's 3D rendering frame rate as \
-		well.  This option works regardless of whether VirtualGL is being run \
-		in Direct Mode (with compression enabled) or in Raw Mode (with \
-		compression disabled.) \
-	|	Frame rate governor disabled \
+		__This option is not available in the Sun Ray Image Transport.__ \
+	|	Do not limit frame rate \
 	|
-| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1''{nl}''VGL_GAMMA=<gamma''{nl} \
-		''correction''{nl}''factor''> \
-	| ''-g''{nl}or{nl}''+g''{nl}or{nl}''-gamma <gamma''{nl}''correction'' \
-		{nl}''factor>'' \
+| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1''{nl}''VGL_GAMMA=''__''{g}''__ \
+	| ''-g''{nl}''+g''{nl}''-gamma ''__''{g}''__ \
 	| "Gamma" refers to the relationship between the intensity of light which \
 		your computer's monitor is instructed to display and the intensity which \
 		it actually displays.  The curve is an exponential curve of the form \
@@ -169,9 +148,9 @@ Each method of configuration takes precedence over the previous method:
 		system as well.  This emulates the default behavior of OpenGL \
 		applications running locally on Linux or Solaris/x86 machines. \
 		{nl}{nl} \
-		__''VGL_GAMMA={gamma correction factor}'' or ''vglrun -gamma {gamma \
-			correction factor}'' : Enable VGL's internal gamma \
-			correction system with the specified gamma correction factor__ \
+		__''VGL_GAMMA=''__''{g}''__ or ''vglrun -gamma ''__''{g}''__ : Enable \
+			VGL's internal gamma correction system with a gamma correction factor \
+			of __''{g}''__ \
 		{nl}{nl} \
 		If ''VGL_GAMMA'' is set to an arbitrary floating point value, then \
 		VirtualGL performs gamma correction internally using the specified value \
@@ -181,8 +160,8 @@ Each method of configuration takes precedence over the previous method:
 		factor of -1/G. \
 	| ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, ''VGL_GAMMA=0'' otherwise \
 	|
-| ''VGL_GLLIB'' | {:} \
-	| __ The location of an alternate OpenGL library__ \
+| ''VGL_GLLIB=''__''{l}''__ | {:} \
+	| __''{l}''__ specifies the location of an alternate OpenGL library. \
 		{nl}{nl} \
 		Normally, VirtualGL loads the first OpenGL dynamic library that it finds \
 		in the dynamic linker path (usually ''/usr/lib/libGL.so.1'', \
@@ -194,80 +173,98 @@ Each method of configuration takes precedence over the previous method:
 		work.  However, this setting is necessary when using VirtualGL with \
 		[[chromium.txt#Chromium][Chromium]]. \
 	| {:} |
-| ''VGL_GUI'' | {:} \
-	| __Key sequence used to invoke the configuration dialog__ \
+| ''VGL_GUI=''__''{k}''__ | {:} \
+	| __''{k}''__ specifies the key sequence used to pop up the VirtualGL \
+		Configuration dialog, or ''none'' to disable it. \
 		{nl}{nl} \
 		VirtualGL will normally monitor an application's X event queue and pop up \
-		the VirtualGL configuration dialog whenever ''CTRL-SHIFT-F9'' is pressed. \
+		the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is pressed. \
 		In the event that this interferes with a key sequence that the \
 		application is already using, you can redefine the key sequence used to \
-		pop up VGL's configuration dialog by setting ''VGL_GUI'' to some \
+		pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to some \
 		combination of ''shift'', ''ctrl'', ''alt'', and one of \
-		''{f1, f2, ..., f12}''.  You can also set ''VGL_GUI'' to ''none'' to \
+		''f1, f2, ..., f12''.  You can also set ''VGL_GUI'' to ''none'' to \
 		disable the configuration dialog altogether.  See \
 		{ref prefix="Chapter ": Config_Dialog} for more details. \
 	|	shift-ctrl-f9 \
 	|
 | ''VGL_INTERFRAME=0''{nl}''VGL_INTERFRAME=1'' | {:} \
-	| __Enable/disable interframe image comparison__ \
-		{nl}{nl} \
-		In Direct Mode, VGL will normally compare each image tile in the frame \
-		with the corresponding image tile in the previous frame and send only \
-		the tiles that have changed.  Setting ''VGL_INTERFRAME'' to ''0'' \
-		disables this behavior. \
+	| The VGL and Sun Ray Image Transports will normally compare each frame \
+		with the previous frame and send only the portions of the image which \
+		have changed.  Setting ''VGL_INTERFRAME'' to ''0'' disables this \
+		behavior. \
 		{nl}{nl} \
 		Normally, you shouldn't need to disable interframe comparison except in \
 		rare situations.  This setting was introduced in order to work around a \
 		specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See \
 		{ref prefix="Section ": Application_Recipes} for more information. \
 		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
+		__This option is not available in the X11 Image Transport__ \
+		{nl}{nl} \
+		__When using the VGL Image Transport, interframe comparison is affected \
+			by the ''VGL_TILESIZE'' option__ \
 	| Inter-frame comparison enabled \
 	|
-| ''VGL_LOG'' | {:} \
-	| __Redirect the console output from the VirtualGL faker to a log file__ \
+| ''VGL_LOG=''__''{l}''__ | {:} \
+	| Redirect all messages from VirtualGL to a log file specified by \
+		__''{l}''__ \
 		{nl}{nl} \
 		Setting this environment variable to the pathname of a log file on the \
-		VirtualGL server will cause the VirtualGL faker to redirect all of its \
-		messages (including profiling and trace output) to the specified log file \
+		VirtualGL server will cause VirtualGL to redirect all of its messages \
+		(including profiling and trace output) to the specified log file \
 		rather than to stderr. \
 	| Print all messages to stderr \
 	|
-| ''VGL_NPROCS '' | ''-np <# of CPUs>''{nl}or{nl}''-np 0''{nl} \
-	(automatically determine the optimal number of CPUs to use) \
-	| __Specify the number of CPUs to use for multi-threaded compression__ \
+| ''VGL_NPROCS=''__''{n}''__{nl}''VGL_NPROCS=0'' \
+	| ''-np ''__''{n}''__{nl}''-np 0''{nl} \
+	| __''{n}''__ specifies the number of CPUs to use for multi-threaded \
+		compression, or ''0'' to automatically determine the optimal number of \
+		CPUs to use. \
 		{nl}{nl} \
-		VirtualGL can divide the task of compressing each frame among multiple \
-		server CPUs.  This might speed up the overall throughput if the \
-		compression stage of the pipeline is the primary bottleneck.  The default \
-		behavior (equivalent to setting ''VGL_NPROCS=0'') is to use all but one \
-		of the available CPUs, up to a maximum of 3 total.  On a large \
-		multiprocessor system, the speedup is almost linear up to 3 processors, \
-		but the algorithm scales very little past that point.  VirtualGL will not \
-		allow more than 4 processors total to be used for compression, nor will \
-		it allow you to assign more processors than are available in the system. \
+		The VGL Image Transport can divide the task of compressing each frame \
+		among multiple server CPUs.  This might speed up the overall throughput \
+		if the compression stage of the pipeline is the primary bottleneck.  The \
+		default behavior (equivalent to setting ''VGL_NPROCS=0'') is to use all \
+		but one of the available CPUs, up to a maximum of 3 total: \
 		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
+	  On a large multiprocessor system, the speedup is almost linear up to 3 \
+		processors, but the algorithm scales very little past that point.  \
+		VirtualGL will not allow more than 4 processors total to be used for \
+		compression, nor will it allow you to set this parameter to a value \
+		greater than the number of processors in the system. \
+		{nl}{nl} \
+		__This option is available only in the VGL Image Transport__ \
+		{nl}{nl} \
+		__Multi-threaded compression is affected by the ''VGL_TILESIZE'' \
+			option__ \
 	|	1P system: 1{nl} \
 		2P system: 1{nl} \
 		3P system: 2{nl} \
-		4P & larger: 3 \
+		4P & larger: 3{nl} \
 	|
-| ''VGL_PORT'' | ''-p <port>'' \
-	| __The TCP port to use when connecting to the client__ \
+| ''VGL_PORT=''__''{p}''__ | ''-p ''__''{p}''__ \
+	| __''{p}''__ specifies the TCP port that the server should use when \
+		connecting to ''vglclient''.  The connection port for the VGL Image \
+		Transport is normally determined by reading an X property that \
+		''vglclient'' stores on the client's X display, so don't override this \
+		unless you know what you're doing. \
 		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
-	|	4242 for unencrypted connections, 4243 for SSL connections \
+		__This option is available only in the VGL Image Transport__ \
+	|	Read from property stored by ''vglclient'' \
 	|
-| ''VGL_PROFILE=0''{nl}''VGL_PROFILE=1'' | ''-pr''{nl}or{nl}''+pr'' \
-	| __Enable/disable profiling output__ \
-		{nl}{nl} \
-		If enabled, this will cause the VirtualGL faker to continuously benchmark \
-		itself and periodically print out the throughput of reading back, \
-		compressing, and sending pixels to the client. \
+| ''VGL_PROFILE=0''{nl}''VGL_PROFILE=1'' | ''-pr''{nl}''+pr'' \
+	| This option enables or disables profiling output.  If enabled, VirtualGL \
+		will continuously benchmark itself and periodically print out the \
+		throughput of various stages in its image pipelines. \
 		{nl}{nl} \
 		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
 	|	Profiling disabled \
+	|
+| ''VGL_PROGRESSIVE=0''{nl}''VGL_PROGRESSIVE=1'' | ''-prog''{nl}''+prog'' \
+	| When Sun Ray default compression is being used, this option causes \
+		the Sun Ray Image Transport to send a lossless (RGB) frame during periods \
+		of inactivity. \
+	| Progressive mode disabled \
 	|
 | {anchor: VGL_QUAL}''VGL_QUAL=''{nl}''<1-100>'' | ''-q <1-100>'' \
 	| __Fine-tune the amount of JPEG compression__ \
@@ -354,6 +351,7 @@ Each method of configuration takes precedence over the previous method:
 		__** This option has no effect in "Raw" Mode. **__ \
 	|	SSL disabled \
 	|
+| {anchor: VGL_STEREO}''VGL_STEREO''=__''{s}''__ | | | |
 | {anchor: VGL_SUBSAMP}''VGL_SUBSAMP=''{nl}''<1x|2x|4x|gray>'' | ''-samp <1x|2x|4x|gray>'' \
 	|	__Manually specify the level of chrominance subsampling (1x, 2x, 4x, or \
 		gray) in the JPEG compressor__ \
