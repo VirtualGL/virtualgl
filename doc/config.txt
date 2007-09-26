@@ -19,99 +19,118 @@ Each method of configuration takes precedence over the previous method:
 		effectively overrides any previous environment variable setting
 		corresponding to that configuration option.
 
-|| Environment Variable \
-	|| ''vglrun'' Command-Line Override || Description || Default Value ||
-| ''VGL_CLIENT=''__''{c}''__ | ''-cl ''__''{c}''__ \
-	| When using the VGL Image Transport, __''{c}''__ specifies the hostname or \
-		IP address of the machine on which ''vglclient'' is running.  When using \
-		the Sun Ray Image Transport, __''{c}''__ specifies the hostname or IP \
-		address of the Sun Ray server.  Normally, ''VGL_CLIENT'' is set \
-		automatically by the ''vglconnect'' or ''vglrun'' script, so don't \
-		override it unless you know what you're doing. \
-	|	Automatically set by ''vglconnect'' or ''vglrun'' \
-	|
-| ''VGL_COMPRESS=proxy''{nl} \
-	''VGL_COMPRESS=jpeg''{nl} \
-	''VGL_COMPRESS=rgb''{nl} \
-	''VGL_COMPRESS=sr''{nl} \
-	''VGL_COMPRESS=srrgb'' \
-	| ''-c proxy''{nl} \
-		''-c jpeg''{nl} \
-		''-c rgb''{nl} \
-		''-c sr''{nl} \
-		''-c srrgb'' \
-	| __proxy__ = Send images uncompressed using the X11 Image Transport.  This \
-			is useful when displaying to a local X server or X proxy (see \
-			{ref prefix="Section ": TurboVNC_Usage_Local}.) \
-		{nl}{nl} \
-		__jpeg__ = Compress images using JPEG and send using the VGL Image \
-			Transport.  This is useful when displaying to a remote X server (see \
-			{ref prefix="Chapter ": VGL_Image_Transport_Usage}.) \
-		{nl}{nl} \
-		__rgb__ = Encode images as uncompressed RGB and send using the \
-			VGL Image Transport.  This is useful when displaying to a remote X \
-			server or X proxy across a very fast network (see \
-			{ref prefix="Section ": TurboVNC_Usage_Remote}.) \
-		{nl}{nl} \
-		__sr__ = Compress images using the Sun Ray default compression method \
-			and send using the Sun Ray Image Transport.  This requires that the \
-			proprietary Sun Ray plugin be installed on the VirtualGL server. \
-			(see {ref prefix="Chapter ": Sun_Ray_Usage}.) \
-		{nl}{nl} \
-		__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray \
-			Image Transport.  This requires that the proprietary Sun Ray plugin be \
-			installed on the VirtualGL server (see \
-			{ref prefix="Chapter ": Sun_Ray_Usage}.) \
-		{nl}{nl} \
-		If this option is not specified, then the default is set as follows: \
-		{nl}{nl} \
-		If the X server is a Sun Ray server and the Sun Ray plugin is installed \
-		on the VirtualGL server, then VGL will default to using __sr__ \
-		compression.  VGL will fall back to using __proxy__ compression if, for \
-		any given frame, it is unable to send the frame using the Sun Ray Image \
-		Transport.  This could occur if, for example, the Sun Ray client is on \
-		a network that is not visible to the VirtualGL server. \
-		{nl}{nl} \
-		If the X server is not a Sun Ray server but the ''DISPLAY'' environment \
-		variable begins with '':'' or ''unix:'', then VirtualGL assumes that the \
-		X display connection is local and it defaults to using __proxy__ \
-		compression.  Otherwise, it defaults to __jpeg__ compression. \
-	| (See Description) \
-	|
-| ''VGL_DISPLAY=''__''{d}''__ | ''-d ''__''{d}''__ \
-	| __''{d}''__ specifies the X display or GLP device to use for 3D rendering. \
-		If the VirtualGL server has multiple 3D graphics cards and you want the \
-		OpenGL rendering to be redirected to a display other than :0, then you \
-		can set ''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for \
-		instance, to support many application instances on a beefy multi-pipe \
-		graphics server. \
-		{nl}{nl} \
-		__GLP mode (Solaris/Sparc only):__ \
-		{nl}{nl} \
-		Setting this option to ''glp'' will enable GLP mode and use the first \
-		framebuffer device listed in ''/etc/dt/config/GraphicsDevices'' to \
-		perform 3D rendering.  You can also set this option to the \
-		pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See \
-		{ref prefix="Section ": GLP_Usage} for more details. \
-	|	:0 \
-	|
-| ''VGL_FPS=''__''{f}''__ | ''-fps ''__''{f}''__ \
-	| Limit the client/server frame rate to __''{f}''__ frames/second, where \
-		__''{f}''__ is a floating point number > 0.0.  If frame spoiling is \
-		disabled, then this effectively limits the server's 3D rendering frame \
-		rate as well. \
-		{nl}{nl} \
-		__This option is not available in the Sun Ray Image Transport.__ \
-	|	Do not limit frame rate \
-	|
-| ''VGL_GAMMA=0''{nl}''VGL_GAMMA=1''{nl}''VGL_GAMMA=''__''{g}''__ \
-	| ''-g''{nl}''+g''{nl}''-gamma ''__''{g}''__ \
-	| "Gamma" refers to the relationship between the intensity of light which \
-		your computer's monitor is instructed to display and the intensity which \
-		it actually displays.  The curve is an exponential curve of the form \
-		__Y = X{^G}__, where X is between 0 and 1.  G is called the "gamma" of the \
-		monitor.  PC monitors and TV's usually have a gamma of around 2.2. \
-		{nl}{nl} \
+| Environment Variable | ''VGL_CLIENT = ''__''{c}''__ |
+| ''vglrun'' argument | ''-cl ''__''{c}''__ |
+| Summary | __''{c}''__ = the hostname or IP address of the VirtualGL client \
+	machine or Sun Ray server |
+| Image Transports | VGL |
+| Default Value | Automatically set by ''vglconnect'' or ''vglrun'' |
+#OPT: hiCol=first
+
+	Description :: When using the VGL Image Transport, ''VGL_CLIENT'' should be
+	set to the hostname or IP address of the machine on which ''vglclient'' is
+	running.  When using the Sun Ray Image Transport, ''VGL_CLIENT'' should be
+	set to the hostname or IP address of the Sun Ray server.  Normally,
+	''VGL_CLIENT'' is set automatically by the ''vglconnect'' or ''vglrun''
+	script, so don't override it unless you know what you're doing. \
+
+| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
+| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
+| Summary | Set image transport and image compression type |
+| Image Transports | All |
+| Default Value | (See description) |
+#OPT: hiCol=first
+
+	Description :: {:}
+	__proxy__ = Send images uncompressed using the X11 Image Transport.  This is
+	useful when displaying to a local X server or X proxy (see
+	{ref prefix="Section ": TurboVNC_Usage_Local}.)
+	{nl}{nl} \
+	__jpeg__ = Compress images using JPEG and send using the VGL Image Transport.
+	This is useful when displaying to a remote X server (see
+	{ref prefix="Chapter ": VGL_Image_Transport_Usage}.)
+	{nl}{nl} \
+	__rgb__ = Encode images as uncompressed RGB and send using the VGL Image
+	Transport.  This is useful when displaying to a remote X server or X proxy
+	across a very fast network (see
+	{ref prefix="Section ": TurboVNC_Usage_Remote}.)
+	{nl}{nl} \
+	__sr__ = Compress images using the Sun Ray default compression method and
+	send using the Sun Ray Image Transport.  This requires that the proprietary
+	Sun Ray plugin be installed on the VirtualGL server.
+	(see {ref prefix="Chapter ": Sun_Ray_Usage}.)
+	{nl}{nl} \
+	__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray
+	Image Transport.  This requires that the proprietary Sun Ray plugin be
+	installed on the VirtualGL server (see
+	{ref prefix="Chapter ": Sun_Ray_Usage}.)
+	{nl}{nl} \
+	If this option is not specified, then the default is set as follows:
+	{nl}{nl} \
+	If the X server is a Sun Ray server and the Sun Ray plugin is installed
+	on the VirtualGL server, then VGL will default to using __sr__
+	compression.  VGL will fall back to using __proxy__ compression if, for
+	any given frame, it is unable to send the frame using the Sun Ray Image
+	Transport.  This could occur if, for example, the Sun Ray client is on
+	a network that is not visible to the VirtualGL server.
+	{nl}{nl} \
+	If the X server is not a Sun Ray server but the ''DISPLAY'' environment
+	variable begins with '':'' or ''unix:'', then VirtualGL assumes that the
+	X display connection is local and it defaults to using __proxy__
+	compression.  Otherwise, it defaults to __jpeg__ compression.
+
+| Environment Variable | ''VGL_DISPLAY = ''__''{d}''__ |
+| ''vglrun'' argument | ''-d ''__''{d}''__ |
+| Summary | __''{d}''__ = the X display or GLP device to use for 3D rendering |
+| Image Transports | All |
+| Default Value | :0 |
+#OPT: hiCol=first
+
+	Description :: If the VirtualGL server has multiple 3D graphics cards and you
+	want the OpenGL rendering to be redirected to a display other than :0, then
+	you can set ''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for
+	instance, to support many application instances on a beefy multi-pipe
+	graphics server.
+	{nl}{nl} \
+	__GLP mode (Solaris/Sparc only):__
+	{nl}{nl} \
+	Setting this option to ''glp'' will enable GLP mode and use the first
+	framebuffer device listed in ''/etc/dt/config/GraphicsDevices'' to
+	perform 3D rendering.  You can also set this option to the
+	pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See
+	{ref prefix="Section ": GLP_Usage} for more details.
+
+| Environment Variable | ''VGL_FPS = ''__''{f}''__ |
+| ''vglrun'' argument | ''-fps ''__''{f}''__ |
+| Summary | Limit the client/server frame rate to __''{f}''__ frames/second, \
+	where __''{f}''__ is a floating point number > 0.0 |
+| Image Transports | VGL, X11 |
+| Default Value | No limit |
+#OPT: hiCol=first
+
+	Description :: This option prevents VirtualGL from sending frames at a rate
+	faster than the specified limit.  It can be used, for instance, as a crude
+	way to control network bandwidth or CPU usage in multi-user environments
+	where those resources are constrained.
+	{nl}{nl} \
+	If frame spoiling is disabled, then this effectively limits the server's 3D
+	rendering frame rate as well.
+
+| Environment Variable | ''VGL_GAMMA = ''__''0 \| 1 \| {g}''__ |
+| ''vglrun'' argument | ''-g'' / ''+g'' / ''-gamma ''__''{g}''__ |
+| Summary | Enable/disable gamma correction and specify gamma correction \
+	factor |
+| Image Transports | All |
+| Default Value | ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, \
+	''VGL_GAMMA=0'' otherwise |
+#OPT: hiCol=first
+
+	Description :: "Gamma" refers to the relationship between the intensity of
+	light which your computer's monitor is instructed to display and the
+	intensity which it actually displays.  The curve is an exponential curve of
+	the form __Y = X{^G}__, where X is between 0 and 1.  G is called the "gamma"
+	of the monitor.  PC monitors and TV's usually have a gamma of around 2.2.
+	{nl}{nl} \
 		Some of the math involved in 3D rendering assumes a linear gamma \
 		(G = 1.0), so technically speaking, 3D applications will not display with \
 		mathematical correctness unless the pixels are "gamma corrected" to \
@@ -150,361 +169,450 @@ Each method of configuration takes precedence over the previous method:
 		{nl}{nl} \
 		__''VGL_GAMMA=''__''{g}''__ or ''vglrun -gamma ''__''{g}''__ : Enable \
 			VGL's internal gamma correction system with a gamma correction factor \
-			of __''{g}''__ \
+			of __''{g}'' \
 		{nl}{nl} \
 		If ''VGL_GAMMA'' is set to an arbitrary floating point value, then \
 		VirtualGL performs gamma correction internally using the specified value \
 		as the gamma correction factor.  You can also specify a negative \
 		value to apply a "de-gamma" function.  Specifying a gamma correction \
 		factor of G (where G < 0) is equivalent to specifying a gamma correction \
-		factor of -1/G. \
-	| ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, ''VGL_GAMMA=0'' otherwise \
-	|
-| ''VGL_GLLIB=''__''{l}''__ | {:} \
-	| __''{l}''__ specifies the location of an alternate OpenGL library. \
-		{nl}{nl} \
-		Normally, VirtualGL loads the first OpenGL dynamic library that it finds \
-		in the dynamic linker path (usually ''/usr/lib/libGL.so.1'', \
-		''/usr/lib64/libGL.so.1'',  or ''/usr/lib/64/libGL.so.1''.)  You can use \
-		this setting to explicitly specify another OpenGL dynamic library to \
-		load. \
-		{nl}{nl} \
-		Normally, you shouldn't need to muck with this unless something doesn't \
-		work.  However, this setting is necessary when using VirtualGL with \
-		[[chromium.txt#Chromium][Chromium]]. \
-	| {:} |
-| ''VGL_GUI=''__''{k}''__ | {:} \
-	| __''{k}''__ specifies the key sequence used to pop up the VirtualGL \
-		Configuration dialog, or ''none'' to disable it. \
-		{nl}{nl} \
-		VirtualGL will normally monitor an application's X event queue and pop up \
-		the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is pressed. \
-		In the event that this interferes with a key sequence that the \
-		application is already using, then you can redefine the key sequence used \
-		to pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to \
-		some combination of ''shift'', ''ctrl'', ''alt'', and one of \
-		''f1, f2, ..., f12''.  You can also set ''VGL_GUI'' to ''none'' to \
-		disable the configuration dialog altogether.  See \
-		{ref prefix="Chapter ": Config_Dialog} for more details. \
-	|	shift-ctrl-f9 \
-	|
-| ''VGL_INTERFRAME=0''{nl}''VGL_INTERFRAME=1'' | {:} \
-	| The VGL and Sun Ray Image Transports will normally compare each frame \
-		with the previous frame and send only the portions of the image which \
-		have changed.  Setting ''VGL_INTERFRAME'' to ''0'' disables this \
-		behavior. \
-		{nl}{nl} \
-		You shouldn't need to disable interframe comparison except in rare \
-		situations.  This setting was introduced in order to work around a \
-		specific interaction issue between VirtualGL and Pro/ENGINEER v3.  See \
-		{ref prefix="Section ": Application_Recipes} for more information. \
-		{nl}{nl} \
-		__This option is not available in the X11 Image Transport__ \
-		{nl}{nl} \
-		__When using the VGL Image Transport, interframe comparison is affected \
-			by the ''VGL_TILESIZE'' option__ \
-	| Inter-frame comparison enabled \
-	|
-| ''VGL_LOG=''__''{l}''__ | {:} \
-	| Redirect all messages from VirtualGL to a log file specified by \
-		__''{l}''__ \
-		{nl}{nl} \
-		Setting this environment variable to the pathname of a log file on the \
-		VirtualGL server will cause VirtualGL to redirect all of its messages \
-		(including profiling and trace output) to the specified log file \
-		rather than to stderr. \
-	| Print all messages to stderr \
-	|
-| ''VGL_NPROCS=''__''{n}''__{nl}''VGL_NPROCS=0'' \
-	| ''-np ''__''{n}''__{nl}''-np 0''{nl} \
-	| __''{n}''__ specifies the number of CPUs to use for multi-threaded \
-		compression, or ''0'' to automatically determine the optimal number of \
-		CPUs to use. \
-		{nl}{nl} \
-		The VGL Image Transport can divide the task of compressing each frame \
-		among multiple server CPUs.  This might speed up the overall throughput \
-		if the compression stage of the pipeline is the primary bottleneck.  The \
-		default behavior (equivalent to setting ''VGL_NPROCS=0'') is to use all \
-		but one of the available CPUs, up to a maximum of 3 total. \
-		{nl}{nl} \
-	  On a large multiprocessor system, the speedup is almost linear up to 3 \
-		processors, but the algorithm scales very little past that point.  \
-		VirtualGL will not allow more than 4 processors total to be used for \
-		compression, nor will it allow you to set this parameter to a value \
-		greater than the number of processors in the system. \
-		{nl}{nl} \
-		__This option is available only in the VGL Image Transport__ \
-		{nl}{nl} \
-		__Multi-threaded compression is affected by the ''VGL_TILESIZE'' \
-			option__ \
-	|	1P system: 1{nl} \
-		2P system: 1{nl} \
-		3P system: 2{nl} \
-		4P & larger: 3{nl} \
-	|
-| ''VGL_PORT=''__''{p}''__ | ''-p ''__''{p}''__ \
-	| __''{p}''__ specifies the TCP port that the server should use when \
-		connecting to ''vglclient''.  The connection port for the VGL Image \
-		Transport is normally determined by reading an X property that \
-		''vglclient'' stores on the client's X display, so don't override this \
-		unless you know what you're doing. \
-		{nl}{nl} \
-		__This option is available only in the VGL Image Transport__ \
-	|	Read from property stored by ''vglclient'' \
-	|
-| ''VGL_PROFILE=0''{nl}''VGL_PROFILE=1'' | ''-pr''{nl}''+pr'' \
-	| This option enables or disables profiling output.  If enabled, VirtualGL \
-		will continuously benchmark itself and periodically print out the \
-		throughput of various stages in its image pipelines. \
-		{nl}{nl} \
-		See {ref prefix="Chapter ": Perf_Measurement} for more details. \
-	|	Profiling disabled \
-	|
-| ''VGL_PROGRESSIVE=0''{nl}''VGL_PROGRESSIVE=1'' | ''-prog''{nl}''+prog'' \
-	| When Sun Ray default compression is being used, this option causes \
-		the Sun Ray Image Transport to send a lossless (RGB) frame during periods \
-		of inactivity.  This is useful in environments where both image quality \
-		and performance are	critical.  You can set the image quality for the Sun \
-		Ray compressor to a fairly low value to speed up rotate/pan/zoom \
-		operations in your application, because with Progressive Mode enabled, \
-		VirtualGL will send a lossless frame as soon as you finish manipulating \
-		the 3D scene. \
-	| Progressive mode disabled \
-	|
-| {anchor: VGL_QUAL}''VGL_QUAL=''__''{q}''__ | ''-q ''__''{q}''__ \
-	| __''{q}''__ specifies the quality of the JPEG compression, an integer \
-		between 1 and 100 (inclusive.) \
-		{nl}{nl} \
-		In digital images, "frequency" refers to how quickly the color changes \
-		between light and dark as you move either horizontally or vertically \
-		in the image.  Images with very sharp, bright features on a dark \
-		background, for instance, consist of both low- and high-frequency \
-		components, whereas images with smooth transitions between each pixel \
-		contain only low-frequency components.  JPEG compression works by \
-		breaking down the image into its constituent frequencies and then \
-		throwing out the highest of these frequencies.  The JPEG image "quality" \
-		determines which frequencies are thrown out.  A JPEG quality of 1 throws \
-		out all but the lowest frequencies and thus produces a very \
-		impressionistic, but generally not very useful, compressed image.  A JPEG \
-		quality of 100 retains all frequencies in the original image (but, due to \
-		roundoff errors, is still not completely lossless.) \
-		{nl}{nl} \
-		Because the human eye usually can't detect the highest frequencies in the \
-		image, and often because the image lacks those high-frequency elements to \
-		begin with, a sufficiently high JPEG quality setting can produce a \
-		"perceptually lossless" image.  A "perceptually lossless" image contains \
-		a small amount of mathematical error vs. the original image, but this \
-		error is so small that the human visual system cannot distinguish it \
-		(under normal circumstances.)  The threshold quality level at which JPEG \
-		compression becomes perceptually lossless is different for each image, \
-		but experiments with various visual difference benchmarks (such as \
-		[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that \
-		a JPEG quality of 95 is sufficient to guarantee perceptual \
-		losslessness in the types of applications (volume visualization apps, \
-		in particular) where image quality is critical.  As with any benchmarks, \
-		Your Mileage May Vary.  If quality is of paramount concern, consider \
-		setting the JPEG quality to 100 or using RGB encoding. \
- 		{nl}{nl} \
-		__This option is available only in the VGL Image Transport__ \
-	|	95 \
-	|
-| ''VGL_READBACK=0''{nl}''VGL_READBACK=1'' | {:} \
-	| On rare occasions, it might be desirable to have VirtualGL redirect \
-		OpenGL rendering from an application into a Pbuffer but not automatically \
-		read back and send the rendered pixels.  Some applications have their own \
-		mechanisms for reading back the buffer, so setting ''VGL_READBACK=0'' \
-		disables VirtualGL's readback mechanism and prevents duplication of \
-		effort. \
-		{nl}{nl} \
-		This feature was developed initially to support running \
-		[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView \
-		MPI normally uses MPI processes 1 through N as rendering servers, each \
-		drawing a portion of the geometry into a separate window on a \
-		separate X display.  ParaView reads back these server windows and \
-		composites the pixels into the main application window, which is \
-		controlled by MPI process 0.  By creating a script which passes a \
-		different value of ''VGL_DISPLAY'' and ''VGL_READBACK'' to each MPI \
-		process, it is possible to make all of the ParaView server processes \
-		render to off-screen buffers on different graphics cards while \
-		preventing VirtualGL from displaying any pixels except those generated by \
-		process 0. \
-	|	Readback enabled \
-	|
-| {anchor: VGL_SPOIL}''VGL_SPOIL=0''{nl}''VGL_SPOIL=1'' | ''-sp''{nl}''+sp'' \
-	| By default, VirtualGL will drop frames so as not to slow down the \
-		rendering rate of the server's graphics engine.  This should produce the \
-		best results with interactive applications, but it may be desirable to \
-		turn off frame spoiling when running benchmarks or other non-interactive \
-		applications.  Turning off frame spoiling will force one frame to be read \
-		back and sent on each end-of-frame event, so that the frame rate reported \
-		by OpenGL benchmarks will accurately reflect the frame rate seen by the \
-		user.  Disabling frame spoiling also prevents non-interactive \
-		applications from wasting graphics resources by rendering frames that \
-		will never be seen.  With frame spoiling turned off, the 3D rendering \
-		pipeline behaves as if it is fill-rate limited to about 30 or 40 \
-		Megapixels/second, the maximum throughput of the VirtualGL system on \
-		current CPU's. \
-	|	Spoiling enabled \
-	|
-| ''VGL_SSL=0''{nl}''VGL_SSL=1'' | ''-s''{nl}''+s'' \
-	| Enabling this option causes the VGL Image Transport to be tunneled \
-		through a secure socket layer (SSL) (see {ref prefix="Section ": SSL_Encryption}.) \
-		{nl}{nl} \
-		__This option is available only in the VGL Image Transport__ \
-	|	SSL disabled \
-	|
-| {anchor: VGL_STEREO}''VGL_STEREO''=__''{s}''__ | | | |
-| {anchor: VGL_SUBSAMP}''VGL_SUBSAMP=''{nl}''<1x|2x|4x|gray>'' | ''-samp <1x|2x|4x|gray>'' \
-	|	__Manually specify the level of chrominance subsampling (1x, 2x, 4x, or \
-		gray) in the JPEG compressor__ \
-		{nl}{nl} \
-		When an image is compressed as JPEG, each pixel in the image is first \
-		converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three \
-		values that specify the amounts of red, green, and blue that make up the \
-		pixel's color.  A YUV pixel has three values that specify the overall \
-		brightness of the pixel (Y, or "luminance") and the overall color of the \
-		pixel (U and V, or "chrominance".) \
-		{nl}{nl} \
-		Since the human eye is less sensitive to changes in color than it is to \
-		changes in brightness, the JPEG standard allows one to throw away the \
-		chrominance components for some of the pixels.  This technique, called \
-		"chrominance subsampling", significantly reduces the size of the \
-		compressed image without causing much noticeable loss in image quality. \
-		By default, VirtualGL uses no chrominance subsampling (AKA "1x \
-		subsampling") when it compresses images for delivery to the client. \
-		"2x subsampling" discards the chrominance components for every other \
-		pixel along the image's X direction (this is also known as "4:2:2 \
-		subsampling.")  Similarly, "4x subsampling" discards the chrominance \
-		components for every other pixel along both the X and Y directions of \
-		the image (this is also known as "4:2:0 subsampling.") Grayscale throws \
-		out all chrominance components, leaving only luminance. \
-		{nl}{nl} \
-		All else being equal, 2x subsampling generally produces images that are \
-		about 20-25% smaller than images with no subsampling.  Thus, VirtualGL \
-		will generally consume about 20-25% less network bandwidth if 2x \
-		subsampling is enabled.  Similarly, 4x subsampling will generally reduce \
-		the network usage by about 35-40%. \
-		{nl}{nl} \
-		Subsampling artifacts are rarely observed with volume data, \
-		since it usually only contains 256 colors to begin with.  But narrow, \
-		aliased lines and other sharp features on a black background will tend to \
-		produce artifacts when subsampling is enabled. \
-		{nl}{nl} \
-		The Axis Indicator from a Popular Visualization App displayed with 1x, \
-		2x, and 4x subsampling (respectively):{nl} \
-		{img: 444.gif}{img: 422.gif}{img: 411.gif} \
-		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
-	|	1x \
-	|
-| ''VGL_SYNC=0''{nl}''VGL_SYNC=1'' | ''-sync''{nl}or{nl}''+sync'' \
-	| __Enable/disable strict 2D/3D synchronization (necessary to pass GLX \
-			conformance tests)__ \
-		{nl}{nl} \
-		Normally, VirtualGL's operation is asynchronous from the point of view of \
-		the application.  The application swaps the buffers or calls \
-		''glFinish()'' or ''glFlush()'' or ''glXWaitGL()'', and VirtualGL reads \
-		back the framebuffer and sends the pixels to the client's display ... \
-		eventually.  This will work fine for the vast majority of applications, \
-		but it is not strictly conformant.  Technically speaking, when an \
-		application calls ''glXWaitGL()'' or ''glFinish()'', it is well within \
-		its rights to expect the OpenGL-rendered pixels to be immediately \
-		available in the X window.  Fortunately, very few applications actually \
-		do expect this, but on rare occasions, an application may try to use \
-		''XGetImage()'' or other X11 functions to obtain a bitmap of the pixels \
-		that were rendered by OpenGL.  Enabling ''VGL_SYNC'' is a somewhat \
-		extreme measure that may be needed to get such applications to work \
-		properly.  It was developed primarily as a way to pass the GLX \
-		conformance suite (''conformx'', specifically.)  When ''VGL_SYNC'' is \
-		enabled, every call to ''glFinish()'' or ''glXWaitGL()'' will cause the \
-		contents of the server's framebuffer to be read back and __synchronously__ \
-		drawn into the client's window __without compression or frame spoiling__. \
-		The call to ''glFinish()'' or ''glXWaitGL()'' will not return until \
-		VirtualGL has verified that the pixels have been delivered into the \
-		client's window.  As such, enabling this mode can have potentially dire \
-		effects on performance. \
-	| Synchronization disabled \
-	|
-| ''VGL_TILESIZE'' | {:} \
-	| __A number between 8 and 1024 (inclusive)__ \
-		{nl}{nl} \
-		Normally, in Direct Mode, VirtualGL will divide an OpenGL window into \
-		tiles of 256x256 pixels, compare each tile vs. the previous frame, and \
-		only compress & send the tiles which have changed.  It will also divide \
-		up the task of compressing these tiles among the available CPUs in a \
-		round robin fashion, if multi-threaded compression is enabled.  There are \
-		several tradeoffs that must be considered when choosing a tile size: \
-		{nl}{nl} \
-		Smaller tile sizes: \
-		{list: \
-			{item: Better parallel scalability} \
-			{item: Worse compression efficiency} \
-			{item: Better inter-frame optimization} \
-			{item: Worse network efficiency}} \
-		Larger tile sizes: \
-		{list: \
-			{item: Worse parallel scalability} \
-			{item: Better compression efficiency} \
-			{item: Worse inter-frame optimization} \
-			{item: Better network efficiency}} \
-		{nl} \
-		Smaller tiles can more easily be divided up among multiple CPUs, but they \
-		compress less efficiently (and less quickly) on an individual basis.  \
-		Using larger tiles can reduce traffic to the client by allowing the \
-		server to send only one frame update instead of many.  But on the flip \
-		side, using larger tiles decreases the chance that a tile will be \
-		unchanged from the previous frame.  Thus, the server may only send one or \
-		two packets per frame, but the cumulative size of those packets may be \
-		much larger than if a smaller tile size was used. \
-		{nl}{nl} \
-		256x256 was chosen as the default because, in experiments, it provided \
-		the best balance between scalability and efficiency on the platforms that \
-		VirtualGL supports. \
-		{nl}{nl} \
-		__** This option has no effect in "Raw" Mode. **__ \
-	|	256 \
-	|
-| ''VGL_TRACE=0''{nl}''VGL_TRACE=1'' | ''-tr''{nl}or{nl}''+tr'' \
-	| __Enable/disable tracing__ \
-		{nl}{nl} \
-		When tracing is enabled, VirtualGL will log all calls to the GLX and X11 \
-		functions it is intercepting, as well as the arguments, return values, \
-		and execution times for those functions.  This is useful when diagnosing \
-		interaction problems between VirtualGL and a particular OpenGL \
-		application. \
-	| Tracing disabled \
-	|
-| ''VGL_VERBOSE=0''{nl}''VGL_VERBOSE=1'' | ''-v''{nl}or{nl}''+v'' \
-	| __Enable/disable verbosity__ \
-		{nl}{nl} \
-		When in verbose mode, VirtualGL will reveal some of the decisions it \
-		makes behind the scenes, such as which code path it is using to compress \
-		JPEG images, which type of X11 drawing it is using, etc.  This can be \
-		helpful when diagnosing performance problems. \
-	|	Verbosity disabled \
-	|
-| ''VGL_X11LIB'' | {:} \
-	| __the location of an alternate X11 library__ \
-		{nl}{nl} \
-		Normally, VirtualGL loads the first X11 dynamic library that it finds in \
-		the dynamic linker path (usually ''/usr/lib/libX11.so.?'', \
-		''/usr/lib/64/libX11.so.?'', ''/usr/X11R6/lib/libX11.so.?'', or \
-		''/usr/X11R6/lib64/libX11.so.?''.)  You can use this setting to \
-		explicitly specify another X11 dynamic library to load. \
-		{nl}{nl} \
-		Normally, you shouldn't need to muck with this unless something doesn't \
-		work. \
-	| {:} |
-| ''VGL_XVENDOR'' | {:} \
-	| __Return a fake X11 vendor string when the application calls \
-		''XServerVendor()''__ \
-		{nl}{nl} \
-		Some applications expect ''XServerVendor()'' to return a particular \
-		value, which the application (sometimes erroneously) uses to figure out \
-		whether it's running locally or remotely.  This setting allows you to \
-		fool such applications into thinking they're running on a "local" X \
-		server rather than a remote connection. \
-	| {:} |
+		factor of -1/G.
+
+| Environment Variable | ''VGL_GLLIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate OpenGL library |
+| Image Transports | All |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL loads the first OpenGL dynamic library
+	that it finds in the dynamic linker path (usually ''/usr/lib/libGL.so.1'',
+	''/usr/lib64/libGL.so.1'',  or ''/usr/lib/64/libGL.so.1''.)  You can use this
+	setting to explicitly specify another OpenGL dynamic library to load.
+	{nl}{nl} \
+	You shouldn't need to muck with this unless something doesn't work.  However,
+	this setting is necessary when using VirtualGL with
+	[[chromium.txt#Chromium][Chromium]]. \
+
+| Environment Variable | ''VGL_GUI = ''__''{k}''__ |
+| Summary | __''{k}''__ = the key sequence used to pop up the VirtualGL \
+	Configuration dialog, or ''none'' to disable the dialog |
+| Image Transports | All |
+| Default Value | shift-ctrl-f9 |
+#OPT: hiCol=first
+
+	Description :: VirtualGL will normally monitor an application's X event queue
+	and pop up the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is
+	pressed.  In the event that this interferes with a key sequence that the
+	application is already using, then you can redefine the key sequence used to
+	pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to some
+	combination of ''shift'', ''ctrl'', ''alt'', and one of ''f1, f2, ..., f12''.
+	You can also set ''VGL_GUI'' to ''none'' to disable the configuration dialog
+	altogether.  See {ref prefix="Chapter ": Config_Dialog} for more details.
+
+| Environment Variable | ''VGL_INTERFRAME = ''__''0 \| 1''__ |
+| Summary | Enable or disable interframe image comparison |
+| Image Transports | Sun Ray, VGL |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: The VGL and Sun Ray Image Transports will normally compare
+	each frame with the previous frame and send only the portions of the image
+	which have changed.  Setting ''VGL_INTERFRAME'' to ''0'' disables this
+	behavior.
+	{nl}{nl} \
+	You shouldn't need to disable interframe comparison except in rare
+	situations.  This setting was introduced in order to work around a specific
+	interaction issue between VirtualGL and Pro/ENGINEER v3.  See 
+	{ref prefix="Section ": Application_Recipes} for more information.
+	{nl}{nl} \
+	__When using the VGL Image Transport, interframe comparison is affected \
+		by the ''VGL_TILESIZE'' option__
+
+| Environment Variable | ''VGL_LOG = ''__''{l}''__ |
+| Summary | Redirect all messages from VirtualGL to a log file specified by \
+	__''{l}''__ |
+| Image Transports | All |
+| Default Value | Print all messages to stderr |
+#OPT: hiCol=first
+
+	Description :: Setting this environment variable to the pathname of a log
+	file on the VirtualGL server will cause VirtualGL to redirect all of its
+	messages (including profiling and trace output) to the specified log file
+	rather than to stderr.
+
+{anchor: VGL_NPROCS}
+| Environment Variable | ''VGL_NPROCS = ''__''{n}''__ |
+| ''vglrun'' argument | ''-np ''__''{n}''__ |
+| Summary | __''{n}''__ = the number of CPUs to use for multi-threaded \
+	compression, or ''0'' to automatically determine the optimal number of CPUs \
+	to use |
+| Image Transports | VGL |
+| Default Value | 0 |
+#OPT: hiCol=first
+
+	Description :: The VGL Image Transport can divide the task of compressing
+	each frame among multiple server CPUs.  This might speed up the overall
+	throughput if the compression stage of the pipeline is the primary
+	bottleneck.  The default behavior (equivalent to setting this option to
+	''0'') is to use all but one of the available CPUs, up to a maximum of 3
+	total:
+	{nl}{nl} \
+	__1P system:__ 1 CPU used{nl} \
+	__2P system:__ 1 CPU used{nl} \
+	__3P system:__ 2 CPUs used{nl} \
+	__4P & larger:__ 3 CPUs used \
+	{nl}{nl} \
+  On a large multiprocessor system, the speedup is almost linear up to 3
+	processors, but the algorithm scales very little past that point.  VirtualGL
+	will not allow more than 4 processors total to be used for compression, nor
+	will it allow you to set this parameter to a value greater than the number of
+	processors in the system.
+	{nl}{nl} \
+	__Multi-threaded compression is affected by the ''VGL_TILESIZE'' option__
+
+| Environment Variable | ''VGL_PORT = ''__''{p}''__ |
+| ''vglrun'' argument | ''-p ''__''{p}''__ |
+| Summary | __''{p}''__ = the TCP port to use when connecting to the \
+	VirtualGL Client |
+| Image Transports | VGL |
+| Default Value | Read from X property stored by VirtualGL client |
+#OPT: hiCol=first
+
+	Description :: The connection port for the VGL Image Transport is normally
+	determined by reading an X property that ''vglclient'' stores on the X
+	server, so don't override this unless you know what you're doing.
+
+| Environment Variable | ''VGL_PROFILE = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-pr'' / ''+pr'' |
+| Summary | Enable/disable profiling output |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: If profiling output is enabled, then VirtualGL will
+	continuously benchmark itself and periodically print out the throughput of
+	various stages in its image pipelines.
+	{nl}{nl} \
+	See {ref prefix="Chapter ": Perf_Measurement} for more details.
+
+| Environment Variable | ''VGL_PROGRESSIVE = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-prog'' / ''+prog'' |
+| Summary | Enable/disable sending a lossless (RGB) frame during periods \
+	of inactivity |
+| Image Transports | Sun Ray (default compression) |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: When Sun Ray default compression is being used, enabling this
+	option causes the Sun Ray Image Transport to send a lossless (RGB) frame
+	during periods of inactivity.  This is useful in environments where both
+	image quality and performance are	critical.  With progressive mode enabled,
+	the image quality for the Sun Ray compressor can be set to a fairly low value
+	to speed up rotate/pan/zoom operations, then when the rotate/pan/zoom is
+	completed, VirtualGL will send a lossless frame that can be analyzed by the
+	user in more detail.
+
+{anchor: VGL_QUAL}
+| Environment Variable | ''VGL_QUAL = ''__''{q}''__ |
+| ''vglrun'' argument | ''-q ''__''{q}''__ |
+| Summary | __''{q}''__ = the JPEG compression quality, 1 \<\= __''{q}''__ \<\= 100 |
+| Image Transports | VGL (JPEG) |
+| Default Value | 95 |
+#OPT: hiCol=first
+
+	Description :: In digital images, "frequency" refers to how quickly the color
+	changes between light and dark as you move either horizontally or vertically
+	in the image.  Images with very sharp, bright features on a dark background,
+	for instance, consist of both low- and high-frequency components, whereas
+	images with smooth transitions between each pixel contain only low-frequency
+	components.  JPEG compression works by breaking down the image into its
+	constituent frequencies and then throwing out the highest of these
+	frequencies.  The JPEG image "quality" determines which frequencies are
+	thrown out.  A JPEG quality of 1 throws out all but the lowest frequencies
+	and thus produces a very impressionistic, but generally not very useful,
+	compressed image.  A JPEG quality of 100 retains all frequencies in the
+	original image (but, due to roundoff errors, is still not completely
+	lossless.)
+	{nl}{nl} \
+	Because the human eye usually can't detect the highest frequencies in the
+	image, and often because the image lacks those high-frequency elements to
+	begin with, a sufficiently high JPEG quality setting can produce a
+	"perceptually lossless" image.  A "perceptually lossless" image contains
+	a small amount of mathematical error vs. the original image, but this error
+	is so small that the human visual system cannot distinguish it (under normal
+	circumstances.)  The threshold quality level at which JPEG compression
+	becomes perceptually lossless is different for each image, but experiments
+	with various visual difference benchmarks (such as
+	[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that	a
+	JPEG quality of 95 is sufficient to guarantee perceptual losslessness in the
+	types of applications (volume visualization apps, in particular) where image
+	quality is critical.  As with any benchmarks, Your Mileage May Vary.  If
+	quality is of paramount concern, consider setting the JPEG quality to 100 or
+	using RGB encoding.
+
+| Environment Variable | ''VGL_READBACK = ''__''0 \| 1''__ |
+| Summary | Enable/disable VirtualGL's pixel pipelines |
+| Image Transports | All |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: On rare occasions, it might be desirable to have VirtualGL
+	redirect OpenGL rendering from an application into a Pbuffer but not
+	automatically read back and send the rendered pixels.  Some applications have
+	their own mechanisms for reading back the buffer, so setting
+	''VGL_READBACK=0'' disables VirtualGL's readback mechanism and prevents
+	duplication of effort.
+	{nl}{nl} \
+	This feature was developed initially to support running
+	[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView/MPI
+	normally uses MPI processes 1 through N as rendering servers, each drawing a
+	portion of the geometry into a separate window on a separate X display.
+	ParaView reads back these server windows and composites the pixels into the
+	main application window, which is controlled by MPI process 0.  By creating a
+	script which passes a different value of ''VGL_DISPLAY'' and ''VGL_READBACK''
+	to each MPI process, it is possible to make all of the ParaView server
+	processes render to off-screen buffers on different graphics cards while
+	preventing VirtualGL from displaying any pixels except those generated by
+	process 0.
+
+{anchor: VGL_SPOIL}
+| Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-sp'' / ''+sp'' |
+| Summary | Enable/disable frame spoiling |
+| Image Transports | All |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: By default, VirtualGL will drop frames so as not to slow down
+	the rendering rate of the server's graphics engine.  This should produce the
+	best results with interactive applications, but frame spoiling should be
+	turned off when running benchmarks or other non-interactive applications.
+	Turning off frame spoiling will force one frame to be sent to the client on
+	every end-of-frame event, and thus the frame rate reported by OpenGL
+	benchmarks will accurately reflect the frame rate seen by the user.
+	Disabling frame spoiling also prevents non-interactive applications from
+	wasting graphics resources by rendering frames that will never be seen.  With
+	frame spoiling turned off, the 3D rendering pipeline behaves as if it is
+	fill-rate limited to about 30 or 40 Megapixels/second, the maximum throughput
+	of the VirtualGL system on current CPU's.
+
+| Environment Variable | ''VGL_SSL = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-s'' / ''+s'' |
+| Summary | Enable/disable SSL encryption of the VGL Image Transport |
+| Image Transports | VGL |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Enabling this option causes the VGL Image Transport to be
+	tunneled through a secure socket layer (SSL)
+	(see {ref prefix="Section ": SSL_Encryption}.)
+
+{anchor: VGL_STEREO}
+| Environment Variable | ''VGL_STEREO = ''__''left \| right \| quad \| rc''__ |
+| ''vglrun'' argument | ''-st ''__''left \| right \| quad \| rc''__ |
+| Summary | Specify the delivery method for stereo images |
+| Image Transports | All |
+| Default Value | quad |
+#OPT: hiCol=first
+
+	Description :: {:}
+	__left__ = When an application renders a stereo frame, send only the left
+	eye buffer
+	{nl}{nl} \
+	__right__ = When an application renders a stereo frame, send only the right
+	eye buffer
+	{nl}{nl} \
+	__quad__ = Attempt to use quad-buffered stereo, which will result in a pair
+	of images being sent to the VirtualGL Client on every frame.  If
+	quad-buffered stereo is not available, either because the client or the
+	image transport does not support it, then fall back to using anaglyphic
+	stereo.  Quad-buffered stereo requires the VGL Image Transport, and it also
+	requires that client support OpenGL and have a 3D accelerator that supports
+	stereo rendering.
+	{nl}{nl} \
+	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
+	available
+	{nl}{nl} \
+	See {ref prefix="Chapter ": Advanced_OpenGL} for more details.
+
+{anchor: VGL_SUBSAMP}
+| Environment Variable | ''VGL_SUBSAMP = ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
+| ''vglrun'' argument | ''-samp ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
+| Summary | Specify the level of chrominance subsampling in the \
+	JPEG and Sun Ray image compressors |
+| Image Transports | Sun Ray (default compression), VGL (JPEG) |
+| Default Value | 1x for VGL Image Transport, 16x for Sun Ray Image Transport |
+#OPT: hiCol=first
+
+	Description :: When an image is compressed using JPEG or using the Sun Ray
+	default compression, each pixel in the image is first converted from RGB
+	(Red/Green/Blue) to YUV.  An RGB pixel has three values that specify the
+	amounts of red, green, and blue that make up the pixel's color.  A YUV pixel
+	has three values that specify the overall brightness of the pixel (Y, or
+	"luminance") and the overall color of the pixel (U and V, or "chrominance".)
+	{nl}{nl} \
+	Since the human eye is less sensitive to changes in color than it is to
+	changes in brightness, the chrominance components for some of the pixels can
+	be discarded without much noticeable loss in image quality.  This technique,
+	called "chrominance subsampling", significantly reduces the size of the
+	compressed image.
+	{nl}{nl} \
+	__1x__ = no chrominance subsampling
+	{nl}{nl} \
+	__2x__ = discard the chrominance components for every other pixel along the
+	image's X direction (this is also known as "4:2:2" or "2:1" subsampling.) All
+	else being equal, 2x subsampling generally reduces the image size by about
+	20-25% when compared to no subsampling.{nl} \
+	{nl} \
+	__4x__ = discard the chrominance components for every other pixel along both
+	the X and Y directions of the image (this is also known as "4:2:0" or "2:2"
+	subsampling.)   All else being equal, 4x subsampling generally reduces the
+	image size by about 35-40% when compared to no subsampling.
+	{nl}{nl} \
+	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
+	the image's X direction and half the pixels along the image's Y direction
+	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
+	available only with Sun Ray default compression.__
+	{nl}{nl} \
+	__16x__ = discard the chrominance components for 3 out of every 4 pixels
+	along both the X and Y directions of the image (this is also known as "4:4"
+	subsampling.)  __This option is available only with Sun Ray default
+	compression.__
+	{nl}{nl} \
+	__gray__ = discard all chrominance components.  This is useful when running
+	applications (such as medical visualization applications) that are already
+	generating grayscale images.  __This option is available only with JPEG
+	compression.__
+	{nl}{nl} \
+	Subsampling artifacts are less noticeable with volume data, since it usually
+	only contains 256 colors to begin with.  But narrow, aliased lines and other
+	sharp features on a black background will tend to produce very noticeable
+	artifacts when subsampling is enabled. \
+	{nl}{nl} \
+	The Axis Indicator from a Popular Visualization App displayed with 1x, \
+	2x, and 4x subsampling (respectively):{nl} \
+	{img: 444.gif}{img: 422.gif}{img: 411.gif} \
+
+| Environment Variable | ''VGL_SYNC = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-sync'' / ''+sync'' |
+| Summary | Enable/disable strict 2D/3D synchronization (necessary to pass GLX \
+			conformance tests) |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL's operation is asynchronous from the point
+	of view of the application.  The application swaps the buffers or calls
+	''glFinish()'' or ''glFlush()'' or ''glXWaitGL()'', and VirtualGL reads	back
+	the framebuffer and sends the pixels to the client's display ... eventually.
+	This will work fine for the vast majority of applications, but it is not
+	strictly conformant.  Technically speaking, when an application calls
+	''glXWaitGL()'' or ''glFinish()'', it is well within its rights to expect the
+	OpenGL-rendered pixels to be immediately available in the X window.
+	Fortunately, very few applications actually do expect this, but on rare
+	occasions, an application may try to use ''XGetImage()'' or other X11
+	functions to obtain a bitmap of the pixels that were rendered by OpenGL.
+	Enabling ''VGL_SYNC'' is a somewhat extreme measure that may be needed to get
+	such applications to work properly.  It was developed primarily as a way to
+	pass the GLX conformance suite (''conformx'', specifically.)  When
+	''VGL_SYNC'' is enabled, every call to ''glFinish()'' or ''glXWaitGL()'' will
+	cause the contents of the server's framebuffer to be read back and
+	__synchronously__ drawn into the client's window __using the X11 Image
+	Transport and no frame spoiling__.  The call to ''glFinish()'' or
+	''glXWaitGL()'' will not return until VirtualGL has verified that the pixels
+	have been delivered into the client's window.  As such, enabling this mode
+	can have potentially dire effects on performance.
+
+| Environment Variable | ''VGL_TILESIZE = ''__''{t}''__ |
+| Summary | __''{t}''__ = the image tile size to use for multi-threaded \
+	compression and interframe comparison (8 \<\= __''{t}''__ \<\= 1024) |
+| Image Transports | VGL |
+| Default Value | 256 |
+#OPT: hiCol=first
+
+	Description :: Normally, the VGL Image Transport will divide an OpenGL window
+	into equal-sized square tiles, compare each tile vs. the same tile in the
+	previous frame, and compress & send only the tiles which have changed
+	(assuming interframe comparison is enabled.)  The VGL Image Transport	will
+	also divide up the task of compressing these tiles among the available CPUs
+	in a round robin fashion, if multi-threaded compression is enabled
+	(see [[#VGL_NPROCS][VGL_NPROCS]].)
+	{nl}{nl} \
+	There are several tradeoffs that must be considered when choosing a tile
+	size:
+	{nl}{nl} \
+	__Smaller tile sizes:__ \
+	{list: \
+		{item: Better parallel scalability} \
+		{item: Worse compression efficiency} \
+		{item: Better inter-frame optimization} \
+		{item: Worse network efficiency}} \
+	__Larger tile sizes:__ \
+	{list: \
+		{item: Worse parallel scalability} \
+		{item: Better compression efficiency} \
+		{item: Worse inter-frame optimization} \
+		{item: Better network efficiency}} \
+	{nl} \
+	Smaller tiles can more easily be divided up among multiple CPUs, but they
+	compress less efficiently (and less quickly) on an individual basis.  Using
+	larger tiles can reduce traffic to the client by allowing the server to send
+	only one frame update instead of many.  But on the flip side, using larger
+	tiles decreases the chance that a tile will be unchanged from the previous
+	frame.
+	{nl}{nl} \
+	256x256 was chosen as the default because, in experiments, it provided
+	the best balance between scalability and efficiency on the platforms that
+	VirtualGL supports.
+
+| Environment Variable | ''VGL_TRACE = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-tr'' / ''+tr'' |
+| Summary | Enable/disable tracing |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: When tracing is enabled, VirtualGL will log all calls to the
+	GLX and X11 functions it is intercepting, as well as the arguments, return
+	values, and execution times for those functions.  This is useful when
+	diagnosing interaction problems between VirtualGL and a particular OpenGL
+	application.
+
+| Environment Variable | ''VGL_VERBOSE = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-v'' / ''+v'' |
+| Summary | Enable/disable verbose VirtualGL messages |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: When in verbose mode, VirtualGL will reveal some of the
+	decisions it makes behind the scenes, such as which code path it is using to
+	compress images, which type of X11 drawing it is using, etc.  This can be
+	helpful when diagnosing performance problems.
+
+| Environment Variable | ''VGL_X11LIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate X11 library |
+| Image Transports | All |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL loads the first X11 dynamic library that
+	it finds in the dynamic linker path (usually ''/usr/lib/libX11.so.?'',
+	''/usr/lib/64/libX11.so.?'', ''/usr/X11R6/lib/libX11.so.?'', or
+	''/usr/X11R6/lib64/libX11.so.?''.)  You can use this setting to
+	explicitly specify another X11 dynamic library to load.
+	{nl}{nl} \
+	You shouldn't need to muck with this unless something doesn't work.
+
+| Environment Variable | ''VGL_XVENDOR = ''__''{v}''__ |
+| Summary | __''{v}''__ = a fake X11 vendor string to return when the \
+	application calls ''XServerVendor()'' |
+| Image Transports | All |
+#OPT: hiCol=first
+
+	Description :: Some applications expect ''XServerVendor()'' to return a
+	particular value, which the application (sometimes erroneously) uses to
+	figure out whether it's running locally or remotely.  This setting allows you
+	to fool such applications into thinking they're running on a "local" X
+	server rather than a remote connection.
 
 ** Client Settings
 
