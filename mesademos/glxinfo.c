@@ -1056,10 +1056,16 @@ find_best_visual(Display *dpy, int scrnum)
 static void
 usage(void)
 {
-   printf("Usage: glxinfo [-b|-c|-h|-i|-l|-t|-v] [-d <dev>] [-display <dname>]\n");
+   printf("Usage: glxinfo [-b|-c|-h|-i|-l|-t|-v]");
+   #ifdef USEGLP
+   printf(" [-d <dev>]");
+   #endif
+   printf(" [-display <dname>]\n");
    printf("\t-b: Find the 'best' visual and print it's number.\n");
    printf("\t-c: Print table of GLXFBConfigs instead of X Visuals\n");
+   #ifdef USEGLP
    printf("\t-d <dev>: Print table of GLXFBConfigs on the specified GLP device.\n");
+   #endif
    printf("\t-display <dname>: Print table of GLX visuals on the specified X server.\n");
    printf("\t-h: Display this screen.\n");
    printf("\t-i: Force an indirect OpenGL rendering context.\n");
