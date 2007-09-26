@@ -1,4 +1,5 @@
 * Using VirtualGL in a Sun Ray Environment
+{anchor: Sun_Ray_Usage}
 
 As described in {ref prefix="Chapter ": Overview}, the Sun Ray environment
 consists of both an X proxy and an ultra-thin hardware client.  If the
@@ -25,8 +26,8 @@ a different machine than the Sun Ray server.
 		ssh -X {user}@{server}
 		---
 
-		Replace ''{user}'' with your user account name on the VirtualGL server and
-		''{server}'' with the hostname or IP address of that server.
+		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSh session, start a 3D application using VirtualGL:
 

@@ -74,6 +74,7 @@ buffering, full support for Solaris, and other tweaks.
 	* TurboVNC does not support stereographic or overlay rendering.
 
 ** Using TurboVNC and VirtualGL on the Same Server
+{anchor: TurboVNC_Usage_Local}
 
 The most common (and optimal) way to use TurboVNC is to set it up on the same
 server that is running VirtualGL.  This allows VirtualGL to send its rendered
@@ -105,8 +106,8 @@ network.
 		"c:\program files\turbovnc\putty" {user}@{server}
 		---
 
-		Replace ''{user}'' with your user account name on the VirtualGL server and
-		''{server}'' with the hostname or IP address of that server.
+		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSh session, start a TurboVNC server session:
 
@@ -171,6 +172,7 @@ network.
 	information on ''vglrun'' command line options.
 
 ** Using TurboVNC When VirtualGL Is Running on a Different Machine
+{anchor: TurboVNC_Usage_Remote}
 
 #IMG: vgltransportservernetwork.png
 #OPT fmt=latex: w=4cm
@@ -224,7 +226,7 @@ To kill a TurboVNC server session:
 		/opt/TurboVNC/bin/vncserver -kill :{n}
 		---
 
-	Replace ''{n}'' with the X display number of the TurboVNC server session you
+	Replace __''{n}''__ with the X display number of the TurboVNC server session you
 	wish to kill.
 
 To list the X display numbers and process ID's of all TurboVNC server sessions
@@ -247,10 +249,10 @@ viewer does not currently support double buffering.
 
 To use the Java TurboVNC viewer, point your web browser to:
 
-''http://turbovnc_server:{5800+n}''
+''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
 
-where ''{turbovnc_server}'' is the hostname or IP address of the TurboVNC
-server machine, and ''n'' is the X display number of the TurboVNC server
+where __''{turbovnc_server}''__ is the hostname or IP address of the TurboVNC
+server machine, and __''n''__ is the X display number of the TurboVNC server
 session to which you want to connect.
 
 __Example:__
@@ -370,9 +372,9 @@ SSh connection into the server machine using the following command line:
 	"c:\program files\turbovnc\putty" -L {5900+n}:localhost:{5900+n} {user}@{server}
 	---
 
-Replace ''{user}'' with your user account name on the TurboVNC server and
-''{server}'' with the hostname or IP address of that server.  Replace
-''n'' with the X display number of the TurboVNC server session to which you
+Replace __''{user}''__ with your user account name on the TurboVNC server and
+__''{server}''__ with the hostname or IP address of that server.  Replace
+__''n''__ with the X display number of the TurboVNC server session to which you
 want to connect.
 
 For instance, if you wish to connect to display '':1'' on server ''my_server''
@@ -389,7 +391,7 @@ using user account ''my_user'', you would type:
 	---
 
 After the SSh connection has been established, you can then launch the
-TurboVNC viewer and point it to ''localhost:{n}'' (''localhost:1'' in the
+TurboVNC viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
 above example.)
 
 *** Performance Notes
