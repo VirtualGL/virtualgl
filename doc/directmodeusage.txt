@@ -34,11 +34,11 @@ maximize performance.
 *** Procedure for Linux/Solaris/Mac Clients
 #OPT: noList! plain!
 
-	#. Start the X server if it isn't started already (__Mac users:__ start the
+	#. Start the X server if it isn't started already (__Mac clients:__ start the
 		Mac X11 application.)
 
-	#. Open a new terminal window (__Mac users:__ in the X11 application, start a
-		new xterm [Command-N] if one isn't already started.)
+	#. Open a new terminal window (__Mac clients:__ in the X11 application, start
+		a new xterm [Command-N] if one isn't already started.)
 
 	#. In the same terminal/xterm window, open a Secure Shell (SSh) session into
 		the VirtualGL server:

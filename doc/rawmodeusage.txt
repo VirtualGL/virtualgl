@@ -1,59 +1,18 @@
-* Using VirtualGL in Raw Mode with Other X Servers and Proxies
-
-*** Other X Proxies
-#OPT: noList! plain!
+* Using VirtualGL with Other X Proxies
+{anchor: X11_Proxy_Usage}
 
 The [[turbovncusage.txt#TurboVNC_Usage][previous chapter]] described how to use
-VirtualGL in Raw Mode with TurboVNC, but much of this information is also
-applicable to other X proxies, such as RealVNC, NX, etc.  Generally, none of
-these other solutions will provide anywhere near the performance of TurboVNC,
-but some of them have capabilities that TurboVNC lacks (NX, for instance, can
-do seamless windows.)
+VirtualGL with TurboVNC, but much of this information is also applicable to
+other X proxies, such as RealVNC, NX, etc.  Generally, none of these other
+solutions will provide anywhere near the performance of TurboVNC, but some of
+them have capabilities that TurboVNC lacks (NX, for instance, can do seamless
+windows.)
 
 VirtualGL reads the value of the ''DISPLAY'' environment variable to
-determine whether to enable Raw Mode by default.  If ''DISPLAY'' begins with
-a colon ("'':''") or with "''unix:''", then VirtualGL will enable Raw Mode as
-the default.  This should effectively make Raw Mode the default for most X
-proxies, but if for some reason it doesn't, then you can force the use of Raw
-Mode by setting ''VGL_COMPRESS'' to ''0'' or passing an argument of ''-c 0''
-to ''vglrun''.
-
-*** Raw Mode Over a Network
-#OPT: noList! plain!
-{anchor: Raw_Mode_Over_Network}
-
-#IMG: rawmodeovernetwork.png
-#OPT fmt=latex: w=4cm
-
-The [[turbovncusage.txt#TurboVNC_Usage][previous chapter]] described how to
-use Raw Mode over a server network to send uncompressed pixels from a VirtualGL
-server to a TurboVNC server.  But Raw Mode can also be used to send
-uncompressed pixels to a client machine.  There are two main reasons why you
-might want to do this:
-
-	- Raw Mode may perform better than Direct Mode if the client or server CPU is
-		extremely slow but the network is extremely fast (Gigabit or faster.)
-	- Raw Mode uses about half the server CPU cycles to maintain the same frame
-		rate as Direct Mode.  This can allow smaller servers to accommodate more
-		users.
-
-The procedure for using Raw Mode over a network is the same as the procedure for
-using Direct Mode with a [[directmodeusage.txt#Direct_X11_Connection][Direct X11 Connection]]
--- with the following notable differences:
-
-	#. It is not necessary to install or run the VirtualGL client.
-
-	#. Once connected to the VirtualGL server via. SSh, it is necessary to either
-		set the environment variable ''VGL_COMPRESS'' to ''0'' or pass an argument
-		of ''-c 0'' to ''vglrun'' when launching VirtualGL.  Otherwise, VirtualGL
-		will detect that the connection to the X server is remote, and it will
-		automatically try to enable Direct Mode.  Setting ''VGL_COMPRESS'' to ''0''
-		forces the use of Raw Mode, regardless of whether the X server is local or
-		remote.
-
-*** WORD OF CAUTION
-#OPT: noList! plain!
-Do not use SSh X11 tunneling with Raw Mode, as this will
-reduce the performance by 80% or more.  It is necessary to use a direct X11
-connection to sustain an interactive frame rate with Raw Mode on Gigabit
-networks.
+determine whether to enable the X11 Image Transport by default.  If ''DISPLAY''
+begins with a colon ("'':''") or with "''unix:''", then VirtualGL will assume
+that the X server connection is local and will enable the X11 Image Transport
+as the default.  This should effectively make the X11 Image Transport the
+default for most X proxies, but if for some reason that doesn't occur, then you
+can force the use of the X11 Image Transport by setting ''VGL_COMPRESS'' to
+''proxy'' or passing an argument of ''-c proxy'' to ''vglrun''.

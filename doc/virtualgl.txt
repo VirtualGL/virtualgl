@@ -28,6 +28,8 @@ systems, OpenGL and GLX, and X windows.
 ----8<--------------
 #INCLUDE: rawmodeusage.txt
 ----8<--------------
+#INCLUDE: sunrayusage.txt
+----8<--------------
 #INCLUDE: solarisshellscripts.txt
 ----8<--------------
 #INCLUDE: dlopen.txt

@@ -164,6 +164,9 @@ network.
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
+		VirtualGL will detect that the X display connection is local and will
+		automatically enable the X11 Image Transport.
+
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 

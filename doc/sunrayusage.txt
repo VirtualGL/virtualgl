@@ -1,0 +1,56 @@
+* Using VirtualGL in a Sun Ray Environment
+
+As described in {ref prefix="Chapter ": Overview}, the Sun Ray environment
+consists of both an X proxy and an ultra-thin hardware client.  If the
+proprietary VirtualGL Sun Ray plugin is not used, then the Sun Ray server can
+be treated just like any other X proxy and used with either the X11 Image
+Transport or the VGL Image Transport, as described in
+{ref prefix="Chapter ": TurboVNC_Usage} and
+{ref prefix="Chapter ": X11_Proxy_Usage}.
+
+If, however, the Sun Ray plugin is installed on the VirtualGL server, then a
+slightly different procedure is required to connect to that server and use the
+Sun Ray Image Transport.  This procedure assumes that VirtualGL is running on
+a different machine than the Sun Ray server.
+
+*** Procedure
+#OPT: noList! plain!
+
+	#. In the Sun Ray session, open a new terminal window.
+
+	#. In the same terminal window, open a Secure Shell (SSh) session into
+		the VirtualGL server:
+
+		#Verb: <<---
+		ssh -X {user}@{server}
+		---
+
+		Replace ''{user}'' with your user account name on the VirtualGL server and
+		''{server}'' with the hostname or IP address of that server.
+
+	#. In the SSh session, start a 3D application using VirtualGL:
+
+		#Verb: <<---
+		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		---
+
+	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
+	information on ''vglrun'' command line options.
+
+Note that this procedure is substantially similar to the
+[[directmodeusage.txt#X11_Forwarding][X11 Forwarding]] procedure used with the
+VGL Image Transport, except that it invokes ''ssh'' directly rather than using
+the ''vglconnect'' wrapper script.  ''vglconnect'' launches ''vglclient'', and
+''vglclient'' is not needed when using the Sun Ray Image Transport.
+
+If the VirtualGL Sun Ray plugin is installed on the VirtualGL server machine,
+then the Sun Ray Image Transport will be used by default by any VirtualGL
+sessions launched on that machine.  However, the Sun Ray Image Transport
+requires that the Sun Ray client be on a network that is accessible
+from the VirtualGL server.  Some Sun Ray deployments place the clients
+on a private network that is visible only to the Sun Ray server, and the Sun
+Ray Image Transport cannot be used in such cases (unless VirtualGL is running
+on the Sun Ray server itself, but that defeats the purpose of the Sun Ray
+Image Transport.)  If VirtualGL detects that it is running in a Sun Ray
+environment but is unable to use the Sun Ray Image Transport, then it will fall
+back to using the X11 Image Transport.
