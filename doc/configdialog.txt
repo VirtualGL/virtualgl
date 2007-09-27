@@ -2,46 +2,128 @@
 {anchor: Config_Dialog}
 
 Several of VirtualGL's configuration parameters can be changed on the fly once
-an application has started.  This is accomplished by using the VirtualGL
-configuration dialog, which can be activated by holding down the ''CTRL'' and
-''SHIFT'' keys and pressing the ''F9'' key while any one of the application's
-windows is active.  This displays a dialog box similar to the following:
+a 3D application has been started.  This is accomplished by using the VirtualGL
+Configuration dialog, which can be popped up by holding down the ''CTRL'' and
+''SHIFT'' keys and pressing the ''F9'' key while any one of the 3D
+application's windows is active.  This displays the following dialog box:
 
 {img: configdialog.gif}
 
-You can use this dialog to enable or disable frame spoiling or to adjust the
-JPEG quality and subsampling.  Changes are reflected immediately in the
-application.
+You can use this dialog to adjust various image compression and display
+parameters in VirtualGL.  Changes are reflected immediately in the application.
 
-	Frame Spoiling :: Clicking on this button will toggle frame spoiling on and
-	off.  If the button is highlighted (black), then frame spoiling is enabled.
+	Image Compression (Transport) :: This is a drop-down gadget with the
+	following options:
+	{nl}{nl} \
+	__None (X11 Transport)__ : equivalent to setting ''VGL_COMPRESS=proxy''.
+	This option can be activated at any time, regardless of which transport was
+	active when VirtualGL started.
+	{nl}{nl} \
+	__JPEG (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=jpeg''.  This
+	option is only available if the VGL Image Transport was active when the
+	application started.
+	{nl}{nl} \
+	__RGB (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=rgb''.  This
+	option is only available if the VGL Image Transport was active when the
+	application started.
+	{nl}{nl} \
+	__DPCM (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=sr''.
+	This option is only available if the Sun Ray Image Transport was active when
+	the application started.
+	{nl}{nl} \
+	__RGB (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=srrgb''.
+	This option is only available if the Sun Ray Image Transport was active when
+	the application started.
+	{nl}{nl} \
+	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
+	''VGL_COMPRESS'' configuration option and its various parameters.
 
-	Qual Preset: Broadband/T1 :: Clicking on this button will set the JPEG
-	quality to 30 and the JPEG subsampling to 4:1:1, settings which will produce
-	good performance on broadband connections (but at the expense of image
-	quality.)
+	Chrominance Subsampling :: This drop-down gadget is active only when using
+	JPEG or Sun Ray DPCM compression.  It has the following options:
+	{nl}{nl} \
+	__Grayscale__ : equivalent to setting ''VGL_SUBSAMP=gray''.  Available only
+	with JPEG compression.
+	{nl}{nl} \
+	__1X__ : equivalent to setting ''VGL_SUBSAMP=1x''
+	{nl}{nl} \
+	__2X__ : equivalent to setting ''VGL_SUBSAMP=2x''
+	{nl}{nl} \
+	__4X__ : equivalent to setting ''VGL_SUBSAMP=4x''
+	{nl}{nl} \
+	__8X__ : equivalent to setting ''VGL_SUBSAMP=8x''.  Available only with Sun
+	Ray DPCM compression.
+	{nl}{nl} \
+	__16X__ : equivalent to setting ''VGL_SUBSAMP=16x''.  Available only with
+	Sun Ray DPCM compression.
+	{nl}{nl} \
+	See {ref prefix="Section ": VGL_SUBSAMP} for more information about the
+	''VGL_SUBSAMP'' configuration option and its various parameters.
 
-	Qual Preset: LAN :: Clicking on this button will set the JPEG quality to 95
-	and the JPEG subsampling to 4:4:4, settings which will produce perceptually
-	lossless image quality (100 Mbit/sec switched LAN recommended.)
+	JPEG Image Quality :: This slider gadget is active only when using JPEG
+	compression.  It is the equivalent of setting ''VGL_QUAL''.  	See
+	{ref prefix="Section ": VGL_QUAL} for more information about the
+	''VGL_QUAL'' configuration option.
 
-	JPEG Quality :: Click and drag the slider to change the JPEG quality to an
-	arbitrary value between 1 and 100.
+	Send Lossless Frame During Periods of Inactivity :: This toggle button is
+	the equivalent of setting ''VGL_PROGRESSIVE''.  It is active only when using
+	Sun Ray DPCM compression.  See {ref prefix="Section ": VGL_PROGRESSIVE}
+	for more information about the ''VGL_PROGRESSIVE'' configuration option.
 
-	JPEG Subsampling :: Click on any of the three buttons to change the JPEG
-	subsampling.  The highlighted (black) button indicates the current value.
+	Connection Profile :: This drop-down gadget is active only if the VGL Image
+	Transport was active when the application started.  It has the following
+	options:
+	{nl}{nl} \
+	__Low Qual (Wide-Area Network)__ : Sets the image compression type to JPEG
+	(VGL Transport), sets the Chrominance Subsampling to 4X, and sets the JPEG
+	Image Quality to 30.
+	{nl}{nl} \
+	__Medium Qual__ : Sets the image compression type to JPEG	(VGL Transport),
+	sets the Chrominance Subsampling to 2X, and sets the JPEG Image Quality to
+	80.
+	{nl}{nl} \
+	__High Qual (High-Speed Network)__ : Sets the image compression type to JPEG
+	(VGL Transport), sets the Chrominance Subsampling to 1X, and sets the JPEG
+	Image Quality to 95.
 
-	Close Dialog :: Close the dialog (you can also use the close gadget on the
-	dialog window)
+	Gamma Correction Factor :: This floating point input gadget is the equivalent
+	of setting ''VGL_GAMMA''.  If using a gamma-corrected visual (Sparc clients
+	only), then this gadget has no effect.  Otherwise, it enables VirtualGL's
+	internal gamma correction system with the specified gamma correction factor.
+	See {ref prefix="Section ": VGL_GAMMA} for more information about the
+	''VGL_GAMMA'' configuration option.
 
- !!! The JPEG quality and subsampling gadgets will only be shown if VirtualGL
- is running in direct mode.  In raw mode, the only setting that can be changed
- with this dialog is frame spoiling.
+	Frame Spoiling :: This toggle button is the equivalent of setting
+	''VGL_SPOIL''.  See {ref prefix="Section ": Frame_Spoiling} and
+	{ref prefix="Section ": VGL_SPOIL} for more information about the
+	''VGL_SPOIL'' configuration option.
 
-The ''VGL_GUI'' environment variable can be used to change the key sequence
-used to pop up the dialog box.  If the default of ''CTRL-SHIFT-F9'' is not
-suitable, then set ''VGL_GUI'' to any combination of ''ctrl'', ''shift'',
-''alt'', and one of ''{f1, f2,..., f12}'' (these are not case sensitive.)  For example:
+	Interframe Comparison :: This toggle button is the equivalent of setting
+	''VGL_INTERFRAME''.  See {ref prefix="Section ": VGL_INTERFRAME} for more
+	information about the ''VGL_INTERFRAME'' configuration option.
+
+	Stereographic Rendering Method :: This drop-down gadget has the following
+	options:
+	{nl}{nl} \
+	__Send Left Eye Only__ : equivalent to setting ''VGL_STEREO=left''.
+	{nl}{nl} \
+	__Send Right Eye Only__ : equivalent to setting ''VGL_STEREO=right''
+	{nl}{nl} \
+	__Quad-Buffered (if available)__ : equivalent to setting ''VGL_STEREO=quad''
+	{nl}{nl} \
+	__Anaglyphic (Red/Cyan)__ : equivalent to setting ''VGL_STEREO=rc''
+	{nl}{nl} \
+	See {ref prefix="Section ": VGL_STEREO} for more information about the
+	''VGL_STEREO'' configuration option and its various parameters.
+
+	Limit Frames/second :: This floating point input gadget is the equivalent
+	of setting ''VGL_FPS''.  See {ref prefix="Section ": VGL_FPS} for more
+	information about the ''VGL_FPS'' configuration option.
+
+You can set the ''VGL_GUI'' environment variable to change the key sequence
+used to pop up the VirtualGL Configuration dialog.  If the default of
+''CTRL-SHIFT-F9'' is not suitable, then set ''VGL_GUI'' to any combination of
+''ctrl'', ''shift'', ''alt'', and one of ''f1, f2,..., f12''
+(these are not case sensitive.)  For example:
 
 #Verb: <<---
 export VGL_GUI=CTRL-F9
