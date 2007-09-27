@@ -127,6 +127,7 @@ argument to ''vglconnect'' when connecting to the server:
 	---
 
 ** VGL Image Transport with SSL Encryption
+{anchor: SSL_Encryption}
 
 This mode encrypts the VGL image stream and, when used in conjunction with
 [[#X11_Forwarding][X11 forwarding]], provides a completely secure solution.

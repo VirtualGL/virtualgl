@@ -181,7 +181,7 @@ If TurboVNC and VirtualGL are running on different servers, then it is
 desirable to use the VGL Image Transport to send images from the VirtualGL
 server to the TurboVNC server.  It is also desirable to disable image
 compression in the VGL Image Transport.  Otherwise, the images would have to be
-compressed by the VirtualGL server, decompressed by the VirtualGL client, then
+compressed by the VirtualGL server, decompressed by the VirtualGL Client, then
 recompressed by the TurboVNC server, which is a waste of CPU resources.
 However, sending images uncompressed over a network requires a fast network
 (generally, Gigabit Ethernet or faster.)  So there needs to be a fast link
