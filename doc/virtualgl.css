@@ -47,7 +47,9 @@ tr
 
 table
 {
-	border-spacing: 3px;
+	border-spacing: 0px;
+	border-width: 1;
+	border-style: solid;
 }
 
 th
@@ -56,6 +58,10 @@ th
 	background-color: rgb(0, 0, 0);
 	color: rgb(255, 255, 255);
 	text-align: left;
+	border-style: solid;
+	border-width: 2;
+	empty-cells: show;
+	border-color: rgb(0, 0, 0);
 }
 
 td
@@ -63,6 +69,10 @@ td
 	padding: 5px;
 	vertical-align: top;
 	text-align: left;
+	border-style: solid;
+	border-width: 2;
+	empty-cells: show;
+	border-color: rgb(0, 0, 0);
 }
 
 td.high
@@ -72,6 +82,10 @@ td.high
 	color: rgb(255, 255, 255);
 	text-align: left;
 	font-weight: bold;
+	border-style: solid;
+	border-width: 2;
+	border-color: rgb(0, 0, 0);
+	empty-cells: show;
 }
 
 .colorheader
