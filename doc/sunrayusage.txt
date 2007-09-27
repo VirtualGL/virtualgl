@@ -39,7 +39,7 @@ a different machine than the Sun Ray server.
 	information on ''vglrun'' command line options.
 
 Note that this procedure is substantially similar to the
-[[directmodeusage.txt#X11_Forwarding][X11 Forwarding]] procedure used with the
+[[#X11_Forwarding][X11 Forwarding]] procedure used with the
 VGL Image Transport, except that it invokes ''ssh'' directly rather than using
 the ''vglconnect'' wrapper script.  ''vglconnect'' launches ''vglclient'', and
 ''vglclient'' is not needed when using the Sun Ray Image Transport.

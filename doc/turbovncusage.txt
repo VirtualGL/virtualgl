@@ -193,7 +193,7 @@ perform well.
 
 The procedure for using the VGL Image Transport to transmit images from a
 VirtualGL server to a TurboVNC server is the same as the
-[[directmodeusage.txt#X11_Forwarding][procedure]] for using the VGL Image
+[[#X11_Forwarding][procedure]] for using the VGL Image
 Transport to transmit images to a remote X server, with the following notable
 differences:
 

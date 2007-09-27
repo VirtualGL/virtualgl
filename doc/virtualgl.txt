@@ -18,15 +18,15 @@ systems, OpenGL and GLX, and X windows.
 ----8<--------------
 #INCLUDE: turbovncinstall.txt
 ----8<--------------
-#INCLUDE: solarisinstall.txt
+#INCLUDE: unixconfig.txt
 ----8<--------------
-#INCLUDE: windowsinstall.txt
+#INCLUDE: windowsconfig.txt
 ----8<--------------
-#INCLUDE: directmodeusage.txt
+#INCLUDE: vgltransportusage.txt
 ----8<--------------
 #INCLUDE: turbovncusage.txt
 ----8<--------------
-#INCLUDE: rawmodeusage.txt
+#INCLUDE: x11transportusage.txt
 ----8<--------------
 #INCLUDE: sunrayusage.txt
 ----8<--------------
