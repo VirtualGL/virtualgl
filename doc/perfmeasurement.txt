@@ -36,6 +36,7 @@ parallel, so the aggregate performance is the harmonic mean of the
 decompression and blitting rates:  __[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.
 
 ** Frame Spoiling
+{anchor: Frame_Spoiling}
 
 By default, VirtualGL will only send a frame to the client if the client is
 ready to receive it.  If a rendered frame arrives at the server's queue and

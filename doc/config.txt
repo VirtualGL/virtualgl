@@ -34,6 +34,7 @@ Each method of configuration takes precedence over the previous method:
 	''VGL_CLIENT'' is set automatically by the ''vglconnect'' or ''vglrun''
 	script, so don't override it unless you know what you're doing. \
 
+{anchor: VGL_COMPRESS}
 | Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
 | ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
 | Summary | Set image transport and image compression type |
@@ -55,9 +56,9 @@ Each method of configuration takes precedence over the previous method:
 	across a very fast network (see
 	{ref prefix="Section ": TurboVNC_Usage_Remote}.)
 	{nl}{nl} \
-	__sr__ = Compress images using the Sun Ray default compression method and
-	send using the Sun Ray Image Transport.  This requires that the proprietary
-	Sun Ray plugin be installed on the VirtualGL server.
+	__sr__ = Compress images using the Sun Ray default compression method (DPCM)
+	and send using the Sun Ray Image Transport.  This requires that the
+	proprietary Sun Ray plugin be installed on the VirtualGL server.
 	(see {ref prefix="Chapter ": Sun_Ray_Usage}.)
 	{nl}{nl} \
 	__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray
@@ -100,6 +101,7 @@ Each method of configuration takes precedence over the previous method:
 	pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See
 	{ref prefix="Section ": GLP_Usage} for more details.
 
+{anchor: VGL_FPS}
 | Environment Variable | ''VGL_FPS = ''__''{f}''__ |
 | ''vglrun'' argument | ''-fps ''__''{f}''__ |
 | Summary | Limit the client/server frame rate to __''{f}''__ frames/second, \
@@ -116,6 +118,7 @@ Each method of configuration takes precedence over the previous method:
 	If frame spoiling is disabled, then this effectively limits the server's 3D
 	rendering frame rate as well.
 
+{anchor: VGL_GAMMA}
 | Environment Variable | ''VGL_GAMMA = ''__''0 \| 1 \| {g}''__ |
 | ''vglrun'' argument | ''-g'' / ''+g'' / ''-gamma ''__''{g}''__ |
 | Summary | Enable/disable gamma correction and specify gamma correction \
@@ -208,6 +211,7 @@ Each method of configuration takes precedence over the previous method:
 	You can also set ''VGL_GUI'' to ''none'' to disable the configuration dialog
 	altogether.  See {ref prefix="Chapter ": Config_Dialog} for more details.
 
+{anchor: VGL_INTERFRAME}
 | Environment Variable | ''VGL_INTERFRAME = ''__''0 \| 1''__ |
 | Summary | Enable or disable interframe image comparison |
 | Image Transports | Sun Ray, VGL |
@@ -294,15 +298,16 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl} \
 	See {ref prefix="Chapter ": Perf_Measurement} for more details.
 
+{anchor: VGL_PROGRESSIVE}
 | Environment Variable | ''VGL_PROGRESSIVE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-prog'' / ''+prog'' |
 | Summary | Enable/disable sending a lossless (RGB) frame during periods \
 	of inactivity |
-| Image Transports | Sun Ray (default compression) |
+| Image Transports | Sun Ray (DPCM) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: When Sun Ray default compression is being used, enabling this
+	Description :: When Sun Ray DPCM compression is being used, enabling this
 	option causes the Sun Ray Image Transport to send a lossless (RGB) frame
 	during periods of inactivity.  This is useful in environments where both
 	image quality and performance are	critical.  With progressive mode enabled,
@@ -439,12 +444,12 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-samp ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
 | Summary | Specify the level of chrominance subsampling in the \
 	JPEG and Sun Ray image compressors |
-| Image Transports | Sun Ray (default compression), VGL (JPEG) |
+| Image Transports | Sun Ray (DPCM), VGL (JPEG) |
 | Default Value | 1x for VGL Image Transport, 16x for Sun Ray Image Transport |
 #OPT: hiCol=first
 
-	Description :: When an image is compressed using JPEG or using the Sun Ray
-	default compression, each pixel in the image is first converted from RGB
+	Description :: When an image is compressed using JPEG or using Sun Ray
+	DPCM compression, each pixel in the image is first converted from RGB
 	(Red/Green/Blue) to YUV.  An RGB pixel has three values that specify the
 	amounts of red, green, and blue that make up the pixel's color.  A YUV pixel
 	has three values that specify the overall brightness of the pixel (Y, or
@@ -471,11 +476,11 @@ Each method of configuration takes precedence over the previous method:
 	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
 	the image's X direction and half the pixels along the image's Y direction
 	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
-	available only with Sun Ray default compression.__
+	available only with Sun Ray DPCM compression.__
 	{nl}{nl} \
 	__16x__ = discard the chrominance components for 3 out of every 4 pixels
 	along both the X and Y directions of the image (this is also known as "4:4"
-	subsampling.)  __This option is available only with Sun Ray default
+	subsampling.)  __This option is available only with Sun Ray DPCM
 	compression.__
 	{nl}{nl} \
 	__gray__ = discard all chrominance components.  This is useful when running
@@ -632,6 +637,12 @@ Each method of configuration takes precedence over the previous method:
 
 ** Client Settings
 
+These settings control the VirtualGL Client, which is used only with the VGL
+Image Transport.  ''vglclient'' is normally launched automatically from
+''vglconnect'' and should not require any further configuration except in
+exotic circumstances.  These settings are meant only for advanced users or
+those wishing to build additional infrastructure around VirtualGL.
+
 | Environment Variable | ''VGLCLIENT_DRAWMODE = ''__''ogl \| x11''__ |
 | ''vglclient'' argument | ''-gl'' / ''-x'' |
 | Summary | Specify the method used to draw pixels into the application window |
@@ -653,17 +664,6 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 {nl}
-
-| Environment Variable | ''VGLCLIENT_LOG = ''__''{l}''__ |
-| ''vglclient'' argument | ''-l ''__''{l}''__ |
-| Summary | Redirect all messages from VirtualGL to a log file specified by \
-	__''{l}''__ |
-| Default Value | Print all messages to stderr |
-#OPT: hiCol=first
-
-	Description :: Setting this option to the pathname of a log	file on the
-	VirtualGL client will cause VirtualGL to redirect all of its messages
-	(including profiling output) to the specified log file rather than to stderr.
 
 | Environment Variable | ''VGLCLIENT_PORT = ''__''{p}''__ |
 | ''vglclient'' argument | ''-port ''__''{p}''__ |
