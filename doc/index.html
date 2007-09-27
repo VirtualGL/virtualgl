@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-09-27T04:50:32-06:00">
+<meta name="date" content="2007-09-27T18:02:52-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -360,7 +360,7 @@ display software the ability to run OpenGL applications with full 3D
 hardware acceleration.  Some remote display software, such as VNC,
 lacks the ability to run OpenGL applications entirely.  Other remote
 display software forces OpenGL applications to use a slow software-only
-OpenGL renderer, to the detriment of both performance as well as compatibility.
+OpenGL renderer, to the detriment of performance as well as compatibility.
 And running OpenGL applications using the traditional remote X-Windows
 approach causes all of the OpenGL commands and 3D data to be sent over
 the network to be rendered on the client machine, which is not a tenable
@@ -376,7 +376,7 @@ room&rdquo; with compute and storage resources.  VirtualGL also allows
 3D graphics hardware to be shared among multiple users, and it provides
 real-time performance on even the most modest of networks.  This makes
 it possible for large, noisy, hot 3D workstations to be replaced with
-laptops or even thinner clients, but more importantly, it eliminates
+laptops or even thinner clients; but more importantly, it eliminates
 the workstation and the network as barriers to data size.  Users can
 now visualize gigabytes and gigabytes of data in real time without
 needing to cache any of the data locally or sit in front of the machine
@@ -967,7 +967,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Download v1.10 or later of the TurboJPEG RPM package (<code>turbojpeg-</code><em><code>{version}</code></em><code>.i386.rpm</code>
-        for 32-bit systems and <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
+        for 32-bit systems or <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
         area</a></span><a name="idx0038"></a> of the
@@ -993,7 +993,7 @@ rpm&nbsp;-U&nbsp;turbojpeg*.rpm
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Download the VirtualGL RPM package (<code>VirtualGL-</code><em><code>{version}</code></em><code>.i386.rpm</code>
-        for 32-bit systems and <code>VirtualGL-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
+        for 32-bit systems or <code>VirtualGL-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
         area</a></span><a name="idx0041"></a> of the
@@ -1020,7 +1020,7 @@ rpm&nbsp;-i&nbsp;VirtualGL*.rpm
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Download the VirtualGL Solaris package (<code>SUNWvgl-</code><em><code>{version}</code></em><code>.pkg.bz2</code>
-        for Sparc and <code>SUNWvgl-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
+        for Sparc or <code>SUNWvgl-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
         for x86) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
         area</a></span><a name="idx0043"></a> of the
@@ -1197,7 +1197,7 @@ TurboVNC must be installed on any machine that will act as a TurboVNC server or 
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Download v1.10 or later of the TurboJPEG RPM package (<code>turbojpeg-</code><em><code>{version}</code></em><code>.i386.rpm</code>
-        for 32-bit systems and <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
+        for 32-bit systems or <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
         area</a></span><a name="idx0054"></a> of the
@@ -1245,7 +1245,7 @@ rpm&nbsp;-U&nbsp;turbovnc*.rpm
 <ol class="Ordered numeric">
     <li class="Ordered" value="1">
         Download the TurboVNC Solaris package (<code>SUNWtvnc-</code><em><code>{version}</code></em><code>.pkg.bz2</code>
-        for Sparc and <code>SUNWtvnc-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
+        for Sparc or <code>SUNWtvnc-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
         for x86) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
         area</a></span><a name="idx0059"></a> of the
@@ -1572,7 +1572,7 @@ svcadm&nbsp;disable&nbsp;gdm2-login
         </dl>
     </li>
     <li class="Ordered">
-        Log in as root from the text console (or remotely via. SSh.)
+        Log in as root from the text console (or remotely using SSh.)
     </li>
     <li class="Ordered">
         Run
@@ -2172,7 +2172,7 @@ where <em><code>{home}</code></em> is the path of the current user&rsquo;s
 home directory (<code>%USERPROFILE%</code> on Windows systems), <em><code>{hostname}</code></em>
 is the name of the computer running <code>vglconnect</code>, and <em><code>{display}</code></em>
 is the name of the current X display (read from the <code>DISPLAY</code>
-environment or passed to <code>vglconnect</code> via. the <code>-display</code>
+environment or passed to <code>vglconnect</code> using the <code>-display</code>
 argument.)  In the event that something goes wrong, this log file is
 the first place to check.</p>
 
@@ -2220,8 +2220,8 @@ More instances than that cannot be accommodated on a firewalled machine,
 unless the firewall is able to create rules based on application executables
 instead of listening ports.</p>
 
-<p>Note that it is not necessary to open any ports in the firewall to
-use the VGL Image Transport with <a href="#SSh_Tunneling">SSh
+<p>Note that it is not necessary to open any inbound ports in the firewall
+to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh
 Tunneling</a><a name="idx0078"></a>.</p>
 
 <hr class="break" />
@@ -2506,7 +2506,7 @@ the following notable differences:</p>
         The &ldquo;X server&rdquo; is really the TurboVNC server session.
     </li>
     <li class="Ordered">
-        Once connected to the VirtualGL server via. SSh, it is recommended
+        Once connected to the VirtualGL server with SSh, it is recommended
         that you disable image compression in the VGL Image Transport by either
         setting the environment variable <code>VGL_COMPRESS</code> to <code>rgb</code>
         or passing an argument of <code>-c&nbsp;rgb</code> to <code>vglrun</code>
@@ -3539,12 +3539,12 @@ stereo visuals available.</p>
 
 <p>In quad-buffered mode, VirtualGL reads back both eye buffers on the
 server and sends the contents as a pair of compressed images (one for
-each eye) to the VirtualGL Client.  The VGL Client then decompresses
-both images and draws them as a single stereo frame to the client&rsquo;s
-display using <code>glDrawPixels()</code>.  It should thus be no surprise
-that enabling quad-buffered stereo in VirtualGL decreases performance
-by 50% or more and uses twice the network bandwidth to maintain the
-same frame rate.</p>
+each eye) to the VirtualGL Client.  The VirtualGL Client then decompresses
+both images and draws them as a single stereo frame to the client machine&rsquo;s
+X display using <code>glDrawPixels()</code>.  It should thus be no
+surprise that enabling quad-buffered stereo in VirtualGL decreases
+performance by 50% or more and uses twice the network bandwidth to
+maintain the same frame rate.</p>
 
 <p>Stereographic rendering requires the VGL Image Transport.  If any other
 image transport is used, then VGL will fall back to anaglyphic stereo
@@ -4674,7 +4674,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Read from X property stored by VirtualGL client</td>
+    <td class="standard">Read from X property stored by VirtualGL Client</td>
   </tr>
 </table>
 </div>
@@ -5368,7 +5368,7 @@ method:</p>
         discards only luminance components from the pixels it subsamples. 
         <code>VGL_ZOOM_*</code>, on the other hand, discards the entire pixels.
         The result is extremely grainy, so this option is generally only useful
-        in conjunction with <code>VGL_PROGRESSIVE</code>.  Note that this
+        in conjunction with <code>VGL_PROGRESSIVE</code>.
     </dd>
 </dl>
 

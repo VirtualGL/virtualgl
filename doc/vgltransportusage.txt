@@ -216,7 +216,7 @@ where __''{home}''__ is the path of the current user's home directory
 (''%USERPROFILE%'' on Windows systems), __''{hostname}''__ is the name of the
 computer running ''vglconnect'', and __''{display}''__ is the name of the
 current X display (read from the ''DISPLAY'' environment or passed to
-''vglconnect'' via. the ''-display'' argument.)  In the event that something
+''vglconnect'' using the ''-display'' argument.)  In the event that something
 goes wrong, this log file is the first place to check.
 
 When ''vglclient'' successfully starts on a given X display, it stores its
@@ -257,5 +257,5 @@ firewall.  Opening ports 4200-4299 will accommodate up to 50 separate
 firewalled machine, unless the firewall is able to create rules based on
 application executables instead of listening ports.
 
-Note that it is not necessary to open any ports in the firewall to use
+Note that it is not necessary to open any inbound ports in the firewall to use
 the VGL Image Transport with [[#SSh_Tunneling][SSh Tunneling]].

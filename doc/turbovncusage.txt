@@ -201,7 +201,7 @@ differences:
 
 	#. The "X server" is really the TurboVNC server session.
 
-	#. Once connected to the VirtualGL server via. SSh, it is recommended that
+	#. Once connected to the VirtualGL server with SSh, it is recommended that
 		you disable image compression in the VGL Image Transport by either setting
 		the environment variable ''VGL_COMPRESS'' to ''rgb'' or passing an argument
 		of ''-c rgb'' to ''vglrun'' when launching VirtualGL.  Otherwise, VirtualGL

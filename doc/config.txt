@@ -278,7 +278,7 @@ Each method of configuration takes precedence over the previous method:
 | Summary | __''{p}''__ = the TCP port to use when connecting to the \
 	VirtualGL Client |
 | Image Transports | VGL |
-| Default Value | Read from X property stored by VirtualGL client |
+| Default Value | Read from X property stored by VirtualGL Client |
 #OPT: hiCol=first
 
 	Description :: The connection port for the VGL Image Transport is normally
@@ -632,8 +632,7 @@ Each method of configuration takes precedence over the previous method:
 	differs from ''VGL_SUBSAMP'' in that ''VGL_SUBSAMP'' discards only luminance
 	components from the pixels it subsamples.  ''VGL_ZOOM_*'', on the other hand,
 	discards the entire pixels.  The result is extremely grainy, so this option
-	is generally only useful in conjunction with ''VGL_PROGRESSIVE''.  Note that
-	this 
+	is generally only useful in conjunction with ''VGL_PROGRESSIVE''.
 
 ** Client Settings
 

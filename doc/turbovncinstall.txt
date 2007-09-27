@@ -11,7 +11,7 @@
 #OPT: noList! plain!
 
 	1. Download v1.10 or later of the TurboJPEG RPM package
-		(''turbojpeg-''__''{version}''__''.i386.rpm'' for 32-bit systems and
+		(''turbojpeg-''__''{version}''__''.i386.rpm'' for 32-bit systems or
 		''turbojpeg-''__''{version}''__''.x86_64.rpm'' for 64-bit systems) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
@@ -47,7 +47,7 @@
 ** Installing TurboVNC on Solaris
 
 	1. Download the TurboVNC Solaris package (''SUNWtvnc-''__''{version}''__''.pkg.bz2''
-		for Sparc and ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
+		for Sparc or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}

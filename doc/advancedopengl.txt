@@ -51,8 +51,8 @@ that both client and server have stereo visuals available.
 
 In quad-buffered mode, VirtualGL reads back both eye buffers on the server
 and sends the contents as a pair of compressed images (one for each eye) to the
-VirtualGL Client.  The VGL Client then decompresses both images and draws them
-as a single stereo frame to the client's display using ''glDrawPixels()''.  It
+VirtualGL Client.  The VirtualGL Client then decompresses both images and draws them
+as a single stereo frame to the client machine's X display using ''glDrawPixels()''.  It
 should thus be no surprise that enabling quad-buffered stereo in VirtualGL
 decreases performance by 50% or more and uses twice the network bandwidth to
 maintain the same frame rate.

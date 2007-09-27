@@ -6,7 +6,7 @@ display software the ability to run OpenGL applications with full 3D
 hardware acceleration.  Some remote display software, such as VNC, lacks the
 ability to run OpenGL applications entirely.  Other remote display software
 forces OpenGL applications to use a slow software-only OpenGL renderer, to the
-detriment of both performance as well as compatibility.  And running OpenGL
+detriment of performance as well as compatibility.  And running OpenGL
 applications using the traditional remote X-Windows approach causes all of the
 OpenGL commands and 3D data to be sent over the network to be rendered on the
 client machine, which is not a tenable proposition unless the data is
@@ -21,7 +21,7 @@ hardware, allowing it to be co-located in the "cold room" with compute and
 storage resources.  VirtualGL also allows 3D graphics hardware to be shared
 among multiple users, and it provides real-time performance on even the most
 modest of networks.  This makes it possible for large, noisy, hot 3D
-workstations to be replaced with laptops or even thinner clients, but more
+workstations to be replaced with laptops or even thinner clients; but more
 importantly, it eliminates the workstation and the network as barriers to
 data size.  Users can now visualize gigabytes and gigabytes of data in real
 time without needing to cache any of the data locally or sit in front of the

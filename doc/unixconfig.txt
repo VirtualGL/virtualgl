@@ -138,7 +138,7 @@ prompt.
 			/etc/init.d/dtlogin stop
 			---
 
-	#. Log in as root from the text console (or remotely via. SSh.)
+	#. Log in as root from the text console (or remotely using SSh.)
 
 	#. Run
 
