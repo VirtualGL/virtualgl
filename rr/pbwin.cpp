@@ -338,7 +338,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		{
 			if(!_rrmoviedpy)
 				errifnot(_rrmoviedpy=new rrdisplayclient(NULL, NULL, true));
-			senddirect(_rrmoviedpy, drawbuf, false, dostereo, RRSTEREO_QUADBUF,
+			sendvgl(_rrmoviedpy, drawbuf, false, dostereo, RRSTEREO_QUADBUF,
 				fconfig.mcompress, fconfig.mqual, fconfig.msubsamp, true);
 		}
 	}
@@ -346,7 +346,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	switch(compress)
 	{
 		case RRCOMP_PROXY:
-			sendraw(drawbuf, spoillast, sync, dostereo, stereomode);
+			sendx11(drawbuf, spoillast, sync, dostereo, stereomode);
 			break;
 
 		case RRCOMP_JPEG:
@@ -354,14 +354,14 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
 				fconfig.client? fconfig.client:DisplayString(_windpy)));
 			_rrdpy->record(sharerrdpy);
-			senddirect(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
+			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
 
 		case RRCOMP_SR:
 		case RRCOMP_SRLOSSLESS:
 			if(sendsr(drawbuf, spoillast, dostereo,	stereomode)==-1)
-			sendraw(drawbuf, spoillast, sync, dostereo, stereomode, true);
+			sendx11(drawbuf, spoillast, sync, dostereo, stereomode, true);
 	}
 }
 
@@ -430,7 +430,7 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 	return 0;
 }
 
-void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
+void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	bool dostereo, int stereomode, int compress, int qual, int subsamp,
 	bool domovie)
 {
@@ -477,7 +477,7 @@ void pbwin::senddirect(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	rrdpy->sendframe(b);
 }
 
-void pbwin::sendraw(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
+void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int stereomode, bool srfallback)
 {
 	int pbw=_pb->width(), pbh=_pb->height();

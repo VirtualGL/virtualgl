@@ -73,9 +73,9 @@ class pbwin
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool stereo=false);
 		void makeanaglyph(rrframe *, int);
-		void senddirect(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
+		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);
-		void sendraw(GLint, bool, bool, bool, int, bool srfallback=false);
+		void sendx11(GLint, bool, bool, bool, int, bool srfallback=false);
 		int sendsr(GLint, bool, bool, int);
 
 		bool _force;
