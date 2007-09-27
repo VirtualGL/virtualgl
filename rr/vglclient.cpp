@@ -328,12 +328,43 @@ unsigned short instancecheck(Display *dpy)
 }
 
 
+void getenvironment(void)
+{
+	char *env=NULL;  int temp;
+	if((env=getenv("VGLCLIENT_DRAWMODE"))!=NULL && strlen(env)>0)
+	{
+		if(!strnicmp(env, "o", 1)) drawmethod=RR_DRAWOGL;
+		else if(!strncmp(env, "x", 1)) drawmethod=RR_DRAWX11;
+	}
+	if((env=getenv("VGLCLIENT_LISTEN"))!=NULL && strlen(env)>0)
+	{
+		if(!strncmp(env, "n", 1)) {ssl=false;  nonssl=true;}
+		else if(!strncmp(env, "s", 1)) {ssl=true;  nonssl=false;}
+	}
+	if((env=getenv("VGLCLIENT_LOG"))!=NULL && strlen(env)>0)
+	{
+		logfile=env;
+		FILE *f=fopen(logfile, "a");
+		if(!f) {rrout.println("Could not open log file %s", logfile);  _throwunix();}
+		else fclose(f);
+	}
+	if((env=getenv("VGLCLIENT_PORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
+		&& temp<65536)
+		port=(unsigned short)temp;
+	if((env=getenv("VGLCLIENT_SSLPORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
+		&& temp<65536)
+		sslport=(unsigned short)temp;
+}
+
+
 int main(int argc, char *argv[])
 {
 	int i;  bool printversion=false;
 	char *displayname=NULL;
 
 	try {
+
+	getenvironment();
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
@@ -362,7 +393,7 @@ int main(int argc, char *argv[])
 			{
 				logfile=argv[++i];
 				FILE *f=fopen(logfile, "a");
-				if(!f) _throwunix();
+				if(!f) {rrout.println("Could not open log file %s", logfile);  _throwunix();}
 				else fclose(f);
 			}
 		}
