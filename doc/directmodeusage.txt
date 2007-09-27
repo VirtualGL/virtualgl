@@ -145,6 +145,7 @@ server prior to invoking ''vglrun''.  (see {ref prefix="Chapter ": Advanced_Conf
 for more details.)
 
 ** VGL Image Transport with X11 Forwarding and SSh Tunneling
+{anchor: SSh_Tunneling}
 
 This mode is useful when either the VirtualGL server or the client machine
 are behind restrictive firewalls and only SSh connections are allowed through.
@@ -178,3 +179,83 @@ server.  Both the X11 and the VGL image traffic will be forwarded from the
 VirtualGL server through the gateway and to the client.
 
 #IMG: sshtunnel.png
+
+** The VirtualGL Client Application: Nuts and Bolts
+
+The VirtualGL Client application receives encoded and/or compressed images on a
+dedicated TCP socket, decodes and/or decompresses the images, and draws the
+images into the appropriate X window.  In previous versions of VirtualGL, it
+was necessary to manually start the VirtualGL Client prior to connecting to the
+server, but the new ''vglconnect'' script wraps both ''vglclient'' and SSh to
+greatly simplify the process of creating VGL Image Transport connections.  One
+consequence of this ease of use is that the actual workings of ''vglclient''
+are hidden from view, which makes it a bit more difficult to see the cause
+of connection failures and other issues as they happen.
+
+''vglconnect'' invokes ''vglclient'' with an argument of ''-detach'', which
+causes ''vglclient'' to completely detach from the console and run as a
+background daemon.  It will remain running silently in the background,
+accepting VGL Image Transport connections for the X display on which it was
+started, until the X server is reset or until the ''vglclient'' process is
+explicitly killed.  Logging out of the X server will reset the X server and
+thus kill all ''vglclient'' instances that are attached to it.  You can also
+explicitly kill all instances of ''vglclient'' running under your user account
+by invoking
+
+	#Verb: <<---
+	vglclient -kill
+	---
+
+(''vglclient'' is in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris systems and
+in ''c:\\program files\\virtualgl-{version}'' on Windows systems.)
+
+''vglconnect'' instructs ''vglclient'' to redirect all of its console output
+to a log file named
+__''{home}''__''/.vgl/vglconnect-''__''{hostname}''__''-''__''{display}''__''.log'',
+where __''{home}''__ is the path of the current user's home directory
+(''%USERPROFILE%'' on Windows systems), __''{hostname}''__ is the name of the
+computer running ''vglconnect'', and __''{display}''__ is the name of the
+current X display (read from the ''DISPLAY'' environment or passed to
+''vglconnect'' via. the ''-display'' argument.)  In the event that something
+goes wrong, this log file is the first place to check.
+
+When ''vglclient'' successfully starts on a given X display, it stores its
+listener port numbers in a pair of root window properties on the X display.  If
+other ''vglclient'' instances attempt to start on the same X display, they read
+the X window properties, determine that another ''vglclient'' instance is
+already running, and exit to allow the first instance to retain control.
+''vglclient'' will clean up these X properties under most circumstances, even
+if it is explicitly killed.  But under rare circumstances (if sent a SIGKILL
+signal on Unix, for instance), a ''vglclient'' instance may exit uncleanly and
+leave the X properties set.  In these cases, it may be necessary to add an
+argument of ''-force'' to ''vglconnect'' the next time you use it.  This tells
+''vglconnect'' to start a new ''vglclient'' instance, regardless of whether
+''vglclient'' thinks that there is already an instance running on this X
+display.  Alternately, you can simply reset your X server to clear the orphaned
+X window properties.
+
+*** The VirtualGL Client and Firewalls
+
+To retain compatibility with previous versions of VirtualGL, the first
+''vglclient'' instance on a given machine will attempt to listen on port 4242
+for unencrypted connections and 4243 for SSL connections.  If it fails to
+obtain one of those ports, because another application or another ''vglclient''
+instance is already using them, then ''vglclient'' will try to obtain a free
+port in the range of 4200-4299.  Failing that, it will request a free port from
+the operating system.
+
+In a nutshell: if you only ever plan to run one X server at a time on your
+client machine, which means that you'll only ever need one instance of
+''vglclient'' at a time, then it is sufficient to open inbound ports 4242 and
+4243 in your client machine's firewall.  If you plan to run multiple X servers
+on your client machine, which means that you will need to run multiple
+''vglclient'' instances, then you may wish to open ports 4200-4299.  Similarly,
+if you are running ''vglclient'' on a multi-user TurboVNC or Sun Ray server
+that has a firewall, then you may wish to open ports 4200-4299 in the server's
+firewall.  Opening ports 4200-4299 will accommodate up to 50 separate
+''vglclient'' instances.  More instances than that cannot be accommodated on a
+firewalled machine, unless the firewall is able to create rules based on
+application executables instead of listening ports.
+
+Note that it is not necessary to open any ports in the firewall to use
+the VGL Image Transport with [[#SSh_Tunneling][SSh Tunneling]].
