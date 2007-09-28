@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-09-28T13:52:34-06:00">
+<meta name="date" content="2007-09-28T17:06:22-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -478,7 +478,7 @@ to send rendered 3D images to the client machine:</p>
 </div>
 
 <dl class="Description">
-    <dt class="Description">2. Sun Ray Image Transport</dt>
+    <dt class="Description">3. Sun Ray Image Transport</dt>
     <dd class="Description">
         The Sun Ray thin client environment from Sun Microsystems consists
         of an X proxy (the Sun Ray Server Software) and a series of ultra-thin
@@ -1555,7 +1555,7 @@ init&nbsp;3
 </pre>
 
             </dd>
-            <dt class="Description">Solaris servers running GDM</dt>
+            <dt class="Description">Solaris 10 (and later) servers running GDM</dt>
             <dd class="Description">
 <pre class="verbatim">
 svcadm&nbsp;disable&nbsp;gdm2-login
@@ -1677,7 +1677,7 @@ init&nbsp;5
 </pre>
 
             </dd>
-            <dt class="Description">Solaris servers running GDM</dt>
+            <dt class="Description">Solaris 10 (and later) servers running GDM</dt>
             <dd class="Description">
 <pre class="verbatim">
 svcadm&nbsp;enable&nbsp;gdm2-login
@@ -2018,7 +2018,7 @@ set&nbsp;DISPLAY=:0.0
     <li class="Ordered">
         Open a Secure Shell (SSh) session into the VirtualGL server:
 <pre class="verbatim">
-cd&nbsp;/d&nbsp;&quot;c:\program&nbsp;files\virtualgl-{version}&quot;
+cd&nbsp;/d&nbsp;&quot;c:\program&nbsp;files\virtualgl-{version}-{build}&quot;
 vglconnect&nbsp;{user}@{server}
 </pre>
 
@@ -2163,7 +2163,7 @@ vglclient&nbsp;-kill
 </pre>
 
 <p>(<code>vglclient</code> is in <code>/opt/VirtualGL/bin</code> on Linux/Mac/Solaris
-systems and in <code>c:\program&nbsp;files\virtualgl-{version}</code>
+systems and in <code>c:\program&nbsp;files\virtualgl-{version}-{build}</code>
 on Windows systems.)</p>
 
 <p><code>vglconnect</code> instructs <code>vglclient</code> to redirect
@@ -2520,16 +2520,20 @@ the following notable differences:</p>
 <h2 id="hd009003">9.3&nbsp;Disconnecting and Killing the TurboVNC Session</h2>
 
 <p>Closing the TurboVNC viewer disconnects from the TurboVNC server session,
-but the TurboVNC server session (and any applications that you may
-have started in it) is still running on the server machine, and you
-can reconnect to it at any time.</p>
+but the TurboVNC server session is still running on the server machine
+(as are any applications that you may have started in it), and you
+can reconnect to the session at any time.</p>
 
 <p>To kill a TurboVNC server session:</p>
 
 <ol class="Ordered numeric">
     <li class="Ordered">
-        Log in to the TurboVNC server using SSh (<code>c:\Program&nbsp;Files\TurboVNC\putty.exe</code>
-        on Windows clients.)
+        Using SSh (<code>c:\Program&nbsp;Files\TurboVNC\putty.exe</code> on
+        Windows clients), log into the machine that is running the TurboVNC
+        server session that you wish to kill.<br /> &hellip; or
+        &hellip;<br /> Using the TurboVNC Viewer, connect to the TurboVNC server
+        session that you wish to kill, and open a new terminal in that TurboVNC
+        session.
     </li>
     <li class="Ordered">
         Type the following command:
@@ -2869,18 +2873,18 @@ than using the <code>vglconnect</code> wrapper script.  <code>vglconnect</code>
 launches <code>vglclient</code>, and <code>vglclient</code> is not
 needed when using the Sun Ray Image Transport.</p>
 
-<p>If the VirtualGL Sun Ray plugin is installed on the VirtualGL server
-machine, then the Sun Ray Image Transport will be used by default by
-any VirtualGL sessions launched on that machine.  However, the Sun
-Ray Image Transport requires that the Sun Ray client be on a network
-that is accessible from the VirtualGL server.  Some Sun Ray deployments
-place the clients on a private network that is visible only to the
-Sun Ray server, and the Sun Ray Image Transport cannot be used in such
-cases (unless VirtualGL is running on the Sun Ray server itself, but
-that defeats the purpose of the Sun Ray Image Transport.)  If VirtualGL
-detects that it is running in a Sun Ray environment but is unable to
-use the Sun Ray Image Transport, then it will fall back to using the
-X11 Image Transport.</p>
+<p>If the VirtualGL Sun Ray plugin is installed on a VirtualGL server
+machine, then VirtualGL will try to use the Sun Ray Image Transport
+when displaying 3D applications from that server to a Sun Ray.  However,
+the Sun Ray Image Transport requires that the Sun Ray client be on
+a network that is accessible from the VirtualGL server.  Some Sun Ray
+deployments place the clients on a private network that is visible
+only to the Sun Ray server, and the Sun Ray Image Transport cannot
+be used in such cases (unless VirtualGL is running on the Sun Ray server
+itself, but that defeats the purpose of the Sun Ray Image Transport.)
+If VirtualGL detects that it is running in a Sun Ray environment but
+is unable to use the Sun Ray Image Transport, then it will fall back
+to using the X11 Image Transport.</p>
 
 <hr class="break" />
 
@@ -3546,7 +3550,7 @@ surprise that enabling quad-buffered stereo in VirtualGL decreases
 performance by 50% or more and uses twice the network bandwidth to
 maintain the same frame rate.</p>
 
-<p>Stereographic rendering requires the VGL Image Transport.  If any other
+<p>Quad-buffered stereo requires the VGL Image Transport.  If any other
 image transport is used, then VGL will fall back to anaglyphic stereo
 mode.</p>
 
@@ -3572,6 +3576,11 @@ provides a cheap and easy way to view stereographic applications in
 X proxies and on clients that do not support quad-buffered stereo.
 Additionally, anaglyphic stereo performs much faster than quad-buffered
 stereo, since it does not require sending twice the data to the client.</p>
+
+<p>As with quad-buffered stereo, anaglyphic stereo requires that the server
+have stereo rendering capabilities.  However, anaglyphic stereo does
+not require any 3D rendering capabilities (stereo or otherwise) on
+the client.</p>
 
 
 <h3 id="hd0016001003">16.1.3&nbsp;Selecting a Stereo Mode</h3>
@@ -3896,7 +3905,7 @@ cpu1:&nbsp;&nbsp;81.5&nbsp;(Usr=&nbsp;75.5&nbsp;Nice=&nbsp;&nbsp;0.0&nbsp;Sys=&n
 <p>The first column indicates what percentage of time the CPU was active
 since the last sample period (this is then broken down into what percentage
 of time the CPU spent running user, nice, and system/kernel code.)
-&ldquo;ALL&rdquo; indicates the average utilization across all CPU&rsquo;s
+&ldquo;ALL&rdquo; indicates the average utilization across all CPUs
 since the last sample period.  &ldquo;Min&rdquo;, &ldquo;Max&rdquo;,
 and &ldquo;Avg&rdquo; indicate a running minimum, maximum, and average
 of all samples since cpustat was started.</p>
@@ -4397,7 +4406,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable gamma correction and specify gamma correction factor</td>
+    <td class="standard">Disable/enable gamma correction and specify gamma correction factor</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4702,7 +4711,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable profiling output</td>
+    <td class="standard">Disable/enable profiling output</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4740,7 +4749,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable sending a lossless (RGB) frame during periods of inactivity</td>
+    <td class="standard">Disable/enable sending a lossless (RGB) frame during periods of inactivity</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4803,10 +4812,10 @@ method:</p>
         color changes between light and dark as you move either horizontally
         or vertically in the image.  Images with very sharp, bright features
         on a dark background, for instance, consist of both low- and high-frequency
-        components, whereas images with smooth transitions between each pixel
-        contain only low-frequency components.  JPEG compression works by breaking
-        down the image into its constituent frequencies and then throwing out
-        the highest of these frequencies.  The JPEG image &ldquo;quality&rdquo;
+        components, whereas images with smooth transitions between neighboring
+        pixels contain only low-frequency components.  JPEG compression works
+        by breaking down the image into its constituent frequencies and then
+        throwing out the highest of these frequencies.  The JPEG image &ldquo;quality&rdquo;
         determines which frequencies are thrown out.  A JPEG quality of 1 throws
         out all but the lowest frequencies and thus produces a very impressionistic,
         but generally not very useful, compressed image.  A JPEG quality of
@@ -4839,7 +4848,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable VirtualGL&rsquo;s pixel pipelines</td>
+    <td class="standard">Disable/enable VirtualGL&rsquo;s pixel pipelines</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4891,7 +4900,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable frame spoiling</td>
+    <td class="standard">Disable/enable frame spoiling</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4914,12 +4923,15 @@ method:</p>
         be turned off when running benchmarks or other non-interactive applications.
         Turning off frame spoiling will force one frame to be sent to the client
         on every end-of-frame event, and thus the frame rate reported by OpenGL
-        benchmarks will accurately reflect the frame rate seen by the user.
-        Disabling frame spoiling also prevents non-interactive applications
-        from wasting graphics resources by rendering frames that will never
-        be seen.  With frame spoiling turned off, the 3D rendering pipeline
-        behaves as if it is fill-rate limited to about 30 or 40 Megapixels/second,
-        the maximum throughput of the VirtualGL system on current CPU&rsquo;s.
+        benchmarks will accurately reflect the frame rate of VirtualGL&rsquo;s
+        image pipeline (though, in X proxy environments, this may still not
+        accurately reflect the frame rate seen by the user.  See Section
+        <a href="#Frame_Spoiling" class="ref">17.2</a>.)  Disabling frame spoiling
+        also prevents non-interactive applications from wasting graphics resources
+        by rendering frames that will never be seen.  With frame spoiling turned
+        off, the 3D rendering pipeline behaves as if it is fill-rate limited
+        to about 30 or 40 Megapixels/second, the maximum throughput of the
+        VirtualGL system on current CPUs.
     </dd>
 </dl>
 
@@ -4935,7 +4947,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable SSL encryption of the VGL Image Transport</td>
+    <td class="standard">Disable/enable SSL encryption of the VGL Image Transport</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5092,7 +5104,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable strict 2D/3D synchronization (necessary to pass GLX conformance tests)</td>
+    <td class="standard">Disable/enable strict 2D/3D synchronization (necessary to pass GLX conformance tests)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5143,7 +5155,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{t}</code></em> = the image tile size to use for multi-threaded compression and interframe comparison (8 &lt;= <em><code>{t}</code></em> &lt;= 1024)</td>
+    <td class="standard"><em><code>{t}</code></em> = the image tile size (<em><code>{t}</code></em> x <em><code>{t}</code></em> pixels) to use for multi-threaded compression and interframe comparison (8 &lt;= <em><code>{t}</code></em> &lt;= 1024)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5215,7 +5227,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable tracing</td>
+    <td class="standard">Disable/enable tracing</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5252,7 +5264,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable verbose VirtualGL messages</td>
+    <td class="standard">Disable/enable verbose VirtualGL messages</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5484,7 +5496,7 @@ infrastructure around VirtualGL.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable profiling output</td>
+    <td class="standard">Disable/enable profiling output</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5549,7 +5561,7 @@ infrastructure around VirtualGL.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Enable/disable verbose VirtualGL messages</td>
+    <td class="standard">Disable/enable verbose VirtualGL messages</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>

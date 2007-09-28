@@ -82,7 +82,7 @@ maximize performance.
 	#. Open a Secure Shell (SSh) session into the VirtualGL server:
 
 		#Verb: <<---
-		cd /d "c:\program files\virtualgl-{version}"
+		cd /d "c:\program files\virtualgl-{version}-{build}"
 		vglconnect {user}@{server}
 		---
 
@@ -207,7 +207,7 @@ by invoking
 	---
 
 (''vglclient'' is in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris systems and
-in ''c:\\program files\\virtualgl-{version}'' on Windows systems.)
+in ''c:\\program files\\virtualgl-{version}-{build}'' on Windows systems.)
 
 ''vglconnect'' instructs ''vglclient'' to redirect all of its console output
 to a log file named

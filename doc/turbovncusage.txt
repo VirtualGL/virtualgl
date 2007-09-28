@@ -211,14 +211,18 @@ differences:
 ** Disconnecting and Killing the TurboVNC Session
 
 Closing the TurboVNC viewer disconnects from the TurboVNC server session, but
-the TurboVNC server session (and any applications that you may have started in
-it) is still running on the server machine, and you can reconnect to it at any
-time.
+the TurboVNC server session is still running on the server machine (as are any
+applications that you may have started in it), and you can reconnect to the
+session at any time.
 
 To kill a TurboVNC server session:
 
-	#. Log in to the TurboVNC server using SSh (''c:\\Program Files\\TurboVNC\\putty.exe''
-		on Windows clients.)
+	#. Using SSh (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
+		log into the machine that is running the TurboVNC server session that you
+		wish to kill.{nl} \
+		... or ...{nl} \
+		Using the TurboVNC Viewer, connect to the TurboVNC server session that you
+		wish to kill, and open a new terminal in that TurboVNC session.
 
 	#. Type the following command:
 

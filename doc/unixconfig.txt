@@ -128,7 +128,7 @@ prompt.
 			init 3
 			---
 
-		Solaris servers running GDM :: {:}
+		Solaris 10 (and later) servers running GDM :: {:}
 			#Verb: <<---
 			svcadm disable gdm2-login
 			---
@@ -215,7 +215,7 @@ prompt.
 			init 5
 			---
 
-		Solaris servers running GDM :: {:}
+		Solaris 10 (and later) servers running GDM :: {:}
 			#Verb: <<---
 			svcadm enable gdm2-login
 			---
