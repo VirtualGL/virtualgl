@@ -104,7 +104,7 @@ images to the client machine:
 #OPT fmt=latex: w=4cm
 #CAP: The X11 Image Transport with an X Proxy
 
-	\2. Sun Ray Image Transport :: The Sun Ray thin client environment from Sun
+	\3. Sun Ray Image Transport :: The Sun Ray thin client environment from Sun
 	Microsystems consists of an X proxy (the Sun Ray Server Software) and a
 	series of ultra-thin hardware clients that connect to this proxy over a
 	network.  It is similar in concept to VNC, in that a virtual X server is

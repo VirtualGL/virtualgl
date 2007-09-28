@@ -57,7 +57,7 @@ should thus be no surprise that enabling quad-buffered stereo in VirtualGL
 decreases performance by 50% or more and uses twice the network bandwidth to
 maintain the same frame rate.
 
-Stereographic rendering requires the VGL Image Transport.  If any other image
+Quad-buffered stereo requires the VGL Image Transport.  If any other image
 transport is used, then VGL will fall back to anaglyphic stereo mode.
 
 *** Anaglyphic Stereo
@@ -80,6 +80,10 @@ view stereographic applications in X proxies and on clients that do not support
 quad-buffered stereo.  Additionally, anaglyphic stereo performs much faster
 than quad-buffered stereo, since it does not require sending twice the data to
 the client.
+
+As with quad-buffered stereo, anaglyphic stereo requires that the server have
+stereo rendering capabilities.  However, anaglyphic stereo does not require
+any 3D rendering capabilities (stereo or otherwise) on the client.
 
 *** Selecting a Stereo Mode
 

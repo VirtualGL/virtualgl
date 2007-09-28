@@ -158,7 +158,7 @@ cpu1:  81.5 (Usr= 75.5 Nice=  0.0 Sys=  6.0) / Min= 16.6 Max= 83.5 Avg= 56.3
 The first column indicates what percentage of time the CPU was active since the
 last sample period (this is then broken down into what percentage of time the
 CPU spent running user, nice, and system/kernel code.)  "ALL" indicates the
-average utilization across all CPU's since the last sample period.  "Min",
+average utilization across all CPUs since the last sample period.  "Min",
 "Max", and "Avg" indicate a running minimum, maximum, and average of all
 samples since cpustat was started.
 

@@ -121,7 +121,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_GAMMA}
 | Environment Variable | ''VGL_GAMMA = ''__''0 \| 1 \| {g}''__ |
 | ''vglrun'' argument | ''-g'' / ''+g'' / ''-gamma ''__''{g}''__ |
-| Summary | Enable/disable gamma correction and specify gamma correction \
+| Summary | Disable/enable gamma correction and specify gamma correction \
 	factor |
 | Image Transports | All |
 | Default Value | ''VGL_GAMMA=1'' on Solaris/Sparc VGL servers, \
@@ -287,7 +287,7 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_PROFILE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-pr'' / ''+pr'' |
-| Summary | Enable/disable profiling output |
+| Summary | Disable/enable profiling output |
 | Image Transports | All |
 | Default Value | Disabled |
 #OPT: hiCol=first
@@ -301,7 +301,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_PROGRESSIVE}
 | Environment Variable | ''VGL_PROGRESSIVE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-prog'' / ''+prog'' |
-| Summary | Enable/disable sending a lossless (RGB) frame during periods \
+| Summary | Disable/enable sending a lossless (RGB) frame during periods \
 	of inactivity |
 | Image Transports | Sun Ray (DPCM) |
 | Default Value | Disabled |
@@ -328,9 +328,9 @@ Each method of configuration takes precedence over the previous method:
 	changes between light and dark as you move either horizontally or vertically
 	in the image.  Images with very sharp, bright features on a dark background,
 	for instance, consist of both low- and high-frequency components, whereas
-	images with smooth transitions between each pixel contain only low-frequency
-	components.  JPEG compression works by breaking down the image into its
-	constituent frequencies and then throwing out the highest of these
+	images with smooth transitions between neighboring pixels contain only
+	low-frequency components.  JPEG compression works by breaking down the image
+	into its constituent frequencies and then throwing out the highest of these
 	frequencies.  The JPEG image "quality" determines which frequencies are
 	thrown out.  A JPEG quality of 1 throws out all but the lowest frequencies
 	and thus produces a very impressionistic, but generally not very useful,
@@ -355,7 +355,7 @@ Each method of configuration takes precedence over the previous method:
 	using RGB encoding.
 
 | Environment Variable | ''VGL_READBACK = ''__''0 \| 1''__ |
-| Summary | Enable/disable VirtualGL's pixel pipelines |
+| Summary | Disable/enable VirtualGL's pixel pipelines |
 | Image Transports | All |
 | Default Value | Enabled |
 #OPT: hiCol=first
@@ -382,7 +382,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_SPOIL}
 | Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sp'' / ''+sp'' |
-| Summary | Enable/disable frame spoiling |
+| Summary | Disable/enable frame spoiling |
 | Image Transports | All |
 | Default Value | Enabled |
 #OPT: hiCol=first
@@ -393,16 +393,19 @@ Each method of configuration takes precedence over the previous method:
 	turned off when running benchmarks or other non-interactive applications.
 	Turning off frame spoiling will force one frame to be sent to the client on
 	every end-of-frame event, and thus the frame rate reported by OpenGL
-	benchmarks will accurately reflect the frame rate seen by the user.
-	Disabling frame spoiling also prevents non-interactive applications from
-	wasting graphics resources by rendering frames that will never be seen.  With
-	frame spoiling turned off, the 3D rendering pipeline behaves as if it is
-	fill-rate limited to about 30 or 40 Megapixels/second, the maximum throughput
-	of the VirtualGL system on current CPU's.
+	benchmarks will accurately reflect the frame rate of VirtualGL's image
+	pipeline (though, in X proxy environments, this may still not accurately
+	reflect the frame rate seen by the user.  See
+	{ref prefix="Section ": Frame_Spoiling}.)  Disabling frame spoiling also
+	prevents non-interactive applications from wasting graphics resources by
+	rendering frames that will never be seen.  With frame spoiling turned off,
+	the 3D rendering pipeline behaves as if it is fill-rate limited to about 30
+	or 40 Megapixels/second, the maximum throughput of the VirtualGL system on
+	current CPUs.
 
 | Environment Variable | ''VGL_SSL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-s'' / ''+s'' |
-| Summary | Enable/disable SSL encryption of the VGL Image Transport |
+| Summary | Disable/enable SSL encryption of the VGL Image Transport |
 | Image Transports | VGL |
 | Default Value | Disabled |
 #OPT: hiCol=first
@@ -499,7 +502,7 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_SYNC = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sync'' / ''+sync'' |
-| Summary | Enable/disable strict 2D/3D synchronization (necessary to pass GLX \
+| Summary | Disable/enable strict 2D/3D synchronization (necessary to pass GLX \
 			conformance tests) |
 | Image Transports | All |
 | Default Value | Disabled |
@@ -528,8 +531,9 @@ Each method of configuration takes precedence over the previous method:
 	can have potentially dire effects on performance.
 
 | Environment Variable | ''VGL_TILESIZE = ''__''{t}''__ |
-| Summary | __''{t}''__ = the image tile size to use for multi-threaded \
-	compression and interframe comparison (8 \<\= __''{t}''__ \<\= 1024) |
+| Summary | __''{t}''__ = the image tile size (__''{t}''__ x __''{t}''__ pixels) \
+	to use for multi-threaded compression and interframe comparison \
+	(8 \<\= __''{t}''__ \<\= 1024) |
 | Image Transports | VGL |
 | Default Value | 256 |
 #OPT: hiCol=first
@@ -571,7 +575,7 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_TRACE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-tr'' / ''+tr'' |
-| Summary | Enable/disable tracing |
+| Summary | Disable/enable tracing |
 | Image Transports | All |
 | Default Value | Disabled |
 #OPT: hiCol=first
@@ -584,7 +588,7 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_VERBOSE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-v'' / ''+v'' |
-| Summary | Enable/disable verbose VirtualGL messages |
+| Summary | Disable/enable verbose VirtualGL messages |
 | Image Transports | All |
 | Default Value | Disabled |
 #OPT: hiCol=first
@@ -682,7 +686,7 @@ those wishing to build additional infrastructure around VirtualGL.
 	port.  Don't do this unless you know what you're doing.
 
 | Environment Variable | ''VGL_PROFILE = ''__''0 \| 1''__ |
-| Summary | Enable/disable profiling output |
+| Summary | Disable/enable profiling output |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
@@ -710,7 +714,7 @@ those wishing to build additional infrastructure around VirtualGL.
 	port.  Don't do this unless you know what you're doing.
 
 | Environment Variable | ''VGL_VERBOSE = ''__''0 \| 1''__ |
-| Summary | Enable/disable verbose VirtualGL messages |
+| Summary | Disable/enable verbose VirtualGL messages |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
