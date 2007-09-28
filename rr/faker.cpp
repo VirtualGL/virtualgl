@@ -1483,6 +1483,8 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		pbwin *drawpbw=NULL, *readpbw=NULL;
 		winh.findpb(draw, drawpbw);
 		winh.findpb(read, readpbw);
+		if(drawpbw) drawpbw->checkresize();
+		if(readpbw && readpbw!=drawpbw) readpbw->checkresize();
 		if(drawpbw) newdraw=drawpbw->updatedrawable();
 		if(readpbw) newread=readpbw->updatedrawable();
 		if(newread!=read || newdraw!=draw)

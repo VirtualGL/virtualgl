@@ -58,6 +58,7 @@ class pbwin
 		GLXDrawable getdrawable(void);
 		GLXDrawable updatedrawable(void);
 		void resize(int, int);
+		void checkresize(void);
 		void initfromwindow(GLXFBConfig);
 		Display *getwindpy(void);
 		Window getwin(void);
@@ -80,7 +81,7 @@ class pbwin
 
 		bool _force;
 		rrcs _mutex;
-		Display *_windpy;  Window _win;
+		Display *_windpy, *_eventdpy;  Window _win;
 		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
 		int _neww, _newh;
 		rrblitter *_blitter;

@@ -169,6 +169,15 @@ pbwin::pbwin(Display *windpy, Window win)
 	_sunrayhandle=NULL;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
+	if(!(xwa.your_event_mask&StructureNotifyMask))
+	{
+		if(!(_eventdpy=XOpenDisplay(DisplayString(windpy))))
+			_throw("Could not clone X display connection");
+		XSelectInput(_eventdpy, win, StructureNotifyMask);
+		if(fconfig.verbose)
+			rrout.println("[VGL] Selecting structure notify events in window 0x%.8x",
+				win);
+	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
 	_gammacorrectedvisual=false;  _stereovisual=false;
 	double gamma=__vglVisualGamma(windpy, DefaultScreen(windpy),
@@ -193,6 +202,7 @@ pbwin::~pbwin(void)
 			rrout.println("[VGL] WARNING: %s", RRSunRayGetError(_sunrayhandle));
 	}
 	#endif 
+	if(_eventdpy) {XCloseDisplay(_eventdpy);  _eventdpy=NULL;}
 	_mutex.unlock(false);
 }
 
@@ -249,6 +259,21 @@ GLXDrawable pbwin::getdrawable(void)
 	rrcs::safelock l(_mutex);
 	retval=_pb->drawable();
 	return retval;
+}
+
+void pbwin::checkresize(void)
+{
+	if(_eventdpy)
+	{
+		if(XPending(_eventdpy)>0)
+		{
+			XEvent event;
+			_XNextEvent(_eventdpy, &event);
+			if(event.type==ConfigureNotify && event.xconfigure.window==_win
+				&& event.xconfigure.width>0 && event.xconfigure.height>0)
+				resize(event.xconfigure.width, event.xconfigure.height);
+		}
+	}
 }
 
 // Get the current Pbuffer drawable, but resize the Pbuffer first if necessary
