@@ -198,9 +198,9 @@ encounter any difficulties.
 	the MIT-SHM X extension is disabled, and disabling this extension severely
 	impacts the performance of VirtualGL.
 
-** Additional Requirements for Quad-Buffered Stereo
+** Additional Requirements for Stereographic Rendering
 
-	!!! These requirements do not apply to anaglyphic stereo.  See
+	!!! The client requirements do not apply to anaglyphic stereo.  See
 	{ref prefix="Chapter ": Advanced_OpenGL} for more details.
 
 || || Server || Client ||
