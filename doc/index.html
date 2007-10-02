@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-09-28T17:06:22-06:00">
+<meta name="date" content="2007-10-01T23:32:14-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3228,10 +3228,6 @@ start a sort-first rendering job using Chromium and VirtualGL:</p>
 
 <p>Again, it&rsquo;s always a good idea to make sure this works without
 VirtualGL before adding VirtualGL into the mix.</p>
-
-<div class="important"><p class="important">
-When using VirtualGL with this mode, resizing the application window may not work properly.  This is because the resize event is sent to the application process, and therefore the CrServer process that&rsquo;s actually drawing the pixels has no way of knowing that a window resize has occurred. A possible fix is to modify Chromium such that it propagates the resize event down the render chain so that all of the CrServer processes are aware that a resize event occurred.
-</p></div>
 
 
 <h2 id="hd0014003">14.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>

@@ -142,14 +142,6 @@ sort-first rendering job using Chromium and VirtualGL:
 Again, it's always a good idea to make sure this works without VirtualGL before
 adding VirtualGL into the mix.
 
-	!!! When using VirtualGL with this mode, resizing the application window may
-	not work properly.  This is because the resize event is sent to the
-	application process, and therefore the CrServer process that's actually
-	drawing the pixels has no way of knowing that a window resize has occurred.
-	A possible fix is to modify Chromium such that it propagates the resize event
-	down the render chain so that all of the CrServer processes are aware that a
-	resize event occurred.
-
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
 
 #IMG: chromium-sortlast.png
