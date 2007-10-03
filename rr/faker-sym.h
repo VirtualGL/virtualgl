@@ -319,6 +319,10 @@ funcdef2(void, glGetFloatv, GLenum, pname, GLfloat *, params,);
 
 funcdef2(void, glGetIntegerv, GLenum, pname, GLint *, params,);
 
+funcdef3(void, glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *, params,);
+
+funcdef3(void, glMaterialiv, GLenum, face, GLenum, pname, const GLint *, params,);
+
 funcdef2(void, glPixelTransferf, GLenum, pname, GLfloat, param,);
 
 funcdef2(void, glPixelTransferi, GLenum, pname, GLint, param,);
