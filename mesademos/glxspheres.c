@@ -352,20 +352,21 @@ int display(int advance)
 	{
 		glXMakeCurrent(dpy, olwin, olctx);
 		renderoverlay();
-		glIndexf(254.);
-		glRasterPos3f(-0.95, -0.95, 0.);
 	}
 	else
+	glPushAttrib(GL_CURRENT_BIT);
+	glPushAttrib(GL_LIST_BIT);
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+	if(useoverlay || useci) glIndexf(254.);
+	else glColor3f(1., 1., 1.);
+	if(useoverlay) glRasterPos3f(-0.95, -0.95, 0.);
+	else 
 	{
 		xaspect=(GLfloat)width/(GLfloat)(min(width, height));
 		yaspect=(GLfloat)height/(GLfloat)(min(width, height));
 		glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5); 
 	}
-	glPushAttrib(GL_CURRENT_BIT);
-	glPushAttrib(GL_LIST_BIT);
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	glColor3f(1., 1., 1.);
 	glListBase(fontlistbase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
 	glPopAttrib();
