@@ -87,7 +87,6 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			unsigned long visualid;
 			long transtype, transpixel, level;
 		} *olprop=NULL;
-		unsigned char *prop=NULL;
 		unsigned long nop=0, bytesleft=0;
 		int actualformat=0;
 		Atom actualtype=0;
@@ -100,7 +99,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 				(unsigned char **)&olprop)!=Success || nop<4 || actualformat!=32
 				|| actualtype!=atom) goto done;
 			len+=(bytesleft+3)/4;
-			if(bytesleft && prop) {XFree(prop);  prop=NULL;}
+			if(bytesleft && olprop) {XFree(olprop);  olprop=NULL;}
 		} while(bytesleft);
 		
 		for(unsigned long i=0; i<nop/4; i++)
@@ -126,7 +125,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		}
 
 		done:
-		if(prop) {XFree(prop);  prop=NULL;}
+		if(olprop) {XFree(olprop);  olprop=NULL;}
 	}
 
 	for(int i=0; i<nv; i++)
@@ -225,19 +224,21 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
-	if(buffersize>=0 && redsize<0 && greensize<0 && bluesize<0)
+	if(redsize<0)
 	{
-		glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=buffersize;
-		glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=buffersize;
-		glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=buffersize;
+		if(buffersize>=0) redsize=buffersize;  else redsize=8;
 	}
-	else
+	if(greensize<0)
 	{
-		if(redsize>=0) {glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;}
-		if(greensize>=0) {glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;}
-		if(bluesize>=0) {glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;}
+		if(buffersize>=0) greensize=buffersize;  else greensize=8;
 	}
-
+	if(bluesize<0)
+	{
+		if(buffersize>=0) bluesize=buffersize;  else bluesize=8;
+	}
+	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
+	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
+	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;
 	if(stereo)
 	{
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
