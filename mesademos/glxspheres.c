@@ -54,8 +54,8 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 Display *dpy=NULL;  Window win=0, olwin=0;
 int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1;
-int ncolors=0, colorscheme=GREY;
-Colormap colormap=0;
+int ncolors=0, nolcolors, colorscheme=GREY;
+Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
 
 int spherelist=0, fontlistbase=0;
@@ -64,29 +64,30 @@ int slices=DEF_SLICES, stacks=DEF_STACKS;
 float x=0., y=0., z=-3.;
 float outer_angle=0., middle_angle=0., inner_angle=0.;
 float lonesphere_color=0.;
+unsigned int transpixel=0;
 
 int width=DEF_WIDTH, height=DEF_HEIGHT;
 
 
-int setcolorscheme(Colormap c, int scheme)
+int setcolorscheme(Colormap c, int nc, int scheme)
 {
 	XColor xc[256];  int i;
-	if(!ncolors || !c) _throw("Color map not allocated");
+	if(!nc || !c) _throw("Color map not allocated");
 	if(scheme<0 || scheme>NSCHEMES-1 || !c) _throw("Invalid argument");
 
-	for(i=0; i<ncolors; i++)
+	for(i=0; i<nc; i++)
 	{
 		xc[i].flags=DoRed | DoGreen | DoBlue;
 		xc[i].pixel=i;
 		xc[i].red=xc[i].green=xc[i].blue=0;
 		if(scheme==GREY || scheme==RED || scheme==YELLOW || scheme==MAGENTA)
-			xc[i].red=(i*(256/ncolors))<<8;
+			xc[i].red=(i*(256/nc))<<8;
 		if(scheme==GREY || scheme==GREEN || scheme==YELLOW || scheme==CYAN)
-			xc[i].green=(i*(256/ncolors))<<8;
+			xc[i].green=(i*(256/nc))<<8;
 		if(scheme==GREY || scheme==BLUE || scheme==MAGENTA || scheme==CYAN)
-			xc[i].blue=(i*(256/ncolors))<<8;
+			xc[i].blue=(i*(256/nc))<<8;
 	}
-	XStoreColors(dpy, c, xc, ncolors);
+	XStoreColors(dpy, c, xc, nc);
 	return 0;
 
 	bailout:
@@ -96,14 +97,21 @@ int setcolorscheme(Colormap c, int scheme)
 
 void reshape(int w, int h)
 {
+	XWindowChanges changes;
 	if(w<=0) w=1;  if(h<=0) h=1;
 	width=w;  height=h;
+	if(useoverlay && olwin)
+	{
+		changes.width=width;
+		changes.height=height;
+		XConfigureWindow(dpy, olwin, CWWidth|CWHeight, &changes);
+	}
 }
 
 
 void setspherecolor(float c)
 {
-	if(useci || useoverlay)
+	if(useci)
 	{
 		GLfloat ndx=c*(float)(ncolors-1);
 		GLfloat mat_ndxs[]={ndx*0.3, ndx*0.8, ndx};
@@ -207,6 +215,48 @@ void renderspheres(int buf)
 }
 
 
+void renderoverlay(void)
+{
+	int i, j, w=width/8, h=height/8;  unsigned char *buf=NULL;
+	int ndx=(int)(lonesphere_color*(float)(nolcolors-1));
+	glShadeModel(GL_FLAT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glViewport(0, 0, width, height);
+	glRasterPos3f(-0.5, 0.5, 0.0);
+	glClearIndex((float)transpixel);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glIndexf(lonesphere_color*(float)(nolcolors-1));
+	glBegin(GL_LINES);
+	glVertex2f(-1.+lonesphere_color*2., -1.);
+	glVertex2f(-1.+lonesphere_color*2., 1.);
+	glVertex2f(-1., -1.+lonesphere_color*2.);
+	glVertex2f(1., -1.+lonesphere_color*2.);
+	glEnd();
+	if(w && h)
+	{
+		if((buf=(unsigned char *)malloc(w*h))==NULL)
+			_throw("Could not allocate memory");
+		for(i=0; i<h; i++)
+			for(j=0; j<w; j++)
+			{
+				if(((i/4)%2)!=((j/4)%2)) buf[i*w+j]=0;
+				else buf[i*w+j]=ndx;
+			}
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glDrawPixels(w, h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buf);
+	}
+	glRasterPos3f(0., 0., 0.);
+	glListBase(fontlistbase);
+	glCallLists(24, GL_UNSIGNED_BYTE, "GLX Spheres Overlay Test");
+	bailout:
+	if(buf) free(buf);
+}
+
+
 int display(int advance)
 {
 	static int first=1;
@@ -230,7 +280,7 @@ int display(int advance)
 		gluSphere(spherequad, 1.3, slices, stacks);
 		glEndList();
 
-		if(useci || useoverlay)
+		if(useci)
 		{
 			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
 		}
@@ -254,6 +304,13 @@ int display(int advance)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
+		if(useoverlay)
+		{
+			glXMakeCurrent(dpy, olwin, olctx);
+			#ifdef SUNOGL
+			glXGetTransparentIndexSUN(dpy, olwin, win, &transpixel);
+			#endif
+		}
 		if(!(fontinfo=XLoadQueryFont(dpy, "fixed")))
 			_throw("Could not load X font");
 		minchar=fontinfo->min_char_or_byte2;
@@ -262,6 +319,7 @@ int display(int advance)
 		glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1, fontlistbase+minchar);
 		XFreeFont(dpy, fontinfo);  fontinfo=NULL;
 		snprintf(temps, 255, "Measuring performance ...");
+		if(useoverlay) glXMakeCurrent(dpy, win, ctx);
 
 		first=0;
 	}
@@ -271,11 +329,9 @@ int display(int advance)
 		z-=0.5;
 		if(z<-29.)
 		{
-			if(useci || useoverlay)
-			{
-				colorscheme=(colorscheme+1)%NSCHEMES;
-				_catch(setcolorscheme(colormap, colorscheme));
-			}
+			if(useci || useoverlay) colorscheme=(colorscheme+1)%NSCHEMES;
+			if(useci) _catch(setcolorscheme(colormap, ncolors, colorscheme));
+			if(useoverlay) _catch(setcolorscheme(olcolormap, nolcolors, colorscheme));
 			z=-3.5;
 		}
 		outer_angle+=0.1;  if(outer_angle>360.) outer_angle-=360.;
@@ -292,14 +348,24 @@ int display(int advance)
 	else renderspheres(GL_BACK);
 
 	glDrawBuffer(GL_BACK);
-	xaspect=(GLfloat)width/(GLfloat)(min(width, height));
-	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
+	if(useoverlay)
+	{
+		glXMakeCurrent(dpy, olwin, olctx);
+		renderoverlay();
+		glIndexf(254.);
+		glRasterPos3f(-0.95, -0.95, 0.);
+	}
+	else
+	{
+		xaspect=(GLfloat)width/(GLfloat)(min(width, height));
+		yaspect=(GLfloat)height/(GLfloat)(min(width, height));
+		glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5); 
+	}
 	glPushAttrib(GL_CURRENT_BIT);
 	glPushAttrib(GL_LIST_BIT);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glColor3f(1., 1., 1.);
-	glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5); 
 	glListBase(fontlistbase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
 	glPopAttrib();
@@ -308,8 +374,9 @@ int display(int advance)
 	if(useoverlay)
 	{
 		if(oldb) glXSwapBuffers(dpy, olwin);
+		glXMakeCurrent(dpy, win, ctx);
 	}
-	else glXSwapBuffers(dpy, win);
+	glXSwapBuffers(dpy, win);
 
 	if(start>0.)
 	{
@@ -408,7 +475,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-c", 2)) useci=1;
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
-		if(!strnicmp(argv[i], "-o", 2)) {useoverlay=1;  useci=0;}
+		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
 		if(!strnicmp(argv[i], "-s", 2))
 		{
 			rgbattribs[10]=GLX_STEREO;
@@ -439,7 +506,7 @@ int main(int argc, char **argv)
 		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
 		ncolors=np2(v->colormap_size);
 		if(ncolors<32) _throw("Color map is not large enough");
-		_catch(setcolorscheme(colormap, colorscheme));
+		_catch(setcolorscheme(colormap, ncolors, colorscheme));
 	}
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 
@@ -465,11 +532,11 @@ int main(int argc, char **argv)
 		}
 		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n",	(int)v->visualid);
 
-		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
-		ncolors=np2(v->colormap_size);
-		if(ncolors<32) _throw("Color map is not large enough");
+		swa.colormap=olcolormap=XCreateColormap(dpy, root, v->visual, AllocAll);
+		nolcolors=np2(v->colormap_size);
+		if(nolcolors<32) _throw("Color map is not large enough");
 
-		_catch(setcolorscheme(colormap, colorscheme));
+		_catch(setcolorscheme(olcolormap, nolcolors, colorscheme));
 
 		if((olwin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
@@ -486,14 +553,6 @@ int main(int argc, char **argv)
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind rendering context");
 
-	if(useoverlay)
- 	{
-		glClearColor(0.5, 0., 0.5, 1.);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glXSwapBuffers(dpy, win);
-		if(!glXMakeCurrent(dpy, olwin, olctx))
-	 		_throw("Could not bind rendering context");
-	}
 	_catch(event_loop(dpy));
 
 	if(dpy && olctx) {glXDestroyContext(dpy, olctx);  olctx=0;}
