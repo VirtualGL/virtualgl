@@ -166,7 +166,7 @@ class rrglframe : public rrframe
 				if(_stereo && f._rbits && _rbits)
 					decompressrgb(f, width, height, true);
 			}
-			else if(f._h.compress==RRCOMP_JPEG)
+			else
 			{
 				if(!_tjhnd)
 				{
@@ -183,7 +183,6 @@ class rrglframe : public rrframe
 						width, _pitch, height, _pixelsize, tjflags));
 				}
 			}
-			else _throw("Invalid compression type");
 		}
 		return *this;
 	}

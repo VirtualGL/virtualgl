@@ -273,6 +273,7 @@ class rrframe
 		rrout.print("h.size    = %lu\n", h.size);
 		rrout.print("h.winid   = 0x%.8x\n", h.winid);
 		rrout.print("h.dpynum  = %d\n", h.dpynum);
+		rrout.print("h.compress= %d\n", h.compress);
 		rrout.print("h.framew  = %d\n", h.framew);
 		rrout.print("h.frameh  = %d\n", h.frameh);
 		rrout.print("h.width   = %d\n", h.width);
