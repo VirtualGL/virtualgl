@@ -142,6 +142,22 @@ sort-first rendering job using Chromium and VirtualGL:
 Again, it's always a good idea to make sure this works without VirtualGL before
 adding VirtualGL into the mix.
 
+*** Using VirtualGL to Force Pbuffer Rendering
+#OPT: noList! plain!
+
+In the procedure above, VirtualGL can also be used on the rendering nodes to
+redirect the rendering commands from ''crserver'' into a Pbuffer instead of a
+window.  If you wish to do this, then perform the following procedure in place
+of step 2 above:
+
+On each of the rendering nodes,
+
+	* set ''VGL_READBACK=0''
+	* set ''CR_SYSTEM_GL_PATH'' to the appropriate value based on the
+		rendering node's operating system type and whether ''crserver'' was
+		compiled as a 32-bit or 64-bit app on that node (see table above)
+	* ''vglrun crserver''
+
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
 
 #IMG: chromium-sortlast.png

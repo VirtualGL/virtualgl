@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-10-01T23:32:14-06:00">
+<meta name="date" content="2007-10-06T01:16:52-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3228,6 +3228,30 @@ start a sort-first rendering job using Chromium and VirtualGL:</p>
 
 <p>Again, it&rsquo;s always a good idea to make sure this works without
 VirtualGL before adding VirtualGL into the mix.</p>
+
+
+<h3 id="hd0014002001">Using VirtualGL to Force Pbuffer Rendering</h3>
+
+<p>In the procedure above, VirtualGL can also be used on the rendering
+nodes to redirect the rendering commands from <code>crserver</code>
+into a Pbuffer instead of a window.  If you wish to do this, then perform
+the following procedure in place of step 2 above:</p>
+
+<p>On each of the rendering nodes,</p>
+
+<ul class="Itemize">
+    <li class="Itemize asterisk">
+        set <code>VGL_READBACK=0</code>
+    </li>
+    <li class="Itemize asterisk">
+        set <code>CR_SYSTEM_GL_PATH</code> to the appropriate value based on
+        the rendering node&rsquo;s operating system type and whether <code>crserver</code>
+        was compiled as a 32-bit or 64-bit app on that node (see table above)
+    </li>
+    <li class="Itemize asterisk">
+        <code>vglrun&nbsp;crserver</code>
+    </li>
+</ul>
 
 
 <h2 id="hd0014003">14.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
