@@ -41,18 +41,6 @@ clean:
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
-
-ifeq ($(JPEGLIB), pegasus)
-
-PEGDIR = ../../pictools
-
-$(ODIR)/turbojpeg.obj: turbojpegp.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -I$(PEGDIR)/include -DWINDOWS -D__FLAT__ -c $< -Fo$@
-
-JPEGLINK = -LIBPATH:$(PEGDIR)/lib picnm.lib
-
-endif
-
 ifeq ($(JPEGLIB), libjpeg)
 
 $(ODIR)/turbojpeg.obj: turbojpegl.c
@@ -126,17 +114,6 @@ clean:
 
 -include $(OBJS:.o=.d)
 
-
-ifeq ($(JPEGLIB), pegasus)
-
-PEGDIR = ../../pictools
-
-$(ODIR)/turbojpeg.o: turbojpegp.c ../include/turbojpeg.h
-	$(CC) $(CFLAGS) -I$(PEGDIR)/include -c $< -o $@
-
-JPEGLINK = -L$(PEGDIR)/lib -lpicl20
-
-endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
