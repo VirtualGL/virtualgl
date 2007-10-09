@@ -152,6 +152,7 @@ void pbuffer::swap(void)
 pbwin::pbwin(Display *windpy, Window win)
 {
 	if(!windpy || !win) _throw("Invalid argument");
+	_eventdpy=NULL;
 	_windpy=windpy;  _win=win;
 	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
