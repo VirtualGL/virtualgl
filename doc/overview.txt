@@ -65,7 +65,7 @@ images to the client machine:
 {anchor: VGL_Image_Transport}
 	\1. VGL Image Transport (Formerly "Direct Mode") :: The VGL image transport
 	is most often used whenever the X server is located across the network from
-	the graphics server, for instance if the X server is running on the user's
+	the application server, for instance if the X server is running on the user's
 	desktop machine.  VirtualGL uses its own protocol on a dedicated TCP socket
 	to send the rendered 3D images to the client machine, and the VirtualGL
 	Client application decodes the images and composites them into the
