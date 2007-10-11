@@ -446,13 +446,14 @@ int event_loop(Display *dpy)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s]\n\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s] [-fs]\n\n", argv[0]);
 	printf("-c = Use color index rendering (default is RGB)\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
+	printf("-fs = Full-screen mode\n");
 	exit(0);
 }
 
@@ -468,6 +469,7 @@ int main(int argc, char **argv)
 	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None};
 	XSetWindowAttributes swa;  Window root;
+	int fullscreen=0;  unsigned long mask=0;
 
 	for(i=0; i<argc; i++)
 	{
@@ -477,6 +479,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
+		if(!stricmp(argv[i], "-fs")) fullscreen=1;
 		if(!strnicmp(argv[i], "-s", 2))
 		{
 			rgbattribs[10]=GLX_STEREO;
@@ -502,6 +505,7 @@ int main(int argc, char **argv)
 	root=DefaultRootWindow(dpy);
 	swa.border_pixel=0;
 	swa.event_mask=StructureNotifyMask|ExposureMask|KeyPressMask;
+	swa.override_redirect=fullscreen? True:False;
 	if(useci)
 	{
 		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
@@ -512,11 +516,20 @@ int main(int argc, char **argv)
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 
 	if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
+
+	mask=CWBorderPixel|CWColormap|CWEventMask;	
+	if(fullscreen)
+	{
+		mask|=CWOverrideRedirect;
+		width=DisplayWidth(dpy, DefaultScreen(dpy));
+		height=DisplayHeight(dpy, DefaultScreen(dpy));
+	}
 	if((win=XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
-		InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
+		InputOutput, v->visual, mask, &swa))==0)
 		_throw("Could not create window");
 	XStoreName(dpy, win, "GLX Spheres");
 	XMapWindow(dpy, win);
+	if(fullscreen) XSetInputFocus(dpy, win, RevertToParent, CurrentTime);
 	XSync(dpy, False);
 
 	if((ctx=glXCreateContext(dpy, v, NULL, True))==0)
