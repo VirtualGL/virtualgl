@@ -187,16 +187,11 @@ encounter any difficulties.
 | Other Software \
 	| {list type=ul: \
 			{item:__VGL Image Transport Only__: [[http://connectivity.hummingbird.com][Hummingbird]] \
-				Exceed 8 or newer required *} \
+				Exceed 8 or newer required} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
 	|
 #OPT: hiCol=first
-
-	!!! * Exceed 2008 contains a serious bug which, as of this writing, has not
-	been resolved.  It prevents the VirtualGL Client from working	properly unless
-	the MIT-SHM X extension is disabled, and disabling this extension severely
-	impacts the performance of VirtualGL.
 
 ** Additional Requirements for Stereographic Rendering
 
@@ -239,14 +234,9 @@ encounter any difficulties.
 				Quadro, 3D Labs Wildcat Realizm) and is configured to export stereo \
 				pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
-				Exceed 3D v8 or newer *}} \
+				Exceed 3D v8 or newer}} \
 	|
 #OPT: hiCol=first
-
-	!!! * Exceed 2008 contains a serious bug which, as of this writing, has not
-	been resolved.  It prevents the VirtualGL Client from working properly unless
-	the MIT-SHM X extension is disabled, and disabling this extension severely
-	impacts the performance of VirtualGL.
 
 ** Additional Requirements for Transparent Overlays
 
@@ -275,12 +265,6 @@ encounter any difficulties.
 				nVidia Quadro, 3D Labs Wildcat Realizm) and is configured to \
 				export overlay pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
-				Exceed 3D v8 or newer *}} \
+				Exceed 3D v8 or newer}} \
 	|
 #OPT: hiCol=first
-
-	!!! * Exceed 2008 contains a serious bug which, as of this writing, has not
-	been resolved.  It prevents the VirtualGL Client from working	properly unless
-	the MIT-SHM X extension is disabled, and disabling this extension severely
-	impacts the performance of VirtualGL.
-
