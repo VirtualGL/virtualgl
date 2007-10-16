@@ -184,8 +184,7 @@ _globalcleanup gdt;
 		__vgltracetime=rrtime()-__vgltracetime;
 
 #define closetrace()  \
-		rrout.print(") %f ms\n", __vgltracetime*1000.);  \
-		fflush(stdout);  \
+		rrout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
 	}
 
 #include "faker-glx.cpp"
