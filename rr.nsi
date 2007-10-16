@@ -26,8 +26,6 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
-	File "$%systemroot%\system32\libeay32.dll"
-	File "$%systemroot%\system32\ssleay32.dll"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
 	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
 	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
@@ -69,8 +67,6 @@ Section "Uninstall"
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\tcbench.exe
 	Delete $INSTDIR\nettest.exe
-	Delete $INSTDIR\libeay32.dll
-	Delete $INSTDIR\ssleay32.dll
 	RMDir /r $INSTDIR\doc
 
 	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"

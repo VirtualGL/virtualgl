@@ -214,8 +214,8 @@ VirtualGL on Cygwin, see the next section.
      c:\openssl
    * Add "c:\openssl\include" to your system INCLUDE environment variable prior
      to building VirtualGL.
-   * Add "c:\openssl\lib\VC" to your system LIB environment variable prior to
-     building VirtualGL.
+   * Add "c:\openssl\lib\VC\static" to your system LIB environment variable
+     prior to building VirtualGL.
 
      NOTE:  It is only necessary to install OpenSSL on the build machine.  The
      VirtualGL build system will copy the necessary DLL's into the VirtualGL
