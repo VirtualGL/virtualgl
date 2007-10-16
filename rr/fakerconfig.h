@@ -663,7 +663,7 @@ class FakerConfig
 	private:
 
 		#ifndef _WIN32
-		void *FakerConfig::operator new(size_t size)
+		void *operator new(size_t size)
 		{
 			void *addr=NULL;
 			if(size!=sizeof(FakerConfig))
@@ -683,7 +683,7 @@ class FakerConfig
 			return addr;
 		}
 
-		void FakerConfig::operator delete(void *addr)
+		void operator delete(void *addr)
 		{
 			if(addr) shmdt((char *)addr);
 			if(_Shmid!=-1)
