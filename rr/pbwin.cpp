@@ -327,12 +327,12 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		if(dostereo && compress==RRCOMP_PROXY && stereomode==RRSTEREO_QUADBUF)
+		if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF)
 		{
 			static bool message=false;
 			if(!message)
 			{
-				rrout.println("[VGL] NOTICE: Quad-buffered stereo doesn't work with the X11 image transport.");
+				rrout.println("[VGL] NOTICE: Quad-buffered stereo requires the VGL image transport.");
 				rrout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}
