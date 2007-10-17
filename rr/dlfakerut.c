@@ -204,6 +204,15 @@ int main(void)
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
 		_throw("putenv() failed!\n");
 
+	char *env=getenv("LD_PRELOAD");
+	fprintf(stderr, "LD_PRELOAD = %s\n", env? env:"(NULL)");
+	#ifdef sun
+	env=getenv("LD_PRELOAD_32");
+	fprintf(stderr, "LD_PRELOAD_32 = %s\n", env? env:"(NULL)");
+	env=getenv("LD_PRELOAD_64");
+	fprintf(stderr, "LD_PRELOAD_64 = %s\n", env? env:"(NULL)");
+	#endif
+
 	loadsymbols1();
 	test("dlopen() test");
 
