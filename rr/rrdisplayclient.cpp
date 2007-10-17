@@ -276,8 +276,8 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 	bool bu=false;  rrcompframe cf;
 	if(!b) return;
 	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
-	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.height;
-	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.width;
+	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.width;
+	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.height;
 	int i, j, n=0;
 
 	_bytes=0;
