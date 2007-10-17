@@ -23,7 +23,6 @@ rrblitter::rrblitter(void) : _t(NULL), _deadyet(false)
 	_t->start();
 	_prof_blit.setname("Blit      ");
 	_prof_total.setname("Total     ");
-	_lastb=NULL;
 	if(fconfig.verbose) fbx_printwarnings(rrout.getfile());
 }
 
@@ -116,35 +115,10 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 	if(sync) 
 	{
 		_prof_blit.startframe();
-		blitdiff(b, _lastb);
+		b->redraw();
+		b->complete();
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
-		if(_lastb) _lastb->complete();
-		_lastb=b;
 		_ready.signal();
 	}
 	else _q.spoil((void *)b, __rrblitter_spoilfct);
-}
-
-void rrblitter::blitdiff(rrfb *b, rrfb *lastb)
-{
-	int i, j;  bool needsync=false;
-	bool bu=false;
-	if(b->_flags&RRBMP_BOTTOMUP) bu=true;
-	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.height;
-	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.width;
-
-	for(i=0; i<b->_h.height; i+=tilesizey)
-	{
-		int h=tilesizey, y=i;
-		if(b->_h.height-i<(3*tilesizey/2)) {h=b->_h.height-i;  i+=tilesizey;}
-		for(j=0; j<b->_h.width; j+=tilesizex)
-		{
-			int w=tilesizex, x=j;
-			if(b->_h.width-j<(3*tilesizex/2)) {w=b->_h.width-j;  j+=tilesizex;}
-			if(b->tileequals(lastb, x, y, w, h)) continue;
-			b->drawtile(x, y, w, h);  needsync=true;
-		}
-	}
-
-	if(needsync) b->sync();
 }
