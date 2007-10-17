@@ -540,52 +540,6 @@ class rrfb : public rrframe
 		fbx(fbx_write(&_fb, 0, 0, 0, 0, _fb.width, _fb.height));
 	}
 
-	void draw(void)
-	{
-		#ifdef XDK
-		rrcs::safelock l(_Mutex);
-		#endif
-		int w=_h.width, h=_h.height;
-		XWindowAttributes xwa;
-		if(!XGetWindowAttributes(_wh.dpy, _wh.win, &xwa))
-		{
-			rrout.print("Failed to get window attributes\n");
-			return;
-		}
-		if(_h.x+_h.width>xwa.width || _h.y+_h.height>xwa.height)
-		{
-			rrout.print("WARNING: bitmap (%d,%d) at (%d,%d) extends beyond window (%d,%d)\n",
-				_h.width, _h.height, _h.x, _h.y, xwa.width, xwa.height);
-			w=min(_h.width, xwa.width-_h.x);
-			h=min(_h.height, xwa.height-_h.y);
-		}
-		if(_h.x+_h.width<=_fb.width && _h.y+_h.height<=_fb.height)
-		fbx(fbx_write(&_fb, _h.x, _h.y, _h.x, _h.y, w, h));
-	}
-
-	void drawtile(int x, int y, int w, int h)
-	{
-		#ifdef XDK
-		rrcs::safelock l(_Mutex);
-		#endif
-		if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
-			return;
-		if(_flags&RRBMP_BOTTOMUP)
-		{
-			fbx(fbx_flip(&_fb, x, y, w, h));
-			fbx_awrite(&_fb, x, y, x, _fb.height-y-h, w, h);
-		}
-		else fbx(fbx_awrite(&_fb, x, y, x, y, w, h));
-	}
-
-	void sync(void)
-	{
-		#ifdef XDK
-		rrcs::safelock l(_Mutex);
-		#endif
-		fbx(fbx_sync(&_fb));
-	}
-
 	private:
 
 	fbx_wh _wh;
