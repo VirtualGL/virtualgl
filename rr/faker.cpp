@@ -1326,7 +1326,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
-		pbw->readback(GL_BACK, false, false);
+		pbw->readback(GL_BACK, false, fconfig.sync);
 		pbw->swapbuffers();
 	}
 	else
