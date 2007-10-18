@@ -200,11 +200,13 @@ void test(const char *testname)
 
 int main(void)
 {
+	char *env;
+
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
 		_throw("putenv() failed!\n");
 
-	char *env=getenv("LD_PRELOAD");
+	env=getenv("LD_PRELOAD");
 	fprintf(stderr, "LD_PRELOAD = %s\n", env? env:"(NULL)");
 	#ifdef sun
 	env=getenv("LD_PRELOAD_32");
