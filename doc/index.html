@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-10-12T11:42:47-06:00">
+<meta name="date" content="2007-10-18T16:57:12-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3392,6 +3392,12 @@ a 64-bit application.)</p>
     <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details</td>
   </tr>
   <tr class="standard">
+    <td class="standard">AutoForm v4.0x</td>
+    <td class="standard">All</td>
+    <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
+    <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 image transport and disables frame spoiling, it is highly recommended that you use TurboVNC when <code>VGL_SYNC</code> is enabled.  See Section <a href="#VGL_SYNC" class="ref">19.1</a> for more details.</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">Descent 3</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;descent3&nbsp;-g&nbsp;/usr/lib/librrfaker.so</code> <br /><br /> or <br /><br /> <code>vglrun&nbsp;-dl&nbsp;descent3</code></td>
@@ -5105,6 +5111,8 @@ method:</p>
     </dd>
 </dl>
 
+<p><a name="VGL_SYNC"></a></p>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -5117,7 +5125,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable strict 2D/3D synchronization (necessary to pass GLX conformance tests)</td>
+    <td class="standard">Disable/enable strict 2D/3D synchronization</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -5139,24 +5147,30 @@ method:</p>
         <code>glFinish()</code> or <code>glFlush()</code> or <code>glXWaitGL()</code>,
         and VirtualGL reads	back the framebuffer and sends the pixels to the
         client&rsquo;s display &hellip; eventually. This will work fine for
-        the vast majority of applications, but it is not strictly conformant.
-        Technically speaking, when an application calls <code>glXWaitGL()</code>
+        the vast majority of applications, but it does not strictly conform
+        to the GLX spec.  Technically speaking, when an application calls <code>glXWaitGL()</code>
         or <code>glFinish()</code>, it is well within its rights to expect
-        the OpenGL-rendered pixels to be immediately available in the X window.
-        Fortunately, very few applications actually do expect this, but on
-        rare occasions, an application may try to use <code>XGetImage()</code>
-        or other X11 functions to obtain a bitmap of the pixels that were rendered
-        by OpenGL. Enabling <code>VGL_SYNC</code> is a somewhat extreme measure
-        that may be needed to get such applications to work properly.  It was
-        developed primarily as a way to pass the GLX conformance suite (<code>conformx</code>,
-        specifically.)  When <code>VGL_SYNC</code> is enabled, every call to
-        <code>glFinish()</code> or <code>glXWaitGL()</code> will cause the
-        contents of the server&rsquo;s framebuffer to be read back and <em>synchronously</em>
-        drawn into the client&rsquo;s window <em>using the X11 Image Transport
-        and no frame spoiling</em>.  The call to <code>glFinish()</code> or
-        <code>glXWaitGL()</code> will not return until VirtualGL has verified
-        that the pixels have been delivered into the client&rsquo;s window.
-        As such, enabling this mode can have potentially dire effects on performance.
+        the 3D image to be immediately available in the X window. Fortunately,
+        very few applications actually do expect this, but on rare occasions,
+        an application may try to use <code>XGetImage()</code> or other X11
+        functions to obtain a bitmap of the pixels that were rendered by OpenGL.
+        Enabling <code>VGL_SYNC</code> is a somewhat extreme measure that may
+        be needed to make such applications work properly.  It was developed
+        initially as a way to pass the GLX conformance suite (<code>conformx</code>,
+        specifically), but at least one commercial application is known to
+        require it as well (see <a href="#Application_Recipes">Application
+        Recipes</a><a name="idx0091"></a>.)<br /><br />When <code>VGL_SYNC</code>
+        is enabled, every call to <code>glFinish()</code>, <code>glXWaitGL()</code>,
+        and <code>glXSwapBuffers()</code> will cause the contents of the server&rsquo;s
+        framebuffer to be read back and <em>synchronously</em> drawn into the
+        application&rsquo;s window <em>using the X11 Image Transport and no
+        frame spoiling</em>.  The call to <code>glFinish()</code>, <code>glXWaitGL()</code>,
+        or <code>glXSwapBuffers()</code> will not return until VirtualGL has
+        verified that the pixels have been delivered into the application&rsquo;s
+        window.  As such, this mode can have potentially dire effects on performance
+        when used with a remote X server.  It is thus strongly recommended
+        that <code>VGL_SYNC</code> be used only in conjunction with an X proxy
+        (such as TurboVNC) running on the same server as VirtualGL.
     </dd>
 </dl>
 
@@ -5191,7 +5205,7 @@ method:</p>
         (assuming interframe comparison is enabled.)  The VGL Image Transport
         will also divide up the task of compressing these tiles among the available
         CPUs in a round robin fashion, if multi-threaded compression is enabled
-        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0091"></a>.)
+        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0092"></a>.)
         <br /><br /> There are several tradeoffs that must be considered when
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em>
         <ul class="Itemize"><li>
