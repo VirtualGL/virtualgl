@@ -1,4 +1,50 @@
 ===============================================================================
+Significant changes between 2.1 beta1 and 2.1 final
+===============================================================================
+[1]
+Windows applications now link statically with OpenSSL to avoid dependency on
+msvcr71.dll that was introduced in the Win32 OpenSSL 0.9.8e DLLs.  libeay32.dll
+and ssleay32.dll have been removed from the Windows package, since they are
+no longer needed.
+-------------------------------------------------------------------------------
+[2]
+Implemented a new interposer library (libgefaker.so) which, when active, will
+interpose on getenv() and return NULL whenever an application queries the
+value of the LD_PRELOAD environment variable (and, on Solaris, the
+LD_PRELOAD_32 and LD_PRELOAD_64 environment variables.)  This fools an
+application into thinking that no preloading is occurring.  This feature is
+currently undocumented and is subject to change, but it can be activated in
+this release by passing an argument of -ge to vglrun.
+-------------------------------------------------------------------------------
+[3]
+Extended VGL_SYNC functionality to include glXSwapBuffers() as well.  This
+works around a couple of interaction issues between VirtualGL and AutoForm.
+The docs have been updated to explain this new functionality, to include an app
+recipe for AutoForm, and to include a warning about the performance
+consequences of using VGL_SYNC on a remote X connection.
+-------------------------------------------------------------------------------
+[4]
+Included a short paragraph in the Chromium section of the docs explaining how
+to use VirtualGL on the render nodes to redirect Chromium's rendering from a
+window to a Pbuffer.
+-------------------------------------------------------------------------------
+[5]
+Documented the patch revision necessary to make Exceed 2008 work properly with
+VirtualGL.  Removed dire warnings.
+-------------------------------------------------------------------------------
+[6]
+Added full-screen rendering mode to GLXspheres.
+-------------------------------------------------------------------------------
+[7]
+Fixed regression (uninitialized variable) introduced by [2.1 beta1][7].
+-------------------------------------------------------------------------------
+[8]
+Fixed logic error that caused vglclient to fail when using OpenGL drawing and
+talking to a legacy (VGL 2.0 or earlier) server.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 New Features Introduced in 2.1 beta1
 ===============================================================================
 [1]
