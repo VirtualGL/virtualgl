@@ -391,7 +391,7 @@ class FakerConfig
 			if(_Instanceptr!=NULL)
 			{
 				rrcs::safelock l(_Instancemutex);
-				if(_Instanceptr!=NULL) delete _Instanceptr;
+				if(_Instanceptr!=NULL) {delete _Instanceptr;  _Instanceptr=NULL;}
 			}
 		}
 
