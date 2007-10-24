@@ -109,7 +109,6 @@ static void __vgl_cleanup(void)
 	ctxh.killhash();
 	glxdh.killhash();
 	if(_winh) _winh->killhash();
-	FakerConfig::deleteinstance();
 	__vgl_unloadsymbols();
 }
 
@@ -122,6 +121,7 @@ void __vgl_safeexit(int retcode)
 	{
 		__shutdown=1;
 		__vgl_cleanup();
+		FakerConfig::deleteinstance();
 	}
 	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
@@ -134,11 +134,7 @@ class _globalcleanup
 		~_globalcleanup()
 		{
 			globalmutex.lock(false);
-			if(!__shutdown)
-			{
-				__shutdown=1;
-				__vgl_cleanup();
-			}
+			FakerConfig::deleteinstance();
 			globalmutex.unlock(false);
 		}
 };
