@@ -42,6 +42,10 @@ Fixed regression (uninitialized variable) introduced by [2.1 beta1][7].
 Fixed logic error that caused vglclient to fail when using OpenGL drawing and
 talking to a legacy (VGL 2.0 or earlier) server.
 -------------------------------------------------------------------------------
+[9]
+Fixed regression bug that would cause VGL to deadlock when the user closed
+the application window while using the X11 Image Transport.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
