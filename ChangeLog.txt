@@ -46,6 +46,10 @@ talking to a legacy (VGL 2.0 or earlier) server.
 Fixed regression bug that would cause VGL to deadlock when the user closed
 the application window while using the X11 Image Transport.
 -------------------------------------------------------------------------------
+[10]
+Fixed issue whereby vglserver_config would fail to detect the presence of GLP
+because nm was not in the default PATH.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
