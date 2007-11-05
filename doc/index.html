@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-10-18T16:57:12-06:00">
+<meta name="date" content="2007-11-05T16:20:13-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -180,11 +180,15 @@ systems, OpenGL and GLX, and X windows.</p>
                 and SSh Tunneling</a>
             </li>
             <li class="toc">
-                <a href="#hd008005" class="toc">8.5 The VirtualGL Client Application:
+                <a href="#hd008005" class="toc">8.5 VGL Image Transport over Gigabit
+                Networks</a>
+            </li>
+            <li class="toc">
+                <a href="#hd008006" class="toc">8.6 The VirtualGL Client Application:
                 Nuts and Bolts</a>
                 <ul class="toc">
                     <li class="toc">
-                        <a href="#hd008005001" class="toc">8.5.1 The VirtualGL Client and Firewalls</a>
+                        <a href="#hd008006001" class="toc">8.6.1 The VirtualGL Client and Firewalls</a>
                     </li>
                 </ul>
             </li>
@@ -2126,7 +2130,21 @@ server through the gateway and to the client.</p>
 </div>
 
 
-<h2 id="hd008005">8.5&nbsp;The VirtualGL Client Application: Nuts and Bolts</h2>
+<h2 id="hd008005">8.5&nbsp;VGL Image Transport over Gigabit Networks</h2>
+
+<p>When using the VGL image transport over Gigabit Ethernet or faster
+networks, it may be desirable to disable image compression.  This can
+be accomplished by passing an argument of <code>-c&nbsp;rgb</code>
+to <code>vglrun</code> or setting the environment variable <code>VGL_COMPRESS</code>
+to <code>rgb</code> on the VirtualGL server machine. Disabling image
+compression will reduce VirtualGL&rsquo;s server and client CPU usage
+by 50% or more, but the tradeoff is that it will also increase VirtualGL&rsquo;s
+network usage by a factor of 10 or more.  Thus, disabling image compression
+is not recommended unless you are using switched Gigabit Ethernet (or
+faster) infrastructure and have plenty of bandwidth to spare.</p>
+
+
+<h2 id="hd008006">8.6&nbsp;The VirtualGL Client Application: Nuts and Bolts</h2>
 
 <p>The VirtualGL Client application receives encoded and/or compressed
 images on a dedicated TCP socket, decodes and/or decompresses the images,
@@ -2186,7 +2204,7 @@ Alternately, you can simply reset your X server to clear the orphaned
 X window properties.</p>
 
 
-<h3 id="hd008005001">8.5.1&nbsp;The VirtualGL Client and Firewalls</h3>
+<h3 id="hd008006001">8.6.1&nbsp;The VirtualGL Client and Firewalls</h3>
 
 <p>To retain compatibility with previous versions of VirtualGL, the first
 <code>vglclient</code> instance on a given machine will attempt to

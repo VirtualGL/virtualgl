@@ -180,6 +180,18 @@ VirtualGL server through the gateway and to the client.
 
 #IMG: sshtunnel.png
 
+** VGL Image Transport over Gigabit Networks
+
+When using the VGL image transport over Gigabit Ethernet or faster networks,
+it may be desirable to disable image compression.  This can be accomplished by
+passing an argument of ''-c rgb'' to ''vglrun'' or setting the environment
+variable ''VGL_COMPRESS'' to ''rgb'' on the VirtualGL server machine.
+Disabling image compression will reduce VirtualGL's server and client CPU usage
+by 50% or more, but the tradeoff is that it will also increase VirtualGL's
+network usage by a factor of 10 or more.  Thus, disabling image compression is
+not recommended unless you are using switched Gigabit Ethernet (or faster)
+infrastructure and have plenty of bandwidth to spare.
+
 ** The VirtualGL Client Application: Nuts and Bolts
 
 The VirtualGL Client application receives encoded and/or compressed images on a
