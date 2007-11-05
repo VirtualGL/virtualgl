@@ -47,7 +47,11 @@ PERFORMANCE OF THIS SOFTWARE.
 
 
 #include <GL/glx.h>
+#ifdef MESAGLU
+#include <mesa/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #include <X11/keysym.h>
 #include <stdlib.h>
 #include <stdio.h>

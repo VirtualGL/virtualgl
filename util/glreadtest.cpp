@@ -25,7 +25,11 @@
 #ifdef USEGLP
 #include <GL/glp.h>
 #endif
+#ifdef MESAGLU
+#include <mesa/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #include "x11err.h"
 
 static int ALIGN=1;

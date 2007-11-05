@@ -39,7 +39,11 @@
 #include <X11/Xutil.h>
 #include <GL/gl.h>
 #ifdef DO_GLU
+#ifdef MESAGLU
+#include <mesa/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #endif
 #include <GL/glx.h>
 #ifdef USEGLP

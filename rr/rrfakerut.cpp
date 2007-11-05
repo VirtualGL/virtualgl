@@ -16,7 +16,11 @@
 #include <stdlib.h>
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
+#ifdef MESAGLU
+#include <mesa/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <dlfcn.h>
