@@ -48,7 +48,11 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-CINCLUDES = -I/usr/X/include
+CINCLUDES = -I/usr/X/include -I/usr/X11/include
+MESAGLU := $(shell if [ -f /usr/X11/include/mesa/glu.h ]; then echo yes; fi)
+ifeq ($(MESAGLU), yes)
+CDEFINES := $(CDEFINES) -DMESAGLU
+endif
 
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
@@ -76,6 +80,10 @@ ifneq ($(USESSL), no)
 ifeq ($(subplatform), 64)
 STATICSSL := $(shell if [ -f /opt/csw/lib/64/libssl.a -a -f /opt/csw/lib/64/libcrypto.a ]; then echo yes; fi)
 STATICSSLDIR = /opt/csw/lib/64
+ifneq ($(STATICSSL), yes)
+STATICSSL := $(shell if [ -f /opt/csw/lib/amd64/libssl.a -a -f /opt/csw/lib/amd64/libcrypto.a ]; then echo yes; fi)
+STATICSSLDIR = /opt/csw/lib/amd64
+endif
 else
 STATICSSL := $(shell if [ -f /opt/csw/lib/libssl.a -a -f /opt/csw/lib/libcrypto.a ]; then echo yes; fi)
 STATICSSLDIR = /opt/csw/lib
