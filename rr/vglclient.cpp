@@ -31,6 +31,9 @@
 #include <dirent.h>
 #include <pwd.h>
 #include <sys/stat.h>
+#ifdef sun
+#include <procfs.h>
+#endif
 #endif
 
 bool restart;
@@ -183,11 +186,28 @@ void killproc(bool useronly)
 				char temps[1024];  struct stat fsbuf;
 				int pid=atoi(dent->d_name);
 				if(pid==getpid()) continue;
+				#ifdef sun
+				sprintf(temps, "/proc/%s/psinfo", dent->d_name);
+				#else
 				sprintf(temps, "/proc/%s/stat", dent->d_name);
+				#endif
 				if((fd=open(temps, O_RDONLY))==-1) continue;
 				if(fstat(fd, &fsbuf)!=-1 && (fsbuf.st_uid==getuid() || !useronly))
 				{
-					char *ptr=NULL;  int bytes=0;
+					int bytes=0;
+					#ifdef sun
+					psinfo_t psinfo;
+					if((bytes=read(fd, &psinfo, sizeof(psinfo_t)))==sizeof(psinfo_t)
+						&& psinfo.pr_nlwp!=0)
+					{
+						if(!strcmp(psinfo.pr_fname, "vglclient"))
+						{
+							rrout.println("Terminating vglclient process %d", pid);
+							kill(pid, SIGTERM);
+						}
+					}
+					#else
+					char *ptr=NULL;
 					if((bytes=read(fd, temps, 1023))>0 && bytes<1024)
 					{
 						temps[bytes]='\0';
@@ -205,6 +225,7 @@ void killproc(bool useronly)
 							}
 						}
 					}
+					#endif
 				}
 				close(fd);  fd=-1;
 			}
