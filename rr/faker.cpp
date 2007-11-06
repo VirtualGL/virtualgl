@@ -135,6 +135,7 @@ class _globalcleanup
 		{
 			globalmutex.lock(false);
 			FakerConfig::deleteinstance();
+			__shutdown=1;
 			globalmutex.unlock(false);
 		}
 };
@@ -696,7 +697,7 @@ int XFree(void *data)
 	int ret=0;
 	TRY();
 	ret=_XFree(data);
-	if(data) vish.remove(NULL, (XVisualInfo *)data);
+	if(data && !isdead()) vish.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
 }
