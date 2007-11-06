@@ -50,6 +50,18 @@ the application window while using the X11 Image Transport.
 Fixed issue whereby vglserver_config would fail to detect the presence of GLP
 because nm was not in the default PATH.
 -------------------------------------------------------------------------------
+[11]
+When running VirtualGL on Enterprise Linux 5 using the 100 series NVidia
+drivers, a normal exit from the application will result in
+glXChannelRectSyncSGIX() being called after the VirtualGL hashes have already
+been destructed.  glXChannelRectSyncSGIX() calls XFree() (an interposed
+function), and under certain circumstances, the interposed version of XFree()
+was trying (and failing) to access one of the previously destructed VirtualGL
+hashes.  This has been fixed.
+-------------------------------------------------------------------------------
+[12]
+vglclient -kill now works properly on Solaris systems.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
