@@ -62,6 +62,11 @@ hashes.  This has been fixed.
 [12]
 vglclient -kill now works properly on Solaris systems.
 -------------------------------------------------------------------------------
+[13]
+Fixed a timing snafu in and raised the run priority of Windows version of
+TCBench.  This improves the accuracy of TCBench on Windows in high client CPU
+usage scenarios.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
