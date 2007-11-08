@@ -124,11 +124,14 @@ int main(int argc, char **argv)
 	fbx(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames=0, samples=0;
-	if(xcoord<0) xcoord=width/2;
-	if(ycoord<0) ycoord=height/2;
+	if(xcoord<0) xcoord=width/2-16;  if(xcoord<0) xcoord=0;
+	if(ycoord<0) ycoord=height/2-16;  if(ycoord<0) ycoord=0;
 	printf("Sample block location: %d, %d\n", xcoord, ycoord);
 	unsigned char buf[32*32*4];
 	int first=1;
+	#ifdef _WIN32
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	#endif
 	benchend=timer.time();
 	do
 	{
@@ -144,9 +147,17 @@ int main(int argc, char **argv)
 			if(memcmp(buf, fb.bits, fbx_ps[fb.format]*32*32)) frames++;
 		}
 		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
+		#ifdef _WIN32
+		int sleeptime=(int)(1000.*(1./(float)samplerate-(timer.time()-benchend)));
+		if(sleeptime>0) Sleep(sleeptime);
+		#else
 		int sleeptime=(int)(1000000.*(1./(float)samplerate-(timer.time()-benchend)));
 		if(sleeptime>0) usleep(sleeptime);
+		#endif
 	} while((benchend=timer.time())-benchstart<benchtime);
-	printf("Samples: %d  Time: %f s  Frames/sec: %f\n", samples, benchend-benchstart, (double)frames/(benchend-benchstart));
+	#ifdef _WIN32
+	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+	#endif
+	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples, frames, benchend-benchstart, (double)frames/(benchend-benchstart));
 	return 0;
 }
