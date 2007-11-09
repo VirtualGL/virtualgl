@@ -411,7 +411,7 @@ int event_loop(Display *dpy)
 	while (1)
 	{
 		int advance=0, dodisplay=0;
-		while(XPending(dpy)>0)
+		do
 		{
 			XEvent event;
 			XNextEvent(dpy, &event);
@@ -438,7 +438,7 @@ int event_loop(Display *dpy)
 					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
  					break;
 			}
-		}
+		} while(XPending(dpy)>0);
 		if(!interactive) {_catch(display(1));}
 		else {if(dodisplay) {_catch(display(advance));}}
 	}
@@ -450,11 +450,12 @@ int event_loop(Display *dpy)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s] [-fs]\n\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s] [-fs] [-p <p>]\n\n", argv[0]);
 	printf("-c = Use color index rendering (default is RGB)\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
+	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-fs = Full-screen mode\n");
@@ -483,6 +484,15 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
+		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
+		{
+			int npolys=atoi(argv[++i]);
+			if(npolys>0)
+			{
+				slices=stacks=(int)(sqrt((double)npolys/((double)(3*NSPHERES+1))));
+				if(slices<1) slices=stacks=1;
+			}
+		}
 		if(!stricmp(argv[i], "-fs")) fullscreen=1;
 		if(!strnicmp(argv[i], "-s", 2))
 		{
@@ -490,6 +500,8 @@ int main(int argc, char **argv)
 			usestereo=1;
 		}
 	}
+
+	fprintf(stderr, "Polygons in scene: %d\n", (NSPHERES*3+1)*slices*stacks);
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 
