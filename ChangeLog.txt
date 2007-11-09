@@ -67,6 +67,15 @@ Fixed a timing snafu in and raised the run priority of Windows version of
 TCBench.  This improves the accuracy of TCBench on Windows in high client CPU
 usage scenarios.
 -------------------------------------------------------------------------------
+[14]
+Fixed an issue in the interactive mode of GLXSpheres whereby it would use 100%
+of the CPU when sitting idle.  Added option to GLXSpheres to adjust the
+polygon count of the scene.
+-------------------------------------------------------------------------------
+[15]
+Added app recipes for ANSYS and Cedega to docs.  Added notes describing
+ANSYS and Pro/E duplicate glFlush() issue and workarounds.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
