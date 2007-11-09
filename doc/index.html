@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-11-05T16:20:13-06:00">
+<meta name="date" content="2007-11-09T04:33:17-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3404,6 +3404,12 @@ a 64-bit application.)</p>
     <td class="standard">The ANSA startup script directly invokes <code>/lib/libc.so.6</code> to query the glibc version.  Since the VirtualGL faker depends on libc, preloading VirtualGL when directly invoking <code>libc.so.6</code> creates an infinite loop. So it is necessary to disable the preloading of VirtualGL in the application script and then re-enable it prior to launching the actual application.</td>
   </tr>
   <tr class="standard">
+    <td class="standard">ANSYS v11.0</td>
+    <td class="standard">All</td>
+    <td class="standard">If you experience extremely long delays (on the order of minutes) when reading input data or performing other operations in ANSYS: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching ANSYS.  When running ANSYS in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching ANSYS.</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0086"></a> below</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">Army Ops</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;armyops</code></td>
@@ -3414,6 +3420,12 @@ a 64-bit application.)</p>
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
     <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 image transport and disables frame spoiling, it is highly recommended that you use TurboVNC when <code>VGL_SYNC</code> is enabled.  See Section <a href="#VGL_SYNC" class="ref">19.1</a> for more details.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Cedega v6.0.x</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Add <br /><br /> <code>export&nbsp;LD_PRELOAD=librrfaker.so</code> <br /><br /> to the top of <code>~/.cedega/.winex_ver/winex-{version}/bin/winex3</code>, then run Cedega as you would normally (without <code>vglrun</code>.)  Since <code>vglrun</code> is not being used, it is necessary to use environment variables or the VirtualGL Configuration dialog to modify VirtualGL&rsquo;s configuration.</td>
+    <td class="standard">The actual binary (WineX) which uses OpenGL is buried beneath several layers of Python and shell scripts.  The <code>LD_PRELOAD</code> variable does not get propagated down from the initial shell that invoked <code>vglrun</code>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Descent 3</td>
@@ -3471,9 +3483,9 @@ a 64-bit application.)</p>
   </tr>
   <tr class="standard">
     <td class="standard">Pro/ENGINEER Wildfire v3.0</td>
-    <td class="standard">Solaris/Sparc</td>
-    <td class="standard">When using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching Pro/E v3.</td>
-    <td class="standard">Pro/E v3 frequently renders to the front buffer and, for unknown reasons, sends long sequences of <code>glFlush()</code> calls (particularly in wireframe mode) even if nothing new has been rendered.  This causes VGL to send long sequences of duplicate images into the VGL Image Transport pipeline.  If interframe comparison is enabled, the overhead of comparing these duplicate images can lead to slow application performance when zooming in or out in Pro/E.  It&rsquo;s faster to disable interframe comparison in this case and simply let VGL&rsquo;s frame spoiling system discard any frames that it can&rsquo;t send in real time.  This results in only a few of the duplicate frames being sent to the client with no CPU time wasted on comparing the hundreds of other duplicate frames that won&rsquo;t be sent.</td>
+    <td class="standard">All</td>
+    <td class="standard">If you experience extremely long delays (on the order of minutes) when zooming or performing other operations in Pro/E: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching Pro/E.  When running Pro/E in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching Pro/E.</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0087"></a> below</td>
   </tr>
   <tr class="standard">
     <td class="standard">QGL (OpenGL Qt Widget)</td>
@@ -3508,6 +3520,69 @@ a 64-bit application.)</p>
 </table>
 </div>
 
+
+
+<h3 id="hd0015000001">Notes for ANSYS and Pro/E</h3>
+
+<p><a name="ansys_proe"></a></p>
+
+<p>ANSYS and Pro/E frequently render to the front buffer and, for unknown
+reasons, call <code>glFlush()</code> thousands of times in a row even
+if nothing new has been rendered.  This exposes a vulnerability in
+VirtualGL&rsquo;s framebuffer readback heuristics.  Normally, when
+an application calls <code>glFlush()</code> on the front buffer, VirtualGL
+will read back, compress, and send the pixels from the front buffer.
+But if <code>glFlush()</code> is called thousands of times without
+changing the contents of the frame buffer, this causes VirtualGL to
+read back, compress, and send thousands of duplicate images.  Whereas
+calling <code>glFlush()</code> on a local display takes practically
+no time, reading back and sending an image in VirtualGL takes a relatively
+long amount of time.  So, left unchecked, this phenomenon can lead
+to delays of several minutes when performing certain operations in
+ANSYS and Pro/E while using VirtualGL.</p>
+
+<p>If frame spoiling is enabled, then VirtualGL will not read back the
+framebuffer in response to a <code>glFlush()</code> call if a prior
+image is still being compressed/sent.  Ideally, this would cause most
+of the duplicate <code>glFlush()</code> calls to be ignored by VirtualGL.
+However, this frame spoiling algorithm only works if it takes longer
+to compress and send an image than it does to read it back from the
+framebuffer.  Frames are spoiled during the time that the readback
+thread is waiting for the compressor thread to finish with the previous
+frame, so if the readback thread never has to wait on the compressor
+thread, then no frames are ever spoiled.  There are several reasons
+why this could occur:</p>
+
+<ol class="Ordered numeric">
+    <li class="Ordered">
+        The system contains an old, slow bus (AGP, for instance) and thus the
+        readback performance from the graphics card is relatively slow.
+    </li>
+    <li class="Ordered">
+        TurboVNC is being used on the same server as VirtualGL.  If this is
+        the case, then the compressor thread is passing images to TurboVNC
+        through shared memory, which (even on modern systems) is almost always
+        faster than reading back images from the graphics card.
+    </li>
+    <li class="Ordered">
+        Interframe comparison is enabled in the VGL Image Transport.  In the
+        case of ANSYS and Pro/E, each duplicate frame can be compared and discarded
+        by the compressor much more quickly than it can be read back from the
+        graphics card, so no spoiling occurs.
+    </li>
+</ol>
+
+<p>A more robust fix for this problem is slated for the next release of
+VirtualGL, but for now, it is necessary to work around the issue if
+it occurs.  The workaround is essentially to slow the compressor thread
+down such that it is slower than the readback thread.  When using the
+VGL Image Transport, it is usually only necessary to disable interframe
+comparison (<code>VGL_INTERFRAME=0</code>) to accomplish this.  But
+when using the X11 Image Transport and TurboVNC, it is necessary to
+introduce an artificial delay into the compressor thread by setting
+<code>VGL_FPS</code>.  A value of <code>20</code> for <code>VGL_FPS</code>
+is a reasonable starting point, but you may have to decrease this value
+if the readback performance on your system is exceptionally slow.</p>
 
 <hr class="break" />
 
@@ -3573,7 +3648,7 @@ will (by default) use quad-buffered stereo rendering if:</p>
 to using anaglyphic stereo (see below.)  It is usually necessary to
 explicitly enable stereo in the graphics driver configuration for both
 the client and server machines.  The
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0086"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0088"></a>
 section below lists a way to verify that both client and server have
 stereo visuals available.</p>
 
@@ -3655,7 +3730,7 @@ they need only be supported and enabled on the client machine.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work
 with VirtualGL.  True color (24-bit) overlays work, in theory, but
 have not been tested.  Use <code>glxinfo</code> (see
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0087"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0089"></a>
 below) to verify whether your client&rsquo;s X display supports overlays
 and whether they are enabled.  In Exceed 3D, make sure that the &ldquo;Overlay
 Support&rdquo; option is checked in the &ldquo;Exceed 3D and GLX&rdquo;
@@ -4538,7 +4613,7 @@ method:</p>
         library to load. <br /><br /> You shouldn&rsquo;t need to muck with
         this unless something doesn&rsquo;t work.  However, this setting is
         necessary when using VirtualGL with
-        <a href="#Chromium">Chromium</a><a name="idx0088"></a>.
+        <a href="#Chromium">Chromium</a><a name="idx0090"></a>.
     </dd>
 </dl>
 
@@ -4868,7 +4943,7 @@ method:</p>
         quality level at which JPEG compression becomes perceptually lossless
         is different for each image, but experiments with various visual difference
         benchmarks (such as
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0089"></a>)
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0091"></a>)
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual
         losslessness in the types of applications (volume visualization apps,
         in particular) where image quality is critical.  As with any benchmarks,
@@ -4909,7 +4984,7 @@ method:</p>
         disables VirtualGL&rsquo;s readback mechanism and prevents duplication
         of effort. <br /><br /> This feature was developed initially to support
         running
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0090"></a>
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0092"></a>
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1
         through N as rendering servers, each drawing a portion of the geometry
         into a separate window on a separate X display. ParaView reads back
@@ -5177,7 +5252,7 @@ method:</p>
         initially as a way to pass the GLX conformance suite (<code>conformx</code>,
         specifically), but at least one commercial application is known to
         require it as well (see <a href="#Application_Recipes">Application
-        Recipes</a><a name="idx0091"></a>.)<br /><br />When <code>VGL_SYNC</code>
+        Recipes</a><a name="idx0093"></a>.)<br /><br />When <code>VGL_SYNC</code>
         is enabled, every call to <code>glFinish()</code>, <code>glXWaitGL()</code>,
         and <code>glXSwapBuffers()</code> will cause the contents of the server&rsquo;s
         framebuffer to be read back and <em>synchronously</em> drawn into the
@@ -5223,7 +5298,7 @@ method:</p>
         (assuming interframe comparison is enabled.)  The VGL Image Transport
         will also divide up the task of compressing these tiles among the available
         CPUs in a round robin fashion, if multi-threaded compression is enabled
-        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0092"></a>.)
+        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0094"></a>.)
         <br /><br /> There are several tradeoffs that must be considered when
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em>
         <ul class="Itemize"><li>
