@@ -411,10 +411,16 @@ int event_loop(Display *dpy)
 	while (1)
 	{
 		int advance=0, dodisplay=0;
-		do
+
+		while(1)
 		{
 			XEvent event;
-			XNextEvent(dpy, &event);
+			if(interactive) XNextEvent(dpy, &event);
+			else
+			{
+				if(XPending(dpy)>0) XNextEvent(dpy, &event);
+				else break;
+			}
 			switch (event.type)
 			{
 				case Expose:
@@ -438,7 +444,11 @@ int event_loop(Display *dpy)
 					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
  					break;
 			}
-		} while(XPending(dpy)>0);
+			if(interactive)
+			{
+				if(XPending(dpy)<=0) break;
+			}
+		}
 		if(!interactive) {_catch(display(1));}
 		else {if(dodisplay) {_catch(display(advance));}}
 	}
