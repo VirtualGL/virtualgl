@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-11-09T04:33:17-06:00">
+<meta name="date" content="2007-11-14T01:51:18-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4741,7 +4741,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{n}</code></em> = the number of CPUs to use for multi-threaded compression, or <code>0</code> to automatically determine the optimal number of CPUs to use</td>
+    <td class="standard"><em><code>{n}</code></em> = the number of CPUs to use for multi-threaded compression</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4749,7 +4749,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">0</td>
+    <td class="standard">1</td>
   </tr>
 </table>
 </div>
@@ -4760,16 +4760,10 @@ method:</p>
     <dd class="Description">
         The VGL Image Transport can divide the task of compressing each frame
         among multiple server CPUs.  This might speed up the overall throughput
-        if the compression stage of the pipeline is the primary bottleneck.
-        The default behavior (equivalent to setting this option to <code>0</code>)
-        is to use all but one of the available CPUs, up to a maximum of 3 total:
-        <br /><br /> <em>1P system:</em> 1 CPU used<br /> <em>2P system:</em>
-        1 CPU used<br /> <em>3P system:</em> 2 CPUs used<br /> <em>4P &amp;
-        larger:</em> 3 CPUs used <br /><br /> On a large multiprocessor system,
-        the speedup is almost linear up to 3 processors, but the algorithm
-        scales very little past that point.  VirtualGL will not allow more
-        than 4 processors total to be used for compression, nor will it allow
-        you to set this parameter to a value greater than the number of processors
+        in rare circumstances where the server CPUs are significantly slower
+        than the client CPUs. <br /><br /> VirtualGL will not allow more than
+        4 processors total to be used for compression, nor will it allow you
+        to set this parameter to a value greater than the number of processors
         in the system. <br /><br /> <em>Multi-threaded compression is affected
         by the <code>VGL_TILESIZE</code> option</em>
     </dd>
