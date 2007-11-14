@@ -179,43 +179,6 @@ class ConfigInt : public Config
 		bool _usebounds, _pow2;
 };
 
-class ConfigNP : public ConfigInt
-{
-	public:
-
-		ConfigNP()
-		{
-			ConfigInt::setbounds(0, 1024);
-			_i=adjust(0);
-		}
-
-		ConfigNP& operator= (int i) {set(adjust(i));  return *this;}
-
-		int get(const char *envvar)
-		{
-			char *temp=NULL;
-			if((temp=envget(envvar))!=NULL)
-			{
-				char *t=NULL;  int itemp=strtol(temp, &t, 10);
-				if(t && t!=temp && itemp>=0) set(adjust(itemp));
-			}
-			return _i;
-		}
-
-	private:
-
-		int adjust(int np)
-		{
-			np=min(np, min(numprocs(), MAXPROCS));
-			if(np==0)
-			{
-				np=min(numprocs(), MAXPROCS);	 if(np>1) np--;
-			}
-			return np;
-		}
-
-};
-
 class ConfigString : public Config
 {
 	public:
@@ -352,6 +315,8 @@ class FakerConfig
 			msubsamp.setbounds(0, 4);
 			msubsamp.setpow2();
 			msubsamp=1;
+			np.setbounds(1, min(numprocs(), MAXPROCS));
+			np=1;
 			port.setbounds(0, 65535);
 			qual.setbounds(1, 100);
 			qual=DEFQUAL;
@@ -593,7 +558,7 @@ class FakerConfig
 		ConfigInt mqual;
 		ConfigInt msubsamp;
 		ConfigString moviefile;
-		ConfigNP np;
+		ConfigInt np;
 		ConfigInt port;
 		ConfigBool progressive;
 		ConfigInt qual;
