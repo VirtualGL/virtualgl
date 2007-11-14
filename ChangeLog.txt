@@ -76,6 +76,11 @@ polygon count of the scene.
 Added app recipes for ANSYS and Cedega to docs.  Added notes describing
 ANSYS and Pro/E duplicate glFlush() issue and workarounds.
 -------------------------------------------------------------------------------
+[16]
+Changed default value for VGL_NPROCS to 1 (performance study indicates that
+there is no longer any measurable advantage to multi-threaded compression on
+modern hardware with VGL 2.1.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
