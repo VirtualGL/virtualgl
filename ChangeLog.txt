@@ -81,6 +81,11 @@ Changed default value for VGL_NPROCS to 1 (performance study indicates that
 there is no longer any measurable advantage to multi-threaded compression on
 modern hardware with VGL 2.1.)
 -------------------------------------------------------------------------------
+[17]
+Added a -bench option to nettest to allow it to measure actual usage on a
+given Solaris or Linux network device.  This was necessitated by accuracy
+issues with other open source network monitoring solutions.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
