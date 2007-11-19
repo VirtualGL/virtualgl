@@ -25,7 +25,7 @@
 #define MAXDATASIZE (4*1024*1024)
 #define ITER 5
 
-#ifndef _WIN32
+#if defined(sun)||defined(linux)
 void benchmark(int interval, char *ifname)
 {
 	double rMbits=0., wMbits=0.;
@@ -38,7 +38,7 @@ void benchmark(int interval, char *ifname)
 	if((kc=kstat_open())==NULL) {_throwunix();}
 	if((kif=kstat_lookup(kc, NULL, -1, ifname))==NULL) {_throwunix();}
 
-	#else
+	#elif defined(linux)
 
 	FILE *f=NULL;
 	if((f=fopen("/proc/net/dev", "r"))==NULL)
@@ -76,7 +76,7 @@ void benchmark(int interval, char *ifname)
 		}
 		wbytes=data->value.ui64;
 
-		#else
+		#elif defined(linux)
 
 		char temps[1024];
 		if(fseek(f, 0, SEEK_SET)!=0) _throwunix();
@@ -138,7 +138,7 @@ void usage(char **argv)
 	printf(" [-ssl]");
 	#endif
 	printf("\n or    %s -findport\n", argv[0]);
-	#ifndef _WIN32
+	#if defined(sun)||defined(linux)
 	printf(" or    %s -bench <interface> [interval]\n", argv[0]);
 	printf("\n-bench = measure throughput on selected network interface");
 	#endif
@@ -151,11 +151,13 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int server;  char *servername=NULL;
+	int server=0;  char *servername=NULL;
 	char *buf;  int i, j;
 	bool dossl=false;
 	rrtimer timer;
+	#if defined(sun)||defined(linux)
 	int interval=2;
+	#endif
 
 	try {
 
@@ -190,7 +192,7 @@ int main(int argc, char **argv)
 		sd.close();
 		exit(0);
 	}
-	#ifndef _WIN32
+	#if defined(sun)||defined(linux)
 	else if(!stricmp(argv[1], "-bench"))
 	{
 		int _interval;
