@@ -8,7 +8,6 @@
 		the user's desktop
 	* Supports stereographic and overlay rendering
 	* Built-in encryption
-	* Multi-threaded image compression
 	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
 		client
 
