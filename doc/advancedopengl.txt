@@ -41,7 +41,7 @@ use quad-buffered stereo rendering if:
 
 	* The client supports OpenGL (Exceed 3D is required for Windows clients)
 	* The client has stereo rendering capabilities
-	* The server has stereo rendering capabilties
+	* The server has stereo rendering capabilities
 
 If one or more of these is not true, then VirtualGL will fall back to using
 anaglyphic stereo (see below.)  It is usually necessary to explicitly enable
