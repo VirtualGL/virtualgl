@@ -100,6 +100,7 @@ ln -fs /usr/bin/vgllogin $RPM_BUILD_ROOT/opt/%{name}/bin/vgllogin
 ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_config
 ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 ln -fs /opt/%{name}/fakelib $RPM_BUILD_ROOT/opt/%{name}/lib
+ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 
 chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
@@ -154,6 +155,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/fakelib/64/libGL.so
 /opt/%{name}/lib64
 %endif
+/opt/%{name}/doc
 
 /usr/lib/librrfaker.so
 /usr/lib/libdlfaker.so
