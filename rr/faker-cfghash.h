@@ -35,9 +35,14 @@ class cfghash : public _cfghash
 {
 	public:
 
-		~cfghash(void)
+		static cfghash *instance(void)
 		{
-			_cfghash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new cfghash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(Display *dpy, GLXFBConfig c, VisualID vid)
@@ -68,6 +73,11 @@ class cfghash : public _cfghash
 
 	private:
 
+		~cfghash(void)
+		{
+			_cfghash::killhash();
+		}
+
 		VisualID attach(char *key1, int cfgid) {return 0;}
 
 		bool compare(char *key1, int key2, _cfghashstruct *h)
@@ -79,4 +89,14 @@ class cfghash : public _cfghash
 		{
 			if(h && h->key1) free(h->key1);
 		}
+
+		static cfghash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+cfghash *cfghash::_Instanceptr=NULL;
+rrcs cfghash::_Instancemutex;
+#endif
+
+#define cfgh (*(cfghash::instance()))

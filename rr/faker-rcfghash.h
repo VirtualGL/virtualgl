@@ -35,10 +35,17 @@ class rcfghash : public _rcfghash
 {
 	public:
 
-		~rcfghash(void)
+		static rcfghash *instance(void)
 		{
-			_rcfghash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new rcfghash;
+			}
+			return _Instanceptr;
 		}
+
+ public:
 
 		void add(Display *dpy, GLXFBConfig c)
 		{
@@ -64,6 +71,11 @@ class rcfghash : public _rcfghash
 
 	private:
 
+		~rcfghash(void)
+		{
+			_rcfghash::killhash();
+		}
+
 		VisualID attach(char *key1, GLXFBConfig c) {return 0;}
 
 		bool compare(char *key1, GLXFBConfig key2, _rcfghashstruct *h)
@@ -75,4 +87,14 @@ class rcfghash : public _rcfghash
 		{
 			if(h && h->key1) free(h->key1);
 		}
+
+		static rcfghash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+rcfghash *rcfghash::_Instanceptr=NULL;
+rrcs rcfghash::_Instancemutex;
+#endif
+
+#define rcfgh (*(rcfghash::instance()))

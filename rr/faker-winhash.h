@@ -34,9 +34,14 @@ class winhash : public _winhash
 {
 	public:
 
-		~winhash(void)
+		static winhash *instance(void)
 		{
-			_winhash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new winhash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(Display *dpy, Window win)
@@ -111,6 +116,11 @@ class winhash : public _winhash
 
 	private:
 
+		~winhash(void)
+		{
+			_winhash::killhash();
+		}
+
 		pbwin *attach(char *key1, Window key2) {return NULL;}
 
 		void detach(_winhashstruct *h)
@@ -129,4 +139,14 @@ class winhash : public _winhash
 				(key1 && !strcasecmp(key1, h->key1) && key2==h->key2)
 			);
 		}
+
+		static winhash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+winhash *winhash::_Instanceptr=NULL;
+rrcs winhash::_Instancemutex;
+#endif
+
+#define winh (*(winhash::instance()))

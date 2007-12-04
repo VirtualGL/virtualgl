@@ -35,9 +35,14 @@ class vishash : public _vishash
 {
 	public:
 
-		~vishash(void)
+		static vishash *instance(void)
 		{
-			_vishash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new vishash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(Display *dpy, XVisualInfo *vis, GLXFBConfig _localc)
@@ -78,6 +83,11 @@ class vishash : public _vishash
 
 	private:
 
+		~vishash(void)
+		{
+			_vishash::killhash();
+		}
+
 		GLXFBConfig attach(char *key1, XVisualInfo *key2) {return NULL;}
 
 		bool compare(char *key1, XVisualInfo *key2, _vishashstruct *h)
@@ -89,4 +99,14 @@ class vishash : public _vishash
 		{
 			if(h && h->key1) free(h->key1);
 		}
+
+		static vishash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+vishash *vishash::_Instanceptr=NULL;
+rrcs vishash::_Instancemutex;
+#endif
+
+#define vish (*(vishash::instance()))

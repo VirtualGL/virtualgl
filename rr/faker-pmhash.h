@@ -34,9 +34,14 @@ class pmhash : public _pmhash
 {
 	public:
 
-		~pmhash(void)
+		static pmhash *instance(void)
 		{
-			_pmhash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new pmhash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(Display *dpy, Pixmap pm, pbuffer *pb)
@@ -61,6 +66,11 @@ class pmhash : public _pmhash
 
 	private:
 
+		~pmhash(void)
+		{
+			_pmhash::killhash();
+		}
+
 		pbuffer *attach(char *key1, Pixmap key2) {return NULL;}
 
 		void detach(_pmhashstruct *h)
@@ -77,4 +87,14 @@ class pmhash : public _pmhash
 					|| (pb && key2==pb->drawable())))
 			);
 		}
+
+		static pmhash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+pmhash *pmhash::_Instanceptr=NULL;
+rrcs pmhash::_Instancemutex;
+#endif
+
+#define pmh (*(pmhash::instance()))

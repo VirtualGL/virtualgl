@@ -23,6 +23,7 @@
 #include "rrmutex.h"
 #define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
+#define __FAKERHASH_STATICDEF__
 #include "faker-winhash.h"
 #include "faker-ctxhash.h"
 #include "faker-vishash.h"
@@ -85,10 +86,6 @@ static inline int _drawingtoright(void)
 }
 
 static rrcs globalmutex;
-winhash *_winh=NULL;  ctxhash ctxh;  vishash vish;
-	cfghash cfgh;  rcfghash rcfgh;  pmhash pmh;  glxdhash glxdh;
-#define winh (*(_winh?_winh:(_winh=new winhash())))
-
 static int __shutdown=0;
 
 static inline int isdead(void)
@@ -108,7 +105,7 @@ static void __vgl_cleanup(void)
 	rcfgh.killhash();
 	ctxh.killhash();
 	glxdh.killhash();
-	if(_winh) _winh->killhash();
+	winh.killhash();
 	__vgl_unloadsymbols();
 }
 
@@ -208,7 +205,6 @@ void __vgl_fakerinit(void)
 	fconfig.reloadenv();
 	if(fconfig.log) rrout.logto(fconfig.log);
 
-	if(!_winh) errifnot(_winh=new winhash())
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
 	{
