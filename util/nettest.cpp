@@ -17,11 +17,102 @@
 #include "rrsocket.h"
 #include "rrutil.h"
 #include "rrtimer.h"
-
+#ifdef sun
+#include <kstat.h>
+#endif
 #define PORT 1972
 #define MINDATASIZE 1
 #define MAXDATASIZE (4*1024*1024)
 #define ITER 5
+
+#if defined(sun)||defined(linux)
+void benchmark(int interval, char *ifname)
+{
+	double rMbits=0., wMbits=0.;
+	unsigned long long rbytes=0, wbytes=0;
+
+	#ifdef sun
+
+	kstat_ctl_t *kc=NULL;
+	kstat_t *kif=NULL;
+	if((kc=kstat_open())==NULL) {_throwunix();}
+	if((kif=kstat_lookup(kc, NULL, -1, ifname))==NULL) {_throwunix();}
+
+	#elif defined(linux)
+
+	FILE *f=NULL;
+	if((f=fopen("/proc/net/dev", "r"))==NULL)
+		_throw("Could not open /proc/net/dev");
+
+	#endif
+
+	double tStart=rrtime();
+	for(;;)
+	{
+		double tEnd=rrtime();
+
+		#ifdef sun
+
+		kstat_named_t *data=NULL;
+		if(kstat_read(kc, kif, NULL)<0) _throwunix();
+		if((data=(kstat_named_t *)kstat_data_lookup(kif, "rbytes64"))==NULL)
+			_throwunix();
+		if(rbytes!=0)
+		{
+			if(rbytes>data->value.ui64)
+				rMbits+=((double)data->value.ui64+4294967296.-(double)rbytes)*8./1000000.;
+			else
+				rMbits+=((double)data->value.ui64-(double)rbytes)*8./1000000.;
+		}
+		rbytes=data->value.ui64;
+		if((data=(kstat_named_t *)kstat_data_lookup(kif, "obytes64"))==NULL)
+			_throwunix();
+		if(wbytes!=0)
+		{
+			if(wbytes>data->value.ui64)
+				wMbits+=((double)data->value.ui64+4294967296.-(double)wbytes)*8./1000000.;
+			else
+				wMbits+=((double)data->value.ui64-(double)wbytes)*8./1000000.;
+		}
+		wbytes=data->value.ui64;
+
+		#elif defined(linux)
+
+		char temps[1024];
+		if(fseek(f, 0, SEEK_SET)!=0) _throwunix();
+		bool read=false;
+		while(fgets(temps, 1024, f))
+		{
+			unsigned long long dummy[16];  char ifstr[80], *ptr;
+			if((ptr=strchr(temps, ':'))!=NULL) *ptr=' ';
+			if(sscanf(temps,
+				"%s %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
+				ifstr, &dummy[0], &dummy[1], &dummy[2], &dummy[3], &dummy[4],
+				&dummy[5], &dummy[6], &dummy[7], &dummy[8], &dummy[9], &dummy[10],
+				&dummy[11], &dummy[12], &dummy[13], &dummy[14], &dummy[15])
+				==17 && !strcmp(ifname, ifstr))
+			{
+				if(rbytes!=0) rMbits+=((double)dummy[0]-(double)rbytes)*8./1000000.;
+				if(wbytes!=0) wMbits+=((double)dummy[8]-(double)wbytes)*8./1000000.;
+				rbytes=dummy[0];  wbytes=dummy[8];  read=true;
+			}
+		}
+		if(!read) _throw("Cannot parse statistics for requested interface from /proc/net/dev.");
+
+		#endif
+
+		if((tEnd-tStart)>=interval)
+		{
+			printf("Read: %f Mbps   Write: %f Mbps   Total: %f Mbps\n",
+				rMbits/(tEnd-tStart), wMbits/(tEnd-tStart),
+				(rMbits+wMbits)/(tEnd-tStart));
+			rMbits=wMbits=0.;
+			tStart=tEnd;
+		}
+		usleep(500000);
+	}
+}
+#endif
 
 void initbuf(char *buf, int len)
 {
@@ -36,23 +127,44 @@ int cmpbuf(char *buf, int len)
 	return 1;
 }
 
+void usage(char **argv)
+{
+	printf("USAGE: %s -client <server name or IP>", argv[0]);
+	#ifdef USESSL
+	printf(" [-ssl]");
+	#endif
+	printf("\n or    %s -server", argv[0]);
+	#ifdef USESSL
+	printf(" [-ssl]");
+	#endif
+	printf("\n or    %s -findport\n", argv[0]);
+	#if defined(sun)||defined(linux)
+	printf(" or    %s -bench <interface> [interval]\n", argv[0]);
+	printf("\n-bench = measure throughput on selected network interface");
+	#endif
+	printf("\n-findport = display a free TCP port number and exit\n");
+	#ifdef USESSL
+	printf("-ssl = use secure tunnel\n");
+	#endif
+	exit(1);
+}
+
 int main(int argc, char **argv)
 {
-	int server;  char *servername=NULL;
+	int server=0;  char *servername=NULL;
 	char *buf;  int i, j;
 	bool dossl=false;
 	rrtimer timer;
-
-	#ifdef USESSL
-	#define usage() {printf("USAGE: %s -client <server name or IP> [-ssl]\n or    %s -server [-ssl]\n or    %s -findport\n\n-ssl = use secure tunnel\n-findport = display a free TCP port number and exit\n", argv[0], argv[0], argv[0]);  exit(1);}
-	#else
-	#define usage() {printf("USAGE: %s -client <server name or IP>\n or    %s -server\n or    %s -findport\n\n-findport = display a free TCP port number and exit\n", argv[0], argv[0], argv[0]);  exit(1);}
+	#if defined(sun)||defined(linux)
+	int interval=2;
 	#endif
 
-	if(argc<2) usage();
+	try {
+
+	if(argc<2) usage(argv);
 	if(!stricmp(argv[1], "-client"))
 	{
-		if(argc<3) usage();
+		if(argc<3) usage(argv);
 		server=0;  servername=argv[2];
 		#ifdef USESSL
 		if(argc>3 && !stricmp(argv[3], "-ssl"))
@@ -80,9 +192,18 @@ int main(int argc, char **argv)
 		sd.close();
 		exit(0);
 	}
-	else usage();
-
-	try {
+	#if defined(sun)||defined(linux)
+	else if(!stricmp(argv[1], "-bench"))
+	{
+		int _interval;
+		if(argc<3) usage(argv);
+		if(argc>3 && ((_interval=atoi(argv[3]))>0))
+			interval=_interval;
+		benchmark(interval, argv[2]);
+		exit(0);
+	}
+	#endif
+	else usage(argv);
 
 	rrsocket sd(dossl);
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)

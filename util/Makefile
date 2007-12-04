@@ -96,8 +96,14 @@ clean:
 $(LDIR)/librrutil.a: $(ODIR)/rrlog.o $(ODIR)/genericQ.o $(ODIR)/bmp.o
 	$(AR) $@ $^
 
+ifeq ($(platform), solaris)
+KSTAT = -lkstat
+endif
+ifeq ($(platform), solx86)
+KSTAT = -lkstat
+endif
 $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a
-	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB)
+	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB) $(KSTAT)
 
 $(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a
 	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB) -lpthread
