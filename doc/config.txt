@@ -23,7 +23,7 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-cl ''__''{c}''__ |
 | Summary | __''{c}''__ = the hostname or IP address of the VirtualGL client \
 	machine or Sun Ray server |
-| Image Transports | VGL |
+| Image Transports | Sun Ray, VGL |
 | Default Value | Automatically set by ''vglconnect'' or ''vglrun'' |
 #OPT: hiCol=first
 
