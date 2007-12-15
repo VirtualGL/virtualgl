@@ -33,9 +33,14 @@ class ctxhash : public _ctxhash
 {
 	public:
 
-		~ctxhash(void)
+		static ctxhash *instance(void)
 		{
-			_ctxhash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new ctxhash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(GLXContext ctx, GLXFBConfig config)
@@ -69,9 +74,24 @@ class ctxhash : public _ctxhash
 
 	private:
 
+		~ctxhash(void)
+		{
+			_ctxhash::killhash();
+		}
+
 		GLXFBConfig attach(GLXContext key1, void *key2) {return NULL;}
 
 		void detach(_ctxhashstruct *h) {}
 
 		bool compare(GLXContext key1, void *key2, _ctxhashstruct *h) {return false;}
+
+		static ctxhash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+ctxhash *ctxhash::_Instanceptr=NULL;
+rrcs ctxhash::_Instancemutex;
+#endif
+
+#define ctxh (*(ctxhash::instance()))

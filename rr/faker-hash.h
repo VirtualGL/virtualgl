@@ -31,17 +31,6 @@ class _hashclass
 {
 	public:
 
-		_hashclass(void)
-		{
-			start=end=NULL;
-			entries=0;
-		}
-
-		virtual ~_hashclass(void)
-		{
-			killhash();
-		}
-
 		void killhash(void)
 		{
 			rrcs::safelock l(mutex);
@@ -97,6 +86,17 @@ class _hashclass
 		int numEntries(void) {return entries;}
 
 	protected:
+
+		_hashclass(void)
+		{
+			start=end=NULL;
+			entries=0;
+		}
+
+		virtual ~_hashclass(void)
+		{
+			killhash();
+		}
 
 		_hashclassstruct *findentry(_hashkeytype1 key1, _hashkeytype2 key2)
 		{

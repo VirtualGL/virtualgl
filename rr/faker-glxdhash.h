@@ -36,9 +36,14 @@ class glxdhash : public _glxdhash
 {
 	public:
 
-		~glxdhash(void)
+		static glxdhash *instance(void)
 		{
-			_glxdhash::killhash();
+			if(_Instanceptr==NULL)
+			{
+				rrcs::safelock l(_Instancemutex);
+				if(_Instanceptr==NULL) _Instanceptr=new glxdhash;
+			}
+			return _Instanceptr;
 		}
 
 		void add(GLXDrawable d, Display *dpy)
@@ -61,6 +66,11 @@ class glxdhash : public _glxdhash
 
 	private:
 
+		~glxdhash(void)
+		{
+			_glxdhash::killhash();
+		}
+
 		Display *attach(GLXDrawable key1, void *key2) {return NULL;}
 
 		bool compare(GLXDrawable key1, void *key2, _glxdhashstruct *h)
@@ -69,4 +79,14 @@ class glxdhash : public _glxdhash
 		}
 
 		void detach(_glxdhashstruct *h) {}
+
+		static glxdhash *_Instanceptr;
+		static rrcs _Instancemutex;
 };
+
+#ifdef __FAKERHASH_STATICDEF__
+glxdhash *glxdhash::_Instanceptr=NULL;
+rrcs glxdhash::_Instancemutex;
+#endif
+
+#define glxdh (*(glxdhash::instance()))
