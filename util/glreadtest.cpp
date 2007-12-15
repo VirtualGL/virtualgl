@@ -49,7 +49,7 @@ typedef struct _pixelformat
 	const char *name;
 } pixelformat;
 
-static int FORMATS=3
+static int FORMATS=4
  #ifdef GL_BGRA_EXT
  +1
  #endif
@@ -61,7 +61,7 @@ static int FORMATS=3
  #endif
  ;
 
-pixelformat pix[3
+pixelformat pix[4
  #ifdef GL_BGRA_EXT
  +1
  #endif
@@ -73,6 +73,7 @@ pixelformat pix[3
  #endif
  ]={
 	{0, 0, 0, 1, GL_LUMINANCE, 0, "LUM"},
+	{0, 0, 0, 1, GL_RED, 0, "RED"},
 	#ifdef GL_BGRA_EXT
 	{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
 	#endif
@@ -372,7 +373,8 @@ void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 		{
 			if(pix[format].glformat==GL_COLOR_INDEX)
 				buf[(i*w+j)*ps]=((i+y)*(j+x))%32;
-			else if(pix[format].glformat==GL_LUMINANCE)
+			else if(pix[format].glformat==GL_LUMINANCE
+				|| pix[format].glformat==GL_RED)
 				buf[(i*w+j)*ps]=((i+y)*(j+x))%256;
 			else
 			{
@@ -396,7 +398,8 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassa
 			{
 				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%32) return 0;
 			}
-			else if(pix[format].glformat==GL_LUMINANCE)
+			else if(pix[format].glformat==GL_LUMINANCE
+				|| pix[format].glformat==GL_RED)
 			{
 				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%256) return 0;
 			}
