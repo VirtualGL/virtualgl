@@ -100,8 +100,7 @@
 	|
 | HyperWorks v8 (Altair) | Linux/x86-64 \
 	| ''vglrun -dl ''__''{application script}''__ \
-	| See {ref prefix="Chapter ": dlopen} for more details.  Note that \
-		HyperWorks will not work with VirtualGL 2.1 and earlier. \
+	| See {ref prefix="Chapter ": dlopen} for more details. \
 	|
 | I-deas Master Series 9, 10, & 11 | Solaris/Sparc \
 	| When running I-deas with VirtualGL on a Solaris/Sparc server, remotely \
