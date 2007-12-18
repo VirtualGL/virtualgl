@@ -45,6 +45,8 @@ class vishash : public _vishash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(Display *dpy, XVisualInfo *vis, GLXFBConfig _localc)
 		{
 			if(!dpy || !vis || !_localc) _throw("Invalid argument");

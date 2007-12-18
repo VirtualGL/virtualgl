@@ -45,6 +45,8 @@ class cfghash : public _cfghash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(Display *dpy, GLXFBConfig c, VisualID vid)
 		{
 			if(!dpy || !vid || !c) _throw("Invalid argument");

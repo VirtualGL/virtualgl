@@ -44,6 +44,8 @@ class winhash : public _winhash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(Display *dpy, Window win)
 		{
 			if(!dpy || !win) _throw("Invalid argument");

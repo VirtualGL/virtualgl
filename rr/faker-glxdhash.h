@@ -46,6 +46,8 @@ class glxdhash : public _glxdhash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(GLXDrawable d, Display *dpy)
 		{
 			if(!d || !dpy) _throw("Invalid argument");
