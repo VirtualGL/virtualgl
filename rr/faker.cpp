@@ -99,13 +99,13 @@ static inline int isdead(void)
 
 static void __vgl_cleanup(void)
 {
-	pmh.killhash();
-	vish.killhash();
-	cfgh.killhash();
-	rcfgh.killhash();
-	ctxh.killhash();
-	glxdh.killhash();
-	winh.killhash();
+	if(pmhash::isalloc()) pmh.killhash();
+	if(vishash::isalloc()) vish.killhash();
+	if(cfghash::isalloc()) cfgh.killhash();
+	if(rcfghash::isalloc()) rcfgh.killhash();
+	if(ctxhash::isalloc()) ctxh.killhash();
+	if(glxdhash::isalloc()) glxdh.killhash();
+	if(winhash::isalloc()) winh.killhash();
 	__vgl_unloadsymbols();
 }
 

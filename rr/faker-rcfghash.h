@@ -45,6 +45,8 @@ class rcfghash : public _rcfghash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
  public:
 
 		void add(Display *dpy, GLXFBConfig c)

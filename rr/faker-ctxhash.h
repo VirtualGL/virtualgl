@@ -43,6 +43,8 @@ class ctxhash : public _ctxhash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(GLXContext ctx, GLXFBConfig config)
 		{
 			if(!ctx || !config) _throw("Invalid argument");

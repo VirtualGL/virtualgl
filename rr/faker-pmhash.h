@@ -44,6 +44,8 @@ class pmhash : public _pmhash
 			return _Instanceptr;
 		}
 
+		static bool isalloc(void) {return (_Instanceptr!=NULL);}
+
 		void add(Display *dpy, Pixmap pm, pbuffer *pb)
 		{
 			if(!dpy || !pm) _throw("Invalid argument");

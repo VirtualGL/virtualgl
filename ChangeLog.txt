@@ -86,6 +86,10 @@ Added a -bench option to nettest to allow it to measure actual usage on a
 given Solaris or Linux network device.  This was necessitated by accuracy
 issues with other open source network monitoring solutions.
 -------------------------------------------------------------------------------
+[18]
+Change the way global hash tables are allocated in VGL in order to fix an
+interaction issue with applications that are built with MainWin.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
