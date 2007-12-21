@@ -28,11 +28,16 @@
 #ifdef _WIN32
 #include <psapi.h>
 #else
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#include <sys/proc.h>
+#else
 #include <dirent.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #ifdef sun
 #include <procfs.h>
+#endif
 #endif
 #endif
 
@@ -172,6 +177,42 @@ void killproc(bool useronly)
 		throw;
 	}
 	#else
+	#ifdef __APPLE__
+	unsigned char *buf=NULL;
+
+	if(!useronly && getuid()!=0) _throw("Only root can do that");
+
+	try
+	{
+		int mib_all[4]={CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0};
+		int mib_user[4]={CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid()};
+		size_t len=0;
+
+		tryunix(sysctl(useronly? mib_user:mib_all, 4, NULL, &len, NULL, 0));
+		if(len<sizeof(kinfo_proc)) _throw("Process table is empty");
+		errifnot(buf=new unsigned char[len]);
+		tryunix(sysctl(useronly? mib_user:mib_all, 4, buf, &len, NULL, 0));
+		int nprocs=len/sizeof(kinfo_proc);
+		kinfo_proc *kp=(kinfo_proc *)buf;
+
+		for(int i=0; i<nprocs; i++)
+		{
+			int pid=kp[i].kp_proc.p_pid;
+			if(!strcmp(kp[i].kp_proc.p_comm, "vglclient")
+				&& pid!=getpid())
+			{
+				rrout.println("Terminating vglclient process %d", pid);
+				kill(pid, SIGTERM);
+			}
+		}
+		free(buf);  buf=NULL;
+	}
+	catch (...)
+	{
+		if(buf) free(buf);
+		throw;
+	}
+	#else
 	DIR *procdir=NULL;  struct dirent *dent=NULL;  int fd=-1;
 
 	if(!useronly && getuid()!=0) _throw("Only root can do that");
@@ -236,6 +277,7 @@ void killproc(bool useronly)
 	{
 		if(fd) close(fd);  if(procdir) closedir(procdir);  throw;
 	}
+	#endif
 	#endif
 }
 
