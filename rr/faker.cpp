@@ -893,7 +893,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// map it to a Pbuffer
 	if(dpy && drawable && ctx)
 	{
-		errifnot(config);
+		if(!config)
+			_throw("Unexpected NULL condition.  App may be trying to make a dead context current.");
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 			drawable=pbw->updatedrawable();
@@ -1062,7 +1063,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	pbwin *drawpbw, *readpbw;
 	if(dpy && (draw || read) && ctx)
 	{
-		errifnot(config);
+		if(!config)
+			_throw("Unexpected NULL condition.  App may be trying to make a dead context current.");
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		if(drawpbw)
