@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes between 2.1 beta1 and 2.1 final
+Significant changes since 2.1 beta1
 ===============================================================================
 [1]
 Windows applications now link statically with OpenSSL to avoid dependency on
@@ -89,6 +89,9 @@ issues with other open source network monitoring solutions.
 [18]
 Change the way global hash tables are allocated in VGL in order to fix an
 interaction issue with applications that are built with MainWin.
+-------------------------------------------------------------------------------
+[12]
+vglclient -kill now works properly on Mac systems.
 -------------------------------------------------------------------------------
 
 
