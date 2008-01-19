@@ -324,7 +324,7 @@ Fl_Menu_Item compmenu[]=
 	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
 	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
 	{"DPCM (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SR},
-	{"RGB (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRLOSSLESS},
+	{"RGB (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRRGB},
 	{0, 0, 0, 0}
 };
 

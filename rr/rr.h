@@ -99,7 +99,7 @@ enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_SR};
 
 /* Compression types */
 #define RR_COMPRESSOPT  5
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_SR, RRCOMP_SRLOSSLESS};
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_SR, RRCOMP_SRRGB};
 
 static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {

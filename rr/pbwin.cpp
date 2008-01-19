@@ -385,7 +385,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			break;
 
 		case RRCOMP_SR:
-		case RRCOMP_SRLOSSLESS:
+		case RRCOMP_SRRGB:
 			if(sendsr(drawbuf, spoillast, dostereo,	stereomode)==-1)
 			sendx11(drawbuf, spoillast, sync, dostereo, stereomode, true);
 	}
