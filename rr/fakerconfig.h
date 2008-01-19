@@ -379,7 +379,8 @@ class FakerConfig
 				else if(!strnicmp(env, "j", 1)) compress(RRCOMP_JPEG);
 				else if(!strnicmp(env, "r", 1)) compress(RRCOMP_RGB);
 				else if(!stricmp(env, "sr")) compress(RRCOMP_SR);
-				else if(!strnicmp(env, "srl", 3)) compress(RRCOMP_SRLOSSLESS);
+				else if(!strnicmp(env, "srl", 3)) compress(RRCOMP_SRRGB);
+				else if(!strnicmp(env, "srr", 3)) compress(RRCOMP_SRRGB);
 			}
 			config.get("VGL_CONFIG");
 			config64.get("VGL_CONFIG64");
@@ -393,7 +394,7 @@ class FakerConfig
 			if((env=subsamp.envget("VGL_SUBSAMP"))!=NULL)
 			{
 				if(!strnicmp(env, "G", 1)) subsamp=0;
-				else if(!strnicmp(env, "L", 1)) compress(RRCOMP_SRLOSSLESS);
+				else if(!strnicmp(env, "L", 1)) compress(RRCOMP_SRRGB);
 				else
 				{
 					char *t=NULL;  int itemp=strtol(env, &t, 10);
