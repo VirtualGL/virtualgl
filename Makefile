@@ -265,7 +265,7 @@ macpkg: rr diags mesademos
 	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
 	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/${APPNAME}"
 	mkdir -p $(BLDDIR)/pkgbuild/Resources
-	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
+	cat Description.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/Description.plist
 	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
 	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
 	install -m 755 $(EDIR)/vglconnect $(BLDDIR)/pkgbuild/Package_Root/usr/bin
@@ -283,7 +283,7 @@ macpkg: rr diags mesademos
 	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
 	$(PACKAGEMAKER) -build -v -p $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
 	  -f $(BLDDIR)/pkgbuild/Package_Root -r $(BLDDIR)/pkgbuild/Resources \
-	  -i $(BLDDIR)/pkgbuild/Info.plist -d $(BLDDIR)/pkgbuild/$(APPNAME).info
+	  -i $(BLDDIR)/pkgbuild/Info.plist -d $(BLDDIR)/pkgbuild/Description.plist
 	sudo rm -rf $(BLDDIR)/pkgbuild
 	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
 	  -srcfolder $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
