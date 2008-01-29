@@ -291,7 +291,7 @@ macpkg: rr diags mesademos
 	sudo rm -rf $$TMPDIR
 	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
 	  -srcfolder $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
-	  $(BLDDIR)/$(APPNAME)-$(VERSION).dmg
+	  $(BLDDIR)/$(APPNAME).dmg
 	rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg
 
 .PHONY: tarball
