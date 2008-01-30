@@ -256,7 +256,7 @@ endif
 
 macpkg: rr diags mesademos
 	if [ -d $(BLDDIR)/$(APPNAME)-$(VERSION).pkg ]; then rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg; fi
-	if [ -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg ]; then rm -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg; fi
+	if [ -f $(BLDDIR)/$(APPNAME).dmg ]; then rm -f $(BLDDIR)/$(APPNAME).dmg; fi
 	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
 	mkdir -p $$TMPDIR/Package_Root/usr/bin; \
 	mkdir -p $$TMPDIR/Package_Root/opt/VirtualGL/bin; \
