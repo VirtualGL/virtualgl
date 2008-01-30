@@ -199,7 +199,13 @@ class ConfigString : public Config
 					{
 						temp=&temp[i];  break;
 					}
-				if(strlen(temp)>0) set(temp);
+				if(strlen(temp)>0)
+				{ 	 
+					for(int i=0; i<(int)strlen(temp); i++) 	 
+						if(temp[i]==' ' || temp[i]=='\t')
+							{temp[i]='\0';  break;}
+					set(temp); 	 
+				}
 			}
 		}
 

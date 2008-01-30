@@ -168,7 +168,7 @@ $(EDIR)/vglclient: $(COBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY) -ldl
 else
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY)
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY) $(OSXGLFIX)
 endif
 
 $(EDIR)/vglconnect: vglconnect
@@ -177,7 +177,7 @@ $(EDIR)/vglconnect: vglconnect
 # Unit tests
 
 $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
-	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL $(OSXGLFIX)
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread

@@ -256,38 +256,42 @@ endif
 
 macpkg: rr diags mesademos
 	if [ -d $(BLDDIR)/$(APPNAME)-$(VERSION).pkg ]; then rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg; fi
-	if [ -d $(BLDDIR)/pkgbuild ]; then sudo rm -rf $(BLDDIR)/pkgbuild; fi
 	if [ -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg ]; then rm -f $(BLDDIR)/$(APPNAME)-$(VERSION).dmg; fi
-	mkdir -p $(BLDDIR)/pkgbuild
-	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/usr/bin
-	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
-	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
-	mkdir -p $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
-	mkdir -p "$(BLDDIR)/pkgbuild/Package_Root/Applications/${APPNAME}"
-	mkdir -p $(BLDDIR)/pkgbuild/Resources
-	cat macpkg.info.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $(BLDDIR)/pkgbuild/$(APPNAME).info
-	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $(BLDDIR)/pkgbuild/Info.plist
-	install -m 755 $(EDIR)/vglclient $(BLDDIR)/pkgbuild/Package_Root/usr/bin
-	install -m 755 $(EDIR)/vglconnect $(BLDDIR)/pkgbuild/Package_Root/usr/bin
-	install -m 755 $(EDIR)/tcbench $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
-	install -m 755 $(EDIR)/nettest $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
-	install -m 755 $(EDIR)/glxinfo $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin
-	ln -fs /usr/bin/vglclient $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin/vglclient
-	ln -fs /usr/bin/vglconnect $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/bin/vglconnect
-	install -m 755 /usr/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/opt/VirtualGL/lib
-	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $(BLDDIR)/pkgbuild/Package_Root/usr/bin/vglclient
-	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $(BLDDIR)/pkgbuild/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)
-	install -m 644 ReadMe-MacApp.txt "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/Read Me.txt"
-	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$(BLDDIR)/pkgbuild/Package_Root/Applications/$(APPNAME)/User's Guide.html"
-	sudo chown -R root:admin $(BLDDIR)/pkgbuild/Package_Root
-	cp License.rtf Welcome.rtf ReadMe.rtf $(BLDDIR)/pkgbuild/Resources/
+	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
+	mkdir -p $$TMPDIR/Package_Root/usr/bin; \
+	mkdir -p $$TMPDIR/Package_Root/opt/VirtualGL/bin; \
+	mkdir -p $$TMPDIR/Package_Root/opt/VirtualGL/lib; \
+	mkdir -p $$TMPDIR/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
+	chmod 1775 $$TMPDIR/Package_Root/Library; \
+	chmod 775 $$TMPDIR/Package_Root/Library/Documentation; \
+	mkdir -p "$$TMPDIR/Package_Root/Applications/${APPNAME}"; \
+	chmod 775 $$TMPDIR/Package_Root/Applications; \
+	mkdir -p $$TMPDIR/Resources; \
+	cat Description.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $$TMPDIR/Description.plist; \
+	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $$TMPDIR/Info.plist; \
+	install -m 755 $(EDIR)/vglclient $$TMPDIR/Package_Root/usr/bin; \
+	install -m 755 $(EDIR)/vglconnect $$TMPDIR/Package_Root/usr/bin; \
+	install -m 755 $(EDIR)/tcbench $$TMPDIR/Package_Root/opt/VirtualGL/bin; \
+	install -m 755 $(EDIR)/nettest $$TMPDIR/Package_Root/opt/VirtualGL/bin; \
+	install -m 755 $(EDIR)/glxinfo $$TMPDIR/Package_Root/opt/VirtualGL/bin; \
+	ln -fs /usr/bin/vglclient $$TMPDIR/Package_Root/opt/VirtualGL/bin/vglclient; \
+	ln -fs /usr/bin/vglconnect $$TMPDIR/Package_Root/opt/VirtualGL/bin/vglconnect; \
+	install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/Package_Root/opt/VirtualGL/lib; \
+	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/Package_Root/usr/bin/vglclient; \
+	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $$TMPDIR/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
+	install -m 644 ReadMe-MacApp.txt "$$TMPDIR/Package_Root/Applications/$(APPNAME)/Read Me.txt"; \
+	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$$TMPDIR/Package_Root/Applications/$(APPNAME)/User's Guide.html"; \
+	sudo chown -R root:admin $$TMPDIR/Package_Root; \
+	sudo chown root:0 $$TMPDIR/Package_Root/usr; \
+	sudo chown root:0 $$TMPDIR/Package_Root/usr/bin; \
+	cp License.rtf Welcome.rtf ReadMe.rtf $$TMPDIR/Resources/; \
 	$(PACKAGEMAKER) -build -v -p $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
-	  -f $(BLDDIR)/pkgbuild/Package_Root -r $(BLDDIR)/pkgbuild/Resources \
-	  -i $(BLDDIR)/pkgbuild/Info.plist -d $(BLDDIR)/pkgbuild/$(APPNAME).info
-	sudo rm -rf $(BLDDIR)/pkgbuild
+	  -f $$TMPDIR/Package_Root -r $$TMPDIR/Resources \
+	  -i $$TMPDIR/Info.plist -d $$TMPDIR/Description.plist; \
+	sudo rm -rf $$TMPDIR
 	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
 	  -srcfolder $(BLDDIR)/$(APPNAME)-$(VERSION).pkg \
-	  $(BLDDIR)/$(APPNAME)-$(VERSION).dmg
+	  $(BLDDIR)/$(APPNAME).dmg
 	rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg
 
 .PHONY: tarball

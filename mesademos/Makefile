@@ -44,7 +44,7 @@ $(ODIR)/glthreadsint.o: $(ODIR)/%.o: %.c
 
 $(EDIR)/glthreads \
 $(EDIR)/glthreadsint: $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lpthread -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lpthread -lm $(OSXGLFIX)
 
 ifeq ($(platform), solaris)
 $(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
@@ -55,12 +55,12 @@ $(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
 	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm -lXmu
 else
 $(EDIR)/glxinfo: $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm $(OSXGLFIX)
 endif
 endif
 
 $(EDIR)/offset: $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lGLU -lm $(OSXGLFIX)
 
 $(EDIR)/glxgears \
 $(EDIR)/glxdemo \
@@ -71,14 +71,14 @@ $(EDIR)/shape \
 $(EDIR)/testgl5 \
 $(EDIR)/wincopy \
 $(EDIR)/xfont : $(EDIR)/%: $(ODIR)/%.o
-	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm
+	$(CC) $(LDFLAGS) -o $@ $< -lGL -lX11 -lXext -lm $(OSXGLFIX)
 
 $(EDIR)/pbdemo \
 $(EDIR)/pbinfo: $(EDIR)/%: $(ODIR)/%.o $(ODIR)/pbutil.o
-	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lX11 -lm
+	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lX11 -lm $(OSXGLFIX)
 
 $(EDIR)/glxspheres: $(ODIR)/glxspheres.o
-	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lGLU -lX11 -lm
+	$(CC) $(LDFLAGS) -o $@ $^ -lGL -lGLU -lX11 -lm $(OSXGLFIX)
 
 ##########################################################################
 endif
