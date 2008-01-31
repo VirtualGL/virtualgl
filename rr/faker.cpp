@@ -459,10 +459,10 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 	}
 	else if(xe && xe->type==KeyPress)
 	{
-		unsigned int state2;
-		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=Mod1Mask;  state2|=Mod2Mask;}
+		unsigned int state2, state=(xe->xkey.state)&(~(LockMask));
+		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=(~(Mod1Mask));  state2|=Mod2Mask;}
 		if(fconfig.gui && XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
-			&& (xe->xkey.state==fconfig.guimod || xe->xkey.state==state2)
+			&& (state==fconfig.guimod || state==state2)
 			&& FakerConfig::_Shmid!=-1)
 			vglpopup(dpy, FakerConfig::_Shmid);
 	}
