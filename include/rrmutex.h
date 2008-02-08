@@ -93,7 +93,13 @@ class rrevent
 		{
 			bool islocked=true;
 			#ifdef _WIN32
-			throw("rrevent::locked() not implemented on Windows");
+			DWORD dw=WaitForSingleObject(event, 0);
+			if(dw==WAIT_FAILED) throw(w32error("rrevent::locked"));
+			else if(dw==WAIT_OBJECT_0)
+			{
+				islocked=false;  SetEvent(event);
+			}
+			else if(dw==WAIT_TIMEOUT) islocked=true;
 			#else
 			int ret;
 			if((ret=pthread_mutex_lock(&event))!=0)

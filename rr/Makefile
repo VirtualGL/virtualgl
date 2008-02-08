@@ -15,16 +15,13 @@ COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrframe.obj \
         $(GLFOBJS)
 
-TOBJS = $(ODIR)/rrblitter.obj \
-        $(ODIR)/rrblitterut.obj \
-        $(ODIR)/rrdisplayclient.obj \
+TOBJS = $(ODIR)/rrdisplayclient.obj \
         $(ODIR)/rrdisplayclientut.obj \
         $(ODIR)/rrframeut.obj
 
 OBJS = $(COBJS) $(TOBJS)
 
-UNITTESTS = $(EDIR)/rrblitterut.exe \
-            $(EDIR)/rrdisplayclientut.exe \
+UNITTESTS = $(EDIR)/rrdisplayclientut.exe \
             $(EDIR)/rrframeut.exe
 
 TARGETS = $(EDIR)/vglclient.exe \
@@ -57,10 +54,6 @@ $(EDIR)/vglconnect.bat: vglconnect.bat
 
 $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
 	$(LINK) $(LDFLAGS) $< -out:$@ $(RRLIB) $(GLFOBJS) \
-		$(ODIR)/rrframe.obj
-
-$(EDIR)/rrblitterut.exe: $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj $(RRDEP)
-	$(LINK) $(LDFLAGS) $(ODIR)/rrblitterut.obj $(ODIR)/rrblitter.obj -out:$@ $(RRLIB) \
 		$(ODIR)/rrframe.obj
 
 $(EDIR)/rrdisplayclientut.exe: $(ODIR)/rrdisplayclientut.obj \

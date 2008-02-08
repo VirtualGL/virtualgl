@@ -91,8 +91,29 @@ class w32error : public rrerror
 				strncpy(_message, "Error in FormatMessage()", MLEN);
 		}
 
+		w32error(const char *method, DWORD lasterr) : rrerror(method, (char *)NULL)
+		{
+			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterr,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), _message, MLEN, NULL))
+				strncpy(_message, "Error in FormatMessage()", MLEN);
+		}
+
 		w32error(const char *method, int line) : rrerror(method, (char *)NULL, line)
 		{
+			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &_message[strlen(_message)],
+				MLEN-strlen(_message), NULL))
+				strncpy(_message, "Error in FormatMessage()", MLEN);
+		}
+
+		w32error(const char *method, int line, char *message) :
+			rrerror(method, (char *)NULL, line)
+		{
+			if(strlen(_message)<MLEN-2)
+			{
+				strncpy(&_message[strlen(_message)], message, MLEN-strlen(_message));
+				strcat(_message, ". ");
+			}
 			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &_message[strlen(_message)],
 				MLEN-strlen(_message), NULL))
@@ -101,6 +122,7 @@ class w32error : public rrerror
 };
 
 #define _throww32() throw(w32error(__FUNCTION__, __LINE__))
+#define _throww32m(message) throw(w32error(__FUNCTION__, __LINE__, message))
 #define tryw32(f) {if(!(f)) _throww32();}
 
 #endif
