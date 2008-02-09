@@ -328,8 +328,8 @@ int main(int argc, char **argv)
 {
 	int i;
 	WNDCLASSEX wndclass;  MSG msg;
-	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
-	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
+	int bw=GetSystemMetrics(SM_CXFRAME)*2;
+	int bh=GetSystemMetrics(SM_CYFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
 	DWORD winstyle=WS_OVERLAPPEDWINDOW | WS_VISIBLE;
 	int pixelformat=0;
 	PIXELFORMATDESCRIPTOR pfd =
@@ -339,7 +339,8 @@ int main(int argc, char **argv)
 		PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0,
 		PFD_MAIN_PLANE, 0, 0, 0, 0
 	};
-	int fullscreen=0, winwidth=width+bw, winheight=height+bw;
+	int fullscreen=0, winwidth=width+bw, winheight=height+bh;
+	RECT rect;
 
 	for(i=0; i<argc; i++)
 	{
@@ -360,7 +361,7 @@ int main(int argc, char **argv)
 		{
 			winwidth=GetSystemMetrics(SM_CXSCREEN);
 			winheight=GetSystemMetrics(SM_CYSCREEN);
-			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE	;
+			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE;
 			fullscreen=1;
 		}
 		if(!strnicmp(argv[i], "-s", 2))
@@ -389,7 +390,10 @@ int main(int argc, char **argv)
 	if(!(win=CreateWindowEx(0, "WGLspheres", "WGLspheres", winstyle, 0,  0,
 		winwidth, winheight, NULL, NULL, GetModuleHandle(NULL), NULL)))
 		_throww32("Cannot create window");
-	UpdateWindow(win);
+
+	GetClientRect(win, &rect);
+	fprintf(stderr, "Client area of window: %d x %d pixels\n",
+		rect.right-rect.left, rect.bottom-rect.top);
 
 	if(!(hdc=GetDC(win))) _throww32("Cannot create device context");
 
