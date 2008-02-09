@@ -1,6 +1,7 @@
 include ../Makerules
 
-TARGETS = $(EDIR)/wglspheres.exe \
+TARGETS = $(EDIR)/wglreadtest.exe \
+          $(EDIR)/wglspheres.exe \
           $(EDIR)/faker.dll
 
 FOBJS = $(ODIR)/faker.obj \
@@ -8,6 +9,7 @@ FOBJS = $(ODIR)/faker.obj \
         $(ODIR)/rrblitter.obj
 
 OBJS = $(FOBJS) \
+       $(ODIR)/wglreadtest.obj \
        $(ODIR)/wglspheres.obj
 
 all: $(TARGETS)
@@ -22,6 +24,9 @@ HDRS := $(wildcard ../include/*.h) $(wildcard *.h)
 $(OBJS): $(HDRS)
 
 $(EDIR)/wglspheres.exe: $(ODIR)/wglspheres.obj
+	$(LINK) $(LDFLAGS) $< -out:$@ opengl32.lib glu32.lib user32.lib gdi32.lib
+
+$(EDIR)/wglreadtest.exe: $(ODIR)/wglreadtest.obj
 	$(LINK) $(LDFLAGS) $< -out:$@ opengl32.lib glu32.lib user32.lib gdi32.lib
 
 $(EDIR)/faker.dll: $(FOBJS)
