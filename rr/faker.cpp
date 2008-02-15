@@ -894,7 +894,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(dpy && drawable && ctx)
 	{
 		if(!config)
-			_throw("Unexpected NULL condition.  App may be trying to make a dead context current.");
+		{
+			rrout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
+			return False;
+		}
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 			drawable=pbw->updatedrawable();
@@ -1064,7 +1067,10 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	if(dpy && (draw || read) && ctx)
 	{
 		if(!config)
-			_throw("Unexpected NULL condition.  App may be trying to make a dead context current.");
+		{
+			rrout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
+			return False;
+		}
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		if(drawpbw)
