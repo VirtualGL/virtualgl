@@ -406,6 +406,9 @@ int display(int advance)
 }
 
 
+Atom protoatom=0, deleteatom=0;
+
+
 int event_loop(Display *dpy)
 {
 	while (1)
@@ -443,6 +446,12 @@ int event_loop(Display *dpy)
 				case MotionNotify:
 					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
  					break;
+				case ClientMessage:
+				{
+					XClientMessageEvent *cme=(XClientMessageEvent *)&event;
+					if(cme->message_type==protoatom && cme->data.l[0]==deleteatom)
+						return 0;
+				}
 			}
 			if(interactive)
 			{
@@ -550,9 +559,14 @@ int main(int argc, char **argv)
 		width=DisplayWidth(dpy, DefaultScreen(dpy));
 		height=DisplayHeight(dpy, DefaultScreen(dpy));
 	}
+	if(!(protoatom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
+		_throw("Cannot obtain WM_PROTOCOLS atom");
+	if(!(deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
+		_throw("Cannot obtain WM_DELETE_WINDOW atom");
 	if((win=XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
 		InputOutput, v->visual, mask, &swa))==0)
 		_throw("Could not create window");
+	XSetWMProtocols(dpy, win, &deleteatom, 1);
 	XStoreName(dpy, win, "GLX Spheres");
 	XMapWindow(dpy, win);
 	if(fullscreen) XSetInputFocus(dpy, win, RevertToParent, CurrentTime);
