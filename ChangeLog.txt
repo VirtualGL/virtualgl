@@ -90,19 +90,19 @@ issues with other open source network monitoring solutions.
 Change the way global hash tables are allocated in VGL in order to fix an
 interaction issue with applications that are built with MainWin.
 -------------------------------------------------------------------------------
-[12]
+[19]
 vglclient -kill now works properly on Mac systems.
 -------------------------------------------------------------------------------
-[13]
+[20]
 VirtualGL Configuration dialog now pops up properly when Caps Lock is active.
 -------------------------------------------------------------------------------
-[14]
+[21]
 If a previously destroyed GLX context is passed as an argument to
 glXMake{Context}Current(), the function now returns False instead of throwing
 a fatal exception.  This was necessary to make a couple of different commercial
 applications work properly.
 -------------------------------------------------------------------------------
-[15]
+[22]
 There was some inconsistency regarding the interface for enabling lossless
 compression in the Sun Ray Image Transport.  The User's Guide listed the
 interface as VGL_COMPRESS=srrgb, whereas the output of vglrun listed the
