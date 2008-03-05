@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2007-12-15T02:02:06-06:00">
+<meta name="date" content="2008-03-05T02:35:48-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -18,7 +18,7 @@
 <link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL with TurboVNC">
 <link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL with Other X Proxies">
 <link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL in a Sun Ray Environment">
-<link rel="chapter" href="index.html#hd0012" title="12 vglrun and Solaris Shell Scripts">
+<link rel="chapter" href="index.html#hd0012" title="12 vglrun and Shell Scripts">
 <link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Applications That Manually Load OpenGL">
 <link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with Chromium and ModViz VGP">
 <link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
@@ -231,7 +231,7 @@ systems, OpenGL and GLX, and X windows.</p>
         <a href="#hd0011" class="toc">11 Using VirtualGL in a Sun Ray Environment</a>
     </li>
     <li class="toc">
-        <a href="#hd0012" class="toc">12 vglrun and Solaris Shell Scripts</a>
+        <a href="#hd0012" class="toc">12 vglrun and Shell Scripts</a>
     </li>
     <li class="toc">
         <a href="#hd0013" class="toc">13 Using VirtualGL with Applications
@@ -2896,54 +2896,68 @@ to using the X11 Image Transport.</p>
 <hr class="break" />
 
 
-<h1 id="hd0012"><a name="file012"></a>12&nbsp;<code>vglrun</code> and Solaris Shell Scripts</h1>
+<h1 id="hd0012"><a name="file012"></a>12&nbsp;<code>vglrun</code> and Shell Scripts</h1>
 
 <p><code>vglrun</code> can be used to launch either binary executables
 or shell scripts, but there are a few things to keep in mind when using
-<code>vglrun</code> to launch a shell script on Solaris.  When you
-<code>vglrun</code> a shell script, the VirtualGL faker library will
-be preloaded into every executable that the script launches. Normally
-this is innocuous, but if the script calls any executables that are
-setuid root, then Solaris will refuse to load those executables because
-you are attempting to preload a library (VirtualGL) that is not in
-a &ldquo;secure path.&rdquo; Solaris keeps a tight lid on what goes
-into <code>/usr/lib</code> and <code>/lib</code>, and by default, it
-will only allow libraries in those paths to be preloaded into an executable
-that is setuid root.  Generally, 3rd party packages are verboden from
-installing anything into <code>/usr/lib</code> or <code>/lib</code>.
-But you can use the <code>crle</code> utility to add other directories
-to the operating system&rsquo;s list of secure paths.  In the case
-of VirtualGL, you would execute the following commands (as root):</p>
+<code>vglrun</code> to launch a shell script.  When you <code>vglrun</code>
+a shell script, the VirtualGL faker library will be preloaded into
+every executable that the script launches.  Normally this is innocuous,
+but if the script calls any executables that are setuid and/or setgid,
+then the dynamic linker will refuse to preload the VirtualGL faker
+library into those executables.  The following warning will be printed
+out for each setuid/setgid executable that the script tries to launch:</p>
+
+<dl class="Description">
+    <dt class="Description">Linux</dt>
+    <dd class="Description">
+    </dd>
+</dl>
 
 <pre class="verbatim">
-crle&nbsp;-u&nbsp;-s&nbsp;/opt/SUNWvgl/lib
-crle&nbsp;-64&nbsp;-u&nbsp;-s&nbsp;/opt/SUNWvgl/lib/64
+ERROR:&nbsp;ld.so:&nbsp;object&nbsp;'librrfaker.so'&nbsp;from&nbsp;LD_PRELOAD&nbsp;cannot&nbsp;be&nbsp;preloaded:&nbsp;ignored.
 </pre>
 
-<p>But please be aware of the security ramifications of this before you
-do it. You are essentially telling Solaris that you trust the security
-and stability of the VirtualGL code as much as you trust the security
-and stability of the operating system.  And while we&rsquo;re flattered,
-we&rsquo;re not sure that we&rsquo;re necessarily deserving of that
-accolade, so if you are in a security critical environment, apply the
-appropriate level of paranoia here.</p>
+<dl class="Description">
+    <dt class="Description">Solaris</dt>
+    <dd class="Description">
+    </dd>
+</dl>
 
-<p>An easier, and perhaps more secure, approach is to simply edit the
-application script and make it store the value of the <code>LD_PRELOAD</code>
-environment variables until right before the actual executable is run.
-For instance, take the following application script (please):</p>
+<pre class="verbatim">
+ld.so.1:&nbsp;warning:&nbsp;librrfaker.so:&nbsp;open&nbsp;failed:&nbsp;No&nbsp;such&nbsp;file&nbsp;in&nbsp;secure&nbsp;directories
+</pre>
 
-<p>Contents of <code>application.sh</code>:</p>
+<p>On Solaris and on newer versions of Linux (Enterprise Linux 3 and later),
+the executable will continue to run, but without VirtualGL preloaded
+into it.  That may be a problem, if the setuid/setgid executable was
+a 3D application that was intended to be used with VirtualGL.  To further
+complicate matters, some older versions of Linux will refuse to launch
+setuid/setgid executables at all if one attempts to preload VirtualGL
+into them.</p>
+
+<p>There are a couple of ways to work around this issue.  Probably the
+safest way is to simply edit the application script and make it store
+the value of the <code>LD_PRELOAD</code> environment variables until
+right before the application executable is launched.  For instance,
+take the following application script (please):</p>
+
+<p>Initial contents of <code>application.sh</code>:</p>
 
 <pre class="verbatim">
 #!/bin/sh
-some_setuid_binary
-some_application_binary
+some_setuid_executable
+some_application_executable
 </pre>
 
-<p>You would modify the script as follows:</p>
+<p>You could modify the script as follows:</p>
 
-<p>Contents of <code>application.sh</code>:</p>
+<dl class="Description">
+    <dt class="Description">Solaris</dt>
+    <dd class="Description">
+        Modified <code>application.sh</code>:
+    </dd>
+</dl>
 
 <pre class="verbatim">
 #!/bin/sh
@@ -2953,17 +2967,78 @@ LD_PRELOAD_32=
 LD_PRELOAD_64=
 export&nbsp;LD_PRELOAD_32&nbsp;LD_PRELOAD_64
 
-some_setuid_binary
+some_setuid_executable
 
 LD_PRELOAD_32=$LD_PRELOAD_32_SAVE
 LD_PRELOAD_64=$LD_PRELOAD_64_SAVE
 export&nbsp;LD_PRELOAD_32&nbsp;LD_PRELOAD_64
 
-some_application_binary
+some_application_executable
 </pre>
 
-<p><code>vglrun</code> on Solaris has two options that are relevant to
-launching scripts:</p>
+<dl class="Description">
+    <dt class="Description">Linux</dt>
+    <dd class="Description">
+        Modified <code>application.sh</code>:
+    </dd>
+</dl>
+
+<pre class="verbatim">
+#!/bin/sh
+LD_PRELOAD_SAVE=$LD_PRELOAD
+LD_PRELOAD=
+export&nbsp;LD_PRELOAD
+
+some_setuid_executable
+
+LD_PRELOAD=$LD_PRELOAD_SAVE
+export&nbsp;LD_PRELOAD
+
+some_application_executable
+</pre>
+
+<p>You can also force VirtualGL to be preloaded into setuid/setgid executables,
+but please be aware of the security ramifications of this before you
+do it.  By applying one of the following workarounds, you are essentially
+telling the operating system that you trust the security and stability
+of the VirtualGL code as much as you trust the security and stability
+of the operating system. And while we&rsquo;re flattered, we&rsquo;re
+not sure that we&rsquo;re necessarily deserving of that accolade, so
+if you are in a security critical environment, apply the appropriate
+level of paranoia here.</p>
+
+<p>To force VirtualGL to be preloaded into setuid/setgid executables on
+Linux, make <code>librrfaker.so</code> a setuid executable.  To do
+this, run the following command as root:</p>
+
+<pre class="verbatim">
+chmod&nbsp;u+s&nbsp;/usr/lib/librrfaker.so
+</pre>
+
+<p>On 64-bit Linux systems, also run:</p>
+
+<pre class="verbatim">
+chmod&nbsp;u+s&nbsp;/usr/lib64/librrfaker.so
+</pre>
+
+<p>On Solaris, you can force VirtualGL to be preloaded into setuid/setgid
+executables by adding the VirtualGL library directories to the Solaris
+&ldquo;secure path.&rdquo;  Solaris keeps a tight lid on what goes
+into <code>/usr/lib</code> and <code>/lib</code>, and by default, it
+will only allow libraries in those paths to be preloaded into an executable
+that is setuid and/or setgid.  Generally, 3rd party packages are verboden
+from installing anything into <code>/usr/lib</code> or <code>/lib</code>.
+But you can use the <code>crle</code> utility to add other directories
+to the operating system&rsquo;s list of secure paths.  In the case
+of VirtualGL, you would execute the following commands (as root):</p>
+
+<pre class="verbatim">
+crle&nbsp;-u&nbsp;-s&nbsp;/opt/SUNWvgl/lib
+crle&nbsp;-64&nbsp;-u&nbsp;-s&nbsp;/opt/SUNWvgl/lib/64
+</pre>
+
+<p><code>vglrun</code> on Solaris has two additional options that are
+relevant to launching scripts:</p>
 
 <pre class="verbatim">
 vglrun&nbsp;-32&nbsp;{script}
@@ -2977,8 +3052,8 @@ vglrun&nbsp;-64&nbsp;{script}
 </pre>
 
 <p>will preload VirtualGL only into 64-bit executables.  So if, for instance,
-the setuid binary that the script is calling is a 32-bit executable
-and the application is a 64-bit executable, then you could use <code>vglrun&nbsp;-64</code>
+the setuid executable that the script is invoking is 32-bit and the
+application executable is 64-bit, then you could use <code>vglrun&nbsp;-64</code>
 to launch the application script.</p>
 
 <hr class="break" />
