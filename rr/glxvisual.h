@@ -36,7 +36,7 @@ double __vglVisualGamma(Display *, int, VisualID);
 
 VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
 
-XVisualInfo *__vglVisualFromVisualID(Display *, VisualID);
+XVisualInfo *__vglVisualFromVisualID(Display *, int, VisualID);
 
 #define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
 
