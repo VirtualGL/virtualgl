@@ -47,7 +47,7 @@ ifeq ($(M32), yes)
 endif
 
 # Macros which are common to all Unix platforms
-VERSION := 2.1
+VERSION := 2.1.1
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
 BUILD := $(BUILD)d
