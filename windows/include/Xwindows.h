@@ -58,8 +58,6 @@ The Open Group.
 #undef ATOM
 #undef FreeResource
 #undef CreateWindowA
-#undef min
-#undef max
 
 #ifdef RESOURCE_H
 #undef RT_FONT
