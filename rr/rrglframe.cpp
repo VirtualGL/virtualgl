@@ -11,6 +11,9 @@
  * wxWindows Library License for more details.
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "rrglframe.h"
 
 #ifdef XDK
