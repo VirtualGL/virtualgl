@@ -12,7 +12,7 @@ How to build VirtualGL in 9043 easy steps
    your Linux distribution, but this produces a version of VirtualGL that is
    not compatible with other Linux distributions.  In order to build a fully
    cross-compatible version of VirtualGL, install the openssl-static package,
-   which is available in the "Download" area of:
+   which can be obtained from the "Download" area of:
 
    http://sourceforge.net/projects/virtualgl
 
@@ -64,9 +64,9 @@ How to build VirtualGL in 9043 easy steps
 
 Building a redistributable VirtualGL package for x86-64 requires building both
 32-bit and 64-bit versions of the VirtualGL server components.  But not all
-x86-64 Linux systems contain the 32-bit packages necessary to build a 32-bit
-version of VirtualGL.  To build 32-bit VirtualGL on an x86-64 Linux system, you
-will need, at minimum, the following 32-bit packages:
+x86-64 Linux systems contain the 32-bit libraries necessary to build a 32-bit
+version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64 Linux
+system, you will need, at minimum, the following 32-bit libraries:
 
 -- glibc development libraries
 
@@ -81,17 +81,18 @@ will need, at minimum, the following 32-bit packages:
      discs
 
 If for some reason your preferred 64-bit Linux distribution does not contain
-32-bit packages for the above, then:
+one or more of the above, then:
 
   1.  Complain to your distribution vendor.
   2.  All x86-64 distributions of Linux have a corresponding 32-bit-only
       distribution, usually released on a separate set of discs.  On those
       discs, you should be able to find the 32-bit versions of the X11 dev. kit
       and the GLIBC dev. kit to match the 64-bit versions that are already
-      installed on your system. You may have to use "rpm --force" to install
-      the 32-bit development packages, since they might contain header files
-      which conflict with the 64-bit development packages that are
-      already installed.  Again, complain to your distribution vendor.
+      installed on your system. You may have to use "rpm --force" (or a similar
+      mechanism) to force the install of the 32-bit development packages, since
+      they might contain header files which conflict with the 64-bit
+      development packages that are already installed.  Again, complain to your
+      distribution vendor.
 
 
 *******************************************************************************
@@ -99,7 +100,8 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 *******************************************************************************
 
 -- Xcode Tools
-   * Available on the OS X disc or from http://developer.apple.com/tools/xcode
+   * Available on the OS X install discs or from:
+     http://developer.apple.com/tools/xcode
    * At minimum, you will need the following packages from Xcode:
      gcc v3 or above
      X11 SDK
@@ -133,7 +135,7 @@ If for some reason your preferred 64-bit Linux distribution does not contain
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
    Solaris 10 and later, but this produces a version of VirtualGL that is not
-   compatible with earlier Solaris platforms.  In order to build a fully
+   compatible with earlier versions of Solaris.  In order to build a fully
    backward-compatible version of VirtualGL, download and install the latest
    OpenSSL package from Blastwave (http://www.blastwave.org).
 
