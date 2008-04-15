@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-03-05T02:55:50-06:00">
+<meta name="date" content="2008-04-15T18:27:40-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1859,8 +1859,8 @@ following patches from the Hummingbird support site:</p>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0073"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Mega Patch</a></span><a name="idx0073"></a>.)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0074"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -2035,7 +2035,7 @@ vglconnect&nbsp;{user}@{server}
 
 <p><a name="Direct_X11_Connection"></a></p>
 
-<p>As with the <a href="#X11_Forwarding">previous mode</a><a name="idx0074"></a>,
+<p>As with the <a href="#X11_Forwarding">previous mode</a><a name="idx0075"></a>,
 this mode performs optimally on local-area networks.  However, it is
 less secure, since both the X11 traffic and the VGL image stream are
 unencrypted.  This mode is primarily useful in grid environments where
@@ -2053,7 +2053,7 @@ Some newer Linux and Solaris distributions ship with default settings that do no
 <h3 id="hd008002001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0075"></a>, except that you should pass a
+forwarding</a><a name="idx0076"></a>, except that you should pass a
 <code>-x</code> argument to <code>vglconnect</code> when connecting
 to the server:</p>
 
@@ -2067,7 +2067,7 @@ to the server:</p>
 <p><a name="SSL_Encryption"></a></p>
 
 <p>This mode encrypts the VGL image stream and, when used in conjunction
-with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0076"></a>,
+with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0077"></a>,
 provides a completely secure solution. However, enabling SSL encryption
 can reduce VirtualGL&rsquo;s performance by as much as 20% on high-speed
 networks such as Ethernet.</p>
@@ -2076,7 +2076,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008003001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0077"></a>, except that you should pass an
+forwarding</a><a name="idx0078"></a>, except that you should pass an
 argument of <code>+s</code> to <code>vglrun</code> when starting a
 3D application using VirtualGL.  You can also set the environment variable
 <code>VGL_SSL</code> to <code>1</code> on the VirtualGL server prior
@@ -2100,7 +2100,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008004001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0078"></a>, except that you should pass a
+forwarding</a><a name="idx0079"></a>, except that you should pass a
 <code>-s</code> argument to <code>vglconnect</code> when connecting
 to the server:</p>
 
@@ -2229,7 +2229,7 @@ instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall
 to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh
-Tunneling</a><a name="idx0079"></a>.</p>
+Tunneling</a><a name="idx0080"></a>.</p>
 
 <hr class="break" />
 
@@ -2256,9 +2256,9 @@ workloads that VirtualGL generates. Therefore, the VirtualGL Project
 provides an optimized X proxy called &ldquo;TurboVNC&rdquo;, which
 is based on the
 <span class="remote"><a href="http://www.realvnc.com/" class="remote">Virtual
-Network Computing (VNC)</a></span><a name="idx0080"></a> standard (more
+Network Computing (VNC)</a></span><a name="idx0081"></a> standard (more
 specifically, on the
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0081"></a>
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0082"></a>
 variant thereof.)</p>
 
 <p>On the surface, TurboVNC behaves very similarly to its parent project,
@@ -2500,7 +2500,7 @@ TurboVNC server for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Image Transport to transmit images
 from a VirtualGL server to a TurboVNC server is the same as the
-<a href="#X11_Forwarding">procedure</a><a name="idx0082"></a> for using
+<a href="#X11_Forwarding">procedure</a><a name="idx0083"></a> for using
 the VGL Image Transport to transmit images to a remote X server, with
 the following notable differences:</p>
 
@@ -2806,7 +2806,7 @@ many of its features.</p>
 
 <p><a name="X11_Proxy_Usage"></a></p>
 
-<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0083"></a>
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0084"></a>
 described how to use VirtualGL with TurboVNC, but much of this information
 is also applicable to other X proxies, such as RealVNC, NX, etc.  Generally,
 none of these other solutions will provide anywhere near the performance
@@ -2874,7 +2874,7 @@ ssh&nbsp;-X&nbsp;{user}@{server}
 </ol>
 
 <p>Note that this procedure is substantially similar to the <a href="#X11_Forwarding">X11
-Forwarding</a><a name="idx0084"></a> procedure used with the VGL Image
+Forwarding</a><a name="idx0085"></a> procedure used with the VGL Image
 Transport, except that it invokes <code>ssh</code> directly rather
 than using the <code>vglconnect</code> wrapper script.  <code>vglconnect</code>
 launches <code>vglclient</code>, and <code>vglclient</code> is not
@@ -3170,7 +3170,7 @@ configuration, and VirtualGL would have to be made DMX-aware for it
 to perform the same job.  Maybe at some point in the future &hellip;
 If you have a need for such a configuration,
 <span class="remote"><a href="http://sourceforge.net/users/dcommander" class="remote">let
-us know</a></span><a name="idx0085"></a>.</p>
+us know</a></span><a name="idx0086"></a>.</p>
 
 
 <h2 id="hd0014002">14.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
@@ -3479,7 +3479,7 @@ a 64-bit application.)</p>
     <td class="standard">ANSYS v11.0</td>
     <td class="standard">All</td>
     <td class="standard">If you experience extremely long delays (on the order of minutes) when reading input data or performing other operations in ANSYS: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching ANSYS.  When running ANSYS in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching ANSYS.</td>
-    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0086"></a> below</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0087"></a> below</td>
   </tr>
   <tr class="standard">
     <td class="standard">Army Ops</td>
@@ -3563,7 +3563,7 @@ a 64-bit application.)</p>
     <td class="standard">Pro/ENGINEER Wildfire v3.0</td>
     <td class="standard">All</td>
     <td class="standard">If you experience extremely long delays (on the order of minutes) when zooming or performing other operations in Pro/E: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching Pro/E.  When running Pro/E in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching Pro/E.</td>
-    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0087"></a> below</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0088"></a> below</td>
   </tr>
   <tr class="standard">
     <td class="standard">QGL (OpenGL Qt Widget)</td>
@@ -3726,7 +3726,7 @@ will (by default) use quad-buffered stereo rendering if:</p>
 to using anaglyphic stereo (see below.)  It is usually necessary to
 explicitly enable stereo in the graphics driver configuration for both
 the client and server machines.  The
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0088"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0089"></a>
 section below lists a way to verify that both client and server have
 stereo visuals available.</p>
 
@@ -3808,7 +3808,7 @@ they need only be supported and enabled on the client machine.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work
 with VirtualGL.  True color (24-bit) overlays work, in theory, but
 have not been tested.  Use <code>glxinfo</code> (see
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0089"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0090"></a>
 below) to verify whether your client&rsquo;s X display supports overlays
 and whether they are enabled.  In Exceed 3D, make sure that the &ldquo;Overlay
 Support&rdquo; option is checked in the &ldquo;Exceed 3D and GLX&rdquo;
@@ -4691,7 +4691,7 @@ method:</p>
         library to load. <br /><br /> You shouldn&rsquo;t need to muck with
         this unless something doesn&rsquo;t work.  However, this setting is
         necessary when using VirtualGL with
-        <a href="#Chromium">Chromium</a><a name="idx0090"></a>.
+        <a href="#Chromium">Chromium</a><a name="idx0091"></a>.
     </dd>
 </dl>
 
@@ -5015,7 +5015,7 @@ method:</p>
         quality level at which JPEG compression becomes perceptually lossless
         is different for each image, but experiments with various visual difference
         benchmarks (such as
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0091"></a>)
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0092"></a>)
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual
         losslessness in the types of applications (volume visualization apps,
         in particular) where image quality is critical.  As with any benchmarks,
@@ -5056,7 +5056,7 @@ method:</p>
         disables VirtualGL&rsquo;s readback mechanism and prevents duplication
         of effort. <br /><br /> This feature was developed initially to support
         running
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0092"></a>
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0093"></a>
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1
         through N as rendering servers, each drawing a portion of the geometry
         into a separate window on a separate X display. ParaView reads back
@@ -5324,7 +5324,7 @@ method:</p>
         initially as a way to pass the GLX conformance suite (<code>conformx</code>,
         specifically), but at least one commercial application is known to
         require it as well (see <a href="#Application_Recipes">Application
-        Recipes</a><a name="idx0093"></a>.)<br /><br />When <code>VGL_SYNC</code>
+        Recipes</a><a name="idx0094"></a>.)<br /><br />When <code>VGL_SYNC</code>
         is enabled, every call to <code>glFinish()</code>, <code>glXWaitGL()</code>,
         and <code>glXSwapBuffers()</code> will cause the contents of the server&rsquo;s
         framebuffer to be read back and <em>synchronously</em> drawn into the
@@ -5370,7 +5370,7 @@ method:</p>
         (assuming interframe comparison is enabled.)  The VGL Image Transport
         will also divide up the task of compressing these tiles among the available
         CPUs in a round robin fashion, if multi-threaded compression is enabled
-        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0094"></a>.)
+        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0095"></a>.)
         <br /><br /> There are several tradeoffs that must be considered when
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em>
         <ul class="Itemize"><li>
