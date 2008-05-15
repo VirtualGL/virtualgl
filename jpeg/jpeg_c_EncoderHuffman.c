@@ -198,7 +198,7 @@ mlib_status jpeg_EncoderHuffmanDumpBlock(jpeg_encoder  *encoder,
     t1   += sflag;  \
     nbits = jpeg_first_bit_table[t];  \
     for(; r > 15; r -= 16) DUMP_BITS(code_0xf0, size_0xf0)  \
-    sflag = ((r & 15) << 4) + nbits;  \
+    sflag = (r << 4) + nbits;  \
     DUMP_VALUE(hac, sflag, t1, nbits)  \
     r = 0;  \
   }}
