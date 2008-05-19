@@ -384,9 +384,11 @@ class FakerConfig
 				else if(!strnicmp(env, "p", 1)) compress(RRCOMP_PROXY);
 				else if(!strnicmp(env, "j", 1)) compress(RRCOMP_JPEG);
 				else if(!strnicmp(env, "r", 1)) compress(RRCOMP_RGB);
-				else if(!stricmp(env, "sr")) compress(RRCOMP_SR);
+				else if(!stricmp(env, "sr")) compress(RRCOMP_SRDPCM);
 				else if(!strnicmp(env, "srl", 3)) compress(RRCOMP_SRRGB);
 				else if(!strnicmp(env, "srr", 3)) compress(RRCOMP_SRRGB);
+				else if(!strnicmp(env, "srd", 3)) compress(RRCOMP_SRDPCM);
+				else if(!strnicmp(env, "sry", 3)) compress(RRCOMP_SRYUV);
 			}
 			config.get("VGL_CONFIG");
 			config64.get("VGL_CONFIG64");
@@ -512,7 +514,7 @@ class FakerConfig
 		{
 			if(!_compress.isset())
 			{
-				if(RRSunRayQueryDisplay(dpy)!=RRSUNRAY_NOT) compress(RRCOMP_SR);
+				if(RRSunRayQueryDisplay(dpy)!=RRSUNRAY_NOT) compress(RRCOMP_SRDPCM);
 				else
 				{
 					const char *dstr=DisplayString(dpy);

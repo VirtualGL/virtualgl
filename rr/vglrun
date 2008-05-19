@@ -30,6 +30,7 @@ usage()
 	echo "            rgb = Encode 3D images as RGB/send using VGL transport"
 	echo "            sr = Compress 3D images using DPCM/send using Sun Ray transport"
 	echo "            srrgb = Encode 3D images as RGB/send using Sun Ray transport"
+	echo "            sryuv = Encode 3D images as YUV/send using Sun Ray transport"
 	echo "-cl <c>   : <c> = The hostname or IP address of the VirtualGL client (or"
 	echo "                  Sun Ray server)"
 	echo "-dl       : Force apps that dlopen() libGL to load VirtualGL instead"

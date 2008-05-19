@@ -105,7 +105,8 @@ void SetQual(void)
 void SetProg(void)
 {
 	if(!progbutton) return;
-	if(fconfig.compress()!=RRCOMP_SR) progbutton->deactivate();
+	if(fconfig.compress()!=RRCOMP_SRDPCM && fconfig.compress()!=RRCOMP_SRYUV)
+		progbutton->deactivate();
 	else progbutton->activate();
 	progbutton->value(fconfig.progressive);
 }
@@ -323,8 +324,9 @@ Fl_Menu_Item compmenu[]=
 	{"None (X11 transport)", 0, CompCB, (void *)RRCOMP_PROXY},
 	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
 	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
-	{"DPCM (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SR},
+	{"DPCM (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRDPCM},
 	{"RGB (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRRGB},
+	{"YUV (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRYUV},
 	{0, 0, 0, 0}
 };
 
