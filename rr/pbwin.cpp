@@ -384,8 +384,9 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
 
-		case RRCOMP_SR:
+		case RRCOMP_SRDPCM:
 		case RRCOMP_SRRGB:
+		case RRCOMP_SRYUV:
 			if(sendsr(drawbuf, spoillast, dostereo,	stereomode)==-1)
 			sendx11(drawbuf, spoillast, sync, dostereo, stereomode, true);
 	}
