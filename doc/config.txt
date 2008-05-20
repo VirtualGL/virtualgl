@@ -35,8 +35,8 @@ Each method of configuration takes precedence over the previous method:
 	script, so don't override it unless you know what you're doing. \
 
 {anchor: VGL_COMPRESS}
-| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
-| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| sr \| srrgb''__ |
+| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| sr \| srrgb \| sryuv''__ |
+| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| sr \| srrgb \| sryuv''__ |
 | Summary | Set image transport and image compression type |
 | Image Transports | All |
 | Default Value | (See description) |
@@ -62,6 +62,11 @@ Each method of configuration takes precedence over the previous method:
 	(see {ref prefix="Chapter ": Sun_Ray_Usage}.)
 	{nl}{nl} \
 	__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray
+	Image Transport.  This requires that the proprietary Sun Ray plugin be
+	installed on the VirtualGL server (see
+	{ref prefix="Chapter ": Sun_Ray_Usage}.)
+	{nl}{nl} \
+	__sryuv__ = Encode images as uncompressed YUV	and send using the Sun Ray
 	Image Transport.  This requires that the proprietary Sun Ray plugin be
 	installed on the VirtualGL server (see
 	{ref prefix="Chapter ": Sun_Ray_Usage}.)
@@ -293,11 +298,11 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-prog'' / ''+prog'' |
 | Summary | Disable/enable sending a lossless (RGB) frame during periods \
 	of inactivity |
-| Image Transports | Sun Ray (DPCM) |
+| Image Transports | Sun Ray (DPCM, YUV) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: When Sun Ray DPCM compression is being used, enabling this
+	Description :: When Sun Ray DPCM or YUV encoding is being used, enabling this
 	option causes the Sun Ray Image Transport to send a lossless (RGB) frame
 	during periods of inactivity.  This is useful in environments where both
 	image quality and performance are	critical.  With progressive mode enabled,
@@ -437,12 +442,12 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-samp ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
 | Summary | Specify the level of chrominance subsampling in the \
 	JPEG and Sun Ray image compressors |
-| Image Transports | Sun Ray (DPCM), VGL (JPEG) |
+| Image Transports | Sun Ray (DPCM, YUV), VGL (JPEG) |
 | Default Value | 1x for VGL Image Transport, 16x for Sun Ray Image Transport |
 #OPT: hiCol=first
 
-	Description :: When an image is compressed using JPEG or using Sun Ray
-	DPCM compression, each pixel in the image is first converted from RGB
+	Description :: When an image is encoded using JPEG, Sun Ray	DPCM, or Sun Ray
+	YUV, each pixel in the image is first converted from RGB
 	(Red/Green/Blue) to YUV.  An RGB pixel has three values that specify the
 	amounts of red, green, and blue that make up the pixel's color.  A YUV pixel
 	has three values that specify the overall brightness of the pixel (Y, or
@@ -469,12 +474,12 @@ Each method of configuration takes precedence over the previous method:
 	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
 	the image's X direction and half the pixels along the image's Y direction
 	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
-	available only with Sun Ray DPCM compression.__
+	available only with Sun Ray DPCM or YUV encoding.__
 	{nl}{nl} \
 	__16x__ = discard the chrominance components for 3 out of every 4 pixels
 	along both the X and Y directions of the image (this is also known as "4:4"
-	subsampling.)  __This option is available only with Sun Ray DPCM
-	compression.__
+	subsampling.)  __This option is available only with Sun Ray DPCM or YUV
+	encoding.__
 	{nl}{nl} \
 	__gray__ = discard all chrominance components.  This is useful when running
 	applications (such as medical visualization applications) that are already
