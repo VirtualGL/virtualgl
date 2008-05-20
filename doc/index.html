@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-04-15T18:27:40-06:00">
+<meta name="date" content="2008-05-19T20:12:28-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4248,10 +4248,13 @@ application.</p>
         setting <code>VGL_COMPRESS=rgb</code>.  This option is only available
         if the VGL Image Transport was active when the application started.
         <br /><br /> <em>DPCM (Sun Ray Transport)</em> : equivalent to setting
-        <code>VGL_COMPRESS=sr</code>. This option is only available if the
-        Sun Ray Image Transport was active when the application started.
+        <code>VGL_COMPRESS=srdpcm</code>. This option is only available if
+        the Sun Ray Image Transport was active when the application started.
         <br /><br /> <em>RGB (Sun Ray Transport)</em> : equivalent to setting
         <code>VGL_COMPRESS=srrgb</code>. This option is only available if the
+        Sun Ray Image Transport was active when the application started.
+        <br /><br /> <em>YUV (Sun Ray Transport)</em> : equivalent to setting
+        <code>VGL_COMPRESS=sryuv</code>. This option is only available if the
         Sun Ray Image Transport was active when the application started.
         <br /><br /> See Section <a href="#VGL_COMPRESS" class="ref">19.1</a>
         for more information about the <code>VGL_COMPRESS</code> configuration
@@ -4442,11 +4445,11 @@ method:</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_COMPRESS&nbsp;=&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb</code></em></td>
+    <td class="standard"><code>VGL_COMPRESS&nbsp;=&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb&nbsp;|&nbsp;sryuv</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-c&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb</code></em></td>
+    <td class="standard"><code>-c&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb&nbsp;|&nbsp;sryuv</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -4477,26 +4480,29 @@ method:</p>
          send using the VGL Image Transport.  This is useful when displaying
          to a remote X server or X proxy across a very fast network (see Section
          <a href="#TurboVNC_Usage_Remote" class="ref">9.2</a>.) <br /><br />
-         <em>sr</em> = Compress images using the Sun Ray default compression
-         method (DPCM) and send using the Sun Ray Image Transport.  This requires
-         that the proprietary Sun Ray plugin be installed on the VirtualGL
-         server. (see Chapter <a href="#Sun_Ray_Usage" class="ref">11</a>.)
-         <br /><br /> <em>srrgb</em> = Encode images as uncompressed RGB and
-         send using the Sun Ray Image Transport.  This requires that the proprietary
-         Sun Ray plugin be installed on the VirtualGL server (see Chapter
-         <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br /> If this
-         option is not specified, then the default is set as follows:
-         <br /><br /> If the X server is a Sun Ray server and the Sun Ray plugin
-         is installed on the VirtualGL server, then VGL will default to using
-         <em>sr</em> compression.  VGL will fall back to using <em>proxy</em>
-         compression if, for any given frame, it is unable to send the frame
-         using the Sun Ray Image Transport.  This could occur if, for example,
-         the Sun Ray client is on a network that is not visible to the VirtualGL
-         server. <br /><br /> If the X server is not a Sun Ray server but the
-         <code>DISPLAY</code> environment variable begins with <code>:</code>
-         or <code>unix:</code>, then VirtualGL assumes that the X display connection
-         is local and it defaults to using <em>proxy</em> compression.  Otherwise,
-         it defaults to <em>jpeg</em> compression.
+         <em>srdpcm</em> = Compress images using the DPCM compression method
+         and send using the Sun Ray Image Transport.  This requires that the
+         proprietary Sun Ray plugin be installed on the VirtualGL server. (see
+         Chapter <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br />
+         <em>srrgb</em> = Encode images as uncompressed RGB and send using
+         the Sun Ray Image Transport.  This requires that the proprietary Sun
+         Ray plugin be installed on the VirtualGL server (see Chapter
+         <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br /> <em>sryuv</em>
+         = Encode images as uncompressed YUV	and send using the Sun Ray Image
+         Transport.  This requires that the proprietary Sun Ray plugin be installed
+         on the VirtualGL server (see Chapter <a href="#Sun_Ray_Usage" class="ref">11</a>.)
+         <br /><br /> If this option is not specified, then the default is
+         set as follows: <br /><br /> If the X server is a Sun Ray server and
+         the Sun Ray plugin is installed on the VirtualGL server, then VGL
+         will default to using <em>sryuv</em> encoding.  VGL will fall back
+         to using <em>proxy</em> compression if, for any given frame, it is
+         unable to send the frame using the Sun Ray Image Transport.  This
+         could occur if, for example, the Sun Ray client is on a network that
+         is not visible to the VirtualGL server. <br /><br /> If the X server
+         is not a Sun Ray server but the <code>DISPLAY</code> environment variable
+         begins with <code>:</code> or <code>unix:</code>, then VirtualGL assumes
+         that the X display connection is local and it defaults to using <em>proxy</em>
+         compression.  Otherwise, it defaults to <em>jpeg</em> compression.
     </dd>
 </dl>
 
@@ -4937,7 +4943,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray (DPCM)</td>
+    <td class="standard">Sun Ray (DPCM, YUV)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -4950,12 +4956,12 @@ method:</p>
 <dl class="Description">
     <dt class="Description">Description</dt>
     <dd class="Description">
-        When Sun Ray DPCM compression is being used, enabling this option causes
-        the Sun Ray Image Transport to send a lossless (RGB) frame during periods
-        of inactivity.  This is useful in environments where both image quality
-        and performance are	critical.  With progressive mode enabled, the image
-        quality for the Sun Ray compressor can be set to a fairly low value
-        to speed up rotate/pan/zoom operations, then when the rotate/pan/zoom
+        When Sun Ray DPCM or YUV encoding is being used, enabling this option
+        causes the Sun Ray Image Transport to send a lossless (RGB) frame during
+        periods of inactivity.  This is useful in environments where both image
+        quality and performance are	critical.  With progressive mode enabled,
+        the image quality for the Sun Ray compressor can be set to a fairly
+        low value to speed up rotate/pan/zoom operations, then when the rotate/pan/zoom
         is completed, VirtualGL will send a lossless frame that can be analyzed
         by the user in more detail.
     </dd>
@@ -5219,7 +5225,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray (DPCM), VGL (JPEG)</td>
+    <td class="standard">Sun Ray (DPCM, YUV), VGL (JPEG)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5232,7 +5238,7 @@ method:</p>
 <dl class="Description">
     <dt class="Description">Description</dt>
     <dd class="Description">
-        When an image is compressed using JPEG or using Sun Ray DPCM compression,
+        When an image is encoded using JPEG, Sun Ray	DPCM, or Sun Ray YUV,
         each pixel in the image is first converted from RGB (Red/Green/Blue)
         to YUV.  An RGB pixel has three values that specify the amounts of
         red, green, and blue that make up the pixel&rsquo;s color.  A YUV pixel
@@ -5257,18 +5263,18 @@ method:</p>
         for 3 out of every 4 pixels along the image&rsquo;s X direction and
         half the pixels along the image&rsquo;s Y direction (this is also known
         as &ldquo;4:1:0&rdquo; or &ldquo;4:2&rdquo; subsampling.)  <em>This
-        option is available only with Sun Ray DPCM compression.</em>
+        option is available only with Sun Ray DPCM or YUV encoding.</em>
         <br /><br /> <em>16x</em> = discard the chrominance components for
         3 out of every 4 pixels along both the X and Y directions of the image
         (this is also known as &ldquo;4:4&rdquo; subsampling.)  <em>This option
-        is available only with Sun Ray DPCM compression.</em> <br /><br />
-        <em>gray</em> = discard all chrominance components.  This is useful
-        when running applications (such as medical visualization applications)
-        that are already generating grayscale images.  <em>This option is available
-        only with JPEG compression.</em> <br /><br /> Subsampling artifacts
-        are less noticeable with volume data, since it usually only contains
-        256 colors to begin with.  But narrow, aliased lines and other sharp
-        features on a black background will tend to produce very noticeable
+        is available only with Sun Ray DPCM or YUV encoding.</em>
+        <br /><br /> <em>gray</em> = discard all chrominance components.  This
+        is useful when running applications (such as medical visualization
+        applications) that are already generating grayscale images.  <em>This
+        option is available only with JPEG compression.</em> <br /><br /> Subsampling
+        artifacts are less noticeable with volume data, since it usually only
+        contains 256 colors to begin with.  But narrow, aliased lines and other
+        sharp features on a black background will tend to produce very noticeable
         artifacts when subsampling is enabled. <br /><br /> The Axis Indicator
         from a Popular Visualization App displayed with 1x, 2x, and 4x subsampling
         (respectively):<br />

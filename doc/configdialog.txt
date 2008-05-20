@@ -27,11 +27,15 @@ parameters in VirtualGL.  Changes are reflected immediately in the application.
 	option is only available if the VGL Image Transport was active when the
 	application started.
 	{nl}{nl} \
-	__DPCM (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=sr''.
+	__DPCM (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=srdpcm''.
 	This option is only available if the Sun Ray Image Transport was active when
 	the application started.
 	{nl}{nl} \
 	__RGB (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=srrgb''.
+	This option is only available if the Sun Ray Image Transport was active when
+	the application started.
+	{nl}{nl} \
+	__YUV (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=sryuv''.
 	This option is only available if the Sun Ray Image Transport was active when
 	the application started.
 	{nl}{nl} \
