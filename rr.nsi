@@ -23,14 +23,15 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${BLDDIR}\bin\xauth.exe"
 	File "${BLDDIR}\bin\putty.exe"
 	File "${BLDDIR}\bin\plink.exe"
-	File "/oname=LICENSE-PuTTY.txt" "putty\LICENCE"
-	File "/oname=LICENSE-xauth.txt" "x11windows\xauth.license"
 	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
 	File "/oname=doc\LICENSE.txt" "LICENSE.txt"
+	File "/oname=doc\LICENSE-FLTK.txt" "fltk\COPYING"
 	File "/oname=doc\LICENSE-OpenSSL.txt" "LICENSE-OpenSSL.txt"
+	File "/oname=doc\LICENSE-PuTTY.txt" "putty\LICENCE"
+	File "/oname=doc\LICENSE-xauth.txt" "x11windows\xauth.license"
 	File "/oname=doc\ChangeLog.txt" "ChangeLog.txt"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
@@ -64,8 +65,6 @@ Section "Uninstall"
 	Delete $INSTDIR\xauth.exe
 	Delete $INSTDIR\putty.exe
 	Delete $INSTDIR\plink.exe
-	Delete $INSTDIR\LICENSE-PuTTY.txt
-	Delete $INSTDIR\LICENSE-xauth.txt
 	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
