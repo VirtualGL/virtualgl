@@ -747,7 +747,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	XFree(configs);
 	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
 	if(!vid) return NULL;
-	v=__vglVisualFromVisualID(dpy, vid);
+	v=__vglVisualFromVisualID(dpy, screen, vid);
 	if(!v) return NULL;
 	vish.add(dpy, v, c);
 
@@ -780,7 +780,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	if(!dpy || !config) return NULL;
 	vid=_MatchVisual(dpy, config);
 	if(!vid) return NULL;
-	v=__vglVisualFromVisualID(dpy, vid);
+	v=__vglVisualFromVisualID(dpy, DefaultScreen(dpy), vid);
 	if(!v) return NULL;
 	vish.add(dpy, v, config);
 

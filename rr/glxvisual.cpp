@@ -64,7 +64,8 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	if(_XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
 		&& maj_opcode>=0 && first_event>=0 && first_error>=0)
 		clientglx=1;
-	if(!(visuals=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &nv)) || nv==0)
+	vtemp.screen=screen;
+	if(!(visuals=XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &nv)) || nv==0)
 		_throw("No visuals found on display");
 
 	if(_va) {delete [] _va;  _va=NULL;}
@@ -378,11 +379,12 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 	return 0;
 }
 
-XVisualInfo *__vglVisualFromVisualID(Display *dpy, VisualID vid)
+XVisualInfo *__vglVisualFromVisualID(Display *dpy, int screen, VisualID vid)
 {
 	XVisualInfo vtemp;  int n=0;
 	vtemp.visualid=vid;
-	return XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
+	vtemp.screen=screen;
+	return XGetVisualInfo(dpy, VisualIDMask|VisualScreenMask, &vtemp, &n);
 }
 
 int __vglConfigDepth(GLXFBConfig c)
