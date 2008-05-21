@@ -34,7 +34,7 @@ typedef struct {
 
 /* JPEG luminance and chrominance quantization tables */
 
-mlib_u8 jpeg_first_bit_table[65536];
+static mlib_u8 jpeg_first_bit_table[65536];
 int jpeg_first_bit_table_init=0;
 
 /***************************************************************/
