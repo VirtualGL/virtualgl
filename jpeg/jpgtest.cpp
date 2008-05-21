@@ -130,7 +130,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 				}
 			}
 			ITER++;
-		} while((elapsed=timer.elapsed())<1.);
+		} while((elapsed=timer.elapsed())<5.);
 		_catch(tjDestroy(hnd));
 		if(quiet)
 		{
@@ -196,7 +196,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 				}
 			}
 			ITER++;
-		}	while((elapsed=timer.elapsed())<1.);
+		}	while((elapsed=timer.elapsed())<5.);
 		_catch(tjDestroy(hnd));
 		if(quiet)
 		{
