@@ -23,6 +23,8 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${BLDDIR}\bin\xauth.exe"
 	File "${BLDDIR}\bin\putty.exe"
 	File "${BLDDIR}\bin\plink.exe"
+	File "/oname=LICENSE-PuTTY.txt" "putty\LICENCE"
+	File "/oname=LICENSE-xauth.txt" "x11windows\xauth.license"
 	File "${TJDIR}\turbojpeg.dll"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
@@ -62,6 +64,8 @@ Section "Uninstall"
 	Delete $INSTDIR\xauth.exe
 	Delete $INSTDIR\putty.exe
 	Delete $INSTDIR\plink.exe
+	Delete $INSTDIR\LICENSE-PuTTY.txt
+	Delete $INSTDIR\LICENSE-xauth.txt
 	Delete $INSTDIR\turbojpeg.dll
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
