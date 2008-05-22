@@ -20,6 +20,9 @@ TurboJPEG.  This should decrease the CPU usage when running VirtualGL on
 Solaris VirtualGL servers, particularly Solaris/x86 servers running 32-bit
 applications.
 -------------------------------------------------------------------------------
+[5]
+vglconnect now works properly with Cygwin.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
