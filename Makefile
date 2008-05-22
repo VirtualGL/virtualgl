@@ -284,6 +284,9 @@ macpkg: rr diags mesademos
 	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect; \
 	install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
 	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
+	install -m 644 fltk/COPYING $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
+	install -m 644 putty/LICENCE $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
+	install -m 644 x11windows/xauth.license $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
 	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
 	install -m 644 ReadMe-MacApp.txt "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/Read Me.txt"; \
 	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/User's Guide.html"; \
