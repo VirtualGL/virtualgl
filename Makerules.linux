@@ -22,7 +22,6 @@ endif
 
 ifeq ($(M32), yes)
 ARCHFLAG = -m32
-LDFLAGS := $(LDFLAGS) -L/usr/lib
 endif
 
 _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
