@@ -5,6 +5,22 @@ Significant changes since 2.1
 Fixed issues that occurred when displaying to the second or subsequent
 screens on a multi-screen X server.
 -------------------------------------------------------------------------------
+[2]
+Updated to wxWindows Library License v3.1.
+-------------------------------------------------------------------------------
+[3]
+Added option which disables DPCM compression in the Sun Ray transport and sends
+uncompressed YUV pixels to the Sun Ray DTU.  This should improve the frame rate
+significantly with Sun Ray 1 DTUs (at the expense of using ~50% more network
+bandwidth.)  Disabling DPCM should also result in much better image quality.
+-------------------------------------------------------------------------------
+[4]
+Further optimized the Huffman encoder in the mediaLib implementation of
+TurboJPEG.  This should decrease the CPU usage when running VirtualGL on
+Solaris VirtualGL servers, particularly Solaris/x86 servers running 32-bit
+applications.
+-------------------------------------------------------------------------------
+
 
 ===============================================================================
 Significant changes since 2.1 beta1
