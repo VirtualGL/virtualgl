@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-05-19T20:12:28-06:00">
+<meta name="date" content="2008-05-21T21:02:13-06:00">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -344,13 +344,24 @@ Further information is contained in
 <a href="LICENSE-OpenSSL.txt"><code>LICENSE-OpenSSL.txt</code></a><a name="idx003"></a>,
 which can be found in the same directory as this documentation.</p>
 
-<p>VirtualGL includes software developed by the
+<p>The VirtualGL server components include software developed by the
 <span class="remote"><a href="http://www.fltk.org/" class="remote">FLTK
-Project</a></span><a name="idx004"></a>.</p>
+Project</a></span><a name="idx004"></a> and distributed under the terms
+of the <a href="LICENSE-FLTK.txt">FLTK License</a><a name="idx005"></a>.</p>
+
+<p>The VirtualGL Windows packages include
+<span class="remote"><a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/" class="remote">PuTTY</a></span><a name="idx006"></a>,
+which is released under <a href="LICENSE-PuTTY.txt">this
+license</a><a name="idx007"></a>.</p>
+
+<p>VirtualGL includes portions of
+<span class="remote"><a href="http://www.x.org" class="remote">X.org</a></span><a name="idx008"></a>,
+which is released under <a href="LICENSE-xauth.txt">this
+license</a><a name="idx009"></a>.</p>
 
 <p>VirtualGL is licensed under the <a href="LICENSE.txt">wxWindows Library
-License, v3</a><a name="idx005"></a>, a derivative of the <a href="LGPL.txt">GNU
-Lesser General Public License (LGPL)</a><a name="idx006"></a>.</p>
+License, v3.1</a><a name="idx0010"></a>, a derivative of the <a href="LGPL.txt">GNU
+Lesser General Public License (LGPL)</a><a name="idx0011"></a>.</p>
 
 <hr class="break" />
 
@@ -568,14 +579,14 @@ to send rendered 3D images to the client machine:</p>
     <td class="high standard">Recommended O/S</td>
     <td class="standard" colspan="3"><ul class="Itemize"><li>
     Any distribution in the
-    <span class="remote"><a href="http://www.redhat.com/" class="remote">RedHat</a></span><a name="idx007"></a>
+    <span class="remote"><a href="http://www.redhat.com/" class="remote">RedHat</a></span><a name="idx0012"></a>
     or
-    <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx008"></a>
+    <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0013"></a>
     families (including
-    <span class="remote"><a href="http://fedora.redhat.com/" class="remote">Fedora</a></span><a name="idx009"></a>,
-    <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0010"></a>,
+    <span class="remote"><a href="http://fedora.redhat.com/" class="remote">Fedora</a></span><a name="idx0014"></a>,
+    <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0015"></a>,
     and <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White
-    Box</a></span><a name="idx0011"></a>)
+    Box</a></span><a name="idx0016"></a>)
 </li>
 <li>
     Specifically tested with RedHat Enterprise Linux 2.1, RedHat/CentOS
@@ -597,7 +608,7 @@ to send rendered 3D images to the client machine:</p>
 <p>VirtualGL should build and run on Itanium Linux, but it has not been
 thoroughly tested. 
 <span class="remote"><a href="http://sourceforge.net/users/dcommander" class="remote">Contact
-us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
+us</a></span><a name="idx0017"></a> if you encounter any difficulties.</p>
 
 
 <h2 id="hd003003">3.3&nbsp;Solaris/x86</h2>
@@ -631,19 +642,19 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0013"></a> (v2.5 or higher recommended
+    mediaLib</a></span><a name="idx0018"></a> (v2.5 or higher recommended
     *)
 </li>
 <li>
     <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Solaris
-    Patch</a></span><a name="idx0014"></a> 118345-04 (or later)
+    Patch</a></span><a name="idx0019"></a> 118345-04 (or later)
 </li>
 <li>
     X server configured to export True Color (24-bit or 32-bit) visuals
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0015"></a> (v2.5 or higher recommended
+    mediaLib</a></span><a name="idx0020"></a> (v2.5 or higher recommended
     *)
 </li>
 <li>
@@ -681,10 +692,10 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
     <td class="high standard">Graphics</td>
     <td class="standard">Any decent 3D graphics card that supports Pbuffers <ul class="Itemize"><li>
     Tested with
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr600/" class="remote">XVR-600</a></span><a name="idx0016"></a>,
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx0017"></a>
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr600/" class="remote">XVR-600</a></span><a name="idx0021"></a>,
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx0022"></a>
     (&ldquo;jfb&rdquo;), and
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0018"></a>
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0023"></a>
     (&ldquo;kfb&rdquo;)
 </li></ul></td>
     <td class="standard">Any graphics card with decent 2D performance</td>
@@ -697,25 +708,25 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0019"></a> (pre-installed on Solaris
+    mediaLib</a></span><a name="idx0024"></a> (pre-installed on Solaris
     10 and higher)
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-    OpenGL</a></span><a name="idx0020"></a> 1.3 or later (1.5 or later
-    required for <a href="#GLP_Usage">GLP</a><a name="idx0021"></a>)
+    OpenGL</a></span><a name="idx0025"></a> 1.3 or later (1.5 or later
+    required for <a href="#GLP_Usage">GLP</a><a name="idx0026"></a>)
 </li>
 <li>
     If your system does not ship with SSh pre-installed (older Solaris
     8 and 9 systems don&rsquo;t), then download and install an OpenSSH
     package from
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0022"></a>
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0027"></a>
     or <a href="http://www.sunfreeware.com/.">http://www.sunfreeware.com/.</a>
 </li>
 <li>
     X server configured to export True Color (24-bit or 32-bit) visuals
-    (if not using <a href="#GLP_Usage">GLP</a><a name="idx0023"></a>)
-</li></ul> Recommended <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patches</a></span><a name="idx0024"></a> <ul class="Itemize"><li>
+    (if not using <a href="#GLP_Usage">GLP</a><a name="idx0028"></a>)
+</li></ul> Recommended <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patches</a></span><a name="idx0029"></a> <ul class="Itemize"><li>
     <em>OpenGL 1.5</em>: 120812-15 (or later)
 </li>
 <li>
@@ -729,12 +740,12 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li>
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun
-    mediaLib</a></span><a name="idx0025"></a> (pre-installed on Solaris
+    mediaLib</a></span><a name="idx0030"></a> (pre-installed on Solaris
     10 and higher)
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-    OpenGL</a></span><a name="idx0026"></a> 1.3 or later recommended if
+    OpenGL</a></span><a name="idx0031"></a> 1.3 or later recommended if
     the client has a 3D graphics card installed.  If available, the VirtualGL
     Client will use OpenGL to draw images, which improves the client&rsquo;s
     performance on Sun 3D graphics cards.
@@ -743,7 +754,7 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
     If your system does not ship with SSh pre-installed (older Solaris
     8 and 9 systems don&rsquo;t), then download and install an OpenSSH
     package from
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0027"></a>
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0032"></a>
     or <a href="http://www.sunfreeware.com/.">http://www.sunfreeware.com/.</a>
 </li>
 <li>
@@ -811,7 +822,7 @@ us</a></span><a name="idx0012"></a> if you encounter any difficulties.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li>
     <em>VGL Image Transport Only</em>:
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0028"></a>
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0033"></a>
     Exceed 8 or newer required
 </li>
 <li>
@@ -851,21 +862,21 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
   <tr class="standard">
     <td class="high standard">Solaris/Sparc</td>
     <td class="standard"><ul class="Itemize"><li>
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0029"></a>
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0034"></a>
     graphics card
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-    OpenGL</a></span><a name="idx0030"></a> 1.5 or later
+    OpenGL</a></span><a name="idx0035"></a> 1.5 or later
 </li>
 <li>
     OpenGL
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0031"></a>
+    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0036"></a>
     120812-14 (or later)
 </li>
 <li>
     XVR-2500 driver
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0032"></a>
+    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0037"></a>
     120928-10 (or later)
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li>
@@ -874,7 +885,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-    OpenGL</a></span><a name="idx0033"></a> 1.3 or later
+    OpenGL</a></span><a name="idx0038"></a> 1.3 or later
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -885,7 +896,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     Labs Wildcat Realizm) and is configured to export stereo pixel formats
 </li>
 <li>
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0034"></a>
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0039"></a>
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -922,7 +933,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 </li>
 <li>
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-    OpenGL</a></span><a name="idx0035"></a> 1.3 or later
+    OpenGL</a></span><a name="idx0040"></a> 1.3 or later
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -933,7 +944,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     pixel formats
 </li>
 <li>
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0036"></a>
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0041"></a>
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -947,7 +958,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Image_Transport">VirtualGL Image Transport</a><a name="idx0037"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Image_Transport">VirtualGL Image Transport</a><a name="idx0042"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
 </p></div>
 
 
@@ -962,11 +973,11 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         for 32-bit systems or <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0038"></a> of the
+        area</a></span><a name="idx0043"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0039"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0044"></a>. <br />
         <div class="important"><p class="important">
-        The 64-bit RPM provides both 32-bit and 64-bit TurboJPEG libraries. <br /><br /> .tgz packages are provided for users of non-RPM-based Linux distributions.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0040"></a> to convert these into .deb packages if you prefer.
+        The 64-bit RPM provides both 32-bit and 64-bit TurboJPEG libraries. <br /><br /> .tgz packages are provided for users of non-RPM-based Linux distributions.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0045"></a> to convert these into .deb packages if you prefer.
         </p></div>
     </li>
     <li class="Ordered" value="2">
@@ -988,9 +999,9 @@ rpm&nbsp;-U&nbsp;turbojpeg*.rpm
         for 32-bit systems or <code>VirtualGL-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0041"></a> of the
+        area</a></span><a name="idx0046"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0042"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0047"></a>. <br />
         <div class="important"><p class="important">
         The 64-bit RPM provides both 32-bit and 64-bit VirtualGL components.
         </p></div>
@@ -1015,9 +1026,9 @@ rpm&nbsp;-i&nbsp;VirtualGL*.rpm
         for Sparc or <code>SUNWvgl-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
         for x86) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0043"></a> of the
+        area</a></span><a name="idx0048"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0044"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0049"></a>. <br />
         <div class="important"><p class="important">
         Both packages provide both 32-bit and 64-bit VirtualGL components.
         </p></div>
@@ -1051,9 +1062,9 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
         Download the VirtualGL Mac disk image (<code>VirtualGL-</code><em><code>{version}</code></em><code>.dmg</code>)
         from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0045"></a> of the
+        area</a></span><a name="idx0050"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0046"></a>.
+        SourceForge web-site</a></span><a name="idx0051"></a>.
     </li>
     <li class="Ordered">
         Open the disk image, then open <code>VirtualGL-</code><em><code>{version}</code></em><code>.pkg</code>
@@ -1071,9 +1082,9 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
         Download the VirtualGL Windows installer package (<code>VirtualGL-</code><em><code>{version}</code></em><code>.exe</code>)
         from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0047"></a> of the
+        area</a></span><a name="idx0052"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0048"></a>.
+        SourceForge web-site</a></span><a name="idx0053"></a>.
     </li>
     <li class="Ordered">
         Run the VirtualGL installer.  The installation of VirtualGL should
@@ -1090,9 +1101,9 @@ for which there is not a pre-built VirtualGL binary package available,
 then log in as root, download the VirtualGL source tarball (<code>VirtualGL-</code><em><code>{version}</code></em><code>.tar.gz</code>)
 from the
 <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-area</a></span><a name="idx0049"></a> of the
+area</a></span><a name="idx0054"></a> of the
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-SourceForge web-site</a></span><a name="idx0050"></a>, uncompress it,
+SourceForge web-site</a></span><a name="idx0055"></a>, uncompress it,
 <code>cd&nbsp;vgl</code>, and read the contents of <code>BUILDING.txt</code>
 for further instructions on how to build and install VirtualGL from
 source.</p>
@@ -1105,7 +1116,7 @@ Microsystems to integrate VirtualGL with the Sun Ray thin client environment.
 If you plan to use this functionality, then it is recommended that
 you download and install the
 <span class="remote"><a href="http://www.sun.com/servers/cr/visualization/get_it.jsp" class="remote">Sun
-Shared Visualization</a></span><a name="idx0051"></a> software.  This
+Shared Visualization</a></span><a name="idx0056"></a> software.  This
 software package is available as a free download (Sun charges for support),
 and it includes VirtualGL, TurboVNC, the proprietary Sun Ray plugin,
 enhanced documentation, and enhancements to N1 GridEngine to allow
@@ -1140,7 +1151,7 @@ pkgrm&nbsp;SUNWvgl
 <ul class="Itemize">
     <li class="Itemize asterisk">
         Download and install the latest version of
-        <span class="remote"><a href="http://www.osxgnu.org/software/pkgdetail.html?project_id=244" class="remote">OSXPM</a></span><a name="idx0052"></a>
+        <span class="remote"><a href="http://www.osxgnu.org/software/pkgdetail.html?project_id=244" class="remote">OSXPM</a></span><a name="idx0057"></a>
     </li>
     <li class="Itemize asterisk">
         Launch OSXPM
@@ -1177,7 +1188,7 @@ running Vista.)</p>
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Obtaining and Installing TurboVNC</h1>
 
 <div class="important"><p class="important">
-TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use the <a href="#VGL_Image_Transport">VirtualGL Image Transport</a><a name="idx0053"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
+TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use the <a href="#VGL_Image_Transport">VirtualGL Image Transport</a><a name="idx0058"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
 </p></div>
 
 
@@ -1192,11 +1203,11 @@ TurboVNC must be installed on any machine that will act as a TurboVNC server or 
         for 32-bit systems or <code>turbojpeg-</code><em><code>{version}</code></em><code>.x86_64.rpm</code>
         for 64-bit systems) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0054"></a> of the
+        area</a></span><a name="idx0059"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0055"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0060"></a>. <br />
         <div class="important"><p class="important">
-        The 64-bit RPM provides both 32-bit and 64-bit TurboJPEG libraries. <br /><br /> .tgz packages are provided for users of non-RPM-based Linux distributions.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0056"></a> to convert these into .deb packages if you prefer.
+        The 64-bit RPM provides both 32-bit and 64-bit TurboJPEG libraries. <br /><br /> .tgz packages are provided for users of non-RPM-based Linux distributions.  You can use <span class="remote"><a href="http://www.kitenet.net/programs/alien/" class="remote">alien</a></span><a name="idx0061"></a> to convert these into .deb packages if you prefer.
         </p></div>
     </li>
     <li class="Ordered" value="2">
@@ -1217,9 +1228,9 @@ rpm&nbsp;-U&nbsp;turbojpeg*.rpm
         Download the TurboVNC RPM package (<code>turbovnc-</code><em><code>{version}</code></em><code>.i386.rpm</code>)
         from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0057"></a> of the
+        area</a></span><a name="idx0062"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0058"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0063"></a>. <br />
     </li>
     <li class="Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the RPM package,
@@ -1240,9 +1251,9 @@ rpm&nbsp;-U&nbsp;turbovnc*.rpm
         for Sparc or <code>SUNWtvnc-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>
         for x86) from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0059"></a> of the
+        area</a></span><a name="idx0064"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0060"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0065"></a>. <br />
     </li>
     <li class="Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package,
@@ -1273,9 +1284,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         Download the TurboVNC Mac disk image (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>)
         from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0061"></a> of the
+        area</a></span><a name="idx0066"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0062"></a>.
+        SourceForge web-site</a></span><a name="idx0067"></a>.
     </li>
     <li class="Ordered">
         Open the disk image, then open <code>TurboVNC-</code><em><code>{version}</code></em><code>.pkg</code>
@@ -1293,9 +1304,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         Download the TurboVNC Windows installer package (<code>TurboVNC-</code><em><code>{version}</code></em><code>.exe</code>)
         from the
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-        area</a></span><a name="idx0063"></a> of the
+        area</a></span><a name="idx0068"></a> of the
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-        SourceForge web-site</a></span><a name="idx0064"></a>.
+        SourceForge web-site</a></span><a name="idx0069"></a>.
     </li>
     <li class="Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be
@@ -1312,9 +1323,9 @@ for which there is not a pre-built TurboVNC binary package available,
 then log in as root, download the TurboVNC source tarball (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>)
 from the
 <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">files
-area</a></span><a name="idx0065"></a> of the
+area</a></span><a name="idx0070"></a> of the
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL
-SourceForge web-site</a></span><a name="idx0066"></a>, uncompress it,
+SourceForge web-site</a></span><a name="idx0071"></a>, uncompress it,
 <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read the contents of <code>BUILDING.txt</code>
 for further instructions on how to build and install TurboVNC from
 source.</p>
@@ -1348,7 +1359,7 @@ pkgrm&nbsp;SUNWtvnc
 <ul class="Itemize">
     <li class="Itemize asterisk">
         Download and install the latest version of
-        <span class="remote"><a href="http://www.osxgnu.org/software/pkgdetail.html?project_id=244" class="remote">OSXPM</a></span><a name="idx0067"></a>
+        <span class="remote"><a href="http://www.osxgnu.org/software/pkgdetail.html?project_id=244" class="remote">OSXPM</a></span><a name="idx0072"></a>
     </li>
     <li class="Itemize asterisk">
         Launch OSXPM
@@ -1413,7 +1424,7 @@ any graphics card in a multi-card system.</p>
 
 <p>If your system is running
 <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun
-OpenGL</a></span><a name="idx0068"></a> 1.5 for Solaris/Sparc, it is
+OpenGL</a></span><a name="idx0073"></a> 1.5 for Solaris/Sparc, it is
 recommended that you configure it to use GLP:</p>
 
 <ol class="Ordered numeric">
@@ -1508,14 +1519,14 @@ when invoking VirtualGL.  See Chapter
 <h2 id="hd006002">6.2&nbsp;Granting Access to the Server&rsquo;s X Display</h2>
 
 <div class="important"><p class="important">
-If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0069"></a>, then you can skip this section.
+If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0074"></a>, then you can skip this section.
 </p></div>
 
 <p>VirtualGL requires access to the server&rsquo;s 3D graphics card so
 that it can create off-screen pixel buffers (Pbuffers) and redirect
 the 3D rendering from applications into these Pbuffers.  Unfortunately,
 accessing a 3D graphics card on Linux and Solaris/x86 systems or on
-Solaris/Sparc systems without <a href="#GLP_Usage">GLP</a><a name="idx0070"></a>
+Solaris/Sparc systems without <a href="#GLP_Usage">GLP</a><a name="idx0075"></a>
 requires going through an X server.  On such systems, the only way
 to share the server&rsquo;s 3D graphics card among multiple users is
 to grant those users access to the X server that is running on the
@@ -1850,17 +1861,17 @@ following patches from the Hummingbird support site:</p>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 8.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0071"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0076"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 9.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0072"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0077"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Mega Patch</a></span><a name="idx0073"></a>.)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0074"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Mega Patch</a></span><a name="idx0078"></a>.)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0079"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -2035,7 +2046,7 @@ vglconnect&nbsp;{user}@{server}
 
 <p><a name="Direct_X11_Connection"></a></p>
 
-<p>As with the <a href="#X11_Forwarding">previous mode</a><a name="idx0075"></a>,
+<p>As with the <a href="#X11_Forwarding">previous mode</a><a name="idx0080"></a>,
 this mode performs optimally on local-area networks.  However, it is
 less secure, since both the X11 traffic and the VGL image stream are
 unencrypted.  This mode is primarily useful in grid environments where
@@ -2053,7 +2064,7 @@ Some newer Linux and Solaris distributions ship with default settings that do no
 <h3 id="hd008002001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0076"></a>, except that you should pass a
+forwarding</a><a name="idx0081"></a>, except that you should pass a
 <code>-x</code> argument to <code>vglconnect</code> when connecting
 to the server:</p>
 
@@ -2067,7 +2078,7 @@ to the server:</p>
 <p><a name="SSL_Encryption"></a></p>
 
 <p>This mode encrypts the VGL image stream and, when used in conjunction
-with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0077"></a>,
+with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0082"></a>,
 provides a completely secure solution. However, enabling SSL encryption
 can reduce VirtualGL&rsquo;s performance by as much as 20% on high-speed
 networks such as Ethernet.</p>
@@ -2076,7 +2087,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008003001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0078"></a>, except that you should pass an
+forwarding</a><a name="idx0083"></a>, except that you should pass an
 argument of <code>+s</code> to <code>vglrun</code> when starting a
 3D application using VirtualGL.  You can also set the environment variable
 <code>VGL_SSL</code> to <code>1</code> on the VirtualGL server prior
@@ -2100,7 +2111,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008004001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for <a href="#X11_Forwarding">X11
-forwarding</a><a name="idx0079"></a>, except that you should pass a
+forwarding</a><a name="idx0084"></a>, except that you should pass a
 <code>-s</code> argument to <code>vglconnect</code> when connecting
 to the server:</p>
 
@@ -2229,7 +2240,7 @@ instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall
 to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh
-Tunneling</a><a name="idx0080"></a>.</p>
+Tunneling</a><a name="idx0085"></a>.</p>
 
 <hr class="break" />
 
@@ -2256,9 +2267,9 @@ workloads that VirtualGL generates. Therefore, the VirtualGL Project
 provides an optimized X proxy called &ldquo;TurboVNC&rdquo;, which
 is based on the
 <span class="remote"><a href="http://www.realvnc.com/" class="remote">Virtual
-Network Computing (VNC)</a></span><a name="idx0081"></a> standard (more
+Network Computing (VNC)</a></span><a name="idx0086"></a> standard (more
 specifically, on the
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0082"></a>
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0087"></a>
 variant thereof.)</p>
 
 <p>On the surface, TurboVNC behaves very similarly to its parent project,
@@ -2500,7 +2511,7 @@ TurboVNC server for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Image Transport to transmit images
 from a VirtualGL server to a TurboVNC server is the same as the
-<a href="#X11_Forwarding">procedure</a><a name="idx0083"></a> for using
+<a href="#X11_Forwarding">procedure</a><a name="idx0088"></a> for using
 the VGL Image Transport to transmit images to a remote X server, with
 the following notable differences:</p>
 
@@ -2806,7 +2817,7 @@ many of its features.</p>
 
 <p><a name="X11_Proxy_Usage"></a></p>
 
-<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0084"></a>
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0089"></a>
 described how to use VirtualGL with TurboVNC, but much of this information
 is also applicable to other X proxies, such as RealVNC, NX, etc.  Generally,
 none of these other solutions will provide anywhere near the performance
@@ -2874,7 +2885,7 @@ ssh&nbsp;-X&nbsp;{user}@{server}
 </ol>
 
 <p>Note that this procedure is substantially similar to the <a href="#X11_Forwarding">X11
-Forwarding</a><a name="idx0085"></a> procedure used with the VGL Image
+Forwarding</a><a name="idx0090"></a> procedure used with the VGL Image
 Transport, except that it invokes <code>ssh</code> directly rather
 than using the <code>vglconnect</code> wrapper script.  <code>vglconnect</code>
 launches <code>vglclient</code>, and <code>vglclient</code> is not
@@ -3170,7 +3181,7 @@ configuration, and VirtualGL would have to be made DMX-aware for it
 to perform the same job.  Maybe at some point in the future &hellip;
 If you have a need for such a configuration,
 <span class="remote"><a href="http://sourceforge.net/users/dcommander" class="remote">let
-us know</a></span><a name="idx0086"></a>.</p>
+us know</a></span><a name="idx0091"></a>.</p>
 
 
 <h2 id="hd0014002">14.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
@@ -3479,7 +3490,7 @@ a 64-bit application.)</p>
     <td class="standard">ANSYS v11.0</td>
     <td class="standard">All</td>
     <td class="standard">If you experience extremely long delays (on the order of minutes) when reading input data or performing other operations in ANSYS: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching ANSYS.  When running ANSYS in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching ANSYS.</td>
-    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0087"></a> below</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0092"></a> below</td>
   </tr>
   <tr class="standard">
     <td class="standard">Army Ops</td>
@@ -3563,7 +3574,7 @@ a 64-bit application.)</p>
     <td class="standard">Pro/ENGINEER Wildfire v3.0</td>
     <td class="standard">All</td>
     <td class="standard">If you experience extremely long delays (on the order of minutes) when zooming or performing other operations in Pro/E: <br /><br /> If using the VGL Image Transport, set the environment variable <code>VGL_INTERFRAME</code> to <code>0</code> on the VirtualGL server prior to launching Pro/E.  When running Pro/E in a TurboVNC session on the VirtualGL server, set the environment variable <code>VGL_FPS</code> to <code>20</code> prior to launching Pro/E.</td>
-    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0088"></a> below</td>
+    <td class="standard">See <a href="#ansys_proe">notes</a><a name="idx0093"></a> below</td>
   </tr>
   <tr class="standard">
     <td class="standard">QGL (OpenGL Qt Widget)</td>
@@ -3726,7 +3737,7 @@ will (by default) use quad-buffered stereo rendering if:</p>
 to using anaglyphic stereo (see below.)  It is usually necessary to
 explicitly enable stereo in the graphics driver configuration for both
 the client and server machines.  The
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0089"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0094"></a>
 section below lists a way to verify that both client and server have
 stereo visuals available.</p>
 
@@ -3808,7 +3819,7 @@ they need only be supported and enabled on the client machine.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work
 with VirtualGL.  True color (24-bit) overlays work, in theory, but
 have not been tested.  Use <code>glxinfo</code> (see
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0090"></a>
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0095"></a>
 below) to verify whether your client&rsquo;s X display supports overlays
 and whether they are enabled.  In Exceed 3D, make sure that the &ldquo;Overlay
 Support&rdquo; option is checked in the &ldquo;Exceed 3D and GLX&rdquo;
@@ -4697,7 +4708,7 @@ method:</p>
         library to load. <br /><br /> You shouldn&rsquo;t need to muck with
         this unless something doesn&rsquo;t work.  However, this setting is
         necessary when using VirtualGL with
-        <a href="#Chromium">Chromium</a><a name="idx0091"></a>.
+        <a href="#Chromium">Chromium</a><a name="idx0096"></a>.
     </dd>
 </dl>
 
@@ -5021,7 +5032,7 @@ method:</p>
         quality level at which JPEG compression becomes perceptually lossless
         is different for each image, but experiments with various visual difference
         benchmarks (such as
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0092"></a>)
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0097"></a>)
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual
         losslessness in the types of applications (volume visualization apps,
         in particular) where image quality is critical.  As with any benchmarks,
@@ -5062,7 +5073,7 @@ method:</p>
         disables VirtualGL&rsquo;s readback mechanism and prevents duplication
         of effort. <br /><br /> This feature was developed initially to support
         running
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0093"></a>
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0098"></a>
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1
         through N as rendering servers, each drawing a portion of the geometry
         into a separate window on a separate X display. ParaView reads back
@@ -5330,7 +5341,7 @@ method:</p>
         initially as a way to pass the GLX conformance suite (<code>conformx</code>,
         specifically), but at least one commercial application is known to
         require it as well (see <a href="#Application_Recipes">Application
-        Recipes</a><a name="idx0094"></a>.)<br /><br />When <code>VGL_SYNC</code>
+        Recipes</a><a name="idx0099"></a>.)<br /><br />When <code>VGL_SYNC</code>
         is enabled, every call to <code>glFinish()</code>, <code>glXWaitGL()</code>,
         and <code>glXSwapBuffers()</code> will cause the contents of the server&rsquo;s
         framebuffer to be read back and <em>synchronously</em> drawn into the
@@ -5376,7 +5387,7 @@ method:</p>
         (assuming interframe comparison is enabled.)  The VGL Image Transport
         will also divide up the task of compressing these tiles among the available
         CPUs in a round robin fashion, if multi-threaded compression is enabled
-        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0095"></a>.)
+        (see <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx00100"></a>.)
         <br /><br /> There are several tradeoffs that must be considered when
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em>
         <ul class="Itemize"><li>
