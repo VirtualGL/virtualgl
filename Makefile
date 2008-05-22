@@ -97,7 +97,10 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
 	$(INSTALL) -m 755 $(EDIR)/vglconfig64 $(prefix)/bin/vglconfig64
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
 	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
@@ -125,7 +128,10 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
 	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
