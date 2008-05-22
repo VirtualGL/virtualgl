@@ -102,7 +102,10 @@ ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 ln -fs /opt/%{name}/fakelib $RPM_BUILD_ROOT/opt/%{name}/lib
 ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 
-chmod 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+cp fltk/COPYING LICENSE-FLTK.txt
+cp putty/LICENCE LICENSE-PuTTY.txt
+cp x11windows/xauth.license LICENSE-xauth.txt
+chmod 644 LGPL.txt LICENSE.txt LICENSE-FLTK.txt LICENSE-OpenSSL.txt LICENSE-PuTTY.txt LICENSE-xauth.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
 echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
@@ -119,7 +122,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %files -n %{name}
 %defattr(-,root,root)
-%doc LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+%doc LGPL.txt LICENSE.txt LICENSE-FLTK.txt LICENSE-OpenSSL.txt LICENSE-PuTTY.txt LICENSE-xauth.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
 
 %dir /opt/%{name}
 %dir /opt/%{name}/bin

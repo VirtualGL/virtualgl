@@ -97,7 +97,10 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
 	$(INSTALL) -m 755 $(EDIR)/vglconfig64 $(prefix)/bin/vglconfig64
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
 	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
@@ -125,7 +128,10 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
 	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $(prefix)/doc
+	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
 	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
 	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
 	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
@@ -278,6 +284,9 @@ macpkg: rr diags mesademos
 	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect; \
 	install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
 	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
+	install -m 644 fltk/COPYING $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
+	install -m 644 putty/LICENCE $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
+	install -m 644 x11windows/xauth.license $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
 	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
 	install -m 644 ReadMe-MacApp.txt "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/Read Me.txt"; \
 	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/User's Guide.html"; \

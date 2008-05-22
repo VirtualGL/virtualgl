@@ -49,7 +49,10 @@ fi
 echo d none SUNWvgl/doc 0755 root bin
 echo f none SUNWvgl/doc/LGPL.txt 0644 root bin
 echo f none SUNWvgl/doc/LICENSE.txt 0644 root bin
+echo f none SUNWvgl/doc/LICENSE-FLTK.txt 0644 root bin
 echo f none SUNWvgl/doc/LICENSE-OpenSSL.txt 0644 root bin
+echo f none SUNWvgl/doc/LICENSE-PuTTY.txt 0644 root bin
+echo f none SUNWvgl/doc/LICENSE-xauth.txt 0644 root bin
 echo f none SUNWvgl/doc/ChangeLog.txt 0644 root bin
 for i in doc/*.gif; do echo f none SUNWvgl/$i 0644 root bin; done
 echo f none SUNWvgl/doc/index.html 0644 root bin
