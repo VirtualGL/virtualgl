@@ -219,7 +219,7 @@ endif
 
 ifeq ($(platform), cygwin)
 
-dist: rr diags 
+dist: rr diags mesademos
 	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; __PWD=`pwd`; \
 	mkdir -p $$TMPDIR/pkg/usr/bin; \
 	mkdir -p $$TMPDIR/pkg/opt/VirtualGL/bin; \
@@ -336,7 +336,7 @@ macpkg: rr diags mesademos
 	sudo rm -rf $$TMPDIR
 
 .PHONY: tarball
-tarball: rr diags
+tarball: rr diags mesademos
 	rm -rf $(BLDDIR)/fakeroot
 	rm -f $(BLDDIR)/$(APPNAME).tar.gz
 	$(MAKE) prefix=$(BLDDIR)/fakeroot install
