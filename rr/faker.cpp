@@ -17,7 +17,6 @@
 #include <sys/signal.h>
 #include <string.h>
 #include <math.h>
-#include "rrutil.h"
 #include "rrtimer.h"
 #include "rrthread.h"
 #include "rrmutex.h"

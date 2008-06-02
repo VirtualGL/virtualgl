@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "rr.h"
-#include "rrutil.h"
 #include "rrlog.h"
 #include "rrsunray.h"
 #include <stdio.h>
@@ -31,6 +30,7 @@
 #include <sys/ipc.h>
 #include <sys/types.h>
 #endif
+#include "rrutil.h"
 
 #define DEFQUAL 95
 
