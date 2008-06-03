@@ -248,6 +248,17 @@ Each method of configuration takes precedence over the previous method:
 	messages (including profiling and trace output) to the specified log file
 	rather than to stderr.
 
+| Environment Variable | ''VGL_LOGO = ''__''0 \| 1''__ |
+| Summary | Enable or disable the display of a VGL logo in the 3D window |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Setting ''VGL_LOGO'' to ''1'' will cause VirtualGL to display
+	a small logo in the bottom right-hand corner of the 3D window.  This is meant
+	as a debugging tool to allow users to determine whether or not VirtualGL is
+	active.
+
 {anchor: VGL_NPROCS}
 | Environment Variable | ''VGL_NPROCS = ''__''{n}''__ |
 | ''vglrun'' argument | ''-np ''__''{n}''__ |

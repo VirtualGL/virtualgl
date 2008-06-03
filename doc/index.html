@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-05-21T21:02:13-06:00">
+<meta name="date" content="2008-06-02T22:38:57">
 <meta name="generator" content="deplate.rb 0.8">
-<title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
+<title>User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
@@ -31,7 +31,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers,
@@ -4819,6 +4819,38 @@ method:</p>
         the VirtualGL server will cause VirtualGL to redirect all of its messages
         (including profiling and trace output) to the specified log file rather
         than to stderr.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_LOGO&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Enable or disable the display of a VGL logo in the 3D window</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description">Description</dt>
+    <dd class="Description">
+        Setting <code>VGL_LOGO</code> to <code>1</code> will cause VirtualGL
+        to display a small logo in the bottom right-hand corner of the 3D window.
+        This is meant as a debugging tool to allow users to determine whether
+        or not VirtualGL is active.
     </dd>
 </dl>
 

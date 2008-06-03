@@ -23,6 +23,11 @@ applications.
 [5]
 vglconnect now works properly with Cygwin.
 -------------------------------------------------------------------------------
+[6]
+Added option which, when enabled, will cause VirtualGL to display a logo in the
+bottom right-hand corner of the 3D window.  This is meant as a debugging tool
+to allow users to determine whether or not VirtualGL is active.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
