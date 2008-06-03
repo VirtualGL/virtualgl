@@ -28,6 +28,7 @@
 #ifdef USEMEDIALIB
 #include <mlib.h>
 #endif
+#include "vgllogo.h"
 
 #define jpegsub(s) (s>=4?TJ_411:s==2?TJ_422:s==1?TJ_444:s==0?TJ_GRAYSCALE:TJ_444)
 
@@ -258,6 +259,52 @@ class rrframe
 			}
 		}
 
+	}
+
+	void addlogo(void)
+	{
+		unsigned char *rowptr, *colptr, *logoptr=vgllogo;
+		int rindex=_flags&RRBMP_BGR? 2:0, gindex=1, bindex=_flags&RRBMP_BGR? 0:2;
+		if(_flags&RRBMP_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
+
+		if(!_bits || _h.width<1 || _h.height<1) return;
+		if(_flags&RRBMP_BOTTOMUP)
+			rowptr=&_bits[_pitch*(VGLLOGO_HEIGHT+1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
+		else
+			rowptr=&_bits[_pitch*(_h.height-VGLLOGO_HEIGHT-1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
+		for(int j=0; j<VGLLOGO_HEIGHT; j++)
+		{
+			colptr=rowptr;
+			for(int i=0; i<VGLLOGO_WIDTH; i++)
+			{
+				if(*(logoptr++))
+				{
+					colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
+				}
+				colptr+=_pixelsize;
+			}
+			rowptr+=(_flags&RRBMP_BOTTOMUP)? -_pitch:_pitch;
+		}
+
+		if(!_rbits) return;
+		logoptr=vgllogo;
+		if(_flags&RRBMP_BOTTOMUP)
+			rowptr=&_rbits[_pitch*(VGLLOGO_HEIGHT+1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
+		else
+			rowptr=&_rbits[_pitch*(_h.height-VGLLOGO_HEIGHT-1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
+		for(int j=0; j<VGLLOGO_HEIGHT; j++)
+		{
+			colptr=rowptr;
+			for(int i=0; i<VGLLOGO_WIDTH; i++)
+			{
+				if(*(logoptr++))
+				{
+					colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
+				}
+				colptr+=_pixelsize;
+			}
+			rowptr+=(_flags&RRBMP_BOTTOMUP)? -_pitch:_pitch;
+		}
 	}
 
 	rrframeheader _h;

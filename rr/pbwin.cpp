@@ -452,6 +452,7 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
 			buf, bottomup);
 	}
+	if(fconfig.logo) f.addlogo();
 	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
 	return 0;
@@ -501,6 +502,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	b->_h.subsamp=subsamp;
 	b->_h.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
+	if(fconfig.logo) b->addlogo();
 	rrdpy->sendframe(b);
 }
 
@@ -560,6 +562,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
 			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, true);
 	}
+	if(fconfig.logo) b->addlogo();
 	_blitter->sendframe(b, sync);
 }
 

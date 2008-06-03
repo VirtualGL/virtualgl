@@ -314,6 +314,7 @@ class FakerConfig
 			guimod=ShiftMask|ControlMask;
 			interframe=true;
 			localdpystring=(char *)":0";
+			logo=false;
 			mcompress.setbounds(RRCOMP_JPEG, RRCOMP_RGB);
 			mcompress=RRCOMP_JPEG;
 			mqual.setbounds(1, 100);
@@ -505,6 +506,7 @@ class FakerConfig
 			}
 			interframe.get("VGL_INTERFRAME");
 			log.get("VGL_LOG");
+			logo.get("VGL_LOGO");
 			zoomx.get("VGL_ZOOM_X");
 			zoomy.get("VGL_ZOOM_Y");
 			progressive.get("VGL_PROGRESSIVE");
@@ -563,6 +565,7 @@ class FakerConfig
 		ConfigBool interframe;
 		ConfigString localdpystring;
 		ConfigString log;
+		ConfigBool logo;
 		ConfigInt mcompress;
 		ConfigInt mqual;
 		ConfigInt msubsamp;
@@ -605,6 +608,7 @@ class FakerConfig
 			prconfint_s(interframe)
 			prconfstr_s(localdpystring)
 			prconfstr_s(log)
+			prconfint_s(logo)
 			prconfint_s(mcompress)
 			prconfstr_s(moviefile)
 			prconfint_s(mqual)
