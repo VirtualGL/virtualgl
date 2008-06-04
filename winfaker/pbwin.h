@@ -49,7 +49,7 @@ class pbwin
 {
 	public:
 
-		pbwin(HWND, HDC);
+		pbwin(HWND, HDC, int);
 		~pbwin(void);
 		void clear(void);
 		void cleanup(void);

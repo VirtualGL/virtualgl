@@ -24,6 +24,7 @@
 #include "fakerconfig.h"
 #define __FAKERHASH_STATICDEF__
 #include "faker-winhash.h"
+#include "faker-pfhash.h"
 #include "detours.h"
 
 
@@ -65,6 +66,7 @@ static inline int isdead(void)
 static void __vgl_cleanup(void)
 {
 	if(winhash::isalloc()) winh.killhash();
+	if(pfhash::isalloc()) pfh.killhash();
 }
 
 
@@ -262,7 +264,7 @@ static void __vgl_fakerinit(HDC hdc)
 int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 	CONST PIXELFORMATDESCRIPTOR *ppfd)
 {
-	int pixelformat=0;
+	int pixelformat=0, pbpf=-1;
 	int attribs[256], i=0;
 
 	TRY();
@@ -273,7 +275,7 @@ int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 
 	if(ppfd && (ppfd->dwFlags)&PFD_SUPPORT_OPENGL)
 	{
-//		attribs[i++]=WGL_ACCELERATION_ARB;  attribs[i++]=WGL_FULL_ACCELERATION_ARB;
+		attribs[i++]=WGL_ACCELERATION_ARB;  attribs[i++]=WGL_FULL_ACCELERATION_ARB;
 		if(ppfd->cAccumBits!=0)
 		{
 			attribs[i++]=WGL_ACCUM_BITS_ARB;  attribs[i++]=ppfd->cAccumBits;
@@ -384,18 +386,20 @@ int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 
 		attribs[i++]=0;
 
-		stoptrace();  prargal13(attribs);  prargi(pixelformat);  closetrace();
-
-		unsigned int count=0;  int pf=-1;
-		if(!wglChoosePixelFormatARB(hdc, attribs, NULL, 1, &pf,
+		unsigned int count=0;
+		if(!wglChoosePixelFormatARB(hdc, attribs, NULL, 1, &pbpf,
 			&count))
 			_throww32m("Could not create Pbuffer pixel format");
-		if(pf<0 || count<1) pixelformat=0;
-		else pixelformat=pf;
+		if(pbpf<0 || count<1)
+			_throw("Could not create Pbuffer pixel format");
+		pixelformat=__ChoosePixelFormat(hdc, ppfd);
+		if(!pixelformat) return 0;
+		pfh.add(hdc, pixelformat, pbpf);
 	}
 	else pixelformat=__ChoosePixelFormat(hdc, ppfd);
 
-		stoptrace();  prargal13(attribs);  prargi(pixelformat);  closetrace();
+		stoptrace();  prargal13(attribs);  prargi(pixelformat);  prargi(pbpf);
+		closetrace();
 
 	CATCH();
 
@@ -419,7 +423,9 @@ HGLRC __declspec(dllexport) WINAPI fake_wglCreateContext(HDC hdc)
 	{
 		if(!winh.findpb(hwnd, NULL, pbw))
 		{
-			pbw=new pbwin(hwnd, hdc);
+			int pf=pfh.find(hdc, GetPixelFormat(hdc));
+			if(!pf) _throw("Current pixel format was not obtained using ChoosePixelFormat().  I'm stymied.");
+			pbw=new pbwin(hwnd, hdc, pf);
 			errifnot(pbw);
 			winh.add(hwnd, NULL, pbw);
 		}

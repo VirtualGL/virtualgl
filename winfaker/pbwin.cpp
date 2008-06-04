@@ -109,9 +109,9 @@ void pbuffer::swap(void)
 // This class encapsulates the Pbuffer, its most recent ancestor, and
 // information specific to its corresponding X window
 
-pbwin::pbwin(HWND hwnd, HDC hdc)
+pbwin::pbwin(HWND hwnd, HDC hdc, int pixelformat)
 {
-	if(!hwnd || !hdc) _throw("Invalid argument");
+	if(!hwnd || !hdc || pixelformat<1) _throw("Invalid argument");
 	_force=false;
 	_pb=NULL;
 	_hwnd=hwnd;
@@ -122,8 +122,7 @@ pbwin::pbwin(HWND hwnd, HDC hdc)
 	_dirty=false;
 	_rdirty=false;
 	_autotestframecount=0;
-	_pixelformat=GetPixelFormat(hdc);
-	if(!_pixelformat) _throw("Device context has no current pixel format");
+	_pixelformat=pixelformat;
 	int attrib=WGL_DRAW_TO_PBUFFER_ARB, value=0;
 	if(!wglGetPixelFormatAttribivARB(hdc, _pixelformat, 0, 1, &attrib, &value)
 		|| value==0)
