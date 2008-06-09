@@ -22,8 +22,6 @@
 #include "rr.h"
 #include "rrlog.h"
 #include <stdio.h>
-#include <X11/X.h>
-#include <X11/keysym.h>
 
 #define MAXSTR 256
 

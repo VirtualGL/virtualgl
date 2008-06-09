@@ -112,7 +112,7 @@ static char _message[256];
 #define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
 #define prargal11(a) if(a) {  \
 	rrout.print("attrib_list=[");  \
-	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
+	for(int __an=0; attrib_list[__an]!=0; __an++) {  \
 		rrout.print("0x%.4x", attrib_list[__an]);  \
 		if(attrib_list[__an]!=GLX_USE_GL && attrib_list[__an]!=GLX_DOUBLEBUFFER  \
 			&& attrib_list[__an]!=GLX_STEREO && attrib_list[__an]!=GLX_RGBA)  \
@@ -121,7 +121,7 @@ static char _message[256];
 	}  rrout.print("] ");}
 #define prargal13(a) if(a) {  \
 	rrout.print("attrib_list=[");  \
-	for(int __an=0; a[__an]!=None; __an+=2) {  \
+	for(int __an=0; a[__an]!=0; __an+=2) {  \
 		rrout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
 	}  rrout.print("] ");}
 
