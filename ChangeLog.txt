@@ -23,6 +23,10 @@ applications.
 [5]
 vglconnect now works properly with Cygwin.
 -------------------------------------------------------------------------------
+[6]
+Fixed regression that caused VirtualGL to remove any part of the VGL_XVENDOR
+string following the first white space.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
