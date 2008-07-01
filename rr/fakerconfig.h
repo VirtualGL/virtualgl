@@ -199,13 +199,7 @@ class ConfigString : public Config
 					{
 						temp=&temp[i];  break;
 					}
-				if(strlen(temp)>0)
-				{ 	 
-					for(int i=0; i<(int)strlen(temp); i++) 	 
-						if(temp[i]==' ' || temp[i]=='\t')
-							{temp[i]='\0';  break;}
-					set(temp); 	 
-				}
+				if(strlen(temp)>0) set(temp);
 			}
 		}
 
@@ -213,6 +207,16 @@ class ConfigString : public Config
 		{
 			if(_s) free(_s);
 			if(s && strlen(s)>0) {_s=strdup(s);  _set=true;}  else {_s=NULL;  _set=false;}
+		}
+
+		void removespaces(void)
+		{
+			if(_s && strlen(_s)>0)
+			{
+				for(int i=0; i<(int)strlen(_s); i++)
+					if(_s[i]==' ' || _s[i]=='\t')
+						{_s[i]='\0';  break;}
+			}
 		}
 
 	private:
@@ -397,7 +401,10 @@ class FakerConfig
 			#ifdef USEGLP
 			if(localdpystring &&
 				(localdpystring[0]=='/' || !strnicmp(localdpystring, "GLP", 3)))
+			{
 				glp=true;
+				localdpystring.removespaces();
+			}
 			#endif
 			qual.get("VGL_QUAL");
 			if((env=subsamp.envget("VGL_SUBSAMP"))!=NULL)
