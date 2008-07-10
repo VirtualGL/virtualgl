@@ -311,6 +311,9 @@ unconfigglx() {
 	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
 		enablextest /etc/gdm/custom.conf
 	fi
+	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
+		enablextest /etc/X11/gdm/custom.conf
+	fi
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
 		enablextest /etc/opt/gnome/gdm/gdm.conf
 	fi
@@ -328,6 +331,9 @@ unconfigglx() {
 	fi
 	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
 		disallowgdmtcp /etc/gdm/custom.conf
+	fi
+	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
+		disallowgdmtcp /etc/X11/gdm/custom.conf
 	fi
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
 		disallowgdmtcp /etc/opt/gnome/gdm/gdm.conf
@@ -432,21 +438,29 @@ configglx() {
 		fi
 
 		if [ ! -f /etc/dt/config/Xsetup ]; then
-			echo ... Copying /usr/dt/config/Xsetup to /etc/dt/config/Xsetup ...
-			cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup
+			if [ -f /usr/dt/config/Xsetup ]; then
+				echo ... Copying /usr/dt/config/Xsetup to /etc/dt/config/Xsetup ...
+				cp /usr/dt/config/Xsetup /etc/dt/config/Xsetup
+			fi
 		else
 			backup /etc/dt/config/Xsetup
 		fi
-		addvglgenkey /etc/dt/config/Xsetup bottom
+		if [ -f /etc/dt/config/Xsetup ]; then
+			addvglgenkey /etc/dt/config/Xsetup bottom
+		fi
 
 		if [ ! -f /etc/dt/config/Xconfig ]; then
-			echo ... Copying /usr/dt/config/Xconfig to /etc/dt/config/Xconfig ...
-			cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig
+			if [ -f /usr/dt/config/Xconfig ]; then
+				echo ... Copying /usr/dt/config/Xconfig to /etc/dt/config/Xconfig ...
+				cp /usr/dt/config/Xconfig /etc/dt/config/Xconfig
+			fi
 		else
 			backup /etc/dt/config/Xconfig
 		fi
-		echo ... Setting Dtlogin\*grabServer to False in /etc/dt/config/Xconfig ...
-		replaceline /etc/dt/config/Xconfig Dtlogin\\*grabServer "Dtlogin\*grabServer: False"
+		if [ -f /etc/dt/config/Xconfig ]; then
+			echo ... Setting Dtlogin\*grabServer to False in /etc/dt/config/Xconfig ...
+			replaceline /etc/dt/config/Xconfig Dtlogin\\*grabServer "Dtlogin\*grabServer: False"
+		fi
 		if [ -f /etc/dt/config/Xconfig.SUNWut.prototype ]; then
 			backup /etc/dt/config/Xconfig.SUNWut.prototype
 			echo ... Setting Dtlogin\*grabServer to False in /etc/dt/config/Xconfig.SUNWut.prototype ...
@@ -476,6 +490,13 @@ configglx() {
 			enablextest /etc/gdm/custom.conf
 		fi
 	fi
+	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/X11/gdm/custom.conf
+		else
+			enablextest /etc/X11/gdm/custom.conf
+		fi
+	fi
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
 		if [ "$DISABLEXTEST" = "1" ]; then
 			disablextest /etc/opt/gnome/gdm/gdm.conf
@@ -493,10 +514,14 @@ configglx() {
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ "$DISABLEXTEST" = "1" ]; then
 			if [ ! -f /etc/dt/config/Xservers ]; then
-	 			echo ... Copying /usr/dt/config/Xservers to /etc/dt/config/Xservers ...
-				cp /usr/dt/config/Xservers /etc/dt/config/Xservers
+				if [ -f /usr/dt/config/Xservers ]; then
+		 			echo ... Copying /usr/dt/config/Xservers to /etc/dt/config/Xservers ...
+					cp /usr/dt/config/Xservers /etc/dt/config/Xservers
+				fi
 			fi
-			disablextest /etc/dt/config/Xservers
+			if [ -f /etc/dt/config/Xservers ]; then
+				disablextest /etc/dt/config/Xservers
+			fi
 		else
 			if [ -f /etc/dt/config/Xservers ]; then
 				enablextest /etc/dt/config/Xservers
@@ -516,6 +541,9 @@ configglx() {
 	fi
 	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
 		allowgdmtcp /etc/gdm/custom.conf
+	fi
+	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
+		allowgdmtcp /etc/X11/gdm/custom.conf
 	fi
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
 		allowgdmtcp /etc/opt/gnome/gdm/gdm.conf
