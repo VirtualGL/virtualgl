@@ -32,6 +32,9 @@ to allow users to determine whether or not VirtualGL is active.
 Fixed regression that caused VirtualGL to remove any part of the VGL_XVENDOR
 string following the first white space.
 -------------------------------------------------------------------------------
+[8]
+vglserver_config now works properly with OpenSolaris.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
