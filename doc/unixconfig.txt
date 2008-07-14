@@ -133,6 +133,11 @@ prompt.
 			svcadm disable gdm2-login
 			---
 
+		OpenSolaris servers running GDM :: {:}
+			#Verb: <<---
+			svcadm disable gdm
+			---
+
 		Solaris servers running dtlogin :: {:}
 			#Verb: <<---
 			/etc/init.d/dtlogin stop
@@ -218,6 +223,11 @@ prompt.
 		Solaris 10 (and later) servers running GDM :: {:}
 			#Verb: <<---
 			svcadm enable gdm2-login
+			---
+
+		OpenSolaris servers running GDM :: {:}
+			#Verb: <<---
+			svcadm enable gdm
 			---
 
 		Solaris servers running dtlogin :: {:}
