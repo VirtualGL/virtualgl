@@ -122,9 +122,19 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
 	try {
 
-	errifnot(winh.findpb(GetCurrentDrawable(), pbw));
-	errifnot(dpy = pbw->getwindpy());
-	errifnot(win = pbw->getwin());
+	GLXDrawable draw=GetCurrentDrawable();
+	if(winh.findpb(draw, pbw))
+	{
+		// Current drawable is a virtualized window
+		errifnot(dpy = pbw->getwindpy());
+		errifnot(win = pbw->getwin());
+	}
+	else if((win=pmh.reversefind(draw))!=0)
+	{
+		errifnot(dpy = glxdh.getcurrentdpy(draw));
+	}
+	else _throw("Application attempted to call glXUseXFont() on a drawable which is not a window or a pixmap.");
+
 	fs = XQueryFont(dpy, font);
 	if(!fs) _throw("Couldn't get font structure information");
 

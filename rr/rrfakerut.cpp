@@ -1626,6 +1626,8 @@ int pbtest(void)
 	XVisualInfo *v=NULL;  GLXFBConfig c=0, *configs=NULL;  int n=0;
 	GLXContext ctx=0;
 	XSetWindowAttributes swa;
+	XFontStruct *fontinfo=NULL;  int minchar, maxchar;
+	int fontlistbase=0;
 
 	printf("Off-screen rendering test\n\n");
 
@@ -1634,6 +1636,12 @@ int pbtest(void)
 		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
 		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if(!(fontinfo=XLoadQueryFont(dpy, "fixed")))
+			_throw("Could not load X font");
+		minchar=fontinfo->min_char_or_byte2;
+		maxchar=fontinfo->max_char_or_byte2;
+		fontlistbase=glGenLists(maxchar+1);
 
 		if((configs=glXChooseFBConfigSGIX(dpy, DefaultScreen(dpy), glxattrib, &n))
 			==NULL || n==0) _throw("Could not find a suitable FB config");
@@ -1733,6 +1741,8 @@ int pbtest(void)
 			printf("Window->Pbuffer:  ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
+			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
+				fontlistbase+minchar);
 			checkcurrent(dpy, glxwin, glxwin, ctx);
 			glClearBuffer(GL_BACK, 0., 1., 1., 0.);
 			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
@@ -1758,6 +1768,8 @@ int pbtest(void)
 			printf("Pixmap->Window:   ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
+			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
+				fontlistbase+minchar);
 			checkcurrent(dpy, glxpm0, glxpm0, ctx);
 			glClearBuffer(GL_FRONT, 0., 0., 1., 0.);
 			verifybufcolor(GL_FRONT, 0xff0000, "PM0");
@@ -1782,6 +1794,8 @@ int pbtest(void)
 			printf("Window->Pixmap:   ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
+			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
+				fontlistbase+minchar);
 			checkcurrent(dpy, glxwin, glxwin, ctx);
 			glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
 			glClearBuffer(GL_BACK, 1., 0., 0., 0.);
@@ -1812,6 +1826,8 @@ int pbtest(void)
 			printf("Pixmap->Pixmap:   ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
+			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
+				fontlistbase+minchar);
 			checkcurrent(dpy, glxpm0, glxpm0, ctx);
 			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
 			verifybufcolor(GL_FRONT, 0xff00ff, "PM0");
