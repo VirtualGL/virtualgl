@@ -30,6 +30,9 @@ string following the first white space.
 [7]
 vglserver_config now works properly with OpenSolaris.
 -------------------------------------------------------------------------------
+[8]
+glXUseXFont() now works if a Pixmap is the current drawable.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
