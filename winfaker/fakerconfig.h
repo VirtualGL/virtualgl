@@ -291,6 +291,7 @@ class FakerConfig
 			fps.get("VGL_FPS");
 			gamma.get("VGL_GAMMA");
 			log.get("VGL_LOG");
+			serial.get("VGL_SERIAL");
 			spoil.get("VGL_SPOIL");
 			if((env=stereo.envget("VGL_STEREO"))!=NULL)
 			{
@@ -315,6 +316,7 @@ class FakerConfig
 		ConfigDouble fps;
 		ConfigGamma gamma;
 		ConfigString log;
+		ConfigBool serial;
 		ConfigBool spoil;
 		ConfigInt stereo;
 		ConfigBool trace;
@@ -326,6 +328,7 @@ class FakerConfig
 			prconfdbl_s(fps)
 			prconfdbl_s(gamma)
 			prconfstr_s(log)
+			prconfint_s(serial)
 			prconfint_s(spoil)
 			prconfint_s(stereo)
 			prconfint_s(trace)

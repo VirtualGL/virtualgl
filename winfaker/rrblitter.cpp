@@ -111,6 +111,36 @@ static void __rrblitter_spoilfct(void *b)
 
 void rrblitter::sendframe(rrfb *b)
 {
+	static rrtimer t, sleept;  double err=0.;  static bool first=true;
 	if(_t) _t->checkerror();
-	_q.spoil((void *)b, __rrblitter_spoilfct);
+	if(fconfig.serial)
+	{
+		_ready.signal();
+		_prof_blit.startframe();
+		b->redraw();
+		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
+
+		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
+		_prof_total.startframe();
+
+		if(fconfig.fps>0.)
+		{
+			double elapsed=t.elapsed();
+			if(first) first=false;
+			else
+			{
+				if(elapsed<1./fconfig.fps)
+				{
+					sleept.start();
+					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+					if(usec>0) usleep(usec);
+					double sleeptime=sleept.elapsed();
+					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+				}
+			}
+			t.start();
+		}
+		b->complete();
+	}
+	else _q.spoil((void *)b, __rrblitter_spoilfct);
 }
