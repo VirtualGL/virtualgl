@@ -60,6 +60,16 @@ class pmhash : public _pmhash
 			return (pbuffer *)_pmhash::find(DisplayString(dpy), pm);
 		}
 
+		Pixmap reversefind(GLXDrawable pb)
+		{
+			if(!pb) return 0;
+			_pmhashstruct *ptr=NULL;
+			rrcs::safelock l(mutex);
+			if((ptr=findentry(NULL, pb))!=NULL)
+				return ptr->key2;
+			return 0;
+		}
+
 		void remove(Display *dpy, GLXPixmap pix)
 		{
 			if(!dpy || !pix) _throw("Invalid argument");
@@ -85,8 +95,9 @@ class pmhash : public _pmhash
 		{
 			pbuffer *pb=h->value;
 			return (
-				(!strcasecmp(key1, h->key1) && (key2==h->key2
+				(key1 && !strcasecmp(key1, h->key1) && (key2==h->key2
 					|| (pb && key2==pb->drawable())))
+				|| (key1==NULL && key2==pb->drawable())
 			);
 		}
 
