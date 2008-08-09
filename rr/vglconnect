@@ -136,7 +136,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
-rm -f $XUTHFILE
+rm -f $XAUTHFILE
 if [ "$CONNECT" = "1" ]; then
 	ssh -t -x ${1+"$@"} 'exec /opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
 else
