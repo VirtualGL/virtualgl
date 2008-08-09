@@ -35,6 +35,28 @@ string following the first white space.
 [8]
 vglserver_config now works properly with OpenSolaris.
 -------------------------------------------------------------------------------
+[9]
+glXUseXFont() now works if a Pixmap is the current drawable.
+-------------------------------------------------------------------------------
+[10]
+vglserver_config now works properly with Debian Linux systems.
+-------------------------------------------------------------------------------
+[11]
+Fixed a typo in vglconnect which caused it to leave temporary files lying
+about.
+-------------------------------------------------------------------------------
+[12]
+Removed libXm (Motif) dependency in the Solaris/x86 version of VirtualGL.  This
+mainly affects OpenSolaris systems, on which Motif is not available.  The
+libXm dependency was introduced in VirtualGL 2.0.x because that version of
+VirtualGL used libXt (X Intrinsics) to generate its popup configuration dialog.
+Java requires that libXm be loaded ahead of libXt, so it was necessary to
+explicitly link the VirtualGL faker library with libXm to guarantee that the
+libraries were loaded in the correct order.  Since VirtualGL 2.1.x and later no
+longer use libXt, the binding to libXm could be safely removed on x86 systems.
+Note, however, that the libXm binding still has to be included on SPARC
+systems, because libGL on SPARC depends on libXmu, which depends on libXt.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
