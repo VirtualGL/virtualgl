@@ -32,3 +32,22 @@ $(EDIR)/wglreadtest.exe: $(ODIR)/wglreadtest.obj
 $(EDIR)/faker.dll: $(FOBJS)
 	$(LINK) $(LDFLAGS) -dll $(FOBJS) -out:$@ detours.lib detoured.lib \
 		opengl32.lib rrutil.lib $(FBXLIB)
+
+ifneq ($(DISTRO),)
+WBLDDIR = $(TOPDIR)\\$(platform)$(subplatform)\\$(DISTRO)
+else
+WBLDDIR = $(TOPDIR)\\$(platform)$(subplatform)
+endif
+
+ifeq ($(DEBUG), yes)
+WBLDDIR := $(WBLDDIR)\\dbg
+endif
+
+DETOURSDIR=$$%systemdrive%\\Program Files\\Microsoft Research\\Detours Express 2.1
+
+dist: all
+	$(RM) $(WBLDDIR)\$(APPNAME)-Server.exe
+	makensis //DAPPNAME=$(APPNAME)-Server //DVERSION=$(VERSION) \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DDETOURSDIR="$(DETOURSDIR)" winfaker.nsi || \
+	makensis /DAPPNAME=$(APPNAME)-Server /DVERSION=$(VERSION) \
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DDETOURSDIR="$(DETOURSDIR)" winfaker.nsi  # Cygwin doesn't like the //
