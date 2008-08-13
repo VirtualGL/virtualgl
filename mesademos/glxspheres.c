@@ -57,7 +57,8 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 
 Display *dpy=NULL;  Window win=0, olwin=0;
-int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1;
+int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1,
+	locolor=0;
 int ncolors=0, nolcolors, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
@@ -284,27 +285,31 @@ int display(int advance)
 		gluSphere(spherequad, 1.3, slices, stacks);
 		glEndList();
 
-		if(useci)
+		if(!locolor)
 		{
-			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
-		}
-		else
-		{
-			glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
-			glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
-			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+			if(useci)
+			{
+				glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+			}
+			else
+			{
+				glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
+				glMaterialf(GL_FRONT, GL_SHININESS, 50.);
 
-			glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
-			glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
-			glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
+				glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
+				glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
+				glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
+			}
+			glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+			glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
+			glEnable(GL_LIGHTING);
+			glEnable(GL_LIGHT0);
 		}
-		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
 
-		glShadeModel(GL_SMOOTH);
+		if(locolor) glShadeModel(GL_FLAT);
+		else glShadeModel(GL_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
@@ -469,10 +474,11 @@ int event_loop(Display *dpy)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-c] [-i] [-m] [-o] [-s] [-fs] [-p <p>]\n\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-c] [-i] [-l] [-m] [-o] [-s] [-fs] [-p <p>]\n\n", argv[0]);
 	printf("-c = Use color index rendering (default is RGB)\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
+	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("-s = Use stereographic rendering initially\n");
@@ -501,6 +507,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-c", 2)) useci=1;
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
+		if(!strnicmp(argv[i], "-l", 2)) locolor=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
 		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
