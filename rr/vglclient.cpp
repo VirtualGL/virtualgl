@@ -399,11 +399,13 @@ void getenvironment(void)
 		if(!strnicmp(env, "o", 1)) drawmethod=RR_DRAWOGL;
 		else if(!strncmp(env, "x", 1)) drawmethod=RR_DRAWX11;
 	}
+	#ifdef USESSL
 	if((env=getenv("VGLCLIENT_LISTEN"))!=NULL && strlen(env)>0)
 	{
 		if(!strncmp(env, "n", 1)) {ssl=false;  nonssl=true;}
 		else if(!strncmp(env, "s", 1)) {ssl=true;  nonssl=false;}
 	}
+	#endif
 	if((env=getenv("VGLCLIENT_LOG"))!=NULL && strlen(env)>0)
 	{
 		logfile=env;
@@ -414,9 +416,11 @@ void getenvironment(void)
 	if((env=getenv("VGLCLIENT_PORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
 		&& temp<65536)
 		port=(unsigned short)temp;
+	#ifdef USESSL
 	if((env=getenv("VGLCLIENT_SSLPORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
 		&& temp<65536)
 		sslport=(unsigned short)temp;
+	#endif
 }
 
 
@@ -652,6 +656,10 @@ void start(char *displayname)
 
 	if(restart)
 	{
-		deadyet=restart=false;  actualport=actualsslport=0;  goto start;
+		deadyet=restart=false;  actualport=0;
+		#ifdef USESSL
+		actualsslport=0;
+		#endif
+		goto start;
 	}
 }
