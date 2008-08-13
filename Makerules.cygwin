@@ -9,7 +9,7 @@ AR = ar ruvs
 CINCLUDES = -I/usr/X11R6/include
 CFLAGS = -Wall
 CDEFINES = -D_GNU_SOURCE
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 
@@ -40,7 +40,7 @@ DEPFLAG = -MM
 
 FBXLIB = -lfbx -lXext -lX11
 SOCKLIB = -lrrsocket -lpthread
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 

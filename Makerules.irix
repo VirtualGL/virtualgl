@@ -6,7 +6,7 @@ CC = cc
 CXX = CC
 AR = ar ruvs
 
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 CDEFINES = -DUSESSL
 endif
 
@@ -33,6 +33,6 @@ DEPFLAG = -M
 
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
