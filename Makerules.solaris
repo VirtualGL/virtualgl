@@ -52,7 +52,7 @@ INSTALL = /usr/ucb/install
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
 endif
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 CDEFINES := $(CDEFINES) -DUSESSL
 endif
 CDEFINES := $(CDEFINES) -DSUNOGL
@@ -71,7 +71,7 @@ SHEXT = so
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lsocket -lxnet
 
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 
 ifeq ($(subplatform), 64)
 STATICSSL := $(shell if [ -f /opt/csw/lib/sparcv9/libssl.a -a -f /opt/csw/lib/sparcv9/libcrypto.a ]; then echo yes; fi)

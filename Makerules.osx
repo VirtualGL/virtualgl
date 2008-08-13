@@ -7,7 +7,7 @@ CXX = g++
 AR = ar ruvs
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 CDEFINES = -DUSESSL
 endif
 
@@ -38,6 +38,6 @@ DEPFLAG = -MM
 
 FBXLIB = -lfbx -lXext -lX11
 SOCKLIB = -lrrsocket -lpthread -lX11 -lGL
-ifneq ($(USESSL), no)
+ifeq ($(USESSL), yes)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto.0.9.7
 endif
