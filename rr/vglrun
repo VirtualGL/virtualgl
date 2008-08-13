@@ -43,7 +43,6 @@ usage()
 	echo "-p <p>    : TCP port to use when connecting to vglclient (VGL transport only)"
 	echo "+/-pr     : Enable/disable performance profiling output"
 	echo "-q <q>    : JPEG compression quality [1 <= <q> <= 100]"
-	echo "+/-s      : Enable/disable SSL encryption of VGL image transport"
 	echo "-samp <s> : JPEG chrominance subsampling factor"
 	echo "            [<s> = gray, 1x, 2x, 4x, 8x, or 16x]"
 	echo "+/-sp     : Turn on/off frame spoiling"
