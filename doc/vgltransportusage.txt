@@ -7,7 +7,6 @@
 	* Seamless windows; every application window appears as a separate window on
 		the user's desktop
 	* Supports stereographic and overlay rendering
-	* Built-in encryption
 	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
 		client
 
@@ -125,33 +124,16 @@ argument to ''vglconnect'' when connecting to the server:
 	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
 	---
 
-** VGL Image Transport with SSL Encryption
-{anchor: SSL_Encryption}
-
-This mode encrypts the VGL image stream and, when used in conjunction with
-[[#X11_Forwarding][X11 forwarding]], provides a completely secure solution.
-However, enabling SSL encryption can reduce VirtualGL's performance by as much
-as 20% on high-speed networks such as Ethernet.
-
-*** Procedure
-#OPT: noList! plain!
-
-The procedure for this mode is identical to the procedure for 
-[[#X11_Forwarding][X11 forwarding]], except that you should pass an argument
-of ''+s'' to ''vglrun'' when starting a 3D application using VirtualGL.  You
-can also set the environment variable ''VGL_SSL'' to ''1'' on the VirtualGL
-server prior to invoking ''vglrun''.  (see {ref prefix="Chapter ": Advanced_Configuration}
-for more details.)
-
 ** VGL Image Transport with X11 Forwarding and SSh Tunneling
 {anchor: SSh_Tunneling}
 
-This mode is useful when either the VirtualGL server or the client machine
-are behind restrictive firewalls and only SSh connections are allowed through.
-Both the VGL image stream and the X11 traffic are tunneled through the SSh
-connection, and thus this mode provides a completely secure solution.  However,
-using SSh tunneling can reduce VirtualGL's performance by anywhere from 20-40%
-on high-speed networks such as Ethernet.
+Both the VGL image stream and the X11 traffic are tunneled through SSh when
+using this mode, and thus it provides a completely secure solution.  It is
+also useful when either the VirtualGL server or the client machine are behind
+restrictive firewalls and only SSh connections are allowed through.  Using
+SSh tunneling on wide-area networks should not affect performance
+significantly, however, using SSh tunneling on a local-area network can reduce
+VirtualGL's performance by anywhere from 20-40%.
 
 *** Procedure
 #OPT: noList! plain!
@@ -231,42 +213,42 @@ current X display (read from the ''DISPLAY'' environment or passed to
 goes wrong, this log file is the first place to check.
 
 When ''vglclient'' successfully starts on a given X display, it stores its
-listener port numbers in a pair of root window properties on the X display.  If
+listener port number in a root window property on the X display.  If
 other ''vglclient'' instances attempt to start on the same X display, they read
-the X window properties, determine that another ''vglclient'' instance is
+the X window property, determine that another ''vglclient'' instance is
 already running, and exit to allow the first instance to retain control.
-''vglclient'' will clean up these X properties under most circumstances, even
+''vglclient'' will clean up the X property under most circumstances, even
 if it is explicitly killed.  But under rare circumstances (if sent a SIGKILL
 signal on Unix, for instance), a ''vglclient'' instance may exit uncleanly and
-leave the X properties set.  In these cases, it may be necessary to add an
+leave the X property set.  In these cases, it may be necessary to add an
 argument of ''-force'' to ''vglconnect'' the next time you use it.  This tells
 ''vglconnect'' to start a new ''vglclient'' instance, regardless of whether
 ''vglclient'' thinks that there is already an instance running on this X
 display.  Alternately, you can simply reset your X server to clear the orphaned
-X window properties.
+X window property.
 
 *** The VirtualGL Client and Firewalls
 
 To retain compatibility with previous versions of VirtualGL, the first
 ''vglclient'' instance on a given machine will attempt to listen on port 4242
-for unencrypted connections and 4243 for SSL connections.  If it fails to
-obtain one of those ports, because another application or another ''vglclient''
-instance is already using them, then ''vglclient'' will try to obtain a free
-port in the range of 4200-4299.  Failing that, it will request a free port from
-the operating system.
+for unencrypted connections and 4243 for SSL connections (if VirtualGL was
+built with OpenSSL support.)  If it fails to obtain one of those ports, because
+another application or another ''vglclient'' instance is already using them,
+then ''vglclient'' will try to obtain a free port in the range of 4200-4299.
+Failing that, it will request a free port from the operating system.
 
 In a nutshell: if you only ever plan to run one X server at a time on your
 client machine, which means that you'll only ever need one instance of
-''vglclient'' at a time, then it is sufficient to open inbound ports 4242 and
-4243 in your client machine's firewall.  If you plan to run multiple X servers
-on your client machine, which means that you will need to run multiple
-''vglclient'' instances, then you may wish to open ports 4200-4299.  Similarly,
-if you are running ''vglclient'' on a multi-user TurboVNC or Sun Ray server
-that has a firewall, then you may wish to open ports 4200-4299 in the server's
-firewall.  Opening ports 4200-4299 will accommodate up to 50 separate
-''vglclient'' instances.  More instances than that cannot be accommodated on a
-firewalled machine, unless the firewall is able to create rules based on
-application executables instead of listening ports.
+''vglclient'' at a time, then it is sufficient to open inbound port 4242 (and
+4243 if you plan to use SSL) in your client machine's firewall.  If you plan to
+run multiple X servers on your client machine, which means that you will need
+to run multiple ''vglclient'' instances, then you may wish to open ports
+4200-4299.  Similarly, if you are running ''vglclient'' on a multi-user
+TurboVNC or Sun Ray server that has a firewall, then you may wish to open ports
+4200-4299 in the server's firewall.  Opening ports 4200-4299 will accommodate
+up to 50 separate ''vglclient'' instances.  More instances than that cannot be
+accommodated on a firewalled machine, unless the firewall is able to create
+rules based on application executables instead of listening ports.
 
 Note that it is not necessary to open any inbound ports in the firewall to use
 the VGL Image Transport with [[#SSh_Tunneling][SSh Tunneling]].

@@ -8,12 +8,6 @@ This document and all associated illustrations are licensed under the
 material derived from this document must cite The VirtualGL Project as the
 source of the material and list the current URL for the VirtualGL web-site.
 
-This product includes software developed by the
-[[http://www.openssl.org][OpenSSL Project]] for use in the OpenSSL Toolkit.
-Further information is contained in
-[[LICENSE-OpenSSL.txt][{code:LICENSE-OpenSSL.txt}]!], which can be found in the
-same directory as this documentation.
-
 The VirtualGL server components include software developed by the
 [[http://www.fltk.org/][FLTK Project]] and distributed under the terms of the
 [[LICENSE-FLTK.txt][FLTK License]!].
