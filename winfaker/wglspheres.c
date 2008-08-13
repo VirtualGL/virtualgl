@@ -58,7 +58,7 @@ static char __lasterror[1024]="No error";
 
 
 HWND win=0;  HDC hdc=0;
-int usestereo=0, useimm=0, interactive=0;
+int usestereo=0, useimm=0, interactive=0, locolor=0;
 HGLRC ctx=0;
 
 int spherelist=0, fontlistbase=0;
@@ -197,20 +197,24 @@ int display(int advance)
 		gluSphere(spherequad, 1.3, slices, stacks);
 		glEndList();
 
-		glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
-		glMaterialf(GL_FRONT, GL_SHININESS, 50.);
+		if(!locolor)
+		{
+			glMaterialfv(GL_FRONT, GL_AMBIENT, id4);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, id4);
+			glMaterialfv(GL_FRONT, GL_SPECULAR, id4);
+			glMaterialf(GL_FRONT, GL_SHININESS, 50.);
 
-		glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
-		glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
+			glLightfv(GL_LIGHT0, GL_AMBIENT, light0_amb);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_dif);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, id4);
+			glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+			glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.);
+			glEnable(GL_LIGHTING);
+			glEnable(GL_LIGHT0);
+  	}
 
-		glShadeModel(GL_SMOOTH);
+		if(locolor) glShadeModel(GL_FLAT);
+		else glShadeModel(GL_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
@@ -313,8 +317,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-i] [-m] [-s] [-fs] [-p <p>]\n\n", argv[0]);
+	printf("USAGE: %s [-h|-?] [-i] [-l] [-m] [-s] [-fs] [-p <p>]\n\n", argv[0]);
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
+	printf("-l = Generate an image with < 24 colors (useful for testing TurboVNC)\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("-s = Use stereographic rendering initially\n");
@@ -347,6 +352,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
+		if(!strnicmp(argv[i], "-l", 2)) locolor=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
 		{
