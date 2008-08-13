@@ -57,6 +57,14 @@ longer use libXt, the binding to libXm could be safely removed on x86 systems.
 Note, however, that the libXm binding still has to be included on SPARC
 systems, because libGL on SPARC depends on libXmu, which depends on libXt.
 -------------------------------------------------------------------------------
+[13]
+Support for encrypting the VGL Image Transport with OpenSSL has been removed
+from the default build of VirtualGL.  It was only a marginally useful feature,
+because VirtualGL also has the ability to tunnel the VGL Image Transport 
+through SSh, and the OpenSSL feature required a great deal of maintenance
+(to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
+can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
