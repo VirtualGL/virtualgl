@@ -43,18 +43,13 @@ FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
 
 ifeq ($(USESSL), yes)
-
-ifeq ($(subplatform), 64)
-STATICSSL := $(shell if [ -f $(TOPDIR)/../openssl.linux64/libssl.a -a -f $(TOPDIR)/../openssl.linux64/libcrypto.a ]; then echo yes; fi)
-STATICSSLDIR = $(TOPDIR)/../openssl.linux64
-else
-STATICSSL := $(shell if [ -f $(TOPDIR)/../openssl.linux/libssl.a -a -f $(TOPDIR)/../openssl.linux/libcrypto.a ]; then echo yes; fi)
-STATICSSLDIR = $(TOPDIR)/../openssl.linux
+SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
+STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 endif
 
 ifeq ($(STATICSSL), yes)
-CINCLUDES = -I$(STATICSSLDIR)/include
-SOCKLIB := $(SOCKLIB) -ldl -L$(STATICSSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+CINCLUDES = -I$(SSLDIR)/include
+SOCKLIB := $(SOCKLIB) -ldl -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
 else
 # Use dynamic libs provided by the O/S
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
