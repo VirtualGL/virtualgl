@@ -3,29 +3,52 @@ How to build VirtualGL in 9043 easy steps
 
 
 *******************************************************************************
+**     A note about OpenSSL support
+*******************************************************************************
+
+   If built with OpenSSL support, VirtualGL can use OpenSSL to encrypt the
+   traffic it sends via the VGL Image Transport.  This is only a marginally
+   useful feature, however, since VirtualGL can also tunnel the VGL Image
+   Transport through SSh.  Thus, since the embedded OpenSSL feature is
+   difficult to maintain, it is not enabled by default in this release of
+   VirtualGL.
+
+   However, you can easily include OpenSSL support in your custom build of
+   VirtualGL by specifying USESSL=yes as an argument to 'make' or by adding
+   USESSL=yes to a file named 'config' in the VirtualGL build directory
+   (create the file if it doesn't exist.)
+
+
+*******************************************************************************
 **     Prerequisites - Linux
 *******************************************************************************
 
--- OpenSSL headers and link libraries
+-- OpenSSL headers and link libraries (optional)
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
-   your Linux distribution, but this produces a version of VirtualGL that is
-   not compatible with other Linux distributions.  In order to build a fully
-   cross-compatible version of VirtualGL, install the openssl-static package,
-   which can be obtained from the "Download" area of:
+   your Linux distribution, but this produces a version of VirtualGL that may
+   not be compatible with other Linux distributions.  In order to build a fully
+   cross-compatible version of VirtualGL, you must link VirtualGL against
+   static versions of the OpenSSL libraries.  To do this:
 
-   http://sourceforge.net/projects/virtualgl
+   * Download the latest OpenSSL source tarball from http://www.openssl.org
+   * Extract the tarball into the directory one level up from your VirtualGL
+     build directory
+   * Rename the OpenSSL source directory to "openssl.linux64" if you are
+     building a 64-bit version of VirtualGL or "openssl.linux" if you are
+     building a 32-bit version of VirtualGL.
+   * cd to the OpenSSL source directory and issue one of the following
+     commands to configure the OpenSSL build:
 
-   The direct link for openssl-static downloads is:
+     64-bit:
+     ./Configure linux-x86_64 shared
 
-   http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=221619
+     32-bit:
+     ./Configure -m32 linux-generic32 shared
 
-   There are three versions of the openssl-static package:  a 32-bit package
-   for GLIBC 2.2 systems (such as RedHat 7.x and Enterprise Linux 2.1) and both
-   32-bit and 32/64-bit packages for GLIBC 2.3 (and later) systems.  These
-   packages are provided in both RPM and tarball formats.  You can use alien
-   (http://www.kitenet.net/programs/alien/) to convert the tarballs into DEB
-   packages, if you prefer.
+   * Build OpenSSL:
+
+     make
 
 -- GCC and G++
 
@@ -131,7 +154,7 @@ one or more of the above, then:
 
 -- Solaris 8 or newer (Sparc) or Solaris/OpenSolaris 10 or newer (x86)
 
--- OpenSSL headers and link libraries
+-- OpenSSL headers and link libraries (optional)
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
    Solaris 10 and later, but this produces a version of VirtualGL that is not
@@ -240,17 +263,34 @@ VirtualGL on Cygwin, see the next section.
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
--- OpenSSL headers and link libraries
+-- OpenSSL headers and link libraries (optional)
 
-   * Download the latest Win32 OpenSSL installer from:
+   * Download the latest OpenSSL source tarball from http://www.openssl.org
+   * Extract the tarball into the directory one level up from your VirtualGL
+     build directory
+   * Rename the OpenSSL source directory to "openssl.windows".
+   * Download the Win32 binaries of NASM from the "Download" section of
+     http://sourceforge.net/projects/nasm/.  Place nasm.exe somewhere in your
+     PATH.
+   * cd to the OpenSSL source directory and issue the following
+     commands to configure the OpenSSL build:
 
-     http://www.slproweb.com/products/Win32OpenSSL.html
+     perl Configure VC-WIN32
+     ms\do_nasm.bat
 
-   * Install it into c:\openssl.
-   * Add c:\openssl\include to the system or user INCLUDE environment
-     variable prior to building VirtualGL.
-   * Add c:\openssl\lib\VC\static to the system or user LIB environment
-     variable prior to building VirtualGL.
+   * Build OpenSSL:
+
+     nmake -f ms\nt.mak
+
+   * If you are building OpenSSL 0.9.8h and are using Visual C++ 2008 or
+     later, then comment out the following lines in
+     openssl.windows\inc32\openssl\ossl_typ.h prior to building VirtualGL:
+
+     typedef struct ocsp_req_ctx_st OCSP_REQ_CTX;
+     typedef struct ocsp_response_st OCSP_RESPONSE;
+     typedef struct ocsp_responder_id_st OCSP_RESPID;
+
+     Hopefully this will be fixed in later releases of OpenSSL.
 
 -- Hummingbird Exceed XDK v8 or later
 
