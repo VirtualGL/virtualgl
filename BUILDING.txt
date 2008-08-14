@@ -251,6 +251,15 @@ VirtualGL on Cygwin, see the next section.
      variable prior to building VirtualGL.
    * Add c:\openssl\lib\VC\static to the system or user LIB environment
      variable prior to building VirtualGL.
+   * If you are using OpenSSL 0.9.8h and Visual C++ 2008 or later to build
+     VirtualGL, then comment out the following lines in
+     c:\openssl\include\openssl\ossl_typ.h prior to building VirtualGL:
+
+     typedef struct ocsp_req_ctx_st OCSP_REQ_CTX;
+     typedef struct ocsp_response_st OCSP_RESPONSE;
+     typedef struct ocsp_responder_id_st OCSP_RESPID;
+
+     Hopefully this will be fixed in later releases of OpenSSL.
 
 -- Hummingbird Exceed XDK v8 or later
 
