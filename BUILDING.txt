@@ -157,10 +157,40 @@ one or more of the above, then:
 -- OpenSSL headers and link libraries (optional)
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
-   Solaris 10 and later, but this produces a version of VirtualGL that is not
-   compatible with earlier versions of Solaris.  In order to build a fully
-   backward-compatible version of VirtualGL, download and install the latest
-   OpenSSL package from Blastwave (http://www.blastwave.org).
+   your Solaris distribution, but this produces a version of VirtualGL that may
+   not be compatible with other Solaris distributions.  In order to build a
+   fully cross-compatible version of VirtualGL, you must link VirtualGL against
+   static versions of the OpenSSL libraries.  To do this:
+
+   * Download the latest OpenSSL source tarball from http://www.openssl.org
+   * Extract the tarball into the directory one level up from your VirtualGL
+     build directory
+   * Rename the OpenSSL source directory to "openssl.solaris64" if you are
+     building a 64-bit SPARC version of VirtualGL, "openssl.solaris" if you are
+     building a 32-bit SPARC version of VirtualGL, "openssl.solx8664" if you
+     are building a 64-bit x86 version of VirtualGL, or "openssl.solx86" if
+     you are building a 32-bit x86 version of VirtualGL.
+   * cd to the OpenSSL source directory and issue one of the following
+     commands to configure the OpenSSL build:
+
+     64-bit SPARC:
+     ./Configure solaris64-sparcv9-cc shared
+
+     32-bit SPARC:
+     ./Configure solaris-sparcv8-cc shared
+
+     64-bit x86:
+     ./Configure solaris64-x86_64-cc shared
+
+     32-bit x86:
+     ./Configure solaris-x86-cc shared
+
+     (If you plan to use GCC to build VirtualGL, replace "cc" with "gcc" in
+     all of the above.)
+
+   * Build OpenSSL:
+
+     make
 
 -- Sun Studio/Workshop Pro Compiler
 
