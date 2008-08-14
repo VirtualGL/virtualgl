@@ -43,9 +43,9 @@ FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
 
 ifeq ($(USESSL), yes)
+
 SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
 STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
-endif
 
 ifeq ($(STATICSSL), yes)
 CINCLUDES = -I$(SSLDIR)/include
