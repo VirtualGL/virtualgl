@@ -31,7 +31,7 @@ GLXLIB = $(FAKEGLXLIB) hclglx.lib
 GLULIB = hclglu.lib
 
 ifeq ($(USESSL), yes)
-SSLDIR = $(TOPDIR)/../openssl.windows
+SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
 SSLLIB = $(SSLDIR)/out32/libeay32.lib $(SSLDIR)/out32/ssleay32.lib
 CINCLUDES := $(CINCLUDES) -I$(SSLDIR)/inc32
 endif
