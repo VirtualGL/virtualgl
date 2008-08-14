@@ -73,21 +73,16 @@ SOCKLIB = -lrrsocket -lsocket -lxnet
 
 ifeq ($(USESSL), yes)
 
-ifeq ($(subplatform), 64)
-STATICSSL := $(shell if [ -f /opt/csw/lib/sparcv9/libssl.a -a -f /opt/csw/lib/sparcv9/libcrypto.a ]; then echo yes; fi)
-STATICSSLDIR = /opt/csw/lib/sparcv9
-else
-STATICSSL := $(shell if [ -f /opt/csw/lib/libssl.a -a -f /opt/csw/lib/libcrypto.a ]; then echo yes; fi)
-STATICSSLDIR = /opt/csw/lib
-endif
+SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
+STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 
 ifeq ($(STATICSSL), yes)
 
-CINCLUDES := $(CINCLUDES) -I/opt/csw/include
+CINCLUDES := $(CINCLUDES) -I$(SSLDIR)/include
 ifeq ($(CC), gcc)
-SSLLIB = -ldl -L$(STATICSSLDIR) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
+SSLLIB = -ldl -L$(SSLDIR) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
 else
-SSLLIB = -ldl -L$(STATICSSLDIR) -Bstatic -lssl -lcrypto -Bdynamic
+SSLLIB = -ldl -L$(SSLDIR) -Bstatic -lssl -lcrypto -Bdynamic
 endif
 
 else
