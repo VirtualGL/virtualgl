@@ -191,6 +191,15 @@ network usage by a factor of 10 or more.  Thus, disabling image compression is
 not recommended unless you are using switched Gigabit Ethernet (or faster)
 infrastructure and have plenty of bandwidth to spare.
 
+** VGL Image Transport with XDMCP
+
+Using the VGL Image Transport with XDMCP should mostly "just work".  Once you
+have established the connection to the remote X server using XDMCP, you can
+then follow any of the above procedures to create an SSh connection to the
+graphics server and start a 3D application using VirtualGL.  The graphics
+server and the machine running the remote X server need not necessarily be the
+same machine.
+
 ** The VirtualGL Client Application: Nuts and Bolts
 
 The VirtualGL Client application receives encoded and/or compressed images on a

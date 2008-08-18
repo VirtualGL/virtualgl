@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-07-14T17:20:43">
+<meta name="date" content="2008-08-18T16:57:52">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1 and TurboVNC 0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -184,11 +184,14 @@ systems, OpenGL and GLX, and X windows.</p>
                 Networks</a>
             </li>
             <li class="toc">
-                <a href="#hd008006" class="toc">8.6 The VirtualGL Client Application:
+                <a href="#hd008006" class="toc">8.6 VGL Image Transport with XDMCP</a>
+            </li>
+            <li class="toc">
+                <a href="#hd008007" class="toc">8.7 The VirtualGL Client Application:
                 Nuts and Bolts</a>
                 <ul class="toc">
                     <li class="toc">
-                        <a href="#hd008006001" class="toc">8.6.1 The VirtualGL Client and Firewalls</a>
+                        <a href="#hd008007001" class="toc">8.7.1 The VirtualGL Client and Firewalls</a>
                     </li>
                 </ul>
             </li>
@@ -2166,7 +2169,17 @@ is not recommended unless you are using switched Gigabit Ethernet (or
 faster) infrastructure and have plenty of bandwidth to spare.</p>
 
 
-<h2 id="hd008006">8.6&nbsp;The VirtualGL Client Application: Nuts and Bolts</h2>
+<h2 id="hd008006">8.6&nbsp;VGL Image Transport with XDMCP</h2>
+
+<p>Using the VGL Image Transport with XDMCP should mostly &ldquo;just
+work&rdquo;.  Once you have established the connection to the remote
+X server using XDMCP, you can then follow any of the above procedures
+to create an SSh connection to the graphics server and start a 3D application
+using VirtualGL.  The graphics server and the machine running the remote
+X server need not necessarily be the same machine.</p>
+
+
+<h2 id="hd008007">8.7&nbsp;The VirtualGL Client Application: Nuts and Bolts</h2>
 
 <p>The VirtualGL Client application receives encoded and/or compressed
 images on a dedicated TCP socket, decodes and/or decompresses the images,
@@ -2226,7 +2239,7 @@ Alternately, you can simply reset your X server to clear the orphaned
 X window properties.</p>
 
 
-<h3 id="hd008006001">8.6.1&nbsp;The VirtualGL Client and Firewalls</h3>
+<h3 id="hd008007001">8.7.1&nbsp;The VirtualGL Client and Firewalls</h3>
 
 <p>To retain compatibility with previous versions of VirtualGL, the first
 <code>vglclient</code> instance on a given machine will attempt to
