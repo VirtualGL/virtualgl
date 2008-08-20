@@ -276,6 +276,7 @@ class FakerConfig
 			// Defaults
 			fps.setbounds(0.0, 1000000.0);
 			gamma=1.0;
+			serial=true;
 			spoil=true;
 			stereo.setbounds(0, RR_STEREOOPT-1);
 			stereo=RRSTEREO_REDCYAN;
