@@ -254,7 +254,9 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
+		#ifndef XDK
 		shmctl(s->shminfo.shmid, IPC_RMID, 0);
+		#endif
 		#ifdef XWIN32
 		if(!shmok)
 		{
