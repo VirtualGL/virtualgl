@@ -52,6 +52,10 @@ longer use libXt, the binding to libXm could be safely removed on x86 systems.
 Note, however, that the libXm binding still has to be included on SPARC
 systems, because libGL on SPARC depends on libXmu, which depends on libXt.
 -------------------------------------------------------------------------------
+[12]
+Fixed an issue in GeomView whereby attempting to resize the oldest window in
+a multi-window view would cause the Exceed version of vglclient to crash.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
