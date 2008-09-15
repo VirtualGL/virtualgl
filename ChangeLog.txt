@@ -65,6 +65,10 @@ through SSh, and the OpenSSL feature required a great deal of maintenance
 (to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
 can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
 -------------------------------------------------------------------------------
+[14]
+Fixed an issue in GeomView whereby attempting to resize the oldest window in
+a multi-window view would cause the Exceed version of vglclient to crash.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
