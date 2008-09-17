@@ -46,6 +46,7 @@ MAPFLAG = -M
 endif
 
 AR = ar ruvs
+INSTALL = /usr/ucb/install
 
 CINCLUDES = -I/usr/X/include -I/usr/X11/include
 MESAGLU := $(shell if [ -f /usr/X11/include/mesa/glu.h ]; then echo yes; fi)
