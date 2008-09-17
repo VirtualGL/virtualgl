@@ -47,6 +47,7 @@ MAPFLAG = -M
 endif
 
 AR = ar ruvs
+INSTALL = /usr/ucb/install
 
 ifeq ($(USEGLP), yes)
 CDEFINES := $(CDEFINES) -DUSEGLP
