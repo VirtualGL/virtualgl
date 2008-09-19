@@ -69,6 +69,14 @@ can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
 Fixed an issue in GeomView whereby attempting to resize the oldest window in
 a multi-window view would cause the Exceed version of vglclient to crash.
 -------------------------------------------------------------------------------
+[15]
+When used to configure a Solaris server for GLX mode with open access (all
+users being able to access the local X server, not just members of the vglusers
+group), vglserver_config was incorrectly placing xhost entries at the top of
+/etc/dt/config/Xsetup instead of the bottom.  This could have led to problems,
+since xhost is not guaranteed to be in the PATH until the bottom of that
+script.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
