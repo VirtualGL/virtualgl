@@ -131,8 +131,13 @@ addvglgenkey() {
 			addtotop $1 vglgenkey
 		fi
 	else	
-		addtotop $1 "xhost +\`hostname\`"
-		addtotop $1 "xhost +localhost"
+		if [ "$2" = "bottom" ]; then
+			addtobottom $1 "xhost +\`hostname\`"
+			addtobottom $1 "xhost +localhost"
+		else
+			addtotop $1 "xhost +\`hostname\`"
+			addtotop $1 "xhost +localhost"
+		fi
 	fi
 }
 
