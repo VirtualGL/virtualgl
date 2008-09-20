@@ -222,7 +222,7 @@ been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in a TurboVNC
 session as opposed to using the VGL Image Transport.
 
-** ModViz VGP and VirtualGL
+** ModViz VGP v1.x and VirtualGL
 
 ModViz Virtual Graphics Platform{^TM} is a polished commercial clustered
 rendering framework for Linux which supports all three of the rendering modes
@@ -250,3 +250,5 @@ vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
 
 Replace ''/usr/lib/libGL.so'' with the full path of your system's OpenGL
 library (''/usr/lib64/libGL.so'' if you are launching a 64-bit application.)
+
+This is known not to work with VGP 2.0.
