@@ -62,8 +62,6 @@ mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 ln -fs /opt/%{name}/fakelib/64 $RPM_BUILD_ROOT/opt/%{name}/lib64
 %endif
-mkdir -p $RPM_BUILD_ROOT/etc
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 
 install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
