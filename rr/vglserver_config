@@ -319,6 +319,9 @@ unconfigglx() {
 	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
 		enablextest /etc/gdm/gdm.conf
 	fi
+	if [ -f /etc/gdm/gdm-cdd.conf ]; then
+		enablextest /etc/gdm/gdm-cdd.conf
+	fi
 	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
 		enablextest /etc/X11/gdm/custom.conf
 	fi
@@ -342,6 +345,9 @@ unconfigglx() {
 	fi
 	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
 		disallowgdmtcp /etc/gdm/gdm.conf
+	fi
+	if [ -f /etc/gdm/gdm-cdd.conf ]; then
+		disallowgdmtcp /etc/gdm/gdm-cdd.conf
 	fi
 	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
 		disallowgdmtcp /etc/X11/gdm/custom.conf
@@ -508,6 +514,13 @@ configglx() {
 			enablextest /etc/gdm/gdm.conf
 		fi
 	fi
+	if [ -f /etc/gdm/gdm-cdd.conf ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextest /etc/gdm/gdm-cdd.conf
+		else
+			enablextest /etc/gdm/gdm-cdd.conf
+		fi
+	fi
 	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
 		if [ "$DISABLEXTEST" = "1" ]; then
 			disablextest /etc/X11/gdm/custom.conf
@@ -562,6 +575,9 @@ configglx() {
 	fi
 	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
 		allowgdmtcp /etc/gdm/gdm.conf
+	fi
+	if [ -f /etc/gdm/gdm-cdd.conf ]; then
+		allowgdmtcp /etc/gdm/gdm-cdd.conf
 	fi
 	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
 		allowgdmtcp /etc/X11/gdm/custom.conf
