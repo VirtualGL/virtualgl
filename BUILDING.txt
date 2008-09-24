@@ -20,19 +20,18 @@ How to build VirtualGL in 9043 easy steps
 
    http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=221619
 
-   There are three versions of the openssl-static package:  a 32-bit package
-   for GLIBC 2.2 systems (such as RedHat 7.x and Enterprise Linux 2.1) and both
-   32-bit and 32/64-bit packages for GLIBC 2.3 (and later) systems.  These
-   packages are provided in both RPM and tarball formats.  You can use alien
-   (http://www.kitenet.net/programs/alien/) to convert the tarballs into DEB
-   packages, if you prefer.
+   There are five versions of the openssl-static package:  a 32-bit RPM
+   for GLIBC 2.2 systems (such as RedHat 7.x and Enterprise Linux 2.1),
+   32-bit and 32/64-bit RPMs for GLIBC 2.3 (and later) systems, and 32-bit
+   and 32/64-bit DEB packages for Debian-based systems.  Tarballs are also
+   provided for users of other types of systems.
 
 -- GCC and G++
 
 -- X11 dev. kit
 
    On most Linux variants, this can be found in the "XFree86-devel" or 
-   "xorg-x11-devel" package.
+   "xorg-x11-devel" package.  On Ubuntu, it is in the "libx11-dev" package.
 
 -- GNU Make v3.7 or later
 
@@ -43,8 +42,8 @@ How to build VirtualGL in 9043 easy steps
 
 -- TurboJPEG SDK
 
-   The TurboJPEG SDK Linux packages (in RPM or tarball format) can be obtained
-   from the "Download" area of:
+   The TurboJPEG SDK Linux packages (in RPM, DEB, or tarball format) can be
+   obtained from the "Download" area of:
 
    http://sourceforge.net/projects/virtualgl
 
@@ -52,10 +51,9 @@ How to build VirtualGL in 9043 easy steps
 
    http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
 
-   Use the i386 package for 32-bit systems and the x86_64 package for 64-bit
-   systems (the x86_64 package contains both 64-bit and 32-bit libraries.)
-   You can use alien (http://www.kitenet.net/programs/alien/) to convert the
-   tarballs into DEB packages, if you prefer.
+   Use the i386 package for 32-bit systems and the x86_64/amd64 package for
+   64-bit systems (the 64-bit package contains both 64-bit and 32-bit
+   libraries.)
 
 
 *******************************************************************************
@@ -72,6 +70,8 @@ system, you will need, at minimum, the following 32-bit libraries:
 
    * Usually contained in the "glibc-devel" package (iX86)
    * Usually installed by default on x86-64 Linux systems
+   * On Ubuntu, these are contained in the "libc6-dev-i386" and "ia32-libs"
+     packages.
 
 -- X11 dev. kit
 
@@ -79,20 +79,28 @@ system, you will need, at minimum, the following 32-bit libraries:
      (iX86)
    * Not always installed by default but usually available on the installation
      discs
+   * On Ubuntu, you will need to use use getlibs
+     (http://ubuntuforums.org/showthread.php?t=474790&highlight=getlibs) to
+     install the 32-bit X11 dev. kit:
+     > sudo getlibs -p libX11-dev
+     > sudo getlibs -p libxext-dev
+     > sudo getlibs -p libxau-dev
+     > sudo getlibs -p libglu1-mesa-dev
 
 If for some reason your preferred 64-bit Linux distribution does not contain
 one or more of the above, then:
 
-  1.  Complain to your distribution vendor.
-  2.  All x86-64 distributions of Linux have a corresponding 32-bit-only
+  (1) Complain to your distribution vendor.
+  (2) All x86-64 distributions of Linux have a corresponding 32-bit-only
       distribution, usually released on a separate set of discs.  On those
       discs, you should be able to find the 32-bit versions of the X11 dev. kit
       and the GLIBC dev. kit to match the 64-bit versions that are already
-      installed on your system. You may have to use "rpm --force" (or a similar
-      mechanism) to force the install of the 32-bit development packages, since
-      they might contain header files which conflict with the 64-bit
-      development packages that are already installed.  Again, complain to your
-      distribution vendor.
+      installed on your system. You may have to use "rpm --force" to force the
+      install of the 32-bit development packages, since they might contain
+      header files which conflict with the 64-bit development packages that
+      are already installed.  On Debian-based systems, you will need to use
+      "dpkg --force-architecture" to force the installation of i386 packages
+      on an amd64 system.  See item (1) above.
 
 
 *******************************************************************************
@@ -421,3 +429,7 @@ To build a redistributable package, type
     (http://nsis.sourceforge.net/.)  makensis.exe should be in your PATH.
   * On OS X, this requires the PackageMaker application, which must be
     installed in Applications/Utilities.
+
+To build a redistributable DEB package (Debian-compatible systems), type
+
+  make deb
