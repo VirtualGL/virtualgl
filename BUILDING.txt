@@ -9,8 +9,8 @@ How to build VirtualGL in 9043 easy steps
 -- OpenSSL headers and link libraries
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
-   your Linux distribution, but this produces a version of VirtualGL that is
-   not compatible with other Linux distributions.  In order to build a fully
+   your Linux distribution, but this produces a version of VirtualGL that may
+   not be compatible with other Linux distributions.  In order to build a fully
    cross-compatible version of VirtualGL, install the openssl-static package,
    which can be obtained from the "Download" area of:
 
@@ -142,9 +142,9 @@ one or more of the above, then:
 -- OpenSSL headers and link libraries
 
    VirtualGL can be built using the shared OpenSSL libraries provided with
-   Solaris 10 and later, but this produces a version of VirtualGL that is not
-   compatible with earlier versions of Solaris.  In order to build a fully
-   backward-compatible version of VirtualGL, download and install the latest
+   your Solaris distribution, but this produces a version of VirtualGL that may
+   not be compatible with other versions of Solaris.  In order to build a fully
+   cross-compatible version of VirtualGL, download and install the latest
    OpenSSL package from Blastwave (http://www.blastwave.org).
 
 -- Sun Studio/Workshop Pro Compiler
