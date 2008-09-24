@@ -263,27 +263,32 @@ class rrframe
 
 	void addlogo(void)
 	{
-		unsigned char *rowptr, *colptr, *logoptr=vgllogo;
+		unsigned char *rowptr, *colptr, *logoptr=vgllogo, *logoptr2;
 		int rindex=_flags&RRBMP_BGR? 2:0, gindex=1, bindex=_flags&RRBMP_BGR? 0:2;
 		if(_flags&RRBMP_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
 
 		if(!_bits || _h.width<1 || _h.height<1) return;
+		int h=min(VGLLOGO_HEIGHT, _h.height-1);
+		int w=min(VGLLOGO_WIDTH, _h.width-1);
+		if(h<1 || w<1) return;
 		if(_flags&RRBMP_BOTTOMUP)
-			rowptr=&_bits[_pitch*(VGLLOGO_HEIGHT+1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
+			rowptr=&_bits[_pitch*h+(_h.width-w-1)*_pixelsize];
 		else
-			rowptr=&_bits[_pitch*(_h.height-VGLLOGO_HEIGHT-1)+(_h.width-VGLLOGO_WIDTH-1)*_pixelsize];
-		for(int j=0; j<VGLLOGO_HEIGHT; j++)
+			rowptr=&_bits[_pitch*(_h.height-h-1)+(_h.width-w-1)*_pixelsize];
+		for(int j=0; j<h; j++)
 		{
 			colptr=rowptr;
-			for(int i=0; i<VGLLOGO_WIDTH; i++)
+			logoptr2=logoptr;
+			for(int i=0; i<w; i++)
 			{
-				if(*(logoptr++))
+				if(*(logoptr2++))
 				{
 					colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
 				}
 				colptr+=_pixelsize;
 			}
 			rowptr+=(_flags&RRBMP_BOTTOMUP)? -_pitch:_pitch;
+			logoptr+=VGLLOGO_WIDTH;
 		}
 
 		if(!_rbits) return;
