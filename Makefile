@@ -199,6 +199,9 @@ dist: rr rr32 diags32 mesademos mesademos32
 	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rm -rf $$TMPDIR
 
+deb: rr rr32 diags32 mesademos mesademos32
+	sh makedpkg $(APPNAME) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
+
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
 	mkdir -p $(BLDDIR)/rpms/RPMS
