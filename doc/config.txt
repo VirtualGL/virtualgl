@@ -680,8 +680,8 @@ those wishing to build additional infrastructure around VirtualGL.
 | Default Value | Accept both SSL and unencrypted connections |
 #OPT: hiCol=first
 
-	!!! This option is available only if both the VirtualGL server and client
-	were built with OpenSSL support.
+	!!! This option is available only if the VirtualGL client was built
+	with OpenSSL support.
 
 | Environment Variable | ''VGLCLIENT_PORT = ''__''{p}''__ |
 | ''vglclient'' argument | ''-port ''__''{p}''__ |
@@ -728,8 +728,8 @@ those wishing to build additional infrastructure around VirtualGL.
 	described above and causes ''vglclient'' to listen only on the specified TCP
 	port.  Don't do this unless you know what you're doing.
 
-	!!! This option is available only if both the VirtualGL server and client
-	were built with OpenSSL support.
+	!!! This option is available only if the VirtualGL client was built
+	with OpenSSL support.
 
 | Environment Variable | ''VGL_VERBOSE = ''__''0 \| 1''__ |
 | Summary | Disable/enable verbose VirtualGL messages |

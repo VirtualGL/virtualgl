@@ -255,9 +255,10 @@ to run multiple ''vglclient'' instances, then you may wish to open ports
 4200-4299.  Similarly, if you are running ''vglclient'' on a multi-user
 TurboVNC or Sun Ray server that has a firewall, then you may wish to open ports
 4200-4299 in the server's firewall.  Opening ports 4200-4299 will accommodate
-up to 50 separate ''vglclient'' instances.  More instances than that cannot be
-accommodated on a firewalled machine, unless the firewall is able to create
-rules based on application executables instead of listening ports.
+up to 100 separate ''vglclient'' instances (50 if OpenSSL support is enabled.)
+More instances than that cannot be accommodated on a firewalled machine, unless
+the firewall is able to create rules based on application executables instead
+of listening ports.
 
 Note that it is not necessary to open any inbound ports in the firewall to use
 the VGL Image Transport with [[#SSh_Tunneling][SSh Tunneling]].

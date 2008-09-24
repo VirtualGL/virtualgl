@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-09-19T23:53:10">
+<meta name="date" content="2008-09-24T16:00:16">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2226,10 +2226,11 @@ on your client machine, which means that you will need to run multiple
 Similarly, if you are running <code>vglclient</code> on a multi-user
 TurboVNC or Sun Ray server that has a firewall, then you may wish to
 open ports 4200-4299 in the server&rsquo;s firewall.  Opening ports
-4200-4299 will accommodate up to 50 separate <code>vglclient</code>
-instances.  More instances than that cannot be accommodated on a firewalled
-machine, unless the firewall is able to create rules based on application
-executables instead of listening ports.</p>
+4200-4299 will accommodate up to 100 separate <code>vglclient</code>
+instances (50 if OpenSSL support is enabled.) More instances than that
+cannot be accommodated on a firewalled machine, unless the firewall
+is able to create rules based on application executables instead of
+listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall
 to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh
@@ -5688,7 +5689,7 @@ infrastructure around VirtualGL.</p>
 
 
 <div class="important"><p class="important">
-This option is available only if both the VirtualGL server and client were built with OpenSSL support.
+This option is available only if the VirtualGL client was built with OpenSSL support.
 </p></div>
 
 <div class="table">
@@ -5791,7 +5792,7 @@ This option is available only if both the VirtualGL server and client were built
         to listen only on the specified TCP port.  Don&rsquo;t do this unless
         you know what you&rsquo;re doing.
         <div class="important"><p class="important">
-        This option is available only if both the VirtualGL server and client were built with OpenSSL support.
+        This option is available only if the VirtualGL client was built with OpenSSL support.
         </p></div>
     </dd>
 </dl>
