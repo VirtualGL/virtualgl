@@ -1323,7 +1323,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 		return;
 	}
 
-	fconfig.flushfps=0.;
+	fconfig.flushdelay=0.;
 	pbwin *pbw=NULL;
 	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
@@ -1377,8 +1377,8 @@ void glFlush(void)
 	else
 	{
 		thistime=rrtime()-lasttime;
-		if(thistime-lasttime<0.01) fconfig.flushfps=100.;
-		else fconfig.flushfps=0.;
+		if(thistime-lasttime<0.01) fconfig.flushdelay=0.01;
+		else fconfig.flushdelay=0.;
 	}
 	_doGLreadback(true, false);
 	CATCH();
@@ -1391,7 +1391,7 @@ void glFinish(void)
 		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
 
 	_glFinish();
-	fconfig.flushfps=0.;
+	fconfig.flushdelay=0.;
 	_doGLreadback(false, fconfig.sync);
 	CATCH();
 }
@@ -1405,7 +1405,7 @@ void glXWaitGL(void)
 	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
 
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this to avoid 2 readbacks
-	fconfig.flushfps=0.;
+	fconfig.flushdelay=0.;
 	_doGLreadback(false, fconfig.sync);
 	CATCH();
 }
