@@ -46,19 +46,23 @@ void rrblitter::run(void)
 		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
 		_prof_total.startframe();
 
-		if(fconfig.fps>0.)
+		double fps=fconfig.fps;
+		if(fconfig.flushfps>0. &&
+			(fconfig.flushfps<fconfig.fps || fconfig.fps<=0.))
+			fps=fconfig.flushfps;
+		if(fps>0.)
 		{
 			double elapsed=t.elapsed();
 			if(first) first=false;
 			else
 			{
-				if(elapsed<1./fconfig.fps)
+				if(elapsed<1./fps)
 				{
 					sleept.start();
-					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+					long usec=(long)((1./fps-elapsed-err)*1000000.);
 					if(usec>0) usleep(usec);
 					double sleeptime=sleept.elapsed();
-					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+					err=sleeptime-(1./fps-elapsed-err);  if(err<0.) err=0.;
 				}
 			}
 			t.start();
