@@ -304,6 +304,7 @@ class FakerConfig
 			config=(char *)"/opt/VirtualGL/bin/vglconfig";
 			config64=(char *)"/opt/VirtualGL/bin/vglconfig64";
 			fps.setbounds(0.0, 1000000.0);
+			flushfps.setbounds(0.0, 1000000.0);
 			#ifdef SUNOGL
 			gamma=2.22;
 			gamma.usesun(true);
@@ -560,6 +561,7 @@ class FakerConfig
 		ConfigString config;
 		ConfigString config64;
 		ConfigDouble fps;
+		ConfigDouble flushfps;
 		ConfigGamma gamma;
 		ConfigString gllib;
 		bool glp;
@@ -602,6 +604,7 @@ class FakerConfig
 			prconfint(_compress.isset())
 			prconfstr_s(config)
 			prconfdbl_s(fps)
+			prconfdbl_s(flushfps)
 			prconfdbl_s(gamma)
 			prconfstr_s(gllib)
 			prconfint(glp)
