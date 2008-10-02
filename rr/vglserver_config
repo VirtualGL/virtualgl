@@ -335,6 +335,7 @@ unconfigglx() {
 		if [ -f /etc/dt/config/Xservers ]; then
 			enablextest /etc/dt/config/Xservers
 		fi
+		svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
 	fi
 
 	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
@@ -553,10 +554,13 @@ configglx() {
 			if [ -f /etc/dt/config/Xservers ]; then
 				disablextest /etc/dt/config/Xservers
 			fi
+			svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+			svccfg -s application/x11/x11-server addpropvalue options/server_args "-tst" 2>&1 >/dev/null
 		else
 			if [ -f /etc/dt/config/Xservers ]; then
 				enablextest /etc/dt/config/Xservers
 			fi
+			svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
 		fi
 	fi
 
