@@ -192,6 +192,12 @@ void rrdisplayclient::run(void)
 		bytes=0;
 		_prof_total.startframe();
 
+		double fps=fconfig.fps;
+		if(fconfig.flushdelay>0.)
+		{
+			long usec=(long)(fconfig.flushdelay*1000000.);
+			if(usec>0) usleep(usec);
+		}
 		if(fconfig.fps>0.)
 		{
 			double elapsed=t.elapsed();

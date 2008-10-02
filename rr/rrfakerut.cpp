@@ -689,6 +689,77 @@ int rbtest(bool stereo, bool ci)
 }
 
 
+// This tests the faker's ability to handle the 2000 Flushes issue
+int flushtest(void)
+{
+	testcolor clr(false, 0);
+	Display *dpy=NULL;  Window win=0;
+	int dpyw, dpyh, lastframe=0, retval=1;
+	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE,
+		8, GLX_BLUE_SIZE, 8, None};
+	XVisualInfo *v=NULL;
+	GLXContext ctx=0;
+	XSetWindowAttributes swa;
+
+	putenv((char *)"VGL_SPOIL=1");
+	printf("10000 flushes test:\n");
+
+	try
+	{
+		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
+		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
+			_throw("Could not find a suitable visual");
+
+		Window root=RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+		swa.border_pixel=0;
+		swa.event_mask=0;
+		if((win=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0, v->depth,
+			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+			&swa))==0)
+			_throw("Could not create window");
+
+		if((ctx=glXCreateContext(dpy, v, 0, True))==NULL)
+			_throw("Could not establish GLX context");
+		XFree(v);  v=NULL;
+		if(!glXMakeCurrent(dpy, win, ctx))
+			_throw("Could not make context current");
+		checkcurrent(dpy, win, win, ctx);
+		int dbworking=dbtest(false);
+		if(!dbworking)
+			_throw("This test requires double buffering, which appears to be broken.");
+		glReadBuffer(GL_FRONT);
+		XMapWindow(dpy, win);
+
+		clr.clear(GL_BACK);
+		clr.clear(GL_FRONT);
+		for(int i=0; i<10000; i++)
+		{
+			printf("%.4d\b\b\b\b", i);  glFlush();
+		}
+		checkframe(win, -1, lastframe);
+		printf("Read back %d of 10000 frames\n", lastframe);
+		checkreadbackstate(GL_FRONT, dpy, win, win, ctx);
+		checkwindowcolor(win, clr.bits(-1), 0);
+		printf("SUCCESS\n");
+	}
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	fflush(stdout);
+	putenv((char *)"VGL_SPOIL=0");
+	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
+	if(win) {XDestroyWindow(dpy, win);  win=0;}
+	if(v) {XFree(v);  v=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
 // This tests the faker's ability to do indexed rendering in the red channel of
 // an RGBA Pbuffer
 
@@ -2100,6 +2171,8 @@ int main(int argc, char **argv)
 	if(!rbtest(false, false)) ret=-1;
 	printf("\n");
 	rbtest(true, false);
+	printf("\n");
+	flushtest();
 	printf("\n");
 	if(doci)
 	{
