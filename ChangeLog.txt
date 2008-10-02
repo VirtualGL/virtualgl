@@ -1,4 +1,22 @@
 ===============================================================================
+Significant changes since 2.1.1
+===============================================================================
+[1]
+Added option which, when enabled, will cause VirtualGL to display a logo in the
+bottom right-hand corner of the 3D window.  This is meant as a debugging tool
+to allow users to determine whether or not VirtualGL is active.
+-------------------------------------------------------------------------------
+[2]
+Support for encrypting the VGL Image Transport with OpenSSL has been removed
+from the default build of VirtualGL.  It was only a marginally useful feature,
+because VirtualGL also has the ability to tunnel the VGL Image Transport 
+through SSh, and the OpenSSL feature required a great deal of maintenance
+(to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
+can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 2.1
 ===============================================================================
 [1]
@@ -24,28 +42,23 @@ applications.
 vglconnect now works properly with Cygwin.
 -------------------------------------------------------------------------------
 [6]
-Added option which, when enabled, will cause VirtualGL to display a logo in the
-bottom right-hand corner of the 3D window.  This is meant as a debugging tool
-to allow users to determine whether or not VirtualGL is active.
--------------------------------------------------------------------------------
-[7]
 Fixed regression that caused VirtualGL to remove any part of the VGL_XVENDOR
 string following the first white space.
 -------------------------------------------------------------------------------
-[8]
+[7]
 vglserver_config now works properly with OpenSolaris.
 -------------------------------------------------------------------------------
-[9]
+[8]
 glXUseXFont() now works if a Pixmap is the current drawable.
 -------------------------------------------------------------------------------
-[10]
+[9]
 vglserver_config now works properly with Debian Linux systems.
 -------------------------------------------------------------------------------
-[11]
+[10]
 Fixed a typo in vglconnect which caused it to leave temporary files lying
 about.
 -------------------------------------------------------------------------------
-[12]
+[11]
 Removed libXm (Motif) dependency in the Solaris/x86 version of VirtualGL.  This
 mainly affects OpenSolaris systems, on which Motif is not available.  The
 libXm dependency was introduced in VirtualGL 2.0.x because that version of
@@ -57,25 +70,40 @@ longer use libXt, the binding to libXm could be safely removed on x86 systems.
 Note, however, that the libXm binding still has to be included on SPARC
 systems, because libGL on SPARC depends on libXmu, which depends on libXt.
 -------------------------------------------------------------------------------
-[13]
-Support for encrypting the VGL Image Transport with OpenSSL has been removed
-from the default build of VirtualGL.  It was only a marginally useful feature,
-because VirtualGL also has the ability to tunnel the VGL Image Transport 
-through SSh, and the OpenSSL feature required a great deal of maintenance
-(to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
-can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
--------------------------------------------------------------------------------
-[14]
+[12]
 Fixed an issue in GeomView whereby attempting to resize the oldest window in
 a multi-window view would cause the Exceed version of vglclient to crash.
 -------------------------------------------------------------------------------
-[15]
+[13]
 When used to configure a Solaris server for GLX mode with open access (all
 users being able to access the local X server, not just members of the vglusers
 group), vglserver_config was incorrectly placing xhost entries at the top of
 /etc/dt/config/Xsetup instead of the bottom.  This could have led to problems,
 since xhost is not guaranteed to be in the PATH until the bottom of that
 script.
+-------------------------------------------------------------------------------
+[14]
+VirtualGL should now build and run cleanly on Ubuntu systems (and possibly
+other Debian derivatives, although only Ubuntu has been tested.)
+-------------------------------------------------------------------------------
+[15]
+Certain applications call glFlush() thousands of times in rapid succession
+when rendering to the front buffer, even if no part of the 3D scene has
+changed.  Sparing the gorey details, this caused the VirtualGL pipeline to
+become overloaded in certain cases, particularly on systems with fast pixel
+readback.  On such systems, every one of the glFlush() commands resulted in
+VirtualGL drawing or sending a frame, even if the pixels in the frame were
+identical to those in the previous frame.  This resulted in application delays
+of up to several minutes.  This version of VGL includes a mechanism which
+ensures that no more than 100 glFlush() commands per second will actually
+result in an image being drawn or sent, and thus strings of rapid fire
+glFlush() commands can no longer overload the pipeline.
+-------------------------------------------------------------------------------
+[16]
+Added uncompressed YUV encoding option to the Sun Ray plugin.  This provides
+significantly better performance than DPCM on Sun Ray 1 clients, and it
+provides significantly better image quality in all cases.  YUV encoding will
+generally use about 50% more network bandwidth than DPCM, all else being equal.
 -------------------------------------------------------------------------------
 
 
