@@ -81,6 +81,12 @@ ensures that no more than 100 glFlush() commands per second will actually
 result in an image being drawn or sent, and thus strings of rapid fire
 glFlush() commands can no longer overload the pipeline.
 -------------------------------------------------------------------------------
+[16]
+Added uncompressed YUV encoding option to the Sun Ray plugin.  This provides
+significantly better performance than DPCM on Sun Ray 1 clients, and it
+provides significantly better image quality in all cases.  YUV encoding will
+generally use about 50% more network bandwidth than DPCM, all else being equal.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
