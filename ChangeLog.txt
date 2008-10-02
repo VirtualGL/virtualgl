@@ -64,6 +64,23 @@ group), vglserver_config was incorrectly placing xhost entries at the top of
 since xhost is not guaranteed to be in the PATH until the bottom of that
 script.
 -------------------------------------------------------------------------------
+[14]
+VirtualGL should now build and run cleanly on Ubuntu systems (and possibly
+other Debian derivatives, although only Ubuntu has been tested.)
+-------------------------------------------------------------------------------
+[15]
+Certain applications call glFlush() thousands of times in rapid succession
+when rendering to the front buffer, even if no part of the 3D scene has
+changed.  Sparing the gorey details, this caused the VirtualGL pipeline to
+become overloaded in certain cases, particularly on systems with fast pixel
+readback.  On such systems, every one of the glFlush() commands resulted in
+VirtualGL drawing or sending a frame, even if the pixels in the frame were
+identical to those in the previous frame.  This resulted in application delays
+of up to several minutes.  This version of VGL includes a mechanism which
+ensures that no more than 100 glFlush() commands per second will actually
+result in an image being drawn or sent, and thus strings of rapid fire
+glFlush() commands can no longer overload the pipeline.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
