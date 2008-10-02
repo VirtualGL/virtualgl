@@ -352,6 +352,7 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	__vgl_fakerinit();
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
+	if(fconfig.vendor) ServerVendor(dpy)=fconfig.vendor;
 
 		stoptrace();  prargd(dpy);  closetrace();
 
