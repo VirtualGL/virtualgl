@@ -20,17 +20,6 @@
 		application script and then re-enable it prior to launching the actual \
 		application. \
 	|
-| ANSYS v11.0 | All \
-	| If you experience extremely long delays (on the order of minutes) when \
-		reading input data or performing other operations in ANSYS: \
-		{nl}{nl} \
-		If using the VGL Image Transport, set the environment variable \
-		''VGL_INTERFRAME'' to ''0'' on the VirtualGL server prior to launching \
-		ANSYS.  When running ANSYS in a TurboVNC session on the VirtualGL server, \
-		set the environment variable ''VGL_FPS'' to ''20'' prior to launching \
-		ANSYS. \
-	| See [[#ansys_proe][notes]] below \
-	|
 | Army Ops | Linux/x86 \
 	| ''vglrun -dl armyops'' \
 	| See {ref prefix="Chapter ": dlopen} for more details \
@@ -161,17 +150,6 @@
 	|	Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote \
 		connection to a non-Sun X server. \
 	|
-| Pro/ENGINEER Wildfire v3.0 | All \
-	| If you experience extremely long delays (on the order of minutes) when \
-		zooming or performing other operations in Pro/E: \
-		{nl}{nl} \
-		If using the VGL Image Transport, set the environment variable \
-		''VGL_INTERFRAME'' to ''0'' on the VirtualGL server prior to launching \
-		Pro/E.  When running Pro/E in a TurboVNC session on the VirtualGL server, \
-		set the environment variable ''VGL_FPS'' to ''20'' prior to launching \
-		Pro/E. \
-	| See [[#ansys_proe][notes]] below \
-	|
 | QGL (OpenGL Qt Widget) | Linux \
 	| ''vglrun -dl {application}'' \
 	| Qt can be built such that it either resolves symbols from libGL \
@@ -206,53 +184,3 @@
 	|	''vglrun -dl wine {windows_opengl_app.exe}'' \
 	| See {ref prefix="Chapter ": dlopen} for more details \
 	|
-
-*** Notes for ANSYS and Pro/E
-#OPT: noList! plain!
-{anchor:ansys_proe}
-
-ANSYS and Pro/E frequently render to the front buffer and, for unknown reasons,
-call ''glFlush()'' thousands of times in a row even if nothing new has been
-rendered.  This exposes a vulnerability in VirtualGL's framebuffer readback
-heuristics.  Normally, when an application calls ''glFlush()'' on the front
-buffer, VirtualGL will read back, compress, and send the pixels from the front
-buffer.  But if ''glFlush()'' is called thousands of times without changing the
-contents of the frame buffer, this causes VirtualGL to read back, compress,
-and send thousands of duplicate images.  Whereas calling ''glFlush()'' on a
-local display takes practically no time, reading back and sending an image in
-VirtualGL takes a relatively long amount of time.  So, left unchecked, this
-phenomenon can lead to delays of several minutes when performing certain
-operations in ANSYS and Pro/E while using VirtualGL.
-
-If frame spoiling is enabled, then VirtualGL will not read back the framebuffer
-in response to a ''glFlush()'' call if a prior image is still being
-compressed/sent.  Ideally, this would cause most of the duplicate ''glFlush()''
-calls to be ignored by VirtualGL.  However, this frame spoiling algorithm only
-works if it takes longer to compress and send an image than it does to read
-it back from the framebuffer.  Frames are spoiled during the time that the
-readback thread is waiting for the compressor thread to finish with the
-previous frame, so if the readback thread never has to wait on the compressor
-thread, then no frames are ever spoiled.  There are several reasons why this
-could occur:
-
-	#. The system contains an old, slow bus (AGP, for instance) and thus the
-		readback performance from the graphics card is relatively slow.
-	#. TurboVNC is being used on the same server as VirtualGL.  If this is the
-		case, then the compressor thread is passing images to TurboVNC through
-		shared memory, which (even on modern systems) is almost always faster than
-		reading back images from the graphics card.
-	#. Interframe comparison is enabled in the VGL Image Transport.  In the case
-		of ANSYS and Pro/E, each duplicate frame can be compared and
-		discarded by the compressor much more quickly than it can be read back from
-		the graphics card, so no spoiling occurs.
-
-A more robust fix for this problem is slated for the next release of VirtualGL,
-but for now, it is necessary to work around the issue if it occurs.  The
-workaround is essentially to slow the compressor thread down such that it is
-slower than the readback thread.  When using the VGL Image Transport, it is
-usually only necessary to disable interframe comparison (''VGL_INTERFRAME=0'')
-to accomplish this.  But when using the X11 Image Transport and TurboVNC,
-it is necessary to introduce an artificial delay into the compressor thread by
-setting ''VGL_FPS''.  A value of ''20'' for ''VGL_FPS'' is a reasonable
-starting point, but you may have to decrease this value if the readback
-performance on your system is exceptionally slow.
