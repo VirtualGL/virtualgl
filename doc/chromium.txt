@@ -145,6 +145,7 @@ sort-first rendering job using Chromium and VirtualGL:
 Again, it's always a good idea to make sure this works without VirtualGL before
 adding VirtualGL into the mix.
 
+{anchor: Force_Pbuffer}
 *** Using VirtualGL to Force Pbuffer Rendering
 #OPT: noList! plain!
 
