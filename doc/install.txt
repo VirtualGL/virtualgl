@@ -10,48 +10,59 @@
 *** Installing TurboJPEG
 #OPT: noList! plain!
 
-	1. Download v1.10 or later of the TurboJPEG RPM package
-		(''turbojpeg-''__''{version}''__''.i386.rpm'' for 32-bit systems or
-		''turbojpeg-''__''{version}''__''.x86_64.rpm'' for 64-bit systems) from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+	1. Download the appropriate TurboJPEG binary package (v1.10 or later) for
+		your system from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
-		!!! The 64-bit RPM provides both 32-bit and 64-bit TurboJPEG libraries.
-		{nl}{nl}
-		.tgz packages are provided for users of non-RPM-based Linux
-		distributions.  You can use
-		[[http://www.kitenet.net/programs/alien/][alien]] to convert these into
-		.deb packages if you prefer.
+		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
+		"x86_64" RPM and "amd64" DEB packages are for 64-bit systems.  The 64-bit
+		packages contain both 32-bit and 64-bit libraries.
 
-	2. Log in as root, cd to the directory where you downloaded the RPM package,
-		and issue the following command:
+	2. Log in as root, cd to the directory where you downloaded the binary
+		package, and issue one of the following commands:
+
+		RPM-based systems :: {:}
 		#Verb <<---
 		rpm -U turbojpeg*.rpm
+		---
+
+		Debian-based systems :: {:}
+		#Verb <<---
+		dpkg -i turbojpeg*.deb
 		---
 
 *** Installing VirtualGL
 #OPT: noList! plain!
 
-	1. Download the VirtualGL RPM package (''VirtualGL-''__''{version}''__''.i386.rpm'' for
-		32-bit systems or ''VirtualGL-''__''{version}''__''.x86_64.rpm'' for 64-bit systems)
-		from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+	1. Download the appropriate VirtualGL binary package for your system from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
-		!!! The 64-bit RPM provides both 32-bit and 64-bit VirtualGL components.
+		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
+		"x86_64" RPM and "amd64" DEB packages are for 64-bit systems.  The 64-bit
+		packages contain both 32-bit and 64-bit VirtualGL components.
 
-	2. Log in as root, cd to the directory where you downloaded the RPM package,
-		and issue the following commands:
+	2. Log in as root, cd to the directory where you downloaded the binary
+		package, and issue the following commands:
+
+		RPM-based systems :: {:}
 		#Verb <<---
 		rpm -e VirtualGL
 		rpm -i VirtualGL*.rpm
 		---
 
+		Debian-based systems :: {:}
+		#Verb <<---
+		dpkg -r VirtualGL
+		dpkg -i VirtualGL*.deb
+		---
+
 ** Installing VirtualGL on Solaris
 
 	1. Download the VirtualGL Solaris package (''SUNWvgl-''__''{version}''__''.pkg.bz2''
-		for Sparc or ''SUNWvgl-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+		for SPARC or ''SUNWvgl-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 		!!! Both packages provide both 32-bit and 64-bit VirtualGL components.
@@ -78,18 +89,18 @@
 
 	#. Download the VirtualGL Mac disk image
 		(''VirtualGL-''__''{version}''__''.dmg'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Open the disk image, then open ''VirtualGL-''__''{version}''__''.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac client.  The Mac
-		package installs files in the same locations as the Linux RPM.
+		package installs files in the same locations as the Linux packages.
 
 ** Installing VirtualGL on Windows (Client Only)
 
 	#. Download the VirtualGL Windows installer package
 		(''VirtualGL-''__''{version}''__''.exe'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Run the VirtualGL installer.  The installation of VirtualGL should be
@@ -98,11 +109,10 @@
 
 ** Installing VirtualGL from Source
 
-If you are using a non-RPM-based distribution of Linux or another platform for
-which there is not a pre-built VirtualGL binary package available, then log in
-as root, download the VirtualGL source tarball (''VirtualGL-''__''{version}''__''.tar.gz'')
-from the 
-[[http://sourceforge.net/project/showfiles.php?group_id=117509][files area]]
+If you are using a platform for which there is not a pre-built VirtualGL binary
+package available, then log in as root, download the VirtualGL source tarball
+(''VirtualGL-''__''{version}''__''.tar.gz'') from the 
+[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
 uncompress it, ''cd vgl'', and read the contents of ''BUILDING.txt'' for
 further instructions on how to build and install VirtualGL from source.
@@ -111,12 +121,12 @@ further instructions on how to build and install VirtualGL from source.
 
 The VirtualGL Sun Ray plugin is a proprietary add-on developed by Sun
 Microsystems to integrate VirtualGL with the Sun Ray thin client environment.
-If you plan to use this functionality, then it is recommended that you
-download and install the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
-software.  This software package is available as a free download (Sun charges
+If you plan to use this functionality, then it is recommended that you download
+and install the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
+software.  This software product is available as a free download (Sun charges
 for support), and it includes VirtualGL, TurboVNC, the proprietary Sun Ray
-plugin, enhanced documentation, and enhancements to N1 GridEngine to allow it
-to manage VirtualGL jobs across a cluster of 3D servers.
+plugin, and enhancements to N1 GridEngine to allow it to manage VirtualGL jobs
+across a cluster of 3D servers.
 
 ** Uninstalling VirtualGL
 
@@ -125,9 +135,15 @@ to manage VirtualGL jobs across a cluster of 3D servers.
 
 As root, issue the following command:
 
-#Verb: <<---
-rpm -e VirtualGL
----
+	RPM-based systems :: {:}
+	#Verb: <<---
+	rpm -e VirtualGL
+	---
+
+	Debian-based systems :: {:}
+	#Verb: <<---
+	dpkg -r VirtualGL
+	---
 
 *** Solaris
 #OPT: noList! plain!
