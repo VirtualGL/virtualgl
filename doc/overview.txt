@@ -4,30 +4,30 @@
 VirtualGL is an open source package which gives any Unix or Linux remote
 display software the ability to run OpenGL applications with full 3D
 hardware acceleration.  Some remote display software, such as VNC, lacks the
-ability to run OpenGL applications entirely.  Other remote display software
+ability to run OpenGL applications at all.  Other remote display software
 forces OpenGL applications to use a slow software-only OpenGL renderer, to the
-detriment of performance as well as compatibility.  And running OpenGL
-applications using the traditional remote X-Windows approach causes all of the
-OpenGL commands and 3D data to be sent over the network to be rendered on the
-client machine, which is not a tenable proposition unless the data is
-relatively small and static, unless the network is fast, and unless
-the OpenGL application is specifically tuned for a remote X-Windows
-environment.
+detriment of performance as well as compatibility.  The traditional method of
+displaying OpenGL applications to a remote X server (indirect rendering)
+supports 3D hardware acceleration, but this approach causes all of the OpenGL
+commands and 3D data to be sent over the network to be rendered on the client
+machine.  This is not a tenable proposition unless the data is relatively small
+and static, unless the network is very fast, and unless the OpenGL application
+is specifically tuned for a remote X-Windows environment.
 
 With VirtualGL, the OpenGL commands and 3D data are instead redirected to a
-3D graphics accelerator on the server machine, and only the rendered 3D images
-are sent to the client machine.  VirtualGL thus "virtualizes" 3D graphics
-hardware, allowing it to be co-located in the "cold room" with compute and
-storage resources.  VirtualGL also allows 3D graphics hardware to be shared
-among multiple users, and it provides real-time performance on even the most
-modest of networks.  This makes it possible for large, noisy, hot 3D
-workstations to be replaced with laptops or even thinner clients; but more
-importantly, it eliminates the workstation and the network as barriers to
-data size.  Users can now visualize gigabytes and gigabytes of data in real
-time without needing to cache any of the data locally or sit in front of the
-machine that is rendering the data.
+3D graphics accelerator on the application server, and only the rendered 3D
+images are sent to the client machine.  VirtualGL thus "virtualizes" 3D
+graphics hardware, allowing it to be co-located in the "cold room" with compute
+and storage resources.  VirtualGL also allows 3D graphics hardware to be shared
+among multiple users, and it provides "workstation-like" levels of performance
+on even the most modest of networks.  This makes it possible for large, noisy,
+hot 3D workstations to be replaced with laptops or even thinner clients.  More
+importantly, however, VirtualGL eliminates the workstation and the network as
+barriers to data size.  Users can now visualize gigabytes and gigabytes of data
+in real time without needing to copy any of the data over the network or sit in
+front of the machine that is rendering the data.
 
-Normally, a 3D Unix OpenGL application would send all of its drawing commands
+Normally, a Unix OpenGL application would send all of its drawing commands
 and data, both 2D and 3D, to an X-Windows server, which may be located across
 the network from the application server.  VirtualGL, however, employs a
 technique called "split rendering" to force the 3D commands from the
@@ -36,12 +36,12 @@ accomplishes this by pre-loading a dynamic shared object (DSO) into the
 application at run time.  This DSO intercepts a handful of GLX, OpenGL, and X11
 commands necessary to perform split rendering.  Whenever a window is created by
 the application, VirtualGL creates a corresponding 3D pixel buffer ("Pbuffer")
-on the server's 3D graphics card.  Whenever the application requests that an
-OpenGL rendering context be created on the window, VirtualGL intercepts the
-request and creates the context in the Pbuffer instead.  Whenever the
-application swaps or flushes the drawing buffer to indicate that it has
-completed rendering a frame, VirtualGL reads back the Pbuffer and sends the
-rendered 3D image to the client.
+on the application server's 3D graphics card.  Whenever the application
+requests that an OpenGL rendering context be created for the window, VirtualGL
+intercepts the request and creates the context on the corresponding Pbuffer
+instead.  Whenever the  application swaps or flushes the drawing buffer to
+indicate that it has finished rendering a frame, VirtualGL reads back the
+Pbuffer and sends the rendered 3D image to the client.
 
 The beauty of this approach is its non-intrusiveness.  VirtualGL monitors a
 few X11 commands and events to determine when windows have been resized, etc.,
@@ -50,12 +50,12 @@ the X server.  For the most part, VGL does not interfere with the delivery of
 OpenGL commands to the graphics card, either (there are some exceptions, such
 as its handling of color index rendering.)  VGL merely forces the OpenGL
 commands to be delivered to a server-side graphics card rather than a
-client-side one.  Once the OpenGL rendering context has been established in a
-server-side Pbuffer, everything (including esoteric OpenGL extensions,
-fragment/vertex programs, etc.) should "just work."  In most cases, if an
-application runs locally on a 3D server/workstation, that same application will
-run remotely from that same server/workstation using VirtualGL.  But obviously,
-if it were always as simple as that, we could all turn out the lights and go
+client-side graphics card.  Once the OpenGL rendering context has been
+established in a server-side Pbuffer, everything (including esoteric OpenGL
+extensions, fragment/vertex programs, etc.) should "just work."  In most cases,
+if an application runs locally on a 3D server/workstation, that same
+application will run remotely from that same machine using VirtualGL.  However,
+if it were really as simple as that, we could all turn out the lights and go
 home.  Most of the time spent developing VirtualGL has been spent working
 around "stupid application tricks."
 
@@ -63,13 +63,13 @@ VirtualGL can currently use one of three "image transports" to send rendered 3D
 images to the client machine:
 
 {anchor: VGL_Image_Transport}
-	\1. VGL Image Transport (Formerly "Direct Mode") :: The VGL image transport
+	\1. VGL Image Transport (Formerly "Direct Mode") :: The VGL Image Transport
 	is most often used whenever the X server is located across the network from
 	the application server, for instance if the X server is running on the user's
 	desktop machine.  VirtualGL uses its own protocol on a dedicated TCP socket
 	to send the rendered 3D images to the client machine, and the VirtualGL
 	Client application decodes the images and composites them into the
-	appropriate X window.  The VGL transport can either deliver uncompressed
+	appropriate X window.  The VGL Transport can either deliver uncompressed
 	images (RGB encoded), or it can compress images in real time using a
 	high-speed JPEG codec.  It also supports the delivery of stereo image pairs,
 	which can be reconstructed into a stereo image by the VirtualGL Client.
@@ -79,22 +79,22 @@ images to the client machine:
 #CAP: The VGL Image Transport with a Remote X Server
 
 {anchor: X11_Image_Transport}
-	\2. X11 Image Transport (Formerly "Raw Mode") :: The X11 image transport
+	\2. X11 Image Transport (Formerly "Raw Mode") :: The X11 Image Transport
 	simply draws the rendered 3D images into the appropriate X window using
 	XPutImage() and similar X-Windows commands.  This is most useful in
 	conjunction with an "X Proxy", which can be one of any number of Unix remote
 	display applications, such as VNC.  These X proxies are essentially "virtual"
-	X servers.  They appear to the application to be a normal X server, but they
+	X servers.  They appear to the application as a normal X server, but they
 	perform X11 rendering to a virtual framebuffer in main memory	rather than to
 	a real framebuffer on a graphics card.  This allows the X proxy to send
 	only images to the client machine rather than chatty X-Windows rendering
-	commands.  When using the X11 transport, VirtualGL does not perform any image
+	commands.  When using the X11 Transport, VirtualGL does not perform any image
 	compression or encoding itself.  It instead relies upon an X proxy to encode
 	and deliver the images to the client(s).  Since the use of an X proxy
 	eliminates the need to send X-Windows commands over the network, this is the
 	best means of using VirtualGL over high-latency or low-bandwidth networks.
 	The VirtualGL Project provides an accelerated version of VNC, called
-	"TurboVNC", which is meant to be used with VirtualGL's X11 transport, and the
+	"TurboVNC", which is meant to be used with VirtualGL's X11 Transport.  The
 	combination of the two provides a highly-performant remote 3D	solution, even
 	on slow networks.  TurboVNC also provides rudimentary collaboration
 	capabilities, allowing multiple users to simultaneously interact with the
@@ -109,24 +109,24 @@ images to the client machine:
 	series of ultra-thin hardware clients that connect to this proxy over a
 	network.  It is similar in concept to VNC, in that a virtual X server is
 	created for every user and that only images, not rendering commands,
-	are sent to the client.  But unlike VNC, the client is not a piece of
+	are sent to the client.  Unlike VNC, however, the client is not a piece of
 	software running on a workstation or laptop.  The client is a fanless,
 	diskless little box with only a monitor port, USB ports, a network jack,
 	and a smart card slot (used for authentication.){nl} \
 	{nl} \
-	This environment presents unique challenges to VirtualGL, however.  The
-	first challenge is that the Sun Ray clients contain relatively slow CPUs, so
-	they are not fast enough to decompress JPEG in real time.  The second
-	challenge is that Sun Ray servers are generally provisioned to handle a lot
-	of simultaneous users, so using VirtualGL's X11 transport would put undue
-	stress on both the Sun Ray servers and the network on which they reside.
-	Thus, Sun Microsystems designed a plugin for VirtualGL which allows VGL to
-	compress images using a protocol that can be sent directly to the Sun Ray
-	hardware client without having to pass through the Sun Ray server first.
+	This environment presents unique challenges to VirtualGL  The first challenge
+	is that the Sun Ray 1 and Sun Ray 2 series clients contain relatively slow
+	CPUs, so they are not fast enough to decompress JPEG in real time.  The
+	second challenge is that Sun Ray servers are generally provisioned to handle
+	a lot of simultaneous users, so using VirtualGL's X11 Transport would put
+	undue stress on both the Sun Ray servers and the network on which they
+	reside.  Thus, Sun Microsystems designed a plugin for VirtualGL which allows
+	VGL to compress images using a protocol that can be sent directly to the Sun
+	Ray hardware client without having to pass through the Sun Ray server first.
 	Since the plugin uses the proprietary Sun Ray image compression technology,
 	it is currently closed source, but the binary packages can be downloaded
-	for free as part of Sun's Shared Visualization product, which also includes
-	VirtualGL, TurboVNC, and other goodies.
+	for free as part of the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
+	product.  This product also includes VirtualGL, TurboVNC, and other goodies.
 
 #IMG: sunray.png
 #OPT fmt=latex: w=4cm
