@@ -343,9 +343,9 @@ Fl_Menu_Item sampmenu[]=
 
 Fl_Menu_Item profmenu[]=
 {
-	{"Low Qual (Wide-Area Network)", 0, ProfCB, (void *)0},
+	{"Low Qual (Low-Bandwidth Network)", 0, ProfCB, (void *)0},
 	{"Medium Qual", 0, ProfCB, (void *)1},
-	{"High Qual (High-Speed Network)", 0, ProfCB, (void *)2},
+	{"High Qual (High-Bandwidth Network)", 0, ProfCB, (void *)2},
 	{"Custom", 0, 0, 0},
 	{0, 0, 0, 0}
 };
@@ -409,7 +409,7 @@ void init(int argc, char **argv)
 	progbutton->callback(ProgCB, 0);
 	SetProg();
 
-	errifnot(profchoice=new Fl_Choice(157, 165, 250, 24,
+	errifnot(profchoice=new Fl_Choice(157, 165, 280, 24,
 		"Connection Profile: "));
 	profchoice->menu(profmenu);
 	profchoice->mode(3, FL_MENU_INACTIVE);
