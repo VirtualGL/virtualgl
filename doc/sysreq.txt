@@ -1,6 +1,6 @@
 * System Requirements
 
-** Linux/x86
+** Linux
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
@@ -13,8 +13,8 @@
 		AMD Opteron or Athlon64, 1.8 GHz or faster \
 		{list type=ul: \
 			{item:For optimal performance with 64-bit VirtualGL, the processor \
-				should support SSE3 extensions.  Only newer AMD 64-bit processors \
-				(mid-2005 and later) support SSE3.} \
+				should support SSE3 extensions.  AMD 64-bit processors manufactured \
+				prior to 2005 do not support SSE3.} \
 			{item:Dual processors recommended}} \
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
@@ -37,9 +37,7 @@
 				families (including [[http://fedora.redhat.com/][Fedora]], \
 				[[http://www.centos.org/][CentOS]], and \
 				[[http://www.whiteboxlinux.org/][White Box]])} \
-			{item:Specifically tested with RedHat Enterprise Linux 2.1, RedHat/CentOS \
-				Enterprise Linux 3, 4, & 5 (32-bit and 64-bit), and SuSE Linux Enterprise \
-				9 & 10 (32-bit and 64-bit)}} \
+			{item:Ubuntu Linux v6.0 or later}} \
 	| < \
 	| < \
 	|
@@ -50,11 +48,14 @@
 	|
 #OPT: hiCol=first
 
-** Linux/Itanium
+*** Linux/Itanium
 
 VirtualGL should build and run on Itanium Linux, but it has not been thoroughly
 tested.  [[http://sourceforge.net/users/dcommander][Contact us]] if you
-encounter any difficulties.
+encounter any difficulties.  A pre-built TurboJPEG binary package is not
+available for Linux/Itanium, so it will be necessary to build TurboJPEG from
+source using the Intel Integrated Performance Primitives for Itanium
+processors.
 
 ** Solaris/x86
 
@@ -71,7 +72,9 @@ encounter any difficulties.
 	| Any graphics card with decent 2D performance \
 	|
 | O/S \
-	| Solaris 10 or higher \
+	| {list type=ul: \
+			{item: Solaris 10 (or newer)} \
+			{item: OpenSolaris 2008.05 (or newer)}} \
 	| < \
 	| < \
 	|
@@ -91,11 +94,11 @@ encounter any difficulties.
 	|
 #OPT: hiCol=first
 
-	!!! * mediaLib is pre-installed on Solaris 10/x86 and higher, but it is
-	strongly recommended that you download and install the mediaLib 2.5 upgrade
-	from the link above.  mediaLib 2.5 improves the performance of VirtualGL
-	significantly on Solaris/x86 systems, when compared to the pre-installed
-	version of mediaLib.
+	!!! * mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you
+	are running an older version of Solaris, it is recommended that you download
+	and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5
+	improves the performance of VirtualGL significantly on Solaris/x86 systems,
+	when compared to mediaLib 2.4.
 
 ** Solaris/Sparc
 
@@ -118,7 +121,9 @@ encounter any difficulties.
 	| Any graphics card with decent 2D performance \
 	|
 | O/S \
-	| Solaris 8 or higher \
+	| {list type=ul: \
+			{item: Solaris 8 (or newer)} \
+			{item: OpenSolaris 2008.05 (or newer)}} \
 	| < \
 	|
 | Other Software \
@@ -136,7 +141,7 @@ encounter any difficulties.
 		Recommended [[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Patches]] \
 		{list type=ul: \
 			{item:__OpenGL 1.5__: 120812-15 (or later)} \
-			{item:__XVR-2500 driver__: 120928-15 (or later)} \
+			{item:__XVR-2500 driver__: 120928-25 (or later)} \
 			{item:__OpenGL 1.3, 32-bit:__ 113886-41 (or later)} \
 			{item:__OpenGL 1.3, 64-bit:__ 113887-41 (or later)}} \
 	| {list type=ul: \
@@ -209,7 +214,9 @@ encounter any difficulties.
 	| ^ \
 	|
 | Mac/x86 \
-	| ^ \
+	| N/A \
+	| 3D graphics card that supports stereo (example: nVidia Quadro) \
+		and is configured to export stereo visuals \
 	|
 | Solaris/Sparc \
 	| {list type=ul: \
