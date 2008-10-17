@@ -1,7 +1,7 @@
 * Obtaining and Installing VirtualGL
 
 	!!! VirtualGL must be installed on any machine that will act as a VirtualGL
-	server or as a client for the [[overview.txt#VGL_Image_Transport][VirtualGL Image Transport]].
+	server or as a client for the [[overview.txt#VGL_Image_Transport][VGL Image Transport]].
 	It is not necessary to install VirtualGL on the client machine if using VNC
 	or another type of X proxy.
 
@@ -133,7 +133,7 @@ across a cluster of 3D servers.
 *** Linux
 #OPT: noList! plain!
 
-As root, issue the following command:
+As root, issue one of the following commands:
 
 	RPM-based systems :: {:}
 	#Verb: <<---
