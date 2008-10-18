@@ -1,6 +1,6 @@
 * System Requirements
 
-** Linux
+** Linux/x86
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
@@ -48,7 +48,7 @@
 	|
 #OPT: hiCol=first
 
-*** Linux/Itanium
+** Linux/Itanium
 
 VirtualGL should build and run on Itanium Linux, but it has not been thoroughly
 tested.  [[http://sourceforge.net/users/dcommander][Contact us]] if you

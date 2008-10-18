@@ -13,7 +13,7 @@ client or clients.
 
 Since VirtualGL is sending rendered 3D images to the X proxy at a very fast
 rate, the proxy must be able to compress the images very quickly in order to
-keep up.  But, unfortunately, most X proxies can't.  They simply aren't
+keep up.  Unfortunately, however, most X proxies can't.  They simply aren't
 designed for the types of full-screen video workloads that VirtualGL generates.
 Therefore, the VirtualGL Project provides an optimized X proxy called
 "TurboVNC", which is based on the
@@ -25,39 +25,67 @@ TurboVNC has been tuned to provide interactive performance for the types of
 full-screen video workloads that VirtualGL produces.  On these types of image
 workloads, TurboVNC performs as much as an order of magnitude faster than
 TightVNC, uses more than an order of magnitude less CPU time to compress each
-frame, and it produces comparable compression ratios.  Part of this speedup
-comes from the use of TurboJPEG, the same high-speed vector-optimized JPEG
-codec used by the VGL Image Transport.  Another large part of the speedup comes
-from bypassing the color compression features of TightVNC.  TightVNC performs
-very CPU-intensive analysis on each image tile to determine whether the tile
-will compress better using color compression or JPEG.  But for the types of
-images that a 3D application generates, it is almost never the case that color
-compression compresses better than JPEG, so TurboVNC bypasses this analysis to
-improve performance.  TurboVNC also has the ability to hide network latency by
-decompressing and drawing a frame on the client while the next frame is being
-fetched from the server, and this can improve performance dramatically on
-high-latency connections.  TurboVNC additionally provides client-side double
-buffering, full support for Solaris, and other tweaks.
+frame, and it produces generally better compression ratios.  As with TightVNC,
+TurboVNC uses JPEG compression for image tiles with a high number of unique
+colors and paletted encoding for image tiles with a low number of
+unique colors.  Part of TurboVNC's speedup comes from the use of TurboJPEG, the
+same high-speed vector-optimized JPEG codec used by the VGL Image Transport.
+However, TurboVNC also bypasses the CPU-hungry smoothness detection routines
+that TightVNC uses to determine whether a tile is a good candidate for JPEG
+compression.  Furthermore, TurboVNC eliminates buffer copies, it maximizes
+network efficiency by using the largest tile sizes supported by the TightVNC
+protocol, and it never uses a Zlib compression level higher than 1.  In the
+aggregate, TurboVNC compresses 2D application workloads less efficiently than
+TightVNC, but it generally does a better job than TightVNC of compressing 3D
+application workloads.  Also, TurboVNC is much faster across the board than
+TightVNC.
+
+TurboVNC also has the ability to hide network latency by decompressing and
+drawing a frame on the client while the next frame is being fetched from the
+server.  This can improve performance dramatically on high-latency
+connections.  TurboVNC additionally provides client-side double buffering, full
+support for Solaris, and other refinements.
 
 *** Advantages of TurboVNC (when compared to the VGL Image Transport)
 #OPT: noList! plain!
 
-	* TurboVNC eliminates the need to send X11 traffic over the network, thus
+	* TurboVNC eliminates the need to send X11 traffic over the network, and thus
 		it performs very well on low-bandwidth, high-latency connections (such as
 		broadband or long-haul T1 lines.)  The 3D application's GUI will load and
 		render much faster (perhaps even orders of magnitude faster) with TurboVNC
 		than with the VGL Image Transport on such connections.
+
+	* For 3D applications whose rendered images do not contain very many unique
+		colors (for instance, CAD applications in wireframe mode), the hybrid
+		protocol used by TurboVNC will generally use less network bandwidth than
+		the pure motion JPEG protocol used by the VGL Image Transport.
+
+	* TurboVNC provides two lossless compression modes, one of which is designed
+		to reduce server CPU usage on gigabit networks and the other of which is
+		designed to provide reasonable performance on wide-area networks (at the
+		expense of higher server CPU usage.)  The VGL Image Transport's only
+		lossless option is uncompressed RGB.
+
+	* TurboVNC includes a lossless refresh feature which will, on demand, send
+		a mathematically lossless image of the current VNC desktop to the client.
+		A user connecting over a low-bandwidth connection can use low-quality JPEG
+		to achieve the best performance when manipulating the 3D model, then they
+		can request a lossless refresh when they are ready to study the model in
+		detail.
 
 	* TurboVNC provides rudimentary collaboration capabilities.  Multiple clients
 		can simultaneously view the same server session and pass around control of
 		the keyboard and mouse.
 
 	* The TurboVNC client is stateless.  If the network hiccups or the client is
-		otherwise disconnected, the session remains running on the server and can
+		otherwise disconnected, the session continues to run on the server and can
 		be rejoined from any machine on the network.
 
 	* No X server is required on the client machine.  This reduces the deployment
 		cost and complexity for Windows clients.
+
+	* Any web browser or PDA can be used as a TurboVNC client (with reduced
+		performance.)
 
 *** Disadvantages of TurboVNC
 #OPT: noList! plain!
@@ -71,7 +99,7 @@ buffering, full support for Solaris, and other tweaks.
 		single window) and because it has to perform 2D (X11) rendering as well as
 		3D rendering.
 
-	* TurboVNC does not support stereographic or overlay rendering.
+	* TurboVNC does not support quad-buffered stereo or transparent overlays.
 
 ** Using TurboVNC and VirtualGL on the Same Server
 {anchor: TurboVNC_Usage_Local}
@@ -150,7 +178,7 @@ network.
 		|| Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
 		| {img:turbovnc3.png} | {img:turbovnc4.png} |
 		{nl}
-		Enter the TurboVNC session password and click "OK" (Windows) or press
+		Enter the VNC session password and click "OK" (Windows) or press
 		Enter (Linux/Mac/Solaris.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
@@ -184,18 +212,18 @@ compression in the VGL Image Transport.  Otherwise, the images would have to be
 compressed by the VirtualGL server, decompressed by the VirtualGL Client, then
 recompressed by the TurboVNC server, which is a waste of CPU resources.
 However, sending images uncompressed over a network requires a fast network
-(generally, Gigabit Ethernet or faster.)  So there needs to be a fast link
+(generally, Gigabit Ethernet or faster), so there needs to be a fast link
 between the VirtualGL server and the TurboVNC server for this procedure to
 perform well.
 
 *** Procedure
 #OPT: noList! plain!
 
-The procedure for using the VGL Image Transport to transmit images from a
-VirtualGL server to a TurboVNC server is the same as the
-[[#X11_Forwarding][procedure]] for using the VGL Image
-Transport to transmit images to a remote X server, with the following notable
-differences:
+The procedure for using the VGL Image Transport to remotely display 3D
+applications from a VirtualGL server to a TurboVNC server is the same as the
+[[#X11_Forwarding][procedure]] for using the VGL Image Transport to remotely
+display 3D applications from a VirtualGL server to a remote X server, with the
+following notable differences:
 
 	#. The "client" in this case is really the TurboVNC server machine.
 
@@ -211,9 +239,9 @@ differences:
 ** Disconnecting and Killing the TurboVNC Session
 
 Closing the TurboVNC viewer disconnects from the TurboVNC server session, but
-the TurboVNC server session is still running on the server machine (as are any
-applications that you may have started in it), and you can reconnect to the
-session at any time.
+the TurboVNC server session will remain running on the server machine (as will
+any applications that you may have started in the session), and you can
+reconnect to the session at any time.
 
 To kill a TurboVNC server session:
 
@@ -234,7 +262,8 @@ To kill a TurboVNC server session:
 	wish to kill.
 
 To list the X display numbers and process ID's of all TurboVNC server sessions
-that are currently running under your user account on this machine, run
+that are currently running under your user account on a particular machine,
+type the following command:
 
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -list
@@ -269,26 +298,20 @@ your web browser to:
 
 The level of image compression in TurboVNC can be adjusted to balance the
 (sometimes conflicting) goals of high image quality and high performance.
-The more TurboVNC compresses an image, the more grainy the resulting
-image becomes.  But these lower quality levels also require less network
-bandwidth and can thus improve the overall performance of TurboVNC on slower
-networks.
+There are four options which control the manner in which TurboVNC compresses
+images:
 
-There are three options that control the level of image compression in
-TurboVNC:
-
-	Image compression type :: {:}
-		Either "JPEG" or "None (RGB)".  "None (RGB)" turns off image compression
-		altogether, which is useful when connecting to a TurboVNC server running
-		on the same machine as the viewer or to a TurboVNC server located across a
-		gigabit or faster network.  Disabling image compression greatly reduces the
-		CPU usage on the server and client, at the expense of greatly increasing
-		the network usage.
+	Allow JPEG compression :: {:}
+		If this option is enabled, then TurboVNC will use JPEG compression for all
+		image tiles with more than 24 unique colors and paletted encoding for all
+		other image tiles.  If this option is disabled, then TurboVNC will select
+		between paletted or raw encoding depending on the size of the image tile
+		and its color count.
 
 	JPEG image quality :: {:}
 		Lower quality levels produce grainier JPEG images with more noticeable
 		compression artifacts, but lower quality levels also use less network
-		bandwidth and CPU power.  Refer to {ref prefix="Section ": VGL_QUAL} for
+		bandwidth and CPU time.  Refer to {ref prefix="Section ": VGL_QUAL} for
 		more details.
 
 	JPEG chrominance subsampling :: {:}
@@ -300,62 +323,92 @@ TurboVNC:
 		grayscale throws out all of the chrominance components.  Refer to
 		{ref prefix="Section ": VGL_SUBSAMP} for more details.
 
+	Zlib compression level :: {:}
+		If Zlib compression is enabled, then paletted and raw-encoded image tiles
+		will be compressed with Zlib prior to transmission.  This decreases network
+		bandwidth usage at the expense of increased server CPU usage.  If JPEG
+		compression is enabled, then Zlib compression is always used with non-JPEG
+		image tiles.
+
 In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
-the Options dialog box (click the "Options" button in the "TurboVNC Connection"
-dialog box or, after connecting to the server, click on the Connection Options
-button in the toolbar.)  In the Unix TurboVNC viewer, press F8 after connecting
-to bring up the options menu.  In the Java viewer, click on the Options button
-at the top of the browser window.
+the Options dialog box (click on the "Options" button in the "TurboVNC
+Connection" dialog box or, after connecting to the server, click on the
+Connection Options button in the toolbar.)  In the Unix TurboVNC viewer, press
+F8 after connecting to bring up the options menu.  In the Java viewer, click on
+the Options button at the top of the browser window.
 
-The TurboVNC Viewer provides three "connection profiles", corresponding
-to three of the most useful levels of JPEG image compression:
+The TurboVNC Viewer provides five image encoding protocols, corresponding
+to the most useful combinations of the image compression options described
+above:
 
-|| Connection profile || JPEG image quality || JPEG chrominance subsampling || Notes ||
-| "Low Quality" | 30 | 4x | \
-	This is generally about the lowest usable JPEG quality.  It produces very \
-	noticeable image compression artifacts but will allow TurboVNC to perform \
-	optimally on broadband connections.  If image quality is more critical than \
-	performance, then use one of the other connection profiles or take \
+|| Image encoding protocol || Allow JPEG || JPEG image quality || \
+	JPEG chrominance subsampling || Zlib compression level || Notes ||
+| "Tight + Perceptually Lossless JPEG" | Yes | 95 | 1x | N/A | \
+	This protocol should be perceptually lossless (that is, any image \
+	compression artifacts it produces should be imperceptible to the human \
+	eye under most viewing conditions.)  This protocol requires a great deal \
+	of network bandwidth, however, and is generally not recommended except on \
+	50 Megabit/second and faster networks. |
+| "Tight + Medium Quality JPEG" | Yes | 80 | 2x | N/A | \
+	For image tiles with a high number of unique colors, this protocol produces \
+	some minor, but generally not very noticeable, image compression artifacts. \
+	All else being equal, this protocol typically uses about twice the network \
+	bandwidth of the "Low Quality" protocol and about half the bandwidth of the \
+	"Perceptually Lossless" protocol, making it appropriate for medium-speed \
+	networks such as 10 Megabit ethernet. |
+| "Tight + Low Quality JPEG" | Yes | 30 | 4x | N/A | \
+	For image tiles with a high number of unique colors, this protocol produces \
+	very noticeable image compression artifacts.  However, it performs \
+	optimally on low-bandwidth connections.  If image quality is more critical \
+	than performance, then use one of the other connection protocols or take \
 	advantage of the "Lossless Refresh" feature. |
-| "Medium Quality" | 80 | 2x | \
-	This profile produces some minor, but generally not very noticeable, image \
-	compression artifacts.  All else being equal, this profile uses \
-	approximately twice the network bandwidth of the "Low Quality" profile and \
-	half the bandwidth of the "High Quality" profile, making it appropriate for \
-	medium-speed networks such as 10 Megabit ethernet. |
-| "High Quality" | 95 | 1x | \
-	This profile should be perceptually lossless (that is, it should produce no \
-	noticeable image compression artifacts) for most applications.  It requires \
-	a great deal of network bandwidth, however, and is generally not recommended \
-	except on 50 Megabit/second and faster networks.  |
+| "Lossless Tight" | No | N/A | N/A | 0 | \
+	This protocol uses paletted encoding for image tiles with a low number of \
+	unique colors but otherwise does not perform any image compression at all. \
+	It is thus suitable only for gigabit and faster networks.  This protocol \
+	uses significantly less CPU time than any of the JPEG-based protocols. |
+| "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
+	This protocol uses paletted encoding for image tiles with a low number of \
+	unique colors and raw encoding for image tiles with a high number of unique \
+	colors.  It compresses all image tiles using Zlib with compression level \
+	1.  For certain types of applications (CAD applications, in particular), \
+	this protocol uses less network bandwidth than the "Perceptually Lossless" \
+	protocol, but it also uses significantly more CPU time on the server than \
+	any of the JPEG-based protocols. |
 
-In the Windows TurboVNC Viewer, there are three buttons in the "TurboVNC
-Connection" dialog box that allow you to easily select the connection profile.
-In the Java viewer, the same thing is accomplished by clicking the "Options"
-button at the top of the browser window.  With the Linux/Mac/Solaris TurboVNC
-Viewer, the "High Quality" profile is the default, and you can use the
-''-lowqual'' and ''-medqual'' command line options to ''vncviewer'' to switch
-to the "Low Quality" or "Medium Quality" profiles.  You can also press the F8
-key after connecting to pop up a menu from which you can select a different
-connection profile.
+In the Windows TurboVNC Viewer, the image encoding protocol can be set using
+the Options dialog box (click on the "Options" button in the "TurboVNC
+Connection" dialog box or, after connecting to the server, click on the
+Connection Options button in the toolbar.)  In the Java viewer, the same thing
+is accomplished by clicking on the "Options" button at the top of the browser
+window.  With the Linux/Mac/Solaris TurboVNC Viewer, the "Perceptually
+Lossless" protocol is the default, and you can use the following command line
+switches to select another protocol:
+
+''-medqual'' = select the "Tight + Medium Quality JPEG" protocol {nl}
+''-lowqual'' = select the "Tight + Low Quality JPEG" protocol {nl}
+''-lossless'' = select the "Lossless Tight" protocol {nl}
+''-losslesswan'' = select the "Lossless Tight + Zlib" protocol {nl}
+
+You can also press the F8 key after connecting to pop up a menu from which you
+can select a different protocol.
 
 *** Lossless Refresh
 #OPT: noList! plain!
 
-TurboVNC can optionally encode images as RGB, which is fully lossless and
-uncompressed, but this mode does not perform well except on extremely fast
-networks.  Another option for quality-critical applications is the "Lossless
-Refresh" feature.  Lossless Refresh causes the server to send a
-mathematically lossless (Zlib-compressed RGB) copy of the current screen to the
-viewer.  So, for instance, a user can rotate/pan/zoom an object in their
-application using a very lossy quality setting, then when that user is ready to
-interpret or analyze the object closely, they can request a lossless refresh
-of the screen.
+Since both of TurboVNC's mathematically lossless protocols have performance
+drawbacks, another option for image-quality-critical applications is the
+"Lossless Refresh" feature.  When a lossless refresh is requested by a TurboVNC
+client, the server will send a mathematically lossless copy of the current
+TurboVNC desktop to the requesting client.  So, for instance, a user can
+rotate/pan/zoom an object in their 3D application using a very low-quality JPEG
+setting, then when that user is ready to interpret or analyze the object, they
+can request a lossless refresh of the screen.
 
 To perform a lossless refresh, press CTRL-ALT-SHIFT-L in the Windows TurboVNC
 Viewer (or click on the Lossless Refresh toolbar icon.)  In the Unix/Linux
 TurboVNC Viewer, select "Lossless Refresh" from the F8 popup menu.  In the
-Java TurboVNC Viewer, click the "Lossless Refresh" button at the top of the
+Java TurboVNC Viewer, click on the "Lossless Refresh" button at the top of the
 browser window.
 
 ** Securing a TurboVNC Connection
@@ -402,15 +455,15 @@ above example.)
 #OPT: noList! plain!
 
 For LAN connections and other high-speed networks, tunneling the TurboVNC
-connection over SSh will reduce performance by as much as 20-40%.  But for
-wide-area networks, broadband, etc., there is no performance penalty for using
-SSh tunneling with TurboVNC.
+connection over SSh will reduce performance by as much as 20-40%.  For
+wide-area networks, however, there is no performance penalty for using SSh
+tunneling with TurboVNC.
 
 ** Further Reading
 
 For more detailed instructions on the usage of TurboVNC:
 
-	Linux and Solaris :: Refer to the TurboVNC man pages:
+	Linux/Mac/Solaris :: Refer to the TurboVNC man pages:
 	#Verb: <<---
 	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
 	---
