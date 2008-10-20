@@ -153,15 +153,15 @@ rendering, however, the applications which use it are becoming a vanishing
 breed.
 
 VirtualGL supports PseudoColor rendering if a PseudoColor visual is available
-on the client's display.  A PseudoColor visual need not be present on the
-server.  On the server, VirtualGL uses the red channel of a standard RGB
-Pbuffer to store the color index.  Upon receiving an end of frame trigger,
-VirtualGL reads back the red channel of the Pbuffer and uses ''XPutImage()'' to
-draw the color indices into the appropriate X window.  To put this another way,
-PseudoColor rendering in VirtualGL always uses the X11 Image Transport.
-However, since there is only 1 byte per pixel in a PseudoColor "image", the
-images can still be sent to the client reasonably quickly even though they are
-uncompressed.
+on the 2D X server or X proxy.  A PseudoColor visual need not be present on the
+application server.  On the application server, VirtualGL uses the red channel
+of a standard RGB Pbuffer to store the color index.  Upon receiving an end of
+frame trigger, VirtualGL reads back the red channel of the Pbuffer and uses
+''XPutImage()'' to draw the color indices into the appropriate X window.  To
+put this another way, PseudoColor rendering in VirtualGL always uses the X11
+Image Transport.  However, since there is only 1 byte per pixel in a
+PseudoColor "image", the images can still be sent to the client reasonably
+quickly even though they are uncompressed.
 
 VirtualGL's PseudoColor rendering mode works with TurboVNC, provided that the
 TurboVNC server is configured to use an 8-bit color depth.  Note, however, that

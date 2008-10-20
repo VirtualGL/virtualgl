@@ -31,7 +31,7 @@ to render a section of the multi-screen image.
 VirtualGL is generally not very useful with Configuration 1.  You could
 theoretically install a separate copy of VirtualGL on each display node and use
 it to redirect the output of each ''crserver'' instance to a separate VirtualGL
-Client instance running on a multi-screen X server elsewhere on the network.
+Client instance running on a multi-screen 2D X server elsewhere on the network.
 However, synchronizing the frames on the remote end would require modifications
 to VirtualGL.  Such is left as an exercise for the reader.
 
@@ -59,14 +59,14 @@ pixels into the window using ''glDrawPixels()''.
 The general strategy for making this work with VirtualGL is to first make it
 work without VirtualGL and then insert VirtualGL only into the processes that
 run on Node 0.  VirtualGL must be inserted into the CrAppFaker process to
-prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the X server
-(which would fail if the X server was a VNC server or otherwise did not support
+prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the 2D X server
+(which would fail if this X server was a VNC session or otherwise did not support
 GLX.)  VirtualGL must be inserted into the CrServer process on Node 0 to
-prevent it from sending ''glDrawPixels()'' calls to the X server (which would
-similarly fail if the X server didn't support GLX and which would create a
-performance issue if the X server was remote.)  Instead, VirtualGL forces
+prevent it from sending ''glDrawPixels()'' calls to the 2D X server (which would
+similarly fail if the 2D X server didn't support GLX and which would create a
+performance issue if the 2D X server was remote.)  Instead, VirtualGL forces
 CrServer to draw into a Pbuffer, and VGL then takes charge of transmitting
-the pixels from the Pbuffer to the destination X server in the most efficient
+the pixels from the Pbuffer to the 2D X server in the most efficient
 way possible.
 
 Since Chromium uses ''dlopen()'' to load the system's OpenGL library,
@@ -220,8 +220,8 @@ VirtualGL:
 ** A Note About Performance
 
 Chromium's use of X11 is generally not very optimal.  It assumes a very fast
-connection between the X server and the Chromium Server.  In certain modes,
-Chromium polls the X server on every frame to determine whether windows have
+connection between the 2D X server and the Chromium Server.  In certain modes,
+Chromium polls the 2D X server on every frame to determine whether windows have
 been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in a TurboVNC
 session as opposed to using the VGL Image Transport.

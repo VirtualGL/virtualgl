@@ -97,7 +97,7 @@
 		it may be necessary to set the ''SDRC_SUN_IGNORE_GAMMA'' environment \
 		variable to ''1''. \
 	| I-deas normally aborts if it detects that the X visual assigned to it is \
-		not gamma-corrected.  But gamma-corrected X visuals only exist on \
+		not gamma-corrected.  However, gamma-corrected X visuals only exist on \
 		Solaris/SPARC X servers, so if you are displaying the application to \
 		another type of X server or X proxy which doesn't provide gamma-corrected \
 		X visuals, then it is necessary to override the gamma detection mechanism \
@@ -134,7 +134,7 @@
 		variable to ''1'' and re-running the application. \
 	| Java 5.0 should call ''glXInitThreadsSUN()'' since it is using multiple \
 		OpenGL threads, but it doesn't.  Purely by chance, this doesn't cause any \
-		problems when the application is displayed locally.  But VirtualGL \
+		problems when the application is displayed locally.  However, VirtualGL \
 		changes things up enough that the luck runs out.  This issue does not \
 		exist in Java 6. \
 	|

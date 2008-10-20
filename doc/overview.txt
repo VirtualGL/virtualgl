@@ -36,7 +36,7 @@ accomplishes this by pre-loading a dynamic shared object (DSO) into the
 application at run time.  This DSO intercepts a handful of GLX, OpenGL, and X11
 commands necessary to perform split rendering.  Whenever a window is created by
 the application, VirtualGL creates a corresponding 3D pixel buffer ("Pbuffer")
-on the application server's 3D graphics card.  Whenever the application
+on a 3D graphics card in the application server.  Whenever the application
 requests that an OpenGL rendering context be created for the window, VirtualGL
 intercepts the request and creates the context on the corresponding Pbuffer
 instead.  Whenever the  application swaps or flushes the drawing buffer to
