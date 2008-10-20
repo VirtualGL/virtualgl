@@ -100,7 +100,7 @@ processors.
 	improves the performance of VirtualGL significantly on Solaris/x86 systems,
 	when compared to mediaLib 2.4.
 
-** Solaris/Sparc
+** Solaris/SPARC
 
 || || Server || Client ||
 | Recommended CPU \
@@ -218,7 +218,7 @@ processors.
 	| 3D graphics card that supports stereo (example: nVidia Quadro) \
 		and is configured to export stereo visuals \
 	|
-| Solaris/Sparc \
+| Solaris/SPARC \
 	| {list type=ul: \
 			{item:[[http://www.sun.com/desktop/products/graphics/xvr2500/][XVR-2500]] \
 				graphics card} \
@@ -258,7 +258,7 @@ processors.
 | Mac/x86 \
 	| ^ \
 	|
-| Solaris/Sparc \
+| Solaris/SPARC \
 	| {list type=ul: \
 			{item:3D graphics card that supports transparent overlays (examples: \
 				XVR-1200, XVR-2500) and is configured to export \

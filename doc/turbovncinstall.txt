@@ -56,7 +56,7 @@
 ** Installing TurboVNC on Solaris
 
 	1. Download the TurboVNC Solaris package (''SUNWtvnc-''__''{version}''__''.pkg.bz2''
-		for Sparc or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
+		for SPARC or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}

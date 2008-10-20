@@ -64,9 +64,11 @@ images to the client machine:
 
 {anchor: VGL_Image_Transport}
 	\1. VGL Image Transport (Formerly "Direct Mode") :: The VGL Image Transport
-	is most often used whenever the X server is located across the network from
-	the application server, for instance if the X server is running on the user's
-	desktop machine.  VirtualGL uses its own protocol on a dedicated TCP socket
+	is most often used whenever the 2D X server (the X server used to draw the
+	application's GUI and transmit keyboard and mouse events back to the
+	application server) is located across the network from the application
+	server, for instance if the 2D X server is running on the user's desktop
+	machine.  VirtualGL uses its own protocol on a dedicated TCP socket
 	to send the rendered 3D images to the client machine, and the VirtualGL
 	Client application decodes the images and composites them into the
 	appropriate X window.  The VGL Transport can either deliver uncompressed
@@ -76,7 +78,7 @@ images to the client machine:
 
 #IMG: vgltransport.png
 #OPT fmt=latex: w=4cm
-#CAP: The VGL Image Transport with a Remote X Server
+#CAP: The VGL Image Transport with a Remote 2D X Server
 
 {anchor: X11_Image_Transport}
 	\2. X11 Image Transport (Formerly "Raw Mode") :: The X11 Image Transport
