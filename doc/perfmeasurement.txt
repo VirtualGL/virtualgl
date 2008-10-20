@@ -62,7 +62,7 @@ report inaccurate data if they are run in a VNC session.  TCBench, described
 below, provides a limited solution to this problem.
 
 To disable frame spoiling, set the ''VGL_SPOIL'' environment variable to ''0''
-on the server or pass an argument of ''-sp'' to ''vglrun''.  See
+on the VirtualGL server or pass an argument of ''-sp'' to ''vglrun''.  See
 {ref prefix="Section ": VGL_SPOIL} for more details.
 
 ** VirtualGL Diagnostic Tools
