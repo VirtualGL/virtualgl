@@ -133,5 +133,3 @@ images to the client machine:
 #IMG: sunray.png
 #OPT fmt=latex: w=4cm
 #CAP: The Sun Ray Image Transport
-
-----8<--------------

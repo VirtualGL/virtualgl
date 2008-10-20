@@ -74,10 +74,10 @@ support for Solaris, and other refinements.
 		detail.
 
 	* TurboVNC provides rudimentary collaboration capabilities.  Multiple clients
-		can simultaneously view the same server session and pass around control of
-		the keyboard and mouse.
+		can simultaneously view the same TurboVNC session and pass around control
+		of the keyboard and mouse.
 
-	* The TurboVNC client is stateless.  If the network hiccups or the client is
+	* The TurboVNC viewer is stateless.  If the network hiccups or the viewer is
 		otherwise disconnected, the session continues to run on the server and can
 		be rejoined from any machine on the network.
 
@@ -122,7 +122,7 @@ network.
 		one isn't already started.)
 
 	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSh)
-		session into the VirtualGL/TurboVNC server machine:
+		session into the VirtualGL/TurboVNC server:
 
 		Linux/Mac/Solaris clients :: {:}
 		#Verb: <<---
@@ -137,18 +137,18 @@ network.
 		Replace __''{user}''__ with your user account name on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.
 
-	#. In the SSh session, start a TurboVNC server session:
+	#. In the SSh session, start a TurboVNC session:
 
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncserver
 		---
 
-	#. Make a note of the X display number that the TurboVNC server process
-		prints out, for instance:
+	#. Make a note of the X display number that the TurboVNC session is
+		occupying, for instance:
 		{nl}{nl}
 		''New 'X' desktop is my_server:1''
 		{nl}{nl}
-		If this is the first time that a TurboVNC server session has ever been run
+		If this is the first time that a TurboVNC session has ever been run
 		under this user account, TurboVNC will prompt for a VNC session password.
 
 	#. The SSh session can now be exited, if desired.
@@ -170,7 +170,7 @@ network.
 		| {img:turbovnc1.png} | {img:turbovnc2.png} |
 		{nl}
 		Enter the X display name (hostname/IP address and display number) of the
-		TurboVNC server in the "VNC Server" field, then click "Connect" (Windows)
+		TurboVNC session in the "VNC Server" field, then click "Connect" (Windows)
 		or press Enter (Linux/Mac/Solaris.)
 
 	#. Another dialog box appears, prompting for the VNC session password.
@@ -183,7 +183,7 @@ network.
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual X server with which you can interact to launch
-		X-Windows applications on the TurboVNC server machine.
+		X-Windows applications on the TurboVNC server.
 
 	#. Open a new terminal inside the TurboVNC desktop.
 
@@ -222,35 +222,35 @@ perform well.
 The procedure for using the VGL Image Transport to remotely display 3D
 applications from a VirtualGL server to a TurboVNC server is the same as the
 [[#X11_Forwarding][procedure]] for using the VGL Image Transport to remotely
-display 3D applications from a VirtualGL server to a remote X server, with the
-following notable differences:
+display 3D applications from a VirtualGL server to a remote 2D X server, with
+the following notable differences:
 
-	#. The "client" in this case is really the TurboVNC server machine.
+	#. The "client" in this case is really the TurboVNC server.
 
-	#. The "X server" is really the TurboVNC server session.
+	#. The "X server" is really the TurboVNC session.
 
 	#. Once connected to the VirtualGL server with SSh, it is recommended that
 		you disable image compression in the VGL Image Transport by either setting
-		the environment variable ''VGL_COMPRESS'' to ''rgb'' or passing an argument
+		the ''VGL_COMPRESS'' environment variable to ''rgb'' or passing an argument
 		of ''-c rgb'' to ''vglrun'' when launching VirtualGL.  Otherwise, VirtualGL
 		will detect that the connection to the X server is remote, and it will
 		automatically try to enable JPEG compression.
 
 ** Disconnecting and Killing the TurboVNC Session
 
-Closing the TurboVNC viewer disconnects from the TurboVNC server session, but
-the TurboVNC server session will remain running on the server machine (as will
-any applications that you may have started in the session), and you can
-reconnect to the session at any time.
+Closing the TurboVNC viewer disconnects from the TurboVNC session, but the
+TurboVNC session will remain running on the TurboVNC server (as will any
+applications that you may have started in the session), and you can reconnect
+to the session at any time.
 
-To kill a TurboVNC server session:
+To kill a TurboVNC session:
 
 	#. Using SSh (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
-		log into the machine that is running the TurboVNC server session that you
-		wish to kill.{nl} \
+		log into the server that is running the TurboVNC session that you wish to
+		kill.{nl} \
 		... or ...{nl} \
-		Using the TurboVNC Viewer, connect to the TurboVNC server session that you
-		wish to kill, and open a new terminal in that TurboVNC session.
+		Using the TurboVNC Viewer, connect to the TurboVNC session that you wish to
+		kill, and open a new terminal in that TurboVNC session.
 
 	#. Type the following command:
 
@@ -258,12 +258,12 @@ To kill a TurboVNC server session:
 		/opt/TurboVNC/bin/vncserver -kill :{n}
 		---
 
-	Replace __''{n}''__ with the X display number of the TurboVNC server session you
+	Replace __''{n}''__ with the X display number of the TurboVNC session you
 	wish to kill.
 
-To list the X display numbers and process ID's of all TurboVNC server sessions
-that are currently running under your user account on a particular machine,
-type the following command:
+To list the X display numbers and process ID's of all TurboVNC sessions that
+are currently running under your user account on a particular machine, type the
+following command:
 
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -list
@@ -271,26 +271,26 @@ type the following command:
 
 ** Using TurboVNC in a Web Browser
 
-When a TurboVNC server session is created, it automatically launches a
-miniature web server that serves up a Java TurboVNC viewer applet.  This Java
-TurboVNC viewer can be used to connect to the TurboVNC server from a machine
-that does not have a native TurboVNC viewer installed (or a machine for which
-no native TurboVNC viewer is available.)  The Java viewer is significantly
-slower than the native viewer on high-speed networks, but on low-speed networks
-the Java viewer and native viewers have comparable performance.  The Java
-viewer does not currently support double buffering.
+When a TurboVNC session is created, it automatically launches a miniature web
+server that serves up a Java TurboVNC viewer applet.  This Java TurboVNC viewer
+can be used to connect to the TurboVNC session from a machine that does not
+have a native TurboVNC viewer installed (or a machine for which no native
+TurboVNC viewer is available.)  The Java viewer is significantly slower than
+the native viewer on high-speed networks, but on low-speed networks the Java
+viewer and native viewers have comparable performance.  The Java viewer does
+not currently support double buffering.
 
 To use the Java TurboVNC viewer, point your web browser to:
 
 ''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
 
 where __''{turbovnc_server}''__ is the hostname or IP address of the TurboVNC
-server machine, and __''n''__ is the X display number of the TurboVNC server
-session to which you want to connect.
+server, and __''n''__ is the X display number of the TurboVNC session to which
+you want to connect.
 
 __Example:__
-If the TurboVNC server is running on X display ''my_server:1'', then point
-your web browser to:
+If the TurboVNC session is occupying X display ''my_server:1'', then point your
+web browser to:
 
 ''http://my_server:5801''
 
@@ -394,16 +394,15 @@ You can also press the F8 key after connecting to pop up a menu from which you
 can select a different protocol.
 
 *** Lossless Refresh
-#OPT: noList! plain!
 
 Since both of TurboVNC's mathematically lossless protocols have performance
 drawbacks, another option for image-quality-critical applications is the
 "Lossless Refresh" feature.  When a lossless refresh is requested by a TurboVNC
-client, the server will send a mathematically lossless copy of the current
-TurboVNC desktop to the requesting client.  So, for instance, a user can
+viewer, the server will send a mathematically lossless copy of the current
+TurboVNC desktop to the requesting viewer.  So, for instance, a user can
 rotate/pan/zoom an object in their 3D application using a very low-quality JPEG
 setting, then when that user is ready to interpret or analyze the object, they
-can request a lossless refresh of the screen.
+can request a lossless refresh of TurboVNC's virtual screen.
 
 To perform a lossless refresh, press CTRL-ALT-SHIFT-L in the Windows TurboVNC
 Viewer (or click on the Lossless Refresh toolbar icon.)  In the Unix/Linux
@@ -416,8 +415,8 @@ browser window.
 Normally, the connection between the TurboVNC server and the TurboVNC viewer is
 completely unencrypted, but securing that connection can be easily
 accomplished by using the port forwarding feature of Secure Shell (SSh.)  After
-you have started a TurboVNC server session on the server machine, open a new
-SSh connection into the server machine using the following command line:
+you have started a TurboVNC session on the TurboVNC server, open a new SSh
+connection into the TurboVNC server using the following command line:
 
 	Linux/Mac/Solaris clients :: {:}
 	#Verb: <<---
@@ -431,8 +430,8 @@ SSh connection into the server machine using the following command line:
 
 Replace __''{user}''__ with your user account name on the TurboVNC server and
 __''{server}''__ with the hostname or IP address of that server.  Replace
-__''n''__ with the X display number of the TurboVNC server session to which you
-want to connect.
+__''n''__ with the X display number of the TurboVNC session to which you want
+to connect.
 
 For instance, if you wish to connect to display '':1'' on server ''my_server''
 using user account ''my_user'', you would type:
