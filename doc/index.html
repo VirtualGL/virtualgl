@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-10-20T04:58:31">
+<meta name="date" content="2008-10-21T14:39:45">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1.1 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4466,13 +4466,6 @@ application.</p>
         <a href="#VGL_QUAL" class="ref">19.1</a> for more information about
         the <code>VGL_QUAL</code> configuration option.
     </dd>
-    <dt class="Description">Send Lossless Frame During Periods of Inactivity</dt>
-    <dd class="Description">
-        This toggle button is the equivalent of setting <code>VGL_PROGRESSIVE</code>.
-        It is active only when using Sun Ray DPCM compression.  See Section
-        <a href="#VGL_PROGRESSIVE" class="ref">19.1</a> for more information
-        about the <code>VGL_PROGRESSIVE</code> configuration option.
-    </dd>
     <dt class="Description">Connection Profile</dt>
     <dd class="Description">
         This drop-down gadget is active only if the VGL Image Transport was
@@ -5113,48 +5106,6 @@ method:</p>
     </dd>
 </dl>
 
-<p><a name="VGL_PROGRESSIVE"></a></p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_PROGRESSIVE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-prog</code> / <code>+prog</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable sending a lossless (RGB) frame during periods of inactivity</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray (DPCM, YUV)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description">Description</dt>
-    <dd class="Description">
-        When Sun Ray DPCM or YUV encoding is being used, enabling this option
-        causes the Sun Ray Image Transport to send a lossless (RGB) frame during
-        periods of inactivity.  This is useful in environments where both image
-        quality and performance are	critical.  With progressive mode enabled,
-        the image quality for the Sun Ray compressor can be set to a fairly
-        low value to speed up rotate/pan/zoom operations, then when the rotate/pan/zoom
-        is completed, VirtualGL will send a lossless frame that can be studied
-        by the user in more detail.
-    </dd>
-</dl>
-
 <p><a name="VGL_QUAL"></a></p>
 
 <div class="table">
@@ -5778,9 +5729,7 @@ method:</p>
         the image.  This differs from <code>VGL_SUBSAMP</code> in that <code>VGL_SUBSAMP</code>
         discards only the chrominance components from the pixels it subsamples.
         <code>VGL_ZOOM_*</code>, on the other hand, discards the lumance components
-        as well.  The result is extremely grainy, so this option is generally
-        only useful in conjunction with
-        <a href="#VGL_PROGRESSIVE"><code>VGL_PROGRESSIVE</code></a><a name="idx00100"></a>.
+        as well.  The result is extremely grainy.
     </dd>
 </dl>
 

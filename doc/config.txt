@@ -293,24 +293,6 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl} \
 	See {ref prefix="Chapter ": Perf_Measurement} for more details.
 
-{anchor: VGL_PROGRESSIVE}
-| Environment Variable | ''VGL_PROGRESSIVE = ''__''0 \| 1''__ |
-| ''vglrun'' argument | ''-prog'' / ''+prog'' |
-| Summary | Disable/enable sending a lossless (RGB) frame during periods \
-	of inactivity |
-| Image Transports | Sun Ray (DPCM, YUV) |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: When Sun Ray DPCM or YUV encoding is being used, enabling this
-	option causes the Sun Ray Image Transport to send a lossless (RGB) frame
-	during periods of inactivity.  This is useful in environments where both
-	image quality and performance are	critical.  With progressive mode enabled,
-	the image quality for the Sun Ray compressor can be set to a fairly low value
-	to speed up rotate/pan/zoom operations, then when the rotate/pan/zoom is
-	completed, VirtualGL will send a lossless frame that can be studied by the
-	user in more detail.
-
 {anchor: VGL_QUAL}
 | Environment Variable | ''VGL_QUAL = ''__''{q}''__ |
 | ''vglrun'' argument | ''-q ''__''{q}''__ |
@@ -648,8 +630,7 @@ Each method of configuration takes precedence over the previous method:
 	differs from ''VGL_SUBSAMP'' in that ''VGL_SUBSAMP'' discards only the
 	chrominance components from the pixels it subsamples.  ''VGL_ZOOM_*'', on the
 	other hand, discards the lumance components as well.  The result is extremely
-	grainy, so this option is generally only useful in conjunction with
-	[[#VGL_PROGRESSIVE][''VGL_PROGRESSIVE'']].
+	grainy.
 
 ** Client Settings
 
