@@ -34,7 +34,7 @@
 Fl_Double_Window *win=NULL;
 Fl_Choice *compchoice=NULL/*, *mcompchoice=NULL*/, *sampchoice=NULL,
 	*stereochoice=NULL/*, *msampchoice=NULL*/, *profchoice=NULL;
-Fl_Light_Button *progbutton=NULL, *spoilbutton=NULL, *ifbutton=NULL;
+Fl_Light_Button *spoilbutton=NULL, *ifbutton=NULL;
 Fl_Value_Slider *qualslider=NULL/*, *mqualslider=NULL*/;
 Fl_Float_Input *gammainput=NULL, *fpsinput;
 /*Fl_Input *movieinput=NULL;*/
@@ -100,15 +100,6 @@ void SetQual(void)
 	qualslider->value(fconfig.qual);
 	if(fconfig.compress()!=RRCOMP_JPEG) qualslider->deactivate();
 	else qualslider->activate();
-}
-
-void SetProg(void)
-{
-	if(!progbutton) return;
-	if(fconfig.compress()!=RRCOMP_SRDPCM && fconfig.compress()!=RRCOMP_SRYUV)
-		progbutton->deactivate();
-	else progbutton->activate();
-	progbutton->value(fconfig.progressive);
 }
 
 void SetProf(void)
@@ -201,7 +192,6 @@ void CompCB(Fl_Widget *w, void *data)
 	SetSamp();
 	SetQual();
 	SetProf();
-	SetProg();
 	SetIF();
 	SetStereo();
 	SetFPS();
@@ -219,12 +209,6 @@ void QualCB(Fl_Widget *w, void *data)
 	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
 	fconfig.qual=(int)slider->value();
 	SetProf();
-}
-
-void ProgCB(Fl_Widget *w, void *data)
-{
-	Fl_Check_Button *check=(Fl_Check_Button *)w;
-	fconfig.progressive=(bool)(check->value()!=0);
 }
 
 void ProfCB(Fl_Widget *w, void *data)
@@ -249,7 +233,6 @@ void ProfCB(Fl_Widget *w, void *data)
 	SetComp();
 	SetSamp();
 	SetQual();
-	SetProg();
 	SetStereo();
 }
 
@@ -382,7 +365,7 @@ void init(int argc, char **argv)
 {
 	char temps[20];
 
-	errifnot(win=new Fl_Double_Window(485, 375, "VirtualGL Configuration"));
+	errifnot(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
 
 	errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
 		"Image Compression (Transport): "));
@@ -404,39 +387,34 @@ void init(int argc, char **argv)
 	qualslider->slider_size(0.01);
 	SetQual();
 
-	errifnot(progbutton=new Fl_Light_Button(30, 130, 340, 25,
-		"Send Lossless Frame During Periods of Inactivity"));
-	progbutton->callback(ProgCB, 0);
-	SetProg();
-
-	errifnot(profchoice=new Fl_Choice(157, 165, 280, 24,
+	errifnot(profchoice=new Fl_Choice(157, 130, 280, 24,
 		"Connection Profile: "));
 	profchoice->menu(profmenu);
 	profchoice->mode(3, FL_MENU_INACTIVE);
 	SetProf();
 
-	errifnot(gammainput=new Fl_Float_Input(315, 200, 85, 25,
+	errifnot(gammainput=new Fl_Float_Input(315, 165, 85, 25,
 		"Gamma Correction Factor (1.0=no correction): "));
 	gammainput->callback(GammaCB, 0);
 	snprintf(temps, 19, "%.2f", (double)fconfig.gamma);
 	gammainput->value(temps);
 
-	errifnot(spoilbutton=new Fl_Light_Button(10, 235, 345, 25,
+	errifnot(spoilbutton=new Fl_Light_Button(10, 200, 345, 25,
 		"Frame Spoiling (Do Not Use When Benchmarking)"));
 	spoilbutton->callback(SpoilCB, 0);
 	spoilbutton->value(fconfig.spoil);
 
-	errifnot(ifbutton=new Fl_Light_Button(10, 270, 185, 25,
+	errifnot(ifbutton=new Fl_Light_Button(10, 235, 185, 25,
 		"Inter-Frame Comparison"));
 	ifbutton->callback(IFCB, 0);
 	SetIF();
 
-	errifnot(stereochoice=new Fl_Choice(232, 305, 220, 25,
+	errifnot(stereochoice=new Fl_Choice(232, 270, 220, 25,
 		"Stereographic Rendering Method: "));
 	stereochoice->menu(stereomenu);
 	SetStereo();
 
-	errifnot(fpsinput=new Fl_Float_Input(240, 340, 85, 25,
+	errifnot(fpsinput=new Fl_Float_Input(240, 305, 85, 25,
 		"Limit Frames/second (0.0=no limit): "));
 	fpsinput->callback(FPSCB, 0);
 	SetFPS();
