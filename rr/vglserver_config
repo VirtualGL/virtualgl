@@ -116,7 +116,7 @@ addvglgenkey() {
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Adding vglgenkey to $1 script ...
 	else
-		echo ... Adding xhost \+localhost to $1 script ...
+		echo ... Adding xhost \+LOCAL\: to $1 script ...
 	fi
 	removeline $1 vglgenkey
 	removeline $1 "xhost +*"
@@ -132,11 +132,9 @@ addvglgenkey() {
 		fi
 	else	
 		if [ "$2" = "bottom" ]; then
-			addtobottom $1 "xhost +\`hostname\`"
-			addtobottom $1 "xhost +localhost"
+			addtobottom $1 "xhost +LOCAL:"
 		else
-			addtotop $1 "xhost +\`hostname\`"
-			addtotop $1 "xhost +localhost"
+			addtotop $1 "xhost +LOCAL:"
 		fi
 	fi
 }
@@ -177,11 +175,11 @@ allowgdmtcp() {
 	return
 	fi
 	backup $1
-	echo ... Setting DisallowTCP=False in $1 ...
+	echo ... Setting DisallowTCP=true in $1 ...
 	removeline $1 "DisallowTCP.*=.*"
 	TMPFILE=`maketemp vglserver_config_9`
 	sed -e "/\[security\]/a\\
-DisallowTCP=false" $1 >$TMPFILE && cp $TMPFILE $1
+DisallowTCP=true" $1 >$TMPFILE && cp $TMPFILE $1
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
