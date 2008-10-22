@@ -629,8 +629,8 @@ Each method of configuration takes precedence over the previous method:
 	''VGL_ZOOM_Y=2'' does the same thing for the Y direction of the image.  This
 	differs from ''VGL_SUBSAMP'' in that ''VGL_SUBSAMP'' discards only the
 	chrominance components from the pixels it subsamples.  ''VGL_ZOOM_*'', on the
-	other hand, discards the lumance components as well.  The result is extremely
-	grainy.
+	other hand, discards the luminance components as well.  The result is
+	extremely grainy.
 
 ** Client Settings
 
