@@ -149,8 +149,8 @@ disablextest() {
 	backup $1
 	echo ... Disabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_7`
-	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
-		sed -e "/\/bin\/X\>/s/$/\ -tst/g" -e "/\/bin\/Xorg\>/s/$/\ -tst/g" -e "/\/bin\/Xsun\>/s/$/\ -tst/g" -e "/\/bin\/Xserver\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
+	sed -e "/\/X11\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
+		sed -e "/\/X11\/X\>/s/$/\ -tst/g" -e "/\/bin\/X\>/s/$/\ -tst/g" -e "/\/bin\/Xorg\>/s/$/\ -tst/g" -e "/\/bin\/Xsun\>/s/$/\ -tst/g" -e "/\/bin\/Xserver\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
 	)
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
@@ -162,7 +162,7 @@ enablextest() {
 	fi
 	echo ... Enabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_8`
-	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
+	sed -e "/\/X11\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
