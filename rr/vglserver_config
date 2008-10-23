@@ -3,6 +3,8 @@
 VGLUSERSONLY=1
 DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
+USINGMODPROBE=0
+RMMODNEEDED=0
 
 uid() {
 	id | cut -f2 -d = | cut -f1 -d \(;
@@ -183,6 +185,14 @@ unconfigdev() {
 			echo ... Modifying /etc/logindevperm to enable automatic permissions for
 			echo "    /dev/nvidia\* ..."
 			uncommentline /etc/logindevperm "\/dev\/nvidia"
+		elif [ -f /etc/modprobe.d/nvidia ]; then
+			USINGMODPROBE=1
+			echo ... Modifying /etc/modprobe.d/nvidia to restore default permissions for
+			echo "    /dev/nvidia\* ..."
+			uncommentline /etc/modprobe.d/nvidia nvidia
+			echo ... Attempting to remove nvidia module from memory so device permissions
+			echo "    will be reloaded ..."
+			rmmod nvidia || RMMODNEEDED=1
 		fi
 	fi
 }
@@ -211,6 +221,20 @@ configdev() {
 			echo ... Modifying /etc/logindevperm to disable automatic permissions for
 			echo "    /dev/nvidia\* ..."
 			commentline /etc/logindevperm "\/dev\/nvidia"
+		elif [ -f /etc/modprobe.d/nvidia ]; then
+			echo ... Modifying /etc/modprobe.d/nvidia to set requested permissions for
+			echo "    /dev/nvidia\* ..."
+			USINGMODPROBE=1
+			VGLUSERSGID=`grep vglusers /etc/group | cut -f3 -d:`
+			if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
+				removeline /etc/modprobe.d/nvidia nvidia
+				addtotop /etc/modprobe.d/nvidia "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660"
+			else
+				commentline /etc/modprobe.d/nvidia nvidia
+			fi
+			echo ... Attempting to remove nvidia module from memory so device permissions
+			echo "    will be reloaded ..."
+			rmmod nvidia || RMMODNEEDED=1
 		fi
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 			echo ... Granting write permission to /dev/nvidia\* for vglusers group ...
@@ -345,6 +369,12 @@ unconfigglx() {
 
 	echo
 	echo Done.  You must restart the display manager for the changes to take effect.
+	if [ "$USINGMODPROBE" = "1" -a "$RMMODNEEDED" = "1" ]; then
+		echo
+		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
+		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
+		echo new device permission settings to become effective.
+	fi
 	echo
 }
 
@@ -576,6 +606,12 @@ configglx() {
 
 	echo
 	echo Done.  You must restart the display manager for the changes to take effect.
+	if [ "$USINGMODPROBE" = "1" -a "$RMMODNEEDED" = "1" ]; then
+		echo
+		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
+		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
+		echo new device permission settings to become effective.
+	fi
 	echo
 }
 
