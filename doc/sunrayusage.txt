@@ -44,9 +44,9 @@ VGL Image Transport, except that it invokes ''ssh'' directly rather than using
 the ''vglconnect'' wrapper script.  ''vglconnect'' launches ''vglclient'', and
 ''vglclient'' is not needed when using the Sun Ray Image Transport.
 
-If the VirtualGL Sun Ray plugin is installed on a VirtualGL server machine,
-then VirtualGL will try to use the Sun Ray Image Transport when displaying 3D
-applications from that server to a Sun Ray.  However, the Sun Ray Image
+If the VirtualGL Sun Ray plugin is installed on a VirtualGL server, then
+VirtualGL will try to use the Sun Ray Image Transport when displaying 3D
+applications from that server to a Sun Ray client.  However, the Sun Ray Image
 Transport requires that the Sun Ray client be on a network that is accessible
 from the VirtualGL server.  Some Sun Ray deployments place the clients on a
 private network that is visible only to the Sun Ray server, and the Sun Ray

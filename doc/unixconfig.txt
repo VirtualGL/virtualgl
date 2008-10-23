@@ -1,27 +1,32 @@
 * Configuring a Linux or Solaris Machine as a VirtualGL Server
 
-** GLP: Using VirtualGL Without an X Server
+** GLP: Using VirtualGL Without a 3D X Server
 {anchor: GLP_Usage}
 
-Sun's OpenGL library for Solaris/Sparc systems has a special extension called
+Sun's OpenGL library for Solaris/SPARC systems has a special extension called
 "GLP" which allows VirtualGL to directly access a 3D graphics card even if
 there is no X server running on the card.  GLP greatly improves the
 overall security of the VirtualGL server, since it eliminates the need to grant
-X server access to VirtualGL users.  In addition, GLP makes it easy to assign
-VirtualGL jobs to any graphics card in a multi-card system.
+VirtualGL users access to the 3D X server running on that machine.  In
+addition, GLP makes it easy to assign VirtualGL jobs to any graphics card in a
+multi-card system.
 
 When using GLP, the architecture of VirtualGL changes as follows:
 
 #IMG: vgltransportglp.png
 #OPT fmt=latex: w=4cm
-#CAP: The VGL Image Transport with a Remote X Server and GLP
+#CAP: The VGL Image Transport with a Remote 2D X Server and GLP
 
 #IMG: x11transportglp.png
 #OPT fmt=latex: w=4cm
 #CAP: The X11 Image Transport with an X Proxy and GLP
 
-If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]]
-1.5 for Solaris/Sparc, it is recommended that you configure it to use GLP:
+#IMG: sunrayglp.png
+#OPT fmt=latex: w=4cm
+#CAP: The Sun Ray Image Transport with GLP
+
+If the application server is running [[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]]
+1.5 for Solaris/SPARC, then it is recommended that you configure it to use GLP:
 
 	#. Log in as root.
 
@@ -44,19 +49,19 @@ If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun Op
 			the VirtualGL server (the configuration script will create the
 			''vglusers'' group if it doesn't already exist.)  This limits the
 			possibility that an unauthorized user could snoop the 3D framebuffer
-			device(s) and thus see (or alter) the 3D output of an application running
-			in VirtualGL.
+			device(s) and thus see (or alter) the output of a 3D application that is
+			being used with VirtualGL.
 
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
-			to log in locally to the server and run OpenGL applications, then this
-			is probably the best option.
+			to log in locally to this server and run OpenGL applications, then this
+			option must be selected.
 
 	#. If you chose to restrict framebuffer device access to the
 		''vglusers'' group, then edit ''/etc/group'' and add ''root'' to the
 		''vglusers'' group.  If you choose, you can also add additional users to
 		the group at this time.  Note that any user you add to ''vglusers''	must log
-		out and back in again before their new group permissions take effect.
+		out and back in again before their new group permissions will take effect.
 
 	#. Edit the ''/etc/dt/config/GraphicsDevices'' file as necessary.  This file
 		contains a list of paths to 3D framebuffer devices (such as
@@ -66,15 +71,16 @@ If your system is running [[http://www.sun.com/software/graphics/opengl/][Sun Op
 *** Sanity Check
 #OPT: noList! plain!
 
-To verify that the system is ready to run VirtualGL, log out of the server,
-log back into the server using SSh, and execute the following command in the
-SSh session:
+To verify that the application server is ready to run VirtualGL, log out of the
+server, log back into the server using SSh, and execute the following command
+in the SSh session:
 
 #Verb <<---
 /opt/VirtualGL/bin/glxinfo -d glp
 ---
 
-This command should output a list of visuals and complete with no errors.
+This command should output a list of visuals and should complete with no
+errors.
 
 *** Using GLP by Default in VirtualGL
 #OPT: noList! plain!
@@ -86,36 +92,39 @@ VGL_DISPLAY=glp
 export VGL_DISPLAY
 ---
 
-to ''/etc/profile''.  This will cause VirtualGL to use the first device
-specified in ''/etc/dt/config/GraphicsDevices'' as the default rendering
-device.  Users can override this default by setting ''VGL_DISPLAY'' in one of
-their startup scripts (such as ''~/.profile'' or ''~/.login'') or by passing an
-argument of ''-d <device>'' to ''vglrun'' when invoking VirtualGL.  See
-{ref prefix="Chapter ": Advanced_Configuration} for more details.
+to ''/etc/profile'' on the application server.  This will cause VirtualGL to
+use the first device specified in ''/etc/dt/config/GraphicsDevices'' as the
+default rendering device.  Users can override this default by setting
+''VGL_DISPLAY'' in one of their startup scripts (such as ''~/.profile'' or
+''~/.login'') or by passing an argument of ''-d <device>'' to ''vglrun'' when
+invoking VirtualGL.  See {ref prefix="Chapter ": Advanced_Configuration} for
+more details.
 
-** Granting Access to the Server's X Display
+** Granting Access to the 3D X Server
 
 	!!! If you plan to use VirtualGL only with [[#GLP_Usage][GLP]], then you
 	can skip this section.
 
-VirtualGL requires access to the server's 3D graphics card so that it can
-create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
+VirtualGL requires access to the application server's 3D graphics card so that
+it can create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
 from applications into these Pbuffers.  Unfortunately, accessing a 3D
-graphics card on Linux and Solaris/x86 systems or on Solaris/Sparc systems
+graphics card on Linux and Solaris/x86 systems or on Solaris/SPARC systems
 without [[#GLP_Usage][GLP]] requires going through an X server.  On such
-systems, the only way to share the server's 3D graphics card among multiple
-users is to grant those users access to the X server that is running on the 3D
-graphics card.
+systems, the only way to share the application server's 3D graphics card among
+multiple users is to grant those users access to the 3D X server (the X
+server attached to the application server's 3D graphics card.  Refer to the
+figures in {ref prefix="Chapter ": Overview}.)
 
 It is important to understand the security risks associated with this.  Once
-X display access is granted to a user, there is nothing that would prevent
-that user from logging keystrokes or reading back images from the X display.
+a user has access to the 3D X server, there is nothing that would prevent
+the user from logging keystrokes or reading back images from that X server.
 Using ''xauth'', one can obtain "untrusted" X authentication keys which prevent
 such exploits, but unfortunately, those untrusted keys also disallow access to
-the 3D hardware.  So it is necessary to grant full trusted X access to any
-users that will need to run VirtualGL.  Unless you fully trust the users to
-whom you are granting this access, you should avoid logging in locally to the
-server's X display as root unless absolutely necessary.
+the 3D hardware.  Thus, it is necessary to grant full trusted access to the 3D
+X server for any users that will need to run VirtualGL.  Unless you fully trust
+the users to whom you are granting this access, then you should avoid logging
+in locally to the 3D X server (particularly as root) unless absolutely
+necessary.
 
 This section will explain how to configure a VirtualGL server such that
 selected users can run VirtualGL, even if the server is sitting at the login
@@ -128,12 +137,12 @@ prompt.
 			init 3
 			---
 
-		Solaris 10 (and later) servers running GDM :: {:}
+		Solaris 10 servers running GDM :: {:}
 			#Verb: <<---
 			svcadm disable gdm2-login
 			---
 
-		OpenSolaris servers running GDM :: {:}
+		Solaris 11/OpenSolaris servers running GDM :: {:}
 			#Verb: <<---
 			svcadm disable gdm
 			---
@@ -164,10 +173,10 @@ prompt.
 			configuration script will create the ''vglusers'' group if it doesn't
 			already exist.)  This is the most secure option, since it prevents any
 			users outside of the ''vglusers'' group from accessing (and thus
-			exploiting) the VirtualGL server's X display.
+			exploiting) the 3D X server.
 
 		No :: VirtualGL can be used by any user that successfully logs into the
-			VirtualGL server.  The X server can also be accessed (and potentially
+			VirtualGL server.  The 3D X server can also be accessed (and potentially
 			exploited) by any user who is logged into the VirtualGL server.  If you
 			choose this option, it is recommended that you also disable the XTEST
 			extension (see below.)
@@ -183,13 +192,13 @@ prompt.
 			the VirtualGL server (the configuration script will create the
 			''vglusers'' group if it doesn't already exist.)  This limits the
 			possibility that an unauthorized user could snoop the 3D framebuffer
-			device(s) and thus see (or alter) the 3D output of an application running
-			in VirtualGL.
+			device(s) and thus see (or alter) the output of a 3D application that is
+			being used with VirtualGL.
 
 		No :: Any authenticated user can run OpenGL applications on the VirtualGL
 			server.  If it is necessary for users outside of the ''vglusers'' group
-			to log in locally to the server and run OpenGL applications, then this
-			is probably the best option.
+			to log in locally to this server and run OpenGL applications, then this
+			option must be selected.
 
 	#. {:}
 
@@ -199,19 +208,19 @@ prompt.
 		---
 
 		Yes :: Disabling XTEST will not prevent a user from logging keystrokes or
-			reading images from the X display, but if a user has access to the X
-			display, disabling XTEST will prevent them from inserting keystrokes or
-			mouse events and thus hijacking local X sessions on that display.
+			reading images from the 3D X server, but if a user has access to the 3D
+			X server, disabling XTEST will prevent them from inserting keystrokes or
+			mouse events and thus hijacking local X sessions on that X server.
 
-		No :: VNC requires XTEST, so if you need to attach a VNC server to the
-			VirtualGL server's local X display, then it is necessary to answer "No"
-			(and thus leave XTEST enabled.)
+		No :: ''x11vnc'' and ''x0vncserver'' both require XTEST, so if you need to
+			attach a VNC server to the 3D X server, then it is necessary to answer
+			"No" (and thus leave XTEST enabled.)
 
 	#. If you chose to restrict X server or framebuffer device access to the
 		''vglusers'' group, then edit ''/etc/group'' and add ''root'' to the
 		''vglusers'' group.  If you choose, you can also add additional users to
 		the group at this time.  Note that any user you add to ''vglusers''	must log
-		out and back in again before their new group permissions take effect.
+		out and back in again before their new group permissions will take effect.
 
 	#. Restart the display manager:
 
@@ -220,12 +229,12 @@ prompt.
 			init 5
 			---
 
-		Solaris 10 (and later) servers running GDM :: {:}
+		Solaris 10 servers running GDM :: {:}
 			#Verb: <<---
 			svcadm enable gdm2-login
 			---
 
-		OpenSolaris servers running GDM :: {:}
+		Solaris 11/OpenSolaris servers running GDM :: {:}
 			#Verb: <<---
 			svcadm enable gdm
 			---
@@ -238,11 +247,11 @@ prompt.
 *** Sanity Check
 #OPT: noList! plain!
 
-To verify that the system is ready to run VirtualGL, log out of the server,
-log back into the server using SSh, and execute the following commands in the
-SSh session:
+To verify that the application server is ready to run VirtualGL, log out of the
+server, log back into the server using SSh, and execute the following commands
+in the SSh session:
 
-	If you restricted X server access to ''vglusers'' :: {:}
+	If you restricted 3D X server access to ''vglusers'' :: {:}
 	#Verb <<---
 	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
 	xdpyinfo -display :0
@@ -252,36 +261,37 @@ SSh session:
 	!!! NOTE: ''xauth'' and ''xdpyinfo'' are in ''/usr/openwin/bin'' on Solaris
 	systems.
 
-	If you did not restrict X server access :: {:}
+	If you did not restrict 3D X server access :: {:}
 	#Verb <<---
 	xdpyinfo -display :0
 	/opt/VirtualGL/bin/glxinfo -display :0
 	---
 
-Both commands should output a list of visuals and complete with no errors.
-If you chose to disable the XTEST extension, then check the output of
-''xdpyinfo'' to verify that ''XTEST'' does not show up in the list of extensions.
+Both commands should output a list of visuals and should complete with no
+errors.  If you chose to disable the XTEST extension, then check the output of
+''xdpyinfo'' to verify that ''XTEST'' does not show up in the list of
+extensions.
 
 ** SSh Server Configuration
 
-The server's SSh daemon should have the ''X11Forwarding'' option enabled and
-the ''UseLogin'' option disabled.  This is configured in ''sshd_config'',
-the location of which varies depending on your distribution of SSh.  Linux and
-Solaris 10 systems generally keep this in ''/etc/ssh'', whereas Blastwave
-OpenSSh keeps it in ''/opt/csw/etc'' and SunFreeware OpenSSh keeps it in
-''/usr/local/etc''.
+The application server's SSh daemon should have the ''X11Forwarding'' option
+enabled and the ''UseLogin'' option disabled.  This is configured in
+''sshd_config'', the location of which varies depending on your distribution of
+SSh.  Linux, Solaris 10+, and OpenSolaris systems generally keep this in
+''/etc/ssh'', whereas Blastwave OpenSSh keeps it in ''/opt/csw/etc'' and
+SunFreeware OpenSSh keeps it in ''/usr/local/etc''.
 
 ** Un-Configuring the Server
 
 You can use the ''vglserver_config'' script to restore the security settings
 that were in place before VirtualGL was installed.  Option 2 (''Unconfigure
 server for use with VirtualGL in GLX mode'') will remove any shared access to
-the server's X display and thus prevent VirtualGL from accessing the 3D
-hardware in that manner.  Option 2 will also re-enable the XTEST extension on
-the server's X display.  Both Option 2 and Option 4 (''Unconfigure server for
-use with VirtualGL in GLP mode'') will restore the framebuffer device
-permissions to their default (by default, only root or the user that is
-currently logged into the system locally can access the framebuffer devices.)
+the 3D X server and thus prevent VirtualGL from accessing the 3D hardware in
+that manner.  Option 2 will also re-enable the XTEST extension on the 3D X
+server.  Both Option 2 and Option 4 (''Unconfigure server for use with
+VirtualGL in GLP mode'') will restore the framebuffer device permissions to
+their default (by default, only root or the user that is currently logged into
+the application server locally can access the framebuffer devices.)
 
 	!!! NOTE: Unconfiguring the server does not remove the ''vglusers'' group or
 	the ''/etc/dt/config/GraphicsDevices'' file.

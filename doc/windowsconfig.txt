@@ -83,7 +83,7 @@ Hummingbird support site:
 | Hummingbird Exceed 2008 \
 | ''xlib.dll'' v13.0.1.235 (or higher){nl} \
 	(or install the latest \
-	[[http://support.hummingbird.com/customer/cspatches/patches.asp][Connectivity 2008 Mega Patch]].) \
+	[[http://support.hummingbird.com/customer/cspatches/patches.asp][Connectivity 2008 Service Pack]].) \
 | Download all patches from the \
 	[[http://connectivity.hummingbird.com/support/nc/exceed_patches.html][Hummingbird support site]]. \
 	{nl} \
