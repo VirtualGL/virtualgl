@@ -30,7 +30,7 @@ also intercept a handful of X11 calls.  Using ''vglrun'' allows VGL to
 intercept these calls, whereas using the game's built-in mechanism for loading
 a substitute OpenGL library allows VirtualGL to intercept the GLX and OpenGL calls.
 
-In some cases, the application doesn't provide an override mechanism such as
+In some cases, the application does not provide an override mechanism such as
 the above.  In these cases, you should pass an argument of ''-dl'' to
 ''vglrun'' when starting the application.  For example:
 

@@ -30,13 +30,10 @@ to render a section of the multi-screen image.
 
 VirtualGL is generally not very useful with Configuration 1.  You could
 theoretically install a separate copy of VirtualGL on each display node and use
-it to redirect the output of each ''crserver'' instance to a multi-screen X
-server running elsewhere on the network.  But there would be no way to
-synchronize the screens on the remote end.  Chromium uses DMX to synchronize
-the screens in a multi-screen configuration, and VirtualGL would have to be
-made DMX-aware for it to perform the same job.  Maybe at some point in the
-future ...  If you have a need for such a configuration,
-[[http://sourceforge.net/users/dcommander][let us know]].
+it to redirect the output of each ''crserver'' instance to a separate VirtualGL
+Client instance running on a multi-screen 2D X server elsewhere on the network.
+However, synchronizing the frames on the remote end would require modifications
+to VirtualGL.  Such is left as an exercise for the reader.
 
 ** Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback
 
@@ -51,36 +48,38 @@ rendering the whole scene on a single node would be prohibitively slow due to
 fill rate limitations.
 
 In this configuration, the application is allowed to choose a visual, create an
-X window, and manage the window as it would normally do.  But all other OpenGL
-and GLX activity is intercepted by the Chromium App Faker (CrAppFaker) so that
-the rendering task can be split up among the rendering nodes.  Once each node
-has rendered its section of the final image, the tiles get passed back to a
-Chromium Server (CrServer) process running on Node 0.  This CrServer process
-attaches to the previously-created application window and draws the pixels into
-it using ''glDrawPixels()''.
+X window, and manage the window as it would normally do.  However, all other
+OpenGL and GLX activity is intercepted by the Chromium App Faker (CrAppFaker)
+so that the 3D rendering can be split up among the rendering nodes.  Once each
+node has rendered its section of the final image, the image tiles get passed
+back to a Chromium Server (CrServer) process running on Node 0.  This CrServer
+process attaches to the previously-created application window and draws the
+pixels into the window using ''glDrawPixels()''.
 
 The general strategy for making this work with VirtualGL is to first make it
 work without VirtualGL and then insert VirtualGL only into the processes that
 run on Node 0.  VirtualGL must be inserted into the CrAppFaker process to
-prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the X server
-(which would fail if the X server is a VNC server or otherwise does not provide
+prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the 2D X server
+(which would fail if this X server was a VNC session or otherwise did not support
 GLX.)  VirtualGL must be inserted into the CrServer process on Node 0 to
-prevent it from sending ''glDrawPixels()'' calls to the X server (which would
-effectively send uncompressed images over the network.)  Instead, VirtualGL
-forces CrServer to draw into a Pbuffer, and VGL takes charge of transmitting
-those pixels to the destination X server in the most efficient way possible.
+prevent it from sending ''glDrawPixels()'' calls to the 2D X server (which would
+similarly fail if the 2D X server didn't support GLX and which would create a
+performance issue if the 2D X server was remote.)  Instead, VirtualGL forces
+CrServer to draw into a Pbuffer, and VGL then takes charge of transmitting
+the pixels from the Pbuffer to the 2D X server in the most efficient
+way possible.
 
 Since Chromium uses ''dlopen()'' to load the system's OpenGL library,
 preloading VirtualGL into the CrAppFaker and CrServer processes using
-''vglrun'' is not sufficient.  Fortunately, Chromium provides an environment
-variable, ''CR_SYSTEM_GL_PATH'', which allows one to specify an alternate path
-in which it will search for the system's ''libGL.so''.  The VirtualGL packages
-for Linux and Solaris include a symbolic link named ''libGL.so'' which really
-points to the VirtualGL faker library (''librrfaker.so'') instead.  This
-symbolic link is located in its own isolated directory, so that directory can
-be passed to Chromium in the ''CR_SYSTEM_GL_PATH'' environment variable, thus
-causing Chromium to load VirtualGL rather than the "real" OpenGL library.
-Refer to the following table:
+''vglrun'' is not sufficient.  Chromium provides an environment variable,
+''CR_SYSTEM_GL_PATH'', which allows one to specify an alternate path to be
+searched for ''libGL.so''.  The VirtualGL packages for Linux and Solaris
+include a symbolic link named ''libGL.so'' which points to the VirtualGL faker
+library (''librrfaker.so'').  This symbolic link is located in its own isolated
+directory, so that directory can be passed to Chromium in the
+''CR_SYSTEM_GL_PATH'' environment variable, and this will cause Chromium to
+load VirtualGL rather than the "real" OpenGL library.  Refer to the following
+table:
 
 {anchor: CR_SYSTEM_GL_PATH_Table}
 || 32-bit Applications     || 64-bit Applications        ||
@@ -100,10 +99,13 @@ location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1''.)
 CrAppFaker creates its own fake version of ''libGL.so'' which is really just a
 copy of Chromium's ''libcrfaker.so''.  So VirtualGL, if left to its own
 devices, will unwittingly try to load ''libcrfaker.so'' instead of the "real"
-OpenGL library.  Chromium's ''libcrfaker.so'' will in turn try to load
+OpenGL library.  Chromium's ''libcrfaker.so'' will, in turn, try to load
 VirtualGL again, and an endless loop will occur.
 
-So what we want to do is something like this:
+Therefore, we must use the ''CR_SYSTEM_GL_PATH'' environment variable to tell
+Chromium to pass OpenGL commands into VirtualGL, then we must use the
+''VGL_GLLIB'' environment variable to tell VirtualGL __not__ to pass OpenGL
+commands into Chromium:
 
 #Verb: <<---
 export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
@@ -111,15 +113,15 @@ export VGL_GLLIB=/usr/lib/libGL.so.1
 crappfaker
 ---
 
-CrAppFaker will copy the application to a temp directory and then copy
+CrAppFaker will copy the application into a temporary directory and then copy
 ''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  So when
 the application is started, it loads ''libcrfaker.so'' instead of ''libGL.so''.
 ''libcrfaker.so'' will then load VirtualGL instead of the "real" libGL, because
-we've overridden ''CR_SYSTEM_GL_PATH'' to make Chromium find VirtualGL's fake
-''libGL.so'' first.  VirtualGL will then use the library specified in
-''VGL_GLLIB'' to make any "real" OpenGL calls that it needs to make.
+we've overridden ''CR_SYSTEM_GL_PATH'' to point to VirtualGL's fake
+''libGL.so''.  VirtualGL will then use the library specified in ''VGL_GLLIB''
+to make any "real" OpenGL calls that it needs to make.
 
-Note that ''crappfaker'' should not be invoked with ''vglrun''.
+	!!! NOTE: ''crappfaker'' should not be invoked with ''vglrun''.
 
 So, putting this all together, here is an example of how you might start a
 sort-first rendering job using Chromium and VirtualGL:
@@ -129,19 +131,21 @@ sort-first rendering job using Chromium and VirtualGL:
 
 	#. Start ''crserver'' on each of the rendering nodes
 
-	#. On Node 0, set ''CR_SYSTEM_GL_PATH'' to the appropriate value for the
-		operating system and application type (see table above)
+	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
+		appropriate value based on whether ''crserver'' and ''crappfaker'' were
+		compiled as 32-bit or 64-bit apps (see table above)
 
 	#. On Node 0, ''vglrun crserver &''
 
 	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" libGL (example:
-		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1''.)
+		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1'').
 
 	#. On Node 0, launch ''crappfaker'' (do not use ''vglrun'' here)
 
 Again, it's always a good idea to make sure this works without VirtualGL before
 adding VirtualGL into the mix.
 
+{anchor: Force_Pbuffer}
 *** Using VirtualGL to Force Pbuffer Rendering
 #OPT: noList! plain!
 
@@ -152,10 +156,10 @@ of step 2 above:
 
 On each of the rendering nodes,
 
-	* set ''VGL_READBACK=0''
-	* set ''CR_SYSTEM_GL_PATH'' to the appropriate value based on the
-		rendering node's operating system type and whether ''crserver'' was
-		compiled as a 32-bit or 64-bit app on that node (see table above)
+	* set the ''VGL_READBACK'' environment variable to ''0''
+	* set the ''CR_SYSTEM_GL_PATH'' environment variable to the appropriate value
+		based on whether ''crserver'' was compiled as a 32-bit or 64-bit app on
+		that node (see table above)
 	* ''vglrun crserver''
 
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
@@ -165,17 +169,16 @@ On each of the rendering nodes,
 Sort-Last Rendering is used when the scene contains a huge number of polygons
 and the rendering bottleneck is processing all of that geometry on a single
 graphics card.  In this case, each node runs a separate copy of the
-application, and for best results, the application needs to be at least partly
-aware that it's running in a parallel environment so that it can give Chromium
-hints as to how to distribute the various objects to be rendered.  Each node
-generates an image of a particular portion of the object space, and these
-images must be composited in such a way that the front-to-back ordering of
-pixels is maintained.  This is generally done by collecting Z buffer data from
-each node to determine whether a particular pixel on a particular node is
-visible in the final image.  The rendered images from each node are often
-composited using a "binary swap", whereby the nodes combine their images in a
-cascading tree so that the overall compositing time is proportional to
-log{,2}(N) rather than N.
+application, and for best results, the application needs to be aware that it is
+running in a parallel environment so that it can give Chromium hints as to how
+to distribute the various objects to be rendered.  Each node generates an image
+of a particular portion of the object space, and these images must be
+composited in such a way that the front-to-back ordering of pixels is
+maintained.  This is generally done by collecting Z buffer data from each node
+to determine whether a particular pixel on a particular node is visible in the
+final image.  The rendered images from each node are often composited using a
+"binary swap", whereby the nodes combine their images in a cascading tree so
+that the overall compositing time is proportional to log{,2}(N) rather than N.
 
 To make this configuration work with VirtualGL:
 
@@ -184,9 +187,9 @@ To make this configuration work with VirtualGL:
 
 	#. Start ''crappfaker'' on each of the rendering nodes
 
-	#. On Node 0, set ''CR_SYSTEM_GL_PATH'' to the appropriate value for the
-		operating system and application type (see table in
-		{ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
+	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
+		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
+		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
 
 	#. On Node 0, ''vglrun crserver''
 
@@ -197,17 +200,18 @@ The Chromium Utility Toolkit provides a convenient way for graphics
 applications to specifically take advantage of Chromium's sort-last rendering
 capabilities.  Such applications can use CRUT to explicitly specify how their
 object space should be decomposed.  CRUT applications require an additional
-piece of software, ''crutserver'', to be running on Node 0.  So to make such
-applications work with VirtualGL:
+piece of software, ''crutserver'', to be running on Node 0.  Therefore, the
+following procedure should be used to make these applications work with
+VirtualGL:
 
 	#. Start the mothership on Node 0 with an appropriate configuration for
 		performing sort-last rendering
 
 	#. Start ''crappfaker'' on each of the rendering nodes
 
-	#. On Node 0, set ''CR_SYSTEM_GL_PATH'' to the appropriate value for the
-		operating system and application type (see table in
-		{ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
+	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
+		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
+		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
 
 	#. On Node 0, ''vglrun crutserver &''
 
@@ -216,8 +220,8 @@ applications work with VirtualGL:
 ** A Note About Performance
 
 Chromium's use of X11 is generally not very optimal.  It assumes a very fast
-connection between the X server and the Chromium Server.  In certain modes,
-Chromium polls the X server on every frame to determine whether windows have
+connection between the 2D X server and the Chromium Server.  In certain modes,
+Chromium polls the 2D X server on every frame to determine whether windows have
 been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in a TurboVNC
 session as opposed to using the VGL Image Transport.
@@ -229,12 +233,12 @@ rendering framework for Linux which supports all three of the rendering modes
 described above and provides a much more straightforward interface to configure
 and run these types of parallel rendering jobs.
 
-All VGP jobs, regardless of configuration, are all spawned through
-''vglauncher'', a front-end program which automatically takes care of starting
-the appropriate processes on the rendering nodes, intercepting OpenGL calls
-from the application instance(s), sending rendered images back to Node 0, and
+All VGP jobs, regardless of configuration, are spawned through ''vglauncher'',
+a front-end program which automatically takes care of starting the appropriate
+processes on the rendering nodes, intercepting OpenGL calls from the
+application instance(s), sending rendered images back to Node 0, and
 compositing the images as appropriate.  In a similar manner to VirtualGL's
-''vglrun'', VGP's vglauncher preloads a library (''libVGP.so'') in place of
+''vglrun'', VGP's ''vglauncher'' preloads a library (''libVGP.so'') in place of
 ''libGL.so'', and this library intercepts the OpenGL calls from the
 application.
 
@@ -251,4 +255,4 @@ vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
 Replace ''/usr/lib/libGL.so'' with the full path of your system's OpenGL
 library (''/usr/lib64/libGL.so'' if you are launching a 64-bit application.)
 
-This is known not to work with VGP 2.0.
+	!!! NOTE: This is known not to work with VGP 2.0.
