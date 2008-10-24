@@ -3,6 +3,7 @@
 VGLUSERSONLY=1
 DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
+RMMODNEEDED=0
 
 uid() {
 	id | cut -f2 -d = | cut -f1 -d \(;
@@ -116,7 +117,7 @@ addvglgenkey() {
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Adding vglgenkey to $1 script ...
 	else
-		echo ... Adding xhost \+localhost to $1 script ...
+		echo ... Adding xhost \+LOCAL\: to $1 script ...
 	fi
 	removeline $1 vglgenkey
 	removeline $1 "xhost +*"
@@ -132,11 +133,9 @@ addvglgenkey() {
 		fi
 	else	
 		if [ "$2" = "bottom" ]; then
-			addtobottom $1 "xhost +\`hostname\`"
-			addtobottom $1 "xhost +localhost"
+			addtobottom $1 "xhost +LOCAL:"
 		else
-			addtotop $1 "xhost +\`hostname\`"
-			addtotop $1 "xhost +localhost"
+			addtotop $1 "xhost +LOCAL:"
 		fi
 	fi
 }
@@ -149,8 +148,8 @@ disablextest() {
 	backup $1
 	echo ... Disabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_7`
-	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
-		sed -e "/\/bin\/X\>/s/$/\ -tst/g" -e "/\/bin\/Xorg\>/s/$/\ -tst/g" -e "/\/bin\/Xsun\>/s/$/\ -tst/g" -e "/\/bin\/Xserver\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
+	sed -e "/\/X11\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
+		sed -e "/\/X11\/X\>/s/$/\ -tst/g" -e "/\/bin\/X\>/s/$/\ -tst/g" -e "/\/bin\/Xorg\>/s/$/\ -tst/g" -e "/\/bin\/Xsun\>/s/$/\ -tst/g" -e "/\/bin\/Xserver\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
 	)
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
@@ -162,27 +161,13 @@ enablextest() {
 	fi
 	echo ... Enabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_8`
-	sed -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
+	sed -e "/\/X11\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
 disallowgdmtcp() {
-	echo ... Restoring default value of DisallowTCP in $1 ...
+	echo ... Commenting out DisallowTCP line \(if it exists\) in $1 ...
 	commentline $1 "DisallowTCP.*=.*"
-}
-
-allowgdmtcp() {
-	if [ -z "$1" ]; then
-		echo USAGE: allowgdmtcp {filename}
-	return
-	fi
-	backup $1
-	echo ... Setting DisallowTCP=False in $1 ...
-	removeline $1 "DisallowTCP.*=.*"
-	TMPFILE=`maketemp vglserver_config_9`
-	sed -e "/\[security\]/a\\
-DisallowTCP=false" $1 >$TMPFILE && cp $TMPFILE $1
-	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
 unconfigdev() {
@@ -195,10 +180,19 @@ unconfigdev() {
 			echo ... Modifying /etc/security/console.perms to enable automatic permissions
 			echo "    for /dev/nvidia\* ..."
 			uncommentline /etc/security/console.perms "\<dri\>"
-		elif [ -f /etc/logindevperm ]; then
+		fi
+		if [ -f /etc/logindevperm ]; then
 			echo ... Modifying /etc/logindevperm to enable automatic permissions for
 			echo "    /dev/nvidia\* ..."
 			uncommentline /etc/logindevperm "\/dev\/nvidia"
+		fi
+		if [ -f /etc/modprobe.d/virtualgl ]; then
+			echo ... Removing /etc/modprobe.d/virtualgl to restore default permissions for
+			echo "    /dev/nvidia\* ..."
+			rm -f /etc/modprobe.d/virtualgl
+			echo ... Attempting to remove nvidia module from memory so device permissions
+			echo "    will be reloaded ..."
+			rmmod nvidia || RMMODNEEDED=1
 		fi
 	fi
 }
@@ -223,10 +217,25 @@ configdev() {
 			echo ... Modifying /etc/security/console.perms to disable automatic permissions
 			echo "    for /dev/nvidia\* ..."
 			commentline /etc/security/console.perms "\<dri\>"
-		elif [ -f /etc/logindevperm ]; then
+		fi
+		if [ -f /etc/logindevperm ]; then
 			echo ... Modifying /etc/logindevperm to disable automatic permissions for
 			echo "    /dev/nvidia\* ..."
 			commentline /etc/logindevperm "\/dev\/nvidia"
+		fi
+		if [ -d /etc/modprobe.d ]; then
+			echo ... Creating /etc/modprobe.d/virtualgl to set requested permissions for
+			echo "    /dev/nvidia\* ..."
+			VGLUSERSGID=`grep vglusers /etc/group | cut -f3 -d:`
+			if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
+				echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660" >/etc/modprobe.d/virtualgl
+			else
+				echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666" >/etc/modprobe.d/virtualgl
+			fi
+			chmod 644 /etc/modprobe.d/virtualgl
+			echo ... Attempting to remove nvidia module from memory so device permissions
+			echo "    will be reloaded ..."
+			rmmod nvidia || RMMODNEEDED=1
 		fi
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 			echo ... Granting write permission to /dev/nvidia\* for vglusers group ...
@@ -335,7 +344,9 @@ unconfigglx() {
 		if [ -f /etc/dt/config/Xservers ]; then
 			enablextest /etc/dt/config/Xservers
 		fi
-		svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+		if [ -x /usr/sbin/svccfg ]; then
+			/usr/sbin/svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+		fi
 	fi
 
 	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
@@ -361,6 +372,12 @@ unconfigglx() {
 
 	echo
 	echo Done.  You must restart the display manager for the changes to take effect.
+	if [ "$RMMODNEEDED" = "1" ]; then
+		echo
+		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
+		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
+		echo new device permission settings to become effective.
+	fi
 	echo
 }
 
@@ -554,13 +571,17 @@ configglx() {
 			if [ -f /etc/dt/config/Xservers ]; then
 				disablextest /etc/dt/config/Xservers
 			fi
-			svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
-			svccfg -s application/x11/x11-server addpropvalue options/server_args "-tst" 2>&1 >/dev/null
+			if [ -x /usr/sbin/svccfg ]; then
+				/usr/sbin/svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+				/usr/sbin/svccfg -s application/x11/x11-server addpropvalue options/server_args "-tst" 2>&1 >/dev/null
+			fi
 		else
 			if [ -f /etc/dt/config/Xservers ]; then
 				enablextest /etc/dt/config/Xservers
 			fi
-			svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+			if [ -x /usr/sbin/svccfg ]; then
+				/usr/sbin/svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
+			fi
 		fi
 	fi
 
@@ -572,26 +593,32 @@ configglx() {
 	fi
 
 	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
-		allowgdmtcp /etc/X11/gdm/gdm.conf
+		disallowgdmtcp /etc/X11/gdm/gdm.conf
 	fi
 	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
-		allowgdmtcp /etc/gdm/custom.conf
+		disallowgdmtcp /etc/gdm/custom.conf
 	fi
 	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
-		allowgdmtcp /etc/gdm/gdm.conf
+		disallowgdmtcp /etc/gdm/gdm.conf
 	fi
 	if [ -f /etc/gdm/gdm-cdd.conf ]; then
-		allowgdmtcp /etc/gdm/gdm-cdd.conf
+		disallowgdmtcp /etc/gdm/gdm-cdd.conf
 	fi
 	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
-		allowgdmtcp /etc/X11/gdm/custom.conf
+		disallowgdmtcp /etc/X11/gdm/custom.conf
 	fi
 	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
-		allowgdmtcp /etc/opt/gnome/gdm/gdm.conf
+		disallowgdmtcp /etc/opt/gnome/gdm/gdm.conf
 	fi
 
 	echo
 	echo Done.  You must restart the display manager for the changes to take effect.
+	if [ "$RMMODNEEDED" = "1" ]; then
+		echo
+		echo IMPORTANT NOTE: Your system uses modprobe.d to set device permissions.  You
+		echo must execute 'rmmod nvidia' with the display manager stopped in order for the
+		echo new device permission settings to become effective.
+	fi
 	echo
 }
 
