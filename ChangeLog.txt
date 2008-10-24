@@ -105,6 +105,18 @@ significantly better performance than DPCM on Sun Ray 1 clients, and it
 provides significantly better image quality in all cases.  YUV encoding will
 generally use about 50% more network bandwidth than DPCM, all else being equal.
 -------------------------------------------------------------------------------
+[17]
+vglserver_config should now work with openSUSE systems.
+-------------------------------------------------------------------------------
+[18]
+It was discovered that 'xhost +LOCAL:' is a better method of enabling 3D X
+server access to all users of the VirtualGL server.  This method works even
+if TCP connections are disabled in the X server (which is the case on recent
+Solaris and Linux distributions.)  vglserver_config has thus been modified to
+use this method rather than 'xhost +localhost'.  Also, since it is no longer
+necessary to set DisallowTCP=false in the GDM configuration file,
+vglserver_config now comments out this line if it exists.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
