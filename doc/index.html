@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-10-22T18:05:50">
+<meta name="date" content="2008-10-24T04:11:05">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.1.1 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1669,7 +1669,14 @@ at the login prompt.</p>
     <li class="Ordered">
         Shut down the display manager:
         <dl class="Description">
-            <dt class="Description">Linux servers</dt>
+            <dt class="Description">Ubuntu Linux servers</dt>
+            <dd class="Description">
+<pre class="verbatim">
+/etc/init.d/gdm&nbsp;stop
+</pre>
+
+            </dd>
+            <dt class="Description">Other Linux servers</dt>
             <dd class="Description">
 <pre class="verbatim">
 init&nbsp;3
@@ -1778,6 +1785,9 @@ Disable&nbsp;XTEST&nbsp;extension&nbsp;(recommended)?
                 reading images from the 3D X server, but if a user has access to the
                 3D X server, disabling XTEST will prevent them from inserting keystrokes
                 or mouse events and thus hijacking local X sessions on that X server.
+                <div class="important"><p class="important">
+                On certain Linux distributions, it may be necessary to run <code>gdmsetup</code> first in order to create the X server command line entries in the GDM configuration file.  Until these command line entries have been created, disabling XTEST using <code>vglserver_config</code> will not work.  This is known to be necessary for openSUSE 10 and Enterprise Linux 5.
+                </p></div>
             </dd>
             <dt class="Description">No</dt>
             <dd class="Description">
@@ -1798,7 +1808,14 @@ Disable&nbsp;XTEST&nbsp;extension&nbsp;(recommended)?
     <li class="Ordered">
         Restart the display manager:
         <dl class="Description">
-            <dt class="Description">Linux servers</dt>
+            <dt class="Description">Ubuntu Linux servers</dt>
+            <dd class="Description">
+<pre class="verbatim">
+/etc/init.d/gdm&nbsp;start
+</pre>
+
+            </dd>
+            <dt class="Description">Other Linux servers</dt>
             <dd class="Description">
 <pre class="verbatim">
 init&nbsp;5
