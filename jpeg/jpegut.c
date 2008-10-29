@@ -358,10 +358,10 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
-	dotest(35, 39, 3, TJ_444, "test");
-	dotest(35, 39, 4, TJ_444, "test");
-	dotest(35, 39, 3, TJ_GRAYSCALE, "test");
-	dotest(35, 39, 4, TJ_GRAYSCALE, "test");
+	dotest(35, 41, 3, TJ_444, "test");
+	dotest(35, 41, 4, TJ_444, "test");
+	dotest(35, 41, 3, TJ_GRAYSCALE, "test");
+	dotest(35, 41, 4, TJ_GRAYSCALE, "test");
 	dotest1();
 
 	return 0;
