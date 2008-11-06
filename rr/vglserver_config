@@ -573,7 +573,7 @@ configglx() {
 			fi
 			if [ -x /usr/sbin/svccfg ]; then
 				/usr/sbin/svccfg -s application/x11/x11-server delpropvalue options/server_args "*-tst*" 2>&1 >/dev/null
-				/usr/sbin/svccfg -s application/x11/x11-server addpropvalue options/server_args "-tst" 2>&1 >/dev/null
+				/usr/sbin/svccfg -s application/x11/x11-server addpropvalue options/server_args -tst 2>&1 >/dev/null
 			fi
 		else
 			if [ -f /etc/dt/config/Xservers ]; then
