@@ -127,6 +127,7 @@
 		__XGetGeometry;
 		__XNextEvent;
 		__XOpenDisplay;
+		__XCreateWindow;
 
 	local:
 		*;
