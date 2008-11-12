@@ -27,10 +27,10 @@ screens on a multi-screen X server.
 Updated to wxWindows Library License v3.1.
 -------------------------------------------------------------------------------
 [3]
-Added option which disables DPCM compression in the Sun Ray transport and sends
-uncompressed YUV pixels to the Sun Ray DTU.  This should improve the frame rate
-significantly with Sun Ray 1 DTUs (at the expense of using ~50% more network
-bandwidth.)  Disabling DPCM should also result in much better image quality.
+Added uncompressed YUV encoding option to the Sun Ray plugin.  This provides
+significantly better performance than DPCM on Sun Ray 1 clients, and it
+provides significantly better image quality in all cases.  YUV encoding will
+generally use about 50% more network bandwidth than DPCM, all else being equal.
 -------------------------------------------------------------------------------
 [4]
 Further optimized the Huffman encoder in the mediaLib implementation of
@@ -46,7 +46,7 @@ Fixed regression that caused VirtualGL to remove any part of the VGL_XVENDOR
 string following the first white space.
 -------------------------------------------------------------------------------
 [7]
-vglserver_config now works properly with OpenSolaris.
+vglserver_config now works properly with OpenSolaris systems.
 -------------------------------------------------------------------------------
 [8]
 glXUseXFont() now works if a Pixmap is the current drawable.
@@ -71,7 +71,7 @@ Note, however, that the libXm binding still has to be included on SPARC
 systems, because libGL on SPARC depends on libXmu, which depends on libXt.
 -------------------------------------------------------------------------------
 [12]
-Fixed an issue in GeomView whereby attempting to resize the oldest window in
+Fixed an issue with GeomView whereby attempting to resize the oldest window in
 a multi-window view would cause the Exceed version of vglclient to crash.
 -------------------------------------------------------------------------------
 [13]
@@ -100,15 +100,9 @@ result in an image being drawn or sent, and thus strings of rapid fire
 glFlush() commands can no longer overload the pipeline.
 -------------------------------------------------------------------------------
 [16]
-Added uncompressed YUV encoding option to the Sun Ray plugin.  This provides
-significantly better performance than DPCM on Sun Ray 1 clients, and it
-provides significantly better image quality in all cases.  YUV encoding will
-generally use about 50% more network bandwidth than DPCM, all else being equal.
--------------------------------------------------------------------------------
-[17]
 vglserver_config should now work with openSUSE systems.
 -------------------------------------------------------------------------------
-[18]
+[17]
 It was discovered that 'xhost +LOCAL:' is a better method of enabling 3D X
 server access to all users of the VirtualGL server.  This method works even
 if TCP connections are disabled in the X server (which is the case on recent
@@ -116,6 +110,10 @@ Solaris and Linux distributions.)  vglserver_config has thus been modified to
 use this method rather than 'xhost +localhost'.  Also, since it is no longer
 necessary to set DisallowTCP=false in the GDM configuration file,
 vglserver_config now comments out this line if it exists.
+-------------------------------------------------------------------------------
+[18]
+Fixed deadlock that occurred when using the VirtualGL Sun Ray plugin and
+ParaView to render multi-context datasets.
 -------------------------------------------------------------------------------
 
 
