@@ -97,6 +97,13 @@ vglserver_config now comments out this line if it exists.
 Fixed deadlock that occurred when using the VirtualGL Sun Ray plugin and
 ParaView to render multi-context datasets.
 -------------------------------------------------------------------------------
+[19]
+Fixed an issue with Mac X11 2.1.x on OS X 10.5 "Leopard" whereby vglconnect
+would abort with "Could not open log file."  X11 2.1.x uses a DISPLAY
+environment of the form /tmp/launch-*/:0, so it was necessary to remove
+everything up to the last slash before using this variable to build a unique
+vglclient log file path.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
