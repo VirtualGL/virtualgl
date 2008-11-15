@@ -122,6 +122,9 @@
 		XResizeWindow;
 		XServerVendor;
 		XWindowEvent;
+		#ifdef sparc
+		XSolarisGetVisualGamma;
+		#endif
 
 		__XFree;
 		__XGetGeometry;

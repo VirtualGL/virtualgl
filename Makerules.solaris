@@ -101,7 +101,7 @@ SOCKLIB := $(SOCKLIB) $(SSLLIB)
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lXm -lGL -lXmu -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
+FAKERLINK = -lXm -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
