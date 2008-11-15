@@ -104,6 +104,9 @@ environment of the form /tmp/launch-*/:0, so it was necessary to remove
 everything up to the last slash before using this variable to build a unique
 vglclient log file path.
 -------------------------------------------------------------------------------
+[20]
+Include libgefaker.so in the Solaris VirtualGL packages (oops).
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
