@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2008-10-24T04:13:21">
+<meta name="date" content="2008-11-14T19:07:22">
 <meta name="generator" content="deplate.rb 0.8">
 <title>User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3766,12 +3766,6 @@ NOTE: This is known not to work with VGP 2.0.
     <td class="standard">Linux/x86-64</td>
     <td class="standard"><code>vglrun&nbsp;-dl&nbsp;</code><em><code>{application&nbsp;script}</code></em></td>
     <td class="standard">See Chapter <a href="#dlopen" class="ref">13</a> for more details.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">I-deas Master Series 9, 10, &amp; 11</td>
-    <td class="standard">Solaris/SPARC</td>
-    <td class="standard">When running I-deas with VirtualGL on a Solaris/SPARC server, remotely displaying to a non-SPARC client machine or to an X proxy such as VNC, it may be necessary to set the <code>SDRC_SUN_IGNORE_GAMMA</code> environment variable to <code>1</code>.</td>
-    <td class="standard">I-deas normally aborts if it detects that the X visual assigned to it is not gamma-corrected.  However, gamma-corrected X visuals only exist on Solaris/SPARC X servers, so if you are displaying the application to another type of X server or X proxy which doesn&rsquo;t provide gamma-corrected X visuals, then it is necessary to override the gamma detection mechanism in I-deas.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Java2D applications that use OpenGL</td>

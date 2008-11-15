@@ -91,18 +91,6 @@
 	| ''vglrun -dl ''__''{application script}''__ \
 	| See {ref prefix="Chapter ": dlopen} for more details. \
 	|
-| I-deas Master Series 9, 10, & 11 | Solaris/SPARC \
-	| When running I-deas with VirtualGL on a Solaris/SPARC server, remotely \
-		displaying to a non-SPARC client machine or to an X proxy such as VNC, \
-		it may be necessary to set the ''SDRC_SUN_IGNORE_GAMMA'' environment \
-		variable to ''1''. \
-	| I-deas normally aborts if it detects that the X visual assigned to it is \
-		not gamma-corrected.  However, gamma-corrected X visuals only exist on \
-		Solaris/SPARC X servers, so if you are displaying the application to \
-		another type of X server or X proxy which doesn't provide gamma-corrected \
-		X visuals, then it is necessary to override the gamma detection mechanism \
-		in I-deas. \
-	|
 | Java2D applications that use OpenGL | Linux, Solaris \
 	| Java2D will use OpenGL to perform its rendering if ''sun.java2d.opengl'' \
 		is set to ''True''.  For example: \
