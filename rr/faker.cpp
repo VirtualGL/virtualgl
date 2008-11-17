@@ -266,7 +266,8 @@ Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
 		opentrace(XSolarisGetVisualGamma);  prargd(dpy);  prargi(screen);
 		prargv(visual);  starttrace();
 
-	if(fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0 && gamma)
+	if(!fconfig.gamma.usesun() && fconfig.gamma!=0.0 && fconfig.gamma!=1.0
+		&& fconfig.gamma!=-1.0 && gamma)
 		*gamma=1.0;
 	else ret=_XSolarisGetVisualGamma(dpy, screen, visual, gamma);
 
