@@ -146,6 +146,7 @@ _globalcleanup gdt;
 #define prargs(a) rrout.print("%s=%s ", #a, a?a:"NULL")
 #define prargx(a) rrout.print("%s=0x%.8lx ", #a, (unsigned long)a)
 #define prargi(a) rrout.print("%s=%d ", #a, a)
+#define prargf(a) rrout.print("%s=%f ", #a, (double)a)
 #define prargv(a) rrout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
 #define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
 #define prargal11(a) if(a) {  \
@@ -254,6 +255,28 @@ void __vgl_fakerinit(void)
 ////////////////
 
 extern "C" {
+
+#ifdef sparc
+
+Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
+  double *gamma)
+{
+	Status ret=0;
+
+		opentrace(XSolarisGetVisualGamma);  prargd(dpy);  prargi(screen);
+		prargv(visual);  starttrace();
+
+	if(!fconfig.gamma.usesun() && fconfig.gamma!=0.0 && fconfig.gamma!=1.0
+		&& fconfig.gamma!=-1.0 && gamma)
+		*gamma=1.0;
+	else ret=_XSolarisGetVisualGamma(dpy, screen, visual, gamma);
+
+		stoptrace();  if(gamma) prargf(*gamma);  closetrace();
+
+	return ret;
+}
+
+#endif
 
 Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	int *first_event, int *first_error)

@@ -35,7 +35,7 @@ static unsigned short nextitem(unsigned char **ptr, unsigned long *n)
    Other hints were obtained from xcmsdb.c, part of the X.org source tree
 */
 
-static Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
+Status _XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
 	double *gamma)
 {
 	Atom atom=0, actualtype=0;

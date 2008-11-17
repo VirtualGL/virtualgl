@@ -38,6 +38,8 @@ VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
 
 XVisualInfo *__vglVisualFromVisualID(Display *, int, VisualID);
 
+Status _XSolarisGetVisualGamma(Display *, int, Visual *, double *);
+
 #define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
 
 #endif

@@ -43,11 +43,7 @@ static int _vascreen=-1, _vaentries=0;
 static rrcs _vamutex;
 static struct _visattrib *_va;
 
-#ifdef sparc
-#include <X11/Xmu/XmuSolaris.h>
-#else
 #include "gamma.c"
-#endif
 
 static void buildVisAttribTable(Display *dpy, int screen)
 {
@@ -130,7 +126,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 
 	for(int i=0; i<nv; i++)
 	{
-		XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &_va[i].gamma);
+		_XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &_va[i].gamma);
 		if(clientglx)
 		{
 			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &_va[i].db);
