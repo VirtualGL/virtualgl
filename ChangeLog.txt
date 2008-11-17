@@ -107,6 +107,12 @@ vglclient log file path.
 [20]
 Include libgefaker.so in the Solaris VirtualGL packages (oops).
 -------------------------------------------------------------------------------
+[21]
+Added an interposed version of XSolarisGetVisualGamma() on SPARC servers so
+that applications that require gamma-corrected visuals can be fooled into
+thinking a gamma-corrected visual is available when in fact VirtualGL's
+software gamma correction mechanism is being used instead.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
