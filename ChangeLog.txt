@@ -113,6 +113,13 @@ that applications that require gamma-corrected visuals can be fooled into
 thinking a gamma-corrected visual is available when in fact VirtualGL's
 software gamma correction mechanism is being used instead.
 -------------------------------------------------------------------------------
+[22]
+Fixed a bug in the color conversion routines of TurboJPEG/mediaLib which
+might have caused the Solaris VirtualGL Client to display incorrect pixels
+along the right-most edge of the window.  This was not observed with
+vglclient, but the same bug caused observable visual defects in the Solaris
+version of vncviewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
