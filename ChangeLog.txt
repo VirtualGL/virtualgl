@@ -115,10 +115,8 @@ software gamma correction mechanism is being used instead.
 -------------------------------------------------------------------------------
 [22]
 Fixed a bug in the color conversion routines of TurboJPEG/mediaLib which
-might have caused the Solaris VirtualGL Client to display incorrect pixels
-along the right-most edge of the window.  This was not observed with
-vglclient, but the same bug caused observable visual defects in the Solaris
-version of vncviewer.
+caused the Solaris VirtualGL Client to display incorrect pixels along the
+right-most edge of the window when 2X or 4X subsampling was used.
 -------------------------------------------------------------------------------
 
 
