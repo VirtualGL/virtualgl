@@ -107,6 +107,12 @@
 		self-explanatory.  The only configuration option is the directory into
 		which you want the files to be installed.
 
+ !!! NOTE: The VirtualGL Windows installer does not remove any previous
+ versions of VirtualGL that may be installed on your machine.  If you wish,
+ you can remove these older versions manually by using the "Add or Remove
+ Programs" applet in the Control Panel (or the "Programs and Features" applet
+ if you are running Vista.)
+
 ** Installing VirtualGL from Source
 
 If you are using a platform for which there is not a pre-built VirtualGL binary
@@ -136,9 +142,9 @@ across a cluster of 3D servers.
 As root, issue one of the following commands:
 
 	RPM-based systems :: {:}
-#Verb: <<---
-rpm -e VirtualGL
----
+	#Verb: <<---
+	rpm -e VirtualGL
+	---
 
 	Debian-based systems :: {:}
 	#Verb: <<---

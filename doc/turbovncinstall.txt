@@ -119,9 +119,9 @@ instructions on how to build TurboVNC from source.
 As root, issue one of the following commands:
 
 	RPM-based systems :: {:}
-#Verb: <<---
-rpm -e turbovnc
----
+	#Verb: <<---
+	rpm -e turbovnc
+	---
 
 	Debian-based systems :: {:}
 	#Verb: <<---
