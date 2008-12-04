@@ -172,8 +172,12 @@ $(EDIR)/vglconnect: vglconnect
 $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL $(OSXGLFIX)
 
+LXMU=
+ifeq ($(platform), solaris)
+LXMU=-lXmu
+endif
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread
+	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread $(LXMU)
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl
