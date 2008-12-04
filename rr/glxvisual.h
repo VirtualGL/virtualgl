@@ -34,6 +34,8 @@ int __vglVisualClass(Display *, int, VisualID);
 
 double __vglVisualGamma(Display *, int, VisualID);
 
+bool __vglHasGCVisuals(Display *, int);
+
 VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
 
 XVisualInfo *__vglVisualFromVisualID(Display *, int, VisualID);

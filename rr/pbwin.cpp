@@ -180,10 +180,7 @@ pbwin::pbwin(Display *windpy, Window win)
 				win);
 	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
-	_gammacorrectedvisual=false;  _stereovisual=false;
-	double gamma=__vglVisualGamma(windpy, DefaultScreen(windpy),
-		xwa.visual->visualid);
-	if(gamma==1.00) _gammacorrectedvisual=true;
+	_gammacorrectedvisuals=__vglHasGCVisuals(windpy, DefaultScreen(windpy));
 	_stereovisual=__vglClientVisualAttrib(windpy, DefaultScreen(windpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
@@ -607,8 +604,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	checkgl("Read Pixels");
 
 	// Gamma correction
-	if(!_gammacorrectedvisual && fconfig.gamma!=0.0 && fconfig.gamma!=1.0
-		&& fconfig.gamma!=-1.0)
+	if((!_gammacorrectedvisuals || !fconfig.gamma.usesun())
+		&& fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0)
 	{
 		_prof_gamma.startframe();
 		static bool first=true;

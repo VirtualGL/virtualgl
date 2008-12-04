@@ -40,6 +40,7 @@ struct _visattrib
 
 static Display *_vadpy=NULL;
 static int _vascreen=-1, _vaentries=0;
+bool _vahasgcv=false;
 static rrcs _vamutex;
 static struct _visattrib *_va;
 
@@ -124,9 +125,11 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		if(olprop) {XFree(olprop);  olprop=NULL;}
 	}
 
+	_vahasgcv=false;
 	for(int i=0; i<nv; i++)
 	{
 		_XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &_va[i].gamma);
+		if(_va[i].gamma==1.00) _vahasgcv=true;
 		if(clientglx)
 		{
 			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &_va[i].db);
@@ -139,7 +142,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 
 	} catch(...) {
 		if(visuals) XFree(visuals);  if(_va) {delete [] _va;  _va=NULL;}
-		_vadpy=NULL;  _vascreen=-1;  _vaentries=0;
+		_vadpy=NULL;  _vascreen=-1;  _vaentries=0;  _vahasgcv=false;
 		throw;
 	}
 }
@@ -333,6 +336,12 @@ double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
 		if(_va[i].visualid==vid) return _va[i].gamma;
 	}		
 	return 2.22;
+}
+
+bool __vglHasGCVisuals(Display *dpy, int screen)
+{
+	buildVisAttribTable(dpy, screen);
+	return _vahasgcv;
 }
 
 VisualID __vglMatchVisual(Display *dpy, int screen,

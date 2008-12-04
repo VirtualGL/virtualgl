@@ -93,7 +93,7 @@ class pbwin
 		void *_sunrayhandle;
 		int _usesunray;
 		bool _truecolor;
-		bool _gammacorrectedvisual;
+		bool _gammacorrectedvisuals;
 		bool _stereovisual;
 		rrframe _r, _g, _b;
 };
