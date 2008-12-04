@@ -14,6 +14,19 @@ through SSh, and the OpenSSL feature required a great deal of maintenance
 (to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
 can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
 -------------------------------------------------------------------------------
+[3]
+Generally improved the software gamma correction heuristics.  Previously,
+VirtualGL's default behavior on SPARC servers was to always use some form of
+gamma correction (either software gamma correction or, if available, a
+gamma-corrected visual) unless VGL_GAMMA was set to 0.  Some applications,
+however, specifically try to select a non-gamma-corrected visual because they
+don't want gamma correction.  Those applications, when run in VirtualGL 2.1.1
+and prior, were forced to use software gamma correction.  VirtualGL now
+assumes that if gamma-corrected visuals are available and VGL_GAMMA=1 but the
+application still ends up with a non-gamma-corrected visual, then the
+application is specifically trying to avoid gamma correction.  Thus, VGL does
+not enable software gamma correction in this case.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
