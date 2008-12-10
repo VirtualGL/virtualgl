@@ -1,4 +1,4 @@
-/* Copyright (C)2004 Landmark Graphics
+/* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
