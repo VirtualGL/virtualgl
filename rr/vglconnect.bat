@@ -1,3 +1,15 @@
+rem Copyright (C)2007 Sun Microsystems, Inc.
+rem
+rem This library is free software and may be redistributed and/or modified under
+rem the terms of the wxWindows Library License, Version 3.1 or (at your option)
+rem any later version.  The full license is in the LICENSE.txt file included
+rem with this distribution.
+rem
+rem This library is distributed in the hope that it will be useful,
+rem but WITHOUT ANY WARRANTY; without even the implied warranty of
+rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+rem wxWindows Library License for more details.
+
 @echo off
 setlocal EnableDelayedExpansion
 
