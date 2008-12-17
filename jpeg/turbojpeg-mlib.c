@@ -631,7 +631,7 @@ static int encode_jpeg(jpgstruct *jpg)
 	_catch(encode_jpeg_init(jpg));
 	jpeg_EncoderHuffmanSetBuffer(&jpg->huffenc, jpg->jpgptr);
 
-	_mlibn(ybuf=(mlib_u8 *)memalign(8, yw*mcuh + cw*8*2));
+	_mlibn(ybuf=(mlib_u8 *)memalign(8, yw*mcuh + cw*8*2 + 8));
 	_mlibn(linebuf=(mlib_u8 *)memalign(8, yw*4*2));
 	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
 
