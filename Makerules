@@ -108,16 +108,24 @@ endif
 ifeq ($(JPEGLIB),)
 JPEGLIB = $(DEFAULTJPEGLIB)
 endif
+
 ifeq ($(JPEGLIB), medialib)
+
 CFLAGS := $(CFLAGS) -DUSEMEDIALIB
 CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
+
+## Open mediaLib
 ifneq ($(platform), solaris)
 ifneq ($(platform), solx86)
 OPENMLIBLDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/lib
 ifeq ($(DEBUG), yes)
 OPENMLIBLDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/dbg/lib
 endif
+ifeq ($(platform), windows)
+MLIB = $(OPENMLIBLDIR)/openmliblite.lib
+else
 MLIB = -L$(OPENMLIBLDIR) -lopenmliblite
+endif
 CFLAGS := $(CFLAGS) -I$(TOPDIR)/../openmliblite/src/include
 CXXFLAGS := $(CXXFLAGS) -I$(TOPDIR)/../openmliblite/src/include
 else
@@ -126,7 +134,9 @@ endif
 else
 MLIB = -lmlib
 endif
+
 FAKERLINK := $(FAKERLINK) $(MLIB)
+
 endif
 
 # Implicit rules
