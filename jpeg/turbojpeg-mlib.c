@@ -21,6 +21,10 @@
 #include "turbojpeg.h"
 #include "jpeg_IN.h"
 
+#ifdef _WIN32
+#define memalign(w, l) malloc(l)
+#endif
+
 static const char *lasterror="No error";
 static const int _mcuw[NUMSUBOPT]={8, 16, 16, 8};
 static const int _mcuh[NUMSUBOPT]={8, 8, 16, 8};
@@ -462,7 +466,9 @@ mlib_status my_VideoQuantizeInit_S16(mlib_d64 dqtable[64],
 {
 	mlib_s16 *qtable=(mlib_s16 *)dqtable;
 	mlib_s32 i;
+	#ifdef __SUNPRO_C
 	#pragma pipeloop(0)
+	#endif
 	for(i=0; i<64; i++)
 	{
 		mlib_s32 tmp=(mlib_s32)(32768.0/iqtable[i]+0.5);

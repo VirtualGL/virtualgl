@@ -51,6 +51,16 @@ JPEGDEP = $(LDIR)/libjpeg.lib
 
 endif
 
+ifeq ($(JPEGLIB), medialib)
+
+$(ODIR)/turbojpeg.obj: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
+	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+
+JPEGLINK = $(OPENMLIBLDIR)/openmliblite.lib
+JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib
+
+endif
+
 ifeq ($(JPEGLIB), quicktime)
 
 $(ODIR)/turbojpeg.obj: turbojpegqt.c
@@ -139,8 +149,12 @@ ifeq ($(JPEGLIB), medialib)
 $(ODIR)/turbojpeg.o: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+ifeq ($(platform), linux)
+JPEGLINK = $(MLIB)
+JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT)
+else
 JPEGLINK = -lmlib
-
+endif
 endif
 
 $(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbojpeg.o $(JPEGDEP)
