@@ -32,7 +32,7 @@ RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/rrsocket.lib
 ifneq ($(JPEGLIB), ipp)
 RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
 endif
-RRLIB = rrutil.lib $(FBXX11LIB) $(FAKEGLXLIB) turbojpeg.lib $(SOCKLIB)
+RRLIB = rrutil.lib $(FBXX11LIB) $(FAKEGLXLIB) turbojpeg.lib $(SOCKLIB) $(MLIB)
 
 all: $(TARGETS)
 
