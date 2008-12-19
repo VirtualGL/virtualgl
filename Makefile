@@ -50,17 +50,24 @@ WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
 ifeq ($(JPEGLIB), ipp)
-TJDIR=$$%systemroot%\\system32
+JPGDIR=$$%systemroot%\\system32
+JPGLIB=turbojpeg.dll
+else ifeq ($(JPEGLIB), medialib)
+JPGDIR=..\\openmliblite\\$(WBLDIR)\\bin
+JPGLIB=openmliblite.dll
 else
-TJDIR=$(WBLDDIR)\\bin
+JPGDIR=$(WBLDDIR)\\bin
+JPGLIB=turbojpeg.dll
 endif
 
 dist: rr diags
 	$(RM) $(WBLDDIR)\$(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DTJDIR=$(TJDIR) rr.nsi || \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DJPGDIR=$(JPGDIR) \
+		//DJPGLIB=$(JPGLIB) rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DTJDIR=$(TJDIR) rr.nsi  # Cygwin doesn't like the //
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DJPGDIR=$(JPGDIR) \
+		/DJPGLIB=$(JPGLIB) rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
