@@ -17,8 +17,8 @@ endif
 
 ifeq ($(JPEGLIB), medialib)
 
-JPEGLINK = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/tjpeg.lib
-JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/tjpeg.lib
+JPEGLINK = $(MLIB) $(LDIR)/tjpeg.lib
+JPEGDEP = $(MLIB) $(LDIR)/tjpeg.lib
 
 endif
 
@@ -59,10 +59,10 @@ JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
 endif
 
 else
-JPEGLINK = -lmlib -ltjpeg
+JPEGLINK = $(MLIB) -ltjpeg
 endif
 else
-JPEGLINK = -lmlib -ltjpeg
+JPEGLINK = $(MLIB) -ltjpeg
 endif
 
 endif
