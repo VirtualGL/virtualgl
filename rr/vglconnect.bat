@@ -1,3 +1,5 @@
+@echo off
+
 rem Copyright (C)2007 Sun Microsystems, Inc.
 rem
 rem This library is free software and may be redistributed and/or modified under
@@ -10,7 +12,6 @@ rem but WITHOUT ANY WARRANTY; without even the implied warranty of
 rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 rem wxWindows Library License for more details.
 
-@echo off
 setlocal EnableDelayedExpansion
 
 if not "%VGLCONNECT_OPENSSH%"=="1" goto useputty
