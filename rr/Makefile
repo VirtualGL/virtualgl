@@ -1,4 +1,5 @@
 include ../Makerules
+include ../jpeg/Makerules.tjpeg
 
 ##########################################################################
 ifeq ($(platform), windows)
@@ -28,11 +29,8 @@ TARGETS = $(EDIR)/vglclient.exe \
           $(EDIR)/vglconnect.bat \
           $(UNITTESTS)
 
-RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/rrsocket.lib
-ifneq ($(JPEGLIB), ipp)
-RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
-endif
-RRLIB = rrutil.lib $(FBXX11LIB) $(FAKEGLXLIB) turbojpeg.lib $(SOCKLIB) $(MLIB)
+RRDEP = $(LDIR)/rrutil.lib $(LDIR)/fbx-x11.lib $(LDIR)/rrsocket.lib $(JPEGDEP)
+RRLIB = rrutil.lib $(FBXX11LIB) $(FAKEGLXLIB) $(JPEGLINK) $(SOCKLIB)
 
 all: $(TARGETS)
 
@@ -116,15 +114,8 @@ endif
 endif
 endif
 
-RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a
-ifneq ($(JPEGLIB), ipp)
-ifeq ($(platform), cygwin)
-RRDEP := $(RRDEP) $(LDIR)/turbojpeg.lib
-else
-RRDEP := $(RRDEP) $(LDIR)/libturbojpeg.$(SHEXT)
-endif
-endif
-RRLIB = -lrrutil $(FBXLIB) -lturbojpeg $(SOCKLIB) -lm $(MLIB)
+RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a $(JPEGDEP)
+RRLIB = -lrrutil $(FBXLIB) $(JPEGLINK) $(SOCKLIB) -lm
 
 
 all: $(TARGETS)
