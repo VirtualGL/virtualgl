@@ -53,7 +53,7 @@ ifeq ($(JPEGLIB), ipp)
 JPGDIR=$$%systemroot%\\system32
 JPGLIB=turbojpeg.dll
 else ifeq ($(JPEGLIB), medialib)
-JPGDIR=..\\openmliblite\\$(WBLDIR)\\bin
+JPGDIR=..\\openmliblite\\$(WBLDDIR)\\bin
 JPGLIB=openmliblite.dll
 else
 JPGDIR=$(WBLDDIR)\\bin
