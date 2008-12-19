@@ -18,12 +18,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mlib.h>
-#include <malloc.h>
 #include "turbojpeg.h"
 #include "jpeg_IN.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
 #define memalign(w, l) malloc(l)
+#else
+#include <malloc.h>
 #endif
 
 static const char *lasterror="No error";
