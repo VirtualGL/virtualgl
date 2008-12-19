@@ -20,8 +20,7 @@ OPTFLAG = -Od -MTd -Zi
 else
 OPTFLAG = -O2 -MT
 endif
-
-DEFAULTJPEGLIB = ipp
+DEFAULTJPEGLIB = medialib
 
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/xdk
 CDEFINES := $(CDEFINES) -DXDK
