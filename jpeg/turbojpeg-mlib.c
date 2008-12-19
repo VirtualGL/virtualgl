@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mlib.h>
+#include <malloc.h>
 #include "turbojpeg.h"
 #include "jpeg_IN.h"
 
