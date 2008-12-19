@@ -1,11 +1,11 @@
 include ../Makerules
+include ./Makerules.tjpeg
 
 ##########################################################################
 ifeq ($(platform), windows)
 ##########################################################################
 
-LTARGET = $(EDIR)/turbojpeg.dll \
-          $(LDIR)/turbojpeg.lib
+LTARGET = $(LDIR)/tjpeg.lib
 
 TARGETS = $(EDIR)/jpgtest.exe \
           $(EDIR)/jpegut.exe
@@ -18,11 +18,8 @@ ifeq ($(JPEGLIB), libjpeg)
 LTARGET := libjpeg $(LTARGET)
 endif
 
-ifeq ($(JPEGLIB), ipp)
-LDEP =
-else
-TARGETS := $(TARGETS) $(LTARGET)
-LDEP := $(LTARGET)
+ifneq ($(JPEGLIB), ipp)
+TARGETS := $(LTARGET) $(TARGETS)
 endif
 
 
@@ -46,9 +43,6 @@ ifeq ($(JPEGLIB), libjpeg)
 $(ODIR)/turbojpeg.obj: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
-JPEGLINK = $(LDIR)/libjpeg.lib
-JPEGDEP = $(LDIR)/libjpeg.lib
-
 endif
 
 ifeq ($(JPEGLIB), medialib)
@@ -56,40 +50,22 @@ ifeq ($(JPEGLIB), medialib)
 $(ODIR)/turbojpeg.obj: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
 	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
 
-JPEGLINK = $(OPENMLIBLDIR)/openmliblite.lib
-JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib
-
 endif
 
-ifeq ($(JPEGLIB), quicktime)
+$(LDIR)/tjpeg.lib: $(ODIR)/turbojpeg.obj
+	$(AR) -OUT:$@ $^
 
-$(ODIR)/turbojpeg.obj: turbojpegqt.c
-	$(CC) $(CFLAGS) -DDLLDEFINE -c $< -Fo$@
+$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/rrutil.lib $(JPEGDEP)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(JPEGLINK) rrutil.lib
 
-JPEGLINK = qtmlClient.lib user32.lib advapi32.lib
-
-endif
-
-$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib: $(ODIR)/turbojpeg.obj $(JPEGDEP)
-	$(LINK) $(LDFLAGS) -dll $< -out:$(EDIR)/turbojpeg.dll \
-		-implib:$(LDIR)/turbojpeg.lib $(JPEGLINK)
-
-$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDEP) $(LDIR)/rrutil.lib
-	$(LINK) $(LDFLAGS) $< -out:$@ turbojpeg.lib rrutil.lib
-
-$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(LDEP)
-	$(LINK) $(LDFLAGS) $< -out:$@ turbojpeg.lib
+$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(JPEGDEP)
+	$(LINK) $(LDFLAGS) $< -out:$@ $(JPEGLINK)
 
 ##########################################################################
 else
 ##########################################################################
 
-ifeq ($(platform), cygwin)
-LTARGET = $(EDIR)/turbojpeg.dll \
-          $(LDIR)/turbojpeg.lib
-else
-LTARGET = $(LDIR)/libturbojpeg.$(SHEXT)
-endif
+LTARGET = $(LDIR)/libtjpeg.a
 
 TARGETS = $(EDIR)/jpgtest \
           $(EDIR)/jpegut
@@ -102,11 +78,9 @@ ifeq ($(JPEGLIB), libjpeg)
 LTARGET := libjpeg $(LTARGET)
 endif
 
-ifeq ($(JPEGLIB), ipp)
-LDEP =
-else
-TARGETS := $(TARGETS) $(LTARGET)
-LDEP := $(LTARGET)
+ifneq ($(JPEGLIB), ipp)
+TARGETS := $(LTARGET) $(TARGETS)
+
 endif
 
 
@@ -118,20 +92,19 @@ libjpeg:
 	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
 
 clean:
-	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d) $(ODIR)/turbojpeg-mapfile.E
+	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
 	cd jpeg-6b; \
 	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
 
 -include $(OBJS:.o=.d)
 
 
+$(ODIR)/turbojpeg.o: ../include/turbojpeg.h
+
 ifeq ($(JPEGLIB), libjpeg)
 
-$(ODIR)/turbojpeg.o: turbojpegl.c ../include/turbojpeg.h
+$(ODIR)/turbojpeg.o: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -o $@
-
-JPEGLINK = $(LDIR)/libjpeg.a
-JPEGDEP = $(LDIR)/libjpeg.a
 
 endif
 
@@ -140,8 +113,6 @@ ifeq ($(JPEGLIB), quicktime)
 $(ODIR)/turbojpeg.o: turbojpegqt.c
 	$(CC)  $(CFLAGS) -c $< -o $@
 
-JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime
-
 endif
 
 ifeq ($(JPEGLIB), medialib)
@@ -149,32 +120,17 @@ ifeq ($(JPEGLIB), medialib)
 $(ODIR)/turbojpeg.o: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ifeq ($(platform), linux)
-JPEGLINK = $(MLIB)
-JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT)
-else
-JPEGLINK = -lmlib
-endif
 endif
 
-$(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbojpeg.o $(JPEGDEP)
-	$(CC) $(LDFLAGS) -shared $< -o $@ -Wl,-out-implib,$(LDIR)/turbojpeg.lib \
-		-Wl,--output-def,$(LDIR)/turbojpeg.def $(JPEGLINK)
 
-ifneq ($(platform), osx)
-ifneq ($(platform), osxx86)
-JPEGLINK := $(JPEGLINK) $(MAPFLAG)$(ODIR)/turbojpeg-mapfile.E
-endif
-endif
+$(LDIR)/libtjpeg.a: $(ODIR)/turbojpeg.o
+	$(AR) $@ $<
 
-$(LDIR)/libturbojpeg.$(SHEXT): $(ODIR)/turbojpeg.o $(ODIR)/turbojpeg-mapfile.E $(JPEGDEP)
-	$(CC) $(LDFLAGS) $(SHFLAG) $< -o $@ $(JPEGLINK)
+$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(JPEGDEP) $(LDIR)/librrutil.a
+	$(CXX) $(LDFLAGS) $< -o $@ $(JPEGLINK) -lrrutil
 
-$(EDIR)/jpgtest: $(ODIR)/jpgtest.o $(LDEP) $(LDIR)/librrutil.a
-	$(CXX) $(LDFLAGS) $< -o $@ -lturbojpeg -lrrutil
-
-$(EDIR)/jpegut: $(ODIR)/jpegut.o $(LDEP)
-	$(CC) $(LDFLAGS) $< -o $@ -lturbojpeg
+$(EDIR)/jpegut: $(ODIR)/jpegut.o $(JPEGDEP)
+	$(CC) $(LDFLAGS) $< -o $@ $(JPEGLINK)
 
 ##########################################################################
 endif

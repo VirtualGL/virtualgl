@@ -1,0 +1,72 @@
+##########################################################################
+ifeq ($(platform), windows)
+##########################################################################
+
+ifeq ($(JPEGLIB), ipp)
+
+JPEGLINK = turbojpeg.lib
+
+endif
+
+ifeq ($(JPEGLIB), libjpeg)
+
+JPEGLINK = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
+JPEGDEP = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
+
+endif
+
+ifeq ($(JPEGLIB), medialib)
+
+JPEGLINK = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/tjpeg.lib
+JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/tjpeg.lib
+
+endif
+
+##########################################################################
+else
+##########################################################################
+
+ifeq ($(JPEGLIB), ipp)
+
+JPEGLINK = -lturbojpeg
+
+endif
+
+ifeq ($(JPEGLIB), libjpeg)
+
+JPEGLINK = -ltjpeg $(LDIR)/libjpeg.a
+JPEGDEP = $(LDIR)/libjpeg.a $(LDIR)/libtjpeg.a
+
+endif
+
+ifeq ($(JPEGLIB), quicktime)
+
+JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime -ltjpeg
+JPEGDEP = $(LDIR)/libtjpeg.a
+
+endif
+
+ifeq ($(JPEGLIB), medialib)
+
+ifneq ($(platform), solaris)
+ifneq ($(platform), solx86)
+
+JPEGLINK = -ltjpeg $(MLIB)
+ifeq ($(platform), cygwin)
+JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
+else
+JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
+endif
+
+else
+JPEGLINK = -lmlib -ltjpeg
+endif
+else
+JPEGLINK = -lmlib -ltjpeg
+endif
+
+endif
+
+##########################################################################
+endif
+##########################################################################
