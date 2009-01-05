@@ -36,7 +36,7 @@ ifeq ($(OS), Darwin)
 endif
 
 ifeq ($(TOPDIR),)
-TOPDIR = ..
+ TOPDIR = ..
 endif
 
 _DUMMY0 := $(shell if [ ! -f $(TOPDIR)/config ]; then touch $(TOPDIR)/config; fi)
@@ -50,26 +50,26 @@ endif
 VERSION := 2.2
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
-BUILD := $(BUILD)d
+ BUILD := $(BUILD)d
 endif
 
 ifneq ($(DISTRO),)
-BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
-BLDDIR32 = $(TOPDIR)/$(platform)/$(DISTRO)
+ BLDDIR = $(TOPDIR)/$(platform)$(subplatform)/$(DISTRO)
+ BLDDIR32 = $(TOPDIR)/$(platform)/$(DISTRO)
 else
-BLDDIR = $(TOPDIR)/$(platform)$(subplatform)
-BLDDIR32 = $(TOPDIR)/$(platform)
+ BLDDIR = $(TOPDIR)/$(platform)$(subplatform)
+ BLDDIR32 = $(TOPDIR)/$(platform)
 endif
 
 ifeq ($(DEBUG), yes)
-BLDDIR := $(BLDDIR)/dbg
-BLDDIR32 := $(BLDDIR32)/dbg
+ BLDDIR := $(BLDDIR)/dbg
+ BLDDIR32 := $(BLDDIR32)/dbg
 endif
 
 ENAME = bin
 LNAME = lib
 ifeq ($(ONAME),)
-ONAME := obj
+ ONAME := obj
 endif
 
 EDIR := $(BLDDIR)/$(ENAME)
@@ -92,51 +92,54 @@ include $(TOPDIR)/Makerules.$(platform)
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include -I$(TOPDIR)/include -I.
 CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__APPNAME=\"$(APPNAME)\"
 ifeq ($(DEBUG), yes)
-CDEFINES := $(CDEFINES) -D__DEBUG__
+ CDEFINES := $(CDEFINES) -D__DEBUG__
 endif
 ifeq ($(CXXFLAGS),)
-CXXFLAGS := $(CFLAGS)
+ CXXFLAGS := $(CFLAGS)
 endif
 CFLAGS := $(CFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
 CXXFLAGS := $(CXXFLAGS) $(OPTFLAG) $(ARCHFLAG) $(CDEFINES) $(CINCLUDES)
 ifeq ($(platform), windows)
-LDFLAGS := -LIBPATH:$(LDIR) $(LDFLAGS)
+ LDFLAGS := -LIBPATH:$(LDIR) $(LDFLAGS)
 else
-LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
+ LDFLAGS := $(OPTFLAG) $(ARCHFLAG) -L$(LDIR) $(LDFLAGS)
 endif
 
 ifeq ($(JPEGLIB),)
-JPEGLIB = $(DEFAULTJPEGLIB)
+ JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
+OMLDIR := $(LDIR)
+OMLDIR32 := $(LDIR32)
 ifeq ($(JPEGLIB), medialib)
-
-CFLAGS := $(CFLAGS) -DUSEMEDIALIB
-CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
-
-## Open mediaLib
-ifneq ($(platform), solaris)
-ifneq ($(platform), solx86)
-OPENMLIBLDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/lib
-ifeq ($(DEBUG), yes)
-OPENMLIBLDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/dbg/lib
-endif
-ifeq ($(platform), windows)
-MLIB = $(OPENMLIBLDIR)/openmliblite.lib
-else
-MLIB = -L$(OPENMLIBLDIR) -lopenmliblite
-endif
-CFLAGS := $(CFLAGS) -I$(TOPDIR)/../openmliblite/src/include
-CXXFLAGS := $(CXXFLAGS) -I$(TOPDIR)/../openmliblite/src/include
-else
-MLIB = -lmlib
-endif
-else
-MLIB = -lmlib
-endif
-
-FAKERLINK := $(FAKERLINK) $(MLIB)
-
+ CFLAGS := $(CFLAGS) -DUSEMEDIALIB
+ CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
+ ifneq ($(platform), solaris)
+  ifneq ($(platform), solx86)
+   ## Open mediaLib
+   ifneq ($(DISTRO),)
+    OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/$(DISTRO)
+    OMBLDDIR32 = $(TOPDIR)/../openmliblite/$(platform)/$(DISTRO)
+   else
+    OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)
+    OMBLDDIR32 = $(TOPDIR)/../openmliblite/$(platform)
+   endif
+   OMLDIR = $(OMBLDDIR)/$(LNAME)
+   OMLDIR32 = $(OMBLDDIR32)/$(LNAME)
+   ifeq ($(platform), windows)
+    MLIB = $(OMLDIR)/openmliblite.lib
+   else
+    MLIB = -L$(OMLDIR) -lopenmliblite
+   endif
+   CFLAGS := $(CFLAGS) -I$(TOPDIR)/../openmliblite/src/include
+   CXXFLAGS := $(CXXFLAGS) -I$(TOPDIR)/../openmliblite/src/include
+  else
+   MLIB = -lmlib
+  endif
+ else
+  MLIB = -lmlib
+ endif
+ FAKERLINK := $(FAKERLINK) $(MLIB)
 endif
 
 # Implicit rules

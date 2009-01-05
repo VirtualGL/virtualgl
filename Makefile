@@ -40,24 +40,26 @@ ifeq ($(platform), windows)
 ##########################################################################
 
 ifneq ($(DISTRO),)
-WBLDDIR = $(platform)$(subplatform)\\$(DISTRO)
+ WBLDDIR = $(platform)$(subplatform)\\$(DISTRO)
 else
-WBLDDIR = $(platform)$(subplatform)
+ WBLDDIR = $(platform)$(subplatform)
 endif
 
 ifeq ($(DEBUG), yes)
-WBLDDIR := $(WBLDDIR)\\dbg
+ WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
 ifeq ($(JPEGLIB), ipp)
-JPGDIR=$$%systemroot%\\system32
-JPGLIB=turbojpeg.dll
-else ifeq ($(JPEGLIB), medialib)
-JPGDIR=..\\openmliblite\\$(WBLDDIR)\\bin
-JPGLIB=openmliblite.dll
+ JPGDIR=$$%systemroot%\\system32
+ JPGLIB=turbojpeg.dll
 else
-JPGDIR=$(WBLDDIR)\\bin
-JPGLIB=turbojpeg.dll
+ ifeq ($(JPEGLIB), medialib)
+  JPGDIR=..\\openmliblite\\$(WBLDDIR)\\bin
+  JPGLIB=openmliblite.dll
+ else
+  JPGDIR=$(WBLDDIR)\\bin
+  JPGLIB=turbojpeg.dll
+ endif
 endif
 
 dist: rr diags
@@ -75,18 +77,18 @@ else
 ##########################################################################
 
 ifeq ($(prefix),)
-prefix=/usr/local
+ prefix=/usr/local
 endif
 
 lib64dir=lib
 ifeq ($(subplatform), 64)
-lib64dir=lib64
-ifeq ($(platform), solaris)
-lib64dir=lib/sparcv9
-endif
-ifeq ($(platform), solx86)
-lib64dir=lib/amd64
-endif
+ lib64dir=lib64
+ ifeq ($(platform), solaris)
+  lib64dir=lib/sparcv9
+ endif
+ ifeq ($(platform), solx86)
+  lib64dir=lib/amd64
+ endif
 endif
 
 ifeq ($(subplatform), 64)
@@ -198,11 +200,13 @@ dist: rr rr32 diags32 mesademos mesademos32
 	mkdir -p $$TMPDIR/RPMS; \
 	ln -fs `pwd` $$TMPDIR/BUILD; \
 	rm -f $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
-	rpmbuild -bb --define "_blddir $$TMPDIR/buildroot" --define "_topdir $$TMPDIR" \
-		--define "_version $(VERSION)" --define "_build $(BUILD)" --define "_bindir $(EDIR)" \
-		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" --define "_libdir32 $(LDIR32)" \
-		--target $(RPMARCH) \
-		rr.spec; \
+	rpmbuild -bb --define "_blddir $$TMPDIR/buildroot" \
+		--define "_topdir $$TMPDIR" --define "_version $(VERSION)"\
+		--define "_build $(BUILD)" --define "_bindir $(EDIR)" \
+		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" \
+		--define "_libdir32 $(LDIR32)" --define "_omlibdir $(OMLDIR)" \
+		--define "_omlibdir32 $(OMLDIR32)" --target $(RPMARCH) \
+		rr.spec.$(JPEGLIB); \
 	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rm -rf $$TMPDIR
 
@@ -216,10 +220,14 @@ srpm:
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
 	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
-	cat rr.spec | sed s/%{_version}/$(VERSION)/g | sed s/%{_build}/$(BUILD)/g \
-		| sed s/%{_blddir}/%{_tmppath}/g | sed s/%{_bindir32}/linux\\/bin/g \
-		| sed s/%{_bindir}/linux64\\/bin/g | sed s/%{_libdir32}/linux\\/lib/g \
-		| sed s/%{_libdir}/linux64\\/lib/g | sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
+	cp openmliblite.tar.gz $(BLDDIR)/rpms/SOURCES/openmliblite-vgl$(VERSION).tar.gz
+	cat rr.spec.$(JPEGLIB) | sed s/%{_version}/$(VERSION)/g \
+		| sed s/%{_build}/$(BUILD)/g | sed s/%{_blddir}/%{_tmppath}/g \
+		| sed s/%{_bindir32}/linux\\/bin/g | sed s/%{_bindir}/linux64\\/bin/g \
+		| sed s/%{_libdir32}/linux\\/lib/g | sed s/%{_libdir}/linux64\\/lib/g \
+		| sed s/%{_omlibdir32}/..\\/openmliblite\\/linux\\/lib/g \
+		| sed s/%{_omlibdir}/..\\/openmliblite\\/linux64\\/lib/g \
+		| sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
 	rpmbuild -ba --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) $(BLDDIR)/virtualgl.spec
 	mv $(BLDDIR)/rpms/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm
 	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(BUILD).src.rpm $(BLDDIR)/$(APPNAME).src.rpm
