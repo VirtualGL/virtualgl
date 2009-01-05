@@ -53,9 +53,9 @@ ifeq ($(JPEGLIB), medialib)
 
    JPEGLINK = -ltjpeg $(MLIB)
    ifeq ($(platform), cygwin)
-    JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
+    JPEGDEP = $(OMLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
    else
-    JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
+    JPEGDEP = $(OMLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
    endif
 
   else
