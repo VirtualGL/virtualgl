@@ -5,10 +5,7 @@ include ../jpeg/Makerules.tjpeg
 ifeq ($(platform), windows)
 ##########################################################################
 
-GLFOBJS = $(ODIR)/rrglframe.obj
-ifneq ($(XWIN32), yes)
-GLFOBJS := $(GLFOBJS) $(ODIR)/xdk-sym.obj
-endif
+GLFOBJS = $(ODIR)/rrglframe.obj $(ODIR)/xdk-sym.obj
 
 COBJS = $(ODIR)/rrcwin.obj \
         $(ODIR)/rrdisplayserver.obj \
@@ -89,11 +86,11 @@ UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayserverut \
             $(EDIR)/rrframeut
 ifneq ($(platform), cygwin)
-ifneq ($(platform), osx)
-ifneq ($(platform), osxx86)
-UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
-endif
-endif
+ ifneq ($(platform), osx)
+  ifneq ($(platform), osxx86)
+   UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
+  endif
+ endif
 endif
 
 TARGETS = $(EDIR)/vglclient \
@@ -101,17 +98,17 @@ TARGETS = $(EDIR)/vglclient \
           $(UNITTESTS)
 
 ifneq ($(platform), cygwin)
-ifneq ($(platform), osx)
-ifneq ($(platform), osxx86)
-VGLCONFIG = $(EDIR)/vglconfig
-ifeq ($(subplatform), 64)
-VGLCONFIG = $(EDIR)/vglconfig64
-endif
-TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
-	$(LDIR)/libdlfaker.$(SHEXT) $(LDIR)/libgefaker.$(SHEXT) \
-	$(VGLCONFIG) $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
-endif
-endif
+ ifneq ($(platform), osx)
+  ifneq ($(platform), osxx86)
+   VGLCONFIG = $(EDIR)/vglconfig
+   ifeq ($(subplatform), 64)
+    VGLCONFIG = $(EDIR)/vglconfig64
+   endif
+   TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
+     $(LDIR)/libdlfaker.$(SHEXT) $(LDIR)/libgefaker.$(SHEXT) \
+     $(VGLCONFIG) $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
+  endif
+ endif
 endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a $(JPEGDEP)
@@ -165,8 +162,9 @@ $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
 
 LXMU=
 ifeq ($(platform), solaris)
-LXMU=-lXmu
+ LXMU=-lXmu
 endif
+
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread $(LXMU)
 

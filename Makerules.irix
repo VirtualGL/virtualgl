@@ -7,19 +7,19 @@ CXX = CC
 AR = ar ruvs
 
 ifeq ($(USESSL), yes)
-CDEFINES = -DUSESSL
+ CDEFINES = -DUSESSL
 endif
 
 ifeq ($(subplatform), 64)
-ARCHFLAG = -64
+ ARCHFLAG = -64
 else
-ARCHFLAG = -n32
+ ARCHFLAG = -n32
 endif
 
 ifeq ($(DEBUG), yes)
-OPTFLAG = -O0 -g
+ OPTFLAG = -O0 -g
 else
-OPTFLAG = -O2
+ OPTFLAG = -O2
 endif
 
 LDFLAGS = -L$(TOPDIR)/../openssl.$(platform)$(subplatform)
@@ -34,5 +34,5 @@ DEPFLAG = -M
 FBXLIB = -lfbx -lX11 -lXext
 SOCKLIB = -lrrsocket -lpthread
 ifeq ($(USESSL), yes)
-SOCKLIB := $(SOCKLIB) -lssl -lcrypto
+ SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif

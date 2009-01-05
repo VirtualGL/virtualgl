@@ -9,27 +9,27 @@ AR = ar ruvs
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 
 ifeq ($(USESSL), yes)
-CDEFINES := $(CDEFINES) -DUSESSL
+ CDEFINES := $(CDEFINES) -DUSESSL
 endif
 
 ifeq ($(subplatform), 64)
-ARCHFLAG = -m64
-LDFLAGS = -L/usr/X11R6/lib64
+ ARCHFLAG = -m64
+ LDFLAGS = -L/usr/X11R6/lib64
 else
-ARCHFLAG =
-LDFLAGS = -L/usr/X11R6/lib
+ ARCHFLAG =
+ LDFLAGS = -L/usr/X11R6/lib
 endif
 
 ifeq ($(M32), yes)
-ARCHFLAG = -m32
+ ARCHFLAG = -m32
 endif
 
 _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
 
 ifeq ($(DEBUG), yes)
-OPTFLAG = -O0 -ggdb
+ OPTFLAG = -O0 -ggdb
 else
-OPTFLAG = -O2
+ OPTFLAG = -O2
 endif
 
 DEFAULTJPEGLIB = ipp
@@ -44,31 +44,31 @@ SOCKLIB = -lrrsocket -lpthread
 
 ifeq ($(USESSL), yes)
 
-SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
-STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
+ SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
+ STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 
-ifeq ($(STATICSSL), yes)
-CINCLUDES = -I$(SSLDIR)/include
-SOCKLIB := $(SOCKLIB) -ldl -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
-else
-# Use dynamic libs provided by the O/S
-SOCKLIB := $(SOCKLIB) -lssl -lcrypto
-endif
+ ifeq ($(STATICSSL), yes)
+  CINCLUDES = -I$(SSLDIR)/include
+  SOCKLIB := $(SOCKLIB) -ldl -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+ else
+  # Use dynamic libs provided by the O/S
+  SOCKLIB := $(SOCKLIB) -lssl -lcrypto
+ endif
 
 endif
 
 FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ifeq ($(subplatform),)
-RPMARCH = i386
-DEBARCH = i386
+ RPMARCH = i386
+ DEBARCH = i386
 else
-ifeq ($(subplatform),64)
-DEBARCH = amd64
-else
-DEBARCH = $(ARCH)
-endif
-RPMARCH = $(ARCH)
+ ifeq ($(subplatform),64)
+  DEBARCH = amd64
+ else
+  DEBARCH = $(ARCH)
+ endif
+ RPMARCH = $(ARCH)
 endif
 
 ZNOW = -z now
