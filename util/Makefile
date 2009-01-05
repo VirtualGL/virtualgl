@@ -97,11 +97,12 @@ $(LDIR)/librrutil.a: $(ODIR)/rrlog.o $(ODIR)/genericQ.o $(ODIR)/bmp.o
 	$(AR) $@ $^
 
 ifeq ($(platform), solaris)
-KSTAT = -lkstat
+ KSTAT = -lkstat
 endif
 ifeq ($(platform), solx86)
-KSTAT = -lkstat
+ KSTAT = -lkstat
 endif
+
 $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a
 	$(CXX) $(LDFLAGS) $< -o $@ $(SOCKLIB) $(KSTAT)
 

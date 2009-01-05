@@ -4,21 +4,21 @@ ifeq ($(platform), windows)
 
 ifeq ($(JPEGLIB), ipp)
 
-JPEGLINK = turbojpeg.lib
+ JPEGLINK = turbojpeg.lib
 
 endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
-JPEGLINK = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
-JPEGDEP = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
+ JPEGLINK = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
+ JPEGDEP = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
 
 endif
 
 ifeq ($(JPEGLIB), medialib)
 
-JPEGLINK = $(MLIB) $(LDIR)/tjpeg.lib
-JPEGDEP = $(MLIB) $(LDIR)/tjpeg.lib
+ JPEGLINK = $(MLIB) $(LDIR)/tjpeg.lib
+ JPEGDEP = $(MLIB) $(LDIR)/tjpeg.lib
 
 endif
 
@@ -28,42 +28,42 @@ else
 
 ifeq ($(JPEGLIB), ipp)
 
-JPEGLINK = -lturbojpeg
+ JPEGLINK = -lturbojpeg
 
 endif
 
 ifeq ($(JPEGLIB), libjpeg)
 
-JPEGLINK = -ltjpeg $(LDIR)/libjpeg.a
-JPEGDEP = $(LDIR)/libjpeg.a $(LDIR)/libtjpeg.a
+ JPEGLINK = -ltjpeg $(LDIR)/libjpeg.a
+ JPEGDEP = $(LDIR)/libjpeg.a $(LDIR)/libtjpeg.a
 
 endif
 
 ifeq ($(JPEGLIB), quicktime)
 
-JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime -ltjpeg
-JPEGDEP = $(LDIR)/libtjpeg.a
+ JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime -ltjpeg
+ JPEGDEP = $(LDIR)/libtjpeg.a
 
 endif
 
 ifeq ($(JPEGLIB), medialib)
 
-ifneq ($(platform), solaris)
-ifneq ($(platform), solx86)
+ ifneq ($(platform), solaris)
+  ifneq ($(platform), solx86)
 
-JPEGLINK = -ltjpeg $(MLIB)
-ifeq ($(platform), cygwin)
-JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
-else
-JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
-endif
+   JPEGLINK = -ltjpeg $(MLIB)
+   ifeq ($(platform), cygwin)
+    JPEGDEP = $(OPENMLIBLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
+   else
+    JPEGDEP = $(OPENMLIBLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
+   endif
 
-else
-JPEGLINK = $(MLIB) -ltjpeg
-endif
-else
-JPEGLINK = $(MLIB) -ltjpeg
-endif
+  else
+   JPEGLINK = $(MLIB) -ltjpeg
+  endif
+ else
+  JPEGLINK = $(MLIB) -ltjpeg
+ endif
 
 endif
 

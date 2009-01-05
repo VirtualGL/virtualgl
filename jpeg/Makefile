@@ -15,11 +15,11 @@ OBJS = $(ODIR)/turbojpeg.obj \
        $(ODIR)/jpegut.obj
 
 ifeq ($(JPEGLIB), libjpeg)
-LTARGET := libjpeg $(LTARGET)
+ LTARGET := libjpeg $(LTARGET)
 endif
 
 ifneq ($(JPEGLIB), ipp)
-TARGETS := $(LTARGET) $(TARGETS)
+ TARGETS := $(LTARGET) $(TARGETS)
 endif
 
 
@@ -75,12 +75,11 @@ OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpegut.o
 
 ifeq ($(JPEGLIB), libjpeg)
-LTARGET := libjpeg $(LTARGET)
+ LTARGET := libjpeg $(LTARGET)
 endif
 
 ifneq ($(JPEGLIB), ipp)
-TARGETS := $(LTARGET) $(TARGETS)
-
+ TARGETS := $(LTARGET) $(TARGETS)
 endif
 
 
