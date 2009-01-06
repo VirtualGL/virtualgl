@@ -305,15 +305,15 @@ VirtualGL on Cygwin, see the next section.
 
      nmake -f ms\nt.mak
 
-   * If you are building OpenSSL 0.9.8h and are using Visual C++ 2008 or
-     later, then comment out the following lines in
+   * If you are building OpenSSL 0.9.8h or 0.9.8i and are using Visual C++ 2008
+     or later, then comment out the following lines in
      openssl.windows\inc32\openssl\ossl_typ.h prior to building VirtualGL:
 
      typedef struct ocsp_req_ctx_st OCSP_REQ_CTX;
      typedef struct ocsp_response_st OCSP_RESPONSE;
      typedef struct ocsp_responder_id_st OCSP_RESPID;
 
-     Hopefully this will be fixed in later releases of OpenSSL.
+     Hopefully this will be fixed in future releases of OpenSSL.
 
 -- Hummingbird Exceed XDK v8 or later
 
