@@ -1,0 +1,75 @@
+#!/bin/sh
+
+usage()
+{
+	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <lib dir> <bin dir> <Open mediaLib lib dir>"
+	exit 1
+}
+
+if [ "$1" = "" ]; then usage $0; fi
+APPNAME=$1
+if [ "$2" = "" ]; then usage $0; fi
+JPEGLIB=$2
+if [ "$3" = "" ]; then usage $0; fi
+BLDDIR=$3
+if [ "$4" = "" ]; then usage $0; fi
+VERSION=$4
+if [ "$5" = "" ]; then usage $0; fi
+BUILD=$5
+if [ "$6" = "" ]; then usage $0; fi
+EDIR=$6
+if [ "$JPEGLIB" = "medialib" ]; then
+	if [ "$7" = "" ]; then usage $0; fi
+	OMLDIR=$7
+fi
+
+PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
+
+if [ -f $DMGNAME ]; then
+	rm -f $DMGNAME || exit -1
+fi
+umask 022
+TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
+mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME-$VERSION || exit -1
+chmod 1775 $TMPDIR/pkg/Package_Root/Library || exit -1
+chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || exit -1
+mkdir -p "$TMPDIR/pkg/Package_Root/Applications/${APPNAME}" || exit -1
+chmod 775 $TMPDIR/pkg/Package_Root/Applications || exit -1
+mkdir -p $TMPDIR/pkg/Resources || exit -1
+(cat Description.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Description.plist) || exit -1
+(cat Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__BUILD}/$BUILD/g > $TMPDIR/pkg/Info.plist) || exit -1
+install -m 755 $EDIR/vglclient $TMPDIR/pkg/Package_Root/usr/bin || exit -1
+install -m 755 $EDIR/vglconnect $TMPDIR/pkg/Package_Root/usr/bin || exit -1
+install -m 755 $EDIR/tcbench $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
+install -m 755 $EDIR/nettest $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
+install -m 755 $EDIR/glxinfo $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
+ln -fs /usr/bin/vglclient $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglclient || exit -1
+ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect || exit -1
+if [ "$JPEGLIB" = "ipp" ]; then
+	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
+	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+elif [ "$JPEGLIB" = "medialib" ]; then
+	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
+	install_name_tool -change libopenmliblite.dylib /opt/VirtualGL/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+fi
+install -m 644 fltk/COPYING $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME-$VERSION/LICENSE-FLTK.txt || exit -1
+install -m 644 putty/LICENCE $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME-$VERSION/LICENSE-PuTTY.txt || exit -1
+install -m 644 x11windows/xauth.license $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME-$VERSION/LICENSE-xauth.txt || exit -1
+install -m 644 LGPL.txt LICENSE.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME-$VERSION || exit -1
+install -m 644 ReadMe-MacApp.txt "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/Read Me.txt" || exit -1
+sudo ln -fs /Library/Documentation/$APPNAME-$VERSION/index.html "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/User's Guide.html" || exit -1
+sudo chown -R root:admin $TMPDIR/pkg/Package_Root || exit -1
+sudo chown root:0 $TMPDIR/pkg/Package_Root/usr || exit -1
+sudo chown root:0 $TMPDIR/pkg/Package_Root/usr/bin || exit -1
+cp License.rtf Welcome.rtf ReadMe.rtf $TMPDIR/pkg/Resources/ || exit -1
+$PACKAGEMAKER -build -v -p $TMPDIR/$APPNAME-$VERSION.pkg \
+	-f $TMPDIR/pkg/Package_Root -r $TMPDIR/pkg/Resources \
+	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist || exit -1
+hdiutil create -fs HFS+ -volname $APPNAME-$VERSION \
+	-srcfolder $TMPDIR/$APPNAME-$VERSION.pkg \
+	$TMPDIR/$APPNAME.dmg || exit -1
+cp $TMPDIR/$APPNAME.dmg $BLDDIR || exit -1
+sudo rm -rf $TMPDIR

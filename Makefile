@@ -303,59 +303,12 @@ sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/pkgbuild
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
-PACKAGEMAKER = /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
-
 ifeq ($(platform), osxx86)
 dist: macpkg
-endif
 
 macpkg: rr diags mesademos
-	if [ -d $(BLDDIR)/$(APPNAME)-$(VERSION).pkg ]; then rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg; fi
-	if [ -f $(BLDDIR)/$(APPNAME).dmg ]; then rm -f $(BLDDIR)/$(APPNAME).dmg; fi
-	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/usr/bin; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
-	chmod 1775 $$TMPDIR/pkg/Package_Root/Library; \
-	chmod 775 $$TMPDIR/pkg/Package_Root/Library/Documentation; \
-	mkdir -p "$$TMPDIR/pkg/Package_Root/Applications/${APPNAME}"; \
-	chmod 775 $$TMPDIR/pkg/Package_Root/Applications; \
-	mkdir -p $$TMPDIR/pkg/Resources; \
-	cat Description.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $$TMPDIR/pkg/Description.plist; \
-	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $$TMPDIR/pkg/Info.plist; \
-	install -m 755 $(EDIR)/vglclient $$TMPDIR/pkg/Package_Root/usr/bin; \
-	install -m 755 $(EDIR)/vglconnect $$TMPDIR/pkg/Package_Root/usr/bin; \
-	install -m 755 $(EDIR)/tcbench $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	install -m 755 $(EDIR)/nettest $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	install -m 755 $(EDIR)/glxinfo $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	ln -fs /usr/bin/vglclient $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglclient; \
-	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect; \
-	if [ "$(JPEGLIB)" = "ipp" ]; then \
-		install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-		install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
-	elif [ "$(JPEGLIB)" = "medialib" ]; then \
-		install -m 755 $(OMLDIR)/libopenmliblite.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-		install_name_tool -change libopenmliblite.dylib /opt/VirtualGL/lib/libopenmliblite.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
-	fi; \
-	install -m 644 fltk/COPYING $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
-	install -m 644 putty/LICENCE $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
-	install -m 644 x11windows/xauth.license $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
-	install -m 644 LGPL.txt LICENSE.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
-	install -m 644 ReadMe-MacApp.txt "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/Read Me.txt"; \
-	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/User's Guide.html"; \
-	sudo chown -R root:admin $$TMPDIR/pkg/Package_Root; \
-	sudo chown root:0 $$TMPDIR/pkg/Package_Root/usr; \
-	sudo chown root:0 $$TMPDIR/pkg/Package_Root/usr/bin; \
-	cp License.rtf Welcome.rtf ReadMe.rtf $$TMPDIR/pkg/Resources/; \
-	$(PACKAGEMAKER) -build -v -p $$TMPDIR/$(APPNAME)-$(VERSION).pkg \
-	  -f $$TMPDIR/pkg/Package_Root -r $$TMPDIR/pkg/Resources \
-	  -i $$TMPDIR/pkg/Info.plist -d $$TMPDIR/pkg/Description.plist; \
-	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
-	  -srcfolder $$TMPDIR/$(APPNAME)-$(VERSION).pkg \
-	  $$TMPDIR/$(APPNAME).dmg; \
-	cp $$TMPDIR/$(APPNAME).dmg $(BLDDIR); \
-	sudo rm -rf $$TMPDIR
+	sh makemacpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(OMLDIR)
+endif
 
 .PHONY: tarball
 tarball: rr diags mesademos
