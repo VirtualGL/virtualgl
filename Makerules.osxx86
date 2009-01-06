@@ -33,7 +33,7 @@ else
  OPTFLAG = -O2
 endif
 
-DEFAULTJPEGLIB = ipp
+DEFAULTJPEGLIB = medialib
 
 SHFLAG = -dynamiclib
 SHEXT = dylib
