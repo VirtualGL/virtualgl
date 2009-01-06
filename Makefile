@@ -211,7 +211,7 @@ dist: rr rr32 diags32 mesademos mesademos32
 	rm -rf $$TMPDIR
 
 deb: rr rr32 diags32 mesademos mesademos32
-	sh makedpkg $(APPNAME) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
+	sh makedpkg $(APPNAME) $(JPEGLIB) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32) $(OMLDIR) $(OMLDIR32)
 
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi

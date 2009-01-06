@@ -2,7 +2,7 @@
 
 usage()
 {
-	echo "$0 <app name> <package path> <version> <build> <package architecture> <lib dir> <32-bit lib dir> <bin dir> <32-bit bin dir>"
+	echo "$0 <app name> <JPEG library type> <package path> <version> <build> <package architecture> <lib dir> <32-bit lib dir> <bin dir> <32-bit bin dir> <Open mediaLib lib dir> <32-bit Open mediaLib lib dir>"
 	exit 1
 }
 
@@ -10,21 +10,29 @@ ARCH=`uname -m`
 if [ "$1" = "" ]; then usage $0; fi
 APPNAME=$1
 if [ "$2" = "" ]; then usage $0; fi
-PKGNAME=$2
+JPEGLIB=$2
 if [ "$3" = "" ]; then usage $0; fi
-VERSION=$3
+PKGNAME=$3
 if [ "$4" = "" ]; then usage $0; fi
-BUILD=$4
+VERSION=$4
 if [ "$5" = "" ]; then usage $0; fi
-DEBARCH=$5
+BUILD=$5
 if [ "$6" = "" ]; then usage $0; fi
-LDIR=$6
+DEBARCH=$6
 if [ "$7" = "" ]; then usage $0; fi
-LDIR32=$7
+LDIR=$7
 if [ "$8" = "" ]; then usage $0; fi
-EDIR=$8
+LDIR32=$8
 if [ "$9" = "" ]; then usage $0; fi
-EDIR32=$9
+EDIR=$9
+if [ "${10}" = "" ]; then usage $0; fi
+EDIR32=${10}
+if [ "$JPEGLIB" = "medialib" ]; then
+	if [ "${11}" = "" ]; then usage $0; fi
+	OMLDIR=${11}
+	if [ "${12}" = "" ]; then usage $0; fi
+	OMLDIR32=${12}
+fi
 
 rm -f $PKGNAME
 umask 022
@@ -32,6 +40,9 @@ TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
 mkdir $TMPDIR/DEBIAN
 cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g | sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control
 
+if [ "$JPEGLIB" = "ipp" ]; then
+	echo "Depends: turbojpeg (>= 1.11)" >>$TMPDIR/DEBIAN/control
+fi
 mkdir -p $TMPDIR/usr/bin
 mkdir -p $TMPDIR/usr/lib
 if [ "$DEBARCH" = "amd64" ]; then
@@ -58,6 +69,9 @@ install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/
 install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/
 install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/
 install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/
+if [ "$JPEGLIB" = "medialib" ]; then
+	install -m 755 $OMLDIR/libopenmliblite.so $TMPDIR/usr/lib/
+fi
 if [ "$DEBARCH" = "amd64" ]; then
 	install -m 755 $LDIR32/librrfaker.so $TMPDIR/usr/lib32/
 	install -m 755 $LDIR32/libdlfaker.so $TMPDIR/usr/lib32/
@@ -67,6 +81,9 @@ if [ "$DEBARCH" = "amd64" ]; then
 	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/64/libGL.so
 	ln -fs /usr/bin/vglconfig64 $TMPDIR/opt/$APPNAME/bin/vglconfig64
 	ln -fs /usr/lib32/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
+	if [ "$JPEGLIB" = "medialib" ]; then
+		install -m 755 $OMLDIR32/libopenmliblite.so $TMPDIR/usr/lib32/
+	fi
 else
 	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
 fi
