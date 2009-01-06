@@ -331,8 +331,13 @@ macpkg: rr diags mesademos
 	install -m 755 $(EDIR)/glxinfo $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
 	ln -fs /usr/bin/vglclient $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglclient; \
 	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect; \
-	install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
+	if [ "$(JPEGLIB)" = "ipp" ]; then \
+		install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
+		install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
+	elif [ "$(JPEGLIB)" = "medialib" ]; then \
+		install -m 755 $(OMLDIR)/libopenmliblite.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
+		install_name_tool -change libopenmliblite.dylib /opt/VirtualGL/lib/libopenmliblite.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
+	fi; \
 	install -m 644 fltk/COPYING $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
 	install -m 644 putty/LICENCE $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
 	install -m 644 x11windows/xauth.license $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
