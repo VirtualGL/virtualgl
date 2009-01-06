@@ -64,20 +64,13 @@ How to build VirtualGL in 9043 easy steps
    download an updated binutils RPM from:
    http://mirror.atrpms.net/ccrma/mirror/7.2/
 
--- TurboJPEG SDK
+-- Open mediaLib Lite
 
-   The TurboJPEG SDK Linux packages (in RPM, DEB, or tarball format) can be
-   obtained from the "Download" area of:
-
-   http://sourceforge.net/projects/virtualgl
-
-   The direct link for TurboJPEG downloads is:
-
-   http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
-
-   Use the i386 package for 32-bit systems and the x86_64/amd64 package for
-   64-bit systems (the 64-bit package contains both 64-bit and 32-bit
-   libraries.)
+   The Open mediaLib Lite source tarball should have been supplied to you along
+   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
+   tarball into the directory one level up from the VirtualGL build directory,
+   and refer to openmliblite/ReadMe.txt for instructions on how to build
+   Open mediaLib Lite.
 
 
 *******************************************************************************
@@ -85,10 +78,10 @@ How to build VirtualGL in 9043 easy steps
 *******************************************************************************
 
 Building a redistributable VirtualGL package for x86-64 requires building both
-32-bit and 64-bit versions of the VirtualGL server components.  But not all
-x86-64 Linux systems contain the 32-bit libraries necessary to build a 32-bit
-version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64 Linux
-system, you will need, at minimum, the following 32-bit libraries:
+32-bit and 64-bit versions of the VirtualGL server components.  However, not
+all x86-64 Linux systems contain the 32-bit libraries necessary to build a
+32-bit version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64
+Linux system, you will need, at minimum, the following 32-bit libraries:
 
 -- glibc development libraries
 
@@ -103,7 +96,7 @@ system, you will need, at minimum, the following 32-bit libraries:
      (iX86)
    * Not always installed by default but usually available on the installation
      discs
-   * On Ubuntu, you will need to use use getlibs
+   * On Ubuntu, you may need to use getlibs
      (http://ubuntuforums.org/showthread.php?t=474790&highlight=getlibs) to
      install the 32-bit X11 dev. kit:
      > sudo getlibs -p libX11-dev
@@ -112,7 +105,7 @@ system, you will need, at minimum, the following 32-bit libraries:
      > sudo getlibs -p libglu1-mesa-dev
 
 If for some reason your preferred 64-bit Linux distribution does not contain
-one or more of the above, then:
+one or more of the necessary 32-bit prerequisites, then:
 
   (1) Complain to your distribution vendor.
   (2) All x86-64 distributions of Linux have a corresponding 32-bit-only
@@ -140,19 +133,13 @@ one or more of the above, then:
      OpenGL SDK
      Mac OS X SDK
 
--- TurboJPEG SDK (Intel-based Macs only)
+-- Open mediaLib Lite (Intel-based Macs only)
 
-   * The TurboJPEG SDK disk image (DMG) can be obtained from the "Download"
-     area of:
-
-     http://sourceforge.net/projects/virtualgl
-
-     The direct link for TurboJPEG downloads is:
-
-     http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
-
-   * Open the DMG file and double-click on the package inside to install
-     TurboJPEG.
+   The Open mediaLib Lite source tarball should have been supplied to you along
+   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
+   tarball into the directory one level up from the VirtualGL build directory,
+   and refer to openmliblite/ReadMe.txt for instructions on how to build
+   Open mediaLib Lite.
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
 
@@ -237,16 +224,13 @@ one or more of the above, then:
      Blastwave (http://www.blastwave.org), or SunFreeware
      (http://www.sunfreeware.com/)
 
--- Sun mediaLib  [recommended]
+-- Sun mediaLib
 
-   * VirtualGL includes a version of libjpeg v6b which will produce correct,
-     albeit slow, behavior.  In order to get optimal performance out of
-     VirtualGL on Solaris, it is necessary to use the mediaLib codec, which is
-     capable of compressing JPEG images 3-4x faster than libjpeg.
-   * mediaLib is pre-installed on Solaris 10.  It can also be downloaded for
-     free from http://www.sun.com/processors/vis/mlib.html.  Solaris 10/x86
-     users should upgrade the pre-installed version of mediaLib on their
-     system to mediaLib 2.5 in order to achieve better performance.
+   * mediaLib is pre-installed on Solaris 10 and later, and it can also be
+     downloaded for free from http://www.sun.com/processors/vis/mlib.html.  If
+     you are running Solaris 10/x86 Update 3 or older, then you should upgrade
+     the pre-installed version of mediaLib on your system to mediaLib 2.5 in
+     order to achieve the best possible performance.
 
 
 *******************************************************************************
@@ -342,21 +326,13 @@ VirtualGL on Cygwin, see the next section.
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
--- TurboJPEG SDK
+-- Open mediaLib Lite
 
-   * The TurboJPEG SDK Windows installer (EXE) can be obtained from the
-     "Download" area of:
-
-     http://sourceforge.net/projects/virtualgl
-
-     The direct link for TurboJPEG downloads is:
-
-     http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
-
-   * Add the TurboJPEG include path (c:\turbojpeg\include) to the system
-     or user INCLUDE environment variable prior to building VirtualGL.
-   * Add the TurboJPEG library path (c:\turbojpeg\lib) to the system
-     or user LIB environment variable prior to building VirtualGL.
+   The Open mediaLib Lite source tarball should have been supplied to you along
+   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
+   tarball into the directory one level up from the VirtualGL build directory,
+   and refer to openmliblite/ReadMe.txt for instructions on how to build
+   Open mediaLib Lite.
 
 
 *******************************************************************************
@@ -375,21 +351,13 @@ Cygwin:
    openssl-devel
    xorg-x11-devel
 
--- Download and install the TurboJPEG SDK
+-- Open mediaLib Lite
 
-   * The TurboJPEG SDK Windows installer (EXE) can be obtained from the
-     "Download" area of:
-
-     http://sourceforge.net/projects/virtualgl
-
-     The direct link for TurboJPEG downloads is:
-
-     http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
-
-   * Add the TurboJPEG include path (/cygdrive/c/turbojpeg/include) to the
-     CPATH environment variable prior to building VirtualGL.
-   * Add the TurboJPEG library path (/cygdrive/c/turbojpeg/lib) to the
-     LIBRARY_PATH environment variable prior to building VirtualGL.
+   The Open mediaLib Lite source tarball should have been supplied to you along
+   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
+   tarball into the directory one level up from the VirtualGL build directory,
+   and refer to openmliblite/ReadMe.txt for instructions on how to build
+   Open mediaLib Lite.
 
 -- Pass an argument of "platform=cygwin" to make when performing the
    build:
@@ -430,24 +398,6 @@ DEBUG = yes
     "${platform}/dbg/bin", whereas the release version will reside in
     "${platform}/lib" and "${platform}/bin", so these two versions can be built
     independently of one another.
-
-JPEGLIB = libjpeg
-
-  * The default build of VirtualGL links against the TurboJPEG SDK, which
-    embeds highly accelerated JPEG coding routines from the Intel(R) Integrated
-    Performance Primitives or Sun mediaLib.  TurboJPEG enables VirtualGL to
-    compress full-screen images at interactive frame rates, but it relies upon
-    closed source components to achieve this.  The use of these closed source
-    components does not limit your ability to use and distribute VirtualGL
-    in any way, but some may still wish to build a 100% open source version
-    of VirtualGL.  Thus, specifying this Makefile option will build an
-    (included) version of libjpeg and link VirtualGL against it rather than the
-    accelerated TurboJPEG codecs mentioned above.  The use of libjpeg produces
-    correct, albeit slow, behavior.  The version of libjpeg included in the
-    VirtualGL build resides in the "jpeg/jpeg-6b" directory and differs
-    from the IJG release (see http://www.ijg.org) only in its support of little
-    endian and 32-bit pixel formats (both of which are necessary to allow
-    the VirtualGL client to decompress directly into X11 shared memory.)
 
 M32 = yes
 
