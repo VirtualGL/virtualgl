@@ -109,6 +109,7 @@ ifeq ($(JPEGLIB),)
  JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
+OMEDIR := $(EDIR)
 OMLDIR := $(LDIR)
 OMLDIR32 := $(LDIR32)
 ifeq ($(JPEGLIB), medialib)
@@ -124,6 +125,7 @@ ifeq ($(JPEGLIB), medialib)
     OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)
     OMBLDDIR32 = $(TOPDIR)/../openmliblite/$(platform)
    endif
+   OMEDIR = $(OMBLDDIR)/$(ENAME)
    OMLDIR = $(OMBLDDIR)/$(LNAME)
    OMLDIR32 = $(OMBLDDIR32)/$(LNAME)
    ifeq ($(platform), windows)

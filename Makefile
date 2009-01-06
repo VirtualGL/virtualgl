@@ -236,34 +236,8 @@ srpm:
 endif
 
 ifeq ($(platform), cygwin)
-
 dist: rr diags mesademos
-	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; __PWD=`pwd`; \
-	mkdir -p $$TMPDIR/pkg/usr/bin; \
-	mkdir -p $$TMPDIR/pkg/opt/VirtualGL/bin; \
-	mkdir -p $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION); \
-	$(INSTALL) -m 755 $(EDIR)/vglclient.exe $$TMPDIR/pkg/usr/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/vglconnect $$TMPDIR/pkg/usr/bin/; \
-	ln -fs /usr/bin/vglclient.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/tcbench.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/nettest.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/glxinfo.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/glxspheres.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 644 LGPL.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 fltk/COPYING $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
-	$(INSTALL) -m 644 putty/LICENCE $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
-	$(INSTALL) -m 644 x11windows/xauth.license $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
-	$(INSTALL) -m 644 LICENSE.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 ChangeLog.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/index.html $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.gif $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.png $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.css $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	cd $$TMPDIR/pkg; tar cfj ../$(APPNAME)-$(VERSION)-$(BUILD).tar.bz2 *; \
-	cd $$__PWD; mv $$TMPDIR/*.tar.bz2 $(BLDDIR); \
-	rm -rf $$TMPDIR
-
+	sh makecygwinpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(OMEDIR)
 endif
 
 ifeq ($(platform), solaris)
@@ -304,9 +278,7 @@ sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
 ifeq ($(platform), osxx86)
-dist: macpkg
-
-macpkg: rr diags mesademos
+dist: rr diags mesademos
 	sh makemacpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(OMLDIR)
 endif
 
