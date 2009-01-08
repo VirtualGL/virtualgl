@@ -162,7 +162,7 @@ OBJS = $(ODIR)/Fl.o \
 all: $(TARGETS)
 
 clean:
-	-$(RM) $(TARGETS) $(OBJS)
+	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
 
 -include $(OBJS:.o=.d)
 
