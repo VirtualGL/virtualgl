@@ -31,6 +31,10 @@ not enable software gamma correction in this case.
 Fixed a buffer overrun issue in TurboJPEG/mediaLib that may have caused
 problems on Solaris/x86 VirtualGL servers.
 -------------------------------------------------------------------------------
+[5]
+Integrated libdlfaker.so into librrfaker.so to eliminate the need for
+invoking 'vglrun -dl'.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -426,7 +430,7 @@ SuSE, etc.
 -------------------------------------------------------------------------------
 [2]
 librrfaker.so and libturbojpeg.so are now being linked with map files (AKA
-“anonymous version scripts” on Linux.)  This is mainly a preventative measure,
+Â“"anonymous version scripts"Â” on Linux.)  This is mainly a preventative measure,
 because it hides any non-global symbols in the shared objects, thus preventing
 those symbols from accidentally interposing on a symbol in an application or
 in another shared object.  However, [2] was also necessary to prevent [1] from
@@ -593,7 +597,7 @@ server from a Sun Ray server using SSh X11 forwarding, this eliminates the need
 to explicitly set VGL_CLIENT in that case as well.
 -------------------------------------------------------------------------------
 [21]
-Implement the “spoil last frame” algorithm in the Sun Ray plugin whenever VGL
+Implement the Â“"spoil last frame"Â” algorithm in the Sun Ray plugin whenever VGL
 reads back/compresses/sends the framebuffer in response to a glFlush().  This
 fixes issues with slow model regeneration and zoom operations in Pro/E when
 using the Sun Ray plugin.
