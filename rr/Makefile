@@ -79,7 +79,7 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrframeut.o \
         $(ODIR)/dlfakerut.o
 
-OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o $(ODIR)/gefaker.o $(ODIR)/vglconfig.o
+OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/gefaker.o $(ODIR)/vglconfig.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
             $(EDIR)/rrdisplayclientut \
@@ -105,7 +105,7 @@ ifneq ($(platform), cygwin)
     VGLCONFIG = $(EDIR)/vglconfig64
    endif
    TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
-     $(LDIR)/libdlfaker.$(SHEXT) $(LDIR)/libgefaker.$(SHEXT) \
+     $(LDIR)/libgefaker.$(SHEXT) \
      $(VGLCONFIG) $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
   endif
  endif
@@ -126,9 +126,6 @@ clean:
 
 $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl
-
-$(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
-	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
 
 $(LDIR)/libgefaker.$(SHEXT): $(ODIR)/gefaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl

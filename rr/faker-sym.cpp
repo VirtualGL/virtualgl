@@ -37,12 +37,14 @@ static void *x11dllhnd=NULL;
 
 void __vgl_loadsymbols(void)
 {
-	void *dllhnd;
+	void *dllhnd=RTLD_NEXT;
 	dlerror();  // Clear error state
+
+	lsym(dlopen);
 
 	if(fconfig.gllib)
 	{
-		dllhnd=dlopen(fconfig.gllib, RTLD_NOW);
+		dllhnd=__dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
@@ -149,7 +151,7 @@ void __vgl_loadsymbols(void)
 	// X11 symbols
 	if(fconfig.x11lib)
 	{
-		dllhnd=dlopen(fconfig.x11lib, RTLD_NOW);
+		dllhnd=__dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",

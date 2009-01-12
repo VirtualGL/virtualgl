@@ -250,11 +250,36 @@ void __vgl_fakerinit(void)
 	}
 }
 
+extern "C" {
+
+void *dlopen(const char *filename, int flag)
+{
+	void *retval=NULL;
+	__vgl_fakerinit();
+
+		opentrace("dlopen");  prargs(filename);  prargi(flag);  starttrace();
+
+	char *env=NULL;  const char *envname="FAKERLIB32";
+	if(sizeof(long)==8) envname="FAKERLIB";
+	if((env=getenv(envname))==NULL || strlen(env)<1)
+		env="librrfaker.so";
+	if(filename && strstr(filename, "libGL"))
+	{
+		if(fconfig.verbose)
+			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
+				filename, env);
+		retval=__dlopen(env, flag);
+	}
+	else retval=__dlopen(filename, flag);
+
+		stoptrace();  prargx(retval);  closetrace();
+
+	return retval;
+}
+
 ////////////////
 // X11 functions
 ////////////////
-
-extern "C" {
 
 #ifdef sparc
 

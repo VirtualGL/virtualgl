@@ -132,6 +132,8 @@
 		__XOpenDisplay;
 		__XCreateWindow;
 
+		dlopen;
+
 	local:
 		*;
 };

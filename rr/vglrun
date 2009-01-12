@@ -47,7 +47,6 @@ usage()
 	echo "            sryuv = Encode 3D images as YUV/send using Sun Ray transport"
 	echo "-cl <c>   : <c> = The hostname or IP address of the VirtualGL client (or"
 	echo "                  Sun Ray server)"
-	echo "-dl       : Force apps that dlopen() libGL to load VirtualGL instead"
 	echo "-d <d>    : <d> = the X Display or GLP device to use for 3D rendering"
 	echo "-fps <f>  : Limit client/server frame rate to <f> frames/sec"
 	echo "+/-g      : Enable/disable gamma correction"
@@ -85,7 +84,6 @@ fi
 unset OPENGL_DEVICE
 export OPENGL_DEVICE
 
-__VGL_DL=0
 __VGL_GE=0
 __VGL_64=0
 __VGL_32=0
@@ -108,7 +106,6 @@ do
 	-q*)        VGL_QUAL=$2       ; export VGL_QUAL     ; shift     ;;
 	+de*)       VGL_DEBUG=1       ; export VGL_DEBUG    ;;
 	-de*)       VGL_DEBUG=0       ; export VGL_DEBUG    ;;
-	-dl)        __VGL_DL=1        ;;
 	+tr*)       VGL_TRACE=1       ; export VGL_TRACE    ;;
 	-tr*)       VGL_TRACE=0       ; export VGL_TRACE    ;;
 	-d*)        VGL_DISPLAY=$2    ; export VGL_DISPLAY  ; shift     ;;
@@ -197,14 +194,6 @@ if [ $__VGL_64 -eq 0 ]; then
 	else
 		LD_PRELOAD_32=$FAKERLIB32:$LD_PRELOAD_32
 	fi
-	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/libdlfaker.so ]
-		then
-			LD_PRELOAD_32=/opt/SUNWvgl/lib/libdlfaker.so:$LD_PRELOAD_32
-		else
-			LD_PRELOAD_32=libdlfaker.so:$LD_PRELOAD_32
-		fi
-	fi
 	if [ $__VGL_GE -eq 1 ]; then
 		if [ -f /opt/SUNWvgl/lib/libgefaker.so ]
 		then
@@ -220,14 +209,6 @@ if [ $__VGL_32 -eq 0 ]; then
 		LD_PRELOAD_64=$FAKERLIB
 	else
 		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
-	fi
-	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/64/libdlfaker.so ]
-		then
-			LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libdlfaker.so:$LD_PRELOAD_64
-		else
-			LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
-		fi
 	fi
 	if [ $__VGL_GE -eq 1 ]; then
 		if [ -f /opt/SUNWvgl/lib/64/libgefaker.so ]
@@ -249,9 +230,6 @@ if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=librrfaker.so
 else
 	LD_PRELOAD=librrfaker.so:$LD_PRELOAD
-fi
-if [ $__VGL_DL -eq 1 ]; then
-	LD_PRELOAD=libdlfaker.so:$LD_PRELOAD
 fi
 if [ $__VGL_GE -eq 1 ]; then
 	LD_PRELOAD=libgefaker.so:$LD_PRELOAD

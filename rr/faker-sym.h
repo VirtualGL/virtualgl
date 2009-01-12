@@ -387,6 +387,10 @@ funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe, return);
 
 
+// From dlfaker
+
+funcdef2(void *, dlopen, const char *, filename, int, flag, return);
+
 #ifdef __cplusplus
 }
 #endif
