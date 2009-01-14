@@ -5,6 +5,13 @@ Significant changes since 2.1.1
 Fixed a buffer overrun issue in TurboJPEG/mediaLib that may have caused
 problems on Solaris/x86 VirtualGL servers.
 -------------------------------------------------------------------------------
+[2]
+Integrated libdlfaker.so into librrfaker.so to eliminate the need for
+invoking 'vglrun -dl'.
+-------------------------------------------------------------------------------
+[3]
+Developed a proper uninstaller app for the Mac OS X VirtualGL package.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
