@@ -6,6 +6,16 @@ usage()
 	exit 1
 }
 
+TMPDIR=
+
+doexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		sudo rm -rf $TMPDIR
+	fi
+	exit $1
+}
+
 if [ "$1" = "" ]; then usage $0; fi
 APPNAME=$1
 if [ "$2" = "" ]; then usage $0; fi
@@ -26,54 +36,54 @@ fi
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
 if [ -f $DMGNAME ]; then
-	rm -f $DMGNAME || exit -1
+	rm -f $DMGNAME || doexit -1
 fi
 umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
-mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
-mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
-mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || exit -1
-chmod 1775 $TMPDIR/pkg/Package_Root/Library || exit -1
-chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || exit -1
-mkdir -p "$TMPDIR/pkg/Package_Root/Applications/$APPNAME" || exit -1
-chmod 775 $TMPDIR/pkg/Package_Root/Applications || exit -1
-mkdir -p $TMPDIR/pkg/Resources || exit -1
-(cat Description.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Description.plist) || exit -1
-(cat Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__BUILD}/$BUILD/g > $TMPDIR/pkg/Info.plist) || exit -1
-install -m 755 $EDIR/vglclient $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-install -m 755 $EDIR/vglconnect $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-install -m 755 $EDIR/tcbench $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
-install -m 755 $EDIR/nettest $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
-install -m 755 $EDIR/glxinfo $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
-(cat uninstall.sh.tmpl | sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/uninstall) || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
+mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || doexit -1
+chmod 1775 $TMPDIR/pkg/Package_Root/Library || doexit -1
+chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || doexit -1
+mkdir -p "$TMPDIR/pkg/Package_Root/Applications/$APPNAME" || doexit -1
+chmod 775 $TMPDIR/pkg/Package_Root/Applications || doexit -1
+mkdir -p $TMPDIR/pkg/Resources || doexit -1
+(cat Description.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Description.plist) || doexit -1
+(cat Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__BUILD}/$BUILD/g > $TMPDIR/pkg/Info.plist) || doexit -1
+install -m 755 $EDIR/vglclient $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
+install -m 755 $EDIR/vglconnect $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
+install -m 755 $EDIR/tcbench $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
+install -m 755 $EDIR/nettest $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
+install -m 755 $EDIR/glxinfo $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
+(cat uninstall.sh.tmpl | sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/uninstall) || doexit -1
 chmod 755 $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/uninstall
-ln -fs /usr/bin/vglclient $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglclient || exit -1
-ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglconnect || exit -1
+ln -fs /usr/bin/vglclient $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglclient || doexit -1
+ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglconnect || doexit -1
 if [ "$JPEGLIB" = "ipp" ]; then
-	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
-	install_name_tool -change libturbojpeg.dylib /opt/$APPNAME/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
+	install_name_tool -change libturbojpeg.dylib /opt/$APPNAME/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || doexit -1
 elif [ "$JPEGLIB" = "medialib" ]; then
-	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
-	install_name_tool -change libopenmliblite.dylib /opt/$APPNAME/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
+	install_name_tool -change libopenmliblite.dylib /opt/$APPNAME/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || doexit -1
 fi
-install -m 644 fltk/COPYING $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-FLTK.txt || exit -1
-install -m 644 putty/LICENCE $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-PuTTY.txt || exit -1
-install -m 644 x11windows/xauth.license $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-xauth.txt || exit -1
-install -m 644 LGPL.txt LICENSE.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || exit -1
-install -m 644 ReadMe-MacApp.txt "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/Read Me.txt" || exit -1
-sudo ln -fs /Library/Documentation/$APPNAME/index.html "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/User's Guide.html" || exit -1
-sudo chown -R root:admin $TMPDIR/pkg/Package_Root || exit -1
-sudo chown root:0 $TMPDIR/pkg/Package_Root/usr || exit -1
-sudo chown root:0 $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-cp License.rtf Welcome.rtf ReadMe.rtf $TMPDIR/pkg/Resources/ || exit -1
+install -m 644 fltk/COPYING $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-FLTK.txt || doexit -1
+install -m 644 putty/LICENCE $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-PuTTY.txt || doexit -1
+install -m 644 x11windows/xauth.license $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-xauth.txt || doexit -1
+install -m 644 LGPL.txt LICENSE.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || doexit -1
+install -m 644 ReadMe-MacApp.txt "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/Read Me.txt" || doexit -1
+sudo ln -fs /Library/Documentation/$APPNAME/index.html "$TMPDIR/pkg/Package_Root/Applications/$APPNAME/User's Guide.html" || doexit -1
+sudo chown -R root:admin $TMPDIR/pkg/Package_Root || doexit -1
+sudo chown root:0 $TMPDIR/pkg/Package_Root/usr || doexit -1
+sudo chown root:0 $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
+cp License.rtf Welcome.rtf ReadMe.rtf $TMPDIR/pkg/Resources/ || doexit -1
 mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$APPNAME.pkg \
 	-f $TMPDIR/pkg/Package_Root -r $TMPDIR/pkg/Resources \
-	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist || exit -1
-osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $APPNAME.app" vgluninstall.applescript || exit -1
+	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist || doexit -1
+osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $APPNAME.app" vgluninstall.applescript || doexit -1
 hdiutil create -fs HFS+ -volname $APPNAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" \
-	$TMPDIR/$APPNAME.dmg || exit -1
-cp $TMPDIR/$APPNAME.dmg $BLDDIR || exit -1
-sudo rm -rf $TMPDIR
+	$TMPDIR/$APPNAME.dmg || doexit -1
+cp $TMPDIR/$APPNAME.dmg $BLDDIR || doexit -1
+doexit 0
