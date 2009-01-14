@@ -440,7 +440,7 @@ To build a redistributable package, type
   * On Windows, this requires the Nullsoft Install System
     (http://nsis.sourceforge.net/.)  makensis.exe should be in your PATH.
   * On OS X, this requires the PackageMaker application, which must be
-    installed in Applications/Utilities.
+    installed in /Developer/Applications/Utilities.
 
 To build a redistributable DEB package (Debian-compatible systems), type
 
