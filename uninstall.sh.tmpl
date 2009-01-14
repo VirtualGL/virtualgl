@@ -47,4 +47,19 @@ rmdir /Applications/VirtualGL 2>&1 || RETCODE=-1
 echo Removing package receipt $RCPT ...
 rm -r $RCPT 2>&1 || error "Could not remove package receipt"
 
+for RCPT in /Library/Receipts/$PKGNAME-*.pkg; do
+	if [ -d $RCPT ]; then
+		echo Attempting to remove old package `basename $RCPT` ...
+		lsbom -s -f -l $RCPT/Contents/Archive.bom 2>/dev/null 1>/dev/null || continue
+		PWD=`pwd`
+		cd /
+		lsbom -s -f -l $RCPT/Contents/Archive.bom | while read line; do
+			rm "$line" 2>/dev/null 1>/dev/null
+		done
+		rmdir /Library/Documentation/`basename $RCPT .pkg` 2>/dev/null 1>/dev/null
+		cd $PWD
+		rm -r $RCPT 2>/dev/null 1>/dev/null
+	fi
+done
+
 exit $RETCODE
