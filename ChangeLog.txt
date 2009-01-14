@@ -35,6 +35,9 @@ problems on Solaris/x86 VirtualGL servers.
 Integrated libdlfaker.so into librrfaker.so to eliminate the need for
 invoking 'vglrun -dl'.
 -------------------------------------------------------------------------------
+[6]
+Developed a proper uninstaller app for the Mac OS X VirtualGL package.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
