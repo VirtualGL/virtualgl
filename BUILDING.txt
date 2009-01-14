@@ -197,9 +197,9 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- GCC
 
-   * Preferred version:
+   * Preferred version for SPARC:
      http://cooltools.sunsource.net/gcc/4.0.3/install.html
-     Also available from the Solaris 9 & 10 Companion CD's
+   * Also available from the Solaris 9 & 10 Companion CD's
      (http://www.sun.com/software/solaris/freeware/),
      Blastwave (http://www.blastwave.org), or SunFreeware
      (http://www.sunfreeware.com/)
@@ -398,6 +398,24 @@ DEBUG = yes
     "${platform}/dbg/bin", whereas the release version will reside in
     "${platform}/lib" and "${platform}/bin", so these two versions can be built
     independently of one another.
+
+JPEGLIB = libjpeg
+
+  * The default build of VirtualGL links against Sun mediaLib on Solaris and
+    Open mediaLib on Linux, Windows, and OS X.  mediaLib provides a variety of
+    image processing primitives which are accelerated by the vector multimedia
+    instructions available in SPARC and x86 CPUs.  These image processing
+    primitives enable VirtualGL to compress full-screen images at interactive
+    frame rates.  However, if building VirtualGL for a CPU other than SPARC or
+    x86, it is necessary to build it without mediaLib support.  Specifying this
+    Makefile option will build an (included) version of libjpeg and link
+    VirtualGL against it rather than the accelerated mediaLib codecs mentioned
+    above.  The use of libjpeg produces correct, albeit slow, behavior.  The
+    version of libjpeg included in the VirtualGL build resides in the
+    "jpeg/jpeg-6b" directory and differs from the IJG release
+    (see http://www.ijg.org) only in its support of little endian and 32-bit
+    pixel formats (both of which are necessary to allow the VirtualGL client to
+    decompress directly into X11 shared memory.)
 
 M32 = yes
 
