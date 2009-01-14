@@ -31,8 +31,8 @@ fi
 umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
 mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-mkdir -p $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
-mkdir -p $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
+mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
 mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || exit -1
 chmod 1775 $TMPDIR/pkg/Package_Root/Library || exit -1
 chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || exit -1
@@ -43,19 +43,19 @@ mkdir -p $TMPDIR/pkg/Resources || exit -1
 (cat Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g	| sed s/{__BUILD}/$BUILD/g > $TMPDIR/pkg/Info.plist) || exit -1
 install -m 755 $EDIR/vglclient $TMPDIR/pkg/Package_Root/usr/bin || exit -1
 install -m 755 $EDIR/vglconnect $TMPDIR/pkg/Package_Root/usr/bin || exit -1
-install -m 755 $EDIR/tcbench $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
-install -m 755 $EDIR/nettest $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
-install -m 755 $EDIR/glxinfo $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin || exit -1
-(cat uninstall.sh.tmpl | sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/uninstall) || exit -1
-chmod 755 $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/uninstall
-ln -fs /usr/bin/vglclient $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglclient || exit -1
-ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect || exit -1
+install -m 755 $EDIR/tcbench $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
+install -m 755 $EDIR/nettest $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
+install -m 755 $EDIR/glxinfo $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || exit -1
+(cat uninstall.sh.tmpl | sed s/{__APPNAME}/$APPNAME/g > $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/uninstall) || exit -1
+chmod 755 $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/uninstall
+ln -fs /usr/bin/vglclient $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglclient || exit -1
+ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglconnect || exit -1
 if [ "$JPEGLIB" = "ipp" ]; then
-	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
-	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
+	install_name_tool -change libturbojpeg.dylib /opt/$APPNAME/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
 elif [ "$JPEGLIB" = "medialib" ]; then
-	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/VirtualGL/lib || exit -1
-	install_name_tool -change libopenmliblite.dylib /opt/VirtualGL/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
+	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || exit -1
+	install_name_tool -change libopenmliblite.dylib /opt/$APPNAME/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || exit -1
 fi
 install -m 644 fltk/COPYING $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-FLTK.txt || exit -1
 install -m 644 putty/LICENCE $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-PuTTY.txt || exit -1
