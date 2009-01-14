@@ -61,10 +61,10 @@ How to build VirtualGL in 9043 easy steps
 *******************************************************************************
 
 Building a redistributable VirtualGL package for x86-64 requires building both
-32-bit and 64-bit versions of the VirtualGL server components.  But not all
-x86-64 Linux systems contain the 32-bit libraries necessary to build a 32-bit
-version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64 Linux
-system, you will need, at minimum, the following 32-bit libraries:
+32-bit and 64-bit versions of the VirtualGL server components.  However, not
+all x86-64 Linux systems contain the 32-bit libraries necessary to build a
+32-bit version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64
+Linux system, you will need, at minimum, the following 32-bit libraries:
 
 -- glibc development libraries
 
@@ -79,7 +79,7 @@ system, you will need, at minimum, the following 32-bit libraries:
      (iX86)
    * Not always installed by default but usually available on the installation
      discs
-   * On Ubuntu, you will need to use use getlibs
+   * On Ubuntu, you may need to use getlibs
      (http://ubuntuforums.org/showthread.php?t=474790&highlight=getlibs) to
      install the 32-bit X11 dev. kit:
      > sudo getlibs -p libX11-dev
@@ -88,7 +88,7 @@ system, you will need, at minimum, the following 32-bit libraries:
      > sudo getlibs -p libglu1-mesa-dev
 
 If for some reason your preferred 64-bit Linux distribution does not contain
-one or more of the above, then:
+one or more of the necessary 32-bit prerequisites, then:
 
   (1) Complain to your distribution vendor.
   (2) All x86-64 distributions of Linux have a corresponding 32-bit-only
@@ -156,9 +156,9 @@ one or more of the above, then:
 
 -- GCC
 
-   * Preferred version:
+   * Preferred version for SPARC:
      http://cooltools.sunsource.net/gcc/4.0.3/install.html
-     Also available from the Solaris 9 & 10 Companion CD's
+   * Also available from the Solaris 9 & 10 Companion CD's
      (http://www.sun.com/software/solaris/freeware/),
      Blastwave (http://www.blastwave.org), or SunFreeware
      (http://www.sunfreeware.com/)
@@ -428,7 +428,7 @@ To build a redistributable package, type
   * On Windows, this requires the Nullsoft Install System
     (http://nsis.sourceforge.net/.)  makensis.exe should be in your PATH.
   * On OS X, this requires the PackageMaker application, which must be
-    installed in Applications/Utilities.
+    installed in /Developer/Applications/Utilities.
 
 To build a redistributable DEB package (Debian-compatible systems), type
 
