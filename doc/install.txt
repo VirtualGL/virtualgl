@@ -165,14 +165,12 @@ Answer "yes" when prompted.
 *** Mac
 #OPT: noList! plain!
 
-	* Download and install the latest version of
-		[[http://www.osxgnu.org/software/pkgdetail.html?project_id=244][OSXPM]]
-	* Launch OSXPM
-	* Click the "Delete Package" button
-	* Find ''VirtualGL-''__''{version}''__''.pkg'' in the list of packages and highlight it
-	* Click "Delete Selected"
-	* Enter your password if prompted
-	* Complain to Apple about the lack of a built-in package uninstaller for OS X
+Use the "Uninstall VirtualGL" application provided in the VirtualGL disk image,
+or issue the following command from the Terminal:
+
+#Verb: <<---
+sudo /opt/VirtualGL/bin/uninstall
+---
 
 *** Windows
 #OPT: noList! plain!
