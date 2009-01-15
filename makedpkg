@@ -38,7 +38,7 @@ EDIR32=$9
 
 rm -f $PKGNAME
 umask 022
-TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
+TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
 mkdir $TMPDIR/DEBIAN || doexit -1
 (cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g | sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control) || doexit -1
 
