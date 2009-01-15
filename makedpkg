@@ -1,5 +1,15 @@
 #!/bin/sh
 
+TMPDIR=
+
+doexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		sudo rm -rf $TMPDIR
+	fi
+	exit $1
+}
+
 usage()
 {
 	echo "$0 <app name> <package path> <version> <build> <package architecture> <lib dir> <32-bit lib dir> <bin dir> <32-bit bin dir>"
@@ -29,69 +39,69 @@ EDIR32=$9
 rm -f $PKGNAME
 umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
-mkdir $TMPDIR/DEBIAN
-cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g | sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control
+mkdir $TMPDIR/DEBIAN || doexit -1
+(cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g | sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control) || doexit -1
 
-mkdir -p $TMPDIR/usr/bin
-mkdir -p $TMPDIR/usr/lib
+mkdir -p $TMPDIR/usr/bin || doexit -1
+mkdir -p $TMPDIR/usr/lib || doexit -1
 if [ "$DEBARCH" = "amd64" ]; then
-	mkdir -p $TMPDIR/usr/lib32
+	mkdir -p $TMPDIR/usr/lib32 || doexit -1
 fi
-mkdir -p $TMPDIR/opt/$APPNAME/bin
-mkdir -p $TMPDIR/opt/$APPNAME/fakelib
+mkdir -p $TMPDIR/opt/$APPNAME/bin || doexit -1
+mkdir -p $TMPDIR/opt/$APPNAME/fakelib || doexit -1
 if [ "$DEBARCH" = "amd64" ]; then
-	mkdir -p $TMPDIR/opt/$APPNAME/fakelib/64
-	ln -fs /opt/$APPNAME/fakelib/64 $TMPDIR/opt/$APPNAME/lib64
+	mkdir -p $TMPDIR/opt/$APPNAME/fakelib/64 || doexit -1
+	ln -fs /opt/$APPNAME/fakelib/64 $TMPDIR/opt/$APPNAME/lib64 || doexit -1
 fi
-install -m 755 $EDIR32/vglclient $TMPDIR/usr/bin/
-install -m 755 $EDIR32/vglconfig $TMPDIR/usr/bin/
-install -m 755 $EDIR32/vglconnect $TMPDIR/usr/bin/
-install -m 755 $EDIR32/vgllogin $TMPDIR/usr/bin/
-install -m 755 $EDIR32/vglrun $TMPDIR/usr/bin/
-install -m 755 rr/vglgenkey $TMPDIR/usr/bin/
-install -m 755 rr/vglserver_config $TMPDIR/usr/bin/
-install -m 755 $EDIR32/tcbench $TMPDIR/opt/$APPNAME/bin/
-install -m 755 $EDIR32/nettest $TMPDIR/opt/$APPNAME/bin/
-install -m 755 $EDIR32/cpustat $TMPDIR/opt/$APPNAME/bin/
-install -m 755 $EDIR32/glxinfo $TMPDIR/opt/$APPNAME/bin/
-install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/
-install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/
-install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/
-install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/
+install -m 755 $EDIR32/vglclient $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR32/vglconfig $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR32/vglconnect $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR32/vgllogin $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR32/vglrun $TMPDIR/usr/bin/ || doexit -1
+install -m 755 rr/vglgenkey $TMPDIR/usr/bin/ || doexit -1
+install -m 755 rr/vglserver_config $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR32/tcbench $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR32/nettest $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR32/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR32/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/ || doexit -1
+install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/ || doexit -1
+install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/ || doexit -1
 if [ "$DEBARCH" = "amd64" ]; then
-	install -m 755 $LDIR32/librrfaker.so $TMPDIR/usr/lib32/
-	install -m 755 $LDIR32/libdlfaker.so $TMPDIR/usr/lib32/
-	install -m 755 $LDIR32/libgefaker.so $TMPDIR/usr/lib32/
-	install -m 755 $EDIR/glxspheres $TMPDIR/opt/$APPNAME/bin/glxspheres64
-	install -m 755 $EDIR/vglconfig64 $TMPDIR/usr/bin/
-	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/64/libGL.so
-	ln -fs /usr/bin/vglconfig64 $TMPDIR/opt/$APPNAME/bin/vglconfig64
-	ln -fs /usr/lib32/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
+	install -m 755 $LDIR32/librrfaker.so $TMPDIR/usr/lib32/ || doexit -1
+	install -m 755 $LDIR32/libdlfaker.so $TMPDIR/usr/lib32/ || doexit -1
+	install -m 755 $LDIR32/libgefaker.so $TMPDIR/usr/lib32/ || doexit -1
+	install -m 755 $EDIR/glxspheres $TMPDIR/opt/$APPNAME/bin/glxspheres64 || doexit -1
+	install -m 755 $EDIR/vglconfig64 $TMPDIR/usr/bin/ || doexit -1
+	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/64/libGL.so || doexit -1
+	ln -fs /usr/bin/vglconfig64 $TMPDIR/opt/$APPNAME/bin/vglconfig64 || doexit -1
+	ln -fs /usr/lib32/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so || doexit -1
 else
-	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
+	ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so || doexit -1
 fi
-ln -fs /usr/bin/vglclient $TMPDIR/opt/$APPNAME/bin/vglclient
-ln -fs /usr/bin/vglconfig $TMPDIR/opt/$APPNAME/bin/vglconfig
-ln -fs /usr/bin/vglconnect $TMPDIR/opt/$APPNAME/bin/vglconnect
-ln -fs /usr/bin/vglgenkey $TMPDIR/opt/$APPNAME/bin/vglgenkey
-ln -fs /usr/bin/vgllogin $TMPDIR/opt/$APPNAME/bin/vgllogin
-ln -fs /usr/bin/vglserver_config $TMPDIR/opt/$APPNAME/bin/vglserver_config
-ln -fs /usr/bin/vglrun $TMPDIR/opt/$APPNAME/bin/vglrun
-ln -fs /opt/$APPNAME/fakelib $TMPDIR/opt/$APPNAME/lib
-ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/opt/$APPNAME/doc
-mkdir -p $TMPDIR/usr/share/doc/$APPNAME-$VERSION
-install -m 644 fltk/COPYING $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt
-install -m 644 putty/LICENCE $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt
-install -m 644 x11windows/xauth.license $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt
-install -m 644 LGPL.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 LICENSE.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 LICENSE-OpenSSL.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 ChangeLog.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 doc/index.html $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 doc/*.png $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 doc/*.gif $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
-install -m 644 doc/*.css $TMPDIR/usr/share/doc/$APPNAME-$VERSION/
+ln -fs /usr/bin/vglclient $TMPDIR/opt/$APPNAME/bin/vglclient || doexit -1
+ln -fs /usr/bin/vglconfig $TMPDIR/opt/$APPNAME/bin/vglconfig || doexit -1
+ln -fs /usr/bin/vglconnect $TMPDIR/opt/$APPNAME/bin/vglconnect || doexit -1
+ln -fs /usr/bin/vglgenkey $TMPDIR/opt/$APPNAME/bin/vglgenkey || doexit -1
+ln -fs /usr/bin/vgllogin $TMPDIR/opt/$APPNAME/bin/vgllogin || doexit -1
+ln -fs /usr/bin/vglserver_config $TMPDIR/opt/$APPNAME/bin/vglserver_config || doexit -1
+ln -fs /usr/bin/vglrun $TMPDIR/opt/$APPNAME/bin/vglrun || doexit -1
+ln -fs /opt/$APPNAME/fakelib $TMPDIR/opt/$APPNAME/lib || doexit -1
+ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/opt/$APPNAME/doc || doexit -1
+mkdir -p $TMPDIR/usr/share/doc/$APPNAME-$VERSION || doexit -1
+install -m 644 fltk/COPYING $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt || doexit -1
+install -m 644 putty/LICENCE $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt || doexit -1
+install -m 644 x11windows/xauth.license $TMPDIR/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt || doexit -1
+install -m 644 LGPL.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 LICENSE.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 LICENSE-OpenSSL.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 ChangeLog.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/index.html $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.png $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.gif $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.css $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 
-sudo chown -R root:root $TMPDIR/*
-dpkg -b $TMPDIR $PKGNAME
-sudo rm -rf $TMPDIR
+sudo chown -R root:root $TMPDIR/* || doexit -1
+dpkg -b $TMPDIR $PKGNAME || doexit -1
+doexit 0
