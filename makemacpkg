@@ -35,11 +35,11 @@ fi
 
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
-if [ -f $DMGNAME ]; then
-	rm -f $DMGNAME || doexit -1
+if [ -f $BLDDIR/$APPNAME.dmg ]; then
+	rm -f $BLDDIR/$APPNAME.dmg
 fi
 umask 022
-TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
+TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
 mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
 mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
 mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
