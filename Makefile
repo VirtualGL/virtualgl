@@ -223,35 +223,8 @@ srpm:
 endif
 
 ifeq ($(platform), cygwin)
-
 dist: rr diags mesademos
-	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; __PWD=`pwd`; \
-	mkdir -p $$TMPDIR/pkg/usr/bin; \
-	mkdir -p $$TMPDIR/pkg/opt/VirtualGL/bin; \
-	mkdir -p $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION); \
-	$(INSTALL) -m 755 $(EDIR)/vglclient.exe $$TMPDIR/pkg/usr/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/vglconnect $$TMPDIR/pkg/usr/bin/; \
-	ln -fs /usr/bin/vglclient.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/tcbench.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/nettest.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/glxinfo.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 755 $(EDIR)/glxspheres.exe $$TMPDIR/pkg/opt/$(APPNAME)/bin/; \
-	$(INSTALL) -m 644 LGPL.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 fltk/COPYING $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
-	$(INSTALL) -m 644 LICENSE-OpenSSL.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 putty/LICENCE $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
-	$(INSTALL) -m 644 x11windows/xauth.license $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
-	$(INSTALL) -m 644 LICENSE.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 ChangeLog.txt $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/index.html $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.gif $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.png $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	$(INSTALL) -m 644 doc/*.css $$TMPDIR/pkg/usr/share/doc/$(APPNAME)-$(VERSION)/; \
-	cd $$TMPDIR/pkg; tar cfj ../$(APPNAME)-$(VERSION)-$(BUILD).tar.bz2 *; \
-	cd $$__PWD; mv $$TMPDIR/*.tar.bz2 $(BLDDIR); \
-	rm -rf $$TMPDIR
-
+	sh makecygwinpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
 
 ifeq ($(platform), solaris)
@@ -291,54 +264,10 @@ sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/pkgbuild
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
-PACKAGEMAKER = /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
-
 ifeq ($(platform), osxx86)
-dist: macpkg
+dist: rr diags mesademos
+	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
-
-macpkg: rr diags mesademos
-	if [ -d $(BLDDIR)/$(APPNAME)-$(VERSION).pkg ]; then rm -rf $(BLDDIR)/$(APPNAME)-$(VERSION).pkg; fi
-	if [ -f $(BLDDIR)/$(APPNAME).dmg ]; then rm -f $(BLDDIR)/$(APPNAME).dmg; fi
-	umask 022; TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/usr/bin; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-	mkdir -p $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
-	chmod 1775 $$TMPDIR/pkg/Package_Root/Library; \
-	chmod 775 $$TMPDIR/pkg/Package_Root/Library/Documentation; \
-	mkdir -p "$$TMPDIR/pkg/Package_Root/Applications/${APPNAME}"; \
-	chmod 775 $$TMPDIR/pkg/Package_Root/Applications; \
-	mkdir -p $$TMPDIR/pkg/Resources; \
-	cat Description.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__APPNAME}/$(APPNAME)/g > $$TMPDIR/pkg/Description.plist; \
-	cat Info.plist.tmpl | sed s/{__VERSION}/$(VERSION)/g	| sed s/{__BUILD}/$(BUILD)/g > $$TMPDIR/pkg/Info.plist; \
-	install -m 755 $(EDIR)/vglclient $$TMPDIR/pkg/Package_Root/usr/bin; \
-	install -m 755 $(EDIR)/vglconnect $$TMPDIR/pkg/Package_Root/usr/bin; \
-	install -m 755 $(EDIR)/tcbench $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	install -m 755 $(EDIR)/nettest $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	install -m 755 $(EDIR)/glxinfo $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin; \
-	ln -fs /usr/bin/vglclient $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglclient; \
-	ln -fs /usr/bin/vglconnect $$TMPDIR/pkg/Package_Root/opt/VirtualGL/bin/vglconnect; \
-	install -m 755 /usr/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/opt/VirtualGL/lib; \
-	install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $$TMPDIR/pkg/Package_Root/usr/bin/vglclient; \
-	install -m 644 fltk/COPYING $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-FLTK.txt; \
-	install -m 644 putty/LICENCE $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-PuTTY.txt; \
-	install -m 644 x11windows/xauth.license $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION)/LICENSE-xauth.txt; \
-	install -m 644 LGPL.txt LICENSE.txt LICENSE-OpenSSL.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css $$TMPDIR/pkg/Package_Root/Library/Documentation/$(APPNAME)-$(VERSION); \
-	install -m 644 ReadMe-MacApp.txt "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/Read Me.txt"; \
-	sudo ln -fs /Library/Documentation/$(APPNAME)-$(VERSION)/index.html "$$TMPDIR/pkg/Package_Root/Applications/$(APPNAME)/User's Guide.html"; \
-	sudo chown -R root:admin $$TMPDIR/pkg/Package_Root; \
-	sudo chown root:0 $$TMPDIR/pkg/Package_Root/usr; \
-	sudo chown root:0 $$TMPDIR/pkg/Package_Root/usr/bin; \
-	cp License.rtf Welcome.rtf ReadMe.rtf $$TMPDIR/pkg/Resources/; \
-	$(PACKAGEMAKER) -build -v -p $$TMPDIR/$(APPNAME)-$(VERSION).pkg \
-	  -f $$TMPDIR/pkg/Package_Root -r $$TMPDIR/pkg/Resources \
-	  -i $$TMPDIR/pkg/Info.plist -d $$TMPDIR/pkg/Description.plist; \
-	hdiutil create -fs HFS+ -volname $(APPNAME)-$(VERSION) \
-	  -srcfolder $$TMPDIR/$(APPNAME)-$(VERSION).pkg \
-	  $$TMPDIR/$(APPNAME).dmg; \
-	cp $$TMPDIR/$(APPNAME).dmg $(BLDDIR); \
-	sudo rm -rf $$TMPDIR
 
 .PHONY: tarball
 tarball: rr diags mesademos
