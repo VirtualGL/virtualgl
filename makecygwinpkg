@@ -34,7 +34,7 @@ if [ "$JPEGLIB" = "medialib" ]; then
 fi
 
 umask 022
-TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
+TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
 __PWD=`pwd`
 mkdir -p $TMPDIR/pkg/usr/bin || doexit -1
 mkdir -p $TMPDIR/pkg/opt/VirtualGL/bin || doexit -1
