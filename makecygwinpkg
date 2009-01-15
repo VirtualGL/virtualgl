@@ -1,8 +1,18 @@
 #!/bin/sh
 
+TMPDIR=
+
+doexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+	exit $1
+}
+
 usage()
 {
-	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <lib dir> <bin dir> <Open mediaLib lib dir>"
+	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <bin dir> <Open mediaLib lib dir>"
 	exit 1
 }
 
@@ -23,37 +33,35 @@ if [ "$JPEGLIB" = "medialib" ]; then
 	OMLDIR=$7
 fi
 
-PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
-
 umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
-__PWD=`pwd`; \
-mkdir -p $TMPDIR/pkg/usr/bin || exit -1
-mkdir -p $TMPDIR/pkg/opt/VirtualGL/bin || exit -1
-mkdir -p $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION || exit -1
-install -m 755 $EDIR/vglclient.exe $TMPDIR/pkg/usr/bin/ || exit -1
-install -m 755 $EDIR/vglconnect $TMPDIR/pkg/usr/bin/ || exit -1
-ln -fs /usr/bin/vglclient.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-ln -fs /usr/bin/vglconnect $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-install -m 755 $EDIR/tcbench.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-install -m 755 $EDIR/nettest.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-install -m 755 $EDIR/glxinfo.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-install -m 755 $EDIR/glxspheres.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || exit -1
-install -m 644 LGPL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 fltk/COPYING $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt || exit -1
-install -m 644 putty/LICENCE $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt || exit -1
-install -m 644 x11windows/xauth.license $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt || exit -1
-install -m 644 LICENSE.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 ChangeLog.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 doc/index.html $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 doc/*.gif $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 doc/*.png $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
-install -m 644 doc/*.css $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || exit -1
+__PWD=`pwd`
+mkdir -p $TMPDIR/pkg/usr/bin || doexit -1
+mkdir -p $TMPDIR/pkg/opt/VirtualGL/bin || doexit -1
+mkdir -p $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION || doexit -1
+install -m 755 $EDIR/vglclient.exe $TMPDIR/pkg/usr/bin/ || doexit -1
+install -m 755 $EDIR/vglconnect $TMPDIR/pkg/usr/bin/ || doexit -1
+ln -fs /usr/bin/vglclient.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+ln -fs /usr/bin/vglconnect $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/tcbench.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/nettest.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/glxinfo.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/glxspheres.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
+install -m 644 LGPL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 fltk/COPYING $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt || doexit -1
+install -m 644 putty/LICENCE $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt || doexit -1
+install -m 644 x11windows/xauth.license $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt || doexit -1
+install -m 644 LICENSE.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 ChangeLog.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/index.html $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.gif $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.png $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+install -m 644 doc/*.css $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 if [ "$JPEGLIB" = "medialib" ]; then
-	install -m 644 $OMLDIR/openmliblite.dll $TMPDIR/pkg/usr/bin/ || exit -1
+	install -m 644 $OMLDIR/openmliblite.dll $TMPDIR/pkg/usr/bin/ || doexit -1
 fi
 cd $TMPDIR/pkg
-tar cfj ../$APPNAME-$VERSION-$BUILD.tar.bz2 * || exit -1
+tar cfj ../$APPNAME-$VERSION-$BUILD.tar.bz2 * || doexit -1
 cd $__PWD
-mv $TMPDIR/*.tar.bz2 $BLDDIR || exit -1
-rm -rf $TMPDIR
+mv $TMPDIR/*.tar.bz2 $BLDDIR || doexit -1
+doexit 0
