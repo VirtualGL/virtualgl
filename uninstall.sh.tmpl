@@ -45,7 +45,7 @@ rmdir /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
 rmdir /Applications/VirtualGL 2>&1 || RETCODE=-1
 
 echo Removing package receipt $RCPT ...
-rm -r $RCPT 2>&1 || error "Could not remove package receipt"
+rm -r $RCPT 2>&1 || RETCODE=-1
 
 for RCPT in /Library/Receipts/$PKGNAME-*.pkg; do
 	if [ -d $RCPT ]; then
