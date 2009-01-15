@@ -84,6 +84,7 @@ And while we're flattered, we're not sure that we're necessarily deserving of
 that accolade, so if you are in a security critical environment, apply the
 appropriate level of paranoia here.
 
+{anchor: setuid_linux}
 To force VirtualGL to be preloaded into setuid/setgid executables on Linux,
 make ''librrfaker.so'' a setuid executable.  To do this, run the following
 command as root:
