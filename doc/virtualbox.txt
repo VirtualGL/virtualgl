@@ -48,6 +48,3 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		used with gigabit Ethernet (or faster.)  For 100 Megabit and slower
 		networks, using TurboVNC is recommended when remotely displaying VirtualBox
 		using VirtualGL.
-
-	* The VirtualGL Configuration Dialog does not currently work when running
-		VirtualBox.
