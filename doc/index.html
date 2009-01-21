@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-01-15T20:26:22">
+<meta name="date" content="2009-01-21T17:11:02">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3722,8 +3722,10 @@ solution provides a means of displaying Windows 3D applications remotely.</p>
         the mix.
     </li>
     <li class="Ordered-1 Ordered">
-        Make <code>librrfaker.so</code> a setuid executable, as described in 
-        Section <a href="#setuid_linux" class="ref">12</a>.
+        Follow the procedure described in Section 
+        <a href="#setuid_linux" class="ref">12</a> to make 
+        <code>librrfaker.so</code> a setuid executable (Linux) or to add the 
+        faker directory to the list of secure paths (Solaris).
     </li>
     <li class="Ordered-1 Ordered">
         <code>vglrun&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
@@ -3738,7 +3740,8 @@ solution provides a means of displaying Windows 3D applications remotely.</p>
         VirtualBox 2.1.0 also works with prior versions of VirtualGL (2.0 and 
         later), but it is necessary to add an argument of <code>-dl</code> to 
         <code>vglrun</code> when using VirtualBox with these versions of 
-        VirtualGL.
+        VirtualGL.  It is also necessary to perform step 3 above on 
+        <code>libdlfaker.so</code> as well as <code>librrfaker.so</code>.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         You might want to temporarily enable profiling (add an argument of 
