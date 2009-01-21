@@ -75,11 +75,9 @@ install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
 install -m 755 %{_bindir32}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
 install -m 755 %{_bindir32}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
-install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
 install -m 755 %{_libdir32}/libgefaker.so $RPM_BUILD_ROOT/usr/lib/libgefaker.so
 %ifarch x86_64
 install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
-install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
 install -m 755 %{_libdir}/libgefaker.so $RPM_BUILD_ROOT/usr/lib64/libgefaker.so
 install -m 755 %{_bindir}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
 install -m 755 %{_bindir}/vglconfig64 $RPM_BUILD_ROOT/usr/bin/vglconfig64
@@ -155,12 +153,10 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/doc
 
 /usr/lib/librrfaker.so
-/usr/lib/libdlfaker.so
 /usr/lib/libgefaker.so
 %ifarch x86_64
 /usr/bin/vglconfig64
 /usr/lib64/librrfaker.so
-/usr/lib64/libdlfaker.so
 /usr/lib64/libgefaker.so
 /opt/%{name}/bin/glxspheres64
 /opt/%{name}/bin/vglconfig64

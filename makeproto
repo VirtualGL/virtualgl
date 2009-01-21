@@ -39,12 +39,10 @@ echo s none SUNWvgl/fakelib/64=$LIB64
 fi
 echo d none SUNWvgl/lib 0755 root bin
 echo f none SUNWvgl/lib/librrfaker.so 0755 root bin
-echo f none SUNWvgl/lib/libdlfaker.so 0755 root bin
 echo f none SUNWvgl/lib/libgefaker.so 0755 root bin
 if [ "$_subplatform" = "64" ]; then
 echo d none SUNWvgl/lib/$LIB64 0755 root bin
 echo f none SUNWvgl/lib/$LIB64/librrfaker.so 0755 root bin
-echo f none SUNWvgl/lib/$LIB64/libdlfaker.so 0755 root bin
 echo f none SUNWvgl/lib/$LIB64/libgefaker.so 0755 root bin
 echo s none SUNWvgl/lib/64=$LIB64
 fi
