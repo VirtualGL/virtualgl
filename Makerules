@@ -202,3 +202,5 @@ $(LDIR)/%.lib: $(ODIR)/%.obj
 # This assures that the "clean" command runs even if there is a file called
 # "clean" in the current directory
 .PHONY : clean
+
+include $(TOPDIR)/config
