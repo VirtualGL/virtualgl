@@ -69,7 +69,11 @@ mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 %endif
 
+%ifarch x86_64
 install -m 755 %{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
+%else
+install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
+%endif
 install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
 install -m 755 %{_bindir32}/vglconnect $RPM_BUILD_ROOT/usr/bin/vglconnect
 install -m 755 %{_bindir32}/vgllogin $RPM_BUILD_ROOT/usr/bin/vgllogin
