@@ -12,6 +12,10 @@ invoking 'vglrun -dl'.
 [3]
 Developed a proper uninstaller app for the Mac OS X VirtualGL package.
 -------------------------------------------------------------------------------
+[4]
+Modified MAXINST variable in SUNWvgl Solaris package to prevent multiple
+instances of this package from being installed simultaneously.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
