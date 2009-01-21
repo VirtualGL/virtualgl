@@ -64,7 +64,7 @@ if [ "$DEBARCH" = "amd64" ]; then
 	mkdir -p $TMPDIR/opt/$APPNAME/fakelib/64 || doexit -1
 	ln -fs /opt/$APPNAME/fakelib/64 $TMPDIR/opt/$APPNAME/lib64 || doexit -1
 fi
-install -m 755 $EDIR32/vglclient $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR/vglclient $TMPDIR/usr/bin/ || doexit -1
 install -m 755 $EDIR32/vglconfig $TMPDIR/usr/bin/ || doexit -1
 install -m 755 $EDIR32/vglconnect $TMPDIR/usr/bin/ || doexit -1
 install -m 755 $EDIR32/vgllogin $TMPDIR/usr/bin/ || doexit -1
@@ -77,14 +77,12 @@ install -m 755 $EDIR32/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/ || doexit -1
-install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/ || doexit -1
 install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/ || doexit -1
 if [ "$JPEGLIB" = "medialib" ]; then
 	install -m 755 $OMLDIR/libopenmliblite.so $TMPDIR/usr/lib/ || doexit -1
 fi
 if [ "$DEBARCH" = "amd64" ]; then
 	install -m 755 $LDIR32/librrfaker.so $TMPDIR/usr/lib32/ || doexit -1
-	install -m 755 $LDIR32/libdlfaker.so $TMPDIR/usr/lib32/ || doexit -1
 	install -m 755 $LDIR32/libgefaker.so $TMPDIR/usr/lib32/ || doexit -1
 	install -m 755 $EDIR/glxspheres $TMPDIR/opt/$APPNAME/bin/glxspheres64 || doexit -1
 	install -m 755 $EDIR/vglconfig64 $TMPDIR/usr/bin/ || doexit -1
