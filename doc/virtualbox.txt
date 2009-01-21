@@ -19,8 +19,9 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		3D acceleration on the virtual machine.  Verify that 3D acceleration works
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
-	#. Make ''librrfaker.so'' a setuid executable, as described in
-		{ref prefix="Section ": setuid_linux}.
+	#. Follow the procedure described in {ref prefix="Section ": setuid_linux} to
+		make ''librrfaker.so'' a setuid executable (Linux) or to add the faker
+		directory to the list of secure paths (Solaris).
 
 	#. ''vglrun VirtualBox -startvm ''__''{VM name or UUID}''__
 
@@ -29,7 +30,9 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 
 	* VirtualBox 2.1.0 also works with prior versions of VirtualGL (2.0 and
 		later), but it is necessary to add an argument of ''-dl'' to ''vglrun''
-		when using VirtualBox with these versions of VirtualGL.
+		when using VirtualBox with these versions of VirtualGL.  It is also
+		necessary to perform step 3 above on ''libdlfaker.so'' as well as
+		''librrfaker.so''.
 
 	* You might want to temporarily enable profiling (add an argument of ''+pr''
 		to ''vglrun'' above) in order to verify that VirtualGL is loaded and
