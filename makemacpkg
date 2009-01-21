@@ -81,7 +81,9 @@ mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$APPNAME.pkg \
 	-f $TMPDIR/pkg/Package_Root -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist || doexit -1
-osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $APPNAME.app" vgluninstall.applescript || doexit -1
+install -m 644 vgluninstall.applescript $TMPDIR || doexit -1
+sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $APPNAME.app" $TMPDIR/vgluninstall.applescript || doexit -1
+sudo chown -R $USER "$TMPDIR/dmg/Uninstall $APPNAME.app" || doexit -1
 hdiutil create -fs HFS+ -volname $APPNAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" \
 	$TMPDIR/$APPNAME.dmg || doexit -1
