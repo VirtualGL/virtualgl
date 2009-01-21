@@ -103,7 +103,6 @@ install: rr
 	if [ "$(JPEGLIB)" = "medialib" ]; then $(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient; fi
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
 	$(INSTALL) -m 755 $(EDIR)/vglconfig64 $(prefix)/bin/vglconfig64
@@ -132,7 +131,6 @@ install: rr diags mesademos
 	$(INSTALL) -m 755 $(EDIR)/vglconnect $(prefix)/bin/vglconnect
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/lib/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/lib/libgefaker.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
@@ -158,7 +156,6 @@ uninstall:
 	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
 	$(RM) $(prefix)/doc/*
 	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
 	echo Uninstall complete.
@@ -172,7 +169,6 @@ uninstall:
 	$(RM) $(prefix)/bin/vglconnect
 	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
 	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
-	$(RM) $(prefix)/lib/libdlfaker.$(SHEXT)
 	$(RM) $(prefix)/bin/tcbench
 	$(RM) $(prefix)/bin/nettest
 	$(RM) $(prefix)/doc/*
