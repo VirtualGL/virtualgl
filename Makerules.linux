@@ -2,8 +2,9 @@
 # Linux 32-bit and 64-bit
 ########################################
 
-CC = cc
-CXX = c++ -static-libgcc
+CC = $(shell if [ -x /usr/bin/gcc4 ]; then echo gcc4; else echo cc; fi)
+CXX = $(shell if [ -x /usr/bin/g++4 ]; then echo g++4; else echo c++; fi)
+CXX := $(CXX) -static-libgcc
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
@@ -29,7 +30,7 @@ _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LD
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -ggdb
 else
- OPTFLAG = -O2
+ OPTFLAG = -O3
 endif
 
 DEFAULTJPEGLIB = medialib
