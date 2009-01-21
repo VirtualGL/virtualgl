@@ -100,6 +100,7 @@ install: rr
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
+	if [ "$(JPEGLIB)" = "medialib" ]; then $(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient; fi
 	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
 	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
@@ -266,8 +267,8 @@ sunpkg: rr diags mesademos
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g \
 		| sed s/{__PKGARCH}/$(PKGARCH)/g >$(BLDDIR)/pkginfo
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
 	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
