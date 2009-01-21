@@ -149,7 +149,9 @@ $(EDIR)/turbojpeg.dll $(LDIR)/turbojpeg.lib $(LDIR)/turbojpeg.def: $(ODIR)/turbo
 
 ifneq ($(platform), osx)
 ifneq ($(platform), osxx86)
+ifneq ($(platform), cygwin)
 JPEGLINK := $(JPEGLINK) $(MAPFLAG)$(ODIR)/turbojpeg-mapfile.E
+endif
 endif
 endif
 
