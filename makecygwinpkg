@@ -43,7 +43,7 @@ install -m 755 $EDIR/glxinfo.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR/glxspheres.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
 install -m 644 LGPL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 install -m 644 fltk/COPYING $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt || doexit -1
-install -m 644 LICENSE-OpenSSL.txt $$TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 LICENSE-OpenSSL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
 install -m 644 putty/LICENCE $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt || doexit -1
 install -m 644 x11windows/xauth.license $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt || doexit -1
 install -m 644 LICENSE.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
