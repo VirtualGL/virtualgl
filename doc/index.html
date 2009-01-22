@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-01-21T17:11:02">
+<meta name="date" content="2009-01-22T02:24:26">
 <meta name="generator" content="deplate.rb 0.8.4">
-<title>User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5</title>
+<title>User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
@@ -31,7 +31,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5.1</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
@@ -1465,33 +1465,12 @@ pkgrm&nbsp;SUNWtvnc
 
 <h3 id="hd005006003">Mac</h3>
 
-<ul class="Itemize">
-    <li class="Itemize-1 Itemize asterisk">
-        Download and install the latest version of 
-        <span class="remote"><a href="http://www.osxgnu.org/software/pkgdetail.html?project_id=244" class="remote">OSXPM</a></span><a name="idx0070"></a>
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Launch OSXPM
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Click the &ldquo;Delete Package&rdquo; button
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Find 
-        <code>TurboVNC-</code><em><code>{version}</code></em><code>.pkg</code> 
-        in the list of packages and highlight it
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Click &ldquo;Delete Selected&rdquo;
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Enter your password if prompted
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Complain to Apple about the lack of a built-in package uninstaller for 
-        OS X
-    </li>
-</ul>
+<p>Use the &ldquo;Uninstall TurboVNC&rdquo; application provided in the 
+TurboVNC disk image, or issue the following command from the Terminal:</p>
+
+<pre class="verbatim">
+sudo&nbsp;/opt/TurboVNC/bin/uninstall
+</pre>
 
 
 <h3 id="hd005006004">Windows</h3>
@@ -1542,7 +1521,7 @@ to assign VirtualGL jobs to any graphics card in a multi-card system.</p>
 
 <p>If the application server is running 
 <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-OpenGL</a></span><a name="idx0071"></a> 1.5 for Solaris/SPARC, then it 
+OpenGL</a></span><a name="idx0070"></a> 1.5 for Solaris/SPARC, then it 
 is recommended that you configure it to use GLP:</p>
 
 <ol class="Ordered numeric">
@@ -1640,7 +1619,7 @@ when invoking VirtualGL.  See Chapter
 <h2 id="hd006002">6.2&nbsp;Granting Access to the 3D X Server</h2>
 
 <div class="important"><p class="important">
-If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0072"></a>, then you can skip this section.
+If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0071"></a>, then you can skip this section.
 </p></div>
 
 <p>VirtualGL requires access to the application server&rsquo;s 3D graphics 
@@ -1648,7 +1627,7 @@ card so that it can create off-screen pixel buffers (Pbuffers) and
 redirect the 3D rendering from applications into these Pbuffers.  
 Unfortunately, accessing a 3D graphics card on Linux and Solaris/x86 
 systems or on Solaris/SPARC systems without 
-<a href="#GLP_Usage">GLP</a><a name="idx0073"></a> requires going 
+<a href="#GLP_Usage">GLP</a><a name="idx0072"></a> requires going 
 through an X server.  On such systems, the only way to share the 
 application server&rsquo;s 3D graphics card among multiple users is to 
 grant those users access to the 3D X server (the X server attached to 
@@ -2024,17 +2003,17 @@ patches from the Hummingbird support site:</p>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 8.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0074"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0073"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 9.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0075"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0074"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0076"></a>.)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0077"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0075"></a>.)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0076"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -2215,7 +2194,7 @@ vglconnect&nbsp;{user}@{server}
 <p><a name="Direct_X11_Connection"></a></p>
 
 <p>As with the <a href="#X11_Forwarding">previous 
-mode</a><a name="idx0078"></a>, this mode performs optimally on 
+mode</a><a name="idx0077"></a>, this mode performs optimally on 
 local-area networks.  However, it is less secure, since both the X11 
 traffic and the VGL image stream are unencrypted.  This mode is 
 primarily useful in grid environments where you may not know ahead of 
@@ -2233,7 +2212,7 @@ Some newer Linux and Solaris distributions ship with default settings that do no
 <h3 id="hd008002001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0079"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0078"></a>, 
 except that you should pass a <code>-x</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -2247,7 +2226,7 @@ except that you should pass a <code>-x</code> argument to
 <p><a name="SSL_Encryption"></a></p>
 
 <p>This mode encrypts the VGL image stream and, when used in conjunction 
-with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0080"></a>, 
+with <a href="#X11_Forwarding">X11 forwarding</a><a name="idx0079"></a>, 
 provides a completely secure solution. However, enabling SSL encryption 
 can reduce VirtualGL&rsquo;s performance by as much as 20% on high-speed 
 networks such as Ethernet.</p>
@@ -2256,7 +2235,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008003001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0081"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0080"></a>, 
 except that you should pass an argument of <code>+s</code> to 
 <code>vglrun</code> when starting a 3D application using VirtualGL.  You 
 can also set the environment variable <code>VGL_SSL</code> to 
@@ -2281,7 +2260,7 @@ networks such as Ethernet.</p>
 <h3 id="hd008004001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0082"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0081"></a>, 
 except that you should pass a <code>-s</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -2427,7 +2406,7 @@ listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh 
-Tunneling</a><a name="idx0083"></a>.</p>
+Tunneling</a><a name="idx0082"></a>.</p>
 
 <p><br /></p>
 
@@ -2457,9 +2436,9 @@ workloads that VirtualGL generates. Therefore, the VirtualGL Project
 provides an optimized X proxy called &ldquo;TurboVNC&rdquo;, which is 
 based on the 
 <span class="remote"><a href="http://www.realvnc.com/" class="remote">Virtual 
-Network Computing (VNC)</a></span><a name="idx0084"></a> standard (more 
+Network Computing (VNC)</a></span><a name="idx0083"></a> standard (more 
 specifically, on the 
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0085"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0084"></a> 
 variant thereof.)</p>
 
 <p>On the surface, TurboVNC behaves very similarly to its parent project, 
@@ -2735,7 +2714,7 @@ TurboVNC server for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Image Transport to remotely display 3D 
 applications from a VirtualGL server to a TurboVNC server is the same as 
-the <a href="#X11_Forwarding">procedure</a><a name="idx0086"></a> for 
+the <a href="#X11_Forwarding">procedure</a><a name="idx0085"></a> for 
 using the VGL Image Transport to remotely display 3D applications from a 
 VirtualGL server to a remote 2D X server, with the following notable 
 differences:</p>
@@ -3076,7 +3055,7 @@ many of its features.</p>
 
 <p><a name="X11_Proxy_Usage"></a></p>
 
-<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0087"></a> 
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0086"></a> 
 described how to use VirtualGL with TurboVNC, but much of this 
 information is also applicable to other X proxies, such as RealVNC, NX, 
 etc.  Generally, none of these other solutions will provide anywhere 
@@ -3147,7 +3126,7 @@ ssh&nbsp;-X&nbsp;{user}@{server}
 </ol>
 
 <p>Note that this procedure is substantially similar to the 
-<a href="#X11_Forwarding">X11 Forwarding</a><a name="idx0088"></a> 
+<a href="#X11_Forwarding">X11 Forwarding</a><a name="idx0087"></a> 
 procedure used with the VGL Image Transport, except that it invokes 
 <code>ssh</code> directly rather than using the <code>vglconnect</code> 
 wrapper script.  <code>vglconnect</code> launches 
@@ -3761,7 +3740,7 @@ solution provides a means of displaying Windows 3D applications remotely.</p>
         the 2D elements of the virtual machine display will not perform well 
         over a remote X11 connection unless a 
         <a href="#Direct_X11_Connection">direct X11 
-        connection</a><a name="idx0089"></a> (<code>vglconnect&nbsp;-x</code>) 
+        connection</a><a name="idx0088"></a> (<code>vglconnect&nbsp;-x</code>) 
         is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
         networks, using TurboVNC is recommended when remotely displaying 
         VirtualBox using VirtualGL.
@@ -3894,7 +3873,7 @@ VirtualGL will (by default) use quad-buffered stereo rendering if:</p>
 using anaglyphic stereo (see below.)  It is usually necessary to 
 explicitly enable stereo in the graphics driver configuration for both 
 the client and server machines.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0090"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0089"></a> 
 section below lists a way to verify that both client and server have 
 stereo visuals available.</p>
 
@@ -3979,7 +3958,7 @@ overlays at the same time.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0091"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0090"></a> 
 below) to verify whether your client&rsquo;s X display supports overlays 
 and whether they are enabled.  In Exceed 3D, make sure that the 
 &ldquo;Overlay Support&rdquo; option is checked in the &ldquo;Exceed 3D 
@@ -4892,7 +4871,7 @@ method:</p>
         You shouldn&rsquo;t need to muck with this unless something 
         doesn&rsquo;t work.  However, setting this environment variable is 
         necessary when using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0092"></a>.
+        <a href="#Chromium">Chromium</a><a name="idx0091"></a>.
     </dd>
 </dl>
 
@@ -4970,7 +4949,7 @@ method:</p>
         a proper fix for that issue was introduced in VirtualGL 2.1.1, this 
         option isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Image Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0093"></a> option
+        When using the VGL Image Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0092"></a> option
         </p></div>
     </dd>
 </dl>
@@ -5046,7 +5025,7 @@ method:</p>
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        Multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0094"></a> option
+        Multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0093"></a> option
         </p></div>
     </dd>
 </dl>
@@ -5178,7 +5157,7 @@ method:</p>
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0095"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0094"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -5219,7 +5198,7 @@ method:</p>
         setting <code>VGL_READBACK=0</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This feature 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0096"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0095"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -5494,7 +5473,7 @@ method:</p>
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0097"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0096"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -5542,11 +5521,11 @@ method:</p>
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0098"></a> is enabled.)  The VGL Image 
+        comparison</a><a name="idx0097"></a> is enabled.)  The VGL Image 
         Transport	will also divide up the task of compressing these tiles among 
         the available CPUs in a round robin fashion, if multi-threaded 
         compression is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0099"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0098"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em> 
         <ul class="Itemize"><li class="Itemize-0">
