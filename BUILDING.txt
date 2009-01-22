@@ -311,7 +311,9 @@ Cygwin:
    gcc-g++
    make
    openssl-devel
-   xorg-x11-devel
+   libX11-devel
+   libXext-devel
+   libGLU-devel
 
 -- Download and install the TurboJPEG SDK
 
