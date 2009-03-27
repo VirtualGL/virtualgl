@@ -2,5 +2,5 @@
 
 void myTestFunction(void)
 {
-	fprintf(stderr, "Hello from inside libGLvgl.so\n");
+	fprintf(stderr, "Hello from inside libGLdlfaker.so\n");
 }
