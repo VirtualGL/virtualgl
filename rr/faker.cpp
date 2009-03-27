@@ -263,7 +263,7 @@ void *dlopen(const char *filename, int flag)
 	if(sizeof(long)==8) envname="FAKERLIB";
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="librrfaker.so";
-	if(filename && strstr(filename, "libGL"))
+	if(filename && !strncmp(filename, "libGL.", 6))
 	{
 		if(fconfig.verbose)
 			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
@@ -754,6 +754,7 @@ int XFree(void *data)
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
 	XVisualInfo *v=NULL;
+	static bool alreadywarned=false;
 	TRY();
 
 	// Prevent recursion
@@ -793,10 +794,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class,
 		level, stereo, trans, n)) || n<1)
 	{
-		rrout.println("[VGL] ERROR: Cannot obtain a Pbuffer-enabled 24-bit FB config on the VirtualGL");
-		rrout.println("[VGL]    server.  This is most likely because the 3D X Server %s", fconfig.localdpystring?(char *)fconfig.localdpystring:"");
-		rrout.println("[VGL]    is not configured for 24-bit color or does not have accelerated 3D");
-		rrout.println("[VGL]    drivers installed.");
+		if(!alreadywarned)
+		{
+			alreadywarned=true;
+			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a Pbuffer-enabled");
+			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  If the application", fconfig.localdpystring?(char *)fconfig.localdpystring:"");
+			rrout.println("[VGL]    subsequently fails, then make sure that the 3D X server is configured");
+			rrout.println("[VGL]    for 24-bit color and has accelerated 3D drivers installed.");
+		}
 		return NULL;
 	}
 	c=configs[0];
