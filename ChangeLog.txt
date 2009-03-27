@@ -1,4 +1,27 @@
 ===============================================================================
+Significant changes since 2.1.2
+===============================================================================
+[1]
+VirtualGL 2.1.2 printed numerous "Cannot obtain a Pbuffer-enabled 24-bit FB
+config ..." error messages when starting Google Earth.  This has been fixed,
+and the message has been changed to a warning and clarified.  These messages
+occured whenever the application called VirtualGL's interposed version of
+glXChooseVisual() and that function subsequently failed to obtain an
+appropriate visual for performing 3D rendering.  However, this is not
+necessarily an error, because applications will sometimes call
+glXChooseVisual() multiple times until they find a visual with desired
+attributes.
+-------------------------------------------------------------------------------
+[2]
+Changed the matching criteria in VirtualGL's interposed version of dlopen().
+In previous versions of VirtualGL, any calls to dlopen("*libGL*") would be
+replaced with a call to dlopen("librrfaker.so").  This caused problems with
+VisIt, which has a library named "libGLabelPlot.so" that was being interposed
+by mistake.  The matching criteria has been changed to dlopen("libGL\.*").
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 2.1.1
 ===============================================================================
 [1]
