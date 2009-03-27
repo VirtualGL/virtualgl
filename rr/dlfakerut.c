@@ -147,6 +147,32 @@ void loadsymbols2(void)
 	exit(1);
 }
 
+/* Test whether librrfaker's version of dlopen() is discriminating enough.
+   This will fail on VGL 2.1.2 and prior */
+typedef void (*_myTestFunctionType)(void);
+_myTestFunctionType _myTestFunction=NULL;
+
+void namematchtest(void)
+{
+	const char *err=NULL;
+
+	fprintf(stderr, "dlopen() name matching test:\n");
+	gldllhnd=dlopen("libGLdlfakerut.so", RTLD_NOW);
+	err=dlerror();
+	if(err) _throw(err)
+	else if(!gldllhnd) _throw("Could not open libGLdlfakerut")
+
+	lsym(myTestFunction);
+	_myTestFunction();
+	dlclose(gldllhnd);
+	gldllhnd=NULL;
+	return;
+
+	bailout:
+	exit(1);
+}
+
+
 void test(const char *testname)
 {
 	Display *dpy=NULL;  Window win=0, root;
@@ -214,6 +240,9 @@ int main(void)
 	env=getenv("LD_PRELOAD_64");
 	fprintf(stderr, "LD_PRELOAD_64 = %s\n", env? env:"(NULL)");
 	#endif
+
+	fprintf(stderr, "\n");
+	namematchtest();
 
 	loadsymbols1();
 	test("dlopen() test");

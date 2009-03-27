@@ -89,7 +89,8 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayserverut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o \
-        $(ODIR)/dlfakerut.o
+        $(ODIR)/dlfakerut.o \
+        $(LDIR)/libGLdlfakerut.o
 
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/gefaker.o $(ODIR)/vglconfig.o
 
@@ -100,7 +101,8 @@ UNITTESTS = $(EDIR)/rrblitterut \
 ifneq ($(platform), cygwin)
 ifneq ($(platform), osx)
 ifneq ($(platform), osxx86)
-UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut
+UNITTESTS := $(UNITTESTS) $(EDIR)/rrfakerut $(EDIR)/dlfakerut \
+             $(LDIR)/libGLdlfakerut.$(SHEXT)
 endif
 endif
 endif
@@ -181,6 +183,9 @@ $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl
+
+$(LDIR)/libGLdlfakerut.$(SHEXT): $(ODIR)/libGLdlfakerut.o
+	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $<
 
 $(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
