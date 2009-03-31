@@ -96,10 +96,16 @@ void *gldllhnd=NULL;
 	err=dlerror();  if(err) _throw(err)  \
 	else if(!_##s) _throw("Could not load symbol "#s)
 
-void loadsymbols1(void)
+void loadsymbols1(char *prefix)
 {
 	const char *err=NULL;
-	gldllhnd=dlopen("libGL.so", RTLD_NOW);
+	if(prefix)
+	{
+		char temps[256];
+		snprintf(temps, 255, "%s/libGL.so", prefix);
+		gldllhnd=dlopen(temps, RTLD_NOW);
+	}
+	else gldllhnd=dlopen("libGL.so", RTLD_NOW);
 	err=dlerror();
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libGL")
@@ -225,9 +231,15 @@ void test(const char *testname)
 	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
-	char *env;
+	char *env, *prefix=NULL;
+
+	if(argc>2 && !strcasecmp(argv[1], "--prefix"))
+	{
+		prefix=argv[2];
+		fprintf(stderr, "prefix = %s\n", prefix);
+	}
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 	|| putenv((char *)"VGL_SPOIL=0")==-1)
@@ -245,7 +257,7 @@ int main(void)
 	fprintf(stderr, "\n");
 	namematchtest();
 
-	loadsymbols1();
+	loadsymbols1(prefix);
 	test("dlopen() test");
 
 	loadsymbols2();
