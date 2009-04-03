@@ -17,6 +17,25 @@ VGLUSERSONLY=1
 DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
+UNATTENDED=0
+
+usage() {
+	echo
+	echo "USAGE: $0 [flags]"
+	echo
+	echo "Flags (for unattended mode):"
+	echo "+glx	Configure system for VirtualGL using GLX"
+	echo "+glp	Configure system for VirtualGL using GLP"
+	echo "-glx	Unconfigure system for VirtualGL using GLX"
+	echo "-glp	Unconfigure system for VirtualGL using GLP"
+	echo "-s	Restrict 3D X server access to vglusers group [default]" 
+	echo "+s	Open 3D X server access to all users of this machine"
+	echo "-f	Restrict framebuffer device access to vglusers group [default]"
+	echo "+f	Open framebuffer device access to all users of this machine"
+	echo "-t	Disable XTEST extension [default]"
+	echo "+t	Enable XTEST extension"
+	exit $1
+}
 
 uid() {
 	id | cut -f2 -d = | cut -f1 -d \(;
@@ -436,11 +455,13 @@ unconfigglx() {
 
 configglp() {
 	if [ "$UNAME_S" = "SunOS" ]; then
-		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
-		if [ $? = 1 ]; then
-			VGLUSERSONLY=1; FBDEVVGLUSERSONLY=1;
-		else
-			VGLUSERSONLY=0; FBDEVVGLUSERSONLY=0;
+		if [ $UNATTENDED = 0 ]; then
+			ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+			if [ $? = 1 ]; then
+				VGLUSERSONLY=1; FBDEVVGLUSERSONLY=1;
+			else
+				VGLUSERSONLY=0; FBDEVVGLUSERSONLY=0;
+			fi
 		fi
 
 		if [ "$VGLUSERSONLY" = "1" ]; then
@@ -468,14 +489,16 @@ configglp() {
 }
 
 configglx() {
-	ynprompt "Restrict local X server access to vglusers group (recommended)?"
-	if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
+	if [ $UNATTENDED = 0 ]; then
+		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
+		if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
 
-	ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
-	if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
+		ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
+		if [ $? = 1 ]; then FBDEVVGLUSERSONLY=1; else FBDEVVGLUSERSONLY=0; fi
 
-	ynprompt "Disable XTEST extension (recommended)?"
-	if [ $? = 1 ]; then DISABLEXTEST=1; else DISABLEXTEST=0; fi
+		ynprompt "Disable XTEST extension (recommended)?"
+		if [ $? = 1 ]; then DISABLEXTEST=1; else DISABLEXTEST=0; fi
+	fi
 
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Creating vglusers group ...
@@ -675,50 +698,79 @@ configglx() {
 	echo
 }
 
+glpcheck() {
+	GLP=0
+	if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
+		NM=nm
+		if [ -x /usr/ccs/bin/nm ]; then NM=/usr/ccs/bin/nm; fi
+		if [ -x /usr/xpg4/bin/nm ]; then NM=/usr/xpg4/bin/nm; fi
+		if $NM -P /usr/openwin/lib/libGL.so.1 2>&1 | egrep -s glPCreateBuffer; then
+			GLP=1
+		fi
+	fi
+	return $GLP
+}
+
+
+if [ "${#}" != 0 ]; then
+	UNATTENDED=1
+	for argument in ${*}
+		do
+			case $argument in
+				-s) VGLUSERSONLY=1 ;;
+				-f) FBDEVVGLUSERSONLY=1 ;;
+				-t) DISABLEXTEST=1 ;;
+				+s) VGLUSERSONLY=0 ;;
+				+f) FBDEVVGLUSERSONLY=0 ;;
+				+t) DISABLEXTEST=0 ;;
+				+glx) CONFIG_VGL="configglx" ;;
+				-glx) CONFIG_VGL="unconfigglx" ;;
+				+glp) glpcheck || CONFIG_VGL="configglp" ;;
+				-glp) glpcheck || CONFIG_VGL="unconfigdev" ;;
+				*) usage 0
+			esac
+	done
+fi
+
 UNAME_S=`uname -s`
 UNAME_M=`uname -m`
-
-GLP=0
-if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
-	NM=nm
-	if [ -x /usr/ccs/bin/nm ]; then NM=/usr/ccs/bin/nm; fi
-	if [ -x /usr/xpg4/bin/nm ]; then NM=/usr/xpg4/bin/nm; fi
-	if $NM -P /usr/openwin/lib/libGL.so.1 2>&1 | egrep -s glPCreateBuffer; then
-		GLP=1
-	fi
-fi
 
 if [ ! `uid` -eq 0 ]; then
 	echo This script can only be executed by the root user.
 	exit
 fi
 
-while [ 1 ]
-do
-	echo
-	echo "1) Configure server for use with VirtualGL in GLX mode"
-	echo "2) Unconfigure server for use with VirtualGL in GLX mode"
-	if [ "$GLP" = "1" ]; then
-		echo "3) Configure server for use with VirtualGL in GLP mode"
-		echo "4) Unconfigure server for use with VirtualGL in GLP mode"
-	fi
-	echo "X) Exit"
-	echo
-	echo Choose:
-	read _CHOICE
+if [ $UNATTENDED = 0 ]; then
+	glpcheck
+	while [ 1 ]
+	do
+		echo
+		echo "1) Configure server for use with VirtualGL in GLX mode"
+		echo "2) Unconfigure server for use with VirtualGL in GLX mode"
+		if [ "$GLP" = "1" ]; then
+			echo "3) Configure server for use with VirtualGL in GLP mode"
+			echo "4) Unconfigure server for use with VirtualGL in GLP mode"
+		fi
+		echo "X) Exit"
+		echo
+		echo Choose:
+		read _CHOICE
 
-	case $_CHOICE in
-	1) configglx
-		;;
-	2) unconfigglx
-		;;
-	3) if [ "$GLP" = "1" ]; then configglp; fi
-		;;
-	4) if [ "$GLP" = "1" ]; then unconfigdev; fi
-		;;
-	X) break
-		;;
-	x) break
-		;;
-	    esac
-done
+		case $_CHOICE in
+		1) configglx
+			;;
+		2) unconfigglx
+			;;
+		3) if [ "$GLP" = "1" ]; then configglp; fi
+			;;
+		4) if [ "$GLP" = "1" ]; then unconfigdev; fi
+			;;
+		X) break
+			;;
+		x) break
+			;;
+			esac
+	done
+else
+	$CONFIG_VGL
+fi
