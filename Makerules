@@ -41,6 +41,8 @@ endif
 
 _DUMMY0 := $(shell if [ ! -f $(TOPDIR)/config ]; then touch $(TOPDIR)/config; fi)
 include $(TOPDIR)/config
+_DUMMY1 := $(shell if [ ! -f $(TOPDIR)/config.$(platform)$(subplatform) ]; then touch $(TOPDIR)/config.$(platform)$(subplatform); fi)
+include $(TOPDIR)/config.$(platform)$(subplatform)
 
 ifeq ($(M32), yes)
  subplatform :=
@@ -172,3 +174,6 @@ $(LDIR)/%.lib: $(ODIR)/%.obj
 # This assures that the "clean" command runs even if there is a file called
 # "clean" in the current directory
 .PHONY : clean
+
+include $(TOPDIR)/config
+include $(TOPDIR)/config.$(platform)$(subplatform)
