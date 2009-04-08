@@ -20,6 +20,15 @@ VisIt, which has a library named "libGLabelPlot.so" that was being interposed
 by mistake.  The matching criteria has been changed such that dlopen() only
 overrides calls to dlopen("libGL\.*") or dlopen("*/libGL\.*").
 -------------------------------------------------------------------------------
+[3]
+vglserver_config now works properly with DRI-compatible graphics drivers
+(including ATI.)
+-------------------------------------------------------------------------------
+[4]
+VirtualGL's interposed version of dlopen() will now modify calls to
+dlopen("libdl*") as well as dlopen("libGL*").  This is to work around an
+interaction issue with v180.xx of the NVidia accelerated 3D drivers and WINE.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
