@@ -265,7 +265,9 @@ void *dlopen(const char *filename, int flag)
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="librrfaker.so";
 	if(filename && (!strncmp(filename, "libGL.", 6)
-		|| strstr(filename, "/libGL.")))
+		|| strstr(filename, "/libGL.")
+		|| !strncmp(filename, "libdl.", 6)
+		|| strstr(filename, "/libdl.")))
 	{
 		if(fconfig.verbose)
 			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
