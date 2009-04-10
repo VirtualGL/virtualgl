@@ -100,6 +100,6 @@ install -m 644 doc/*.png $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 install -m 644 doc/*.gif $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 install -m 644 doc/*.css $TMPDIR/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 
-sudo chown -R root:root $TMPDIR/* || doexit -1
+sudo chown -Rh root:root $TMPDIR/* || doexit -1
 dpkg -b $TMPDIR $PKGNAME || doexit -1
 doexit 0
