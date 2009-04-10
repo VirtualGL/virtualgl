@@ -41,12 +41,13 @@ endif
 
 _DUMMY0 := $(shell if [ ! -f $(TOPDIR)/config ]; then touch $(TOPDIR)/config; fi)
 include $(TOPDIR)/config
-_DUMMY1 := $(shell if [ ! -f $(TOPDIR)/config.$(platform)$(subplatform) ]; then touch $(TOPDIR)/config.$(platform)$(subplatform); fi)
-include $(TOPDIR)/config.$(platform)$(subplatform)
 
 ifeq ($(M32), yes)
  subplatform :=
 endif
+
+_DUMMY1 := $(shell if [ ! -f $(TOPDIR)/config.$(platform)$(subplatform) ]; then touch $(TOPDIR)/config.$(platform)$(subplatform); fi)
+include $(TOPDIR)/config.$(platform)$(subplatform)
 
 # Macros which are common to all Unix platforms
 VERSION := 2.1.3
