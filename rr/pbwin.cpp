@@ -228,7 +228,11 @@ void pbwin::resize(int w, int h)
 	rrcs::safelock l(_mutex);
 	if(w==0 && _pb) w=_pb->width();
 	if(h==0 && _pb) h=_pb->height();
-	if(_pb && _pb->width()==w && _pb->height()==h) return;
+	if(_pb && _pb->width()==w && _pb->height()==h)
+	{
+		_neww=_newh=-1;
+		return;
+	}
 	_neww=w;  _newh=h;
 }
 
