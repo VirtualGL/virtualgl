@@ -29,6 +29,10 @@ VirtualGL's interposed version of dlopen() will now modify calls to
 dlopen("libdl*") as well as dlopen("libGL*").  This is to work around an
 interaction issue with v180.xx of the NVidia accelerated 3D drivers and WINE.
 -------------------------------------------------------------------------------
+[5]
+Fixed interaction issue with QT4 in which VirtualGL would not properly handle
+window resize events under certain circumstances.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
