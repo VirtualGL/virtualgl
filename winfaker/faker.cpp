@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics
  * Copyright (C)2005-2008 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -24,7 +25,6 @@
 #include "fakerconfig.h"
 #define __FAKERHASH_STATICDEF__
 #include "faker-winhash.h"
-#include "faker-pfhash.h"
 #include "detours.h"
 
 
@@ -66,7 +66,6 @@ static inline int isdead(void)
 static void __vgl_cleanup(void)
 {
 	if(winhash::isalloc()) winh.killhash();
-	if(pfhash::isalloc()) pfh.killhash();
 }
 
 
@@ -164,17 +163,15 @@ PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
 PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB=NULL;
 
 
-static void __vgl_loadsymbols(HDC hdc)
+static void __vgl_loadsymbols(void)
 {
-	HGLRC ctx=0;
-	HMODULE hmod=0;
-	int state=0;
+	HGLRC ctx=0;  HDC hdc=0;
 
 	try {
 
 	if(!wglGetCurrentContext() || !wglGetCurrentDC())
 	{
-		state=SaveDC(hdc);
+		tryw32(hdc=GetDC(NULL));
 		PIXELFORMATDESCRIPTOR pfd =
 		{
 			sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -227,18 +224,18 @@ static void __vgl_loadsymbols(HDC hdc)
 	}
 
 	wglDeleteContext(ctx);
-	if(state!=0) RestoreDC(hdc, state);
+	if(hdc) ReleaseDC(NULL, hdc);
 
 	}	catch(...)
 	{
 		if(ctx) wglDeleteContext(ctx);
-		if(state!=0) RestoreDC(hdc, state);
+		if(hdc) ReleaseDC(NULL, hdc);
 		throw;
 	}
 }
 
 
-static void __vgl_fakerinit(HDC hdc)
+static void __vgl_fakerinit(void)
 {
 	static int init=0;
 
@@ -257,19 +254,19 @@ static void __vgl_fakerinit(HDC hdc)
 	}
 	#endif
 
-	__vgl_loadsymbols(hdc);
+	__vgl_loadsymbols();
 }
 
 
 int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 	CONST PIXELFORMATDESCRIPTOR *ppfd)
 {
-	int pixelformat=0, pbpf=-1;
+	int pixelformat=0;
 	int attribs[256], i=0;
 
 	TRY();
 
-	__vgl_fakerinit(hdc);
+	__vgl_fakerinit();
 
 		opentrace(ChoosePixelFormat);  prargx(hdc);  starttrace();
 
@@ -328,7 +325,7 @@ int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 		}
 		if(ppfd->cDepthBits!=0 && !(ppfd->dwFlags&PFD_DEPTH_DONTCARE))
 		{
-			attribs[i++]=WGL_DEPTH_BITS_ARB;  attribs[i++]=ppfd->cDepthBits;
+			attribs[i++]=WGL_DEPTH_BITS_ARB;  attribs[i++]=1;
 		}
 		attribs[i++]=WGL_DRAW_TO_PBUFFER_ARB;  attribs[i++]=1;
 		if(!(ppfd->dwFlags&PFD_DOUBLEBUFFER_DONTCARE))
@@ -349,10 +346,14 @@ int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 		{
 			attribs[i++]=WGL_GREEN_SHIFT_ARB;  attribs[i++]=ppfd->cGreenShift;
 		}
-		attribs[i++]=WGL_NEED_PALETTE_ARB;
-		attribs[i++]=(ppfd->dwFlags&PFD_NEED_PALETTE)? 1:0;
-		attribs[i++]=WGL_NEED_SYSTEM_PALETTE_ARB;  
-		attribs[i++]=(ppfd->dwFlags&PFD_NEED_SYSTEM_PALETTE)? 1:0;
+		if(ppfd->dwFlags&PFD_NEED_PALETTE)
+		{
+			attribs[i++]=WGL_NEED_PALETTE_ARB;  attribs[i++]=1;
+		}
+		if(ppfd->dwFlags&PFD_NEED_SYSTEM_PALETTE)
+		{
+			attribs[i++]=WGL_NEED_SYSTEM_PALETTE_ARB;  attribs[i++]=1;
+		}
 		attribs[i++]=WGL_PIXEL_TYPE_ARB;
 		attribs[i++]=(ppfd->iPixelType==PFD_TYPE_COLORINDEX)?
 			WGL_TYPE_COLORINDEX_ARB:WGL_TYPE_RGBA_ARB;
@@ -379,26 +380,25 @@ int __declspec(dllexport) WINAPI fake_ChoosePixelFormat(HDC hdc,
 		}
 		attribs[i++]=WGL_SUPPORT_OPENGL_ARB;
 		attribs[i++]=(ppfd->dwFlags&PFD_SUPPORT_OPENGL)? 1:0;
-		attribs[i++]=WGL_SUPPORT_GDI_ARB;
-		attribs[i++]=(ppfd->dwFlags&PFD_SUPPORT_GDI)? 1:0;
-		attribs[i++]=WGL_DRAW_TO_BITMAP_ARB;
-		attribs[i++]=(ppfd->dwFlags&PFD_DRAW_TO_BITMAP)? 1:0;
-
+		if(ppfd->dwFlags&PFD_SUPPORT_GDI)
+		{
+			attribs[i++]=WGL_SUPPORT_GDI_ARB;  attribs[i++]=1;
+		}
+		if(ppfd->dwFlags&PFD_DRAW_TO_BITMAP)
+		{
+			attribs[i++]=WGL_DRAW_TO_BITMAP_ARB;  attribs[i++]=1;
+		}
 		attribs[i++]=0;
 
 		unsigned int count=0;
-		if(!wglChoosePixelFormatARB(hdc, attribs, NULL, 1, &pbpf,
+		if(!wglChoosePixelFormatARB(hdc, attribs, NULL, 1, &pixelformat,
 			&count))
-			_throww32m("Could not create Pbuffer pixel format");
-		if(pbpf<0 || count<1)
-			_throw("Could not create Pbuffer pixel format");
-		pixelformat=__ChoosePixelFormat(hdc, ppfd);
-		if(!pixelformat) return 0;
-		pfh.add(hdc, pixelformat, pbpf);
+			return 0;
+		if(pixelformat<1 || count<1) return 0;
 	}
 	else pixelformat=__ChoosePixelFormat(hdc, ppfd);
 
-		stoptrace();  prargal13(attribs);  prargi(pixelformat);  prargi(pbpf);
+		stoptrace();  prargal13(attribs);  prargi(pixelformat);
 		closetrace();
 
 	CATCH();
@@ -414,7 +414,7 @@ HGLRC __declspec(dllexport) WINAPI fake_wglCreateContext(HDC hdc)
 
 	TRY();
 
-	__vgl_fakerinit(hdc);
+	__vgl_fakerinit();
 
 		opentrace(wglCreateContext);  prargx(hdc);  starttrace();
 
@@ -423,8 +423,8 @@ HGLRC __declspec(dllexport) WINAPI fake_wglCreateContext(HDC hdc)
 	{
 		if(!winh.findpb(hwnd, NULL, pbw))
 		{
-			int pf=pfh.find(hdc, GetPixelFormat(hdc));
-			if(!pf) _throw("Current pixel format was not obtained using ChoosePixelFormat().  I'm stymied.");
+			int pf=GetPixelFormat(hdc);
+			if(pf<1) _throw("Current pixel format is invalid");
 			pbw=new pbwin(hwnd, hdc, pf);
 			errifnot(pbw);
 			winh.add(hwnd, NULL, pbw);
@@ -449,7 +449,7 @@ BOOL __declspec(dllexport) WINAPI fake_wglMakeCurrent(HDC hdc, HGLRC ctx)
 
 	TRY();
 
-	__vgl_fakerinit(hdc);
+	__vgl_fakerinit();
 
 		opentrace(wglMakeCurrent);  prargx(hdc);  prargx(ctx);  starttrace();
 
@@ -491,10 +491,7 @@ BOOL __declspec(dllexport) WINAPI fake_DestroyWindow(HWND hwnd)
 
 	TRY();
 
-	HDC dc=GetDC(hwnd);
-	errifnot(dc);
-	__vgl_fakerinit(dc);
-	DeleteDC(dc);
+	__vgl_fakerinit();
 
 		opentrace(DestroyWindow);  prargx(hwnd);  starttrace();
 
@@ -515,7 +512,7 @@ BOOL __declspec(dllexport) WINAPI fake_SwapBuffers(HDC hdc)
 
 	TRY();
 
-	__vgl_fakerinit(hdc);
+	__vgl_fakerinit();
 
 		opentrace(SwapBuffers);  prargx(hdc);  starttrace();
 
@@ -563,7 +560,7 @@ void __declspec(dllexport) WINAPI fake_glFlush(void)
 {
 	TRY();
 
-	__vgl_fakerinit(0);
+	__vgl_fakerinit();
 
 		if(fconfig.trace) rrout.print("[VGL] glFlush()\n");
 
@@ -577,7 +574,7 @@ void __declspec(dllexport) WINAPI fake_glFinish(void)
 {
 	TRY();
 
-	__vgl_fakerinit(0);
+	__vgl_fakerinit();
 
 		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
 
@@ -620,7 +617,7 @@ void __declspec(dllexport) WINAPI fake_glPopAttrib(void)
 {
 	TRY();
 
-	__vgl_fakerinit(0);
+	__vgl_fakerinit();
 
 		opentrace(glPopAttrib);  starttrace();
 
@@ -650,7 +647,7 @@ void __declspec(dllexport) WINAPI fake_glViewport(GLint x, GLint y,
 {
 	TRY();
 
-	__vgl_fakerinit(0);
+	__vgl_fakerinit();
 
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();
