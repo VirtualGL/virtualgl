@@ -2,7 +2,9 @@ include ../Makerules
 
 TARGETS = $(EDIR)/wglreadtest.exe \
           $(EDIR)/wglspheres.exe \
-          $(EDIR)/faker.dll
+          $(EDIR)/wglinfo.exe \
+          $(EDIR)/faker.dll \
+          $(EDIR)/vglrun.bat
 
 FOBJS = $(ODIR)/faker.obj \
         $(ODIR)/pbwin.obj \
@@ -26,12 +28,18 @@ $(OBJS): $(HDRS)
 $(EDIR)/wglspheres.exe: $(ODIR)/wglspheres.obj
 	$(LINK) $(LDFLAGS) $< -out:$@ opengl32.lib glu32.lib user32.lib gdi32.lib
 
+$(EDIR)/wglinfo.exe: $(ODIR)/wglinfo.obj
+	$(LINK) $(LDFLAGS) $< -out:$@ opengl32.lib glu32.lib user32.lib gdi32.lib
+
 $(EDIR)/wglreadtest.exe: $(ODIR)/wglreadtest.obj
 	$(LINK) $(LDFLAGS) $< -out:$@ opengl32.lib glu32.lib user32.lib gdi32.lib
 
 $(EDIR)/faker.dll: $(FOBJS)
 	$(LINK) $(LDFLAGS) -dll $(FOBJS) -out:$@ detours.lib detoured.lib \
 		opengl32.lib rrutil.lib $(FBXLIB)
+
+$(EDIR)/vglrun.bat: vglrun.bat
+	cp $< $@
 
 ifneq ($(DISTRO),)
 WBLDDIR = $(TOPDIR)\\$(platform)$(subplatform)\\$(DISTRO)
