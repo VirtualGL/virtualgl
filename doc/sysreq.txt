@@ -205,7 +205,7 @@ processors.
 
 || || Server || Client ||
 | Linux \
-	| 3D graphics card that supports stereo (example: nVidia Quadro) \
+	| 3D graphics card that supports stereo (example: nVidia Quadro, ATI FirePro) \
 		and is configured to export stereo visuals \
 	| < \
 	|
@@ -238,7 +238,7 @@ processors.
 	| N/A \
 	| {list type=ul: \
 			{item:3D graphics card that supports stereo (examples: nVidia \
-				Quadro, 3D Labs Wildcat Realizm) and is configured to export stereo \
+				Quadro, 3D Labs Wildcat Realizm, ATI FirePro) and is configured to export stereo \
 				pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 3D v8 or newer}} \
@@ -250,7 +250,7 @@ processors.
 || || Client ||
 | Linux \
 	| 3D graphics card that supports transparent overlays (example: \
-		nVidia Quadro) and is configured to export overlay visuals \
+		nVidia Quadro, ATI FirePro) and is configured to export overlay visuals \
 	|
 | Solaris/x86 \
 	| ^ \
@@ -269,7 +269,7 @@ processors.
 | Windows \
 	| {list type=ul: \
 			{item:3D graphics card that supports transparent overlays (examples: \
-				nVidia Quadro, 3D Labs Wildcat Realizm) and is configured to \
+				nVidia Quadro, 3D Labs Wildcat Realizm, ATI FirePro) and is configured to \
 				export overlay pixel formats} \
 			{item:[[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 3D v8 or newer}} \
