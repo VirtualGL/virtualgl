@@ -253,37 +253,19 @@ void __vgl_fakerinit(void)
 
 extern "C" {
 
-void *dlopen(const char *filename, int flag)
+void *_vgl_dlopen(const char *file, int mode)
 {
-	void *retval=NULL;
-	__vgl_fakerinit();
-
-		opentrace("dlopen");  prargs(filename);  prargi(flag);  starttrace();
-
-	char *env=NULL;  const char *envname="FAKERLIB32";
-	if(sizeof(long)==8) envname="FAKERLIB";
-	if((env=getenv(envname))==NULL || strlen(env)<1)
-		env="librrfaker.so";
-	if(filename && (!strncmp(filename, "libGL.", 6)
-		|| strstr(filename, "/libGL.")
-		|| !strncmp(filename, "libdl.", 6)
-		|| strstr(filename, "/libdl.")))
-	{
-		if(fconfig.verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
-				filename, env);
-		retval=__dlopen(env, flag);
-	}
-	else retval=__dlopen(filename, flag);
-
-		stoptrace();  prargx(retval);  closetrace();
-
-	return retval;
+	globalmutex.lock(false);
+	if(!__dlopen) __vgl_loaddlsymbols();
+	globalmutex.unlock(false);
+	checksym(dlopen);
+	return __dlopen(file, mode);
 }
 
 ////////////////
 // X11 functions
 ////////////////
+
 
 #ifdef sparc
 
@@ -501,7 +483,8 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		if(winh.findpb(dpy, xe->xconfigure.window, pbw))
 		{
 				opentrace(_HandleEvent);  prargi(xe->xconfigure.width);
-				prargi(xe->xconfigure.height);  starttrace();
+				prargi(xe->xconfigure.height);  prargx(xe->xconfigure.window);
+				starttrace();
 
 			pbw->resize(xe->xconfigure.width, xe->xconfigure.height);
 

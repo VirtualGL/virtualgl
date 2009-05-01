@@ -389,13 +389,16 @@ funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 
 // From dlfaker
 
-funcdef2(void *, dlopen, const char *, filename, int, flag, return);
+typedef	void* (*_dlopenType)(const char *, int);
+void *_vgl_dlopen(const char *, int);
+symdef(dlopen);
 
 #ifdef __cplusplus
 }
 #endif
 
 void __vgl_loadsymbols(void);
+void __vgl_loaddlsymbols(void);
 void __vgl_unloadsymbols(void);
 
 #endif

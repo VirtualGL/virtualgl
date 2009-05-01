@@ -28,22 +28,34 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	rrout.print("[VGL] ERROR: Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
+	rrout.print("[VGL] ERROR: Could not load symbol %s\n", #s);  __vgl_safeexit(1);}  \
+	if(__##s==s) {  \
+	rrout.print("[VGL] ERROR: symbol %s referenced itself\n", #s);  __vgl_safeexit(1);}
+
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
 
+void __vgl_loaddlsymbols(void)
+{
+	dlerror();  // Clear error state
+	__dlopen=(_dlopenType)loadsym(RTLD_NEXT, "dlopen", 0);
+	if(!__dlopen)
+	{
+		rrout.print("[VGL] ERROR: Could not load symbol dlopen\n");
+		__vgl_safeexit(1);
+	}
+}
+
 void __vgl_loadsymbols(void)
 {
-	void *dllhnd=RTLD_NEXT;
+	void *dllhnd;
 	dlerror();  // Clear error state
-
-	lsym(dlopen);
 
 	if(fconfig.gllib)
 	{
-		dllhnd=__dlopen(fconfig.gllib, RTLD_NOW);
+		dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
@@ -150,7 +162,7 @@ void __vgl_loadsymbols(void)
 	// X11 symbols
 	if(fconfig.x11lib)
 	{
-		dllhnd=__dlopen(fconfig.x11lib, RTLD_NOW);
+		dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
