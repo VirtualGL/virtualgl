@@ -2,13 +2,13 @@
 
 VirtualBox is an enterprise-class, open source virtualization solution
 provided by Sun Microsystems.  With the release of VirtualBox 2.1.0,
-experimental support was added for hardware-accelerated OpenGL in 32-bit
-Windows guests running on Windows, MacIntel, Linux, and Solaris/x86 hosts.
+experimental support was added for hardware-accelerated OpenGL in Windows
+and Linux guests running on Windows, MacIntel, Linux, and Solaris/x86 hosts.
 3D acceleration in VirtualBox is accomplished by installing a special driver in
 the guest which uses a subset of Chromium to transmit OpenGL calls through a
 local connection to the VirtualBox process running on the host.  When used in
-conjunction with VirtualGL, this solution provides a means of displaying
-Windows 3D applications remotely.
+conjunction with VirtualGL on a Linux or Solaris/x86 host, this solution
+provides a means of displaying Windows 3D applications remotely.
 
 To use VirtualGL with VirtualBox, perform the following procedure:
 
@@ -20,19 +20,27 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Section ": setuid_linux} to
-		make ''librrfaker.so'' a setuid executable (Linux) or to add the faker
-		directory to the list of secure paths (Solaris).
+		make ''librrfaker.so'' a setuid executable (Linux) or to add the VirtualGL
+		library directory to the list of secure paths (Solaris).
 
-	#. ''vglrun VirtualBox -startvm ''__''{VM name or UUID}''__
+	#. If running 32-bit VirtualBox,
+		#Verb <<---
+		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
+		---
+		If running 64-bit VirtualBox,
+		#Verb <<---
+		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
+		---
+
+	#. ''vglrun -nodl VirtualBox -startvm ''__''{VM name or UUID}''__
 
 *** NOTES
 #OPT: noList! plain!
 
-	* VirtualBox 2.1.0 also works with prior versions of VirtualGL (2.0 and
-		later), but it is necessary to add an argument of ''-dl'' to ''vglrun''
-		when using VirtualBox with these versions of VirtualGL.  It is also
-		necessary to perform step 3 above on ''libdlfaker.so'' as well as
-		''librrfaker.so''.
+	* VirtualBox should work with prior versions of VirtualGL (2.0 through
+		2.1.1), but it is necessary to remove the ''-nodl'' argument from the
+		''vglrun'' command line when using VirtualBox with these versions of
+		VirtualGL.  Some versions of VirtualBox may not work with VirtualGL 2.1.2.
 
 	* You might want to temporarily enable profiling (add an argument of ''+pr''
 		to ''vglrun'' above) in order to verify that VirtualGL is loaded and
