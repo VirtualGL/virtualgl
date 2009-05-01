@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-04-29T01:53:36">
+<meta name="date" content="2009-05-01T06:11:33">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.1.2 and TurboVNC 0.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -18,7 +18,7 @@
 <link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL with TurboVNC">
 <link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL with Other X Proxies">
 <link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL in a Sun Ray Environment">
-<link rel="chapter" href="index.html#hd0012" title="12 vglrun and Shell Scripts">
+<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with setuid/setgid Executables">
 <link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Chromium and ModViz VGP">
 <link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with VirtualBox">
 <link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
@@ -244,7 +244,8 @@ systems, OpenGL and GLX, and X windows.</p>
         Environment</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0012" class="toc">12 vglrun and Shell Scripts</a>
+        <a href="#hd0012" class="toc">12 Using VirtualGL with setuid/setgid 
+        Executables</a>
     </li>
     <li class="Itemize-1 toc">
         <a href="#hd0013" class="toc">13 Using VirtualGL with Chromium and 
@@ -3152,7 +3153,7 @@ Image Transport.</p>
 <hr class="break" />
 
 
-<h1 id="hd0012"><a name="file012"></a>12&nbsp;<code>vglrun</code> and Shell Scripts</h1>
+<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
 
 <p><code>vglrun</code> can be used to launch either binary executables or 
 shell scripts, but there are a few things to keep in mind when using 
@@ -3162,7 +3163,7 @@ preloaded into every executable that the script launches.  Normally this
 is innocuous, but if the script calls any executables that have the 
 setuid and/or setgid permission bits set, then the dynamic linker will 
 refuse to preload the VirtualGL faker library into those executables.  
-The following warning will be printed out for each setuid/setgid 
+One of the following warnings will be printed out for each setuid/setgid 
 executable that the script tries to launch:</p>
 
 <dl class="Description">
@@ -3175,6 +3176,10 @@ executable that the script tries to launch:</p>
 ERROR:&nbsp;ld.so:&nbsp;object&nbsp;'librrfaker.so'&nbsp;from&nbsp;LD_PRELOAD&nbsp;cannot&nbsp;be&nbsp;preloaded:&nbsp;ignored.
 </pre>
 
+<pre class="verbatim">
+ERROR:&nbsp;ld.so:&nbsp;object&nbsp;'libdlfaker.so'&nbsp;from&nbsp;LD_PRELOAD&nbsp;cannot&nbsp;be&nbsp;preloaded:&nbsp;ignored.
+</pre>
+
 <dl class="Description">
     <dt class="Description-1 Description">Solaris</dt>
     <dd class="Description-1 Description">
@@ -3185,6 +3190,10 @@ ERROR:&nbsp;ld.so:&nbsp;object&nbsp;'librrfaker.so'&nbsp;from&nbsp;LD_PRELOAD&nb
 ld.so.1:&nbsp;warning:&nbsp;librrfaker.so:&nbsp;open&nbsp;failed:&nbsp;No&nbsp;such&nbsp;file&nbsp;in&nbsp;secure&nbsp;directories
 </pre>
 
+<pre class="verbatim">
+ld.so.1:&nbsp;warning:&nbsp;libdlfaker.so:&nbsp;open&nbsp;failed:&nbsp;No&nbsp;such&nbsp;file&nbsp;in&nbsp;secure&nbsp;directories
+</pre>
+
 <p>On Solaris and on newer versions of Linux (GLIBC 2.3 and later), the 
 executable will continue to run, but without VirtualGL preloaded into 
 it.  That may be a problem, if the setuid/setgid executable was a 3D 
@@ -3193,11 +3202,13 @@ complicate matters, some older versions of Linux will refuse to launch
 setuid/setgid executables at all if one attempts to preload VirtualGL 
 into them.</p>
 
-<p>There are a couple of ways to work around this issue.  Probably the 
-safest way is to simply edit the application script and make it store 
-the value of the <code>LD_PRELOAD</code> environment variables until 
-right before the application executable is launched.  For instance, 
-consider the following application script:</p>
+<p>There are a couple of ways to work around this issue.  If the 3D 
+application that you are intending to run in VirtualGL is not itself a 
+setuid/setgid executable, then probably the safest way to work around 
+the issue is simply to edit the application script and make it store the 
+value of the <code>LD_PRELOAD</code> environment variables until right 
+before the application executable is launched.  For instance, consider 
+the following application script:</p>
 
 <p>Initial contents of <code>application.sh</code>:</p>
 
@@ -3265,17 +3276,20 @@ accolade, so if you are in a security critical environment, apply the
 appropriate level of paranoia here.</p>
 
 <p><a name="setuid_linux"></a> To force VirtualGL to be preloaded into 
-setuid/setgid executables on Linux, make <code>librrfaker.so</code> a 
-setuid executable.  To do this, run the following command as root:</p>
+setuid/setgid executables on Linux, make <code>librrfaker.so</code> and 
+<code>libdlfaker.so</code> setuid executables.  To do this, run the 
+following commands as root:</p>
 
 <pre class="verbatim">
 chmod&nbsp;u+s&nbsp;/usr/lib/librrfaker.so
+chmod&nbsp;u+s&nbsp;/usr/lib/libdlfaker.so
 </pre>
 
 <p>On 64-bit Linux systems, also run:</p>
 
 <pre class="verbatim">
 chmod&nbsp;u+s&nbsp;/usr/lib64/librrfaker.so
+chmod&nbsp;u+s&nbsp;/usr/lib64/libdlfaker.so
 </pre>
 
 <p>On Solaris, you can force VirtualGL to be preloaded into setuid/setgid 
@@ -3447,8 +3461,12 @@ environment variable and then invoking <code>crserver</code> with
 
 <pre class="verbatim">
 export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-vglrun&nbsp;crserver
+vglrun&nbsp;-nodl&nbsp;crserver
 </pre>
+
+<div class="important"><p class="important">
+NOTE: <code>vglrun</code> is invoked with the <code>-nodl</code> argument in order to disable VirtualGL&rsquo;s <code>dlopen()</code> interposer, which has been known to interfere with Chromium.
+</p></div>
 
 <p>In the case of CrAppFaker, it is also necessary to set 
 <code>VGL_GLLIB</code> to the location of the &ldquo;real&rdquo; OpenGL 
@@ -3504,7 +3522,7 @@ a sort-first rendering job using Chromium and VirtualGL:</p>
         table above)
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;crserver&nbsp;&amp;</code>
+        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver&nbsp;&amp;</code>
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, set <code>VGL_GLLIB</code> to the location of the 
@@ -3542,7 +3560,7 @@ following procedure in place of step 2 above:</p>
         a 32-bit or 64-bit app on that node (see table above)
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        <code>vglrun&nbsp;crserver</code>
+        <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
     </li>
 </ul>
 
@@ -3586,7 +3604,7 @@ log<sub>2</sub>(N) rather than N.</p>
         <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;crserver</code>
+        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
     </li>
 </ol>
 
@@ -3617,10 +3635,10 @@ VirtualGL:</p>
         <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;crutserver&nbsp;&amp;</code>
+        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crutserver&nbsp;&amp;</code>
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;crserver</code>
+        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
     </li>
 </ol>
 
@@ -3660,7 +3678,7 @@ OpenGL library, so that VGP will call VirtualGL and VirtualGL will call
 
 <pre class="verbatim">
 export&nbsp;VGP_BACKING_GL_LIB=librrfaker.so
-vglrun&nbsp;vglauncher&nbsp;--preload=librrfaker.so:/usr/lib/libGL.so&nbsp;{application}
+vglrun&nbsp;-nodl&nbsp;vglauncher&nbsp;--preload=librrfaker.so:/usr/lib/libGL.so&nbsp;{application}
 </pre>
 
 <p>Replace <code>/usr/lib/libGL.so</code> with the full path of your 

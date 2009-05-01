@@ -91,8 +91,12 @@ environment variable and then invoking ''crserver'' with ''vglrun''.  For exampl
 
 #Verb: <<---
 export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-vglrun crserver
+vglrun -nodl crserver
 ---
+
+	!!! NOTE: ''vglrun'' is invoked with the ''-nodl'' argument in order to
+	disable VirtualGL's ''dlopen()'' interposer, which has been known to
+	interfere with Chromium.
 
 In the case of CrAppFaker, it is also necessary to set ''VGL_GLLIB'' to the
 location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1''.)
@@ -135,7 +139,7 @@ sort-first rendering job using Chromium and VirtualGL:
 		appropriate value based on whether ''crserver'' and ''crappfaker'' were
 		compiled as 32-bit or 64-bit apps (see table above)
 
-	#. On Node 0, ''vglrun crserver &''
+	#. On Node 0, ''vglrun -nodl crserver &''
 
 	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" libGL (example:
 		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1'').
@@ -160,7 +164,7 @@ On each of the rendering nodes,
 	* set the ''CR_SYSTEM_GL_PATH'' environment variable to the appropriate value
 		based on whether ''crserver'' was compiled as a 32-bit or 64-bit app on
 		that node (see table above)
-	* ''vglrun crserver''
+	* ''vglrun -nodl crserver''
 
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
 
@@ -191,7 +195,7 @@ To make this configuration work with VirtualGL:
 		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
 		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
 
-	#. On Node 0, ''vglrun crserver''
+	#. On Node 0, ''vglrun -nodl crserver''
 
 *** CRUT
 #OPT: noList! plain!
@@ -213,9 +217,9 @@ VirtualGL:
 		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
 		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
 
-	#. On Node 0, ''vglrun crutserver &''
+	#. On Node 0, ''vglrun -nodl crutserver &''
 
-	#. On Node 0, ''vglrun crserver''
+	#. On Node 0, ''vglrun -nodl crserver''
 
 ** A Note About Performance
 
@@ -249,7 +253,7 @@ Achieving this with VGP is relatively simple:
 
 #Verb: <<---
 export VGP_BACKING_GL_LIB=librrfaker.so
-vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
+vglrun -nodl vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
 ---
 
 Replace ''/usr/lib/libGL.so'' with the full path of your system's OpenGL

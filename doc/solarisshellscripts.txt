@@ -1,4 +1,4 @@
-* ''vglrun'' and Shell Scripts
+* Using VirtualGL with setuid/setgid Executables
 
 ''vglrun'' can be used to launch either binary executables or shell scripts,
 but there are a few things to keep in mind when using ''vglrun'' to launch a
@@ -6,18 +6,24 @@ shell script.  When you ''vglrun'' a shell script, the VirtualGL faker library
 will be preloaded into every executable that the script launches.  Normally
 this is innocuous, but if the script calls any executables that have the setuid
 and/or setgid permission bits set, then the dynamic linker will refuse to
-preload the VirtualGL faker library into those executables.  The following
-warning will be printed out for each setuid/setgid executable that the script
-tries to launch:
+preload the VirtualGL faker library into those executables.  One of the
+following warnings will be printed out for each setuid/setgid executable that
+the script tries to launch:
 
 	Linux :: {:}
 #Verb: <<---
 ERROR: ld.so: object 'librrfaker.so' from LD_PRELOAD cannot be preloaded: ignored.
 ---
+#Verb: <<---
+ERROR: ld.so: object 'libdlfaker.so' from LD_PRELOAD cannot be preloaded: ignored.
+---
 
 	Solaris :: {:}
 #Verb: <<---
 ld.so.1: warning: librrfaker.so: open failed: No such file in secure directories
+---
+#Verb: <<---
+ld.so.1: warning: libdlfaker.so: open failed: No such file in secure directories
 ---
 
 On Solaris and on newer versions of Linux (GLIBC 2.3 and later), the executable
@@ -27,8 +33,10 @@ to be used with VirtualGL.  To further complicate matters, some older versions
 of Linux will refuse to launch setuid/setgid executables at all if one attempts
 to preload VirtualGL into them.
 
-There are a couple of ways to work around this issue.  Probably the safest way
-is to simply edit the application script and make it store the value of the
+There are a couple of ways to work around this issue.  If the 3D application
+that you are intending to run in VirtualGL is not itself a setuid/setgid
+executable, then probably the safest way to work around the issue is simply
+to edit the application script and make it store the value of the
 ''LD_PRELOAD'' environment variables until right before the application
 executable is launched.  For instance, consider the following application
 script:
@@ -86,17 +94,19 @@ appropriate level of paranoia here.
 
 {anchor: setuid_linux}
 To force VirtualGL to be preloaded into setuid/setgid executables on Linux,
-make ''librrfaker.so'' a setuid executable.  To do this, run the following
-command as root:
+make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables.  To do this,
+run the following commands as root:
 
 #Verb: <<---
 chmod u+s /usr/lib/librrfaker.so
+chmod u+s /usr/lib/libdlfaker.so
 ---
 
 On 64-bit Linux systems, also run:
 
 #Verb: <<---
 chmod u+s /usr/lib64/librrfaker.so
+chmod u+s /usr/lib64/libdlfaker.so
 ---
 
 On Solaris, you can force VirtualGL to be preloaded into setuid/setgid

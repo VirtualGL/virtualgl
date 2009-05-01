@@ -33,6 +33,12 @@ interaction issue with v180.xx of the NVidia accelerated 3D drivers and WINE.
 Fixed interaction issue with QT4 in which VirtualGL would not properly handle
 window resize events under certain circumstances.
 -------------------------------------------------------------------------------
+[6]
+Moved dlopen() back into a separate faker library (libdlfaker.so.)
+libdlfaker.so is loaded by default, which should maintain the behavior of
+VGL 2.1.2.  However, it can be unloaded by passing an argument of '-nodl' to
+vglrun.  The latter is necessary to make VirtualBox 2.2.x work.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
