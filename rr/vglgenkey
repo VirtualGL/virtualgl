@@ -9,5 +9,6 @@ fi
 if [ ! -d /etc/opt/VirtualGL ]; then
 	mkdir -p /etc/opt/VirtualGL
 fi
-$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate :0 . trusted timeout 0
+$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate $DISPLAY . trusted timeout 0 ||
+	$XAUTH extract /etc/opt/VirtualGL/vgl_xauth_key $DISPLAY
 chmod 644 /etc/opt/VirtualGL/vgl_xauth_key
