@@ -39,6 +39,10 @@ libdlfaker.so is loaded by default, which should maintain the behavior of
 VGL 2.1.2.  However, it can be unloaded by passing an argument of '-nodl' to
 vglrun.  The latter is necessary to make VirtualBox 2.2.x work.
 -------------------------------------------------------------------------------
+[7]
+vglserver_config now works properly on Kubuntu 9.04 (and possibly other
+systems that use KDM 4.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
