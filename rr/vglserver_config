@@ -443,6 +443,9 @@ unconfigglx() {
 	if [ -f /etc/kde4/kdm/kdmrc -a ! -h /etc/kde4/kdm/kdmrc ]; then
 		enablextestkdm /etc/kde4/kdm/kdmrc
 	fi
+	if [ -f /etc/kde/kdm/kdmrc -a ! -h /etc/kde/kdm/kdmrc ]; then
+		enablextestkdm /etc/kde/kdm/kdmrc
+	fi
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xservers ]; then
 			enablextest /etc/dt/config/Xservers
@@ -675,6 +678,13 @@ configglx() {
 			disablextestkdm /etc/kde4/kdm/kdmrc
 		else
 			enablextestkdm /etc/kde4/kdm/kdmrc
+		fi
+	fi
+	if [ -f /etc/kde/kdm/kdmrc -a ! -h /etc/kde/kdm/kdmrc ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextestkdm /etc/kde/kdm/kdmrc
+		else
+			enablextestkdm /etc/kde/kdm/kdmrc
 		fi
 	fi
 	if [ "$UNAME_S" = "SunOS" ]; then
