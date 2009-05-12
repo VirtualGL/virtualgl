@@ -186,6 +186,20 @@ disablextest() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
+disablextestkdm() {
+	if [ -z "$1" ]; then
+		echo USAGE: disablextestkdm {filename}
+		return
+	fi
+	backup $1
+	echo ... Disabling XTEST extension in $1 ...
+	TMPFILE=`maketemp vglserver_config_12`
+	sed -e "/ServerArgsLocal\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
+		sed -e "/ServerArgsLocal\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
+	)
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
 enablextest() {
 	if [ -z "$1" ]; then
 		echo USAGE: enablextest {filename}
@@ -194,6 +208,17 @@ enablextest() {
 	echo ... Enabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_8`
 	sed -e "/\/X11\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/X\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xorg\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xsun\>/s/[ #\t]*-tst//g" -e "/\/bin\/Xserver\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
+	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+}
+
+enablextestkdm() {
+	if [ -z "$1" ]; then
+		echo USAGE: enablextestkdm {filename}
+		return
+	fi
+	echo ... Enabling XTEST extension in $1 ...
+	TMPFILE=`maketemp vglserver_config_11`
+	sed -e "/ServerArgsLocal\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
@@ -371,6 +396,9 @@ unconfigglx() {
 	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
 		delvglgenkey /etc/opt/gnome/gdm/Init/Default
 	fi
+	if [ -f /etc/kde4/kdm/Xsetup -a ! -h /etc/kde4/kdm/Xsetup ]; then
+		delvglgenkey /etc/kde4/kdm/Xsetup
+	fi
 
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xsetup ]; then
@@ -411,6 +439,9 @@ unconfigglx() {
 	fi
 	if [ -f /etc/opt/kde3/share/config/kdm/Xservers -a ! -h /etc/opt/kde3/share/config/kdm/Xservers ]; then
 		enablextest /etc/opt/kde3/share/config/kdm/Xservers
+	fi
+	if [ -f /etc/kde4/kdm/kdmrc -a ! -h /etc/kde4/kdm/kdmrc ]; then
+		enablextestkdm /etc/kde4/kdm/kdmrc
 	fi
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xservers ]; then
@@ -540,6 +571,9 @@ configglx() {
 	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
 		addvglgenkey /etc/opt/gnome/gdm/Init/Default
 	fi
+	if [ -f /etc/kde4/kdm/Xsetup -a ! -h /etc/kde4/kdm/Xsetup ]; then
+		addvglgenkey /etc/kde4/kdm/Xsetup
+	fi
 		
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ ! -d /etc/dt/config ]; then
@@ -634,6 +668,13 @@ configglx() {
 			disablextest /etc/opt/kde3/share/config/kdm/Xservers
 		else
 			enablextest /etc/opt/kde3/share/config/kdm/Xservers
+		fi
+	fi
+	if [ -f /etc/kde4/kdm/kdmrc -a ! -h /etc/kde4/kdm/kdmrc ]; then
+		if [ "$DISABLEXTEST" = "1" ]; then
+			disablextestkdm /etc/kde4/kdm/kdmrc
+		else
+			enablextestkdm /etc/kde4/kdm/kdmrc
 		fi
 	fi
 	if [ "$UNAME_S" = "SunOS" ]; then
