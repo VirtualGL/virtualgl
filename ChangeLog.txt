@@ -21,7 +21,7 @@ by mistake.  The matching criteria has been changed such that dlopen() only
 overrides calls to dlopen("libGL\.*") or dlopen("*/libGL\.*").
 -------------------------------------------------------------------------------
 [3]
-vglserver_config now works properly with DRI-compatible graphics drivers
+vglserver_config should now work properly with DRI-compatible graphics drivers
 (including ATI.)
 -------------------------------------------------------------------------------
 [4]
@@ -37,12 +37,19 @@ window resize events under certain circumstances.
 Moved dlopen() back into a separate faker library (libdlfaker.so.)
 libdlfaker.so is loaded by default, which should maintain the behavior of
 VGL 2.1.2.  However, it can be unloaded by passing an argument of '-nodl' to
-vglrun.  The latter is necessary to make VirtualBox 2.2.x work.
+vglrun.  The latter is necessary to make VirtualBox 2.2.x work with VirtualGL.
 -------------------------------------------------------------------------------
 [7]
 vglserver_config should now work properly on Ubuntu 9.04 when using gdm or kdm.
 It should also (mostly) work on Fedora 11, but only when using gdm (disabling
 XTEST does not work.)
+-------------------------------------------------------------------------------
+[8]
+Added fallback logic to VirtualGL's symbol loader which will try to directly
+load the GLX/OpenGL symbols from libGL.so.1 and the X11 symbols from
+libX11.so.6 if loading these symbols using dlsym(RTLD_NEXT, ...) fails.  This
+is to work around an issue with version 18x.xx of the nVidia Linux Display
+Driver.
 -------------------------------------------------------------------------------
 
 
