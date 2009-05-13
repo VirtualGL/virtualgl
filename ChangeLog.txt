@@ -40,8 +40,9 @@ VGL 2.1.2.  However, it can be unloaded by passing an argument of '-nodl' to
 vglrun.  The latter is necessary to make VirtualBox 2.2.x work.
 -------------------------------------------------------------------------------
 [7]
-vglserver_config now works properly on Kubuntu 9.04 (and possibly other
-systems that use KDM 4.)
+vglserver_config should now work properly on Ubuntu 9.04 when using gdm or kdm.
+It should also (mostly) work on Fedora 11, but only when using gdm (disabling
+XTEST does not work.)
 -------------------------------------------------------------------------------
 
 
