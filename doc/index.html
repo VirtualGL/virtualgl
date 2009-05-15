@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-05-11T18:09:42">
+<meta name="date" content="2009-05-15T04:35:10">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.1.3 and TurboVNC 0.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3416,8 +3416,8 @@ theoretically install a separate copy of VirtualGL on each display node
 and use it to redirect the output of each <code>crserver</code> instance 
 to a separate VirtualGL Client instance running on a multi-screen 2D X 
 server elsewhere on the network. However, synchronizing the frames on 
-the remote end would require modifications to VirtualGL.  Such is left 
-as an exercise for the reader.</p>
+the remote end would require extensive modifications to VirtualGL and 
+perhaps to Chromium as well.  Such is left as an exercise for the reader.</p>
 
 
 <h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
@@ -3439,7 +3439,7 @@ create an X window, and manage the window as it would normally do.
 However, all other OpenGL and GLX activity is intercepted by the 
 Chromium App Faker (CrAppFaker) so that the 3D rendering can be split up 
 among the rendering nodes.  Once each node has rendered its section of 
-the final image, the image tiles get passed back to a Chromium Server 
+the final image, the image tiles are passed back to a Chromium Server 
 (CrServer) process running on Node 0.  This CrServer process attaches to 
 the previously-created application window and draws the pixels into the 
 window using <code>glDrawPixels()</code>.</p>
@@ -3458,18 +3458,19 @@ server was remote.)  Instead, VirtualGL forces CrServer to draw into a
 Pbuffer, and VGL then takes charge of transmitting the pixels from the 
 Pbuffer to the 2D X server in the most efficient way possible.</p>
 
-<p>Since Chromium uses <code>dlopen()</code> to load the system&rsquo;s 
-OpenGL library, preloading VirtualGL into the CrAppFaker and CrServer 
-processes using <code>vglrun</code> is not sufficient.  Chromium 
-provides an environment variable, <code>CR_SYSTEM_GL_PATH</code>, which 
-allows one to specify an alternate path to be searched for 
-<code>libGL.so</code>.  The VirtualGL packages for Linux and Solaris 
-include a symbolic link named <code>libGL.so</code> which points to the 
-VirtualGL faker library (<code>librrfaker.so</code>).  This symbolic 
-link is located in its own isolated directory, so that directory can be 
-passed to Chromium in the <code>CR_SYSTEM_GL_PATH</code> environment 
-variable, and this will cause Chromium to load VirtualGL rather than the 
-&ldquo;real&rdquo; OpenGL library.  Refer to the following table:</p>
+<p>As with any normal OpenGL application, CrServer can be launched using 
+<code>vglrun</code>.  However, because CrAppFaker also interposes OpenGL 
+and GLX functions, it must be handled differently in order to avoid 
+interference with VirtualGL.  Chromium provides an environment variable, 
+<code>CR_SYSTEM_GL_PATH</code>, which allows one to specify an alternate 
+path to be searched for <code>libGL.so</code>. The VirtualGL packages 
+for Linux and Solaris include a symbolic link named 
+<code>libGL.so</code> which points to the VirtualGL faker library 
+(<code>librrfaker.so</code>). This symbolic link is located in its own 
+isolated directory, so that directory can be passed to Chromium in the 
+<code>CR_SYSTEM_GL_PATH</code> environment variable, and this will cause 
+Chromium to load VirtualGL rather than the &ldquo;real&rdquo; OpenGL 
+library.  Refer to the following table:</p>
 
 <p><a name="CR_SYSTEM_GL_PATH_Table"></a></p>
 
@@ -3490,28 +3491,17 @@ variable, and this will cause Chromium to load VirtualGL rather than the
 </div>
 
 
-<p>Running the CrServer in VirtualGL is simply a matter of setting this 
-environment variable and then invoking <code>crserver</code> with 
-<code>vglrun</code>.  For example:</p>
-
-<pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-vglrun&nbsp;-nodl&nbsp;crserver
-</pre>
-
-<div class="important"><p class="important">
-NOTE: <code>vglrun</code> is invoked with the <code>-nodl</code> argument in order to disable VirtualGL&rsquo;s <code>dlopen()</code> interposer, which has been known to interfere with Chromium.
-</p></div>
-
-<p>In the case of CrAppFaker, it is also necessary to set 
+<p>To run CrAppFaker, it is necessary to set this environment variable to 
+the appropriate value so that Chromium will load the interposed versions 
+of OpenGL and GLX functions from VirtualGL.  It is also necessary to set 
 <code>VGL_GLLIB</code> to the location of the &ldquo;real&rdquo; OpenGL 
-library (example: <code>/usr/lib/libGL.so.1</code>.) CrAppFaker creates 
+library (example: <code>/usr/lib/libGL.so.1</code>). CrAppFaker creates 
 its own fake version of <code>libGL.so</code> which is really just a 
-copy of Chromium&rsquo;s <code>libcrfaker.so</code>.  So VirtualGL, if 
-left to its own devices, will unwittingly try to load 
+copy of Chromium&rsquo;s <code>libcrfaker.so</code>.  Thus, if left to 
+its own devices, VirtualGL will unwittingly try to load 
 <code>libcrfaker.so</code> instead of the &ldquo;real&rdquo; OpenGL 
 library.  Chromium&rsquo;s <code>libcrfaker.so</code> will, in turn, try 
-to load VirtualGL again, and an endless loop will occur.</p>
+to load VirtualGL, and an endless loop will occur.</p>
 
 <p>Therefore, we must use the <code>CR_SYSTEM_GL_PATH</code> environment 
 variable to tell Chromium to pass OpenGL commands into VirtualGL, then 
@@ -3529,7 +3519,7 @@ copy <code>libcrfaker.so</code> to that same directory, renaming it as
 <code>libGL.so</code>.  So when the application is started, it loads 
 <code>libcrfaker.so</code> instead of <code>libGL.so</code>. 
 <code>libcrfaker.so</code> will then load VirtualGL instead of the 
-&ldquo;real&rdquo; libGL, because we&rsquo;ve overridden 
+&ldquo;real&rdquo; OpenGL library, because we&rsquo;ve overridden 
 <code>CR_SYSTEM_GL_PATH</code> to point to VirtualGL&rsquo;s fake 
 <code>libGL.so</code>.  VirtualGL will then use the library specified in 
 <code>VGL_GLLIB</code> to make any &ldquo;real&rdquo; OpenGL calls that 
@@ -3551,18 +3541,17 @@ a sort-first rendering job using Chromium and VirtualGL:</p>
         Start <code>crserver</code> on each of the rendering nodes
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, set the <code>CR_SYSTEM_GL_PATH</code> environment variable 
-        to the appropriate value based on whether <code>crserver</code> and 
-        <code>crappfaker</code> were compiled as 32-bit or 64-bit apps (see 
-        table above)
+        On Node 0, <code>vglrun&nbsp;crserver&nbsp;&amp;</code>
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver&nbsp;&amp;</code>
+        On Node 0, set the <code>CR_SYSTEM_GL_PATH</code> environment variable 
+        to the appropriate value based on whether <code>crappfaker</code> was 
+        compiled as a 32-bit or a 64-bit app (see table above)
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, set <code>VGL_GLLIB</code> to the location of the 
-        &ldquo;real&rdquo; libGL (example: <code>/usr/lib/libGL.so.1</code> or 
-        <code>/usr/lib64/libGL.so.1</code>).
+        &ldquo;real&rdquo; OpenGL library (example: 
+        <code>/usr/lib/libGL.so.1</code> or <code>/usr/lib64/libGL.so.1</code>).
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, launch <code>crappfaker</code> (do not use 
@@ -3590,12 +3579,7 @@ following procedure in place of step 2 above:</p>
         set the <code>VGL_READBACK</code> environment variable to <code>0</code>
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        set the <code>CR_SYSTEM_GL_PATH</code> environment variable to the 
-        appropriate value based on whether <code>crserver</code> was compiled as 
-        a 32-bit or 64-bit app on that node (see table above)
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
+        <code>vglrun&nbsp;crserver</code>
     </li>
 </ul>
 
@@ -3633,13 +3617,7 @@ log<sub>2</sub>(N) rather than N.</p>
         Start <code>crappfaker</code> on each of the rendering nodes
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, set the <code>CR_SYSTEM_GL_PATH</code> environment variable 
-        to the appropriate value based on whether <code>crserver</code> was	
-        compiled as a 32-bit or a 64-bit app (see table in Section 
-        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
-    </li>
-    <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
+        On Node 0, <code>vglrun&nbsp;crserver</code>
     </li>
 </ol>
 
@@ -3664,16 +3642,10 @@ VirtualGL:</p>
         Start <code>crappfaker</code> on each of the rendering nodes
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, set the <code>CR_SYSTEM_GL_PATH</code> environment variable 
-        to the appropriate value based on whether <code>crserver</code> was	
-        compiled as a 32-bit or a 64-bit app (see table in Section 
-        <a href="#CR_SYSTEM_GL_PATH_Table" class="ref">13.2</a>.)
+        On Node 0, <code>vglrun&nbsp;crutserver&nbsp;&amp;</code>
     </li>
     <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crutserver&nbsp;&amp;</code>
-    </li>
-    <li class="Ordered-1 Ordered">
-        On Node 0, <code>vglrun&nbsp;-nodl&nbsp;crserver</code>
+        On Node 0, <code>vglrun&nbsp;crserver</code>
     </li>
 </ol>
 
@@ -4930,15 +4902,22 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally, VirtualGL loads the first OpenGL dynamic library that it finds 
-        in the dynamic linker path (usually <code>/usr/lib/libGL.so.1</code>, 
+        Normally, VirtualGL tries to call any &ldquo;real&rdquo; GLX and OpenGL 
+        functions it needs from the OpenGL library against which it is linked 
+        (usually <code>/usr/lib/libGL.so.1</code>, 
         <code>/usr/lib64/libGL.so.1</code>,  or 
-        <code>/usr/lib/64/libGL.so.1</code>.)  You can use this setting to 
-        explicitly specify another OpenGL dynamic library to load. <br /><br /> 
-        You shouldn&rsquo;t need to muck with this unless something 
-        doesn&rsquo;t work.  However, setting this environment variable is 
-        necessary when using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0091"></a>.
+        <code>/usr/lib/64/libGL.so.1</code>).  Failing this, VirtualGL will then 
+        try to call these functions from the first compatible library named 
+        <code>libGL.so.1</code> that is found in the dynamic loader path.  You 
+        can use the <code>VGL_GLLIB</code> environment variable to override this 
+        and specify a dynamic library from which VirtualGL will call the 
+        &ldquo;real&rdquo; GLX and OpenGL functions. <br /><br /> You 
+        shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
+        work.  However, setting this environment variable is necessary when 
+        using VirtualGL with 
+        <a href="#Chromium">Chromium</a><a name="idx0091"></a>.  It is also 
+        potentially useful if one wishes to insert another OpenGL interposer 
+        between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
 </dl>
 
@@ -5724,14 +5703,19 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally, VirtualGL loads the first X11 dynamic library that it finds in 
-        the dynamic linker path (usually <code>/usr/lib/libX11.so.?</code>, 
-        <code>/usr/lib/64/libX11.so.?</code>, 
-        <code>/usr/X11R6/lib/libX11.so.?</code>, or 
-        <code>/usr/X11R6/lib64/libX11.so.?</code>).  You can use this setting to 
-        explicitly specify another X11 dynamic library to load. <br /><br /> You 
-        shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
-        work.
+        Normally, VirtualGL tries to call any &ldquo;real&rdquo; X11 functions 
+        it needs from the X11 library against which it is linked (usually 
+        <code>/usr/lib/libX11.so.6</code>, <code>/usr/lib/64/libX11.so.6</code>, 
+        <code>/usr/X11R6/lib/libX11.so.6</code>, or 
+        <code>/usr/X11R6/lib64/libX11.so.6</code>). Failing this, VirtualGL will 
+        then try to call these functions from the first compatible library named 
+        <code>libX11.so.6</code> that is found in the dynamic loader path.  You 
+        can use the <code>VGL_X11LIB</code> environment	variable to override 
+        this and specify a dynamic library from which VirtualGL will call the 
+        &ldquo;real&rdquo; X11 functions. <br /><br /> You shouldn&rsquo;t need 
+        to muck with this unless something doesn&rsquo;t work.  However, it is 
+        potentially useful if one wishes to insert another X11 interposer 
+        between VirtualGL and the system&rsquo;s X11 library.
     </dd>
 </dl>
 

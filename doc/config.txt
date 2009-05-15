@@ -191,14 +191,20 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL loads the first OpenGL dynamic library
-	that it finds in the dynamic linker path (usually ''/usr/lib/libGL.so.1'',
-	''/usr/lib64/libGL.so.1'',  or ''/usr/lib/64/libGL.so.1''.)  You can use this
-	setting to explicitly specify another OpenGL dynamic library to load.
+	Description :: Normally, VirtualGL tries to call any "real" GLX and OpenGL
+	functions it needs from the OpenGL library against which it is linked
+	(usually ''/usr/lib/libGL.so.1'', ''/usr/lib64/libGL.so.1'',  or
+	''/usr/lib/64/libGL.so.1'').  Failing this, VirtualGL will then try to call
+	these functions from the first compatible library named ''libGL.so.1'' that
+	is found in the dynamic loader path.  You can use the ''VGL_GLLIB''
+	environment variable to override this and specify a dynamic library from
+	which VirtualGL will call the "real" GLX and OpenGL functions.
 	{nl}{nl} \
 	You shouldn't need to muck with this unless something doesn't work.  However,
 	setting this environment variable is necessary when using VirtualGL with
-	[[chromium.txt#Chromium][Chromium]]. \
+	[[chromium.txt#Chromium][Chromium]].  It is also potentially useful if one
+	wishes to insert another OpenGL interposer between VirtualGL and the system's
+	OpenGL library.
 
 | Environment Variable | ''VGL_GUI = ''__''{k}''__ |
 | Summary | __''{k}''__ = the key sequence used to pop up the VirtualGL \
@@ -594,13 +600,19 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL loads the first X11 dynamic library that
-	it finds in the dynamic linker path (usually ''/usr/lib/libX11.so.?'',
-	''/usr/lib/64/libX11.so.?'', ''/usr/X11R6/lib/libX11.so.?'', or
-	''/usr/X11R6/lib64/libX11.so.?'').  You can use this setting to
-	explicitly specify another X11 dynamic library to load.
+	Description :: Normally, VirtualGL tries to call any "real" X11 functions it
+	needs from the X11 library against which it is linked (usually
+	''/usr/lib/libX11.so.6'', ''/usr/lib/64/libX11.so.6'',
+	''/usr/X11R6/lib/libX11.so.6'', or ''/usr/X11R6/lib64/libX11.so.6'').
+	Failing this, VirtualGL will then try to call these functions from the first
+	compatible library named ''libX11.so.6'' that is found in the dynamic loader
+	path.  You can use the ''VGL_X11LIB'' environment	variable to override this
+	and specify a dynamic library from which VirtualGL will call the "real" X11
+	functions.
 	{nl}{nl} \
-	You shouldn't need to muck with this unless something doesn't work.
+	You shouldn't need to muck with this unless something doesn't work.  However,
+	it is potentially useful if one wishes to insert another X11 interposer
+	between VirtualGL and the system's X11 library.
 
 | Environment Variable | ''VGL_XVENDOR = ''__''{v}''__ |
 | Summary | __''{v}''__ = a fake X11 vendor string to return when the \
