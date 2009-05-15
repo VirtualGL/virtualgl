@@ -28,9 +28,7 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	return -1;}  \
-	if(__##s==s) {  \
-	rrout.print("[VGL] ERROR: symbol %s referenced itself\n", #s);  return -1;}
+	return -1;}
 
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
