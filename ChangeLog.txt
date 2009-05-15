@@ -42,7 +42,7 @@ vglrun.  The latter is necessary to make VirtualBox 2.2.x work with VirtualGL.
 [7]
 vglserver_config should now work properly on Ubuntu 9.04 when using gdm or kdm.
 It should also (mostly) work on Fedora 11, but only when using gdm (disabling
-XTEST does not work.)
+XTEST does not work on Fedora 11.)
 -------------------------------------------------------------------------------
 [8]
 Added fallback logic to VirtualGL's symbol loader which will try to directly
@@ -50,6 +50,20 @@ load the GLX/OpenGL symbols from libGL.so.1 and the X11 symbols from
 libX11.so.6 if loading these symbols using dlsym(RTLD_NEXT, ...) fails.  This
 is to work around an issue with version 18x.xx of the nVidia Linux Display
 Driver.
+-------------------------------------------------------------------------------
+[9]
+If an application window was destroyed by the window manager and the
+application did not explicitly monitor and handle the WM_DELETE protocol
+message, then previous versions of VirtualGL would, when using the X11 image
+transport, generally abort with an X11 BadDrawable error.  This occurred
+because the window was basically being ripped out from underneath VirtualGL's
+blitter thread without warning.  This version of VirtualGL has been modified
+to monitor WM_DELETE messages, so VirtualGL can now bow out gracefully if the
+3D application window is closed by the window manager but the application
+does not handle WM_DELETE.
+
+This issue was specifically being encountered when choosing a new screen size
+in World of Warcraft when running the game in WINE and VirtualGL.
 -------------------------------------------------------------------------------
 
 
