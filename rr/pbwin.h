@@ -66,6 +66,7 @@ class pbwin
 		void swapbuffers(void);
 		bool stereo(void);
 		bool _dirty, _rdirty;
+		void wmdelete(void);
 
 	private:
 
@@ -96,6 +97,7 @@ class pbwin
 		bool _gammacorrectedvisual;
 		bool _stereovisual;
 		rrframe _r, _g, _b;
+		bool _wmdelete;
 };
 
 #endif

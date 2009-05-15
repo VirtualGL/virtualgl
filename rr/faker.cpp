@@ -408,6 +408,8 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	if(!(win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -428,6 +430,8 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -499,6 +503,16 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 			&& (state==fconfig.guimod || state==state2)
 			&& FakerConfig::_Shmid!=-1)
 			vglpopup(dpy, FakerConfig::_Shmid);
+	}
+	else if(xe && xe->type==ClientMessage)
+	{
+		XClientMessageEvent *cme=(XClientMessageEvent *)xe;
+		Atom protoatom=XInternAtom(dpy, "WM_PROTOCOLS", True);
+		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+		if(protoatom && deleteatom && cme->message_type==protoatom
+			&& cme->data.l[0]==(long)deleteatom
+			&& winh.findpb(dpy, cme->window, pbw))
+			pbw->wmdelete();
 	}
 }
 

@@ -168,6 +168,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_truecolor=true;
 	fconfig.compress(_windpy);
 	_sunrayhandle=NULL;
+	_wmdelete=false;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))
@@ -212,6 +213,7 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
 	if((_pb=new pbuffer(w, h, config))==NULL)
 			_throw("Could not create Pbuffer");
@@ -226,6 +228,7 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 void pbwin::resize(int w, int h)
 {
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(w==0 && _pb) w=_pb->width();
 	if(h==0 && _pb) h=_pb->height();
 	if(_pb && _pb->width()==w && _pb->height()==h)
@@ -239,12 +242,14 @@ void pbwin::resize(int w, int h)
 void pbwin::clear(void)
 {
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_pb) _pb->clear();
 }
 
 void pbwin::cleanup(void)
 {
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 }
 
@@ -262,6 +267,7 @@ GLXDrawable pbwin::getdrawable(void)
 {
 	GLXDrawable retval=0;
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	retval=_pb->drawable();
 	return retval;
 }
@@ -287,6 +293,7 @@ GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_neww>0 && _newh>0)
 	{
 		pbuffer *oldpb=_pb;
@@ -310,7 +317,14 @@ Window pbwin::getwin(void)
 void pbwin::swapbuffers(void)
 {
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_pb) _pb->swap();
+}
+
+void pbwin::wmdelete(void)
+{
+	rrcs::safelock l(_mutex);
+	_wmdelete=true;
 }
 
 void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
@@ -321,6 +335,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	if(!fconfig.readback) return;
 
 	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
 
 	_dirty=false;
 
