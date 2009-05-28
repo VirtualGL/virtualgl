@@ -460,22 +460,23 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 	unsigned int *border_width, unsigned int *depth)
 {
 	Status ret=0;
+	unsigned int w=0, h=0;
 
 		opentrace(XGetGeometry);  prargx(display);  prargx(drawable);
 		starttrace();
 
-	ret=_XGetGeometry(display, drawable, root, x, y, width, height, border_width,
+	ret=_XGetGeometry(display, drawable, root, x, y, &w, &h, border_width,
 		depth);
 	pbwin *pbw=NULL;
-	if(winh.findpb(display, drawable, pbw) && width && height
-		&& *width>0 && *height>0)
-		pbw->resize(*width, *height);
+	if(winh.findpb(display, drawable, pbw) && w>0 && h>0)
+		pbw->resize(w, h);
 
 		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
-		if(width) prargi(*width);  if(height) prargi(*height);
+		prargi(w);  prargi(h);
 		if(border_width) prargi(*border_width);  if(depth) prargi(*depth);
 		closetrace();
 
+	if(width) *width=w;  if(height) *height=h;
 	return ret;
 }
 
