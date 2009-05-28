@@ -65,6 +65,14 @@ does not handle WM_DELETE.
 This issue was specifically being encountered when choosing a new screen size
 in World of Warcraft when running the game in WINE and VirtualGL.
 -------------------------------------------------------------------------------
+[10]
+Worked around an interaction issue with IDL whereby the application was calling
+XGetGeometry() with the same pointer for every argument, and this was causing
+VirtualGL to lose the width and height data returned from the "real"
+XGetGeometry() function.  Subsequently, the Pbuffer corresponding to the main
+IDL window would become improperly sized, and the rendering area would not
+appear to update.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
