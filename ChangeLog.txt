@@ -41,8 +41,8 @@ vglrun.  The latter is necessary to make VirtualBox 2.2.x work with VirtualGL.
 -------------------------------------------------------------------------------
 [7]
 vglserver_config should now work properly on Ubuntu 9.04 when using gdm or kdm.
-It should also (mostly) work on Fedora 11, but only when using gdm (disabling
-XTEST does not work on Fedora 11.)
+It should also (mostly) work on Fedora 11 (disabling XTEST does not work on
+Fedora 11 when using gdm.)
 -------------------------------------------------------------------------------
 [8]
 Added fallback logic to VirtualGL's symbol loader which will try to directly
