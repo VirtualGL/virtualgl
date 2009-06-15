@@ -346,6 +346,7 @@ class FakerConfig
 			vendor=NULL;
 			zoomx.setbounds(1, 2);
 			zoomy.setbounds(1, 2);
+			trapx11=false;
 			reloadenv();
 		}
 
@@ -516,6 +517,7 @@ class FakerConfig
 			zoomx.get("VGL_ZOOM_X");
 			zoomy.get("VGL_ZOOM_Y");
 			progressive.get("VGL_PROGRESSIVE");
+			trapx11.get("VGL_TRAPX11");
 		}
 
 		void compress(Display *dpy)
@@ -589,6 +591,7 @@ class FakerConfig
 		ConfigInt tilesize;
 		ConfigBool trace;
 		ConfigInt transpixel;
+		ConfigBool trapx11;
 		bool transvalid[RR_TRANSPORTOPT];
 		ConfigBool usewindow;
 		ConfigString vendor;
@@ -636,6 +639,7 @@ class FakerConfig
 			prconfint(transvalid[RRTRANS_X11])
 			prconfint(transvalid[RRTRANS_VGL])
 			prconfint(transvalid[RRTRANS_SR])
+			prconfint_s(trapx11)
 			prconfint_s(usewindow)
 			prconfstr_s(vendor)
 			prconfint_s(verbose)

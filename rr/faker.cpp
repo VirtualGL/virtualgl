@@ -37,9 +37,6 @@
 #include "vglconfigstart.h"
 #include <sys/types.h>
 #include <unistd.h>
-#ifdef __DEBUG__
-#include "x11err.h"
-#endif
 
 #ifdef SUNOGL
 extern "C" {
@@ -184,16 +181,16 @@ _globalcleanup gdt;
 
 #include "faker-glx.cpp"
 
-#if 0
-// Used during debug so we can get a stack trace from an X11 protocol error
-#ifdef __DEBUG__
+// Used when VGL_TRAPX11=1
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	rrout.PRINT("[VGL] ERROR: X11 error--\n[VGL]    %s\n", x11error(xe->error_code));
+	char temps[256];
+	temps[0]=0;
+	XGetErrorText(dpy, xe->error_code, temps, 255);
+	rrout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
+		temps, xe->resourceid);
 	return 0;
 }
-#endif
-#endif
 
 void __vgl_fakerinit(void)
 {
@@ -212,10 +209,8 @@ void __vgl_fakerinit(void)
 		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
 		fgetc(stdin);
 	}
-	#if 0
-	XSetErrorHandler(xhandler);
 	#endif
-	#endif
+	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
 	__vgl_loadsymbols();
 	#ifdef USEGLP
