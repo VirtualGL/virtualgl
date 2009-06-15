@@ -583,6 +583,19 @@ Each method of configuration takes precedence over the previous method:
 	diagnosing interaction problems between VirtualGL and a particular OpenGL
 	application.
 
+| Environment Variable | ''VGL_TRAPX11 = ''__''0 \| 1''__ |
+| Summary | Disable/enable VirtualGL's X11 error handler |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: If an application does not install its own X11 error handler,
+	then the default X11 error handler is used.  The default X11 error handler
+	will cause the application to exit if an X11 error occurs.  Enabling the
+	''VGL_TRAPX11'' option will cause VirtualGL to install its own X11 error
+	handler, which prints a warning message but allows the application to
+	continue running.
+
 | Environment Variable | ''VGL_VERBOSE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-v'' / ''+v'' |
 | Summary | Disable/enable verbose VirtualGL messages |
