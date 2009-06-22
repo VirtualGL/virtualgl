@@ -30,7 +30,7 @@
 #endif
 #include "vgllogo.h"
 
-#define jpegsub(s) (s>=4?TJ_411:s==2?TJ_422:s==1?TJ_444:s==0?TJ_GRAYSCALE:TJ_444)
+#define jpegsub(s) (s>=4?TJ_420:s==2?TJ_422:s==1?TJ_444:s==0?TJ_GRAYSCALE:TJ_444)
 
 // Bitmap flags
 #define RRBMP_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)

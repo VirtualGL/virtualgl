@@ -318,7 +318,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 
 	switch(jpg->subsamp)
 	{
-		case TJ_411:
+		case TJ_420:
 			if(jpg->flags&TJ_BGR && jpg->flags&TJ_ALPHAFIRST && jpg->ps==4) // ABGR
 				ccfct420=mlib_VideoColorABGR2JFIFYCC420;
 			else if(!(jpg->flags&TJ_BGR) && !(jpg->flags&TJ_ALPHAFIRST) && jpg->ps==4) // RGBA
@@ -364,7 +364,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	rgbstride=jpg->pitch;
 	if(jpg->flags&TJ_BOTTOMUP) rgbstride=-jpg->pitch;
 
-	if(jpg->subsamp==TJ_411)
+	if(jpg->subsamp==TJ_420)
 	{
 		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr, *tmpptr2;
 		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=yw*2, cb+=cw, cr+=cw)
@@ -852,7 +852,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 
 	switch(jpg->subsamp)
 	{
-		case TJ_411:
+		case TJ_420:
 			ccfct420=mlib_VideoColorJFIFYCC2RGB420_Nearest;
 			if(jpg->flags&TJ_BGR || jpg->ps!=3) convreq=1;
 			break;
@@ -878,7 +878,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	rgbstride=jpg->pitch;
 	if(jpg->flags&TJ_BOTTOMUP) rgbstride=-jpg->pitch;
 
-	if(jpg->subsamp==TJ_411)
+	if(jpg->subsamp==TJ_420)
 	{
 		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr, *tmpptr2;
 		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=yw*2, cb+=cw, cr+=cw)
@@ -1059,7 +1059,7 @@ static int decode_jpeg_init(jpgstruct *jpg)
 				{
 					if(tempbyte==0x11) jpg->subsamp=TJ_444;
 					else if(tempbyte==0x21) jpg->subsamp=TJ_422;
-					else if(tempbyte==0x22) jpg->subsamp=TJ_411;
+					else if(tempbyte==0x22) jpg->subsamp=TJ_420;
 					else _throw("Unsupported subsampling type");
 				}
 				check_byte(jpg, 0);  // Luminance
