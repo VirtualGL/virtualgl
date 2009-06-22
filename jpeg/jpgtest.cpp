@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +24,7 @@
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  goto bailout;}}
 
-int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0;
+int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, fastupsample=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 const int _flags[BMPPIXELFORMATS]={0, 0, TJ_BGR, TJ_BGR,
 	TJ_BGR|TJ_ALPHAFIRST, TJ_ALPHAFIRST};
@@ -62,7 +63,8 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 	int jpgbufsize=0, i, j, tilesizex, tilesizey, numtilesx, numtilesy, ITER;
 	unsigned long *comptilesize=NULL;
 	int flags=(forcemmx?TJ_FORCEMMX:0)|(forcesse?TJ_FORCESSE:0)
-		|(forcesse2?TJ_FORCESSE2:0)|(forcesse3?TJ_FORCESSE3:0);
+		|(forcesse2?TJ_FORCESSE2:0)|(forcesse3?TJ_FORCESSE3:0)
+		|(fastupsample?TJ_FASTUPSAMPLE:0);
 	int ps=_ps[pf];
 	int pitch=w*ps;
 
@@ -294,6 +296,9 @@ int main(int argc, char *argv[])
 		printf("       Force MMX, SSE, or SSE2 code paths in Intel codec\n\n");
 		printf("       [-rgb | -bgr | -rgba | -bgra | -abgr | -argb]\n");
 		printf("       Test the specified color conversion path in the codec (default: BGR)\n\n");
+		printf("       [-fastupsample]\n");
+		printf("       Use fast, inaccurate upsampling code to perform 4:2:2 and 4:2:0\n\n");
+		printf("       YUV decoding in libjpeg decompressor\n");
 		printf("       [-quiet]\n");
 		printf("       Output in tabular rather than verbose format\n\n");
 		printf("       NOTE: If the quality is specified as a range, i.e. 90-100, a separate\n");
@@ -334,6 +339,11 @@ int main(int argc, char *argv[])
 			{
 				printf("Using MMX code in Intel compressor\n");
 				forcemmx=1;
+			}
+			if(!stricmp(argv[i], "-fastupsample"))
+			{
+				printf("Using fast upsampling code\n");
+				fastupsample=1;
 			}
 			if(!stricmp(argv[i], "-rgb")) pf=BMP_RGB;
 			if(!stricmp(argv[i], "-rgba")) pf=BMP_RGBA;
