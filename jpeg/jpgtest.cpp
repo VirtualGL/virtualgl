@@ -297,8 +297,8 @@ int main(int argc, char *argv[])
 		printf("       [-rgb | -bgr | -rgba | -bgra | -abgr | -argb]\n");
 		printf("       Test the specified color conversion path in the codec (default: BGR)\n\n");
 		printf("       [-fastupsample]\n");
-		printf("       Use fast, inaccurate upsampling code to perform 4:2:2 and 4:2:0\n\n");
-		printf("       YUV decoding in libjpeg decompressor\n");
+		printf("       Use fast, inaccurate upsampling code to perform 4:2:2 and 4:2:0\n");
+		printf("       YUV decoding in libjpeg decompressor\n\n");
 		printf("       [-quiet]\n");
 		printf("       Output in tabular rather than verbose format\n\n");
 		printf("       NOTE: If the quality is specified as a range, i.e. 90-100, a separate\n");
