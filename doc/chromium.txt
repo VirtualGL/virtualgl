@@ -32,8 +32,9 @@ VirtualGL is generally not very useful with Configuration 1.  You could
 theoretically install a separate copy of VirtualGL on each display node and use
 it to redirect the output of each ''crserver'' instance to a separate VirtualGL
 Client instance running on a multi-screen 2D X server elsewhere on the network.
-However, synchronizing the frames on the remote end would require modifications
-to VirtualGL.  Such is left as an exercise for the reader.
+However, synchronizing the frames on the remote end would require extensive
+modifications to VirtualGL and perhaps to Chromium as well.  Such is left as an
+exercise for the reader.
 
 ** Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback
 
@@ -51,7 +52,7 @@ In this configuration, the application is allowed to choose a visual, create an
 X window, and manage the window as it would normally do.  However, all other
 OpenGL and GLX activity is intercepted by the Chromium App Faker (CrAppFaker)
 so that the 3D rendering can be split up among the rendering nodes.  Once each
-node has rendered its section of the final image, the image tiles get passed
+node has rendered its section of the final image, the image tiles are passed
 back to a Chromium Server (CrServer) process running on Node 0.  This CrServer
 process attaches to the previously-created application window and draws the
 pixels into the window using ''glDrawPixels()''.
@@ -69,38 +70,32 @@ CrServer to draw into a Pbuffer, and VGL then takes charge of transmitting
 the pixels from the Pbuffer to the 2D X server in the most efficient
 way possible.
 
-Since Chromium uses ''dlopen()'' to load the system's OpenGL library,
-preloading VirtualGL into the CrAppFaker and CrServer processes using
-''vglrun'' is not sufficient.  Chromium provides an environment variable,
-''CR_SYSTEM_GL_PATH'', which allows one to specify an alternate path to be
-searched for ''libGL.so''.  The VirtualGL packages for Linux and Solaris
-include a symbolic link named ''libGL.so'' which points to the VirtualGL faker
-library (''librrfaker.so'').  This symbolic link is located in its own isolated
-directory, so that directory can be passed to Chromium in the
-''CR_SYSTEM_GL_PATH'' environment variable, and this will cause Chromium to
-load VirtualGL rather than the "real" OpenGL library.  Refer to the following
-table:
+As with any normal OpenGL application, CrServer can be launched using
+''vglrun''.  However, because CrAppFaker also interposes OpenGL and GLX
+functions, it must be handled differently in order to avoid interference with
+VirtualGL.  Chromium provides an environment variable, ''CR_SYSTEM_GL_PATH'',
+which allows one to specify an alternate path to be searched for ''libGL.so''.
+The VirtualGL packages for Linux and Solaris include a symbolic link named
+''libGL.so'' which points to the VirtualGL faker library (''librrfaker.so'').
+This symbolic link is located in its own isolated directory, so that directory
+can be passed to Chromium in the ''CR_SYSTEM_GL_PATH'' environment variable,
+and this will cause Chromium to load VirtualGL rather than the "real" OpenGL
+library.  Refer to the following table:
 
 {anchor: CR_SYSTEM_GL_PATH_Table}
 || 32-bit Applications     || 64-bit Applications        ||
 | ''/opt/VirtualGL/fakelib''   | ''/opt/VirtualGL/fakelib/64''    |
 #OPT: note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
 
-Running the CrServer in VirtualGL is simply a matter of setting this
-environment variable and then invoking ''crserver'' with ''vglrun''.  For example:
-
-#Verb: <<---
-export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-vglrun crserver
----
-
-In the case of CrAppFaker, it is also necessary to set ''VGL_GLLIB'' to the
-location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1''.)
+To run CrAppFaker, it is necessary to set this environment variable to the
+appropriate value so that Chromium will load the interposed versions of OpenGL
+and GLX functions from VirtualGL.  It is also necessary to set ''VGL_GLLIB'' to
+the location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1'').
 CrAppFaker creates its own fake version of ''libGL.so'' which is really just a
-copy of Chromium's ''libcrfaker.so''.  So VirtualGL, if left to its own
-devices, will unwittingly try to load ''libcrfaker.so'' instead of the "real"
+copy of Chromium's ''libcrfaker.so''.  Thus, if left to its own devices,
+VirtualGL will unwittingly try to load ''libcrfaker.so'' instead of the "real"
 OpenGL library.  Chromium's ''libcrfaker.so'' will, in turn, try to load
-VirtualGL again, and an endless loop will occur.
+VirtualGL, and an endless loop will occur.
 
 Therefore, we must use the ''CR_SYSTEM_GL_PATH'' environment variable to tell
 Chromium to pass OpenGL commands into VirtualGL, then we must use the
@@ -116,10 +111,10 @@ crappfaker
 CrAppFaker will copy the application into a temporary directory and then copy
 ''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  So when
 the application is started, it loads ''libcrfaker.so'' instead of ''libGL.so''.
-''libcrfaker.so'' will then load VirtualGL instead of the "real" libGL, because
-we've overridden ''CR_SYSTEM_GL_PATH'' to point to VirtualGL's fake
-''libGL.so''.  VirtualGL will then use the library specified in ''VGL_GLLIB''
-to make any "real" OpenGL calls that it needs to make.
+''libcrfaker.so'' will then load VirtualGL instead of the "real" OpenGL
+library, because we've overridden ''CR_SYSTEM_GL_PATH'' to point to VirtualGL's
+fake ''libGL.so''.  VirtualGL will then use the library specified in
+''VGL_GLLIB'' to make any "real" OpenGL calls that it needs to make.
 
 	!!! NOTE: ''crappfaker'' should not be invoked with ''vglrun''.
 
@@ -131,14 +126,14 @@ sort-first rendering job using Chromium and VirtualGL:
 
 	#. Start ''crserver'' on each of the rendering nodes
 
-	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
-		appropriate value based on whether ''crserver'' and ''crappfaker'' were
-		compiled as 32-bit or 64-bit apps (see table above)
-
 	#. On Node 0, ''vglrun crserver &''
 
-	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" libGL (example:
-		''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1'').
+	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
+		appropriate value based on whether ''crappfaker'' was
+		compiled as a 32-bit or a 64-bit app (see table above)
+
+	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" OpenGL
+		library (example: ''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1'').
 
 	#. On Node 0, launch ''crappfaker'' (do not use ''vglrun'' here)
 
@@ -157,9 +152,6 @@ of step 2 above:
 On each of the rendering nodes,
 
 	* set the ''VGL_READBACK'' environment variable to ''0''
-	* set the ''CR_SYSTEM_GL_PATH'' environment variable to the appropriate value
-		based on whether ''crserver'' was compiled as a 32-bit or 64-bit app on
-		that node (see table above)
 	* ''vglrun crserver''
 
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
@@ -187,10 +179,6 @@ To make this configuration work with VirtualGL:
 
 	#. Start ''crappfaker'' on each of the rendering nodes
 
-	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
-		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
-		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
-
 	#. On Node 0, ''vglrun crserver''
 
 *** CRUT
@@ -208,10 +196,6 @@ VirtualGL:
 		performing sort-last rendering
 
 	#. Start ''crappfaker'' on each of the rendering nodes
-
-	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
-		appropriate value based on whether ''crserver'' was	compiled as a 32-bit or
-		a 64-bit app (see table in {ref prefix="Section ": CR_SYSTEM_GL_PATH_Table}.)
 
 	#. On Node 0, ''vglrun crutserver &''
 
@@ -249,7 +233,7 @@ Achieving this with VGP is relatively simple:
 
 #Verb: <<---
 export VGP_BACKING_GL_LIB=librrfaker.so
-vglrun vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
+vglrun -nodl vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
 ---
 
 Replace ''/usr/lib/libGL.so'' with the full path of your system's OpenGL
