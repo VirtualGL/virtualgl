@@ -46,6 +46,9 @@ ifeq ($(M32), yes)
  subplatform :=
 endif
 
+_DUMMY1 := $(shell if [ ! -f $(TOPDIR)/config.$(platform)$(subplatform) ]; then touch $(TOPDIR)/config.$(platform)$(subplatform); fi)
+include $(TOPDIR)/config.$(platform)$(subplatform)
+
 # Macros which are common to all Unix platforms
 VERSION := 2.2
 BUILD := $(shell date +%Y%m%d)
@@ -204,3 +207,4 @@ $(LDIR)/%.lib: $(ODIR)/%.obj
 .PHONY : clean
 
 include $(TOPDIR)/config
+include $(TOPDIR)/config.$(platform)$(subplatform)

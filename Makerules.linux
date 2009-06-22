@@ -4,7 +4,6 @@
 
 CC = $(shell if [ -x /usr/bin/gcc4 ]; then echo gcc4; else echo cc; fi)
 CXX = $(shell if [ -x /usr/bin/g++4 ]; then echo g++4; else echo c++; fi)
-CXX := $(CXX) -static-libgcc
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
@@ -15,10 +14,10 @@ endif
 
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
- LDFLAGS = -L/usr/X11R6/lib64
+ LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
 else
  ARCHFLAG =
- LDFLAGS = -L/usr/X11R6/lib
+ LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 endif
 
 ifeq ($(M32), yes)
