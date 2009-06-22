@@ -189,10 +189,11 @@ one or more of the necessary 32-bit prerequisites, then:
      albeit slow, behavior.  In order to get optimal performance out of
      VirtualGL on Solaris, it is necessary to use the mediaLib codec, which is
      capable of compressing JPEG images 3-4x faster than libjpeg.
-   * mediaLib is pre-installed on Solaris 10.  It can also be downloaded for
-     free from http://www.sun.com/processors/vis/mlib.html.  Solaris 10/x86
-     users should upgrade the pre-installed version of mediaLib on their
-     system to mediaLib 2.5 in order to achieve better performance.
+   * mediaLib is pre-installed on Solaris 10 and later, and it can also be
+     downloaded for free from http://www.sun.com/processors/vis/mlib.html.  If
+     you are running Solaris 10/x86 Update 3 or older, then you should upgrade
+     the pre-installed version of mediaLib on your system to mediaLib 2.5 in
+     order to achieve the best possible performance.
 
 
 *******************************************************************************
