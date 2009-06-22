@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -389,13 +390,16 @@ funcdef4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 
 // From dlfaker
 
-funcdef2(void *, dlopen, const char *, filename, int, flag, return);
+typedef	void* (*_dlopenType)(const char *, int);
+void *_vgl_dlopen(const char *, int);
+symdef(dlopen);
 
 #ifdef __cplusplus
 }
 #endif
 
 void __vgl_loadsymbols(void);
+void __vgl_loaddlsymbols(void);
 void __vgl_unloadsymbols(void);
 
 #endif

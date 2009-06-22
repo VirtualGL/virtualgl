@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,28 +24,39 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 	void *sym;  const char *err;
 	dlerror();  // Clear error state
 	sym=dlsym(dllhnd, (char *)symbol);
-	if(!sym && dllhnd==RTLD_NEXT) {dlerror();  sym=dlsym(RTLD_DEFAULT, (char *)symbol);}
 	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] ERROR: Could not load symbol %s:\n[VGL]    %s\n", symbol, err);}
 	return sym;
 }
 
 #define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
-	rrout.print("[VGL] ERROR: Could not load symbol %s\n", #s);  __vgl_safeexit(1);}
+	return -1;}
+
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
 
+void __vgl_loaddlsymbols(void)
+{
+	dlerror();  // Clear error state
+	__dlopen=(_dlopenType)loadsym(RTLD_NEXT, "dlopen", 0);
+	if(!__dlopen)
+	{
+		rrout.print("[VGL] ERROR: Could not load symbol dlopen\n");
+		__vgl_safeexit(1);
+	}
+}
+
+static int __vgl_loadglsymbols(void *);
+static int __vgl_loadx11symbols(void *);
+
 void __vgl_loadsymbols(void)
 {
-	void *dllhnd=RTLD_NEXT;
-	dlerror();  // Clear error state
-
-	lsym(dlopen);
+	void *dllhnd;
 
 	if(fconfig.gllib)
 	{
-		dllhnd=__dlopen(fconfig.gllib, RTLD_NOW);
+		dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
@@ -54,6 +66,66 @@ void __vgl_loadsymbols(void)
 		else gldllhnd=dllhnd;
 	}
 	else dllhnd=RTLD_NEXT;
+	if(__vgl_loadglsymbols(dllhnd)<0)
+	{
+		if(dllhnd==RTLD_NEXT)
+		{
+			if(fconfig.verbose)
+			{
+				rrout.print("[VGL] WARNING: Could not load GLX/OpenGL symbols using RTLD_NEXT.  Attempting\n");
+				rrout.print("[VGL]    to load GLX/OpenGL symbols directly from libGL.so.1.\n");
+			}
+			dllhnd=_vgl_dlopen("libGL.so.1", RTLD_NOW);
+			if(!dllhnd)
+			{
+				rrout.print("[VGL] ERROR: Could not open libGL.so.1\n[VGL]    %s\n",
+					dlerror());
+				__vgl_safeexit(1);
+			}
+			if(__vgl_loadglsymbols(dllhnd)<0) __vgl_safeexit(1);
+			gldllhnd=dllhnd;
+		}
+		else __vgl_safeexit(1);
+	}
+
+	if(fconfig.x11lib)
+	{
+		dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_NOW);
+		if(!dllhnd)
+		{
+			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
+				(char *)fconfig.x11lib, dlerror());
+			__vgl_safeexit(1);
+		}
+		else x11dllhnd=dllhnd;
+	}
+	else dllhnd=RTLD_NEXT;
+	if(__vgl_loadx11symbols(dllhnd)<0)
+	{
+		if(dllhnd==RTLD_NEXT)
+		{
+			if(fconfig.verbose)
+			{
+				rrout.print("[VGL] WARNING: Could not load X11 symbols using RTLD_NEXT.  Attempting\n");
+				rrout.print("[VGL]    to load X11 symbols directly from libX11.so.6.\n");
+			}
+			dllhnd=_vgl_dlopen("libX11.so.6", RTLD_NOW);
+			if(!dllhnd)
+			{
+				rrout.print("[VGL] ERROR: Could not open libX11.so.6\n[VGL]    %s\n",
+					dlerror());
+				__vgl_safeexit(1);
+			}
+			if(__vgl_loadx11symbols(dllhnd)<0) __vgl_safeexit(1);
+			x11dllhnd=dllhnd;
+		}
+		else __vgl_safeexit(1);
+	}
+}
+
+static int __vgl_loadglsymbols(void *dllhnd)
+{
+	dlerror();  // Clear error state
 
 	// GLX symbols
 	lsym(glXChooseVisual)
@@ -147,20 +219,12 @@ void __vgl_loadsymbols(void)
 	lsym(glMaterialiv)
 	lsym(glPixelTransferf)
 	lsym(glPixelTransferi)
+	return 0;
+}
 
-	// X11 symbols
-	if(fconfig.x11lib)
-	{
-		dllhnd=__dlopen(fconfig.x11lib, RTLD_NOW);
-		if(!dllhnd)
-		{
-			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
-				(char *)fconfig.x11lib, dlerror());
-			__vgl_safeexit(1);
-		}
-		else x11dllhnd=dllhnd;
-	}
-	else dllhnd=RTLD_NEXT;
+static int __vgl_loadx11symbols(void *dllhnd)
+{
+	dlerror();  // Clear error state
 
 	lsym(XCheckMaskEvent);
 	lsym(XCheckTypedEvent);
@@ -182,6 +246,7 @@ void __vgl_loadsymbols(void)
 	lsym(XResizeWindow);
 	lsym(XServerVendor);
 	lsym(XWindowEvent);
+	return 0;
 }
 
 void __vgl_unloadsymbols(void)

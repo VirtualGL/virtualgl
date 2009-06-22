@@ -37,9 +37,6 @@
 #include "vglconfigstart.h"
 #include <sys/types.h>
 #include <unistd.h>
-#ifdef __DEBUG__
-#include "x11err.h"
-#endif
 
 #ifdef SUNOGL
 extern "C" {
@@ -184,16 +181,16 @@ _globalcleanup gdt;
 
 #include "faker-glx.cpp"
 
-#if 0
-// Used during debug so we can get a stack trace from an X11 protocol error
-#ifdef __DEBUG__
+// Used when VGL_TRAPX11=1
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	rrout.PRINT("[VGL] ERROR: X11 error--\n[VGL]    %s\n", x11error(xe->error_code));
+	char temps[256];
+	temps[0]=0;
+	XGetErrorText(dpy, xe->error_code, temps, 255);
+	rrout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
+		temps, xe->resourceid);
 	return 0;
 }
-#endif
-#endif
 
 void __vgl_fakerinit(void)
 {
@@ -212,10 +209,8 @@ void __vgl_fakerinit(void)
 		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
 		fgetc(stdin);
 	}
-	#if 0
-	XSetErrorHandler(xhandler);
 	#endif
-	#endif
+	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
 	__vgl_loadsymbols();
 	#ifdef USEGLP
@@ -253,35 +248,19 @@ void __vgl_fakerinit(void)
 
 extern "C" {
 
-void *dlopen(const char *filename, int flag)
+void *_vgl_dlopen(const char *file, int mode)
 {
-	void *retval=NULL;
-	__vgl_fakerinit();
-
-		opentrace("dlopen");  prargs(filename);  prargi(flag);  starttrace();
-
-	char *env=NULL;  const char *envname="FAKERLIB32";
-	if(sizeof(long)==8) envname="FAKERLIB";
-	if((env=getenv(envname))==NULL || strlen(env)<1)
-		env="librrfaker.so";
-	if(filename && (!strncmp(filename, "libGL.", 6)
-		|| strstr(filename, "/libGL.")))
-	{
-		if(fconfig.verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
-				filename, env);
-		retval=__dlopen(env, flag);
-	}
-	else retval=__dlopen(filename, flag);
-
-		stoptrace();  prargx(retval);  closetrace();
-
-	return retval;
+	globalmutex.lock(false);
+	if(!__dlopen) __vgl_loaddlsymbols();
+	globalmutex.unlock(false);
+	checksym(dlopen);
+	return __dlopen(file, mode);
 }
 
 ////////////////
 // X11 functions
 ////////////////
+
 
 #ifdef sparc
 
@@ -426,6 +405,8 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	if(!(win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -446,6 +427,8 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background))) return 0;
 	if(_isremote(dpy)) winh.add(dpy, win);
+	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -474,22 +457,23 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 	unsigned int *border_width, unsigned int *depth)
 {
 	Status ret=0;
+	unsigned int w=0, h=0;
 
 		opentrace(XGetGeometry);  prargx(display);  prargx(drawable);
 		starttrace();
 
-	ret=_XGetGeometry(display, drawable, root, x, y, width, height, border_width,
+	ret=_XGetGeometry(display, drawable, root, x, y, &w, &h, border_width,
 		depth);
 	pbwin *pbw=NULL;
-	if(winh.findpb(display, drawable, pbw) && width && height
-		&& *width>0 && *height>0)
-		pbw->resize(*width, *height);
+	if(winh.findpb(display, drawable, pbw) && w>0 && h>0)
+		pbw->resize(w, h);
 
 		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
-		if(width) prargi(*width);  if(height) prargi(*height);
+		prargi(w);  prargi(h);
 		if(border_width) prargi(*border_width);  if(depth) prargi(*depth);
 		closetrace();
 
+	if(width) *width=w;  if(height) *height=h;
 	return ret;
 }
 
@@ -501,7 +485,8 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		if(winh.findpb(dpy, xe->xconfigure.window, pbw))
 		{
 				opentrace(_HandleEvent);  prargi(xe->xconfigure.width);
-				prargi(xe->xconfigure.height);  starttrace();
+				prargi(xe->xconfigure.height);  prargx(xe->xconfigure.window);
+				starttrace();
 
 			pbw->resize(xe->xconfigure.width, xe->xconfigure.height);
 
@@ -516,6 +501,16 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 			&& (state==fconfig.guimod || state==state2)
 			&& FakerConfig::_Shmid!=-1)
 			vglpopup(dpy, FakerConfig::_Shmid);
+	}
+	else if(xe && xe->type==ClientMessage)
+	{
+		XClientMessageEvent *cme=(XClientMessageEvent *)xe;
+		Atom protoatom=XInternAtom(dpy, "WM_PROTOCOLS", True);
+		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+		if(protoatom && deleteatom && cme->message_type==protoatom
+			&& cme->data.l[0]==(long)deleteatom
+			&& winh.findpb(dpy, cme->window, pbw))
+			pbw->wmdelete();
 	}
 }
 

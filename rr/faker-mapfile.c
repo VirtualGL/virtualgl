@@ -132,7 +132,7 @@
 		__XOpenDisplay;
 		__XCreateWindow;
 
-		dlopen;
+		_vgl_dlopen;
 
 	local:
 		*;

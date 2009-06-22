@@ -128,6 +128,9 @@ clean:
 $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl
 
+$(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
+	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
+
 $(LDIR)/libgefaker.$(SHEXT): $(ODIR)/gefaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
 
