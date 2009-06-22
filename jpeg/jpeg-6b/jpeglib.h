@@ -2,6 +2,7 @@
  * jpeglib.h
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
+ * Copyright (C) 2009, D. R. Commander.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -203,13 +204,22 @@ struct jpeg_marker_struct {
 
 /* Known color spaces. */
 
+#define JCS_EXTENSIONS 1
+
 typedef enum {
 	JCS_UNKNOWN,		/* error/unspecified */
 	JCS_GRAYSCALE,		/* monochrome */
-	JCS_RGB,		/* red/green/blue */
+	JCS_RGB,		/* red/green/blue as specified by the RGB_RED, RGB_GREEN,
+                 RGB_BLUE, and RGB_PIXELSIZE macros */
 	JCS_YCbCr,		/* Y/Cb/Cr (also known as YUV) */
 	JCS_CMYK,		/* C/M/Y/K */
-	JCS_YCCK		/* Y/Cb/Cr/K */
+	JCS_YCCK,		/* Y/Cb/Cr/K */
+	JCS_EXT_RGB,		/* red/green/blue */
+	JCS_EXT_RGBX,		/* red/green/blue/x */
+	JCS_EXT_BGR,		/* blue/green/red */
+	JCS_EXT_BGRX,		/* blue/green/red/x */
+	JCS_EXT_XBGR,		/* x/blue/green/red */
+	JCS_EXT_XRGB,		/* x/red/green/blue */
 } J_COLOR_SPACE;
 
 /* DCT/IDCT algorithm options. */
@@ -239,7 +249,6 @@ typedef enum {
 /* Common fields between JPEG compression and decompression master structs. */
 
 #define jpeg_common_fields \
-  int rgb_red, rgb_green, rgb_blue, rgb_pixelsize;  /* Allows support of RGB(A) or BGR(A) bitmaps */\
   struct jpeg_error_mgr * err;	/* Error handler module */\
   struct jpeg_memory_mgr * mem;	/* Memory manager module */\
   struct jpeg_progress_mgr * progress; /* Progress monitor, or NULL if none */\

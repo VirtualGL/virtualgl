@@ -2,6 +2,7 @@
  * jquant2.c
  *
  * Copyright (C) 1991-1996, Thomas G. Lane.
+ * Copyright (C) 2009, D. R. Commander.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -75,10 +76,9 @@
 #define B_SCALE 1		/* and B by this much */
 
 static const int c_scales[3]={R_SCALE, G_SCALE, B_SCALE};
-
-#define C0_SCALE c_scales[cinfo->rgb_red]
-#define C1_SCALE c_scales[cinfo->rgb_green]
-#define C2_SCALE c_scales[cinfo->rgb_blue]
+#define C0_SCALE c_scales[rgb_red[cinfo->out_color_space]]
+#define C1_SCALE c_scales[rgb_green[cinfo->out_color_space]]
+#define C2_SCALE c_scales[rgb_blue[cinfo->out_color_space]]
 
 /*
  * First we have the histogram data structure and routines for creating it.
@@ -436,7 +436,7 @@ median_cut (j_decompress_ptr cinfo, boxptr boxlist, int numboxes,
     /* We want to break any ties in favor of green, then red, blue last.
      * This code does the right thing for R,G,B or B,G,R color orders only.
      */
-    if(cinfo->rgb_red == 0) {
+    if (rgb_red[cinfo->out_color_space] == 0) {
       cmax = c1; n = 1;
       if (c0 > cmax) { cmax = c0; n = 0; }
       if (c2 > cmax) { n = 2; }

@@ -80,12 +80,6 @@ jpeg_CreateDecompress (j_decompress_ptr cinfo, int version, size_t structsize)
 
   /* OK, I'm ready */
   cinfo->global_state = DSTATE_START;
-
-  /* Set up default pixel format for RGB conversion */
-  cinfo->rgb_red = RGB_RED;
-  cinfo->rgb_green = RGB_GREEN;
-  cinfo->rgb_blue = RGB_BLUE;
-  cinfo->rgb_pixelsize = RGB_PIXELSIZE;
 }
 
 
