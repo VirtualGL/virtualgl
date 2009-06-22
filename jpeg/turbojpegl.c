@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -128,19 +129,25 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	j->cinfo.rgb_pixelsize = ps;
-	j->cinfo.rgb_green = 1;
-	if(flags&TJ_BGR) {j->cinfo.rgb_red = 2;  j->cinfo.rgb_blue = 0;}
-	else {j->cinfo.rgb_red = 0;  j->cinfo.rgb_blue = 2;}
-	if(flags&TJ_ALPHAFIRST)
-	{
-		j->cinfo.rgb_red++;  j->cinfo.rgb_green++;  j->cinfo.rgb_blue++;
-	}
-
 	j->cinfo.image_width = width;
 	j->cinfo.image_height = height;
 	j->cinfo.input_components = ps;
-	j->cinfo.in_color_space = JCS_RGB;
+
+	#if JCS_EXTENSIONS==1
+	j->cinfo.in_color_space = JCS_EXT_RGB;
+	if(ps==3 && (flags&TJ_BGR))
+		j->cinfo.in_color_space = JCS_EXT_BGR;
+	else if(ps==4 && !(flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST))
+		j->cinfo.in_color_space = JCS_EXT_RGBX;
+	else if(ps==4 && (flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST))
+		j->cinfo.in_color_space = JCS_EXT_BGRX;
+	else if(ps==4 && (flags&TJ_BGR) && (flags&TJ_ALPHAFIRST))
+		j->cinfo.in_color_space = JCS_EXT_XBGR;
+	else if(ps==4 && !(flags&TJ_BGR) && (flags&TJ_ALPHAFIRST))
+		j->cinfo.in_color_space = JCS_EXT_XRGB;
+	#else
+	#error "TurboJPEG requires JPEG colorspace extensions"
+	#endif
 
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
@@ -280,15 +287,6 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	j->dinfo.rgb_pixelsize=ps;
-	j->dinfo.rgb_green=1;
-	if(flags&TJ_BGR) {j->dinfo.rgb_red=2;  j->dinfo.rgb_blue=0;}
-	else {j->dinfo.rgb_red=0;  j->dinfo.rgb_blue=2;}
-	if(flags&TJ_ALPHAFIRST)
-	{
-		j->dinfo.rgb_red++;  j->dinfo.rgb_green++;  j->dinfo.rgb_blue++;
-	}
-
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
 		if(row_pointer) free(row_pointer);
@@ -308,7 +306,22 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 		else row_pointer[i]= &dstbuf[i*pitch];
 	}
 
-	j->dinfo.out_color_space=JCS_RGB;
+	#if JCS_EXTENSIONS==1
+	j->dinfo.out_color_space = JCS_EXT_RGB;
+	if(ps==3 && (flags&TJ_BGR))
+		j->dinfo.out_color_space = JCS_EXT_BGR;
+	else if(ps==4 && !(flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST))
+		j->dinfo.out_color_space = JCS_EXT_RGBX;
+	else if(ps==4 && (flags&TJ_BGR) && !(flags&TJ_ALPHAFIRST))
+		j->dinfo.out_color_space = JCS_EXT_BGRX;
+	else if(ps==4 && (flags&TJ_BGR) && (flags&TJ_ALPHAFIRST))
+		j->dinfo.out_color_space = JCS_EXT_XBGR;
+	else if(ps==4 && !(flags&TJ_BGR) && (flags&TJ_ALPHAFIRST))
+		j->dinfo.out_color_space = JCS_EXT_XRGB;
+	#else
+	#error "TurboJPEG requires JPEG colorspace extensions"
+	#endif
+	if(flags&TJ_FASTUPSAMPLE) j->dinfo.do_fancy_upsampling=FALSE;
 
 	jpeg_start_decompress(&j->dinfo);
 	while(j->dinfo.output_scanline<j->dinfo.output_height)
