@@ -51,6 +51,61 @@ VisIt, which has a library named "libGLabelPlot.so" that was being interposed
 by mistake.  The matching criteria has been changed such that dlopen() only
 overrides calls to dlopen("libGL\.*") or dlopen("*/libGL\.*").
 -------------------------------------------------------------------------------
+[3]
+vglserver_config should now work properly with DRI-compatible graphics drivers
+(including ATI.)
+-------------------------------------------------------------------------------
+[4]
+VirtualGL's interposed version of dlopen() will now modify calls to
+dlopen("libdl*") as well as dlopen("libGL*").  This is to work around an
+interaction issue with v180.xx of the NVidia accelerated 3D drivers and WINE.
+-------------------------------------------------------------------------------
+[5]
+Fixed interaction issue with QT4 in which VirtualGL would not properly handle
+window resize events under certain circumstances.
+-------------------------------------------------------------------------------
+[6]
+Moved dlopen() back into a separate faker library (libdlfaker.so.)
+libdlfaker.so is loaded by default, which should maintain the behavior of
+VGL 2.1.2.  However, it can be unloaded by passing an argument of '-nodl' to
+vglrun.  The latter is necessary to make VirtualBox 2.2.x work with VirtualGL.
+-------------------------------------------------------------------------------
+[7]
+vglserver_config should now work properly on Ubuntu 9.04 when using gdm or kdm.
+It should also (mostly) work on Fedora 11 (disabling XTEST does not work on
+Fedora 11 when using gdm.)
+-------------------------------------------------------------------------------
+[8]
+Added fallback logic to VirtualGL's symbol loader which will try to directly
+load the GLX/OpenGL symbols from libGL.so.1 and the X11 symbols from
+libX11.so.6 if loading these symbols using dlsym(RTLD_NEXT, ...) fails.  This
+is to work around an issue with version 18x.xx of the nVidia Linux Display
+Driver.
+-------------------------------------------------------------------------------
+[9]
+If an application window was destroyed by the window manager and the
+application did not explicitly monitor and handle the WM_DELETE protocol
+message, then previous versions of VirtualGL would, when using the X11 image
+transport, generally abort with an X11 BadDrawable error.  This occurred
+because the window was basically being ripped out from underneath VirtualGL's
+blitter thread without warning.  This version of VirtualGL has been modified
+to monitor WM_DELETE messages, so VirtualGL can now bow out gracefully if the
+3D application window is closed by the window manager but the application
+does not handle WM_DELETE.
+-------------------------------------------------------------------------------
+[10]
+Worked around an interaction issue with IDL whereby the application was calling
+XGetGeometry() with the same pointer for every argument, and this was causing
+VirtualGL to lose the width and height data returned from the "real"
+XGetGeometry() function.  Subsequently, the Pbuffer corresponding to the main
+IDL window would become improperly sized, and the rendering area would not
+appear to update.
+-------------------------------------------------------------------------------
+[11]
+Added VGL_TRAPX11 option, which will cause VirtualGL to gracefully trap X11
+errors, print a warning message when these occur, and allow the application to
+continue running.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
