@@ -31,8 +31,8 @@ const int _rindex[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
 const int _gindex[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
 const int _bindex[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 const char *_pfname[]={"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"};
-const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:1:1", "GRAY"};
-const char *_subnames[NUMSUBOPT]={"444", "422", "411", "GRAY"};
+const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:2:0", "GRAY"};
+const char *_subnames[NUMSUBOPT]={"444", "422", "420", "GRAY"};
 
 void printsigfig(double val, int figs)
 {
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
 		dotest(bmpbuf, w, h, pf, bu, TJ_GRAYSCALE, i, argv[1], dotile, useppm, quiet);
 	if(quiet) printf("\n");
 	for(i=hiqual; i>=qual; i--)
-		dotest(bmpbuf, w, h, pf, bu, TJ_411, i, argv[1], dotile, useppm, quiet);
+		dotest(bmpbuf, w, h, pf, bu, TJ_420, i, argv[1], dotile, useppm, quiet);
 	if(quiet) printf("\n");
 	for(i=hiqual; i>=qual; i--)
 		dotest(bmpbuf, w, h, pf, bu, TJ_422, i, argv[1], dotile, useppm, quiet);
