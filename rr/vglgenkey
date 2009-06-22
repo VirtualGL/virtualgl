@@ -9,5 +9,9 @@ fi
 if [ ! -d /etc/opt/VirtualGL ]; then
 	mkdir -p /etc/opt/VirtualGL
 fi
-$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate :0 . trusted timeout 0
+if [ -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
+	rm /etc/opt/VirtualGL/vgl_xauth_key
+fi
+$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate $DISPLAY . trusted timeout 0 ||
+	$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key add $DISPLAY . `xauth list | awk '{print $3}'`
 chmod 644 /etc/opt/VirtualGL/vgl_xauth_key
