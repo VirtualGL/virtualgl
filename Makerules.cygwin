@@ -44,7 +44,8 @@ ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
 
-FAKERLINK = -lGL
+GLLIB = -lGL
+FAKERLINK = $(GLLIB)
 
 ifeq ($(subplatform),)
 RPMARCH = i386
