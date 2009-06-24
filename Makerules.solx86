@@ -18,7 +18,7 @@ OPTFLAG = -O0 -ggdb
 else
 OPTFLAG = -O2
 endif
-SHFLAG = -shared -lc -z defs
+SHFLAG = -shared -lc
 DEPFLAG = -MM
 MAPFLAG = -Wl,-M,
 
@@ -114,7 +114,8 @@ SOCKLIB := $(SOCKLIB) $(SSLLIB)
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
+GLLIB = -lGL
+FAKERLINK = $(GLLIB) -lXdamage -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
