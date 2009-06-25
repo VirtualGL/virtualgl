@@ -39,7 +39,7 @@ OPTFLAG = -g
 else
 OPTFLAG = -O
 endif
-SHFLAG = -G -lc -z direct -lCrun -z nodirect -z defs
+SHFLAG = -G -lc -z direct -lCrun -z nodirect
 DEPFLAG = -xM1
 MAPFLAG = -M
 
