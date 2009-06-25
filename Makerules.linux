@@ -57,7 +57,8 @@ ifeq ($(USESSL), yes)
 
 endif
 
-FAKERLINK = -lGL $(MAPFLAG)$(ODIR)/faker-mapfile.E
+GLLIB = -lGL
+FAKERLINK = $(GLLIB) $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ifeq ($(subplatform),)
  RPMARCH = i386

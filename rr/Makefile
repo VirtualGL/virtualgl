@@ -148,10 +148,10 @@ $(VGLCONFIG): $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
 
 ifeq ($(platform), solaris)
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY) -ldl
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) $(GLLIB) $(NOLAZY) -ldl
 else
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) -lGL $(NOLAZY) $(OSXGLFIX)
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) $(GLLIB) $(NOLAZY) $(OSXGLFIX)
 endif
 
 $(EDIR)/vglconnect: vglconnect
@@ -160,7 +160,7 @@ $(EDIR)/vglconnect: vglconnect
 # Unit tests
 
 $(EDIR)/rrframeut: $(ODIR)/rrframeut.o $(RRDEP)
-	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) -lGL $(OSXGLFIX)
+	$(CXX) $(LDFLAGS) -o $@ $< $(RRLIB) $(GLLIB) $(OSXGLFIX)
 
 LXMU=
 ifeq ($(platform), solaris)
@@ -168,7 +168,7 @@ ifeq ($(platform), solaris)
 endif
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) -lGL -lGLU $(ZNOW) -lX11 -ldl -lpthread $(LXMU)
+	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) $(GLLIB) -lGLU $(ZNOW) -lX11 -ldl -lpthread $(LXMU)
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl

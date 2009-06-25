@@ -113,7 +113,7 @@ $(EDIR)/threadtest: $(ODIR)/threadtest.o
 	$(CXX) $(LDFLAGS) $< -o $@ -lpthread
 
 $(EDIR)/glreadtest: $(ODIR)/glreadtest.o
-	$(CXX) $(LDFLAGS) $< -o $@ -lGL -lGLU -lX11 $(OSXGLFIX)
+	$(CXX) $(LDFLAGS) $< -o $@ $(GLLIB) -lGLU -lX11 $(OSXGLFIX)
 
 ##########################################################################
 endif
