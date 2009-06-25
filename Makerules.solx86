@@ -18,7 +18,7 @@ ifeq ($(CC), gcc)
  else
   OPTFLAG = -O2
  endif
- SHFLAG = -shared -lc -z defs
+ SHFLAG = -shared -lc
  DEPFLAG = -MM
  MAPFLAG = -Wl,-M,
 
@@ -39,7 +39,7 @@ else
  else
   OPTFLAG = -O
  endif
- SHFLAG = -G -lc -z direct -lCrun -z nodirect -z defs
+ SHFLAG = -G -lc -z direct -lCrun -z nodirect
  DEPFLAG = -xM1
  MAPFLAG = -M
 
@@ -105,7 +105,8 @@ ifeq ($(USESSL), yes)
 endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
-FAKERLINK = -lGL -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
+GLLIB = -lGL
+FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
