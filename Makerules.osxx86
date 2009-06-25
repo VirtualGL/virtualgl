@@ -44,4 +44,5 @@ SOCKLIB = -lrrsocket -lpthread
 ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
+GLLIB = -lGL
 OSXGLFIX = -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib

@@ -42,3 +42,4 @@ SOCKLIB = -lrrsocket -lpthread -lX11 $(GLLIB)
 ifneq ($(USESSL), no)
 SOCKLIB := $(SOCKLIB) -lssl -lcrypto.0.9.7
 endif
+GLLIB = -lGL
