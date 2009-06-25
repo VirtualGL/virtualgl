@@ -115,7 +115,7 @@ endif
 
 # Have to explicitly link libXm before libGL so Java apps don't barf
 GLLIB = -lGL
-FAKERLINK = $(GLLIB) -lXdamage -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
+FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
