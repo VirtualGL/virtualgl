@@ -329,13 +329,13 @@ configdev() {
 			fi
 		fi
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
-			if [ -e /dev/nvidia* ]; then
+			if [ -e /dev/nvidia0 -o -e /dev/nvidiactl ]; then
 				echo ... Granting write permission to /dev/nvidia* for vglusers group ...
 				chmod 660 /dev/nvidia*
 				chown root:vglusers /dev/nvidia*
 			fi
 		else
-			if [ -e /dev/nvidia* ]; then
+			if [ -e /dev/nvidia0 -o -e /dev/nvidiactl ]; then
 				echo ... Granting write permission to /dev/nvidia* for all users ...
 				chmod 666 /dev/nvidia*
 				chown root:root /dev/nvidia*
