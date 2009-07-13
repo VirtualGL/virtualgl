@@ -6,6 +6,10 @@ Fixed a regression bug in vglserver_config which caused a "binary operator
 expected" error when restricting framebuffer device access to the vglusers
 group.
 -------------------------------------------------------------------------------
+[2]
+Fixed an issue in vglserver_config whereby the device permissions were not
+being set correctly on SuSE Linux Enterprise Desktop 11.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
