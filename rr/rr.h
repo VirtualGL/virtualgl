@@ -49,10 +49,6 @@ typedef struct _rrframeheader
 } rrframeheader;
 #define sizeof_rrframeheader 26
 
-#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
-#pragma pack()
-#endif
-
 typedef struct _rrversion
 {
 	char id[3];
@@ -85,10 +81,6 @@ typedef struct _rrframeheader_v1
 	                            drawn */
 } rrframeheader_v1;
 #define sizeof_rrframeheader_v1 24
-
-#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
-#pragma pack()
-#endif
 
 /* Header flags */
 enum {
@@ -144,10 +136,6 @@ enum rrstereo {RRSTEREO_LEYE=0, RRSTEREO_REYE, RRSTEREO_QUADBUF, RRSTEREO_REDCYA
 #define MAXPROCS 4
 
 #define MAXSTR 256
-
-#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
-#pragma pack(1)
-#endif
 
 /* Faker configuration */
 typedef struct _FakerConfig
