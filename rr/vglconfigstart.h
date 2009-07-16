@@ -50,8 +50,7 @@ class vglconfigstart : public Runnable
 				unsetenv("LD_PRELOAD_32");
 				unsetenv("LD_PRELOAD_64");
 				sprintf(commandline, "%s -display %s -shmid %d -ppid %d",
-					sizeof(long)==8? (char *)fconfig.config64:(char *)fconfig.config,
-					DisplayString(_dpy), _shmid, getpid());
+					fconfig.config, DisplayString(_dpy), _shmid, getpid());
 				if(system(commandline)==-1) _throwunix();
 			}
 			catch(rrerror &e)

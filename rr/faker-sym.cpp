@@ -54,13 +54,13 @@ void __vgl_loadsymbols(void)
 {
 	void *dllhnd;
 
-	if(fconfig.gllib)
+	if(strlen(fconfig.gllib)>0)
 	{
 		dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
-				(char *)fconfig.gllib, dlerror());
+				fconfig.gllib, dlerror());
 			__vgl_safeexit(1);
 		}
 		else gldllhnd=dllhnd;
@@ -88,13 +88,13 @@ void __vgl_loadsymbols(void)
 		else __vgl_safeexit(1);
 	}
 
-	if(fconfig.x11lib)
+	if(strlen(fconfig.x11lib)>0)
 	{
 		dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_NOW);
 		if(!dllhnd)
 		{
 			rrout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
-				(char *)fconfig.x11lib, dlerror());
+				fconfig.x11lib, dlerror());
 			__vgl_safeexit(1);
 		}
 		else x11dllhnd=dllhnd;

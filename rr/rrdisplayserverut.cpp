@@ -1,4 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +13,6 @@
  */
 
 #include "rrdisplayclient.h"
-#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
 
 #define WIDTH 301
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-ssl")) usessl=true;
 		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
 		{
-			fconfig.client=argv[i+1];  i++;
+			strncpy(fconfig.client, argv[i+1], MAXSTR-1);  i++;
 		}
 	}
 
@@ -53,7 +53,8 @@ int main(int argc, char **argv)
 	printf("Creating window %lu\n", (unsigned long)win);
 	errifnot(XMapRaised(dpy, win));
 	XSync(dpy, False);
-	if(!fconfig.client) fconfig.client=DisplayString(dpy);
+	if(strlen(fconfig.client)==0)
+		strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
 
 	rrframe *b;
 
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=4;
-			b->_h.winid=win;
+			b->_h.winid=win;  b->_h.compress=RRCOMP_JPEG;
 			rrdpy->sendframe(b);
 		}
 		delete rrdpy;

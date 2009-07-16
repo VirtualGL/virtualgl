@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -102,11 +103,11 @@ rrdisplayclient::rrdisplayclient(Display *dpy, char *displayname,
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
 		rrout.println("[VGL] Using %d / %d CPU's for compression",
-			(int)fconfig.np, numprocs());
+			fconfig.np, numprocs());
 	char *servername=NULL;
 	try
 	{
-		if(displayname)
+		if(displayname && strlen(displayname)>0)
 		{
 			unsigned short port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 			char *ptr=NULL;  servername=strdup(displayname);
@@ -118,7 +119,7 @@ rrdisplayclient::rrdisplayclient(Display *dpy, char *displayname,
 			}
 			if(!strlen(servername) || !strcmp(servername, "unix"))
 				{free(servername);  servername=strdup("localhost");}
-			if(fconfig.port.isset()) port=fconfig.port;
+			if(fconfig.port>=0) port=fconfig.port;
 			else
 			{
 				Atom atom=None;  unsigned long n=0, bytesleft=0;
@@ -358,15 +359,15 @@ void rrdisplayclient::recv(char *buf, int len)
 
 void rrdisplayclient::save(char *buf, int len)
 {
-	if(fconfig.moviefile)
+	if(strlen(fconfig.moviefile)>0)
 	{
 		int fd=open(fconfig.moviefile, O_CREAT|O_APPEND|O_RDWR, S_IREAD|S_IWRITE);
 		if(fd==-1)
 		{
 			rrout.println("[VGL] WARNING: Could not open %s (%s.)",
-				(char *)fconfig.moviefile, strerror(errno));
+				fconfig.moviefile, strerror(errno));
 			rrout.println("[VGL]    Disabling movie creation.");
-			fconfig.moviefile=(char *)NULL;
+			fconfig.moviefile[0]=0;
 		}
 		else
 		{
@@ -375,7 +376,7 @@ void rrdisplayclient::save(char *buf, int len)
 				rrout.println("[VGL] WARNING: Could not write to movie file (%s.)\n",
 					strerror(errno));
 				rrout.println("[VGL]    Disabling movie creation.");
-				fconfig.moviefile=(char *)NULL;
+				fconfig.moviefile[0]=0;
 			}
 			close(fd);
 		}
@@ -384,9 +385,9 @@ void rrdisplayclient::save(char *buf, int len)
 
 void rrdisplayclient::connect(char *servername, unsigned short port)
 {
-	if(servername)
+	if(servername && strlen(servername)>0)
 	{
-		errifnot(_sd=new rrsocket(fconfig.ssl));
+		errifnot(_sd=new rrsocket((bool)fconfig.ssl));
 		try
 		{
 			_sd->connect(servername, port);

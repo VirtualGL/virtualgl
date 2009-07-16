@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -722,7 +723,7 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 		prargx(underlay);  starttrace();
 
 	if(fconfig.transpixel>=0)
-		*transparentIndex=(unsigned int)fconfig.transpixel;
+		*transparentIndex=fconfig.transpixel;
 	else
 	{
 		if(!dpy || !overlay) return False;

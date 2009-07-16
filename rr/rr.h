@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -47,6 +48,10 @@ typedef struct _rrframeheader
 	                            drawn */
 } rrframeheader;
 #define sizeof_rrframeheader 26
+
+#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
+#pragma pack()
+#endif
 
 typedef struct _rrversion
 {
@@ -137,5 +142,65 @@ enum rrstereo {RRSTEREO_LEYE=0, RRSTEREO_REYE, RRSTEREO_QUADBUF, RRSTEREO_REDCYA
 /* Maximum CPUs that be can be used for parallel image compression */
 /* (the algorithms don't scale beyond 3) */
 #define MAXPROCS 4
+
+#define MAXSTR 256
+
+#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
+#pragma pack(1)
+#endif
+
+/* Faker configuration */
+typedef struct _FakerConfig
+{
+	char autotest;
+	char client[MAXSTR];
+	int compress;
+	char config[MAXSTR];
+	double flushdelay;
+	double fps;
+	double gamma;
+	unsigned char gamma_lut[256];
+	unsigned short gamma_lut16[65536];
+	char gamma_usesun;
+	char gllib[MAXSTR];
+	char glp;
+	char gui;
+	unsigned int guikey;
+	char guikeyseq[MAXSTR];
+	unsigned int guimod;
+	char interframe;
+	char localdpystring[MAXSTR];
+	char log[MAXSTR];
+	char logo;
+	int mcompress;
+	char moviefile[MAXSTR];
+	int mqual;
+	int msubsamp;
+	int np;
+	int port;
+	char progressive;
+	int qual;
+	char readback;
+	char spoil;
+	char ssl;
+	int stereo;
+	int subsamp;
+	char sync;
+	int tilesize;
+	char trace;
+	int transpixel;
+	char transvalid[RR_TRANSPORTOPT];
+	char trapx11;
+	char usewindow;
+	char vendor[MAXSTR];
+	char verbose;
+	char x11lib[MAXSTR];
+	int zoomx;
+	int zoomy;
+} FakerConfig;
+
+#if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
+#pragma pack()
+#endif
 
 #endif

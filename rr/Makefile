@@ -70,7 +70,8 @@ FOBJS = $(ODIR)/faker.o \
         $(ODIR)/glxvisual.o \
         $(ODIR)/rrblitter.o \
         $(ODIR)/rrdisplayclient.o \
-        $(ODIR)/rrsunray.o
+        $(ODIR)/rrsunray.o \
+        $(ODIR)/fakerconfig.o
 
 TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrdisplayclientut.o \
@@ -102,13 +103,9 @@ TARGETS = $(EDIR)/vglclient \
 ifneq ($(platform), cygwin)
  ifneq ($(platform), osx)
   ifneq ($(platform), osxx86)
-   VGLCONFIG = $(EDIR)/vglconfig
-   ifeq ($(subplatform), 64)
-    VGLCONFIG = $(EDIR)/vglconfig64
-   endif
    TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) \
      $(LDIR)/libdlfaker.$(SHEXT) $(LDIR)/libgefaker.$(SHEXT) \
-     $(VGLCONFIG) $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
+     $(EDIR)/vglconfig $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
   endif
  endif
 endif
@@ -141,8 +138,10 @@ $(EDIR)/vglrun: vglrun
 $(EDIR)/vgllogin: vgllogin
 	$(INSTALL) -m 755 $< $@
 
-$(VGLCONFIG): $(ODIR)/vglconfig.o $(LDIR)/libfltk_static.a
-	$(CXX) $(LDFLAGS) -o $@ $< -lX11 -lfltk_static -lpthread -lrrutil
+$(EDIR)/vglconfig: $(ODIR)/vglconfig.o $(ODIR)/fakerconfig.o \
+	$(ODIR)/rrsunray.o $(LDIR)/libfltk_static.a
+	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/vglconfig.o $(ODIR)/fakerconfig.o \
+		$(ODIR)/rrsunray.o -lX11 -lfltk_static -lpthread -lrrutil
 
 # Client
 
@@ -176,18 +175,20 @@ $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
 $(LDIR)/libGLdlfakerut.$(SHEXT): $(ODIR)/libGLdlfakerut.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $<
 
-$(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRDEP)
-	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o $(RRLIB)
+$(EDIR)/rrblitterut: $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o \
+	$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRDEP)
+	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrblitterut.o $(ODIR)/rrblitter.o \
+		$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRLIB)
 
 $(EDIR)/rrdisplayclientut: $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
-	$(RRDEP)
+	$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrdisplayclientut.o $(ODIR)/rrdisplayclient.o \
-		$(RRLIB)
+		$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRLIB)
 
 $(EDIR)/rrdisplayserverut: $(ODIR)/rrdisplayserverut.o $(ODIR)/rrdisplayclient.o \
-	$(RRDEP)
+	$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRDEP)
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/rrdisplayserverut.o $(ODIR)/rrdisplayclient.o \
-		$(RRLIB)
+		$(ODIR)/fakerconfig.o $(ODIR)/rrsunray.o $(RRLIB)
 
 ##########################################################################
 endif

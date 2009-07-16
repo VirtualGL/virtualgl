@@ -106,7 +106,6 @@ install: rr
 	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT)
 	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
-	$(INSTALL) -m 755 $(EDIR)/vglconfig64 $(prefix)/bin/vglconfig64
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
 	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt

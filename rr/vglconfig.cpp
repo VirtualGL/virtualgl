@@ -1,4 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,10 +27,10 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Spinner.H>
-#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
 #include "rr.h"
 #include "rrlog.h"
+#include "rrutil.h"
 
 Fl_Double_Window *win=NULL;
 Fl_Choice *compchoice=NULL/*, *mcompchoice=NULL*/, *sampchoice=NULL,
@@ -55,32 +56,32 @@ void SetComp(void)
 	{
 		if(!fconfig.transvalid[_Trans[i]]) compchoice->mode(i, FL_MENU_INACTIVE);
 		else compchoice->mode(i, 0);
-		if((int)fconfig.compress()==i) compchoice->value(i);
+		if(fconfig.compress==i) compchoice->value(i);
 	}
 }
 
 void SetSamp(void)
 {
 	if(!sampchoice) return;
-	if(_Maxsubsamp[fconfig.compress()]==_Minsubsamp[fconfig.compress()])
+	if(_Maxsubsamp[fconfig.compress]==_Minsubsamp[fconfig.compress])
 		sampchoice->deactivate();
 	else sampchoice->activate();
-	if(_Minsubsamp[fconfig.compress()]>0)
+	if(_Minsubsamp[fconfig.compress]>0)
 		sampchoice->mode(0, FL_MENU_INACTIVE);
 	else sampchoice->mode(0, 0);
-	if(_Minsubsamp[fconfig.compress()]>1 || _Maxsubsamp[fconfig.compress()]<1)
+	if(_Minsubsamp[fconfig.compress]>1 || _Maxsubsamp[fconfig.compress]<1)
 		sampchoice->mode(1, FL_MENU_INACTIVE);
 	else sampchoice->mode(1, 0);
-	if(_Minsubsamp[fconfig.compress()]>2 || _Maxsubsamp[fconfig.compress()]<2)
+	if(_Minsubsamp[fconfig.compress]>2 || _Maxsubsamp[fconfig.compress]<2)
 		sampchoice->mode(2, FL_MENU_INACTIVE);
 	else sampchoice->mode(2, 0);
-	if(_Minsubsamp[fconfig.compress()]>4 || _Maxsubsamp[fconfig.compress()]<4)
+	if(_Minsubsamp[fconfig.compress]>4 || _Maxsubsamp[fconfig.compress]<4)
 		sampchoice->mode(3, FL_MENU_INACTIVE);
 	else sampchoice->mode(3, 0);
-	if(_Minsubsamp[fconfig.compress()]>8 || _Maxsubsamp[fconfig.compress()]<8)
+	if(_Minsubsamp[fconfig.compress]>8 || _Maxsubsamp[fconfig.compress]<8)
 		sampchoice->mode(4, FL_MENU_INACTIVE);
 	else sampchoice->mode(4, 0);
-	if(_Minsubsamp[fconfig.compress()]>16 || _Maxsubsamp[fconfig.compress()]<16)
+	if(_Minsubsamp[fconfig.compress]>16 || _Maxsubsamp[fconfig.compress]<16)
 		sampchoice->mode(5, FL_MENU_INACTIVE);
 	else sampchoice->mode(5, 0);
 	switch(fconfig.subsamp)
@@ -98,7 +99,7 @@ void SetQual(void)
 {
 	if(!qualslider) return;
 	qualslider->value(fconfig.qual);
-	if(fconfig.compress()!=RRCOMP_JPEG) qualslider->deactivate();
+	if(fconfig.compress!=RRCOMP_JPEG) qualslider->deactivate();
 	else qualslider->activate();
 }
 
@@ -112,11 +113,11 @@ void SetProf(void)
 	else
 	{
 		profchoice->activate();
-		if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==30
+		if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==30
 			&& fconfig.subsamp==4) profchoice->value(0);
-		else if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==80
+		else if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==80
 			&& fconfig.subsamp==2) profchoice->value(1);
-		else if(fconfig.compress()==RRCOMP_JPEG && fconfig.qual==95
+		else if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==95
 			&& fconfig.subsamp==1) profchoice->value(2);
 		else profchoice->value(3);
 	}
@@ -126,7 +127,7 @@ void SetIF(void)
 {
 	if(!ifbutton) return;
 	ifbutton->value(fconfig.interframe);
-	if(fconfig.compress()!=RRCOMP_PROXY) ifbutton->activate();
+	if(fconfig.compress!=RRCOMP_PROXY) ifbutton->activate();
 	else ifbutton->deactivate();
 }
 
@@ -137,16 +138,16 @@ void SetStereo(void)
 	if(!fconfig.transvalid[RRTRANS_VGL]) stereochoice->mode(2, FL_MENU_INACTIVE);
 	else stereochoice->mode(2, 0);
 	for(i=0; i<RR_STEREOOPT; i++)
-		if((int)fconfig.stereo==i) stereochoice->value(i);
+		if(fconfig.stereo==i) stereochoice->value(i);
 }
 
 void SetFPS(void)
 {
 	char temps[20];
-	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
+	snprintf(temps, 19, "%.2f", fconfig.fps);
 	fpsinput->value(temps);
-	if(_Trans[fconfig.compress()]==RRTRANS_X11
-		|| _Trans[fconfig.compress()]==RRTRANS_VGL) fpsinput->activate();
+	if(_Trans[fconfig.compress]==RRTRANS_X11
+		|| _Trans[fconfig.compress]==RRTRANS_VGL) fpsinput->activate();
 	else fpsinput->deactivate();
 }
 
@@ -155,7 +156,7 @@ void SetMovie(void)
 {
 	if(mcompchoice)
 	{
-		if(fconfig.moviefile) mcompchoice->activate();
+		if(strlen(fconfig.moviefile)>0) mcompchoice->activate();
 		else mcompchoice->deactivate();
 		if(fconfig.mcompress==RRCOMP_JPEG) mcompchoice->value(0);
 		else if(fconfig.mcompress==RRCOMP_RGB) mcompchoice->value(1);
@@ -163,7 +164,7 @@ void SetMovie(void)
 	if(msampchoice)
 	{
 		if(_Maxsubsamp[fconfig.mcompress]==_Minsubsamp[fconfig.mcompress]
-			|| !fconfig.moviefile)
+			|| strlen(fconfig.moviefile)==0)
 			msampchoice->deactivate();
 		else msampchoice->activate();
 		switch(fconfig.msubsamp)
@@ -177,7 +178,7 @@ void SetMovie(void)
 	if(mqualslider)
 	{
 		mqualslider->value(fconfig.mqual);
-		if(fconfig.mcompress!=RRCOMP_JPEG || !fconfig.moviefile)
+		if(fconfig.mcompress!=RRCOMP_JPEG || strlen(fconfig.moviefile)==0)
 			mqualslider->deactivate();
 		else mqualslider->activate();
 	}
@@ -188,7 +189,7 @@ void SetMovie(void)
 void CompCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
-	if(d>=0 && d<=RR_COMPRESSOPT-1) fconfig.compress(d);
+	if(d>=0 && d<=RR_COMPRESSOPT-1) fconfig_setcompress(fconfig, d);
 	SetSamp();
 	SetQual();
 	SetProf();
@@ -218,15 +219,15 @@ void ProfCB(Fl_Widget *w, void *data)
 	switch(d)
 	{
 		case 0:
-			fconfig.compress(RRCOMP_JPEG);
+			fconfig_setcompress(fconfig, RRCOMP_JPEG);
 			fconfig.qual=30;  fconfig.subsamp=4;
 			break;
 		case 1:
-			fconfig.compress(RRCOMP_JPEG);
+			fconfig_setcompress(fconfig, RRCOMP_JPEG);
 			fconfig.qual=80;  fconfig.subsamp=2;
 			break;
 		case 2:
-			fconfig.compress(RRCOMP_JPEG);
+			fconfig_setcompress(fconfig, RRCOMP_JPEG);
 			fconfig.qual=95;  fconfig.subsamp=1;
 			break;
 	}
@@ -239,22 +240,22 @@ void ProfCB(Fl_Widget *w, void *data)
 void SpoilCB(Fl_Widget *w, void *data)
 {
 	Fl_Check_Button *check=(Fl_Check_Button *)w;
-	fconfig.spoil=(bool)(check->value()!=0);
+	fconfig.spoil=(check->value()!=0);
 }
 
 void GammaCB(Fl_Widget *w, void *data)
 {
 	Fl_Float_Input *input=(Fl_Float_Input *)w;
-	fconfig.gamma=(double)atof(input->value());
+	fconfig_setgamma(fconfig, atof(input->value()));
 	char temps[20];
-	snprintf(temps, 19, "%.2f", (double)fconfig.gamma);
+	snprintf(temps, 19, "%.2f", fconfig.gamma);
 	input->value(temps);
 }
 
 void IFCB(Fl_Widget *w, void *data)
 {
 	Fl_Check_Button *check=(Fl_Check_Button *)w;
-	fconfig.interframe=(bool)(check->value()!=0);
+	fconfig.interframe=(check->value()!=0);
 }
 
 void StereoCB(Fl_Widget *w, void *data)
@@ -266,9 +267,9 @@ void StereoCB(Fl_Widget *w, void *data)
 void FPSCB(Fl_Widget *w, void *data)
 {
 	Fl_Float_Input *input=(Fl_Float_Input *)w;
-	fconfig.fps=(double)atof(input->value());
+	fconfig.fps=atof(input->value());
 	char temps[20];
-	snprintf(temps, 19, "%.2f", (double)fconfig.fps);
+	snprintf(temps, 19, "%.2f", fconfig.fps);
 	input->value(temps);
 }
 
@@ -276,7 +277,7 @@ void FPSCB(Fl_Widget *w, void *data)
 void MovieCB(Fl_Widget *w, void *data)
 {
 	Fl_Input *input=(Fl_Input *)w;
-	fconfig.moviefile=(char *)input->value();
+	strncpy(fconfig.moviefile, input->value(), MAXSTR-1);
 	input->value(fconfig.moviefile);
 	SetMovie();
 }
@@ -396,7 +397,7 @@ void init(int argc, char **argv)
 	errifnot(gammainput=new Fl_Float_Input(315, 165, 85, 25,
 		"Gamma Correction Factor (1.0=no correction): "));
 	gammainput->callback(GammaCB, 0);
-	snprintf(temps, 19, "%.2f", (double)fconfig.gamma);
+	snprintf(temps, 19, "%.2f", fconfig.gamma);
 	gammainput->value(temps);
 
 	errifnot(spoilbutton=new Fl_Light_Button(10, 200, 345, 25,
@@ -499,9 +500,9 @@ int main(int argc, char **argv)
 
 		if(test)
 		{
-			if(!(_fconfig=FakerConfig::instance()))
+			if(!(_fconfig=fconfig_instance()))
 				_throw("Could not allocate FakerConfig");
-			_fconfig->print();
+			fconfig_print(fconfig);
 		}
 		else
 		{
@@ -523,7 +524,7 @@ int main(int argc, char **argv)
 	}
 	if(_fconfig)
 	{
-		if(test) FakerConfig::deleteinstance();
+		if(test) fconfig_deleteinstance();
 		else shmdt((char *)_fconfig);
 	}
 	return status;

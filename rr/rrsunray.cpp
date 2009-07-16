@@ -1,4 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,14 +18,15 @@
 #include "rrerror.h"
 #include "fakerconfig.h"
 #include "rrlog.h"
+#include "rrutil.h"
 
 static int RRSunRayConfigCallback(const char *name, int type, void *value)
 {
 	if(!name || !value || type<0) return -1;
 	if(!stricmp(name, "VGL_CLIENT") && type==RRSUNRAY_CONFIGSTR)
-		{*((char **)value)=(char *)fconfig.client;  return 0;}
+		{*((char **)value)=fconfig.client;  return 0;}
 	else if(!stricmp(name, "VGL_COMPRESS") && type==RRSUNRAY_CONFIGINT)
-		{*((int *)value)=(int)fconfig.compress();  return 0;}
+		{*((int *)value)=fconfig.compress;  return 0;}
 	else if(!stricmp(name, "VGL_INTERFRAME") && type==RRSUNRAY_CONFIGINT)
 		{*((int *)value)=(int)fconfig.interframe;  return 0;}
 	else if(!stricmp(name, "VGL_PROGRESSIVE") && type==RRSUNRAY_CONFIGINT)
@@ -32,7 +34,7 @@ static int RRSunRayConfigCallback(const char *name, int type, void *value)
 	else if(!stricmp(name, "VGL_SPOIL") && type==RRSUNRAY_CONFIGINT)
 		{*((int *)value)=(int)fconfig.spoil;  return 0;}
 	else if(!stricmp(name, "VGL_SUBSAMP") && type==RRSUNRAY_CONFIGINT)
-		{*((int *)value)=(int)fconfig.subsamp;  return 0;}
+		{*((int *)value)=fconfig.subsamp;  return 0;}
 	else if(!stricmp(name, "VGL_VERBOSE") && type==RRSUNRAY_CONFIGINT)
 		{*((int *)value)=(int)fconfig.verbose;  return 0;}
 	return -1;

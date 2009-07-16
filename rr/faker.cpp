@@ -21,7 +21,6 @@
 #include "rrtimer.h"
 #include "rrthread.h"
 #include "rrmutex.h"
-#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
 #define __FAKERHASH_STATICDEF__
 #include "faker-winhash.h"
@@ -115,7 +114,7 @@ void __vgl_safeexit(int retcode)
 	{
 		__shutdown=1;
 		__vgl_cleanup();
-		FakerConfig::deleteinstance();
+		fconfig_deleteinstance();
 	}
 	globalmutex.unlock(false);
 	if(!shutdown) exit(retcode);
@@ -128,7 +127,7 @@ class _globalcleanup
 		~_globalcleanup()
 		{
 			globalmutex.lock(false);
-			FakerConfig::deleteinstance();
+			fconfig_deleteinstance();
 			__shutdown=1;
 			globalmutex.unlock(false);
 		}
@@ -200,8 +199,8 @@ void __vgl_fakerinit(void)
 	if(init) return;
 	init=1;
 
-	fconfig.reloadenv();
-	if(fconfig.log) rrout.logto(fconfig.log);
+	fconfig_reloadenv();
+	if(strlen(fconfig.log)>0) rrout.logto(fconfig.log);
 
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
@@ -227,7 +226,7 @@ void __vgl_fakerinit(void)
 				device?device:"(default)");
 			if((_localdev=glPOpenDevice(device))<0)
 			{
-				rrout.print("[VGL] ERROR: Could not open GLP device %s.\n", (char *)fconfig.localdpystring);
+				rrout.print("[VGL] ERROR: Could not open GLP device %s.\n", fconfig.localdpystring);
 				__vgl_safeexit(1);
 			}
 		}
@@ -237,10 +236,10 @@ void __vgl_fakerinit(void)
 	if(!_localdpy)
 	{
 		if(fconfig.verbose) rrout.println("[VGL] Opening local display %s",
-			fconfig.localdpystring?(char *)fconfig.localdpystring:"(default)");
+			strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			rrout.print("[VGL] ERROR: Could not open display %s.\n", (char *)fconfig.localdpystring);
+			rrout.print("[VGL] ERROR: Could not open display %s.\n", fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}
 	}
@@ -272,7 +271,7 @@ Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
 		opentrace(XSolarisGetVisualGamma);  prargd(dpy);  prargi(screen);
 		prargv(visual);  starttrace();
 
-	if((!__vglHasGCVisuals(dpy, screen) || !fconfig.gamma.usesun())
+	if((!__vglHasGCVisuals(dpy, screen) || !fconfig.gamma_usesun)
 		&& fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0
 		&& gamma)
 		*gamma=1.0;
@@ -369,7 +368,7 @@ char **XListExtensions(Display *dpy, int *next)
 
 char *XServerVendor(Display *dpy)
 {
-	if(fconfig.vendor) return fconfig.vendor;
+	if(strlen(fconfig.vendor)>0) return fconfig.vendor;
 	else return _XServerVendor(dpy);
 }
 
@@ -382,7 +381,7 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	__vgl_fakerinit();
 	if(!(dpy=_XOpenDisplay(name))) return NULL;
-	if(fconfig.vendor) ServerVendor(dpy)=fconfig.vendor;
+	if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=fconfig.vendor;
 
 		stoptrace();  prargd(dpy);  closetrace();
 
@@ -499,8 +498,8 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=(~(Mod1Mask));  state2|=Mod2Mask;}
 		if(fconfig.gui && XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
 			&& (state==fconfig.guimod || state==state2)
-			&& FakerConfig::_Shmid!=-1)
-			vglpopup(dpy, FakerConfig::_Shmid);
+			&& fconfig_getshmid()!=-1)
+			vglpopup(dpy, fconfig_getshmid());
 	}
 	else if(xe && xe->type==ClientMessage)
 	{
@@ -795,7 +794,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a Pbuffer-enabled");
-			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  If the application", fconfig.localdpystring?(char *)fconfig.localdpystring:"");
+			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  If the application", fconfig.localdpystring);
 			rrout.println("[VGL]    subsequently fails, then make sure that the 3D X server is configured");
 			rrout.println("[VGL]    for 24-bit color and has accelerated 3D drivers installed.");
 		}

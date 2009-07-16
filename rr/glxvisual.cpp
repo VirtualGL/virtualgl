@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -364,8 +365,8 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 				if(_va[i].depth!=depth) match=0;
 				if(trygamma)
 				{
-					if(fconfig.gamma.usesun() && _va[i].gamma!=1.0) match=0;
-					if(!fconfig.gamma.usesun() && _va[i].gamma==1.0) match=0;
+					if(fconfig.gamma_usesun && _va[i].gamma!=1.0) match=0;
+					if(!fconfig.gamma_usesun && _va[i].gamma==1.0) match=0;
 				}
 				if(fconfig.stereo==RRSTEREO_QUADBUF && trystereo)
 				{

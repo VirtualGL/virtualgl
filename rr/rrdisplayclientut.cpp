@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +16,6 @@
 #include "rrdisplayclient.h"
 #include "rrtimer.h"
 #include "bmp.h"
-#define __FAKERCONFIG_STATICDEF__
 #include "fakerconfig.h"
 
 void usage(char **argv)
@@ -29,17 +29,17 @@ void usage(char **argv)
 	printf("\n\n");
 	printf("-client = X Display where the video should be sent (VGL client must be running\n");
 	printf("          on that machine) or 0 for local test only\n");
-	printf("          [default = %s]\n", fconfig.client? (char *)fconfig.client:"read from DISPLAY environment");
+	printf("          [default = %s]\n", strlen(fconfig.client)>0? fconfig.client:"read from DISPLAY environment");
 	printf("-samp = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
-	printf("        [default = %d]\n", (int)fconfig.subsamp);
-	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", (int)fconfig.qual);
+	printf("        [default = %d]\n", fconfig.subsamp);
+	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", fconfig.qual);
 	printf("-tilesize = width/height of each inter-frame difference tile\n");
-	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
+	printf("            [default = %d x %d pixels]\n", fconfig.tilesize, fconfig.tilesize);
 	printf("-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
 	#ifdef USESSL
 	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
 	#endif
-	printf("-np <n> = number of processors to use for compression [default = %d]\n", (int)fconfig.np);
+	printf("-np <n> = number of processors to use for compression [default = %d]\n", fconfig.np);
 	printf("\n");
 	exit(1);
 }
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
 	try {
 
-	fconfig.compress(RRCOMP_JPEG);
+	fconfig_setcompress(fconfig, RRCOMP_JPEG);
 
 	bool localtest=false;
 	if(argc<2) usage(argv);
@@ -61,12 +61,13 @@ int main(int argc, char **argv)
 	for(i=0; i<argc; i++)
 	{
 		#ifdef USESSL
-		if(!stricmp(argv[i], "-ssl")) fconfig.ssl=true;
+		if(!stricmp(argv[i], "-ssl")) fconfig.ssl=1;
 		#endif
 		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
 		{
-			fconfig.client=argv[i+1];  i++;
-			if(!stricmp(fconfig.client, "0")) {localtest=true;  fconfig.client=NULL;}
+			strncpy(fconfig.client, argv[i+1], MAXSTR-1);  i++;
+			if(!stricmp(fconfig.client, "0"))
+				{localtest=true;  fconfig.client[0]=0;}
 		}
 		if(!strnicmp(argv[i], "-sa", 3) && i<argc-1)
 		{
@@ -84,9 +85,9 @@ int main(int argc, char **argv)
 		{
 			fconfig.np=atoi(argv[i+1]);  i++;
 		}
-		if(!stricmp(argv[i], "-rgb")) fconfig.compress(RRCOMP_RGB);
+		if(!stricmp(argv[i], "-rgb")) fconfig_setcompress(fconfig, RRCOMP_RGB);
 	}
-	if(fconfig.compress()==RRCOMP_RGB) bgr=0;
+	if(fconfig.compress==RRCOMP_RGB) bgr=0;
 
 	int w, h, d=3;
 
@@ -105,10 +106,11 @@ int main(int argc, char **argv)
 		printf("Creating window %lu\n", (unsigned long)win);
 		errifnot(XMapRaised(dpy, win));
 		XSync(dpy, False);
-		if(!fconfig.client) fconfig.client=DisplayString(dpy);
+		if(strlen(fconfig.client)==0)
+			strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
 	}
 
-	printf("Tile size = %d x %d pixels\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
+	printf("Tile size = %d x %d pixels\n", fconfig.tilesize, fconfig.tilesize);
 
 	rrdisplayclient rrdpy(dpy, fconfig.client);
 
@@ -127,7 +129,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress();
+		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -144,7 +146,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress();
+		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		clientframes++;  frames++;
@@ -162,7 +164,7 @@ int main(int argc, char **argv)
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress();
+		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
 		rrdpy.sendframe(b);
 		frames++;
@@ -178,7 +180,7 @@ int main(int argc, char **argv)
 		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
 		memcpy(b->_bits, buf, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress();
+		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		rrdpy.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
