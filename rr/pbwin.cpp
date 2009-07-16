@@ -167,7 +167,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
-	fconfig.compress(_windpy);
+	fconfig_setcompressfromdpy(_windpy);
 	_sunrayhandle=NULL;
 	_wmdelete=false;
 	XWindowAttributes xwa;
@@ -327,7 +327,7 @@ void pbwin::wmdelete(void)
 
 void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 {
-	fconfig.reloadenv();
+	fconfig_reloadenv();
 	bool dostereo=false;  int stereomode=fconfig.stereo;
 
 	if(!fconfig.readback) return;
@@ -337,7 +337,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	_dirty=false;
 
-	int compress=(int)fconfig.compress();
+	int compress=fconfig.compress;
 	if(sync) {compress=RRCOMP_PROXY;}
 
 	if(stereo() && stereomode!=RRSTEREO_LEYE && stereomode!=RRSTEREO_REYE)
@@ -371,7 +371,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	if(!_truecolor) compress=RRCOMP_PROXY;
 
 	bool sharerrdpy=false;
-	if(fconfig.moviefile)
+	if(strlen(fconfig.moviefile)>0)
 	{
 		if(fconfig.mcompress==compress && fconfig.mqual==fconfig.qual
 			&& fconfig.msubsamp==fconfig.subsamp && !fconfig.spoil)
@@ -395,7 +395,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		case RRCOMP_JPEG:
 		case RRCOMP_RGB:
 			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
-				fconfig.client? fconfig.client:DisplayString(_windpy)));
+				strlen(fconfig.client)>0? fconfig.client:DisplayString(_windpy)));
 			_rrdpy->record(sharerrdpy);
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
@@ -624,24 +624,24 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	checkgl("Read Pixels");
 
 	// Gamma correction
-	if((!_gammacorrectedvisuals || !fconfig.gamma.usesun())
+	if((!_gammacorrectedvisuals || !fconfig.gamma_usesun)
 		&& fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0)
 	{
 		_prof_gamma.startframe();
 		static bool first=true;
-		#ifdef USEMEDIALIB
+		#if defined(USEMEDIALIB) && defined(sun)
 		if(first)
 		{
 			first=false;
 			if(fconfig.verbose)
 				rrout.println("[VGL] Using mediaLib gamma correction (correction factor=%f)\n",
-					(double)fconfig.gamma);
+					fconfig.gamma);
 		}
 		mlib_image *image=NULL;
 		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
 		{
-			unsigned char *luts[4]={fconfig.gamma._lut, fconfig.gamma._lut,
-				fconfig.gamma._lut, fconfig.gamma._lut};
+			unsigned char *luts[4]={fconfig.gamma_lut, fconfig.gamma_lut,
+				fconfig.gamma_lut, fconfig.gamma_lut};
 			mlib_ImageLookUp_Inp(image, (const void **)luts);
 			mlib_ImageDelete(image);
 		}
@@ -653,13 +653,13 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			first=false;
 			if(fconfig.verbose)
 				rrout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
-					(double)fconfig.gamma);
+					fconfig.gamma);
 		}
 		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*h]);
 		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
-			*ptr1=fconfig.gamma._lut16[*ptr1];
-		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.gamma._lut[bits[pitch*h-1]];
-		#ifdef USEMEDIALIB
+			*ptr1=fconfig.gamma_lut16[*ptr1];
+		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.gamma_lut[bits[pitch*h-1]];
+		#if defined(USEMEDIALIB) && defined(sun)
 		}
 		#endif
 		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
