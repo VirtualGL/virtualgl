@@ -20,6 +20,7 @@
 #include "rrmutex.h"
 #include "rrblitter.h"
 #include "rrdisplayclient.h"
+#include "rrplugin.h"
 #include "fbx.h"
 #ifdef USEGLP
 #include <GL/glp.h>
@@ -79,7 +80,7 @@ class pbwin
 		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);
 		void sendx11(GLint, bool, bool, bool, int, bool srfallback=false);
-		int sendsr(GLint, bool, bool, int);
+		void sendplugin(GLint, bool, bool, int);
 
 		bool _force;
 		rrcs _mutex;
@@ -92,8 +93,7 @@ class pbwin
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
-		void *_sunrayhandle;
-		int _usesunray;
+		rrplugin *_plugin;
 		bool _truecolor;
 		bool _gammacorrectedvisuals;
 		bool _stereovisual;

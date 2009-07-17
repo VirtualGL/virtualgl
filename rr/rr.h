@@ -91,31 +91,31 @@ enum {
 };
 
 /* Transport types */
-#define RR_TRANSPORTOPT 3
-enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_SR};
+#define RR_TRANSPORTOPT 2
+enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL};
 
 /* Compression types */
-#define RR_COMPRESSOPT  6
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_SRDPCM, RRCOMP_SRRGB, RRCOMP_SRYUV};
+#define RR_COMPRESSOPT  3
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB};
 
 static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {
-	RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_SR, RRTRANS_SR, RRTRANS_SR
+	RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL
 };
 
 static const int _Minsubsamp[RR_COMPRESSOPT]=
 {
-	-1, 0, -1, 1, -1, 1
+	-1, 0, -1
 };
 
 static const int _Defsubsamp[RR_COMPRESSOPT]=
 {
-	1, 1, 1, 16, 16, 16
+	1, 1, 1
 };
 
 static const int _Maxsubsamp[RR_COMPRESSOPT]=
 {
-	-1, 4, -1, 16, -1, 16
+	-1, 4, -1
 };
 
 /* Stereo options */
@@ -166,7 +166,6 @@ typedef struct _FakerConfig
 	int msubsamp;
 	int np;
 	int port;
-	char progressive;
 	int qual;
 	char readback;
 	char spoil;
@@ -177,14 +176,13 @@ typedef struct _FakerConfig
 	int tilesize;
 	char trace;
 	int transpixel;
+	char transport[MAXSTR];
 	char transvalid[RR_TRANSPORTOPT];
 	char trapx11;
 	char usewindow;
 	char vendor[MAXSTR];
 	char verbose;
 	char x11lib[MAXSTR];
-	int zoomx;
-	int zoomy;
 } FakerConfig;
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

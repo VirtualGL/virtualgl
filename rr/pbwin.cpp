@@ -20,9 +20,6 @@
 #ifdef USEMEDIALIB
 #include <mlib.h>
 #endif
-#if defined(sun)||defined(linux)
-#include "rrsunray.h"
-#endif
 #include "glxvisual.h"
 
 #define INFAKER
@@ -167,8 +164,8 @@ pbwin::pbwin(Display *windpy, Window win)
 	_rdirty=false;
 	_autotestframecount=0;
 	_truecolor=true;
-	fconfig_setcompressfromdpy(_windpy);
-	_sunrayhandle=NULL;
+	fconfig_setdefaultsfromdpy(_windpy);
+	_plugin=NULL;
 	_wmdelete=false;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
@@ -195,13 +192,15 @@ pbwin::~pbwin(void)
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
 	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
 	if(_rrmoviedpy) {delete _rrmoviedpy;  _rrmoviedpy=NULL;}
-	#if defined(sun)||defined(linux)
-	if(_sunrayhandle)
+	if(_plugin)
 	{
-		if(RRSunRayDestroy(_sunrayhandle)==-1 && fconfig.verbose)
-			rrout.println("[VGL] WARNING: %s", RRSunRayGetError(_sunrayhandle));
+		try {delete _plugin;}
+		catch (rrerror &e)
+		{
+			if(fconfig.verbose)
+				rrout.println("[VGL] WARNING: %s", e.getMessage());
+		}
 	}
-	#endif 
 	if(_eventdpy) {XCloseDisplay(_eventdpy);  _eventdpy=NULL;}
 	_mutex.unlock(false);
 }
@@ -380,10 +379,17 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		if(!sharerrdpy)
 		{
 			if(!_rrmoviedpy)
-				errifnot(_rrmoviedpy=new rrdisplayclient(NULL, NULL, true));
+				errifnot(_rrmoviedpy=new rrdisplayclient());
+			_rrmoviedpy->record(true);
 			sendvgl(_rrmoviedpy, drawbuf, false, dostereo, RRSTEREO_QUADBUF,
 				fconfig.mcompress, fconfig.mqual, fconfig.msubsamp, true);
 		}
+	}
+
+	if(strlen(fconfig.transport)>0)
+	{
+		sendplugin(drawbuf, spoillast, dostereo, stereomode);
+		return;
 	}
 
 	switch(compress)
@@ -394,85 +400,68 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 		case RRCOMP_JPEG:
 		case RRCOMP_RGB:
-			if(!_rrdpy) errifnot(_rrdpy=new rrdisplayclient(_windpy,
-				strlen(fconfig.client)>0? fconfig.client:DisplayString(_windpy)));
+			if(!_rrdpy)
+			{
+				errifnot(_rrdpy=new rrdisplayclient());
+				_rrdpy->connect(strlen(fconfig.client)>0?
+					fconfig.client:DisplayString(_windpy), fconfig.port);
+			}
 			_rrdpy->record(sharerrdpy);
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
-
-		case RRCOMP_SRDPCM:
-		case RRCOMP_SRRGB:
-		case RRCOMP_SRYUV:
-			if(sendsr(drawbuf, spoillast, dostereo,	stereomode)==-1)
-			sendx11(drawbuf, spoillast, sync, dostereo, stereomode, true);
 	}
 }
 
-int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
+void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool dostereo,
+	int stereomode)
 {
 	rrframe f;
 	int pbw=_pb->width(), pbh=_pb->height();
-	unsigned char *bitmap=NULL;  int pitch, bottomup, format;
-	static bool sroffwarned=false, sronwarned=true;
+	RRFrame *frame=NULL;
 
-	if(!_sunrayhandle) _sunrayhandle=RRSunRayInit(_windpy, _win);
-	if(!_sunrayhandle) _throw("Could not initialize Sun Ray plugin");
-	if(spoillast && fconfig.spoil && !RRSunRayFrameReady(_sunrayhandle))
-		return 0;
-	if(!(bitmap=RRSunRayGetFrame(_sunrayhandle, pbw, pbh, &pitch, &format,
-		&bottomup)))
+	if(!_plugin)
 	{
-		const char *err=RRSunRayGetError(_sunrayhandle);
-		if(err) _throw(err);
-		else
-		{
-			if(!sroffwarned)
-			{
-				rrout.println("[VGL] NOTICE: Could not use the Sun Ray image transport, probably because");
-				rrout.println("[VGL]    there is no network route between this server and your Sun Ray");
-				rrout.println("[VGL]    client.  Temporarily switching to the X11 image transport.");
-				sroffwarned=true;  sronwarned=false;
-			}
-			return -1;
-		}
+		_plugin=new rrplugin(fconfig.transport);
+		_plugin->connect(strlen(fconfig.client)>0?
+			fconfig.client:DisplayString(_windpy), fconfig.port);
 	}
-	else
-	{
-		if(!sronwarned)
-		{
-			rrout.println("[VGL] NOTICE: Sun Ray image transport has been re-activated.");
-			sronwarned=true;
-		}
-		sroffwarned=false;
-	}
-	f.init(bitmap, pbw, pitch, pbh, rrsunray_ps[format],
-		(rrsunray_bgr[format]? RRBMP_BGR:0) |
-		(rrsunray_afirst[format]? RRBMP_ALPHAFIRST:0) |
-		(bottomup? RRBMP_BOTTOMUP:0));
-	int glformat= (rrsunray_ps[format]==3? GL_RGB:GL_RGBA);
+	if(spoillast && fconfig.spoil && !_plugin->frameready())
+		return;
+	frame=_plugin->getframe(pbw, pbh, dostereo && stereomode==RRSTEREO_QUADBUF,
+		fconfig.spoil);
+	f.init(frame->bits, frame->w, frame->pitch, frame->h,
+		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? RRBMP_BGR:0) |
+		(rrtrans_afirst[frame->format]? RRBMP_ALPHAFIRST:0) |
+		RRBMP_BOTTOMUP);
+	int glformat= (rrtrans_ps[frame->format]==3? GL_RGB:GL_RGBA);
 	#ifdef GL_BGR_EXT
-	if(format==RRSUNRAY_BGR) glformat=GL_BGR_EXT;
+	if(frame->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
 	#endif
 	#ifdef GL_BGRA_EXT
-	if(format==RRSUNRAY_BGRA) glformat=GL_BGRA_EXT;
+	if(frame->format==RRTRANS_BGRA) glformat=GL_BGRA_EXT;
 	#endif
 	#ifdef GL_ABGR_EXT
-	if(format==RRSUNRAY_ABGR) glformat=GL_ABGR_EXT;
+	// FIXME: Implement ARGB properly
+	if(frame->format==RRTRANS_ABGR || frame->format==RRTRANS_ARGB)
+		glformat=GL_ABGR_EXT;
 	#endif
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&f, drawbuf);
 	else
 	{
 		GLint buf=drawbuf;
+		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
-		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
-		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-			buf, bottomup);
+		readpixels(0, 0, frame->w, frame->pitch, frame->h, glformat,
+			rrtrans_ps[frame->format], frame->bits, buf, dostereo);
+		if(dostereo && frame->rbits)
+			readpixels(0, 0, frame->w, frame->pitch, frame->h, glformat,
+				rrtrans_ps[frame->format], frame->rbits, reye(drawbuf), dostereo);
 	}
+	frame->winid=_win;
+	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 	if(fconfig.logo) f.addlogo();
-	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
-		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
-	return 0;
+	_plugin->sendframe(frame);
 }
 
 void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
@@ -480,11 +469,6 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	bool domovie)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
-
-	if(_sunrayhandle)
-	{
-		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
-	}
 
 	if(spoillast && fconfig.spoil && !rrdpy->frameready() && !domovie)
 		return;
@@ -528,10 +512,6 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	if(_sunrayhandle && !srfallback)
-	{
-		RRSunRayDestroy(_sunrayhandle);  _sunrayhandle=NULL;
-	}
 	rrfb *b;
 	if(!_blitter) errifnot(_blitter=new rrblitter());
 	if(spoillast && fconfig.spoil && !_blitter->frameready()) return;

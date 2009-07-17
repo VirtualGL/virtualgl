@@ -108,11 +108,13 @@ int main(int argc, char **argv)
 		XSync(dpy, False);
 		if(strlen(fconfig.client)==0)
 			strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
+		fconfig_setdefaultsfromdpy(dpy);
 	}
 
 	printf("Tile size = %d x %d pixels\n", fconfig.tilesize, fconfig.tilesize);
 
-	rrdisplayclient rrdpy(dpy, fconfig.client);
+	rrdisplayclient rrdpy;
+	if(!localtest) rrdpy.connect(fconfig.client, fconfig.port);
 
 	int i;
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];

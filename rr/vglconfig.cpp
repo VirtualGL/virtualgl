@@ -235,6 +235,7 @@ void ProfCB(Fl_Widget *w, void *data)
 	SetSamp();
 	SetQual();
 	SetStereo();
+	SetIF();
 }
 
 void SpoilCB(Fl_Widget *w, void *data)
@@ -308,9 +309,6 @@ Fl_Menu_Item compmenu[]=
 	{"None (X11 transport)", 0, CompCB, (void *)RRCOMP_PROXY},
 	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
 	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
-	{"DPCM (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRDPCM},
-	{"RGB (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRRGB},
-	{"YUV (Sun Ray transport)", 0, CompCB, (void *)RRCOMP_SRYUV},
 	{0, 0, 0, 0}
 };
 

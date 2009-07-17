@@ -39,38 +39,67 @@ usage()
 	echo
 	echo "Usage: `basename $0` [options] [--] <OpenGL app> [OpenGL app arguments]"
 	echo
-	echo "VirtualGL options"
+	echo "VirtualGL options (see documentation for a more comprehensive list)"
+	echo
 	echo "-c <c>    : proxy = Send 3D images uncompressed using X11 transport"
-  echo "            jpeg = Compress 3D images using JPEG/send using VGL transport"
+	echo "                    [default for local X connections]"
+	echo "            jpeg = Compress 3D images using JPEG/send using VGL transport"
+	echo "                   [default for remote X connections]"
 	echo "            rgb = Encode 3D images as RGB/send using VGL transport"
-	echo "            srdpcm = Compress 3D images using DPCM/send using Sun Ray transport"
-	echo "            srrgb = Encode 3D images as RGB/send using Sun Ray transport"
-	echo "            sryuv = Encode 3D images as YUV/send using Sun Ray transport"
-	echo "-cl <c>   : <c> = The hostname or IP address of the VirtualGL client (or"
-	echo "                  Sun Ray server)"
-	echo "-nodl     : Don't force apps that dlopen() libGL to load VirtualGL instead"
+	echo "            [If a transport plugin is being used, then <c> can be the"
+	echo "             name of any codec that the custom transport supports.]"
+	echo
+	echo "-nodl     : If an app uses dlopen() to explicitly access libGL.so, don't"
+	echo "            force it to open VirtualGL instead (see docs)"
+	echo
 	echo "-d <d>    : <d> = the X Display or GLP device to use for 3D rendering"
+	echo "            [default = :0.0]"
+	echo
 	echo "-fps <f>  : Limit client/server frame rate to <f> frames/sec"
-	echo "+/-g      : Enable/disable gamma correction"
+	echo
+	echo "+/-g      : Enable/disable gamma correction (see docs)"
 	echo "-gamma <g>: Set gamma correction factor to <g> (see docs)"
+	echo
 	echo "-ge       : Fool application into thinking that LD_PRELOAD is unset"
-	echo "-np <n>   : Use <n> CPUs to perform image compression (VGL transport only)"
-	echo "-p <p>    : TCP port to use when connecting to vglclient (VGL transport only)"
-	echo "+/-pr     : Enable/disable performance profiling output"
-	echo "-q <q>    : JPEG compression quality [1 <= <q> <= 100]"
-	echo "-samp <s> : JPEG chrominance subsampling factor"
-	echo "            [<s> = gray, 1x, 2x, 4x, 8x, or 16x]"
-	echo "+/-sp     : Turn on/off frame spoiling"
-	echo "-st <s>   : left = Send only left eye buffer"
-	echo "            right = Send only right eye buffer"
+	echo
+	echo "-np <n>   : Use <n> CPUs to perform image compression [default = 1]"
+	echo
+	echo "+/-pr     : Enable/disable performance profiling output [default = disabled]"
+	echo
+	echo "-q <q>    : Compression quality [1 <= <q> <= 100]"
+	echo "            [default = 95 for JPEG/VGL transport.  Has no effect with"
+	echo "             X11 transport]"
+	echo
+	echo "-samp <s> : Chrominance subsampling factor"
+	echo "            <s> = gray, 1x, 2x, 4x"
+	echo "            [default = 1x for JPEG/VGL transport.  Has no effect with"
+	echo "             X11 transport or RGB encoding]"
+	echo
+	echo "+/-s      : Enable/disable SSL encryption of VGL transport or custom"
+	echo "            image transport, if applicable."
+	echo "            [default = disabled.  Has no effect unless VirtualGL was built"
+	echo "             with OpenSSL support]"
+	echo
+	echo "+/-sp     : Turn on/off frame spoiling [default = enabled]"
+	echo
+	echo "-st <s>   : left = Send only left eye buffer of stereo application"
+	echo "            right = Send only right eye buffer of stereo application"
 	echo "            quad = Use quad-buffered stereo if available, otherwise use"
 	echo "                   red/cyan (anaglyphic) stereo [default]"
 	echo "            rc = Always use red/cyan (anaglyphic) stereo"
-	echo "+/-sync   : Enable/disable strict 2D/3D synchronization"
+	echo
+	echo "+/-sync   : Enable/disable strict 2D/3D synchronization [default = disabled]"
+	echo
 	echo "+/-tr     : Enable/disable function call tracing (generates a lot of output)"
-	echo "+/-v      : Enable/disable verbose VirtualGL messages"
+	echo "            [default = disabled]"
+	echo
+	echo "-trans <t>: Use transport plugin contained in library libvgltrans_<t>.so"
+	echo
+	echo "+/-v      : Enable/disable verbose VirtualGL messages [default = disabled]"
+	echo
 	echo "-64       : (Solaris only) Preload VirtualGL only into 64-bit apps"
 	echo "-32       : (Solaris only) Preload VirtualGL only into 32-bit apps"
+	echo
 	exit $1
 }
 
@@ -110,6 +139,7 @@ do
 	+de*)       VGL_DEBUG=1       ; export VGL_DEBUG    ;;
 	-de*)       VGL_DEBUG=0       ; export VGL_DEBUG    ;;
 	-nodl)      __VGL_DL=0        ;;
+	-trans*)    VGL_TRANSPORT=$2  ; export VGL_TRANSPORT; shift     ;;
 	+tr*)       VGL_TRACE=1       ; export VGL_TRACE    ;;
 	-tr*)       VGL_TRACE=0       ; export VGL_TRACE    ;;
 	-d*)        VGL_DISPLAY=$2    ; export VGL_DISPLAY  ; shift     ;;

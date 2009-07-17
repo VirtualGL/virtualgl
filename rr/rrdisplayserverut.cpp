@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 	printf("Creating window %lu\n", (unsigned long)win);
 	errifnot(XMapRaised(dpy, win));
 	XSync(dpy, False);
+	fconfig_setdefaultsfromdpy(dpy);
 	if(strlen(fconfig.client)==0)
 		strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
 
@@ -63,19 +64,18 @@ int main(int argc, char **argv)
 
 	for(int i=0; i<iter; i++)
 	{
-		rrdisplayclient *rrdpy=NULL;
-		errifnot(rrdpy=new rrdisplayclient(dpy, fconfig.client));
+		rrdisplayclient rrdpy;
+		rrdpy.connect(fconfig.client, fconfig.port);
 		for(int f=0; f<frames; f++)
 		{
-			errifnot(b=rrdpy->getbitmap(WIDTH, HEIGHT, 3,
+			errifnot(b=rrdpy.getbitmap(WIDTH, HEIGHT, 3,
 				littleendian()? RRBMP_BGR:0, false, false));
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=4;
 			b->_h.winid=win;  b->_h.compress=RRCOMP_JPEG;
-			rrdpy->sendframe(b);
+			rrdpy.sendframe(b);
 		}
-		delete rrdpy;
 	}
 
 	} catch(rrerror &e) {printf("%s--\n%s\n", e.getMethod(), e.getMessage());}

@@ -33,8 +33,8 @@ int fconfig_getshmid(void);
 #endif
 void fconfig_print(FakerConfig &fc);
 void fconfig_reloadenv(void);
-void fconfig_setcompressfromdpy(Display *dpy);
 void fconfig_setcompress(FakerConfig &fc, int i);
+void fconfig_setdefaultsfromdpy(Display *dpy);
 void fconfig_setgamma(FakerConfig &fc, double gamma);
 
 #endif

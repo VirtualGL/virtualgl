@@ -17,7 +17,6 @@
 #include <math.h>
 #include "fakerconfig.h"
 #include "rrlog.h"
-#include "rrsunray.h"
 #include <stdio.h>
 #include <X11/keysym.h>
 #if FCONFIG_USESHM==1
@@ -26,6 +25,7 @@
 #include <sys/types.h>
 #endif
 #include "rrutil.h"
+#include <X11/Xatom.h>
 
 #define DEFQUAL 95
 
@@ -222,7 +222,6 @@ void fconfig_reloadenv(void)
 	{
 		int subsamp=-1, compress=-1;
 		if(!strnicmp(env, "G", 1)) subsamp=0;
-		else if(!strnicmp(env, "L", 1)) compress=RRCOMP_SRRGB;
 		else
 		{
 			char *t=NULL;  int itemp=strtol(env, &t, 10);
@@ -255,14 +254,8 @@ void fconfig_reloadenv(void)
 		else if(!strnicmp(env, "p", 1)) compress=RRCOMP_PROXY;
 		else if(!strnicmp(env, "j", 1)) compress=RRCOMP_JPEG;
 		else if(!strnicmp(env, "r", 1)) compress=RRCOMP_RGB;
-		else if(!stricmp(env, "sr")) compress=RRCOMP_SRDPCM;
-		else if(!strnicmp(env, "srl", 3)) compress=RRCOMP_SRRGB;
-		else if(!strnicmp(env, "srr", 3)) compress=RRCOMP_SRRGB;
-		else if(!strnicmp(env, "srd", 3)) compress=RRCOMP_SRDPCM;
-		else if(!strnicmp(env, "sry", 3)) compress=RRCOMP_SRYUV;
 		if(compress>=0 && (!fcenv_set || fcenv.compress!=compress))
 		{
-			rrout.println("here %d %d\n", compress, fcenv.compress);
 			fconfig_setcompress(fconfig, compress);
 			fcenv.compress=compress;
 		}
@@ -382,7 +375,6 @@ void fconfig_reloadenv(void)
 	}
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
 	fetchenv_int("VGL_PORT", port, 0, 65535);
-	fetchenv_bool("VGL_PROGRESSIVE", progressive);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
 	fetchenv_bool("VGL_READBACK", readback);
 	fetchenv_bool("VGL_SPOIL", spoil);
@@ -408,33 +400,45 @@ void fconfig_reloadenv(void)
 	fetchenv_int("VGL_TILESIZE", tilesize, 8, 1024);
 	fetchenv_bool("VGL_TRACE", trace);
 	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
+	fetchenv_str("VGL_TRANSPORT", transport);
 	fetchenv_bool("VGL_TRAPX11", trapx11);
 	fetchenv_bool("VGL_WINDOW", usewindow);
 	fetchenv_str("VGL_XVENDOR", vendor);
 	fetchenv_bool("VGL_VERBOSE", verbose);
 	fetchenv_str("VGL_X11LIB", x11lib);
-	fetchenv_int("VGL_ZOOMX", zoomx, 1, 2);
-	fetchenv_int("VGL_ZOOMY", zoomy, 1, 2);
 
 	if(fconfig.glp) fconfig.usewindow=false;
 	fcenv_set=true;
 }
 
-void fconfig_setcompressfromdpy(Display *dpy)
+void fconfig_setdefaultsfromdpy(Display *dpy)
 {
 	rrcs::safelock l(fcmutex);
 
 	if(fconfig.compress<0)
 	{
-		if(RRSunRayQueryDisplay(dpy)!=RRSUNRAY_NOT)
-			fconfig_setcompress(fconfig, RRCOMP_SRYUV);
-		else
+		const char *dstr=DisplayString(dpy);
+		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+			&& !strnicmp(dstr, "unix", 4)))
+			fconfig_setcompress(fconfig, RRCOMP_PROXY);
+		else fconfig_setcompress(fconfig, RRCOMP_JPEG);
+	}
+
+	if(fconfig.port<0)
+	{
+		fconfig.port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
+		Atom atom=None;  unsigned long n=0, bytesleft=0;
+		int actualformat=0;  Atom actualtype=None;
+		unsigned short *prop=NULL;
+		if((atom=XInternAtom(dpy,
+			fconfig.ssl? "_VGLCLIENT_SSLPORT":"_VGLCLIENT_PORT", True))!=None)
 		{
-			const char *dstr=DisplayString(dpy);
-			if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-				&& !strnicmp(dstr, "unix", 4)))
-				fconfig_setcompress(fconfig, RRCOMP_PROXY);
-			else fconfig_setcompress(fconfig, RRCOMP_JPEG);
+			if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom,
+				0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
+				&bytesleft, (unsigned char **)&prop)==Success && n>=1
+				&& actualformat==16 && actualtype==XA_INTEGER && prop)
+				fconfig.port=*prop;
+			if(prop) XFree(prop);
 		}
 	}
 }
@@ -485,7 +489,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(msubsamp);
 	prconfint(np);
 	prconfint(port);
-	prconfint(progressive);
 	prconfint(qual);
 	prconfint(readback);
 	prconfint(spoil);
@@ -498,12 +501,9 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transpixel);
 	prconfint(transvalid[RRTRANS_X11]);
 	prconfint(transvalid[RRTRANS_VGL]);
-	prconfint(transvalid[RRTRANS_SR]);
 	prconfint(trapx11);
 	prconfint(usewindow);
 	prconfstr(vendor);
 	prconfint(verbose);
 	prconfstr(x11lib);
-	prconfint(zoomx);
-	prconfint(zoomy);
 }

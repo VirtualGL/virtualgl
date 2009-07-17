@@ -29,7 +29,6 @@
 #define S_IREAD 0400
 #define S_IWRITE 0200
 #endif
-#include <X11/Xatom.h>
 
 void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 {
@@ -96,59 +95,17 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 }
 
 
-rrdisplayclient::rrdisplayclient(Display *dpy, char *displayname,
-	bool domovie) : _np(fconfig.np), _domovie(domovie), _sd(NULL), _t(NULL),
-	_deadyet(false), _dpynum(0)
+rrdisplayclient::rrdisplayclient(void) : _np(fconfig.np),
+	_dosend(false), _domovie(false), _sd(NULL), _t(NULL), _deadyet(false),
+	_dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	if(fconfig.verbose)
 		rrout.println("[VGL] Using %d / %d CPU's for compression",
 			fconfig.np, numprocs());
-	char *servername=NULL;
-	try
-	{
-		if(displayname && strlen(displayname)>0)
-		{
-			unsigned short port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
-			char *ptr=NULL;  servername=strdup(displayname);
-			if((ptr=strchr(servername, ':'))!=NULL)
-			{
-				if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
-				if(_dpynum<0 || _dpynum>65535) _dpynum=0;
-				*ptr='\0';
-			}
-			if(!strlen(servername) || !strcmp(servername, "unix"))
-				{free(servername);  servername=strdup("localhost");}
-			if(fconfig.port>=0) port=fconfig.port;
-			else
-			{
-				Atom atom=None;  unsigned long n=0, bytesleft=0;
-				int actualformat=0;  Atom actualtype=None;
-				unsigned short *prop=NULL;
-				if((atom=XInternAtom(dpy,
-					fconfig.ssl? "_VGLCLIENT_SSLPORT":"_VGLCLIENT_PORT", True))!=None)
-				{
-					if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom,
-						0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
-						&bytesleft, (unsigned char **)&prop)==Success && n>=1
-						&& actualformat==16 && actualtype==XA_INTEGER && prop)
-						port=*prop;
-					if(prop) XFree(prop);
-				}
-			}
-			connect(servername, port);
-			_dosend=true;
-		}
-		else _dosend=false;
-		_prof_total.setname(_dosend? "Total     ":"Total(mov)");
-		errifnot(_t=new Thread(this));
-		_t->start();
-	}
-	catch(...)
-	{
-		if(servername) free(servername);  throw;
-	}
-	if(servername) free(servername);
+	_prof_total.setname("Total(mov)");
+	errifnot(_t=new Thread(this));
+	_t->start();
 }
 
 void rrdisplayclient::run(void)
@@ -383,10 +340,22 @@ void rrdisplayclient::save(char *buf, int len)
 	}
 }
 
-void rrdisplayclient::connect(char *servername, unsigned short port)
+void rrdisplayclient::connect(char *displayname, unsigned short port)
 {
-	if(servername && strlen(servername)>0)
+	char *servername=NULL;
+	try
 	{
+		if(!displayname || strlen(displayname)<=0)
+			_throw("Invalid receiver name");
+		char *ptr=NULL;  servername=strdup(displayname);
+		if((ptr=strchr(servername, ':'))!=NULL)
+		{
+			if(strlen(ptr)>1) _dpynum=atoi(ptr+1);
+			if(_dpynum<0 || _dpynum>65535) _dpynum=0;
+			*ptr='\0';
+		}
+		if(!strlen(servername) || !strcmp(servername, "unix"))
+			{free(servername);  servername=strdup("localhost");}
 		errifnot(_sd=new rrsocket((bool)fconfig.ssl));
 		try
 		{
@@ -399,7 +368,14 @@ void rrdisplayclient::connect(char *servername, unsigned short port)
 			rrout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
+		_dosend=true;
+		_prof_total.setname("Total     ");
 	}
+	catch(...)
+	{
+		if(servername) free(servername);  throw;
+	}
+	if(servername) free(servername);
 }
 
 void rrcompressor::send(void)

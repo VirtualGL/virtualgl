@@ -29,7 +29,7 @@ class rrdisplayclient : public Runnable
 {
 	public:
 
-	rrdisplayclient(Display *, char *, bool domovie=false);
+	rrdisplayclient(void);
 
 	virtual ~rrdisplayclient(void)
 	{
