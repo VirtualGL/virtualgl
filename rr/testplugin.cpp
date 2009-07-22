@@ -59,20 +59,6 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return ret;
 }
 
-int RRTransSetConfig(void *handle, FakerConfig *fconfig)
-{
-	int ret=0;
-	try
-	{
-		_fconfig=fconfig;
-	}
-	catch(rrerror &e)
-	{
-		err=e;  return -1;
-	}
-	return ret;
-}
-
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 	int spoil)
 {
