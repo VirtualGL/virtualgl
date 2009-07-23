@@ -401,11 +401,14 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
 		prargi(c_class);  prargv(visual);  starttrace();
 
-	if(!(win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
-		depth, c_class, visual, valuemask, attributes))) return 0;
-	if(_isremote(dpy)) winh.add(dpy, win);
-	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
+	win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
+		depth, c_class, visual, valuemask, attributes);
+	if(win)
+	{
+		if(_isremote(dpy)) winh.add(dpy, win);
+		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+		if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
+	}
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -423,11 +426,14 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 		opentrace(XCreateSimpleWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
-	if(!(win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
-		border, background))) return 0;
-	if(_isremote(dpy)) winh.add(dpy, win);
-	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-	if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
+	win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
+		border, background);
+	if(win)
+	{
+		if(_isremote(dpy)) winh.add(dpy, win);
+		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+		if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
+	}
 
 		stoptrace();  prargx(win);  closetrace();
 
