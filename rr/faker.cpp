@@ -380,8 +380,8 @@ Display *XOpenDisplay(_Xconst char* name)
 		opentrace(XOpenDisplay);  prargs(name);  starttrace();
 
 	__vgl_fakerinit();
-	if(!(dpy=_XOpenDisplay(name))) return NULL;
-	if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=fconfig.vendor;
+	dpy=_XOpenDisplay(name);
+	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=fconfig.vendor;
 
 		stoptrace();  prargd(dpy);  closetrace();
 
