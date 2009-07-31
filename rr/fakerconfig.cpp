@@ -445,7 +445,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
-	if(i<0 || i>=RR_COMPRESSOPT) return;
+	if(i<0 || i>=RR_COMPRESSOPT || strlen(fconfig.transport)>0) return;
 	rrcs::safelock l(fcmutex);
 
 	bool is=(fc.compress>=0);
