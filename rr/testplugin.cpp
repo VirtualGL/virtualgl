@@ -17,6 +17,7 @@
 #include "rrdisplayclient.h"
 
 static rrerror err;
+char errstr[MAXSTR];
 
 static FakerConfig *_fconfig=NULL;
 
@@ -154,7 +155,9 @@ int RRTransDestroy(void *handle)
 
 const char *RRTransGetError(void)
 {
-	return err.getMessage();
+	snprintf(errstr, MAXSTR-1, "Error in %s -- %s",
+		err.getMethod(), err.getMessage());
+	return errstr;
 }
 
 }

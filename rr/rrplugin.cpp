@@ -15,6 +15,9 @@
 #include "fakerconfig.h"
 #include <dlfcn.h>
 
+#undef _throw
+#define _throw(m) throw(rrerror("transport plugin", m, -1))
+
 static void *loadsym(void *dllhnd, const char *symbol)
 {
 	void *sym=NULL;  const char *err=NULL;
