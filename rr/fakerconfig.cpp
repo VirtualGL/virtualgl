@@ -407,6 +407,12 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_VERBOSE", verbose);
 	fetchenv_str("VGL_X11LIB", x11lib);
 
+	if(strlen(fconfig.transport)>0)
+	{
+		if(fconfig.compress<0) fconfig.compress=0;
+		if(fconfig.subsamp<0) fconfig.subsamp=1;
+	}
+
 	if(fconfig.glp) fconfig.usewindow=false;
 	fcenv_set=true;
 }
@@ -445,14 +451,15 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
-	if(i<0 || i>=RR_COMPRESSOPT || strlen(fconfig.transport)>0) return;
+	if(i<0 || i>=RR_COMPRESSOPT) return;
 	rrcs::safelock l(fcmutex);
 
 	bool is=(fc.compress>=0);
 	fc.compress=i;
 	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]=1;
 	if(fc.subsamp<0) fc.subsamp=_Defsubsamp[fc.compress];
-	if(_Minsubsamp[fc.compress]>=0 && _Maxsubsamp[fc.compress]>=0)
+	if(strlen(fc.transport)==0 && _Minsubsamp[fc.compress]>=0
+		&& _Maxsubsamp[fc.compress]>=0)
 	{
 		if(fc.subsamp<_Minsubsamp[fc.compress]
 			|| fc.subsamp>_Maxsubsamp[fc.compress])
