@@ -54,7 +54,8 @@ void SetComp(void)
 	int i;
 	for(i=0; i<RR_COMPRESSOPT; i++)
 	{
-		if(!fconfig.transvalid[_Trans[i]]) compchoice->mode(i, FL_MENU_INACTIVE);
+		if(strlen(fconfig.transport)==0 && !fconfig.transvalid[_Trans[i]])
+			compchoice->mode(i, FL_MENU_INACTIVE);
 		else compchoice->mode(i, 0);
 		if(fconfig.compress==i) compchoice->value(i);
 	}
@@ -63,27 +64,31 @@ void SetComp(void)
 void SetSamp(void)
 {
 	if(!sampchoice) return;
-	if(_Maxsubsamp[fconfig.compress]==_Minsubsamp[fconfig.compress])
+	if(_Maxsubsamp[fconfig.compress]==_Minsubsamp[fconfig.compress]
+		&& strlen(fconfig.transport)==0)
 		sampchoice->deactivate();
 	else sampchoice->activate();
-	if(_Minsubsamp[fconfig.compress]>0)
-		sampchoice->mode(0, FL_MENU_INACTIVE);
-	else sampchoice->mode(0, 0);
-	if(_Minsubsamp[fconfig.compress]>1 || _Maxsubsamp[fconfig.compress]<1)
-		sampchoice->mode(1, FL_MENU_INACTIVE);
-	else sampchoice->mode(1, 0);
-	if(_Minsubsamp[fconfig.compress]>2 || _Maxsubsamp[fconfig.compress]<2)
-		sampchoice->mode(2, FL_MENU_INACTIVE);
-	else sampchoice->mode(2, 0);
-	if(_Minsubsamp[fconfig.compress]>4 || _Maxsubsamp[fconfig.compress]<4)
-		sampchoice->mode(3, FL_MENU_INACTIVE);
-	else sampchoice->mode(3, 0);
-	if(_Minsubsamp[fconfig.compress]>8 || _Maxsubsamp[fconfig.compress]<8)
-		sampchoice->mode(4, FL_MENU_INACTIVE);
-	else sampchoice->mode(4, 0);
-	if(_Minsubsamp[fconfig.compress]>16 || _Maxsubsamp[fconfig.compress]<16)
-		sampchoice->mode(5, FL_MENU_INACTIVE);
-	else sampchoice->mode(5, 0);
+	if(strlen(fconfig.transport)==0)
+	{
+		if(_Minsubsamp[fconfig.compress]>0)
+			sampchoice->mode(0, FL_MENU_INACTIVE);
+		else sampchoice->mode(0, 0);
+		if(_Minsubsamp[fconfig.compress]>1 || _Maxsubsamp[fconfig.compress]<1)
+			sampchoice->mode(1, FL_MENU_INACTIVE);
+		else sampchoice->mode(1, 0);
+		if(_Minsubsamp[fconfig.compress]>2 || _Maxsubsamp[fconfig.compress]<2)
+			sampchoice->mode(2, FL_MENU_INACTIVE);
+		else sampchoice->mode(2, 0);
+		if(_Minsubsamp[fconfig.compress]>4 || _Maxsubsamp[fconfig.compress]<4)
+			sampchoice->mode(3, FL_MENU_INACTIVE);
+		else sampchoice->mode(3, 0);
+		if(_Minsubsamp[fconfig.compress]>8 || _Maxsubsamp[fconfig.compress]<8)
+			sampchoice->mode(4, FL_MENU_INACTIVE);
+		else sampchoice->mode(4, 0);
+		if(_Minsubsamp[fconfig.compress]>16 || _Maxsubsamp[fconfig.compress]<16)
+			sampchoice->mode(5, FL_MENU_INACTIVE);
+		else sampchoice->mode(5, 0);
+	}
 	switch(fconfig.subsamp)
 	{
 		case 0:  sampchoice->value(0);  break;
@@ -99,14 +104,15 @@ void SetQual(void)
 {
 	if(!qualslider) return;
 	qualslider->value(fconfig.qual);
-	if(fconfig.compress!=RRCOMP_JPEG) qualslider->deactivate();
+	if(fconfig.compress!=RRCOMP_JPEG && strlen(fconfig.transport)==0)
+		qualslider->deactivate();
 	else qualslider->activate();
 }
 
 void SetProf(void)
 {
 	if(!profchoice) return;
-	if(!fconfig.transvalid[RRTRANS_VGL])
+	if(!fconfig.transvalid[RRTRANS_VGL] || strlen(fconfig.transport)>0)
 	{
 		profchoice->value(3);  profchoice->deactivate();
 	}
@@ -127,7 +133,8 @@ void SetIF(void)
 {
 	if(!ifbutton) return;
 	ifbutton->value(fconfig.interframe);
-	if(fconfig.compress!=RRCOMP_PROXY) ifbutton->activate();
+	if(strlen(fconfig.transport)>0 || fconfig.compress!=RRCOMP_PROXY)
+		ifbutton->activate();
 	else ifbutton->deactivate();
 }
 
@@ -135,7 +142,8 @@ void SetStereo(void)
 {
 	int i;
 	if(!stereochoice) return;
-	if(!fconfig.transvalid[RRTRANS_VGL]) stereochoice->mode(2, FL_MENU_INACTIVE);
+	if(strlen(fconfig.transport)==0 && !fconfig.transvalid[RRTRANS_VGL])
+		stereochoice->mode(2, FL_MENU_INACTIVE);
 	else stereochoice->mode(2, 0);
 	for(i=0; i<RR_STEREOOPT; i++)
 		if(fconfig.stereo==i) stereochoice->value(i);
@@ -146,9 +154,6 @@ void SetFPS(void)
 	char temps[20];
 	snprintf(temps, 19, "%.2f", fconfig.fps);
 	fpsinput->value(temps);
-	if(_Trans[fconfig.compress]==RRTRANS_X11
-		|| _Trans[fconfig.compress]==RRTRANS_VGL) fpsinput->activate();
-	else fpsinput->deactivate();
 }
 
 #if 0
@@ -312,6 +317,14 @@ Fl_Menu_Item compmenu[]=
 	{0, 0, 0, 0}
 };
 
+Fl_Menu_Item ctcompmenu[]=
+{
+	{"0", 0, CompCB, (void *)RRCOMP_JPEG},
+	{"1", 0, CompCB, (void *)RRCOMP_JPEG},
+	{"2", 0, CompCB, (void *)RRCOMP_RGB},
+	{0, 0, 0, 0}
+};
+
 Fl_Menu_Item sampmenu[]=
 {
 	{"Grayscale", 0, SampCB, (void *)0},
@@ -366,9 +379,18 @@ void init(int argc, char **argv)
 
 	errifnot(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
 
-	errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
-		"Image Compression (Transport): "));
-	compchoice->menu(compmenu);
+	if(strlen(fconfig.transport)>0)
+	{
+		errifnot(compchoice=new Fl_Choice(211, 10, 225, 25,
+			"Image Compression: "));
+		compchoice->menu(ctcompmenu);
+	}
+	else
+	{
+		errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
+			"Image Compression (Transport): "));
+		compchoice->menu(compmenu);
+	}
 	SetComp();
 
 	errifnot(sampchoice=new Fl_Choice(210, 45, 100, 25,
@@ -376,8 +398,16 @@ void init(int argc, char **argv)
 	sampchoice->menu(sampmenu);
 	SetSamp();
 
-	errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
-		"JPEG Image Quality"));
+	if(strlen(fconfig.transport)>0)
+	{
+		errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
+			"Image Quality"));
+	}
+	else
+	{
+		errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
+			"JPEG Image Quality"));
+	}
 	qualslider->callback(QualCB, 0);
 	qualslider->type(1);
 	qualslider->minimum(1);
