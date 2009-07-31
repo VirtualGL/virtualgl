@@ -10,7 +10,7 @@ application's windows is active.  This displays the following dialog box:
 {img: configdialog.gif}
 
 You can use this dialog to adjust various image compression and display
-parameters in VirtualGL.  Changes are reflected immediately in the application.
+parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 
 	Image Compression (Transport) :: This is a drop-down gadget with the
 	following options:
@@ -20,34 +20,24 @@ parameters in VirtualGL.  Changes are reflected immediately in the application.
 	active when VirtualGL started.
 	{nl}{nl} \
 	__JPEG (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=jpeg''.  This
-	option is only available if the VGL Image Transport was active when VirtualGL
+	option is only available if the VGL Transport was active when VirtualGL
 	started.
 	{nl}{nl} \
 	__RGB (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=rgb''.  This
-	option is only available if the VGL Image Transport was active when VirtualGL
+	option is only available if the VGL Transport was active when VirtualGL
 	started.
-	{nl}{nl} \
-	__DPCM (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=srdpcm''.
-	This option is only available if the Sun Ray Image Transport was active when
-	VirtualGL started.
-	{nl}{nl} \
-	__RGB (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=srrgb''.
-	This option is only available if the Sun Ray Image Transport was active when
-	VirtualGL started.
-	{nl}{nl} \
-	__YUV (Sun Ray Transport)__ : equivalent to setting ''VGL_COMPRESS=sryuv''.
-	This option is only available if the Sun Ray Image Transport was active when
-	VirtualGL started.
 	{nl}{nl} \
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
 	''VGL_COMPRESS'' configuration option and its various parameters.
 
+	!!! If a custom image transport plugin is loaded, then this gadget's name
+	changes to "Image Compression", and it has options "0", "1", and "2".
+
 	Chrominance Subsampling :: This drop-down gadget is active only when using
-	JPEG, Sun Ray DPCM, or Sun Ray YUV compression.  It has the following
+	JPEG compression or a custom image transport plugin.  It has the following
 	options:
 	{nl}{nl} \
-	__Grayscale__ : equivalent to setting ''VGL_SUBSAMP=gray''.  Available only
-	with JPEG compression.
+	__Grayscale__ : equivalent to setting ''VGL_SUBSAMP=gray''
 	{nl}{nl} \
 	__1X__ : equivalent to setting ''VGL_SUBSAMP=1x''
 	{nl}{nl} \
@@ -55,19 +45,19 @@ parameters in VirtualGL.  Changes are reflected immediately in the application.
 	{nl}{nl} \
 	__4X__ : equivalent to setting ''VGL_SUBSAMP=4x''
 	{nl}{nl} \
-	__8X__ : equivalent to setting ''VGL_SUBSAMP=8x''.  Available only with Sun
-	Ray DPCM or YUV compression.
-	{nl}{nl} \
-	__16X__ : equivalent to setting ''VGL_SUBSAMP=16x''.  Available only with
-	Sun Ray DPCM or YUV compression.
-	{nl}{nl} \
 	See {ref prefix="Section ": VGL_SUBSAMP} for more information about the
 	''VGL_SUBSAMP'' configuration option and its various parameters.
 
+	!!! If a custom image transport plugin is loaded, then this gadget has two
+	additional options, "8X" and "16X".
+
 	JPEG Image Quality :: This slider gadget is active only when using JPEG
-	compression.  It is the equivalent of setting ''VGL_QUAL''.  	See
-	{ref prefix="Section ": VGL_QUAL} for more information about the
-	''VGL_QUAL'' configuration option.
+	compression or a custom image transport plugin.  It is the equivalent of
+	setting ''VGL_QUAL''.  See {ref prefix="Section ": VGL_QUAL} for more
+	information about the ''VGL_QUAL'' configuration option.
+
+	!!! If a custom image transport plugin is loaded, then this gadget's name
+	changes to "Image Quality".
 
 	Connection Profile :: This drop-down gadget is active only if the VGL Image
 	Transport was active when VirtualGL started.  It has the following options:
