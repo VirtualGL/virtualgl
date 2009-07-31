@@ -337,13 +337,14 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	_dirty=false;
 
 	int compress=fconfig.compress;
-	if(sync) {compress=RRCOMP_PROXY;}
+	if(sync && strlen(fconfig.transport)==0) {compress=RRCOMP_PROXY;}
 
 	if(stereo() && stereomode!=RRSTEREO_LEYE && stereomode!=RRSTEREO_REYE)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF)
+		if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF
+			&& strlen(fconfig.transport)==0)
 		{
 			static bool message=false;
 			if(!message)
@@ -354,7 +355,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			}
 			stereomode=RRSTEREO_REDCYAN;				
 		}
-		else if(dostereo && !_stereovisual && stereomode==RRSTEREO_QUADBUF)
+		else if(dostereo && !_stereovisual && stereomode==RRSTEREO_QUADBUF
+			&& strlen(fconfig.transport)==0)
 		{
 			static bool message2=false;
 			if(!message2)
@@ -367,7 +369,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		}
 	}
 
-	if(!_truecolor) compress=RRCOMP_PROXY;
+	if(!_truecolor && strlen(fconfig.transport)==0) compress=RRCOMP_PROXY;
 
 	bool sharerrdpy=false;
 	if(strlen(fconfig.moviefile)>0)
