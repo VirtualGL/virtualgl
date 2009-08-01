@@ -18,72 +18,54 @@ Each method of configuration takes precedence over the previous method:
 	#. Passing a configuration option as an argument to ''vglrun''.  This
 		effectively overrides any previous environment variable setting
 		corresponding to that configuration option.
+{:}
+	!!! If "Custom (if supported)" is listed as one of the available Image
+	Transports, then this means that custom image transport plugins are free
+	to handle or ignore this option as they see fit.
 
 | Environment Variable | ''VGL_CLIENT = ''__''{c}''__ |
 | ''vglrun'' argument | ''-cl ''__''{c}''__ |
-| Summary | __''{c}''__ = the hostname or IP address of the VirtualGL client \
-	machine or Sun Ray server |
-| Image Transports | Sun Ray, VGL |
+| Summary | __''{c}''__ = the hostname or IP address of the VirtualGL client |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | Automatically set by ''vglconnect'' or ''vglrun'' |
 #OPT: hiCol=first
 
-	Description :: When using the VGL Image Transport, ''VGL_CLIENT'' should be
-	set to the hostname or IP address of the machine on which ''vglclient'' is
-	running.  When using the Sun Ray Image Transport, ''VGL_CLIENT'' should be
-	set to the hostname or IP address of the Sun Ray server.  Normally,
-	''VGL_CLIENT'' is set automatically by the ''vglconnect'' or ''vglrun''
-	script, so don't override it unless you know what you're doing. \
+	Description :: When using the VGL Transport, ''VGL_CLIENT'' should be set to
+	the hostname or IP address of the machine on which ''vglclient'' is running.
+	Normally, ''VGL_CLIENT'' is set automatically by the ''vglconnect'' or
+	''vglrun'' script, so don't override it unless you know what you're doing. \
 
 {anchor: VGL_COMPRESS}
-| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| sr \| srrgb \| sryuv''__ |
-| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| sr \| srrgb \| sryuv''__ |
+| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb''__ |
+| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb''__ |
 | Summary | Set image transport and image compression type |
 | Image Transports | All |
 | Default Value | (See description) |
 #OPT: hiCol=first
 
 	Description :: {:}
-	__proxy__ = Send images uncompressed using the X11 Image Transport.  This is
-	useful when displaying to a local 2D X server or X proxy (see
+	__proxy__ = Send images uncompressed using the X11 Transport.  This is useful
+	when displaying to a local 2D X server or X proxy (see
 	{ref prefix="Section ": TurboVNC_Usage_Local}.)
 	{nl}{nl} \
-	__jpeg__ = Compress images using JPEG and send using the VGL Image Transport.
-	This is useful when displaying to a remote 2D X server (see
-	{ref prefix="Chapter ": VGL_Image_Transport_Usage}.)
+	__jpeg__ = Compress images using JPEG and send using the VGL Transport.  This
+	is useful when displaying to a remote 2D X server (see
+	{ref prefix="Chapter ": VGL_Transport_Usage}.)
 	{nl}{nl} \
-	__rgb__ = Encode images as uncompressed RGB and send using the VGL Image
-	Transport.  This is useful when displaying to a remote 2D X server or X proxy
-	across a very fast network (see
-	{ref prefix="Section ": TurboVNC_Usage_Remote}.)
-	{nl}{nl} \
-	__srdpcm__ = Compress images using the DPCM compression method
-	and send using the Sun Ray Image Transport.  This requires that the
-	proprietary Sun Ray plugin be installed on the VirtualGL server.
-	(see {ref prefix="Chapter ": Sun_Ray_Usage}.)
-	{nl}{nl} \
-	__srrgb__ = Encode images as uncompressed RGB and send using the Sun Ray
-	Image Transport.  This requires that the proprietary Sun Ray plugin be
-	installed on the VirtualGL server (see
-	{ref prefix="Chapter ": Sun_Ray_Usage}.)
-	{nl}{nl} \
-	__sryuv__ = Encode images as uncompressed YUV	and send using the Sun Ray
-	Image Transport.  This requires that the proprietary Sun Ray plugin be
-	installed on the VirtualGL server (see
-	{ref prefix="Chapter ": Sun_Ray_Usage}.)
+	__rgb__ = Encode images as uncompressed RGB and send using the VGL Transport.
+	 This is useful when displaying to a remote 2D X server or X proxy across a
+	very fast network (see {ref prefix="Section ": TurboVNC_Usage_Remote}.)
 	{nl}{nl} \
 	If this option is not specified, then the default is set as follows:
 	{nl}{nl} \
-	If the 2D X server is a Sun Ray server and the Sun Ray plugin is installed
-	on the VirtualGL server, then VGL will default to using __sryuv__
-	encoding.  VGL will fall back to using __proxy__ compression if, for
-	any given frame, it is unable to send the frame using the Sun Ray Image
-	Transport.  This could occur if, for example, the Sun Ray client is on
-	a network that is not visible to the VirtualGL server.
-	{nl}{nl} \
-	If the 2D X server is not a Sun Ray server but the ''DISPLAY'' environment
-	variable begins with '':'' or ''unix:'', then VirtualGL assumes that the
-	X display connection is local and it defaults to using __proxy__
-	compression.  Otherwise, it defaults to __jpeg__ compression.
+	If the ''DISPLAY'' environment variable begins with '':'' or ''unix:'', then
+	VirtualGL assumes that the X display connection is local and it defaults to
+	using __proxy__ compression.  Otherwise, it defaults to __jpeg__
+	compression.
+
+	!!! If a custom image transport plugin is being used, then you can set
+	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  How the
+	plugin responds to this value is implementation-specific.
 
 | Environment Variable | ''VGL_DISPLAY = ''__''{d}''__ |
 | ''vglrun'' argument | ''-d ''__''{d}''__ |
@@ -111,7 +93,7 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-fps ''__''{f}''__ |
 | Summary | Limit the client/server frame rate to __''{f}''__ frames/second, \
 	where __''{f}''__ is a floating point number > 0.0 |
-| Image Transports | VGL, X11 |
+| Image Transports | VGL, X11, Custom (if supported) |
 | Default Value | 0.0 (No limit) |
 #OPT: hiCol=first
 
@@ -225,21 +207,20 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_INTERFRAME}
 | Environment Variable | ''VGL_INTERFRAME = ''__''0 \| 1''__ |
 | Summary | Enable or disable interframe image comparison |
-| Image Transports | Sun Ray, VGL |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | Enabled |
 #OPT: hiCol=first
 
-	Description :: The VGL and Sun Ray Image Transports will normally compare
-	each frame with the previous frame and send only the portions of the image
-	which have changed.  Setting ''VGL_INTERFRAME'' to ''0'' disables this
-	behavior.
+	Description :: The VGL Transport will normally compare each frame with the
+	previous frame and send only the portions of the image which have changed.
+	Setting ''VGL_INTERFRAME'' to ''0'' disables this behavior.
 	{nl}{nl} \
 	This setting was introduced in order to work around a specific application
 	interaction issue, but since a proper fix for that issue was introduced in
 	VirtualGL 2.1.1, this option isn't really useful anymore.
 
-	!!! When using the VGL Image Transport, interframe comparison is affected
-	by the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
+	!!! When using the VGL Transport, interframe comparison is affected by the
+	[[#VGL_TILESIZE][''VGL_TILESIZE'']] option
 
 | Environment Variable | ''VGL_LOG = ''__''{l}''__ |
 | Summary | Redirect all messages from VirtualGL to a log file specified by \
@@ -269,38 +250,38 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-np ''__''{n}''__ |
 | Summary | __''{n}''__ = the number of CPUs to use for multi-threaded \
 	compression |
-| Image Transports | VGL |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | 1 |
 #OPT: hiCol=first
 
-	Description :: The VGL Image Transport can divide the task of compressing
-	each frame among multiple server CPUs.  This might speed up the overall
-	throughput in rare circumstances where the server CPUs are significantly
-	slower than the client CPUs.
+	Description :: The VGL Transport can divide the task of compressing each
+	frame among multiple server CPUs.  This might speed up the overall throughput
+	in rare circumstances where the server CPUs are significantly slower than the
+	client CPUs.
 	{nl}{nl} \
 	VirtualGL will not allow more than 4 processors total to be used for
 	compression, nor will it allow you to set this parameter to a value greater
 	than the number of processors in the system.
 
-	!!! Multi-threaded compression is affected by the [[#VGL_TILESIZE][''VGL_TILESIZE'']]
-	option
+	!!! When using the VGL Transport, multi-threaded compression is affected by
+	the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
 
 | Environment Variable | ''VGL_PORT = ''__''{p}''__ |
 | ''vglrun'' argument | ''-p ''__''{p}''__ |
 | Summary | __''{p}''__ = the TCP port to use when connecting to the \
 	VirtualGL Client |
-| Image Transports | VGL |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | Read from X property stored by VirtualGL Client |
 #OPT: hiCol=first
 
-	Description :: The connection port for the VGL Image Transport is normally
+	Description :: The connection port for the VGL Transport is normally
 	determined by reading an X property that ''vglclient'' stores on the 2D X
 	server, so don't override this unless you know what you're doing.
 
 | Environment Variable | ''VGL_PROFILE = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-pr'' / ''+pr'' |
 | Summary | Disable/enable profiling output |
-| Image Transports | All |
+| Image Transports | VGL, X11, Custom (if supported) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
@@ -314,7 +295,7 @@ Each method of configuration takes precedence over the previous method:
 | Environment Variable | ''VGL_QUAL = ''__''{q}''__ |
 | ''vglrun'' argument | ''-q ''__''{q}''__ |
 | Summary | __''{q}''__ = the JPEG compression quality, 1 \<\= __''{q}''__ \<\= 100 |
-| Image Transports | VGL (JPEG) |
+| Image Transports | VGL (JPEG), Custom (if supported) |
 | Default Value | 95 |
 #OPT: hiCol=first
 
@@ -380,7 +361,7 @@ Each method of configuration takes precedence over the previous method:
 | Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sp'' / ''+sp'' |
 | Summary | Disable/enable frame spoiling |
-| Image Transports | All |
+| Image Transports | VGL, X11, Custom (if supported) |
 | Default Value | Enabled |
 #OPT: hiCol=first
 
@@ -406,15 +387,15 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_SSL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-s'' / ''+s'' |
-| Summary | Disable/enable SSL encryption of the VGL Image Transport |
-| Image Transports | VGL |
+| Summary | Disable/enable SSL encryption of the image transport |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: Enabling this option causes the VGL Image Transport to be
+	Description :: Enabling this option causes the VGL Transport to be
 	tunneled through a secure socket layer (SSL).
 
-	!!! This option is available only if both the VirtualGL server and client
+	!!! This option has no effect unless both the VirtualGL server and client
 	were built with OpenSSL support.
 
 {anchor: VGL_STEREO}
@@ -433,12 +414,13 @@ Each method of configuration takes precedence over the previous method:
 	eye buffer
 	{nl}{nl} \
 	__quad__ = Attempt to use quad-buffered stereo, which will result in a pair
-	of images being sent to the VirtualGL Client for every frame.  If
-	quad-buffered stereo is not available, either because the client machine or
-	the image transport does not support it, then fall back to using anaglyphic
-	stereo.  Quad-buffered stereo requires the VGL Image Transport, and it also
-	requires that the 2D X server support OpenGL and be connected to a 3D
-	accelerator that supports stereo rendering.
+	of images being sent to the VirtualGL Client for every frame.  If using the
+	VGL Transport and quad-buffered stereo is not available on the client, or if
+	using the X11 Transport, then fall back to using anaglyphic stereo.
+	Using quad-buffered stereo requires the VGL Transport (or a transport plugin
+	that can handle stereo image pairs.)  Using quad-buffered stereo with the VGL
+	Transport also requires that the 2D X server support OpenGL and be connected
+	to a 3D accelerator that supports stereo rendering.
 	{nl}{nl} \
 	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
 	available
@@ -449,17 +431,17 @@ Each method of configuration takes precedence over the previous method:
 | Environment Variable | ''VGL_SUBSAMP = ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
 | ''vglrun'' argument | ''-samp ''__''gray \| 1x \| 2x \| 4x \| 8x \| 16x''__ |
 | Summary | Specify the level of chrominance subsampling in the \
-	JPEG and Sun Ray image compressors |
-| Image Transports | Sun Ray (DPCM, YUV), VGL (JPEG) |
-| Default Value | 1x for VGL Image Transport, 16x for Sun Ray Image Transport |
+	JPEG image compressor |
+| Image Transports | VGL (JPEG), Custom (if supported) |
+| Default Value | 1x |
 #OPT: hiCol=first
 
-	Description :: When an image is encoded using JPEG, Sun Ray	DPCM, or Sun Ray
-	YUV, each pixel in the image is first converted from RGB
-	(Red/Green/Blue) to YUV.  An RGB pixel has three values that specify the
-	amounts of red, green, and blue that make up the pixel's color.  A YUV pixel
-	has three values that specify the overall brightness of the pixel (Y, or
-	"luminance") and the overall color of the pixel (U and V, or "chrominance".)
+	Description :: When an image is encoded using JPEG, each pixel in the image
+	is first converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three
+	values that specify the amounts of red, green, and blue that make up the
+	pixel's color.  A YUV pixel has three values that specify the overall
+	brightness of the pixel (Y, or "luminance") and the overall color of the
+	pixel (U and V, or "chrominance".)
 	{nl}{nl} \
 	Since the human eye is less sensitive to changes in color than it is to
 	changes in brightness, the chrominance components for some of the pixels can
@@ -482,17 +464,16 @@ Each method of configuration takes precedence over the previous method:
 	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
 	the image's X direction and half the pixels along the image's Y direction
 	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
-	available only with Sun Ray DPCM or YUV encoding.__
+	available only when using a custom image transport plugin that supports it.__
 	{nl}{nl} \
 	__16x__ = discard the chrominance components for 3 out of every 4 pixels
 	along both the X and Y directions of the image (this is also known as "4:4"
-	subsampling.)  __This option is available only with Sun Ray DPCM or YUV
-	encoding.__
+	subsampling.)  __This option is available only when using a custom image
+	transport plugin that supports it.__
 	{nl}{nl} \
 	__gray__ = discard all chrominance components.  This is useful when running
 	applications (such as medical visualization applications) that are already
-	generating grayscale images.  __This option is available only with JPEG
-	compression.__
+	generating grayscale images.
 	{nl}{nl} \
 	Subsampling artifacts are less noticeable with volume data, since it usually
 	only contains 256 colors to begin with.  But narrow, aliased lines and other
@@ -507,7 +488,7 @@ Each method of configuration takes precedence over the previous method:
 | Environment Variable | ''VGL_SYNC = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sync'' / ''+sync'' |
 | Summary | Disable/enable strict 2D/3D synchronization |
-| Image Transports | All |
+| Image Transports | VGL, X11, Custom (if supported) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
@@ -531,7 +512,7 @@ Each method of configuration takes precedence over the previous method:
 	When ''VGL_SYNC'' is enabled, every call to ''glFinish()'', ''glXWaitGL()'',
 	and ''glXSwapBuffers()'' will cause the contents of the Pbuffer
 	to be read back and __synchronously__ drawn into the application's window
-	__using the X11 Image Transport and no frame spoiling__.  The call to
+	__using the X11 Transport and no frame spoiling__.  The call to
 	''glFinish()'', ''glXWaitGL()'', or ''glXSwapBuffers()'' will not return
 	until VirtualGL has verified that the pixels have been delivered into the
 	application's window.  As such, this mode can have potentially dire effects
@@ -539,22 +520,27 @@ Each method of configuration takes precedence over the previous method:
 	recommended that ''VGL_SYNC'' be used only in conjunction with an X proxy
 	(such as TurboVNC) running on the same server as VirtualGL.
 
+	!!! If a custom image transport plugin is being used, then VirtualGL does
+	not automatically enable the X11 Transport or disable frame spoiling when
+	''VGL_SYNC'' is set.  This allows the plugin to handle synchronous image
+	delivery as it sees fit (or to simply ignore this option.)
+
 {anchor: VGL_TILESIZE}
 | Environment Variable | ''VGL_TILESIZE = ''__''{t}''__ |
 | Summary | __''{t}''__ = the image tile size (__''{t}''__ x __''{t}''__ pixels) \
 	to use for multi-threaded compression and interframe comparison \
 	(8 \<\= __''{t}''__ \<\= 1024) |
-| Image Transports | VGL |
+| Image Transports | VGL, Custom (if supported) |
 | Default Value | 256 |
 #OPT: hiCol=first
 
-	Description :: Normally, the VGL Image Transport will divide an OpenGL window
-	into equal-sized square tiles, compare each tile vs. the same tile in the
-	previous frame, then compress and send only the tiles which have changed
-	(assuming [[#VGL_INTERFRAME][interframe comparison]] is enabled.)  The VGL
-	Image Transport	will also divide up the task of compressing these tiles among
-	the available CPUs in a round robin fashion, if multi-threaded compression is
-	enabled (see [[#VGL_NPROCS][VGL_NPROCS]].)
+	Description :: Normally, the VGL Transport will divide an OpenGL window into
+	equal-sized square tiles, compare each tile vs. the same tile in the previous
+	frame, then compress and send only the tiles which have changed (assuming
+	[[#VGL_INTERFRAME][interframe comparison]] is enabled.)  The VGL Transport
+	will also divide up the task of compressing these tiles among the available
+	CPUs in a round robin fashion, if multi-threaded compression is enabled
+	(see [[#VGL_NPROCS][VGL_NPROCS]].)
 	{nl}{nl} \
 	There are several tradeoffs that must be considered when choosing a tile
 	size:
@@ -595,6 +581,16 @@ Each method of configuration takes precedence over the previous method:
 	values, and execution times for those functions.  This is useful when
 	diagnosing interaction problems between VirtualGL and a particular OpenGL
 	application.
+
+| Environment Variable | ''VGL_TRANSPORT = ''__''{t}''__ |
+| ''vglrun'' argument | ''-trans ''__''{t}''__ |
+| Summary | Use a custom image transport plugin |
+| Default Value | None |
+#OPT: hiCol=first
+
+	Description :: If this option is specified, then VirtualGL will attempt to
+	load a custom image transport plugin contained in a dynamic library named
+	''libtransvgl_''__''{t}''__''.so'' located in the dynamic linker path.
 
 | Environment Variable | ''VGL_TRAPX11 = ''__''0 \| 1''__ |
 | Summary | Disable/enable VirtualGL's X11 error handler |
@@ -654,21 +650,6 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl} \
 	Refer to {ref prefix="Chapter ": Application_Recipes} for specific
 	applications that require this.
-
-| Environment Variable | ''VGL_ZOOM_X = ''__''1 \| 2''__{nl} \
-	''VGL_ZOOM_Y = ''__''1 \| 2''__ |
-| Summary | Subsample all pixels by the specified factor |
-| Image Transports | Sun Ray |
-| Default Value | 1 |
-#OPT: hiCol=first
-
-	Description :: Setting ''VGL_ZOOM_X=2'' causes the Sun Ray Image Transport
-	to discard every other pixel along the X direction of the image.  Setting
-	''VGL_ZOOM_Y=2'' does the same thing for the Y direction of the image.  This
-	differs from ''VGL_SUBSAMP'' in that ''VGL_SUBSAMP'' discards only the
-	chrominance components from the pixels it subsamples.  ''VGL_ZOOM_*'', on the
-	other hand, discards the luminance components as well.  The result is
-	extremely grainy.
 
 ** Client Settings
 
