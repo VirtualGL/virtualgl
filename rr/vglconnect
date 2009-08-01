@@ -33,8 +33,8 @@ usage()
 	echo
 	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
 	echo "               (default: read from DISPLAY environment variable)"
-	echo "-s = Tunnel VGL image transport and X11 through SSh (default: tunnel only X11)"
-	echo "-x = Do not tunnel X11 or the VGL image transport, but create an xauth key"
+	echo "-s = Tunnel VGL Transport and X11 through SSh (default: tunnel only X11)"
+	echo "-x = Do not tunnel X11 or the VGL Transport, but create an xauth key"
 	echo "     and add it to the VirtualGL server's keyring so that the VirtualGL"
 	echo "     server (and any that share its home directory) can use this X display"
 	echo "-k = Do not connect to server, but create an xauth key for this X display and"

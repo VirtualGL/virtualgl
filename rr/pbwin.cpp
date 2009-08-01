@@ -349,7 +349,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message=false;
 			if(!message)
 			{
-				rrout.println("[VGL] NOTICE: Quad-buffered stereo requires the VGL image transport.");
+				rrout.println("[VGL] NOTICE: Quad-buffered stereo requires the VGL Transport.");
 				rrout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}

@@ -166,7 +166,7 @@ echo        [Additional SSh options]
 echo.
 echo -display ^<d^> = Local X display to use when drawing VirtualGL's images
 echo                (default: read from DISPLAY environment variable)
-echo -s = Tunnel VGL image transport over SSh
+echo -s = Tunnel VGL Transport over SSh
 echo -x = Do not tunnel X11 traffic over SSh
 echo -force = Force a new vglclient instance (use with caution)
 echo.

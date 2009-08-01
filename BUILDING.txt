@@ -7,11 +7,10 @@ How to build VirtualGL in 9043 easy steps
 *******************************************************************************
 
    If built with OpenSSL support, VirtualGL can use OpenSSL to encrypt the
-   traffic it sends via the VGL Image Transport.  This is only a marginally
-   useful feature, however, since VirtualGL can also tunnel the VGL Image
-   Transport through SSh.  Thus, since the embedded OpenSSL feature is
-   difficult to maintain, it is not enabled by default in this release of
-   VirtualGL.
+   traffic it sends via the VGL Transport.  This is only a marginally useful
+   feature, however, since VirtualGL can also tunnel the VGL Transport through
+   SSh.  Thus, since the embedded OpenSSL feature is difficult to maintain, it
+   is not enabled by default in this release of VirtualGL.
 
    However, you can easily include OpenSSL support in your custom build of
    VirtualGL by specifying USESSL=yes as an argument to 'make' or by adding
