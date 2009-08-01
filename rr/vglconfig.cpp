@@ -194,7 +194,8 @@ void SetMovie(void)
 void CompCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
-	if(d>=0 && d<=RR_COMPRESSOPT-1) fconfig_setcompress(fconfig, d);
+	if(d>=0 && d<=RR_COMPRESSOPT-1 || strlen(fconfig.transport)>0)
+		fconfig_setcompress(fconfig, d);
 	SetSamp();
 	SetQual();
 	SetProf();
@@ -319,9 +320,17 @@ Fl_Menu_Item compmenu[]=
 
 Fl_Menu_Item ctcompmenu[]=
 {
-	{"0", 0, CompCB, (void *)RRCOMP_JPEG},
-	{"1", 0, CompCB, (void *)RRCOMP_JPEG},
-	{"2", 0, CompCB, (void *)RRCOMP_RGB},
+	{"0", 0, CompCB, (void *)0},
+	{"1", 0, CompCB, (void *)1},
+	{"2", 0, CompCB, (void *)2},
+	{"3", 0, CompCB, (void *)3},
+	{"4", 0, CompCB, (void *)4},
+	{"5", 0, CompCB, (void *)5},
+	{"6", 0, CompCB, (void *)6},
+	{"7", 0, CompCB, (void *)7},
+	{"8", 0, CompCB, (void *)8},
+	{"9", 0, CompCB, (void *)9},
+	{"10", 0, CompCB, (void *)10},
 	{0, 0, 0, 0}
 };
 

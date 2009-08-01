@@ -246,11 +246,13 @@ void fconfig_reloadenv(void)
 			fcenv.compress=compress;
 		}
 	}
+	fetchenv_str("VGL_TRANSPORT", transport);
 	if((env=getenv("VGL_COMPRESS"))!=NULL && strlen(env)>0)
 	{
 		char *t=NULL;  int itemp=strtol(env, &t, 10);
 		int compress=-1;
-		if(t && t!=env && itemp>=0 && itemp<RR_COMPRESSOPT) compress=itemp;
+		if(t && t!=env && itemp>=0
+			&& (itemp<RR_COMPRESSOPT || strlen(fconfig.transport)>0)) compress=itemp;
 		else if(!strnicmp(env, "p", 1)) compress=RRCOMP_PROXY;
 		else if(!strnicmp(env, "j", 1)) compress=RRCOMP_JPEG;
 		else if(!strnicmp(env, "r", 1)) compress=RRCOMP_RGB;
@@ -400,7 +402,6 @@ void fconfig_reloadenv(void)
 	fetchenv_int("VGL_TILESIZE", tilesize, 8, 1024);
 	fetchenv_bool("VGL_TRACE", trace);
 	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
-	fetchenv_str("VGL_TRANSPORT", transport);
 	fetchenv_bool("VGL_TRAPX11", trapx11);
 	fetchenv_bool("VGL_WINDOW", usewindow);
 	fetchenv_str("VGL_XVENDOR", vendor);
@@ -451,11 +452,12 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
-	if(i<0 || i>=RR_COMPRESSOPT) return;
+	if(i<0 || (i>=RR_COMPRESSOPT && strlen(fc.transport)==0)) return;
 	rrcs::safelock l(fcmutex);
 
 	bool is=(fc.compress>=0);
 	fc.compress=i;
+	if(strlen(fc.transport)>0) return;
 	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]=1;
 	if(fc.subsamp<0) fc.subsamp=_Defsubsamp[fc.compress];
 	if(strlen(fc.transport)==0 && _Minsubsamp[fc.compress]>=0
