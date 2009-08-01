@@ -220,7 +220,7 @@ void fconfig_reloadenv(void)
 	fetchenv_str("VGL_CLIENT", client);
 	if((env=getenv("VGL_SUBSAMP"))!=NULL && strlen(env)>0)
 	{
-		int subsamp=-1, compress=-1;
+		int subsamp=-1;
 		if(!strnicmp(env, "G", 1)) subsamp=0;
 		else
 		{
@@ -240,11 +240,6 @@ void fconfig_reloadenv(void)
 		}
 		if(subsamp>=0 && (!fcenv_set || fcenv.subsamp!=subsamp))
 			fconfig.subsamp=fcenv.subsamp=subsamp;
-		if(compress>=0 && (!fcenv_set || fcenv.compress!=compress))
-		{
-			fconfig_setcompress(fconfig, compress);
-			fcenv.compress=compress;
-		}
 	}
 	fetchenv_str("VGL_TRANSPORT", transport);
 	if((env=getenv("VGL_COMPRESS"))!=NULL && strlen(env)>0)
