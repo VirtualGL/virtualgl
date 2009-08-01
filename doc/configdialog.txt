@@ -31,7 +31,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	''VGL_COMPRESS'' configuration option and its various parameters.
 
 	!!! If a custom image transport plugin is loaded, then this gadget's name
-	changes to "Image Compression", and it has options "0", "1", and "2".
+	changes to "Image Compression", and it has options "0" through "10".
 
 	Chrominance Subsampling :: This drop-down gadget is active only when using
 	JPEG compression or a custom image transport plugin.  It has the following
