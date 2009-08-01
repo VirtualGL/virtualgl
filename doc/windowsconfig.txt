@@ -1,4 +1,4 @@
-* Configuring a Windows Machine as a Client for the VGL Image Transport
+* Configuring a Windows Machine as a VGL Transport Client
 
 	#. Install Hummingbird Exceed if it isn't already installed.
 

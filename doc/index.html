@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-06-22T04:26:36">
+<meta name="date" content="2009-07-31T20:38:09">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -13,19 +13,18 @@
 <link rel="chapter" href="index.html#hd004" title="4 Obtaining and Installing VirtualGL">
 <link rel="chapter" href="index.html#hd005" title="5 Obtaining and Installing TurboVNC">
 <link rel="chapter" href="index.html#hd006" title="6 Configuring a Linux or Solaris Machine as a VirtualGL Server">
-<link rel="chapter" href="index.html#hd007" title="7 Configuring a Windows Machine as a Client for the VGL Image Transport">
-<link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL with the VGL Image Transport">
+<link rel="chapter" href="index.html#hd007" title="7 Configuring a Windows Machine as a VGL Transport Client">
+<link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL with the VGL Transport">
 <link rel="chapter" href="index.html#hd009" title="9 Using VirtualGL with TurboVNC">
 <link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL with Other X Proxies">
-<link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL in a Sun Ray Environment">
-<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with setuid/setgid Executables">
-<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Chromium and ModViz VGP">
-<link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with VirtualBox">
-<link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
-<link rel="chapter" href="index.html#hd0016" title="16 Advanced OpenGL Features">
-<link rel="chapter" href="index.html#hd0017" title="17 Performance Measurement">
-<link rel="chapter" href="index.html#hd0018" title="18 The VirtualGL Configuration Dialog">
-<link rel="chapter" href="index.html#hd0019" title="19 Advanced Configuration">
+<link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL with setuid/setgid Executables">
+<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with Chromium and ModViz VGP">
+<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with VirtualBox">
+<link rel="chapter" href="index.html#hd0014" title="14 Other Application Recipes">
+<link rel="chapter" href="index.html#hd0015" title="15 Advanced OpenGL Features">
+<link rel="chapter" href="index.html#hd0016" title="16 Performance Measurement">
+<link rel="chapter" href="index.html#hd0017" title="17 The VirtualGL Configuration Dialog">
+<link rel="chapter" href="index.html#hd0018" title="18 Advanced Configuration">
 <link rel="stylesheet" type="text/css" href="virtualgl.css" title="virtualgl">
 </head>
 <body >
@@ -100,11 +99,7 @@ systems, OpenGL and GLX, and X windows.</p>
                 <a href="#hd004005" class="toc">4.5 Installing VirtualGL from Source</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004006" class="toc">4.6 Obtaining and Installing the Sun Ray 
-                Plugin</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd004007" class="toc">4.7 Uninstalling VirtualGL</a>
+                <a href="#hd004006" class="toc">4.6 Uninstalling VirtualGL</a>
             </li>
         </ul>
     </li>
@@ -154,8 +149,8 @@ systems, OpenGL and GLX, and X windows.</p>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd007" class="toc">7 Configuring a Windows Machine as a Client 
-        for the VGL Image Transport</a>
+        <a href="#hd007" class="toc">7 Configuring a Windows Machine as a VGL 
+        Transport Client</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
                 <a href="#hd007001" class="toc">7.1 Optimizing Exceed</a>
@@ -163,27 +158,25 @@ systems, OpenGL and GLX, and X windows.</p>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd008" class="toc">8 Using VirtualGL with the VGL Image 
-        Transport</a>
+        <a href="#hd008" class="toc">8 Using VirtualGL with the VGL Transport</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd008001" class="toc">8.1 VGL Image Transport with X11 
-                Forwarding</a>
+                <a href="#hd008001" class="toc">8.1 VGL Transport with X11 Forwarding</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd008002" class="toc">8.2 VGL Image Transport with a Direct 
-                X11 Connection</a>
+                <a href="#hd008002" class="toc">8.2 VGL Transport with a Direct X11 
+                Connection</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd008003" class="toc">8.3 VGL Image Transport with X11 
-                Forwarding and SSh Tunneling</a>
+                <a href="#hd008003" class="toc">8.3 VGL Transport with X11 Forwarding 
+                and SSh Tunneling</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd008004" class="toc">8.4 VGL Image Transport over Gigabit 
+                <a href="#hd008004" class="toc">8.4 VGL Transport over Gigabit 
                 Networks</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd008005" class="toc">8.5 VGL Image Transport with XDMCP</a>
+                <a href="#hd008005" class="toc">8.5 VGL Transport with XDMCP</a>
             </li>
             <li class="Itemize-3 toc">
                 <a href="#hd008006" class="toc">8.6 The VirtualGL Client Application: 
@@ -236,97 +229,93 @@ systems, OpenGL and GLX, and X windows.</p>
         <a href="#hd0010" class="toc">10 Using VirtualGL with Other X Proxies</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0011" class="toc">11 Using VirtualGL in a Sun Ray 
-        Environment</a>
-    </li>
-    <li class="Itemize-1 toc">
-        <a href="#hd0012" class="toc">12 Using VirtualGL with setuid/setgid 
+        <a href="#hd0011" class="toc">11 Using VirtualGL with setuid/setgid 
         Executables</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0013" class="toc">13 Using VirtualGL with Chromium and 
+        <a href="#hd0012" class="toc">12 Using VirtualGL with Chromium and 
         ModViz VGP</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0013001" class="toc">13.1 Configuration 1: Sort-First 
+                <a href="#hd0012001" class="toc">12.1 Configuration 1: Sort-First 
                 Rendering (Image-Space Decomposition)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0013002" class="toc">13.2 Configuration 2: Sort-First 
+                <a href="#hd0012002" class="toc">12.2 Configuration 2: Sort-First 
                 Rendering (Image-Space Decomposition) with Readback</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0013003" class="toc">13.3 Configuration 3: Sort-Last 
+                <a href="#hd0012003" class="toc">12.3 Configuration 3: Sort-Last 
                 Rendering (Object-Space Decomposition)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0013004" class="toc">13.4 A Note About Performance</a>
+                <a href="#hd0012004" class="toc">12.4 A Note About Performance</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0013005" class="toc">13.5 ModViz VGP v1.x and VirtualGL</a>
+                <a href="#hd0012005" class="toc">12.5 ModViz VGP v1.x and VirtualGL</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0014" class="toc">14 Using VirtualGL with VirtualBox</a>
+        <a href="#hd0013" class="toc">13 Using VirtualGL with VirtualBox</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0015" class="toc">15 Other Application Recipes</a>
+        <a href="#hd0014" class="toc">14 Other Application Recipes</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0016" class="toc">16 Advanced OpenGL Features</a>
+        <a href="#hd0015" class="toc">15 Advanced OpenGL Features</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0016001" class="toc">16.1 Stereographic Rendering</a>
+                <a href="#hd0015001" class="toc">15.1 Stereographic Rendering</a>
                 <ul class="toc">
                     <li class="Itemize-5 toc">
-                        <a href="#hd0016001001" class="toc">16.1.1 Quad-Buffered Stereo</a>
+                        <a href="#hd0015001001" class="toc">15.1.1 Quad-Buffered Stereo</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd0016001002" class="toc">16.1.2 Anaglyphic Stereo</a>
+                        <a href="#hd0015001002" class="toc">15.1.2 Anaglyphic Stereo</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd0016001003" class="toc">16.1.3 Selecting a Stereo Mode</a>
+                        <a href="#hd0015001003" class="toc">15.1.3 Selecting a Stereo Mode</a>
                     </li>
                 </ul>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0016002" class="toc">16.2 Transparent Overlays</a>
+                <a href="#hd0015002" class="toc">15.2 Transparent Overlays</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0016003" class="toc">16.3 Indexed (PseudoColor) Rendering</a>
+                <a href="#hd0015003" class="toc">15.3 Indexed (PseudoColor) Rendering</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0016004" class="toc">16.4 Troubleshooting</a>
+                <a href="#hd0015004" class="toc">15.4 Troubleshooting</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0017" class="toc">17 Performance Measurement</a>
+        <a href="#hd0016" class="toc">16 Performance Measurement</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0017001" class="toc">17.1 VirtualGL&rsquo;s Built-In 
+                <a href="#hd0016001" class="toc">16.1 VirtualGL&rsquo;s Built-In 
                 Profiling System</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0017002" class="toc">17.2 Frame Spoiling</a>
+                <a href="#hd0016002" class="toc">16.2 Frame Spoiling</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0017003" class="toc">17.3 VirtualGL Diagnostic Tools</a>
+                <a href="#hd0016003" class="toc">16.3 VirtualGL Diagnostic Tools</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0018" class="toc">18 The VirtualGL Configuration Dialog</a>
+        <a href="#hd0017" class="toc">17 The VirtualGL Configuration Dialog</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0019" class="toc">19 Advanced Configuration</a>
+        <a href="#hd0018" class="toc">18 Advanced Configuration</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0019001" class="toc">19.1 Server Settings</a>
+                <a href="#hd0018001" class="toc">18.1 Server Settings</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0019002" class="toc">19.2 Client Settings</a>
+                <a href="#hd0018002" class="toc">18.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -442,16 +431,16 @@ turn out the lights and go home.  Most of the time spent developing
 VirtualGL has been spent working around &ldquo;stupid application 
 tricks.&rdquo;</p>
 
-<p>VirtualGL can currently use one of three &ldquo;image transports&rdquo; 
-to send rendered 3D images to the client machine:</p>
+<p>VirtualGL has two built-in &ldquo;image transports&rdquo; which can be 
+used to send rendered 3D images to the client machine:</p>
 
-<p><a name="VGL_Image_Transport"></a></p>
+<p><a name="VGL_Transport"></a></p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">1. VGL Image Transport (Formerly &ldquo;Direct Mode&rdquo;)</dt>
+    <dt class="Description-1 Description">1. VGL Transport</dt>
     <dd class="Description-1 Description">
-        The VGL Image Transport is most often used whenever the 2D X server (the 
-        X server used to draw the application&rsquo;s GUI and transmit keyboard 
+        The VGL Transport is most often used whenever the 2D X server (the X 
+        server used to draw the application&rsquo;s GUI and transmit keyboard 
         and mouse events back to the application server) is located across the 
         network from the application server, for instance if the 2D X server is 
         running on the user&rsquo;s desktop machine.  VirtualGL uses its own 
@@ -467,22 +456,22 @@ to send rendered 3D images to the client machine:</p>
 
 <a name="fig002001"></a>
 <div class="figure">
-<p class="caption">Figure 2.1: The VGL Image Transport with a Remote 2D X Server</p>
+<p class="caption">Figure 2.1: The VGL Transport with a Remote 2D X Server</p>
 <img src="vgltransport.png" alt="vgltransport" class="figure" id="imgid_13" name="imgid_13"/>
 </div>
 
-<p><a name="X11_Image_Transport"></a></p>
+<p><a name="X11_Transport"></a></p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">2. X11 Image Transport (Formerly &ldquo;Raw Mode&rdquo;)</dt>
+    <dt class="Description-1 Description">2. X11 Transport</dt>
     <dd class="Description-1 Description">
-        The X11 Image Transport simply draws the rendered 3D images into the 
+        The X11 Transport simply draws the rendered 3D images into the 
         appropriate X window using XPutImage() and similar X-Windows commands.  
         This is most useful in conjunction with an &ldquo;X Proxy&rdquo;, which 
         can be one of any number of Unix remote display applications, such as 
         VNC.  These X proxies are essentially &ldquo;virtual&rdquo; X servers.  
         They appear to the application as a normal X server, but they perform 
-        X11 rendering to a virtual framebuffer in main memory	rather than to a 
+        X11 rendering to a virtual framebuffer in main memory rather than to a 
         real framebuffer on a graphics card.  This allows the X proxy to send 
         only images to the client machine rather than chatty X-Windows rendering 
         commands.  When using the X11 Transport, VirtualGL does not perform any 
@@ -490,7 +479,7 @@ to send rendered 3D images to the client machine:</p>
         to encode and deliver the images to the client(s).  Since the use of an 
         X proxy eliminates the need to send X-Windows commands over the network, 
         this is the best means of using VirtualGL over high-latency or 
-        low-bandwidth networks. The VirtualGL Project provides an accelerated 
+        low-bandwidth networks.  The VirtualGL Project provides an accelerated 
         version of VNC, called &ldquo;TurboVNC&rdquo;, which is meant to be used 
         with VirtualGL&rsquo;s X11 Transport.  The combination of the two 
         provides a highly-performant remote 3D	solution, even on slow networks.  
@@ -501,45 +490,12 @@ to send rendered 3D images to the client machine:</p>
 
 <a name="fig002002"></a>
 <div class="figure">
-<p class="caption">Figure 2.2: The X11 Image Transport with an X Proxy</p>
+<p class="caption">Figure 2.2: The X11 Transport with an X Proxy</p>
 <img src="x11transport.png" alt="x11transport" class="figure" id="imgid_14" name="imgid_14"/>
 </div>
 
-<dl class="Description">
-    <dt class="Description-1 Description">3. Sun Ray Image Transport</dt>
-    <dd class="Description-1 Description">
-        The Sun Ray thin client environment from Sun Microsystems consists of an 
-        X proxy (the Sun Ray Server Software) and a series of ultra-thin 
-        hardware clients that connect to this proxy over a network.  It is 
-        similar in concept to VNC, in that a virtual X server is created for 
-        every user and that only images, not rendering commands, are sent to the 
-        client.  Unlike VNC, however, the client is not a piece of software 
-        running on a workstation or laptop.  The client is a fanless, diskless 
-        little box with only a monitor port, USB ports, a network jack, and a 
-        smart card slot (used for authentication.)<br /> <br /> This environment 
-        presents unique challenges to VirtualGL  The first challenge is that the 
-        Sun Ray 1 and Sun Ray 2 series clients contain relatively slow CPUs, so 
-        they are not fast enough to decompress JPEG in real time.  The second 
-        challenge is that Sun Ray servers are generally provisioned to handle a 
-        lot of simultaneous users, so using VirtualGL&rsquo;s X11 Transport 
-        would put undue stress on both the Sun Ray servers and the network on 
-        which they reside.  Thus, Sun Microsystems designed a plugin for 
-        VirtualGL which allows VGL to compress images using a protocol that can 
-        be sent directly to the Sun Ray hardware client without having to pass 
-        through the Sun Ray server first. Since the plugin uses the proprietary 
-        Sun Ray image compression technology, it is currently closed source, but 
-        the binary packages can be downloaded for free as part of the 
-        <span class="remote"><a href="http://www.sun.com/servers/cr/visualization/get_it.jsp" class="remote">Sun 
-        Shared Visualization</a></span><a name="idx0010"></a> product.  This 
-        product also includes VirtualGL, TurboVNC, and other goodies.
-    </dd>
-</dl>
-
-<a name="fig002003"></a>
-<div class="figure">
-<p class="caption">Figure 2.3: The Sun Ray Image Transport</p>
-<img src="sunray.png" alt="sunray" class="figure" id="imgid_15" name="imgid_15"/>
-</div>
+<p>VirtualGL also provides a framework which can be used to develop custom 
+image transport plugins.</p>
 
 <p><br /></p>
 
@@ -595,15 +551,15 @@ to send rendered 3D images to the client machine:</p>
     <td class="high standard">Recommended O/S</td>
     <td class="standard" colspan="3"><ul class="Itemize"><li class="Itemize-0">
     Any distribution in the 
-    <span class="remote"><a href="http://www.redhat.com/" class="remote">RedHat</a></span><a name="idx0011"></a> 
+    <span class="remote"><a href="http://www.redhat.com/" class="remote">RedHat</a></span><a name="idx0010"></a> 
     or 
-    <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0012"></a> 
+    <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a> 
     families (including 
-    <span class="remote"><a href="http://fedora.redhat.com/" class="remote">Fedora</a></span><a name="idx0013"></a>, 
-    <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0014"></a>, 
+    <span class="remote"><a href="http://fedora.redhat.com/" class="remote">Fedora</a></span><a name="idx0012"></a>, 
+    <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0013"></a>, 
     and 
     <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
-    Box</a></span><a name="idx0015"></a>)
+    Box</a></span><a name="idx0014"></a>)
 </li>
 <li class="Itemize-0">
     Ubuntu Linux v6.0 or later
@@ -623,7 +579,7 @@ to send rendered 3D images to the client machine:</p>
 <p>VirtualGL should build and run on Itanium Linux, but it has not been 
 thoroughly tested.  
 <span class="remote"><a href="http://sourceforge.net/users/dcommander" class="remote">Contact 
-us</a></span><a name="idx0016"></a> if you encounter any difficulties.  
+us</a></span><a name="idx0015"></a> if you encounter any difficulties.  
 A pre-built TurboJPEG binary package is not available for Linux/Itanium, 
 so it will be necessary to build TurboJPEG from source using the Intel 
 Integrated Performance Primitives for Itanium processors.</p>
@@ -665,18 +621,18 @@ Integrated Performance Primitives for Itanium processors.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0017"></a> (v2.5 or higher recommended *)
+    mediaLib</a></span><a name="idx0016"></a> (v2.5 or higher recommended *)
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Solaris 
-    Patch</a></span><a name="idx0018"></a> 118345-04 (or later)
+    Patch</a></span><a name="idx0017"></a> 118345-04 (or later)
 </li>
 <li class="Itemize-0">
     X server configured to export True Color (24-bit or 32-bit) visuals
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0019"></a> (v2.5 or higher recommended *)
+    mediaLib</a></span><a name="idx0018"></a> (v2.5 or higher recommended *)
 </li>
 <li class="Itemize-0">
     X server configured to export True Color (24-bit or 32-bit) visuals
@@ -713,10 +669,10 @@ Integrated Performance Primitives for Itanium processors.</p>
     <td class="high standard">Graphics</td>
     <td class="standard">Any decent 3D graphics card that supports Pbuffers <ul class="Itemize"><li class="Itemize-0">
     Tested with 
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr600/" class="remote">XVR-600</a></span><a name="idx0020"></a>, 
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx0021"></a> 
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr600/" class="remote">XVR-600</a></span><a name="idx0019"></a>, 
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr1200/" class="remote">XVR-1200</a></span><a name="idx0020"></a> 
     (&ldquo;jfb&rdquo;), and 
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0022"></a> 
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0021"></a> 
     (&ldquo;kfb&rdquo;)
 </li></ul></td>
     <td class="standard">Any graphics card with decent 2D performance</td>
@@ -734,26 +690,26 @@ Integrated Performance Primitives for Itanium processors.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0023"></a> (pre-installed on Solaris 10 
+    mediaLib</a></span><a name="idx0022"></a> (pre-installed on Solaris 10 
     and higher)
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-    OpenGL</a></span><a name="idx0024"></a> 1.3 or later (1.5 or later 
-    required for <a href="#GLP_Usage">GLP</a><a name="idx0025"></a>)
+    OpenGL</a></span><a name="idx0023"></a> 1.3 or later (1.5 or later 
+    required for <a href="#GLP_Usage">GLP</a><a name="idx0024"></a>)
 </li>
 <li class="Itemize-0">
     If your system does not ship with SSh pre-installed (older Solaris 8 and 
     9 systems don&rsquo;t), then download and install an OpenSSH package 
     from 
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0026"></a> 
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0025"></a> 
     or 
     <span class="remote"><a href="http://www.sunfreeware.com/." class="remote">http://www.sunfreeware.com/.</a></span>
 </li>
 <li class="Itemize-0">
     X server configured to export True Color (24-bit or 32-bit) visuals (if 
-    not using <a href="#GLP_Usage">GLP</a><a name="idx0027"></a>)
-</li></ul> Recommended <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patches</a></span><a name="idx0028"></a> <ul class="Itemize"><li class="Itemize-0">
+    not using <a href="#GLP_Usage">GLP</a><a name="idx0026"></a>)
+</li></ul> Recommended <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patches</a></span><a name="idx0027"></a> <ul class="Itemize"><li class="Itemize-0">
     <em>OpenGL 1.5</em>: 120812-15 (or later)
 </li>
 <li class="Itemize-0">
@@ -767,12 +723,12 @@ Integrated Performance Primitives for Itanium processors.</p>
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0029"></a> (pre-installed on Solaris 10 
+    mediaLib</a></span><a name="idx0028"></a> (pre-installed on Solaris 10 
     and higher)
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-    OpenGL</a></span><a name="idx0030"></a> 1.3 or later recommended if the 
+    OpenGL</a></span><a name="idx0029"></a> 1.3 or later recommended if the 
     client has a 3D graphics card installed.  If available, the VirtualGL 
     Client will use OpenGL to draw images, which improves the client&rsquo;s 
     performance on Sun 3D graphics cards.
@@ -781,7 +737,7 @@ Integrated Performance Primitives for Itanium processors.</p>
     If your system does not ship with SSh pre-installed (older Solaris 8 and 
     9 systems don&rsquo;t), then download and install an OpenSSH package 
     from 
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0031"></a> 
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0030"></a> 
     or 
     <span class="remote"><a href="http://www.sunfreeware.com/." class="remote">http://www.sunfreeware.com/.</a></span>
 </li>
@@ -815,8 +771,8 @@ Integrated Performance Primitives for Itanium processors.</p>
   <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <em>VGL Image Transport Only</em>: Mac X11 application (in the 
-    &ldquo;Optional Installs&rdquo; package on the OS X install discs)
+    <em>VGL Transport Only</em>: Mac X11 application (in the &ldquo;Optional 
+    Installs&rdquo; package on the OS X install discs)
 </li></ul></td>
   </tr>
 </table>
@@ -849,8 +805,8 @@ Integrated Performance Primitives for Itanium processors.</p>
   <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <em>VGL Image Transport Only</em>: 
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0032"></a> 
+    <em>VGL Transport Only</em>: 
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0031"></a> 
     Exceed 8 or newer required
 </li>
 <li class="Itemize-0">
@@ -865,7 +821,7 @@ Integrated Performance Primitives for Itanium processors.</p>
 <h2 id="hd003007">3.7&nbsp;Additional Requirements for Stereographic Rendering</h2>
 
 <div class="important"><p class="important">
-The client requirements do not apply to anaglyphic stereo.  See Chapter <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
+The client requirements do not apply to anaglyphic stereo.  See Chapter <a href="#Advanced_OpenGL" class="ref">15</a> for more details.
 </p></div>
 
 <div class="table">
@@ -892,21 +848,21 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
   <tr class="standard">
     <td class="high standard">Solaris/SPARC</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0033"></a> 
+    <span class="remote"><a href="http://www.sun.com/desktop/products/graphics/xvr2500/" class="remote">XVR-2500</a></span><a name="idx0032"></a> 
     graphics card
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-    OpenGL</a></span><a name="idx0034"></a> 1.5 or later
+    OpenGL</a></span><a name="idx0033"></a> 1.5 or later
 </li>
 <li class="Itemize-0">
     OpenGL 
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0035"></a> 
+    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0034"></a> 
     120812-14 (or later)
 </li>
 <li class="Itemize-0">
     XVR-2500 driver 
-    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0036"></a> 
+    <span class="remote"><a href="http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage" class="remote">Patch</a></span><a name="idx0035"></a> 
     120928-10 (or later)
 </li></ul></td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
@@ -915,7 +871,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-    OpenGL</a></span><a name="idx0037"></a> 1.3 or later
+    OpenGL</a></span><a name="idx0036"></a> 1.3 or later
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -927,7 +883,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     formats
 </li>
 <li class="Itemize-0">
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0038"></a> 
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0037"></a> 
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -964,7 +920,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-    OpenGL</a></span><a name="idx0039"></a> 1.3 or later
+    OpenGL</a></span><a name="idx0038"></a> 1.3 or later
 </li></ul></td>
   </tr>
   <tr class="standard">
@@ -975,7 +931,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     export overlay pixel formats
 </li>
 <li class="Itemize-0">
-    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0040"></a> 
+    <span class="remote"><a href="http://connectivity.hummingbird.com" class="remote">Hummingbird</a></span><a name="idx0039"></a> 
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -991,7 +947,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Image_Transport">VGL Image Transport</a><a name="idx0041"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0040"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
 </p></div>
 
 
@@ -1005,9 +961,9 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         Download the appropriate TurboJPEG binary package (v1.10 or later) for 
         your system from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0042"></a> of the 
+        area</a></span><a name="idx0041"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0043"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0042"></a>. <br />
         <div class="important"><p class="important">
         The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages contain both 32-bit and 64-bit libraries.
         </p></div>
@@ -1042,9 +998,9 @@ dpkg&nbsp;-i&nbsp;turbojpeg*.deb
         Download the appropriate VirtualGL binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0044"></a> of the 
+        area</a></span><a name="idx0043"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0045"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0044"></a>. <br />
         <div class="important"><p class="important">
         The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages contain both 32-bit and 64-bit VirtualGL components.
         </p></div>
@@ -1084,9 +1040,9 @@ dpkg&nbsp;-i&nbsp;VirtualGL*.deb
         <code>SUNWvgl-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code> 
         for x86) from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0046"></a> of the 
+        area</a></span><a name="idx0045"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0047"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0046"></a>. <br />
         <div class="important"><p class="important">
         Both packages provide both 32-bit and 64-bit VirtualGL components.
         </p></div>
@@ -1120,9 +1076,9 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0048"></a> of the 
+        area</a></span><a name="idx0047"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0049"></a>.
+        SourceForge web-site</a></span><a name="idx0048"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -1142,9 +1098,9 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>.exe</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0050"></a> of the 
+        area</a></span><a name="idx0049"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0051"></a>.
+        SourceForge web-site</a></span><a name="idx0050"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the VirtualGL installer.  The installation of VirtualGL should be 
@@ -1165,32 +1121,18 @@ source tarball
 (<code>VirtualGL-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-area</a></span><a name="idx0052"></a> of the 
+area</a></span><a name="idx0051"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge web-site</a></span><a name="idx0053"></a>, uncompress it, 
+SourceForge web-site</a></span><a name="idx0052"></a>, uncompress it, 
 <code>cd&nbsp;vgl</code>, and read the contents of 
 <code>BUILDING.txt</code> for further instructions on how to build and 
 install VirtualGL from source.</p>
 
 
-<h2 id="hd004006">4.6&nbsp;Obtaining and Installing the Sun Ray Plugin</h2>
-
-<p>The VirtualGL Sun Ray plugin is a proprietary add-on developed by Sun 
-Microsystems to integrate VirtualGL with the Sun Ray thin client 
-environment. If you plan to use this functionality, then it is 
-recommended that you download and install the 
-<span class="remote"><a href="http://www.sun.com/servers/cr/visualization/get_it.jsp" class="remote">Sun 
-Shared Visualization</a></span><a name="idx0054"></a> software.  This 
-software product is available as a free download (Sun charges for 
-support), and it includes VirtualGL, TurboVNC, the proprietary Sun Ray 
-plugin, and enhancements to N1 GridEngine to allow it to manage 
-VirtualGL jobs across a cluster of 3D servers.</p>
+<h2 id="hd004006">4.6&nbsp;Uninstalling VirtualGL</h2>
 
 
-<h2 id="hd004007">4.7&nbsp;Uninstalling VirtualGL</h2>
-
-
-<h3 id="hd004007001">Linux</h3>
+<h3 id="hd004006001">Linux</h3>
 
 <p>As root, issue one of the following commands:</p>
 
@@ -1212,7 +1154,7 @@ dpkg&nbsp;-r&nbsp;VirtualGL
 </dl>
 
 
-<h3 id="hd004007002">Solaris</h3>
+<h3 id="hd004006002">Solaris</h3>
 
 <p>As root, issue the following command:</p>
 
@@ -1223,7 +1165,7 @@ pkgrm&nbsp;SUNWvgl
 <p>Answer &ldquo;yes&rdquo; when prompted.</p>
 
 
-<h3 id="hd004007003">Mac</h3>
+<h3 id="hd004006003">Mac</h3>
 
 <p>Use the &ldquo;Uninstall VirtualGL&rdquo; application provided in the 
 VirtualGL disk image, or issue the following command from the Terminal:</p>
@@ -1233,7 +1175,7 @@ sudo&nbsp;/opt/VirtualGL/bin/uninstall
 </pre>
 
 
-<h3 id="hd004007004">Windows</h3>
+<h3 id="hd004006004">Windows</h3>
 
 <p>Use the &ldquo;Add or Remove Programs&rdquo; applet in the Control Panel 
 (or the &ldquo;Programs and Features&rdquo; applet if you&rsquo;re 
@@ -1247,7 +1189,7 @@ running Vista.)</p>
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Obtaining and Installing TurboVNC</h1>
 
 <div class="important"><p class="important">
-TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use the <a href="#VGL_Image_Transport">VGL Image Transport</a><a name="idx0055"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
+TurboVNC must be installed on any machine that will act as a TurboVNC server or client.  It is not necessary to install TurboVNC to use the <a href="#VGL_Transport">VGL Transport</a><a name="idx0053"></a>.  Also, TurboVNC need not necessarily be installed on the same server as VirtualGL.
 </p></div>
 
 
@@ -1261,9 +1203,9 @@ TurboVNC must be installed on any machine that will act as a TurboVNC server or 
         Download the appropriate TurboJPEG binary package (v1.10 or later) for 
         your system from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0056"></a> of the 
+        area</a></span><a name="idx0054"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0057"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0055"></a>. <br />
         <div class="important"><p class="important">
         The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages contain both 32-bit and 64-bit libraries.
         </p></div>
@@ -1298,9 +1240,9 @@ dpkg&nbsp;-i&nbsp;turbojpeg*.deb
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0058"></a> of the 
+        area</a></span><a name="idx0056"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0059"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0057"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
@@ -1335,9 +1277,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <code>SUNWtvnc-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code> 
         for x86) from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0060"></a> of the 
+        area</a></span><a name="idx0058"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0061"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0059"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package, 
@@ -1369,9 +1311,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0062"></a> of the 
+        area</a></span><a name="idx0060"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0063"></a>.
+        SourceForge web-site</a></span><a name="idx0061"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -1391,9 +1333,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.exe</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-        area</a></span><a name="idx0064"></a> of the 
+        area</a></span><a name="idx0062"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0065"></a>.
+        SourceForge web-site</a></span><a name="idx0063"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -1411,9 +1353,9 @@ source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/project/showfiles.php?group_id=117509" class="remote">Download 
-area</a></span><a name="idx0066"></a> of the 
+area</a></span><a name="idx0064"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge web-site</a></span><a name="idx0067"></a>, uncompress it, 
+SourceForge web-site</a></span><a name="idx0065"></a>, uncompress it, 
 <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read the <code>README</code> 
 file for further instructions on how to build TurboVNC from source.</p>
 
@@ -1494,25 +1436,19 @@ to assign VirtualGL jobs to any graphics card in a multi-card system.</p>
 
 <a name="fig006001"></a>
 <div class="figure">
-<p class="caption">Figure 6.1: The VGL Image Transport with a Remote 2D X Server and GLP</p>
-<img src="vgltransportglp.png" alt="vgltransportglp" class="figure" id="imgid_16" name="imgid_16"/>
+<p class="caption">Figure 6.1: The VGL Transport with a Remote 2D X Server and GLP</p>
+<img src="vgltransportglp.png" alt="vgltransportglp" class="figure" id="imgid_15" name="imgid_15"/>
 </div>
 
 <a name="fig006002"></a>
 <div class="figure">
-<p class="caption">Figure 6.2: The X11 Image Transport with an X Proxy and GLP</p>
-<img src="x11transportglp.png" alt="x11transportglp" class="figure" id="imgid_17" name="imgid_17"/>
-</div>
-
-<a name="fig006003"></a>
-<div class="figure">
-<p class="caption">Figure 6.3: The Sun Ray Image Transport with GLP</p>
-<img src="sunrayglp.png" alt="sunrayglp" class="figure" id="imgid_18" name="imgid_18"/>
+<p class="caption">Figure 6.2: The X11 Transport with an X Proxy and GLP</p>
+<img src="x11transportglp.png" alt="x11transportglp" class="figure" id="imgid_16" name="imgid_16"/>
 </div>
 
 <p>If the application server is running 
 <span class="remote"><a href="http://www.sun.com/software/graphics/opengl/" class="remote">Sun 
-OpenGL</a></span><a name="idx0068"></a> 1.5 for Solaris/SPARC, then it 
+OpenGL</a></span><a name="idx0066"></a> 1.5 for Solaris/SPARC, then it 
 is recommended that you configure it to use GLP:</p>
 
 <ol class="Ordered numeric">
@@ -1604,13 +1540,13 @@ device.  Users can override this default by setting
 <code>~/.profile</code> or <code>~/.login</code>) or by passing an 
 argument of <code>-d&nbsp;&lt;device&gt;</code> to <code>vglrun</code> 
 when invoking VirtualGL.  See Chapter 
-<a href="#Advanced_Configuration" class="ref">19</a> for more details.</p>
+<a href="#Advanced_Configuration" class="ref">18</a> for more details.</p>
 
 
 <h2 id="hd006002">6.2&nbsp;Granting Access to the 3D X Server</h2>
 
 <div class="important"><p class="important">
-If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0069"></a>, then you can skip this section.
+If you plan to use VirtualGL only with <a href="#GLP_Usage">GLP</a><a name="idx0067"></a>, then you can skip this section.
 </p></div>
 
 <p>VirtualGL requires access to the application server&rsquo;s 3D graphics 
@@ -1618,7 +1554,7 @@ card so that it can create off-screen pixel buffers (Pbuffers) and
 redirect the 3D rendering from applications into these Pbuffers.  
 Unfortunately, accessing a 3D graphics card on Linux and Solaris/x86 
 systems or on Solaris/SPARC systems without 
-<a href="#GLP_Usage">GLP</a><a name="idx0070"></a> requires going 
+<a href="#GLP_Usage">GLP</a><a name="idx0068"></a> requires going 
 through an X server.  On such systems, the only way to share the 
 application server&rsquo;s 3D graphics card among multiple users is to 
 grant those users access to the 3D X server (the X server attached to 
@@ -1899,7 +1835,7 @@ the changes will take effect.</p>
 <hr class="break" />
 
 
-<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Windows Machine as a Client for the VGL Image Transport</h1>
+<h1 id="hd007"><a name="file007"></a>7&nbsp;Configuring a Windows Machine as a VGL Transport Client</h1>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -1994,17 +1930,17 @@ patches from the Hummingbird support site:</p>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 8.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0071"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0069"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 9.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0072"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0070"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Hummingbird Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0073"></a>.)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0074"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
+    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0071"></a>.)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://connectivity.hummingbird.com/support/nc/exceed_patches.html" class="remote">Hummingbird support site</a></span><a name="idx0072"></a>. <br /> (<em>Hummingbird WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -2041,12 +1977,12 @@ patches from the Hummingbird support site:</p>
 <hr class="break" />
 
 
-<h1 id="hd008"><a name="file008"></a>8&nbsp;Using VirtualGL with the VGL Image Transport</h1>
+<h1 id="hd008"><a name="file008"></a>8&nbsp;Using VirtualGL with the VGL Transport</h1>
 
-<p><a name="VGL_Image_Transport_Usage"></a></p>
+<p><a name="VGL_Transport_Usage"></a></p>
 
 
-<h3 id="hd008000001">Advantages of the VGL Image Transport</h3>
+<h3 id="hd008000001">Advantages of the VGL Transport</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -2063,15 +1999,14 @@ patches from the Hummingbird support site:</p>
 </ul>
 
 
-<h3 id="hd008000002">Disadvantages of the VGL Image Transport</h3>
+<h3 id="hd008000002">Disadvantages of the VGL Transport</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
-        The VGL Image Transport is designed to be used with remote X servers, 
-        thus it relies on the chatty remote X11 protocol to send the 2D elements 
-        of the application&rsquo;s GUI to the user&rsquo;s desktop.  As a 
-        result, the VGL Image Transport is not recommended for use on 
-        high-latency networks
+        The VGL Transport is designed to be used with remote X servers, thus it 
+        relies on the chatty remote X11 protocol to send the 2D elements of the 
+        application&rsquo;s GUI to the user&rsquo;s desktop.  As a result, the 
+        VGL Transport is not recommended for use on high-latency networks
     </li>
     <li class="Itemize-1 Itemize asterisk">
         No collaboration features
@@ -2086,7 +2021,7 @@ patches from the Hummingbird support site:</p>
 </ul>
 
 
-<h2 id="hd008001">8.1&nbsp;VGL Image Transport with X11 Forwarding</h2>
+<h2 id="hd008001">8.1&nbsp;VGL Transport with X11 Forwarding</h2>
 
 <p><a name="X11_Forwarding"></a></p>
 
@@ -2124,7 +2059,7 @@ to maximize performance.</p>
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a> for 
         more information on <code>vglrun</code> command line options.
     </li>
 </ol>
@@ -2171,18 +2106,18 @@ vglconnect&nbsp;{user}@{server}
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a> for 
         more information on <code>vglrun</code> command line options.
     </li>
 </ol>
 
 
-<h2 id="hd008002">8.2&nbsp;VGL Image Transport with a Direct X11 Connection</h2>
+<h2 id="hd008002">8.2&nbsp;VGL Transport with a Direct X11 Connection</h2>
 
 <p><a name="Direct_X11_Connection"></a></p>
 
 <p>As with the <a href="#X11_Forwarding">previous 
-mode</a><a name="idx0075"></a>, this mode performs optimally on 
+mode</a><a name="idx0073"></a>, this mode performs optimally on 
 local-area networks.  However, it is less secure, since both the X11 
 traffic and the VGL image stream are unencrypted.  This mode is 
 primarily useful in grid environments where you may not know ahead of 
@@ -2200,7 +2135,7 @@ Some newer Linux and Solaris distributions ship with default settings that do no
 <h3 id="hd008002001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0076"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0074"></a>, 
 except that you should pass a <code>-x</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -2209,7 +2144,7 @@ except that you should pass a <code>-x</code> argument to
 </pre>
 
 
-<h2 id="hd008003">8.3&nbsp;VGL Image Transport with X11 Forwarding and SSh Tunneling</h2>
+<h2 id="hd008003">8.3&nbsp;VGL Transport with X11 Forwarding and SSh Tunneling</h2>
 
 <p><a name="SSh_Tunneling"></a></p>
 
@@ -2225,7 +2160,7 @@ network can reduce VirtualGL&rsquo;s performance by anywhere from 20-40%.</p>
 <h3 id="hd008003001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0077"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0075"></a>, 
 except that you should pass a <code>-s</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -2249,14 +2184,14 @@ forwarded from the VirtualGL server through the gateway and to the
 client.</p>
 
 <div class="figure">
-<img src="sshtunnel.png" alt="sshtunnel" class="figure" id="imgid_19" name="imgid_19"/>
+<img src="sshtunnel.png" alt="sshtunnel" class="figure" id="imgid_17" name="imgid_17"/>
 </div>
 
 
-<h2 id="hd008004">8.4&nbsp;VGL Image Transport over Gigabit Networks</h2>
+<h2 id="hd008004">8.4&nbsp;VGL Transport over Gigabit Networks</h2>
 
-<p>When using the VGL image transport over Gigabit Ethernet or faster 
-networks, it may be desirable to disable image compression.  This can be 
+<p>When using the VGL Transport over Gigabit Ethernet or faster networks, 
+it may be desirable to disable image compression.  This can be 
 accomplished by passing an argument of <code>-c&nbsp;rgb</code> to 
 <code>vglrun</code> or setting the <code>VGL_COMPRESS</code> environment 
 variable to <code>rgb</code> on the VirtualGL server.  Disabling image 
@@ -2268,9 +2203,9 @@ switched Gigabit Ethernet (or faster) infrastructure and have plenty of
 bandwidth to spare.</p>
 
 
-<h2 id="hd008005">8.5&nbsp;VGL Image Transport with XDMCP</h2>
+<h2 id="hd008005">8.5&nbsp;VGL Transport with XDMCP</h2>
 
-<p>Using the VGL Image Transport with XDMCP should mostly &ldquo;just 
+<p>Using the VGL Transport with XDMCP should mostly &ldquo;just 
 work&rdquo;.  Once you have established the connection to the remote X 
 server using XDMCP, you can then follow any of the above procedures to 
 create an SSh connection to the application server and start a 3D 
@@ -2286,18 +2221,18 @@ images, and draws the images into the appropriate X window.  In previous
 versions of VirtualGL, it was necessary to manually start the VirtualGL 
 Client prior to connecting to the application server, but the new 
 <code>vglconnect</code> script wraps both <code>vglclient</code> and SSh 
-to greatly simplify the process of creating VGL Image Transport 
-connections.  One consequence of this ease of use is that the actual 
-workings of <code>vglclient</code> are hidden from view, which makes it 
-a bit more difficult to see the cause of connection failures and other 
-issues as they happen.</p>
+to greatly simplify the process of creating VGL Transport connections. 
+One consequence of this ease of use is that the actual workings of 
+<code>vglclient</code> are hidden from view, which makes it a bit more 
+difficult to see the cause of connection failures and other issues as 
+they happen.</p>
 
 <p><code>vglconnect</code> invokes <code>vglclient</code> with an argument 
 of <code>-detach</code>, which causes <code>vglclient</code> to 
 completely detach from the console and run as a background daemon.  It 
-will remain running silently in the background, accepting VGL Image 
-Transport connections for the X server on which it was started, until 
-that X server is reset or until the <code>vglclient</code> process is 
+will remain running silently in the background, accepting VGL Transport 
+connections for the X server on which it was started, until that X 
+server is reset or until the <code>vglclient</code> process is 
 explicitly killed.  Logging out of the X server will reset the X server 
 and thus kill all <code>vglclient</code> instances that are attached to 
 it.  You can also explicitly kill all instances of 
@@ -2362,17 +2297,17 @@ machine&rsquo;s firewall.  If you plan to run multiple X servers on your
 client machine, which means that you will need to run multiple 
 <code>vglclient</code> instances, then you may wish to open ports 
 4200-4299.  Similarly, if you are running <code>vglclient</code> on a 
-multi-user TurboVNC or Sun Ray server that has a firewall, then you may 
-wish to open ports 4200-4299 in the server&rsquo;s firewall.  Opening 
-ports 4200-4299 will accommodate up to 100 separate 
-<code>vglclient</code> instances (50 if OpenSSL support is enabled.) 
-More instances than that cannot be accommodated on a firewalled machine, 
-unless the firewall is able to create rules based on application 
-executables instead of listening ports.</p>
+multi-user TurboVNC server that has a firewall, then you may wish to 
+open ports 4200-4299 in the server&rsquo;s firewall.  Opening ports 
+4200-4299 will accommodate up to 100 separate <code>vglclient</code> 
+instances (50 if OpenSSL support is enabled.)  More instances than that 
+cannot be accommodated on a firewalled machine, unless the firewall is 
+able to create rules based on application executables instead of 
+listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
-to use the VGL Image Transport with <a href="#SSh_Tunneling">SSh 
-Tunneling</a><a name="idx0078"></a>.</p>
+to use the VGL Transport with <a href="#SSh_Tunneling">SSh 
+Tunneling</a><a name="idx0076"></a>.</p>
 
 <p><br /></p>
 
@@ -2384,15 +2319,15 @@ Tunneling</a><a name="idx0078"></a>.</p>
 <p><a name="TurboVNC_Usage"></a></p>
 
 <p>Referring to Chapter <a href="#Overview" class="ref">2</a>, the X11 
-Image Transport bypasses VirtualGL&rsquo;s internal image compressor and 
+Transport bypasses VirtualGL&rsquo;s internal image compressor and 
 instead draws the rendered 3D images to an X server using standard X11 
 drawing commands.  Since this results in the images being sent 
-uncompressed to the X server, the X11 Image Transport is designed to be 
-used with an &ldquo;X Proxy.&rdquo;  An X proxy acts as a virtual X 
-server, receiving X11 commands from the application (and from 
-VirtualGL), rendering the X11 commands into images, compressing the 
-resulting images, and sending the compressed images over the network to 
-a client or clients.</p>
+uncompressed to the X server, the X11 Transport is designed to be used 
+with an &ldquo;X Proxy.&rdquo;  An X proxy acts as a virtual X server, 
+receiving X11 commands from the application (and from VirtualGL), 
+rendering the X11 commands into images, compressing the resulting 
+images, and sending the compressed images over the network to a client 
+or clients.</p>
 
 <p>Since VirtualGL is sending rendered 3D images to the X proxy at a very 
 fast rate, the proxy must be able to compress the images very quickly in 
@@ -2402,9 +2337,9 @@ workloads that VirtualGL generates. Therefore, the VirtualGL Project
 provides an optimized X proxy called &ldquo;TurboVNC&rdquo;, which is 
 based on the 
 <span class="remote"><a href="http://www.realvnc.com/" class="remote">Virtual 
-Network Computing (VNC)</a></span><a name="idx0079"></a> standard (more 
+Network Computing (VNC)</a></span><a name="idx0077"></a> standard (more 
 specifically, on the 
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0080"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0078"></a> 
 variant thereof.)</p>
 
 <p>On the surface, TurboVNC behaves very similarly to its parent project, 
@@ -2417,7 +2352,7 @@ compression ratios.  As with TightVNC, TurboVNC uses JPEG compression
 for image tiles with a high number of unique colors and paletted 
 encoding for image tiles with a low number of unique colors.  Part of 
 TurboVNC&rsquo;s speedup comes from the use of TurboJPEG, the same 
-high-speed vector-optimized JPEG codec used by the VGL Image Transport. 
+high-speed vector-optimized JPEG codec used by the VGL Transport. 
 However, TurboVNC also bypasses the CPU-hungry smoothness detection 
 routines that TightVNC uses to determine whether a tile is a good 
 candidate for JPEG compression.  Furthermore, TurboVNC eliminates buffer 
@@ -2435,7 +2370,7 @@ high-latency connections.  TurboVNC additionally provides client-side
 double buffering, full support for Solaris, and other refinements.</p>
 
 
-<h3 id="hd009000001">Advantages of TurboVNC (when compared to the VGL Image Transport)</h3>
+<h3 id="hd009000001">Advantages of TurboVNC (when compared to the VGL Transport)</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -2443,21 +2378,19 @@ double buffering, full support for Solaris, and other refinements.</p>
         thus it performs very well on low-bandwidth, high-latency connections 
         (such as broadband or long-haul T1 lines.)  The 3D application&rsquo;s 
         GUI will load and render much faster (perhaps even orders of magnitude 
-        faster) with TurboVNC than with the VGL Image Transport on such 
-        connections.
+        faster) with TurboVNC than with the VGL Transport on such connections.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         For 3D applications whose rendered images do not contain very many 
         unique colors (for instance, CAD applications in wireframe mode), the 
         hybrid protocol used by TurboVNC will generally use less network 
-        bandwidth than the pure motion JPEG protocol used by the VGL Image 
-        Transport.
+        bandwidth than the pure motion JPEG protocol used by the VGL Transport.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC provides two lossless compression modes, one of which is 
         designed to reduce server CPU usage on gigabit networks and the other of 
         which is designed to provide reasonable performance on wide-area 
-        networks (at the expense of higher server CPU usage.)  The VGL Image 
+        networks (at the expense of higher server CPU usage.)  The VGL 
         Transport&rsquo;s only lossless option is uncompressed RGB.
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -2499,10 +2432,10 @@ double buffering, full support for Solaris, and other refinements.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC will generally	require about 20% more server CPU cycles to 
-        maintain the same frame rate as the VGL Image Transport, both because it 
-        has to compress more pixels in each frame	(an entire desktop rather than 
-        a single window) and because it has to perform 2D (X11) rendering as 
-        well as 3D rendering.
+        maintain the same frame rate as the VGL Transport, both because it has 
+        to compress more pixels in each frame (an entire desktop rather than a 
+        single window) and because it has to perform 2D (X11) rendering as well 
+        as 3D rendering.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC does not support quad-buffered stereo or transparent overlays.
@@ -2520,7 +2453,7 @@ its rendered 3D images to TurboVNC through shared memory rather than
 sending them over a network.</p>
 
 <div class="figure">
-<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_20" name="imgid_20"/>
+<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_18" name="imgid_18"/>
 </div>
 
 
@@ -2649,8 +2582,8 @@ ssh&nbsp;{user}@{server}
 </pre>
 
         VirtualGL will detect that the X display connection is local and will 
-        automatically enable the X11 Image Transport.
-        <br class="itempara" />Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
+        automatically enable the X11 Transport.
+        <br class="itempara" />Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a> for 
         more information on <code>vglrun</code> command line options.
     </li>
 </ol>
@@ -2661,27 +2594,27 @@ ssh&nbsp;{user}@{server}
 <p><a name="TurboVNC_Usage_Remote"></a></p>
 
 <div class="figure">
-<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_21" name="imgid_21"/>
+<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_19" name="imgid_19"/>
 </div>
 
 <p>If TurboVNC and VirtualGL are running on different servers, then it is 
-desirable to use the VGL Image Transport to send images from the 
-VirtualGL server to the TurboVNC server.  It is also desirable to 
-disable image compression in the VGL Image Transport.  Otherwise, the 
-images would have to be compressed by the VirtualGL server, decompressed 
-by the VirtualGL Client, then recompressed by the TurboVNC server, which 
-is a waste of CPU resources. However, sending images uncompressed over a 
-network requires a fast network (generally, Gigabit Ethernet or faster), 
-so there needs to be a fast link between the VirtualGL server and the 
+desirable to use the VGL Transport to send images from the VirtualGL 
+server to the TurboVNC server.  It is also desirable to disable image 
+compression in the VGL Transport.  Otherwise, the images would have to 
+be compressed by the VirtualGL server, decompressed by the VirtualGL 
+Client, then recompressed by the TurboVNC server, which is a waste of 
+CPU resources.  However, sending images uncompressed over a network 
+requires a fast network (generally, Gigabit Ethernet or faster), so 
+there needs to be a fast link between the VirtualGL server and the 
 TurboVNC server for this procedure to perform well.</p>
 
 
 <h3 id="hd009002001">Procedure</h3>
 
-<p>The procedure for using the VGL Image Transport to remotely display 3D 
+<p>The procedure for using the VGL Transport to remotely display 3D 
 applications from a VirtualGL server to a TurboVNC server is the same as 
-the <a href="#X11_Forwarding">procedure</a><a name="idx0081"></a> for 
-using the VGL Image Transport to remotely display 3D applications from a 
+the <a href="#X11_Forwarding">procedure</a><a name="idx0079"></a> for 
+using the VGL Transport to remotely display 3D applications from a 
 VirtualGL server to a remote 2D X server, with the following notable 
 differences:</p>
 
@@ -2694,12 +2627,12 @@ differences:</p>
     </li>
     <li class="Ordered-1 Ordered">
         Once connected to the VirtualGL server with SSh, it is recommended that 
-        you disable image compression in the VGL Image Transport by either 
-        setting the <code>VGL_COMPRESS</code> environment variable to 
-        <code>rgb</code> or passing an argument of <code>-c&nbsp;rgb</code> to 
-        <code>vglrun</code> when launching VirtualGL.  Otherwise, VirtualGL will 
-        detect that the connection to the X server is remote, and it will 
-        automatically try to enable JPEG compression.
+        you disable image compression in the VGL Transport by either setting the 
+        <code>VGL_COMPRESS</code> environment variable to <code>rgb</code> or 
+        passing an argument of <code>-c&nbsp;rgb</code> to <code>vglrun</code> 
+        when launching VirtualGL.  Otherwise, VirtualGL will detect that the 
+        connection to the X server is remote, and it will automatically try to 
+        enable JPEG compression.
     </li>
 </ol>
 
@@ -2788,7 +2721,7 @@ TurboVNC compresses images:</p>
          Lower quality levels produce grainier JPEG images with more noticeable 
          compression artifacts, but lower quality levels also use less network 
          bandwidth and CPU time.  Refer to Section 
-         <a href="#VGL_QUAL" class="ref">19.1</a> for more details.
+         <a href="#VGL_QUAL" class="ref">18.1</a> for more details.
     </dd>
     <dt class="Description-1 Description">JPEG chrominance subsampling</dt>
     <dd class="Description-1 Description">
@@ -2798,7 +2731,7 @@ TurboVNC compresses images:</p>
          subsampling retains the chrominance components for every other pixel, 
          4x subsampling retains the chrominance components for every fourth 
          pixel, and grayscale throws out all of the chrominance components.  
-         Refer to Section <a href="#VGL_SUBSAMP" class="ref">19.1</a> for more 
+         Refer to Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for more 
          details.
     </dd>
     <dt class="Description-1 Description">Zlib compression level</dt>
@@ -3021,7 +2954,7 @@ many of its features.</p>
 
 <p><a name="X11_Proxy_Usage"></a></p>
 
-<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0082"></a> 
+<p>The <a href="#TurboVNC_Usage">previous chapter</a><a name="idx0080"></a> 
 described how to use VirtualGL with TurboVNC, but much of this 
 information is also applicable to other X proxies, such as RealVNC, NX, 
 etc.  Generally, none of these other solutions will provide anywhere 
@@ -3029,95 +2962,23 @@ near the performance of TurboVNC, but some of them have capabilities
 that TurboVNC lacks (NX, for instance, can do seamless windows.)</p>
 
 <p>VirtualGL reads the value of the <code>DISPLAY</code> environment 
-variable to determine whether to enable the X11 Image Transport by 
-default.  If <code>DISPLAY</code> begins with a colon 
+variable to determine whether to enable the X11 Transport by default.  
+If <code>DISPLAY</code> begins with a colon 
 (&ldquo;<code>:</code>&rdquo;) or with &ldquo;<code>unix:</code>&rdquo;, 
 then VirtualGL will assume that the X server connection is local and 
-will enable the X11 Image Transport as the default.  This should 
-effectively make the X11 Image Transport the default for most X proxies, 
-but if for some reason that doesn&rsquo;t occur, then you can force the 
-use of the X11 Image Transport by setting the <code>VGL_COMPRESS</code> 
-environment variable to <code>proxy</code> on the application server or 
-passing an argument of <code>-c&nbsp;proxy</code> to <code>vglrun</code>.</p>
+will enable the X11 Transport as the default.  This should effectively 
+make the X11 Transport the default for most X proxies, but if for some 
+reason that doesn&rsquo;t occur, then you can force the use of the X11 
+Transport by setting the <code>VGL_COMPRESS</code> environment variable 
+to <code>proxy</code> on the application server or passing an argument 
+of <code>-c&nbsp;proxy</code> to <code>vglrun</code>.</p>
 
 <p><br /></p>
 
 <hr class="break" />
 
 
-<h1 id="hd0011"><a name="file011"></a>11&nbsp;Using VirtualGL in a Sun Ray Environment</h1>
-
-<p><a name="Sun_Ray_Usage"></a></p>
-
-<p>As described in Chapter <a href="#Overview" class="ref">2</a>, the Sun 
-Ray environment consists of both an X proxy and an ultra-thin hardware 
-client.  If the proprietary VirtualGL Sun Ray plugin is not used, then 
-the Sun Ray server can be treated just like any other X proxy and used 
-with either the X11 Image Transport or the VGL Image Transport, as 
-described in Chapter <a href="#TurboVNC_Usage" class="ref">9</a> and 
-Chapter <a href="#X11_Proxy_Usage" class="ref">10</a>.</p>
-
-<p>If, however, the Sun Ray plugin is installed on the VirtualGL server, 
-then a slightly different procedure is required to connect to that 
-server and use the Sun Ray Image Transport.  This procedure assumes that 
-VirtualGL is running on a different machine than the Sun Ray server.</p>
-
-
-<h3 id="hd0011000001">Procedure</h3>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        In the Sun Ray session, open a new terminal window.
-    </li>
-    <li class="Ordered-1 Ordered">
-        In the same terminal window, open a Secure Shell (SSh) session into the 
-        VirtualGL server:
-<pre class="verbatim">
-ssh&nbsp;-X&nbsp;{user}@{server}
-</pre>
-
-        Replace <em><code>{user}</code></em> with your user account name on the 
-        VirtualGL server and <em><code>{server}</code></em> with the hostname or 
-        IP address of that server.
-    </li>
-    <li class="Ordered-1 Ordered">
-        In the SSh session, start a 3D application using VirtualGL:
-<pre class="verbatim">
-/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
-        more information on <code>vglrun</code> command line options.
-    </li>
-</ol>
-
-<p>Note that this procedure is substantially similar to the 
-<a href="#X11_Forwarding">X11 Forwarding</a><a name="idx0083"></a> 
-procedure used with the VGL Image Transport, except that it invokes 
-<code>ssh</code> directly rather than using the <code>vglconnect</code> 
-wrapper script.  <code>vglconnect</code> launches 
-<code>vglclient</code>, and <code>vglclient</code> is not needed when 
-using the Sun Ray Image Transport.</p>
-
-<p>If the VirtualGL Sun Ray plugin is installed on a VirtualGL server, then 
-VirtualGL will try to use the Sun Ray Image Transport when displaying 3D 
-applications from that server to a Sun Ray client.  However, the Sun Ray 
-Image Transport requires that the Sun Ray client be on a network that is 
-accessible from the VirtualGL server.  Some Sun Ray deployments place 
-the clients on a private network that is visible only to the Sun Ray 
-server, and the Sun Ray Image Transport cannot be used in such cases 
-(unless VirtualGL is running on the Sun Ray server itself, but that 
-defeats the purpose of the Sun Ray Image Transport.)  If VirtualGL 
-detects that it is running in a Sun Ray environment but is unable to use 
-the Sun Ray Image Transport, then it will fall back to using the X11 
-Image Transport.</p>
-
-<p><br /></p>
-
-<hr class="break" />
-
-
-<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
+<h1 id="hd0011"><a name="file011"></a>11&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
 
 <p><code>vglrun</code> can be used to launch either binary executables or 
 shell scripts, but there are a few things to keep in mind when using 
@@ -3297,7 +3158,7 @@ and the application executable is 64-bit, then you could use
 <hr class="break" />
 
 
-<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with Chromium and ModViz VGP</h1>
+<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with Chromium and ModViz VGP</h1>
 
 <p><a name="Chromium"></a></p>
 
@@ -3320,10 +3181,10 @@ Chromium is most often used in one of three configurations:</p>
 </ol>
 
 
-<h2 id="hd0013001">13.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
+<h2 id="hd0012001">12.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_22" name="imgid_22"/>
+<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_20" name="imgid_20"/>
 </div>
 
 <p>Sort-First Rendering (Image-Space Decomposition) is used to overcome the 
@@ -3349,10 +3210,10 @@ the remote end would require extensive modifications to VirtualGL and
 perhaps to Chromium as well.  Such is left as an exercise for the reader.</p>
 
 
-<h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
+<h2 id="hd0012002">12.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
 
 <div class="figure">
-<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_23" name="imgid_23"/>
+<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_21" name="imgid_21"/>
 </div>
 
 <p>Configuration 2 uses the same sort-first principle as Configuration 1, 
@@ -3494,7 +3355,7 @@ VirtualGL before adding VirtualGL into the mix.</p>
 <p><a name="Force_Pbuffer"></a></p>
 
 
-<h3 id="hd0013002001">Using VirtualGL to Force Pbuffer Rendering</h3>
+<h3 id="hd0012002001">Using VirtualGL to Force Pbuffer Rendering</h3>
 
 <p>In the procedure above, VirtualGL can also be used on the rendering 
 nodes to redirect the rendering commands from <code>crserver</code> into 
@@ -3513,10 +3374,10 @@ following procedure in place of step 2 above:</p>
 </ul>
 
 
-<h2 id="hd0013003">13.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
+<h2 id="hd0012003">12.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_24" name="imgid_24"/>
+<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_22" name="imgid_22"/>
 </div>
 
 <p>Sort-Last Rendering is used when the scene contains a huge number of 
@@ -3551,7 +3412,7 @@ log<sub>2</sub>(N) rather than N.</p>
 </ol>
 
 
-<h3 id="hd0013003001">CRUT</h3>
+<h3 id="hd0012003001">CRUT</h3>
 
 <p>The Chromium Utility Toolkit provides a convenient way for graphics 
 applications to specifically take advantage of Chromium&rsquo;s 
@@ -3579,7 +3440,7 @@ VirtualGL:</p>
 </ol>
 
 
-<h2 id="hd0013004">13.4&nbsp;A Note About Performance</h2>
+<h2 id="hd0012004">12.4&nbsp;A Note About Performance</h2>
 
 <p>Chromium&rsquo;s use of X11 is generally not very optimal.  It assumes a 
 very fast connection between the 2D X server and the Chromium Server.  
@@ -3587,10 +3448,10 @@ In certain modes, Chromium polls the 2D X server on every frame to
 determine whether windows have been resized, etc.  Thus, we have 
 observed that, even on a fast network, Chromium tends to perform much 
 better with VirtualGL running in a TurboVNC session as opposed to using 
-the VGL Image Transport.</p>
+the VGL Transport.</p>
 
 
-<h2 id="hd0013005">13.5&nbsp;ModViz VGP v1.x and VirtualGL</h2>
+<h2 id="hd0012005">12.5&nbsp;ModViz VGP v1.x and VirtualGL</h2>
 
 <p>ModViz Virtual Graphics Platform<sup>TM</sup> is a polished commercial 
 clustered rendering framework for Linux which supports all three of the 
@@ -3630,7 +3491,7 @@ NOTE: This is known not to work with VGP 2.0.
 <hr class="break" />
 
 
-<h1 id="hd0014"><a name="file014"></a>14&nbsp;Using VirtualGL with VirtualBox</h1>
+<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with VirtualBox</h1>
 
 <p>VirtualBox is an enterprise-class, open source virtualization solution 
 provided by Sun Microsystems.  With the release of VirtualBox 2.1.0, 
@@ -3658,7 +3519,7 @@ displaying Windows 3D applications remotely.</p>
     </li>
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Section 
-        <a href="#setuid_linux" class="ref">12</a> to make 
+        <a href="#setuid_linux" class="ref">11</a> to make 
         <code>librrfaker.so</code> a setuid executable (Linux) or to add the 
         VirtualGL library directory to the list of secure paths (Solaris).
     </li>
@@ -3680,7 +3541,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 </ol>
 
 
-<h3 id="hd0014000001">NOTES</h3>
+<h3 id="hd0013000001">NOTES</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -3708,7 +3569,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
         the 2D elements of the virtual machine display will not perform well 
         over a remote X11 connection unless a 
         <a href="#Direct_X11_Connection">direct X11 
-        connection</a><a name="idx0084"></a> (<code>vglconnect&nbsp;-x</code>) 
+        connection</a><a name="idx0081"></a> (<code>vglconnect&nbsp;-x</code>) 
         is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
         networks, using TurboVNC is recommended when remotely displaying 
         VirtualBox using VirtualGL.
@@ -3720,7 +3581,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 <hr class="break" />
 
 
-<h1 id="hd0015"><a name="file015"></a>15&nbsp;Other Application Recipes</h1>
+<h1 id="hd0014"><a name="file014"></a>14&nbsp;Other Application Recipes</h1>
 
 <p><a name="Application_Recipes"></a></p>
 
@@ -3744,7 +3605,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">AutoForm v4.0x</td>
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
-    <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 image transport and disables frame spoiling, it is highly recommended that you use TurboVNC when <code>VGL_SYNC</code> is enabled.  See Section <a href="#VGL_SYNC" class="ref">19.1</a> for more details.</td>
+    <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use TurboVNC when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">18.1</a> for more details.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Cedega v6.0.x</td>
@@ -3779,12 +3640,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 <hr class="break" />
 
 
-<h1 id="hd0016"><a name="file016"></a>16&nbsp;Advanced OpenGL Features</h1>
+<h1 id="hd0015"><a name="file015"></a>15&nbsp;Advanced OpenGL Features</h1>
 
 <p><a name="Advanced_OpenGL"></a></p>
 
 
-<h2 id="hd0016001">16.1&nbsp;Stereographic Rendering</h2>
+<h2 id="hd0015001">15.1&nbsp;Stereographic Rendering</h2>
 
 <p>Stereographic rendering is a feature of OpenGL that creates separate 
 rendering buffers for the left and right eyes and allows the application 
@@ -3797,7 +3658,7 @@ graphics card, or (2) by combining each stereo image pair into a single
 anaglyph that can be viewed with traditional red/cyan 3D glasses.</p>
 
 
-<h3 id="hd0016001001">16.1.1&nbsp;Quad-Buffered Stereo</h3>
+<h3 id="hd0015001001">15.1.1&nbsp;Quad-Buffered Stereo</h3>
 
 <p>The name &ldquo;quad-buffered&rdquo; stereo derives from the fact that 
 OpenGL uses four buffers (left front, right front, left back, and right 
@@ -3841,7 +3702,7 @@ VirtualGL will (by default) use quad-buffered stereo rendering if:</p>
 using anaglyphic stereo (see below.)  It is usually necessary to 
 explicitly enable stereo in the graphics driver configuration for both 
 the client and server machines.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0085"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0082"></a> 
 section below lists a way to verify that both client and server have 
 stereo visuals available.</p>
 
@@ -3854,12 +3715,11 @@ should thus be no surprise that enabling quad-buffered stereo in
 VirtualGL decreases performance by 50% or more and uses twice the 
 network bandwidth to maintain the same frame rate as mono.</p>
 
-<p>Quad-buffered stereo requires the VGL Image Transport.  If any other 
-image transport is used, then VGL will fall back to anaglyphic stereo 
-mode.</p>
+<p>Quad-buffered stereo requires the VGL Transport.  If any other image 
+transport is used, then VGL will fall back to anaglyphic stereo mode.</p>
 
 
-<h3 id="hd0016001002">16.1.2&nbsp;Anaglyphic Stereo</h3>
+<h3 id="hd0015001002">15.1.2&nbsp;Anaglyphic Stereo</h3>
 
 <p>Anaglyphic stereo is the type of stereographic display used by old 3D 
 movies. It generally relies on a set of 3D glasses consisting of red 
@@ -3875,9 +3735,9 @@ client&rsquo;s capabilities.</p>
 <p>VirtualGL uses anaglyphic stereo if it detects that an application has 
 rendered something in stereo but quad-buffered stereo is not available, 
 either because the client doesn&rsquo;t support it or because a 
-transport other than the VGL Image Transport is being used.  Anaglyphic 
-stereo provides a cheap and easy way to view stereographic applications 
-in X proxies and on clients that do not support quad-buffered stereo.  
+transport other than the VGL Transport is being used.  Anaglyphic stereo 
+provides a cheap and easy way to view stereographic applications in X 
+proxies and on clients that do not support quad-buffered stereo.  
 Additionally, anaglyphic stereo performs much faster than quad-buffered 
 stereo, since it does not require sending twice the data to the client.</p>
 
@@ -3887,15 +3747,15 @@ anaglyphic stereo does not require any 3D rendering capabilities (stereo
 or otherwise) on the client machine.</p>
 
 
-<h3 id="hd0016001003">16.1.3&nbsp;Selecting a Stereo Mode</h3>
+<h3 id="hd0015001003">15.1.3&nbsp;Selecting a Stereo Mode</h3>
 
 <p>A particular stereo mode can be selected by setting the 
 <code>VGL_STEREO</code> environment variable or by using the 
 <code>-st</code> argument to <code>vglrun</code>.  See Section 
-<a href="#VGL_STEREO" class="ref">19.1</a> for more details.</p>
+<a href="#VGL_STEREO" class="ref">18.1</a> for more details.</p>
 
 
-<h2 id="hd0016002">16.2&nbsp;Transparent Overlays</h2>
+<h2 id="hd0015002">15.2&nbsp;Transparent Overlays</h2>
 
 <p>Transparent overlays have similar requirements and restrictions as 
 quad-buffered stereo.  In this case, VirtualGL completely bypasses its 
@@ -3926,7 +3786,7 @@ overlays at the same time.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0086"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0083"></a> 
 below) to verify whether your client&rsquo;s X display supports overlays 
 and whether they are enabled.  In Exceed 3D, make sure that the 
 &ldquo;Overlay Support&rdquo; option is checked in the &ldquo;Exceed 3D 
@@ -3939,7 +3799,7 @@ Overlays do not work with X proxies (including TurboVNC.)  VirtualGL must be dis
 </p></div>
 
 
-<h2 id="hd0016003">16.3&nbsp;Indexed (PseudoColor) Rendering</h2>
+<h2 id="hd0015003">15.3&nbsp;Indexed (PseudoColor) Rendering</h2>
 
 <p>In a PseudoColor visual, each pixel is represented by an index which 
 refers to a location in a color table.  The color table stores the 
@@ -3969,7 +3829,7 @@ color index.  Upon receiving an end of frame trigger, VirtualGL reads
 back the red channel of the Pbuffer and uses <code>XPutImage()</code> to 
 draw the color indices into the appropriate X window.  To put this 
 another way, PseudoColor rendering in VirtualGL always uses the X11 
-Image Transport.  However, since there is only 1 byte per pixel in a 
+Transport.  However, since there is only 1 byte per pixel in a 
 PseudoColor &ldquo;image&rdquo;, the images can still be sent to the 
 client reasonably quickly even though they are uncompressed.</p>
 
@@ -3979,7 +3839,7 @@ depth.  Note, however, that VNC cannot provide both PseudoColor and
 TrueColor visuals at the same time.</p>
 
 
-<h2 id="hd0016004">16.4&nbsp;Troubleshooting</h2>
+<h2 id="hd0015004">15.4&nbsp;Troubleshooting</h2>
 
 <p><a name="Troubleshooting"></a></p>
 
@@ -4034,12 +3894,12 @@ rendering, one of the visuals should have a class of
 <hr class="break" />
 
 
-<h1 id="hd0017"><a name="file017"></a>17&nbsp;Performance Measurement</h1>
+<h1 id="hd0016"><a name="file016"></a>16&nbsp;Performance Measurement</h1>
 
 <p><a name="Perf_Measurement"></a></p>
 
 
-<h2 id="hd0017001">17.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
+<h2 id="hd0016001">16.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
 
 <p>The easiest way to uncover bottlenecks in VirtualGL&rsquo;s image 
 pipelines is to set the <code>VGL_PROFILE</code> environment variable to 
@@ -4085,7 +3945,7 @@ this case, we could improve the performance of the whole system by
 simply using a client with a faster CPU.</p>
 
 
-<h2 id="hd0017002">17.2&nbsp;Frame Spoiling</h2>
+<h2 id="hd0016002">16.2&nbsp;Frame Spoiling</h2>
 
 <p><a name="Frame_Spoiling"></a></p>
 
@@ -4116,16 +3976,16 @@ problem.</p>
 <p>To disable frame spoiling, set the <code>VGL_SPOIL</code> environment 
 variable to <code>0</code> on the VirtualGL server or pass an argument 
 of <code>-sp</code> to <code>vglrun</code>.  See Section 
-<a href="#VGL_SPOIL" class="ref">19.1</a> for more details.</p>
+<a href="#VGL_SPOIL" class="ref">18.1</a> for more details.</p>
 
 
-<h2 id="hd0017003">17.3&nbsp;VirtualGL Diagnostic Tools</h2>
+<h2 id="hd0016003">16.3&nbsp;VirtualGL Diagnostic Tools</h2>
 
 <p>VirtualGL includes several tools which can be useful in diagnosing 
 performance problems with the system.</p>
 
 
-<h3 id="hd0017003001">NetTest</h3>
+<h3 id="hd0016003001">NetTest</h3>
 
 <p>NetTest is a network benchmark that uses the same network I/O classes as 
 VirtualGL.  It can be used to test the latency and throughput of any 
@@ -4198,7 +4058,7 @@ transit time for a zero-byte packet, which is about 93 microseconds in
 this case.</p>
 
 
-<h3 id="hd0017003002">CPUstat</h3>
+<h3 id="hd0016003002">CPUstat</h3>
 
 <p>CPUstat is available only in the VirtualGL Linux packages and is located 
 in the same place as NetTest (<code>/opt/VirtualGL/bin</code>.)  It 
@@ -4233,7 +4093,7 @@ run CPUstat for a bit and wait for the Max. and Avg. for the
 the application&rsquo;s peak and average % CPU utilization is.</p>
 
 
-<h3 id="hd0017003003">TCBench</h3>
+<h3 id="hd0016003003">TCBench</h3>
 
 <p>TCBench was born out of the need to compare VirtualGL&rsquo;s 
 performance to that of other thin client packages, some of which had 
@@ -4275,7 +4135,7 @@ the benchmark time, the sampling rate, and the x and y offset of the
 sampling area within the window.</p>
 
 
-<h3 id="hd0017003004">GLXSpheres</h3>
+<h3 id="hd0016003004">GLXSpheres</h3>
 
 <p>GLXSpheres is a benchmark which produces very similar images to 
 NVidia&rsquo;s (long discontinued) SphereMark benchmark.  Back in the 
@@ -4350,7 +4210,7 @@ Solaris VirtualGL servers.  64-bit VirtualGL packages contain both a
 <hr class="break" />
 
 
-<h1 id="hd0018"><a name="file018"></a>18&nbsp;The VirtualGL Configuration Dialog</h1>
+<h1 id="hd0017"><a name="file017"></a>17&nbsp;The VirtualGL Configuration Dialog</h1>
 
 <p><a name="Config_Dialog"></a></p>
 
@@ -4365,8 +4225,8 @@ dialog box:</p>
 <p><img src="configdialog.gif" alt="configdialog" class="inline" id="imgid_9" name="imgid_9"/></p>
 
 <p>You can use this dialog to adjust various image compression and display 
-parameters in VirtualGL.  Changes are reflected immediately in the 
-application.</p>
+parameters in VirtualGL.  Changes are communicated immediately to 
+VirtualGL.</p>
 
 <dl class="Description">
     <dt class="Description-1 Description">Image Compression (Transport)</dt>
@@ -4377,61 +4237,56 @@ application.</p>
         time, regardless of which transport was active when VirtualGL started. 
         <br /><br /> <em>JPEG (VGL Transport)</em> : equivalent to setting 
         <code>VGL_COMPRESS=jpeg</code>.  This option is only available if the 
-        VGL Image Transport was active when VirtualGL started. <br /><br /> 
-        <em>RGB (VGL Transport)</em> : equivalent to setting 
+        VGL Transport was active when VirtualGL started. <br /><br /> <em>RGB 
+        (VGL Transport)</em> : equivalent to setting 
         <code>VGL_COMPRESS=rgb</code>.  This option is only available if the VGL 
-        Image Transport was active when VirtualGL started. <br /><br /> <em>DPCM 
-        (Sun Ray Transport)</em> : equivalent to setting 
-        <code>VGL_COMPRESS=srdpcm</code>. This option is only available if the 
-        Sun Ray Image Transport was active when VirtualGL started. <br /><br /> 
-        <em>RGB (Sun Ray Transport)</em> : equivalent to setting 
-        <code>VGL_COMPRESS=srrgb</code>. This option is only available if the 
-        Sun Ray Image Transport was active when VirtualGL started. <br /><br /> 
-        <em>YUV (Sun Ray Transport)</em> : equivalent to setting 
-        <code>VGL_COMPRESS=sryuv</code>. This option is only available if the 
-        Sun Ray Image Transport was active when VirtualGL started. <br /><br /> 
-        See Section <a href="#VGL_COMPRESS" class="ref">19.1</a> for more 
-        information about the <code>VGL_COMPRESS</code> configuration option and 
-        its various parameters.
+        Transport was active when VirtualGL started. <br /><br /> See Section 
+        <a href="#VGL_COMPRESS" class="ref">18.1</a> for more information about 
+        the <code>VGL_COMPRESS</code> configuration option and its various 
+        parameters.
+        <div class="important"><p class="important">
+        If a custom image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Compression&rdquo;, and it has options &ldquo;0&rdquo; through &ldquo;10&rdquo;.
+        </p></div>
     </dd>
     <dt class="Description-1 Description">Chrominance Subsampling</dt>
     <dd class="Description-1 Description">
-        This drop-down gadget is active only when using JPEG, Sun Ray DPCM, or 
-        Sun Ray YUV compression.  It has the following options: <br /><br /> 
-        <em>Grayscale</em> : equivalent to setting 
-        <code>VGL_SUBSAMP=gray</code>.  Available only with JPEG compression. 
-        <br /><br /> <em>1X</em> : equivalent to setting 
-        <code>VGL_SUBSAMP=1x</code> <br /><br /> <em>2X</em> : equivalent to 
-        setting <code>VGL_SUBSAMP=2x</code> <br /><br /> <em>4X</em> : 
-        equivalent to setting <code>VGL_SUBSAMP=4x</code> <br /><br /> 
-        <em>8X</em> : equivalent to setting <code>VGL_SUBSAMP=8x</code>.  
-        Available only with Sun Ray DPCM or YUV compression. <br /><br /> 
-        <em>16X</em> : equivalent to setting <code>VGL_SUBSAMP=16x</code>.  
-        Available only with Sun Ray DPCM or YUV compression. <br /><br /> See 
-        Section <a href="#VGL_SUBSAMP" class="ref">19.1</a> for more information 
-        about the <code>VGL_SUBSAMP</code> configuration option and its various 
-        parameters.
+        This drop-down gadget is active only when using JPEG compression or a 
+        custom image transport plugin.  It has the following options: 
+        <br /><br /> <em>Grayscale</em> : equivalent to setting 
+        <code>VGL_SUBSAMP=gray</code> <br /><br /> <em>1X</em> : equivalent to 
+        setting <code>VGL_SUBSAMP=1x</code> <br /><br /> <em>2X</em> : 
+        equivalent to setting <code>VGL_SUBSAMP=2x</code> <br /><br /> 
+        <em>4X</em> : equivalent to setting <code>VGL_SUBSAMP=4x</code> 
+        <br /><br /> See Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for 
+        more information about the <code>VGL_SUBSAMP</code> configuration option 
+        and its various parameters.
+        <div class="important"><p class="important">
+        If a custom image transport plugin is loaded, then this gadget has two additional options, &ldquo;8X&rdquo; and &ldquo;16X&rdquo;.
+        </p></div>
     </dd>
     <dt class="Description-1 Description">JPEG Image Quality</dt>
     <dd class="Description-1 Description">
-        This slider gadget is active only when using JPEG compression.  It is 
-        the equivalent of setting <code>VGL_QUAL</code>.  	See Section 
-        <a href="#VGL_QUAL" class="ref">19.1</a> for more information about the 
+        This slider gadget is active only when using JPEG compression or a 
+        custom image transport plugin.  It is the equivalent of setting 
+        <code>VGL_QUAL</code>.  See Section 
+        <a href="#VGL_QUAL" class="ref">18.1</a> for more information about the 
         <code>VGL_QUAL</code> configuration option.
+        <div class="important"><p class="important">
+        If a custom image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Quality&rdquo;.
+        </p></div>
     </dd>
     <dt class="Description-1 Description">Connection Profile</dt>
     <dd class="Description-1 Description">
-        This drop-down gadget is active only if the VGL Image Transport was 
-        active when VirtualGL started.  It has the following options: 
-        <br /><br /> <em>Low Qual (Low-Bandwidth Network)</em> : Sets the image 
-        compression type to JPEG (VGL Transport), sets the Chrominance 
-        Subsampling to 4X, and sets the JPEG Image Quality to 30. <br /><br /> 
-        <em>Medium Qual</em> : Sets the image compression type to JPEG	(VGL 
-        Transport), sets the Chrominance Subsampling to 2X, and sets the JPEG 
-        Image Quality to 80. <br /><br /> <em>High Qual (High-Bandwidth 
-        Network)</em> : Sets the image compression type to JPEG (VGL Transport), 
-        sets the Chrominance Subsampling to 1X, and sets the JPEG Image Quality 
-        to 95.
+        This drop-down gadget is active only if the VGL Transport was active 
+        when VirtualGL started.  It has the following options: <br /><br /> 
+        <em>Low Qual (Low-Bandwidth Network)</em> : Sets the image compression 
+        type to JPEG (VGL Transport), sets the Chrominance Subsampling to 4X, 
+        and sets the JPEG Image Quality to 30. <br /><br /> <em>Medium Qual</em> 
+        : Sets the image compression type to JPEG	(VGL Transport), sets the 
+        Chrominance Subsampling to 2X, and sets the JPEG Image Quality to 80. 
+        <br /><br /> <em>High Qual (High-Bandwidth Network)</em> : Sets the 
+        image compression type to JPEG (VGL Transport), sets the Chrominance 
+        Subsampling to 1X, and sets the JPEG Image Quality to 95.
     </dd>
     <dt class="Description-1 Description">Gamma Correction Factor</dt>
     <dd class="Description-1 Description">
@@ -4440,21 +4295,21 @@ application.</p>
         clients only), then this gadget has no effect.  Otherwise, it enables 
         VirtualGL&rsquo;s internal gamma correction system with the specified 
         gamma correction factor. See Section 
-        <a href="#VGL_GAMMA" class="ref">19.1</a> for more information about the 
+        <a href="#VGL_GAMMA" class="ref">18.1</a> for more information about the 
         <code>VGL_GAMMA</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Frame Spoiling</dt>
     <dd class="Description-1 Description">
         This toggle button is the equivalent of setting <code>VGL_SPOIL</code>.  
-        See Section <a href="#Frame_Spoiling" class="ref">17.2</a> and Section 
-        <a href="#VGL_SPOIL" class="ref">19.1</a> for more information about the 
+        See Section <a href="#Frame_Spoiling" class="ref">16.2</a> and Section 
+        <a href="#VGL_SPOIL" class="ref">18.1</a> for more information about the 
         <code>VGL_SPOIL</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Interframe Comparison</dt>
     <dd class="Description-1 Description">
         This toggle button is the equivalent of setting 
         <code>VGL_INTERFRAME</code>.  See Section 
-        <a href="#VGL_INTERFRAME" class="ref">19.1</a> for more information 
+        <a href="#VGL_INTERFRAME" class="ref">18.1</a> for more information 
         about the <code>VGL_INTERFRAME</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Stereographic Rendering Method</dt>
@@ -4466,7 +4321,7 @@ application.</p>
         available)</em> : equivalent to setting <code>VGL_STEREO=quad</code> 
         <br /><br /> <em>Anaglyphic (Red/Cyan)</em> : equivalent to setting 
         <code>VGL_STEREO=rc</code> <br /><br /> See Section 
-        <a href="#VGL_STEREO" class="ref">19.1</a> for more information about 
+        <a href="#VGL_STEREO" class="ref">18.1</a> for more information about 
         the <code>VGL_STEREO</code> configuration option and its various 
         parameters.
     </dd>
@@ -4474,7 +4329,7 @@ application.</p>
     <dd class="Description-1 Description">
         This floating point input gadget is the equivalent of setting 
         <code>VGL_FPS</code>.  See Section 
-        <a href="#VGL_FPS" class="ref">19.1</a> for more information about the 
+        <a href="#VGL_FPS" class="ref">18.1</a> for more information about the 
         <code>VGL_FPS</code> configuration option.
     </dd>
 </dl>
@@ -4506,12 +4361,12 @@ VirtualGL monitors the application&rsquo;s X event loop to determine whenever a 
 <hr class="break" />
 
 
-<h1 id="hd0019"><a name="file019"></a>19&nbsp;Advanced Configuration</h1>
+<h1 id="hd0018"><a name="file018"></a>18&nbsp;Advanced Configuration</h1>
 
 <p><a name="Advanced_Configuration"></a></p>
 
 
-<h2 id="hd0019001">19.1&nbsp;Server Settings</h2>
+<h2 id="hd0018001">18.1&nbsp;Server Settings</h2>
 
 <p>You can control the operation of the VirtualGL faker in four different 
 ways. Each method of configuration takes precedence over the previous 
@@ -4537,6 +4392,12 @@ method:</p>
     </li>
 </ol>
 
+<p></p>
+
+<div class="important"><p class="important">
+If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image Transports, then this means that custom image transport plugins are free to handle or ignore this option as they see fit.
+</p></div>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -4549,11 +4410,11 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard"><em><code>{c}</code></em> = the hostname or IP address of the VirtualGL client machine or Sun Ray server</td>
+    <td class="standard"><em><code>{c}</code></em> = the hostname or IP address of the VirtualGL client</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray, VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -4566,12 +4427,10 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        When using the VGL Image Transport, <code>VGL_CLIENT</code> should be 
-        set to the hostname or IP address of the machine on which 
-        <code>vglclient</code> is running.  When using the Sun Ray Image 
-        Transport, <code>VGL_CLIENT</code> should be set to the hostname or IP 
-        address of the Sun Ray server.  Normally, <code>VGL_CLIENT</code> is set 
-        automatically by the <code>vglconnect</code> or <code>vglrun</code> 
+        When using the VGL Transport, <code>VGL_CLIENT</code> should be set to 
+        the hostname or IP address of the machine on which 
+        <code>vglclient</code> is running. Normally, <code>VGL_CLIENT</code> is 
+        set automatically by the <code>vglconnect</code> or <code>vglrun</code> 
         script, so don&rsquo;t override it unless you know what you&rsquo;re 
         doing.
     </dd>
@@ -4583,11 +4442,11 @@ method:</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_COMPRESS&nbsp;=&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb&nbsp;|&nbsp;sryuv</code></em></td>
+    <td class="standard"><code>VGL_COMPRESS&nbsp;=&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-c&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb&nbsp;|&nbsp;sr&nbsp;|&nbsp;srrgb&nbsp;|&nbsp;sryuv</code></em></td>
+    <td class="standard"><code>-c&nbsp;</code><em><code>proxy&nbsp;|&nbsp;jpeg&nbsp;|&nbsp;rgb</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -4608,41 +4467,25 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-         <em>proxy</em> = Send images uncompressed using the X11 Image 
-         Transport.  This is useful when displaying to a local 2D X server or X 
-         proxy (see Section 
-         <a href="#TurboVNC_Usage_Local" class="ref">9.1</a>.) <br /><br /> 
-         <em>jpeg</em> = Compress images using JPEG and send using the VGL Image 
-         Transport. This is useful when displaying to a remote 2D X server (see 
-         Chapter <a href="#VGL_Image_Transport_Usage" class="ref">8</a>.) 
+         <em>proxy</em> = Send images uncompressed using the X11 Transport.  
+         This is useful when displaying to a local 2D X server or X proxy (see 
+         Section <a href="#TurboVNC_Usage_Local" class="ref">9.1</a>.) 
+         <br /><br /> <em>jpeg</em> = Compress images using JPEG and send using 
+         the VGL Transport.  This is useful when displaying to a remote 2D X 
+         server (see Chapter <a href="#VGL_Transport_Usage" class="ref">8</a>.) 
          <br /><br /> <em>rgb</em> = Encode images as uncompressed RGB and send 
-         using the VGL Image Transport.  This is useful when displaying to a 
-         remote 2D X server or X proxy across a very fast network (see Section 
-         <a href="#TurboVNC_Usage_Remote" class="ref">9.2</a>.) <br /><br /> 
-         <em>srdpcm</em> = Compress images using the DPCM compression method and 
-         send using the Sun Ray Image Transport.  This requires that the 
-         proprietary Sun Ray plugin be installed on the VirtualGL server. (see 
-         Chapter <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br /> 
-         <em>srrgb</em> = Encode images as uncompressed RGB and send using the 
-         Sun Ray Image Transport.  This requires that the proprietary Sun Ray 
-         plugin be installed on the VirtualGL server (see Chapter 
-         <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br /> 
-         <em>sryuv</em> = Encode images as uncompressed YUV	and send using the 
-         Sun Ray Image Transport.  This requires that the proprietary Sun Ray 
-         plugin be installed on the VirtualGL server (see Chapter 
-         <a href="#Sun_Ray_Usage" class="ref">11</a>.) <br /><br /> If this 
-         option is not specified, then the default is set as follows: 
-         <br /><br /> If the 2D X server is a Sun Ray server and the Sun Ray 
-         plugin is installed on the VirtualGL server, then VGL will default to 
-         using <em>sryuv</em> encoding.  VGL will fall back to using 
-         <em>proxy</em> compression if, for any given frame, it is unable to 
-         send the frame using the Sun Ray Image Transport.  This could occur if, 
-         for example, the Sun Ray client is on a network that is not visible to 
-         the VirtualGL server. <br /><br /> If the 2D X server is not a Sun Ray 
-         server but the <code>DISPLAY</code> environment variable begins with 
-         <code>:</code> or <code>unix:</code>, then VirtualGL assumes that the X 
-         display connection is local and it defaults to using <em>proxy</em> 
-         compression.  Otherwise, it defaults to <em>jpeg</em> compression.
+         using the VGL Transport. This is useful when displaying to a remote 2D 
+         X server or X proxy across a very fast network (see Section 
+         <a href="#TurboVNC_Usage_Remote" class="ref">9.2</a>.) <br /><br /> If 
+         this option is not specified, then the default is set as follows: 
+         <br /><br /> If the <code>DISPLAY</code> environment variable begins 
+         with <code>:</code> or <code>unix:</code>, then VirtualGL assumes that 
+         the X display connection is local and it defaults to using 
+         <em>proxy</em> compression.  Otherwise, it defaults to <em>jpeg</em> 
+         compression.
+        <div class="important"><p class="important">
+        If a custom image transport plugin is being used, then you can set <code>VGL_COMPRESS</code> to any numeric value &gt;= 0 (Default value = 0.)  How the plugin responds to this value is implementation-specific.
+        </p></div>
     </dd>
 </dl>
 
@@ -4707,7 +4550,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL, X11</td>
+    <td class="standard">VGL, X11, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -4846,7 +4689,7 @@ method:</p>
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0087"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0084"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -4887,7 +4730,7 @@ method:</p>
         <code>f1,&nbsp;f2,&nbsp;...,&nbsp;f12</code>. You can also set 
         <code>VGL_GUI</code> to <code>none</code> to disable the configuration 
         dialog altogether.  See Chapter 
-        <a href="#Config_Dialog" class="ref">18</a> for more details.
+        <a href="#Config_Dialog" class="ref">17</a> for more details.
     </dd>
 </dl>
 
@@ -4905,7 +4748,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray, VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -4918,15 +4761,15 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        The VGL and Sun Ray Image Transports will normally compare each frame 
-        with the previous frame and send only the portions of the image which 
-        have changed.  Setting <code>VGL_INTERFRAME</code> to <code>0</code> 
-        disables this behavior. <br /><br /> This setting was introduced in 
-        order to work around a specific application interaction issue, but since 
-        a proper fix for that issue was introduced in VirtualGL 2.1.1, this 
-        option isn&rsquo;t really useful anymore.
+        The VGL Transport will normally compare each frame with the previous 
+        frame and send only the portions of the image which have changed. 
+        Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this 
+        behavior. <br /><br /> This setting was introduced in order to work 
+        around a specific application interaction issue, but since a proper fix 
+        for that issue was introduced in VirtualGL 2.1.1, this option 
+        isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Image Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0088"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0085"></a> option
         </p></div>
     </dd>
 </dl>
@@ -5013,7 +4856,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5026,15 +4869,15 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        The VGL Image Transport can divide the task of compressing each frame 
-        among multiple server CPUs.  This might speed up the overall throughput 
-        in rare circumstances where the server CPUs are significantly slower 
-        than the client CPUs. <br /><br /> VirtualGL will not allow more than 4 
+        The VGL Transport can divide the task of compressing each frame among 
+        multiple server CPUs.  This might speed up the overall throughput in 
+        rare circumstances where the server CPUs are significantly slower than 
+        the client CPUs. <br /><br /> VirtualGL will not allow more than 4 
         processors total to be used for compression, nor will it allow you to 
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        Multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0089"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0086"></a> option
         </p></div>
     </dd>
 </dl>
@@ -5055,7 +4898,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5068,8 +4911,8 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        The connection port for the VGL Image Transport is normally determined 
-        by reading an X property that <code>vglclient</code> stores on the 2D X 
+        The connection port for the VGL Transport is normally determined by 
+        reading an X property that <code>vglclient</code> stores on the 2D X 
         server, so don&rsquo;t override this unless you know what you&rsquo;re 
         doing.
     </dd>
@@ -5091,7 +4934,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">All</td>
+    <td class="standard">VGL, X11, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5107,7 +4950,7 @@ method:</p>
         If profiling output is enabled, then VirtualGL will continuously 
         benchmark itself and periodically print out the throughput of various 
         stages in its image pipelines. <br /><br /> See Chapter 
-        <a href="#Perf_Measurement" class="ref">17</a> for more details.
+        <a href="#Perf_Measurement" class="ref">16</a> for more details.
     </dd>
 </dl>
 
@@ -5129,7 +4972,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL (JPEG)</td>
+    <td class="standard">VGL (JPEG), Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5166,7 +5009,7 @@ method:</p>
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0090"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0087"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -5207,7 +5050,7 @@ method:</p>
         setting <code>VGL_READBACK=0</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This feature 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0091"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0088"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -5219,7 +5062,7 @@ method:</p>
         different graphics cards while preventing VirtualGL from displaying any 
         pixels except those generated by process 0. <br /><br /> This setting 
         can also be used to force Chromium to render into Pbuffers instead of 
-        windows.  See Section <a href="#Force_Pbuffer" class="ref">13.2</a>.
+        windows.  See Section <a href="#Force_Pbuffer" class="ref">12.2</a>.
     </dd>
 </dl>
 
@@ -5241,7 +5084,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">All</td>
+    <td class="standard">VGL, X11, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5270,7 +5113,7 @@ method:</p>
         will accurately reflect the frame rate of VirtualGL&rsquo;s image 
         pipeline (though, in X proxy environments, this may still not accurately 
         reflect the frame rate seen by the user.  See Section 
-        <a href="#Frame_Spoiling" class="ref">17.2</a>.)  Disabling frame 
+        <a href="#Frame_Spoiling" class="ref">16.2</a>.)  Disabling frame 
         spoiling also prevents non-interactive applications from wasting 
         graphics resources by rendering frames that will never be seen.
     </dd>
@@ -5288,11 +5131,11 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable SSL encryption of the VGL Image Transport</td>
+    <td class="standard">Disable/enable SSL encryption of the image transport</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5305,10 +5148,10 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Enabling this option causes the VGL Image Transport to be tunneled 
-        through a secure socket layer (SSL).
+        Enabling this option causes the VGL Transport to be tunneled through a 
+        secure socket layer (SSL).
         <div class="important"><p class="important">
-        This option is available only if both the VirtualGL server and client were built with OpenSSL support.
+        This option has no effect unless both the VirtualGL server and client were built with OpenSSL support.
         </p></div>
     </dd>
 </dl>
@@ -5349,14 +5192,16 @@ method:</p>
          renders a stereo frame, send only the right eye buffer <br /><br /> 
          <em>quad</em> = Attempt to use quad-buffered stereo, which will result 
          in a pair of images being sent to the VirtualGL Client for every frame.  
-         If quad-buffered stereo is not available, either because the client 
-         machine or the image transport does not support it, then fall back to 
-         using anaglyphic stereo.  Quad-buffered stereo requires the VGL Image 
-         Transport, and it also requires that the 2D X server support OpenGL and 
-         be connected to a 3D accelerator that supports stereo rendering. 
-         <br /><br /> <em>rc</em> = Use Red/Cyan (anaglyphic) stereo, even if 
-         quad-buffered is available <br /><br /> See Chapter 
-         <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
+         If using the VGL Transport and quad-buffered stereo is not available on 
+         the client, or if using the X11 Transport, then fall back to using 
+         anaglyphic stereo. Using quad-buffered stereo requires the VGL 
+         Transport (or a transport plugin that can handle stereo image pairs.)  
+         Using quad-buffered stereo with the VGL Transport also requires that 
+         the 2D X server support OpenGL and be connected to a 3D accelerator 
+         that supports stereo rendering. <br /><br /> <em>rc</em> = Use Red/Cyan 
+         (anaglyphic) stereo, even if quad-buffered is available <br /><br /> 
+         See Chapter <a href="#Advanced_OpenGL" class="ref">15</a> for more 
+         details.
     </dd>
 </dl>
 
@@ -5374,15 +5219,15 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Specify the level of chrominance subsampling in the JPEG and Sun Ray image compressors</td>
+    <td class="standard">Specify the level of chrominance subsampling in the JPEG image compressor</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray (DPCM, YUV), VGL (JPEG)</td>
+    <td class="standard">VGL (JPEG), Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">1x for VGL Image Transport, 16x for Sun Ray Image Transport</td>
+    <td class="standard">1x</td>
   </tr>
 </table>
 </div>
@@ -5391,46 +5236,46 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        When an image is encoded using JPEG, Sun Ray	DPCM, or Sun Ray YUV, each 
-        pixel in the image is first converted from RGB (Red/Green/Blue) to YUV.  
-        An RGB pixel has three values that specify the amounts of red, green, 
-        and blue that make up the pixel&rsquo;s color.  A YUV pixel has three 
-        values that specify the overall brightness of the pixel (Y, or 
-        &ldquo;luminance&rdquo;) and the overall color of the pixel (U and V, or 
-        &ldquo;chrominance&rdquo;.) <br /><br /> Since the human eye is less 
-        sensitive to changes in color than it is to changes in brightness, the 
-        chrominance components for some of the pixels can be discarded without 
-        much noticeable loss in image quality.  This technique, called 
-        &ldquo;chrominance subsampling&rdquo;, significantly reduces the size of 
-        the compressed image. <br /><br /> <em>1x</em> = no chrominance 
-        subsampling <br /><br /> <em>2x</em> = discard the chrominance 
-        components for every other pixel along the image&rsquo;s X direction 
-        (this is also known as &ldquo;4:2:2&rdquo; or &ldquo;2:1&rdquo; 
-        subsampling.) All else being equal, 2x subsampling generally reduces the 
-        image size by about 20-25% when compared to no subsampling.<br /> <br /> 
-        <em>4x</em> = discard the chrominance components for every other pixel 
-        along both the X and Y directions of the image (this is also known as 
-        &ldquo;4:2:0&rdquo; or &ldquo;2:2&rdquo; subsampling.)   All else being 
-        equal, 4x subsampling generally reduces the image size by about 35-40% 
-        when compared to no subsampling. <br /><br /> <em>8x</em> = discard the 
-        chrominance components for 3 out of every 4 pixels along the 
-        image&rsquo;s X direction and half the pixels along the image&rsquo;s Y 
-        direction (this is also known as &ldquo;4:1:0&rdquo; or 
-        &ldquo;4:2&rdquo; subsampling.)  <em>This option is available only with 
-        Sun Ray DPCM or YUV encoding.</em> <br /><br /> <em>16x</em> = discard 
-        the chrominance components for 3 out of every 4 pixels along both the X 
-        and Y directions of the image (this is also known as &ldquo;4:4&rdquo; 
-        subsampling.)  <em>This option is available only with Sun Ray DPCM or 
-        YUV encoding.</em> <br /><br /> <em>gray</em> = discard all chrominance 
-        components.  This is useful when running applications (such as medical 
-        visualization applications) that are already generating grayscale 
-        images.  <em>This option is available only with JPEG compression.</em> 
-        <br /><br /> Subsampling artifacts are less noticeable with volume data, 
-        since it usually only contains 256 colors to begin with.  But narrow, 
-        aliased lines and other sharp features on a black background will tend 
-        to produce very noticeable artifacts when subsampling is enabled. 
-        <br /><br /> The axis indicator from a popular visualization app 
-        displayed with 1x, 2x, and 4x subsampling (respectively):<br /> 
+        When an image is encoded using JPEG, each pixel in the image is first 
+        converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three 
+        values that specify the amounts of red, green, and blue that make up the 
+        pixel&rsquo;s color.  A YUV pixel has three values that specify the 
+        overall brightness of the pixel (Y, or &ldquo;luminance&rdquo;) and the 
+        overall color of the pixel (U and V, or &ldquo;chrominance&rdquo;.) 
+        <br /><br /> Since the human eye is less sensitive to changes in color 
+        than it is to changes in brightness, the chrominance components for some 
+        of the pixels can be discarded without much noticeable loss in image 
+        quality.  This technique, called &ldquo;chrominance subsampling&rdquo;, 
+        significantly reduces the size of the compressed image. <br /><br /> 
+        <em>1x</em> = no chrominance subsampling <br /><br /> <em>2x</em> = 
+        discard the chrominance components for every other pixel along the 
+        image&rsquo;s X direction (this is also known as &ldquo;4:2:2&rdquo; or 
+        &ldquo;2:1&rdquo; subsampling.) All else being equal, 2x subsampling 
+        generally reduces the image size by about 20-25% when compared to no 
+        subsampling.<br /> <br /> <em>4x</em> = discard the chrominance 
+        components for every other pixel along both the X and Y directions of 
+        the image (this is also known as &ldquo;4:2:0&rdquo; or 
+        &ldquo;2:2&rdquo; subsampling.)   All else being equal, 4x subsampling 
+        generally reduces the image size by about 35-40% when compared to no 
+        subsampling. <br /><br /> <em>8x</em> = discard the chrominance 
+        components for 3 out of every 4 pixels along the image&rsquo;s X 
+        direction and half the pixels along the image&rsquo;s Y direction (this 
+        is also known as &ldquo;4:1:0&rdquo; or &ldquo;4:2&rdquo; subsampling.)  
+        <em>This option is available only when using a custom image transport 
+        plugin that supports it.</em> <br /><br /> <em>16x</em> = discard the 
+        chrominance components for 3 out of every 4 pixels along both the X and 
+        Y directions of the image (this is also known as &ldquo;4:4&rdquo; 
+        subsampling.)  <em>This option is available only when using a custom 
+        image transport plugin that supports it.</em> <br /><br /> <em>gray</em> 
+        = discard all chrominance components.  This is useful when running 
+        applications (such as medical visualization applications) that are 
+        already generating grayscale images. <br /><br /> Subsampling artifacts 
+        are less noticeable with volume data, since it usually only contains 256 
+        colors to begin with.  But narrow, aliased lines and other sharp 
+        features on a black background will tend to produce very noticeable 
+        artifacts when subsampling is enabled. <br /><br /> The axis indicator 
+        from a popular visualization app displayed with 1x, 2x, and 4x 
+        subsampling (respectively):<br /> 
         <img src="444.gif" alt="444" class="inline" id="imgid_10" name="imgid_10"/><img src="422.gif" alt="422" class="inline" id="imgid_11" name="imgid_11"/><img src="411.gif" alt="411" class="inline" id="imgid_12" name="imgid_12"/>
     </dd>
 </dl>
@@ -5453,7 +5298,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">All</td>
+    <td class="standard">VGL, X11, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5484,20 +5329,22 @@ method:</p>
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0092"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0089"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
-        drawn into the application&rsquo;s window <em>using the X11 Image 
-        Transport and no frame spoiling</em>.  The call to 
-        <code>glFinish()</code>, <code>glXWaitGL()</code>, or 
-        <code>glXSwapBuffers()</code> will not return until VirtualGL has 
-        verified that the pixels have been delivered into the 
-        application&rsquo;s window.  As such, this mode can have potentially 
-        dire effects on performance when used with a remote 2D X server.  It is 
-        strongly recommended that <code>VGL_SYNC</code> be used only in 
-        conjunction with an X proxy (such as TurboVNC) running on the same 
-        server as VirtualGL.
+        drawn into the application&rsquo;s window <em>using the X11 Transport 
+        and no frame spoiling</em>.  The call to <code>glFinish()</code>, 
+        <code>glXWaitGL()</code>, or <code>glXSwapBuffers()</code> will not 
+        return until VirtualGL has verified that the pixels have been delivered 
+        into the application&rsquo;s window.  As such, this mode can have 
+        potentially dire effects on performance when used with a remote 2D X 
+        server.  It is strongly recommended that <code>VGL_SYNC</code> be used 
+        only in conjunction with an X proxy (such as TurboVNC) running on the 
+        same server as VirtualGL.
+        <div class="important"><p class="important">
+        If a custom image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)
+        </p></div>
     </dd>
 </dl>
 
@@ -5515,7 +5362,7 @@ method:</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
-    <td class="standard">VGL</td>
+    <td class="standard">VGL, Custom (if supported)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5528,15 +5375,15 @@ method:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally, the VGL Image Transport will divide an OpenGL window into 
+        Normally, the VGL Transport will divide an OpenGL window into 
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0093"></a> is enabled.)  The VGL Image 
-        Transport	will also divide up the task of compressing these tiles among 
-        the available CPUs in a round robin fashion, if multi-threaded 
-        compression is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0094"></a>.) 
+        comparison</a><a name="idx0090"></a> is enabled.)  The VGL Transport 
+        will also divide up the task of compressing these tiles among the 
+        available CPUs in a round robin fashion, if multi-threaded compression 
+        is enabled (see 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0091"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em> 
         <ul class="Itemize"><li class="Itemize-0">
@@ -5608,6 +5455,38 @@ method:</p>
         and execution times for those functions.  This is useful when diagnosing 
         interaction problems between VirtualGL and a particular OpenGL 
         application.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_TRANSPORT&nbsp;=&nbsp;</code><em><code>{t}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard"><code>vglrun</code> argument</td>
+    <td class="standard"><code>-trans&nbsp;</code><em><code>{t}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Use a custom image transport plugin</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">None</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If this option is specified, then VirtualGL will attempt to load a 
+        custom image transport plugin contained in a dynamic library named 
+        <code>libtransvgl_</code><em><code>{t}</code></em><code>.so</code> 
+        located in the dynamic linker path.
     </dd>
 </dl>
 
@@ -5745,52 +5624,16 @@ method:</p>
         setting allows you to fool such applications into thinking that they are 
         being	displayed to a &ldquo;local&rdquo; X server rather than a remote 
         one. <br /><br /> Refer to Chapter 
-        <a href="#Application_Recipes" class="ref">15</a> for specific 
+        <a href="#Application_Recipes" class="ref">14</a> for specific 
         applications that require this.
     </dd>
 </dl>
 
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_ZOOM_X&nbsp;=&nbsp;</code><em><code>1&nbsp;|&nbsp;2</code></em><br /> <code>VGL_ZOOM_Y&nbsp;=&nbsp;</code><em><code>1&nbsp;|&nbsp;2</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Subsample all pixels by the specified factor</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Image Transports</td>
-    <td class="standard">Sun Ray</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">1</td>
-  </tr>
-</table>
-</div>
 
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Setting <code>VGL_ZOOM_X=2</code> causes the Sun Ray Image Transport to 
-        discard every other pixel along the X direction of the image.  Setting 
-        <code>VGL_ZOOM_Y=2</code> does the same thing for the Y direction of the 
-        image.  This differs from <code>VGL_SUBSAMP</code> in that 
-        <code>VGL_SUBSAMP</code> discards only the chrominance components from 
-        the pixels it subsamples.  <code>VGL_ZOOM_*</code>, on the other hand, 
-        discards the luminance components as well.  The result is extremely 
-        grainy.
-    </dd>
-</dl>
-
-
-<h2 id="hd0019002">19.2&nbsp;Client Settings</h2>
+<h2 id="hd0018002">18.2&nbsp;Client Settings</h2>
 
 <p>These settings control the VirtualGL Client, which is used only with the 
-VGL Image Transport.  <code>vglclient</code> is normally launched 
+VGL Transport.  <code>vglclient</code> is normally launched 
 automatically from <code>vglconnect</code> and should not require any 
 further configuration except in exotic circumstances.  These settings 
 are meant only for advanced users or those wishing to build additional 
@@ -5916,7 +5759,7 @@ This option is available only if the VirtualGL client was built with OpenSSL sup
         If profiling output is enabled, then VirtualGL will continuously 
         benchmark itself and periodically print out the throughput of various 
         stages in its image pipelines. <br /><br /> See Chapter 
-        <a href="#Perf_Measurement" class="ref">17</a> for more details.
+        <a href="#Perf_Measurement" class="ref">16</a> for more details.
     </dd>
 </dl>
 

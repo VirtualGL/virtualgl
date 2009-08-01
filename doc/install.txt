@@ -1,7 +1,7 @@
 * Obtaining and Installing VirtualGL
 
 	!!! VirtualGL must be installed on any machine that will act as a VirtualGL
-	server or as a client for the [[overview.txt#VGL_Image_Transport][VGL Image Transport]].
+	server or as a client for the [[overview.txt#VGL_Transport][VGL Transport]].
 	It is not necessary to install VirtualGL on the client machine if using VNC
 	or another type of X proxy.
 
@@ -122,17 +122,6 @@ package available, then log in as root, download the VirtualGL source tarball
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
 uncompress it, ''cd vgl'', and read the contents of ''BUILDING.txt'' for
 further instructions on how to build and install VirtualGL from source.
-
-** Obtaining and Installing the Sun Ray Plugin
-
-The VirtualGL Sun Ray plugin is a proprietary add-on developed by Sun
-Microsystems to integrate VirtualGL with the Sun Ray thin client environment.
-If you plan to use this functionality, then it is recommended that you download
-and install the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
-software.  This software product is available as a free download (Sun charges
-for support), and it includes VirtualGL, TurboVNC, the proprietary Sun Ray
-plugin, and enhancements to N1 GridEngine to allow it to manage VirtualGL jobs
-across a cluster of 3D servers.
 
 ** Uninstalling VirtualGL
 

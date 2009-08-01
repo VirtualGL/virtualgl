@@ -654,7 +654,7 @@ Each method of configuration takes precedence over the previous method:
 ** Client Settings
 
 These settings control the VirtualGL Client, which is used only with the VGL
-Image Transport.  ''vglclient'' is normally launched automatically from
+Transport.  ''vglclient'' is normally launched automatically from
 ''vglconnect'' and should not require any further configuration except in
 exotic circumstances.  These settings are meant only for advanced users or
 those wishing to build additional infrastructure around VirtualGL.

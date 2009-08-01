@@ -1,7 +1,7 @@
-* Using VirtualGL with the VGL Image Transport
-{anchor: VGL_Image_Transport_Usage}
+* Using VirtualGL with the VGL Transport
+{anchor: VGL_Transport_Usage}
 
-*** Advantages of the VGL Image Transport
+*** Advantages of the VGL Transport
 #OPT: noList! plain!
 
 	* Seamless windows; every application window appears as a separate window on
@@ -10,19 +10,19 @@
 	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
 		client machine
 
-*** Disadvantages of the VGL Image Transport
+*** Disadvantages of the VGL Transport
 #OPT: noList! plain!
 
-	* The VGL Image Transport is designed to be used with remote X servers, thus
-		it relies on the chatty remote X11 protocol to send the 2D elements of the
-		application's GUI to the user's desktop.  As a result, the VGL Image
-		Transport is not recommended for use on high-latency networks
+	* The VGL Transport is designed to be used with remote X servers, thus it
+		relies on the chatty remote X11 protocol to send the 2D elements of the
+		application's GUI to the user's desktop.  As a result, the VGL Transport is
+		not recommended for use on high-latency networks
 	* No collaboration features
 	* Requires purchasing Exceed for use with Windows clients
 	* The client is not stateless.  As with any remote X11 app, if the network
 		connection drops, then the application will exit
 
-** VGL Image Transport with X11 Forwarding
+** VGL Transport with X11 Forwarding
 {anchor: X11_Forwarding}
 
 This mode is recommended for use on secure local-area networks.  The X11
@@ -96,7 +96,7 @@ maximize performance.
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command line options.
 
-** VGL Image Transport with a Direct X11 Connection
+** VGL Transport with a Direct X11 Connection
 {anchor: Direct_X11_Connection}
 
 As with the [[#X11_Forwarding][previous mode]], this mode performs optimally on
@@ -124,7 +124,7 @@ argument to ''vglconnect'' when connecting to the server:
 	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
 	---
 
-** VGL Image Transport with X11 Forwarding and SSh Tunneling
+** VGL Transport with X11 Forwarding and SSh Tunneling
 {anchor: SSh_Tunneling}
 
 Both the VGL image stream and the X11 traffic are tunneled through SSh when
@@ -161,11 +161,11 @@ VirtualGL server through the gateway and to the client.
 
 #IMG: sshtunnel.png
 
-** VGL Image Transport over Gigabit Networks
+** VGL Transport over Gigabit Networks
 
-When using the VGL image transport over Gigabit Ethernet or faster networks,
-it may be desirable to disable image compression.  This can be accomplished by
-passing an argument of ''-c rgb'' to ''vglrun'' or setting the ''VGL_COMPRESS''
+When using the VGL Transport over Gigabit Ethernet or faster networks, it may
+be desirable to disable image compression.  This can be accomplished by passing
+an argument of ''-c rgb'' to ''vglrun'' or setting the ''VGL_COMPRESS''
 environment variable to ''rgb'' on the VirtualGL server.  Disabling image
 compression will reduce VirtualGL's server and client CPU usage by 50% or more,
 but the tradeoff is that it will also increase VirtualGL's network usage by a
@@ -173,11 +173,11 @@ factor of 10 or more.  Thus, disabling image compression is not recommended
 unless you are using switched Gigabit Ethernet (or faster) infrastructure and
 have plenty of bandwidth to spare.
 
-** VGL Image Transport with XDMCP
+** VGL Transport with XDMCP
 
-Using the VGL Image Transport with XDMCP should mostly "just work".  Once you
-have established the connection to the remote X server using XDMCP, you can
-then follow any of the above procedures to create an SSh connection to the
+Using the VGL Transport with XDMCP should mostly "just work".  Once you have
+established the connection to the remote X server using XDMCP, you can then
+follow any of the above procedures to create an SSh connection to the
 application server and start a 3D application using VirtualGL.  The application
 server and the machine running the remote X server need not necessarily be the
 same machine.
@@ -189,20 +189,19 @@ dedicated TCP socket, decodes and/or decompresses the images, and draws the
 images into the appropriate X window.  In previous versions of VirtualGL, it
 was necessary to manually start the VirtualGL Client prior to connecting to the
 application server, but the new ''vglconnect'' script wraps both ''vglclient''
-and SSh to greatly simplify the process of creating VGL Image Transport
-connections.  One consequence of this ease of use is that the actual workings
-of ''vglclient'' are hidden from view, which makes it a bit more difficult to
-see the cause of connection failures and other issues as they happen.
+and SSh to greatly simplify the process of creating VGL Transport connections.
+One consequence of this ease of use is that the actual workings of
+''vglclient'' are hidden from view, which makes it a bit more difficult to see
+the cause of connection failures and other issues as they happen.
 
 ''vglconnect'' invokes ''vglclient'' with an argument of ''-detach'', which
 causes ''vglclient'' to completely detach from the console and run as a
 background daemon.  It will remain running silently in the background,
-accepting VGL Image Transport connections for the X server on which it was
-started, until that X server is reset or until the ''vglclient'' process is
-explicitly killed.  Logging out of the X server will reset the X server and
-thus kill all ''vglclient'' instances that are attached to it.  You can also
-explicitly kill all instances of ''vglclient'' running under your user account
-by invoking
+accepting VGL Transport connections for the X server on which it was started,
+until that X server is reset or until the ''vglclient'' process is explicitly
+killed.  Logging out of the X server will reset the X server and thus kill all
+''vglclient'' instances that are attached to it.  You can also explicitly kill
+all instances of ''vglclient'' running under your user account by invoking
 
 	#Verb: <<---
 	vglclient -kill
@@ -253,12 +252,12 @@ client machine, which means that you'll only ever need one instance of
 run multiple X servers on your client machine, which means that you will need
 to run multiple ''vglclient'' instances, then you may wish to open ports
 4200-4299.  Similarly, if you are running ''vglclient'' on a multi-user
-TurboVNC or Sun Ray server that has a firewall, then you may wish to open ports
-4200-4299 in the server's firewall.  Opening ports 4200-4299 will accommodate
-up to 100 separate ''vglclient'' instances (50 if OpenSSL support is enabled.)
-More instances than that cannot be accommodated on a firewalled machine, unless
-the firewall is able to create rules based on application executables instead
-of listening ports.
+TurboVNC server that has a firewall, then you may wish to open ports 4200-4299
+in the server's firewall.  Opening ports 4200-4299 will accommodate up to 100
+separate ''vglclient'' instances (50 if OpenSSL support is enabled.)  More
+instances than that cannot be accommodated on a firewalled machine, unless the
+firewall is able to create rules based on application executables instead of
+listening ports.
 
 Note that it is not necessary to open any inbound ports in the firewall to use
-the VGL Image Transport with [[#SSh_Tunneling][SSh Tunneling]].
+the VGL Transport with [[#SSh_Tunneling][SSh Tunneling]].

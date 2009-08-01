@@ -2,8 +2,8 @@
 
 	!!! TurboVNC must be installed on any machine that will act as a TurboVNC
 	server or client.  It is not necessary to install TurboVNC to use the
-	[[overview.txt#VGL_Image_Transport][VGL Image Transport]].  Also,
-	TurboVNC need not necessarily be installed on the same server as VirtualGL.
+	[[overview.txt#VGL_Transport][VGL Transport]].  Also, TurboVNC need not
+	necessarily be installed on the same server as VirtualGL.
 
 ** Installing TurboVNC on Linux
 

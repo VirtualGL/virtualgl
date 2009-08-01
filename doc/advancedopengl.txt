@@ -58,8 +58,8 @@ them as a single stereo frame to the client machine's X display using
 stereo in VirtualGL decreases performance by 50% or more and uses twice the
 network bandwidth to maintain the same frame rate as mono.
 
-Quad-buffered stereo requires the VGL Image Transport.  If any other image
-transport is used, then VGL will fall back to anaglyphic stereo mode.
+Quad-buffered stereo requires the VGL Transport.  If any other image transport
+is used, then VGL will fall back to anaglyphic stereo mode.
 
 *** Anaglyphic Stereo
 
@@ -75,7 +75,7 @@ of the client's capabilities.
 
 VirtualGL uses anaglyphic stereo if it detects that an application has rendered
 something in stereo but quad-buffered stereo is not available, either because
-the client doesn't support it or because a transport other than the VGL Image
+the client doesn't support it or because a transport other than the VGL
 Transport is being used.  Anaglyphic stereo provides a cheap and easy way to
 view stereographic applications in X proxies and on clients that do not support
 quad-buffered stereo.  Additionally, anaglyphic stereo performs much faster
@@ -159,9 +159,9 @@ of a standard RGB Pbuffer to store the color index.  Upon receiving an end of
 frame trigger, VirtualGL reads back the red channel of the Pbuffer and uses
 ''XPutImage()'' to draw the color indices into the appropriate X window.  To
 put this another way, PseudoColor rendering in VirtualGL always uses the X11
-Image Transport.  However, since there is only 1 byte per pixel in a
-PseudoColor "image", the images can still be sent to the client reasonably
-quickly even though they are uncompressed.
+Transport.  However, since there is only 1 byte per pixel in a PseudoColor
+"image", the images can still be sent to the client reasonably quickly even
+though they are uncompressed.
 
 VirtualGL's PseudoColor rendering mode works with TurboVNC, provided that the
 TurboVNC server is configured to use an 8-bit color depth.  Note, however, that

@@ -59,7 +59,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	!!! If a custom image transport plugin is loaded, then this gadget's name
 	changes to "Image Quality".
 
-	Connection Profile :: This drop-down gadget is active only if the VGL Image
+	Connection Profile :: This drop-down gadget is active only if the VGL
 	Transport was active when VirtualGL started.  It has the following options:
 	{nl}{nl} \
 	__Low Qual (Low-Bandwidth Network)__ : Sets the image compression type to

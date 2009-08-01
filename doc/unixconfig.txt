@@ -15,15 +15,11 @@ When using GLP, the architecture of VirtualGL changes as follows:
 
 #IMG: vgltransportglp.png
 #OPT fmt=latex: w=4cm
-#CAP: The VGL Image Transport with a Remote 2D X Server and GLP
+#CAP: The VGL Transport with a Remote 2D X Server and GLP
 
 #IMG: x11transportglp.png
 #OPT fmt=latex: w=4cm
-#CAP: The X11 Image Transport with an X Proxy and GLP
-
-#IMG: sunrayglp.png
-#OPT fmt=latex: w=4cm
-#CAP: The Sun Ray Image Transport with GLP
+#CAP: The X11 Transport with an X Proxy and GLP
 
 If the application server is running [[http://www.sun.com/software/graphics/opengl/][Sun OpenGL]]
 1.5 for Solaris/SPARC, then it is recommended that you configure it to use GLP:

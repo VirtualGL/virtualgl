@@ -9,11 +9,11 @@ them have capabilities that TurboVNC lacks (NX, for instance, can do seamless
 windows.)
 
 VirtualGL reads the value of the ''DISPLAY'' environment variable to
-determine whether to enable the X11 Image Transport by default.  If ''DISPLAY''
+determine whether to enable the X11 Transport by default.  If ''DISPLAY''
 begins with a colon ("'':''") or with "''unix:''", then VirtualGL will assume
-that the X server connection is local and will enable the X11 Image Transport
-as the default.  This should effectively make the X11 Image Transport the
-default for most X proxies, but if for some reason that doesn't occur, then you
-can force the use of the X11 Image Transport by setting the ''VGL_COMPRESS''
-environment variable to ''proxy'' on the application server or passing an
-argument of ''-c proxy'' to ''vglrun''.
+that the X server connection is local and will enable the X11 Transport as the
+default.  This should effectively make the X11 Transport the default for most X
+proxies, but if for some reason that doesn't occur, then you can force the use
+of the X11 Transport by setting the ''VGL_COMPRESS'' environment variable to
+''proxy'' on the application server or passing an argument of ''-c proxy'' to
+''vglrun''.

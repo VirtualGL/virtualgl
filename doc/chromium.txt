@@ -208,7 +208,7 @@ connection between the 2D X server and the Chromium Server.  In certain modes,
 Chromium polls the 2D X server on every frame to determine whether windows have
 been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in a TurboVNC
-session as opposed to using the VGL Image Transport.
+session as opposed to using the VGL Transport.
 
 ** ModViz VGP v1.x and VirtualGL
 

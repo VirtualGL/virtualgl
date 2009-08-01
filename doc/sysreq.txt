@@ -172,7 +172,7 @@ processors.
 	|
 | Other Software \
 	| {list type=ul: \
-			{item:__VGL Image Transport Only__: Mac X11 application (in the \
+			{item:__VGL Transport Only__: Mac X11 application (in the \
 				"Optional Installs" package on the OS X install discs)}} \
 	|
 #OPT: hiCol=first
@@ -191,7 +191,7 @@ processors.
 	|
 | Other Software \
 	| {list type=ul: \
-			{item:__VGL Image Transport Only__: [[http://connectivity.hummingbird.com][Hummingbird]] \
+			{item:__VGL Transport Only__: [[http://connectivity.hummingbird.com][Hummingbird]] \
 				Exceed 8 or newer required} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
