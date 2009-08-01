@@ -20,8 +20,8 @@ Each method of configuration takes precedence over the previous method:
 		corresponding to that configuration option.
 {:}
 	!!! If "Custom (if supported)" is listed as one of the available Image
-	Transports, then this means that custom image transport plugins are free
-	to handle or ignore this option as they see fit.
+	Transports, then this means that image transport plugins are free to handle
+	or ignore this option as they see fit.
 
 | Environment Variable | ''VGL_CLIENT = ''__''{c}''__ |
 | ''vglrun'' argument | ''-cl ''__''{c}''__ |
@@ -63,7 +63,7 @@ Each method of configuration takes precedence over the previous method:
 	using __proxy__ compression.  Otherwise, it defaults to __jpeg__
 	compression.
 
-	!!! If a custom image transport plugin is being used, then you can set
+	!!! If an image transport plugin is being used, then you can set
 	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  How the
 	plugin responds to this value is implementation-specific.
 
@@ -464,12 +464,12 @@ Each method of configuration takes precedence over the previous method:
 	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
 	the image's X direction and half the pixels along the image's Y direction
 	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
-	available only when using a custom image transport plugin that supports it.__
+	available only when using an image transport plugin that supports it.__
 	{nl}{nl} \
 	__16x__ = discard the chrominance components for 3 out of every 4 pixels
 	along both the X and Y directions of the image (this is also known as "4:4"
-	subsampling.)  __This option is available only when using a custom image
-	transport plugin that supports it.__
+	subsampling.)  __This option is available only when using an image transport
+	plugin that supports it.__
 	{nl}{nl} \
 	__gray__ = discard all chrominance components.  This is useful when running
 	applications (such as medical visualization applications) that are already
@@ -520,8 +520,8 @@ Each method of configuration takes precedence over the previous method:
 	recommended that ''VGL_SYNC'' be used only in conjunction with an X proxy
 	(such as TurboVNC) running on the same server as VirtualGL.
 
-	!!! If a custom image transport plugin is being used, then VirtualGL does
-	not automatically enable the X11 Transport or disable frame spoiling when
+	!!! If an image transport plugin is being used, then VirtualGL does not
+	automatically enable the X11 Transport or disable frame spoiling when
 	''VGL_SYNC'' is set.  This allows the plugin to handle synchronous image
 	delivery as it sees fit (or to simply ignore this option.)
 
@@ -584,12 +584,12 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_TRANSPORT = ''__''{t}''__ |
 | ''vglrun'' argument | ''-trans ''__''{t}''__ |
-| Summary | Use a custom image transport plugin |
+| Summary | Use an image transport plugin |
 | Default Value | None |
 #OPT: hiCol=first
 
 	Description :: If this option is specified, then VirtualGL will attempt to
-	load a custom image transport plugin contained in a dynamic library named
+	load an image transport plugin contained in a dynamic library named
 	''libtransvgl_''__''{t}''__''.so'' located in the dynamic linker path.
 
 | Environment Variable | ''VGL_TRAPX11 = ''__''0 \| 1''__ |

@@ -30,11 +30,11 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
 	''VGL_COMPRESS'' configuration option and its various parameters.
 
-	!!! If a custom image transport plugin is loaded, then this gadget's name
-	changes to "Image Compression", and it has options "0" through "10".
+	!!! If an image transport plugin is loaded, then this gadget's name changes
+	to "Image Compression", and it has options "0" through "10".
 
 	Chrominance Subsampling :: This drop-down gadget is active only when using
-	JPEG compression or a custom image transport plugin.  It has the following
+	JPEG compression or an image transport plugin.  It has the following
 	options:
 	{nl}{nl} \
 	__Grayscale__ : equivalent to setting ''VGL_SUBSAMP=gray''
@@ -48,16 +48,16 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	See {ref prefix="Section ": VGL_SUBSAMP} for more information about the
 	''VGL_SUBSAMP'' configuration option and its various parameters.
 
-	!!! If a custom image transport plugin is loaded, then this gadget has two
+	!!! If an image transport plugin is loaded, then this gadget has two
 	additional options, "8X" and "16X".
 
 	JPEG Image Quality :: This slider gadget is active only when using JPEG
-	compression or a custom image transport plugin.  It is the equivalent of
-	setting ''VGL_QUAL''.  See {ref prefix="Section ": VGL_QUAL} for more
-	information about the ''VGL_QUAL'' configuration option.
+	compression or an image transport plugin.  It is the equivalent of setting
+	''VGL_QUAL''.  See {ref prefix="Section ": VGL_QUAL} for more information
+	about the ''VGL_QUAL'' configuration option.
 
-	!!! If a custom image transport plugin is loaded, then this gadget's name
-	changes to "Image Quality".
+	!!! If an image transport plugin is loaded, then this gadget's name changes
+	to "Image Quality".
 
 	Connection Profile :: This drop-down gadget is active only if the VGL
 	Transport was active when VirtualGL started.  It has the following options:

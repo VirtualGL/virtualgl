@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-07-31T20:38:09">
+<meta name="date" content="2009-07-31T20:52:53">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.2 and TurboVNC 0.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4245,34 +4245,34 @@ VirtualGL.</p>
         the <code>VGL_COMPRESS</code> configuration option and its various 
         parameters.
         <div class="important"><p class="important">
-        If a custom image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Compression&rdquo;, and it has options &ldquo;0&rdquo; through &ldquo;10&rdquo;.
+        If an image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Compression&rdquo;, and it has options &ldquo;0&rdquo; through &ldquo;10&rdquo;.
         </p></div>
     </dd>
     <dt class="Description-1 Description">Chrominance Subsampling</dt>
     <dd class="Description-1 Description">
-        This drop-down gadget is active only when using JPEG compression or a 
-        custom image transport plugin.  It has the following options: 
-        <br /><br /> <em>Grayscale</em> : equivalent to setting 
-        <code>VGL_SUBSAMP=gray</code> <br /><br /> <em>1X</em> : equivalent to 
-        setting <code>VGL_SUBSAMP=1x</code> <br /><br /> <em>2X</em> : 
-        equivalent to setting <code>VGL_SUBSAMP=2x</code> <br /><br /> 
-        <em>4X</em> : equivalent to setting <code>VGL_SUBSAMP=4x</code> 
-        <br /><br /> See Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for 
-        more information about the <code>VGL_SUBSAMP</code> configuration option 
-        and its various parameters.
+        This drop-down gadget is active only when using JPEG compression or an 
+        image transport plugin.  It has the following options: <br /><br /> 
+        <em>Grayscale</em> : equivalent to setting <code>VGL_SUBSAMP=gray</code> 
+        <br /><br /> <em>1X</em> : equivalent to setting 
+        <code>VGL_SUBSAMP=1x</code> <br /><br /> <em>2X</em> : equivalent to 
+        setting <code>VGL_SUBSAMP=2x</code> <br /><br /> <em>4X</em> : 
+        equivalent to setting <code>VGL_SUBSAMP=4x</code> <br /><br /> See 
+        Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for more information 
+        about the <code>VGL_SUBSAMP</code> configuration option and its various 
+        parameters.
         <div class="important"><p class="important">
-        If a custom image transport plugin is loaded, then this gadget has two additional options, &ldquo;8X&rdquo; and &ldquo;16X&rdquo;.
+        If an image transport plugin is loaded, then this gadget has two additional options, &ldquo;8X&rdquo; and &ldquo;16X&rdquo;.
         </p></div>
     </dd>
     <dt class="Description-1 Description">JPEG Image Quality</dt>
     <dd class="Description-1 Description">
-        This slider gadget is active only when using JPEG compression or a 
-        custom image transport plugin.  It is the equivalent of setting 
+        This slider gadget is active only when using JPEG compression or an 
+        image transport plugin.  It is the equivalent of setting 
         <code>VGL_QUAL</code>.  See Section 
         <a href="#VGL_QUAL" class="ref">18.1</a> for more information about the 
         <code>VGL_QUAL</code> configuration option.
         <div class="important"><p class="important">
-        If a custom image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Quality&rdquo;.
+        If an image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Quality&rdquo;.
         </p></div>
     </dd>
     <dt class="Description-1 Description">Connection Profile</dt>
@@ -4395,7 +4395,7 @@ method:</p>
 <p></p>
 
 <div class="important"><p class="important">
-If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image Transports, then this means that custom image transport plugins are free to handle or ignore this option as they see fit.
+If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image Transports, then this means that image transport plugins are free to handle or ignore this option as they see fit.
 </p></div>
 
 <div class="table">
@@ -4484,7 +4484,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
          <em>proxy</em> compression.  Otherwise, it defaults to <em>jpeg</em> 
          compression.
         <div class="important"><p class="important">
-        If a custom image transport plugin is being used, then you can set <code>VGL_COMPRESS</code> to any numeric value &gt;= 0 (Default value = 0.)  How the plugin responds to this value is implementation-specific.
+        If an image transport plugin is being used, then you can set <code>VGL_COMPRESS</code> to any numeric value &gt;= 0 (Default value = 0.)  How the plugin responds to this value is implementation-specific.
         </p></div>
     </dd>
 </dl>
@@ -5261,13 +5261,13 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         components for 3 out of every 4 pixels along the image&rsquo;s X 
         direction and half the pixels along the image&rsquo;s Y direction (this 
         is also known as &ldquo;4:1:0&rdquo; or &ldquo;4:2&rdquo; subsampling.)  
-        <em>This option is available only when using a custom image transport 
-        plugin that supports it.</em> <br /><br /> <em>16x</em> = discard the 
+        <em>This option is available only when using an image transport plugin 
+        that supports it.</em> <br /><br /> <em>16x</em> = discard the 
         chrominance components for 3 out of every 4 pixels along both the X and 
         Y directions of the image (this is also known as &ldquo;4:4&rdquo; 
-        subsampling.)  <em>This option is available only when using a custom 
-        image transport plugin that supports it.</em> <br /><br /> <em>gray</em> 
-        = discard all chrominance components.  This is useful when running 
+        subsampling.)  <em>This option is available only when using an image 
+        transport plugin that supports it.</em> <br /><br /> <em>gray</em> = 
+        discard all chrominance components.  This is useful when running 
         applications (such as medical visualization applications) that are 
         already generating grayscale images. <br /><br /> Subsampling artifacts 
         are less noticeable with volume data, since it usually only contains 256 
@@ -5343,7 +5343,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         only in conjunction with an X proxy (such as TurboVNC) running on the 
         same server as VirtualGL.
         <div class="important"><p class="important">
-        If a custom image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)
+        If an image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)
         </p></div>
     </dd>
 </dl>
@@ -5470,7 +5470,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Use a custom image transport plugin</td>
+    <td class="standard">Use an image transport plugin</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -5483,8 +5483,8 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        If this option is specified, then VirtualGL will attempt to load a 
-        custom image transport plugin contained in a dynamic library named 
+        If this option is specified, then VirtualGL will attempt to load an 
+        image transport plugin contained in a dynamic library named 
         <code>libtransvgl_</code><em><code>{t}</code></em><code>.so</code> 
         located in the dynamic linker path.
     </dd>
