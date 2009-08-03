@@ -83,6 +83,8 @@ install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
 install -m 755 %{_libdir}/libgefaker.so $RPM_BUILD_ROOT/usr/lib64/libgefaker.so
 install -m 755 %{_bindir}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
 %endif
+install -m 644 rr/rrtransport.h $RPM_BUILD_ROOT/usr/include/rrtransport.h
+install -m 644 rr/rr.h $RPM_BUILD_ROOT/usr/include/rr.h
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
@@ -159,6 +161,8 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
 /usr/lib64/libgefaker.so
+/usr/include/rrtransport.h
+/usr/include/rr.h
 /opt/%{name}/bin/glxspheres64
 %endif
 

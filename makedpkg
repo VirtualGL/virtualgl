@@ -70,6 +70,8 @@ install -m 755 $EDIR32/nettest $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 644 rr/rrtransport.h $RPMDIR/usr/include/rrtransport.h
+install -m 644 rr/rr.h $RPMDIR/usr/include/rr.h
 install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/ || doexit -1
 install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/ || doexit -1
 install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/ || doexit -1

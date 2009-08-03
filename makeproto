@@ -34,6 +34,9 @@ echo d none SUNWvgl/fakelib/$LIB64 0755 root bin
 echo s none SUNWvgl/fakelib/$LIB64/libGL.so=../../lib/$LIB64/librrfaker.so
 echo s none SUNWvgl/fakelib/64=$LIB64
 fi
+echo d none SUNWvgl/include 0755 root bin
+echo f none SUNWvgl/include/rrtransport.h 0644 root bin
+echo f none SUNWvgl/include/rr.h 0644 root bin
 echo d none SUNWvgl/lib 0755 root bin
 echo f none SUNWvgl/lib/librrfaker.so 0755 root bin
 echo f none SUNWvgl/lib/libdlfaker.so 0755 root bin
