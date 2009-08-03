@@ -15,13 +15,12 @@
 #ifndef __RRTRANSPORT_H
 #define __RRTRANSPORT_H
 
-#include <X11/Xlib.h>
 #include "rr.h"
 
 // Pixel formats
 #define RRTRANS_FORMATOPT 6
 enum {RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
-	RRTRANS_ARGB};
+      RRTRANS_ARGB};
 
 static const int rrtrans_ps[RRTRANS_FORMATOPT]={3, 4, 3, 4, 4, 4};
 static const int rrtrans_bgr[RRTRANS_FORMATOPT]={0, 0, 1, 1, 1, 0};
@@ -33,32 +32,32 @@ static const int rrtrans_afirst[RRTRANS_FORMATOPT]={0, 0, 0, 0, 1, 1};
 
 typedef struct _RRFrame
 {
-	/* A pointer to the pixels in the framebuffer allocated by the transport
-		plugin.  If this is a stereo frame, this points to the pixels in the left
-		eye buffer.  Pixels returned from VirtualGL are always returned in
-    bottom-up order. */
-	unsigned char *bits;
+  /* A pointer to the pixels in the framebuffer allocated by the transport
+     plugin.  If this is a stereo frame, this points to the pixels in the left
+     eye buffer.  Pixels returned from VirtualGL are always returned in
+     bottom-up order. */
+  unsigned char *bits;
 
-	/* If this is a stereo frame, this points to the pixels in the right eye
-		buffer */
-	unsigned char *rbits;
+  /* If this is a stereo frame, then this points to the pixels in the right
+     eye buffer */
+  unsigned char *rbits;
 
-	/* The format of the pixels in the allocated framebuffer (see enum above) */
-	int format;
+  /* The format of the pixels in the allocated framebuffer (see enum above) */
+  int format;
 
-	/* The width and height of the allocate framebuffer, in pixels */
-	int w, h;
+  /* The width and height of the allocate framebuffer, in pixels */
+  int w, h;
 
-	/* The number of bytes in each pixel row of the allocated framebuffer */
-	int pitch;
+  /* The number of bytes in each pixel row of the allocated framebuffer */
+  int pitch;
 
-	/* The window ID into which this frame should be drawn.  This is set by
-		VirtualGL prior to calling RRTransSendFrame() */
-	unsigned int winid;
+  /* The window ID into which this frame should be drawn.  This is set by
+     VirtualGL prior to calling RRTransSendFrame() */
+  unsigned int winid;
 
-	/* A pointer to a data structure used by the plugin to represent the
-		framebuffer.  No user serviceable parts inside. */
-	void *opaque;
+  /* A pointer to a data structure used by the plugin to represent the
+     framebuffer.  No user serviceable parts inside. */
+  void *opaque;
 
 } RRFrame;
 
@@ -73,7 +72,7 @@ extern "C" {
 #endif
 
 void *
-	RRTransInit (FakerConfig *fconfig);
+   RRTransInit (FakerConfig *fconfig);
 /*
    Initialize an instance of the transport plugin
 
@@ -88,7 +87,7 @@ void *
 */
 
 int
-	RRTransConnect (void *handle, char *receiver_name, int port);
+   RRTransConnect (void *handle, char *receiver_name, int port);
 /*
    Connect to a remote image receiver
 
@@ -109,7 +108,7 @@ int
 */
 
 RRFrame *
-	RRTransGetFrame (void *handle, int width, int height, int stereo, int spoil);
+   RRTransGetFrame (void *handle, int width, int height, int stereo, int spoil);
 /*
    Retrieve a frame buffer of the requested dimensions from the transport
    plugin's buffer pool
@@ -136,7 +135,7 @@ RRFrame *
 */
 
 int
-	RRTransFrameReady(void *handle);
+   RRTransFrameReady(void *handle);
 /*
    Returns 1 if the plugin is ready to deliver a new frame immediately or
    0 if it is currently processing a frame and a new frame would have to be
@@ -149,7 +148,7 @@ int
 */
 
 int
-	RRTransSendFrame (void *handle, RRFrame *frame);
+   RRTransSendFrame (void *handle, RRFrame *frame);
 /*
    Send the contents of a frame buffer to the receiver
 
@@ -165,7 +164,7 @@ int
 */
 
 int
-	RRTransDestroy(void *handle);
+   RRTransDestroy(void *handle);
 /*
    Clean up an instance of the transport plugin
 
@@ -179,7 +178,7 @@ int
 */
 
 const char *
-	RRTransGetError(void);
+   RRTransGetError(void);
 /*
    Return an error string describing why the last command failed
 */
