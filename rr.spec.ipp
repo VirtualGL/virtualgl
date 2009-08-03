@@ -56,6 +56,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/lib
 %ifarch x86_64
 mkdir -p $RPM_BUILD_ROOT/usr/lib64
 %endif
+mkdir -p $RPM_BUILD_ROOT/usr/include
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 %ifarch x86_64

@@ -52,6 +52,7 @@ mkdir -p $TMPDIR/usr/lib || doexit -1
 if [ "$DEBARCH" = "amd64" ]; then
 	mkdir -p $TMPDIR/usr/lib32 || doexit -1
 fi
+mkdir -p $TMPDIR/usr/include || doexit -1
 mkdir -p $TMPDIR/opt/$APPNAME/bin || doexit -1
 mkdir -p $TMPDIR/opt/$APPNAME/fakelib || doexit -1
 if [ "$DEBARCH" = "amd64" ]; then
@@ -70,8 +71,8 @@ install -m 755 $EDIR/nettest $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/ || doexit -1
-install -m 644 rr/rrtransport.h $RPMDIR/usr/include/rrtransport.h
-install -m 644 rr/rr.h $RPMDIR/usr/include/rr.h
+install -m 644 rr/rrtransport.h $TMPDIR/usr/include/rrtransport.h || doexit -1
+install -m 644 rr/rr.h $TMPDIR/usr/include/rr.h || doexit -1
 install -m 755 $LDIR/librrfaker.so $TMPDIR/usr/lib/ || doexit -1
 install -m 755 $LDIR/libdlfaker.so $TMPDIR/usr/lib/ || doexit -1
 install -m 755 $LDIR/libgefaker.so $TMPDIR/usr/lib/ || doexit -1
