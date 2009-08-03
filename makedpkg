@@ -59,16 +59,16 @@ if [ "$DEBARCH" = "amd64" ]; then
 	ln -fs /opt/$APPNAME/fakelib/64 $TMPDIR/opt/$APPNAME/lib64 || doexit -1
 fi
 install -m 755 $EDIR/vglclient $TMPDIR/usr/bin/ || doexit -1
-install -m 755 $EDIR32/vglconfig $TMPDIR/usr/bin/ || doexit -1
-install -m 755 $EDIR32/vglconnect $TMPDIR/usr/bin/ || doexit -1
-install -m 755 $EDIR32/vgllogin $TMPDIR/usr/bin/ || doexit -1
-install -m 755 $EDIR32/vglrun $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR/vglconfig $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR/vglconnect $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR/vgllogin $TMPDIR/usr/bin/ || doexit -1
+install -m 755 $EDIR/vglrun $TMPDIR/usr/bin/ || doexit -1
 install -m 755 rr/vglgenkey $TMPDIR/usr/bin/ || doexit -1
 install -m 755 rr/vglserver_config $TMPDIR/usr/bin/ || doexit -1
-install -m 755 $EDIR32/tcbench $TMPDIR/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR32/nettest $TMPDIR/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR32/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR32/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/tcbench $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/nettest $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/cpustat $TMPDIR/opt/$APPNAME/bin/ || doexit -1
+install -m 755 $EDIR/glxinfo $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 755 $EDIR32/glxspheres $TMPDIR/opt/$APPNAME/bin/ || doexit -1
 install -m 644 rr/rrtransport.h $RPMDIR/usr/include/rrtransport.h
 install -m 644 rr/rr.h $RPMDIR/usr/include/rr.h

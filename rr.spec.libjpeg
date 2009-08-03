@@ -61,17 +61,17 @@ mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 %endif
 
-install -m 755 %{_bindir32}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
-install -m 755 %{_bindir32}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
-install -m 755 %{_bindir32}/vglconnect $RPM_BUILD_ROOT/usr/bin/vglconnect
-install -m 755 %{_bindir32}/vgllogin $RPM_BUILD_ROOT/usr/bin/vgllogin
-install -m 755 %{_bindir32}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
+install -m 755 %{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
+install -m 755 %{_bindir}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
+install -m 755 %{_bindir}/vglconnect $RPM_BUILD_ROOT/usr/bin/vglconnect
+install -m 755 %{_bindir}/vgllogin $RPM_BUILD_ROOT/usr/bin/vgllogin
+install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
 install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
 install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
-install -m 755 %{_bindir32}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
-install -m 755 %{_bindir32}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
-install -m 755 %{_bindir32}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
-install -m 755 %{_bindir32}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
+install -m 755 %{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
+install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
+install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
+install -m 755 %{_bindir}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
 install -m 755 %{_bindir32}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres
 install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
 install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
