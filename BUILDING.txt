@@ -63,13 +63,12 @@ How to build VirtualGL in 9043 easy steps
    download an updated binutils RPM from:
    http://mirror.atrpms.net/ccrma/mirror/7.2/
 
--- Open mediaLib Lite
-
-   The Open mediaLib Lite source tarball should have been supplied to you along
-   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
-   tarball into the directory one level up from the VirtualGL build directory,
-   and refer to openmliblite/ReadMe.txt for instructions on how to build
-   Open mediaLib Lite.
+-- NASM (http://www.nasm.us/)
+   * 0.99 or later required if building 32-bit VirtualGL
+   * 2.05 or later required if building 64-bit VirtualGL
+   * If you don't plan to use the VGL Transport, then you can build VirtualGL
+     without SIMD-accelerated JPEG compression by passing "LIBJPEG_SIMD=no" as
+     an argument to "make".  This eliminates the need for NASM.
 
 
 *******************************************************************************
@@ -132,13 +131,7 @@ one or more of the necessary 32-bit prerequisites, then:
      OpenGL SDK
      Mac OS X SDK
 
--- Open mediaLib Lite (Intel-based Macs only)
-
-   The Open mediaLib Lite source tarball should have been supplied to you along
-   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
-   tarball into the directory one level up from the VirtualGL build directory,
-   and refer to openmliblite/ReadMe.txt for instructions on how to build
-   Open mediaLib Lite.
+-- NASM (http://www.nasm.us/) 0.99 or later (Intel-based Macs only)
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
 
@@ -325,13 +318,7 @@ VirtualGL on Cygwin, see the next section.
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
--- Open mediaLib Lite
-
-   The Open mediaLib Lite source tarball should have been supplied to you along
-   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
-   tarball into the directory one level up from the VirtualGL build directory,
-   and refer to openmliblite/ReadMe.txt for instructions on how to build
-   Open mediaLib Lite.
+-- NASM (http://www.nasm.us/) 0.99 or later
 
 
 *******************************************************************************
@@ -352,13 +339,7 @@ Cygwin:
    libXext-devel
    libGLU-devel
 
--- Open mediaLib Lite
-
-   The Open mediaLib Lite source tarball should have been supplied to you along
-   with the VirtualGL source tarball.  Untar the Open mediaLib Lite source
-   tarball into the directory one level up from the VirtualGL build directory,
-   and refer to openmliblite/ReadMe.txt for instructions on how to build
-   Open mediaLib Lite.
+-- NASM (http://www.nasm.us/) 0.99 or later
 
 -- Pass an argument of "platform=cygwin" to make when performing the
    build:
@@ -402,21 +383,21 @@ DEBUG = yes
 
 JPEGLIB = libjpeg
 
-  * The default build of VirtualGL links against Sun mediaLib on Solaris and
-    Open mediaLib on Linux, Windows, and OS X.  mediaLib provides a variety of
-    image processing primitives which are accelerated by the vector multimedia
-    instructions available in SPARC and x86 CPUs.  These image processing
-    primitives enable VirtualGL to compress full-screen images at interactive
-    frame rates.  However, if building VirtualGL for a CPU other than SPARC or
-    x86, it is necessary to build it without mediaLib support.  Specifying this
-    Makefile option will build an (included) version of libjpeg and link
-    VirtualGL against it rather than the accelerated mediaLib codecs mentioned
-    above.  The use of libjpeg produces correct, albeit slow, behavior.  The
-    version of libjpeg included in the VirtualGL build resides in the
-    "jpeg/jpeg-6b" directory and differs from the IJG release
-    (see http://www.ijg.org) only in its support of little endian and 32-bit
-    pixel formats (both of which are necessary to allow the VirtualGL client to
-    decompress directly into X11 shared memory.)
+  * This option is the default on Intel-based Macs, Linux, and Windows, but on
+    Solaris, you can use this option to build a version of VirtualGL that
+    does not depend on Sun mediaLib.  The resulting version of VirtualGL will
+    be quite a bit slower, however, so this is not recommended.  VirtualGL on
+    Solaris uses mediaLib both to accelerate JPEG compression in the VGL
+    Transport as well as to accelerate gamma correction.
+
+LIBJPEG_SIMD = no
+
+  * Disable SIMD acceleration in libjpeg.  SIMD acceleration, which is the
+    default on Intel-based Macs, Linux, and Windows, will provide 2-3X better
+    performance when using JPEG compression in the VGL Transport.  However, if
+    you are building VirtualGL strictly for a server and do not plan to use the
+    VGL transport, then you can safely disable SIMD acceleration.  This
+    eliminates the need to have NASM on the build machine.
 
 M32 = yes
 
