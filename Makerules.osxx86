@@ -33,7 +33,10 @@ else
  OPTFLAG = -O2
 endif
 
-DEFAULTJPEGLIB = medialib
+NAFLAGS = -fmacho -DMACHO
+
+DEFAULTJPEGLIB = libjpeg
+LIBJPEG_SIMD = yes
 
 SHFLAG = -dynamiclib
 SHEXT = dylib

@@ -20,7 +20,10 @@ ifeq ($(DEBUG), yes)
 else
  OPTFLAG = -O2 -MT
 endif
-DEFAULTJPEGLIB = medialib
+NAFLAGS = -fwin32 -DWIN32
+
+DEFAULTJPEGLIB = libjpeg
+LIBJPEG_SIMD = yes
 
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/xdk
 CDEFINES := $(CDEFINES) -DXDK

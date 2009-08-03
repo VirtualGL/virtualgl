@@ -149,8 +149,8 @@ endif
 
 # Implicit rules
 $(ODIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $*.c -o $(ODIR)/$*.o
-	$(CC) $(CFLAGS) $(DEPFLAG) $*.c > $(ODIR)/$*.d
+	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DEPFLAG) $< > $(ODIR)/$*.d
 	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
 	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
@@ -158,8 +158,8 @@ $(ODIR)/%.o: %.c
 	@rm -f $(ODIR)/$*.d.tmp
 
 $(ODIR)/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $*.cpp -o $(ODIR)/$*.o
-	$(CXX) $(CXXFLAGS) $(DEPFLAG) $*.cpp > $(ODIR)/$*.d
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEPFLAG) $< > $(ODIR)/$*.d
 	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
 	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
@@ -167,8 +167,8 @@ $(ODIR)/%.o: %.cpp
 	@rm -f $(ODIR)/$*.d.tmp
 
 $(ODIR)/%.o: %.cxx
-	$(CXX) $(CXXFLAGS) -c $*.cxx -o $(ODIR)/$*.o
-	$(CXX) $(CXXFLAGS) $(DEPFLAG) $*.cxx > $(ODIR)/$*.d
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEPFLAG) $< > $(ODIR)/$*.d
 	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
 	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | fmt -1 | \
@@ -177,15 +177,15 @@ $(ODIR)/%.o: %.cxx
 
 $(ODIR)/%.E: %.c
 	@rm -f $@
-	$(CC) $(CFLAGS) -E $*.c > $@
+	$(CC) $(CFLAGS) -E $< > $@
 
 $(ODIR)/%.E: %.cpp
 	@rm -f $@
-	$(CXX) $(CXXFLAGS) -E $*.cpp > $@ 
+	$(CXX) $(CXXFLAGS) -E $< > $@ 
 
 $(ODIR)/%.E: %.cxx
 	@rm -f $@
-	$(CXX) $(CXXFLAGS) -E $*.cxx > $@ 
+	$(CXX) $(CXXFLAGS) -E $< > $@ 
 
 $(LDIR)/lib%.a: $(ODIR)/%.o
 	$(AR) $@ $<

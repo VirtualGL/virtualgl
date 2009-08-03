@@ -2,8 +2,8 @@
 # Linux 32-bit and 64-bit
 ########################################
 
-CC = $(shell if [ -x /usr/bin/gcc4 ]; then echo gcc4; else echo cc; fi)
-CXX = $(shell if [ -x /usr/bin/g++4 ]; then echo g++4; else echo c++; fi)
+CC = cc
+CXX = c++
 AR = ar ruvs
 
 CFLAGS = -Wall -fpic
@@ -15,9 +15,11 @@ endif
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
+ NAFLAGS = -felf64 -DELF -D__x86_64__
 else
  ARCHFLAG =
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib
+ NAFLAGS = -felf -DELF
 endif
 
 ifeq ($(M32), yes)
@@ -32,7 +34,8 @@ else
  OPTFLAG = -O3
 endif
 
-DEFAULTJPEGLIB = medialib
+DEFAULTJPEGLIB = libjpeg
+LIBJPEG_SIMD = yes
 
 SHFLAG = -shared
 SHEXT = so

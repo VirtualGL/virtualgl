@@ -27,13 +27,11 @@ all: $(TARGETS)
 
 .PHONY: libjpeg
 libjpeg:
-	cd jpeg-6b; \
-	diff -q jconfig.vc jconfig.h || cp jconfig.vc jconfig.h; \
-	$(MAKE) -f makefile.vc; cd ..
+	cd jpeg-6b; $(MAKE); cd ..
 
 clean:
 	-$(RM) $(TARGETS) $(LTARGET) $(OBJS)
-	cd jpeg-6b; $(MAKE) -f makefile.vc clean; cd ..
+	cd jpeg-6b; $(MAKE) clean; cd ..
 
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
@@ -88,12 +86,12 @@ lib: $(LTARGET)
 
 .PHONY: libjpeg
 libjpeg:
-	cd jpeg-6b; sh configure CC=$(CC); $(MAKE); cd ..
+	cd jpeg-6b; $(MAKE); cd ..
 
 clean:
 	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
 	cd jpeg-6b; \
-	$(MAKE) clean || (sh configure CC=$(CC); $(MAKE) clean); cd ..
+	$(MAKE) clean
 
 -include $(OBJS:.o=.d)
 
