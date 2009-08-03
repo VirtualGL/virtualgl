@@ -2,7 +2,7 @@
 
 usage()
 {
-	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <lib dir> <bin dir> <Open mediaLib lib dir>"
+	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <lib dir> <bin dir>"
 	exit 1
 }
 
@@ -28,10 +28,6 @@ if [ "$5" = "" ]; then usage $0; fi
 BUILD=$5
 if [ "$6" = "" ]; then usage $0; fi
 EDIR=$6
-if [ "$JPEGLIB" = "medialib" ]; then
-	if [ "$7" = "" ]; then usage $0; fi
-	OMLDIR=$7
-fi
 
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
@@ -63,9 +59,6 @@ ln -fs /usr/bin/vglconnect $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin/vglconnect 
 if [ "$JPEGLIB" = "ipp" ]; then
 	install -m 755 /usr/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
 	install_name_tool -change libturbojpeg.dylib /opt/$APPNAME/lib/libturbojpeg.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || doexit -1
-elif [ "$JPEGLIB" = "medialib" ]; then
-	install -m 755 $OMLDIR/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
-	install_name_tool -change libopenmliblite.dylib /opt/$APPNAME/lib/libopenmliblite.dylib $TMPDIR/pkg/Package_Root/usr/bin/vglclient || doexit -1
 fi
 install -m 644 fltk/COPYING $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-FLTK.txt || doexit -1
 install -m 644 putty/LICENCE $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME/LICENSE-PuTTY.txt || doexit -1

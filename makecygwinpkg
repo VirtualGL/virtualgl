@@ -12,7 +12,7 @@ doexit()
 
 usage()
 {
-	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <bin dir> <Open mediaLib lib dir>"
+	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <bin dir>"
 	exit 1
 }
 
@@ -28,10 +28,6 @@ if [ "$5" = "" ]; then usage $0; fi
 BUILD=$5
 if [ "$6" = "" ]; then usage $0; fi
 EDIR=$6
-if [ "$JPEGLIB" = "medialib" ]; then
-	if [ "$7" = "" ]; then usage $0; fi
-	OMLDIR=$7
-fi
 
 umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
@@ -57,9 +53,6 @@ install -m 644 doc/index.html $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || do
 install -m 644 doc/*.gif $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 install -m 644 doc/*.png $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
 install -m 644 doc/*.css $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-if [ "$JPEGLIB" = "medialib" ]; then
-	install -m 644 $OMLDIR/openmliblite.dll $TMPDIR/pkg/usr/bin/ || doexit -1
-fi
 cd $TMPDIR/pkg
 tar cfj ../$APPNAME-$VERSION-$BUILD.tar.bz2 * || doexit -1
 cd $__PWD
