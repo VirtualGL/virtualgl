@@ -52,14 +52,6 @@ endif
 ifeq ($(JPEGLIB), ipp)
  JPGDIR=$$%systemroot%\\system32
  JPGLIB=turbojpeg.dll
-else
- ifeq ($(JPEGLIB), medialib)
-  JPGDIR=..\\openmliblite\\$(WBLDDIR)\\bin
-  JPGLIB=openmliblite.dll
- else
-  JPGDIR=$(WBLDDIR)\\bin
-  JPGLIB=turbojpeg.dll
- endif
 endif
 
 dist: rr diags
@@ -80,107 +72,6 @@ ifeq ($(prefix),)
  prefix=/usr/local
 endif
 
-lib64dir=lib
-ifeq ($(subplatform), 64)
- lib64dir=lib64
- ifeq ($(platform), solaris)
-  lib64dir=lib/sparcv9
- endif
- ifeq ($(platform), solx86)
-  lib64dir=lib/amd64
- endif
-endif
-
-ifeq ($(subplatform), 64)
-install: rr
-	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
-	if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi
-	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
-	$(INSTALL) -m 755 $(EDIR)/vgllogin $(prefix)/bin/vgllogin
-	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
-	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
-	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
-	if [ "$(JPEGLIB)" = "medialib" ]; then $(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient; fi
-	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT); fi
-	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT)
-	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
-	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
-	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
-	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
-	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
-	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
-	echo Install complete.
-else
-install: rr diags mesademos
-	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
-	if [ ! -d $(prefix)/lib ]; then mkdir -p $(prefix)/lib; fi
-	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
-	$(INSTALL) -m 755 $(EDIR)/vgllogin $(prefix)/bin/vgllogin
-	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
-	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
-	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
-	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
-	$(INSTALL) -m 755 $(EDIR)/vglconfig $(prefix)/bin/vglconfig
-	$(INSTALL) -m 755 $(EDIR)/vglconnect $(prefix)/bin/vglconnect
-	if [ -f $(LDIR)/libturbojpeg.$(SHEXT) ]; then $(INSTALL) -m 755 $(LDIR)/libturbojpeg.$(SHEXT) $(prefix)/lib/libturbojpeg.$(SHEXT); fi
-	$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/lib/librrfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/lib/libdlfaker.$(SHEXT)
-	$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/lib/libgefaker.$(SHEXT)
-	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
-	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
-	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
-	$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
-	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
-	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
-	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
-	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
-	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
-	echo Install complete.
-endif
-
-ifeq ($(subplatform), 64)
-uninstall:
-	$(RM) $(prefix)/bin/vgllogin
-	$(RM) $(prefix)/bin/vglrun
-	$(RM) $(prefix)/bin/vglserver_config
-	$(RM) $(prefix)/$(lib64dir)/libturbojpeg.$(SHEXT)
-	$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT)
-	$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT)
-	$(RM) $(prefix)/doc/*
-	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
-	echo Uninstall complete.
-else
-uninstall:
-	$(RM) $(prefix)/bin/vgllogin
-	$(RM) $(prefix)/bin/vglrun
-	$(RM) $(prefix)/bin/vglserver_config
-	$(RM) $(prefix)/bin/vglclient
-	$(RM) $(prefix)/bin/vglconfig
-	$(RM) $(prefix)/bin/vglconnect
-	$(RM) $(prefix)/lib/libturbojpeg.$(SHEXT)
-	$(RM) $(prefix)/lib/librrfaker.$(SHEXT)
-	$(RM) $(prefix)/lib/libdlfaker.$(SHEXT)
-	$(RM) $(prefix)/bin/tcbench
-	$(RM) $(prefix)/bin/nettest
-	$(RM) $(prefix)/doc/*
-	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
-	echo Uninstall complete.
-endif
-
-ifeq ($(platform), linux)
-
 .PHONY: rr32 diags32 mesademos32
 ifeq ($(subplatform),)
 rr32: rr
@@ -195,6 +86,98 @@ mesademos32:
 	$(MAKE) M32=yes mesademos
 endif
 
+libdir=$(shell if [ -d /usr/lib32 ]; then echo lib32; else echo lib; fi)
+ifeq ($(subplatform), 64)
+ lib64dir=$(shell if [ -d /usr/lib32 ]; then echo lib; else echo lib64; fi)
+ ifeq ($(platform), solaris)
+  lib64dir=lib/sparcv9
+ endif
+ ifeq ($(platform), solx86)
+  lib64dir=lib/amd64
+ endif
+endif
+
+install: rr rr32 diags32 mesademos32
+	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
+	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
+	if [ ! -d $(prefix)/fakelib ]; then mkdir -p $(prefix)/fakelib; fi
+	if [ "$(subplatform)" = "64" ]; then \
+		if [ ! -d $(prefix)/$(lib64dir) ]; then mkdir -p $(prefix)/$(lib64dir); fi; \
+		if [ ! -d $(prefix)/fakelib/64 ]; then mkdir -p $(prefix)/fakelib/64; fi; \
+	fi
+	if [ ! -d $(prefix)/$(libdir) ]; then mkdir -p $(prefix)/$(libdir); fi
+	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
+	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
+	$(INSTALL) -m 755 $(EDIR)/vglconfig $(prefix)/bin/vglconfig
+	$(INSTALL) -m 755 $(EDIR)/vglconnect $(prefix)/bin/vglconnect
+	$(INSTALL) -m 755 $(EDIR)/vgllogin $(prefix)/bin/vgllogin
+	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
+	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
+	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
+	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
+	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
+	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
+	$(INSTALL) -m 755 $(EDIR32)/glxspheres $(prefix)/bin/glxspheres
+	$(INSTALL) -m 755 $(LDIR32)/librrfaker.$(SHEXT) $(prefix)/$(libdir)/librrfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR32)/libdlfaker.$(SHEXT) $(prefix)/$(libdir)/libdlfaker.$(SHEXT)
+	$(INSTALL) -m 755 $(LDIR32)/libgefaker.$(SHEXT) $(prefix)/$(libdir)/libgefaker.$(SHEXT)
+	ln -fs $(prefix)/$(libdir)/librrfaker.so $(prefix)/fakelib/libGL.so
+	if [ "$(subplatform)" = "64" ]; then \
+		$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT); \
+		$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT); \
+		$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT); \
+		$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64; \
+		ln -fs $(prefix)/$(lib64dir)/librrfaker.so $(prefix)/fakelib/64/libGL.so; \
+	fi
+	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
+	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
+	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
+	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
+	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
+	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
+	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
+	$(INSTALL) -m 644 rr/rrtransport.h $(prefix)/include
+	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
+	echo Install complete.
+
+uninstall:
+	$(RM) $(prefix)/bin/vglclient
+	$(RM) $(prefix)/bin/vglconfig
+	$(RM) $(prefix)/bin/vglconnect
+	$(RM) $(prefix)/bin/vgllogin
+	$(RM) $(prefix)/bin/vglrun
+	$(RM) $(prefix)/bin/vglgenkey
+	$(RM) $(prefix)/bin/vglserver_config
+	$(RM) $(prefix)/bin/tcbench
+	$(RM) $(prefix)/bin/nettest
+	$(RM) $(prefix)/bin/glxinfo
+	$(RM) $(prefix)/bin/glxspheres
+	$(RM) $(prefix)/$(libdir)/librrfaker.$(SHEXT)
+	$(RM) $(prefix)/$(libdir)/libdlfaker.$(SHEXT)
+	$(RM) $(prefix)/$(libdir)/libgefaker.$(SHEXT)
+	if [ "$(subplatform)" = "64" ]; then \
+		$(RM) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT); \
+		$(RM) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT); \
+		$(RM) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT); \
+		$(RM) $(prefix)/bin/glxspheres64; \
+		if [ -d $(prefix)/fakelib/64 ]; then \
+			$(RM) $(prefix)/fakelib/64/*;  rmdir $(prefix)/fakelib/64; \
+		fi; \
+	fi
+	if [ -d $(prefix)/fakelib ]; then \
+		$(RM) $(prefix)/fakelib/*;  rmdir $(prefix)/fakelib; \
+	fi
+	$(RM) $(prefix)/doc/*
+	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
+	$(RM) $(prefix)/include/rrtransport.h
+	$(RM) $(prefix)/include/rr.h
+	echo Uninstall complete.
+
+ifeq ($(platform), linux)
+
 dist: rr rr32 diags32 mesademos mesademos32
 	TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
 	mkdir -p $$TMPDIR/RPMS; \
@@ -204,8 +187,7 @@ dist: rr rr32 diags32 mesademos mesademos32
 		--define "_topdir $$TMPDIR" --define "_version $(VERSION)"\
 		--define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" \
-		--define "_libdir32 $(LDIR32)" --define "_omlibdir $(OMLDIR)" \
-		--define "_omlibdir32 $(OMLDIR32)" --target $(RPMARCH) \
+		--define "_libdir32 $(LDIR32)" --target $(RPMARCH) \
 		rr.spec.$(JPEGLIB); \
 	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rm -rf $$TMPDIR
