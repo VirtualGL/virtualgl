@@ -16,9 +16,11 @@ endif
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
  LDFLAGS = -L/usr/X11R6/lib64
+ NAFLAGS = -fwin32 -DWIN32 -D__x86_64__
 else
  ARCHFLAG =
  LDFLAGS = -L/usr/X11R6/lib
+ NAFLAGS = -fwin32 -DWIN32
 endif
 
 ifeq ($(M32), yes)
@@ -28,11 +30,13 @@ endif
 
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -ggdb
+ NAFLAGS := $(NAFLAGS) -g
 else
- OPTFLAG = -O2
+ OPTFLAG = -O3
 endif
 
-DEFAULTJPEGLIB = medialib
+DEFAULTJPEGLIB = libjpeg
+LIBJPEG_SIMD = yes
 
 SHFLAG = -shared
 SHEXT = so
