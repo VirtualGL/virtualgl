@@ -72,16 +72,13 @@ ifeq ($(prefix),)
  prefix=/usr/local
 endif
 
-.PHONY: rr32 diags32 mesademos32
+.PHONY: rr32 mesademos32
 ifeq ($(subplatform),)
 rr32: rr
-diags32: diags
 mesademos32: mesademos
 else
 rr32:
 	$(MAKE) M32=yes rr
-diags32:
-	$(MAKE) M32=yes diags
 mesademos32:
 	$(MAKE) M32=yes mesademos
 endif
@@ -97,7 +94,7 @@ ifeq ($(subplatform), 64)
  endif
 endif
 
-install: rr rr32 diags32 mesademos32
+install: rr rr32 diags mesademos mesademos32
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
 	if [ ! -d $(prefix)/fakelib ]; then mkdir -p $(prefix)/fakelib; fi
@@ -121,13 +118,13 @@ install: rr rr32 diags32 mesademos32
 	$(INSTALL) -m 755 $(LDIR32)/librrfaker.$(SHEXT) $(prefix)/$(libdir)/librrfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR32)/libdlfaker.$(SHEXT) $(prefix)/$(libdir)/libdlfaker.$(SHEXT)
 	$(INSTALL) -m 755 $(LDIR32)/libgefaker.$(SHEXT) $(prefix)/$(libdir)/libgefaker.$(SHEXT)
-	ln -fs $(prefix)/$(libdir)/librrfaker.so $(prefix)/fakelib/libGL.so
+	ln -fs ../$(libdir)/librrfaker.so $(prefix)/fakelib/libGL.so
 	if [ "$(subplatform)" = "64" ]; then \
 		$(INSTALL) -m 755 $(LDIR)/librrfaker.$(SHEXT) $(prefix)/$(lib64dir)/librrfaker.$(SHEXT); \
 		$(INSTALL) -m 755 $(LDIR)/libdlfaker.$(SHEXT) $(prefix)/$(lib64dir)/libdlfaker.$(SHEXT); \
 		$(INSTALL) -m 755 $(LDIR)/libgefaker.$(SHEXT) $(prefix)/$(lib64dir)/libgefaker.$(SHEXT); \
 		$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64; \
-		ln -fs $(prefix)/$(lib64dir)/librrfaker.so $(prefix)/fakelib/64/libGL.so; \
+		ln -fs ../../$(lib64dir)/librrfaker.so $(prefix)/fakelib/64/libGL.so; \
 	fi
 	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
 	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
@@ -178,7 +175,7 @@ uninstall:
 
 ifeq ($(platform), linux)
 
-dist: rr rr32 diags32 mesademos mesademos32
+dist: rr rr32 diags mesademos mesademos32
 	TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`; \
 	mkdir -p $$TMPDIR/RPMS; \
 	ln -fs `pwd` $$TMPDIR/BUILD; \
@@ -192,7 +189,7 @@ dist: rr rr32 diags32 mesademos mesademos32
 	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rm -rf $$TMPDIR
 
-deb: rr rr32 diags32 mesademos mesademos32
+deb: rr rr32 diags mesademos mesademos32
 	sh makedpkg $(APPNAME) $(JPEGLIB) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
 
 srpm:
@@ -261,10 +258,10 @@ dist: rr diags mesademos
 endif
 
 .PHONY: tarball
-tarball: rr diags mesademos
+tarball:
 	rm -rf $(BLDDIR)/fakeroot
 	rm -f $(BLDDIR)/$(APPNAME).tar.gz
-	$(MAKE) prefix=$(BLDDIR)/fakeroot install
+	$(MAKE) prefix=$(BLDDIR)/fakeroot/VirtualGL-$(VERSION) install
 	cd $(BLDDIR)/fakeroot; \
 	tar cf ../$(APPNAME).tar *
 	gzip $(BLDDIR)/$(APPNAME).tar
