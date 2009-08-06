@@ -80,7 +80,7 @@ class pbwin
 		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);
 		void sendx11(GLint, bool, bool, bool, int, bool srfallback=false);
-		void sendplugin(GLint, bool, bool, int);
+		void sendplugin(GLint, bool, bool, bool, int);
 
 		bool _force;
 		rrcs _mutex;

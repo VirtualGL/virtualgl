@@ -31,7 +31,7 @@ static void *loadsym(void *dllhnd, const char *symbol)
 	return sym;
 }
 
-rrplugin::rrplugin(char *name)
+rrplugin::rrplugin(Display *dpy, Window win, char *name)
 {
 	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
 	const char *err=NULL;
@@ -53,7 +53,7 @@ rrplugin::rrplugin(char *name)
 	_RRTransSendFrame=(_RRTransSendFrameType)loadsym(dllhnd, "RRTransSendFrame");
 	_RRTransDestroy=(_RRTransDestroyType)loadsym(dllhnd, "RRTransDestroy");
 	_RRTransGetError=(_RRTransGetErrorType)loadsym(dllhnd, "RRTransGetError");
-	if(!(handle=_RRTransInit(&fconfig))) _throw(_RRTransGetError());
+	if(!(handle=_RRTransInit(dpy, win, &fconfig))) _throw(_RRTransGetError());
 }
 
 rrplugin::~rrplugin(void)
@@ -93,9 +93,9 @@ RRFrame *rrplugin::getframe(int width, int height, bool stereo, bool spoil)
 	return ret;
 }
 
-void rrplugin::sendframe(RRFrame *frame)
+void rrplugin::sendframe(RRFrame *frame, bool sync)
 {
 	rrcs::safelock l(mutex);
-	int ret=_RRTransSendFrame(handle, frame);
+	int ret=_RRTransSendFrame(handle, frame, sync);
 	if(ret<0) _throw(_RRTransGetError());
 }

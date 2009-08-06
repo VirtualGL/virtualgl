@@ -15,17 +15,18 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include "rrtransport.h"
-#include "rrdisplayclient.h"
+#include "rrblitter.h"
 
 static rrerror err;
 char errstr[MAXSTR];
 
 static FakerConfig *_fconfig=NULL;
+static Display *_dpy=NULL;
 static Window _win=0;
 
 FakerConfig *fconfig_instance(void) {return _fconfig;}
 
-/* This just wraps the rrdisplayclient class in order to demonstrate how to
+/* This just wraps the rrblitter class in order to demonstrate how to
    build a custom transport plugin for VGL and also to serve as a sanity
    check for the plugin API */
 
@@ -37,8 +38,9 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 	try
 	{
 		_fconfig=fconfig;
+		_dpy=dpy;
 		_win=win;
-		handle=(void *)(new rrdisplayclient());
+		handle=(void *)(new rrblitter());
 	}
 	catch(rrerror &e)
 	{
@@ -49,18 +51,7 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 
 int RRTransConnect(void *handle, char *receiver_name, int port)
 {
-	int ret=0;
-	try
-	{
-		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
-		if(!rrdpy) _throw("Invalid handle");
-		rrdpy->connect(receiver_name, port);
-	}
-	catch(rrerror &e)
-	{
-		err=e;  return -1;
-	}
-	return ret;
+	return 0;
 }
 
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
@@ -68,25 +59,18 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 {
 	try
 	{
-		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
-		if(!rrdpy) _throw("Invalid handle");
+		rrblitter *rrb=(rrblitter *)handle;
+		if(!rrb) _throw("Invalid handle");
 		RRFrame *frame=new RRFrame;
 		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
-		int compress=_fconfig->compress;
-		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
-		else compress=RRCOMP_JPEG;
-		int flags=RRBMP_BOTTOMUP;
-		if(littleendian() && compress!=RRCOMP_RGB) flags|=RRBMP_BGR;
-		rrframe *f=rrdpy->getbitmap(width, height, 3, flags, (bool)stereo,
-			(bool)spoil);
-		f->_h.compress=compress;
+		rrfb *f=rrb->getbitmap(_dpy, _win, width, height, (bool)spoil);
+		f->_flags|=RRBMP_BOTTOMUP;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;
 		frame->h=f->_h.frameh;
 		frame->pitch=f->_pitch;
 		frame->bits=f->_bits;
-		frame->rbits=f->_rbits;
 		for(int i=0; i<RRTRANS_FORMATOPT; i++)
 		{
 			if(rrtrans_bgr[i]==(f->_flags&RRBMP_BGR? 1:0)
@@ -107,9 +91,9 @@ int RRTransFrameReady(void *handle)
 	int ret=-1;
 	try
 	{
-		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
-		if(!rrdpy) _throw("Invalid handle");
-		ret=(int)rrdpy->frameready();
+		rrblitter *rrb=(rrblitter *)handle;
+		if(!rrb) _throw("Invalid handle");
+		ret=(int)rrb->frameready();
 	}
 	catch(rrerror &e)
 	{
@@ -123,15 +107,12 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	int ret=0;
 	try
 	{
-		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
-		if(!rrdpy) _throw("Invalid handle");
-		rrframe *f;
-		if(!frame || (f=(rrframe *)frame->opaque)==NULL)
+		rrblitter *rrb=(rrblitter *)handle;
+		if(!rrb) _throw("Invalid handle");
+		rrfb *f;
+		if(!frame || (f=(rrfb *)frame->opaque)==NULL)
 			_throw("Invalid frame handle");
-		f->_h.qual=_fconfig->qual;
-		f->_h.subsamp=_fconfig->subsamp;
-		f->_h.winid=_win;
-		rrdpy->sendframe(f);
+		rrb->sendframe(f, (bool)sync);
 		delete frame;
 	}
 	catch(rrerror &e)
@@ -146,9 +127,9 @@ int RRTransDestroy(void *handle)
 	int ret=0;
 	try
 	{
-		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
-		if(!rrdpy) _throw("Invalid handle");
-		delete rrdpy;
+		rrblitter *rrb=(rrblitter *)handle;
+		if(!rrb) _throw("Invalid handle");
+		delete rrb;
 	}
 	catch(rrerror &e)
 	{

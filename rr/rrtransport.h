@@ -15,6 +15,7 @@
 #ifndef __RRTRANSPORT_H
 #define __RRTRANSPORT_H
 
+#include <X11/Xlib.h>
 #include "rr.h"
 
 // Pixel formats
@@ -51,10 +52,6 @@ typedef struct _RRFrame
   /* The number of bytes in each pixel row of the allocated framebuffer */
   int pitch;
 
-  /* The window ID into which this frame should be drawn.  This is set by
-     VirtualGL prior to calling RRTransSendFrame() */
-  unsigned int winid;
-
   /* A pointer to a data structure used by the plugin to represent the
      framebuffer.  No user serviceable parts inside. */
   void *opaque;
@@ -65,6 +62,8 @@ typedef struct _RRFrame
 #pragma pack()
 #endif
 
+/* THIS API IS SUBJECT TO CHANGE */
+
 #ifndef RRTRANS_NOPROTOTYPES
 
 #ifdef __cplusplus
@@ -72,10 +71,17 @@ extern "C" {
 #endif
 
 void *
-   RRTransInit (FakerConfig *fconfig);
+   RRTransInit (Display *dpy, Window win, FakerConfig *fconfig);
 /*
    Initialize an instance of the transport plugin
 
+   dpy (IN) = a handle to the 2D X server display connection.  The plugin can
+              use this handle to send the 3D pixels to the 2D X server using
+              X11 functions, if it so desires.
+   win (IN) = a handle to the X window into which the application intends the
+              3D pixels to be rendered.  The plugin can use this handle to
+              deliver the 3D pixels into the window using X11 functions, if it
+              so desires.
    fconfig (IN) = pointer to VirtualGL's faker configuration structure, which
                   can be read or modified by the plugin
 
@@ -154,7 +160,7 @@ int
 */
 
 int
-   RRTransSendFrame (void *handle, RRFrame *frame);
+   RRTransSendFrame (void *handle, RRFrame *frame, int sync);
 /*
    Send the contents of a frame buffer to the receiver
 
@@ -163,6 +169,9 @@ int
                  RRTransInit())
    frame (IN) = pointer to an RRFrame structure obtained in a previous call to
                 RRTransGetFrame()
+   sync (IN) = if this parameter is set to 1, then this frame must be delivered
+               synchronously to the client in order to maintain strict GLX
+               conformance
 
    RETURN VALUE:
    This function returns 0 on success or -1 on failure.  RRTransGetError() can

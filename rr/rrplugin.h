@@ -15,11 +15,11 @@
 #include "rrtransport.h"
 #include "rrmutex.h"
 
-typedef void* (*_RRTransInitType)(FakerConfig *);
+typedef void* (*_RRTransInitType)(Display *, Window, FakerConfig *);
 typedef int (*_RRTransConnectType)(void *, char *, int);
 typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int, int);
 typedef int (*_RRTransFrameReadyType)(void *);
-typedef int (*_RRTransSendFrameType)(void *, RRFrame *);
+typedef int (*_RRTransSendFrameType)(void *, RRFrame *, int);
 typedef int (*_RRTransDestroyType)(void *);
 typedef const char* (*_RRTransGetErrorType)(void);
 
@@ -27,13 +27,13 @@ class rrplugin
 {
 	public:
 
-		rrplugin(char *);
+		rrplugin(Display *, Window, char *);
 		~rrplugin(void);
 		void connect(char *, int);
 		void destroy(void);
 		int frameready(void);
 		RRFrame *getframe(int, int, bool, bool);
-		void sendframe(RRFrame *);
+		void sendframe(RRFrame *, bool);
 
 	private:
 

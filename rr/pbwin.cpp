@@ -390,7 +390,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	if(strlen(fconfig.transport)>0)
 	{
-		sendplugin(drawbuf, spoillast, dostereo, stereomode);
+		sendplugin(drawbuf, spoillast, sync, dostereo, stereomode);
 		return;
 	}
 
@@ -415,8 +415,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	}
 }
 
-void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool dostereo,
-	int stereomode)
+void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
+	bool dostereo, int stereomode)
 {
 	rrframe f;
 	int pbw=_pb->width(), pbh=_pb->height();
@@ -424,7 +424,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool dostereo,
 
 	if(!_plugin)
 	{
-		_plugin=new rrplugin(fconfig.transport);
+		_plugin=new rrplugin(_windpy, _win, fconfig.transport);
 		_plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(_windpy), fconfig.port);
 	}
@@ -460,10 +460,9 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool dostereo,
 			readpixels(0, 0, frame->w, frame->pitch, frame->h, glformat,
 				rrtrans_ps[frame->format], frame->rbits, reye(drawbuf), dostereo);
 	}
-	frame->winid=_win;
 	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
 	if(fconfig.logo) f.addlogo();
-	_plugin->sendframe(frame);
+	_plugin->sendframe(frame, sync);
 }
 
 void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,

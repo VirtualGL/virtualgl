@@ -79,7 +79,9 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/rrfakerut.o \
         $(ODIR)/rrframeut.o \
         $(ODIR)/dlfakerut.o \
-        $(LDIR)/libGLdlfakerut.o
+        $(ODIR)/libGLdlfakerut.o \
+        $(ODIR)/testplugin.o \
+        $(ODIR)/testplugin2.o
 
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o $(ODIR)/gefaker.o $(ODIR)/vglconfig.o
 
@@ -104,8 +106,9 @@ ifneq ($(platform), cygwin)
  ifneq ($(platform), osx)
   ifneq ($(platform), osxx86)
    TARGETS :=  $(LDIR)/librrfaker.$(SHEXT) $(LDIR)/libvgltrans_test.$(SHEXT) \
-     $(LDIR)/libdlfaker.$(SHEXT) $(LDIR)/libgefaker.$(SHEXT) \
-     $(EDIR)/vglconfig $(EDIR)/vglrun $(EDIR)/vgllogin $(TARGETS)
+     $(LDIR)/libvgltrans_test2.$(SHEXT) $(LDIR)/libdlfaker.$(SHEXT) \
+     $(LDIR)/libgefaker.$(SHEXT) $(EDIR)/vglconfig $(EDIR)/vglrun \
+     $(EDIR)/vgllogin $(TARGETS)
   endif
  endif
 endif
@@ -194,6 +197,11 @@ $(LDIR)/libvgltrans_test.$(SHEXT): $(ODIR)/testplugin.o \
 	$(ODIR)/rrdisplayclient.o $(RRDEP)
 	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/testplugin.o \
 		$(ODIR)/rrdisplayclient.o $(RRLIB)
+
+$(LDIR)/libvgltrans_test2.$(SHEXT): $(ODIR)/testplugin2.o \
+	$(ODIR)/rrblitter.o $(RRDEP)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(ODIR)/testplugin2.o \
+		$(ODIR)/rrblitter.o $(RRLIB)
 
 ##########################################################################
 endif
