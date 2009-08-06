@@ -131,7 +131,7 @@ one or more of the necessary 32-bit prerequisites, then:
      OpenGL SDK
      Mac OS X SDK
 
--- NASM (http://www.nasm.us/) 0.99 or later (Intel-based Macs only)
+-- NASM (http://www.nasm.us/) 0.98 or later (Intel-based Macs only)
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
 
