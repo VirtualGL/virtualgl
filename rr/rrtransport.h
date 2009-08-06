@@ -98,9 +98,15 @@ int
                         to which to connect.  This is typically the TCP/IP
                         address or hostname of the client machine, but this
                         parameter may be used for other purposes as well.
+                        VirtualGL sets this parameter to the value of the
+                        VGL_CLIENT environment variable or, if VGL_CLIENT is
+                        unset, to the display string of the 2D X server.
    port (IN) = the receiver port to which to connect.  This is typically
                the TCP port on which the receiver is listening, but this
-               parameter may be used for other purposes as well.
+               parameter may be used for other purposes as well.  VirtualGL
+               sets this parameter to the value of the "port" variable in the
+               faker configuration structure.  See the User's Guide for more
+               information on how that variable is set.
 
    RETURN VALUE:
    This function returns 0 on success or -1 on failure.  RRTransGetError() can
