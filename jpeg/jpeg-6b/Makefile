@@ -334,15 +334,25 @@ OBJS := $(LOBJS) \
 all: $(TARGETS)
 
 clean:
-	-$(RM) $(TARGETS) $(OBJS)
+	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
 
 -include $(OBJS:.o=.d)
 
 ifeq ($(LIBJPEG_SIMD), yes)
 SIMD_HDRS := $(wildcard simd/*.inc)
 $(SIMD_OBJS): $(SIMD_HDRS)
-endif
 
+$(ODIR)/jccolss2-64.o: jcclrss2-64.asm
+$(ODIR)/jdcolss2-64.o: jdclrss2-64.asm
+$(ODIR)/jdmerss2-64.o: jdmrgss2-64.asm
+
+$(ODIR)/jccolmmx.o: jcclrmmx.asm
+$(ODIR)/jccolss2.o: jcclrss2.asm
+$(ODIR)/jdcolmmx.o: jdclrmmx.asm
+$(ODIR)/jdcolss2.o: jdclrss2.asm
+$(ODIR)/jdmermmx.o: jdmrgmmx.asm
+$(ODIR)/jdmerss2.o: jdmrgss2.asm
+endif
 
 $(LDIR)/libjpeg.a: $(LOBJS)
 	$(AR) $@ $^
