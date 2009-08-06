@@ -30,6 +30,7 @@ _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LD
 
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -ggdb
+ NAFLAGS := $(NAFLAGS) -g
 else
  OPTFLAG = -O3
 endif

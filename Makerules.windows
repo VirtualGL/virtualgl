@@ -15,12 +15,13 @@ CDEFINES = -DWIN32 -D_CRT_SECURE_NO_DEPRECATE
 ifeq ($(USESSL), yes)
  CDEFINES := $(CDEFINES) -DUSESSL
 endif
+NAFLAGS = -fwin32 -DWIN32
 ifeq ($(DEBUG), yes)
  OPTFLAG = -Od -MTd -Zi
+ NAFLAGS := $(NAFLAGS) -g
 else
  OPTFLAG = -O2 -MT
 endif
-NAFLAGS = -fwin32 -DWIN32
 
 DEFAULTJPEGLIB = libjpeg
 LIBJPEG_SIMD = yes
