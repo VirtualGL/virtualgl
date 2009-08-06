@@ -226,19 +226,18 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
 	if(redsize<0)
 	{
-		if(buffersize>=0 && buffersize<24) redsize=buffersize;  else redsize=8;
+		if(buffersize>=0 && c_class==PseudoColor && depth==8) redsize=buffersize;
+		else redsize=8;
 	}
 	if(greensize<0)
 	{
-		if(buffersize>=0 && buffersize<24) greensize=buffersize;  else greensize=8;
+		if(buffersize>=0 && c_class==PseudoColor && depth==8) greensize=buffersize;
+		else greensize=8;
 	}
 	if(bluesize<0)
 	{
-		if(buffersize>=0 && buffersize<24) bluesize=buffersize;  else bluesize=8;
-	}
-	if(buffersize>=24)
-	{
-		glxattribs[j++]=GLX_BUFFER_SIZE;  glxattribs[j++]=buffersize;
+		if(buffersize>=0 && c_class==PseudoColor && depth==8) bluesize=buffersize;
+		else bluesize=8;
 	}
 	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
 	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
