@@ -161,9 +161,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
 /usr/lib64/libgefaker.so
-/usr/include/rrtransport.h
-/usr/include/rr.h
 /opt/%{name}/bin/glxspheres64
 %endif
+/usr/include/rrtransport.h
+/usr/include/rr.h
 
 %changelog
