@@ -11,10 +11,9 @@ Fixed an issue in vglserver_config whereby the device permissions were not
 being set correctly on SuSE Linux Enterprise Desktop 11.
 -------------------------------------------------------------------------------
 [3]
-VGL should now properly handle the case in which an app requests a true color
-visual by specifying GLX_BUFFER_SIZE but not specifying GLX_RED_SIZE,
-GLX_GREEN_SIZE, or GLX_BLUE_SIZE.  Specifically, this allows the Second Life
-SnowGlobe client to run properly in VGL and WINE.
+VGL should now properly ignore GLX_BUFFER_SIZE if an application attempts to
+specify it when requesting a true color visual.  Specifically, this allows the
+Second Life SnowGlobe client to run properly in VGL and WINE.
 -------------------------------------------------------------------------------
 
 
