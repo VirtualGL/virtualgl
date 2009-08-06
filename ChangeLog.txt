@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes since 2.1.3.1
+Significant changes since 2.1.4
 ===============================================================================
 [1]
 Added option which, when enabled, will cause VirtualGL to display a logo in the
@@ -7,12 +7,14 @@ bottom right-hand corner of the 3D window.  This is meant as a debugging tool
 to allow users to determine whether or not VirtualGL is active.
 -------------------------------------------------------------------------------
 [2]
-Support for encrypting the VGL Image Transport with OpenSSL has been removed
-from the default build of VirtualGL.  It was only a marginally useful feature,
-because VirtualGL also has the ability to tunnel the VGL Image Transport 
-through SSh, and the OpenSSL feature required a great deal of maintenance
-(to keep abreast of the latest OpenSSL security fixes, etc.)  OpenSSL support
-can easily be re-added by building VirtualGL from source (see BUILDING.txt.)
+Support for encrypting the VGL Transport with OpenSSL has been removed from the
+default build and distribution packages.  It was only a marginally useful
+feature, because VirtualGL also has the ability to tunnel the VGL Transport
+through SSh.  It was necessary to maintain our own static OpenSSL libraries on
+Linux in order to provide a version of VirtualGL that was compatible across all
+Linux platforms, and this required us to keep abreast of the latest OpenSSL
+security fixes, etc.  OpenSSL support can easily be re-added by building
+VirtualGL from source (see BUILDING.txt.)
 -------------------------------------------------------------------------------
 [3]
 Generally improved the software gamma correction heuristics.  Previously,
@@ -27,6 +29,19 @@ application still ends up with a non-gamma-corrected visual, then the
 application is specifically trying to avoid gamma correction.  Thus, VGL does
 not enable software gamma correction in this case.
 -------------------------------------------------------------------------------
+[4]
+Added a framework for creating generic image transport plugins.
+-------------------------------------------------------------------------------
+[5]
+Removed support for the proprietary Sun Ray plugin, since that plugin is no
+longer available from Sun.
+-------------------------------------------------------------------------------
+[6]
+For Linux, Mac/Intel, and Windows systems, VirtualGL is no longer using
+TurboJPEG or the proprietary Intel Performance Primitives.  Instead, VGL v2.2
+uses libjpeg/SIMD, a fully open source vector-accelerated JPEG codec developed
+in conjunction with the TigerVNC Project.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -38,10 +53,9 @@ expected" error when restricting framebuffer device access to the vglusers
 group.
 -------------------------------------------------------------------------------
 [2]
-VGL should now properly handle the case in which an app requests a true color
-visual by specifying GLX_BUFFER_SIZE but not specifying GLX_RED_SIZE,
-GLX_GREEN_SIZE, or GLX_BLUE_SIZE.  Specifically, this allows the Second Life
-SnowGlobe client to run properly in VGL and WINE.
+VGL should now properly ignore GLX_BUFFER_SIZE if an application attempts to
+specify it when requesting a true color visual.  Specifically, this allows the
+Second Life SnowGlobe client to run properly in VGL and WINE.
 -------------------------------------------------------------------------------
 
 
