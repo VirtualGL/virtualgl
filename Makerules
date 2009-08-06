@@ -112,9 +112,7 @@ ifeq ($(JPEGLIB),)
  JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
-OMEDIR := $(EDIR)
 OMLDIR := $(LDIR)
-OMLDIR32 := $(LDIR32)
 ifeq ($(JPEGLIB), medialib)
  CFLAGS := $(CFLAGS) -DUSEMEDIALIB
  CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
@@ -123,14 +121,10 @@ ifeq ($(JPEGLIB), medialib)
    ## Open mediaLib
    ifneq ($(DISTRO),)
     OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/$(DISTRO)
-    OMBLDDIR32 = $(TOPDIR)/../openmliblite/$(platform)/$(DISTRO)
    else
     OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)
-    OMBLDDIR32 = $(TOPDIR)/../openmliblite/$(platform)
    endif
-   OMEDIR = $(OMBLDDIR)/$(ENAME)
    OMLDIR = $(OMBLDDIR)/$(LNAME)
-   OMLDIR32 = $(OMBLDDIR32)/$(LNAME)
    ifeq ($(platform), windows)
     MLIB = $(OMLDIR)/openmliblite.lib
    else

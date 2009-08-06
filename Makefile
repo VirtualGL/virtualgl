@@ -193,7 +193,7 @@ dist: rr rr32 diags32 mesademos mesademos32
 	rm -rf $$TMPDIR
 
 deb: rr rr32 diags32 mesademos mesademos32
-	sh makedpkg $(APPNAME) $(JPEGLIB) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32) $(OMLDIR) $(OMLDIR32)
+	sh makedpkg $(APPNAME) $(JPEGLIB) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
 
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
@@ -202,13 +202,10 @@ srpm:
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
 	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
-	cp openmliblite.tar.gz $(BLDDIR)/rpms/SOURCES/openmliblite-vgl$(VERSION).tar.gz
 	cat rr.spec.$(JPEGLIB) | sed s/%{_version}/$(VERSION)/g \
 		| sed s/%{_build}/$(BUILD)/g | sed s/%{_blddir}/%{_tmppath}/g \
 		| sed s/%{_bindir32}/linux\\/bin/g | sed s/%{_bindir}/linux64\\/bin/g \
 		| sed s/%{_libdir32}/linux\\/lib/g | sed s/%{_libdir}/linux64\\/lib/g \
-		| sed s/%{_omlibdir32}/..\\/openmliblite\\/linux\\/lib/g \
-		| sed s/%{_omlibdir}/..\\/openmliblite\\/linux64\\/lib/g \
 		| sed s/#--\>//g >$(BLDDIR)/virtualgl.spec
 	rpmbuild -bs --define "_topdir `pwd`/$(BLDDIR)/rpms" --target $(RPMARCH) $(BLDDIR)/virtualgl.spec
 	mv $(BLDDIR)/rpms/SRPMS/$(APPNAME)-$(VERSION)-$(BUILD).src.rpm $(BLDDIR)/$(APPNAME).src.rpm
@@ -218,7 +215,7 @@ endif
 
 ifeq ($(platform), cygwin)
 dist: rr diags mesademos
-	sh makecygwinpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(OMEDIR)
+	sh makecygwinpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
 
 ifeq ($(platform), solaris)
@@ -260,7 +257,7 @@ sunpkg: rr diags mesademos
 
 ifeq ($(platform), osxx86)
 dist: rr diags mesademos
-	sh makemacpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(OMLDIR)
+	sh makemacpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
 
 .PHONY: tarball
