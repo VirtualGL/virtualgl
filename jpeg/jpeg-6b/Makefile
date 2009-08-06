@@ -1,5 +1,6 @@
 vpath %.c simd
 vpath %.asm simd
+ONAME := obj/libjpeg
 
 TOPDIR = ../..
 include $(TOPDIR)/Makerules
@@ -133,6 +134,7 @@ OBJS := $(LOBJS) \
         $(ODIR)/djpeg.obj \
         $(ODIR)/jpegtran.obj \
         $(ODIR)/rdbmp.obj \
+        $(ODIR)/rdcolmap.obj \
         $(ODIR)/rdgif.obj \
         $(ODIR)/rdjpgcom.obj \
         $(ODIR)/rdppm.obj \
@@ -314,6 +316,7 @@ OBJS := $(LOBJS) \
         $(ODIR)/djpeg.o \
         $(ODIR)/jpegtran.o \
         $(ODIR)/rdbmp.o \
+        $(ODIR)/rdcolmap.o \
         $(ODIR)/rdgif.o \
         $(ODIR)/rdjpgcom.o \
         $(ODIR)/rdppm.o \
