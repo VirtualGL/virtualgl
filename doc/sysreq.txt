@@ -48,15 +48,6 @@
 	|
 #OPT: hiCol=first
 
-** Linux/Itanium
-
-VirtualGL should build and run on Itanium Linux, but it has not been thoroughly
-tested.  [[http://sourceforge.net/users/dcommander][Contact us]] if you
-encounter any difficulties.  A pre-built TurboJPEG binary package is not
-available for Linux/Itanium, so it will be necessary to build TurboJPEG from
-source using the Intel Integrated Performance Primitives for Itanium
-processors.
-
 ** Solaris/x86
 
 || || Server || Client ||
