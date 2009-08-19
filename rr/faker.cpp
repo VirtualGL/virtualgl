@@ -655,6 +655,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	pbuffer *pb;
 	GLXDrawable read=src, draw=dst;  bool srcpm=false, dstpm=false;
 
+	if(src==0 || dst==0) return BadDrawable;
+
 	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
 	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
 
