@@ -94,6 +94,8 @@ ifeq ($(subplatform), 64)
  endif
 endif
 
+docdir=$(prefix)/doc/$(APPNAME)-$(VERSION)
+
 install: rr rr32 diags mesademos mesademos32
 	if [ ! -d $(prefix)/bin ]; then mkdir -p $(prefix)/bin; fi
 	if [ ! -d $(prefix)/include ]; then mkdir -p $(prefix)/include; fi
@@ -103,7 +105,7 @@ install: rr rr32 diags mesademos mesademos32
 		if [ ! -d $(prefix)/fakelib/64 ]; then mkdir -p $(prefix)/fakelib/64; fi; \
 	fi
 	if [ ! -d $(prefix)/$(libdir) ]; then mkdir -p $(prefix)/$(libdir); fi
-	if [ ! -d $(prefix)/doc ]; then mkdir -p $(prefix)/doc; fi
+	if [ ! -d $(docdir) ]; then mkdir -p $(docdir); fi
 	$(INSTALL) -m 755 $(EDIR)/vglclient $(prefix)/bin/vglclient
 	$(INSTALL) -m 755 $(EDIR)/vglconfig $(prefix)/bin/vglconfig
 	$(INSTALL) -m 755 $(EDIR)/vglconnect $(prefix)/bin/vglconnect
@@ -126,16 +128,16 @@ install: rr rr32 diags mesademos mesademos32
 		$(INSTALL) -m 755 $(EDIR)/glxspheres $(prefix)/bin/glxspheres64; \
 		ln -fs ../../$(lib64dir)/librrfaker.so $(prefix)/fakelib/64/libGL.so; \
 	fi
-	$(INSTALL) -m 644 LGPL.txt $(prefix)/doc
-	$(INSTALL) -m 644 fltk/COPYING $(prefix)/doc/LICENSE-FLTK.txt
-	$(INSTALL) -m 644 putty/LICENCE $(prefix)/doc/LICENSE-PuTTY.txt
-	$(INSTALL) -m 644 x11windows/xauth.license $(prefix)/doc/LICENSE-xauth.txt
-	$(INSTALL) -m 644 LICENSE.txt $(prefix)/doc
-	$(INSTALL) -m 644 ChangeLog.txt $(prefix)/doc
-	$(INSTALL) -m 644 doc/index.html $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.gif $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.png $(prefix)/doc
-	$(INSTALL) -m 644 doc/*.css $(prefix)/doc
+	$(INSTALL) -m 644 LGPL.txt $(docdir)
+	$(INSTALL) -m 644 fltk/COPYING $(docdir)/LICENSE-FLTK.txt
+	$(INSTALL) -m 644 putty/LICENCE $(docdir)/LICENSE-PuTTY.txt
+	$(INSTALL) -m 644 x11windows/xauth.license $(docdir)/LICENSE-xauth.txt
+	$(INSTALL) -m 644 LICENSE.txt $(docdir)
+	$(INSTALL) -m 644 ChangeLog.txt $(docdir)
+	$(INSTALL) -m 644 doc/index.html $(docdir)
+	$(INSTALL) -m 644 doc/*.gif $(docdir)
+	$(INSTALL) -m 644 doc/*.png $(docdir)
+	$(INSTALL) -m 644 doc/*.css $(docdir)
 	$(INSTALL) -m 644 rr/rrtransport.h $(prefix)/include
 	$(INSTALL) -m 644 rr/rr.h $(prefix)/include
 	echo Install complete.
@@ -167,8 +169,8 @@ uninstall:
 	if [ -d $(prefix)/fakelib ]; then \
 		$(RM) $(prefix)/fakelib/*;  rmdir $(prefix)/fakelib; \
 	fi
-	$(RM) $(prefix)/doc/*
-	if [ -d $(prefix)/doc ]; then rmdir $(prefix)/doc; fi
+	$(RM) $(docdir)/*
+	if [ -d $(docdir) ]; then rmdir $(docdir); fi
 	$(RM) $(prefix)/include/rrtransport.h
 	$(RM) $(prefix)/include/rr.h
 	echo Uninstall complete.
@@ -241,8 +243,8 @@ sunpkg: rr diags mesademos
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
 		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g \
 		| sed s/{__PKGARCH}/$(PKGARCH)/g >$(BLDDIR)/pkginfo
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) M32=yes install
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) docdir=$(BLDDIR)/pkgbuild/$(PKGDIR)/doc M32=yes install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) docdir=$(BLDDIR)/pkgbuild/$(PKGDIR)/doc install
 	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
