@@ -16,10 +16,10 @@ endif
 
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
- LDFLAGS = -L/usr/X11R6/lib64
+ LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
 else
  ARCHFLAG =
- LDFLAGS = -L/usr/X11R6/lib
+ LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 endif
 
 ifeq ($(M32), yes)
