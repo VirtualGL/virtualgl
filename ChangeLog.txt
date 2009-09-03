@@ -53,6 +53,10 @@ expected" error when restricting framebuffer device access to the vglusers
 group.
 -------------------------------------------------------------------------------
 [2]
+Fixed an issue in vglserver_config whereby the device permissions were not
+being set correctly on SuSE Linux Enterprise Desktop 11.
+-------------------------------------------------------------------------------
+[3]
 VGL should now properly ignore GLX_BUFFER_SIZE if an application attempts to
 specify it when requesting a true color visual.  Specifically, this allows the
 Second Life SnowGlobe client to run properly in VGL and WINE.
