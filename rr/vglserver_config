@@ -312,15 +312,27 @@ configdev() {
 			commentline /etc/logindevperm "\/dev\/nvidia"
 		fi
 		if [ -d /etc/modprobe.d ]; then
-			echo ... Creating /etc/modprobe.d/virtualgl to set requested permissions for
+			if [ -f /etc/modprobe.d/nvidia ]; then
+				echo ... Modifying /etc/modprobe.d/nvidia to set requested permissions for
+			else
+				echo ... Creating /etc/modprobe.d/nvidia to set requested permissions for
+			fi
 			echo "    /dev/nvidia* ..."
 			VGLUSERSGID=`grep vglusers /etc/group | cut -f3 -d:`
-			if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
-				echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660" >/etc/modprobe.d/virtualgl
+			if [ -f /etc/modprobe.d/nvidia ]; then
+				if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
+					replaceline /etc/modprobe.d/nvidia "options nvidia" "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660"
+				else
+					replaceline /etc/modprobe.d/nvidia "options nvidia" "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666"
+				fi
 			else
-				echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666" >/etc/modprobe.d/virtualgl
+				if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
+					echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660" >/etc/modprobe.d/virtualgl
+				else
+					echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666" >/etc/modprobe.d/virtualgl
+				fi
 			fi
-			chmod 644 /etc/modprobe.d/virtualgl
+			chmod 644 /etc/modprobe.d/nvidia
 			lsmod | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
 				echo ... Attempting to remove nvidia module from memory so device permissions
