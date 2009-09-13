@@ -12,7 +12,7 @@
 
 	1. Download the appropriate TurboJPEG binary package (v1.11 or later) for
 		your system from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboJPEG/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
@@ -36,7 +36,7 @@
 #OPT: noList! plain!
 
 	1. Download the appropriate VirtualGL binary package for your system from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
@@ -62,7 +62,7 @@
 
 	1. Download the VirtualGL Solaris package (''SUNWvgl-''__''{version}''__''.pkg.bz2''
 		for SPARC or ''SUNWvgl-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 		!!! Both packages provide both 32-bit and 64-bit VirtualGL components.
@@ -89,7 +89,7 @@
 
 	#. Download the VirtualGL Mac disk image
 		(''VirtualGL-''__''{version}''__''.dmg'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Open the disk image, then open ''VirtualGL-''__''{version}''__''.pkg'' inside the
@@ -100,7 +100,7 @@
 
 	#. Download the VirtualGL Windows installer package
 		(''VirtualGL-''__''{version}''__''.exe'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Run the VirtualGL installer.  The installation of VirtualGL should be
@@ -118,7 +118,7 @@
 If you are using a platform for which there is not a pre-built VirtualGL binary
 package available, then log in as root, download the VirtualGL source tarball
 (''VirtualGL-''__''{version}''__''.tar.gz'') from the 
-[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
 uncompress it, ''cd vgl'', and read the contents of ''BUILDING.txt'' for
 further instructions on how to build and install VirtualGL from source.
@@ -127,12 +127,12 @@ further instructions on how to build and install VirtualGL from source.
 
 The VirtualGL Sun Ray plugin is a proprietary add-on developed by Sun
 Microsystems to integrate VirtualGL with the Sun Ray thin client environment.
-If you plan to use this functionality, then it is recommended that you download
-and install the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
-software.  This software product is available as a free download (Sun charges
-for support), and it includes VirtualGL, TurboVNC, the proprietary Sun Ray
-plugin, and enhancements to N1 GridEngine to allow it to manage VirtualGL jobs
-across a cluster of 3D servers.
+This plugin was part of the Sun Shared Visualization product, which is now EOL.
+However, the packages (''VirtualGL-SunRay.i386.rpm'' and
+''VirtualGL-SunRay.x86_64.rpm'' for Linux systems, and ''SUNWvglsr'' for
+Solaris systems) can be obtained from the Sun Shared Visualization 1.1.1
+distribution, which, as of this writing, is still available for download from
+the [[https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_SMI-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=SharedViz-1.1.1-SP-F@CDS-CDS_SMI][Sun Download Center]].
 
 ** Uninstalling VirtualGL
 

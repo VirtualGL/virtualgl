@@ -116,7 +116,7 @@ images to the client machine:
 	diskless little box with only a monitor port, USB ports, a network jack,
 	and a smart card slot (used for authentication.){nl} \
 	{nl} \
-	This environment presents unique challenges to VirtualGL  The first challenge
+	This environment presents unique challenges to VirtualGL.  The first challenge
 	is that the Sun Ray 1 and Sun Ray 2 series clients contain relatively slow
 	CPUs, so they are not fast enough to decompress JPEG in real time.  The
 	second challenge is that Sun Ray servers are generally provisioned to handle
@@ -126,9 +126,11 @@ images to the client machine:
 	VGL to compress images using a protocol that can be sent directly to the Sun
 	Ray hardware client without having to pass through the Sun Ray server first.
 	Since the plugin uses the proprietary Sun Ray image compression technology,
-	it is currently closed source, but the binary packages can be downloaded
-	for free as part of the [[http://www.sun.com/servers/cr/visualization/get_it.jsp][Sun Shared Visualization]]
-	product.  This product also includes VirtualGL, TurboVNC, and other goodies.
+	it is closed source, but the binary packages can be downloaded for free
+	as part of the Sun Shared Visualization product.  Sun Shared Visualization
+	was discontinued in early 2009, but as of this writing, it is still available
+	in the
+	[[https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_SMI-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=SharedViz-1.1.1-SP-F@CDS-CDS_SMI][Sun Download Center]].
 
 #IMG: sunray.png
 #OPT fmt=latex: w=4cm
