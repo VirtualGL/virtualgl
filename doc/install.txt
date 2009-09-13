@@ -10,7 +10,7 @@
 *** Installing TurboJPEG
 #OPT: noList! plain!
 
-	1. Download the appropriate TurboJPEG binary package (v1.10 or later) for
+	1. Download the appropriate TurboJPEG binary package (v1.11 or later) for
 		your system from the
 		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
