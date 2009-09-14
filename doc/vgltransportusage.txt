@@ -17,7 +17,8 @@
 	* The VGL Image Transport is designed to be used with remote X servers, thus
 		it relies on the chatty remote X11 protocol to send the 2D elements of the
 		application's GUI to the user's desktop.  As a result, the VGL Image
-		Transport is not recommended for use on high-latency networks
+		Transport is not recommended for use on high-latency or low-bandwidth
+		networks
 	* No collaboration features
 	* Requires purchasing Exceed for use with Windows clients
 	* The client is not stateless.  As with any remote X11 app, if the network

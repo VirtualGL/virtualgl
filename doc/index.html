@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-09-13T21:16:10">
+<meta name="date" content="2009-09-14T01:10:20">
 <meta name="generator" content="deplate.rb 0.8.4">
 <title>User&rsquo;s Guide for VirtualGL 2.1.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1805,7 +1805,7 @@ patches from the Hummingbird support site:</p>
         thus it relies on the chatty remote X11 protocol to send the 2D elements 
         of the application&rsquo;s GUI to the user&rsquo;s desktop.  As a 
         result, the VGL Image Transport is not recommended for use on 
-        high-latency networks
+        high-latency or low-bandwidth networks
     </li>
     <li class="Itemize-1 Itemize asterisk">
         No collaboration features
@@ -2141,22 +2141,23 @@ Tunneling</a><a name="idx0069"></a>.</p>
 
 <p>The VGL Image Transport is a good solution for using VirtualGL over a 
 fast network.  However, the VGL Image Transport is not generally 
-suitable for high-latency networks, due to its reliance on the X11 
-protocol to send the non-3D elements of the 3D application&rsquo;s GUI.  
-The VGL Image Transport also requires an X server to be running on the 
-client machine, which makes it more difficult and costly to deploy for 
-Windows clients.  VirtualGL can be used with an &ldquo;X proxy&rdquo; to 
-overcome these limitations.  An X proxy acts as a virtual X server, 
-receiving X11 commands from the application (and from VirtualGL), 
-rendering the X11 commands into images, compressing the resulting 
-images, and sending the compressed images over the network to a client 
-or clients.  X proxies perform well on all types of networks, including 
-high-latency networks. They often provide rudimentary collaboration 
-capabilities, allowing multiple clients to simultaneously view the same 
-X session and pass around control of the keyboard and mouse.  X proxies 
-are also stateless, meaning that the client can disconnect and reconnect 
-at will from any machine on the network, and the 3D application will 
-remain running on the server.</p>
+suitable for high-latency or low-bandwidth networks, due to its reliance 
+on the X11 protocol to send the non-3D elements of the 3D 
+application&rsquo;s GUI.  The VGL Image Transport also requires an X 
+server to be running on the client machine, which makes it more 
+difficult and costly to deploy for Windows clients.  VirtualGL can be 
+used with an &ldquo;X proxy&rdquo; to overcome these limitations.  An X 
+proxy acts as a virtual X server, receiving X11 commands from the 
+application (and from VirtualGL), rendering the X11 commands into 
+images, compressing the resulting images, and sending the compressed 
+images over the network to a client or clients.  X proxies perform well 
+on all types of networks, including high-latency and low-bandwidth 
+networks.  They often provide rudimentary collaboration capabilities, 
+allowing multiple clients to simultaneously view the same X session and 
+pass around control of the keyboard and mouse.  X proxies are also 
+stateless, meaning that the client can disconnect and reconnect at will 
+from any machine on the network, and the 3D application will remain 
+running on the server.</p>
 
 <p>Since VirtualGL is sending rendered 3D images to the X proxy at a very 
 fast rate, the proxy must be able to compress the images very quickly in 
@@ -3585,8 +3586,8 @@ dialog box:</p>
 <p><img src="configdialog.gif" alt="configdialog" class="inline" id="imgid_5" name="imgid_5"/></p>
 
 <p>You can use this dialog to adjust various image compression and display 
-parameters in VirtualGL.  Changes are reflected immediately in the 
-application.</p>
+parameters in VirtualGL.  Changes are communicated immediately to 
+VirtualGL.</p>
 
 <dl class="Description">
     <dt class="Description-1 Description">Image Compression (Transport)</dt>

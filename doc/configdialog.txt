@@ -10,7 +10,7 @@ application's windows is active.  This displays the following dialog box:
 {img: configdialog.gif}
 
 You can use this dialog to adjust various image compression and display
-parameters in VirtualGL.  Changes are reflected immediately in the application.
+parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 
 	Image Compression (Transport) :: This is a drop-down gadget with the
 	following options:
