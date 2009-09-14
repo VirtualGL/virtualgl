@@ -94,12 +94,7 @@ rendered 3D images to the client machine:
 	upon an X proxy to encode and deliver the images to the client(s).  Since the
 	use of an X proxy eliminates the need to send X-Windows commands over the
 	network, this is the best means of using VirtualGL over high-latency or
-	low-bandwidth networks.  The VirtualGL Project provides an accelerated
-	version of VNC, called "TurboVNC", which is meant to be used with VirtualGL's
-	X11 Transport.  The combination of the two provides a highly-performant
-	remote 3D	solution, even on slow networks.  TurboVNC also provides
-	rudimentary collaboration capabilities, allowing multiple users to
-	simultaneously interact with the same 3D application.
+	low-bandwidth networks.
 
 #IMG: x11transport.png
 #OPT fmt=latex: w=4cm

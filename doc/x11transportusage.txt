@@ -2,8 +2,8 @@
 {anchor: X11_Proxy_Usage}
 
 The VGL Transport is a good solution for using VirtualGL over a fast
-network.  However, the VGL Transport is not generally suitable for
-high-latency networks, due to its reliance on the X11 protocol to send the
+network.  However, the VGL Transport is not generally suitable for high-latency
+or low-bandwidth networks, due to its reliance on the X11 protocol to send the
 non-3D elements of the 3D application's GUI.  The VGL Transport also
 requires an X server to be running on the client machine, which makes it more
 difficult and costly to deploy for Windows clients.  VirtualGL can be used with
@@ -11,12 +11,13 @@ an "X proxy" to overcome these limitations.  An X proxy acts as a virtual X
 server, receiving X11 commands from the application (and from VirtualGL),
 rendering the X11 commands into images, compressing the resulting images, and
 sending the compressed images over the network to a client or clients.  X
-proxies perform well on all types of networks, including high-latency networks.
-They often provide rudimentary collaboration capabilities, allowing multiple
-clients to simultaneously view the same X session and pass around control of
-the keyboard and mouse.  X proxies are also stateless, meaning that the client
-can disconnect and reconnect at will from any machine on the network, and the
-3D application will remain running on the server.
+proxies perform well on all types of networks, including high-latency and
+low-bandwidth networks.  They often provide rudimentary collaboration
+capabilities, allowing multiple clients to simultaneously view the same X
+session and pass around control of the keyboard and mouse.  X proxies are also
+stateless, meaning that the client can disconnect and reconnect at will from
+any machine on the network, and the 3D application will remain running on the
+server.
 
 Since VirtualGL is sending rendered 3D images to the X proxy at a very fast
 rate, the proxy must be able to compress the images very quickly in order to

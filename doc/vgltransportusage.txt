@@ -16,7 +16,7 @@
 	* The VGL Transport is designed to be used with remote X servers, thus it
 		relies on the chatty remote X11 protocol to send the 2D elements of the
 		application's GUI to the user's desktop.  As a result, the VGL Transport is
-		not recommended for use on high-latency networks
+		not recommended for use on high-latency or low-bandwidth networks
 	* No collaboration features
 	* Requires purchasing Exceed for use with Windows clients
 	* The client is not stateless.  As with any remote X11 app, if the network
@@ -252,7 +252,7 @@ client machine, which means that you'll only ever need one instance of
 run multiple X servers on your client machine, which means that you will need
 to run multiple ''vglclient'' instances, then you may wish to open ports
 4200-4299.  Similarly, if you are running ''vglclient'' on a multi-user
-TurboVNC server that has a firewall, then you may wish to open ports 4200-4299
+X proxy server that has a firewall, then you may wish to open ports 4200-4299
 in the server's firewall.  Opening ports 4200-4299 will accommodate up to 100
 separate ''vglclient'' instances (50 if OpenSSL support is enabled.)  More
 instances than that cannot be accommodated on a firewalled machine, unless the

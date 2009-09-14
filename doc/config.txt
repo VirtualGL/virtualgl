@@ -46,7 +46,7 @@ Each method of configuration takes precedence over the previous method:
 	Description :: {:}
 	__proxy__ = Send images uncompressed using the X11 Transport.  This is useful
 	when displaying to a local 2D X server or X proxy (see
-	{ref prefix="Section ": TurboVNC_Usage_Local}.)
+	{ref prefix="Section ": X11_Proxy_Usage_Local}.)
 	{nl}{nl} \
 	__jpeg__ = Compress images using JPEG and send using the VGL Transport.  This
 	is useful when displaying to a remote 2D X server (see
@@ -54,7 +54,7 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl} \
 	__rgb__ = Encode images as uncompressed RGB and send using the VGL Transport.
 	 This is useful when displaying to a remote 2D X server or X proxy across a
-	very fast network (see {ref prefix="Section ": TurboVNC_Usage_Remote}.)
+	very fast network (see {ref prefix="Section ": X11_Proxy_Usage_Remote}.)
 	{nl}{nl} \
 	If this option is not specified, then the default is set as follows:
 	{nl}{nl} \
@@ -518,7 +518,7 @@ Each method of configuration takes precedence over the previous method:
 	application's window.  As such, this mode can have potentially dire effects
 	on performance when used with a remote 2D X server.  It is strongly
 	recommended that ''VGL_SYNC'' be used only in conjunction with an X proxy
-	(such as TurboVNC) running on the same server as VirtualGL.
+	running on the same server as VirtualGL.
 
 	!!! If an image transport plugin is being used, then VirtualGL does not
 	automatically enable the X11 Transport or disable frame spoiling when

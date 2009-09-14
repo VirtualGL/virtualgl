@@ -26,7 +26,7 @@
 		(particularly the "Dynamic Section" dialog and "Export Image" feature) do \
 		not work properly unless ''VGL_SYNC'' is enabled.  Since ''VGL_SYNC'' \
 		automatically enables the X11 transport and disables frame spoiling, it \
-		is highly recommended that you use TurboVNC when ''VGL_SYNC'' is enabled. \
+		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
 		See {ref prefix="Section ": VGL_SYNC} for more details. \
 	|
 | Cedega v6.0.x | Linux \

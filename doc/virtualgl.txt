@@ -1,5 +1,5 @@
 #VAR: css=virtualgl.css
-#TITLE: User's Guide for VirtualGL 2.2 and TurboVNC 0.5.1
+#TITLE: User's Guide for VirtualGL 2.2
 #MAKETITLE
 __Intended audience:__ System Administrators, Graphics Programmers,
 Researchers, and others with knowledge of the Linux or Solaris operating
@@ -20,9 +20,6 @@ systems, OpenGL and GLX, and X windows.
 #INCLUDE: install.txt
 {nl}
 ----8<--------------
-#INCLUDE: turbovncinstall.txt
-{nl}
-----8<--------------
 #INCLUDE: unixconfig.txt
 {nl}
 ----8<--------------
@@ -30,9 +27,6 @@ systems, OpenGL and GLX, and X windows.
 {nl}
 ----8<--------------
 #INCLUDE: vgltransportusage.txt
-{nl}
-----8<--------------
-#INCLUDE: turbovncusage.txt
 {nl}
 ----8<--------------
 #INCLUDE: x11transportusage.txt

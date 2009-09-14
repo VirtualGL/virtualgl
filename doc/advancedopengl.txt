@@ -26,14 +26,13 @@ VirtualGL supports true quad-buffered stereo by rendering the stereo images on
 the server and sending the image pairs across the network to be displayed by a
 3D graphics card on the client.
 
-In most cases, the VirtualGL Client and TurboVNC Viewer use only 2D drawing
-commands, thus eliminating the need for a 3D graphics card on the client
-machine.  But drawing stereo images requires a 3D graphics card, so such a card
-must be present in any client machine that will use VirtualGL's quad-buffered
-stereo feature.  Since the 3D graphics card is only being used to draw images,
-it need not necessarily be a high-end card.  Generally, the least expensive 3D
-graphics card that has stereo capabilities will work fine in a VirtualGL client
-machine.
+In most cases, VirtualGL does not require a 3D graphics card to be present in
+the client machine.  However, a 3D graphics card is required to display stereo
+image pairs, so such a card must be present in any client machine that will use
+VirtualGL's quad-buffered stereo feature.  Since the 3D graphics card is only
+being used to draw images, it need not necessarily be a high-end card.
+Generally, the least expensive 3D graphics card that has stereo capabilities
+will work fine in a VirtualGL client machine.
 
 The VirtualGL server must also have a 3D graphics card that supports stereo,
 since this is the only way that VirtualGL can obtain a stereo Pbuffer.  When an
@@ -128,8 +127,8 @@ and GLX" applet:
 
 {img: exceed6.png}
 
-	!!! Overlays do not work with X proxies (including TurboVNC.)  VirtualGL must
-	be displaying to a "real" X server.
+	!!! Overlays do not work with X proxies.  VirtualGL must be displaying to a
+	"real" X server.
 
 ** Indexed (PseudoColor) Rendering
 
@@ -163,8 +162,8 @@ Transport.  However, since there is only 1 byte per pixel in a PseudoColor
 "image", the images can still be sent to the client reasonably quickly even
 though they are uncompressed.
 
-VirtualGL's PseudoColor rendering mode works with TurboVNC, provided that the
-TurboVNC server is configured to use an 8-bit color depth.  Note, however, that
+VirtualGL's PseudoColor rendering mode works with X proxies, provided that the
+X proxy is configured to use an 8-bit color depth.  Note, however, that
 VNC cannot provide both PseudoColor and TrueColor visuals at the same time.
 
 ** Troubleshooting

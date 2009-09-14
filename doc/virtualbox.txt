@@ -57,5 +57,5 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		over a remote X11 connection unless a
 		[[#Direct_X11_Connection][direct X11 connection]] (''vglconnect -x'') is
 		used with gigabit Ethernet (or faster.)  For 100 Megabit and slower
-		networks, using TurboVNC is recommended when remotely displaying VirtualBox
-		using VirtualGL.
+		networks, using a high-performance X proxy is recommended when remotely
+		displaying VirtualBox using VirtualGL.
