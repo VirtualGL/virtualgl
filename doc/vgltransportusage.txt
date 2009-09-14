@@ -270,7 +270,7 @@ client machine, which means that you'll only ever need one instance of
 4243 in your client machine's firewall.  If you plan to run multiple X servers
 on your client machine, which means that you will need to run multiple
 ''vglclient'' instances, then you may wish to open ports 4200-4299.  Similarly,
-if you are running ''vglclient'' on a multi-user TurboVNC or Sun Ray server
+if you are running ''vglclient'' on a multi-user X proxy server or Sun Ray server
 that has a firewall, then you may wish to open ports 4200-4299 in the server's
 firewall.  Opening ports 4200-4299 will accommodate up to 50 separate
 ''vglclient'' instances.  More instances than that cannot be accommodated on a

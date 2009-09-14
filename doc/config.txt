@@ -45,7 +45,7 @@ Each method of configuration takes precedence over the previous method:
 	Description :: {:}
 	__proxy__ = Send images uncompressed using the X11 Image Transport.  This is
 	useful when displaying to a local 2D X server or X proxy (see
-	{ref prefix="Section ": TurboVNC_Usage_Local}.)
+	{ref prefix="Section ": X11_Proxy_Usage_Local}.)
 	{nl}{nl} \
 	__jpeg__ = Compress images using JPEG and send using the VGL Image Transport.
 	This is useful when displaying to a remote 2D X server (see
@@ -54,7 +54,7 @@ Each method of configuration takes precedence over the previous method:
 	__rgb__ = Encode images as uncompressed RGB and send using the VGL Image
 	Transport.  This is useful when displaying to a remote 2D X server or X proxy
 	across a very fast network (see
-	{ref prefix="Section ": TurboVNC_Usage_Remote}.)
+	{ref prefix="Section ": X11_Proxy_Usage_Remote}.)
 	{nl}{nl} \
 	__sr__ = Compress images using the Sun Ray default compression method (DPCM)
 	and send using the Sun Ray Image Transport.  This requires that the

@@ -6,7 +6,6 @@ consists of both an X proxy and an ultra-thin hardware client.  If the
 proprietary VirtualGL Sun Ray plugin is not used, then the Sun Ray server can
 be treated just like any other X proxy and used with either the X11 Image
 Transport or the VGL Image Transport, as described in
-{ref prefix="Chapter ": TurboVNC_Usage} and
 {ref prefix="Chapter ": X11_Proxy_Usage}.
 
 If, however, the Sun Ray plugin is installed on the VirtualGL server, then a
