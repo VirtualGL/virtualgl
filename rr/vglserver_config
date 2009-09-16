@@ -330,7 +330,6 @@ configdev() {
 				else
 					replaceline /etc/modprobe.d/nvidia "options nvidia" "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666"
 				fi
-				chmod 644 /etc/modprobe.d/nvidia
 			else
 				if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
 					echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660" >/etc/modprobe.d/virtualgl
