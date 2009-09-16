@@ -18,6 +18,8 @@
 #include "fakerconfig.h"
 #include "rrlog.h"
 
+extern "C" void *_vgl_dlopen(const char *, int);
+
 static int RRSunRayConfigCallback(const char *name, int type, void *value)
 {
 	if(!name || !value || type<0) return -1;
@@ -110,7 +112,7 @@ static int loadsunraysymbols(bool fatal)
 	rrcs::safelock l(sunraymutex);
 	if(init) return 1;
 	dlerror();  // Clear error state
-	dllhnd=dlopen("librrsunray.so", RTLD_NOW);
+	dllhnd=_vgl_dlopen("librrsunray.so", RTLD_NOW);
 	if(!dllhnd)
 	{
 		if(fatal)
