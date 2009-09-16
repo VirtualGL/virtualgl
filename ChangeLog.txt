@@ -61,6 +61,14 @@ VGL should now properly ignore GLX_BUFFER_SIZE if an application attempts to
 specify it when requesting a true color visual.  Specifically, this allows the
 Second Life SnowGlobe client to run properly in VGL and WINE.
 -------------------------------------------------------------------------------
+[4]
+vglserver_config should now work even if /sbin and /usr/sbin are not in the
+PATH.
+-------------------------------------------------------------------------------
+[5]
+The Solaris 10/x86 version of VirtualGL should now work properly with
+the nVidia 18x.xx series drivers.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
