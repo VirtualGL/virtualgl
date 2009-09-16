@@ -24,11 +24,11 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 	void *sym;  const char *err;
 	dlerror();  // Clear error state
 	sym=dlsym(dllhnd, (char *)symbol);
-	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] ERROR: Could not load symbol %s:\n[VGL]    %s\n", symbol, err);}
+	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] %s\n", err);}
 	return sym;
 }
 
-#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 0);  if(!__##s) {  \
+#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, !fconfig.verbose);  if(!__##s) {  \
 	return -1;}
 
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
@@ -82,10 +82,20 @@ void __vgl_loadsymbols(void)
 					dlerror());
 				__vgl_safeexit(1);
 			}
-			if(__vgl_loadglsymbols(dllhnd)<0) __vgl_safeexit(1);
+			if(__vgl_loadglsymbols(dllhnd)<0)
+			{
+				rrout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from libGL.so.1.\n");
+				__vgl_safeexit(1);
+			}
 			gldllhnd=dllhnd;
 		}
-		else __vgl_safeexit(1);
+		else
+		{
+			if(strlen(fconfig.gllib)>0)
+				rrout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from %s.\n",
+					fconfig.gllib);
+			__vgl_safeexit(1);
+		}
 	}
 
 	if(strlen(fconfig.x11lib)>0)
@@ -107,19 +117,31 @@ void __vgl_loadsymbols(void)
 			if(fconfig.verbose)
 			{
 				rrout.print("[VGL] WARNING: Could not load X11 symbols using RTLD_NEXT.  Attempting\n");
-				rrout.print("[VGL]    to load X11 symbols directly from libX11.so.6.\n");
+				rrout.print("[VGL]    to load X11 symbols directly from libX11.\n");
 			}
-			dllhnd=_vgl_dlopen("libX11.so.6", RTLD_NOW);
+			dllhnd=_vgl_dlopen("libX11.so.4", RTLD_NOW);
+			if(!dllhnd) dllhnd=_vgl_dlopen("libX11.so.5", RTLD_NOW);
+			if(!dllhnd) dllhnd=_vgl_dlopen("libX11.so.6", RTLD_NOW);
 			if(!dllhnd)
 			{
-				rrout.print("[VGL] ERROR: Could not open libX11.so.6\n[VGL]    %s\n",
+				rrout.print("[VGL] ERROR: Could not open libX11\n[VGL]    %s\n",
 					dlerror());
 				__vgl_safeexit(1);
 			}
-			if(__vgl_loadx11symbols(dllhnd)<0) __vgl_safeexit(1);
+			if(__vgl_loadx11symbols(dllhnd)<0)
+			{
+				rrout.print("[VGL] ERROR: Could not load X11 symbols from libX11.\n");
+				__vgl_safeexit(1);
+			}
 			x11dllhnd=dllhnd;
 		}
-		else __vgl_safeexit(1);
+		else
+		{
+			if(strlen(fconfig.x11lib)>0)
+				rrout.print("[VGL] ERROR: Could not load X11 symbols from %s.\n",
+					fconfig.x11lib);
+			__vgl_safeexit(1);
+		}
 	}
 }
 
