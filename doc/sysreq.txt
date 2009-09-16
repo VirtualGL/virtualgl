@@ -74,7 +74,7 @@ processors.
 	|
 | O/S \
 	| {list type=ul: \
-			{item: Solaris 10 (or newer)} \
+			{item: Solaris 10 Update 1 or newer (Update 3 or newer recommended)} \
 			{item: OpenSolaris 2008.11 (or newer)}} \
 	| < \
 	| < \
@@ -83,8 +83,6 @@ processors.
 	| {list type=ul: \
 			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
 				(v2.5 or higher recommended *)} \
-			{item:[[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Solaris Patch]] \
-				118345-04 (or later)} \
 			{item:X server configured to export True Color (24-bit or 32-bit) \
 				visuals}} \
 	| {list type=ul: \
