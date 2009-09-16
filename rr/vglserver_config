@@ -19,6 +19,11 @@ FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
 UNATTENDED=0
 
+GROUPADD=/usr/sbin/groupadd
+if [ ! -x $GROUPADD ]; then GROUPADD=groupadd; fi
+LSMOD=/sbin/lsmod
+if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
+
 usage() {
 	echo
 	echo "USAGE: $0 [flags]"
@@ -274,7 +279,7 @@ unconfigdev() {
 			echo ... Removing /etc/modprobe.d/virtualgl to restore default permissions for
 			echo "    /dev/nvidia* ..."
 			rm -f /etc/modprobe.d/virtualgl
-			lsmod | grep -q nvidia >/dev/null 2>/dev/null
+			$LSMOD | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
@@ -325,15 +330,16 @@ configdev() {
 				else
 					replaceline /etc/modprobe.d/nvidia "options nvidia" "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666"
 				fi
+				chmod 644 /etc/modprobe.d/nvidia
 			else
 				if [ "$FBDEVVGLUSERSONLY" = "1" -a ! "$VGLUSERSGID" = "" ]; then
 					echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=$VGLUSERSGID NVreg_DeviceFileMode=0660" >/etc/modprobe.d/virtualgl
 				else
 					echo "options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=0 NVreg_DeviceFileMode=0666" >/etc/modprobe.d/virtualgl
 				fi
+				chmod 644 /etc/modprobe.d/virtualgl
 			fi
-			chmod 644 /etc/modprobe.d/nvidia
-			lsmod | grep -q nvidia >/dev/null 2>/dev/null
+			$LSMOD | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
@@ -512,7 +518,7 @@ configglp() {
 
 		if [ "$VGLUSERSONLY" = "1" ]; then
 			echo ... Creating vglusers group ...
-			groupadd vglusers >/dev/null 2>/dev/null || echo "Could not add vglusers group (probably because it already exists.)"
+			$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
 		fi
 
 		if [ ! -d /etc/dt/config ]; then
@@ -548,7 +554,7 @@ configglx() {
 
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Creating vglusers group ...
-		groupadd vglusers >/dev/null 2>/dev/null || echo "Could not add vglusers group (probably because it already exists.)"
+		$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
 
 		if [ ! -d /etc/opt/VirtualGL ]; then
 			echo ... Creating /etc/opt/VirtualGL/ ...
