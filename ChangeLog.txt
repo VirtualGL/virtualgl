@@ -20,9 +20,8 @@ vglserver_config should now work even if /sbin and /usr/sbin are not in the
 PATH.
 -------------------------------------------------------------------------------
 [5]
-VirtualGL 2.1.3 on Solaris 10/x86 seg faulted with the nVidia 18x.xx series
-drivers unless vglrun was invoked with the '-nodl' switch.  This has been
-fixed.
+The Solaris 10/x86 version of VirtualGL should now work properly with
+the nVidia 18x.xx series drivers.
 -------------------------------------------------------------------------------
 
 
