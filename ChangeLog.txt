@@ -69,6 +69,10 @@ PATH.
 The Solaris 10/x86 version of VirtualGL should now work properly with
 the nVidia 18x.xx series drivers.
 -------------------------------------------------------------------------------
+[6]
+Fix memory leak that occurred with running VirtualGL in quad-buffered stereo
+mode.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
