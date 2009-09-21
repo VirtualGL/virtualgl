@@ -53,6 +53,7 @@ class rrframe
 	virtual ~rrframe(void)
 	{
 		if(_bits && _primary) delete [] _bits;
+		if(_rbits && _primary) delete [] _rbits;
 	}
 
 	void init(rrframeheader &h, int pixelsize, int flags, bool stereo=false)
