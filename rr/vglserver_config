@@ -23,6 +23,8 @@ GROUPADD=/usr/sbin/groupadd
 if [ ! -x $GROUPADD ]; then GROUPADD=groupadd; fi
 LSMOD=/sbin/lsmod
 if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
+RMMOD=/sbin/rmmod
+if [ ! -x $RMMOD ]; then RMMOD=rmmod; fi
 
 usage() {
 	echo
@@ -283,7 +285,7 @@ unconfigdev() {
 			if [ $? = 0 ]; then
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
-				rmmod nvidia || RMMODNEEDED=1
+				$RMMOD nvidia || RMMODNEEDED=1
 			fi
 
 		fi
@@ -342,7 +344,7 @@ configdev() {
 			if [ $? = 0 ]; then
 				echo ... Attempting to remove nvidia module from memory so device permissions
 				echo "    will be reloaded ..."
-				rmmod nvidia || RMMODNEEDED=1
+				$RMMOD nvidia || RMMODNEEDED=1
 			fi
 		fi
 		if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
