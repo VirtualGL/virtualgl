@@ -24,8 +24,15 @@ The Solaris 10/x86 version of VirtualGL should now work properly with
 the nVidia 18x.xx series drivers.
 -------------------------------------------------------------------------------
 [6]
-Fix memory leak that occurred with running VirtualGL in quad-buffered stereo
+Fix memory leak that occurred when running VirtualGL in quad-buffered stereo
 mode.
+-------------------------------------------------------------------------------
+[7]
+The DRI device permissions in RHEL 5 were being overridden whenever a user
+logged in, because RHEL 5 uses a file in /etc/security/console.perms.d to
+specify the default DRI permissions rather than using
+/etc/security/console.perms.  vglserver_config has been modified to handle
+this.
 -------------------------------------------------------------------------------
 
 
