@@ -272,6 +272,11 @@ unconfigdev() {
 			echo "    for DRI devices ..."
 			uncommentline /etc/security/console.perms "\<dri\>"
 		fi
+		if [ -f /etc/security/console.perms.d/50-default.perms ]; then
+			echo ... Modifying /etc/security/console.perms.d/50-default.perms to enable automatic permissions
+			echo "    for DRI devices ..."
+			uncommentline /etc/security/console.perms.d/50-default.perms "\<dri\>"
+		fi
 		if [ -f /etc/logindevperm ]; then
 			echo ... Modifying /etc/logindevperm to enable automatic permissions for
 			echo "    /dev/nvidia* ..."
@@ -313,6 +318,11 @@ configdev() {
 			echo "    for DRI devices ..."
 			commentline /etc/security/console.perms "\<dri\>"
 		fi
+		if [ -f /etc/security/console.perms.d/50-default.perms ]; then
+			echo ... Modifying /etc/security/console.perms.d/50-default.perms to disable automatic permissions
+			echo "    for DRI devices ..."
+			commentline /etc/security/console.perms.d/50-default.perms "\<dri\>"
+		fi
 		if [ -f /etc/logindevperm ]; then
 			echo ... Modifying /etc/logindevperm to disable automatic permissions for
 			echo "    /dev/nvidia* ..."
@@ -322,7 +332,7 @@ configdev() {
 			if [ -f /etc/modprobe.d/nvidia ]; then
 				echo ... Modifying /etc/modprobe.d/nvidia to set requested permissions for
 			else
-				echo ... Creating /etc/modprobe.d/nvidia to set requested permissions for
+				echo ... Creating /etc/modprobe.d/virtualgl to set requested permissions for
 			fi
 			echo "    /dev/nvidia* ..."
 			VGLUSERSGID=`grep vglusers /etc/group | cut -f3 -d:`
