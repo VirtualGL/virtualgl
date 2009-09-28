@@ -13,6 +13,10 @@
 #include "pbutil.h"
 
 
+#ifndef GLX_X_VISUAL_TYPE_EXT
+#define GLX_X_VISUAL_TYPE_EXT GLX_X_VISUAL_TYPE
+#endif
+
 
 /*
  * Test if we pixel buffers are available for a particular X screen.
