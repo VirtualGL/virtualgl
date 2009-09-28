@@ -18,7 +18,7 @@ ifeq ($(subplatform), 64)
 ARCHFLAG = -m64
 LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
 else
-ARCHFLAG =
+ARCHFLAG = -m32
 LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 endif
 
