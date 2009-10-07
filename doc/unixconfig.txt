@@ -213,11 +213,13 @@ prompt.
 			X server, disabling XTEST will prevent them from inserting keystrokes or
 			mouse events and thus hijacking local X sessions on that X server.
 
-		!!! On certain Linux distributions, it may be necessary to run ''gdmsetup''
-		first in order to create the X server command line entries in the GDM
-		configuration file.  Until these command line entries have been created,
-		disabling XTEST using ''vglserver_config'' will not work.  This is known to
-		be necessary for openSUSE 10 and Enterprise Linux 5.
+		!!! Certain Linux distributions do not have the X server command line
+		entries in their GDM configuration files.  On these distributions, it will
+		be necessary to run ''gdmsetup'' and manually add an argument of ''-tst''
+		to the X server command line to disable XTEST for the first time.  After
+		this, ''vglserver_config'' should be able to disable and enable XTEST
+		properly.  This is known to be necessary for openSUSE 10 and Enterprise
+		Linux 5.
 
 		No :: ''x11vnc'' and ''x0vncserver'' both require XTEST, so if you need to
 			attach a VNC server to the 3D X server, then it is necessary to answer
