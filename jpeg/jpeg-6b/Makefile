@@ -117,7 +117,7 @@ ifeq ($(LIBJPEG_SIMD), yes)
  endif
 
  $(ODIR)/%.obj: %.asm
-	nasm $(NAFLAGS) -Isimd/ -o $@ $<
+	$(NASM) $(NAFLAGS) -Isimd/ -o $@ $<
 
  CFLAGS := $(CFLAGS) -DWITH_SIMD
  LOBJS := $(LOBJS) $(SIMD_OBJS)
@@ -299,7 +299,7 @@ ifeq ($(LIBJPEG_SIMD), yes)
  endif
 
  $(ODIR)/%.o: %.asm
-	nasm $(NAFLAGS) -Isimd/ -o $@ $<
+	$(NASM) $(NAFLAGS) -Isimd/ -o $@ $<
 
  CFLAGS := $(CFLAGS) -DWITH_SIMD
  LOBJS := $(LOBJS) $(SIMD_OBJS)

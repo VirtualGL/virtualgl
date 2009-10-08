@@ -5,6 +5,9 @@
 CC = cc
 CXX = c++
 AR = ar ruvs
+ifeq ($(NASM),)
+NASM = nasm
+endif
 
 CINCLUDES = -I/usr/X11R6/include
 CFLAGS = -Wall

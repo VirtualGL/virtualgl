@@ -9,6 +9,9 @@ LINK = "link" -nologo
 ifeq ($(DEBUG), yes)
  LINK = "link" -nologo -debug
 endif
+ifeq ($(NASM),)
+NASM = nasm
+endif
 
 CFLAGS = -W3 -wd4996
 CDEFINES = -DWIN32 -D_CRT_SECURE_NO_DEPRECATE

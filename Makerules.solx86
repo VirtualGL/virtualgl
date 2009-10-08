@@ -45,6 +45,10 @@ else
 
 endif
 
+ifeq ($(NASM),)
+NASM = nasm
+endif
+
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
