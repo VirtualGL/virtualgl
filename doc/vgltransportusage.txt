@@ -175,12 +175,91 @@ have plenty of bandwidth to spare.
 
 ** VGL Transport with XDMCP
 
-Using the VGL Transport with XDMCP should mostly "just work".  Once you have
-established the connection to the remote X server using XDMCP, you can then
-follow any of the above procedures to create an SSh connection to the
-application server and start a 3D application using VirtualGL.  The application
-server and the machine running the remote X server need not necessarily be the
-same machine.
+	!!! XDMCP is very insecure and is not recommended as a means of running
+	VirtualGL, in general.  This section is provided mainly for completeness and
+	should not be construed as an endorsement of XDMCP.  In general, using an X
+	proxy is a much better approach for getting a remote desktop session on the
+	3D application server.
+
+Using the VGL Transport with XDMCP is conceptually similar to using
+the VGL Transport with a
+[[#Direct_X11_Connection][direct X11 connection]].  The major difference is
+that, rather than remotely displaying individual X windows to the 2D X server,
+XDMCP remotely displays a complete desktop session from the application server.
+Any applications that are started within this desktop session will run on the
+application server, not the client.  Thus, ''vglconnect'' cannot be used in
+this case.  Instead, it is necessary to start ''vglclient'' manually on the
+client machine.
+
+*** Procedure
+#OPT: noList! plain!
+
+	#. Configure the server machine to accept XDMCP connections.  This may
+		require opening specific ports in its firewall.
+
+	#. Configure the client machine to make XDMCP connections.  This may require
+		enabling X11 TCP connections and opening specific ports in its firewall.
+
+	#. Once you have established an XDMCP connection from the client to the
+		server, open a terminal inside the XDMCP session and type:
+
+		#Verb: <<---
+		xhost +LOCAL:
+		---
+
+		!!! This grants access to the 2D X server for any user that is currently
+		logged into the client machine.  This is not very secure, but neither is
+		using XDMCP.  If you are concerned, then
+		see below for a discussion of how to use ''xauth'' to provide 2D X server
+		access in a slightly more secure manner.
+
+	#. If you are using a Mac or Windows client, or if you are using a nested X
+		server (such as Xephyr or XNest) on a Linux/Unix client to make the XDMCP
+		connection, then the next step is easy.  Simply open a new terminal/command
+		prompt on the client machine, set the ''DISPLAY'' environment variable to
+		the display name of the X server that is running the XDMCP session (usually
+		'':0'' or '':1''), and type:
+
+		#Verb: <<---
+		vglclient -detach
+		---
+
+		You can now close the terminal/command prompt, if you wish.
+
+	#. If you are running a full-screen XDMCP session on a Linux/Unix client
+		(for instance, using GDM Chooser), then starting ''vglclient'' is a bit
+		trickier.  You will need to use SSh to connect back into the client machine
+		from inside the XDMCP session.  Then, in the client SSh session, set the
+		''DISPLAY'' environment variable to the display name of the X server that
+		is running the XDMCP session (usually '':0'' or '':1''), and type:
+
+		#Verb: <<---
+		vglclient -detach
+		---
+
+		You can now close the SSh session, if you wish.
+
+*** Security
+#OPT: noList! plain!
+
+Typing ''xhost +LOCAL:'' in step 3 above opens the 2D X server to all current
+users of the client machine.  This shouldn't pose any significant risk if the
+client is a Windows or a Mac machine.  However, Linux/Unix clients might have
+multiple simultaneous users, so in these cases, it may be desirable to use a
+more secure method of granting access to the 2D X server.
+
+Instead of typing ''xhost +LOCAL:'', you can type the following:
+
+#Verb: <<---
+xauth nextract - $DISPLAY | sed "s/.*[ ]//g" | xargs ssh {client} xauth add {display} .
+---
+
+where __''{client}''__ is the hostname or IP address of the client machine and
+__''{display}''__ is the display name of the 2D X server, from the point of
+view of the client machine (usually '':0'' or '':1'').
+
+This extracts the XAuth key for the 2D X server, then remotely adds it to the
+XAuth keyring on the client machine.
 
 ** The VirtualGL Client Application: Nuts and Bolts
 

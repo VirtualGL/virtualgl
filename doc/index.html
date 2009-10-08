@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-09-16T16:12:43">
-<meta name="generator" content="deplate.rb 0.8.4">
+<meta name="date" content="2009-10-07T19:33:38">
+<meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
@@ -308,6 +308,7 @@ License, v3.1</a><a name="idx008"></a>, a derivative of the
 <hr class="break" />
 
 
+
 <h1 id="hd002"><a name="file002"></a>2&nbsp;Overview</h1>
 
 <p><a name="Overview"></a></p>
@@ -443,6 +444,7 @@ image transport plugins.</p>
 <hr class="break" />
 
 
+
 <h1 id="hd003"><a name="file003"></a>3&nbsp;System Requirements</h1>
 
 
@@ -515,6 +517,7 @@ image transport plugins.</p>
 
 
 
+
 <h2 id="hd003002">3.2&nbsp;Solaris/x86</h2>
 
 <div class="table">
@@ -571,6 +574,7 @@ image transport plugins.</p>
 <div class="important"><p class="important">
 * mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you are running an older version of Solaris, it is recommended that you download and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5 improves the performance of VirtualGL significantly on Solaris/x86 systems, when compared to mediaLib 2.4.
 </p></div>
+
 
 
 <h2 id="hd003003">3.3&nbsp;Solaris/SPARC</h2>
@@ -676,6 +680,7 @@ image transport plugins.</p>
 
 
 
+
 <h2 id="hd003004">3.4&nbsp;Mac/x86</h2>
 
 <div class="table">
@@ -703,6 +708,7 @@ image transport plugins.</p>
   </tr>
 </table>
 </div>
+
 
 
 
@@ -741,6 +747,7 @@ image transport plugins.</p>
   </tr>
 </table>
 </div>
+
 
 
 
@@ -818,6 +825,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 
 
 
+
 <h2 id="hd003007">3.7&nbsp;Additional Requirements for Transparent Overlays</h2>
 
 <div class="table">
@@ -870,6 +878,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <hr class="break" />
 
 
+
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
@@ -919,6 +928,7 @@ dpkg&nbsp;-i&nbsp;VirtualGL*.deb
 </ol>
 
 
+
 <h2 id="hd004002">4.2&nbsp;Installing VirtualGL on Solaris</h2>
 
 <ol class="Ordered numeric">
@@ -957,6 +967,7 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
 </p></div>
 
 
+
 <h2 id="hd004003">4.3&nbsp;Installing VirtualGL on Mac (Client Only)</h2>
 
 <ol class="Ordered numeric">
@@ -977,6 +988,7 @@ VirtualGL for Solaris installs into <code>/opt/SUNWvgl</code>.
         Linux packages.
     </li>
 </ol>
+
 
 
 <h2 id="hd004004">4.4&nbsp;Installing VirtualGL on Windows (Client Only)</h2>
@@ -1002,6 +1014,7 @@ NOTE: The VirtualGL Windows installer does not remove any previous versions of V
 </p></div>
 
 
+
 <h2 id="hd004005">4.5&nbsp;Installing VirtualGL from Source</h2>
 
 <p>If you are using a platform for which there is not a pre-built VirtualGL 
@@ -1016,6 +1029,7 @@ SourceForge web-site</a></span><a name="idx0048"></a>, uncompress it,
 <code>cd&nbsp;vgl</code>, and read the contents of 
 <code>BUILDING.txt</code> for further instructions on how to build and 
 install VirtualGL from source.</p>
+
 
 
 <h2 id="hd004006">4.6&nbsp;Uninstalling VirtualGL</h2>
@@ -1043,6 +1057,7 @@ dpkg&nbsp;-r&nbsp;VirtualGL
 </dl>
 
 
+
 <h3 id="hd004006002">Solaris</h3>
 
 <p>As root, issue the following command:</p>
@@ -1052,6 +1067,7 @@ pkgrm&nbsp;SUNWvgl
 </pre>
 
 <p>Answer &ldquo;yes&rdquo; when prompted.</p>
+
 
 
 <h3 id="hd004006003">Mac</h3>
@@ -1064,6 +1080,7 @@ sudo&nbsp;/opt/VirtualGL/bin/uninstall
 </pre>
 
 
+
 <h3 id="hd004006004">Windows</h3>
 
 <p>Use the &ldquo;Add or Remove Programs&rdquo; applet in the Control Panel 
@@ -1073,6 +1090,7 @@ running Vista.)</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Configuring a Linux or Solaris Machine as a VirtualGL Server</h1>
@@ -1181,6 +1199,7 @@ following command in the SSh session:</p>
 errors.</p>
 
 
+
 <h3 id="hd005001002">Using GLP by Default in VirtualGL</h3>
 
 <p>If you wish VirtualGL to use GLP by default, then you can add</p>
@@ -1199,6 +1218,7 @@ device.  Users can override this default by setting
 argument of <code>-d&nbsp;&lt;device&gt;</code> to <code>vglrun</code> 
 when invoking VirtualGL.  See Chapter 
 <a href="#Advanced_Configuration" class="ref">16</a> for more details.</p>
+
 
 
 <h2 id="hd005002">5.2&nbsp;Granting Access to the 3D X Server</h2>
@@ -1357,7 +1377,7 @@ Disable&nbsp;XTEST&nbsp;extension&nbsp;(recommended)?
                 X server, disabling XTEST will prevent them from inserting keystrokes or 
                 mouse events and thus hijacking local X sessions on that X server.
                 <div class="important"><p class="important">
-                On certain Linux distributions, it may be necessary to run <code>gdmsetup</code> first in order to create the X server command line entries in the GDM configuration file.  Until these command line entries have been created, disabling XTEST using <code>vglserver_config</code> will not work.  This is known to be necessary for openSUSE 10 and Enterprise Linux 5.
+                Certain Linux distributions do not have the X server command line entries in their GDM configuration files.  On these distributions, it will be necessary to run <code>gdmsetup</code> and manually add an argument of <code>-tst</code> to the X server command line to disable XTEST for the first time.  After this, <code>vglserver_config</code> should be able to disable and enable XTEST properly.  This is known to be necessary for openSUSE 10 and Enterprise Linux 5.
                 </p></div>
             </dd>
             <dt class="Description-3 Description">No</dt>
@@ -1454,6 +1474,7 @@ output of <code>xdpyinfo</code> to verify that <code>XTEST</code> does
 not show up in the list of extensions.</p>
 
 
+
 <h2 id="hd005003">5.3&nbsp;SSh Server Configuration</h2>
 
 <p>The application server&rsquo;s SSh daemon should have the 
@@ -1464,6 +1485,7 @@ Solaris 10+, and OpenSolaris systems generally keep this in
 <code>/etc/ssh</code>, whereas Blastwave OpenSSh keeps it in 
 <code>/opt/csw/etc</code> and SunFreeware OpenSSh keeps it in 
 <code>/usr/local/etc</code>.</p>
+
 
 
 <h2 id="hd005004">5.4&nbsp;Un-Configuring the Server</h2>
@@ -1491,6 +1513,7 @@ the changes will take effect.</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd006"><a name="file006"></a>6&nbsp;Configuring a Windows Machine as a VGL Transport Client</h1>
@@ -1537,6 +1560,7 @@ the changes will take effect.</p>
 </ol>
 
 
+
 <h3 id="hd006001002">Disabling Backing Store</h3>
 
 <ol class="Ordered numeric">
@@ -1561,6 +1585,7 @@ the changes will take effect.</p>
         you want to perform a server reset, click &ldquo;Yes.&rdquo;
     </li>
 </ol>
+
 
 
 <h3 id="hd006001003">Enabling MIT-SHM</h3>
@@ -1635,6 +1660,7 @@ patches from the Hummingbird support site:</p>
 <hr class="break" />
 
 
+
 <h1 id="hd007"><a name="file007"></a>7&nbsp;Using VirtualGL with the VGL Transport</h1>
 
 <p><a name="VGL_Transport_Usage"></a></p>
@@ -1655,6 +1681,7 @@ patches from the Hummingbird support site:</p>
         the client machine
     </li>
 </ul>
+
 
 
 <h3 id="hd007000002">Disadvantages of the VGL Transport</h3>
@@ -1678,6 +1705,7 @@ patches from the Hummingbird support site:</p>
         connection drops, then the application will exit
     </li>
 </ul>
+
 
 
 <h2 id="hd007001">7.1&nbsp;VGL Transport with X11 Forwarding</h2>
@@ -1722,6 +1750,7 @@ to maximize performance.</p>
         more information on <code>vglrun</code> command line options.
     </li>
 </ol>
+
 
 
 <h3 id="hd007001002">Procedure for Windows Clients</h3>
@@ -1771,6 +1800,7 @@ vglconnect&nbsp;{user}@{server}
 </ol>
 
 
+
 <h2 id="hd007002">7.2&nbsp;VGL Transport with a Direct X11 Connection</h2>
 
 <p><a name="Direct_X11_Connection"></a></p>
@@ -1801,6 +1831,7 @@ except that you should pass a <code>-x</code> argument to
 <pre class="verbatim">
 /opt/VirtualGL/bin/vglconnect&nbsp;-x&nbsp;{user}@{server}
 </pre>
+
 
 
 <h2 id="hd007003">7.3&nbsp;VGL Transport with X11 Forwarding and SSh Tunneling</h2>
@@ -1847,6 +1878,7 @@ client.</p>
 </div>
 
 
+
 <h2 id="hd007004">7.4&nbsp;VGL Transport over Gigabit Networks</h2>
 
 <p>When using the VGL Transport over Gigabit Ethernet or faster networks, 
@@ -1862,14 +1894,103 @@ switched Gigabit Ethernet (or faster) infrastructure and have plenty of
 bandwidth to spare.</p>
 
 
+
 <h2 id="hd007005">7.5&nbsp;VGL Transport with XDMCP</h2>
 
-<p>Using the VGL Transport with XDMCP should mostly &ldquo;just 
-work&rdquo;.  Once you have established the connection to the remote X 
-server using XDMCP, you can then follow any of the above procedures to 
-create an SSh connection to the application server and start a 3D 
-application using VirtualGL.  The application server and the machine 
-running the remote X server need not necessarily be the same machine.</p>
+<div class="important"><p class="important">
+XDMCP is very insecure and is not recommended as a means of running VirtualGL, in general.  This section is provided mainly for completeness and should not be construed as an endorsement of XDMCP.  In general, using an X proxy is a much better approach for getting a remote desktop session on the 3D application server.
+</p></div>
+
+<p>Using the VGL Transport with XDMCP is conceptually similar to using the 
+VGL Transport with a <a href="#Direct_X11_Connection">direct X11 
+connection</a><a name="idx0059"></a>.  The major difference is that, 
+rather than remotely displaying individual X windows to the 2D X server, 
+XDMCP remotely displays a complete desktop session from the application 
+server. Any applications that are started within this desktop session 
+will run on the application server, not the client.  Thus, 
+<code>vglconnect</code> cannot be used in this case.  Instead, it is 
+necessary to start <code>vglclient</code> manually on the client machine.</p>
+
+
+<h3 id="hd007005001">Procedure</h3>
+
+<ol class="Ordered numeric">
+    <li class="Ordered-1 Ordered">
+        Configure the server machine to accept XDMCP connections.  This may 
+        require opening specific ports in its firewall.
+    </li>
+    <li class="Ordered-1 Ordered">
+        Configure the client machine to make XDMCP connections.  This may 
+        require enabling X11 TCP connections and opening specific ports in its 
+        firewall.
+    </li>
+    <li class="Ordered-1 Ordered">
+        Once you have established an XDMCP connection from the client to the 
+        server, open a terminal inside the XDMCP session and type:
+<pre class="verbatim">
+xhost&nbsp;+LOCAL:
+</pre>
+
+        <div class="important"><p class="important">
+        This grants access to the 2D X server for any user that is currently logged into the client machine.  This is not very secure, but neither is using XDMCP.  If you are concerned, then see below for a discussion of how to use <code>xauth</code> to provide 2D X server access in a slightly more secure manner.
+        </p></div>
+    </li>
+    <li class="Ordered-1 Ordered">
+        If you are using a Mac or Windows client, or if you are using a nested X 
+        server (such as Xephyr or XNest) on a Linux/Unix client to make the 
+        XDMCP connection, then the next step is easy.  Simply open a new 
+        terminal/command prompt on the client machine, set the 
+        <code>DISPLAY</code> environment variable to the display name of the X 
+        server that is running the XDMCP session (usually <code>:0</code> or 
+        <code>:1</code>), and type:
+<pre class="verbatim">
+vglclient&nbsp;-detach
+</pre>
+
+        You can now close the terminal/command prompt, if you wish.
+    </li>
+    <li class="Ordered-1 Ordered">
+        If you are running a full-screen XDMCP session on a Linux/Unix client 
+        (for instance, using GDM Chooser), then starting <code>vglclient</code> 
+        is a bit trickier.  You will need to use SSh to connect back into the 
+        client machine from inside the XDMCP session.  Then, in the client SSh 
+        session, set the <code>DISPLAY</code> environment variable to the 
+        display name of the X server that is running the XDMCP session (usually 
+        <code>:0</code> or <code>:1</code>), and type:
+<pre class="verbatim">
+vglclient&nbsp;-detach
+</pre>
+
+        You can now close the SSh session, if you wish.
+    </li>
+</ol>
+
+
+
+<h3 id="hd007005002">Security</h3>
+
+<p>Typing <code>xhost&nbsp;+LOCAL:</code> in step 3 above opens the 2D X 
+server to all current users of the client machine.  This shouldn&rsquo;t 
+pose any significant risk if the client is a Windows or a Mac machine.  
+However, Linux/Unix clients might have multiple simultaneous users, so 
+in these cases, it may be desirable to use a more secure method of 
+granting access to the 2D X server.</p>
+
+<p>Instead of typing <code>xhost&nbsp;+LOCAL:</code>, you can type the 
+following:</p>
+
+<pre class="verbatim">
+xauth&nbsp;nextract&nbsp;-&nbsp;$DISPLAY&nbsp;|&nbsp;sed&nbsp;&quot;s/.*[&nbsp;]//g&quot;&nbsp;|&nbsp;xargs&nbsp;ssh&nbsp;{client}&nbsp;xauth&nbsp;add&nbsp;{display}&nbsp;.
+</pre>
+
+<p>where <em><code>{client}</code></em> is the hostname or IP address of 
+the client machine and <em><code>{display}</code></em> is the display 
+name of the 2D X server, from the point of view of the client machine 
+(usually <code>:0</code> or <code>:1</code>).</p>
+
+<p>This extracts the XAuth key for the 2D X server, then remotely adds it 
+to the XAuth keyring on the client machine.</p>
+
 
 
 <h2 id="hd007006">7.6&nbsp;The VirtualGL Client Application: Nuts and Bolts</h2>
@@ -1965,11 +2086,12 @@ create rules based on application executables instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Transport with <a href="#SSh_Tunneling">SSh 
-Tunneling</a><a name="idx0059"></a>.</p>
+Tunneling</a><a name="idx0060"></a>.</p>
 
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd008"><a name="file008"></a>8&nbsp;Using VirtualGL with X Proxies Such as VNC</h1>
@@ -2002,12 +2124,12 @@ They simply aren&rsquo;t designed to compress, with any degree of
 performance, the large and complex images generated by 3D applications.  
 Therefore, the VirtualGL Project provides an optimized X proxy called 
 &ldquo;TurboVNC&rdquo;, a variant of 
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0060"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0061"></a> 
 that is designed specifically to achieve high levels of performance with 
 VirtualGL.  More information about TurboVNC, including instructions for 
 using it with VirtualGL, can be found in the TurboVNC User&rsquo;s Guide.</p>
 
-<p><span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0061"></a> 
+<p><span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0062"></a> 
 is a next-generation VNC project based on the RealVNC and Xorg code 
 bases.  TigerVNC spun off from the TightVNC project in early 2009, and 
 the VirtualGL Project now actively participates in its development.  
@@ -2057,6 +2179,7 @@ by passing an argument of <code>-c&nbsp;proxy</code> to
 <code>vglrun</code>.</p>
 
 
+
 <h2 id="hd008002">8.2&nbsp;Using VirtualGL with an X Proxy on a Different Machine</h2>
 
 <p><a name="X11_Proxy_Usage_Remote"></a></p>
@@ -2078,7 +2201,7 @@ procedure to perform well.</p>
 
 <p>The procedure for using the VGL Transport to remotely display 3D 
 applications from a VirtualGL server to an X proxy is the same as the 
-<a href="#X11_Forwarding">procedure</a><a name="idx0062"></a> for using 
+<a href="#X11_Forwarding">procedure</a><a name="idx0063"></a> for using 
 the VGL Transport to remotely display 3D applications from a VirtualGL 
 server to a remote 2D X server, with the following notable differences:</p>
 
@@ -2104,6 +2227,7 @@ server to a remote 2D X server, with the following notable differences:</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd009"><a name="file009"></a>9&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
@@ -2286,6 +2410,7 @@ and the application executable is 64-bit, then you could use
 <hr class="break" />
 
 
+
 <h1 id="hd0010"><a name="file010"></a>10&nbsp;Using VirtualGL with Chromium and ModViz VGP</h1>
 
 <p><a name="Chromium"></a></p>
@@ -2336,6 +2461,7 @@ to a separate VirtualGL Client instance running on a multi-screen 2D X
 server elsewhere on the network. However, synchronizing the frames on 
 the remote end would require extensive modifications to VirtualGL and 
 perhaps to Chromium as well.  Such is left as an exercise for the reader.</p>
+
 
 
 <h2 id="hd0010002">10.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
@@ -2502,6 +2628,7 @@ following procedure in place of step 2 above:</p>
 </ul>
 
 
+
 <h2 id="hd0010003">10.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
@@ -2568,6 +2695,7 @@ VirtualGL:</p>
 </ol>
 
 
+
 <h2 id="hd0010004">10.4&nbsp;A Note About Performance</h2>
 
 <p>Chromium&rsquo;s use of X11 is generally not very optimal.  It assumes a 
@@ -2577,6 +2705,7 @@ determine whether windows have been resized, etc.  Thus, we have
 observed that, even on a fast network, Chromium tends to perform much 
 better with VirtualGL running in an X proxy as opposed to using the VGL 
 Transport.</p>
+
 
 
 <h2 id="hd0010005">10.5&nbsp;ModViz VGP v1.x and VirtualGL</h2>
@@ -2617,6 +2746,7 @@ NOTE: This is known not to work with VGP 2.0.
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd0011"><a name="file011"></a>11&nbsp;Using VirtualGL with VirtualBox</h1>
@@ -2697,7 +2827,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
         the 2D elements of the virtual machine display will not perform well 
         over a remote X11 connection unless a 
         <a href="#Direct_X11_Connection">direct X11 
-        connection</a><a name="idx0063"></a> (<code>vglconnect&nbsp;-x</code>) 
+        connection</a><a name="idx0064"></a> (<code>vglconnect&nbsp;-x</code>) 
         is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
         networks, using a high-performance X proxy is recommended when remotely 
         displaying VirtualBox using VirtualGL.
@@ -2707,6 +2837,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd0012"><a name="file012"></a>12&nbsp;Other Application Recipes</h1>
@@ -2766,6 +2897,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd0013"><a name="file013"></a>13&nbsp;Advanced OpenGL Features</h1>
@@ -2830,7 +2962,7 @@ VirtualGL will (by default) use quad-buffered stereo rendering if:</p>
 using anaglyphic stereo (see below.)  It is usually necessary to 
 explicitly enable stereo in the graphics driver configuration for both 
 the client and server machines.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0064"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0065"></a> 
 section below lists a way to verify that both client and server have 
 stereo visuals available.</p>
 
@@ -2845,6 +2977,7 @@ network bandwidth to maintain the same frame rate as mono.</p>
 
 <p>Quad-buffered stereo requires the VGL Transport.  If any other image 
 transport is used, then VGL will fall back to anaglyphic stereo mode.</p>
+
 
 
 <h3 id="hd0013001002">13.1.2&nbsp;Anaglyphic Stereo</h3>
@@ -2875,12 +3008,14 @@ anaglyphic stereo does not require any 3D rendering capabilities (stereo
 or otherwise) on the client machine.</p>
 
 
+
 <h3 id="hd0013001003">13.1.3&nbsp;Selecting a Stereo Mode</h3>
 
 <p>A particular stereo mode can be selected by setting the 
 <code>VGL_STEREO</code> environment variable or by using the 
 <code>-st</code> argument to <code>vglrun</code>.  See Section 
 <a href="#VGL_STEREO" class="ref">16.1</a> for more details.</p>
+
 
 
 <h2 id="hd0013002">13.2&nbsp;Transparent Overlays</h2>
@@ -2914,7 +3049,7 @@ overlays at the same time.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0065"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0066"></a> 
 below) to verify whether your client&rsquo;s X display supports overlays 
 and whether they are enabled.  In Exceed 3D, make sure that the 
 &ldquo;Overlay Support&rdquo; option is checked in the &ldquo;Exceed 3D 
@@ -2925,6 +3060,7 @@ and GLX&rdquo; applet:</p>
 <div class="important"><p class="important">
 Overlays do not work with X proxies.  VirtualGL must be displaying to a &ldquo;real&rdquo; X server.
 </p></div>
+
 
 
 <h2 id="hd0013003">13.3&nbsp;Indexed (PseudoColor) Rendering</h2>
@@ -2965,6 +3101,7 @@ client reasonably quickly even though they are uncompressed.</p>
 provided that the X proxy is configured to use an 8-bit color depth.  
 Note, however, that VNC cannot provide both PseudoColor and TrueColor 
 visuals at the same time.</p>
+
 
 
 <h2 id="hd0013004">13.4&nbsp;Troubleshooting</h2>
@@ -3022,6 +3159,7 @@ rendering, one of the visuals should have a class of
 <hr class="break" />
 
 
+
 <h1 id="hd0014"><a name="file014"></a>14&nbsp;Performance Measurement</h1>
 
 <p><a name="Perf_Measurement"></a></p>
@@ -3073,6 +3211,7 @@ this case, we could improve the performance of the whole system by
 simply using a client with a faster CPU.</p>
 
 
+
 <h2 id="hd0014002">14.2&nbsp;Frame Spoiling</h2>
 
 <p><a name="Frame_Spoiling"></a></p>
@@ -3105,6 +3244,7 @@ problem.</p>
 variable to <code>0</code> on the VirtualGL server or pass an argument 
 of <code>-sp</code> to <code>vglrun</code>.  See Section 
 <a href="#VGL_SPOIL" class="ref">16.1</a> for more details.</p>
+
 
 
 <h2 id="hd0014003">14.3&nbsp;VirtualGL Diagnostic Tools</h2>
@@ -3186,6 +3326,7 @@ transit time for a zero-byte packet, which is about 93 microseconds in
 this case.</p>
 
 
+
 <h3 id="hd0014003002">CPUstat</h3>
 
 <p>CPUstat is available only in the VirtualGL Linux packages and is located 
@@ -3219,6 +3360,7 @@ maximum, and average of all samples since CPUstat was started.</p>
 run CPUstat for a bit and wait for the Max. and Avg. for the 
 &ldquo;ALL&rdquo; category to stabilize, then that will tell you what 
 the application&rsquo;s peak and average % CPU utilization is.</p>
+
 
 
 <h3 id="hd0014003003">TCBench</h3>
@@ -3261,6 +3403,7 @@ tcbench&nbsp;-?
 <p>lists the relevant command line switches, which can be used to adjust 
 the benchmark time, the sampling rate, and the x and y offset of the 
 sampling area within the window.</p>
+
 
 
 <h3 id="hd0014003004">GLXSpheres</h3>
@@ -3336,6 +3479,7 @@ Solaris VirtualGL servers.  64-bit VirtualGL packages contain both a
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd0015"><a name="file015"></a>15&nbsp;The VirtualGL Configuration Dialog</h1>
@@ -3487,6 +3631,7 @@ VirtualGL monitors the application&rsquo;s X event loop to determine whenever a 
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd0016"><a name="file016"></a>16&nbsp;Advanced Configuration</h1>
@@ -3817,7 +3962,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0066"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0067"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -3897,7 +4042,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0067"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0068"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4005,7 +4150,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0068"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0069"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4137,7 +4282,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0069"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0070"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4178,7 +4323,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         setting <code>VGL_READBACK=0</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This feature 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0070"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0071"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4457,7 +4602,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0071"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0072"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4507,11 +4652,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0072"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0073"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0073"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0074"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em> 
         <ul class="Itemize"><li class="Itemize-0">
@@ -4758,6 +4903,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 </dl>
 
 
+
 <h2 id="hd0016002">16.2&nbsp;Client Settings</h2>
 
 <p>These settings control the VirtualGL Client, which is used only with the 
@@ -4960,6 +5106,7 @@ This option is available only if the VirtualGL client was built with OpenSSL sup
 </dl>
 
 <p><br /></p>
+
 
 </body>
 </html>
