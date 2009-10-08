@@ -38,7 +38,9 @@ umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
 mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
 mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
-mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
+if [ "$JPEGLIB" = "ipp" ]; then
+	mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
+fi
 mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || doexit -1
 chmod 1775 $TMPDIR/pkg/Package_Root/Library || doexit -1
 chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || doexit -1
