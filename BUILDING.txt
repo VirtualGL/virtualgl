@@ -14,7 +14,7 @@ How to build VirtualGL in 9043 easy steps
 
    However, you can easily include OpenSSL support in your custom build of
    VirtualGL by specifying USESSL=yes as an argument to 'make' or by adding
-   USESSL=yes to a file named 'config' in the VirtualGL build directory
+   USESSL=yes to a file named "config" in the VirtualGL build directory
    (create the file if it doesn't exist.)
 
 
@@ -68,7 +68,7 @@ How to build VirtualGL in 9043 easy steps
    * 2.05 or later required if building 64-bit VirtualGL
    * If you don't plan to use the VGL Transport, then you can build VirtualGL
      without SIMD-accelerated JPEG compression by passing "LIBJPEG_SIMD=no" as
-     an argument to "make".  This eliminates the need for NASM.
+     an argument to 'make'.  This eliminates the need for NASM.
 
 
 *******************************************************************************
@@ -110,11 +110,11 @@ one or more of the necessary 32-bit prerequisites, then:
       distribution, usually released on a separate set of discs.  On those
       discs, you should be able to find the 32-bit versions of the X11 dev. kit
       and the GLIBC dev. kit to match the 64-bit versions that are already
-      installed on your system. You may have to use "rpm --force" to force the
+      installed on your system. You may have to use 'rpm --force' to force the
       install of the 32-bit development packages, since they might contain
       header files which conflict with the 64-bit development packages that
       are already installed.  On Debian-based systems, you will need to use
-      "dpkg --force-architecture" to force the installation of i386 packages
+      'dpkg --force-architecture' to force the installation of i386 packages
       on an amd64 system.  See item (1) above.
 
 
@@ -131,9 +131,25 @@ one or more of the necessary 32-bit prerequisites, then:
      OpenGL SDK
      Mac OS X SDK
 
--- NASM (http://www.nasm.us/) 0.98 or later (Intel-based Macs only)
+-- NASM (http://www.nasm.us/) (Intel-based Macs only)
+   * 0.98 or later required if building 32-bit VirtualGL
+   * 2.07 or later required if building 64-bit VirtualGL
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
+
+-- On OS X 10.6 and later, VirtualGL can be built as a 64-bit binary, but this
+   is not the default.  To build a 64-bit Mac binary, pass an argument of
+   "subplatform=64" to 'make' when performing the build:
+
+     make subplatform=64
+
+   You can also add
+
+     subplatform=64
+
+   to the "config.osxx86" file to make 64-bit builds the default.  The 64-bit
+   binaries will reside in "osxx8664/bin" and "osxx8664/lib".
+
 
 
 *******************************************************************************
@@ -341,7 +357,7 @@ Cygwin:
 
 -- NASM (http://www.nasm.us/) 0.99 or later
 
--- Pass an argument of "platform=cygwin" to make when performing the
+-- Pass an argument of "platform=cygwin" to 'make' when performing the
    build:
 
      make platform=cygwin
