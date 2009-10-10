@@ -65,15 +65,18 @@ ifeq ($(prefix),)
  prefix=/usr/local
 endif
 
-.PHONY: rr32 mesademos32
+.PHONY: rr32 mesademos32 diags32
 ifeq ($(subplatform),)
 rr32: rr
 mesademos32: mesademos
+diags32: diags
 else
 rr32:
 	$(MAKE) M32=yes rr
 mesademos32:
 	$(MAKE) M32=yes mesademos
+diags32:
+	$(MAKE) M32=yes diags
 endif
 
 libdir=$(shell if [ -d /usr/lib32 ]; then echo lib32; else echo lib; fi)
@@ -248,8 +251,13 @@ sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/$(PKGNAME)
 
 ifeq ($(platform), osxx86)
+ifeq ($(subplatform), 64)
+dist: rr rr32 diags diags32 mesademos mesademos32
+	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(EDIR32) universal
+else
 dist: rr diags mesademos
-	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
+	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(EDIR32)
+endif
 endif
 
 .PHONY: tarball
