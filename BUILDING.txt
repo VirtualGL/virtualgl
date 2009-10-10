@@ -429,10 +429,9 @@ USEGLP = no
   * On Solaris, this builds VirtualGL without GLP extension code.  This is 
     necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.
 
-USESSL = no
+USESSL = yes
 
-  * Build VirtualGL without SSL support.
-
+  * Build VirtualGL with SSL support.
 
 *******************************************************************************
 **     Installing / Distributing
