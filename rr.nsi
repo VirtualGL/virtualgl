@@ -23,7 +23,6 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 	File "${BLDDIR}\bin\xauth.exe"
 	File "${BLDDIR}\bin\putty.exe"
 	File "${BLDDIR}\bin\plink.exe"
-	File "${JPGDIR}\${JPGLIB}"
 	File "${BLDDIR}\bin\tcbench.exe"
 	File "${BLDDIR}\bin\nettest.exe"
 	File "/oname=doc\LGPL.txt" "LGPL.txt"
@@ -64,7 +63,6 @@ Section "Uninstall"
 	Delete $INSTDIR\xauth.exe
 	Delete $INSTDIR\putty.exe
 	Delete $INSTDIR\plink.exe
-	Delete $INSTDIR\${JPGLIB}
 	Delete $INSTDIR\uninstall.exe
 	Delete $INSTDIR\stunnel.rnd
 	Delete $INSTDIR\tcbench.exe

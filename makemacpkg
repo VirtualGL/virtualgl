@@ -2,7 +2,7 @@
 
 usage()
 {
-	echo "$0 <app name> <JPEG library type> <build dir.> <version> <build> <lib dir> <bin dir>"
+	echo "$0 <app name> <build dir.> <version> <build> <lib dir> <bin dir>"
 	exit 1
 }
 
@@ -19,15 +19,13 @@ doexit()
 if [ "$1" = "" ]; then usage $0; fi
 APPNAME=$1
 if [ "$2" = "" ]; then usage $0; fi
-JPEGLIB=$2
+BLDDIR=$2
 if [ "$3" = "" ]; then usage $0; fi
-BLDDIR=$3
+VERSION=$3
 if [ "$4" = "" ]; then usage $0; fi
-VERSION=$4
+BUILD=$4
 if [ "$5" = "" ]; then usage $0; fi
-BUILD=$5
-if [ "$6" = "" ]; then usage $0; fi
-EDIR=$6
+EDIR=$5
 
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
@@ -38,9 +36,6 @@ umask 022
 TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
 mkdir -p $TMPDIR/pkg/Package_Root/usr/bin || doexit -1
 mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/bin || doexit -1
-if [ "$JPEGLIB" = "ipp" ]; then
-	mkdir -p $TMPDIR/pkg/Package_Root/opt/$APPNAME/lib || doexit -1
-fi
 mkdir -p $TMPDIR/pkg/Package_Root/Library/Documentation/$APPNAME || doexit -1
 chmod 1775 $TMPDIR/pkg/Package_Root/Library || doexit -1
 chmod 775 $TMPDIR/pkg/Package_Root/Library/Documentation || doexit -1
