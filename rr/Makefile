@@ -15,7 +15,8 @@ COBJS = $(ODIR)/rrcwin.obj \
 
 TOBJS = $(ODIR)/rrdisplayclient.obj \
         $(ODIR)/rrdisplayclientut.obj \
-        $(ODIR)/rrframeut.obj
+        $(ODIR)/rrframeut.obj \
+        $(ODIR)/fakerconfig.obj
 
 OBJS = $(COBJS) $(TOBJS)
 
@@ -52,9 +53,9 @@ $(EDIR)/rrframeut.exe: $(ODIR)/rrframeut.obj $(RRDEP)
 		$(ODIR)/rrframe.obj
 
 $(EDIR)/rrdisplayclientut.exe: $(ODIR)/rrdisplayclientut.obj \
-	$(ODIR)/rrdisplayclient.obj $(RRDEP)
+	$(ODIR)/rrdisplayclient.obj $(ODIR)/fakerconfig.obj $(RRDEP)
 	$(LINK) $(LDFLAGS) $(ODIR)/rrdisplayclientut.obj $(ODIR)/rrdisplayclient.obj \
-		-out:$@ $(RRLIB)
+		$(ODIR)/fakerconfig.obj -out:$@ $(RRLIB)
 
 ##########################################################################
 else

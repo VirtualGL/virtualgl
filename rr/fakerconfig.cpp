@@ -15,8 +15,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "fakerconfig.h"
 #include "rrlog.h"
+#include "fakerconfig.h"
 #include <stdio.h>
 #include <X11/keysym.h>
 #if FCONFIG_USESHM==1
