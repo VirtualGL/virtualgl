@@ -42,6 +42,10 @@ TurboJPEG or the proprietary Intel Performance Primitives.  Instead, VGL v2.2
 uses libjpeg/SIMD, a fully open source vector-accelerated JPEG codec developed
 in conjunction with the TigerVNC Project.
 -------------------------------------------------------------------------------
+[7]
+Added the ability to create universal 32/64-bit binaries for OS X 10.6 "Snow
+Leopard"
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
