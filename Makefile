@@ -49,19 +49,12 @@ ifeq ($(DEBUG), yes)
  WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
-ifeq ($(JPEGLIB), ipp)
- JPGDIR=$$%systemroot%\\system32
- JPGLIB=turbojpeg.dll
-endif
-
 dist: rr diags
 	$(RM) $(WBLDDIR)\$(APPNAME).exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) //DJPGDIR=$(JPGDIR) \
-		//DJPGLIB=$(JPGLIB) rr.nsi || \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) /DJPGDIR=$(JPGDIR) \
-		/DJPGLIB=$(JPGLIB) rr.nsi  # Cygwin doesn't like the //
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
 
 
 ##########################################################################
@@ -187,12 +180,12 @@ dist: rr rr32 diags mesademos mesademos32
 		--define "_build $(BUILD)" --define "_bindir $(EDIR)" \
 		--define "_bindir32 $(EDIR32)" --define "_libdir $(LDIR)" \
 		--define "_libdir32 $(LDIR32)" --target $(RPMARCH) \
-		rr.spec.$(JPEGLIB); \
+		rr.spec; \
 	cp $$TMPDIR/RPMS/$(RPMARCH)/$(APPNAME)-$(VERSION)-$(BUILD).$(RPMARCH).rpm $(BLDDIR)/$(APPNAME).$(RPMARCH).rpm; \
 	rm -rf $$TMPDIR
 
 deb: rr rr32 diags mesademos mesademos32
-	sh makedpkg $(APPNAME) $(JPEGLIB) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
+	sh makedpkg $(APPNAME) $(BLDDIR)/$(APPNAME)_$(DEBARCH).deb $(VERSION) $(BUILD) $(DEBARCH) $(LDIR) $(LDIR32) $(EDIR) $(EDIR32)
 
 srpm:
 	if [ -d $(BLDDIR)/rpms ]; then rm -rf $(BLDDIR)/rpms; fi
@@ -201,7 +194,7 @@ srpm:
 	mkdir -p $(BLDDIR)/rpms/BUILD
 	mkdir -p $(BLDDIR)/rpms/SOURCES
 	cp vgl.tar.gz $(BLDDIR)/rpms/SOURCES/$(APPNAME)-$(VERSION).tar.gz
-	cat rr.spec.$(JPEGLIB) | sed s/%{_version}/$(VERSION)/g \
+	cat rr.spec | sed s/%{_version}/$(VERSION)/g \
 		| sed s/%{_build}/$(BUILD)/g | sed s/%{_blddir}/%{_tmppath}/g \
 		| sed s/%{_bindir32}/linux\\/bin/g | sed s/%{_bindir}/linux64\\/bin/g \
 		| sed s/%{_libdir32}/linux\\/lib/g | sed s/%{_libdir}/linux64\\/lib/g \
@@ -214,7 +207,7 @@ endif
 
 ifeq ($(platform), cygwin)
 dist: rr diags mesademos
-	sh makecygwinpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
+	sh makecygwinpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
 
 ifeq ($(platform), solaris)
@@ -256,7 +249,7 @@ sunpkg: rr diags mesademos
 
 ifeq ($(platform), osxx86)
 dist: rr diags mesademos
-	sh makemacpkg $(APPNAME) $(JPEGLIB) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
+	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
 endif
 
 .PHONY: tarball
