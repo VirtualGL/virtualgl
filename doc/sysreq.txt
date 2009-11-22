@@ -23,7 +23,7 @@
 		{list type=ul: \
 			{item:Install the vendor drivers for the server's 3D graphics card. \
 				Do not use the drivers that ship with Linux, as these do not provide \
-				3D acceleration or Pbuffer support.}} \
+				full 3D acceleration or Pbuffer support.}} \
 	| < \
 	| Any graphics card with decent 2D performance \
 		{list type=ul: \
