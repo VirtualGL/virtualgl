@@ -21,9 +21,10 @@
 | Graphics \
 	| Any decent 3D graphics card that supports Pbuffers \
 		{list type=ul: \
-			{item:Install the vendor drivers for the server's 3D graphics card. \
-				Do not use the drivers that ship with Linux, as these do not provide \
-				full 3D acceleration or Pbuffer support.}} \
+			{item:If the manufacturer of your 3D adapter provides proprietary \
+				drivers for Linux, then it is recommended that you install these. \
+				Many of the drivers that ship with Linux do not provide full 3D \
+				acceleration or Pbuffer support.  }} \
 	| < \
 	| Any graphics card with decent 2D performance \
 		{list type=ul: \
