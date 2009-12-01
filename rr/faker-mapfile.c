@@ -67,6 +67,9 @@
 		glXQueryFrameCountNV;
 		glXResetFrameCountNV;
 
+		glXBindTexImageEXT;
+		glXReleaseTexImageEXT;
+
 		glXGetTransparentIndexSUN;
 
 		glXGetProcAddressARB;
