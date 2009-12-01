@@ -34,6 +34,10 @@ specify the default DRI permissions rather than using
 /etc/security/console.perms.  vglserver_config has been modified to handle
 this.
 -------------------------------------------------------------------------------
+[8]
+Added support for the GLX_EXT_texture_from_pixmap extension so that compiz can
+be run with VirtualGL.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
