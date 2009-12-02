@@ -42,7 +42,7 @@ usage()
 	echo "-k = Do not connect to server, but create an xauth key for this X display and"
 	echo "     add it to the local keyring so that any VirtualGL servers that share the"
 	echo "     same home directory as this machine can use this X display"
-	echo "-g = Use gissh from Globus Toolkit to make all SSh connections"
+	echo "-g = Use gsissh from Globus Toolkit to make all SSh connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo
 	exit $1
@@ -56,7 +56,7 @@ do
 	-s*) X11TUNNEL=1; VGLTUNNEL=1; CONNECT=1 ;;
 	-x*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=1 ;;
 	-k*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=0 ;;
-	-g*) SSHCMD=gissh; GLOBUS=1 ;;
+	-g*) SSHCMD=gsissh; GLOBUS=1 ;;
 	*) break ;;
 	esac
 	shift
@@ -85,7 +85,7 @@ if [ "$X11TUNNEL" = "1" ]; then
 	4*) SSHARG='-Y' ;;
 	5*) SSHARG='-Y' ;;
 	esac
-	if [ "$SSHCMD" = "gissh" ]; then
+	if [ "$SSHCMD" = "gsissh" ]; then
 		SSHARG='-Y'
 	fi
 fi
