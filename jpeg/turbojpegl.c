@@ -149,6 +149,10 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	#error "TurboJPEG requires JPEG colorspace extensions"
 	#endif
 
+	if(flags&TJ_FORCEMMX) setenv("JSIMD_FORCEMMX", "1", 1);
+	else if(flags&TJ_FORCESSE) setenv("JSIMD_FORCESSE", "1", 1);
+	else if(flags&TJ_FORCESSE2) setenv("JSIMD_FORCESSE2", "1", 1);
+
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
 		if(row_pointer) free(row_pointer);
@@ -181,6 +185,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 		if(flags&TJ_BOTTOMUP) row_pointer[i]= &srcbuf[(height-i-1)*pitch];
 		else row_pointer[i]= &srcbuf[i*pitch];
 	}
+	
 	jpeg_start_compress(&j->cinfo, TRUE);
 	while(j->cinfo.next_scanline<j->cinfo.image_height)
 	{
@@ -286,6 +291,10 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 	if(!j->initd) _throw("Instance has not been initialized for decompression");
 
 	if(pitch==0) pitch=width*ps;
+
+	if(flags&TJ_FORCEMMX) setenv("JSIMD_FORCEMMX", "1", 1);
+	else if(flags&TJ_FORCESSE) setenv("JSIMD_FORCESSE", "1", 1);
+	else if(flags&TJ_FORCESSE2) setenv("JSIMD_FORCESSE2", "1", 1);
 
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
