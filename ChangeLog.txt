@@ -46,10 +46,6 @@ in conjunction with the TigerVNC Project.
 Added the ability to create universal 32/64-bit binaries for OS X 10.6 "Snow
 Leopard"
 -------------------------------------------------------------------------------
-[8]
-Added an option to vglconnect on Linux/Unix to allow it to use gissh from the
-Globus Toolkit instead of the regular ssh program.
--------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -91,6 +87,10 @@ this.
 [8]
 Added support for the GLX_EXT_texture_from_pixmap extension so that compiz can
 be run with VirtualGL.
+-------------------------------------------------------------------------------
+[9]
+Added an option to vglconnect on Linux/Unix to allow it to use gsissh from the
+Globus Toolkit instead of the regular ssh program.
 -------------------------------------------------------------------------------
 
 
