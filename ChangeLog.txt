@@ -38,6 +38,10 @@ this.
 Added support for the GLX_EXT_texture_from_pixmap extension so that compiz can
 be run with VirtualGL.
 -------------------------------------------------------------------------------
+[9]
+Added an option to vglconnect on Linux/Unix to allow it to use gsissh from the
+Globus Toolkit instead of the regular ssh program.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
