@@ -308,8 +308,9 @@ static mlib_u8 *e_extendline(mlib_u8 *srcbuf, mlib_u8 *linebuf, int oldw, int ne
 	return linebuf;
 }
 
-static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *cbbuf,
-	mlib_u8 *crbuf, int cw, int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2)
+static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw,
+	int ypitch, mlib_u8 *cbbuf, mlib_u8 *crbuf, int cw, int cpitch,
+	int startline, mlib_u8 *linebuf, mlib_u8 *linebuf2, int hextend)
 {
 	int rgbstride=jpg->pitch;
 	mlib_status (DLLCALL *ccfct)(mlib_u8 *, mlib_u8 *, mlib_u8 *,
@@ -372,7 +373,8 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	if(jpg->subsamp==TJ_420)
 	{
 		mlib_u8 *y=ybuf, *cb=cbbuf, *cr=crbuf, *tmpptr, *tmpptr2;
-		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=yw*2, cb+=cw, cr+=cw)
+		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=ypitch*2, cb+=cpitch,
+			cr+=cpitch)
 		{
 			int ps=jpg->ps;
 			tmpptr=e_preconvertline(jpg->bmpptr, linebuf, &ps, jpg->flags, jpg->width, yw);
@@ -383,7 +385,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 				tmpptr2=e_preconvertline(jpg->bmpptr+rgbstride, linebuf2, &ps, jpg->flags, jpg->width, yw);
 				tmpptr2=e_extendline(tmpptr2, linebuf2, jpg->width, yw, ps);
 			} else tmpptr2=tmpptr;
-			_mlib(ccfct420(y, y+yw, cb, cr, tmpptr, tmpptr2, yw));
+			_mlib(ccfct420(y, y+ypitch, cb, cr, tmpptr, tmpptr2, yw));
 		}
 	}
 	else
@@ -398,7 +400,7 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 
 			if(jpg->flags&TJ_ALPHAFIRST) {rindex++;  gindex++;  bindex++;}
 
-			for(j=0; j<h; j++, dptr+=yw, jpg->bmpptr+=rgbstride)
+			for(j=0; j<h; j++, dptr+=ypitch, jpg->bmpptr+=rgbstride)
 			{
 				for(i=0, dptr2=dptr, tmpptr=jpg->bmpptr; i<jpg->width; i++, dptr2++,
 					tmpptr+=jpg->ps)
@@ -410,14 +412,15 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			if(jpg->width<yw)
 			{
 				dptr=&y[jpg->width-1];
-				for(j=0; j<h; j++, dptr+=yw)
+				for(j=0; j<h; j++, dptr+=ypitch)
 					for(i=jpg->width, dptr2=dptr+1; i<yw; i++, dptr2++)
 						*dptr2=*dptr;
 			}
 		}
 		else
 		{
-			for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
+			for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=ypitch, cb+=cpitch,
+				cr+=cpitch)
 			{
 				int ps=jpg->ps;
 				tmpptr=e_preconvertline(jpg->bmpptr, linebuf, &ps, jpg->flags, jpg->width, yw);
@@ -428,21 +431,21 @@ static int e_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	}
 
 	// Extend to a full MCU row (if necessary)
-	if(mcuh>h)
+	if(mcuh>h && hextend)
 	{
 		for(j=h; j<mcuh; j++)
 		{
-			mlib_VectorCopy_U8(&ybuf[j*yw], &ybuf[(h-1)*yw], yw);
+			mlib_VectorCopy_U8(&ybuf[j*ypitch], &ybuf[(h-1)*ypitch], yw);
 		}
 	}
 	if(jpg->subsamp!=TJ_GRAYSCALE)
 	{
-		if(8>(h-1)*8/mcuh+1)
+		if(8>(h-1)*8/mcuh+1 && hextend)
 		{
 			for(j=(h-1)*8/mcuh+1; j<8; j++)
 			{
-				mlib_VectorCopy_U8(&cbbuf[j*cw], &cbbuf[((h-1)*8/mcuh)*cw], cw);
-				mlib_VectorCopy_U8(&crbuf[j*cw], &crbuf[((h-1)*8/mcuh)*cw], cw);
+				mlib_VectorCopy_U8(&cbbuf[j*cpitch], &cbbuf[((h-1)*8/mcuh)*cpitch], cw);
+				mlib_VectorCopy_U8(&crbuf[j*cpitch], &crbuf[((h-1)*8/mcuh)*cpitch], cw);
 			}
 		}
 	}
@@ -650,7 +653,8 @@ static int encode_jpeg(jpgstruct *jpg)
 
 	for(j=0; j<jpg->height; j+=mcuh)
 	{
-		_catch(e_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
+		_catch(e_mcu_color_convert(jpg, ybuf, yw, yw, cbbuf, crbuf, cw, cw, j,
+			linebuf, &linebuf[yw*4], 1));
 
 		for(i=0; i<yw; i+=mcuw)
 		{
@@ -714,63 +718,38 @@ static int encode_jpeg(jpgstruct *jpg)
 
 static int encode_yuv(jpgstruct *jpg)
 {
-	int i, j, _h;
+	int j;
 	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
 	mlib_u8 *ybuf, *cbbuf, *crbuf, *linebuf=NULL;
-	mlib_u8 *yin, *cbin, *crin, *yout, *cbout, *crout;
-	int yw=PAD(jpg->width, mcuw);
-	int yh=PAD(jpg->height, mcuh);
-	int cw=yw*8/mcuw;
-	int ch=yh*8/mcuh;
-	int ywo=PAD(jpg->width, mcuw/8);
-	int yho=PAD(jpg->height, mcuh/8);
-	int cwo=ywo*8/mcuw, cho=yho*8/mcuh;
-	int ypitch=PAD(ywo, 4), cpitch=PAD(cwo, 4);
+	int yw=PAD(jpg->width, mcuw/8);
+	int yh=PAD(jpg->height, mcuh/8);
+	int cw=yw*8/mcuw, ch=yh*8/mcuh;
+	int ypitch=PAD(yw, 4), cpitch=PAD(cw, 4);
 
-	if(jpg->subsamp==TJ_GRAYSCALE) cw=ch=cwo=cho=0;
+	if(jpg->subsamp==TJ_GRAYSCALE) cw=ch=0;
 	jpg->bytesprocessed=0;
 	if(jpg->flags&TJ_BOTTOMUP) jpg->bmpptr=&jpg->bmpbuf[jpg->pitch*(jpg->height-1)];
 	else jpg->bmpptr=jpg->bmpbuf;
+	jpg->jpgptr=jpg->jpgbuf;
 
-	_mlibn(ybuf=(mlib_u8 *)memalign(16, yw*mcuh + cw*8*2 + 8));
-	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
+	ybuf=jpg->jpgptr;
+	cbbuf=&ybuf[ypitch*yh];  crbuf=&ybuf[ypitch*yh + cpitch*ch];
 	_mlibn(linebuf=(mlib_u8 *)memalign(16, yw*4*2));
 
 	for(j=0; j<jpg->height; j+=mcuh)
 	{
-		_catch(e_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
-		yin=ybuf;  cbin=cbbuf;  crin=crbuf;
-		yout=&jpg->jpgbuf[ypitch*j];
-		_h=min(mcuh, yho-j);
-		for(i=0; i<_h; i++)
-		{
-			mlib_VectorCopy_U8(yout, yin, ywo);
-			yout+=ypitch;  yin+=yw;
-		}
-		if(jpg->subsamp!=TJ_GRAYSCALE)
-		{
-			cbout=&jpg->jpgbuf[ypitch*yho + cpitch*j*8/mcuh];
-			crout=&jpg->jpgbuf[ypitch*yho + cpitch*cho + cpitch*j*8/mcuh];
-			_h=min(8, cho-(j*8/mcuh));
-			for(i=0; i<_h; i++)
-			{
-				mlib_VectorCopy_U8(cbout, cbin, cwo);
-				mlib_VectorCopy_U8(crout, crin, cwo);
-				cbout+=cpitch;  crout+=cpitch;
-				cbin+=cw;  crin+=cw;
-			}
-		}
+		_catch(e_mcu_color_convert(jpg, ybuf, yw, ypitch, cbbuf, crbuf, cw,
+			cpitch, j, linebuf, &linebuf[yw*4], 0));
+		ybuf+=mcuh*ypitch;  cbbuf+=8*cpitch;  crbuf+=8*cpitch;
 	}
-	jpg->jpgptr+=(ypitch*yho + cpitch*cho*2);
-	jpg->bytesprocessed+=(ypitch*yho + cpitch*cho*2);
-	jpg->bytesleft-=(ypitch*yho + cpitch*cho*2);
+	jpg->jpgptr+=(ypitch*yh + cpitch*ch*2);
+	jpg->bytesprocessed+=(ypitch*yh + cpitch*ch*2);
+	jpg->bytesleft-=(ypitch*yh + cpitch*ch*2);
 
-	if(ybuf) free(ybuf);
 	if(linebuf) free(linebuf);
 	return 0;
 
 	bailout:
-	if(ybuf) free(ybuf);
 	if(linebuf) free(linebuf);
 	return -1;
 }
