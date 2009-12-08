@@ -210,7 +210,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	j->jdms.free_in_buffer = TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height);
 
 	jpeg_start_compress(&j->cinfo, TRUE);
-	if(flags&TJ_CCONLY)
+	if(flags&TJ_YUVOUT)
 	{
 		j_compress_ptr cinfo=&j->cinfo;
 		int row;
@@ -295,7 +295,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 		}
 	}
 	jpeg_finish_compress(&j->cinfo);
-	if(!(flags&TJ_CCONLY))
+	if(!(flags&TJ_YUVOUT))
 		*size=TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height)-(j->jdms.free_in_buffer);
 
 	if(row_pointer) free(row_pointer);
@@ -443,19 +443,13 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 	#endif
 	if(flags&TJ_FASTUPSAMPLE) j->dinfo.do_fancy_upsampling=FALSE;
 
-	if(flags&TJ_CCONLY)
+	jpeg_start_decompress(&j->dinfo);
+	while(j->dinfo.output_scanline<j->dinfo.output_height)
 	{
+		jpeg_read_scanlines(&j->dinfo, &row_pointer[j->dinfo.output_scanline],
+			j->dinfo.output_height-j->dinfo.output_scanline);
 	}
-	else
-	{
-		jpeg_start_decompress(&j->dinfo);
-		while(j->dinfo.output_scanline<j->dinfo.output_height)
-		{
-			jpeg_read_scanlines(&j->dinfo, &row_pointer[j->dinfo.output_scanline],
-				j->dinfo.output_height-j->dinfo.output_scanline);
-		}
-		jpeg_finish_decompress(&j->dinfo);
-	}
+	jpeg_finish_decompress(&j->dinfo);
 
 	if(row_pointer) free(row_pointer);
 	return 0;

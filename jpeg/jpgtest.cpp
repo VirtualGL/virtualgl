@@ -24,7 +24,7 @@
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  goto bailout;}}
 
-int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, fastupsample=0, cconly=0;
+int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, fastupsample=0, yuvout=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 const int _flags[BMPPIXELFORMATS]={0, 0, TJ_BGR, TJ_BGR,
 	TJ_BGR|TJ_ALPHAFIRST, TJ_ALPHAFIRST};
@@ -70,7 +70,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 
 	flags |= _flags[pf];
 	if(bu) flags |= TJ_BOTTOMUP;
-	if(cconly) flags |= TJ_CCONLY;
+	if(yuvout) flags |= TJ_YUVOUT;
 
 	if((rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL)
 	{
@@ -80,7 +80,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 
 	if(!quiet)
 	{
-		if(cconly)
+		if(yuvout)
 			printf("\n>>>>>  %s (%s) <--> YUV %s  <<<<<\n", _pfname[pf],
 				bu?"Bottom-up":"Top-down", _subnamel[jpegsub]);
 		else
@@ -166,7 +166,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 		if(tilesizex==w && tilesizey==h)
 		{
-			if(cconly)
+			if(yuvout)
 				sprintf(tempstr, "%s_%s.yuv", filename, _subnames[jpegsub]);
 			else
 				sprintf(tempstr, "%s_%sQ%d.jpg", filename, _subnames[jpegsub], qual);
@@ -183,7 +183,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			fclose(outfile);
 			if(!quiet) printf("Reference image written to %s\n", tempstr);
 		}
-		if(cconly) goto bailout;
+		if(yuvout) goto bailout;
 
 		// Decompression test
 		memset(rgbbuf, 127, pitch*h);  // Grey image means decompressor did nothing
@@ -357,10 +357,10 @@ int main(int argc, char *argv[])
 				printf("Using fast upsampling code\n");
 				fastupsample=1;
 			}
-			if(!stricmp(argv[i], "-cconly"))
+			if(!stricmp(argv[i], "-yuvout"))
 			{
 				printf("Testing YUV planar encoding\n");
-				cconly=1;
+				yuvout=1;
 			}
 			if(!stricmp(argv[i], "-rgb")) pf=BMP_RGB;
 			if(!stricmp(argv[i], "-rgba")) pf=BMP_RGBA;

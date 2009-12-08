@@ -837,7 +837,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	jpg->ps=ps;  jpg->subsamp=jpegsub;  jpg->qual=qual;  jpg->flags=flags;
 	jpg->bytesleft=TJBUFSIZE(width, height);
 
-	if(flags&TJ_CCONLY) {_catch(encode_yuv(jpg));}
+	if(flags&TJ_YUVOUT) {_catch(encode_yuv(jpg));}
 	else {_catch(encode_jpeg(jpg));}
 
 	*size=jpg->bytesprocessed;
