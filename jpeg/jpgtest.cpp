@@ -24,7 +24,7 @@
 
 #define _catch(f) {if((f)==-1) {printf("Error in %s:\n%s\n", #f, tjGetErrorStr());  goto bailout;}}
 
-int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, fastupsample=0;
+int forcemmx=0, forcesse=0, forcesse2=0, forcesse3=0, fastupsample=0, cconly=0;
 const int _ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 const int _flags[BMPPIXELFORMATS]={0, 0, TJ_BGR, TJ_BGR,
 	TJ_BGR|TJ_ALPHAFIRST, TJ_ALPHAFIRST};
@@ -70,6 +70,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 
 	flags |= _flags[pf];
 	if(bu) flags |= TJ_BOTTOMUP;
+	if(cconly) flags |= TJ_CCONLY;
 
 	if((rgbbuf=(unsigned char *)malloc(pitch*h)) == NULL)
 	{
@@ -77,8 +78,15 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		exit(1);
 	}
 
-	if(!quiet) printf("\n>>>>>  %s (%s) <--> JPEG %s Q%d  <<<<<\n", _pfname[pf],
-		bu?"Bottom-up":"Top-down", _subnamel[jpegsub], qual);
+	if(!quiet)
+	{
+		if(cconly)
+			printf("\n>>>>>  %s (%s) <--> YUV %s  <<<<<\n", _pfname[pf],
+				bu?"Bottom-up":"Top-down", _subnamel[jpegsub]);
+		else
+			printf("\n>>>>>  %s (%s) <--> JPEG %s Q%d  <<<<<\n", _pfname[pf],
+				bu?"Bottom-up":"Top-down", _subnamel[jpegsub], qual);
+	}
 	if(dotile) {tilesizex=tilesizey=4;}  else {tilesizex=w;  tilesizey=h;}
 
 	do
@@ -158,7 +166,10 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 		}
 		if(tilesizex==w && tilesizey==h)
 		{
-			sprintf(tempstr, "%s_%sQ%d.jpg", filename, _subnames[jpegsub], qual);
+			if(cconly)
+				sprintf(tempstr, "%s_%s.yuv", filename, _subnames[jpegsub]);
+			else
+				sprintf(tempstr, "%s_%sQ%d.jpg", filename, _subnames[jpegsub], qual);
 			if((outfile=fopen(tempstr, "wb"))==NULL)
 			{
 				puts("ERROR: Could not open reference image");
@@ -172,6 +183,7 @@ void dotest(unsigned char *srcbuf, int w, int h, BMPPIXELFORMAT pf, int bu,
 			fclose(outfile);
 			if(!quiet) printf("Reference image written to %s\n", tempstr);
 		}
+		if(cconly) goto bailout;
 
 		// Decompression test
 		memset(rgbbuf, 127, pitch*h);  // Grey image means decompressor did nothing
@@ -344,6 +356,11 @@ int main(int argc, char *argv[])
 			{
 				printf("Using fast upsampling code\n");
 				fastupsample=1;
+			}
+			if(!stricmp(argv[i], "-cconly"))
+			{
+				printf("Testing YUV planar encoding\n");
+				cconly=1;
 			}
 			if(!stricmp(argv[i], "-rgb")) pf=BMP_RGB;
 			if(!stricmp(argv[i], "-rgba")) pf=BMP_RGBA;

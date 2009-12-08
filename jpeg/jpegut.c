@@ -17,11 +17,16 @@
 #include <string.h>
 #include "turbojpeg.h"
 #include "rrtimer.h"
+#include "rrutil.h"
 
 #define _catch(f) {if((f)==-1) {printf("TJPEG: %s\n", tjGetErrorStr());  goto finally;}}
 
-const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:1:1", "GRAY"};
-const char *_subnames[NUMSUBOPT]={"444", "422", "411", "GRAY"};
+const char *_subnamel[NUMSUBOPT]={"4:4:4", "4:2:2", "4:2:0", "GRAY"};
+const char *_subnames[NUMSUBOPT]={"444", "422", "420", "GRAY"};
+const int _hsf[NUMSUBOPT]={1, 2, 2, 1};
+const int _vsf[NUMSUBOPT]={1, 1, 2, 1};
+
+int cconly=0;
 
 int pixels[9][3]=
 {
@@ -155,6 +160,126 @@ int checkbuf(unsigned char *buf, int w, int h, int ps, int subsamp, int flags)
 	return 1;
 }
 
+#define checkval(v, cv) { \
+	if(v<cv-1 || v>cv+1) { \
+		printf("\nComp. %s at %d,%d should be %d, not %d\n", #v, i, j, cv, v); \
+		retval=0;  goto bailout; \
+	}}
+
+#define checkval0(v) { \
+	if(v>1) { \
+		printf("\nComp. %s at %d,%d should be 0, not %d\n", #v, i, j, v); \
+		retval=0;  goto bailout; \
+	}}
+
+#define checkval255(v) { \
+	if(v<254 && !(v==217 && i==0 && j==21)) { \
+		printf("\nComp. %s at %d,%d should be 255, not %d\n", #v, i, j, v); \
+		retval=0;  goto bailout; \
+	}}
+
+#define PAD(v, p) ((v+(p)-1)&(~((p)-1)))
+
+int checkbufyuv(unsigned char *buf, unsigned long size, int w, int h,
+	int subsamp)
+{
+	int i, j;
+	int hsf=_hsf[subsamp], vsf=_vsf[subsamp];
+	int pw=PAD(w, hsf), ph=PAD(h, vsf);
+	int cw=pw/hsf, ch=ph/vsf;
+	int ypitch=PAD(pw, 4), uvpitch=PAD(cw, 4);
+	int retval=1;
+	unsigned long correctsize=ypitch*ph + (subsamp==TJ_GRAYSCALE? 0:uvpitch*ch*2);
+
+	if(size!=correctsize)
+	{
+		printf("\nIncorrect size %lu.  Should be %lu\n", size, correctsize);
+		retval=0;  goto bailout;
+	}
+
+	for(i=0; i<16; i++)
+	{
+		for(j=0; j<pw; j++)
+		{
+			unsigned char y=buf[ypitch*i+j];
+			if(((i/8)+(j/8))%2==0) checkval255(y)
+			else checkval(y, 76)
+		}
+	}
+	for(i=16; i<ph; i++)
+	{
+		for(j=0; j<pw; j++)
+		{
+			unsigned char y=buf[ypitch*i+j];
+			if(((i/8)+(j/8))%2==0) checkval0(y)
+			else checkval(y, 226)
+		}
+	}
+	if(subsamp!=TJ_GRAYSCALE)
+	{
+		for(i=0; i<16/vsf; i++)
+		{
+			for(j=0; j<cw; j++)
+			{
+				unsigned char u=buf[ypitch*ph + (uvpitch*i+j)],
+					v=buf[ypitch*ph + uvpitch*ch + (uvpitch*i+j)];
+				if(((i*vsf/8)+(j*hsf/8))%2==0)
+				{
+					checkval(u, 128);  checkval(v, 128);
+				}
+				else
+				{
+					checkval(u, 85);  checkval255(v);
+				}
+			}
+		}
+		for(i=16/vsf; i<ch; i++)
+		{
+			for(j=0; j<cw; j++)
+			{
+				unsigned char u=buf[ypitch*ph + (uvpitch*i+j)],
+					v=buf[ypitch*ph + uvpitch*ch + (uvpitch*i+j)];
+				if(((i*vsf/8)+(j*hsf/8))%2==0)
+				{
+					checkval(u, 128);  checkval(v, 128);
+				}
+				else
+				{
+					checkval0(u);  checkval(v, 149);
+				}
+			}
+		}
+	}
+
+	bailout:
+	if(retval==0)
+	{
+		for(i=0; i<ph; i++)
+		{
+			for(j=0; j<pw; j++)
+				printf("%.3d ", buf[ypitch*i+j]);
+			printf("\n");
+		}
+		printf("\n");
+		for(i=0; i<ch; i++)
+		{
+			for(j=0; j<cw; j++)
+				printf("%.3d ", buf[ypitch*ph + (uvpitch*i+j)]);
+			printf("\n");
+		}
+		printf("\n");
+		for(i=0; i<ch; i++)
+		{
+			for(j=0; j<cw; j++)
+				printf("%.3d ", buf[ypitch*ph + uvpitch*ch + (uvpitch*i+j)]);
+			printf("\n");
+		}
+		printf("\n");
+	}
+
+	return retval;
+}
+
 void writejpeg(unsigned char *jpegbuf, unsigned long jpgbufsize, char *filename)
 {
 	FILE *outfile=NULL;
@@ -179,6 +304,8 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	char tempstr[1024];  unsigned char *bmpbuf=NULL;
 	const char *pixformat;  double t;
 
+	if(cconly) flags|=TJ_CCONLY;
+
 	if(flags&TJ_BGR)
 	{
 		if(ps==3) pixformat="BGR";
@@ -189,8 +316,12 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 		if(ps==3) pixformat="RGB";
 		else {if(flags&TJ_ALPHAFIRST) pixformat="ARGB";  else pixformat="RGBA";}
 	}
-	printf("%s %s -> %s Q%d ... ", pixformat,
-		(flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ", _subnamel[subsamp], qual);
+	if(cconly)
+		printf("%s %s -> %s YUV ... ", pixformat,
+			(flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ", _subnamel[subsamp]);
+	else
+		printf("%s %s -> %s Q%d ... ", pixformat,
+			(flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ", _subnamel[subsamp], qual);
 
 	if((bmpbuf=(unsigned char *)malloc(w*h*ps+1))==NULL)
 	{
@@ -203,10 +334,20 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	_catch(tjCompress(hnd, bmpbuf, w, 0, h, ps, jpegbuf, size, subsamp, qual, flags));
 	t=rrtime()-t;
 
-	sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat,
-		(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp], qual);
+	if(cconly)
+		sprintf(tempstr, "%s_enc_%s_%s_%s.yuv", basefilename, pixformat,
+			(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp]);
+	else
+		sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat,
+			(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp], qual);
 	writejpeg(jpegbuf, *size, tempstr);
-	printf("Done.  %f ms\n  Result in %s\n", t*1000., tempstr);
+	if(cconly)
+	{
+		if(checkbufyuv(jpegbuf, *size, w, h, subsamp)) printf("Passed.");
+		else printf("FAILED!");
+	}
+	else printf("Done.");
+	printf("  %f ms\n  Result in %s\n", t*1000., tempstr);
 
 	finally:
 	if(bmpbuf) free(bmpbuf);
@@ -217,6 +358,8 @@ void gentestbmp(tjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 {
 	unsigned char *bmpbuf=NULL;
 	const char *pixformat;  int _w=0, _h=0;  double t;
+
+	if(cconly) return;
 
 	if(flags&TJ_BGR)
 	{
@@ -358,8 +501,16 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
+	if(argc>1 && !stricmp(argv[1], "-cconly")) cconly=1;
 	dotest(35, 41, 3, TJ_444, "test");
 	dotest(35, 41, 4, TJ_444, "test");
+	if(cconly)
+	{
+		dotest(35, 41, 3, TJ_422, "test");
+		dotest(35, 41, 4, TJ_422, "test");
+		dotest(35, 41, 3, TJ_420, "test");
+		dotest(35, 41, 4, TJ_420, "test");
+	}
 	dotest(35, 41, 3, TJ_GRAYSCALE, "test");
 	dotest(35, 41, 4, TJ_GRAYSCALE, "test");
 	dotest1();

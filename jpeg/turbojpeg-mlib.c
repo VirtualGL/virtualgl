@@ -42,6 +42,11 @@ static const int _mcuh[NUMSUBOPT]={8, 8, 16, 8};
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
+#ifndef min
+ #define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
+#define PAD(v, p) ((v+(p)-1)&(~((p)-1)))
 
 #define write_byte(j, b) {if(j->bytesleft<=0) _throw("Not enough space in buffer");  \
 	*j->jpgptr=b;  j->jpgptr++;  j->bytesprocessed++;  j->bytesleft--;}
@@ -707,6 +712,69 @@ static int encode_jpeg(jpgstruct *jpg)
 	return -1;
 }
 
+static int encode_yuv(jpgstruct *jpg)
+{
+	int i, j, _h;
+	int mcuw=_mcuw[jpg->subsamp], mcuh=_mcuh[jpg->subsamp];
+	mlib_u8 *ybuf, *cbbuf, *crbuf, *linebuf=NULL;
+	mlib_u8 *yin, *cbin, *crin, *yout, *cbout, *crout;
+	int yw=PAD(jpg->width, mcuw);
+	int yh=PAD(jpg->height, mcuh);
+	int cw=yw*8/mcuw;
+	int ch=yh*8/mcuh;
+	int ywo=PAD(jpg->width, mcuw/8);
+	int yho=PAD(jpg->height, mcuh/8);
+	int cwo=ywo*8/mcuw, cho=yho*8/mcuh;
+	int ypitch=PAD(ywo, 4), cpitch=PAD(cwo, 4);
+
+	if(jpg->subsamp==TJ_GRAYSCALE) cw=ch=cwo=cho=0;
+	jpg->bytesprocessed=0;
+	if(jpg->flags&TJ_BOTTOMUP) jpg->bmpptr=&jpg->bmpbuf[jpg->pitch*(jpg->height-1)];
+	else jpg->bmpptr=jpg->bmpbuf;
+
+	_mlibn(ybuf=(mlib_u8 *)memalign(16, yw*mcuh + cw*8*2 + 8));
+	cbbuf=&ybuf[yw*mcuh];  crbuf=&ybuf[yw*mcuh+cw*8];
+	_mlibn(linebuf=(mlib_u8 *)memalign(16, yw*4*2));
+
+	for(j=0; j<jpg->height; j+=mcuh)
+	{
+		_catch(e_mcu_color_convert(jpg, ybuf, yw, cbbuf, crbuf, cw, j, linebuf, &linebuf[yw*4]));
+		yin=ybuf;  cbin=cbbuf;  crin=crbuf;
+		yout=&jpg->jpgbuf[ypitch*j];
+		_h=min(mcuh, yho-j);
+		for(i=0; i<_h; i++)
+		{
+			mlib_VectorCopy_U8(yout, yin, ywo);
+			yout+=ypitch;  yin+=yw;
+		}
+		if(jpg->subsamp!=TJ_GRAYSCALE)
+		{
+			cbout=&jpg->jpgbuf[ypitch*yho + cpitch*j*8/mcuh];
+			crout=&jpg->jpgbuf[ypitch*yho + cpitch*cho + cpitch*j*8/mcuh];
+			_h=min(8, cho-(j*8/mcuh));
+			for(i=0; i<_h; i++)
+			{
+				mlib_VectorCopy_U8(cbout, cbin, cwo);
+				mlib_VectorCopy_U8(crout, crin, cwo);
+				cbout+=cpitch;  crout+=cpitch;
+				cbin+=cw;  crin+=cw;
+			}
+		}
+	}
+	jpg->jpgptr+=(ypitch*yho + cpitch*cho*2);
+	jpg->bytesprocessed+=(ypitch*yho + cpitch*cho*2);
+	jpg->bytesleft-=(ypitch*yho + cpitch*cho*2);
+
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
+	return 0;
+
+	bailout:
+	if(ybuf) free(ybuf);
+	if(linebuf) free(linebuf);
+	return -1;
+}
+
 DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 {
 	jpgstruct *jpg=NULL;  char *v=NULL;
@@ -769,7 +837,8 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	jpg->ps=ps;  jpg->subsamp=jpegsub;  jpg->qual=qual;  jpg->flags=flags;
 	jpg->bytesleft=TJBUFSIZE(width, height);
 
-	_catch(encode_jpeg(jpg));
+	if(flags&TJ_CCONLY) {_catch(encode_yuv(jpg));}
+	else {_catch(encode_jpeg(jpg));}
 
 	*size=jpg->bytesprocessed;
 	return 0;
