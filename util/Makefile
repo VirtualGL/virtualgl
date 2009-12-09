@@ -76,12 +76,17 @@ TARGETS = $(LDIR)/librrutil.a \
           $(EDIR)/threadtest \
           $(EDIR)/glreadtest
 
+ifeq ($(USEXV), yes)
+TARGETS := $(TARGETS) $(LDIR)/libfbxv.a $(EDIR)/fbxvtest
+endif
+
 OBJS = $(ODIR)/bmp.o \
        $(ODIR)/rrlog.o \
        $(ODIR)/genericQ.o \
        $(ODIR)/rrsocket.o \
        $(ODIR)/fbx.o \
        $(ODIR)/fbxtest.o \
+       $(ODIR)/fbxv.o \
        $(ODIR)/nettest.o \
        $(ODIR)/threadtest.o \
        $(ODIR)/glreadtest.o
@@ -108,6 +113,11 @@ $(EDIR)/nettest: $(ODIR)/nettest.o $(LDIR)/librrsocket.a
 
 $(EDIR)/fbxtest: $(ODIR)/fbxtest.o $(LDIR)/libfbx.a
 	$(CXX) $(LDFLAGS) $< -o $@ $(FBXLIB) -lpthread
+
+ifeq ($(USEXV), yes)
+$(EDIR)/fbxvtest: $(ODIR)/fbxvtest.o $(LDIR)/libfbxv.a
+	$(CXX) $(LDFLAGS) $< -o $@ -lfbxv -lXv -lX11 -lXext
+endif
 
 $(EDIR)/threadtest: $(ODIR)/threadtest.o
 	$(CXX) $(LDFLAGS) $< -o $@ -lpthread

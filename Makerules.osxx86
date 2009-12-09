@@ -53,3 +53,5 @@ ifeq ($(USESSL), yes)
 endif
 GLLIB = -lGL
 OSXGLFIX = -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
+
+USEXV = yes

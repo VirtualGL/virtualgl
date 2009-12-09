@@ -80,3 +80,5 @@ else
 endif
 
 ZNOW = -z now
+
+USEXV = yes

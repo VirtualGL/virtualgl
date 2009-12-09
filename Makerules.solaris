@@ -106,3 +106,5 @@ FAKERLINK = -lXm $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
+
+USEXV = yes
