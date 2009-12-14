@@ -470,7 +470,7 @@ int pbwin::sendsr(GLint drawbuf, bool spoillast, bool dostereo, int stereomode)
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, pbw, pitch, pbh, glformat, rrsunray_ps[format], bitmap,
-			buf, bottomup);
+			buf, false);
 	}
 	if(RRSunRaySendFrame(_sunrayhandle, bitmap, pbw, pbh, pitch, format,
 		bottomup)==-1) _throw(RRSunRayGetError(_sunrayhandle));
@@ -578,7 +578,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
-			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, true);
+			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, false);
 	}
 	_blitter->sendframe(b, sync);
 }
