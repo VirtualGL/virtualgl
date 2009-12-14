@@ -20,7 +20,7 @@
 #include "x11err.h"
 
 static int __line=-1;
-FILE *__warningfile=NULL;
+static FILE *__warningfile=NULL;
 
 static char __lasterror[1024]="No error";
 #define _throw(m) {snprintf(__lasterror, 1023, "%s", m);  __line=__LINE__; \
@@ -34,8 +34,8 @@ static char __lasterror[1024]="No error";
 	__line=__LINE__;  goto finally;}}
 
 #ifdef USESHM
-unsigned long serial=0;  int __extok=1;
-XErrorHandler prevhandler=NULL;
+static unsigned long serial=0;  static int __extok=1;
+static XErrorHandler prevhandler=NULL;
 
 int _fbxv_xhandler(Display *dpy, XErrorEvent *e)
 {
