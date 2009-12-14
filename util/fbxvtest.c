@@ -33,14 +33,14 @@
 double testtime=5.;
 Display *dpy=NULL;  Window win=0;
 fbxv_struct s;
-int width=WIDTH, height=HEIGHT, useshm=1, scale=1;
+int width=WIDTH, height=HEIGHT, useshm=1, scale=1, interactive=0;
 char *filename=NULL;
+Atom protoatom=0, deleteatom=0;
 
-void dotest(int id, char *name)
+void initbuf(fbxv_struct *s, int id, int seed)
 {
-	int yindex0, yindex1, uindex, vindex, iter=0, i, j, c;
-	double elapsed=0., t;
-	FILE *file=NULL;
+	int i, j, c;
+	int yindex0, yindex1, uindex, vindex;
 
 	switch(id)
 	{
@@ -51,6 +51,34 @@ void dotest(int id, char *name)
 		default:
 			yindex0=yindex1=uindex=vindex=0;  break;
 	}
+	if(id==YUY2_PACKED || id==UYVY_PACKED)
+	{
+		for(i=0; i<s->xvi->height; i++)
+		{
+			for(j=0; j<s->xvi->width; j+=2)
+			{
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex0] = (i+seed)*(j+seed);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex1] = (i+seed+1)*(j+seed+1);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + uindex] = (i+seed)*(j+seed);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + vindex] = (i+seed)*(j+seed);
+			}
+		}
+	}
+	else
+	{
+		for(c=0; c<s->xvi->num_planes; c++)
+			for(i=0; i<s->xvi->height; i++)
+				for(j=0; j<s->xvi->width; j++)
+					s->xvi->data[s->xvi->offsets[c] + s->xvi->pitches[c]*(c==0? i:i/2)
+						+ (c==0? j:j/2)] = (i+seed)*(j+seed);
+	}
+}
+
+void dotest(int id, char *name)
+{
+	int iter=0, i;
+	double elapsed=0., t;
+	FILE *file=NULL;
 
 	printf("Testing %s format (ID=0x%.8x) ...\n", name, id);
 
@@ -91,33 +119,10 @@ void dotest(int id, char *name)
 		}
 		fclose(file);
 	}
-	else
-	{
-		if(id==YUY2_PACKED || id==UYVY_PACKED)
-		{
-			for(i=0; i<s.xvi->height; i++)
-			{
-				for(j=0; j<s.xvi->width; j+=2)
-				{
-					s.xvi->data[s.xvi->pitches[0]*i + j*2 + yindex0] = i*j;
-					s.xvi->data[s.xvi->pitches[0]*i + j*2 + yindex1] = (i+1)*(j+1);
-					s.xvi->data[s.xvi->pitches[0]*i + j*2 + uindex] = i*j;
-					s.xvi->data[s.xvi->pitches[0]*i + j*2 + vindex] = i*j;
-				}
-			}
-		}
-		else
-		{
-			for(c=0; c<s.xvi->num_planes; c++)
-				for(i=0; i<s.xvi->height; i++)
-					for(j=0; j<s.xvi->width; j++)
-						s.xvi->data[s.xvi->offsets[c] + s.xvi->pitches[c]*(c==0? i:i/2)
-							+ (c==0? j:j/2)] = i*j;
-		}
-	}
 
 	do
 	{
+		if(!filename) initbuf(&s, id, iter);
 		t=rrtime();
 		fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
 		elapsed+=rrtime()-t;
@@ -127,6 +132,63 @@ void dotest(int id, char *name)
 
 	bailout:
 	fbxv_term(&s);
+}
+
+void dotesti(Display *dpy, int id, char *name)
+{
+	int iter=0;
+	printf("Interactive test, %s format (ID=0x%.8x) ...\n", name, id);
+	memset(&s, 0, sizeof(s));
+
+	while (1)
+	{
+		int dodisplay=0;
+
+		while(1)
+		{
+			XEvent event;
+			XNextEvent(dpy, &event);
+			switch (event.type)
+			{
+				case Expose:
+					dodisplay=1;
+					break;
+				case ConfigureNotify:
+					width=event.xconfigure.width;  height=event.xconfigure.height;
+					break;
+				case KeyPress:
+				{
+					char buf[10];  int key;
+					key=XLookupString(&event.xkey, buf, sizeof(buf), NULL, NULL);
+					switch(buf[0])
+					{
+						case 27: case 'q': case 'Q':
+							return;
+					}
+					break;
+				}
+				case MotionNotify:
+					if(event.xmotion.state & Button1Mask) dodisplay=1;
+ 					break;
+				case ClientMessage:
+				{
+					XClientMessageEvent *cme=(XClientMessageEvent *)&event;
+					if(cme->message_type==protoatom && cme->data.l[0]==deleteatom)
+						return;
+				}
+			}
+			if(XPending(dpy)<=0) break;
+		}
+		if(dodisplay) 
+		{
+			fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useshm));
+			initbuf(&s, id, iter);  iter++;
+			fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
+		}
+	}
+
+	bailout:
+	return;
 }
 
 int main(int argc, char **argv)
@@ -140,6 +202,7 @@ int main(int argc, char **argv)
 		for(i=0; i<argc; i++)
 		{
 			if(!strcasecmp(argv[i], "-noshm")) useshm=0;
+			else if(!strcasecmp(argv[i], "-i")) interactive=1;
 			else if(!strcasecmp(argv[i], "-scale") && i<argc-1)
 			{
 				scale=atoi(argv[++i]);
@@ -186,23 +249,34 @@ int main(int argc, char **argv)
 	swa.border_pixel=0;
 	swa.background_pixel=0;
 	swa.event_mask=0;
+	if(interactive) swa.event_mask=StructureNotifyMask|ExposureMask
+		|KeyPressMask|PointerMotionMask|ButtonPressMask;
   printf("Visual ID = 0x%.2x\n", (unsigned int)v->visualid);
+	if(!(protoatom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
+		_throw("Cannot obtain WM_PROTOCOLS atom");
+	if(!(deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
+		_throw("Cannot obtain WM_DELETE_WINDOW atom");
 	if(!(win=XCreateWindow(dpy, DefaultRootWindow(dpy), 0, 0, width, height, 0,
 		v->depth, InputOutput, v->visual,
 		CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &swa)))
 		_throw("Could not create window");
 	XFree(v);  v=NULL;
+	XSetWMProtocols(dpy, win, &deleteatom, 1);
 	if(!XMapRaised(dpy, win)) _throw("Could not show window");
 	XSync(dpy, False);
 
-	dotest(I420_PLANAR, "I420 Planar");
-	printf("\n");
-	dotest(YV12_PLANAR, "YV12 Planar");
-	printf("\n");
-	dotest(YUY2_PACKED, "YUY2 Packed");
-	printf("\n");
-	dotest(UYVY_PACKED, "UYVY Packed");
-	printf("\n");
+	if(interactive) dotesti(dpy, I420_PLANAR, "I420 Planar");
+	else
+	{
+		dotest(I420_PLANAR, "I420 Planar");
+		printf("\n");
+		dotest(YV12_PLANAR, "YV12 Planar");
+		printf("\n");
+		dotest(YUY2_PACKED, "YUY2 Packed");
+		printf("\n");
+		dotest(UYVY_PACKED, "UYVY Packed");
+		printf("\n");
+	}
 
 	bailout:
 	if(dpy && win) XDestroyWindow(dpy, win);
