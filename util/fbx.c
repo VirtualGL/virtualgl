@@ -21,7 +21,7 @@
 #define MINHEIGHT 24
 
 static int __line=-1;
-FILE *__warningfile=NULL;
+static FILE *__warningfile=NULL;
 
 const int fbx_rmask[FBX_FORMATS]=
 	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0};
@@ -64,8 +64,8 @@ const char *_fbx_formatname[FBX_FORMATS]=
  static int fbx_checkdll(char *, int *, int *, int *, int *);
  #endif
 
- unsigned long serial=0;  int __extok=1;
- XErrorHandler prevhandler=NULL;
+ static unsigned long serial=0;  static int __extok=1;
+ static XErrorHandler prevhandler=NULL;
 
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
