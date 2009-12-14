@@ -220,7 +220,7 @@ int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 	x11(XvPutImage(s->dpy, s->port, s->win, s->xgc, s->xvi, sx, sy, sw, sh, dx,
 		dy, dstw, dsth));
 	XFlush(s->dpy);
-	if(s->shm) XSync(s->dpy, False);
+	XSync(s->dpy, False);
 	return 0;
 
 	finally:
