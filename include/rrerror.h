@@ -138,6 +138,7 @@ class unixerror : public rrerror
 #define tryunix(f) {if((f)==-1) _throwunix();}
 
 #define fbx(f) {if((f)==-1) throw(rrerror("FBX", fbx_geterrmsg(), fbx_geterrline()));}
+#define fbxv(f) {if((f)==-1) throw(rrerror("FBXV", fbxv_geterrmsg(), fbxv_geterrline()));}
 #define tj(f) {if((f)==-1) throw(rrerror(__FUNCTION__, tjGetErrorStr(), __LINE__));}
 
 #endif
