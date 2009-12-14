@@ -26,7 +26,7 @@ const char *_subnames[NUMSUBOPT]={"444", "422", "420", "GRAY"};
 const int _hsf[NUMSUBOPT]={1, 2, 2, 1};
 const int _vsf[NUMSUBOPT]={1, 1, 2, 1};
 
-int yuvout=0;
+int yuv=0;
 
 int pixels[9][3]=
 {
@@ -304,7 +304,7 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	char tempstr[1024];  unsigned char *bmpbuf=NULL;
 	const char *pixformat;  double t;
 
-	if(yuvout) flags|=TJ_YUVOUT;
+	if(yuv) flags|=TJ_YUV;
 
 	if(flags&TJ_BGR)
 	{
@@ -316,7 +316,7 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 		if(ps==3) pixformat="RGB";
 		else {if(flags&TJ_ALPHAFIRST) pixformat="ARGB";  else pixformat="RGBA";}
 	}
-	if(yuvout)
+	if(yuv)
 		printf("%s %s -> %s YUV ... ", pixformat,
 			(flags&TJ_BOTTOMUP)?"Bottom-Up":"Top-Down ", _subnamel[subsamp]);
 	else
@@ -334,14 +334,14 @@ void gentestjpeg(tjhandle hnd, unsigned char *jpegbuf, unsigned long *size,
 	_catch(tjCompress(hnd, bmpbuf, w, 0, h, ps, jpegbuf, size, subsamp, qual, flags));
 	t=rrtime()-t;
 
-	if(yuvout)
+	if(yuv)
 		sprintf(tempstr, "%s_enc_%s_%s_%s.yuv", basefilename, pixformat,
 			(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp]);
 	else
 		sprintf(tempstr, "%s_enc_%s_%s_%sQ%d.jpg", basefilename, pixformat,
 			(flags&TJ_BOTTOMUP)? "BU":"TD", _subnames[subsamp], qual);
 	writejpeg(jpegbuf, *size, tempstr);
-	if(yuvout)
+	if(yuv)
 	{
 		if(checkbufyuv(jpegbuf, *size, w, h, subsamp)) printf("Passed.");
 		else printf("FAILED!");
@@ -359,7 +359,7 @@ void gentestbmp(tjhandle hnd, unsigned char *jpegbuf, unsigned long jpegsize,
 	unsigned char *bmpbuf=NULL;
 	const char *pixformat;  int _w=0, _h=0;  double t;
 
-	if(yuvout) return;
+	if(yuv) return;
 
 	if(flags&TJ_BGR)
 	{
@@ -501,10 +501,10 @@ void dotest1(void)
 
 int main(int argc, char *argv[])
 {
-	if(argc>1 && !stricmp(argv[1], "-yuvout")) yuvout=1;
+	if(argc>1 && !stricmp(argv[1], "-yuv")) yuv=1;
 	dotest(35, 41, 3, TJ_444, "test");
 	dotest(35, 41, 4, TJ_444, "test");
-	if(yuvout)
+	if(yuv)
 	{
 		dotest(35, 41, 3, TJ_422, "test");
 		dotest(35, 41, 4, TJ_422, "test");

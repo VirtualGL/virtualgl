@@ -210,7 +210,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	j->jdms.free_in_buffer = TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height);
 
 	jpeg_start_compress(&j->cinfo, TRUE);
-	if(flags&TJ_YUVOUT)
+	if(flags&TJ_YUV)
 	{
 		j_compress_ptr cinfo=&j->cinfo;
 		int row;
@@ -295,7 +295,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 		}
 	}
 	jpeg_finish_compress(&j->cinfo);
-	if(!(flags&TJ_YUVOUT))
+	if(!(flags&TJ_YUV))
 		*size=TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height)-(j->jdms.free_in_buffer);
 
 	if(row_pointer) free(row_pointer);
