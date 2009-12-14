@@ -97,6 +97,9 @@ CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__AP
 ifeq ($(DEBUG), yes)
  CDEFINES := $(CDEFINES) -D__DEBUG__
 endif
+ifeq ($(USEXV), yes)
+ CDEFINES := $(CDEFINES) -DUSEXV
+endif
 ifeq ($(CXXFLAGS),)
  CXXFLAGS := $(CFLAGS)
 endif

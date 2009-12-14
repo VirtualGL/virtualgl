@@ -38,9 +38,9 @@ typedef struct _rrframeheader
   unsigned short height;   /* The height of this tile (in pixels) */
   unsigned short x;        /* The X offset of this tile within the frame */
   unsigned short y;        /* The Y offset of this tile within the frame */
-  unsigned char qual;      /* Quality of destination JPEG (1-100) */
-  unsigned char subsamp;   /* Chrominance subsampling of destination JPEG
-                              1 (=4:4:4), 2 (=4:2:2), or 4 (=4:1:1 or 4:2:0) */
+  unsigned char qual;      /* Quality used when compressing the image (1-100) */
+  unsigned char subsamp;   /* Chrominance subsampling used when compressing
+                              the image. (1=4:4:4, 2=4:2:2, 4=4:2:0) */
   unsigned char flags;     /* See enum below */
   unsigned char compress;  /* Compression algorithm (see enum below) */
   unsigned short dpynum;   /* Display number on the client machine that
@@ -72,9 +72,9 @@ typedef struct _rrframeheader_v1
   unsigned short height;   /* The height of this tile (in pixels) */
   unsigned short x;        /* The X offset of this tile within the frame */
   unsigned short y;        /* The Y offset of this tile within the frame */
-  unsigned char qual;      /* Quality of destination JPEG (1-100) */
-  unsigned char subsamp;   /* YUV subsampling of destination JPEG
-                              (RR_411, RR_422, or RR_444) */
+  unsigned char qual;      /* Quality used when compressing the image (1-100) */
+  unsigned char subsamp;   /* Chrominance subsampling used when compressing
+                              the image. (1=4:4:4, 2=4:2:2, 4=4:2:0) */
   unsigned char flags;     /* See enum below */
   unsigned char dpynum;    /* Display number on the client machine that
                               contains the window into which this frame will be
@@ -91,31 +91,31 @@ enum {
 };
 
 /* Transport types */
-#define RR_TRANSPORTOPT 2
-enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL};
+#define RR_TRANSPORTOPT 3
+enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_XV};
 
 /* Compression types */
-#define RR_COMPRESSOPT  3
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB};
+#define RR_COMPRESSOPT  4
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_YUV};
 
 static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {
-  RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL
+  RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_XV
 };
 
 static const int _Minsubsamp[RR_COMPRESSOPT]=
 {
-  -1, 0, -1
+  -1, 0, -1, 4
 };
 
 static const int _Defsubsamp[RR_COMPRESSOPT]=
 {
-  1, 1, 1
+  1, 1, 1, 4
 };
 
 static const int _Maxsubsamp[RR_COMPRESSOPT]=
 {
-  -1, 4, -1
+  -1, 4, -1, 4
 };
 
 /* Stereo options */

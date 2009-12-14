@@ -84,6 +84,10 @@ TOBJS = $(ODIR)/rrblitterut.o \
         $(ODIR)/testplugin.o \
         $(ODIR)/testplugin2.o
 
+ifeq ($(USEXV), yes)
+ FOBJS := $(FOBJS) $(ODIR)/rrxvtrans.o
+endif
+
 OBJS = $(COBJS) $(FOBJS) $(TOBJS) $(ODIR)/dlfaker.o $(ODIR)/gefaker.o $(ODIR)/vglconfig.o
 
 UNITTESTS = $(EDIR)/rrblitterut \
@@ -116,6 +120,11 @@ endif
 
 RRDEP = $(LDIR)/librrutil.a $(LDIR)/libfbx.a $(LDIR)/librrsocket.a $(JPEGDEP)
 RRLIB = -lrrutil $(FBXLIB) $(JPEGLINK) $(SOCKLIB) -lm
+
+ifeq ($(USEXV), yes)
+ RRDEP := $(RRDEP) $(LDIR)/libfbxv.a
+ RRLIB := $(RRLIB) -lXv -lfbxv
+endif
 
 
 all: $(TARGETS)

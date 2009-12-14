@@ -155,6 +155,9 @@ pbwin::pbwin(Display *windpy, Window win)
 	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
+	#ifdef USEXV
+	_xvtrans=NULL;
+	#endif
 	_rrdpy=_rrmoviedpy=NULL;
 	_prof_rb.setname("Readback  ");
 	_prof_gamma.setname("Gamma     ");
@@ -191,6 +194,9 @@ pbwin::~pbwin(void)
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
 	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
+	#ifdef USEXV
+	if(_xvtrans) {delete _xvtrans;  _xvtrans=NULL;}
+	#endif
 	if(_rrmoviedpy) {delete _rrmoviedpy;  _rrmoviedpy=NULL;}
 	if(_plugin)
 	{
@@ -412,6 +418,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
+		case RRCOMP_YUV:
+			sendxv(drawbuf, spoillast, sync, dostereo, stereomode);
 	}
 }
 
@@ -509,7 +517,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 }
 
 void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
-	int stereomode, bool srfallback)
+	int stereomode)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
@@ -563,6 +571,41 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(fconfig.logo) b->addlogo();
 	_blitter->sendframe(b, sync);
 }
+
+#ifdef USEXV
+
+void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
+	int stereomode)
+{
+	int pbw=_pb->width(), pbh=_pb->height();
+
+	rrxvframe *b;
+	if(!_xvtrans) errifnot(_xvtrans=new rrxvtrans());
+	if(spoillast && fconfig.spoil && !_xvtrans->frameready()) return;
+	errifnot(b=_xvtrans->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
+	rrframeheader hdr;
+	hdr.height=hdr.frameh=pbh;
+	hdr.width=hdr.framew=pbw;
+	hdr.x=hdr.y=0;
+	_f.init(hdr, 3, RRBMP_BOTTOMUP, false);
+
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&_f, drawbuf);
+	else
+	{
+		GLint buf=drawbuf;
+		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
+		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
+		readpixels(0, 0, min(pbw, _f._h.framew), _f._pitch,
+			min(pbh, _f._h.frameh), GL_RGB, _f._pixelsize, _f._bits, buf, true);
+	}
+	
+	if(fconfig.logo) _f.addlogo();
+
+	*b=_f;
+	_xvtrans->sendframe(b, sync);
+}
+
+#endif
 
 void pbwin::makeanaglyph(rrframe *b, int drawbuf)
 {

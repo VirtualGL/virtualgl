@@ -24,18 +24,40 @@
 #define MINW 1
 #define MAXW 400
 #define BORDER 0
-#define NUMWIN 3
+#define NUMWIN 1
+
+bool usegl=false, usexv=false, pctest=false, usergb=false;
+
+void resizewindow(Display *dpy, Window win, int w, int h, int myid)
+{
+	XWindowAttributes xwa;
+	XGetWindowAttributes(dpy, win, &xwa);
+	if(w!=xwa.width || h!=xwa.height)
+	{
+		XLockDisplay(dpy);
+		XWindowChanges xwc;
+		xwc.width=w;  xwc.height=h;
+		xwc.x=(w+BORDER*2)*myid;  xwc.y=0;
+		XConfigureWindow(dpy, win, CWWidth|CWHeight|CWX|CWY, &xwc);
+		XFlush(dpy);
+		XSync(dpy, False);
+		XUnlockDisplay(dpy);
+	}
+}
 
 class blitter : public Runnable
 {
 	public:
 
-	blitter(Display *dpy, Window win, bool usegl=false) : _indx(0), _deadyet(false), _dpy(dpy),
-		_win(win), _t(NULL)
+	blitter(Display *dpy, Window win, int myid) : _indx(0), _deadyet(false),
+		_dpy(dpy), _win(win), _t(NULL), _myid(myid)
 	{
 		for(int i=0; i<NB; i++)
 		{
 			if(usegl) {errifnot(_fb[i]=new rrglframe(_dpy, _win));}
+			#ifdef USEXV
+			else if(usexv) {errifnot(_fb[i]=new rrxvframe(_dpy, _win));}
+			#endif
 			else {errifnot(_fb[i]=new rrfb(_dpy, _win));}
 		}
 		errifnot(_t=new Thread(this));
@@ -50,6 +72,9 @@ class blitter : public Runnable
 			if(_fb[i])
 			{
 				if(_fb[i]->_isgl) delete (rrglframe *)_fb[i];
+				#ifdef USEXV
+				else if(_fb[i]->_isxv) delete (rrxvframe *)_fb[i];
+				#endif
 				else delete (rrfb *)_fb[i];
 				_fb[i]=NULL;
 			}
@@ -91,8 +116,12 @@ class blitter : public Runnable
 			{
 				b=_fb[buf];  buf=(buf+1)%NB;
 				b->waituntilready();  if(_deadyet) break;
+				if(usexv) resizewindow(_dpy, _win, b->_h.width, b->_h.height, _myid);
 				timer.start();
 				if(b->_isgl) ((rrglframe *)b)->redraw();
+				#ifdef USEXV
+				else if(b->_isxv) ((rrxvframe *)b)->redraw();
+				#endif
 				else ((rrfb *)b)->redraw();
 				mpixels+=(double)(b->_h.width*b->_h.height)/1000000.;
 				totaltime+=timer.elapsed();
@@ -111,6 +140,7 @@ class blitter : public Runnable
 	rrframe *_fb[NB];
 	Display *_dpy;  Window _win;
 	Thread *_t;
+	int _myid;
 };
 
 class decompressor : public Runnable
@@ -161,23 +191,11 @@ class decompressor : public Runnable
 				rrcompframe &c=_cf[buf];  buf=(buf+1)%NB;
 				c.waituntilready();  if(_deadyet) break;
 				b=_bobj->get();  if(_deadyet) break;
-				XWindowAttributes xwa;
-				int w=c._h.width, h=c._h.height;
-				XGetWindowAttributes(_dpy, _win, &xwa);
-				if(w!=xwa.width || h!=xwa.height)
-				{
-					XLockDisplay(_dpy);
-					XWindowChanges xwc;
-					xwc.width=w;  xwc.height=h;
-					xwc.x=(w+BORDER*2)*_myid;  xwc.y=0;
-					XConfigureWindow(_dpy, _win, CWWidth|CWHeight|CWX|CWY, &xwc);
-					XFlush(_dpy);
-					XSync(_dpy, False);
-//					XWindowAttributes xwa;
-//					do XGetWindowAttributes(_dpy, _win, &xwa); while(xwa.width<w || xwa.height<h);
-					XUnlockDisplay(_dpy);
-				}
+				resizewindow(_dpy, _win, c._h.width, c._h.height, _myid);
 				if(b->_isgl) *((rrglframe *)b)=c;
+				#ifdef USEXV
+				else if(b->_isxv) *((rrxvframe *)b)=c;
+				#endif
 				else *((rrfb *)b)=c;
 				_bobj->put(b);
 				c.complete();
@@ -201,7 +219,8 @@ class compressor : public Runnable
 {
 	public:
 
-	compressor(decompressor *dobj) : _indx(0), _deadyet(false), _t(NULL), _dobj(dobj)
+	compressor(decompressor *dobj, blitter *bobj) : _indx(0), _deadyet(false),
+		_t(NULL), _dobj(dobj), _bobj(bobj)
 	{
 		errifnot(_t=new Thread(this));
 		_t->start();
@@ -212,7 +231,7 @@ class compressor : public Runnable
 		if(_t) _t->stop();
 	}
 
-	rrframe &get(int w, int h, bool usergb)
+	rrframe &get(int w, int h)
 	{
 		rrframe &f=_bmp[_indx];  _indx=(_indx+1)%NB;
 		if(_t) _t->checkerror();  f.waituntilcomplete();  if(_t) _t->checkerror();
@@ -223,7 +242,8 @@ class compressor : public Runnable
 		hdr.qual=80;
 		hdr.subsamp=2;
 		hdr.compress=usergb? RRCOMP_RGB:RRCOMP_JPEG;
-		f.init(hdr, 3, (littleendian() && !usergb)? RRBMP_BGR:0);
+		if(usexv) hdr.compress=RRCOMP_YUV;
+		f.init(hdr, 3, (littleendian() && !usergb && !usexv)? RRBMP_BGR:0);
 		return f;
 	}
 
@@ -253,9 +273,20 @@ class compressor : public Runnable
 			{
 				rrframe &f=_bmp[buf];  buf=(buf+1)%NB;
 				f.waituntilready();  if(_deadyet) break;
-				rrcompframe &c=_dobj->get();  if(_deadyet) break;
-				c=f;
-				_dobj->put(c);
+				#ifdef USEXV
+				if(usexv)
+				{
+					rrxvframe *c=(rrxvframe *)_bobj->get();  if(_deadyet) break;
+					*c=f;
+					_bobj->put(c);
+				}
+				else
+				#endif
+				{
+					rrcompframe &c=_dobj->get();  if(_deadyet) break;
+					c=f;
+					_dobj->put(c);
+				}
 				f.complete();
 			}
 		}
@@ -270,45 +301,46 @@ class compressor : public Runnable
 	Thread *_t;
 	rrframe _bmp[NB];
 	decompressor *_dobj;
+	blitter *_bobj;
 };
 
 class rrframeut
 {
 	public:
 
-	rrframeut(Display *dpy, int myid, bool usegl=false) : c(NULL), d(NULL), b(NULL)
+	rrframeut(Display *dpy, int myid) : c(NULL), d(NULL), b(NULL)
 	{
 		Window win;
 		errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), myid*(MINW+BORDER*2), 0, MINW+BORDER, MINW+BORDER, 0,
 			WhitePixel(dpy, DefaultScreen(dpy)), BlackPixel(dpy, DefaultScreen(dpy))));
 		errifnot(XMapRaised(dpy, win));
 
-		errifnot(b=new blitter(dpy, win, usegl));
-		errifnot(d=new decompressor(b, dpy, win, myid));
-		errifnot(c=new compressor(d));
+		errifnot(b=new blitter(dpy, win, myid));
+		if(!usexv) errifnot(d=new decompressor(b, dpy, win, myid));
+		errifnot(c=new compressor(d, b));
 	}
 
 	~rrframeut(void) {shutdown();}
 
-	void dotest(int w, int h, bool usergb)
+	void dotest(int w, int h, int seed)
 	{
-		rrframe &f=c->get(w, h, usergb);
-		initbmp(f);
+		rrframe &f=c->get(w, h);
+		initbmp(f, seed);
 		c->put(f);
 	}
 
 	private:
 
-	void initbmp(rrframe &f)
+	void initbmp(rrframe &f, int seed)
 	{
 		int i, j, pitch=f._pitch;
 		for(i=0; i<f._h.height; i++)
 		{
 			for(j=0; j<f._h.width; j++)
 			{
-				f._bits[i*pitch+j*f._pixelsize]=i%256;
-				f._bits[i*pitch+j*f._pixelsize+1]=j%256;
-				f._bits[i*pitch+j*f._pixelsize+2]=(i+j)%256;
+				f._bits[i*pitch+j*f._pixelsize]=(i+seed)%256;
+				f._bits[i*pitch+j*f._pixelsize+1]=(j+seed)%256;
+				f._bits[i*pitch+j*f._pixelsize+2]=(i+j+seed)%256;
 			}	
 		}
 	}
@@ -402,7 +434,6 @@ int main(int argc, char **argv)
 	Display *dpy=NULL;
 	rrframeut *test[NUMWIN];
 	int i, j, w, h;
-	bool usegl=false;  bool pctest=false;  bool usergb=false;
 	char *bmpfile=NULL;
 
 	if(argc>1)
@@ -410,6 +441,9 @@ int main(int argc, char **argv)
 		for(i=1; i<argc; i++)
 		{
 			if(!stricmp(argv[i], "-gl")) usegl=true;
+			#ifdef USEXV
+			else if(!stricmp(argv[i], "-xv")) usexv=true;
+			#endif
 			else if(!stricmp(argv[i], "-rgb")) usergb=true;
 			else if(!stricmp(argv[i], "-pc"))
 			{
@@ -435,7 +469,7 @@ int main(int argc, char **argv)
 
 		for(i=0; i<NUMWIN; i++)
 		{
-			errifnot(test[i]=new rrframeut(dpy, i, usegl));
+			errifnot(test[i]=new rrframeut(dpy, i));
 		}
 
 		for(w=MINW; w<=MAXW; w+=33)
@@ -445,7 +479,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
 			fprintf(stderr, "\n");
 		}
@@ -457,7 +491,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
 			fprintf(stderr, "\n");
 		}
@@ -469,7 +503,7 @@ int main(int argc, char **argv)
 			for(i=0; i<ITER; i++)
 			{
 				fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, usergb);
+				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
 			fprintf(stderr, "\n");
 		}

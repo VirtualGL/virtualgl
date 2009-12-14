@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -29,6 +30,9 @@
 #include <mlib.h>
 #endif
 #include "vgllogo.h"
+#ifdef USEXV
+#include "fbxv.h"
+#endif
 
 #define jpegsub(s) (s>=4?TJ_420:s==2?TJ_422:s==1?TJ_444:s==0?TJ_GRAYSCALE:TJ_444)
 
@@ -44,7 +48,8 @@ class rrframe
 	public:
 
 	rrframe(bool primary=true) : _bits(NULL), _rbits(NULL), _pitch(0),
-		_pixelsize(0), _flags(0), _isgl(false), _stereo(false), _primary(primary)
+		_pixelsize(0), _flags(0), _isgl(false), _isxv(false), _stereo(false),
+		_primary(primary)
 	{
 		memset(&_h, 0, sizeof(rrframeheader));
 		_ready.wait();
@@ -317,7 +322,7 @@ class rrframe
 	unsigned char *_bits;
 	unsigned char *_rbits;
 	int _pitch, _pixelsize, _flags;
-	bool _isgl, _stereo;
+	bool _isgl, _isxv, _stereo;
 
 	protected:
 
@@ -383,9 +388,23 @@ class rrcompframe : public rrframe
 		{
 			case RRCOMP_RGB:  compressrgb(b);  break;
 			case RRCOMP_JPEG:  compressjpeg(b);  break;
+			case RRCOMP_YUV:  compressyuv(b);  break;
 			default:  _throw("Invalid compression type");
 		}
 		return *this;
+	}
+
+	void compressyuv(rrframe& b)
+	{
+		int tjflags=TJ_YUV;
+		if(b._h.subsamp!=4) throw(rrerror("YUV encoder", "Invalid argument"));
+		init(b._h, 0);
+		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
+		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
+		unsigned long size;
+		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
+			_bits, &size, jpegsub(b._h.subsamp), b._h.qual, tjflags));
+		_h.size=(unsigned int)size;
 	}
 
 	void compressjpeg(rrframe& b)
@@ -599,5 +618,95 @@ class rrfb : public rrframe
 	fbx_struct _fb;
 	tjhandle _tjhnd;
 };
+
+#ifdef USEXV
+
+// Bitmap created using X Video
+
+class rrxvframe : public rrframe
+{
+	public:
+
+	rrxvframe(Display *dpy, Window win) : rrframe()
+	{
+		if(!dpy || !win) throw(rrerror("rrxvframe::rrxvframe", "Invalid argument"));
+		XFlush(dpy);
+		init(DisplayString(dpy), win);
+	}
+
+	rrxvframe(char *dpystring, Window win) : rrframe()
+	{
+		init(dpystring, win);
+	}
+
+	void init(char *dpystring, Window win)
+	{
+		_tjhnd=NULL;  _isxv=true;
+		memset(&_fb, 0, sizeof(fbxv_struct));
+		if(!dpystring || !win) throw(rrerror("rrxvframe::init", "Invalid argument"));
+		if(!(_dpy=XOpenDisplay(dpystring)))
+			throw(rrerror("rrxvframe::init", "Could not open display"));
+		_win=win;
+	}
+
+	~rrxvframe(void)
+	{
+		fbxv_term(&_fb);  if(_bits) _bits=NULL;
+		if(_tjhnd) tjDestroy(_tjhnd);
+		if(_dpy) XCloseDisplay(_dpy);
+	}
+
+	rrxvframe& operator= (rrframe& b)
+	{
+		if(!b._bits) _throw("Bitmap not initialized");
+		if(b._pixelsize<3 || b._pixelsize>4)
+			_throw("Only true color bitmaps are supported");
+		int tjflags=TJ_YUV;
+		init(b._h);
+		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
+		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
+		unsigned long size;
+		if(!_tjhnd)
+		{
+			if((_tjhnd=tjInitCompress())==NULL)
+				throw(rrerror("rrxvframe::compressor", tjGetErrorStr()));
+		}
+		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height,
+			b._pixelsize, _bits, &size, TJ_420, 100, tjflags));
+		_h.size=(unsigned int)size;
+		if(_h.size!=(unsigned long)_fb.xvi->data_size)
+			_throw("Image size mismatch in YUV encoder");
+		return *this;
+	}
+
+	void init(rrframeheader &h)
+	{
+		checkheader(h);
+		fbxv(fbxv_init(&_fb, _dpy, _win, h.framew, h.frameh, I420_PLANAR, 0));
+		if(h.framew>_fb.xvi->width || h.frameh>_fb.xvi->height)
+		{
+			XSync(_dpy, False);
+			fbx(fbxv_init(&_fb, _dpy, _win, h.framew, h.frameh, I420_PLANAR, 0));
+		}
+		_h=h;
+		if(_h.framew>_fb.xvi->width) _h.framew=_fb.xvi->width;
+		if(_h.frameh>_fb.xvi->height) _h.frameh=_fb.xvi->height;
+		_bits=(unsigned char *)_fb.xvi->data;
+		_flags=_pixelsize=_pitch=0;
+	}
+
+	void redraw(void)
+	{
+		fbxv(fbxv_write(&_fb, 0, 0, 0, 0, 0, 0, _h.framew, _h.frameh));
+	}
+
+	private:
+
+	fbxv_struct _fb;
+	Display *_dpy;  Window _win;
+	tjhandle _tjhnd;
+};
+
+#endif
 
 #endif

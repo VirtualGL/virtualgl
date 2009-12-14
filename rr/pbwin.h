@@ -20,6 +20,9 @@
 #include "rrmutex.h"
 #include "rrblitter.h"
 #include "rrdisplayclient.h"
+#ifdef USEXV
+#include "rrxvtrans.h"
+#endif
 #include "rrplugin.h"
 #include "fbx.h"
 #ifdef USEGLP
@@ -79,8 +82,11 @@ class pbwin
 		void makeanaglyph(rrframe *, int);
 		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);
-		void sendx11(GLint, bool, bool, bool, int, bool srfallback=false);
+		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
+		#ifdef USEXV
+		void sendxv(GLint, bool, bool, bool, int);
+		#endif
 
 		bool _force;
 		rrcs _mutex;
@@ -88,6 +94,9 @@ class pbwin
 		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
 		int _neww, _newh;
 		rrblitter *_blitter;
+		#ifdef USEXV
+		rrxvtrans *_xvtrans;
+		#endif
 		rrdisplayclient *_rrdpy, *_rrmoviedpy;
 		rrprofiler _prof_rb, _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
@@ -97,7 +106,7 @@ class pbwin
 		bool _truecolor;
 		bool _gammacorrectedvisuals;
 		bool _stereovisual;
-		rrframe _r, _g, _b;
+		rrframe _r, _g, _b, _f;
 		bool _wmdelete;
 };
 
