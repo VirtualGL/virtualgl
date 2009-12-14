@@ -566,7 +566,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
-			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, true);
+			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, false);
 	}
 	if(fconfig.logo) b->addlogo();
 	_blitter->sendframe(b, sync);
@@ -596,7 +596,7 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		readpixels(0, 0, min(pbw, _f._h.framew), _f._pitch,
-			min(pbh, _f._h.frameh), GL_RGB, _f._pixelsize, _f._bits, buf, true);
+			min(pbh, _f._h.frameh), GL_RGB, _f._pixelsize, _f._bits, buf, false);
 	}
 	
 	if(fconfig.logo) _f.addlogo();
