@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -64,6 +65,9 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
 	_dpynum=dpynum;  _window=window;
 
+	#ifdef USEXV
+	for(int i=0; i<NB; i++) _xvf[i]=NULL;
+	#endif
 	setdrawmethod();
 	if(_stereo) _drawmethod=RR_DRAWOGL;
 	initgl();
@@ -90,6 +94,15 @@ rrcwin::~rrcwin(void)
 	_q.release();
 	if(_t) _t->stop();
 	if(_b) delete _b;
+	#ifdef USEXV
+	for(int i=0; i<NB; i++)
+	{
+		if(_xvf[i])
+		{
+			_xvf[i]->complete();  delete _xvf[i];  _xvf[i]=NULL;
+		}
+	}
+	#endif
 	for(int i=0; i<NB; i++) _cf[i].complete();
 	if(_t) {delete _t;  _t=NULL;}
 }
@@ -172,81 +185,116 @@ int rrcwin::match(int dpynum, Window window)
 	return (_dpynum==dpynum && _window==window);
 }
 
-rrcompframe *rrcwin::getFrame(void)
+rrframe *rrcwin::getFrame(bool usexv)
 {
-	rrcompframe *c=NULL;
+	rrframe *f=NULL;
 	if(_t) _t->checkerror();
 	_cfmutex.lock();
-	c=&_cf[_cfi];  _cfi=(_cfi+1)%NB;
+	#ifdef USEXV
+	if(usexv)
+	{
+		if(!_xvf[_cfi])
+		{
+			char dpystr[80];
+			sprintf(dpystr, ":%d.0", _dpynum);
+			_xvf[_cfi]=new rrxvframe(dpystr, _window);
+			if(!_xvf[_cfi]) _throw("Could not allocate class instance");
+		}
+		f=(rrframe *)_xvf[_cfi];
+	}
+	else
+	#endif
+	f=(rrframe *)&_cf[_cfi];
+	_cfi=(_cfi+1)%NB;
 	_cfmutex.unlock();
-	c->waituntilcomplete();
+	f->waituntilcomplete();
 	if(_t) _t->checkerror();
-	return c;
+	return f;
 }
 
-void rrcwin::drawFrame(rrcompframe *c)
+void rrcwin::drawFrame(rrframe *f)
 {
 	if(_t) _t->checkerror();
-	if((c->_rh.flags==RR_RIGHT || c->_h.flags==RR_LEFT) && !_stereo)
+	if(!f->_isxv)
 	{
-		_stereo=true;
-		if(_drawmethod!=RR_DRAWOGL)
+		rrcompframe *c=(rrcompframe *)f;
+		if((c->_rh.flags==RR_RIGHT || c->_h.flags==RR_LEFT) && !_stereo)
 		{
-			_drawmethod=RR_DRAWOGL;
-			initgl();
+			_stereo=true;
+			if(_drawmethod!=RR_DRAWOGL)
+			{
+				_drawmethod=RR_DRAWOGL;
+				initgl();
+			}
+		}
+		if((c->_h.flags==0) && _stereo)
+		{
+			_stereo=false;
+			_drawmethod=_reqdrawmethod;
+			setdrawmethod();
+			initx11();
 		}
 	}
-	if((c->_h.flags==0) && _stereo)
-	{
-		_stereo=false;
-		_drawmethod=_reqdrawmethod;
-		setdrawmethod();
-		initx11();
-	}
-	_q.add(c);
+	_q.add(f);
 }
-
 
 void rrcwin::run(void)
 {
 	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
-	rrcompframe *c=NULL;  long bytes=0;
+	rrframe *f=NULL;  long bytes=0;
 
 	try {
 
 	while(!_deadyet)
 	{
-		c=NULL;
-		_q.get((void **)&c);  if(_deadyet) break;
-		if(!c) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
+		f=NULL;
+		_q.get((void **)&f);  if(_deadyet) break;
+		if(!f) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
 		rrcs::safelock l(_mutex);
-		if(c->_h.flags==RR_EOF)
+		#ifdef USEXV
+		if(f->_isxv)
 		{
-			pb.startframe();
-			if(_b->_isgl) ((rrglframe *)_b)->init(c->_h, _stereo);
-			else ((rrfb *)_b)->init(c->_h);
-			if(_b->_isgl) ((rrglframe *)_b)->redraw();
-			else ((rrfb *)_b)->redraw();
-			pb.endframe(_b->_h.framew*_b->_h.frameh, 0, 1);
-			pt.endframe(_b->_h.framew*_b->_h.frameh, bytes, 1);
-			bytes=0;
-			pt.startframe();
+			if(f->_h.flags!=RR_EOF)
+			{
+				pb.startframe();
+				((rrxvframe *)f)->redraw();
+				pb.endframe(f->_h.width*f->_h.height, 0, 1);
+				pt.endframe(f->_h.width*f->_h.height, bytes, 1);
+				bytes=0;
+				pt.startframe();
+			}
 		}
 		else
+		#endif
 		{
-			pd.startframe();
-			if(_b->_isgl) *((rrglframe *)_b)=*c;
-			else *((rrfb *)_b)=*c;
-			pd.endframe(c->_h.width*c->_h.height, 0, (double)(c->_h.width*c->_h.height)/
-				(double)(c->_h.framew*c->_h.frameh));
-			bytes+=c->_h.size;
+			if(f->_h.flags==RR_EOF)
+			{
+				pb.startframe();
+				if(_b->_isgl) ((rrglframe *)_b)->init(f->_h, _stereo);
+				else ((rrfb *)_b)->init(f->_h);
+				if(_b->_isgl) ((rrglframe *)_b)->redraw();
+				else ((rrfb *)_b)->redraw();
+				pb.endframe(_b->_h.framew*_b->_h.frameh, 0, 1);
+				pt.endframe(_b->_h.framew*_b->_h.frameh, bytes, 1);
+				bytes=0;
+				pt.startframe();
+			}
+			else
+			{
+				pd.startframe();
+				if(_b->_isgl) *((rrglframe *)_b)=*((rrcompframe *)f);
+				else *((rrfb *)_b)=*((rrcompframe *)f);
+				pd.endframe(f->_h.width*f->_h.height, 0, (double)(f->_h.width*f->_h.height)/
+					(double)(f->_h.framew*f->_h.frameh));
+				bytes+=f->_h.size;
+			}
 		}
-		c->complete();
+		f->complete();
 	}
 
 	} catch(rrerror &e)
 	{
-		if(_t) _t->seterror(e);  if(c) c->complete();
+		if(_t) _t->seterror(e);  if(f) f->complete();
 		throw;
 	}
 }

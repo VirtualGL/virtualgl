@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -127,7 +128,7 @@ void rrdisplayserver::run(void)
 void rrserver::run(void)
 {
 	rrcwin *w=NULL;
-	rrcompframe *c=NULL;
+	rrframe *f=NULL;
 	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
 
@@ -177,22 +178,31 @@ void rrserver::run(void)
 					h.dpynum : DisplayNumber(maindpy);
 				errifnot(w=addwindow(dpynum, h.winid, stereo));
 
-				if(!stereo || h.flags==RR_LEFT || !c)
+				if(!stereo || h.flags==RR_LEFT || !f)
 				{
-					try {c=w->getFrame();}
+					try {f=w->getFrame(h.compress==RRCOMP_YUV);}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
-				c->init(h, h.flags);
+				#ifdef USEXV
+				if(h.compress==RRCOMP_YUV)
+				{
+					((rrxvframe *)f)->init(h);
+					if(h.size!=((rrxvframe *)f)->_h.size && h.flags!=RR_EOF)
+						_throw("YUV image size mismatch");
+				}
+				else
+				#endif
+				((rrcompframe *)f)->init(h, h.flags);
 				if(h.flags!=RR_EOF)
-					recv((char *)(h.flags==RR_RIGHT? c->_rbits:c->_bits), h.size);
+					recv((char *)(h.flags==RR_RIGHT? f->_rbits:f->_bits), h.size);
 
 				if(!stereo || h.flags!=RR_LEFT)
 				{
-					try {w->drawFrame(c);}
+					try {w->drawFrame(f);}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
 
-			} while(!(c && c->_h.flags==RR_EOF));
+			} while(!(f && f->_h.flags==RR_EOF));
 
 			if(v.major==1 && v.minor==0)
 			{

@@ -251,6 +251,7 @@ void fconfig_reloadenv(void)
 		else if(!strnicmp(env, "p", 1)) compress=RRCOMP_PROXY;
 		else if(!strnicmp(env, "j", 1)) compress=RRCOMP_JPEG;
 		else if(!strnicmp(env, "r", 1)) compress=RRCOMP_RGB;
+		else if(!strnicmp(env, "x", 1)) compress=RRCOMP_XV;
 		else if(!strnicmp(env, "y", 1)) compress=RRCOMP_YUV;
 		if(compress>=0 && (!fcenv_set || fcenv.compress!=compress))
 		{
@@ -420,15 +421,20 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 	if(fconfig.compress<0)
 	{
+		bool usesunray=false;
 		Atom atom=None;
 		if((atom=XInternAtom(dpy, "_SUN_SUNRAY_SESSION", True))!=None)
-			fconfig_setcompress(fconfig, RRCOMP_YUV);
+			usesunray=true;
+		const char *dstr=DisplayString(dpy);
+		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
+			&& !strnicmp(dstr, "unix", 4)))
+		{
+			if(usesunray) fconfig_setcompress(fconfig, RRCOMP_XV);
+			else fconfig_setcompress(fconfig, RRCOMP_PROXY);
+		}
 		else
 		{
-			const char *dstr=DisplayString(dpy);
-			if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
-				&& !strnicmp(dstr, "unix", 4)))
-				fconfig_setcompress(fconfig, RRCOMP_PROXY);
+			if(usesunray) fconfig_setcompress(fconfig, RRCOMP_YUV);
 			else fconfig_setcompress(fconfig, RRCOMP_JPEG);
 		}
 	}

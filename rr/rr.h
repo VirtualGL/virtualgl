@@ -95,27 +95,27 @@ enum {
 enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_XV};
 
 /* Compression types */
-#define RR_COMPRESSOPT  4
-enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_YUV};
+#define RR_COMPRESSOPT  5
+enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_XV, RRCOMP_YUV};
 
 static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {
-  RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_XV
+  RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_XV, RRTRANS_VGL
 };
 
 static const int _Minsubsamp[RR_COMPRESSOPT]=
 {
-  -1, 0, -1, 4
+  -1, 0, -1, 4, 4
 };
 
 static const int _Defsubsamp[RR_COMPRESSOPT]=
 {
-  1, 1, 1, 4
+  1, 1, 1, 4, 4
 };
 
 static const int _Maxsubsamp[RR_COMPRESSOPT]=
 {
-  -1, 4, -1, 4
+  -1, 4, -1, 4, 4
 };
 
 /* Stereo options */

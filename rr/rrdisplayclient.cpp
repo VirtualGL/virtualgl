@@ -128,18 +128,20 @@ void rrdisplayclient::run(void)
 
 	while(!_deadyet)
 	{
+		int np;
 		b=NULL;
 		_q.get((void **)&b);  if(_deadyet) break;
 		if(!b) _throw("Queue has been shut down");
 		_ready.signal();
-		if(_np>1)
-			for(i=1; i<_np; i++) {
+		np=_np;  if(b->_h.compress==RRCOMP_YUV) np=1;
+		if(np>1)
+			for(i=1; i<np; i++) {
 				ct[i]->checkerror();  c[i]->go(b, lastb);
 			}
 		c[0]->compresssend(b, lastb);
 		bytes+=c[0]->_bytes;
-		if(_np>1)
-			for(i=1; i<_np; i++) {
+		if(np>1)
+			for(i=1; i<np; i++) {
 				c[i]->stop();  ct[i]->checkerror();  c[i]->send();
 				bytes+=c[i]->_bytes;
 			}
@@ -242,6 +244,17 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 	int tilesizex=fconfig.tilesize? fconfig.tilesize:b->_h.width;
 	int tilesizey=fconfig.tilesize? fconfig.tilesize:b->_h.height;
 	int i, j, n=0;
+
+	if(b->_h.compress==RRCOMP_YUV)
+	{
+		_prof_comp.startframe();
+		cf=*b;
+		_prof_comp.endframe(b->_h.framew*b->_h.frameh, 0, 1);
+		_parent->sendheader(cf._h);
+		if(_parent->_dosend) _parent->send((char *)cf._bits, cf._h.size);
+		if(_parent->_domovie) _parent->save((char *)cf._bits, cf._h.size);
+		return;
+	}
 
 	_bytes=0;
 	for(i=0; i<b->_h.height; i+=tilesizey)

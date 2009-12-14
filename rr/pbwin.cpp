@@ -349,7 +349,18 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	{
 		if(_drawingtoright() || _rdirty) dostereo=true;
 		_rdirty=false;
-		if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF
+		if(dostereo && compress==RRCOMP_YUV && strlen(fconfig.transport)==0)
+		{
+			static bool message3=false;
+			if(!message3)
+			{
+				rrout.println("[VGL] NOTICE: Quad-buffered stereo cannot be used with YUV encoding.");
+				rrout.println("[VGL]    Using anaglyphic stereo instead.");
+				message3=true;
+			}
+			stereomode=RRSTEREO_REDCYAN;				
+		}
+		else if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF
 			&& strlen(fconfig.transport)==0)
 		{
 			static bool message=false;
@@ -408,6 +419,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 		case RRCOMP_JPEG:
 		case RRCOMP_RGB:
+		case RRCOMP_YUV:
 			if(!_rrdpy)
 			{
 				errifnot(_rrdpy=new rrdisplayclient());
@@ -418,7 +430,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
-		case RRCOMP_YUV:
+		case RRCOMP_XV:
 			sendxv(drawbuf, spoillast, sync, dostereo, stereomode);
 	}
 }

@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2009 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,9 +32,8 @@ class rrcwin : public Runnable
 
 	rrcwin(int, Window, int, bool);
 	virtual ~rrcwin(void);
-	rrcompframe *getFrame(void);
-	void drawFrame(rrcompframe *);
-	void redrawFrame(rrcompframe *);
+	rrframe *getFrame(bool);
+	void drawFrame(rrframe *);
 	int match(int, Window);
 	bool stereoenabled(void) {return _stereo;}
 
@@ -42,6 +42,9 @@ class rrcwin : public Runnable
 	int _drawmethod, _reqdrawmethod;
 	static const int NB=2;
 	rrframe *_b;  rrcompframe _cf[NB];  int _cfi;
+	#ifdef USEXV
+	rrxvframe *_xvf[NB];
+	#endif
 	void initgl(void);
 	void initx11(void);
 	void setdrawmethod(void);

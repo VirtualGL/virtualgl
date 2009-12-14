@@ -693,6 +693,7 @@ class rrxvframe : public rrframe
 		if(_h.frameh>_fb.xvi->height) _h.frameh=_fb.xvi->height;
 		_bits=(unsigned char *)_fb.xvi->data;
 		_flags=_pixelsize=_pitch=0;
+		_h.size=_fb.xvi->data_size;
 	}
 
 	void redraw(void)
