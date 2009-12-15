@@ -133,7 +133,8 @@ void SetIF(void)
 {
 	if(!ifbutton) return;
 	ifbutton->value(fconfig.interframe);
-	if(strlen(fconfig.transport)>0 || fconfig.compress!=RRCOMP_PROXY)
+	if(strlen(fconfig.transport)>0 || fconfig.compress==RRCOMP_JPEG
+		|| fconfig.compress==RRCOMP_RGB)
 		ifbutton->activate();
 	else ifbutton->deactivate();
 }
@@ -315,6 +316,8 @@ Fl_Menu_Item compmenu[]=
 	{"None (X11 transport)", 0, CompCB, (void *)RRCOMP_PROXY},
 	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
 	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
+	{"YUV (X Video transport)", 0, CompCB, (void *)RRCOMP_XV},
+	{"YUV (VGL transport)", 0, CompCB, (void *)RRCOMP_YUV},
 	{0, 0, 0, 0}
 };
 

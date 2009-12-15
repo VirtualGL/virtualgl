@@ -466,7 +466,8 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 	bool is=(fc.compress>=0);
 	fc.compress=i;
 	if(strlen(fc.transport)>0) return;
-	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]=1;
+	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]
+		=fc.transvalid[RRTRANS_XV]=1;
 	if(fc.subsamp<0) fc.subsamp=_Defsubsamp[fc.compress];
 	if(strlen(fc.transport)==0 && _Minsubsamp[fc.compress]>=0
 		&& _Maxsubsamp[fc.compress]>=0)
@@ -518,6 +519,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transpixel);
 	prconfint(transvalid[RRTRANS_X11]);
 	prconfint(transvalid[RRTRANS_VGL]);
+	prconfint(transvalid[RRTRANS_XV]);
 	prconfint(trapx11);
 	prconfint(usewindow);
 	prconfstr(vendor);
