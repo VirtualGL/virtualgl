@@ -135,13 +135,13 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	JSAMPROW *tmpbuf[MAX_COMPONENTS], *tmpbuf2[MAX_COMPONENTS];
 	JSAMPROW *outbuf[MAX_COMPONENTS];
 
+	checkhandle(h);
+
 	for(i=0; i<MAX_COMPONENTS; i++)
 	{
 		tmpbuf[i]=NULL;  _tmpbuf[i]=NULL;
 		tmpbuf2[i]=NULL;  _tmpbuf2[i]=NULL;  outbuf[i]=NULL;
 	}
-
-	checkhandle(h);
 
 	if(srcbuf==NULL || width<=0 || pitch<0 || height<=0
 		|| dstbuf==NULL || size==NULL
@@ -172,9 +172,9 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	#error "TurboJPEG requires JPEG colorspace extensions"
 	#endif
 
-	if(flags&TJ_FORCEMMX) setenv("JSIMD_FORCEMMX", "1", 1);
-	else if(flags&TJ_FORCESSE) setenv("JSIMD_FORCESSE", "1", 1);
-	else if(flags&TJ_FORCESSE2) setenv("JSIMD_FORCESSE2", "1", 1);
+	if(flags&TJ_FORCEMMX) putenv("JSIMD_FORCEMMX=1");
+	else if(flags&TJ_FORCESSE) putenv("JSIMD_FORCESSE=1");
+	else if(flags&TJ_FORCESSE2) putenv("JSIMD_FORCESSE2=1");
 
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
@@ -403,9 +403,9 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 
 	if(pitch==0) pitch=width*ps;
 
-	if(flags&TJ_FORCEMMX) setenv("JSIMD_FORCEMMX", "1", 1);
-	else if(flags&TJ_FORCESSE) setenv("JSIMD_FORCESSE", "1", 1);
-	else if(flags&TJ_FORCESSE2) setenv("JSIMD_FORCESSE2", "1", 1);
+	if(flags&TJ_FORCEMMX) putenv("JSIMD_FORCEMMX=1");
+	else if(flags&TJ_FORCESSE) putenv("JSIMD_FORCESSE=1");
+	else if(flags&TJ_FORCESSE2) putenv("JSIMD_FORCESSE2=1");
 
 	if(setjmp(j->jerr.jb))
 	{  // this will execute if LIBJPEG has an error
