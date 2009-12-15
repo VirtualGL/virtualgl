@@ -46,6 +46,11 @@ in conjunction with the TigerVNC Project.
 Added the ability to create universal 32/64-bit binaries for OS X 10.6 "Snow
 Leopard"
 -------------------------------------------------------------------------------
+[8]
+Added support for encoding images as I420 YUV and displaying through X Video.
+The images can either be displayed directly to the X server or sent through
+the VGL transport for display using vglclient.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
