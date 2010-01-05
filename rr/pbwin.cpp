@@ -430,8 +430,10 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
 			break;
+		#ifdef USEXV
 		case RRCOMP_XV:
 			sendxv(drawbuf, spoillast, sync, dostereo, stereomode);
+		#endif
 	}
 }
 
