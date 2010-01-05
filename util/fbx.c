@@ -46,6 +46,9 @@ const char *_fbx_formatname[FBX_FORMATS]=
  static char *__lasterror="No error";
  #define _throw(m) {__lasterror=m;  __line=__LINE__;  goto finally;}
  #define x11(f) if(!(f)) {__lasterror="X11 Error (window may have disappeared)";  __line=__LINE__;  goto finally;}
+ #ifndef X_ShmAttach
+ #define X_ShmAttach 1
+ #endif
 
 #endif
 
