@@ -48,6 +48,11 @@ endif
 ifeq ($(NASM),)
 NASM = nasm
 endif
+ifeq ($(subplatform), 64)
+NAFLAGS = -felf64 -DELF -D__x86_64__
+else
+NAFLAGS = -felf -DELF
+endif
 
 AR = ar ruvs
 INSTALL = /usr/ucb/install
@@ -73,6 +78,7 @@ else
 endif
 
 DEFAULTJPEGLIB = medialib
+LIBJPEG_SIMD = yes
 
 SHEXT = so
 
@@ -114,3 +120,5 @@ FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
 MLIB = -lmlib
+
+USEXV = yes
