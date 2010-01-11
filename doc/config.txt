@@ -36,8 +36,8 @@ Each method of configuration takes precedence over the previous method:
 	''vglrun'' script, so don't override it unless you know what you're doing. \
 
 {anchor: VGL_COMPRESS}
-| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb''__ |
-| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb''__ |
+| Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| xv \| yuv''__ |
+| ''vglrun'' argument | ''-c ''__''proxy \| jpeg \| rgb \| xv \| yuv''__ |
 | Summary | Set image transport and image compression type |
 | Image Transports | All |
 | Default Value | (See description) |
@@ -56,12 +56,28 @@ Each method of configuration takes precedence over the previous method:
 	 This is useful when displaying to a remote 2D X server or X proxy across a
 	very fast network (see {ref prefix="Section ": X11_Proxy_Usage_Remote}.)
 	{nl}{nl} \
+	__xv__ = Encode images as YUV420P (planar YUV with 4X chrominance
+	subsampling) and display them to the 2D X server using the XV Transport.
+	This transport is designed for use with X proxies, such as the Sun Ray Server
+	Software, which support the X Video extension (see
+	{ref prefix="Chapter ":X_Video_Support}.)
+	{nl}{nl} \
+	__yuv__ = Encode images as YUV420P, send using the VGL Transport, and display
+	on the client machine using the X Video extension.  This greatly reduces the
+	CPU usage on both server and client and uses only about half the network
+	bandwidth as RGB, but the use of 4X chrominance subsampling does produce some
+	visible artifacts (see {ref prefix="Chapter ":X_Video_Support}.)
+	{nl}{nl} \
 	If this option is not specified, then the default is set as follows:
 	{nl}{nl} \
 	If the ''DISPLAY'' environment variable begins with '':'' or ''unix:'', then
-	VirtualGL assumes that the X display connection is local and it defaults to
-	using __proxy__ compression.  Otherwise, it defaults to __jpeg__
-	compression.
+	VirtualGL assumes that the X display connection is local.  If it detects that
+	the 2D X server is a Sun Ray X Server instance, then it will default to using
+	__xv__ compression.  Otherwise, it will default to __proxy__ compression.
+	{nl}{nl} \
+	If VirtualGL detects that the 2D X server is remote, then it will default to
+	using __yuv__ compression if that X server is a Sun Ray X Server instance or
+	__jpeg__ compression otherwise.
 
 	!!! If an image transport plugin is being used, then you can set
 	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  How the
@@ -207,7 +223,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_INTERFRAME}
 | Environment Variable | ''VGL_INTERFRAME = ''__''0 \| 1''__ |
 | Summary | Enable or disable interframe image comparison |
-| Image Transports | VGL, Custom (if supported) |
+| Image Transports | VGL (JPEG, RGB), Custom (if supported) |
 | Default Value | Enabled |
 #OPT: hiCol=first
 
@@ -250,7 +266,7 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-np ''__''{n}''__ |
 | Summary | __''{n}''__ = the number of CPUs to use for multi-threaded \
 	compression |
-| Image Transports | VGL, Custom (if supported) |
+| Image Transports | VGL (JPEG, RGB), Custom (if supported) |
 | Default Value | 1 |
 #OPT: hiCol=first
 
@@ -420,7 +436,8 @@ Each method of configuration takes precedence over the previous method:
 	Using quad-buffered stereo requires the VGL Transport (or a transport plugin
 	that can handle stereo image pairs.)  Using quad-buffered stereo with the VGL
 	Transport also requires that the 2D X server support OpenGL and be connected
-	to a 3D accelerator that supports stereo rendering.
+	to a 3D accelerator that supports stereo rendering.  Quad-buffered stereo
+	is not supported when using the VGL Transport with YUV encoding.
 	{nl}{nl} \
 	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
 	available
@@ -530,7 +547,7 @@ Each method of configuration takes precedence over the previous method:
 | Summary | __''{t}''__ = the image tile size (__''{t}''__ x __''{t}''__ pixels) \
 	to use for multi-threaded compression and interframe comparison \
 	(8 \<\= __''{t}''__ \<\= 1024) |
-| Image Transports | VGL, Custom (if supported) |
+| Image Transports | VGL (JPEG, RGB), Custom (if supported) |
 | Default Value | 256 |
 #OPT: hiCol=first
 

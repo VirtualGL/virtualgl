@@ -32,6 +32,12 @@ systems, OpenGL and GLX, and X windows.
 #INCLUDE: x11transportusage.txt
 {nl}
 ----8<--------------
+#INCLUDE: xvideosupport.txt
+{nl}
+----8<--------------
+#INCLUDE: sunrayusage.txt
+{nl}
+----8<--------------
 #INCLUDE: solarisshellscripts.txt
 {nl}
 ----8<--------------
