@@ -1,0 +1,43 @@
+* Support for the X Video Extension
+{anchor: X_Video_Support}
+
+The X Video extension allows applications to pre-encode or pre-compress images
+and send them through the X server to the graphics card, which presumably has
+on-board video decoding capabilities.  This approach greatly reduces the amount
+of CPU resources used by the X server, which can be beneficial if the X
+server is running on a different machine than the application.
+
+In the case of VirtualGL, what this means is that the VirtualGL client machine
+no longer has to decode or decompress images from the 3D application server.
+It can simply pass the images along to the graphics card for decoding.
+
+VirtualGL supports the X Video extension in two ways:
+
+** YUV Encoding with the VGL Transport
+
+Setting the ''VGL_COMPRESS'' environment variable to ''yuv'' or passing an
+argument of ''-c yuv'' to ''vglrun'' enables YUV encoding with the VGL
+Transport.  When this mode is enabled, VirtualGL encodes images as YUV420P (a
+form of YUV encoding which uses 4X chrominance subsampling and separates Y, U,
+and V pixel components into separate image planes) instead of RGB or JPEG.  The
+YUV420P images are sent to the VirtualGL Client, which draws them using the X
+Video extension.
+
+On a per-frame basis, YUV encoding uses about half the server CPU time as
+JPEG compression and only slightly more server CPU time than RGB encoding.  On
+a per-frame basis, YUV encoding uses about 1/3 the client CPU time as JPEG
+compression and about half the client CPU time as RGB encoding.  YUV encoding
+also uses about half the network bandwidth (per frame) as RGB.
+
+However, since YUV encoding uses 4X chrominance subsampling, there is some loss
+of image quality.
+
+** The XV Transport
+
+The XV Transport is essentially the same as the X11 Transport, except that it
+encodes images as YUV420P and draws them directly to the 2D X server using the
+X Video extension.  This is mainly useful in conjunction with X proxies, such
+as the Sun Ray Server Software, which support the X Video extension.  The
+idea is that if the X proxy is going to have to transcode the image to YUV
+anyhow, VirtualGL may be faster at doing this, since it has a SIMD-accelerated
+YUV encoder.
