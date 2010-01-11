@@ -100,12 +100,7 @@ rrdisplayclient::rrdisplayclient(void) : _np(fconfig.np),
 	_dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
-	if(fconfig.verbose)
-		rrout.println("[VGL] Using %d / %d CPU's for compression",
-			fconfig.np, numprocs());
 	_prof_total.setname("Total(mov)");
-	errifnot(_t=new Thread(this));
-	_t->start();
 }
 
 void rrdisplayclient::run(void)
@@ -118,6 +113,9 @@ void rrdisplayclient::run(void)
 	try {
 
 	rrcompressor *c[MAXPROCS];  Thread *ct[MAXPROCS];
+	if(fconfig.verbose)
+		rrout.println("[VGL] Using %d / %d CPU's for compression",
+			_np, numprocs());
 	for(i=0; i<_np; i++)
 		errifnot(c[i]=new rrcompressor(i, this));
 	if(_np>1) for(i=1; i<_np; i++)
@@ -383,6 +381,8 @@ void rrdisplayclient::connect(char *displayname, unsigned short port)
 		}
 		_dosend=true;
 		_prof_total.setname("Total     ");
+		errifnot(_t=new Thread(this));
+		_t->start();
 	}
 	catch(...)
 	{
