@@ -29,12 +29,15 @@ a per-frame basis, YUV encoding uses about 1/3 the client CPU time as JPEG
 compression and about half the client CPU time as RGB encoding.  YUV encoding
 also uses about half the network bandwidth (per frame) as RGB.
 
-However, since YUV encoding uses 4X chrominance subsampling, there is some loss
-of image quality.
+However, since YUV encoding uses 4X chrominance subsampling, the resulting
+images may contain some visible artifacts.  In particular, narrow, aliased
+lines and other sharp features may appear "soft".
 
 ** The XV Transport
 
-The XV Transport is essentially the same as the X11 Transport, except that it
+Setting the ''VGL_COMPRESS'' environment variable to ''xv'' or passing an
+argument of ''-c xv'' to ''vglrun'' enables the XV Transport.  The XV Transport
+is essentially the same as the X11 Transport, except that it
 encodes images as YUV420P and draws them directly to the 2D X server using the
 X Video extension.  This is mainly useful in conjunction with X proxies, such
 as the Sun Ray Server Software, which support the X Video extension.  The
