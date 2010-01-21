@@ -4,23 +4,31 @@
 
 ARCHFLAG =
 
-ifeq ($(CC), gcc)
+ifeq ($(findstring gcc, $(CC)), gcc)
 
- CXX = g++
+ ifeq ($(CXX),)
+  CXX = g++
+ endif
  CFLAGS = -Wall -fpic
  CDEFINES = -D_GNU_SOURCE
 
  ifeq ($(subplatform), 64)
   ARCHFLAG = -m64
  endif
+ ifeq ($(M32), yes)
+  ARCHFLAG = -m32
+ endif
  ifeq ($(DEBUG), yes)
   OPTFLAG = -O0 -ggdb
  else
-  OPTFLAG = -O2
+  OPTFLAG = -O3
  endif
  SHFLAG = -shared -lc
  DEPFLAG = -MM
  MAPFLAG = -Wl,-M,
+ LDFLAGS = -static-libgcc
+
+ _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
 
 else
 
@@ -70,7 +78,7 @@ ifeq ($(USESSL), yes)
  CDEFINES := $(CDEFINES) -DUSESSL
 endif
 
-LDFLAGS = -mt -lpthread -lrt
+LDFLAGS := $(LDFLAGS) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
  LDFLAGS := -L/usr/X/lib/64 -L/usr/X11/lib/64 -R/opt/SUNWvgl/lib/amd64 $(LDFLAGS)
 else
