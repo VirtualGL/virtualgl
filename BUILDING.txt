@@ -49,7 +49,7 @@ How to build VirtualGL in 9043 easy steps
 
      make
 
--- GCC and G++
+-- GCC and G++ (4.0 or later recommended for best performance)
 
 -- X11 dev. kit
 
