@@ -46,6 +46,9 @@ usage()
 	echo "            jpeg = Compress 3D images using JPEG/send using VGL Transport"
 	echo "                   [default for remote X connections]"
 	echo "            rgb = Encode 3D images as RGB/send using VGL Transport"
+	echo "            xv = Encode 3D images as YUV420P/send using XV Transport"
+	echo "            yuv = Encode 3D images as YUV420P/send using the VGL Transport"
+	echo "                  and display on the client using X Video"
 	echo "            [If an image transport plugin is being used, then <c> can be any"
 	echo "             number >= 0 (default=0).]"
 	echo
