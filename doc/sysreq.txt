@@ -72,24 +72,11 @@
 	| < \
 	|
 | Other Software \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(v2.5 or higher recommended *)} \
-			{item:X server configured to export True Color (24-bit or 32-bit) \
-				visuals}} \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(v2.5 or higher recommended *)} \
-			{item:X server configured to export True Color (24-bit or 32-bit) \
-				visuals}} \
+	| X server configured to export True Color (24-bit or 32-bit) visuals \
+	| < \
+	| < \
 	|
 #OPT: hiCol=first
-
-	!!! * mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you
-	are running an older version of Solaris, it is recommended that you download
-	and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5
-	improves the performance of VirtualGL significantly on Solaris/x86 systems,
-	when compared to mediaLib 2.4.
 
 ** Solaris/SPARC
 
