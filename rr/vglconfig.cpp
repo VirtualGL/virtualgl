@@ -41,7 +41,6 @@ Fl_Float_Input *gammainput=NULL, *fpsinput;
 /*Fl_Input *movieinput=NULL;*/
 Fl_Check_Button *fpsbutton=NULL/*, *mcbutton=NULL*/;
 /*Fl_Group *moviebox=NULL;*/
-Display *_dpy=NULL;
 int ppid=-1;
 
 #undef fconfig
@@ -58,6 +57,10 @@ void SetComp(void)
 			compchoice->mode(i, FL_MENU_INACTIVE);
 		else compchoice->mode(i, 0);
 		if(fconfig.compress==i) compchoice->value(i);
+	}
+	if(!fconfig.transvalid[RRTRANS_XV])
+	{
+		compchoice->mode(4, FL_MENU_INACTIVE);
 	}
 }
 
@@ -313,11 +316,11 @@ void MQualCB(Fl_Widget *w, void *data)
 
 Fl_Menu_Item compmenu[]=
 {
-	{"None (X11 transport)", 0, CompCB, (void *)RRCOMP_PROXY},
-	{"JPEG (VGL transport)", 0, CompCB, (void *)RRCOMP_JPEG},
-	{"RGB (VGL transport)", 0, CompCB, (void *)RRCOMP_RGB},
-	{"YUV (X Video transport)", 0, CompCB, (void *)RRCOMP_XV},
-	{"YUV (VGL transport)", 0, CompCB, (void *)RRCOMP_YUV},
+	{"None (X11 Transport)", 0, CompCB, (void *)RRCOMP_PROXY},
+	{"JPEG (VGL Transport)", 0, CompCB, (void *)RRCOMP_JPEG},
+	{"RGB (VGL Transport)", 0, CompCB, (void *)RRCOMP_RGB},
+	{"YUV (XV Transport)", 0, CompCB, (void *)RRCOMP_XV},
+	{"YUV (VGL Transport)", 0, CompCB, (void *)RRCOMP_YUV},
 	{0, 0, 0, 0}
 };
 

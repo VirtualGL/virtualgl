@@ -26,6 +26,10 @@
 #endif
 #include "rrutil.h"
 #include <X11/Xatom.h>
+#ifdef USEXV
+#include <X11/extensions/Xv.h>
+#include <X11/extensions/Xvlib.h>
+#endif
 
 #define DEFQUAL 95
 
@@ -456,6 +460,43 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 			if(prop) XFree(prop);
 		}
 	}
+
+	#ifdef USEXV
+	int k, port, nformats;
+	unsigned int i, j, dummy1, dummy2, dummy3, dummy4, dummy5, nadaptors=0;
+	XvAdaptorInfo *ai=NULL;
+	XvImageFormatValues *ifv=NULL;
+
+	if(XvQueryExtension(dpy, &dummy1, &dummy2, &dummy3, &dummy4, &dummy5)
+		==Success && XvQueryAdaptors(dpy, DefaultRootWindow(dpy), &nadaptors,
+		&ai)==Success && nadaptors>=1 && ai)
+	{
+		port=-1;
+		for(i=0; i<nadaptors; i++)
+		{
+			for(j=ai[i].base_id; j<ai[i].base_id+ai[i].num_ports; j++)
+			{
+				nformats=0;
+				ifv=XvListImageFormats(dpy, j, &nformats);
+				if(ifv && nformats>0)
+				{
+					for(k=0; k<nformats; k++)
+					{
+						if(ifv[k].id==0x30323449)
+						{
+							XFree(ifv);  port=j;
+							goto found;
+						}
+					}
+				}
+				XFree(ifv);
+			}
+		}
+		found:
+		XvFreeAdaptorInfo(ai);  ai=NULL;
+		if(port!=-1) fconfig.transvalid[RRTRANS_XV]=1;
+	}
+	#endif
 }
 
 void fconfig_setcompress(FakerConfig &fc, int i)
@@ -466,8 +507,7 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 	bool is=(fc.compress>=0);
 	fc.compress=i;
 	if(strlen(fc.transport)>0) return;
-	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]
-		=fc.transvalid[RRTRANS_XV]=1;
+	if(!is) fc.transvalid[_Trans[fc.compress]]=fc.transvalid[RRTRANS_X11]=1;
 	if(fc.subsamp<0) fc.subsamp=_Defsubsamp[fc.compress];
 	if(strlen(fc.transport)==0 && _Minsubsamp[fc.compress]>=0
 		&& _Maxsubsamp[fc.compress]>=0)

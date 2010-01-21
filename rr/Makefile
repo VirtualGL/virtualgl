@@ -151,10 +151,14 @@ $(EDIR)/vglrun: vglrun
 $(EDIR)/vgllogin: vgllogin
 	$(INSTALL) -m 755 $< $@
 
+VGLCONFIGLINK = -lX11 -lfltk_static -lpthread -lrrutil
+ifeq ($(USEXV), yes)
+VGLCONFIGLINK := $(VGLCONFIGLINK) -lXv
+endif
 $(EDIR)/vglconfig: $(ODIR)/vglconfig.o $(ODIR)/fakerconfig.o \
 	$(LDIR)/libfltk_static.a
 	$(CXX) $(LDFLAGS) -o $@ $(ODIR)/vglconfig.o $(ODIR)/fakerconfig.o \
-		-lX11 -lfltk_static -lpthread -lrrutil
+		$(VGLCONFIGLINK)
 
 # Client
 
