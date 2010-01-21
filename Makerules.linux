@@ -2,8 +2,12 @@
 # Linux 32-bit and 64-bit
 ########################################
 
-CC = cc
-CXX = c++
+ifeq ($(CC),)
+ CC = cc
+endif
+ifeq ($(CXX),)
+ CXX = c++
+endif
 AR = ar ruvs
 ifeq ($(NASM),)
 NASM = nasm
