@@ -45,7 +45,7 @@ else
  ifeq ($(DEBUG), yes)
   OPTFLAG = -g
  else
-  OPTFLAG = -O
+  OPTFLAG = -fast
  endif
  SHFLAG = -G -lc -z direct -lCrun -z nodirect
  DEPFLAG = -xM1
