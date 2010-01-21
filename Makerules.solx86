@@ -14,6 +14,7 @@ ifeq ($(findstring gcc, $(CC)), gcc)
 
  ifeq ($(subplatform), 64)
   ARCHFLAG = -m64
+  CDEFINES := $(CDEFINES) __arch64__
  endif
  ifeq ($(M32), yes)
   ARCHFLAG = -m32
@@ -45,7 +46,7 @@ else
  ifeq ($(DEBUG), yes)
   OPTFLAG = -g
  else
-  OPTFLAG = -fast
+  OPTFLAG = -xO5
  endif
  SHFLAG = -G -lc -z direct -lCrun -z nodirect
  DEPFLAG = -xM1
