@@ -27,6 +27,15 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	option is only available if the VGL Transport was active when VirtualGL
 	started.
 	{nl}{nl} \
+	__YUV (XV Transport)__ : equivalent to setting ''VGL_COMPRESS=xv''.  This
+	option is only available if the 2D X Server has the X Video extension and
+	the X Video implementation supports the YUV420P (AKA "I420") pixel format.
+	{nl}{nl} \
+	__YUV (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=yuv''.  This
+	option is only available if the 2D X Server has the X Video extension,
+	the X Video implementation supports the YUV420P (AKA "I420") pixel format, and
+	the VGL Transport was active when VirtualGL started.
+	{nl}{nl} \
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
 	''VGL_COMPRESS'' configuration option and its various parameters.
 
