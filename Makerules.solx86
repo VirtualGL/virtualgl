@@ -85,7 +85,7 @@ else
  LDFLAGS := -L/usr/X/lib -L/usr/X11/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
 endif
 
-DEFAULTJPEGLIB = medialib
+DEFAULTJPEGLIB = libjpeg
 LIBJPEG_SIMD = yes
 
 SHEXT = so
