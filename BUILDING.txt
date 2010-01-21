@@ -232,14 +232,12 @@ one or more of the necessary 32-bit prerequisites, then:
      Blastwave (http://www.blastwave.org), or SunFreeware
      (http://www.sunfreeware.com/)
 
--- Sun mediaLib
+-- SPARC ONLY:  Sun mediaLib
 
    * mediaLib is pre-installed on Solaris 10 and later, and it can also be
-     downloaded for free from http://www.sun.com/processors/vis/mlib.html.  If
-     you are running Solaris 10/x86 Update 3 or older, then you should upgrade
-     the pre-installed version of mediaLib on your system to mediaLib 2.5 in
-     order to achieve the best possible performance.
+     downloaded for free from http://www.sun.com/processors/vis/mlib.html.
 
+-- x86 ONLY:  NASM v2.07 or later
 
 *******************************************************************************
 **     Prerequisites - Win32
@@ -399,12 +397,9 @@ DEBUG = yes
 
 JPEGLIB = libjpeg
 
-  * This option is the default on Intel-based Macs, Linux, and Windows, but on
-    Solaris, you can use this option to build a version of VirtualGL that
-    does not depend on Sun mediaLib.  The resulting version of VirtualGL will
-    be quite a bit slower, however, so this is not recommended.  VirtualGL on
-    Solaris uses mediaLib both to accelerate JPEG compression in the VGL
-    Transport as well as to accelerate gamma correction.
+  * This option is the default on x86 systems, but on Solaris/SPARC, you can
+    use this option to build a version of VirtualGL that does not depend on Sun
+    mediaLib.
 
 LIBJPEG_SIMD = no
 
