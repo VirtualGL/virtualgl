@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-01-21T03:42:14">
+<meta name="date" content="2010-02-04T16:13:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2353,7 +2353,14 @@ Transport and YUV encoding with the VGL Transport (see Chapter
 <a href="#X_Video_Support" class="ref">9</a>.)  If VirtualGL detects 
 that the 2D X server is a Sun Ray X Server instance, then it will 
 automatically enable the XV transport if the X server connection is 
-local or YUV encoding with the VGL Transport if the X server is remote.</p>
+local or YUV encoding with the VGL Transport if the X server is remote.  
+The remote case is illustrated in the figure below.</p>
+
+<a name="fig0010002"></a>
+<div class="figure">
+<p class="caption">Figure 10.2: YUV Encoding with the VGL Transport in a Sun Ray Environment</p>
+<img src="sunrayvgltransport.png" width="4cm" alt="sunrayvgltransport" class="figure" id="imgid_17" name="imgid_17"/>
+</div>
 
 <p>There are trade-offs with using X Video vs. using the Sun Ray Transport. 
 Whereas the X Video mechanism still uses very little CPU time on the Sun 
@@ -2582,7 +2589,7 @@ Chromium is most often used in one of three configurations:</p>
 <h2 id="hd0012001">12.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_17" name="imgid_17"/>
+<img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_18" name="imgid_18"/>
 </div>
 
 <p>Sort-First Rendering (Image-Space Decomposition) is used to overcome the 
@@ -2612,7 +2619,7 @@ perhaps to Chromium as well.  Such is left as an exercise for the reader.</p>
 <h2 id="hd0012002">12.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
 
 <div class="figure">
-<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_18" name="imgid_18"/>
+<img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_19" name="imgid_19"/>
 </div>
 
 <p>Configuration 2 uses the same sort-first principle as Configuration 1, 
@@ -2777,7 +2784,7 @@ following procedure in place of step 2 above:</p>
 <h2 id="hd0012003">12.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
-<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_19" name="imgid_19"/>
+<img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_20" name="imgid_20"/>
 </div>
 
 <p>Sort-Last Rendering is used when the scene contains a huge number of 

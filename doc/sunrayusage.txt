@@ -48,7 +48,12 @@ YUV encoding with the VGL Transport (see
 {ref prefix="Chapter ": X_Video_Support}.)  If VirtualGL detects that the 2D X
 server is a Sun Ray X Server instance, then it will automatically enable the XV
 transport if the X server connection is local or YUV encoding with the VGL
-Transport if the X server is remote.
+Transport if the X server is remote.  The remote case is illustrated in the
+figure below.
+
+#IMG: sunrayvgltransport.png
+#OPT: fmt=latex; w=4cm
+#CAP: YUV Encoding with the VGL Transport in a Sun Ray Environment
 
 There are trade-offs with using X Video vs. using the Sun Ray Transport.
 Whereas the X Video mechanism still uses very little CPU time on the Sun Ray
