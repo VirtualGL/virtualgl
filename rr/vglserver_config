@@ -282,9 +282,10 @@ unconfigdev() {
 			echo "    /dev/nvidia* ..."
 			uncommentline /etc/logindevperm "\/dev\/nvidia"
 		fi
-		if [ -f /etc/modprobe.d/virtualgl.conf ]; then
+		if [ -f /etc/modprobe.d/virtualgl.conf -o -f /etc/modprobe.d/virtualgl ]; then
 			echo ... Removing /etc/modprobe.d/virtualgl.conf to restore default permissions for
 			echo "    /dev/nvidia* ..."
+			rm -f /etc/modprobe.d/virtualgl
 			rm -f /etc/modprobe.d/virtualgl.conf
 			$LSMOD | grep -q nvidia >/dev/null 2>/dev/null
 			if [ $? = 0 ]; then
