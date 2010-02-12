@@ -51,6 +51,10 @@ Added support for encoding images as I420 YUV and displaying through X Video.
 The images can either be displayed directly to the X server or sent through
 the VGL transport for display using vglclient.
 -------------------------------------------------------------------------------
+[9]
+Renamed /etc/modprobe.d/virtualgl to /etc/modprobe.d/virtualgl.conf to comply
+with Ubuntu standard.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
