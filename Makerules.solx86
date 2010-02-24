@@ -54,14 +54,6 @@ else
 
 endif
 
-ifeq ($(NASM),)
-NASM = nasm
-endif
-ifeq ($(subplatform), 64)
-NAFLAGS = -felf64 -DELF -D__x86_64__
-else
-NAFLAGS = -felf -DELF
-endif
 
 AR = ar ruvs
 INSTALL = /usr/ucb/install
@@ -86,8 +78,7 @@ else
  LDFLAGS := -L/usr/X/lib -L/usr/X11/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
 endif
 
-DEFAULTJPEGLIB = libjpeg
-LIBJPEG_SIMD = yes
+DEFAULTJPEGLIB = libjpeg-turbo
 
 SHEXT = so
 

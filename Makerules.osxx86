@@ -8,9 +8,6 @@ ifeq ($(CC), icc)
  CXX = icpc
 endif
 AR = ar ruvs
-ifeq ($(NASM),)
-NASM = nasm
-endif
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
 ifeq ($(USESSL), yes)
@@ -20,11 +17,9 @@ endif
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib
- NAFLAGS = -fmacho64 -DMACHO -D__x86_64__
 else
  ARCHFLAG = -m32
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib
- NAFLAGS = -fmacho -DMACHO
 endif
 
 ifeq ($(M32), yes)
@@ -34,13 +29,11 @@ endif
 
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -g
- NAFLAGS := $(NAFLAGS) -g
 else
  OPTFLAG = -O3
 endif
 
-DEFAULTJPEGLIB = libjpeg
-LIBJPEG_SIMD = yes
+DEFAULTJPEGLIB = libjpeg-turbo
 
 SHFLAG = -dynamiclib
 SHEXT = dylib

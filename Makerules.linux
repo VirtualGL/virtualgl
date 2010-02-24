@@ -9,9 +9,6 @@ ifeq ($(CXX),)
  CXX = c++
 endif
 AR = ar ruvs
-ifeq ($(NASM),)
-NASM = nasm
-endif
 
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 
@@ -22,11 +19,9 @@ endif
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
- NAFLAGS = -felf64 -DELF -D__x86_64__
 else
  ARCHFLAG =
  LDFLAGS = -static-libgcc -L/usr/X11R6/lib
- NAFLAGS = -felf -DELF
 endif
 
 ifeq ($(M32), yes)
@@ -37,13 +32,11 @@ _DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LD
 
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -ggdb
- NAFLAGS := $(NAFLAGS) -g
 else
  OPTFLAG = -O3
 endif
 
-DEFAULTJPEGLIB = libjpeg
-LIBJPEG_SIMD = yes
+DEFAULTJPEGLIB = libjpeg-turbo
 
 SHFLAG = -shared
 SHEXT = so
