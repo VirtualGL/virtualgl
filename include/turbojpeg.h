@@ -35,13 +35,13 @@ enum {TJ_444=0, TJ_422, TJ_420, TJ_GRAYSCALE};
      order, not top-down (X11) order */
 #define TJ_FORCEMMX        8
   /* Turn off CPU auto-detection and force TurboJPEG to use MMX code
-     (IPP and 32-bit libjpeg/SIMD versions only) */
+     (IPP and 32-bit libjpeg-turbo versions only) */
 #define TJ_FORCESSE       16
   /* Turn off CPU auto-detection and force TurboJPEG to use SSE code
-     (32-bit IPP and 32-bit libjpeg/SIMD versions only) */
+     (32-bit IPP and 32-bit libjpeg-turbo versions only) */
 #define TJ_FORCESSE2      32
   /* Turn off CPU auto-detection and force TurboJPEG to use SSE2 code
-     (32-bit IPP and 32-bit libjpeg/SIMD versions only) */
+     (32-bit IPP and 32-bit libjpeg-turbo versions only) */
 #define TJ_ALPHAFIRST     64
   /* If the source/destination bitmap is 32 bpp, assume that each pixel is
      ARGB/XRGB (or ABGR/XBGR if TJ_BGR is also specified) */
