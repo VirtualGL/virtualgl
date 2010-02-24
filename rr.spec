@@ -13,7 +13,7 @@ URL: http://www.virtualgl.org
 Group: Applications/Graphics
 #-->Source0: http://prdownloads.sourceforge.net/virtualgl/VirtualGL-%{version}.tar.gz
 Release: %{_build}
-License: wxWindows Library License v3
+License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
 Prereq: /sbin/ldconfig, /usr/bin/perl
 Provides: %{name} = %{version}-%{release}
