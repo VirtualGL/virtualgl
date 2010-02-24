@@ -49,7 +49,7 @@ How to build VirtualGL in 9043 easy steps
 
      make
 
--- GCC and G++ (4.0 or later recommended for best performance)
+-- GCC and G++
 
 -- X11 dev. kit
 
@@ -63,12 +63,12 @@ How to build VirtualGL in 9043 easy steps
    download an updated binutils RPM from:
    http://mirror.atrpms.net/ccrma/mirror/7.2/
 
--- NASM (http://www.nasm.us/)
-   * 0.99 or later required if building 32-bit VirtualGL
-   * 2.05 or later required if building 64-bit VirtualGL
-   * If you don't plan to use the VGL Transport, then you can build VirtualGL
-     without SIMD-accelerated JPEG compression by passing "LIBJPEG_SIMD=no" as
-     an argument to 'make'.  This eliminates the need for NASM.
+-- libjpeg-turbo SDK
+
+   The libjpeg-turbo SDK Linux packages (in RPM or DEB format) can be obtained
+   from the "Files" area of:
+
+   http://sourceforge.net/projects/libjpeg-turbo/
 
 
 *******************************************************************************
@@ -131,9 +131,15 @@ one or more of the necessary 32-bit prerequisites, then:
      OpenGL SDK
      Mac OS X SDK
 
--- NASM (http://www.nasm.us/) (Intel-based Macs only)
-   * 0.98 or later required if building 32-bit VirtualGL
-   * 2.07 or later required if building 64-bit VirtualGL
+-- libjpeg-turbo SDK (Intel-based Macs only)
+
+   * The libjpeg-turbo SDK disk image (DMG) can be obtained from the "Files"
+     area of:
+
+     http://sourceforge.net/projects/libjpeg-turbo
+
+   * Open the DMG file and double-click on the package inside to install
+     libjpeg-turbo.
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
 
@@ -206,11 +212,11 @@ one or more of the necessary 32-bit prerequisites, then:
 -- GCC
 
    * Preferred version for SPARC:
-     http://cooltools.sunsource.net/gcc/4.0.3/install.html
+     http://cooltools.sunsource.net/gcc/
    * Also available from the Solaris 9 & 10 Companion CD's
      (http://www.sun.com/software/solaris/freeware/),
-     Blastwave (http://www.blastwave.org), or SunFreeware
-     (http://www.sunfreeware.com/)
+     Blastwave (http://www.blastwave.org), OpenCSW (http://www.opencsw.org/),
+     or SunFreeware (http://www.sunfreeware.com/)
    * Build VirtualGL using
        gmake CC=gcc
 
@@ -237,7 +243,11 @@ one or more of the necessary 32-bit prerequisites, then:
    * mediaLib is pre-installed on Solaris 10 and later, and it can also be
      downloaded for free from http://www.sun.com/processors/vis/mlib.html.
 
--- x86 ONLY:  NASM v2.07 or later
+-- x86 ONLY:  libjpeg-turbo SDK
+
+   * The libjpeg-turbo SDK package can be obtained from the "Files" area of:
+
+     http://sourceforge.net/projects/libjpeg-turbo
 
 *******************************************************************************
 **     Prerequisites - Win32
@@ -332,7 +342,17 @@ VirtualGL on Cygwin, see the next section.
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
--- NASM (http://www.nasm.us/) 0.99 or later
+-- libjpeg-turbo SDK for Visual C++
+
+   * The libjpeg-turbo SDK Windows installer (EXE) can be obtained from the
+     "Files" area of:
+
+     http://sourceforge.net/projects/libjpeg-turbo
+
+   * Add the libjpeg-turbo include path (c:\libjpeg-turbo\include) to the
+     system or user INCLUDE environment variable prior to building VirtualGL.
+   * Add the libjpeg-turbo library path (c:\libjpeg-turbo\lib) to the system
+     or user LIB environment variable prior to building VirtualGL.
 
 
 *******************************************************************************
@@ -353,7 +373,17 @@ Cygwin:
    libXext-devel
    libGLU-devel
 
--- NASM (http://www.nasm.us/) 0.99 or later
+-- Download and install the libjpeg-turbo SDK for GCC
+
+   * The libjpeg-turbo SDK Windows installer (EXE) can be obtained from the
+     "Files" area of:
+
+     http://sourceforge.net/projects/libjpeg-turbo
+
+   * Add the libjpeg-turbo include path (/cygdrive/c/libjpeg-turbo-gcc/include) to the
+     CPATH environment variable prior to building VirtualGL.
+   * Add the libjpeg-turbo library path (/cygdrive/c/libjpeg-turbo-gcc/lib) to the
+     LIBRARY_PATH environment variable prior to building VirtualGL.
 
 -- Pass an argument of "platform=cygwin" to 'make' when performing the
    build:
@@ -395,20 +425,11 @@ DEBUG = yes
     "${platform}/lib" and "${platform}/bin", so these two versions can be built
     independently of one another.
 
-JPEGLIB = libjpeg
+JPEGLIB = medialib
 
-  * This option is the default on x86 systems, but on Solaris/SPARC, you can
-    use this option to build a version of VirtualGL that does not depend on Sun
-    mediaLib.
-
-LIBJPEG_SIMD = no
-
-  * Disable SIMD acceleration in libjpeg.  SIMD acceleration, which is the
-    default on Intel-based Macs, Linux, and Windows, will provide 2-3X better
-    performance when using JPEG compression in the VGL Transport.  However, if
-    you are building VirtualGL strictly for a server and do not plan to use the
-    VGL transport, then you can safely disable SIMD acceleration.  This
-    eliminates the need to have NASM on the build machine.
+  * On Solaris/x86, use Sun mediaLib to perform JPEG compression/decompression
+    and YUV encoding/decoding rather than libjpeg-turbo.  VirtualGL will also
+    use Sun mediaLib to perform gamma correction if built with this option.
 
 M32 = yes
 
@@ -421,8 +442,8 @@ CC = gcc
 
 USEGLP = no
 
-  * On Solaris, this builds VirtualGL without GLP extension code.  This is 
-    necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.
+  * On Solaris/SPARC, this builds VirtualGL without GLP extension code.  This
+    is necessary to build VirtualGL on versions of Sun OpenGL prior to 1.5.
 
 USESSL = yes
 
