@@ -335,7 +335,23 @@ static const int rgb_pixelsize[JPEG_NUMCS] = {
 	-1, -1, RGB_PIXELSIZE, -1, -1, -1, 3, 4, 3, 4, 4, 4
 };
 
+
 /* Definitions for speed-related optimizations. */
+
+
+/* If your compiler supports inline functions, define INLINE
+ * as the inline keyword; otherwise define it as empty.
+ */
+
+#ifndef INLINE
+#ifdef __GNUC__			/* for instance, GNU C knows about inline */
+#define INLINE __inline__
+#endif
+#ifndef INLINE
+#define INLINE			/* default is to define it as empty */
+#endif
+#endif
+
 
 /* On some machines (notably 68000 series) "int" is 32 bits, but multiplying
  * two 16-bit shorts is faster than multiplying two ints.  Define MULTIPLIER

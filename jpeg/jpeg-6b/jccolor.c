@@ -522,12 +522,8 @@ jinit_color_converter (j_compress_ptr cinfo)
         cinfo->in_color_space == JCS_EXT_BGRX ||
         cinfo->in_color_space == JCS_EXT_XBGR ||
         cinfo->in_color_space == JCS_EXT_XRGB) {
-      if (jsimd_can_rgb_ycc())
-        cconvert->pub.color_convert = jsimd_rgb_ycc_convert;
-      else {
-        cconvert->pub.start_pass = rgb_ycc_start;
-        cconvert->pub.color_convert = rgb_ycc_convert;
-      }
+      cconvert->pub.start_pass = rgb_ycc_start;
+      cconvert->pub.color_convert = rgb_ycc_convert;
     } else if (cinfo->in_color_space == JCS_YCbCr)
       cconvert->pub.color_convert = null_convert;
     else
