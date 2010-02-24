@@ -63,11 +63,11 @@ typedef unsigned char JSAMPLE;
 #else /* not HAVE_UNSIGNED_CHAR */
 
 typedef char JSAMPLE;
-#ifdef __CHAR_UNSIGNED__
+#ifdef CHAR_IS_UNSIGNED
 #define GETJSAMPLE(value)  ((int) (value))
 #else
 #define GETJSAMPLE(value)  ((int) (value) & 0xFF)
-#endif /* __CHAR_UNSIGNED__ */
+#endif /* CHAR_IS_UNSIGNED */
 
 #endif /* HAVE_UNSIGNED_CHAR */
 
@@ -114,11 +114,11 @@ typedef unsigned char JOCTET;
 #else /* not HAVE_UNSIGNED_CHAR */
 
 typedef char JOCTET;
-#ifdef __CHAR_UNSIGNED__
+#ifdef CHAR_IS_UNSIGNED
 #define GETJOCTET(value)  (value)
 #else
 #define GETJOCTET(value)  ((value) & 0xFF)
-#endif /* __CHAR_UNSIGNED__ */
+#endif /* CHAR_IS_UNSIGNED */
 
 #endif /* HAVE_UNSIGNED_CHAR */
 
@@ -135,11 +135,11 @@ typedef char JOCTET;
 #ifdef HAVE_UNSIGNED_CHAR
 typedef unsigned char UINT8;
 #else /* not HAVE_UNSIGNED_CHAR */
-#ifdef __CHAR_UNSIGNED__
+#ifdef CHAR_IS_UNSIGNED
 typedef char UINT8;
-#else /* not __CHAR_UNSIGNED__ */
+#else /* not CHAR_IS_UNSIGNED */
 typedef short UINT8;
-#endif /* __CHAR_UNSIGNED__ */
+#endif /* CHAR_IS_UNSIGNED */
 #endif /* HAVE_UNSIGNED_CHAR */
 
 /* UINT16 must hold at least the values 0..65535. */
@@ -343,11 +343,7 @@ static const int rgb_pixelsize[JPEG_NUMCS] = {
  */
 
 #ifndef MULTIPLIER
-#ifndef WITH_SIMD
 #define MULTIPLIER  int		/* type for fastest integer multiply */
-#else
-#define MULTIPLIER short  /* prefer 16-bit with SIMD for parellelism */
-#endif
 #endif
 
 

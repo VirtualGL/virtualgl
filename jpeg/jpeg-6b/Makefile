@@ -1,5 +1,3 @@
-vpath %.c simd
-vpath %.asm simd
 ONAME := obj/libjpeg
 
 TOPDIR = ../..
@@ -63,71 +61,6 @@ LOBJS = $(ODIR)/jcapimin.obj \
         $(ODIR)/jmemmgr.obj \
         $(ODIR)/jmemnobs.obj
 
-ifeq ($(LIBJPEG_SIMD), yes)
-
- ifeq ($(subplatform), 64)
-  SIMD_OBJS = $(ODIR)/jsimd_x86_64.obj \
-              $(ODIR)/jfsseflt-64.obj \
-              $(ODIR)/jccolss2-64.obj \
-              $(ODIR)/jdcolss2-64.obj \
-              $(ODIR)/jcsamss2-64.obj \
-              $(ODIR)/jdsamss2-64.obj \
-              $(ODIR)/jdmerss2-64.obj \
-              $(ODIR)/jcqnts2i-64.obj \
-              $(ODIR)/jfss2fst-64.obj \
-              $(ODIR)/jfss2int-64.obj \
-              $(ODIR)/jiss2red-64.obj \
-              $(ODIR)/jiss2int-64.obj \
-              $(ODIR)/jiss2fst-64.obj \
-              $(ODIR)/jcqnts2f-64.obj \
-              $(ODIR)/jiss2flt-64.obj
- else
-  SIMD_OBJS = $(ODIR)/jsimd_i386.obj \
-              $(ODIR)/jsimdcpu.obj \
-              $(ODIR)/jccolmmx.obj \
-              $(ODIR)/jdcolmmx.obj \
-              $(ODIR)/jcsammmx.obj \
-              $(ODIR)/jdsammmx.obj \
-              $(ODIR)/jdmermmx.obj \
-              $(ODIR)/jcqntmmx.obj \
-              $(ODIR)/jfmmxfst.obj \
-              $(ODIR)/jfmmxint.obj \
-              $(ODIR)/jimmxred.obj \
-              $(ODIR)/jimmxint.obj \
-              $(ODIR)/jimmxfst.obj \
-              $(ODIR)/jcqnt3dn.obj \
-              $(ODIR)/jf3dnflt.obj \
-              $(ODIR)/ji3dnflt.obj \
-              $(ODIR)/jcqntsse.obj \
-              $(ODIR)/jfsseflt.obj \
-              $(ODIR)/jisseflt.obj \
-              $(ODIR)/jccolss2.obj \
-              $(ODIR)/jdcolss2.obj \
-              $(ODIR)/jcsamss2.obj \
-              $(ODIR)/jdsamss2.obj \
-              $(ODIR)/jdmerss2.obj \
-              $(ODIR)/jcqnts2i.obj \
-              $(ODIR)/jfss2fst.obj \
-              $(ODIR)/jfss2int.obj \
-              $(ODIR)/jiss2red.obj \
-              $(ODIR)/jiss2int.obj \
-              $(ODIR)/jiss2fst.obj \
-              $(ODIR)/jcqnts2f.obj \
-              $(ODIR)/jiss2flt.obj
- endif
-
- $(ODIR)/%.obj: %.asm
-	$(NASM) $(NAFLAGS) -Isimd/ -o $@ $<
-
- CFLAGS := $(CFLAGS) -DWITH_SIMD
- LOBJS := $(LOBJS) $(SIMD_OBJS)
-
-else
-
- LOBJS := $(LOBJS) $(ODIR)/jsimd_none.obj
-
-endif
-
 OBJS := $(LOBJS) \
         $(ODIR)/cdjpeg.obj \
         $(ODIR)/cjpeg.obj \
@@ -156,11 +89,6 @@ clean:
 
 HDRS := $(wildcard *.h)
 $(OBJS): $(HDRS)
-
-ifeq ($(LIBJPEG_SIMD), yes)
-SIMD_HDRS := $(wildcard simd/*.inc)
-$(SIMD_OBJS): $(SIMD_HDRS)
-endif
 
 
 $(LDIR)/libjpeg.lib: $(LOBJS)
@@ -245,71 +173,6 @@ LOBJS = $(ODIR)/jcapimin.o \
         $(ODIR)/jmemmgr.o \
         $(ODIR)/jmemnobs.o
 
-ifeq ($(LIBJPEG_SIMD), yes)
-
- ifeq ($(subplatform), 64)
-  SIMD_OBJS = $(ODIR)/jsimd_x86_64.o \
-              $(ODIR)/jfsseflt-64.o \
-              $(ODIR)/jccolss2-64.o \
-              $(ODIR)/jdcolss2-64.o \
-              $(ODIR)/jcsamss2-64.o \
-              $(ODIR)/jdsamss2-64.o \
-              $(ODIR)/jdmerss2-64.o \
-              $(ODIR)/jcqnts2i-64.o \
-              $(ODIR)/jfss2fst-64.o \
-              $(ODIR)/jfss2int-64.o \
-              $(ODIR)/jiss2red-64.o \
-              $(ODIR)/jiss2int-64.o \
-              $(ODIR)/jiss2fst-64.o \
-              $(ODIR)/jcqnts2f-64.o \
-              $(ODIR)/jiss2flt-64.o
- else
-  SIMD_OBJS = $(ODIR)/jsimd_i386.o \
-              $(ODIR)/jsimdcpu.o \
-              $(ODIR)/jccolmmx.o \
-              $(ODIR)/jdcolmmx.o \
-              $(ODIR)/jcsammmx.o \
-              $(ODIR)/jdsammmx.o \
-              $(ODIR)/jdmermmx.o \
-              $(ODIR)/jcqntmmx.o \
-              $(ODIR)/jfmmxfst.o \
-              $(ODIR)/jfmmxint.o \
-              $(ODIR)/jimmxred.o \
-              $(ODIR)/jimmxint.o \
-              $(ODIR)/jimmxfst.o \
-              $(ODIR)/jcqnt3dn.o \
-              $(ODIR)/jf3dnflt.o \
-              $(ODIR)/ji3dnflt.o \
-              $(ODIR)/jcqntsse.o \
-              $(ODIR)/jfsseflt.o \
-              $(ODIR)/jisseflt.o \
-              $(ODIR)/jccolss2.o \
-              $(ODIR)/jdcolss2.o \
-              $(ODIR)/jcsamss2.o \
-              $(ODIR)/jdsamss2.o \
-              $(ODIR)/jdmerss2.o \
-              $(ODIR)/jcqnts2i.o \
-              $(ODIR)/jfss2fst.o \
-              $(ODIR)/jfss2int.o \
-              $(ODIR)/jiss2red.o \
-              $(ODIR)/jiss2int.o \
-              $(ODIR)/jiss2fst.o \
-              $(ODIR)/jcqnts2f.o \
-              $(ODIR)/jiss2flt.o
- endif
-
- $(ODIR)/%.o: %.asm
-	$(NASM) $(NAFLAGS) -Isimd/ -o $@ $<
-
- CFLAGS := $(CFLAGS) -DWITH_SIMD
- LOBJS := $(LOBJS) $(SIMD_OBJS)
-
-else
-
- LOBJS := $(LOBJS) $(ODIR)/jsimd_none.o
-
-endif
-
 OBJS := $(LOBJS) \
         $(ODIR)/cdjpeg.o \
         $(ODIR)/cjpeg.o \
@@ -337,22 +200,6 @@ clean:
 	-$(RM) $(TARGETS) $(OBJS) $(OBJS:.o=.d)
 
 -include $(OBJS:.o=.d)
-
-ifeq ($(LIBJPEG_SIMD), yes)
-SIMD_HDRS := $(wildcard simd/*.inc)
-$(SIMD_OBJS): $(SIMD_HDRS)
-
-$(ODIR)/jccolss2-64.o: jcclrss2-64.asm
-$(ODIR)/jdcolss2-64.o: jdclrss2-64.asm
-$(ODIR)/jdmerss2-64.o: jdmrgss2-64.asm
-
-$(ODIR)/jccolmmx.o: jcclrmmx.asm
-$(ODIR)/jccolss2.o: jcclrss2.asm
-$(ODIR)/jdcolmmx.o: jdclrmmx.asm
-$(ODIR)/jdcolss2.o: jdclrss2.asm
-$(ODIR)/jdmermmx.o: jdmrgmmx.asm
-$(ODIR)/jdmerss2.o: jdmrgss2.asm
-endif
 
 $(LDIR)/libjpeg.a: $(LOBJS)
 	$(AR) $@ $^
