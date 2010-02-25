@@ -20,6 +20,7 @@ endif
 
 ifneq ($(JPEGLIB), ipp)
  TARGETS := $(LTARGET) $(TARGETS)
+ LDEP := $(LTARGET)
 endif
 
 
@@ -40,6 +41,13 @@ ifeq ($(JPEGLIB), libjpeg)
 
 $(ODIR)/turbojpeg.obj: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -Fo$@
+
+endif
+
+ifeq ($(JPEGLIB), libjpeg-turbo)
+
+$(ODIR)/turbojpeg.obj: turbojpegl.c
+	$(CC) $(CFLAGS) -c $< -Fo$@
 
 endif
 
@@ -103,6 +111,20 @@ ifeq ($(JPEGLIB), libjpeg)
 $(ODIR)/turbojpeg.o: turbojpegl.c
 	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -o $@
 
+endif
+
+ifeq ($(JPEGLIB), libjpeg-turbo)
+ifeq ($(platform), cygwin)
+
+$(ODIR)/turbojpeg.o: turbojpegl.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+else
+
+$(ODIR)/turbojpeg.o: turbojpegl.c
+	$(CC) $(CFLAGS) -I$(LJTDIR)/include -c $< -o $@
+
+endif
 endif
 
 ifeq ($(JPEGLIB), quicktime)

@@ -8,6 +8,13 @@ ifeq ($(JPEGLIB), ipp)
 
 endif
 
+ifeq ($(JPEGLIB), libjpeg-turbo)
+
+ JPEGLINK = jpeg-static.lib $(LDIR)/tjpeg.lib
+ JPEGDEP = $(LDIR)/tjpeg.lib
+
+endif
+
 ifeq ($(JPEGLIB), libjpeg)
 
  JPEGLINK = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
@@ -29,6 +36,17 @@ else
 ifeq ($(JPEGLIB), ipp)
 
  JPEGLINK = -lturbojpeg
+
+endif
+
+ifeq ($(JPEGLIB), libjpeg-turbo)
+
+ ifeq ($(platform), cygwin)
+  JPEGLINK = -ltjpeg -Wl,-Bstatic -ljpeg -Wl,-Bdynamic
+ else
+  JPEGLINK = -ltjpeg $(LJTLIB)/libjpeg.a
+ endif
+ JPEGDEP = $(LDIR)/libtjpeg.a
 
 endif
 
