@@ -37,10 +37,11 @@ Removed support for the proprietary Sun Ray plugin, since that plugin is no
 longer available from Sun.
 -------------------------------------------------------------------------------
 [6]
-For Linux, Mac/Intel, and Windows systems, VirtualGL is no longer using
-TurboJPEG or the proprietary Intel Performance Primitives.  Instead, VGL v2.2
-uses libjpeg/SIMD, a fully open source vector-accelerated JPEG codec developed
-in conjunction with the TigerVNC Project.
+For Linux, Mac/Intel, Solaris/x86, and Windows systems, the default build of
+VirtualGL no longer uses TurboJPEG/IPP (which was based on the proprietary
+Intel Performance Primitives) or Sun mediaLib.  Instead, VGL v2.2 uses
+libjpeg-turbo, a fully open source vector-accelerated JPEG codec developed in
+conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 -------------------------------------------------------------------------------
 [7]
 Added the ability to create universal 32/64-bit binaries for OS X 10.6 "Snow
