@@ -115,6 +115,24 @@ ifeq ($(JPEGLIB),)
  JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
+LJTDIR = /opt/libjpeg-turbo
+LJTLIB := $(LJTDIR)/lib
+ifeq ($(JPEGLIB), libjpeg-turbo)
+ ifeq ($(platform), linux)
+  ifeq ($(subplatform), 64)
+   LJTLIB := $(shell if [ -d $(LJTDIR)/lib64 ]; then echo $(LJTDIR)/lib64; else echo $(LJTLIB); fi)
+  else
+   LJTLIB := $(shell if [ -d $(LJTDIR)/lib32 ]; then echo $(LJTDIR)/lib32; else echo $(LJTLIB); fi)
+  endif
+ else
+  ifeq ($(platform), solx86)
+   ifeq ($(subplatform), 64)
+    LJTLIB := $(LJTDIR)/lib/amd64
+   endif
+  endif
+ endif
+endif
+
 OMLDIR := $(LDIR)
 ifeq ($(JPEGLIB), medialib)
  CFLAGS := $(CFLAGS) -DUSEMEDIALIB
