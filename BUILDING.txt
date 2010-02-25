@@ -261,44 +261,29 @@ VirtualGL on Cygwin, see the next section.
    GNU Make for Win32 can be found in MSYS
    (http://www.mingw.org/download.shtml) or Cygwin (http://www.cygwin.com/)
 
--- Microsoft Visual C++ 2003 or later
+-- Windows SDK for Windows Server 2008 and .NET Framework 3.5 (or a later
+   version)
 
-   * Tested with Microsoft Visual C++ 2005 Express Edition and
-     Microsoft Visual C++ 2008 Express Edition (both free downloads):
+   http://msdn.microsoft.com/en-us/windows/dd146047.aspx
 
-     http://msdn.microsoft.com/vstudio/express/visualc/
-
-   * Add the compiler binary directories (for instance,
+   * The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
+     everything necessary to build VirtualGL.  If you do not already have
+     Visual C++ installed, then this is the recommended solution.  Also tested
+     with Microsoft Visual C++ 2008 Express Edition (both are free downloads.)
+   * Add the compiler and SDK binary directories (for instance,
      c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN;
-     c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE)
+     c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE;
+     c:\Program Files\Microsoft SDKs\Windows\v6.1\bin)
      to the system or user PATH environment variable prior to building
      VirtualGL.
-   * Add the compiler include directory (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\INCLUDE)
+   * Add the compiler and SDK include directories (for instance,
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\INCLUDE;
+     c:\Program Files\Microsoft SDKs\Windows\v6.1\include)
      to the system or user INCLUDE environment variable prior to building
      VirtualGL.
    * Add the compiler library directory (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB)
-     to the system or user LIB environment variable prior to building
-     VirtualGL.
-
--- Microsoft Windows SDK
-
-   * This is included with Microsoft Visual C++ 2008 Express Edition, but users
-     of prior editions of Visual C++ can download the SDK from:
-
-     http://msdn2.microsoft.com/en-us/windowsserver/bb980924.aspx
-
-   * Add the SDK binary directory (for instance,
-     c:\Program Files\Microsoft SDKs\Windows\v6.0A\bin)
-     to the system or user PATH environment variable prior to building
-     VirtualGL.
-   * Add the SDK include directory (for instance,
-     c:\Program Files\Microsoft SDKs\Windows\v6.0A\include)
-     to the system or user INCLUDE environment variable prior to building
-     VirtualGL.
-   * Add the SDK library directory (for instance,
-     c:\Program Files\Microsoft SDKs\Windows\v6.0A\lib)
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB;
+     c:\Program Files\Microsoft SDKs\Windows\v6.1\lib)
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
@@ -380,10 +365,10 @@ Cygwin:
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * Add the libjpeg-turbo include path (/cygdrive/c/libjpeg-turbo-gcc/include) to the
-     CPATH environment variable prior to building VirtualGL.
-   * Add the libjpeg-turbo library path (/cygdrive/c/libjpeg-turbo-gcc/lib) to the
-     LIBRARY_PATH environment variable prior to building VirtualGL.
+   * Add the libjpeg-turbo include path (/cygdrive/c/libjpeg-turbo-gcc/include)
+     to the CPATH environment variable prior to building VirtualGL.
+   * Add the libjpeg-turbo library path (/cygdrive/c/libjpeg-turbo-gcc/lib) to
+     the LIBRARY_PATH environment variable prior to building VirtualGL.
 
 -- Pass an argument of "platform=cygwin" to 'make' when performing the
    build:
