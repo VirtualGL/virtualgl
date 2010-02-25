@@ -35,6 +35,16 @@ ifeq ($(OS), Darwin)
  endif
 endif
 
+ifeq ($(platform), windows)
+ ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
+  subplatform := 64
+ else
+  ifeq ($(PROCESSOR_ARCHITEW6432), AMD64)
+   subplatform := 64
+  endif
+ endif
+endif
+
 ifeq ($(TOPDIR),)
  TOPDIR = ..
 endif
@@ -92,7 +102,7 @@ INSTALL = install
 # System-specific macros
 include $(TOPDIR)/Makerules.$(platform)
 
-CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include -I$(TOPDIR)/include -I.
+CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)/include -I$(TOPDIR)/include -I.
 CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__APPNAME=\"$(APPNAME)\"
 ifeq ($(DEBUG), yes)
  CDEFINES := $(CDEFINES) -D__DEBUG__

@@ -102,7 +102,7 @@ class w32error : public rrerror
 		{
 			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &_message[strlen(_message)],
-				MLEN-strlen(_message), NULL))
+				MLEN-(DWORD)strlen(_message), NULL))
 				strncpy(_message, "Error in FormatMessage()", MLEN);
 		}
 
@@ -116,7 +116,7 @@ class w32error : public rrerror
 			}
 			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &_message[strlen(_message)],
-				MLEN-strlen(_message), NULL))
+				MLEN-(DWORD)strlen(_message), NULL))
 				strncpy(_message, "Error in FormatMessage()", MLEN);
 		}
 };

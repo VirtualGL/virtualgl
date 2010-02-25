@@ -97,15 +97,19 @@ class sslerror : public rrerror
 #define _throwssl() throw(sslerror(__FUNCTION__, __LINE__))
 #endif
 
+#ifndef _WIN32
+typedef int SOCKET;
+#endif
+
 class rrsocket
 {
 	public:
 
 		rrsocket(bool);
 		#ifdef USESSL
-		rrsocket(int, SSL *);
+		rrsocket(SOCKET, SSL *);
 		#else
-		rrsocket(int);
+		rrsocket(SOCKET);
 		#endif
 		~rrsocket(void);
 		void close(void);
@@ -142,11 +146,7 @@ class rrsocket
 		static const int MAXCONN=1024;
 		static int _Instancecount;  
 		static rrcs _Mutex;
-		#ifdef _WIN32
 		SOCKET _sd;
-		#else
-		int _sd;
-		#endif
 };
 
 #endif

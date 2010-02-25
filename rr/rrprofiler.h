@@ -74,7 +74,7 @@ class rrprofiler
 		if(lastframe==0.0) lastframe=now;
 		if(totaltime>interval || (now-lastframe)>interval)
 		{
-			char temps[256];  int i=0;
+			char temps[256];  size_t i=0;
 			snprintf(&temps[i], 255-i, "%s  ", name);  i=strlen(temps);
 			if(mpixels) {snprintf(&temps[i], 255-i, "- %7.2f Mpixels/sec", mpixels/totaltime);  i=strlen(temps);}
 			if(frames) {snprintf(&temps[i], 255-i, "- %7.2f fps", frames/totaltime);  i=strlen(temps);}

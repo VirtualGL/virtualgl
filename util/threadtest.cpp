@@ -81,7 +81,7 @@ int main(void)
 	try {
 
 	printf("Number of CPU's in this system:  %d\n", numprocs());
-	printf("Word size = %d-bit\n", (int)sizeof(long)*8);
+	printf("Word size = %d-bit\n", (int)sizeof(long*)*8);
 
 	event.wait();
 

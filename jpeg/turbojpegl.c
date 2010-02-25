@@ -263,7 +263,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 				ptr+=PAD(cw[i], 4);
 			}
 		}
-		yuvsize=ptr-dstbuf;
+		yuvsize=(unsigned long)(ptr-dstbuf);
 
 		for(row=0; row<ph; row+=cinfo->max_v_samp_factor)
 		{
@@ -296,7 +296,8 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 	}
 	jpeg_finish_compress(&j->cinfo);
 	if(!(flags&TJ_YUV))
-		*size=TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height)-(j->jdms.free_in_buffer);
+		*size=TJBUFSIZE(j->cinfo.image_width, j->cinfo.image_height)
+			-(unsigned long)(j->jdms.free_in_buffer);
 
 	if(row_pointer) free(row_pointer);
 	for(i=0; i<MAX_COMPONENTS; i++)

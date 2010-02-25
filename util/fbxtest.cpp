@@ -498,7 +498,7 @@ int main(int argc, char **argv)
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	return msg.wParam;
+	return (int)msg.wParam;
 
 	#else
 

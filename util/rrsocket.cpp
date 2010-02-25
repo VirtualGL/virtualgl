@@ -152,7 +152,7 @@ rrsocket::rrsocket(bool dossl=false)
 }
 
 #ifdef USESSL
-rrsocket::rrsocket(int sd, SSL *ssl)
+rrsocket::rrsocket(SOCKET sd, SSL *ssl)
 	: _sslctx(NULL), _ssl(ssl), _sd(sd)
 {
 	if(_ssl) _dossl=true;  else _dossl=false;
@@ -162,7 +162,7 @@ rrsocket::rrsocket(int sd, SSL *ssl)
 	#endif
 }
 #else
-rrsocket::rrsocket(int sd)
+rrsocket::rrsocket(SOCKET sd)
 	: _sd(sd)
 {
 	#ifdef _WIN32
@@ -304,7 +304,8 @@ unsigned short rrsocket::listen(unsigned short port, bool findport)
 
 rrsocket *rrsocket::accept(void)
 {
-	int sd_client, m=1;  struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen;
+	SOCKET sd_client;
+	int m=1;  struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen;
 	addrlen=sizeof(remoteaddr);
 
 	if(_sd==INVALID_SOCKET) _throw("Not connected");
