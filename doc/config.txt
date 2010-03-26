@@ -373,6 +373,27 @@ Each method of configuration takes precedence over the previous method:
 	This setting can also be used to force Chromium to render into Pbuffers
 	instead of windows.  See {ref prefix="Section ": Force_Pbuffer}.
 
+| Environment Variable | ''VGL_SAMPLES = ''__''{s}''__ |
+| ''vglrun'' argument | ''-ms ''__''{s}''__ |
+| Summary | Force OpenGL multisampling to be enabled with __''{s}''__ \
+	samples.  __''{s}''__ = 0 to force OpenGL multisampling to be disabled. |
+| Image Transports | All |
+| Default Value | Allow the 3D application to determine the level of \
+	multisampling |
+#OPT: hiCol=first
+
+	Description :: This option was added primarily because certain
+	vendor-specific methods of enabling full-scene antialiasing at a global level
+	(such as nVidia's ''__GL_FSAA_MODE'' environment variable) do not work with
+	Pbuffers and, subsequently, do not work with VirtualGL.  If ''VGL_SAMPLES''
+	is > 0, then VirtualGL will attempt to redirect 3D rendering to
+	multisample-enabled Pbuffers with the specified number (or a greater
+	number) of samples.  This effectively forces the 3D application to render
+	with the specified multisampling level, as if the application had explicitly
+	passed parameters of ''GLX_SAMPLES'', __''{s}''__ to ''glXChooseVisual()''.
+	If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces multisampling to be
+	disabled, even if the 3D application explicitly tries to enable it.
+
 {anchor: VGL_SPOIL}
 | Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sp'' / ''+sp'' |
