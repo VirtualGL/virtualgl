@@ -136,6 +136,7 @@ static void fconfig_init(void)
 	fconfig.port=-1;
 	fconfig.qual=DEFQUAL;
 	fconfig.readback=1;
+	fconfig.samples=-1;
 	fconfig.spoil=1;
 	fconfig.stereo=RRSTEREO_QUADBUF;
 	fconfig.subsamp=-1;
@@ -380,6 +381,7 @@ void fconfig_reloadenv(void)
 	fetchenv_int("VGL_PORT", port, 0, 65535);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
 	fetchenv_bool("VGL_READBACK", readback);
+	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
 	fetchenv_bool("VGL_SPOIL", spoil);
 	fetchenv_bool("VGL_SSL", ssl);
 	{
@@ -549,6 +551,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(port);
 	prconfint(qual);
 	prconfint(readback);
+	prconfint(samples);
 	prconfint(spoil);
 	prconfint(ssl);
 	prconfint(stereo);

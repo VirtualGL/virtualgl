@@ -65,6 +65,9 @@ usage()
 	echo
 	echo "-ge       : Fool application into thinking that LD_PRELOAD is unset"
 	echo
+	echo "-ms <s>   : Force VirtualGL to use OpenGL multisampling with <s>"
+	echo "            samples (<s> = 0 forces multisampling to be disabled)"
+	echo
 	echo "-np <n>   : Use <n> CPUs to perform image compression [default = 1]"
 	echo
 	echo "+/-pr     : Enable/disable performance profiling output [default = disabled]"
@@ -157,6 +160,7 @@ do
 	-v*)        VGL_VERBOSE=0     ; export VGL_VERBOSE  ;;
 	+v*)        VGL_VERBOSE=1     ; export VGL_VERBOSE  ;;
 	-fps)       VGL_FPS=$2        ; export VGL_FPS      ; shift     ;;
+	-ms)        VGL_SAMPLES=$2    ; export VGL_SAMPLES  ; shift     ;;
 	-ld)        LD_LIBRARY_PATH=$2:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-64)        __VGL_64=1; __VGL_32=0        ;;

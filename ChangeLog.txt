@@ -56,6 +56,11 @@ the VGL transport for display using vglclient.
 Renamed /etc/modprobe.d/virtualgl to /etc/modprobe.d/virtualgl.conf to comply
 with Ubuntu standard.
 -------------------------------------------------------------------------------
+[10]
+Added VGL_SAMPLES environment variable (and vglrun -ms command line switch) to
+force VirtualGL to select a multisampled visual or override the level of
+multisampling selected by the 3D application.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -154,7 +154,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 {
 	int glxattribs[257], j=0;
 	int doublebuffer=0, buffersize=-1, redsize=-1, greensize=-1,
-		bluesize=-1;
+		bluesize=-1, samples=-1;
 
 	depth=glx13? 24:8;  c_class=glx13? TrueColor:PseudoColor;
 
@@ -207,6 +207,10 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 				trans=1;
 			i++;
 		}
+		else if(attribs[i]==GLX_SAMPLES)
+		{
+			samples=attribs[i+1];  i++;
+		}
 		else if(attribs[i]==GLX_DRAWABLE_TYPE) i++;
 		else if(attribs[i]==GLX_X_VISUAL_TYPE) i++;
 		else if(attribs[i]==GLX_VISUAL_ID) i++;
@@ -242,6 +246,11 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
 	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
 	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;
+	if(fconfig.samples>=0) samples=fconfig.samples;
+	if(samples>=0)
+	{
+		glxattribs[j++]=GLX_SAMPLES;  glxattribs[j++]=samples;
+	}
 	if(stereo)
 	{
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;

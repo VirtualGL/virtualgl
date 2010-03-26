@@ -169,6 +169,7 @@ typedef struct _FakerConfig
   int port;
   int qual;
   char readback;
+	int samples;
   char spoil;
   char ssl;
   int stereo;

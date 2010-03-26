@@ -95,7 +95,7 @@ static void process_input(Display *dpy, Window win);
 static int query_extension(char* extName);
 
 static int attributeList[] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
-    GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 1, None };
+    GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 1, None, None, None };
 
 static int dimension = 3;
 
@@ -105,12 +105,26 @@ int main(int argc, char** argv) {
     XSetWindowAttributes swa;
     Window win;
     GLXContext cx;
+    int ns;
+
+    if(argc > 2 && !strcmp(argv[1], "-ms"))
+    {
+        ns = atoi(argv[2]);
+        if(ns >= 1)
+        {
+            attributeList[10] = GLX_SAMPLES;
+            attributeList[11] = ns;
+        }
+    }
 
     dpy = XOpenDisplay(0);
     if (!dpy) error(argv[0], "can't open display");
 
     vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeList);
     if (!vi) error(argv[0], "no suitable visual");
+    printf("Visual ID: 0x%.2x\n", vi->visualid);
+    glXGetConfig(dpy, vi, GLX_SAMPLES, &ns);
+    if (ns > 0) printf("Number of samples: %d\n", ns);
 
     cx = glXCreateContext(dpy, vi, 0, GL_TRUE);
 
