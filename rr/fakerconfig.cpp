@@ -464,13 +464,13 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 	}
 
 	#ifdef USEXV
-	int k, port, nformats;
-	unsigned int i, j, dummy1, dummy2, dummy3, dummy4, dummy5, nadaptors=0;
+	int k, port, nformats, dummy1, dummy2, dummy3;
+	unsigned int i, j, nadaptors=0;
 	XvAdaptorInfo *ai=NULL;
 	XvImageFormatValues *ifv=NULL;
 
-	if(XvQueryExtension(dpy, &dummy1, &dummy2, &dummy3, &dummy4, &dummy5)
-		==Success && XvQueryAdaptors(dpy, DefaultRootWindow(dpy), &nadaptors,
+	if(XQueryExtension(dpy, "XVideo", &dummy1, &dummy2, &dummy3)
+		&& XvQueryAdaptors(dpy, DefaultRootWindow(dpy), &nadaptors,
 		&ai)==Success && nadaptors>=1 && ai)
 	{
 		port=-1;
