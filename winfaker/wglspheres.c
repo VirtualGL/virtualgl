@@ -220,7 +220,14 @@ int display(int advance)
 
 		fontlistbase=glGenLists(256+1);
 		if(!wglUseFontBitmaps(hdc, 0, 256, fontlistbase))
-			_throww32("Cannot create font display lists");
+		{
+			DWORD err=GetLastError();
+			fprintf(stderr, "WARNING: Cannot create font display lists\n");
+			if(err!=ERROR_SUCCESS && FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+				err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024,
+				NULL))
+				fprintf(stderr, "         %s", __lasterror);
+		}
 		_snprintf(temps, 255, "Measuring performance ...");
 
 		first=0;
@@ -253,7 +260,7 @@ int display(int advance)
 	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
 	glRasterPos3f(-0.95f*xaspect, -0.95f*yaspect, -1.5f); 
 	glListBase(fontlistbase);
-	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
+	glCallLists((int)strlen(temps), GL_UNSIGNED_BYTE, temps);
 	glPopAttrib();
 	glPopAttrib();
 	glPopAttrib();
