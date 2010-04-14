@@ -12,9 +12,6 @@
 	| Pentium 4/Xeon with EM64T, or...{nl} \
 		AMD Opteron or Athlon64, 1.8 GHz or faster \
 		{list type=ul: \
-			{item:For optimal performance with 64-bit VirtualGL, the processor \
-				should support SSE3 extensions.  AMD 64-bit processors manufactured \
-				prior to 2005 do not support SSE3.} \
 			{item:Dual processors or dual cores recommended}} \
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
