@@ -18,7 +18,6 @@ DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
 UNATTENDED=0
-AUTOXSTART=1
 
 GROUPADD=/usr/sbin/groupadd
 if [ ! -x $GROUPADD ]; then GROUPADD=groupadd; fi
@@ -42,8 +41,6 @@ usage() {
 	echo "+f	Open framebuffer device access to all users of this machine"
 	echo "-t	Disable XTEST extension [default]"
 	echo "+t	Enable XTEST extension"
-	echo "-x	Do not change the way in which the 3D X server starts up"
-	echo "+x	Automatically start the 3D X server at boot time [default]"
 	exit $1
 }
 
@@ -745,7 +742,7 @@ configglx() {
 		fi
 	fi
 
-	if [ "$UNAME_S" = "Linux" -a $AUTOXSTART = 1 ]; then
+	if [ "$UNAME_S" = "Linux" ]; then
 		if [ -f /etc/inittab ]; then
 			echo ... Setting default run level to 5 \(enabling graphical login prompt\) ...
 			replaceline /etc/inittab "id:[0-9]:initdefault:" "id:5:initdefault:"
@@ -807,8 +804,6 @@ if [ "${#}" != 0 ]; then
 				+s) VGLUSERSONLY=0 ;;
 				+f) FBDEVVGLUSERSONLY=0 ;;
 				+t) DISABLEXTEST=0 ;;
-				-x) AUTOXSTART=0 ;;
-				+x) AUTOXSTART=1 ;;
 				+glx) CONFIG_VGL="configglx" ;;
 				-glx) CONFIG_VGL="unconfigglx" ;;
 				+glp) glpcheck || CONFIG_VGL="configglp" ;;
