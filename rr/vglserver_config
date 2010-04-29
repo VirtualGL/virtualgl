@@ -812,6 +812,10 @@ if [ "${#}" != 0 ]; then
 	done
 fi
 
+if [ "$CONFIG_VGL" = "" ]; then
+	usage 0
+fi
+
 UNAME_S=`uname -s`
 UNAME_M=`uname -m`
 
