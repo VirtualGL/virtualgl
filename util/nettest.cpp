@@ -25,6 +25,19 @@
 #define MAXDATASIZE (4*1024*1024)
 #define ITER 5
 
+bool deadyet=false;
+
+#ifndef _WIN32
+#include <sys/signal.h>
+
+extern "C" {
+void handler(int type)
+{
+	deadyet=true;
+}
+}
+#endif
+
 #if defined(sun)||defined(linux)
 void benchmark(int interval, char *ifname)
 {
@@ -224,15 +237,20 @@ int main(int argc, char **argv)
 	{
 		rrsocket *clientsd=NULL;
 
+		#ifndef _WIN32
+		signal(SIGINT, handler);
+		signal(SIGTERM, handler);
+		#endif
+
 		printf("Listening on TCP port %d\n", PORT);
 		sd.listen(PORT);
 		clientsd=sd.accept();
 
 		printf("Accepted TCP connection from %s\n", clientsd->remotename());
 
-		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+		for(i=MINDATASIZE; i<=MAXDATASIZE && !deadyet; i*=2)
 		{
-			for(j=0; j<ITER; j++)
+			for(j=0; j<ITER && !deadyet; j++)
 			{
 				clientsd->recv(buf, i);
 				clientsd->send(buf, i);
