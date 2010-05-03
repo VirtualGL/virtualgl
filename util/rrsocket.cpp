@@ -245,14 +245,9 @@ typedef int SOCKLEN_T;
 typedef socklen_t SOCKLEN_T;
 #endif
 
-unsigned short rrsocket::listen(unsigned short port, bool findport)
+unsigned short rrsocket::setuplistener(unsigned short port, bool reuseaddr)
 {
-	unsigned short actualport=port;
-	#ifdef USESSL
-	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
-	#endif
-
-	int m=1, m2=0;  struct sockaddr_in myaddr;
+	int m=1, m2=reuseaddr? 1:0;  struct sockaddr_in myaddr;
 
 	if(_sd!=INVALID_SOCKET) _throw("Already connected");
 	#ifdef USESSL
@@ -271,8 +266,23 @@ unsigned short rrsocket::listen(unsigned short port, bool findport)
 	trysock( bind(_sd, (struct sockaddr *)&myaddr, sizeof(myaddr)) );
 	SOCKLEN_T n=sizeof(myaddr);
 	trysock(getsockname(_sd, (struct sockaddr *)&myaddr, &n));
-	actualport=ntohs(myaddr.sin_port);
-	if(findport) return actualport;
+	unsigned short actualport=ntohs(myaddr.sin_port);
+	return actualport;
+}
+
+unsigned short rrsocket::findport(void)
+{
+	return setuplistener(0, false);
+}
+
+unsigned short rrsocket::listen(unsigned short port, bool reuseaddr)
+{
+	unsigned short actualport=port;
+	#ifdef USESSL
+	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
+	#endif
+
+	actualport=setuplistener(port, reuseaddr);
 
 	trysock( ::listen(_sd, MAXCONN) );
 

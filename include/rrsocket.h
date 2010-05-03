@@ -114,13 +114,16 @@ class rrsocket
 		~rrsocket(void);
 		void close(void);
 		void connect(char *, unsigned short);
-		unsigned short listen(unsigned short, bool findport=false);
+		unsigned short findport(void);
+		unsigned short listen(unsigned short, bool reuseaddr=false);
 		rrsocket *accept(void);
 		void send(char *, int);
 		void recv(char *, int);
 		char *remotename(void);
 
 	private:
+
+		unsigned short setuplistener(unsigned short, bool reuseaddr);
 
 		#ifdef USESSL
 		static unsigned long thread_id(void)
