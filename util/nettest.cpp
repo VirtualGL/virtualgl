@@ -25,19 +25,6 @@
 #define MAXDATASIZE (4*1024*1024)
 #define ITER 5
 
-bool deadyet=false;
-
-#ifndef _WIN32
-#include <sys/signal.h>
-
-extern "C" {
-void handler(int type)
-{
-	deadyet=true;
-}
-}
-#endif
-
 #if defined(sun)||defined(linux)
 void benchmark(int interval, char *ifname)
 {
@@ -165,7 +152,7 @@ void usage(char **argv)
 int main(int argc, char **argv)
 {
 	int server=0;  char *servername=NULL;
-	char *buf;  int i, j;
+	char *buf;  int i, j, size;
 	bool dossl=false;
 	rrtimer timer;
 	#if defined(sun)||defined(linux)
@@ -201,7 +188,7 @@ int main(int argc, char **argv)
 	else if(!stricmp(argv[1], "-findport"))
 	{
 		rrsocket sd(false);
-		printf("%d\n", sd.listen(0, true));
+		printf("%d\n", sd.findport());
 		sd.close();
 		exit(0);
 	}
@@ -237,23 +224,39 @@ int main(int argc, char **argv)
 	{
 		rrsocket *clientsd=NULL;
 
-		#ifndef _WIN32
-		signal(SIGINT, handler);
-		signal(SIGTERM, handler);
-		#endif
-
 		printf("Listening on TCP port %d\n", PORT);
-		sd.listen(PORT);
+		sd.listen(PORT, true);
 		clientsd=sd.accept();
 
 		printf("Accepted TCP connection from %s\n", clientsd->remotename());
 
-		for(i=MINDATASIZE; i<=MAXDATASIZE && !deadyet; i*=2)
+		clientsd->recv(buf, 1);
+		if(buf[0]=='V')
 		{
-			for(j=0; j<ITER && !deadyet; j++)
+			clientsd->recv(&buf[1], 4);
+			if(strcmp(buf, "VGL22")) _throw("Invalid header");
+			while(1)
 			{
-				clientsd->recv(buf, i);
-				clientsd->send(buf, i);
+				clientsd->recv((char *)&size, (int)sizeof(int));
+				if(!littleendian()) size=byteswap(size);
+				if(size<1) break;
+				while(1)
+				{
+					clientsd->recv(buf, size);
+					if((unsigned char)buf[0]==255) break;
+					clientsd->send(buf, size);
+				}
+			}
+		}
+		else
+		{
+			for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+			{
+				for(j=0; j<ITER; j++)
+				{
+					if(i!=MINDATASIZE || j!=0) clientsd->recv(buf, i);
+					clientsd->send(buf, i);
+				}
 			}
 		}
 		printf("Shutting down TCP connection ...\n");
@@ -267,19 +270,33 @@ int main(int argc, char **argv)
 		printf("TCP transfer performance between localhost and %s:\n\n", sd.remotename());
 		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
 		printf("(bytes)                (msec)        (MB/sec)     (Mbits/sec)\n");
+		char id[6]="VGL22";
+		sd.send(id, 5);
 		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
 		{
+			size=i;
+			if(!littleendian()) size=byteswap(size);
+			sd.send((char *)&size, (int)sizeof(int));
 			initbuf(buf, i);
+			j=0;
 			timer.start();
-			for(j=0; j<ITER; j++)
+			do
 			{
 				sd.send(buf, i);
 				sd.recv(buf, i);
-			}
-			elapsed=timer.elapsed();
+				j++;
+				elapsed=timer.elapsed();
+			} while(elapsed<2.0);
 			if(!cmpbuf(buf, i)) {printf("DATA ERROR\n");  exit(1);}
-			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)ITER, (double)i*(double)ITER/1048576./(elapsed/2.), (double)i*(double)ITER/125000./(elapsed/2.));
+			buf[0]=255;
+			sd.send(buf, i);
+			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)j,
+				(double)i*(double)j/1048576./(elapsed/2.),
+				(double)i*(double)j/125000./(elapsed/2.));
 		}
+		size=0;
+		if(!littleendian()) size=byteswap(size);
+		sd.send((char *)&size, (int)sizeof(int));
 	}
 
 	sd.close();
