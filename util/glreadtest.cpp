@@ -369,20 +369,21 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v
 // Useful functions
 //////////////////////////////////////////////////////////////////////
 
-static int check_errors(const char * tag)
+char glerrstr[STRLEN]="No error";
+
+static void check_errors(const char * tag)
 {
-	int i, ret;  char *s;
-	ret=0;
+	int i, error=0;  char *s;
 	i=glGetError();
-	if(i!=GL_NO_ERROR) ret=1;
+	if(i!=GL_NO_ERROR) error=1;
 	while(i!=GL_NO_ERROR)
 	{
 		s=(char *)gluErrorString(i);
-		if(s) fprintf(stderr, "ERROR: %s in %s \n", s, tag);
-		else fprintf(stderr, "OpenGL error #%d in %s\n", i, tag);
+		if(s) snprintf(glerrstr, STRLEN-1, "OpenGL ERROR in %s: %s\n", tag, s);
+		else snprintf(glerrstr, STRLEN-1, "OpenGL ERROR #%d in %s\n", i, tag);
 		i=glGetError();
 	}
-	return ret;
+	if(error) _throw(glerrstr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -498,8 +499,8 @@ void glwrite(int format)
 	} while((rbtime=timer.elapsed())<benchtime || n<2);
 
 	double avgmps=(double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime);
-	if(!check_errors("frame buffer write"))
-		fprintf(stderr, "%s Mpixels/sec\n", sigfig(4, temps, avgmps));
+	check_errors("frame buffer write");
+	fprintf(stderr, "%s Mpixels/sec\n", sigfig(4, temps, avgmps));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -510,7 +511,7 @@ void glwrite(int format)
 void glread(int format)
 {
 	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
-	double rbtime;  GLuint bufferid;
+	double rbtime;  GLuint bufferid=0;
 	char temps[STRLEN];
 
 	try {
@@ -521,10 +522,15 @@ void glread(int format)
 	glReadBuffer(GL_FRONT);
 	if(pbo)
 	{
+		const char *ext=(const char *)glGetString(GL_EXTENSIONS);
+		if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
+			_throw("GL_ARB_pixel_buffer_object extension not available");
 		glGenBuffers(1, &bufferid);
+		if(!bufferid) _throw("Could not generate PBO buffer");
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, bufferid);
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB, PAD(WIDTH*ps)*HEIGHT, NULL,
 			GL_STREAM_READ);
+		check_errors("PBO initialization");
 	}
 	else
 	{
@@ -586,13 +592,11 @@ void glread(int format)
 	double avgmps=(double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime);
 	double minmps=(double)(WIDTH*HEIGHT)/((double)1000000.*tmax);
 	double maxmps=(double)(WIDTH*HEIGHT)/((double)1000000.*tmin);
-	if(!check_errors("frame buffer read"))
-	{
-		fprintf(stderr, "%s Mpixels/sec ", sigfig(4, temps, avgmps));
-		fprintf(stderr, "(min = %s, ", sigfig(4, temps, minmps));
-		fprintf(stderr, "max = %s, ", sigfig(4, temps, maxmps));
-		fprintf(stderr, "sdev = %s)\n", sigfig(4, temps, stddev));
-	}
+	check_errors("frame buffer read");
+	fprintf(stderr, "%s Mpixels/sec ", sigfig(4, temps, avgmps));
+	fprintf(stderr, "(min = %s, ", sigfig(4, temps, minmps));
+	fprintf(stderr, "max = %s, ", sigfig(4, temps, maxmps));
+	fprintf(stderr, "sdev = %s)\n", sigfig(4, temps, stddev));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -602,10 +606,13 @@ void glread(int format)
 		{
 			if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB))
 				_throw("Could not unmap buffer");
-			glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
-			glDeleteBuffers(1, &bufferid);
 		}
 		else free(rgbaBuffer);
+	}
+	if(pbo && bufferid>0)
+	{
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+		glDeleteBuffers(1, &bufferid);
 	}
 }
 
