@@ -61,6 +61,10 @@ Added VGL_SAMPLES environment variable (and vglrun -ms command line switch) to
 force VirtualGL to select a multisampled visual or override the level of
 multisampling selected by the 3D application.
 -------------------------------------------------------------------------------
+[11]
+The uninstall script in the Mac distribution package should now work on OS X
+10.6.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
