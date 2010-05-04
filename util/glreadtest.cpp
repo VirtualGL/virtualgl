@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -139,7 +140,8 @@ int useglp=0;
 #ifdef USEGLP
 int glpdevice=-1;
 #endif
-int usewindow=0, useci=0, useoverlay=0, visualid=0;
+int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1;
+double benchtime=1.0;
 
 //////////////////////////////////////////////////////////////////////
 // Error handling
@@ -453,7 +455,7 @@ void glwrite(int format)
 
 	try {
 
-	fprintf(stderr, "glDrawPixels():               ");
+	fprintf(stderr, "glDrawPixels():   ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
 	glShadeModel(GL_FLAT);
@@ -470,7 +472,7 @@ void glwrite(int format)
 		glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
 		glFinish();
 		n++;
-	} while((rbtime=timer.elapsed())<1.0 || n<2);
+	} while((rbtime=timer.elapsed())<benchtime || n<2);
 
 	if(!check_errors("frame buffer write"))
 		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
@@ -483,22 +485,23 @@ void glwrite(int format)
 // Generic OpenGL readback test
 void glread(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int i, n, ps=pix[format].pixelsize;
+	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
 	double rbtime;
 
 	try {
 
-	fprintf(stderr, "glReadPixels() [bottom-up]:   ");
+	fprintf(stderr, "glReadPixels():   ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
 	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN);
 	glReadBuffer(GL_FRONT);
 	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	n=0;
-	timer.start();
+	n=0;  rbtime=0.;
+	double tmin=0., tmax=0.;  int first=1;
 	do
 	{
+		timer.start();
 		if(pix[format].glformat==GL_LUMINANCE)
 		{
 			glPushAttrib(GL_PIXEL_MODE_BIT);
@@ -511,44 +514,23 @@ void glread(int format)
 		{
 			glPopAttrib();
 		}
+		double elapsed=timer.elapsed();
+		if(first) {tmin=tmax=elapsed;  first=0;}
+		else
+		{
+			if(elapsed<tmin) tmin=elapsed;
+			if(elapsed>tmax) tmax=elapsed;
+		}		
 		n++;
-	} while((rbtime=timer.elapsed())<1.0 || n<2);
+		rbtime+=elapsed;
+	} while(rbtime<benchtime || n<2);
 	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
 		_throw("ERROR: Bogus data read back.");
 	if(!check_errors("frame buffer read"))
-		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
-
-	fprintf(stderr, "glReadPixels() [top-down]:    ");
-	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
-	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN); 
-	glReadBuffer(GL_FRONT);
-	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	n=0;
-	timer.start();
-	do
-	{
-		if(pix[format].glformat==GL_LUMINANCE)
-		{
-			glPushAttrib(GL_PIXEL_MODE_BIT);
-			glPixelTransferf(GL_RED_SCALE, (GLfloat)0.299);
-			glPixelTransferf(GL_GREEN_SCALE, (GLfloat)0.587);
-			glPixelTransferf(GL_BLUE_SCALE, (GLfloat)0.114);
-		}
-		for (i=0; i<n; i++)
-		{
-			for(int j=0; j<HEIGHT; j++)
-				glReadPixels(0, HEIGHT-j-1, WIDTH, 1, pix[format].glformat, GL_UNSIGNED_BYTE, &rgbaBuffer[PAD(WIDTH*ps)*j]);
-		}
-		if(pix[format].glformat==GL_LUMINANCE)
-		{
-			glPopAttrib();
-		}
-		n++;
-	} while((rbtime=timer.elapsed())<1.0 || n<2);
-	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 1))
-		_throw("ERROR: Bogus data read back.");
-	if(!check_errors("frame buffer read"))
-		fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime));
+		fprintf(stderr, "%f Mpixels/sec (min = %f, max = %f)\n",
+			(double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime),
+			(double)(WIDTH*HEIGHT)/((double)1000000.*tmax),
+			(double)(WIDTH*HEIGHT)/((double)1000000.*tmin));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -583,7 +565,7 @@ void display(void)
 		#endif
 
 		glwrite(format);
-		glread(format);
+		for(int i=0; i<loops; i++) glread(format);
 		fprintf(stderr, "\n");
 	}
 
@@ -605,6 +587,13 @@ void usage(char **argv)
 	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
 	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
 	fprintf(stderr, "-visualid = Ignore visual selection and use this visual ID (hex) instead\n");
+	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
+	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
+	fprintf(stderr, "-bgr = Test only BGR pixel format\n");
+	fprintf(stderr, "-bgra = Test only BGRA pixel format\n");
+	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
+	fprintf(stderr, "-time <t> = Run each test for <t> seconds\n");
+	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
 	#ifdef USEGLP
 	fprintf(stderr, "-device = Set GLP device to use for rendering (default: Use GLX)\n");
 	#endif
@@ -629,6 +618,47 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-window")) usewindow=1;
 		if(!stricmp(argv[i], "-index")) useci=1;
 		if(!stricmp(argv[i], "-overlay")) {useci=1;  useoverlay=1;  usewindow=1;}
+		if(!stricmp(argv[i], "-rgb"))
+		{
+			pixelformat pixtemp={0, 1, 2, 3, GL_RGB, 0, "RGB"};
+			pix[0]=pixtemp;
+			FORMATS=1;
+		}
+		if(!stricmp(argv[i], "-rgba"))
+		{
+			pixelformat pixtemp={0, 1, 2, 4, GL_RGBA, 0, "RGBA"};
+			pix[0]=pixtemp;
+			FORMATS=1;
+		}
+		#ifdef GL_BGR_EXT
+		if(!stricmp(argv[i], "-bgr"))
+		{
+			pixelformat pixtemp={2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"};
+			pix[0]=pixtemp;
+			FORMATS=1;
+		}
+		#endif
+		#ifdef GL_BGRA_EXT
+		if(!stricmp(argv[i], "-bgra"))
+		{
+			pixelformat pixtemp={2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"};
+			pix[0]=pixtemp;
+			FORMATS=1;
+		}
+		#endif
+		#ifdef GL_ABGR_EXT
+		if(!stricmp(argv[i], "-abgr"))
+		{
+			pixelformat pixtemp={3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"};
+			pix[0]=pixtemp;
+			FORMATS=1;
+		}
+		#endif
+		if(!stricmp(argv[i], "-loop") && i<argc-1)
+		{
+			int temp=atoi(argv[i+1]);  i++;
+			if(temp>1) loops=temp;
+		}
 		if(!stricmp(argv[i], "-align") && i<argc-1)
 		{
 			int temp=atoi(argv[i+1]);  i++;
@@ -649,6 +679,11 @@ int main(int argc, char **argv)
 		{
 			int temp=atoi(argv[i+1]);  i++;
 			if(temp>=1) HEIGHT=temp;
+		}
+		if(!stricmp(argv[i], "-time") && i<argc-1)
+		{
+			double temp=atof(argv[i+1]);  i++;
+			if(temp>0.0) benchtime=temp;
 		}
 		#ifdef USEGLP
 		if(!strnicmp(argv[i], "-d", 2) && i<argc-1)
