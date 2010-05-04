@@ -648,8 +648,7 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-index] [-overlay]\n", argv[0]);
 	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>]\n");
-	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]\n");
-	fprintf(stderr, "       [-pbo]\n");
+	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>] [-pbo]\n");
 	#ifdef USEGLP
 	fprintf(stderr, "       [-device <GLP device>]\n");
 	#endif
