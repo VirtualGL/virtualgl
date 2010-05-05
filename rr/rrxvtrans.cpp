@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -79,11 +79,9 @@ void rrxvtrans::run(void)
 	}
 }
 
-rrxvframe *rrxvtrans::getbitmap(Display *dpy, Window win, int w, int h,
-	bool spoil)
+rrxvframe *rrxvtrans::getbitmap(Display *dpy, Window win, int w, int h)
 {
 	rrxvframe *b=NULL;
-	if(!spoil) _ready.wait();
 	if(_t) _t->checkerror();
 	{
 	rrcs::safelock l(_bmpmutex);
@@ -103,10 +101,15 @@ rrxvframe *rrxvtrans::getbitmap(Display *dpy, Window win, int w, int h,
 	return b;
 }
 
-bool rrxvtrans::frameready(void)
+bool rrxvtrans::ready(void)
 {
 	if(_t) _t->checkerror();
 	return(_q.items()<=0);
+}
+
+void rrxvtrans::synchronize(void)
+{
+	_ready.wait();
 }
 
 static void __rrxvtrans_spoilfct(void *b)

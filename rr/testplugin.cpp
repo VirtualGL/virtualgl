@@ -1,4 +1,4 @@
-/* Copyright (C)2009 D. R. Commander
+/* Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -63,8 +63,7 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return ret;
 }
 
-RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
-	int spoil)
+RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo)
 {
 	try
 	{
@@ -78,8 +77,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 		else compress=RRCOMP_JPEG;
 		int flags=RRBMP_BOTTOMUP;
 		if(littleendian() && compress!=RRCOMP_RGB) flags|=RRBMP_BGR;
-		rrframe *f=rrdpy->getbitmap(width, height, 3, flags, (bool)stereo,
-			(bool)spoil);
+		rrframe *f=rrdpy->getbitmap(width, height, 3, flags, (bool)stereo);
 		f->_h.compress=compress;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;
@@ -102,14 +100,30 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 	}
 }
 
-int RRTransFrameReady(void *handle)
+int RRTransReady(void *handle)
 {
 	int ret=-1;
 	try
 	{
 		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
 		if(!rrdpy) _throw("Invalid handle");
-		ret=(int)rrdpy->frameready();
+		ret=(int)rrdpy->ready();
+	}
+	catch(rrerror &e)
+	{
+		err=e;  return -1;
+	}
+	return ret;
+}
+
+int RRTransSynchronize(void *handle)
+{
+	int ret=0;
+	try
+	{
+		rrdisplayclient *rrdpy=(rrdisplayclient *)handle;
+		if(!rrdpy) _throw("Invalid handle");
+		rrdpy->synchronize();
 	}
 	catch(rrerror &e)
 	{

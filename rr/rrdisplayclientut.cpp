@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -127,7 +127,8 @@ int main(int argc, char **argv)
 	int frames=0, fill=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
+		rrdpy.synchronize();
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
@@ -144,7 +145,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, true));
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
@@ -162,7 +163,8 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
+		rrdpy.synchronize();
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
@@ -179,7 +181,8 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false, false));
+		rrdpy.synchronize();
+		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		memcpy(b->_bits, buf, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;  b->_h.compress=fconfig.compress;

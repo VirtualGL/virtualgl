@@ -1,4 +1,4 @@
-/* Copyright (C)2009 D. R. Commander
+/* Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -49,7 +49,8 @@ rrplugin::rrplugin(Display *dpy, Window win, char *name)
 	_RRTransInit=(_RRTransInitType)loadsym(dllhnd, "RRTransInit");
 	_RRTransConnect=(_RRTransConnectType)loadsym(dllhnd, "RRTransConnect");
 	_RRTransGetFrame=(_RRTransGetFrameType)loadsym(dllhnd, "RRTransGetFrame");
-	_RRTransFrameReady=(_RRTransFrameReadyType)loadsym(dllhnd, "RRTransFrameReady");
+	_RRTransReady=(_RRTransReadyType)loadsym(dllhnd, "RRTransReady");
+	_RRTransSynchronize=(_RRTransSynchronizeType)loadsym(dllhnd, "RRTransSynchronize");
 	_RRTransSendFrame=(_RRTransSendFrameType)loadsym(dllhnd, "RRTransSendFrame");
 	_RRTransDestroy=(_RRTransDestroyType)loadsym(dllhnd, "RRTransDestroy");
 	_RRTransGetError=(_RRTransGetErrorType)loadsym(dllhnd, "RRTransGetError");
@@ -77,18 +78,25 @@ void rrplugin::destroy(void)
 	if(ret<0) _throw(_RRTransGetError());
 }
 
-int rrplugin::frameready(void)
+int rrplugin::ready(void)
 {
 	rrcs::safelock l(mutex);
-	int ret=_RRTransFrameReady(handle);
+	int ret=_RRTransReady(handle);
 	if(ret<0) _throw(_RRTransGetError());
 	return ret;
 }
 
-RRFrame *rrplugin::getframe(int width, int height, bool stereo, bool spoil)
+void rrplugin::synchronize(void)
 {
 	rrcs::safelock l(mutex);
-	RRFrame *ret=_RRTransGetFrame(handle, width, height, stereo, spoil);
+	int ret=_RRTransSynchronize(handle);
+	if(ret<0) _throw(_RRTransGetError());
+}
+
+RRFrame *rrplugin::getframe(int width, int height, bool stereo)
+{
+	rrcs::safelock l(mutex);
+	RRFrame *ret=_RRTransGetFrame(handle, width, height, stereo);
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
 }

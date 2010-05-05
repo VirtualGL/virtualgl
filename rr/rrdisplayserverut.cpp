@@ -1,5 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -68,8 +68,9 @@ int main(int argc, char **argv)
 		rrdpy.connect(fconfig.client, fconfig.port);
 		for(int f=0; f<frames; f++)
 		{
+			rrdpy.synchronize();
 			errifnot(b=rrdpy.getbitmap(WIDTH, HEIGHT, 3,
-				littleendian()? RRBMP_BGR:0, false, false));
+				littleendian()? RRBMP_BGR:0, false));
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=4;

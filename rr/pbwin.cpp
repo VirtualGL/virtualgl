@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -450,10 +450,10 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		_plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(_windpy), fconfig.port);
 	}
-	if(spoillast && fconfig.spoil && !_plugin->frameready())
+	if(spoillast && fconfig.spoil && !_plugin->ready())
 		return;
-	frame=_plugin->getframe(pbw, pbh, dostereo && stereomode==RRSTEREO_QUADBUF,
-		fconfig.spoil);
+	if(!fconfig.spoil) _plugin->synchronize();
+	frame=_plugin->getframe(pbw, pbh, dostereo && stereomode==RRSTEREO_QUADBUF);
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
 		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? RRBMP_BGR:0) |
 		(rrtrans_afirst[frame->format]? RRBMP_ALPHAFIRST:0) |
@@ -493,7 +493,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	if(spoillast && fconfig.spoil && !rrdpy->frameready() && !domovie)
+	if(spoillast && fconfig.spoil && !rrdpy->ready() && !domovie)
 		return;
 	rrframe *b;
 	int flags=RRBMP_BOTTOMUP, format=GL_RGB;
@@ -503,8 +503,9 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 		format=GL_BGR_EXT;  flags|=RRBMP_BGR;
 	}
 	#endif
+	if(domovie || !fconfig.spoil) rrdpy->synchronize();
 	errifnot(b=rrdpy->getbitmap(pbw, pbh, 3, flags,
-		dostereo && stereomode==RRSTEREO_QUADBUF, domovie? false:fconfig.spoil));
+		dostereo && stereomode==RRSTEREO_QUADBUF));
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
 	{
@@ -537,8 +538,9 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 
 	rrfb *b;
 	if(!_blitter) errifnot(_blitter=new rrblitter());
-	if(spoillast && fconfig.spoil && !_blitter->frameready()) return;
-	errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
+	if(spoillast && fconfig.spoil && !_blitter->ready()) return;
+	if(!fconfig.spoil) _blitter->synchronize();
+	errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
 	b->_flags|=RRBMP_BOTTOMUP;
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
@@ -595,8 +597,9 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 
 	rrxvframe *b;
 	if(!_xvtrans) errifnot(_xvtrans=new rrxvtrans());
-	if(spoillast && fconfig.spoil && !_xvtrans->frameready()) return;
-	errifnot(b=_xvtrans->getbitmap(_windpy, _win, pbw, pbh, fconfig.spoil));
+	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
+	if(!fconfig.spoil) _xvtrans->synchronize();
+	errifnot(b=_xvtrans->getbitmap(_windpy, _win, pbw, pbh));
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=pbh;
 	hdr.width=hdr.framew=pbw;

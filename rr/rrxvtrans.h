@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,10 +34,11 @@ class rrxvtrans : public Runnable
 		for(int i=0; i<NB; i++) {if(_bmp[i]) delete _bmp[i];  _bmp[i]=NULL;}
 	}
 
-	bool frameready(void);
+	bool ready(void);
+	void synchronize(void);
 	void sendframe(rrxvframe *, bool sync=false);
 	void run(void);
-	rrxvframe *getbitmap(Display *, Window, int, int, bool spoil);
+	rrxvframe *getbitmap(Display *, Window, int, int);
 
 	private:
 

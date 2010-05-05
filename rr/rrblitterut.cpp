@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -79,7 +79,8 @@ int main(int argc, char **argv)
 	int fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
+		blitter.synchronize();
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, true));
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
@@ -112,7 +113,8 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
+		blitter.synchronize();
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		memset(b->_bits, 0, b->_pitch*HEIGHT);
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
@@ -129,7 +131,8 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT, false));
+		blitter.synchronize();
+		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}

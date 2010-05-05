@@ -1,4 +1,4 @@
-/* Copyright (C)2009 D. R. Commander
+/* Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,8 +17,9 @@
 
 typedef void* (*_RRTransInitType)(Display *, Window, FakerConfig *);
 typedef int (*_RRTransConnectType)(void *, char *, int);
-typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int, int);
-typedef int (*_RRTransFrameReadyType)(void *);
+typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int);
+typedef int (*_RRTransReadyType)(void *);
+typedef int (*_RRTransSynchronizeType)(void *);
 typedef int (*_RRTransSendFrameType)(void *, RRFrame *, int);
 typedef int (*_RRTransDestroyType)(void *);
 typedef const char* (*_RRTransGetErrorType)(void);
@@ -31,8 +32,9 @@ class rrplugin
 		~rrplugin(void);
 		void connect(char *, int);
 		void destroy(void);
-		int frameready(void);
-		RRFrame *getframe(int, int, bool, bool);
+		int ready(void);
+		void synchronize(void);
+		RRFrame *getframe(int, int, bool);
 		void sendframe(RRFrame *, bool);
 
 	private:
@@ -40,7 +42,8 @@ class rrplugin
 		_RRTransInitType _RRTransInit;
 		_RRTransConnectType _RRTransConnect;
 		_RRTransGetFrameType _RRTransGetFrame;
-		_RRTransFrameReadyType _RRTransFrameReady;
+		_RRTransReadyType _RRTransReady;
+		_RRTransSynchronizeType _RRTransSynchronize;
 		_RRTransSendFrameType _RRTransSendFrame;
 		_RRTransDestroyType _RRTransDestroy;
 		_RRTransGetErrorType _RRTransGetError;

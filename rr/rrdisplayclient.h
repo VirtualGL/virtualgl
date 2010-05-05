@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -38,8 +39,9 @@ class rrdisplayclient : public Runnable
 		if(_sd) {delete _sd;  _sd=NULL;}
 	}
 
-	rrframe *getbitmap(int, int, int, int, bool stereo, bool spoil);
-	bool frameready(void);
+	rrframe *getbitmap(int, int, int, int, bool stereo);
+	bool ready(void);
+	void synchronize(void);
 	void sendframe(rrframe *);
 	void run(void);
 	void sendheader(rrframeheader h, bool eof);

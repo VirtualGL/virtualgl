@@ -1,4 +1,4 @@
-/* Copyright (C)2009 D. R. Commander
+/* Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -54,8 +54,7 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return 0;
 }
 
-RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
-	int spoil)
+RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo)
 {
 	try
 	{
@@ -64,7 +63,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 		RRFrame *frame=new RRFrame;
 		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
-		rrfb *f=rrb->getbitmap(_dpy, _win, width, height, (bool)spoil);
+		rrfb *f=rrb->getbitmap(_dpy, _win, width, height);
 		f->_flags|=RRBMP_BOTTOMUP;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;
@@ -86,14 +85,30 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo,
 	}
 }
 
-int RRTransFrameReady(void *handle)
+int RRTransReady(void *handle)
 {
 	int ret=-1;
 	try
 	{
 		rrblitter *rrb=(rrblitter *)handle;
 		if(!rrb) _throw("Invalid handle");
-		ret=(int)rrb->frameready();
+		ret=(int)rrb->ready();
+	}
+	catch(rrerror &e)
+	{
+		err=e;  return -1;
+	}
+	return ret;
+}
+
+int RRTransSynchronize(void *handle)
+{
+	int ret=0;
+	try
+	{
+		rrblitter *rrb=(rrblitter *)handle;
+		if(!rrb) _throw("Invalid handle");
+		rrb->synchronize();
 	}
 	catch(rrerror &e)
 	{

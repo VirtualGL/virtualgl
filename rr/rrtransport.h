@@ -1,5 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,19 +34,19 @@ static const int rrtrans_afirst[RRTRANS_FORMATOPT]={0, 0, 0, 0, 1, 1};
 typedef struct _RRFrame
 {
   /* A pointer to the pixels in the framebuffer allocated by the transport
-     plugin.  If this is a stereo frame, this points to the pixels in the left
-     eye buffer.  Pixels returned from VirtualGL are always returned in
-     bottom-up order. */
+     plugin.  If this is a stereo frame, then this pointer points to the pixels
+     in the left eye buffer.  Pixels delivered from VirtualGL to the plugin are
+     always delivered in bottom-up order. */
   unsigned char *bits;
 
-  /* If this is a stereo frame, then this points to the pixels in the right
-     eye buffer */
+  /* If this is a stereo frame, then this pointer points to the pixels in the
+     right eye buffer */
   unsigned char *rbits;
 
   /* The format of the pixels in the allocated framebuffer (see enum above) */
   int format;
 
-  /* The width and height of the allocate framebuffer, in pixels */
+  /* The width and height of the allocated framebuffer, in pixels */
   int w, h;
 
   /* The number of bytes in each pixel row of the allocated framebuffer */
@@ -88,8 +88,8 @@ void *
    RETURN VALUE:
    If successful, a non-NULL instance handle is returned.  This handle can then
    be passed to the functions below.  If the plugin fails to initialize
-   properly, then RRTransInit() will return NULL.  RRTransGetError() can
-   be called to determine the reason for the failure.
+   properly, then RRTransInit() returns NULL, and RRTransGetError() can be
+   called to determine the reason for the failure.
 */
 
 int
@@ -120,10 +120,11 @@ int
 */
 
 RRFrame *
-   RRTransGetFrame (void *handle, int width, int height, int stereo, int spoil);
+   RRTransGetFrame (void *handle, int width, int height, int stereo);
 /*
    Retrieve a frame buffer of the requested dimensions from the transport
-   plugin's buffer pool
+   plugin's buffer pool.  If no frame buffers are available in the pool, then
+   this function waits until one is available.
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to
@@ -131,38 +132,56 @@ RRFrame *
    width, height (IN) = dimensions of frame buffer to be allocated by the
                         transport plugin
    stereo (IN) = 1 to request a stereo frame or 0 to request a mono frame
-   spoil (IN) = 1 to allow this frame to be discarded if the receiver is busy
-                or 0 to force this frame to be sent
 
    RETURN VALUE:
    If a buffer is successfully allocated, then a non-NULL pointer to an RRFrame
    structure is returned (see above for a description of this structure.)
    Otherwise, NULL is returned and the reason for the failure can be queried
    with RRTransGetError().
-
-   DEADLOCK WARNING:
-   This function may block until a frame is available in the pool.  Frames
-   obtained via. RRTransGetFrame() should be sent as soon as possible to avoid
-   the possibility of a deadlock.
 */
 
 int
-   RRTransFrameReady(void *handle);
+   RRTransReady(void *handle);
 /*
    Returns 1 if the plugin is ready to deliver a new frame immediately or
    0 if it is currently processing a frame and a new frame would have to be
-   queued for transmission.  This function can be used to implement the "spoil
-   last frame" spoiling algorithm within the plugin.
+   queued for transmission.  This function is used by VirtualGL to implement
+   frame spoiling with asynchronous image transports.  The function always
+   returns 1 if the image transport being implemented by the plugin is
+   synchronous.
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to
                  RRTransInit())
+
+   RETURN VALUE:
+   This function returns -1 on failure.  RRTransGetError() can be called to
+   determine the cause of the failure.
+*/
+
+int
+   RRTransSynchronize(void *handle);
+/*
+   In asynchronous image transports, this function blocks until the queue is
+   empty.  VirtualGL calls this function only if frame spoiling is disabled.
+   It is used to synchronize the image transport thread with the OpenGL
+   rendering thread while still allowing those two operations to occur in
+   parallel.
+
+   PARAMETERS:
+   handle (IN) = instance handle (returned from a previous call to
+                 RRTransInit())
+
+   RETURN VALUE:
+   This function returns 0 on success or -1 on failure.  RRTransGetError() can
+   be called to determine the cause of the failure.
 */
 
 int
    RRTransSendFrame (void *handle, RRFrame *frame, int sync);
 /*
-   Send the contents of a frame buffer to the receiver
+   Send the contents of a frame buffer to the receiver (or queue it for
+   transmission)
 
    PARAMETERS:
    handle (IN) = instance handle (returned from a previous call to

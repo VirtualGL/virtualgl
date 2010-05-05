@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -33,10 +34,11 @@ class rrblitter : public Runnable
 		for(int i=0; i<NB; i++) {if(_bmp[i]) delete _bmp[i];  _bmp[i]=NULL;}
 	}
 
-	bool frameready(void);
+	bool ready(void);
+	void synchronize(void);
 	void sendframe(rrfb *, bool sync=false);
 	void run(void);
-	rrfb *getbitmap(Display *, Window, int, int, bool spoil);
+	rrfb *getbitmap(Display *, Window, int, int);
 
 	private:
 
