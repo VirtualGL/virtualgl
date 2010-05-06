@@ -141,7 +141,7 @@ int useglp=0;
 #ifdef USEGLP
 int glpdevice=-1;
 #endif
-int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, pbo=0;
+int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, pbo=0, usealpha=0;
 double benchtime=1.0;
 
 #define STRLEN 256
@@ -188,19 +188,20 @@ void findvisual(XVisualInfo* &v
 )
 {
 	int winattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, None};
+		GLX_BLUE_SIZE, 8, None, None, None};
 	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8,
-		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None};
+		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None, None};
 	int winattribsci[]={GLX_BUFFER_SIZE, 8, None, None, None, None, None, None};
 	int winattribscidb[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, None, None,
 		None, None, None, None};
 
 	#ifndef GLX11
 	int pbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
-		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None,
+		None, None};
 	int pbattribsdb[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
-		GLX_PBUFFER_BIT, None};
+		GLX_PBUFFER_BIT, None, None, None};
 	int pbattribsci[]={GLX_BUFFER_SIZE, 8, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
 		GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 	int pbattribscidb[]={GLX_DOUBLEBUFFER, 1, GLX_BUFFER_SIZE, 8,
@@ -229,6 +230,11 @@ void findvisual(XVisualInfo* &v
 				winattribsci[2]=winattribscidb[3]=GLX_LEVEL;
 				winattribsci[3]=winattribscidb[4]=1;
 			};
+			if(usealpha)
+			{
+				winattribs[7]=GLX_ALPHA_SIZE;  winattribs[8]=8;
+				winattribsdb[8]=GLX_ALPHA_SIZE;  winattribsdb[9]=8;
+			}
 			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
 				winattribsci:winattribs))
 				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
@@ -251,6 +257,11 @@ void findvisual(XVisualInfo* &v
 		pbattribs[7]=pbattribsdb[9]=pbattribsci[3]=pbattribscidb[5]=None;
 		pbattribs[8]=pbattribsdb[10]=pbattribsci[4]=pbattribscidb[6]=None;
 		pbattribs[9]=pbattribsdb[11]=pbattribsci[5]=pbattribscidb[7]=None;
+		if(usealpha)
+		{
+			pbattribs[6]=GLP_ALPHA_SIZE;  pbattribs[7]=8;
+			pbattribsdb[8]=GLP_ALPHA_SIZE;  pbattribsdb[9]=8;
+		}
 		fbconfigs=glPChooseFBConfig(glpdevice, useci? pbattribsci:pbattribs,
 			&nelements);
 		if(!fbconfigs) fbconfigs=glPChooseFBConfig(glpdevice,
@@ -259,6 +270,11 @@ void findvisual(XVisualInfo* &v
 	else
 	#endif
 	{
+		if(usealpha)
+		{
+			pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
+			pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=8;
+		}
 		fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
 			pbattribsci:pbattribs, &nelements);
 		if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
@@ -654,7 +670,7 @@ void display(void)
 void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-index] [-overlay]\n", argv[0]);
-	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>]\n");
+	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
 	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>] [-pbo]\n");
 	#ifdef USEGLP
 	fprintf(stderr, "       [-device <GLP device>]\n");
@@ -667,6 +683,7 @@ void usage(char **argv)
 	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
 	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
 	fprintf(stderr, "-visualid = Ignore visual selection and use this visual ID (hex) instead\n");
+	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
 	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
 	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
 	fprintf(stderr, "-bgr = Test only BGR pixel format\n");
@@ -700,6 +717,7 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-index")) useci=1;
 		if(!stricmp(argv[i], "-overlay")) {useci=1;  useoverlay=1;  usewindow=1;}
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
+		if(!stricmp(argv[i], "-alpha")) usealpha=1;
 		if(!stricmp(argv[i], "-rgb"))
 		{
 			pixelformat pixtemp={0, 1, 2, 3, GL_RGB, 0, "RGB"};
