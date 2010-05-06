@@ -646,6 +646,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	GLint readbuf=GL_BACK;
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
+	static GLuint pbo=0;  static const char *ext=NULL;
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
@@ -657,10 +658,46 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
 	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
+	if(fconfig.usepbo)
+	{
+		if(!ext)
+		{
+			ext=(const char *)glGetString(GL_EXTENSIONS);
+			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
+				_throw("GL_ARB_pixel_buffer_object extension not available");
+		}
+		if(!pbo)
+		{
+			glGenBuffers(1, &pbo);
+			if(!pbo) _throw("Could not generate pixel buffer object");
+			if(fconfig.verbose)
+				rrout.println("Using pixel buffer objects for readback");
+		}
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbo);
+		int size=0;
+		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_ARB, GL_BUFFER_SIZE, &size);
+		if(size!=pitch*h)
+			glBufferData(GL_PIXEL_PACK_BUFFER_ARB, pitch*h, NULL, GL_STREAM_READ);
+	}
+
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 	_prof_rb.startframe();
-	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, bits);
+	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE,
+		fconfig.usepbo? NULL:bits);
+
+	if(fconfig.usepbo)
+	{
+		unsigned char *pbobits=NULL;
+		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+			GL_READ_ONLY);
+		if(!pbobits) _throw("Could not map pixel buffer object");
+		memcpy(bits, pbobits, pitch*h);
+		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB))
+			_throw("Could not unmap pixel buffer object");
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+	}
+
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 

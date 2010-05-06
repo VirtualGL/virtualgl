@@ -1,4 +1,4 @@
-/* Copyright (C)2009 D. R. Commander
+/* Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -406,6 +406,7 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_TRACE", trace);
 	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
 	fetchenv_bool("VGL_TRAPX11", trapx11);
+	fetchenv_bool("VGL_PBO", usepbo);
 	fetchenv_bool("VGL_WINDOW", usewindow);
 	fetchenv_str("VGL_XVENDOR", vendor);
 	fetchenv_bool("VGL_VERBOSE", verbose);
@@ -564,6 +565,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transvalid[RRTRANS_VGL]);
 	prconfint(transvalid[RRTRANS_XV]);
 	prconfint(trapx11);
+	prconfint(usepbo);
 	prconfint(usewindow);
 	prconfstr(vendor);
 	prconfint(verbose);

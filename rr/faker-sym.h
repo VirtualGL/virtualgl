@@ -17,6 +17,7 @@
 #define __FAKER_SYM_H__
 
 #include <stdio.h>
+#define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
 #ifdef USEGLP
