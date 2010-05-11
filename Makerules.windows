@@ -21,12 +21,7 @@ else
  OPTFLAG = -O2 -MT
 endif
 
-ifeq ($(subplatform), 64)
-DEFAULTJPEGLIB = libjpeg
-# libjpeg-turbo doesn't work yet on Win64
-else
 DEFAULTJPEGLIB = libjpeg-turbo
-endif
 
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)$(subplatform)/include/xdk
 CDEFINES := $(CDEFINES) -DXDK
