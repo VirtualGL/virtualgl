@@ -211,12 +211,10 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- GCC
 
-   * Preferred version for SPARC:
-     http://cooltools.sunsource.net/gcc/
-   * Also available from the Solaris 9 & 10 Companion CD's
-     (http://www.sun.com/software/solaris/freeware/),
-     Blastwave (http://www.blastwave.org), OpenCSW (http://www.opencsw.org/),
-     or SunFreeware (http://www.sunfreeware.com/)
+   * Ships with later versions of Solaris 10
+   * Also available from Blastwave (http://www.blastwave.org),
+     OpenCSW (http://www.opencsw.org/), or
+     SunFreeware (http://www.sunfreeware.com/)
    * Build VirtualGL using
        gmake CC=gcc
 
@@ -233,10 +231,10 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- GNU Make v3.7 or later
 
-   * Available from the Solaris 9 & 10 Companion CD's
-     (http://www.sun.com/software/solaris/freeware/),
-     Blastwave (http://www.blastwave.org), or SunFreeware
-     (http://www.sunfreeware.com/)
+   * Ships with later versions of Solaris 10
+   * Also available from Blastwave (http://www.blastwave.org),
+     OpenCSW (http://www.opencsw.org/), or
+     SunFreeware (http://www.sunfreeware.com/)
 
 -- SPARC ONLY:  Sun mediaLib
 
@@ -261,19 +259,24 @@ VirtualGL on Cygwin, see the next section.
    GNU Make for Win32 can be found in MSYS
    (http://www.mingw.org/download.shtml) or Cygwin (http://www.cygwin.com/)
 
--- Windows SDK for Windows Server 2008 and .NET Framework 3.5 (or a later
-   version)
+-- Microsoft Visual C++ 2003 or later
+
+   If you don't already have Visual C++, then the easiest way to get it is by
+   installing the Windows SDK for Windows Server 2008 and .NET Framework 3.5
+   (or a later version):
 
    http://msdn.microsoft.com/en-us/windows/dd146047.aspx
 
-   * The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
-     everything necessary to build VirtualGL.  If you do not already have
-     Visual C++ installed, then this is the recommended solution.  Also tested
-     with Microsoft Visual C++ 2008 Express Edition (both are free downloads.)
+   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
+   everything necessary to build VirtualGL.
+
+   * For 32-bit builds, you can also use Microsoft Visual C++ 2008 Express
+     Edition (or a later version.)  Visual C++ Express Edition is a free
+     download.
    * Add the compiler and SDK binary directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN;
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN[\amd64];
      c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\bin)
+     c:\Program Files\Microsoft SDKs\Windows\v6.1\bin[\x64])
      to the system or user PATH environment variable prior to building
      VirtualGL.
    * Add the compiler and SDK include directories (for instance,
@@ -281,9 +284,9 @@ VirtualGL on Cygwin, see the next section.
      c:\Program Files\Microsoft SDKs\Windows\v6.1\include)
      to the system or user INCLUDE environment variable prior to building
      VirtualGL.
-   * Add the compiler library directory (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\lib)
+   * Add the compiler and SDK library directories (for instance,
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB[\amd64];
+     c:\Program Files\Microsoft SDKs\Windows\v6.1\lib[\x64])
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
@@ -334,10 +337,10 @@ VirtualGL on Cygwin, see the next section.
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * Add the libjpeg-turbo include path (c:\libjpeg-turbo\include) to the
+   * Add the libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the
      system or user INCLUDE environment variable prior to building VirtualGL.
-   * Add the libjpeg-turbo library path (c:\libjpeg-turbo\lib) to the system
-     or user LIB environment variable prior to building VirtualGL.
+   * Add the libjpeg-turbo library path (c:\libjpeg-turbo[64]\lib) to the
+     system or user LIB environment variable prior to building VirtualGL.
 
 
 *******************************************************************************
@@ -413,8 +416,9 @@ DEBUG = yes
 JPEGLIB = medialib
 
   * On Solaris/x86, use Sun mediaLib to perform JPEG compression/decompression
-    and YUV encoding/decoding rather than libjpeg-turbo.  VirtualGL will also
-    use Sun mediaLib to perform gamma correction if built with this option.
+    and YUV encoding/decoding rather than libjpeg-turbo.  If this option is
+    passed to the VirtualGL build, then VirtualGL will also use Sun mediaLib
+    to perform gamma correction.
 
 M32 = yes
 
