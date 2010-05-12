@@ -41,7 +41,7 @@ else
  NOLAZY = -znolazyload
 
  ifeq ($(subplatform), 64)
-  ARCHFLAG = -xtarget=opteron -xarch=amd64
+  ARCHFLAG = -m64
  endif
  ifeq ($(DEBUG), yes)
   OPTFLAG = -g
@@ -114,7 +114,6 @@ ifeq ($(USESSL), yes)
 
 endif
 
-# Have to explicitly link libXm before libGL so Java apps don't barf
 GLLIB = -lGL
 FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
