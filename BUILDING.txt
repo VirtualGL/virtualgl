@@ -162,7 +162,7 @@ one or more of the necessary 32-bit prerequisites, then:
 **     Prerequisites - Solaris
 *******************************************************************************
 
--- Solaris 8 or newer (Sparc) or Solaris/OpenSolaris 10 or newer (x86)
+-- Solaris 8 or newer (SPARC) or Solaris/OpenSolaris 10 or newer (x86)
 
 -- OpenSSL headers and link libraries (optional)
 
@@ -204,7 +204,8 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- Sun Studio/Workshop Pro Compiler
 
-   * Tested with v5.5 (Sparc) and with Sun Studio 10, 11, & 12 (Sparc and x86)
+   * Sun Studio 12 or later required for x86
+   * v5.5 or later required for SPARC
    * See http://www.sun.com/software/products/studio/ for a free download.
 
 ... or ...
