@@ -1,13 +1,14 @@
-{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf480
-{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
+{\rtf1\ansi\ansicpg1252\cocoartf1038\cocoasubrtf290
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;}
 \margl1440\margr1440\vieww9000\viewh8400\viewkind0
 \deftab720
 \pard\pardeftab720\ql\qnatural
 
-\f0\fs24 \cf0 VirtualGL is a library which allows most Unix OpenGL applications to be remotely displayed to a thin client without the need to alter the applications in any way.  VGL inserts itself into an application at run time and intercepts a handful of GLX calls, which it reroutes to the server's display (which presumably has a 3D accelerator attached.)  This causes all 3D rendering to occur on the server's display.  As each frame is rendered by the server, VirtualGL reads back the pixels from the server's framebuffer and sends them to the client for re-compositing into the appropriate X Window.  VirtualGL can be used to give hardware-accelerated 3D capabilities to VNC or other remote display environments that lack GLX support.  In a LAN environment, it can also be used with its built-in motion-JPEG video delivery system to remotely display full-screen 3D applications at 20+ frames/second.\
-\
-This package includes the VirtualGL Client application, which enables Intel-based Macintosh computers to receive images from a VirtualGL server using the VGL Transport.  It is not necessary to install this package when using VirtualGL with VNC and similar systems.  The Macintosh X11 application (which is not installed by default but which can be installed from the OS X distribution discs) must be installed prior to using the VirtualGL Client.\
+\f0\fs24 \cf0 VirtualGL is an open source package which gives any Unix or Linux remote display software (remote X11, VNC, NX, etc.) the ability to run OpenGL applications with full 3D hardware acceleration and direct rendering.  When an OpenGL application is run with VirtualGL on a Unix or Linux server, VirtualGL intercepts a handful of GLX calls from the application and modifies them so that 3D rendering will occur in an invisible pixel buffer (Pbuffer) on a 3D accelerator card located in the server machine.  As each frame is rendered on the server, VirtualGL reads back the pixels and sends them through one of several "image transports".  The simplest of these (the X11 Transport) re-composites the image into the appropriate X window, and this can be used to give hardware-accelerated 3D capabilities to VNC or other X proxies.  In a LAN environment, VirtualGL can also send the 3D images through its built-in high-speed motion-JPEG image delivery system (the VGL Transport) and re-composite them on a remote X server.\
+\pard\pardeftab720\ql\qnatural
+\cf0 \
+This package includes the VirtualGL Client application, which enables Intel-based Macintosh computers to receive and re-composite 3D images from a VirtualGL server using the VGL Transport.  It is not necessary to install this package when using VirtualGL with VNC and other X proxies.  The Macintosh X11 application (which is not installed by default but which can be installed from the OS X distribution discs) must be installed prior to using the VirtualGL Client.\
 \
 Refer to the VirtualGL documentation (a link to which is provided in the Applications folder) for usage information.\
 }
