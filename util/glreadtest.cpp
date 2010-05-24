@@ -547,13 +547,17 @@ void glread(int format)
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB, PAD(WIDTH*ps)*HEIGHT, NULL,
 			GL_STREAM_READ);
 		check_errors("PBO initialization");
+		int temp=0;
+		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_ARB, GL_BUFFER_SIZE,
+			&temp);
+		if(temp!=PAD(WIDTH*ps)*HEIGHT) _throw("Could not generate PBO buffer");
+		temp=0;
+		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_ARB, &temp);
+		if(temp!=pbo) _throw("Could not bind PBO buffer");
 	}
-	else
-	{
-		if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
-			_throw("Could not allocate buffer");
-		memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	}
+	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
+		_throw("Could not allocate buffer");
+	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
 	n=0;  rbtime=0.;
 	double tmin=0., tmax=0., ssq=0., sum=0.;  int first=1;
 	do
@@ -568,11 +572,14 @@ void glread(int format)
 		}
 		if(pbo)
 		{
+			unsigned char *pixels=NULL;
+			glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, bufferid);
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
 				NULL);
-			rgbaBuffer=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+			pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
 				GL_READ_ONLY);
-			if(!rgbaBuffer) _throw("Could not map buffer");
+			if(!pixels) _throw("Could not map buffer");
+			memcpy(rgbaBuffer, pixels, PAD(WIDTH*ps)*HEIGHT);
 			glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
 		}
 		else
@@ -595,12 +602,6 @@ void glread(int format)
 		ssq+=pow((double)(WIDTH*HEIGHT)/((double)1000000.*elapsed), 2.0);
 		sum+=(double)(WIDTH*HEIGHT)/((double)1000000.*elapsed);
 	} while(rbtime<benchtime || n<2);
-	if(pbo)
-	{
-		rgbaBuffer=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
-			GL_READ_ONLY);
-		if(!rgbaBuffer) _throw("Could not map buffer");
-	}
 	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
 		_throw("ERROR: Bogus data read back.");
 	double mean=sum/(double)n;
@@ -616,15 +617,7 @@ void glread(int format)
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
-	if(rgbaBuffer)
-	{
-		if(pbo)
-		{
-			if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB))
-				_throw("Could not unmap buffer");
-		}
-		else free(rgbaBuffer);
-	}
+	if(rgbaBuffer) free(rgbaBuffer);
 	if(pbo && bufferid>0)
 	{
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
