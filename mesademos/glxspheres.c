@@ -474,26 +474,28 @@ int event_loop(Display *dpy)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s [-h|-?] [-c] [-i] [-l] [-m] [-o] [-s] [-fs] [-p <p>]\n\n", argv[0]);
+	printf("\nUSAGE: %s [-h|-?] [-c] [-fs] [-i] [-l] [-m] [-o] [-p <p>] [-s] [-32]\n\n", argv[0]);
 	printf("-c = Use color index rendering (default is RGB)\n");
+	printf("-fs = Full-screen mode\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
+	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)\n");
 	printf("-m = Use immediate mode rendering (default is display list)\n");
-	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
-	printf("-fs = Full-screen mode\n");
+	printf("-32 = Use 32-bit visual (default is 24-bit)\n\n");
 	exit(0);
 }
 
 
 int main(int argc, char **argv)
 {
-	int i;
+	int i, usealpha=0;
 	XVisualInfo *v=NULL;
 	int rgbattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None};
+		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None, None,
+		None};
 	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, 
 		None};
 	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
@@ -524,6 +526,21 @@ int main(int argc, char **argv)
 		{
 			rgbattribs[10]=GLX_STEREO;
 			usestereo=1;
+		}
+		if(!strnicmp(argv[i], "-32", 3)) usealpha=1;
+	}
+
+	if(usealpha)
+	{
+		if(rgbattribs[10]==None)
+		{
+			rgbattribs[10]=GLX_ALPHA_SIZE;
+			rgbattribs[11]=8;
+		}
+		else
+		{
+			rgbattribs[11]=GLX_ALPHA_SIZE;
+			rgbattribs[12]=8;
 		}
 	}
 
