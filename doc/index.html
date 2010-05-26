@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-05-26T02:49:57">
+<meta name="date" content="2010-05-26T03:03:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3661,11 +3661,11 @@ VirtualGL.</p>
         <code>VGL_COMPRESS=rgb</code>.  This option is only available if the VGL 
         Transport was active when VirtualGL started. <br /><br /> <em>YUV (XV 
         Transport)</em> : equivalent to setting <code>VGL_COMPRESS=xv</code>.  
-        This option is only available if the 2D X Server has the X Video 
+        This option is only available if the 2D X server has the X Video 
         extension and the X Video implementation supports the YUV420P (AKA 
         &ldquo;I420&rdquo;) pixel format. <br /><br /> <em>YUV (VGL 
         Transport)</em> : equivalent to setting <code>VGL_COMPRESS=yuv</code>.  
-        This option is only available if the 2D X Server has the X Video 
+        This option is only available if the 2D X server has the X Video 
         extension, the X Video implementation supports the YUV420P (AKA 
         &ldquo;I420&rdquo;) pixel format, and the VGL Transport was active when 
         VirtualGL started. <br /><br /> See Section 
@@ -4581,7 +4581,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         readback mode if it needs to read back pixels in a format other than the 
         native format of the Pbuffer.  This will generally be the case if 
         anaglyphic stereo is enabled, if RGB encoding is used with the VGL 
-        Transport, or if the X11 Transport is used with a 2D X Server whose 
+        Transport, or if the X11 Transport is used with a 2D X server whose 
         pixel format does not match that of the Pbuffer. Setting 
         <code>VGL_VERBOSE=1</code> will print a warning message whenever this 
         occurs. Since PBO&rsquo;s are not accelerated on some platforms unless 

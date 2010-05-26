@@ -418,7 +418,7 @@ Each method of configuration takes precedence over the previous method:
 	needs to read back pixels in a format other than the native format of the
 	Pbuffer.  This will generally be the case if anaglyphic stereo is enabled, if
 	RGB encoding is used with the VGL Transport, or if the X11 Transport is used
-	with a 2D X Server whose pixel format does not match that of the Pbuffer.
+	with a 2D X server whose pixel format does not match that of the Pbuffer.
 	Setting ''VGL_VERBOSE=1'' will print a warning message whenever this occurs.
 	Since PBO's are not accelerated on some platforms unless 32-bit pixel formats
 	are used, VirtualGL's default behavior is to automatically create Pbuffers
