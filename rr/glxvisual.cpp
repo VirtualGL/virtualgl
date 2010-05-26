@@ -247,7 +247,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		if(buffersize>=0 && c_class==PseudoColor && depth==8) bluesize=buffersize;
 		else bluesize=8;
 	}
-	if(fconfig.forcealpha && redsize==8 && greensize==8 && bluesize==8
+	if(fconfig.forcealpha==1 && redsize==8 && greensize==8 && bluesize==8
 		&& alphasize<1) alphasize=8;
 	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
 	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;

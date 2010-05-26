@@ -120,6 +120,7 @@ static void fconfig_init(void)
 	memset(&fcenv, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
 	strncpy(fconfig.config, "/opt/VirtualGL/bin/vglconfig", MAXSTR);
+	fconfig.forcealpha=-1;
 	#ifdef SUNOGL
 	fconfig_setgamma(fconfig, 2.22);
 	fconfig.gamma_usesun=1;
@@ -135,7 +136,7 @@ static void fconfig_init(void)
 	fconfig.np=1;
 	fconfig.port=-1;
 	fconfig.qual=DEFQUAL;
-	fconfig.readback=RRREAD_SYNC;
+	fconfig.readback=RRREAD_PBO;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
 	fconfig.stereo=RRSTEREO_QUADBUF;
@@ -432,6 +433,10 @@ void fconfig_reloadenv(void)
 	}
 
 	if(fconfig.glp) fconfig.usewindow=false;
+
+	if(fconfig.forcealpha==-1 && fconfig.readback==RRREAD_PBO)
+		fconfig.forcealpha=1;
+
 	fcenv_set=true;
 }
 
