@@ -652,7 +652,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			if(fconfig.verbose && !alreadywarned)
 			{
 				alreadywarned=true;
-				rrout.println("[VGL] NOTICE: Pixel format of 2D X Server does not match pixel format of");
+				rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
 				rrout.println("[VGL}    Pbuffer.  Disabling PBO's.");
 			}
 		}

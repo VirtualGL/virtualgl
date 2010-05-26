@@ -412,7 +412,7 @@ Each method of configuration takes precedence over the previous method:
 	memory copy, but there are a few platforms on which it may perform a bit
 	worse.  However, it is probably still advantageous to use PBO readback mode
 	on those platforms, because the non-blocking pixel readback operation will
-	allow for smoother performance if many users are sharing the same GPU.
+	allow for better performance if many users are sharing the same GPU.
 	{nl}{nl} \
 	VirtualGL will automatically fall back to synchronous readback mode if it
 	needs to read back pixels in a format other than the native format of the
