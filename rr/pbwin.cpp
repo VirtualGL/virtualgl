@@ -492,8 +492,8 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		if(fconfig.verbose && !alreadywarned)
 		{
 			alreadywarned=true;
-			rrout.println("[VGL] NOTICE: The pixel format returned by the transport plugin does not match");
-			rrout.println("[VGL]    the pixel format of the Pbuffer.  Disabling PBO's.");
+			rrout.println("[VGL] NOTICE: The pixel format of the buffer returned by the transport plugin");
+			rrout.println("[VGL]    does not match the pixel format of the Pbuffer.  Disabling PBO's.");
 		}
 	}
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
@@ -759,7 +759,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			glGenBuffers(1, &pbo);
 			if(!pbo) _throw("Could not generate pixel buffer object");
 			if(fconfig.verbose)
-				rrout.println("[VGL] Using pixel buffer objects for readback");
+				rrout.println("[VGL] Using pixel buffer objects for readback (GL format = 0x%.4x)",
+				format);
 		}
 		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_ARB, &boundbuffer);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbo);
