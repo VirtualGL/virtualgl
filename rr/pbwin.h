@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,12 +44,14 @@ class pbuffer
 		void clear(void);
 		void swap(void);
 		bool stereo(void) {return _stereo;}
+		int format(void) {return _format;}
 
 	private:
 
 		bool _cleared, _stereo;
 		GLXPbuffer _drawable;
 		int _w, _h;
+		int _format;
 };
 
 class pbwin
@@ -78,7 +80,7 @@ class pbwin
 		int init(int, int, GLXFBConfig);
 		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
-			GLint, bool stereo=false);
+			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int);
 		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
 			bool);

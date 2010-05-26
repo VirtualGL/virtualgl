@@ -54,7 +54,8 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return 0;
 }
 
-RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo)
+RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
+	int stereo)
 {
 	try
 	{

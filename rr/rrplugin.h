@@ -17,7 +17,7 @@
 
 typedef void* (*_RRTransInitType)(Display *, Window, FakerConfig *);
 typedef int (*_RRTransConnectType)(void *, char *, int);
-typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int);
+typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int, int);
 typedef int (*_RRTransReadyType)(void *);
 typedef int (*_RRTransSynchronizeType)(void *);
 typedef int (*_RRTransSendFrameType)(void *, RRFrame *, int);
@@ -34,7 +34,7 @@ class rrplugin
 		void destroy(void);
 		int ready(void);
 		void synchronize(void);
-		RRFrame *getframe(int, int, bool);
+		RRFrame *getframe(int, int, int, bool);
 		void sendframe(RRFrame *, bool);
 
 	private:

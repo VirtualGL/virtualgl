@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -98,6 +98,10 @@ enum rrtrans {RRTRANS_X11=0, RRTRANS_VGL, RRTRANS_XV};
 #define RR_COMPRESSOPT  5
 enum rrcomp {RRCOMP_PROXY=0, RRCOMP_JPEG, RRCOMP_RGB, RRCOMP_XV, RRCOMP_YUV};
 
+/* Readback types */
+#define RR_READBACKOPT  3
+enum rrread {RRREAD_NONE=0, RRREAD_SYNC, RRREAD_PBO};
+
 static const enum rrtrans _Trans[RR_COMPRESSOPT]=
 {
   RRTRANS_X11, RRTRANS_VGL, RRTRANS_VGL, RRTRANS_XV, RRTRANS_VGL
@@ -146,6 +150,7 @@ typedef struct _FakerConfig
   int compress;
   char config[MAXSTR];
   double flushdelay;
+  int forcealpha;
   double fps;
   double gamma;
   unsigned char gamma_lut[256];
@@ -181,7 +186,6 @@ typedef struct _FakerConfig
   char transport[MAXSTR];
   char transvalid[RR_TRANSPORTOPT];
   char trapx11;
-  char usepbo;
   char usewindow;
   char vendor[MAXSTR];
   char verbose;

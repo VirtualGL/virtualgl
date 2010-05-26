@@ -120,7 +120,8 @@ int
 */
 
 RRFrame *
-   RRTransGetFrame (void *handle, int width, int height, int stereo);
+   RRTransGetFrame (void *handle, int width, int height, int format,
+      int stereo);
 /*
    Retrieve a frame buffer of the requested dimensions from the transport
    plugin's buffer pool.  If no frame buffers are available in the pool, then
@@ -131,6 +132,12 @@ RRFrame *
                  RRTransInit())
    width, height (IN) = dimensions of frame buffer to be allocated by the
                         transport plugin
+   format (IN) = the pixel format that VirtualGL believes will produce the
+                 most optimal readback performance.  This will always
+                 correspond to the "native" pixel format of the Pbuffer.  When
+                 PBO readback mode is enabled, then the plugin must return a
+                 frame with this pixel format, or VirtualGL will automatically
+                 fall back to using synchronous readback mode for this frame.
    stereo (IN) = 1 to request a stereo frame or 0 to request a mono frame
 
    RETURN VALUE:

@@ -93,10 +93,10 @@ void rrplugin::synchronize(void)
 	if(ret<0) _throw(_RRTransGetError());
 }
 
-RRFrame *rrplugin::getframe(int width, int height, bool stereo)
+RRFrame *rrplugin::getframe(int width, int height, int format, bool stereo)
 {
 	rrcs::safelock l(mutex);
-	RRFrame *ret=_RRTransGetFrame(handle, width, height, stereo);
+	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
 }

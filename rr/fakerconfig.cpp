@@ -135,7 +135,7 @@ static void fconfig_init(void)
 	fconfig.np=1;
 	fconfig.port=-1;
 	fconfig.qual=DEFQUAL;
-	fconfig.readback=1;
+	fconfig.readback=RRREAD_SYNC;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
 	fconfig.stereo=RRSTEREO_QUADBUF;
@@ -279,6 +279,7 @@ void fconfig_reloadenv(void)
 			strncpy(fcenv.localdpystring, env, MAXSTR-1);
 		}
 	}
+	fetchenv_bool("VGL_FORCEALPHA", forcealpha);
 	fetchenv_dbl("VGL_FPS", fps, 0.0, 1000000.0);
 	if((env=getenv("VGL_GAMMA"))!=NULL && strlen(env)>0)
 	{
@@ -380,7 +381,20 @@ void fconfig_reloadenv(void)
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
 	fetchenv_int("VGL_PORT", port, 0, 65535);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
-	fetchenv_bool("VGL_READBACK", readback);
+	if((env=getenv("VGL_READBACK"))!=NULL && strlen(env)>0)
+	{
+		int readback=-1;
+		if(!strnicmp(env, "N", 1)) readback=RRREAD_NONE;
+		else if(!strnicmp(env, "P", 1)) readback=RRREAD_PBO;
+		else if(!strnicmp(env, "S", 1)) readback=RRREAD_SYNC;
+		else
+		{
+			char *t=NULL;  int itemp=strtol(env, &t, 10);
+			if(t && t!=env && itemp>=0 && itemp<RR_READBACKOPT) readback=itemp;
+		}
+		if(readback>=0 && (!fcenv_set || fcenv.readback!=readback))
+			fconfig.readback=fcenv.readback=readback;
+	}
 	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
 	fetchenv_bool("VGL_SPOIL", spoil);
 	fetchenv_bool("VGL_SSL", ssl);
@@ -406,7 +420,6 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_TRACE", trace);
 	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
 	fetchenv_bool("VGL_TRAPX11", trapx11);
-	fetchenv_bool("VGL_PBO", usepbo);
 	fetchenv_bool("VGL_WINDOW", usewindow);
 	fetchenv_str("VGL_XVENDOR", vendor);
 	fetchenv_bool("VGL_VERBOSE", verbose);
@@ -532,6 +545,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfstr(config);
 	prconfdbl(fps);
 	prconfdbl(flushdelay);
+	prconfint(forcealpha);
 	prconfdbl(gamma);
 	prconfint(gamma_usesun);
 	prconfstr(gllib);
@@ -565,7 +579,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transvalid[RRTRANS_VGL]);
 	prconfint(transvalid[RRTRANS_XV]);
 	prconfint(trapx11);
-	prconfint(usepbo);
 	prconfint(usewindow);
 	prconfstr(vendor);
 	prconfint(verbose);

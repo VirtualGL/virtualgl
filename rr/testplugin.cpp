@@ -63,7 +63,8 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return ret;
 }
 
-RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo)
+RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
+	int stereo)
 {
 	try
 	{
@@ -75,9 +76,24 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int stereo)
 		int compress=_fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
 		else compress=RRCOMP_JPEG;
-		int flags=RRBMP_BOTTOMUP;
-		if(littleendian() && compress!=RRCOMP_RGB) flags|=RRBMP_BGR;
-		rrframe *f=rrdpy->getbitmap(width, height, 3, flags, (bool)stereo);
+		int flags=RRBMP_BOTTOMUP, pixelsize=3;
+		if(compress!=RRCOMP_RGB)
+		{
+			switch(format)
+			{
+				case RRTRANS_BGR:
+					flags|=RRBMP_BGR;  break;
+				case RRTRANS_RGBA:
+					pixelsize=4;  break;
+				case RRTRANS_BGRA:
+					flags|=RRBMP_BGR;  pixelsize=4;  break;
+				case RRTRANS_ABGR:
+					flags|=(RRBMP_BGR|RRBMP_ALPHAFIRST);  pixelsize=4;  break;
+				case RRTRANS_ARGB:
+					flags|=RRBMP_ALPHAFIRST;  pixelsize=4;  break;
+			}
+		}
+		rrframe *f=rrdpy->getbitmap(width, height, pixelsize, flags, (bool)stereo);
 		f->_h.compress=compress;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;

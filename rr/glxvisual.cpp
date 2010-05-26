@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -154,7 +154,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 {
 	int glxattribs[257], j=0;
 	int doublebuffer=0, buffersize=-1, redsize=-1, greensize=-1,
-		bluesize=-1, samples=-1;
+		bluesize=-1, alphasize=-1, samples=-1;
 
 	depth=glx13? 24:8;  c_class=glx13? TrueColor:PseudoColor;
 
@@ -200,6 +200,10 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		{
 			bluesize=attribs[i+1];  i++;
 		}
+		else if(attribs[i]==GLX_ALPHA_SIZE)
+		{
+			alphasize=attribs[i+1];  i++;
+		}
 		else if(attribs[i]==GLX_TRANSPARENT_TYPE)
 		{
 			if(attribs[i+1]==GLX_TRANSPARENT_INDEX
@@ -243,9 +247,15 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		if(buffersize>=0 && c_class==PseudoColor && depth==8) bluesize=buffersize;
 		else bluesize=8;
 	}
+	if(fconfig.forcealpha && redsize==8 && greensize==8 && bluesize==8
+		&& alphasize<1) alphasize=8;
 	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
 	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
 	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;
+	if(alphasize>=0)
+	{
+		glxattribs[j++]=GLX_ALPHA_SIZE;  glxattribs[j++]=alphasize;
+	}
 	if(fconfig.samples>=0) samples=fconfig.samples;
 	if(samples>=0)
 	{
