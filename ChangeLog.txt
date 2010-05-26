@@ -72,6 +72,12 @@ The uninstall script in the Mac distribution package should now work on OS X
 [12]
 Added support for 64-bit Windows platforms.
 -------------------------------------------------------------------------------
+[13]
+VirtualGL now attempts to use pixel buffer objects (PBO's) to accelerate the
+readback of the 3D pixels.  This particularly helps when multiple users are
+sharing the GPU.  See the "Advanced Configuration" section of the User's Guide
+for more information.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
