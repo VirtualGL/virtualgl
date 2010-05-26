@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-04-14T01:38:34">
+<meta name="date" content="2010-05-26T02:49:57">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3976,6 +3976,48 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     </dd>
 </dl>
 
+<p><a name="VGL_FORCEALPHA"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_FORCEALPHA&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Force the Pbuffers used for 3D rendering to have an 8-bit alpha channel</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>VGL_FORCEALPHA=1</code> if PBO readback mode is used, <code>VGL_FORCEALPHA=0</code> otherwise</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally, VirtualGL will create a Pbuffer whose pixel format matches the 
+        specifications of the visual requested by the 3D application. However, 
+        on some 3D hardware, this may produce suboptimal performance when 
+        reading back the 3D pixels.  Thus, this option can be used to force 
+        VirtualGL to create a 32-bit-per-pixel Pbuffer when the application 
+        requests a 24-bit-per-pixel visual. <br /><br /> On some 3D hardware, it 
+        is necessary to use a 32-bit-per-pixel Pbuffer to realize any 
+        performance improvement from the use of pixel buffer objects 
+        (PBO&rsquo;s).  Thus, this option is enabled by default whenever PBO 
+        readback mode is enabled.  See the 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0065"></a> 
+        option for further information.
+    </dd>
+</dl>
+
 <p><a name="VGL_FPS"></a></p>
 
 <div class="table">
@@ -4133,7 +4175,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0065"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0066"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -4213,7 +4255,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0066"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0067"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4321,7 +4363,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0067"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0068"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4453,7 +4495,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0068"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0069"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4462,15 +4504,17 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     </dd>
 </dl>
 
+<p><a name="VGL_READBACK"></a></p>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_READBACK&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>VGL_READBACK&nbsp;=&nbsp;</code><em><code>none&nbsp;|&nbsp;pbo&nbsp;|&nbsp;sync</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable VirtualGL&rsquo;s pixel pipelines</td>
+    <td class="standard">Specify the method used by VirtualGL to read back the 3D pixels from the 3D graphics hardware</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Image Transports</td>
@@ -4478,7 +4522,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Enabled</td>
+    <td class="standard">pbo</td>
   </tr>
 </table>
 </div>
@@ -4487,14 +4531,19 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        On rare occasions, it might be desirable to have VirtualGL redirect 
-        OpenGL rendering from an application into a Pbuffer but not 
-        automatically read back and send the rendered pixels.  Some applications 
-        have their own mechanisms for reading back the rendered pixels, so 
-        setting <code>VGL_READBACK=0</code> disables VirtualGL&rsquo;s readback 
-        mechanism and prevents duplication of effort. <br /><br /> This feature 
+    </dd>
+</dl>
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        <em>none</em> = Do not read back the 3D pixels at all.  On rare 
+        occasions, it might be desirable to have VirtualGL redirect OpenGL 
+        rendering from an application into a Pbuffer but not automatically read 
+        back and send the rendered pixels.  Some applications have their own 
+        mechanisms for reading back the rendered pixels, so setting 
+        <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s readback 
+        mechanism and prevents duplication of effort. <br /><br /> This option 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0069"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0070"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4506,9 +4555,50 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         different graphics cards while preventing VirtualGL from displaying any 
         pixels except those generated by process 0. <br /><br /> This setting 
         can also be used to force Chromium to render into Pbuffers instead of 
-        windows.  See Section <a href="#Force_Pbuffer" class="ref">12.2</a>.
-    </dd>
-</dl>
+        windows.  See Section <a href="#Force_Pbuffer" class="ref">12.2</a>. 
+        <br /><br />
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <em>pbo</em> = PBO readback mode.  Attempt to use pixel buffer objects 
+        (PBO&rsquo;s) to accelerate the readback of the 3D pixels from the 3D 
+        graphics card.  A PBO is an	opaque memory buffer managed by OpenGL, so 
+        it can be locked down for direct DMA transfers.  This improves 
+        performance as well as makes the pixel readback operation non-blocking.  
+        However, the catch is that the pixel format requested in the pixel 
+        readback operation must match the &ldquo;native&rdquo; pixel format of 
+        the Pbuffer in order for PBO&rsquo;s to realize any performance benefit. 
+        Otherwise, the 3D driver falls back to using the standard blocking pixel 
+        readback operation. <br /><br /> Because the PBO is a managed buffer, 
+        VirtualGL has to introduce an additional memory copy to transfer the 
+        pixels out of the PBO and into the image transport&rsquo;s buffer.  On 
+        high-end hardware, PBO readback mode will generally perform better than 
+        synchronous readback mode, even with this additional memory copy, but 
+        there are a few platforms on which it may perform a bit worse.  However, 
+        it is probably still advantageous to use PBO readback mode on those 
+        platforms, because the non-blocking pixel readback operation will allow 
+        for smoother performance if many users are sharing the same GPU. 
+        <br /><br /> VirtualGL will automatically fall back to synchronous 
+        readback mode if it needs to read back pixels in a format other than the 
+        native format of the Pbuffer.  This will generally be the case if 
+        anaglyphic stereo is enabled, if RGB encoding is used with the VGL 
+        Transport, or if the X11 Transport is used with a 2D X Server whose 
+        pixel format does not match that of the Pbuffer. Setting 
+        <code>VGL_VERBOSE=1</code> will print a warning message whenever this 
+        occurs. Since PBO&rsquo;s are not accelerated on some platforms unless 
+        32-bit pixel formats are used, VirtualGL&rsquo;s default behavior is to 
+        automatically create Pbuffers with 32 bits per pixel when PBO readback 
+        mode is enabled (you can use the 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0071"></a> 
+        option to override this.) <br /><br />
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <em>sync</em> = Synchronous readback mode.  This disables the use of 
+        PBO&rsquo;s altogether, which causes VirtualGL to always use blocking 
+        pixel readback operations and to let the 3D driver perform any pixel 
+        translation that is necessary.  This setting duplicates the behavior of 
+        VirtualGL 2.1.x and prior. <br /><br />
+    </li>
+</ul>
 
 <div class="table">
 <table class="standard">
@@ -4819,7 +4909,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0070"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0072"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4869,11 +4959,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0071"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0073"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0072"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0074"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Smaller tile sizes:</em> 
         <ul class="Itemize"><li class="Itemize-0">

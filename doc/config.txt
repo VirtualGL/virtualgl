@@ -104,6 +104,26 @@ Each method of configuration takes precedence over the previous method:
 	pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See
 	{ref prefix="Section ": GLP_Usage} for more details.
 
+{anchor: VGL_FORCEALPHA}
+| Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
+| Summary | Force the Pbuffers used for 3D rendering to have an 8-bit alpha channel |
+| Image Transports | All |
+| Default Value | ''VGL_FORCEALPHA=1'' if PBO readback mode is used, ''VGL_FORCEALPHA=0'' otherwise |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL will create a Pbuffer whose pixel format
+	matches the specifications of the visual requested by the 3D application.
+	However, on some 3D hardware, this may produce suboptimal performance when
+	reading back the 3D pixels.  Thus, this option can be used to force VirtualGL
+	to create a 32-bit-per-pixel Pbuffer when the application requests a
+	24-bit-per-pixel visual.
+	{nl}{nl} \
+	On some 3D hardware, it is necessary to use a 32-bit-per-pixel Pbuffer to
+	realize any performance improvement from the use of pixel buffer objects
+	(PBO's).  Thus, this option is enabled by default whenever PBO readback mode
+	is enabled.  See the [[#VGL_READBACK][''VGL_READBACK'']] option for further
+	information.
+
 {anchor: VGL_FPS}
 | Environment Variable | ''VGL_FPS = ''__''{f}''__ |
 | ''vglrun'' argument | ''-fps ''__''{f}''__ |
@@ -345,20 +365,22 @@ Each method of configuration takes precedence over the previous method:
 	If image quality is of paramount concern, consider setting the JPEG quality
 	to 100 or using RGB encoding.
 
-| Environment Variable | ''VGL_READBACK = ''__''0 \| 1''__ |
-| Summary | Disable/enable VirtualGL's pixel pipelines |
+{anchor: VGL_READBACK}
+| Environment Variable | ''VGL_READBACK = ''__''none \| pbo \| sync''__ |
+| Summary | Specify the method used by VirtualGL to read back the 3D pixels from the 3D graphics hardware |
 | Image Transports | All |
-| Default Value | Enabled |
+| Default Value | pbo |
 #OPT: hiCol=first
 
-	Description :: On rare occasions, it might be desirable to have VirtualGL
-	redirect OpenGL rendering from an application into a Pbuffer but not
-	automatically read back and send the rendered pixels.  Some applications have
-	their own mechanisms for reading back the rendered pixels, so setting
-	''VGL_READBACK=0'' disables VirtualGL's readback mechanism and prevents
-	duplication of effort.
+	Description :: {:}
+	* __none__ = Do not read back the 3D pixels at all.  On rare occasions, it
+	might be desirable to have VirtualGL redirect OpenGL rendering from an
+	application into a Pbuffer but not automatically read back and send the
+	rendered pixels.  Some applications have their own mechanisms for reading
+	back the rendered pixels, so setting ''VGL_READBACK=none'' disables
+	VirtualGL's readback mechanism and prevents duplication of effort.
 	{nl}{nl} \
-	This feature was developed initially to support running
+	This option was developed initially to support running
 	[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView/MPI
 	normally uses MPI processes 1 through N as rendering servers, each drawing a
 	portion of the geometry into a separate window on a separate X display.
@@ -372,6 +394,43 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl} \
 	This setting can also be used to force Chromium to render into Pbuffers
 	instead of windows.  See {ref prefix="Section ": Force_Pbuffer}.
+	{nl}{nl}
+	* __pbo__ = PBO readback mode.  Attempt to use pixel buffer objects (PBO's)
+	to accelerate the readback of the 3D pixels from the 3D graphics card.  A PBO
+	is an	opaque memory buffer managed by OpenGL, so it can be locked down for
+	direct DMA transfers.  This improves performance as well as makes the pixel
+	readback operation non-blocking.  However, the catch is that the pixel format
+	requested in the pixel readback operation must match the "native" pixel
+	format of the Pbuffer in order for PBO's to realize any performance benefit.
+	Otherwise, the 3D driver falls back to using the standard blocking pixel
+	readback operation.
+	{nl}{nl} \
+	Because the PBO is a managed buffer, VirtualGL has to introduce an additional
+	memory copy to transfer the pixels out of the PBO and into the image
+	transport's buffer.  On high-end hardware, PBO readback mode will generally
+	perform better than synchronous readback mode, even with this additional
+	memory copy, but there are a few platforms on which it may perform a bit
+	worse.  However, it is probably still advantageous to use PBO readback mode
+	on those platforms, because the non-blocking pixel readback operation will
+	allow for smoother performance if many users are sharing the same GPU.
+	{nl}{nl} \
+	VirtualGL will automatically fall back to synchronous readback mode if it
+	needs to read back pixels in a format other than the native format of the
+	Pbuffer.  This will generally be the case if anaglyphic stereo is enabled, if
+	RGB encoding is used with the VGL Transport, or if the X11 Transport is used
+	with a 2D X Server whose pixel format does not match that of the Pbuffer.
+	Setting ''VGL_VERBOSE=1'' will print a warning message whenever this occurs.
+	Since PBO's are not accelerated on some platforms unless 32-bit pixel formats
+	are used, VirtualGL's default behavior is to automatically create Pbuffers
+	with 32 bits per pixel when PBO readback mode is enabled (you can use the
+	[[#VGL_FORCEALPHA][''VGL_FORCEALPHA'']] option to override this.)
+	{nl}{nl}
+	* __sync__ = Synchronous readback mode.  This disables the use of PBO's
+	altogether, which causes VirtualGL to always use blocking pixel readback
+	operations and to let the 3D driver perform any pixel translation that is
+	necessary.  This setting duplicates the behavior of VirtualGL 2.1.x and
+	prior.
+	{nl}{nl}
 
 | Environment Variable | ''VGL_SAMPLES = ''__''{s}''__ |
 | ''vglrun'' argument | ''-ms ''__''{s}''__ |
