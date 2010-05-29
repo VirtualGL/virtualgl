@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-05-26T03:37:07">
+<meta name="date" content="2010-05-29T03:25:54">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3001,6 +3001,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <th class="head standard">Notes</th>
   </tr>
   </thead>
+  <tr class="standard">
+    <td class="standard">Abaqus v6.9</td>
+    <td class="standard">Linux/x86</td>
+    <td class="standard"><code>vglrun&nbsp;-nodl&nbsp;{abaqus_path}/abaqus</code></td>
+    <td class="standard">Users reports indicate that Abaqus 6.9 will not work properly if <code>libdlfaker.so</code> from VirtualGL is preloaded into it.  This may be true for other versions of Abaqus as well.</td>
+  </tr>
   <tr class="standard">
     <td class="standard">ANSA v12.1.0</td>
     <td class="standard">Linux/x86</td>
