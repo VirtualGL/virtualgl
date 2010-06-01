@@ -813,7 +813,7 @@ if [ "${#}" != 0 ]; then
 	done
 fi
 
-if [ "$CONFIG_VGL" = "" ]; then
+if [ "$CONFIG_VGL" = "" -a $UNATTENDED = 1 ]; then
 	usage 0
 fi
 
