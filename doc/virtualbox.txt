@@ -20,27 +20,14 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
-		make ''librrfaker.so'' a setuid executable (Linux) or to add the VirtualGL
-		library directory to the list of secure paths (Solaris).
+		make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables (Linux) or
+		to add the VirtualGL library directory to the list of secure paths
+		(Solaris).
 
-	#. If running 32-bit VirtualBox,
-		#Verb <<---
-		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-		---
-		If running 64-bit VirtualBox,
-		#Verb <<---
-		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
-		---
-
-	#. ''vglrun -nodl VirtualBox -startvm ''__''{VM name or UUID}''__
+	#. ''vglrun VirtualBox -startvm ''__''{VM name or UUID}''__
 
 *** NOTES
 #OPT: noList! plain!
-
-	* VirtualBox should work with prior versions of VirtualGL (2.0 through
-		2.1.1), but it is necessary to remove the ''-nodl'' argument from the
-		''vglrun'' command line when using VirtualBox with these versions of
-		VirtualGL.  Some versions of VirtualBox may not work with VirtualGL 2.1.2.
 
 	* You might want to temporarily enable profiling (add an argument of ''+pr''
 		to ''vglrun'' above) in order to verify that VirtualGL is loaded and
@@ -57,5 +44,5 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		over a remote X11 connection unless a
 		[[#Direct_X11_Connection][direct X11 connection]] (''vglconnect -x'') is
 		used with gigabit Ethernet (or faster.)  For 100 Megabit and slower
-		networks, using a high-performance X proxy is recommended when remotely
-		displaying VirtualBox using VirtualGL.
+		networks, using a high-performance X proxy (such as TurboVNC or TigerVNC)
+		is recommended when remotely displaying VirtualBox using VirtualGL.

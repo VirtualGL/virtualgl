@@ -78,6 +78,11 @@ readback of the 3D pixels.  This particularly helps when multiple users are
 sharing the GPU.  See the "Advanced Configuration" section of the User's Guide
 for more information.
 -------------------------------------------------------------------------------
+[14]
+This version of VirtualGL works around the interaction issues with VirtualBox,
+thus eliminating the need to specify CR_SYSTEM_GL_PATH or to run the VirtualBox
+application using 'vglrun -nodl'.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

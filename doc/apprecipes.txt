@@ -4,7 +4,7 @@
 || Application || Platform || Recipe || Notes ||
 | Abaqus v6.9 | Linux/x86 \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
-	| Users reports indicate that Abaqus 6.9 will not work properly if \
+	| User reports indicate that Abaqus 6.9 will not work properly if \
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
 		for other versions of Abaqus as well. \
 	|

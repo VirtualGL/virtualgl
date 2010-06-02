@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-01T17:28:59">
+<meta name="date" content="2010-06-02T15:15:02">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2925,23 +2925,12 @@ displaying Windows 3D applications remotely.</p>
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
         <a href="#setuid_linux" class="ref">11</a> to make 
-        <code>librrfaker.so</code> a setuid executable (Linux) or to add the 
-        VirtualGL library directory to the list of secure paths (Solaris).
+        <code>librrfaker.so</code> and <code>libdlfaker.so</code> setuid 
+        executables (Linux) or to add the VirtualGL library directory to the 
+        list of secure paths (Solaris).
     </li>
     <li class="Ordered-1 Ordered">
-        If running 32-bit VirtualBox,
-<pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-</pre>
-
-        If running 64-bit VirtualBox,
-<pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
-</pre>
-
-    </li>
-    <li class="Ordered-1 Ordered">
-        <code>vglrun&nbsp;-nodl&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
+        <code>vglrun&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
     </li>
 </ol>
 
@@ -2949,13 +2938,6 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 <h3 id="hd0013000001">NOTES</h3>
 
 <ul class="Itemize">
-    <li class="Itemize-1 Itemize asterisk">
-        VirtualBox should work with prior versions of VirtualGL (2.0 through 
-        2.1.1), but it is necessary to remove the <code>-nodl</code> argument 
-        from the <code>vglrun</code> command line when using VirtualBox with 
-        these versions of VirtualGL.  Some versions of VirtualBox may not work 
-        with VirtualGL 2.1.2.
-    </li>
     <li class="Itemize-1 Itemize asterisk">
         You might want to temporarily enable profiling (add an argument of 
         <code>+pr</code> to <code>vglrun</code> above) in order to verify that 
@@ -2976,8 +2958,9 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
         <a href="#Direct_X11_Connection">direct X11 
         connection</a><a name="idx0062"></a> (<code>vglconnect&nbsp;-x</code>) 
         is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
-        networks, using a high-performance X proxy is recommended when remotely 
-        displaying VirtualBox using VirtualGL.
+        networks, using a high-performance X proxy (such as TurboVNC or 
+        TigerVNC) is recommended when remotely displaying VirtualBox using 
+        VirtualGL.
     </li>
 </ul>
 
@@ -3005,7 +2988,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">Abaqus v6.9</td>
     <td class="standard">Linux/x86</td>
     <td class="standard"><code>vglrun&nbsp;-nodl&nbsp;{abaqus_path}/abaqus</code></td>
-    <td class="standard">Users reports indicate that Abaqus 6.9 will not work properly if <code>libdlfaker.so</code> from VirtualGL is preloaded into it.  This may be true for other versions of Abaqus as well.</td>
+    <td class="standard">User reports indicate that Abaqus 6.9 will not work properly if <code>libdlfaker.so</code> from VirtualGL is preloaded into it.  This may be true for other versions of Abaqus as well.</td>
   </tr>
   <tr class="standard">
     <td class="standard">ANSA v12.1.0</td>
