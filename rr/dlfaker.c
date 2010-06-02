@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dlfcn.h>
 
 extern void *_vgl_dlopen(const char *, int);
 
@@ -55,6 +56,18 @@ void *dlopen(const char *filename, int flag)
 		retval=_vgl_dlopen("libdlfaker.so", flag);
 	}
 	else retval=_vgl_dlopen(filename, flag);
+
+	if(!retval && filename && !strncmp(filename, "VBoxOGL", 7))
+	{
+		char temps[256];
+		snprintf(temps, 255, "/usr/lib/virtualbox/%s", filename);
+		if(verbose)
+		{
+			fprintf(stderr, "[VGL] NOTICE: dlopen(\"%s\") failed.\n", filename);
+			fprintf(stderr, "[VGL]    Trying dlopen(\"%s\")\n", temps);
+		}
+		retval=_vgl_dlopen(temps, flag);
+	}
 
 	if(trace)
 	{
