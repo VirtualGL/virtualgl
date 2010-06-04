@@ -22,13 +22,6 @@ ifeq ($(JPEGLIB), libjpeg)
 
 endif
 
-ifeq ($(JPEGLIB), medialib)
-
- JPEGLINK = $(MLIB) $(LDIR)/tjpeg.lib
- JPEGDEP = $(MLIB) $(LDIR)/tjpeg.lib
-
-endif
-
 ##########################################################################
 else
 ##########################################################################
@@ -66,22 +59,8 @@ endif
 
 ifeq ($(JPEGLIB), medialib)
 
- ifneq ($(platform), solaris)
-  ifneq ($(platform), solx86)
-
-   JPEGLINK = -ltjpeg $(MLIB)
-   ifeq ($(platform), cygwin)
-    JPEGDEP = $(OMLDIR)/openmliblite.lib $(LDIR)/libtjpeg.a
-   else
-    JPEGDEP = $(OMLDIR)/libopenmliblite.$(SHEXT) $(LDIR)/libtjpeg.a
-   endif
-
-  else
-   JPEGLINK = $(MLIB) -ltjpeg
-  endif
- else
-  JPEGLINK = $(MLIB) -ltjpeg
- endif
+ JPEGLINK = -lmlib -ltjpeg
+ JPEGDEP = $(LDIR)/libtjpeg.a
 
 endif
 
