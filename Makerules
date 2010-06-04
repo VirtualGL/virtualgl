@@ -125,51 +125,19 @@ ifeq ($(JPEGLIB),)
  JPEGLIB = $(DEFAULTJPEGLIB)
 endif
 
-LJTDIR = /opt/libjpeg-turbo
-LJTLIB := $(LJTDIR)/lib
 ifeq ($(JPEGLIB), libjpeg-turbo)
- ifeq ($(platform), linux)
-  ifeq ($(subplatform), 64)
-   LJTLIB := $(shell if [ -d $(LJTDIR)/lib64 ]; then echo $(LJTDIR)/lib64; else echo $(LJTLIB); fi)
-  else
-   LJTLIB := $(shell if [ -d $(LJTDIR)/lib32 ]; then echo $(LJTDIR)/lib32; else echo $(LJTLIB); fi)
-  endif
+ LJTDIR = /opt/libjpeg-turbo
+ ifeq ($(subplatform), 64)
+  LJTLIB := $(LJTDIR)/lib64
  else
-  ifeq ($(platform), solx86)
-   ifeq ($(subplatform), 64)
-    LJTLIB := $(LJTDIR)/lib/amd64
-   endif
-  endif
+  LJTLIB := $(LJTDIR)/lib32
  endif
 endif
 
-OMLDIR := $(LDIR)
 ifeq ($(JPEGLIB), medialib)
  CFLAGS := $(CFLAGS) -DUSEMEDIALIB
  CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
- ifneq ($(platform), solaris)
-  ifneq ($(platform), solx86)
-   ## Open mediaLib
-   ifneq ($(DISTRO),)
-    OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)/$(DISTRO)
-   else
-    OMBLDDIR = $(TOPDIR)/../openmliblite/$(platform)$(subplatform)
-   endif
-   OMLDIR = $(OMBLDDIR)/$(LNAME)
-   ifeq ($(platform), windows)
-    MLIB = $(OMLDIR)/openmliblite.lib
-   else
-    MLIB = -L$(OMLDIR) -lopenmliblite
-   endif
-   CFLAGS := $(CFLAGS) -I$(TOPDIR)/../openmliblite/src/include
-   CXXFLAGS := $(CXXFLAGS) -I$(TOPDIR)/../openmliblite/src/include
-  else
-   MLIB = -lmlib
-  endif
- else
-  MLIB = -lmlib
- endif
- FAKERLINK := $(FAKERLINK) $(MLIB)
+ FAKERLINK := $(FAKERLINK) -lmlib
 endif
 
 # Implicit rules
