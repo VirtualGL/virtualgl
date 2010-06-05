@@ -71,8 +71,8 @@ void fbxv_printwarnings(FILE *stream)
 int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 	unsigned int format, int useshm)
 {
-	int w, h, nadaptors=0, i, j, k, shmok=1, nformats;
-	unsigned int dummy1, dummy2, dummy3, dummy4, dummy5;
+	int w, h, i, j, k, shmok=1, nformats;
+	unsigned int dummy1, dummy2, dummy3, dummy4, dummy5, nadaptors=0;
 	XWindowAttributes xwinattrib;
 	XvAdaptorInfo *ai=NULL;
 	XvImageFormatValues *ifv=NULL;
