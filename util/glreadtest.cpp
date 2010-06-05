@@ -141,7 +141,10 @@ int useglp=0;
 #ifdef USEGLP
 int glpdevice=-1;
 #endif
-int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, pbo=0, usealpha=0;
+int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, usealpha=0;
+#ifdef GL_VERSION_1_5
+int pbo=0;
+#endif
 double benchtime=1.0;
 
 #define STRLEN 256
@@ -527,7 +530,10 @@ void glwrite(int format)
 void glread(int format)
 {
 	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
-	double rbtime;  GLuint bufferid=0;
+	double rbtime;
+	#ifdef GL_VERSION_1_5
+	GLuint bufferid=0;
+	#endif
 	char temps[STRLEN];
 
 	try {
@@ -536,6 +542,7 @@ void glread(int format)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
 	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN);
 	glReadBuffer(GL_FRONT);
+	#ifdef GL_VERSION_1_5
 	if(pbo)
 	{
 		const char *ext=(const char *)glGetString(GL_EXTENSIONS);
@@ -555,6 +562,7 @@ void glread(int format)
 		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_ARB, &temp);
 		if(temp!=pbo) _throw("Could not bind PBO buffer");
 	}
+	#endif
 	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
@@ -570,6 +578,7 @@ void glread(int format)
 			glPixelTransferf(GL_GREEN_SCALE, (GLfloat)0.587);
 			glPixelTransferf(GL_BLUE_SCALE, (GLfloat)0.114);
 		}
+		#ifdef GL_VERSION_1_5
 		if(pbo)
 		{
 			unsigned char *pixels=NULL;
@@ -583,6 +592,7 @@ void glread(int format)
 			glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
 		}
 		else
+		#endif
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
 				rgbaBuffer);
 
@@ -618,11 +628,13 @@ void glread(int format)
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
 	if(rgbaBuffer) free(rgbaBuffer);
+	#ifdef GL_VERSION_1_5
 	if(pbo && bufferid>0)
 	{
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 		glDeleteBuffers(1, &bufferid);
 	}
+	#endif
 }
 
 void display(void)
@@ -664,7 +676,12 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-index] [-overlay]\n", argv[0]);
 	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
-	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>] [-pbo]\n");
+	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]");
+	#ifdef GL_VERSION_1_5
+	fprintf(stderr, " [-pbo]\n");
+	#else
+	fprintf(stderr, "\n");
+	#endif
 	#ifdef USEGLP
 	fprintf(stderr, "       [-device <GLP device>]\n");
 	#endif
@@ -684,7 +701,9 @@ void usage(char **argv)
 	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
 	fprintf(stderr, "-time <t> = Run each test for <t> seconds\n");
 	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
+	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
+	#endif
 	#ifdef USEGLP
 	fprintf(stderr, "-device = Set GLP device to use for rendering (default: Use GLX)\n");
 	#endif
@@ -709,7 +728,9 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-window")) usewindow=1;
 		if(!stricmp(argv[i], "-index")) useci=1;
 		if(!stricmp(argv[i], "-overlay")) {useci=1;  useoverlay=1;  usewindow=1;}
+		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
+		#endif
 		if(!stricmp(argv[i], "-alpha")) usealpha=1;
 		if(!stricmp(argv[i], "-rgb"))
 		{
@@ -814,7 +835,9 @@ int main(int argc, char **argv)
 		XSetErrorHandler(xhandler);
 		if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
 		fprintf(stderr, "\nRendering to %s using GLX on display %s\n", usewindow?"window":"Pbuffer", DisplayString(dpy));
+		#ifdef GL_VERSION_1_5
 		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
+		#endif
 
 		if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
 		{
