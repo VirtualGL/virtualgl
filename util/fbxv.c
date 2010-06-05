@@ -37,6 +37,10 @@ static char __lasterror[1024]="No error";
 static unsigned long serial=0;  static int __extok=1;
 static XErrorHandler prevhandler=NULL;
 
+#ifndef X_ShmAttach
+#define X_ShmAttach 1
+#endif
+
 int _fbxv_xhandler(Display *dpy, XErrorEvent *e)
 {
 	if(e->serial==serial && (e->minor_code==X_ShmAttach
