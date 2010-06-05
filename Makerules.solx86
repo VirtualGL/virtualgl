@@ -114,7 +114,12 @@ ifeq ($(USESSL), yes)
 
 endif
 
-GLLIB = -lGL
+ifeq ($(REV), 5.10)
+ GLLIB = -lGL
+else
+ GLLIB = -lGL -lXdamage
+endif
+
 FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
 ZNOW = -z now
