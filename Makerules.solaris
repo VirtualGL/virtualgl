@@ -59,9 +59,9 @@ CDEFINES := $(CDEFINES) -DSUNOGL
 
 LDFLAGS = -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
- LDFLAGS := -L/usr/X/lib/sparcv9 -R/opt/SUNWvgl/lib/sparcv9 $(LDFLAGS)
+ LDFLAGS := -L/usr/X/lib/sparcv9 $(LDFLAGS)
 else
- LDFLAGS := -L/usr/X/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
+ LDFLAGS := -L/usr/X/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = medialib

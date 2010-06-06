@@ -73,9 +73,9 @@ endif
 
 LDFLAGS := $(LDFLAGS) -mt -lpthread -lrt
 ifeq ($(subplatform), 64)
- LDFLAGS := -L/usr/X/lib/64 -L/usr/X11/lib/64 -R/opt/SUNWvgl/lib/amd64 $(LDFLAGS)
+ LDFLAGS := -L/usr/X/lib/64 -L/usr/X11/lib/64 $(LDFLAGS)
 else
- LDFLAGS := -L/usr/X/lib -L/usr/X11/lib -R/opt/SUNWvgl/lib $(LDFLAGS)
+ LDFLAGS := -L/usr/X/lib -L/usr/X11/lib $(LDFLAGS)
 endif
 
 DEFAULTJPEGLIB = libjpeg-turbo
