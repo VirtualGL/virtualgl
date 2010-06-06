@@ -23,7 +23,7 @@ among multiple users, and it provides "workstation-like" levels of performance
 on even the most modest of networks.  This makes it possible for large, noisy,
 hot 3D workstations to be replaced with laptops or even thinner clients.  More
 importantly, however, VirtualGL eliminates the workstation and the network as
-barriers to data size.  Users can now visualize gigabytes and gigabytes of data
+barriers to data size.  Users can now visualize huge amounts of data
 in real time without needing to copy any of the data over the network or sit in
 front of the machine that is rendering the data.
 
