@@ -6,13 +6,14 @@ This document and all associated illustrations are licensed under the
 [[http://creativecommons.org/licenses/by/2.5/]\
 [Creative Commons Attribution 2.5 License]].  Any works which contain
 material derived from this document must cite The VirtualGL Project as the
-source of the material and list the current URL for the VirtualGL web site.
+source of the material and list the current URL for the VirtualGL website.
 
 The VirtualGL server components include software developed by the
 [[http://www.fltk.org/][FLTK Project]] and distributed under the terms of the
 [[LICENSE-FLTK.txt][FLTK License]!].
 
-The VirtualGL Windows packages include [[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
+The package for the VirtualGL Client for Exceed includes
+[[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
 which is released under [[LICENSE-PuTTY.txt][this license]!].
 
 VirtualGL includes portions of [[http://www.x.org][X.org]], which is released
