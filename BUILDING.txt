@@ -357,9 +357,9 @@ Cygwin:
    gcc-core
    gcc-g++
    make
-   openssl-devel
    libX11-devel
    libXext-devel
+   libGL-devel
    libGLU-devel
 
 -- Download and install the libjpeg-turbo SDK for GCC
