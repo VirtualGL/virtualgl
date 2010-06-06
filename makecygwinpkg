@@ -1,58 +1,59 @@
 #!/bin/sh
 
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
 TMPDIR=
 
-doexit()
+onexit()
 {
 	if [ ! "$TMPDIR" = "" ]; then
 		rm -rf $TMPDIR
 	fi
-	exit $1
 }
 
 usage()
 {
-	echo "$0 <app name> <build dir.> <version> <build> <bin dir>"
+	echo "$0 <app name> <build dir.> <version> <bin dir>"
 	exit 1
 }
 
-if [ "$1" = "" ]; then usage $0; fi
+if [ $# -lt 4 ]; then usage $0; fi
 APPNAME=$1
-if [ "$2" = "" ]; then usage $0; fi
 BLDDIR=$2
-if [ "$3" = "" ]; then usage $0; fi
 VERSION=$3
-if [ "$4" = "" ]; then usage $0; fi
-BUILD=$4
-if [ "$5" = "" ]; then usage $0; fi
-EDIR=$5
+EDIR=$4
 
 umask 022
-TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX || doexit -1`
+TMPDIR=`mktemp -d /tmp/vglbuild.XXXXXX`
 __PWD=`pwd`
-mkdir -p $TMPDIR/pkg/usr/bin || doexit -1
-mkdir -p $TMPDIR/pkg/opt/VirtualGL/bin || doexit -1
-mkdir -p $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION || doexit -1
-install -m 755 $EDIR/vglclient.exe $TMPDIR/pkg/usr/bin/ || doexit -1
-install -m 755 $EDIR/vglconnect $TMPDIR/pkg/usr/bin/ || doexit -1
-ln -fs /usr/bin/vglclient.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-ln -fs /usr/bin/vglconnect $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR/tcbench.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR/nettest.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR/glxinfo.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-install -m 755 $EDIR/glxspheres.exe $TMPDIR/pkg/opt/$APPNAME/bin/ || doexit -1
-install -m 644 LGPL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 fltk/COPYING $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt || doexit -1
-install -m 644 putty/LICENCE $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt || doexit -1
-install -m 644 x11windows/xauth.license $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt || doexit -1
-install -m 644 LICENSE.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 ChangeLog.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 doc/index.html $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 doc/*.gif $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 doc/*.png $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
-install -m 644 doc/*.css $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/ || doexit -1
+mkdir -p $TMPDIR/pkg/usr/bin
+mkdir -p $TMPDIR/pkg/opt/VirtualGL/bin
+mkdir -p $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION
+install -m 755 $EDIR/vglclient.exe $TMPDIR/pkg/usr/bin/
+install -m 755 $EDIR/vglconnect $TMPDIR/pkg/usr/bin/
+ln -fs /usr/bin/vglclient.exe $TMPDIR/pkg/opt/$APPNAME/bin/
+ln -fs /usr/bin/vglconnect $TMPDIR/pkg/opt/$APPNAME/bin/
+install -m 755 $EDIR/tcbench.exe $TMPDIR/pkg/opt/$APPNAME/bin/
+install -m 755 $EDIR/nettest.exe $TMPDIR/pkg/opt/$APPNAME/bin/
+install -m 755 $EDIR/glxinfo.exe $TMPDIR/pkg/opt/$APPNAME/bin/
+install -m 755 $EDIR/glxspheres.exe $TMPDIR/pkg/opt/$APPNAME/bin/
+install -m 644 LGPL.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 fltk/COPYING $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-FLTK.txt
+install -m 644 putty/LICENCE $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-PuTTY.txt
+install -m 644 x11windows/xauth.license $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/LICENSE-xauth.txt
+install -m 644 LICENSE.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 ChangeLog.txt $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 doc/index.html $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 doc/*.gif $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 doc/*.png $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
+install -m 644 doc/*.css $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION/
 cd $TMPDIR/pkg
-tar cfj ../$APPNAME-$VERSION-$BUILD.tar.bz2 * || doexit -1
+tar cfj ../$APPNAME-$VERSION-cygwin.tar.bz2 *
 cd $__PWD
-mv $TMPDIR/*.tar.bz2 $BLDDIR || doexit -1
-doexit 0
+mv $TMPDIR/*.tar.bz2 $BLDDIR
+
+exit 0

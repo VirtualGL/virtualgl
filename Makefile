@@ -210,7 +210,7 @@ endif
 
 ifeq ($(platform), cygwin)
 dist: rr diags mesademos
-	sh makecygwinpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR)
+	sh makecygwinpkg $(APPNAME) $(BLDDIR) $(VERSION) $(EDIR)
 endif
 
 ifeq ($(platform), solaris)
