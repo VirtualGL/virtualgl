@@ -33,6 +33,9 @@
 #include <GL/glu.h>
 #endif
 #include "x11err.h"
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 
 static int ALIGN=1;
 #define PAD(w) (((w)+(ALIGN-1))&(~(ALIGN-1)))
