@@ -6,7 +6,9 @@
 
 	* Seamless windows; every application window appears as a separate window on
 		the user's desktop
-	* Supports stereographic and overlay rendering
+	* Supports stereographic and overlay rendering (see requirements in
+		{ref prefix="Sections ": Stereo_Requirements} and
+		{ref prefix="": Overlay_Requirements})
 	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
 		client machine
 
@@ -18,7 +20,6 @@
 		application's GUI to the user's desktop.  As a result, the VGL Transport is
 		not recommended for use on high-latency or low-bandwidth networks
 	* No collaboration features
-	* Requires purchasing Exceed for use with Windows clients
 	* The client is not stateless.  As with any remote X11 app, if the network
 		connection drops, then the application will exit
 
@@ -26,17 +27,22 @@
 {anchor: X11_Forwarding}
 
 This mode is recommended for use on secure local-area networks.  The X11
-traffic is encrypted, but the VirtualGL image stream is left unencrypted to
+traffic is encrypted, but the VGL Transport is left unencrypted to
 maximize performance.
 
-*** Procedure for Linux/Solaris/Mac Clients
+*** Procedure for Linux/Solaris/Mac/Cygwin Clients
 #OPT: noList! plain!
 
-	#. Start the X server if it isn't started already (__Mac clients:__ start the
-		Mac X11 application.)
+	#. Start the X server if it isn't started already.{nl}
+		__Mac clients:__ start the Mac X11 application.{nl}
+		__Cygwin clients:__ start Cygwin/X.
 
-	#. Open a new terminal window (__Mac clients:__ in the X11 application, start
-		a new xterm [Command-N] if one isn't already started.)
+	#. Open a new terminal window.{nl}
+		__Mac clients:__ in the X11 application, start a new xterm [Command-N] if
+			one isn't already started.{nl}
+		__Cygwin clients:__ start a new xterm if one isn't already started
+			(right-click on the Cygwin/X taskbar icon, then select
+			__Applications-->xterm__.)
 
 	#. In the same terminal/xterm window, open a Secure Shell (SSh) session into
 		the VirtualGL server:
@@ -55,9 +61,9 @@ maximize performance.
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
-	information on ''vglrun'' command line options.
+	information on ''vglrun'' command-line options.
 
-*** Procedure for Windows Clients
+*** Procedure for Windows Clients Running Exceed
 #OPT: noList! plain!
 
 	#. Start Exceed if it isn't already started.  Hover the mouse pointer over
@@ -75,7 +81,7 @@ maximize performance.
 
 		!!! If you only ever plan to use one Exceed session at a time, then you
 		can set the ''DISPLAY'' environment variable in your global user
-		environment (__Control Panel-->System-->Advanced-->Environment Variables__.)
+		environment.
 
 	#. Open a Secure Shell (SSh) session into the VirtualGL server:
 
@@ -94,14 +100,14 @@ maximize performance.
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
-	information on ''vglrun'' command line options.
+	information on ''vglrun'' command-line options.
 
 ** VGL Transport with a Direct X11 Connection
 {anchor: Direct_X11_Connection}
 
-As with the [[#X11_Forwarding][previous mode]], this mode performs optimally on
+As with the previous mode, this mode performs optimally on
 local-area networks.  However, it is less secure, since both the X11 traffic
-and the VGL image stream are unencrypted.  This mode is primarily useful in
+and the VGL Transport are unencrypted.  This mode is primarily useful in
 grid environments where you may not know ahead of time which server will
 execute a VirtualGL job.  It is assumed that the "submit host" (the machine
 into which you connect with SSh) and the "execute hosts" (the machines that
@@ -127,7 +133,7 @@ argument to ''vglconnect'' when connecting to the server:
 ** VGL Transport with X11 Forwarding and SSh Tunneling
 {anchor: SSh_Tunneling}
 
-Both the VGL image stream and the X11 traffic are tunneled through SSh when
+Both the VGL Transport and the X11 traffic are tunneled through SSh when
 using this mode, and thus it provides a completely secure solution.  It is
 also useful when either the VirtualGL server or the client machine are behind
 restrictive firewalls and only SSh connections are allowed through.  Using
@@ -147,7 +153,7 @@ argument to ''vglconnect'' when connecting to the server:
 	---
 
 ''vglconnect'' will make two SSh connections into the server, the first to find
-an open port on the server and the second to create the secure image tunnels
+an open port on the server and the second to create the SSh tunnel for the VGL Transport
 and open the secure shell.  If you are not using an SSh agent to create
 password-less logins, then this mode will require you to enter your password
 twice.
@@ -156,7 +162,7 @@ twice.
 instance, if the VirtualGL server is not directly accessible from the Internet,
 you can use ''vglconnect -s'' to connect to a gateway server, then use
 ''vglconnect -s'' again on the gateway server to connect to the VirtualGL
-server.  Both the X11 and the VGL image traffic will be forwarded from the
+server.  Both the X11 traffic and the VGL Transport will be forwarded from the
 VirtualGL server through the gateway and to the client.
 
 #IMG: sshtunnel.png
@@ -263,15 +269,11 @@ XAuth keyring on the client machine.
 
 ** The VirtualGL Client Application: Nuts and Bolts
 
-The VirtualGL Client application receives encoded and/or compressed images on a
-dedicated TCP socket, decodes and/or decompresses the images, and draws the
-images into the appropriate X window.  In previous versions of VirtualGL, it
-was necessary to manually start the VirtualGL Client prior to connecting to the
-application server, but the new ''vglconnect'' script wraps both ''vglclient''
-and SSh to greatly simplify the process of creating VGL Transport connections.
-One consequence of this ease of use is that the actual workings of
-''vglclient'' are hidden from view, which makes it a bit more difficult to see
-the cause of connection failures and other issues as they happen.
+The VirtualGL Client application (''vglclient'') receives encoded and/or
+compressed images on a dedicated TCP socket, decodes and/or decompresses the
+images, and draws the images into the appropriate X window.  The ''vglconnect''
+script wraps both ''vglclient'' and SSh to greatly simplify the process of
+creating VGL Transport connections.
 
 ''vglconnect'' invokes ''vglclient'' with an argument of ''-detach'', which
 causes ''vglclient'' to completely detach from the console and run as a
@@ -286,18 +288,20 @@ all instances of ''vglclient'' running under your user account by invoking
 	vglclient -kill
 	---
 
-(''vglclient'' is in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris systems and
-in ''c:\\program files\\virtualgl-{version}-{build}'' on Windows systems.)
+(''vglclient'' for Linux/Mac/Solaris/Cygwin is in ''/opt/VirtualGL/bin'', and
+''vglclient'' for Exceed is in
+''c:\\program files\\virtualgl-''__''{version}''__''-''__''{build}''__.)
 
 ''vglconnect'' instructs ''vglclient'' to redirect all of its console output
 to a log file named
 __''{home}''__''/.vgl/vglconnect-''__''{hostname}''__''-''__''{display}''__''.log'',
 where __''{home}''__ is the path of the current user's home directory
-(''%USERPROFILE%'' on Windows systems), __''{hostname}''__ is the name of the
-computer running ''vglconnect'', and __''{display}''__ is the name of the
-current X display (read from the ''DISPLAY'' environment or passed to
-''vglconnect'' using the ''-display'' argument.)  In the event that something
-goes wrong, this log file is the first place to check.
+(''%USERPROFILE%'' if using the VirtualGL Client for Exceed),
+__''{hostname}''__ is the name of the computer running ''vglconnect'', and
+__''{display}''__ is the name of the current X display (read from the
+''DISPLAY'' environment or passed to ''vglconnect'' using the ''-display''
+argument.)  In the event that something goes wrong, this log file is the first
+place to check.
 
 When ''vglclient'' successfully starts on a given X display, it stores its
 listener port number in a root window property on the X display.  If

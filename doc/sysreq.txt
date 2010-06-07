@@ -125,6 +125,7 @@ are broken.  If you need to run VirtualGL on SPARC, then please contact us.
 #OPT: hiCol=first
 
 ** Additional Requirements for Stereographic Rendering
+{anchor: Stereo_Requirements}
 
 	!!! The client requirements do not apply to anaglyphic stereo.  See
 	{ref prefix="Chapter ": Advanced_OpenGL} for more details.
@@ -156,6 +157,7 @@ are broken.  If you need to run VirtualGL on SPARC, then please contact us.
 #OPT: hiCol=first
 
 ** Additional Requirements for Transparent Overlays
+{anchor: Overlay_Requirements}
 
 || || Client ||
 | Linux \
