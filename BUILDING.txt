@@ -157,7 +157,6 @@ one or more of the necessary 32-bit prerequisites, then:
    binaries will reside in "osxx8664/bin" and "osxx8664/lib".
 
 
-
 *******************************************************************************
 **     Prerequisites - Solaris
 *******************************************************************************
@@ -248,12 +247,13 @@ one or more of the necessary 32-bit prerequisites, then:
 
      http://sourceforge.net/projects/libjpeg-turbo
 
+
 *******************************************************************************
-**     Prerequisites - Win32
+**     Building the VirtualGL Client for Exceed
 *******************************************************************************
 
-These prerequisites are for building a native Windows client.  For building
-VirtualGL on Cygwin, see the next section.
+Prerequisites
+=============
 
 -- GNU Make v3.7 or later
 
@@ -320,7 +320,7 @@ VirtualGL on Cygwin, see the next section.
 
      Hopefully this will be fixed in future releases of OpenSSL.
 
--- Hummingbird Exceed XDK v8 or later
+-- OpenText Exceed XDK v8 or later
 
    * Add the XDK include path (for instance,
      c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
@@ -342,6 +342,17 @@ VirtualGL on Cygwin, see the next section.
      system or user INCLUDE environment variable prior to building VirtualGL.
    * Add the libjpeg-turbo library path (c:\libjpeg-turbo[64]\lib) to the
      system or user LIB environment variable prior to building VirtualGL.
+
+64-bit Build
+============
+
+-- To build a 64-bit version of the VirtualGL Client for Exceed, pass an
+   argument of "subplatform=64" to 'make' when performing the build:
+
+     make subplatform=64
+
+   The binaries will reside in "windows64/bin".  This configuration has not
+   been fully tested.
 
 
 *******************************************************************************
@@ -379,7 +390,7 @@ Cygwin:
 
      make platform=cygwin
 
-   The binaries will reside in "cygwin/bin" and "cygwin/lib".
+   The binaries will reside in "cygwin/bin".
 
 
 *******************************************************************************
