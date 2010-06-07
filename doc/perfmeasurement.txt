@@ -206,7 +206,7 @@ thin client systems.
 tcbench -?
 ---
 
-lists the relevant command line switches, which can be used to adjust the
+lists the relevant command-line switches, which can be used to adjust the
 benchmark time, the sampling rate, and the x and y offset of the sampling area
 within the window.
 

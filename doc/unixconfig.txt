@@ -113,7 +113,7 @@ prompt.
 			X server, disabling XTEST will prevent them from inserting keystrokes or
 			mouse events and thus hijacking local X sessions on that X server.
 
-		!!! Certain Linux distributions do not have the X server command line
+		!!! Certain Linux distributions do not have the X server command-line
 		entries in their GDM configuration files.  On these distributions, it will
 		be necessary to run ''gdmsetup'' and manually add an argument of ''-tst''
 		to the X server command line to disable XTEST for the first time.  After
