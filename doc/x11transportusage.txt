@@ -5,19 +5,19 @@ The VGL Transport is a good solution for using VirtualGL over a fast
 network.  However, the VGL Transport is not generally suitable for high-latency
 or low-bandwidth networks, due to its reliance on the X11 protocol to send the
 non-3D elements of the 3D application's GUI.  The VGL Transport also
-requires an X server to be running on the client machine, which makes it more
-difficult and costly to deploy for Windows clients.  VirtualGL can be used with
-an "X proxy" to overcome these limitations.  An X proxy acts as a virtual X
-server, receiving X11 commands from the application (and from VirtualGL),
-rendering the X11 commands into images, compressing the resulting images, and
-sending the compressed images over the network to a client or clients.  X
-proxies perform well on all types of networks, including high-latency and
-low-bandwidth networks.  They often provide rudimentary collaboration
-capabilities, allowing multiple clients to simultaneously view the same X
-session and pass around control of the keyboard and mouse.  X proxies are also
-stateless, meaning that the client can disconnect and reconnect at will from
-any machine on the network, and the 3D application will remain running on the
-server.
+requires an X server to be running on the client machine, which makes it
+generally more difficult to deploy and use, particularly on Windows clients.
+VirtualGL can be used with an "X proxy" to overcome these limitations.  An X
+proxy acts as a virtual X server, receiving X11 commands from the application
+(and from VirtualGL), rendering the X11 commands into images, compressing the
+resulting images, and sending the compressed images over the network to a
+client or clients.  X proxies perform well on all types of networks, including
+high-latency and low-bandwidth networks.  They often provide rudimentary
+collaboration capabilities, allowing multiple clients to simultaneously view
+the same X session and pass around control of the keyboard and mouse.  X
+proxies are also stateless, meaning that the client can disconnect and
+reconnect at will from any machine on the network, and the 3D application will
+remain running on the server.
 
 Since VirtualGL is sending rendered 3D images to the X proxy at a very fast
 rate, the proxy must be able to compress the images very quickly in order to
@@ -33,11 +33,11 @@ TurboVNC User's Guide.
 [[http://www.tigervnc.com][TigerVNC]] is a next-generation VNC project based
 on the RealVNC and Xorg code bases.  TigerVNC spun off from the TightVNC
 project in early 2009, and the VirtualGL Project now actively participates in
-its development.  TigerVNC uses a SIMD-accelerated version of libjpeg, which
-makes it much faster than RealVNC or TightVNC.  As of this writing, TigerVNC's
-performance is not yet on par with TurboVNC, but the ultimate goal is to
-replace TurboVNC with this solution.  TigerVNC is available in Fedora 11 or
-later.
+its development.  TigerVNC uses the same high-speed JPEG codec as VirtualGL
+and TurboVNC ([[http://libjpeg-turbo.virtualgl.org][libjpeg-turbo]]), but as of
+this writing, TigerVNC's performance is not quite yet on par with TurboVNC.
+The ultimate goal, however, is to replace TurboVNC with TigerVNC.  TigerVNC is
+available in Fedora 11 or later.
 
 Other solutions, such as RealVNC and NX, also work well with VirtualGL.
 Generally, none of these other solutions will provide anywhere near the
@@ -85,16 +85,15 @@ the VirtualGL server, decompressed by the VirtualGL Client, then recompressed
 by the X proxy, which is a waste of CPU resources.  However, sending images
 uncompressed over a network requires a fast network (generally, Gigabit
 Ethernet or faster), so there needs to be a fast link between the VirtualGL
-server and the X proxy for this procedure to perform well.
+server and the X proxy server for this procedure to perform well.
 
-The procedure for using the VGL Transport to remotely display 3D
-applications from a VirtualGL server to an X proxy is the same as the
-[[#X11_Forwarding][procedure]] for using the VGL Transport to remotely display
+The procedure for using the VGL Transport to display 3D applications from a
+VirtualGL server to a remote X proxy is the same as the
+[[#X11_Forwarding][procedure]] for using the VGL Transport to display
 3D applications from a VirtualGL server to a remote 2D X server, with the
-following notable differences:
+following exceptions:
 
-	#. The "client" in this case is really the machine on which the X proxy is
-		running.
+	#. The "client" in this case is really the X proxy server.
 
 	#. The "X server" is really the X proxy.
 
