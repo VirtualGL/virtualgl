@@ -334,14 +334,14 @@ int console_get_userpass_input(prompts_t *p, unsigned char *in, int inlen)
     /* We only print the `name' caption if we have to... */
     if (p->name_reqd && p->name) {
 	size_t l = strlen(p->name);
-	console_data_untrusted(hout, p->name, l);
+	console_data_untrusted(hout, p->name, (int)l);
 	if (p->name[l-1] != '\n')
 	    console_data_untrusted(hout, "\n", 1);
     }
     /* ...but we always print any `instruction'. */
     if (p->instruction) {
 	size_t l = strlen(p->instruction);
-	console_data_untrusted(hout, p->instruction, l);
+	console_data_untrusted(hout, p->instruction, (int)l);
 	if (p->instruction[l-1] != '\n')
 	    console_data_untrusted(hout, "\n", 1);
     }
@@ -360,14 +360,14 @@ int console_get_userpass_input(prompts_t *p, unsigned char *in, int inlen)
 	    newmode |= ENABLE_ECHO_INPUT;
 	SetConsoleMode(hin, newmode);
 
-	console_data_untrusted(hout, pr->prompt, strlen(pr->prompt));
+	console_data_untrusted(hout, pr->prompt, (int)strlen(pr->prompt));
 
-	r = ReadFile(hin, pr->result, pr->result_len - 1, &i, NULL);
+	r = ReadFile(hin, pr->result, (DWORD)(pr->result_len - 1), &i, NULL);
 
 	SetConsoleMode(hin, savemode);
 
 	if ((int) i > pr->result_len)
-	    i = pr->result_len - 1;
+	    i = (DWORD)(pr->result_len - 1);
 	else
 	    i = i - 2;
 	pr->result[i] = '\0';

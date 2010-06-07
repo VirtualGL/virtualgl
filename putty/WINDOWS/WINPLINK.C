@@ -382,7 +382,7 @@ int main(int argc, char **argv)
 		    if (r) {
 			int i, j;
 			for (i = 0; backends[i].backend != NULL; i++) {
-			    j = strlen(backends[i].name);
+			    j = (int)strlen(backends[i].name);
 			    if (j == r - p &&
 				!memcmp(backends[i].name, p, j)) {
 				default_protocol = cfg.protocol =
@@ -480,7 +480,7 @@ int main(int argc, char **argv)
      * Trim leading whitespace off the hostname if it's there.
      */
     {
-	int space = strspn(cfg.host, " \t");
+	int space = (int)strspn(cfg.host, " \t");
 	memmove(cfg.host, cfg.host+space, 1+strlen(cfg.host)-space);
     }
 
@@ -688,7 +688,7 @@ int main(int argc, char **argv)
                     };
                     int e;
 
-		    noise_ultralight(socket);
+		    noise_ultralight((unsigned long)socket);
 		    noise_ultralight(things.lNetworkEvents);
 
                     for (e = 0; e < lenof(eventtypes); e++)

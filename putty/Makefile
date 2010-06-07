@@ -80,8 +80,13 @@ $(ODIR)/%.obj: %.C
 $(ODIR)/%.obj: WINDOWS/%.C
 	$(CC) $(CFLAGS) -c $< -Fo$@
 
+ifeq ($(subplatform), 64)
+$(ODIR)/%.res: WINDOWS/%.RC
+	"rc" -D_WIN64 -l 0x809 -fo $@ $<
+else
 $(ODIR)/%.res: WINDOWS/%.RC
 	"rc" -l 0x809 -fo $@ $<
+endif
 
 CFLAGS := $(CFLAGS) -D_WINDOWS -DRELEASE=0.60-VGL -I./WINDOWS
 
