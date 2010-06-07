@@ -31,7 +31,7 @@
 | Recommended O/S \
 	| {list type=ul: \
 			{item:Any distribution in the \
-				[[http://www.redhat.com/][RedHat]] or [[http://www.novell.com/linux/][SuSE]] \
+				[[http://www.redhat.com/][Red Hat]] or [[http://www.novell.com/linux/][SuSE]] \
 				families which contains GLIBC 2.3.2 or later (including \
 				[[http://fedora.redhat.com/][Fedora]], \
 				[[http://www.centos.org/][CentOS]] 3 and later, and \
