@@ -50,11 +50,13 @@ ifeq ($(DEBUG), yes)
 endif
 
 dist: rr diags
-	$(RM) $(WBLDDIR)\$(APPNAME).exe
+	$(RM) $(WBLDDIR)/$(APPNAME).exe
+	$(RM) $(WBLDDIR)/$(APPNAME)-exceed.exe
 	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
 		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
 	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
 		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
+	mv $(WBLDDIR)/$(APPNAME).exe $(WBLDDIR)/$(APPNAME)-exceed.exe
 
 
 ##########################################################################
