@@ -36,16 +36,6 @@ ifeq ($(OS), Darwin)
  endif
 endif
 
-ifeq ($(platform), windows)
- ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
-  subplatform := 64
- else
-  ifeq ($(PROCESSOR_ARCHITEW6432), AMD64)
-   subplatform := 64
-  endif
- endif
-endif
-
 ifeq ($(TOPDIR),)
  TOPDIR = ..
 endif
