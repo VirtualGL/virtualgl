@@ -77,17 +77,17 @@
 
 ** Installing the VirtualGL Client on Windows (Exceed)
 
-	#. Download the VirtualGL Windows installer package
+	#. Download the VirtualGL Client for Exceed installer package
 		(''VirtualGL-''__''{version}''__''.exe'') from the
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
-	#. Run the VirtualGL installer.  The installation of VirtualGL should be
+	#. Run the installer.  The installation of the VirtualGL Client should be
 		self-explanatory.  The only configuration option is the directory into
 		which you want the files to be installed.
 
- !!! NOTE: The VirtualGL Windows installer does not remove any previous
- versions of the VirtualGL Client that may be installed on your machine.  If
+ !!! NOTE: The VirtualGL Client for Exceed installer does not remove any
+ previous versions of the VirtualGL Client that may be installed on your machine.  If
  you wish, you can remove these older versions manually by using the "Add or
  Remove Programs" applet in the Control Panel (or the "Programs and Features"
  applet if you are running Windows Vista.)
