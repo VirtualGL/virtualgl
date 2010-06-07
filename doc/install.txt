@@ -7,9 +7,6 @@
 
 ** Installing VirtualGL on Linux
 
-*** Installing VirtualGL
-#OPT: noList! plain!
-
 	1. Download the appropriate VirtualGL binary package for your system from the
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
