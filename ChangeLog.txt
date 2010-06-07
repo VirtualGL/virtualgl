@@ -83,6 +83,10 @@ This version of VirtualGL works around the interaction issues with VirtualBox,
 thus eliminating the need to specify CR_SYSTEM_GL_PATH or to run the VirtualBox
 application using 'vglrun -nodl'.
 -------------------------------------------------------------------------------
+[15]
+This version of VirtualGL provides a binary package, documentation, and full
+support for Cygwin/X.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
