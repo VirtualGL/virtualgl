@@ -10,7 +10,10 @@ local connection to the VirtualBox process running on the host.  When used in
 conjunction with VirtualGL on a Linux or Solaris/x86 host, this solution
 provides a means of displaying Windows 3D applications remotely.
 
-To use VirtualGL with VirtualBox, perform the following procedure:
+To use VirtualGL with VirtualBox, perform the following procedures:
+
+*** Configuring the System
+#OPT: noList! plain!
 
 	#. Launch VirtualBox and use the VirtualBox GUI to create and test your
 		virtual machine.
@@ -24,14 +27,35 @@ To use VirtualGL with VirtualBox, perform the following procedure:
 		to add the VirtualGL library directory to the list of secure paths
 		(Solaris).
 
+*** Launching VirtualBox (Method 1)
+#OPT: noList! plain!
+
+This should work on most Linux systems.
+
 	#. ''vglrun VirtualBox -startvm ''__''{VM name or UUID}''__
+
+*** Launching VirtualBox (Method 2)
+#OPT: noList! plain!
+
+If the above does not work, then try the following alternate method:
+
+	#. If running 32-bit VirtualBox,
+		#Verb <<---
+		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
+		---
+		If running 64-bit VirtualBox,
+		#Verb <<---
+		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
+		---
+
+	#. ''vglrun -nodl VirtualBox -startvm ''__''{VM name or UUID}''__
 
 *** NOTES
 #OPT: noList! plain!
 
 	* You might want to temporarily enable profiling (add an argument of ''+pr''
-		to ''vglrun'' above) in order to verify that VirtualGL is loaded and
-		working.
+		to ''vglrun'' above) or set the ''VGL_LOGO'' environment variable to ''1''
+		in order to verify that VirtualGL is loaded and working.
 
 	* It is necessary to start the virtual machine directly as described above.
 		Simply executing ''vglrun VirtualBox'' and using the GUI to launch the VM
