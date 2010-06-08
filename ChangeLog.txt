@@ -17,27 +17,14 @@ security fixes, etc.  OpenSSL support can easily be re-added by building
 VirtualGL from source (see BUILDING.txt.)
 -------------------------------------------------------------------------------
 [3]
-Generally improved the software gamma correction heuristics.  Previously,
-VirtualGL's default behavior on SPARC servers was to always use some form of
-gamma correction (either software gamma correction or, if available, a
-gamma-corrected visual) unless VGL_GAMMA was set to 0.  Some applications,
-however, specifically try to select a non-gamma-corrected visual because they
-don't want gamma correction.  Those applications, when run in VirtualGL 2.1.x
-and prior, were forced to use software gamma correction.  VirtualGL now
-assumes that if gamma-corrected visuals are available and VGL_GAMMA=1 but the
-application still ends up with a non-gamma-corrected visual, then the
-application is specifically trying to avoid gamma correction.  Thus, VGL does
-not enable software gamma correction in this case.
--------------------------------------------------------------------------------
-[4]
 Added a framework for creating generic image transport plugins.  See
 rrtransport.h for a description of the API.
 -------------------------------------------------------------------------------
-[5]
+[4]
 Removed support for the proprietary Sun Ray plugin, since that plugin is no
 longer available from Sun.
 -------------------------------------------------------------------------------
-[6]
+[5]
 For Linux, Mac/Intel, Solaris/x86, and Windows systems, the default build of
 VirtualGL no longer uses TurboJPEG/IPP (which was based on the proprietary
 Intel Performance Primitives) or Sun mediaLib.  Instead, VirtualGL now uses
@@ -46,41 +33,41 @@ conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 
 As a result of this, the VirtualGL RPMs and DEBs are now self-contained.
 -------------------------------------------------------------------------------
-[7]
+[6]
 Added a universal 32/64-bit VirtualGL Client binary for OS X.  The 32-bit fork
 works on 10.4 "Tiger" or later, and the 64-bit fork works on 10.6 "Snow
 Leopard" or later.
 -------------------------------------------------------------------------------
-[8]
+[7]
 Added support for encoding images as I420 YUV and displaying through X Video.
 The images can either be displayed directly to the X server or sent through
 the VGL transport for display using vglclient.
 -------------------------------------------------------------------------------
-[9]
+[8]
 Renamed /etc/modprobe.d/virtualgl to /etc/modprobe.d/virtualgl.conf to comply
 with the Ubuntu standard.
 -------------------------------------------------------------------------------
-[10]
+[9]
 Added VGL_SAMPLES environment variable (and vglrun -ms command line switch) to
 force VirtualGL to select a multisampled visual or override the level of
 multisampling selected by the 3D application.
 -------------------------------------------------------------------------------
-[11]
+[10]
 The uninstall script in the Mac distribution package should now work on OS X
 10.6.
 -------------------------------------------------------------------------------
-[12]
+[11]
 VirtualGL now attempts to use pixel buffer objects (PBO's) to accelerate the
 readback of the 3D pixels.  This particularly helps when multiple users are
 sharing the GPU.  See the "Advanced Configuration" section of the User's Guide
 for more information.
 -------------------------------------------------------------------------------
-[13]
-This version of VirtualGL works around the interaction issues with VirtualBox,
-thus eliminating the need to specify CR_SYSTEM_GL_PATH or to run the VirtualBox
-application using 'vglrun -nodl'.
+[12]
+On Linux systems, this version of VirtualGL works around the interaction issues
+between libdlfaker.so and VirtualBox, thus eliminating the need to specify
+CR_SYSTEM_GL_PATH or to run the VirtualBox application using 'vglrun -nodl'.
 -------------------------------------------------------------------------------
-[14]
+[13]
 This version of VirtualGL provides a binary package, documentation, and full
 support for Cygwin/X.
 -------------------------------------------------------------------------------
