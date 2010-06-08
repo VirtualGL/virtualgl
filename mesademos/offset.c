@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 
     vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeList);
     if (!vi) error(argv[0], "no suitable visual");
-    printf("Visual ID: 0x%.2x\n", vi->visualid);
+    printf("Visual ID: 0x%.2x\n", (unsigned int)vi->visualid);
     glXGetConfig(dpy, vi, GLX_SAMPLES, &ns);
     if (ns > 0) printf("Number of samples: %d\n", ns);
 

@@ -288,9 +288,6 @@ void drawBuffer(void)
 
 static void event_loop( Display *dpy )
 {
-  static int prevx = 0, prevy = 0;
-  static int deltax = 90, deltay = 40;
-
   XEvent eventHolder;
   XEvent *event = &eventHolder;
 
@@ -329,8 +326,6 @@ static Window make_rgb_db_window( Display *dpy,
   unsigned long mask;
   Window root;
   Window xwin;
-  
-  int numAux;
   
   scrnum = DefaultScreen( dpy );
 
