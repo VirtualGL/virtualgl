@@ -3,7 +3,7 @@
 
 ** VirtualGL's Built-In Profiling System
 
-The easiest way to uncover bottlenecks in VirtualGL's image pipelines is to
+The easiest way to uncover bottlenecks in VirtualGL's image pipeline is to
 set the ''VGL_PROFILE'' environment variable to ''1'' on both server and client
 (passing an argument of ''+pr'' to ''vglrun'' on the server has the same
 effect.)  This will cause VirtualGL to measure and report the throughput of the
@@ -76,8 +76,9 @@ problems with the system.
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  ''nettest'' can be found in
-''/opt/VirtualGL/bin'' on Linux/Mac/Solaris VirtualGL installations or in
-''c:\\program files\\VirtualGL-{version}-{build}'' on Windows installations.
+''/opt/VirtualGL/bin'' on Linux/Mac/Solaris/Cygwin VirtualGL installations or
+in ''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__ if
+using the VirtualGL Client for Exceed.
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
@@ -96,10 +97,10 @@ Next, start the client on the other end of the connection:
 nettest -client {server} [-ssl]
 ---
 
-(Replace __''{server}''__ with the hostname or IP address of the machine where
-the NetTest server is running.  Use ''-ssl'' if the NetTest server is running
-in SSL mode.  VirtualGL must have been compiled with OpenSSL support for the
-''-ssl'' option to be available.)
+Replace __''{server}''__ with the hostname or IP address of the machine where
+the NetTest server is running.  (Use ''-ssl'' if the NetTest server is running
+in SSL mode.  VirtualGL must have been compiled with OpenSSL support for this
+option to be available.)
 
 The NetTest client will produce output similar to the following:
 
@@ -187,8 +188,10 @@ checked with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
-TCBench can be found in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris or in
-''c:\\program files\\VirtualGL-{version}-{build}'' on Windows.  Run ''tcbench''
+TCBench can be found in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris/Cygwin
+VirtualGL installations or in
+''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__
+if using the VirtualGL Client for Exceed.  Run ''tcbench''
 from the command line, and it will prompt you to click in the window you want
 to benchmark.   That window should already have an automated animation of some
 sort running before you launch TCBench.  Note that GLXSpheres (see below) is
@@ -213,7 +216,7 @@ within the window.
 *** GLXSpheres
 #OPT: noList! plain!
 
-GLXSpheres is a benchmark which produces very similar images to NVidia's
+GLXSpheres is a benchmark which produces very similar images to nVidia's
 (long discontinued) SphereMark benchmark.  Back in the early days of
 VirtualGL's existence, it was discovered (quite by accident) that SphereMark
 was a pretty good test of VirtualGL's end-to-end performance, because
