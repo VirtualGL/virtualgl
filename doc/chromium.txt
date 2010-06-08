@@ -1,4 +1,4 @@
-* Using VirtualGL with Chromium and ModViz VGP
+* Using VirtualGL with Chromium
 {anchor: Chromium}
 
 Chromium is a powerful framework for performing various types of parallel
@@ -100,7 +100,7 @@ VirtualGL, and an endless loop will occur.
 Therefore, we must use the ''CR_SYSTEM_GL_PATH'' environment variable to tell
 Chromium to pass OpenGL commands into VirtualGL, then we must use the
 ''VGL_GLLIB'' environment variable to tell VirtualGL __not__ to pass OpenGL
-commands into Chromium:
+commands into Chromium.  For example:
 
 #Verb: <<---
 export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
@@ -109,7 +109,7 @@ crappfaker
 ---
 
 CrAppFaker will copy the application into a temporary directory and then copy
-''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  So when
+''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  So, when
 the application is started, it loads ''libcrfaker.so'' instead of ''libGL.so''.
 ''libcrfaker.so'' will then load VirtualGL instead of the "real" OpenGL
 library, because we've overridden ''CR_SYSTEM_GL_PATH'' to point to VirtualGL's
@@ -209,34 +209,3 @@ Chromium polls the 2D X server on every frame to determine whether windows have
 been resized, etc.  Thus, we have observed that, even on a fast network,
 Chromium tends to perform much better with VirtualGL running in an X proxy
 as opposed to using the VGL Transport.
-
-** ModViz VGP v1.x and VirtualGL
-
-ModViz Virtual Graphics Platform{^TM} is a polished commercial clustered
-rendering framework for Linux which supports all three of the rendering modes
-described above and provides a much more straightforward interface to configure
-and run these types of parallel rendering jobs.
-
-All VGP jobs, regardless of configuration, are spawned through ''vglauncher'',
-a front-end program which automatically takes care of starting the appropriate
-processes on the rendering nodes, intercepting OpenGL calls from the
-application instance(s), sending rendered images back to Node 0, and
-compositing the images as appropriate.  In a similar manner to VirtualGL's
-''vglrun'', VGP's ''vglauncher'' preloads a library (''libVGP.so'') in place of
-''libGL.so'', and this library intercepts the OpenGL calls from the
-application.
-
-So our strategy here is similar to our strategy for loading the Chromium App
-Faker.  We want to insert VirtualGL between VGP and the real system OpenGL
-library, so that VGP will call VirtualGL and VirtualGL will call ''libGL.so''.
-Achieving this with VGP is relatively simple:
-
-#Verb: <<---
-export VGP_BACKING_GL_LIB=librrfaker.so
-vglrun -nodl vglauncher --preload=librrfaker.so:/usr/lib/libGL.so {application}
----
-
-Replace ''/usr/lib/libGL.so'' with the full path of your system's OpenGL
-library (''/usr/lib64/libGL.so'' if you are launching a 64-bit application.)
-
-	!!! NOTE: This is known not to work with VGP 2.0.

@@ -2,13 +2,13 @@
 {anchor: Application_Recipes}
 
 || Application || Platform || Recipe || Notes ||
-| Abaqus v6.9 | Linux/x86 \
+| Abaqus v6.9 | Linux \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
 	| User reports indicate that Abaqus 6.9 will not work properly if \
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
 		for other versions of Abaqus as well. \
 	|
-| ANSA v12.1.0 | Linux/x86 \
+| ANSA v12.1.0 | Linux \
 	| Add \
 		{nl}{nl} \
 		''LD_PRELOAD_SAVE=$LD_PRELOAD''{nl} \
@@ -48,35 +48,7 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
-| Heretic II | Linux/x86 \
+| Heretic II | Linux \
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
-	|
-| Java2D applications that use OpenGL | Solaris/SPARC \
-	| When VirtualGL is used in conjunction with Java v5.0 (also known as Java \
-		1.5.0) to remotely display Java2D applications using the OpenGL pipeline \
-		(see above), certain Java2D applications will cause the OpenGL subsystem \
-		to crash with the following error: \
-		{nl}{nl} \
-		''thread tries to access GL context current to another thread'' \
-		{nl}{nl} \
-		If you encounter this error, try setting the ''SUN_OGL_IS_MT'' environment \
-		variable to ''1'' and re-running the application. \
-	| Java 5.0 should call ''glXInitThreadsSUN()'' since it is using multiple \
-		OpenGL threads, but it doesn't.  Purely by chance, this doesn't cause any \
-		problems when the application is displayed locally.  However, VirtualGL \
-		changes things up enough that the luck runs out.  This issue does not \
-		exist in Java 6. \
-	|
-| Pro/ENGINEER Wildfire v2.0 | Solaris/SPARC \
-	| Add \
-		{nl}{nl} \
-		''graphics opengl'' \
-		{nl}{nl} \
-		to ''~/config.pro''.  You may also need to set the ''VGL_XVENDOR'' \
-		environment variable to ''"Sun Microsystems, Inc."'' if you are running \
-		Pro/ENGINEER 2.0 over a remote X connection to a Linux or Windows \
-		VirtualGL client. \
-	|	Pro/E 2.0 for Solaris will disable OpenGL if it detects a remote \
-		connection to a non-Sun X server. \
 	|
