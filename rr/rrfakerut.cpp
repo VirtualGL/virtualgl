@@ -2115,28 +2115,6 @@ int gammatest(void)
 #endif
 
 
-static int check_errors(const char * tag)
-{
-	int i;
-	int ret;
-	char * s;
-
-	ret = 0;
-	i = glGetError();
-	if (i!= GL_NO_ERROR) ret = 1;
-	while(i != GL_NO_ERROR)
-	{
-		s = (char *) gluErrorString(i);
-		if (s)
-			printf("ERROR: %s in %s \n", s, tag);
-		else
-			printf("OpenGL error #%d in %s\n", i, tag);
-		i = glGetError();
-	}
-	return ret;
-}
-
-
 // Put the display hash through its paces
 #define NDPY 15
 int dpyhashtest(void)
