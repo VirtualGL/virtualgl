@@ -1,0 +1,16 @@
+* Transport Plugins
+
+VirtualGL 2.2 includes an API which allows you to write your own image
+transports.  Thus, you can use VirtualGL for doing split rendering and pixel
+readback but then use your own library for delivering the pixels to the client.
+
+When the ''VGL_TRANSPORT'' environment variable (or the
+''-trans'' option to ''vglrun'') is set to __''{t}''__, then VirtualGL will
+look for a DSO (dynamic shared object) with the name
+''libtransvgl_''__''{t}''__''.so'' in the dynamic linker path and will attempt
+to access a set of API functions from this library.  The functions that the
+plugin library must export are defined in
+''/opt/VirtualGL/include/rrtransport.h'', and an example of their usage can be
+found in ''rr/testplugin.cpp'' and ''rr/testplugin2.cpp'' in the VirtualGL
+source distribution.  The former wraps the VGL Transport as an image transport
+plugin, and the latter does the same for the X11 Transport.

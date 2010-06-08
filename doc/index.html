@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-08T04:28:33">
+<meta name="date" content="2010-06-08T17:30:25">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -17,14 +17,15 @@
 <link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL with X Proxies Such as VNC">
 <link rel="chapter" href="index.html#hd009" title="9 Support for the X Video Extension">
 <link rel="chapter" href="index.html#hd0010" title="10 Using VirtualGL in a Sun Ray Environment">
-<link rel="chapter" href="index.html#hd0011" title="11 Using VirtualGL with setuid/setgid Executables">
-<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with Chromium">
-<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with VirtualBox">
-<link rel="chapter" href="index.html#hd0014" title="14 Other Application Recipes">
-<link rel="chapter" href="index.html#hd0015" title="15 Advanced OpenGL Features">
-<link rel="chapter" href="index.html#hd0016" title="16 Performance Measurement">
-<link rel="chapter" href="index.html#hd0017" title="17 The VirtualGL Configuration Dialog">
-<link rel="chapter" href="index.html#hd0018" title="18 Advanced Configuration">
+<link rel="chapter" href="index.html#hd0011" title="11 Transport Plugins">
+<link rel="chapter" href="index.html#hd0012" title="12 Using VirtualGL with setuid/setgid Executables">
+<link rel="chapter" href="index.html#hd0013" title="13 Using VirtualGL with Chromium">
+<link rel="chapter" href="index.html#hd0014" title="14 Using VirtualGL with VirtualBox">
+<link rel="chapter" href="index.html#hd0015" title="15 Other Application Recipes">
+<link rel="chapter" href="index.html#hd0016" title="16 Advanced OpenGL Features">
+<link rel="chapter" href="index.html#hd0017" title="17 Performance Measurement">
+<link rel="chapter" href="index.html#hd0018" title="18 The VirtualGL Configuration Dialog">
+<link rel="chapter" href="index.html#hd0019" title="19 Advanced Configuration">
 <link rel="stylesheet" type="text/css" href="virtualgl.css" title="virtualgl">
 </head>
 <body >
@@ -196,89 +197,92 @@ systems, OpenGL and GLX, and X windows.</p>
         Environment</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0011" class="toc">11 Using VirtualGL with setuid/setgid 
+        <a href="#hd0011" class="toc">11 Transport Plugins</a>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd0012" class="toc">12 Using VirtualGL with setuid/setgid 
         Executables</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0012" class="toc">12 Using VirtualGL with Chromium</a>
+        <a href="#hd0013" class="toc">13 Using VirtualGL with Chromium</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0012001" class="toc">12.1 Configuration 1: Sort-First 
+                <a href="#hd0013001" class="toc">13.1 Configuration 1: Sort-First 
                 Rendering (Image-Space Decomposition)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0012002" class="toc">12.2 Configuration 2: Sort-First 
+                <a href="#hd0013002" class="toc">13.2 Configuration 2: Sort-First 
                 Rendering (Image-Space Decomposition) with Readback</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0012003" class="toc">12.3 Configuration 3: Sort-Last 
+                <a href="#hd0013003" class="toc">13.3 Configuration 3: Sort-Last 
                 Rendering (Object-Space Decomposition)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0012004" class="toc">12.4 A Note About Performance</a>
+                <a href="#hd0013004" class="toc">13.4 A Note About Performance</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0013" class="toc">13 Using VirtualGL with VirtualBox</a>
+        <a href="#hd0014" class="toc">14 Using VirtualGL with VirtualBox</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0014" class="toc">14 Other Application Recipes</a>
+        <a href="#hd0015" class="toc">15 Other Application Recipes</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0015" class="toc">15 Advanced OpenGL Features</a>
+        <a href="#hd0016" class="toc">16 Advanced OpenGL Features</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0015001" class="toc">15.1 Stereographic Rendering</a>
+                <a href="#hd0016001" class="toc">16.1 Stereographic Rendering</a>
                 <ul class="toc">
                     <li class="Itemize-5 toc">
-                        <a href="#hd0015001001" class="toc">15.1.1 Quad-Buffered Stereo</a>
+                        <a href="#hd0016001001" class="toc">16.1.1 Quad-Buffered Stereo</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd0015001002" class="toc">15.1.2 Anaglyphic Stereo</a>
+                        <a href="#hd0016001002" class="toc">16.1.2 Anaglyphic Stereo</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd0015001003" class="toc">15.1.3 Selecting a Stereo Mode</a>
+                        <a href="#hd0016001003" class="toc">16.1.3 Selecting a Stereo Mode</a>
                     </li>
                 </ul>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0015002" class="toc">15.2 Transparent Overlays</a>
+                <a href="#hd0016002" class="toc">16.2 Transparent Overlays</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0015003" class="toc">15.3 Indexed (PseudoColor) Rendering</a>
+                <a href="#hd0016003" class="toc">16.3 Indexed (PseudoColor) Rendering</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0015004" class="toc">15.4 Troubleshooting</a>
+                <a href="#hd0016004" class="toc">16.4 Troubleshooting</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0016" class="toc">16 Performance Measurement</a>
+        <a href="#hd0017" class="toc">17 Performance Measurement</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0016001" class="toc">16.1 VirtualGL&rsquo;s Built-In 
+                <a href="#hd0017001" class="toc">17.1 VirtualGL&rsquo;s Built-In 
                 Profiling System</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0016002" class="toc">16.2 Frame Spoiling</a>
+                <a href="#hd0017002" class="toc">17.2 Frame Spoiling</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0016003" class="toc">16.3 VirtualGL Diagnostic Tools</a>
+                <a href="#hd0017003" class="toc">17.3 VirtualGL Diagnostic Tools</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0017" class="toc">17 The VirtualGL Configuration Dialog</a>
+        <a href="#hd0018" class="toc">18 The VirtualGL Configuration Dialog</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0018" class="toc">18 Advanced Configuration</a>
+        <a href="#hd0019" class="toc">19 Advanced Configuration</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0018001" class="toc">18.1 Server Settings</a>
+                <a href="#hd0019001" class="toc">19.1 Server Settings</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0018002" class="toc">18.2 Client Settings</a>
+                <a href="#hd0019002" class="toc">19.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -666,7 +670,7 @@ SPARC, then please contact us.</p>
 <p><a name="Stereo_Requirements"></a></p>
 
 <div class="important"><p class="important">
-The client requirements do not apply to anaglyphic stereo.  See Chapter <a href="#Advanced_OpenGL" class="ref">15</a> for more details.
+The client requirements do not apply to anaglyphic stereo.  See Chapter <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
 </p></div>
 
 <div class="table">
@@ -1595,7 +1599,7 @@ maximize performance.</p>
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a> for 
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
         more information on <code>vglrun</code> command-line options.
     </li>
 </ol>
@@ -1643,7 +1647,7 @@ vglconnect&nbsp;{user}@{server}
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
 
-        Consult Chapter <a href="#Advanced_Configuration" class="ref">18</a> for 
+        Consult Chapter <a href="#Advanced_Configuration" class="ref">19</a> for 
         more information on <code>vglrun</code> command-line options.
     </li>
 </ol>
@@ -2222,7 +2226,34 @@ Gigabit Ethernet adapters in this case.</p>
 
 
 
-<h1 id="hd0011"><a name="file011"></a>11&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
+<h1 id="hd0011"><a name="file011"></a>11&nbsp;Transport Plugins</h1>
+
+<p>VirtualGL 2.2 includes an API which allows you to write your own image 
+transports.  Thus, you can use VirtualGL for doing split rendering and 
+pixel readback but then use your own library for delivering the pixels 
+to the client.</p>
+
+<p>When the <code>VGL_TRANSPORT</code> environment variable (or the 
+<code>-trans</code> option to <code>vglrun</code>) is set to 
+<em><code>{t}</code></em>, then VirtualGL will look for a DSO (dynamic 
+shared object) with the name 
+<code>libtransvgl_</code><em><code>{t}</code></em><code>.so</code> in 
+the dynamic linker path and will attempt to access a set of API 
+functions from this library.  The functions that the plugin library must 
+export are defined in <code>/opt/VirtualGL/include/rrtransport.h</code>, 
+and an example of their usage can be found in 
+<code>rr/testplugin.cpp</code> and <code>rr/testplugin2.cpp</code> in 
+the VirtualGL source distribution.  The former wraps the VGL Transport 
+as an image transport plugin, and the latter does the same for the X11 
+Transport.</p>
+
+<p><br /></p>
+
+<hr class="break" />
+
+
+
+<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with setuid/setgid Executables</h1>
 
 <p><code>vglrun</code> can be used to launch either binary executables or 
 shell scripts, but there are a few things to keep in mind when using 
@@ -2400,7 +2431,7 @@ and the application executable is 64-bit, then you could use
 
 
 
-<h1 id="hd0012"><a name="file012"></a>12&nbsp;Using VirtualGL with Chromium</h1>
+<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with Chromium</h1>
 
 <p><a name="Chromium"></a></p>
 
@@ -2423,7 +2454,7 @@ Chromium is most often used in one of three configurations:</p>
 </ol>
 
 
-<h2 id="hd0012001">12.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
+<h2 id="hd0013001">13.1&nbsp;Configuration 1: Sort-First Rendering (Image-Space Decomposition)</h2>
 
 <div class="figure">
 <img src="chromium-displaywall.png" alt="chromium-displaywall" class="figure" id="imgid_16" name="imgid_16"/>
@@ -2453,7 +2484,7 @@ perhaps to Chromium as well.  Such is left as an exercise for the reader.</p>
 
 
 
-<h2 id="hd0012002">12.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
+<h2 id="hd0013002">13.2&nbsp;Configuration 2: Sort-First Rendering (Image-Space Decomposition) with Readback</h2>
 
 <div class="figure">
 <img src="chromium-sortfirst.png" alt="chromium-sortfirst" class="figure" id="imgid_17" name="imgid_17"/>
@@ -2599,7 +2630,7 @@ VirtualGL before adding VirtualGL into the mix.</p>
 <p><a name="Force_Pbuffer"></a></p>
 
 
-<h3 id="hd0012002001">Using VirtualGL to Force Pbuffer Rendering</h3>
+<h3 id="hd0013002001">Using VirtualGL to Force Pbuffer Rendering</h3>
 
 <p>In the procedure above, VirtualGL can also be used on the rendering 
 nodes to redirect the rendering commands from <code>crserver</code> into 
@@ -2619,7 +2650,7 @@ following procedure in place of step 2 above:</p>
 
 
 
-<h2 id="hd0012003">12.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
+<h2 id="hd0013003">13.3&nbsp;Configuration 3: Sort-Last Rendering (Object-Space Decomposition)</h2>
 
 <div class="figure">
 <img src="chromium-sortlast.png" alt="chromium-sortlast" class="figure" id="imgid_18" name="imgid_18"/>
@@ -2657,7 +2688,7 @@ log<sub>2</sub>(N) rather than N.</p>
 </ol>
 
 
-<h3 id="hd0012003001">CRUT</h3>
+<h3 id="hd0013003001">CRUT</h3>
 
 <p>The Chromium Utility Toolkit provides a convenient way for graphics 
 applications to specifically take advantage of Chromium&rsquo;s 
@@ -2686,7 +2717,7 @@ VirtualGL:</p>
 
 
 
-<h2 id="hd0012004">12.4&nbsp;A Note About Performance</h2>
+<h2 id="hd0013004">13.4&nbsp;A Note About Performance</h2>
 
 <p>Chromium&rsquo;s use of X11 is generally not very optimal.  It assumes a 
 very fast connection between the 2D X server and the Chromium Server.  
@@ -2702,7 +2733,7 @@ Transport.</p>
 
 
 
-<h1 id="hd0013"><a name="file013"></a>13&nbsp;Using VirtualGL with VirtualBox</h1>
+<h1 id="hd0014"><a name="file014"></a>14&nbsp;Using VirtualGL with VirtualBox</h1>
 
 <p>VirtualBox is an enterprise-class, open source virtualization solution 
 provided by Sun Microsystems.  With the release of VirtualBox 2.1.0, 
@@ -2718,7 +2749,7 @@ displaying Windows 3D applications remotely.</p>
 <p>To use VirtualGL with VirtualBox, perform the following procedures:</p>
 
 
-<h3 id="hd0013000001">Configuring the System</h3>
+<h3 id="hd0014000001">Configuring the System</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -2733,7 +2764,7 @@ displaying Windows 3D applications remotely.</p>
     </li>
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
-        <a href="#setuid_linux" class="ref">11</a> to make 
+        <a href="#setuid_linux" class="ref">12</a> to make 
         <code>librrfaker.so</code> and <code>libdlfaker.so</code> setuid 
         executables (Linux) or to add the VirtualGL library directory to the 
         list of secure paths (Solaris).
@@ -2742,7 +2773,7 @@ displaying Windows 3D applications remotely.</p>
 
 
 
-<h3 id="hd0013000002">Launching VirtualBox (Method 1)</h3>
+<h3 id="hd0014000002">Launching VirtualBox (Method 1)</h3>
 
 <p>This should work on most Linux systems.</p>
 
@@ -2754,7 +2785,7 @@ displaying Windows 3D applications remotely.</p>
 
 
 
-<h3 id="hd0013000003">Launching VirtualBox (Method 2)</h3>
+<h3 id="hd0014000003">Launching VirtualBox (Method 2)</h3>
 
 <p>If the above does not work, then try the following alternate method:</p>
 
@@ -2778,7 +2809,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 
 
 
-<h3 id="hd0013000004">NOTES</h3>
+<h3 id="hd0014000004">NOTES</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -2814,7 +2845,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 
 
 
-<h1 id="hd0014"><a name="file014"></a>14&nbsp;Other Application Recipes</h1>
+<h1 id="hd0015"><a name="file015"></a>15&nbsp;Other Application Recipes</h1>
 
 <p><a name="Application_Recipes"></a></p>
 
@@ -2844,7 +2875,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">AutoForm v4.0x</td>
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
-    <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">18.1</a> for more details.</td>
+    <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">19.1</a> for more details.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Cedega v6.0.x</td>
@@ -2868,12 +2899,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
 
 
 
-<h1 id="hd0015"><a name="file015"></a>15&nbsp;Advanced OpenGL Features</h1>
+<h1 id="hd0016"><a name="file016"></a>16&nbsp;Advanced OpenGL Features</h1>
 
 <p><a name="Advanced_OpenGL"></a></p>
 
 
-<h2 id="hd0015001">15.1&nbsp;Stereographic Rendering</h2>
+<h2 id="hd0016001">16.1&nbsp;Stereographic Rendering</h2>
 
 <p>Stereographic rendering is a feature of OpenGL that creates separate 
 rendering buffers for the left and right eyes and allows the application 
@@ -2886,7 +2917,7 @@ graphics card, or (2) by combining each stereo image pair into a single
 anaglyph that can be viewed with traditional red/cyan 3D glasses.</p>
 
 
-<h3 id="hd0015001001">15.1.1&nbsp;Quad-Buffered Stereo</h3>
+<h3 id="hd0016001001">16.1.1&nbsp;Quad-Buffered Stereo</h3>
 
 <p>The name &ldquo;quad-buffered&rdquo; stereo derives from the fact that 
 OpenGL uses four buffers (left front, right front, left back, and right 
@@ -2935,7 +2966,7 @@ transport is used, then VGL will fall back to anaglyphic stereo mode.</p>
 
 
 
-<h3 id="hd0015001002">15.1.2&nbsp;Anaglyphic Stereo</h3>
+<h3 id="hd0016001002">16.1.2&nbsp;Anaglyphic Stereo</h3>
 
 <p>Anaglyphic stereo is the type of stereographic display used by old 3D 
 movies. It generally relies on a set of 3D glasses consisting of red 
@@ -2964,16 +2995,16 @@ or otherwise) on the client machine.</p>
 
 
 
-<h3 id="hd0015001003">15.1.3&nbsp;Selecting a Stereo Mode</h3>
+<h3 id="hd0016001003">16.1.3&nbsp;Selecting a Stereo Mode</h3>
 
 <p>A particular stereo mode can be selected by setting the 
 <code>VGL_STEREO</code> environment variable or by using the 
 <code>-st</code> argument to <code>vglrun</code>.  See Section 
-<a href="#VGL_STEREO" class="ref">18.1</a> for more details.</p>
+<a href="#VGL_STEREO" class="ref">19.1</a> for more details.</p>
 
 
 
-<h2 id="hd0015002">15.2&nbsp;Transparent Overlays</h2>
+<h2 id="hd0016002">16.2&nbsp;Transparent Overlays</h2>
 
 <p>Transparent overlays have similar requirements and restrictions as 
 quad-buffered stereo.  In this case, VirtualGL completely bypasses its 
@@ -3018,7 +3049,7 @@ Overlays do not work with X proxies.  VirtualGL must be displaying to a &ldquo;r
 
 
 
-<h2 id="hd0015003">15.3&nbsp;Indexed (PseudoColor) Rendering</h2>
+<h2 id="hd0016003">16.3&nbsp;Indexed (PseudoColor) Rendering</h2>
 
 <p>In a PseudoColor visual, each pixel is represented by an index which 
 refers to a location in a color table.  The color table stores the 
@@ -3059,7 +3090,7 @@ visuals at the same time.</p>
 
 
 
-<h2 id="hd0015004">15.4&nbsp;Troubleshooting</h2>
+<h2 id="hd0016004">16.4&nbsp;Troubleshooting</h2>
 
 <p><a name="Troubleshooting"></a></p>
 
@@ -3103,12 +3134,12 @@ rendering, one of the visuals should have a class of
 
 
 
-<h1 id="hd0016"><a name="file016"></a>16&nbsp;Performance Measurement</h1>
+<h1 id="hd0017"><a name="file017"></a>17&nbsp;Performance Measurement</h1>
 
 <p><a name="Perf_Measurement"></a></p>
 
 
-<h2 id="hd0016001">16.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
+<h2 id="hd0017001">17.1&nbsp;VirtualGL&rsquo;s Built-In Profiling System</h2>
 
 <p>The easiest way to uncover bottlenecks in VirtualGL&rsquo;s image 
 pipeline is to set the <code>VGL_PROFILE</code> environment variable to 
@@ -3155,7 +3186,7 @@ simply using a client with a faster CPU.</p>
 
 
 
-<h2 id="hd0016002">16.2&nbsp;Frame Spoiling</h2>
+<h2 id="hd0017002">17.2&nbsp;Frame Spoiling</h2>
 
 <p><a name="Frame_Spoiling"></a></p>
 
@@ -3186,17 +3217,17 @@ problem.</p>
 <p>To disable frame spoiling, set the <code>VGL_SPOIL</code> environment 
 variable to <code>0</code> on the VirtualGL server or pass an argument 
 of <code>-sp</code> to <code>vglrun</code>.  See Section 
-<a href="#VGL_SPOIL" class="ref">18.1</a> for more details.</p>
+<a href="#VGL_SPOIL" class="ref">19.1</a> for more details.</p>
 
 
 
-<h2 id="hd0016003">16.3&nbsp;VirtualGL Diagnostic Tools</h2>
+<h2 id="hd0017003">17.3&nbsp;VirtualGL Diagnostic Tools</h2>
 
 <p>VirtualGL includes several tools which can be useful in diagnosing 
 performance problems with the system.</p>
 
 
-<h3 id="hd0016003001">NetTest</h3>
+<h3 id="hd0017003001">NetTest</h3>
 
 <p>NetTest is a network benchmark that uses the same network I/O classes as 
 VirtualGL.  It can be used to test the latency and throughput of any 
@@ -3270,7 +3301,7 @@ this case.</p>
 
 
 
-<h3 id="hd0016003002">CPUstat</h3>
+<h3 id="hd0017003002">CPUstat</h3>
 
 <p>CPUstat is available only in the VirtualGL Linux packages and is located 
 in the same place as NetTest (<code>/opt/VirtualGL/bin</code>.)  It 
@@ -3306,7 +3337,7 @@ the application&rsquo;s peak and average % CPU utilization is.</p>
 
 
 
-<h3 id="hd0016003003">TCBench</h3>
+<h3 id="hd0017003003">TCBench</h3>
 
 <p>TCBench was born out of the need to compare VirtualGL&rsquo;s 
 performance to that of other thin client packages, some of which had 
@@ -3349,7 +3380,7 @@ sampling area within the window.</p>
 
 
 
-<h3 id="hd0016003004">GLXSpheres</h3>
+<h3 id="hd0017003004">GLXSpheres</h3>
 
 <p>GLXSpheres is a benchmark which produces very similar images to 
 nVidia&rsquo;s (long discontinued) SphereMark benchmark.  Back in the 
@@ -3425,7 +3456,7 @@ Solaris VirtualGL servers.  64-bit VirtualGL packages contain both a
 
 
 
-<h1 id="hd0017"><a name="file017"></a>17&nbsp;The VirtualGL Configuration Dialog</h1>
+<h1 id="hd0018"><a name="file018"></a>18&nbsp;The VirtualGL Configuration Dialog</h1>
 
 <p><a name="Config_Dialog"></a></p>
 
@@ -3465,7 +3496,7 @@ VirtualGL.</p>
         extension, the X Video implementation supports the YUV420P (AKA 
         &ldquo;I420&rdquo;) pixel format, and the VGL Transport was active when 
         VirtualGL started. <br /><br /> See Section 
-        <a href="#VGL_COMPRESS" class="ref">18.1</a> for more information about 
+        <a href="#VGL_COMPRESS" class="ref">19.1</a> for more information about 
         the <code>VGL_COMPRESS</code> configuration option.
         <div class="important"><p class="important">
         If an image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Compression&rdquo;, and it has options &ldquo;0&rdquo; through &ldquo;10&rdquo;.
@@ -3480,7 +3511,7 @@ VirtualGL.</p>
         <code>VGL_SUBSAMP=1x</code> <br /><br /> <em>2X</em> : equivalent to 
         setting <code>VGL_SUBSAMP=2x</code> <br /><br /> <em>4X</em> : 
         equivalent to setting <code>VGL_SUBSAMP=4x</code> <br /><br /> See 
-        Section <a href="#VGL_SUBSAMP" class="ref">18.1</a> for more information 
+        Section <a href="#VGL_SUBSAMP" class="ref">19.1</a> for more information 
         about the <code>VGL_SUBSAMP</code> configuration option.
         <div class="important"><p class="important">
         If an image transport plugin is loaded, then this gadget has two additional options, &ldquo;8X&rdquo; and &ldquo;16X&rdquo;.
@@ -3491,7 +3522,7 @@ VirtualGL.</p>
         This slider gadget is active only when using JPEG compression or an 
         image transport plugin.  It is the equivalent of setting 
         <code>VGL_QUAL</code>.  See Section 
-        <a href="#VGL_QUAL" class="ref">18.1</a> for more information about the 
+        <a href="#VGL_QUAL" class="ref">19.1</a> for more information about the 
         <code>VGL_QUAL</code> configuration option.
         <div class="important"><p class="important">
         If an image transport plugin is loaded, then this gadget&rsquo;s name changes to &ldquo;Image Quality&rdquo;.
@@ -3515,21 +3546,21 @@ VirtualGL.</p>
         This floating point input gadget is the equivalent of setting 
         <code>VGL_GAMMA</code>.  This enables VirtualGL&rsquo;s internal gamma 
         correction system with the specified gamma correction factor.  See 
-        Section <a href="#VGL_GAMMA" class="ref">18.1</a> for more information 
+        Section <a href="#VGL_GAMMA" class="ref">19.1</a> for more information 
         about the <code>VGL_GAMMA</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Frame Spoiling</dt>
     <dd class="Description-1 Description">
         This toggle button is the equivalent of setting <code>VGL_SPOIL</code>.  
-        See Section <a href="#Frame_Spoiling" class="ref">16.2</a> and Section 
-        <a href="#VGL_SPOIL" class="ref">18.1</a> for more information about the 
+        See Section <a href="#Frame_Spoiling" class="ref">17.2</a> and Section 
+        <a href="#VGL_SPOIL" class="ref">19.1</a> for more information about the 
         <code>VGL_SPOIL</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Interframe Comparison</dt>
     <dd class="Description-1 Description">
         This toggle button is the equivalent of setting 
         <code>VGL_INTERFRAME</code>.  See Section 
-        <a href="#VGL_INTERFRAME" class="ref">18.1</a> for more information 
+        <a href="#VGL_INTERFRAME" class="ref">19.1</a> for more information 
         about the <code>VGL_INTERFRAME</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Stereographic Rendering Method</dt>
@@ -3541,14 +3572,14 @@ VirtualGL.</p>
         available)</em> : equivalent to setting <code>VGL_STEREO=quad</code> 
         <br /><br /> <em>Anaglyphic (Red/Cyan)</em> : equivalent to setting 
         <code>VGL_STEREO=rc</code> <br /><br /> See Section 
-        <a href="#VGL_STEREO" class="ref">18.1</a> for more information about 
+        <a href="#VGL_STEREO" class="ref">19.1</a> for more information about 
         the <code>VGL_STEREO</code> configuration option.
     </dd>
     <dt class="Description-1 Description">Limit Frames/second</dt>
     <dd class="Description-1 Description">
         This floating point input gadget is the equivalent of setting 
         <code>VGL_FPS</code>.  See Section 
-        <a href="#VGL_FPS" class="ref">18.1</a> for more information about the 
+        <a href="#VGL_FPS" class="ref">19.1</a> for more information about the 
         <code>VGL_FPS</code> configuration option.
     </dd>
 </dl>
@@ -3581,12 +3612,12 @@ VirtualGL monitors the application&rsquo;s X event loop to determine whenever a 
 
 
 
-<h1 id="hd0018"><a name="file018"></a>18&nbsp;Advanced Configuration</h1>
+<h1 id="hd0019"><a name="file019"></a>19&nbsp;Advanced Configuration</h1>
 
 <p><a name="Advanced_Configuration"></a></p>
 
 
-<h2 id="hd0018001">18.1&nbsp;Server Settings</h2>
+<h2 id="hd0019001">19.1&nbsp;Server Settings</h2>
 
 <p>You can control the operation of the VirtualGL faker in four different 
 ways. Each method of configuration takes precedence over the previous 
@@ -3978,7 +4009,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>f1,&nbsp;f2,&nbsp;...,&nbsp;f12</code>. You can also set 
         <code>VGL_GUI</code> to <code>none</code> to disable the configuration 
         dialog altogether.  See Chapter 
-        <a href="#Config_Dialog" class="ref">17</a> for more details.
+        <a href="#Config_Dialog" class="ref">18</a> for more details.
     </dd>
 </dl>
 
@@ -4198,7 +4229,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         If profiling output is enabled, then VirtualGL will continuously 
         benchmark itself and periodically print out the throughput of various 
         stages in its image pipeline. <br /><br /> See Chapter 
-        <a href="#Perf_Measurement" class="ref">16</a> for more details.
+        <a href="#Perf_Measurement" class="ref">17</a> for more details.
     </dd>
 </dl>
 
@@ -4321,7 +4352,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         different graphics cards while preventing VirtualGL from displaying any 
         pixels except those generated by process 0. <br /><br /> This setting 
         can also be used to force Chromium to render into Pbuffers instead of 
-        windows.  See Section <a href="#Force_Pbuffer" class="ref">12.2</a>. 
+        windows.  See Section <a href="#Force_Pbuffer" class="ref">13.2</a>. 
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4457,7 +4488,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         will accurately reflect the frame rate of VirtualGL&rsquo;s image 
         pipeline (though, in X proxy environments, this may still not accurately 
         reflect the frame rate seen by the user.  See Section 
-        <a href="#Frame_Spoiling" class="ref">16.2</a>.)  Disabling frame 
+        <a href="#Frame_Spoiling" class="ref">17.2</a>.)  Disabling frame 
         spoiling also prevents non-interactive applications from wasting 
         graphics resources by rendering frames that will never be seen.
     </dd>
@@ -4546,7 +4577,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
          when using the VGL Transport with YUV encoding. <br /><br /> 
          <em>rc</em> = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered 
          is available <br /><br /> See Chapter 
-         <a href="#Advanced_OpenGL" class="ref">15</a> for more details.
+         <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
     </dd>
 </dl>
 
@@ -4974,7 +5005,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 
 
 
-<h2 id="hd0018002">18.2&nbsp;Client Settings</h2>
+<h2 id="hd0019002">19.2&nbsp;Client Settings</h2>
 
 <p>These settings control the VirtualGL Client, which is used only with the 
 VGL Transport.  <code>vglclient</code> is normally launched 
@@ -5101,7 +5132,7 @@ This option is available only if the VirtualGL client was built with OpenSSL sup
         If profiling output is enabled, then VirtualGL will continuously 
         benchmark itself and periodically print out the throughput of various 
         stages in its image pipelines. <br /><br /> See Chapter 
-        <a href="#Perf_Measurement" class="ref">16</a> for more details.
+        <a href="#Perf_Measurement" class="ref">17</a> for more details.
     </dd>
 </dl>
 
