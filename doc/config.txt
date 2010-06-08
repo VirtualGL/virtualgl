@@ -33,7 +33,7 @@ Each method of configuration takes precedence over the previous method:
 	Description :: When using the VGL Transport, ''VGL_CLIENT'' should be set to
 	the hostname or IP address of the machine on which ''vglclient'' is running.
 	Normally, ''VGL_CLIENT'' is set automatically by the ''vglconnect'' or
-	''vglrun'' script, so don't override it unless you know what you're doing. \
+	''vglrun'' script, so don't override it unless you know what you're doing.
 
 {anchor: VGL_COMPRESS}
 | Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| xv \| yuv''__ |
@@ -47,34 +47,34 @@ Each method of configuration takes precedence over the previous method:
 	__proxy__ = Send images uncompressed using the X11 Transport.  This is useful
 	when displaying to a local 2D X server or X proxy (see
 	{ref prefix="Section ": X11_Proxy_Usage_Local}.)
-	{nl}{nl} \
+	{nl}{nl}
 	__jpeg__ = Compress images using JPEG and send using the VGL Transport.  This
 	is useful when displaying to a remote 2D X server (see
 	{ref prefix="Chapter ": VGL_Transport_Usage}.)
-	{nl}{nl} \
+	{nl}{nl}
 	__rgb__ = Encode images as uncompressed RGB and send using the VGL Transport.
 	 This is useful when displaying to a remote 2D X server or X proxy across a
 	very fast network (see {ref prefix="Section ": X11_Proxy_Usage_Remote}.)
-	{nl}{nl} \
+	{nl}{nl}
 	__xv__ = Encode images as YUV420P (planar YUV with 4X chrominance
 	subsampling) and display them to the 2D X server using the XV Transport.
 	This transport is designed for use with X proxies, such as the Sun Ray Server
 	Software, which support the X Video extension (see
 	{ref prefix="Chapter ":X_Video_Support}.)
-	{nl}{nl} \
+	{nl}{nl}
 	__yuv__ = Encode images as YUV420P, send using the VGL Transport, and display
 	on the client machine using the X Video extension.  This greatly reduces the
 	CPU usage on both server and client and uses only about half the network
 	bandwidth as RGB, but the use of 4X chrominance subsampling does produce some
 	visible artifacts (see {ref prefix="Chapter ":X_Video_Support}.)
-	{nl}{nl} \
+	{nl}{nl}
 	If this option is not specified, then the default is set as follows:
-	{nl}{nl} \
+	{nl}{nl}
 	If the ''DISPLAY'' environment variable begins with '':'' or ''unix:'', then
 	VirtualGL assumes that the X display connection is local.  If it detects that
 	the 2D X server is a Sun Ray X Server instance, then it will default to using
 	__xv__ compression.  Otherwise, it will default to __proxy__ compression.
-	{nl}{nl} \
+	{nl}{nl}
 	If VirtualGL detects that the 2D X server is remote, then it will default to
 	using __yuv__ compression if that X server is a Sun Ray X Server instance or
 	__jpeg__ compression otherwise.
@@ -85,7 +85,7 @@ Each method of configuration takes precedence over the previous method:
 
 | Environment Variable | ''VGL_DISPLAY = ''__''{d}''__ |
 | ''vglrun'' argument | ''-d ''__''{d}''__ |
-| Summary | __''{d}''__ = the X display or GLP device to use for 3D rendering |
+| Summary | __''{d}''__ = the X display to use for 3D rendering |
 | Image Transports | All |
 | Default Value | :0 |
 #OPT: hiCol=first
@@ -93,16 +93,8 @@ Each method of configuration takes precedence over the previous method:
 	Description :: If the VirtualGL server has multiple 3D graphics cards and you
 	want the OpenGL rendering to be redirected to a display other than :0, then
 	you can set ''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for
-	instance, to support many application instances on a beefy multi-pipe
-	application server.
-	{nl}{nl} \
-	__GLP mode (Solaris/SPARC only):__
-	{nl}{nl} \
-	Setting this option to ''glp'' will enable GLP mode and use the first
-	framebuffer device listed in ''/etc/dt/config/GraphicsDevices'' to
-	perform 3D rendering.  You can also set this option to the
-	pathname of a specific GLP device (example: ''/dev/fbs/jfb0''.)  See
-	{ref prefix="Section ": GLP_Usage} for more details.
+	instance, to support many application instances on an application server with
+	multiple 3D graphics cards.
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
@@ -117,7 +109,7 @@ Each method of configuration takes precedence over the previous method:
 	reading back the 3D pixels.  Thus, this option can be used to force VirtualGL
 	to create a 32-bit-per-pixel Pbuffer when the application requests a
 	24-bit-per-pixel visual.
-	{nl}{nl} \
+	{nl}{nl}
 	On some 3D hardware, it is necessary to use a 32-bit-per-pixel Pbuffer to
 	realize any performance improvement from the use of pixel buffer objects
 	(PBO's).  Thus, this option is enabled by default whenever PBO readback mode
@@ -137,18 +129,16 @@ Each method of configuration takes precedence over the previous method:
 	faster than the specified limit.  It can be used, for instance, as a crude
 	way to control network bandwidth or CPU usage in multi-user environments
 	where those resources are constrained.
-	{nl}{nl} \
-	If frame spoiling is disabled, then this effectively limits the server's 3D
-	rendering frame rate as well.
+	{nl}{nl}
+	If frame spoiling is disabled, then setting ''VGL_FPS'' effectively limits
+	the server's 3D rendering frame rate as well.
 
 {anchor: VGL_GAMMA}
-| Environment Variable | ''VGL_GAMMA = ''__''0 \| 1 \| {g}''__ |
-| ''vglrun'' argument | ''-g'' / ''+g'' / ''-gamma ''__''{g}''__ |
-| Summary | Disable/enable gamma correction and specify gamma correction \
-	factor |
+| Environment Variable | ''VGL_GAMMA = ''__''{g}''__ |
+| ''vglrun'' argument | ''-gamma ''__''{g}''__ |
+| Summary | Specify gamma correction factor |
 | Image Transports | All |
-| Default Value | ''VGL_GAMMA=1'' on Solaris/SPARC VGL servers, \
-	''VGL_GAMMA=0'' otherwise |
+| Default Value | 1.00 (no gamma correction) |
 #OPT: hiCol=first
 
 	Description :: "Gamma" refers to the relationship between the intensity of
@@ -156,53 +146,27 @@ Each method of configuration takes precedence over the previous method:
 	intensity which it actually displays.  The curve is an exponential curve of
 	the form __Y = X{^G}__, where X is between 0 and 1.  G is called the "gamma"
 	of the monitor.  PC monitors and TV's usually have a gamma of around 2.2.
-	{nl}{nl} \
-		Some of the math involved in 3D rendering assumes a linear gamma \
-		(G = 1.0), so technically speaking, 3D applications will not display with \
-		mathematical correctness unless the pixels are "gamma corrected" to \
-		counterbalance the non-linear response curve of the monitor.  However, \
-		some systems do not have any form of built-in gamma correction, so the \
-		applications developed for such systems have usually been designed to \
-		display properly without gamma correction.  Gamma correction involves \
-		passing pixels through a function of the form __X = W{^1/G}__, where G \
-		is the "gamma correction factor" and should be equal to the gamma of the \
-		monitor.  So the final output is __Y = X{^G} = (W{^1/G}){^G} = W__, which \
-		describes a linear relationship between the intensity of the pixels drawn \
-		by the application and the intensity of the pixels displayed by the \
-		monitor. \
-		{nl}{nl} \
-		__''VGL_GAMMA=1'' or ''vglrun +g'' : Enable gamma correction with default \
-			settings__ \
-		{nl}{nl} \
-		This option tells VirtualGL to enable gamma correction using the best \
-		available method.  If VirtualGL is remotely displaying to a Solaris/SPARC \
-		X server which has gamma-corrected X visuals, then VGL will attempt to \
-		assign one of these visuals to the application.  This causes the 3D \
-		output of the application to be gamma corrected by the factor specified \
-		in ''fbconfig'' on the client machine (default: 2.22.)  Otherwise, if the \
-		2D X server does not have gamma-corrected X visuals or if the \
-		gamma-corrected visuals it has do not match the application's needs, then \
-		VirtualGL performs gamma correction internally and uses a default gamma \
-		correction factor of 2.22.  This option emulates the default behavior of \
-		OpenGL applications running locally on SPARC machines. \
-		{nl}{nl} \
-		__''VGL_GAMMA=0'' or ''vglrun -g'' : Disable gamma correction__ \
-		{nl}{nl} \
-		This option tells VGL not to use gamma-corrected visuals, even if they are \
-		available on the 2D X server, and disables VGL's internal gamma correction \
-		system as well.  This emulates the default behavior of OpenGL \
-		applications running locally on Linux or Solaris/x86 machines. \
-		{nl}{nl} \
-		__''VGL_GAMMA=''__''{g}''__ or ''vglrun -gamma ''__''{g}''__ : Enable \
-			VGL's internal gamma correction system with a gamma correction factor \
-			of __''{g}'' \
-		{nl}{nl} \
-		If ''VGL_GAMMA'' is set to an arbitrary floating point value, then \
-		VirtualGL performs gamma correction internally using the specified value \
-		as the gamma correction factor.  You can also specify a negative \
-		value to apply a "de-gamma" function.  Specifying a gamma correction \
-		factor of G (where G < 0) is equivalent to specifying a gamma correction \
-		factor of -1/G.
+	{nl}{nl}
+	Some of the math involved in 3D rendering assumes a linear gamma
+	(G = 1.0), so technically speaking, 3D applications will not display with
+	mathematical correctness unless the pixels are "gamma corrected" to
+	counterbalance the non-linear response curve of the monitor.  However,
+	some systems do not have any form of built-in gamma correction, so the
+	applications developed for such systems have usually been designed to
+	display properly without gamma correction.  Gamma correction involves
+	passing pixels through a function of the form __X = W{^1/G}__, where G
+	is the "gamma correction factor" and should be equal to the gamma of the
+	monitor.  So the final output is __Y = X{^G} = (W{^1/G}){^G} = W__, which
+	describes a linear relationship between the intensity of the pixels drawn
+	by the application and the intensity of the pixels displayed by the
+	monitor.
+	{nl}{nl}
+	If ''VGL_GAMMA'' is set to an arbitrary floating point value, then
+	VirtualGL performs gamma correction internally using the specified value
+	as the gamma correction factor.  You can also specify a negative
+	value to apply a "de-gamma" function.  Specifying a gamma correction
+	factor of G (where G < 0) is equivalent to specifying a gamma correction
+	factor of -1/G.
 
 | Environment Variable | ''VGL_GLLIB = ''__''{l}''__ |
 | Summary | __''{l}''__ = the location of an alternate OpenGL library |
@@ -215,9 +179,9 @@ Each method of configuration takes precedence over the previous method:
 	''/usr/lib/64/libGL.so.1'').  Failing this, VirtualGL will then try to call
 	these functions from the first compatible library named ''libGL.so.1'' that
 	is found in the dynamic loader path.  You can use the ''VGL_GLLIB''
-	environment variable to override this and specify a dynamic library from
-	which VirtualGL will call the "real" GLX and OpenGL functions.
-	{nl}{nl} \
+	environment variable to override this behavior and specify a dynamic library
+	from which VirtualGL will call the "real" GLX and OpenGL functions.
+	{nl}{nl}
 	You shouldn't need to muck with this unless something doesn't work.  However,
 	setting this environment variable is necessary when using VirtualGL with
 	[[chromium.txt#Chromium][Chromium]].  It is also potentially useful if one
@@ -233,7 +197,7 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: VirtualGL will normally monitor an application's X event queue
 	and pop up the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is
-	pressed.  In the event that this interferes with a key sequence that the
+	pressed.  In the event that this interferes with a key sequence that a 3D
 	application is already using, then you can redefine the key sequence used to
 	pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to some
 	combination of ''shift'', ''ctrl'', ''alt'', and one of ''f1, f2, ..., f12''.
@@ -250,7 +214,7 @@ Each method of configuration takes precedence over the previous method:
 	Description :: The VGL Transport will normally compare each frame with the
 	previous frame and send only the portions of the image which have changed.
 	Setting ''VGL_INTERFRAME'' to ''0'' disables this behavior.
-	{nl}{nl} \
+	{nl}{nl}
 	This setting was introduced in order to work around a specific application
 	interaction issue, but since a proper fix for that issue was introduced in
 	VirtualGL 2.1.1, this option isn't really useful anymore.
@@ -294,7 +258,7 @@ Each method of configuration takes precedence over the previous method:
 	frame among multiple server CPUs.  This might speed up the overall throughput
 	in rare circumstances where the server CPUs are significantly slower than the
 	client CPUs.
-	{nl}{nl} \
+	{nl}{nl}
 	VirtualGL will not allow more than 4 processors total to be used for
 	compression, nor will it allow you to set this parameter to a value greater
 	than the number of processors in the system.
@@ -323,8 +287,8 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: If profiling output is enabled, then VirtualGL will
 	continuously benchmark itself and periodically print out the throughput of
-	various stages in its image pipelines.
-	{nl}{nl} \
+	various stages in its image pipeline.
+	{nl}{nl}
 	See {ref prefix="Chapter ": Perf_Measurement} for more details.
 
 {anchor: VGL_QUAL}
@@ -348,7 +312,7 @@ Each method of configuration takes precedence over the previous method:
 	compressed image.  A JPEG quality of 100 retains all frequencies in the
 	original image (but, due to roundoff errors, the compressed image is still
 	not completely lossless.)
-	{nl}{nl} \
+	{nl}{nl}
 	Because the human eye usually can't detect the highest frequencies in the
 	image, and often because the image lacks those high-frequency elements to
 	begin with, a sufficiently high JPEG quality setting can produce a
@@ -364,6 +328,10 @@ Each method of configuration takes precedence over the previous method:
 	image quality is critical.  As with any benchmarks, Your Mileage May Vary.
 	If image quality is of paramount concern, consider setting the JPEG quality
 	to 100 or using RGB encoding.
+	{nl}
+	!!! If using an image transport plugin, then this setting need not
+	necessarily correspond to JPEG image quality.  How the plugin responds to the
+	''VGL_QUAL'' option is implementation-specific.
 
 {anchor: VGL_READBACK}
 | Environment Variable | ''VGL_READBACK = ''__''none \| pbo \| sync''__ |
@@ -379,7 +347,7 @@ Each method of configuration takes precedence over the previous method:
 	rendered pixels.  Some applications have their own mechanisms for reading
 	back the rendered pixels, so setting ''VGL_READBACK=none'' disables
 	VirtualGL's readback mechanism and prevents duplication of effort.
-	{nl}{nl} \
+	{nl}{nl}
 	This option was developed initially to support running
 	[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView/MPI
 	normally uses MPI processes 1 through N as rendering servers, each drawing a
@@ -391,7 +359,7 @@ Each method of configuration takes precedence over the previous method:
 	processes render to off-screen buffers on different graphics cards while
 	preventing VirtualGL from displaying any pixels except those generated by
 	process 0.
-	{nl}{nl} \
+	{nl}{nl}
 	This setting can also be used to force Chromium to render into Pbuffers
 	instead of windows.  See {ref prefix="Section ": Force_Pbuffer}.
 	{nl}{nl}
@@ -404,16 +372,16 @@ Each method of configuration takes precedence over the previous method:
 	format of the Pbuffer in order for PBO's to realize any performance benefit.
 	Otherwise, the 3D driver falls back to using the standard blocking pixel
 	readback operation.
-	{nl}{nl} \
+	{nl}{nl}
 	Because the PBO is a managed buffer, VirtualGL has to introduce an additional
 	memory copy to transfer the pixels out of the PBO and into the image
-	transport's buffer.  On high-end hardware, PBO readback mode will generally
+	transport's buffer.  On high-end 3D hardware, PBO readback mode will generally
 	perform better than synchronous readback mode, even with this additional
 	memory copy, but there are a few platforms on which it may perform a bit
 	worse.  However, it is probably still advantageous to use PBO readback mode
 	on those platforms, because the non-blocking pixel readback operation will
 	allow for better performance if many users are sharing the same GPU.
-	{nl}{nl} \
+	{nl}{nl}
 	VirtualGL will automatically fall back to synchronous readback mode if it
 	needs to read back pixels in a format other than the native format of the
 	Pbuffer.  This will generally be the case if anaglyphic stereo is enabled, if
@@ -469,7 +437,7 @@ Each method of configuration takes precedence over the previous method:
 	dropping frames.  This ensures that every mouse motion event will result in a
 	new frame being rendered on the server, even though not all of these frames
 	will actually be delivered to the client.
-	{nl}{nl} \
+	{nl}{nl}
 	Frame spoiling should produce the best results with interactive applications,
 	but it should be turned off when running benchmarks or other non-interactive
 	applications.  Turning off frame spoiling will force every frame rendered on
@@ -505,10 +473,10 @@ Each method of configuration takes precedence over the previous method:
 	Description :: {:}
 	__left__ = When an application renders a stereo frame, send only the left
 	eye buffer
-	{nl}{nl} \
+	{nl}{nl}
 	__right__ = When an application renders a stereo frame, send only the right
 	eye buffer
-	{nl}{nl} \
+	{nl}{nl}
 	__quad__ = Attempt to use quad-buffered stereo, which will result in a pair
 	of images being sent to the VirtualGL Client for every frame.  If using the
 	VGL Transport and quad-buffered stereo is not available on the client, or if
@@ -518,10 +486,10 @@ Each method of configuration takes precedence over the previous method:
 	Transport also requires that the 2D X server support OpenGL and be connected
 	to a 3D accelerator that supports stereo rendering.  Quad-buffered stereo
 	is not supported when using the VGL Transport with YUV encoding.
-	{nl}{nl} \
+	{nl}{nl}
 	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
 	available
-	{nl}{nl} \
+	{nl}{nl}
 	See {ref prefix="Chapter ": Advanced_OpenGL} for more details.
 
 {anchor: VGL_SUBSAMP}
@@ -539,47 +507,51 @@ Each method of configuration takes precedence over the previous method:
 	pixel's color.  A YUV pixel has three values that specify the overall
 	brightness of the pixel (Y, or "luminance") and the overall color of the
 	pixel (U and V, or "chrominance".)
-	{nl}{nl} \
+	{nl}{nl}
 	Since the human eye is less sensitive to changes in color than it is to
 	changes in brightness, the chrominance components for some of the pixels can
 	be discarded without much noticeable loss in image quality.  This technique,
 	called "chrominance subsampling", significantly reduces the size of the
 	compressed image.
-	{nl}{nl} \
+	{nl}{nl}
 	__1x__ = no chrominance subsampling
-	{nl}{nl} \
+	{nl}{nl}
 	__2x__ = discard the chrominance components for every other pixel along the
 	image's X direction (this is also known as "4:2:2" or "2:1" subsampling.) All
 	else being equal, 2x subsampling generally reduces the image size by about
-	20-25% when compared to no subsampling.{nl} \
-	{nl} \
+	20-25% when compared to no subsampling.{nl}
+	{nl}
 	__4x__ = discard the chrominance components for every other pixel along both
 	the X and Y directions of the image (this is also known as "4:2:0" or "2:2"
 	subsampling.)   All else being equal, 4x subsampling generally reduces the
 	image size by about 35-40% when compared to no subsampling.
-	{nl}{nl} \
+	{nl}{nl}
 	__8x__ = discard the chrominance components for 3 out of every 4 pixels along
 	the image's X direction and half the pixels along the image's Y direction
 	(this is also known as "4:1:0" or "4:2" subsampling.)  __This option is
 	available only when using an image transport plugin that supports it.__
-	{nl}{nl} \
+	{nl}{nl}
 	__16x__ = discard the chrominance components for 3 out of every 4 pixels
 	along both the X and Y directions of the image (this is also known as "4:4"
 	subsampling.)  __This option is available only when using an image transport
 	plugin that supports it.__
-	{nl}{nl} \
+	{nl}{nl}
 	__gray__ = discard all chrominance components.  This is useful when running
 	applications (such as medical visualization applications) that are already
 	generating grayscale images.
-	{nl}{nl} \
+	{nl}{nl}
 	Subsampling artifacts are less noticeable with volume data, since it usually
-	only contains 256 colors to begin with.  But narrow, aliased lines and other
+	only contains 256 colors to begin with, but narrow, aliased lines and other
 	sharp features on a black background will tend to produce very noticeable
-	artifacts when subsampling is enabled. \
-	{nl}{nl} \
-	The axis indicator from a popular visualization app displayed with 1x, \
-	2x, and 4x subsampling (respectively):{nl} \
-	{img: 444.gif}{img: 422.gif}{img: 411.gif} \
+	artifacts when subsampling is enabled.
+	{nl}{nl}
+	The axis indicator from a popular visualization app displayed with 1x,
+	2x, and 4x chrominance subsampling (respectively):{nl}
+	{img: 444.gif}{img: 422.gif}{img: 411.gif}
+	{nl}
+	!!! If using an image transport plugin, then this setting need not
+	necessarily correspond to JPEG chrominance subsampling.  How the plugin
+	responds to the ''VGL_SUBSAMP'' option is implementation-specific.
 
 {anchor: VGL_SYNC}
 | Environment Variable | ''VGL_SYNC = ''__''0 \| 1''__ |
@@ -638,30 +610,35 @@ Each method of configuration takes precedence over the previous method:
 	will also divide up the task of compressing these tiles among the available
 	CPUs in a round robin fashion, if multi-threaded compression is enabled
 	(see [[#VGL_NPROCS][VGL_NPROCS]].)
-	{nl}{nl} \
+	{nl}{nl}
 	There are several tradeoffs that must be considered when choosing a tile
 	size:
-	{nl}{nl} \
-	__Smaller tile sizes:__ \
-	{list: \
-		{item: Better parallel scalability} \
-		{item: Worse compression efficiency} \
-		{item: Better inter-frame optimization} \
-		{item: Worse network efficiency}} \
-	__Larger tile sizes:__ \
-	{list: \
-		{item: Worse parallel scalability} \
-		{item: Better compression efficiency} \
-		{item: Worse inter-frame optimization} \
-		{item: Better network efficiency}} \
-	{nl} \
-	Smaller tiles can more easily be divided up among multiple CPUs, but they
-	compress less efficiently (and less quickly) on an individual basis.  Using
-	larger tiles can reduce traffic to the client by allowing the server to send
-	only one frame update instead of many.  But on the flip side, using larger
-	tiles decreases the chance that a tile will be unchanged from the previous
-	frame.
-	{nl}{nl} \
+	{nl}{nl}
+	__Parallel scalability:__
+	{list:
+		{item: Smaller tiles can more easily be divided up among multiple CPUs.
+			If the tile size if too large, then there may not be enough tiles to
+			go around.}}
+	{nl}
+	__Compression efficiency:__
+	{list:
+		{item: There is a certain amount of fixed CPU overhead required when
+			compressing images, so compressing larger tiles makes more efficient use
+			of the CPUs and increases the aggregate throughput of the compressor.}}
+	{nl}
+	__Inter-frame optimization:__
+	{list:
+		{item: When using smaller tiles, there is more of a chance that a given
+			tile will remain unchanged from frame to frame and thus not need to be
+			re-transmitted to the client.}}
+	{nl}
+	__Network efficiency:__
+	{list:
+		{item: Each tile has a certain amount of fixed overhead required to
+			represent it on the network.  Thus, using smaller tiles will increase the
+			total number of tiles per frame, which will increase the total network
+			usage.}}
+	{nl}
 	256x256 was chosen as the default because, in experiments, it provided
 	the best balance between scalability and efficiency on the platforms that
 	VirtualGL supports.
@@ -726,9 +703,9 @@ Each method of configuration takes precedence over the previous method:
 	Failing this, VirtualGL will then try to call these functions from the first
 	compatible library named ''libX11.so.6'' that is found in the dynamic loader
 	path.  You can use the ''VGL_X11LIB'' environment	variable to override this
-	and specify a dynamic library from which VirtualGL will call the "real" X11
-	functions.
-	{nl}{nl} \
+	behavior and specify a dynamic library from which VirtualGL will call the
+	"real" X11 functions.
+	{nl}{nl}
 	You shouldn't need to muck with this unless something doesn't work.  However,
 	it is potentially useful if one wishes to insert another X11 interposer
 	between VirtualGL and the system's X11 library.
@@ -744,9 +721,6 @@ Each method of configuration takes precedence over the previous method:
 	figure out whether it is being displayed to a local or a remote X server.
 	This setting allows you to fool such applications into thinking that they
 	are being	displayed to a "local" X server rather than a remote one.
-	{nl}{nl} \
-	Refer to {ref prefix="Chapter ": Application_Recipes} for specific
-	applications that require this.
 
 ** Client Settings
 
@@ -759,15 +733,12 @@ those wishing to build additional infrastructure around VirtualGL.
 | Environment Variable | ''VGLCLIENT_DRAWMODE = ''__''ogl \| x11''__ |
 | ''vglclient'' argument | ''-gl'' / ''-x'' |
 | Summary | Specify the method used to draw pixels into the application window |
-| Default Value | ''ogl'' for Solaris/SPARC systems with 3D accelerators, \
-	''x11'' otherwise |
+| Default Value | ''x11'' |
 #OPT: hiCol=first
 
 	Description :: If the client machine has a 3D accelerator, then it may be
-	faster to draw pixels using OpenGL rather than using 2D (X11) commands.  This
-	is particularly true of many 3D accelerators available for the Solaris/SPARC
-	platform, since they are able to draw images using 24-bit pixels instead of
-	the 32-bit pixels required by the X server.
+	faster in some rare instances to draw pixels using OpenGL rather than using
+	2D (X11) commands.
 
 | Environment Variable | ''VGLCLIENT_LISTEN = ''__''sslonly \| nossl''__ |
 | ''vglclient'' argument | ''-sslonly'' / ''-nossl'' |
@@ -787,11 +758,12 @@ those wishing to build additional infrastructure around VirtualGL.
 #OPT: hiCol=first
 
 	Description :: The default behavior for ''vglclient'' is to first try
-	listening on port	4242, to maintain backward compatibility with VirtualGL
-	v2.0.x.  If port 4242 is not available, then ''vglclient'' will try to find
-	a free port in the range of 4200-4299.  If none of those ports is available,
-	then ''vglclient'' will request a free port from the operating system.
-	{nl}{nl} \
+	listening for unencrypted connections on port 4242, to maintain backward
+	compatibility with VirtualGL v2.0.x.  If port 4242 is not available, then
+	''vglclient'' will try to find a free port in the range of 4200-4299.  If
+	none of those ports is available, then ''vglclient'' will request a free port
+	from the operating system.
+	{nl}{nl}
 	Setting this option circumvents the automatic behavior described above and
 	causes ''vglclient'' to listen only on the specified TCP port.
 
@@ -803,7 +775,7 @@ those wishing to build additional infrastructure around VirtualGL.
 	Description :: If profiling output is enabled, then VirtualGL will
 	continuously benchmark itself and periodically print out the throughput of
 	various stages in its image pipelines.
-	{nl}{nl} \
+	{nl}{nl}
 	See {ref prefix="Chapter ": Perf_Measurement} for more details.
 
 | Environment Variable | ''VGLCLIENT_SSLPORT = ''__''{p}''__ |
@@ -814,11 +786,12 @@ those wishing to build additional infrastructure around VirtualGL.
 #OPT: hiCol=first
 
 	Description :: The default behavior for ''vglclient'' is to first try
-	listening on port	4243, to maintain backward compatibility with VirtualGL
-	v2.0.x.  If port 4243 is not available, then ''vglclient'' will try to find
-	a free port in the range of 4200-4299.  If none of those ports is available,
-	then ''vglclient'' will request a free port from the operating system.
-	{nl}{nl} \
+	listening for SSL connections on port 4243, to maintain backward
+	compatibility with VirtualGL v2.0.x.  If port 4243 is not available, then
+	''vglclient'' will try to find a free port in the range of 4200-4299.  If
+	none of those ports is available, then ''vglclient'' will request a free port
+	from the operating system.
+	{nl}{nl}
 	Setting this option circumvents the automatic behavior described above and
 	causes ''vglclient'' to listen only on the specified TCP port.
 
