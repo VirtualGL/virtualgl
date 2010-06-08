@@ -26,12 +26,10 @@ ld.so.1: warning: librrfaker.so: open failed: No such file in secure directories
 ld.so.1: warning: libdlfaker.so: open failed: No such file in secure directories
 ---
 
-On Solaris and on newer versions of Linux (GLIBC 2.3 and later), the executable
-will continue to run, but without VirtualGL preloaded into it.  That may be a
-problem, if the setuid/setgid executable was a 3D application that was intended
-to be used with VirtualGL.  To further complicate matters, some older versions
-of Linux will refuse to launch setuid/setgid executables at all if one attempts
-to preload VirtualGL into them.
+On Solaris and on versions of Linux with GLIBC 2.3 and later, the executable
+will continue to run-- but without VirtualGL preloaded into it.  That is definitely a
+problem if the setuid/setgid executable was a 3D application that was intended
+to be used with VirtualGL.
 
 There are a couple of ways to work around this issue.  If the 3D application
 that you are intending to run in VirtualGL is not itself a setuid/setgid
@@ -45,7 +43,7 @@ Initial contents of ''application.sh'':
 #Verb: <<---
 #!/bin/sh
 some_setuid_executable
-some_application_executable
+some_3D_application_executable
 ---
 
 You could modify the script as follows:
@@ -65,7 +63,7 @@ LD_PRELOAD_32=$LD_PRELOAD_32_SAVE
 LD_PRELOAD_64=$LD_PRELOAD_64_SAVE
 export LD_PRELOAD_32 LD_PRELOAD_64
 
-some_application_executable
+some_3D_application_executable
 ---
 
 	Linux :: Modified ''application.sh'':
@@ -80,7 +78,7 @@ some_setuid_executable
 LD_PRELOAD=$LD_PRELOAD_SAVE
 export LD_PRELOAD
 
-some_application_executable
+some_3D_application_executable
 ---
 
 You can also force VirtualGL to be preloaded into setuid/setgid executables,
@@ -114,7 +112,7 @@ executables by adding the VirtualGL library directories to the Solaris "secure
 path."  Solaris keeps a tight lid on what goes into ''/usr/lib'' and ''/lib'',
 and by default, it will only allow libraries in those paths to be preloaded
 into an executable that is setuid and/or setgid.  Generally, 3rd party packages
-are forbidden from installing anything into ''/usr/lib'' or ''/lib''.  But you
+are forbidden from installing anything into ''/usr/lib'' or ''/lib'', but you
 can use the ''crle'' utility to add other directories to the operating system's
 list of secure paths.  In the case of VirtualGL, you would execute the
 following commands (as root):
