@@ -60,7 +60,6 @@ usage()
 	echo
 	echo "-fps <f>  : Limit client/server frame rate to <f> frames/sec"
 	echo
-	echo "+/-g      : Enable/disable gamma correction (see docs)"
 	echo "-gamma <g>: Set gamma correction factor to <g> (see docs)"
 	echo
 	echo "-ge       : Fool application into thinking that LD_PRELOAD is unset"
