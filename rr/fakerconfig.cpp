@@ -136,7 +136,7 @@ static void fconfig_init(void)
 	fconfig.np=1;
 	fconfig.port=-1;
 	fconfig.qual=DEFQUAL;
-	fconfig.readback=RRREAD_PBO;
+	fconfig.readback=RRREAD_SYNC;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
 	fconfig.stereo=RRSTEREO_QUADBUF;

@@ -112,9 +112,9 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl}
 	On some 3D hardware, it is necessary to use a 32-bit-per-pixel Pbuffer to
 	realize any performance improvement from the use of pixel buffer objects
-	(PBO's).  Thus, this option is enabled by default whenever PBO readback mode
-	is enabled.  See the [[#VGL_READBACK][''VGL_READBACK'']] option for further
-	information.
+	(PBO's).  Thus, unless this option is explicitly disabled, it will be
+	enabled by default whenever PBO readback mode is enabled.  See the
+	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
 {anchor: VGL_FPS}
 | Environment Variable | ''VGL_FPS = ''__''{f}''__ |
@@ -337,7 +337,7 @@ Each method of configuration takes precedence over the previous method:
 | Environment Variable | ''VGL_READBACK = ''__''none \| pbo \| sync''__ |
 | Summary | Specify the method used by VirtualGL to read back the 3D pixels from the 3D graphics hardware |
 | Image Transports | All |
-| Default Value | pbo |
+| Default Value | sync |
 #OPT: hiCol=first
 
 	Description :: {:}
@@ -377,10 +377,9 @@ Each method of configuration takes precedence over the previous method:
 	memory copy to transfer the pixels out of the PBO and into the image
 	transport's buffer.  On high-end 3D hardware, PBO readback mode will generally
 	perform better than synchronous readback mode, even with this additional
-	memory copy, but there are a few platforms on which it may perform a bit
-	worse.  However, it is probably still advantageous to use PBO readback mode
-	on those platforms, because the non-blocking pixel readback operation will
-	allow for better performance if many users are sharing the same GPU.
+	memory copy, but there are a few platforms on which it performs worse, which
+	is why it is not enabled by default.  PBO's will significantly improve
+	performance on nVidia hardware when multiple users are sharing the GPU.
 	{nl}{nl}
 	VirtualGL will automatically fall back to synchronous readback mode if it
 	needs to read back pixels in a format other than the native format of the
@@ -396,8 +395,7 @@ Each method of configuration takes precedence over the previous method:
 	* __sync__ = Synchronous readback mode.  This disables the use of PBO's
 	altogether, which causes VirtualGL to always use blocking pixel readback
 	operations and to let the 3D driver perform any pixel translation that is
-	necessary.  This setting duplicates the behavior of VirtualGL 2.1.x and
-	prior.
+	necessary.  This is the default behavior of VirtualGL.
 	{nl}{nl}
 
 | Environment Variable | ''VGL_SAMPLES = ''__''{s}''__ |
