@@ -37,7 +37,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	the VGL Transport was active when VirtualGL started.
 	{nl}{nl} \
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
-	''VGL_COMPRESS'' configuration option and its various parameters.
+	''VGL_COMPRESS'' configuration option.
 
 	!!! If an image transport plugin is loaded, then this gadget's name changes
 	to "Image Compression", and it has options "0" through "10".
@@ -55,7 +55,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	__4X__ : equivalent to setting ''VGL_SUBSAMP=4x''
 	{nl}{nl} \
 	See {ref prefix="Section ": VGL_SUBSAMP} for more information about the
-	''VGL_SUBSAMP'' configuration option and its various parameters.
+	''VGL_SUBSAMP'' configuration option.
 
 	!!! If an image transport plugin is loaded, then this gadget has two
 	additional options, "8X" and "16X".
@@ -84,10 +84,9 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	JPEG Image Quality to 95.
 
 	Gamma Correction Factor :: This floating point input gadget is the equivalent
-	of setting ''VGL_GAMMA''.  If using a gamma-corrected visual (SPARC clients
-	only), then this gadget has no effect.  Otherwise, it enables VirtualGL's
-	internal gamma correction system with the specified gamma correction factor.
-	See {ref prefix="Section ": VGL_GAMMA} for more information about the
+	of setting ''VGL_GAMMA''.  This enables VirtualGL's internal gamma correction
+	system with the specified gamma correction factor.  See
+	{ref prefix="Section ": VGL_GAMMA} for more information about the
 	''VGL_GAMMA'' configuration option.
 
 	Frame Spoiling :: This toggle button is the equivalent of setting
@@ -111,7 +110,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	__Anaglyphic (Red/Cyan)__ : equivalent to setting ''VGL_STEREO=rc''
 	{nl}{nl} \
 	See {ref prefix="Section ": VGL_STEREO} for more information about the
-	''VGL_STEREO'' configuration option and its various parameters.
+	''VGL_STEREO'' configuration option.
 
 	Limit Frames/second :: This floating point input gadget is the equivalent
 	of setting ''VGL_FPS''.  See {ref prefix="Section ": VGL_FPS} for more
