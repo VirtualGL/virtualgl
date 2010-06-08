@@ -553,16 +553,16 @@ void glread(int format)
 			_throw("GL_ARB_pixel_buffer_object extension not available");
 		glGenBuffers(1, &bufferid);
 		if(!bufferid) _throw("Could not generate PBO buffer");
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, bufferid);
-		glBufferData(GL_PIXEL_PACK_BUFFER_ARB, PAD(WIDTH*ps)*HEIGHT, NULL,
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
+		glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(WIDTH*ps)*HEIGHT, NULL,
 			GL_STREAM_READ);
 		check_errors("PBO initialization");
 		int temp=0;
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_ARB, GL_BUFFER_SIZE,
+		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE,
 			&temp);
 		if(temp!=PAD(WIDTH*ps)*HEIGHT) _throw("Could not generate PBO buffer");
 		temp=0;
-		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_ARB, &temp);
+		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &temp);
 		if(temp!=pbo) _throw("Could not bind PBO buffer");
 	}
 	#endif
@@ -585,14 +585,14 @@ void glread(int format)
 		if(pbo)
 		{
 			unsigned char *pixels=NULL;
-			glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, bufferid);
+			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
 				NULL);
-			pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+			pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 				GL_READ_ONLY);
 			if(!pixels) _throw("Could not map buffer");
 			memcpy(rgbaBuffer, pixels, PAD(WIDTH*ps)*HEIGHT);
-			glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
+			glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
 		}
 		else
 		#endif
@@ -634,7 +634,7 @@ void glread(int format)
 	#ifdef GL_VERSION_1_5
 	if(pbo && bufferid>0)
 	{
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		glDeleteBuffers(1, &bufferid);
 	}
 	#endif

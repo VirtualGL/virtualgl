@@ -762,13 +762,13 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 				rrout.println("[VGL] Using pixel buffer objects for readback (GL format = 0x%.4x)",
 				format);
 		}
-		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_ARB, &boundbuffer);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbo);
+		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &boundbuffer);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
 		int size=0;
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_ARB, GL_BUFFER_SIZE, &size);
+		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*h)
-			glBufferData(GL_PIXEL_PACK_BUFFER_ARB, pitch*h, NULL, GL_STREAM_READ);
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_ARB, GL_BUFFER_SIZE, &size);
+			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*h, NULL, GL_STREAM_READ);
+		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*h)
 			_throw("Could not set PBO size");
 	}
@@ -781,13 +781,13 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	if(usepbo)
 	{
 		unsigned char *pbobits=NULL;
-		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
 		if(!pbobits) _throw("Could not map pixel buffer object");
 		memcpy(bits, pbobits, pitch*h);
-		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB))
+		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			_throw("Could not unmap pixel buffer object");
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, boundbuffer);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, boundbuffer);
 	}
 
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
