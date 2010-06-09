@@ -104,6 +104,8 @@ endif
 GLLIB = -lGL
 FAKERLINK = -lXm $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
 
+LIBDL = -ldl
+
 ZNOW = -z now
 MLIB = -lmlib
 

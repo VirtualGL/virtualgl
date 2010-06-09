@@ -1,5 +1,5 @@
 ########################################
-# Linux 32-bit and 64-bit
+# FreeBSD 32-bit and 64-bit
 ########################################
 
 ifeq ($(CC),)
@@ -10,6 +10,7 @@ ifeq ($(CXX),)
 endif
 AR = ar ruvs
 
+CINCLUDES = -I/usr/X11R6/include
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 
 ifeq ($(USESSL), yes)
@@ -18,17 +19,14 @@ endif
 
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
- LDFLAGS = -static-libgcc -L/usr/X11R6/lib64
 else
  ARCHFLAG =
- LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 endif
+LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 
 ifeq ($(M32), yes)
  ARCHFLAG = -m32
 endif
-
-_DUMMY4 := $(shell ln -fs `$(CXX) $(ARCHFLAG) -print-file-name=libstdc++.a` $(LDIR))
 
 ifeq ($(DEBUG), yes)
  OPTFLAG = -O0 -ggdb
@@ -52,8 +50,8 @@ ifeq ($(USESSL), yes)
  STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 
  ifeq ($(STATICSSL), yes)
-  CINCLUDES = -I$(SSLDIR)/include
-  SOCKLIB := $(SOCKLIB) -ldl -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+  CINCLUDES := $(CINCLUDES) -I$(SSLDIR)/include
+  SOCKLIB := $(SOCKLIB) -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
  else
   # Use dynamic libs provided by the O/S
   SOCKLIB := $(SOCKLIB) -lssl -lcrypto
@@ -63,20 +61,6 @@ endif
 
 GLLIB = -lGL
 FAKERLINK = $(GLLIB) $(MAPFLAG)$(ODIR)/faker-mapfile.E
-
-ifeq ($(subplatform),)
- RPMARCH = i386
- DEBARCH = i386
-else
- ifeq ($(subplatform),64)
-  DEBARCH = amd64
- else
-  DEBARCH = $(ARCH)
- endif
- RPMARCH = $(ARCH)
-endif
-
-LIBDL = -ldl
 
 ZNOW = -z now
 

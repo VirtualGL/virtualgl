@@ -137,13 +137,13 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) -ldl
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) $(LIBDL)
 
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
-	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
+	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< $(LIBDL)
 
 $(LDIR)/libgefaker.$(SHEXT): $(ODIR)/gefaker.o
-	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< -ldl
+	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< $(LIBDL)
 
 $(EDIR)/vglrun: vglrun
 	$(INSTALL) -m 755 $< $@
@@ -164,7 +164,7 @@ $(EDIR)/vglconfig: $(ODIR)/vglconfig.o $(ODIR)/fakerconfig.o \
 
 ifeq ($(platform), solaris)
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) $(GLLIB) $(NOLAZY) -ldl
+	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) $(GLLIB) $(NOLAZY) $(LIBDL)
 else
 $(EDIR)/vglclient: $(COBJS) $(RRDEP)
 	$(CXX) $(LDFLAGS) $(COBJS) -o $@ $(RRLIB) $(LAZY) $(GLLIB) $(NOLAZY) $(OSXGLFIX)
@@ -184,10 +184,10 @@ ifeq ($(platform), solaris)
 endif
 
 $(EDIR)/rrfakerut: $(ODIR)/rrfakerut.o
-	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) $(GLLIB) -lGLU $(ZNOW) -lX11 -ldl -lpthread $(LXMU)
+	$(CXX) $(LDFLAGS) -o $@ $< $(ZNOW) $(GLLIB) -lGLU $(ZNOW) -lX11 $(LIBDL) -lpthread $(LXMU)
 
 $(EDIR)/dlfakerut: $(ODIR)/dlfakerut.o
-	$(CC) $(LDFLAGS) -o $@ $< -lX11 -ldl
+	$(CC) $(LDFLAGS) -o $@ $< -lX11 $(LIBDL)
 
 $(LDIR)/libGLdlfakerut.$(SHEXT): $(ODIR)/libGLdlfakerut.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $<

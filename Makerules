@@ -15,6 +15,12 @@ ifeq ($(OS), Linux)
   subplatform := 64
  endif
 endif
+ifeq ($(OS), FreeBSD)
+ platform := freebsd
+ ifeq ($(ARCH), amd64)
+  subplatform := 64
+ endif
+endif
 ifeq ($(OS), IRIX64)
  platform := irix
  subplatform := 64
