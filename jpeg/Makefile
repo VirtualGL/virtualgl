@@ -122,7 +122,7 @@ $(ODIR)/turbojpeg.o: turbojpegl.c
 else
 
 $(ODIR)/turbojpeg.o: turbojpegl.c
-	$(CC) $(CFLAGS) -I$(LJTDIR)/include -c $< -o $@
+	$(CC) -I$(TOPDIR)/include -I$(LJTDIR)/include $(CFLAGS) -c $< -o $@
 
 endif
 endif
