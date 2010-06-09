@@ -61,6 +61,7 @@ mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 %ifarch x86_64
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 %endif
+mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
 
 install -m 755 %{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
 install -m 755 %{_bindir}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
@@ -98,6 +99,9 @@ ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_confi
 ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
 ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 
+ln -fs /usr/include/rrtransport.h $RPM_BUILD_ROOT/opt/%{name}/include/rrtransport.h
+ln -fs /usr/include/rr.h $RPM_BUILD_ROOT/opt/%{name}/include/rr.h
+
 cp fltk/COPYING LICENSE-FLTK.txt
 cp putty/LICENCE LICENSE-PuTTY.txt
 cp x11windows/xauth.license LICENSE-xauth.txt
@@ -126,6 +130,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %ifarch x86_64
 %dir /opt/%{name}/fakelib/64
 %endif
+%dir /opt/%{name}/include
 
 /usr/bin/vglclient
 /usr/bin/vglconfig
@@ -153,6 +158,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/fakelib/64/libGL.so
 %endif
 /opt/%{name}/doc
+
+/opt/%{name}/include/rrtransport.h
+/opt/%{name}/include/rr.h
 
 /usr/lib/librrfaker.so
 /usr/lib/libdlfaker.so
