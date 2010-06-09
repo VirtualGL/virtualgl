@@ -51,7 +51,7 @@ _DUMMY1 := $(shell if [ ! -f $(TOPDIR)/config.$(platform)$(subplatform) ]; then 
 include $(TOPDIR)/config.$(platform)$(subplatform)
 
 # Macros which are common to all Unix platforms
-VERSION := 2.1.82
+VERSION := 2.1.83
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
  BUILD := $(BUILD)d
