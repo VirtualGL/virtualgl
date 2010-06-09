@@ -772,6 +772,16 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		if(size!=pitch*h)
 			_throw("Could not set PBO size");
 	}
+	else
+	{
+		static bool alreadyprinted=false;
+		if(!alreadyprinted && fconfig.verbose)
+		{
+			rrout.println("[VGL] Using synchronous readback (GL format = 0x%.4x)",
+				format);
+			alreadyprinted=true;
+		}
+	}
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
