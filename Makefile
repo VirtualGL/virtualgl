@@ -111,6 +111,9 @@ install: rr rr32 diags mesademos mesademos32
 	$(INSTALL) -m 755 $(EDIR)/vglrun $(prefix)/bin/vglrun
 	$(INSTALL) -m 755 rr/vglgenkey $(prefix)/bin/vglgenkey
 	$(INSTALL) -m 755 rr/vglserver_config $(prefix)/bin/vglserver_config
+	if [ "$(platform)" = "linux" ]; then \
+		$(INSTALL) -m 755 $(EDIR)/cpustat $(prefix)/bin/cpustat; \
+	fi
 	$(INSTALL) -m 755 $(EDIR)/tcbench $(prefix)/bin/tcbench
 	$(INSTALL) -m 755 $(EDIR)/nettest $(prefix)/bin/nettest
 	$(INSTALL) -m 755 $(EDIR)/glxinfo $(prefix)/bin/glxinfo
