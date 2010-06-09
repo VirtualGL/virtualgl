@@ -34,11 +34,7 @@ endif
 
 ifeq ($(JPEGLIB), libjpeg-turbo)
 
- ifeq ($(platform), cygwin)
-  JPEGLINK = -ltjpeg -Wl,-Bstatic -ljpeg -Wl,-Bdynamic
- else
-  JPEGLINK = -ltjpeg $(LJTLIB)/libjpeg.a
- endif
+ JPEGLINK = -ltjpeg $(LJTLIB)/libjpeg.a
  JPEGDEP = $(LDIR)/libtjpeg.a
 
 endif
