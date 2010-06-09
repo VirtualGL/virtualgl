@@ -50,58 +50,36 @@ Ertl 2000.)
 %install
 
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/bin
-mkdir -p $RPM_BUILD_ROOT/usr/lib
-%ifarch x86_64
-mkdir -p $RPM_BUILD_ROOT/usr/lib64
-%endif
-mkdir -p $RPM_BUILD_ROOT/usr/include
+
+make install prefix=$RPM_BUILD_ROOT/usr
+
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
+for i in tcbench nettest cpustat glxinfo glxspheres; do
+	mv $RPM_BUILD_ROOT/usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/
+done
+%ifarch x86_64
+mv $RPM_BUILD_ROOT/usr/bin/glxspheres64 $RPM_BUILD_ROOT/opt/%{name}/bin/
+%endif
+pushd $RPM_BUILD_ROOT/usr/bin
+for i in *; do ln -fs /usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/; done
+popd
+
+rm -rf $RPM_BUILD_ROOT/usr/fakelib
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
 %ifarch x86_64
 mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
 %endif
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
-
-install -m 755 %{_bindir}/vglclient $RPM_BUILD_ROOT/usr/bin/vglclient
-install -m 755 %{_bindir}/vglconfig $RPM_BUILD_ROOT/usr/bin/vglconfig
-install -m 755 %{_bindir}/vglconnect $RPM_BUILD_ROOT/usr/bin/vglconnect
-install -m 755 %{_bindir}/vgllogin $RPM_BUILD_ROOT/usr/bin/vgllogin
-install -m 755 %{_bindir}/vglrun $RPM_BUILD_ROOT/usr/bin/vglrun
-install -m 755 rr/vglgenkey $RPM_BUILD_ROOT/usr/bin/vglgenkey
-install -m 755 rr/vglserver_config $RPM_BUILD_ROOT/usr/bin//vglserver_config
-install -m 755 %{_bindir}/tcbench $RPM_BUILD_ROOT/opt/%{name}/bin/tcbench
-install -m 755 %{_bindir}/nettest $RPM_BUILD_ROOT/opt/%{name}/bin/nettest
-install -m 755 %{_bindir}/cpustat $RPM_BUILD_ROOT/opt/%{name}/bin/cpustat
-install -m 755 %{_bindir}/glxinfo $RPM_BUILD_ROOT/opt/%{name}/bin/glxinfo
-install -m 755 %{_bindir32}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres
-install -m 755 %{_libdir32}/librrfaker.so $RPM_BUILD_ROOT/usr/lib/librrfaker.so
-install -m 755 %{_libdir32}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib/libdlfaker.so
-install -m 755 %{_libdir32}/libgefaker.so $RPM_BUILD_ROOT/usr/lib/libgefaker.so
-%ifarch x86_64
-install -m 755 %{_libdir}/librrfaker.so $RPM_BUILD_ROOT/usr/lib64/librrfaker.so
-install -m 755 %{_libdir}/libdlfaker.so $RPM_BUILD_ROOT/usr/lib64/libdlfaker.so
-install -m 755 %{_libdir}/libgefaker.so $RPM_BUILD_ROOT/usr/lib64/libgefaker.so
-install -m 755 %{_bindir}/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
-%endif
-install -m 644 rr/rrtransport.h $RPM_BUILD_ROOT/usr/include/rrtransport.h
-install -m 644 rr/rr.h $RPM_BUILD_ROOT/usr/include/rr.h
 ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
 %endif
-ln -fs /usr/bin/vglclient $RPM_BUILD_ROOT/opt/%{name}/bin/vglclient
-ln -fs /usr/bin/vglconfig $RPM_BUILD_ROOT/opt/%{name}/bin/vglconfig
-ln -fs /usr/bin/vglconnect $RPM_BUILD_ROOT/opt/%{name}/bin/vglconnect
-ln -fs /usr/bin/vglgenkey $RPM_BUILD_ROOT/opt/%{name}/bin/vglgenkey
-ln -fs /usr/bin/vgllogin $RPM_BUILD_ROOT/opt/%{name}/bin/vgllogin
-ln -fs /usr/bin/vglserver_config $RPM_BUILD_ROOT/opt/%{name}/bin/vglserver_config
-ln -fs /usr/bin/vglrun $RPM_BUILD_ROOT/opt/%{name}/bin/vglrun
-ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 
+mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
 ln -fs /usr/include/rrtransport.h $RPM_BUILD_ROOT/opt/%{name}/include/rrtransport.h
 ln -fs /usr/include/rr.h $RPM_BUILD_ROOT/opt/%{name}/include/rr.h
 
+rm -rf $RPM_BUILD_ROOT/usr/doc
+ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 cp fltk/COPYING LICENSE-FLTK.txt
 cp putty/LICENCE LICENSE-PuTTY.txt
 cp x11windows/xauth.license LICENSE-xauth.txt
