@@ -9,8 +9,10 @@ How to build VirtualGL in 9043 easy steps
    If built with OpenSSL support, VirtualGL can use OpenSSL to encrypt the
    traffic it sends via the VGL Transport.  This is only a marginally useful
    feature, however, since VirtualGL can also tunnel the VGL Transport through
-   SSh.  Thus, since the embedded OpenSSL feature is difficult to maintain, it
-   is not enabled by default in this release of VirtualGL.
+   SSh.  Including OpenSSL support in the VirtualGL distribution packages
+   required us to statically link with the OpenSSL libraries, which required us
+   to keep abreast of any security fixes to those libraries.  Thus, embedded
+   OpenSSL support is not enabled by default in this release of VirtualGL.
 
    However, you can easily include OpenSSL support in your custom build of
    VirtualGL by specifying USESSL=yes as an argument to 'make' or by adding
@@ -28,7 +30,11 @@ How to build VirtualGL in 9043 easy steps
    your Linux distribution, but this produces a version of VirtualGL that may
    not be compatible with other Linux distributions.  In order to build a fully
    cross-compatible version of VirtualGL, you must link VirtualGL against
-   static versions of the OpenSSL libraries.  To do this:
+   static versions of the OpenSSL libraries.  If your system already has
+   libssl.a and libcrypto.a installed, then you can use the SSLINC and SSLLIB
+   Makefile options (see "Makefile Options" below) to tell VirtualGL to link
+   against your existing copy of these libraries.  Otherwise, follow the
+   instructions below to build libssl.a and libcrypto.a from scratch.
 
    * Download the latest OpenSSL source tarball from http://www.openssl.org
    * Extract the tarball into the directory one level up from your VirtualGL
@@ -161,7 +167,7 @@ one or more of the necessary 32-bit prerequisites, then:
 **     Prerequisites - Solaris
 *******************************************************************************
 
--- Solaris 8 or newer (SPARC) or Solaris/OpenSolaris 10 or newer (x86)
+-- Solaris 10/OpenSolaris 2008.11 or newer
 
 -- OpenSSL headers and link libraries (optional)
 
@@ -169,7 +175,11 @@ one or more of the necessary 32-bit prerequisites, then:
    your Solaris distribution, but this produces a version of VirtualGL that may
    not be compatible with other versions of Solaris.  In order to build a fully
    cross-compatible version of VirtualGL, you must link VirtualGL against
-   static versions of the OpenSSL libraries.  To do this:
+   static versions of the OpenSSL libraries.  If your system already has
+   libssl.a and libcrypto.a installed, then you can use the SSLINC and SSLLIB
+   Makefile options (see "Makefile Options" below) to tell VirtualGL to link
+   against your existing copy of these libraries.  Otherwise, follow the
+   instructions below to build libssl.a and libcrypto.a from scratch.
 
    * Download the latest OpenSSL source tarball from http://www.openssl.org
    * Extract the tarball into the directory one level up from your VirtualGL
@@ -201,10 +211,8 @@ one or more of the necessary 32-bit prerequisites, then:
 
      make
 
--- Sun Studio/Workshop Pro Compiler
+-- Sun Studio 12 or later
 
-   * Sun Studio 12 or later required for x86
-   * v5.5 or later required for SPARC
    * See http://www.sun.com/software/products/studio/ for a free download.
 
 ... or ...
@@ -217,10 +225,6 @@ one or more of the necessary 32-bit prerequisites, then:
      SunFreeware (http://www.sunfreeware.com/)
    * Build VirtualGL using
        gmake CC=gcc
-
--- SOLARIS 8 ONLY:  Linker patch 109147-32 must be installed
-
-   * See http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage
 
 -- SPARC ONLY:  Sun OpenGL
 
@@ -417,6 +421,11 @@ can also create a file called "config" in the root of the VirtualGL build
 directory and add Makefile options to that file so as to avoid having to type
 them every time you build VirtualGL.
 
+CC = gcc
+
+  * On Solaris, this builds VirtualGL using the GCC compiler rather than the
+    default (Sun Studio) compiler.  gcc and g++ should be in your PATH.
+
 DEBUG = yes
 
   * Build a version of VirtualGL with debugging symbols and no optimization.
@@ -432,14 +441,30 @@ JPEGLIB = medialib
     passed to the VirtualGL build, then VirtualGL will also use Sun mediaLib
     to perform gamma correction.
 
+LJTDIR = {libjpeg-turbo directory}
+
+  * Override the directory in which the build system looks for the 
+    libjpeg-turbo SDK (default: /opt/libjpeg-turbo).
+
+LJTLIB = {libjpeg-turbo library directory}
+
+  * Override the directory in which the build system looks for the
+    libjpeg-turbo link libraries (default: /opt/libjpeg-turbo/lib32 for 32-bit
+    builds and /opt/libjpeg-turbo/lib64 for 64-bit builds.)
+
 M32 = yes
 
   * On x86-64 systems, this cross-compiles a 32-bit (x86) version of VirtualGL.
 
-CC = gcc
+SSLINC = {OpenSSL include directory)
 
-  * On Solaris, this builds VirtualGL using the GCC compiler rather than the
-    default (Sun Studio) compiler.  gcc and g++ should be in your PATH.
+  * Override the directory in which the VirtualGL build looks for the
+    OpenSSL headers (see build prerequisites for default.)
+
+SSLLIB = {OpenSSL static library directory)
+
+  * Override the directory in which the VirtualGL build looks for the
+    OpenSSL static link libraries (see build prerequisites for default.)
 
 USEGLP = no
 
