@@ -45,12 +45,13 @@ SOCKLIB = -lrrsocket -lpthread
 ifeq ($(USESSL), yes)
 
  CDEFINES := $(CDEFINES) -DUSESSL
- SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
- STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
+ SSLINC = $(TOPDIR)/../openssl.$(platform)$(subplatform)
+ SSLLIB = $(TOPDIR)/../openssl.$(platform)$(subplatform)
+ STATICSSL := $(shell if [ -f $(SSLLIB)/libssl.a -a -f $(SSLLIB)/libcrypto.a ]; then echo yes; fi)
 
  ifeq ($(STATICSSL), yes)
-  CINCLUDES = -I$(SSLDIR)/include
-  SOCKLIB := $(SOCKLIB) -ldl -L$(SSLDIR) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
+  CINCLUDES = -I$(SSLINC)
+  SOCKLIB := $(SOCKLIB) -ldl -L$(SSLLIB) -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic
  else
   # Use dynamic libs provided by the O/S
   SOCKLIB := $(SOCKLIB) -lssl -lcrypto
