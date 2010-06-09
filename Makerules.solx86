@@ -107,12 +107,7 @@ ifeq ($(USESSL), yes)
 
 endif
 
-ifeq ($(REV), 5.10)
- GLLIB = -lGL
-else
- GLLIB = -lGL -lXdamage
-endif
-
+GLLIB = -lGL
 FAKERLINK = $(GLLIB) -lm
 
 LIBDL = -ldl

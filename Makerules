@@ -2,7 +2,6 @@ APPNAME = VirtualGL
 
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
-REV := $(shell uname -r)
 
 platform := windows
 subplatform :=
