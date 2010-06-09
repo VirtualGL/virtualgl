@@ -152,6 +152,9 @@ uninstall:
 	$(RM) $(prefix)/bin/vglgenkey
 	$(RM) $(prefix)/bin/vglserver_config
 	$(RM) $(prefix)/bin/tcbench
+	if [ "$(platform)" = "linux" ]; then \
+		$(RM) $(prefix)/bin/cpustat; \
+	fi
 	$(RM) $(prefix)/bin/nettest
 	$(RM) $(prefix)/bin/glxinfo
 	$(RM) $(prefix)/bin/glxspheres
