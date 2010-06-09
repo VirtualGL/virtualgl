@@ -631,6 +631,8 @@ int main(int argc, char **argv)
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind rendering context");
 
+	fprintf(stderr, "OpenGL Renderer: %s\n", glGetString(GL_RENDERER));
+
 	_catch(event_loop(dpy));
 
 	if(dpy && olctx) {glXDestroyContext(dpy, olctx);  olctx=0;}
