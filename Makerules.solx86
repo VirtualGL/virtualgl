@@ -82,10 +82,10 @@ ifeq ($(USESSL), yes)
  SSLINC = $(TOPDIR)/../openssl.$(platform)$(subplatform)
  SSLLIB = $(TOPDIR)/../openssl.$(platform)$(subplatform)
  STATICSSL := $(shell if [ -f $(SSLLIB)/libssl.a -a -f $(SSLLIB)/libcrypto.a ]; then echo yes; fi)
- CINCLUDES := $(CINCLUDES) -I$(SSLINC)/include -I/usr/sfw/include
 
  ifeq ($(STATICSSL), yes)
 
+  CINCLUDES := $(CINCLUDES) -I$(SSLINC)
   ifeq ($(CC), gcc)
    SSLLINK = -ldl -L$(SSLLIB) -Xlinker -Bstatic -Xlinker -lssl -Xlinker -lcrypto -Xlinker -Bdynamic
   else
@@ -94,6 +94,7 @@ ifeq ($(USESSL), yes)
 
  else
 
+  CINCLUDES := $(CINCLUDES) -I/usr/sfw/include
   ifeq ($(subplatform), 64)
    SSLLINK = -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 -lssl -lcrypto
   else
