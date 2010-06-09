@@ -533,7 +533,7 @@ void glwrite(int format)
 void glread(int format)
 {
 	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
-	double rbtime;
+	double rbtime, readpixelstime;  rrtimer timer2;
 	#ifdef GL_VERSION_1_5
 	GLuint bufferid=0;
 	#endif
@@ -569,7 +569,7 @@ void glread(int format)
 	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
 		_throw("Could not allocate buffer");
 	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
-	n=0;  rbtime=0.;
+	n=0;  rbtime=readpixelstime=0.;
 	double tmin=0., tmax=0., ssq=0., sum=0.;  int first=1;
 	do
 	{
@@ -586,8 +586,10 @@ void glread(int format)
 		{
 			unsigned char *pixels=NULL;
 			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
+			timer2.start();
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
 				NULL);
+			readpixelstime+=timer2.elapsed();
 			pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 				GL_READ_ONLY);
 			if(!pixels) _throw("Could not map buffer");
@@ -596,8 +598,12 @@ void glread(int format)
 		}
 		else
 		#endif
+		{
+			timer2.start();
 			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
 				rgbaBuffer);
+			readpixelstime+=timer2.elapsed();
+		}
 
 		if(pix[format].glformat==GL_LUMINANCE)
 		{
@@ -627,6 +633,8 @@ void glread(int format)
 	fprintf(stderr, "(min = %s, ", sigfig(4, temps, minmps));
 	fprintf(stderr, "max = %s, ", sigfig(4, temps, maxmps));
 	fprintf(stderr, "sdev = %s)\n", sigfig(4, temps, stddev));
+	fprintf(stderr, "glReadPixels() accounted for %s%% of total time\n",
+		sigfig(4, temps, readpixelstime/rbtime*100.0));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
