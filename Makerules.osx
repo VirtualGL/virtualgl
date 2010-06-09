@@ -7,17 +7,8 @@ CXX = g++
 AR = ar ruvs
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
-ifeq ($(USESSL), yes)
- CDEFINES = -DUSESSL
-endif
 
-ifeq ($(subplatform), 64)
- ARCHFLAG = -m64
- LDFLAGS = -L/usr/X11R6/lib64
-else
- ARCHFLAG =
- LDFLAGS = -L/usr/X11R6/lib
-endif
+LDFLAGS = -L/usr/X11R6/lib
 
 ifeq ($(M32), yes)
  ARCHFLAG = -m32
@@ -37,8 +28,11 @@ SHEXT = dylib
 DEPFLAG = -MM
 
 FBXLIB = -lfbx -lXext -lX11
-GLLIB = -lGL
 SOCKLIB = -lrrsocket -lpthread -lX11 $(GLLIB)
+
 ifeq ($(USESSL), yes)
+ CDEFINES = -DUSESSL
  SOCKLIB := $(SOCKLIB) -lssl -lcrypto.0.9.7
 endif
+
+GLLIB = -lGL

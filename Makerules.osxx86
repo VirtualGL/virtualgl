@@ -4,15 +4,9 @@
 
 CC = gcc
 CXX = g++
-ifeq ($(CC), icc)
- CXX = icpc
-endif
 AR = ar ruvs
 
 CFLAGS = -Wall -fPIC -I/usr/X11R6/include
-ifeq ($(USESSL), yes)
- CDEFINES = -DUSESSL
-endif
 
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
@@ -41,9 +35,12 @@ DEPFLAG = -MM
 
 FBXLIB = -lfbx -lXext -lX11
 SOCKLIB = -lrrsocket -lpthread
+
 ifeq ($(USESSL), yes)
+ CDEFINES = -DUSESSL
  SOCKLIB := $(SOCKLIB) -lssl -lcrypto
 endif
+
 GLLIB = -lGL
 OSXGLFIX = -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib
 
