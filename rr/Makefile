@@ -137,7 +137,8 @@ clean:
 # Server
 
 $(LDIR)/librrfaker.$(SHEXT): $(ODIR)/faker-mapfile.E $(FOBJS) $(RRDEP)
-	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) $(LIBDL)
+	$(CXX) $(LDFLAGS) $(SHFLAG) -o $@ $(FOBJS) $(RRLIB) $(FAKERLINK) \
+		$(MAPFLAG)$(ODIR)/faker-mapfile.E $(LIBDL)
 
 $(LDIR)/libdlfaker.$(SHEXT): $(ODIR)/dlfaker.o
 	$(CC) $(LDFLAGS) $(SHFLAG) -o $@ $< $(LIBDL)

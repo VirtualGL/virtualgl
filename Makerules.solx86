@@ -120,7 +120,7 @@ else
  GLLIB = -lGL -lXdamage
 endif
 
-FAKERLINK = $(GLLIB) -lm $(MAPFLAG)$(ODIR)/faker-mapfile.E
+FAKERLINK = $(GLLIB) -lm 
 
 LIBDL = -ldl
 

@@ -60,7 +60,7 @@ ifeq ($(USESSL), yes)
 endif
 
 GLLIB = -lGL
-FAKERLINK = $(GLLIB) $(MAPFLAG)$(ODIR)/faker-mapfile.E
+FAKERLINK = $(GLLIB)
 
 ZNOW = -z now
 
