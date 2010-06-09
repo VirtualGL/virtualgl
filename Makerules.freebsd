@@ -13,14 +13,9 @@ AR = ar ruvs
 CINCLUDES = -I/usr/X11R6/include
 CFLAGS = -Wall -fpic
 CDEFINES = -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 
-ifeq ($(USESSL), yes)
- CDEFINES := $(CDEFINES) -DUSESSL
-endif
 
 ifeq ($(subplatform), 64)
  ARCHFLAG = -m64
-else
- ARCHFLAG =
 endif
 LDFLAGS = -static-libgcc -L/usr/X11R6/lib
 
@@ -46,6 +41,7 @@ SOCKLIB = -lrrsocket -lpthread
 
 ifeq ($(USESSL), yes)
 
+ CDEFINES := $(CDEFINES) -DUSESSL
  SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
  STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 

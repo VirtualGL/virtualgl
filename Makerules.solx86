@@ -14,7 +14,6 @@ ifeq ($(findstring gcc, $(CC)), gcc)
 
  ifeq ($(subplatform), 64)
   ARCHFLAG = -m64
-  CDEFINES := $(CDEFINES) __arch64__
  endif
  ifeq ($(M32), yes)
   ARCHFLAG = -m32
@@ -54,7 +53,6 @@ else
 
 endif
 
-
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
@@ -62,13 +60,6 @@ CINCLUDES = -I/usr/X/include -I/usr/X11/include
 MESAGLU := $(shell if [ -f /usr/X11/include/mesa/glu.h ]; then echo yes; fi)
 ifeq ($(MESAGLU), yes)
  CDEFINES := $(CDEFINES) -DMESAGLU
-endif
-
-ifeq ($(USEGLP), yes)
- CDEFINES := $(CDEFINES) -DUSEGLP
-endif
-ifeq ($(USESSL), yes)
- CDEFINES := $(CDEFINES) -DUSESSL
 endif
 
 LDFLAGS := $(LDFLAGS) -mt -lpthread -lrt
@@ -87,6 +78,7 @@ SOCKLIB = -lrrsocket -lsocket -lxnet
 
 ifeq ($(USESSL), yes)
 
+ CDEFINES := $(CDEFINES) -DUSESSL
  SSLDIR = $(TOPDIR)/../openssl.$(platform)$(subplatform)
  STATICSSL := $(shell if [ -f $(SSLDIR)/libssl.a -a -f $(SSLDIR)/libcrypto.a ]; then echo yes; fi)
 
@@ -103,7 +95,7 @@ ifeq ($(USESSL), yes)
 
   CINCLUDES := $(CINCLUDES) -I/usr/sfw/include
   ifeq ($(subplatform), 64)
-   SSLLIB = -L/usr/sfw/lib/amd64 -R/usr/sfw/lib/amd64 -lssl -lcrypto
+   SSLLIB = -L/usr/sfw/lib/64 -R/usr/sfw/lib/64 -lssl -lcrypto
   else
    SSLLIB = -L/usr/sfw/lib -R/usr/sfw/lib -lssl -lcrypto
   endif
@@ -120,7 +112,7 @@ else
  GLLIB = -lGL -lXdamage
 endif
 
-FAKERLINK = $(GLLIB) -lm 
+FAKERLINK = $(GLLIB) -lm
 
 LIBDL = -ldl
 
