@@ -259,6 +259,10 @@ dist: rr diags mesademos
 	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(EDIR32)
 endif
 endif
+ifeq ($(platform), osx)
+dist: rr rr32 diags diags32 mesademos mesademos32
+	sh makemacpkg $(APPNAME) $(BLDDIR) $(VERSION) $(BUILD) $(EDIR) $(EDIR32)
+endif
 
 .PHONY: tarball
 tarball:
