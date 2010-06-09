@@ -118,8 +118,8 @@ list of secure paths.  In the case of VirtualGL, you would execute the
 following commands (as root):
 
 #Verb: <<---
-crle -u -s /opt/SUNWvgl/lib
-crle -64 -u -s /opt/SUNWvgl/lib/64
+crle -u -s /opt/VirtualGL/lib
+crle -64 -u -s /opt/VirtualGL/lib/64
 ---
 
 ''vglrun'' on Solaris has two additional options that are relevant to launching

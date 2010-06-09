@@ -163,9 +163,9 @@ addvglgenkey() {
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		if [ "$UNAME_S" = "SunOS" ]; then
 			if [ "$2" = "bottom" ]; then
-				addtobottom $1 /opt/SUNWvgl/bin/vglgenkey
+				addtobottom $1 /opt/VirtualGL/bin/vglgenkey
 			else
-				addtotop $1 /opt/SUNWvgl/bin/vglgenkey
+				addtotop $1 /opt/VirtualGL/bin/vglgenkey
 			fi
 		else
 			addtotop $1 vglgenkey

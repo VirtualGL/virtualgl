@@ -222,8 +222,6 @@ ifeq ($(platform), solx86)
 dist: sunpkg
 endif
 
-PKGDIR = SUNWvgl
-PKGNAME = $(PKGDIR)
 PKGARCH = sparc
 ifeq ($(platform), solx86)
 PKGARCH = i386
@@ -232,25 +230,25 @@ endif
 .PHONY: sunpkg
 sunpkg: rr diags mesademos
 	rm -rf $(BLDDIR)/pkgbuild
-	rm -rf $(BLDDIR)/$(PKGNAME)
-	rm -f $(BLDDIR)/$(PKGNAME).pkg.bz2
-	mkdir -p $(BLDDIR)/pkgbuild/$(PKGDIR)
-	mkdir -p $(BLDDIR)/$(PKGNAME)
+	rm -rf $(BLDDIR)/$(APPNAME)
+	rm -f $(BLDDIR)/$(APPNAME).pkg.bz2
+	mkdir -p $(BLDDIR)/pkgbuild/$(APPNAME)
+	mkdir -p $(BLDDIR)/$(APPNAME)
 	cp copyright $(BLDDIR)
 	cp depend.$(platform) $(BLDDIR)/depend
 	cat pkginfo.tmpl | sed s/{__VERSION}/$(VERSION)/g | sed s/{__BUILD}/$(BUILD)/g \
-		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(PKGNAME)/g \
+		| sed s/{__APPNAME}/$(APPNAME)/g | sed s/{__PKGNAME}/$(APPNAME)/g \
 		| sed s/{__PKGARCH}/$(PKGARCH)/g >$(BLDDIR)/pkginfo
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) docdir=$(BLDDIR)/pkgbuild/$(PKGDIR)/doc M32=yes install
-	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(PKGDIR) docdir=$(BLDDIR)/pkgbuild/$(PKGDIR)/doc install
-	sh makeproto $(BLDDIR)/pkgbuild/$(PKGDIR) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(APPNAME) docdir=$(BLDDIR)/pkgbuild/$(APPNAME)/doc M32=yes install
+	$(MAKE) prefix=$(BLDDIR)/pkgbuild/$(APPNAME) docdir=$(BLDDIR)/pkgbuild/$(APPNAME)/doc install
+	sh makeproto $(BLDDIR)/pkgbuild/$(APPNAME) $(platform) $(subplatform) > $(BLDDIR)/rr.proto
 	cd $(BLDDIR); \
 	pkgmk -o -r ./pkgbuild -d . -a `uname -p` -f rr.proto; \
 	rm rr.proto copyright depend pkginfo; \
-	pkgtrans -s `pwd` `pwd`/$(PKGNAME).pkg $(PKGNAME)
-	bzip2 $(BLDDIR)/$(PKGNAME).pkg
+	pkgtrans -s `pwd` `pwd`/$(APPNAME).pkg $(APPNAME)
+	bzip2 $(BLDDIR)/$(APPNAME).pkg
 	rm -rf $(BLDDIR)/pkgbuild
-	rm -rf $(BLDDIR)/$(PKGNAME)
+	rm -rf $(BLDDIR)/$(APPNAME)
 
 ifeq ($(platform), osxx86)
 ifeq ($(subplatform), 64)

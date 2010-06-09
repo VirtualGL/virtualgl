@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009 D. R. Commander
+# Copyright (C)2009-2010 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -214,17 +214,17 @@ SunOS)
 
 if [ -z "$FAKERLIB" ]; then
 FAKERLIB=librrfaker.so
-if [ -f /opt/SUNWvgl/lib/64/librrfaker.so ]
+if [ -f /opt/VirtualGL/lib/64/librrfaker.so ]
 then
-	FAKERLIB=/opt/SUNWvgl/lib/64/librrfaker.so
+	FAKERLIB=/opt/VirtualGL/lib/64/librrfaker.so
 fi
 fi
 export FAKERLIB
 if [ -z "$FAKERLIB32" ]; then
 FAKERLIB32=librrfaker.so
-if [ -f /opt/SUNWvgl/lib/librrfaker.so ]
+if [ -f /opt/VirtualGL/lib/librrfaker.so ]
 then
-	FAKERLIB32=/opt/SUNWvgl/lib/librrfaker.so
+	FAKERLIB32=/opt/VirtualGL/lib/librrfaker.so
 fi
 fi
 export FAKERLIB32
@@ -235,17 +235,17 @@ if [ $__VGL_64 -eq 0 ]; then
 		LD_PRELOAD_32=$FAKERLIB32:$LD_PRELOAD_32
 	fi
 	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/libdlfaker.so ]
+		if [ -f /opt/VirtualGL/lib/libdlfaker.so ]
 		then
-			LD_PRELOAD_32=/opt/SUNWvgl/lib/libdlfaker.so:$LD_PRELOAD_32
+			LD_PRELOAD_32=/opt/VirtualGL/lib/libdlfaker.so:$LD_PRELOAD_32
 		else
 			LD_PRELOAD_32=libdlfaker.so:$LD_PRELOAD_32
 		fi
 	fi
 	if [ $__VGL_GE -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/libgefaker.so ]
+		if [ -f /opt/VirtualGL/lib/libgefaker.so ]
 		then
-			LD_PRELOAD_32=/opt/SUNWvgl/lib/libgefaker.so:$LD_PRELOAD_32
+			LD_PRELOAD_32=/opt/VirtualGL/lib/libgefaker.so:$LD_PRELOAD_32
 		else
 			LD_PRELOAD_32=libgefaker.so:$LD_PRELOAD_32
 		fi
@@ -259,17 +259,17 @@ if [ $__VGL_32 -eq 0 ]; then
 		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
 	fi
 	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/64/libdlfaker.so ]
+		if [ -f /opt/VirtualGL/lib/64/libdlfaker.so ]
 		then
-			LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libdlfaker.so:$LD_PRELOAD_64
+			LD_PRELOAD_64=/opt/VirtualGL/lib/64/libdlfaker.so:$LD_PRELOAD_64
 		else
 			LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
 		fi
 	fi
 	if [ $__VGL_GE -eq 1 ]; then
-		if [ -f /opt/SUNWvgl/lib/64/libgefaker.so ]
+		if [ -f /opt/VirtualGL/lib/64/libgefaker.so ]
 		then
-			LD_PRELOAD_64=/opt/SUNWvgl/lib/64/libgefaker.so:$LD_PRELOAD_64
+			LD_PRELOAD_64=/opt/VirtualGL/lib/64/libgefaker.so:$LD_PRELOAD_64
 		else
 			LD_PRELOAD_64=libgefaker.so:$LD_PRELOAD_64
 		fi
