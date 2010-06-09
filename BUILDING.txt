@@ -377,20 +377,14 @@ Cygwin:
    libGL-devel
    libGLU-devel
 
--- Download and install the libjpeg-turbo SDK for GCC
+-- libjpeg-turbo SDK
 
-   * The libjpeg-turbo SDK Windows installer (EXE) can be obtained from the
-     "Files" area of:
+   * The libjpeg-turbo Cygwin package can be obtained from the "Files" area of:
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * Add the libjpeg-turbo include path (/cygdrive/c/libjpeg-turbo-gcc/include)
-     to the CPATH environment variable prior to building VirtualGL.
-   * Add the libjpeg-turbo library path (/cygdrive/c/libjpeg-turbo-gcc/lib) to
-     the LIBRARY_PATH environment variable prior to building VirtualGL.
-
 -- Pass an argument of "platform=cygwin" to 'make' when performing the
-   build:
+   VirtualGL build:
 
      make platform=cygwin
 
