@@ -733,8 +733,10 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	GLint readbuf=GL_BACK;
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
-	static GLuint pbo=0;  static const char *ext=NULL;
-	int boundbuffer=0;
+	#ifdef GL_VERSION_1_5
+	static GLuint pbo=0;  int boundbuffer=0;
+	#endif
+	static const char *ext=NULL;
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
@@ -754,6 +756,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
 				_throw("GL_ARB_pixel_buffer_object extension not available");
 		}
+		#ifdef GL_VERSION_1_5
 		if(!pbo)
 		{
 			glGenBuffers(1, &pbo);
@@ -771,6 +774,9 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*h)
 			_throw("Could not set PBO size");
+		#else
+		_throw("PBO support not compiled in.  Rebuild VGL on a system that has OpenGL 1.5.");
+		#endif
 	}
 	else
 	{
@@ -790,6 +796,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	if(usepbo)
 	{
+		#ifdef GL_VERSION_1_5
 		unsigned char *pbobits=NULL;
 		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
@@ -798,6 +805,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			_throw("Could not unmap pixel buffer object");
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, boundbuffer);
+		#endif
 	}
 
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
