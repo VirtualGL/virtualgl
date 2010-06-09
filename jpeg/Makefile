@@ -51,13 +51,6 @@ $(ODIR)/turbojpeg.obj: turbojpegl.c
 
 endif
 
-ifeq ($(JPEGLIB), medialib)
-
-$(ODIR)/turbojpeg.obj: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h
-	$(CC) $(CFLAGS) -c $< -Fo$@
-
-endif
-
 $(LDIR)/tjpeg.lib: $(ODIR)/turbojpeg.obj
 	$(AR) -OUT:$@ $^
 
