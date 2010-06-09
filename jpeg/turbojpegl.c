@@ -23,13 +23,24 @@
 #include <jerror.h>
 #include <setjmp.h>
 #include "turbojpeg.h"
-
-#if defined(_WIN32) || defined(__APPLE__)
-#define memalign(w, l) malloc(l)
-#else
+#ifdef sun
 #include <malloc.h>
 #endif
 
+void *__memalign(size_t boundary, size_t size)
+{
+	#if defined(_WIN32) || defined(__APPLE__)
+	return malloc(size);
+	#else
+	#ifdef sun
+	return memalign(boundary, size);
+	#else
+	void *ptr=NULL;
+	posix_memalign(&ptr, boundary, size);
+	return ptr;
+	#endif
+	#endif
+}
 
 #ifndef min
  #define min(a,b) ((a)<(b)?(a):(b))
@@ -233,21 +244,21 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 		for(i=0; i<cinfo->num_components; i++)
 		{
 			compptr=&cinfo->comp_info[i];
-			_tmpbuf[i]=(JSAMPLE *)memalign(16,
+			_tmpbuf[i]=(JSAMPLE *)__memalign(16,
 				PAD((compptr->width_in_blocks*cinfo->max_h_samp_factor*DCTSIZE)
 					/compptr->h_samp_factor, 16) * cinfo->max_v_samp_factor);
 			if(!_tmpbuf[i]) _throw("Memory allocation failure");
-			tmpbuf[i]=(JSAMPROW *)memalign(16,
+			tmpbuf[i]=(JSAMPROW *)__memalign(16,
 				sizeof(JSAMPROW)*cinfo->max_v_samp_factor);
 			if(!tmpbuf[i]) _throw("Memory allocation failure");
 			for(row=0; row<cinfo->max_v_samp_factor; row++)
 				tmpbuf[i][row]=&_tmpbuf[i][
 					PAD((compptr->width_in_blocks*cinfo->max_h_samp_factor*DCTSIZE)
 						/compptr->h_samp_factor, 16) * row];
-			_tmpbuf2[i]=(JSAMPLE *)memalign(16,
+			_tmpbuf2[i]=(JSAMPLE *)__memalign(16,
 				PAD(compptr->width_in_blocks*DCTSIZE, 16) * compptr->v_samp_factor);
 			if(!_tmpbuf2[i]) _throw("Memory allocation failure");
-			tmpbuf2[i]=(JSAMPROW *)memalign(16,
+			tmpbuf2[i]=(JSAMPROW *)__memalign(16,
 				sizeof(JSAMPROW)*compptr->v_samp_factor);
 			if(!tmpbuf2[i]) _throw("Memory allocation failure");
 			for(row=0; row<compptr->v_samp_factor; row++)
@@ -255,7 +266,7 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 					PAD(compptr->width_in_blocks*DCTSIZE, 16) * row];
 			cw[i]=pw*compptr->h_samp_factor/cinfo->max_h_samp_factor;
 			ch[i]=ph*compptr->v_samp_factor/cinfo->max_v_samp_factor;
-			outbuf[i]=(JSAMPROW *)memalign(16, sizeof(JSAMPROW)*ch[i]);
+			outbuf[i]=(JSAMPROW *)__memalign(16, sizeof(JSAMPROW)*ch[i]);
 			if(!outbuf[i]) _throw("Memory allocation failure");
 			for(row=0; row<ch[i]; row++)
 			{
