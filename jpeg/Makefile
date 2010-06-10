@@ -107,17 +107,10 @@ $(ODIR)/turbojpeg.o: turbojpegl.c
 endif
 
 ifeq ($(JPEGLIB), libjpeg-turbo)
-ifeq ($(platform), cygwin)
-
-$(ODIR)/turbojpeg.o: turbojpegl.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-else
 
 $(ODIR)/turbojpeg.o: turbojpegl.c
 	$(CC) -I$(TOPDIR)/include -I$(LJTDIR)/include $(CFLAGS) -c $< -o $@
 
-endif
 endif
 
 ifeq ($(JPEGLIB), quicktime)
