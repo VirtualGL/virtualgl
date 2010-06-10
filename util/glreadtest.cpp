@@ -633,7 +633,7 @@ void glread(int format)
 	fprintf(stderr, "(min = %s, ", sigfig(4, temps, minmps));
 	fprintf(stderr, "max = %s, ", sigfig(4, temps, maxmps));
 	fprintf(stderr, "sdev = %s)\n", sigfig(4, temps, stddev));
-	fprintf(stderr, "glReadPixels() accounted for %s%% of total time\n",
+	fprintf(stderr, "glReadPixels() accounted for %s%% of total readback time\n",
 		sigfig(4, temps, readpixelstime/rbtime*100.0));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
