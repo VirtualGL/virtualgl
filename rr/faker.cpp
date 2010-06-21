@@ -381,7 +381,7 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	__vgl_fakerinit();
 	dpy=_XOpenDisplay(name);
-	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=fconfig.vendor;
+	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
 		stoptrace();  prargd(dpy);  closetrace();
 
