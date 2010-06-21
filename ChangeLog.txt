@@ -71,6 +71,10 @@ CR_SYSTEM_GL_PATH or to run the VirtualBox application using 'vglrun -nodl'.
 This version of VirtualGL provides a binary package, documentation, and full
 support for Cygwin/X.
 -------------------------------------------------------------------------------
+[14]
+Fixed "free(): invalid pointer" error which occurred whenever an application
+called XCloseDisplay() and the VGL_XVENDOR environment variable was set.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
