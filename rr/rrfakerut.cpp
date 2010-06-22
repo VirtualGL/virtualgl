@@ -32,6 +32,7 @@
 #ifdef sparc
 #include <X11/Xmu/XmuSolaris.h>
 #endif
+#include "glext-vgl.h"
 
 #ifndef GLX_RGBA_BIT
 #define GLX_RGBA_BIT 0x00000001
@@ -1853,22 +1854,22 @@ int pbtest(void)
 				_error("Could not make context current");
 			checkcurrent(dpy, glxwin, glxwin, ctx);
 			glDrawBuffer(GL_BACK);
-			glGenFramebuffers(1, &fb);
-			glGenRenderbuffers(1, &rb);
-			glBindRenderbuffer(GL_RENDERBUFFER, rb);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, dpyw/2, dpyh/2);
-			glBindFramebuffer(GL_FRAMEBUFFER, fb);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_RENDERBUFFER, rb);
+			glGenFramebuffersEXT(1, &fb);
+			glGenRenderbuffersEXT(1, &rb);
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rb);
+			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA, dpyw/2, dpyh/2);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rb);
 			clr.clear(0);
 			verifybufcolor(0, clr.bits(-1), "FBO");
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_RENDERBUFFER, 0);
+			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+			glFramebufferRenderbufferEXT(GL_DRAW_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, 0);
 			glDrawBuffer(GL_BACK);
 			glXSwapBuffers(dpy, glxwin);
 			checkframe(win, 1, lastframe);
-			checkreadbackstate(GL_COLOR_ATTACHMENT0, dpy, glxwin, glxwin, ctx);
+			checkreadbackstate(GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin, ctx);
 			checkwindowcolor(win, dbwin? clr.bits(-3):clr.bits(-2), false);
 			printf("SUCCESS\n");
 		}
@@ -1877,12 +1878,12 @@ int pbtest(void)
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
 		fflush(stdout);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-			GL_RENDERBUFFER, 0);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		if(rb) {glDeleteRenderbuffers(1, &rb);  rb=0;}
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		if(fb) {glDeleteFramebuffers(1, &fb);  fb=0;}
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+			GL_RENDERBUFFER_EXT, 0);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+		if(rb) {glDeleteRenderbuffersEXT(1, &rb);  rb=0;}
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		if(fb) {glDeleteFramebuffersEXT(1, &fb);  fb=0;}
 
 		try
 		{
@@ -1975,12 +1976,12 @@ int pbtest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-		GL_RENDERBUFFER, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	if(rb) {glDeleteRenderbuffers(1, &rb);  rb=0;}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	if(fb) {glDeleteFramebuffers(1, &fb);  fb=0;}
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+		GL_RENDERBUFFER_EXT, 0);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	if(rb) {glDeleteRenderbuffersEXT(1, &rb);  rb=0;}
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	if(fb) {glDeleteFramebuffersEXT(1, &fb);  fb=0;}
 	if(ctx && dpy) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
 	if(pb && dpy) {glXDestroyPbuffer(dpy, pb);  pb=0;}
 	if(glxpm1 && dpy) {glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1=0;}

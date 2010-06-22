@@ -21,6 +21,7 @@
 #include <mlib.h>
 #endif
 #include "glxvisual.h"
+#include "glext-vgl.h"
 
 #define INFAKER
 #include "tempctx.h"
@@ -738,9 +739,9 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	#endif
 	static const char *ext=NULL;
 
-	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &fbr);
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbw);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
@@ -905,8 +906,8 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	tc.restore();
 
 	glReadBuffer(readbuf);
-	if(fbr) glBindFramebuffer(GL_READ_FRAMEBUFFER, fbr);
-	if(fbw) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbw);
+	if(fbr) glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbr);
+	if(fbw) glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbw);
 }
 
 bool pbwin::stereo(void)
