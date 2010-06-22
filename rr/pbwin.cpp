@@ -732,11 +732,16 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 {
 
 	GLint readbuf=GL_BACK;
-	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
+	GLint fbr=0, fbw=0;
 	#ifdef GL_VERSION_1_5
 	static GLuint pbo=0;  int boundbuffer=0;
 	#endif
 	static const char *ext=NULL;
+
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &fbr);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbw);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
@@ -898,7 +903,10 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	glPopClientAttrib();
 	tc.restore();
+
 	glReadBuffer(readbuf);
+	if(fbr) glBindFramebuffer(GL_READ_FRAMEBUFFER, fbr);
+	if(fbw) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbw);
 }
 
 bool pbwin::stereo(void)

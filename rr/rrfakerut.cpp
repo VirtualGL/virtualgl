@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define GLX_GLXEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES
 #include "glx.h"
 #ifdef MESAGLU
 #include <mesa/glu.h>
@@ -58,12 +60,12 @@ int usingglp=0;
 
 
 #define glClearBuffer(buffer, r, g, b, a) { \
-	glDrawBuffer(buffer); \
+	if(buffer>0) glDrawBuffer(buffer); \
 	glClearColor(r, g, b, a); \
 	glClear(GL_COLOR_BUFFER_BIT);}
 
 #define glClearBufferci(buffer, i) { \
-	glDrawBuffer(buffer); \
+	if(buffer>0) glDrawBuffer(buffer); \
 	glClearIndex(i); \
 	glClear(GL_COLOR_BUFFER_BIT);}
 
@@ -1681,7 +1683,7 @@ void checkdrawable(Display *dpy, GLXDrawable draw, int width, int height,
 }
 
 #define verifybufcolor(buf, shouldbe, tag) {\
-	glReadBuffer(buf); \
+	if(buf>0) glReadBuffer(buf); \
 	unsigned int bufcol=checkbuffercolor(false); \
 	if(bufcol!=(shouldbe)) \
 		_prerror2(tag" is 0x%.6x, should be 0x%.6x", bufcol, (shouldbe)); \
@@ -1701,6 +1703,8 @@ int pbtest(void)
 	XSetWindowAttributes swa;
 	XFontStruct *fontinfo=NULL;  int minchar, maxchar;
 	int fontlistbase=0;
+	GLuint fb=0, rb=0;
+	testcolor clr(false, 0);
 
 	printf("Off-screen rendering test\n\n");
 
@@ -1788,9 +1792,9 @@ int pbtest(void)
 			if(!(glXMakeContextCurrent(dpy, pb, pb, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, pb, pb, ctx);
-			glClearBuffer(GL_BACK, 1., 0., 0., 0.);
-			glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
-			verifybufcolor(GL_BACK, dbpb? 0x0000ff:0x00ff00, "PB");
+			clr.clear(GL_BACK);
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_BACK, dbpb? clr.bits(-2):clr.bits(-1), "PB");
 			if(!(glXMakeContextCurrent(dpy, glxwin, pb, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, glxwin, pb, ctx);
@@ -1800,7 +1804,7 @@ int pbtest(void)
 			glXSwapBuffers(dpy, glxwin);
 			checkframe(win, 1, lastframe);
 			checkreadbackstate(GL_FRONT, dpy, glxwin, pb, ctx);
-			checkwindowcolor(win, dbpb? 0x0000ff:0x00ff00, false);
+			checkwindowcolor(win, dbpb? clr.bits(-2):clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)
@@ -1817,9 +1821,9 @@ int pbtest(void)
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
 				fontlistbase+minchar);
 			checkcurrent(dpy, glxwin, glxwin, ctx);
-			glClearBuffer(GL_BACK, 0., 1., 1., 0.);
-			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
-			verifybufcolor(GL_BACK, dbwin? 0xffff00:0xff00ff, "Win");
+			clr.clear(GL_BACK);
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, pb, glxwin, ctx);
@@ -1827,7 +1831,7 @@ int pbtest(void)
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
 			glCopyPixels(0, 0, dpyw/2, dpyh/2, GL_COLOR);
 			glXSwapBuffers(dpy, pb);
-			verifybufcolor(GL_BACK, dbwin? 0xffff00:0xff00ff, "PB");
+			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "PB");
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)
@@ -1838,14 +1842,58 @@ int pbtest(void)
 
 		try
 		{
+			printf("FBO->Window:      ");
+			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
+				_error("Could not make context current");
+			checkcurrent(dpy, glxwin, glxwin, ctx);
+			clr.clear(GL_BACK);
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "Win");
+			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
+				_error("Could not make context current");
+			checkcurrent(dpy, glxwin, glxwin, ctx);
+			glDrawBuffer(GL_BACK);
+			glGenFramebuffers(1, &fb);
+			glGenRenderbuffers(1, &rb);
+			glBindRenderbuffer(GL_RENDERBUFFER, rb);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, dpyw/2, dpyh/2);
+			glBindFramebuffer(GL_FRAMEBUFFER, fb);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_RENDERBUFFER, rb);
+			clr.clear(0);
+			verifybufcolor(0, clr.bits(-1), "FBO");
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_RENDERBUFFER, 0);
+			glDrawBuffer(GL_BACK);
+			glXSwapBuffers(dpy, glxwin);
+			checkframe(win, 1, lastframe);
+			checkreadbackstate(GL_COLOR_ATTACHMENT0, dpy, glxwin, glxwin, ctx);
+			checkwindowcolor(win, dbwin? clr.bits(-3):clr.bits(-2), false);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+		fflush(stdout);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_RENDERBUFFER, 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		if(rb) {glDeleteRenderbuffers(1, &rb);  rb=0;}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if(fb) {glDeleteFramebuffers(1, &fb);  fb=0;}
+
+		try
+		{
 			printf("Pixmap->Window:   ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
 				fontlistbase+minchar);
 			checkcurrent(dpy, glxpm0, glxpm0, ctx);
-			glClearBuffer(GL_FRONT, 0., 0., 1., 0.);
-			verifybufcolor(GL_FRONT, 0xff0000, "PM0");
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
 			XCopyArea(dpy, pm0, win, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw/2, dpyh/2, 0, 0);
@@ -1853,7 +1901,7 @@ int pbtest(void)
 			int temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
 			if(temp!=GL_BACK) _error("Draw buffer changed");
 			checkframe(win, 1, lastframe);
-			checkwindowcolor(win, 0xff0000, false);
+			checkwindowcolor(win, clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)
@@ -1870,9 +1918,9 @@ int pbtest(void)
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
 				fontlistbase+minchar);
 			checkcurrent(dpy, glxwin, glxwin, ctx);
-			glClearBuffer(GL_FRONT, 0., 1., 0., 0.);
-			glClearBuffer(GL_BACK, 1., 0., 0., 0.);
-			verifybufcolor(GL_FRONT, dbwin? 0x00ff00:0x0000ff, "Win");
+			clr.clear(GL_FRONT);
+			clr.clear(GL_BACK);
+			verifybufcolor(GL_FRONT, dbwin? clr.bits(-2):clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, glxpm1, glxpm1, ctx);
@@ -1884,8 +1932,8 @@ int pbtest(void)
 			int temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
 			if(temp!=GL_BACK) _error("Draw buffer changed");
 			checkframe(win, 0, lastframe);
-			verifybufcolor(GL_BACK, dbwin? 0x00ff00:0x0000ff, "PM1");
-			verifybufcolor(GL_FRONT, dbwin? 0x00ff00:0x0000ff, "PM1");
+			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "PM1");
+			verifybufcolor(GL_FRONT, dbwin? clr.bits(-2):clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)
@@ -1902,8 +1950,8 @@ int pbtest(void)
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
 				fontlistbase+minchar);
 			checkcurrent(dpy, glxpm0, glxpm0, ctx);
-			glClearBuffer(GL_FRONT, 1., 0., 1., 0.);
-			verifybufcolor(GL_FRONT, 0xff00ff, "PM0");
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, glxpm1, glxpm1, ctx);
@@ -1913,8 +1961,8 @@ int pbtest(void)
 			checkreadbackstate(GL_BACK, dpy, glxpm1, glxpm1, ctx);
 			int temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
 			if(temp!=GL_BACK) _error("Draw buffer changed");
-			verifybufcolor(GL_BACK, 0xff00ff, "PM1");
-			verifybufcolor(GL_FRONT, 0xff00ff, "PM1");
+			verifybufcolor(GL_BACK, clr.bits(-1), "PM1");
+			verifybufcolor(GL_FRONT, clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)
@@ -1927,6 +1975,12 @@ int pbtest(void)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_RENDERBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	if(rb) {glDeleteRenderbuffers(1, &rb);  rb=0;}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if(fb) {glDeleteFramebuffers(1, &fb);  fb=0;}
 	if(ctx && dpy) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
 	if(pb && dpy) {glXDestroyPbuffer(dpy, pb);  pb=0;}
 	if(glxpm1 && dpy) {glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1=0;}
