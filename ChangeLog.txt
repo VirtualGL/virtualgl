@@ -81,6 +81,10 @@ called XCloseDisplay() and the VGL_XVENDOR environment variable was set.
 VirtualGL should now work properly when used with applications that render to
 framebuffer objects (FBO's).
 -------------------------------------------------------------------------------
+[16]
+vglconnect.bat should now work properly on 64-bit Windows systems.  Previously,
+it would fail if it was installed under the "Program Files (x86)" directory.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
