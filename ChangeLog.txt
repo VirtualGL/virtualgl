@@ -31,7 +31,8 @@ Intel Performance Primitives) or Sun mediaLib.  Instead, VirtualGL now uses
 libjpeg-turbo, a fully open source vector-accelerated JPEG codec developed in
 conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 
-As a result of this, the VirtualGL RPMs and DEBs are now self-contained.
+As a result of this, it is no longer necessary to install a separate TurboJPEG
+package on Linux systems.
 -------------------------------------------------------------------------------
 [6]
 Added a universal 32/64-bit VirtualGL Client binary for OS X.  The 32-bit fork
@@ -41,7 +42,8 @@ Leopard" or later.
 [7]
 Added support for encoding images as I420 YUV and displaying through X Video.
 The images can either be displayed directly to the X server or sent through
-the VGL transport for display using vglclient.
+the VGL transport for display using vglclient.  See the User's Guide for more
+details.
 -------------------------------------------------------------------------------
 [8]
 Renamed /etc/modprobe.d/virtualgl to /etc/modprobe.d/virtualgl.conf to comply
@@ -57,7 +59,7 @@ The uninstall script in the Mac distribution package should now work on OS X
 10.6.
 -------------------------------------------------------------------------------
 [11]
-VirtualGL now attempts to use pixel buffer objects (PBO's) to accelerate the
+VirtualGL can now use pixel buffer objects (PBO's) to accelerate the
 readback of the 3D pixels.  This particularly helps when multiple users are
 sharing the GPU.  See the "Advanced Configuration" section of the User's Guide
 for more information.
