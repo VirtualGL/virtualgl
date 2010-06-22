@@ -75,6 +75,10 @@ support for Cygwin/X.
 Fixed "free(): invalid pointer" error which occurred whenever an application
 called XCloseDisplay() and the VGL_XVENDOR environment variable was set.
 -------------------------------------------------------------------------------
+[15]
+VirtualGL should now work properly when used with applications that render to
+framebuffer objects (FBO's).
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
