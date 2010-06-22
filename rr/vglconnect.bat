@@ -1,6 +1,7 @@
 @echo off
 
 rem Copyright (C)2007 Sun Microsystems, Inc.
+rem Copyright (C)2010 D. R. Commander.
 rem
 rem This library is free software and may be redistributed and/or modified under
 rem the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -91,6 +92,8 @@ set VGLCLIENT=%~d0%~p0vglclient.exe
 if not exist "%VGLCLIENT%" set VGLCLIENT=vglclient.exe
 
 set VGLCLIENT="%VGLCLIENT%" %VGLARGS%
+set VGLCLIENT=%VGLCLIENT:(=^(%
+set VGLCLIENT=%VGLCLIENT:)=^)%
 for /f %%i in ('"%VGLCLIENT%"') do set PORT=%%i
 
 set /a PORTM1=PORT-1
