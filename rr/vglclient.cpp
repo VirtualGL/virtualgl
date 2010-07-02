@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
 
 	if(!child)
 	{
-		rrout.println("\n%s Client v%s (Build %s %d-bit)", __APPNAME, __VERSION, __BUILD, sizeof(long)*8);
+		rrout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME, (int)sizeof(size_t)*8, __VERSION, __BUILD);
 		if(printversion) return 0;
 		if(detach) daemonize();
 	}
