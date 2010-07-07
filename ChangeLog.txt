@@ -85,6 +85,10 @@ framebuffer objects (FBO's).
 vglconnect.bat should now work properly on 64-bit Windows systems.  Previously,
 it would fail if it was installed under the "Program Files (x86)" directory.
 -------------------------------------------------------------------------------
+[17]
+Added -gid option to vglserver_config to allow the group ID of the vglusers
+group to be specified, if that group must be created.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
