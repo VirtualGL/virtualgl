@@ -19,6 +19,7 @@ FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
 UNATTENDED=0
 
+GID=
 GROUPADD=/usr/sbin/groupadd
 if [ ! -x $GROUPADD ]; then GROUPADD=groupadd; fi
 LSMOD=/sbin/lsmod
@@ -31,16 +32,20 @@ usage() {
 	echo "USAGE: $0 [flags]"
 	echo
 	echo "Flags (for unattended mode):"
-	echo "+glx	Configure system for VirtualGL using GLX"
-	echo "+glp	Configure system for VirtualGL using GLP"
-	echo "-glx	Unconfigure system for VirtualGL using GLX"
-	echo "-glp	Unconfigure system for VirtualGL using GLP"
+	echo "+glx	Configure server for use with VirtualGL in GLX mode"
+	echo "+glp	Configure server for use with VirtualGL in GLP mode"
+	echo "-glx	Unconfigure server for use with VirtualGL in GLX mode"
+	echo "-glp	Unconfigure server for use with VirtualGL in GLP mode"
 	echo "-s	Restrict 3D X server access to vglusers group [default]" 
 	echo "+s	Open 3D X server access to all users of this machine"
 	echo "-f	Restrict framebuffer device access to vglusers group [default]"
 	echo "+f	Open framebuffer device access to all users of this machine"
 	echo "-t	Disable XTEST extension [default]"
 	echo "+t	Enable XTEST extension"
+	echo
+	echo "Flags (for both interactive and unattended modes):"
+	echo "-gid {g}  If vglusers group must be created, then set its group ID to {g}"
+	echo
 	exit $1
 }
 
@@ -530,7 +535,11 @@ configglp() {
 
 		if [ "$VGLUSERSONLY" = "1" ]; then
 			echo ... Creating vglusers group ...
-			$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+			if [ ! "$GID" = "" ]; then
+				$GROUPADD -g $GID vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+			else
+				$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+			fi
 		fi
 
 		if [ ! -d /etc/dt/config ]; then
@@ -566,7 +575,11 @@ configglx() {
 
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Creating vglusers group ...
-		$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+		if [ ! "$GID" = "" ]; then
+			$GROUPADD -g $GID vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+		else
+			$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
+		fi
 
 		if [ ! -d /etc/opt/VirtualGL ]; then
 			echo ... Creating /etc/opt/VirtualGL/ ...
@@ -792,26 +805,23 @@ glpcheck() {
 	return $GLP
 }
 
-
-if [ "${#}" != 0 ]; then
-	UNATTENDED=1
-	for argument in ${*}
-		do
-			case $argument in
-				-s) VGLUSERSONLY=1 ;;
-				-f) FBDEVVGLUSERSONLY=1 ;;
-				-t) DISABLEXTEST=1 ;;
-				+s) VGLUSERSONLY=0 ;;
-				+f) FBDEVVGLUSERSONLY=0 ;;
-				+t) DISABLEXTEST=0 ;;
-				+glx) CONFIG_VGL="configglx" ;;
-				-glx) CONFIG_VGL="unconfigglx" ;;
-				+glp) glpcheck || CONFIG_VGL="configglp" ;;
-				-glp) glpcheck || CONFIG_VGL="unconfigdev" ;;
-				*) usage 0
-			esac
-	done
-fi
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-s) VGLUSERSONLY=1 ;;
+		-f) FBDEVVGLUSERSONLY=1 ;;
+		-t) DISABLEXTEST=1 ;;
+		+s) VGLUSERSONLY=0 ;;
+		+f) FBDEVVGLUSERSONLY=0 ;;
+		+t) DISABLEXTEST=0 ;;
+		-gid) GID=$2;  shift ;;
+		+glx) CONFIG_VGL="configglx";  UNATTENDED=1 ;;
+		-glx) CONFIG_VGL="unconfigglx"; UNATTENDED=1 ;;
+		+glp) glpcheck || (CONFIG_VGL="configglp";  UNATTENDED=1) ;;
+		-glp) glpcheck || (CONFIG_VGL="unconfigdev";  UNATTENDED=1) ;;
+		*) usage 0
+	esac
+	shift
+done
 
 if [ "$CONFIG_VGL" = "" -a $UNATTENDED = 1 ]; then
 	usage 0
