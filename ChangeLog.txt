@@ -89,6 +89,9 @@ it would fail if it was installed under the "Program Files (x86)" directory.
 Added -gid option to vglserver_config to allow the group ID of the vglusers
 group to be specified, if that group must be created.
 -------------------------------------------------------------------------------
+[18]
+TCBench should now work properly on OS X.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
