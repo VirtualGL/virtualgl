@@ -332,7 +332,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	int wx, wy;
 	#ifdef FBXWIN32
 	fbx_gc gc;
-	#else
+	#elif !defined(__APPLE__)
 	int x=0, y=0;  XWindowAttributes xwinattrib, rwinattrib;  Window dummy;
 	#endif
 	if(!s) _throw("Invalid argument");
@@ -350,6 +350,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	if(!s->xattach && s->shm) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
 	#endif
 
+	#ifndef __APPLE__
 	x11(XGetWindowAttributes(s->wh.dpy, s->wh.win, &xwinattrib));
 	if(s->wh.win!=xwinattrib.root && s->format!=FBX_INDEX)
 	{
@@ -371,6 +372,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 		}
 	}
 	else
+	#endif
 	{
 		#ifdef USESHM
 		if(s->shm)
