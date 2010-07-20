@@ -33,8 +33,6 @@
 
 #define _throw(f, l, m) {fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
 #define fbx(a) {if((a)==-1)_throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
-#define dieifnot(a) {if(!(a)) {_throw(__LINE__, __FILE__, hputil_strerror());}}
-#define hpu(a) {if((a)==-1) {_throw(__LINE__, __FILE__, hputil_strerror());}}
 
 void usage(void)
 {
