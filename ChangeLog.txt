@@ -36,8 +36,8 @@ package on Linux systems.
 -------------------------------------------------------------------------------
 [6]
 Added a universal 32/64-bit VirtualGL Client binary for OS X.  The 32-bit fork
-works on 10.4 "Tiger" or later, and the 64-bit fork works on 10.6 "Snow
-Leopard" or later.
+works on 10.4 "Tiger" or later, and the 64-bit fork works on 10.5 "Leopard" or
+later.
 -------------------------------------------------------------------------------
 [7]
 Added support for encoding images as I420 YUV and displaying through X Video.
