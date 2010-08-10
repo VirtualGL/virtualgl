@@ -170,9 +170,9 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	}
 	else
 	{
-		rmask=0xFF;
+		rmask=0xFF0000;
 		gmask=0xFF00;
-		bmask=0xFF0000;
+		bmask=0xFF;
 	}
 
 	s->format=-1;
