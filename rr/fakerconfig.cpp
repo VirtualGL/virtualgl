@@ -139,6 +139,7 @@ static void fconfig_init(void)
 	fconfig.readback=RRREAD_SYNC;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
+	fconfig.spoillast=1;
 	fconfig.stereo=RRSTEREO_QUADBUF;
 	fconfig.subsamp=-1;
 	fconfig.tilesize=RR_DEFAULTTILESIZE;
@@ -398,6 +399,7 @@ void fconfig_reloadenv(void)
 	}
 	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
 	fetchenv_bool("VGL_SPOIL", spoil);
+	fetchenv_bool("VGL_SPOILLAST", spoillast);
 	fetchenv_bool("VGL_SSL", ssl);
 	{
 		if((env=getenv("VGL_STEREO"))!=NULL && strlen(env)>0)
@@ -573,6 +575,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(readback);
 	prconfint(samples);
 	prconfint(spoil);
+	prconfint(spoillast);
 	prconfint(ssl);
 	prconfint(stereo);
 	prconfint(subsamp);

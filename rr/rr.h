@@ -176,6 +176,7 @@ typedef struct _FakerConfig
   char readback;
   int samples;
   char spoil;
+  char spoillast;
   char ssl;
   int stereo;
   int subsamp;

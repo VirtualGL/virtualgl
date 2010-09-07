@@ -1446,7 +1446,7 @@ void glFlush(void)
 		if(thistime-lasttime<0.01) fconfig.flushdelay=0.01;
 		else fconfig.flushdelay=0.;
 	}
-	_doGLreadback(true, false);
+	_doGLreadback(fconfig.spoillast, false);
 	CATCH();
 }
 
