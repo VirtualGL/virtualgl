@@ -447,6 +447,45 @@ Each method of configuration takes precedence over the previous method:
 	prevents non-interactive applications from wasting graphics resources by
 	rendering frames that will never be seen.
 
+{anchor: VGL_SPOILLAST}
+| Environment Variable | ''VGL_SPOILLAST = ''__''0 \| 1''__ |
+| Summary | Disable/enable "spoil last" frame spoiling algorithm for frames triggered by ''glFlush()'' |
+| Image Transports | VGL, X11, XV, Custom (if supported) |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: VirtualGL will commonly read back a rendered 3D image if the
+	3D application calls ''glXSwapBuffers()'' while rendering to the back
+	buffer or if the 3D application calls ''glFinish()'', ''glFlush()'', or
+	''glXWaitGL()'' while rendering to the front buffer.  When frame spoiling is
+	enabled and the frame queue is busy compressing/sending a frame,
+	the newly-rendered frame is normally promoted to the head of the frame
+	queue, and the rest of the frames in the queue are "spoiled" (discarded.)
+	This algorithm, called "spoil first",	ensures that when a frame is actually
+	sent to the client (rather than spoiled), the sent frame will be the most
+	recently rendered frame.  However, this algorithm requires that VirtualGL
+	read back every frame that the application renders, even if the frame is
+	ultimately discarded.
+	{nl}{nl}
+	Some applications call ''glFlush()'' many thousands of times per frame while
+	rendering to the front buffer.  Thus, VirtualGL's default behavior is to use
+	a different spoiling algorithm, "spoil last", to process frames triggered by
+	''glFlush()'' calls.  "Spoil last" discards the most recently rendered frame
+	if the frame queue is busy.  Thus, the only frames that are read back from
+	the graphics card are the frames that are actually sent to the client.
+	However, there is no guarantee in this case that the frame sent to the client
+	will be the most recently rendered frame, so applications that perform
+	front buffer rendering and call ''glFlush()'' in response to an
+	interactive operation may not display properly.  For such applications,
+	setting the ''VGL_SPOILLAST'' environment variable to ''0'' prior to
+	launching the application with ''vglrun'' will cause the "spoil first"
+	algorithm to be used for all frame triggers, including ''glFlush()''.  This
+	should fix the display problem, at the expense of increased load on the
+	graphics card (because VirtualGL is now reading back the rendered 3D image
+	every time ''glFlush()'' is called.)  See
+	[[#Application_Recipes][Application Recipes]] for a list of applications that
+	are known to require this.
+
 | Environment Variable | ''VGL_SSL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-s'' / ''+s'' |
 | Summary | Disable/enable SSL encryption of the image transport |

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-08T21:03:24">
+<meta name="date" content="2010-09-07T16:36:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2872,6 +2872,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">The ANSA startup script directly invokes <code>/lib/libc.so.6</code> to query the glibc version.  Since the VirtualGL faker depends on libc, preloading VirtualGL when directly invoking <code>libc.so.6</code> creates an infinite loop. So it is necessary to disable the preloading of VirtualGL in the application script and then re-enable it prior to launching the actual application.</td>
   </tr>
   <tr class="standard">
+    <td class="standard">Ansoft HFSS</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_SPOILLAST</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">Ansoft HFSS uses double buffering and draws geometry to the back buffer, but all cursor node highlighting is drawn directly to the front buffer using XOR operations.  In order for this highlighting to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for more details.</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">AutoForm v4.0x</td>
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
@@ -4494,6 +4500,70 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     </dd>
 </dl>
 
+<p><a name="VGL_SPOILLAST"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_SPOILLAST&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable &ldquo;spoil last&rdquo; frame spoiling algorithm for frames triggered by <code>glFlush()</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">VGL, X11, XV, Custom (if supported)</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Enabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        VirtualGL will commonly read back a rendered 3D image if the 3D 
+        application calls <code>glXSwapBuffers()</code> while rendering to the 
+        back buffer or if the 3D application calls <code>glFinish()</code>, 
+        <code>glFlush()</code>, or <code>glXWaitGL()</code> while rendering to 
+        the front buffer.  When frame spoiling is enabled and the frame queue is 
+        busy compressing/sending a frame, the newly-rendered frame is normally 
+        promoted to the head of the frame queue, and the rest of the frames in 
+        the queue are &ldquo;spoiled&rdquo; (discarded.) This algorithm, called 
+        &ldquo;spoil first&rdquo;,	ensures that when a frame is actually sent to 
+        the client (rather than spoiled), the sent frame will be the most 
+        recently rendered frame.  However, this algorithm requires that 
+        VirtualGL read back every frame that the application renders, even if 
+        the frame is ultimately discarded. <br /><br /> Some applications call 
+        <code>glFlush()</code> many thousands of times per frame while rendering 
+        to the front buffer.  Thus, VirtualGL&rsquo;s default behavior is to use 
+        a different spoiling algorithm, &ldquo;spoil last&rdquo;, to process 
+        frames triggered by <code>glFlush()</code> calls.  &ldquo;Spoil 
+        last&rdquo; discards the most recently rendered frame if the frame queue 
+        is busy.  Thus, the only frames that are read back from the graphics 
+        card are the frames that are actually sent to the client. However, there 
+        is no guarantee in this case that the frame sent to the client will be 
+        the most recently rendered frame, so applications that perform front 
+        buffer rendering and call <code>glFlush()</code> in response to an 
+        interactive operation may not display properly.  For such applications, 
+        setting the <code>VGL_SPOILLAST</code> environment variable to 
+        <code>0</code> prior to launching the application with 
+        <code>vglrun</code> will cause the &ldquo;spoil first&rdquo; algorithm 
+        to be used for all frame triggers, including <code>glFlush()</code>.  
+        This should fix the display problem, at the expense of increased load on 
+        the graphics card (because VirtualGL is now reading back the rendered 3D 
+        image every time <code>glFlush()</code> is called.)  See 
+        <a href="#Application_Recipes">Application 
+        Recipes</a><a name="idx0054"></a> for a list of applications that are 
+        known to require this.
+    </dd>
+</dl>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -4709,7 +4779,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0054"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0055"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4759,11 +4829,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0055"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0056"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0056"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0057"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">

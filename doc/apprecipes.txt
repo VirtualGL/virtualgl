@@ -26,6 +26,16 @@
 		application script and then re-enable it prior to launching the actual \
 		application. \
 	|
+| Ansoft HFSS | Linux \
+	| Set the ''VGL_SPOILLAST'' environment variable to ''0'' prior to \
+		launching the application with ''vglrun'' \
+	| Ansoft HFSS uses double buffering and draws geometry to the back buffer, \
+		but all cursor node highlighting is drawn directly to the front buffer \
+		using XOR operations.  In order for this highlighting to be displayed \
+		properly, it is necessary to use the "spoil first" frame spoiling \
+		algorithm whenever the application calls ''glFlush()''.  See \
+		{ref prefix="Section ": VGL_SPOILLAST} for more details. \
+	|
 | AutoForm v4.0x | All \
 	| ''vglrun +sync xaf_''__''{version}''__ \
 	| AutoForm relies on mixed X11/OpenGL rendering, and thus certain features \
