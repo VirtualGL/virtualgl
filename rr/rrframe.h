@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -560,11 +560,14 @@ class rrfb : public rrframe
 		rrcs::safelock l(_Mutex);
 		#endif
 		checkheader(h);
-		fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1));
+		int usexshm=1;  char *env=NULL;
+		if((env=getenv("VGL_USEXSHM"))!=NULL && strlen(env)>0 && !strcmp(env, "0"))
+			usexshm=0;
+		fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, usexshm));
 		if(h.framew>_fb.width || h.frameh>_fb.height)
 		{
 			XSync(_wh.dpy, False);
-			fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, 1));
+			fbx(fbx_init(&_fb, _wh, h.framew, h.frameh, usexshm));
 		}
 		_h=h;
 		if(_h.framew>_fb.width) _h.framew=_fb.width;
