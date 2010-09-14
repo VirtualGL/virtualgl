@@ -133,6 +133,7 @@ void usage(char **argv)
 	#ifdef USESSL
 	printf(" [-ssl]");
 	#endif
+	printf(" [-old]");
 	printf("\n or    %s -server", argv[0]);
 	#ifdef USESSL
 	printf(" [-ssl]");
@@ -142,7 +143,8 @@ void usage(char **argv)
 	printf(" or    %s -bench <interface> [interval]\n", argv[0]);
 	printf("\n-bench = measure throughput on selected network interface");
 	#endif
-	printf("\n-findport = display a free TCP port number and exit\n");
+	printf("\n-findport = display a free TCP port number and exit");
+	printf("\n-old = communicate with NetTest server v2.1.x or earlier\n");
 	#ifdef USESSL
 	printf("-ssl = use secure tunnel\n");
 	#endif
@@ -153,7 +155,7 @@ int main(int argc, char **argv)
 {
 	int server=0;  char *servername=NULL;
 	char *buf;  int i, j, size;
-	bool dossl=false;
+	bool dossl=false, old=false;
 	rrtimer timer;
 	#if defined(sun)||defined(linux)
 	int interval=2;
@@ -166,13 +168,24 @@ int main(int argc, char **argv)
 	{
 		if(argc<3) usage(argv);
 		server=0;  servername=argv[2];
-		#ifdef USESSL
-		if(argc>3 && !stricmp(argv[3], "-ssl"))
+		if(argc>3)
 		{
-			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-			dossl=true;
+			for(i=3; i<argc; i++)
+			{
+				#ifdef USESSL
+				if(!stricmp(argv[i], "-ssl"))
+				{
+					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+					dossl=true;
+				}
+				#endif
+				if(!stricmp(argv[i], "-old"))
+				{
+					printf("Using old protocol\n");
+					old=true;
+				}
+			}
 		}
-		#endif
 	}
 	else if(!stricmp(argv[1], "-server"))
 	{
@@ -270,6 +283,29 @@ int main(int argc, char **argv)
 		printf("TCP transfer performance between localhost and %s:\n\n", sd.remotename());
 		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
 		printf("(bytes)                (msec)        (MB/sec)     (Mbits/sec)\n");
+
+		if(old)
+		{
+			for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+			{
+				initbuf(buf, i);
+				timer.start();
+				for(j=0; j<ITER; j++)
+				{
+					sd.send(buf, i);
+					sd.recv(buf, i);
+				}
+				elapsed=timer.elapsed();
+				if(!cmpbuf(buf, i)) {printf("DATA ERROR\n"); exit(1);}
+				printf("%-13d %14.6f %14.6f %14.6f\n", i, elapsed/2.*1000./(double)ITER,
+					(double)i*(double)ITER/1048576./(elapsed/2.),
+					(double)i*(double)ITER/125000./(elapsed/2.));
+			}
+			sd.close();
+			free(buf);
+			return 0;
+		}
+
 		char id[6]="VGL22";
 		sd.send(id, 5);
 		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
