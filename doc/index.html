@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-09-07T16:36:03">
+<meta name="date" content="2010-10-01T14:58:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1275,7 +1275,7 @@ following commands in the SSh session:</p>
 <pre class="verbatim">
 xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
 xdpyinfo&nbsp;-display&nbsp;:0
-/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0
+/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0&nbsp;-c
 </pre>
 
         <div class="important"><p class="important">
@@ -1286,7 +1286,7 @@ xdpyinfo&nbsp;-display&nbsp;:0
     <dd class="Description-1 Description">
 <pre class="verbatim">
 xdpyinfo&nbsp;-display&nbsp;:0
-/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0
+/opt/VirtualGL/bin/glxinfo&nbsp;-display&nbsp;:0&nbsp;-c
 </pre>
 
     </dd>
@@ -1296,6 +1296,25 @@ xdpyinfo&nbsp;-display&nbsp;:0
 no errors.  If you chose to disable the XTEST extension, then check the 
 output of <code>xdpyinfo</code> to verify that <code>XTEST</code> does 
 not show up in the list of extensions.</p>
+
+<p>You should also examine the output of <code>glxinfo</code> to ensure 
+that at least one of the visuals is 24-bit or 32-bit TrueColor and has 
+Pbuffer support (the latter is indicated by a &ldquo;P&rdquo; in the 
+last column.)  Example:</p>
+
+<pre class="verbatim">
+&nbsp;&nbsp;&nbsp;&nbsp;visual&nbsp;&nbsp;x&nbsp;&nbsp;bf&nbsp;lv&nbsp;rg&nbsp;d&nbsp;st&nbsp;colorbuffer&nbsp;ax&nbsp;dp&nbsp;st&nbsp;accumbuffer&nbsp;&nbsp;ms&nbsp;&nbsp;cav&nbsp;&nbsp;drw
+&nbsp;&nbsp;id&nbsp;dep&nbsp;cl&nbsp;sp&nbsp;sz&nbsp;l&nbsp;&nbsp;ci&nbsp;b&nbsp;ro&nbsp;&nbsp;r&nbsp;&nbsp;g&nbsp;&nbsp;b&nbsp;&nbsp;a&nbsp;bf&nbsp;th&nbsp;cl&nbsp;&nbsp;r&nbsp;&nbsp;g&nbsp;&nbsp;b&nbsp;&nbsp;a&nbsp;ns&nbsp;b&nbsp;eat&nbsp;&nbsp;typ
+---------------------------------------------------------------------------
+0x151&nbsp;&nbsp;0&nbsp;tc&nbsp;&nbsp;0&nbsp;32&nbsp;&nbsp;0&nbsp;r&nbsp;&nbsp;y&nbsp;&nbsp;.&nbsp;&nbsp;8&nbsp;&nbsp;8&nbsp;&nbsp;8&nbsp;&nbsp;0&nbsp;&nbsp;4&nbsp;24&nbsp;&nbsp;8&nbsp;16&nbsp;16&nbsp;16&nbsp;16&nbsp;&nbsp;0&nbsp;0&nbsp;None&nbsp;PXW
+</pre>
+
+<p>If none of the visuals has Pbuffer support, then this is most likely 
+because there is no 3D acceleration, which is most likely because the 
+correct 3D drivers are not installed (or are misconfigured.)  Lack of 3D 
+acceleration is also typically indicated by the word &ldquo;Mesa&rdquo; 
+in the client GLX vendor string and/or the OpenGL vendor string, and the 
+words &ldquo;Software Rasterizer&rdquo; in the OpenGL renderer string.</p>
 
 
 

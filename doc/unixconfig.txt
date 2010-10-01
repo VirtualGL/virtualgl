@@ -169,7 +169,7 @@ in the SSh session:
 	#Verb <<---
 	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
 	xdpyinfo -display :0
-	/opt/VirtualGL/bin/glxinfo -display :0
+	/opt/VirtualGL/bin/glxinfo -display :0 -c
 	---
 
 	!!! NOTE: ''xauth'' and ''xdpyinfo'' are in ''/usr/openwin/bin'' on Solaris
@@ -178,13 +178,31 @@ in the SSh session:
 	If you did not restrict 3D X server access :: {:}
 	#Verb <<---
 	xdpyinfo -display :0
-	/opt/VirtualGL/bin/glxinfo -display :0
+	/opt/VirtualGL/bin/glxinfo -display :0 -c
 	---
 
 Both commands should output a list of visuals and should complete with no
 errors.  If you chose to disable the XTEST extension, then check the output of
 ''xdpyinfo'' to verify that ''XTEST'' does not show up in the list of
 extensions.
+
+You should also examine the output of ''glxinfo'' to ensure that at least one
+of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support (the
+latter is indicated by a "P" in the last column.)  Example:
+
+	#Verb <<---
+	    visual  x  bf lv rg d st colorbuffer ax dp st accumbuffer  ms  cav  drw
+	  id dep cl sp sz l  ci b ro  r  g  b  a bf th cl  r  g  b  a ns b eat  typ
+	---------------------------------------------------------------------------
+	0x151  0 tc  0 32  0 r  y  .  8  8  8  0  4 24  8 16 16 16 16  0 0 None PXW
+	---
+
+If none of the visuals has Pbuffer support, then this is most likely because
+there is no 3D acceleration, which is most likely because the correct 3D
+drivers are not installed (or are misconfigured.)  Lack of 3D acceleration is
+also typically indicated by the word "Mesa" in the client GLX vendor string
+and/or the OpenGL vendor string, and the words "Software Rasterizer" in the
+OpenGL renderer string.
 
 ** SSh Server Configuration
 
