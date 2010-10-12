@@ -1,4 +1,18 @@
 ===============================================================================
+Significant changes since 2.2 beta1
+===============================================================================
+[1]
+Added VGL_SPOILLAST environment variable which, when set to 0, will change the
+frame spoiling algorithm used for frames triggered by glFlush() calls.  This
+is necessary to make Ansoft HFSS display properly.
+-------------------------------------------------------------------------------
+[2]
+Add compatibility mode to allow NetTest to communicate with older versions
+(from VGL 2.1.x and prior.)
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 2.1.4
 ===============================================================================
 [1]
