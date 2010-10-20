@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009-2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -78,7 +78,9 @@ rrdisplayserver::rrdisplayserver(bool dossl, int drawmethod) :
 rrdisplayserver::~rrdisplayserver(void)
 {
 	_deadyet=true;
+	_listensdmutex.lock();
 	if(_listensd) _listensd->close();
+	_listensdmutex.unlock();
 	if(_t) {_t->stop();  _t=NULL;}
 }
 
@@ -122,12 +124,9 @@ void rrdisplayserver::run(void)
 		}
 	}
 	rrout.println("Listener exiting ...");
-	if(_listensd)
-	{
-		rrsocket *_2delete=_listensd;
-		_listensd=NULL;
-		delete _2delete;
-	}
+	_listensdmutex.lock();
+	if(_listensd) {delete _listensd;  _listensd=NULL;}
+	_listensdmutex.unlock();
 }
 
 void rrserver::run(void)

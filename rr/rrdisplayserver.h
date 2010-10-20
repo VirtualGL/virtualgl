@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -35,6 +36,7 @@ class rrdisplayserver : public Runnable
 
 	int _drawmethod;
 	rrsocket *_listensd;
+  rrcs _listensdmutex;
 	Thread *_t;
 	bool _deadyet;
 	bool _dossl;
