@@ -10,6 +10,12 @@ is necessary to make Ansoft HFSS display properly.
 Add compatibility mode to allow NetTest to communicate with older versions
 (from VGL 2.1.x and prior.)
 -------------------------------------------------------------------------------
+[3]
+Fix race condition in vglclient which would frequently cause an "incorrect
+checksum for freed object" error when the client was shut down via CTRL-C.
+This problem was reported only on OS X but could have existed on other
+platforms as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
