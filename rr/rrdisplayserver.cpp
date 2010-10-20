@@ -20,7 +20,7 @@ extern Display *maindpy;
 static unsigned short DisplayNumber(Display *dpy)
 {
 	int dpynum=0;  char *ptr=NULL;
-  if((ptr=strchr(DisplayString(dpy), ':'))!=NULL)
+	if((ptr=strchr(DisplayString(dpy), ':'))!=NULL)
 	{
 		if(strlen(ptr)>1) dpynum=atoi(ptr+1);
 		if(dpynum<0 || dpynum>65535) dpynum=0;
@@ -122,7 +122,12 @@ void rrdisplayserver::run(void)
 		}
 	}
 	rrout.println("Listener exiting ...");
-	if(_listensd) {delete _listensd;  _listensd=NULL;}
+	if(_listensd)
+	{
+		rrsocket *_2delete=_listensd;
+		_listensd=NULL;
+		delete _2delete;
+	}
 }
 
 void rrserver::run(void)
