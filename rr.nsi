@@ -1,6 +1,14 @@
-Name ${APPNAME}
+!include x64.nsh
+!ifdef WIN64
+!define PROGNAME "${APPNAME} 64-bit Client"
+OutFile ${BLDDIR}\${APPNAME}64.exe
+InstallDir $PROGRAMFILES64\${APPNAME}-${VERSION}-${BUILD}
+!else
+!define PROGNAME "${APPNAME} Client"
 OutFile ${BLDDIR}\${APPNAME}.exe
 InstallDir $PROGRAMFILES\${APPNAME}-${VERSION}-${BUILD}
+!endif
+Name "${PROGNAME}"
 
 SetCompressor bzip2
 
@@ -11,6 +19,13 @@ UninstPage uninstConfirm
 UninstPage instfiles
 
 Section "${APPNAME}-${VERSION}-${BUILD} (required)"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
+
 	SectionIn RO
 	SetOutPath $INSTDIR\doc
 	File "doc\*.gif"
@@ -34,7 +49,7 @@ Section "${APPNAME}-${VERSION}-${BUILD} (required)"
 
 	WriteRegStr HKLM "SOFTWARE\${APPNAME}-${VERSION}-${BUILD}" "Install_Dir" "$INSTDIR"
 
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}" "DisplayName" "${APPNAME} Client v${VERSION} (${BUILD})"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}" "DisplayName" "${PROGNAME} v${VERSION} (${BUILD})"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}" "NoModify" 1
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}-${VERSION}-${BUILD}" "NoRepair" 1
@@ -44,13 +59,19 @@ SectionEnd
 Section "Start Menu Shortcuts (required)"
 
 	SetShellVarContext all
-	CreateDirectory "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\Uninstall ${APPNAME} Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-	CreateShortCut "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\${APPNAME} User's Guide.lnk" "$INSTDIR\doc\index.html"
+	CreateDirectory "$SMPROGRAMS\${PROGNAME} v${VERSION} (${BUILD})"
+	CreateShortCut "$SMPROGRAMS\${PROGNAME} v${VERSION} (${BUILD})\Uninstall ${APPNAME} Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+	CreateShortCut "$SMPROGRAMS\${PROGNAME} v${VERSION} (${BUILD})\${APPNAME} User's Guide.lnk" "$INSTDIR\doc\index.html"
 
 SectionEnd
 
 Section "Uninstall"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
 
 	SetShellVarContext all
 	ExecWait "$INSTDIR\vglclient.exe -killall"
@@ -69,8 +90,8 @@ Section "Uninstall"
 	Delete $INSTDIR\nettest.exe
 	RMDir /r $INSTDIR\doc
 
-	Delete "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})\*.*"
-	RMDir "$SMPROGRAMS\${APPNAME} Client v${VERSION} (${BUILD})"
+	Delete "$SMPROGRAMS\${PROGNAME} v${VERSION} (${BUILD})\*.*"
+	RMDir "$SMPROGRAMS\${PROGNAME} v${VERSION} (${BUILD})"
 	RMDir "$INSTDIR"
 
 SectionEnd

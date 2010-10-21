@@ -49,15 +49,19 @@ ifeq ($(DEBUG), yes)
  WBLDDIR := $(WBLDDIR)\\dbg
 endif
 
-dist: rr diags
-	$(RM) $(WBLDDIR)/$(APPNAME).exe
-	$(RM) $(WBLDDIR)/$(APPNAME)-exceed.exe
-	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) \
-		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
-	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) \
-		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
-	mv $(WBLDDIR)/$(APPNAME).exe $(WBLDDIR)/$(APPNAME)-exceed.exe
+ifeq ($(subplatform), 64)
+ WIN64DEF1 := //DWIN64
+ WIN64DEF2 := /DWIN64
+endif
 
+dist: rr diags
+	$(RM) $(WBLDDIR)/$(APPNAME)$(subplatform).exe
+	$(RM) $(WBLDDIR)/$(APPNAME)$(subplatform)-exceed.exe
+	makensis //DAPPNAME=$(APPNAME) //DVERSION=$(VERSION) $(WIN64DEF1) \
+		//DBUILD=$(BUILD) //DBLDDIR=$(WBLDDIR) rr.nsi || \
+	makensis /DAPPNAME=$(APPNAME) /DVERSION=$(VERSION) $(WIN64DEF2) \
+		/DBUILD=$(BUILD) /DBLDDIR=$(WBLDDIR) rr.nsi  # Cygwin doesn't like the //
+	mv $(WBLDDIR)/$(APPNAME)$(subplatform).exe $(WBLDDIR)/$(APPNAME)$(subplatform)-exceed.exe
 
 ##########################################################################
 else
