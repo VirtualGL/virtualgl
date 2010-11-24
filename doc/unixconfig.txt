@@ -1,4 +1,5 @@
 * Configuring a Linux or Solaris Machine as a VirtualGL Server
+{anchor: Unix_Config}
 
 ** Granting Access to the 3D X Server
 

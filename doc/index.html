@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-10-01T14:58:03">
+<meta name="date" content="2010-11-24T13:41:05">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1049,6 +1049,8 @@ the &ldquo;VirtualGL Client&rdquo; Start Menu group.</p>
 
 
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Configuring a Linux or Solaris Machine as a VirtualGL Server</h1>
+
+<p><a name="Unix_Config"></a></p>
 
 
 <h2 id="hd005001">5.1&nbsp;Granting Access to the 3D X Server</h2>
@@ -2623,6 +2625,9 @@ a sort-first rendering job using Chromium and VirtualGL:</p>
     </li>
     <li class="Ordered-1 Ordered">
         Start <code>crserver</code> on each of the rendering nodes
+        <div class="important"><p class="important">
+        NOTE: <code>crserver</code> should be run on display :0 (or whichever display is attached to the 3D hardware.)
+        </p></div>
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, <code>vglrun&nbsp;crserver&nbsp;&amp;</code>
@@ -2664,6 +2669,9 @@ following procedure in place of step 2 above:</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         <code>vglrun&nbsp;crserver</code>
+        <div class="important"><p class="important">
+        NOTE: You must configure each of the rendering nodes as a VirtualGL server (that is, run <code>'vglserver_config</code>&rsquo; as instructed in Chapter <a href="#Unix_Config" class="ref">5</a>) in order for this to work when the rendering nodes are sitting at the login prompt.
+        </p></div>
     </li>
 </ul>
 
@@ -2700,6 +2708,9 @@ log<sub>2</sub>(N) rather than N.</p>
     </li>
     <li class="Ordered-1 Ordered">
         Start <code>crappfaker</code> on each of the rendering nodes
+        <div class="important"><p class="important">
+        NOTE: <code>crappfaker</code> should be run on display :0 (or whichever display is attached to the 3D hardware.)
+        </p></div>
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, <code>vglrun&nbsp;crserver</code>
@@ -2725,6 +2736,9 @@ VirtualGL:</p>
     </li>
     <li class="Ordered-1 Ordered">
         Start <code>crappfaker</code> on each of the rendering nodes
+        <div class="important"><p class="important">
+        NOTE: <code>crappfaker</code> should be run on display :0 (or whichever display is attached to the 3D hardware.)
+        </p></div>
     </li>
     <li class="Ordered-1 Ordered">
         On Node 0, <code>vglrun&nbsp;crutserver&nbsp;&amp;</code>

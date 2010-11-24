@@ -126,6 +126,9 @@ sort-first rendering job using Chromium and VirtualGL:
 
 	#. Start ''crserver'' on each of the rendering nodes
 
+		!!! NOTE: ''crserver'' should be run on display :0 (or whichever display is
+		attached to the 3D hardware.)
+
 	#. On Node 0, ''vglrun crserver &''
 
 	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
@@ -154,6 +157,11 @@ On each of the rendering nodes,
 	* set the ''VGL_READBACK'' environment variable to ''0''
 	* ''vglrun crserver''
 
+	!!! NOTE: You must configure each of the rendering nodes as a VirtualGL
+	server (that is, run '''vglserver_config''' as instructed in
+	{ref prefix="Chapter ": Unix_Config}) in order for this to work when
+	the rendering nodes are sitting at the login prompt.
+
 ** Configuration 3: Sort-Last Rendering (Object-Space Decomposition)
 
 #IMG: chromium-sortlast.png
@@ -179,6 +187,9 @@ To make this configuration work with VirtualGL:
 
 	#. Start ''crappfaker'' on each of the rendering nodes
 
+		!!! NOTE: ''crappfaker'' should be run on display :0 (or whichever display
+		is attached to the 3D hardware.)
+
 	#. On Node 0, ''vglrun crserver''
 
 *** CRUT
@@ -196,6 +207,9 @@ VirtualGL:
 		performing sort-last rendering
 
 	#. Start ''crappfaker'' on each of the rendering nodes
+
+		!!! NOTE: ''crappfaker'' should be run on display :0 (or whichever display
+		is attached to the 3D hardware.)
 
 	#. On Node 0, ''vglrun crutserver &''
 
