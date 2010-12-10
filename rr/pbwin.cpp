@@ -732,7 +732,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
 {
 
-	GLint readbuf=GL_BACK;
+	GLint readbuf=GL_BACK, oldrendermode=GL_RENDER;
 	GLint fbr=0, fbw=0;
 	#ifdef GL_VERSION_1_5
 	static GLuint pbo=0;  int boundbuffer=0;
@@ -743,10 +743,12 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
+	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
 
 	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
 
 	glReadBuffer(buf);
+	glRenderMode(GL_RENDER);
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
 	if(pitch%8==0) glPixelStorei(GL_PACK_ALIGNMENT, 8);
@@ -902,6 +904,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		putenv(_autotestframe);
 	}
 
+	glRenderMode(oldrendermode);
 	glPopClientAttrib();
 	tc.restore();
 
