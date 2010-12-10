@@ -4,6 +4,11 @@ Significant changes since 2.2
 [1]
 A 64-bit installer package can now be built on Windows platforms.
 -------------------------------------------------------------------------------
+[2]
+Fixed a severe readback performance problem that occurred whenever an
+application set the render mode to GL_SELECT and called glFlush() while doing
+front buffer rendering.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
