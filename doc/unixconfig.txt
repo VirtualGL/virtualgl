@@ -67,7 +67,7 @@ prompt.
 	#. {:}
 
 		#Verb: <<---
-		Restrict local X server access to vglusers group (recommended)?
+		Restrict 3D X server access to vglusers group (recommended)?
 		[Y/n]
 		---
 
