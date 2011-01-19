@@ -181,6 +181,14 @@ uninstall:
 	if [ -d $(docdir) ]; then rmdir $(docdir); fi
 	$(RM) $(prefix)/include/rrtransport.h
 	$(RM) $(prefix)/include/rr.h
+	rmdir $(prefix)/doc || true
+	if [ ! "$(prefix)" = "/usr" -a ! "$(prefix)" = "/" -a ! "$(prefix)" = "" ]; then \
+		rmdir $(prefix)/bin || true; \
+		rmdir $(prefix)/include || true; \
+		rmdir $(prefix)/$(libdir) || true; \
+		rmdir $(prefix)/$(lib64dir) || true; \
+		rmdir $(prefix) || true; \
+	fi
 	echo Uninstall complete.
 
 ifeq ($(platform), linux)
