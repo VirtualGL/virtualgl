@@ -68,7 +68,7 @@ else
 ##########################################################################
 
 ifeq ($(prefix),)
- prefix=/usr/local
+ prefix=/opt/VirtualGL
 endif
 
 .PHONY: rr32 mesademos32 diags32
