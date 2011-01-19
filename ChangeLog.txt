@@ -9,6 +9,11 @@ Fixed a severe readback performance problem that occurred whenever an
 application set the render mode to GL_SELECT and called glFlush() while doing
 front buffer rendering.
 -------------------------------------------------------------------------------
+[3]
+vglserver_config will now work properly whenever vglgenkey is installed in a
+directory other than /usr/bin or /opt/VirtualGL/bin, as long as vglgenkey is
+installed in the same directory as vglserver_config.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
