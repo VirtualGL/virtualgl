@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2010 D. R. Commander
+# Copyright (C)2009-2011 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -30,9 +30,9 @@ usage()
 {
 	echo
 	echo "USAGE: $0"
-	echo "       [-display <d>] [-s] [-x] [-k] [-force] [user@]hostname"
-	echo "       [Additional SSh options]"
+	echo "       [vglconnect options] [user@]hostname [Additional SSh options]"
 	echo
+	echo "vglconnect options:"
 	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
 	echo "               (default: read from DISPLAY environment variable)"
 	echo "-s = Tunnel VGL Transport and X11 through SSh (default: tunnel only X11)"
@@ -44,14 +44,23 @@ usage()
 	echo "     same home directory as this machine can use this X display"
 	echo "-g = Use gsissh from Globus Toolkit to make all SSh connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
+	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
+	echo "              the server machine (default: /opt/VirtualGL/bin).  Can also be"
+	echo "              set with the VGL_BINDIR environment variable on the client"
+	echo "              machine."
 	echo
 	exit $1
 }
+
+if [ -z $VGL_BINDIR ]; then
+	VGL_BINDIR=/opt/VirtualGL/bin
+fi
 
 while [ $# -gt 0 ]
 do
 	case "$1" in
 	-d*) DISPLAY=$2; shift ;;
+	-b*) VGL_BINDIR=$2; shift ;;
 	-f*) FORCE=1 ;;
 	-s*) X11TUNNEL=1; VGLTUNNEL=1; CONNECT=1 ;;
 	-x*) X11TUNNEL=0; VGLTUNNEL=0; CONNECT=1 ;;
@@ -118,14 +127,14 @@ fi
 
 if [ $VGLTUNNEL = 1 ]; then
 	echo Making preliminary SSh connection to find a free port on the server ...
-	REMOTEPORT=`$SSHCMD ${1+"$@"} '/opt/VirtualGL/bin/nettest -findport && /opt/VirtualGL/bin/vgllogin -check'`
+	REMOTEPORT=`$SSHCMD ${1+"$@"} "$VGL_BINDIR/nettest -findport && $VGL_BINDIR/vgllogin -check"`
 	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
 		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
 		echo "[VGL]    installed."
 		exit 1
 	fi
 	echo Making final SSh connection ...
-	$SSHCMD -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} '/opt/VirtualGL/bin/vgllogin -s '$REMOTEPORT
+	$SSHCMD -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
 	exit 0
 fi
 
@@ -154,7 +163,7 @@ fi
 XAUTHCOOKIE=`$XAUTH -f $XAUTHFILE list | sed "s/.*[ ]//g"`
 rm -f $XAUTHFILE
 if [ "$CONNECT" = "1" ]; then
-	$SSHCMD -t -x ${1+"$@"} 'exec /opt/VirtualGL/bin/vgllogin -x '$DISPLAY' '$XAUTHCOOKIE
+	$SSHCMD -t -x ${1+"$@"} "exec $VGL_BINDIR/vgllogin -x "$DISPLAY" "$XAUTHCOOKIE
 else
 	DNUM=`echo $DISPLAY | sed 's/.*[:]//g'`
 	xauth add `hostname`":"$DNUM . $XAUTHCOOKIE
