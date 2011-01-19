@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2010 D. R. Commander
+# Copyright (C)2009-2011 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,6 +26,7 @@ LSMOD=/sbin/lsmod
 if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
 RMMOD=/sbin/rmmod
 if [ ! -x $RMMOD ]; then RMMOD=rmmod; fi
+VGLGENKEY=vglgenkey
 
 usage() {
 	echo
@@ -166,14 +167,10 @@ addvglgenkey() {
 	removeline $1 vglgenkey
 	removeline $1 "xhost +*"
 	if [ "$VGLUSERSONLY" = "1" ]; then
-		if [ "$UNAME_S" = "SunOS" ]; then
-			if [ "$2" = "bottom" ]; then
-				addtobottom $1 /opt/VirtualGL/bin/vglgenkey
-			else
-				addtotop $1 /opt/VirtualGL/bin/vglgenkey
-			fi
+		if [ "$2" = "bottom" ]; then
+			addtobottom $1 $VGLGENKEY
 		else
-			addtotop $1 vglgenkey
+			addtotop $1 $VGLGENKEY
 		fi
 	else	
 		if [ "$2" = "bottom" ]; then
@@ -805,6 +802,14 @@ glpcheck() {
 	return $GLP
 }
 
+MYPATH=`dirname $0`
+if [ -x $MYPATH/vglgenkey ]; then
+	VGLGENKEY=$MYPATH/vglgenkey
+else
+	echo The vglgenkey script must be in the same directory as vglserver_config and must be executable.
+	exit 1
+fi
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 		-s) VGLUSERSONLY=1 ;;
@@ -832,7 +837,7 @@ UNAME_M=`uname -m`
 
 if [ ! `uid` -eq 0 ]; then
 	echo This script can only be executed by the root user.
-	exit
+	exit 1
 fi
 
 if [ $UNATTENDED = 0 ]; then
