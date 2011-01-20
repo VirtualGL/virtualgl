@@ -1,7 +1,7 @@
 @echo off
 
 rem Copyright (C)2007 Sun Microsystems, Inc.
-rem Copyright (C)2010 D. R. Commander.
+rem Copyright (C)2010-2011 D. R. Commander.
 rem
 rem This library is free software and may be redistributed and/or modified under
 rem the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -38,6 +38,7 @@ if not exist "%SSHL%" set SSHL=plink.exe
 set VGLTUNNEL=0
 set X11TUNNEL=1
 set FORCE=0
+if "%VGL_BINDIR"=="" VGL_BINDIR=/opt/VirtualGL/bin
 
 :getargs
 if "%1"=="" goto argsdone
@@ -57,7 +58,12 @@ if "%1"=="-display" (
 				set X11TUNNEL=0
 				shift /1 & goto getargs
 			) else (
-				goto argsdone
+				if "%1"=="-bindir" (
+					set VGL_BINDIR=%2
+					shift /1 & shift /1 & goto getargs
+				) else (
+					goto argsdone
+				)
 			)
 		)
 	)
@@ -123,15 +129,15 @@ set XAUTHCMD="%XAUTH%" -f "%XAUTHFILE%" list
 for /f "tokens=1,2,3,*" %%i in ('"%XAUTHCMD%"') do set XAUTHCOOKIE=%%k
 del /q "%XAUTHFILE%"
 if "%VGLCONNECT_OPENSSH%"=="1" (
-	"%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 "exec /opt/VirtualGL/bin/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
+	"%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 "exec %VGL_BINDIR%/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
 ) else (
-	start "" "%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "exec /opt/VirtualGL/bin/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
+	start "" "%SSH%" -t -x %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "exec %VGL_BINDIR%/vgllogin -x %DISPLAY% %XAUTHCOOKIE%"
 )
 goto done
 
 :vgltunnel
 echo Making preliminary SSh connection to find a free port on the server ...
-for /f "usebackq tokens=1,*" %%i in (`""%SSHL%"" %1 %2 %3 %4 %5 %6 %7 %8 %9 ''/opt/VirtualGL/bin/nettest -findport''`) do set REMOTEPORT=%%i
+for /f "usebackq tokens=1,*" %%i in (`""%SSHL%"" %1 %2 %3 %4 %5 %6 %7 %8 %9 ''%VGL_BINDIR%/nettest -findport''`) do set REMOTEPORT=%%i
 set /a REMOTEPORTM1=REMOTEPORT-1
 if "%REMOTEPORT%"=="" (
 	echo [VGL] ERROR: Could not obtain a free port on the server.  Does the server have
@@ -145,9 +151,9 @@ if "%REMOTEPORTM1%"=="-1" (
 )
 echo Making final SSh connection ...
 if "%VGLCONNECT_OPENSSH%"=="1" (
-	"%SSH%" -t %SSHARG% -R%REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 "/opt/VirtualGL/bin/vgllogin -s %REMOTEPORT%"
+	"%SSH%" -t %SSHARG% -R%REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 "%VGL_BINDIR%/vgllogin -s %REMOTEPORT%"
 ) else (
-	start "" "%SSH%" -t %SSHARG% -R %REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "/opt/VirtualGL/bin/vgllogin -s %REMOTEPORT%"
+	start "" "%SSH%" -t %SSHARG% -R %REMOTEPORT%:localhost:%PORT% %1 %2 %3 %4 %5 %6 %7 %8 %9 -mc "%VGL_BINDIR%/vgllogin -s %REMOTEPORT%"
 )
 
 goto done
@@ -164,14 +170,18 @@ goto done
 :usage
 echo.
 echo USAGE: %0
-echo        [-display ^<d^>] [-s] [-x] [-force] [user@]hostname
-echo        [Additional SSh options]
+echo        [vglconnect options] [user@]hostname [Additional SSh options]
 echo.
+echo vglconnect options:
 echo -display ^<d^> = Local X display to use when drawing VirtualGL's images
 echo                (default: read from DISPLAY environment variable)
 echo -s = Tunnel VGL Transport over SSh
 echo -x = Do not tunnel X11 traffic over SSh
 echo -force = Force a new vglclient instance (use with caution)
+echo -bindir ^<d^> = Path in which the VGL executables and scripts are installed on
+echo               the server machine (default: /opt/VirtualGL/bin).  Can also be
+echo               set with the VGL_BINDIR environment variable on the client
+echo               machine.
 echo.
 
 :done
