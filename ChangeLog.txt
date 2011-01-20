@@ -14,6 +14,11 @@ vglserver_config will now work properly whenever vglgenkey is installed in a
 directory other than /usr/bin or /opt/VirtualGL/bin, as long as vglgenkey is
 installed in the same directory as vglserver_config.
 -------------------------------------------------------------------------------
+[4]
+vglconnect now allows the user to specify the directory in which VirtualGL
+binaries are installed on the server, rather than always assuming that they are
+in /opt/VirtualGL/bin.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
