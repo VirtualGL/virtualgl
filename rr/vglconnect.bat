@@ -126,6 +126,8 @@ set XAUTHFILE=%TMPDIR%\vglconnect_%RANDOM%%RANDOM%%RANDOM%.tmp
 if exist "%XAUTHFILE%" goto mktemp
 "%XAUTH%" -f "%XAUTHFILE%" generate %DISPLAY% . trusted timeout 0
 set XAUTHCMD="%XAUTH%" -f "%XAUTHFILE%" list
+set XAUTHCMD=%XAUTHCMD:(=^(%
+set XAUTHCMD=%XAUTHCMD:)=^)%
 for /f "tokens=1,2,3,*" %%i in ('"%XAUTHCMD%"') do set XAUTHCOOKIE=%%k
 del /q "%XAUTHFILE%"
 if "%VGLCONNECT_OPENSSH%"=="1" (
@@ -137,7 +139,7 @@ goto done
 
 :vgltunnel
 echo Making preliminary SSh connection to find a free port on the server ...
-for /f "usebackq tokens=1,*" %%i in (`""%SSHL%"" %1 %2 %3 %4 %5 %6 %7 %8 %9 ''%VGL_BINDIR%/nettest -findport''`) do set REMOTEPORT=%%i
+for /f "usebackq tokens=1,*" %%i in (`"%SSHL%" %1 %2 %3 %4 %5 %6 %7 %8 %9 ''%VGL_BINDIR%/nettest -findport''`) do set REMOTEPORT=%%i
 set /a REMOTEPORTM1=REMOTEPORT-1
 if "%REMOTEPORT%"=="" (
 	echo [VGL] ERROR: Could not obtain a free port on the server.  Does the server have
