@@ -38,7 +38,7 @@ if not exist "%SSHL%" set SSHL=plink.exe
 set VGLTUNNEL=0
 set X11TUNNEL=1
 set FORCE=0
-if "%VGL_BINDIR"=="" VGL_BINDIR=/opt/VirtualGL/bin
+if "%VGL_BINDIR%"=="" set VGL_BINDIR=/opt/VirtualGL/bin
 
 :getargs
 if "%1"=="" goto argsdone
