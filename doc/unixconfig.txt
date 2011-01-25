@@ -205,6 +205,15 @@ also typically indicated by the word "Mesa" in the client GLX vendor string
 and/or the OpenGL vendor string, and the words "Software Rasterizer" in the
 OpenGL renderer string.
 
+** Using VirtualGL with Multiple Graphics Cards
+
+VirtualGL can redirect the OpenGL commands from a 3D application to any 3D
+graphics card in the server machine.  In order for this to work, however, all
+of the 3D graphics cards must be attached to different screens on the same X
+server using Xinerama.  They can then be individually addressed by setting
+''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':0.1'',
+'':0.2'', etc.
+
 ** SSh Server Configuration
 
 The application server's SSh daemon should have the ''X11Forwarding'' option

@@ -91,10 +91,9 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 	Description :: If the VirtualGL server has multiple 3D graphics cards and you
-	want the OpenGL rendering to be redirected to a display other than :0, then
-	you can set ''VGL_DISPLAY=:1.0'' or whatever.  This could be used, for
-	instance, to support many application instances on an application server with
-	multiple 3D graphics cards.
+	want the OpenGL commands from the 3D application to be redirected to the
+	second or subsequent graphics cards in the system, then you can set
+	''VGL_DISPLAY'' to (or invoke ''vglrun -d'' with) '':0.1'', '':0.2'', etc.
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |

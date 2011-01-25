@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-01-04T16:27:35">
+<meta name="date" content="2011-01-25T01:14:08">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for VirtualGL 2.2</title>
+<title>User&rsquo;s Guide for VirtualGL 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
@@ -31,7 +31,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 2.2</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 2.2.1</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
@@ -114,10 +114,14 @@ systems, OpenGL and GLX, and X windows.</p>
                 Server</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005002" class="toc">5.2 SSh Server Configuration</a>
+                <a href="#hd005002" class="toc">5.2 Using VirtualGL with Multiple 
+                Graphics Cards</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005003" class="toc">5.3 Un-Configuring the Server</a>
+                <a href="#hd005003" class="toc">5.3 SSh Server Configuration</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd005004" class="toc">5.4 Un-Configuring the Server</a>
             </li>
         </ul>
     </li>
@@ -1320,7 +1324,19 @@ words &ldquo;Software Rasterizer&rdquo; in the OpenGL renderer string.</p>
 
 
 
-<h2 id="hd005002">5.2&nbsp;SSh Server Configuration</h2>
+<h2 id="hd005002">5.2&nbsp;Using VirtualGL with Multiple Graphics Cards</h2>
+
+<p>VirtualGL can redirect the OpenGL commands from a 3D application to any 
+3D graphics card in the server machine.  In order for this to work, 
+however, all of the 3D graphics cards must be attached to different 
+screens on the same X server using Xinerama.  They can then be 
+individually addressed by setting <code>VGL_DISPLAY</code> to (or 
+invoking <code>vglrun&nbsp;-d</code> with) <code>:0.0</code>, 
+<code>:0.1</code>, <code>:0.2</code>, etc.</p>
+
+
+
+<h2 id="hd005003">5.3&nbsp;SSh Server Configuration</h2>
 
 <p>The application server&rsquo;s SSh daemon should have the 
 <code>X11Forwarding</code> option enabled and the <code>UseLogin</code> 
@@ -1329,7 +1345,7 @@ is usually located under <code>/etc/ssh</code>.</p>
 
 
 
-<h2 id="hd005003">5.3&nbsp;Un-Configuring the Server</h2>
+<h2 id="hd005004">5.4&nbsp;Un-Configuring the Server</h2>
 
 <p>You can use the <code>vglserver_config</code> script to restore the 
 security settings that were in place before VirtualGL was installed.  
@@ -3824,10 +3840,10 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         If the VirtualGL server has multiple 3D graphics cards and you want the 
-        OpenGL rendering to be redirected to a display other than :0, then you 
-        can set <code>VGL_DISPLAY=:1.0</code> or whatever.  This could be used, 
-        for instance, to support many application instances on an application 
-        server with multiple 3D graphics cards.
+        OpenGL commands from the 3D application to be redirected to the second 
+        or subsequent graphics cards in the system, then you can set 
+        <code>VGL_DISPLAY</code> to (or invoke <code>vglrun&nbsp;-d</code> with) 
+        <code>:0.1</code>, <code>:0.2</code>, etc.
     </dd>
 </dl>
 
