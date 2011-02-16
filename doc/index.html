@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-01-25T01:14:08">
+<meta name="date" content="2011-02-16T13:23:08">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2921,10 +2921,10 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">The ANSA startup script directly invokes <code>/lib/libc.so.6</code> to query the glibc version.  Since the VirtualGL faker depends on libc, preloading VirtualGL when directly invoking <code>libc.so.6</code> creates an infinite loop. So it is necessary to disable the preloading of VirtualGL in the application script and then re-enable it prior to launching the actual application.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Ansoft HFSS</td>
+    <td class="standard">Ansoft HFSS, Roxar RMS</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_SPOILLAST</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
-    <td class="standard">Ansoft HFSS uses double buffering and draws geometry to the back buffer, but all cursor node highlighting is drawn directly to the front buffer using XOR operations.  In order for this highlighting to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for more details.</td>
+    <td class="standard">These applications use double buffering and draw geometry to the back buffer, but node highlighting and rubber banding are drawn directly to the front buffer. In order for these front-buffer operations to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for more details.</td>
   </tr>
   <tr class="standard">
     <td class="standard">AutoForm v4.0x</td>
