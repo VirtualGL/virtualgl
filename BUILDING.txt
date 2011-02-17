@@ -355,8 +355,7 @@ Prerequisites
 
      make subplatform=64
 
-   The binaries will reside in "windows64/bin".  This configuration has not
-   been fully tested.
+   The binaries will reside in "windows64/bin".
 
 
 *******************************************************************************
