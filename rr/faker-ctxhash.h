@@ -70,8 +70,7 @@ class ctxhash : public _ctxhash
 
 		void remove(GLXContext ctx)
 		{
-			if(!ctx) _throw("Invalid argument");
-			_ctxhash::remove(ctx, NULL);
+			if(ctx) _ctxhash::remove(ctx, NULL);
 		}
 
 	private:
