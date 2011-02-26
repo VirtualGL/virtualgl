@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./rrtimer.h"
-#include "./turbojpeg.h"
+#include "rrtimer.h"
+#include "turbojpeg.h"
 #ifndef _WIN32
  #define stricmp strcasecmp
 #endif
