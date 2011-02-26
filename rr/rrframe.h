@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -396,15 +396,15 @@ class rrcompframe : public rrframe
 
 	void compressyuv(rrframe& b)
 	{
-		int tjflags=TJ_YUV;
+		int tjflags=0;
 		if(b._h.subsamp!=4) throw(rrerror("YUV encoder", "Invalid argument"));
 		init(b._h, 0);
 		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
-		unsigned long size;
-		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height, b._pixelsize,
-			_bits, &size, jpegsub(b._h.subsamp), b._h.qual, tjflags));
-		_h.size=(unsigned int)size;
+		tj(tjEncodeYUV(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height,
+			b._pixelsize, _bits, jpegsub(b._h.subsamp), tjflags));
+		_h.size=(unsigned int)TJBUFSIZEYUV(b._h.width, b._h.height,
+			jpegsub(b._h.subsamp));
 	}
 
 	void compressjpeg(rrframe& b)
@@ -664,19 +664,18 @@ class rrxvframe : public rrframe
 		if(!b._bits) _throw("Bitmap not initialized");
 		if(b._pixelsize<3 || b._pixelsize>4)
 			_throw("Only true color bitmaps are supported");
-		int tjflags=TJ_YUV;
+		int tjflags=0;
 		init(b._h);
 		if(b._flags&RRBMP_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 		if(b._flags&RRBMP_BGR) tjflags|=TJ_BGR;
-		unsigned long size;
 		if(!_tjhnd)
 		{
 			if((_tjhnd=tjInitCompress())==NULL)
 				throw(rrerror("rrxvframe::compressor", tjGetErrorStr()));
 		}
-		tj(tjCompress(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height,
-			b._pixelsize, _bits, &size, TJ_420, 100, tjflags));
-		_h.size=(unsigned int)size;
+		tj(tjEncodeYUV(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height,
+			b._pixelsize, _bits, TJ_420, tjflags));
+		_h.size=(unsigned int)TJBUFSIZEYUV(b._h.width, b._h.height, TJ_420);
 		if(_h.size!=(unsigned long)_fb.xvi->data_size)
 			_throw("Image size mismatch in YUV encoder");
 		return *this;

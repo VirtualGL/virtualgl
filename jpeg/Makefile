@@ -5,59 +5,25 @@ include ./Makerules.tjpeg
 ifeq ($(platform), windows)
 ##########################################################################
 
-LTARGET = $(LDIR)/tjpeg.lib
-
 TARGETS = $(EDIR)/jpgtest.exe \
           $(EDIR)/jpegut.exe
 
-OBJS = $(ODIR)/turbojpeg.obj \
-       $(ODIR)/jpgtest.obj \
+OBJS = $(ODIR)/jpgtest.obj \
        $(ODIR)/jpegut.obj
-
-ifeq ($(JPEGLIB), libjpeg)
- LTARGET := libjpeg $(LTARGET)
-endif
-
-ifneq ($(JPEGLIB), ipp)
- TARGETS := $(LTARGET) $(TARGETS)
- LDEP := $(LTARGET)
-endif
 
 
 all: $(TARGETS)
 
-.PHONY: libjpeg
-libjpeg:
-	cd jpeg-6b; $(MAKE); cd ..
-
 clean:
 	-$(RM) $(TARGETS) $(LTARGET) $(OBJS)
-	cd jpeg-6b; $(MAKE) clean; cd ..
 
 HDRS := $(wildcard ../include/*.h)
 $(OBJS): $(HDRS)
 
-ifeq ($(JPEGLIB), libjpeg)
-
-$(ODIR)/turbojpeg.obj: turbojpegl.c
-	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -Fo$@
-
-endif
-
-ifeq ($(JPEGLIB), libjpeg-turbo)
-
-$(ODIR)/turbojpeg.obj: turbojpegl.c
-	$(CC) $(CFLAGS) -c $< -Fo$@
-
-endif
-
-$(LDIR)/tjpeg.lib: $(ODIR)/turbojpeg.obj
-	$(AR) -OUT:$@ $^
-
-$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/rrutil.lib $(JPEGDEP)
+$(EDIR)/jpgtest.exe: $(ODIR)/jpgtest.obj $(LDIR)/rrutil.lib
 	$(LINK) $(LDFLAGS) $< -out:$@ $(JPEGLINK) rrutil.lib
-
-$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj $(JPEGDEP)
+	
+$(EDIR)/jpegut.exe: $(ODIR)/jpegut.obj
 	$(LINK) $(LDFLAGS) $< -out:$@ $(JPEGLINK)
 
 ##########################################################################
@@ -73,11 +39,7 @@ OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpgtest.o \
        $(ODIR)/jpegut.o
 
-ifeq ($(JPEGLIB), libjpeg)
- LTARGET := libjpeg $(LTARGET)
-endif
-
-ifneq ($(JPEGLIB), ipp)
+ifneq ($(JPEGLIB), libjpeg-turbo)
  TARGETS := $(LTARGET) $(TARGETS)
 endif
 
@@ -85,33 +47,13 @@ endif
 all: $(TARGETS)
 lib: $(LTARGET)
 
-.PHONY: libjpeg
-libjpeg:
-	cd jpeg-6b; $(MAKE); cd ..
-
 clean:
 	-$(RM) $(TARGETS) $(LTARGET) $(OBJS) $(OBJS:.o=.d)
-	cd jpeg-6b; \
-	$(MAKE) clean
 
 -include $(OBJS:.o=.d)
 
 
 $(ODIR)/turbojpeg.o: ../include/turbojpeg.h
-
-ifeq ($(JPEGLIB), libjpeg)
-
-$(ODIR)/turbojpeg.o: turbojpegl.c
-	$(CC) -Ijpeg-6b/ $(CFLAGS) -c $< -o $@
-
-endif
-
-ifeq ($(JPEGLIB), libjpeg-turbo)
-
-$(ODIR)/turbojpeg.o: turbojpegl.c
-	$(CC) -I$(TOPDIR)/include -I$(LJTDIR)/include $(CFLAGS) -c $< -o $@
-
-endif
 
 ifeq ($(JPEGLIB), quicktime)
 

@@ -122,11 +122,18 @@ ifeq ($(JPEGLIB),)
 endif
 
 ifeq ($(JPEGLIB), libjpeg-turbo)
- LJTDIR = /opt/libjpeg-turbo
- ifeq ($(subplatform), 64)
-  LJTLIB := $(LJTDIR)/lib64
+ ifeq ($(platform), osxx86)
+  JPEG_LDFLAGS=/opt/libjpeg-turbo/lib/libturbojpeg.a
  else
-  LJTLIB := $(LJTDIR)/lib32
+  ifeq ($(platform), windows)
+   JPEG_LDFLAGS=turbojpeg-static.lib
+  else
+   ifeq ($(subplatform), 64)
+    JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib64 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+   else
+    JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib32 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+   endif
+  endif
  endif
 endif
 

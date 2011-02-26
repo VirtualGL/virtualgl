@@ -2,47 +2,15 @@
 ifeq ($(platform), windows)
 ##########################################################################
 
-ifeq ($(JPEGLIB), ipp)
-
- JPEGLINK = turbojpeg.lib
-
-endif
-
-ifeq ($(JPEGLIB), libjpeg-turbo)
-
- JPEGLINK = jpeg-static.lib $(LDIR)/tjpeg.lib
- JPEGDEP = $(LDIR)/tjpeg.lib
-
-endif
-
-ifeq ($(JPEGLIB), libjpeg)
-
- JPEGLINK = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
- JPEGDEP = $(LDIR)/libjpeg.lib $(LDIR)/tjpeg.lib
-
-endif
+JPEGLINK = ${JPEG_LDFLAGS}
 
 ##########################################################################
 else
 ##########################################################################
 
-ifeq ($(JPEGLIB), ipp)
-
- JPEGLINK = -lturbojpeg
-
-endif
-
 ifeq ($(JPEGLIB), libjpeg-turbo)
 
- JPEGLINK = -ltjpeg $(LJTLIB)/libjpeg.a
- JPEGDEP = $(LDIR)/libtjpeg.a
-
-endif
-
-ifeq ($(JPEGLIB), libjpeg)
-
- JPEGLINK = -ltjpeg $(LDIR)/libjpeg.a
- JPEGDEP = $(LDIR)/libjpeg.a $(LDIR)/libtjpeg.a
+ JPEGLINK = $(JPEG_LDFLAGS)
 
 endif
 
