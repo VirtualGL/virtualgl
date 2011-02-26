@@ -388,12 +388,15 @@ class rrcompframe : public rrframe
 		{
 			case RRCOMP_RGB:  compressrgb(b);  break;
 			case RRCOMP_JPEG:  compressjpeg(b);  break;
+			#ifdef USEXV
 			case RRCOMP_YUV:  compressyuv(b);  break;
+			#endif
 			default:  _throw("Invalid compression type");
 		}
 		return *this;
 	}
 
+	#ifdef USEXV
 	void compressyuv(rrframe& b)
 	{
 		int tjflags=0;
@@ -406,6 +409,7 @@ class rrcompframe : public rrframe
 		_h.size=(unsigned int)TJBUFSIZEYUV(b._h.width, b._h.height,
 			jpegsub(b._h.subsamp));
 	}
+	#endif
 
 	void compressjpeg(rrframe& b)
 	{
