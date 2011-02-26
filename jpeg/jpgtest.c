@@ -18,10 +18,11 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include "./bmp.h"
-#include "./rrutil.h"
-#include "./rrtimer.h"
-#include "./turbojpeg.h"
+#include "bmp.h"
+#include "rrutil.h"
+#include "rrtimer.h"
+#include "turbojpeg.h"
+
 
 #define _throw(op, err) {  \
 	printf("ERROR in line %d while %s:\n%s\n", __LINE__, op, err);  goto bailout;}
