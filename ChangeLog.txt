@@ -2,7 +2,7 @@
 Significant changes since 2.2
 ===============================================================================
 [1]
-A 64-bit installer package can now be built on Windows platforms.
+A 64-bit version of the VirtualGL Client for Exceed is now fully supported.
 -------------------------------------------------------------------------------
 [2]
 Fixed a severe readback performance problem that occurred whenever an
@@ -18,6 +18,18 @@ installed in the same directory as vglserver_config.
 vglconnect now allows the user to specify the directory in which VirtualGL
 binaries are installed on the server, rather than always assuming that they are
 in /opt/VirtualGL/bin.
+-------------------------------------------------------------------------------
+[5]
+Fixed issues with vglconnect.bat that occurred when it was installed under
+c:\Program Files (x86) on 64-bit Windows systems and invoked with the -x or -s
+options.
+-------------------------------------------------------------------------------
+[6]
+Clarified the documentation of the VGL_DISPLAY option and documented how to use
+VirtualGL with multiple graphics cards.
+-------------------------------------------------------------------------------
+[7]
+VirtualGL will no longer die if glXDestroyContext() is passed a NULL argument.
 -------------------------------------------------------------------------------
 
 
