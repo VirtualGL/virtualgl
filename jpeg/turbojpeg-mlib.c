@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -787,8 +788,35 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 
 DLLEXPORT unsigned long DLLCALL TJBUFSIZE(int width, int height)
 {
-	// This allows enough room in case the image doesn't compress
-	return ((width+15)&(~15)) * ((height+15)&(~15)) * 6 + 2048;
+	unsigned long retval=0;
+	if(width<1 || height<1)
+		_throw("Invalid argument in TJBUFSIZE()");
+
+	// This allows for rare corner cases in which a JPEG image can actually be
+	// larger than the uncompressed input (we wouldn't mention it if it hadn't
+	// happened before.)
+	retval=((width+15)&(~15)) * ((height+15)&(~15)) * 6 + 2048;
+
+	bailout:
+	return retval;
+}
+
+DLLEXPORT unsigned long DLLCALL TJBUFSIZEYUV(int width, int height,
+	int subsamp)
+{
+	unsigned long retval=0;
+	int pw, ph, cw, ch, hsampfactor, vsampfactor;
+	if(width<1 || height<1 || subsamp<0 || subsamp>=NUMSUBOPT)
+		_throw("Invalid argument in TJBUFSIZEYUV()");
+	hsampfactor=_mcuw[subsamp]/8;
+	vsampfactor=_mcuh[subsamp]/8;
+	pw=PAD(width, hsampfactor);
+	ph=PAD(height, vsampfactor);
+	cw=pw/hsampfactor;  ch=ph/vsampfactor;
+	retval=PAD(pw, 4)*ph + (subsamp==TJ_GRAYSCALE? 0:PAD(cw, 4)*ch*2);
+
+	bailout:
+	return retval;
 }
 
 DLLEXPORT int DLLCALL tjCompress(tjhandle h,
@@ -824,6 +852,15 @@ DLLEXPORT int DLLCALL tjCompress(tjhandle h,
 
 	bailout:
 	return -1;
+}
+
+DLLEXPORT int DLLCALL tjEncodeYUV(tjhandle h,
+	unsigned char *srcbuf, int width, int pitch, int height, int ps,
+	unsigned char *dstbuf, int subsamp, int flags)
+{
+	unsigned long size;
+	return tjCompress(h, srcbuf, width, pitch, height, ps, dstbuf, &size,
+		subsamp, 0, flags|TJ_YUV);
 }
 
 
@@ -1224,13 +1261,13 @@ DLLEXPORT tjhandle DLLCALL tjInitDecompress(void)
 	return NULL;
 }
 
-DLLEXPORT int DLLCALL tjDecompressHeader(tjhandle h,
+DLLEXPORT int DLLCALL tjDecompressHeader2(tjhandle h,
 	unsigned char *srcbuf, unsigned long size,
-	int *width, int *height)
+	int *width, int *height, int *jpegsub)
 {
 	checkhandle(h);
 
-	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL)
+	if(srcbuf==NULL || size<=0 || width==NULL || height==NULL || jpegsub==NULL)
 		_throw("Invalid argument in tjDecompressHeader()");
 	if(!jpg->initd) _throw("Instance has not been initialized for decompression");
 
@@ -1240,13 +1277,21 @@ DLLEXPORT int DLLCALL tjDecompressHeader(tjhandle h,
 	jpg->width=jpg->height=0;
 
 	_catch(decode_jpeg_init(jpg));
-	*width=jpg->width;  *height=jpg->height;
+	*width=jpg->width;  *height=jpg->height;  *jpegsub=jpg->subsamp;
 
 	if(*width<1 || *height<1) _throw("Invalid data returned in header");
 	return 0;
 
 	bailout:
 	return -1;
+}
+
+DLLEXPORT int DLLCALL tjDecompressHeader(tjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	int *width, int *height)
+{
+	int jpegsub;
+	return tjDecompressHeader2(h, srcbuf, size, width, height, &jpegsub);
 }
 
 DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
@@ -1275,6 +1320,16 @@ DLLEXPORT int DLLCALL tjDecompress(tjhandle h,
 	_catch(decode_jpeg(jpg));
 
 	return 0;
+
+	bailout:
+	return -1;
+}
+
+DLLEXPORT int DLLCALL tjDecompressToYUV(tjhandle h,
+	unsigned char *srcbuf, unsigned long size,
+	unsigned char *dstbuf, int flags)
+{
+	_throw("tjDecompressToYUV() not implemented");
 
 	bailout:
 	return -1;
