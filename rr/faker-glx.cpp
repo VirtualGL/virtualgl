@@ -76,16 +76,16 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		else
 		#endif
 		{
-			configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
+			configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			if((!configs || n<1) && attribs[11])
 			{
 				attribs[11]=0;
-				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
+				configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if((!configs || n<1) && attribs[1])
 			{
 				attribs[1]=0;
-				configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
+				configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 			}
 			if(!configs || n<1) return 0;
 		}
@@ -108,7 +108,18 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 	TRY();
 
 	// Prevent recursion
-	if(!_isremote(dpy)) return _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+	if(!_isremote(dpy))
+	{
+			opentrace(_glXChooseFBConfig);  prargd(dpy);  prargi(screen);
+			prargal13(attrib_list);  starttrace();
+
+		configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+
+			stoptrace();  if(configs) {prargc(configs[0]);}
+			if(nelements) {prargi(*nelements);}	 closetrace();
+
+		return configs;
+	}
 	////////////////////
 
 		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
