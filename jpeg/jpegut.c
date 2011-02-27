@@ -18,6 +18,7 @@
 #include <string.h>
 #include "rrtimer.h"
 #include "turbojpeg.h"
+#include "turbojpeg-ipp-compat.h"
 #ifndef _WIN32
  #define stricmp strcasecmp
 #endif

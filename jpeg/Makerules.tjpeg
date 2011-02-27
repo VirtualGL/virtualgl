@@ -14,6 +14,12 @@ ifeq ($(JPEGLIB), libjpeg-turbo)
 
 endif
 
+ifeq ($(JPEGLIB), ipp)
+
+ JPEGLINK = $(JPEG_LDFLAGS)
+
+endif
+
 ifeq ($(JPEGLIB), quicktime)
 
  JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime -ltjpeg

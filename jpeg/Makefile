@@ -40,7 +40,9 @@ OBJS = $(ODIR)/turbojpeg.o \
        $(ODIR)/jpegut.o
 
 ifneq ($(JPEGLIB), libjpeg-turbo)
- TARGETS := $(LTARGET) $(TARGETS)
+ ifneq ($(JPEGLIB), ipp)
+  TARGETS := $(LTARGET) $(TARGETS)
+ endif
 endif
 
 

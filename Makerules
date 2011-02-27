@@ -137,11 +137,22 @@ ifeq ($(JPEGLIB), libjpeg-turbo)
  endif
 endif
 
+ifeq ($(JPEGLIB), ipp)
+ ifeq ($(platform), windows)
+  JPEG_LDFLAGS=turbojpeg.lib
+ else
+  JPEG_LDFLAGS=-lturbojpeg
+ endif
+ CFLAGS := $(CFLAGS) -DUSEIPP
+ CXXFLAGS := $(CXXFLAGS) -DUSEIPP
+endif
+
 ifeq ($(JPEGLIB), medialib)
  CFLAGS := $(CFLAGS) -DUSEMEDIALIB
  CXXFLAGS := $(CXXFLAGS) -DUSEMEDIALIB
  FAKERLINK := $(FAKERLINK) -lmlib
 endif
+
 
 # Implicit rules
 $(ODIR)/%.o: %.c

@@ -22,6 +22,7 @@
 #include "rrutil.h"
 #include "rrtimer.h"
 #include "turbojpeg.h"
+#include "turbojpeg-ipp-compat.h"
 
 
 #define _throw(op, err) {  \
