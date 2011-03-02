@@ -66,6 +66,7 @@
 		glXQueryMaxSwapGroupsNV;
 		glXQueryFrameCountNV;
 		glXResetFrameCountNV;
+		glXSwapIntervalSGI;
 
 		glXBindTexImageEXT;
 		glXReleaseTexImageEXT;

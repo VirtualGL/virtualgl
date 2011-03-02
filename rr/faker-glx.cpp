@@ -778,6 +778,13 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 	return _glXResetFrameCountNV(_localdpy, DefaultScreen(_localdpy));
 }
 
+int glXSwapIntervalSGI(int interval)
+{
+	if(fconfig.trace)
+		rrout.print("[VGL] glXSwapIntervalSGI() [NOT SUPPORTED]\n");
+	return 0;
+}
+
 void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 	const int *attrib_list)
 {
@@ -790,7 +797,8 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 	_glXReleaseTexImageEXT(_localdpy, ServerDrawable(dpy, drawable), buffer);
 }
 
-#define checkfaked(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))f;
+#define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \
+	retval=(void (*)(void))f;  if(fconfig.trace) rrout.print("[INTERPOSED]");}
 #ifdef SUNOGL
 #define checkfakedidx(f) if(!strcmp((char *)procName, #f)) retval=(void (*)(void))r_##f;
 #else
@@ -874,6 +882,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXQueryGLXPbufferSGIX)
 		checkfaked(glXSelectEventSGIX)
 		checkfaked(glXGetSelectedEventSGIX)
+		checkfaked(glXSwapIntervalSGI)
 
 		checkfaked(glXGetTransparentIndexSUN)
 
@@ -909,6 +918,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	}
 	if(!retval)
 	{
+		if(fconfig.trace) rrout.print("[passed through]");
 		if(__glXGetProcAddressARB) retval=_glXGetProcAddressARB(procName);
 		else if(__glXGetProcAddress) retval=_glXGetProcAddress(procName);
 	}
