@@ -792,7 +792,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	}
 
 
-	GLXFBConfig *configs=NULL, c=0;  int n=0;
+	GLXFBConfig *configs=NULL, c=0, cprev;  int n=0;
 	if(!dpy || !attrib_list) return NULL;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class,
@@ -814,6 +814,12 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!vid) return NULL;
 	v=__vglVisualFromVisualID(dpy, screen, vid);
 	if(!v) return NULL;
+
+	if((cprev=vish.getpbconfig(dpy, v)) && _FBCID(c) != _FBCID(cprev)
+		&& fconfig.trace)
+		rrout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
+			v->visualid, _FBCID(cprev), _FBCID(c));
+
 	vish.add(dpy, v, c);
 
 		stoptrace();  prargv(v);  prargc(c);  closetrace();
