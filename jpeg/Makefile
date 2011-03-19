@@ -57,13 +57,6 @@ clean:
 
 $(ODIR)/turbojpeg.o: ../include/turbojpeg.h
 
-ifeq ($(JPEGLIB), quicktime)
-
-$(ODIR)/turbojpeg.o: turbojpegqt.c
-	$(CC)  $(CFLAGS) -c $< -o $@
-
-endif
-
 ifeq ($(JPEGLIB), medialib)
 
 $(ODIR)/turbojpeg.o: turbojpeg-mlib.c jpeg_c_EncoderHuffman.c jpeg_c_DecoderHuffman.c jpeg_IN.h

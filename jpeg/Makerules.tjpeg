@@ -20,13 +20,6 @@ ifeq ($(JPEGLIB), ipp)
 
 endif
 
-ifeq ($(JPEGLIB), quicktime)
-
- JPEGLINK = -framework ApplicationServices -framework CoreFoundation -framework CoreServices -framework QuickTime -ltjpeg
- JPEGDEP = $(LDIR)/libtjpeg.a
-
-endif
-
 ifeq ($(JPEGLIB), medialib)
 
  JPEGLINK = -lmlib -ltjpeg

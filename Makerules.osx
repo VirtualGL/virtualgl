@@ -21,7 +21,7 @@ else
  OPTFLAG = -mcpu=7450 -fast
 endif
 
-DEFAULTJPEGLIB = quicktime
+DEFAULTJPEGLIB = libjpeg-turbo
 
 SHFLAG = -dynamiclib
 SHEXT = dylib
