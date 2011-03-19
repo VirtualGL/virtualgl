@@ -125,13 +125,17 @@ ifeq ($(JPEGLIB), libjpeg-turbo)
  ifeq ($(platform), osxx86)
   JPEG_LDFLAGS=/opt/libjpeg-turbo/lib/libturbojpeg.a
  else
-  ifeq ($(platform), windows)
-   JPEG_LDFLAGS=turbojpeg-static.lib
+  ifeq ($(platform), osx)
+   JPEG_LDFLAGS=/opt/libjpeg-turbo/lib/libturbojpeg.a
   else
-   ifeq ($(subplatform), 64)
-    JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib64 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+   ifeq ($(platform), windows)
+    JPEG_LDFLAGS=turbojpeg-static.lib
    else
-    JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib32 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+    ifeq ($(subplatform), 64)
+     JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib64 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+    else
+     JPEG_LDFLAGS=-L/opt/libjpeg-turbo/lib32 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+    endif
    endif
   endif
  endif
