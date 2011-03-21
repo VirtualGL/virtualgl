@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-03-21T15:24:38">
+<meta name="date" content="2011-03-21T15:30:30">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2912,7 +2912,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">Abaqus v6</td>
     <td class="standard">Linux</td>
     <td class="standard">User reports indicate that it is necessary to add <br /><br /> <code>import&nbsp;os</code><br /> <code>os.environ['ABAQUS_EMULATE_OVERLAYS']&nbsp;=&nbsp;&quot;1&quot;</code> <br /><br /> to the <code>abaqus_v6.env</code> file in order to make Abaqus v6 work properly with VirtualGL in an X proxy environment.  If this is not done, then the application may fail to launch, fail to display the 3D pixels, or the 3D pixels may become corrupted whenever other windows obscure them.</td>
-    <td class="standard">VirtualGL does not redirect the rendering of transparent overlays, since those cannot be rendered in a Pbuffer.  Thus, in order to use transparent overlays, the 2D X Server must be able to render them, which is never the case for X proxies.  See Section <a href="#overlays" class="ref">16.2</a> for more details.</td>
+    <td class="standard">VirtualGL does not redirect the rendering of transparent overlays, since those cannot be rendered in a Pbuffer.  Thus, in order to use transparent overlays, the 2D X Server must be able to render them, which is never the case for X proxies (see Section <a href="#overlays" class="ref">16.2</a> for more details.)  Setting <code>ABAQUS_EMULATE_OVERLAYS</code> to <code>1</code> causes the application to emulate overlay rendering instead of using actual transparent overlays.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Abaqus v6</td>

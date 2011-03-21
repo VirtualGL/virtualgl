@@ -15,8 +15,10 @@
 	| VirtualGL does not redirect the rendering of transparent overlays, since \
 		those cannot be rendered in a Pbuffer.  Thus, in order to use transparent \
 		overlays, the 2D X Server must be able to render them, which is never the \
-		case for X proxies.  See {ref prefix="Section ": overlays} for more \
-		details. \
+		case for X proxies (see {ref prefix="Section ": overlays} for more \
+		details.)  Setting ''ABAQUS_EMULATE_OVERLAYS'' to ''1'' causes \
+		the application to emulate overlay rendering instead of using actual \
+		transparent overlays. \
 	|
 | Abaqus v6 | Linux \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
