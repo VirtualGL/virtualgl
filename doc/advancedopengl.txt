@@ -89,6 +89,7 @@ environment variable or by using the ''-st'' argument to ''vglrun''.  See
 {ref prefix="Section ": VGL_STEREO} for more details.
 
 ** Transparent Overlays
+{anchor: overlays}
 
 Transparent overlays have similar requirements and restrictions as
 quad-buffered stereo.  In this case, VirtualGL completely bypasses its own GLX

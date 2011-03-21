@@ -2,7 +2,23 @@
 {anchor: Application_Recipes}
 
 || Application || Platform || Recipe || Notes ||
-| Abaqus v6.9 | Linux \
+| Abaqus v6 | Linux \
+	| User reports indicate that it is necessary to add \
+		{nl}{nl} \
+		''import os''{nl} \
+		''os.environ['ABAQUS_EMULATE_OVERLAYS'] = "1"'' \
+		{nl}{nl} \
+		to the ''abaqus_v6.env'' file in order to make Abaqus v6 work properly \
+		with VirtualGL in an X proxy environment.  If this is not done, then the \
+		application may fail to launch, fail to display the 3D pixels, or the 3D \
+		pixels may become corrupted whenever other windows obscure them. \
+	| VirtualGL does not redirect the rendering of transparent overlays, since \
+		those cannot be rendered in a Pbuffer.  Thus, in order to use transparent \
+		overlays, the 2D X Server must be able to render them, which is never the \
+		case for X proxies.  See {ref prefix="Section ": overlays} for more \
+		details. \
+	|
+| Abaqus v6 | Linux \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
 	| User reports indicate that Abaqus 6.9 will not work properly if \
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
