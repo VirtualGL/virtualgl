@@ -756,6 +756,16 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
 	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
+	glPushAttrib(GL_PIXEL_MODE_BIT);
+	_glPixelTransferf(GL_RED_SCALE, 1.0);
+	_glPixelTransferf(GL_RED_BIAS, 0.0);
+	_glPixelTransferf(GL_GREEN_SCALE, 1.0);
+	_glPixelTransferf(GL_GREEN_BIAS, 0.0);
+	_glPixelTransferf(GL_BLUE_SCALE, 1.0);
+	_glPixelTransferf(GL_BLUE_BIAS, 0.0);
+	_glPixelTransferf(GL_ALPHA_SCALE, 1.0);
+	_glPixelTransferf(GL_ALPHA_BIAS, 0.0);
+
 	if(usepbo)
 	{
 		if(!ext)
@@ -905,6 +915,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	}
 
 	glRenderMode(oldrendermode);
+	glPopAttrib();
 	glPopClientAttrib();
 	tc.restore();
 
