@@ -35,6 +35,12 @@ VirtualGL will no longer die if glXDestroyContext() is passed a NULL argument.
 Worked around a BadWindow error that would occur whenever Direct3D applications
 were run using WINE 1.3.11 or later, VirtualGL, and recent nVidia drivers.
 -------------------------------------------------------------------------------
+[9]
+Fixed an issue whereby, if a 3D application set
+GL_{RED|GREEN|BLUE|ALPHA}_SCALE or GL_{RED|GREEN|BLUE|ALPHA}_BIAS to
+non-default values, the colors would appear wrong when running the
+application in VirtualGL, and the readback performance would be very slow.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
