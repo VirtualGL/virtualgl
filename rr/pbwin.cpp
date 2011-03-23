@@ -915,7 +915,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	}
 
 	glRenderMode(oldrendermode);
-	glPopAttrib();
+	_glPopAttrib();
 	glPopClientAttrib();
 	tc.restore();
 
