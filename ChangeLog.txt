@@ -41,6 +41,14 @@ GL_{RED|GREEN|BLUE|ALPHA}_SCALE or GL_{RED|GREEN|BLUE|ALPHA}_BIAS to
 non-default values, the colors would appear wrong when running the
 application in VirtualGL, and the readback performance would be very slow.
 -------------------------------------------------------------------------------
+[10]
+Fixed an issue whereby 3D applications that requested an overlay visual would
+fail with BadRequest or other X11 errors if the 2D X Server lacked GLX support
+(as is the case with TurboVNC.)  This was caused by the fact that VirtualGL
+passes through glXChooseVisual() and related calls to the 2D X Server if it
+detects that an overlay visual is being requested.  Now, VirtualGL will first
+check that the 2D X Server supports GLX before passing through those calls.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

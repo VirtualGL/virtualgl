@@ -785,7 +785,10 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		}
 		if(overlayreq)
 		{
-			v=_glXChooseVisual(dpy, screen, attrib_list);
+			int dummy;
+			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+				v=NULL;
+			else v=_glXChooseVisual(dpy, screen, attrib_list);
 			stoptrace();  prargv(v);  closetrace();
 			return v;
 		}
@@ -886,7 +889,10 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
-			ctx=_glXCreateContext(dpy, vis, share_list, direct);
+			int dummy;
+			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+				ctx=NULL;
+			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
 			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
 			stoptrace();  prargx(ctx);  closetrace();
 			return ctx;
@@ -1269,7 +1275,10 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
-			drawable=_glXCreateGLXPixmap(dpy, vi, pm);
+			int dummy;
+			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+				drawable=0;
+			else drawable=_glXCreateGLXPixmap(dpy, vi, pm);
 			stoptrace();  prargx(drawable);  closetrace();
 			return drawable;
 		}

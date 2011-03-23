@@ -135,7 +135,10 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 		}
 		if(overlayreq)
 		{
-			configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+			int dummy;
+			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+				configs=NULL;
+			else configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 			if(configs && nelements && *nelements)
 			{
 				for(int i=0; i<*nelements; i++) rcfgh.add(dpy, configs[i]);
@@ -301,8 +304,12 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
 		if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
 		{
+			int dummy;
 			stoptrace();  if(value) {prargi(*value);}  closetrace();
-			return _glXGetConfig(dpy, vis, attrib, value);
+			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+				retval=0;
+			else retval=_glXGetConfig(dpy, vis, attrib, value);
+			return retval;
 		}
 	}
 
