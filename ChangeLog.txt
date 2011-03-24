@@ -32,8 +32,12 @@ VirtualGL with multiple graphics cards.
 VirtualGL will no longer die if glXDestroyContext() is passed a NULL argument.
 -------------------------------------------------------------------------------
 [8]
-Worked around a BadWindow error that would occur whenever Direct3D applications
-were run using WINE 1.3.11 or later, VirtualGL, and recent nVidia drivers.
+Fixed a BadWindow error that would occur whenever a 3D application attempted to
+call glXSwapIntervalSGI() (specifically, this was observed when running
+Direct3D applications using WINE 1.3.11 or later.)  The nVidia GLX
+implementation requires that a window be current (not a Pbuffer) when calling
+glXSwapIntervalSGI(), so VirtualGL now interposes that function and makes it
+a noop.
 -------------------------------------------------------------------------------
 [9]
 Fixed an issue whereby, if a 3D application set
