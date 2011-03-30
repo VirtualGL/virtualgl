@@ -27,6 +27,21 @@
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
 		for other versions of Abaqus as well. \
 	|
+| Animator 4 | Linux \
+	| Comment out the line that reads \
+		{nl}{nl} \
+		''unsetenv LD_PRELOAD'' \
+		{nl}{nl} \
+		in the ''a4'' script, then launch Animator 4 using \
+		{nl}{nl} \
+		''vglrun -ge a4'' \
+		{nl}{nl} \
+	| When the ''a4'' script unsets ''LD_PRELOAD'', this prevents VirtualGL \
+		from being loaded into the application.  Animator 4 additionally checks \
+		the value of ''LD_PRELOAD'' and attempts to unset it from inside \
+		the application.  Using ''vglrun -ge'' to launch the application fools \
+		Animator 4 into thinking that ''LD_PRELOAD'' is unset. \
+	|
 | ANSA v12.1.0 | Linux \
 	| Add \
 		{nl}{nl} \
