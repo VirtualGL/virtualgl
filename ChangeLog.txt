@@ -53,6 +53,9 @@ passes through glXChooseVisual() and related calls to the 2D X Server if it
 detects that an overlay visual is being requested.  Now, VirtualGL will first
 check that the 2D X Server supports GLX before passing through those calls.
 -------------------------------------------------------------------------------
+[11]
+vglclient -kill and vglclient -killall now work (again) in the Exceed client.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
