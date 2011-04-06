@@ -148,7 +148,8 @@ void killproc(bool useronly)
 		if(nps) for(i=0; i<nps; i++)
 		{
 			if(pid[i]==GetCurrentProcessId()) continue;
-			if(!(ph=OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid[i]))) continue;
+			if(!(ph=OpenProcess(PROCESS_TERMINATE|PROCESS_QUERY_INFORMATION
+				|PROCESS_VM_READ, FALSE, pid[i]))) continue;
 			if(EnumProcessModules(ph, mod, 1024, &bytes))
 			{
 				nmod=bytes/sizeof(DWORD);
