@@ -801,13 +801,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class,
 		level, stereo, trans, n)) || n<1)
 	{
-		if(!alreadywarned)
+		if(!alreadywarned && fconfig.verbose)
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a Pbuffer-enabled");
-			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  If the application", fconfig.localdpystring);
-			rrout.println("[VGL]    subsequently fails, then make sure that the 3D X server is configured");
-			rrout.println("[VGL]    for 24-bit color and has accelerated 3D drivers installed.");
+			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  This is normal if", fconfig.localdpystring);
+			rrout.println("[VGL]    the 3D application is probing for visuals with certain capabilities,");
+			rrout.println("[VGL]    but if the app fails to start, then make sure that the 3D X server is");
+			rrout.println("[VGL]    configured for 24-bit color and has accelerated 3D drivers installed.");
 		}
 		return NULL;
 	}
