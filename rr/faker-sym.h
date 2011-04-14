@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,10 +20,6 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
-#ifdef USEGLP
-#include <GL/glp.h>
-#include "glpweak.h"
-#endif
 #include "rrlog.h"
 
 extern void __vgl_safeexit(int);
@@ -94,17 +90,10 @@ extern void __vgl_fakerinit(void);
 	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);}
 
 
-#ifdef USEGLP
-#define GetCurrentContext() (fconfig.glp ? glPGetCurrentContext():_glXGetCurrentContext())
-#define GetCurrentDrawable() (fconfig.glp ? glPGetCurrentBuffer():_glXGetCurrentDrawable())
-#define GetCurrentReadDrawable() (fconfig.glp ? glPGetCurrentReadBuffer():_glXGetCurrentReadDrawable())
-#define GetCurrentDisplay() (fconfig.glp ? NULL:_glXGetCurrentDisplay())
-#else
 #define GetCurrentContext() glXGetCurrentContext()
 #define GetCurrentDrawable() _glXGetCurrentDrawable()
 #define GetCurrentReadDrawable() _glXGetCurrentReadDrawable()
 #define GetCurrentDisplay() _glXGetCurrentDisplay()
-#endif
 
 
 #ifdef __cplusplus
@@ -132,10 +121,6 @@ funcdef2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
 
 funcdef4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
 	int *, value, return);
-
-#ifdef USEGLP
-funcdef0(GLXContext, glXGetCurrentContext, return);
-#endif
 
 funcdef0(GLXDrawable, glXGetCurrentDrawable, return);
 
@@ -272,12 +257,6 @@ static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
 {
 	checksym(glXGetProcAddress);  return __glXGetProcAddress(procName);
 }
-
-// Exists in SUNWglrt 120812-15 and later only
-
-#ifdef USEGLP
-funcdef1(void, glPSwapBuffers, GLPBuffer, drawable,);
-#endif
 
 
 // GL functions

@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,9 +24,6 @@
 
 #ifdef INFAKER
  #include "faker-sym.h"
- #ifdef USEGLP
- #define glXGetCurrentContext GetCurrentContext
- #endif
  #define glXGetCurrentDisplay GetCurrentDisplay
  #define glXGetCurrentDrawable GetCurrentDrawable
  #define glXGetCurrentReadDrawable GetCurrentReadDrawable
@@ -39,12 +37,6 @@
  #define glXMakeCurrent _glXMakeCurrent
 #else
  #include <GL/glx.h>
-#endif
-
-#ifdef USEGLP
- #include <GL/glp.h>
- #include "glpweak.h"
- #include "fakerconfig.h"
 #endif
 
 class tempctx
@@ -62,32 +54,16 @@ class tempctx
 			_draw(glXGetCurrentDrawable()),
 			_mc(false), _glx11(glx11)
 		{
-			#ifdef USEGLP
-			if(!fconfig.glp && !dpy) return;
-			#else
 			if(!dpy) return;
-			#endif
 			if(read==EXISTING_DRAWABLE) read=_read;
 			if(draw==EXISTING_DRAWABLE) draw=_draw;
-			if(_read!=read || _draw!=draw || _ctx!=ctx
-			#ifdef USEGLP
-			|| (!fconfig.glp && _dpy!=dpy)
-			#else
-			|| (_dpy!=dpy)
-			#endif
-			)
+			if(_read!=read || _draw!=draw || _ctx!=ctx || (_dpy!=dpy))
 			{
 				Bool ret=True;
-				#ifdef USEGLP
-				if(fconfig.glp) ret=glPMakeContextCurrent(draw, read, ctx);
-				else
+				if(glx11) ret=glXMakeCurrent(dpy, draw, ctx);
+				#ifndef GLX11
+				else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
 				#endif
-				{
-					if(glx11) ret=glXMakeCurrent(dpy, draw, ctx);
-					#ifndef GLX11
-					else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
-					#endif
-				}
 				if(!ret) _throw("Could not bind OpenGL context to window (window may have disappeared)");
 				_mc=true;
 			}
@@ -97,10 +73,6 @@ class tempctx
 		{
 			if(_mc && _ctx && (_draw || _read))
 			{
-				#ifdef USEGLP
-				if(fconfig.glp) glPMakeContextCurrent(_draw, _read, _ctx);
-				else
-				#endif
 				if(_dpy)
 				{
 					if(_glx11) glXMakeCurrent(_dpy, _draw, _ctx);

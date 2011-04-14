@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2010 D. R. Commander
+# Copyright (C)2009-2011 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,8 +55,7 @@ usage()
 	echo "-nodl     : If an app uses dlopen() to explicitly access libGL.so, don't"
 	echo "            force it to open VirtualGL instead (see docs)"
 	echo
-	echo "-d <d>    : <d> = the X Display or GLP device to use for 3D rendering"
-	echo "            [default = :0.0]"
+	echo "-d <d>    : <d> = the X Display to use for 3D rendering [default = :0.0]"
 	echo
 	echo "-fps <f>  : Limit client/server frame rate to <f> frames/sec"
 	echo

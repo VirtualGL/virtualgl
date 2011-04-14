@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010 D. R. Commander
+/* Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -269,12 +269,6 @@ void fconfig_reloadenv(void)
 	fetchenv_str("VGL_CONFIG", config);
 	if((env=getenv("VGL_DISPLAY"))!=NULL && strlen(env)>0)
 	{
-		#ifdef USEGLP
-		if((env[0]=='/' || !strnicmp(env, "GLP", 3)))
-		{
-			fconfig.glp=true;  removespaces(env);
-		}
-		#endif
 		if(!fcenv_set || strncmp(env, fcenv.localdpystring, MAXSTR-1))
 		{
 			strncpy(fconfig.localdpystring, env, MAXSTR-1);
@@ -434,8 +428,6 @@ void fconfig_reloadenv(void)
 		if(fconfig.subsamp<0) fconfig.subsamp=1;
 	}
 
-	if(fconfig.glp) fconfig.usewindow=false;
-
 	if(fconfig.forcealpha==-1 && fconfig.readback==RRREAD_PBO)
 		fconfig.forcealpha=1;
 
@@ -556,7 +548,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfdbl(gamma);
 	prconfint(gamma_usesun);
 	prconfstr(gllib);
-	prconfint(glp);
 	prconfint(gui);
 	prconfint(guikey);
 	prconfstr(guikeyseq);

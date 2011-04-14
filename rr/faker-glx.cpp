@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,40 +55,18 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
 			attribs[11]=1;
-		#ifdef USEGLP
-		if(fconfig.glp)
+		configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
+		if((!configs || n<1) && attribs[11])
 		{
-			attribs[12]=attribs[13]=None;
-			if(!attribs[11]) attribs[10]=None;
-			configs=glPChooseFBConfig(_localdev, attribs, &n);
-			if((!configs || n<1) && attribs[11])
-			{
-				attribs[10]=attribs[11]=0;
-				configs=glPChooseFBConfig(_localdev, attribs, &n);
-			}
-			if((!configs || n<1) && attribs[1])
-			{
-				attribs[1]=0;
-				configs=glPChooseFBConfig(_localdev, attribs, &n);
-			}
-			if(!configs || n<1) return 0;
-		}
-		else
-		#endif
-		{
+			attribs[11]=0;
 			configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
-			if((!configs || n<1) && attribs[11])
-			{
-				attribs[11]=0;
-				configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
-			}
-			if((!configs || n<1) && attribs[1])
-			{
-				attribs[1]=0;
-				configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
-			}
-			if(!configs || n<1) return 0;
 		}
+		if((!configs || n<1) && attribs[1])
+		{
+			attribs[1]=0;
+			configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
+		}
+		if(!configs || n<1) return 0;
 		c=configs[0];
 		XFree(configs);
 		if(c)
@@ -192,10 +170,6 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long 
 		{_glXCopyContext(dpy, src, dst, mask);  return;}
 	else if(srcoverlay!=dstoverlay)
 		_throw("glXCopyContext() cannot copy between overlay and non-overlay contexts");
-	#ifdef USEGLP
-	if(fconfig.glp) glPCopyContext(src, dst, mask);
-	else
-	#endif
 	_glXCopyContext(_localdpy, src, dst, mask);
 	CATCH();
 }
@@ -207,10 +181,6 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config, const int *attrib_
 		opentrace(glXCreatePbuffer);  prargd(dpy);  prargc(config);
 		prargal13(attrib_list);  starttrace();
 
-	#ifdef USEGLP
-	if(fconfig.glp) pb=glPCreateBuffer(config, attrib_list);
-	else
-	#endif
 	pb=_glXCreatePbuffer(_localdpy, config, attrib_list);
 	TRY();
 	if(dpy && pb) glxdh.add(pb, dpy);
@@ -243,10 +213,6 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 {
 		opentrace(glXDestroyPbuffer);  prargd(dpy);  prargx(pbuf);  starttrace();
 
-	#ifdef USEGLP
-	if(fconfig.glp) glPDestroyBuffer(pbuf);
-	else
-	#endif
 	_glXDestroyPbuffer(_localdpy, pbuf);
 	TRY();
 	if(pbuf) glxdh.remove(pbuf);
@@ -258,11 +224,6 @@ void glXDestroyPbuffer(Display *dpy, GLXPbuffer pbuf)
 void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 {
 	if(ctxh.isoverlay(ctx)) {_glXFreeContextEXT(dpy, ctx);  return;}
-	#ifdef USEGLP
-	// Tell me about the rabbits, George ...
-	if(fconfig.glp) return;
-	else
-	#endif
 	_glXFreeContextEXT(_localdpy, ctx);
 }
 
@@ -350,16 +311,6 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor
 			&& __vglServerVisualAttrib(c, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
 			attrib=GLX_RED_SIZE;
-		#ifdef USEGLP
-		if(fconfig.glp)
-		{
-			if(attrib==GLX_VIDEO_RESIZE_SUN) *value=0;
-			else if(attrib==GLX_VIDEO_REFRESH_TIME_SUN) *value=0;
-			else if(attrib==GLX_GAMMA_VALUE_SUN) *value=100;
-			else retval=glPGetFBConfigAttrib(c, attrib, value);
-		}
-		else
-		#endif
 		retval=_glXGetFBConfigAttrib(_localdpy, c, attrib, value);
 	}
 
@@ -368,15 +319,6 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	CATCH();
 	return retval;
 }
-
-#ifdef USEGLP
-GLXContext glXGetCurrentContext(void)
-{
-	GLXContext ctx=_glXGetCurrentContext();
-	if(fconfig.glp && !ctxh.isoverlay(ctx)) ctx=glPGetCurrentContext();
-	return ctx;
-}
-#endif
 
 Display *glXGetCurrentDisplay(void)
 {
@@ -503,22 +445,12 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 		if(attribute==GLX_CONFIG_CAVEAT)
 		{
 			int vistype=__vglServerVisualAttrib(config, GLX_X_VISUAL_TYPE);
-			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR && !fconfig.glp)
+			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR)
 			{
 				*value=GLX_NON_CONFORMANT_CONFIG;
 				return retval;
 			}
 		}
-		#ifdef USEGLP
-		if(fconfig.glp)
-		{
-			if(attribute==GLX_VIDEO_RESIZE_SUN) *value=0;
-			else if(attribute==GLX_VIDEO_REFRESH_TIME_SUN) *value=0;
-			else if(attribute==GLX_GAMMA_VALUE_SUN) *value=100;
-			else retval=glPGetFBConfigAttrib(config, attribute, value);
-		}
-		else
-		#endif
 		retval=_glXGetFBConfigAttrib(_localdpy, config, attribute, value);
 	}
 
@@ -540,10 +472,6 @@ GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
 
 GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) return glPGetFBConfigs(_localdev, nelements);
-	else
-	#endif
 	return _glXGetFBConfigs(_localdpy, DefaultScreen(_localdpy), nelements);
 }
 
@@ -552,10 +480,6 @@ void glXGetSelectedEvent(Display *dpy, GLXDrawable draw, unsigned long *event_ma
 	if(winh.isoverlay(dpy, draw))
 		return _glXGetSelectedEvent(dpy, draw, event_mask);
 
-	#ifdef USEGLP
-	if(fconfig.glp) return;
-	else
-	#endif
 	_glXGetSelectedEvent(_localdpy, ServerDrawable(dpy, draw), event_mask);
 }
 
@@ -566,10 +490,6 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long *
 
 GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) return 0;
-	else
-	#endif
 	return _glXImportContextEXT(_localdpy, contextID);
 }
 
@@ -577,10 +497,6 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 {
 	if(ctxh.isoverlay(ctx)) return _glXIsDirect(dpy, ctx);
 
-	#ifdef USEGLP
-	if(fconfig.glp) return True;
-	else
-	#endif
 	return _glXIsDirect(_localdpy, ctx);
 }
 
@@ -595,10 +511,6 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 	if(attribute==GLX_RENDER_TYPE)
 	{
 		int fbcid=-1;
-		#ifdef USEGLP
-		if(fconfig.glp) retval=glPQueryContext(ctx, GLX_FBCONFIG_ID, &fbcid);
-		else
-		#endif
 		retval=_glXQueryContext(_localdpy, ctx, GLX_FBCONFIG_ID, &fbcid);
 		if(fbcid>0)
 		{
@@ -608,14 +520,7 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 			else if(value) *value=GLX_RGBA_TYPE;
 		}
 	}
-	else
-	{
-		#ifdef USEGLP
-		if(fconfig.glp) retval=glPQueryContext(ctx, attribute, value);
-		else
-		#endif
-		retval=_glXQueryContext(_localdpy, ctx, attribute, value);
-	}
+	else retval=_glXQueryContext(_localdpy, ctx, attribute, value);
 
 		stoptrace();  if(value) prargi(*value);  closetrace();
 
@@ -627,10 +532,6 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute, int *val
 	if(ctxh.isoverlay(ctx))
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
-	#ifdef USEGLP
-	if(fconfig.glp) return glPQueryContext(ctx, attribute, value);
-	else
-	#endif
 	return _glXQueryContextInfoEXT(_localdpy, ctx, attribute, value);
 }
 
@@ -648,10 +549,6 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned in
 		return;
 	}
 
-	#ifdef USEGLP
-	if(fconfig.glp) glPQueryBuffer(ServerDrawable(dpy, draw), attribute, value);
-	else
-	#endif
 	_glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
 
 		stoptrace();  prargx(ServerDrawable(dpy, draw));  if(value) {prargi(*value);}
@@ -662,11 +559,6 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute, unsigned in
 
 Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 {
-	#ifdef USEGLP
-	if(fconfig.glp)
-		{if(error_base) *error_base=0;  if(event_base) *event_base=0;  return True;}
-	else
-	#endif
 	return _glXQueryExtension(_localdpy, error_base, event_base);
 }
 
@@ -703,10 +595,6 @@ int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute, unsigne
 
 Bool glXQueryVersion(Display *dpy, int *major, int *minor)
 {
-	#ifdef USEGLP
-	if(fconfig.glp) {*major=1;  *minor=4;  return True;}
-	else
-	#endif
 	return _glXQueryVersion(_localdpy, major, minor);
 }
 
@@ -714,10 +602,6 @@ void glXSelectEvent(Display *dpy, GLXDrawable draw, unsigned long event_mask)
 {
 	if(winh.isoverlay(dpy, draw)) return _glXSelectEvent(dpy, draw, event_mask);
 
-	#ifdef USEGLP
-	if(fconfig.glp) return;
-	else
-	#endif
 	_glXSelectEvent(_localdpy, ServerDrawable(dpy, draw), event_mask);
 }
 

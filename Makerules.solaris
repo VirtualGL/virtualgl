@@ -3,7 +3,6 @@
 ########################################
 
 ARCHFLAG =
-USEGLP = yes
 
 ifeq ($(findstring gcc, $(CC)), gcc)
 
@@ -57,9 +56,6 @@ endif
 AR = ar ruvs
 INSTALL = /usr/ucb/install
 
-ifeq ($(USEGLP), yes)
- CDEFINES := $(CDEFINES) -DUSEGLP
-endif
 CDEFINES := $(CDEFINES) -DSUNOGL
 
 LDFLAGS := $(LDFLAGS) -mt -lpthread -lrt

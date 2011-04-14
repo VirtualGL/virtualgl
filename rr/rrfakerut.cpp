@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,9 +55,6 @@
 #ifndef GLX_HEIGHT
 #define GLX_HEIGHT 0x801E
 #endif
-
-
-int usingglp=0;
 
 
 #define glClearBuffer(buffer, r, g, b, a) { \
@@ -1168,7 +1165,6 @@ int cfgid(Display *dpy, GLXFBConfig c)
 void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 {
 	GLXContext ctx=0;  int render_type, fbcid, temp;
-	if(usingglp) return;
 	try
 	{
 		int visual_caveat;
@@ -2342,18 +2338,6 @@ int main(int argc, char **argv)
 	{
 		printf("putenv() failed!\n");  return -1;
 	}
-	#ifdef USEGLP
-	char *temp=NULL;
-	if((temp=getenv("VGL_DISPLAY"))!=NULL && strlen(temp)>0)
-	{
-		for(int i=0; i<strlen(temp); i++)
-			if(temp[i]!=' ' && temp[i]!='\t')
-			{
-				temp=&temp[i];  break;
-			}
-		if(temp[0]=='/' || !strncasecmp(temp, "GLP", 3)) usingglp=1;
-	}
-	#endif
 
 	if(argc>1) for(int i=1; i<argc; i++)
 	{

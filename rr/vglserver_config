@@ -33,16 +33,14 @@ usage() {
 	echo "USAGE: $0 [flags]"
 	echo
 	echo "Flags (for unattended mode):"
-	echo "+glx	Configure server for use with VirtualGL in GLX mode"
-	echo "+glp	Configure server for use with VirtualGL in GLP mode"
-	echo "-glx	Unconfigure server for use with VirtualGL in GLX mode"
-	echo "-glp	Unconfigure server for use with VirtualGL in GLP mode"
-	echo "-s	Restrict 3D X server access to vglusers group [default]" 
-	echo "+s	Open 3D X server access to all users of this machine"
-	echo "-f	Restrict framebuffer device access to vglusers group [default]"
-	echo "+f	Open framebuffer device access to all users of this machine"
-	echo "-t	Disable XTEST extension [default]"
-	echo "+t	Enable XTEST extension"
+	echo "-config		Configure server for use with VirtualGL"
+	echo "-unconfig	Unconfigure server for use with VirtualGL"
+	echo "-s		Restrict 3D X server access to vglusers group [default]" 
+	echo "+s		Open 3D X server access to all users of this machine"
+	echo "-f		Restrict framebuffer device access to vglusers group [default]"
+	echo "+f		Open framebuffer device access to all users of this machine"
+	echo "-t		Disable XTEST extension [default]"
+	echo "+t		Enable XTEST extension"
 	echo
 	echo "Flags (for both interactive and unattended modes):"
 	echo "-gid {g}  If vglusers group must be created, then set its group ID to {g}"
@@ -519,45 +517,6 @@ unconfigglx() {
 	echo
 }
 
-configglp() {
-	if [ "$UNAME_S" = "SunOS" ]; then
-		if [ $UNATTENDED = 0 ]; then
-			ynprompt "Restrict framebuffer device access to vglusers group (recommended)?"
-			if [ $? = 1 ]; then
-				VGLUSERSONLY=1; FBDEVVGLUSERSONLY=1;
-			else
-				VGLUSERSONLY=0; FBDEVVGLUSERSONLY=0;
-			fi
-		fi
-
-		if [ "$VGLUSERSONLY" = "1" ]; then
-			echo ... Creating vglusers group ...
-			if [ ! "$GID" = "" ]; then
-				$GROUPADD -g $GID vglusers || echo "Could not add vglusers group (probably because it already exists.)"
-			else
-				$GROUPADD vglusers || echo "Could not add vglusers group (probably because it already exists.)"
-			fi
-		fi
-
-		if [ ! -d /etc/dt/config ]; then
-			echo ... Creating /etc/dt/config/ directory ...
-			mkdir -p /etc/dt/config
-			chmod 755 /etc/dt/config
-		fi
-
-		if [ ! -f /etc/dt/config/GraphicsDevices ]; then
-			echo ... Creating /etc/dt/config/GraphicsDevices file ...
-			touch /etc/dt/config/GraphicsDevices
-			for i in /dev/fbs/*[0-9]; do echo $i >>/etc/dt/config/GraphicsDevices; done
-		fi
-		chmod 644 /etc/dt/config/GraphicsDevices
-		chown root:root /etc/dt/config/GraphicsDevices
-
-		configdev
-
-	fi
-}
-
 configglx() {
 	if [ $UNATTENDED = 0 ]; then
 		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
@@ -789,19 +748,6 @@ configglx() {
 	echo
 }
 
-glpcheck() {
-	GLP=0
-	if [ "$UNAME_S" = "SunOS" -a "$UNAME_M" = "sun4u" ]; then
-		NM=nm
-		if [ -x /usr/ccs/bin/nm ]; then NM=/usr/ccs/bin/nm; fi
-		if [ -x /usr/xpg4/bin/nm ]; then NM=/usr/xpg4/bin/nm; fi
-		if $NM -P /usr/openwin/lib/libGL.so.1 2>&1 | egrep -s glPCreateBuffer; then
-			GLP=1
-		fi
-	fi
-	return $GLP
-}
-
 MYPATH=`dirname $0`
 if [ -x $MYPATH/vglgenkey ]; then
 	VGLGENKEY=$MYPATH/vglgenkey
@@ -821,8 +767,8 @@ while [ $# -gt 0 ]; do
 		-gid) GID=$2;  shift ;;
 		+glx) CONFIG_VGL="configglx";  UNATTENDED=1 ;;
 		-glx) CONFIG_VGL="unconfigglx"; UNATTENDED=1 ;;
-		+glp) glpcheck || (CONFIG_VGL="configglp";  UNATTENDED=1) ;;
-		-glp) glpcheck || (CONFIG_VGL="unconfigdev";  UNATTENDED=1) ;;
+		-config) CONFIG_VGL="configglx";  UNATTENDED=1 ;;
+		-unconfig) CONFIG_VGL="unconfigglx"; UNATTENDED=1 ;;
 		*) usage 0
 	esac
 	shift
@@ -841,16 +787,11 @@ if [ ! `uid` -eq 0 ]; then
 fi
 
 if [ $UNATTENDED = 0 ]; then
-	glpcheck
 	while [ 1 ]
 	do
 		echo
-		echo "1) Configure server for use with VirtualGL in GLX mode"
-		echo "2) Unconfigure server for use with VirtualGL in GLX mode"
-		if [ "$GLP" = "1" ]; then
-			echo "3) Configure server for use with VirtualGL in GLP mode"
-			echo "4) Unconfigure server for use with VirtualGL in GLP mode"
-		fi
+		echo "1) Configure server for use with VirtualGL"
+		echo "2) Unconfigure server for use with VirtualGL"
 		echo "X) Exit"
 		echo
 		echo Choose:
@@ -860,10 +801,6 @@ if [ $UNATTENDED = 0 ]; then
 		1) configglx
 			;;
 		2) unconfigglx
-			;;
-		3) if [ "$GLP" = "1" ]; then configglp; fi
-			;;
-		4) if [ "$GLP" = "1" ]; then unconfigdev; fi
 			;;
 		X) break
 			;;

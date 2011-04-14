@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,9 +28,6 @@
 #include "fakerconfig.h"
 
 extern Display *_localdpy;
-#ifdef USEGLP
-extern GLPDevice _localdev;
-#endif
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
@@ -158,10 +155,7 @@ void pbuffer::clear(void)
 
 void pbuffer::swap(void)
 {
-	if(!fconfig.glp) _glXSwapBuffers(_localdpy, _drawable);
-	#ifdef USEGLP
-	else if(__glPSwapBuffers) _glPSwapBuffers(_drawable);
-	#endif
+	_glXSwapBuffers(_localdpy, _drawable);
 }
 
 

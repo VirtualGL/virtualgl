@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -54,13 +54,8 @@ static GLvoid r_glIndexubv(OglContextPtr, const GLubyte *);
 
 // Globals
 Display *_localdpy=NULL;
-#ifdef USEGLP
-GLPDevice _localdev=-1;
-#define _localdisplayiscurrent() ((fconfig.glp && glPGetCurrentDevice()==_localdev) || (!fconfig.glp && GetCurrentDisplay()==_localdpy))
-#else
 #define _localdisplayiscurrent() (GetCurrentDisplay()==_localdpy)
-#endif
-#define _isremote(dpy) (fconfig.glp || (_localdpy && dpy!=_localdpy))
+#define _isremote(dpy) (_localdpy && dpy!=_localdpy)
 #define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
 	|| drawbuf==GL_RIGHT)
@@ -212,27 +207,6 @@ void __vgl_fakerinit(void)
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
 	__vgl_loadsymbols();
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		if(_localdev<0)
-		{
-			char **devices=NULL;  int ndevices=0;  char *device=NULL;
-			if((devices=glPGetDeviceNames(&ndevices))==NULL || ndevices<1)
-				_throw("No GLP devices are registered");
-			device=fconfig.localdpystring;
-			if(!strnicmp(device, "GLP", 3)) device=NULL;
-			if(fconfig.verbose) rrout.println("[VGL] Opening GLP device %s",
-				device?device:"(default)");
-			if((_localdev=glPOpenDevice(device))<0)
-			{
-				rrout.print("[VGL] ERROR: Could not open GLP device %s.\n", fconfig.localdpystring);
-				__vgl_safeexit(1);
-			}
-		}
-	}
-	else
-	#endif
 	if(!_localdpy)
 	{
 		if(fconfig.verbose) rrout.println("[VGL] Opening local display %s",
@@ -674,7 +648,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	GLXDrawable olddraw=GetCurrentDrawable();
 	GLXContext ctx=GetCurrentContext();
 	Display *olddpy=NULL;
-	if(!ctx || (!fconfig.glp && !(olddpy=GetCurrentDisplay())))
+	if(!ctx || !(olddpy=GetCurrentDisplay()))
 	{
 		stoptrace();  closetrace();
 		return 0;  // Does ... not ... compute
@@ -684,20 +658,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	glXMakeContextCurrent(dpy, draw, read, ctx);
 
 	unsigned int srch, dsth, dstw;
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		glPQueryBuffer(glPGetCurrentBuffer(), GLP_WIDTH, &dstw);
-		glPQueryBuffer(glPGetCurrentBuffer(), GLP_HEIGHT, &dsth);
-		glPQueryBuffer(glPGetCurrentReadBuffer(), GLP_HEIGHT, &srch);
-	}
-	else
-	#endif
-	{
-		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
-		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
-		_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
-	}
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
+	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
 
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 	glPushAttrib(GL_VIEWPORT_BIT|GL_COLOR_BUFFER_BIT|GL_PIXEL_MODE_BIT);
@@ -729,10 +692,6 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int sr
 	_glPopAttrib();
 	glPopClientAttrib();
 
-	#ifdef USEGLP
-	if(fconfig.glp) glPMakeContextCurrent(olddraw, oldread, ctx);
-	else
-	#endif
 	_glXMakeContextCurrent(olddpy, olddraw, oldread, ctx);
 
 		stoptrace();  closetrace();
@@ -903,26 +862,15 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-	#ifdef USEGLP
-	if(fconfig.glp)
-	{
-		if(!(ctx=glPCreateNewContext(c,
-			render_type==GLP_COLOR_INDEX_BIT?GLP_COLOR_INDEX_TYPE:GLP_RGBA_TYPE, share_list)))
+	if(!(ctx=_glXCreateNewContext(_localdpy, c,
+		render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
 		return NULL;
-	}
-	else
-	#endif
+	if(!glXIsDirect(_localdpy, ctx))
 	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, c,
-			render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
-			return NULL;
-		if(!glXIsDirect(_localdpy, ctx))
-		{
-			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-			rrout.println("[VGL]    permissions may be set incorrectly.");
-		}
+		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+		rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+		rrout.println("[VGL]    permissions may be set incorrectly.");
 	}
 	ctxh.add(ctx, c);
 
@@ -994,12 +942,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		}
 	}
 
-	#ifdef USEGLP
-	if(fconfig.glp)
-		retval=glPMakeContextCurrent(drawable, drawable, ctx);
-	else
-	#endif
-		retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
+	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbuffer *pb;
 	if((pb=pmh.find(dpy, drawable))!=NULL) pb->clear();
@@ -1036,10 +979,6 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 	}
 
 	ctxh.remove(ctx);
-	#ifdef USEGLP
-	if(fconfig.glp)	glPDestroyContext(ctx);
-	else
-	#endif
 	_glXDestroyContext(_localdpy, ctx);
 
 		stoptrace();  closetrace();
@@ -1076,24 +1015,14 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	else
 		render_type=GLX_RGBA_TYPE;
 
-	#ifdef USEGLP
-	if(fconfig.glp)
+	if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
+		return NULL;
+	if(!glXIsDirect(_localdpy, ctx))
 	{
-		if(!(ctx=glPCreateNewContext(config, render_type, share_list)))
-			return NULL;
-	}
-	else
-	#endif
-	{
-		if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
-			return NULL;
-		if(!glXIsDirect(_localdpy, ctx))
-		{
-			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-			rrout.println("[VGL]    permissions may be set incorrectly.");
-		}
+		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
+		rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
+		rrout.println("[VGL]    permissions may be set incorrectly.");
 	}
 	ctxh.add(ctx, config);
 
@@ -1155,12 +1084,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 			draw=drawpbw->updatedrawable();
 		if(readpbw) read=readpbw->updatedrawable();
 	}
-	#ifdef USEGLP
-	if(fconfig.glp)
-		retval=glPMakeContextCurrent(draw, read, ctx);
-	else
-	#endif
-		retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
+	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
 	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
 	pbuffer *pb;
@@ -1412,13 +1336,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 		pbw->readback(GL_BACK, false, fconfig.sync);
 		pbw->swapbuffers();
 	}
-	else
-	{
-		if(!fconfig.glp) _glXSwapBuffers(_localdpy, drawable);
-		#ifdef USEGLP
-		else if(__glPSwapBuffers) _glPSwapBuffers(drawable);
-		#endif
-	}
+	else _glXSwapBuffers(_localdpy, drawable);
 
 		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getdrawable());}
 		closetrace();  
@@ -1566,10 +1484,9 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	GLXContext ctx=GetCurrentContext();
 	GLXDrawable draw=GetCurrentDrawable();
 	GLXDrawable read=GetCurrentReadDrawable();
-	Display *dpy=NULL;
-	if(!fconfig.glp) dpy=GetCurrentDisplay();
+	Display *dpy=GetCurrentDisplay();
 	GLXDrawable newread=0, newdraw=0;
-	if((dpy || fconfig.glp) && (draw || read) && ctx)
+	if(dpy && (draw || read) && ctx)
 	{
 		newread=read, newdraw=draw;
 		pbwin *drawpbw=NULL, *readpbw=NULL;
@@ -1581,10 +1498,6 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		if(readpbw) newread=readpbw->updatedrawable();
 		if(newread!=read || newdraw!=draw)
 		{
-			#ifdef USEGLP
-			if(fconfig.glp) glPMakeContextCurrent(newdraw, newread, ctx);
-			else
-			#endif
 			_glXMakeContextCurrent(dpy, newdraw, newread, ctx);
 			if(drawpbw) {drawpbw->clear();  drawpbw->cleanup();}
 			if(readpbw) readpbw->cleanup();

@@ -7,9 +7,6 @@
 		glXDestroyContext;
 		glXDestroyGLXPixmap;
 		glXGetConfig;
-		#ifdef USEGLP
-		glXGetCurrentContext;
-		#endif
 		glXGetCurrentDrawable;
 		glXIsDirect;
 		glXMakeCurrent;

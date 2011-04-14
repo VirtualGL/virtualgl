@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,9 +26,6 @@
 #include "faker-sym.h"
 
 extern Display *_localdpy;
-#ifdef USEGLP
-extern GLPDevice _localdev;
-#endif
 
 struct _visattrib
 {
@@ -265,23 +262,12 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	{
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	}
-	#ifdef USEGLP
-	if(!fconfig.glp) {
-	#endif
 	if(!fconfig.usewindow)
 	{
 		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
 	}
-	#ifdef USEGLP
-	}
-	#endif
 	glxattribs[j]=None;
-	#ifdef USEGLP
-	if(fconfig.glp)
-		return glPChooseFBConfig(_localdev, glxattribs, &nelements);
-	else
-	#endif
-		return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs, &nelements);
+	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs, &nelements);
 }
 
 int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid, int attribute)
@@ -322,12 +308,7 @@ int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid, int attribut
 int __vglServerVisualAttrib(GLXFBConfig c, int attribute)
 {
 	int value=0;
-	#ifdef USEGLP
-	if(fconfig.glp)
-		glPGetFBConfigAttrib(c, attribute, &value);
-	else
-	#endif
-		_glXGetFBConfigAttrib(_localdpy, c, attribute, &value);
+	_glXGetFBConfigAttrib(_localdpy, c, attribute, &value);
 	return value;
 }
 

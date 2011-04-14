@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,9 +24,6 @@
 #include <errno.h>
 #define GL_GLEXT_PROTOTYPES
 #include "../rr/glx.h"
-#ifdef USEGLP
-#include <GL/glp.h>
-#endif
 #ifdef MESAGLU
 #include <mesa/glu.h>
 #else
@@ -140,10 +137,6 @@ pixelformat pix[4
 int WIDTH=_WIDTH, HEIGHT=_HEIGHT;
 Display *dpy=NULL;  Window win=0;
 rrtimer timer;
-int useglp=0;
-#ifdef USEGLP
-int glpdevice=-1;
-#endif
 int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, usealpha=0;
 #ifdef GL_VERSION_1_5
 int pbo=0;
@@ -256,45 +249,20 @@ void findvisual(XVisualInfo* &v
 	}
 
 	#ifndef GLX11
-	#ifdef USEGLP
-	if(useglp)
+	if(usealpha)
 	{
-		pbattribs[6]=pbattribsdb[8]=pbattribsci[2]=pbattribscidb[4]=None;
-		pbattribs[7]=pbattribsdb[9]=pbattribsci[3]=pbattribscidb[5]=None;
-		pbattribs[8]=pbattribsdb[10]=pbattribsci[4]=pbattribscidb[6]=None;
-		pbattribs[9]=pbattribsdb[11]=pbattribsci[5]=pbattribscidb[7]=None;
-		if(usealpha)
-		{
-			pbattribs[6]=GLP_ALPHA_SIZE;  pbattribs[7]=8;
-			pbattribsdb[8]=GLP_ALPHA_SIZE;  pbattribsdb[9]=8;
-		}
-		fbconfigs=glPChooseFBConfig(glpdevice, useci? pbattribsci:pbattribs,
-			&nelements);
-		if(!fbconfigs) fbconfigs=glPChooseFBConfig(glpdevice,
-			useci? pbattribscidb:pbattribsdb, &nelements);
+		pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
+		pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=8;
 	}
-	else
-	#endif
-	{
-		if(usealpha)
-		{
-			pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
-			pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=8;
-		}
-		fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
-			pbattribsci:pbattribs, &nelements);
-		if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-			useci?pbattribscidb:pbattribsdb, &nelements);
-	}
+	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
+		pbattribsci:pbattribs, &nelements);
+	if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+		useci?pbattribscidb:pbattribsdb, &nelements);
 	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
 	c=fbconfigs[0];  XFree(fbconfigs);
 
 	int fbcid=-1;
-	#ifdef USEGLP
-	if(useglp) glPGetFBConfigAttrib(c, GLP_FBCONFIG_ID, &fbcid);
-	else
-	#endif
-		glXGetFBConfigAttrib(dpy, c, GLX_FBCONFIG_ID, &fbcid);
+	glXGetFBConfigAttrib(dpy, c, GLX_FBCONFIG_ID, &fbcid);
 	printf("FB Config = 0x%.2x\n", fbcid);
 	#endif
 }
@@ -332,55 +300,24 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v
 	#ifndef GLX11
 	try {
 
-	if(!useglp) {if(usewindow) {errifnot(win);}  errifnot(dpy);}
+	if(usewindow) {errifnot(win);}  errifnot(dpy);
 
-	#ifdef USEGLP
-	if(useglp)
-		ctx=glPCreateNewContext(c, useci? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, NULL);
-	else
-	#endif
 	ctx=glXCreateNewContext(dpy, c, useci? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
 		NULL, True);
 	if(!ctx)	_throw("Could not create GL context");
 
 	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
-	#ifdef USEGLP
-	if(useglp)
-		pbuffer=glPCreateBuffer(c, pbattribs);
-	else
-	#endif
 	pbuffer=glXCreatePbuffer(dpy, c, pbattribs);
 	if(!pbuffer) _throw("Could not create Pbuffer");
 
-	#ifdef USEGLP
-	if(useglp)
-		glPMakeContextCurrent(pbuffer, pbuffer, ctx);
-	else
-	#endif
 	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
 
 	} catch(...)
 	{
-		if(pbuffer)
-		{
-			#ifdef USEGLP
-			if(useglp) glPDestroyBuffer(pbuffer);
-			else
-			#endif
-			glXDestroyPbuffer(dpy, pbuffer);
-		}
+		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
 		if(ctx)
 		{
-			#ifdef USEGLP
-			if(useglp)
-			{
-				glPMakeContextCurrent(0, 0, 0);  glPDestroyContext(ctx);
-			}
-			else
-			#endif
-			{
-				glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);
-			}
+			glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);
 		}
 		throw;
 	}
@@ -693,9 +630,6 @@ void usage(char **argv)
 	#else
 	fprintf(stderr, "\n");
 	#endif
-	#ifdef USEGLP
-	fprintf(stderr, "       [-device <GLP device>]\n");
-	#endif
 	fprintf(stderr, "\n-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
 	fprintf(stderr, "-index = Test color index visual instead of RGB\n");
@@ -715,9 +649,6 @@ void usage(char **argv)
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
 	#endif
-	#ifdef USEGLP
-	fprintf(stderr, "-device = Set GLP device to use for rendering (default: Use GLX)\n");
-	#endif
 	fprintf(stderr, "\n");
 	exit(0);
 }
@@ -727,9 +658,6 @@ void usage(char **argv)
 //////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-	#ifdef USEGLP
-	char *device=NULL;
-	#endif
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
 
 	for(int i=0; i<argc; i++)
@@ -810,51 +738,23 @@ int main(int argc, char **argv)
 			double temp=atof(argv[i+1]);  i++;
 			if(temp>0.0) benchtime=temp;
 		}
-		#ifdef USEGLP
-		if(!strnicmp(argv[i], "-d", 2) && i<argc-1)
-		{
-			char **devices=NULL;  int ndevices=0;
-			if((devices=glPGetDeviceNames(&ndevices))==NULL || ndevices<1)
-			{
-				fprintf(stderr, "ERROR: No GLP devices are registered.\n");
-				exit(1);
-			}
-			if(!strnicmp(argv[i+1], "GLP", 3)) device=NULL;
-			else device=argv[i+1];
-			if((glpdevice=glPOpenDevice(device))<0)
-			{
-				fprintf(stderr, "ERROR: Could not open GLP device %s.\n", device);
-				exit(1);
-			}
-			if(!device) device=devices[0];
-			useglp=1;
-		}
-		#endif
 	}
 
 	try {
 
-	if(usewindow && useglp)
-		_throw("ERROR: Cannot render to a window if GLP mode is enabled.");
 	if(argc<2) fprintf(stderr, "\n%s -h for advanced usage.\n", argv[0]);
-	#ifdef USEGLP
-	if(useglp) fprintf(stderr, "\nRendering to Pbuffer using GLP on device %s\n", device);
+
+	XSetErrorHandler(xhandler);
+	if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
+	fprintf(stderr, "\nRendering to %s using GLX on display %s\n", usewindow?"window":"Pbuffer", DisplayString(dpy));
+	#ifdef GL_VERSION_1_5
+	if(pbo) fprintf(stderr, "Using PBO's for readback\n");
 	#endif
 
-	if(!useglp)
+	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
 	{
-		XSetErrorHandler(xhandler);
-		if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
-		fprintf(stderr, "\nRendering to %s using GLX on display %s\n", usewindow?"window":"Pbuffer", DisplayString(dpy));
-		#ifdef GL_VERSION_1_5
-		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
-		#endif
-
-		if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
-		{
-			fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
-			exit(1);
-		}
+		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
+		exit(1);
 	}
 
 	if(useci)
