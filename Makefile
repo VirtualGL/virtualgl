@@ -25,15 +25,9 @@ clean:
 TOPDIR=.
 include Makerules
 
-ifeq ($(USEGLP), yes)
-test: rr mesademos
-	chmod u+x mesademos/dotests ;\
-	exec mesademos/dotests $(EDIR) $(platform) $(subplatform) GLP
-else
 test: rr mesademos
 	chmod u+x mesademos/dotests ;\
 	exec mesademos/dotests $(EDIR) $(platform) $(subplatform)
-endif
 
 ##########################################################################
 ifeq ($(platform), windows)
