@@ -27,6 +27,7 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Spinner.H>
+#include <FL/x.h>
 #include "fakerconfig.h"
 #include "rr.h"
 #include "rrlog.h"
@@ -545,6 +546,8 @@ int main(int argc, char **argv)
 		{
 			if(!(_fconfig=fconfig_instance()))
 				_throw("Could not allocate FakerConfig");
+			fl_open_display();
+			fconfig_setdefaultsfromdpy(fl_display);
 			fconfig_print(fconfig);
 		}
 		else
