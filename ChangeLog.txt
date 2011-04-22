@@ -1,4 +1,14 @@
 ===============================================================================
+Significant changes since 2.2.1
+===============================================================================
+[1]
+Re-fix issue that caused MainWin-based applications to hang.  This was
+initially fixed in VGL 2.1 final, but it was re-broken by the rewrite of the
+global faker configuration routines in VGL 2.2.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 2.2
 ===============================================================================
 [1]
