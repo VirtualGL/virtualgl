@@ -41,7 +41,40 @@ static int fc_shmid=-1;
 int fconfig_getshmid(void) {return fc_shmid;}
 #endif
 static FakerConfig *fc=NULL;
-static rrcs fcmutex;
+
+/* This is a hack necessary to defer the initialization of the recursive mutex
+   so MainWin will not interfere with it */
+
+class rrdeferredcs : rrcs
+{
+	public:
+		rrdeferredcs() : _init(false) {}
+		
+		rrdeferredcs *init(void)
+		{
+			if(!_init)
+			{
+				_init=true;
+				#ifdef _WIN32
+				cs=CreateMutex(NULL, FALSE, NULL);
+				#else
+				pthread_mutexattr_t ma;
+				pthread_mutexattr_init(&ma);
+				pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
+				pthread_mutex_init(&cs, &ma);
+				pthread_mutexattr_destroy(&ma);
+				#endif
+			}
+			return this;
+		}
+
+	private:
+
+		bool _init;
+};
+
+static rrdeferredcs _fcmutex;
+#define fcmutex ((rrcs &)(*_fcmutex.init()))
 
 static void fconfig_init(void);
 
