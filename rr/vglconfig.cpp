@@ -27,7 +27,7 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Spinner.H>
-#include <FL/x.h>
+#include <FL/x.H>
 #include "fakerconfig.h"
 #include "rr.h"
 #include "rrlog.h"
