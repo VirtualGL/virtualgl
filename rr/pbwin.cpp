@@ -167,7 +167,6 @@ pbwin::pbwin(Display *windpy, Window win)
 	if(!windpy || !win) _throw("Invalid argument");
 	_eventdpy=NULL;
 	_windpy=windpy;  _win=win;
-	_force=false;
 	_oldpb=_pb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
 	#ifdef USEXV
@@ -234,7 +233,6 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 	if((_pb=new pbuffer(w, h, config))==NULL)
 			_throw("Could not create Pbuffer");
 	_config=config;
-	_force=true;
 	return 1;
 }
 

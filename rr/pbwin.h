@@ -85,7 +85,6 @@ class pbwin
 		void sendxv(GLint, bool, bool, bool, int);
 		#endif
 
-		bool _force;
 		rrcs _mutex;
 		Display *_windpy, *_eventdpy;  Window _win;
 		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
