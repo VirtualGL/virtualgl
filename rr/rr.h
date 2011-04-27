@@ -165,10 +165,6 @@ typedef struct _FakerConfig
   char localdpystring[MAXSTR];
   char log[MAXSTR];
   char logo;
-  int mcompress;
-  char moviefile[MAXSTR];
-  int mqual;
-  int msubsamp;
   int np;
   int port;
   int qual;

@@ -374,39 +374,6 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_INTERFRAME", interframe);
 	fetchenv_str("VGL_LOG", log);
 	fetchenv_bool("VGL_LOGO", logo);
-	if((env=getenv("VGL_MCOMPRESS"))!=NULL && strlen(env)>0)
-	{
-		char *t=NULL;  int itemp=strtol(env, &t, 10);
-		int mcompress=-1;
-		if(t && t!=env && itemp>=RRCOMP_JPEG && itemp<=RRCOMP_RGB) mcompress=itemp;
-		else if(!strnicmp(env, "j", 1)) mcompress=RRCOMP_JPEG;
-		else if(!strnicmp(env, "r", 1)) mcompress=RRCOMP_RGB;
-		if(mcompress>=0 && (!fcenv_set || fcenv.mcompress!=mcompress))
-			fconfig.mcompress=fcenv.mcompress=mcompress;
-	}
-	fetchenv_str("VGL_MOVIE", moviefile);
-	fetchenv_int("VGL_MQUAL", mqual, 1, 100);
-	if((env=getenv("VGL_MSUBSAMP"))!=NULL && strlen(env)>0)
-	{
-		int msubsamp=-1;
-		if(!strnicmp(env, "G", 1)) msubsamp=0;
-		else
-		{
-			char *t=NULL;  int itemp=strtol(env, &t, 10);
-			if(t && t!=env)
-			{
-				switch(itemp)
-				{
-					case 0:                              msubsamp=0;  break;
-					case 444: case 11: case 1:           msubsamp=1;  break;
-					case 422: case 21: case 2:           msubsamp=2;  break;
-					case 411: case 420: case 22: case 4: msubsamp=4;  break;
-				}
-			}
-		}
-		if(msubsamp>=0 && (!fcenv_set || fcenv.msubsamp!=msubsamp))
-			fconfig.msubsamp=fcenv.msubsamp=msubsamp;
-	}
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
 	fetchenv_int("VGL_PORT", port, 0, 65535);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
@@ -589,10 +556,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfstr(localdpystring);
 	prconfstr(log);
 	prconfint(logo);
-	prconfint(mcompress);
-	prconfstr(moviefile);
-	prconfint(mqual);
-	prconfint(msubsamp);
 	prconfint(np);
 	prconfint(port);
 	prconfint(qual);

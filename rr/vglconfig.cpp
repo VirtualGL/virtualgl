@@ -34,14 +34,12 @@
 #include "rrutil.h"
 
 Fl_Double_Window *win=NULL;
-Fl_Choice *compchoice=NULL/*, *mcompchoice=NULL*/, *sampchoice=NULL,
-	*stereochoice=NULL/*, *msampchoice=NULL*/, *profchoice=NULL;
+Fl_Choice *compchoice=NULL, *sampchoice=NULL,
+	*stereochoice=NULL, *profchoice=NULL;
 Fl_Light_Button *spoilbutton=NULL, *ifbutton=NULL;
-Fl_Value_Slider *qualslider=NULL/*, *mqualslider=NULL*/;
+Fl_Value_Slider *qualslider=NULL;
 Fl_Float_Input *gammainput=NULL, *fpsinput;
-/*Fl_Input *movieinput=NULL;*/
-Fl_Check_Button *fpsbutton=NULL/*, *mcbutton=NULL*/;
-/*Fl_Group *moviebox=NULL;*/
+Fl_Check_Button *fpsbutton=NULL;
 int ppid=-1;
 
 #undef fconfig
@@ -161,40 +159,6 @@ void SetFPS(void)
 	fpsinput->value(temps);
 }
 
-#if 0
-void SetMovie(void)
-{
-	if(mcompchoice)
-	{
-		if(strlen(fconfig.moviefile)>0) mcompchoice->activate();
-		else mcompchoice->deactivate();
-		if(fconfig.mcompress==RRCOMP_JPEG) mcompchoice->value(0);
-		else if(fconfig.mcompress==RRCOMP_RGB) mcompchoice->value(1);
-	}
-	if(msampchoice)
-	{
-		if(_Maxsubsamp[fconfig.mcompress]==_Minsubsamp[fconfig.mcompress]
-			|| strlen(fconfig.moviefile)==0)
-			msampchoice->deactivate();
-		else msampchoice->activate();
-		switch(fconfig.msubsamp)
-		{
-			case 0:  msampchoice->value(0);  break;
-			case 1:  msampchoice->value(1);  break;
-			case 2:  msampchoice->value(2);  break;
-			case 4:  msampchoice->value(3);  break;
-		}
-	}
-	if(mqualslider)
-	{
-		mqualslider->value(fconfig.mqual);
-		if(fconfig.mcompress!=RRCOMP_JPEG || strlen(fconfig.moviefile)==0)
-			mqualslider->deactivate();
-		else mqualslider->activate();
-	}
-}
-#endif
-
 
 void CompCB(Fl_Widget *w, void *data)
 {
@@ -284,35 +248,6 @@ void FPSCB(Fl_Widget *w, void *data)
 	snprintf(temps, 19, "%.2f", fconfig.fps);
 	input->value(temps);
 }
-
-#if 0
-void MovieCB(Fl_Widget *w, void *data)
-{
-	Fl_Input *input=(Fl_Input *)w;
-	strncpy(fconfig.moviefile, input->value(), MAXSTR-1);
-	input->value(fconfig.moviefile);
-	SetMovie();
-}
-
-void MCompCB(Fl_Widget *w, void *data)
-{
-	int d=(int)((long)data);
-	if(d>=RRCOMP_JPEG && d<=RRCOMP_RGB) fconfig.mcompress=d;
-	SetMovie();
-}
-
-void MSampCB(Fl_Widget *w, void *data)
-{
-	int d=(int)((long)data);
-	fconfig.msubsamp=d;
-}
-
-void MQualCB(Fl_Widget *w, void *data)
-{
-	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
-	fconfig.mqual=(int)slider->value();
-}
-#endif
 
 
 Fl_Menu_Item compmenu[]=
@@ -463,34 +398,6 @@ void init(int argc, char **argv)
 		"Limit Frames/second (0.0=no limit): "));
 	fpsinput->callback(FPSCB, 0);
 	SetFPS();
-
-	#if 0
-	errifnot(moviebox=new Fl_Group(10, 430, 465, 175, "Movie Recorder"));
-	moviebox->box(FL_ENGRAVED_BOX);
-
-	errifnot(movieinput=new Fl_Input(252, 445, 210, 25,
-		"Movie File (leave blank to disable): "));
-	movieinput->callback(MovieCB, 0);
-	movieinput->value(fconfig.moviefile);
-
-	errifnot(mcompchoice=new Fl_Choice(198, 480, 225, 25,
-		"Image Compression Type: "));
-	mcompchoice->menu(mcompmenu);
-
-	errifnot(msampchoice=new Fl_Choice(216, 515, 100, 25,
-		"Chrominance Subsampling: "));
-	msampchoice->menu(msampmenu);
-
-	errifnot(mqualslider=new Fl_Value_Slider(35, 550, 335, 25,
-		"JPEG Image Quality"));
-	mqualslider->type(1);
-  mqualslider->minimum(1);
- 	mqualslider->maximum(100);
-	mqualslider->step(1);
-	mqualslider->slider_size(0.01);
-
-	SetMovie();
-	#endif
 
 	win->end();
   win->show(argc, argv);

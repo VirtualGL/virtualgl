@@ -49,10 +49,9 @@ class rrdisplayclient : public Runnable
 	void save(char *, int);
 	void recv(char *, int);
 	void connect(char *, unsigned short);
-	void record(bool domovie) {_domovie=domovie;}
 
 	int _np;
-	bool _dosend, _domovie;
+	bool _dosend;
 
 	private:
 

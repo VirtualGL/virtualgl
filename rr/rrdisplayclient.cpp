@@ -91,13 +91,11 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 			send((char *)&h, sizeof_rrframeheader);
 		}
 	}
-	if(_domovie) save((char *)&h, sizeof_rrframeheader);
 }
 
 
 rrdisplayclient::rrdisplayclient(void) : _np(fconfig.np),
-	_dosend(false), _domovie(false), _sd(NULL), _t(NULL), _deadyet(false),
-	_dpynum(0)
+	_dosend(false), _sd(NULL), _t(NULL), _deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	_prof_total.setname("Total(mov)");
@@ -255,7 +253,6 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 		_prof_comp.endframe(b->_h.framew*b->_h.frameh, 0, 1);
 		_parent->sendheader(cf._h);
 		if(_parent->_dosend) _parent->send((char *)cf._bits, cf._h.size);
-		if(_parent->_domovie) _parent->save((char *)cf._bits, cf._h.size);
 		return;
 	}
 
@@ -288,12 +285,10 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 			{
 				_parent->sendheader(c->_h);
 				if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
-				if(_parent->_domovie) _parent->save((char *)c->_bits, c->_h.size);
 				if(c->_stereo && c->_rbits)
 				{
 					_parent->sendheader(c->_rh);
 					if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
-					if(_parent->_domovie) _parent->save((char *)c->_rbits, c->_rh.size);
 				}
 			}
 			else
@@ -327,32 +322,6 @@ void rrdisplayclient::recv(char *buf, int len)
 	{
 		rrout.println("[VGL] ERROR: Could not receive data from client.  Client may have disconnected.");
 		throw;
-	}
-}
-
-void rrdisplayclient::save(char *buf, int len)
-{
-	if(strlen(fconfig.moviefile)>0)
-	{
-		int fd=open(fconfig.moviefile, O_CREAT|O_APPEND|O_RDWR, S_IREAD|S_IWRITE);
-		if(fd==-1)
-		{
-			rrout.println("[VGL] WARNING: Could not open %s (%s.)",
-				fconfig.moviefile, strerror(errno));
-			rrout.println("[VGL]    Disabling movie creation.");
-			fconfig.moviefile[0]=0;
-		}
-		else
-		{
-			if(write(fd, buf, len)==-1)
-			{
-				rrout.println("[VGL] WARNING: Could not write to movie file (%s.)\n",
-					strerror(errno));
-				rrout.println("[VGL]    Disabling movie creation.");
-				fconfig.moviefile[0]=0;
-			}
-			close(fd);
-		}
 	}
 }
 
@@ -404,12 +373,10 @@ void rrcompressor::send(void)
 		errifnot(c);
 		_parent->sendheader(c->_h);
 		if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
-		if(_parent->_domovie) _parent->save((char *)c->_bits, c->_h.size);
 		if(c->_stereo && c->_rbits)
 		{
 			_parent->sendheader(c->_rh);
 			if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
-			if(_parent->_domovie) _parent->save((char *)c->_rbits, c->_rh.size);
 		}
 		delete c;		
 	}

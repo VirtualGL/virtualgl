@@ -78,8 +78,7 @@ class pbwin
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int);
-		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int,
-			bool);
+		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
 		#ifdef USEXV
@@ -95,7 +94,7 @@ class pbwin
 		#ifdef USEXV
 		rrxvtrans *_xvtrans;
 		#endif
-		rrdisplayclient *_rrdpy, *_rrmoviedpy;
+		rrdisplayclient *_rrdpy;
 		rrprofiler _prof_rb, _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];

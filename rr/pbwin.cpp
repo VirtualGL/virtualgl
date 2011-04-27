@@ -173,7 +173,6 @@ pbwin::pbwin(Display *windpy, Window win)
 	#ifdef USEXV
 	_xvtrans=NULL;
 	#endif
-	_rrdpy=_rrmoviedpy=NULL;
 	_prof_rb.setname("Readback  ");
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
@@ -212,7 +211,6 @@ pbwin::~pbwin(void)
 	#ifdef USEXV
 	if(_xvtrans) {delete _xvtrans;  _xvtrans=NULL;}
 	#endif
-	if(_rrmoviedpy) {delete _rrmoviedpy;  _rrmoviedpy=NULL;}
 	if(_plugin)
 	{
 		try {delete _plugin;}
@@ -403,23 +401,6 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	if(!_truecolor && strlen(fconfig.transport)==0) compress=RRCOMP_PROXY;
 
-	bool sharerrdpy=false;
-	if(strlen(fconfig.moviefile)>0)
-	{
-		if(fconfig.mcompress==compress && fconfig.mqual==fconfig.qual
-			&& fconfig.msubsamp==fconfig.subsamp && !fconfig.spoil)
-			sharerrdpy=true;
-
-		if(!sharerrdpy)
-		{
-			if(!_rrmoviedpy)
-				errifnot(_rrmoviedpy=new rrdisplayclient());
-			_rrmoviedpy->record(true);
-			sendvgl(_rrmoviedpy, drawbuf, false, dostereo, RRSTEREO_QUADBUF,
-				fconfig.mcompress, fconfig.mqual, fconfig.msubsamp, true);
-		}
-	}
-
 	if(strlen(fconfig.transport)>0)
 	{
 		sendplugin(drawbuf, spoillast, sync, dostereo, stereomode);
@@ -441,9 +422,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				_rrdpy->connect(strlen(fconfig.client)>0?
 					fconfig.client:DisplayString(_windpy), fconfig.port);
 			}
-			_rrdpy->record(sharerrdpy);
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
-				(int)compress, fconfig.qual, fconfig.subsamp, sharerrdpy);
+				(int)compress, fconfig.qual, fconfig.subsamp);
 			break;
 		#ifdef USEXV
 		case RRCOMP_XV:
@@ -526,14 +506,13 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 }
 
 void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
-	bool dostereo, int stereomode, int compress, int qual, int subsamp,
-	bool domovie)
+	bool dostereo, int stereomode, int compress, int qual, int subsamp)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 	bool usepbo=(fconfig.readback==RRREAD_PBO);
 	static bool alreadywarned=false;
 
-	if(spoillast && fconfig.spoil && !rrdpy->ready() && !domovie)
+	if(spoillast && fconfig.spoil && !rrdpy->ready())
 		return;
 	rrframe *b;
 
@@ -560,7 +539,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 		}
 	}
 
-	if(domovie || !fconfig.spoil) rrdpy->synchronize();
+	if(!fconfig.spoil) rrdpy->synchronize();
 	errifnot(b=rrdpy->getbitmap(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
