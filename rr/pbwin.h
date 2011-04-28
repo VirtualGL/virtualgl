@@ -78,7 +78,6 @@ class pbwin
 	private:
 
 		int init(int, int, GLXFBConfig);
-		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int);
