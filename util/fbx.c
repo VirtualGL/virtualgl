@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-// This library abstracts fast frame buffer access
+/* This library abstracts fast frame buffer access */
 #include <string.h>
 #include <stdlib.h>
 #include "fbx.h"
@@ -36,17 +36,23 @@ const char *_fbx_formatname[FBX_FORMATS]=
 #if defined(FBXWIN32)
 
  static char __lasterror[1024]="No error";
- #define _throw(m) {strncpy(__lasterror, m, 1023);  __line=__LINE__;  goto finally;}
- #define w32(f) {if(!(f)) {FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
-	MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)__lasterror, 1024, NULL);  \
-	__line=__LINE__;  goto finally;}}
- #define x11(f) if(!(f)) {snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  __line=__LINE__;  goto finally;}
+ #define _throw(m) {strncpy(__lasterror, m, 1023);  __line=__LINE__;  \
+  goto finally;}
+ #define w32(f) {if(!(f)) {FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL,  \
+  GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  \
+  (LPTSTR)__lasterror, 1024, NULL);  \
+  __line=__LINE__;  goto finally;}}
+ #define x11(f) if(!(f)) {  \
+  snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  \
+  __line=__LINE__;  goto finally;}
 
 #else
 
  static char *__lasterror="No error";
  #define _throw(m) {__lasterror=m;  __line=__LINE__;  goto finally;}
- #define x11(f) if(!(f)) {__lasterror="X11 Error (window may have disappeared)";  __line=__LINE__;  goto finally;}
+ #define x11(f) if(!(f)) {  \
+  __lasterror="X11 Error (window may have disappeared)";  \
+  __line=__LINE__;  goto finally;}
  #ifndef X_ShmAttach
  #define X_ShmAttach 1
  #endif
@@ -60,7 +66,6 @@ const char *_fbx_formatname[FBX_FORMATS]=
 #else
 
  #include <errno.h>
- #include "x11err.h"
 
  #ifdef USESHM
  #ifdef XDK
@@ -73,7 +78,8 @@ const char *_fbx_formatname[FBX_FORMATS]=
 
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
-	if(e->serial==serial && (e->minor_code==X_ShmAttach && e->error_code==BadAccess))
+	if(e->serial==serial && (e->minor_code==X_ShmAttach
+		&& e->error_code==BadAccess))
 	{
 		__extok=0;  return 0;
 	}
@@ -140,7 +146,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	bminfo.bmi.bmiHeader.biBitCount=0;
 	w32(GetDIBits(s->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
 	w32(GetDIBits(s->hmdc, hmembmp, 0, 1, NULL, &bminfo.bmi, DIB_RGB_COLORS));
-	w32(DeleteObject(hmembmp));  hmembmp=0;  // We only needed it to get the screen properties
+	w32(DeleteObject(hmembmp));  hmembmp=0;
+		/* (we only needed it to get the screen properties) */
 	ps=bminfo.bmi.bmiHeader.biBitCount/8;
 	if(width>0) bminfo.bmi.bmiHeader.biWidth=width;
 	if(height>0) bminfo.bmi.bmiHeader.biHeight=height;
@@ -149,7 +156,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(ps<3)
 	{
-		// Make the buffer BGRA
+		/* Make the buffer BGRA */
 		bminfo.bmi.bmiHeader.biCompression=BI_BITFIELDS;
 		bminfo.bmi.bmiHeader.biBitCount=32;
 		ps=4;
@@ -158,7 +165,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		(*(DWORD *)&bminfo.bmi.bmiColors[2])=0xFF;
 	}
 
-	s->pitch=BMPPAD(s->width*ps);  // Windoze bitmaps are always padded
+	s->pitch=BMPPAD(s->width*ps);  /* Windoze bitmaps are always padded */
 
 	if(bminfo.bmi.bmiHeader.biCompression==BI_BITFIELDS)
 	{
@@ -179,8 +186,10 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			&& ps==fbx_ps[i] && fbx_alphafirst[i]==0) s->format=i;
 	if(s->format==-1) _throw("Display has unsupported pixel format");
 
-	bminfo.bmi.bmiHeader.biHeight=-bminfo.bmi.bmiHeader.biHeight;  // Our convention is top down
-	w32(s->hdib=CreateDIBSection(hdc, &bminfo.bmi, DIB_RGB_COLORS, (void **)&s->bits, NULL, 0));
+	bminfo.bmi.bmiHeader.biHeight=-bminfo.bmi.bmiHeader.biHeight;
+		/* (our convention is top-down) */
+	w32(s->hdib=CreateDIBSection(hdc, &bminfo.bmi, DIB_RGB_COLORS,
+		(void **)&s->bits, NULL, 0));
 	w32(SelectObject(s->hmdc, s->hdib));
 	ReleaseDC(s->wh, hdc);
 	return 0;
@@ -193,15 +202,24 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(!wh.dpy || !wh.win) _throw("Invalid argument");
 	x11(XGetWindowAttributes(wh.dpy, wh.win, &xwinattrib));
+	if(wh.pm)
+	{
+		x11(XGetGeometry(wh.dpy, wh.pm, &xwinattrib.root, &xwinattrib.x,
+			&xwinattrib.y, (unsigned int *)&xwinattrib.width,
+			(unsigned int *)&xwinattrib.height,
+			(unsigned int *)&xwinattrib.border_width,
+			(unsigned int *)&xwinattrib.depth));
+		useshm=0;
+	}
 	if(width>0) w=width;  else w=xwinattrib.width;
 	if(height>0) h=height;  else h=xwinattrib.height;
-	if(s->wh.dpy==wh.dpy && s->wh.win==wh.win)
+	if(s->wh.dpy==wh.dpy && s->wh.win==wh.win && s->wh.pm==wh.pm)
 	{
 		if(w==s->width && h==s->height && s->xi && s->xgc && s->bits) return 0;
 		else if(fbx_term(s)==-1) return -1;
 	}
 	memset(s, 0, sizeof(fbx_struct));
-	s->wh.dpy=wh.dpy;  s->wh.win=wh.win;
+	s->wh.dpy=wh.dpy;  s->wh.win=wh.win;  s->wh.pm=wh.pm;
 
 	#ifdef USESHM
 	#ifdef XDK
@@ -211,19 +229,21 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	{
 		static int alreadywarned=0;
 		s->shminfo.shmid=-1;
-		if(!(s->xi=XShmCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, NULL,
-			&s->shminfo, w, h)))
+		if(!(s->xi=XShmCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth,
+			ZPixmap, NULL, &s->shminfo, w, h)))
 		{
 			useshm=0;  goto noshm;
 		}
-		if((s->shminfo.shmid=shmget(IPC_PRIVATE, s->xi->bytes_per_line*s->xi->height+1, IPC_CREAT|0777))==-1)
+		if((s->shminfo.shmid=shmget(IPC_PRIVATE,
+			s->xi->bytes_per_line*s->xi->height+1, IPC_CREAT|0777))==-1)
 		{
 			useshm=0;  XDestroyImage(s->xi);  goto noshm;
 		}
 		if((s->shminfo.shmaddr=s->xi->data=(char *)shmat(s->shminfo.shmid, 0, 0))
 			==(char *)-1)
 		{
-			useshm=0;  XDestroyImage(s->xi);  shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
+			useshm=0;  XDestroyImage(s->xi);
+			shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
 		s->shminfo.readOnly=False;
 		XLockDisplay(s->wh.dpy);
@@ -237,8 +257,10 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		shmok=__extok;
 		if(!alreadywarned && !shmok && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
-			fprintf(__warningfile, "[FBX]    remote connection.)  Will use X Pixmap drawing instead.\n");
+			fprintf(__warningfile,
+				"[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
+			fprintf(__warningfile,
+				"[FBX]    remote connection.)  Will use X Pixmap drawing instead.\n");
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
@@ -257,7 +279,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		static int alreadywarned=0;
 		if(!alreadywarned && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension not available.  Will use X pixmap\n");
+			fprintf(__warningfile,
+				"[FBX] WARNING: MIT-SHM extension not available.  Will use X pixmap\n");
 			fprintf(__warningfile, "[FBX]    drawing instead.\n");
 			alreadywarned=1;
 		}
@@ -267,23 +290,29 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(!useshm)
 	#endif
 	{
-		x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width, xwinattrib.height,
-			xwinattrib.depth));
-		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
-			w, h, 8, 0));
-		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))==NULL)
+		if(!s->wh.pm)
+			x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width,
+				xwinattrib.height, xwinattrib.depth));
+		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth,
+			ZPixmap, 0, NULL, w, h, 8, 0));
+		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))
+			==NULL)
 			_throw("Memory allocation error");
 	}
 	ps=s->xi->bits_per_pixel/8;
 	s->width=s->xi->width;
 	s->height=s->xi->height;
 	s->pitch=s->xi->bytes_per_line;
-	if(s->width!=w || s->height!=h) _throw("Bitmap returned does not match requested size");
+	if(s->width!=w || s->height!=h)
+		_throw("Bitmap returned does not match requested size");
 	rmask=s->xi->red_mask;  gmask=s->xi->green_mask;  bmask=s->xi->blue_mask;
 	alphafirst=0;
 	if(s->xi->byte_order==MSBFirst)
 	{
-		if(ps<4) {rmask=s->xi->blue_mask;  gmask=s->xi->green_mask;  bmask=s->xi->red_mask;}
+		if(ps<4)
+		{
+			rmask=s->xi->blue_mask;  gmask=s->xi->green_mask;  bmask=s->xi->red_mask;
+		}
 		else alphafirst=1;
 	}
 
@@ -310,67 +339,50 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	int wx, wy;
 	#ifdef FBXWIN32
 	fbx_gc gc;
-	#elif !defined(__APPLE__)
-	int x=0, y=0;  XWindowAttributes xwinattrib, rwinattrib;  Window dummy;
 	#endif
 	if(!s) _throw("Invalid argument");
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 
 	#ifdef FBXWIN32
-	if(!s->hmdc || s->width<=0 || s->height<=0 || !s->bits || !s->wh) _throw("Not initialized");
+
+	if(!s->hmdc || s->width<=0 || s->height<=0 || !s->bits || !s->wh)
+		_throw("Not initialized");
 	w32(gc=GetDC(s->wh));
 	w32(BitBlt(s->hmdc, 0, 0, s->width, s->height, gc, wx, wy, SRCCOPY));
 	w32(ReleaseDC(s->wh, gc));
 	return 0;
+
 	#else
+
 	if(!s->wh.dpy || !s->wh.win || !s->xi || !s->bits) _throw("Not initialized");
 	#ifdef USESHM
-	if(!s->xattach && s->shm) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
+	if(!s->xattach && s->shm)
+	{
+		x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;
+	}
 	#endif
 
-	#ifndef __APPLE__
-	x11(XGetWindowAttributes(s->wh.dpy, s->wh.win, &xwinattrib));
-	if(s->wh.win!=xwinattrib.root && s->format!=FBX_INDEX)
+	#ifdef USESHM
+	if(s->shm)
 	{
-		x11(XGetWindowAttributes(s->wh.dpy, xwinattrib.root, &rwinattrib));
-		XTranslateCoordinates(s->wh.dpy, s->wh.win, xwinattrib.root, 0, 0, &x, &y, &dummy);
-		x=wx+x;  y=wy+y;
-		if(x<0) x=0;  if(y<0) y=0;
-		if(x>rwinattrib.width-s->width) x=rwinattrib.width-s->width;
-		if(y>rwinattrib.height-s->height) y=rwinattrib.height-s->height;
-		#ifdef USESHM
-		if(s->shm)
-		{
-			x11(XShmGetImage(s->wh.dpy, xwinattrib.root, s->xi, x, y, AllPlanes));
-		}
-		else
-		#endif
-		{
-			x11(XGetSubImage(s->wh.dpy, xwinattrib.root, x, y, s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
-		}
+		x11(XShmGetImage(s->wh.dpy, s->wh.win, s->xi, wx, wy, AllPlanes));
 	}
 	else
 	#endif
 	{
-		#ifdef USESHM
-		if(s->shm)
-		{
-			x11(XShmGetImage(s->wh.dpy, s->wh.win, s->xi, wx, wy, AllPlanes));
-		}
-		else
-		#endif
-		{
-			x11(XGetSubImage(s->wh.dpy, s->wh.win, wx, wy, s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
-		}
+		x11(XGetSubImage(s->wh.dpy, s->wh.pm? s->wh.pm:s->wh.win, wx, wy,
+			s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
 	}
 	return 0;
+
 	#endif
 
 	finally:
 	return -1;
 }
 
-int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
+int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
+	int h)
 {
 	int bx, by, wx, wy, bw, bh;
 	#ifdef FBXWIN32
@@ -378,13 +390,16 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
+	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
+	bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
 	#ifdef FBXWIN32
-	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits) _throw("Not initialized");
+
+	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits)
+		_throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
 	bmi.bmiHeader.biWidth=s->width;
@@ -393,11 +408,13 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	bmi.bmiHeader.biBitCount=fbx_ps[s->format]*8;
 	bmi.bmiHeader.biCompression=BI_RGB;
 	w32(gc=GetDC(s->wh));
-	w32(SetDIBitsToDevice(gc, wx, wy, bw, bh, bx, 0, 0, bh, &s->bits[by*s->pitch], &bmi,
-		DIB_RGB_COLORS));
+	w32(SetDIBitsToDevice(gc, wx, wy, bw, bh, bx, 0, 0, bh,
+		&s->bits[by*s->pitch], &bmi, DIB_RGB_COLORS));
 	w32(ReleaseDC(s->wh, gc));
 	return 0;
+
 	#else
+
 	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
 	if(s->pm)
 	{
@@ -406,6 +423,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
 	return 0;
+
 	#endif
 
 	finally:
@@ -418,7 +436,8 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	char *tmpbuf=NULL, *srcptr, *dstptr;
 	if(!s) _throw("Invalid argument");
 
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
+	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
+	bh=h>0?h:s->height;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 	ps=fbx_ps[s->format];  pitch=s->pitch;
@@ -442,11 +461,14 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 }
 
 #ifndef FBXWIN32
-int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
+
+int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
+	int h)
 {
 	int bx, by, wx, wy, bw, bh;
 	if(!s) _throw("Invalid argument");
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
+	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
+	bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
@@ -455,27 +477,34 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 	if(s->shm)
 	{
 		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
-		x11(XShmPutImage(s->wh.dpy, s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
+		x11(XShmPutImage(s->wh.dpy, s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw,
+			bh, False));
 	}
 	else
 	#endif
-	XPutImage(s->wh.dpy, s->pm, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
+		XPutImage(s->wh.dpy, s->wh.pm? s->wh.pm:s->pm, s->xgc, s->xi, bx, by, wx,
+			wy, bw, bh);
 	return 0;
 
 	finally:
 	return -1;
 }
+
 #endif
 
 int fbx_sync(fbx_struct *s)
 {
 	#ifdef FBXWIN32
+
 	return 0;
+
 	#else
+
 	if(!s) _throw("Invalid argument");
 	if(s->pm)
 	{
-		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, 0, 0, s->width, s->height, 0, 0);
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, 0, 0, s->width, s->height,
+			0, 0);
 	}
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
@@ -483,16 +512,21 @@ int fbx_sync(fbx_struct *s)
 
 	finally:
 	return -1;
+
 	#endif
 }
 
 int fbx_term(fbx_struct *s)
 {
 	if(!s) _throw("Invalid argument");
+
 	#ifdef FBXWIN32
+
 	if(s->hdib) DeleteObject(s->hdib);
 	if(s->hmdc) DeleteDC(s->hmdc);
+
 	#else
+
 	if(s->pm) {XFreePixmap(s->wh.dpy, s->pm);  s->pm=0;}
 	if(s->xi) 
 	{
@@ -502,13 +536,18 @@ int fbx_term(fbx_struct *s)
 	#ifdef USESHM
 	if(s->shm)
 	{
-		if(s->xattach) {XShmDetach(s->wh.dpy, &s->shminfo);  XSync(s->wh.dpy, False);}
+		if(s->xattach)
+		{
+			XShmDetach(s->wh.dpy, &s->shminfo);  XSync(s->wh.dpy, False);
+		}
 		if(s->shminfo.shmaddr!=NULL) shmdt(s->shminfo.shmaddr);
 		if(s->shminfo.shmid!=-1) shmctl(s->shminfo.shmid, IPC_RMID, 0);
 	}
 	#endif
 	if(s->xgc) XFreeGC(s->wh.dpy, s->xgc);
+
 	#endif
+
 	memset(s, 0, sizeof(fbx_struct));
 	return 0;
 
@@ -527,9 +566,11 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] WARNING: Installed version of hclshm.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile,
+					"[FBX] WARNING: Installed version of hclshm.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.1 for shared memory drawing\n");
+				fprintf(__warningfile,
+					"[FBX]    Need version >= 9.0.0.1 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -540,9 +581,11 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] WARNING: Installed version of xlib.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile,
+					"[FBX] WARNING: Installed version of xlib.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.3 for shared memory drawing\n");
+				fprintf(__warningfile,
+					"[FBX]    Need version >= 9.0.0.3 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -553,9 +596,11 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile,
+					"[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]    Need version >= 8.0.0.28 for shared memory drawing\n");
+				fprintf(__warningfile,
+					"[FBX]    Need version >= 8.0.0.28 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -563,15 +608,18 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile,
+					"[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.9 for shared memory drawing\n");
+				fprintf(__warningfile,
+					"[FBX]    Need version >= 9.0.0.9 for shared memory drawing\n");
 			}
 			retval=0;
 		}
 	}
 	if(!retval && !alreadywarned && __warningfile)
-		fprintf(__warningfile, "[FBX] WARNING: Exceed patches not installed.  Disabling shared memory drawing\n");
+		fprintf(__warningfile,
+			"[FBX] WARNING: Exceed patches not installed.  Disabling shared memory drawing\n");
 	if(!alreadywarned) alreadywarned=1;
 	return retval;
 }
