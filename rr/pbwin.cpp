@@ -99,6 +99,7 @@ pbwin::~pbwin(void)
 
 int pbwin::init(int w, int h, GLXFBConfig config)
 {
+	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::init(w, h, config);
 }
@@ -122,6 +123,7 @@ void pbwin::resize(int w, int h)
 
 void pbwin::clear(void)
 {
+	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	pbdrawable::clear();
 }
@@ -145,6 +147,7 @@ void pbwin::initfromwindow(GLXFBConfig config)
 
 GLXDrawable pbwin::getglxdrawable(void)
 {
+	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::getglxdrawable();
 }
