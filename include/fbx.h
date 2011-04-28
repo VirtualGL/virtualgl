@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,9 +13,12 @@
  * wxWindows Library License for more details.
  */
 
-// FBX -- the fast Frame Buffer eXchange library
-// This library is designed to facilitate transferring pixels to/from the framebuffer using fast
-// 2D O/S-native methods that do not rely on OpenGL acceleration
+/*
+  FBX -- the fast Frame Buffer eXchange library
+  This library is designed to facilitate transferring pixels to/from the
+  framebuffer using fast 2D O/S-native methods that do not rely on OpenGL
+  acceleration
+*/
 
 #ifndef __FBX_H__
 #define __FBX_H__
@@ -40,7 +44,7 @@
  #ifdef USESHM
   #ifdef XDK
    #include <X11/hclshm.h>
-   // Exceed likes to redefine stdio, so we un-redefine it :/
+   /* Exceed likes to redefine stdio, so we un-redefine it :/ */
    #undef fprintf
    #undef printf
    #undef putchar
@@ -62,8 +66,9 @@
 
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
+/* Pixel formats */
 #define FBX_FORMATS 7
-enum {FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB, FBX_INDEX};  // pixel formats
+enum {FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB, FBX_INDEX};
 
 static const int fbx_ps[FBX_FORMATS]=
 	{3, 4, 3, 4, 4, 4, 1};
@@ -102,33 +107,37 @@ typedef struct _fbx_struct
 extern "C" {
 #endif
 
-/////////////////////////////////////////////////////////////
-// All of these methods return -1 on failure or 0 on success.
-/////////////////////////////////////////////////////////////
+/*
+  All of these methods return -1 on failure or 0 on success.
+*/
 
 /*
   fbx_init
   (fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
   s = Address of fbx_struct (must be pre-allocated by user)
-  wh = Handle to the window that you wish to read from or write to.  On Windows, this is the same
-       as the HWND.  On Unix, this is a struct {Display *dpy, Window win} that describes the X11
-       display and window you wish to use
-  width = Width of buffer (in pixels) that you wish to create.  0 = use width of window
-  height = Height of buffer (in pixels) that you wish to create.  0 = use height of window
-  useshm = Use MIT-SHM extension, if available (Unix only)
+  wh = Handle to the window that you wish to read from or write to.  On
+       Windows, this is the same as the HWND.  On Unix, this is a struct
+       (see above) that describes the X11 display and drawable you wish to use.
+  width = Width of buffer (in pixels) that you wish to create.  0 = use width
+          of window
+  height = Height of buffer (in pixels) that you wish to create.  0 = use
+           height of window
+  useshm = Use MIT-SHM extension, if available (Unix only.)
 
   NOTES:
-  -- fbx_init() is idempotent.  If you call it multiple times, it will re-initialize the
-     buffer only when it is necessary to do so (such as when the window size has changed.)
-  -- On Windows, fbx_init() will return a buffer configured with the same pixel format as the
-     screen, unless the screen depth is < 24 bits, in which case it will always return a 32-bit BGRA
-     buffer.
+  -- fbx_init() is idempotent.  If you call it multiple times, it will
+     re-initialize the buffer only when it is necessary to do so (such as when
+     the window size has changed.)
+  -- On Windows, fbx_init() will return a buffer configured with the same pixel
+     format as the screen, unless the screen depth is < 24 bits, in which case
+     it will always return a 32-bit BGRA buffer.
 
-  On return, fbx_init() fills in the following relevant information in the fbx_struct that you
-  passed to it:
-  s->format = pixel format of the buffer (one of FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR,
-              or FBX_ARGB)
+  On return, fbx_init() fills in the following relevant information in the
+  fbx_struct that you passed to it:
+
+  s->format = pixel format of the buffer (one of FBX_RGB, FBX_RGBA, FBX_BGR,
+              FBX_BGRA, FBX_ABGR, or FBX_ARGB)
   s->width, s->height = dimensions of the buffer
   s->pitch = bytes in each scanline of the buffer
   s->bits = address of the start of the buffer
@@ -139,12 +148,15 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm);
   fbx_read
   (fbx_struct *s, int x, int y)
 
-  This routine copies pixels from the framebuffer into the memory buffer specified by s
+  This routine copies pixels from the framebuffer into the memory buffer
+  specified by s.
 
   s = Address of fbx_struct previously initialized by a call to fbx_init()
-  x = Horizontal offset (from left of window client area) of rectangle to read
-  y = Vertical offset (from top of window client area) of rectangle to read
-  NOTE: width and height of rectangle are not adjustable without re-calling fbx_init()
+  x = Horizontal offset (from left of drawable) of rectangle to read
+  y = Vertical offset (from top of drawable) of rectangle to read
+
+  NOTE: width and height of rectangle are not adjustable without re-calling
+  fbx_init()
 
   On return, s->bits contains a facsimile of the window's pixels
 */
@@ -154,18 +166,24 @@ int fbx_read(fbx_struct *s, int x, int y);
   fbx_write
   (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 
-  This routine copies pixels from the memory buffer specified by s to the framebuffer
+  This routine copies pixels from the memory buffer specified by s to the
+  framebuffer.
 
   s = Address of fbx_struct previously initialized by a call to fbx_init()
       s->bits should contain the pixels you wish to blit
-  bmpx = left offset of the region you wish to blit (relative to the memory buffer)
-  bmpy = top offset of the region you wish to blit (relative to the memory buffer)
-  winx = left offset of where you want the pixels to end up (relative to window client area)
-  winy = top offset of where you want the pixels to end up (relative to window client area)
+  bmpx = left offset of the region you wish to blit (relative to the memory
+         buffer)
+  bmpy = top offset of the region you wish to blit (relative to the memory
+         buffer)
+  winx = left offset of where you want the pixels to end up (relative to
+         drawable area)
+  winy = top offset of where you want the pixels to end up (relative to
+         drawable area)
   w = width of region you wish to blit (0 = whole bitmap)
   h = height of region you wish to blit (0 = whole bitmap)
 */
-int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
+int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
+	int h);
 
 /*
   fbx_awrite
@@ -177,20 +195,23 @@ int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 #ifdef FBXWIN32
 #define fbx_awrite fbx_write
 #else
-int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h);
+int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
+	int h);
 #endif
 
 /*
   fbx_flip
   (fbx_struct *s, int bmpx, int bmpy, int w, int h)
 
-  This routine performs an in-place vertical flip of the region of interest specified by
-  bmpx, bmpy, w, and h in the memory buffer specified by s
+  This routine performs an in-place vertical flip of the region of interest
+  specified by bmpx, bmpy, w, and h in the memory buffer specified by s.
 
   s = Address of fbx_struct previously initialized by a call to fbx_init()
       s->bits should contain the pixels you wish to flip
-  bmpx = left offset of the region you wish to flip (relative to the memory buffer)
-  bmpy = top offset of the region you wish to flip (relative to the memory buffer)
+  bmpx = left offset of the region you wish to flip (relative to the memory
+         buffer)
+  bmpy = top offset of the region you wish to flip (relative to the memory
+         buffer)
   w = width of region you wish to flip (0 = whole bitmap)
   h = height of region you wish to flip (0 = whole bitmap)
 */
@@ -208,7 +229,7 @@ int fbx_sync (fbx_struct *s);
   fbx_term
   (fbx_struct *s)
 
-  Free the memory buffers pointed to by structure s
+  Free the memory buffers pointed to by structure s.
 
   NOTE: this routine is idempotent.  It only frees stuff that needs freeing.
 */
@@ -217,14 +238,14 @@ int fbx_term(fbx_struct *s);
 /*
   fbx_geterrmsg
 
-  This returns a string containing the reason why the last command failed
+  This returns a string containing the reason why the last command failed.
 */
 char *fbx_geterrmsg(void);
 
 /*
   fbx_geterrline
 
-  This returns the line (within fbx.c) of the last failure
+  This returns the line (within fbx.c) of the last failure.
 */
 int fbx_geterrline(void);
 
@@ -232,7 +253,7 @@ int fbx_geterrline(void);
   fbx_formatname
 
   Returns a character string describing the pixel format specified in the
-  format parameter
+  format parameter.
 */
 const char *fbx_formatname(int format);
 
@@ -254,4 +275,4 @@ void fbx_printwarnings(FILE *output_stream);
 }
 #endif
 
-#endif // __FBX_H__
+#endif /* __FBX_H__ */
