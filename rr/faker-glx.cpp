@@ -20,7 +20,7 @@
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
 	pbwin *pbw=NULL;
-	if(winh.findpb(dpy, draw, pbw)) return pbw->getdrawable();
+	if(winh.findpb(dpy, draw, pbw)) return pbw->getglxdrawable();
 	else return draw;
 }
 
@@ -331,7 +331,7 @@ Display *glXGetCurrentDisplay(void)
 		opentrace(glXGetCurrentDisplay);  starttrace();
 
 	GLXDrawable curdraw=GetCurrentDrawable();
-	if(winh.findpb(curdraw, pbw)) dpy=pbw->getwindpy();
+	if(winh.findpb(curdraw, pbw)) dpy=pbw->get2ddpy();
 	else
 	{
 		if(curdraw) dpy=glxdh.getcurrentdpy(curdraw);
@@ -353,7 +353,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 		opentrace(glXGetCurrentDrawable);  starttrace();
 
-	if(winh.findpb(draw, pbw)) draw=pbw->getwin();
+	if(winh.findpb(draw, pbw)) draw=pbw->getx11drawable();
 
 		stoptrace();  prargx(draw);  closetrace();
 
@@ -371,7 +371,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 		opentrace(glXGetCurrentReadDrawable);  starttrace();
 
-	if(winh.findpb(read, pbw)) read=pbw->getwin();
+	if(winh.findpb(read, pbw)) read=pbw->getx11drawable();
 
 		stoptrace();  prargx(read);  closetrace();
 

@@ -909,7 +909,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		pbwin *newpbw;
 		if(drawable==0 || !winh.findpb(dpy, drawable, newpbw)
-		|| newpbw->getdrawable()!=curdraw)
+		|| newpbw->getglxdrawable()!=curdraw)
 		{
 			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, false, false);
 		}
@@ -1062,7 +1062,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	{
 		pbwin *newpbw;
 		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
-			|| newpbw->getdrawable()!=curdraw)
+			|| newpbw->getglxdrawable()!=curdraw)
 		{
 			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, false, false);
 		}
@@ -1152,7 +1152,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const in
 		errifnot(pbw=winh.setpb(dpy, win, config));
 	}
 
-		stoptrace();  if(pbw) {prargx(pbw->getdrawable());}  closetrace();
+		stoptrace();  if(pbw) {prargx(pbw->getglxdrawable());}  closetrace();
 
 	CATCH();
 	return win;  // Make the client store the original window handle, which we use
@@ -1338,7 +1338,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	}
 	else _glXSwapBuffers(_localdpy, drawable);
 
-		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getdrawable());}
+		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getglxdrawable());}
 		closetrace();  
 
 	CATCH();
@@ -1355,7 +1355,7 @@ static void _doGLreadback(bool spoillast, bool sync)
 	{
 		if(_drawingtofront() || pbw->_dirty)
 		{
-				opentrace(_doGLreadback);  prargx(pbw->getdrawable());  prargi(sync);
+				opentrace(_doGLreadback);  prargx(pbw->getglxdrawable());  prargi(sync);
 				prargi(spoillast);  starttrace();
 
 			pbw->readback(GL_FRONT, spoillast, sync);
@@ -1435,7 +1435,7 @@ void glDrawBuffer(GLenum mode)
 	else _glDrawBuffer(mode);
 
 		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
-		prargi(pbw->_rdirty);  prargx(pbw->getdrawable());}  closetrace();
+		prargi(pbw->_rdirty);  prargx(pbw->getglxdrawable());}  closetrace();
 
 	CATCH();
 }
@@ -1464,7 +1464,7 @@ void glPopAttrib(void)
 	else _glPopAttrib();
 
 		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
-		prargi(pbw->_rdirty);  prargx(pbw->getdrawable());}  closetrace();
+		prargi(pbw->_rdirty);  prargx(pbw->getglxdrawable());}  closetrace();
 
 	CATCH();
 }

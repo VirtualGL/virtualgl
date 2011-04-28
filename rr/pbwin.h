@@ -16,41 +16,14 @@
 #ifndef __PBWIN_H__
 #define __PBWIN_H__
 
-#include "faker-sym.h"
-#include "rrmutex.h"
-#include "rrblitter.h"
+#include "pbdrawable.h"
 #include "rrdisplayclient.h"
 #ifdef USEXV
 #include "rrxvtrans.h"
 #endif
 #include "rrplugin.h"
-#include "fbx.h"
 
-// A container class for the actual Pbuffer
-
-class pbuffer
-{
-	public:
-
-		pbuffer(int, int, GLXFBConfig);
-		GLXDrawable drawable(void) {return _drawable;}
-		~pbuffer(void);
-		int width(void) {return _w;}
-		int height(void) {return _h;}
-		void clear(void);
-		void swap(void);
-		bool stereo(void) {return _stereo;}
-		int format(void) {return _format;}
-
-	private:
-
-		bool _cleared, _stereo;
-		GLXPbuffer _drawable;
-		int _w, _h;
-		int _format;
-};
-
-class pbwin
+class pbwin : public pbdrawable
 {
 	public:
 
@@ -58,13 +31,11 @@ class pbwin
 		~pbwin(void);
 		void clear(void);
 		void cleanup(void);
-		GLXDrawable getdrawable(void);
+		GLXDrawable getglxdrawable(void);
 		GLXDrawable updatedrawable(void);
 		void resize(int, int);
 		void checkresize(void);
 		void initfromwindow(GLXFBConfig);
-		Display *getwindpy(void);
-		Window getwin(void);
 		void readback(GLint, bool, bool);
 		void swapbuffers(void);
 		bool stereo(void);
@@ -74,7 +45,6 @@ class pbwin
 	private:
 
 		int init(int, int, GLXFBConfig);
-		void blit(GLint);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int);
@@ -85,19 +55,16 @@ class pbwin
 		void sendxv(GLint, bool, bool, bool, int);
 		#endif
 
-		rrcs _mutex;
-		Display *_windpy, *_eventdpy;  Window _win;
-		pbuffer *_oldpb, *_pb;  GLXFBConfig _config;
+		Display *_eventdpy;
+		pbuffer *_oldpb;
 		int _neww, _newh;
 		rrblitter *_blitter;
 		#ifdef USEXV
 		rrxvtrans *_xvtrans;
 		#endif
 		rrdisplayclient *_rrdpy;
-		rrprofiler _prof_rb, _prof_gamma, _prof_anaglyph;
+		rrprofiler _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
-		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
-		int _autotestframecount;
 		rrplugin *_plugin;
 		bool _truecolor;
 		bool _gammacorrectedvisuals;

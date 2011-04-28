@@ -4,6 +4,7 @@
  * Version:  3.5
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
+ * Copyright (C) 2011  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -126,8 +127,8 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	if(winh.findpb(draw, pbw))
 	{
 		// Current drawable is a virtualized window
-		errifnot(dpy = pbw->getwindpy());
-		errifnot(win = pbw->getwin());
+		errifnot(dpy = pbw->get2ddpy());
+		errifnot(win = pbw->getx11drawable());
 	}
 	else if((win=pmh.reversefind(draw))!=0)
 	{

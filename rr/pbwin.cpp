@@ -20,16 +20,8 @@
 #ifdef USEMEDIALIB
 #include <mlib.h>
 #endif
-#include "glxvisual.h"
-#include "glext-vgl.h"
-
-#define INFAKER
-#include "tempctx.h"
 #include "fakerconfig.h"
-
-extern Display *_localdpy;
-
-#define checkgl(m) if(glerror()) _throw("Could not "m);
+#include "glxvisual.h"
 
 #define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
@@ -45,149 +37,32 @@ static inline int _drawingtoright(void)
 	return _isright(drawbuf);
 }
 
-// Generic OpenGL error checker (0 = no errors)
-static int glerror(void)
-{
-	int i, ret=0;
-	i=glGetError();
-	while(i!=GL_NO_ERROR)
-	{
-		ret=1;
-		rrout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
-		i=glGetError();
-	}
-	return ret;
-}
-
-#ifndef min
- #define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
-{
-	XVisualInfo *vis;
-	Window win;
-	XSetWindowAttributes wattrs;
-	Colormap cmap;
-
-	if((vis=_glXGetVisualFromFBConfig(dpy, config))==NULL) return 0;
-	cmap=XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual,
-		AllocNone);
-	wattrs.background_pixel = 0;
-	wattrs.border_pixel = 0;
-	wattrs.colormap = cmap;
-	wattrs.event_mask = ExposureMask | StructureNotifyMask;
-	win = XCreateWindow(dpy, RootWindow(dpy, vis->screen), 0, 0, w, h, 1,
-		vis->depth, InputOutput, vis->visual,
-		CWBackPixel | CWBorderPixel | CWEventMask | CWColormap, &wattrs);
-	XMapWindow(dpy, win);
-	return win;
-}
-
-pbuffer::pbuffer(int w, int h, GLXFBConfig config)
-{
-	if(!config || w<1 || h<1) _throw("Invalid argument");
-
-	_cleared=false;  _stereo=false;  _format=0;
-	#if 0
-	const char *glxext=NULL;
-	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
-	if(!glxext || !strstr(glxext, "GLX_SGIX_pbuffer"))
-		_throw("Pbuffer extension not supported on rendering display");
-	#endif
-
-	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
-		GLX_PRESERVED_CONTENTS, True, None};
-
-	_w=w;  _h=h;
-	pbattribs[1]=w;  pbattribs[3]=h;
-	#ifdef SUNOGL
-	tempctx tc(_localdpy, 0, 0, 0);
-	#endif
-	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
-	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
-	if(__vglServerVisualAttrib(config, GLX_STEREO)) _stereo=true;
-	int pixelsize=__vglServerVisualAttrib(config, GLX_RED_SIZE)
-		+__vglServerVisualAttrib(config, GLX_GREEN_SIZE)
-		+__vglServerVisualAttrib(config, GLX_BLUE_SIZE)
-		+__vglServerVisualAttrib(config, GLX_ALPHA_SIZE);
-	if(pixelsize==32)
-	{
-		#ifdef GL_BGRA_EXT
-		if(littleendian()) _format=GL_BGRA_EXT;
-		else
-		#endif
-		_format=GL_RGBA;
-	}
-	else
-	{
-		#ifdef GL_BGR_EXT
-		if(littleendian()) _format=GL_BGR_EXT;
-		else
-		#endif
-		_format=GL_RGB;
-	}
-	if(!_drawable) _throw("Could not create Pbuffer");
-}
-
-pbuffer::~pbuffer(void)
-{
-	if(_drawable)
-	{
-		#ifdef SUNOGL
-		tempctx tc(_localdpy, 0, 0, 0);
-		#endif
-		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
-		else glXDestroyPbuffer(_localdpy, _drawable);
-	}
-}
-
-void pbuffer::clear(void)
-{
-	if(_cleared) return;
-	_cleared=true;
-	GLfloat params[4];
-	_glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(params[0], params[1], params[2], params[3]);
-}
-
-void pbuffer::swap(void)
-{
-	_glXSwapBuffers(_localdpy, _drawable);
-}
-
 
 // This class encapsulates the Pbuffer, its most recent ancestor, and
 // information specific to its corresponding X window
 
-pbwin::pbwin(Display *windpy, Window win)
+pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 {
-	if(!windpy || !win) _throw("Invalid argument");
 	_eventdpy=NULL;
-	_windpy=windpy;  _win=win;
-	_oldpb=_pb=NULL;  _neww=_newh=-1;
+	_oldpb=NULL;  _neww=_newh=-1;
 	_blitter=NULL;
 	#ifdef USEXV
 	_xvtrans=NULL;
 	#endif
-	_prof_rb.setname("Readback  ");
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
-	_autotestframecount=0;
 	_truecolor=true;
-	fconfig_setdefaultsfromdpy(_windpy);
+	fconfig_setdefaultsfromdpy(_dpy);
 	_plugin=NULL;
 	_wmdelete=false;
 	XWindowAttributes xwa;
-	XGetWindowAttributes(windpy, win, &xwa);
+	XGetWindowAttributes(dpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))
 	{
-		if(!(_eventdpy=XOpenDisplay(DisplayString(windpy))))
+		if(!(_eventdpy=XOpenDisplay(DisplayString(dpy))))
 			_throw("Could not clone X display connection");
 		XSelectInput(_eventdpy, win, StructureNotifyMask);
 		if(fconfig.verbose)
@@ -195,15 +70,14 @@ pbwin::pbwin(Display *windpy, Window win)
 				win);
 	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
-	_gammacorrectedvisuals=__vglHasGCVisuals(windpy, DefaultScreen(windpy));
-	_stereovisual=__vglClientVisualAttrib(windpy, DefaultScreen(windpy),
+	_gammacorrectedvisuals=__vglHasGCVisuals(dpy, DefaultScreen(dpy));
+	_stereovisual=__vglClientVisualAttrib(dpy, DefaultScreen(dpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
 
 pbwin::~pbwin(void)
 {
 	_mutex.lock(false);
-	if(_pb) {delete _pb;  _pb=NULL;}
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 	if(_blitter) {delete _blitter;  _blitter=NULL;}
 	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
@@ -225,15 +99,8 @@ pbwin::~pbwin(void)
 
 int pbwin::init(int w, int h, GLXFBConfig config)
 {
-	if(!config || w<1 || h<1) _throw("Invalid argument");
-
-	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
-	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
-	if((_pb=new pbuffer(w, h, config))==NULL)
-			_throw("Could not create Pbuffer");
-	_config=config;
-	return 1;
+	return pbdrawable::init(w, h, config);
 }
 
 // The resize doesn't actually occur until the next time updatedrawable() is
@@ -255,9 +122,8 @@ void pbwin::resize(int w, int h)
 
 void pbwin::clear(void)
 {
-	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
-	if(_pb) _pb->clear();
+	pbdrawable::clear();
 }
 
 void pbwin::cleanup(void)
@@ -269,21 +135,18 @@ void pbwin::cleanup(void)
 
 void pbwin::initfromwindow(GLXFBConfig config)
 {
-	XSync(_windpy, False);
+	XSync(_dpy, False);
 	XWindowAttributes xwa;
-	XGetWindowAttributes(_windpy, _win, &xwa);
+	XGetWindowAttributes(_dpy, _drawable, &xwa);
 	init(xwa.width, xwa.height, config);
 }
 
 // Get the current Pbuffer drawable
 
-GLXDrawable pbwin::getdrawable(void)
+GLXDrawable pbwin::getglxdrawable(void)
 {
-	GLXDrawable retval=0;
-	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
-	retval=_pb->drawable();
-	return retval;
+	return pbdrawable::getglxdrawable();
 }
 
 void pbwin::checkresize(void)
@@ -294,7 +157,7 @@ void pbwin::checkresize(void)
 		{
 			XEvent event;
 			_XNextEvent(_eventdpy, &event);
-			if(event.type==ConfigureNotify && event.xconfigure.window==_win
+			if(event.type==ConfigureNotify && event.xconfigure.window==_drawable
 				&& event.xconfigure.width>0 && event.xconfigure.height>0)
 				resize(event.xconfigure.width, event.xconfigure.height);
 		}
@@ -316,16 +179,6 @@ GLXDrawable pbwin::updatedrawable(void)
 	}
 	retval=_pb->drawable();
 	return retval;
-}
-
-Display *pbwin::getwindpy(void)
-{
-	return _windpy;
-}
-
-Window pbwin::getwin(void)
-{
-	return _win;
 }
 
 void pbwin::swapbuffers(void)
@@ -418,7 +271,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			{
 				errifnot(_rrdpy=new rrdisplayclient());
 				_rrdpy->connect(strlen(fconfig.client)>0?
-					fconfig.client:DisplayString(_windpy), fconfig.port);
+					fconfig.client:DisplayString(_dpy), fconfig.port);
 			}
 			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp);
@@ -440,9 +293,9 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 
 	if(!_plugin)
 	{
-		_plugin=new rrplugin(_windpy, _win, fconfig.transport);
+		_plugin=new rrplugin(_dpy, _drawable, fconfig.transport);
 		_plugin->connect(strlen(fconfig.client)>0?
-			fconfig.client:DisplayString(_windpy), fconfig.port);
+			fconfig.client:DisplayString(_dpy), fconfig.port);
 	}
 	if(spoillast && fconfig.spoil && !_plugin->ready())
 		return;
@@ -498,7 +351,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 				rrtrans_ps[frame->format], frame->rbits, reye(drawbuf), usepbo,
 				dostereo);
 	}
-	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
+	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
 	if(fconfig.logo) f.addlogo();
 	_plugin->sendframe(frame, sync);
 }
@@ -552,7 +405,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
 				b->_pixelsize, b->_rbits, reye(drawbuf), usepbo, dostereo);
 	}
-	b->_h.winid=_win;
+	b->_h.winid=_drawable;
 	b->_h.framew=b->_h.width;
 	b->_h.frameh=b->_h.height;
 	b->_h.x=0;
@@ -560,7 +413,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	b->_h.qual=qual;
 	b->_h.subsamp=subsamp;
 	b->_h.compress=(unsigned char)compress;
-	if(!_syncdpy) {XSync(_windpy, False);  _syncdpy=true;}
+	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
 	if(fconfig.logo) b->addlogo();
 	rrdpy->sendframe(b);
 }
@@ -577,7 +430,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(!_blitter) errifnot(_blitter=new rrblitter());
 	if(spoillast && fconfig.spoil && !_blitter->ready()) return;
 	if(!fconfig.spoil) _blitter->synchronize();
-	errifnot(b=_blitter->getbitmap(_windpy, _win, pbw, pbh));
+	errifnot(b=_blitter->getbitmap(_dpy, _drawable, pbw, pbh));
 	b->_flags|=RRBMP_BOTTOMUP;
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
@@ -647,7 +500,7 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(!_xvtrans) errifnot(_xvtrans=new rrxvtrans());
 	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
 	if(!fconfig.spoil) _xvtrans->synchronize();
-	errifnot(b=_xvtrans->getbitmap(_windpy, _win, pbw, pbh));
+	errifnot(b=_xvtrans->getbitmap(_dpy, _drawable, pbw, pbh));
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=pbh;
 	hdr.width=hdr.framew=pbw;
@@ -702,103 +555,8 @@ void pbwin::makeanaglyph(rrframe *b, int drawbuf)
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
 {
-
-	GLint readbuf=GL_BACK, oldrendermode=GL_RENDER;
-	GLint fbr=0, fbw=0;
-	#ifdef GL_VERSION_1_5
-	static GLuint pbo=0;  int boundbuffer=0;
-	#endif
-	static const char *ext=NULL;
-
-	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
-	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
-
-	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
-
-	glReadBuffer(buf);
-	glRenderMode(GL_RENDER);
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-
-	if(pitch%8==0) glPixelStorei(GL_PACK_ALIGNMENT, 8);
-	else if(pitch%4==0) glPixelStorei(GL_PACK_ALIGNMENT, 4);
-	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
-	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-	glPushAttrib(GL_PIXEL_MODE_BIT);
-	_glPixelTransferf(GL_RED_SCALE, 1.0);
-	_glPixelTransferf(GL_RED_BIAS, 0.0);
-	_glPixelTransferf(GL_GREEN_SCALE, 1.0);
-	_glPixelTransferf(GL_GREEN_BIAS, 0.0);
-	_glPixelTransferf(GL_BLUE_SCALE, 1.0);
-	_glPixelTransferf(GL_BLUE_BIAS, 0.0);
-	_glPixelTransferf(GL_ALPHA_SCALE, 1.0);
-	_glPixelTransferf(GL_ALPHA_BIAS, 0.0);
-
-	if(usepbo)
-	{
-		if(!ext)
-		{
-			ext=(const char *)glGetString(GL_EXTENSIONS);
-			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
-				_throw("GL_ARB_pixel_buffer_object extension not available");
-		}
-		#ifdef GL_VERSION_1_5
-		if(!pbo)
-		{
-			glGenBuffers(1, &pbo);
-			if(!pbo) _throw("Could not generate pixel buffer object");
-			if(fconfig.verbose)
-				rrout.println("[VGL] Using pixel buffer objects for readback (GL format = 0x%.4x)",
-				format);
-		}
-		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &boundbuffer);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
-		int size=0;
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
-		if(size!=pitch*h)
-			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*h, NULL, GL_STREAM_READ);
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
-		if(size!=pitch*h)
-			_throw("Could not set PBO size");
-		#else
-		_throw("PBO support not compiled in.  Rebuild VGL on a system that has OpenGL 1.5.");
-		#endif
-	}
-	else
-	{
-		static bool alreadyprinted=false;
-		if(!alreadyprinted && fconfig.verbose)
-		{
-			rrout.println("[VGL] Using synchronous readback (GL format = 0x%.4x)",
-				format);
-			alreadyprinted=true;
-		}
-	}
-
-	int e=glGetError();
-	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	_prof_rb.startframe();
-	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, usepbo? NULL:bits);
-
-	if(usepbo)
-	{
-		#ifdef GL_VERSION_1_5
-		unsigned char *pbobits=NULL;
-		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
-			GL_READ_ONLY);
-		if(!pbobits) _throw("Could not map pixel buffer object");
-		memcpy(bits, pbobits, pitch*h);
-		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
-			_throw("Could not unmap pixel buffer object");
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, boundbuffer);
-		#endif
-	}
-
-	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
-	checkgl("Read Pixels");
+	pbdrawable::readpixels(x, y, w, pitch, h, format, ps, bits, buf, usepbo,
+		stereo);
 
 	// Gamma correction
 	if((!_gammacorrectedvisuals || !fconfig.gamma_usesun)
@@ -841,58 +599,6 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		#endif
 		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 	}
-
-	// If automatic faker testing is enabled, store the FB color in an
-	// environment variable so the test program can verify it
-	if(fconfig.autotest)
-	{
-		unsigned char *rowptr, *pixel;  int match=1;
-		int color=-1, i, j, k;
-		color=-1;
-		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT) _autotestframecount++;
-		for(j=0, rowptr=bits; j<h && match; j++, rowptr+=pitch)
-			for(i=1, pixel=&rowptr[ps]; i<w && match; i++, pixel+=ps)
-				for(k=0; k<ps; k++)
-				{
-					if(pixel[k]!=rowptr[k]) {match=0;  break;}
-				}
-		if(match)
-		{
-			if(format==GL_COLOR_INDEX)
-			{
-				unsigned char index;
-				glReadPixels(0, 0, 1, 1, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, &index);
-				color=index;
-			}
-			else
-			{
-				unsigned char rgb[3];
-				glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
-				color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
-			}
-		}
-		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
-		{
-			snprintf(_autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d", (unsigned int)_win, color);
-			putenv(_autotestrclr);
-		}
-		else
-		{
-			snprintf(_autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)_win, color);
-			putenv(_autotestclr);
-		}
-		snprintf(_autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)_win, _autotestframecount);
-		putenv(_autotestframe);
-	}
-
-	glRenderMode(oldrendermode);
-	_glPopAttrib();
-	glPopClientAttrib();
-	tc.restore();
-
-	glReadBuffer(readbuf);
-	if(fbr) glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbr);
-	if(fbw) glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbw);
 }
 
 bool pbwin::stereo(void)
