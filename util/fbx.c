@@ -33,7 +33,7 @@ const int fbx_bmask[FBX_FORMATS]=
 const char *_fbx_formatname[FBX_FORMATS]=
 	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX"};
 
-#if defined(FBXWIN32) || defined(XWIN32)
+#if defined(FBXWIN32)
 
  static char __lasterror[1024]="No error";
  #define _throw(m) {strncpy(__lasterror, m, 1023);  __line=__LINE__;  goto finally;}
@@ -113,9 +113,6 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
 	XWindowAttributes xwinattrib;  int shmok=1, alphafirst;
-	#ifdef XWIN32
-	static int seqnum=1;  char temps[80];
-	#endif
 	#endif
 
 	if(!s) _throw("Invalid argument");
@@ -219,18 +216,6 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		{
 			useshm=0;  goto noshm;
 		}
-		#ifdef XWIN32
-		s->shminfo.shmid=seqnum;
-		sprintf(temps, "X11-MIT-SHM-%d", s->shminfo.shmid);
-		seqnum++;
-		w32(s->filemap=CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
-			0, s->xi->bytes_per_line*s->xi->height+1, temps));
-		if((s->shminfo.shmaddr=s->xi->data=(char *)MapViewOfFile(s->filemap,
-			FILE_MAP_WRITE, 0, 0, 0))==NULL)
-		{
-			useshm=0;  XDestroyImage(s->xi);  CloseHandle(s->filemap);  goto noshm;
-		}
-		#else
 		if((s->shminfo.shmid=shmget(IPC_PRIVATE, s->xi->bytes_per_line*s->xi->height+1, IPC_CREAT|0777))==-1)
 		{
 			useshm=0;  XDestroyImage(s->xi);  goto noshm;
@@ -240,7 +225,6 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		{
 			useshm=0;  XDestroyImage(s->xi);  shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
-		#endif
 		s->shminfo.readOnly=False;
 		XLockDisplay(s->wh.dpy);
 		XSync(s->wh.dpy, False);
@@ -261,18 +245,11 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		#ifndef XDK
 		shmctl(s->shminfo.shmid, IPC_RMID, 0);
 		#endif
-		#ifdef XWIN32
-		if(!shmok)
-		{
-			useshm=0;  XDestroyImage(s->xi);  if(s->filemap) CloseHandle(s->filemap);  goto noshm;
-		}
-		#else
 		if(!shmok)
 		{
 			useshm=0;  XDestroyImage(s->xi);  shmdt(s->shminfo.shmaddr);
 			shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
-		#endif
 		s->xattach=1;  s->shm=1;
 	}
 	else if(useshm)
@@ -526,13 +503,8 @@ int fbx_term(fbx_struct *s)
 	if(s->shm)
 	{
 		if(s->xattach) {XShmDetach(s->wh.dpy, &s->shminfo);  XSync(s->wh.dpy, False);}
-		#ifdef XWIN32
-		if(s->shminfo.shmaddr!=NULL) UnmapViewOfFile(s->shminfo.shmaddr);
-		if(s->filemap) CloseHandle(s->filemap);
-		#else
 		if(s->shminfo.shmaddr!=NULL) shmdt(s->shminfo.shmaddr);
 		if(s->shminfo.shmid!=-1) shmctl(s->shminfo.shmid, IPC_RMID, 0);
-		#endif
 	}
 	#endif
 	if(s->xgc) XFreeGC(s->wh.dpy, s->xgc);

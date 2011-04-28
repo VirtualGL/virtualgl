@@ -49,7 +49,7 @@
    #undef fputc
    #undef fputs
    #undef perror
-  #elif !defined(XWIN32)
+  #else
    #include <sys/ipc.h>
    #include <sys/shm.h>
   #endif
@@ -90,9 +90,6 @@ typedef struct _fbx_struct
 	HDC hmdc;  HBITMAP hdib;
 	#else
 	#ifdef USESHM
-	#ifdef XWIN32
-	HANDLE filemap;
-	#endif
 	XShmSegmentInfo shminfo;  int xattach;
 	#endif
 	GC xgc;
