@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -56,6 +57,9 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 int width, height;
 int checkdb=0, doshm=1;
+#ifndef FBXWIN32
+int dopixmap=0;
+#endif
 fbx_wh wh;
 rrtimer timer;
 #ifdef FBXWIN32
@@ -416,6 +420,17 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 #endif
 
 
+void usage(char *progname)
+{
+	fprintf(stderr, "USAGE: %s [options]\n\n", progname);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "-checkdb = Verify that double buffering is working correctly\n");
+	fprintf(stderr, "-noshm = Do not use MIT-SHM extension to accelerate blitting\n");
+	fprintf(stderr, "-pm = Blit to a pixmap rather than to a window\n");
+	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n\n");
+	exit(1);
+}
+
 //////////////////////////////////////////////////////////////////////
 // Main
 //////////////////////////////////////////////////////////////////////
@@ -437,10 +452,17 @@ int main(int argc, char **argv)
 		{
 			doshm=0;
 		}
-		if(!stricmp(argv[i], "-verbose"))
+		if(!strnicmp(argv[i], "-v", 2))
 		{
 			fbx_printwarnings(stderr);
 		}
+		#ifndef FBXWIN32
+		if(!stricmp(argv[i], "-pm"))
+		{
+			dopixmap=1;  doshm=0;
+		}
+		#endif
+		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?")) usage(argv[0]);
 	}
 
 	try {
@@ -512,12 +534,23 @@ int main(int argc, char **argv)
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
 		swa.border_pixel=0;
 		swa.event_mask=0;
-		errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-			v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-			&swa));
-		errifnot(XMapRaised(wh.dpy, wh.win));
+		if(dopixmap)
+		{
+			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
+				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+				&swa));
+			errifnot(wh.pm=XCreatePixmap(wh.dpy, wh.win, width, height, v->depth));
+		}
+		else
+		{
+			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+				&swa));
+			errifnot(XMapRaised(wh.dpy, wh.win));
+		}
 		XSync(wh.dpy, False);
 		display();
+		if(dopixmap) XFreePixmap(wh.dpy, wh.pm);
 		XDestroyWindow(wh.dpy, wh.win);
 		XFree(v);  v=NULL;
 	}
@@ -540,12 +573,23 @@ int main(int argc, char **argv)
 			xc[i].pixel=i;
 		}
 		XStoreColors(wh.dpy, swa.colormap, xc, 32);
-		errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-			v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-			&swa));
-		errifnot(XMapRaised(wh.dpy, wh.win));
+		if(dopixmap)
+		{
+			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
+				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+				&swa));
+			errifnot(wh.pm=XCreatePixmap(wh.dpy, wh.win, width, height, v->depth));
+		}
+		else
+		{
+			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+				&swa));
+			errifnot(XMapRaised(wh.dpy, wh.win));
+		}
 		XSync(wh.dpy, False);
 		display();
+		if(dopixmap) XFreePixmap(wh.dpy, wh.pm);
 		XDestroyWindow(wh.dpy, wh.win);
 		XFreeColormap(wh.dpy, swa.colormap);
 		XFree(v);  v=NULL;

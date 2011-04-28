@@ -61,7 +61,7 @@
  #endif
  #include <X11/Xutil.h>
  typedef GC fbx_gc;
- typedef struct {Display *dpy; Window win;} fbx_wh;
+ typedef struct {Display *dpy;  Window win;  Pixmap pm;} fbx_wh;
 #endif
 
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
