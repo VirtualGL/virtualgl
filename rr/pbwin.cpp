@@ -49,6 +49,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	#ifdef USEXV
 	_xvtrans=NULL;
 	#endif
+	_rrdpy=NULL;
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
 	_syncdpy=false;
