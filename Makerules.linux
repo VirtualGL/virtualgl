@@ -60,7 +60,7 @@ ifeq ($(USESSL), yes)
 endif
 
 GLLIB = -lGL
-FAKERLINK = $(GLLIB)
+FAKERLINK = $(GLLIB) -Wl,-no-undefined,-zdefs
 
 ifeq ($(subplatform),)
  RPMARCH = i386
