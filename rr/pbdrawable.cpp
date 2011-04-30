@@ -202,7 +202,6 @@ Drawable pbdrawable::getx11drawable(void)
 void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
 {
-
 	GLint readbuf=GL_BACK, oldrendermode=GL_RENDER;
 	GLint fbr=0, fbw=0;
 	#ifdef GL_VERSION_1_5
@@ -331,15 +330,18 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
 		{
-			snprintf(_autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d", (unsigned int)_drawable, color);
+			snprintf(_autotestrclr, 79, "__VGL_AUTOTESTRCLR%x=%d",
+				(unsigned int)_drawable, color);
 			putenv(_autotestrclr);
 		}
 		else
 		{
-			snprintf(_autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d", (unsigned int)_drawable, color);
+			snprintf(_autotestclr, 79, "__VGL_AUTOTESTCLR%x=%d",
+				(unsigned int)_drawable, color);
 			putenv(_autotestclr);
 		}
-		snprintf(_autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d", (unsigned int)_drawable, _autotestframecount);
+		snprintf(_autotestframe, 79, "__VGL_AUTOTESTFRAME%x=%d",
+			(unsigned int)_drawable, _autotestframecount);
 		putenv(_autotestframe);
 	}
 
@@ -349,6 +351,74 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	tc.restore();
 
 	glReadBuffer(readbuf);
+	if(fbr) glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbr);
+	if(fbw) glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbw);
+}
+
+void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
+	GLint dest_x, GLint dest_y, GLXDrawable draw)
+{
+	GLint readbuf=GL_BACK, drawbuf=GL_BACK, oldrendermode=GL_RENDER;
+	GLint fbr=0, fbw=0;
+
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
+
+	tempctx tc(_localdpy, draw, getglxdrawable());
+
+	glReadBuffer(GL_FRONT);
+	_glDrawBuffer(GL_FRONT_AND_BACK);
+	glRenderMode(GL_RENDER);
+
+	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+	glPushAttrib(GL_VIEWPORT_BIT|GL_COLOR_BUFFER_BIT|GL_PIXEL_MODE_BIT);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	_glPixelTransferf(GL_RED_SCALE, 1.0);
+	_glPixelTransferf(GL_RED_BIAS, 0.0);
+	_glPixelTransferf(GL_GREEN_SCALE, 1.0);
+	_glPixelTransferf(GL_GREEN_BIAS, 0.0);
+	_glPixelTransferf(GL_BLUE_SCALE, 1.0);
+	_glPixelTransferf(GL_BLUE_BIAS, 0.0);
+	_glPixelTransferf(GL_ALPHA_SCALE, 1.0);
+	_glPixelTransferf(GL_ALPHA_BIAS, 0.0);
+
+	int e=glGetError();
+	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+
+	_glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, w, 0, h, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	for(GLint i=0; i<h; i++)
+	{
+		glRasterPos2i(dest_x, h-dest_y-i-1);
+		glCopyPixels(src_x, h-src_y-i-1, w, 1, GL_COLOR);
+	}
+	checkgl("Copy Pixels");
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glRenderMode(oldrendermode);
+	_glPopAttrib();
+	glPopClientAttrib();
+	tc.restore();
+
+	glReadBuffer(readbuf);
+	_glDrawBuffer(drawbuf);
 	if(fbr) glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbr);
 	if(fbw) glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbw);
 }

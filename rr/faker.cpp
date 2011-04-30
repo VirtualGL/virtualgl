@@ -129,18 +129,23 @@ class _globalcleanup
 };
 _globalcleanup gdt;
 
-#define _die(f,m) {if(!isdead()) rrout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  __vgl_safeexit(1);}
+#define _die(f,m) {if(!isdead())  \
+	rrout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
+	__vgl_safeexit(1);}
 
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
-#define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a, a?DisplayString(a):"NULL")
+#define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
+	a? DisplayString(a):"NULL")
 #define prargs(a) rrout.print("%s=%s ", #a, a?a:"NULL")
 #define prargx(a) rrout.print("%s=0x%.8lx ", #a, (unsigned long)a)
 #define prargi(a) rrout.print("%s=%d ", #a, a)
 #define prargf(a) rrout.print("%s=%f ", #a, (double)a)
-#define prargv(a) rrout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a?a->visualid:0)
-#define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a?_FBCID(a):0)
+#define prargv(a) rrout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a,  \
+	a? a->visualid:0)
+#define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
+	a? _FBCID(a):0)
 #define prargal11(a) if(a) {  \
 	rrout.print("attrib_list=[");  \
 	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
@@ -213,7 +218,8 @@ void __vgl_fakerinit(void)
 			strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			rrout.print("[VGL] ERROR: Could not open display %s.\n", fconfig.localdpystring);
+			rrout.print("[VGL] ERROR: Could not open display %s.\n",
+				fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}
 	}
@@ -475,8 +481,10 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 	else if(xe && xe->type==KeyPress)
 	{
 		unsigned int state2, state=(xe->xkey.state)&(~(LockMask));
-		state2=fconfig.guimod;  if(state2&Mod1Mask) {state2&=(~(Mod1Mask));  state2|=Mod2Mask;}
-		if(fconfig.gui && XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
+		state2=fconfig.guimod;
+		if(state2&Mod1Mask) {state2&=(~(Mod1Mask));  state2|=Mod2Mask;}
+		if(fconfig.gui
+			&& XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
 			&& (state==fconfig.guimod || state==state2)
 			&& fconfig_getshmid()!=-1)
 			vglpopup(dpy, fconfig_getshmid());
@@ -553,7 +561,8 @@ Bool XCheckTypedEvent(Display *dpy, int event_type, XEvent *xe)
 	return retval;
 }
 
-Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type, XEvent *xe)
+Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type,
+	XEvent *xe)
 {
 	Bool retval=0;
 	TRY();
@@ -563,18 +572,21 @@ Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type, XEvent *xe
 	return retval;
 }
 
-int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask, XWindowChanges *values)
+int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
+	XWindowChanges *values)
 {
 	int retval=0;
 	TRY();
 
 		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
 		if(values && (value_mask&CWWidth)) {prargi(values->width);}
-		if(values && (value_mask&CWHeight)) {prargi(values->height);}  starttrace();
+		if(values && (value_mask&CWHeight)) {prargi(values->height);}
+		starttrace();
 
 	pbwin *pbw=NULL;
 	if(winh.findpb(dpy, win, pbw) && values)
-		pbw->resize(value_mask&CWWidth?values->width:0, value_mask&CWHeight?values->height:0);
+		pbw->resize(value_mask&CWWidth? values->width:0,
+			value_mask&CWHeight?values->height:0);
 	retval=_XConfigureWindow(dpy, win, value_mask, values);
 
 		stoptrace();  closetrace();
@@ -583,7 +595,8 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask, XWindowC
 	return retval;
 }
 
-int XResizeWindow(Display *dpy, Window win, unsigned int width, unsigned int height)
+int XResizeWindow(Display *dpy, Window win, unsigned int width,
+	unsigned int height)
 {
 	int retval=0;
 	TRY();
@@ -601,7 +614,8 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width, unsigned int hei
 	return retval;
 }
 
-int XMoveResizeWindow(Display *dpy, Window win, int x, int y, unsigned int width, unsigned int height)
+int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
+	unsigned int width, unsigned int height)
 {
 	int retval=0;
 	TRY();
@@ -622,79 +636,79 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y, unsigned int width
 // We have to trap any attempts to copy from/to a GLXPixmap (ugh)
 // It should work as long as a valid GLX context is current
 // in the calling thread
-int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x, int src_y,
-	unsigned int w, unsigned int h, int dest_x, int dest_y)
+int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
+	int src_y, unsigned int w, unsigned int h, int dest_x, int dest_y)
 {
 	TRY();
-	pbuffer *pb;
-	GLXDrawable read=src, draw=dst;  bool srcpm=false, dstpm=false;
+	pbdrawable *pbsrc=NULL;  pbdrawable *pbdst=NULL;
+	bool srcwin=false, dstwin=false;
+	bool copy2d=true, copy3d=false, triggerrb=false;
+	int retval=0;
+	GLXDrawable glxsrc=0, glxdst=0;
 
 	if(src==0 || dst==0) return BadDrawable;
 
-	if((pb=pmh.find(dpy, src))!=0) {read=pb->drawable();  srcpm=true;}
-	if((pb=pmh.find(dpy, dst))!=0) {draw=pb->drawable();  dstpm=true;}
+		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);
+		prargx(gc); prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);
+		prargi(dest_x);  prargi(dest_y);  starttrace();
 
-	if(!srcpm && !dstpm)
+	if(!(pbsrc=(pbdrawable *)pmh.find(dpy, src)))
 	{
-		int retval=_XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);
-		return retval;
+		pbsrc=(pbdrawable *)winh.findwin(dpy, src);
+		if(pbsrc) srcwin=true;
+	};
+	if(!(pbdst=(pbdrawable *)pmh.find(dpy, dst)))
+	{
+		pbdst=(pbdrawable *)winh.findwin(dpy, dst);
+		if(pbdst) dstwin=true;
 	}
 
-		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);  prargx(gc);
-		prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);  prargi(dest_x);
-		prargi(dest_y);  prargx(read);  prargx(draw);  starttrace();
+	// GLX (Pbuffer-backed) Pixmap --> non-GLX drawable
+	// Sync pixels from the Pbuffer backing the Pixmap to the actual Pixmap and
+	// let the "real" XCopyArea() do the rest.
+	if(pbsrc && !srcwin && !pbdst) ((pbpm *)pbsrc)->readback();
 
-	GLXDrawable oldread=GetCurrentReadDrawable();
-	GLXDrawable olddraw=GetCurrentDrawable();
-	GLXContext ctx=GetCurrentContext();
-	Display *olddpy=NULL;
-	if(!ctx || !(olddpy=GetCurrentDisplay()))
+	// non-GLX drawable --> non-GLX drawable
+	// Source and destination are not backed by a Pbuffer, so defer to the
+	// real XCopyArea() function.
+	//
+	// non-GLX drawable --> GLX (Pbuffer-backed) drawable
+	// We don't really handle this yet (and won't until we have to.)  Copy to the
+	// X11 destination drawable only, without updating the corresponding Pbuffer.
+	//
+	// GLX (Pbuffer-backed) Window --> non-GLX drawable
+	// We assume that glFinish() or another synchronization function has been
+	// called prior to XCopyArea(), so we defer to the real XCopyArea() function
+	// (but this may not work properly without VGL_SYNC=1.)
+	{}
+
+	// GLX (Pbuffer-backed) Window --> GLX (Pbuffer-backed) drawable
+	// GLX (Pbuffer-backed) Pixmap --> GLX (Pbuffer-backed) Pixmap
+	// Sync both 2D and 3D pixels.
+	if(pbsrc && srcwin && pbdst) copy3d=true;
+	if(pbsrc && !srcwin && pbdst && !dstwin) copy3d=true;
+
+	// GLX (Pbuffer-backed) Pixmap --> GLX (Pbuffer-backed) Window
+	// Copy 3D pixels to the destination Pbuffer, then trigger a VirtualGL
+	// readback to deliver the pixels to the window.
+	if(pbsrc && !srcwin && pbdst && dstwin)
 	{
-		stoptrace();  closetrace();
-		return 0;  // Does ... not ... compute
+		copy2d=false;  copy3d=true;  triggerrb=true;
 	}
 
-	// Intentionally call the faked function so it will map a PB if src or dst is a window
-	glXMakeContextCurrent(dpy, draw, read, ctx);
+	if(copy2d) retval=_XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x,
+		dest_y);
 
-	unsigned int srch, dsth, dstw;
-	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_WIDTH, &dstw);
-	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentDrawable(), GLX_HEIGHT, &dsth);
-	_glXQueryDrawable(_glXGetCurrentDisplay(), _glXGetCurrentReadDrawable(), GLX_HEIGHT, &srch);
-
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPushAttrib(GL_VIEWPORT_BIT|GL_COLOR_BUFFER_BIT|GL_PIXEL_MODE_BIT);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	_glViewport(0, 0, dstw, dsth);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, dstw, 0, dsth, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	_glDrawBuffer(GL_FRONT_AND_BACK);
-	glReadBuffer(GL_FRONT);
-	for(unsigned int i=0; i<h; i++)
+	if(copy3d)
 	{
-		glRasterPos2i(dest_x, dsth-dest_y-i-1);
-		glCopyPixels(src_x, srch-src_y-i-1, w, 1, GL_COLOR);
+		glxsrc=pbsrc->getglxdrawable();
+		glxdst=pbdst->getglxdrawable();
+		pbsrc->copypixels(src_x, src_y, w, h, dest_x, dest_y, glxdst);
+		if(triggerrb) ((pbwin *)pbdst)->readback(GL_FRONT, false, fconfig.sync);
 	}
-	glFinish();  // call faked function here, so it will perform a readback
 
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	_glPopAttrib();
-	glPopClientAttrib();
-
-	_glXMakeContextCurrent(olddpy, olddraw, oldread, ctx);
-
-		stoptrace();  closetrace();
+		stoptrace();  if(copy3d) prargx(glxsrc);  if(copy3d) prargx(glxdst);
+		closetrace();
 
 	CATCH();
 	return 0;
@@ -829,7 +843,8 @@ XVisualInfo *glXGetVisualFromFBConfigSGIX(Display *dpy, GLXFBConfigSGIX config)
 	return glXGetVisualFromFBConfig(dpy, config);
 }
 
-GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_list, Bool direct)
+GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
+	GLXContext share_list, Bool direct)
 {
 	GLXContext ctx=0;
 	TRY();
@@ -860,10 +875,12 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis, GLXContext share_lis
 	}
 
 	GLXFBConfig c;
-	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
+	if(!(c=_MatchConfig(dpy, vis)))
+		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
 	if(!(ctx=_glXCreateNewContext(_localdpy, c,
-		render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, share_list, True)))
+		render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
+			share_list, True)))
 		return NULL;
 	if(!glXIsDirect(_localdpy, ctx))
 	{
@@ -905,13 +922,14 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// Equivalent of a glFlush()
 	GLXDrawable curdraw=GetCurrentDrawable();
 	if(GetCurrentContext() && _localdisplayiscurrent()
-	&& curdraw && winh.findpb(curdraw, pbw))
+		&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
 		if(drawable==0 || !winh.findpb(dpy, drawable, newpbw)
-		|| newpbw->getglxdrawable()!=curdraw)
+			|| newpbw->getglxdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, false, false);
+			if(_drawingtofront() || pbw->_dirty)
+				pbw->readback(GL_FRONT, false, false);
 		}
 	}
 
@@ -925,8 +943,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			return False;
 		}
 		pbw=winh.setpb(dpy, drawable, config);
-		if(pbw)
-			drawable=pbw->updatedrawable();
+		if(pbw) drawable=pbw->updatedrawable();
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
@@ -944,8 +961,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
-	pbuffer *pb;
-	if((pb=pmh.find(dpy, drawable))!=NULL) pb->clear();
+	pbpm *pbp;
+	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
 	#ifdef SUNOGL
 	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
 	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
@@ -990,13 +1007,15 @@ void glXDestroyContext(Display* dpy, GLXContext ctx)
 // GLX 1.3 Context management
 /////////////////////////////
 
-GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type, GLXContext share_list, Bool direct)
+GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
+	int render_type, GLXContext share_list, Bool direct)
 {
 	GLXContext ctx=0;
 	TRY();
 
 	// Prevent recursion
-	if(!_isremote(dpy)) return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
+	if(!_isremote(dpy))
+		return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
 		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
@@ -1032,7 +1051,8 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config, int render_type
 	return ctx;
 }
 
-Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx)
+Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
+	GLXContext ctx)
 {
 	Bool retval=0;
 	pbwin *pbw;  GLXFBConfig config=0;
@@ -1064,7 +1084,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
 			|| newpbw->getglxdrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty) pbw->readback(GL_FRONT, false, false);
+			if(_drawingtofront() || pbw->_dirty)
+				pbw->readback(GL_FRONT, false, false);
 		}
 	}
 
@@ -1087,8 +1108,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
 	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
-	pbuffer *pb;
-	if((pb=pmh.find(dpy, draw))!=NULL) pb->clear();
+	pbpm *pbp;
+	if((pbp=pmh.find(dpy, draw))!=NULL) pbp->clear();
 	#ifdef SUNOGL
 	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
 	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
@@ -1108,7 +1129,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 	return retval;
 }
 
-Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx)
+Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read,
+	GLXContext ctx)
 {
 	return glXMakeContextCurrent(dpy, draw, read, ctx);
 }
@@ -1118,7 +1140,8 @@ Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read, GLX
 ///////////////////////////////////
 
 // On Linux, GLXFBConfigSGIX is typedef'd to GLXFBConfig
-GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, int render_type, GLXContext share_list, Bool direct)
+GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config,
+	int render_type, GLXContext share_list, Bool direct)
 {
 	return glXCreateNewContext(dpy, config, render_type, share_list, direct);
 }
@@ -1129,7 +1152,8 @@ GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, 
 
 // Here, we fake out the client into thinking it's getting a window drawable,
 // but really it's getting a Pbuffer drawable
-GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const int *attrib_list)
+GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
+	const int *attrib_list)
 {
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
@@ -1155,8 +1179,8 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win, const in
 		stoptrace();  if(pbw) {prargx(pbw->getglxdrawable());}  closetrace();
 
 	CATCH();
-	return win;  // Make the client store the original window handle, which we use
-               // to find the Pbuffer in the hash
+	return win;  // Make the client store the original window handle, which we
+               // use to find the Pbuffer in the hash
 }
 
 void glXDestroyWindow(Display *dpy, GLXWindow win)
@@ -1211,13 +1235,15 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	if(!(c=_MatchConfig(dpy, vi))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
-	pbuffer *pb=new pbuffer(w, h, c);
-	if(pb)
+	if(!(c=_MatchConfig(dpy, vi)))
+		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
+	pbpm *pbp=new pbpm(dpy, pm, vi->visual);
+	if(pbp)
 	{
-		pmh.add(dpy, pm, pb);
-		glxdh.add(pb->drawable(), dpy);
-		drawable=pb->drawable();
+		pbp->init(w, h, c);
+		pmh.add(dpy, pm, pbp);
+		glxdh.add(pbp->getglxdrawable(), dpy);
+		drawable=pbp->getglxdrawable();
 	}
 
 		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
@@ -1236,6 +1262,11 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
+	// Sync the contents of the Pbuffer with the real Pixmap before we delete
+	// the Pbuffer
+	pbpm *pbp=pmh.find(dpy, pix);
+	if(pbp) pbp->readback();
+
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
 
@@ -1244,7 +1275,8 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	CATCH();
 }
 
-GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int *attribs)
+GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
+	const int *attribs)
 {
 	GLXPixmap drawable=0;
 	TRY();
@@ -1259,12 +1291,20 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	pbuffer *pb=new pbuffer(w, h, config);
-	if(pb)
+
+	VisualID vid=_MatchVisual(dpy, config);
+	pbpm *pbp=NULL;
+	if(vid)
 	{
-		pmh.add(dpy, pm, pb);
-		glxdh.add(pb->drawable(), dpy);
-		drawable=pb->drawable();
+		XVisualInfo *v=__vglVisualFromVisualID(dpy, DefaultScreen(dpy), vid);
+		if(v) pbp=new pbpm(dpy, pm, v->visual);
+	}
+	if(pbp)
+	{
+		pbp->init(w, h, config);
+		pmh.add(dpy, pm, pbp);
+		glxdh.add(pbp->getglxdrawable(), dpy);
+		drawable=pbp->getglxdrawable();
 	}
 
 		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
@@ -1274,7 +1314,8 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm, const int
 	return drawable;
 }
 
-GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config, Pixmap pixmap)
+GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy,
+	GLXFBConfigSGIX config, Pixmap pixmap)
 {
 	return glXCreatePixmap(dpy, config, pixmap, NULL);
 }
@@ -1287,6 +1328,11 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	////////////////////
 
 		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
+
+	// Sync the contents of the Pbuffer with the real Pixmap before we delete
+	// the Pbuffer
+	pbpm *pbp=pmh.find(dpy, pix);
+	if(pbp) pbp->readback();
 
 	glxdh.remove(pix);
 	pmh.remove(dpy, pix);
@@ -1355,8 +1401,8 @@ static void _doGLreadback(bool spoillast, bool sync)
 	{
 		if(_drawingtofront() || pbw->_dirty)
 		{
-				opentrace(_doGLreadback);  prargx(pbw->getglxdrawable());  prargi(sync);
-				prargi(spoillast);  starttrace();
+				opentrace(_doGLreadback);  prargx(pbw->getglxdrawable());
+				prargi(sync); prargi(spoillast);  starttrace();
 
 			pbw->readback(GL_FRONT, spoillast, sync);
 
@@ -1404,7 +1450,8 @@ void glXWaitGL(void)
 
 	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
 
-	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this to avoid 2 readbacks
+	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this
+	              // to avoid 2 readbacks
 	fconfig.flushdelay=0.;
 	_doGLreadback(false, fconfig.sync);
 	CATCH();

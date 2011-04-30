@@ -51,15 +51,15 @@ class pbdrawable
 
 		pbdrawable(Display *, Drawable);
 		~pbdrawable(void);
+		int init(int, int, GLXFBConfig);
 		void clear(void);
 		Display *get2ddpy(void);
 		Drawable getx11drawable(void);
 		GLXDrawable getglxdrawable(void);
-		void readback(GLint, bool, bool);
+		void copypixels(GLint, GLint, GLint, GLint, GLint, GLint, GLXDrawable);
 
 	protected:
 
-		int init(int, int, GLXFBConfig);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 

@@ -55,6 +55,12 @@ class winhash : public _winhash
 				free(dpystring);
 		}
 
+		pbwin *findwin(Display *dpy, Window win)
+		{
+			if(!dpy || !win) return NULL;
+			return _winhash::find(DisplayString(dpy), win);
+		}
+
 		bool findpb(Display *dpy, GLXDrawable d, pbwin* &pbw)
 		{
 			pbwin *p;

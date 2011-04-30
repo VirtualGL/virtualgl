@@ -61,7 +61,7 @@
  #endif
  #include <X11/Xutil.h>
  typedef GC fbx_gc;
- typedef struct {Display *dpy;  Window win;  Pixmap pm;} fbx_wh;
+ typedef struct {Display *dpy;  Drawable d;  Visual *v;} fbx_wh;
 #endif
 
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
@@ -100,6 +100,7 @@ typedef struct _fbx_struct
 	GC xgc;
 	XImage *xi;
 	Pixmap pm;
+	int pixmap;
 	#endif
 } fbx_struct;
 
@@ -119,6 +120,7 @@ extern "C" {
   wh = Handle to the window that you wish to read from or write to.  On
        Windows, this is the same as the HWND.  On Unix, this is a struct
        (see above) that describes the X11 display and drawable you wish to use.
+       If wh.v is non-NULL, then FBX assumes that the drawable is a Pixmap.
   width = Width of buffer (in pixels) that you wish to create.  0 = use width
           of window
   height = Height of buffer (in pixels) that you wish to create.  0 = use

@@ -69,6 +69,7 @@ FOBJS = $(ODIR)/faker.o \
         $(ODIR)/faker-sym.o \
         $(ODIR)/pbdrawable.o \
         $(ODIR)/pbwin.o \
+        $(ODIR)/pbpm.o \
         $(ODIR)/glxvisual.o \
         $(ODIR)/rrblitter.o \
         $(ODIR)/rrdisplayclient.o \

@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2006-2007 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,12 +32,14 @@
  #include <sys/resource.h>
 #endif
 
-#define _throw(f, l, m) {fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
+#define _throw(f, l, m) {  \
+	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
 #define fbx(a) {if((a)==-1)_throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
 
 void usage(void)
 {
-	printf("\nUSAGE: %s [-h|-?] -t<seconds> -s<samples per second>\n", program_name);
+	printf("\nUSAGE: %s [-h|-?] -t<seconds> -s<samples per second>\n",
+		program_name);
 	printf("       -wh<window handle in hex>\n");
 	printf("       -x<x offset> -y<y offset>\n\n");
 	printf("-h or -? = This help screen\n");
@@ -77,7 +80,7 @@ int main(int argc, char **argv)
 			#ifdef _WIN32
 			if(sscanf(&argv[i][3], "%x", &temp)==1) wh=temp;
 			#else
-			if(sscanf(&argv[i][3], "%x", &temp.win)==1) wh.win=temp.win;
+			if(sscanf(&argv[i][3], "%x", &temp.d)==1) wh.d=temp.d;
 			#endif
 		}
 	}
@@ -106,11 +109,16 @@ int main(int argc, char **argv)
 	printf("Monitoring window 0x%.8x (%s)\n", wh, temps);
 	#else
 	if(!XInitThreads()) {fprintf(stderr, "XInitThreads() failed\n");  exit(1);}
-	if(!(wh.dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
-	if(!wh.win) {
-	printf("Click the mouse in the window that you wish to monitor ...\n");
-	wh.win=Select_Window(wh.dpy);
-	XSetInputFocus(wh.dpy, wh.win, RevertToNone, CurrentTime);
+	if(!(wh.dpy=XOpenDisplay(0)))
+	{
+		fprintf(stderr, "Could not open display %s\n",
+		XDisplayName(0));  exit(1);
+	}
+	if(!wh.d)
+	{
+		printf("Click the mouse in the window that you wish to monitor ...\n");
+		wh.d=Select_Window(wh.dpy);
+		XSetInputFocus(wh.dpy, wh.d, RevertToNone, CurrentTime);
 	}
 	#endif
 
@@ -150,13 +158,15 @@ int main(int argc, char **argv)
 		int sleeptime=(int)(1000.*(1./(float)samplerate-(timer.time()-benchend)));
 		if(sleeptime>0) Sleep(sleeptime);
 		#else
-		int sleeptime=(int)(1000000.*(1./(float)samplerate-(timer.time()-benchend)));
+		int sleeptime=(int)(1000000.*(1./(float)samplerate
+			-(timer.time()-benchend)));
 		if(sleeptime>0) usleep(sleeptime);
 		#endif
 	} while((benchend=timer.time())-benchstart<benchtime);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	#endif
-	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples, frames, benchend-benchstart, (double)frames/(benchend-benchstart));
+	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples,
+		frames, benchend-benchstart, (double)frames/(benchend-benchstart));
 	return 0;
 }

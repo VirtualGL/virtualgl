@@ -1689,7 +1689,7 @@ void checkdrawable(Display *dpy, GLXDrawable draw, int width, int height,
 // Test Pbuffer and Pixmap rendering
 int pbtest(void)
 {
-	Display *dpy=NULL;  Window win=0;  Pixmap pm0=0, pm1=0;
+	Display *dpy=NULL;  Window win=0;  Pixmap pm0=0, pm1=0, pm2=0;
 	GLXPixmap glxpm0=0, glxpm1=0;  GLXPbuffer pb=0;  GLXWindow glxwin=0;
 	int dpyw, dpyh, lastframe=0, retval=1;
 	int glxattrib[]={GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
@@ -1740,7 +1740,8 @@ int pbtest(void)
 		checkdrawable(dpy, glxwin, dpyw/2, dpyh/2, -1, -1, fbcid);
 
 		if((pm0=XCreatePixmap(dpy, win, dpyw/2, dpyh/2, v->depth))==0
-		|| (pm1=XCreatePixmap(dpy, win, dpyw/2, dpyh/2, v->depth))==0)
+		|| (pm1=XCreatePixmap(dpy, win, dpyw/2, dpyh/2, v->depth))==0
+		|| (pm2=XCreatePixmap(dpy, win, dpyw/2, dpyh/2, v->depth))==0)
 			_throw("Could not create pixmap");
 		if((glxpm0=glXCreateGLXPixmap(dpy, v, pm0))==0
 		|| (glxpm1=glXCreatePixmap(dpy, c, pm1, NULL))==0)
@@ -1785,7 +1786,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("PBuffer->Window:  ");
+			printf("PBuffer->Window:                ");
 			if(!(glXMakeContextCurrent(dpy, pb, pb, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, pb, pb, ctx);
@@ -1812,7 +1813,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("Window->Pbuffer:  ");
+			printf("Window->Pbuffer:                ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
@@ -1839,7 +1840,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("FBO->Window:      ");
+			printf("FBO->Window:                    ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, glxwin, glxwin, ctx);
@@ -1883,7 +1884,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("Pixmap->Window:   ");
+			printf("Pixmap->Window:                 ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
@@ -1909,7 +1910,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("Window->Pixmap:   ");
+			printf("Window->Pixmap:                 ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
@@ -1941,7 +1942,7 @@ int pbtest(void)
 
 		try
 		{
-			printf("Pixmap->Pixmap:   ");
+			printf("Pixmap->Pixmap:                 ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
@@ -1967,6 +1968,57 @@ int pbtest(void)
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
 		fflush(stdout);
+
+		try
+		{
+			printf("GLX Pixmap->2D Pixmap:          ");
+			lastframe=0;
+			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
+				_error("Could not make context current");
+			checkcurrent(dpy, glxpm0, glxpm0, ctx);
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
+			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
+			XCopyArea(dpy, pm0, pm2, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
+				dpyw/2, dpyh/2, 0, 0);
+			checkreadbackstate(GL_BACK, dpy, glxpm0, glxpm0, ctx);
+			int temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
+			if(temp!=GL_BACK) _error("Draw buffer changed");
+			checkframe(pm0, 1, lastframe);
+			checkwindowcolor(pm0, clr.bits(-1), false);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+		fflush(stdout);
+
+		try
+		{
+			// Same as above, but with a deleted GLX pixmap
+			printf("Deleted GLX Pixmap->2D Pixmap:  ");
+			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
+				_error("Could not make context current");
+			checkcurrent(dpy, glxpm0, glxpm0, ctx);
+			clr.clear(GL_FRONT);
+			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
+			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
+			glXDestroyPixmap(dpy, glxpm0);  glxpm0=0;
+			if(!glXMakeContextCurrent(dpy, 0, 0, 0))
+				_error("Could not make context current");
+			XCopyArea(dpy, pm0, pm2, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
+				dpyw/2, dpyh/2, 0, 0);
+			checkframe(pm0, 1, lastframe);
+			checkwindowcolor(pm0, clr.bits(-1), false);
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+		fflush(stdout);
+
 	}
 	catch(rrerror &e)
 	{
@@ -1982,6 +2034,7 @@ int pbtest(void)
 	if(pb && dpy) {glXDestroyPbuffer(dpy, pb);  pb=0;}
 	if(glxpm1 && dpy) {glXDestroyGLXPixmap(dpy, glxpm1);  glxpm1=0;}
 	if(glxpm0 && dpy) {glXDestroyGLXPixmap(dpy, glxpm0);  glxpm0=0;}
+	if(pm2 && dpy) {XFreePixmap(dpy, pm2);  pm2=0;}
 	if(pm1 && dpy) {XFreePixmap(dpy, pm1);  pm1=0;}
 	if(pm0 && dpy) {XFreePixmap(dpy, pm0);  pm0=0;}
 	if(glxwin && dpy) {glXDestroyWindow(dpy, glxwin);  glxwin=0;}

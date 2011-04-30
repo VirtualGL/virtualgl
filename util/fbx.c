@@ -118,7 +118,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	#ifdef FBXWIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
-	XWindowAttributes xwinattrib;  int shmok=1, alphafirst;
+	XWindowAttributes xwinattrib;  int shmok=1, alphafirst, pixmap=0;
 	#endif
 
 	if(!s) _throw("Invalid argument");
@@ -200,26 +200,31 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	#else
 
-	if(!wh.dpy || !wh.win) _throw("Invalid argument");
-	x11(XGetWindowAttributes(wh.dpy, wh.win, &xwinattrib));
-	if(wh.pm)
+	if(!wh.dpy || !wh.d) _throw("Invalid argument");
+	if(wh.v)
 	{
-		x11(XGetGeometry(wh.dpy, wh.pm, &xwinattrib.root, &xwinattrib.x,
+		x11(XGetGeometry(wh.dpy, wh.d, &xwinattrib.root, &xwinattrib.x,
 			&xwinattrib.y, (unsigned int *)&xwinattrib.width,
 			(unsigned int *)&xwinattrib.height,
 			(unsigned int *)&xwinattrib.border_width,
 			(unsigned int *)&xwinattrib.depth));
+		xwinattrib.visual=wh.v;
 		useshm=0;
+		pixmap=1;
+	}
+	else
+	{
+		x11(XGetWindowAttributes(wh.dpy, wh.d, &xwinattrib));
 	}
 	if(width>0) w=width;  else w=xwinattrib.width;
 	if(height>0) h=height;  else h=xwinattrib.height;
-	if(s->wh.dpy==wh.dpy && s->wh.win==wh.win && s->wh.pm==wh.pm)
+	if(s->wh.dpy==wh.dpy && s->wh.d==wh.d)
 	{
 		if(w==s->width && h==s->height && s->xi && s->xgc && s->bits) return 0;
 		else if(fbx_term(s)==-1) return -1;
 	}
 	memset(s, 0, sizeof(fbx_struct));
-	s->wh.dpy=wh.dpy;  s->wh.win=wh.win;  s->wh.pm=wh.pm;
+	s->wh.dpy=wh.dpy;  s->wh.d=wh.d;
 
 	#ifdef USESHM
 	#ifdef XDK
@@ -290,8 +295,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(!useshm)
 	#endif
 	{
-		if(!s->wh.pm)
-			x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width,
+		if(!pixmap)
+			x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.d, xwinattrib.width,
 				xwinattrib.height, xwinattrib.depth));
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth,
 			ZPixmap, 0, NULL, w, h, 8, 0));
@@ -323,7 +328,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(s->format==-1) _throw("Display has unsupported pixel format");
 
 	s->bits=s->xi->data;
-	x11(s->xgc=XCreateGC(s->wh.dpy, s->pm? s->pm:s->wh.win, 0, NULL));
+	s->pixmap=pixmap;
+	x11(s->xgc=XCreateGC(s->wh.dpy, s->pm? s->pm:s->wh.d, 0, NULL));
 	return 0;
 
 	finally:
@@ -354,7 +360,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 	#else
 
-	if(!s->wh.dpy || !s->wh.win || !s->xi || !s->bits) _throw("Not initialized");
+	if(!s->wh.dpy || !s->wh.d || !s->xi || !s->bits) _throw("Not initialized");
 	#ifdef USESHM
 	if(!s->xattach && s->shm)
 	{
@@ -365,13 +371,13 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	#ifdef USESHM
 	if(s->shm)
 	{
-		x11(XShmGetImage(s->wh.dpy, s->wh.win, s->xi, wx, wy, AllPlanes));
+		x11(XShmGetImage(s->wh.dpy, s->wh.d, s->xi, wx, wy, AllPlanes));
 	}
 	else
 	#endif
 	{
-		x11(XGetSubImage(s->wh.dpy, s->wh.pm? s->wh.pm:s->wh.win, wx, wy,
-			s->width, s->height, AllPlanes, ZPixmap, s->xi, 0, 0));
+		x11(XGetSubImage(s->wh.dpy, s->wh.d, wx, wy, s->width, s->height,
+			AllPlanes, ZPixmap, s->xi, 0, 0));
 	}
 	return 0;
 
@@ -418,7 +424,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
 	if(s->pm)
 	{
-		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, wx, wy, bw, bh, wx, wy);
+		XCopyArea(s->wh.dpy, s->pm, s->wh.d, s->xgc, wx, wy, bw, bh, wx, wy);
 	}
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
@@ -472,18 +478,20 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
-	if(!s->wh.dpy || !s->wh.win || !s->xi || !s->bits) _throw("Not initialized");
+	if(!s->wh.dpy || !s->wh.d || !s->xi || !s->bits) _throw("Not initialized");
 	#ifdef USESHM
 	if(s->shm)
 	{
 		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
-		x11(XShmPutImage(s->wh.dpy, s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw,
+		x11(XShmPutImage(s->wh.dpy, s->wh.d, s->xgc, s->xi, bx, by, wx, wy, bw,
 			bh, False));
 	}
 	else
 	#endif
-		XPutImage(s->wh.dpy, s->wh.pm? s->wh.pm:s->pm, s->xgc, s->xi, bx, by, wx,
+	{
+		XPutImage(s->wh.dpy, s->pixmap? s->wh.d:s->pm, s->xgc, s->xi, bx, by, wx,
 			wy, bw, bh);
+	}
 	return 0;
 
 	finally:
@@ -503,7 +511,7 @@ int fbx_sync(fbx_struct *s)
 	if(!s) _throw("Invalid argument");
 	if(s->pm)
 	{
-		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, 0, 0, s->width, s->height,
+		XCopyArea(s->wh.dpy, s->pm, s->wh.d, s->xgc, 0, 0, s->width, s->height,
 			0, 0);
 	}
 	XFlush(s->wh.dpy);

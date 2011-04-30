@@ -517,14 +517,14 @@ class rrfb : public rrframe
 {
 	public:
 
-	rrfb(Display *dpy, Window win, Pixmap pm=0) : rrframe()
+	rrfb(Display *dpy, Drawable d, Visual *v=NULL) : rrframe()
 	{
-		if(!dpy || !win) throw(rrerror("rrfb::rrfb", "Invalid argument"));
+		if(!dpy || !d) throw(rrerror("rrfb::rrfb", "Invalid argument"));
 		#ifdef XDK
 		rrcs::safelock l(_Mutex);
 		#endif
 		XFlush(dpy);
-		init(DisplayString(dpy), win, pm);
+		init(DisplayString(dpy), d, v);
 	}
 
 	rrfb(char *dpystring, Window win) : rrframe()
@@ -535,14 +535,14 @@ class rrfb : public rrframe
 		init(dpystring, win);
 	}
 
-	void init(char *dpystring, Window win, Pixmap pm=0)
+	void init(char *dpystring, Drawable d, Visual *v=NULL)
 	{
 		_tjhnd=NULL;
 		memset(&_fb, 0, sizeof(fbx_struct));
-		if(!dpystring || !win) throw(rrerror("rrfb::init", "Invalid argument"));
+		if(!dpystring || !d) throw(rrerror("rrfb::init", "Invalid argument"));
 		if(!(_wh.dpy=XOpenDisplay(dpystring)))
 			throw(rrerror("rrfb::init", "Could not open display"));
-		_wh.win=win;  _wh.pm=pm;
+		_wh.d=d;  _wh.v=v;
 	}
 
 	~rrfb(void)

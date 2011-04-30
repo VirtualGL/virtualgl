@@ -59,6 +59,7 @@ int width, height;
 int checkdb=0, doshm=1;
 #ifndef FBXWIN32
 int dopixmap=0;
+Window win=0;
 #endif
 fbx_wh wh;
 rrtimer timer;
@@ -129,8 +130,8 @@ void clearfb(void)
 		tryw32(ReleaseDC(wh, hdc));
 	}
 	#else
-	if(wh.dpy && wh.win)
-		XSetWindowBackground(wh.dpy, wh.win, BlackPixel(wh.dpy, DefaultScreen(wh.dpy)));
+	if(wh.dpy && wh.d && !dopixmap)
+		XSetWindowBackground(wh.dpy, wh.d, BlackPixel(wh.dpy, DefaultScreen(wh.dpy)));
 	#endif
 	return;
 }
@@ -536,22 +537,27 @@ int main(int argc, char **argv)
 		swa.event_mask=0;
 		if(dopixmap)
 		{
-			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
+			errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
 				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
 				&swa));
-			errifnot(wh.pm=XCreatePixmap(wh.dpy, wh.win, width, height, v->depth));
+			errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
+			wh.v=v->visual;
 		}
 		else
 		{
-			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+			errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
 				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
 				&swa));
-			errifnot(XMapRaised(wh.dpy, wh.win));
+			errifnot(XMapRaised(wh.dpy, wh.d));
 		}
 		XSync(wh.dpy, False);
 		display();
-		if(dopixmap) XFreePixmap(wh.dpy, wh.pm);
-		XDestroyWindow(wh.dpy, wh.win);
+		if(dopixmap)
+		{
+			XFreePixmap(wh.dpy, wh.d);
+			XDestroyWindow(wh.dpy, win);
+		}
+		else XDestroyWindow(wh.dpy, wh.d);
 		XFree(v);  v=NULL;
 	}
 	else fprintf(stderr, "No RGB visuals available.  Skipping those tests.\n\n");
@@ -575,22 +581,27 @@ int main(int argc, char **argv)
 		XStoreColors(wh.dpy, swa.colormap, xc, 32);
 		if(dopixmap)
 		{
-			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
+			errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
 				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
 				&swa));
-			errifnot(wh.pm=XCreatePixmap(wh.dpy, wh.win, width, height, v->depth));
+			errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
+			wh.v=v->visual;
 		}
 		else
 		{
-			errifnot(wh.win=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+			errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
 				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
 				&swa));
-			errifnot(XMapRaised(wh.dpy, wh.win));
+			errifnot(XMapRaised(wh.dpy, wh.d));
 		}
 		XSync(wh.dpy, False);
 		display();
-		if(dopixmap) XFreePixmap(wh.dpy, wh.pm);
-		XDestroyWindow(wh.dpy, wh.win);
+		if(dopixmap)
+		{
+			XFreePixmap(wh.dpy, wh.d);
+			XDestroyWindow(wh.dpy, win);
+		}
+		else XDestroyWindow(wh.dpy, wh.d);
 		XFreeColormap(wh.dpy, swa.colormap);
 		XFree(v);  v=NULL;
 	}

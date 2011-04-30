@@ -1,4 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -11,12 +12,12 @@
  * wxWindows Library License for more details.
  */
 
-#include "pbwin.h"
+#include "pbpm.h"
 
 #define _hashclass _pmhash
 #define _hashkeytype1 char*
 #define _hashkeytype2 Pixmap
-#define _hashvaluetype pbuffer*
+#define _hashvaluetype pbpm*
 #define _hashclassstruct _pmhashstruct
 #define __hashclassstruct __pmhashstruct
 #include "faker-hash.h"
@@ -27,8 +28,8 @@
 #undef _hashclassstruct
 #undef __hashclassstruct
 
-// This maps a pixmap ID on the remote display to a GLXPbuffer ID on the local
-// display
+// This maps a Pixmap ID on the 2D X Server to a pbpm instance, which
+// encapsulates a Pbuffer on the 3D X Server
 
 class pmhash : public _pmhash
 {
@@ -46,18 +47,18 @@ class pmhash : public _pmhash
 
 		static bool isalloc(void) {return (_Instanceptr!=NULL);}
 
-		void add(Display *dpy, Pixmap pm, pbuffer *pb)
+		void add(Display *dpy, Pixmap pm, pbpm *pbp)
 		{
 			if(!dpy || !pm) _throw("Invalid argument");
 			char *dpystring=strdup(DisplayString(dpy));
-			if(!_pmhash::add(dpystring, pm, pb))
+			if(!_pmhash::add(dpystring, pm, pbp))
 				free(dpystring);
 		}
 
-		pbuffer *find(Display *dpy, Pixmap pm)
+		pbpm *find(Display *dpy, Pixmap pm)
 		{
 			if(!dpy || !pm) return NULL;
-			return (pbuffer *)_pmhash::find(DisplayString(dpy), pm);
+			return _pmhash::find(DisplayString(dpy), pm);
 		}
 
 		Pixmap reversefind(GLXDrawable pb)
@@ -83,21 +84,21 @@ class pmhash : public _pmhash
 			_pmhash::killhash();
 		}
 
-		pbuffer *attach(char *key1, Pixmap key2) {return NULL;}
+		pbpm *attach(char *key1, Pixmap key2) {return NULL;}
 
 		void detach(_pmhashstruct *h)
 		{
 			if(h && h->key1) free(h->key1);
-			if(h && h->value) delete((pbuffer *)h->value);
+			if(h && h->value) delete((pbpm *)h->value);
 		}
 
 		bool compare(char *key1, Pixmap key2, _pmhashstruct *h)
 		{
-			pbuffer *pb=h->value;
+			pbpm *pbp=h->value;
 			return (
 				(key1 && !strcasecmp(key1, h->key1) && (key2==h->key2
-					|| (pb && key2==pb->drawable())))
-				|| (key1==NULL && key2==pb->drawable())
+					|| (pbp && key2==pbp->getglxdrawable())))
+				|| (key1==NULL && key2==pbp->getglxdrawable())
 			);
 		}
 
