@@ -256,6 +256,7 @@ void fconfig_reloadenv(void)
 
 	rrcs::safelock l(fcmutex);
 
+	fetchenv_bool("VGL_ALLOWINDIRECT", allowindirect);
 	fetchenv_bool("VGL_AUTOTEST", autotest);
 	fetchenv_str("VGL_CLIENT", client);
 	if((env=getenv("VGL_SUBSAMP"))!=NULL && strlen(env)>0)
@@ -539,6 +540,7 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 
 void fconfig_print(FakerConfig &fc)
 {
+	prconfint(allowindirect);
 	prconfstr(client);
 	prconfint(compress);
 	prconfstr(config);

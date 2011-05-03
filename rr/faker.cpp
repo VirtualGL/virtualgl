@@ -856,6 +856,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
 		prargi(direct);  starttrace();
 
+	if(!fconfig.allowindirect) direct=True;
+
 	if(vis)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -880,9 +882,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
 	if(!(ctx=_glXCreateNewContext(_localdpy, c,
 		render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
-			share_list, True)))
+			share_list, direct)))
 		return NULL;
-	if(!glXIsDirect(_localdpy, ctx))
+	if(!glXIsDirect(_localdpy, ctx) && direct)
 	{
 		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
@@ -1021,6 +1023,8 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
 		prargi(render_type);  prargi(direct);  starttrace();
 
+	if(!fconfig.allowindirect) direct=True;
+
 	if(rcfgh.isoverlay(dpy, config)) // Overlay config
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
@@ -1034,9 +1038,10 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	else
 		render_type=GLX_RGBA_TYPE;
 
-	if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, True)))
+	if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list,
+		direct)))
 		return NULL;
-	if(!glXIsDirect(_localdpy, ctx))
+	if(!glXIsDirect(_localdpy, ctx) && direct)
 	{
 		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));

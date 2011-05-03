@@ -145,6 +145,7 @@ enum rrstereo {RRSTEREO_LEYE=0, RRSTEREO_REYE, RRSTEREO_QUADBUF,
 /* Faker configuration */
 typedef struct _FakerConfig
 {
+  char allowindirect;
   char autotest;
   char client[MAXSTR];
   int compress;
