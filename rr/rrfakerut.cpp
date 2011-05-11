@@ -2004,9 +2004,9 @@ int pbtest(void)
 			clr.clear(GL_FRONT);
 			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
-			glXDestroyPixmap(dpy, glxpm0);  glxpm0=0;
 			if(!glXMakeContextCurrent(dpy, 0, 0, 0))
 				_error("Could not make context current");
+			glXDestroyPixmap(dpy, glxpm0);  glxpm0=0;
 			XCopyArea(dpy, pm0, pm2, DefaultGC(dpy, DefaultScreen(dpy)), 0, 0,
 				dpyw/2, dpyh/2, 0, 0);
 			checkframe(pm0, 1, lastframe);
