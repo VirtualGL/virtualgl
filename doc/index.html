@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-05-04T02:14:57">
+<meta name="date" content="2011-05-11T16:31:35">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -515,11 +515,12 @@ image transport plugins.</p>
     <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
     Hat</a></span><a name="idx0010"></a> or 
     <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a> 
-    families which contains GLIBC 2.3.4 or later (including 
-    <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0012"></a> 
-    4 and later, and 
+    families which contains GLIBC 2.3.2 or later (including 
+    <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0012"></a>, 
     <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0013"></a> 
-    4 and later)
+    3 and later, and 
+    <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
+    Box</a></span><a name="idx0014"></a>)
 </li>
 <li class="Itemize-0">
     Ubuntu Linux v6.0 or later
@@ -641,9 +642,9 @@ image transport plugins.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <em>VGL Transport Only</em>: 
-    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0014"></a> 
+    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0015"></a> 
     or 
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0015"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0016"></a> 
     Exceed v8 or newer
 </li>
 <li class="Itemize-0">
@@ -693,7 +694,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     FirePro) and is configured to export stereo pixel formats
 </li>
 <li class="Itemize-0">
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0016"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0017"></a> 
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -732,7 +733,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     Quadro, ATI FirePro) and is configured to export overlay pixel formats
 </li>
 <li class="Itemize-0">
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0017"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0018"></a> 
     Exceed 3D v8 or newer
 </li></ul></td>
   </tr>
@@ -749,7 +750,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0018"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0019"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
 </p></div>
 
 
@@ -760,9 +761,9 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         Download the appropriate VirtualGL binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0019"></a> of the 
+        area</a></span><a name="idx0020"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0020"></a>. <br />
+        SourceForge project page</a></span><a name="idx0021"></a>. <br />
         <div class="important"><p class="important">
         The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages also contain 32-bit VirtualGL server components, which can be used to run 32-bit OpenGL applications on 64-bit servers.
         </p></div>
@@ -803,9 +804,9 @@ dpkg&nbsp;-i&nbsp;VirtualGL*.deb
         <code>VirtualGL-</code><em><code>{version}</code></em><code>-x64.pkg.bz2</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0021"></a> of the 
+        area</a></span><a name="idx0022"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0022"></a>. <br />
+        SourceForge project page</a></span><a name="idx0023"></a>. <br />
         <div class="important"><p class="important">
         The 64-bit package also contains 32-bit VirtualGL server components, which can be used to run 32-bit OpenGL applications on 64-bit servers.
         </p></div>
@@ -850,9 +851,9 @@ pkgadd&nbsp;-d&nbsp;VirtualGL*.pkg
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0023"></a> of the 
+        area</a></span><a name="idx0024"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0024"></a>.
+        SourceForge project page</a></span><a name="idx0025"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -872,9 +873,9 @@ pkgadd&nbsp;-d&nbsp;VirtualGL*.pkg
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>.exe</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0025"></a> of the 
+        area</a></span><a name="idx0026"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0026"></a>.
+        SourceForge project page</a></span><a name="idx0027"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the installer.  The installation of the VirtualGL Client should be 
@@ -901,9 +902,9 @@ NOTE: The VirtualGL Client for Exceed installer does not remove any previous ver
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>-cygwin.tar.bz2</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0027"></a> of the 
+        area</a></span><a name="idx0028"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0028"></a>.
+        SourceForge project page</a></span><a name="idx0029"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the Cygwin Setup application (the same application you used to 
@@ -939,9 +940,9 @@ source tarball
 (<code>VirtualGL-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-area</a></span><a name="idx0029"></a> of the 
+area</a></span><a name="idx0030"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0030"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0031"></a>, uncompress 
 it, <code>cd&nbsp;vgl</code>, and read the contents of 
 <code>BUILDING.txt</code> for further instructions on how to build and 
 install VirtualGL from source.</p>
@@ -1449,17 +1450,17 @@ patches from the OpenText support site:</p>
   <tr class="standard">
     <td class="standard">Exceed 8.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0031"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0032"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Exceed 9.0</td>
     <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0032"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
+    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0033"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
   </tr>
   <tr class="standard">
     <td class="standard">Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0033"></a>.)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0034"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
+    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">Connectivity 2008 Service Pack</a></span><a name="idx0034"></a>.)</td>
+    <td class="standard">Download all patches from the <span class="remote"><a href="http://support.hummingbird.com/customer/cspatches/patches.asp" class="remote">OpenText support site</a></span><a name="idx0035"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
   </tr>
 </table>
 </div>
@@ -1699,7 +1700,7 @@ Some newer Linux and Solaris distributions ship with default settings that do no
 <h3 id="hd007002001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0035"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0036"></a>, 
 except that you should pass a <code>-x</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -1725,7 +1726,7 @@ network can reduce VirtualGL&rsquo;s performance by anywhere from 20-40%.</p>
 <h3 id="hd007003001">Procedure</h3>
 
 <p>The procedure for this mode is identical to the procedure for 
-<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0036"></a>, 
+<a href="#X11_Forwarding">X11 forwarding</a><a name="idx0037"></a>, 
 except that you should pass a <code>-s</code> argument to 
 <code>vglconnect</code> when connecting to the server:</p>
 
@@ -1778,7 +1779,7 @@ XDMCP is very insecure and is not recommended as a means of running VirtualGL, i
 
 <p>Using the VGL Transport with XDMCP is conceptually similar to using the 
 VGL Transport with a <a href="#Direct_X11_Connection">direct X11 
-connection</a><a name="idx0037"></a>.  The major difference is that, 
+connection</a><a name="idx0038"></a>.  The major difference is that, 
 rather than remotely displaying individual X windows to the 2D X server, 
 XDMCP remotely displays a complete desktop session from the application 
 server. Any applications that are started within this desktop session 
@@ -1957,7 +1958,7 @@ create rules based on application executables instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Transport with <a href="#SSh_Tunneling">SSh 
-Tunneling</a><a name="idx0038"></a>.</p>
+Tunneling</a><a name="idx0039"></a>.</p>
 
 <p><br /></p>
 
@@ -1995,17 +1996,17 @@ They simply aren&rsquo;t designed to compress, with any degree of
 performance, the large and complex images generated by 3D applications.  
 Therefore, the VirtualGL Project provides an optimized X proxy called 
 &ldquo;TurboVNC&rdquo;, a variant of 
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0039"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0040"></a> 
 that is designed specifically to achieve high levels of performance with 
 VirtualGL.  More information about TurboVNC, including instructions for 
 using it with VirtualGL, can be found in the TurboVNC User&rsquo;s Guide.</p>
 
-<p><span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0040"></a> 
+<p><span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0041"></a> 
 is a next-generation VNC project based on the RealVNC and Xorg code 
 bases.  TigerVNC spun off from the TightVNC project in early 2009, and 
 the VirtualGL Project now actively participates in its development.  
 TigerVNC uses the same high-speed JPEG codec as VirtualGL and TurboVNC 
-(<span class="remote"><a href="http://libjpeg-turbo.virtualgl.org" class="remote">libjpeg-turbo</a></span><a name="idx0041"></a>), 
+(<span class="remote"><a href="http://libjpeg-turbo.virtualgl.org" class="remote">libjpeg-turbo</a></span><a name="idx0042"></a>), 
 but as of this writing, TigerVNC&rsquo;s performance is not quite yet on 
 par with TurboVNC. The ultimate goal, however, is to replace TurboVNC 
 with TigerVNC.  TigerVNC is available in Fedora 11 or later.</p>
@@ -2072,7 +2073,7 @@ for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Transport to display 3D applications 
 from a VirtualGL server to a remote X proxy is the same as the 
-<a href="#X11_Forwarding">procedure</a><a name="idx0042"></a> for using 
+<a href="#X11_Forwarding">procedure</a><a name="idx0043"></a> for using 
 the VGL Transport to display 3D applications from a VirtualGL server to 
 a remote 2D X server, with the following exceptions:</p>
 
@@ -2867,7 +2868,7 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
         the 2D elements of the virtual machine display will not perform well 
         over a remote X11 connection unless a 
         <a href="#Direct_X11_Connection">direct X11 
-        connection</a><a name="idx0043"></a> (<code>vglconnect&nbsp;-x</code>) 
+        connection</a><a name="idx0044"></a> (<code>vglconnect&nbsp;-x</code>) 
         is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
         networks, using a high-performance X proxy (such as TurboVNC or 
         TigerVNC) is recommended when remotely displaying VirtualBox using 
@@ -3002,7 +3003,7 @@ for Windows clients.) Otherwise, VirtualGL will fall back to using
 anaglyphic stereo (see below.) It is usually necessary to explicitly 
 enable stereo in the graphics driver configuration for both the client 
 and server machines.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0044"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0045"></a> 
 section below lists a way to verify that both the 3D X server and the 2D 
 X server have stereo visuals available.</p>
 
@@ -3091,7 +3092,7 @@ overlays at the same time.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0045"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0046"></a> 
 below) to verify whether your client&rsquo;s X display supports overlays 
 and whether they are enabled.  In Exceed 3D, make sure that the 
 &ldquo;Overlay Support&rdquo; option is checked in the &ldquo;Exceed 3D 
@@ -3885,7 +3886,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         performance improvement from the use of pixel buffer objects 
         (PBO&rsquo;s).  Thus, unless this option is explicitly disabled, it will 
         be enabled by default whenever PBO readback mode is enabled.  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0046"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0047"></a> 
         option for further information.
     </dd>
 </dl>
@@ -4024,7 +4025,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0047"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0048"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -4104,7 +4105,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0048"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0049"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4212,7 +4213,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0049"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0050"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4344,7 +4345,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0050"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0051"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4396,7 +4397,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This option 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0051"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0052"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4440,7 +4441,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         32-bit pixel formats are used, VirtualGL&rsquo;s default behavior is to 
         automatically create Pbuffers with 32 bits per pixel when PBO readback 
         mode is enabled (you can use the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0052"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0053"></a> 
         option to override this.) <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4609,7 +4610,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the graphics card (because VirtualGL is now reading back the rendered 3D 
         image every time <code>glFlush()</code> is called.)  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0053"></a> for a list of applications that are 
+        Recipes</a><a name="idx0054"></a> for a list of applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4829,7 +4830,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0054"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0055"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4879,11 +4880,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0055"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0056"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0056"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0057"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">
