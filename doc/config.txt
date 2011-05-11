@@ -23,6 +23,23 @@ Each method of configuration takes precedence over the previous method:
 	Transports, then this means that image transport plugins are free to handle
 	or ignore this option as they see fit.
 
+{anchor: VGL_ALLOWINDIRECT}
+| Environment Variable | ''VGL_ALLOWINDIRECT = ''__''0 \| 1''__ |
+| Summary | Allow applications to request an indirect OpenGL context |
+| Image Transports | All |
+| Default Value | 0 (all OpenGL contexts use direct rendering, unless \
+	rendering to a [[#overlays][transparent overlay]]) |
+#OPT: hiCol=first
+
+	Description :: Normally, when VirtualGL maps a Pbuffer to a window and
+	establishes an OpenGL rendering context with the Pbuffer, it forces direct
+	rendering to be used with this context.  This is to prevent severe
+	performance pitfalls on some systems that do not support hardware-accelerated
+	indirect rendering.  However, applications that intentionally attempt to
+	create indirect contexts so that these contexts can be shared may not work
+	properly.  Settting ''VGL_ALLOWINDIRECT'' to ''1'' will cause VirtualGL to
+	honor the application's request for an indirect OpenGL context.
+
 | Environment Variable | ''VGL_CLIENT = ''__''{c}''__ |
 | ''vglrun'' argument | ''-cl ''__''{c}''__ |
 | Summary | __''{c}''__ = the hostname or IP address of the VirtualGL client |

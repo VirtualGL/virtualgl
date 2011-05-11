@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-05-11T16:31:35">
+<meta name="date" content="2011-05-11T18:06:31">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2944,6 +2944,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
     <td class="standard"></td>
   </tr>
+  <tr class="standard">
+    <td class="standard">Mathematica 7</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_ALLOWINDIRECT</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">Mathematica 7 will not draw the axis numbers on 3D charts correctly unless it is allowed to create an indirect OpenGL context.  See See Section <a href="#VGL_ALLOWINDIRECT" class="ref">19.1</a> for more details.</td>
+  </tr>
 </table>
 </div>
 
@@ -3706,6 +3712,45 @@ method:</p>
 If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image Transports, then this means that image transport plugins are free to handle or ignore this option as they see fit.
 </p></div>
 
+<p><a name="VGL_ALLOWINDIRECT"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_ALLOWINDIRECT&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Allow applications to request an indirect OpenGL context</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">0 (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0047"></a>)</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally, when VirtualGL maps a Pbuffer to a window and establishes an 
+        OpenGL rendering context with the Pbuffer, it forces direct rendering to 
+        be used with this context.  This is to prevent severe performance 
+        pitfalls on some systems that do not support hardware-accelerated 
+        indirect rendering.  However, applications that intentionally attempt to 
+        create indirect contexts so that these contexts can be shared may not 
+        work properly.  Settting <code>VGL_ALLOWINDIRECT</code> to 
+        <code>1</code> will cause VirtualGL to honor the application&rsquo;s 
+        request for an indirect OpenGL context.
+    </dd>
+</dl>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -3886,7 +3931,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         performance improvement from the use of pixel buffer objects 
         (PBO&rsquo;s).  Thus, unless this option is explicitly disabled, it will 
         be enabled by default whenever PBO readback mode is enabled.  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0047"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0048"></a> 
         option for further information.
     </dd>
 </dl>
@@ -4025,7 +4070,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0048"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0049"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -4105,7 +4150,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         for that issue was introduced in VirtualGL 2.1.1, this option 
         isn&rsquo;t really useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0049"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0050"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4213,7 +4258,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0050"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0051"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4345,7 +4390,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0051"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0052"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4397,7 +4442,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This option 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0052"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0053"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4441,7 +4486,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         32-bit pixel formats are used, VirtualGL&rsquo;s default behavior is to 
         automatically create Pbuffers with 32 bits per pixel when PBO readback 
         mode is enabled (you can use the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0053"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0054"></a> 
         option to override this.) <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4610,7 +4655,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the graphics card (because VirtualGL is now reading back the rendered 3D 
         image every time <code>glFlush()</code> is called.)  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0054"></a> for a list of applications that are 
+        Recipes</a><a name="idx0055"></a> for a list of applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4830,7 +4875,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0055"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0056"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4880,11 +4925,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles which have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0056"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0057"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0057"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0058"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">

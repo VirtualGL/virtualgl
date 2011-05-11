@@ -96,3 +96,10 @@
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
 	|
+| Mathematica 7 | Linux \
+	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
+		launching the application with ''vglrun'' \
+	| Mathematica 7 will not draw the axis numbers on 3D charts correctly \
+		unless it is allowed to create an indirect OpenGL context.  See \
+		See {ref prefix="Section ": VGL_ALLOWINDIRECT} for more details. \
+	|
