@@ -330,7 +330,7 @@ Display *glXGetCurrentDisplay(void)
 
 		opentrace(glXGetCurrentDisplay);  starttrace();
 
-	GLXDrawable curdraw=GetCurrentDrawable();
+	GLXDrawable curdraw=_glXGetCurrentDrawable();
 	if(winh.findpb(curdraw, pbw)) dpy=pbw->get2ddpy();
 	else
 	{
@@ -347,7 +347,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 {
 	if(ctxh.overlaycurrent()) return _glXGetCurrentDrawable();
 
-	pbwin *pbw=NULL;  GLXDrawable draw=GetCurrentDrawable();
+	pbwin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
 
 	TRY();
 
@@ -365,7 +365,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	if(ctxh.overlaycurrent()) return _glXGetCurrentReadDrawable();
 
-	pbwin *pbw=NULL;  GLXDrawable read=GetCurrentReadDrawable();
+	pbwin *pbw=NULL;  GLXDrawable read=_glXGetCurrentReadDrawable();
 
 	TRY();
 
@@ -495,9 +495,18 @@ GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
 
 Bool glXIsDirect(Display *dpy, GLXContext ctx)
 {
+	Bool direct;
+
 	if(ctxh.isoverlay(ctx)) return _glXIsDirect(dpy, ctx);
 
-	return _glXIsDirect(_localdpy, ctx);
+		opentrace(glXIsDirect);  prargd(dpy);  prargx(ctx);
+		starttrace();
+
+	direct=_glXIsDirect(_localdpy, ctx);
+
+		stoptrace();  prargi(direct);  closetrace();
+
+	return direct;
 }
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
