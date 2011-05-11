@@ -136,7 +136,7 @@ _globalcleanup gdt;
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
-static __thread int __vgltracelevel=0;
+static int __vgltracelevel=0;
 
 #define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
 	a? DisplayString(a):"NULL")
