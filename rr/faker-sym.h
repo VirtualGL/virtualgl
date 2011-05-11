@@ -90,12 +90,6 @@ extern void __vgl_fakerinit(void);
 	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);}
 
 
-#define GetCurrentContext() glXGetCurrentContext()
-#define GetCurrentDrawable() _glXGetCurrentDrawable()
-#define GetCurrentReadDrawable() _glXGetCurrentReadDrawable()
-#define GetCurrentDisplay() _glXGetCurrentDisplay()
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif

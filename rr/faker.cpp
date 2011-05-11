@@ -54,7 +54,7 @@ static GLvoid r_glIndexubv(OglContextPtr, const GLubyte *);
 
 // Globals
 Display *_localdpy=NULL;
-#define _localdisplayiscurrent() (GetCurrentDisplay()==_localdpy)
+#define _localdisplayiscurrent() (_glXGetCurrentDisplay()==_localdpy)
 #define _isremote(dpy) (_localdpy && dpy!=_localdpy)
 #define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
@@ -936,8 +936,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	// Equivalent of a glFlush()
-	GLXDrawable curdraw=GetCurrentDrawable();
-	if(GetCurrentContext() && _localdisplayiscurrent()
+	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	if(glXGetCurrentContext() && _localdisplayiscurrent()
 		&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
@@ -1095,8 +1095,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 
 	// Equivalent of a glFlush()
-	GLXDrawable curdraw=GetCurrentDrawable();
-	if(GetCurrentContext() && _localdisplayiscurrent()
+	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
@@ -1414,7 +1414,7 @@ static void _doGLreadback(bool spoillast, bool sync)
 	pbwin *pbw;
 	GLXDrawable drawable;
 	if(ctxh.overlaycurrent()) return;
-	drawable=GetCurrentDrawable();
+	drawable=_glXGetCurrentDrawable();
 	if(!drawable) return;
 	if(winh.findpb(drawable, pbw))
 	{
@@ -1487,7 +1487,7 @@ void glDrawBuffer(GLenum mode)
 		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
 
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
-	GLXDrawable drawable=GetCurrentDrawable();
+	GLXDrawable drawable=_glXGetCurrentDrawable();
 	if(drawable && winh.findpb(drawable, pbw))
 	{
 		before=_drawingtofront();
@@ -1516,7 +1516,7 @@ void glPopAttrib(void)
 		opentrace(glPopAttrib);  starttrace();
 
 	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
-	GLXDrawable drawable=GetCurrentDrawable();
+	GLXDrawable drawable=_glXGetCurrentDrawable();
 	if(drawable && winh.findpb(drawable, pbw))
 	{
 		before=_drawingtofront();
@@ -1547,10 +1547,10 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();
 
-	GLXContext ctx=GetCurrentContext();
-	GLXDrawable draw=GetCurrentDrawable();
-	GLXDrawable read=GetCurrentReadDrawable();
-	Display *dpy=GetCurrentDisplay();
+	GLXContext ctx=glXGetCurrentContext();
+	GLXDrawable draw=_glXGetCurrentDrawable();
+	GLXDrawable read=_glXGetCurrentReadDrawable();
+	Display *dpy=_glXGetCurrentDisplay();
 	GLXDrawable newread=0, newdraw=0;
 	if(dpy && (draw || read) && ctx)
 	{
