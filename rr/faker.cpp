@@ -136,6 +136,8 @@ _globalcleanup gdt;
 #define TRY() try {
 #define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
 
+static __thread int __vgltracelevel=0;
+
 #define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
 	a? DisplayString(a):"NULL")
 #define prargs(a) rrout.print("%s=%s ", #a, a?a:"NULL")
@@ -164,7 +166,13 @@ _globalcleanup gdt;
 #define opentrace(f)  \
 	double __vgltracetime=0.;  \
 	if(fconfig.trace) {  \
-		rrout.print("[VGL] %s (", #f);  \
+		if(__vgltracelevel>0) {  \
+			rrout.print("\n      ");  \
+			for(int __i=0; __i<__vgltracelevel; __i++) rrout.print("  ");  \
+		}  \
+		else rrout.print("[VGL] ");  \
+		__vgltracelevel++;  \
+		rrout.print("%s (", #f);  \
 
 #define starttrace()  \
 		__vgltracetime=rrtime();  \
@@ -176,6 +184,12 @@ _globalcleanup gdt;
 
 #define closetrace()  \
 		rrout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
+		__vgltracelevel--;  \
+		if(__vgltracelevel>0) {  \
+			rrout.print("      ");  \
+			if(__vgltracelevel>1)  \
+				for(int __i=0; __i<__vgltracelevel-1; __i++) rrout.print("  ");  \
+    }  \
 	}
 
 #include "faker-glx.cpp"
