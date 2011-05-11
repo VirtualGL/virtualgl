@@ -22,64 +22,44 @@
 
 #define EXISTING_DRAWABLE (GLXDrawable)-1
 
-#ifdef INFAKER
- #include "faker-sym.h"
- #define glXGetCurrentDisplay GetCurrentDisplay
- #define glXGetCurrentDrawable GetCurrentDrawable
- #define glXGetCurrentReadDrawable GetCurrentReadDrawable
- #define glXMakeCurrent _glXMakeCurrent
- #define glXMakeContextCurrent _glXMakeContextCurrent
-#elif defined(XDK)
- #include "xdk-sym.h"
- #define glXGetCurrentContext _glXGetCurrentContext
- #define glXGetCurrentDisplayEXT _glXGetCurrentDisplayEXT
- #define glXGetCurrentDrawable _glXGetCurrentDrawable
- #define glXMakeCurrent _glXMakeCurrent
-#else
- #include <GL/glx.h>
-#endif
+#include "faker-sym.h"
 
 class tempctx
 {
 	public:
 
 		tempctx(Display *dpy, GLXDrawable draw, GLXDrawable read,
-			GLXContext ctx=glXGetCurrentContext(), bool glx11=false) :
-			_dpy(glXGetCurrentDisplay()), _ctx(glXGetCurrentContext()),
-			#ifndef GLX11
-			_read(glXGetCurrentReadDrawable()),
-			#else
-			_read(EXISTING_DRAWABLE),
-			#endif
-			_draw(glXGetCurrentDrawable()),
-			_mc(false), _glx11(glx11)
+			GLXContext ctx=glXGetCurrentContext(), GLXFBConfig config=NULL,
+			int rendtype=0) : _olddpy(_glXGetCurrentDisplay()),
+			_oldctx(glXGetCurrentContext()), _newctx(NULL),
+			_oldread(_glXGetCurrentReadDrawable()),
+			_olddraw(_glXGetCurrentDrawable()), _ctxchanged(false)
 		{
 			if(!dpy) return;
-			if(read==EXISTING_DRAWABLE) read=_read;
-			if(draw==EXISTING_DRAWABLE) draw=_draw;
-			if(_read!=read || _draw!=draw || _ctx!=ctx || (_dpy!=dpy))
+			if(!_olddpy) _olddpy=dpy;
+			if(read==EXISTING_DRAWABLE) read=_oldread;
+			if(draw==EXISTING_DRAWABLE) draw=_olddraw;
+			if(draw && read && !ctx && config && rendtype)
+				_newctx=ctx=_glXCreateNewContext(dpy, config, rendtype, NULL, True);
+			if(((read || draw) && ctx && dpy)
+				&& (_oldread!=read  || _olddraw!=draw || _oldctx!=ctx || _olddpy!=dpy))
 			{
-				Bool ret=True;
-				if(glx11) ret=glXMakeCurrent(dpy, draw, ctx);
-				#ifndef GLX11
-				else ret=glXMakeContextCurrent(dpy, draw, read, ctx);
-				#endif
-				if(!ret) _throw("Could not bind OpenGL context to window (window may have disappeared)");
-				_mc=true;
+				if(!_glXMakeContextCurrent(dpy, draw, read, ctx))
+					_throw("Could not bind OpenGL context to window (window may have disappeared)");
+				_ctxchanged=true;
 			}
 		}
 
 		void restore(void)
 		{
-			if(_mc && _ctx && (_draw || _read))
+			if(_ctxchanged)
 			{
-				if(_dpy)
-				{
-					if(_glx11) glXMakeCurrent(_dpy, _draw, _ctx);
-					#ifndef GLX11
-					else glXMakeContextCurrent(_dpy, _draw, _read, _ctx);
-					#endif
-				}
+				_glXMakeContextCurrent(_olddpy, _olddraw, _oldread, _oldctx);
+				_ctxchanged=false;
+			}
+			if(_newctx)
+			{
+				_glXDestroyContext(_olddpy, _newctx);  _newctx=NULL;
 			}
 		}
 
@@ -90,19 +70,10 @@ class tempctx
 
 	private:
 
-		Display *_dpy;
-		GLXContext _ctx;
-		GLXDrawable _read, _draw;
-		bool _mc, _glx11;
+		Display *_olddpy;
+		GLXContext _oldctx, _newctx;
+		GLXDrawable _oldread, _olddraw;
+		bool _ctxchanged;
 };
-
-#if defined(INFAKER)||defined(XDK)
- #undef glXGetCurrentContext
- #undef glXGetCurrentDisplay
- #undef glXGetCurrentDrawable
- #undef glXGetCurrentReadDrawable
- #undef glXMakeCurrent
- #undef glXMakeContextCurrent
-#endif
 
 #endif // __TEMPCTX_H

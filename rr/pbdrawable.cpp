@@ -20,7 +20,6 @@
 #include "glxvisual.h"
 #include "glext-vgl.h"
 
-#define INFAKER
 #include "tempctx.h"
 #include "fakerconfig.h"
 
@@ -215,7 +214,13 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
 
-	tempctx tc(_localdpy, EXISTING_DRAWABLE, GetCurrentDrawable());
+	GLXDrawable read=_glXGetCurrentDrawable();
+	GLXDrawable draw=_glXGetCurrentDrawable();
+	if(read==0) read=getglxdrawable();
+	if(draw==0) draw=getglxdrawable();
+
+	tempctx tc(_localdpy, draw, read, glXGetCurrentContext(), _config,
+		format==GL_COLOR_INDEX ? GLX_COLOR_INDEX_TYPE : GLX_RGBA_TYPE);
 
 	glReadBuffer(buf);
 	glRenderMode(GL_RENDER);
@@ -368,7 +373,11 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
 
-	tempctx tc(_localdpy, draw, getglxdrawable());
+
+	tempctx tc(_localdpy, draw, getglxdrawable(), glXGetCurrentContext(),
+		_config,
+		__vglServerVisualAttrib(_config, GLX_RENDER_TYPE) & GLX_COLOR_INDEX_BIT ?
+			GLX_COLOR_INDEX_TYPE : GLX_RGBA_TYPE);
 
 	glReadBuffer(GL_FRONT);
 	_glDrawBuffer(GL_FRONT_AND_BACK);
