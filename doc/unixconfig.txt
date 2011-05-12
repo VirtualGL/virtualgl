@@ -34,7 +34,12 @@ prompt.
 			/etc/init.d/gdm stop
 			---
 
-		Other Linux servers :: {:}
+		SuSE Linux servers :: {:}
+			#Verb: <<---
+			/etc/init.d/xdm stop
+			---
+
+		Red Hat/Fedora Linux servers :: {:}
 			#Verb: <<---
 			init 3
 			---
@@ -139,7 +144,12 @@ prompt.
 			/etc/init.d/gdm start
 			---
 
-		Other Linux servers :: {:}
+		SuSE Linux servers :: {:}
+			#Verb: <<---
+			/etc/init.d/xdm start
+			---
+
+		Red Hat/Fedora Linux servers :: {:}
 			#Verb: <<---
 			init 5
 			---
