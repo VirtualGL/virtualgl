@@ -167,7 +167,7 @@ static int __vgltracelevel=0;
 	double __vgltracetime=0.;  \
 	if(fconfig.trace) {  \
 		if(__vgltracelevel>0) {  \
-			rrout.print("\n      ");  \
+			rrout.print("\n[VGL] ");  \
 			for(int __i=0; __i<__vgltracelevel; __i++) rrout.print("  ");  \
 		}  \
 		else rrout.print("[VGL] ");  \
@@ -186,7 +186,7 @@ static int __vgltracelevel=0;
 		rrout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
 		__vgltracelevel--;  \
 		if(__vgltracelevel>0) {  \
-			rrout.print("      ");  \
+			rrout.print("[VGL] ");  \
 			if(__vgltracelevel>1)  \
 				for(int __i=0; __i<__vgltracelevel-1; __i++) rrout.print("  ");  \
     }  \
