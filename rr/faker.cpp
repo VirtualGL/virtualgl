@@ -915,7 +915,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
-	Bool retval=0;
+	Bool retval=0;  const char *renderer="Unknown";
 	TRY();
 	pbwin *pbw;  GLXFBConfig config=0;
 
@@ -976,6 +976,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
+	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
@@ -992,7 +993,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
 	#endif
 
-		stoptrace();  prargc(config);  prargx(drawable);  closetrace();
+		stoptrace();  prargc(config);  prargx(drawable);  prargs(renderer);
+		closetrace();
 
 	CATCH();
 	return retval;
@@ -1073,7 +1075,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
-	Bool retval=0;
+	Bool retval=0;  const char *renderer="Unknown";
 	pbwin *pbw;  GLXFBConfig config=0;
 	TRY();
 
@@ -1125,6 +1127,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		if(readpbw) read=readpbw->updatedrawable();
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
+	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
 	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
 	pbpm *pbp;
@@ -1142,7 +1145,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
 	#endif
 
-		stoptrace();  prargc(config);  prargx(draw);  prargx(read);  closetrace();
+		stoptrace();  prargc(config);  prargx(draw);  prargx(read);
+		prargs(renderer);  closetrace();
 
 	CATCH();
 	return retval;
