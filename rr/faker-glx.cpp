@@ -391,11 +391,11 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	TRY();
 
 	// Prevent recursion && handle overlay configs
-	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+	if((dpy && config) && (!_isremote(dpy) || rcfgh.isoverlay(dpy, config)))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 	////////////////////
 
-	int screen=DefaultScreen(dpy);
+	int screen=dpy? DefaultScreen(dpy):0;
 
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargi(attribute);  starttrace();
