@@ -216,6 +216,10 @@ void __vgl_fakerinit(void)
 	fconfig_reloadenv();
 	if(strlen(fconfig.log)>0) rrout.logto(fconfig.log);
 
+	if(fconfig.verbose)
+		rrout.println("[VGL] %s v%s %d-bit (Build %s)",
+			__APPNAME, __VERSION, (int)sizeof(size_t)*8, __BUILD);
+
 	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
 	{
