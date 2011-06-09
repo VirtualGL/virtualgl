@@ -1,4 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -55,10 +56,9 @@
 #define NSCHEMES 7
 enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
-
 Display *dpy=NULL;  Window win=0, olwin=0;
 int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1,
-	locolor=0;
+	locolor=0, maxframes=0, totalframes=0;
 int ncolors=0, nolcolors, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
@@ -390,9 +390,9 @@ int display(int advance)
 
 	if(start>0.)
 	{
-		elapsed+=rrtime()-start;  frames++;
+		elapsed+=rrtime()-start;  frames++;  totalframes++;
 		mpixels+=(double)width*(double)height/1000000.;
-		if(elapsed>2.)
+		if(elapsed>2. || (maxframes && totalframes>maxframes))
 		{
 			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
 				(double)frames/elapsed, mpixels/elapsed);
@@ -400,6 +400,7 @@ int display(int advance)
 			elapsed=mpixels=0.;  frames=0;
 		}
 	}
+	if(maxframes && totalframes>maxframes) goto bailout;
 
 	start=rrtime();
 	return 0;
@@ -474,7 +475,8 @@ int event_loop(Display *dpy)
 
 void usage(char **argv)
 {
-	printf("\nUSAGE: %s [-h|-?] [-c] [-fs] [-i] [-l] [-m] [-o] [-p <p>] [-s] [-32]\n\n", argv[0]);
+	printf("\nUSAGE: %s [options]\n\n", argv[0]);
+	printf("Options:\n");
 	printf("-c = Use color index rendering (default is RGB)\n");
 	printf("-fs = Full-screen mode\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
@@ -484,7 +486,10 @@ void usage(char **argv)
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
-	printf("-32 = Use 32-bit visual (default is 24-bit)\n\n");
+	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
+	printf("-f <n> = max frames to render\n");
+	printf("-w <wxh> = specify window width and height\n");
+	printf("\n");
 	exit(0);
 }
 
@@ -512,6 +517,24 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-l", 2)) locolor=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
+		if(!strnicmp(argv[i], "-w", 2) && i<argc-1)
+		{
+			int w=0, h=0;
+			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
+			{
+				width=w;  height=h;
+				printf("Window dimensions: %d x %d\n", width, height);
+			}
+		}
+		if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
+		{ 
+			int mf=atoi(argv[++i]); 
+			if(mf>0)
+			{
+				maxframes=mf;
+				printf("Number of frames to render: %d\n", maxframes);
+			}
+		}
 		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
 		{
 			int npolys=atoi(argv[++i]);
