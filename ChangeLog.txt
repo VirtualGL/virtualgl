@@ -21,6 +21,10 @@ Added two new command line options to GLXSpheres which allow the window size
 to be changed and which allow the total number of frames to be specified (the
 application will abort after the total number of frames has been rendered.)
 -------------------------------------------------------------------------------
+[5]
+VirtualGL will no longer die if glXGetConfig() or glXGetFBConfigAttrib() is
+passed a NULL argument.
+-------------------------------------------------------------------------------
 
 
 ==============================================================================
