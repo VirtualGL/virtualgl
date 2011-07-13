@@ -1,35 +1,30 @@
 ===============================================================================
-Significant changes since 2.2.x
-===============================================================================
-[1]
-Overhauled the way VirtualGL handles Pixmap rendering, mainly to fix
-interaction issues with Mathematica.
--------------------------------------------------------------------------------
-[2]
-Added an option (VGL_ALLOWINDIRECT) which, when enabled, will cause VirtualGL
-to honor an application's request to create an indirect OpenGL context.
-Normally, VirtualGL forces all contexts to be direct for performance reasons,
-but this causes problems with certain applications (notably Mathematica 7.)
--------------------------------------------------------------------------------
-[3]
-Added two new command line options to GLXSpheres which allow the window size
-to be changed and which allow the total number of frames to be specified (the
-application will abort after the total number of frames has been rendered.)
--------------------------------------------------------------------------------
-
-
-===============================================================================
-Significant changes since 2.2.1
+2.3 beta1
 ===============================================================================
 [1]
 Re-fix issue that caused MainWin-based applications to hang.  This was
 initially fixed in VGL 2.1 final, but it was re-broken by the rewrite of the
 global faker configuration routines in VGL 2.2.
 -------------------------------------------------------------------------------
+[2]
+Overhauled the way VirtualGL handles Pixmap rendering, mainly to fix
+interaction issues with Mathematica.
+-------------------------------------------------------------------------------
+[3]
+Added an option (VGL_ALLOWINDIRECT) which, when enabled, will cause VirtualGL
+to honor an application's request to create an indirect OpenGL context.
+Normally, VirtualGL forces all contexts to be direct for performance reasons,
+but this causes problems with certain applications (notably Mathematica 7.)
+-------------------------------------------------------------------------------
+[4]
+Added two new command line options to GLXSpheres which allow the window size
+to be changed and which allow the total number of frames to be specified (the
+application will abort after the total number of frames has been rendered.)
+-------------------------------------------------------------------------------
 
 
-===============================================================================
-Significant changes since 2.2
+==============================================================================
+2.2.1
 ===============================================================================
 [1]
 A 64-bit version of the VirtualGL Client for Exceed is now fully supported.
@@ -89,7 +84,7 @@ vglclient -kill and vglclient -killall now work (again) in the Exceed client.
 
 
 ===============================================================================
-Significant changes since 2.2 beta1
+2.2
 ===============================================================================
 [1]
 Added VGL_SPOILLAST environment variable which, when set to 0, will change the
@@ -109,7 +104,7 @@ platforms as well.
 
 
 ===============================================================================
-Significant changes since 2.1.4
+2.2 beta1
 ===============================================================================
 [1]
 Added option which, when enabled, will cause VirtualGL to display a logo in the
@@ -205,7 +200,7 @@ TCBench should now work properly on OS X.
 
 
 ===============================================================================
-Significant changes since 2.1.3
+2.1.4
 ===============================================================================
 [1]
 Fixed a regression bug in vglserver_config which caused a "binary operator
@@ -251,7 +246,7 @@ Globus Toolkit instead of the regular ssh program.
 
 
 ===============================================================================
-Significant changes since 2.1.2
+2.1.3
 ===============================================================================
 [1]
 VirtualGL 2.1.2 printed numerous "Cannot obtain a Pbuffer-enabled 24-bit FB
@@ -330,7 +325,7 @@ continue running.
 
 
 ===============================================================================
-Significant changes since 2.1.1
+2.1.2
 ===============================================================================
 [1]
 Fixed a buffer overrun issue in TurboJPEG/mediaLib that may have caused
@@ -350,7 +345,7 @@ instances of this package from being installed simultaneously.
 
 
 ===============================================================================
-Significant changes since 2.1
+2.1.1
 ===============================================================================
 [1]
 Fixed issues that occurred when displaying to the second or subsequent
@@ -472,7 +467,7 @@ right-most edge of the window when 2X or 4X subsampling was used.
 
 
 ===============================================================================
-Significant changes since 2.1 beta1
+2.1
 ===============================================================================
 [1]
 Windows applications now link statically with OpenSSL to avoid dependency on
@@ -587,7 +582,7 @@ been changed.
 
 
 ===============================================================================
-New Features Introduced in 2.1 beta1
+2.1 beta1
 ===============================================================================
 [1]
 The VirtualGL Configuration Dialog is now written with FLTK instead of X
@@ -726,7 +721,7 @@ interframe comparison can now be disabled by using the VGL_INTERFRAME option.
 
 
 ===============================================================================
-Significant changes between 2.0 final and 2.0.1
+2.0.1
 ===============================================================================
 [1]
 The Linux and Solaris versions of VirtualGL are now statically linked with
@@ -950,7 +945,7 @@ own custom memory allocators.)
 
 
 ===============================================================================
-Significant changes between 2.0beta3 and 2.0 final:
+2.0
 ===============================================================================
 [1]
 Included libturbojpeg.dylib in Mac package (so that installing the TurboJPEG
@@ -1022,7 +1017,7 @@ threads.  This led to memory exhaustion if the tile size was set to a low value
 
 
 ===============================================================================
-Significant changes between 2.0beta2 and 2.0beta3:
+2.0 beta3
 ===============================================================================
 [1]
 Solaris packages now include the OpenSSL shared libraries (libssl and
@@ -1071,7 +1066,7 @@ doesn't work in Raw Mode and proceeds to send only the left eye buffer.
 
 
 ===============================================================================
-Significant changes between 2.0beta1 and 2.0beta2:
+2.0 beta2
 ===============================================================================
 [1]
 Added a -dl option to vglrun, which inserts a new libdlfaker.so interposer
