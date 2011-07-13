@@ -6,6 +6,12 @@ Re-fix issue that caused MainWin-based applications to hang.  This was
 initially fixed in VGL 2.1 final, but it was re-broken by the rewrite of the
 global faker configuration routines in VGL 2.2.
 -------------------------------------------------------------------------------
+[2]
+Fixed a BadMatch X11 error that occurred when an application attempted to
+apply a new OpenGL rendering context to a drawable and the FB config of the new
+OpenGL context differed from that of a context that was previously applied to
+the same drawable.  This specifically was known to affect D3D applications running in WINE.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

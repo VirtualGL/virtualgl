@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -2250,6 +2250,94 @@ int dpyhashtest(void)
 }
 
 
+// Test whether glXMakeCurrent() can handle mismatches between the FB config
+// of the context and the Pbuffer
+
+int ctxmismatchtest(void)
+{
+	Display *dpy=NULL;  Window win=0;
+	int dpyw, dpyh, retval=1;
+	int glxattrib1[]={GLX_DOUBLEBUFFER, 1, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT,
+		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None};
+	int glxattrib2[]={GLX_DOUBLEBUFFER, 0, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+		GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT,
+		GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_ALPHA_SIZE, 8,
+		None};
+	XVisualInfo *v=NULL;  GLXFBConfig c1=0, c2=0, *configs=NULL;  int n=0;
+	GLXContext ctx1=0, ctx2=0;
+	XSetWindowAttributes swa;
+
+	printf("Context FB config mismatch test:\n\n");
+
+	try
+	{
+		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
+		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
+		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+
+		if((configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib1, &n))
+			==NULL || n==0) _throw("Could not find a suitable FB config");
+		c1=configs[0];
+		if(!(v=glXGetVisualFromFBConfig(dpy, c1)))
+			_throw("glXGetVisualFromFBConfig()");
+		XFree(configs);  configs=NULL;
+
+		if((configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib2, &n))
+			==NULL || n==0) _throw("Could not find a suitable FB config");
+		c2=configs[0];
+		XFree(configs);  configs=NULL;
+
+		Window root=RootWindow(dpy, DefaultScreen(dpy));
+		swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+		swa.border_pixel=0;
+		swa.background_pixel=0;
+		swa.event_mask = 0;
+		if((win=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0, v->depth,
+			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+			&swa))==0)
+			_throw("Could not create window");
+		XMapWindow(dpy, win);
+
+		try
+		{
+			if(!(ctx1=glXCreateNewContext(dpy, c1, GLX_RGBA_TYPE, NULL, True)))
+				_throw("Could not create context");
+			if(!(ctx2=glXCreateNewContext(dpy, c2, GLX_RGBA_TYPE, NULL, True)))
+				_throw("Could not create context");
+
+			if(!(glXMakeCurrent(dpy, win, ctx1)))
+				_error("Could not make context current");
+			if(!(glXMakeCurrent(dpy, win, ctx2)))
+				_error("Could not make context current");
+
+			if(!(glXMakeContextCurrent(dpy, win, win, ctx1)))
+				_error("Could not make context current");
+			if(!(glXMakeContextCurrent(dpy, win, win, ctx2)))
+				_error("Could not make context current");
+			
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+		fflush(stdout);
+	}
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	if(ctx1 && dpy) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx1);  ctx1=0;}
+	if(ctx2 && dpy) {glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx2);  ctx2=0;}
+	if(win && dpy) {XDestroyWindow(dpy, win);  win=0;}
+	if(v) {XFree(v);  v=NULL;}
+	if(configs) {XFree(configs);  configs=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
 int querytest(void)
 {
 	Display *dpy=NULL;  int retval=1;
@@ -2379,6 +2467,8 @@ int main(int argc, char **argv)
 	if(!rbtest(false, false)) ret=-1;
 	printf("\n");
 	rbtest(true, false);
+	printf("\n");
+	ctxmismatchtest();
 	printf("\n");
 	flushtest();
 	printf("\n");

@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -91,10 +92,15 @@ class winhash : public _winhash
 				if(!ptr->value)
 				{
 					errifnot(ptr->value=new pbwin(dpy, win));
-					pbwin *pb=(pbwin *)ptr->value;
-					pb->initfromwindow(config);
+					pbwin *pbw=ptr->value;
+					pbw->initfromwindow(config);
 				}
-				return (pbwin *)ptr->value;
+				else
+				{
+					pbwin *pbw=ptr->value;
+					pbw->checkconfig(config);
+				}
+				return ptr->value;
 			}
 			return NULL;
 		}
@@ -127,17 +133,17 @@ class winhash : public _winhash
 
 		void detach(_winhashstruct *h)
 		{
-			pbwin *pb=h->value;
+			pbwin *pbw=h->value;
 			if(h && h->key1) free(h->key1);
-			if(h && pb && pb!=(pbwin *)-1) delete pb;
+			if(h && pbw && pbw!=(pbwin *)-1) delete pbw;
 		}
 
 		bool compare(char *key1, Window key2, _winhashstruct *h)
 		{
-			pbwin *pb=h->value;
+			pbwin *pbw=h->value;
 			return (
-				(pb && pb!=(pbwin *)-1 && key1 && !strcasecmp(DisplayString(pb->getwindpy()), key1) && key2==pb->getwin()) ||
-				(pb && pb!=(pbwin *)-1 && key1==NULL && key2==pb->getdrawable()) ||
+				(pbw && pbw!=(pbwin *)-1 && key1 && !strcasecmp(DisplayString(pbw->getwindpy()), key1) && key2==pbw->getwin()) ||
+				(pbw && pbw!=(pbwin *)-1 && key1==NULL && key2==pbw->getdrawable()) ||
 				(key1 && !strcasecmp(key1, h->key1) && key2==h->key2)
 			);
 		}

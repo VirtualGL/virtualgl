@@ -41,6 +41,7 @@ class pbuffer
 		~pbuffer(void);
 		int width(void) {return _w;}
 		int height(void) {return _h;}
+		GLXFBConfig config(void) {return _config;}
 		void clear(void);
 		void swap(void);
 		bool stereo(void) {return _stereo;}
@@ -51,6 +52,7 @@ class pbuffer
 		bool _cleared, _stereo;
 		GLXPbuffer _drawable;
 		int _w, _h;
+		GLXFBConfig _config;
 		int _format;
 };
 
@@ -64,6 +66,7 @@ class pbwin
 		void cleanup(void);
 		GLXDrawable getdrawable(void);
 		GLXDrawable updatedrawable(void);
+		void checkconfig(GLXFBConfig);
 		void resize(int, int);
 		void checkresize(void);
 		void initfromwindow(GLXFBConfig);
@@ -108,6 +111,7 @@ class pbwin
 		bool _stereovisual;
 		rrframe _r, _g, _b, _f;
 		bool _wmdelete;
+		bool _newconfig;
 };
 
 #endif

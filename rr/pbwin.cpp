@@ -102,7 +102,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
 
-	_w=w;  _h=h;
+	_w=w;  _h=h;  _config=config;
 	pbattribs[1]=w;  pbattribs[3]=h;
 	#ifdef SUNOGL
 	tempctx tc(_localdpy, 0, 0, 0);
@@ -190,6 +190,7 @@ pbwin::pbwin(Display *windpy, Window win)
 	fconfig_setdefaultsfromdpy(_windpy);
 	_plugin=NULL;
 	_wmdelete=false;
+	_newconfig=false;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(windpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))
@@ -237,7 +238,8 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 
 	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
-	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
+	if(_pb && _pb->width()==w && _pb->height()==h
+		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
 	if((_pb=new pbuffer(w, h, config))==NULL)
 			_throw("Could not create Pbuffer");
 	_config=config;
@@ -259,6 +261,19 @@ void pbwin::resize(int w, int h)
 		return;
 	}
 	_neww=w;  _newh=h;
+}
+
+// The FB config change doesn't actually occur until the next time
+// updatedrawable() is called
+
+void pbwin::checkconfig(GLXFBConfig config)
+{
+	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
+	if(_FBCID(config)!=_FBCID(_config))
+	{
+		_config=config;  _newconfig=true;
+	}
 }
 
 void pbwin::clear(void)
@@ -309,13 +324,20 @@ void pbwin::checkresize(void)
 	}
 }
 
-// Get the current Pbuffer drawable, but resize the Pbuffer first if necessary
+// Get the current Pbuffer drawable, but resize the Pbuffer (or change its
+// FB config) first if necessary
 
 GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
 	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
+	if(_newconfig)
+	{
+		if(_neww<=0 && _pb) _neww=_pb->width();
+		if(_newh<=0 && _pb) _newh=_pb->height();
+		_newconfig=false;
+	}
 	if(_neww>0 && _newh>0)
 	{
 		pbuffer *oldpb=_pb;
