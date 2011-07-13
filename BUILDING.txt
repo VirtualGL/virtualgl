@@ -69,7 +69,7 @@ How to build VirtualGL in 9043 easy steps
    download an updated binutils RPM from:
    http://mirror.atrpms.net/ccrma/mirror/7.2/
 
--- libjpeg-turbo SDK v1.1.0 or later
+-- libjpeg-turbo SDK v1.1.1 or later
 
    The libjpeg-turbo SDK Linux packages (in RPM or DEB format) can be obtained
    from the "Files" area of:
@@ -137,7 +137,7 @@ one or more of the necessary 32-bit prerequisites, then:
      OpenGL SDK
      Mac OS X SDK
 
--- libjpeg-turbo SDK v1.1.0 or later (Intel-based Macs only)
+-- libjpeg-turbo SDK v1.1.1 or later (Intel-based Macs only)
 
    * The libjpeg-turbo SDK disk image (DMG) can be obtained from the "Files"
      area of:
@@ -149,7 +149,7 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
 
--- On OS X 10.6 and later, VirtualGL can be built as a 64-bit binary, but this
+-- On 64-bit OS X systems, VirtualGL can be built as a 64-bit binary, but this
    is not the default.  To build a 64-bit Mac binary, pass an argument of
    "subplatform=64" to 'make' when performing the build:
 
@@ -211,15 +211,16 @@ one or more of the necessary 32-bit prerequisites, then:
 
      make
 
--- Sun Studio 12 or later
+-- Oracle Solaris Studio 12 or later
 
-   * See http://www.sun.com/software/products/studio/ for a free download.
+   * See http://www.oracle.com/technetwork/server-storage/solarisstudio/ for a
+     free download.
 
 ... or ...
 
 -- GCC
 
-   * Ships with later versions of Solaris 10
+   * Ships with later versions of Solaris 10 and with OpenSolaris
    * Also available from Blastwave (http://www.blastwave.org),
      OpenCSW (http://www.opencsw.org/), or
      SunFreeware (http://www.sunfreeware.com/)
@@ -235,17 +236,16 @@ one or more of the necessary 32-bit prerequisites, then:
 
 -- GNU Make v3.7 or later
 
-   * Ships with later versions of Solaris 10
+   * Ships with later versions of Solaris 10 and with OpenSolaris
    * Also available from Blastwave (http://www.blastwave.org),
      OpenCSW (http://www.opencsw.org/), or
      SunFreeware (http://www.sunfreeware.com/)
 
 -- SPARC ONLY:  Sun mediaLib
 
-   * mediaLib is pre-installed on Solaris 10 and later, and it can also be
-     downloaded for free from http://www.sun.com/processors/vis/mlib.html.
+   * mediaLib is pre-installed on Solaris 10 and later and on OpenSolaris.
 
--- x86 ONLY:  libjpeg-turbo SDK v1.1.0 or later
+-- x86 ONLY:  libjpeg-turbo SDK v1.1.1 or later
 
    * The libjpeg-turbo SDK package can be obtained from the "Files" area of:
 
@@ -335,7 +335,7 @@ Prerequisites
      to the system or user LIB environment variable prior to building
      VirtualGL.
 
--- libjpeg-turbo SDK v1.1.0 or later for Visual C++
+-- libjpeg-turbo SDK v1.1.1 or later for Visual C++
 
    * The libjpeg-turbo SDK Windows installer (EXE) can be obtained from the
      "Files" area of:
@@ -376,7 +376,7 @@ Cygwin:
    libGL-devel
    libGLU-devel
 
--- libjpeg-turbo SDK v1.1.0 or later
+-- libjpeg-turbo SDK v1.1.1 or later
 
    * The libjpeg-turbo Cygwin package can be obtained from the "Files" area of:
 
