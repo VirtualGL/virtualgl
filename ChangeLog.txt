@@ -5,6 +5,17 @@ Significant changes since 2.2.x
 Overhauled the way VirtualGL handles Pixmap rendering, mainly to fix
 interaction issues with Mathematica.
 -------------------------------------------------------------------------------
+[2]
+Added an option (VGL_ALLOWINDIRECT) which, when enabled, will cause VirtualGL
+to honor an application's request to create an indirect OpenGL context.
+Normally, VirtualGL forces all contexts to be direct for performance reasons,
+but this causes problems with certain applications (notably Mathematica 7.)
+-------------------------------------------------------------------------------
+[3]
+Added two new command line options to GLXSpheres which allow the window size
+to be changed and which allow the total number of frames to be specified (the
+application will abort after the total number of frames has been rendered.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

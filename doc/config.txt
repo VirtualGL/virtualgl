@@ -33,12 +33,19 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: Normally, when VirtualGL maps a Pbuffer to a window and
 	establishes an OpenGL rendering context with the Pbuffer, it forces direct
-	rendering to be used with this context.  This is to prevent severe
-	performance pitfalls on some systems that do not support hardware-accelerated
-	indirect rendering.  However, applications that intentionally attempt to
-	create indirect contexts so that these contexts can be shared may not work
-	properly.  Settting ''VGL_ALLOWINDIRECT'' to ''1'' will cause VirtualGL to
-	honor the application's request for an indirect OpenGL context.
+	rendering to be used with this context.  Some 3D applications erroneously try
+	to create indirect OpenGL contexts because they detect that the X display is
+	remote and assume that the 3D rendering commands will be sent over the
+	network.  Thus, VirtualGL normally forces all contexts to be direct in order
+	to prevent severe readback performance degradation with such apps (even on
+	modern 3D adapters, ''glReadPixels()'' can perform very slowly if an indirect
+	OpenGL context is used.)
+	{nl}{nl}
+	However, some applications intentionally try to create indirect contexts so
+	that these contexts can be shared, and those apps may not work properly when
+	the contexts are forced to be direct.  For such apps, setting
+	''VGL_ALLOWINDIRECT'' to ''1'' will cause VirtualGL to honor the
+	application's request for an indirect OpenGL context.
 
 | Environment Variable | ''VGL_CLIENT = ''__''{c}''__ |
 | ''vglrun'' argument | ''-cl ''__''{c}''__ |
