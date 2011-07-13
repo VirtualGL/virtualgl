@@ -58,7 +58,7 @@ enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
 Display *dpy=NULL;  Window win=0, olwin=0;
 int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1,
-	locolor=0, maxframes=0, totalframes=0;
+	locolor=0, maxframes=0, totalframes=0, directctx=True;
 int ncolors=0, nolcolors, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
@@ -489,6 +489,7 @@ void usage(char **argv)
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
 	printf("-f <n> = max frames to render\n");
 	printf("-w <wxh> = specify window width and height\n");
+	printf("-ic = Use indirect rendering context\n");
 	printf("\n");
 	exit(0);
 }
@@ -513,7 +514,8 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-c", 2)) useci=1;
-		if(!strnicmp(argv[i], "-i", 2)) interactive=1;
+		if(!strnicmp(argv[i], "-ic", 3)) directctx=False;
+		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-l", 2)) locolor=1;
 		if(!strnicmp(argv[i], "-m", 2)) useimm=1;
 		if(!strnicmp(argv[i], "-o", 2)) useoverlay=1;
@@ -619,8 +621,10 @@ int main(int argc, char **argv)
 	if(fullscreen) XSetInputFocus(dpy, win, RevertToParent, CurrentTime);
 	XSync(dpy, False);
 
-	if((ctx=glXCreateContext(dpy, v, NULL, True))==0)
+	if((ctx=glXCreateContext(dpy, v, NULL, directctx))==0)
 		_throw("Could not create rendering context");
+	fprintf(stderr, "Context is %s\n",
+		glXIsDirect(dpy, ctx)? "Direct":"Indirect");
 	XFree(v);  v=NULL;
 
 	if(useoverlay)
@@ -645,8 +649,10 @@ int main(int argc, char **argv)
 		XMapWindow(dpy, olwin);
 		XSync(dpy, False);
 
-		if((olctx=glXCreateContext(dpy, v, NULL, True))==0)
+		if((olctx=glXCreateContext(dpy, v, NULL, directctx))==0)
 			_throw("Could not create overlay rendering context");
+		fprintf(stderr, "Overlay context is %s\n",
+			glXIsDirect(dpy, olctx)? "Direct":"Indirect");
 
 		XFree(v);  v=NULL;
 	}
