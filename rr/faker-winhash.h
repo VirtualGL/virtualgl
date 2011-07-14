@@ -98,10 +98,15 @@ class winhash : public _winhash
 				if(!ptr->value)
 				{
 					errifnot(ptr->value=new pbwin(dpy, win));
-					pbwin *pb=(pbwin *)ptr->value;
-					pb->initfromwindow(config);
+					pbwin *pbw=ptr->value;
+					pbw->initfromwindow(config);
 				}
-				return (pbwin *)ptr->value;
+				else
+				{
+					pbwin *pbw=ptr->value;
+					pbw->checkconfig(config);
+				}
+				return ptr->value;
 			}
 			return NULL;
 		}
@@ -134,23 +139,23 @@ class winhash : public _winhash
 
 		void detach(_winhashstruct *h)
 		{
-			pbwin *pb=h->value;
+			pbwin *pbw=h->value;
 			if(h && h->key1) free(h->key1);
-			if(h && pb && pb!=(pbwin *)-1) delete pb;
+			if(h && pbw && pbw!=(pbwin *)-1) delete pbw;
 		}
 
 		bool compare(char *key1, Window key2, _winhashstruct *h)
 		{
-			pbwin *pb=h->value;
+			pbwin *pbw=h->value;
 			return (
 				// Match 2D X Server display string and Window ID stored in pbdrawable
 				// instance
-				(pb && pb!=(pbwin *)-1 && key1
-					&& !strcasecmp(DisplayString(pb->get2ddpy()), key1)
-					&& key2==pb->getx11drawable())
+				(pbw && pbw!=(pbwin *)-1 && key1
+					&& !strcasecmp(DisplayString(pbw->get2ddpy()), key1)
+					&& key2==pbw->getx11drawable())
 				||
 				// If key1 is NULL, match Pbuffer drawable ID instead of X Window ID
-				(pb && pb!=(pbwin *)-1 && key1==NULL && key2==pb->getglxdrawable())
+				(pbw && pbw!=(pbwin *)-1 && key1==NULL && key2==pbw->getglxdrawable())
 				||
 				// Direct match
 				(key1 && !strcasecmp(key1, h->key1) && key2==h->key2)

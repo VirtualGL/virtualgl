@@ -25,9 +25,16 @@ application will abort after the total number of frames has been rendered.)
 VirtualGL will no longer die if glXGetConfig() or glXGetFBConfigAttrib() is
 passed a NULL argument.
 -------------------------------------------------------------------------------
+[6]
+Fixed a BadMatch X11 error that occurred when an application attempted to
+apply a new OpenGL rendering context to a drawable and the FB config of the new
+OpenGL context differed from that of a context that was previously applied to
+the same drawable.  This specifically was known to affect D3D applications
+running in WINE.
+-------------------------------------------------------------------------------
 
 
-==============================================================================
+===============================================================================
 2.2.1
 ===============================================================================
 [1]

@@ -59,6 +59,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	fconfig_setdefaultsfromdpy(_dpy);
 	_plugin=NULL;
 	_wmdelete=false;
+	_newconfig=false;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))
@@ -122,6 +123,19 @@ void pbwin::resize(int w, int h)
 	_neww=w;  _newh=h;
 }
 
+// The FB config change doesn't actually occur until the next time
+// updatedrawable() is called
+
+void pbwin::checkconfig(GLXFBConfig config)
+{
+	rrcs::safelock l(_mutex);
+	if(_wmdelete) _throw("Window has been deleted by window manager");
+	if(_FBCID(config)!=_FBCID(_config))
+	{
+		_config=config;  _newconfig=true;
+	}
+}
+
 void pbwin::clear(void)
 {
 	rrcs::safelock l(_mutex);
@@ -168,13 +182,20 @@ void pbwin::checkresize(void)
 	}
 }
 
-// Get the current Pbuffer drawable, but resize the Pbuffer first if necessary
+// Get the current Pbuffer drawable, but resize the Pbuffer (or change its
+// FB config) first if necessary
 
 GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
 	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
+	if(_newconfig)
+	{
+		if(_neww<=0 && _pb) _neww=_pb->width();
+		if(_newh<=0 && _pb) _newh=_pb->height();
+		_newconfig=false;
+	}
 	if(_neww>0 && _newh>0)
 	{
 		pbuffer *oldpb=_pb;

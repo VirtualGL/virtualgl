@@ -81,7 +81,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
 
-	_w=w;  _h=h;
+	_w=w;  _h=h;  _config=config;
 	pbattribs[1]=w;  pbattribs[3]=h;
 	#ifdef SUNOGL
 	tempctx tc(_localdpy, 0, 0, 0);
@@ -165,7 +165,8 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	rrcs::safelock l(_mutex);
-	if(_pb && _pb->width()==w && _pb->height()==h) return 0;
+	if(_pb && _pb->width()==w && _pb->height()==h
+		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
 	if((_pb=new pbuffer(w, h, config))==NULL)
 			_throw("Could not create Pbuffer");
 	_config=config;

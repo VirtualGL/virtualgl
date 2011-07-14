@@ -32,6 +32,7 @@ class pbuffer
 		~pbuffer(void);
 		int width(void) {return _w;}
 		int height(void) {return _h;}
+		GLXFBConfig config(void) {return _config;}
 		void clear(void);
 		void swap(void);
 		bool stereo(void) {return _stereo;}
@@ -42,6 +43,7 @@ class pbuffer
 		bool _cleared, _stereo;
 		GLXPbuffer _drawable;
 		int _w, _h;
+		GLXFBConfig _config;
 		int _format;
 };
 

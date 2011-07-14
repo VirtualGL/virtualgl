@@ -33,6 +33,7 @@ class pbwin : public pbdrawable
 		void cleanup(void);
 		GLXDrawable getglxdrawable(void);
 		GLXDrawable updatedrawable(void);
+		void checkconfig(GLXFBConfig);
 		void resize(int, int);
 		void checkresize(void);
 		void initfromwindow(GLXFBConfig);
@@ -71,6 +72,7 @@ class pbwin : public pbdrawable
 		bool _stereovisual;
 		rrframe _r, _g, _b, _f;
 		bool _wmdelete;
+		bool _newconfig;
 };
 
 #endif
