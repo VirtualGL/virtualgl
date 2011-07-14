@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -296,24 +296,25 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
 		starttrace();
 
-	if(vis)
+	if(!dpy || !vis || !value)
 	{
-		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_LEVEL);
-		int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
-		if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
-		{
-			int dummy;
-			stoptrace();  if(value) {prargi(*value);}  closetrace();
-			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-				retval=0;
-			else retval=_glXGetConfig(dpy, vis, attrib, value);
-			return retval;
-		}
+		stoptrace()  prargx(value);  closetrace();
+		return GLX_BAD_VALUE;
 	}
 
-	if(!dpy || !value) throw rrerror("glXGetConfig", "Invalid argument");
+	int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+		GLX_LEVEL);
+	int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+		GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+	if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
+	{
+		int dummy;
+		stoptrace();  if(value) {prargi(*value);}  closetrace();
+		if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
+			retval=GLX_NO_EXTENSION;
+		else retval=_glXGetConfig(dpy, vis, attrib, value);
+		return retval;
+	}
 
 	if(!(c=_MatchConfig(dpy, vis))) _throw("Could not obtain Pbuffer-capable RGB visual on the server");
 
@@ -448,15 +449,20 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute, int *v
 	TRY();
 
 	// Prevent recursion && handle overlay configs
-	if(!_isremote(dpy) || rcfgh.isoverlay(dpy, config))
+	if((dpy && config) && (!_isremote(dpy) || rcfgh.isoverlay(dpy, config)))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 	////////////////////
 
-	if(!dpy || !value) throw rrerror("glXGetFBConfigAttrib", "Invalid argument");
-	int screen=DefaultScreen(dpy);
+	int screen=dpy? DefaultScreen(dpy):0;
 
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargi(attribute);  starttrace();
+
+	if(!dpy || !config || !value)
+	{
+		stoptrace();  prargx(value);  closetrace();
+		return GLX_BAD_VALUE;
+	}
 
 	if(!(vid=_MatchVisual(dpy, config)))
 		throw rrerror("glXGetFBConfigAttrib", "Invalid FB config");
