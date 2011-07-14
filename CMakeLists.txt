@@ -164,6 +164,7 @@ else()
 	set(BINDIR bin)
 endif()
 
+add_subdirectory(diags)
 add_subdirectory(doc)
 add_subdirectory(util)
 add_subdirectory(jpeg)
@@ -171,6 +172,8 @@ add_subdirectory(rr)
 if(WIN32)
 add_subdirectory(putty)
 add_subdirectory(x11windows)
+else()
+add_subdirectory(mesademos)
 endif()
 
 

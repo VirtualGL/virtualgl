@@ -1,0 +1,18 @@
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	add_executable(cpustat cpustat.c)
+	install(TARGETS cpustat DESTINATION ${BINDIR})
+endif()
+
+add_executable(imgdiff imgdiff.c)
+target_link_libraries(imgdiff rrutil)
+if(UNIX)
+	target_link_libraries(imgdiff m)
+endif()
+
+if(WIN32)
+	add_executable(tcbench tcbench.cpp)
+else()
+	add_executable(tcbench tcbench.cpp dsimple.c)
+endif()
+target_link_libraries(tcbench fbx)
+install(TARGETS tcbench DESTINATION ${BINDIR})
