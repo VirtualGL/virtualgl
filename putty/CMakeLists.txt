@@ -76,8 +76,10 @@ set_source_files_properties(${COMMON_SOURCES} ${PUTTY_SOURCES} ${PLINK_SOURCES}
 add_executable(putty WIN32 ${PUTTY_SOURCES} ${COMMON_SOURCES}
 	WINDOWS/PUTTY.rc)
 target_link_libraries(putty comctl32 imm32 winmm)
+install(TARGETS putty DESTINATION ${BINDIR})
 
 add_executable(plink ${PLINK_SOURCES} ${COMMON_SOURCES}	WINDOWS/PLINK.rc)
+install(TARGETS plink DESTINATION ${BINDIR})
 
 if(64BIT)
 	set(_WIN64 1)

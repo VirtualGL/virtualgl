@@ -20,7 +20,23 @@ else()
 	target_link_libraries(vglclient ${OPENGL_gl_LIBRARY})
 endif()
 target_link_libraries(vglclient rrutil ${FBXLIB} rrsocket ${TJPEG_LIBRARY})
+install(TARGETS vglclient DESTINATION ${BINDIR})
 
+if(WIN32)
+	add_custom_target(vglconnect.bat ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${CMAKE_CURRENT_SOURCE_DIR}/vglconnect.bat
+			${CMAKE_CURRENT_BINARY_DIR}/vglconnect.bat
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglconnect.bat)
+	install(PROGRAMS vglconnect.bat DESTINATION ${BINDIR})
+else()
+	add_custom_target(vglconnect ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${CMAKE_CURRENT_SOURCE_DIR}/vglconnect
+			${CMAKE_CURRENT_BINARY_DIR}/vglconnect
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglconnect)
+	install(PROGRAMS vglconnect DESTINATION ${BINDIR})
+endif()
 
 #
 # Unit tests

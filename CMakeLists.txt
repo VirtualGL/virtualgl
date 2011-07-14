@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 2.6)
 
 include(CheckCSourceCompiles)
 
+if(UNIX)
+	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL)
+endif()
+
 project(VirtualGL)
 set(VERSION 2.2.80)
 
@@ -35,6 +39,8 @@ endif()
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 	-D__APPNAME="${CMAKE_PROJECT_NAME}")
+
+message(STATUS "Install prefix = ${CMAKE_INSTALL_PREFIX}")
 
 if(MSVC)
 	# Use the static C library for all build types
@@ -152,6 +158,27 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Targets
 #
 
+if(WIN32)
+	set(BINDIR .)
+else()
+	set(BINDIR bin)
+endif()
+
+add_subdirectory(doc)
 add_subdirectory(util)
 add_subdirectory(jpeg)
 add_subdirectory(rr)
+if(WIN32)
+add_subdirectory(putty)
+add_subdirectory(x11windows)
+endif()
+
+
+#
+# Installation and packaging
+#
+
+configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
+  "cmake_uninstall.cmake" IMMEDIATE @ONLY)
+
+add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)
