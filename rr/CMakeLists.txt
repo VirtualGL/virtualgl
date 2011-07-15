@@ -44,6 +44,7 @@ if(VGL_BUILDSERVER)
 	if(VGL_USEXV)
 		target_link_libraries(vglconfig ${X11_Xv_LIB})
 	endif()
+	install(TARGETS vglconfig DESTINATION ${BINDIR})
 
 	install(PROGRAMS vglgenkey vgllogin vglserver_config DESTINATION ${BINDIR})
 
