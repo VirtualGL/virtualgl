@@ -21,6 +21,9 @@
 #include "turbojpeg-ipp-compat.h"
 #ifndef _WIN32
  #define stricmp strcasecmp
+#else
+ #include <time.h>
+ #define random() rand()
 #endif
 
 #define _catch(f) {if((f)==-1) {printf("TJPEG: %s\n", tjGetErrorStr());  bailout();}}
@@ -566,6 +569,9 @@ void dotest1(void)
 int main(int argc, char *argv[])
 {
 	int doyuv=0;
+	#ifdef _WIN32
+	srand((unsigned int)time(NULL));
+	#endif
 	if(argc>1 && !stricmp(argv[1], "-yuv")) doyuv=1;
 	if(doyuv) yuv=YUVENCODE;
 	dotest(35, 39, 3, TJ_444, "test");
