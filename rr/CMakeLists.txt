@@ -51,6 +51,7 @@ if(VGL_BUILDSERVER)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_CURRENT_SOURCE_DIR}/vglrun
 			${CMAKE_CURRENT_BINARY_DIR}/vglrun
+		COMMAND chmod u+rx ${CMAKE_CURRENT_BINARY_DIR}/vglrun
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglrun)
 	install(PROGRAMS vglrun DESTINATION ${BINDIR})
 
@@ -84,6 +85,7 @@ else()
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_CURRENT_SOURCE_DIR}/vglconnect
 			${CMAKE_CURRENT_BINARY_DIR}/vglconnect
+		COMMAND chmod u+rx ${CMAKE_CURRENT_BINARY_DIR}/vglconnect
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglconnect)
 	install(PROGRAMS vglconnect DESTINATION ${BINDIR})
 endif()
