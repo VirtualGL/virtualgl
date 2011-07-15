@@ -57,10 +57,6 @@ if(MSVC)
 	include_directories(${CMAKE_SOURCE_DIR}/windows/include/xdk)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	add_definitions(-D__DEBUG__)
-endif()
-
 # Detect whether compiler is 64-bit
 if(CMAKE_SIZEOF_VOID_P MATCHES 8)
 	set(64BIT 1)
@@ -118,7 +114,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mt")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mt -lc")
-	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
+	if("${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"-z direct -lCrun -z nodirect ${CMAKE_SHARED_LINKER_FLAGS}")
 	endif()
@@ -151,9 +147,6 @@ if(APPLE)
 	set(OPENGL_gl_LIBRARY /usr/X11R6/lib/libGL.dylib)
 	set(OPENGL_glu_LIBRARY /usr/X11R6/lib/libGLU.dylib)
 endif()
-
-message(STATUS "CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
-message(STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}")
 
 include_directories(${X11_X11_INCLUDE_PATH})
 

@@ -220,7 +220,7 @@ void __vgl_fakerinit(void)
 		rrout.println("[VGL] %s v%s %d-bit (Build %s)",
 			__APPNAME, __VERSION, (int)sizeof(size_t)*8, __BUILD);
 
-	#ifdef __DEBUG__
+	#ifndef NDEBUG
 	if(getenv("VGL_DEBUG"))
 	{
 		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
