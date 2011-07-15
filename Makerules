@@ -100,9 +100,6 @@ include $(TOPDIR)/Makerules.$(platform)
 
 CINCLUDES := $(CINCLUDES) -I$(TOPDIR)/$(platform)/include -I$(TOPDIR)/include -I.
 CDEFINES := $(CDEFINES) -D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\" -D__APPNAME=\"$(APPNAME)\"
-ifeq ($(DEBUG), yes)
- CDEFINES := $(CDEFINES) -D__DEBUG__
-endif
 ifeq ($(USEXV), yes)
  CDEFINES := $(CDEFINES) -DUSEXV
 endif

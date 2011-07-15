@@ -202,13 +202,11 @@ void __vgl_fakerinit(void)
 	fconfig_reloadenv();
 	if(strlen(fconfig.log)>0) rrout.logto(fconfig.log);
 
-	#ifdef __DEBUG__
 	if(getenv("VGL_DEBUG"))
 	{
 		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
 		fgetc(stdin);
 	}
-	#endif
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
 	__vgl_loadsymbols();
