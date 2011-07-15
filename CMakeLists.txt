@@ -71,30 +71,43 @@ endif()
 
 # This ensures that we don't depend on libstdc++ or libgcc
 if(CMAKE_COMPILER_IS_GNUCXX)
-	# For some reason, simply passing ${CMAKE_CXX_FLAGS} to the compiler in
-	# execute_process() doesn't work.  Grrr...
-	if(64BIT)
-		execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m64 --print-file-name=libstdc++.a
-			OUTPUT_VARIABLE LIBSTDCPLUSPLUS RESULT_VARIABLE RESULT)
-	else()
-		execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m32 --print-file-name=libstdc++.a
-			OUTPUT_VARIABLE LIBSTDCPLUSPLUS RESULT_VARIABLE RESULT)
+	option(VGL_BUILDSTATIC
+		"Link statically against libgcc and libstdc++, if possible" ON)
+	if(VGL_BUILDSTATIC)
+		# For some reason, simply passing ${CMAKE_CXX_FLAGS} to the compiler in
+		# execute_process() doesn't work.  Grrr...
+		if(64BIT)
+			execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m64
+				--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
+				RESULT_VARIABLE RESULT)
+		else()
+			execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m32
+				--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
+				RESULT_VARIABLE RESULT)
+		endif()
+		string(REGEX REPLACE "\n" "" LIBSTDCPLUSPLUS ${LIBSTDCPLUSPLUS})
+		if(RESULT MATCHES 0 AND LIBSTDCPLUSPLUS)
+			message(STATUS "Linking with static libstdc++:\n   ${LIBSTDCPLUSPLUS}")
+			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/staticlib)
+			execute_process(COMMAND ${CMAKE_COMMAND} -E remove
+				${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
+			execute_process(COMMAND ${CMAKE_COMMAND} -E	create_symlink
+				${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
+			set(CMAKE_EXE_LINKER_FLAGS
+				"${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_BINARY_DIR}/staticlib")
+			set(CMAKE_SHARED_LINKER_FLAGS
+				"${CMAKE_SHARED_LINKER_FLAGS} -L${CMAKE_BINARY_DIR}/staticlib")
+		else()
+			message(WARNING Cannot find static libstdc++.  VirtualGL will depend on dynamic libstdc++.)
+		endif()
+		add_definitions(-static-libgcc)
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
+		set(CMAKE_SHARED_LINKER_FLAGS
+			"${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc")
 	endif()
-	string(REGEX REPLACE "\n" "" LIBSTDCPLUSPLUS ${LIBSTDCPLUSPLUS})
-	if(RESULT MATCHES 0 AND LIBSTDCPLUSPLUS)
-		message(STATUS "Linking with static libstdc++:\n   ${LIBSTDCPLUSPLUS}")
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/staticlib)
-		execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-		execute_process(COMMAND ${CMAKE_COMMAND} -E	create_symlink ${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-		set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -L${CMAKE_BINARY_DIR}/staticlib")
-	else()
-		message(WARNING Cannot find static libstdc++.  VirtualGL will depend on dynamic libstdc++.)
-	endif()
-	add_definitions(-static-libgcc)
-	set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
 endif()
 
-if(GCC)
+if(CMAKE_COMPILER_IS_GNUCC)
 	add_definitions(-D_GNU_SOURCE)
 endif()
 
@@ -103,8 +116,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	set(CMAKE_C_LINK_EXECUTABLE "${CMAKE_C_LINK_EXECUTABLE} -mt")
-	set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -mt")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mt")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mt -lc")
+	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
+		set(CMAKE_SHARED_LINKER_FLAGS
+			"-z direct -lCrun -z nodirect ${CMAKE_SHARED_LINKER_FLAGS}")
+	endif()
 endif()
 
 if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
@@ -125,13 +142,18 @@ endif()
 if(APPLE)
 	option(VGL_OSXOGLFIX "Adds Linker arguments needed to correctly select the X11 OpenGL Library" TRUE)
 	if(VGL_OSXOGLFIX)
-		set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
-		set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
+		set(CMAKE_EXE_LINKER_FLAGS
+			"${CMAKE_EXE_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
+		set(CMAKE_SHARED_LINKER_FLAGS
+			"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
 	endif()
 	set(X11_X11_INCLUDE_PATH /usr/X11R6/include)
 	set(OPENGL_gl_LIBRARY /usr/X11R6/lib/libGL.dylib)
 	set(OPENGL_glu_LIBRARY /usr/X11R6/lib/libGLU.dylib)
 endif()
+
+message(STATUS "CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}")
+message(STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}")
 
 include_directories(${X11_X11_INCLUDE_PATH})
 
@@ -164,10 +186,26 @@ else()
 	set(BINDIR bin)
 endif()
 
-add_subdirectory(diags)
-add_subdirectory(doc)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"
+	OR ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
+	option(VGL_BUILDSERVER "Build VirtualGL Server components" ON)
+else()
+	option(VGL_BUILDSERVER "Build VirtualGL Server components" OFF)
+endif()
+
+if(VGL_BUILDSERVER)
+	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
+		add_definitions(-KPIC)
+	elseif(CMAKE_COMPILER_IS_GNUCC)
+		add_definitions(-fPIC)
+	endif()
+endif()
+
 add_subdirectory(util)
 add_subdirectory(jpeg)
+if(VGL_BUILDSERVER)
+add_subdirectory(fltk)
+endif()
 add_subdirectory(rr)
 if(WIN32)
 add_subdirectory(putty)
@@ -175,6 +213,8 @@ add_subdirectory(x11windows)
 else()
 add_subdirectory(mesademos)
 endif()
+add_subdirectory(diags)
+add_subdirectory(doc)
 
 
 #

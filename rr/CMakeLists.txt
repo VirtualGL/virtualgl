@@ -7,6 +7,51 @@ if(VGL_USEXV)
 	set(FBXLIB ${FBXLIB};fbxv)
 endif()
 
+
+#
+# Server
+#
+
+if(VGL_BUILDSERVER)
+
+	set(RRFAKER_SOURCES faker.cpp faker-sym.cpp pbdrawable.cpp pbwin.cpp
+		pbpm.cpp glxvisual.cpp rrblitter.cpp rrdisplayclient.cpp rrplugin.cpp
+		fakerconfig.cpp)
+	if(VGL_USEXV)
+		set(RRFAKER_SOURCES ${RRFAKER_SOURCES};rrxvtrans.cpp)
+	endif()
+	add_library(rrfaker SHARED ${RRFAKER_SOURCES})
+	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
+	target_link_libraries(rrfaker rrutil ${FBXLIB} ${TJPEG_LIBRARY} rrsocket m
+		${OPENGL_gl_LIBRARY} dl)
+
+	add_library(dlfaker SHARED dlfaker.c)
+	target_link_libraries(dlfaker dl)
+
+	add_library(gefaker SHARED gefaker.c)
+	set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
+	target_link_libraries(gefaker dl)
+
+	install(FILES rr.h rrtransport.h DESTINATION include)
+
+	add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
+	target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static pthread rrutil)
+	if(VGL_USEXV)
+		target_link_libraries(vglconfig ${X11_Xv_LIB})
+	endif()
+
+	install(PROGRAMS vglgenkey vgllogin vglserver_config DESTINATION ${BINDIR})
+
+	add_custom_target(vglrun ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${CMAKE_CURRENT_SOURCE_DIR}/vglrun
+			${CMAKE_CURRENT_BINARY_DIR}/vglrun
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglrun)
+	install(PROGRAMS vglrun DESTINATION ${BINDIR})
+
+endif()
+
+
 #
 # Client
 #
@@ -38,6 +83,7 @@ else()
 	install(PROGRAMS vglconnect DESTINATION ${BINDIR})
 endif()
 
+
 #
 # Unit tests
 #
@@ -67,3 +113,23 @@ else()
 endif()
 target_link_libraries(rrframeut rrutil ${FBXLIB} ${TJPEG_LIBRARY}
 	${OPENGL_gl_LIBRARY})
+
+if(VGL_BUILDSERVER)
+	add_executable(dlfakerut dlfakerut.c)
+	target_link_libraries(dlfakerut ${X11_X11_LIB} dl)
+
+	add_library(GLdlfakerut SHARED libGLdlfakerut.c)
+
+	add_executable(rrfakerut rrfakerut.cpp)
+	target_link_libraries(rrfakerut "-z now ${OPENGL_gl_LIBRARY}"
+		${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" dl pthread)
+
+	add_library(vgltrans_test SHARED testplugin.cpp rrdisplayclient.cpp)
+	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs")
+	target_link_libraries(vgltrans_test rrutil ${TJPEG_LIBRARY} rrsocket)
+
+	add_library(vgltrans_test2 SHARED testplugin2.cpp rrblitter.cpp)
+	set_target_properties(vgltrans_test2 PROPERTIES LINK_FLAGS "-z defs")
+	target_link_libraries(vgltrans_test2 rrutil ${FBXLIB} ${TJPEG_LIBRARY})
+
+endif()
