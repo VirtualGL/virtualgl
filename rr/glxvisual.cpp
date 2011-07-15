@@ -266,6 +266,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	{
 		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
 	}
+	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=GLX_TRUE_COLOR;
 	glxattribs[j]=None;
 	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs, &nelements);
 }

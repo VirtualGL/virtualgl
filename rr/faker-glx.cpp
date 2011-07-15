@@ -52,7 +52,8 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 		// Punt.  We can't figure out where the visual came from
 		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
-			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
+			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+			GLX_DEPTH_SIZE, 1, None};
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
 			attribs[11]=1;
 		configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
