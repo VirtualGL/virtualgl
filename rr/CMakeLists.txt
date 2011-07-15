@@ -24,6 +24,11 @@ if(VGL_BUILDSERVER)
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 	target_link_libraries(rrfaker rrutil ${FBXLIB} ${TJPEG_LIBRARY} rrsocket m
 		${OPENGL_gl_LIBRARY} dl)
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
+		# C++ shared libs.  Grrr...
+		target_link_libraries(rrfaker stdc++)
+	endif()
 
 	add_library(dlfaker SHARED dlfaker.c)
 	target_link_libraries(dlfaker dl)
@@ -127,9 +132,15 @@ if(VGL_BUILDSERVER)
 	add_library(vgltrans_test SHARED testplugin.cpp rrdisplayclient.cpp)
 	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs")
 	target_link_libraries(vgltrans_test rrutil ${TJPEG_LIBRARY} rrsocket)
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+		target_link_libraries(vgltrans_test stdc++)
+	endif()
 
 	add_library(vgltrans_test2 SHARED testplugin2.cpp rrblitter.cpp)
 	set_target_properties(vgltrans_test2 PROPERTIES LINK_FLAGS "-z defs")
 	target_link_libraries(vgltrans_test2 rrutil ${FBXLIB} ${TJPEG_LIBRARY})
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+		target_link_libraries(vgltrans_test2 stdc++)
+	endif()
 
 endif()
