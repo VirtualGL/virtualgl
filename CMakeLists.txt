@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckCSourceCompiles)
 
 if(UNIX)
-	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL)
+	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
+		"Install path prefix, prepended onto install directories.")
 endif()
 
 project(VirtualGL)
@@ -164,7 +165,24 @@ else()
 	message(STATUS "X Video not available")
 endif()
 
-include(cmakescripts/FindTurboJPEG.cmake)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	set(DEFAULT_VGL_USEMEDIALIB 0)
+	if(CMAKE_SYSTEM_NAME MATCHES "sparc")
+		set(DEFAULT_VGL_USEMEDIALIB 1)
+	endif()
+	option(VGL_USEMEDIALIB
+		"Use mediaLib to perform JPEG compression/decompression and YUV encoding/decoding rather than libjpeg-turbo.  If this option is enabled, then VirtualGL will also use mediaLib to perform gamma correction."
+		${DEFAULT_VGL_USEMEDIALIB})
+
+	if(VGL_USEMEDIALIB)
+		message(STATUS "Using mediaLib for image encoding/decoding and gamma correction")
+		add_definitions(-DUSEMEDIALIB)
+		set(TJPEG_LIBRARY tjpeg)
+	endif()
+endif()
+if(NOT VGL_USEMEDIALIB)
+	include(cmakescripts/FindTurboJPEG.cmake)
+endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -179,14 +197,16 @@ else()
 	set(BINDIR bin)
 endif()
 
+set(DEFAULT_VGL_BUILDSERVER 0)
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"
 	OR ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
-	option(VGL_BUILDSERVER "Build VirtualGL Server components" ON)
-else()
-	option(VGL_BUILDSERVER "Build VirtualGL Server components" OFF)
+	set(DEFAULT_VGL_BUILDSERVER 1)
 endif()
+option(VGL_BUILDSERVER "Build VirtualGL server components"
+	${DEFAULT_VGL_BUILDSERVER})
 
 if(VGL_BUILDSERVER)
+	message(STATUS "Building VirtualGL server components")
 	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 		add_definitions(-KPIC)
 	elseif(CMAKE_COMPILER_IS_GNUCC)
