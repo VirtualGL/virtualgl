@@ -14,6 +14,16 @@ endif()
 
 if(VGL_BUILDSERVER)
 
+	get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
+	foreach(def ${DEFS_PROP})
+		set(DEFINES ${DEFINES};-D${def})
+	endforeach()
+	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
+		COMMAND ${CMAKE_C_COMPILER} ${DEFINES} -E
+			${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c
+			> ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
+
 	set(RRFAKER_SOURCES faker.cpp faker-sym.cpp pbdrawable.cpp pbwin.cpp
 		pbpm.cpp glxvisual.cpp rrblitter.cpp rrdisplayclient.cpp rrplugin.cpp
 		fakerconfig.cpp)
@@ -21,7 +31,14 @@ if(VGL_BUILDSERVER)
 		set(RRFAKER_SOURCES ${RRFAKER_SOURCES};rrxvtrans.cpp)
 	endif()
 	add_library(rrfaker SHARED ${RRFAKER_SOURCES})
-	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
+	if(MAPFLAG)
+		set_source_files_properties(faker-sym.cpp PROPERTIES
+			OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
+		set_target_properties(rrfaker PROPERTIES
+			LINK_FLAGS "-z defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
+	else()
+		set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
+	endif()
 	target_link_libraries(rrfaker rrutil ${FBXLIB} ${TJPEG_LIBRARY} rrsocket m
 		${OPENGL_gl_LIBRARY} dl)
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)

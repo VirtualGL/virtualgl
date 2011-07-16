@@ -106,6 +106,9 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)
 	add_definitions(-D_GNU_SOURCE)
+	if(NOT APPLE)
+		set(MAPFLAG "-Wl,--version-script,")
+	endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -115,9 +118,11 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mt")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mt -lc")
+	set(MAPFLAG "-Wl,-M,")
 	if("${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"-z direct -lCrun -z nodirect ${CMAKE_SHARED_LINKER_FLAGS}")
+		set(MAPFLAG "-M")
 	endif()
 endif()
 
