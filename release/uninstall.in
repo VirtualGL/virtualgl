@@ -1,5 +1,5 @@
 # Copyright (C)2009 Sun Microsystems, Inc.
-# Copyright (C)2009 D. R. Commander
+# Copyright (C)2009-2011 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +23,7 @@ if [ ! "`id -u`" = "0" ]; then
 	error "This command must be run as root"
 fi
 
-PKGNAME={__APPNAME}
+PKGNAME=@CMAKE_PROJECT_NAME@
 MACPKGNAME=com.virtualgl.vglclient
 RCPT=/Library/Receipts/$PKGNAME.pkg
 
@@ -45,13 +45,11 @@ done
 cd $PWD
 
 echo Removing directories ...
-rmdir /opt/VirtualGL/bin 2>&1 || RETCODE=-1
-if [ -d /opt/VirtualGL/lib ]; then
-	rmdir /opt/VirtualGL/lib 2>&1 || RETCODE=-1
-fi
-rmdir /opt/VirtualGL 2>&1 || RETCODE=-1
+rmdir /opt/$PKGNAME/bin 2>&1 || RETCODE=-1
+rmdir /opt/$PKGNAME 2>&1 || RETCODE=-1
 rmdir /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
-rmdir /Applications/VirtualGL 2>&1 || RETCODE=-1
+rm /Applications/$PKGNAME/Documentation 2>&1 || RETCODE=-1
+rmdir /Applications/$PKGNAME 2>&1 || RETCODE=-1
 
 if [ -d $RCPT ]; then
 	echo Removing package receipt $RCPT ...

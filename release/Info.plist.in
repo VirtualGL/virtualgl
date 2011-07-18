@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleGetInfoString</key>
-	<string>{__VERSION}, The VirtualGL Project</string>
+	<string>@VERSION@, The VirtualGL Project</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.virtualgl.vglclient</string>
 	<key>CFBundleShortVersionString</key>
-	<string>{__VERSION}</string>
+	<string>@VERSION@</string>
 	<key>IFMajorVersion</key>
 	<integer>1</integer>
 	<key>IFMinorVersion</key>
-	<integer>{__BUILD}</integer>
+	<integer>@BUILD@</integer>
 	<key>IFPkgFlagAllowBackRev</key>
 	<false/>
 	<key>IFPkgFlagAuthorizationAction</key>
@@ -26,8 +26,6 @@
 	<true/>
 	<key>IFPkgFlagInstallFat</key>
 	<false/>
-	<key>IFPkgFlagInstalledSize</key>
-	<integer>29332</integer>
 	<key>IFPkgFlagIsRequired</key>
 	<false/>
 	<key>IFPkgFlagOverwritePermissions</key>
