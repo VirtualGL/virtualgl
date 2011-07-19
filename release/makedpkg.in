@@ -32,13 +32,14 @@ makedeb()
 	rm -f $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
 	TMPDIR=`mktemp -d /tmp/$APPNAME-build.XXXXXX`
 	mkdir $TMPDIR/DEBIAN
-	cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 	make install DESTDIR=$TMPDIR
-
 	mkdir -p $TMPDIR/usr
 
 	if [ $SUPPLEMENT = 1 ]; then
+
+		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
+			| sed s/VirtualGL/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
 
 		rm -rf $TMPDIR/opt/$APPNAME/doc
 		rm -rf $TMPDIR/opt/$APPNAME/include
@@ -52,6 +53,8 @@ makedeb()
 		ln -fs /usr/lib32/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
 
 	else
+
+		cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 		mkdir -p $TMPDIR/usr/bin
 		if [ "$DEBARCH" = "amd64" ]; then
