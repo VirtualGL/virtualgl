@@ -31,6 +31,10 @@ endif()
 
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 # This only works if building from the command line.  There is currently no way
 # to set a variable's value based on the build type when using the MSVC IDE.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -42,6 +46,8 @@ add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 	-D__APPNAME="${CMAKE_PROJECT_NAME}")
 
 message(STATUS "Install prefix = ${CMAKE_INSTALL_PREFIX}")
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if(MSVC)
 	# Use the static C library for all build types
@@ -56,6 +62,9 @@ if(MSVC)
 	add_definitions(-wd4996 -D_CRT_SECURE_NO_DEPRECATE -DXDK)
 	include_directories(${CMAKE_SOURCE_DIR}/windows/include)
 	include_directories(${CMAKE_SOURCE_DIR}/windows/include/xdk)
+
+	# Don't auto-generate manifests
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
 endif()
 
 # Detect whether compiler is 64-bit
@@ -189,8 +198,6 @@ if(NOT VGL_USEMEDIALIB)
 	include(cmakescripts/FindTurboJPEG.cmake)
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-
 
 #
 # Targets
@@ -238,6 +245,8 @@ add_subdirectory(doc)
 #
 # Installation and packaging
 #
+
+include(cmakescripts/BuildPackages.cmake)
 
 configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
   "cmake_uninstall.cmake" IMMEDIATE @ONLY)
