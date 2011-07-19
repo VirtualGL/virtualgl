@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+APPNAME=@CMAKE_PROJECT_NAME@
+VERSION=@VERSION@
+
+umask 022
+TMPDIR=`mktemp -d /tmp/$APPNAME-build.XXXXXX`
+__PWD=`pwd`
+
+make install DESTDIR=$TMPDIR/pkg
+
+mkdir -p $TMPDIR/pkg/usr/share/doc
+mv $TMPDIR/pkg/opt/VirtualGL/doc $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION
+
+mkdir -p $TMPDIR/pkg/usr/bin
+for i in vglclient.exe vglconnect; do
+	mv $TMPDIR/pkg/opt/VirtualGL/bin/$i $TMPDIR/pkg/usr/bin/
+	ln -fs /usr/bin/$i $TMPDIR/pkg/opt/$APPNAME/bin/
+done
+
+cd $TMPDIR/pkg
+tar cfj ../$APPNAME-$VERSION-cygwin.tar.bz2 *
+cd $__PWD
+mv $TMPDIR/*.tar.bz2 .
+
+exit 0
