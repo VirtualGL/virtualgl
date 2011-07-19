@@ -1,0 +1,97 @@
+!include x64.nsh
+!ifdef WIN64
+!define PROGNAME "@CMAKE_PROJECT_NAME@ 64-bit Client"
+OutFile @CMAKE_BINARY_DIR@\@CMAKE_PROJECT_NAME@64-@VERSION@-exceed.exe
+InstallDir $PROGRAMFILES64\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@
+!else
+!define PROGNAME "@CMAKE_PROJECT_NAME@ Client"
+OutFile @CMAKE_BINARY_DIR@\@CMAKE_PROJECT_NAME@-@VERSION@-exceed.exe
+InstallDir $PROGRAMFILES\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@
+!endif
+Name "${PROGNAME}"
+
+SetCompressor bzip2
+
+Page directory
+Page instfiles
+
+UninstPage uninstConfirm
+UninstPage instfiles
+
+Section "@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@ (required)"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
+
+	SectionIn RO
+	SetOutPath $INSTDIR\doc
+	File "@CMAKE_SOURCE_DIR@\doc\*.gif"
+	File "@CMAKE_SOURCE_DIR@\doc\*.png"
+	File "@CMAKE_SOURCE_DIR@\doc\*.css"
+	File "@CMAKE_SOURCE_DIR@\doc\*.html"
+	SetOutPath $INSTDIR
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}vglclient.exe"
+	File "@CMAKE_SOURCE_DIR@\rr\vglconnect.bat"
+	File "@CMAKE_SOURCE_DIR@\x11windows\xauth.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}putty.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}plink.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}tcbench.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}nettest.exe"
+	File "/oname=doc\LGPL.txt" "@CMAKE_SOURCE_DIR@\LGPL.txt"
+	File "/oname=doc\LICENSE.txt" "@CMAKE_SOURCE_DIR@\LICENSE.txt"
+	File "/oname=doc\LICENSE-FLTK.txt" "@CMAKE_SOURCE_DIR@\fltk\COPYING"
+	File "/oname=doc\LICENSE-PuTTY.txt" "@CMAKE_SOURCE_DIR@\putty\LICENCE"
+	File "/oname=doc\LICENSE-xauth.txt" "@CMAKE_SOURCE_DIR@\x11windows\xauth.license"
+	File "/oname=doc\ChangeLog.txt" "@CMAKE_SOURCE_DIR@\ChangeLog.txt"
+
+	WriteRegStr HKLM "SOFTWARE\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "Install_Dir" "$INSTDIR"
+
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "DisplayName" "${PROGNAME} v@VERSION@ (@BUILD@)"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "NoModify" 1
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "NoRepair" 1
+	WriteUninstaller "uninstall.exe"
+SectionEnd
+
+Section "Start Menu Shortcuts (required)"
+
+	SetShellVarContext all
+	CreateDirectory "$SMPROGRAMS\${PROGNAME} v@VERSION@ (@BUILD@)"
+	CreateShortCut "$SMPROGRAMS\${PROGNAME} v@VERSION@ (@BUILD@)\Uninstall @CMAKE_PROJECT_NAME@ Client.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+	CreateShortCut "$SMPROGRAMS\${PROGNAME} v@VERSION@ (@BUILD@)\@CMAKE_PROJECT_NAME@ User's Guide.lnk" "$INSTDIR\doc\index.html"
+
+SectionEnd
+
+Section "Uninstall"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
+
+	SetShellVarContext all
+	ExecWait "$INSTDIR\vglclient.exe -killall"
+
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@"
+	DeleteRegKey HKLM "SOFTWARE\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@"
+
+	Delete $INSTDIR\vglclient.exe
+	Delete $INSTDIR\vglconnect.bat
+	Delete $INSTDIR\xauth.exe
+	Delete $INSTDIR\putty.exe
+	Delete $INSTDIR\plink.exe
+	Delete $INSTDIR\uninstall.exe
+	Delete $INSTDIR\stunnel.rnd
+	Delete $INSTDIR\tcbench.exe
+	Delete $INSTDIR\nettest.exe
+	RMDir /r $INSTDIR\doc
+
+	Delete "$SMPROGRAMS\${PROGNAME} v@VERSION@ (@BUILD@)\*.*"
+	RMDir "$SMPROGRAMS\${PROGNAME} v@VERSION@ (@BUILD@)"
+	RMDir "$INSTDIR"
+
+SectionEnd
