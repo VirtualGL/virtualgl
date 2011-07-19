@@ -68,8 +68,8 @@ if(VGL_BUILDSERVER)
 	add_custom_target(vglrun ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_CURRENT_SOURCE_DIR}/vglrun
-			${CMAKE_CURRENT_BINARY_DIR}/vglrun
-		COMMAND chmod u+rx ${CMAKE_CURRENT_BINARY_DIR}/vglrun
+			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
+		COMMAND chmod u+rx ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglrun)
 	install(PROGRAMS vglrun DESTINATION ${BINDIR})
 
@@ -95,15 +95,15 @@ if(WIN32)
 	add_custom_target(vglconnect.bat ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_CURRENT_SOURCE_DIR}/vglconnect.bat
-			${CMAKE_CURRENT_BINARY_DIR}/vglconnect.bat
+			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/vglconnect.bat
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglconnect.bat)
 	install(PROGRAMS vglconnect.bat DESTINATION ${BINDIR})
 else()
 	add_custom_target(vglconnect ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_CURRENT_SOURCE_DIR}/vglconnect
-			${CMAKE_CURRENT_BINARY_DIR}/vglconnect
-		COMMAND chmod u+rx ${CMAKE_CURRENT_BINARY_DIR}/vglconnect
+			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglconnect
+		COMMAND chmod u+rx ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglconnect
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglconnect)
 	install(PROGRAMS vglconnect DESTINATION ${BINDIR})
 endif()
