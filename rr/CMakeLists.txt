@@ -46,13 +46,34 @@ if(VGL_BUILDSERVER)
 		# C++ shared libs.  Grrr...
 		target_link_libraries(rrfaker stdc++)
 	endif()
+	install(TARGETS rrfaker DESTINATION lib)
+	if(64BIT)
+		set(FAKELIBDIR fakelib/64)
+	else()
+		set(FAKELIBDIR fakelib)
+	endif()
+	if(64BIT)
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/64)")
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+			../../lib/librrfaker.so
+			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/64/libGL.so)")
+	else()
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib)")
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+			../lib/librrfaker.so
+			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/libGL.so)")
+	endif()
 
 	add_library(dlfaker SHARED dlfaker.c)
 	target_link_libraries(dlfaker dl)
+	install(TARGETS dlfaker DESTINATION lib)
 
 	add_library(gefaker SHARED gefaker.c)
 	set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
 	target_link_libraries(gefaker dl)
+	install(TARGETS gefaker DESTINATION lib)
 
 	install(FILES rr.h rrtransport.h DESTINATION include)
 
