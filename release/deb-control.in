@@ -1,8 +1,8 @@
-Package: {__PKGNAME}
-Version: {__VERSION}-{__BUILD}
+Package: @CMAKE_PROJECT_NAME@
+Version: @VERSION@-@BUILD@
 Section: misc
 Priority: optional
-Architecture: {__ARCH}
+Architecture: @DEBARCH@
 Essential: no
 Maintainer: The VirtualGL Project [http://www.VirtualGL.org]
 Description: A toolkit for displaying OpenGL applications to thin clients
