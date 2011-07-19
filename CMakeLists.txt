@@ -3,6 +3,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 
 include(CheckCSourceCompiles)
 
@@ -97,8 +98,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/staticlib)
 			execute_process(COMMAND ${CMAKE_COMMAND} -E remove
 				${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-			execute_process(COMMAND ${CMAKE_COMMAND} -E	create_symlink
-				${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
+			if(CYGWIN)
+				execute_process(COMMAND ${CMAKE_COMMAND} -E	copy
+					${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
+			else()
+				execute_process(COMMAND ${CMAKE_COMMAND} -E	create_symlink
+					${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
+			endif()
 			set(CMAKE_EXE_LINKER_FLAGS
 				"${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_BINARY_DIR}/staticlib")
 			set(CMAKE_SHARED_LINKER_FLAGS
