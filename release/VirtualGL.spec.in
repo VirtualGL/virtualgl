@@ -6,13 +6,13 @@
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
-Name: VirtualGL
-Version: %{_version}
+Name: @CMAKE_PROJECT_NAME@
+Version: @VERSION@
 Vendor: The VirtualGL Project
 URL: http://www.virtualgl.org
 Group: Applications/Graphics
 #-->Source0: http://prdownloads.sourceforge.net/virtualgl/VirtualGL-%{version}.tar.gz
-Release: %{_build}
+Release: @BUILD@
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
 Prereq: /sbin/ldconfig, /usr/bin/perl
@@ -51,39 +51,40 @@ Ertl 2000.)
 
 rm -rf $RPM_BUILD_ROOT
 
-make install prefix=$RPM_BUILD_ROOT/usr
+make install DESTDIR=$RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/bin
-for i in tcbench nettest cpustat glxinfo glxspheres; do
-	mv $RPM_BUILD_ROOT/usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/
-done
+mkdir -p $RPM_BUILD_ROOT/usr/bin
 %ifarch x86_64
-mv $RPM_BUILD_ROOT/usr/bin/glxspheres64 $RPM_BUILD_ROOT/opt/%{name}/bin/
+mv $RPM_BUILD_ROOT/opt/%{name}/lib $RPM_BUILD_ROOT/usr/lib64
+mv $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
+%else
+mv $RPM_BUILD_ROOT/opt/%{name}/lib $RPM_BUILD_ROOT/usr/lib
 %endif
+for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
+	mv $RPM_BUILD_ROOT/opt/%{name}/bin/$i $RPM_BUILD_ROOT/usr/bin/
+done
 pushd $RPM_BUILD_ROOT/usr/bin
-for i in *; do ln -fs /usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/; done
+for i in *; do
+	ln -fs /usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/; done
 popd
 
-rm -rf $RPM_BUILD_ROOT/usr/fakelib
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib
+mkdir -p $RPM_BUILD_ROOT/usr/include
+for i in rr.h rrtransport.h; do
+	mv $RPM_BUILD_ROOT/opt/%{name}/include/$i $RPM_BUILD_ROOT/usr/include/
+	ln -fs /usr/include/$i $RPM_BUILD_ROOT/opt/%{name}/include/$i
+done
+
 %ifarch x86_64
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/fakelib/64
-%endif
-ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
-%ifarch x86_64
+rm $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
 ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
+%else
+rm $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
+ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
 %endif
 
-mkdir -p $RPM_BUILD_ROOT/opt/%{name}/include
-ln -fs /usr/include/rrtransport.h $RPM_BUILD_ROOT/opt/%{name}/include/rrtransport.h
-ln -fs /usr/include/rr.h $RPM_BUILD_ROOT/opt/%{name}/include/rr.h
-
-rm -rf $RPM_BUILD_ROOT/usr/doc
-ln -fs /usr/share/doc/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
-cp fltk/COPYING LICENSE-FLTK.txt
-cp putty/LICENCE LICENSE-PuTTY.txt
-cp x11windows/xauth.license LICENSE-xauth.txt
-chmod 644 LGPL.txt LICENSE.txt LICENSE-FLTK.txt LICENSE-PuTTY.txt LICENSE-xauth.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}
+mv $RPM_BUILD_ROOT/opt/%{name}/doc $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+ln -fs %{_defaultdocdir}/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
 
 echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
@@ -100,7 +101,8 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %files -n %{name}
 %defattr(-,root,root)
-%doc LGPL.txt LICENSE.txt LICENSE-FLTK.txt LICENSE-PuTTY.txt LICENSE-xauth.txt ChangeLog.txt doc/index.html doc/*.png doc/*.gif doc/*.css
+%dir %{_defaultdocdir}/%{name}-%{version}
+%doc %{_defaultdocdir}/%{name}-%{version}/*
 
 %dir /opt/%{name}
 %dir /opt/%{name}/bin
@@ -129,25 +131,30 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 /opt/%{name}/bin/vgllogin
 /opt/%{name}/bin/vglserver_config
 /opt/%{name}/bin/vglrun
+%ifarch x86_64
+/opt/%{name}/bin/glxspheres64
+%else
 /opt/%{name}/bin/glxspheres
+%endif
 
-/opt/%{name}/fakelib/libGL.so
 %ifarch x86_64
 /opt/%{name}/fakelib/64/libGL.so
+%else
+/opt/%{name}/fakelib/libGL.so
 %endif
 /opt/%{name}/doc
 
 /opt/%{name}/include/rrtransport.h
 /opt/%{name}/include/rr.h
 
-/usr/lib/librrfaker.so
-/usr/lib/libdlfaker.so
-/usr/lib/libgefaker.so
 %ifarch x86_64
 /usr/lib64/librrfaker.so
 /usr/lib64/libdlfaker.so
 /usr/lib64/libgefaker.so
-/opt/%{name}/bin/glxspheres64
+%else
+/usr/lib/librrfaker.so
+/usr/lib/libdlfaker.so
+/usr/lib/libgefaker.so
 %endif
 /usr/include/rrtransport.h
 /usr/include/rr.h
