@@ -87,13 +87,12 @@ endif() # CYGWIN
 
 if(APPLE)
 
-set(DEFAULT_OSX_X86_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
-set(OSX_X86_BUILD ${DEFAULT_OSX_X86_BUILD} CACHE PATH
-  "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_OSX_X86_BUILD})")
+set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
+set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
+  "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_VGL_32BIT_BUILD})")
 
 string(REGEX REPLACE "/" ":" VGL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" VGL_MACPREFIX ${VGL_MACPREFIX})
-message(STATUS ${VGL_MACPREFIX})
 
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
@@ -108,3 +107,40 @@ add_custom_target(udmg sh pkgscripts/makemacpkg universal
   SOURCES pkgscripts/makemacpkg)
 
 endif() # APPLE
+
+
+#
+# Solaris package
+#
+
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
+	set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/solaris)
+	if(64BIT)
+		set(PKGARCH sparcv9)
+	else()
+		set(PKGARCH sparc)
+	endif()
+else()
+	set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/solx86)
+	if(64BIT)
+		set(PKGARCH amd64)
+	else()
+		set(PKGARCH i386)
+	endif()
+endif()
+set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
+  "Directory containing 32-bit Solaris build to include in combined package (default: ${DEFAULT_VGL_32BIT_BUILD})")
+
+configure_file(release/makesolarispkg.in pkgscripts/makesolarispkg)
+configure_file(release/pkginfo.in pkgscripts/pkginfo)
+
+add_custom_target(solarispkg sh pkgscripts/makesolarispkg
+	SOURCES pkgscripts/makesolarispkg)
+
+add_custom_target(csolarispkg sh pkgscripts/makesolarispkg combined
+	SOURCES pkgscripts/makesolarispkg)
+
+endif() # SunOS
+
