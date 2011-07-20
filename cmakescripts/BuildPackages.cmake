@@ -20,7 +20,7 @@ set(VGL_DOCSYMLINK 0)
 set(VGL_SYSPREFIX ${CMAKE_INSTALL_PREFIX})
 if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
 	AND NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
-	option(VGL_USESYSDIR "Package VirtualGL server and client executables in /usr, not ${CMAKE_INSTALL_PREFIX}" ON)
+	option(VGL_USESYSDIR "Package essential VirtualGL server/client components in /usr, not ${CMAKE_INSTALL_PREFIX}" ON)
 	if(VGL_USESYSDIR)
 		set(VGL_SYSPREFIX /usr)
 	endif()
@@ -81,6 +81,17 @@ endif() # WIN32
 #
 
 if(CYGWIN)
+
+set(VGL_DOCSYMLINK 0)
+set(VGL_SYSPREFIX ${CMAKE_INSTALL_PREFIX})
+if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
+	AND NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
+	option(VGL_USESYSDIR "Package essential VirtualGL client components in /usr, not ${CMAKE_INSTALL_PREFIX}" ON)
+	if(VGL_USESYSDIR)
+		set(VGL_SYSPREFIX /usr)
+	endif()
+	set(VGL_DOCSYMLINK 1)
+endif()	
 
 configure_file(release/makecygwinpkg.in pkgscripts/makecygwinpkg)
 
