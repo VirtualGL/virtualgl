@@ -17,6 +17,10 @@ onexit()
 
 APPNAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
+PREFIX=@CMAKE_INSTALL_PREFIX@
+SYSPREFIX=@VGL_SYSPREFIX@
+SYSPKG=`test ! "$PREFIX" = "$SYSPREFIX" && echo 1 || echo 0`
+DOCSYMLINK=`test ! "$PREFIX" = "/usr/share" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0`
 
 umask 022
 TMPDIR=`mktemp -d /tmp/$APPNAME-build.XXXXXX`
@@ -25,13 +29,18 @@ __PWD=`pwd`
 make install DESTDIR=$TMPDIR/pkg
 
 mkdir -p $TMPDIR/pkg/usr/share/doc
-mv $TMPDIR/pkg/opt/VirtualGL/doc $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION
+mv $TMPDIR/pkg/$PREFIX/doc $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION
+if [ $DOCSYMLINK = 1 ]; then
+	ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/pkg/$PREFIX/doc
+fi
 
-mkdir -p $TMPDIR/pkg/usr/bin
-for i in vglclient.exe vglconnect; do
-	mv $TMPDIR/pkg/opt/VirtualGL/bin/$i $TMPDIR/pkg/usr/bin/
-	ln -fs /usr/bin/$i $TMPDIR/pkg/opt/$APPNAME/bin/
-done
+if [ $SYSPKG = 1 ]; then
+	mkdir -p $TMPDIR/pkg/$SYSPREFIX/bin
+	for i in vglclient.exe vglconnect; do
+		mv $TMPDIR/pkg/$PREFIX/bin/$i $TMPDIR/pkg/$SYSPREFIX/bin/
+		ln -fs $SYSPREFIX/bin/$i $TMPDIR/pkg/$PREFIX/bin/
+	done
+fi
 
 cd $TMPDIR/pkg
 tar cfj ../$APPNAME-$VERSION-cygwin.tar.bz2 *
