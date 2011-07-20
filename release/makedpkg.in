@@ -34,57 +34,65 @@ makedeb()
 	mkdir $TMPDIR/DEBIAN
 
 	make install DESTDIR=$TMPDIR
-	mkdir -p $TMPDIR/usr
+	mkdir -p $TMPDIR/$SYSPREFIX
 
 	if [ $SUPPLEMENT = 1 ]; then
 
 		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
 			| sed s/VirtualGL/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
 
-		rm -rf $TMPDIR/opt/$APPNAME/doc
-		rm -rf $TMPDIR/opt/$APPNAME/include
-		mv $TMPDIR/opt/$APPNAME/bin/glxspheres $TMPDIR/opt/$APPNAME/
-		rm -rf $TMPDIR/opt/$APPNAME/bin
-		mkdir -p $TMPDIR/opt/$APPNAME/bin
-		mv $TMPDIR/opt/$APPNAME/glxspheres $TMPDIR/opt/$APPNAME/bin/
+		rm -rf $TMPDIR/$PREFIX/doc
+		rm -rf $TMPDIR/$PREFIX/include
+		mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/
+		rm -rf $TMPDIR/$PREFIX/bin
+		mkdir -p $TMPDIR/$PREFIX/bin
+		mv $TMPDIR/$PREFIX/glxspheres $TMPDIR/$PREFIX/bin/
 
-		mv $TMPDIR/opt/$APPNAME/lib $TMPDIR/usr/lib32
-		rm $TMPDIR/opt/$APPNAME/fakelib/libGL.so
-		ln -fs /usr/lib32/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
+		mv $TMPDIR/$PREFIX/lib $TMPDIR/$SYSPREFIX/lib32
+		rm $TMPDIR/$PREFIX/fakelib/libGL.so
+		ln -fs $SYSPREFIX/lib32/librrfaker.so $TMPDIR/$PREFIX/fakelib/libGL.so
 
 	else
 
 		cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
-		mkdir -p $TMPDIR/usr/bin
 		if [ "$DEBARCH" = "amd64" ]; then
-			mv $TMPDIR/opt/$APPNAME/bin/glxspheres $TMPDIR/opt/$APPNAME/bin/glxspheres64
+			mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/bin/glxspheres64
 		fi
-		for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
-			mv $TMPDIR/opt/$APPNAME/bin/$i $TMPDIR/usr/bin/
-		done
-		pushd $TMPDIR/usr/bin
-		for i in *; do
-			ln -fs /usr/bin/$i $TMPDIR/opt/$APPNAME/bin/; done
-		popd
 
-		mkdir -p $TMPDIR/usr/include
-		for i in rr.h rrtransport.h; do
-			mv $TMPDIR/opt/$APPNAME/include/$i $TMPDIR/usr/include/
-			ln -fs /usr/include/$i $TMPDIR/opt/$APPNAME/include/$i
-		done
+		if [ $SYSPKG = 1 ]; then
+
+			mkdir -p $TMPDIR/$SYSPREFIX/bin
+			mv $TMPDIR/$PREFIX/lib $TMPDIR/$SYSPREFIX/lib
+
+			for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
+				mv $TMPDIR/$PREFIX/bin/$i $TMPDIR/$SYSPREFIX/bin/
+			done
+			pushd $TMPDIR/$SYSPREFIX/bin
+			for i in *; do
+				ln -fs $SYSPREFIX/bin/$i $TMPDIR/$PREFIX/bin/; done
+			popd
+
+			mkdir -p $TMPDIR/$SYSPREFIX/include
+			for i in rr.h rrtransport.h; do
+				mv $TMPDIR/$PREFIX/include/$i $TMPDIR/$SYSPREFIX/include/
+				ln -fs $SYSPREFIX/include/$i $TMPDIR/$PREFIX/include/$i
+			done
+
+		fi
 
 		mkdir -p $TMPDIR/usr/share/doc
-		mv $TMPDIR/opt/$APPNAME/doc $TMPDIR/usr/share/doc/$APPNAME-$VERSION
-		ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/opt/$APPNAME/doc
+		mv $TMPDIR/$PREFIX/doc $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+		if [ $DOCSYMLINK = 1 ]; then
+			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
+		fi
 
-		mv $TMPDIR/opt/$APPNAME/lib $TMPDIR/usr/lib
 		if [ "$DEBARCH" = "amd64" ]; then
-			rm $TMPDIR/opt/$APPNAME/fakelib/64/libGL.so
-			ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/64/libGL.so
+			rm $TMPDIR/$PREFIX/fakelib/64/libGL.so
+			ln -fs $SYSPREFIX/lib/librrfaker.so $TMPDIR/$PREFIX/fakelib/64/libGL.so
 		else
-			rm $TMPDIR/opt/$APPNAME/fakelib/libGL.so
-			ln -fs /usr/lib/librrfaker.so $TMPDIR/opt/$APPNAME/fakelib/libGL.so
+			rm $TMPDIR/$PREFIX/fakelib/libGL.so
+			ln -fs $SYSPREFIX/lib/librrfaker.so $TMPDIR/$PREFIX/fakelib/libGL.so
 		fi
 
 	fi
@@ -97,6 +105,10 @@ APPNAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 DEBARCH=@DEBARCH@
+PREFIX=@CMAKE_INSTALL_PREFIX@
+SYSPREFIX=@VGL_SYSPREFIX@
+SYSPKG=`test ! "$PREFIX" = "$SYSPREFIX" && echo 1 || echo 0`
+DOCSYMLINK=`test ! "$PREFIX" = "/usr/share" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0`
 
 makedeb 0
 if [ "$DEBARCH" = "i386" ]; then makedeb 1; fi
