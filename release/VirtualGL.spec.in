@@ -5,6 +5,16 @@
 
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
+# Prefix in which essential server/client binaries should be stored
+%define sysprefix @VGL_SYSPREFIX@
+
+# Prefix in which everything else (except docs) should be stored
+%define prefix @CMAKE_INSTALL_PREFIX@
+
+%define syspkg %(test ! "%{prefix}" = "%{sysprefix}" && echo 1 || echo 0)
+
+%define docsymlink %(test ! "%{prefix}" = "`dirname %{_defaultdocdir}`" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0)
+
 Summary: A toolkit for displaying OpenGL applications to thin clients
 Name: @CMAKE_PROJECT_NAME@
 Version: @VERSION@
@@ -53,38 +63,55 @@ rm -rf $RPM_BUILD_ROOT
 
 make install DESTDIR=$RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/usr/bin
 %ifarch x86_64
-mv $RPM_BUILD_ROOT/opt/%{name}/lib $RPM_BUILD_ROOT/usr/lib64
-mv $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres $RPM_BUILD_ROOT/opt/%{name}/bin/glxspheres64
-%else
-mv $RPM_BUILD_ROOT/opt/%{name}/lib $RPM_BUILD_ROOT/usr/lib
+mv $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres64
 %endif
+
+%if %{syspkg}
+
+mkdir -p $RPM_BUILD_ROOT/%{sysprefix}/bin
+%ifarch x86_64
+mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{sysprefix}/lib64
+%else
+mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{sysprefix}/lib
+%endif
+
 for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
-	mv $RPM_BUILD_ROOT/opt/%{name}/bin/$i $RPM_BUILD_ROOT/usr/bin/
+	mv $RPM_BUILD_ROOT/%{prefix}/bin/$i $RPM_BUILD_ROOT/%{sysprefix}/bin/
 done
-pushd $RPM_BUILD_ROOT/usr/bin
+
+mkdir -p $RPM_BUILD_ROOT/%{sysprefix}/include
+for i in rr.h rrtransport.h; do
+	mv $RPM_BUILD_ROOT/%{prefix}/include/$i $RPM_BUILD_ROOT/%{sysprefix}/include/
+	ln -fs %{sysprefix}/include/$i $RPM_BUILD_ROOT/%{prefix}/include/$i
+done
+
+pushd $RPM_BUILD_ROOT/%{sysprefix}/bin
 for i in *; do
-	ln -fs /usr/bin/$i $RPM_BUILD_ROOT/opt/%{name}/bin/; done
+	ln -fs %{sysprefix}/bin/$i $RPM_BUILD_ROOT/%{prefix}/bin/; done
 popd
 
-mkdir -p $RPM_BUILD_ROOT/usr/include
-for i in rr.h rrtransport.h; do
-	mv $RPM_BUILD_ROOT/opt/%{name}/include/$i $RPM_BUILD_ROOT/usr/include/
-	ln -fs /usr/include/$i $RPM_BUILD_ROOT/opt/%{name}/include/$i
-done
+%else
 
 %ifarch x86_64
-rm $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
-ln -fs /usr/lib64/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/64/libGL.so
+mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{prefix}/lib64
+%endif
+
+%endif
+
+%ifarch x86_64
+rm $RPM_BUILD_ROOT/%{prefix}/fakelib/64/libGL.so
+ln -fs %{sysprefix}/lib64/librrfaker.so $RPM_BUILD_ROOT/%{prefix}/fakelib/64/libGL.so
 %else
-rm $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
-ln -fs /usr/lib/librrfaker.so $RPM_BUILD_ROOT/opt/%{name}/fakelib/libGL.so
+rm $RPM_BUILD_ROOT/%{prefix}/fakelib/libGL.so
+ln -fs %{sysprefix}/lib/librrfaker.so $RPM_BUILD_ROOT/%{prefix}/fakelib/libGL.so
 %endif
 
 mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}
-mv $RPM_BUILD_ROOT/opt/%{name}/doc $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-ln -fs %{_defaultdocdir}/%{name}-%{version} $RPM_BUILD_ROOT/opt/%{name}/doc
+mv $RPM_BUILD_ROOT/%{prefix}/doc $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+%if %{docsymlink}
+ln -fs %{_defaultdocdir}/%{name}-%{version} $RPM_BUILD_ROOT/%{prefix}/doc
+%endif
 
 echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
 chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
@@ -104,59 +131,71 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %dir %{_defaultdocdir}/%{name}-%{version}
 %doc %{_defaultdocdir}/%{name}-%{version}/*
 
-%dir /opt/%{name}
-%dir /opt/%{name}/bin
-%dir /opt/%{name}/fakelib
-%ifarch x86_64
-%dir /opt/%{name}/fakelib/64
-%endif
-%dir /opt/%{name}/include
+%dir %{prefix}
 
-/usr/bin/vglclient
-/usr/bin/vglconfig
-/usr/bin/vglconnect
-/usr/bin/vgllogin
-/usr/bin/vglrun
-/usr/bin/vglgenkey
-/usr/bin/vglserver_config
-
-/opt/%{name}/bin/tcbench
-/opt/%{name}/bin/nettest
-/opt/%{name}/bin/cpustat
-/opt/%{name}/bin/glxinfo
-/opt/%{name}/bin/vglclient
-/opt/%{name}/bin/vglconfig
-/opt/%{name}/bin/vglconnect
-/opt/%{name}/bin/vglgenkey
-/opt/%{name}/bin/vgllogin
-/opt/%{name}/bin/vglserver_config
-/opt/%{name}/bin/vglrun
+%dir %{prefix}/bin
+%{prefix}/bin/tcbench
+%{prefix}/bin/nettest
+%{prefix}/bin/cpustat
+%{prefix}/bin/glxinfo
+%{prefix}/bin/vglclient
+%{prefix}/bin/vglconfig
+%{prefix}/bin/vglconnect
+%{prefix}/bin/vglgenkey
+%{prefix}/bin/vgllogin
+%{prefix}/bin/vglserver_config
+%{prefix}/bin/vglrun
 %ifarch x86_64
-/opt/%{name}/bin/glxspheres64
+ %{prefix}/bin/glxspheres64
 %else
-/opt/%{name}/bin/glxspheres
+ %{prefix}/bin/glxspheres
+%endif
+%if %{syspkg}
+ %{sysprefix}/bin/vglclient
+ %{sysprefix}/bin/vglconfig
+ %{sysprefix}/bin/vglconnect
+ %{sysprefix}/bin/vgllogin
+ %{sysprefix}/bin/vglrun
+ %{sysprefix}/bin/vglgenkey
+ %{sysprefix}/bin/vglserver_config
+%endif
+
+%if %{docsymlink}
+ %{prefix}/doc
+%endif
+
+%dir %{prefix}/fakelib
+%ifarch x86_64
+ %dir %{prefix}/fakelib/64
+ %{prefix}/fakelib/64/libGL.so
+%else
+ %{prefix}/fakelib/libGL.so
+%endif
+
+%dir %{prefix}/include
+%{prefix}/include/rrtransport.h
+%{prefix}/include/rr.h
+%if %{syspkg}
+ %{sysprefix}/include/rrtransport.h
+ %{sysprefix}/include/rr.h
 %endif
 
 %ifarch x86_64
-/opt/%{name}/fakelib/64/libGL.so
+ %{sysprefix}/lib64/librrfaker.so
+ %{sysprefix}/lib64/libdlfaker.so
+ %{sysprefix}/lib64/libgefaker.so
+ %if %{syspkg}
+ %else
+  %dir %{prefix}/lib64
+ %endif
 %else
-/opt/%{name}/fakelib/libGL.so
+ %{sysprefix}/lib/librrfaker.so
+ %{sysprefix}/lib/libdlfaker.so
+ %{sysprefix}/lib/libgefaker.so
+ %if %{syspkg}
+ %else
+  %dir %{prefix}/lib
+ %endif
 %endif
-/opt/%{name}/doc
-
-/opt/%{name}/include/rrtransport.h
-/opt/%{name}/include/rr.h
-
-%ifarch x86_64
-/usr/lib64/librrfaker.so
-/usr/lib64/libdlfaker.so
-/usr/lib64/libgefaker.so
-%else
-/usr/lib/librrfaker.so
-/usr/lib/libdlfaker.so
-/usr/lib/libgefaker.so
-%endif
-/usr/include/rrtransport.h
-/usr/include/rr.h
 
 %changelog
