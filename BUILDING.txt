@@ -1,107 +1,143 @@
-How to build VirtualGL in 9043 easy steps
-=========================================
-
-
 *******************************************************************************
-**     A note about OpenSSL support
+**     Building VirtualGL
 *******************************************************************************
 
-   If built with OpenSSL support, VirtualGL can use OpenSSL to encrypt the
-   traffic it sends via the VGL Transport.  This is only a marginally useful
-   feature, however, since VirtualGL can also tunnel the VGL Transport through
-   SSh.  Including OpenSSL support in the VirtualGL distribution packages
-   required us to statically link with the OpenSSL libraries, which required us
-   to keep abreast of any security fixes to those libraries.  Thus, embedded
-   OpenSSL support is not enabled by default in this release of VirtualGL.
 
-   However, you can easily include OpenSSL support in your custom build of
-   VirtualGL by specifying USESSL=yes as an argument to 'make' or by adding
-   USESSL=yes to a file named "config" in the VirtualGL build directory
-   (create the file if it doesn't exist.)
+==================
+Build Requirements
+==================
 
 
-*******************************************************************************
-**     Prerequisites - Linux
-*******************************************************************************
+All Systems
+-----------
 
--- OpenSSL headers and link libraries (optional)
+-- CMake (http://www.cmake.org) v2.8 or later
 
-   VirtualGL can be built using the shared OpenSSL libraries provided with
-   your Linux distribution, but this produces a version of VirtualGL that may
-   not be compatible with other Linux distributions.  In order to build a fully
-   cross-compatible version of VirtualGL, you must link VirtualGL against
-   static versions of the OpenSSL libraries.  If your system already has
-   libssl.a and libcrypto.a installed, then you can use the SSLINC and SSLLIB
-   Makefile options (see "Makefile Options" below) to tell VirtualGL to link
-   against your existing copy of these libraries.  Otherwise, follow the
-   instructions below to build libssl.a and libcrypto.a from scratch.
+-- If building SSL support:
+   * OpenSSL (see "Building SSL Support" below)
 
-   * Download the latest OpenSSL source tarball from http://www.openssl.org
-   * Extract the tarball into the directory one level up from your VirtualGL
-     build directory
-   * Rename the OpenSSL source directory to "openssl.linux64" if you are
-     building a 64-bit version of VirtualGL or "openssl.linux" if you are
-     building a 32-bit version of VirtualGL.
-   * cd to the OpenSSL source directory and issue one of the following
-     commands to configure the OpenSSL build:
+-- libjpeg-turbo SDK v1.1.1 or later
+   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
+     area of http://sourceforge.net/projects/libjpeg-turbo/
+   * The VirtualGL build system will search for the TurboJPEG/OSS header and
+     library under /opt/libjpeg-turbo on Unix or c:\libjpeg-turbo[64] on
+     Windows, but you can override this by setting the TJPEG_INCLUDE_DIR
+     CMake variable to the directory containing turbojpeg.h and the 
+     TJPEG_LIBRARY CMake variable to the full path of the TurboJPEG/OSS library
+     against which you want to link.
 
-     64-bit:
-     ./Configure linux-x86_64 shared
 
-     32-bit:
-     ./Configure -m32 linux-generic32 shared
-
-   * Build OpenSSL:
-
-     make
+Linux
+-----
 
 -- GCC and G++
 
--- X11 dev. kit
-
-   On most Linux variants, this can be found in the "XFree86-devel" or 
-   "xorg-x11-devel" package.  On Ubuntu, it is in the "libx11-dev" package.
-
--- GNU Make v3.7 or later
-
--- binutils 2.12.90 or later.  This shouldn't be an issue unless you are
-   (still) running RedHat 7.x or Enterprise Linux 2.1, in which case you can
-   download an updated binutils RPM from:
-   http://mirror.atrpms.net/ccrma/mirror/7.2/
-
--- libjpeg-turbo SDK v1.1.1 or later
-
-   The libjpeg-turbo SDK Linux packages (in RPM or DEB format) can be obtained
-   from the "Files" area of:
-
-   http://sourceforge.net/projects/libjpeg-turbo/
+-- X11 and OpenGL development libraries:
+   * libX11, libXext, libGL, libGLU, and (if you wish to enable X Video
+     support) libXv
 
 
-*******************************************************************************
-**     Prerequisites - x86-64 Linux
-*******************************************************************************
+Mac
+---
 
-Building a redistributable VirtualGL package for x86-64 requires building both
-32-bit and 64-bit versions of the VirtualGL server components.  However, not
-all x86-64 Linux systems contain the 32-bit libraries necessary to build a
-32-bit version of VirtualGL.  To build 32-bit VirtualGL components on an x86-64
-Linux system, you will need, at minimum, the following 32-bit libraries:
+-- Xcode Tools
+   * Available on the OS X install discs or from:
+     http://developer.apple.com/tools/xcode
+   * At minimum, you will need the following packages from Xcode:
+     gcc v3 or above
+     X11 SDK
+     OpenGL SDK
+     Mac OS X SDK
+
+
+Solaris
+-------
+
+-- Solaris 10/OpenSolaris 2008.11 or newer (currently, only x86 is supported)
+
+-- Oracle Solaris Studio 12 or later
+
+   * See http://www.oracle.com/technetwork/server-storage/solarisstudio/ for a
+     free download.
+
+... or ...
+
+-- GCC
+
+   * Ships with later versions of Solaris 10 and with OpenSolaris
+   * Also available from OpenCSW (http://www.opencsw.org/),
+     Blastwave (http://www.blastwave.org), or
+     SunFreeware (http://www.sunfreeware.com/)
+
+
+Windows
+-------
+
+-- Microsoft Visual C++ 2005 or later
+
+   If you don't already have Visual C++, then the easiest way to get it is by
+   installing the Windows SDK:
+
+   http://msdn.microsoft.com/en-us/windows/bb980924.aspx
+
+   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
+   everything necessary to build VirtualGL.
+
+   * For 32-bit builds, you can also use Microsoft Visual C++ Express
+     Edition.  Visual C++ Express Edition is a free download.
+   * If you intend to build VirtualGL from the command line, then add the
+     appropriate compiler and SDK directories to the INCLUDE, LIB, and PATH
+     environment variables.  This is generally accomplished by executing
+     vcvars32.bat or vcvars64.bat and SetEnv.cmd.  vcvars32.bat and
+     vcvars64.bat are part of Visual C++ and are located in the same directory
+     as the compiler.  SetEnv.cmd is part of the Windows SDK.  You can pass
+     optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
+     environment.
+
+-- OpenText Exceed XDK v8 or later
+
+   * Add the XDK include path (for instance,
+     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
+     to the system or user INCLUDE environment variable prior to building
+     VirtualGL.
+   * Add the XDK library path (for instance,
+     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\lib)
+     to the system or user LIB environment variable prior to building
+     VirtualGL.
+
+
+Cygwin
+------
+
+-- GCC and G++
+
+-- X11 and OpenGL development libraries:
+   * libX11, libXext, libGL, and libGLU
+
+
+=======================================
+32-bit VirtualGL Builds on 64-bit Linux
+=======================================
+
+In order to run 32-bit OpenGL applications using VirtualGL on a 64-bit Linux
+platform, it is necessary to build both 32-bit and 64-bit versions of the
+VirtualGL server components.  However, not all x86-64 Linux systems contain the
+32-bit libraries necessary to build a 32-bit version of VirtualGL.  To build
+32-bit VirtualGL components on an x86-64 Linux system, you will need, at
+minimum, the following 32-bit libraries:
 
 -- glibc development libraries
+   * On Ubuntu, these are contained in the "libc6-dev-i386" package
 
-   * Usually contained in the "glibc-devel" package (iX86)
-   * Usually installed by default on x86-64 Linux systems
-   * On Ubuntu, these are contained in the "libc6-dev-i386" and "ia32-libs"
-     packages.
+-- 32-bit libstd++ libraries
+   * On Ubuntu, these are contained in the "g++-{version}-multilib" package
 
--- X11 dev. kit
-
-   * Usually contained in the "XFree86-devel" or "xorg-x11-devel" package
-     (iX86)
-   * Not always installed by default but usually available on the installation
-     discs
-   * On Ubuntu, you may need to use getlibs
-     (http://ubuntuforums.org/showthread.php?t=474790&highlight=getlibs) to
+-- X11 and OpenGL development libraries:
+   * libX11, libXext, libGL, libGLU, and (if you wish to enable X Video
+     support) libXv
+   * Recent versions of Ubuntu ship these libraries in the "ia32-libs" package.
+     On older releases, you may have to use getlibs
+     (http://explore-ubuntu.blogspot.com/2010/04/getlibs.html) to
      install the 32-bit X11 dev. kit:
      > sudo getlibs -p libX11-dev
      > sudo getlibs -p libxext-dev
@@ -115,8 +151,8 @@ one or more of the necessary 32-bit prerequisites, then:
   (2) All x86-64 distributions of Linux have a corresponding 32-bit-only
       distribution, usually released on a separate set of discs.  On those
       discs, you should be able to find the 32-bit versions of the X11 dev. kit
-      and the GLIBC dev. kit to match the 64-bit versions that are already
-      installed on your system. You may have to use 'rpm --force' to force the
+      and the glibc dev. kit to match the 64-bit versions that are already
+      installed on your system.  You may have to use 'rpm --force' to force the
       install of the 32-bit development packages, since they might contain
       header files which conflict with the 64-bit development packages that
       are already installed.  On Debian-based systems, you will need to use
@@ -124,367 +160,371 @@ one or more of the necessary 32-bit prerequisites, then:
       on an amd64 system.  See item (1) above.
 
 
-*******************************************************************************
-**     Prerequisites - Mac
-*******************************************************************************
-
--- Xcode Tools
-   * Available on the OS X install discs or from:
-     http://developer.apple.com/tools/xcode
-   * At minimum, you will need the following packages from Xcode:
-     gcc v3 or above
-     X11 SDK
-     OpenGL SDK
-     Mac OS X SDK
-
--- libjpeg-turbo SDK v1.1.1 or later (Intel-based Macs only)
-
-   * The libjpeg-turbo SDK disk image (DMG) can be obtained from the "Files"
-     area of:
-
-     http://sourceforge.net/projects/libjpeg-turbo
-
-   * Open the DMG file and double-click on the package inside to install
-     libjpeg-turbo.
-
--- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
-
--- On 64-bit OS X systems, VirtualGL can be built as a 64-bit binary, but this
-   is not the default.  To build a 64-bit Mac binary, pass an argument of
-   "subplatform=64" to 'make' when performing the build:
-
-     make subplatform=64
-
-   You can also add
-
-     subplatform=64
-
-   to the "config.osxx86" file to make 64-bit builds the default.  The 64-bit
-   binaries will reside in "osxx8664/bin" and "osxx8664/lib".
-
-
-*******************************************************************************
-**     Prerequisites - Solaris
-*******************************************************************************
-
--- Solaris 10/OpenSolaris 2008.11 or newer
-
--- OpenSSL headers and link libraries (optional)
-
-   VirtualGL can be built using the shared OpenSSL libraries provided with
-   your Solaris distribution, but this produces a version of VirtualGL that may
-   not be compatible with other versions of Solaris.  In order to build a fully
-   cross-compatible version of VirtualGL, you must link VirtualGL against
-   static versions of the OpenSSL libraries.  If your system already has
-   libssl.a and libcrypto.a installed, then you can use the SSLINC and SSLLIB
-   Makefile options (see "Makefile Options" below) to tell VirtualGL to link
-   against your existing copy of these libraries.  Otherwise, follow the
-   instructions below to build libssl.a and libcrypto.a from scratch.
-
-   * Download the latest OpenSSL source tarball from http://www.openssl.org
-   * Extract the tarball into the directory one level up from your VirtualGL
-     build directory
-   * Rename the OpenSSL source directory to "openssl.solaris64" if you are
-     building a 64-bit SPARC version of VirtualGL, "openssl.solaris" if you are
-     building a 32-bit SPARC version of VirtualGL, "openssl.solx8664" if you
-     are building a 64-bit x86 version of VirtualGL, or "openssl.solx86" if
-     you are building a 32-bit x86 version of VirtualGL.
-   * cd to the OpenSSL source directory and issue one of the following
-     commands to configure the OpenSSL build:
-
-     64-bit SPARC:
-     ./Configure solaris64-sparcv9-cc shared
-
-     32-bit SPARC:
-     ./Configure solaris-sparcv8-cc shared
-
-     64-bit x86:
-     ./Configure solaris64-x86_64-cc shared
-
-     32-bit x86:
-     ./Configure solaris-x86-cc shared
-
-     (If you plan to use GCC to build VirtualGL, replace "cc" with "gcc" in
-     all of the above.)
-
-   * Build OpenSSL:
-
-     make
-
--- Oracle Solaris Studio 12 or later
-
-   * See http://www.oracle.com/technetwork/server-storage/solarisstudio/ for a
-     free download.
-
-... or ...
-
--- GCC
-
-   * Ships with later versions of Solaris 10 and with OpenSolaris
-   * Also available from Blastwave (http://www.blastwave.org),
-     OpenCSW (http://www.opencsw.org/), or
-     SunFreeware (http://www.sunfreeware.com/)
-   * Build VirtualGL using
-       gmake CC=gcc
-
--- SPARC ONLY:  Sun OpenGL
-
-   * Requires v1.3 or later (1.5 or later recommended)
-   * See http://www.sun.com/software/graphics/opengl/
-
--- GNU Make v3.7 or later
-
-   * Ships with later versions of Solaris 10 and with OpenSolaris
-   * Also available from Blastwave (http://www.blastwave.org),
-     OpenCSW (http://www.opencsw.org/), or
-     SunFreeware (http://www.sunfreeware.com/)
-
--- SPARC ONLY:  Sun mediaLib
-
-   * mediaLib is pre-installed on Solaris 10 and later and on OpenSolaris.
-
--- x86 ONLY:  libjpeg-turbo SDK v1.1.1 or later
-
-   * The libjpeg-turbo SDK package can be obtained from the "Files" area of:
-
-     http://sourceforge.net/projects/libjpeg-turbo
-
-
-*******************************************************************************
-**     Building the VirtualGL Client for Exceed
-*******************************************************************************
-
-Prerequisites
-=============
-
--- GNU Make v3.7 or later
-
-   GNU Make for Win32 can be found in MSYS
-   (http://www.mingw.org/download.shtml) or Cygwin (http://www.cygwin.com/)
-
--- Microsoft Visual C++ 2003 or later
-
-   If you don't already have Visual C++, then the easiest way to get it is by
-   installing the Windows SDK for Windows Server 2008 and .NET Framework 3.5
-   (or a later version):
-
-   http://msdn.microsoft.com/en-us/windows/dd146047.aspx
-
-   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
-   everything necessary to build VirtualGL.
-
-   * For 32-bit builds, you can also use Microsoft Visual C++ 2008 Express
-     Edition (or a later version.)  Visual C++ Express Edition is a free
-     download.
-   * Add the compiler and SDK binary directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN[\amd64];
-     c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\bin[\x64])
-     to the system or user PATH environment variable prior to building
-     VirtualGL.
-   * Add the compiler and SDK include directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\INCLUDE;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\include)
-     to the system or user INCLUDE environment variable prior to building
-     VirtualGL.
-   * Add the compiler and SDK library directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB[\amd64];
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\lib[\x64])
-     to the system or user LIB environment variable prior to building
-     VirtualGL.
-
--- OpenSSL headers and link libraries (optional)
-
-   * Download the latest OpenSSL source tarball from http://www.openssl.org
-   * Extract the tarball into the directory one level up from your VirtualGL
-     build directory
-   * Rename the OpenSSL source directory to "openssl.windows".
-   * Download the Win32 binaries of NASM from the "Download" section of
-     http://sourceforge.net/projects/nasm/.  Place nasm.exe somewhere in your
-     PATH.
-   * cd to the OpenSSL source directory and issue the following
-     commands to configure the OpenSSL build:
-
-     perl Configure VC-WIN32
-     ms\do_nasm.bat
-
-   * Build OpenSSL:
-
-     nmake -f ms\nt.mak
-
-   * If you are building OpenSSL 0.9.8h or 0.9.8i and are using Visual C++ 2008
-     or later, then comment out the following lines in
-     openssl.windows\inc32\openssl\ossl_typ.h prior to building VirtualGL:
-
-     typedef struct ocsp_req_ctx_st OCSP_REQ_CTX;
-     typedef struct ocsp_response_st OCSP_RESPONSE;
-     typedef struct ocsp_responder_id_st OCSP_RESPID;
-
-     Hopefully this will be fixed in future releases of OpenSSL.
-
--- OpenText Exceed XDK v8 or later
-
-   * Add the XDK include path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
-     to the system or user INCLUDE environment variable prior to building
-     VirtualGL.
-   * Add the XDK library path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\lib)
-     to the system or user LIB environment variable prior to building
-     VirtualGL.
-
--- libjpeg-turbo SDK v1.1.1 or later for Visual C++
-
-   * The libjpeg-turbo SDK Windows installer (EXE) can be obtained from the
-     "Files" area of:
-
-     http://sourceforge.net/projects/libjpeg-turbo
-
-   * Add the libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the
-     system or user INCLUDE environment variable prior to building VirtualGL.
-   * Add the libjpeg-turbo library path (c:\libjpeg-turbo[64]\lib) to the
-     system or user LIB environment variable prior to building VirtualGL.
-
-64-bit Build
-============
-
--- To build a 64-bit version of the VirtualGL Client for Exceed, pass an
-   argument of "subplatform=64" to 'make' when performing the build:
-
-     make subplatform=64
-
-   The binaries will reside in "windows64/bin".
-
-
-*******************************************************************************
-**     Building VirtualGL on Cygwin
-*******************************************************************************
-
-You should be able to build and run the VirtualGL client on Cygwin, although
-this configuration has not been thoroughly tested.  To build VirtualGL on
-Cygwin:
-
--- Install the following Cygwin packages if they aren't already installed:
-   gcc
-   gcc-core
-   gcc-g++
-   make
-   libX11-devel
-   libXext-devel
-   libGL-devel
-   libGLU-devel
-
--- libjpeg-turbo SDK v1.1.1 or later
-
-   * The libjpeg-turbo Cygwin package can be obtained from the "Files" area of:
-
-     http://sourceforge.net/projects/libjpeg-turbo
-
--- Pass an argument of "platform=cygwin" to 'make' when performing the
-   VirtualGL build:
-
-     make platform=cygwin
-
-   The binaries will reside in "cygwin/bin".
-
-
-*******************************************************************************
-**     Building
-*******************************************************************************
-
-Assuming all of the above is set up correctly, you should be able to just type
-
+==================
+Out-of-Tree Builds
+==================
+
+Binary objects, libraries, and executables are generated in the same directory
+from which CMake was executed (the "binary directory"), and this directory need
+not necessarily be the same as the VirtualGL source directory.  You can create
+multiple independent binary directories, in which different versions of
+VirtualGL can be built from the same source tree using different compilers or
+settings.  In the sections below, {build_directory} refers to the binary
+directory, whereas {source_directory} refers to the VirtualGL source directory.
+For in-tree builds, these directories are the same.
+
+
+===============
+Build Procedure
+===============
+
+
+Unix/Mac
+--------
+
+The following procedure will build the VirtualGL Client and, on Linux and
+Solaris systems, the VirtualGL Server components.  On most 64-bit systems
+(Solaris being a notable exception), this will build a 64-bit version of
+VirtualGL.  See "Build Recipes" for specific instructions on how to build a
+32-bit or 64-bit version of VirtualGL on 64-bit systems.
+
+  cd {build_directory}
+  cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
   make
 
-On Solaris, type
 
-  gmake
+Visual C++ (Command Line)
+-------------------------
 
-instead.
+  cd {build_directory}
+  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
+  nmake
+
+This will build either a 32-bit or a 64-bit version of VirtualGL, depending
+on which version of cl.exe is in the PATH.
+
+
+Visual C++ (IDE)
+----------------
+
+Choose the appropriate CMake generator option for your version of Visual Studio
+(run "cmake" with no arguments for a list of available generators.)  For
+instance:
+
+  cd {build_directory}
+  cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
+
+You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
+configurations in that project ("Debug", "Release", etc.) to generate a full
+build of VirtualGL.
+
+
+===========
+Debug Build
+===========
+
+Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
+NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
+NMake.)
+
+
+===========================================
+Building Secure Sockets Layer (SSL) Support
+===========================================
+
+If built with SSL support, VirtualGL can use OpenSSL to encrypt the traffic it
+sends and received via the VGL Transport.  This is only a marginally useful
+feature, however, since VirtualGL can also tunnel the VGL Transport through
+SSH.  To enable SSL support, set the VGL_USESSL CMake variable to 1.
+
+In general, if you are building on a Unix-ish platform that has the OpenSSL
+link libraries and include files installed in the standard system locations,
+then the VirtualGL build system should detect the system version of OpenSSL
+automatically and link against it.  However, this produces a version of
+VirtualGL that depends on the OpenSSL dynamic libraries, and thus the VirtualGL
+binaries are not necessarily portable.  On other platforms, there is no system
+version of OpenSSL to link against, so it's a moot point.  Thus, to build a
+fully portable, cross-compatible version of VirtualGL with SSL support, it is
+necessary on most systems to link against the OpenSSL static libraries.  The
+following sections describe how to do that on various operating systems.
+
+
+Linux
+-----
+
+There is generally no sane way to statically link with OpenSSL on Linux.  Some
+distributions of Linux ship with the OpenSSL static libraries, but these
+usually depend on Kerberos, which introduces a long list of dependencies, some
+of which aren't available in static library form.  Attempts to build the
+OpenSSL libraries from source, as of this writing, resulted in various
+problems.  The primary show-stopper is that some objects in OpenSSL are not
+built with PIC support despite configuring the build with the "shared" option,
+and thus the resulting libraries cannot be linked into librrfaker.so.
+
+Theoretically, however, if you are successful in building a static version of
+OpenSSL for Linux, then you can manipulate the OPENSSL_INCLUDE_DIR,
+OPENSSL_SSL_LIBRARIES, and OPENSSL_CRYPTO_LIBRARIES CMake variables to link
+VirtualGL against your custom OpenSSL build.  For instance, adding
+
+  -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/openssl/include \
+    -DOPENSSL_SSL_LIBRARIES=/opt/openssl/lib/libssl.a \
+    -DOPENSSL_CRYPTO_LIBRARIES=/opt/openssl/lib/libcrypto.a
+
+to the CMake command line will cause VirtualGL to be statically linked against
+a custom installation of OpenSSL that resides under /opt/openssl.
+
+
+Mac
+---
+
+Linking with the OpenSSL dynamic libraries is generally not a concern on OS X,
+since Apple ships several versions of these in order to retain backward
+compatibility with OS X 10.4 and later.  See the "Build Recipes" section for
+instructions on how to build a backward-compatible version of VirtualGL for
+OS X.
+
+
+Solaris
+-------
+
+The easiest approach on Solaris is to install the OpenSSL development libraries
+from OpenCSW (http://www.OpenCSW.org) or BlastWave (http://www.BlastWave.org).
+You can then add one of the following to the CMake command line to statically
+link VirtualGL with OpenSSL:
+
+  64-bit:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
+      -DOPENSSL_SSL_LIBRARIES=/opt/csw/lib/64/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARIES=/opt/csw/lib/64/libcrypto.a
+
+  32-bit:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
+      -DOPENSSL_SSL_LIBRARIES=/opt/csw/lib/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARIES=/opt/csw/lib/libcrypto.a
+
+
+Windows
+-------
+
+The easiest approach on Windows is to install either Win32 OpenSSL or Win64
+OpenSSL (http://www.slproweb.com/products/Win32OpenSSL.html).  You can then add
+one of the following to the CMake command line to statically link VirtualGL
+with OpenSSL:
+
+  Win64 Release:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
+      -DLIB_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\libeay32MT.lib \
+      -DSSL_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\ssleay32MT.lib
+
+  Win64 Debug:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
+      -DLIB_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\libeay32MTd.lib \
+      -DSSL_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\ssleay32MTd.lib
+
+  Win32 Release:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
+      -DLIB_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\libeay32MT.lib \
+      -DSSL_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\ssleay32MT.lib
+
+  Win32 Debug:
+
+    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
+      -DLIB_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\libeay32MTd.lib \
+      -DSSL_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\ssleay32MTd.lib
+
+
+=============
+Build Recipes
+=============
+
+
+32-bit Build on 64-bit Linux/Unix (including OS X)
+--------------------------------------------------
+
+Set the following environment variables before running CMake:
+
+  CFLAGS=-m32
+  CXXFLAGS=-m32
+  LDFLAGS=-m32
+
+
+32-bit Build on 64-bit Debian-based systems
+-------------------------------------------
+
+Add
+
+  -DX11_X11_LIB=/usr/lib32/libX11.so -DX11_Xext_LIB=/usr/lib32/libXext.so \
+    -DOPENGL_gl_LIBRARY=/usr/lib32/libGL.so
+
+to the CMake command line (and complain to the CMake developers that the
+FindX11 and FindOpenGL modules should search in /usr/lib32, as well as allow
+the user to override the search paths.)
+
+
+64-bit Backward-Compatible Build on 64-bit OS X
+-----------------------------------------------
+
+Add
+
+  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 
+
+to the CMake command line.  The OS X 10.5 SDK must be installed.
+
+
+32-bit Backward-Compatible Build on 64-bit OS X
+-----------------------------------------------
+
+Set the following environment variables:
+
+  CC=gcc-4.0
+  CXX=g++-4.0
+  CFLAGS=-m32
+  CXXFLAGS=-m32
+  LDFLAGS=-m32
+
+and add
+
+  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.4u.sdk \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.4
+
+to the CMake command line.  The OS X 10.4 SDK must be installed.
+
+
+64-bit Build on Solaris
+-----------------------
+
+Set the following environment variables before running CMake:
+
+  CFLAGS=-m64
+  CXXFLAGS=-m64
+  LDFLAGS=-m64
+
+
+Oracle Solaris Studio
+---------------------
+
+Set the following environment variables before running CMake:
+
+  CC=cc
+  CXX=CC
 
 
 *******************************************************************************
-**     Makefile Options
+**     Advanced CMake Options
 *******************************************************************************
 
-Each of these options can be passed as an argument to "make" or "gmake".  You
-can also create a file called "config" in the root of the VirtualGL build
-directory and add Makefile options to that file so as to avoid having to type
-them every time you build VirtualGL.
+To list and configure other CMake options not specifically mentioned in this
+guide, run
 
-CC = gcc
+  ccmake {source_directory}
 
-  * On Solaris, this builds VirtualGL using the GCC compiler rather than the
-    default (Sun Studio) compiler.  gcc and g++ should be in your PATH.
+after initially configuring the build.  CCMake is the interactive version of
+CMake.  It will display all variables that are relevant to the VirtualGL build,
+their current values, and a help string describing what they do.
 
-DEBUG = yes
-
-  * Build a version of VirtualGL with debugging symbols and no optimization.
-    The debug version will reside in "${platform}/dbg/lib" and
-    "${platform}/dbg/bin", whereas the release version will reside in
-    "${platform}/lib" and "${platform}/bin", so these two versions can be built
-    independently of one another.
-
-JPEGLIB = medialib
-
-  * On Solaris/x86, use Sun mediaLib to perform JPEG compression/decompression
-    and YUV encoding/decoding rather than libjpeg-turbo.  If this option is
-    passed to the VirtualGL build, then VirtualGL will also use Sun mediaLib
-    to perform gamma correction.
-
-JPEG_LDFLAGS = {Custom linker flags for libjpeg-turbo}
-
-  * Normally, on x86 systems, the VirtualGL build system will attempt to
-    statically link VirtualGL with TurboJPEG/OSS, a wrapper library distributed
-    with libjpeg-turbo which emulates the legacy TurboJPEG/IPP codec.  However,
-    you can set JPEG_LDFLAGS to override this behavior and link with
-    TurboJPEG/OSS in a different manner or in a different directory.  For
-    instance, setting JPEG_LDFLAGS="-L/usr/local/lib -lturbojpeg" would link
-    dynamically with an installation of libjpeg-turbo installed under
-    /usr/local.
-
-M32 = yes
-
-  * On x86-64 systems, this cross-compiles a 32-bit (x86) version of VirtualGL.
-
-SSLINC = {OpenSSL include directory)
-
-  * Override the directory in which the VirtualGL build looks for the
-    OpenSSL headers (see build prerequisites for default.)
-
-SSLLIB = {OpenSSL static library directory)
-
-  * Override the directory in which the VirtualGL build looks for the
-    OpenSSL static link libraries (see build prerequisites for default.)
-
-USESSL = yes
-
-  * Build VirtualGL with SSL support.
 
 *******************************************************************************
-**     Installing / Distributing
+**     Installing VirtualGL
 *******************************************************************************
 
-On Unix systems, you can type
+You can use the build system to install VirtualGL into a directory of your
+choosing.  To do this, add:
 
-  make install [prefix={install prefix}]
+  -DCMAKE_INSTALL_PREFIX={install_directory}
 
-"prefix" defaults to "/usr/local" but can be changed to something else (such
-as "/usr") if you prefer.  Executables will be installed to "$prefix/bin", and
-libraries will be installed to "$prefix/lib" (or "$prefix/lib/64" or
-"$prefix/lib64", as appropriate.)
+to the CMake command line.  Then, you can run 'make install' or 'nmake install'
+(or build the "install" target in the Visual Studio IDE) to build and install
+VirtualGL.
 
-To build a redistributable package, type
+If you don't specify CMAKE_INSTALL_PREFIX, then the default is
+c:\Program Files\VirtualGL on Windows and /opt/VirtualGL on Unix.
 
-  make dist
 
-  * On Linux, this requires RPM v4 or later.
-  * On Solaris, this requires pkgmk, pkgtrans, and bzip2.
-  * On Windows, this requires the Nullsoft Install System
-    (http://nsis.sourceforge.net/.)  makensis.exe should be in your PATH.
-  * On OS X, this requires the PackageMaker application, which must be
-    installed in /Developer/Applications/Utilities.
+*******************************************************************************
+**     Creating Release Packages
+*******************************************************************************
 
-To build a redistributable DEB package (Debian-compatible systems), type
+The following commands can be used to create various types of release packages:
 
-  make deb
+
+====
+Unix
+====
+
+make rpm
+
+  Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
+
+#make srpm
+#
+#  This runs 'make dist' to create a pristine source tarball, then creates a
+#  Red Hat-style source RPM package from the tarball.  Requires RPM v4 or later.
+
+make deb
+
+  Create Debian-style binary package.  Requires dpkg.
+
+make dmg
+
+  Create Macintosh package/disk image.  This requires the PackageMaker
+  application, which must be installed in /Developer/Applications/Utilities.
+
+make udmg
+
+  On 64-bit OS X systems, this creates a version of the Macintosh package and
+  disk image which contains universal i386/x86-64 binaries.  You should first
+  configure a 32-bit out-of-tree build of VirtualGL, then configure a 64-bit
+  out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
+  build system will look for the 32-bit build under {source_directory}/osxx86
+  by default, but you can override this by setting the VGL_32BIT_BUILD CMake
+  variable.
+
+make solarispkg
+
+  Build a Solaris package.  This requires pkgmk, pkgtrans, and bzip2.
+
+make csolarispkg
+
+  On 64-bit Solaris systems, this creates a combined package which contains
+  both 32-bit and 64-bit binaries.  You should first configure a 32-bit
+  out-of-tree build of VirtualGL, then configure a 64-bit out-of-tree build,
+  then run 'make csolarispkg' from the 64-bit build directory.  The build
+  system will look for the 32-bit build under {source_directory}/solx86 by
+  default, but you can override this by setting the VGL_32BIT_BUILD CMake
+  variable.
+
+make cygwinpkg
+
+  Build a Cygwin binary package.
+
+
+=======
+Windows
+=======
+
+If using NMake:
+
+  cd {build_directory}
+  nmake installer
+
+If using MinGW:
+
+  cd {build_directory}
+  make installer
+
+If using the Visual Studio IDE, build the "installer" project.
+
+The installer package (VirtualGL[64]-{version}-exceed.exe) will be located
+under {build_directory}.  If building using the Visual Studio IDE, then the
+installer package will be located in a subdirectory with the same name as the
+configuration you built (such as {build_directory}\Debug\ or
+{build_directory}\Release\).
+
+Building a Windows installer requires the Nullsoft Install System
+(http://nsis.sourceforge.net/).  makensis.exe should be in your PATH.
