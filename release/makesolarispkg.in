@@ -1,0 +1,155 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+usage()
+{
+	echo "$0 [combined [32-bit build dir.]]"
+	exit 1
+}
+
+COMBINED=0
+
+PACKAGE_NAME=@CMAKE_PROJECT_NAME@
+VERSION=@VERSION@
+BUILD=@BUILD@
+PKGARCH=@PKGARCH@
+_64BIT=@64BIT@
+SRCDIR=@CMAKE_SOURCE_DIR@
+BUILDDIR32=@CMAKE_SOURCE_DIR@/solx86
+PREFIX=@CMAKE_INSTALL_PREFIX@
+if [ $# -gt 0 ]; then
+	if [ "$1" = "combined" ]; then
+		COMBINED=1
+		if [ $# -gt 1 ]; then	BUILDDIR32=$2; fi
+	fi
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+rm -f $PACKAGE_NAME.pkg.bz2
+cp $SRCDIR/release/copyright $TMPDIR
+touch $TMPDIR/depend
+cp pkgscripts/pkginfo $TMPDIR/pkginfo 
+
+if [ "$_64BIT" = "1" ]; then
+	__LIB=lib/$PKGARCH
+else
+	__LIB=lib
+fi
+
+if [ "$PREFIX" != "/opt/$PACKAGE_NAME" ]; then
+	echo ERROR: Solaris package must be installed in /opt/$PACKAGE_NAME
+	exit 1
+fi
+
+if [ $COMBINED = 1 ]; then
+	if [ ! -d $BUILDDIR32 ]; then
+		echo ERROR: 32-bit build directory $BUILDDIR32 does not exist
+		exit 1
+	fi
+	if [ ! -f $BUILDDIR32/Makefile ]; then
+		echo ERROR: 32-bit build directory $BUILDDIR32 is not configured
+		exit 1
+	fi
+	PWD=`pwd`
+	cd $BUILDDIR32
+	make install DESTDIR=$TMPDIR
+	mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/bin/glxspheres32
+	mv $TMPDIR/$PREFIX/lib $TMPDIR/$PREFIX/lib32
+	cd $PWD
+fi
+make install DESTDIR=$TMPDIR
+rm -rf $TMPDIR/$PREFIX/fakelib
+if [ "$_64BIT" = "1" ]; then
+	mv $TMPDIR/$PREFIX/lib $TMPDIR/$PREFIX/lib64
+	if [ $COMBINED = 1 ]; then
+		mv $TMPDIR/$PREFIX/lib32 $TMPDIR/$PREFIX/lib
+	else
+		mkdir -p $TMPDIR/$PREFIX/lib
+	fi
+	mv $TMPDIR/$PREFIX/lib64 $TMPDIR/$PREFIX/$__LIB
+	mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/bin/glxspheres64
+	if [ $COMBINED = 1 ]; then
+		mv $TMPDIR/$PREFIX/bin/glxspheres32 $TMPDIR/$PREFIX/bin/glxspheres
+	fi
+fi
+
+cat >$TMPDIR/proto <<EOF
+i copyright
+i depend
+i pkginfo
+d none $PACKAGE_NAME 0755 root bin
+d none $PACKAGE_NAME/bin 0755 root bin
+f none $PACKAGE_NAME/bin/vglclient 0755 root bin
+f none $PACKAGE_NAME/bin/vglconfig 0755 root bin
+f none $PACKAGE_NAME/bin/vglconnect 0755 root bin
+f none $PACKAGE_NAME/bin/vgllogin 0755 root bin
+f none $PACKAGE_NAME/bin/vglrun 0755 root bin
+f none $PACKAGE_NAME/bin/vglgenkey 0755 root bin
+f none $PACKAGE_NAME/bin/vglserver_config 0755 root bin
+f none $PACKAGE_NAME/bin/tcbench 0755 root bin
+f none $PACKAGE_NAME/bin/nettest 0755 root bin
+f none $PACKAGE_NAME/bin/glxinfo 0755 root bin
+d none $PACKAGE_NAME/fakelib 0755 root bin
+d none $PACKAGE_NAME/include 0755 root bin
+f none $PACKAGE_NAME/include/rrtransport.h 0644 root bin
+f none $PACKAGE_NAME/include/rr.h 0644 root bin
+d none $PACKAGE_NAME/lib 0755 root bin
+EOF
+
+if [ ! "$_64BIT" = "1" -o $COMBINED = 1 ]; then
+cat >>$TMPDIR/proto <<EOF
+f none $PACKAGE_NAME/bin/glxspheres 0755 root bin
+f none $PACKAGE_NAME/lib/librrfaker.so 0755 root bin
+f none $PACKAGE_NAME/lib/libdlfaker.so 0755 root bin
+f none $PACKAGE_NAME/lib/libgefaker.so 0755 root bin
+s none $PACKAGE_NAME/fakelib/libGL.so=../lib/librrfaker.so
+EOF
+fi
+
+if [ "$_64BIT" = "1" ]; then
+cat >>$TMPDIR/proto <<EOF
+f none $PACKAGE_NAME/bin/glxspheres64 0755 root bin
+d none $PACKAGE_NAME/$__LIB 0755 root bin
+f none $PACKAGE_NAME/$__LIB/librrfaker.so 0755 root bin
+f none $PACKAGE_NAME/$__LIB/libdlfaker.so 0755 root bin
+f none $PACKAGE_NAME/$__LIB/libgefaker.so 0755 root bin
+s none $PACKAGE_NAME/lib/64=$PKGARCH
+d none $PACKAGE_NAME/fake$__LIB 0755 root bin
+s none $PACKAGE_NAME/fake$__LIB/libGL.so=../../$__LIB/librrfaker.so
+s none $PACKAGE_NAME/fakelib/64=$PKGARCH
+EOF
+fi
+
+echo d none $PACKAGE_NAME/doc 0755 root bin >>$TMPDIR/proto
+echo f none $PACKAGE_NAME/doc/LGPL.txt 0644 root bin >>$TMPDIR/proto
+echo f none $PACKAGE_NAME/doc/ChangeLog.txt 0644 root bin >>$TMPDIR/proto
+echo f none $PACKAGE_NAME/doc/index.html 0644 root bin >>$TMPDIR/proto
+PWD=`pwd`
+cd $SRCDIR
+for i in doc/LICENSE*.txt; do echo f none $PACKAGE_NAME/$i 0644 root bin; done >>$TMPDIR/proto
+for i in doc/*.gif; do echo f none $PACKAGE_NAME/$i 0644 root bin; done >>$TMPDIR/proto
+for i in doc/*.png; do echo f none $PACKAGE_NAME/$i 0644 root bin; done >>$TMPDIR/proto
+for i in doc/*.css; do echo f none $PACKAGE_NAME/$i 0644 root bin; done >>$TMPDIR/proto
+cd $PWD
+
+pkgmk -o -r $TMPDIR/opt -d $TMPDIR -a i386 -f $TMPDIR/proto
+pkgtrans -s $TMPDIR $TMPDIR/$PACKAGE_NAME-$VERSION.pkg $PACKAGE_NAME
+bzip2 $TMPDIR/$PACKAGE_NAME-$VERSION.pkg
+cp $TMPDIR/$PACKAGE_NAME-$VERSION.pkg.bz2 . 
+
+exit

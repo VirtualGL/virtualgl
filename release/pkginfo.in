@@ -1,12 +1,12 @@
-ARCH={__PKGARCH}
-PKG={__PKGNAME}
-NAME={__APPNAME} server, client, and diagnostic utilities
-VERSION={__VERSION},REV={__BUILD}
+ARCH=i386
+PKG=@CMAKE_PROJECT_NAME@
+NAME=@CMAKE_PROJECT_NAME@ server, client, and diagnostic utilities
+VERSION=@VERSION@,REV=@BUILD@
 SUNW_PKGVERS=1.0
 DESC=A system which allows real-time remote display of any OpenGL application
 VENDOR=The VirtualGL Project
 HOTLINE=http://www.VirtualGL.org
-EMAIL=dcommander@users.sourceforge.net
+EMAIL=information@virtualgl.org
 MAXINST=1
 CATEGORY=application
 BASEDIR=/opt
