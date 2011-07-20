@@ -91,10 +91,15 @@ set(DEFAULT_OSX_X86_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
 set(OSX_X86_BUILD ${DEFAULT_OSX_X86_BUILD} CACHE PATH
   "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_OSX_X86_BUILD})")
 
+string(REGEX REPLACE "/" ":" VGL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
+string(REGEX REPLACE "^:" "" VGL_MACPREFIX ${VGL_MACPREFIX})
+message(STATUS ${VGL_MACPREFIX})
+
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
 configure_file(release/Description.plist.in pkgscripts/Description.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
+configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 
 add_custom_target(dmg sh pkgscripts/makemacpkg
 	SOURCES pkgscripts/makemacpkg)
