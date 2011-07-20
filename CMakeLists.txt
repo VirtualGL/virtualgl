@@ -77,7 +77,7 @@ else()
 endif()
 
 # This ensures that we don't depend on libstdc++ or libgcc
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
 	option(VGL_BUILDSTATIC
 		"Link statically against libgcc and libstdc++, if possible" ON)
 	if(VGL_BUILDSTATIC)
@@ -98,13 +98,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/staticlib)
 			execute_process(COMMAND ${CMAKE_COMMAND} -E remove
 				${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-			if(CYGWIN)
-				execute_process(COMMAND ${CMAKE_COMMAND} -E	copy
-					${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-			else()
-				execute_process(COMMAND ${CMAKE_COMMAND} -E	create_symlink
-					${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
-			endif()
+			execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+				${LIBSTDCPLUSPLUS} ${CMAKE_BINARY_DIR}/staticlib/libstdc++.a)
 			set(CMAKE_EXE_LINKER_FLAGS
 				"${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_BINARY_DIR}/staticlib")
 			set(CMAKE_SHARED_LINKER_FLAGS
