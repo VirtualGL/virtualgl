@@ -14,17 +14,17 @@ All Systems
 -- CMake (http://www.cmake.org) v2.8 or later
 
 -- If building SSL support:
-   * OpenSSL (see "Building SSL Support" below)
+   * OpenSSL (http://www.OpenSSL.org) -- see "Building SSL Support" below
 
 -- libjpeg-turbo SDK v1.1.1 or later
    * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
      area of http://sourceforge.net/projects/libjpeg-turbo/
    * The VirtualGL build system will search for the TurboJPEG/OSS header and
-     library under /opt/libjpeg-turbo on Unix or c:\libjpeg-turbo[64] on
-     Windows, but you can override this by setting the TJPEG_INCLUDE_DIR
-     CMake variable to the directory containing turbojpeg.h and the 
-     TJPEG_LIBRARY CMake variable to the full path of the TurboJPEG/OSS library
-     against which you want to link.
+     library under /opt/libjpeg-turbo on Unix (including Cygwin) or
+     c:\libjpeg-turbo[64] on Windows, but you can override this by setting the
+     TJPEG_INCLUDE_DIR CMake variable to the directory containing turbojpeg.h
+     and the TJPEG_LIBRARY CMake variable to the full path of the TurboJPEG/OSS
+     library against which you want to link.
 
 
 Linux
@@ -144,6 +144,13 @@ minimum, the following 32-bit libraries:
      > sudo getlibs -p libxau-dev
      > sudo getlibs -p libglu1-mesa-dev
 
+-- Out of the box, Red Hat Enterprise Linux 6 does not contain 32-bit libraries
+   at all.  See
+
+   http://www.virtualgl.org/Documentation/RHEL6
+
+   for instructions on how to install 32-bit libraries on that platform.
+
 If for some reason your preferred 64-bit Linux distribution does not contain
 one or more of the necessary 32-bit prerequisites, then:
 
@@ -154,8 +161,8 @@ one or more of the necessary 32-bit prerequisites, then:
       and the glibc dev. kit to match the 64-bit versions that are already
       installed on your system.  You may have to use 'rpm --force' to force the
       install of the 32-bit development packages, since they might contain
-      header files which conflict with the 64-bit development packages that
-      are already installed.  On Debian-based systems, you will need to use
+      some of the same files as the 64-bit development packages that are
+      already installed.  On Debian-based systems, you will need to use
       'dpkg --force-architecture' to force the installation of i386 packages
       on an amd64 system.  See item (1) above.
 
@@ -186,7 +193,7 @@ The following procedure will build the VirtualGL Client and, on Linux and
 Solaris systems, the VirtualGL Server components.  On most 64-bit systems
 (Solaris being a notable exception), this will build a 64-bit version of
 VirtualGL.  See "Build Recipes" for specific instructions on how to build a
-32-bit or 64-bit version of VirtualGL on 64-bit systems.
+32-bit or 64-bit version of VirtualGL on systems that support both.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
@@ -233,7 +240,7 @@ Building Secure Sockets Layer (SSL) Support
 ===========================================
 
 If built with SSL support, VirtualGL can use OpenSSL to encrypt the traffic it
-sends and received via the VGL Transport.  This is only a marginally useful
+sends and receives via the VGL Transport.  This is only a marginally useful
 feature, however, since VirtualGL can also tunnel the VGL Transport through
 SSH.  To enable SSL support, set the VGL_USESSL CMake variable to 1.
 
@@ -246,7 +253,7 @@ binaries are not necessarily portable.  On other platforms, there is no system
 version of OpenSSL to link against, so it's a moot point.  Thus, to build a
 fully portable, cross-compatible version of VirtualGL with SSL support, it is
 necessary on most systems to link against the OpenSSL static libraries.  The
-following sections describe how to do that on various operating systems.
+following sections describe how to do that on various platforms.
 
 
 Linux
@@ -512,11 +519,6 @@ If using NMake:
 
   cd {build_directory}
   nmake installer
-
-If using MinGW:
-
-  cd {build_directory}
-  make installer
 
 If using the Visual Studio IDE, build the "installer" project.
 
