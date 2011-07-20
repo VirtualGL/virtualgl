@@ -27,7 +27,8 @@ PACKAGE_NAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 SRCDIR=@CMAKE_SOURCE_DIR@
-PREFIX=`dirname @CMAKE_INSTALL_PREFIX@//dummy`
+BINDIR=@CMAKE_BINARY_DIR@
+PREFIX=@CMAKE_INSTALL_PREFIX@
 BUILDDIR32=@OSX_X86_BUILD@
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
@@ -92,7 +93,7 @@ mkdir -p $TMPDIR/pkg/Resources
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
 cp pkgscripts/Description.plist $TMPDIR/pkg/
 cp pkgscripts/Info.plist $TMPDIR/pkg/
-install -m 755 pkgscripts/uninstall $PKGROOT/opt/$PACKAGE_NAME/bin/
+install -m 755 pkgscripts/uninstall $PKGROOT$PREFIX/bin/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
 chmod 775 $PKGROOT/Applications
@@ -107,7 +108,7 @@ mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
 	-f $PKGROOT -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
-install -m 644 $SRCDIR/release/uninstall.applescript $TMPDIR
+install -m 644 $BINDIR/pkgscripts/uninstall.applescript $TMPDIR
 sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
