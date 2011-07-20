@@ -60,10 +60,18 @@ endif()
 
 configure_file(release/VirtualGL.nsi.in pkgscripts/VirtualGL.nsi @ONLY)
 
-add_custom_target(installer
-	makensis -nocd ${INST_DEFS} pkgscripts/VirtualGL.nsi
-	DEPENDS vglclient tcbench nettest putty plink
-	SOURCES pkgscripts/VirtualGL.nsi)
+if(MSVC_IDE)
+	add_custom_target(installer
+		COMMAND ${CMAKE_COMMAND} -E make_directory @CMAKE_BINARY_DIR@/${CMAKE_CFG_INTDIR}
+		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/VirtualGL.nsi
+		DEPENDS vglclient tcbench nettest putty plink
+		SOURCES pkgscripts/VirtualGL.nsi)
+else()
+	add_custom_target(installer
+		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/VirtualGL.nsi
+		DEPENDS vglclient tcbench nettest putty plink
+		SOURCES pkgscripts/VirtualGL.nsi)
+endif()
 
 endif() # WIN32
 
