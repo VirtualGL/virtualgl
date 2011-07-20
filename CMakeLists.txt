@@ -2,7 +2,7 @@
 # Setup
 #
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 
 include(CheckCSourceCompiles)
@@ -143,6 +143,19 @@ endif()
 
 if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 	add_definitions(-mt -norunpath)
+endif()
+
+option(VGL_USESSL
+	"Enable SSL (Secure Sockets Layer) encryption feature in the VGL Transport"
+	OFF)
+if(VGL_USESSL)
+	include(FindOpenSSL)
+	if(NOT OPENSSL_FOUND)
+		message(STATUS "OpenSSL not found.  Disabling SSL support.")
+	else()
+		add_definitions(-DUSESSL)
+		include_directories(${OPENSSL_INCLUDE_DIR})
+	endif()
 endif()
 
 if(UNIX)
