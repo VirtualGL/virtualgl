@@ -171,7 +171,13 @@ if(VGL_BUILDSERVER)
 		${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" dl pthread)
 
 	add_library(vgltrans_test SHARED testplugin.cpp rrdisplayclient.cpp)
-	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs")
+	if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+		# Work around this issue:
+		# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
+		set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs -Wl,-Bsymbolic")
+	else()
+		set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs")
+	endif()
 	target_link_libraries(vgltrans_test rrutil ${TJPEG_LIBRARY} rrsocket)
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 		target_link_libraries(vgltrans_test stdc++)
