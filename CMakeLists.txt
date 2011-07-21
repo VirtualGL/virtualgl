@@ -122,6 +122,13 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	if(NOT APPLE)
 		set(MAPFLAG "-Wl,--version-script,")
 	endif()
+	# Use the maximum optimization level for release builds
+	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
+		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		if(${var} MATCHES "-O2")
+			string(REGEX REPLACE "-O2" "-O3" ${var} "${${var}}")
+		endif()
+	endforeach()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -141,6 +148,16 @@ endif()
 
 if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 	add_definitions(-mt -norunpath)
+	# Use the maximum optimization level for release builds
+	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
+		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		if(${var} MATCHES "-xO3")
+			string(REGEX REPLACE "-xO3" "-xO5" ${var} "${${var}}")
+		endif()
+		if(${var} MATCHES "-xO2")
+			string(REGEX REPLACE "-xO2" "-xO5" ${var} "${${var}}")
+		endif()
+	endforeach()
 endif()
 
 option(VGL_USESSL
