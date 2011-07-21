@@ -114,6 +114,9 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
 	endif()
 endif()
 
+# Don't build RPATH into libraries generated in the build directory
+set(CMAKE_SKIP_BUILD_RPATH 1)
+
 if(CMAKE_COMPILER_IS_GNUCC)
 	add_definitions(-D_GNU_SOURCE)
 	if(NOT APPLE)
