@@ -249,36 +249,45 @@ link libraries and include files installed in the standard system locations,
 then the VirtualGL build system should detect the system version of OpenSSL
 automatically and link against it.  However, this produces a version of
 VirtualGL that depends on the OpenSSL dynamic libraries, and thus the VirtualGL
-binaries are not necessarily portable.  On other platforms, there is no system
-version of OpenSSL to link against, so it's a moot point.  Thus, to build a
-fully portable, cross-compatible version of VirtualGL with SSL support, it is
-necessary on most systems to link against the OpenSSL static libraries.  The
-following sections describe how to do that on various platforms.
+binaries are not necessarily portable.  On Windows platforms, there is no
+system version of OpenSSL to link against, so it's a moot point.  Thus, to
+build a fully portable, cross-compatible version of VirtualGL with SSL support,
+it is necessary on most systems to link against the OpenSSL static libraries.
+The following sections describe how to do that on various platforms.
 
 
 Linux
 -----
 
-There is generally no sane way to statically link with OpenSSL on Linux.  Some
-distributions of Linux ship with the OpenSSL static libraries, but these
-usually depend on Kerberos, which introduces a long list of dependencies, some
-of which aren't available in static library form.  Attempts to build the
-OpenSSL libraries from source, as of this writing, resulted in various
-problems.  The primary show-stopper is that some objects in OpenSSL are not
-built with PIC support despite configuring the build with the "shared" option,
-and thus the resulting libraries cannot be linked into librrfaker.so.
+There is generally no sane way to statically link with OpenSSL on Linux without
+building OpenSSL from source.  Some distributions of Linux ship with the
+OpenSSL static libraries, but these usually depend on Kerberos, which
+introduces a long list of dependencies, some of which aren't available in
+static library form.  To build OpenSSL from source:
 
-Theoretically, however, if you are successful in building a static version of
-OpenSSL for Linux, then you can manipulate the OPENSSL_INCLUDE_DIR,
-OPENSSL_SSL_LIBRARIES, and OPENSSL_CRYPTO_LIBRARIES CMake variables to link
-VirtualGL against your custom OpenSSL build.  For instance, adding
+* Download the latest OpenSSL source tarball from http://www.OpenSSL.org
+* Extract the tarball
+* cd to the OpenSSL source directory and issue one of the following commands to
+  configure the OpenSSL build:
 
-  -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/openssl/include \
-    -DOPENSSL_SSL_LIBRARIES=/opt/openssl/lib/libssl.a \
-    -DOPENSSL_CRYPTO_LIBRARIES=/opt/openssl/lib/libcrypto.a
+  64-bit:
+  ./Configure linux-x86_64 shared no-krb5 no-dso
+
+  32-bit:
+  ./Configure -m32 linux-generic32 shared no-krb5 no-dso
+
+* make
+
+You can then manipulate the OPENSSL_INCLUDE_DIR, OPENSSL_SSL_LIBRARIES, and
+OPENSSL_CRYPTO_LIBRARIES CMake variables to link VirtualGL against your custom
+OpenSSL build.  For instance, adding
+
+  -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=~/openssl/include \
+    -DOPENSSL_SSL_LIBRARIES=~/openssl/libssl.a \
+    -DOPENSSL_CRYPTO_LIBRARIES=~/openssl/libcrypto.a
 
 to the CMake command line will cause VirtualGL to be statically linked against
-a custom installation of OpenSSL that resides under /opt/openssl.
+a custom build of OpenSSL that resides under ~/openssl.
 
 
 Mac
