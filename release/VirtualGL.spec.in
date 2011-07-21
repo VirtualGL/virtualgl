@@ -52,7 +52,7 @@ Ertl 2000.)
 #-->%setup -q
 
 #-->%build
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_USEXV=@VGL_USEXV@ .
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ .
 #-->make
 
 %install
