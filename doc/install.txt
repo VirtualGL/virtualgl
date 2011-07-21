@@ -78,7 +78,7 @@
 ** Installing the VirtualGL Client on Windows (Exceed)
 
 	#. Download the VirtualGL Client for Exceed installer package
-		(''VirtualGL-''__''{version}''__''.exe'') from the
+		(''VirtualGL[64]-''__''{version}''__''.exe'') from the
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 

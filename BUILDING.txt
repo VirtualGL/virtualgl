@@ -147,8 +147,6 @@ one or more of the necessary 32-bit prerequisites, then:
    * Open the DMG file and double-click on the package inside to install
      libjpeg-turbo.
 
--- Quicktime and CoreAudio SDK's (PowerPC-based Macs only)
-
 -- On 64-bit OS X systems, VirtualGL can be built as a 64-bit binary, but this
    is not the default.  To build a 64-bit Mac binary, pass an argument of
    "subplatform=64" to 'make' when performing the build:
@@ -362,9 +360,7 @@ Prerequisites
 **     Building VirtualGL on Cygwin
 *******************************************************************************
 
-You should be able to build and run the VirtualGL client on Cygwin, although
-this configuration has not been thoroughly tested.  To build VirtualGL on
-Cygwin:
+To build VirtualGL on Cygwin:
 
 -- Install the following Cygwin packages if they aren't already installed:
    gcc
