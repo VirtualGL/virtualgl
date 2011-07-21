@@ -11,10 +11,11 @@
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		{nl}
-		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
-		"x86_64" RPM and "amd64" DEB packages are for 64-bit systems.  The 64-bit
-		packages also contain 32-bit VirtualGL server components, which can be used
-		to run 32-bit OpenGL applications on 64-bit servers.
+		!!! If you wish to run both 32-bit and 64-bit OpenGL applications using
+		VirtualGL on 64-bit Linux systems, you will need to install both the i386
+		and x86_64 VirtualGL RPMs or both the "VirtualGL" and "VirtualGL32" amd64
+		DEBs.  (The VirtualGL32 DEB is a supplementary package that contains only
+		the 32-bit server components.)
 
 	2. Log in as root, cd to the directory where you downloaded the binary
 		package, and issue the following commands:
@@ -78,7 +79,7 @@
 ** Installing the VirtualGL Client on Windows (Exceed)
 
 	#. Download the VirtualGL Client for Exceed installer package
-		(''VirtualGL-''__''{version}''__''.exe'') from the
+		(''VirtualGL[64]-''__''{version}''__''.exe'') from the
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
@@ -132,8 +133,9 @@ package available, then log in as root, download the VirtualGL source tarball
 (''VirtualGL-''__''{version}''__''.tar.gz'') from the 
 [[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
-uncompress it, ''cd vgl'', and read the contents of ''BUILDING.txt'' for
-further instructions on how to build and install VirtualGL from source.
+uncompress it, ''cd VirtualGL-''__''{version}''__, and read the contents of
+''BUILDING.txt'' for further instructions on how to build and install VirtualGL
+from source.
 
 ** Uninstalling VirtualGL
 

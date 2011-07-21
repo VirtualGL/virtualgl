@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-07-14T04:45:14">
+<meta name="date" content="2011-07-20T21:50:13">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -765,7 +765,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0021"></a>. <br />
         <div class="important"><p class="important">
-        The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages also contain 32-bit VirtualGL server components, which can be used to run 32-bit OpenGL applications on 64-bit servers.
+        If you wish to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;VirtualGL&rdquo; and &ldquo;VirtualGL32&rdquo; amd64 DEBs.  (The VirtualGL32 DEB is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -870,7 +870,7 @@ pkgadd&nbsp;-d&nbsp;VirtualGL*.pkg
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the VirtualGL Client for Exceed installer package 
-        (<code>VirtualGL-</code><em><code>{version}</code></em><code>.exe</code>) 
+        (<code>VirtualGL[64]-</code><em><code>{version}</code></em><code>.exe</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
         area</a></span><a name="idx0026"></a> of the 
@@ -943,9 +943,9 @@ from the
 area</a></span><a name="idx0030"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
 SourceForge project page</a></span><a name="idx0031"></a>, uncompress 
-it, <code>cd&nbsp;vgl</code>, and read the contents of 
-<code>BUILDING.txt</code> for further instructions on how to build and 
-install VirtualGL from source.</p>
+it, <code>cd&nbsp;VirtualGL-</code><em><code>{version}</code></em>, and 
+read the contents of <code>BUILDING.txt</code> for further instructions 
+on how to build and install VirtualGL from source.</p>
 
 
 
