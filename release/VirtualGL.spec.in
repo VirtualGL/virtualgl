@@ -11,7 +11,7 @@
 # Prefix in which everything else (except docs) should be stored
 %define prefix @CMAKE_INSTALL_PREFIX@
 
-%define syspkg %(test ! "%{prefix}" = "%{sysprefix}" && echo 1 || echo 0)
+%define usesysdir %(test ! "%{prefix}" = "%{sysprefix}" && echo 1 || echo 0)
 
 %define docsymlink %(test ! "%{prefix}" = "`dirname %{_defaultdocdir}`" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0)
 
@@ -25,7 +25,7 @@ Group: Applications/Graphics
 Release: @BUILD@
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
-Prereq: /sbin/ldconfig, /usr/bin/perl
+Prereq: /sbin/ldconfig
 Provides: %{name} = %{version}-%{release}
 
 %description
@@ -49,13 +49,11 @@ Interactive Hardware Accelerated Remote 3D-Visualization" (Engel, Sommer,
 Ertl 2000.)
 
 #-->%prep
-#-->%setup -q -n vgl
+#-->%setup -q
 
 #-->%build
-#-->make DISTRO=
-#-->%ifarch x86_64
-#-->make M32=yes DISTRO=
-#-->%endif
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_USEXV=@VGL_USEXV@ .
+#-->make
 
 %install
 
@@ -67,7 +65,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 mv $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres64
 %endif
 
-%if %{syspkg}
+%if %{usesysdir}
 
 mkdir -p $RPM_BUILD_ROOT/%{sysprefix}/bin
 %ifarch x86_64
@@ -150,7 +148,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %else
  %{prefix}/bin/glxspheres
 %endif
-%if %{syspkg}
+%if %{usesysdir}
  %{sysprefix}/bin/vglclient
  %{sysprefix}/bin/vglconfig
  %{sysprefix}/bin/vglconnect
@@ -175,7 +173,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %dir %{prefix}/include
 %{prefix}/include/rrtransport.h
 %{prefix}/include/rr.h
-%if %{syspkg}
+%if %{usesysdir}
  %{sysprefix}/include/rrtransport.h
  %{sysprefix}/include/rr.h
 %endif
@@ -184,7 +182,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
  %{sysprefix}/lib64/librrfaker.so
  %{sysprefix}/lib64/libdlfaker.so
  %{sysprefix}/lib64/libgefaker.so
- %if %{syspkg}
+ %if %{usesysdir}
  %else
   %dir %{prefix}/lib64
  %endif
@@ -192,7 +190,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
  %{sysprefix}/lib/librrfaker.so
  %{sysprefix}/lib/libdlfaker.so
  %{sysprefix}/lib/libgefaker.so
- %if %{syspkg}
+ %if %{usesysdir}
  %else
   %dir %{prefix}/lib
  %endif
