@@ -32,6 +32,9 @@ OpenGL context differed from that of a context that was previously applied to
 the same drawable.  This specifically was known to affect D3D applications
 running in WINE.
 -------------------------------------------------------------------------------
+[7]
+CMake-based build and packaging system
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
