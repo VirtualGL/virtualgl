@@ -15,7 +15,7 @@ Group: Applications/Graphics
 Release: %{_build}
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
-Prereq: /sbin/ldconfig, /usr/bin/perl
+Prereq: /sbin/ldconfig
 Provides: %{name} = %{version}-%{release}
 
 %description
