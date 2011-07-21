@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+if [ -f @CMAKE_PROJECT_NAME@-@VERSION@.tar.gz ]; then
+	rm -f @CMAKE_PROJECT_NAME@-@VERSION@.tar.gz
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/@CMAKE_PROJECT_NAME@-build.XXXXXX`
+
+pushd @CMAKE_SOURCE_DIR@
+CVSTAG=`cvs status ChangeLog.txt | grep "Sticky Tag" | awk '{print $3}'`
+if [ "$CVSTAG" = "(none)" ]; then
+	CVSTAG=HEAD
+fi
+popd
+
+pushd $TMPDIR
+cvs -Q -d:pserver:anonymous@virtualgl.cvs.sourceforge.net:/cvsroot/virtualgl export -r $CVSTAG vgl
+mv vgl @CMAKE_PROJECT_NAME@-@VERSION@
+tar -z -cf @CMAKE_PROJECT_NAME@-@VERSION@.tar.gz @CMAKE_PROJECT_NAME@-@VERSION@
+popd
+
+mv $TMPDIR/@CMAKE_PROJECT_NAME@-@VERSION@.tar.gz .
+
+exit

@@ -163,3 +163,17 @@ add_custom_target(csolarispkg sh pkgscripts/makesolarispkg combined
 
 endif() # SunOS
 
+
+#
+# Generic
+#
+
+configure_file(release/makesrctarball.in pkgscripts/makesrctarball)
+
+add_custom_target(srctarball sh pkgscripts/makesrctarball
+	SOURCES pkgscripts/makesrctarball)
+
+configure_file(release/makesrpm.in pkgscripts/makesrpm)
+
+add_custom_target(srpm sh pkgscripts/makesrpm
+	SOURCES pkgscripts/makesrpm)
