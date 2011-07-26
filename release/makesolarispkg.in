@@ -45,10 +45,17 @@ cp $SRCDIR/release/copyright $TMPDIR
 touch $TMPDIR/depend
 cp pkgscripts/pkginfo $TMPDIR/pkginfo 
 
+PKGID=solaris
 if [ "$_64BIT" = "1" ]; then
 	__LIB=lib/$PKGARCH
+	if [ "$PKGARCH" = "amd64" ]; then
+		PKGID=solarisx64
+	fi
 else
 	__LIB=lib
+	if [ "$PKGARCH" = "i386" ]; then
+		PKGID=solarisx86
+	fi
 fi
 
 if [ "$PREFIX" != "/opt/$PACKAGE_NAME" ]; then
@@ -150,6 +157,6 @@ cd $PWD
 pkgmk -o -r $TMPDIR/opt -d $TMPDIR -a i386 -f $TMPDIR/proto
 pkgtrans -s $TMPDIR $TMPDIR/$PACKAGE_NAME-$VERSION.pkg $PACKAGE_NAME
 bzip2 $TMPDIR/$PACKAGE_NAME-$VERSION.pkg
-cp $TMPDIR/$PACKAGE_NAME-$VERSION.pkg.bz2 . 
+cp $TMPDIR/$PACKAGE_NAME-$VERSION.pkg.bz2 $PACKAGE_NAME-$VERSION-$PKGID.pkg.bz2
 
 exit
