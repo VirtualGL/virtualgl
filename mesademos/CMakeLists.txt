@@ -18,14 +18,14 @@ target_link_libraries(glxinfo ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 if(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
 	target_link_libraries(glxinfo Xmu)
 endif()
-install(TARGETS glxinfo DESTINATION ${BINDIR})
+install(TARGETS glxinfo DESTINATION ${VGL_BINDIR})
 
 foreach(program glxspheres offset)
 	add_executable(${program} ${program}.c)
 	target_link_libraries(${program} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 		${OPENGL_glu_LIBRARY} m)
 endforeach()
-install(TARGETS glxspheres DESTINATION ${BINDIR})
+install(TARGETS glxspheres DESTINATION ${VGL_BINDIR})
 
 foreach(program pbdemo pbinfo)
 	add_executable(${program} ${program}.c pbutil.c)

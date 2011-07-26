@@ -48,6 +48,21 @@ add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 
 message(STATUS "Install prefix = ${CMAKE_INSTALL_PREFIX}")
 
+set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
+if(WIN32)
+	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX})
+else()
+	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
+endif()
+
+set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
+	"Directory into which to install executables and scripts (default: ${DEFAULT_VGL_BINDIR})")
+set(VGL_DOCDIR ${DEFAULT_VGL_DOCDIR} CACHE PATH
+	"Directory into which to install docs (default: ${DEFAULT_VGL_DOCDIR})")
+
+message(STATUS "Binary directory = ${VGL_BINDIR}")
+message(STATUS "Doc directory = ${VGL_DOCDIR}")
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if(MSVC)
@@ -236,12 +251,6 @@ endif()
 #
 # Targets
 #
-
-if(WIN32)
-	set(BINDIR .)
-else()
-	set(BINDIR bin)
-endif()
 
 set(DEFAULT_VGL_BUILDSERVER 0)
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"

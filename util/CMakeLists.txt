@@ -24,7 +24,7 @@ target_link_libraries(nettest rrsocket)
 if(${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
 	target_link_libraries(nettest -lkstat)
 endif()
-install(TARGETS nettest DESTINATION ${BINDIR})
+install(TARGETS nettest DESTINATION ${VGL_BINDIR})
 
 add_library(fbx STATIC fbx.c)
 
