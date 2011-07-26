@@ -53,9 +53,8 @@ uid() {
 }
 
 maketemp() {
-	TMP_FILE=/tmp/$1.$RANDOM.$RANDOM.$RANDOM.$$
-	(umask 077;  touch $TMP_FILE) || exit 1
-	echo $TMP_FILE
+	umask 077
+	mktemp $1.XXXXXX || exit 1
 }
 
 removeline() {
