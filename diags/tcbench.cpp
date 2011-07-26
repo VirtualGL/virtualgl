@@ -36,6 +36,9 @@
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
 #define fbx(a) {if((a)==-1)_throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
 
+#define DEFSAMPLERATE 100
+#define DEFBENCHTIME 30.0
+
 void usage(void)
 {
 	printf("\nUSAGE: %s [-h|-?] -t<seconds> -s<samples per second>\n",
@@ -43,8 +46,10 @@ void usage(void)
 	printf("       -wh<window handle in hex>\n");
 	printf("       -x<x offset> -y<y offset>\n\n");
 	printf("-h or -? = This help screen\n");
-	printf("-t = Run the benchmark for this many seconds\n");
-	printf("-s = Sample the window this many times per second\n");
+	printf("-t = Run the benchmark for this many seconds (default: %.1f)\n",
+		DEFBENCHTIME);
+	printf("-s = Sample the window this many times per second (default: %d)\n",
+		DEFSAMPLERATE);
 	printf("-wh = Explicitly specify a window (if auto-detect fails)\n");
 	printf("-x = x coordinate (relative to window) of the sampling block\n");
 	printf("-y = y coordinate (relative to window) of the sampling block\n");
@@ -55,8 +60,8 @@ void usage(void)
 int main(int argc, char **argv)
 {
 	int i;  fbx_wh wh;
-	double benchtime=30.0, benchstart=0., benchend;  rrtimer timer;
-	int samplerate=50, xcoord=-1, ycoord=-1;
+	double benchtime=DEFBENCHTIME, benchstart=0., benchend;  rrtimer timer;
+	int samplerate=DEFSAMPLERATE, xcoord=-1, ycoord=-1;
 
 	program_name=argv[0];
 	memset(&wh, 0, sizeof(wh));
