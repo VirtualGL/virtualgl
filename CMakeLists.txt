@@ -263,14 +263,22 @@ option(VGL_BUILDSERVER "Build VirtualGL server components"
 if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
 
+	if(64BIT)
+		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib/64)
+	else()
+		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib)
+	endif()
 	set(DEFAULT_VGL_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
 	set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
 
+	set(VGL_FAKELIBDIR ${DEFAULT_VGL_FAKELIBDIR} CACHE PATH
+		"Directory into which to install the libGL symlinks for Chromium (default: ${DEFAULT_VGL_FAKELIBDIR})")
 	set(VGL_INCDIR ${DEFAULT_VGL_INCDIR} CACHE PATH
 		"Directory into which to install the VirtualGL transport API headers (default: ${DEFAULT_VGL_INCDIR})")
 	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
 		"Directory into which to install the VirtualGL faker libraries (default: ${DEFAULT_VGL_LIBDIR})")
 
+	message(STATUS "Chromium libGL symlinks installed in:  ${VGL_FAKELIBDIR}")
 	message(STATUS "Transport API headers installed in:  ${VGL_INCDIR}")
 	message(STATUS "Faker libraries installed in:  ${VGL_LIBDIR}")
 

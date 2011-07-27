@@ -47,16 +47,11 @@ if(VGL_BUILDSERVER)
 		target_link_libraries(rrfaker stdc++)
 	endif()
 	install(TARGETS rrfaker DESTINATION ${VGL_LIBDIR})
-	if(64BIT)
-		set(FAKELIBDIR fakelib/64)
-	else()
-		set(FAKELIBDIR fakelib)
-	endif()
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-		\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${FAKELIBDIR})")
+		\$ENV{DESTDIR}${VGL_FAKELIBDIR})")
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
 		${VGL_LIBDIR}/librrfaker.so
-		\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${FAKELIBDIR}/libGL.so)")
+		\$ENV{DESTDIR}${VGL_FAKELIBDIR}/libGL.so)")
 
 	add_library(dlfaker SHARED dlfaker.c)
 	target_link_libraries(dlfaker dl)
@@ -69,15 +64,6 @@ if(VGL_BUILDSERVER)
 
 	set(HEADERS rr.h rrtransport.h)
 	install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
-	if(NOT VGL_INCDIR STREQUAL DEFAULT_VGL_INCDIR)
-		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-			\$ENV{DESTDIR}${DEFAULT_VGL_INCDIR})")
-		foreach(header ${HEADERS})
-			install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-				${VGL_INCDIR}/${header}
-				\$ENV{DESTDIR}${DEFAULT_VGL_INCDIR}/${header})")
-		endforeach()
-	endif()
 
 	add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
 	target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static pthread rrutil)
