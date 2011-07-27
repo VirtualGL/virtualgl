@@ -20,7 +20,7 @@ find_path(TJPEG_INCLUDE_DIR turbojpeg.h
 if(TJPEG_INCLUDE_DIR STREQUAL "TJPEG_INCLUDE_DIR-NOTFOUND")
 	message(FATAL_ERROR "Could not find turbojpeg.h in ${DEFAULT_TJPEG_INCLUDE_DIR}.  If it is installed in a different place, then set TJPEG_INCLUDE_DIR accordingly.")
 else()
-	message(STATUS "TurboJPEG header: ${TJPEG_INCLUDE_DIR}")
+	message(STATUS "TJPEG_INCLUDE_DIR = ${TJPEG_INCLUDE_DIR}")
 endif()
 include_directories(${TJPEG_INCLUDE_DIR})
 
@@ -54,4 +54,4 @@ if(NOT TURBOJPEG_WORKS)
 	message(FATAL_ERROR "Could not link with TurboJPEG library ${TJPEG_LIBRARY}.  If it is installed in a different place, then set TJPEG_LIBRARY accordingly.")
 endif()
 
-message(STATUS "TurboJPEG library: ${TJPEG_LIBRARY}")
+message(STATUS "TJPEG_LIBRARY = ${TJPEG_LIBRARY}")

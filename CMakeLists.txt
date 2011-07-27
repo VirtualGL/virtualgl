@@ -46,7 +46,7 @@ message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 	-D__APPNAME="${CMAKE_PROJECT_NAME}")
 
-message(STATUS "Install prefix:  ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
 if(WIN32)
@@ -60,8 +60,8 @@ set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
 set(VGL_DOCDIR ${DEFAULT_VGL_DOCDIR} CACHE PATH
 	"Directory into which to install docs (default: ${DEFAULT_VGL_DOCDIR})")
 
-message(STATUS "Executables/scripts installed in:  ${VGL_BINDIR}")
-message(STATUS "Docs installed in:  ${VGL_DOCDIR}")
+message(STATUS "VGL_BINDIR = ${VGL_BINDIR}")
+message(STATUS "VGL_DOCDIR = ${VGL_DOCDIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -278,9 +278,9 @@ if(VGL_BUILDSERVER)
 	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
 		"Directory into which to install the VirtualGL faker libraries (default: ${DEFAULT_VGL_LIBDIR})")
 
-	message(STATUS "Chromium libGL symlinks installed in:  ${VGL_FAKELIBDIR}")
-	message(STATUS "Transport API headers installed in:  ${VGL_INCDIR}")
-	message(STATUS "Faker libraries installed in:  ${VGL_LIBDIR}")
+	message(STATUS "VGL_FAKELIBDIR = ${VGL_FAKELIBDIR}")
+	message(STATUS "VGL_INCDIR = ${VGL_INCDIR}")
+	message(STATUS "VGL_LIBDIR = ${VGL_LIBDIR}")
 
 	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 		add_definitions(-KPIC)
