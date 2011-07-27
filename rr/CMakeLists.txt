@@ -24,6 +24,8 @@ if(VGL_BUILDSERVER)
 			> ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
 
+	configure_file(fakerconfig.h.in fakerconfig.h)
+	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 	set(RRFAKER_SOURCES faker.cpp faker-sym.cpp pbdrawable.cpp pbwin.cpp
 		pbpm.cpp glxvisual.cpp rrblitter.cpp rrdisplayclient.cpp rrplugin.cpp
 		fakerconfig.cpp)

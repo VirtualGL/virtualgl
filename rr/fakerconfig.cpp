@@ -152,7 +152,7 @@ static void fconfig_init(void)
 	memset(&fconfig, 0, sizeof(FakerConfig));
 	memset(&fcenv, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
-	strncpy(fconfig.config, "/opt/VirtualGL/bin/vglconfig", MAXSTR);
+	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
 	fconfig.forcealpha=-1;
 	#ifdef SUNOGL
 	fconfig_setgamma(fconfig, 2.22);

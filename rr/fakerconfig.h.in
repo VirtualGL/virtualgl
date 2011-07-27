@@ -23,6 +23,8 @@
 #endif
 #endif
 
+#define VGLCONFIG_PATH "@VGL_BINDIR@/vglconfig"
+
 FakerConfig *fconfig_instance(void);
 void fconfig_deleteinstance(void);
 
