@@ -268,5 +268,6 @@ features:
 	on the performance of interactive applications in a VirtualGL environment.
 
 GLXSpheres is installed in ''/opt/VirtualGL/bin'' on Linux and Solaris
-VirtualGL servers.  64-bit VirtualGL packages contain both a 32-bit version
-(''glxpheres'') and a 64-bit version (''glxspheres64''.)
+VirtualGL servers.  64-bit VirtualGL packages name this program
+''glxspheres64'' so as to allow both a 64-bit and a 32-bit version of
+GLXSpheres to be installed on the same system.
