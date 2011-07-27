@@ -46,7 +46,7 @@ message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 	-D__APPNAME="${CMAKE_PROJECT_NAME}")
 
-message(STATUS "Install prefix = ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Install prefix:  ${CMAKE_INSTALL_PREFIX}")
 
 set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
 if(WIN32)
@@ -60,8 +60,8 @@ set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
 set(VGL_DOCDIR ${DEFAULT_VGL_DOCDIR} CACHE PATH
 	"Directory into which to install docs (default: ${DEFAULT_VGL_DOCDIR})")
 
-message(STATUS "Binary directory = ${VGL_BINDIR}")
-message(STATUS "Doc directory = ${VGL_DOCDIR}")
+message(STATUS "Executables/scripts installed in:  ${VGL_BINDIR}")
+message(STATUS "Docs installed in:  ${VGL_DOCDIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -262,6 +262,18 @@ option(VGL_BUILDSERVER "Build VirtualGL server components"
 
 if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
+
+	set(DEFAULT_VGL_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
+	set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
+
+	set(VGL_INCDIR ${DEFAULT_VGL_INCDIR} CACHE PATH
+		"Directory into which to install the VirtualGL transport API headers (default: ${DEFAULT_VGL_INCDIR})")
+	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
+		"Directory into which to install the VirtualGL faker libraries (default: ${DEFAULT_VGL_LIBDIR})")
+
+	message(STATUS "Transport API headers installed in:  ${VGL_INCDIR}")
+	message(STATUS "Faker libraries installed in:  ${VGL_LIBDIR}")
+
 	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 		add_definitions(-KPIC)
 	elseif(CMAKE_COMPILER_IS_GNUCC)

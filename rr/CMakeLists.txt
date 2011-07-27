@@ -46,36 +46,38 @@ if(VGL_BUILDSERVER)
 		# C++ shared libs.  Grrr...
 		target_link_libraries(rrfaker stdc++)
 	endif()
-	install(TARGETS rrfaker DESTINATION lib)
+	install(TARGETS rrfaker DESTINATION ${VGL_LIBDIR})
 	if(64BIT)
 		set(FAKELIBDIR fakelib/64)
 	else()
 		set(FAKELIBDIR fakelib)
 	endif()
-	if(64BIT)
-		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/64)")
-		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-			../../lib/librrfaker.so
-			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/64/libGL.so)")
-	else()
-		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib)")
-		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-			../lib/librrfaker.so
-			\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/fakelib/libGL.so)")
-	endif()
+	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+		\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${FAKELIBDIR})")
+	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+		${VGL_LIBDIR}/librrfaker.so
+		\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${FAKELIBDIR}/libGL.so)")
 
 	add_library(dlfaker SHARED dlfaker.c)
 	target_link_libraries(dlfaker dl)
-	install(TARGETS dlfaker DESTINATION lib)
+	install(TARGETS dlfaker DESTINATION ${VGL_LIBDIR})
 
 	add_library(gefaker SHARED gefaker.c)
 	set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
 	target_link_libraries(gefaker dl)
-	install(TARGETS gefaker DESTINATION lib)
+	install(TARGETS gefaker DESTINATION ${VGL_LIBDIR})
 
-	install(FILES rr.h rrtransport.h DESTINATION include)
+	set(HEADERS rr.h rrtransport.h)
+	install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
+	if(NOT VGL_INCDIR STREQUAL DEFAULT_VGL_INCDIR)
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+			\$ENV{DESTDIR}${DEFAULT_VGL_INCDIR})")
+		foreach(header ${HEADERS})
+			install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+				${VGL_INCDIR}/${header}
+				\$ENV{DESTDIR}${DEFAULT_VGL_INCDIR}/${header})")
+		endforeach()
+	endif()
 
 	add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
 	target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static pthread rrutil)
