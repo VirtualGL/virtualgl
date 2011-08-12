@@ -62,8 +62,6 @@ typedef struct _RRFrame
 #pragma pack()
 #endif
 
-/* THIS API IS SUBJECT TO CHANGE */
-
 #ifndef RRTRANS_NOPROTOTYPES
 
 #ifdef __cplusplus
