@@ -3,7 +3,7 @@ PKG=@CMAKE_PROJECT_NAME@
 NAME=@CMAKE_PROJECT_NAME@ server, client, and diagnostic utilities
 VERSION=@VERSION@,REV=@BUILD@
 SUNW_PKGVERS=1.0
-DESC=A system which allows real-time remote display of any OpenGL application
+DESC=A toolkit for displaying OpenGL applications to thin clients
 VENDOR=The VirtualGL Project
 HOTLINE=http://www.VirtualGL.org
 EMAIL=information@virtualgl.org
