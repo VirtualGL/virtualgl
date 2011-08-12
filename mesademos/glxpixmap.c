@@ -176,11 +176,10 @@ int main( int argc, char *argv[] )
    glClear( GL_COLOR_BUFFER_BIT );
    glViewport( 0, 0, 300, 300 );
    glOrtho( -1.0, 1.0, -1.0, 1.0, -1.0, 1.0 );
-   glColor3f( 0.0, 1.0, 0.0 );
-   glRectf( -0.75, -0.75, 0.75, 0.0 );
-   glColor3f( 0.0, 0.5, 1.0 );
-   glRectf( -0.75, 0.0, 0.75, 0.75 );
+   glColor3f( 0.0, 1.0, 1.0 );
+   glRectf( -0.75, -0.75, 0.75, 0.75 );
    glFlush();
+   glXWaitGL();
 
    XMapWindow( dpy, win );
 

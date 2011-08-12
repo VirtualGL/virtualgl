@@ -6,165 +6,127 @@
  * Written by Brian Paul for the "OpenGL and Window System Integration"
  * course presented at SIGGRAPH '97.  Updated on 5 October 2002.
  *
+ * Updated on 31 January 2004 to use native GLX by
+ * Andrew P. Lentvorski, Jr. <bsder@allcaps.org>
+ *
  * Usage:
- *   pbuffers width height imgfile
+ *   glxpbdemo width height imgfile
  * Where:
  *   width is the width, in pixels, of the image to generate.
  *   height is the height, in pixels, of the image to generate.
  *   imgfile is the name of the PPM image file to write.
  *
  *
- * This demo draws 3-D boxes with random orientation.  A pbuffer with
- * a depth (Z) buffer is prefered but if such a pbuffer can't be created
- * we use a non-depth-buffered config.
+ * This demo draws 3-D boxes with random orientation.
  *
  * On machines such as the SGI Indigo you may have to reconfigure your
  * display/X server to enable pbuffers.  Look in the /usr/gfx/ucode/MGRAS/vof/
- * directory for display configurationswith the _pbuf suffix.  Use
+ * directory for display configurations with the _pbuf suffix.  Use
  * setmon -x <vof> to configure your X server and display for pbuffers.
  *
  * O2 systems seem to support pbuffers well.
  *
- * IR systems (at least 1RM systems) don't have single-buffered, RGBA,
- * Z-buffered pbuffer configs.  BUT, they DO have DOUBLE-buffered, RGBA,
- * Z-buffered pbuffers.  Note how we try four different fbconfig attribute
- * lists below!
  */
 
-
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
-#include "pbutil.h"
-
+#include <GL/glx.h>
 
 /* Some ugly global vars */
+static GLXFBConfig gFBconfig = 0;
 static Display *gDpy = NULL;
 static int gScreen = 0;
-static FBCONFIG gFBconfig = 0;
-static PBUFFER gPBuffer = 0;
+static GLXPbuffer gPBuffer = 0;
 static int gWidth, gHeight;
-static GLXContext glCtx;
+
+
+/*
+ * Test for appropriate version of GLX to run this program
+ * Input:  dpy - the X display
+ *         screen - screen number
+ * Return:  0 = GLX not available.
+ *          1 = GLX available.
+ */
+static int
+RuntimeQueryGLXVersion(Display *dpy, int screen)
+{
+#if defined(GLX_VERSION_1_3) || defined(GLX_VERSION_1_4)
+   char *glxversion;
+ 
+   glxversion = (char *) glXGetClientString(dpy, GLX_VERSION);
+   if (!(strstr(glxversion, "1.3") || strstr(glxversion, "1.4")))
+      return 0;
+
+   glxversion = (char *) glXQueryServerString(dpy, screen, GLX_VERSION);
+   if (!(strstr(glxversion, "1.3") || strstr(glxversion, "1.4")))
+      return 0;
+
+   return 1;
+#else
+   return 0;
+#endif
+}
 
 
 
 /*
  * Create the pbuffer and return a GLXPbuffer handle.
- *
- * We loop over a list of fbconfigs trying to create
- * a pixel buffer.  We return the first pixel buffer which we successfully
- * create.
  */
-static PBUFFER
+static GLXPbuffer
 MakePbuffer( Display *dpy, int screen, int width, int height )
 {
-#define NUM_FB_CONFIGS 4
-   const char fbString[NUM_FB_CONFIGS][100] = {
-      "Single Buffered, depth buffer",
-      "Double Buffered, depth buffer",
-      "Single Buffered, no depth buffer",
-      "Double Buffered, no depth buffer"
-   };
-   int fbAttribs[NUM_FB_CONFIGS][100] = {
-      {
-         /* Single buffered, with depth buffer */
-         GLX_RENDER_TYPE, GLX_RGBA_BIT,
-         GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-         GLX_RED_SIZE, 1,
-         GLX_GREEN_SIZE, 1,
-         GLX_BLUE_SIZE, 1,
-         GLX_DEPTH_SIZE, 1,
-         GLX_DOUBLEBUFFER, 0,
-         GLX_STENCIL_SIZE, 0,
-         None
-      },
-      {
-         /* Double buffered, with depth buffer */
-         GLX_RENDER_TYPE, GLX_RGBA_BIT,
-         GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-         GLX_RED_SIZE, 1,
-         GLX_GREEN_SIZE, 1,
-         GLX_BLUE_SIZE, 1,
-         GLX_DEPTH_SIZE, 1,
-         GLX_DOUBLEBUFFER, 1,
-         GLX_STENCIL_SIZE, 0,
-         None
-      },
-      {
-         /* Single buffered, without depth buffer */
-         GLX_RENDER_TYPE, GLX_RGBA_BIT,
-         GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-         GLX_RED_SIZE, 1,
-         GLX_GREEN_SIZE, 1,
-         GLX_BLUE_SIZE, 1,
-         GLX_DEPTH_SIZE, 0,
-         GLX_DOUBLEBUFFER, 0,
-         GLX_STENCIL_SIZE, 0,
-         None
-      },
-      {
-         /* Double buffered, without depth buffer */
-         GLX_RENDER_TYPE, GLX_RGBA_BIT,
-         GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-         GLX_RED_SIZE, 1,
-         GLX_GREEN_SIZE, 1,
-         GLX_BLUE_SIZE, 1,
-         GLX_DEPTH_SIZE, 0,
-         GLX_DOUBLEBUFFER, 1,
-         GLX_STENCIL_SIZE, 0,
-         None
-      }
-   };
-   Bool largest = True;
-   Bool preserve = False;
-   FBCONFIG *fbConfigs;
-   PBUFFER pBuffer = None;
+   GLXFBConfig *fbConfigs;
+   GLXFBConfig chosenFBConfig;
+   GLXPbuffer pBuffer = None;
+
    int nConfigs;
-   int i;
-   int attempt;
+   int fbconfigid;
 
-   for (attempt=0; attempt<NUM_FB_CONFIGS; attempt++) {
+   int fbAttribs[] = {
+      GLX_RENDER_TYPE, GLX_RGBA_BIT,
+      GLX_DEPTH_SIZE, 1,
+      GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT | GLX_PBUFFER_BIT,
+      None
+   };
 
-      /* Get list of possible frame buffer configurations */
-      fbConfigs = ChooseFBConfig(dpy, screen, fbAttribs[attempt], &nConfigs);
-      if (nConfigs==0 || !fbConfigs) {
-         printf("Note: glXChooseFBConfig(%s) failed\n", fbString[attempt]);
-         continue;
-      }
+   int pbAttribs[] = {
+      GLX_PBUFFER_WIDTH, 0,
+      GLX_PBUFFER_HEIGHT, 0,
+      GLX_LARGEST_PBUFFER, False,
+      GLX_PRESERVED_CONTENTS, False,
+      None
+   };
 
-#if 0 /*DEBUG*/
-      for (i=0;i<nConfigs;i++) {
-         printf("Config %d\n", i);
-         PrintFBConfigInfo(dpy, screen, fbConfigs[i], 0);
-      }
-#endif
+   pbAttribs[1] = width;
+   pbAttribs[3] = height;
 
-      /* Create the pbuffer using first fbConfig in the list that works. */
-      for (i=0;i<nConfigs;i++) {
-         pBuffer = CreatePbuffer(dpy, screen, fbConfigs[i], width, height, preserve, largest);
-         if (pBuffer) {
-            gFBconfig = fbConfigs[i];
-            gWidth = width;
-            gHeight = height;
-            break;
-         }
-      }
+   fbConfigs = glXChooseFBConfig(dpy, screen, fbAttribs, &nConfigs);
 
-      if (pBuffer!=None) {
-         break;
-      }
+   if (0 == nConfigs || !fbConfigs) {
+      printf("Error: glxChooseFBConfig failed\n");
+      XCloseDisplay(dpy);
+      return 0;
    }
 
+   chosenFBConfig = fbConfigs[0];
+
+   glXGetFBConfigAttrib(dpy, chosenFBConfig, GLX_FBCONFIG_ID, &fbconfigid);
+   printf("Chose 0x%x as fbconfigid\n", fbconfigid);
+
+   /* Create the pbuffer using first fbConfig in the list that works. */
+   pBuffer = glXCreatePbuffer(dpy, chosenFBConfig, pbAttribs);
+
    if (pBuffer) {
-      printf("Using: %s\n", fbString[attempt]);
+      gFBconfig = chosenFBConfig;
+      gWidth = width;
+      gHeight = height;
    }
 
    XFree(fbConfigs);
 
    return pBuffer;
-#undef NUM_FB_CONFIGS
 }
 
 
@@ -175,8 +137,8 @@ MakePbuffer( Display *dpy, int screen, int width, int height )
 static int
 Setup(int width, int height)
 {
-   int pbSupport;
-   XVisualInfo *visInfo;
+#if defined(GLX_VERSION_1_3) || defined(GLX_VERSION_1_4)
+   GLXContext glCtx;
 
    /* Open the X display */
    gDpy = XOpenDisplay(NULL);
@@ -188,18 +150,11 @@ Setup(int width, int height)
    /* Get default screen */
    gScreen = DefaultScreen(gDpy);
 
-   /* Test that pbuffers are available */
-   pbSupport = QueryPbuffers(gDpy, gScreen);
-   if (pbSupport == 1) {
-      printf("Using GLX 1.3 Pbuffers\n");
-   }
-   else if (pbSupport == 2) {
-      printf("Using SGIX Pbuffers\n");
-   }
-   else {
-      printf("Error: pbuffers not available on this screen\n");
-      XCloseDisplay(gDpy);
-      return 0;
+   /* Test that GLX is available */
+   if (!RuntimeQueryGLXVersion(gDpy, gScreen)) {
+     printf("Error: GLX 1.3 or 1.4 not available\n");
+     XCloseDisplay(gDpy);
+     return 0;
    }
 
    /* Create Pbuffer */
@@ -210,39 +165,31 @@ Setup(int width, int height)
       return 0;
    }
 
-   /* Get corresponding XVisualInfo */
-   visInfo = GetVisualFromFBConfig(gDpy, gScreen, gFBconfig);
-   if (!visInfo) {
-      printf("Error: can't get XVisualInfo from FBconfig\n");
-      XCloseDisplay(gDpy);
-      return 0;
-   }
-
    /* Create GLX context */
-   glCtx = glXCreateContext(gDpy, visInfo, NULL, True);
-   if (!glCtx) {
-      /* try indirect */
-      glCtx = glXCreateContext(gDpy, visInfo, NULL, False);
-      if (!glCtx) {
-         printf("Error: Couldn't create GLXContext\n");
-         XFree(visInfo);
-         XCloseDisplay(gDpy);
-         return 0;
-      }
-      else {
+   glCtx = glXCreateNewContext(gDpy, gFBconfig, GLX_RGBA_TYPE, NULL, True);
+   if (glCtx) {
+      if (!glXIsDirect(gDpy, glCtx)) {
          printf("Warning: using indirect GLXContext\n");
       }
+   }
+   else {
+      printf("Error: Couldn't create GLXContext\n");
+      XCloseDisplay(gDpy);
+      return 0;
    }
 
    /* Bind context to pbuffer */
    if (!glXMakeCurrent(gDpy, gPBuffer, glCtx)) {
       printf("Error: glXMakeCurrent failed\n");
-      XFree(visInfo);
       XCloseDisplay(gDpy);
       return 0;
    }
 
    return 1;  /* Success!! */
+#else
+   printf("Error: GLX version 1.3 or 1.4 not available at compile time\n");
+   return 0;
+#endif
 }
 
 
@@ -266,6 +213,7 @@ InitGL(void)
    glMatrixMode( GL_MODELVIEW );
    glLoadIdentity();
    glTranslatef( 0.0, 0.0, -15.0 );
+
 }
 
 
@@ -293,7 +241,7 @@ RandomColor(void)
 /* This function borrowed from Mark Kilgard's GLUT */
 static void
 drawBox(GLfloat x0, GLfloat x1, GLfloat y0, GLfloat y1,
-  GLfloat z0, GLfloat z1, GLenum type)
+        GLfloat z0, GLfloat z1, GLenum type)
 {
   static GLfloat n[6][3] =
   {
@@ -358,6 +306,7 @@ Render(void)
    int NumBoxes = 100;
    int i;
 
+   InitGL();
    glClearColor(0.2, 0.2, 0.9, 0.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -467,10 +416,14 @@ main(int argc, char *argv[])
       if (!Setup(width, height)) {
          return 1;
       }
-      InitGL();
+
+      printf("Setup completed\n");
       Render();
+      printf("Render completed.\n");
       WriteFile(fileName);
-      DestroyPbuffer(gDpy, gScreen, gPBuffer);
+      printf("File write completed.\n");
+
+      glXDestroyPbuffer( gDpy, gPBuffer );
    }
    return 0;
 }

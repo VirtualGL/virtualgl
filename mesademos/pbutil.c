@@ -3,115 +3,246 @@
  * OpenGL pbuffers utility functions.
  *
  * Brian Paul
- * April 1997
+ * Original code: April 1997
  * Updated on 5 October 2002
+ * Updated again on 3 January 2005 to use GLX 1.3 functions in preference
+ * to the GLX_SGIX_fbconfig/pbuffer extensions.
  */
-
 
 #include <stdio.h>
 #include <string.h>
 #include "pbutil.h"
 
 
-#ifndef GLX_X_VISUAL_TYPE_EXT
-#define GLX_X_VISUAL_TYPE_EXT GLX_X_VISUAL_TYPE
+/**
+ * Test if we pixel buffers are available for a particular X screen.
+ * Input:  dpy - the X display
+ *         screen - screen number
+ * Return:  0 = fbconfigs not available.
+ *          1 = fbconfigs are available via GLX 1.3.
+ *          2 = fbconfigs and pbuffers are available via GLX_SGIX_fbconfig
+ */
+int
+QueryFBConfig(Display *dpy, int screen)
+{
+#if defined(GLX_VERSION_1_3)
+   {
+      /* GLX 1.3 supports pbuffers */
+      int glxVersionMajor, glxVersionMinor;
+      if (!glXQueryVersion(dpy, &glxVersionMajor, &glxVersionMinor)) {
+         /* GLX not available! */
+         return 0;
+      }
+      if (glxVersionMajor * 100 + glxVersionMinor >= 103) {
+         return 1;
+      }
+      /* fall-through */
+   }
 #endif
 
+   /* Try the SGIX extensions */
+   {
+      char *extensions;
+      extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
+      if (extensions && strstr(extensions,"GLX_SGIX_fbconfig")) {
+	 return 2;
+      }
+   }
 
-/*
+   return 0;
+}
+
+/**
  * Test if we pixel buffers are available for a particular X screen.
  * Input:  dpy - the X display
  *         screen - screen number
  * Return:  0 = pixel buffers not available.
- *          1 = pixel buffers are available.
+ *          1 = pixel buffers are available via GLX 1.3.
+ *          2 = pixel buffers are available via GLX_SGIX_fbconfig/pbuffer.
  */
 int
 QueryPbuffers(Display *dpy, int screen)
 {
-#if defined(GLX_SGIX_pbuffer)
-/*
-   char *extensions;
+   int ret;
 
-   extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
-   if (!strstr(extensions,"GLX_SGIX_pbuffer")) {
-      return 0;
+   ret = QueryFBConfig(dpy, screen);
+   if (ret == 2) {
+      char *extensions;
+      extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
+      if (extensions && strstr(extensions, "GLX_SGIX_pbuffer"))
+	 return 2;
+      else
+	 return 0;
    }
-*/
-   return 1;
-#else
-   return 0;
+   else
+      return ret;
+}
+
+FBCONFIG *
+ChooseFBConfig(Display *dpy, int screen, const int attribs[], int *nConfigs)
+{
+   int fbcSupport = QueryPbuffers(dpy, screen);
+#if defined(GLX_VERSION_1_3)
+   if (fbcSupport == 1) {
+      return glXChooseFBConfig(dpy, screen, attribs, nConfigs);
+   }
 #endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (fbcSupport == 2) {
+      return glXChooseFBConfigSGIX(dpy, screen, (int *) attribs, nConfigs);
+   }
+#endif
+   return NULL;
+}
+
+
+FBCONFIG *
+GetAllFBConfigs(Display *dpy, int screen, int *nConfigs)
+{
+   int fbcSupport = QueryFBConfig(dpy, screen);
+#if defined(GLX_VERSION_1_3)
+   if (fbcSupport == 1) {
+      return glXGetFBConfigs(dpy, screen, nConfigs);
+   }
+#endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (fbcSupport == 2) {
+      /* The GLX_SGIX_fbconfig extensions says to pass NULL to get list
+       * of all available configurations.
+       */
+      return glXChooseFBConfigSGIX(dpy, screen, NULL, nConfigs);
+   }
+#endif
+   return NULL;
+}
+
+
+XVisualInfo *
+GetVisualFromFBConfig(Display *dpy, int screen, FBCONFIG config)
+{
+   int fbcSupport = QueryFBConfig(dpy, screen);
+#if defined(GLX_VERSION_1_3)
+   if (fbcSupport == 1) {
+      return glXGetVisualFromFBConfig(dpy, config);
+   }
+#endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (fbcSupport == 2) {
+      return glXGetVisualFromFBConfigSGIX(dpy, config);
+   }
+#endif
+   return NULL;
+}
+
+
+/**
+ * Either use glXGetFBConfigAttrib() or glXGetFBConfigAttribSGIX()
+ * to query an fbconfig attribute.
+ */
+static int
+GetFBConfigAttrib(Display *dpy, int screen,
+#if defined(GLX_VERSION_1_3)
+                  const GLXFBConfig config,
+#elif defined(GLX_SGIX_fbconfig)
+                  const GLXFBConfigSGIX config,
+#endif
+                  int attrib
+                  )
+{
+   int fbcSupport = QueryFBConfig(dpy, screen);
+   int value = 0;
+
+#if defined(GLX_VERSION_1_3)
+   if (fbcSupport == 1) {
+      /* ok */
+      if (glXGetFBConfigAttrib(dpy, config, attrib, &value) != 0) {
+         value = 0;
+      }
+      return value;
+   }
+   /* fall-through */
+#endif
+
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (fbcSupport == 2) {
+      if (glXGetFBConfigAttribSGIX(dpy, config, attrib, &value) != 0) {
+         value = 0;
+      }
+      return value;
+   }
+#endif
+   
+   return value;
 }
 
 
 
-
-/*
+/**
  * Print parameters for a GLXFBConfig to stdout.
  * Input:  dpy - the X display
+ *         screen - the X screen number
  *         fbConfig - the fbconfig handle
  *         horizFormat - if true, print in horizontal format
  */
 void
-PrintFBConfigInfo(Display *dpy, GLXFBConfig fbConfig, Bool horizFormat)
+PrintFBConfigInfo(Display *dpy, int screen, FBCONFIG config, Bool horizFormat)
 {
-   int pbAttribs[] = {GLX_LARGEST_PBUFFER, True,
-		      GLX_PRESERVED_CONTENTS, False,
-		      GLX_PBUFFER_WIDTH, 0,
-		      GLX_PBUFFER_HEIGHT, 0,
-		      None};
-   GLXPbuffer pBuffer;
+   PBUFFER pBuffer;
    int width=2, height=2;
    int bufferSize, level, doubleBuffer, stereo, auxBuffers;
    int redSize, greenSize, blueSize, alphaSize;
    int depthSize, stencilSize;
    int accumRedSize, accumBlueSize, accumGreenSize, accumAlphaSize;
-//   int sampleBuffers, samples;
+   int sampleBuffers, samples;
    int drawableType, renderType, xRenderable, xVisual, id;
    int maxWidth, maxHeight, maxPixels;
-//   int optWidth, optHeight;
+   int optWidth, optHeight;
+   int floatComponents = 0;
 
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_BUFFER_SIZE, &bufferSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_LEVEL, &level);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_DOUBLEBUFFER, &doubleBuffer);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_STEREO, &stereo);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_AUX_BUFFERS, &auxBuffers);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_RED_SIZE, &redSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_GREEN_SIZE, &greenSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_BLUE_SIZE, &blueSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_ALPHA_SIZE, &alphaSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_DEPTH_SIZE, &depthSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_STENCIL_SIZE, &stencilSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_ACCUM_RED_SIZE, &accumRedSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_ACCUM_GREEN_SIZE, &accumGreenSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_ACCUM_BLUE_SIZE, &accumBlueSize);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_ACCUM_ALPHA_SIZE, &accumAlphaSize);
-//   glXGetFBConfigAttrib(dpy, fbConfig, GLX_SAMPLE_BUFFERS_ARB, &sampleBuffers);
-//   glXGetFBConfigAttrib(dpy, fbConfig, GLX_SAMPLES_ARB, &samples);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_DRAWABLE_TYPE, &drawableType);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_RENDER_TYPE, &renderType);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_X_RENDERABLE, &xRenderable);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_X_VISUAL_TYPE_EXT, &xVisual);
-   if (!xRenderable || !(drawableType & GLX_WINDOW_BIT))
+   /* do queries using the GLX 1.3 tokens (same as the SGIX tokens) */
+   bufferSize     = GetFBConfigAttrib(dpy, screen, config, GLX_BUFFER_SIZE);
+   level          = GetFBConfigAttrib(dpy, screen, config, GLX_LEVEL);
+   doubleBuffer   = GetFBConfigAttrib(dpy, screen, config, GLX_DOUBLEBUFFER);
+   stereo         = GetFBConfigAttrib(dpy, screen, config, GLX_STEREO);
+   auxBuffers     = GetFBConfigAttrib(dpy, screen, config, GLX_AUX_BUFFERS);
+   redSize        = GetFBConfigAttrib(dpy, screen, config, GLX_RED_SIZE);
+   greenSize      = GetFBConfigAttrib(dpy, screen, config, GLX_GREEN_SIZE);
+   blueSize       = GetFBConfigAttrib(dpy, screen, config, GLX_BLUE_SIZE);
+   alphaSize      = GetFBConfigAttrib(dpy, screen, config, GLX_ALPHA_SIZE);
+   depthSize      = GetFBConfigAttrib(dpy, screen, config, GLX_DEPTH_SIZE);
+   stencilSize    = GetFBConfigAttrib(dpy, screen, config, GLX_STENCIL_SIZE);
+   accumRedSize   = GetFBConfigAttrib(dpy, screen, config, GLX_ACCUM_RED_SIZE);
+   accumGreenSize = GetFBConfigAttrib(dpy, screen, config, GLX_ACCUM_GREEN_SIZE);
+   accumBlueSize  = GetFBConfigAttrib(dpy, screen, config, GLX_ACCUM_BLUE_SIZE);
+   accumAlphaSize = GetFBConfigAttrib(dpy, screen, config, GLX_ACCUM_ALPHA_SIZE);
+   sampleBuffers  = GetFBConfigAttrib(dpy, screen, config, GLX_SAMPLE_BUFFERS);
+   samples        = GetFBConfigAttrib(dpy, screen, config, GLX_SAMPLES);
+   drawableType   = GetFBConfigAttrib(dpy, screen, config, GLX_DRAWABLE_TYPE);
+   renderType     = GetFBConfigAttrib(dpy, screen, config, GLX_RENDER_TYPE);
+   xRenderable    = GetFBConfigAttrib(dpy, screen, config, GLX_X_RENDERABLE);
+   xVisual        = GetFBConfigAttrib(dpy, screen, config, GLX_X_VISUAL_TYPE);
+   if (!xRenderable || !(drawableType & GLX_WINDOW_BIT_SGIX))
       xVisual = -1;
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_FBCONFIG_ID, &id);
 
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_MAX_PBUFFER_WIDTH,
-			    &maxWidth);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_MAX_PBUFFER_HEIGHT,
-			    &maxHeight);
-   glXGetFBConfigAttrib(dpy, fbConfig, GLX_MAX_PBUFFER_PIXELS,
-			    &maxPixels);
-//   glXGetFBConfigAttrib(dpy, fbConfig, GLX_OPTIMAL_PBUFFER_WIDTH,
-//			    &optWidth);
-//   glXGetFBConfigAttrib(dpy, fbConfig, GLX_OPTIMAL_PBUFFER_HEIGHT,
-//			    &optHeight);
+   id        = GetFBConfigAttrib(dpy, screen, config, GLX_FBCONFIG_ID);
+   maxWidth  = GetFBConfigAttrib(dpy, screen, config, GLX_MAX_PBUFFER_WIDTH);
+   maxHeight = GetFBConfigAttrib(dpy, screen, config, GLX_MAX_PBUFFER_HEIGHT);
+   maxPixels = GetFBConfigAttrib(dpy, screen, config, GLX_MAX_PBUFFER_PIXELS);
+#if defined(GLX_SGIX_pbuffer)
+   optWidth  = GetFBConfigAttrib(dpy, screen, config, GLX_OPTIMAL_PBUFFER_WIDTH_SGIX);
+   optHeight = GetFBConfigAttrib(dpy, screen, config, GLX_OPTIMAL_PBUFFER_HEIGHT_SGIX);
+#else
+   optWidth = optHeight = 0;
+#endif
+#if defined(GLX_NV_float_buffer)
+   floatComponents = GetFBConfigAttrib(dpy, screen, config, GLX_FLOAT_COMPONENTS_NV);
+#endif
 
-   pbAttribs[5]=width;  pbAttribs[7]=height;
-   pBuffer = CreatePbuffer(dpy, fbConfig, pbAttribs);
+   /* See if we can create a pbuffer with this config */
+   pBuffer = CreatePbuffer(dpy, screen, config, width, height, False, False);
 
    if (horizFormat) {
-      printf("0x%03x ", id);
+      printf("0x%-9x ", id);
       if (xVisual==GLX_STATIC_GRAY)        printf("StaticGray  ");
       else if (xVisual==GLX_GRAY_SCALE)    printf("GrayScale   ");
       else if (xVisual==GLX_STATIC_COLOR)  printf("StaticColor ");
@@ -120,16 +251,17 @@ PrintFBConfigInfo(Display *dpy, GLXFBConfig fbConfig, Bool horizFormat)
       else if (xVisual==GLX_DIRECT_COLOR)  printf("DirectColor ");
       else                            printf("  -none-    ");
       printf(" %3d %3d   %s   %s  %s   %2s   ", bufferSize, level,
-	     (renderType & GLX_RGBA_BIT) ? "y" : "n",
-	     (renderType & GLX_COLOR_INDEX_BIT) ? "y" : "n",
-	     doubleBuffer ? "y" : "n",
-	     stereo ? "y" : "n");
+	     (renderType & GLX_RGBA_BIT_SGIX) ? "y" : ".",
+	     (renderType & GLX_COLOR_INDEX_BIT_SGIX) ? "y" : ".",
+	     doubleBuffer ? "y" : ".",
+	     stereo ? "y" : ".");
       printf("%2d %2d %2d %2d  ", redSize, greenSize, blueSize, alphaSize);
       printf("%2d %2d  ", depthSize, stencilSize);
       printf("%2d %2d %2d %2d", accumRedSize, accumGreenSize, accumBlueSize,
 	     accumAlphaSize);
-//      printf("    %2d    %2d", sampleBuffers, samples);
-      printf("       %s", pBuffer ? "y" : "n");
+      printf("    %2d    %2d", sampleBuffers, samples);
+      printf("       %s       %c", pBuffer ? "y" : ".",
+             ".y"[floatComponents]);
       printf("\n");
    }
    else {
@@ -149,77 +281,166 @@ PrintFBConfigInfo(Display *dpy, GLXFBConfig fbConfig, Bool horizFormat)
       printf("  Accum Green Size: %d\n", accumGreenSize);
       printf("  Accum Blue Size: %d\n", accumBlueSize);
       printf("  Accum Alpha Size: %d\n", accumAlphaSize);
-//      printf("  Sample Buffers: %d\n", sampleBuffers);
-//      printf("  Samples/Pixel: %d\n", samples);
+      printf("  Sample Buffers: %d\n", sampleBuffers);
+      printf("  Samples/Pixel: %d\n", samples);
       printf("  Drawable Types: ");
       if (drawableType & GLX_WINDOW_BIT)  printf("Window ");
       if (drawableType & GLX_PIXMAP_BIT)  printf("Pixmap ");
       if (drawableType & GLX_PBUFFER_BIT)  printf("PBuffer");
       printf("\n");
       printf("  Render Types: ");
-      if (renderType & GLX_RGBA_BIT)  printf("RGBA ");
-      if (renderType & GLX_COLOR_INDEX_BIT)  printf("CI ");
+      if (renderType & GLX_RGBA_BIT_SGIX)  printf("RGBA ");
+      if (renderType & GLX_COLOR_INDEX_BIT_SGIX)  printf("CI ");
       printf("\n");
       printf("  X Renderable: %s\n", xRenderable ? "yes" : "no");
-      /*
-      printf("  Max width: %d\n", maxWidth);
-      printf("  Max height: %d\n", maxHeight);
-      printf("  Max pixels: %d\n", maxPixels);
-      printf("  Optimum width: %d\n", optWidth);
-      printf("  Optimum height: %d\n", optHeight);
-      */
+
       printf("  Pbuffer: %s\n", pBuffer ? "yes" : "no");
+      printf("  Max Pbuffer width: %d\n", maxWidth);
+      printf("  Max Pbuffer height: %d\n", maxHeight);
+      printf("  Max Pbuffer pixels: %d\n", maxPixels);
+      printf("  Optimum Pbuffer width: %d\n", optWidth);
+      printf("  Optimum Pbuffer height: %d\n", optHeight);
+
+      printf("  Float Components: %s\n", floatComponents ? "yes" : "no");
    }
 
    if (pBuffer) {
-      glXDestroyPbuffer(dpy, pBuffer);
+      DestroyPbuffer(dpy, screen, pBuffer);
    }
 }
 
 
 
+GLXContext
+CreateContext(Display *dpy, int screen, FBCONFIG config)
+{
+   int fbcSupport = QueryFBConfig(dpy, screen);
+#if defined(GLX_VERSION_1_3)
+   if (fbcSupport == 1) {
+      /* GLX 1.3 */
+      GLXContext c;
+      c = glXCreateNewContext(dpy, config, GLX_RGBA_TYPE, NULL, True);
+      if (!c) {
+         /* try indirect */
+         c = glXCreateNewContext(dpy, config, GLX_RGBA_TYPE, NULL, False);
+      }
+      return c;
+   }
+#endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (fbcSupport == 2) {
+      GLXContext c;
+      c = glXCreateContextWithConfigSGIX(dpy, config, GLX_RGBA_TYPE_SGIX, NULL, True);
+      if (!c) {
+         c = glXCreateContextWithConfigSGIX(dpy, config, GLX_RGBA_TYPE_SGIX, NULL, False);
+      }
+      return c;
+   }
+#endif
+   return 0;
+}
+
+
+void
+DestroyContext(Display *dpy, GLXContext ctx)
+{
+   glXDestroyContext(dpy, ctx);
+}
+
+
 /* This is only used by CreatePbuffer() */
 static int XErrorFlag = 0;
-static int HandleXError( Display *dpy, XErrorEvent *event )
+static int HandleXError(Display *dpy, XErrorEvent *event)
 {
     XErrorFlag = 1;
     return 0;
 }
 
 
-/*
+/**
  * Create a Pbuffer.  Use an X error handler to deal with potential
  * BadAlloc errors.
  *
  * Input:  dpy - the X display
- *         fbConfig - an FBConfig as returned by glXChooseFBConfig().
+ *         fbConfig - an FBConfig as returned by glXChooseFBConfigSGIX().
  *         width, height - size of pixel buffer to request, in pixels.
- *         pbAttribs - list of pixel buffer attributes as used by
- *                     glXCreatePbuffer().
- * Return:  a pixel buffer or None.
+ *         pbAttribs - list of optional pixel buffer attributes
+ * Return:  a Pbuffer or None.
  */
-GLXPbuffer
-CreatePbuffer( Display *dpy, GLXFBConfig fbConfig,
-	       int *pbAttribs )
+PBUFFER
+CreatePbuffer(Display *dpy, int screen, FBCONFIG config,
+              int width, int height, Bool largest, Bool preserve)
 {
-   int (*oldHandler)( Display *, XErrorEvent * );
-   GLXPbuffer pBuffer = None;
+   int (*oldHandler)(Display *, XErrorEvent *);
+   PBUFFER pBuffer = None;
+   int pbSupport = QueryPbuffers(dpy, screen);
 
    /* Catch X protocol errors with our own error handler */
-   oldHandler = XSetErrorHandler( HandleXError );
-
+   oldHandler = XSetErrorHandler(HandleXError);
    XErrorFlag = 0;
-   pBuffer = glXCreatePbuffer(dpy, fbConfig, pbAttribs);
 
+#if defined(GLX_VERSION_1_3)
+   if (pbSupport == 1) {
+      /* GLX 1.3 */
+      int attribs[100], i = 0;
+      attribs[i++] = GLX_PBUFFER_WIDTH;
+      attribs[i++] = width;
+      attribs[i++] = GLX_PBUFFER_HEIGHT;
+      attribs[i++] = height;
+      attribs[i++] = GLX_PRESERVED_CONTENTS;
+      attribs[i++] = preserve;
+      attribs[i++] = GLX_LARGEST_PBUFFER;
+      attribs[i++] = largest;
+      attribs[i++] = 0;
+      pBuffer = glXCreatePbuffer(dpy, config, attribs);
+   }
+   else
+#endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (pbSupport == 2) {
+      int attribs[100], i = 0;
+      attribs[i++] = GLX_PRESERVED_CONTENTS;
+      attribs[i++] = preserve;
+      attribs[i++] = GLX_LARGEST_PBUFFER;
+      attribs[i++] = largest;
+      attribs[i++] = 0;
+      pBuffer = glXCreateGLXPbufferSGIX(dpy, config, width, height, attribs);
+   }
+   else
+#endif
+   {
+      pBuffer = None;
+   }
+
+   XSync(dpy, False);
    /* Restore original X error handler */
-   (void) XSetErrorHandler( oldHandler );
+   (void) XSetErrorHandler(oldHandler);
 
    /* Return pbuffer (may be None) */
-   if (!XErrorFlag && pBuffer!=None) {
+   if (!XErrorFlag && pBuffer != None) {
       /*printf("config %d worked!\n", i);*/
       return pBuffer;
    }
    else {
       return None;
    }
+}
+
+
+void
+DestroyPbuffer(Display *dpy, int screen, PBUFFER pbuffer)
+{
+   int pbSupport = QueryPbuffers(dpy, screen);
+#if defined(GLX_VERSION_1_3)
+   if (pbSupport == 1) {
+      glXDestroyPbuffer(dpy, pbuffer);
+      return;
+   }
+#endif
+#if defined(GLX_SGIX_fbconfig) && defined(GLX_SGIX_pbuffer)
+   if (pbSupport == 2) {
+      glXDestroyGLXPbufferSGIX(dpy, pbuffer);
+      return;
+   }
+#endif
 }

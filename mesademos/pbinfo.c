@@ -20,47 +20,26 @@
 static void
 PrintConfigs(Display *dpy, int screen, Bool horizFormat)
 {
-   GLXFBConfig *fbConfigs;
+   FBCONFIG *fbConfigs;
    int nConfigs;
    int i;
-   /* Note: you may want to tweek the attribute list to select a different
-    * set of fbconfigs.
-    */
-   int fbAttribs[] = {
-                      GLX_RENDER_TYPE, 0,
-		      GLX_DRAWABLE_TYPE, 0,
-#if 0
-                      GLX_RENDER_TYPE, GLX_RGBA_BIT,
-		      GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT,
-		      GLX_RED_SIZE, 1,
-		      GLX_GREEN_SIZE, 1,
-		      GLX_BLUE_SIZE, 1,
-		      GLX_DEPTH_SIZE, 1,
-		      GLX_DOUBLEBUFFER, 0,
-		      GLX_STENCIL_SIZE, 0,
-#endif
-		      None};
 
-
-   /* Get list of possible frame buffer configurations */
-   (void) fbAttribs;
-   fbConfigs = glXGetFBConfigs(dpy, screen, &nConfigs);
-
-   if (nConfigs==0 || !fbConfigs) {
-      printf("Error: glxChooseFBConfig failed\n");
+   fbConfigs = GetAllFBConfigs(dpy, screen, &nConfigs);
+   if (!nConfigs || !fbConfigs) {
+      printf("Error: glxGetFBConfigs failed\n");
       return;
    }
 
    printf("Number of fbconfigs: %d\n", nConfigs);
 
    if (horizFormat) {
-      printf("  ID  VisualType  Depth Lvl RGB CI DB Stereo  R  G  B  A");
-      printf("   Z  S  AR AG AB AA  MSbufs MSnum  Pbuffer\n");
+      printf("  ID        VisualType  Depth Lvl RGB CI DB Stereo  R  G  B  A");
+      printf("   Z  S  AR AG AB AA  MSbufs MSnum  Pbuffer  Float\n");
    }
 
    /* Print config info */
-   for (i=0;i<nConfigs;i++) {
-      PrintFBConfigInfo(dpy, fbConfigs[i], horizFormat);
+   for (i = 0; i < nConfigs; i++) {
+      PrintFBConfigInfo(dpy, screen, fbConfigs[i], horizFormat);
    }
 
    /* free the list */
@@ -116,7 +95,7 @@ main(int argc, char *argv[])
    dpy = XOpenDisplay(dpyName);
 
    if (!dpy) {
-      printf("Error: couldn't open display %s\n", dpyName ? dpyName : ":0");
+      printf("Error: couldn't open display %s\n", XDisplayName(dpyName));
       return 1;
    }
 

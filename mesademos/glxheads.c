@@ -57,7 +57,7 @@ static int NumHeads = 0;
 static void
 Error(const char *display, const char *msg)
 {
-   fprintf(stderr, "Error on display %s - %s\n", display, msg);
+   fprintf(stderr, "Error on display %s - %s\n", XDisplayName(display), msg);
    exit(1);
 }
 
@@ -247,7 +247,7 @@ static void
 PrintInfo(const struct head *h)
 {
    printf("Name: %s\n", h->DisplayName);
-   printf("  Display:     %p\n", h->Dpy);
+   printf("  Display:     %p\n", (void *) h->Dpy);
    printf("  Window:      0x%x\n", (int) h->Win);
    printf("  Context:     0x%lx\n", (long) h->Context);
    printf("  GL_VERSION:  %s\n", h->Version);
@@ -267,7 +267,8 @@ main(int argc, char *argv[])
       printf("  glxheads xdisplayname ...\n");
       printf("Example:\n");
       printf("  glxheads :0 mars:0 venus:1\n");
-      h = AddHead(":0");
+
+      h = AddHead(XDisplayName(NULL));
       if (h)
          PrintInfo(h);
    }
