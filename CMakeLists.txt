@@ -5,8 +5,6 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 
-include(CheckCSourceCompiles)
-
 if(UNIX)
 	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
 		"Install path prefix, prepended onto install directories.")
@@ -39,7 +37,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # This only works if building from the command line.  There is currently no way
 # to set a variable's value based on the build type when using the MSVC IDE.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(BUILD "${BUILD}d")
+	set(BUILD "${BUILD}d")
 endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
@@ -75,12 +73,17 @@ if(MSVC)
 			string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
 		endif()
 	endforeach()
+
 	add_definitions(-wd4996 -D_CRT_SECURE_NO_DEPRECATE -DXDK)
 	include_directories(${CMAKE_SOURCE_DIR}/windows/include)
 	include_directories(${CMAKE_SOURCE_DIR}/windows/include/xdk)
 
 	# Don't auto-generate manifests
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
+  # Avoid linker warning when doing Debug build if dependent libraries are
+  # linked with the Release version of the static C library.
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 endif()
 
 # Detect whether compiler is 64-bit
