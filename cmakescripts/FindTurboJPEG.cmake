@@ -1,3 +1,5 @@
+include(CheckCSourceCompiles)
+
 if(NOT TJPEG_INCLUDE_DIR)
 	if(WIN32)
 		if(64BIT)
