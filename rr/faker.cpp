@@ -649,9 +649,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	return retval;
 }
 
-// We have to trap any attempts to copy from/to a GLXPixmap (ugh)
-// It should work as long as a valid GLX context is current
-// in the calling thread
+// We have to override this function to handle GLX pixmap rendering
 int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	int src_y, unsigned int w, unsigned int h, int dest_x, int dest_y)
 {
