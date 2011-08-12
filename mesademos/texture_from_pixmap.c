@@ -43,13 +43,14 @@
 
 static float top, bottom;
 
-typedef void (*PFNGLXBINDTEXIMAGEEXTPROC)(Display *, GLXDrawable, int,
-   const int *);
-typedef void (*PFNGLXRELEASETEXIMAGEEXTPROC)(Display *, GLXDrawable drawable,
-   int); 
 
-static PFNGLXBINDTEXIMAGEEXTPROC glXBindTexImageEXT_func = NULL;
-static PFNGLXRELEASETEXIMAGEEXTPROC glXReleaseTexImageEXT_func = NULL;
+typedef void (* glXBindTexImageEXTType) (Display *, GLXDrawable, int,
+   const int *);
+typedef void (* glXReleaseTexImageEXTType) (Display *, GLXDrawable, int);
+
+
+static glXBindTexImageEXTType glXBindTexImageEXT_func = NULL;
+static glXReleaseTexImageEXTType glXReleaseTexImageEXT_func = NULL;
 
 
 static Display *
@@ -72,9 +73,9 @@ OpenDisplay(void)
       exit(1);
    }
 
-   glXBindTexImageEXT_func = (PFNGLXBINDTEXIMAGEEXTPROC)
+   glXBindTexImageEXT_func = (glXBindTexImageEXTType)
       glXGetProcAddress((GLubyte *) "glXBindTexImageEXT");
-   glXReleaseTexImageEXT_func = (PFNGLXRELEASETEXIMAGEEXTPROC)
+   glXReleaseTexImageEXT_func = (glXReleaseTexImageEXTType)
       glXGetProcAddress((GLubyte*) "glXReleaseTexImageEXT");
 
    if (!glXBindTexImageEXT_func || !glXReleaseTexImageEXT_func) {
