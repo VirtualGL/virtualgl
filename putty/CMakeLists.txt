@@ -1,4 +1,6 @@
-SET(CMAKE_C_SOURCE_FILE_EXTENSIONS C)
+add_definitions(-D_WINDOWS -DRELEASE=0.60-VGL)
+include_directories(WINDOWS ${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}/WINDOWS)
 
 set(COMMON_SOURCES
 	BE_ALL_S.C
@@ -85,8 +87,3 @@ if(64BIT)
 	set(_WIN64 1)
 endif()
 configure_file(WINDOWS/resdefs.h.in WINDOWS/resdefs.h)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} WINDOWS
-	${CMAKE_CURRENT_BINARY_DIR}/WINDOWS)
-
-add_definitions(-DRELEASE=0.60-VGL)
