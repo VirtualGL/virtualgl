@@ -6,18 +6,27 @@ Architecture: @DEBARCH@
 Essential: no
 Maintainer: The VirtualGL Project [http://www.VirtualGL.org]
 Description: A toolkit for displaying OpenGL applications to thin clients
- VirtualGL is a library which allows most Linux OpenGL applications to be
- remotely displayed to a thin client without the need to alter the
- applications in any way.  VGL inserts itself into an application at run time
- and intercepts a handful of GLX calls, which it reroutes to the server's
- display (which presumably has a 3D accelerator attached.)  This causes all
- 3D rendering to occur on the server's display.  As each frame is rendered
- by the server, VirtualGL reads back the pixels from the server's framebuffer
- and sends them to the client for re-compositing into the appropriate X
- Window.  VirtualGL can be used to give hardware-accelerated 3D capabilities to
- VNC or other remote display environments that lack GLX support.  In a LAN
- environment, it can also be used with its built-in motion-JPEG video delivery
- system to remotely display full-screen 3D applications at 20+ frames/second.
+ VirtualGL is a toolkit that allows most Unix/Linux OpenGL applications to be
+ remotely displayed with hardware 3D acceleration to thin clients, regardless
+ of whether the clients have 3D capabilities, and regardless of the size of the
+ 3D data being rendered or the speed of the network.
+ .
+ Using the vglrun script, the VirtualGL "faker" is loaded into an OpenGL
+ application at run time.  The faker then intercepts a handful of GLX calls,
+ which it reroutes to the server's X display (the "3D X Server", which
+ presumably has a 3D accelerator attached.)  The GLX commands are also
+ dynamically modified such that all rendering is redirected into a Pbuffer
+ instead of a window.  As each frame is rendered by the application, the faker
+ reads back the pixels from the 3D accelerator and sends them to the
+ "2D X Server" for compositing into the appropriate X Window.
+ .
+ VirtualGL can be used to give hardware-accelerated 3D capabilities to VNC or
+ other X proxies that either lack OpenGL support or provide it through software
+ rendering.  In a LAN environment, VGL can also be used with its built-in
+ high-performance image transport, which sends the rendered 3D images to a
+ remote client (vglclient) for compositing on a remote X server.  VirtualGL
+ also supports image transport plugins, allowing the rendered 3D images to be
+ sent or captured using other mechanisms.
  .
  VirtualGL is based upon ideas presented in various academic papers on
  this topic, including "A Generic Solution for Hardware-Accelerated Remote
