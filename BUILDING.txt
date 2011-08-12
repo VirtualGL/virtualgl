@@ -477,11 +477,6 @@ make rpm
 
   Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
 
-#make srpm
-#
-#  This runs 'make dist' to create a pristine source tarball, then creates a
-#  Red Hat-style source RPM package from the tarball.  Requires RPM v4 or later.
-
 make deb
 
   Create Debian-style binary package.  Requires dpkg.
@@ -494,7 +489,7 @@ make dmg
 make udmg
 
   On 64-bit OS X systems, this creates a version of the Macintosh package and
-  disk image which contains universal i386/x86-64 binaries.  You should first
+  disk image that contains universal i386/x86-64 binaries.  You should first
   configure a 32-bit out-of-tree build of VirtualGL, then configure a 64-bit
   out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
   build system will look for the 32-bit build under {source_directory}/osxx86
@@ -507,7 +502,7 @@ make solarispkg
 
 make csolarispkg
 
-  On 64-bit Solaris systems, this creates a combined package which contains
+  On 64-bit Solaris systems, this creates a combined package that contains
   both 32-bit and 64-bit binaries.  You should first configure a 32-bit
   out-of-tree build of VirtualGL, then configure a 64-bit out-of-tree build,
   then run 'make csolarispkg' from the 64-bit build directory.  The build
