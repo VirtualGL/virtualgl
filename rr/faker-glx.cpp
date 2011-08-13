@@ -781,6 +781,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 		checkfaked(glXGetTransparentIndexSUN)
 
+		checkfaked(glXCreateContextAttribsARB)
+
 		checkfaked(glFinish)
 		checkfaked(glFlush)
 		checkfaked(glViewport)
