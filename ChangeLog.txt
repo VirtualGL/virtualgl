@@ -1,5 +1,5 @@
 ===============================================================================
-2.3 pre-beta
+2.3 beta1
 ===============================================================================
 [1]
 Re-fix issue that caused MainWin-based applications to hang.  This was
@@ -37,6 +37,9 @@ CMake-based build and packaging system
 -------------------------------------------------------------------------------
 [8]
 TCBench now takes 100 samples/second by default instead of 50.
+-------------------------------------------------------------------------------
+[9]
+Added support for the GLX_ARB_create_context extension.
 -------------------------------------------------------------------------------
 
 
@@ -253,10 +256,6 @@ specify the default DRI permissions rather than using
 this.
 -------------------------------------------------------------------------------
 [8]
-Added support for the GLX_EXT_texture_from_pixmap extension so that compiz can
-be run with VirtualGL.
--------------------------------------------------------------------------------
-[9]
 Added an option to vglconnect on Linux/Unix to allow it to use gsissh from the
 Globus Toolkit instead of the regular ssh program.
 -------------------------------------------------------------------------------
