@@ -244,6 +244,13 @@ static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
 }
 
 
+// GLX_ARB_create_context
+
+funcdef5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
+	config, GLXContext, share_context, Bool, direct, const int *, attribs,
+	return);
+
+
 // GL functions
 
 funcdef0(void, glFinish,);

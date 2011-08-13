@@ -70,6 +70,8 @@
 		glXGetProcAddressARB;
 		glXGetProcAddress;
 
+		glXCreateContextAttribsARB;
+
 		glFinish;
 		glFlush;
 		glViewport;

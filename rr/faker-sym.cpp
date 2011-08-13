@@ -204,6 +204,8 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	lsymopt(glXGetProcAddressARB)
 	lsymopt(glXGetProcAddress)
 
+	lsymopt(glXCreateContextAttribsARB)
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)

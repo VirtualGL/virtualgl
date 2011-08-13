@@ -1173,9 +1173,10 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 		getcfgattrib(c, GLX_RENDER_TYPE, render_type);
 		render_type=(render_type==GLX_COLOR_INDEX_BIT)? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE;
 		fbcid=cfgid(dpy, c);
+		int attribs[]={GLX_RENDER_TYPE, render_type, 0};
 
-		if(!(ctx=glXCreateNewContext(dpy, c, render_type, NULL, True)))
-			_error("glXCreateNewContext");
+		if(!(ctx=glXCreateContextAttribsARB(dpy, c, NULL, True, attribs)))
+			_error("glXCreateContextAttribsARB");
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
 		if(temp!=fbcid) _error("glXQueryContext FB cfg ID");

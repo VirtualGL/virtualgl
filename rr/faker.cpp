@@ -149,18 +149,18 @@ static int __vgltracelevel=0;
 #define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
 	a? _FBCID(a):0)
 #define prargal11(a) if(a) {  \
-	rrout.print("attrib_list=[");  \
-	for(int __an=0; attrib_list[__an]!=None; __an++) {  \
-		rrout.print("0x%.4x", attrib_list[__an]);  \
-		if(attrib_list[__an]!=GLX_USE_GL && attrib_list[__an]!=GLX_DOUBLEBUFFER  \
-			&& attrib_list[__an]!=GLX_STEREO && attrib_list[__an]!=GLX_RGBA)  \
-			rrout.print("=0x%.4x", attrib_list[++__an]);  \
+	rrout.print(#a"=[");  \
+	for(int __an=0; a[__an]!=None; __an++) {  \
+		rrout.print("0x%.4x", a[__an]);  \
+		if(a[__an]!=GLX_USE_GL && a[__an]!=GLX_DOUBLEBUFFER  \
+			&& a[__an]!=GLX_STEREO && a[__an]!=GLX_RGBA)  \
+			rrout.print("=0x%.4x", a[++__an]);  \
 		rrout.print(" ");  \
 	}  rrout.print("] ");}
 #define prargal13(a) if(a) {  \
-	rrout.print("attrib_list=[");  \
-	for(int __an=0; attrib_list[__an]!=None; __an+=2) {  \
-		rrout.print("0x%.4x=0x%.4x ", attrib_list[__an], attrib_list[__an+1]);  \
+	rrout.print(#a"=[");  \
+	for(int __an=0; a[__an]!=None; __an+=2) {  \
+		rrout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
 	}  rrout.print("] ");}
 
 #define opentrace(f)  \
@@ -868,7 +868,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	////////////////////
 
 		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
-		prargi(direct);  starttrace();
+		prargx(share_list);  prargi(direct);  starttrace();
 
 	if(!fconfig.allowindirect) direct=True;
 
@@ -894,18 +894,22 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	if(!(c=_MatchConfig(dpy, vis)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-	if(!(ctx=_glXCreateNewContext(_localdpy, c,
-		render_type==GLX_COLOR_INDEX_BIT?GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
-			share_list, direct)))
-		return NULL;
-	if(!_glXIsDirect(_localdpy, ctx) && direct)
+	ctx=_glXCreateNewContext(_localdpy, c,
+		render_type==GLX_COLOR_INDEX_BIT? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
+			share_list, direct);
+	if(ctx)
 	{
-		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-		rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-		rrout.println("[VGL]    permissions may be set incorrectly.");
+		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    permissions may be set incorrectly.");
+		}
+		ctxh.add(ctx, c);
 	}
-	ctxh.add(ctx, c);
 
 		stoptrace();  prargc(c);  prargx(ctx);  closetrace();
 
@@ -1037,7 +1041,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	////////////////////
 
 		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
-		prargi(render_type);  prargi(direct);  starttrace();
+		prargi(render_type);  prargx(share_list);  prargi(direct);  starttrace();
 
 	if(!fconfig.allowindirect) direct=True;
 
@@ -1054,17 +1058,20 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	else
 		render_type=GLX_RGBA_TYPE;
 
-	if(!(ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list,
-		direct)))
-		return NULL;
-	if(!_glXIsDirect(_localdpy, ctx) && direct)
+	ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, direct);
+	if(ctx)
 	{
-		rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-		rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.", DisplayString(_localdpy));
-		rrout.println("[VGL]    If %s is a local X display, then the framebuffer device", DisplayString(_localdpy));
-		rrout.println("[VGL]    permissions may be set incorrectly.");
+		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    permissions may be set incorrectly.");
+		}
+		ctxh.add(ctx, config);
 	}
-	ctxh.add(ctx, config);
 
 		stoptrace();  prargx(ctx);  closetrace();
 
@@ -1156,6 +1163,82 @@ Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
 	return glXMakeContextCurrent(dpy, draw, read, ctx);
+}
+
+/////////////////////////////
+// GLX 1.4 Context management
+/////////////////////////////
+
+GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
+	GLXContext share_context, Bool direct, const int *attribs)
+{
+	GLXContext ctx=0;
+	TRY();
+
+	// Prevent recursion
+	if(!_isremote(dpy))
+		return _glXCreateContextAttribsARB(dpy, config, share_context, direct,
+			attribs);
+	////////////////////
+
+		opentrace(glXCreateContextAttribsARB);  prargd(dpy);  prargc(config);
+		prargx(share_context);  prargi(direct);  prargal13(attribs);
+		starttrace();
+
+	if(!fconfig.allowindirect) direct=True;
+
+	if(rcfgh.isoverlay(dpy, config)) // Overlay config
+	{
+		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
+			attribs);
+		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+		stoptrace();  prargx(ctx);  closetrace();
+		return ctx;
+	}
+
+	int render_type;
+	if(__vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_COLOR_INDEX_BIT)
+		render_type=GLX_COLOR_INDEX_TYPE;
+	else
+		render_type=GLX_RGBA_TYPE;
+
+	int newattribs[257]={None}, n=0;
+	if(attribs)
+	{
+		for(int i=0; attribs[i]!=None && i<=254; i+=2)
+		{
+			if(attribs[i]!=GLX_RENDER_TYPE)
+			{
+				newattribs[n++]=attribs[i];  newattribs[n++]=attribs[i+1];
+			}
+		}
+	}
+	if(n<=254)
+	{
+		newattribs[n++]=GLX_RENDER_TYPE;  newattribs[n++]=render_type;
+	}
+	newattribs[n]=None;
+
+	ctx=_glXCreateContextAttribsARB(_localdpy, config, share_context, direct,
+		newattribs);
+	if(ctx)
+	{
+		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		{
+			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+				DisplayString(_localdpy));
+			rrout.println("[VGL]    permissions may be set incorrectly.");
+		}
+		ctxh.add(ctx, config);
+	}
+
+		stoptrace();  prargx(ctx);  closetrace();
+
+	CATCH();
+	return ctx;
 }
 
 ///////////////////////////////////

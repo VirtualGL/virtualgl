@@ -74,6 +74,20 @@ extern "C" {
 #define GLX_RGBA_FLOAT_BIT_ARB             0x00000004
 #endif
 
+#ifndef GLX_ARB_create_context
+#define GLX_CONTEXT_DEBUG_BIT_ARB          0x00000001
+#define GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x00000002
+#define GLX_CONTEXT_MAJOR_VERSION_ARB      0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB      0x2092
+#define GLX_CONTEXT_FLAGS_ARB              0x2094
+#endif
+
+#ifndef GLX_ARB_create_context_profile
+#define GLX_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
+#define GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+#define GLX_CONTEXT_PROFILE_MASK_ARB       0x9126
+#endif
+
 #ifndef GLX_SGIS_multisample
 #define GLX_SAMPLE_BUFFERS_SGIS            100000
 #define GLX_SAMPLES_SGIS                   100001
@@ -342,6 +356,18 @@ typedef __GLXextFuncPtr ( * PFNGLXGETPROCADDRESSPROC) (const GLubyte *procName);
 
 #ifndef GLX_ARB_fbconfig_float
 #define GLX_ARB_fbconfig_float 1
+#endif
+
+#ifndef GLX_ARB_create_context
+#define GLX_ARB_create_context 1
+#ifdef GLX_GLXEXT_PROTOTYPES
+extern GLXContext glXCreateContextAttribsARB (Display *, GLXFBConfig, GLXContext, Bool, const int *);
+#endif /* GLX_GLXEXT_PROTOTYPES */
+typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display *dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
+#endif
+
+#ifndef GLX_ARB_create_context_profile
+#define GLX_ARB_create_context_profile 1
 #endif
 
 #ifndef GLX_SGIS_multisample
