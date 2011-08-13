@@ -231,7 +231,7 @@ void rrsocket::connect(char *servername, unsigned short port)
 	{
 		if((_sslctx=SSL_CTX_new(SSLv23_client_method()))==NULL) _throwssl();
 		if((_ssl=SSL_new(_sslctx))==NULL) _throwssl();
-		if(!SSL_set_fd(_ssl, _sd)) _throwssl();
+		if(!SSL_set_fd(_ssl, (int)_sd)) _throwssl();
 		int ret=SSL_connect(_ssl);
 		if(ret!=1) throw(sslerror("rrsocket::connect", _ssl, ret));
 		SSL_set_connect_state(_ssl);
