@@ -65,9 +65,6 @@
 		glXResetFrameCountNV;
 		glXSwapIntervalSGI;
 
-		glXBindTexImageEXT;
-		glXReleaseTexImageEXT;
-
 		glXGetTransparentIndexSUN;
 
 		glXGetProcAddressARB;
