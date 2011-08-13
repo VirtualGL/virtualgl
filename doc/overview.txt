@@ -1,7 +1,7 @@
 * Overview
 {anchor: Overview}
 
-VirtualGL is an open source package which gives any Unix or Linux remote
+VirtualGL is an open source package that gives any Unix or Linux remote
 display software the ability to run OpenGL applications with full 3D
 hardware acceleration.  Some remote display software, such as VNC, lacks the
 ability to run OpenGL applications at all.  Other remote display software
@@ -100,5 +100,5 @@ rendered 3D images to the client machine:
 #OPT fmt=latex: w=4cm
 #CAP: The X11 Transport with an X Proxy
 
-VirtualGL also provides a framework which can be used to develop custom
-image transport plugins.
+VirtualGL also provides an API which can be used to develop custom image
+transport plugins.

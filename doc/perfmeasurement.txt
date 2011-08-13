@@ -216,7 +216,7 @@ within the window.
 *** GLXSpheres
 #OPT: noList! plain!
 
-GLXSpheres is a benchmark which produces very similar images to nVidia's
+GLXSpheres is a benchmark that produces very similar images to nVidia's
 (long discontinued) SphereMark benchmark.  Back in the early days of
 VirtualGL's existence, it was discovered (quite by accident) that SphereMark
 was a pretty good test of VirtualGL's end-to-end performance, because

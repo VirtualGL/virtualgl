@@ -76,7 +76,7 @@ functions, it must be handled differently in order to avoid interference with
 VirtualGL.  Chromium provides an environment variable, ''CR_SYSTEM_GL_PATH'',
 which allows one to specify an alternate path to be searched for ''libGL.so''.
 The VirtualGL packages for Linux and Solaris include a symbolic link named
-''libGL.so'' which points to the VirtualGL faker library (''librrfaker.so'').
+''libGL.so'', which points to the VirtualGL faker library (''librrfaker.so'').
 This symbolic link is located in its own isolated directory, so that directory
 can be passed to Chromium in the ''CR_SYSTEM_GL_PATH'' environment variable,
 and this will cause Chromium to load VirtualGL rather than the "real" OpenGL
@@ -91,7 +91,7 @@ To run CrAppFaker, it is necessary to set this environment variable to the
 appropriate value so that Chromium will load the interposed versions of OpenGL
 and GLX functions from VirtualGL.  It is also necessary to set ''VGL_GLLIB'' to
 the location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1'').
-CrAppFaker creates its own fake version of ''libGL.so'' which is really just a
+CrAppFaker creates its own fake version of ''libGL.so'', which is really just a
 copy of Chromium's ''libcrfaker.so''.  Thus, if left to its own devices,
 VirtualGL will unwittingly try to load ''libcrfaker.so'' instead of the "real"
 OpenGL library.  Chromium's ''libcrfaker.so'' will, in turn, try to load

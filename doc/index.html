@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-07-27T11:58:16">
+<meta name="date" content="2011-08-13T02:25:43">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -301,7 +301,7 @@ systems, OpenGL and GLX, and X windows.</p>
 <p>This document and all associated illustrations are licensed under the 
 <span class="remote"><a href="http://creativecommons.org/licenses/by/2.5/" class="remote">Creative 
 Commons Attribution 2.5 License</a></span><a name="idx001"></a>.  Any 
-works which contain material derived from this document must cite The 
+works that contain material derived from this document must cite The 
 VirtualGL Project as the source of the material and list the current URL 
 for the VirtualGL website.</p>
 
@@ -335,7 +335,7 @@ License, v3.1</a><a name="idx008"></a>, a derivative of the
 
 <p><a name="Overview"></a></p>
 
-<p>VirtualGL is an open source package which gives any Unix or Linux remote 
+<p>VirtualGL is an open source package that gives any Unix or Linux remote 
 display software the ability to run OpenGL applications with full 3D 
 hardware acceleration.  Some remote display software, such as VNC, lacks 
 the ability to run OpenGL applications at all.  Other remote display 
@@ -458,8 +458,8 @@ used to send rendered 3D images to the client machine:</p>
 <img src="x11transport.png" alt="x11transport" class="figure" id="imgid_10" name="imgid_10"/>
 </div>
 
-<p>VirtualGL also provides a framework which can be used to develop custom 
-image transport plugins.</p>
+<p>VirtualGL also provides an API which can be used to develop custom image 
+transport plugins.</p>
 
 <p><br /></p>
 
@@ -515,7 +515,7 @@ image transport plugins.</p>
     <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
     Hat</a></span><a name="idx0010"></a> or 
     <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a> 
-    families which contains GLIBC 2.3.2 or later (including 
+    families that contains GLIBC 2.3.2 or later (including 
     <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0012"></a>, 
     <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0013"></a> 
     3 and later, and 
@@ -2167,7 +2167,7 @@ narrow, aliased lines and other sharp features may appear
 special version of the X11 Transport which encodes images as YUV420P and 
 draws them directly to the 2D X server using the X Video extension.  
 This is mainly useful in conjunction with X proxies, such as the Sun Ray 
-Server Software, which support the X Video extension.  The idea is that 
+Server Software, that support the X Video extension.  The idea is that 
 if the X proxy is going to have to transcode the image to YUV anyhow, 
 VirtualGL may be faster at doing this, since it has a SIMD-accelerated 
 YUV encoder.</p>
@@ -2568,7 +2568,7 @@ interference with VirtualGL.  Chromium provides an environment variable,
 <code>CR_SYSTEM_GL_PATH</code>, which allows one to specify an alternate 
 path to be searched for <code>libGL.so</code>. The VirtualGL packages 
 for Linux and Solaris include a symbolic link named 
-<code>libGL.so</code> which points to the VirtualGL faker library 
+<code>libGL.so</code>, which points to the VirtualGL faker library 
 (<code>librrfaker.so</code>). This symbolic link is located in its own 
 isolated directory, so that directory can be passed to Chromium in the 
 <code>CR_SYSTEM_GL_PATH</code> environment variable, and this will cause 
@@ -2599,7 +2599,7 @@ the appropriate value so that Chromium will load the interposed versions
 of OpenGL and GLX functions from VirtualGL.  It is also necessary to set 
 <code>VGL_GLLIB</code> to the location of the &ldquo;real&rdquo; OpenGL 
 library (example: <code>/usr/lib/libGL.so.1</code>). CrAppFaker creates 
-its own fake version of <code>libGL.so</code> which is really just a 
+its own fake version of <code>libGL.so</code>, which is really just a 
 copy of Chromium&rsquo;s <code>libcrfaker.so</code>.  Thus, if left to 
 its own devices, VirtualGL will unwittingly try to load 
 <code>libcrfaker.so</code> instead of the &ldquo;real&rdquo; OpenGL 
@@ -3130,7 +3130,7 @@ Overlays do not work with X proxies.  VirtualGL must be displaying to a &ldquo;r
 
 <p>In a PseudoColor visual, each pixel is represented by an index which 
 refers to a location in a color table.  The color table stores the 
-actual color values (256 of them in the case of 8-bit PseudoColor) which 
+actual color values (256 of them in the case of 8-bit PseudoColor) that 
 correspond to each index. An application merely tells the X server which 
 color index to use when drawing, and the X server takes care of mapping 
 that index to an actual color from the color table.  OpenGL allows for 
@@ -3146,7 +3146,7 @@ data often only contained 8 bits per sample to begin with.  Applications
 could manipulate the color table to allow the user to dynamically 
 control the relationship between sample values and colors.  As more and 
 more graphics cards drop support for PseudoColor rendering, however, the 
-applications which use it are becoming a vanishing breed.</p>
+applications that use it are becoming a vanishing breed.</p>
 
 <p>VirtualGL supports PseudoColor rendering if a PseudoColor visual is 
 available on the 2D X server or X proxy.  A PseudoColor visual need not 
@@ -3459,7 +3459,7 @@ sampling area within the window.</p>
 
 <h3 id="hd0017003004">GLXSpheres</h3>
 
-<p>GLXSpheres is a benchmark which produces very similar images to 
+<p>GLXSpheres is a benchmark that produces very similar images to 
 nVidia&rsquo;s (long discontinued) SphereMark benchmark.  Back in the 
 early days of VirtualGL&rsquo;s existence, it was discovered (quite by 
 accident) that SphereMark was a pretty good test of VirtualGL&rsquo;s 
@@ -3853,7 +3853,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
          <em>xv</em> = Encode images as YUV420P (planar YUV with 4X chrominance 
          subsampling) and display them to the 2D X server using the XV 
          Transport. This transport is designed for use with X proxies, such as 
-         the Sun Ray Server Software, which support the X Video extension (see 
+         the Sun Ray Server Software, that support the X Video extension (see 
          Chapter <a href="#X_Video_Support" class="ref">9</a>.) <br /><br /> 
          <em>yuv</em> = Encode images as YUV420P, send using the VGL Transport, 
          and display on the client machine using the X Video extension.  This 
@@ -4028,8 +4028,8 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         &ldquo;Gamma&rdquo; refers to the relationship between the intensity of 
-        light which your computer&rsquo;s monitor is instructed to display and 
-        the intensity which it actually displays.  The curve is an exponential 
+        light that your computer&rsquo;s monitor is instructed to display and 
+        the intensity that it actually displays.  The curve is an exponential 
         curve of the form <em>Y = X<sup>G</sup></em>, where X is between 0 and 
         1.  G is called the &ldquo;gamma&rdquo; of the monitor.  PC monitors and 
         TV&rsquo;s usually have a gamma of around 2.2. <br /><br /> Some of the 
@@ -4163,12 +4163,12 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         The VGL Transport will normally compare each frame with the previous 
-        frame and send only the portions of the image which have changed. 
-        Setting <code>VGL_INTERFRAME</code> to <code>0</code> disables this 
-        behavior. <br /><br /> This setting was introduced in order to work 
-        around a specific application interaction issue, but since a proper fix 
-        for that issue was introduced in VirtualGL 2.1.1, this option 
-        isn&rsquo;t really useful anymore.
+        frame and send only the portions of the image that have changed. Setting 
+        <code>VGL_INTERFRAME</code> to <code>0</code> disables this behavior. 
+        <br /><br /> This setting was introduced in order to work around a 
+        specific application interaction issue, but since a proper fix for that 
+        issue was introduced in VirtualGL 2.1.1, this option isn&rsquo;t really 
+        useful anymore.
         <div class="important"><p class="important">
         When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0050"></a> option
         </p></div>
@@ -4467,8 +4467,8 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
         these server windows and composites the pixels into the main application 
-        window, which is controlled by MPI process 0.  By creating a script 
-        which passes a different value of <code>VGL_DISPLAY</code> and 
+        window, which is controlled by MPI process 0.  By creating a script that 
+        passes a different value of <code>VGL_DISPLAY</code> and 
         <code>VGL_READBACK</code> to each MPI process, it is possible to make 
         all of the ParaView server processes render to off-screen buffers on 
         different graphics cards while preventing VirtualGL from displaying any 
@@ -4943,7 +4943,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     <dd class="Description-1 Description">
         Normally, the VGL Transport will divide an OpenGL window into 
         equal-sized square tiles, compare each tile vs. the same tile in the 
-        previous frame, then compress and send only the tiles which have changed 
+        previous frame, then compress and send only the tiles that have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
         comparison</a><a name="idx0057"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 

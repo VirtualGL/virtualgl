@@ -32,7 +32,7 @@
 	| {list type=ul: \
 			{item:Any distribution in the \
 				[[http://www.redhat.com/][Red Hat]] or [[http://www.novell.com/linux/][SuSE]] \
-				families which contains GLIBC 2.3.2 or later (including \
+				families that contains GLIBC 2.3.2 or later (including \
 				[[http://fedoraproject.org/][Fedora]], \
 				[[http://www.centos.org/][CentOS]] 3 and later, and \
 				[[http://www.whiteboxlinux.org/][White Box]])} \

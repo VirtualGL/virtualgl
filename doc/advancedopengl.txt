@@ -131,7 +131,7 @@ and GLX" applet:
 
 In a PseudoColor visual, each pixel is represented by an index which refers to
 a location in a color table.  The color table stores the actual color values
-(256 of them in the case of 8-bit PseudoColor) which correspond to each index.
+(256 of them in the case of 8-bit PseudoColor) that correspond to each index.
 An application merely tells the X server which color index to use when drawing,
 and the X server takes care of mapping that index to an actual color from the
 color table.  OpenGL allows for rendering to Pseudocolor visuals, and it does
@@ -145,7 +145,7 @@ technique for visualizing scientific data, because such data often only containe
 8 bits per sample to begin with.  Applications could manipulate the color table
 to allow the user to dynamically control the relationship between sample values
 and colors.  As more and more graphics cards drop support for PseudoColor
-rendering, however, the applications which use it are becoming a vanishing
+rendering, however, the applications that use it are becoming a vanishing
 breed.
 
 VirtualGL supports PseudoColor rendering if a PseudoColor visual is available

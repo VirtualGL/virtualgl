@@ -40,7 +40,7 @@ argument of ''-c xv'' to ''vglrun'' enables the XV Transport.  The XV Transport
 is a special version of the X11 Transport which
 encodes images as YUV420P and draws them directly to the 2D X server using the
 X Video extension.  This is mainly useful in conjunction with X proxies, such
-as the Sun Ray Server Software, which support the X Video extension.  The
+as the Sun Ray Server Software, that support the X Video extension.  The
 idea is that if the X proxy is going to have to transcode the image to YUV
 anyhow, VirtualGL may be faster at doing this, since it has a SIMD-accelerated
 YUV encoder.
