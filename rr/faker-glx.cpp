@@ -230,9 +230,9 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 
 static const char *glxextensions=
 #ifdef SUNOGL
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_texture_from_pixmap GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_SUN_init_threads";
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_SUN_init_threads";
 #else
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_texture_from_pixmap GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index";
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index";
 #endif
 
 const char *glXGetClientString(Display *dpy, int name)
@@ -690,18 +690,6 @@ int glXSwapIntervalSGI(int interval)
 	if(fconfig.trace)
 		rrout.print("[VGL] glXSwapIntervalSGI() [NOT SUPPORTED]\n");
 	return 0;
-}
-
-void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
-	const int *attrib_list)
-{
-	_glXBindTexImageEXT(_localdpy, ServerDrawable(dpy, drawable), buffer,
-		attrib_list);
-}
-
-void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
-{
-	_glXReleaseTexImageEXT(_localdpy, ServerDrawable(dpy, drawable), buffer);
 }
 
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \

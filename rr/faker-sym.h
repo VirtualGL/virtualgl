@@ -227,15 +227,6 @@ funcdef3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
 funcdef2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen, return);
 
 
-// GLX_EXT_texture_from_pixmap
-
-funcdef4(void, glXBindTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer, const int *, attrib_list,);
-
-funcdef3(void, glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer,);
-
-
 // GLX_ARB_get_proc_address
 
 typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);

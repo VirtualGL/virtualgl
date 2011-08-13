@@ -201,9 +201,6 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	lsymopt(glXQueryFrameCountNV)
 	lsymopt(glXResetFrameCountNV)
 
-	lsymopt(glXBindTexImageEXT)
-	lsymopt(glXReleaseTexImageEXT)
-
 	lsymopt(glXGetProcAddressARB)
 	lsymopt(glXGetProcAddress)
 
