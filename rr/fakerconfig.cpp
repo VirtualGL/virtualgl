@@ -234,16 +234,6 @@ static void buildlut(FakerConfig &fc)
 	} \
 }
 
-static void removespaces(char *s)
-{
-	if(s && strlen(s)>0)
-	{
-		for(int i=0; i<(int)strlen(s); i++)
-			if(s[i]==' ' || s[i]=='\t')
-				{s[i]='\0';  break;}
-	}
-}
-
 void fconfig_setgamma(FakerConfig &fc, double gamma)
 {
 	fc.gamma=gamma;
