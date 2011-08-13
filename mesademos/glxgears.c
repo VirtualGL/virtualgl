@@ -37,6 +37,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/gl.h>
+#define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
 
 #ifndef GLX_MESA_swap_control

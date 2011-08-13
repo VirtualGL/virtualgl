@@ -65,6 +65,7 @@
 #define GLX_COLOR_INDEX_BIT		0x00000002
 #endif
 
+
 Bool fbConfigs = False;
 
 typedef enum
@@ -746,9 +747,10 @@ glx_token_to_visual_class(int visual_type)
 }
 
 static GLboolean
-get_fbconfig_attribs(Display *dpy, GLXFBConfig fbconfig,
+get_fbconfig_attribs(Display *dpy, int scrnum, GLXFBConfig fbconfig,
 		     struct visual_attribs *attribs)
 {
+   const char *ext = glXQueryExtensionsString(dpy, scrnum);
    int visual_type;
 
    memset(attribs, 0, sizeof(struct visual_attribs));
@@ -798,8 +800,18 @@ get_fbconfig_attribs(Display *dpy, GLXFBConfig fbconfig,
      glXGetFBConfigAttrib(dpy, fbconfig, GLX_TRANSPARENT_INDEX_VALUE, &attribs->transparentIndexValue);
    }
 
-   glXGetFBConfigAttrib(dpy, fbconfig, GLX_SAMPLE_BUFFERS, &attribs->numMultisample);
-   glXGetFBConfigAttrib(dpy, fbconfig, GLX_SAMPLES, &attribs->numSamples);
+   /* multisample attribs */
+#ifdef GLX_ARB_multisample
+   if (ext && strstr(ext, "GLX_ARB_multisample")) {
+      glXGetFBConfigAttrib(dpy, fbconfig, GLX_SAMPLE_BUFFERS_ARB, &attribs->numMultisample);
+      glXGetFBConfigAttrib(dpy, fbconfig, GLX_SAMPLES_ARB, &attribs->numSamples);
+   }
+#endif
+   else {
+      attribs->numSamples = 0;
+      attribs->numMultisample = 0;
+   }
+
    glXGetFBConfigAttrib(dpy, fbconfig, GLX_CONFIG_CAVEAT, &attribs->visualCaveat);
 
 #ifdef GLX_VIDEO_RESIZE_SUN
@@ -1089,7 +1101,7 @@ print_fbconfig_info(Display *dpy, int scrnum, InfoMode mode)
       print_visual_attribs_long_header();
 
    for (i = 0; i < numFBConfigs; i++) {
-      get_fbconfig_attribs(dpy, fbconfigs[i], &attribs);
+      get_fbconfig_attribs(dpy, scrnum, fbconfigs[i], &attribs);
 
       if (mode == Verbose) 
          print_visual_attribs_verbose(&attribs);
@@ -1167,7 +1179,7 @@ find_best_visual(Display *dpy, int scrnum)
 
    /* init bestVis with first visual info */
    if(fbConfigs)
-      get_fbconfig_attribs(dpy, configs[0], &bestVis);
+      get_fbconfig_attribs(dpy, scrnum, configs[0], &bestVis);
    else
       get_visual_attribs(dpy, &visuals[0], &bestVis);
 
@@ -1176,7 +1188,7 @@ find_best_visual(Display *dpy, int scrnum)
       struct visual_attribs vis;
 
       if(fbConfigs)
-         get_fbconfig_attribs(dpy, configs[i], &vis);
+         get_fbconfig_attribs(dpy, scrnum, configs[i], &vis);
       else
          get_visual_attribs(dpy, &visuals[i], &vis);
 

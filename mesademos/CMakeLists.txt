@@ -1,4 +1,4 @@
-foreach(program glthreads glthreadsint)
+foreach(program glthreads glthreadsint sharedtex_mt)
 	add_executable(${program} ${program}.c)
 	target_link_libraries(${program} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB} pthread
 		m)
@@ -6,8 +6,7 @@ foreach(program glthreads glthreadsint)
 endforeach()
 
 foreach(program glxcontexts glxdemo glxgears glxgears_pixmap glxheads	glxpbdemo
-	glxpixmap manywin offset overlay shape sharedtex sharedtex_mt testgl5
-	wincopy xfont)
+	glxpixmap manywin offset overlay shape sharedtex testgl5 wincopy xfont)
 	add_executable(${program} ${program}.c)
 	target_link_libraries(${program} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 		${X11_Xext_LIB} m)
