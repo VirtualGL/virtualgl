@@ -528,15 +528,6 @@ int main(int argc, char **argv)
 				printf("Window dimensions: %d x %d\n", width, height);
 			}
 		}
-		if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
-		{ 
-			int mf=atoi(argv[++i]); 
-			if(mf>0)
-			{
-				maxframes=mf;
-				printf("Number of frames to render: %d\n", maxframes);
-			}
-		}
 		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
 		{
 			int npolys=atoi(argv[++i]);
@@ -546,7 +537,16 @@ int main(int argc, char **argv)
 				if(slices<1) slices=stacks=1;
 			}
 		}
-		if(!stricmp(argv[i], "-fs")) fullscreen=1;
+		if(!strnicmp(argv[i], "-fs", 3)) fullscreen=1;
+		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
+		{ 
+			int mf=atoi(argv[++i]); 
+			if(mf>0)
+			{
+				maxframes=mf;
+				printf("Number of frames to render: %d\n", maxframes);
+			}
+		}
 		if(!strnicmp(argv[i], "-s", 2))
 		{
 			rgbattribs[10]=GLX_STEREO;
