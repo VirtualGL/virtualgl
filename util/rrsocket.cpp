@@ -331,7 +331,7 @@ rrsocket *rrsocket::accept(void)
 	if(_dossl)
 	{
 		if(!(tempssl=SSL_new(_sslctx))) _throwssl();
-		if(!(SSL_set_fd(tempssl, sd_client))) _throwssl();
+		if(!(SSL_set_fd(tempssl, (int)sd_client))) _throwssl();
 		int ret=SSL_accept(tempssl);
 		if(ret!=1) throw(sslerror("rrsocket::accept", tempssl, ret));
 		SSL_set_accept_state(tempssl);
