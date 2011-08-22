@@ -26,6 +26,11 @@
  #include <errno.h>
  #include "x11err.h"
 #endif
+#include "bmp.h"
+
+#ifdef _MSC_VER
+#define snprintf(str, n, format, ...) _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
+#endif
 
 
 //////////////////////////////////////////////////////////////////////
@@ -56,7 +61,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define N                 2
 
 int width, height;
-int checkdb=0, doshm=1;
+int checkdb=0, doshm=1, dofs=0, dovid=0, dodisplay=0, interactive=0;
 #ifndef FBXWIN32
 int dopixmap=0;
 Window win=0;
@@ -68,6 +73,9 @@ rrtimer timer;
 #else
 #define fg()
 #endif
+
+const BMPPIXELFORMAT fb2bmpformat[FBX_FORMATS]=
+	{BMP_RGB, BMP_RGBX, BMP_BGR, BMP_BGRX, BMP_XBGR, BMP_XRGB, BMP_RGB};
 
 void nativeread(int), nativewrite(int);
 
@@ -412,13 +420,134 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		case WM_CLOSE:
 			PostQuitMessage(0);
 			return 0;
+		case WM_CHAR:
+			if((wParam==27 || wParam=='q' || wParam=='Q') && dovid)
+			{
+				PostQuitMessage(0);
+				return 0;
+			}
+			break;
 		case WM_PAINT:
-			display();
-			PostQuitMessage(0);
+			if(!dovid)
+			{
+				display();
+				PostQuitMessage(0);
+			}
+			else return 0;
+			break;
+		case WM_MOUSEMOVE:
+			if((wParam & MK_LBUTTON) && dovid && interactive)
+			{
+				dodisplay=1;
+				return 0;
+			}
+			break;
 	}
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
 #endif
+
+
+void event_loop(void)
+{
+	fbx_struct fb[10];
+	int frame=0, inc=-1, first=1;
+	unsigned long frames=0;
+	rrtimer timer;
+	double elapsed, mpixels=0.;
+	char temps[256];
+
+	for(int i=0; i<10; i++)
+	{
+		memset(&fb[i], 0, sizeof(fb[i]));
+	}
+
+	try {
+
+	for(int i=0; i<10; i++)
+	{
+		fbx(fbx_init(&fb[i], wh, 0, 0, doshm));
+		snprintf(temps, 256, "frame%d.ppm", i);
+		unsigned char *buf=NULL;  int tempw=0, temph=0;
+		if(loadbmp(temps, &buf, &tempw, &temph, fb2bmpformat[fb[i].format],
+			1, 0)==-1)
+			_throw(bmpgeterr());
+		int ps=fbx_ps[fb[i].format];
+		for(int j=0; j<min(temph, fb[i].height); j++)
+			memcpy(&fb[i].bits[fb[i].pitch*j], &buf[tempw*ps*j],
+				min(tempw, fb[i].width)*ps);
+		free(buf);
+	}
+
+	timer.start();
+	while (1)
+	{
+		dodisplay=0;
+		if(first) {dodisplay=1;  first=0;}
+
+		#ifdef FBXWIN32
+
+		int ret;  MSG msg;
+		if((ret=GetMessage(&msg, NULL, 0, 0))==-1)
+			{_throww32();}
+		else if(ret==0) break;
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+
+		#else
+
+		while(1)
+		{
+			XEvent event;
+			if(XPending(wh.dpy)>0) XNextEvent(wh.dpy, &event);
+			else break;
+			switch (event.type)
+			{
+				case KeyPress:
+				{
+					char buf[10];  int key;
+					key=XLookupString(&event.xkey, buf, sizeof(buf), NULL, NULL);
+					switch(buf[0])
+					{
+						case 27: case 'q': case 'Q':
+							return;
+					}
+					break;
+				}
+				case MotionNotify:
+					if(event.xmotion.state & Button1Mask) dodisplay=1;
+ 					break;
+			}
+		}
+
+		#endif
+
+		if(!interactive || dodisplay)
+		{
+			fbx(fbx_write(&fb[frame], 0, 0, 0, 0, 0, 0));
+			if(frame==0 || frame==9) inc=-1*inc;
+			frame+=inc;  frames++;
+			mpixels+=(double)fb[frame].width*(double)fb[frame].height/1000000.;
+
+			if((elapsed=timer.elapsed())>2.0)
+			{
+				snprintf(temps, 256, "%f frames/sec - %f Mpixels/sec",
+					(double)frames/elapsed, mpixels/elapsed);
+				printf("%s\n", temps);
+				timer.start();  mpixels=0.;  frames=0;
+			}
+		}
+	}
+
+	for(int i=0; i<10; i++) fbx_term(&fb[i]);
+
+	} catch(...)
+	{
+		for(int i=0; i<10; i++) fbx_term(&fb[i]);
+		throw;
+	}
+
+}
 
 
 void usage(char *progname)
@@ -428,7 +557,8 @@ void usage(char *progname)
 	fprintf(stderr, "-checkdb = Verify that double buffering is working correctly\n");
 	fprintf(stderr, "-noshm = Do not use MIT-SHM extension to accelerate blitting\n");
 	fprintf(stderr, "-pm = Blit to a pixmap rather than to a window\n");
-	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n\n");
+	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
+	fprintf(stderr, "-fs = Full-screen mode\n\n");
 	exit(1);
 }
 
@@ -437,6 +567,9 @@ void usage(char *progname)
 //////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+	#ifdef FBXWIN32
+	int winstyle=WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_VISIBLE;
+	#endif
 	int i;
 
 	fprintf(stderr, "\n%s v%s (Build %s)\n\n", bench_name, __VERSION, __BUILD);
@@ -453,16 +586,25 @@ int main(int argc, char **argv)
 		{
 			doshm=0;
 		}
-		if(!strnicmp(argv[i], "-v", 2))
+		if(!stricmp(argv[i], "-vid")) dovid=1;
+		else if(!strnicmp(argv[i], "-v", 2))
 		{
 			fbx_printwarnings(stderr);
 		}
+		if(!stricmp(argv[i], "-i")) interactive=1;
 		#ifndef FBXWIN32
 		if(!stricmp(argv[i], "-pm"))
 		{
 			dopixmap=1;  doshm=0;
 		}
 		#endif
+		if(!stricmp(argv[i], "-fs"))
+		{
+			dofs=1;
+			#ifdef FBXWIN32
+			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE;
+			#endif
+		}
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?")) usage(argv[0]);
 	}
 
@@ -502,18 +644,24 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
 		exit(1);
 	}
-	width=WIDTH;
-	height=HEIGHT;
+	if(!dofs)
+	{
+		width=WIDTH;
+		height=HEIGHT;
+	}
 
 	#ifdef FBXWIN32
 
 	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
-	tryw32(wh=CreateWindowEx(0, bench_name, bench_name, WS_OVERLAPPED |
-		WS_SYSMENU | WS_CAPTION | WS_VISIBLE, 0,  0, width+bw, height+bh, NULL,
-		NULL, GetModuleHandle(NULL), NULL));
+	tryw32(wh=CreateWindowEx(0, bench_name, bench_name, winstyle, 0, 0, width+bw,
+		height+bh, NULL, NULL, GetModuleHandle(NULL), NULL));
 	UpdateWindow(wh);
 	BOOL ret;
+	if(dovid)
+	{
+		event_loop();  return 0;
+	}
 	while(1)
 	{
 		if((ret=GetMessage(&msg, NULL, 0, 0))==-1) _throww32();
@@ -532,26 +680,36 @@ int main(int argc, char **argv)
 	vtemp.depth=24;  vtemp.c_class=TrueColor;
 	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
 	{
+		int mask=CWBorderPixel|CWColormap|CWEventMask;
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
 		swa.border_pixel=0;
 		swa.event_mask=0;
+		if(dofs)
+		{
+			mask|=CWOverrideRedirect;  swa.override_redirect=True;
+		}
+		if(dovid)
+		{
+			if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
+			swa.event_mask|=KeyPressMask;
+		}
 		if(dopixmap)
 		{
-			errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
-				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-				&swa));
+			errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
+				InputOutput, v->visual, mask, &swa));
 			errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
 			wh.v=v->visual;
 		}
 		else
 		{
 			errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-				&swa));
+				v->depth, InputOutput, v->visual, mask, &swa));
 			errifnot(XMapRaised(wh.dpy, wh.d));
 		}
+		if(dofs) XSetInputFocus(wh.dpy, wh.d, RevertToParent, CurrentTime);
 		XSync(wh.dpy, False);
-		display();
+		if(dovid) event_loop();
+		else display();
 		if(dopixmap)
 		{
 			XFreePixmap(wh.dpy, wh.d);
@@ -561,6 +719,8 @@ int main(int argc, char **argv)
 		XFree(v);  v=NULL;
 	}
 	else fprintf(stderr, "No RGB visuals available.  Skipping those tests.\n\n");
+
+	if(dovid) return 0;
 
 	vtemp.depth=8;  vtemp.c_class=PseudoColor;
 	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
