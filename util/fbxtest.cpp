@@ -61,7 +61,8 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define N                 2
 
 int width, height;
-int checkdb=0, doshm=1, dofs=0, dovid=0, dodisplay=0, interactive=0;
+int checkdb=0, doshm=1, dofs=0, dovid=0, dodisplay=0, interactive=0,
+	advance=0;
 #ifndef FBXWIN32
 int dopixmap=0;
 Window win=0;
@@ -433,12 +434,16 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 				display();
 				PostQuitMessage(0);
 			}
-			else return 0;
+			else
+			{
+				if(interactive) dodisplay=1;
+				return 0;
+			}
 			break;
 		case WM_MOUSEMOVE:
 			if((wParam & MK_LBUTTON) && dovid && interactive)
 			{
-				dodisplay=1;
+				dodisplay=advance=1;
 				return 0;
 			}
 			break;
@@ -482,7 +487,7 @@ void event_loop(void)
 	timer.start();
 	while (1)
 	{
-		dodisplay=0;
+		advance=0;  dodisplay=0;
 		if(first) {dodisplay=1;  first=0;}
 
 		#ifdef FBXWIN32
@@ -503,6 +508,9 @@ void event_loop(void)
 			else break;
 			switch (event.type)
 			{
+				case Expose:
+					dodisplay=1;
+					break;
 				case KeyPress:
 				{
 					char buf[10];  int key;
@@ -515,7 +523,7 @@ void event_loop(void)
 					break;
 				}
 				case MotionNotify:
-					if(event.xmotion.state & Button1Mask) dodisplay=1;
+					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
  					break;
 			}
 		}
@@ -525,16 +533,19 @@ void event_loop(void)
 		if(!interactive || dodisplay)
 		{
 			fbx(fbx_write(&fb[frame], 0, 0, 0, 0, 0, 0));
-			if(frame==0 || frame==9) inc=-1*inc;
-			frame+=inc;  frames++;
-			mpixels+=(double)fb[frame].width*(double)fb[frame].height/1000000.;
-
-			if((elapsed=timer.elapsed())>2.0)
+			if(!interactive || advance)
 			{
-				snprintf(temps, 256, "%f frames/sec - %f Mpixels/sec",
-					(double)frames/elapsed, mpixels/elapsed);
-				printf("%s\n", temps);
-				timer.start();  mpixels=0.;  frames=0;
+				if(frame==0 || frame==9) inc=-1*inc;
+				frame+=inc;  frames++;
+				mpixels+=(double)fb[frame].width*(double)fb[frame].height/1000000.;
+
+				if((elapsed=timer.elapsed())>2.0)
+				{
+					snprintf(temps, 256, "%f frames/sec - %f Mpixels/sec",
+						(double)frames/elapsed, mpixels/elapsed);
+					printf("%s\n", temps);
+					timer.start();  mpixels=0.;  frames=0;
+				}
 			}
 		}
 	}
@@ -690,7 +701,8 @@ int main(int argc, char **argv)
 		}
 		if(dovid)
 		{
-			if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
+			if(interactive)
+				swa.event_mask|=PointerMotionMask|ButtonPressMask|ExposureMask;
 			swa.event_mask|=KeyPressMask;
 		}
 		if(dopixmap)
