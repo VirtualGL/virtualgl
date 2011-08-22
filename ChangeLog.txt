@@ -5,6 +5,11 @@
 Fix regression bug whereby GLXSpheres would ignore the first argument after
 -fs.
 -------------------------------------------------------------------------------
+[2]
+glXChooseFBConfig() and glXChooseFBConfigSGIX() were erroneously returning an
+error when a NULL attribute list argument was passed to them.  They now behave
+correctly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
