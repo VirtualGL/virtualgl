@@ -1253,6 +1253,12 @@ int vistest(void)
 	{
 		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
 
+		// This will fail with VGL 2.2.x and earlier
+		if(!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), NULL, &n))
+			|| n==0)
+			_throw("No FB configs found");
+		XFree(configs);  configs=NULL;
+
 		try
 		{
 			printf("RGBA:   ");

@@ -81,7 +81,8 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 
 extern "C" {
 
-GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list, int *nelements)
+GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
+	const int *attrib_list, int *nelements)
 {
 	GLXFBConfig *configs=NULL;
 	TRY();
@@ -128,10 +129,13 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 		}
 	}
 
-	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
-	if(!attrib_list || !nelements) return NULL;
+	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0, temp;
+	if(!nelements) nelements=&temp;
 	*nelements=0;
-	configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class, level,
+	if(!attrib_list)
+		configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy),
+			attrib_list, nelements);
+	else configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class, level,
 		stereo, trans, *nelements, true);
 	if(configs && *nelements)
 	{
@@ -149,9 +153,11 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen, const int *attrib_list,
 }
 
 #ifdef SUNOGL
-GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, const int *attrib_list, int *nelements)
+GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
+	const int *attrib_list, int *nelements)
 #else
-GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen, int *attrib_list, int *nelements)
+GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
+	int *attrib_list, int *nelements)
 #endif
 {
 	return glXChooseFBConfig(dpy, screen, attrib_list, nelements);
