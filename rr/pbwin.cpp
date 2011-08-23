@@ -259,7 +259,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				rrout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}
-			stereomode=RRSTEREO_REDCYAN;				
+			stereomode=RRSTEREO_REDCYAN;
 		}
 		else if(dostereo && !_stereovisual && stereomode==RRSTEREO_QUADBUF
 			&& strlen(fconfig.transport)==0)
@@ -363,6 +363,17 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	if(frame->format==RRTRANS_ABGR || frame->format==RRTRANS_ARGB)
 		glformat=GL_ABGR_EXT;
 	#endif
+	if(dostereo && stereomode==RRSTEREO_QUADBUF && frame->rbits==NULL)
+	{
+		static bool message=false;
+		if(!message)
+		{
+			rrout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
+			rrout.println("[VGL]    Using anaglyphic stereo instead.");
+			message=true;
+		}
+		stereomode=RRSTEREO_REDCYAN;				
+	}
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&f, drawbuf);
 	else
 	{
