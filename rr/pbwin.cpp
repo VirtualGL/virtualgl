@@ -334,6 +334,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	if(_pb->format()==GL_BGRA_EXT) desiredformat=RRTRANS_BGRA;
 	#endif
 	if(_pb->format()==GL_RGBA) desiredformat=RRTRANS_RGBA;
+	if(!_truecolor) desiredformat=RRTRANS_INDEX;
 
 	frame=_plugin->getframe(pbw, pbh, desiredformat,
 		dostereo && stereomode==RRSTEREO_QUADBUF);
@@ -363,6 +364,8 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	if(frame->format==RRTRANS_ABGR || frame->format==RRTRANS_ARGB)
 		glformat=GL_ABGR_EXT;
 	#endif
+	if(frame->format==RRTRANS_INDEX) glformat=GL_COLOR_INDEX;
+
 	if(dostereo && stereomode==RRSTEREO_QUADBUF && frame->rbits==NULL)
 	{
 		static bool message=false;
