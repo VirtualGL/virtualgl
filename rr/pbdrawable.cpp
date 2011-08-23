@@ -202,7 +202,9 @@ Drawable pbdrawable::getx11drawable(void)
 void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
 {
-	GLint readbuf=GL_BACK, oldrendermode=GL_RENDER;
+	GLint readbuf=GL_BACK, oldrendermode=GL_RENDER, oldpackalignment=1;
+	GLfloat oldredscale=1.0, oldredbias=0.0, oldgreenscale=1.0, oldgreenbias=0.0,
+		oldbluescale=1.0, oldbluebias=0.0, oldalphascale=1.0, oldalphabias=0.0;
 	GLint fbr=0, fbw=0;
 	#ifdef GL_VERSION_1_5
 	static GLuint pbo=0;  int boundbuffer=0;
@@ -225,14 +227,21 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	glReadBuffer(buf);
 	glRenderMode(GL_RENDER);
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 
+	_glGetIntegerv(GL_PACK_ALIGNMENT, &oldpackalignment);
 	if(pitch%8==0) glPixelStorei(GL_PACK_ALIGNMENT, 8);
 	else if(pitch%4==0) glPixelStorei(GL_PACK_ALIGNMENT, 4);
 	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
 	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-	glPushAttrib(GL_PIXEL_MODE_BIT);
+	_glGetFloatv(GL_RED_SCALE, &oldredscale);
+	_glGetFloatv(GL_RED_BIAS, &oldredbias);
+	_glGetFloatv(GL_GREEN_SCALE, &oldgreenscale);
+	_glGetFloatv(GL_GREEN_BIAS, &oldgreenbias);
+	_glGetFloatv(GL_BLUE_SCALE, &oldbluescale);
+	_glGetFloatv(GL_BLUE_BIAS, &oldbluebias);
+	_glGetFloatv(GL_ALPHA_SCALE, &oldalphascale);
+	_glGetFloatv(GL_ALPHA_BIAS, &oldalphabias);
 	_glPixelTransferf(GL_RED_SCALE, 1.0);
 	_glPixelTransferf(GL_RED_BIAS, 0.0);
 	_glPixelTransferf(GL_GREEN_SCALE, 1.0);
@@ -351,9 +360,19 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		putenv(_autotestframe);
 	}
 
-	glRenderMode(oldrendermode);
-	_glPopAttrib();
-	glPopClientAttrib();
+	if(oldrendermode!=GL_RENDER) glRenderMode(oldrendermode);
+
+	if(oldredscale!=1.0) _glPixelTransferf(GL_RED_SCALE, oldredscale);
+	if(oldredbias!=0.0) _glPixelTransferf(GL_RED_BIAS, oldredbias);
+	if(oldgreenscale!=1.0) _glPixelTransferf(GL_GREEN_SCALE, oldgreenscale);
+	if(oldgreenbias!=0.0) _glPixelTransferf(GL_GREEN_BIAS, oldgreenbias);
+	if(oldbluescale!=1.0) _glPixelTransferf(GL_BLUE_SCALE, oldbluescale);
+	if(oldbluebias!=0.0) _glPixelTransferf(GL_BLUE_BIAS, oldbluebias);
+	if(oldalphascale!=1.0) _glPixelTransferf(GL_ALPHA_SCALE, oldalphascale);
+	if(oldalphabias!=0.0) _glPixelTransferf(GL_ALPHA_BIAS, oldalphabias);
+
+	glPixelStorei(GL_PACK_ALIGNMENT, oldpackalignment);
+
 	tc.restore();
 
 	glReadBuffer(readbuf);
@@ -364,7 +383,11 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	GLint dest_x, GLint dest_y, GLXDrawable draw)
 {
-	GLint readbuf=GL_BACK, drawbuf=GL_BACK, oldrendermode=GL_RENDER;
+	GLint readbuf=GL_BACK, drawbuf=GL_BACK, oldrendermode=GL_RENDER,
+		oldpackalignment=1, oldunpackalignment=1;
+	GLfloat oldredscale=1.0, oldredbias=0.0, oldgreenscale=1.0, oldgreenbias=0.0,
+		oldbluescale=1.0, oldbluebias=0.0, oldalphascale=1.0, oldalphabias=0.0;
+	GLint oldviewport[4];
 	GLint fbr=0, fbw=0;
 
 	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
@@ -373,7 +396,6 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
-
 
 	tempctx tc(_localdpy, draw, getglxdrawable(), glXGetCurrentContext(),
 		_config,
@@ -384,11 +406,19 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	_glDrawBuffer(GL_FRONT_AND_BACK);
 	glRenderMode(GL_RENDER);
 
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glPushAttrib(GL_VIEWPORT_BIT|GL_COLOR_BUFFER_BIT|GL_PIXEL_MODE_BIT);
-
+	_glGetIntegerv(GL_UNPACK_ALIGNMENT, &oldunpackalignment);
+	_glGetIntegerv(GL_PACK_ALIGNMENT, &oldpackalignment);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	_glGetFloatv(GL_RED_SCALE, &oldredscale);
+	_glGetFloatv(GL_RED_BIAS, &oldredbias);
+	_glGetFloatv(GL_GREEN_SCALE, &oldgreenscale);
+	_glGetFloatv(GL_GREEN_BIAS, &oldgreenbias);
+	_glGetFloatv(GL_BLUE_SCALE, &oldbluescale);
+	_glGetFloatv(GL_BLUE_BIAS, &oldbluebias);
+	_glGetFloatv(GL_ALPHA_SCALE, &oldalphascale);
+	_glGetFloatv(GL_ALPHA_BIAS, &oldalphabias);
 	_glPixelTransferf(GL_RED_SCALE, 1.0);
 	_glPixelTransferf(GL_RED_BIAS, 0.0);
 	_glPixelTransferf(GL_GREEN_SCALE, 1.0);
@@ -401,6 +431,7 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 
+	_glGetIntegerv(GL_VIEWPORT, oldviewport);
 	_glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -422,9 +453,22 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 
-	glRenderMode(oldrendermode);
-	_glPopAttrib();
-	glPopClientAttrib();
+	_glViewport(oldviewport[0], oldviewport[1], oldviewport[2], oldviewport[3]);
+
+	if(oldrendermode!=GL_RENDER) glRenderMode(oldrendermode);
+
+	if(oldredscale!=1.0) _glPixelTransferf(GL_RED_SCALE, oldredscale);
+	if(oldredbias!=0.0) _glPixelTransferf(GL_RED_BIAS, oldredbias);
+	if(oldgreenscale!=1.0) _glPixelTransferf(GL_GREEN_SCALE, oldgreenscale);
+	if(oldgreenbias!=0.0) _glPixelTransferf(GL_GREEN_BIAS, oldgreenbias);
+	if(oldbluescale!=1.0) _glPixelTransferf(GL_BLUE_SCALE, oldbluescale);
+	if(oldbluebias!=0.0) _glPixelTransferf(GL_BLUE_BIAS, oldbluebias);
+	if(oldalphascale!=1.0) _glPixelTransferf(GL_ALPHA_SCALE, oldalphascale);
+	if(oldalphabias!=0.0) _glPixelTransferf(GL_ALPHA_BIAS, oldalphabias);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, oldunpackalignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, oldpackalignment);
+
 	tc.restore();
 
 	glReadBuffer(readbuf);
