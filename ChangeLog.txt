@@ -10,13 +10,17 @@ glXChooseFBConfig() and glXChooseFBConfigSGIX() were erroneously returning an
 error when a NULL attribute list argument was passed to them.  They now behave
 correctly.
 -------------------------------------------------------------------------------
+[3]
+Fixed regression issue whereby VirtualGL would deadlock when using the X11
+Transport with a remote X connection.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
 2.3 beta1
 ===============================================================================
 [1]
-Re-fix issue that caused MainWin-based applications to hang.  This was
+Re-fixed issue that caused MainWin-based applications to hang.  This was
 initially fixed in VGL 2.1 final, but it was re-broken by the rewrite of the
 global faker configuration routines in VGL 2.2.
 -------------------------------------------------------------------------------
