@@ -28,6 +28,11 @@ install(TARGETS nettest DESTINATION ${VGL_BINDIR})
 
 add_library(fbx STATIC fbx.c)
 
+if(VGL_BUILDSERVER)
+	add_library(fbx-faker STATIC fbx.c)
+	set_property(TARGET fbx-faker APPEND PROPERTY COMPILE_DEFINITIONS INFAKER)
+endif()
+
 add_executable(fbxtest fbxtest.cpp)
 if(WIN32)
 	target_link_libraries(fbxtest fbx rrutil)

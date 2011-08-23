@@ -17,6 +17,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(VGL_BUILDSERVER)
 
+	set(FBXFAKERLIB fbx-faker)
+	if(VGL_USEXV)
+		set(FBXFAKERLIB ${FBXFAKERLIB};fbxv)
+	endif()
+
 	get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
 	foreach(def ${DEFS_PROP})
 		set(DEFINES ${DEFINES};-D${def})
@@ -42,8 +47,8 @@ if(VGL_BUILDSERVER)
 	else()
 		set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 	endif()
-	target_link_libraries(rrfaker rrutil ${FBXLIB} ${TJPEG_LIBRARY} rrsocket m
-		${OPENGL_gl_LIBRARY} dl)
+	target_link_libraries(rrfaker rrutil ${FBXFAKERLIB} ${TJPEG_LIBRARY} rrsocket
+		m ${OPENGL_gl_LIBRARY} dl)
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 		# C++ shared libs.  Grrr...
@@ -176,8 +181,7 @@ if(VGL_BUILDSERVER)
 	endif()
 
 	add_library(vgltrans_test2 SHARED testplugin2.cpp rrblitter.cpp)
-	set_target_properties(vgltrans_test2 PROPERTIES LINK_FLAGS "-z defs")
-	target_link_libraries(vgltrans_test2 rrutil ${FBXLIB} ${TJPEG_LIBRARY})
+	target_link_libraries(vgltrans_test2 rrutil ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 		target_link_libraries(vgltrans_test2 stdc++)
 	endif()

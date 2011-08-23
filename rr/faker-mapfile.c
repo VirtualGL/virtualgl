@@ -126,11 +126,7 @@
 		XSolarisGetVisualGamma;
 		#endif
 
-		__XFree;
-		__XGetGeometry;
-		__XNextEvent;
-		__XOpenDisplay;
-		__XCreateWindow;
+		__XCopyArea;
 
 		_vgl_dlopen;
 

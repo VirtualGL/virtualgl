@@ -59,6 +59,20 @@ const char *_fbx_formatname[FBX_FORMATS]=
 
 #endif
 
+#ifdef INFAKER
+
+typedef int (*_XCopyAreaType)(Display *, Drawable, Drawable, GC, int, int,
+	unsigned int, unsigned int, int, int);
+extern _XCopyAreaType __XCopyArea;
+
+#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y) { \
+	if(!__XCopyArea) _throw("[FBX] ERROR: XCopyArea symbol not loaded"); \
+	__XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y); \
+}
+
+#endif
+
+
 #ifdef FBXWIN32
 
  typedef struct _BMINFO {BITMAPINFO bmi;  RGBQUAD cmap[256];} BMINFO;
