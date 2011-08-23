@@ -58,7 +58,7 @@ class _hashclass
 			return 1;
 		}
 
-		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2, bool useref=false)
+		_hashvaluetype find(_hashkeytype1 key1, _hashkeytype2 key2)
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
