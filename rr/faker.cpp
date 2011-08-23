@@ -893,10 +893,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
-	int render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-	ctx=_glXCreateNewContext(_localdpy, c,
-		render_type==GLX_COLOR_INDEX_BIT? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
-			share_list, direct);
+	ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, direct);
 	if(ctx)
 	{
 		if(!_glXIsDirect(_localdpy, ctx) && direct)
@@ -1053,12 +1050,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		return ctx;
 	}
 
-	if(__vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_COLOR_INDEX_BIT)
-		render_type=GLX_COLOR_INDEX_TYPE;
-	else
-		render_type=GLX_RGBA_TYPE;
-
-	ctx=_glXCreateNewContext(_localdpy, config, render_type, share_list, direct);
+	ctx=_glXCreateNewContext(_localdpy, config, GLX_RGBA_TYPE, share_list, direct);
 	if(ctx)
 	{
 		if(!_glXIsDirect(_localdpy, ctx) && direct)
@@ -1196,31 +1188,16 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		return ctx;
 	}
 
-	int render_type;
-	if(__vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_COLOR_INDEX_BIT)
-		render_type=GLX_COLOR_INDEX_TYPE;
-	else
-		render_type=GLX_RGBA_TYPE;
-
-	int newattribs[257]={None}, n=0;
 	if(attribs)
 	{
 		for(int i=0; attribs[i]!=None && i<=254; i+=2)
 		{
-			if(attribs[i]!=GLX_RENDER_TYPE)
-			{
-				newattribs[n++]=attribs[i];  newattribs[n++]=attribs[i+1];
-			}
+			if(attribs[i]==GLX_RENDER_TYPE) ((int *)attribs)[i+1]=GLX_RGBA_TYPE;
 		}
 	}
-	if(n<=254)
-	{
-		newattribs[n++]=GLX_RENDER_TYPE;  newattribs[n++]=render_type;
-	}
-	newattribs[n]=None;
 
 	ctx=_glXCreateContextAttribsARB(_localdpy, config, share_context, direct,
-		newattribs);
+		attribs);
 	if(ctx)
 	{
 		if(!_glXIsDirect(_localdpy, ctx) && direct)
