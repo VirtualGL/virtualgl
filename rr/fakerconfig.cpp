@@ -119,7 +119,7 @@ void fconfig_deleteinstance(void)
 {
 	if(fc!=NULL)
 	{
-		rrcs::safelock l(fcmutex);
+		rrcs::safelock l(fcmutex, false);
 		if(fc!=NULL)
 		{
 			#if FCONFIG_USESHM==1

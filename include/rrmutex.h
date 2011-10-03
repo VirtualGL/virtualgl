@@ -178,10 +178,15 @@ class rrcs
 		class safelock
 		{
 			public:
-				safelock(rrcs &cs) : _cs(cs) {cs.lock();}
-				~safelock() {_cs.unlock();}
+				safelock(rrcs &cs, bool errorcheck=true) : _cs(cs),
+					_errorcheck(errorcheck)
+				{
+					cs.lock(errorcheck);
+				}
+				~safelock() {_cs.unlock(_errorcheck);}
 			private:
 				rrcs &_cs;
+				bool _errorcheck;
 		};
 
 	protected:
