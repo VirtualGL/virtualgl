@@ -31,6 +31,7 @@ add_library(fbx STATIC fbx.c)
 if(VGL_BUILDSERVER)
 	add_library(fbx-faker STATIC fbx.c)
 	set_property(TARGET fbx-faker APPEND PROPERTY COMPILE_DEFINITIONS INFAKER)
+	target_link_libraries(fbx-faker ${X11_X11_LIB} ${X11_Xext_LIB})
 endif()
 
 add_executable(fbxtest fbxtest.cpp)
