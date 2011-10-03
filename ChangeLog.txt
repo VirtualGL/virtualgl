@@ -18,6 +18,11 @@ Transport with a remote X connection.
 Fixed a GL_INVALID_OPERATION error that would occur after a call to
 glXSwapBuffers() when a context with the OpenGL Core Profile was being used.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue whereby VirtualGL would abort with "terminate called after
+throwing an instance of 'rrerror'" whenever a 3D application running in
+VirtualGL exited and VirtualGL was compiled with GCC 4.6.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
