@@ -490,6 +490,7 @@ void usage(char **argv)
 	printf("-f <n> = max frames to render\n");
 	printf("-w <wxh> = specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
+	printf("-sc <s> = Create window on X screen # <s>\n");
 	printf("\n");
 	exit(0);
 }
@@ -508,6 +509,7 @@ int main(int argc, char **argv)
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None};
 	XSetWindowAttributes swa;  Window root;
 	int fullscreen=0;  unsigned long mask=0;
+	int screen=-1;
 
 	for(i=0; i<argc; i++)
 	{
@@ -547,7 +549,16 @@ int main(int argc, char **argv)
 				printf("Number of frames to render: %d\n", maxframes);
 			}
 		}
-		if(!strnicmp(argv[i], "-s", 2))
+		if(!strnicmp(argv[i], "-sc", 3) && i<argc-1)
+		{
+			int sc=atoi(argv[++i]); 
+			if(sc>0)
+			{
+				screen=sc;
+				printf("Rendering to screen %d\n", screen);
+			}
+		}
+		else if(!strnicmp(argv[i], "-s", 2))
 		{
 			rgbattribs[10]=GLX_STEREO;
 			usestereo=1;
@@ -572,21 +583,22 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Polygons in scene: %d\n", (NSPHERES*3+1)*slices*stacks);
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
+	if(screen<0) screen=DefaultScreen(dpy);
 
 	if(useci)
 	{
-		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), ciattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, ciattribs))==NULL)
 			_throw("Could not obtain index visual");
 	}
 	else
 	{
-		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), rgbattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, rgbattribs))==NULL)
 			_throw("Could not obtain RGB visual with requested properties");
 	}
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useoverlay? "underlay":"window",
 		(int)v->visualid);
 
-	root=DefaultRootWindow(dpy);
+	root=RootWindow(dpy, screen);
 	swa.border_pixel=0;
 	swa.event_mask=StructureNotifyMask|ExposureMask|KeyPressMask;
 	swa.override_redirect=fullscreen? True:False;
@@ -605,8 +617,8 @@ int main(int argc, char **argv)
 	if(fullscreen)
 	{
 		mask|=CWOverrideRedirect;
-		width=DisplayWidth(dpy, DefaultScreen(dpy));
-		height=DisplayHeight(dpy, DefaultScreen(dpy));
+		width=DisplayWidth(dpy, screen);
+		height=DisplayHeight(dpy, screen);
 	}
 	if(!(protoatom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
 		_throw("Cannot obtain WM_PROTOCOLS atom");
@@ -629,10 +641,10 @@ int main(int argc, char **argv)
 
 	if(useoverlay)
 	{
-		if((v=glXChooseVisual(dpy, DefaultScreen(dpy), olattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, olattribs))==NULL)
 		{
 			olattribs[6]=None;  oldb=0;
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), olattribs))==NULL)
+			if((v=glXChooseVisual(dpy, screen, olattribs))==NULL)
 				_throw("Could not obtain overlay visual");
 		}
 		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n",	(int)v->visualid);
