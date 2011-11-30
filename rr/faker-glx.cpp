@@ -14,6 +14,7 @@
  */
 
 #include "faker-sym.h"
+#include <limits.h>
 
 // Map a client-side drawable to a server-side drawable
 
@@ -43,6 +44,16 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 	return vid;
 }
 
+#define testattrib(attrib, index, min, max) {  \
+	if(!strcmp(argv[i], #attrib) && i<argc-1) {  \
+		int temp=atoi(argv[++i]);  \
+		if(temp>=min && temp<=max) {  \
+			attribs[index++]=attrib;  \
+			attribs[index++]=temp;  \
+		}  \
+	}  \
+}
+
 static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 {
 	GLXFBConfig c=0, *configs=NULL;  int n=0;
@@ -50,12 +61,55 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
 	if(!(c=vish.getpbconfig(dpy, vis))&& !(c=vish.mostrecentcfg(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from
-		int attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+		int default_attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
 			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
 			GLX_DEPTH_SIZE, 1, None};
+		int attribs[256];
+
+		memset(attribs, 0, sizeof(attribs));
+		memcpy(attribs, default_attribs, sizeof(default_attribs));
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
 			attribs[11]=1;
+
+		// Allow the default FB config attribs to be manually specified.  This is
+		// necessary to support apps that implement their own visual selection
+		// mechanisms.  Since those apps don't use glXChooseVisual(), VirtualGL has
+		// no idea what 3D visual attributes they need, and thus it is necessary
+		// to give it a hint using this environment variable.
+		char *env=getenv("VGL_DEFAULTFBCONFIG");
+		char *argv[512];  int argc=0;
+		if(env && strlen(env)>0)
+		{
+			char *arg=strtok(env, " \t,");
+			while(arg && argc<512)
+			{
+				argv[argc]=arg;  argc++;
+				arg=strtok(NULL, " \t,");
+			}
+		}
+		for(int i=0, j=18; i<argc && j<256; i++)
+		{
+			int index;
+			index=2;
+			testattrib(GLX_RED_SIZE, index, 0, INT_MAX);
+			index=4;
+			testattrib(GLX_GREEN_SIZE, index, 0, INT_MAX);
+			index=6;
+			testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
+			index=16;
+			testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
+			testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_STENCIL_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
+			testattrib(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
+			testattrib(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
+			testattrib(GLX_SAMPLES, j, 0, INT_MAX);
+		}
+
 		configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);
 		if((!configs || n<1) && attribs[11])
 		{
