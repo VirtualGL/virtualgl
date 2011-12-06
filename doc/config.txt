@@ -107,6 +107,46 @@ Each method of configuration takes precedence over the previous method:
 	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  How the
 	plugin responds to this value is implementation-specific.
 
+{anchor: VGL_DEFAULTFBCONFIG}
+| Environment Variable | ''VGL_DEFAULTFBCONFIG = ''__''{attrib_list}''__ |
+| Summary | __''{attrib_list}''__ = GLX attributes of the default FB config \
+	that VirtualGL uses if a 3D application does not call \
+	''glXChooseVisual()'' to specify the 3D rendering attributes it desires |
+| Image Transports | All |
+| Default Value | None |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL monitors the ''glXChooseVisual()''
+	function and uses the parameters passed to that function to determine which
+	rendering attributes the 3D application desires.  VGL uses those attributes
+	to obtain a GLX FB config, and that FB config is mapped internally to the
+	visual that is returned to the 3D application.  The FB config is also used
+	when creating the Pbuffers that back the application's 3D windows.
+	{nl}{nl}
+	In rare cases, however, an application may choose to implement its own
+	visual selection mechanism rather than calling ''glXChooseVisual()''.  Such
+	applications will iterate through the list of X visuals and examine the 3D
+	attributes of each using ''glXGetConfig()''.  The problem is that, whereas
+	in a "normal" GLX environment there would be a 1:1 correspondence between
+	X visuals and GLX FB configs, in VirtualGL's split rendering environment,
+	X visuals are on the 2D X server and GLX FB configs are on the 3D X server.
+	Thus, if an application calls ''glXGetConfig()'' before calling
+	''glXChooseVisual()'', VirtualGL has not yet mapped the X visual in question
+	to an FB config, and furthermore, VirtualGL has no idea what type of visual
+	the application is looking for.  In such cases, VGL has to map the visual to
+	a default FB config.  Since this default FB config is very basic, if
+	the application is hunting for a visual with a particular parameter (such as
+	an alpha channel or a stencil buffer), then it may fail to find one.
+	{nl}{nl}
+	This configuration option allows the user to specify the 3D rendering
+	attributes of VirtualGL's default FB config, which may be necessary to make
+	certain applications work, if those applications do not use
+	''glXChooseVisual()'' to obtain a visual.  The attribute list is specified in
+	the same way that you would specify arguments to ''glXChooseFBConfig()''.
+	Example: ''VGL_DEFAULTFBCONFIG = GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8''.  See
+	[[#Application_Recipes][Application Recipes]] for a list of applications that
+	are known to require the use of this configuration option.
+
 | Environment Variable | ''VGL_DISPLAY = ''__''{d}''__ |
 | ''vglrun'' argument | ''-d ''__''{d}''__ |
 | Summary | __''{d}''__ = the X display to use for 3D rendering |

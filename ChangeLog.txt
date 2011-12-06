@@ -23,6 +23,13 @@ Fixed an issue whereby VirtualGL would abort with "terminate called after
 throwing an instance of 'rrerror'" whenever a 3D application running in
 VirtualGL exited and VirtualGL was compiled with GCC 4.6.
 -------------------------------------------------------------------------------
+[6]
+Added a new configuration option (VGL_DEFAULTFBCONFIG), which can be used to
+manually specify the rendering attributes of the default FB config that
+VirtualGL uses in the event that a 3D application does not call
+glXChooseVisual() to specify a desired set of attributes.  Refer to the User's
+Guide for more information.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

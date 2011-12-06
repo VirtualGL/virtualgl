@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-08-13T02:25:43">
+<meta name="date" content="2011-12-06T07:31:54">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2923,6 +2923,12 @@ export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
     <td class="standard">User reports indicate that Abaqus 6.9 will not work properly if <code>libdlfaker.so</code> from VirtualGL is preloaded into it.  This may be true for other versions of Abaqus as well.</td>
   </tr>
   <tr class="standard">
+    <td class="standard">Abaqus v6</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_DEFAULTFBCONFIG</code> environment variable to <code>GLX_STENCIL_SIZE,8</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">Abaqus 6.10 requires a visual with a stencil buffer, but it does not call <code>glXChooseVisual()</code> to specify its desire for such a visual.  Thus, VirtualGL has no idea of the application&rsquo;s preference, and it is necessary to use <code>VGL_DEFAULTFBCONFIG</code> to give VirtualGL a hint as to what the application wants.  Otherwise, VirtualGL will create a Pbuffer without a stencil buffer, and this will cause incorrect rendering when using certain modes within Abaqus.  See Section <a href="#VGL_DEFAULTFBCONFIG" class="ref">19.1</a> for more details.</td>
+  </tr>
+  <tr class="standard">
     <td class="standard">Animator 4</td>
     <td class="standard">Linux</td>
     <td class="standard">Comment out the line that reads <br /><br /> <code>unsetenv&nbsp;LD_PRELOAD</code> <br /><br /> in the <code>a4</code> script, then launch Animator 4 using <br /><br /> <code>vglrun&nbsp;-ge&nbsp;a4</code> <br /><br /></td>
@@ -3877,6 +3883,69 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     </dd>
 </dl>
 
+<p><a name="VGL_DEFAULTFBCONFIG"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_DEFAULTFBCONFIG&nbsp;=&nbsp;</code><em><code>{attrib_list}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{attrib_list}</code></em> = GLX attributes of the default FB config that VirtualGL uses if a 3D application does not call <code>glXChooseVisual()</code> to specify the 3D rendering attributes it desires</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">None</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally, VirtualGL monitors the <code>glXChooseVisual()</code> function 
+        and uses the parameters passed to that function to determine which 
+        rendering attributes the 3D application desires.  VGL uses those 
+        attributes to obtain a GLX FB config, and that FB config is mapped 
+        internally to the visual that is returned to the 3D application.  The FB 
+        config is also used when creating the Pbuffers that back the 
+        application&rsquo;s 3D windows. <br /><br /> In rare cases, however, an 
+        application may choose to implement its own visual selection mechanism 
+        rather than calling <code>glXChooseVisual()</code>.  Such applications 
+        will iterate through the list of X visuals and examine the 3D attributes 
+        of each using <code>glXGetConfig()</code>.  The problem is that, whereas 
+        in a &ldquo;normal&rdquo; GLX environment there would be a 1:1 
+        correspondence between X visuals and GLX FB configs, in 
+        VirtualGL&rsquo;s split rendering environment, X visuals are on the 2D X 
+        server and GLX FB configs are on the 3D X server. Thus, if an 
+        application calls <code>glXGetConfig()</code> before calling 
+        <code>glXChooseVisual()</code>, VirtualGL has not yet mapped the X 
+        visual in question to an FB config, and furthermore, VirtualGL has no 
+        idea what type of visual the application is looking for.  In such cases, 
+        VGL has to map the visual to a default FB config.  Since this default FB 
+        config is very basic, if the application is hunting for a visual with a 
+        particular parameter (such as an alpha channel or a stencil buffer), 
+        then it may fail to find one. <br /><br /> This configuration option 
+        allows the user to specify the 3D rendering attributes of 
+        VirtualGL&rsquo;s default FB config, which may be necessary to make 
+        certain applications work, if those applications do not use 
+        <code>glXChooseVisual()</code> to obtain a visual.  The attribute list 
+        is specified in the same way that you would specify arguments to 
+        <code>glXChooseFBConfig()</code>. Example: 
+        <code>VGL_DEFAULTFBCONFIG&nbsp;=&nbsp;GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8</code>.  
+        See <a href="#Application_Recipes">Application 
+        Recipes</a><a name="idx0048"></a> for a list of applications that are 
+        known to require the use of this configuration option.
+    </dd>
+</dl>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -3951,7 +4020,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         performance improvement from the use of pixel buffer objects 
         (PBO&rsquo;s).  Thus, unless this option is explicitly disabled, it will 
         be enabled by default whenever PBO readback mode is enabled.  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0048"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0049"></a> 
         option for further information.
     </dd>
 </dl>
@@ -4090,7 +4159,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         shouldn&rsquo;t need to muck with this unless something doesn&rsquo;t 
         work.  However, setting this environment variable is necessary when 
         using VirtualGL with 
-        <a href="#Chromium">Chromium</a><a name="idx0049"></a>.  It is also 
+        <a href="#Chromium">Chromium</a><a name="idx0050"></a>.  It is also 
         potentially useful if one wishes to insert another OpenGL interposer 
         between VirtualGL and the system&rsquo;s OpenGL library.
     </dd>
@@ -4170,7 +4239,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         issue was introduced in VirtualGL 2.1.1, this option isn&rsquo;t really 
         useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0050"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0051"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4278,7 +4347,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         set this parameter to a value greater than the number of processors in 
         the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0051"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0052"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4410,7 +4479,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         The threshold quality level at which JPEG compression becomes 
         perceptually lossless is different for each image, but experiments with 
         various visual difference benchmarks (such as 
-        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0052"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0053"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4462,7 +4531,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s readback 
         mechanism and prevents duplication of effort. <br /><br /> This option 
         was developed initially to support running 
-        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0053"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0054"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI processes 1 
         through N as rendering servers, each drawing a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4506,7 +4575,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         32-bit pixel formats are used, VirtualGL&rsquo;s default behavior is to 
         automatically create Pbuffers with 32 bits per pixel when PBO readback 
         mode is enabled (you can use the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0054"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0055"></a> 
         option to override this.) <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4675,7 +4744,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the graphics card (because VirtualGL is now reading back the rendered 3D 
         image every time <code>glFlush()</code> is called.)  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0055"></a> for a list of applications that are 
+        Recipes</a><a name="idx0056"></a> for a list of applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4895,7 +4964,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         the GLX conformance suite (<code>conformx</code>, specifically), but at 
         least one commercial application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0056"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0057"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4945,11 +5014,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles that have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0057"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0058"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0058"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0059"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">
