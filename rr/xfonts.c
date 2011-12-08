@@ -24,6 +24,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <X11/Xatom.h>
 
 /* xfonts.c -- glXUseXFont() for Mesa written by
  * Copyright (C) 1995 Thorsten.Ohl @ Physik.TH-Darmstadt.de
@@ -138,6 +139,20 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 
 	fs = XQueryFont(dpy, font);
 	if(!fs) _throw("Couldn't get font structure information");
+
+	if(fconfig.trace)
+	{
+		unsigned long name_value;
+		if(XGetFontProperty(fs, XA_FONT, &name_value))
+		{
+			char *name=XGetAtomName(dpy, name_value);
+			if(name)
+			{
+				prargs(name);
+				XFree(name);
+			}
+		}
+	}
 
 	/* Allocate a bitmap that can fit all characters.  */
 	max_width = fs->max_bounds.rbearing - fs->min_bounds.lbearing;
