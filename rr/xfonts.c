@@ -66,12 +66,14 @@ static XCharStruct *isvalid(XFontStruct * fs, unsigned int which)
 	rows = fs->max_byte1 - fs->min_byte1 + 1;
 	pages = fs->max_char_or_byte2 - fs->min_char_or_byte2 + 1;
 
-	if (rows == 1) {
+	if (rows == 1)
+	{
 		/* "linear" fonts */
 		if ((fs->min_char_or_byte2 > which) || (fs->max_char_or_byte2 < which))
 			valid = 0;
 	}
-	else {
+	else
+	{
 		/* "matrix" fonts */
 		byte2 = which & 0xff;
 		byte1 = which >> 8;
@@ -80,20 +82,25 @@ static XCharStruct *isvalid(XFontStruct * fs, unsigned int which)
 			valid = 0;
 	}
 
-	if (valid) {
-		if (fs->per_char) {
-			if (rows == 1) {
+	if (valid)
+	{
+		if (fs->per_char)
+		{
+			if (rows == 1)
+			{
 				/* "linear" fonts */
 				return (fs->per_char + (which - fs->min_char_or_byte2));
 			}
-			else {
+			else
+			{
 				/* "matrix" fonts */
 				i = ((byte1 - fs->min_byte1) * pages) +
 					(byte2 - fs->min_char_or_byte2);
 				return (fs->per_char + i);
 			}
 		}
-		else {
+		else
+		{
 			return (&fs->min_bounds);
 		}
 	}
@@ -103,35 +110,36 @@ static XCharStruct *isvalid(XFontStruct * fs, unsigned int which)
 
 void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 {
-	Display *dpy=NULL;
+	Display *dpy = NULL;
 	Window win;
-	Pixmap pixmap=0;  XImage *image=NULL;
-	GC gc=0;
+	Pixmap pixmap = 0;  XImage *image = NULL;
+	GC gc = 0;
 	XGCValues values;
 	unsigned long valuemask;
-	XFontStruct *fs=NULL;
+	XFontStruct *fs = NULL;
 	GLint swapbytes, lsbfirst, rowlength;
 	GLint skiprows, skippixels, alignment;
 	unsigned int max_width, max_height, max_bm_width, max_bm_height;
-	GLubyte *bm=NULL;
+	GLubyte *bm = NULL;
 	int i;
 	pbwin *pbw;
-	typedef struct {
+	typedef struct
+	{
 		int bm_width, bm_height, width, height, valid;
 		GLfloat x0, y0, dx, dy;
 	} charinfo;
-	charinfo *ci=NULL;
+	charinfo *ci = NULL;
 
 	try {
 
-	GLXDrawable draw=_glXGetCurrentDrawable();
+	GLXDrawable draw = _glXGetCurrentDrawable();
 	if(winh.findpb(draw, pbw))
 	{
 		// Current drawable is a virtualized window
 		errifnot(dpy = pbw->get2ddpy());
 		errifnot(win = pbw->getx11drawable());
 	}
-	else if((win=pmh.reversefind(draw))!=0)
+	else if((win = pmh.reversefind(draw)) != 0)
 	{
 		errifnot(dpy = glxdh.getcurrentdpy(draw));
 	}
@@ -148,8 +156,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 			char *name=XGetAtomName(dpy, name_value);
 			if(name)
 			{
-				prargs(name);
-				XFree(name);
+				prargs(name);  XFree(name);
 			}
 		}
 	}
@@ -161,12 +168,14 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	max_bm_height = max_height;
 
 	bm = (GLubyte *) malloc((max_bm_width * max_bm_height) * sizeof(GLubyte));
-	if (!bm) {
-    _throw("Couldn't allocate bitmap in glXUseXFont()");
+	if (!bm)
+	{
+		_throw("Couldn't allocate bitmap in glXUseXFont()");
 	}
 
 	ci = (charinfo *) malloc(count * sizeof(charinfo));
-	if (!ci) {
+	if (!ci)
+	{
 		_throw("Couldn't allocate character info structure in glXUseXFont()");
 	}
 
@@ -188,7 +197,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	pixmap = XCreatePixmap(dpy, win, 8*max_bm_width*count, max_bm_height, 1);
+	pixmap = XCreatePixmap(dpy, win, 8 * max_bm_width * count, max_bm_height, 1);
 	values.foreground = BlackPixel(dpy, DefaultScreen(dpy));
 	values.background = WhitePixel(dpy, DefaultScreen(dpy));
 	values.font = fs->fid;
@@ -196,17 +205,20 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	gc = XCreateGC(dpy, pixmap, valuemask, &values);
 
 	XSetForeground(dpy, gc, 0);
-	XFillRectangle(dpy, pixmap, gc, 0, 0, 8*max_bm_width*count, max_bm_height);
+	XFillRectangle(dpy, pixmap, gc, 0, 0, 8 * max_bm_width * count,
+		max_bm_height);
 	XSetForeground(dpy, gc, 1);
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; i < count; i++)
+	{
 		XCharStruct *ch;
 		int x, y;
 		unsigned int c = first + i;
 
 		/* check on index validity and get the bounds */
 		ch = isvalid(fs, c);
-		if (!ch) {
+		if (!ch)
+		{
 			ch = &fs->max_bounds;
 			ci[i].valid = 0;
 		}
@@ -232,7 +244,8 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		ci[i].bm_width = (ci[i].width + 7) / 8;
 		ci[i].bm_height = ci[i].height;
 
-		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0)) {
+		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
+		{
 			XChar2b char2b;
 			char2b.byte1 = (c >> 8) & 0xff;
 			char2b.byte2 = (c & 0xff);
@@ -240,16 +253,19 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		}
 	}
 
-	XFreeFontInfo(NULL, fs, 1);  fs=NULL;
-	XFreeGC(dpy, gc);  gc=0;
-	errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8*max_bm_width*count, max_bm_height, 1, XYPixmap));
-	XFreePixmap(dpy, pixmap);  pixmap=0;
+	XFreeFontInfo(NULL, fs, 1);  fs = NULL;
+	XFreeGC(dpy, gc);  gc = 0;
+	errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8*max_bm_width*count,
+		max_bm_height, 1, XYPixmap));
+	XFreePixmap(dpy, pixmap);  pixmap = 0;
 	
-	for (i = 0; i < count; i++) {
+	for (i = 0; i < count; i++)
+	{
 		int list = listbase + i;
 
 		glNewList(list, GL_COMPILE);
-		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0)) {
+		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
+		{
 			int x, y;
 			memset(bm, '\0', ci[i].bm_width * ci[i].bm_height);
 			/* Fill the bitmap (X11 and OpenGL are upside down wrt each other).  */
@@ -258,16 +274,18 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 					if (XGetPixel(image, x+i*max_bm_width*8, y))
 						bm[ci[i].bm_width * (ci[i].bm_height - y - 1) + x / 8] |=
 							(1 << (7 - (x % 8)));
-			glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx, ci[i].dy, bm);
+			glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx,
+				ci[i].dy, bm);
 		}
-		else {
+		else
+		{
 			glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
 		}
  		glEndList();
 	}
-	XDestroyImage(image);  image=NULL;
-	free(bm);  bm=NULL;
-	free(ci);  ci=NULL;
+	XDestroyImage(image);  image = NULL;
+	free(bm);  bm = NULL;
+	free(ci);  ci = NULL;
 
 	/* Restore saved packing modes.  */
 	glPixelStorei(GL_UNPACK_SWAP_BYTES, swapbytes);
