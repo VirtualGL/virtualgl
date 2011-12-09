@@ -30,6 +30,10 @@ VirtualGL uses in the event that a 3D application does not call
 glXChooseVisual() to specify a desired set of attributes.  Refer to the User's
 Guide for more information.
 -------------------------------------------------------------------------------
+[7]
+Worked around an issue whereby using very large fonts with glXUseXFont() would
+cause Pixmap allocation failures with certain X servers.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

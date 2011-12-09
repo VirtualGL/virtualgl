@@ -121,7 +121,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	GLint skiprows, skippixels, alignment;
 	unsigned int max_width, max_height, max_bm_width, max_bm_height;
 	GLubyte *bm = NULL;
-	int i;
+	int i, j, ngroups, groupsize, n;
 	pbwin *pbw;
 	typedef struct
 	{
@@ -173,12 +173,6 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		_throw("Couldn't allocate bitmap in glXUseXFont()");
 	}
 
-	ci = (charinfo *) malloc(count * sizeof(charinfo));
-	if (!ci)
-	{
-		_throw("Couldn't allocate character info structure in glXUseXFont()");
-	}
-
 	/* Save the current packing mode for bitmaps.  */
 	_glGetIntegerv(GL_UNPACK_SWAP_BYTES, &swapbytes);
 	_glGetIntegerv(GL_UNPACK_LSB_FIRST, &lsbfirst);
@@ -197,93 +191,112 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	pixmap = XCreatePixmap(dpy, win, 8 * max_bm_width * count, max_bm_height, 1);
-	values.foreground = BlackPixel(dpy, DefaultScreen(dpy));
-	values.background = WhitePixel(dpy, DefaultScreen(dpy));
-	values.font = fs->fid;
-	valuemask = GCForeground | GCBackground | GCFont;
-	gc = XCreateGC(dpy, pixmap, valuemask, &values);
+	/* Try not to create a Pixmap more than 1 megapixel in size, to avoid
+	   running out of memory on some X server implementations. */
+	ngroups = (8 * max_bm_width * count * max_bm_height + 999999) / 1000000;
+	groupsize = (count + ngroups - 1) / ngroups;
 
-	XSetForeground(dpy, gc, 0);
-	XFillRectangle(dpy, pixmap, gc, 0, 0, 8 * max_bm_width * count,
-		max_bm_height);
-	XSetForeground(dpy, gc, 1);
-
-	for (i = 0; i < count; i++)
+	ci = (charinfo *) malloc(groupsize * sizeof(charinfo));
+	if (!ci)
 	{
-		XCharStruct *ch;
-		int x, y;
-		unsigned int c = first + i;
+		_throw("Couldn't allocate character info structure in glXUseXFont()");
+	}
 
-		/* check on index validity and get the bounds */
-		ch = isvalid(fs, c);
-		if (!ch)
+	for (j = 0; j < count; j += groupsize)
+	{
+		n = min(groupsize, count - j);
+		pixmap = XCreatePixmap(dpy, win, 8 * max_bm_width * n, max_bm_height, 1);
+		if (!pixmap) _throw("Couldn't allocate pixmap in glXUseXFont()");
+		values.foreground = BlackPixel(dpy, DefaultScreen(dpy));
+		values.background = WhitePixel(dpy, DefaultScreen(dpy));
+		values.font = fs->fid;
+		valuemask = GCForeground | GCBackground | GCFont;
+		gc = XCreateGC(dpy, pixmap, valuemask, &values);
+
+		XSetForeground(dpy, gc, 0);
+		XFillRectangle(dpy, pixmap, gc, 0, 0, 8 * max_bm_width * n,
+			max_bm_height);
+		XSetForeground(dpy, gc, 1);
+
+		for (i = 0; i < n; i++)
 		{
-			ch = &fs->max_bounds;
-			ci[i].valid = 0;
+			XCharStruct *ch;
+			int x, y;
+			unsigned int c = first + i;
+
+			/* check on index validity and get the bounds */
+			ch = isvalid(fs, c);
+			if (!ch)
+			{
+				ch = &fs->max_bounds;
+				ci[i].valid = 0;
+			}
+			else ci[i].valid = 1;
+
+			/* glBitmap()' parameters:
+			   straight from the glXUseXFont(3) manpage.  */
+			ci[i].width = ch->rbearing - ch->lbearing;
+			ci[i].height = ch->ascent + ch->descent;
+			ci[i].x0 = -ch->lbearing;
+			ci[i].y0 = ch->descent - 0;	/* XXX used to subtract 1 here */
+			/* but that caused a conformace failure */
+			ci[i].dx = ch->width;
+			ci[i].dy = 0;
+
+			/* X11's starting point.  */
+			x = -ch->lbearing;
+			y = ch->ascent;
+
+			/* Round the width to a multiple of eight.  We will use this also
+			   for the pixmap for capturing the X11 font.  This is slightly
+			   inefficient, but it makes the OpenGL part real easy.  */
+			ci[i].bm_width = (ci[i].width + 7) / 8;
+			ci[i].bm_height = ci[i].height;
+
+			if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
+			{
+				XChar2b char2b;
+				char2b.byte1 = (c >> 8) & 0xff;
+				char2b.byte2 = (c & 0xff);
+				XDrawString16(dpy, pixmap, gc, x + i * max_bm_width * 8, y, &char2b,
+					1);
+			}
 		}
-		else ci[i].valid = 1;
 
-		/* glBitmap()' parameters:
-		   straight from the glXUseXFont(3) manpage.  */
-		ci[i].width = ch->rbearing - ch->lbearing;
-		ci[i].height = ch->ascent + ch->descent;
-		ci[i].x0 = -ch->lbearing;
-		ci[i].y0 = ch->descent - 0;	/* XXX used to subtract 1 here */
-		/* but that caused a conformace failure */
-		ci[i].dx = ch->width;
-		ci[i].dy = 0;
-
-		/* X11's starting point.  */
-		x = -ch->lbearing;
-		y = ch->ascent;
-
-		/* Round the width to a multiple of eight.  We will use this also
-		   for the pixmap for capturing the X11 font.  This is slightly
-		   inefficient, but it makes the OpenGL part real easy.  */
-		ci[i].bm_width = (ci[i].width + 7) / 8;
-		ci[i].bm_height = ci[i].height;
-
-		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
+		XFreeGC(dpy, gc);  gc = 0;
+		errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
+			max_bm_height, 1, XYPixmap));
+		XFreePixmap(dpy, pixmap);  pixmap = 0;
+	
+		for (i = 0; i < n; i++)
 		{
-			XChar2b char2b;
-			char2b.byte1 = (c >> 8) & 0xff;
-			char2b.byte2 = (c & 0xff);
-			XDrawString16(dpy, pixmap, gc, x+i*max_bm_width*8, y, &char2b, 1);
+			int list = listbase + j + i;
+
+			glNewList(list, GL_COMPILE);
+			if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
+			{
+				int x, y;
+				memset(bm, '\0', ci[i].bm_width * ci[i].bm_height);
+				/* Fill the bitmap (X11 and OpenGL are upside down wrt each other). */
+				for (y = 0; y < ci[i].bm_height; y++)
+					for (x = 0; x < 8 * ci[i].bm_width; x++)
+						if (XGetPixel(image, x + i * max_bm_width * 8, y))
+							bm[ci[i].bm_width * (ci[i].bm_height - y - 1) + x / 8] |=
+								(1 << (7 - (x % 8)));
+				glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx,
+					ci[i].dy, bm);
+			}
+			else
+			{
+				glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
+			}
+ 			glEndList();
 		}
+
+		XDestroyImage(image);  image = NULL;
 	}
 
 	XFreeFontInfo(NULL, fs, 1);  fs = NULL;
-	XFreeGC(dpy, gc);  gc = 0;
-	errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8*max_bm_width*count,
-		max_bm_height, 1, XYPixmap));
-	XFreePixmap(dpy, pixmap);  pixmap = 0;
-	
-	for (i = 0; i < count; i++)
-	{
-		int list = listbase + i;
-
-		glNewList(list, GL_COMPILE);
-		if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
-		{
-			int x, y;
-			memset(bm, '\0', ci[i].bm_width * ci[i].bm_height);
-			/* Fill the bitmap (X11 and OpenGL are upside down wrt each other).  */
-			for (y = 0; y < ci[i].bm_height; y++)
-				for (x = 0; x < 8 * ci[i].bm_width; x++)
-					if (XGetPixel(image, x+i*max_bm_width*8, y))
-						bm[ci[i].bm_width * (ci[i].bm_height - y - 1) + x / 8] |=
-							(1 << (7 - (x % 8)));
-			glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx,
-				ci[i].dy, bm);
-		}
-		else
-		{
-			glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
-		}
- 		glEndList();
-	}
-	XDestroyImage(image);  image = NULL;
 	free(bm);  bm = NULL;
 	free(ci);  ci = NULL;
 
