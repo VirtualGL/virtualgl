@@ -194,8 +194,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	/* X.org can't handle pixmaps more than 32767 pixels in width or height,
 	   so we have to split the font into multiple groups if it would cause the
 	   temporary pixmap to exceed those limits */
-	ngroups = max((8 * max_bm_width * count + 32766) / 32767,
-		(max_bm_height + 32766) / 32767);
+	ngroups = (8 * max_bm_width * count + 32766) / 32767,
 	groupsize = (count + ngroups - 1) / ngroups;
 
 	ci = (charinfo *) malloc(groupsize * sizeof(charinfo));
