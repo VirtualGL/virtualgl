@@ -41,7 +41,7 @@ systems, OpenGL and GLX, and X windows.
 #INCLUDE: transportplugins.txt
 {nl}
 ----8<--------------
-#INCLUDE: solarisshellscripts.txt
+#INCLUDE: setuid.txt
 {nl}
 ----8<--------------
 #INCLUDE: chromium.txt
@@ -62,5 +62,5 @@ systems, OpenGL and GLX, and X windows.
 #INCLUDE: configdialog.txt
 {nl}
 ----8<--------------
-#INCLUDE: config.txt
+#INCLUDE: advancedconfig.txt
 {nl}
