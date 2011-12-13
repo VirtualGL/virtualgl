@@ -34,9 +34,9 @@ can be found in the TurboVNC User's Guide.
 on the RealVNC and Xorg code bases.  TigerVNC spun off from the TightVNC
 project in early 2009, and it uses the same high-speed JPEG codec as VirtualGL
 and TurboVNC ([[http://libjpeg-turbo.virtualgl.org][libjpeg-turbo]].)  Unlike
-TurboVNC, TigerVNC is not specifically designed with 3D applications in mind.
-However, TigerVNC can, if properly configured, produce suitable performance for
-running VirtualGL.  TigerVNC is available in Fedora 11 or later.
+TurboVNC, TigerVNC is not specifically designed for 3D applications.
+However, TigerVNC can, if properly configured, produce performance that is
+sufficient for using VirtualGL.  TigerVNC is available in Fedora 11 or later.
 
 Other solutions, such as RealVNC and NX, also work well with VirtualGL.
 Generally, none of these other solutions will provide anywhere near the
