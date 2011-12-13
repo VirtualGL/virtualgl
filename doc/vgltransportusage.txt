@@ -6,7 +6,7 @@
 
 	* Seamless windows; every application window appears as a separate window on
 		the user's desktop
-	* Supports stereographic and overlay rendering (see requirements in
+	* Supports stereographic rendering (see requirements in
 		{ref prefix="Sections ": Stereo_Requirements} and
 		{ref prefix="": Overlay_Requirements})
 	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
@@ -15,7 +15,7 @@
 *** Disadvantages of the VGL Transport
 #OPT: noList! plain!
 
-	* The VGL Transport is designed to be used with remote X servers, thus it
+	* The VGL Transport is designed to be used with remote X servers, and thus it
 		relies on the chatty remote X11 protocol to send the 2D elements of the
 		application's GUI to the user's desktop.  As a result, the VGL Transport is
 		not recommended for use on high-latency or low-bandwidth networks
@@ -44,7 +44,7 @@ maximize performance.
 			(right-click on the Cygwin/X taskbar icon, then select
 			__Applications-->xterm__.)
 
-	#. In the same terminal/xterm window, open a Secure Shell (SSh) session into
+	#. In the same terminal/xterm window, open a Secure Shell (SSH) session into
 		the VirtualGL server:
 
 		#Verb: <<---
@@ -54,7 +54,7 @@ maximize performance.
 		Replace __''{user}''__ with your user account name on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.
 
-	#. In the SSh session, start a 3D application using VirtualGL:
+	#. In the SSH session, start a 3D application using VirtualGL:
 
 		#Verb: <<---
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
@@ -80,10 +80,10 @@ maximize performance.
 		---
 
 		!!! If you only ever plan to use one Exceed session at a time, then you
-		can set the ''DISPLAY'' environment variable in your global user
-		environment.
+		can set the ''DISPLAY'' environment variable in your user environment,
+		which is configured through the Windows Control Panel.
 
-	#. Open a Secure Shell (SSh) session into the VirtualGL server:
+	#. Open a Secure Shell (SSH) session into the VirtualGL server:
 
 		#Verb: <<---
 		cd /d "c:\program files\virtualgl-{version}-{build}"
@@ -93,7 +93,7 @@ maximize performance.
 		Replace __''{user}''__ with your user account name on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.
 
-	#. In the SSh session, start a 3D application using VirtualGL:
+	#. In the SSH session, start a 3D application using VirtualGL:
 
 		#Verb: <<---
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
@@ -108,9 +108,9 @@ maximize performance.
 As with the previous mode, this mode performs optimally on
 local-area networks.  However, it is less secure, since both the X11 traffic
 and the VGL Transport are unencrypted.  This mode is primarily useful in
-grid environments where you may not know ahead of time which server will
+grid environments, in which you may not know ahead of time which server will
 execute a VirtualGL job.  It is assumed that the "submit host" (the machine
-into which you connect with SSh) and the "execute hosts" (the machines that
+into which you connect with SSH) and the "execute hosts" (the machines that
 will run VirtualGL jobs) share the same home directories and reside in the same
 domain.
 
@@ -130,15 +130,15 @@ argument to ''vglconnect'' when connecting to the server:
 	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
 	---
 
-** VGL Transport with X11 Forwarding and SSh Tunneling
-{anchor: SSh_Tunneling}
+** VGL Transport with X11 Forwarding and SSH Tunneling
+{anchor: SSH_Tunneling}
 
-Both the VGL Transport and the X11 traffic are tunneled through SSh when
+Both the VGL Transport and the X11 traffic are tunneled through SSH when
 using this mode, and thus it provides a completely secure solution.  It is
 also useful when either the VirtualGL server or the client machine are behind
-restrictive firewalls and only SSh connections are allowed through.  Using
-SSh tunneling on wide-area networks should not affect performance
-significantly.  However, using SSh tunneling on a local-area network can reduce
+restrictive firewalls and only SSH connections are allowed through.  Using
+SSH tunneling on wide-area networks should not affect performance
+significantly.  However, using SSH tunneling on a local-area network can reduce
 VirtualGL's performance by anywhere from 20-40%.
 
 *** Procedure
@@ -152,13 +152,13 @@ argument to ''vglconnect'' when connecting to the server:
 	/opt/VirtualGL/bin/vglconnect -s {user}@{server}
 	---
 
-''vglconnect'' will make two SSh connections into the server, the first to find
-an open port on the server and the second to create the SSh tunnel for the VGL Transport
-and open the secure shell.  If you are not using an SSh agent to create
+''vglconnect'' will make two SSH connections into the server, the first to find
+an open port on the server and the second to create the SSH tunnel for the VGL Transport
+and open the secure shell.  If you are not using an SSH agent to create
 password-less logins, then this mode will require you to enter your password
 twice.
 
-''vglconnect -s'' can be used to create multi-layered SSh tunnels.  For
+''vglconnect -s'' can be used to create multi-layered SSH tunnels.  For
 instance, if the VirtualGL server is not directly accessible from the Internet,
 you can use ''vglconnect -s'' to connect to a gateway server, then use
 ''vglconnect -s'' again on the gateway server to connect to the VirtualGL
@@ -234,8 +234,8 @@ client machine.
 
 	#. If you are running a full-screen XDMCP session on a Linux/Unix client
 		(for instance, using GDM Chooser), then starting ''vglclient'' is a bit
-		trickier.  You will need to use SSh to connect back into the client machine
-		from inside the XDMCP session.  Then, in the client SSh session, set the
+		trickier.  You will need to use SSH to connect back into the client machine
+		from inside the XDMCP session.  Then, in the client SSH session, set the
 		''DISPLAY'' environment variable to the display name of the X server that
 		is running the XDMCP session (usually '':0'' or '':1''), and type:
 
@@ -243,7 +243,7 @@ client machine.
 		vglclient -detach
 		---
 
-		You can now close the SSh session, if you wish.
+		You can now close the SSH session, if you wish.
 
 *** Security
 #OPT: noList! plain!
@@ -272,7 +272,7 @@ XAuth keyring on the client machine.
 The VirtualGL Client application (''vglclient'') receives encoded and/or
 compressed images on a dedicated TCP socket, decodes and/or decompresses the
 images, and draws the images into the appropriate X window.  The ''vglconnect''
-script wraps both ''vglclient'' and SSh to greatly simplify the process of
+script wraps both ''vglclient'' and SSH to greatly simplify the process of
 creating VGL Transport connections.
 
 ''vglconnect'' invokes ''vglclient'' with an argument of ''-detach'', which
@@ -343,4 +343,4 @@ firewall is able to create rules based on application executables instead of
 listening ports.
 
 Note that it is not necessary to open any inbound ports in the firewall to use
-the VGL Transport with [[#SSh_Tunneling][SSh Tunneling]].
+the VGL Transport with [[#SSH_Tunneling][SSH Tunneling]].

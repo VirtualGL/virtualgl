@@ -67,7 +67,7 @@ on the VirtualGL server or pass an argument of ''-sp'' to ''vglrun''.  See
 
 ** VirtualGL Diagnostic Tools
 
-VirtualGL includes several tools which can be useful in diagnosing performance
+VirtualGL includes several tools that can be useful in diagnosing performance
 problems with the system.
 
 *** NetTest
@@ -108,7 +108,7 @@ The NetTest client will produce output similar to the following:
 TCP transfer performance between localhost and {server}:
 
 Transfer size  1/2 Round-Trip      Throughput      Throughput
-(bytes)                (msec)        (MB/sec)     (Mbits/sec)
+(bytes)                (msec)    (MBytes/sec)     (Mbits/sec)
 1                    0.093402        0.010210        0.085651
 2                    0.087308        0.021846        0.183259
 4                    0.087504        0.043594        0.365697
@@ -200,8 +200,8 @@ to the center of its window on every frame.
 
 TCBench can also be used to measure the frame rate of applications that are
 running on the local display, although for extremely fast applications (those
-that exceed 40 fps on the local display), you may need to increase the sampling
-rate of TCBench to get accurate results.  The default sampling rate of 50
+that exceed 80 fps on the local display), you may need to increase the sampling
+rate of TCBench to get accurate results.  The default sampling rate of 100
 samples/sec should be fine for measuring the throughput of VirtualGL and other
 thin client systems.
 
@@ -229,11 +229,11 @@ SphereMark (the original SphereMark was for Windows only) completely from
 scratch.  GLXSpheres does not use any code from the original benchmark,
 but it does attempt to mimic the image output of the original as closely as
 possible.  GLXSpheres lacks some of the advanced rendering features of the
-original, such as the ability to use vertex arrays, but since it was primarily
-designed as a benchmark for VirtualGL, display lists are more than fast enough
-for that purpose.
+original, such as the ability to use vertex arrays, but since GLXspheres was
+primarily designed as a benchmark for VirtualGL, display lists are more than
+fast enough for that purpose.
 
-GLXSpheres has some additional modes which its predecessor lacked, modes which
+GLXSpheres has some additional modes that its predecessor lacked, modes which
 are designed specifically to test the performance of various VirtualGL
 features:
 
@@ -254,9 +254,9 @@ features:
 	Immediate mode does not use display lists, so when immediate mode OpenGL is
 	rendered indirectly (over a remote X connection), this causes every OpenGL
 	command to be sent as a separate network request to the X server ... on every
-	frame.  Many applications cannot use display lists, because the geometry they
-	are rendering is dynamic, so this models how such applications might perform
-	when displayed remotely without VirtualGL.
+	frame.  Many applications do not use display lists (because the geometry they
+	are rendering is dynamic, or for other reasons), so this models how such
+	applications might perform when displayed remotely without VirtualGL.
 
 	Interactive mode (''glxspheres -i'') ::	In interactive mode, GLXSpheres will
 	wait to draw a frame until it receives a mouse event.  Continuously dragging

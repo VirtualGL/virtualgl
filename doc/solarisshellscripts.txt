@@ -26,18 +26,13 @@ ld.so.1: warning: librrfaker.so: open failed: No such file in secure directories
 ld.so.1: warning: libdlfaker.so: open failed: No such file in secure directories
 ---
 
-On Solaris and on versions of Linux with GLIBC 2.3 and later, the executable
-will continue to run-- but without VirtualGL preloaded into it.  That is definitely a
-problem if the setuid/setgid executable was a 3D application that was intended
-to be used with VirtualGL.
-
-There are a couple of ways to work around this issue.  If the 3D application
-that you are intending to run in VirtualGL is not itself a setuid/setgid
-executable, then probably the safest way to work around the issue is simply
-to edit the application script and make it store the value of the
-''LD_PRELOAD'' environment variables until right before the application
-executable is launched.  For instance, consider the following application
-script:
+On Solaris and versions of Linux with GLIBC 2.3 and later, these are just
+warnings, and the setuid/setgid executables will continue to run (without
+VirtualGL preloaded into them.)  However, if you want to get rid of the
+warnings, an easy way to do so is to simply edit the application script and
+make it store the value of the ''LD_PRELOAD'' environment variables until right
+before the application executable is launched.  For instance, consider the
+following application script:
 
 Initial contents of ''application.sh'':
 #Verb: <<---
@@ -81,14 +76,21 @@ export LD_PRELOAD
 some_3D_application_executable
 ---
 
-You can also force VirtualGL to be preloaded into setuid/setgid executables,
-but please be aware of the security ramifications of this before you do it.  By
-applying one of the following workarounds, you are essentially telling the
-operating system that you trust the security and stability of the VirtualGL
-code as much as you trust the security and stability of the operating system.
-And while we're flattered, we're not sure that we're necessarily deserving of
-that accolade, so if you are in a security critical environment, apply the
-appropriate level of paranoia here.
+This procedure may be necessary to work around certain other problems that
+exist in the launch scripts of specific applications.  See
+[[#Application_Recipes][Application Recipes]] for more details.
+
+If the 3D application that you are intending to run in VirtualGL is itself a
+setuid/setgid executable, then further steps are required.  Otherwise, the
+3D application will launch without VirtualGL preloaded into it.  Forcing
+VirtualGL to be preloaded into setuid/setgid executables has security
+ramifications, so please be aware of these before you do it.  By applying one
+of the following workarounds, you are essentially telling the operating system
+that you trust the security and stability of the VirtualGL code as much as you
+trust the security and stability of the operating system.  While we're
+flattered, we're not sure that we're necessarily deserving of that accolade, so
+if you are in a security-critical environment, apply the appropriate level of
+paranoia here.
 
 {anchor: setuid_linux}
 To force VirtualGL to be preloaded into setuid/setgid executables on Linux,

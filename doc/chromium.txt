@@ -61,14 +61,13 @@ The general strategy for making this work with VirtualGL is to first make it
 work without VirtualGL and then insert VirtualGL only into the processes that
 run on Node 0.  VirtualGL must be inserted into the CrAppFaker process to
 prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the 2D X server
-(which would fail if this X server was a VNC session or otherwise did not support
-GLX.)  VirtualGL must be inserted into the CrServer process on Node 0 to
-prevent it from sending ''glDrawPixels()'' calls to the 2D X server (which would
-similarly fail if the 2D X server didn't support GLX and which would create a
-performance issue if the 2D X server was remote.)  Instead, VirtualGL forces
-CrServer to draw into a Pbuffer, and VGL then takes charge of transmitting
-the pixels from the Pbuffer to the 2D X server in the most efficient
-way possible.
+(which would fail if this X server did not support GLX.)  VirtualGL must be
+inserted into the CrServer process on Node 0 to prevent it from sending
+''glDrawPixels()'' calls to the 2D X server (which would similarly fail if the
+2D X server didn't support GLX and which would create a performance issue if
+the 2D X server was remote.)  Instead, VirtualGL forces CrServer to draw into a
+Pbuffer, and VGL then takes charge of transmitting the pixels from the Pbuffer
+to the 2D X server in the most efficient way possible.
 
 As with any normal OpenGL application, CrServer can be launched using
 ''vglrun''.  However, because CrAppFaker also interposes OpenGL and GLX

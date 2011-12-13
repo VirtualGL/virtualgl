@@ -3,7 +3,7 @@
 ** Configuring and Optimizing Exceed
 
 If using the VirtualGL Client for Exceed, then add the Exceed path (example:
-''C:\\Program Files\\Hummingbird\\Connectivity\\9.00\\Exceed'') to the system
+''C:\\Program Files\\Hummingbird\\Connectivity\\14.00\\Exceed'') to the system
 ''PATH'' environment if it isn't already there.
 
 *** Disabling Pixel Format Conversion (Exceed 2006 and earlier)
@@ -25,7 +25,7 @@ If using the VirtualGL Client for Exceed, then add the Exceed path (example:
 	#. Click "Validate and Apply Changes."  If XConfig asks whether you want to
 		perform a server reset, click "Yes."
 
-*** Disabling Backing Store
+*** Disabling Backing Store (Exceed 2008 and earlier)
 #OPT: noList! plain!
 
 	#. Load Exceed XConfig (right-click on the Exceed taskbar icon, then select
@@ -89,7 +89,7 @@ OpenText support site:
 	(__OpenText WebSupport account required__) \
 |
 
-No patches should be necessary for Exceed 10, 2006, or 2007.
+No patches should be necessary for Exceed 10, 2006, 2007, or 14.
 
 Next, you need to enable the MIT-SHM extension in Exceed:
 

@@ -5,7 +5,7 @@ provided by Sun Microsystems.  With the release of VirtualBox 2.1.0,
 experimental support was added for hardware-accelerated OpenGL in Windows
 and Linux guests running on Windows, MacIntel, Linux, and Solaris/x86 hosts.
 3D acceleration in VirtualBox is accomplished by installing a special driver in
-the guest which uses a subset of Chromium to transmit OpenGL calls through a
+the guest that uses a subset of Chromium to transmit OpenGL calls through a
 local connection to the VirtualBox process running on the host.  When used in
 conjunction with VirtualGL on a Linux or Solaris/x86 host, this solution
 provides a means of displaying Windows 3D applications remotely.
@@ -68,5 +68,5 @@ If the above does not work, then try the following alternate method:
 		over a remote X11 connection unless a
 		[[#Direct_X11_Connection][direct X11 connection]] (''vglconnect -x'') is
 		used with gigabit Ethernet (or faster.)  For 100 Megabit and slower
-		networks, using a high-performance X proxy (such as TurboVNC or TigerVNC)
+		networks, using a high-performance X proxy (such as TurboVNC)
 		is recommended when remotely displaying VirtualBox using VirtualGL.

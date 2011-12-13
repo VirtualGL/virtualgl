@@ -129,7 +129,7 @@
 ** Installing VirtualGL from Source
 
 If you are using a platform for which there is not a pre-built VirtualGL binary
-package available, then log in as root, download the VirtualGL source tarball
+package available, then download the VirtualGL source tarball
 (''VirtualGL-''__''{version}''__''.tar.gz'') from the 
 [[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
@@ -178,9 +178,9 @@ sudo /opt/VirtualGL/bin/uninstall
 *** Windows (Exceed)
 #OPT: noList! plain!
 
-Use the "Add or Remove Programs" applet in the Control Panel (or the
-"Programs and Features" applet if you are running Windows Vista), or select
-"Uninstall VirtualGL Client" in the "VirtualGL Client" Start Menu group.
+Use the "Programs and Features" applet in the Control Panel (or the
+"Add or Remove Programs" applet if you are running Windows XP), or
+select "Uninstall VirtualGL Client" in the "VirtualGL Client" Start Menu group.
 
 *** Windows (Cygwin/X)
 #OPT: noList! plain!

@@ -126,8 +126,8 @@
 
 || || Server || Client ||
 | Linux \
-	| 3D graphics card that supports stereo (examples: nVidia Quadro, ATI FirePro) \
-		and is configured to export stereo visuals \
+	| 3D graphics card that supports stereo (examples: nVidia Quadro, ATI \
+		FirePro.)  The 2D X server should be configured to export stereo visuals. \
 	| < \
 	|
 | Solaris/x86 \
@@ -136,17 +136,18 @@
 	|
 | Mac/x86 \
 	| N/A \
-	| 3D graphics card that supports stereo (example: nVidia Quadro) \
-		and is configured to export stereo visuals \
+	| 3D graphics card that supports stereo (example: nVidia Quadro.) \
+		The 2D X server should be configured to export stereo visuals. \
 	|
 | Windows \
 	| N/A \
 	| {list type=ul: \
 			{item:3D graphics card that supports stereo (examples: nVidia \
-				Quadro, ATI FirePro) and is configured to export stereo \
-				pixel formats} \
-			{item:[[http://connectivity.opentext.com][OpenText]] \
-				Exceed 3D v8 or newer}} \
+				Quadro, ATI FirePro.)  Stereo support should be enabled in the 3D \
+				driver configuration.} \
+			{item:2D X server that supports and is configured to export stereo \
+				visuals (such as [[http://connectivity.opentext.com][OpenText]] \
+				Exceed 3D v8 or newer)}} \
 	|
 #OPT: hiCol=first
 
@@ -156,7 +157,8 @@
 || || Client ||
 | Linux \
 	| 3D graphics card that supports transparent overlays (examples: \
-		nVidia Quadro, ATI FirePro) and is configured to export overlay visuals \
+		nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to \
+		export overlay visuals. \
 	|
 | Solaris/x86 \
 	| ^ \
@@ -167,9 +169,11 @@
 | Windows \
 	| {list type=ul: \
 			{item:3D graphics card that supports transparent overlays (examples: \
-				nVidia Quadro, ATI FirePro) and is configured to \
-				export overlay pixel formats} \
-			{item:[[http://connectivity.opentext.com][OpenText]] \
-				Exceed 3D v8 or newer}} \
+				nVidia Quadro, ATI FirePro.)  Overlay support should be enabled in \
+				the 3D driver configuration.} \
+			{item:2D X server that supports and is configured to export transparent \
+				overlay visuals (such as \
+				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or \
+				newer)}} \
 	|
 #OPT: hiCol=first

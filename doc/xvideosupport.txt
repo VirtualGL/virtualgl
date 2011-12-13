@@ -13,12 +13,12 @@ It can simply pass the images along to the graphics card for decoding.
 
 VirtualGL supports the X Video extension in two ways:
 
-** YUV Encoding with the VGL Transport
+** The VGL Transport with YUV Encoding
 
 Setting the ''VGL_COMPRESS'' environment variable to ''yuv'' or passing an
-argument of ''-c yuv'' to ''vglrun'' enables YUV encoding with the VGL
-Transport.  When this mode is enabled, VirtualGL encodes images as YUV420P (a
-form of YUV encoding which uses 4X chrominance subsampling and separates Y, U,
+argument of ''-c yuv'' to ''vglrun'' enables the VGL Transport with YUV
+encoding.  When this mode is enabled, VirtualGL encodes images as YUV420P (a
+form of YUV encoding that uses 4X chrominance subsampling and separates Y, U,
 and V pixel components into separate image planes) instead of RGB or JPEG.  The
 YUV420P images are sent to the VirtualGL Client, which draws them using the X
 Video extension.
@@ -37,10 +37,10 @@ lines and other sharp features may appear "soft".
 
 Setting the ''VGL_COMPRESS'' environment variable to ''xv'' or passing an
 argument of ''-c xv'' to ''vglrun'' enables the XV Transport.  The XV Transport
-is a special version of the X11 Transport which
+is a special version of the X11 Transport that
 encodes images as YUV420P and draws them directly to the 2D X server using the
 X Video extension.  This is mainly useful in conjunction with X proxies, such
 as the Sun Ray Server Software, that support the X Video extension.  The
-idea is that if the X proxy is going to have to transcode the image to YUV
+idea is that, if the X proxy is going to have to transcode the image to YUV
 anyhow, VirtualGL may be faster at doing this, since it has a SIMD-accelerated
 YUV encoder.

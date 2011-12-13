@@ -26,7 +26,7 @@ system resources, so running these applications on a Sun Ray Server that is
 shared by many 2D application users is not a recommended approach.
 
 To get around this problem, VirtualGL 2.0.x and 2.1.x used a proprietary plugin
-provided by Sun which sent images directly from the 3D application server
+provided by Sun, which sent images directly from the 3D application server
 to the Sun Ray DTU, thus bypassing the Sun Ray Server altogether.
 
 #IMG: sunray.png
@@ -44,16 +44,16 @@ which allows applications to pre-encode YUV images and send these through
 the Sun Ray X Server to the DTU without any transcoding.
 
 VirtualGL 2.2 supports this mechanism through the use of the XV Transport and
-YUV encoding with the VGL Transport (see
+the VGL Transport with YUV encoding (see
 {ref prefix="Chapter ": X_Video_Support}.)  If VirtualGL detects that the 2D X
 server is a Sun Ray X Server instance, then it will automatically enable the XV
-transport if the X server connection is local or YUV encoding with the VGL
-Transport if the X server is remote.  The remote case is illustrated in the
+Transport if the X server connection is local or the VGL Transport with YUV
+encoding if the X server is remote.  The remote case is illustrated in the
 figure below.
 
 #IMG: sunrayvgltransport.png
 #OPT: fmt=latex; w=4cm
-#CAP: YUV Encoding with the VGL Transport in a Sun Ray Environment
+#CAP: The VGL Transport with YUV Encoding in a Sun Ray Environment
 
 There are trade-offs with using X Video vs. using the Sun Ray Transport.
 Whereas the X Video mechanism still uses very little CPU time on the Sun Ray

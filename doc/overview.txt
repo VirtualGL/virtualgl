@@ -3,16 +3,16 @@
 
 VirtualGL is an open source package that gives any Unix or Linux remote
 display software the ability to run OpenGL applications with full 3D
-hardware acceleration.  Some remote display software, such as VNC, lacks the
-ability to run OpenGL applications at all.  Other remote display software
-forces OpenGL applications to use a slow software-only OpenGL renderer, to the
-detriment of performance as well as compatibility.  The traditional method of
-displaying OpenGL applications to a remote X server (indirect rendering)
-supports 3D hardware acceleration, but this approach causes all of the OpenGL
-commands and 3D data to be sent over the network to be rendered on the client
-machine.  This is not a tenable proposition unless the data is relatively small
-and static, unless the network is very fast, and unless the OpenGL application
-is specifically tuned for a remote X-Windows environment.
+hardware acceleration.  Some remote display software lacks the ability to run
+OpenGL applications at all.  Other remote display software forces OpenGL
+applications to use a slow software-only OpenGL renderer, to the detriment of
+performance as well as compatibility.  The traditional method of displaying
+OpenGL applications to a remote X server (indirect rendering) supports 3D
+hardware acceleration, but this approach causes all of the OpenGL commands and
+3D data to be sent over the network to be rendered on the client machine.  This
+is not a tenable proposition unless the data is relatively small and static,
+unless the network is very fast, and unless the OpenGL application is
+specifically tuned for a remote X-Windows environment.
 
 With VirtualGL, the OpenGL commands and 3D data are instead redirected to a
 3D graphics accelerator on the application server, and only the rendered 3D
@@ -33,15 +33,15 @@ the network from the application server.  VirtualGL, however, employs a
 technique called "split rendering" to force the 3D commands from the
 application to go to a 3D graphics card in the application server.  VGL
 accomplishes this by pre-loading a dynamic shared object (DSO) into the
-application at run time.  This DSO intercepts a handful of GLX, OpenGL, and X11
-commands necessary to perform split rendering.  Whenever a window is created by
-the application, VirtualGL creates a corresponding 3D pixel buffer ("Pbuffer")
-on a 3D graphics card in the application server.  Whenever the application
-requests that an OpenGL rendering context be created for the window, VirtualGL
-intercepts the request and creates the context on the corresponding Pbuffer
-instead.  Whenever the  application swaps or flushes the drawing buffer to
-indicate that it has finished rendering a frame, VirtualGL reads back the
-Pbuffer and sends the rendered 3D image to the client.
+OpenGL application at run time.  This DSO intercepts a handful of GLX, OpenGL,
+and X11 commands necessary to perform split rendering.  Whenever a window is
+created by the application, VirtualGL creates a corresponding 3D pixel buffer
+("Pbuffer") on a 3D graphics card in the application server.  Whenever the
+application requests that an OpenGL rendering context be created for the
+window, VirtualGL intercepts the request and creates the context on the
+corresponding Pbuffer instead.  Whenever the  application swaps or flushes the
+drawing buffer to indicate that it has finished rendering a frame, VirtualGL
+reads back the Pbuffer and sends the rendered 3D image to the client.
 
 The beauty of this approach is its non-intrusiveness.  VirtualGL monitors a
 few X11 commands and events to determine when windows have been resized, etc.,
@@ -52,14 +52,11 @@ as its handling of color index rendering.)  VGL merely forces the OpenGL
 commands to be delivered to a server-side graphics card rather than a
 client-side graphics card.  Once the OpenGL rendering context has been
 established in a server-side Pbuffer, everything (including esoteric OpenGL
-extensions, fragment/vertex programs, etc.) should "just work."  In most cases,
-if an application runs locally on a 3D server/workstation, that same
-application will run remotely from that same machine using VirtualGL.  However,
-if it were really as simple as that, we could all turn out the lights and go
-home.  Most of the time spent developing VirtualGL has been spent working
-around "stupid application tricks."
+extensions, fragment/vertex programs, etc.) should "just work."  If an
+application runs locally on a 3D server/workstation, that that same application
+should run remotely from that same machine using VirtualGL.
 
-VirtualGL has two built-in "image transports" which can be used to send
+VirtualGL has two built-in "image transports" that can be used to send
 rendered 3D images to the client machine:
 
 {anchor: VGL_Transport}
@@ -100,5 +97,5 @@ rendered 3D images to the client machine:
 #OPT fmt=latex: w=4cm
 #CAP: The X11 Transport with an X Proxy
 
-VirtualGL also provides an API which can be used to develop custom image
+VirtualGL also provides an API that can be used to develop custom image
 transport plugins.

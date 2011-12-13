@@ -20,4 +20,4 @@ VirtualGL includes portions of [[http://www.x.org][X.org]], which is released
 under [[LICENSE-xauth.txt][this license]!].
 
 VirtualGL is licensed under the [[LICENSE.txt][wxWindows Library License, v3.1]!],
-a derivative of the [[LGPL.txt][GNU Lesser General Public License (LGPL)]!].
+a derivative of the [[LGPL.txt][GNU Lesser General Public License (LGPL), v2.1]!].

@@ -91,29 +91,29 @@ environment variable or by using the ''-st'' argument to ''vglrun''.  See
 ** Transparent Overlays
 {anchor: overlays}
 
-Transparent overlays have similar requirements and restrictions as
-quad-buffered stereo.  In this case, VirtualGL completely bypasses its own GLX
-faker and uses indirect OpenGL rendering to render the transparent overlay on
-the client machine's 3D graphics card.  The underlay is still rendered on the
-server, as always.  Using indirect rendering to render the overlay is
-unfortunately necessary, because there is no reliable way to draw to an overlay
-using 2D (X11) functions, there are severe performance issues (on some cards)
-with using ''glDrawPixels()'' to draw to the overlay, and there is no
-reasonable way to composite the overlay and underlay on the VirtualGL server.
+In the case of transparent overlays, VirtualGL completely bypasses its own GLX
+faker and uses indirect OpenGL rendering to draw to the transparent overlay
+using the 2D X server.  The underlay is still rendered on the 3D X server, read
+back, and sent to the 2D X server, as always.  Using indirect rendering to
+render the overlay is unfortunately necessary, because there is no reliable way
+to draw to an overlay using 2D (X11) functions, there are severe performance
+issues (on some cards) with using ''glDrawPixels()'' to draw to the overlay,
+and there is no reasonable way to composite the overlay and underlay in a
+Pbuffer on the VirtualGL server.
 
 The use of overlays is becoming more and more infrequent, and when they are
 used, it is generally only for drawing small, simple, static shapes and text.
 We have found that it is often faster to ship the overlay geometry over to the
-client rather than to render it as an image and send the image.  Thus, even if
-it were possible to implement overlays without using indirect rendering, it is
-likely that indirect rendering of overlays would still be the fastest approach
-for most applications.
+2D X server rather than to render it as an image and send the image.  Thus,
+even if it were possible to implement overlays without using indirect
+rendering, it is likely that indirect rendering of overlays would still be the
+fastest approach for most applications.
 
 As with quad-buffered stereo, overlays must be explicitly enabled in the
-graphics driver configuration.  In the case of overlays, however, they need
-only be supported and enabled on the client machine.  Some graphics drivers are
-known to disallow using both quad-buffered stereo and overlays at the same
-time.
+graphics driver and X server configurations.  In the case of overlays, however,
+they need only be supported and enabled on the client machine and in the 2D X
+server.  Some graphics drivers are known to disallow using both quad-buffered
+stereo and overlays at the same time.
 
 Indexed color (8-bit) overlays have been tested and are known to work with
 VirtualGL.  True color (24-bit) overlays work, in theory, but have not been
@@ -124,12 +124,9 @@ and GLX" applet:
 
 {img: exceed6.png}
 
-	!!! Overlays do not work with X proxies.  VirtualGL must be displaying to a
-	"real" X server.
-
 ** Indexed (PseudoColor) Rendering
 
-In a PseudoColor visual, each pixel is represented by an index which refers to
+In a PseudoColor visual, each pixel is represented by an index that refers to
 a location in a color table.  The color table stores the actual color values
 (256 of them in the case of 8-bit PseudoColor) that correspond to each index.
 An application merely tells the X server which color index to use when drawing,
@@ -160,8 +157,9 @@ Transport.  However, since there is only 1 byte per pixel in a PseudoColor
 though they are uncompressed.
 
 VirtualGL's PseudoColor rendering mode works with X proxies, provided that the
-X proxy is configured to use an 8-bit color depth.  Note, however, that
-VNC cannot provide both PseudoColor and TrueColor visuals at the same time.
+X proxy provides a PseudoColor visual.  Note, however, that some X proxies,
+such as VNC, cannot provide both PseudoColor and TrueColor visuals at the same
+time.
 
 ** Troubleshooting
 {anchor: Troubleshooting}

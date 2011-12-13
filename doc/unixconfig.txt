@@ -15,7 +15,7 @@ Refer to the figures in {ref prefix="Chapter ": Overview}.)
 It is important to understand the security risks associated with this.  Once
 a user has access to the 3D X server, there is nothing that would prevent
 the user from logging keystrokes or reading back images from that X server.
-Using ''xauth'', one can obtain "untrusted" X authentication keys which prevent
+Using ''xauth'', one can obtain "untrusted" X authentication keys that prevent
 such exploits, but unfortunately, those untrusted keys also disallow access to
 the 3D hardware.  Thus, it is necessary to grant full trusted access to the 3D
 X server for any users that will need to run VirtualGL.  Unless you fully trust
@@ -59,7 +59,7 @@ prompt.
 			/etc/init.d/dtlogin stop
 			---
 
-	#. Log in as root from the text console (or remotely using SSh.)
+	#. Log in as root from the text console (or remotely using SSH.)
 
 	#. Run
 
@@ -173,8 +173,8 @@ prompt.
 #OPT: noList! plain!
 
 To verify that the application server is ready to run VirtualGL, log out of the
-server, log back into the server using SSh, and execute the following commands
-in the SSh session:
+server, log back into the server using SSH, and execute the following commands
+in the SSH session:
 
 	If you restricted 3D X server access to ''vglusers'' :: {:}
 	#Verb <<---
@@ -220,13 +220,12 @@ OpenGL renderer string.
 VirtualGL can redirect the OpenGL commands from a 3D application to any 3D
 graphics card in the server machine.  In order for this to work, however, all
 of the 3D graphics cards must be attached to different screens on the same X
-server using Xinerama.  They can then be individually addressed by setting
-''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':0.1'',
-'':0.2'', etc.
+server.  They can then be individually addressed by setting ''VGL_DISPLAY'' to
+(or invoking ''vglrun -d'' with) '':0.0'', '':0.1'', '':0.2'', etc.
 
-** SSh Server Configuration
+** SSH Server Configuration
 
-The application server's SSh daemon should have the ''X11Forwarding'' option
+The application server's SSH daemon should have the ''X11Forwarding'' option
 enabled and the ''UseLogin'' option disabled.  This is configured in
 ''sshd_config'', which is usually located under ''/etc/ssh''.
 

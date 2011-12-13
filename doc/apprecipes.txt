@@ -9,17 +9,18 @@
 		''os.environ['ABAQUS_EMULATE_OVERLAYS'] = "1"'' \
 		{nl}{nl} \
 		to ''/{abaqus_install_dir}/{abaqus_version}/site/abaqus_v6.env'' to make \
-		Abaqus v6 work properly with VirtualGL in an X proxy environment.  If \
-		this is not done, then the application may fail to launch, fail to \
-		display the 3D pixels, or the 3D pixels may become corrupted whenever \
-		other windows obscure them. \
+		Abaqus v6 work properly with VirtualGL if the 2D X server does not \
+		support transparent overlays.  If this is not done, then the application \
+		may fail to launch, fail to display the 3D pixels, or the 3D pixels may \
+		become corrupted whenever other windows obscure them. \
 	| VirtualGL does not redirect the rendering of transparent overlays, since \
 		those cannot be rendered in a Pbuffer.  Thus, in order to use transparent \
-		overlays, the 2D X Server must be able to render them, which is never the \
-		case for X proxies (see {ref prefix="Section ": overlays} for more \
+		overlays, the 2D X server must be able to render them, which is rarely \
+		the case for X proxies (see {ref prefix="Section ": overlays} for more \
 		details.)  Setting ''ABAQUS_EMULATE_OVERLAYS'' to ''1'' causes \
 		the application to emulate overlay rendering instead of using actual \
-		transparent overlays. \
+		transparent overlays.  This workaround is known to be necessary when \
+		running Abaqus 6.9 and 6.10 in VNC. \
 	|
 | Abaqus v6 | Linux \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
@@ -36,7 +37,7 @@
 		necessary to use ''VGL_DEFAULTFBCONFIG'' to give VirtualGL a hint as to \
 		what the application wants.  Otherwise, VirtualGL will create a Pbuffer \
 		without a stencil buffer, and this will cause incorrect rendering when \
-		using certain modes within Abaqus.  See \
+		using certain functions within Abaqus (such as View Cut.)  See \
 		{ref prefix="Section ": VGL_DEFAULTFBCONFIG} for more details. \
 	|
 | Animator 4 | Linux \
@@ -68,7 +69,7 @@
 	| The ANSA startup script directly invokes ''/lib/libc.so.6'' to query \
 		the glibc version.  Since the VirtualGL faker depends on libc, preloading \
 		VirtualGL when directly invoking ''libc.so.6'' creates an infinite loop. \
-		So it is necessary to disable the preloading of VirtualGL in the \
+		Thus, it is necessary to disable the preloading of VirtualGL in the \
 		application script and then re-enable it prior to launching the actual \
 		application. \
 	|
@@ -100,7 +101,7 @@
 		run Cedega as you would normally (without ''vglrun''.)  Since ''vglrun'' \
 		is not being used, it is necessary to use environment variables or the \
 		VirtualGL Configuration dialog to modify VirtualGL's configuration. \
-	| The actual binary (WineX) which uses OpenGL is buried beneath several \
+	| The actual binary (WineX) that uses OpenGL is buried beneath several \
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
@@ -113,5 +114,5 @@
 		launching the application with ''vglrun'' \
 	| Mathematica 7 will not draw the axis numbers on 3D charts correctly \
 		unless it is allowed to create an indirect OpenGL context.  See \
-		See {ref prefix="Section ": VGL_ALLOWINDIRECT} for more details. \
+		{ref prefix="Section ": VGL_ALLOWINDIRECT} for more details. \
 	|

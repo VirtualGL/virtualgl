@@ -1,6 +1,6 @@
 * Transport Plugins
 
-VirtualGL 2.2 includes an API which allows you to write your own image
+VirtualGL 2.2 includes an API that allows you to write your own image
 transports.  Thus, you can use VirtualGL for doing split rendering and pixel
 readback but then use your own library for delivering the pixels to the client.
 

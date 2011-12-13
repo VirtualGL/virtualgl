@@ -38,8 +38,9 @@ Each method of configuration takes precedence over the previous method:
 	remote and assume that the 3D rendering commands will be sent over the
 	network.  Thus, VirtualGL normally forces all contexts to be direct in order
 	to prevent severe readback performance degradation with such apps (even on
-	modern 3D adapters, ''glReadPixels()'' can perform very slowly if an indirect
-	OpenGL context is used.)
+	modern 3D adapters, and even when the connection to the 3D X server is local,
+	''glReadPixels()'' can perform very slowly if an indirect OpenGL context is
+	used.)
 	{nl}{nl}
 	However, some applications intentionally try to create indirect contexts so
 	that these contexts can be shared, and those apps may not work properly when
@@ -104,8 +105,8 @@ Each method of configuration takes precedence over the previous method:
 	__jpeg__ compression otherwise.
 
 	!!! If an image transport plugin is being used, then you can set
-	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  How the
-	plugin responds to this value is implementation-specific.
+	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  The plugin
+	can choose to respond to this value as it sees fit.
 
 {anchor: VGL_DEFAULTFBCONFIG}
 | Environment Variable | ''VGL_DEFAULTFBCONFIG = ''__''{attrib_list}''__ |
@@ -179,6 +180,10 @@ Each method of configuration takes precedence over the previous method:
 	enabled by default whenever PBO readback mode is enabled.  See the
 	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
+	!!! ''VGL_FORCEALPHA'' overrides the application's choice of visuals.  It has
+	no effect if the application is not explicitly choosing a visual.  In that
+	case, use [[#VGL_DEFAULTFBCONFIG][''VGL_DEFAULTFBCONFIG'']] instead.
+
 {anchor: VGL_FPS}
 | Environment Variable | ''VGL_FPS = ''__''{f}''__ |
 | ''vglrun'' argument | ''-fps ''__''{f}''__ |
@@ -219,7 +224,7 @@ Each method of configuration takes precedence over the previous method:
 	display properly without gamma correction.  Gamma correction involves
 	passing pixels through a function of the form __X = W{^1/G}__, where G
 	is the "gamma correction factor" and should be equal to the gamma of the
-	monitor.  So the final output is __Y = X{^G} = (W{^1/G}){^G} = W__, which
+	monitor.  So, the final output is __Y = X{^G} = (W{^1/G}){^G} = W__, which
 	describes a linear relationship between the intensity of the pixels drawn
 	by the application and the intensity of the pixels displayed by the
 	monitor.
@@ -393,8 +398,8 @@ Each method of configuration takes precedence over the previous method:
 	to 100 or using RGB encoding.
 	{nl}
 	!!! If using an image transport plugin, then this setting need not
-	necessarily correspond to JPEG image quality.  How the plugin responds to the
-	''VGL_QUAL'' option is implementation-specific.
+	necessarily correspond to JPEG image quality.  The plugin can choose to
+	respond to the ''VGL_QUAL'' option as it sees fit.
 
 {anchor: VGL_READBACK}
 | Environment Variable | ''VGL_READBACK = ''__''none \| pbo \| sync''__ |
@@ -481,6 +486,10 @@ Each method of configuration takes precedence over the previous method:
 	passed parameters of ''GLX_SAMPLES'', __''{s}''__ to ''glXChooseVisual()''.
 	If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces multisampling to be
 	disabled, even if the 3D application explicitly tries to enable it.
+
+	!!! ''VGL_SAMPLES'' overrides the application's choice of visuals.  It has
+	no effect if the application is not explicitly choosing a visual.  In that
+	case, use [[#VGL_DEFAULTFBCONFIG][''VGL_DEFAULTFBCONFIG'']] instead.
 
 {anchor: VGL_SPOIL}
 | Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
