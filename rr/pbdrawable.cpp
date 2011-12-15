@@ -213,7 +213,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	if(fbr || fbw) glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
 
@@ -392,7 +392,7 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 
 	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING_EXT, &fbr);
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &fbw);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	if(fbr || fbw) glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	_glGetIntegerv(GL_READ_BUFFER, &readbuf);
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
 	_glGetIntegerv(GL_RENDER_MODE, &oldrendermode);
