@@ -53,7 +53,7 @@ commands to be delivered to a server-side graphics card rather than a
 client-side graphics card.  Once the OpenGL rendering context has been
 established in a server-side Pbuffer, everything (including esoteric OpenGL
 extensions, fragment/vertex programs, etc.) should "just work."  If an
-application runs locally on a 3D server/workstation, that that same application
+application runs locally on a 3D server/workstation, then that same application
 should run remotely from that same machine using VirtualGL.
 
 VirtualGL has two built-in "image transports" that can be used to send
