@@ -16,11 +16,7 @@
 
 // Bitmap drawn using OpenGL
 
-#ifdef INFAKER
- #include "faker-sym.h"
- #define XCloseDisplay _XCloseDisplay
- #define XOpenDisplay _XOpenDisplay
-#elif defined(XDK)
+#ifdef XDK
  #include "xdk-sym.h"
  #define glGetError _glGetError
  #define glGetIntegerv _glGetIntegerv
