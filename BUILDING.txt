@@ -443,9 +443,14 @@ guide, run
 
   ccmake {source_directory}
 
-after initially configuring the build.  CCMake is the interactive version of
-CMake.  It will display all variables that are relevant to the VirtualGL build,
-their current values, and a help string describing what they do.
+or
+
+  cmake-gui {source_directory}
+
+after initially configuring the build.  CCMake is a text-based interactive
+version of CMake, and CMake-GUI is a GUI version.  Both will display all
+variables that are relevant to the VirtualGL build, their current values, and a
+help string describing what they do.
 
 
 *******************************************************************************
