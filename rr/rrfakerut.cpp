@@ -2225,86 +2225,6 @@ int gammatest(void)
 #endif
 
 
-// Put the display hash through its paces
-#define NDPY 15
-int dpyhashtest(void)
-{
-	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, None};
-	Display *_dpy[NDPY], *dpy=NULL;  int i, dpyw, dpyh, retval=1;
-	XVisualInfo *v=NULL;  Window win=0;
-	XSetWindowAttributes swa;  GLXContext ctx=0;
-	for(i=0; i<NDPY; i++) _dpy[i]=NULL;
-
-	printf("Display hash test:\n\n");
-
-	try
-	{
-		for(i=0; i<NDPY; i++)
-		{
-			if((_dpy[i]=XOpenDisplay(0))==NULL)
-				_throw("Could not open display");
-		}
-		for(i=0; i<NDPY; i++)
-		{
-			XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;
-		}
-		for(i=0; i<5; i++)
-		{
-			if((_dpy[i]=XOpenDisplay(0))==NULL)
-				_throw("Could not open display");
-		}
-		for(i=0; i<3; i++)
-		{
-			XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;
-		}
-
-		for(i=3; i<5; i++)
-		{
-			dpy=_dpy[i];
-			dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
-			dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
-				_throw("Could not find a suitable visual");
-			Window root=RootWindow(dpy, DefaultScreen(dpy));
-			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
-			swa.border_pixel=0;
-			swa.event_mask=0;
-			if((win=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0, v->depth,
-				InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-				&swa))==0)
-				_throw("Could not create window");
-			XMapWindow(dpy, win);
-			if((ctx=glXCreateContext(dpy, v, 0, True))==NULL)
-				_throw("Could not establish GLX context");
-			XFree(v);  v=NULL;
-			if(!glXMakeCurrent(dpy, win, ctx))
-				_throw("Could not make context current");
-			checkcurrent(dpy, win, win, ctx);
-			glClearBuffer(GL_BACK, 1., 1., 1., 0.);
-			glXSwapBuffers(dpy, win);
-			checkwindowcolor(win, 0xffffff, false);
-			glXMakeCurrent(dpy, 0, 0);
-			glXDestroyContext(dpy, ctx);  ctx=0;
-			XDestroyWindow(dpy, win);  win=0;
-		}
-		for(i=3; i<5; i++) {XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;}
-
-		printf("SUCCESS!\n");
-	}	
-	catch(rrerror &e)
-	{
-		printf("Failed! (%s)\n", e.getMessage());  retval=0;
-	}
-	fflush(stdout);
-	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
-	if(win && dpy) {XDestroyWindow(dpy, win);  win=0;}
-	if(v) {XFree(v);  v=NULL;}
-	for(i=0; i<NDPY; i++) {if(_dpy[i]) {XCloseDisplay(_dpy[i]);  _dpy[i]=NULL;}}
-	return retval;
-}
-
-
 // Test whether glXMakeCurrent() can handle mismatches between the FB config
 // of the context and the Pbuffer
 
@@ -2531,8 +2451,6 @@ int main(int argc, char **argv)
 	if(!mttest(nthr)) ret=-1;
 	printf("\n");
 	if(!pbtest()) ret=-1;
-	printf("\n");
-	if(!dpyhashtest()) ret=-1;
 	printf("\n");
 	return ret;
 }
