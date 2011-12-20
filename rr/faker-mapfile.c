@@ -106,10 +106,12 @@
 		XCheckTypedEvent;
 		XCheckTypedWindowEvent;
 		XCheckWindowEvent;
+		XCloseDisplay;
 		XConfigureWindow;
 		XCopyArea;
 		XCreateWindow;
 		XCreateSimpleWindow;
+		XDestroySubwindows;
 		XDestroyWindow;
 		XFree;
 		XGetGeometry;

@@ -385,6 +385,22 @@ Display *XOpenDisplay(_Xconst char* name)
 	return dpy;
 }
 
+int XCloseDisplay(Display *dpy)
+{
+	int retval=0;
+	TRY();
+
+		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
+
+	winh.remove(dpy);
+	retval=_XCloseDisplay(dpy);
+
+		stoptrace();  closetrace();
+
+	CATCH();
+	return retval;
+}
+
 Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	unsigned int width, unsigned int height, unsigned int border_width,
 	int depth, unsigned int c_class, Visual *visual, unsigned long valuemask,
@@ -437,6 +453,18 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	return win;
 }
 
+static void DeleteWindow(Display *dpy, Window win, bool subonly=false)
+{
+	Window root, parent, *children=NULL;  unsigned int n=0;
+
+	if(!subonly) winh.remove(dpy, win);
+	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
+		&& children && n>0)
+	{
+		for(unsigned int i=0; i<n; i++) DeleteWindow(dpy, children[i]);
+	}
+}
+
 int XDestroyWindow(Display *dpy, Window win)
 {
 	int retval=0;
@@ -444,7 +472,7 @@ int XDestroyWindow(Display *dpy, Window win)
 
 		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
-	winh.remove(dpy, win);
+	DeleteWindow(dpy, win);
 	retval=_XDestroyWindow(dpy, win);
 
 		stoptrace();  closetrace();
@@ -452,6 +480,23 @@ int XDestroyWindow(Display *dpy, Window win)
 	CATCH();
 	return retval;
 }
+
+int XDestroySubwindows(Display *dpy, Window win)
+{
+	int retval=0;
+	TRY();
+
+		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
+
+	DeleteWindow(dpy, win, true);
+	retval=_XDestroySubwindows(dpy, win);
+
+		stoptrace();  closetrace();
+
+	CATCH();
+	return retval;
+}
+
 
 Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 	int *y, unsigned int *width, unsigned int *height,

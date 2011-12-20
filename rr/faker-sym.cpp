@@ -247,10 +247,12 @@ static int __vgl_loadx11symbols(void *dllhnd)
 	lsym(XCheckTypedEvent);
 	lsym(XCheckTypedWindowEvent);
 	lsym(XCheckWindowEvent);
+	lsym(XCloseDisplay);
 	lsym(XConfigureWindow);
 	lsym(XCopyArea);
 	lsym(XCreateWindow);
 	lsym(XCreateSimpleWindow);
+	lsym(XDestroySubwindows);
 	lsym(XDestroyWindow);
 	lsym(XFree);
 	lsym(XGetGeometry);

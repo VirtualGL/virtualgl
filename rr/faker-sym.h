@@ -322,6 +322,8 @@ funcdef4(Bool, XCheckTypedWindowEvent, Display *, dpy, Window, win,
 funcdef4(Bool, XCheckWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe, return);
 
+funcdef1(int, XCloseDisplay, Display *, dpy, return);
+
 funcdef4(int, XConfigureWindow, Display *, dpy, Window, win,
 	unsigned int, value_mask, XWindowChanges *, values, return);
 
@@ -337,6 +339,8 @@ funcdef12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int, y,
 	unsigned int, width, unsigned int, height, unsigned int, border_width,
 	int, depth, unsigned int, c_class, Visual *, visual, unsigned long, value_mask,
 	XSetWindowAttributes *, attributes, return);
+
+funcdef2(int, XDestroySubwindows, Display *, dpy, Window, win, return);
 
 funcdef2(int, XDestroyWindow, Display *, dpy, Window, win, return);
 

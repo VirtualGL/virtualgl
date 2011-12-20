@@ -128,6 +128,21 @@ class winhash : public _winhash
 			_winhash::remove(DisplayString(dpy), d);
 		}
 
+		void remove(Display *dpy)
+		{
+			if(!dpy) _throw("Invalid argument");
+			_winhashstruct *ptr=NULL, *next=NULL;
+			rrcs::safelock l(mutex);
+			ptr=start;
+			while(ptr!=NULL)
+			{
+				pbwin *pbw=ptr->value;
+				next=ptr->next;
+				if(pbw && pbw!=(pbwin *)-1 && dpy==pbw->get2ddpy()) killentry(ptr);
+				ptr=next;
+			}
+		}
+
 	private:
 
 		~winhash(void)

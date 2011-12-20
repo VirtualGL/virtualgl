@@ -95,7 +95,7 @@ pbwin::~pbwin(void)
 				rrout.println("[VGL] WARNING: %s", e.getMessage());
 		}
 	}
-	if(_eventdpy) {XCloseDisplay(_eventdpy);  _eventdpy=NULL;}
+	if(_eventdpy) {_XCloseDisplay(_eventdpy);  _eventdpy=NULL;}
 	_mutex.unlock(false);
 }
 

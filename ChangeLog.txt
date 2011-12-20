@@ -4,6 +4,13 @@
 [1]
 Work around seg fault that occurred when running CoreBreach.
 -------------------------------------------------------------------------------
+[2]
+VirtualGL now properly handles implicit deletion of windows/subwindows via
+XCloseDisplay(), implicit deletion of subwindows via XDestroyWindow(), and
+explicit deletion of subwindows via XDestroySubwindows().  This specifically
+addresses BadDrawable errors that occurred when running certain applications
+in WINE 1.3.34 and later.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -2313,6 +2313,92 @@ int ctxmismatchtest(void)
 }
 
 
+// Test whether VirtualGL properly handles explicit and implicit destruction of
+// subwindows
+
+int subwintest(void)
+{
+	Display *dpy=NULL;  Window win=0, win1=0, win2=0;
+	testcolor clr(false, 0);
+	int dpyw, dpyh, retval=1, lastframe=0;
+	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE,
+		8, GLX_BLUE_SIZE, 8, None};
+	XVisualInfo *v=NULL;
+	GLXContext ctx=0;
+	XSetWindowAttributes swa;
+
+	printf("Subwindow destruction test:\n\n");
+
+	try
+	{
+		try
+		{
+			for(int i=0; i<20; i++)
+			{
+				if(!dpy && !(dpy=XOpenDisplay(0))) _throw("Could not open display");
+				dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
+				dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+
+				if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))
+					==NULL) _throw("Could not find a suitable visual");
+
+				Window root=RootWindow(dpy, DefaultScreen(dpy));
+				swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+				swa.border_pixel=0;
+				swa.background_pixel=0;
+				swa.event_mask = 0;
+				if(!win && (win=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0,
+					v->depth, InputOutput, v->visual,
+					CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
+					_throw("Could not create window");
+				if((win1=XCreateWindow(dpy, win, 0, 0, dpyw/2, dpyh/2, 0, v->depth,
+					InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+					&swa))==0)
+					_throw("Could not create subwindow");
+				if((win2=XCreateWindow(dpy, win1, 0, 0, dpyw/2, dpyh/2, 0, v->depth,
+					InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
+					&swa))==0)
+					_throw("Could not create subwindow");
+				XMapSubwindows(dpy, win);
+				XMapWindow(dpy, win);
+
+				lastframe=0;
+				if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
+					_throw("Could not create context");
+				XFree(v);  v=NULL;
+				if(!(glXMakeCurrent(dpy, win2, ctx)))
+					_error("Could not make context current");
+				clr.clear(GL_BACK);
+				glXSwapBuffers(dpy, win2);
+				checkframe(win2, 1, lastframe);
+				checkwindowcolor(win2, clr.bits(-1), false);
+				glXMakeCurrent(dpy, 0, 0);
+				glXDestroyContext(dpy, ctx);  ctx=0;
+
+				if(i%3==0) {XCloseDisplay(dpy);  dpy=NULL;  win=0;}
+				else if(i%3==1) {XDestroyWindow(dpy, win);  win=0;}
+				else XDestroySubwindows(dpy, win);
+			}
+			printf("SUCCESS\n");
+		}
+		catch(rrerror &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
+		fflush(stdout);
+	}
+	catch(rrerror &e)
+	{
+		printf("Failed! (%s)\n", e.getMessage());  retval=0;
+	}
+	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
+	if(win && dpy) {XDestroyWindow(dpy, win);  win=0;}
+	if(v) {XFree(v);  v=NULL;}
+	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	return retval;
+}
+
+
 int querytest(void)
 {
 	Display *dpy=NULL;  int retval=1;
@@ -2451,6 +2537,8 @@ int main(int argc, char **argv)
 	if(!mttest(nthr)) ret=-1;
 	printf("\n");
 	if(!pbtest()) ret=-1;
+	printf("\n");
+	if(!subwintest()) ret=-1;
 	printf("\n");
 	return ret;
 }
