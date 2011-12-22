@@ -64,7 +64,9 @@
  typedef struct {Display *dpy;  Drawable d;  Visual *v;} fbx_wh;
 #endif
 
+
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
+
 
 /* Pixel formats */
 #define FBX_FORMATS 7
@@ -82,6 +84,7 @@ static const int fbx_goffset[FBX_FORMATS]=
 	{1, 1, 1, 1, 2, 2, 0};
 static const int fbx_boffset[FBX_FORMATS]=
 	{2, 2, 0, 0, 1, 3, 0};
+
 
 typedef struct _fbx_struct
 {
@@ -104,6 +107,7 @@ typedef struct _fbx_struct
 	#endif
 } fbx_struct;
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -111,6 +115,7 @@ extern "C" {
 /*
   All of these methods return -1 on failure or 0 on success.
 */
+
 
 /*
   fbx_init
@@ -146,6 +151,7 @@ extern "C" {
 */
 int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm);
 
+
 /*
   fbx_read
   (fbx_struct *s, int x, int y)
@@ -163,6 +169,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm);
   On return, s->bits contains a facsimile of the window's pixels
 */
 int fbx_read(fbx_struct *s, int x, int y);
+
 
 /*
   fbx_write
@@ -187,6 +194,7 @@ int fbx_read(fbx_struct *s, int x, int y);
 int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	int h);
 
+
 /*
   fbx_awrite
   (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
@@ -200,6 +208,7 @@ int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	int h);
 #endif
+
 
 /*
   fbx_flip
@@ -219,6 +228,7 @@ int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 */
 int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h);
 
+
 /*
   fbx_sync
   (fbx_struct *s)
@@ -226,6 +236,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h);
   Complete a previous asynchronous write.  On Windows, this does nothing.
 */
 int fbx_sync (fbx_struct *s);
+
 
 /*
   fbx_term
@@ -237,12 +248,14 @@ int fbx_sync (fbx_struct *s);
 */
 int fbx_term(fbx_struct *s);
 
+
 /*
   fbx_geterrmsg
 
   This returns a string containing the reason why the last command failed.
 */
 char *fbx_geterrmsg(void);
+
 
 /*
   fbx_geterrline
@@ -251,6 +264,7 @@ char *fbx_geterrmsg(void);
 */
 int fbx_geterrline(void);
 
+
 /*
   fbx_formatname
 
@@ -258,6 +272,7 @@ int fbx_geterrline(void);
   format parameter.
 */
 const char *fbx_formatname(int format);
+
 
 /*
   fbx_printwarnings
@@ -272,6 +287,7 @@ const char *fbx_formatname(int format);
   function will disable warnings.
 */
 void fbx_printwarnings(FILE *output_stream);
+
 
 #ifdef __cplusplus
 }

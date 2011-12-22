@@ -1,4 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,38 +21,38 @@
 
 genericQ::genericQ(void)
 {
-	startptr=NULL;  endptr=NULL;
-	deadyet=0;
+	_start=NULL;  _end=NULL;
+	_deadyet=0;
 }
 
 
 genericQ::~genericQ(void)
 {
-	deadyet=1;
+	_deadyet=1;
 	release();
-	qmutex.lock(false);
-	if(startptr!=NULL)
+	_qmutex.lock(false);
+	if(_start!=NULL)
 	{
 		qstruct *temp;
-		do {temp=startptr->next;  delete startptr;  startptr=temp;} while(startptr!=NULL);
+		do {temp=_start->next;  delete _start;  _start=temp;} while(_start!=NULL);
 	}
-	qmutex.unlock(false);
+	_qmutex.unlock(false);
 }
 
 
 void genericQ::release(void)
 {
-	deadyet=1;
-	qhasitem.post();
+	_deadyet=1;
+	_qhasitem.post();
 }
 
 
 void genericQ::spoil(void *myval, qspoilfct f)
 {
-	if(deadyet) return;
+	if(_deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::spoil()");
-	rrcs::safelock l(qmutex);
-	if(deadyet) return;
+	rrcs::safelock l(_qmutex);
+	if(_deadyet) return;
 	void *dummy;
 	while(1)
 	{
@@ -63,41 +64,41 @@ void genericQ::spoil(void *myval, qspoilfct f)
 
 void genericQ::add(void *myval)
 {
-	if(deadyet) return;
+	if(_deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::add()");
-	rrcs::safelock l(qmutex);
-	if(deadyet) return;
+	rrcs::safelock l(_qmutex);
+	if(_deadyet) return;
 	qstruct *temp=new qstruct;
 	if(temp==NULL) _throw("Alloc error");
-	if(startptr==NULL) startptr=temp;
-	else endptr->next=temp;
+	if(_start==NULL) _start=temp;
+	else _end->next=temp;
 	temp->value=myval;  temp->next=NULL;
-	endptr=temp;
-	qhasitem.post();
+	_end=temp;
+	_qhasitem.post();
 }
 
 
 // This will block until there is something in the queue
 void genericQ::get(void **myval, bool nonblocking)
 {
-	if(deadyet) return;
+	if(_deadyet) return;
 	if(myval==NULL) _throw("NULL argument in genericQ::get()");
 	if(nonblocking)
 	{
-		if(!qhasitem.trywait())
+		if(!_qhasitem.trywait())
 		{
 			*myval=NULL;  return;
 		}
 	}
-	else qhasitem.wait();
-	if(!deadyet)
+	else _qhasitem.wait();
+	if(!_deadyet)
 	{
-		rrcs::safelock l(qmutex);
-		if(deadyet) return;
-		if(startptr==NULL) _throw("Nothing in the queue");
-		*myval=startptr->value;
-		qstruct *temp=startptr->next;
-		delete startptr;  startptr=temp;
+		rrcs::safelock l(_qmutex);
+		if(_deadyet) return;
+		if(_start==NULL) _throw("Nothing in the queue");
+		*myval=_start->value;
+		qstruct *temp=_start->next;
+		delete _start;  _start=temp;
 	}
 }
 
@@ -105,7 +106,6 @@ void genericQ::get(void **myval, bool nonblocking)
 int genericQ::items(void)
 {
 	int retval=0;
-	retval=qhasitem.getvalue();
+	retval=_qhasitem.getvalue();
 	return retval;
 }
-

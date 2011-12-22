@@ -13,37 +13,42 @@
  * wxWindows Library License for more details.
 */
 
-// This provides rudimentary facilities for loading and saving true color
-// BMP and PPM files
+/* This provides rudimentary facilities for loading and saving true color
+   BMP and PPM files */
 
 #ifndef __BMP_H__
 #define __BMP_H__
 
 #define BMPPIXELFORMATS 6
-enum BMPPIXELFORMAT {BMP_RGB=0, BMP_RGBX, BMP_BGR, BMP_BGRX, BMP_XBGR, BMP_XRGB};
+enum BMPPIXELFORMAT {BMP_RGB=0, BMP_RGBX, BMP_BGR, BMP_BGRX, BMP_XBGR,
+	BMP_XRGB};
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// This will load a Windows bitmap from a file and return a buffer with the
-// specified pixel format, scanline alignment, and orientation.  The width and
-// height are returned in w and h.
+/* This will load a Windows bitmap from a file and return a buffer with the
+   specified pixel format, scanline alignment, and orientation.  The width and
+   height are returned in w and h. */
 
 int loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 	enum BMPPIXELFORMAT f, int align, int dstbottomup);
 
-// This will save a buffer with the specified pixel format, pitch, orientation,
-// width, and height as a 24-bit Windows bitmap or PPM (the filename determines
-// which format to use)
+
+/* This will save a buffer with the specified pixel format, pitch, orientation,
+   width, and height as a 24-bit Windows bitmap or PPM (the filename determines
+   which format to use) */
 
 int savebmp(char *filename, unsigned char *buf, int w, int h,
 	enum BMPPIXELFORMAT f, int srcpitch, int srcbottomup);
 
+
 const char *bmpgeterr(void);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* __BMP_H__ */

@@ -27,12 +27,14 @@
 #include "rrutil.h"
 #include "bmp.h"
 
+
 #ifndef BI_BITFIELDS
 #define BI_BITFIELDS 3L
 #endif
 #ifndef BI_RGB
 #define BI_RGB 0L
 #endif
+
 
 #define BMPHDRSIZE 54
 typedef struct _bmphdr
@@ -50,6 +52,7 @@ typedef struct _bmphdr
 	unsigned int biClrUsed, biClrImportant;
 } bmphdr;
 
+
 static const char *__bmperr="No error";
 
 static const int ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
@@ -57,13 +60,20 @@ static const int roffset[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
 static const int goffset[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
 static const int boffset[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 
+
 #define _throw(m) {__bmperr=m;  retcode=-1;  goto finally;}
 #define _unix(f) {if((f)==-1) _throw(strerror(errno));}
 #define _catch(f) {if((f)==-1) {retcode=-1;  goto finally;}}
 
+
 #define readme(fd, addr, size) \
 	if((bytesread=read(fd, addr, (size)))==-1) _throw(strerror(errno)); \
 	if(bytesread!=(size)) _throw("Read error");
+
+#define writeme(fd, addr, size) \
+	if((byteswritten=write(fd, addr, (size)))==-1) _throw(strerror(errno)); \
+	if(byteswritten!=(size)) _throw("Write error");
+
 
 void pixelconvert(unsigned char *srcbuf, enum BMPPIXELFORMAT srcformat,
 	int srcpitch, unsigned char *dstbuf, enum BMPPIXELFORMAT dstformat, int dstpitch,
@@ -85,6 +95,7 @@ void pixelconvert(unsigned char *srcbuf, enum BMPPIXELFORMAT srcformat,
 		}
 	}
 }
+
 
 int loadppm(int *fd, unsigned char **buf, int *w, int *h,
 	enum BMPPIXELFORMAT f, int align, int dstbottomup, int ascii)
@@ -247,9 +258,6 @@ int loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 	return retcode;
 }
 
-#define writeme(fd, addr, size) \
-	if((byteswritten=write(fd, addr, (size)))==-1) _throw(strerror(errno)); \
-	if(byteswritten!=(size)) _throw("Write error");
 
 int saveppm(char *filename, unsigned char *buf, int w, int h,
 	enum BMPPIXELFORMAT f, int srcpitch, int srcbottomup)
@@ -275,6 +283,7 @@ int saveppm(char *filename, unsigned char *buf, int w, int h,
 	if(fs) fclose(fs);
 	return retcode;
 }
+
 
 int savebmp(char *filename, unsigned char *buf, int w, int h,
 	enum BMPPIXELFORMAT f, int srcpitch, int srcbottomup)
@@ -363,6 +372,7 @@ int savebmp(char *filename, unsigned char *buf, int w, int h,
 	if(fd!=-1) close(fd);
 	return retcode;
 }
+
 
 const char *bmpgeterr(void)
 {

@@ -22,6 +22,7 @@
 #endif
 #include "rrerror.h"
 
+
 inline unsigned long rrthread_id(void)
 {
 	#ifdef _WIN32
@@ -30,6 +31,7 @@ inline unsigned long rrthread_id(void)
 	return (unsigned long)pthread_self();
 	#endif
 }
+
 
 // This class implements Java-like threads in C++
 
@@ -45,6 +47,7 @@ class Runnable
 		rrerror lasterror;
 		friend class Thread;
 };
+
 
 class Thread
 {
@@ -69,7 +72,10 @@ class Thread
 		void stop(void)
 		{
 			#ifdef _WIN32
-			if(_handle) {WaitForSingleObject(_handle, INFINITE);  CloseHandle(_handle);}
+			if(_handle)
+			{
+				WaitForSingleObject(_handle, INFINITE);  CloseHandle(_handle);
+			}
 			#else
 			if(_handle && !_detached) pthread_join(_handle, NULL);
 			#endif
@@ -124,5 +130,5 @@ class Thread
 		bool _detached;
 };
 
-#endif
 
+#endif // __RRTHREAD_H__

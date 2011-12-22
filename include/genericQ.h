@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2007 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -42,11 +43,13 @@ class genericQ
 		void get(void **, bool nonblocking=false);
 		void release(void);
 		int items(void);
+
 	private:
-		qstruct *startptr, *endptr;
-		rrsem qhasitem;
-		rrcs qmutex;
-		int deadyet;
+		qstruct *_start, *_end;
+		rrsem _qhasitem;
+		rrcs _qmutex;
+		int _deadyet;
 };
 
-#endif
+
+#endif // __GENERICQ_H__

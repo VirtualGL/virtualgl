@@ -20,12 +20,16 @@
 #ifdef sun
 #include <kstat.h>
 #endif
+
+
 #define PORT 1972
 #define MINDATASIZE 1
 #define MAXDATASIZE (4*1024*1024)
 #define ITER 5
 
+
 #if defined(sun)||defined(linux)
+
 void benchmark(int interval, char *ifname)
 {
 	double rMbits=0., wMbits=0.;
@@ -112,7 +116,9 @@ void benchmark(int interval, char *ifname)
 		usleep(500000);
 	}
 }
-#endif
+
+#endif // defined(sun)||defined(linux)
+
 
 void initbuf(char *buf, int len)
 {
@@ -120,12 +126,14 @@ void initbuf(char *buf, int len)
 	for(i=0; i<len; i++) buf[i]=(char)(i%256);
 }
 
+
 int cmpbuf(char *buf, int len)
 {
 	int i;
 	for(i=0; i<len; i++) if(buf[i]!=(char)(i%256)) return 0;
 	return 1;
 }
+
 
 void usage(char **argv)
 {
@@ -150,6 +158,7 @@ void usage(char **argv)
 	#endif
 	exit(1);
 }
+
 
 int main(int argc, char **argv)
 {
@@ -280,7 +289,8 @@ int main(int argc, char **argv)
 		double elapsed;
 		sd.connect(servername, PORT);
 
-		printf("TCP transfer performance between localhost and %s:\n\n", sd.remotename());
+		printf("TCP transfer performance between localhost and %s:\n\n",
+			sd.remotename());
 		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
 		printf("(bytes)                (msec)    (MBytes/sec)     (Mbits/sec)\n");
 
@@ -297,7 +307,8 @@ int main(int argc, char **argv)
 				}
 				elapsed=timer.elapsed();
 				if(!cmpbuf(buf, i)) {printf("DATA ERROR\n"); exit(1);}
-				printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)ITER,
+				printf("%-13d  %14.6f  %14.6f  %14.6f\n", i,
+					elapsed/2.*1000./(double)ITER,
 					(double)i*(double)ITER/1048576./(elapsed/2.),
 					(double)i*(double)ITER/125000./(elapsed/2.));
 			}

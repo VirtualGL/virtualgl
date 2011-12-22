@@ -15,13 +15,14 @@
 #ifndef __RRTIMER_H__
 #define __RRTIMER_H__
 
-#ifdef __cplusplus
-
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/time.h>
 #endif
+
+
+#ifdef __cplusplus
 
 class rrtimer
 {
@@ -78,9 +79,8 @@ class rrtimer
 
 #endif  // __cplusplus
 
-#ifdef _WIN32
 
-#include <windows.h>
+#ifdef _WIN32
 
 __inline double rrtime(void)
 {
@@ -95,8 +95,6 @@ __inline double rrtime(void)
 
 #else
 
-#include <sys/time.h>
-
 #ifdef sun
 #define __inline inline
 #endif
@@ -108,7 +106,7 @@ static __inline double rrtime(void)
 	return((double)__tv.tv_sec+(double)__tv.tv_usec*0.000001);
 }
 
-#endif
+#endif /* _WIN32 */
 
-#endif
 
+#endif /* __RRTIMER_H__ */

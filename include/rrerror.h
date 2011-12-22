@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <new>
 
+
 class rrerror
 {
 	public:
@@ -54,7 +55,8 @@ class rrerror
 			if(line>=1) sprintf(_message, "%d: ", line);
 			if(!method) method="(Unknown error location)";
 			_method=method;
-			if(message) strncpy(&_message[strlen(_message)], message, MLEN-strlen(_message));
+			if(message)
+				strncpy(&_message[strlen(_message)], message, MLEN-strlen(_message));
 		}
 			
 		rrerror(void) : _method(NULL) {_message[0]=0;}
@@ -70,6 +72,7 @@ class rrerror
 		const char *_method;  char _message[MLEN+1];
 };
 
+
 #if defined(sgi)||defined(sun)
 #define __FUNCTION__ __FILE__
 #endif
@@ -78,6 +81,7 @@ class rrerror
 #define newcheck(f) \
 	try {if(!(f)) _throw("Memory allocation error");} \
 	catch(std::bad_alloc& e) {_throw(e.what());}
+
 
 #ifdef _WIN32
 class w32error : public rrerror
@@ -98,7 +102,8 @@ class w32error : public rrerror
 				strncpy(_message, "Error in FormatMessage()", MLEN);
 		}
 
-		w32error(const char *method, int line) : rrerror(method, (char *)NULL, line)
+		w32error(const char *method, int line) :
+			rrerror(method, (char *)NULL, line)
 		{
 			if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &_message[strlen(_message)],
@@ -127,19 +132,25 @@ class w32error : public rrerror
 
 #endif
 
+
 class unixerror : public rrerror
 {
 	public:
 		unixerror(const char *method) : rrerror(method, strerror(errno)) {}
-		unixerror(const char *method, int line) : rrerror(method, strerror(errno), line) {}
+		unixerror(const char *method, int line) :
+			rrerror(method, strerror(errno), line) {}
 };
 
 #define _throwunix() throw(unixerror(__FUNCTION__, __LINE__))
 #define tryunix(f) {if((f)==-1) _throwunix();}
 
-#define fbx(f) {if((f)==-1) throw(rrerror("FBX", fbx_geterrmsg(), fbx_geterrline()));}
-#define fbxv(f) {if((f)==-1) throw(rrerror("FBXV", fbxv_geterrmsg(), fbxv_geterrline()));}
-#define tj(f) {if((f)==-1) throw(rrerror(__FUNCTION__, tjGetErrorStr(), __LINE__));}
 
-#endif
+#define fbx(f) {if((f)==-1) \
+	throw(rrerror("FBX", fbx_geterrmsg(), fbx_geterrline()));}
+#define fbxv(f) {if((f)==-1) \
+	throw(rrerror("FBXV", fbxv_geterrmsg(), fbxv_geterrline()));}
+#define tj(f) {if((f)==-1) \
+	throw(rrerror(__FUNCTION__, tjGetErrorStr(), __LINE__));}
 
+
+#endif // __RRERROR_H__

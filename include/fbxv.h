@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-// FBXV -- An FBX-like API to abstract interaction with X Video
+/* FBXV -- An FBX-like API to abstract interaction with X Video */
 
 #ifndef __FBXV_H__
 #define __FBXV_H__
@@ -31,10 +31,12 @@
 #include <X11/extensions/Xvlib.h>
 #include <X11/Xutil.h>
 
+
 #define YUY2_PACKED 0x32595559
 #define YV12_PLANAR 0x32315659
 #define UYVY_PACKED 0x59565955
 #define I420_PLANAR 0x30323449
+
 
 typedef struct _fbxv_struct
 {
@@ -47,13 +49,15 @@ typedef struct _fbxv_struct
 	XvImage *xvi;
 } fbxv_struct;
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/////////////////////////////////////////////////////////////
-// All of these methods return -1 on failure or 0 on success.
-/////////////////////////////////////////////////////////////
+/*
+   All of these methods return -1 on failure or 0 on success.
+*/
+
 
 int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 	unsigned int format, int useshm);
@@ -74,10 +78,11 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
      re-initialize the buffer only when it is necessary to do so (such as when
      the window size has changed.)
   -- If this function returns successfully, s->xvi will point to a valid
-     XvImage structure which can be populated with image data.  Double-check
+     XvImage structure that can be populated with image data.  Double-check
      s->xvi->width and s->xvi->height, as these may differ from the requested
      width and height.
 */
+
 
 int fbxv_write (fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 	int dstx, int dsty, int dstw, int dsth);
@@ -100,6 +105,7 @@ int fbxv_write (fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
                should be drawn
 */
 
+
 int fbxv_term(fbxv_struct *s);
 /*
   Frees the X Video image associated with s (if any), then frees the memory
@@ -108,15 +114,18 @@ int fbxv_term(fbxv_struct *s);
   NOTE: this routine is idempotent.  It only frees stuff that needs freeing.
 */
 
+
 char *fbxv_geterrmsg(void);
 /*
   This returns a string containing the reason why the last command failed
 */
 
+
 int fbxv_geterrline(void);
 /*
   This returns the line (within fbxv.c) of the last failure
 */
+
 
 void fbxv_printwarnings(FILE *output_stream);
 /*
@@ -129,8 +138,9 @@ void fbxv_printwarnings(FILE *output_stream);
   function will disable warnings.
 */
 
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __FBXV_H__
+#endif /* __FBXV_H__ */

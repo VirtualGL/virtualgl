@@ -18,8 +18,10 @@
 #include "rrthread.h"
 #include "rrmutex.h"
 
+
 rrevent event;
 rrsem sem;
+
 
 class testthread : public Runnable
 {
@@ -102,4 +104,3 @@ int main(void)
 
 	return 0;
 }
-

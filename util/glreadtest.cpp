@@ -34,13 +34,11 @@
 #define snprintf _snprintf
 #endif
 
+
 static int ALIGN=1;
 #define PAD(w) (((w)+(ALIGN-1))&(~(ALIGN-1)))
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
-//////////////////////////////////////////////////////////////////////
-// Structs and globals
-//////////////////////////////////////////////////////////////////////
 
 typedef struct _pixelformat
 {
@@ -89,6 +87,7 @@ pixelformat pix[4
 	{0, 1, 2, 3, GL_RGB, 0, "RGB"},
 };
 
+
 #ifdef XDK
 // Exceed likes to redefine stdio, so we un-redefine it :/
 #undef fprintf
@@ -129,6 +128,7 @@ pixelformat pix[4
 #define GLX_PBUFFER_WIDTH 0x8041
 #endif
 
+
 #define bench_name		"GLreadtest"
 
 #define _WIDTH            701
@@ -144,6 +144,7 @@ int pbo=0;
 double benchtime=1.0;
 
 #define STRLEN 256
+
 
 char *sigfig(int fig, char *string, double value)
 {
@@ -164,9 +165,6 @@ char *sigfig(int fig, char *string, double value)
 	return(string);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Error handling
-//////////////////////////////////////////////////////////////////////
 
 extern "C" {
 int xhandler(Display *dpy, XErrorEvent *xe)
@@ -176,9 +174,6 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 }
 } // extern "C"
 
-//////////////////////////////////////////////////////////////////////
-// Pbuffer setup
-//////////////////////////////////////////////////////////////////////
 
 void findvisual(XVisualInfo* &v
 #ifndef GLX11
@@ -267,6 +262,7 @@ void findvisual(XVisualInfo* &v
 	#endif
 }
 
+
 void pbufferinit(Display *dpy, Window win, XVisualInfo *v
 #ifndef GLX11
 , GLXFBConfig c
@@ -324,9 +320,6 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v
 	#endif
 }
 
-//////////////////////////////////////////////////////////////////////
-// Useful functions
-//////////////////////////////////////////////////////////////////////
 
 char glerrstr[STRLEN]="No error";
 
@@ -345,9 +338,7 @@ static void check_errors(const char * tag)
 	if(error) _throw(glerrstr);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Buffer initialization and checking
-//////////////////////////////////////////////////////////////////////
+
 void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 {
 	int i, j, ps=pix[format].pixelsize;
@@ -370,7 +361,9 @@ void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 	}
 }
 
-int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassackwards)
+
+int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf,
+	int bassackwards)
 {
 	int i, j, l, ps=pix[format].pixelsize;
 	for(i=0; i<h; i++)
@@ -389,14 +382,18 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf, int bassa
 			}
 			else
 			{
-				if(buf[l*PAD(w*ps)+j*ps+pix[format].roffset]!=((i+y)*(j+x))%256) return 0;
-				if(buf[l*PAD(w*ps)+j*ps+pix[format].goffset]!=((i+y)*(j+x)*2)%256) return 0;
-				if(buf[l*PAD(w*ps)+j*ps+pix[format].boffset]!=((i+y)*(j+x)*3)%256) return 0;
+				if(buf[l*PAD(w*ps)+j*ps+pix[format].roffset]!=((i+y)*(j+x))%256)
+					return 0;
+				if(buf[l*PAD(w*ps)+j*ps+pix[format].goffset]!=((i+y)*(j+x)*2)%256)
+					return 0;
+				if(buf[l*PAD(w*ps)+j*ps+pix[format].boffset]!=((i+y)*(j+x)*3)%256)
+					return 0;
 			}
 		}
 	}
 	return 1;
 }
+
 
 // Makes sure the frame buffer has been cleared prior to a write
 void clearfb(int format)
@@ -425,9 +422,6 @@ void clearfb(int format)
 	if(buf) free(buf);
 }
 
-//////////////////////////////////////////////////////////////////////
-// The actual tests
-//////////////////////////////////////////////////////////////////////
 
 // Generic GL write test
 void glwrite(int format)
@@ -452,7 +446,8 @@ void glwrite(int format)
 	timer.start();
 	do
 	{
-		glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE, rgbaBuffer);
+		glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
+			rgbaBuffer);
 		glFinish();
 		n++;
 	} while((rbtime=timer.elapsed())<benchtime || n<2);
@@ -465,6 +460,7 @@ void glwrite(int format)
 
 	if(rgbaBuffer) free(rgbaBuffer);
 }
+
 
 // Generic OpenGL readback test
 void glread(int format)
@@ -585,13 +581,15 @@ void glread(int format)
 	#endif
 }
 
+
 void display(void)
 {
 	int format;
 
 	for(format=0; format<FORMATS; format++)
 	{
-		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n", pix[format].name);
+		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n",
+			pix[format].name);
 
 		#if defined(GL_ABGR_EXT) || defined(GL_BGRA_EXT) || defined(GL_BGR_EXT)
 		const char *ext=(const char *)glGetString(GL_EXTENSIONS), *compext=NULL;
@@ -653,9 +651,7 @@ void usage(char **argv)
 	exit(0);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Main
-//////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv)
 {
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
@@ -745,15 +741,23 @@ int main(int argc, char **argv)
 	if(argc<2) fprintf(stderr, "\n%s -h for advanced usage.\n", argv[0]);
 
 	XSetErrorHandler(xhandler);
-	if(!(dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
-	fprintf(stderr, "\nRendering to %s using GLX on display %s\n", usewindow?"window":"Pbuffer", DisplayString(dpy));
+	if(!(dpy=XOpenDisplay(0)))
+	{
+		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
+		exit(1);
+	}
+	fprintf(stderr, "\nRendering to %s using GLX on display %s\n",
+		usewindow?"window":"Pbuffer", DisplayString(dpy));
 	#ifdef GL_VERSION_1_5
 	if(pbo) fprintf(stderr, "Using PBO's for readback\n");
 	#endif
 
-	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT)
+	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy,
+		DefaultScreen(dpy))<HEIGHT)
 	{
-		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", WIDTH, HEIGHT);
+		fprintf(stderr,
+			"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
+			WIDTH, HEIGHT);
 		exit(1);
 	}
 
@@ -785,8 +789,8 @@ int main(int argc, char **argv)
 
 		if(useoverlay)
 		{
-			errifnot(root=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, WIDTH,
-				HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+			errifnot(root=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
+				WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy))));
 			XMapWindow(dpy, root);
 			XSync(dpy, False);

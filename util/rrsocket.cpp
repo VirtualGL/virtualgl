@@ -30,10 +30,27 @@
  #define INADDR_NONE ((in_addr_t) 0xffffffff)
 #endif
 
+
+#ifdef _WIN32
+typedef int SOCKLEN_T;
+#else
+typedef socklen_t SOCKLEN_T;
+#endif
+
 #ifdef USESSL
+bool rrsocket::_Sslinit=false;
+rrcs rrsocket::_Cryptolock[CRYPTO_NUM_LOCKS];
+#endif
+rrcs rrsocket::_Mutex;
+int rrsocket::_Instancecount=0;
+
+
+#ifdef USESSL
+
 static void progress_callback(int p, int n, void *arg)
 {
 }
+
 
 static EVP_PKEY *newprivkey(int bits)
 {
@@ -52,6 +69,7 @@ static EVP_PKEY *newprivkey(int bits)
 	}
 	return NULL;
 }
+
 
 static X509 *newcert(EVP_PKEY *priv)
 {
@@ -99,11 +117,7 @@ static X509 *newcert(EVP_PKEY *priv)
 	return NULL;
 }
 
-bool rrsocket::_Sslinit=false;
-rrcs rrsocket::_Cryptolock[CRYPTO_NUM_LOCKS];
-#endif
-rrcs rrsocket::_Mutex;
-int rrsocket::_Instancecount=0;
+#endif // USESSL
 
 
 rrsocket::rrsocket(bool dossl=false)
@@ -131,7 +145,8 @@ rrsocket::rrsocket(bool dossl=false)
 		#if defined(sun)||defined(sgi)
 		char buf[128];  int i;
 		srandom(getpid());
-		for(i=0; i<128; i++) buf[i]=(char)((double)random()/(double)RAND_MAX*254.+1.0);
+		for(i=0; i<128; i++)
+			buf[i]=(char)((double)random()/(double)RAND_MAX*254.+1.0);
 		RAND_seed(buf, 128);
 		#endif
 		OpenSSL_add_all_algorithms();
@@ -144,12 +159,14 @@ rrsocket::rrsocket(bool dossl=false)
 		char *env=NULL;
 		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 			&& !strncmp(env, "1", 1))
-			fprintf(stderr, "[VGL] Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
+			fprintf(stderr, "[VGL] Using OpenSSL version %s\n",
+				SSLeay_version(SSLEAY_VERSION));
 	}
 	_ssl=NULL;  _sslctx=NULL;
 	#endif
 	_sd=INVALID_SOCKET;
 }
+
 
 #ifdef USESSL
 rrsocket::rrsocket(SOCKET sd, SSL *ssl)
@@ -172,6 +189,7 @@ rrsocket::rrsocket(SOCKET sd)
 }
 #endif
 
+
 rrsocket::~rrsocket(void)
 {
 	close();
@@ -181,6 +199,7 @@ rrsocket::~rrsocket(void)
 	_Mutex.unlock(false);
 	#endif
 }
+
 
 void rrsocket::close(void)
 {
@@ -199,6 +218,7 @@ void rrsocket::close(void)
 		_sd=INVALID_SOCKET;
 	}
 }
+
 
 void rrsocket::connect(char *servername, unsigned short port)
 {
@@ -222,7 +242,8 @@ void rrsocket::connect(char *servername, unsigned short port)
 		memcpy(&(servaddr.sin_addr), hent->h_addr_list[0], hent->h_length);
 	}
 
-	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET) _throwsock();
+	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET)
+		_throwsock();
 	trysock( ::connect(_sd, (struct sockaddr *)&servaddr, sizeof(servaddr)) );
 	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char*)&m, sizeof(int)) );
 
@@ -239,11 +260,6 @@ void rrsocket::connect(char *servername, unsigned short port)
 	#endif
 }
 
-#ifdef _WIN32
-typedef int SOCKLEN_T;
-#else
-typedef socklen_t SOCKLEN_T;
-#endif
 
 unsigned short rrsocket::setuplistener(unsigned short port, bool reuseaddr)
 {
@@ -254,9 +270,12 @@ unsigned short rrsocket::setuplistener(unsigned short port, bool reuseaddr)
 	if(_ssl && _sslctx && _dossl) _throw("SSL already connected");
 	#endif
 
-	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET) _throwsock();
-	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)) );
-	trysock( setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2, sizeof(int)) );
+	if((_sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET)
+		_throwsock();
+	trysock( setsockopt(_sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+		sizeof(int)) );
+	trysock( setsockopt(_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2,
+		sizeof(int)) );
 
 	memset(&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family=AF_INET;
@@ -270,10 +289,12 @@ unsigned short rrsocket::setuplistener(unsigned short port, bool reuseaddr)
 	return actualport;
 }
 
+
 unsigned short rrsocket::findport(void)
 {
 	return setuplistener(0, false);
 }
+
 
 unsigned short rrsocket::listen(unsigned short port, bool reuseaddr)
 {
@@ -312,6 +333,7 @@ unsigned short rrsocket::listen(unsigned short port, bool reuseaddr)
 	return actualport;
 }
 
+
 rrsocket *rrsocket::accept(void)
 {
 	SOCKET sd_client;
@@ -323,8 +345,10 @@ rrsocket *rrsocket::accept(void)
 	if(!_sslctx && _dossl) _throw("SSL not initialized");
 	#endif
 
-	trysock( sd_client=::accept(_sd, (struct sockaddr *)&remoteaddr, &addrlen) );
-	trysock( setsockopt(sd_client, IPPROTO_TCP, TCP_NODELAY, (char*)&m, sizeof(int)) );
+	trysock( sd_client=::accept(_sd, (struct sockaddr *)&remoteaddr,
+		&addrlen) );
+	trysock( setsockopt(sd_client, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
+		sizeof(int)) );
 
 	#ifdef USESSL
 	SSL *tempssl=NULL;
@@ -342,6 +366,7 @@ rrsocket *rrsocket::accept(void)
 	#endif
 }
 
+
 char *rrsocket::remotename(void)
 {
 	struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen=sizeof(remoteaddr);
@@ -350,6 +375,7 @@ char *rrsocket::remotename(void)
 	remotename=inet_ntoa(remoteaddr.sin_addr);
 	return (remotename? remotename:(char *)"Unknown");
 }
+
 
 void rrsocket::send(char *buf, int len)
 {
@@ -377,6 +403,7 @@ void rrsocket::send(char *buf, int len)
 	}
 	if(bytessent!=len) _throw("Incomplete send");
 }
+
 
 void rrsocket::recv(char *buf, int len)
 {

@@ -14,12 +14,15 @@
  */
 
 /* This library abstracts fast frame buffer access */
+
 #include <string.h>
 #include <stdlib.h>
 #include "fbx.h"
 
+
 #define MINWIDTH  160
 #define MINHEIGHT 24
+
 
 static int __line=-1;
 static FILE *__warningfile=NULL;
@@ -32,6 +35,7 @@ const int fbx_bmask[FBX_FORMATS]=
 	{0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF, 0};
 const char *_fbx_formatname[FBX_FORMATS]=
 	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX"};
+
 
 #if defined(FBXWIN32)
 
@@ -58,6 +62,7 @@ const char *_fbx_formatname[FBX_FORMATS]=
  #endif
 
 #endif
+
 
 #ifdef INFAKER
 
@@ -104,26 +109,31 @@ extern _XCopyAreaType __XCopyArea;
 
 #endif
 
+
 char *fbx_geterrmsg(void)
 {
 	return __lasterror;
 }
+
 
 int fbx_geterrline(void)
 {
 	return __line;
 }
 
+
 void fbx_printwarnings(FILE *stream)
 {
 	__warningfile=stream;
 }
+
 
 const char *fbx_formatname(int format)
 {
 	if(format>=0 && format<=FBX_FORMATS-1) return _fbx_formatname[format];
 	else return "Invalid format";
 }
+
 
 int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 {
@@ -354,6 +364,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	return -1;
 }
 
+
 int fbx_read(fbx_struct *s, int winx, int winy)
 {
 	int wx, wy;
@@ -400,6 +411,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	finally:
 	return -1;
 }
+
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	int h)
@@ -450,6 +462,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	return -1;
 }
 
+
 int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 {
 	int i, bx, by, bw, bh, ps, pitch;
@@ -479,6 +492,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	if(tmpbuf) free(tmpbuf);
 	return -1;
 }
+
 
 #ifndef FBXWIN32
 
@@ -514,6 +528,7 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 
 #endif
 
+
 int fbx_sync(fbx_struct *s)
 {
 	#ifdef FBXWIN32
@@ -537,6 +552,7 @@ int fbx_sync(fbx_struct *s)
 
 	#endif
 }
+
 
 int fbx_term(fbx_struct *s)
 {
@@ -577,7 +593,9 @@ int fbx_term(fbx_struct *s)
 	return -1;
 }
 
+
 #if defined(XDK) && defined(USESHM) && !defined(FBXWIN32)
+
 static int fbx_checkdlls(void)
 {
 	int retval=1, v1, v2, v3, v4;
@@ -646,6 +664,7 @@ static int fbx_checkdlls(void)
 	return retval;
 }
 
+
 static int fbx_checkdll(char *filename, int *v1, int *v2, int *v3, int *v4)
 {
 	unsigned long vinfolen, vinfohnd=0;
@@ -680,4 +699,5 @@ static int fbx_checkdll(char *filename, int *v1, int *v2, int *v3, int *v4)
 	if(vinfo) free(vinfo);
 	return retval;
 }
-#endif
+
+#endif /* defined(XDK) && defined(USESHM) && !defined(FBXWIN32) */

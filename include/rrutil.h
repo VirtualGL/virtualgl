@@ -79,4 +79,4 @@ static __inline int littleendian(void)
 	else return 0;
 }
 
-#endif
+#endif /* __RRUTIL_H__ */

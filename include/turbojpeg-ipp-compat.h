@@ -1,4 +1,4 @@
-// Compatibility macros for older TurboJPEG/IPP implementation
+/* Compatibility macros for older TurboJPEG/IPP implementation */
 
 #ifndef __TURBOJPEG_IPP_COMPAT_H__
 #define __TURBOJPEG_IPP_COMPAT_H__
@@ -13,4 +13,4 @@
 		+ tjDecompressHeader(j, srcbuf, size, width, height))
 #endif
 
-#endif
+#endif /* __TURBOJPEG_IPP_COMPAT_H__ */

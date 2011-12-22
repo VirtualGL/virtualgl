@@ -29,13 +29,10 @@
 #include "bmp.h"
 
 #ifdef _MSC_VER
-#define snprintf(str, n, format, ...) _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
+#define snprintf(str, n, format, ...) \
+	_snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
 #endif
 
-
-//////////////////////////////////////////////////////////////////////
-// Error handling
-//////////////////////////////////////////////////////////////////////
 
 #ifndef FBXWIN32
 extern "C" {
@@ -47,10 +44,6 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 } // extern "C"
 #endif
 
-
-//////////////////////////////////////////////////////////////////////
-// Structs and globals
-//////////////////////////////////////////////////////////////////////
 
 #define bench_name		"FBXtest"
 
@@ -80,9 +73,6 @@ const BMPPIXELFORMAT fb2bmpformat[FBX_FORMATS]=
 
 void nativeread(int), nativewrite(int);
 
-//////////////////////////////////////////////////////////////////////
-// Buffer initialization and checking
-//////////////////////////////////////////////////////////////////////
 
 void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
 {
@@ -103,6 +93,7 @@ void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *b
 		}
 	}
 }
+
 
 int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
 {
@@ -126,6 +117,7 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf
 	return 1;
 }
 
+
 // Makes sure the frame buffer has been cleared prior to a write
 void clearfb(void)
 {
@@ -145,9 +137,6 @@ void clearfb(void)
 	return;
 }
 
-//////////////////////////////////////////////////////////////////////
-// The actual tests
-//////////////////////////////////////////////////////////////////////
 
 // Platform-specific write test
 void nativewrite(int useshm)
@@ -219,6 +208,7 @@ void nativewrite(int useshm)
 	fbx_term(&s);
 }
 
+
 // Platform-specific readback test
 void nativeread(int useshm)
 {
@@ -257,6 +247,7 @@ void nativeread(int useshm)
 	fbx_term(&s);
 }
 
+
 // This serves as a unit test for the FBX library
 class writethread : public Runnable
 {
@@ -278,7 +269,8 @@ class writethread : public Runnable
 			else {myheight=height-height/2;  myy=height/2;}
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
-			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format, (unsigned char *)stressfb.bits);
+			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
+				(unsigned char *)stressfb.bits);
 			for (i=0; i<iter; i++)
 				fbx(fbx_write(&stressfb, 0, 0, myx, myy, mywidth, myheight));
 
@@ -288,6 +280,7 @@ class writethread : public Runnable
 	private:
 		int myrank, iter, useshm;
 };
+
 
 class readthread : public Runnable
 {
@@ -313,7 +306,8 @@ class readthread : public Runnable
 			memset(stressfb.bits, 0, mywidth*myheight*ps);
 			for(i=0; i<iter; i++)
 				fbx(fbx_read(&stressfb, myx, myy));
-			if(!cmpbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format, (unsigned char *)stressfb.bits))
+			if(!cmpbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
+				(unsigned char *)stressfb.bits))
 				_throw("ERROR: Bogus data read back.");
 
 			} catch(...) {fbx_term(&stressfb);  throw;}
@@ -322,6 +316,7 @@ class readthread : public Runnable
 	private:
 		int myrank, iter, useshm;
 };
+
 
 void nativestress(int useshm)
 {
@@ -352,7 +347,8 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) {delete t[i];  delete wt[i];}
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -379,12 +375,14 @@ void nativestress(int useshm)
 		for(i=0; i<4; i++) {delete t[i];  delete rt[i];}
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
 	return;
 }
+
 
 void display(void)
 {
@@ -410,6 +408,7 @@ void display(void)
 	fg();  nativestress(0);
 	fprintf(stderr, "\n");
 }
+
 
 #ifdef FBXWIN32
 LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
@@ -573,9 +572,7 @@ void usage(char *progname)
 	exit(1);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Main
-//////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv)
 {
 	#ifdef FBXWIN32
@@ -642,9 +639,17 @@ int main(int argc, char **argv)
 
 	#else
 
-	if(!XInitThreads()) {fprintf(stderr, "ERROR: Could not initialize Xlib thread safety\n");  exit(1);}
+	if(!XInitThreads())
+	{
+		fprintf(stderr, "ERROR: Could not initialize Xlib thread safety\n");
+		exit(1);
+	}
 	XSetErrorHandler(xhandler);
-	if(!(wh.dpy=XOpenDisplay(0))) {fprintf(stderr, "Could not open display %s\n", XDisplayName(0));  exit(1);}
+	if(!(wh.dpy=XOpenDisplay(0)))
+	{
+		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
+		exit(1);
+	}
 	width=DisplayWidth(wh.dpy, DefaultScreen(wh.dpy));
 	height=DisplayHeight(wh.dpy, DefaultScreen(wh.dpy));
 
@@ -652,7 +657,9 @@ int main(int argc, char **argv)
 
 	if(width<MIN_SCREEN_WIDTH && height<MIN_SCREEN_HEIGHT)
 	{
-		fprintf(stderr, "ERROR: Please switch to a screen resolution of at least %d x %d.\n", MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
+		fprintf(stderr,
+			"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
+			MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
 		exit(1);
 	}
 	if(!dofs)
@@ -689,7 +696,8 @@ int main(int argc, char **argv)
 	Window root=DefaultRootWindow(wh.dpy);
 
 	vtemp.depth=24;  vtemp.c_class=TrueColor;
-	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
+	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp,
+		&n))!=NULL && n!=0)
 	{
 		int mask=CWBorderPixel|CWColormap|CWEventMask;
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
@@ -735,7 +743,8 @@ int main(int argc, char **argv)
 	if(dovid) return 0;
 
 	vtemp.depth=8;  vtemp.c_class=PseudoColor;
-	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))!=NULL && n!=0)
+	if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp,
+		&n))!=NULL && n!=0)
 	{
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocAll);
 		swa.border_pixel=0;

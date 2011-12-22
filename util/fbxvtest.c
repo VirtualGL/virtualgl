@@ -17,8 +17,10 @@
 #include "fbxv.h"
 #include "rrtimer.h"
 
+
 #define WIDTH 1241
 #define HEIGHT 903
+
 
 #define _throw(m) { \
 	printf("ERROR: %s\n", m);  goto bailout; \
@@ -30,12 +32,14 @@
 		goto bailout; \
 	}
 
+
 double testtime=5.;
 Display *dpy=NULL;  Window win=0;
 fbxv_struct s, s1;
 int width=-1, height=-1, useshm=1, scale=1, interactive=0;
 char *filename=NULL;
 Atom protoatom=0, deleteatom=0;
+
 
 void initbuf(fbxv_struct *s, int id, int seed)
 {
@@ -73,6 +77,7 @@ void initbuf(fbxv_struct *s, int id, int seed)
 						+ (c==0? j:j/2)] = (i+seed)*(j+seed);
 	}
 }
+
 
 void dotest(int id, char *name)
 {
@@ -141,6 +146,7 @@ void dotest(int id, char *name)
 	fbxv_term(&s);
 }
 
+
 void dotesti(Display *dpy, int id, char *name)
 {
 	int iter=0;
@@ -197,6 +203,7 @@ void dotesti(Display *dpy, int id, char *name)
 	bailout:
 	return;
 }
+
 
 int main(int argc, char **argv)
 {
@@ -282,7 +289,7 @@ int main(int argc, char **argv)
 	swa.event_mask=0;
 	if(interactive) swa.event_mask=StructureNotifyMask|ExposureMask
 		|KeyPressMask|PointerMotionMask|ButtonPressMask;
-  printf("Visual ID = 0x%.2x\n", (unsigned int)v->visualid);
+	printf("Visual ID = 0x%.2x\n", (unsigned int)v->visualid);
 	if(!(protoatom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
 		_throw("Cannot obtain WM_PROTOCOLS atom");
 	if(!(deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))

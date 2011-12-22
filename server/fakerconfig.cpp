@@ -56,12 +56,12 @@ class rrdeferredcs : rrcs
 			{
 				_init=true;
 				#ifdef _WIN32
-				cs=CreateMutex(NULL, FALSE, NULL);
+				_cs=CreateMutex(NULL, FALSE, NULL);
 				#else
 				pthread_mutexattr_t ma;
 				pthread_mutexattr_init(&ma);
 				pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-				pthread_mutex_init(&cs, &ma);
+				pthread_mutex_init(&_cs, &ma);
 				pthread_mutexattr_destroy(&ma);
 				#endif
 			}

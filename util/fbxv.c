@@ -19,8 +19,10 @@
 #include "fbxv.h"
 #include "x11err.h"
 
+
 static int __line=-1;
 static FILE *__warningfile=NULL;
+
 
 static char __lasterror[1024]="No error";
 #define _throw(m) {snprintf(__lasterror, 1023, "%s", m);  __line=__LINE__; \
@@ -32,6 +34,7 @@ static char __lasterror[1024]="No error";
 #define errifnot(f) {if(!(f)) { \
 	snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)"); \
 	__line=__LINE__;  goto finally;}}
+
 
 #ifdef USESHM
 static unsigned long serial=0;  static int __extok=1;
@@ -53,20 +56,24 @@ int _fbxv_xhandler(Display *dpy, XErrorEvent *e)
 }
 #endif
 
+
 char *fbxv_geterrmsg(void)
 {
 	return __lasterror;
 }
+
 
 int fbxv_geterrline(void)
 {
 	return __line;
 }
 
+
 void fbxv_printwarnings(FILE *stream)
 {
 	__warningfile=stream;
 }
+
 
 int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 	unsigned int format, int useshm)
@@ -198,6 +205,7 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 	return -1;
 }
 
+
 int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 	int dstx, int dsty, int dstw, int dsth)
 {
@@ -230,6 +238,7 @@ int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 	finally:
 	return -1;
 }
+
 
 int fbxv_term(fbxv_struct *s)
 {
