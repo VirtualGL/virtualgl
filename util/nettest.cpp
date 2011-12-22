@@ -335,7 +335,7 @@ int main(int argc, char **argv)
 				elapsed=timer.elapsed();
 			} while(elapsed<2.0);
 			if(!cmpbuf(buf, i)) {printf("DATA ERROR\n");  exit(1);}
-			buf[0]=255;
+			buf[0]=(char)255;
 			sd.send(buf, i);
 			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)j,
 				(double)i*(double)j/1048576./(elapsed/2.),
