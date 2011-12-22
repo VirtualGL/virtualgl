@@ -12,7 +12,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrdisplayclient.h"
+#include "vgltransconn.h"
 #include "fakerconfig.h"
 
 #define WIDTH 301
@@ -64,18 +64,18 @@ int main(int argc, char **argv)
 
 	for(int i=0; i<iter; i++)
 	{
-		rrdisplayclient rrdpy;
-		rrdpy.connect(fconfig.client, fconfig.port);
+		vgltransconn vglt;
+		vglt.connect(fconfig.client, fconfig.port);
 		for(int f=0; f<frames; f++)
 		{
-			rrdpy.synchronize();
-			errifnot(b=rrdpy.getbitmap(WIDTH, HEIGHT, 3,
+			vglt.synchronize();
+			errifnot(b=vglt.getbitmap(WIDTH, HEIGHT, 3,
 				littleendian()? RRBMP_BGR:0, false));
 			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
 			b->_h.qual=50;  b->_h.subsamp=4;
 			b->_h.winid=win;  b->_h.compress=RRCOMP_JPEG;
-			rrdpy.sendframe(b);
+			vglt.sendframe(b);
 		}
 	}
 

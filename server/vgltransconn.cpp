@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrdisplayclient.h"
+#include "vgltransconn.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
 #ifdef _WIN32
@@ -30,7 +30,7 @@
 #define S_IWRITE 0200
 #endif
 
-void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
+void vgltransconn::sendheader(rrframeheader h, bool eof=false)
 {
 	if(_dosend)
 	{
@@ -94,14 +94,14 @@ void rrdisplayclient::sendheader(rrframeheader h, bool eof=false)
 }
 
 
-rrdisplayclient::rrdisplayclient(void) : _np(fconfig.np),
+vgltransconn::vgltransconn(void) : _np(fconfig.np),
 	_dosend(false), _sd(NULL), _t(NULL), _deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
 	_prof_total.setname("Total(mov)");
 }
 
-void rrdisplayclient::run(void)
+void vgltransconn::run(void)
 {
 	rrframe *lastb=NULL, *b=NULL;
 	long bytes=0;
@@ -192,7 +192,7 @@ void rrdisplayclient::run(void)
 	}
 }
 
-rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
+rrframe *vgltransconn::getbitmap(int w, int h, int ps, int flags,
 	bool stereo)
 {
 	rrframe *b=NULL;
@@ -214,27 +214,27 @@ rrframe *rrdisplayclient::getbitmap(int w, int h, int ps, int flags,
 	return b;
 }
 
-bool rrdisplayclient::ready(void)
+bool vgltransconn::ready(void)
 {
 	if(_t) _t->checkerror();
 	return(_q.items()<=0);
 }
 
-void rrdisplayclient::synchronize(void)
+void vgltransconn::synchronize(void)
 {
 	_ready.wait();
 }
 
-static void __rrdisplayclient_spoilfct(void *b)
+static void __vgltransconn_spoilfct(void *b)
 {
 	if(b) ((rrframe *)b)->complete();
 }
 
-void rrdisplayclient::sendframe(rrframe *b)
+void vgltransconn::sendframe(rrframe *b)
 {
 	if(_t) _t->checkerror();
 	b->_h.dpynum=_dpynum;
-	_q.spoil((void *)b, __rrdisplayclient_spoilfct);
+	_q.spoil((void *)b, __vgltransconn_spoilfct);
 }
 
 void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
@@ -299,7 +299,7 @@ void rrcompressor::compresssend(rrframe *b, rrframe *lastb)
 	}
 }
 
-void rrdisplayclient::send(char *buf, int len)
+void vgltransconn::send(char *buf, int len)
 {
 	try
 	{
@@ -312,7 +312,7 @@ void rrdisplayclient::send(char *buf, int len)
 	}
 }
 
-void rrdisplayclient::recv(char *buf, int len)
+void vgltransconn::recv(char *buf, int len)
 {
 	try
 	{
@@ -325,7 +325,7 @@ void rrdisplayclient::recv(char *buf, int len)
 	}
 }
 
-void rrdisplayclient::connect(char *displayname, unsigned short port)
+void vgltransconn::connect(char *displayname, unsigned short port)
 {
 	char *servername=NULL;
 	try

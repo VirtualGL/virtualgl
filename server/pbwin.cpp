@@ -45,11 +45,11 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 {
 	_eventdpy=NULL;
 	_oldpb=NULL;  _neww=_newh=-1;
-	_blitter=NULL;
+	_x11trans=NULL;
 	#ifdef USEXV
 	_xvtrans=NULL;
 	#endif
-	_rrdpy=NULL;
+	_vglconn=NULL;
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
 	_syncdpy=false;
@@ -81,8 +81,8 @@ pbwin::~pbwin(void)
 {
 	_mutex.lock(false);
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
-	if(_blitter) {delete _blitter;  _blitter=NULL;}
-	if(_rrdpy) {delete _rrdpy;  _rrdpy=NULL;}
+	if(_x11trans) {delete _x11trans;  _x11trans=NULL;}
+	if(_vglconn) {delete _vglconn;  _vglconn=NULL;}
 	#ifdef USEXV
 	if(_xvtrans) {delete _xvtrans;  _xvtrans=NULL;}
 	#endif
@@ -292,13 +292,13 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		case RRCOMP_JPEG:
 		case RRCOMP_RGB:
 		case RRCOMP_YUV:
-			if(!_rrdpy)
+			if(!_vglconn)
 			{
-				errifnot(_rrdpy=new rrdisplayclient());
-				_rrdpy->connect(strlen(fconfig.client)>0?
+				errifnot(_vglconn=new vgltransconn());
+				_vglconn->connect(strlen(fconfig.client)>0?
 					fconfig.client:DisplayString(_dpy), fconfig.port);
 			}
-			sendvgl(_rrdpy, drawbuf, spoillast, dostereo, stereomode,
+			sendvgl(_vglconn, drawbuf, spoillast, dostereo, stereomode,
 				(int)compress, fconfig.qual, fconfig.subsamp);
 			break;
 		#ifdef USEXV
@@ -318,7 +318,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 
 	if(!_plugin)
 	{
-		_plugin=new rrplugin(_dpy, _drawable, fconfig.transport);
+		_plugin=new transplugin(_dpy, _drawable, fconfig.transport);
 		_plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(_dpy), fconfig.port);
 	}
@@ -395,14 +395,14 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	_plugin->sendframe(frame, sync);
 }
 
-void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
+void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	bool dostereo, int stereomode, int compress, int qual, int subsamp)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 	bool usepbo=(fconfig.readback==RRREAD_PBO);
 	static bool alreadywarned=false;
 
-	if(spoillast && fconfig.spoil && !rrdpy->ready())
+	if(spoillast && fconfig.spoil && !vgltrans->ready())
 		return;
 	rrframe *b;
 
@@ -429,8 +429,8 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 		}
 	}
 
-	if(!fconfig.spoil) rrdpy->synchronize();
-	errifnot(b=rrdpy->getbitmap(pbw, pbh, pixelsize, flags,
+	if(!fconfig.spoil) vgltrans->synchronize();
+	errifnot(b=vgltrans->getbitmap(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
@@ -454,7 +454,7 @@ void pbwin::sendvgl(rrdisplayclient *rrdpy, GLint drawbuf, bool spoillast,
 	b->_h.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
 	if(fconfig.logo) b->addlogo();
-	rrdpy->sendframe(b);
+	vgltrans->sendframe(b);
 }
 
 void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
@@ -466,10 +466,10 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	static bool alreadywarned=false;
 
 	rrfb *b;
-	if(!_blitter) errifnot(_blitter=new rrblitter());
-	if(spoillast && fconfig.spoil && !_blitter->ready()) return;
-	if(!fconfig.spoil) _blitter->synchronize();
-	errifnot(b=_blitter->getbitmap(_dpy, _drawable, pbw, pbh));
+	if(!_x11trans) errifnot(_x11trans=new x11trans());
+	if(spoillast && fconfig.spoil && !_x11trans->ready()) return;
+	if(!fconfig.spoil) _x11trans->synchronize();
+	errifnot(b=_x11trans->getbitmap(_dpy, _drawable, pbw, pbh));
 	b->_flags|=RRBMP_BOTTOMUP;
 	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
 	else
@@ -524,7 +524,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, usepbo, false);
 	}
 	if(fconfig.logo) b->addlogo();
-	_blitter->sendframe(b, sync);
+	_x11trans->sendframe(b, sync);
 }
 
 #ifdef USEXV
@@ -536,7 +536,7 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	bool usepbo=(fconfig.readback==RRREAD_PBO);
 
 	rrxvframe *b;
-	if(!_xvtrans) errifnot(_xvtrans=new rrxvtrans());
+	if(!_xvtrans) errifnot(_xvtrans=new xvtrans());
 	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
 	if(!fconfig.spoil) _xvtrans->synchronize();
 	errifnot(b=_xvtrans->getbitmap(_dpy, _drawable, pbw, pbh));

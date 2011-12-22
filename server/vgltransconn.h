@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,8 +13,8 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __RRDISPLAYCLIENT_H
-#define __RRDISPLAYCLIENT_H
+#ifndef __VGLTRANSCONN_H
+#define __VGLTRANSCONN_H
 
 #include "rrsocket.h"
 #include "rrthread.h"
@@ -26,13 +26,13 @@
 #define snprintf _snprintf
 #endif
 
-class rrdisplayclient : public Runnable
+class vgltransconn : public Runnable
 {
 	public:
 
-	rrdisplayclient(void);
+	vgltransconn(void);
 
-	virtual ~rrdisplayclient(void)
+	virtual ~vgltransconn(void)
 	{
 		_deadyet=true;  _q.release();
 		if(_t) {_t->stop();  delete _t;  _t=NULL;}
@@ -107,7 +107,7 @@ class rrcompressor : public Runnable
 {
 	public:
 
-	rrcompressor(int myrank, rrdisplayclient *parent) : _bytes(0),
+	rrcompressor(int myrank, vgltransconn *parent) : _bytes(0),
 		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank),
 		_deadyet(false), _parent(parent)
 	{
@@ -172,7 +172,7 @@ class rrcompressor : public Runnable
 	rrevent _ready, _complete;  bool _deadyet;
 	rrcs _mutex;
 	rrprofiler _prof_comp;
-	rrdisplayclient *_parent;
+	vgltransconn *_parent;
 };
 
 #endif

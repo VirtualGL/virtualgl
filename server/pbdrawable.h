@@ -18,7 +18,7 @@
 
 #include "faker-sym.h"
 #include "rrmutex.h"
-#include "rrblitter.h"
+#include "x11trans.h"
 #include "fbx.h"
 
 // A container class for the actual Pbuffer
@@ -68,7 +68,7 @@ class pbdrawable
 		rrcs _mutex;
 		Display *_dpy;  Drawable _drawable;
 		pbuffer *_pb;  GLXFBConfig _config;
-		rrblitter *_blitter;
+		x11trans *_x11trans;
 		rrprofiler _prof_rb;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;

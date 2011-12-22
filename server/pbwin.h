@@ -17,11 +17,11 @@
 #define __PBWIN_H__
 
 #include "pbdrawable.h"
-#include "rrdisplayclient.h"
+#include "vgltransconn.h"
 #ifdef USEXV
-#include "rrxvtrans.h"
+#include "xvtrans.h"
 #endif
-#include "rrplugin.h"
+#include "transplugin.h"
 
 class pbwin : public pbdrawable
 {
@@ -49,7 +49,7 @@ class pbwin : public pbdrawable
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int);
-		void sendvgl(rrdisplayclient *, GLint, bool, bool, int, int, int, int);
+		void sendvgl(vgltransconn *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
 		#ifdef USEXV
@@ -59,14 +59,14 @@ class pbwin : public pbdrawable
 		Display *_eventdpy;
 		pbuffer *_oldpb;
 		int _neww, _newh;
-		rrblitter *_blitter;
+		x11trans *_x11trans;
 		#ifdef USEXV
-		rrxvtrans *_xvtrans;
+		xvtrans *_xvtrans;
 		#endif
-		rrdisplayclient *_rrdpy;
+		vgltransconn *_vglconn;
 		rrprofiler _prof_gamma, _prof_anaglyph;
 		bool _syncdpy;
-		rrplugin *_plugin;
+		transplugin *_plugin;
 		bool _truecolor;
 		bool _gammacorrectedvisuals;
 		bool _stereovisual;

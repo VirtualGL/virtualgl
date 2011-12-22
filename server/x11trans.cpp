@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,11 +13,11 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrblitter.h"
+#include "x11trans.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
 
-rrblitter::rrblitter(void) : _t(NULL), _deadyet(false)
+x11trans::x11trans(void) : _t(NULL), _deadyet(false)
 {
 	for(int i=0; i<NB; i++) _bmp[i]=NULL;
 	errifnot(_t=new Thread(this));
@@ -27,7 +27,7 @@ rrblitter::rrblitter(void) : _t(NULL), _deadyet(false)
 	if(fconfig.verbose) fbx_printwarnings(rrout.getfile());
 }
 
-void rrblitter::run(void)
+void x11trans::run(void)
 {
 	rrtimer t, sleept;  double err=0.;  bool first=true;
 //	rrfb *lastb=NULL;
@@ -81,7 +81,7 @@ void rrblitter::run(void)
 	}
 }
 
-rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
+rrfb *x11trans::getbitmap(Display *dpy, Window win, int w, int h)
 {
 	rrfb *b=NULL;
 	if(_t) _t->checkerror();
@@ -103,23 +103,23 @@ rrfb *rrblitter::getbitmap(Display *dpy, Window win, int w, int h)
 	return b;
 }
 
-bool rrblitter::ready(void)
+bool x11trans::ready(void)
 {
 	if(_t) _t->checkerror();
 	return(_q.items()<=0);
 }
 
-void rrblitter::synchronize(void)
+void x11trans::synchronize(void)
 {
 	_ready.wait();
 }
 
-static void __rrblitter_spoilfct(void *b)
+static void __x11trans_spoilfct(void *b)
 {
 	if(b) ((rrfb *)b)->complete();
 }
 
-void rrblitter::sendframe(rrfb *b, bool sync)
+void x11trans::sendframe(rrfb *b, bool sync)
 {
 	if(_t) _t->checkerror();
 	if(sync) 
@@ -130,5 +130,5 @@ void rrblitter::sendframe(rrfb *b, bool sync)
 		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
 		_ready.signal();
 	}
-	else _q.spoil((void *)b, __rrblitter_spoilfct);
+	else _q.spoil((void *)b, __x11trans_spoilfct);
 }

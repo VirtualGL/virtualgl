@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,22 +13,22 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __RRDISPLAYSERVER_H
-#define __RRDISPLAYSERVER_H
+#ifndef __VGLTRANSRECEIVER_H
+#define __VGLTRANSRECEIVER_H
 
 #include "rrsocket.h"
-#include "rrcwin.h"
+#include "clientwin.h"
 
 #define MAXWIN 1024
 
-class rrdisplayserver : public Runnable
+class vgltransreceiver : public Runnable
 {
 	public:
 
-	rrdisplayserver(bool, int _drawmethod);
+	vgltransreceiver(bool, int _drawmethod);
 	void listen(unsigned short);
 	unsigned short port(void) {return _port;}
-	virtual ~rrdisplayserver(void);
+	virtual ~vgltransreceiver(void);
 
 	private:
 
@@ -43,25 +43,25 @@ class rrdisplayserver : public Runnable
 	unsigned short _port;
 };
 
-class rrserver : public Runnable
+class vgltransserver : public Runnable
 {
 	public:
 
-	rrserver(rrsocket *sd, int drawmethod) : _drawmethod(drawmethod),
-		_windows(0), _sd(sd), _t(NULL), _remotename(NULL)
+	vgltransserver(rrsocket *sd, int drawmethod) : _drawmethod(drawmethod),
+		_nwin(0), _sd(sd), _t(NULL), _remotename(NULL)
 	{
-		memset(_rrw, 0, sizeof(rrcwin *)*MAXWIN);
+		memset(_win, 0, sizeof(clientwin *)*MAXWIN);
 		if(_sd) _remotename=_sd->remotename();
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
 
-	virtual ~rrserver(void)
+	virtual ~vgltransserver(void)
 	{
 		int i;
 		_winmutex.lock(false);
-		for(i=0; i<_windows; i++) {if(_rrw[i]) {delete _rrw[i];  _rrw[i]=NULL;}}
-		_windows=0;
+		for(i=0; i<_nwin; i++) {if(_win[i]) {delete _win[i];  _win[i]=NULL;}}
+		_nwin=0;
 		_winmutex.unlock(false);
 		if(!_remotename) rrout.PRINTLN("-- Disconnecting\n");
 		else rrout.PRINTLN("-- Disconnecting %s", _remotename);
@@ -76,10 +76,10 @@ class rrserver : public Runnable
 	void run(void);
 
 	int _drawmethod;
-	rrcwin *_rrw[MAXWIN];
-	int _windows;
-	rrcwin *addwindow(int, Window, bool stereo=false);
-	void delwindow(rrcwin *w);
+	clientwin *_win[MAXWIN];
+	int _nwin;
+	clientwin *addwindow(int, Window, bool stereo=false);
+	void delwindow(clientwin *w);
 	rrcs _winmutex;
 	rrsocket *_sd;
 	Thread *_t;

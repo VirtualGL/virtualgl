@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrcwin.h"
+#include "clientwin.h"
 #include "rrerror.h"
 #include "rrprofiler.h"
 #include "rrglframe.h"
@@ -57,12 +57,12 @@ static int use_ogl_as_default(void)
 }
 #endif
 
-rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
+clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _cfi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	if(dpynum<0 || dpynum>65535 || !window)
-		throw(rrerror("rrcwin::rrcwin()", "Invalid argument"));
+		throw(rrerror("clientwin::clientwin()", "Invalid argument"));
 	_dpynum=dpynum;  _window=window;
 
 	#ifdef USEXV
@@ -77,7 +77,7 @@ rrcwin::rrcwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_t->start();
 }
 
-void rrcwin::setdrawmethod(void)
+void clientwin::setdrawmethod(void)
 {
 	if(_drawmethod==RR_DRAWAUTO)
 	{
@@ -88,7 +88,7 @@ void rrcwin::setdrawmethod(void)
 	}
 }
 
-rrcwin::~rrcwin(void)
+clientwin::~clientwin(void)
 {
 	_deadyet=true;
 	_q.release();
@@ -107,7 +107,7 @@ rrcwin::~rrcwin(void)
 	if(_t) {delete _t;  _t=NULL;}
 }
 
-void rrcwin::initgl(void)
+void clientwin::initgl(void)
 {
 	rrglframe *b=NULL;
 	char dpystr[80];
@@ -146,7 +146,7 @@ void rrcwin::initgl(void)
 	}
 }
 
-void rrcwin::initx11(void)
+void clientwin::initx11(void)
 {
 	rrfb *b=NULL;
 	char dpystr[80];
@@ -180,12 +180,12 @@ void rrcwin::initx11(void)
 	}
 }
 
-int rrcwin::match(int dpynum, Window window)
+int clientwin::match(int dpynum, Window window)
 {
 	return (_dpynum==dpynum && _window==window);
 }
 
-rrframe *rrcwin::getFrame(bool usexv)
+rrframe *clientwin::getFrame(bool usexv)
 {
 	rrframe *f=NULL;
 	if(_t) _t->checkerror();
@@ -212,7 +212,7 @@ rrframe *rrcwin::getFrame(bool usexv)
 	return f;
 }
 
-void rrcwin::drawFrame(rrframe *f)
+void clientwin::drawFrame(rrframe *f)
 {
 	if(_t) _t->checkerror();
 	if(!f->_isxv)
@@ -238,7 +238,7 @@ void rrcwin::drawFrame(rrframe *f)
 	_q.add(f);
 }
 
-void rrcwin::run(void)
+void clientwin::run(void)
 {
 	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
 	rrframe *f=NULL;  long bytes=0;
@@ -249,7 +249,7 @@ void rrcwin::run(void)
 	{
 		f=NULL;
 		_q.get((void **)&f);  if(_deadyet) break;
-		if(!f) throw(rrerror("rrcwin::run()", "Invalid image received from queue"));
+		if(!f) throw(rrerror("clientwin::run()", "Invalid image received from queue"));
 		rrcs::safelock l(_mutex);
 		#ifdef USEXV
 		if(f->_isxv)

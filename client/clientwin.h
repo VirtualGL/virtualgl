@@ -13,8 +13,8 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __RRCWIN_H
-#define __RRCWIN_H
+#ifndef __CLIENTWIN_H
+#define __CLIENTWIN_H
 
 #ifdef _WIN32
 #include <windows.h>
@@ -25,12 +25,12 @@
 
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
 
-class rrcwin : public Runnable
+class clientwin : public Runnable
 {
 	public:
 
-	rrcwin(int, Window, int, bool);
-	virtual ~rrcwin(void);
+	clientwin(int, Window, int, bool);
+	virtual ~clientwin(void);
 	rrframe *getFrame(bool);
 	void drawFrame(rrframe *);
 	int match(int, Window);

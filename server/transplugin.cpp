@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010 D. R. Commander
+/* Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -11,7 +11,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrplugin.h"
+#include "transplugin.h"
 #include "fakerconfig.h"
 #include <dlfcn.h>
 
@@ -31,7 +31,7 @@ static void *loadsym(void *dllhnd, const char *symbol)
 	return sym;
 }
 
-rrplugin::rrplugin(Display *dpy, Window win, char *name)
+transplugin::transplugin(Display *dpy, Window win, char *name)
 {
 	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
 	const char *err=NULL;
@@ -57,28 +57,28 @@ rrplugin::rrplugin(Display *dpy, Window win, char *name)
 	if(!(handle=_RRTransInit(dpy, win, &fconfig))) _throw(_RRTransGetError());
 }
 
-rrplugin::~rrplugin(void)
+transplugin::~transplugin(void)
 {
 	rrcs::safelock l(mutex);
 	destroy();
 	if(dllhnd) dlclose(dllhnd);
 }
 
-void rrplugin::connect(char *name, int port)
+void transplugin::connect(char *name, int port)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransConnect(handle, name, port);
 	if(ret<0) _throw(_RRTransGetError());
 }
 
-void rrplugin::destroy(void)
+void transplugin::destroy(void)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransDestroy(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
 
-int rrplugin::ready(void)
+int transplugin::ready(void)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransReady(handle);
@@ -86,14 +86,14 @@ int rrplugin::ready(void)
 	return ret;
 }
 
-void rrplugin::synchronize(void)
+void transplugin::synchronize(void)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransSynchronize(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
 
-RRFrame *rrplugin::getframe(int width, int height, int format, bool stereo)
+RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 {
 	rrcs::safelock l(mutex);
 	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
@@ -101,7 +101,7 @@ RRFrame *rrplugin::getframe(int width, int height, int format, bool stereo)
 	return ret;
 }
 
-void rrplugin::sendframe(RRFrame *frame, bool sync)
+void transplugin::sendframe(RRFrame *frame, bool sync)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransSendFrame(handle, frame, sync);

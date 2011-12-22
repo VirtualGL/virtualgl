@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,11 +13,11 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrxvtrans.h"
+#include "xvtrans.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
 
-rrxvtrans::rrxvtrans(void) : _t(NULL), _deadyet(false)
+xvtrans::xvtrans(void) : _t(NULL), _deadyet(false)
 {
 	for(int i=0; i<NB; i++) _bmp[i]=NULL;
 	errifnot(_t=new Thread(this));
@@ -27,7 +27,7 @@ rrxvtrans::rrxvtrans(void) : _t(NULL), _deadyet(false)
 	if(fconfig.verbose) fbxv_printwarnings(rrout.getfile());
 }
 
-void rrxvtrans::run(void)
+void xvtrans::run(void)
 {
 	rrtimer t, sleept;  double err=0.;  bool first=true;
 
@@ -79,7 +79,7 @@ void rrxvtrans::run(void)
 	}
 }
 
-rrxvframe *rrxvtrans::getbitmap(Display *dpy, Window win, int w, int h)
+rrxvframe *xvtrans::getbitmap(Display *dpy, Window win, int w, int h)
 {
 	rrxvframe *b=NULL;
 	if(_t) _t->checkerror();
@@ -101,23 +101,23 @@ rrxvframe *rrxvtrans::getbitmap(Display *dpy, Window win, int w, int h)
 	return b;
 }
 
-bool rrxvtrans::ready(void)
+bool xvtrans::ready(void)
 {
 	if(_t) _t->checkerror();
 	return(_q.items()<=0);
 }
 
-void rrxvtrans::synchronize(void)
+void xvtrans::synchronize(void)
 {
 	_ready.wait();
 }
 
-static void __rrxvtrans_spoilfct(void *b)
+static void __xvtrans_spoilfct(void *b)
 {
 	if(b) ((rrxvframe *)b)->complete();
 }
 
-void rrxvtrans::sendframe(rrxvframe *b, bool sync)
+void xvtrans::sendframe(rrxvframe *b, bool sync)
 {
 	if(_t) _t->checkerror();
 	if(sync) 
@@ -128,5 +128,5 @@ void rrxvtrans::sendframe(rrxvframe *b, bool sync)
 		_prof_xv.endframe(b->_h.width*b->_h.height, 0, 1);
 		_ready.signal();
 	}
-	else _q.spoil((void *)b, __rrxvtrans_spoilfct);
+	else _q.spoil((void *)b, __xvtrans_spoilfct);
 }

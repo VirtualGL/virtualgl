@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010 D. R. Commander
+/* Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,12 +24,12 @@ typedef int (*_RRTransSendFrameType)(void *, RRFrame *, int);
 typedef int (*_RRTransDestroyType)(void *);
 typedef const char* (*_RRTransGetErrorType)(void);
 
-class rrplugin
+class transplugin
 {
 	public:
 
-		rrplugin(Display *, Window, char *);
-		~rrplugin(void);
+		transplugin(Display *, Window, char *);
+		~transplugin(void);
 		void connect(char *, int);
 		void destroy(void);
 		int ready(void);

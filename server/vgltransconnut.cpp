@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrdisplayclient.h"
+#include "vgltransconn.h"
 #include "rrtimer.h"
 #include "bmp.h"
 #include "fakerconfig.h"
@@ -113,8 +113,8 @@ int main(int argc, char **argv)
 
 	printf("Tile size = %d x %d pixels\n", fconfig.tilesize, fconfig.tilesize);
 
-	rrdisplayclient rrdpy;
-	if(!localtest) rrdpy.connect(fconfig.client, fconfig.port);
+	vgltransconn vglconn;
+	if(!localtest) vglconn.connect(fconfig.client, fconfig.port);
 
 	int i;
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];
@@ -127,14 +127,14 @@ int main(int argc, char **argv)
 	int frames=0, fill=0;  t.start();
 	do
 	{
-		rrdpy.synchronize();
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
+		vglconn.synchronize();
+		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
-		rrdpy.sendframe(b);
+		vglconn.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -145,13 +145,13 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
+		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf2, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
-		rrdpy.sendframe(b);
+		vglconn.sendframe(b);
 		clientframes++;  frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -163,14 +163,14 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		rrdpy.synchronize();
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
+		vglconn.synchronize();
+		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		if(fill) memcpy(b->_bits, buf, w*h*d);
 		else memcpy(b->_bits, buf3, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;  b->_h.compress=fconfig.compress;
 		fill=1-fill;
-		rrdpy.sendframe(b);
+		vglconn.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -181,12 +181,12 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		rrdpy.synchronize();
-		errifnot(b=rrdpy.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
+		vglconn.synchronize();
+		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
 		memcpy(b->_bits, buf, w*h*d);
 		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
 		b->_h.winid=win;  b->_h.compress=fconfig.compress;
-		rrdpy.sendframe(b);
+		vglconn.sendframe(b);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 

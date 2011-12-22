@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <fcntl.h>
-#include "rrdisplayserver.h"
+#include "vgltransreceiver.h"
 #include "x11err.h"
 #include "xdk-sym.h"
 #include <X11/Xatom.h>
@@ -506,10 +506,10 @@ int main(int argc, char *argv[])
 
 void start(char *displayname)
 {
-	rrdisplayserver *rrdpy=NULL;
+	vgltransreceiver *vglrecv=NULL;
   Atom port_atom=None;  unsigned short actualport=0;
 	#ifdef USESSL
-	rrdisplayserver *rrssldpy=NULL;
+	vgltransreceiver *vglsslrecv=NULL;
   Atom sslport_atom=None;  unsigned short actualsslport=0;
 	#endif
 	bool newlistener=false;
@@ -543,7 +543,7 @@ void start(char *displayname)
 		if(!force) actualsslport=instancecheckssl(maindpy);
 		if(actualsslport==0)
 		{
-			if(!(rrssldpy=new rrdisplayserver(true, drawmethod)))
+			if(!(vglsslrecv=new vgltransreceiver(true, drawmethod)))
 				_throw("Could not initialize SSL listener");
 			if(sslport==0)
 			{
@@ -552,16 +552,16 @@ void start(char *displayname)
 				{
 					try
 					{
-						rrssldpy->listen(i);
+						vglsslrecv->listen(i);
 						success=true;
 					}
 					catch(...) {success=false;  if(i==0) throw;}
 					i++;  if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
 				} while(!success);
 			}
-			else rrssldpy->listen(sslport);
+			else vglsslrecv->listen(sslport);
 			rrout.println("Listening for SSL connections on port %d",
-				actualsslport=rrssldpy->port());
+				actualsslport=vglsslrecv->port());
 			if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
 				_throw("Could not get _VGLCLIENT_SSLPORT atom");
 			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
@@ -576,7 +576,7 @@ void start(char *displayname)
 		if(!force) actualport=instancecheck(maindpy);
 		if(actualport==0)
 		{
-			if(!(rrdpy=new rrdisplayserver(false, drawmethod)))
+			if(!(vglrecv=new vgltransreceiver(false, drawmethod)))
 				_throw("Could not initialize listener");
 			if(port==0)
 			{
@@ -585,7 +585,7 @@ void start(char *displayname)
 				{
 					try
 					{
-						rrdpy->listen(i);
+						vglrecv->listen(i);
 						success=true;
 					}
 					catch(...) {success=false;  if(i==0) throw;}
@@ -593,9 +593,9 @@ void start(char *displayname)
 					if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
 				} while(!success);
 			}
-			else rrdpy->listen(port);
+			else vglrecv->listen(port);
 			rrout.println("Listening for unencrypted connections on port %d",
-				actualport=rrdpy->port());
+				actualport=vglrecv->port());
 			if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
 				_throw("Could not get _VGLCLIENT_PORT atom");
 			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
@@ -638,9 +638,9 @@ void start(char *displayname)
 		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 
-	if(rrdpy) {delete rrdpy;  rrdpy=NULL;}
+	if(vglrecv) {delete vglrecv;  vglrecv=NULL;}
 	#ifdef USESSL
-	if(rrssldpy) {delete rrssldpy;  rrssldpy=NULL;}
+	if(vglsslrecv) {delete vglsslrecv;  vglsslrecv=NULL;}
 	if(maindpy && sslport_atom!=None)
 	{
 		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),

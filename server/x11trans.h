@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2010-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,21 +13,21 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __RRXVTRANS_H
-#define __RRXVTRANS_H
+#ifndef __X11TRANS_H
+#define __X11TRANS_H
 
 #include "rrthread.h"
 #include "rrframe.h"
 #include "genericQ.h"
 #include "rrprofiler.h"
 
-class rrxvtrans : public Runnable
+class x11trans : public Runnable
 {
 	public:
 
-	rrxvtrans(void);
+	x11trans(void);
 
-	virtual ~rrxvtrans(void)
+	virtual ~x11trans(void)
 	{
 		_deadyet=true;  _q.release();
 		if(_t) {_t->stop();  delete _t;  _t=NULL;}
@@ -36,18 +36,18 @@ class rrxvtrans : public Runnable
 
 	bool ready(void);
 	void synchronize(void);
-	void sendframe(rrxvframe *, bool sync=false);
+	void sendframe(rrfb *, bool sync=false);
 	void run(void);
-	rrxvframe *getbitmap(Display *, Window, int, int);
+	rrfb *getbitmap(Display *, Window, int, int);
 
 	private:
 
 	static const int NB=3;
-	rrcs _bmpmutex;  rrxvframe *_bmp[NB];
+	rrcs _bmpmutex;  rrfb *_bmp[NB];
 	rrevent _ready;
 	genericQ _q;
 	Thread *_t;  bool _deadyet;
-	rrprofiler _prof_xv, _prof_total;
+	rrprofiler _prof_blit, _prof_total;
 };
 
 #endif

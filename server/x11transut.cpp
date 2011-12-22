@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrblitter.h"
+#include "x11trans.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
 
@@ -44,7 +44,7 @@ void fillbmp(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 
 int main(int argc, char **argv)
 {
-	rrblitter blitter;  rrtimer t;  double elapsed;
+	x11trans x11t;  rrtimer t;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
 	bool dosync=false, bottomup=false;
@@ -79,13 +79,13 @@ int main(int argc, char **argv)
 	int fill=0, frames=0;  t.start();
 	do
 	{
-		blitter.synchronize();
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		x11t.synchronize();
+		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
-		blitter.sendframe(b, dosync);
+		x11t.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -96,12 +96,12 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
-		blitter.sendframe(b, dosync);
+		x11t.sendframe(b, dosync);
 		clientframes++;  frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -113,14 +113,14 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  t.start();
 	do
 	{
-		blitter.synchronize();
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		x11t.synchronize();
+		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		memset(b->_bits, 0, b->_pitch*HEIGHT);
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
 		fill=1-fill;
-		blitter.sendframe(b, dosync);
+		x11t.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
@@ -131,12 +131,12 @@ int main(int argc, char **argv)
 	frames=0;  t.start();
 	do
 	{
-		blitter.synchronize();
-		errifnot(b=blitter.getbitmap(dpy, win, WIDTH, HEIGHT));
+		x11t.synchronize();
+		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
 		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
 		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
 		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
-		blitter.sendframe(b, dosync);
+		x11t.sendframe(b, dosync);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 

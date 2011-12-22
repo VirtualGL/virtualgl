@@ -15,7 +15,7 @@
 
 #include "rrthread.h"
 #include "rrframe.h"
-#include "rrglframe.h"
+#include "../client/rrglframe.h"
 #include "rrtimer.h"
 #include "bmp.h"
 

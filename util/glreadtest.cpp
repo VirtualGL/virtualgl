@@ -23,7 +23,7 @@
 #include "rrerror.h"
 #include <errno.h>
 #define GL_GLEXT_PROTOTYPES
-#include "../rr/glx.h"
+#include "../common/glx.h"
 #ifdef MESAGLU
 #include <mesa/glu.h>
 #else

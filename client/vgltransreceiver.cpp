@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrdisplayserver.h"
+#include "vgltransreceiver.h"
 
 extern Display *maindpy;
 
@@ -65,7 +65,7 @@ static unsigned short DisplayNumber(Display *dpy)
 	h.flags=h1.flags;  \
 	h.dpynum=(unsigned short)h1.dpynum;}
 
-rrdisplayserver::rrdisplayserver(bool dossl, int drawmethod) :
+vgltransreceiver::vgltransreceiver(bool dossl, int drawmethod) :
 	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false),
 	_dossl(dossl)
 {
@@ -75,7 +75,7 @@ rrdisplayserver::rrdisplayserver(bool dossl, int drawmethod) :
 	errifnot(_t=new Thread(this));
 }
 
-rrdisplayserver::~rrdisplayserver(void)
+vgltransreceiver::~vgltransreceiver(void)
 {
 	_deadyet=true;
 	_listensdmutex.lock();
@@ -84,7 +84,7 @@ rrdisplayserver::~rrdisplayserver(void)
 	if(_t) {_t->stop();  _t=NULL;}
 }
 
-void rrdisplayserver::listen(unsigned short port)
+void vgltransreceiver::listen(unsigned short port)
 {
 	try
 	{
@@ -99,9 +99,9 @@ void rrdisplayserver::listen(unsigned short port)
 	_t->start();
 }
 
-void rrdisplayserver::run(void)
+void vgltransreceiver::run(void)
 {
-	rrsocket *sd=NULL;  rrserver *s=NULL;
+	rrsocket *sd=NULL;  vgltransserver *s=NULL;
 
 	while(!_deadyet)
 	{
@@ -110,7 +110,7 @@ void rrdisplayserver::run(void)
 			s=NULL;  sd=NULL;
 			sd=_listensd->accept();  if(_deadyet) break;
 			rrout.println("++ %sConnection from %s.", _dossl?"SSL ":"", sd->remotename());
-			s=new rrserver(sd, _drawmethod);
+			s=new vgltransserver(sd, _drawmethod);
 			continue;
 		}
 		catch(rrerror &e)
@@ -129,9 +129,9 @@ void rrdisplayserver::run(void)
 	_listensdmutex.unlock();
 }
 
-void rrserver::run(void)
+void vgltransserver::run(void)
 {
-	rrcwin *w=NULL;
+	clientwin *w=NULL;
 	rrframe *f=NULL;
 	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
@@ -223,40 +223,40 @@ void rrserver::run(void)
 	delete this;
 }
 
-void rrserver::delwindow(rrcwin *w)
+void vgltransserver::delwindow(clientwin *w)
 {
 	int i, j;
 	rrcs::safelock l(_winmutex);
-	if(_windows>0)
-		for(i=0; i<_windows; i++)
-			if(_rrw[i]==w)
+	if(_nwin>0)
+		for(i=0; i<_nwin; i++)
+			if(_win[i]==w)
 			{
-				delete w;  _rrw[i]=NULL;
-				if(i<_windows-1) for(j=i; j<_windows-1; j++) _rrw[j]=_rrw[j+1];
-				_rrw[_windows-1]=NULL;  _windows--;  break;
+				delete w;  _win[i]=NULL;
+				if(i<_nwin-1) for(j=i; j<_nwin-1; j++) _win[j]=_win[j+1];
+				_win[_nwin-1]=NULL;  _nwin--;  break;
 			}
 }
 
 // Register a new window with this server
-rrcwin *rrserver::addwindow(int dpynum, Window win, bool stereo)
+clientwin *vgltransserver::addwindow(int dpynum, Window win, bool stereo)
 {
 	rrcs::safelock l(_winmutex);
-	int winid=_windows;
-	if(_windows>0)
+	int winid=_nwin;
+	if(_nwin>0)
 	{
-		for(winid=0; winid<_windows; winid++)
-			if(_rrw[winid] && _rrw[winid]->match(dpynum, win)) return _rrw[winid];
+		for(winid=0; winid<_nwin; winid++)
+			if(_win[winid] && _win[winid]->match(dpynum, win)) return _win[winid];
 	}
-	if(_windows>=MAXWIN) _throw("No free window ID's");
+	if(_nwin>=MAXWIN) _throw("No free window ID's");
 	if(dpynum<0 || dpynum>65535 || win==None) _throw("Invalid argument");
-	_rrw[winid]=new rrcwin(dpynum, win, _drawmethod, stereo);
+	_win[winid]=new clientwin(dpynum, win, _drawmethod, stereo);
 
-	if(!_rrw[winid]) _throw("Could not create window instance");
-	_windows++;
-	return _rrw[winid];
+	if(!_win[winid]) _throw("Could not create window instance");
+	_nwin++;
+	return _win[winid];
 }
 
-void rrserver::send(char *buf, int len)
+void vgltransserver::send(char *buf, int len)
 {
 	try
 	{
@@ -270,7 +270,7 @@ void rrserver::send(char *buf, int len)
 	}
 }
 
-void rrserver::recv(char *buf, int len)
+void vgltransserver::recv(char *buf, int len)
 {
 	try
 	{
