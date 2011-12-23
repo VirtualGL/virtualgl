@@ -17,7 +17,17 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
+
 extern void *_vgl_dlopen(const char *, int);
+
+
+// If an application uses dlopen()/dlsym() to load functions from libGL, this
+// bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to intercept
+// dlopen() and return a handle to itself rather than a handle to libGL.
+//
+// NOTE: If the application tries to use dlopen() to obtain a handle to libdl,
+// we similarly replace the handle with a handle to libdlfaker.  This works
+// around an interaction issue between 180.xx of the nVidia drivers and WINE.
 
 void *dlopen(const char *filename, int flag)
 {
@@ -43,7 +53,8 @@ void *dlopen(const char *filename, int flag)
 		|| strstr(filename, "/libGL.")))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
+			fprintf(stderr,
+				"[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
 				filename? filename:"NULL", env? env:"NULL");
 		retval=_vgl_dlopen(env, flag);
 	}
