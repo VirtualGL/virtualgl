@@ -13,6 +13,8 @@
  * wxWindows Library License for more details.
  */
 
+// Interposed GLX functions
+
 #include "faker-sym.h"
 #include <limits.h>
 
@@ -177,9 +179,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
 
-	// If 'config' is an overlay FB config, hand off to the 2D X server without
-	// modification.
-
+	// If 'attrib_list' specifies properties for transparent overlay rendering,
+	// then hand off to the 2D X server.
 	if(attrib_list)
 	{
 		bool overlayreq=false;
@@ -213,8 +214,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy),
 			attrib_list, nelements);
 
-	// Modify the attributes to return a subset of FB configs appropriate for
-	// Pbuffer rendering.
+	// Modify the attributes so that only FB configs appropriate for Pbuffer
+	// rendering are considered.
 	else configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class, level,
 		stereo, trans, *nelements, true);
 
@@ -266,7 +267,6 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	// If 'attrib_list' specifies properties for transparent overlay rendering,
 	// then hand off to the 2D X server.
-
 	if(attrib_list)
 	{
 		bool overlayreq=false;
@@ -294,7 +294,6 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	// Use the specified set of GLX attributes to obtain a Pbuffer-compatible FB
 	// config on the 3D X server
-
 	GLXFBConfig *configs=NULL, c=0, cprev;  int n=0;
 	if(!dpy || !attrib_list) return NULL;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
@@ -316,7 +315,6 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	XFree(configs);
 
 	// Find an appropriate matching visual on the 2D X server.
-
 	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
 	if(!vid) return NULL;
 	v=__vglVisualFromVisualID(dpy, screen, vid);
@@ -330,7 +328,6 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	// Hash the FB config and the visual so that we can look up the FB config
 	// whenever the app subsequently passes the visual to glXCreateContext() or
 	// other functions.
-
 	vish.add(dpy, v, c);
 
 		stoptrace();  prargv(v);  prargc(c);  closetrace();
@@ -380,7 +377,6 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	if(!fconfig.allowindirect) direct=True;
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
-
 	if(vis)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -402,7 +398,6 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from _MatchConfig().
-
 	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
@@ -448,7 +443,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 
 	if(!fconfig.allowindirect) direct=True;
 
-	if(rcfgh.isoverlay(dpy, config)) // Overlay config
+	// Overlay config.  Hand off to 2D X server.
+	if(rcfgh.isoverlay(dpy, config))
 	{
 		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
@@ -459,6 +455,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 
 	if(attribs)
 	{
+		// Color index rendering is handled behind the scenes using the red
+		// channel of an RGB Pbuffer, so VirtualGL always uses RGBA contexts.
 		for(int i=0; attribs[i]!=None && i<=254; i+=2)
 		{
 			if(attribs[i]==GLX_RENDER_TYPE) ((int *)attribs)[i+1]=GLX_RGBA_TYPE;
@@ -504,7 +502,8 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 
 	if(!fconfig.allowindirect) direct=True;
 
-	if(rcfgh.isoverlay(dpy, config)) // Overlay config
+	 // Overlay config.  Hand off to 2D X server.
+	if(rcfgh.isoverlay(dpy, config))
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
 		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
@@ -598,6 +597,8 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vi);  prargx(pm);
 		starttrace();
 
+	// Not sure whether a transparent pixmap has any meaning, but in any case,
+	// we have to hand it off to the 2D X server.
 	if(vi)
 	{
 		int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vi->visualid,
@@ -622,6 +623,8 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	pbpm *pbp=new pbpm(dpy, pm, vi->visual);
 	if(pbp)
 	{
+		// Hash the pbpm instance to the Pixmap and also hash the 2D X display
+		// handle to the GLXPixmap (which is really a Pbuffer.)
 		pbp->init(w, h, c);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
@@ -698,6 +701,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		starttrace();
 
 	pbwin *pbw=NULL;
+	// Overlay config.  Hand off to 2D X server.
 	if(rcfgh.isoverlay(dpy, config))
 	{
 		GLXWindow glxw=_glXCreateWindow(dpy, config, win, attrib_list);
@@ -717,7 +721,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 }
 
 
-// Remove the context's entry in the context-to-FB config hash
+// When the context is destroyed, remove it from the context-to-FB config hash.
 
 void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
@@ -861,11 +865,8 @@ const char *glXGetClientString(Display *dpy, int name)
 }
 
 
-// If 'vis' (a 2D X server visual) was obtained from a previous call to
-// glXChooseVisual() or glXGetVisualFromFBConfig(), then this function returns
-// the specified attribute from the corresponding 3D X server FB config.
-// Otherwise, it has to obtain a default FB config from the 3D X server,
-// hash it to 'vis', and return the property from the default FB config.
+// For the specified 2D X server visual, return a property from the
+// corresponding 3D X server FB config.
 
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
@@ -885,6 +886,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return GLX_BAD_VALUE;
 	}
 
+	// If 'vis' is an overlay visual, hand off to the 2D X server.
 	int level=__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
 		GLX_LEVEL);
 	int trans=(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -899,6 +901,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return retval;
 	}
 
+	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
+	// the corresponding FB config in the hash.  Otherwise, we have to fall back
+	// to using a default FB config returned from _MatchConfig().
 	if(!(c=_MatchConfig(dpy, vis)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
 
@@ -907,12 +912,17 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(vis->c_class==TrueColor || vis->c_class==PseudoColor) *value=1;
 		else *value=0;
 	}
+	// Color index rendering really uses an RGB Pbuffer, so we have to fake out
+	// the application if it is asking about RGBA properties.
 	else if(vis->c_class==PseudoColor
 		&& (attrib==GLX_RED_SIZE || attrib==GLX_GREEN_SIZE
 			|| attrib==GLX_BLUE_SIZE || attrib==GLX_ALPHA_SIZE
 			|| attrib==GLX_ACCUM_RED_SIZE || attrib==GLX_ACCUM_GREEN_SIZE
 			|| attrib==GLX_ACCUM_BLUE_SIZE || attrib==GLX_ACCUM_ALPHA_SIZE))
 		*value=0;
+	// Transparent overlay visuals are actual 2D X server visuals, not dummy
+	// visuals mapped to 3D X server FB configs, so we obtain their properties
+	// from the 2D X server.
 	else if(attrib==GLX_LEVEL || attrib==GLX_TRANSPARENT_TYPE
 		|| attrib==GLX_TRANSPARENT_INDEX_VALUE
 		|| attrib==GLX_TRANSPARENT_RED_VALUE
@@ -1021,9 +1031,7 @@ GLXDrawable glXGetCurrentReadDrawableSGI(void)
 }
 
 
-// If the application is doing color index rendering, we have to fake it out
-// into thinking that 'config' is a color index config, even though it's really
-// RGBA behind the scenes.
+// Return a property from the specified FB config.
 
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	int *value)
@@ -1047,9 +1055,13 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		return GLX_BAD_VALUE;
 	}
 
+	// Obtain the corresponding 2D X server visual from the hash, or find an
+	// appropriate 2D X server visual for this FB config.
 	if(!(vid=_MatchVisual(dpy, config)))
 		throw rrerror("glXGetFBConfigAttrib", "Invalid FB config");
 
+	// Color index rendering really uses an RGB Pbuffer, so we have to fake out
+	// the application if it is asking about RGBA properties.
 	int c_class=__vglVisualClass(dpy, screen, vid);
 	if(c_class==PseudoColor
 		&& (attribute==GLX_RED_SIZE
@@ -1058,6 +1070,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 			|| attribute==GLX_ACCUM_RED_SIZE || attribute==GLX_ACCUM_GREEN_SIZE
 			|| attribute==GLX_ACCUM_BLUE_SIZE || attribute==GLX_ACCUM_ALPHA_SIZE))
 		*value=0;
+	// Transparent overlay FB configs are located on the 2D X server, not the 3D
+	// X server.
 	else if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
 		|| attribute==GLX_TRANSPARENT_INDEX_VALUE
 		|| attribute==GLX_TRANSPARENT_RED_VALUE
@@ -1309,8 +1323,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
 
-	// If 'config' is an overlay FB config, then hand off to the 2D X server
-	// without modification
+	// Overlay config.  Hand off to 2D X server.
 	if(rcfgh.isoverlay(dpy, config))
 	{
 		v=_glXGetVisualFromFBConfig(dpy, config);
@@ -1395,8 +1408,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		return retval;
 	}
 
-	// glXMakeCurrent() implies a glFlush(), which is why a front buffer readback
-	// can occur here.
+	// glXMakeCurrent() implies a glFinish() on the previous context, which is
+	// why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 		&& curdraw && winh.findpb(curdraw, pbw))
@@ -1438,9 +1451,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
 	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
+	// The pixels in a new Pbuffer are undefined, so we have to clear it.
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
+	// Needed to support color index rendering on Sun OpenGL
 	#ifdef SUNOGL
 	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
 	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
@@ -1479,6 +1494,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(ctx) config=ctxh.findconfig(ctx);
 	if(config==(GLXFBConfig)-1)
 	{
+		// Overlay config.  Hand off to 2D X server.
 		retval=_glXMakeContextCurrent(dpy, draw, read, ctx);
 		winh.setoverlay(dpy, draw);
 		winh.setoverlay(dpy, read);
@@ -1486,7 +1502,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		return retval;
 	}
 
-	// Equivalent of a glFlush()
+	// glXMakeContextCurrent() implies a glFinish() on the previous context,
+	// which is why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 	&& curdraw && winh.findpb(curdraw, pbw))
