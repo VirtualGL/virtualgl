@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include "vgltransreceiver.h"
+#include "rrutil.h"
 #include "x11err.h"
 #include "xdk-sym.h"
 #include <X11/Xatom.h>
@@ -42,6 +43,7 @@
 #endif
 #endif
 
+
 bool restart;
 bool deadyet;
 unsigned short port=0;
@@ -55,6 +57,7 @@ bool detach=false, force=false, child=false;
 char *logfile=NULL;
 
 void start(char *);
+
 
 #ifdef SUNOGL
 #include "dlfcn.h"
@@ -70,7 +73,9 @@ int _glXInitThreadsSUN(void)
 }
 #endif
 
+
 extern "C" {
+
 void handler(int type)
 {
 	restart=false;
@@ -314,6 +319,7 @@ void usage(char *progname)
 	fprintf(stderr, "-gl = Use OpenGL drawing (default for Sparc systems with 3D accelerators)\n");
 }
 
+
 #ifdef _WIN32
 
 void daemonize(void)
@@ -346,6 +352,7 @@ void daemonize(void)
 
 
 #ifdef USESSL
+
 unsigned short instancecheckssl(Display *dpy)
 {
 	Atom atom=None;  unsigned short p=0;
@@ -367,6 +374,7 @@ unsigned short instancecheckssl(Display *dpy)
 	}
 	return p;
 }
+
 #endif
 
 
@@ -412,15 +420,18 @@ void getenvironment(void)
 	{
 		logfile=env;
 		FILE *f=fopen(logfile, "a");
-		if(!f) {rrout.println("Could not open log file %s", logfile);  _throwunix();}
+		if(!f)
+		{
+			rrout.println("Could not open log file %s", logfile);  _throwunix();
+		}
 		else fclose(f);
 	}
-	if((env=getenv("VGLCLIENT_PORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
-		&& temp<65536)
+	if((env=getenv("VGLCLIENT_PORT"))!=NULL && strlen(env)>0
+		&& (temp=atoi(env))>0 && temp<65536)
 		port=(unsigned short)temp;
 	#ifdef USESSL
-	if((env=getenv("VGLCLIENT_SSLPORT"))!=NULL && strlen(env)>0 && (temp=atoi(env))>0
-		&& temp<65536)
+	if((env=getenv("VGLCLIENT_SSLPORT"))!=NULL && strlen(env)>0
+		&& (temp=atoi(env))>0 && temp<65536)
 		sslport=(unsigned short)temp;
 	#endif
 }
@@ -462,7 +473,10 @@ int main(int argc, char *argv[])
 			{
 				logfile=argv[++i];
 				FILE *f=fopen(logfile, "a");
-				if(!f) {rrout.println("Could not open log file %s", logfile);  _throwunix();}
+				if(!f)
+				{
+					rrout.println("Could not open log file %s", logfile);  _throwunix();
+				}
 				else fclose(f);
 			}
 		}
@@ -479,7 +493,8 @@ int main(int argc, char *argv[])
 
 	if(!child)
 	{
-		rrout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME, (int)sizeof(size_t)*8, __VERSION, __BUILD);
+		rrout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME,
+			(int)sizeof(size_t)*8, __VERSION, __BUILD);
 		if(printversion) return 0;
 		if(detach) daemonize();
 	}
@@ -501,7 +516,6 @@ int main(int argc, char *argv[])
 	#endif
 	return 0;
 }
-
 
 
 void start(char *displayname)
@@ -530,110 +544,112 @@ void start(char *displayname)
 
 	start:
 
-	try {
-
-	restart=false;
-
-	if((maindpy=XOpenDisplay(displayname))==NULL)
-		_throw("Could not open display");
-
-	#ifdef USESSL
-	if(ssl)
+	try
 	{
-		if(!force) actualsslport=instancecheckssl(maindpy);
-		if(actualsslport==0)
+		restart=false;
+
+		if((maindpy=XOpenDisplay(displayname))==NULL)
+			_throw("Could not open display");
+
+		#ifdef USESSL
+		if(ssl)
 		{
-			if(!(vglsslrecv=new vgltransreceiver(true, drawmethod)))
-				_throw("Could not initialize SSL listener");
-			if(sslport==0)
+			if(!force) actualsslport=instancecheckssl(maindpy);
+			if(actualsslport==0)
 			{
-				bool success=false;  unsigned short i=RR_DEFAULTSSLPORT;
-				do
+				if(!(vglsslrecv=new vgltransreceiver(true, drawmethod)))
+					_throw("Could not initialize SSL listener");
+				if(sslport==0)
 				{
-					try
+					bool success=false;  unsigned short i=RR_DEFAULTSSLPORT;
+					do
 					{
-						vglsslrecv->listen(i);
-						success=true;
-					}
-					catch(...) {success=false;  if(i==0) throw;}
-					i++;  if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
-				} while(!success);
+						try
+						{
+							vglsslrecv->listen(i);
+							success=true;
+						}
+						catch(...) {success=false;  if(i==0) throw;}
+						i++;  if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+					} while(!success);
+				}
+				else vglsslrecv->listen(sslport);
+				rrout.println("Listening for SSL connections on port %d",
+					actualsslport=vglsslrecv->port());
+				if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
+					False))==None)
+					_throw("Could not get _VGLCLIENT_SSLPORT atom");
+				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+					sslport_atom, XA_INTEGER, 16, PropModeReplace,
+					(unsigned char *)&actualsslport, 1);
+				newlistener=true;
 			}
-			else vglsslrecv->listen(sslport);
-			rrout.println("Listening for SSL connections on port %d",
-				actualsslport=vglsslrecv->port());
-			if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT", False))==None)
-				_throw("Could not get _VGLCLIENT_SSLPORT atom");
-			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-				sslport_atom, XA_INTEGER, 16, PropModeReplace,
-				(unsigned char *)&actualsslport, 1);
-			newlistener=true;
 		}
-	}
-	if(nonssl)
-	#endif
-	{
-		if(!force) actualport=instancecheck(maindpy);
-		if(actualport==0)
-		{
-			if(!(vglrecv=new vgltransreceiver(false, drawmethod)))
-				_throw("Could not initialize listener");
-			if(port==0)
-			{
-				bool success=false;  unsigned short i=RR_DEFAULTPORT;
-				do
-				{
-					try
-					{
-						vglrecv->listen(i);
-						success=true;
-					}
-					catch(...) {success=false;  if(i==0) throw;}
-					i++;  if(i==RR_DEFAULTSSLPORT) i++;
-					if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
-				} while(!success);
-			}
-			else vglrecv->listen(port);
-			rrout.println("Listening for unencrypted connections on port %d",
-				actualport=vglrecv->port());
-			if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
-				_throw("Could not get _VGLCLIENT_PORT atom");
-			XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-				port_atom, XA_INTEGER, 16, PropModeReplace,
-				(unsigned char *)&actualport, 1);
-			newlistener=true;
-		}
-	}
-
-	if(logfile && newlistener)
-	{
-		rrout.println("Redirecting output to %s", logfile);
-		rrout.logto(logfile);
-	}
-
-	if(child)
-	{
-		printf("%d\n", actualport);
-		#ifdef _WIN32
-		FreeConsole();
+		if(nonssl)
 		#endif
-		fclose(stdin);  fclose(stdout);  fclose(stderr);
-	}
+		{
+			if(!force) actualport=instancecheck(maindpy);
+			if(actualport==0)
+			{
+				if(!(vglrecv=new vgltransreceiver(false, drawmethod)))
+					_throw("Could not initialize listener");
+				if(port==0)
+				{
+					bool success=false;  unsigned short i=RR_DEFAULTPORT;
+					do
+					{
+						try
+						{
+							vglrecv->listen(i);
+							success=true;
+						}
+						catch(...) {success=false;  if(i==0) throw;}
+						i++;  if(i==RR_DEFAULTSSLPORT) i++;
+						if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+					} while(!success);
+				}
+				else vglrecv->listen(port);
+				rrout.println("Listening for unencrypted connections on port %d",
+					actualport=vglrecv->port());
+				if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
+					_throw("Could not get _VGLCLIENT_PORT atom");
+				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
+					port_atom, XA_INTEGER, 16, PropModeReplace,
+					(unsigned char *)&actualport, 1);
+				newlistener=true;
+			}
+		}
 
-	if(!newlistener)
-	{
-		if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
-		return;
-	}
+		if(logfile && newlistener)
+		{
+			rrout.println("Redirecting output to %s", logfile);
+			rrout.logto(logfile);
+		}
 
-	restart=true;
-	while(!deadyet)
-	{
-		if(XPending(maindpy)>0) {}
-		usleep(100000);
-	}
+		if(child)
+		{
+			printf("%d\n", actualport);
+			#ifdef _WIN32
+			FreeConsole();
+			#endif
+			fclose(stdin);  fclose(stdout);  fclose(stderr);
+		}
 
-	} catch(rrerror &e)
+		if(!newlistener)
+		{
+			if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
+			return;
+		}
+
+		restart=true;
+		while(!deadyet)
+		{
+			if(XPending(maindpy)>0) {}
+			usleep(100000);
+		}
+
+	}
+	catch(rrerror &e)
 	{
 		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}

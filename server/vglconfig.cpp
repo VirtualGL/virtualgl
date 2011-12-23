@@ -33,6 +33,7 @@
 #include "rrlog.h"
 #include "rrutil.h"
 
+
 Fl_Double_Window *win=NULL;
 Fl_Choice *compchoice=NULL, *sampchoice=NULL,
 	*stereochoice=NULL, *profchoice=NULL;
@@ -46,6 +47,8 @@ int ppid=-1;
 FakerConfig *_fconfig=NULL;
 #define fconfig (*_fconfig)
 
+
+// Set functions
 
 void SetComp(void)
 {
@@ -160,6 +163,8 @@ void SetFPS(void)
 }
 
 
+// Callbacks
+
 void CompCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
@@ -249,6 +254,8 @@ void FPSCB(Fl_Widget *w, void *data)
 	input->value(temps);
 }
 
+
+// Menus
 
 Fl_Menu_Item compmenu[]=
 {

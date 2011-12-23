@@ -14,12 +14,14 @@
  */
 
 #include "xvtrans.h"
+#include "rrutil.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
 
+
 xvtrans::xvtrans(void) : _t(NULL), _deadyet(false)
 {
-	for(int i=0; i<NB; i++) _bmp[i]=NULL;
+	for(int i=0; i<NFRAMES; i++) _frame[i]=NULL;
 	errifnot(_t=new Thread(this));
 	_t->start();
 	_prof_xv.setname("XV        ");
@@ -27,79 +29,83 @@ xvtrans::xvtrans(void) : _t(NULL), _deadyet(false)
 	if(fconfig.verbose) fbxv_printwarnings(rrout.getfile());
 }
 
+
 void xvtrans::run(void)
 {
 	rrtimer t, sleept;  double err=0.;  bool first=true;
 
-	try {
- 
-	while(!_deadyet)
+	try
 	{
-		rrxvframe *b=NULL;
-		_q.get((void **)&b);  if(_deadyet) return;
-		if(!b) _throw("Queue has been shut down");
-		_ready.signal();
-		_prof_xv.startframe();
-		b->redraw();
-		_prof_xv.endframe(b->_h.width*b->_h.height, 0, 1);
-
-		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
-		_prof_total.startframe();
-
-		if(fconfig.flushdelay>0.)
+		while(!_deadyet)
 		{
-			long usec=(long)(fconfig.flushdelay*1000000.);
-			if(usec>0) usleep(usec);
-		}
-		if(fconfig.fps>0.)
-		{
-			double elapsed=t.elapsed();
-			if(first) first=false;
-			else
+			rrxvframe *f=NULL;
+			_q.get((void **)&f);  if(_deadyet) return;
+			if(!f) _throw("Queue has been shut down");
+			_ready.signal();
+			_prof_xv.startframe();
+			f->redraw();
+			_prof_xv.endframe(f->_h.width*f->_h.height, 0, 1);
+
+			_prof_total.endframe(f->_h.width*f->_h.height, 0, 1);
+			_prof_total.startframe();
+
+			if(fconfig.flushdelay>0.)
 			{
-				if(elapsed<1./fconfig.fps)
-				{
-					sleept.start();
-					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
-					if(usec>0) usleep(usec);
-					double sleeptime=sleept.elapsed();
-					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
-				}
+				long usec=(long)(fconfig.flushdelay*1000000.);
+				if(usec>0) usleep(usec);
 			}
-			t.start();
+			if(fconfig.fps>0.)
+			{
+				double elapsed=t.elapsed();
+				if(first) first=false;
+				else
+				{
+					if(elapsed<1./fconfig.fps)
+					{
+						sleept.start();
+						long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+						if(usec>0) usleep(usec);
+						double sleeptime=sleept.elapsed();
+						err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+					}
+				}
+				t.start();
+			}
+
+			f->complete();
 		}
 
-		b->complete();
 	}
-
-	} catch(rrerror &e)
+	catch(rrerror &e)
 	{
 		if(_t) _t->seterror(e);
 		_ready.signal();  throw;
 	}
 }
 
-rrxvframe *xvtrans::getbitmap(Display *dpy, Window win, int w, int h)
+
+rrxvframe *xvtrans::getframe(Display *dpy, Window win, int w, int h)
 {
-	rrxvframe *b=NULL;
+	rrxvframe *f=NULL;
 	if(_t) _t->checkerror();
 	{
-	rrcs::safelock l(_bmpmutex);
-	int bmpi=-1;
-	for(int i=0; i<NB; i++)
-		if(!_bmp[i] || (_bmp[i] && _bmp[i]->iscomplete())) bmpi=i;
-	if(bmpi<0) _throw("No free buffers in pool");
-	if(!_bmp[bmpi]) errifnot(_bmp[bmpi]=new rrxvframe(dpy, win));
-	b=_bmp[bmpi];  b->waituntilcomplete();
+	rrcs::safelock l(_mutex);
+	int framei=-1;
+	for(int i=0; i<NFRAMES; i++)
+		if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
+	if(framei<0) _throw("No free buffers in pool");
+	if(!_frame[framei]) errifnot(_frame[framei]=new rrxvframe(dpy, win));
+	f=_frame[framei];  f->waituntilcomplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
-	b->init(hdr);
-	return b;
+	f->init(hdr);
+	return f;
 }
+
 
 bool xvtrans::ready(void)
 {
@@ -107,26 +113,29 @@ bool xvtrans::ready(void)
 	return(_q.items()<=0);
 }
 
+
 void xvtrans::synchronize(void)
 {
 	_ready.wait();
 }
 
-static void __xvtrans_spoilfct(void *b)
+
+static void __xvtrans_spoilfct(void *f)
 {
-	if(b) ((rrxvframe *)b)->complete();
+	if(f) ((rrxvframe *)f)->complete();
 }
 
-void xvtrans::sendframe(rrxvframe *b, bool sync)
+
+void xvtrans::sendframe(rrxvframe *f, bool sync)
 {
 	if(_t) _t->checkerror();
 	if(sync) 
 	{
 		_prof_xv.startframe();
-		b->redraw();
-		b->complete();
-		_prof_xv.endframe(b->_h.width*b->_h.height, 0, 1);
+		f->redraw();
+		f->complete();
+		_prof_xv.endframe(f->_h.width*f->_h.height, 0, 1);
 		_ready.signal();
 	}
-	else _q.spoil((void *)b, __xvtrans_spoilfct);
+	else _q.spoil((void *)f, __xvtrans_spoilfct);
 }

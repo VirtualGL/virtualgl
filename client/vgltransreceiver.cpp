@@ -14,8 +14,11 @@
  */
 
 #include "vgltransreceiver.h"
+#include "rrutil.h"
+
 
 extern Display *maindpy;
+
 
 static unsigned short DisplayNumber(Display *dpy)
 {
@@ -27,6 +30,7 @@ static unsigned short DisplayNumber(Display *dpy)
 	}
 	return (unsigned short)dpynum;
 }
+
 
 #define endianize(h) { \
 	if(!littleendian()) {  \
@@ -65,6 +69,7 @@ static unsigned short DisplayNumber(Display *dpy)
 	h.flags=h1.flags;  \
 	h.dpynum=(unsigned short)h1.dpynum;}
 
+
 vgltransreceiver::vgltransreceiver(bool dossl, int drawmethod) :
 	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false),
 	_dossl(dossl)
@@ -75,6 +80,7 @@ vgltransreceiver::vgltransreceiver(bool dossl, int drawmethod) :
 	errifnot(_t=new Thread(this));
 }
 
+
 vgltransreceiver::~vgltransreceiver(void)
 {
 	_deadyet=true;
@@ -83,6 +89,7 @@ vgltransreceiver::~vgltransreceiver(void)
 	_listensdmutex.unlock();
 	if(_t) {_t->stop();  _t=NULL;}
 }
+
 
 void vgltransreceiver::listen(unsigned short port)
 {
@@ -99,6 +106,7 @@ void vgltransreceiver::listen(unsigned short port)
 	_t->start();
 }
 
+
 void vgltransreceiver::run(void)
 {
 	rrsocket *sd=NULL;  vgltransserver *s=NULL;
@@ -109,7 +117,8 @@ void vgltransreceiver::run(void)
 		{
 			s=NULL;  sd=NULL;
 			sd=_listensd->accept();  if(_deadyet) break;
-			rrout.println("++ %sConnection from %s.", _dossl?"SSL ":"", sd->remotename());
+			rrout.println("++ %sConnection from %s.", _dossl?"SSL ":"",
+				sd->remotename());
 			s=new vgltransserver(sd, _drawmethod);
 			continue;
 		}
@@ -129,6 +138,7 @@ void vgltransreceiver::run(void)
 	_listensdmutex.unlock();
 }
 
+
 void vgltransserver::run(void)
 {
 	clientwin *w=NULL;
@@ -145,7 +155,8 @@ void vgltransserver::run(void)
 			{v.major=1;  v.minor=0;  haveheader=true;}
 		else
 		{
-			strncpy(v.id, "VGL", 3);  v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
+			strncpy(v.id, "VGL", 3);
+			v.major=RR_MAJOR_VERSION;  v.minor=RR_MINOR_VERSION;
 			send((char *)&v, sizeof_rrversion);
 			recv((char *)&v, sizeof_rrversion);
 			if(strncmp(v.id, "VGL", 3) || v.major<1)
@@ -184,7 +195,7 @@ void vgltransserver::run(void)
 
 				if(!stereo || h.flags==RR_LEFT || !f)
 				{
-					try {f=w->getFrame(h.compress==RRCOMP_YUV);}
+					try {f=w->getframe(h.compress==RRCOMP_YUV);}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
 				#ifdef USEXV
@@ -202,7 +213,7 @@ void vgltransserver::run(void)
 
 				if(!stereo || h.flags!=RR_LEFT)
 				{
-					try {w->drawFrame(f);}
+					try {w->drawframe(f);}
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
 
@@ -223,6 +234,7 @@ void vgltransserver::run(void)
 	delete this;
 }
 
+
 void vgltransserver::delwindow(clientwin *w)
 {
 	int i, j;
@@ -236,6 +248,7 @@ void vgltransserver::delwindow(clientwin *w)
 				_win[_nwin-1]=NULL;  _nwin--;  break;
 			}
 }
+
 
 // Register a new window with this server
 clientwin *vgltransserver::addwindow(int dpynum, Window win, bool stereo)
@@ -256,6 +269,7 @@ clientwin *vgltransserver::addwindow(int dpynum, Window win, bool stereo)
 	return _win[winid];
 }
 
+
 void vgltransserver::send(char *buf, int len)
 {
 	try
@@ -269,6 +283,7 @@ void vgltransserver::send(char *buf, int len)
 		throw;
 	}
 }
+
 
 void vgltransserver::recv(char *buf, int len)
 {

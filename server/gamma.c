@@ -14,7 +14,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
+
 #define DEFAULT_GAMMA 2.22
+
 
 static unsigned short nextitem(unsigned char **ptr, unsigned long *n)
 {
@@ -22,9 +24,10 @@ static unsigned short nextitem(unsigned char **ptr, unsigned long *n)
 	(*ptr)+=2;  (*n)--;  return value;
 }
 
+
 /*
    This emulates the XSolarisGetVisualGamma() function so that a non-Solaris
-   X client can select a corrected visual on a Solaris X server
+   X client can select a corrected visual on a Solaris X server.
 
    Information about the XDCCC_LINEAR_RGB_CORRECTION property was obtained
    from the Sun X Server Device Developer's Guide
@@ -32,7 +35,7 @@ static unsigned short nextitem(unsigned char **ptr, unsigned long *n)
    and from the X11 Inter-Client Communication Conventions Manual:
    http://tronche.com/gui/x/icccm/sec-7.html
 
-   Other hints were obtained from xcmsdb.c, part of the X.org source tree
+   Other hints were obtained from xcmsdb.c, part of the X.org source tree.
 */
 
 Status _XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,

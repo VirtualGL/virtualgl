@@ -15,8 +15,10 @@
 #include "fakerconfig.h"
 #include <dlfcn.h>
 
+
 #undef _throw
 #define _throw(m) throw(rrerror("transport plugin", m, -1))
+
 
 static void *loadsym(void *dllhnd, const char *symbol)
 {
@@ -30,6 +32,7 @@ static void *loadsym(void *dllhnd, const char *symbol)
 	}
 	return sym;
 }
+
 
 transplugin::transplugin(Display *dpy, Window win, char *name)
 {
@@ -57,12 +60,14 @@ transplugin::transplugin(Display *dpy, Window win, char *name)
 	if(!(handle=_RRTransInit(dpy, win, &fconfig))) _throw(_RRTransGetError());
 }
 
+
 transplugin::~transplugin(void)
 {
 	rrcs::safelock l(mutex);
 	destroy();
 	if(dllhnd) dlclose(dllhnd);
 }
+
 
 void transplugin::connect(char *name, int port)
 {
@@ -71,12 +76,14 @@ void transplugin::connect(char *name, int port)
 	if(ret<0) _throw(_RRTransGetError());
 }
 
+
 void transplugin::destroy(void)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransDestroy(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
+
 
 int transplugin::ready(void)
 {
@@ -86,12 +93,14 @@ int transplugin::ready(void)
 	return ret;
 }
 
+
 void transplugin::synchronize(void)
 {
 	rrcs::safelock l(mutex);
 	int ret=_RRTransSynchronize(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
+
 
 RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 {
@@ -100,6 +109,7 @@ RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
 }
+
 
 void transplugin::sendframe(RRFrame *frame, bool sync)
 {

@@ -17,12 +17,14 @@
 // drawable and then "pop the stack" after we're done with it.  It does nothing
 // unless there is already a valid context established
 
-#ifndef __TEMPCTX_H
-#define __TEMPCTX_H
+#ifndef __TEMPCTX_H__
+#define __TEMPCTX_H__
+
+#include "faker-sym.h"
+
 
 #define EXISTING_DRAWABLE (GLXDrawable)-1
 
-#include "faker-sym.h"
 
 class tempctx
 {
@@ -76,4 +78,5 @@ class tempctx
 		bool _ctxchanged;
 };
 
-#endif // __TEMPCTX_H
+
+#endif // __TEMPCTX_H__

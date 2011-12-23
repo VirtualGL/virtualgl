@@ -17,13 +17,16 @@
 #include "rrtransport.h"
 #include "vgltransconn.h"
 
+
 static rrerror err;
 char errstr[MAXSTR];
 
 static FakerConfig *_fconfig=NULL;
 static Window _win=0;
 
+
 FakerConfig *fconfig_instance(void) {return _fconfig;}
+
 
 /* This just wraps the vgltransconn class in order to demonstrate how to
    build a custom transport plugin for VGL and also to serve as a sanity
@@ -47,6 +50,7 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 	return handle;
 }
 
+
 int RRTransConnect(void *handle, char *receiver_name, int port)
 {
 	int ret=0;
@@ -63,6 +67,7 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 	return ret;
 }
 
+
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	int stereo)
 {
@@ -76,24 +81,25 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		int compress=_fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
 		else compress=RRCOMP_JPEG;
-		int flags=RRBMP_BOTTOMUP, pixelsize=3;
+		int flags=RRFRAME_BOTTOMUP, pixelsize=3;
 		if(compress!=RRCOMP_RGB)
 		{
 			switch(format)
 			{
 				case RRTRANS_BGR:
-					flags|=RRBMP_BGR;  break;
+					flags|=RRFRAME_BGR;  break;
 				case RRTRANS_RGBA:
 					pixelsize=4;  break;
 				case RRTRANS_BGRA:
-					flags|=RRBMP_BGR;  pixelsize=4;  break;
+					flags|=RRFRAME_BGR;  pixelsize=4;  break;
 				case RRTRANS_ABGR:
-					flags|=(RRBMP_BGR|RRBMP_ALPHAFIRST);  pixelsize=4;  break;
+					flags|=(RRFRAME_BGR|RRFRAME_ALPHAFIRST);  pixelsize=4;  break;
 				case RRTRANS_ARGB:
-					flags|=RRBMP_ALPHAFIRST;  pixelsize=4;  break;
+					flags|=RRFRAME_ALPHAFIRST;  pixelsize=4;  break;
 			}
 		}
-		rrframe *f=vglconn->getbitmap(width, height, pixelsize, flags, (bool)stereo);
+		rrframe *f=vglconn->getframe(width, height, pixelsize, flags,
+			(bool)stereo);
 		f->_h.compress=compress;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;
@@ -103,8 +109,8 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->rbits=f->_rbits;
 		for(int i=0; i<RRTRANS_FORMATOPT; i++)
 		{
-			if(rrtrans_bgr[i]==(f->_flags&RRBMP_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->_flags&RRBMP_ALPHAFIRST? 1:0)
+			if(rrtrans_bgr[i]==(f->_flags&RRFRAME_BGR? 1:0)
+				&& rrtrans_afirst[i]==(f->_flags&RRFRAME_ALPHAFIRST? 1:0)
 				&& rrtrans_ps[i]==f->_pixelsize)
 				{frame->format=i;  break;}
 		}
@@ -115,6 +121,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		err=e;  return NULL;
 	}
 }
+
 
 int RRTransReady(void *handle)
 {
@@ -132,6 +139,7 @@ int RRTransReady(void *handle)
 	return ret;
 }
 
+
 int RRTransSynchronize(void *handle)
 {
 	int ret=0;
@@ -147,6 +155,7 @@ int RRTransSynchronize(void *handle)
 	}
 	return ret;
 }
+
 
 int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 {
@@ -171,6 +180,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	return ret;
 }
 
+
 int RRTransDestroy(void *handle)
 {
 	int ret=0;
@@ -187,6 +197,7 @@ int RRTransDestroy(void *handle)
 	return ret;
 }
 
+
 const char *RRTransGetError(void)
 {
 	snprintf(errstr, MAXSTR-1, "Error in %s -- %s",
@@ -194,4 +205,5 @@ const char *RRTransGetError(void)
 	return errstr;
 }
 
-}
+
+} // extern "C"

@@ -17,12 +17,13 @@
 #ifdef XDK
 
 #define NOREDIRECT
-#include <GL/glx.h>
 #include "rrerror.h"
+#include <GL/glx.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable:4297)
 #endif
+
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
@@ -35,32 +36,46 @@
 #define funcdef0(rettype, f, ret) \
 	typedef rettype (*_##f##Type)(void); \
 	symdef(f); \
-	static inline rettype _##f(void) {checksym(f);  ret __##f();}
+	static inline rettype _##f(void) { \
+		checksym(f);  ret __##f(); \
+	}
 
 #define funcdef1(rettype, f, at1, a1, ret) \
 	typedef rettype (*_##f##Type)(at1); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1) {checksym(f);  ret __##f(a1);}
+	static inline rettype _##f(at1 a1) { \
+		checksym(f);  ret __##f(a1); \
+	}
 
 #define funcdef2(rettype, f, at1, a1, at2, a2, ret) \
 	typedef rettype (*_##f##Type)(at1, at2); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2) {checksym(f);  ret __##f(a1, a2);}
+	static inline rettype _##f(at1 a1, at2 a2) { \
+		checksym(f);  ret __##f(a1, a2); \
+	}
 
 #define funcdef3(rettype, f, at1, a1, at2, a2, at3, a3, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3) {checksym(f);  ret __##f(a1, a2, a3);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3) { \
+		checksym(f);  ret __##f(a1, a2, a3); \
+	}
 
 #define funcdef4(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4) {checksym(f);  ret __##f(a1, a2, a3, a4);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4); \
+	}
 
-#define funcdef5(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, ret) \
+#define funcdef5(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) {checksym(f);  ret __##f(a1, a2, a3, a4, a5);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5); \
+	}
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,6 +121,7 @@ funcdef2(void, glRasterPos2f, GLfloat, x, GLfloat, y,);
 void __vgl_loadsymbols(void);
 void __vgl_unloadsymbols(void);
 
+
 #endif // XDK
 
-#endif
+#endif // __XDK_SYM_H__

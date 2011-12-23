@@ -14,9 +14,11 @@
  */
 
 #include "vgltransconn.h"
+#include "rrutil.h"
 #include "rrtimer.h"
 #include "bmp.h"
 #include "fakerconfig.h"
+
 
 void usage(char **argv)
 {
@@ -43,6 +45,7 @@ void usage(char **argv)
 	printf("\n");
 	exit(1);
 }
+
 
 int main(int argc, char **argv)
 {
@@ -91,9 +94,12 @@ int main(int argc, char **argv)
 
 	int w, h, d=3;
 
-	if(loadbmp(argv[1], &buf, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
-	if(loadbmp(argv[1], &buf2, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
-	if(loadbmp(argv[1], &buf3, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1) _throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
+		_throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf2, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
+		_throw(bmpgeterr());
+	if(loadbmp(argv[1], &buf3, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
+		_throw(bmpgeterr());
 	printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
 
 	if(!localtest)
@@ -102,7 +108,8 @@ int main(int argc, char **argv)
 		if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 		if((win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			w, h, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-			BlackPixel(dpy, DefaultScreen(dpy))))==0) _throw("Could not create window");
+			BlackPixel(dpy, DefaultScreen(dpy))))==0)
+			_throw("Could not create window");
 		printf("Creating window %lu\n", (unsigned long)win);
 		errifnot(XMapRaised(dpy, win));
 		XSync(dpy, False);
@@ -120,7 +127,7 @@ int main(int argc, char **argv)
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];
 	for(i=0; i<w*h*d/2; i++) buf3[i]=255-buf3[i];
 
-	rrframe *b;
+	rrframe *f;
 
 	printf("\nTesting full-frame send ...\n");
 
@@ -128,35 +135,38 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
-		if(fill) memcpy(b->_bits, buf, w*h*d);
-		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
+		if(fill) memcpy(f->_bits, buf, w*h*d);
+		else memcpy(f->_bits, buf2, w*h*d);
+		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
+		f->_h.winid=win;  f->_h.compress=fconfig.compress;
 		fill=1-fill;
-		vglconn.sendframe(b);
+		vglconn.sendframe(f);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)w*(double)h*(double)frames/1000000./elapsed);
+	printf("%f Megapixels/sec\n",
+		(double)w*(double)h*(double)frames/1000000./elapsed);
 
 	printf("\nTesting full-frame send (spoiling) ...\n");
 
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
-		if(fill) memcpy(b->_bits, buf, w*h*d);
-		else memcpy(b->_bits, buf2, w*h*d);
-		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
+		if(fill) memcpy(f->_bits, buf, w*h*d);
+		else memcpy(f->_bits, buf2, w*h*d);
+		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
+		f->_h.winid=win;  f->_h.compress=fconfig.compress;
 		fill=1-fill;
-		vglconn.sendframe(b);
+		vglconn.sendframe(f);
 		clientframes++;  frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec (server)\n", (double)w*(double)h*(double)frames/1000000./elapsed);
-	printf("%f Megapixels/sec (client)\n", (double)w*(double)h*(double)clientframes/1000000./elapsed);
+	printf("%f Megapixels/sec (server)\n",
+		(double)w*(double)h*(double)frames/1000000./elapsed);
+	printf("%f Megapixels/sec (client)\n",
+		(double)w*(double)h*(double)clientframes/1000000./elapsed);
 
 	printf("\nTesting half-frame send ...\n");
 
@@ -164,17 +174,18 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
-		if(fill) memcpy(b->_bits, buf, w*h*d);
-		else memcpy(b->_bits, buf3, w*h*d);
-		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
+		if(fill) memcpy(f->_bits, buf, w*h*d);
+		else memcpy(f->_bits, buf3, w*h*d);
+		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
+		f->_h.winid=win;  f->_h.compress=fconfig.compress;
 		fill=1-fill;
-		vglconn.sendframe(b);
+		vglconn.sendframe(f);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)w*(double)h*(double)frames/1000000./elapsed);
+	printf("%f Megapixels/sec\n",
+		(double)w*(double)h*(double)frames/1000000./elapsed);
 
 	printf("\nTesting zero-frame send ...\n");
 
@@ -182,15 +193,16 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(b=vglconn.getbitmap(w, h, d, bgr?RRBMP_BGR:0, false));
-		memcpy(b->_bits, buf, w*h*d);
-		b->_h.qual=fconfig.qual;  b->_h.subsamp=fconfig.subsamp;
-		b->_h.winid=win;  b->_h.compress=fconfig.compress;
-		vglconn.sendframe(b);
+		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
+		memcpy(f->_bits, buf, w*h*d);
+		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
+		f->_h.winid=win;  f->_h.compress=fconfig.compress;
+		vglconn.sendframe(f);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);
 
-	printf("%f Megapixels/sec\n", (double)w*(double)h*(double)frames/1000000./elapsed);
+	printf("%f Megapixels/sec\n",
+		(double)w*(double)h*(double)frames/1000000./elapsed);
 
 	} catch(rrerror &e) {printf("%s--\n%s\n", e.getMethod(), e.getMessage());}
 

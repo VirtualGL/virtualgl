@@ -1,14 +1,16 @@
 #
-# Unit tests
+# Libraries
 #
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-if(WIN32)
-	add_executable(rrframeut rrframeut.cpp rrframe.cpp ../client/rrglframe.cpp
-		../client/xdk-sym.cpp)
-else()
-	add_executable(rrframeut rrframeut.cpp)
-endif()
-target_link_libraries(rrframeut rrutil ${FBXLIB} ${TJPEG_LIBRARY}
-	${OPENGL_gl_LIBRARY})
+add_library(rrframe STATIC rrframe.cpp)
+target_link_libraries(rrframe rrutil ${TJPEG_LIBRARY})
+
+
+#
+# Unit tests
+#
+
+add_executable(rrframeut rrframeut.cpp)
+target_link_libraries(rrframeut rrframe ${FBXLIB} rrglframe)

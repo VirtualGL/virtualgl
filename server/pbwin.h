@@ -23,6 +23,7 @@
 #endif
 #include "transplugin.h"
 
+
 class pbwin : public pbdrawable
 {
 	public:
@@ -75,4 +76,5 @@ class pbwin : public pbdrawable
 		bool _newconfig;
 };
 
-#endif
+
+#endif // __PBWIN_H__

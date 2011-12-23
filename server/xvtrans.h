@@ -13,41 +13,46 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __XVTRANS_H
-#define __XVTRANS_H
+#ifndef __XVTRANS_H__
+#define __XVTRANS_H__
 
 #include "rrthread.h"
 #include "rrframe.h"
 #include "genericQ.h"
 #include "rrprofiler.h"
 
+
 class xvtrans : public Runnable
 {
 	public:
 
-	xvtrans(void);
+		xvtrans(void);
 
-	virtual ~xvtrans(void)
-	{
-		_deadyet=true;  _q.release();
-		if(_t) {_t->stop();  delete _t;  _t=NULL;}
-		for(int i=0; i<NB; i++) {if(_bmp[i]) delete _bmp[i];  _bmp[i]=NULL;}
-	}
+		virtual ~xvtrans(void)
+		{
+			_deadyet=true;  _q.release();
+			if(_t) {_t->stop();  delete _t;  _t=NULL;}
+			for(int i=0; i<NFRAMES; i++)
+			{
+				if(_frame[i]) delete _frame[i];  _frame[i]=NULL;
+			}
+		}
 
-	bool ready(void);
-	void synchronize(void);
-	void sendframe(rrxvframe *, bool sync=false);
-	void run(void);
-	rrxvframe *getbitmap(Display *, Window, int, int);
+		bool ready(void);
+		void synchronize(void);
+		void sendframe(rrxvframe *, bool sync=false);
+		void run(void);
+		rrxvframe *getframe(Display *, Window, int, int);
 
 	private:
 
-	static const int NB=3;
-	rrcs _bmpmutex;  rrxvframe *_bmp[NB];
-	rrevent _ready;
-	genericQ _q;
-	Thread *_t;  bool _deadyet;
-	rrprofiler _prof_xv, _prof_total;
+		static const int NFRAMES=3;
+		rrcs _mutex;  rrxvframe *_frame[NFRAMES];
+		rrevent _ready;
+		genericQ _q;
+		Thread *_t;  bool _deadyet;
+		rrprofiler _prof_xv, _prof_total;
 };
 
-#endif
+
+#endif // __XVTRANS_H__

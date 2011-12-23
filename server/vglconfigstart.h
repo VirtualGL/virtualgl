@@ -17,6 +17,7 @@
 #include "rrthread.h"
 #include "rrlog.h"
 
+
 class vglconfigstart : public Runnable
 {
 	public:

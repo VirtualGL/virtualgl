@@ -11,14 +11,15 @@ endif()
 include_directories(../common)
 
 if(WIN32)
-	add_executable(vglclient vglclient.cpp clientwin.cpp vgltransreceiver.cpp
-		../common/rrframe.cpp rrglframe.cpp xdk-sym.cpp)
-	target_link_libraries(vglclient psapi)
+	add_library(rrglframe STATIC rrglframe.cpp xdk-sym.cpp)
+	target_link_libraries(rrglframe psapi)
 else()
-	add_executable(vglclient vglclient.cpp clientwin.cpp vgltransreceiver.cpp)
-	target_link_libraries(vglclient ${OPENGL_gl_LIBRARY})
+	add_library(rrglframe STATIC rrglframe.cpp)
+	target_link_libraries(rrglframe ${OPENGL_gl_LIBRARY})
 endif()
-target_link_libraries(vglclient rrutil ${FBXLIB} rrsocket ${TJPEG_LIBRARY})
+
+add_executable(vglclient vglclient.cpp clientwin.cpp vgltransreceiver.cpp)
+target_link_libraries(vglclient rrframe ${FBXLIB} rrglframe rrsocket)
 install(TARGETS vglclient DESTINATION ${VGL_BINDIR})
 
 if(WIN32)

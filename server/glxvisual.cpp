@@ -13,17 +13,17 @@
  * wxWindows Library License for more details.
  */
 
-#include "glxvisual.h"
-#include <stdio.h>
-#include <stdlib.h>
-
 // This class attempts to manage visual properties across Windows and Pbuffers
 // and across GLX 1.0 and 1.3 in a sane manner
 
+#include "glxvisual.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "rrerror.h"
 #include "fakerconfig.h"
 #include "rrmutex.h"
 #include "faker-sym.h"
+
 
 extern Display *_localdpy;
 
@@ -42,7 +42,9 @@ bool _vahasgcv=false;
 static rrcs _vamutex;
 static struct _visattrib *_va;
 
+
 #include "gamma.c"
+
 
 static void buildVisAttribTable(Display *dpy, int screen)
 {
@@ -144,6 +146,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		throw;
 	}
 }
+
 
 GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	int &depth, int &c_class, int &level, int &stereo, int &trans,
@@ -268,10 +271,13 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	}
 	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=GLX_TRUE_COLOR;
 	glxattribs[j]=None;
-	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs, &nelements);
+	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs,
+		&nelements);
 }
 
-int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid, int attribute)
+
+int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid,
+	int attribute)
 {
 	buildVisAttribTable(dpy, screen);
 	for(int i=0; i<_vaentries; i++)
@@ -306,12 +312,14 @@ int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid, int attribut
 	return 0;
 }
 
+
 int __vglServerVisualAttrib(GLXFBConfig c, int attribute)
 {
 	int value=0;
 	_glXGetFBConfigAttrib(_localdpy, c, attribute, &value);
 	return value;
 }
+
 
 int __vglVisualDepth(Display *dpy, int screen, VisualID vid)
 {
@@ -323,6 +331,7 @@ int __vglVisualDepth(Display *dpy, int screen, VisualID vid)
 	return 24;
 }
 
+
 int __vglVisualClass(Display *dpy, int screen, VisualID vid)
 {
 	buildVisAttribTable(dpy, screen);
@@ -332,6 +341,7 @@ int __vglVisualClass(Display *dpy, int screen, VisualID vid)
 	}		
 	return TrueColor;
 }
+
 
 double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
 {
@@ -343,11 +353,13 @@ double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
 	return 2.22;
 }
 
+
 bool __vglHasGCVisuals(Display *dpy, int screen)
 {
 	buildVisAttribTable(dpy, screen);
 	return _vahasgcv;
 }
+
 
 VisualID __vglMatchVisual(Display *dpy, int screen,
 	int depth, int c_class, int level, int stereo, int trans)
@@ -389,6 +401,7 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 	return 0;
 }
 
+
 XVisualInfo *__vglVisualFromVisualID(Display *dpy, int screen, VisualID vid)
 {
 	XVisualInfo vtemp;  int n=0;
@@ -396,6 +409,7 @@ XVisualInfo *__vglVisualFromVisualID(Display *dpy, int screen, VisualID vid)
 	vtemp.screen=screen;
 	return XGetVisualInfo(dpy, VisualIDMask|VisualScreenMask, &vtemp, &n);
 }
+
 
 int __vglConfigDepth(GLXFBConfig c)
 {
@@ -416,6 +430,7 @@ int __vglConfigDepth(GLXFBConfig c)
 	}
 	return depth;
 }
+
 
 int __vglConfigClass(GLXFBConfig c)
 {

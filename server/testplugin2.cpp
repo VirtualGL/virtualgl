@@ -17,6 +17,7 @@
 #include "rrtransport.h"
 #include "x11trans.h"
 
+
 static rrerror err;
 char errstr[MAXSTR];
 
@@ -24,7 +25,9 @@ static FakerConfig *_fconfig=NULL;
 static Display *_dpy=NULL;
 static Window _win=0;
 
+
 FakerConfig *fconfig_instance(void) {return _fconfig;}
+
 
 /* This just wraps the x11trans class in order to demonstrate how to
    build a custom transport plugin for VGL and also to serve as a sanity
@@ -49,10 +52,12 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 	return handle;
 }
 
+
 int RRTransConnect(void *handle, char *receiver_name, int port)
 {
 	return 0;
 }
+
 
 RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	int stereo)
@@ -64,8 +69,8 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		RRFrame *frame=new RRFrame;
 		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
-		rrfb *f=x11t->getbitmap(_dpy, _win, width, height);
-		f->_flags|=RRBMP_BOTTOMUP;
+		rrfb *f=x11t->getframe(_dpy, _win, width, height);
+		f->_flags|=RRFRAME_BOTTOMUP;
 		frame->opaque=(void *)f;
 		frame->w=f->_h.framew;
 		frame->h=f->_h.frameh;
@@ -73,8 +78,8 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->bits=f->_bits;
 		for(int i=0; i<RRTRANS_FORMATOPT; i++)
 		{
-			if(rrtrans_bgr[i]==(f->_flags&RRBMP_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->_flags&RRBMP_ALPHAFIRST? 1:0)
+			if(rrtrans_bgr[i]==(f->_flags&RRFRAME_BGR? 1:0)
+				&& rrtrans_afirst[i]==(f->_flags&RRFRAME_ALPHAFIRST? 1:0)
 				&& rrtrans_ps[i]==f->_pixelsize)
 				{frame->format=i;  break;}
 		}
@@ -85,6 +90,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		err=e;  return NULL;
 	}
 }
+
 
 int RRTransReady(void *handle)
 {
@@ -102,6 +108,7 @@ int RRTransReady(void *handle)
 	return ret;
 }
 
+
 int RRTransSynchronize(void *handle)
 {
 	int ret=0;
@@ -117,6 +124,7 @@ int RRTransSynchronize(void *handle)
 	}
 	return ret;
 }
+
 
 int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 {
@@ -138,6 +146,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	return ret;
 }
 
+
 int RRTransDestroy(void *handle)
 {
 	int ret=0;
@@ -154,6 +163,7 @@ int RRTransDestroy(void *handle)
 	return ret;
 }
 
+
 const char *RRTransGetError(void)
 {
 	snprintf(errstr, MAXSTR-1, "Error in %s -- %s",
@@ -161,4 +171,5 @@ const char *RRTransGetError(void)
 	return errstr;
 }
 
-}
+
+} // extern "C"

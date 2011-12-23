@@ -18,7 +18,9 @@
 #include "rrprofiler.h"
 #include "rrglframe.h"
 
+
 extern Display *maindpy;
+
 
 #ifdef SUNOGL
 static int use_ogl_as_default(void)
@@ -27,7 +29,8 @@ static int use_ogl_as_default(void)
 	if(maindpy)
 	{
 		int maj_opcode=-1, first_event=-1, first_error=-1;
-		if(XQueryExtension(maindpy, "GLX", &maj_opcode, &first_event, &first_error))
+		if(XQueryExtension(maindpy, "GLX", &maj_opcode, &first_event,
+			&first_error))
 		{
 			int attribs[]={GLX_RGBA, GLX_DOUBLEBUFFER, 0};
 			int sbattribs[]={GLX_RGBA, 0};
@@ -57,8 +60,9 @@ static int use_ogl_as_default(void)
 }
 #endif
 
+
 clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
-	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _b(NULL), _cfi(0),
+	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _fb(NULL), _cfi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	if(dpynum<0 || dpynum>65535 || !window)
@@ -66,7 +70,7 @@ clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_dpynum=dpynum;  _window=window;
 
 	#ifdef USEXV
-	for(int i=0; i<NB; i++) _xvf[i]=NULL;
+	for(int i=0; i<NFRAMES; i++) _xvf[i]=NULL;
 	#endif
 	setdrawmethod();
 	if(_stereo) _drawmethod=RR_DRAWOGL;
@@ -76,6 +80,7 @@ clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	errifnot(_t=new Thread(this));
 	_t->start();
 }
+
 
 void clientwin::setdrawmethod(void)
 {
@@ -88,14 +93,15 @@ void clientwin::setdrawmethod(void)
 	}
 }
 
+
 clientwin::~clientwin(void)
 {
 	_deadyet=true;
 	_q.release();
 	if(_t) _t->stop();
-	if(_b) delete _b;
+	if(_fb) delete _fb;
 	#ifdef USEXV
-	for(int i=0; i<NB; i++)
+	for(int i=0; i<NFRAMES; i++)
 	{
 		if(_xvf[i])
 		{
@@ -103,13 +109,14 @@ clientwin::~clientwin(void)
 		}
 	}
 	#endif
-	for(int i=0; i<NB; i++) _cf[i].complete();
+	for(int i=0; i<NFRAMES; i++) _cf[i].complete();
 	if(_t) {delete _t;  _t=NULL;}
 }
 
+
 void clientwin::initgl(void)
 {
-	rrglframe *b=NULL;
+	rrglframe *fb=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
@@ -121,34 +128,35 @@ void clientwin::initgl(void)
 	{
 		try
 		{
-			b=new rrglframe(dpystr, _window);
-			if(!b) _throw("Could not allocate class instance");
+			fb=new rrglframe(dpystr, _window);
+			if(!fb) _throw("Could not allocate class instance");
 		}
 		catch(rrerror &e)
 		{
 			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
 				e.getMessage());
-			if(b) {delete b;  b=NULL;}
+			if(fb) {delete fb;  fb=NULL;}
 			_drawmethod=RR_DRAWX11;
 			rrout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
 			_stereo=false;
 			return;
 		}
 	}
-	if(b)
+	if(fb)
 	{
-		if(_b)
+		if(_fb)
 		{
-			if(_b->_isgl) delete ((rrglframe *)_b);
-			else delete ((rrfb *)_b);
+			if(_fb->_isgl) delete ((rrglframe *)_fb);
+			else delete ((rrfb *)_fb);
 		}
-		_b=(rrframe *)b;
+		_fb=(rrframe *)fb;
 	}
 }
 
+
 void clientwin::initx11(void)
 {
-	rrfb *b=NULL;
+	rrfb *fb=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "localhost:%d.0", _dpynum);
@@ -160,32 +168,34 @@ void clientwin::initx11(void)
 	{
 		try
 		{
-			b=new rrfb(dpystr, _window);
-			if(!b) _throw("Could not allocate class instance");
+			fb=new rrfb(dpystr, _window);
+			if(!fb) _throw("Could not allocate class instance");
 		}
 		catch(...)
 		{
-			if(b) {delete b;  b=NULL;}
+			if(fb) {delete fb;  fb=NULL;}
 			throw;
 		}
 	}
-	if(b)
+	if(fb)
 	{
-		if(_b)
+		if(_fb)
 		{
-			if(_b->_isgl) {delete ((rrglframe *)_b);}
-			else delete ((rrfb *)_b);
+			if(_fb->_isgl) {delete ((rrglframe *)_fb);}
+			else delete ((rrfb *)_fb);
 		}
-		_b=(rrframe *)b;
+		_fb=(rrframe *)fb;
 	}
 }
+
 
 int clientwin::match(int dpynum, Window window)
 {
 	return (_dpynum==dpynum && _window==window);
 }
 
-rrframe *clientwin::getFrame(bool usexv)
+
+rrframe *clientwin::getframe(bool usexv)
 {
 	rrframe *f=NULL;
 	if(_t) _t->checkerror();
@@ -205,14 +215,15 @@ rrframe *clientwin::getFrame(bool usexv)
 	else
 	#endif
 	f=(rrframe *)&_cf[_cfi];
-	_cfi=(_cfi+1)%NB;
+	_cfi=(_cfi+1)%NFRAMES;
 	_cfmutex.unlock();
 	f->waituntilcomplete();
 	if(_t) _t->checkerror();
 	return f;
 }
 
-void clientwin::drawFrame(rrframe *f)
+
+void clientwin::drawframe(rrframe *f)
 {
 	if(_t) _t->checkerror();
 	if(!f->_isxv)
@@ -238,61 +249,65 @@ void clientwin::drawFrame(rrframe *f)
 	_q.add(f);
 }
 
+
 void clientwin::run(void)
 {
 	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
 	rrframe *f=NULL;  long bytes=0;
 
-	try {
-
-	while(!_deadyet)
+	try
 	{
-		f=NULL;
-		_q.get((void **)&f);  if(_deadyet) break;
-		if(!f) throw(rrerror("clientwin::run()", "Invalid image received from queue"));
-		rrcs::safelock l(_mutex);
-		#ifdef USEXV
-		if(f->_isxv)
+		while(!_deadyet)
 		{
-			if(f->_h.flags!=RR_EOF)
+			f=NULL;
+			_q.get((void **)&f);  if(_deadyet) break;
+			if(!f) throw(rrerror("clientwin::run()",
+				"Invalid image received from queue"));
+			rrcs::safelock l(_mutex);
+			#ifdef USEXV
+			if(f->_isxv)
 			{
-				pb.startframe();
-				((rrxvframe *)f)->redraw();
-				pb.endframe(f->_h.width*f->_h.height, 0, 1);
-				pt.endframe(f->_h.width*f->_h.height, bytes, 1);
-				bytes=0;
-				pt.startframe();
-			}
-		}
-		else
-		#endif
-		{
-			if(f->_h.flags==RR_EOF)
-			{
-				pb.startframe();
-				if(_b->_isgl) ((rrglframe *)_b)->init(f->_h, _stereo);
-				else ((rrfb *)_b)->init(f->_h);
-				if(_b->_isgl) ((rrglframe *)_b)->redraw();
-				else ((rrfb *)_b)->redraw();
-				pb.endframe(_b->_h.framew*_b->_h.frameh, 0, 1);
-				pt.endframe(_b->_h.framew*_b->_h.frameh, bytes, 1);
-				bytes=0;
-				pt.startframe();
+				if(f->_h.flags!=RR_EOF)
+				{
+					pb.startframe();
+					((rrxvframe *)f)->redraw();
+					pb.endframe(f->_h.width*f->_h.height, 0, 1);
+					pt.endframe(f->_h.width*f->_h.height, bytes, 1);
+					bytes=0;
+					pt.startframe();
+				}
 			}
 			else
+			#endif
 			{
-				pd.startframe();
-				if(_b->_isgl) *((rrglframe *)_b)=*((rrcompframe *)f);
-				else *((rrfb *)_b)=*((rrcompframe *)f);
-				pd.endframe(f->_h.width*f->_h.height, 0, (double)(f->_h.width*f->_h.height)/
-					(double)(f->_h.framew*f->_h.frameh));
-				bytes+=f->_h.size;
+				if(f->_h.flags==RR_EOF)
+				{
+					pb.startframe();
+					if(_fb->_isgl) ((rrglframe *)_fb)->init(f->_h, _stereo);
+					else ((rrfb *)_fb)->init(f->_h);
+					if(_fb->_isgl) ((rrglframe *)_fb)->redraw();
+					else ((rrfb *)_fb)->redraw();
+					pb.endframe(_fb->_h.framew*_fb->_h.frameh, 0, 1);
+					pt.endframe(_fb->_h.framew*_fb->_h.frameh, bytes, 1);
+					bytes=0;
+					pt.startframe();
+				}
+				else
+				{
+					pd.startframe();
+					if(_fb->_isgl) *((rrglframe *)_fb)=*((rrcompframe *)f);
+					else *((rrfb *)_fb)=*((rrcompframe *)f);
+					pd.endframe(f->_h.width*f->_h.height, 0,
+						(double)(f->_h.width*f->_h.height)/
+							(double)(f->_h.framew*f->_h.frameh));
+					bytes+=f->_h.size;
+				}
 			}
+			f->complete();
 		}
-		f->complete();
-	}
 
-	} catch(rrerror &e)
+	}
+	catch(rrerror &e)
 	{
 		if(_t) _t->seterror(e);  if(f) f->complete();
 		throw;

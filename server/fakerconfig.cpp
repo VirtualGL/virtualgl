@@ -31,6 +31,7 @@
 #include <X11/extensions/Xvlib.h>
 #endif
 
+
 #define DEFQUAL 95
 
 static FakerConfig fcenv;
@@ -41,6 +42,7 @@ static int fc_shmid=-1;
 int fconfig_getshmid(void) {return fc_shmid;}
 #endif
 static FakerConfig *fc=NULL;
+
 
 /* This is a hack necessary to defer the initialization of the recursive mutex
    so MainWin will not interfere with it */
@@ -76,7 +78,9 @@ class rrdeferredcs : rrcs
 static rrdeferredcs _fcmutex;
 #define fcmutex ((rrcs &)(*_fcmutex.init()))
 
+
 static void fconfig_init(void);
+
 
 FakerConfig *fconfig_instance(void)
 {
@@ -115,6 +119,7 @@ FakerConfig *fconfig_instance(void)
 	return fc;
 }
 
+
 void fconfig_deleteinstance(void)
 {
 	if(fc!=NULL)
@@ -145,6 +150,7 @@ void fconfig_deleteinstance(void)
 		}
 	}
 }
+
 
 static void fconfig_init(void)
 {
@@ -180,6 +186,7 @@ static void fconfig_init(void)
 	fconfig_reloadenv();
 }
 
+
 static void buildlut(FakerConfig &fc)
 {
 	if(fc.gamma!=0.0 && fc.gamma!=1.0 && fc.gamma!=-1.0)
@@ -197,6 +204,7 @@ static void buildlut(FakerConfig &fc)
 		}
 	}
 }
+
 
 #define fetchenv_str(envvar, s) { \
 	if((env=getenv(envvar))!=NULL && strlen(env)>0 \
@@ -234,11 +242,13 @@ static void buildlut(FakerConfig &fc)
 	} \
 }
 
+
 void fconfig_setgamma(FakerConfig &fc, double gamma)
 {
 	fc.gamma=gamma;
 	buildlut(fc);
 }
+
 
 void fconfig_reloadenv(void)
 {
@@ -425,6 +435,7 @@ void fconfig_reloadenv(void)
 	fcenv_set=true;
 }
 
+
 void fconfig_setdefaultsfromdpy(Display *dpy)
 {
 	rrcs::safelock l(fcmutex);
@@ -505,6 +516,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 	#endif
 }
 
+
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
 	if(i<0 || (i>=RR_COMPRESSOPT && strlen(fc.transport)==0)) return;
@@ -523,6 +535,7 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 			fc.subsamp=_Defsubsamp[fc.compress];
 	}
 }
+
 
 #define prconfint(i) rrout.println(#i"  =  %d", (int)fc.i)
 #define prconfstr(s) rrout.println(#s"  =  \"%s\"", strlen(fc.s)>0? fc.s:"{Empty}")

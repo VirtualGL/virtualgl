@@ -13,6 +13,8 @@
 
 #include "pbpm.h"
 #include "fakerconfig.h"
+#include "rrutil.h"
+
 
 pbpm::pbpm(Display *dpy, Pixmap pm, Visual *v) : pbdrawable(dpy, pm)
 {
@@ -21,11 +23,13 @@ pbpm::pbpm(Display *dpy, Pixmap pm, Visual *v) : pbdrawable(dpy, pm)
 	errifnot(_fb=new rrfb(dpy, pm, v));
 }
 
+
 pbpm::~pbpm()
 {
 	rrcs::safelock l(_mutex);
 	if(_fb) {delete _fb;  _fb=NULL;}
 }
+
 
 void pbpm::readback(void)
 {
@@ -44,7 +48,7 @@ void pbpm::readback(void)
 	hdr.x=hdr.y=0;
 	_fb->init(hdr);
 
-	_fb->_flags|=RRBMP_BOTTOMUP;
+	_fb->_flags|=RRFRAME_BOTTOMUP;
 	int format;
 	unsigned char *bits=_fb->_bits;
 	switch(_fb->_pixelsize)
@@ -53,16 +57,16 @@ void pbpm::readback(void)
 		case 3:
 			format=GL_RGB;
 			#ifdef GL_BGR_EXT
-			if(_fb->_flags&RRBMP_BGR) format=GL_BGR_EXT;
+			if(_fb->_flags&RRFRAME_BGR) format=GL_BGR_EXT;
 			#endif
 			break;
 		case 4:
 			format=GL_RGBA;
 			#ifdef GL_BGRA_EXT
-			if(_fb->_flags&RRBMP_BGR && !(_fb->_flags&RRBMP_ALPHAFIRST))
+			if(_fb->_flags&RRFRAME_BGR && !(_fb->_flags&RRFRAME_ALPHAFIRST))
 				format=GL_BGRA_EXT;
 			#endif
-			if(_fb->_flags&RRBMP_BGR && _fb->_flags&RRBMP_ALPHAFIRST)
+			if(_fb->_flags&RRFRAME_BGR && _fb->_flags&RRFRAME_ALPHAFIRST)
 			{
 				#ifdef GL_ABGR_EXT
 				format=GL_ABGR_EXT;
@@ -70,7 +74,7 @@ void pbpm::readback(void)
 				format=GL_BGRA_EXT;  bits=_fb->_bits+1;
 				#endif
 			}
-			if(!(_fb->_flags&RRBMP_BGR) && _fb->_flags&RRBMP_ALPHAFIRST)
+			if(!(_fb->_flags&RRFRAME_BGR) && _fb->_flags&RRFRAME_ALPHAFIRST)
 			{
 				format=GL_RGBA;  bits=_fb->_bits+1;
 			}

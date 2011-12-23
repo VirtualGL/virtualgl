@@ -13,8 +13,8 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __CLIENTWIN_H
-#define __CLIENTWIN_H
+#ifndef __CLIENTWIN_H__
+#define __CLIENTWIN_H__
 
 #ifdef _WIN32
 #include <windows.h>
@@ -23,39 +23,42 @@
 #include "rrthread.h"
 #include "genericQ.h"
 
+
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
+
 
 class clientwin : public Runnable
 {
 	public:
 
-	clientwin(int, Window, int, bool);
-	virtual ~clientwin(void);
-	rrframe *getFrame(bool);
-	void drawFrame(rrframe *);
-	int match(int, Window);
-	bool stereoenabled(void) {return _stereo;}
+		clientwin(int, Window, int, bool);
+		virtual ~clientwin(void);
+		rrframe *getframe(bool);
+		void drawframe(rrframe *);
+		int match(int, Window);
+		bool stereoenabled(void) {return _stereo;}
 
 	private:
 
-	int _drawmethod, _reqdrawmethod;
-	static const int NB=2;
-	rrframe *_b;  rrcompframe _cf[NB];  int _cfi;
-	#ifdef USEXV
-	rrxvframe *_xvf[NB];
-	#endif
-	void initgl(void);
-	void initx11(void);
-	void setdrawmethod(void);
-	genericQ _q;
-	void showprofile(rrframeheader *, int);
-	bool _deadyet;
-	int _dpynum;  Window _window;
-	void run(void);
-	Thread *_t;
-	rrcs _cfmutex;
-	bool _stereo;
-	rrcs _mutex;
+		int _drawmethod, _reqdrawmethod;
+		static const int NFRAMES=2;
+		rrframe *_fb;  rrcompframe _cf[NFRAMES];  int _cfi;
+		#ifdef USEXV
+		rrxvframe *_xvf[NFRAMES];
+		#endif
+		void initgl(void);
+		void initx11(void);
+		void setdrawmethod(void);
+		genericQ _q;
+		void showprofile(rrframeheader *, int);
+		bool _deadyet;
+		int _dpynum;  Window _window;
+		void run(void);
+		Thread *_t;
+		rrcs _cfmutex;
+		bool _stereo;
+		rrcs _mutex;
 };
 
-#endif
+
+#endif // __CLIENTWIN_H__

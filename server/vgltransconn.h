@@ -13,8 +13,8 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __VGLTRANSCONN_H
-#define __VGLTRANSCONN_H
+#ifndef __VGLTRANSCONN_H__
+#define __VGLTRANSCONN_H__
 
 #include "rrsocket.h"
 #include "rrthread.h"
@@ -26,45 +26,47 @@
 #define snprintf _snprintf
 #endif
 
+
 class vgltransconn : public Runnable
 {
 	public:
 
-	vgltransconn(void);
+		vgltransconn(void);
 
-	virtual ~vgltransconn(void)
-	{
-		_deadyet=true;  _q.release();
-		if(_t) {_t->stop();  delete _t;  _t=NULL;}
-		if(_sd) {delete _sd;  _sd=NULL;}
-	}
+		virtual ~vgltransconn(void)
+		{
+			_deadyet=true;  _q.release();
+			if(_t) {_t->stop();  delete _t;  _t=NULL;}
+			if(_sd) {delete _sd;  _sd=NULL;}
+		}
 
-	rrframe *getbitmap(int, int, int, int, bool stereo);
-	bool ready(void);
-	void synchronize(void);
-	void sendframe(rrframe *);
-	void run(void);
-	void sendheader(rrframeheader h, bool eof);
-	void send(char *, int);
-	void save(char *, int);
-	void recv(char *, int);
-	void connect(char *, unsigned short);
+		rrframe *getframe(int, int, int, int, bool stereo);
+		bool ready(void);
+		void synchronize(void);
+		void sendframe(rrframe *);
+		void run(void);
+		void sendheader(rrframeheader h, bool eof);
+		void send(char *, int);
+		void save(char *, int);
+		void recv(char *, int);
+		void connect(char *, unsigned short);
 
-	int _np;
-	bool _dosend;
+		int _np;
+		bool _dosend;
 
 	private:
 
-	rrsocket *_sd;
-	static const int NB=4;
-	rrcs _bmpmutex;  rrframe _bmp[NB];
-	rrevent _ready;
-	genericQ _q;
-	Thread *_t;  bool _deadyet;
-	rrprofiler _prof_total;
-	int _dpynum;
-	rrversion _v;
+		rrsocket *_sd;
+		static const int NFRAMES=4;
+		rrcs _mutex;  rrframe _frame[NFRAMES];
+		rrevent _ready;
+		genericQ _q;
+		Thread *_t;  bool _deadyet;
+		rrprofiler _prof_total;
+		int _dpynum;
+		rrversion _v;
 };
+
 
 #define endianize(h) { \
 	if(!littleendian()) {  \
@@ -103,76 +105,78 @@ class vgltransconn : public Runnable
 	h1.flags=h.flags;  \
 	h1.dpynum=(unsigned char)h.dpynum;}
 
-class rrcompressor : public Runnable
+
+class vgltranscompressor : public Runnable
 {
 	public:
 
-	rrcompressor(int myrank, vgltransconn *parent) : _bytes(0),
-		_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank),
-		_deadyet(false), _parent(parent)
-	{
-		if(parent) {_np=parent->_np;}
-		_ready.wait();  _complete.wait();
-		char temps[20];
-		if(_parent->_dosend) snprintf(temps, 19, "Compress %d", myrank);
-		else snprintf(temps, 19, "Comp(mov)%d", myrank);
-		_prof_comp.setname(temps);
-	}
-
-	virtual ~rrcompressor(void)
-	{
-		shutdown();
-		if(_frame) {free(_frame);  _frame=NULL;}
-	}
-
-	void run(void)
-	{
-		while(!_deadyet)
+		vgltranscompressor(int myrank, vgltransconn *parent) : _bytes(0),
+			_storedframes(0), _frame(NULL), _b(NULL), _lastb(NULL), _myrank(myrank),
+			_deadyet(false), _parent(parent)
 		{
-			try {
-
-			_ready.wait();  if(_deadyet) break;
-			compresssend(_b, _lastb);
-			_complete.signal();
-
-			} catch (...) {_complete.signal();  throw;}
+			if(parent) {_np=parent->_np;}
+			_ready.wait();  _complete.wait();
+			char temps[20];
+			if(_parent->_dosend) snprintf(temps, 19, "Compress %d", myrank);
+			else snprintf(temps, 19, "Comp(mov)%d", myrank);
+			_prof_comp.setname(temps);
 		}
-	}
 
-	void go(rrframe *b, rrframe *lastb)
-	{
-		_b=b;  _lastb=lastb;
-		_ready.signal();
-	}
+		virtual ~vgltranscompressor(void)
+		{
+			shutdown();
+			if(_frame) {free(_frame);  _frame=NULL;}
+		}
 
-	void stop(void)
-	{
-		_complete.wait();
-	}
+		void run(void)
+		{
+			while(!_deadyet)
+			{
+				try
+				{
+					_ready.wait();  if(_deadyet) break;
+					compresssend(_b, _lastb);
+					_complete.signal();
+				} catch (...) {_complete.signal();  throw;}
+			}
+		}
 
-	void shutdown(void) {_deadyet=true;  _ready.signal();}
-	void compresssend(rrframe *, rrframe *);
-	void send(void);
+		void go(rrframe *b, rrframe *lastb)
+		{
+			_b=b;  _lastb=lastb;
+			_ready.signal();
+		}
 
-	long _bytes;
+		void stop(void)
+		{
+			_complete.wait();
+		}
+
+		void shutdown(void) {_deadyet=true;  _ready.signal();}
+		void compresssend(rrframe *, rrframe *);
+		void send(void);
+
+		long _bytes;
 
 	private:
 
-	void store(rrcompframe *c)
-	{
-		_storedframes++;
-		if(!(_frame=(rrcompframe **)realloc(_frame, sizeof(rrcompframe *)*_storedframes)))
-			_throw("Memory allocation error");
-		_frame[_storedframes-1]=c;
-	}
+		void store(rrcompframe *c)
+		{
+			_storedframes++;
+			if(!(_frame=(rrcompframe **)realloc(_frame,
+				sizeof(rrcompframe *)*_storedframes)))
+				_throw("Memory allocation error");
+			_frame[_storedframes-1]=c;
+		}
 
-	int _storedframes;  rrcompframe **_frame;
-	rrframe *_b, *_lastb;
-	int _myrank, _np;
-	rrevent _ready, _complete;  bool _deadyet;
-	rrcs _mutex;
-	rrprofiler _prof_comp;
-	vgltransconn *_parent;
+		int _storedframes;  rrcompframe **_frame;
+		rrframe *_b, *_lastb;
+		int _myrank, _np;
+		rrevent _ready, _complete;  bool _deadyet;
+		rrcs _mutex;
+		rrprofiler _prof_comp;
+		vgltransconn *_parent;
 };
 
-#endif
+
+#endif // __VGLTRANSCONN_H__

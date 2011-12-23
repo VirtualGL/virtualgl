@@ -15,8 +15,10 @@
 #include "rrmutex.h"
 #include "xdk-sym.h"
 
+
 static HMODULE hmod=0;
 static rrcs globalmutex;
+
 
 #define lsym(s) tryw32(__##s=(_##s##Type)GetProcAddress(hmod, #s));
 
@@ -41,6 +43,7 @@ void __vgl_loadsymbols(void)
 	lsym(glRasterPos2f)
 	lsym(glViewport)
 }
+
 
 void __vgl_unloadsymbols(void)
 {

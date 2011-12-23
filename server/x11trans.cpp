@@ -16,10 +16,12 @@
 #include "x11trans.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
+#include "rrutil.h"
+
 
 x11trans::x11trans(void) : _t(NULL), _deadyet(false)
 {
-	for(int i=0; i<NB; i++) _bmp[i]=NULL;
+	for(int i=0; i<NFRAMES; i++) _frame[i]=NULL;
 	errifnot(_t=new Thread(this));
 	_t->start();
 	_prof_blit.setname("Blit      ");
@@ -27,81 +29,83 @@ x11trans::x11trans(void) : _t(NULL), _deadyet(false)
 	if(fconfig.verbose) fbx_printwarnings(rrout.getfile());
 }
 
+
 void x11trans::run(void)
 {
 	rrtimer t, sleept;  double err=0.;  bool first=true;
-//	rrfb *lastb=NULL;
 
-	try {
- 
-	while(!_deadyet)
+	try
 	{
-		rrfb *b=NULL;
-		_q.get((void **)&b);  if(_deadyet) return;
-		if(!b) _throw("Queue has been shut down");
-		_ready.signal();
-		_prof_blit.startframe();
-		b->redraw();
-		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
-
-		_prof_total.endframe(b->_h.width*b->_h.height, 0, 1);
-		_prof_total.startframe();
-
-		if(fconfig.flushdelay>0.)
+ 		while(!_deadyet)
 		{
-			long usec=(long)(fconfig.flushdelay*1000000.);
-			if(usec>0) usleep(usec);
-		}
-		if(fconfig.fps>0.)
-		{
-			double elapsed=t.elapsed();
-			if(first) first=false;
-			else
+			rrfb *f=NULL;
+			_q.get((void **)&f);  if(_deadyet) return;
+			if(!f) _throw("Queue has been shut down");
+			_ready.signal();
+			_prof_blit.startframe();
+			f->redraw();
+			_prof_blit.endframe(f->_h.width*f->_h.height, 0, 1);
+
+			_prof_total.endframe(f->_h.width*f->_h.height, 0, 1);
+			_prof_total.startframe();
+
+			if(fconfig.flushdelay>0.)
 			{
-				if(elapsed<1./fconfig.fps)
-				{
-					sleept.start();
-					long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
-					if(usec>0) usleep(usec);
-					double sleeptime=sleept.elapsed();
-					err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
-				}
+				long usec=(long)(fconfig.flushdelay*1000000.);
+				if(usec>0) usleep(usec);
 			}
-			t.start();
+			if(fconfig.fps>0.)
+			{
+				double elapsed=t.elapsed();
+				if(first) first=false;
+				else
+				{
+					if(elapsed<1./fconfig.fps)
+					{
+						sleept.start();
+						long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
+						if(usec>0) usleep(usec);
+						double sleeptime=sleept.elapsed();
+						err=sleeptime-(1./fconfig.fps-elapsed-err);  if(err<0.) err=0.;
+					}
+				}
+				t.start();
+			}
+
+			f->complete();
 		}
 
-		b->complete();
-//		lastb=b;
 	}
-
-	} catch(rrerror &e)
+	catch(rrerror &e)
 	{
 		if(_t) _t->seterror(e);
 		_ready.signal();  throw;
 	}
 }
 
-rrfb *x11trans::getbitmap(Display *dpy, Window win, int w, int h)
+
+rrfb *x11trans::getframe(Display *dpy, Window win, int w, int h)
 {
-	rrfb *b=NULL;
+	rrfb *f=NULL;
 	if(_t) _t->checkerror();
 	{
-	rrcs::safelock l(_bmpmutex);
-	int bmpi=-1;
-	for(int i=0; i<NB; i++)
-		if(!_bmp[i] || (_bmp[i] && _bmp[i]->iscomplete())) bmpi=i;
-	if(bmpi<0) _throw("No free buffers in pool");
-	if(!_bmp[bmpi]) errifnot(_bmp[bmpi]=new rrfb(dpy, win));
-	b=_bmp[bmpi];  b->waituntilcomplete();
+	rrcs::safelock l(_mutex);
+	int framei=-1;
+	for(int i=0; i<NFRAMES; i++)
+		if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
+	if(framei<0) _throw("No free buffers in pool");
+	if(!_frame[framei]) errifnot(_frame[framei]=new rrfb(dpy, win));
+	f=_frame[framei];  f->waituntilcomplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
 	hdr.height=hdr.frameh=h;
 	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
-	b->init(hdr);
-	return b;
+	f->init(hdr);
+	return f;
 }
+
 
 bool x11trans::ready(void)
 {
@@ -109,26 +113,29 @@ bool x11trans::ready(void)
 	return(_q.items()<=0);
 }
 
+
 void x11trans::synchronize(void)
 {
 	_ready.wait();
 }
 
-static void __x11trans_spoilfct(void *b)
+
+static void __x11trans_spoilfct(void *f)
 {
-	if(b) ((rrfb *)b)->complete();
+	if(f) ((rrfb *)f)->complete();
 }
 
-void x11trans::sendframe(rrfb *b, bool sync)
+
+void x11trans::sendframe(rrfb *f, bool sync)
 {
 	if(_t) _t->checkerror();
 	if(sync) 
 	{
 		_prof_blit.startframe();
-		b->redraw();
-		b->complete();
-		_prof_blit.endframe(b->_h.width*b->_h.height, 0, 1);
+		f->redraw();
+		f->complete();
+		_prof_blit.endframe(f->_h.width*f->_h.height, 0, 1);
 		_ready.signal();
 	}
-	else _q.spoil((void *)b, __x11trans_spoilfct);
+	else _q.spoil((void *)f, __x11trans_spoilfct);
 }

@@ -40,8 +40,8 @@ if(MAPFLAG)
 else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
-target_link_libraries(rrfaker rrutil ${FBXFAKERLIB} ${TJPEG_LIBRARY} rrsocket
-	m ${OPENGL_gl_LIBRARY} dl)
+target_link_libraries(rrfaker rrframe ${FBXFAKERLIB} rrsocket m
+	${OPENGL_gl_LIBRARY} dl)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 	# C++ shared libs.  Grrr...
@@ -95,16 +95,16 @@ if(WIN32)
 else()
 	add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp)
 endif()
-target_link_libraries(x11transut rrutil ${FBXLIB} ${TJPEG_LIBRARY})
+target_link_libraries(x11transut rrframe ${FBXLIB} ${TJPEG_LIBRARY})
 
 add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransconnut rrutil ${FBXLIB} rrsocket
+target_link_libraries(vgltransconnut rrframe ${FBXLIB} rrsocket
 	${TJPEG_LIBRARY})
 
 add_executable(vgltransreceiverut vgltransreceiverut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransreceiverut rrutil ${FBXLIB} rrsocket
+target_link_libraries(vgltransreceiverut rrframe ${FBXLIB} rrsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
@@ -120,17 +120,16 @@ add_library(vgltrans_test SHARED testplugin.cpp vgltransconn.cpp)
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# Work around this issue:
 	# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
-	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs -Wl,-Bsymbolic")
-else()
-	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-z defs")
+	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-Wl,-Bsymbolic")
 endif()
-target_link_libraries(vgltrans_test rrutil ${TJPEG_LIBRARY} rrsocket)
+target_link_libraries(vgltrans_test rrframe ${FBXFAKERLIB} ${TJPEG_LIBRARY}
+	rrsocket)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()
 
 add_library(vgltrans_test2 SHARED testplugin2.cpp x11trans.cpp)
-target_link_libraries(vgltrans_test2 rrutil ${FBXFAKERLIB} ${TJPEG_LIBRARY})
+target_link_libraries(vgltrans_test2 rrframe ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()

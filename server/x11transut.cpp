@@ -14,15 +14,18 @@
  */
 
 #include "x11trans.h"
+#include "rrutil.h"
 #include "rrtimer.h"
 #include "fakerconfig.h"
+
 
 void usage(char **argv)
 {
 	printf("\nUSAGE: %s [-tilesize <n>] [-sync] [-bottomup]\n", argv[0]);
 	printf("\n");
 	printf("-tilesize = width/height of each inter-frame difference tile\n");
-	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize, (int)fconfig.tilesize);
+	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize,
+		(int)fconfig.tilesize);
 	printf("-sync = Test synchronous blitting code\n");
 	printf("-bottomup = Test bottom-up blitting code\n");
 	printf("-nodbe = Disable use of the DOUBLE-BUFFER extension\n");
@@ -30,7 +33,8 @@ void usage(char **argv)
 	exit(1);
 }
 
-void fillbmp(unsigned char *buf, int w, int pitch, int h, int ps, int on)
+
+void fillframe(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 {
 	unsigned char *ptr;  unsigned char pixel[3];
 	ptr=buf;
@@ -42,6 +46,7 @@ void fillbmp(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 	}
 }
 
+
 int main(int argc, char **argv)
 {
 	x11trans x11t;  rrtimer t;  double elapsed;
@@ -49,98 +54,107 @@ int main(int argc, char **argv)
 	int WIDTH=700, HEIGHT=700;
 	bool dosync=false, bottomup=false;
 
-	try {
-
-	if(argc>1)
+	try
 	{
-		for(int i=1; i<argc; i++)
+		if(argc>1)
 		{
-			if(!stricmp(argv[i], "-h")) usage(argv);
-			if(!stricmp(argv[i], "-sync")) dosync=true;
-			if(!stricmp(argv[i], "-bottomup")) bottomup=true;
-			if(!stricmp(argv[i], "-tilesize") && i<argc-1)
+			for(int i=1; i<argc; i++)
 			{
-				fconfig.tilesize=atoi(argv[i+1]);  i++;
+				if(!stricmp(argv[i], "-h")) usage(argv);
+				if(!stricmp(argv[i], "-sync")) dosync=true;
+				if(!stricmp(argv[i], "-bottomup")) bottomup=true;
+				if(!stricmp(argv[i], "-tilesize") && i<argc-1)
+				{
+					fconfig.tilesize=atoi(argv[i+1]);  i++;
+				}
 			}
 		}
+
+		if(!XInitThreads()) _throw("XInitThreads failed");
+		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
+		if(!(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
+			WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+			BlackPixel(dpy, DefaultScreen(dpy))))) _throw("Could not create window");
+		errifnot(XMapRaised(dpy, win));
+
+		rrfb *f;
+
+		fprintf(stderr, "\nTesting full-frame blits ...\n");
+
+		int fill=0, frames=0;  t.start();
+		do
+		{
+			x11t.synchronize();
+			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
+			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT, f->_pixelsize, fill);
+			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			fill=1-fill;
+			x11t.sendframe(f, dosync);
+			frames++;
+		} while((elapsed=t.elapsed())<2.);
+
+		fprintf(stderr, "%f Megapixels/sec\n",
+			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+
+		fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
+
+		fill=0, frames=0;  int clientframes=0;  t.start();
+		do
+		{
+			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
+			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT, f->_pixelsize, fill);
+			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			fill=1-fill;
+			x11t.sendframe(f, dosync);
+			clientframes++;  frames++;
+		} while((elapsed=t.elapsed())<2.);
+
+		fprintf(stderr, "%f Megapixels/sec (server)\n",
+			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+		fprintf(stderr, "%f Megapixels/sec (client)\n",
+			(double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
+
+		fprintf(stderr, "\nTesting half-frame blits ...\n");
+
+		fill=0, frames=0;  t.start();
+		do
+		{
+			x11t.synchronize();
+			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
+			memset(f->_bits, 0, f->_pitch*HEIGHT);
+			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT/2, f->_pixelsize, fill);
+			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			fill=1-fill;
+			x11t.sendframe(f, dosync);
+			frames++;
+		} while((elapsed=t.elapsed())<2.);
+
+		fprintf(stderr, "%f Megapixels/sec\n",
+			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+
+		fprintf(stderr, "\nTesting zero-frame blits ...\n");
+
+		frames=0;  t.start();
+		do
+		{
+			x11t.synchronize();
+			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
+			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT/2, f->_pixelsize, 1);
+			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			x11t.sendframe(f, dosync);
+			frames++;
+		} while((elapsed=t.elapsed())<2.);
+
+		fprintf(stderr, "%f Megapixels/sec\n",
+			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+
 	}
-
-	if(!XInitThreads()) _throw("XInitThreads failed");
-	if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
-	if(!(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
-		WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-		BlackPixel(dpy, DefaultScreen(dpy))))) _throw("Could not create window");
-	errifnot(XMapRaised(dpy, win));
-
-	rrfb *b;
-
-	fprintf(stderr, "\nTesting full-frame blits ...\n");
-
-	int fill=0, frames=0;  t.start();
-	do
+	catch(rrerror &e)
 	{
-		x11t.synchronize();
-		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
-		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
-		fill=1-fill;
-		x11t.sendframe(b, dosync);
-		frames++;
-	} while((elapsed=t.elapsed())<2.);
-
-	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-
-	fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
-
-	fill=0, frames=0;  int clientframes=0;  t.start();
-	do
-	{
-		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT, b->_pixelsize, fill);
-		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
-		fill=1-fill;
-		x11t.sendframe(b, dosync);
-		clientframes++;  frames++;
-	} while((elapsed=t.elapsed())<2.);
-
-	fprintf(stderr, "%f Megapixels/sec (server)\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-	fprintf(stderr, "%f Megapixels/sec (client)\n", (double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
-
-	fprintf(stderr, "\nTesting half-frame blits ...\n");
-
-	fill=0, frames=0;  t.start();
-	do
-	{
-		x11t.synchronize();
-		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		memset(b->_bits, 0, b->_pitch*HEIGHT);
-		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, fill);
-		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
-		fill=1-fill;
-		x11t.sendframe(b, dosync);
-		frames++;
-	} while((elapsed=t.elapsed())<2.);
-
-	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-
-	fprintf(stderr, "\nTesting zero-frame blits ...\n");
-
-	frames=0;  t.start();
-	do
-	{
-		x11t.synchronize();
-		errifnot(b=x11t.getbitmap(dpy, win, WIDTH, HEIGHT));
-		WIDTH=b->_h.framew;  HEIGHT=b->_h.frameh;
-		fillbmp(b->_bits, WIDTH, b->_pitch, HEIGHT/2, b->_pixelsize, 1);
-		if(bottomup) {b->_flags|=RRBMP_BOTTOMUP;}
-		x11t.sendframe(b, dosync);
-		frames++;
-	} while((elapsed=t.elapsed())<2.);
-
-	fprintf(stderr, "%f Megapixels/sec\n", (double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-
-	} catch(rrerror &e) {fprintf(stderr, "%s--\n%s\n", e.getMethod(), e.getMessage());}
+		fprintf(stderr, "%s--\n%s\n", e.getMethod(), e.getMessage());
+	}
 }

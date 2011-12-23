@@ -21,6 +21,7 @@
 #include "x11trans.h"
 #include "fbx.h"
 
+
 // A container class for the actual Pbuffer
 
 class pbuffer
@@ -46,6 +47,7 @@ class pbuffer
 		GLXFBConfig _config;
 		int _format;
 };
+
 
 class pbdrawable
 {
@@ -74,4 +76,5 @@ class pbdrawable
 		int _autotestframecount;
 };
 
-#endif
+
+#endif // __PBDRAWABLE_H__

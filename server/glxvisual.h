@@ -44,4 +44,4 @@ Status _XSolarisGetVisualGamma(Display *, int, Visual *, double *);
 
 #define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
 
-#endif
+#endif // __GLXVISUAL_H__

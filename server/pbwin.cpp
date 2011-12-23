@@ -22,6 +22,8 @@
 #endif
 #include "fakerconfig.h"
 #include "glxvisual.h"
+#include "rrutil.h"
+
 
 #define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
@@ -77,6 +79,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 		xwa.visual->visualid, GLX_STEREO);
 }
 
+
 pbwin::~pbwin(void)
 {
 	_mutex.lock(false);
@@ -99,12 +102,14 @@ pbwin::~pbwin(void)
 	_mutex.unlock(false);
 }
 
+
 int pbwin::init(int w, int h, GLXFBConfig config)
 {
 	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::init(w, h, config);
 }
+
 
 // The resize doesn't actually occur until the next time updatedrawable() is
 // called
@@ -123,6 +128,7 @@ void pbwin::resize(int w, int h)
 	_neww=w;  _newh=h;
 }
 
+
 // The FB config change doesn't actually occur until the next time
 // updatedrawable() is called
 
@@ -136,6 +142,7 @@ void pbwin::checkconfig(GLXFBConfig config)
 	}
 }
 
+
 void pbwin::clear(void)
 {
 	rrcs::safelock l(_mutex);
@@ -143,12 +150,14 @@ void pbwin::clear(void)
 	pbdrawable::clear();
 }
 
+
 void pbwin::cleanup(void)
 {
 	rrcs::safelock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 }
+
 
 void pbwin::initfromwindow(GLXFBConfig config)
 {
@@ -158,6 +167,7 @@ void pbwin::initfromwindow(GLXFBConfig config)
 	init(xwa.width, xwa.height, config);
 }
 
+
 // Get the current Pbuffer drawable
 
 GLXDrawable pbwin::getglxdrawable(void)
@@ -166,6 +176,7 @@ GLXDrawable pbwin::getglxdrawable(void)
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::getglxdrawable();
 }
+
 
 void pbwin::checkresize(void)
 {
@@ -181,6 +192,7 @@ void pbwin::checkresize(void)
 		}
 	}
 }
+
 
 // Get the current Pbuffer drawable, but resize the Pbuffer (or change its
 // FB config) first if necessary
@@ -206,6 +218,7 @@ GLXDrawable pbwin::updatedrawable(void)
 	return retval;
 }
 
+
 void pbwin::swapbuffers(void)
 {
 	rrcs::safelock l(_mutex);
@@ -213,11 +226,13 @@ void pbwin::swapbuffers(void)
 	if(_pb) _pb->swap();
 }
 
+
 void pbwin::wmdelete(void)
 {
 	rrcs::safelock l(_mutex);
 	_wmdelete=true;
 }
+
 
 void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 {
@@ -249,8 +264,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			}
 			stereomode=RRSTEREO_REDCYAN;				
 		}
-		else if(dostereo && _Trans[compress]!=RRTRANS_VGL && stereomode==RRSTEREO_QUADBUF
-			&& strlen(fconfig.transport)==0)
+		else if(dostereo && _Trans[compress]!=RRTRANS_VGL
+			&& stereomode==RRSTEREO_QUADBUF && strlen(fconfig.transport)==0)
 		{
 			static bool message=false;
 			if(!message)
@@ -308,6 +323,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 	}
 }
 
+
 void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	bool dostereo, int stereomode)
 {
@@ -349,9 +365,9 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		}
 	}
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
-		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? RRBMP_BGR:0) |
-		(rrtrans_afirst[frame->format]? RRBMP_ALPHAFIRST:0) |
-		RRBMP_BOTTOMUP);
+		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? RRFRAME_BGR:0) |
+		(rrtrans_afirst[frame->format]? RRFRAME_ALPHAFIRST:0) |
+		RRFRAME_BOTTOMUP);
 	int glformat= (rrtrans_ps[frame->format]==3? GL_RGB:GL_RGBA);
 	#ifdef GL_BGR_EXT
 	if(frame->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
@@ -395,6 +411,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	_plugin->sendframe(frame, sync);
 }
 
+
 void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	bool dostereo, int stereomode, int compress, int qual, int subsamp)
 {
@@ -404,18 +421,18 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 
 	if(spoillast && fconfig.spoil && !vgltrans->ready())
 		return;
-	rrframe *b;
+	rrframe *f;
 
-	int flags=RRBMP_BOTTOMUP, format=GL_RGB, pixelsize=3;
+	int flags=RRFRAME_BOTTOMUP, format=GL_RGB, pixelsize=3;
 	if(compress!=RRCOMP_RGB)
 	{
 		format=_pb->format();
 		if(_pb->format()==GL_RGBA) pixelsize=4;
 		#ifdef GL_BGR_EXT
-		else if(_pb->format()==GL_BGR_EXT) flags|=RRBMP_BGR;
+		else if(_pb->format()==GL_BGR_EXT) flags|=RRFRAME_BGR;
 		#endif
 		#ifdef GL_BGRA_EXT
-		else if(_pb->format()==GL_BGRA_EXT) {flags|=RRBMP_BGR;  pixelsize=4;}
+		else if(_pb->format()==GL_BGRA_EXT) {flags|=RRFRAME_BGR;  pixelsize=4;}
 		#endif
 	}
 	if(usepbo && format!=_pb->format())
@@ -430,32 +447,33 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	}
 
 	if(!fconfig.spoil) vgltrans->synchronize();
-	errifnot(b=vgltrans->getbitmap(pbw, pbh, pixelsize, flags,
+	errifnot(f=vgltrans->getframe(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(f, drawbuf);
 	else
 	{
 		GLint buf=drawbuf;
 		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
-		readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-			b->_pixelsize, b->_bits, buf, usepbo, dostereo);
-		if(dostereo && b->_rbits)
-			readpixels(0, 0, b->_h.framew, b->_pitch, b->_h.frameh, format,
-				b->_pixelsize, b->_rbits, reye(drawbuf), usepbo, dostereo);
+		readpixels(0, 0, f->_h.framew, f->_pitch, f->_h.frameh, format,
+			f->_pixelsize, f->_bits, buf, usepbo, dostereo);
+		if(dostereo && f->_rbits)
+			readpixels(0, 0, f->_h.framew, f->_pitch, f->_h.frameh, format,
+				f->_pixelsize, f->_rbits, reye(drawbuf), usepbo, dostereo);
 	}
-	b->_h.winid=_drawable;
-	b->_h.framew=b->_h.width;
-	b->_h.frameh=b->_h.height;
-	b->_h.x=0;
-	b->_h.y=0;
-	b->_h.qual=qual;
-	b->_h.subsamp=subsamp;
-	b->_h.compress=(unsigned char)compress;
+	f->_h.winid=_drawable;
+	f->_h.framew=f->_h.width;
+	f->_h.frameh=f->_h.height;
+	f->_h.x=0;
+	f->_h.y=0;
+	f->_h.qual=qual;
+	f->_h.subsamp=subsamp;
+	f->_h.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
-	if(fconfig.logo) b->addlogo();
-	vgltrans->sendframe(b);
+	if(fconfig.logo) f->addlogo();
+	vgltrans->sendframe(f);
 }
+
 
 void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int stereomode)
@@ -465,43 +483,43 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int desiredformat=_pb->format();
 	static bool alreadywarned=false;
 
-	rrfb *b;
+	rrfb *f;
 	if(!_x11trans) errifnot(_x11trans=new x11trans());
 	if(spoillast && fconfig.spoil && !_x11trans->ready()) return;
 	if(!fconfig.spoil) _x11trans->synchronize();
-	errifnot(b=_x11trans->getbitmap(_dpy, _drawable, pbw, pbh));
-	b->_flags|=RRBMP_BOTTOMUP;
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(b, drawbuf);
+	errifnot(f=_x11trans->getframe(_dpy, _drawable, pbw, pbh));
+	f->_flags|=RRFRAME_BOTTOMUP;
+	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(f, drawbuf);
 	else
 	{
 		int format;
-		unsigned char *bits=b->_bits;
-		switch(b->_pixelsize)
+		unsigned char *bits=f->_bits;
+		switch(f->_pixelsize)
 		{
 			case 1:  format=GL_COLOR_INDEX;  break;
 			case 3:
 				format=GL_RGB;
 				#ifdef GL_BGR_EXT
-				if(b->_flags&RRBMP_BGR) format=GL_BGR_EXT;
+				if(f->_flags&RRFRAME_BGR) format=GL_BGR_EXT;
 				#endif
 				break;
 			case 4:
 				format=GL_RGBA;
 				#ifdef GL_BGRA_EXT
-				if(b->_flags&RRBMP_BGR && !(b->_flags&RRBMP_ALPHAFIRST))
+				if(f->_flags&RRFRAME_BGR && !(f->_flags&RRFRAME_ALPHAFIRST))
 					format=GL_BGRA_EXT;
 				#endif
-				if(b->_flags&RRBMP_BGR && b->_flags&RRBMP_ALPHAFIRST)
+				if(f->_flags&RRFRAME_BGR && f->_flags&RRFRAME_ALPHAFIRST)
 				{
 					#ifdef GL_ABGR_EXT
 					format=GL_ABGR_EXT;
 					#elif defined(GL_BGRA_EXT)
-					format=GL_BGRA_EXT;  bits=b->_bits+1;
+					format=GL_BGRA_EXT;  bits=f->_bits+1;
 					#endif
 				}
-				if(!(b->_flags&RRBMP_BGR) && b->_flags&RRBMP_ALPHAFIRST)
+				if(!(f->_flags&RRFRAME_BGR) && f->_flags&RRFRAME_ALPHAFIRST)
 				{
-					format=GL_RGBA;  bits=b->_bits+1;
+					format=GL_RGBA;  bits=f->_bits+1;
 				}
 				break;
 			default:
@@ -520,12 +538,13 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 				rrout.println("[VGL}    Pbuffer.  Disabling PBO's.");
 			}
 		}
-		readpixels(0, 0, min(pbw, b->_h.framew), b->_pitch,
-			min(pbh, b->_h.frameh), format, b->_pixelsize, bits, buf, usepbo, false);
+		readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
+			min(pbh, f->_h.frameh), format, f->_pixelsize, bits, buf, usepbo, false);
 	}
-	if(fconfig.logo) b->addlogo();
-	_x11trans->sendframe(b, sync);
+	if(fconfig.logo) f->addlogo();
+	_x11trans->sendframe(f, sync);
 }
+
 
 #ifdef USEXV
 
@@ -535,23 +554,23 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int pbw=_pb->width(), pbh=_pb->height();
 	bool usepbo=(fconfig.readback==RRREAD_PBO);
 
-	rrxvframe *b;
+	rrxvframe *f;
 	if(!_xvtrans) errifnot(_xvtrans=new xvtrans());
 	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
 	if(!fconfig.spoil) _xvtrans->synchronize();
-	errifnot(b=_xvtrans->getbitmap(_dpy, _drawable, pbw, pbh));
+	errifnot(f=_xvtrans->getframe(_dpy, _drawable, pbw, pbh));
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=pbh;
 	hdr.width=hdr.framew=pbw;
 	hdr.x=hdr.y=0;
 
-	int flags=RRBMP_BOTTOMUP, format=_pb->format(), pixelsize=3;
+	int flags=RRFRAME_BOTTOMUP, format=_pb->format(), pixelsize=3;
 	if(_pb->format()==GL_RGBA) pixelsize=4;
 	#ifdef GL_BGR_EXT
-	else if(_pb->format()==GL_BGR_EXT) flags|=RRBMP_BGR;
+	else if(_pb->format()==GL_BGR_EXT) flags|=RRFRAME_BGR;
 	#endif
 	#ifdef GL_BGRA_EXT
-	else if(_pb->format()==GL_BGRA_EXT) {flags|=RRBMP_BGR;  pixelsize=4;}
+	else if(_pb->format()==GL_BGRA_EXT) {flags|=RRFRAME_BGR;  pixelsize=4;}
 	#endif
 
 	_f.init(hdr, pixelsize, flags, false);
@@ -569,27 +588,29 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	
 	if(fconfig.logo) _f.addlogo();
 
-	*b=_f;
-	_xvtrans->sendframe(b, sync);
+	*f=_f;
+	_xvtrans->sendframe(f, sync);
 }
 
 #endif
 
-void pbwin::makeanaglyph(rrframe *b, int drawbuf)
+
+void pbwin::makeanaglyph(rrframe *f, int drawbuf)
 {
-	_r.init(b->_h, 1, b->_flags, false);
+	_r.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _r._h.framew, _r._pitch, _r._h.frameh, GL_RED,
 		_r._pixelsize, _r._bits, leye(drawbuf), false, false);
-	_g.init(b->_h, 1, b->_flags, false);
+	_g.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _g._h.framew, _g._pitch, _g._h.frameh, GL_GREEN,
 		_g._pixelsize, _g._bits, reye(drawbuf), false, false);
-	_b.init(b->_h, 1, b->_flags, false);
+	_b.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _b._h.framew, _b._pitch, _b._h.frameh, GL_BLUE,
 		_b._pixelsize, _b._bits, reye(drawbuf), false, false);
 	_prof_anaglyph.startframe();
-	b->makeanaglyph(_r, _g, _b);
-	_prof_anaglyph.endframe(b->_h.framew*b->_h.frameh, 0, 1);
+	f->makeanaglyph(_r, _g, _b);
+	_prof_anaglyph.endframe(f->_h.framew*f->_h.frameh, 0, 1);
 }
+
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
@@ -639,6 +660,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 	}
 }
+
 
 bool pbwin::stereo(void)
 {

@@ -17,10 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 static pthread_mutex_t globalmutex=PTHREAD_MUTEX_INITIALIZER;
 
 typedef	char* (*_getenvType)(const char *);
 static _getenvType __getenv=NULL;
+
 
 static void __loadsymbol(void)
 {
@@ -34,6 +36,7 @@ static void __loadsymbol(void)
 	else if(!__getenv) fprintf(stderr, "[gefaker] Could not load symbol.\n");
 	pthread_mutex_unlock(&globalmutex);
 }
+
 
 char *getenv(const char *name)
 {

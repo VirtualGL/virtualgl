@@ -19,11 +19,13 @@
 #include <string.h>
 #include "glxvisual.h"
 #include "glext-vgl.h"
-
 #include "tempctx.h"
 #include "fakerconfig.h"
+#include "rrutil.h"
+
 
 extern Display *_localdpy;
+
 
 #define checkgl(m) if(glerror()) _throw("Could not "m);
 
@@ -41,9 +43,6 @@ static int glerror(void)
 	return ret;
 }
 
-#ifndef min
- #define min(a,b) ((a)<(b)?(a):(b))
-#endif
 
 Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
 {
@@ -65,6 +64,7 @@ Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
 	XMapWindow(dpy, win);
 	return win;
 }
+
 
 pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 {
@@ -112,6 +112,7 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	if(!_drawable) _throw("Could not create Pbuffer");
 }
 
+
 pbuffer::~pbuffer(void)
 {
 	if(_drawable)
@@ -124,6 +125,7 @@ pbuffer::~pbuffer(void)
 	}
 }
 
+
 void pbuffer::clear(void)
 {
 	if(_cleared) return;
@@ -134,6 +136,7 @@ void pbuffer::clear(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(params[0], params[1], params[2], params[3]);
 }
+
 
 void pbuffer::swap(void)
 {
@@ -153,12 +156,14 @@ pbdrawable::pbdrawable(Display *dpy, Drawable drawable)
 	_autotestframecount=0;
 }
 
+
 pbdrawable::~pbdrawable(void)
 {
 	_mutex.lock(false);
 	if(_pb) {delete _pb;  _pb=NULL;}
 	_mutex.unlock(false);
 }
+
 
 int pbdrawable::init(int w, int h, GLXFBConfig config)
 {
@@ -173,11 +178,13 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	return 1;
 }
 
+
 void pbdrawable::clear(void)
 {
 	rrcs::safelock l(_mutex);
 	if(_pb) _pb->clear();
 }
+
 
 // Get the current Pbuffer drawable
 
@@ -189,15 +196,18 @@ GLXDrawable pbdrawable::getglxdrawable(void)
 	return retval;
 }
 
+
 Display *pbdrawable::get2ddpy(void)
 {
 	return _dpy;
 }
 
+
 Drawable pbdrawable::getx11drawable(void)
 {
 	return _drawable;
 }
+
 
 void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
@@ -379,6 +389,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	if(fbr) glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbr);
 	if(fbw) glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbw);
 }
+
 
 void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	GLint dest_x, GLint dest_y, GLXDrawable draw)

@@ -14,9 +14,12 @@
 
 #include "vgltransconn.h"
 #include "fakerconfig.h"
+#include "rrutil.h"
+
 
 #define WIDTH 301
 #define HEIGHT 301
+
 
 int main(int argc, char **argv)
 {
@@ -24,62 +27,70 @@ int main(int argc, char **argv)
 	bool usessl=false;  int i;
 	int iter=10000, frames=2;
 
-	try {
-
-	if(argc<3 || (iter=atoi(argv[1]))<1 || (frames=atoi(argv[2]))<1)
+	try
 	{
-		printf("USAGE: %s <iterations> <frames> [-client <machine:0.0>] [-ssl]\n", argv[0]);
-		printf("-client = X Display where the video should be sent (VGL client must be running\n");
-		printf("          on that machine)\n");
-		printf("          [default = read from DISPLAY environment]\n");
-		printf("-ssl = use SSL tunnel to connect to client\n");
-		exit(1);
-	}
 
-	for(i=0; i<argc; i++)
-	{
-		if(!stricmp(argv[i], "-ssl")) usessl=true;
-		if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
+		if(argc<3 || (iter=atoi(argv[1]))<1 || (frames=atoi(argv[2]))<1)
 		{
-			strncpy(fconfig.client, argv[i+1], MAXSTR-1);  i++;
+			printf("USAGE: %s <iterations> <frames> [-client <machine:0.0>] [-ssl]\n",
+				argv[0]);
+			printf("-client = X Display where the video should be sent (VGL client must be running\n");
+			printf("          on that machine)\n");
+			printf("          [default = read from DISPLAY environment]\n");
+			printf("-ssl = use SSL tunnel to connect to client\n");
+			exit(1);
 		}
-	}
 
-	if(!XInitThreads()) _throw("Could not initialize X threads");
-	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
-	if((win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
-		WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-		BlackPixel(dpy, DefaultScreen(dpy))))==0) _throw("Could not create window");
-	printf("Creating window %lu\n", (unsigned long)win);
-	errifnot(XMapRaised(dpy, win));
-	XSync(dpy, False);
-	fconfig_setdefaultsfromdpy(dpy);
-	if(strlen(fconfig.client)==0)
-		strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
-
-	rrframe *b;
-
-	printf("\nTesting client for memory leaks and stability ...\n");
-	printf("%d iterations\n", iter);
-
-	for(int i=0; i<iter; i++)
-	{
-		vgltransconn vglt;
-		vglt.connect(fconfig.client, fconfig.port);
-		for(int f=0; f<frames; f++)
+		for(i=0; i<argc; i++)
 		{
-			vglt.synchronize();
-			errifnot(b=vglt.getbitmap(WIDTH, HEIGHT, 3,
-				littleendian()? RRBMP_BGR:0, false));
-			memset(b->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
-			for(int j=0; j<WIDTH*HEIGHT*3; j++) if(j%2==0) b->_bits[j]=i%2==0?255:0;
-			b->_h.qual=50;  b->_h.subsamp=4;
-			b->_h.winid=win;  b->_h.compress=RRCOMP_JPEG;
-			vglt.sendframe(b);
+			if(!stricmp(argv[i], "-ssl")) usessl=true;
+			if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
+			{
+				strncpy(fconfig.client, argv[i+1], MAXSTR-1);  i++;
+			}
 		}
-	}
 
-	} catch(rrerror &e) {printf("%s--\n%s\n", e.getMethod(), e.getMessage());}
+		if(!XInitThreads()) _throw("Could not initialize X threads");
+		if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
+		if((win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
+			WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+			BlackPixel(dpy, DefaultScreen(dpy))))==0)
+			_throw("Could not create window");
+		printf("Creating window %lu\n", (unsigned long)win);
+		errifnot(XMapRaised(dpy, win));
+		XSync(dpy, False);
+		fconfig_setdefaultsfromdpy(dpy);
+		if(strlen(fconfig.client)==0)
+			strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
+
+		rrframe *f;
+
+		printf("\nTesting client for memory leaks and stability ...\n");
+		printf("%d iterations\n", iter);
+
+		for(int i=0; i<iter; i++)
+		{
+			vgltransconn vglconn;
+			vglconn.connect(fconfig.client, fconfig.port);
+			for(int fi=0; fi<frames; fi++)
+			{
+				vglconn.synchronize();
+				errifnot(f=vglconn.getframe(WIDTH, HEIGHT, 3,
+					littleendian()? RRFRAME_BGR:0, false));
+				memset(f->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
+				for(int j=0; j<WIDTH*HEIGHT*3; j++)
+					if(j%2==0) f->_bits[j]=i%2==0?255:0;
+				f->_h.qual=50;  f->_h.subsamp=4;
+				f->_h.winid=win;  f->_h.compress=RRCOMP_JPEG;
+				vglconn.sendframe(f);
+			}
+		}
+
+	}
+	catch(rrerror &e)
+	{
+		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
+	}
 
 	if(win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);
