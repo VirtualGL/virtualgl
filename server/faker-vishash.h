@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,6 +29,7 @@
 #undef _hashvaluetype
 #undef _hashclassstruct
 #undef __hashclassstruct
+
 
 // This maps a XVisualInfo * to a GLXFBConfig
 
@@ -71,8 +73,8 @@ class vishash : public _vishash
 		{
 			if(!dpy || !vis) _throw("Invalid argument");
 			_vishashstruct *ptr=NULL;
-			rrcs::safelock l(mutex);
-			ptr=end;
+			rrcs::safelock l(_mutex);
+			ptr=_end;
 			while(ptr!=NULL)
 			{
 				if(ptr->key1 && !strcasecmp(DisplayString(dpy), ptr->key1)

@@ -20,12 +20,15 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+
 #ifdef SUNOGL
 #define _glXGetProcAddressARBType _glXGetProcAddressType
 #define _glXGetProcAddressARB _glXGetProcAddress
 #endif
 
+
 #define _throw(m) {fprintf(stderr, "ERROR: %s\n", m);  goto bailout;}
+
 
 int checkwindowcolor(Window win, unsigned int color)
 {
@@ -46,6 +49,7 @@ int checkwindowcolor(Window win, unsigned int color)
 	return 0;
 }
 
+
 int checkframe(Window win, int desiredreadbacks, int *lastframe)
 {
 	char *e=NULL, temps[80];  int frame;
@@ -64,6 +68,7 @@ int checkframe(Window win, int desiredreadbacks, int *lastframe)
 	bailout:
 	return 0;
 }
+
 
 typedef XVisualInfo* (*_glXChooseVisualType)(Display *, int, int *);
 _glXChooseVisualType _glXChooseVisual=NULL;
@@ -128,6 +133,7 @@ void unloadsymbols1(void)
 	if(gldllhnd) dlclose(gldllhnd);
 }
 
+
 #define lsym2(s) _##s=(_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s);  \
 	if(!_##s) _throw("Could not load symbol "#s)
 
@@ -154,8 +160,10 @@ void loadsymbols2(void)
 	exit(1);
 }
 
+
 /* Test whether librrfaker's version of dlopen() is discriminating enough.
    This will fail on VGL 2.1.2 and prior */
+
 typedef void (*_myTestFunctionType)(void);
 _myTestFunctionType _myTestFunction=NULL;
 
@@ -230,6 +238,7 @@ void test(const char *testname)
 	if(v) {XFree(v);  v=NULL;}
 	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
 }
+
 
 int main(int argc, char **argv)
 {

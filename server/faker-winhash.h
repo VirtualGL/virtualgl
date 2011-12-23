@@ -29,6 +29,7 @@
 #undef _hashclassstruct
 #undef __hashclassstruct
 
+
 // This maps a window ID to a Pbuffer instance
 
 class winhash : public _winhash
@@ -92,7 +93,7 @@ class winhash : public _winhash
 		{
 			if(!dpy || !win || !config) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL;
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
 				if(!ptr->value)
@@ -115,7 +116,7 @@ class winhash : public _winhash
 		{
 			if(!dpy || !win) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL;
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
 				if(!ptr->value) ptr->value=(pbwin *)-1;
@@ -132,8 +133,8 @@ class winhash : public _winhash
 		{
 			if(!dpy) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL, *next=NULL;
-			rrcs::safelock l(mutex);
-			ptr=start;
+			rrcs::safelock l(_mutex);
+			ptr=_start;
 			while(ptr!=NULL)
 			{
 				pbwin *pbw=ptr->value;

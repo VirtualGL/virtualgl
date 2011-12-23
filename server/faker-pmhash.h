@@ -28,6 +28,7 @@
 #undef _hashclassstruct
 #undef __hashclassstruct
 
+
 // This maps a Pixmap ID on the 2D X Server to a pbpm instance, which
 // encapsulates a Pbuffer on the 3D X Server
 
@@ -65,7 +66,7 @@ class pmhash : public _pmhash
 		{
 			if(!pb) return 0;
 			_pmhashstruct *ptr=NULL;
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(NULL, pb))!=NULL)
 				return ptr->key2;
 			return 0;

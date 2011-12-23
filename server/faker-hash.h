@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2011 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,6 +19,7 @@
 
 #include "rrmutex.h"
 
+
 typedef struct __hashclassstruct
 {
 	_hashkeytype1 key1;
@@ -27,21 +29,23 @@ typedef struct __hashclassstruct
 	struct __hashclassstruct *prev, *next;
 } _hashclassstruct;
 
+
 class _hashclass
 {
 	public:
 
 		void killhash(void)
 		{
-			rrcs::safelock l(mutex);
-			while(start!=NULL) killentry(start);
+			rrcs::safelock l(_mutex);
+			while(_start!=NULL) killentry(_start);
 		}
 
-		int add(_hashkeytype1 key1, _hashkeytype2 key2, _hashvaluetype value, bool useref=false)
+		int add(_hashkeytype1 key1, _hashkeytype2 key2, _hashvaluetype value,
+			bool useref=false)
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(value) ptr->value=value;
@@ -49,12 +53,12 @@ class _hashclass
 			}
 			errifnot(ptr=new _hashclassstruct);
 			memset(ptr, 0, sizeof(_hashclassstruct));
-			ptr->prev=end;  if(end) end->next=ptr;
-			if(!start) start=ptr;
-			end=ptr;
-			end->key1=key1;  end->key2=key2;  end->value=value;
-			if(useref) end->refcount=1;
-			entries++;
+			ptr->prev=_end;  if(_end) _end->next=ptr;
+			if(!_start) _start=ptr;
+			_end=ptr;
+			_end->key1=key1;  _end->key2=key2;  _end->value=value;
+			if(useref) _end->refcount=1;
+			_nentries++;
 			return 1;
 		}
 
@@ -62,7 +66,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(!ptr->value) ptr->value=attach(key1, key2);
@@ -75,7 +79,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(useref && ptr->refcount>0) ptr->refcount--;
@@ -83,14 +87,14 @@ class _hashclass
 			}
 		}
 
-		int numEntries(void) {return entries;}
+		int numEntries(void) {return _nentries;}
 
 	protected:
 
 		_hashclass(void)
 		{
-			start=end=NULL;
-			entries=0;
+			_start=_end=NULL;
+			_nentries=0;
 		}
 
 		virtual ~_hashclass(void)
@@ -102,8 +106,8 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(mutex);
-			ptr=start;
+			rrcs::safelock l(_mutex);
+			ptr=_start;
 			while(ptr!=NULL)
 			{
 				if((ptr->key1==key1 && ptr->key2==key2) || compare(key1, key2, ptr))
@@ -117,21 +121,21 @@ class _hashclass
 
 		void killentry(_hashclassstruct *ptr)
 		{
-			rrcs::safelock l(mutex);
+			rrcs::safelock l(_mutex);
 			if(ptr->prev) ptr->prev->next=ptr->next;
 			if(ptr->next) ptr->next->prev=ptr->prev;
-			if(ptr==start) start=ptr->next;
-			if(ptr==end) end=ptr->prev;
+			if(ptr==_start) _start=ptr->next;
+			if(ptr==_end) _end=ptr->prev;
 			if(ptr->value) detach(ptr);
 			memset(ptr, 0, sizeof(_hashclassstruct));
 			delete ptr;
-			entries--;
+			_nentries--;
 		}
 
-		int entries;
+		int _nentries;
 		virtual _hashvaluetype attach(_hashkeytype1, _hashkeytype2)=0;
 		virtual void detach(_hashclassstruct *h)=0;
 		virtual bool compare(_hashkeytype1, _hashkeytype2, _hashclassstruct *h)=0;
-		_hashclassstruct *start, *end;
-		rrcs mutex;
+		_hashclassstruct *_start, *_end;
+		rrcs _mutex;
 };

@@ -29,6 +29,7 @@
 #undef __hashclassstruct
 #include "glxvisual.h"
 
+
 // This maps a GLXFBConfig to an X Visual ID
 
 class rcfghash : public _rcfghash

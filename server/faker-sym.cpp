@@ -19,22 +19,28 @@
 
 #include "fakerconfig.h"
 
+
 static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	dlerror();  // Clear error state
 	sym=dlsym(dllhnd, (char *)symbol);
-	err=dlerror();	if(err) {if(!quiet) rrout.print("[VGL] %s\n", err);}
+	err=dlerror();
+	if(err && !quiet) rrout.print("[VGL] %s\n", err);
 	return sym;
 }
 
-#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, !fconfig.verbose);  if(!__##s) {  \
-	return -1;}
+
+#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, !fconfig.verbose);  \
+	if(!__##s) return -1;
 
 #define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
+static int __vgl_loadglsymbols(void *);
+static int __vgl_loadx11symbols(void *);
+
 
 void __vgl_loaddlsymbols(void)
 {
@@ -47,8 +53,6 @@ void __vgl_loaddlsymbols(void)
 	}
 }
 
-static int __vgl_loadglsymbols(void *);
-static int __vgl_loadx11symbols(void *);
 
 void __vgl_loadsymbols(void)
 {
@@ -145,6 +149,7 @@ void __vgl_loadsymbols(void)
 	}
 }
 
+
 static int __vgl_loadglsymbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
@@ -239,6 +244,7 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	return 0;
 }
 
+
 static int __vgl_loadx11symbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
@@ -267,6 +273,7 @@ static int __vgl_loadx11symbols(void *dllhnd)
 	lsym(XWindowEvent);
 	return 0;
 }
+
 
 void __vgl_unloadsymbols(void)
 {

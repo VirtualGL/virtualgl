@@ -29,6 +29,7 @@
 #undef _hashclassstruct
 #undef __hashclassstruct
 
+
 // This maps a GLXDrawable instance to a (remote) Display handle.
 // Used primarily to make glXGetCurrentDisplay() work properly :/
 

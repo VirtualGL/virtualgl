@@ -22,8 +22,10 @@
 #include "glx.h"
 #include "rrlog.h"
 
+
 extern void __vgl_safeexit(int);
 extern void __vgl_fakerinit(void);
+
 
 #define checksym(s) {if(!__##s) {__vgl_fakerinit();  if(!__##s) { \
 	rrout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
@@ -34,60 +36,97 @@ extern void __vgl_fakerinit(void);
 #define symdef(f) extern _##f##Type __##f
 #endif
 
+
 #define funcdef0(rettype, f, ret) \
 	typedef rettype (*_##f##Type)(void); \
 	symdef(f); \
-	static inline rettype _##f(void) {checksym(f);  ret __##f();}
+	static inline rettype _##f(void) { \
+		checksym(f);  ret __##f(); \
+	}
 
 #define funcdef1(rettype, f, at1, a1, ret) \
 	typedef rettype (*_##f##Type)(at1); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1) {checksym(f);  ret __##f(a1);}
+	static inline rettype _##f(at1 a1) { \
+		checksym(f);  ret __##f(a1); \
+	}
 
 #define funcdef2(rettype, f, at1, a1, at2, a2, ret) \
 	typedef rettype (*_##f##Type)(at1, at2); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2) {checksym(f);  ret __##f(a1, a2);}
+	static inline rettype _##f(at1 a1, at2 a2) { \
+		checksym(f);  ret __##f(a1, a2); \
+	}
 
 #define funcdef3(rettype, f, at1, a1, at2, a2, at3, a3, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3) {checksym(f);  ret __##f(a1, a2, a3);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3) { \
+		checksym(f);  ret __##f(a1, a2, a3); \
+	}
 
 #define funcdef4(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4) {checksym(f);  ret __##f(a1, a2, a3, a4);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4); \
+	}
 
-#define funcdef5(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, ret) \
+#define funcdef5(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) {checksym(f);  ret __##f(a1, a2, a3, a4, a5);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5); \
+	}
 
-#define funcdef6(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, ret) \
+#define funcdef6(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, \
+		at6 a6) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6); \
+	}
 
-#define funcdef7(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, at7, a7, ret) \
+#define funcdef7(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7); \
+	}
 
-#define funcdef9(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, at7, a7, at8, a8, at9, a9, ret) \
+#define funcdef9(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, at8, a8, at9, a9, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8, at9 a9) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
+	}
 
-#define funcdef10(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, ret) \
-	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, at10); \
+#define funcdef10(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, ret) \
+	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
+		at10); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9, at10 a10) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8, at9 a9, at10 a10) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
+	}
 
-#define funcdef12(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, ret) \
-	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, at10, at11, at12); \
+#define funcdef12(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, ret) \
+	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
+		at10, at11, at12); \
 	symdef(f); \
-	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) {checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);}
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) { \
+		checksym(f); \
+		ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+	}
 
 
 #ifdef __cplusplus
@@ -100,8 +139,8 @@ extern "C" {
 funcdef3(XVisualInfo*, glXChooseVisual, Display *, dpy, int, screen,
 	int *, attrib_list, return);
 
-funcdef4(void, glXCopyContext, Display *, dpy, GLXContext, src, GLXContext, dst,
-	unsigned long, mask,);
+funcdef4(void, glXCopyContext, Display *, dpy, GLXContext, src, GLXContext,
+	dst, unsigned long, mask,);
 
 funcdef4(GLXContext, glXCreateContext, Display *, dpy, XVisualInfo *, vis,
 	GLXContext, share_list, Bool, direct, return);
@@ -126,11 +165,13 @@ funcdef3(Bool, glXMakeCurrent, Display *, dpy, GLXDrawable, drawable,
 funcdef3(Bool, glXQueryExtension, Display *, dpy, int *, error_base,
 	int *, event_base, return);
 
-funcdef3(Bool, glXQueryVersion, Display *, dpy, int *, major, int *, minor, return);
+funcdef3(Bool, glXQueryVersion, Display *, dpy, int *, major, int *, minor,
+	return);
 
 funcdef2(void, glXSwapBuffers, Display *, dpy, GLXDrawable, drawable,);
 
-funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int, list_base,);
+funcdef4(void, glXUseXFont, Font, font, int, first, int, count, int,
+	list_base,);
 
 funcdef0(void, glXWaitGL,);
 
@@ -139,9 +180,11 @@ funcdef0(void, glXWaitGL,);
 
 funcdef2(const char *, glXGetClientString, Display *, dpy, int, name, return);
 
-funcdef3(const char *, glXQueryServerString, Display *, dpy, int, screen, int, name, return);
+funcdef3(const char *, glXQueryServerString, Display *, dpy, int, screen, int,
+	name, return);
 
-funcdef2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen, return);
+funcdef2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen,
+	return);
 
 
 // GLX 1.3 functions
@@ -257,14 +300,15 @@ funcdef0(void, glFinish,);
 
 funcdef0(void, glFlush,);
 
-funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height,);
+funcdef4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei,
+	height,);
 
 funcdef1(void, glDrawBuffer, GLenum, drawbuf,);
 
 funcdef0(void, glPopAttrib,);
 
-funcdef7(void, glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
-	GLenum, format, GLenum, type, GLvoid*, pixels,);
+funcdef7(void, glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei,
+	height, GLenum, format, GLenum, type, GLvoid*, pixels,);
 
 funcdef5(void, glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
 	GLenum, type, const GLvoid*, pixels,);
@@ -301,9 +345,11 @@ funcdef2(void, glGetFloatv, GLenum, pname, GLfloat *, params,);
 
 funcdef2(void, glGetIntegerv, GLenum, pname, GLint *, params,);
 
-funcdef3(void, glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *, params,);
+funcdef3(void, glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *,
+	params,);
 
-funcdef3(void, glMaterialiv, GLenum, face, GLenum, pname, const GLint *, params,);
+funcdef3(void, glMaterialiv, GLenum, face, GLenum, pname, const GLint *,
+	params,);
 
 funcdef2(void, glPixelTransferf, GLenum, pname, GLfloat, param,);
 
@@ -312,15 +358,17 @@ funcdef2(void, glPixelTransferi, GLenum, pname, GLint, param,);
 
 // X11 functions
 
-funcdef3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe, return);
+funcdef3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
+	return);
 
-funcdef3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type, XEvent *, xe, return);
+funcdef3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type, XEvent *, xe,
+	return);
 
 funcdef4(Bool, XCheckTypedWindowEvent, Display *, dpy, Window, win,
 	int, event_type, XEvent *, xe, return);
 
-funcdef4(Bool, XCheckWindowEvent, Display *, dpy, Window, win, long, event_mask,
-	XEvent *, xe, return);
+funcdef4(Bool, XCheckWindowEvent, Display *, dpy, Window, win, long,
+	event_mask, XEvent *, xe, return);
 
 funcdef1(int, XCloseDisplay, Display *, dpy, return);
 
@@ -332,13 +380,13 @@ funcdef10(int, XCopyArea, Display *, dpy, Drawable, src, Drawable, dst, GC, gc,
 	int, dest_y, return);
 
 funcdef9(Window, XCreateSimpleWindow, Display *, dpy, Window, parent, int, x,
-	int, y, unsigned int, width, unsigned int, height, unsigned int, border_width,
-	unsigned long, border, unsigned long, background, return);
+	int, y, unsigned int, width, unsigned int, height, unsigned int,
+	border_width, unsigned long, border, unsigned long, background, return);
 
-funcdef12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int, y,
-	unsigned int, width, unsigned int, height, unsigned int, border_width,
-	int, depth, unsigned int, c_class, Visual *, visual, unsigned long, value_mask,
-	XSetWindowAttributes *, attributes, return);
+funcdef12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int,
+	y, unsigned int, width, unsigned int, height, unsigned int, border_width,
+	int, depth, unsigned int, c_class, Visual *, visual, unsigned long,
+	value_mask, XSetWindowAttributes *, attributes, return);
 
 funcdef2(int, XDestroySubwindows, Display *, dpy, Window, win, return);
 
@@ -352,7 +400,8 @@ funcdef9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
 
 funcdef2(char **, XListExtensions, Display *, dpy, int *, next, return);
 
-funcdef3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe, return);
+funcdef3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
+	return);
 
 funcdef6(int, XMoveResizeWindow, Display *, dpy, Window, win, int, x, int, y,
 	unsigned int, width, unsigned int, height, return);
@@ -379,12 +428,15 @@ typedef	void* (*_dlopenType)(const char *, int);
 void *_vgl_dlopen(const char *, int);
 symdef(dlopen);
 
+
 #ifdef __cplusplus
 }
 #endif
 
+
 void __vgl_loadsymbols(void);
 void __vgl_loaddlsymbols(void);
 void __vgl_unloadsymbols(void);
+
 
 #endif
