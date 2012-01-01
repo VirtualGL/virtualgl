@@ -17,6 +17,7 @@
 
 #define MAXCPUS 4
 
+
 void collect(void)
 {
 	static long long usrjif[MAXCPUS+1], nicejif[MAXCPUS+1], sysjif[MAXCPUS+1],

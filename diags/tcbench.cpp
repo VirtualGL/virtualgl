@@ -20,9 +20,7 @@
 #include "rrutil.h"
 #include "rrtimer.h"
 #include "fbx.h"
-#ifdef _WIN32
- char *program_name;
-#else
+#ifndef _WIN32
  extern "C" {
  #define NeedFunctionPrototypes 1
  #include "dsimple.h"
@@ -32,12 +30,20 @@
  #include <sys/resource.h>
 #endif
 
+
 #define _throw(f, l, m) {  \
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
 #define fbx(a) {if((a)==-1)_throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
 
+
 #define DEFSAMPLERATE 100
 #define DEFBENCHTIME 30.0
+
+
+#ifdef _WIN32
+ char *program_name;
+#endif
+
 
 void usage(void)
 {
@@ -85,7 +91,7 @@ int main(int argc, char **argv)
 			#ifdef _WIN32
 			if(sscanf(&argv[i][3], "%x", &temp)==1) wh=temp;
 			#else
-			if(sscanf(&argv[i][3], "%x", &temp.d)==1) wh.d=temp.d;
+			if(sscanf(&argv[i][3], "%x", (unsigned int *)&temp.d)==1) wh.d=temp.d;
 			#endif
 		}
 	}

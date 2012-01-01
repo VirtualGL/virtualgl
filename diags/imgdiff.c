@@ -19,16 +19,15 @@
 #include "rrutil.h"
 #include "bmp.h"
 
-#ifndef min
- #define min(a,b) ((a)<(b)?(a):(b))
-#endif
 
 unsigned char rct[256], gct[256], bct[256];
+
 
 int main(int argc, char **argv)
 {
 	unsigned char *bmp1=NULL, *bmp2=NULL, *bmpdiff=NULL;  int useppm=0;
-	unsigned char diff, diffmax, max[4]={0, 0, 0, 0}, min[4]={255, 255, 255, 255}, tmax, tmin;
+	unsigned char diff, diffmax, max[4]={0, 0, 0, 0},
+		min[4]={255, 255, 255, 255}, tmax, tmin;
 	double avg[4]={0., 0., 0., 0.}, ssq[4]={0., 0., 0., 0.}, tavg=0., tssq=0.;
 	int w1, h1, d1=3, w2, h2, d2=3, w, h, i, j, k, mag=0;
 	char *temp;
@@ -85,7 +84,8 @@ int main(int argc, char **argv)
 			diffmax=0;
 			for(k=0; k<d1; k++)
 			{
-				diff=(unsigned char)abs((int)bmp2[(w2*i+j)*d2+k]-(int)bmp1[(w1*i+j)*d1+k]);
+				diff=(unsigned char)abs((int)bmp2[(w2*i+j)*d2+k]
+					-(int)bmp1[(w1*i+j)*d1+k]);
 				if(diff>diffmax) diffmax=diff;
 				if(diff>max[k]) max[k]=diff;  if(diff<min[k]) min[k]=diff;
 				avg[k]+=diff;  ssq[k]+=diff*diff;
@@ -120,7 +120,8 @@ int main(int argc, char **argv)
 	free(bmpdiff);
 	for(k=0; k<d1; k++)
 		printf("%s: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
-		k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k], ssq[k], 20.*log10(255./ssq[k]));
+		k==0?"B":(k==1?"G":(k==2?"R":"A")), min[k], max[k], avg[k], ssq[k],
+		20.*log10(255./ssq[k]));
 	printf("T: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
 		tmin, tmax, tavg, tssq, 20.*log10(255./tssq));
 	return 0;
