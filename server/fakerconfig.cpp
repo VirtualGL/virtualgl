@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011 D. R. Commander
+/* Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -174,6 +174,7 @@ static void fconfig_init(void)
 	strncpy(fconfig.localdpystring, ":0", MAXSTR);
 	fconfig.np=1;
 	fconfig.port=-1;
+	fconfig.probeglx=1;
 	fconfig.qual=DEFQUAL;
 	fconfig.readback=RRREAD_SYNC;
 	fconfig.samples=-1;
@@ -377,6 +378,7 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_LOGO", logo);
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
 	fetchenv_int("VGL_PORT", port, 0, 65535);
+	fetchenv_bool("VGL_PROBEGLX", probeglx);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
 	if((env=getenv("VGL_READBACK"))!=NULL && strlen(env)>0)
 	{

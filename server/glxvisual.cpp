@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -58,7 +58,8 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	rrcs::safelock l(_vamutex);
 
 	if(dpy==_vadpy && screen==_vascreen) return;
-	if(_XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
+	if(fconfig.probeglx
+		&& _XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
 		&& maj_opcode>=0 && first_event>=0 && first_error>=0)
 		clientglx=1;
 	vtemp.screen=screen;
