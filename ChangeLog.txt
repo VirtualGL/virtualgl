@@ -11,6 +11,10 @@ explicit deletion of subwindows via XDestroySubwindows().  This specifically
 addresses BadDrawable errors that occurred when running certain applications
 in WINE 1.3.34 and later.
 -------------------------------------------------------------------------------
+[3]
+Fix crash in glXCreateGLXPbufferSGIX() that occurred when a NULL attribute list
+pointer was passed to it.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -22,7 +26,7 @@ Fix regression bug whereby GLXSpheres would ignore the first argument after
 -------------------------------------------------------------------------------
 [2]
 glXChooseFBConfig() and glXChooseFBConfigSGIX() were erroneously returning an
-error when a NULL attribute list argument was passed to them.  They now behave
+error when a NULL attribute list pointer was passed to them.  They now behave
 correctly.
 -------------------------------------------------------------------------------
 [3]

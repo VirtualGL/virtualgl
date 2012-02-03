@@ -570,9 +570,12 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 	unsigned int width, unsigned int height, int *attrib_list)
 {
 	int attribs[257], j=0;
-	for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+	if(attrib_list)
 	{
-		attribs[j++]=attrib_list[i];  attribs[j++]=attrib_list[i+1];
+		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		{
+			attribs[j++]=attrib_list[i];  attribs[j++]=attrib_list[i+1];
+		}
 	}
 	attribs[j++]=GLX_PBUFFER_WIDTH;  attribs[j++]=width;
 	attribs[j++]=GLX_PBUFFER_HEIGHT;  attribs[j++]=height;
