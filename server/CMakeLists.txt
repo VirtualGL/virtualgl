@@ -41,7 +41,7 @@ else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
 target_link_libraries(rrfaker rrframe ${FBXFAKERLIB} rrsocket m
-	${OPENGL_gl_LIBRARY} dl)
+	${OPENGL_gl_LIBRARY} ${LIBDL})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 	# C++ shared libs.  Grrr...
@@ -55,12 +55,12 @@ install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
 	\$ENV{DESTDIR}${VGL_FAKELIBDIR}/libGL.so)")
 
 add_library(dlfaker SHARED dlfaker.c)
-target_link_libraries(dlfaker dl)
+target_link_libraries(dlfaker ${LIBDL})
 install(TARGETS dlfaker DESTINATION ${VGL_LIBDIR})
 
 add_library(gefaker SHARED gefaker.c)
 set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
-target_link_libraries(gefaker dl)
+target_link_libraries(gefaker ${LIBDL})
 install(TARGETS gefaker DESTINATION ${VGL_LIBDIR})
 
 set(HEADERS ../common/rr.h rrtransport.h)
@@ -108,13 +108,13 @@ target_link_libraries(vgltransreceiverut rrframe ${FBXLIB} rrsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
-target_link_libraries(dlfakerut ${X11_X11_LIB} dl)
+target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 
 add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
 add_executable(fakerut fakerut.cpp)
 target_link_libraries(fakerut "-z now ${OPENGL_gl_LIBRARY}"
-	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" dl pthread)
+	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} pthread)
 
 add_library(vgltrans_test SHARED testplugin.cpp vgltransconn.cpp)
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")

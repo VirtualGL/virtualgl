@@ -96,8 +96,13 @@ endif()
 
 # This ensures that we don't depend on libstdc++ or libgcc
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
+	set(DEFAULT_VGL_BUILDSTATIC 1)
+	if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+		set(DEFAULT_VGL_BUILDSTATIC 0)
+	endif()
 	option(VGL_BUILDSTATIC
-		"Link statically against libgcc and libstdc++, if possible" ON)
+		"Link statically against libgcc and libstdc++, if possible"
+		${DEFAULT_VGL_BUILDSTATIC})
 	if(VGL_BUILDSTATIC)
 		# For some reason, simply passing ${CMAKE_CXX_FLAGS} to the compiler in
 		# execute_process() doesn't work.  Grrr...
@@ -250,14 +255,17 @@ if(NOT VGL_USEMEDIALIB)
 	include(cmakescripts/FindTurboJPEG.cmake)
 endif()
 
+if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	set(LIBDL dl)
+endif()
+
 
 #
 # Targets
 #
 
 set(DEFAULT_VGL_BUILDSERVER 0)
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"
-	OR ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
+if(UNIX AND NOT APPLE)
 	set(DEFAULT_VGL_BUILDSERVER 1)
 endif()
 option(VGL_BUILDSERVER "Build VirtualGL server components"
