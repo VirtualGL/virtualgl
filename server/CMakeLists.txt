@@ -63,7 +63,7 @@ set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
 target_link_libraries(gefaker dl)
 install(TARGETS gefaker DESTINATION ${VGL_LIBDIR})
 
-set(HEADERS rr.h rrtransport.h)
+set(HEADERS ../common/rr.h rrtransport.h)
 install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
 
 add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
