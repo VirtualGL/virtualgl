@@ -79,9 +79,6 @@
 		glPopAttrib;
 		glReadPixels;
 		glDrawPixels;
-		#ifdef SUNOGL
-		glBegin;
-		#else
 		glIndexd;
 		glIndexf;
 		glIndexi;
@@ -92,7 +89,6 @@
 		glIndexiv;
 		glIndexsv;
 		glIndexubv;
-		#endif
 		glClearIndex;
 		glGetDoublev;
 		glGetFloatv;
@@ -124,9 +120,6 @@
 		XResizeWindow;
 		XServerVendor;
 		XWindowEvent;
-		#ifdef sparc
-		XSolarisGetVisualGamma;
-		#endif
 
 		__XCopyArea;
 

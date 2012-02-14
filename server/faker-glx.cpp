@@ -236,13 +236,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	return configs;
 }
 
-#ifdef SUNOGL
-GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
-	const int *attrib_list, int *nelements)
-#else
 GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
 	int *attrib_list, int *nelements)
-#endif
 {
 	return glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 }
@@ -340,11 +335,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 // If src or dst is an overlay context, hand off to the 2D X server.
 // Otherwise, hand off to the 3D X server without modification.
 
-#ifdef SUNOGL
-void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned int mask)
-#else
 void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long mask)
-#endif
 {
 	TRY();
 	bool srcoverlay=false, dstoverlay=false;
@@ -850,11 +841,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 static const char *glxextensions=
-#ifdef SUNOGL
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_SUN_init_threads GLX_ARB_create_context";
-#else
 	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context";
-#endif
 
 const char *glXGetClientString(Display *dpy, int name)
 {
@@ -1155,12 +1142,6 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \
 	retval=(void (*)(void))f;  if(fconfig.trace) rrout.print("[INTERPOSED]");}
-#ifdef SUNOGL
-#define checkfakedidx(f) if(!strcmp((char *)procName, #f)) \
-	retval=(void (*)(void))r_##f;
-#else
-#define checkfakedidx(f) checkfaked(f)
-#endif
 
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
@@ -1252,19 +1233,16 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glPopAttrib)
 		checkfaked(glReadPixels)
 		checkfaked(glDrawPixels)
-		#ifdef SUNOGL
-		checkfaked(glBegin)
-		#endif
-		checkfakedidx(glIndexd)
-		checkfakedidx(glIndexf)
-		checkfakedidx(glIndexi)
-		checkfakedidx(glIndexs)
-		checkfakedidx(glIndexub)
-		checkfakedidx(glIndexdv)
-		checkfakedidx(glIndexfv)
-		checkfakedidx(glIndexiv)
-		checkfakedidx(glIndexsv)
-		checkfakedidx(glIndexubv)
+		checkfaked(glIndexd)
+		checkfaked(glIndexf)
+		checkfaked(glIndexi)
+		checkfaked(glIndexs)
+		checkfaked(glIndexub)
+		checkfaked(glIndexdv)
+		checkfaked(glIndexfv)
+		checkfaked(glIndexiv)
+		checkfaked(glIndexsv)
+		checkfaked(glIndexubv)
 		checkfaked(glClearIndex)
 		checkfaked(glGetDoublev)
 		checkfaked(glGetFloatv)
@@ -1459,18 +1437,6 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
 	// Needed to support color index rendering on Sun OpenGL
-	#ifdef SUNOGL
-	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
-	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
-	sunOglCurPrimTablePtr->oglIndexi=r_glIndexi;
-	sunOglCurPrimTablePtr->oglIndexs=r_glIndexs;
-	sunOglCurPrimTablePtr->oglIndexub=r_glIndexub;
-	sunOglCurPrimTablePtr->oglIndexdv=r_glIndexdv;
-	sunOglCurPrimTablePtr->oglIndexfv=r_glIndexfv;
-	sunOglCurPrimTablePtr->oglIndexiv=r_glIndexiv;
-	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
-	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
-	#endif
 
 		stoptrace();  prargc(config);  prargx(drawable);  prargs(renderer);
 		closetrace();
@@ -1542,18 +1508,6 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, draw))!=NULL) pbp->clear();
-	#ifdef SUNOGL
-	sunOglCurPrimTablePtr->oglIndexd=r_glIndexd;
-	sunOglCurPrimTablePtr->oglIndexf=r_glIndexf;
-	sunOglCurPrimTablePtr->oglIndexi=r_glIndexi;
-	sunOglCurPrimTablePtr->oglIndexs=r_glIndexs;
-	sunOglCurPrimTablePtr->oglIndexub=r_glIndexub;
-	sunOglCurPrimTablePtr->oglIndexdv=r_glIndexdv;
-	sunOglCurPrimTablePtr->oglIndexfv=r_glIndexfv;
-	sunOglCurPrimTablePtr->oglIndexiv=r_glIndexiv;
-	sunOglCurPrimTablePtr->oglIndexsv=r_glIndexsv;
-	sunOglCurPrimTablePtr->oglIndexubv=r_glIndexubv;
-	#endif
 
 		stoptrace();  prargc(config);  prargx(draw);  prargx(read);
 		prargs(renderer);  closetrace();
@@ -1642,18 +1596,11 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	CATCH();
 }
 
-#ifdef SUNOGL
-void glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute,
-	unsigned int *value)
-#else
 int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute,
 	unsigned int *value)
-#endif
 {
 	glXQueryDrawable(dpy, pbuf, attribute, value);
-	#ifndef SUNOGL
 	return 0;
-	#endif
 }
 
 
@@ -1748,13 +1695,8 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 // Returns the transparent index from the overlay visual on the 2D X server
 
-#ifdef SUNOGL
-GLboolean glXGetTransparentIndexSUN(Display *dpy, Window overlay,
-	Window underlay, unsigned int *transparentIndex)
-#else
 int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 	Window underlay, long *transparentIndex)
-#endif
 {
 	XWindowAttributes xwa;
 	if(!transparentIndex) return False;

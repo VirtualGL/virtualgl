@@ -22,45 +22,6 @@
 extern Display *maindpy;
 
 
-#ifdef SUNOGL
-static int use_ogl_as_default(void)
-{
-	int retval=0;
-	if(maindpy)
-	{
-		int maj_opcode=-1, first_event=-1, first_error=-1;
-		if(XQueryExtension(maindpy, "GLX", &maj_opcode, &first_event,
-			&first_error))
-		{
-			int attribs[]={GLX_RGBA, GLX_DOUBLEBUFFER, 0};
-			int sbattribs[]={GLX_RGBA, 0};
-			XVisualInfo *vi=NULL;
-			if((vi=glXChooseVisual(maindpy, DefaultScreen(maindpy), attribs))!=NULL
-				|| (vi=glXChooseVisual(maindpy, DefaultScreen(maindpy), sbattribs))!=NULL)
-			{
-				GLXContext ctx=glXCreateContext(maindpy, vi, NULL, True);
-				if(ctx)
-				{
-					if(glXMakeCurrent(maindpy, DefaultRootWindow(maindpy), ctx))
-					{
-						char *renderer=(char *)glGetString(GL_RENDERER);
-						if(renderer && !strstr(renderer, "SUNWpfb")
-							&& !strstr(renderer, "SUNWm64") && !strstr(renderer, "SUNWnfb")
-							&& !strstr(renderer, "Sun dpa")
-							&& !strstr(renderer, "software renderer")) retval=1;
-						glXMakeCurrent(maindpy, 0, 0);
-					}
-					glXDestroyContext(maindpy, ctx);
-				}
-				XFree(vi);
-			}
-		}
-	}
-	return retval;
-}
-#endif
-
-
 clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_drawmethod(drawmethod), _reqdrawmethod(drawmethod), _fb(NULL), _cfi(0),
 	_deadyet(false), _t(NULL), _stereo(stereo)
@@ -87,9 +48,6 @@ void clientwin::setdrawmethod(void)
 	if(_drawmethod==RR_DRAWAUTO)
 	{
 		_drawmethod=RR_DRAWX11;
-		#ifdef SUNOGL
-		if(use_ogl_as_default()) _drawmethod=RR_DRAWOGL;
-		#endif
 	}
 }
 

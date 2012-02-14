@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -74,7 +74,6 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 				win);
 	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
-	_gammacorrectedvisuals=__vglHasGCVisuals(dpy, DefaultScreen(dpy));
 	_stereovisual=__vglClientVisualAttrib(dpy, DefaultScreen(dpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
@@ -619,8 +618,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		stereo);
 
 	// Gamma correction
-	if((!_gammacorrectedvisuals || !fconfig.gamma_usesun)
-		&& fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0)
+	if(fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0)
 	{
 		_prof_gamma.startframe();
 		static bool first=true;

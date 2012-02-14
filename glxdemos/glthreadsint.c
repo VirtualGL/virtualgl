@@ -400,12 +400,6 @@ main(int argc, char *argv[])
       printf("XInitThreads() returned 0 (failure- this program may fail)\n");
    }
 
-   #ifdef SUNOGL
-   if (!glXInitThreadsSUN()) {
-      printf("glXInitThreadsSUN() returned 0 (failure- this program may fail)\n");
-   }
-   #endif
-
    dpy = XOpenDisplay(displayName);
    if (!dpy) {
       fprintf(stderr, "Unable to open display %s\n", displayName);

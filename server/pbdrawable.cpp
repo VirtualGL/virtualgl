@@ -83,9 +83,6 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 
 	_w=w;  _h=h;  _config=config;
 	pbattribs[1]=w;  pbattribs[3]=h;
-	#ifdef SUNOGL
-	tempctx tc(_localdpy, 0, 0, 0);
-	#endif
 	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
 	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
 	if(__vglServerVisualAttrib(config, GLX_STEREO)) _stereo=true;
@@ -117,9 +114,6 @@ pbuffer::~pbuffer(void)
 {
 	if(_drawable)
 	{
-		#ifdef SUNOGL
-		tempctx tc(_localdpy, 0, 0, 0);
-		#endif
 		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
 		else glXDestroyPbuffer(_localdpy, _drawable);
 	}

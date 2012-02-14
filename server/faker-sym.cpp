@@ -219,9 +219,6 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	lsym(glPopAttrib)
 	lsym(glReadPixels)
 	lsym(glDrawPixels)
-	#ifdef SUNOGL
-	lsym(glBegin)
-	#else
 	lsym(glIndexd)
 	lsym(glIndexf)
 	lsym(glIndexi)
@@ -232,7 +229,6 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	lsym(glIndexiv)
 	lsym(glIndexsv)
 	lsym(glIndexubv)
-	#endif
 	lsym(glClearIndex)
 	lsym(glGetDoublev)
 	lsym(glGetFloatv)

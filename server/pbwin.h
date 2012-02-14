@@ -69,7 +69,6 @@ class pbwin : public pbdrawable
 		bool _syncdpy;
 		transplugin *_plugin;
 		bool _truecolor;
-		bool _gammacorrectedvisuals;
 		bool _stereovisual;
 		rrframe _r, _g, _b, _f;
 		bool _wmdelete;

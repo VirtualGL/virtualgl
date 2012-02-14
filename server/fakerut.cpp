@@ -29,9 +29,6 @@
 #include <unistd.h>
 #include "rrerror.h"
 #include "rrthread.h"
-#ifdef sparc
-#include <X11/Xmu/XmuSolaris.h>
-#endif
 #include "glext-vgl.h"
 
 #ifndef GLX_RGBA_BIT
@@ -1206,9 +1203,6 @@ void queryctxtest(Display *dpy, XVisualInfo *v, GLXFBConfig c)
 }
 
 
-#ifdef SUNOGL
-#define glXGetFBConfigFromVisual glXGetFBConfigFromVisualSGIX
-#else
 GLXFBConfig glXGetFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 {
 	GLXContext ctx=0;  int temp, fbcid=0, n=0;  GLXFBConfig *configs=NULL, c=0;
@@ -1237,7 +1231,6 @@ GLXFBConfig glXGetFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 	}
 	return 0;
 }
-#endif
 
 
 // This tests the faker's client/server visual matching heuristics
@@ -2052,179 +2045,6 @@ int pbtest(void)
 }
 
 
-#ifdef sparc
-
-// Test Emulation of Gamma-Corrected Visuals
-int gammatest(void)
-{
-	testcolor clr(false, 0);
-	Display *dpy=NULL;
-	Window win=0;
-	int dpyw, dpyh, lastframe=0, retval=1;
-	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE,
-		8, GLX_BLUE_SIZE, 8, None};
-	XVisualInfo *v0=NULL, *v=NULL, vtemp;
-	GLXContext ctx=0;
-	XSetWindowAttributes swa;
-	double gamma=0.0;
-	int n=0;
-
-	printf("Gamma-Corrected Visuals test\n\n");
-
-	try
-	{
-		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
-		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
-		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
-		if((v0=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
-			_throw("Could not find a suitable visual");
-
-		Window root=RootWindow(dpy, DefaultScreen(dpy));
-		swa.colormap=XCreateColormap(dpy, root, v0->visual, AllocNone);
-		swa.border_pixel=0;
-		swa.event_mask=0;
-		if((win=XCreateWindow(dpy, root, 0, 0, dpyw/2, dpyh/2, 0, v0->depth,
-			InputOutput, v0->visual, CWBorderPixel|CWColormap|CWEventMask,
-			&swa))==0)
-			_throw("Could not create window");
-
-		if((ctx=glXCreateContext(dpy, v0, 0, True))==NULL)
-			_throw("Could not establish GLX context");
-		XFree(v0);  v0=NULL;
-		if(!glXMakeCurrent(dpy, win, ctx))
-			_throw("Could not make context current");
-		XMapWindow(dpy, win);
-
-		try
-		{
-			printf("VGL_GAMMA=1:    ");
-			putenv((char *)"VGL_GAMMA=1");
-			clr.clear(GL_BACK);
-			glXSwapBuffers(dpy, win);
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
-				_throw("Could not find a suitable visual");
-			gamma=0.0;
-			if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v->visual, &gamma)
-				|| gamma==0.0)
-				_throw("XSolarisGetVisualGamma failed");
-			if(v) {XFree(v);  v=NULL;}
-			if(gamma!=1.0) _throw("Default visual gamma != 1.0");
-
-			n=0;
-			if((v=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n))==NULL || n<1)
-				_throw("No visuals found");
-			int gcv=0, ngcv=0;
-			for(int i=0; i<n; i++)
-			{
-				gamma=0.0;
-				if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v[i].visual, &gamma)
-					|| gamma==0.0)
-					_throw("XSolarisGetVisualGamma failed");
-				if(gamma==1.00) gcv++;  else ngcv++;
-			}
-			printf("gc/ngc %d/%d ", gcv, ngcv);
-			if(v) {XFree(v);  v=NULL;}
-
-			printf("SUCCESS\n");
-		}
-		catch(rrerror &e)
-		{
-			printf("Failed! (%s)\n", e.getMessage());  retval=0;
-		}
-		fflush(stdout);
-
-		try
-		{
-			printf("VGL_GAMMA=0:    ");
-			putenv((char *)"VGL_GAMMA=0");
-			clr.clear(GL_BACK);
-			glXSwapBuffers(dpy, win);
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
-				_throw("Could not find a suitable visual");
-			gamma=0.0;
-			if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v->visual, &gamma)
-				|| gamma==0.0)
-				_throw("XSolarisGetVisualGamma failed");
-			if(v) {XFree(v);  v=NULL;}
-			if(gamma==1.0) _throw("Default visual gamma == 1.0");
-
-			n=0;
-			if((v=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n))==NULL || n<1)
-				_throw("No visuals found");
-			int gcv=0, ngcv=0;
-			for(int i=0; i<n; i++)
-			{
-				gamma=0.0;
-				if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v[i].visual, &gamma)
-					|| gamma==0.0)
-					_throw("XSolarisGetVisualGamma failed");
-				if(gamma==1.00) gcv++;  else ngcv++;
-			}
-			printf("gc/ngc %d/%d ", gcv, ngcv);
-			if(v) {XFree(v);  v=NULL;}
-
-			printf("SUCCESS\n");
-		}
-		catch(rrerror &e)
-		{
-			printf("Failed! (%s)\n", e.getMessage());  retval=0;
-		}
-		fflush(stdout);
-
-		try
-		{
-			printf("VGL_GAMMA=1.1:  ");
-			putenv((char *)"VGL_GAMMA=1.1");
-			clr.clear(GL_BACK);
-			glXSwapBuffers(dpy, win);
-			if((v=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
-				_throw("Could not find a suitable visual");
-			gamma=0.0;
-			if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v->visual, &gamma)
-				|| gamma==0.0)
-				_throw("XSolarisGetVisualGamma failed");
-			if(v) {XFree(v);  v=NULL;}
-			if(gamma!=1.0) _throw("Default visual gamma != 1.0");
-
-			n=0;
-			if((v=XGetVisualInfo(dpy, VisualNoMask, &vtemp, &n))==NULL || n<1)
-				_throw("No visuals found");
-			int gcv=0, ngcv=0;
-			for(int i=0; i<n; i++)
-			{
-				gamma=0.0;
-				if(XSolarisGetVisualGamma(dpy, DefaultScreen(dpy), v[i].visual, &gamma)
-					|| gamma==0.0)
-					_throw("XSolarisGetVisualGamma failed");
-				if(gamma==1.00) gcv++;  else ngcv++;
-			}
-			printf("gc/ngc %d/%d ", gcv, ngcv);
-			if(v) {XFree(v);  v=NULL;}
-
-			printf("SUCCESS\n");
-		}
-		catch(rrerror &e)
-		{
-			printf("Failed! (%s)\n", e.getMessage());  retval=0;
-		}
-		fflush(stdout);
-
-	}
-	catch(rrerror &e)
-	{
-		printf("Failed! (%s)\n", e.getMessage());  retval=0;
-	}
-	if(ctx && dpy) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;}
-	if(v) {XFree(v);  v=NULL;}
-	if(v0) {XFree(v0);  v0=NULL;}
-	if(win) {XDestroyWindow(dpy, win);  win=0;}
-	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
-	return retval;
-}
-
-#endif
-
-
 // Test whether glXMakeCurrent() can handle mismatches between the FB config
 // of the context and the Pbuffer
 
@@ -2442,19 +2262,11 @@ int querytest(void)
 }
 
 
-#ifdef SUNOGL
-#define testprocsym(f) \
-	if((sym=(void *)glXGetProcAddress((const GLubyte *)#f))==NULL) \
-		_throw("glXGetProcAddress(\""#f"\") returned NULL"); \
-	else if(sym!=(void *)f) \
-		_throw("glXGetProcAddress(\""#f"\")!="#f);
-#else
 #define testprocsym(f) \
 	if((sym=(void *)glXGetProcAddressARB((const GLubyte *)#f))==NULL) \
 		_throw("glXGetProcAddressARB(\""#f"\") returned NULL"); \
 	else if(sym!=(void *)f) \
 		_throw("glXGetProcAddressARB(\""#f"\")!="#f);
-#endif
 
 int procaddrtest(void)
 {
@@ -2506,9 +2318,6 @@ int main(int argc, char **argv)
 	dlsym(RTLD_NEXT, "ifThisSymbolExistsI'llEatMyHat2");
 
 	if(!XInitThreads()) _throw("XInitThreads() failed");
-	#ifdef SUNOGL
-	if(!glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
-	#endif
 	if(!querytest()) ret=-1;
 	printf("\n");
 	if(!procaddrtest()) ret=-1;
@@ -2530,10 +2339,6 @@ int main(int argc, char **argv)
 	}
 	if(!vistest()) ret=-1;
 	printf("\n");
-	#ifdef sparc
-	if(!gammatest()) ret=-1;
-	printf("\n");
-	#endif
 	if(!mttest(nthr)) ret=-1;
 	printf("\n");
 	if(!pbtest()) ret=-1;

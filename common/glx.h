@@ -1,4 +1,4 @@
-#if defined(SUNOGL) || defined(_WIN32)
+#if defined(_WIN32)
 #include <GL/glx.h>
 #else
 #ifndef __glx_h__

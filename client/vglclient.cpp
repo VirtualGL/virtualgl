@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -57,21 +57,6 @@ bool detach=false, force=false, child=false;
 char *logfile=NULL;
 
 void start(char *);
-
-
-#ifdef SUNOGL
-#include "dlfcn.h"
-int _glXInitThreadsSUN(void)
-{
-	int retval=1;
-	typedef int (*_glXInitThreadsSUNType)(void);
-	_glXInitThreadsSUNType __glXInitThreadsSUN=NULL;
-	if((__glXInitThreadsSUN=
-		(_glXInitThreadsSUNType)dlsym(RTLD_NEXT, "glXInitThreadsSUN"))!=NULL)
-		retval=__glXInitThreadsSUN();
-	return retval;
-}
-#endif
 
 
 extern "C" {
@@ -315,8 +300,8 @@ void usage(char *progname)
 	fprintf(stderr, "-kill = Kill all detached VGLclient processes running under this user ID\n");
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
 	fprintf(stderr, "-v = Display version information\n");
-	fprintf(stderr, "-x = Use X11 drawing (default for x86 systems)\n");
-	fprintf(stderr, "-gl = Use OpenGL drawing (default for Sparc systems with 3D accelerators)\n");
+	fprintf(stderr, "-x = Use X11 drawing (default)\n");
+	fprintf(stderr, "-gl = Use OpenGL drawing\n");
 }
 
 
@@ -529,9 +514,6 @@ void start(char *displayname)
 	bool newlistener=false;
 
 	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
-	#ifdef SUNOGL
-	if(!_glXInitThreadsSUN()) _throw("glXInitThreadsSUN() failed");
-	#endif
 
 	signal(SIGINT, handler);
 	signal(SIGTERM, handler);

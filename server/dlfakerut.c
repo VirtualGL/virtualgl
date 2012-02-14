@@ -21,12 +21,6 @@
 #include <ctype.h>
 
 
-#ifdef SUNOGL
-#define _glXGetProcAddressARBType _glXGetProcAddressType
-#define _glXGetProcAddressARB _glXGetProcAddress
-#endif
-
-
 #define _throw(m) {fprintf(stderr, "ERROR: %s\n", m);  goto bailout;}
 
 
@@ -141,12 +135,7 @@ void loadsymbols2(void)
 {
 	const char *err=NULL;
 
-	#ifdef SUNOGL
-	lsym(glXGetProcAddress);
-	#else
 	lsym(glXGetProcAddressARB);
-	#endif
-
 	lsym2(glXChooseVisual);
 	lsym2(glXCreateContext);
 	lsym2(glXDestroyContext);

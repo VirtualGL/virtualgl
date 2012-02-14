@@ -313,9 +313,6 @@ funcdef7(void, glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei,
 funcdef5(void, glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
 	GLenum, type, const GLvoid*, pixels,);
 
-#ifdef SUNOGL
-funcdef1(void, glBegin, GLenum, mode,);
-#else
 funcdef1(void, glIndexd, GLdouble, c,);
 
 funcdef1(void, glIndexf, GLfloat, c,);
@@ -335,7 +332,6 @@ funcdef1(void, glIndexiv, const GLint*, c,);
 funcdef1(void, glIndexsv, const GLshort*, c,);
 
 funcdef1(void, glIndexubv, const GLubyte*, c,);
-#endif
 
 funcdef1(void, glClearIndex, GLfloat, c,);
 

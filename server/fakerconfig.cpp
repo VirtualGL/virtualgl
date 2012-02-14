@@ -160,13 +160,7 @@ static void fconfig_init(void)
 	fconfig.compress=-1;
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
 	fconfig.forcealpha=-1;
-	#ifdef SUNOGL
-	fconfig_setgamma(fconfig, 2.22);
-	fconfig.gamma_usesun=1;
-	#else
 	fconfig_setgamma(fconfig, 1.0);
-	fconfig.gamma_usesun=0;
-	#endif
 	fconfig.gui=1;
 	fconfig.guikey=XK_F9;
 	fconfig.guimod=ShiftMask|ControlMask;
@@ -316,18 +310,16 @@ void fconfig_reloadenv(void)
 	{
 		if(!strcmp(env, "1"))
 		{
-			if(!fcenv_set || fcenv.gamma_usesun!=1 || fcenv.gamma!=2.22)
+			if(!fcenv_set || fcenv.gamma!=2.22)
 			{
-				fconfig.gamma_usesun=fcenv.gamma_usesun=1;
 				fcenv.gamma=2.22;
 				fconfig_setgamma(fconfig, 2.22);
 			}
 		}
 		else if(!strcmp(env, "0"))
 		{
-			if(!fcenv_set || fcenv.gamma_usesun!=0 || fcenv.gamma!=1.0)
+			if(!fcenv_set || fcenv.gamma!=1.0)
 			{
-				fconfig.gamma_usesun=fcenv.gamma_usesun=0;
 				fcenv.gamma=1.0;
 				fconfig_setgamma(fconfig, 1.0);
 			}
@@ -336,9 +328,8 @@ void fconfig_reloadenv(void)
 		{
 			char *t=NULL;  double dtemp=strtod(env, &t);
 			if(t && t!=env
-				&& (!fcenv_set || fcenv.gamma_usesun!=0 || fcenv.gamma!=dtemp))
+				&& (!fcenv_set || fcenv.gamma!=dtemp))
 			{
-				fconfig.gamma_usesun=fcenv.gamma_usesun=0;
 				fcenv.gamma=dtemp;
 				fconfig_setgamma(fconfig, dtemp);
 			}
@@ -553,7 +544,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfdbl(flushdelay);
 	prconfint(forcealpha);
 	prconfdbl(gamma);
-	prconfint(gamma_usesun);
 	prconfstr(gllib);
 	prconfint(gui);
 	prconfint(guikey);

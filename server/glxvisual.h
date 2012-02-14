@@ -32,15 +32,9 @@ int __vglVisualDepth(Display *, int, VisualID);
 
 int __vglVisualClass(Display *, int, VisualID);
 
-double __vglVisualGamma(Display *, int, VisualID);
-
-bool __vglHasGCVisuals(Display *, int);
-
 VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
 
 XVisualInfo *__vglVisualFromVisualID(Display *, int, VisualID);
-
-Status _XSolarisGetVisualGamma(Display *, int, Visual *, double *);
 
 #define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
 

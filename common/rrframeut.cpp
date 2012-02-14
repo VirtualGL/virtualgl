@@ -480,9 +480,6 @@ int main(int argc, char **argv)
 		if(pctest) {dopctest(bmpfile);  exit(0);}
 
 		errifnot(XInitThreads());
-		#ifdef SUNOGL
-		errifnot(glXInitThreadsSUN());
-		#endif
 		if(!(dpy=XOpenDisplay(0)))
 		{
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));

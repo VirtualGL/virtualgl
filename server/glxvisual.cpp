@@ -29,7 +29,6 @@ extern Display *_localdpy;
 
 struct _visattrib
 {
-	double gamma;
 	VisualID visualid;
 	int depth, c_class;
 	int level, stereo, db, gl, trans;
@@ -41,9 +40,6 @@ static int _vascreen=-1, _vaentries=0;
 bool _vahasgcv=false;
 static rrcs _vamutex;
 static struct _visattrib *_va;
-
-
-#include "gamma.c"
 
 
 static void buildVisAttribTable(Display *dpy, int screen)
@@ -129,8 +125,6 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	_vahasgcv=false;
 	for(int i=0; i<nv; i++)
 	{
-		_XSolarisGetVisualGamma(dpy, screen, visuals[i].visual, &_va[i].gamma);
-		if(_va[i].gamma==1.00) _vahasgcv=true;
 		if(clientglx)
 		{
 			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &_va[i].db);
@@ -344,28 +338,10 @@ int __vglVisualClass(Display *dpy, int screen, VisualID vid)
 }
 
 
-double __vglVisualGamma(Display *dpy, int screen, VisualID vid)
-{
-	buildVisAttribTable(dpy, screen);
-	for(int i=0; i<_vaentries; i++)
-	{
-		if(_va[i].visualid==vid) return _va[i].gamma;
-	}		
-	return 2.22;
-}
-
-
-bool __vglHasGCVisuals(Display *dpy, int screen)
-{
-	buildVisAttribTable(dpy, screen);
-	return _vahasgcv;
-}
-
-
 VisualID __vglMatchVisual(Display *dpy, int screen,
 	int depth, int c_class, int level, int stereo, int trans)
 {
-	int i, trystereo, trygamma;
+	int i, trystereo;
 	if(!dpy) return 0;
 
 	buildVisAttribTable(dpy, screen);
@@ -373,29 +349,21 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 	// Try to find an exact match
 	for(trystereo=1; trystereo>=0; trystereo--)
 	{
-		for(trygamma=1; trygamma>=0; trygamma--)
+		for(i=0; i<_vaentries; i++)
 		{
-			for(i=0; i<_vaentries; i++)
+			int match=1;
+			if(_va[i].c_class!=c_class) match=0;
+			if(_va[i].depth!=depth) match=0;
+			if(fconfig.stereo==RRSTEREO_QUADBUF && trystereo)
 			{
-				int match=1;
-				if(_va[i].c_class!=c_class) match=0;
-				if(_va[i].depth!=depth) match=0;
-				if(trygamma)
-				{
-					if(fconfig.gamma_usesun && _va[i].gamma!=1.0) match=0;
-					if(!fconfig.gamma_usesun && _va[i].gamma==1.0) match=0;
-				}
-				if(fconfig.stereo==RRSTEREO_QUADBUF && trystereo)
-				{
-					if(stereo!=_va[i].stereo) match=0;
-					if(stereo && !_va[i].db) match=0;
-					if(stereo && !_va[i].gl) match=0;
-					if(stereo && _va[i].c_class!=TrueColor) match=0;
-				}
-				if(level!=_va[i].level) match=0;
-				if(trans && !_va[i].trans) match=0;
-				if(match) return _va[i].visualid;
+				if(stereo!=_va[i].stereo) match=0;
+				if(stereo && !_va[i].db) match=0;
+				if(stereo && !_va[i].gl) match=0;
+				if(stereo && _va[i].c_class!=TrueColor) match=0;
 			}
+			if(level!=_va[i].level) match=0;
+			if(trans && !_va[i].trans) match=0;
+			if(match) return _va[i].visualid;
 		}
 	}
 

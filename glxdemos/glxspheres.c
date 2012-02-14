@@ -316,9 +316,6 @@ int display(int advance)
 		if(useoverlay)
 		{
 			glXMakeCurrent(dpy, olwin, olctx);
-			#ifdef SUNOGL
-			glXGetTransparentIndexSUN(dpy, olwin, win, &transpixel);
-			#endif
 		}
 		if(!(fontinfo=XLoadQueryFont(dpy, "fixed")))
 			_throw("Could not load X font");

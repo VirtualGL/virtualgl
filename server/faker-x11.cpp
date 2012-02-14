@@ -395,32 +395,6 @@ char *XServerVendor(Display *dpy)
 }
 
 
-// Part of VirtualGL's support for gamma-corrected visuals on SPARC clients
-
-#ifdef sparc
-
-Status XSolarisGetVisualGamma(Display *dpy, int screen, Visual *visual,
-  double *gamma)
-{
-	Status ret=0;
-
-		opentrace(XSolarisGetVisualGamma);  prargd(dpy);  prargi(screen);
-		prargv(visual);  starttrace();
-
-	if((!__vglHasGCVisuals(dpy, screen) || !fconfig.gamma_usesun)
-		&& fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0
-		&& gamma)
-		*gamma=1.0;
-	else ret=_XSolarisGetVisualGamma(dpy, screen, visual, gamma);
-
-		stoptrace();  if(gamma) prargf(*gamma);  closetrace();
-
-	return ret;
-}
-
-#endif
-
-
 // The following functions are interposed so that VirtualGL can detect window
 // resizes, key presses (to pop up the VGL configuration dialog), and window
 // delete events from the window manager.
