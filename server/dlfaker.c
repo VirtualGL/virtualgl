@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -50,7 +50,8 @@ void *dlopen(const char *filename, int flag)
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="librrfaker.so";
 	if(filename && (!strncmp(filename, "libGL.", 6)
-		|| strstr(filename, "/libGL.")))
+		|| strstr(filename, "/libGL.") || !strncmp(filename, "libX11.", 7)
+		|| strstr(filename, "/libX11.")))
 	{
 		if(verbose)
 			fprintf(stderr,

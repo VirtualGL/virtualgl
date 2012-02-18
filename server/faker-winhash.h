@@ -163,16 +163,11 @@ class winhash : public _winhash
 		bool compare(char *key1, Window key2, _winhashstruct *h)
 		{
 			pbwin *pbw=h->value;
-			char *displaystring=NULL;
-			if(pbw && pbw!=(pbwin *)-1 && pbw->get2ddpy())
-			{
-				displaystring=DisplayString(pbw->get2ddpy());
-			}
 			return (
 				// Match 2D X Server display string and Window ID stored in pbdrawable
 				// instance
 				(pbw && pbw!=(pbwin *)-1 && key1
-					&& displaystring && !strcasecmp(displaystring, key1)
+					&& !strcasecmp(DisplayString(pbw->get2ddpy()), key1)
 					&& key2==pbw->getx11drawable())
 				||
 				// If key1 is NULL, match Pbuffer drawable ID instead of X Window ID

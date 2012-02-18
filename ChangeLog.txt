@@ -18,6 +18,12 @@ pointer was passed to it.
 [4]
 VirtualGL should now build and run properly on FreeBSD.
 -------------------------------------------------------------------------------
+[5]
+VirtualGL now works properly with applications that dynamically load libX11.
+This specifically fixes several issues that occurred when running SDL-based
+applications against a version of libSDL that was configured with
+--enable-x11-shared.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
