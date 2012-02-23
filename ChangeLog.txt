@@ -24,6 +24,11 @@ This specifically fixes several issues that occurred when running SDL-based
 applications against a version of libSDL that was configured with
 --enable-x11-shared.
 -------------------------------------------------------------------------------
+[6]
+Changed Debian package names to lower case ("virtualgl" and "virtualgl32") to
+avoid an issue whereby the package was always being installed, even if the
+installed version was up to date.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
