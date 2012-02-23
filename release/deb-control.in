@@ -1,4 +1,4 @@
-Package: @CMAKE_PROJECT_NAME@
+Package: @CMAKE_PROJECT_NAME_LC@
 Version: @VERSION@-@BUILD@
 Section: misc
 Priority: optional

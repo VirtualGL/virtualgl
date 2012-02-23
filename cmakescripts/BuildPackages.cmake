@@ -33,6 +33,7 @@ configure_file(release/VirtualGL.spec.in pkgscripts/VirtualGL.spec @ONLY)
 add_custom_target(rpm sh pkgscripts/makerpm
 	SOURCES pkgscripts/makerpm)
 
+string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 configure_file(release/makedpkg.in pkgscripts/makedpkg)
 configure_file(release/deb-control.in pkgscripts/deb-control)
 
