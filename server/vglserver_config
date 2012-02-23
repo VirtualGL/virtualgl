@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2011 D. R. Commander
+# Copyright (C)2009-2012 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,6 +22,9 @@ UNATTENDED=0
 GID=
 GROUPADD=/usr/sbin/groupadd
 if [ ! -x $GROUPADD ]; then GROUPADD=groupadd; fi
+if [ "`uname -s`" = "FreeBSD" ]; then
+	GROUPADD="pw groupadd"
+fi
 LSMOD=/sbin/lsmod
 if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
 RMMOD=/sbin/rmmod
@@ -419,15 +422,14 @@ unconfigglx() {
 	if [ -f /etc/X11/gdm/SunRayInit/Default ]; then
 		delvglgenkey /etc/X11/gdm/SunRayInit/Default
 	fi
-	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
-		delvglgenkey /etc/gdm/Init/Default
-	fi
-	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
-		delvglgenkey /etc/opt/gnome/gdm/Init/Default
-	fi
-	if [ -f /etc/kde4/kdm/Xsetup -a ! -h /etc/kde4/kdm/Xsetup ]; then
-		delvglgenkey /etc/kde4/kdm/Xsetup
-	fi
+	for file in /etc/gdm/Init/Default \
+		/usr/local/etc/gdm/Init/Default \
+		/etc/opt/gnome/gdm/Init/Default \
+		/etc/kde4/kdm/Xsetup; do
+		if [ -f $file -a ! -h $file ]; then
+			delvglgenkey $file
+		fi
+	done
 
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xsetup ]; then
@@ -445,36 +447,27 @@ unconfigglx() {
 		fi
 	fi
 
-	if [ -f /etc/X11/xdm/Xservers -a ! -h /etc/X11/xdm/Xservers ]; then
-		enablextest /etc/X11/xdm/Xservers
-	fi
-	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
-		enablextest /etc/X11/gdm/gdm.conf
-	fi
-	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
-		enablextest /etc/gdm/custom.conf
-	fi
-	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
-		enablextest /etc/gdm/gdm.conf
-	fi
+	for file in /etc/X11/xdm/Xservers \
+		/etc/X11/gdm/gdm.conf \
+		/etc/gdm/custom.conf \
+		/usr/local/etc/gdm/custom.conf \
+		/etc/gdm/gdm.conf \
+		/etc/X11/gdm/custom.conf \
+		/etc/opt/gnome/gdm/gdm.conf \
+		/etc/opt/kde3/share/config/kdm/Xservers; do
+		if [ -f $file -a ! -h $file ]; then
+			enablextest $file
+		fi
+	done
 	if [ -f /etc/gdm/gdm-cdd.conf ]; then
 		enablextest /etc/gdm/gdm-cdd.conf
 	fi
-	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
-		enablextest /etc/X11/gdm/custom.conf
-	fi
-	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
-		enablextest /etc/opt/gnome/gdm/gdm.conf
-	fi
-	if [ -f /etc/opt/kde3/share/config/kdm/Xservers -a ! -h /etc/opt/kde3/share/config/kdm/Xservers ]; then
-		enablextest /etc/opt/kde3/share/config/kdm/Xservers
-	fi
-	if [ -f /etc/kde4/kdm/kdmrc -a ! -h /etc/kde4/kdm/kdmrc ]; then
-		enablextestkdm /etc/kde4/kdm/kdmrc
-	fi
-	if [ -f /etc/kde/kdm/kdmrc -a ! -h /etc/kde/kdm/kdmrc ]; then
-		enablextestkdm /etc/kde/kdm/kdmrc
-	fi
+	for file in /etc/kde4/kdm/kdmrc \
+		/etc/kde/kdm/kdmrc; do
+		if [ -f $file -a ! -h $file ]; then
+			enablextestkdm $file
+		fi
+	done
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xservers ]; then
 			enablextest /etc/dt/config/Xservers
@@ -484,23 +477,18 @@ unconfigglx() {
 		fi
 	fi
 
-	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/X11/gdm/gdm.conf
-	fi
-	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
-		disallowgdmtcp /etc/gdm/custom.conf
-	fi
-	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/gdm/gdm.conf
-	fi
+	for file in /etc/X11/gdm/gdm.conf \
+		/etc/gdm/custom.conf \
+		/usr/local/etc/gdm/custom.conf \
+		/etc/gdm/gdm.conf \
+		/etc/X11/gdm/custom.conf \
+		/etc/opt/gnome/gdm/gdm.conf; do
+		if [ -f $file -a ! -h $file ]; then
+			disallowgdmtcp $file
+		fi
+	done
 	if [ -f /etc/gdm/gdm-cdd.conf ]; then
 		disallowgdmtcp /etc/gdm/gdm-cdd.conf
-	fi
-	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
-		disallowgdmtcp /etc/X11/gdm/custom.conf
-	fi
-	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/opt/gnome/gdm/gdm.conf
 	fi
 
 	unconfigdev
@@ -566,15 +554,14 @@ configglx() {
 	if [ -f /etc/X11/gdm/SunRayInit/Default ]; then
 		addvglgenkey /etc/X11/gdm/SunRayInit/Default
 	fi
-	if [ -f /etc/gdm/Init/Default -a ! -h /etc/gdm/Init/Default ]; then
-		addvglgenkey /etc/gdm/Init/Default
-	fi
-	if [ -f /etc/opt/gnome/gdm/Init/Default -a ! -h /etc/opt/gnome/gdm/Init/Default ]; then
-		addvglgenkey /etc/opt/gnome/gdm/Init/Default
-	fi
-	if [ -f /etc/kde4/kdm/Xsetup -a ! -h /etc/kde4/kdm/Xsetup ]; then
-		addvglgenkey /etc/kde4/kdm/Xsetup
-	fi
+	for file in /etc/gdm/Init/Default \
+		/usr/local/etc/gdm/Init/Default \
+		/etc/opt/gnome/gdm/Init/Default \
+		/etc/kde4/kdm/Xsetup; do
+		if [ -f $file -a ! -h $file ]; then
+			addvglgenkey $file
+		fi
+	done
 		
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ ! -d /etc/dt/config ]; then
@@ -615,34 +602,22 @@ configglx() {
 
 	fi
 
-	if [ -f /etc/X11/xdm/Xservers -a ! -h /etc/X11/xdm/Xservers ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/X11/xdm/Xservers
-		else
-			enablextest /etc/X11/xdm/Xservers
+	for file in /etc/X11/xdm/Xservers \
+		/etc/X11/gdm/gdm.conf \
+		/etc/gdm/custom.conf \
+		/usr/local/etc/gdm/custom.conf \
+		/etc/gdm/gdm.conf \
+		/etc/X11/gdm/custom.conf \
+		/etc/opt/gnome/gdm/gdm.conf \
+		/etc/opt/kde3/share/config/kdm/Xservers; do
+		if [ -f $file -a ! -h $file ]; then
+			if [ "$DISABLEXTEST" = "1" ]; then
+				disablextest $file
+			else
+				enablextest $file
+			fi
 		fi
-	fi
-	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/X11/gdm/gdm.conf
-		else
-			enablextest /etc/X11/gdm/gdm.conf
-		fi
-	fi
-	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/gdm/custom.conf
-		else
-			enablextest /etc/gdm/custom.conf
-		fi
-	fi
-	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/gdm/gdm.conf
-		else
-			enablextest /etc/gdm/gdm.conf
-		fi
-	fi
+	done
 	if [ -f /etc/gdm/gdm-cdd.conf ]; then
 		if [ "$DISABLEXTEST" = "1" ]; then
 			disablextest /etc/gdm/gdm-cdd.conf
@@ -650,41 +625,16 @@ configglx() {
 			enablextest /etc/gdm/gdm-cdd.conf
 		fi
 	fi
-	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/X11/gdm/custom.conf
-		else
-			enablextest /etc/X11/gdm/custom.conf
+	for file in /etc/kde4/kdm/kdmrc \
+		/etc/kde/kdm/kdmrc; do
+		if [ -f $file -a ! -h $file ]; then
+			if [ "$DISABLEXTEST" = "1" ]; then
+				disablextestkdm $file
+			else
+				enablextestkdm $file
+			fi
 		fi
-	fi
-	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/opt/gnome/gdm/gdm.conf
-		else
-			enablextest /etc/opt/gnome/gdm/gdm.conf
-		fi
-	fi
-	if [ -f /etc/opt/kde3/share/config/kdm/Xservers -a ! -h /etc/opt/kde3/share/config/kdm/Xservers ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextest /etc/opt/kde3/share/config/kdm/Xservers
-		else
-			enablextest /etc/opt/kde3/share/config/kdm/Xservers
-		fi
-	fi
-	if [ -f /etc/kde4/kdm/kdmrc -a ! -h /etc/kde4/kdm/kdmrc ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextestkdm /etc/kde4/kdm/kdmrc
-		else
-			enablextestkdm /etc/kde4/kdm/kdmrc
-		fi
-	fi
-	if [ -f /etc/kde/kdm/kdmrc -a ! -h /etc/kde/kdm/kdmrc ]; then
-		if [ "$DISABLEXTEST" = "1" ]; then
-			disablextestkdm /etc/kde/kdm/kdmrc
-		else
-			enablextestkdm /etc/kde/kdm/kdmrc
-		fi
-	fi
+	done
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ "$DISABLEXTEST" = "1" ]; then
 			if [ ! -f /etc/dt/config/Xservers ]; then
@@ -717,23 +667,18 @@ configglx() {
 		fi
 	fi
 
-	if [ -f /etc/X11/gdm/gdm.conf -a ! -h /etc/X11/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/X11/gdm/gdm.conf
-	fi
-	if [ -f /etc/gdm/custom.conf -a ! -h /etc/gdm/custom.conf ]; then
-		disallowgdmtcp /etc/gdm/custom.conf
-	fi
-	if [ -f /etc/gdm/gdm.conf -a ! -h /etc/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/gdm/gdm.conf
-	fi
+	for file in /etc/X11/gdm/gdm.conf \
+		/etc/gdm/custom.conf \
+		/usr/local/etc/gdm/custom.conf \
+		/etc/gdm/gdm.conf \
+		/etc/X11/gdm/custom.conf \
+		/etc/opt/gnome/gdm/gdm.conf; do
+		if [ -f $file -a ! -h $file ]; then
+			disallowgdmtcp $file
+		fi
+	done
 	if [ -f /etc/gdm/gdm-cdd.conf ]; then
 		disallowgdmtcp /etc/gdm/gdm-cdd.conf
-	fi
-	if [ -f /etc/X11/gdm/custom.conf -a ! -h /etc/X11/gdm/custom.conf ]; then
-		disallowgdmtcp /etc/X11/gdm/custom.conf
-	fi
-	if [ -f /etc/opt/gnome/gdm/gdm.conf -a ! -h /etc/opt/gnome/gdm/gdm.conf ]; then
-		disallowgdmtcp /etc/opt/gnome/gdm/gdm.conf
 	fi
 
 	echo
