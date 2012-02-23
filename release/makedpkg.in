@@ -39,7 +39,7 @@ makedeb()
 	if [ $SUPPLEMENT = 1 ]; then
 
 		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
-			| sed s/VirtualGL/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
+			| sed s/virtualgl/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
 
 		rm -rf $TMPDIR/$PREFIX/doc
 		rm -rf $TMPDIR/$PREFIX/include
