@@ -427,7 +427,8 @@ unconfigglx() {
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
-		/usr/share/config/kdm/Xsetup; do
+		/usr/share/config/kdm/Xsetup \
+		/usr/local/kde4/share/config/kdm/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			delvglgenkey $file
 		fi
@@ -466,7 +467,8 @@ unconfigglx() {
 	fi
 	for file in /etc/kde4/kdm/kdmrc \
 		/etc/kde/kdm/kdmrc \
-		/usr/share/config/kdm/kdmrc; do
+		/usr/share/config/kdm/kdmrc \
+		/usr/local/kde4/share/config/kdm/kdmrc; do
 		if [ -f $file -a ! -h $file ]; then
 			enablextestkdm $file
 		fi
@@ -561,7 +563,8 @@ configglx() {
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
-		/usr/share/config/kdm/Xsetup; do
+		/usr/share/config/kdm/Xsetup \
+		/usr/local/kde4/share/config/kdm/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			addvglgenkey $file
 		fi
@@ -631,7 +634,8 @@ configglx() {
 	fi
 	for file in /etc/kde4/kdm/kdmrc \
 		/etc/kde/kdm/kdmrc \
-		/usr/share/config/kdm/kdmrc; do
+		/usr/share/config/kdm/kdmrc \
+		/usr/local/kde4/share/config/kdm/kdmrc; do
 		if [ -f $file -a ! -h $file ]; then
 			if [ "$DISABLEXTEST" = "1" ]; then
 				disablextestkdm $file
