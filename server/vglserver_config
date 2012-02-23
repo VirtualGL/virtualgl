@@ -57,7 +57,7 @@ uid() {
 
 maketemp() {
 	umask 077
-	mktemp $1.XXXXXX || exit 1
+	mktemp /tmp/$1.XXXXXX || exit 1
 }
 
 removeline() {
