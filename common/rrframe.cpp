@@ -16,9 +16,6 @@
 #include "rrlog.h"
 #include "rrutil.h"
 #include <string.h>
-#ifdef USEMEDIALIB
-#include <mlib.h>
-#endif
 #include "vgllogo.h"
 #include "rrframe.h"
 
@@ -214,24 +211,6 @@ void rrframe::decompressrgb(rrframe &f, int w, int h, bool righteye)
 			memcpy(dstptr, srcptr, wps);
 		}
 	}
-	#ifdef USEMEDIALIB
-	else if(dstaf && dstbgr && _pixelsize==4)
-	{
-		for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
-		{
-			mlib_VideoColorRGBint_to_ABGRint((mlib_u32 *)dstptr, srcptr,
-				NULL, 0, w, 1, _pitch, f._pitch, 0);
-		}
-	}
-	else if(dstaf && !dstbgr && _pixelsize==4)
-	{
-		for(i=0; i<h; i++, srcptr+=srcstride, dstptr+=dststride)
-		{
-			mlib_VideoColorBGRint_to_ABGRint((mlib_u32 *)dstptr, srcptr,
-				NULL, 0, w, 1, _pitch, f._pitch, 0);
-		}
-	}
-	#endif
 	else
 	{
 		if(dstaf) dstptr++;

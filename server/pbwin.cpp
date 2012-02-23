@@ -17,9 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef USEMEDIALIB
-#include <mlib.h>
-#endif
 #include "fakerconfig.h"
 #include "glxvisual.h"
 #include "rrutil.h"
@@ -622,25 +619,6 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	{
 		_prof_gamma.startframe();
 		static bool first=true;
-		#if defined(USEMEDIALIB) && defined(sun)
-		if(first)
-		{
-			first=false;
-			if(fconfig.verbose)
-				rrout.println("[VGL] Using mediaLib gamma correction (correction factor=%f)\n",
-					fconfig.gamma);
-		}
-		mlib_image *image=NULL;
-		if((image=mlib_ImageCreateStruct(MLIB_BYTE, ps, w, h, pitch, bits))!=NULL)
-		{
-			unsigned char *luts[4]={fconfig.gamma_lut, fconfig.gamma_lut,
-				fconfig.gamma_lut, fconfig.gamma_lut};
-			mlib_ImageLookUp_Inp(image, (const void **)luts);
-			mlib_ImageDelete(image);
-		}
-		else
-		{
-		#endif
 		if(first)
 		{
 			first=false;
@@ -652,9 +630,6 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
 			*ptr1=fconfig.gamma_lut16[*ptr1];
 		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.gamma_lut[bits[pitch*h-1]];
-		#if defined(USEMEDIALIB) && defined(sun)
-		}
-		#endif
 		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
 	}
 }

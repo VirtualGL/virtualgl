@@ -236,24 +236,7 @@ else()
 	message(STATUS "X Video not available")
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	set(DEFAULT_VGL_USEMEDIALIB 0)
-	if(CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
-		set(DEFAULT_VGL_USEMEDIALIB 1)
-	endif()
-	option(VGL_USEMEDIALIB
-		"Use mediaLib to perform JPEG compression/decompression and YUV encoding/decoding rather than libjpeg-turbo.  If this option is enabled, then VirtualGL will also use mediaLib to perform gamma correction."
-		${DEFAULT_VGL_USEMEDIALIB})
-
-	if(VGL_USEMEDIALIB)
-		message(STATUS "Using mediaLib for image encoding/decoding and gamma correction")
-		add_definitions(-DUSEMEDIALIB)
-		set(TJPEG_LIBRARY tjpeg)
-	endif()
-endif()
-if(NOT VGL_USEMEDIALIB)
-	include(cmakescripts/FindTurboJPEG.cmake)
-endif()
+include(cmakescripts/FindTurboJPEG.cmake)
 
 if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
 	set(LIBDL dl)
@@ -310,7 +293,6 @@ if(VGL_USEXV)
 endif()
 
 add_subdirectory(util)
-add_subdirectory(jpeg)
 add_subdirectory(common)
 if(VGL_BUILDSERVER)
 add_subdirectory(server)
