@@ -30,7 +30,7 @@ This mode is recommended for use on secure local-area networks.  The X11
 traffic is encrypted, but the VGL Transport is left unencrypted to
 maximize performance.
 
-*** Procedure for Linux/Solaris/Mac/Cygwin Clients
+*** Procedure for Linux/Unix/Mac/Cygwin Clients
 #OPT: noList! plain!
 
 	#. Start the X server if it isn't started already.{nl}
@@ -114,7 +114,7 @@ into which you connect with SSH) and the "execute hosts" (the machines that
 will run VirtualGL jobs) share the same home directories and reside in the same
 domain.
 
-	!!! Some newer Linux and Solaris distributions ship with default settings
+	!!! Some newer Linux and Unix distributions ship with default settings
 	that do not allow TCP connections into the X server.  Such systems cannot be
 	used as clients with this procedure unless they are reconfigured to allow
 	X11 TCP connections.
@@ -288,7 +288,8 @@ all instances of ''vglclient'' running under your user account by invoking
 	vglclient -kill
 	---
 
-(''vglclient'' for Linux/Mac/Solaris/Cygwin is in ''/opt/VirtualGL/bin'', and
+(''vglclient'' for Linux/Unix/Mac/Cygwin installs in ''/opt/VirtualGL/bin'' by
+default, and
 ''vglclient'' for Exceed is in
 ''c:\\program files\\virtualgl-''__''{version}''__''-''__''{build}''__.)
 

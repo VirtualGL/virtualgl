@@ -74,7 +74,7 @@ As with any normal OpenGL application, CrServer can be launched using
 functions, it must be handled differently in order to avoid interference with
 VirtualGL.  Chromium provides an environment variable, ''CR_SYSTEM_GL_PATH'',
 which allows one to specify an alternate path to be searched for ''libGL.so''.
-The VirtualGL packages for Linux and Solaris include a symbolic link named
+On Linux and Unix systems, VirtualGL installs a symbolic link named
 ''libGL.so'', which points to the VirtualGL faker library (''librrfaker.so'').
 This symbolic link is located in its own isolated directory, so that directory
 can be passed to Chromium in the ''CR_SYSTEM_GL_PATH'' environment variable,

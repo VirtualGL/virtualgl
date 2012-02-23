@@ -76,7 +76,7 @@ problems with the system.
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  ''nettest'' can be found in
-''/opt/VirtualGL/bin'' on Linux/Mac/Solaris/Cygwin VirtualGL installations or
+''/opt/VirtualGL/bin'' on Linux/Unix/Mac/Cygwin VirtualGL installations or
 in ''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__ if
 using the VirtualGL Client for Exceed.
 
@@ -143,7 +143,7 @@ packet, which is about 93 microseconds in this case.
 *** CPUstat
 #OPT: noList! plain!
 
-CPUstat is available only in the VirtualGL Linux packages and is located in the
+CPUstat is available only for Linux and is installed in the
 same place as NetTest (''/opt/VirtualGL/bin''.)  It measures the average,
 minimum, and peak CPU usage for all processors combined and for each processor
 individually.  On Windows, this same functionality is provided in the Windows
@@ -176,7 +176,7 @@ utilization is.
 #OPT: noList! plain!
 
 TCBench was born out of the need to compare VirtualGL's performance to that of
-other thin client packages, some of which had frame spoiling features that
+other thin client software, some of which had frame spoiling features that
 couldn't be disabled.  TCBench measures the frame rate of a thin client system
 as seen from the client's point of view.  It does this by attaching to one of
 the client windows and continuously reading back a small area at the center of
@@ -188,7 +188,7 @@ checked with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
-TCBench can be found in ''/opt/VirtualGL/bin'' on Linux/Mac/Solaris/Cygwin
+TCBench can be found in ''/opt/VirtualGL/bin'' on Linux/Unix/Mac/Cygwin
 VirtualGL installations or in
 ''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__
 if using the VirtualGL Client for Exceed.  Run ''tcbench''
@@ -267,7 +267,7 @@ features:
 	(''vglrun -sp glxspheres'') allows you to quantify the effect of X latency
 	on the performance of interactive applications in a VirtualGL environment.
 
-GLXSpheres is installed in ''/opt/VirtualGL/bin'' on Linux and Solaris
+GLXSpheres is installed in ''/opt/VirtualGL/bin'' on Linux and Unix
 VirtualGL servers.  64-bit VirtualGL packages name this program
 ''glxspheres64'' so as to allow both a 64-bit and a 32-bit version of
 GLXSpheres to be installed on the same system.

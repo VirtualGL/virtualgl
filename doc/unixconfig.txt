@@ -1,4 +1,4 @@
-* Configuring a Linux or Solaris Machine as a VirtualGL Server
+* Configuring a Linux or Unix Machine as a VirtualGL Server
 {anchor: Unix_Config}
 
 ** Granting Access to the 3D X Server
@@ -6,7 +6,7 @@
 VirtualGL requires access to the application server's 3D graphics card so that
 it can create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
 from applications into these Pbuffers.  Unfortunately, accessing a 3D
-graphics card on Linux and Solaris/x86 systems requires going through an X
+graphics card on Linux and Unix systems requires going through an X
 server.  On such systems, the only way to share the application server's 3D
 graphics card among multiple users is to grant those users access to the 3D X
 server (the X server attached to the application server's 3D graphics card.
@@ -57,6 +57,16 @@ prompt.
 		Solaris servers running dtlogin :: {:}
 			#Verb: <<---
 			/etc/init.d/dtlogin stop
+			---
+
+		FreeBSD servers running GDM :: {:}
+			#Verb: <<---
+			/usr/local/etc/rc.d/gdm stop
+			---
+
+		FreeBSD servers running KDM :: {:}
+			#Verb: <<---
+			/usr/local/kde4/etc/rc.d/kdm4 stop
 			---
 
 	#. Log in as root from the text console (or remotely using SSH.)
@@ -167,6 +177,16 @@ prompt.
 		Solaris servers running dtlogin :: {:}
 			#Verb: <<---
 			/etc/init.d/dtlogin start
+			---
+
+		FreeBSD servers running GDM :: {:}
+			#Verb: <<---
+			/usr/local/etc/rc.d/gdm start
+			---
+
+		FreeBSD servers running KDM :: {:}
+			#Verb: <<---
+			/usr/local/kde4/etc/rc.d/kdm4 start
 			---
 
 *** Sanity Check

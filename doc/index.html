@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-12-15T08:57:42">
+<meta name="date" content="2012-02-23T14:47:16">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -11,7 +11,7 @@
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
 <link rel="chapter" href="index.html#hd003" title="3 System Requirements">
 <link rel="chapter" href="index.html#hd004" title="4 Obtaining and Installing VirtualGL">
-<link rel="chapter" href="index.html#hd005" title="5 Configuring a Linux or Solaris Machine as a VirtualGL Server">
+<link rel="chapter" href="index.html#hd005" title="5 Configuring a Linux or Unix Machine as a VirtualGL Server">
 <link rel="chapter" href="index.html#hd006" title="6 Configuring a Windows Machine as a VGL Transport Client">
 <link rel="chapter" href="index.html#hd007" title="7 Using VirtualGL with the VGL Transport">
 <link rel="chapter" href="index.html#hd008" title="8 Using VirtualGL with X Proxies Such as VNC">
@@ -35,7 +35,7 @@
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
-Researchers, and others with knowledge of the Linux or Solaris operating 
+Researchers, and others with knowledge of Linux or Unix operating 
 systems, OpenGL and GLX, and X windows.</p>
 
 <div id="Table_of_Contents">
@@ -52,23 +52,21 @@ systems, OpenGL and GLX, and X windows.</p>
         <a href="#hd003" class="toc">3 System Requirements</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd003001" class="toc">3.1 Linux/x86</a>
+                <a href="#hd003001" class="toc">3.1 Linux/x86 and Other x86 Un*x 
+                Operating Systems</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003002" class="toc">3.2 Solaris/x86</a>
+                <a href="#hd003002" class="toc">3.2 Mac/x86</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003003" class="toc">3.3 Mac/x86</a>
+                <a href="#hd003003" class="toc">3.3 Windows</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003004" class="toc">3.4 Windows</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd003005" class="toc">3.5 Additional Requirements for 
+                <a href="#hd003004" class="toc">3.4 Additional Requirements for 
                 Stereographic Rendering</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003006" class="toc">3.6 Additional Requirements for 
+                <a href="#hd003005" class="toc">3.5 Additional Requirements for 
                 Transparent Overlays</a>
             </li>
         </ul>
@@ -80,31 +78,28 @@ systems, OpenGL and GLX, and X windows.</p>
                 <a href="#hd004001" class="toc">4.1 Installing VirtualGL on Linux</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004002" class="toc">4.2 Installing VirtualGL on Solaris</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd004003" class="toc">4.3 Installing the VirtualGL Client on 
+                <a href="#hd004002" class="toc">4.2 Installing the VirtualGL Client on 
                 OS X</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004004" class="toc">4.4 Installing the VirtualGL Client on 
+                <a href="#hd004003" class="toc">4.3 Installing the VirtualGL Client on 
                 Windows (Exceed)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004005" class="toc">4.5 Installing the VirtualGL Client on 
+                <a href="#hd004004" class="toc">4.4 Installing the VirtualGL Client on 
                 Windows (Cygwin/X)</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004006" class="toc">4.6 Installing VirtualGL from Source</a>
+                <a href="#hd004005" class="toc">4.5 Installing VirtualGL from Source</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004007" class="toc">4.7 Uninstalling VirtualGL</a>
+                <a href="#hd004006" class="toc">4.6 Uninstalling VirtualGL</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd005" class="toc">5 Configuring a Linux or Solaris Machine as 
-        a VirtualGL Server</a>
+        <a href="#hd005" class="toc">5 Configuring a Linux or Unix Machine as a 
+        VirtualGL Server</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
                 <a href="#hd005001" class="toc">5.1 Granting Access to the 3D X 
@@ -466,7 +461,7 @@ transport plugins.</p>
 <h1 id="hd003"><a name="file003"></a>3&nbsp;System Requirements</h1>
 
 
-<h2 id="hd003001">3.1&nbsp;Linux/x86</h2>
+<h2 id="hd003001">3.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
 
 <div class="table">
 <table class="standard">
@@ -494,9 +489,9 @@ transport plugins.</p>
   <tr class="standard">
     <td class="high standard">Graphics</td>
     <td class="standard" colspan="2">Any decent 3D graphics card that supports Pbuffers <ul class="Itemize"><li class="Itemize-0">
-    If the manufacturer of your 3D adapter provides proprietary drivers for 
-    Linux, then it is recommended that you install these. Many of the 
-    drivers that ship with Linux do not provide full 3D acceleration or 
+    If the manufacturer of your 3D adapter provides proprietary drivers, 
+    then it is recommended that you install these.  Many of the drivers that 
+    ship with Linux, for instance, do not provide full 3D acceleration or 
     Pbuffer support.
 </li></ul></td>
     <td class="standard">Any graphics card with decent 2D performance <ul class="Itemize"><li class="Itemize-0">
@@ -505,24 +500,6 @@ transport plugins.</p>
 </li></ul></td>
   </tr>
   <tr class="standard">
-    <td class="high standard">Recommended O/S</td>
-    <td class="standard" colspan="3"><ul class="Itemize"><li class="Itemize-0">
-    Any distribution in the 
-    <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
-    Hat</a></span><a name="idx0010"></a> or 
-    <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a> 
-    families that contains GLIBC 2.3.2 or later (including 
-    <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0012"></a>, 
-    <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0013"></a> 
-    3 and later, and 
-    <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
-    Box</a></span><a name="idx0014"></a>)
-</li>
-<li class="Itemize-0">
-    Ubuntu Linux v6.0 or later
-</li></ul></td>
-  </tr>
-  <tr class="standard">
     <td class="high standard">Other Software</td>
     <td class="standard" colspan="3">X server configured to export True Color (24-bit or 32-bit) visuals</td>
   </tr>
@@ -532,56 +509,7 @@ transport plugins.</p>
 
 
 
-<h2 id="hd003002">3.2&nbsp;Solaris/x86</h2>
-
-<div class="table">
-<table class="standard">
-  <thead class="standard">
-  <tr class="head ">
-    <th class="head standard"></th>
-    <th class="head standard">Server (x86)</th>
-    <th class="head standard">Server (x86-64)</th>
-    <th class="head standard">Client</th>
-  </tr>
-  </thead>
-  <tr class="standard">
-    <td class="high standard">Recommended CPU</td>
-    <td class="standard">Pentium 4, 1.7 GHz or faster (or equivalent) <ul class="Itemize"><li class="Itemize-0">
-    For optimal performance, the processor should support SSE2 extensions.
-</li>
-<li class="Itemize-0">
-    Dual processors or dual cores recommended
-</li></ul></td>
-    <td class="standard">Pentium 4/Xeon with EM64T, or&hellip;<br /> AMD Opteron or Athlon64, 1.8 GHz or faster <ul class="Itemize"><li class="Itemize-0">
-    Dual processors or dual cores recommended
-</li></ul></td>
-    <td class="standard">Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Graphics</td>
-    <td class="standard" colspan="2">nVidia 3D graphics card</td>
-    <td class="standard">Any graphics card with decent 2D performance</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">O/S</td>
-    <td class="standard" colspan="3"><ul class="Itemize"><li class="Itemize-0">
-    Solaris 10 Update 1 or newer (Update 3 or newer recommended)
-</li>
-<li class="Itemize-0">
-    OpenSolaris 2008.11 (or newer)
-</li></ul></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Other Software</td>
-    <td class="standard" colspan="3">X server configured to export True Color (24-bit or 32-bit) visuals</td>
-  </tr>
-</table>
-</div>
-
-
-
-
-<h2 id="hd003003">3.3&nbsp;Mac/x86</h2>
+<h2 id="hd003002">3.2&nbsp;Mac/x86</h2>
 
 <div class="table">
 <table class="standard">
@@ -612,7 +540,7 @@ transport plugins.</p>
 
 
 
-<h2 id="hd003004">3.4&nbsp;Windows</h2>
+<h2 id="hd003003">3.3&nbsp;Windows</h2>
 
 <div class="table">
 <table class="standard">
@@ -638,9 +566,9 @@ transport plugins.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <em>VGL Transport Only</em>: 
-    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0015"></a> 
+    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0010"></a> 
     or 
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0016"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0011"></a> 
     Exceed v8 or newer
 </li>
 <li class="Itemize-0">
@@ -653,7 +581,7 @@ transport plugins.</p>
 
 
 
-<h2 id="hd003005">3.5&nbsp;Additional Requirements for Stereographic Rendering</h2>
+<h2 id="hd003004">3.4&nbsp;Additional Requirements for Stereographic Rendering</h2>
 
 <p><a name="Stereo_Requirements"></a></p>
 
@@ -671,11 +599,8 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
   </tr>
   </thead>
   <tr class="standard">
-    <td class="high standard">Linux</td>
-    <td class="standard" colspan="2" rowspan="2">3D graphics card that supports stereo (examples: nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to export stereo visuals.</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Solaris/x86</td>
+    <td class="high standard">Linux/Unix</td>
+    <td class="standard" colspan="2">3D graphics card that supports stereo (examples: nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to export stereo visuals.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Mac/x86</td>
@@ -693,7 +618,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <li class="Itemize-0">
     2D X server that supports and is configured to export stereo visuals 
     (such as 
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0017"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0012"></a> 
     Exceed 3D v8 or newer)
 </li></ul></td>
   </tr>
@@ -703,7 +628,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 
 
 
-<h2 id="hd003006">3.6&nbsp;Additional Requirements for Transparent Overlays</h2>
+<h2 id="hd003005">3.5&nbsp;Additional Requirements for Transparent Overlays</h2>
 
 <p><a name="Overlay_Requirements"></a></p>
 
@@ -716,11 +641,8 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
   </tr>
   </thead>
   <tr class="standard">
-    <td class="high standard">Linux</td>
-    <td class="standard" rowspan="3">3D graphics card that supports transparent overlays (examples: nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to export overlay visuals.</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Solaris/x86</td>
+    <td class="high standard">Linux/Unix</td>
+    <td class="standard" rowspan="2">3D graphics card that supports transparent overlays (examples: nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to export overlay visuals.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Mac/x86</td>
@@ -735,7 +657,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <li class="Itemize-0">
     2D X server that supports and is configured to export transparent 
     overlay visuals (such as 
-    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0018"></a> 
+    <span class="remote"><a href="http://connectivity.opentext.com" class="remote">OpenText</a></span><a name="idx0013"></a> 
     Exceed 3D v8 or newer)
 </li></ul></td>
   </tr>
@@ -752,7 +674,7 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing VirtualGL</h1>
 
 <div class="important"><p class="important">
-VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0019"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
+VirtualGL must be installed on any machine that will act as a VirtualGL server or as a client for the <a href="#VGL_Transport">VGL Transport</a><a name="idx0014"></a>. It is not necessary to install VirtualGL on the client machine if using VNC or another type of X proxy.
 </p></div>
 
 
@@ -763,11 +685,25 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         Download the appropriate VirtualGL binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0020"></a> of the 
+        area</a></span><a name="idx0015"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0021"></a>. <br />
+        SourceForge project page</a></span><a name="idx0016"></a>. Packages are 
+        provided for Linux distributions in the 
+        <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
+        Hat</a></span><a name="idx0017"></a>, 
+        <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0018"></a>, 
+        or 
+        <span class="remote"><a href="http://www.debian.org/" class="remote">Debian</a></span><a name="idx0019"></a> 
+        families that contain GLIBC 2.3.2 or later (including 
+        <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0020"></a>, 
+        <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0021"></a> 
+        3 and later, 
+        <span class="remote"><a href="http://www.ubuntu.com/" class="remote">Ubuntu 
+        Linux</a></span><a name="idx0022"></a> v6.0 or later, and 
+        <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
+        Box</a></span><a name="idx0023"></a>.) <br />
         <div class="important"><p class="important">
-        If you wish to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;VirtualGL&rdquo; and &ldquo;VirtualGL32&rdquo; amd64 DEBs.  (The VirtualGL32 DEB is a supplementary package that contains only the 32-bit server components.)
+        If you wish to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;virtualgl&rdquo; and &ldquo;virtualgl32&rdquo; amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -785,8 +721,8 @@ rpm&nbsp;-i&nbsp;VirtualGL*.rpm
             <dt class="Description-3 Description">Debian-based systems</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
-dpkg&nbsp;-r&nbsp;VirtualGL
-dpkg&nbsp;-i&nbsp;VirtualGL*.deb
+dpkg&nbsp;-r&nbsp;virtualgl
+dpkg&nbsp;-i&nbsp;virtualgl*.deb
 </pre>
 
             </dd>
@@ -796,56 +732,7 @@ dpkg&nbsp;-i&nbsp;VirtualGL*.deb
 
 
 
-<h2 id="hd004002">4.2&nbsp;Installing VirtualGL on Solaris</h2>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
-        Download the VirtualGL Solaris package 
-        (<code>VirtualGL-</code><em><code>{version}</code></em><code>-solarisx86.pkg.bz2</code> 
-        for 32-bit systems or 
-        <code>VirtualGL-</code><em><code>{version}</code></em><code>-solarisx64.pkg.bz2</code> 
-        for 64-bit systems) from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/" class="remote">Files 
-        area</a></span><a name="idx0022"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0023"></a>. <br />
-        <div class="important"><p class="important">
-        The 64-bit package also contains 32-bit VirtualGL server components, which can be used to run 32-bit OpenGL applications on 64-bit servers.
-        </p></div>
-    </li>
-    <li class="Ordered-1 Ordered" value="2">
-        Log in as root, cd to the directory where you downloaded the package, 
-        and issue the following commands:
-        <dl class="Description">
-            <dt class="Description-3 Description">If VirtualGL 2.1.x or older is installed</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-pkgrm&nbsp;SUNWvgl
-</pre>
-
-            </dd>
-            <dt class="Description-3 Description">If VirtualGL 2.2 or newer is installed</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-pkgrm&nbsp;VirtualGL
-</pre>
-
-            </dd>
-        </dl>
-        (answer &ldquo;Y&rdquo; when prompted.)
-<pre class="verbatim">
-bzip2&nbsp;-d&nbsp;VirtualGL*.pkg.bz2
-pkgadd&nbsp;-d&nbsp;VirtualGL*.pkg
-</pre>
-
-        Select the <code>VirtualGL</code> package (usually option 1) from the 
-        menu.
-    </li>
-</ol>
-
-
-
-<h2 id="hd004003">4.3&nbsp;Installing the VirtualGL Client on OS X</h2>
+<h2 id="hd004002">4.2&nbsp;Installing the VirtualGL Client on OS X</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -867,7 +754,7 @@ pkgadd&nbsp;-d&nbsp;VirtualGL*.pkg
 
 
 
-<h2 id="hd004004">4.4&nbsp;Installing the VirtualGL Client on Windows (Exceed)</h2>
+<h2 id="hd004003">4.3&nbsp;Installing the VirtualGL Client on Windows (Exceed)</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -891,7 +778,7 @@ NOTE: The VirtualGL Client for Exceed installer does not remove any previous ver
 
 
 
-<h2 id="hd004005">4.5&nbsp;Installing the VirtualGL Client on Windows (Cygwin/X)</h2>
+<h2 id="hd004004">4.4&nbsp;Installing the VirtualGL Client on Windows (Cygwin/X)</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -934,7 +821,7 @@ NOTE: The VirtualGL Client for Exceed installer does not remove any previous ver
 
 
 
-<h2 id="hd004006">4.6&nbsp;Installing VirtualGL from Source</h2>
+<h2 id="hd004005">4.5&nbsp;Installing VirtualGL from Source</h2>
 
 <p>If you are using a platform for which there is not a pre-built VirtualGL 
 binary package available, then download the VirtualGL source tarball 
@@ -950,10 +837,10 @@ on how to build and install VirtualGL from source.</p>
 
 
 
-<h2 id="hd004007">4.7&nbsp;Uninstalling VirtualGL</h2>
+<h2 id="hd004006">4.6&nbsp;Uninstalling VirtualGL</h2>
 
 
-<h3 id="hd004007001">Linux</h3>
+<h3 id="hd004006001">Linux</h3>
 
 <p>As root, issue one of the following commands:</p>
 
@@ -968,7 +855,7 @@ rpm&nbsp;-e&nbsp;VirtualGL
     <dt class="Description-1 Description">Debian-based systems</dt>
     <dd class="Description-1 Description">
 <pre class="verbatim">
-dpkg&nbsp;-r&nbsp;VirtualGL
+dpkg&nbsp;-r&nbsp;virtualgl
 </pre>
 
     </dd>
@@ -976,19 +863,7 @@ dpkg&nbsp;-r&nbsp;VirtualGL
 
 
 
-<h3 id="hd004007002">Solaris</h3>
-
-<p>As root, issue the following command:</p>
-
-<pre class="verbatim">
-pkgrm&nbsp;VirtualGL
-</pre>
-
-<p>Answer &ldquo;yes&rdquo; when prompted.</p>
-
-
-
-<h3 id="hd004007003">OS X</h3>
+<h3 id="hd004006002">OS X</h3>
 
 <p>Use the &ldquo;Uninstall VirtualGL&rdquo; application provided in the 
 VirtualGL disk image, or issue the following command from the Terminal:</p>
@@ -999,7 +874,7 @@ sudo&nbsp;/opt/VirtualGL/bin/uninstall
 
 
 
-<h3 id="hd004007004">Windows (Exceed)</h3>
+<h3 id="hd004006003">Windows (Exceed)</h3>
 
 <p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
 (or the &ldquo;Add or Remove Programs&rdquo; applet if you are running 
@@ -1008,7 +883,7 @@ Windows XP), or select &ldquo;Uninstall VirtualGL Client&rdquo; in the
 
 
 
-<h3 id="hd004007005">Windows (Cygwin/X)</h3>
+<h3 id="hd004006004">Windows (Cygwin/X)</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -1041,7 +916,7 @@ Windows XP), or select &ldquo;Uninstall VirtualGL Client&rdquo; in the
 
 
 
-<h1 id="hd005"><a name="file005"></a>5&nbsp;Configuring a Linux or Solaris Machine as a VirtualGL Server</h1>
+<h1 id="hd005"><a name="file005"></a>5&nbsp;Configuring a Linux or Unix Machine as a VirtualGL Server</h1>
 
 <p><a name="Unix_Config"></a></p>
 
@@ -1051,12 +926,12 @@ Windows XP), or select &ldquo;Uninstall VirtualGL Client&rdquo; in the
 <p>VirtualGL requires access to the application server&rsquo;s 3D graphics 
 card so that it can create off-screen pixel buffers (Pbuffers) and 
 redirect the 3D rendering from applications into these Pbuffers.  
-Unfortunately, accessing a 3D graphics card on Linux and Solaris/x86 
-systems requires going through an X server.  On such systems, the only 
-way to share the application server&rsquo;s 3D graphics card among 
-multiple users is to grant those users access to the 3D X server (the X 
-server attached to the application server&rsquo;s 3D graphics card. 
-Refer to the figures in Chapter <a href="#Overview" class="ref">2</a>.)</p>
+Unfortunately, accessing a 3D graphics card on Linux and Unix systems 
+requires going through an X server.  On such systems, the only way to 
+share the application server&rsquo;s 3D graphics card among multiple 
+users is to grant those users access to the 3D X server (the X server 
+attached to the application server&rsquo;s 3D graphics card. Refer to 
+the figures in Chapter <a href="#Overview" class="ref">2</a>.)</p>
 
 <p>It is important to understand the security risks associated with this.  
 Once a user has access to the 3D X server, there is nothing that would 
@@ -1117,6 +992,20 @@ svcadm&nbsp;disable&nbsp;gdm
             <dd class="Description-3 Description">
 <pre class="verbatim">
 /etc/init.d/dtlogin&nbsp;stop
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">FreeBSD servers running GDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/usr/local/etc/rc.d/gdm&nbsp;stop
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">FreeBSD servers running KDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/usr/local/kde4/etc/rc.d/kdm4&nbsp;stop
 </pre>
 
             </dd>
@@ -1264,6 +1153,20 @@ svcadm&nbsp;enable&nbsp;gdm
             <dd class="Description-3 Description">
 <pre class="verbatim">
 /etc/init.d/dtlogin&nbsp;start
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">FreeBSD servers running GDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/usr/local/etc/rc.d/gdm&nbsp;start
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">FreeBSD servers running KDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/usr/local/kde4/etc/rc.d/kdm4&nbsp;start
 </pre>
 
             </dd>
@@ -1566,8 +1469,8 @@ over a local-area network.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Supports stereographic rendering (see requirements in Sections 
-        <a href="#Stereo_Requirements" class="ref">3.5</a> and 
-        <a href="#Overlay_Requirements" class="ref">3.6</a>)
+        <a href="#Stereo_Requirements" class="ref">3.4</a> and 
+        <a href="#Overlay_Requirements" class="ref">3.5</a>)
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Consumes fewer server resources, since the 2D (X11) rendering occurs on 
@@ -1607,7 +1510,7 @@ traffic is encrypted, but the VGL Transport is left unencrypted to
 maximize performance.</p>
 
 
-<h3 id="hd007001001">Procedure for Linux/Solaris/Mac/Cygwin Clients</h3>
+<h3 id="hd007001001">Procedure for Linux/Unix/Mac/Cygwin Clients</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -1708,7 +1611,7 @@ host&rdquo; (the machine into which you connect with SSH) and the
 share the same home directories and reside in the same domain.</p>
 
 <div class="important"><p class="important">
-Some newer Linux and Solaris distributions ship with default settings that do not allow TCP connections into the X server.  Such systems cannot be used as clients with this procedure unless they are reconfigured to allow X11 TCP connections.
+Some newer Linux and Unix distributions ship with default settings that do not allow TCP connections into the X server.  Such systems cannot be used as clients with this procedure unless they are reconfigured to allow X11 TCP connections.
 </p></div>
 
 
@@ -1908,9 +1811,9 @@ it.  You can also explicitly kill all instances of
 vglclient&nbsp;-kill
 </pre>
 
-<p>(<code>vglclient</code> for Linux/Mac/Solaris/Cygwin is in 
-<code>/opt/VirtualGL/bin</code>, and <code>vglclient</code> for Exceed 
-is in 
+<p>(<code>vglclient</code> for Linux/Unix/Mac/Cygwin installs in 
+<code>/opt/VirtualGL/bin</code> by default, and <code>vglclient</code> 
+for Exceed is in 
 <code>c:\program&nbsp;files\virtualgl-</code><em><code>{version}</code></em><code>-</code><em><code>{build}</code></em>.)</p>
 
 <p><code>vglconnect</code> instructs <code>vglclient</code> to redirect all 
@@ -2572,9 +2475,9 @@ server in the most efficient way possible.</p>
 and GLX functions, it must be handled differently in order to avoid 
 interference with VirtualGL.  Chromium provides an environment variable, 
 <code>CR_SYSTEM_GL_PATH</code>, which allows one to specify an alternate 
-path to be searched for <code>libGL.so</code>. The VirtualGL packages 
-for Linux and Solaris include a symbolic link named 
-<code>libGL.so</code>, which points to the VirtualGL faker library 
+path to be searched for <code>libGL.so</code>. On Linux and Unix 
+systems, VirtualGL installs a symbolic link named <code>libGL.so</code>, 
+which points to the VirtualGL faker library 
 (<code>librrfaker.so</code>). This symbolic link is located in its own 
 isolated directory, so that directory can be passed to Chromium in the 
 <code>CR_SYSTEM_GL_PATH</code> environment variable, and this will cause 
@@ -3316,8 +3219,8 @@ performance problems with the system.</p>
 <p>NetTest is a network benchmark that uses the same network I/O classes as 
 VirtualGL.  It can be used to test the latency and throughput of any 
 TCP/IP connection, with or without SSL encryption.  <code>nettest</code> 
-can be found in <code>/opt/VirtualGL/bin</code> on 
-Linux/Mac/Solaris/Cygwin VirtualGL installations or in 
+can be found in <code>/opt/VirtualGL/bin</code> on Linux/Unix/Mac/Cygwin 
+VirtualGL installations or in 
 <code>c:\program&nbsp;files\VirtualGL-</code><em><code>{version}</code></em><code>-</code><em><code>{build}</code></em> 
 if using the VirtualGL Client for Exceed.</p>
 
@@ -3387,13 +3290,13 @@ this case.</p>
 
 <h3 id="hd0017003002">CPUstat</h3>
 
-<p>CPUstat is available only in the VirtualGL Linux packages and is located 
-in the same place as NetTest (<code>/opt/VirtualGL/bin</code>.)  It 
-measures the average, minimum, and peak CPU usage for all processors 
-combined and for each processor individually.  On Windows, this same 
-functionality is provided in the Windows Performance Monitor, which is 
-part of the operating system.  On Solaris, the same data can be obtained 
-through <code>vmstat</code>.</p>
+<p>CPUstat is available only for Linux and is installed in the same place 
+as NetTest (<code>/opt/VirtualGL/bin</code>.)  It measures the average, 
+minimum, and peak CPU usage for all processors combined and for each 
+processor individually.  On Windows, this same functionality is provided 
+in the Windows Performance Monitor, which is part of the operating 
+system.  On Solaris, the same data can be obtained through 
+<code>vmstat</code>.</p>
 
 <p>CPUstat measures the CPU usage over a given sample period (a few 
 seconds) and continuously reports how much the CPU was utilized since 
@@ -3424,7 +3327,7 @@ the application&rsquo;s peak and average % CPU utilization is.</p>
 <h3 id="hd0017003003">TCBench</h3>
 
 <p>TCBench was born out of the need to compare VirtualGL&rsquo;s 
-performance to that of other thin client packages, some of which had 
+performance to that of other thin client software, some of which had 
 frame spoiling features that couldn&rsquo;t be disabled.  TCBench 
 measures the frame rate of a thin client system as seen from the 
 client&rsquo;s point of view.  It does this by attaching to one of the 
@@ -3438,7 +3341,7 @@ mechanism and with a variety of system-specific techniques, such as
 monitoring redraw events on the client&rsquo;s windowing system.</p>
 
 <p>TCBench can be found in <code>/opt/VirtualGL/bin</code> on 
-Linux/Mac/Solaris/Cygwin VirtualGL installations or in 
+Linux/Unix/Mac/Cygwin VirtualGL installations or in 
 <code>c:\program&nbsp;files\VirtualGL-</code><em><code>{version}</code></em><code>-</code><em><code>{build}</code></em> 
 if using the VirtualGL Client for Exceed.  Run <code>tcbench</code> from 
 the command line, and it will prompt you to click in the window you want 
@@ -3530,7 +3433,7 @@ VirtualGL features:</p>
 </dl>
 
 <p>GLXSpheres is installed in <code>/opt/VirtualGL/bin</code> on Linux and 
-Solaris VirtualGL servers.  64-bit VirtualGL packages name this program 
+Unix VirtualGL servers.  64-bit VirtualGL packages name this program 
 <code>glxspheres64</code> so as to allow both a 64-bit and a 32-bit 
 version of GLXSpheres to be installed on the same system.</p>
 

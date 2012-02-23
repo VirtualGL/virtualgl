@@ -1,6 +1,6 @@
 * System Requirements
 
-** Linux/x86
+** Linux/x86 and Other x86 Un*x Operating Systems
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
@@ -19,60 +19,14 @@
 	| Any decent 3D graphics card that supports Pbuffers \
 		{list type=ul: \
 			{item:If the manufacturer of your 3D adapter provides proprietary \
-				drivers for Linux, then it is recommended that you install these. \
-				Many of the drivers that ship with Linux do not provide full 3D \
+				drivers, then it is recommended that you install these.  Many of the \
+				drivers that ship with Linux, for instance, do not provide full 3D \
 				acceleration or Pbuffer support.  }} \
 	| < \
 	| Any graphics card with decent 2D performance \
 		{list type=ul: \
 			{item:If using a 3D graphics card, install the vendor drivers for \
 				that 3D graphics card.}} \
-	|
-| Recommended O/S \
-	| {list type=ul: \
-			{item:Any distribution in the \
-				[[http://www.redhat.com/][Red Hat]] or [[http://www.novell.com/linux/][SuSE]] \
-				families that contains GLIBC 2.3.2 or later (including \
-				[[http://fedoraproject.org/][Fedora]], \
-				[[http://www.centos.org/][CentOS]] 3 and later, and \
-				[[http://www.whiteboxlinux.org/][White Box]])} \
-			{item:Ubuntu Linux v6.0 or later}} \
-	| < \
-	| < \
-	|
-| Other Software \
-	| X server configured to export True Color (24-bit or 32-bit) visuals \
-	| < \
-	| < \
-	|
-#OPT: hiCol=first
-
-** Solaris/x86
-
-|| || Server (x86) || Server (x86-64) || Client ||
-| Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
-				extensions.} \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium 4/Xeon with EM64T, or...{nl} \
-		AMD Opteron or Athlon64, 1.8 GHz or faster \
-		{list type=ul: \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
-	|
-| Graphics \
-	| nVidia 3D graphics card \
-	| < \
-	| Any graphics card with decent 2D performance \
-	|
-| O/S \
-	| {list type=ul: \
-			{item: Solaris 10 Update 1 or newer (Update 3 or newer recommended)} \
-			{item: OpenSolaris 2008.11 (or newer)}} \
-	| < \
-	| < \
 	|
 | Other Software \
 	| X server configured to export True Color (24-bit or 32-bit) visuals \
@@ -125,14 +79,10 @@
 	{ref prefix="Chapter ": Advanced_OpenGL} for more details.
 
 || || Server || Client ||
-| Linux \
+| Linux/Unix \
 	| 3D graphics card that supports stereo (examples: nVidia Quadro, ATI \
 		FirePro.)  The 2D X server should be configured to export stereo visuals. \
 	| < \
-	|
-| Solaris/x86 \
-	| ^ \
-	| ^ \
 	|
 | Mac/x86 \
 	| N/A \
@@ -155,13 +105,10 @@
 {anchor: Overlay_Requirements}
 
 || || Client ||
-| Linux \
+| Linux/Unix \
 	| 3D graphics card that supports transparent overlays (examples: \
 		nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to \
 		export overlay visuals. \
-	|
-| Solaris/x86 \
-	| ^ \
 	|
 | Mac/x86 \
 	| ^ \

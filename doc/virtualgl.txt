@@ -2,8 +2,8 @@
 #TITLE: User's Guide for VirtualGL 2.3.1
 #MAKETITLE
 __Intended audience:__ System Administrators, Graphics Programmers,
-Researchers, and others with knowledge of the Linux or Solaris operating
-systems, OpenGL and GLX, and X windows.
+Researchers, and others with knowledge of Linux or Unix operating systems,
+OpenGL and GLX, and X windows.
 
 #LIST: contents
 {nl}
