@@ -203,6 +203,7 @@ disablextestkdm() {
 	backup $1
 	echo ... Disabling XTEST extension in $1 ...
 	TMPFILE=`maketemp vglserver_config_12`
+	uncommentline $1 ServerArgsLocal
 	sed -e "/ServerArgsLocal\>/s/[ #\t]*-tst//g" $1 >$TMPFILE && cp $TMPFILE $1 && (
 		sed -e "/ServerArgsLocal\>/s/$/\ -tst/g" $1 >$TMPFILE && cp $TMPFILE $1
 	)
@@ -425,7 +426,8 @@ unconfigglx() {
 	for file in /etc/gdm/Init/Default \
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
-		/etc/kde4/kdm/Xsetup; do
+		/etc/kde4/kdm/Xsetup \
+		/usr/share/config/kdm/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			delvglgenkey $file
 		fi
@@ -463,7 +465,8 @@ unconfigglx() {
 		enablextest /etc/gdm/gdm-cdd.conf
 	fi
 	for file in /etc/kde4/kdm/kdmrc \
-		/etc/kde/kdm/kdmrc; do
+		/etc/kde/kdm/kdmrc \
+		/usr/share/config/kdm/kdmrc; do
 		if [ -f $file -a ! -h $file ]; then
 			enablextestkdm $file
 		fi
@@ -557,7 +560,8 @@ configglx() {
 	for file in /etc/gdm/Init/Default \
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
-		/etc/kde4/kdm/Xsetup; do
+		/etc/kde4/kdm/Xsetup \
+		/usr/share/config/kdm/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			addvglgenkey $file
 		fi
@@ -626,7 +630,8 @@ configglx() {
 		fi
 	fi
 	for file in /etc/kde4/kdm/kdmrc \
-		/etc/kde/kdm/kdmrc; do
+		/etc/kde/kdm/kdmrc \
+		/usr/share/config/kdm/kdmrc; do
 		if [ -f $file -a ! -h $file ]; then
 			if [ "$DISABLEXTEST" = "1" ]; then
 				disablextestkdm $file
