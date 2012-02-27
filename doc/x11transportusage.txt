@@ -51,7 +51,6 @@ both on the same server.  This allows VirtualGL to send its rendered 3D images
 to the X proxy through shared memory rather than sending them over a network.
 
 #IMG: x11transport.png
-#OPT fmt=latex: w=4cm
 
 With this configuration, you can usually invoke
 
@@ -74,7 +73,6 @@ environment variable to ''proxy'' or by passing an argument of ''-c proxy'' to
 {anchor: X11_Proxy_Usage_Remote}
 
 #IMG: vgltransportservernetwork.png
-#OPT fmt=latex: w=4cm
 
 If the X proxy and VirtualGL are running on different servers, then it is
 desirable to use the VGL Transport to send images from the VirtualGL

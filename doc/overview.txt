@@ -74,7 +74,6 @@ rendered 3D images to the client machine:
 	Client.
 
 #IMG: vgltransport.png
-#OPT fmt=latex: w=4cm
 #CAP: The VGL Transport with a Remote 2D X Server
 
 {anchor: X11_Transport}
@@ -94,7 +93,6 @@ rendered 3D images to the client machine:
 	low-bandwidth networks.
 
 #IMG: x11transport.png
-#OPT fmt=latex: w=4cm
 #CAP: The X11 Transport with an X Proxy
 
 VirtualGL also provides an API that can be used to develop custom image

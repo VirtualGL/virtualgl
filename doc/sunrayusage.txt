@@ -30,7 +30,6 @@ provided by Sun, which sent images directly from the 3D application server
 to the Sun Ray DTU, thus bypassing the Sun Ray Server altogether.
 
 #IMG: sunray.png
-#OPT fmt=latex: w=4cm
 #CAP: The Sun Ray Transport (Provided by a Proprietary Plugin to VirtualGL 2.0.x and 2.1.x)
 
 When the Sun Visualization System product was discontinued in early 2009, the
@@ -52,7 +51,6 @@ encoding if the X server is remote.  The remote case is illustrated in the
 figure below.
 
 #IMG: sunrayvgltransport.png
-#OPT: fmt=latex; w=4cm
 #CAP: The VGL Transport with YUV Encoding in a Sun Ray Environment
 
 There are trade-offs with using X Video vs. using the Sun Ray Transport.
