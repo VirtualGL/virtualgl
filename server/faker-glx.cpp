@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011 D. R. Commander
+ * Copyright (C)2009, 2011-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -159,25 +159,19 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	const int *attrib_list, int *nelements)
 {
 	GLXFBConfig *configs=NULL;
+
+		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
+		prargal13(attrib_list);  starttrace();
+
 	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy))
 	{
-			opentrace(_glXChooseFBConfig);  prargd(dpy);  prargi(screen);
-			prargal13(attrib_list);  starttrace();
-
 		configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
-
-			stoptrace();  if(configs) {prargc(configs[0]);}
-			if(nelements) {prargi(*nelements);}	 closetrace();
-
-		return configs;
+		goto done;
 	}
 	////////////////////
-
-		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
-		prargal13(attrib_list);  starttrace();
 
 	// If 'attrib_list' specifies properties for transparent overlay rendering,
 	// then hand off to the 2D X server.
@@ -199,9 +193,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			{
 				for(int i=0; i<*nelements; i++) rcfgh.add(dpy, configs[i]);
 			}
-			stoptrace();  if(configs) {prargc(configs[0]);}
-			if(nelements) {prargi(*nelements);}	 closetrace();
-			return configs;
+			goto done;
 		}
 	}
 
@@ -226,13 +218,16 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo,
 			trans);
 		if(vid) for(int i=0; i<*nelements; i++) cfgh.add(dpy, configs[i], vid);
-		else {XFree(configs);  return NULL;}
+		else {XFree(configs);  configs=NULL;  goto done;}
 	}
 
-		stoptrace();  if(configs) {prargc(configs[0]);}
-		if(nelements) {prargi(*nelements);}	 closetrace();
-
 	CATCH();
+
+	done:
+
+		stoptrace();  if(configs) {prargc(configs[0]);}
+		if(configs && nelements) {prargi(*nelements);}	 closetrace();
+
 	return configs;
 }
 
@@ -249,9 +244,8 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
 
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
-	XVisualInfo *v=NULL;
+	XVisualInfo *v=NULL;  GLXFBConfig c=0;
 	static bool alreadywarned=false;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
@@ -259,6 +253,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
 		prargal11(attrib_list);  starttrace();
+
+	TRY();
 
 	// If 'attrib_list' specifies properties for transparent overlay rendering,
 	// then hand off to the 2D X server.
@@ -282,15 +278,14 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 				v=NULL;
 			else v=_glXChooseVisual(dpy, screen, attrib_list);
-			stoptrace();  prargv(v);  closetrace();
-			return v;
+			goto done;
 		}
 	}
 
 	// Use the specified set of GLX attributes to obtain a Pbuffer-compatible FB
 	// config on the 3D X server
-	GLXFBConfig *configs=NULL, c=0, cprev;  int n=0;
-	if(!dpy || !attrib_list) return NULL;
+	GLXFBConfig *configs=NULL, cprev;  int n=0;
+	if(!dpy || !attrib_list) goto done;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
 	if(!(configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class,
 		level, stereo, trans, n)) || n<1)
@@ -304,16 +299,16 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 			rrout.println("[VGL]    but if the app fails to start, then make sure that the 3D X server is");
 			rrout.println("[VGL]    configured for 24-bit color and has accelerated 3D drivers installed.");
 		}
-		return NULL;
+		goto done;
 	}
 	c=configs[0];
 	XFree(configs);
 
 	// Find an appropriate matching visual on the 2D X server.
 	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
-	if(!vid) return NULL;
+	if(!vid) goto done;
 	v=__vglVisualFromVisualID(dpy, screen, vid);
-	if(!v) return NULL;
+	if(!v) goto done;
 
 	if((cprev=vish.getpbconfig(dpy, v)) && _FBCID(c) != _FBCID(cprev)
 		&& fconfig.trace)
@@ -325,9 +320,12 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	// other functions.
 	vish.add(dpy, v, c);
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargv(v);  prargc(c);  closetrace();
 
-	CATCH();
 	return v;
 }
 
@@ -355,8 +353,7 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long 
 GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	GLXContext share_list, Bool direct)
 {
-	GLXContext ctx=0;
-	TRY();
+	GLXContext ctx=0;  GLXFBConfig c=0;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
@@ -364,6 +361,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 
 		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
 		prargx(share_list);  prargi(direct);  starttrace();
+
+	TRY();
 
 	if(!fconfig.allowindirect) direct=True;
 
@@ -381,15 +380,13 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 				ctx=NULL;
 			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
 			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
-			stoptrace();  prargx(ctx);  closetrace();
-			return ctx;
+			goto done;
 		}
 	}
 
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from _MatchConfig().
-	GLXFBConfig c;
 	if(!(c=_MatchConfig(dpy, vis)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, direct);
@@ -409,9 +406,12 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		ctxh.add(ctx, c);
 	}
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargc(c);  prargx(ctx);  closetrace();
 
-	CATCH();
 	return ctx;
 }
 
@@ -420,7 +420,6 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	GLXContext share_context, Bool direct, const int *attribs)
 {
 	GLXContext ctx=0;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy))
@@ -432,6 +431,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		prargx(share_context);  prargi(direct);  prargal13(attribs);
 		starttrace();
 
+	TRY();
+
 	if(!fconfig.allowindirect) direct=True;
 
 	// Overlay config.  Hand off to 2D X server.
@@ -440,8 +441,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
 		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
-		stoptrace();  prargx(ctx);  closetrace();
-		return ctx;
+		goto done;
 	}
 
 	if(attribs)
@@ -470,9 +470,12 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		ctxh.add(ctx, config);
 	}
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargx(ctx);  closetrace();
 
-	CATCH();
 	return ctx;
 }
 
@@ -481,7 +484,6 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	int render_type, GLXContext share_list, Bool direct)
 {
 	GLXContext ctx=0;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy))
@@ -491,6 +493,8 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
 		prargi(render_type);  prargx(share_list);  prargi(direct);  starttrace();
 
+	TRY();
+
 	if(!fconfig.allowindirect) direct=True;
 
 	 // Overlay config.  Hand off to 2D X server.
@@ -498,8 +502,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
 		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
-		stoptrace();  prargx(ctx);  closetrace();
-		return ctx;
+		goto done;
 	}
 
 	ctx=_glXCreateNewContext(_localdpy, config, GLX_RGBA_TYPE, share_list, direct);
@@ -517,9 +520,12 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		ctxh.add(ctx, config);
 	}
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargx(ctx);  closetrace();
 
-	CATCH();
 	return ctx;
 }
 
@@ -580,9 +586,8 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
-	GLXPixmap drawable=0;
-	TRY();
-	GLXFBConfig c;
+	GLXPixmap drawable=0;  GLXFBConfig c=0;
+	int x=0, y=0;  unsigned int w=0, h=0, d=0;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXCreateGLXPixmap(dpy, vi, pm);
@@ -590,6 +595,8 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vi);  prargx(pm);
 		starttrace();
+
+	TRY();
 
 	// Not sure whether a transparent pixmap has any meaning, but in any case,
 	// we have to hand it off to the 2D X server.
@@ -605,12 +612,11 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 				drawable=0;
 			else drawable=_glXCreateGLXPixmap(dpy, vi, pm);
-			stoptrace();  prargx(drawable);  closetrace();
-			return drawable;
+			goto done;
 		}
 	}
 
-	Window root;  int x, y;  unsigned int w, h, bw, d;
+	Window root;  unsigned int bw;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 	if(!(c=_MatchConfig(dpy, vi)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
@@ -625,10 +631,13 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 		drawable=pbp->getglxdrawable();
 	}
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
 		prargi(d);  prargc(c);  prargx(drawable);  closetrace();
 
-	CATCH();
 	return drawable;
 }
 
@@ -719,23 +728,24 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 
 void glXDestroyContext(Display* dpy, GLXContext ctx)
 {
-	TRY();
-
 		opentrace(glXDestroyContext);  prargd(dpy);  prargx(ctx);  starttrace();
+
+	TRY();
 
 	if(ctxh.isoverlay(ctx))
 	{
 		_glXDestroyContext(dpy, ctx);
-		stoptrace();  closetrace();
-		return;
+		goto done;
 	}
 
 	ctxh.remove(ctx);
 	_glXDestroyContext(_localdpy, ctx);
 
-		stoptrace();  closetrace();
-
 	CATCH();
+
+	done:
+
+		stoptrace();  closetrace();
 }
 
 
@@ -861,7 +871,6 @@ const char *glXGetClientString(Display *dpy, int name)
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
 	GLXFBConfig c;  int retval=0;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
@@ -870,10 +879,12 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
 		starttrace();
 
+	TRY();
+
 	if(!dpy || !vis || !value)
 	{
-		stoptrace()  prargx(value);  closetrace();
-		return GLX_BAD_VALUE;
+		retval=GLX_BAD_VALUE;
+		goto done;
 	}
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
@@ -884,11 +895,10 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
 	{
 		int dummy;
-		stoptrace();  if(value) {prargi(*value);}  closetrace();
 		if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 			retval=GLX_NO_EXTENSION;
 		else retval=_glXGetConfig(dpy, vis, attrib, value);
-		return retval;
+		goto done;
 	}
 
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
@@ -939,9 +949,13 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		retval=_glXGetFBConfigAttrib(_localdpy, c, attrib, value);
 	}
 
-		stoptrace();  if(value) {prargi(*value);}  closetrace();
-
 	CATCH();
+
+	done:
+
+		stoptrace();  if(value) {prargi(*value);}  else {prargx(value);}
+		closetrace();
+
 	return retval;
 }
 
@@ -1027,7 +1041,6 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	int *value)
 {
 	VisualID vid=0;  int retval=0;
-	TRY();
 
 	// Prevent recursion && handle overlay configs
 	if((dpy && config) && (!_isremote(dpy) || rcfgh.isoverlay(dpy, config)))
@@ -1039,10 +1052,12 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargi(attribute);  starttrace();
 
+	TRY();
+
 	if(!dpy || !config || !value)
 	{
-		stoptrace();  prargx(value);  closetrace();
-		return GLX_BAD_VALUE;
+		retval=GLX_BAD_VALUE;
+		goto done;
 	}
 
 	// Obtain the corresponding 2D X server visual from the hash, or find an
@@ -1101,15 +1116,19 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR)
 			{
 				*value=GLX_NON_CONFORMANT_CONFIG;
-				return retval;
+				goto done;
 			}
 		}
 		retval=_glXGetFBConfigAttrib(_localdpy, config, attribute, value);
 	}
 
-		stoptrace();  if(value) {prargi(*value);}  closetrace();
-
 	CATCH();
+
+	done:
+
+		stoptrace();  if(value) {prargi(*value);}  else {prargx(value);}
+		closetrace();
+
 	return retval;
 }
 
@@ -1295,7 +1314,6 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable,
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
 	XVisualInfo *v=NULL;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
@@ -1304,25 +1322,29 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
 
+	TRY();
+
 	// Overlay config.  Hand off to 2D X server.
 	if(rcfgh.isoverlay(dpy, config))
 	{
 		v=_glXGetVisualFromFBConfig(dpy, config);
-		stoptrace();  prargv(v);  closetrace();
-		return v;
+		goto done;
 	}
 
 	VisualID vid=0;
-	if(!dpy || !config) return NULL;
+	if(!dpy || !config) goto done;
 	vid=_MatchVisual(dpy, config);
-	if(!vid) return NULL;
+	if(!vid) goto done;
 	v=__vglVisualFromVisualID(dpy, DefaultScreen(dpy), vid);
-	if(!v) return NULL;
+	if(!v) goto done;
 	vish.add(dpy, v, config);
+
+	CATCH();
+
+	done:
 
 		stoptrace();  prargv(v);  closetrace();
 
-	CATCH();
 	return v;
 }
 
@@ -1366,8 +1388,7 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
-	Bool retval=0;  const char *renderer="Unknown";
-	TRY();
+	Bool retval=False;  const char *renderer="Unknown";
 	pbwin *pbw;  GLXFBConfig config=0;
 
 	// Prevent recursion
@@ -1377,6 +1398,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		opentrace(glXMakeCurrent);  prargd(dpy);  prargx(drawable);  prargx(ctx);
 		starttrace();
 
+	TRY();
+
 	// Find the FB config that was previously hashed to this context when it was
 	// created.
 	if(ctx) config=ctxh.findconfig(ctx);
@@ -1385,8 +1408,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		// Overlay context.  Hand off to the 2D X server.
 		retval=_glXMakeCurrent(dpy, drawable, ctx);
 		winh.setoverlay(dpy, drawable);
-		stoptrace();  closetrace();
-		return retval;
+		goto done;
 	}
 
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
@@ -1411,7 +1433,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(!config)
 		{
 			rrout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
-			return False;
+			goto done;
 		}
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw) drawable=pbw->updatedrawable();
@@ -1438,10 +1460,13 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
 	// Needed to support color index rendering on Sun OpenGL
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargc(config);  prargx(drawable);  prargs(renderer);
 		closetrace();
 
-	CATCH();
 	return retval;
 }
 
@@ -1449,9 +1474,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
-	Bool retval=0;  const char *renderer="Unknown";
+	Bool retval=False;  const char *renderer="Unknown";
 	pbwin *pbw;  GLXFBConfig config=0;
-	TRY();
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
@@ -1460,6 +1484,8 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		opentrace(glXMakeContextCurrent);  prargd(dpy);  prargx(draw);
 		prargx(read);  prargx(ctx);  starttrace();
 
+	TRY();
+
 	if(ctx) config=ctxh.findconfig(ctx);
 	if(config==(GLXFBConfig)-1)
 	{
@@ -1467,8 +1493,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		retval=_glXMakeContextCurrent(dpy, draw, read, ctx);
 		winh.setoverlay(dpy, draw);
 		winh.setoverlay(dpy, read);
-		stoptrace();  closetrace();
-		return retval;
+		goto done;
 	}
 
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
@@ -1494,7 +1519,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		if(!config)
 		{
 			rrout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
-			return False;
+			goto done;
 		}
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
@@ -1509,10 +1534,13 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, draw))!=NULL) pbp->clear();
 
+	CATCH();
+
+	done:
+
 		stoptrace();  prargc(config);  prargx(draw);  prargx(read);
 		prargs(renderer);  closetrace();
 
-	CATCH();
 	return retval;
 }
 
@@ -1576,24 +1604,25 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	unsigned int *value)
 {
-	TRY();
-
 		opentrace(glXQueryDrawable);  prargd(dpy);  prargx(draw);  prargi(attribute);
 		starttrace();
+
+	TRY();
 
 	if(winh.isoverlay(dpy, draw))
 	{
 		_glXQueryDrawable(dpy, draw, attribute, value);
-		stoptrace(); if(value) {prargi(*value);}  closetrace();
-		return;
+		goto done;
 	}
 
 	_glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
 
-		stoptrace();  prargx(ServerDrawable(dpy, draw));  if(value) {prargi(*value);}
-		closetrace();
-
 	CATCH();
+
+	done:
+
+		stoptrace();  prargx(ServerDrawable(dpy, draw));
+		if(value) {prargi(*value);}  else {prargx(value);}  closetrace();
 }
 
 int glXQueryGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf, int attribute,
@@ -1666,19 +1695,19 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
-	TRY();
+	pbwin *pbw=NULL;
 
 		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
+
+	TRY();
 
 	if(winh.isoverlay(dpy, drawable))
 	{
 		_glXSwapBuffers(dpy, drawable);
-		stoptrace();  closetrace();  
-		return;
+		goto done;
 	}
 
 	fconfig.flushdelay=0.;
-	pbwin *pbw=NULL;
 	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
 		pbw->readback(GL_BACK, false, fconfig.sync);
@@ -1686,10 +1715,12 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	}
 	else _glXSwapBuffers(_localdpy, drawable);
 
-		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getglxdrawable());}
-		closetrace();  
-
 	CATCH();
+
+	done:
+
+		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getglxdrawable());}
+		closetrace();
 }
 
 
@@ -1698,6 +1729,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 	Window underlay, long *transparentIndex)
 {
+	int retval=False;
 	XWindowAttributes xwa;
 	if(!transparentIndex) return False;
 
@@ -1708,15 +1740,19 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 		*transparentIndex=fconfig.transpixel;
 	else
 	{
-		if(!dpy || !overlay) return False;
+		if(!dpy || !overlay) goto done;
 		XGetWindowAttributes(dpy, overlay, &xwa);
 		*transparentIndex=__vglClientVisualAttrib(dpy, DefaultScreen(dpy),
 			xwa.visual->visualid, GLX_TRANSPARENT_INDEX_VALUE);
 	}
+	retval=True;
 
-		stoptrace();  prargi(*transparentIndex);  closetrace();
+	done:
 
-	return True;
+		stoptrace();  if(transparentIndex) {prargi(*transparentIndex);}
+		else {prargx(transparentIndex);}  closetrace();
+
+	return retval;
 }
 
 
@@ -1803,7 +1839,6 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 
 		stoptrace();  closetrace();
 
-	return;
 	CATCH();
 }
 
