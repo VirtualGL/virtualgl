@@ -1,7 +1,7 @@
 * Using VirtualGL with VirtualBox
 
 VirtualBox is an enterprise-class, open source virtualization solution
-provided by Sun Microsystems.  With the release of VirtualBox 2.1.0,
+provided by Oracle.  With the release of VirtualBox 2.1.0,
 experimental support was added for hardware-accelerated OpenGL in Windows
 and Linux guests running on Windows, MacIntel, Linux, and Solaris/x86 hosts.
 3D acceleration in VirtualBox is accomplished by installing a special driver in

@@ -1,7 +1,7 @@
 * Using VirtualGL in a Sun Ray Environment
 {anchor: Sun_Ray_Usage}
 
-The Sun Ray technology from Sun Microsystems consists of a software component
+The Sun Ray technology from Oracle consists of a software component
 (the Sun Ray Server Software, or SRSS) and an ultra-thin hardware client (the
 Sun Ray Desktop Unit, or DTU.)  The SRSS receives connection requests from
 multiple DTU's and creates a separate instance of the Sun Ray X Server (an
