@@ -78,7 +78,7 @@
 		launching the application with ''vglrun'' \
 	| These applications use double buffering and draw geometry to the back buffer, \
 		but node highlighting and rubber banding are drawn directly to the front \
-		buffer. In order for these front-buffer operations to be displayed \
+		buffer. In order for these front buffer operations to be displayed \
 		properly, it is necessary to use the "spoil first" frame spoiling \
 		algorithm whenever the application calls ''glFlush()''.  See \
 		{ref prefix="Section ": VGL_SPOILLAST} for more details. \
@@ -115,4 +115,13 @@
 	| Mathematica 7 will not draw the axis numbers on 3D charts correctly \
 		unless it is allowed to create an indirect OpenGL context.  See \
 		{ref prefix="Section ": VGL_ALLOWINDIRECT} for more details. \
+	|
+| Tecplot 360 2011 and earlier | Linux \
+	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
+		launching the application with ''vglrun'' \
+	| When running in TurboVNC (using VirtualGL), flashing artifacts will be \
+		produced when the user zooms/pans/rotates the scene in Tecplot 360, \
+		unless VirtualGL is instructed not to use ''glFlush()'' as an \
+		end-of-frame trigger.  This has been fixed in Tecplot 2012 and later. \
+		See {ref prefix="Section ": VGL_GLFLUSHTRIGGER} for more details. \
 	|

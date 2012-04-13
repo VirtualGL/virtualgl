@@ -236,6 +236,46 @@ Each method of configuration takes precedence over the previous method:
 	factor of G (where G < 0) is equivalent to specifying a gamma correction
 	factor of -1/G.
 
+{anchor: VGL_GLFLUSHTRIGGER}
+| Environment Variable | ''VGL_GLFLUSHTRIGGER = ''__''0 \| 1''__ |
+| Summary | Disable/enable reading back and sending the front buffer contents \
+	whenever the 3D application calls ''glFlush()'' while rendering to the \
+	front buffer |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: ''glFlush()'' is a sort of "asynchronous synchronization"
+	command.  It flushes the OpenGL command buffers, which generally has the
+	effect of ensuring that the commands have been delivered to the 3D hardware.
+	However, unlike ''glFinish()'', ''glFlush()'' does not wait until the
+	commands have been rendered before it returns.
+	{nl}{nl}
+	The use of ''glFlush()'' can vary widely from application to application.
+	When doing front buffer rendering, some applications call ''glFlush()'' after
+	each object is rendered.  Some call it only at the end of the frame.  Others
+	call ''glFlush()'' much more often, even as frequently as every time a few
+	lines are drawn.  This creates problems for VirtualGL, since it has to guess
+	what the application is intending to do.  Not all applications that use
+	front buffer rendering call ''glFinish()'' to signal the end of a frame, so
+	VirtualGL can't usually get away with ignoring ''glFlush()''.  However, some
+	applications call ''glFlush()'' so often that VirtualGL can't usually get
+	away with reading back/sending a frame every time ''glFlush()'' is called,
+	either (see [[#VGL_SPOILLAST][VGL_SPOILLAST]] for more information on how
+	VirtualGL tries to handle this, under normal circumstances.)
+	{nl}{nl}
+	Some 3D applications use ''glFlush()'' very liberally and intend for it to be
+	an intermediate rather than a final synchronization command.  Such
+	applications will call ''glFinish()'' after a sequence of ''glFlush()''
+	calls, so for those applications, reading back and sending the rendered 3D
+	image in response to ''glFlush()'' calls is a waste of resources and can
+	sometimes create visual artifacts (for instance, if the application clears
+	the front buffer with a particular color, calls ''glFlush()'', then clears it
+	again with another color.  We wouldn't mention it if it hadn't happened
+	before.)  For such applications, setting ''VGL_GLFLUSHTRIGGER'' to ''0''
+	should allow them to display properly.  See
+	[[#Application_Recipes][Application Recipes]] for a list of applications that
+	are known to require this.
+
 | Environment Variable | ''VGL_GLLIB = ''__''{l}''__ |
 | Summary | __''{l}''__ = the location of an alternate OpenGL library |
 | Image Transports | All |

@@ -161,6 +161,7 @@ static void fconfig_init(void)
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
 	fconfig.forcealpha=-1;
 	fconfig_setgamma(fconfig, 1.0);
+	fconfig.glflushtrigger=1;
 	fconfig.gui=1;
 	fconfig.guikey=XK_F9;
 	fconfig.guimod=ShiftMask|ControlMask;
@@ -335,6 +336,7 @@ void fconfig_reloadenv(void)
 			}
 		}
 	}
+	fetchenv_bool("VGL_GLFLUSHTRIGGER", glflushtrigger);
 	fetchenv_str("VGL_GLLIB", gllib);
 	fetchenv_str("VGL_GUI", guikeyseq);
 	if(strlen(fconfig.guikeyseq)>0)
@@ -544,6 +546,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfdbl(flushdelay);
 	prconfint(forcealpha);
 	prconfdbl(gamma);
+	prconfint(glflushtrigger);
 	prconfstr(gllib);
 	prconfint(gui);
 	prconfint(guikey);

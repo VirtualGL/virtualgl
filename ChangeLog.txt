@@ -32,6 +32,13 @@ installed version was up to date.
 [7]
 vglserver_config now works properly with KDM on RHEL/CentOS 5 systems.
 -------------------------------------------------------------------------------
+[8]
+Added a new option (VGL_GLFLUSHTRIGGER) that, when set to 0, will cause
+VirtualGL to ignore glFlush() commands from the 3D application.  This is
+intended for rare applications that do front buffer rendering and use glFlush()
+as an "intermediate" synchronization command but then subsequently call
+glFinish() to indicate the end of the frame.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

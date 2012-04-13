@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011 D. R. Commander
+ * Copyright (C)2009, 2011-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -75,8 +75,9 @@ void glFlush(void)
 		if(thistime-lasttime<0.01) fconfig.flushdelay=0.01;
 		else fconfig.flushdelay=0.;
 	}
-	// See the notes regarding VGL_SPOILLAST in the VirtualGL User's Guide.
-	_doGLreadback(fconfig.spoillast, false);
+	// See the notes regarding VGL_SPOILLAST and VGL_GLFLUSHTRIGGER in the
+	// VirtualGL User's Guide.
+	if(fconfig.glflushtrigger) _doGLreadback(fconfig.spoillast, false);
 	CATCH();
 }
 
