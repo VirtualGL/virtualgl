@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011 D. R. Commander
+ * Copyright (C)2009, 2011-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -136,12 +136,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
-	if(win)
-	{
-		if(_isremote(dpy)) winh.add(dpy, win);
-		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-		if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
-	}
+	if(win && _isremote(dpy)) winh.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -164,12 +159,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes);
-	if(win)
-	{
-		if(_isremote(dpy)) winh.add(dpy, win);
-		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-		if(deleteatom) XSetWMProtocols(dpy, win, &deleteatom, 1);
-	}
+	if(win && _isremote(dpy)) winh.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 

@@ -1436,7 +1436,12 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			goto done;
 		}
 		pbw=winh.setpb(dpy, drawable, config);
-		if(pbw) drawable=pbw->updatedrawable();
+		if(pbw)
+		{
+			Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+			if(deleteatom) XSetWMProtocols(dpy, drawable, &deleteatom, 1);
+			drawable=pbw->updatedrawable();
+		}
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
@@ -1500,7 +1505,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	// which is why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
-	&& curdraw && winh.findpb(curdraw, pbw))
+		&& curdraw && winh.findpb(curdraw, pbw))
 	{
 		pbwin *newpbw;
 		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
@@ -1523,9 +1528,17 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		}
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
+		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 		if(drawpbw)
+		{
+			if(deleteatom) XSetWMProtocols(dpy, draw, &deleteatom, 1);
 			draw=drawpbw->updatedrawable();
-		if(readpbw) read=readpbw->updatedrawable();
+		}
+		if(readpbw)
+		{
+			if(deleteatom) XSetWMProtocols(dpy, read, &deleteatom, 1);
+			read=readpbw->updatedrawable();
+		}
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
 	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);

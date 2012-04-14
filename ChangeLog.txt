@@ -39,6 +39,11 @@ intended for rare applications that do front buffer rendering and use glFlush()
 as an "intermediate" synchronization command but then subsequently call
 glFinish() to indicate the end of the frame.
 -------------------------------------------------------------------------------
+[9]
+Fixed an issue whereby drag 'n' drop operations in certain Java applications
+would cause VNC servers (any VNC server, not just TurboVNC) to hang whenever
+the Java application was run using VirtualGL.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
