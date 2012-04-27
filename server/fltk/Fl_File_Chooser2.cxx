@@ -564,7 +564,7 @@ Fl_File_Chooser::fileNameCB()
       }
     } else {
       // File doesn't exist, so beep at and alert the user...
-      fl_alert(existing_file_label);
+      fl_alert("%s",existing_file_label);
     }
   }
   else if (Fl::event_key() != FL_Delete &&
@@ -752,7 +752,7 @@ Fl_File_Chooser::newdir()
 
 
   // Get a directory name from the user
-  if ((dir = fl_input(new_directory_label, NULL)) == NULL)
+  if ((dir = fl_input("%s", NULL, new_directory_label)) == NULL)
     return;
 
   // Make it relative to the current directory as needed...
@@ -871,7 +871,7 @@ Fl_File_Chooser::showChoiceCB()
   item = showChoice->text(showChoice->value());
 
   if (strcmp(item, custom_filter_label) == 0) {
-    if ((item = fl_input(custom_filter_label, pattern_)) != NULL) {
+    if ((item = fl_input("%s", pattern_, custom_filter_label)) != NULL) {
       strlcpy(pattern_, item, sizeof(pattern_));
 
       quote_pathname(temp, item, sizeof(temp));
