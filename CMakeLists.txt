@@ -248,7 +248,7 @@ endif()
 #
 
 set(DEFAULT_VGL_BUILDSERVER 0)
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT CYGWIN)
 	set(DEFAULT_VGL_BUILDSERVER 1)
 endif()
 option(VGL_BUILDSERVER "Build VirtualGL server components"
