@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -309,6 +309,8 @@ Fl_Menu_Item stereomenu[]=
 	{"Send Right Eye Only", 0, StereoCB, (void *)RRSTEREO_REYE},
 	{"Quad-Buffered (if available)", 0, StereoCB, (void *)RRSTEREO_QUADBUF},
 	{"Anaglyphic (Red/Cyan)", 0, StereoCB, (void *)RRSTEREO_REDCYAN},
+	{"Anaglyphic (Green/Magenta)", 0, StereoCB, (void *)RRSTEREO_GREENMAGENTA},
+	{"Anaglyphic (Blue/Yellow)", 0, StereoCB, (void *)RRSTEREO_BLUEYELLOW},
 	{0, 0, 0, 0}
 };
 

@@ -389,7 +389,9 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		}
 		stereomode=RRSTEREO_REDCYAN;				
 	}
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&f, drawbuf);
+	if(dostereo
+		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+		makeanaglyph(&f, drawbuf, stereomode);
 	else
 	{
 		GLint buf=drawbuf;
@@ -445,7 +447,9 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	if(!fconfig.spoil) vgltrans->synchronize();
 	errifnot(f=vgltrans->getframe(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(f, drawbuf);
+	if(dostereo
+		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+		makeanaglyph(f, drawbuf, stereomode);
 	else
 	{
 		GLint buf=drawbuf;
@@ -485,7 +489,9 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(!fconfig.spoil) _x11trans->synchronize();
 	errifnot(f=_x11trans->getframe(_dpy, _drawable, pbw, pbh));
 	f->_flags|=RRFRAME_BOTTOMUP;
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(f, drawbuf);
+	if(dostereo
+		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+		makeanaglyph(f, drawbuf, stereomode);
 	else
 	{
 		int format;
@@ -571,7 +577,9 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 
 	_f.init(hdr, pixelsize, flags, false);
 
-	if(dostereo && stereomode==RRSTEREO_REDCYAN) makeanaglyph(&_f, drawbuf);
+	if(dostereo
+		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+		makeanaglyph(&_f, drawbuf, stereomode);
 	else
 	{
 		GLint buf=drawbuf;
@@ -591,17 +599,26 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 #endif
 
 
-void pbwin::makeanaglyph(rrframe *f, int drawbuf)
+void pbwin::makeanaglyph(rrframe *f, int drawbuf, int stereomode)
 {
+	int rbuf=leye(drawbuf), gbuf=reye(drawbuf),  bbuf=reye(drawbuf);
+	if(stereomode==RRSTEREO_GREENMAGENTA)
+	{
+		rbuf=reye(drawbuf);  gbuf=leye(drawbuf);  bbuf=reye(drawbuf);
+	}
+	else if(stereomode==RRSTEREO_BLUEYELLOW)
+	{
+		rbuf=reye(drawbuf);  gbuf=reye(drawbuf);  bbuf=leye(drawbuf);
+	}
 	_r.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _r._h.framew, _r._pitch, _r._h.frameh, GL_RED,
-		_r._pixelsize, _r._bits, leye(drawbuf), false, false);
+		_r._pixelsize, _r._bits, rbuf, false, false);
 	_g.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _g._h.framew, _g._pitch, _g._h.frameh, GL_GREEN,
-		_g._pixelsize, _g._bits, reye(drawbuf), false, false);
+		_g._pixelsize, _g._bits, gbuf, false, false);
 	_b.init(f->_h, 1, f->_flags, false);
 	readpixels(0, 0, _b._h.framew, _b._pitch, _b._h.frameh, GL_BLUE,
-		_b._pixelsize, _b._bits, reye(drawbuf), false, false);
+		_b._pixelsize, _b._bits, bbuf, false, false);
 	_prof_anaglyph.startframe();
 	f->makeanaglyph(_r, _g, _b);
 	_prof_anaglyph.endframe(f->_h.framew*f->_h.frameh, 0, 1);
