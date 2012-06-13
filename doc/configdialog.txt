@@ -109,6 +109,10 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	{nl}{nl} \
 	__Anaglyphic (Red/Cyan)__ : equivalent to setting ''VGL_STEREO=rc''
 	{nl}{nl} \
+	__Anaglyphic (Green/Magenta)__ : equivalent to setting ''VGL_STEREO=gm''
+	{nl}{nl} \
+	__Anaglyphic (Blue/Yellow)__ : equivalent to setting ''VGL_STEREO=by''
+	{nl}{nl} \
 	See {ref prefix="Section ": VGL_STEREO} for more information about the
 	''VGL_STEREO'' configuration option.
 

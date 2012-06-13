@@ -396,9 +396,11 @@ void fconfig_reloadenv(void)
 		{
 			int stereo=-1;
 			if(!strnicmp(env, "L", 1)) stereo=RRSTEREO_LEYE;
-			else if(!strnicmp(env, "RC", 2)) stereo=RRSTEREO_REDCYAN;
 			else if(!strnicmp(env, "R", 1)) stereo=RRSTEREO_REYE;
 			else if(!strnicmp(env, "Q", 1)) stereo=RRSTEREO_QUADBUF;
+			else if(!strnicmp(env, "RC", 2)) stereo=RRSTEREO_REDCYAN;
+			else if(!strnicmp(env, "GM", 2)) stereo=RRSTEREO_GREENMAGENTA;
+			else if(!strnicmp(env, "BY", 2)) stereo=RRSTEREO_BLUEYELLOW;
 			else
 			{
 				char *t=NULL;  int itemp=strtol(env, &t, 10);

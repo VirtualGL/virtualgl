@@ -10,7 +10,7 @@ displayed depends on the particulars of the 3D hardware and the user's
 environment.  VirtualGL can support stereographic applications in one of two
 ways: (1) by sending the stereo image pairs to the client to be displayed in
 stereo by the client's 3D graphics card, or (2) by combining each stereo image
-pair into a single anaglyph that can be viewed with traditional red/cyan 3D
+pair into a single image that can be viewed with traditional anaglyphic 3D
 glasses.
 
 *** Quad-Buffered Stereo
@@ -59,14 +59,17 @@ is used, then VGL will fall back to anaglyphic stereo mode.
 *** Anaglyphic Stereo
 
 Anaglyphic stereo is the type of stereographic display used by old 3D movies.
-It generally relies on a set of 3D glasses consisting of red transparency film
-over the left eye and cyan transparency film over the right eye.  To generate a
-3D anaglyph, the red color data from the left eye buffer is combined with the
-green and blue color data from the right eye buffer, thus allowing a single
-monographic image to contain stereo data.  From the point of view of VirtualGL,
-an anaglyphic image is the same as a monographic image, so anaglyphic stereo
-images can be sent using any image transport to any type of client, regardless
-of the client's capabilities.
+It typically relies on a set of 3D glasses consisting of red transparency film
+over the left eye and cyan transparency film over the right eye, although
+green/magenta and blue/yellow schemes can be used as well.  To generate a
+3D anaglyph, one color channel from the left eye buffer is combined with the
+other two color channels from the right eye buffer, thus allowing a single
+monographic image to contain stereo data.  For instance, in the case of
+red/cyan, the red channel is taken from the left eye buffer, and the green and
+blue channels are taken from the right eye buffer.  From the point of view of
+VirtualGL, an anaglyphic image is the same as a monographic image, so
+anaglyphic stereo images can be sent using any image transport to any type of
+client, regardless of the client's capabilities.
 
 VirtualGL uses anaglyphic stereo if it detects that an application has rendered
 something in stereo but quad-buffered stereo is not available, either because

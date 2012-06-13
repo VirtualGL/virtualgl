@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-06-13T01:37:21">
+<meta name="date" content="2012-06-13T02:03:06">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2908,7 +2908,7 @@ the user&rsquo;s environment.  VirtualGL can support stereographic
 applications in one of two ways: (1) by sending the stereo image pairs 
 to the client to be displayed in stereo by the client&rsquo;s 3D 
 graphics card, or (2) by combining each stereo image pair into a single 
-anaglyph that can be viewed with traditional red/cyan 3D glasses.</p>
+image that can be viewed with traditional anaglyphic 3D glasses.</p>
 
 
 <h3 id="hd0016001001">16.1.1&nbsp;Quad-Buffered Stereo</h3>
@@ -2963,15 +2963,18 @@ transport is used, then VGL will fall back to anaglyphic stereo mode.</p>
 <h3 id="hd0016001002">16.1.2&nbsp;Anaglyphic Stereo</h3>
 
 <p>Anaglyphic stereo is the type of stereographic display used by old 3D 
-movies. It generally relies on a set of 3D glasses consisting of red 
+movies. It typically relies on a set of 3D glasses consisting of red 
 transparency film over the left eye and cyan transparency film over the 
-right eye.  To generate a 3D anaglyph, the red color data from the left 
-eye buffer is combined with the green and blue color data from the right 
-eye buffer, thus allowing a single monographic image to contain stereo 
-data.  From the point of view of VirtualGL, an anaglyphic image is the 
-same as a monographic image, so anaglyphic stereo images can be sent 
-using any image transport to any type of client, regardless of the 
-client&rsquo;s capabilities.</p>
+right eye, although green/magenta and blue/yellow schemes can be used as 
+well.  To generate a 3D anaglyph, one color channel from the left eye 
+buffer is combined with the other two color channels from the right eye 
+buffer, thus allowing a single monographic image to contain stereo data.  
+For instance, in the case of red/cyan, the red channel is taken from the 
+left eye buffer, and the green and blue channels are taken from the 
+right eye buffer.  From the point of view of VirtualGL, an anaglyphic 
+image is the same as a monographic image, so anaglyphic stereo images 
+can be sent using any image transport to any type of client, regardless 
+of the client&rsquo;s capabilities.</p>
 
 <p>VirtualGL uses anaglyphic stereo if it detects that an application has 
 rendered something in stereo but quad-buffered stereo is not available, 
@@ -3563,7 +3566,10 @@ VirtualGL.</p>
         <code>VGL_STEREO=right</code> <br /><br /> <em>Quad-Buffered (if 
         available)</em> : equivalent to setting <code>VGL_STEREO=quad</code> 
         <br /><br /> <em>Anaglyphic (Red/Cyan)</em> : equivalent to setting 
-        <code>VGL_STEREO=rc</code> <br /><br /> See Section 
+        <code>VGL_STEREO=rc</code> <br /><br /> <em>Anaglyphic 
+        (Green/Magenta)</em> : equivalent to setting <code>VGL_STEREO=gm</code> 
+        <br /><br /> <em>Anaglyphic (Blue/Yellow)</em> : equivalent to setting 
+        <code>VGL_STEREO=by</code> <br /><br /> See Section 
         <a href="#VGL_STEREO" class="ref">19.1</a> for more information about 
         the <code>VGL_STEREO</code> configuration option.
     </dd>
@@ -4769,11 +4775,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_STEREO&nbsp;=&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc</code></em></td>
+    <td class="standard"><code>VGL_STEREO&nbsp;=&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-st&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc</code></em></td>
+    <td class="standard"><code>-st&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -4808,8 +4814,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
          that supports stereo rendering.  Quad-buffered stereo is not supported 
          when using the VGL Transport with YUV encoding. <br /><br /> 
          <em>rc</em> = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered 
-         is available <br /><br /> See Chapter 
-         <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
+         is available <br /><br /> <em>gm</em> = Use Green/Magenta (anaglyphic) 
+         stereo, even if quad-buffered is available <br /><br /> <em>by</em> = 
+         Use Blue/Yellow (anaglyphic) stereo, even if quad-buffered is available 
+         <br /><br /> See Chapter <a href="#Advanced_OpenGL" class="ref">16</a> 
+         for more details.
     </dd>
 </dl>
 
