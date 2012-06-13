@@ -113,6 +113,12 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	{nl}{nl} \
 	__Anaglyphic (Blue/Yellow)__ : equivalent to setting ''VGL_STEREO=by''
 	{nl}{nl} \
+	__Passive (Interleaved)__ : equivalent to setting ''VGL_STEREO=i''
+	{nl}{nl} \
+	__Passive (Top/Bottom)__ : equivalent to setting ''VGL_STEREO=tb''
+	{nl}{nl} \
+	__Passive (Side-by-Side)__ : equivalent to setting ''VGL_STEREO=ss''
+	{nl}{nl} \
 	See {ref prefix="Section ": VGL_STEREO} for more information about the
 	''VGL_STEREO'' configuration option.
 

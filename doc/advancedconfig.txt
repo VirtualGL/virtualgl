@@ -612,8 +612,8 @@ Each method of configuration takes precedence over the previous method:
 	were built with OpenSSL support.
 
 {anchor: VGL_STEREO}
-| Environment Variable | ''VGL_STEREO = ''__''left \| right \| quad \| rc \| gm \| by''__ |
-| ''vglrun'' argument | ''-st ''__''left \| right \| quad \| rc \| gm \| by''__ |
+| Environment Variable | ''VGL_STEREO = ''__''left \| right \| quad \| rc \| gm \| by \| i \| tb \| ss''__ |
+| ''vglrun'' argument | ''-st ''__''left \| right \| quad \| rc \| gm \| by \| i \| tb \| ss''__ |
 | Summary | Specify the delivery method for stereo images |
 | Image Transports | All |
 | Default Value | quad |
@@ -643,6 +643,15 @@ Each method of configuration takes precedence over the previous method:
 	available
 	{nl}{nl}
 	__by__ = Use Blue/Yellow (anaglyphic) stereo, even if quad-buffered is
+	available
+	{nl}{nl}
+	__i__ = Use Interleaved (passive) stereo, even if quad-buffered is
+	available
+	{nl}{nl}
+	__tb__ = Use Top/Bottom (passive) stereo, even if quad-buffered is
+	available
+	{nl}{nl}
+	__ss__ = Use Side-by-Side (passive) stereo, even if quad-buffered is
 	available
 	{nl}{nl}
 	See {ref prefix="Chapter ": Advanced_OpenGL} for more details.

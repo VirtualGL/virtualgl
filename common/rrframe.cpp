@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -42,8 +42,14 @@ rrframe::rrframe(bool primary) : _bits(NULL), _rbits(NULL), _pitch(0),
 
 rrframe::~rrframe(void)
 {
-	if(_bits && _primary) delete [] _bits;
-	if(_rbits && _primary) delete [] _rbits;
+	deinit();
+}
+
+
+void rrframe::deinit(void)
+{
+	if(_bits && _primary) {delete [] _bits;  _bits=NULL;}
+	if(_rbits && _primary) {delete [] _rbits;  _rbits=NULL;}
 }
 
 
@@ -180,6 +186,66 @@ void rrframe::makeanaglyph(rrframe &r, rrframe &g, rrframe &b)
 			dg+=_pixelsize, db+=_pixelsize)
 		{
 			*dr=sr[i];  *dg=sg[i];  *db=sb[i];
+		}
+	}
+}
+
+
+void rrframe::makepassive(rrframe &stf, int mode)
+{
+	unsigned char *lptr=stf._bits, *rptr=stf._rbits;
+	unsigned char *dstptr=_bits;
+
+	if(mode==RRSTEREO_INTERLEAVED)
+	{
+		int rowsize=_pixelsize*_h.framew;
+		for(int j=0; j<_h.frameh; j++)
+		{
+			if(j%2==0) memcpy(dstptr, lptr, rowsize);
+			else memcpy(dstptr, rptr, rowsize);
+			lptr+=_pitch;  rptr+=_pitch;  dstptr+=_pitch;  
+		}
+	}
+	else if(mode==RRSTEREO_TOPBOTTOM)
+	{
+		int rowsize=_pixelsize*_h.framew;
+		rptr+=_pitch;
+		for(int j=0; j<(_h.frameh+1)/2; j++)
+		{
+			memcpy(dstptr, lptr, rowsize);
+			lptr+=_pitch*2;  dstptr+=_pitch;
+		}
+		for(int j=(_h.frameh+1)/2; j<_h.frameh; j++)
+		{
+			memcpy(dstptr, rptr, rowsize);
+			rptr+=_pitch*2;  dstptr+=_pitch;
+		}
+	}
+	else if(mode==RRSTEREO_SIDEBYSIDE)
+	{
+		int pad=_pitch-_h.framew*_pixelsize;
+		int h=_h.frameh;
+		while(h>0)
+		{
+			unsigned char *lptr2=lptr;
+			unsigned char *rptr2=rptr+_pixelsize;
+			for(int i=0; i<(_h.framew+1)/2; i++)
+			{
+				*(int *)dstptr=*(int *)lptr2;
+				lptr2+=_pixelsize*2;  dstptr+=_pixelsize;  
+			}
+			for(int i=(_h.framew+1)/2; i<_h.framew-1; i++)
+			{
+				*(int *)dstptr=*(int *)rptr2;
+				rptr2+=_pixelsize*2;  dstptr+=_pixelsize;  
+			}
+			if(_h.framew>1)
+			{
+				memcpy(dstptr, rptr2, _pixelsize);
+				dstptr+=_pixelsize;  
+			}
+			lptr+=_pitch;  rptr+=_pitch;  dstptr+=pad;
+			h--;
 		}
 	}
 }

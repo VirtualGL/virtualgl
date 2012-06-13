@@ -28,6 +28,10 @@
 	(buf==GL_FRONT? GL_FRONT_LEFT:buf))
 #define reye(buf) (buf==GL_BACK? GL_BACK_RIGHT: \
 	(buf==GL_FRONT? GL_FRONT_RIGHT:buf))
+#define isanaglyphic(mode) \
+	(mode>=RRSTEREO_REDCYAN && mode<=RRSTEREO_BLUEYELLOW)
+#define ispassive(mode) \
+	(mode>=RRSTEREO_INTERLEAVED && mode<=RRSTEREO_SIDEBYSIDE)
 
 static inline int _drawingtoright(void)
 {
@@ -51,6 +55,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	_vglconn=NULL;
 	_prof_gamma.setname("Gamma     ");
 	_prof_anaglyph.setname("Anaglyph  ");
+	_prof_passive.setname("Stereo Gen");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
@@ -389,11 +394,19 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		}
 		stereomode=RRSTEREO_REDCYAN;				
 	}
-	if(dostereo
-		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+	if(dostereo && isanaglyphic(stereomode))
+	{
+		_stf.deinit();
 		makeanaglyph(&f, drawbuf, stereomode);
+	}
+	else if(dostereo && ispassive(stereomode))
+	{
+		_r.deinit();  _g.deinit();  _b.deinit();
+		makepassive(&f, drawbuf, glformat, usepbo, stereomode);
+	}
 	else
 	{
+		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
 		GLint buf=drawbuf;
 		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
@@ -447,11 +460,19 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	if(!fconfig.spoil) vgltrans->synchronize();
 	errifnot(f=vgltrans->getframe(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
-	if(dostereo
-		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+	if(dostereo && isanaglyphic(stereomode))
+	{
+		_stf.deinit();
 		makeanaglyph(f, drawbuf, stereomode);
+	}
+	else if(dostereo && ispassive(stereomode))
+	{
+		_r.deinit();  _g.deinit();  _b.deinit();
+		makepassive(f, drawbuf, format, usepbo, stereomode);
+	}
 	else
 	{
+		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
 		GLint buf=drawbuf;
 		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
@@ -489,11 +510,14 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	if(!fconfig.spoil) _x11trans->synchronize();
 	errifnot(f=_x11trans->getframe(_dpy, _drawable, pbw, pbh));
 	f->_flags|=RRFRAME_BOTTOMUP;
-	if(dostereo
-		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+	if(dostereo && isanaglyphic(stereomode))
+	{
+		_stf.deinit();
 		makeanaglyph(f, drawbuf, stereomode);
+	}
 	else
 	{
+		_r.deinit();  _g.deinit();  _b.deinit();
 		int format;
 		unsigned char *bits=f->_bits;
 		switch(f->_pixelsize)
@@ -527,21 +551,27 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			default:
 				_throw("Unsupported pixel format");
 		}
-		GLint buf=drawbuf;
-		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
-		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
-		if(usepbo && format!=desiredformat)
+		if(dostereo && ispassive(stereomode))
+			makepassive(f, drawbuf, format, usepbo, stereomode);
+		else
 		{
-			usepbo=false;
-			if(fconfig.verbose && !alreadywarned)
+			_stf.deinit();
+			GLint buf=drawbuf;
+			if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
+			else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
+			if(usepbo && format!=desiredformat)
 			{
-				alreadywarned=true;
-				rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-				rrout.println("[VGL}    Pbuffer.  Disabling PBO's.");
+				usepbo=false;
+				if(fconfig.verbose && !alreadywarned)
+				{
+					alreadywarned=true;
+					rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
+					rrout.println("[VGL}    Pbuffer.  Disabling PBO's.");
+				}
 			}
+			readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
+				min(pbh, f->_h.frameh), format, f->_pixelsize, bits, buf, usepbo, false);
 		}
-		readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
-			min(pbh, f->_h.frameh), format, f->_pixelsize, bits, buf, usepbo, false);
 	}
 	if(fconfig.logo) f->addlogo();
 	_x11trans->sendframe(f, sync);
@@ -577,11 +607,19 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 
 	_f.init(hdr, pixelsize, flags, false);
 
-	if(dostereo
-		&& (stereomode>=RRSTEREO_REDCYAN && stereomode<=RRSTEREO_BLUEYELLOW))
+	if(dostereo && isanaglyphic(stereomode))
+	{
+		_stf.deinit();
 		makeanaglyph(&_f, drawbuf, stereomode);
+	}
+	else if(dostereo && ispassive(stereomode))
+	{
+		_r.deinit();  _g.deinit();  _b.deinit();
+		makepassive(&_f, drawbuf, format, usepbo, stereomode);
+	}
 	else
 	{
+		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
 		GLint buf=drawbuf;
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
@@ -624,6 +662,18 @@ void pbwin::makeanaglyph(rrframe *f, int drawbuf, int stereomode)
 	_prof_anaglyph.endframe(f->_h.framew*f->_h.frameh, 0, 1);
 }
 
+void pbwin::makepassive(rrframe *f, int drawbuf, int format, bool usepbo,
+	int stereomode)
+{
+	_stf.init(f->_h, f->_pixelsize, f->_flags, true);
+	readpixels(0, 0, _stf._h.framew, _stf._pitch, _stf._h.frameh, format,
+		_stf._pixelsize, _stf._bits, leye(drawbuf), usepbo, true);
+	readpixels(0, 0, _stf._h.framew, _stf._pitch, _stf._h.frameh, format,
+		_stf._pixelsize, _stf._rbits, reye(drawbuf), usepbo, true);
+	_prof_passive.startframe();
+	f->makepassive(_stf, stereomode);
+	_prof_passive.endframe(f->_h.framew*f->_h.frameh, 0, 1);
+}
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)

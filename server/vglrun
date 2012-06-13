@@ -93,6 +93,9 @@ usage()
 	echo "            rc = Always use red/cyan (anaglyphic) stereo"
 	echo "            gm = Always use green/magenta (anaglyphic) stereo"
 	echo "            by = Always use blue/yellow (anaglyphic) stereo"
+	echo "            i = Always use interleaved (passive) stereo"
+	echo "            tb = Always use top/bottom (passive) stereo"
+	echo "            ss = Always use side-by-side (passive) stereo"
 	echo
 	echo "+/-sync   : Enable/disable strict 2D/3D synchronization [default = disabled]"
 	echo

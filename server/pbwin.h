@@ -50,6 +50,7 @@ class pbwin : public pbdrawable
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool, bool stereo);
 		void makeanaglyph(rrframe *, int, int);
+		void makepassive(rrframe *, int, int, bool, int);
 		void sendvgl(vgltransconn *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
@@ -65,12 +66,12 @@ class pbwin : public pbdrawable
 		xvtrans *_xvtrans;
 		#endif
 		vgltransconn *_vglconn;
-		rrprofiler _prof_gamma, _prof_anaglyph;
+		rrprofiler _prof_gamma, _prof_anaglyph, _prof_passive;
 		bool _syncdpy;
 		transplugin *_plugin;
 		bool _truecolor;
 		bool _stereovisual;
-		rrframe _r, _g, _b, _f;
+		rrframe _r, _g, _b, _f, _stf;
 		bool _wmdelete;
 		bool _newconfig;
 };

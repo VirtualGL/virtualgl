@@ -311,6 +311,9 @@ Fl_Menu_Item stereomenu[]=
 	{"Anaglyphic (Red/Cyan)", 0, StereoCB, (void *)RRSTEREO_REDCYAN},
 	{"Anaglyphic (Green/Magenta)", 0, StereoCB, (void *)RRSTEREO_GREENMAGENTA},
 	{"Anaglyphic (Blue/Yellow)", 0, StereoCB, (void *)RRSTEREO_BLUEYELLOW},
+	{"Passive (Interleaved)", 0, StereoCB, (void *)RRSTEREO_INTERLEAVED},
+	{"Passive (Top/Bottom)", 0, StereoCB, (void *)RRSTEREO_TOPBOTTOM},
+	{"Passive (Side-by-Side)", 0, StereoCB, (void *)RRSTEREO_SIDEBYSIDE},
 	{0, 0, 0, 0}
 };
 

@@ -11,7 +11,7 @@ environment.  VirtualGL can support stereographic applications in one of two
 ways: (1) by sending the stereo image pairs to the client to be displayed in
 stereo by the client's 3D graphics card, or (2) by combining each stereo image
 pair into a single image that can be viewed with traditional anaglyphic 3D
-glasses.
+glasses or a passive stereo system, such as a 3D TV.
 
 *** Quad-Buffered Stereo
 
@@ -84,6 +84,32 @@ As with quad-buffered stereo, anaglyphic stereo requires that the VirtualGL
 server have stereo rendering capabilities.  However, anaglyphic stereo does not
 require any 3D rendering capabilities (stereo or otherwise) on the client
 machine.
+
+*** Passive Stereo
+
+As with anaglyphic stereo, passive stereo combines a stereographic image pair
+into a single image (a "stereogram"), and thus it can be used with any image
+transport.  However, unlike anaglyphic stereo, passive stereo must be used
+with specific display hardware, such as a 3D TV or monitor, that decodes the
+left and right eye images from the stereogram and sends them separately to a
+pair of 3D glasses (typically, this is accomplished by way of polarization.)
+
+VirtualGL supports three methods of encoding stereograms:
+
+	Interleaved :: The even rows of the stereogram are taken from the left eye
+	image, and the odd rows are taken from the right eye image.
+
+	Top/Bottom :: The top half of the stereogram is taken from the left eye
+	image, and the bottom half is taken from the right eye image.  Both halves
+	are subsampled 2X vertically.
+
+	Side-by-Side :: The left half of the stereogram is taken from the left eye
+	image, and the right half is taken from the right eye image.  Both halves are
+	subsampled 2X horizontally.
+
+Most 3D TV's/monitors can be configured to decode at least one of these types
+of stereograms.  In order for this to work, however, the 3D drawing area must
+be full-screen.
 
 *** Selecting a Stereo Mode
 

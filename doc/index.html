@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-06-13T02:03:06">
+<meta name="date" content="2012-06-13T18:09:17">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -238,7 +238,10 @@ systems, OpenGL and GLX, and X windows.</p>
                         <a href="#hd0016001002" class="toc">16.1.2 Anaglyphic Stereo</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd0016001003" class="toc">16.1.3 Selecting a Stereo Mode</a>
+                        <a href="#hd0016001003" class="toc">16.1.3 Passive Stereo</a>
+                    </li>
+                    <li class="Itemize-5 toc">
+                        <a href="#hd0016001004" class="toc">16.1.4 Selecting a Stereo Mode</a>
                     </li>
                 </ul>
             </li>
@@ -2908,7 +2911,8 @@ the user&rsquo;s environment.  VirtualGL can support stereographic
 applications in one of two ways: (1) by sending the stereo image pairs 
 to the client to be displayed in stereo by the client&rsquo;s 3D 
 graphics card, or (2) by combining each stereo image pair into a single 
-image that can be viewed with traditional anaglyphic 3D glasses.</p>
+image that can be viewed with traditional anaglyphic 3D glasses or a 
+passive stereo system, such as a 3D TV.</p>
 
 
 <h3 id="hd0016001001">16.1.1&nbsp;Quad-Buffered Stereo</h3>
@@ -2992,7 +2996,45 @@ or otherwise) on the client machine.</p>
 
 
 
-<h3 id="hd0016001003">16.1.3&nbsp;Selecting a Stereo Mode</h3>
+<h3 id="hd0016001003">16.1.3&nbsp;Passive Stereo</h3>
+
+<p>As with anaglyphic stereo, passive stereo combines a stereographic image 
+pair into a single image (a &ldquo;stereogram&rdquo;), and thus it can 
+be used with any image transport.  However, unlike anaglyphic stereo, 
+passive stereo must be used with specific display hardware, such as a 3D 
+TV or monitor, that decodes the left and right eye images from the 
+stereogram and sends them separately to a pair of 3D glasses (typically, 
+this is accomplished by way of polarization.)</p>
+
+<p>VirtualGL supports three methods of encoding stereograms:</p>
+
+<dl class="Description">
+    <dt class="Description-1 Description">Interleaved</dt>
+    <dd class="Description-1 Description">
+        The even rows of the stereogram are taken from the left eye image, and 
+        the odd rows are taken from the right eye image.
+    </dd>
+    <dt class="Description-1 Description">Top/Bottom</dt>
+    <dd class="Description-1 Description">
+        The top half of the stereogram is taken from the left eye image, and the 
+        bottom half is taken from the right eye image.  Both halves are 
+        subsampled 2X vertically.
+    </dd>
+    <dt class="Description-1 Description">Side-by-Side</dt>
+    <dd class="Description-1 Description">
+        The left half of the stereogram is taken from the left eye image, and 
+        the right half is taken from the right eye image.  Both halves are 
+        subsampled 2X horizontally.
+    </dd>
+</dl>
+
+<p>Most 3D TV&rsquo;s/monitors can be configured to decode at least one of 
+these types of stereograms.  In order for this to work, however, the 3D 
+drawing area must be full-screen.</p>
+
+
+
+<h3 id="hd0016001004">16.1.4&nbsp;Selecting a Stereo Mode</h3>
 
 <p>A particular stereo mode can be selected by setting the 
 <code>VGL_STEREO</code> environment variable or by using the 
@@ -3569,7 +3611,11 @@ VirtualGL.</p>
         <code>VGL_STEREO=rc</code> <br /><br /> <em>Anaglyphic 
         (Green/Magenta)</em> : equivalent to setting <code>VGL_STEREO=gm</code> 
         <br /><br /> <em>Anaglyphic (Blue/Yellow)</em> : equivalent to setting 
-        <code>VGL_STEREO=by</code> <br /><br /> See Section 
+        <code>VGL_STEREO=by</code> <br /><br /> <em>Passive (Interleaved)</em> : 
+        equivalent to setting <code>VGL_STEREO=i</code> <br /><br /> <em>Passive 
+        (Top/Bottom)</em> : equivalent to setting <code>VGL_STEREO=tb</code> 
+        <br /><br /> <em>Passive (Side-by-Side)</em> : equivalent to setting 
+        <code>VGL_STEREO=ss</code> <br /><br /> See Section 
         <a href="#VGL_STEREO" class="ref">19.1</a> for more information about 
         the <code>VGL_STEREO</code> configuration option.
     </dd>
@@ -4775,11 +4821,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_STEREO&nbsp;=&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by</code></em></td>
+    <td class="standard"><code>VGL_STEREO&nbsp;=&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by&nbsp;|&nbsp;i&nbsp;|&nbsp;tb&nbsp;|&nbsp;ss</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard"><code>vglrun</code> argument</td>
-    <td class="standard"><code>-st&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by</code></em></td>
+    <td class="standard"><code>-st&nbsp;</code><em><code>left&nbsp;|&nbsp;right&nbsp;|&nbsp;quad&nbsp;|&nbsp;rc&nbsp;|&nbsp;gm&nbsp;|&nbsp;by&nbsp;|&nbsp;i&nbsp;|&nbsp;tb&nbsp;|&nbsp;ss</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -4817,8 +4863,12 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
          is available <br /><br /> <em>gm</em> = Use Green/Magenta (anaglyphic) 
          stereo, even if quad-buffered is available <br /><br /> <em>by</em> = 
          Use Blue/Yellow (anaglyphic) stereo, even if quad-buffered is available 
-         <br /><br /> See Chapter <a href="#Advanced_OpenGL" class="ref">16</a> 
-         for more details.
+         <br /><br /> <em>i</em> = Use Interleaved (passive) stereo, even if 
+         quad-buffered is available <br /><br /> <em>tb</em> = Use Top/Bottom 
+         (passive) stereo, even if quad-buffered is available <br /><br /> 
+         <em>ss</em> = Use Side-by-Side (passive) stereo, even if quad-buffered 
+         is available <br /><br /> See Chapter 
+         <a href="#Advanced_OpenGL" class="ref">16</a> for more details.
     </dd>
 </dl>
 

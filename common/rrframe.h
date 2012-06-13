@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -45,9 +45,11 @@ class rrframe
 		virtual ~rrframe(void);
 		void init(rrframeheader &, int, int, bool stereo=false);
 		void init(unsigned char *, int, int, int, int, int);
+		void deinit(void);
 		rrframe *gettile(int, int, int, int);
 		bool tileequals(rrframe *, int, int, int, int);
 		void makeanaglyph(rrframe &, rrframe &, rrframe &);
+		void makepassive(rrframe &, int);
 		void ready(void) { _ready.signal(); }
 		void waituntilready(void) { _ready.wait(); }
 		void complete(void) { _complete.signal(); }
