@@ -6,6 +6,10 @@ Added new stereo options, including green/magenta and blue/yellow anaglyphic as
 well as three half-resolution passive stereo options that can be used to drive
 3D TV's.
 -------------------------------------------------------------------------------
+[2]
+The 32-bit supplementary package for amd64 Debian systems should now work
+properly on MultiArch-compatible systems (such as Ubuntu 11 and later.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -23,9 +23,6 @@ makedeb()
 	if [ $SUPPLEMENT = 1 ]; then
 		PACKAGE_NAME=$APPNAME\32
 		DEBARCH=amd64
-		__LIB=lib32
-	else
-		__LIB=lib
 	fi
 
 	umask 022
@@ -49,6 +46,10 @@ makedeb()
 		mv $TMPDIR/$PREFIX/glxspheres $TMPDIR/$PREFIX/bin/
 
 		mv $TMPDIR/$PREFIX/lib $TMPDIR/$SYSPREFIX/lib32
+		mkdir -p $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu
+		ln -fs $SYSPREFIX/lib32/librrfaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/librrfaker.so
+		ln -fs $SYSPREFIX/lib32/libdlfaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/libdlfaker.so
+		ln -fs $SYSPREFIX/lib32/libgefaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/libgefaker.so
 		rm $TMPDIR/$PREFIX/fakelib/libGL.so
 		ln -fs $SYSPREFIX/lib32/librrfaker.so $TMPDIR/$PREFIX/fakelib/libGL.so
 
