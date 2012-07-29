@@ -23,15 +23,10 @@ umask 022
 TMPDIR=`mktemp -d /tmp/@CMAKE_PROJECT_NAME@-build.XXXXXX`
 
 pushd @CMAKE_SOURCE_DIR@
-CVSTAG=`cvs status ChangeLog.txt | grep "Sticky Tag" | awk '{print $3}'`
-if [ "$CVSTAG" = "(none)" ]; then
-	CVSTAG=HEAD
-fi
+svn export . $TMPDIR/@CMAKE_PROJECT_NAME@-@VERSION@
 popd
 
 pushd $TMPDIR
-cvs -Q -d:pserver:anonymous@virtualgl.cvs.sourceforge.net:/cvsroot/virtualgl export -r $CVSTAG vgl
-mv vgl @CMAKE_PROJECT_NAME@-@VERSION@
 tar -z -cf @CMAKE_PROJECT_NAME@-@VERSION@.tar.gz @CMAKE_PROJECT_NAME@-@VERSION@
 popd
 
