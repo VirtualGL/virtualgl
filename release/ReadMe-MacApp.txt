@@ -1,4 +1,4 @@
-The Mac VirtualGL Client is a Unix application which must be executed
+The Mac VirtualGL Client is a Unix application that must be executed
 inside the Mac X11 environment.  To do this,
 
 -- Install the Mac X11 Application (this application is not installed by
