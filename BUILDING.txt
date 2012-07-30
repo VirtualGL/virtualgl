@@ -43,11 +43,10 @@ Mac
 -- Xcode Tools
    * Available on the OS X install discs or from:
      http://developer.apple.com/tools/xcode
-   * At minimum, you will need the following packages from Xcode:
-     gcc v3 or above
-     X11 SDK
-     OpenGL SDK
-     Mac OS X SDK
+   * With earlier versions of Xcode, you will need to specify a custom install
+     and select the following packages:
+     gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
+   * With Xcode 3.x and later, you can simply check "Unix Development Support"
 
 
 Solaris
