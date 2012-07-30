@@ -11,6 +11,9 @@ OpenGL and GLX, and X windows.
 #INCLUDE: legalinfo.txt
 {nl}
 ----8<--------------
+#INCLUDE: prefix.txt
+{nl}
+----8<--------------
 #INCLUDE: overview.txt
 {nl}
 ----8<--------------

@@ -1,0 +1,9 @@
+* Conventions Used in This Document
+
+This document assumes that VirtualGL will be installed in the default
+directory (''/opt/VirtualGL'' on Un*x and Mac systems and
+''c:\\Program Files\\VirtualGL-''__''{version}''__''-''__''{build}''__
+on Windows systems, where __''{version}''__ and __''{build}''__ are the version
+and build number of VirtualGL, respectively.)  If your installation of
+VirtualGL resides in a different directory, then adjust the instructions
+accordingly.
