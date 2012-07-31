@@ -52,7 +52,7 @@ Mac
 Solaris
 -------
 
--- Solaris 10/OpenSolaris 2008.11 or newer (currently, only x86 is supported)
+-- Solaris 10 or newer (currently, only x86 is supported)
 
 -- Oracle Solaris Studio 12 or later
 
@@ -63,7 +63,7 @@ Solaris
 
 -- GCC
 
-   * Ships with later versions of Solaris 10 and with OpenSolaris
+   * Ships with later versions of Solaris 10 and with Solaris 11
    * Also available from OpenCSW (http://www.opencsw.org/),
      Blastwave (http://www.blastwave.org), or
      SunFreeware (http://www.sunfreeware.com/)
@@ -125,23 +125,33 @@ VirtualGL server components.  However, not all x86-64 Linux systems contain the
 32-bit VirtualGL components on an x86-64 Linux system, you will need, at
 minimum, the following 32-bit libraries:
 
--- glibc development libraries
-   * On Ubuntu, these are contained in the "libc6-dev-i386" package
+-- glibc and libstdc++ development libraries
+   * On Ubuntu, these can both be obtained by installing the "g++-multilib"
+     package
 
--- 32-bit libstd++ libraries
-   * On Ubuntu, these are contained in the "g++-{version}-multilib" package
-
--- X11 and OpenGL development libraries:
-   * libX11, libXext, libGL, libGLU, and (if you wish to enable X Video
+-- X11 and OpenGL development libraries
+   * libX11, libXext, libGL, libGLU, and (unless you wish to disable X Video
      support) libXv
-   * Recent versions of Ubuntu ship these libraries in the "ia32-libs" package.
+   * Ubuntu 10 and 11 ship these libraries in the "ia32-libs" package.
      On older releases, you may have to use getlibs
      (http://explore-ubuntu.blogspot.com/2010/04/getlibs.html) to
      install the 32-bit X11 dev. kit:
-     > sudo getlibs -p libX11-dev
-     > sudo getlibs -p libxext-dev
-     > sudo getlibs -p libxau-dev
-     > sudo getlibs -p libglu1-mesa-dev
+     > sudo getlibs -p libx11-dev libxext-dev libxau-dev libglu1-mesa-dev libxv-dev
+   * Ubuntu 12 is currently a special case.  Because of the transition to
+     MultiArch, ia32-libs is no longer used to install development stubs for
+     32-bit libraries.  The accepted way to install these is to install the
+     i386 version of the needed dev. kit.  However, unfortunately, some of the
+     dev. kits conflict when you attempt to install 64-bit and 32-bit versions
+     simultaneously.  The best solution at the moment is to install either the
+     32-bit dev. kits:
+
+     > sudo apt-get install libglu1-mesa-dev:i386 libxv-dev:i386
+
+     or the 64-bit dev. kits:
+
+     > sudo apt-get install libglu1-mesa-dev libxv-dev
+
+     depending on which type of build you need to do.
 
 -- Out of the box, Red Hat Enterprise Linux 6 does not contain 32-bit libraries
    at all.  See
@@ -369,19 +379,6 @@ CMake:
   LDFLAGS=-m32
 
 
-32-bit Build on 64-bit Debian-based systems
--------------------------------------------
-
-Add
-
-  -DX11_X11_LIB=/usr/lib32/libX11.so -DX11_Xext_LIB=/usr/lib32/libXext.so \
-    -DOPENGL_gl_LIBRARY=/usr/lib32/libGL.so
-
-to the CMake command line (and complain to the CMake developers that the
-FindX11 and FindOpenGL modules should search in /usr/lib32, as well as allow
-the user to override the search paths.)
-
-
 64-bit Backward-Compatible Build on 64-bit OS X
 -----------------------------------------------
 
@@ -491,7 +488,9 @@ make deb
 make dmg
 
   Create Macintosh package/disk image.  This requires the PackageMaker
-  application, which must be installed in /Developer/Applications/Utilities.
+  application, which the build system looks for in
+  /Developer/Applications/Utilities by default.  You can override this by
+  setting the PACKAGEMAKER_PATH CMake variable.
 
 make udmg
 
