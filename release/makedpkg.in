@@ -69,10 +69,11 @@ makedeb()
 			for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
 				mv $TMPDIR/$PREFIX/bin/$i $TMPDIR/$SYSPREFIX/bin/
 			done
-			pushd $TMPDIR/$SYSPREFIX/bin
+			__PWD=$PWD
+			cd $TMPDIR/$SYSPREFIX/bin
 			for i in *; do
 				ln -fs $SYSPREFIX/bin/$i $TMPDIR/$PREFIX/bin/; done
-			popd
+			cd $__PWD
 
 			mkdir -p $TMPDIR/$SYSPREFIX/include
 			for i in rr.h rrtransport.h; do
