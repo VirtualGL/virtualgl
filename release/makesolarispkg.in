@@ -27,7 +27,7 @@ PACKAGE_NAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 PKGARCH=@PKGARCH@
-_64BIT=@64BIT@
+BITS=@BITS@
 SRCDIR=@CMAKE_SOURCE_DIR@
 BUILDDIR32=@CMAKE_SOURCE_DIR@/solx86
 PREFIX=@CMAKE_INSTALL_PREFIX@
@@ -46,7 +46,7 @@ touch $TMPDIR/depend
 cp pkgscripts/pkginfo $TMPDIR/pkginfo 
 
 PKGID=solaris
-if [ "$_64BIT" = "1" ]; then
+if [ "$BITS" = "64" ]; then
 	__LIB=lib/$PKGARCH
 	if [ "$PKGARCH" = "amd64" ]; then
 		PKGID=solarisx64
@@ -81,7 +81,7 @@ if [ $COMBINED = 1 ]; then
 fi
 make install DESTDIR=$TMPDIR
 rm -rf $TMPDIR/$PREFIX/fakelib
-if [ "$_64BIT" = "1" ]; then
+if [ "$BITS" = "64" ]; then
 	mv $TMPDIR/$PREFIX/lib $TMPDIR/$PREFIX/lib64
 	if [ $COMBINED = 1 ]; then
 		mv $TMPDIR/$PREFIX/lib32 $TMPDIR/$PREFIX/lib
@@ -118,7 +118,7 @@ f none $PACKAGE_NAME/include/rr.h 0644 root bin
 d none $PACKAGE_NAME/lib 0755 root bin
 EOF
 
-if [ ! "$_64BIT" = "1" -o $COMBINED = 1 ]; then
+if [ ! "$BITS" = "64" -o $COMBINED = 1 ]; then
 cat >>$TMPDIR/proto <<EOF
 f none $PACKAGE_NAME/bin/glxspheres 0755 root bin
 f none $PACKAGE_NAME/lib/librrfaker.so 0755 root bin
@@ -128,7 +128,7 @@ s none $PACKAGE_NAME/fakelib/libGL.so=../lib/librrfaker.so
 EOF
 fi
 
-if [ "$_64BIT" = "1" ]; then
+if [ "$BITS" = "64" ]; then
 cat >>$TMPDIR/proto <<EOF
 f none $PACKAGE_NAME/bin/glxspheres64 0755 root bin
 d none $PACKAGE_NAME/$__LIB 0755 root bin

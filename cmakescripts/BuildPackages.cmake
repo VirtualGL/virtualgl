@@ -8,12 +8,11 @@
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-if(64BIT)
-	set(RPMARCH x86_64)
+set(RPMARCH ${CPU_TYPE})
+if(${CPU_TYPE} STREQUAL "x86_64")
 	set(DEBARCH amd64)
 else()
-	set(RPMARCH i386)
-	set(DEBARCH i386)
+	set(DEBARCH ${CPU_TYPE})
 endif()
 
 set(VGL_DOCSYMLINK 0)
@@ -49,7 +48,7 @@ endif() # Linux
 
 if(WIN32)
 
-if(64BIT)
+if(BITS EQUAL 64)
   set(INST_DEFS -DWIN64)
 endif()
 
@@ -140,10 +139,10 @@ endif() # APPLE
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 
 set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/solx86)
-if(64BIT)
+if(${CPU_TYPE} STREQUAL "x86_64")
 	set(PKGARCH amd64)
 else()
-	set(PKGARCH i386)
+	set(PKGARCH ${CPU_TYPE})
 endif()
 set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
   "Directory containing 32-bit Solaris build to include in combined package (default: ${DEFAULT_VGL_32BIT_BUILD})")

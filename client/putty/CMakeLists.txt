@@ -83,7 +83,7 @@ install(TARGETS putty DESTINATION ${VGL_BINDIR})
 add_executable(plink ${PLINK_SOURCES} ${COMMON_SOURCES}	WINDOWS/PLINK.rc)
 install(TARGETS plink DESTINATION ${VGL_BINDIR})
 
-if(64BIT)
+if(BITS EQUAL 64)
 	set(_WIN64 1)
 endif()
 configure_file(WINDOWS/resdefs.h.in WINDOWS/resdefs.h)

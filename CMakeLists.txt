@@ -86,13 +86,15 @@ if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 endif()
 
-# Detect whether compiler is 64-bit
-if(CMAKE_SIZEOF_VOID_P MATCHES 8)
-	set(64BIT 1)
-	message(STATUS "64-bit build")
+# Detect CPU type and word size
+math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
+if((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND BITS EQUAL 32)
+	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
+	set(CPU_TYPE i386)
 else()
-	message(STATUS "32-bit build")
+	string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CPU_TYPE)
 endif()
+message(STATUS "${BITS}-bit build (${CPU_TYPE})")
 
 # This ensures that we don't depend on libstdc++ or libgcc
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
@@ -106,15 +108,9 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
 	if(VGL_BUILDSTATIC)
 		# For some reason, simply passing ${CMAKE_CXX_FLAGS} to the compiler in
 		# execute_process() doesn't work.  Grrr...
-		if(64BIT)
-			execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m64
-				--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
-				RESULT_VARIABLE RESULT)
-		else()
-			execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m32
-				--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
-				RESULT_VARIABLE RESULT)
-		endif()
+		execute_process(COMMAND ${CMAKE_CXX_COMPILER} -m${BITS}
+			--print-file-name=libstdc++.a OUTPUT_VARIABLE LIBSTDCPLUSPLUS
+			RESULT_VARIABLE RESULT)
 		string(REGEX REPLACE "\n" "" LIBSTDCPLUSPLUS ${LIBSTDCPLUSPLUS})
 		if(RESULT MATCHES 0 AND LIBSTDCPLUSPLUS)
 			message(STATUS "Linking with static libstdc++:\n   ${LIBSTDCPLUSPLUS}")
@@ -197,6 +193,9 @@ if(VGL_USESSL)
 endif()
 
 if(UNIX)
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
+	endif()
 	include(FindX11)
 	include(FindOpenGL)
 elseif(WIN32)
@@ -257,7 +256,7 @@ option(VGL_BUILDSERVER "Build VirtualGL server components"
 if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
 
-	if(64BIT)
+	if(BITS EQUAL 64)
 		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib/64)
 	else()
 		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib)
