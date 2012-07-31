@@ -107,6 +107,10 @@ endif() # CYGWIN
 
 if(APPLE)
 
+set(DEFAULT_PACKAGEMAKER_PATH /Developer/Applications/Utilities)
+set(PACKAGEMAKER_PATH ${DEFAULT_PACKAGEMAKER_PATH} CACHE PATH
+	"Directory containing PackageMaker.app (default: ${DEFAULT_PACKAGEMAKER_PATH})")
+
 set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
 set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
   "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_VGL_32BIT_BUILD})")

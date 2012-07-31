@@ -35,7 +35,7 @@ if [ $# -gt 0 ]; then
 		UNIVERSAL=1
 	fi
 fi
-PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
+PACKAGEMAKER=@PACKAGEMAKER_PATH@/PackageMaker.app/Contents/MacOS/PackageMaker
 
 if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
 	rm -f $PACKAGE_NAME-$VERSION.dmg
