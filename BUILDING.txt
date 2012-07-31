@@ -75,14 +75,18 @@ Windows
 
 -- OpenText Exceed XDK v8 or later
 
-   * Add the XDK include path (for instance,
+   * If you plan to build VirtualGL from the command line, add the XDK include
+     path (for instance,
      c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
      to the system or user INCLUDE environment variable prior to building
-     VirtualGL.
-   * Add the XDK library path (for instance,
+     VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
+     path to the "Include Directories" property in Visual Studio.
+   * If you plan to build VirtualGL from the command line, add the XDK library
+     path (for instance,
      c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\lib)
      to the system or user LIB environment variable prior to building
-     VirtualGL.
+     VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
+     path to the "Include Directories" property in Visual Studio.
 
 
 Cygwin
@@ -438,7 +442,8 @@ choosing.  To do this, add:
 
 to the CMake command line.  Then, you can run 'make install' or 'nmake install'
 (or build the "install" target in the Visual Studio IDE) to build and install
-VirtualGL.
+VirtualGL.  Running 'make uninstall' or 'nmake uninstall' (or building the
+"uninstall" target in the Visual Studio IDE) will uninstall VirtualGL.
 
 If you don't specify CMAKE_INSTALL_PREFIX, then the default is
 c:\Program Files\VirtualGL on Windows and /opt/VirtualGL on Unix.
