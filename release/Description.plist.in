@@ -5,7 +5,7 @@
 	<key>IFPkgDescriptionDescription</key>
 	<string>A toolkit for displaying OpenGL applications to thin clients</string>
 	<key>IFPkgDescriptionTitle</key>
-	<string>@PACKAGE_NAME@</string>
+	<string>@CMAKE_PACKAGE_NAME@</string>
 	<key>IFPkgDescriptionVersion</key>
 	<string>@VERSION@</string>
 </dict>

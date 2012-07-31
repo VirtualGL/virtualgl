@@ -38,10 +38,10 @@ fi
 
 cp $PKGNAME-$VERSION.tar.gz $TMPDIR/SOURCES/$PKGNAME-$VERSION.tar.gz
 
-cat pkgscripts/VirtualGL.spec | sed s/%{_blddir}/%{_tmppath}/g \
-	| sed s/#--\>//g > $TMPDIR/SPECS/VirtualGL.spec
+cat pkgscripts/@CMAKE_PROJECT_NAME@.spec | sed s/%{_blddir}/%{_tmppath}/g \
+	| sed s/#--\>//g > $TMPDIR/SPECS/@CMAKE_PROJECT_NAME@.spec
 
-rpmbuild -bs --define "_topdir $TMPDIR" $TMPDIR/SPECS/VirtualGL.spec
+rpmbuild -bs --define "_topdir $TMPDIR" $TMPDIR/SPECS/@CMAKE_PROJECT_NAME@.spec
 mv $TMPDIR/SRPMS/$PKGNAME-$VERSION-$BUILD.src.rpm $PKGNAME-$VERSION.src.rpm
 
 exit

@@ -15,14 +15,13 @@ set(VERSION 2.3.80)
 
 if(UNIX)
 	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 elseif(WIN32 AND NOT MINGW)
 	execute_process(COMMAND "${CMAKE_SOURCE_DIR}/cmakescripts/getdate.bat"
 		OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 else()
 	message(FATAL_ERROR "Platform not supported.")
 endif()
+string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -54,9 +53,9 @@ else()
 endif()
 
 set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
-	"Directory into which to install executables and scripts (default: ${DEFAULT_VGL_BINDIR})")
+	"Directory into which executables and scripts should be installed (default: ${DEFAULT_VGL_BINDIR})")
 set(VGL_DOCDIR ${DEFAULT_VGL_DOCDIR} CACHE PATH
-	"Directory into which to install docs (default: ${DEFAULT_VGL_DOCDIR})")
+	"Directory into which docs should be installed (default: ${DEFAULT_VGL_DOCDIR})")
 
 message(STATUS "VGL_BINDIR = ${VGL_BINDIR}")
 message(STATUS "VGL_DOCDIR = ${VGL_DOCDIR}")
@@ -88,7 +87,9 @@ endif()
 
 # Detect CPU type and word size
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
-if((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND BITS EQUAL 32)
+if(APPLE AND ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86" AND BITS EQUAL 64)
+	set(CPU_TYPE x86_64)
+elseif((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND BITS EQUAL 32)
 	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
 	set(CPU_TYPE i386)
 else()
@@ -265,11 +266,11 @@ if(VGL_BUILDSERVER)
 	set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 	set(VGL_FAKELIBDIR ${DEFAULT_VGL_FAKELIBDIR} CACHE PATH
-		"Directory into which to install the libGL symlinks for Chromium (default: ${DEFAULT_VGL_FAKELIBDIR})")
+		"Directory into which the libGL symlinks for Chromium should be installed (default: ${DEFAULT_VGL_FAKELIBDIR})")
 	set(VGL_INCDIR ${DEFAULT_VGL_INCDIR} CACHE PATH
-		"Directory into which to install the VirtualGL transport API headers (default: ${DEFAULT_VGL_INCDIR})")
+		"Directory into which the VirtualGL transport API headers should be installed(default: ${DEFAULT_VGL_INCDIR})")
 	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
-		"Directory into which to install the VirtualGL faker libraries (default: ${DEFAULT_VGL_LIBDIR})")
+		"Directory into which the VirtualGL faker libraries should be installed (default: ${DEFAULT_VGL_LIBDIR})")
 
 	message(STATUS "VGL_FAKELIBDIR = ${VGL_FAKELIBDIR}")
 	message(STATUS "VGL_INCDIR = ${VGL_INCDIR}")

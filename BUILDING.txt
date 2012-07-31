@@ -49,26 +49,6 @@ Mac
    * With Xcode 3.x and later, you can simply check "Unix Development Support"
 
 
-Solaris
--------
-
--- Solaris 10 or newer (currently, only x86 is supported)
-
--- Oracle Solaris Studio 12 or later
-
-   * See http://www.oracle.com/technetwork/server-storage/solarisstudio/ for a
-     free download.
-
-... or ...
-
--- GCC
-
-   * Ships with later versions of Solaris 10 and with Solaris 11
-   * Also available from OpenCSW (http://www.opencsw.org/),
-     Blastwave (http://www.blastwave.org), or
-     SunFreeware (http://www.sunfreeware.com/)
-
-
 Windows
 -------
 
@@ -420,14 +400,12 @@ CMake:
   LDFLAGS=-m64
 
 
-Oracle Solaris Studio
----------------------
+Compilers Other Than GCC
+------------------------
 
-Use export/setenv to set the following environment variables before running
-CMake:
-
-  CC=cc
-  CXX=CC
+On Un*x systems, prior to running CMake, you can set the CC environment
+variable to the command used to invoke the C compiler and the CXX environment
+variable to the command used to invoke the C++ compiler.
 
 
 *******************************************************************************
@@ -500,20 +478,6 @@ make udmg
   out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
   build system will look for the 32-bit build under {source_directory}/osxx86
   by default, but you can override this by setting the VGL_32BIT_BUILD CMake
-  variable.
-
-make solarispkg
-
-  Build a Solaris package.  This requires pkgmk, pkgtrans, and bzip2.
-
-make csolarispkg
-
-  On 64-bit Solaris systems, this creates a combined package that contains
-  both 32-bit and 64-bit binaries.  You should first configure a 32-bit
-  out-of-tree build of VirtualGL, then configure a 64-bit out-of-tree build,
-  then run 'make csolarispkg' from the 64-bit build directory.  The build
-  system will look for the 32-bit build under {source_directory}/solx86 by
-  default, but you can override this by setting the VGL_32BIT_BUILD CMake
   variable.
 
 make cygwinpkg

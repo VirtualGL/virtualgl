@@ -25,6 +25,6 @@ TMPDIR=`mktemp -d /tmp/@CMAKE_PROJECT_NAME@-build.XXXXXX`
 mkdir -p $TMPDIR/RPMS
 ln -fs `pwd` $TMPDIR/BUILD
 rpmbuild -bb --define "_blddir $TMPDIR/buildroot" --define "_topdir $TMPDIR" \
-	--target @RPMARCH@ pkgscripts/VirtualGL.spec; \
+	--target @RPMARCH@ pkgscripts/@CMAKE_PROJECT_NAME@.spec; \
 cp $TMPDIR/RPMS/@RPMARCH@/@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@.@RPMARCH@.rpm \
 	@CMAKE_PROJECT_NAME@-@VERSION@.@RPMARCH@.rpm

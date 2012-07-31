@@ -15,6 +15,8 @@ else()
 	set(DEBARCH ${CPU_TYPE})
 endif()
 
+string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
+
 set(VGL_DOCSYMLINK 0)
 set(VGL_SYSPREFIX ${CMAKE_INSTALL_PREFIX})
 if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
@@ -27,12 +29,12 @@ if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
 endif()	
 
 configure_file(release/makerpm.in pkgscripts/makerpm)
-configure_file(release/VirtualGL.spec.in pkgscripts/VirtualGL.spec @ONLY)
+configure_file(release/${CMAKE_PROJECT_NAME}.spec.in
+	pkgscripts/${CMAKE_PROJECT_NAME}.spec @ONLY)
 
 add_custom_target(rpm sh pkgscripts/makerpm
 	SOURCES pkgscripts/makerpm)
 
-string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 configure_file(release/makedpkg.in pkgscripts/makedpkg)
 configure_file(release/deb-control.in pkgscripts/deb-control)
 
@@ -58,19 +60,19 @@ else()
   set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
-configure_file(release/VirtualGL.nsi.in pkgscripts/VirtualGL.nsi @ONLY)
+configure_file(release/@CMAKE_PROJECT_NAME@.nsi.in pkgscripts/@CMAKE_PROJECT_NAME@.nsi @ONLY)
 
 if(MSVC_IDE)
 	add_custom_target(installer
 		COMMAND ${CMAKE_COMMAND} -E make_directory @CMAKE_BINARY_DIR@/${CMAKE_CFG_INTDIR}
-		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/VirtualGL.nsi
+		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/@CMAKE_PROJECT_NAME@.nsi
 		DEPENDS vglclient tcbench nettest putty plink
-		SOURCES pkgscripts/VirtualGL.nsi)
+		SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.nsi)
 else()
 	add_custom_target(installer
-		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/VirtualGL.nsi
+		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/@CMAKE_PROJECT_NAME@.nsi
 		DEPENDS vglclient tcbench nettest putty plink
-		SOURCES pkgscripts/VirtualGL.nsi)
+		SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.nsi)
 endif()
 
 endif() # WIN32
@@ -130,33 +132,6 @@ add_custom_target(udmg sh pkgscripts/makemacpkg universal
   SOURCES pkgscripts/makemacpkg)
 
 endif() # APPLE
-
-
-#
-# Solaris package
-#
-
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-
-set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/solx86)
-if(${CPU_TYPE} STREQUAL "x86_64")
-	set(PKGARCH amd64)
-else()
-	set(PKGARCH ${CPU_TYPE})
-endif()
-set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
-  "Directory containing 32-bit Solaris build to include in combined package (default: ${DEFAULT_VGL_32BIT_BUILD})")
-
-configure_file(release/makesolarispkg.in pkgscripts/makesolarispkg)
-configure_file(release/pkginfo.in pkgscripts/pkginfo)
-
-add_custom_target(solarispkg sh pkgscripts/makesolarispkg
-	SOURCES pkgscripts/makesolarispkg)
-
-add_custom_target(csolarispkg sh pkgscripts/makesolarispkg combined
-	SOURCES pkgscripts/makesolarispkg)
-
-endif() # SunOS
 
 
 #
