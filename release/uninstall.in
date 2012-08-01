@@ -1,5 +1,5 @@
 # Copyright (C)2009 Sun Microsystems, Inc.
-# Copyright (C)2009-2011 D. R. Commander
+# Copyright (C)2009-2012 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -25,6 +25,7 @@ fi
 
 PKGNAME=@CMAKE_PROJECT_NAME@
 PREFIX=@CMAKE_INSTALL_PREFIX@
+BINDIR=@VGL_BINDIR@
 MACPKGNAME=com.virtualgl.vglclient
 RCPT=/Library/Receipts/$PKGNAME.pkg
 
@@ -46,7 +47,8 @@ done
 cd $PWD
 
 echo Removing directories ...
-rmdir $PREFIX/bin 2>&1 || RETCODE=-1
+rmdir $BINDIR 2>&1 || RETCODE=-1
+rm $PREFIX/doc 2>&1
 rmdir $PREFIX 2>&1 || RETCODE=-1
 rmdir /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
 rm /Applications/$PKGNAME/Documentation 2>&1 || RETCODE=-1

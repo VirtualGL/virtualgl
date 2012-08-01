@@ -15,6 +15,32 @@ onexit()
 	fi
 }
 
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
 usage()
 {
 	echo "$0 [universal]"
@@ -27,8 +53,9 @@ PACKAGE_NAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 SRCDIR=@CMAKE_SOURCE_DIR@
-BINDIR=@CMAKE_BINARY_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
+BINDIR=@VGL_BINDIR@
+DOCDIR=@VGL_DOCDIR@
 BUILDDIR32=@VGL_32BIT_BUILD@
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
@@ -47,10 +74,10 @@ PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
 make install DESTDIR=$PKGROOT
-if [ "$PREFIX" != "/usr/bin" ]; then
+if [ "$BINDIR" != "/usr/bin" ]; then
 	mkdir -p $PKGROOT/usr/bin
-	ln -fs $PREFIX/bin/vglclient $PKGROOT/usr/bin/vglclient
-	ln -fs $PREFIX/bin/vglconnect $PKGROOT/usr/bin/vglconnect
+	ln -fs $BINDIR/vglclient $PKGROOT/usr/bin/vglclient
+	ln -fs $BINDIR/vglconnect $PKGROOT/usr/bin/vglconnect
 fi
 
 if [ $UNIVERSAL = 1 ]; then
@@ -66,39 +93,41 @@ if [ $UNIVERSAL = 1 ]; then
 	make
 	popd
 	lipo -create -arch i386 $BUILDDIR32/bin/vglclient \
-		-arch x86_64 $PKGROOT$PREFIX/bin/vglclient \
-		-output $PKGROOT$PREFIX/bin/vglclient
-	chmod 755 $PKGROOT$PREFIX/bin/vglclient
+		-arch x86_64 $PKGROOT$BINDIR/vglclient \
+		-output $PKGROOT$BINDIR/vglclient
+	chmod 755 $PKGROOT$BINDIR/vglclient
 	lipo -create -arch i386 $BUILDDIR32/bin/tcbench \
-		-arch x86_64 $PKGROOT$PREFIX/bin/tcbench \
-		-output $PKGROOT$PREFIX/bin/tcbench
-	chmod 755 $PKGROOT$PREFIX/bin/tcbench
+		-arch x86_64 $PKGROOT$BINDIR/tcbench \
+		-output $PKGROOT$BINDIR/tcbench
+	chmod 755 $PKGROOT$BINDIR/tcbench
 	lipo -create -arch i386 $BUILDDIR32/bin/nettest \
-		-arch x86_64 $PKGROOT$PREFIX/bin/nettest \
-		-output $PKGROOT$PREFIX/bin/nettest
-	chmod 755 $PKGROOT$PREFIX/bin/nettest
+		-arch x86_64 $PKGROOT$BINDIR/nettest \
+		-output $PKGROOT$BINDIR/nettest
+	chmod 755 $PKGROOT$BINDIR/nettest
 	lipo -create -arch i386 $BUILDDIR32/bin/glxinfo \
-		-arch x86_64 $PKGROOT$PREFIX/bin/glxinfo \
-		-output $PKGROOT$PREFIX/bin/glxinfo
-	chmod 755 $PKGROOT$PREFIX/bin/glxinfo
+		-arch x86_64 $PKGROOT$BINDIR/glxinfo \
+		-output $PKGROOT$BINDIR/glxinfo
+	chmod 755 $PKGROOT$BINDIR/glxinfo
 fi
 
-mkdir -p $PKGROOT/Library/Documentation/$PACKAGE_NAME
+mkdir -p $PKGROOT/Library/Documentation
 chmod 1775 $PKGROOT/Library
 chmod 775 $PKGROOT/Library/Documentation
-mv $PKGROOT$PREFIX/doc/* $PKGROOT/Library/Documentation/$PACKAGE_NAME/
-rmdir $PKGROOT$PREFIX/doc
+safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/Resources 
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
 cp pkgscripts/Description.plist $TMPDIR/pkg/
 cp pkgscripts/Info.plist $TMPDIR/pkg/
-install -m 755 pkgscripts/uninstall $PKGROOT$PREFIX/bin/
+install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
 chmod 775 $PKGROOT/Applications
 install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
 sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE_NAME/Documentation"
+if [ "$PREFIX" = "/opt/VirtualGL" ]; then
+	ln -fs /Library/Documentation/$PACKAGE_NAME $PKGROOT/$PREFIX/doc
+fi
 
 sudo chown -R root:admin $PKGROOT
 sudo chown root:0 $TMPDIR/pkg/Package_Root/usr
@@ -108,7 +137,7 @@ mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
 	-f $PKGROOT -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
-install -m 644 $BINDIR/pkgscripts/uninstall.applescript $TMPDIR
+install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
