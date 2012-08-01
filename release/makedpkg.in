@@ -116,8 +116,8 @@ makedeb()
 		fi
 
 		safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc 
-		if [ "$DOCDIR" = "/opt/VirtualGL/doc" ]; then
-			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$DOCDIR
+		if [ "$PREFIX" = "/opt/VirtualGL" ]; then
+			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
 		fi
 
 		rm $TMPDIR/$FAKELIBDIR/libGL.so
