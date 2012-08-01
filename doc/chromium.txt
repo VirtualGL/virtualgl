@@ -83,7 +83,7 @@ library.  Refer to the following table:
 
 {anchor: CR_SYSTEM_GL_PATH_Table}
 || 32-bit Applications     || 64-bit Applications        ||
-| ''/opt/VirtualGL/fakelib''   | ''/opt/VirtualGL/fakelib/64''    |
+| ''/opt/VirtualGL/fakelib''   | ''/opt/VirtualGL/fakelib64''    |
 #OPT: note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
 
 To run CrAppFaker, it is necessary to set this environment variable to the

@@ -15,6 +15,32 @@ onexit()
 	fi
 }
 
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
 makedeb()
 {
 	SUPPLEMENT=$1
@@ -31,71 +57,71 @@ makedeb()
 	mkdir $TMPDIR/DEBIAN
 
 	make install DESTDIR=$TMPDIR
-	mkdir -p $TMPDIR/$SYSPREFIX
+	mkdir -p $TMPDIR/usr
 
 	if [ $SUPPLEMENT = 1 ]; then
 
 		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
 			| sed s/virtualgl/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
 
-		rm -rf $TMPDIR/$PREFIX/doc
-		rm -rf $TMPDIR/$PREFIX/include
-		mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/
-		rm -rf $TMPDIR/$PREFIX/bin
-		mkdir -p $TMPDIR/$PREFIX/bin
-		mv $TMPDIR/$PREFIX/glxspheres $TMPDIR/$PREFIX/bin/
+		rm -rf $TMPDIR/$DOCDIR
+		rm -rf $TMPDIR/$INCDIR
+		mv $TMPDIR/$BINDIR/glxspheres $TMPDIR/
+		rm -rf $TMPDIR/$BINDIR
+		mkdir -p $TMPDIR/$BINDIR
+		mv $TMPDIR/glxspheres $TMPDIR/$BINDIR/
 
-		mv $TMPDIR/$PREFIX/lib $TMPDIR/$SYSPREFIX/lib32
-		mkdir -p $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu
-		ln -fs $SYSPREFIX/lib32/librrfaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/librrfaker.so
-		ln -fs $SYSPREFIX/lib32/libdlfaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/libdlfaker.so
-		ln -fs $SYSPREFIX/lib32/libgefaker.so $TMPDIR/$SYSPREFIX/lib/i386-linux-gnu/libgefaker.so
-		rm $TMPDIR/$PREFIX/fakelib/libGL.so
-		ln -fs $SYSPREFIX/lib32/librrfaker.so $TMPDIR/$PREFIX/fakelib/libGL.so
+		if [ ! "$LIBDIR" = "/usr/lib32" ]; then
+			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib32 $TMPDIR/__tmplib
+		fi
+		if [ ! "$LIBDIR" = "/usr/lib/i386-linux-gnu" ]; then
+			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
+			ln -fs /usr/lib32/librrfaker.so $TMPDIR/usr/lib/i386-linux-gnu/librrfaker.so
+			ln -fs /usr/lib32/libdlfaker.so $TMPDIR/usr/lib/i386-linux-gnu/libdlfaker.so
+			ln -fs /usr/lib32/libgefaker.so $TMPDIR/usr/lib/i386-linux-gnu/libgefaker.so
+		fi
+		rm $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib32/librrfaker.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	else
 
 		cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 		if [ "$DEBARCH" = "amd64" ]; then
-			mv $TMPDIR/$PREFIX/bin/glxspheres $TMPDIR/$PREFIX/bin/glxspheres64
+			mv $TMPDIR/$BINDIR/glxspheres $TMPDIR/$BINDIR/glxspheres64
 		fi
 
-		if [ $SYSPKG = 1 ]; then
+		if [ ! "$LIBDIR" = "/usr/lib" ]; then
+			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib $TMPDIR/__tmplib
+		fi
 
-			mkdir -p $TMPDIR/$SYSPREFIX/bin
-			mv $TMPDIR/$PREFIX/lib $TMPDIR/$SYSPREFIX/lib
-
-			for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
-				mv $TMPDIR/$PREFIX/bin/$i $TMPDIR/$SYSPREFIX/bin/
-			done
+		if [ ! "$BINDIR" = "/usr/bin" ]; then
+			mkdir -p $TMPDIR/usr/bin
 			__PWD=$PWD
-			cd $TMPDIR/$SYSPREFIX/bin
-			for i in *; do
-				ln -fs $SYSPREFIX/bin/$i $TMPDIR/$PREFIX/bin/; done
-			cd $__PWD
-
-			mkdir -p $TMPDIR/$SYSPREFIX/include
-			for i in rr.h rrtransport.h; do
-				mv $TMPDIR/$PREFIX/include/$i $TMPDIR/$SYSPREFIX/include/
-				ln -fs $SYSPREFIX/include/$i $TMPDIR/$PREFIX/include/$i
+			cd $TMPDIR/$BINDIR
+			for i in vgl*; do
+				ln -fs $BINDIR/$i $TMPDIR/usr/bin/
 			done
-
+			cd $__PWD
 		fi
 
-		mkdir -p $TMPDIR/usr/share/doc
-		mv $TMPDIR/$PREFIX/doc $TMPDIR/usr/share/doc/$APPNAME-$VERSION
-		if [ $DOCSYMLINK = 1 ]; then
-			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
+		if [ ! "$INCDIR" = "/usr/include" ]; then
+			mkdir -p $TMPDIR/usr/include
+			__PWD=$PWD
+			cd $TMPDIR/$INCDIR
+			for i in *; do
+				ln -fs $INCDIR/$i $TMPDIR/usr/include/$i
+			done
+			cd $__PWD
 		fi
 
-		if [ "$DEBARCH" = "amd64" ]; then
-			rm $TMPDIR/$PREFIX/fakelib/64/libGL.so
-			ln -fs $SYSPREFIX/lib/librrfaker.so $TMPDIR/$PREFIX/fakelib/64/libGL.so
-		else
-			rm $TMPDIR/$PREFIX/fakelib/libGL.so
-			ln -fs $SYSPREFIX/lib/librrfaker.so $TMPDIR/$PREFIX/fakelib/libGL.so
+		safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc 
+		if [ "$DOCDIR" = "/opt/VirtualGL/doc" ]; then
+			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$DOCDIR
 		fi
+
+		rm $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib/librrfaker.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	fi
 
@@ -107,10 +133,11 @@ APPNAME=@CMAKE_PROJECT_NAME_LC@
 VERSION=@VERSION@
 BUILD=@BUILD@
 DEBARCH=@DEBARCH@
-PREFIX=@CMAKE_INSTALL_PREFIX@
-SYSPREFIX=@VGL_SYSPREFIX@
-SYSPKG=`test ! "$PREFIX" = "$SYSPREFIX" && echo 1 || echo 0`
-DOCSYMLINK=`test ! "$PREFIX" = "/usr/share" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0`
+BINDIR=@VGL_BINDIR@
+DOCDIR=@VGL_DOCDIR@
+FAKELIBDIR=@VGL_FAKELIBDIR@
+INCDIR=@VGL_INCDIR@
+LIBDIR=@VGL_LIBDIR@
 
 makedeb 0
 if [ "$DEBARCH" = "i386" ]; then makedeb 1; fi

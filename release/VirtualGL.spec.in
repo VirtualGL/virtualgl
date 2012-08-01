@@ -2,18 +2,33 @@
 # libnvidia-tls.so.1 if it was built on a system that has the NVidia
 # drivers installed.  The custom find-requires script is created during
 # install and removed during clean
-
 %define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
-# Prefix in which essential server/client binaries should be stored
-%define sysprefix @VGL_SYSPREFIX@
-
-# Prefix in which everything else (except docs) should be stored
+# Path under which VirtualGL should be installed
 %define prefix @CMAKE_INSTALL_PREFIX@
 
-%define usesysdir %(test ! "%{prefix}" = "%{sysprefix}" && echo 1 || echo 0)
+# Path under which executables and scripts should be installed
+%define bindir @VGL_BINDIR@
 
-%define docsymlink %(test ! "%{prefix}" = "`dirname %{_defaultdocdir}`" -a @VGL_DOCSYMLINK@ = 1 && echo 1 || echo 0)
+# Create symlinks in %{_bindir} (usually /usr/bin), assuming
+# %{bindir} != %{_bindir}
+%define binsymlinks 1
+
+# Path under which the VirtualGL faker libraries should be installed
+%define libdir %{_libdir}
+
+# Path under which the VirtualGL transport API headers should be installed
+%define incdir @VGL_INCDIR@
+
+# Create symlinks in %{_includedir} (usually /usr/include), assuming
+# %{incdir} != %{_includedir}
+%define incsymlinks 1
+
+# Path under which the libGL symlinks for Chromium should be installed
+%define fakelibdir @VGL_FAKELIBDIR@
+
+# Path under which docs should be installed
+%define docdir %{_defaultdocdir}/%{name}-%{version}
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
 Name: @CMAKE_PROJECT_NAME@
@@ -61,63 +76,84 @@ Ertl 2000.)
 #-->%setup -q
 
 #-->%build
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_BINDIR=%{bindir} -DVGL_DOCDIR=%{docdir} -DVGL_LIBDIR=%{libdir} -DVGL_INCDIR=%{incdir} -DVGL_FAKELIBDIR=%{fakelibdir} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
 #-->make
 
 %install
-
 rm -rf $RPM_BUILD_ROOT
-
 make install DESTDIR=$RPM_BUILD_ROOT
 
 %ifarch x86_64
-mv $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres $RPM_BUILD_ROOT/%{prefix}/bin/glxspheres64
+mv $RPM_BUILD_ROOT/%{bindir}/glxspheres $RPM_BUILD_ROOT/%{bindir}/glxspheres64
 %endif
 
-%if %{usesysdir}
-
-mkdir -p $RPM_BUILD_ROOT/%{sysprefix}/bin
-%ifarch x86_64
-mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{sysprefix}/lib64
-%else
-mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{sysprefix}/lib
-%endif
-
-for i in vglclient vglconfig vglconnect vglgenkey vgllogin vglrun vglserver_config; do
-	mv $RPM_BUILD_ROOT/%{prefix}/bin/$i $RPM_BUILD_ROOT/%{sysprefix}/bin/
+%if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
+mkdir -p $RPM_BUILD_ROOT/%{_bindir}
+pushd $RPM_BUILD_ROOT/%{bindir}
+for i in vgl*; do
+	ln -fs %{bindir}/$i $RPM_BUILD_ROOT/%{_bindir}/
 done
-
-mkdir -p $RPM_BUILD_ROOT/%{sysprefix}/include
-for i in rr.h rrtransport.h; do
-	mv $RPM_BUILD_ROOT/%{prefix}/include/$i $RPM_BUILD_ROOT/%{sysprefix}/include/
-	ln -fs %{sysprefix}/include/$i $RPM_BUILD_ROOT/%{prefix}/include/$i
-done
-
-pushd $RPM_BUILD_ROOT/%{sysprefix}/bin
-for i in *; do
-	ln -fs %{sysprefix}/bin/$i $RPM_BUILD_ROOT/%{prefix}/bin/; done
 popd
-
-%else
-
-%ifarch x86_64
-mv $RPM_BUILD_ROOT/%{prefix}/lib $RPM_BUILD_ROOT/%{prefix}/lib64
 %endif
 
+%if "%{incdir}" != "%{_includedir}" && %{incsymlinks}
+mkdir -p $RPM_BUILD_ROOT/%{_includedir}
+pushd $RPM_BUILD_ROOT/%{incdir}
+for i in *; do
+	ln -fs %{incdir}/$i $RPM_BUILD_ROOT/%{_includedir}/
+done
+popd
 %endif
 
-%ifarch x86_64
-rm $RPM_BUILD_ROOT/%{prefix}/fakelib/64/libGL.so
-ln -fs %{sysprefix}/lib64/librrfaker.so $RPM_BUILD_ROOT/%{prefix}/fakelib/64/libGL.so
-%else
-rm $RPM_BUILD_ROOT/%{prefix}/fakelib/libGL.so
-ln -fs %{sysprefix}/lib/librrfaker.so $RPM_BUILD_ROOT/%{prefix}/fakelib/libGL.so
-%endif
+#-->%if 0
 
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}
-mv $RPM_BUILD_ROOT/%{prefix}/doc $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-%if %{docsymlink}
-ln -fs %{_defaultdocdir}/%{name}-%{version} $RPM_BUILD_ROOT/%{prefix}/doc
+# This is only needed to support in-tree RPM generation via 'make rpm'.  When
+# building from a SRPM, we control where things are installed via CMake
+# variables.
+
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
+VGL_DOCDIR=@VGL_DOCDIR@
+if [ ! "$VGL_DOCDIR" = "%{docdir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$VGL_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
+fi
+
+VGL_LIBDIR=@VGL_LIBDIR@
+if [ ! "$VGL_LIBDIR" = "%{libdir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$VGL_LIBDIR $RPM_BUILD_ROOT/%{libdir} $RPM_BUILD_ROOT/__tmplib
+fi
+
+rm $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
+ln -fs %{libdir}/librrfaker.so $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
+
+#-->%endif
+
+%if "%{prefix}" == "/opt/VirtualGL" && "%{docdir}" != "%{prefix}/doc"
+	ln -fs %{docdir} $RPM_BUILD_ROOT/%{prefix}/doc
 %endif
 
 echo '/usr/lib/rpm/find-requires|grep -v libGLcore|grep -v libnvidia-tls' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
@@ -135,74 +171,56 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %files -n %{name}
 %defattr(-,root,root)
-%dir %{_defaultdocdir}/%{name}-%{version}
-%doc %{_defaultdocdir}/%{name}-%{version}/*
 
 %dir %{prefix}
-
-%dir %{prefix}/bin
-%{prefix}/bin/tcbench
-%{prefix}/bin/nettest
-%{prefix}/bin/cpustat
-%{prefix}/bin/glxinfo
-%{prefix}/bin/vglclient
-%{prefix}/bin/vglconfig
-%{prefix}/bin/vglconnect
-%{prefix}/bin/vglgenkey
-%{prefix}/bin/vgllogin
-%{prefix}/bin/vglserver_config
-%{prefix}/bin/vglrun
-%ifarch x86_64
- %{prefix}/bin/glxspheres64
-%else
- %{prefix}/bin/glxspheres
-%endif
-%if %{usesysdir}
- %{sysprefix}/bin/vglclient
- %{sysprefix}/bin/vglconfig
- %{sysprefix}/bin/vglconnect
- %{sysprefix}/bin/vgllogin
- %{sysprefix}/bin/vglrun
- %{sysprefix}/bin/vglgenkey
- %{sysprefix}/bin/vglserver_config
-%endif
-
-%if %{docsymlink}
+%if "%{prefix}" == "/opt/VirtualGL" && "%{docdir}" != "%{prefix}/doc"
  %{prefix}/doc
 %endif
 
-%dir %{prefix}/fakelib
+%dir %{docdir}
+%doc %{docdir}/*
+
+%dir %{bindir}
+%{bindir}/tcbench
+%{bindir}/nettest
+%{bindir}/cpustat
+%{bindir}/glxinfo
+%{bindir}/vglclient
+%{bindir}/vglconfig
+%{bindir}/vglconnect
+%{bindir}/vglgenkey
+%{bindir}/vgllogin
+%{bindir}/vglserver_config
+%{bindir}/vglrun
 %ifarch x86_64
- %dir %{prefix}/fakelib/64
- %{prefix}/fakelib/64/libGL.so
+ %{bindir}/glxspheres64
 %else
- %{prefix}/fakelib/libGL.so
+ %{bindir}/glxspheres
+%endif
+%if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
+ %{_bindir}/vglclient
+ %{_bindir}/vglconfig
+ %{_bindir}/vglconnect
+ %{_bindir}/vgllogin
+ %{_bindir}/vglrun
+ %{_bindir}/vglgenkey
+ %{_bindir}/vglserver_config
 %endif
 
-%dir %{prefix}/include
-%{prefix}/include/rrtransport.h
-%{prefix}/include/rr.h
-%if %{usesysdir}
- %{sysprefix}/include/rrtransport.h
- %{sysprefix}/include/rr.h
+%dir %{fakelibdir}
+%{fakelibdir}/libGL.so
+
+%dir %{incdir}
+%{incdir}/rrtransport.h
+%{incdir}/rr.h
+%if "%{incdir}" != "%{_includedir}" && %{incsymlinks}
+ %{_includedir}/rrtransport.h
+ %{_includedir}/rr.h
 %endif
 
-%ifarch x86_64
- %{sysprefix}/lib64/librrfaker.so
- %{sysprefix}/lib64/libdlfaker.so
- %{sysprefix}/lib64/libgefaker.so
- %if %{usesysdir}
- %else
-  %dir %{prefix}/lib64
- %endif
-%else
- %{sysprefix}/lib/librrfaker.so
- %{sysprefix}/lib/libdlfaker.so
- %{sysprefix}/lib/libgefaker.so
- %if %{usesysdir}
- %else
-  %dir %{prefix}/lib
- %endif
-%endif
+%dir %{libdir}
+%{libdir}/librrfaker.so
+%{libdir}/libdlfaker.so
+%{libdir}/libgefaker.so
 
 %changelog

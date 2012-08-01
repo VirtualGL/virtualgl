@@ -258,7 +258,7 @@ if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
 
 	if(BITS EQUAL 64)
-		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib/64)
+		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib64)
 	else()
 		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib)
 	endif()

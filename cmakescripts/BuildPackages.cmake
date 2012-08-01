@@ -17,17 +17,6 @@ endif()
 
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 
-set(VGL_DOCSYMLINK 0)
-set(VGL_SYSPREFIX ${CMAKE_INSTALL_PREFIX})
-if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr"
-	AND NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
-	option(VGL_USESYSDIR "Package essential VirtualGL server/client components in /usr, not ${CMAKE_INSTALL_PREFIX}" ON)
-	if(VGL_USESYSDIR)
-		set(VGL_SYSPREFIX /usr)
-	endif()
-	set(VGL_DOCSYMLINK 1)
-endif()	
-
 configure_file(release/makerpm.in pkgscripts/makerpm)
 configure_file(release/${CMAKE_PROJECT_NAME}.spec.in
 	pkgscripts/${CMAKE_PROJECT_NAME}.spec @ONLY)
