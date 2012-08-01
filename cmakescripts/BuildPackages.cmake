@@ -51,13 +51,13 @@ endif() # Linux
 if(WIN32)
 
 if(BITS EQUAL 64)
-  set(INST_DEFS -DWIN64)
+	set(INST_DEFS -DWIN64)
 endif()
 
 if(MSVC_IDE)
-  set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=${CMAKE_CFG_INTDIR}\\")
+	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=${CMAKE_CFG_INTDIR}\\")
 else()
-  set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
+	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
 configure_file(release/@CMAKE_PROJECT_NAME@.nsi.in pkgscripts/@CMAKE_PROJECT_NAME@.nsi @ONLY)
