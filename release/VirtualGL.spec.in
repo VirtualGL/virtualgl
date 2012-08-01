@@ -31,7 +31,11 @@
 %define incsymlinks 1
 
 # Path under which the libGL symlinks for Chromium should be installed
-%define fakelibdir @VGL_FAKELIBDIR@
+%ifarch x86_64
+%define fakelibdir %{prefix}/fakelib64
+%else
+%define fakelibdir %{prefix}/fakelib
+%endif
 
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
@@ -153,7 +157,10 @@ if [ ! "$VGL_LIBDIR" = "%{libdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$VGL_LIBDIR $RPM_BUILD_ROOT/%{libdir} $RPM_BUILD_ROOT/__tmplib
 fi
 
-rm $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
+VGL_FAKELIBDIR=@VGL_FAKELIBDIR@
+rm $RPM_BUILD_ROOT/$VGL_FAKELIBDIR/libGL.so
+rmdir $RPM_BUILD_ROOT/$VGL_FAKELIBDIR
+mkdir -p $RPM_BUILD_ROOT/%{fakelibdir}
 ln -fs %{libdir}/librrfaker.so $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
 
 #-->%endif
