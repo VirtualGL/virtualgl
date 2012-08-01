@@ -14,8 +14,14 @@
 # %{bindir} != %{_bindir}
 %define binsymlinks 1
 
+%ifarch x86_64
+%define _syslibdir /usr/lib64
+%else
+%define _syslibdir /usr/lib
+%endif
+
 # Path under which the VirtualGL faker libraries should be installed
-%define libdir %{_libdir}
+%define libdir %{_syslibdir}
 
 # Path under which the VirtualGL transport API headers should be installed
 %define incdir @VGL_INCDIR@
