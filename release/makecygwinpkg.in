@@ -54,7 +54,7 @@ __PWD=`pwd`
 make install DESTDIR=$TMPDIR/pkg
 
 mkdir -p $TMPDIR/pkg/usr/share/doc
-safemovedir $TMPDIR/pkg/$DOCDIR $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc
+safedirmove $TMPDIR/pkg/$DOCDIR $TMPDIR/pkg/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc
 if [ "$PREFIX" = "/opt/VirtualGL" ]; then
 	ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/pkg/$PREFIX/doc
 fi
