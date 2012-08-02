@@ -328,7 +328,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	bool dostereo, int stereomode)
 {
-	rrframe f;  bool usepbo=(fconfig.readback==RRREAD_PBO);
+	rrframe f;  bool usepbo;
 	int pbw=_pb->width(), pbh=_pb->height();
 	RRFrame *frame=NULL;
 	static bool alreadywarned=false;
@@ -339,6 +339,8 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		_plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(_dpy), fconfig.port);
 	}
+	usepbo=(fconfig.readback==RRREAD_PBO);
+
 	if(spoillast && fconfig.spoil && !_plugin->ready())
 		return;
 	if(!fconfig.spoil) _plugin->synchronize();
