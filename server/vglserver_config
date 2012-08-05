@@ -140,6 +140,24 @@ EOF
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
+addtoconf() {
+	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
+		echo USAGE: addtoconf {filename} {stanza} {line to add}
+		return
+	fi
+	grep "\[$2\]" $1 >/dev/null 2>/dev/null
+	if [ $? = 0 ]; then
+		TMPFILE=`maketemp vglserver_config_7`
+		AWK=nawk
+		type $AWK >/dev/null 2>/dev/null || AWK=gawk
+		$AWK -vstanza=$2 -vadd="$3" '{if ($0 ~ stanza) {print "["stanza"]"; print add} else print $0;}' $1 >$TMPFILE && cp $TMPFILE $1
+		if [ -f $TMPFILE ]; then rm $TMPFILE; fi
+	else
+		addtobottom $1 "[$2]"
+		addtobottom $1 "$3"
+	fi
+}
+
 backup() {
 	if [ -z "$1" ]; then
 		echo USAGE: backup {filename}
@@ -180,6 +198,21 @@ addvglgenkey() {
 		fi
 	fi
 }
+
+addvglgenkey_lightdm() {
+	backup $1
+	if [ "$VGLUSERSONLY" = "1" ]; then
+		echo ... Adding display-setup-script=vglgenkey to $1 ...
+	else
+		echo ... Adding display-setup-script=xhost \+LOCAL\: to $1 ...
+	fi
+	removeline $1 display-setup-script
+	if [ "$VGLUSERSONLY" = "1" ]; then
+		addtoconf $1 SeatDefaults display-setup-script=$VGLGENKEY
+	else	
+		addtoconf $1 SeatDefaults "display-setup-script=xhost +LOCAL:"
+	fi
+}	
 
 disablextest() {
 	if [ -z "$1" ]; then
@@ -433,6 +466,10 @@ unconfigglx() {
 			delvglgenkey $file
 		fi
 	done
+	if [ -f /etc/lightdm/lightdm.conf ]; then
+		echo "... Removing X server access from /etc/lightdm/lightdm.conf"
+		removeline /etc/lightdm/lightdm.conf display-setup-script
+	fi
 
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xsetup ]; then
@@ -569,7 +606,10 @@ configglx() {
 			addvglgenkey $file
 		fi
 	done
-		
+	if [ -f /etc/lightdm/lightdm.conf ]; then
+		addvglgenkey_lightdm /etc/lightdm/lightdm.conf
+	fi
+
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ ! -d /etc/dt/config ]; then
 			echo ... Creating /etc/dt/config/ directory ...

@@ -10,6 +10,9 @@ well as three half-resolution passive stereo options that can be used to drive
 The 32-bit supplementary package for amd64 Debian systems should now work
 properly on MultiArch-compatible systems (such as Ubuntu 11 and later.)
 -------------------------------------------------------------------------------
+[3]
+vglserver_config should now work properly with LightDM.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

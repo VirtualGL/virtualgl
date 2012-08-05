@@ -29,9 +29,14 @@ prompt.
 
 	#. Shut down the display manager:
 
-		Ubuntu Linux servers :: {:}
+		Ubuntu Linux servers running GDM :: {:}
 			#Verb: <<---
 			/etc/init.d/gdm stop
+			---
+
+		Ubuntu Linux servers running LightDM :: {:}
+			#Verb: <<---
+			/etc/init.d/lightdm stop
 			---
 
 		SuSE Linux servers :: {:}
@@ -149,9 +154,14 @@ prompt.
 
 	#. Restart the display manager:
 
-		Ubuntu Linux servers :: {:}
+		Ubuntu Linux servers running GDM :: {:}
 			#Verb: <<---
 			/etc/init.d/gdm start
+			---
+
+		Ubuntu Linux servers running LightDM :: {:}
+			#Verb: <<---
+			/etc/init.d/lightdm start
 			---
 
 		SuSE Linux servers :: {:}
