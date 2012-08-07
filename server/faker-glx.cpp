@@ -851,7 +851,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 static const char *glxextensions=
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context";
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile";
 
 const char *glXGetClientString(Display *dpy, int name)
 {

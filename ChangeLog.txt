@@ -13,6 +13,11 @@ properly on MultiArch-compatible systems (such as Ubuntu 11 and later.)
 [3]
 vglserver_config should now work properly with LightDM.
 -------------------------------------------------------------------------------
+[4]
+VirtualGL was not advertising that it supported the
+GLX_ARB_create_context_profile extension, even though it does.  This has been
+fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
