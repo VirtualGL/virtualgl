@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -70,6 +70,7 @@ class pbdrawable
 		rrcs _mutex;
 		Display *_dpy;  Drawable _drawable;
 		pbuffer *_pb;  GLXFBConfig _config;
+		GLXContext _ctx;
 		x11trans *_x11trans;
 		rrprofiler _prof_rb;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];

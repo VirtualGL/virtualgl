@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -71,12 +71,6 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	_cleared=false;  _stereo=false;  _format=0;
-	#if 0
-	const char *glxext=NULL;
-	glxext=_glXQueryExtensionsString(dpy, DefaultScreen(dpy));
-	if(!glxext || !strstr(glxext, "GLX_SGIX_pbuffer"))
-		_throw("Pbuffer extension not supported on rendering display");
-	#endif
 
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
@@ -148,6 +142,8 @@ pbdrawable::pbdrawable(Display *dpy, Drawable drawable)
 	_pb=NULL;
 	_prof_rb.setname("Readback  ");
 	_autotestframecount=0;
+	_config=0;
+	_ctx=0;
 }
 
 
@@ -155,6 +151,7 @@ pbdrawable::~pbdrawable(void)
 {
 	_mutex.lock(false);
 	if(_pb) {delete _pb;  _pb=NULL;}
+	if(_ctx) {_glXDestroyContext(_localdpy, _ctx);  _ctx=0;}
 	_mutex.unlock(false);
 }
 
@@ -168,6 +165,10 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
 	if((_pb=new pbuffer(w, h, config))==NULL)
 		_throw("Could not create Pbuffer");
+	if(_config && _FBCID(config)!=_FBCID(_config) && _ctx)
+	{
+		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;
+	}
 	_config=config;
 	return 1;
 }
@@ -217,7 +218,13 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	if(read==0) read=getglxdrawable();
 	if(draw==0) draw=getglxdrawable();
 
-	tempctx tc(_localdpy, draw, read, 0, _config, GLX_RGBA_TYPE);
+	if(!_ctx)
+	{
+		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
+			True))==0)
+			_throw("Could not create OpenGL context for readback");
+	}
+	tempctx tc(_localdpy, draw, read, _ctx, _config, GLX_RGBA_TYPE);
 
 	glReadBuffer(buf);
 
@@ -339,7 +346,13 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 	GLint dest_x, GLint dest_y, GLXDrawable draw)
 {
-	tempctx tc(_localdpy, draw, getglxdrawable(), 0, _config, GLX_RGBA_TYPE);
+	if(!_ctx)
+	{
+		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
+			True))==0)
+			_throw("Could not create OpenGL context for readback");
+	}
+	tempctx tc(_localdpy, draw, getglxdrawable(), _ctx, _config, GLX_RGBA_TYPE);
 
 	glReadBuffer(GL_FRONT);
 	_glDrawBuffer(GL_FRONT_AND_BACK);
