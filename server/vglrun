@@ -194,22 +194,22 @@ fi
 
 SSH_IP=`echo $SSH_CLIENT | cut -d' ' -f1 | cut -d: -f4`
 if [ -z "$DISPLAY" ]; then
-  if [ ! -z "$SSH_IP" ]; then
-    DISPLAY=$SSH_IP:0.0
-    export DISPLAY
-    echo "[VGL] NOTICE: Automatically setting the DISPLAY environment variable to"
-    echo "[VGL]    $DISPLAY, based on the IP address of your SSh client."
-  fi
+	if [ ! -z "$SSH_IP" ]; then
+		DISPLAY=$SSH_IP:0.0
+		export DISPLAY
+		echo "[VGL] NOTICE: Automatically setting the DISPLAY environment variable to"
+		echo "[VGL]    $DISPLAY, based on the IP address of your SSh client."
+	fi
 else
-  DISPLAYHOST=`echo $DISPLAY | cut -d: -f1`
-  if [ "$DISPLAYHOST" = "localhost" -o "$DISPLAYHOST" = "`hostname`" ]; then
-    if [ ! -z "$SSH_IP" -a -z "$VGL_CLIENT" -a -z "$RRCLIENT" ]; then
-      VGL_CLIENT=$SSH_IP:0.0
-      export VGL_CLIENT
-      echo "[VGL] NOTICE: Automatically setting VGL_CLIENT environment variable to"
+	DISPLAYHOST=`echo $DISPLAY | cut -d: -f1`
+	if [ "$DISPLAYHOST" = "localhost" -o "$DISPLAYHOST" = "`hostname`" ]; then
+		if [ ! -z "$SSH_IP" -a -z "$VGL_CLIENT" -a -z "$RRCLIENT" ]; then
+			VGL_CLIENT=$SSH_IP:0.0
+			export VGL_CLIENT
+			echo "[VGL] NOTICE: Automatically setting VGL_CLIENT environment variable to"
 			echo "[VGL]    $SSH_IP, the IP address of your SSh client."
-    fi
-  fi
+		fi
+	fi
 fi
 
 case `uname -s` in
