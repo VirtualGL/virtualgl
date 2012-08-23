@@ -18,6 +18,15 @@ VirtualGL was not advertising that it supported the
 GLX_ARB_create_context_profile extension, even though it does.  This has been
 fixed.
 -------------------------------------------------------------------------------
+[5]
+VirtualGL now uses a separate OpenGL context to perform pixel readback.  This
+fixes several issues, including an error ("GL_ARB_pixel_buffer_object extension
+not available") when trying to enable PBO readback with applications that use a
+3.x or later OpenGL core profile, and incorrect rendering in JPCSP and other
+applications that modify certain pixel store parameters (such as
+GL_PACK_SWAP_BYTES or GL_PACK_ROW_LENGTH) that VirtualGL wasn't properly
+handling.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
