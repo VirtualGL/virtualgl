@@ -27,6 +27,10 @@ applications that modify certain pixel store parameters (such as
 GL_PACK_SWAP_BYTES or GL_PACK_ROW_LENGTH) that VirtualGL wasn't properly
 handling.
 -------------------------------------------------------------------------------
+[6]
+VGL_FORCEALPHA=1 now works properly if the 3D application specifies visual
+attributes of GLX_RED_SIZE=GLX_GREEN_SIZE=GLX_BLUE_SIZE=1.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
