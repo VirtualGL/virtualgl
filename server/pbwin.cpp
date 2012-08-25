@@ -360,11 +360,11 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	if(usepbo && desiredformat!=frame->format)
 	{
 		usepbo=false;
-		if(fconfig.verbose && !alreadywarned)
+		if(!alreadywarned)
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: The pixel format of the buffer returned by the transport plugin");
-			rrout.println("[VGL]    does not match the pixel format of the Pbuffer.  Disabling PBO's.");
+			rrout.println("[VGL]    does not match the pixel format of the Pbuffer.  Disabling PBO readback.");
 		}
 	}
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
@@ -451,11 +451,11 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	if(usepbo && format!=_pb->format())
 	{
 		usepbo=false;
-		if(fconfig.verbose && !alreadywarned)
+		if(!alreadywarned)
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: RGB encoding requires RGB pixel readback, which does not match");
-			rrout.println("[VGL}    the pixel format of the Pbuffer.  Disabling PBO's.");
+			rrout.println("[VGL}    the pixel format of the Pbuffer.  Disabling PBO readback.");
 		}
 	}
 
@@ -564,11 +564,11 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			if(usepbo && format!=desiredformat)
 			{
 				usepbo=false;
-				if(fconfig.verbose && !alreadywarned)
+				if(!alreadywarned)
 				{
 					alreadywarned=true;
 					rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-					rrout.println("[VGL}    Pbuffer.  Disabling PBO's.");
+					rrout.println("[VGL}    Pbuffer.  Disabling PBO readback.");
 				}
 			}
 			readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
