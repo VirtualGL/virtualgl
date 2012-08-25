@@ -1431,6 +1431,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to a Pbuffer.
+	int direct=ctxh.isdirect(ctx);
 	if(dpy && drawable && ctx)
 	{
 		if(!config)
@@ -1438,14 +1439,13 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			rrout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
 			goto done;
 		}
-		int direct=ctxh.isdirect(ctx);
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 		{
 			Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 			if(deleteatom) XSetWMProtocols(dpy, drawable, &deleteatom, 1);
 			drawable=pbw->updatedrawable();
-			if(direct==True || direct==False) pbw->setdirect(direct);
+			pbw->setdirect(direct);
 		}
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
@@ -1459,7 +1459,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 				if(pbw)
 				{
 					drawable=pbw->updatedrawable();
-					if(direct==True || direct==False) pbw->setdirect(direct);
+					pbw->setdirect(direct);
 				}
 			}
 		}
@@ -1470,8 +1470,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// The pixels in a new Pbuffer are undefined, so we have to clear it.
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbpm *pbp;
-	if((pbp=pmh.find(dpy, drawable))!=NULL) pbp->clear();
-	// Needed to support color index rendering on Sun OpenGL
+	if((pbp=pmh.find(dpy, drawable))!=NULL)
+	{
+		pbp->clear();
+		pbp->setdirect(direct);
+	}
 
 	CATCH();
 
@@ -1527,6 +1530,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to a Pbuffer.
 	pbwin *drawpbw, *readpbw;
+	int direct=ctxh.isdirect(ctx);
 	if(dpy && (draw || read) && ctx)
 	{
 		if(!config)
@@ -1534,7 +1538,6 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			rrout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
 			goto done;
 		}
-		int direct=ctxh.isdirect(ctx);
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
@@ -1542,13 +1545,13 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		{
 			if(deleteatom) XSetWMProtocols(dpy, draw, &deleteatom, 1);
 			draw=drawpbw->updatedrawable();
-			if(direct==True || direct==False) drawpbw->setdirect(direct);
+			drawpbw->setdirect(direct);
 		}
 		if(readpbw)
 		{
 			if(deleteatom) XSetWMProtocols(dpy, read, &deleteatom, 1);
 			read=readpbw->updatedrawable();
-			if(direct==True || direct==False) readpbw->setdirect(direct);
+			readpbw->setdirect(direct);
 		}
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
@@ -1556,8 +1559,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
 	pbpm *pbp;
-	if((pbp=pmh.find(dpy, draw))!=NULL) pbp->clear();
-
+	if((pbp=pmh.find(dpy, draw))!=NULL)
+	{
+		pbp->clear();
+		pbp->setdirect(direct);
+	}
 	CATCH();
 
 	done:

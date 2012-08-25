@@ -177,7 +177,7 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 
 void pbdrawable::setdirect(Bool direct)
 {
-	if(direct!=True && direct!=False) _throw("Invalid argument");
+	if(direct!=True && direct!=False) return;
 	if(direct!=_direct && _ctx)
 	{
 		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;
