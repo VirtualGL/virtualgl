@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,10 +13,16 @@
  * wxWindows Library License for more details.
  */
 
+typedef struct
+{
+	GLXFBConfig config;
+	Bool direct;
+} ctxattribs;
+
 #define _hashclass _ctxhash
 #define _hashkeytype1 GLXContext
 #define _hashkeytype2 void*
-#define _hashvaluetype GLXFBConfig
+#define _hashvaluetype ctxattribs*
 #define _hashclassstruct _ctxhashstruct
 #define __hashclassstruct __ctxhashstruct
 #include "faker-hash.h"
@@ -46,22 +52,38 @@ class ctxhash : public _ctxhash
 
 		static bool isalloc(void) {return (_Instanceptr!=NULL);}
 
-		void add(GLXContext ctx, GLXFBConfig config)
+		void add(GLXContext ctx, GLXFBConfig config, Bool direct)
 		{
 			if(!ctx || !config) _throw("Invalid argument");
-			_ctxhash::add(ctx, NULL, config);
+			ctxattribs *attribs=NULL;
+			newcheck(attribs=new ctxattribs);
+			attribs->config=config;
+			attribs->direct=direct;
+			_ctxhash::add(ctx, NULL, attribs);
 		}
 
 		GLXFBConfig findconfig(GLXContext ctx)
 		{
 			if(!ctx) _throw("Invalid argument");
-			return _ctxhash::find(ctx, NULL);
+			ctxattribs *attribs=_ctxhash::find(ctx, NULL);
+			if(attribs) return attribs->config;
+			return 0;
 		}
 
 		bool isoverlay(GLXContext ctx)
 		{
 			if(ctx && findconfig(ctx)==(GLXFBConfig)-1) return true;
 			return false;
+		}
+
+		Bool isdirect(GLXContext ctx)
+		{
+			if(ctx)
+			{
+				ctxattribs *attribs=_ctxhash::find(ctx, NULL);
+				if(attribs) return attribs->direct;
+			}
+			return -1;
 		}
 
 		bool overlaycurrent(void)
@@ -81,9 +103,13 @@ class ctxhash : public _ctxhash
 			_ctxhash::killhash();
 		}
 
-		GLXFBConfig attach(GLXContext key1, void *key2) {return NULL;}
+		ctxattribs *attach(GLXContext key1, void *key2) {return NULL;}
 
-		void detach(_ctxhashstruct *h) {}
+		void detach(_ctxhashstruct *h)
+		{
+			ctxattribs *attribs=h? (ctxattribs *)h->value:NULL;
+			if(attribs) delete attribs;
+		}
 
 		bool compare(GLXContext key1, void *key2, _ctxhashstruct *h) {return false;}
 

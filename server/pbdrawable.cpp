@@ -144,6 +144,7 @@ pbdrawable::pbdrawable(Display *dpy, Drawable drawable)
 	_autotestframecount=0;
 	_config=0;
 	_ctx=0;
+	_direct=-1;
 }
 
 
@@ -171,6 +172,17 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	}
 	_config=config;
 	return 1;
+}
+
+
+void pbdrawable::setdirect(Bool direct)
+{
+	if(direct!=True && direct!=False) _throw("Invalid argument");
+	if(direct!=_direct && _ctx)
+	{
+		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;
+	}
+	_direct=direct;
 }
 
 
@@ -220,8 +232,10 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	if(!_ctx)
 	{
+		if(_direct!=True && _direct!=False)
+			_throw("pbdrawable instance has not been fully initialized");
 		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
-			True))==0)
+			_direct))==0)
 			_throw("Could not create OpenGL context for readback");
 	}
 	tempctx tc(_localdpy, draw, read, _ctx, _config, GLX_RGBA_TYPE);
@@ -348,8 +362,10 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 {
 	if(!_ctx)
 	{
+		if(_direct!=True && _direct!=False)
+			_throw("pbdrawable instance has not been fully initialized");
 		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
-			True))==0)
+			_direct))==0)
 			_throw("Could not create OpenGL context for readback");
 	}
 	tempctx tc(_localdpy, draw, getglxdrawable(), _ctx, _config, GLX_RGBA_TYPE);

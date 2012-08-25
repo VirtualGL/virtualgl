@@ -56,6 +56,7 @@ class pbdrawable
 		pbdrawable(Display *, Drawable);
 		~pbdrawable(void);
 		int init(int, int, GLXFBConfig);
+		void setdirect(Bool);
 		void clear(void);
 		Display *get2ddpy(void);
 		Drawable getx11drawable(void);
@@ -71,6 +72,7 @@ class pbdrawable
 		Display *_dpy;  Drawable _drawable;
 		pbuffer *_pb;  GLXFBConfig _config;
 		GLXContext _ctx;
+		Bool _direct;
 		x11trans *_x11trans;
 		rrprofiler _prof_rb;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];

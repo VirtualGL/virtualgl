@@ -379,7 +379,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 				ctx=NULL;
 			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
-			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+			if(ctx) ctxh.add(ctx, (GLXFBConfig)-1, -1);
 			goto done;
 		}
 	}
@@ -392,7 +392,8 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, direct);
 	if(ctx)
 	{
-		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
+		if(!newctxisdirect && direct)
 		{
 			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -403,7 +404,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		}
 		// Hash the FB config to the context so we can use it in subsequent calls
 		// to glXMake[Context]Current().
-		ctxh.add(ctx, c);
+		ctxh.add(ctx, c, newctxisdirect);
 	}
 
 	CATCH();
@@ -440,7 +441,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	{
 		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
-		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1, -1);
 		goto done;
 	}
 
@@ -458,7 +459,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		attribs);
 	if(ctx)
 	{
-		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
+		if(!newctxisdirect && direct)
 		{
 			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -467,7 +469,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 				DisplayString(_localdpy));
 			rrout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxh.add(ctx, config);
+		ctxh.add(ctx, config, newctxisdirect);
 	}
 
 	CATCH();
@@ -501,14 +503,15 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	if(rcfgh.isoverlay(dpy, config))
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
-		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1);
+		if(ctx) ctxh.add(ctx, (GLXFBConfig)-1, -1);
 		goto done;
 	}
 
 	ctx=_glXCreateNewContext(_localdpy, config, GLX_RGBA_TYPE, share_list, direct);
 	if(ctx)
 	{
-		if(!_glXIsDirect(_localdpy, ctx) && direct)
+		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
+		if(!newctxisdirect && direct)
 		{
 			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
 			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
@@ -517,7 +520,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 				DisplayString(_localdpy));
 			rrout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxh.add(ctx, config);
+		ctxh.add(ctx, config, newctxisdirect);
 	}
 
 	CATCH();
@@ -1435,12 +1438,14 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			rrout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
 			goto done;
 		}
+		int direct=ctxh.isdirect(ctx);
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 		{
 			Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 			if(deleteatom) XSetWMProtocols(dpy, drawable, &deleteatom, 1);
 			drawable=pbw->updatedrawable();
+			if(direct==True || direct==False) pbw->setdirect(direct);
 		}
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
@@ -1452,7 +1457,10 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 				winh.add(dpy, drawable);
 				pbw=winh.setpb(dpy, drawable, config);
 				if(pbw)
+				{
 					drawable=pbw->updatedrawable();
+					if(direct==True || direct==False) pbw->setdirect(direct);
+				}
 			}
 		}
 	}
@@ -1526,6 +1534,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			rrout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
 			goto done;
 		}
+		int direct=ctxh.isdirect(ctx);
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
 		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
@@ -1533,11 +1542,13 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		{
 			if(deleteatom) XSetWMProtocols(dpy, draw, &deleteatom, 1);
 			draw=drawpbw->updatedrawable();
+			if(direct==True || direct==False) drawpbw->setdirect(direct);
 		}
 		if(readpbw)
 		{
 			if(deleteatom) XSetWMProtocols(dpy, read, &deleteatom, 1);
 			read=readpbw->updatedrawable();
+			if(direct==True || direct==False) readpbw->setdirect(direct);
 		}
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
