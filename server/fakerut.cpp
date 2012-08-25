@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1823,6 +1823,8 @@ int pbtest(void)
 			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "Win");
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				_error("Could not make context current");
+			glXUseXFont(fontinfo->fid, minchar, maxchar-minchar+1,
+				fontlistbase+minchar);
 			checkcurrent(dpy, pb, glxwin, ctx);
 			checkframe(win, 1, lastframe);
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);

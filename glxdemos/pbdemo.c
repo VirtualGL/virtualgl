@@ -5,6 +5,8 @@
  *
  * Written by Brian Paul for the "OpenGL and Window System Integration"
  * course presented at SIGGRAPH '97.  Updated on 5 October 2002.
+ * Modified by D. R. Commander, 2012.
+ * Modifications provided under the same license as the original file.
  *
  * Usage:
  *   pbuffers width height imgfile
@@ -357,6 +359,7 @@ Render(void)
 {
    int NumBoxes = 100;
    int i;
+   XFontStruct *fontinfo=NULL;  int fontlistbase, minchar, maxchar;
 
    glClearColor(0.2, 0.2, 0.9, 0.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -380,6 +383,21 @@ Render(void)
       drawBox(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0, GL_POLYGON);
       glPopMatrix();
    }
+
+   fontinfo = XLoadQueryFont(gDpy, "fixed");
+   if (!fontinfo) {
+      printf("Could not load X font\n");
+      exit(1);
+   }
+   minchar = fontinfo->min_char_or_byte2;
+   maxchar = fontinfo->max_char_or_byte2;
+   fontlistbase = glGenLists(maxchar + 1);
+   glXUseXFont(fontinfo->fid, minchar, maxchar - minchar + 1,
+      fontlistbase + minchar);
+   XFreeFont(gDpy, fontinfo);
+   glListBase(fontlistbase);
+   glCallLists(16, GL_UNSIGNED_BYTE, "GLX Pbuffer demo");
+   glDeleteLists(fontlistbase, 1);
 
    glFinish();
 }

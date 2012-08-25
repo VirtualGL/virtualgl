@@ -4,7 +4,7 @@
  * Version:  3.5
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011-2012  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -112,7 +112,7 @@ static XCharStruct *isvalid(XFontStruct * fs, unsigned int which)
 void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 {
 	Display *dpy = NULL;
-	Window win;
+	Window win;  bool newwin = false;
 	Pixmap pixmap = 0;  XImage *image = NULL;
 	GC gc = 0;
 	XGCValues values;
@@ -136,15 +136,25 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	GLXDrawable draw = _glXGetCurrentDrawable();
 	if(winh.findpb(draw, pbw))
 	{
-		// Current drawable is a virtualized window
+		// Current drawable is a virtualized Window
 		errifnot(dpy = pbw->get2ddpy());
 		errifnot(win = pbw->getx11drawable());
 	}
 	else if((win = pmh.reversefind(draw)) != 0)
 	{
+		// Current drawable is a virtualized Pixmap
 		errifnot(dpy = glxdh.getcurrentdpy(draw));
 	}
-	else _throw("Application attempted to call glXUseXFont() on a drawable which is not a window or a pixmap.");
+	else
+	{
+		// Current drawable must be a Pbuffer that the app created.  Blerg.  There
+		// is no window attached, so we have to create one temporarily.
+		errifnot(dpy = glxdh.getcurrentdpy(draw));
+		errifnot(win = _XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 1,
+			1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+			BlackPixel(dpy, DefaultScreen(dpy))));
+		newwin = true;
+	}
 
 	fs = XQueryFont(dpy, font);
 	if(!fs) _throw("Couldn't get font structure information");
@@ -316,6 +326,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		if(gc && dpy) XFreeGC(dpy, gc);
 		if(pixmap && dpy) XFreePixmap(dpy, pixmap);
 		if(image) XDestroyImage(image);
+		if(win && dpy && newwin) _XDestroyWindow(dpy, win);
 		if(bm) free(bm);
 		if(ci) free(ci);
 		throw;

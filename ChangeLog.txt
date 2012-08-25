@@ -31,6 +31,11 @@ handling.
 VGL_FORCEALPHA=1 now works properly if the 3D application specifies visual
 attributes of GLX_RED_SIZE=GLX_GREEN_SIZE=GLX_BLUE_SIZE=1.
 -------------------------------------------------------------------------------
+[7]
+glXUseXFont() has been extended to work with Pbuffers.  Due to an oversight,
+VirtualGL would previously abort with an error message if the 3D application
+attempted to render text to a Pbuffer that it created, 
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
