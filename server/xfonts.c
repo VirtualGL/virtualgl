@@ -149,17 +149,29 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	{
 		// Current drawable must be a Pbuffer that the app created.  Blerg.  There
 		// is no window attached, so we have to create one temporarily.
+		XVisualInfo *v = NULL, vtemp;
+		XSetWindowAttributes swa;
+		int n = 0;
+
 		errifnot(dpy = glxdh.getcurrentdpy(draw));
-		errifnot(win = _XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 1,
-			1, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-			BlackPixel(dpy, DefaultScreen(dpy))));
+		vtemp.c_class = TrueColor;  vtemp.depth = 24;
+		Window root = DefaultRootWindow(dpy);
+		if((v = XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))
+			== NULL || n < 1)
+			_throw("Could not create temporary window for font rendering");
+		swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
+		swa.border_pixel = 0;
+		swa.event_mask = 0;
+		if((win = _XCreateWindow(dpy, root, 0, 0, 1, 1, 0, v->depth, InputOutput,
+			v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa)) == 0)
+			_throw("Could not create temporary window for font rendering");
 		newwin = true;
 	}
 
 	fs = XQueryFont(dpy, font);
-	if(!fs) _throw("Couldn't get font structure information");
+	if (!fs) _throw("Couldn't get font structure information");
 
-	if(fconfig.trace)
+	if (fconfig.trace)
 	{
 		unsigned long name_value;
 		if(XGetFontProperty(fs, XA_FONT, &name_value))
