@@ -36,23 +36,29 @@
 	}  \
 }
 
-static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis)
+static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis,
+	bool prefersinglebuffer=false)
 {
 	GLXFBConfig c=0, *configs=NULL;  int n=0;
 	if(!dpy || !vis) return 0;
 	if(!(c=vish.getpbconfig(dpy, vis))&& !(c=vish.mostrecentcfg(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from
-		int default_attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-			GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_STEREO, 0,
-			GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
-			GLX_DEPTH_SIZE, 1, None};
+		int default_attribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
+			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
+			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, None};
 		int attribs[256];
 
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, default_attribs, sizeof(default_attribs));
-		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid, GLX_STEREO))
+		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_STEREO))
 			attribs[11]=1;
+
+		// If we're creating a GLX pixmap and we can't determine an exact FB config
+		// to map to the visual, then we will make the pixmap single-buffered.
+		if(prefersinglebuffer) attribs[1]=0;
 
 		// Allow the default FB config attribs to be manually specified.  This is
 		// necessary to support apps that implement their own visual selection
@@ -621,7 +627,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  unsigned int bw;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	if(!(c=_MatchConfig(dpy, vi)))
+	if(!(c=_MatchConfig(dpy, vi, true)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
 	pbpm *pbp=new pbpm(dpy, pm, vi->visual);
 	if(pbp)
