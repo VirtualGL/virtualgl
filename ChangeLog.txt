@@ -44,6 +44,11 @@ This specifically caused OpendTect to display only a portion of its 3D view
 whenever it resized its 3D window after a "Restore" operation, but the issue
 may have affected other applications as well.
 -------------------------------------------------------------------------------
+[9]
+Previously, 3D applications running in VirtualGL could not successfully use
+XGetImage() to obtain the rendered 3D pixels from a GLX pixmap.  This has been
+fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

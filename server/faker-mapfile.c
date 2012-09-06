@@ -111,6 +111,7 @@
 		XDestroyWindow;
 		XFree;
 		XGetGeometry;
+		XGetImage;
 		XListExtensions;
 		XMaskEvent;
 		XMoveResizeWindow;

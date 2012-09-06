@@ -265,6 +265,32 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 }
 
 
+// If the Pixmap has been used for 3D rendering, then we have to synchronize
+// the contents of the Pbuffer backing the Pixmap, which resides on the 3D X
+// server, with the actual Pixmap on the 2D X server before calling the
+// "real" XGetImage() function.
+
+XImage *XGetImage(Display *display, Drawable d, int x, int y,
+	unsigned int width, unsigned int height, unsigned long plane_mask,
+	int format)
+{
+	XImage *xi=NULL;
+
+		opentrace(XGetImage);  prargd(display);  prargx(d);  prargi(x);  prargi(y);
+		prargi(width);  prargi(height);  prargx(plane_mask);  prargi(format);
+		starttrace();
+
+	pbpm *pbp=pmh.find(display, d);
+	if(pbp) pbp->readback();
+
+	xi=_XGetImage(display, d, x, y, width, height, plane_mask, format);
+
+		stoptrace();  closetrace();
+
+	return xi;
+}
+
+
 // Tell the application that the GLX extension is present, even if it isn't
 
 char **XListExtensions(Display *dpy, int *next)

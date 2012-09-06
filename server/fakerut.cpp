@@ -1977,6 +1977,7 @@ int pbtest(void)
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			checkcurrent(dpy, glxpm0, glxpm0, ctx);
+
 			clr.clear(GL_FRONT);
 			verifybufcolor(GL_FRONT, clr.bits(-1), "PM0");
 			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
@@ -1987,6 +1988,19 @@ int pbtest(void)
 			if(temp!=GL_BACK) _error("Draw buffer changed");
 			checkframe(pm0, 1, lastframe);
 			checkwindowcolor(pm0, clr.bits(-1), false);
+
+			clr.clear(GL_FRONT);
+			clr.clear(GL_BACK);
+			verifybufcolor(GL_FRONT, clr.bits(-2), "PM0");
+			glDrawBuffer(GL_BACK);  glReadBuffer(GL_BACK);
+			XImage *xi=XGetImage(dpy, pm0, 0, 0, dpyw/2, dpyh/2, AllPlanes, ZPixmap);
+			if(xi) XDestroyImage(xi);
+			checkreadbackstate(GL_BACK, dpy, glxpm0, glxpm0, ctx);
+			temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
+			if(temp!=GL_BACK) _error("Draw buffer changed");
+			checkframe(pm0, 1, lastframe);
+			checkwindowcolor(pm0, clr.bits(-2), false);
+
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e)

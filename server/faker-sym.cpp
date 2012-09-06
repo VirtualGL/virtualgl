@@ -258,6 +258,7 @@ static int __vgl_loadx11symbols(void *dllhnd)
 	lsym(XDestroyWindow);
 	lsym(XFree);
 	lsym(XGetGeometry);
+	lsym(XGetImage);
 	lsym(XListExtensions);
 	lsym(XMaskEvent);
 	lsym(XMoveResizeWindow);

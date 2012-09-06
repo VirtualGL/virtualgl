@@ -98,6 +98,15 @@ extern void __vgl_fakerinit(void);
 		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7); \
 	}
 
+#define funcdef8(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
+	at6, a6, at7, a7, at8, a8, ret) \
+	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8); \
+	symdef(f); \
+	static inline rettype _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+		at7 a7, at8 a8) { \
+		checksym(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8); \
+	}
+
 #define funcdef9(rettype, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
 	at6, a6, at7, a7, at8, a8, at9, a9, ret) \
 	typedef rettype (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9); \
@@ -393,6 +402,10 @@ funcdef1(int, XFree, void *, data, return);
 funcdef9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
 	root, int *, x, int *, y, unsigned int *, width, unsigned int *, height,
 	unsigned int *, border_width, unsigned int *, depth, return);
+
+funcdef8(XImage *, XGetImage, Display *, display, Drawable, d, int, x, int, y,
+	unsigned int, width, unsigned int, height, unsigned long, plane_mask, int,
+	format, return);
 
 funcdef2(char **, XListExtensions, Display *, dpy, int *, next, return);
 
