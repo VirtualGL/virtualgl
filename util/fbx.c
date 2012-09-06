@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2012 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -320,8 +320,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	#endif
 	{
 		if(!pixmap)
-			x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.d, xwinattrib.width,
-				xwinattrib.height, xwinattrib.depth));
+			x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.d, w, h, xwinattrib.depth));
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth,
 			ZPixmap, 0, NULL, w, h, 8, 0));
 		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))

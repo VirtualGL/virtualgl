@@ -36,6 +36,14 @@ glXUseXFont() has been extended to work with Pbuffers.  Due to an oversight,
 VirtualGL would previously abort with an error message if the 3D application
 attempted to render text to a Pbuffer that it created, 
 -------------------------------------------------------------------------------
+[8]
+Fixed an issue whereby, when displaying to a 2D X server that lacked the
+MIT-SHM extension, the X11 Transport would sometimes fail to resize its
+internal Pixmap (used for double buffering) whenever the X window was resized.
+This specifically caused OpendTect to display only a portion of its 3D view
+whenever it resized its 3D window after a "Restore" operation, but the issue
+may have affected other applications as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
