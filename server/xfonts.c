@@ -112,7 +112,7 @@ static XCharStruct *isvalid(XFontStruct * fs, unsigned int which)
 void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 {
 	Display *dpy = NULL;
-	Window win;  bool newwin = false;
+	Window win = 0;  bool newwin = false;
 	Pixmap pixmap = 0;  XImage *image = NULL;
 	GC gc = 0;
 	XGCValues values;
