@@ -23,10 +23,7 @@
  * This is a port of the infamous "gears" demo to straight GLX (i.e. no GLUT)
  * Port by Brian Paul  23 March 2001
  *
- * Command line options:
- *    -info      print GL implementation information
- *    -stereo    use stereo enabled GLX visual
- *
+ * See usage() below for command line options.
  */
 
 
@@ -39,16 +36,13 @@
 #include <GL/gl.h>
 #define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
+#include <GL/glxext.h>
 
 #ifndef GLX_MESA_swap_control
 #define GLX_MESA_swap_control 1
 typedef int (*PFNGLXGETSWAPINTERVALMESAPROC)(void);
 #endif
 
-
-static int is_glx_extension_supported(Display *dpy, const char *query);
-
-static void query_vsync(Display *dpy);
 
 #define BENCHMARK
 
@@ -582,7 +576,7 @@ make_window( Display *dpy, const char *name,
 /**
  * Determine whether or not a GLX extension is supported.
  */
-int
+static int
 is_glx_extension_supported(Display *dpy, const char *query)
 {
    const int scrnum = DefaultScreen(dpy);
@@ -602,12 +596,18 @@ is_glx_extension_supported(Display *dpy, const char *query)
 /**
  * Attempt to determine whether or not the display is synched to vblank.
  */
-void
-query_vsync(Display *dpy)
+static void
+query_vsync(Display *dpy, GLXDrawable drawable)
 {
    int interval = 0;
 
-
+#if defined(GLX_EXT_swap_control)
+   if (is_glx_extension_supported(dpy, "GLX_EXT_swap_control")) {
+       unsigned int tmp = -1;
+       glXQueryDrawable(dpy, drawable, GLX_SWAP_INTERVAL_EXT, &tmp);
+       interval = tmp;
+   } else
+#endif
    if (is_glx_extension_supported(dpy, "GLX_MESA_swap_control")) {
       PFNGLXGETSWAPINTERVALMESAPROC pglXGetSwapIntervalMESA =
           (PFNGLXGETSWAPINTERVALMESAPROC)
@@ -771,7 +771,7 @@ main(int argc, char *argv[])
    make_window(dpy, "glxgears", x, y, winWidth, winHeight, &win, &ctx);
    XMapWindow(dpy, win);
    glXMakeCurrent(dpy, win, ctx);
-   query_vsync(dpy);
+   query_vsync(dpy, win);
 
    if (printInfo) {
       printf("GL_RENDERER   = %s\n", (char *) glGetString(GL_RENDERER));
@@ -793,6 +793,7 @@ main(int argc, char *argv[])
    glDeleteLists(gear1, 1);
    glDeleteLists(gear2, 1);
    glDeleteLists(gear3, 1);
+   glXMakeCurrent(dpy, None, NULL);
    glXDestroyContext(dpy, ctx);
    XDestroyWindow(dpy, win);
    XCloseDisplay(dpy);

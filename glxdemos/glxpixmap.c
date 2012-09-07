@@ -105,11 +105,13 @@ static GLXPixmap make_pixmap( Display *dpy, Window win,
     *   to render correctly.  This is because Mesa allows RGB rendering
     *   into any kind of visual, not just TrueColor or DirectColor.
     */
-#undef GLX_MESA_pixmap_colormap
 #ifdef GLX_MESA_pixmap_colormap
    if (strstr(glXQueryExtensionsString(dpy, 0), "GLX_MESA_pixmap_colormap")) {
       /* stand-alone Mesa, specify the colormap */
-      glxpm = glXCreateGLXPixmapMESA( dpy, visinfo, pm, attr.colormap );
+      PFNGLXCREATEGLXPIXMAPMESAPROC glXCreateGLXPixmapMESA_func =
+         (PFNGLXCREATEGLXPIXMAPMESAPROC)
+         glXGetProcAddressARB((GLubyte *) "glXCreateGLXPixmapMESA");
+      glxpm = glXCreateGLXPixmapMESA_func( dpy, visinfo, pm, attr.colormap );
    }
    else {
       glxpm = glXCreateGLXPixmap( dpy, visinfo, pm );

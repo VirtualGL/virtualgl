@@ -98,6 +98,9 @@ static int attributeList[] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
 
 static int dimension = 3;
 
+static float Scale = 1.0;
+
+
 int main(int argc, char** argv) {
     Display *dpy;
     XVisualInfo *vi;
@@ -200,6 +203,7 @@ draw_scene(int mx, int my) {
 #else
     glEnable(GL_POLYGON_OFFSET_FILL);
 #endif
+    glScalef(Scale, Scale, Scale);
     cubes(mx, my, HIDDEN_LINE);
 #ifdef GL_EXT_polygon_offset
     glDisable(GL_POLYGON_OFFSET_EXT);
@@ -307,11 +311,18 @@ process_input(Display *dpy, Window win) {
 	case KeyPress:
 	    (void) XLookupString(&event.xkey, buf, sizeof(buf), &keysym, NULL);
 	    switch (keysym) {
+            case 'Z':
+               Scale *= 1.1;
+               break;
+            case 'z':
+               Scale *= 0.9;
+               break;
 	    case XK_Escape:
 		exit(EXIT_SUCCESS);
 	    default:
 		break;
 	    }
+	    break;
 	case ButtonPress:
 	    prevx = event.xbutton.x;
 	    prevy = event.xbutton.y;
