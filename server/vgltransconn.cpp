@@ -128,8 +128,8 @@ void vgltransconn::run(void)
 		while(!_deadyet)
 		{
 			int np;
-			f=NULL;
-			_q.get((void **)&f);  if(_deadyet) break;
+			void *ftemp=NULL;
+			_q.get(&ftemp);  f=(rrframe *)ftemp;  if(_deadyet) break;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
 			np=_np;  if(f->_h.compress==RRCOMP_YUV) np=1;

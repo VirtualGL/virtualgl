@@ -217,8 +217,8 @@ void clientwin::run(void)
 	{
 		while(!_deadyet)
 		{
-			f=NULL;
-			_q.get((void **)&f);  if(_deadyet) break;
+			void *ftemp=NULL;
+			_q.get(&ftemp);  f=(rrframe *)ftemp;  if(_deadyet) break;
 			if(!f) throw(rrerror("clientwin::run()",
 				"Invalid image received from queue"));
 			rrcs::safelock l(_mutex);

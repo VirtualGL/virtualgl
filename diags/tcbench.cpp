@@ -86,12 +86,13 @@ int main(int argc, char **argv)
 		  (temp=atoi(&argv[i][2]))>0) ycoord=temp;
 		if(!strnicmp(argv[i], "-wh", 3) && strlen(argv[i])>3)
 		{
+			#ifdef _WIN32
 			fbx_wh temp;
 			memset(&temp, 0, sizeof(temp));
-			#ifdef _WIN32
 			if(sscanf(&argv[i][3], "%x", &temp)==1) wh=temp;
 			#else
-			if(sscanf(&argv[i][3], "%x", (unsigned int *)&temp.d)==1) wh.d=temp.d;
+			unsigned int temp=0;
+			if(sscanf(&argv[i][3], "%x", &temp)==1) wh.d=(Drawable)temp;
 			#endif
 		}
 	}

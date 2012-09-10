@@ -368,13 +368,13 @@ unsigned short instancecheck(Display *dpy)
 	Atom atom=None;  unsigned short p=0;
 	if((atom=XInternAtom(dpy, "_VGLCLIENT_PORT", True))!=None)
 	{
-		unsigned short *prop=NULL;  unsigned long n=0, bytesleft=0;
+		unsigned char *prop=NULL;  unsigned long n=0, bytesleft=0;
 		int actualformat=0;  Atom actualtype=None;
 		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), atom, 0, 1, False,
 			XA_INTEGER, &actualtype, &actualformat, &n, &bytesleft,
-			(unsigned char **)&prop)==Success && n>=1 && actualformat==16
+			&prop)==Success && n>=1 && actualformat==16
 			&& actualtype==XA_INTEGER && prop)
-			p=*prop;
+			p=*(unsigned short *)prop;
 		if(prop) XFree(prop);
 		if(p!=0)
 		{

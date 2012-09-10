@@ -38,8 +38,8 @@ void xvtrans::run(void)
 	{
 		while(!_deadyet)
 		{
-			rrxvframe *f=NULL;
-			_q.get((void **)&f);  if(_deadyet) return;
+			rrxvframe *f;  void *ftemp=NULL;
+			_q.get(&ftemp);  f=(rrxvframe *)ftemp;  if(_deadyet) return;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
 			_prof_xv.startframe();

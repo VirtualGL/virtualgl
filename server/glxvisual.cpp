@@ -88,10 +88,12 @@ static void buildVisAttribTable(Display *dpy, int screen)
 		do
 		{
 			nop=0;  actualformat=0;  actualtype=0;
+			unsigned char *olproptemp=NULL;
 			if(XGetWindowProperty(dpy, RootWindow(dpy, screen), atom, 0, len, False,
 				atom, &actualtype, &actualformat, &nop, &bytesleft,
-				(unsigned char **)&olprop)!=Success || nop<4 || actualformat!=32
+				&olproptemp)!=Success || nop<4 || actualformat!=32
 				|| actualtype!=atom) goto done;
+			olprop=(struct overlay_info *)olproptemp;
 			len+=(bytesleft+3)/4;
 			if(bytesleft && olprop) {XFree(olprop);  olprop=NULL;}
 		} while(bytesleft);

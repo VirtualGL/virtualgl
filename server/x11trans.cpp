@@ -38,8 +38,8 @@ void x11trans::run(void)
 	{
  		while(!_deadyet)
 		{
-			rrfb *f=NULL;
-			_q.get((void **)&f);  if(_deadyet) return;
+			rrfb *f;  void *ftemp=NULL;
+			_q.get(&ftemp);  f=(rrfb *)ftemp;  if(_deadyet) return;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
 			_prof_blit.startframe();

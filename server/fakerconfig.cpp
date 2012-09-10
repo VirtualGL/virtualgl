@@ -465,15 +465,15 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 		fconfig.port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
 		Atom atom=None;  unsigned long n=0, bytesleft=0;
 		int actualformat=0;  Atom actualtype=None;
-		unsigned short *prop=NULL;
+		unsigned char *prop=NULL;
 		if((atom=XInternAtom(dpy,
 			fconfig.ssl? "_VGLCLIENT_SSLPORT":"_VGLCLIENT_PORT", True))!=None)
 		{
 			if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom,
 				0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
-				&bytesleft, (unsigned char **)&prop)==Success && n>=1
+				&bytesleft, &prop)==Success && n>=1
 				&& actualformat==16 && actualtype==XA_INTEGER && prop)
-				fconfig.port=*prop;
+				fconfig.port=*(unsigned short *)prop;
 			if(prop) XFree(prop);
 		}
 	}
