@@ -49,6 +49,17 @@ Previously, 3D applications running in VirtualGL could not successfully use
 XGetImage() to obtain the rendered 3D pixels from a GLX pixmap.  This has been
 fixed.
 -------------------------------------------------------------------------------
+[10]
+vglrun now automatically sets an environment variable that disables the
+execution of the VBoxTestOGL program in VirtualBox 4.2 and later.  Since
+LD_PRELOAD is not propagated down to VBoxTestOGL whenever VirtualBox launches
+it (because VirtualBox is a setuid root executable), VBoxTestOGL always fails
+in a VirtualGL environment, which makes VirtualBox believe that the system has
+no 3D support.  With version 4.1.10, VirtualBox began running VBoxTestOGL every
+time a VM was launched, which effectively prevented VBox from being used with
+VirtualGL unless the user hacked their system by symlinking /bin/true to
+/usr/lib/virtualbox/VBoxTestOGL.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

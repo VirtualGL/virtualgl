@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-08-05T02:54:54">
+<meta name="date" content="2012-09-10T14:02:46">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2771,13 +2771,17 @@ Solaris/x86 host, this solution provides a means of displaying Windows
 
 <h3 id="hd0015000002">Launching VirtualBox (Method 1)</h3>
 
-<p>This should work on most Linux systems.</p>
+<p>This should work on most Linux systems.  It is known to work with 
+VirtualBox 4.1.8 and prior and VirtualBox 4.2 and later.</p>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         <code>vglrun&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
     </li>
 </ol>
+<div class="important"><p class="important">
+With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code>/usr/lib/virtualbox/VBoxTestOGL</code> and symlink <code>/bin/true</code> to <code>/usr/lib/virtualbox/VBoxTestOGL</code> in order to use those versions of VirtualBox with VirtualGL.
+</p></div>
 
 
 

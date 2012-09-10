@@ -30,9 +30,15 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 *** Launching VirtualBox (Method 1)
 #OPT: noList! plain!
 
-This should work on most Linux systems.
+This should work on most Linux systems.  It is known to work with VirtualBox
+4.1.8 and prior and VirtualBox 4.2 and later.
 
 	#. ''vglrun VirtualBox -startvm ''__''{VM name or UUID}''__
+
+ !!! With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename
+ ''/usr/lib/virtualbox/VBoxTestOGL'' and symlink ''/bin/true'' to
+ ''/usr/lib/virtualbox/VBoxTestOGL'' in order to use those versions of
+ VirtualBox with VirtualGL.
 
 *** Launching VirtualBox (Method 2)
 #OPT: noList! plain!
