@@ -27,7 +27,7 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 		to add the VirtualGL library directory to the list of secure paths
 		(Solaris).
 
-*** Launching VirtualBox (Method 1)
+*** Launching VirtualBox
 #OPT: noList! plain!
 
 This should work on most Linux systems.  It is known to work with VirtualBox
@@ -39,22 +39,6 @@ This should work on most Linux systems.  It is known to work with VirtualBox
  ''/usr/lib/virtualbox/VBoxTestOGL'' and symlink ''/bin/true'' to
  ''/usr/lib/virtualbox/VBoxTestOGL'' in order to use those versions of
  VirtualBox with VirtualGL.
-
-*** Launching VirtualBox (Method 2)
-#OPT: noList! plain!
-
-If the above does not work, then try the following alternate method:
-
-	#. If running 32-bit VirtualBox,
-		#Verb <<---
-		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-		---
-		If running 64-bit VirtualBox,
-		#Verb <<---
-		export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
-		---
-
-	#. ''vglrun -nodl VirtualBox -startvm ''__''{VM name or UUID}''__
 
 *** NOTES
 #OPT: noList! plain!

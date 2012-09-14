@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-09-10T14:02:46">
+<meta name="date" content="2012-09-11T01:16:31">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2769,7 +2769,7 @@ Solaris/x86 host, this solution provides a means of displaying Windows
 
 
 
-<h3 id="hd0015000002">Launching VirtualBox (Method 1)</h3>
+<h3 id="hd0015000002">Launching VirtualBox</h3>
 
 <p>This should work on most Linux systems.  It is known to work with 
 VirtualBox 4.1.8 and prior and VirtualBox 4.2 and later.</p>
@@ -2785,31 +2785,7 @@ With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code
 
 
 
-<h3 id="hd0015000003">Launching VirtualBox (Method 2)</h3>
-
-<p>If the above does not work, then try the following alternate method:</p>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        If running 32-bit VirtualBox,
-<pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-</pre>
-
-        If running 64-bit VirtualBox,
-<pre class="verbatim">
-export&nbsp;CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib/64
-</pre>
-
-    </li>
-    <li class="Ordered-1 Ordered">
-        <code>vglrun&nbsp;-nodl&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
-    </li>
-</ol>
-
-
-
-<h3 id="hd0015000004">NOTES</h3>
+<h3 id="hd0015000003">NOTES</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
