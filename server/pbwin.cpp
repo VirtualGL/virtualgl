@@ -455,7 +455,7 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: RGB encoding requires RGB pixel readback, which does not match");
-			rrout.println("[VGL}    the pixel format of the Pbuffer.  Disabling PBO readback.");
+			rrout.println("[VGL]    the pixel format of the Pbuffer.  Disabling PBO readback.");
 		}
 	}
 
@@ -568,7 +568,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 				{
 					alreadywarned=true;
 					rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-					rrout.println("[VGL}    Pbuffer.  Disabling PBO readback.");
+					rrout.println("[VGL]    Pbuffer.  Disabling PBO readback.");
 				}
 			}
 			readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
