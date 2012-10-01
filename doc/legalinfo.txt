@@ -6,7 +6,10 @@ This document and all associated illustrations are licensed under the
 [[http://creativecommons.org/licenses/by/2.5/]\
 [Creative Commons Attribution 2.5 License]].  Any works that contain
 material derived from this document must cite The VirtualGL Project as the
-source of the material and list the current URL for the VirtualGL website.
+source of the material and list the current URL for the VirtualGL web site.
+
+The official VirtualGL binaries contain libjpeg-turbo, which is based in part on
+the work of the Independent JPEG Group.
 
 The VirtualGL server components include software developed by the
 [[http://www.fltk.org/][FLTK Project]] and distributed under the terms of the
