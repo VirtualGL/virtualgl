@@ -128,7 +128,6 @@ struct visual_attribs
 static void
 print_extension_list(const char *ext)
 {
-   const char *indentString = "    ";
    const int indent = 4;
    const int max = 79;
    int width, i, j;
@@ -137,7 +136,7 @@ print_extension_list(const char *ext)
       return;
 
    width = indent;
-   printf(indentString);
+   printf("    ");
    i = j = 0;
    while (1) {
       if (ext[j] == ' ' || ext[j] == 0) {
@@ -147,7 +146,7 @@ print_extension_list(const char *ext)
             /* start a new line */
             printf("\n");
             width = indent;
-            printf(indentString);
+            printf("    ");
          }
          /* print the extension name between ext[i] and ext[j] */
          while (i < j) {
