@@ -251,6 +251,15 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	s->wh.dpy=wh.dpy;  s->wh.d=wh.d;
 
 	#ifdef USESHM
+	if(!useshm)
+	{
+		static int alreadywarned=0;
+		if(!alreadywarned && __warningfile)
+		{
+			fprintf(__warningfile, "[FBX] Disabling shared memory blitting\n");
+			alreadywarned=1;
+		}
+	}
 	#ifdef XDK
 	if(!fbx_checkdlls()) useshm=0;
 	#endif
