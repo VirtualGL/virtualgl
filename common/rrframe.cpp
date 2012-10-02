@@ -196,6 +196,10 @@ void rrframe::makepassive(rrframe &stf, int mode)
 	unsigned char *lptr=stf._bits, *rptr=stf._rbits;
 	unsigned char *dstptr=_bits;
 
+	if(_h.framew != stf._h.framew || _h.frameh != stf._h.frameh ||
+		_pitch != stf._pitch)
+		_throw("Frames are not the same size");
+
 	if(mode==RRSTEREO_INTERLEAVED)
 	{
 		int rowsize=_pixelsize*_h.framew;
