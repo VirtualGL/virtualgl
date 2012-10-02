@@ -71,10 +71,10 @@ makedeb()
 		mkdir -p $TMPDIR/$BINDIR
 		mv $TMPDIR/glxspheres $TMPDIR/$BINDIR/
 
-		if [ ! "$LIBDIR" = "/usr/lib32" ]; then
-			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib32 $TMPDIR/__tmplib
-		fi
 		if [ ! "$LIBDIR" = "/usr/lib/i386-linux-gnu" ]; then
+			if [ ! "$LIBDIR" = "/usr/lib32" ]; then
+				safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib32 $TMPDIR/__tmplib
+			fi
 			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
 			ln -fs /usr/lib32/librrfaker.so $TMPDIR/usr/lib/i386-linux-gnu/librrfaker.so
 			ln -fs /usr/lib32/libdlfaker.so $TMPDIR/usr/lib/i386-linux-gnu/libdlfaker.so
