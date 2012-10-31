@@ -109,6 +109,18 @@
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
 	|
+| Magma 5 | Linux \
+	| Set the ''VGL_DEFAULTFBCONFIG'' environment variable to \
+		''GLX_STENCIL_SIZE,8'' prior to launching the application with ''vglrun'' \
+	| Magma 5 requires a visual with a stencil buffer, but it does not call \
+		''glXChooseVisual()'' to specify its desire for such a visual.  Thus, \
+		VirtualGL has no idea of the application's preference, and it is \
+		necessary to use ''VGL_DEFAULTFBCONFIG'' to give VirtualGL a hint as to \
+		what the application wants.  Otherwise, VirtualGL will create a Pbuffer \
+		without a stencil buffer, and this will cause incorrect rendering when \
+		using certain functions within Magma 5.  See \
+		{ref prefix="Section ": VGL_DEFAULTFBCONFIG} for more details. \
+	|
 | Mathematica 7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
 		launching the application with ''vglrun'' \

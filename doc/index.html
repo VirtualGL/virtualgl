@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-10-01T21:15:46">
+<meta name="date" content="2012-10-31T05:27:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2890,6 +2890,12 @@ With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
     <td class="standard"></td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Magma 5</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_DEFAULTFBCONFIG</code> environment variable to <code>GLX_STENCIL_SIZE,8</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">Magma 5 requires a visual with a stencil buffer, but it does not call <code>glXChooseVisual()</code> to specify its desire for such a visual.  Thus, VirtualGL has no idea of the application&rsquo;s preference, and it is necessary to use <code>VGL_DEFAULTFBCONFIG</code> to give VirtualGL a hint as to what the application wants.  Otherwise, VirtualGL will create a Pbuffer without a stencil buffer, and this will cause incorrect rendering when using certain functions within Magma 5.  See Section <a href="#VGL_DEFAULTFBCONFIG" class="ref">20.1</a> for more details.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Mathematica 7</td>
