@@ -1,4 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
+ * Copyright (C)2012 D. R. Commander.  All Rights Reserved.
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -60,7 +61,7 @@ class rcfghash : public _rcfghash
 
 		bool isoverlay(Display *dpy, GLXFBConfig c)
 		{
-			if(!dpy || !c) _throw("Invalid argument");
+			if(!dpy || !c) return false;
 			VisualID vid=rcfghash::find(DisplayString(dpy), c);
 			if(vid==(VisualID)-1) return true;
 			else return false;

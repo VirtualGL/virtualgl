@@ -192,7 +192,7 @@ int XDestroySubwindows(Display *dpy, Window win)
 
 		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
 
-	DeleteWindow(dpy, win, true);
+	if(dpy && win) DeleteWindow(dpy, win, true);
 	retval=_XDestroySubwindows(dpy, win);
 
 		stoptrace();  closetrace();
@@ -209,7 +209,7 @@ int XDestroyWindow(Display *dpy, Window win)
 
 		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
-	DeleteWindow(dpy, win);
+	if(dpy && win) DeleteWindow(dpy, win);
 	retval=_XDestroyWindow(dpy, win);
 
 		stoptrace();  closetrace();

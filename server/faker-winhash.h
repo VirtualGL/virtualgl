@@ -50,7 +50,7 @@ class winhash : public _winhash
 
 		void add(Display *dpy, Window win)
 		{
-			if(!dpy || !win) _throw("Invalid argument");
+			if(!dpy || !win) return;
 			char *dpystring=strdup(DisplayString(dpy));
 			if(!_winhash::add(dpystring, win, NULL))
 				free(dpystring);
@@ -114,7 +114,7 @@ class winhash : public _winhash
 
 		void setoverlay(Display *dpy, Window win)
 		{
-			if(!dpy || !win) _throw("Invalid argument");
+			if(!dpy || !win) return;
 			_winhashstruct *ptr=NULL;
 			rrcs::safelock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
@@ -125,13 +125,13 @@ class winhash : public _winhash
 
 		void remove(Display *dpy, GLXDrawable d)
 		{
-			if(!dpy || !d) _throw("Invalid argument");
+			if(!dpy || !d) return;
 			_winhash::remove(DisplayString(dpy), d);
 		}
 
 		void remove(Display *dpy)
 		{
-			if(!dpy) _throw("Invalid argument");
+			if(!dpy) return;
 			_winhashstruct *ptr=NULL, *next=NULL;
 			rrcs::safelock l(_mutex);
 			ptr=_start;

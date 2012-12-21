@@ -795,8 +795,8 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 	pbpm *pbp=pmh.find(dpy, pix);
 	if(pbp) pbp->readback();
 
-	glxdh.remove(pix);
-	pmh.remove(dpy, pix);
+	if(pix) glxdh.remove(pix);
+	if(dpy && pix) pmh.remove(dpy, pix);
 
 		stoptrace();  closetrace();
 
@@ -816,8 +816,8 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 	pbpm *pbp=pmh.find(dpy, pix);
 	if(pbp) pbp->readback();
 
-	glxdh.remove(pix);
-	pmh.remove(dpy, pix);
+	if(pix) glxdh.remove(pix);
+	if(dpy && pix) pmh.remove(dpy, pix);
 
 		stoptrace();  closetrace();
 

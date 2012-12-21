@@ -1,4 +1,15 @@
 ===============================================================================
+2.3.3
+===============================================================================
+[1]
+VirtualGL will no longer throw an exception if a 3D application calls certain
+X11 and GLX functions with a NULL argument.  It will instead allow the
+underlying X11 or GLX library to handle the error.  This specifically works
+around an issue with Fiji.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.3.2
 ===============================================================================
 [1]
