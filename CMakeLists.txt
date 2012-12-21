@@ -11,7 +11,7 @@ if(UNIX)
 endif()
 
 project(VirtualGL)
-set(VERSION 2.3.2)
+set(VERSION 2.3.3)
 
 if(UNIX)
 	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
