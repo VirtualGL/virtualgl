@@ -7,6 +7,11 @@ X11 and GLX functions with a NULL argument.  It will instead allow the
 underlying X11 or GLX library to handle the error.  This specifically works
 around an issue with Fiji.
 -------------------------------------------------------------------------------
+[2]
+Worked around an issue whereby, when ANSYS Workbench 14.5 was run with
+VirtualGL, subprocesses (such as the geometry editor) launched from within the
+Workbench environment would not exit properly (and thus would become zombies.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
