@@ -12,6 +12,11 @@ Worked around an issue whereby, when ANSYS Workbench 14.5 was run with
 VirtualGL, subprocesses (such as the geometry editor) launched from within the
 Workbench environment would not exit properly (and thus would become zombies.)
 -------------------------------------------------------------------------------
+[3]
+Worked around an issue whereby, when using MAGMA5 with VirtualGL, the second
+and subsequent perspectives opened within the application would not always
+function correctly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

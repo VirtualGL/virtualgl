@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2012 D. R. Commander
+ * Copyright (C)2009, 2011-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -65,37 +65,39 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis,
 		// mechanisms.  Since those apps don't use glXChooseVisual(), VirtualGL has
 		// no idea what 3D visual attributes they need, and thus it is necessary
 		// to give it a hint using this environment variable.
-		char *env=getenv("VGL_DEFAULTFBCONFIG");
-		char *argv[512];  int argc=0;
-		if(env && strlen(env)>0)
+		if(strlen(fconfig.defaultfbconfig)>0)
 		{
-			char *arg=strtok(env, " \t,");
+			char *str=strdup(fconfig.defaultfbconfig);
+			if(!str) _throwunix();
+			char *argv[512];  int argc=0;
+			char *arg=strtok(str, " \t,");
 			while(arg && argc<512)
 			{
 				argv[argc]=arg;  argc++;
 				arg=strtok(NULL, " \t,");
 			}
-		}
-		for(int i=0, j=18; i<argc && j<256; i++)
-		{
-			int index;
-			index=2;
-			testattrib(GLX_RED_SIZE, index, 0, INT_MAX);
-			index=4;
-			testattrib(GLX_GREEN_SIZE, index, 0, INT_MAX);
-			index=6;
-			testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
-			index=16;
-			testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
-			testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_STENCIL_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
-			testattrib(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
-			testattrib(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
-			testattrib(GLX_SAMPLES, j, 0, INT_MAX);
+			for(int i=0, j=18; i<argc && j<256; i++)
+			{
+				int index;
+				index=2;
+				testattrib(GLX_RED_SIZE, index, 0, INT_MAX);
+				index=4;
+				testattrib(GLX_GREEN_SIZE, index, 0, INT_MAX);
+				index=6;
+				testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
+				index=16;
+				testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
+				testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_STENCIL_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
+				testattrib(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_ACCUM_BLUE_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_ACCUM_ALPHA_SIZE, j, 0, INT_MAX);
+				testattrib(GLX_SAMPLE_BUFFERS, j, 0, INT_MAX);
+				testattrib(GLX_SAMPLES, j, 0, INT_MAX);
+			}
+			free(str);
 		}
 
 		configs=glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), attribs, &n);

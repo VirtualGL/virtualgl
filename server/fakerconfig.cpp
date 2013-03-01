@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2012 D. R. Commander
+/* Copyright (C)2009-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -297,6 +297,7 @@ void fconfig_reloadenv(void)
 		}
 	}
 	fetchenv_str("VGL_CONFIG", config);
+	fetchenv_str("VGL_DEFAULTFBCONFIG", defaultfbconfig);
 	if((env=getenv("VGL_DISPLAY"))!=NULL && strlen(env)>0)
 	{
 		if(!fcenv_set || strncmp(env, fcenv.localdpystring, MAXSTR-1))
@@ -547,6 +548,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfstr(client);
 	prconfint(compress);
 	prconfstr(config);
+	prconfstr(defaultfbconfig);
 	prconfdbl(fps);
 	prconfdbl(flushdelay);
 	prconfint(forcealpha);
