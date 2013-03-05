@@ -15,7 +15,7 @@ Workbench environment would not exit properly (and thus would become zombies.)
 [3]
 Worked around an issue whereby, when using MAGMA5 with VirtualGL, the second
 and subsequent perspectives opened within the application would not always
-function correctly.
+display correctly.
 -------------------------------------------------------------------------------
 
 
