@@ -47,6 +47,9 @@ Mac
      and select the following packages:
      gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
    * With Xcode 3.x and later, you can simply check "Unix Development Support"
+   * With Xcode 4.x, the X11 and GLX headers and link libraries are no longer
+     included.  You can obtain these by installing XQuartz
+     (http://xquartz.macosforge.org).
 
 
 Windows
@@ -379,8 +382,8 @@ to the CMake command line.  The OS X 10.5 SDK must be installed.
 
 Use export/setenv to set the following environment variables:
 
-  CC=gcc-4.0
-  CXX=g++-4.0
+  CC=/Developer/usr/bin/gcc-4.0
+  CXX=/Developer/usr/bin/g++-4.0
   CFLAGS=-m32
   CXXFLAGS=-m32
   LDFLAGS=-m32
