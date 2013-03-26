@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2012 D. R. Commander
+ * Copyright (C)2010-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -302,6 +302,22 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
+		if(shmok)
+		{
+			char *env=getenv("FBX_USESHMPIXMAPS");
+			if(env && !strcmp(env, "1"))
+			{
+				static int alreadywarned=0;
+				if(!alreadywarned && __warningfile)
+				{
+					fprintf(__warningfile, "[FBX] Using MIT-SHM pixmaps\n");
+					alreadywarned=1;
+				}
+				s->pm=XShmCreatePixmap(s->wh.dpy, s->wh.d, s->shminfo.shmaddr,
+					&s->shminfo, w, h, xwinattrib.depth);
+				if(!s->pm) shmok=0;
+			}
+		}
 		#ifndef XDK
 		shmctl(s->shminfo.shmid, IPC_RMID, 0);
 		#endif
@@ -455,10 +471,11 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 
 	#else
 
-	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
+	if(!s->pm || !s->shm)
+		if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
 	if(s->pm)
 	{
-		XCopyArea(s->wh.dpy, s->pm, s->wh.d, s->xgc, wx, wy, bw, bh, wx, wy);
+		XCopyArea(s->wh.dpy, s->pm, s->wh.d, s->xgc, bx, by, bw, bh, wx, wy);
 	}
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
@@ -525,8 +542,9 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	else
 	#endif
 	{
-		XPutImage(s->wh.dpy, s->pixmap? s->wh.d:s->pm, s->xgc, s->xi, bx, by, wx,
-			wy, bw, bh);
+		Drawable d=s->pixmap? s->wh.d:s->pm;
+		if(d==s->pm) wx=wy=0;
+		XPutImage(s->wh.dpy, d, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
 	}
 	return 0;
 

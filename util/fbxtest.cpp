@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -49,19 +49,19 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 #define MIN_SCREEN_WIDTH  1024
 #define MIN_SCREEN_HEIGHT 768
-#define WIDTH             701
-#define HEIGHT            701
+#define WIDTH             1240
+#define HEIGHT            900
 #define N                 2
 
 int width, height;
 int checkdb=0, doshm=1, dofs=0, dovid=0, dodisplay=0, interactive=0,
-	advance=0;
+	advance=0, dostress=0, offset;
 #ifndef FBXWIN32
 int dopixmap=0;
 Window win=0;
 #endif
 fbx_wh wh;
-rrtimer timer;
+rrtimer timer, timer2;
 #ifdef FBXWIN32
 #define fg() SetForegroundWindow(wh)
 #else
@@ -74,7 +74,8 @@ const BMPPIXELFORMAT fb2bmpformat[FBX_FORMATS]=
 void nativeread(int), nativewrite(int);
 
 
-void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
+void initbuf(int x, int y, int w, int pitch, int h, int format,
+	unsigned char *buf, int offset)
 {
 	int i, j, ps=fbx_ps[format];
 	for(i=0; i<h; i++)
@@ -83,19 +84,20 @@ void initbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *b
 		{
 			memset(&buf[i*pitch+j*ps], 0, fbx_ps[format]);
 			if(format==FBX_INDEX)
-				buf[i*pitch+j]=(j+x+i+y)%32;
+				buf[i*pitch+j]=(j+x+i+y+offset)%32;
 			else
 			{
-				buf[i*pitch+j*ps+fbx_roffset[format]]=255;
-				buf[i*pitch+j*ps+fbx_goffset[format]]=(j+x)%256;
-				buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y)%256;
+				buf[i*pitch+j*ps+fbx_roffset[format]]=(j+x+offset)%256;
+				buf[i*pitch+j*ps+fbx_goffset[format]]=(i+y+offset)%256;
+				buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y+j+x+offset)%256;
 			}
 		}
 	}
 }
 
 
-int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf)
+int cmpbuf(int x, int y, int w, int pitch, int h, int format,
+	unsigned char *buf, int offset)
 {
 	int i, j, ps=fbx_ps[format];
 	for(i=0; i<h; i++)
@@ -104,13 +106,16 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format, unsigned char *buf
 		{
 			if(format==FBX_INDEX)
 			{
-				if(buf[i*pitch+j]!=(j+x+i+y)%32) return 0;
+				if(buf[i*pitch+j]!=(j+x+i+y+offset)%32) return 0;
 			}
 			else
 			{
-				if(buf[i*pitch+j*ps+fbx_roffset[format]]!=255) return 0;
-				if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(j+x)%256) return 0;
-				if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y)%256) return 0;
+				if(buf[i*pitch+j*ps+fbx_roffset[format]]!=(j+x+offset)%256)
+					return 0;
+				if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(i+y+offset)%256)
+					return 0;
+				if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y+j+x+offset)%256)
+					return 0;
 			}
 		}
 	}
@@ -132,7 +137,11 @@ void clearfb(void)
 	}
 	#else
 	if(wh.dpy && wh.d && !dopixmap)
+	{
 		XSetWindowBackground(wh.dpy, wh.d, BlackPixel(wh.dpy, DefaultScreen(wh.dpy)));
+		XClearWindow(wh.dpy, wh.d);
+		XSync(wh.dpy, False);
+	}
 	#endif
 	return;
 }
@@ -141,69 +150,90 @@ void clearfb(void)
 // Platform-specific write test
 void nativewrite(int useshm)
 {
-	fbx_struct s;  int n, i;  double rbtime;
+	fbx_struct s;  int i=0;  double rbtime;
 	memset(&s, 0, sizeof(s));
 
 	try {
 
 	fbx(fbx_init(&s, wh, 0, 0, useshm));
 	if(useshm && !s.shm) _throw("MIT-SHM not available");
-	fprintf(stderr, "Native Pixel Format:  %s", fbx_formatname(s.format));
-	fprintf(stderr, "\n");
+	fprintf(stderr, "Native Pixel Format:  %s\n", fbx_formatname(s.format));
 	if(s.width!=width || s.height!=height)
 		_throw("The benchmark window lost input focus or was obscured.\nSkipping native write test\n");
 
 	clearfb();
-	initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
 	if(useshm)
 		fprintf(stderr, "FBX bottom-up write [SHM]:        ");
 	else
 		fprintf(stderr, "FBX bottom-up write:              ");
-	n=N;
+	i=0;  rbtime=0;  timer2.start();
 	do
 	{
-		n+=n;
-		timer.start();
-		for (i=0; i<n; i++)
+		if(checkdb)
 		{
-			if(checkdb)
-			{
-				memset(s.bits, 255, s.pitch*s.height);
-				fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
-				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
-			}
-			fbx(fbx_flip(&s, 0, 0, 0, 0));
-			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
+			memset(s.bits, 255, s.pitch*s.height);
+			fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
 		}
-		rbtime=timer.elapsed();
-	} while(rbtime<1.);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+		initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits,
+			i);
+		timer.start();
+		fbx(fbx_flip(&s, 0, 0, 0, 0));
+		fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
+		rbtime+=timer.elapsed();
+		i++;
+	} while(timer2.elapsed()<5.);
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)i*(double)(width*height)/((double)1000000.*rbtime));
+
+	clearfb();
+	if(useshm)
+		fprintf(stderr, "FBX 1/4 top-down write [SHM]:     ");
+	else
+		fprintf(stderr, "FBX 1/4 top-down write:           ");
+	i=0;  rbtime=0.;  timer2.start();
+	do
+	{
+		if(checkdb)
+		{
+			memset(s.bits, 255, s.pitch*s.height);
+			fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
+		}
+		initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits,
+			i);
+		timer.start();
+		fbx(fbx_write(&s, 0, 0, WIDTH/2, HEIGHT/2, WIDTH/2, HEIGHT/2));
+		rbtime+=timer.elapsed();
+		i++;
+	} while(timer2.elapsed()<5.);
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)i*(double)(width*height)/((double)4000000.*rbtime));
 
 	clearfb();
 	if(useshm)
 		fprintf(stderr, "FBX top-down write [SHM]:         ");
 	else
 		fprintf(stderr, "FBX top-down write:               ");
-	n=N;
+	i=0;  rbtime=0.;  timer2.start();
 	do
 	{
-		n+=n;
-		timer.start();
-		for (i=0; i<n; i++)
+		if(checkdb)
 		{
-			if(checkdb)
-			{
-				memset(s.bits, 255, s.pitch*s.height);
-				fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
-				initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits);
-			}
-			fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
+			memset(s.bits, 255, s.pitch*s.height);
+			fbx(fbx_awrite(&s, 0, 0, 0, 0, 0, 0));
 		}
-		rbtime=timer.elapsed();
-	} while(rbtime<1.);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+		initbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits,
+			i);
+		timer.start();
+		fbx(fbx_write(&s, 0, 0, 0, 0, 0, 0));
+		rbtime+=timer.elapsed();
+		i++;
+	} while(timer2.elapsed()<5.);
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)i*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+
+	offset=i-1;
 
 	fbx_term(&s);
 }
@@ -212,7 +242,7 @@ void nativewrite(int useshm)
 // Platform-specific readback test
 void nativeread(int useshm)
 {
-	fbx_struct s;  int n, i;  double rbtime;
+	fbx_struct s;  int i;  double rbtime;
 	memset(&s, 0, sizeof(s));
 
 	try {
@@ -227,20 +257,19 @@ void nativeread(int useshm)
 	else
 		fprintf(stderr, "FBX read:                         ");
 	memset(s.bits, 0, width*height*ps);
-	n=N;
+	i=0;  rbtime=0.;  timer2.start();
 	do
 	{
-		n+=n;
 		timer.start();
-		for(i=0; i<n; i++)
-		{
-			fbx(fbx_read(&s, 0, 0));
-		}
-		rbtime=timer.elapsed();
-		if(!cmpbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits))
+		fbx(fbx_read(&s, 0, 0));
+		rbtime+=timer.elapsed();
+		if(!cmpbuf(0, 0, width, s.pitch, height, s.format, (unsigned char *)s.bits,
+			offset))
 			_throw("ERROR: Bogus data read back.");
-	} while (rbtime<1.);
-	fprintf(stderr, "%f Mpixels/sec\n", (double)n*(double)(width*height)/((double)1000000.*rbtime));
+		i++;
+	} while (timer2.elapsed()<5.);
+	fprintf(stderr, "%f Mpixels/sec\n",
+		(double)i*(double)(width*height)/((double)1000000.*rbtime));
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
@@ -270,7 +299,7 @@ class writethread : public Runnable
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
-				(unsigned char *)stressfb.bits);
+				(unsigned char *)stressfb.bits, 0);
 			for (i=0; i<iter; i++)
 				fbx(fbx_write(&stressfb, 0, 0, myx, myy, mywidth, myheight));
 
@@ -307,7 +336,7 @@ class readthread : public Runnable
 			for(i=0; i<iter; i++)
 				fbx(fbx_read(&stressfb, myx, myy));
 			if(!cmpbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
-				(unsigned char *)stressfb.bits))
+				(unsigned char *)stressfb.bits, 0))
 				_throw("ERROR: Bogus data read back.");
 
 			} catch(...) {fbx_term(&stressfb);  throw;}
@@ -386,6 +415,20 @@ void nativestress(int useshm)
 
 void display(void)
 {
+	if(dostress)
+	{
+		fprintf(stderr, "-- Stress tests --\n");
+		#ifndef FBXWIN32
+		if(doshm)
+		{
+			fg();  nativestress(1);
+		}
+		#endif
+		fg();  nativestress(0);
+		fprintf(stderr, "\n");
+		return;
+	}
+
 	fprintf(stderr, "-- Performance tests --\n");
 	#ifndef FBXWIN32
 	if(doshm)
@@ -396,16 +439,6 @@ void display(void)
 	#endif
 	fg();  nativewrite(0);
 	fg();  nativeread(0);
-	fprintf(stderr, "\n");
-
-	fprintf(stderr, "-- Stress tests --\n");
-	#ifndef FBXWIN32
-	if(doshm)
-	{
-		fg();  nativestress(1);
-	}
-	#endif
-	fg();  nativestress(0);
 	fprintf(stderr, "\n");
 }
 
@@ -566,6 +599,7 @@ void usage(char *progname)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "-checkdb = Verify that double buffering is working correctly\n");
 	fprintf(stderr, "-noshm = Do not use MIT-SHM extension to accelerate blitting\n");
+	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-pm = Blit to a pixmap rather than to a window\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
 	fprintf(stderr, "-fs = Full-screen mode\n\n");
@@ -606,6 +640,7 @@ int main(int argc, char **argv)
 			dopixmap=1;  doshm=0;
 		}
 		#endif
+		if(!stricmp(argv[i], "-mt")) dostress=1;
 		if(!stricmp(argv[i], "-fs"))
 		{
 			dofs=1;
