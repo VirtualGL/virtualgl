@@ -96,9 +96,6 @@ void __vgl_safeexit(int retcode)
 	int shutdown;
 	globalmutex.lock(false);
 	shutdown=__shutdown;
-	// Without the following, subprocesses (such as the geometry editor) started
-	// from ANSYS Workbench 14.5 will not exit properly.  No clue as to why. 
-	rrout.print("");
 	if(!__shutdown)
 	{
 		__shutdown=1;

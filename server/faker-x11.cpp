@@ -24,6 +24,12 @@ extern "C" {
 
 int XCloseDisplay(Display *dpy)
 {
+	// For reasons unexplained, MainWin apps will sometimes call XCloseDisplay()
+	// after the global instances have been destroyed, so if this has occurred,
+	// we can't access fconfig or rrout or winh without causing deadlocks or
+	// other issues.
+	if(__shutdown) return _XCloseDisplay(dpy);
+
 	int retval=0;
 	TRY();
 
