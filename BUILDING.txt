@@ -124,7 +124,7 @@ minimum, the following 32-bit libraries:
      (http://explore-ubuntu.blogspot.com/2010/04/getlibs.html) to
      install the 32-bit X11 dev. kit:
      > sudo getlibs -p libx11-dev libxext-dev libxau-dev libglu1-mesa-dev libxv-dev
-   * Ubuntu 12 is currently a special case.  Because of the transition to
+   * Ubuntu 12 and 13 are a bit tricky.  Because of the transition to
      MultiArch, ia32-libs is no longer used to install development stubs for
      32-bit libraries.  The accepted way to install these is to install the
      i386 version of the needed dev. kit.  However, unfortunately, some of the
