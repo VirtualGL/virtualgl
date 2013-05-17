@@ -438,7 +438,7 @@ event_loop(Display *dpy)
          case KeyPress:
             {
                char buffer[10];
-               int r, code;
+               int code;
                code = XLookupKeysym(&event.xkey, 0);
                if (code == XK_Left) {
                   view_roty += 5.0;
@@ -453,8 +453,8 @@ event_loop(Display *dpy)
                   view_rotx -= 5.0;
                }
                else {
-                  r = XLookupString(&event.xkey, buffer, sizeof(buffer),
-                                    NULL, NULL);
+                  XLookupString(&event.xkey, buffer, sizeof(buffer),
+                                NULL, NULL);
                   if (buffer[0] == 27) {
                      /* escape */
                      return;
@@ -490,6 +490,7 @@ event_loop(Display *dpy)
             GLfloat fps = frames / seconds;
             printf("%d frames in %3.1f seconds = %6.3f FPS\n", frames, seconds,
                    fps);
+	    fflush(stdout);
             tRate0 = t;
 
             /* Destroy window and create new one */	    

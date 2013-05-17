@@ -146,11 +146,9 @@ MakeOverlayWindow(Display *dpy)
       None
    };
    int scrnum;
-   Window root;
    XVisualInfo *visinfo;
 
    scrnum = DefaultScreen(dpy);
-   root = RootWindow(dpy, scrnum);
 
    visinfo = glXChooseVisual(dpy, scrnum, rgbAttribs);
    if (visinfo) {
@@ -201,10 +199,8 @@ EventLoop(Display *dpy)
          case KeyPress:
             {
                char buffer[10];
-               int r, code;
-               code = XLookupKeysym(&event.xkey, 0);
-	       r = XLookupString(&event.xkey, buffer, sizeof(buffer),
-				 NULL, NULL);
+	       XLookupString(&event.xkey, buffer, sizeof(buffer),
+                             NULL, NULL);
 	       if (buffer[0] == 27) {
                   /* escape */
                   return;
