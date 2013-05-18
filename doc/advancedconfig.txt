@@ -374,6 +374,21 @@ Each method of configuration takes precedence over the previous method:
 	!!! When using the VGL Transport, multi-threaded compression is affected by
 	the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
 
+| Environment Variable | ''VGL_PIXMAP = ''__''0 \| 1''__ |
+| Summary | Disable/enable the use of Pixmaps for 3D rendering |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL will redirect the 3D rendering from each
+	OpenGL window on the 2D X server into a corresponding Pbuffer on the 3D X
+	server, and it will likewise redirect the 3D rendering from each OpenGL
+	pixmap on the 2D X server into a corresponding Pixmap on the 3D X server.
+	Enabling this option causes VirtualGL to use pixmaps on the 3D X server to
+	represent all OpenGL drawables on the 2D X server.  This option should be
+	considered experimental and is only recommended for systems on which Pbuffer
+	support is incomplete or unstable.
+
 | Environment Variable | ''VGL_PORT = ''__''{p}''__ |
 | ''vglrun'' argument | ''-p ''__''{p}''__ |
 | Summary | __''{p}''__ = the TCP port to use when connecting to the \

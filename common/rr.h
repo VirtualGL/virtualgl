@@ -186,7 +186,7 @@ typedef struct _FakerConfig
   char transport[MAXSTR];
   char transvalid[RR_TRANSPORTOPT];
   char trapx11;
-  char usewindow;
+  char usepixmap;
   char vendor[MAXSTR];
   char verbose;
   char x11lib[MAXSTR];

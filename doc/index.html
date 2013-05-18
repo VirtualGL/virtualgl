@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2013-03-02T00:41:15">
+<meta name="date" content="2013-05-18T01:06:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -707,7 +707,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 <h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux</h2>
 
 <ol class="Ordered numeric">
-    <li value="1" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="1">
         Download the appropriate VirtualGL binary package for your system from 
         the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/VirtualGL/">Files 
@@ -732,7 +732,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         If you wish to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;virtualgl&rdquo; and &ldquo;virtualgl32&rdquo; amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
-    <li value="2" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue the following commands:
         <dl class="Description">
@@ -2429,13 +2429,13 @@ geometries or large pixel counts (such as when driving a display wall.)
 Chromium is most often used in one of three configurations:</p>
 
 <ol class="Ordered numeric">
-    <li value="1" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="1">
         Sort-First Rendering (Image-Space Decomposition)
     </li>
-    <li value="2" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="2">
         Sort-First Rendering (Image-Space Decomposition) with Readback
     </li>
-    <li value="3" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="3">
         Sort-Last Rendering (Object-Space Decomposition)
     </li>
 </ol>
@@ -4398,6 +4398,42 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <div class="important"><p class="important">
         When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0056"></a> option
         </p></div>
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_PIXMAP&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable the use of Pixmaps for 3D rendering</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally, VirtualGL will redirect the 3D rendering from each OpenGL 
+        window on the 2D X server into a corresponding Pbuffer on the 3D X 
+        server, and it will likewise redirect the 3D rendering from each OpenGL 
+        pixmap on the 2D X server into a corresponding Pixmap on the 3D X 
+        server. Enabling this option causes VirtualGL to use pixmaps on the 3D X 
+        server to represent all OpenGL drawables on the 2D X server.  This 
+        option should be considered experimental and is only recommended for 
+        systems on which Pbuffer support is incomplete or unstable.
     </dd>
 </dl>
 

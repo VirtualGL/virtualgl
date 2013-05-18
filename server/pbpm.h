@@ -1,4 +1,4 @@
-/* Copyright (C)2011 D. R. Commander
+/* Copyright (C)2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,12 +14,15 @@
 #include "pbdrawable.h"
 #include "rrframe.h"
 
+
 class pbpm : public pbdrawable
 {
 	public:
 
-		pbpm(Display *, Pixmap, Visual *v);
+		pbpm(Display *, XVisualInfo *, Pixmap);
+		pbpm(Display *, XVisualInfo *, Pixmap, const int *);
 		~pbpm();
+		int init(int, int, GLXFBConfig, const int *);
 		void readback(void);
 
 	private:

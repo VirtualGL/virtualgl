@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -262,10 +262,11 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	{
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	}
-	if(!fconfig.usewindow)
-	{
-		glxattribs[j++]=GLX_DRAWABLE_TYPE;  glxattribs[j++]=GLX_PBUFFER_BIT;
-	}
+	glxattribs[j++]=GLX_DRAWABLE_TYPE;
+	if(fconfig.usepixmap)
+		glxattribs[j++]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
+	else
+		glxattribs[j++]=GLX_PBUFFER_BIT;
 	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=GLX_TRUE_COLOR;
 	glxattribs[j]=None;
 	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs,

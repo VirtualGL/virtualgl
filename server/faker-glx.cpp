@@ -631,12 +631,12 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 	if(!(c=_MatchConfig(dpy, vi, true)))
 		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
-	pbpm *pbp=new pbpm(dpy, pm, vi->visual);
+	pbpm *pbp=new pbpm(dpy, vi, pm);
 	if(pbp)
 	{
 		// Hash the pbpm instance to the Pixmap and also hash the 2D X display
 		// handle to the GLXPixmap (which is really a Pbuffer.)
-		pbp->init(w, h, c);
+		pbp->init(w, h, c, NULL);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
 		drawable=pbp->getglxdrawable();
@@ -675,11 +675,11 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	if(vid)
 	{
 		XVisualInfo *v=__vglVisualFromVisualID(dpy, DefaultScreen(dpy), vid);
-		if(v) pbp=new pbpm(dpy, pm, v->visual);
+		if(v) pbp=new pbpm(dpy, v, pm);
 	}
 	if(pbp)
 	{
-		pbp->init(w, h, config);
+		pbp->init(w, h, config, attribs);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
 		drawable=pbp->getglxdrawable();

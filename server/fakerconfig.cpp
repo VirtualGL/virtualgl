@@ -371,6 +371,7 @@ void fconfig_reloadenv(void)
 	fetchenv_str("VGL_LOG", log);
 	fetchenv_bool("VGL_LOGO", logo);
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
+	fetchenv_bool("VGL_PIXMAP", usepixmap);
 	fetchenv_int("VGL_PORT", port, 0, 65535);
 	fetchenv_bool("VGL_PROBEGLX", probeglx);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
@@ -419,7 +420,6 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_TRACE", trace);
 	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
 	fetchenv_bool("VGL_TRAPX11", trapx11);
-	fetchenv_bool("VGL_WINDOW", usewindow);
 	fetchenv_str("VGL_XVENDOR", vendor);
 	fetchenv_bool("VGL_VERBOSE", verbose);
 	fetchenv_str("VGL_X11LIB", x11lib);
@@ -581,7 +581,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transvalid[RRTRANS_VGL]);
 	prconfint(transvalid[RRTRANS_XV]);
 	prconfint(trapx11);
-	prconfint(usewindow);
+	prconfint(usepixmap);
 	prconfstr(vendor);
 	prconfint(verbose);
 	prconfstr(x11lib);

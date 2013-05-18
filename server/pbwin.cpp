@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -211,7 +211,7 @@ GLXDrawable pbwin::updatedrawable(void)
 	}
 	if(_neww>0 && _newh>0)
 	{
-		pbuffer *oldpb=_pb;
+		glxdrawable *oldpb=_pb;
 		if(init(_neww, _newh, _config)) _oldpb=oldpb;
 		_neww=_newh=-1;
 	}

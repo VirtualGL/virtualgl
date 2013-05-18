@@ -1,4 +1,4 @@
-/* Copyright (C)2011 D. R. Commander
+/* Copyright (C)2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,15 +12,19 @@
  */
 
 #include "pbpm.h"
+#include "glxvisual.h"
 #include "fakerconfig.h"
 #include "rrutil.h"
 
 
-pbpm::pbpm(Display *dpy, Pixmap pm, Visual *v) : pbdrawable(dpy, pm)
+extern Display *_localdpy;
+
+
+pbpm::pbpm(Display *dpy, XVisualInfo *vis, Pixmap pm) : pbdrawable(dpy, pm)
 {
 	rrcs::safelock l(_mutex);
 	_prof_pmblit.setname("PMap Blit ");
-	errifnot(_fb=new rrfb(dpy, pm, v));
+	errifnot(_fb=new rrfb(dpy, pm, vis->visual));
 }
 
 
@@ -28,6 +32,23 @@ pbpm::~pbpm()
 {
 	rrcs::safelock l(_mutex);
 	if(_fb) {delete _fb;  _fb=NULL;}
+}
+
+
+int pbpm::init(int w, int h, GLXFBConfig config, const int *attribs)
+{
+	if(!config || w<1 || h<1) _throw("Invalid argument");
+
+	rrcs::safelock l(_mutex);
+	if(_pb && _pb->width()==w && _pb->height()==h
+		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
+	_pb=new glxdrawable(w, h, config, attribs);
+	if(_config && _FBCID(config)!=_FBCID(_config) && _ctx)
+	{
+		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;
+	}
+	_config=config;
+	return 1;
 }
 
 

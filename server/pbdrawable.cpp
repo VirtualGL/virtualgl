@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,41 +44,73 @@ static int glerror(void)
 }
 
 
-Window create_window(Display *dpy, GLXFBConfig config, int w, int h)
+Window create_window(Display *dpy, XVisualInfo *vis, int w, int h)
 {
-	XVisualInfo *vis;
 	Window win;
 	XSetWindowAttributes wattrs;
 	Colormap cmap;
 
-	if((vis=_glXGetVisualFromFBConfig(dpy, config))==NULL) return 0;
 	cmap=XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual,
 		AllocNone);
 	wattrs.background_pixel = 0;
 	wattrs.border_pixel = 0;
 	wattrs.colormap = cmap;
-	wattrs.event_mask = ExposureMask | StructureNotifyMask;
-	win = XCreateWindow(dpy, RootWindow(dpy, vis->screen), 0, 0, w, h, 1,
+	wattrs.event_mask = 0;
+	win = _XCreateWindow(dpy, RootWindow(dpy, vis->screen), 0, 0, w, h, 1,
 		vis->depth, InputOutput, vis->visual,
 		CWBackPixel | CWBorderPixel | CWEventMask | CWColormap, &wattrs);
-	XMapWindow(dpy, win);
 	return win;
 }
 
 
-pbuffer::pbuffer(int w, int h, GLXFBConfig config)
+// Pbuffer constructor
+
+glxdrawable::glxdrawable(int w, int h, GLXFBConfig config)
+	: _cleared(false), _stereo(false), _drawable(0), _w(w), _h(h),
+	_config(config), _format(0), _pm(0), _win(0), _ispixmap(false)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
-
-	_cleared=false;  _stereo=false;  _format=0;
 
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0,
 		GLX_PRESERVED_CONTENTS, True, None};
 
-	_w=w;  _h=h;  _config=config;
 	pbattribs[1]=w;  pbattribs[3]=h;
-	if(fconfig.usewindow) _drawable=create_window(_localdpy, config, w, h);
-	else _drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
+	_drawable=glXCreatePbuffer(_localdpy, config, pbattribs);
+	if(!_drawable) _throw("Could not create Pbuffer");
+
+	setvisattribs(config);
+}
+
+
+// Pixmap constructor
+
+glxdrawable::glxdrawable(int w, int h, GLXFBConfig config, const int *attribs)
+	: _cleared(false), _stereo(false), _drawable(0), _w(w), _h(h),
+	_config(config), _format(0), _pm(0), _win(0), _ispixmap(true)
+{
+	if(!config || w<1 || h<1) _throw("Invalid argument");
+
+	XVisualInfo *vis=NULL;
+	if((vis=_glXGetVisualFromFBConfig(_localdpy, config))==NULL)
+		goto bailout;
+	_win=create_window(_localdpy, vis, 1, 1);
+	if(!_win) goto bailout;
+	_pm=XCreatePixmap(_localdpy, _win, w, h, vis->depth);
+	if(!_pm) goto bailout;
+	_drawable=_glXCreatePixmap(_localdpy, config, _pm, attribs);
+	if(!_drawable) goto bailout;
+
+	setvisattribs(config);
+	return;
+
+	bailout:
+	if(vis) XFree(vis);
+	_throw("Could not create GLX pixmap");
+}
+
+
+void glxdrawable::setvisattribs(GLXFBConfig config)
+{
 	if(__vglServerVisualAttrib(config, GLX_STEREO)) _stereo=true;
 	int pixelsize=__vglServerVisualAttrib(config, GLX_RED_SIZE)
 		+__vglServerVisualAttrib(config, GLX_GREEN_SIZE)
@@ -100,21 +132,30 @@ pbuffer::pbuffer(int w, int h, GLXFBConfig config)
 		#endif
 		_format=GL_RGB;
 	}
-	if(!_drawable) _throw("Could not create Pbuffer");
 }
 
 
-pbuffer::~pbuffer(void)
+glxdrawable::~glxdrawable(void)
 {
-	if(_drawable)
+	if(_ispixmap)
 	{
-		if(fconfig.usewindow) XDestroyWindow(_localdpy, _drawable);
-		else glXDestroyPbuffer(_localdpy, _drawable);
+		if(_drawable)
+		{
+			_glXDestroyPixmap(_localdpy, _drawable);
+			_drawable=0;
+		}
+		if(_pm) {XFreePixmap(_localdpy, _pm);  _pm=0;}
+		if(_win) {_XDestroyWindow(_localdpy, _win);  _win=0;}
+	}
+	else
+	{
+		glXDestroyPbuffer(_localdpy, _drawable);
+		_drawable=0;
 	}
 }
 
 
-void pbuffer::clear(void)
+void glxdrawable::clear(void)
 {
 	if(_cleared) return;
 	_cleared=true;
@@ -126,7 +167,7 @@ void pbuffer::clear(void)
 }
 
 
-void pbuffer::swap(void)
+void glxdrawable::swap(void)
 {
 	_glXSwapBuffers(_localdpy, _drawable);
 }
@@ -159,13 +200,30 @@ pbdrawable::~pbdrawable(void)
 
 int pbdrawable::init(int w, int h, GLXFBConfig config)
 {
+	static bool alreadyprinted=false;
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	rrcs::safelock l(_mutex);
 	if(_pb && _pb->width()==w && _pb->height()==h
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
-	if((_pb=new pbuffer(w, h, config))==NULL)
-		_throw("Could not create Pbuffer");
+	if(fconfig.usepixmap)
+	{
+		if(!alreadyprinted && fconfig.verbose)
+		{
+			rrout.println("[VGL] Using Pixmaps for rendering");
+			alreadyprinted=true;
+		}
+		_pb=new glxdrawable(w, h, config, NULL);
+	}
+	else
+	{
+		if(!alreadyprinted && fconfig.verbose)
+		{
+			rrout.println("[VGL] Using Pbuffers for rendering");
+			alreadyprinted=true;
+		}
+		_pb=new glxdrawable(w, h, config);
+	}
 	if(_config && _FBCID(config)!=_FBCID(_config) && _ctx)
 	{
 		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;

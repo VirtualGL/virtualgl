@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,13 +24,14 @@
 
 // A container class for the actual Pbuffer
 
-class pbuffer
+class glxdrawable
 {
 	public:
 
-		pbuffer(int, int, GLXFBConfig);
+		glxdrawable(int, int, GLXFBConfig);
+		glxdrawable(int, int, GLXFBConfig, const int *);
 		GLXDrawable drawable(void) {return _drawable;}
-		~pbuffer(void);
+		~glxdrawable(void);
 		int width(void) {return _w;}
 		int height(void) {return _h;}
 		GLXFBConfig config(void) {return _config;}
@@ -41,11 +42,15 @@ class pbuffer
 
 	private:
 
+		void setvisattribs(GLXFBConfig);
 		bool _cleared, _stereo;
-		GLXPbuffer _drawable;
+		GLXDrawable _drawable;
 		int _w, _h;
 		GLXFBConfig _config;
 		int _format;
+		Pixmap _pm;
+		Window _win;
+		bool _ispixmap;
 };
 
 
@@ -70,7 +75,7 @@ class pbdrawable
 
 		rrcs _mutex;
 		Display *_dpy;  Drawable _drawable;
-		pbuffer *_pb;  GLXFBConfig _config;
+		glxdrawable *_pb;  GLXFBConfig _config;
 		GLXContext _ctx;
 		Bool _direct;
 		x11trans *_x11trans;
