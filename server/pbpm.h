@@ -22,11 +22,14 @@ class pbpm : public pbdrawable
 		pbpm(Display *, XVisualInfo *, Pixmap);
 		pbpm(Display *, XVisualInfo *, Pixmap, const int *);
 		~pbpm();
-		int init(int, int, GLXFBConfig, const int *);
+		int init(int, int, int, GLXFBConfig, const int *);
 		void readback(void);
+		Pixmap get3dx11drawable(void);
+		XVisualInfo *visual(void) {return _pb ? _pb->visual() : NULL;}
 
 	private:
 
 		rrprofiler _prof_pmblit;
 		rrfb *_fb;
+		XVisualInfo *vis;
 };

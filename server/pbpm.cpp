@@ -35,20 +35,30 @@ pbpm::~pbpm()
 }
 
 
-int pbpm::init(int w, int h, GLXFBConfig config, const int *attribs)
+int pbpm::init(int w, int h, int depth, GLXFBConfig config, const int *attribs)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
 	rrcs::safelock l(_mutex);
-	if(_pb && _pb->width()==w && _pb->height()==h
+	if(_pb && _pb->width()==w && _pb->height()==h && _pb->depth()==depth
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
-	_pb=new glxdrawable(w, h, config, attribs);
+	_pb=new glxdrawable(w, h, depth, config, attribs);
 	if(_config && _FBCID(config)!=_FBCID(_config) && _ctx)
 	{
 		_glXDestroyContext(_localdpy, _ctx);  _ctx=0;
 	}
 	_config=config;
 	return 1;
+}
+
+
+// Returns the X11 Pixmap on the 3D X server corresponding to the GLX Pixmap
+Pixmap pbpm::get3dx11drawable(void)
+{
+	GLXDrawable retval=0;
+	rrcs::safelock l(_mutex);
+	retval=_pb->pixmap();
+	return retval;
 }
 
 

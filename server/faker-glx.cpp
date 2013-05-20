@@ -641,7 +641,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	{
 		// Hash the pbpm instance to the 2D pixmap and also hash the 2D X display
 		// handle to the 3D pixmap.
-		pbp->init(w, h, c, NULL);
+		pbp->init(w, h, d, c, NULL);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
 		drawable=pbp->getglxdrawable();
@@ -684,7 +684,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	}
 	if(pbp)
 	{
-		pbp->init(w, h, config, attribs);
+		pbp->init(w, h, d, config, attribs);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
 		drawable=pbp->getglxdrawable();
@@ -867,7 +867,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 static const char *glxextensions=
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile";
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile GLX_EXT_texture_from_pixmap";
 
 const char *glXGetClientString(Display *dpy, int name)
 {
@@ -1171,6 +1171,63 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 }
 
 
+// GLX_EXT_texture_from_pixmap support.  drawable is a GLX pixmap that was
+// previously created on the 3D X server, so passing it to glXBindTexImageEXT()
+// or glXReleaseTexImageEXT() should "just work."  However, we first have to
+// copy the pixels from the corresponding 2D pixmap, which is on the 2D X
+// server.  Thus, this extension will probably not perform well except with an
+// X proxy.
+
+void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
+	const int *attrib_list)
+{
+		opentrace(glXBindTexImageEXT);  prargd(dpy);  prargx(drawable);
+		prargi(buffer);  prargal13(attrib_list);  starttrace();
+
+	TRY();
+
+	pbpm *pbp=NULL;
+	if((pbp=pmh.find(dpy, drawable))==NULL)
+		// If we get here, then the drawable wasn't created with
+		// glXCreate[GLX]Pixmap().  Thus, we set it to 0 so _glXBindTexImageEXT()
+		// will throw a GLXBadPixmap error for us.
+		drawable=0;
+	else
+	{
+		// Transfer pixels from the 2D Pixmap (stored on the 2D X server) to the
+		// 3D Pixmap (stored on the 3D X server.)
+		XImage *image=_XGetImage(dpy, pbp->getx11drawable(), 0, 0, pbp->width(),
+			pbp->height(), AllPlanes, ZPixmap);
+		GC gc=XCreateGC(_localdpy, pbp->get3dx11drawable(), 0, NULL);
+		if(gc && image)
+			XPutImage(_localdpy, pbp->get3dx11drawable(), gc, image, 0, 0, 0, 0,
+				pbp->width(), pbp->height());
+		else
+			// Also trigger GLXBadPixmap error
+			drawable=0;
+		if(gc) XFreeGC(_localdpy, gc);
+		if(image) XDestroyImage(image);
+	}
+
+	_glXBindTexImageEXT(_localdpy, drawable, buffer, attrib_list);
+
+	CATCH();
+
+		stoptrace();  closetrace();
+}
+
+
+void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
+{
+		opentrace(glXReleaseTexImageEXT);  prargd(dpy);  prargx(drawable);
+		prargi(buffer);  starttrace();
+
+	_glXReleaseTexImageEXT(_localdpy, drawable, buffer);
+
+		stoptrace();  closetrace();
+}
+
+
 // If an application uses glXGetProcAddressARB() to obtain the address of a
 // function that we're interposing, we need to return the address of the
 // interposed function.
@@ -1260,6 +1317,9 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXGetTransparentIndexSUN)
 
 		checkfaked(glXCreateContextAttribsARB)
+
+		checkfaked(glXBindTexImageEXT)
+		checkfaked(glXReleaseTexImageEXT)
 
 		checkfaked(glFinish)
 		checkfaked(glFlush)

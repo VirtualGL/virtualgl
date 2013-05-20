@@ -29,23 +29,30 @@ class glxdrawable
 	public:
 
 		glxdrawable(int, int, GLXFBConfig);
-		glxdrawable(int, int, GLXFBConfig, const int *);
-		GLXDrawable drawable(void) {return _drawable;}
+		glxdrawable(int, int, int, GLXFBConfig, const int *);
 		~glxdrawable(void);
+		GLXDrawable drawable(void) {return _drawable;}
+		Pixmap pixmap(void)
+		{
+			if(!_ispixmap) _throw("Not a pixmap");
+			return _pm;
+		}
 		int width(void) {return _w;}
 		int height(void) {return _h;}
+		int depth(void) {return _depth;}
 		GLXFBConfig config(void) {return _config;}
 		void clear(void);
 		void swap(void);
 		bool stereo(void) {return _stereo;}
 		int format(void) {return _format;}
+		XVisualInfo *visual(void);
 
 	private:
 
 		void setvisattribs(GLXFBConfig);
 		bool _cleared, _stereo;
 		GLXDrawable _drawable;
-		int _w, _h;
+		int _w, _h, _depth;
 		GLXFBConfig _config;
 		int _format;
 		Pixmap _pm;
@@ -67,6 +74,8 @@ class pbdrawable
 		Drawable getx11drawable(void);
 		GLXDrawable getglxdrawable(void);
 		void copypixels(GLint, GLint, GLint, GLint, GLint, GLint, GLXDrawable);
+		int width(void) {return _pb ? _pb->width() : -1;}
+		int height(void) {return _pb ? _pb->height() : -1;}
 
 	protected:
 

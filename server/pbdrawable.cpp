@@ -66,7 +66,7 @@ Window create_window(Display *dpy, XVisualInfo *vis, int w, int h)
 // Pbuffer constructor
 
 glxdrawable::glxdrawable(int w, int h, GLXFBConfig config)
-	: _cleared(false), _stereo(false), _drawable(0), _w(w), _h(h),
+	: _cleared(false), _stereo(false), _drawable(0), _w(w), _h(h), _depth(0),
 	_config(config), _format(0), _pm(0), _win(0), _ispixmap(false)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
@@ -84,18 +84,19 @@ glxdrawable::glxdrawable(int w, int h, GLXFBConfig config)
 
 // Pixmap constructor
 
-glxdrawable::glxdrawable(int w, int h, GLXFBConfig config, const int *attribs)
-	: _cleared(false), _stereo(false), _drawable(0), _w(w), _h(h),
-	_config(config), _format(0), _pm(0), _win(0), _ispixmap(true)
+glxdrawable::glxdrawable(int w, int h, int depth, GLXFBConfig config,
+	const int *attribs) : _cleared(false), _stereo(false), _drawable(0), _w(w),
+	_h(h), _depth(depth), _config(config), _format(0), _pm(0), _win(0),
+	_ispixmap(true)
 {
-	if(!config || w<1 || h<1) _throw("Invalid argument");
+	if(!config || w<1 || h<1 || depth<0) _throw("Invalid argument");
 
 	XVisualInfo *vis=NULL;
 	if((vis=_glXGetVisualFromFBConfig(_localdpy, config))==NULL)
 		goto bailout;
 	_win=create_window(_localdpy, vis, 1, 1);
 	if(!_win) goto bailout;
-	_pm=XCreatePixmap(_localdpy, _win, w, h, vis->depth);
+	_pm=XCreatePixmap(_localdpy, _win, w, h, depth>0? depth:vis->depth);
 	if(!_pm) goto bailout;
 	_drawable=_glXCreatePixmap(_localdpy, config, _pm, attribs);
 	if(!_drawable) goto bailout;
@@ -152,6 +153,12 @@ glxdrawable::~glxdrawable(void)
 		glXDestroyPbuffer(_localdpy, _drawable);
 		_drawable=0;
 	}
+}
+
+
+XVisualInfo *glxdrawable::visual(void)
+{
+	return _glXGetVisualFromFBConfig(_localdpy, _config);
 }
 
 
@@ -213,7 +220,7 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 			rrout.println("[VGL] Using Pixmaps for rendering");
 			alreadyprinted=true;
 		}
-		_pb=new glxdrawable(w, h, config, NULL);
+		_pb=new glxdrawable(w, h, 0, config, NULL);
 	}
 	else
 	{

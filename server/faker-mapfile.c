@@ -72,6 +72,9 @@
 
 		glXCreateContextAttribsARB;
 
+		glXBindTexImageEXT;
+		glXReleaseTexImageEXT;
+
 		glFinish;
 		glFlush;
 		glViewport;
