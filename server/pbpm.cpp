@@ -110,7 +110,7 @@ void pbpm::readback(void)
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-			rrout.println("[VGL]    Pbuffer.  Disabling PBO's.");
+			rrout.println("[VGL]    3D pixmap.  Disabling PBO's.");
 		}
 	}
 	readpixels(0, 0, min(pbw, _fb->_h.framew), _fb->_pitch,

@@ -760,7 +760,7 @@ int flushtest(void)
 
 
 // This tests the faker's ability to do indexed rendering in the red channel of
-// an RGBA Pbuffer
+// an RGBA off-screen drawable
 
 #define drawquad() {  \
 	glBegin(GL_QUADS);  glVertex3f(-1., -1., 0.);  glVertex3f(-1., 1., 0.);  \
@@ -1685,7 +1685,7 @@ void checkdrawable(Display *dpy, GLXDrawable draw, int width, int height,
 		_prerror2(tag" is 0x%.6x, should be 0x%.6x", bufcol, (shouldbe)); \
 }
 
-// Test Pbuffer and Pixmap rendering
+// Test off-screen rendering
 int pbtest(void)
 {
 	Display *dpy=NULL;  Window win=0;  Pixmap pm0=0, pm1=0, pm2=0;
@@ -1778,7 +1778,7 @@ int pbtest(void)
 		int dbpb=dbtest(false);
 		if(!dbpb)
 		{
-			printf("WARNING: Double buffered Pbuffers not available.\n");
+			printf("WARNING: Double buffered off-screen rendering not available.\n");
 			printf("         Testing in single buffered mode\n\n");
 		}
 		checkframe(win, -1, lastframe);
@@ -2062,7 +2062,7 @@ int pbtest(void)
 
 
 // Test whether glXMakeCurrent() can handle mismatches between the FB config
-// of the context and the Pbuffer
+// of the context and the off-screen drawable
 
 int ctxmismatchtest(void)
 {

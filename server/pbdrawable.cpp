@@ -174,7 +174,7 @@ void glxdrawable::swap(void)
 
 
 // This class encapsulates the relationship between an X11 drawable and the
-// Pbuffer that backs it.
+// 3D off-screen drawable that backs it.
 
 pbdrawable::pbdrawable(Display *dpy, Drawable drawable)
 {
@@ -251,7 +251,7 @@ void pbdrawable::clear(void)
 }
 
 
-// Get the current Pbuffer drawable
+// Get the current 3D off-screen drawable
 
 GLXDrawable pbdrawable::getglxdrawable(void)
 {

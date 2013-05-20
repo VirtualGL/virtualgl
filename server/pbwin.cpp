@@ -41,8 +41,8 @@ static inline int _drawingtoright(void)
 }
 
 
-// This class encapsulates the Pbuffer, its most recent ancestor, and
-// information specific to its corresponding X window
+// This class encapsulates the 3D off-screen drawable, its most recent
+// ancestor, and information specific to its corresponding X window
 
 pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 {
@@ -169,7 +169,7 @@ void pbwin::initfromwindow(GLXFBConfig config)
 }
 
 
-// Get the current Pbuffer drawable
+// Get the current 3D off-screen drawable
 
 GLXDrawable pbwin::getglxdrawable(void)
 {
@@ -195,8 +195,8 @@ void pbwin::checkresize(void)
 }
 
 
-// Get the current Pbuffer drawable, but resize the Pbuffer (or change its
-// FB config) first if necessary
+// Get the current 3D off-screen drawable, but resize the drawable (or change
+// its FB config) first if necessary
 
 GLXDrawable pbwin::updatedrawable(void)
 {
@@ -364,7 +364,8 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: The pixel format of the buffer returned by the transport plugin");
-			rrout.println("[VGL]    does not match the pixel format of the Pbuffer.  Disabling PBO readback.");
+			rrout.println("[VGL]    does not match the pixel format of the off-screen drawable.  Disabling");
+			rrout.println("[VGL]    PBO readback.");
 		}
 	}
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
@@ -455,7 +456,7 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 		{
 			alreadywarned=true;
 			rrout.println("[VGL] NOTICE: RGB encoding requires RGB pixel readback, which does not match");
-			rrout.println("[VGL]    the pixel format of the Pbuffer.  Disabling PBO readback.");
+			rrout.println("[VGL]    the pixel format of the off-screen drawawble.  Disabling PBO readback.");
 		}
 	}
 
@@ -568,7 +569,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 				{
 					alreadywarned=true;
 					rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-					rrout.println("[VGL]    Pbuffer.  Disabling PBO readback.");
+					rrout.println("[VGL]    the off-screen drawable.  Disabling PBO readback.");
 				}
 			}
 			readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,

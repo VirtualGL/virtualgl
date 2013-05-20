@@ -37,7 +37,7 @@
 }
 
 static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis,
-	bool prefersinglebuffer=false)
+	bool prefersinglebuffer=false, bool pixmap=false)
 {
 	GLXFBConfig c=0, *configs=NULL;  int n=0;
 	if(!dpy || !vis) return 0;
@@ -50,6 +50,8 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis,
 			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, None};
 		int attribs[256];
 
+		if(pixmap || fconfig.usepixmap)
+			default_attribs[13]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, default_attribs, sizeof(default_attribs));
 		if(__vglClientVisualAttrib(dpy, DefaultScreen(dpy), vis->visualid,
@@ -148,7 +150,7 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 
 
 // If GLXDrawable is a window ID, then return the ID for its corresponding
-// Pbuffer (if applicable.)
+// off-screen drawable (if applicable.)
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
@@ -160,8 +162,8 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 
 extern "C" {
 
-// Return a set of Pbuffer-compatible FB configs from the 3D X server that
-// contain the desired GLX attributes.
+// Return a set of FB configs from the 3D X server that support off-screen
+// rendering and contain the desired GLX attributes.
 
 GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	const int *attrib_list, int *nelements)
@@ -214,7 +216,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy),
 			attrib_list, nelements);
 
-	// Modify the attributes so that only FB configs appropriate for Pbuffer
+	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
 	else configs=__vglConfigsFromVisAttribs(attrib_list, depth, c_class, level,
 		stereo, trans, *nelements, true);
@@ -246,9 +248,9 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
 }
 
 
-// Obtain a Pbuffer-compatible 3D X server FB config that has the desired set
-// of attributes, match it to an appropriate 2D X server visual, hash the two,
-// and return the visual.
+// Obtain a 3D X server FB config that supports off-screen rendering and has
+// the desired set of attributes, match it to an appropriate 2D X server
+// visual, hash the two, and return the visual.
 
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
@@ -290,8 +292,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		}
 	}
 
-	// Use the specified set of GLX attributes to obtain a Pbuffer-compatible FB
-	// config on the 3D X server
+	// Use the specified set of GLX attributes to obtain an FB config on the 3D X
+	// server suitable for off-screen rendering
 	GLXFBConfig *configs=NULL, cprev;  int n=0;
 	if(!dpy || !attrib_list) goto done;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
@@ -301,11 +303,12 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		if(!alreadywarned && fconfig.verbose)
 		{
 			alreadywarned=true;
-			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a Pbuffer-enabled");
-			rrout.println("[VGL]    24-bit visual on the 3D X server %s.  This is normal if", fconfig.localdpystring);
-			rrout.println("[VGL]    the 3D application is probing for visuals with certain capabilities,");
-			rrout.println("[VGL]    but if the app fails to start, then make sure that the 3D X server is");
-			rrout.println("[VGL]    configured for 24-bit color and has accelerated 3D drivers installed.");
+			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a true color visual on");
+			rrout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.", fconfig.localdpystring);
+			rrout.println("[VGL]    This is normal if the 3D application is probing for visuals with");
+			rrout.println("[VGL]    certain capabilities, but if the app fails to start, then make sure");
+			rrout.println("[VGL]    that the 3D X server is configured for true color and has accelerated");
+			rrout.println("[VGL]    3D drivers installed.");
 		}
 		goto done;
 	}
@@ -356,7 +359,7 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst, unsigned long 
 }
 
 
-// Create a Pbuffer-compatible GLX context on the 3D X server.
+// Create a GLX context on the 3D X server suitable for off-screen rendering.
 
 GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	GLXContext share_list, Bool direct)
@@ -396,7 +399,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from _MatchConfig().
 	if(!(c=_MatchConfig(dpy, vis)))
-		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
+		_throw("Could not obtain RGB visual on the server suitable for off-screen rendering.");
 	ctx=_glXCreateNewContext(_localdpy, c, GLX_RGBA_TYPE, share_list, direct);
 	if(ctx)
 	{
@@ -456,7 +459,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	if(attribs)
 	{
 		// Color index rendering is handled behind the scenes using the red
-		// channel of an RGB Pbuffer, so VirtualGL always uses RGBA contexts.
+		// channel of an RGB off-screen drawable, so VirtualGL always uses RGBA
+		// contexts.
 		for(int i=0; attribs[i]!=None && i<=254; i+=2)
 		{
 			if(attribs[i]==GLX_RENDER_TYPE) ((int *)attribs)[i+1]=GLX_RGBA_TYPE;
@@ -592,8 +596,9 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 }
 
 
-// Pixmap rendering in VirtualGL is implemented using Pbuffers, so we create
-// one, hash it to the Pixmap, and return the Pbuffer handle.
+// Pixmap rendering in VirtualGL is implemented by redirecting rendering into
+// a "3D pixmap" stored on the 3D X server.  Thus, we create a 3D pixmap, hash
+// it to the "2D pixmap", and return the 3D pixmap handle.
 
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 {
@@ -629,13 +634,13 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 
 	Window root;  unsigned int bw;
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
-	if(!(c=_MatchConfig(dpy, vi, true)))
-		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
+	if(!(c=_MatchConfig(dpy, vi, true, true)))
+		_throw("Could not obtain pixmap-capable RGB visual on the server");
 	pbpm *pbp=new pbpm(dpy, vi, pm);
 	if(pbp)
 	{
-		// Hash the pbpm instance to the Pixmap and also hash the 2D X display
-		// handle to the GLXPixmap (which is really a Pbuffer.)
+		// Hash the pbpm instance to the 2D pixmap and also hash the 2D X display
+		// handle to the 3D pixmap.
 		pbp->init(w, h, c, NULL);
 		pmh.add(dpy, pm, pbp);
 		glxdh.add(pbp->getglxdrawable(), dpy);
@@ -700,7 +705,7 @@ GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy,
 
 
 // Fake out the application into thinking it's getting a window drawable, but
-// really it's getting a Pbuffer drawable.
+// really it's getting an off-screen drawable.
 
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 	const int *attrib_list)
@@ -731,7 +736,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 
 	CATCH();
 	return win;  // Make the client store the original window handle, which we
-               // use to find the Pbuffer in the hash
+               // use to find the off-screen drawable in the hash
 }
 
 
@@ -782,8 +787,8 @@ void glXDestroyGLXPbufferSGIX(Display *dpy, GLXPbuffer pbuf)
 
 
 // Some applications will destroy the GLX pixmap handle but then try to use X11
-// functions on the X11 pixmap handle, so we sync the contents of the Pbuffer
-// with the real Pixmap before we delete the Pbuffer.
+// functions on the X11 pixmap handle, so we sync the contents of the 3D pixmap
+// with the 2D pixmap before we delete the 3D pixmap.
 
 void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 {
@@ -827,8 +832,8 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 }
 
 
-// 'win' is really a Pbuffer ID, so the window hash matches it to the
-// corresponding pbwin instance and shuts down that instance.
+// 'win' is really an off-screen drawable ID, so the window hash matches it to
+// the corresponding pbwin instance and shuts down that instance.
 
 void glXDestroyWindow(Display *dpy, GLXWindow win)
 {
@@ -916,15 +921,15 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from _MatchConfig().
 	if(!(c=_MatchConfig(dpy, vis)))
-		_throw("Could not obtain Pbuffer-capable RGB visual on the server");
+		_throw("Could not obtain RGB visual on the server suitable for off-screen rendering");
 
 	if(attrib==GLX_USE_GL)
 	{
 		if(vis->c_class==TrueColor || vis->c_class==PseudoColor) *value=1;
 		else *value=0;
 	}
-	// Color index rendering really uses an RGB Pbuffer, so we have to fake out
-	// the application if it is asking about RGBA properties.
+	// Color index rendering really uses an RGB off-screen drawable, so we have
+	// to fake out the application if it is asking about RGBA properties.
 	else if(vis->c_class==PseudoColor
 		&& (attrib==GLX_RED_SIZE || attrib==GLX_GREEN_SIZE
 			|| attrib==GLX_BLUE_SIZE || attrib==GLX_ALPHA_SIZE
@@ -1001,8 +1006,8 @@ Display *glXGetCurrentDisplay(void)
 
 
 // As far as the application is concerned, it is rendering to a window and not
-// a Pbuffer, so we must maintain that illusion and pass it back the window ID
-// instead of the GLX drawable (Pbuffer) ID.
+// an off-screen drawable, so we must maintain that illusion and pass it back
+// the window ID instead of the GLX drawable ID.
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
@@ -1076,8 +1081,8 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	if(!(vid=_MatchVisual(dpy, config)))
 		throw rrerror("glXGetFBConfigAttrib", "Invalid FB config");
 
-	// Color index rendering really uses an RGB Pbuffer, so we have to fake out
-	// the application if it is asking about RGBA properties.
+	// Color index rendering really uses an RGB off-screen drawable, so we have
+	// to fake out the application if it is asking about RGBA properties.
 	int c_class=__vglVisualClass(dpy, screen, vid);
 	if(c_class==PseudoColor
 		&& (attribute==GLX_RED_SIZE
@@ -1300,7 +1305,7 @@ void (*glXGetProcAddress(const GLubyte *procName))(void)
 
 // Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
 // rendering) without modification, except that, if 'draw' is not an overlay
-// window, we replace it with its corresponding Pbuffer ID.
+// window, we replace it with its corresponding off-screen drawable ID.
 
 void glXGetSelectedEvent(Display *dpy, GLXDrawable draw,
 	unsigned long *event_mask)
@@ -1438,7 +1443,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
-	// map it to a Pbuffer.
+	// map it to an off-screen drawable.
 	int direct=ctxh.isdirect(ctx);
 	if(dpy && drawable && ctx)
 	{
@@ -1475,7 +1480,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	retval=_glXMakeContextCurrent(_localdpy, drawable, drawable, ctx);
 	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
-	// The pixels in a new Pbuffer are undefined, so we have to clear it.
+	// The pixels in a new off-screen drawable are undefined, so we have to clear
+	// it.
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
 	pbpm *pbp;
 	if((pbp=pmh.find(dpy, drawable))!=NULL)
@@ -1536,7 +1542,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	}
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
-	// map it to a Pbuffer.
+	// map it to an off-screen drawable.
 	pbwin *drawpbw, *readpbw;
 	int direct=ctxh.isdirect(ctx);
 	if(dpy && (draw || read) && ctx)
@@ -1637,7 +1643,7 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 
 // Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
 // rendering) without modification, except that, if 'draw' is not an overlay
-// window, we replace it with its corresponding Pbuffer ID.
+// window, we replace it with its corresponding off-screen drawable ID.
 
 void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	unsigned int *value)
@@ -1795,7 +1801,7 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 
 
 // Hand off to the 3D X server without modification, except that 'drawable' is
-// replaced with its corresponding Pbuffer ID.
+// replaced with its corresponding off-screen drawable ID.
 
 Bool glXJoinSwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint group)
 {
@@ -1812,7 +1818,7 @@ Bool glXBindSwapBarrierNV(Display *dpy, GLuint group, GLuint barrier)
 
 
 // Hand off to the 3D X server without modification, except that 'drawable' is
-// replaced with its corresponding Pbuffer ID.
+// replaced with its corresponding off-screen drawable ID.
 
 Bool glXQuerySwapGroupNV(Display *dpy, GLXDrawable drawable, GLuint *group,
 	GLuint *barrier)
@@ -1851,7 +1857,8 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 // Recent releases of the nVidia drivers always try to send this function to
 // the 2D X server for some reason, and some apps don't bother to ask VirtualGL
 // whether it supports GLX_SGI_swap_control, so we have to interpose this
-// function out of existence (it isn't relevant with Pbuffers, anyhow.)
+// function out of existence (it isn't relevant with off-screen rendering,
+// anyhow.)
 
 int glXSwapIntervalSGI(int interval)
 {

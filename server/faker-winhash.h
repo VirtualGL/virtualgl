@@ -30,7 +30,7 @@
 #undef __hashclassstruct
 
 
-// This maps a window ID to a Pbuffer instance
+// This maps a window ID to an off-screen drawable instance
 
 class winhash : public _winhash
 {
@@ -170,7 +170,7 @@ class winhash : public _winhash
 					&& !strcasecmp(DisplayString(pbw->get2ddpy()), key1)
 					&& key2==pbw->getx11drawable())
 				||
-				// If key1 is NULL, match Pbuffer drawable ID instead of X Window ID
+				// If key1 is NULL, match off-screen drawable ID instead of X Window ID
 				(pbw && pbw!=(pbwin *)-1 && key1==NULL && key2==pbw->getglxdrawable())
 				||
 				// Direct match

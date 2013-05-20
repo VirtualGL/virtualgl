@@ -165,7 +165,7 @@ void glPopAttrib(void)
 
 // Sometimes XNextEvent() is called from a thread other than the
 // rendering thread, so we wait until glViewport() is called and
-// take that opportunity to resize the Pbuffer.
+// take that opportunity to resize the off-screen drawable.
 
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {

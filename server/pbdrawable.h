@@ -22,7 +22,7 @@
 #include "fbx.h"
 
 
-// A container class for the actual Pbuffer
+// A container class for the actual off-screen drawable
 
 class glxdrawable
 {

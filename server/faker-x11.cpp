@@ -74,34 +74,38 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		if(pbdst) dstwin=true;
 	}
 
-	// GLX (Pbuffer-backed) Pixmap --> non-GLX drawable
-	// Sync pixels from the Pbuffer backing the Pixmap to the actual Pixmap and
-	// let the "real" XCopyArea() do the rest.
+	// GLX (3D) Pixmap --> non-GLX (2D) drawable
+	// Sync pixels from the 3D pixmap (on the 3D X Server) to the corresponding
+	// 2D pixmap (on the 2D X Server) and let the "real" XCopyArea() do the rest.
 	if(pbsrc && !srcwin && !pbdst) ((pbpm *)pbsrc)->readback();
 
-	// non-GLX drawable --> non-GLX drawable
-	// Source and destination are not backed by a Pbuffer, so defer to the
-	// real XCopyArea() function.
+	// non-GLX (2D) drawable --> non-GLX (2D) drawable
+	// Source and destination are not backed by a drawable on the 3D X Server, so
+	// defer to the real XCopyArea() function.
 	//
-	// non-GLX drawable --> GLX (Pbuffer-backed) drawable
+	// non-GLX (2D) drawable --> GLX (3D) drawable
 	// We don't really handle this yet (and won't until we have to.)  Copy to the
-	// X11 destination drawable only, without updating the corresponding Pbuffer.
+	// 2D destination drawable only, without updating the corresponding 3D
+	// drawable.
 	//
-	// GLX (Pbuffer-backed) Window --> non-GLX drawable
+	// GLX (3D) Window --> non-GLX (2D) drawable
 	// We assume that glFinish() or another synchronization function has been
-	// called prior to XCopyArea(), so we defer to the real XCopyArea() function
-	// (but this may not work properly without VGL_SYNC=1.)
+	// called prior to XCopyArea(), in order to copy the pixels from the
+	// off-screen drawable on the 3D X Server to the corresponding window on the
+	// 2D X Server.  Thus, we defer to the real XCopyArea() function (but this
+	// may not work properly without VGL_SYNC=1.)
 	{}
 
-	// GLX (Pbuffer-backed) Window --> GLX (Pbuffer-backed) drawable
-	// GLX (Pbuffer-backed) Pixmap --> GLX (Pbuffer-backed) Pixmap
+	// GLX (3D) Window --> GLX (3D) drawable
+	// GLX (3D) Pixmap --> GLX (3D) Pixmap
 	// Sync both 2D and 3D pixels.
 	if(pbsrc && srcwin && pbdst) copy3d=true;
 	if(pbsrc && !srcwin && pbdst && !dstwin) copy3d=true;
 
-	// GLX (Pbuffer-backed) Pixmap --> GLX (Pbuffer-backed) Window
-	// Copy 3D pixels to the destination Pbuffer, then trigger a VirtualGL
-	// readback to deliver the pixels to the window.
+	// GLX (3D) Pixmap --> GLX (3D) Window
+	// Copy 3D pixels to the window's corresponding off-screen drawable, then
+	// trigger a VirtualGL readback to deliver the pixels from the off-screen
+	// drawable to the window.
 	if(pbsrc && !srcwin && pbdst && dstwin)
 	{
 		copy2d=false;  copy3d=true;  triggerrb=true;
@@ -271,10 +275,9 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 }
 
 
-// If the Pixmap has been used for 3D rendering, then we have to synchronize
-// the contents of the Pbuffer backing the Pixmap, which resides on the 3D X
-// server, with the actual Pixmap on the 2D X server before calling the
-// "real" XGetImage() function.
+// If the pixmap has been used for 3D rendering, then we have to synchronize
+// the contents of the 3D pixmap, which resides on the 3D X server, with the
+// 2D pixmap on the 2D X server before calling the "real" XGetImage() function.
 
 XImage *XGetImage(Display *display, Drawable d, int x, int y,
 	unsigned int width, unsigned int height, unsigned long plane_mask,
