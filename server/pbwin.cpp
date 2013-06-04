@@ -68,7 +68,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	XGetWindowAttributes(dpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))
 	{
-		if(!(_eventdpy=XOpenDisplay(DisplayString(dpy))))
+		if(!(_eventdpy=_XOpenDisplay(DisplayString(dpy))))
 			_throw("Could not clone X display connection");
 		XSelectInput(_eventdpy, win, StructureNotifyMask);
 		if(fconfig.verbose)
