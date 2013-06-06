@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 1999-2001  Brian Paul   All Rights Reserved.
+ * Copyright (C) 2013  D. R. Commander   All Rights Reserved.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -35,12 +36,14 @@
 #include <X11/keysym.h>
 #include <GL/gl.h>
 #define GLX_GLXEXT_PROTOTYPES
-#include <GL/glx.h>
-#include <GL/glxext.h>
+#include "../common/glx.h"
+#include "../common/glxext.h"
 
 #ifndef GLX_MESA_swap_control
 #define GLX_MESA_swap_control 1
 typedef int (*PFNGLXGETSWAPINTERVALMESAPROC)(void);
+typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
+typedef 
 #endif
 
 
@@ -108,6 +111,8 @@ static GLboolean animate = GL_TRUE;	/* Animation */
 static GLfloat eyesep = 5.0;		/* Eye separation. */
 static GLfloat fix_point = 40.0;	/* Fixation point distance.  */
 static GLfloat left, right, asp;	/* Stereo frustum params.  */
+
+static int swapinterval = -1;
 
 
 /*
@@ -608,6 +613,8 @@ query_vsync(Display *dpy, GLXDrawable drawable)
 #if defined(GLX_EXT_swap_control)
    if (is_glx_extension_supported(dpy, "GLX_EXT_swap_control")) {
        unsigned int tmp = -1;
+       if (swapinterval >= 1)
+          glXSwapIntervalEXT(dpy, drawable, swapinterval);
        glXQueryDrawable(dpy, drawable, GLX_SWAP_INTERVAL_EXT, &tmp);
        interval = tmp;
    } else
@@ -617,16 +624,23 @@ query_vsync(Display *dpy, GLXDrawable drawable)
           (PFNGLXGETSWAPINTERVALMESAPROC)
           glXGetProcAddressARB((const GLubyte *) "glXGetSwapIntervalMESA");
 
+      if (swapinterval >= 1) {
+         PFNGLXSWAPINTERVALMESAPROC pglXSwapIntervalMESA =
+            (PFNGLXSWAPINTERVALMESAPROC)
+            glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalMESA");
+         (*pglXSwapIntervalMESA)(swapinterval);
+      }
+
       interval = (*pglXGetSwapIntervalMESA)();
    } else if (is_glx_extension_supported(dpy, "GLX_SGI_swap_control")) {
-      /* The default swap interval with this extension is 1.  Assume that it
-       * is set to the default.
-       *
-       * Many Mesa-based drivers default to 0, but all of these drivers also
-       * export GLX_MESA_swap_control.  In that case, this branch will never
-       * be taken, and the correct result should be reported.
+      /* The default swap interval with this extension is 0.  Assume that it
+       * is set to the default unless it was overridden on the command line.
        */
-      interval = 1;
+      interval = 0;
+      if (swapinterval >= 1) {
+         glXSwapIntervalSGI(swapinterval);
+         interval = swapinterval;
+      }
    }
 
 
@@ -723,6 +737,7 @@ usage(void)
    printf("  -info                   display OpenGL renderer info\n");
    printf("  -geometry WxH+X+Y       window geometry\n");
    printf("  -visualid <id>          force window to use this visual\n");
+   printf("  -interval <n>           set swap interval to <n>\n");
 }
  
 
@@ -762,6 +777,12 @@ main(int argc, char *argv[])
       }
       else if (i < argc-1 && strcmp(argv[i], "-visualid") == 0) {
          sscanf(argv[i+1], "%x", &visualid);
+         i++;
+      }
+      else if (i < argc-1 && strcmp(argv[i], "-interval") == 0) {
+         int temp = -1;
+         sscanf(argv[i+1], "%d", &temp);
+         if (temp >= 1) swapinterval = temp;
          i++;
       }
       else {

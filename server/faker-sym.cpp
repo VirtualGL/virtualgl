@@ -214,6 +214,9 @@ static int __vgl_loadglsymbols(void *dllhnd)
 	lsymopt(glXBindTexImageEXT)
 	lsymopt(glXReleaseTexImageEXT)
 
+	lsymopt(glXSwapIntervalEXT)
+	lsymopt(glXSwapIntervalSGI)
+
 	// GL symbols
 	lsym(glFinish)
 	lsym(glFlush)

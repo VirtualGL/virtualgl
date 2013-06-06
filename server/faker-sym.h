@@ -312,6 +312,17 @@ funcdef3(void, glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
 	int, buffer,)
 
 
+// GLX_EXT_swap_control
+
+funcdef3(void, glXSwapIntervalEXT, Display *, dpy, GLXDrawable, drawable, int,
+	interval,);
+
+
+// GLX_SGI_swap_control
+
+funcdef1(int, glXSwapIntervalSGI, int, interval, return);
+
+
 // GL functions
 
 funcdef0(void, glFinish,);

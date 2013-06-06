@@ -173,6 +173,7 @@ typedef struct _FakerConfig
   char probeglx;
   int qual;
   char readback;
+  double refreshrate;
   int samples;
   char spoil;
   char spoillast;

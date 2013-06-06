@@ -43,6 +43,8 @@ class pbwin : public pbdrawable
 		bool stereo(void);
 		bool _dirty, _rdirty;
 		void wmdelete(void);
+		int getswapinterval(void) { return _swapinterval; }
+		int setswapinterval(int swapinterval) { _swapinterval=swapinterval; }
 
 	private:
 
@@ -74,6 +76,7 @@ class pbwin : public pbdrawable
 		rrframe _r, _g, _b, _f, _stf;
 		bool _wmdelete;
 		bool _newconfig;
+		int _swapinterval;
 };
 
 

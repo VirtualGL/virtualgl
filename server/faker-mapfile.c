@@ -63,7 +63,6 @@
 		glXQueryMaxSwapGroupsNV;
 		glXQueryFrameCountNV;
 		glXResetFrameCountNV;
-		glXSwapIntervalSGI;
 
 		glXGetTransparentIndexSUN;
 
@@ -74,6 +73,9 @@
 
 		glXBindTexImageEXT;
 		glXReleaseTexImageEXT;
+
+		glXSwapIntervalEXT;
+		glXSwapIntervalSGI;
 
 		glFinish;
 		glFlush;

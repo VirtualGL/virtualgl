@@ -262,6 +262,11 @@ extern "C" {
 #ifndef GLX_MESA_agp_offset
 #endif
 
+#ifndef GLX_EXT_swap_control
+#define GLX_SWAP_INTERVAL_EXT              0x20F1
+#define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
+#endif
+
 
 /*************************************************************/
 
@@ -762,6 +767,14 @@ typedef int ( * PFNGLXGETVIDEOINFONVPROC) (Display *dpy, int screen,
                                            GLXVideoDeviceNV VideoDevice,
                                            unsigned long *pulCounterOutputVideo,
                                            unsigned long *pulCounterOutputPbuffer);
+#endif
+
+#ifndef GLX_EXT_swap_control
+#define GLX_EXT_swap_control 1
+#ifdef GLX_GLXEXT_PROTOTYPES
+extern void glXSwapIntervalEXT (Display *dpy, GLXDrawable drawable, int interval);
+#endif /* GLX_GLXEXT_PROTOTYPES */
+typedef void ( * PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawable drawable, int interval);
 #endif
 
 #ifdef __cplusplus

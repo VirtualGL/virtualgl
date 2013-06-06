@@ -64,6 +64,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	_plugin=NULL;
 	_wmdelete=false;
 	_newconfig=false;
+	_swapinterval=0;
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, win, &xwa);
 	if(!(xwa.your_event_mask&StructureNotifyMask))

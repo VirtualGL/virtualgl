@@ -172,6 +172,7 @@ static void fconfig_init(void)
 	fconfig.probeglx=1;
 	fconfig.qual=DEFQUAL;
 	fconfig.readback=RRREAD_SYNC;
+	fconfig.refreshrate=60.0;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
 	fconfig.spoillast=1;
@@ -389,6 +390,7 @@ void fconfig_reloadenv(void)
 		if(readback>=0 && (!fcenv_set || fcenv.readback!=readback))
 			fconfig.readback=fcenv.readback=readback;
 	}
+	fetchenv_dbl("VGL_REFRESHRATE", refreshrate, 0.0, 1000000.0);
 	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
 	fetchenv_bool("VGL_SPOIL", spoil);
 	fetchenv_bool("VGL_SPOILLAST", spoillast);

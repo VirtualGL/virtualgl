@@ -13,10 +13,12 @@
  * wxWindows Library License for more details.
  */
 
-// Interposed GLX functions
-
 #include "faker-sym.h"
 #include <limits.h>
+
+
+// This emulates the behavior of the nVidia drivers
+#define VGL_MAX_SWAP_INTERVAL 8
 
 
 // Applications will sometimes use X11 functions to obtain a list of 2D X
@@ -159,6 +161,8 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 	else return draw;
 }
 
+
+// Interposed GLX functions
 
 extern "C" {
 
@@ -867,7 +871,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 static const char *glxextensions=
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile GLX_EXT_texture_from_pixmap";
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile GLX_EXT_texture_from_pixmap GLX_EXT_swap_control GLX_SGI_swap_control";
 
 const char *glXGetClientString(Display *dpy, int name)
 {
@@ -1312,7 +1316,6 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXQueryGLXPbufferSGIX)
 		checkfaked(glXSelectEventSGIX)
 		checkfaked(glXGetSelectedEventSGIX)
-		checkfaked(glXSwapIntervalSGI)
 
 		checkfaked(glXGetTransparentIndexSUN)
 
@@ -1320,6 +1323,9 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 		checkfaked(glXBindTexImageEXT)
 		checkfaked(glXReleaseTexImageEXT)
+
+		checkfaked(glXSwapIntervalEXT)
+		checkfaked(glXSwapIntervalSGI)
 
 		checkfaked(glFinish)
 		checkfaked(glFlush)
@@ -1719,6 +1725,22 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 		goto done;
 	}
 
+	// GLX_EXT_swap_control attributes
+	if(attribute==GLX_SWAP_INTERVAL_EXT && value)
+	{
+		pbwin *pbw=NULL;
+		if(winh.findpb(dpy, draw, pbw))
+			*value=pbw->getswapinterval();
+		else
+			*value=0;
+		goto done;
+	}
+	else if(attribute==GLX_MAX_SWAP_INTERVAL_EXT && value)
+	{
+		*value=VGL_MAX_SWAP_INTERVAL;
+		goto done;
+	}
+
 	_glXQueryDrawable(_localdpy, ServerDrawable(dpy, draw), attribute, value);
 
 	CATCH();
@@ -1800,6 +1822,8 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
 	pbwin *pbw=NULL;
+	static rrtimer t;  rrtimer sleept;
+	static double err=0.;  static bool first=true;
 
 		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
 
@@ -1816,6 +1840,25 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	{
 		pbw->readback(GL_BACK, false, fconfig.sync);
 		pbw->swapbuffers();
+		int interval=pbw->getswapinterval();
+		if(interval>0)
+		{
+			double elapsed=t.elapsed();
+			if(first) first=false;
+			else
+			{
+				double fps=fconfig.refreshrate/(double)interval;
+				if(fps>0.0 && elapsed<1./fps)
+				{
+					sleept.start();
+					long usec=(long)((1./fps-elapsed-err)*1000000.);
+					if(usec>0) usleep(usec);
+					double sleeptime=sleept.elapsed();
+					err=sleeptime-(1./fps-elapsed-err);  if(err<0.) err=0.;
+				}
+			}
+			t.start();
+		}
 	}
 	else _glXSwapBuffers(_localdpy, drawable);
 
@@ -1914,17 +1957,77 @@ Bool glXResetFrameCountNV(Display *dpy, int screen)
 }
 
 
-// Recent releases of the nVidia drivers always try to send this function to
-// the 2D X server for some reason, and some apps don't bother to ask VirtualGL
-// whether it supports GLX_SGI_swap_control, so we have to interpose this
-// function out of existence (it isn't relevant with off-screen rendering,
-// anyhow.)
+// Vertical refresh rate has no meaning with an off-screen drawable, but we
+// emulate it using an internal timer so that we can provide a reasonable
+// implementation of the swap control extensions, which are used by some
+// applications as a way of governing the frame rate.
+
+void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
+{
+		opentrace(glXSwapIntervalEXT);  prargd(dpy);  prargx(drawable);
+		prargi(interval);  starttrace();
+
+	// If drawable is an overlay, hand off to the 2D X Server
+	if(winh.isoverlay(dpy, drawable))
+	{
+		_glXSwapIntervalEXT(dpy, drawable, interval);
+		goto done;
+	}
+
+	TRY();
+
+	if(interval>VGL_MAX_SWAP_INTERVAL) interval=VGL_MAX_SWAP_INTERVAL;
+	if(interval<0)
+		// NOTE:  Technically, this should trigger a BadValue error, but nVidia's
+		// implementation doesn't, so we emulate their behavior.
+		interval=1;
+
+	pbwin *pbw=NULL;
+	if(winh.findpb(dpy, drawable, pbw))
+		pbw->setswapinterval(interval);
+	// NOTE:  Technically, a BadWindow error should be triggered if drawable
+	// isn't a GLX window, but nVidia's implementation doesn't, so we emulate
+	// their behavior.
+	
+	CATCH();
+
+	done:
+
+		stoptrace();  closetrace();
+}
+
+
+// This is basically the same as calling glXSwapIntervalEXT() with the current
+// drawable.
 
 int glXSwapIntervalSGI(int interval)
 {
-	if(fconfig.trace)
-		rrout.print("[VGL] glXSwapIntervalSGI() [NOT SUPPORTED]\n");
-	return 0;
+	int retval=0;
+
+		opentrace(glXSwapIntervalSGI);  prargi(interval);  starttrace();
+
+	// If current drawable is an overlay, hand off to the 2D X Server
+	if(ctxh.overlaycurrent())
+	{
+		retval=_glXSwapIntervalSGI(interval);
+		goto done;
+	}
+
+	TRY();
+
+	pbwin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
+	if(interval<0) retval=GLX_BAD_VALUE;
+	else if(!draw || !winh.findpb(draw, pbw))
+		retval=GLX_BAD_CONTEXT;
+	else pbw->setswapinterval(interval);
+
+	CATCH();
+
+	done:
+
+		stoptrace();  closetrace();
+
+	return retval;
 }
 
 

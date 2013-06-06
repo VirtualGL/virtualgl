@@ -521,6 +521,25 @@ Each method of configuration takes precedence over the previous method:
 	necessary.  This is the default behavior of VirtualGL.
 	{nl}{nl}
 
+| Environment Variable | ''VGL_REFRESHRATE = ''__''{r}''__ |
+| Summary |  __''{r}''__ = the "virtual" refresh rate, in Hz, for the \
+	GLX_EXT_swap_control and GLX_SGI_swap_control extensions |
+| Image Transports | All |
+| Default Value | 60.0 |
+#OPT: hiCol=first
+
+	Description :: The GLX_EXT_swap_control and GLX_SGI_swap_control extensions
+	allow applications to specify that buffer swaps should be synchronized with
+	the refresh rate of the monitor.  When one of these extensions is used,
+	''glXSwapBuffers()'' will not return until a specified number of refreshes
+	(the "swap interval") has occurred.  Although refresh rate has no
+	meaning when rendering into an off-screen buffer, VirtualGL still emulates
+	the swap control extensions so that applications can control their own frame
+	rate (this is often used by games, for instance, in which maintaining a
+	constant frame rate is important.)  VirtualGL uses an internal timer to
+	emulate the refresh rate, and setting ''VGL_REFRESHRATE'' changes the
+	interval of that timer.
+
 | Environment Variable | ''VGL_SAMPLES = ''__''{s}''__ |
 | ''vglrun'' argument | ''-ms ''__''{s}''__ |
 | Summary | Force OpenGL multisampling to be enabled with __''{s}''__ \

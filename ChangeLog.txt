@@ -23,6 +23,11 @@ display correctly.
 [4]
 Added support for the GLX_EXT_texture_from_pixmap extension.
 -------------------------------------------------------------------------------
+[5]
+Added support for the GLX_EXT_swap_control and GLX_SGI_swap_control extensions
+and a new configuration variable (VGL_REFRESHRATE) that can be used to control
+them.  See the User's Guide for more information.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
