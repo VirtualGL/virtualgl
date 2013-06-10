@@ -594,10 +594,8 @@ bitmask_to_string(const struct bit_info bits[], int numBits, int mask)
    p = buffer;
    for (i = 0; i < numBits; i++) {
       if (mask & bits[i].bit) {
-         if (p > buffer) {
+         if (p > buffer)
             *p++ = ',';
-            *p++ = ' ';
-         }
          strcpy(p, bits[i].name);
          p += strlen(bits[i].name);
       }

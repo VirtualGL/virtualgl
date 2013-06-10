@@ -232,10 +232,10 @@ of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support (the
 latter is indicated by a "P" in the last column.)  Example:
 
 	#Verb <<---
-	    visual  x  bf lv rg d st colorbuffer ax dp st accumbuffer  ms  cav  drw
-	  id dep cl sp sz l  ci b ro  r  g  b  a bf th cl  r  g  b  a ns b eat  typ
-	---------------------------------------------------------------------------
-	0x151  0 tc  0 32  0 r  y  .  8  8  8  0  4 24  8 16 16 16 16  0 0 None PXW
+	    visual  x   bf lv rg d st  colorbuffer  ax dp st accumbuffer  ms  cav  drw
+	  id dep cl sp  sz l  ci b ro  r  g  b  a F bf th cl  r  g  b  a ns b eat  typ
+	------------------------------------------------------------------------------
+	0x151 24 tc  0  32  0 r  y  .  8  8  8  0 .  4 24  8 16 16 16 16  0 0 None PXW
 	---
 
 If none of the visuals has Pbuffer support, then this is most likely because
