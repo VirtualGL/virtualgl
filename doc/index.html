@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2013-06-10T04:42:33">
+<meta name="date" content="2013-06-11T15:04:24">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3967,6 +3967,42 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     </dd>
 </dl>
 
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_DRAWABLE&nbsp;=&nbsp;</code><em><code>pbuffer&nbsp;|&nbsp;pixmap</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Specify the drawable type to use for 3D rendering</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">pbuffer</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Normally, VirtualGL will redirect the 3D rendering from each OpenGL 
+        window on the 2D X server into a corresponding Pbuffer on the 3D X 
+        server, and it will likewise redirect the 3D rendering from each OpenGL 
+        pixmap on the 2D X server into a corresponding pixmap on the 3D X 
+        server. Changing the drawable type to &ldquo;pixmap&rdquo; causes 
+        VirtualGL to use pixmaps on the 3D X server to represent all OpenGL 
+        drawables on the 2D X server.  Generally, this is recommended only for 
+        systems on which Pbuffer support is incomplete or unstable.
+    </dd>
+</dl>
+
 <p><a name="VGL_FORCEALPHA"></a></p>
 
 <div class="table">
@@ -4398,42 +4434,6 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <div class="important"><p class="important">
         When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0056"></a> option
         </p></div>
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_PIXMAP&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable the use of Pixmaps for 3D rendering</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Image Transports</td>
-    <td class="standard">All</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Normally, VirtualGL will redirect the 3D rendering from each OpenGL 
-        window on the 2D X server into a corresponding Pbuffer on the 3D X 
-        server, and it will likewise redirect the 3D rendering from each OpenGL 
-        pixmap on the 2D X server into a corresponding Pixmap on the 3D X 
-        server. Enabling this option causes VirtualGL to use pixmaps on the 3D X 
-        server to represent all OpenGL drawables on the 2D X server.  This 
-        option should be considered experimental and is only recommended for 
-        systems on which Pbuffer support is incomplete or unstable.
     </dd>
 </dl>
 

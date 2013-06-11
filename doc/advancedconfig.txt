@@ -160,6 +160,21 @@ Each method of configuration takes precedence over the previous method:
 	second or subsequent graphics cards in the system, then you can set
 	''VGL_DISPLAY'' to (or invoke ''vglrun -d'' with) '':0.1'', '':0.2'', etc.
 
+| Environment Variable | ''VGL_DRAWABLE = ''__''pbuffer \| pixmap''__ |
+| Summary | Specify the drawable type to use for 3D rendering |
+| Image Transports | All |
+| Default Value | pbuffer |
+#OPT: hiCol=first
+
+	Description :: Normally, VirtualGL will redirect the 3D rendering from each
+	OpenGL window on the 2D X server into a corresponding Pbuffer on the 3D X
+	server, and it will likewise redirect the 3D rendering from each OpenGL
+	pixmap on the 2D X server into a corresponding pixmap on the 3D X server.
+	Changing the drawable type to "pixmap" causes VirtualGL to use pixmaps on the
+	3D X server to represent all OpenGL drawables on the 2D X server.  Generally,
+	this is recommended only for systems on which Pbuffer support is incomplete
+	or unstable.
+
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
 | Summary | Force the Pbuffers used for 3D rendering to have an 8-bit alpha channel |
@@ -373,21 +388,6 @@ Each method of configuration takes precedence over the previous method:
 
 	!!! When using the VGL Transport, multi-threaded compression is affected by
 	the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
-
-| Environment Variable | ''VGL_PIXMAP = ''__''0 \| 1''__ |
-| Summary | Disable/enable the use of Pixmaps for 3D rendering |
-| Image Transports | All |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: Normally, VirtualGL will redirect the 3D rendering from each
-	OpenGL window on the 2D X server into a corresponding Pbuffer on the 3D X
-	server, and it will likewise redirect the 3D rendering from each OpenGL
-	pixmap on the 2D X server into a corresponding Pixmap on the 3D X server.
-	Enabling this option causes VirtualGL to use pixmaps on the 3D X server to
-	represent all OpenGL drawables on the 2D X server.  This option should be
-	considered experimental and is only recommended for systems on which Pbuffer
-	support is incomplete or unstable.
 
 | Environment Variable | ''VGL_PORT = ''__''{p}''__ |
 | ''vglrun'' argument | ''-p ''__''{p}''__ |

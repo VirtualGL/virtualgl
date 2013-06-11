@@ -263,7 +263,7 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		glxattribs[j++]=GLX_STEREO;  glxattribs[j++]=stereo;
 	}
 	glxattribs[j++]=GLX_DRAWABLE_TYPE;
-	if(fconfig.usepixmap)
+	if(fconfig.drawable==RRDRAWABLE_PIXMAP)
 		glxattribs[j++]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
 	else
 		glxattribs[j++]=GLX_PBUFFER_BIT;

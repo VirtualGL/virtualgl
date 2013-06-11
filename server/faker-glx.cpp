@@ -52,7 +52,7 @@ static GLXFBConfig _MatchConfig(Display *dpy, XVisualInfo *vis,
 			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, None};
 		int attribs[256];
 
-		if(pixmap || fconfig.usepixmap)
+		if(pixmap || fconfig.drawable==RRDRAWABLE_PIXMAP)
 			default_attribs[13]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, default_attribs, sizeof(default_attribs));

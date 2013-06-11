@@ -128,6 +128,10 @@ enum rrstereo {RRSTEREO_LEYE=0, RRSTEREO_REYE, RRSTEREO_QUADBUF,
                RRSTEREO_REDCYAN, RRSTEREO_GREENMAGENTA, RRSTEREO_BLUEYELLOW,
                RRSTEREO_INTERLEAVED, RRSTEREO_TOPBOTTOM, RRSTEREO_SIDEBYSIDE};
 
+/* 3D drawable options */
+#define RR_DRAWABLEOPT  2
+enum rrdrawable {RRDRAWABLE_PBUFFER=0, RRDRAWABLE_PIXMAP};
+
 /* Other */
 #define RR_DEFAULTPORT        4242
 #ifdef USESSL
@@ -152,6 +156,7 @@ typedef struct _FakerConfig
   int compress;
   char config[MAXSTR];
   char defaultfbconfig[MAXSTR];
+  char drawable;
   double flushdelay;
   int forcealpha;
   double fps;
@@ -187,7 +192,6 @@ typedef struct _FakerConfig
   char transport[MAXSTR];
   char transvalid[RR_TRANSPORTOPT];
   char trapx11;
-  char usepixmap;
   char vendor[MAXSTR];
   char verbose;
   char x11lib[MAXSTR];

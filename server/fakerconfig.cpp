@@ -307,6 +307,19 @@ void fconfig_reloadenv(void)
 			strncpy(fcenv.localdpystring, env, MAXSTR-1);
 		}
 	}
+	if((env=getenv("VGL_DRAWABLE"))!=NULL && strlen(env)>0)
+	{
+		int drawable=-1;
+		if(!strnicmp(env, "PB", 2)) drawable=RRDRAWABLE_PBUFFER;
+		else if(!strnicmp(env, "PI", 2)) drawable=RRDRAWABLE_PIXMAP;
+		else
+		{
+			char *t=NULL;  int itemp=strtol(env, &t, 10);
+			if(t && t!=env && itemp>=0 && itemp<RR_DRAWABLEOPT) drawable=itemp;
+		}
+		if(drawable>=0 && (!fcenv_set || fcenv.drawable!=drawable))
+			fconfig.drawable=fcenv.drawable=drawable;
+	}
 	fetchenv_bool("VGL_FORCEALPHA", forcealpha);
 	fetchenv_dbl("VGL_FPS", fps, 0.0, 1000000.0);
 	if((env=getenv("VGL_GAMMA"))!=NULL && strlen(env)>0)
@@ -372,7 +385,6 @@ void fconfig_reloadenv(void)
 	fetchenv_str("VGL_LOG", log);
 	fetchenv_bool("VGL_LOGO", logo);
 	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
-	fetchenv_bool("VGL_PIXMAP", usepixmap);
 	fetchenv_int("VGL_PORT", port, 0, 65535);
 	fetchenv_bool("VGL_PROBEGLX", probeglx);
 	fetchenv_int("VGL_QUAL", qual, 1, 100);
@@ -551,6 +563,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(compress);
 	prconfstr(config);
 	prconfstr(defaultfbconfig);
+	prconfint(drawable);
 	prconfdbl(fps);
 	prconfdbl(flushdelay);
 	prconfint(forcealpha);
@@ -583,7 +596,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(transvalid[RRTRANS_VGL]);
 	prconfint(transvalid[RRTRANS_XV]);
 	prconfint(trapx11);
-	prconfint(usepixmap);
 	prconfstr(vendor);
 	prconfint(verbose);
 	prconfstr(x11lib);

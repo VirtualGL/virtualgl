@@ -213,7 +213,7 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	rrcs::safelock l(_mutex);
 	if(_pb && _pb->width()==w && _pb->height()==h
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
-	if(fconfig.usepixmap)
+	if(fconfig.drawable==RRDRAWABLE_PIXMAP)
 	{
 		if(!alreadyprinted && fconfig.verbose)
 		{
