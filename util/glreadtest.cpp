@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -135,9 +135,16 @@ pixelformat pix[4
 #define _HEIGHT           701
 
 int WIDTH=_WIDTH, HEIGHT=_HEIGHT;
-Display *dpy=NULL;  Window win=0;
+Display *dpy=NULL;  Window win=0;  Pixmap pm=0;  GLXPixmap glxpm=0;
+XVisualInfo *v=NULL;  GLXFBConfig c=0;
+GLXContext ctx=0;
+#ifndef GLX11
+GLXPbuffer pbuffer=0;
+#endif
+
 rrtimer timer;
-int usewindow=0, useci=0, useoverlay=0, visualid=0, loops=1, usealpha=0;
+int usewindow=0, usepixmap=0, useci=0, useoverlay=0, visualid=0, loops=1,
+	usealpha=0;
 #ifdef GL_VERSION_1_5
 int pbo=0;
 #endif
@@ -175,11 +182,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 } // extern "C"
 
 
-void findvisual(XVisualInfo* &v
-#ifndef GLX11
-, GLXFBConfig &c
-#endif
-)
+void findvisual(void)
 {
 	int winattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, None, None, None};
@@ -206,7 +209,7 @@ void findvisual(XVisualInfo* &v
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
-	if(usewindow)
+	if(usewindow || usepixmap)
 	{
 		try
 		{
@@ -253,7 +256,11 @@ void findvisual(XVisualInfo* &v
 		pbattribsci:pbattribs, &nelements);
 	if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
 		useci?pbattribscidb:pbattribsdb, &nelements);
-	if(!nelements || !fbconfigs) _throw("Could not obtain Visual");
+	if(!nelements || !fbconfigs)
+	{
+		if(fbconfigs) XFree(fbconfigs);
+		_throw("Could not obtain Visual");
+	}
 	c=fbconfigs[0];  XFree(fbconfigs);
 
 	int fbcid=-1;
@@ -263,41 +270,29 @@ void findvisual(XVisualInfo* &v
 }
 
 
-void pbufferinit(Display *dpy, Window win, XVisualInfo *v
-#ifndef GLX11
-, GLXFBConfig c
-#endif
-)
+void pbufferinit(void)
 {
 	#ifndef	GLX11
-	GLXPbuffer pbuffer=0;
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
 	#endif
-	GLXContext ctx=0;
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
-	if(usewindow)
+	if(usewindow || usepixmap)
 	{
-		try
+		if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
+			_throw("Could not create GL context");
+
+		if(usepixmap)
 		{
-			if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
-				_throw("Could not create GL context");
-			glXMakeCurrent(dpy, win, ctx);
-			return;
+			if(!(glxpm=glXCreateGLXPixmap(dpy, v, pm)))
+				_throw("Could not creaate GLX pixmap");
 		}
-		catch(...)
-		{
-			if(ctx) {glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);}
-			throw;
-		}
+		glXMakeCurrent(dpy, usepixmap? glxpm:win, ctx);
+		return;
 	}
 
 	#ifndef GLX11
-	try {
-
-	if(usewindow) {errifnot(win);}  errifnot(dpy);
-
 	ctx=glXCreateNewContext(dpy, c, useci? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
 		NULL, True);
 	if(!ctx)	_throw("Could not create GL context");
@@ -307,16 +302,6 @@ void pbufferinit(Display *dpy, Window win, XVisualInfo *v
 	if(!pbuffer) _throw("Could not create Pbuffer");
 
 	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
-
-	} catch(...)
-	{
-		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
-		if(ctx)
-		{
-			glXMakeContextCurrent(dpy, 0, 0, 0);  glXDestroyContext(dpy, ctx);
-		}
-		throw;
-	}
 	#endif
 }
 
@@ -620,7 +605,7 @@ void display(void)
 
 void usage(char **argv)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-index] [-overlay]\n", argv[0]);
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm] [-index] [-overlay]\n", argv[0]);
 	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
 	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]");
 	#ifdef GL_VERSION_1_5
@@ -630,6 +615,7 @@ void usage(char **argv)
 	#endif
 	fprintf(stderr, "\n-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
+	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
 	fprintf(stderr, "-index = Test color index visual instead of RGB\n");
 	fprintf(stderr, "-overlay = Render to 8-bit overlay window (implies -window and -index)\n");
 	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", _WIDTH);
@@ -656,11 +642,16 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "\n%s v%s (Build %s)\n", bench_name, __VERSION, __BUILD);
 
+	#ifdef GLX11
+	usewindow=1;
+	#endif
+
 	for(int i=0; i<argc; i++)
 	{
 		if(!stricmp(argv[i], "-h")) usage(argv);
 		if(!stricmp(argv[i], "-?")) usage(argv);
 		if(!stricmp(argv[i], "-window")) usewindow=1;
+		if(!stricmp(argv[i], "-pm")) usepixmap=1;
 		if(!stricmp(argv[i], "-index")) useci=1;
 		if(!stricmp(argv[i], "-overlay")) {useci=1;  useoverlay=1;  usewindow=1;}
 		#ifdef GL_VERSION_1_5
@@ -736,100 +727,105 @@ int main(int argc, char **argv)
 		}
 	}
 
-	try {
-
 	if(argc<2) fprintf(stderr, "\n%s -h for advanced usage.\n", argv[0]);
 
-	XSetErrorHandler(xhandler);
-	if(!(dpy=XOpenDisplay(0)))
-	{
-		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
-		exit(1);
-	}
-	fprintf(stderr, "\nRendering to %s using GLX on display %s\n",
-		usewindow?"window":"Pbuffer", DisplayString(dpy));
-	#ifdef GL_VERSION_1_5
-	if(pbo) fprintf(stderr, "Using PBO's for readback\n");
-	#endif
+	try {
 
-	if(DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH && DisplayHeight(dpy,
-		DefaultScreen(dpy))<HEIGHT)
-	{
-		fprintf(stderr,
-			"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
-			WIDTH, HEIGHT);
-		exit(1);
-	}
-
-	if(useci)
-	{
-		FORMATS=1;
-		pix[0].roffset=pix[0].goffset=pix[0].boffset=0;
-		pix[0].pixelsize=1;
-		pix[0].glformat=GL_COLOR_INDEX;
-		pix[0].bgr=0;
-		pix[0].name="INDEX";
-	}
-
-	XVisualInfo *v=NULL;
-	#ifndef GLX11
-	GLXFBConfig c=0;
-	findvisual(v, c);
-	#else
-	usewindow=1;
-	findvisual(v);
-	#endif
-
-	if(usewindow)
-	{
-		XSetWindowAttributes swa;
-		Window root=DefaultRootWindow(dpy);
-		swa.border_pixel=0;
-		swa.event_mask=0;
-
-		if(useoverlay)
+		XSetErrorHandler(xhandler);
+		if(!(dpy=XOpenDisplay(0)))
 		{
-			errifnot(root=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
-				WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-				BlackPixel(dpy, DefaultScreen(dpy))));
-			XMapWindow(dpy, root);
-			XSync(dpy, False);
+			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
+			exit(1);
+		}
+		#ifdef GL_VERSION_1_5
+		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
+		#endif
+
+		if((DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH ||
+			DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT) && usewindow)
+		{
+			fprintf(stderr,
+				"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
+				WIDTH, HEIGHT);
+			exit(1);
 		}
 
 		if(useci)
 		{
-			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
-			XColor xc[32];  int i;
-			if(v->colormap_size<32) _throw("Color map is not large enough");
-			for(i=0; i<32; i++)
-			{
-				xc[i].red=(i<16? i*16:255)<<8;
-				xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
-				xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
-				xc[i].flags = DoRed | DoGreen | DoBlue;
-				xc[i].pixel=i;
-			}
-			XStoreColors(dpy, swa.colormap, xc, 32);
+			FORMATS=1;
+			pix[0].roffset=pix[0].goffset=pix[0].boffset=0;
+			pix[0].pixelsize=1;
+			pix[0].glformat=GL_COLOR_INDEX;
+			pix[0].bgr=0;
+			pix[0].name="INDEX";
 		}
-		else
-			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
-		errifnot(win=XCreateWindow(dpy, root, 0, 0, WIDTH,
-			HEIGHT, 0, v->depth, InputOutput, v->visual,
-			CWBorderPixel|CWColormap|CWEventMask, &swa));
-		XMapWindow(dpy, win);
-		XSync(dpy, False);
-	}
-	fprintf(stderr, "Drawable size = %d x %d pixels\n", WIDTH, HEIGHT);
-	fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
-	pbufferinit(dpy, win, v
-	#ifndef GLX11
-	, c
-	#endif
-	);
 
-	if(v) XFree(v);
-	display();
-	return 0;
+		findvisual();
+
+		if(usewindow || usepixmap)
+		{
+			XSetWindowAttributes swa;
+			Window root=DefaultRootWindow(dpy);
+			swa.border_pixel=0;
+			swa.event_mask=0;
+
+			if(useoverlay)
+			{
+				errifnot(root=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
+					WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+					BlackPixel(dpy, DefaultScreen(dpy))));
+				XMapWindow(dpy, root);
+				XSync(dpy, False);
+			}
+
+			if(useci)
+			{
+				swa.colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
+				XColor xc[32];  int i;
+				if(v->colormap_size<32) _throw("Color map is not large enough");
+				for(i=0; i<32; i++)
+				{
+					xc[i].red=(i<16? i*16:255)<<8;
+					xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
+					xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
+					xc[i].flags = DoRed | DoGreen | DoBlue;
+					xc[i].pixel=i;
+				}
+				XStoreColors(dpy, swa.colormap, xc, 32);
+			}
+			else
+				swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+			errifnot(win=XCreateWindow(dpy, root, 0, 0, usepixmap? 1:WIDTH,
+				usepixmap? 1:HEIGHT, 0, v->depth, InputOutput, v->visual,
+				CWBorderPixel|CWColormap|CWEventMask, &swa));
+			if(usepixmap)
+			{
+				errifnot(pm=XCreatePixmap(dpy, win, WIDTH, HEIGHT, v->depth));
+			}
+			else XMapWindow(dpy, win);
+			XSync(dpy, False);
+		}
+		fprintf(stderr, "%s size = %d x %d pixels\n",
+			usepixmap? "Pixmap" : usewindow? "Window" : "Pbuffer", WIDTH, HEIGHT);
+		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
+
+		pbufferinit();
+		display();
+		return 0;
 
 	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+
+	if(dpy)
+	{
+		glXMakeCurrent(dpy, 0, 0);
+		if(ctx) glXDestroyContext(dpy, ctx);
+		#ifndef GLX11
+		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
+		#endif
+		if(glxpm) glXDestroyGLXPixmap(dpy, glxpm);
+		if(pm) XFreePixmap(dpy, pm);
+		if(win) XDestroyWindow(dpy, win);
+		XCloseDisplay(dpy);
+	}
+	if(v) XFree(v);
 }
