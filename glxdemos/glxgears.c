@@ -612,17 +612,21 @@ query_vsync(Display *dpy, GLXDrawable drawable)
 
 #if defined(GLX_EXT_swap_control)
    if (is_glx_extension_supported(dpy, "GLX_EXT_swap_control")) {
-       unsigned int tmp = -1;
-       if (swapinterval >= 1)
-          glXSwapIntervalEXT(dpy, drawable, swapinterval);
-       glXQueryDrawable(dpy, drawable, GLX_SWAP_INTERVAL_EXT, &tmp);
-       interval = tmp;
+      PFNGLXSWAPINTERVALEXTPROC pglXSwapIntervalEXT =
+         (PFNGLXSWAPINTERVALEXTPROC)
+         glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalEXT");
+
+      unsigned int tmp = -1;
+      if (swapinterval >= 1)
+         (*pglXSwapIntervalEXT)(dpy, drawable, swapinterval);
+      glXQueryDrawable(dpy, drawable, GLX_SWAP_INTERVAL_EXT, &tmp);
+      interval = tmp;
    } else
 #endif
    if (is_glx_extension_supported(dpy, "GLX_MESA_swap_control")) {
       PFNGLXGETSWAPINTERVALMESAPROC pglXGetSwapIntervalMESA =
-          (PFNGLXGETSWAPINTERVALMESAPROC)
-          glXGetProcAddressARB((const GLubyte *) "glXGetSwapIntervalMESA");
+         (PFNGLXGETSWAPINTERVALMESAPROC)
+         glXGetProcAddressARB((const GLubyte *) "glXGetSwapIntervalMESA");
 
       if (swapinterval >= 1) {
          PFNGLXSWAPINTERVALMESAPROC pglXSwapIntervalMESA =
