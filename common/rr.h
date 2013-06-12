@@ -194,6 +194,7 @@ typedef struct _FakerConfig
   char trapx11;
   char vendor[MAXSTR];
   char verbose;
+	char wm;
   char x11lib[MAXSTR];
 } FakerConfig;
 

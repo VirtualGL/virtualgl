@@ -76,6 +76,7 @@ class pbdrawable
 		void copypixels(GLint, GLint, GLint, GLint, GLint, GLint, GLXDrawable);
 		int width(void) {return _pb ? _pb->width() : -1;}
 		int height(void) {return _pb ? _pb->height() : -1;}
+		bool isinit(void) {return (_direct==True || _direct==False);}
 
 	protected:
 

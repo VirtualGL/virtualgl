@@ -436,6 +436,7 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_TRAPX11", trapx11);
 	fetchenv_str("VGL_XVENDOR", vendor);
 	fetchenv_bool("VGL_VERBOSE", verbose);
+	fetchenv_bool("VGL_WM", wm);
 	fetchenv_str("VGL_X11LIB", x11lib);
 
 	if(strlen(fconfig.transport)>0)
@@ -598,5 +599,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(trapx11);
 	prconfstr(vendor);
 	prconfint(verbose);
+	prconfint(wm);
 	prconfstr(x11lib);
 }

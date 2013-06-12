@@ -105,6 +105,12 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
+| Compiz | Linux \
+	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
+		window manager with ''vglrun'', or pass an argument of ''+wm'' to \
+		''vglrun''. \
+	| See {ref prefix="Section ": VGL_WM} for more details. \
+	|
 | Heretic II | Linux \
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \

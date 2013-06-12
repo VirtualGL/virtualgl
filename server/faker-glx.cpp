@@ -138,12 +138,26 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 	int screen=DefaultScreen(dpy);
 	if(!(vid=cfgh.getvisual(dpy, config)))
 	{
-		vid=__vglMatchVisual(dpy, screen, __vglConfigDepth(config),
-				__vglConfigClass(config),
-				0,
-				__vglServerVisualAttrib(config, GLX_STEREO),
-				0);
-		if(!vid) 
+		// If we get here, then the app is using an FB config that was not obtained
+		// through glXChooseFBConfig(), so we have no idea what attributes it is
+		// looking for.  We first try to match the FB config with a 2D X Server
+		// visual that has the same class, depth, and stereo properties.
+		XVisualInfo *v=_glXGetVisualFromFBConfig(_localdpy, config);
+		if(v)
+		{
+			if((v->depth==8 && v->c_class==PseudoColor) ||
+				(v->depth>=24 && v->c_class==TrueColor))
+				vid=__vglMatchVisual(dpy, screen, v->depth, v->c_class, 0,
+					__vglServerVisualAttrib(config, GLX_STEREO), 0);
+			XFree(v);
+		}
+		// Failing that, we try to find a 24-bit TrueColor visual with the same
+		// stereo properties.
+		if(!vid)
+			vid=__vglMatchVisual(dpy, screen, 24, TrueColor, 0,
+				__vglServerVisualAttrib(config, GLX_STEREO), 0);
+		// Failing that, we try to find a 24-bit TrueColor mono visual.
+		if(!vid)
 			vid=__vglMatchVisual(dpy, screen, 24, TrueColor, 0, 0, 0);
 	}
 	if(vid) cfgh.add(dpy, config, vid);
@@ -217,8 +231,11 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	// No attributes specified.  Return all FB configs.
 	if(!attrib_list)
+	{
 		configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy),
 			attrib_list, nelements);
+		goto done;
+	}
 
 	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
@@ -227,12 +244,33 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	if(configs && *nelements)
 	{
+		int nv=0;
+
 		// Get a matching visual from the 2D X server and hash it to every FB
 		// config we just obtained.
-		VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo,
-			trans);
-		if(vid) for(int i=0; i<*nelements; i++) cfgh.add(dpy, configs[i], vid);
-		else {XFree(configs);  configs=NULL;  goto done;}
+		for(int i=0; i<*nelements; i++)
+		{
+			int d=depth;
+			XVisualInfo *v=_glXGetVisualFromFBConfig(_localdpy, configs[i]);
+			if(v)
+			{
+				if(v->depth==32) d=32;
+				XFree(v);
+			}
+
+			// Find an appropriate matching visual on the 2D X server.
+			VisualID vid=__vglMatchVisual(dpy, screen, d, c_class, level, stereo,
+				trans);
+			if(!vid)
+			{
+				if(depth==32) vid=__vglMatchVisual(dpy, screen, 24, c_class, level,
+					stereo, trans);
+				if(!vid) continue;
+			}
+			nv++;
+			cfgh.add(dpy, configs[i], vid);
+		}
+		if(!nv) {*nelements=0;  XFree(configs);  configs=NULL;}
 	}
 
 	CATCH();
@@ -318,10 +356,22 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	}
 	c=configs[0];
 	XFree(configs);
+	XVisualInfo *vtemp=_glXGetVisualFromFBConfig(_localdpy, c);
+	if(vtemp)
+	{
+		if(vtemp->depth==32) depth=32;
+		XFree(vtemp);
+	}
 
 	// Find an appropriate matching visual on the 2D X server.
-	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo, trans);
-	if(!vid) goto done;
+	VisualID vid=__vglMatchVisual(dpy, screen, depth, c_class, level, stereo,
+		trans);
+	if(!vid)
+	{
+		if(depth==32) vid=__vglMatchVisual(dpy, screen, 24, c_class, level, stereo,
+			trans);
+		if(!vid) goto done;
+	}
 	v=__vglVisualFromVisualID(dpy, screen, vid);
 	if(!v) goto done;
 
@@ -804,7 +854,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
 	pbpm *pbp=pmh.find(dpy, pix);
-	if(pbp) pbp->readback();
+	if(pbp && pbp->isinit()) pbp->readback();
 
 	if(pix) glxdh.remove(pix);
 	if(dpy && pix) pmh.remove(dpy, pix);
@@ -825,7 +875,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
 	pbpm *pbp=pmh.find(dpy, pix);
-	if(pbp) pbp->readback();
+	if(pbp && pbp->isinit()) pbp->readback();
 
 	if(pix) glxdh.remove(pix);
 	if(dpy && pix) pmh.remove(dpy, pix);
@@ -1080,66 +1130,61 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 		goto done;
 	}
 
-	// Obtain the corresponding 2D X server visual from the hash, or find an
-	// appropriate 2D X server visual for this FB config.
-	if(!(vid=_MatchVisual(dpy, config)))
-		throw rrerror("glXGetFBConfigAttrib", "Invalid FB config");
+	retval=_glXGetFBConfigAttrib(_localdpy, config, attribute, value);
 
-	// Color index rendering really uses an RGB off-screen drawable, so we have
-	// to fake out the application if it is asking about RGBA properties.
-	int c_class=__vglVisualClass(dpy, screen, vid);
-	if(c_class==PseudoColor
-		&& (attribute==GLX_RED_SIZE
-			|| attribute==GLX_GREEN_SIZE
-			|| attribute==GLX_BLUE_SIZE || attribute==GLX_ALPHA_SIZE
-			|| attribute==GLX_ACCUM_RED_SIZE || attribute==GLX_ACCUM_GREEN_SIZE
-			|| attribute==GLX_ACCUM_BLUE_SIZE || attribute==GLX_ACCUM_ALPHA_SIZE))
+	if(attribute==GLX_DRAWABLE_TYPE && retval==Success)
+	{
+		int temp=*value;
 		*value=0;
-	// Transparent overlay FB configs are located on the 2D X server, not the 3D
-	// X server.
-	else if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
-		|| attribute==GLX_TRANSPARENT_INDEX_VALUE
-		|| attribute==GLX_TRANSPARENT_RED_VALUE
-		|| attribute==GLX_TRANSPARENT_GREEN_VALUE
-		|| attribute==GLX_TRANSPARENT_BLUE_VALUE
-		|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
-		*value=__vglClientVisualAttrib(dpy, screen, vid, attribute);
-	else if(attribute==GLX_RENDER_TYPE)
-	{
-		if(c_class==PseudoColor) *value=GLX_COLOR_INDEX_BIT;
-		else *value=GLX_RGBA_BIT;
+		if((fconfig.drawable==RRDRAWABLE_PBUFFER && temp&GLX_PBUFFER_BIT)
+			|| (fconfig.drawable==RRDRAWABLE_PIXMAP && temp&GLX_WINDOW_BIT
+				&& temp&GLX_PIXMAP_BIT))
+			*value|=GLX_WINDOW_BIT;
+		if(temp&GLX_PIXMAP_BIT && temp&GLX_WINDOW_BIT) *value|=GLX_PIXMAP_BIT;
+		if(temp&GLX_PBUFFER_BIT) *value|=GLX_PBUFFER_BIT;
 	}
-	else if(attribute==GLX_STEREO)
+
+	// If there is a corresponding 2D X server visual hashed to this FB config,
+	// then that means it was obtained via glXChooseFBConfig(), and we can
+	// return attributes that take into account the interaction between visuals
+	// on the 2D X Server and FB Configs on the 3D X Server.
+
+	if((vid=cfgh.getvisual(dpy, config))!=0)
 	{
-		*value= (__vglClientVisualAttrib(dpy, screen, vid, GLX_STEREO)
-			&& __vglServerVisualAttrib(config, GLX_STEREO));
-	}
-	else if(attribute==GLX_X_VISUAL_TYPE)
-	{
-		if(c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
-		else *value=GLX_TRUE_COLOR;
-	}
-	else if(attribute==GLX_VISUAL_ID)
-		*value=vid;
-	else if(attribute==GLX_DRAWABLE_TYPE)
-	{
-		*value=GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT;
-	}
-	else
-	{
-		if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
-			&& __vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
-			attribute=GLX_RED_SIZE;
-		if(attribute==GLX_CONFIG_CAVEAT)
+		// Color index rendering really uses an RGB off-screen drawable, so we have
+		// to fake out the application if it is asking about RGBA properties.
+		int c_class=__vglVisualClass(dpy, screen, vid);
+		if(c_class==PseudoColor
+			&& (attribute==GLX_RED_SIZE
+				|| attribute==GLX_GREEN_SIZE
+				|| attribute==GLX_BLUE_SIZE || attribute==GLX_ALPHA_SIZE
+				|| attribute==GLX_ACCUM_RED_SIZE || attribute==GLX_ACCUM_GREEN_SIZE
+				|| attribute==GLX_ACCUM_BLUE_SIZE || attribute==GLX_ACCUM_ALPHA_SIZE))
+			*value=0;
+		// Transparent overlay FB configs are located on the 2D X server, not the
+		// 3D X server.
+		else if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
+			|| attribute==GLX_TRANSPARENT_INDEX_VALUE
+			|| attribute==GLX_TRANSPARENT_RED_VALUE
+			|| attribute==GLX_TRANSPARENT_GREEN_VALUE
+			|| attribute==GLX_TRANSPARENT_BLUE_VALUE
+			|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
+			*value=__vglClientVisualAttrib(dpy, screen, vid, attribute);
+		else if(attribute==GLX_RENDER_TYPE)
 		{
-			int vistype=__vglServerVisualAttrib(config, GLX_X_VISUAL_TYPE);
-			if(vistype!=GLX_TRUE_COLOR && vistype!=GLX_PSEUDO_COLOR)
-			{
-				*value=GLX_NON_CONFORMANT_CONFIG;
-				goto done;
-			}
+			if(c_class==PseudoColor) *value=GLX_COLOR_INDEX_BIT;
+			else *value=__vglServerVisualAttrib(config, GLX_RENDER_TYPE);
 		}
-		retval=_glXGetFBConfigAttrib(_localdpy, config, attribute, value);
+		else if(attribute==GLX_X_VISUAL_TYPE)
+		{
+			if(c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
+			else *value=GLX_TRUE_COLOR;
+		}
+		else if(attribute==GLX_VISUAL_ID)
+			*value=vid;
+		else if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
+			&& __vglServerVisualAttrib(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
+			*value=__vglServerVisualAttrib(config, GLX_RED_SIZE);
 	}
 
 	CATCH();

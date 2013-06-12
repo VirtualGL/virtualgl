@@ -17,10 +17,6 @@
 
 #include "faker-sym.h"
 
-int __vglConfigDepth(GLXFBConfig);
-
-int __vglConfigClass(GLXFBConfig);
-
 GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	int &, int &, int &, int &, int &, int &, bool glx13=false);
 

@@ -28,6 +28,16 @@ Added support for the GLX_EXT_swap_control and GLX_SGI_swap_control extensions
 and a new configuration variable (VGL_REFRESHRATE) that can be used to control
 them.  See the User's Guide for more information.
 -------------------------------------------------------------------------------
+[6]
+Added support for depth=32 visuals and FB configs.
+-------------------------------------------------------------------------------
+[7]
+Added a new "window manager" mode that disables certain features in VirtualGL
+that interfere with 3D window managers such as compiz.  This, combined with
+[6] and [4] above, should allow compiz to run properly with this version of
+VirtualGL, provided that the 2D X Server has support for the X Composite
+extension.  See the User's Guide for more information.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

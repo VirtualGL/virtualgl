@@ -106,6 +106,8 @@ usage()
 	echo
 	echo "+/-v      : Enable/disable verbose VirtualGL messages [default = disabled]"
 	echo
+	echo "+wm/-wm   : Enable/disable window manager mode (for running compiz, etc.)"
+	echo
 	echo "-64       : (Solaris only) Preload VirtualGL only into 64-bit apps"
 	echo "-32       : (Solaris only) Preload VirtualGL only into 32-bit apps"
 	echo
@@ -166,6 +168,8 @@ do
 	+v*)        VGL_VERBOSE=1     ; export VGL_VERBOSE  ;;
 	-fps)       VGL_FPS=$2        ; export VGL_FPS      ; shift     ;;
 	-ms)        VGL_SAMPLES=$2    ; export VGL_SAMPLES  ; shift     ;;
+	+wm)        VGL_WM=1          ; export VGL_WM       ;;
+  -wm)        VGL_WM=0          ; export VGL_WM       ;;
 	-ld)        LD_LIBRARY_PATH=$2:$LD_LIBRARY_PATH ;
 	            export LD_LIBRARY_PATH              ; shift     ;;
 	-64)        __VGL_64=1; __VGL_32=0        ;;

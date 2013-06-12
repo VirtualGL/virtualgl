@@ -889,6 +889,18 @@ Each method of configuration takes precedence over the previous method:
 	to compress images, which type of X11 drawing it is using, etc.  This can be
 	helpful when diagnosing performance problems.
 
+{anchor: VGL_WM}
+| Environment Variable | ''VGL_WM = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-wm'' / ''+wm'' |
+| Summary | Disable/enable window manager mode |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: When window manager mode is enabled, VirtualGL will disable
+	some of its internal features that interfere with the correct operation of
+	3D window managers such as compiz.
+
 | Environment Variable | ''VGL_X11LIB = ''__''{l}''__ |
 | Summary | __''{l}''__ = the location of an alternate X11 library |
 | Image Transports | All |

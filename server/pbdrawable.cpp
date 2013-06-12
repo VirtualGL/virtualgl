@@ -297,7 +297,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	if(!_ctx)
 	{
-		if(_direct!=True && _direct!=False)
+		if(!isinit())
 			_throw("pbdrawable instance has not been fully initialized");
 		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
 			_direct))==0)
@@ -427,7 +427,7 @@ void pbdrawable::copypixels(GLint src_x, GLint src_y, GLint w, GLint h,
 {
 	if(!_ctx)
 	{
-		if(_direct!=True && _direct!=False)
+		if(!isinit())
 			_throw("pbdrawable instance has not been fully initialized");
 		if((_ctx=_glXCreateNewContext(_localdpy, _config, GLX_RGBA_TYPE, NULL,
 			_direct))==0)

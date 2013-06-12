@@ -381,34 +381,3 @@ XVisualInfo *__vglVisualFromVisualID(Display *dpy, int screen, VisualID vid)
 	vtemp.screen=screen;
 	return XGetVisualInfo(dpy, VisualIDMask|VisualScreenMask, &vtemp, &n);
 }
-
-
-int __vglConfigDepth(GLXFBConfig c)
-{
-	int depth, render_type, r, g, b;
-	errifnot(c);
-	render_type=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-	if(render_type==GLX_RGBA_BIT)
-	{
-		r=__vglServerVisualAttrib(c, GLX_RED_SIZE);
-		g=__vglServerVisualAttrib(c, GLX_GREEN_SIZE);
-		b=__vglServerVisualAttrib(c, GLX_BLUE_SIZE);
-		depth=r+g+b;
-		if(depth<8) depth=1;  // Monochrome
-	}
-	else
-	{
-		depth=__vglServerVisualAttrib(c, GLX_BUFFER_SIZE);
-	}
-	return depth;
-}
-
-
-int __vglConfigClass(GLXFBConfig c)
-{
-	int rendertype;
-	errifnot(c);
-	rendertype=__vglServerVisualAttrib(c, GLX_RENDER_TYPE);
-	if(rendertype==GLX_RGBA_BIT) return TrueColor;
-	else return PseudoColor;
-}
