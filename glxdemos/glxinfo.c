@@ -42,7 +42,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/gl.h>
-#include <GL/glx.h>
+#include "../common/glx.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -62,14 +62,6 @@
 
 #ifndef GLX_COLOR_INDEX_BIT
 #define GLX_COLOR_INDEX_BIT		0x00000002
-#endif
-
-#ifndef GLX_CONTEXT_CORE_PROFILE_BIT_ARB
-#define GLX_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
-#endif
-
-#ifndef GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT
-#define GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT 0x00000008
 #endif
 
 #ifndef GL_NUM_EXTENSIONS

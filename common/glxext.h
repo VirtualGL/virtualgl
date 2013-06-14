@@ -654,6 +654,11 @@ extern unsigned int glXGetAGPOffsetMESA (const void *);
 typedef unsigned int ( * PFNGLXGETAGPOFFSETMESAPROC) (const void *pointer);
 #endif
 
+#ifndef GLX_EXT_fbconfig_packed_float
+#define GLX_RGBA_UNSIGNED_FLOAT_TYPE_EXT   0x20B1
+#define GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT    0x00000008
+#endif
+
 #ifndef GLX_EXT_texture_from_pixmap
 #define GLX_TEXTURE_1D_BIT_EXT             0x00000001
 #define GLX_TEXTURE_2D_BIT_EXT             0x00000002
