@@ -4,7 +4,8 @@ Section: misc
 Priority: optional
 Architecture: @DEBARCH@
 Essential: no
-Maintainer: The VirtualGL Project [http://www.VirtualGL.org]
+Maintainer: The VirtualGL Project <information@VirtualGL.org>
+Homepage: http://www.VirtualGL.org
 Description: A toolkit for displaying OpenGL applications to thin clients
  VirtualGL is a toolkit that allows most Unix/Linux OpenGL applications to be
  remotely displayed with hardware 3D acceleration to thin clients, regardless
