@@ -21,9 +21,10 @@
 extern void *_vgl_dlopen(const char *, int);
 
 
-// If an application uses dlopen()/dlsym() to load functions from libGL, this
-// bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to intercept
-// dlopen() and return a handle to itself rather than a handle to libGL.
+// If an application uses dlopen()/dlsym() to load functions from libGL or
+// libX11, this bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to
+// intercept dlopen() and return a handle to itself rather than a handle to
+// libGL or libX11.
 //
 // NOTE: If the application tries to use dlopen() to obtain a handle to libdl,
 // we similarly replace the handle with a handle to libdlfaker.  This works
@@ -49,9 +50,12 @@ void *dlopen(const char *filename, int flag)
 
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="librrfaker.so";
-	if(filename && (!strncmp(filename, "libGL.", 6)
-		|| strstr(filename, "/libGL.") || !strncmp(filename, "libX11.", 7)
-		|| strstr(filename, "/libX11.")))
+	if(filename &&
+		(!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
+			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
+			|| (flag&RTLD_LAZY
+					&& (!strncmp(filename, "libopengl.", 10)
+							|| strstr(filename, "/libopengl.")))))
 	{
 		if(verbose)
 			fprintf(stderr,
