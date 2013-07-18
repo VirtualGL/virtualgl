@@ -72,3 +72,6 @@ endif()
 add_executable(glreadtest glreadtest.cpp)
 target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 	${X11_X11_LIB})
+if(VGL_BUILDSERVER)
+	install(TARGETS glreadtest DESTINATION ${VGL_BINDIR})
+endif()

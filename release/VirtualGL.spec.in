@@ -194,6 +194,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %doc %{docdir}/*
 
 %dir %{bindir}
+%{bindir}/glreadtest
 %{bindir}/tcbench
 %{bindir}/nettest
 %{bindir}/cpustat
