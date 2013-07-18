@@ -642,7 +642,10 @@ query_vsync(Display *dpy, GLXDrawable drawable)
        */
       interval = 0;
       if (swapinterval >= 1) {
-         glXSwapIntervalSGI(swapinterval);
+         PFNGLXSWAPINTERVALSGIPROC pglXSwapIntervalSGI =
+            (PFNGLXSWAPINTERVALSGIPROC)
+            glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalSGI");
+         (*pglXSwapIntervalSGI)(swapinterval);
          interval = swapinterval;
       }
    }
