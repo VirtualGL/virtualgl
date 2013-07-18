@@ -277,8 +277,16 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	done:
 
-		stoptrace();  if(configs) {prargc(configs[0]);}
-		if(configs && nelements) {prargi(*nelements);}	 closetrace();
+		stoptrace();
+		if(configs && nelements)
+		{
+			if(*nelements)
+				for(int i=0; i<*nelements; i++)
+					rrout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
+						(unsigned long)configs[i], configs[i]? _FBCID(configs[i]):0);
+			prargi(*nelements);
+		}
+		closetrace();
 
 	return configs;
 }
@@ -1216,7 +1224,17 @@ GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
 
 GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 {
-	return _glXGetFBConfigs(_localdpy, DefaultScreen(_localdpy), nelements);
+	GLXFBConfig *configs=NULL;
+
+		opentrace(glXGetFBConfigs);  prargd(dpy);  prargi(screen);
+		starttrace();
+	
+	configs=_glXGetFBConfigs(_localdpy, DefaultScreen(_localdpy), nelements);
+
+		stoptrace();  if(configs && nelements) prargi(*nelements);
+		closetrace();
+
+	return configs;
 }
 
 
