@@ -38,6 +38,10 @@ that interfere with 3D window managers such as compiz.  This, combined with
 VirtualGL, provided that the 2D X Server has support for the X Composite
 extension.  See the User's Guide for more information.
 -------------------------------------------------------------------------------
+[8]
+Fixed a BadDrawable X11 error that occurred when running the Steam client in
+VirtualGL.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
