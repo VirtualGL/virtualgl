@@ -213,6 +213,16 @@ static int __vgl_loadglsymbols(void *dllhnd)
 
 	lsymopt(glXBindTexImageEXT)
 	lsymopt(glXReleaseTexImageEXT)
+	// For some reason, the ATI implementation of libGL on Ubuntu (and maybe
+	// other platforms as well) does not export glXBindTexImageEXT and
+	// glXReleaseTexImageEXT, but those symbols can be obtained through
+	// glXGetProcAddressARB().
+	if(!__glXBindTexImageEXT && __glXGetProcAddressARB)
+		__glXBindTexImageEXT=
+			(_glXBindTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXBindTexImageEXT");
+	if(!__glXReleaseTexImageEXT && __glXGetProcAddressARB)
+		__glXReleaseTexImageEXT=
+			(_glXReleaseTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXReleaseTexImageEXT");
 
 	lsymopt(glXSwapIntervalEXT)
 	lsymopt(glXSwapIntervalSGI)
