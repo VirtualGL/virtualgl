@@ -249,15 +249,14 @@ int XFree(void *data)
 // process has no X event loop, monitoring this function is the only way for
 // VirtualGL to know that the window size has changed.
 
-Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
+Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	int *y, unsigned int *width, unsigned int *height,
 	unsigned int *border_width, unsigned int *depth)
 {
 	Status ret=0;
 	unsigned int w=0, h=0;
 
-		opentrace(XGetGeometry);  prargx(display);  prargx(drawable);
-		starttrace();
+		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
 
 	pbwin *pbw=NULL;
 	if(winh.findpb(drawable, pbw))
@@ -265,12 +264,11 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
 		// prevents a BadDrawable error in Steam.
-		display=pbw->get2ddpy();
+		dpy=pbw->get2ddpy();
 		drawable=pbw->getx11drawable();
 	}
-	ret=_XGetGeometry(display, drawable, root, x, y, &w, &h, border_width,
-		depth);
-	if(winh.findpb(display, drawable, pbw) && w>0 && h>0)
+	ret=_XGetGeometry(dpy, drawable, root, x, y, &w, &h, border_width, depth);
+	if(winh.findpb(dpy, drawable, pbw) && w>0 && h>0)
 		pbw->resize(w, h);
 
 		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
@@ -287,20 +285,20 @@ Status XGetGeometry(Display *display, Drawable drawable, Window *root, int *x,
 // the contents of the 3D pixmap, which resides on the 3D X server, with the
 // 2D pixmap on the 2D X server before calling the "real" XGetImage() function.
 
-XImage *XGetImage(Display *display, Drawable d, int x, int y,
+XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	unsigned int width, unsigned int height, unsigned long plane_mask,
 	int format)
 {
 	XImage *xi=NULL;
 
-		opentrace(XGetImage);  prargd(display);  prargx(d);  prargi(x);  prargi(y);
-		prargi(width);  prargi(height);  prargx(plane_mask);  prargi(format);
-		starttrace();
+		opentrace(XGetImage);  prargd(dpy);  prargx(drawable);  prargi(x);
+		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
+		prargi(format);  starttrace();
 
-	pbpm *pbp=pmh.find(display, d);
+	pbpm *pbp=pmh.find(dpy, drawable);
 	if(pbp) pbp->readback();
 
-	xi=_XGetImage(display, d, x, y, width, height, plane_mask, format);
+	xi=_XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
 		stoptrace();  closetrace();
 
