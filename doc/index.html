@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2013-06-11T21:50:38">
+<meta name="date" content="2013-08-25T17:34:21">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2735,9 +2735,9 @@ Transport.</p>
 <h1 id="hd0015"><a name="file015"></a>15&nbsp;Using VirtualGL with VirtualBox</h1>
 
 <p>VirtualBox is an enterprise-class, open source virtualization solution 
-provided by Oracle.  With the release of VirtualBox 2.1.0, experimental 
-support was added for hardware-accelerated OpenGL in Windows and Linux 
-guests running on Windows, MacIntel, Linux, and Solaris/x86 hosts. 3D 
+provided by Oracle.  Since version 2.1.0, VirtualBox has provided 
+support for hardware-accelerated OpenGL in Windows and Linux guests 
+running on Windows, Mac/Intel, Linux, and Solaris/x86 hosts. 3D 
 acceleration in VirtualBox is accomplished by installing a special 
 driver in the guest that uses a subset of Chromium to transmit OpenGL 
 calls through a local connection to the VirtualBox process running on 
@@ -2775,13 +2775,12 @@ Solaris/x86 host, this solution provides a means of displaying Windows
 <h3 id="hd0015000002">Launching VirtualBox</h3>
 
 <p>This should work on most Linux systems.  It is known to work with 
-VirtualBox 4.1.8 and prior and VirtualBox 4.2 and later.</p>
+VirtualBox 4.1.8 and prior and with VirtualBox 4.2 and later.</p>
 
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        <code>vglrun&nbsp;VirtualBox&nbsp;-startvm&nbsp;</code><em><code>{VM&nbsp;name&nbsp;or&nbsp;UUID}</code></em>
-    </li>
-</ol>
+<pre class="verbatim">
+vglrun&nbsp;VirtualBox&nbsp;-startvm&nbsp;{VM&nbsp;name&nbsp;or&nbsp;UUID}
+</pre>
+
 <div class="important"><p class="important">
 With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code>/usr/lib/virtualbox/VBoxTestOGL</code> and symlink <code>/bin/true</code> to <code>/usr/lib/virtualbox/VBoxTestOGL</code> in order to use those versions of VirtualBox with VirtualGL.
 </p></div>
@@ -2808,12 +2807,12 @@ With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code
     <li class="Itemize-1 Itemize asterisk">
         VirtualBox sends mainly uncompressed image updates to the X display, so 
         the 2D elements of the virtual machine display will not perform well 
-        over a remote X11 connection unless a 
+        over a remote X11 connection unless gigabit Ethernet (or faster) and a 
         <a href="#Direct_X11_Connection">direct X11 
         connection</a><a name="idx0045"></a> (<code>vglconnect&nbsp;-x</code>) 
-        is used with gigabit Ethernet (or faster.)  For 100 Megabit and slower 
-        networks, using a high-performance X proxy (such as TurboVNC) is 
-        recommended when remotely displaying VirtualBox using VirtualGL.
+        are used.  Using a high-performance X proxy (such as TurboVNC) is 
+        generally preferred when remotely displaying VirtualBox using VirtualGL, 
+        particularly on 100 Megabit and slower networks.
     </li>
 </ul>
 
