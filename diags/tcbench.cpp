@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2006-2007 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,8 +22,8 @@
 #include "fbx.h"
 #ifndef _WIN32
  extern "C" {
- #define NeedFunctionPrototypes 1
- #include "dsimple.h"
+  #define NeedFunctionPrototypes 1
+  #include "dsimple.h"
  }
  #include <sys/signal.h>
  #include <sys/time.h>
@@ -33,7 +33,16 @@
 
 #define _throw(f, l, m) {  \
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
-#define fbx(a) {if((a)==-1)_throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
+#define fbx(a) {if((a)==-1) _throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
+#ifdef _WIN32
+char _message[256];
+#define _throww32(f) {  \
+	if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), _message, 255, NULL))  \
+		strncpy(_message, "Error in FormatMessage()", 256);  \
+	_throw(f, __LINE__, _message);  \
+ }
+#endif
 
 
 #define DEFSAMPLERATE 100
@@ -47,10 +56,10 @@
 
 void usage(void)
 {
-	printf("\nUSAGE: %s [-h|-?] -t<seconds> -s<samples per second>\n",
-		program_name);
-	printf("       -wh<window handle in hex>\n");
-	printf("       -x<x offset> -y<y offset>\n\n");
+	printf("\n");
+	printf("USAGE: %s [-h|-?]\n", program_name);
+	printf("       [-t <seconds>] [-s <samples per second>]\n");
+	printf("       [-wh <window handle in hex>] [-x <x offset>] [-y <y offset>]\n\n");
 	printf("-h or -? = This help screen\n");
 	printf("-t = Run the benchmark for this many seconds (default: %.1f)\n",
 		DEFBENCHTIME);
@@ -66,7 +75,7 @@ void usage(void)
 int main(int argc, char **argv)
 {
 	int i;  fbx_wh wh;
-	double benchtime=DEFBENCHTIME, benchstart=0., benchend;  rrtimer timer;
+	double benchtime=DEFBENCHTIME, elapsed;  rrtimer timer;
 	int samplerate=DEFSAMPLERATE, xcoord=-1, ycoord=-1;
 
 	program_name=argv[0];
@@ -76,23 +85,31 @@ int main(int argc, char **argv)
 	{
 		double tempf;  int temp;
 		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage();
-		if(!strnicmp(argv[i], "-t", 2) && strlen(argv[i])>2 &&
-		  (tempf=atof(&argv[i][2]))>0.) benchtime=tempf;
-		if(!strnicmp(argv[i], "-s", 2) && strlen(argv[i])>2 &&
-		  (temp=atoi(&argv[i][2]))>1) samplerate=temp;
-		if(!strnicmp(argv[i], "-x", 2) && strlen(argv[i])>2 &&
-		  (temp=atoi(&argv[i][2]))>0) xcoord=temp;
-		if(!strnicmp(argv[i], "-y", 2) && strlen(argv[i])>2 &&
-		  (temp=atoi(&argv[i][2]))>0) ycoord=temp;
-		if(!strnicmp(argv[i], "-wh", 3) && strlen(argv[i])>3)
+		if(!stricmp(argv[i], "-t") && i<argc-1)
+		{
+			if((tempf=atof(argv[++i]))>0.) benchtime=tempf;
+		}
+		if(!stricmp(argv[i], "-s") && i<argc-1)
+		{
+			if((temp=atoi(argv[++i]))>1) samplerate=temp;
+		}
+		if(!stricmp(argv[i], "-x") && i<argc-1)
+		{
+			if((temp=atoi(argv[++i]))>0) xcoord=temp;
+		}
+		if(!stricmp(argv[i], "-y") && i<argc-1)
+		{
+			if((temp=atoi(argv[++i]))>0) ycoord=temp;
+		}
+		if(!stricmp(argv[i], "-wh") && i<argc-1)
 		{
 			#ifdef _WIN32
 			fbx_wh temp;
 			memset(&temp, 0, sizeof(temp));
-			if(sscanf(&argv[i][3], "%x", &temp)==1) wh=temp;
+			if(sscanf(argv[++i], "%x", &temp)==1) wh=temp;
 			#else
 			unsigned int temp=0;
-			if(sscanf(&argv[i][3], "%x", &temp)==1) wh.d=(Drawable)temp;
+			if(sscanf(argv[++i], "%x", &temp)==1) wh.d=(Drawable)temp;
 			#endif
 		}
 	}
@@ -100,31 +117,36 @@ int main(int argc, char **argv)
 	printf("\nThin Client Benchmark\n");
 
 	#ifdef _WIN32
-	if(!wh) {
-	printf("Click the mouse in the window that you wish to monitor ... ");
-	wh=GetForegroundWindow();
-	double tStart, tElapsed;  int t, oldt=-1;
-	tStart=timer.time();
-	do
+
+	if(!wh)
 	{
-		tElapsed=timer.time()-tStart;
-		t=(int)(10.-tElapsed);
-		if(t!=oldt) {oldt=t;  printf("%.2d\b\b", t);}
-		Sleep(50);
-	} while(wh==GetForegroundWindow() && tElapsed<10.);
-	wh=GetForegroundWindow();
-	FlashWindow(wh, TRUE);
-	printf("  \n");
+		printf("Click the mouse in the window that you wish to monitor ... ");
+		wh=GetForegroundWindow();
+		int t, oldt=-1;
+		timer.start();
+		do
+		{
+			elapsed=timer.elapsed();
+			t=(int)(10.-elapsed);
+			if(t!=oldt) {oldt=t;  printf("%.2d\b\b", t);}
+			Sleep(50);
+		} while(wh==GetForegroundWindow() && elapsed<10.);
+		if((wh=GetForegroundWindow())==0)
+			_throww32("Could not get foreground window")
+		FlashWindow(wh, TRUE);
+		printf("  \n");
 	}
 	char temps[1024];
 	GetWindowText(wh, temps, 1024);
 	printf("Monitoring window 0x%.8x (%s)\n", wh, temps);
+
 	#else
+
 	if(!XInitThreads()) {fprintf(stderr, "XInitThreads() failed\n");  exit(1);}
 	if(!(wh.dpy=XOpenDisplay(0)))
 	{
-		fprintf(stderr, "Could not open display %s\n",
-		XDisplayName(0));  exit(1);
+		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
+		exit(1);
 	}
 	if(!wh.d)
 	{
@@ -132,6 +154,7 @@ int main(int argc, char **argv)
 		wh.d=Select_Window(wh.dpy);
 		XSetInputFocus(wh.dpy, wh.d, RevertToNone, CurrentTime);
 	}
+
 	#endif
 
 	fbx_struct fb;
@@ -151,34 +174,33 @@ int main(int argc, char **argv)
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	#endif
-	benchend=timer.time();
+	timer.start();
 	do
 	{
 		fbx(fbx_read(&fb, xcoord, ycoord));
 		samples++;
 		if(first)
 		{
-			first=0;
-			benchstart=timer.time();
+			first=0;  frames++;
 		}
 		else
 		{
 			if(memcmp(buf, fb.bits, fbx_ps[fb.format]*32*32)) frames++;
 		}
 		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
+		elapsed=timer.elapsed();
 		#ifdef _WIN32
-		int sleeptime=(int)(1000.*(1./(float)samplerate-(timer.time()-benchend)));
+		int sleeptime=(int)(1000.*((double)samples/(double)samplerate-elapsed));
 		if(sleeptime>0) Sleep(sleeptime);
 		#else
-		int sleeptime=(int)(1000000.*(1./(float)samplerate
-			-(timer.time()-benchend)));
+		int sleeptime=(int)(1000000.*((double)samples/(double)samplerate-elapsed));
 		if(sleeptime>0) usleep(sleeptime);
 		#endif
-	} while((benchend=timer.time())-benchstart<benchtime);
+	} while((elapsed=timer.elapsed())<benchtime);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	#endif
 	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples,
-		frames, benchend-benchstart, (double)frames/(benchend-benchstart));
+		frames, elapsed, (double)frames/elapsed);
 	return 0;
 }
