@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,7 @@
  */
 
 /* This program's goal is to reproduce, as closely as possible, the image
-   output of the NVidia SphereMark demo by R. Stephen Glanville using the
+   output of the nVidia SphereMark demo by R. Stephen Glanville using the
    simplest available rendering method.  GLXSpheres is meant primarily to
    serve as an image pipeline benchmark for VirtualGL. */
 
@@ -56,9 +56,12 @@
 #define NSCHEMES 7
 enum {GREY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN};
 
+#define DEFBENCHTIME 2.0
+
 Display *dpy=NULL;  Window win=0, olwin=0;
 int usestereo=0, useoverlay=0, useci=0, useimm=0, interactive=0, oldb=1,
 	locolor=0, maxframes=0, totalframes=0, directctx=True;
+double benchtime=DEFBENCHTIME;
 int ncolors=0, nolcolors, colorscheme=GREY;
 Colormap colormap=0, olcolormap=0;
 GLXContext ctx=0, olctx=0;
@@ -389,7 +392,7 @@ int display(int advance)
 	{
 		elapsed+=rrtime()-start;  frames++;  totalframes++;
 		mpixels+=(double)width*(double)height/1000000.;
-		if(elapsed>2. || (maxframes && totalframes>maxframes))
+		if(elapsed>benchtime || (maxframes && totalframes>maxframes))
 		{
 			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
 				(double)frames/elapsed, mpixels/elapsed);
@@ -485,6 +488,8 @@ void usage(char **argv)
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
 	printf("-f <n> = max frames to render\n");
+	printf("-bt <t> = print benchmark results every <t> seconds (default=%.1f)\n",
+		DEFBENCHTIME);
 	printf("-w <wxh> = specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
@@ -545,6 +550,11 @@ int main(int argc, char **argv)
 				maxframes=mf;
 				printf("Number of frames to render: %d\n", maxframes);
 			}
+		}
+		if(!strnicmp(argv[i], "-bt", 3) && i<argc-1)
+		{
+			double temp=atof(argv[++i]);
+			if(temp>0.0) benchtime=temp;
 		}
 		if(!strnicmp(argv[i], "-sc", 3) && i<argc-1)
 		{
