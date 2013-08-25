@@ -1,4 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
+ * Copyright (C)2013 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -25,7 +26,8 @@ void collect(void)
 	static double min[MAXCPUS+1], max[MAXCPUS+1], grandtotal[MAXCPUS+1];
 	static long long iter=0;
 	double usr, nice, sys, total;
-	long long _usrjif, _nicejif, _sysjif, _idlejif, _totaljif;
+	long long _usrjif, _nicejif, _sysjif, _idlejif, _iojif, _hiqjif, _siqjif,
+		_totaljif;
 	static int first=1;
 	int i, j;
 
@@ -40,15 +42,18 @@ void collect(void)
 	for(i=0; i<MAXCPUS+1; i++)
 	{
 		if(!fgets(temps, 254, procfile)) continue;
-		if((j=sscanf(temps, "%s %lld %lld %lld %lld", temps2, &_usrjif, &_nicejif,
-			&_sysjif, &_idlejif))!=5 || strncasecmp(temps, "cpu", 3))
+		_iojif=_hiqjif=_siqjif=0;
+		if((j=sscanf(temps, "%s %lld %lld %lld %lld %lld %lld %lld", temps2,
+			&_usrjif, &_nicejif, &_sysjif, &_idlejif, &_iojif, &_hiqjif, &_siqjif))<5
+			|| strncasecmp(temps, "cpu", 3))
 			break;
-		_totaljif=_usrjif+_nicejif+_sysjif+_idlejif;
+		_totaljif=_usrjif+_nicejif+_sysjif+_idlejif+_iojif+_hiqjif+_siqjif;
 		if(!first)
 		{
 			usr=(double)(_usrjif-usrjif[i])/(double)(_totaljif-totaljif[i])*100.;
 			nice=(double)(_nicejif-nicejif[i])/(double)(_totaljif-totaljif[i])*100.;
-			sys=(double)(_sysjif-sysjif[i])/(double)(_totaljif-totaljif[i])*100.;
+			sys=(double)(_sysjif+_iojif+_hiqjif+_siqjif-sysjif[i])/
+				(double)(_totaljif-totaljif[i])*100.;
 			total=usr+nice+sys;
 			if(total>max[i]) max[i]=total;
 			if(total<min[i]) min[i]=total;
@@ -63,7 +68,7 @@ void collect(void)
 		}
 		usrjif[i]=_usrjif;
 		nicejif[i]=_nicejif;
-		sysjif[i]=_sysjif;
+		sysjif[i]=_sysjif+_iojif+_hiqjif+_siqjif;
 		totaljif[i]=_totaljif;
 	}
 	if(first) first=0;
