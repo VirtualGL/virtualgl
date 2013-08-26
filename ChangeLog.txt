@@ -42,6 +42,9 @@ extension.  See the User's Guide for more information.
 Fixed a BadDrawable X11 error that occurred when running the Steam client in
 VirtualGL.
 -------------------------------------------------------------------------------
+[9]
+Improved the accuracy of TCBench and CPUstat
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
