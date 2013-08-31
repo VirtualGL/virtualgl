@@ -53,6 +53,9 @@ OpenGL and GLX, and X windows.
 #INCLUDE: virtualbox.txt
 {nl}
 ----8<--------------
+#INCLUDE: vmware.txt
+{nl}
+----8<--------------
 #INCLUDE: apprecipes.txt
 {nl}
 ----8<--------------
