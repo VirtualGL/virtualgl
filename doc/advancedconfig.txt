@@ -83,9 +83,8 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl}
 	__xv__ = Encode images as YUV420P (planar YUV with 4X chrominance
 	subsampling) and display them to the 2D X server using the XV Transport.
-	This transport is designed for use with X proxies, such as the Sun Ray Server
-	Software, that support the X Video extension (see
-	{ref prefix="Chapter ":X_Video_Support}.)
+	This transport is designed for use with X proxies that support the X Video
+	extension (see {ref prefix="Chapter ":X_Video_Support}.)
 	{nl}{nl}
 	__yuv__ = Encode images as YUV420P, send using the VGL Transport, and display
 	on the client machine using the X Video extension.  This greatly reduces the
@@ -96,13 +95,11 @@ Each method of configuration takes precedence over the previous method:
 	If this option is not specified, then the default is set as follows:
 	{nl}{nl}
 	If the ''DISPLAY'' environment variable begins with '':'' or ''unix:'', then
-	VirtualGL assumes that the X display connection is local.  If it detects that
-	the 2D X server is a Sun Ray X Server instance, then it will default to using
-	__xv__ compression.  Otherwise, it will default to __proxy__ compression.
+	VirtualGL assumes that the X display connection is local and will default to
+	using __proxy__ compression.
 	{nl}{nl}
 	If VirtualGL detects that the 2D X server is remote, then it will default to
-	using __yuv__ compression if that X server is a Sun Ray X Server instance or
-	__jpeg__ compression otherwise.
+	using __jpeg__ compression.
 
 	!!! If an image transport plugin is being used, then you can set
 	''VGL_COMPRESS'' to any numeric value >= 0 (Default value = 0.)  The plugin

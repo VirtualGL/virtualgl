@@ -38,9 +38,6 @@ OpenGL and GLX, and X windows.
 #INCLUDE: xvideosupport.txt
 {nl}
 ----8<--------------
-#INCLUDE: sunrayusage.txt
-{nl}
-----8<--------------
 #INCLUDE: transportplugins.txt
 {nl}
 ----8<--------------
