@@ -23,7 +23,7 @@ To use VirtualGL with VMWare Workstation, perform the following procedures:
 *** Launching VMWare
 #OPT: noList! plain!
 
-This has been tested with VMWare Workstation 9.0.x.
+This has been tested with VMWare Workstation 9.
 
 #Verb: <<---
 vglrun vmware -X {VM path}/{VM name}.vmx
