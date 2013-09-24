@@ -696,13 +696,18 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | 1x |
 #OPT: hiCol=first
 
-	Description :: When an image is encoded using JPEG, each pixel in the image
-	is first converted from RGB (Red/Green/Blue) to YUV.  An RGB pixel has three
-	values that specify the amounts of red, green, and blue that make up the
-	pixel's color.  A YUV pixel has three values that specify the overall
-	brightness of the pixel (Y, or "luminance") and the overall color of the
-	pixel (U and V, or "chrominance".)
-	{nl}{nl}
+	Description :: When an image is compressed using JPEG, each pixel in the
+	image is first converted from RGB (Red/Green/Blue) to YCbCr.  An RGB pixel
+	has three values that specify the amounts of red, green, and blue that make
+	up the pixel's color.  A YCbCr pixel has three values that specify the
+	overall brightness of the pixel (Y, or "luminance") and the overall color of
+	the pixel (Cb and Cr, or "chrominance".)
+
+	!!! NOTE: in the digital world, the terms "YCbCr" and "YUV" are often used
+	interchangeably.  Per the convention of the image processing and digital
+	video communities, we use "YCbCr" when discussing JPEG compression and "YUV"
+	when discussing video formats, but they are really the same thing.
+
 	Since the human eye is less sensitive to changes in color than it is to
 	changes in brightness, the chrominance components for some of the pixels can
 	be discarded without much noticeable loss in image quality.  This technique,
