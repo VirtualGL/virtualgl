@@ -44,7 +44,7 @@ class pbwin : public pbdrawable
 		bool _dirty, _rdirty;
 		void wmdelete(void);
 		int getswapinterval(void) { return _swapinterval; }
-		int setswapinterval(int swapinterval) { _swapinterval=swapinterval; }
+		void setswapinterval(int swapinterval) { _swapinterval=swapinterval; }
 
 	private:
 

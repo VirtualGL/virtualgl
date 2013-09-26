@@ -43,7 +43,6 @@
 #define GLX_MESA_swap_control 1
 typedef int (*PFNGLXGETSWAPINTERVALMESAPROC)(void);
 typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
-typedef 
 #endif
 
 
