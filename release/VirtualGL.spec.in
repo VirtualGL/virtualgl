@@ -34,7 +34,7 @@
 %ifarch x86_64
 %define fakelibdir %{prefix}/fakelib64
 %else
-%define fakelibdir %{prefix}/fakelib
+%define fakelibdir %{prefix}/fakelib32
 %endif
 
 # Path under which docs should be installed
