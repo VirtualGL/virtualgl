@@ -83,6 +83,12 @@ add_custom_target(vglrun ALL
 	COMMAND chmod u+rx ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglrun)
 install(PROGRAMS vglrun DESTINATION ${VGL_BINDIR})
+configure_file(vglrun.vars.in
+	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS} @ONLY)
+execute_process(COMMAND chmod +x .vglrun.vars${BITS}
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS}
+	DESTINATION ${VGL_BINDIR})
 
 
 #

@@ -57,6 +57,7 @@ makedeb()
 	mkdir $TMPDIR/DEBIAN
 
 	make install DESTDIR=$TMPDIR
+	rm $TMPDIR/$BINDIR/.vglrun.vars*
 	mkdir -p $TMPDIR/usr
 
 	if [ $SUPPLEMENT = 1 ]; then
@@ -66,10 +67,10 @@ makedeb()
 
 		rm -rf $TMPDIR/$DOCDIR
 		rm -rf $TMPDIR/$INCDIR
-		mv $TMPDIR/$BINDIR/glxspheres $TMPDIR/
+		mv $TMPDIR/$BINDIR/glxspheres* $TMPDIR/
 		rm -rf $TMPDIR/$BINDIR
 		mkdir -p $TMPDIR/$BINDIR
-		mv $TMPDIR/glxspheres $TMPDIR/$BINDIR/
+		mv $TMPDIR/glxspheres* $TMPDIR/$BINDIR/
 
 		if [ ! "$LIBDIR" = "/usr/lib/i386-linux-gnu" ]; then
 			if [ ! "$LIBDIR" = "/usr/lib32" ]; then
@@ -86,10 +87,6 @@ makedeb()
 	else
 
 		cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
-
-		if [ "$DEBARCH" = "amd64" ]; then
-			mv $TMPDIR/$BINDIR/glxspheres $TMPDIR/$BINDIR/glxspheres64
-		fi
 
 		if [ ! "$LIBDIR" = "/usr/lib" ]; then
 			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib $TMPDIR/__tmplib

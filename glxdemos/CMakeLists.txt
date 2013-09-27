@@ -21,10 +21,14 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
 endif()
 install(TARGETS glxinfo DESTINATION ${VGL_BINDIR})
 
-add_executable(glxspheres glxspheres.c)
-target_link_libraries(glxspheres ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
+set(GLXSPHERES glxspheres)
+if(BITS EQUAL 64)
+	set(GLXSPHERES glxspheres64)
+endif()
+add_executable(${GLXSPHERES} glxspheres.c)
+target_link_libraries(${GLXSPHERES} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 	${OPENGL_glu_LIBRARY} m)
-install(TARGETS glxspheres DESTINATION ${VGL_BINDIR})
+install(TARGETS ${GLXSPHERES} DESTINATION ${VGL_BINDIR})
 
 foreach(program pbdemo pbinfo)
 	add_executable(${program} ${program}.c pbutil.c)

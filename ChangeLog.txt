@@ -45,6 +45,27 @@ VirtualGL.
 [9]
 Improved the accuracy of TCBench and CPUstat
 -------------------------------------------------------------------------------
+[10]
+Streamlined VirtualGL's behavior when it is installed from source:
+-- vglrun now works regardless of where the faker libraries have been
+installed.  The build system hard-codes the value of the VGL_LIBDIR CMake
+variable into a script that vglrun invokes so it can add this directory to
+LD_LIBRARY_PATH.  If the faker libraries are installed into a system library
+directory, then packagers can choose to omit the new script, and vglrun will
+continue to work as it always has.
+-- Whenever a 64-bit build is installed, glxspheres is now renamed
+glxspheres64, per the convention of the official packages.  This makes it
+possible to install a 32-bit and a 64-bit version of VirtualGL into the same
+directory.
+-- If the install prefix is set to the default (/opt/VirtualGL), then the
+build system defaults to installing faker libraries from a 32-bit build into
+/opt/VirtualGL/lib32 and faker libraries from a 64-bit build into
+/opt/VirtualGL/lib64.
+-- Similarly, if the install prefix is set to the default (/opt/VirtualGL),
+then the build system defaults to installing the libGL symlink for Chromium
+from a 32-bit build into /opt/VirtualGL/fakelib32 and the libGL symlink for
+Chromium from a 64-bit build into /opt/VirtualGL/fakelib64.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

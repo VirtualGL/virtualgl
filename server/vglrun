@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2012 D. R. Commander
+# Copyright (C)2009-2013 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -130,8 +130,8 @@ export OPENGL_DEVICE
 
 __VGL_DL=1
 __VGL_GE=0
-__VGL_64=0
-__VGL_32=0
+VGL_LIBRARY_PATH=
+MYPATH=`dirname $0`
 
 while [ $# -gt 0 ]
 do
@@ -169,11 +169,8 @@ do
 	-fps)       VGL_FPS=$2        ; export VGL_FPS      ; shift     ;;
 	-ms)        VGL_SAMPLES=$2    ; export VGL_SAMPLES  ; shift     ;;
 	+wm)        VGL_WM=1          ; export VGL_WM       ;;
-  -wm)        VGL_WM=0          ; export VGL_WM       ;;
-	-ld)        LD_LIBRARY_PATH=$2:$LD_LIBRARY_PATH ;
-	            export LD_LIBRARY_PATH              ; shift     ;;
-	-64)        __VGL_64=1; __VGL_32=0        ;;
-	-32)        __VGL_32=1; __VGL_64=0        ;;
+	-wm)        VGL_WM=0          ; export VGL_WM       ;;
+	-ld)        VGL_LIBRARY_PATH=$2 ; shift ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;
 	--)         shift   ; break ;;
@@ -218,79 +215,23 @@ else
 	fi
 fi
 
-case `uname -s` in
-
-SunOS)
-
-if [ -z "$FAKERLIB" ]; then
-FAKERLIB=librrfaker.so
-if [ -f /opt/VirtualGL/lib/64/librrfaker.so ]
-then
-	FAKERLIB=/opt/VirtualGL/lib/64/librrfaker.so
+# This is so we can launch both 32-bit and 64-bit executables using the same
+# script.
+if [ -x "$MYPATH/.vglrun.vars64" ]; then
+	. "$MYPATH/.vglrun.vars64"
 fi
+if [ -x "$MYPATH/.vglrun.vars32" ]; then
+	. "$MYPATH/.vglrun.vars32"
 fi
-export FAKERLIB
-if [ -z "$FAKERLIB32" ]; then
-FAKERLIB32=librrfaker.so
-if [ -f /opt/VirtualGL/lib/librrfaker.so ]
-then
-	FAKERLIB32=/opt/VirtualGL/lib/librrfaker.so
-fi
-fi
-export FAKERLIB32
-if [ $__VGL_64 -eq 0 ]; then
-	if [ -z "$LD_PRELOAD_32" ]; then
-		LD_PRELOAD_32=$FAKERLIB32
-	else
-		LD_PRELOAD_32=$FAKERLIB32:$LD_PRELOAD_32
-	fi
-	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/VirtualGL/lib/libdlfaker.so ]
-		then
-			LD_PRELOAD_32=/opt/VirtualGL/lib/libdlfaker.so:$LD_PRELOAD_32
-		else
-			LD_PRELOAD_32=libdlfaker.so:$LD_PRELOAD_32
+if [ ! -z "$VGL_LIBRARY_PATH" ]; then
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VGL_LIBRARY_PATH
+	export LD_LIBRARY_PATH
+	if [ ! -z "$VGL_VERBOSE" ]; then
+		if [ $VGL_VERBOSE -eq 1 ]; then
+			echo [VGL] NOTICE: Added $VGL_LIBRARY_PATH to LD_LIBRARY_PATH
 		fi
 	fi
-	if [ $__VGL_GE -eq 1 ]; then
-		if [ -f /opt/VirtualGL/lib/libgefaker.so ]
-		then
-			LD_PRELOAD_32=/opt/VirtualGL/lib/libgefaker.so:$LD_PRELOAD_32
-		else
-			LD_PRELOAD_32=libgefaker.so:$LD_PRELOAD_32
-		fi
-	fi
-	export LD_PRELOAD_32
 fi
-if [ $__VGL_32 -eq 0 ]; then
-	if [ -z "$LD_PRELOAD_64" ]; then
-		LD_PRELOAD_64=$FAKERLIB
-	else
-		LD_PRELOAD_64=$FAKERLIB:$LD_PRELOAD_64
-	fi
-	if [ $__VGL_DL -eq 1 ]; then
-		if [ -f /opt/VirtualGL/lib/64/libdlfaker.so ]
-		then
-			LD_PRELOAD_64=/opt/VirtualGL/lib/64/libdlfaker.so:$LD_PRELOAD_64
-		else
-			LD_PRELOAD_64=libdlfaker.so:$LD_PRELOAD_64
-		fi
-	fi
-	if [ $__VGL_GE -eq 1 ]; then
-		if [ -f /opt/VirtualGL/lib/64/libgefaker.so ]
-		then
-			LD_PRELOAD_64=/opt/VirtualGL/lib/64/libgefaker.so:$LD_PRELOAD_64
-		else
-			LD_PRELOAD_64=libgefaker.so:$LD_PRELOAD_64
-		fi
-	fi
-	export LD_PRELOAD_64
-fi
-exec ${1+"$@"}
-
-;;
-
-*)
 
 if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=librrfaker.so
@@ -305,7 +246,3 @@ if [ $__VGL_GE -eq 1 ]; then
 fi
 export LD_PRELOAD
 exec ${1+"$@"}
-
-;;
-
-esac
