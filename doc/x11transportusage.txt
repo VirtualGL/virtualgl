@@ -6,7 +6,7 @@ network.  However, the VGL Transport is not generally suitable for high-latency
 or low-bandwidth networks, due to its reliance on the X11 protocol to send the
 non-3D elements of the 3D application's GUI.  The VGL Transport also
 requires an X server to be running on the client machine, which makes it
-generally more difficult to deploy and use, particularly on Windows clients.
+generally more difficult to deploy and use on Windows clients.
 VirtualGL can be used with an "X proxy" to overcome these limitations.  An X
 proxy acts as a virtual X server, receiving X11 commands from the application
 (and from VirtualGL), rendering the X11 commands into images, compressing the
@@ -33,15 +33,16 @@ can be found in the TurboVNC User's Guide.
 [[http://www.tigervnc.com][TigerVNC]] is a next-generation VNC project based
 on the RealVNC and Xorg code bases.  TigerVNC spun off from the TightVNC
 project in early 2009, and it uses the same high-speed JPEG codec as VirtualGL
-and TurboVNC ([[http://libjpeg-turbo.virtualgl.org][libjpeg-turbo]].)  Unlike
+and TurboVNC ([[http://www.libjpeg-turbo.org][libjpeg-turbo]]).  Unlike
 TurboVNC, TigerVNC is not specifically designed for 3D applications.
 However, TigerVNC can, if properly configured, produce performance that is
-sufficient for using VirtualGL.  TigerVNC is available in Fedora 11 or later.
+sufficient for use with VirtualGL.  As of this writing, TigerVNC is available
+in Fedora 11 or later and in Red Hat Enterprise Linux 6.
 
-Other solutions, such as RealVNC and NX, also work well with VirtualGL.
-Generally, none of these other solutions will provide anywhere near the
-performance of TurboVNC, but some of them have capabilities that TurboVNC lacks
-(NX, for instance, can do seamless windows.)
+Many other X proxy solutions work well with VirtualGL, and some of these
+solutions provide compelling features (seamless windows, for instance, or
+session management), but none of these X proxies matches the performance of
+TurboVNC, as of this writing.
 
 ** Using VirtualGL with an X Proxy on the Same Server
 {anchor: X11_Proxy_Usage_Local}
@@ -58,14 +59,14 @@ With this configuration, you can usually invoke
 /opt/VirtualGL/bin/vglrun {application_executable_or_script}
 ---
 
-from within an X proxy session, and it will "just work."  VirtualGL reads the
-value of the ''DISPLAY'' environment variable to determine whether to enable
-the X11 Transport by default.  If ''DISPLAY'' begins with a colon
-("'':''") or with "''unix:''", then VirtualGL will assume that the X server
+from a terminal inside of the X proxy session, and it will "just work."
+VirtualGL reads the value of the ''DISPLAY'' environment variable to determine
+whether to enable the X11 Transport by default.  If ''DISPLAY'' begins with a
+colon ("'':''") or with "''unix:''", then VirtualGL will assume that the X
 connection is local and will enable the X11 Transport as the default.  In
-some cases, however, the ''DISPLAY'' environment variable within the X proxy
-may not begin with a colon or "''unix:''".  In these cases, it is necessary to
-manually enable the X11 Transport by setting the ''VGL_COMPRESS''
+some cases, however, the ''DISPLAY'' environment variable in the X proxy
+session may not begin with a colon or "''unix:''".  In these cases, it is
+necessary to manually enable the X11 Transport by setting the ''VGL_COMPRESS''
 environment variable to ''proxy'' or by passing an argument of ''-c proxy'' to
 ''vglrun''.
 
@@ -94,9 +95,8 @@ following exceptions:
 
 	#. The "X server" is really the X proxy.
 
-	#. Once connected to the VirtualGL server with SSH, it is recommended that
-		you disable image compression in the VGL Transport by either setting
-		the ''VGL_COMPRESS'' environment variable to ''rgb'' or passing an argument
-		of ''-c rgb'' to ''vglrun'' when launching VirtualGL.  Otherwise, VirtualGL
-		will detect that the connection to the X server is remote, and it will
-		automatically try to enable JPEG compression.
+	#. It is recommended that you disable image compression in the VGL Transport
+		by either setting the ''VGL_COMPRESS'' environment variable to ''rgb'' or
+		passing an argument of ''-c rgb'' to ''vglrun'' when launching VirtualGL.
+		Otherwise, VirtualGL will detect that the connection to the X server is
+		remote, and it will automatically try to enable JPEG compression.

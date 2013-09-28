@@ -64,7 +64,7 @@ prevent CrAppFaker from sending ''glXChooseVisual()'' calls to the 2D X server
 (which would fail if this X server did not support GLX.)  VirtualGL must be
 inserted into the CrServer process on Node 0 to prevent it from sending
 ''glDrawPixels()'' calls to the 2D X server (which would similarly fail if the
-2D X server didn't support GLX and which would create a performance issue if
+2D X server did not support GLX, and which would perform very poorly if
 the 2D X server was remote.)  Instead, VirtualGL forces CrServer to draw into a
 Pbuffer, and VGL then takes charge of transmitting the pixels from the Pbuffer
 to the 2D X server in the most efficient way possible.
@@ -83,13 +83,13 @@ library.  Refer to the following table:
 
 {anchor: CR_SYSTEM_GL_PATH_Table}
 || 32-bit Applications     || 64-bit Applications        ||
-| ''/opt/VirtualGL/fakelib''   | ''/opt/VirtualGL/fakelib64''    |
+| ''/opt/VirtualGL/fakelib32''   | ''/opt/VirtualGL/fakelib64''    |
 #OPT: note="''CR_SYSTEM_GL_PATH'' setting required to use VirtualGL with Chromium" align=center
 
 To run CrAppFaker, it is necessary to set this environment variable to the
 appropriate value so that Chromium will load the interposed versions of OpenGL
 and GLX functions from VirtualGL.  It is also necessary to set ''VGL_GLLIB'' to
-the location of the "real" OpenGL library (example: ''/usr/lib/libGL.so.1'').
+the location of the "real" OpenGL library (example: ''/usr/lib64/libGL.so.1'').
 CrAppFaker creates its own fake version of ''libGL.so'', which is really just a
 copy of Chromium's ''libcrfaker.so''.  Thus, if left to its own devices,
 VirtualGL will unwittingly try to load ''libcrfaker.so'' instead of the "real"
@@ -102,18 +102,19 @@ Chromium to pass OpenGL commands into VirtualGL, then we must use the
 commands into Chromium.  For example:
 
 #Verb: <<---
-export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib
-export VGL_GLLIB=/usr/lib/libGL.so.1
+export CR_SYSTEM_GL_PATH=/opt/VirtualGL/fakelib64
+export VGL_GLLIB=/usr/lib64/libGL.so.1
 crappfaker
 ---
 
 CrAppFaker will copy the application into a temporary directory and then copy
-''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  So, when
-the application is started, it loads ''libcrfaker.so'' instead of ''libGL.so''.
+''libcrfaker.so'' to that same directory, renaming it as ''libGL.so''.  This
+causes the application to load ''libcrfaker.so'' instead of ''libGL.so''.
 ''libcrfaker.so'' will then load VirtualGL instead of the "real" OpenGL
-library, because we've overridden ''CR_SYSTEM_GL_PATH'' to point to VirtualGL's
-fake ''libGL.so''.  VirtualGL will then use the library specified in
-''VGL_GLLIB'' to make any "real" OpenGL calls that it needs to make.
+library, because we've set ''CR_SYSTEM_GL_PATH'' to point to the directory
+containing VirtualGL's fake ''libGL.so''.  VirtualGL will then use the library
+specified in ''VGL_GLLIB'' to make any "real" OpenGL calls that it needs to
+make.
 
 	!!! NOTE: ''crappfaker'' should not be invoked with ''vglrun''.
 
@@ -128,14 +129,14 @@ sort-first rendering job using Chromium and VirtualGL:
 		!!! NOTE: ''crserver'' should be run on display :0 (or whichever display is
 		attached to the 3D hardware.)
 
-	#. On Node 0, ''vglrun crserver &''
+	#. On Node 0, execute ''vglrun crserver &''
 
 	#. On Node 0, set the ''CR_SYSTEM_GL_PATH'' environment variable to the
 		appropriate value based on whether ''crappfaker'' was
 		compiled as a 32-bit or a 64-bit app (see table above)
 
 	#. On Node 0, set ''VGL_GLLIB'' to the location of the "real" OpenGL
-		library (example: ''/usr/lib/libGL.so.1'' or ''/usr/lib64/libGL.so.1'').
+		library (example: ''/usr/lib64/libGL.so.1'').
 
 	#. On Node 0, launch ''crappfaker'' (do not use ''vglrun'' here)
 
@@ -148,7 +149,7 @@ adding VirtualGL into the mix.
 
 In the procedure above, VirtualGL can also be used on the rendering nodes to
 redirect the rendering commands from ''crserver'' into a Pbuffer instead of a
-window.  If you wish to do this, then perform the following procedure in place
+window.  If you want to do this, then perform the following procedure in place
 of step 2 above:
 
 On each of the rendering nodes,
@@ -189,7 +190,7 @@ To make this configuration work with VirtualGL:
 		!!! NOTE: ''crappfaker'' should be run on display :0 (or whichever display
 		is attached to the 3D hardware.)
 
-	#. On Node 0, ''vglrun crserver''
+	#. On Node 0, execute ''vglrun crserver''
 
 *** CRUT
 #OPT: noList! plain!
@@ -198,7 +199,7 @@ The Chromium Utility Toolkit provides a convenient way for graphics
 applications to specifically take advantage of Chromium's sort-last rendering
 capabilities.  Such applications can use CRUT to explicitly specify how their
 object space should be decomposed.  CRUT applications require an additional
-piece of software, ''crutserver'', to be running on Node 0.  Therefore, the
+piece of software, ''crutserver'', to be run on Node 0.  Therefore, the
 following procedure should be used to make these applications work with
 VirtualGL:
 
@@ -210,9 +211,9 @@ VirtualGL:
 		!!! NOTE: ''crappfaker'' should be run on display :0 (or whichever display
 		is attached to the 3D hardware.)
 
-	#. On Node 0, ''vglrun crutserver &''
+	#. On Node 0, execute ''vglrun crutserver &''
 
-	#. On Node 0, ''vglrun crserver''
+	#. On Node 0, execute ''vglrun crserver''
 
 ** A Note About Performance
 

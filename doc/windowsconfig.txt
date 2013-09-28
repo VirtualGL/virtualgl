@@ -49,7 +49,7 @@ If using the VirtualGL Client for Exceed, then add the Exceed path (example:
 
 VirtualGL has the ability to take advantage of the MIT-SHM extension in
 OpenText Exceed to accelerate image drawing on Windows.  This can significantly
-improve the overall performance of the VirtualGL pipeline when running over a
+improve the end-to-end performance of the VGL Transport when running over a
 local-area network.
 
 The bad news is that this extension is not consistently implemented across
@@ -82,7 +82,7 @@ OpenText support site:
 | Exceed 2008 \
 | ''xlib.dll'' v13.0.1.235 (or higher){nl} \
 	(or install the latest \
-	[[http://support.hummingbird.com/customer/cspatches/patches.asp][Connectivity 2008 Service Pack]].) \
+	[[http://support.hummingbird.com/customer/cspatches/patches.asp][Connectivity 2008 Service Pack]]) \
 | Download all patches from the \
 	[[http://support.hummingbird.com/customer/cspatches/patches.asp][OpenText support site]]. \
 	{nl} \
@@ -123,7 +123,7 @@ To enable MIT-SHM in Cygwin/X:
 
 	#. Answer "yes" when asked "Do you want to install cygserver as service?"
 
-	#. Run ''net start cygserver''
+	#. From a Windows (not Cygwin) command prompt, run ''net start cygserver''
 
 	#. Add ''server'' to the ''CYGWIN'' system environment variable (create this
 		environment variable if it doesn't already exist)

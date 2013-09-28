@@ -2,13 +2,13 @@
 
 ''vglrun'' can be used to launch either binary executables or shell scripts,
 but there are a few things to keep in mind when using ''vglrun'' to launch a
-shell script.  When you ''vglrun'' a shell script, the VirtualGL faker library
-will be preloaded into every executable that the script launches.  Normally
-this is innocuous, but if the script calls any executables that have the setuid
-and/or setgid permission bits set, then the dynamic linker will refuse to
-preload the VirtualGL faker library into those executables.  One of the
-following warnings will be printed out for each setuid/setgid executable that
-the script tries to launch:
+shell script.  When you launch a shell script with ''vglrun'', the VirtualGL
+faker library will be preloaded into every executable that the script launches.
+Normally this is innocuous, but if the script calls any executables that have
+the setuid and/or setgid permission bits set, then the dynamic linker will
+refuse to preload the VirtualGL faker library into those executables.  One of
+the following warnings will be printed for each setuid/setgid executable
+that the script tries to launch:
 
 	Linux :: {:}
 #Verb: <<---
@@ -30,7 +30,7 @@ On Solaris and versions of Linux with GLIBC 2.3 and later, these are just
 warnings, and the setuid/setgid executables will continue to run (without
 VirtualGL preloaded into them.)  However, if you want to get rid of the
 warnings, an easy way to do so is to simply edit the application script and
-make it store the value of the ''LD_PRELOAD'' environment variables until right
+make it store the value of the ''LD_PRELOAD'' environment variable until right
 before the application executable is launched.  For instance, consider the
 following application script:
 
@@ -43,25 +43,6 @@ some_3D_application_executable
 
 You could modify the script as follows:
 
-	Solaris :: Modified ''application.sh'':
-#Verb: <<---
-#!/bin/sh
-LD_PRELOAD_32_SAVE=$LD_PRELOAD_32
-LD_PRELOAD_64_SAVE=$LD_PRELOAD_64
-LD_PRELOAD_32=
-LD_PRELOAD_64=
-export LD_PRELOAD_32 LD_PRELOAD_64
-
-some_setuid_executable
-
-LD_PRELOAD_32=$LD_PRELOAD_32_SAVE
-LD_PRELOAD_64=$LD_PRELOAD_64_SAVE
-export LD_PRELOAD_32 LD_PRELOAD_64
-
-some_3D_application_executable
----
-
-	Linux :: Modified ''application.sh'':
 #Verb: <<---
 #!/bin/sh
 LD_PRELOAD_SAVE=$LD_PRELOAD
@@ -76,8 +57,8 @@ export LD_PRELOAD
 some_3D_application_executable
 ---
 
-This procedure may be necessary to work around certain other problems that
-exist in the launch scripts of specific applications.  See
+This procedure may be necessary to work around certain other interaction issues
+between VirtualGL and the launch scripts of specific applications.  See
 [[#Application_Recipes][Application Recipes]] for more details.
 
 If the 3D application that you are intending to run in VirtualGL is itself a
@@ -86,7 +67,7 @@ setuid/setgid executable, then further steps are required.  Otherwise, the
 VirtualGL to be preloaded into setuid/setgid executables has security
 ramifications, so please be aware of these before you do it.  By applying one
 of the following workarounds, you are essentially telling the operating system
-that you trust the security and stability of the VirtualGL code as much as you
+that you trust the security and stability of VirtualGL as much as you
 trust the security and stability of the operating system.  While we're
 flattered, we're not sure that we're necessarily deserving of that accolade, so
 if you are in a security-critical environment, apply the appropriate level of
@@ -94,20 +75,19 @@ paranoia here.
 
 {anchor: setuid_linux}
 To force VirtualGL to be preloaded into setuid/setgid executables on Linux,
-make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables.  To do this,
-run the following commands as root:
+you have to first make sure that the faker libraries (''librrfaker.so'' and
+''libdlfaker.so'') are installed in the "system" library path (usually
+''/usr/lib'', ''/usr/lib64'', ''/usr/lib32'', or ''/usr/lib/i386-linux-gnu'').
+Next, make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables.  To do
+this, run the following commands as root:
 
 #Verb: <<---
-chmod u+s /usr/lib/librrfaker.so
-chmod u+s /usr/lib/libdlfaker.so
+chmod u+s /usr/{lib}/librrfaker.so
+chmod u+s /usr/{lib}/libdlfaker.so
 ---
 
-On 64-bit Linux systems, also run:
-
-#Verb: <<---
-chmod u+s /usr/lib64/librrfaker.so
-chmod u+s /usr/lib64/libdlfaker.so
----
+where __''{lib}''__ is ''lib'', ''lib64'', ''lib32'', or
+''lib/i386-linux-gnu'', depending on your system.
 
 On Solaris, you can force VirtualGL to be preloaded into setuid/setgid
 executables by adding the VirtualGL library directories to the Solaris "secure
@@ -116,28 +96,15 @@ and by default, it will only allow libraries in those paths to be preloaded
 into an executable that is setuid and/or setgid.  Generally, 3rd party packages
 are forbidden from installing anything into ''/usr/lib'' or ''/lib'', but you
 can use the ''crle'' utility to add other directories to the operating system's
-list of secure paths.  In the case of VirtualGL, you would execute the
+list of secure paths.  In the case of VirtualGL, you would execute one of the
 following commands (as root):
 
-#Verb: <<---
-crle -u -s /opt/VirtualGL/lib
-crle -64 -u -s /opt/VirtualGL/lib/64
----
+	32-bit VirtualGL: :: {:}
+	#Verb: <<---
+	crle -u -s /opt/VirtualGL/lib32
+	---
 
-''vglrun'' on Solaris has two additional options that are relevant to launching
-scripts:
-
-#Verb: <<---
-vglrun -32 {script}
----
-
-will preload VirtualGL only into 32-bit executables called by a script, whereas
-
-#Verb: <<---
-vglrun -64 {script}
----
-
-will preload VirtualGL only into 64-bit executables.  So if, for instance,
-the setuid executable that the script is invoking is 32-bit and the
-application executable is 64-bit, then you could use ''vglrun -64'' to
-launch the application script.
+	64-bit VirtualGL: :: {:}
+	#Verb: <<---
+	crle -64 -u -s /opt/VirtualGL/lib64
+	---

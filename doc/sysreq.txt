@@ -47,7 +47,8 @@
 | Other Software \
 	| {list type=ul: \
 			{item:__VGL Transport Only__: Mac X11 application (in the \
-				"Optional Installs" package on the OS X install discs)}} \
+				"Optional Installs" package on the OS X 10.7 and earlier install \
+				discs) or [[http://xquartz.macosforge.org][XQuartz]]}} \
 	|
 #OPT: hiCol=first
 
@@ -96,8 +97,10 @@
 				Quadro, ATI FirePro.)  Stereo support should be enabled in the 3D \
 				driver configuration.} \
 			{item:2D X server that supports and is configured to export stereo \
-				visuals (such as [[http://connectivity.opentext.com][OpenText]] \
-				Exceed 3D v8 or newer)}} \
+				visuals.  (As of this writing, \
+				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \
+				is the only known Windows X server solution that supports stereo \
+				drawing with sufficient performance to be used with VirtualGL.)}} \
 	|
 #OPT: hiCol=first
 
@@ -119,8 +122,9 @@
 				nVidia Quadro, ATI FirePro.)  Overlay support should be enabled in \
 				the 3D driver configuration.} \
 			{item:2D X server that supports and is configured to export transparent \
-				overlay visuals (such as \
-				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or \
-				newer)}} \
+				overlay visuals. (As of this writing, \
+				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \
+				is the only known Windows X server solution that supports transparent \
+				overlays.)}} \
 	|
 #OPT: hiCol=first

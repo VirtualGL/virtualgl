@@ -19,11 +19,11 @@
 		[[http://www.oracle.com/us/technologies/linux/][Oracle Linux]],
 		and [[http://www.ubuntu.com/][Ubuntu Linux]] v6.0 or later.)
 		{nl}
-		!!! If you wish to run both 32-bit and 64-bit OpenGL applications using
-		VirtualGL on 64-bit Linux systems, you will need to install both the i386
-		and x86_64 VirtualGL RPMs or both the "virtualgl" and "virtualgl32" amd64
-		DEBs.  (The virtualgl32 DEB is a supplementary package that contains only
-		the 32-bit server components.)
+		!!! If you want to run both 32-bit and 64-bit OpenGL applications using
+		VirtualGL on 64-bit Linux systems, then you will need to install both the
+		i386 and x86_64 VirtualGL RPMs or both the "virtualgl" and "virtualgl32"
+		amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains
+		only the 32-bit server components.)
 
 	2. Log in as root, cd to the directory where you downloaded the binary
 		package, and issue the following commands:
@@ -34,9 +34,11 @@
 		rpm -i VirtualGL*.rpm
 		---
 
+		!!! You may need to add ''--all-matches'' to the ''rpm -e'' command line if
+		you have installed both the 32-bit and 64-bit VirtualGL RPMs.
+
 		Debian-based systems :: {:}
 		#Verb <<---
-		dpkg -r virtualgl
 		dpkg -i virtualgl*.deb
 		---
 
@@ -62,8 +64,8 @@
 		which you want the files to be installed.
 
  !!! NOTE: The VirtualGL Client for Exceed installer does not remove any
- previous versions of the VirtualGL Client that may be installed on your machine.  If
- you wish, you can remove these older versions manually by using the "Add or
+ previous versions of the VirtualGL Client that may be installed on your machine.
+ If you wish, you can remove these older versions manually by using the "Add or
  Remove Programs" applet in the Control Panel (or the "Programs and Features"
  applet if you are running Windows Vista.)
 
@@ -80,7 +82,9 @@
 		xauth{nl}
 
 	#. Download the VirtualGL Cygwin package
-		(''VirtualGL-''__''{version}''__''-cygwin.tar.bz2'') from the
+		(''VirtualGL-''__''{version}''__''-cygwin.tar.bz2'', or
+		''VirtualGL-''__''{version}''__''-cygwin64.tar.bz2'' if you are running
+		Cygwin64) from the
 		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
@@ -96,7 +100,7 @@
 	#. On the "Select Local Package Directory" page, enter the directory
 		containing the VirtualGL Cygwin package.
 
-	#. On the "Select Packages" page, change "View" to "Partial" and verify
+	#. On the "Select Packages" page, change "View" to "Pending" and verify
 		that the VirtualGL package with the correct version is selected for
 		install.  Click "Next>" to install.
 
@@ -123,9 +127,17 @@ As root, issue one of the following commands:
 	rpm -e VirtualGL
 	---
 
+		!!! You may need to add ''--all-matches'' to the RPM command line if you
+		have installed both the 32-bit and 64-bit VirtualGL RPMs.
+
 	Debian-based systems :: {:}
 	#Verb: <<---
 	dpkg -r virtualgl
+	---
+
+	If you have also installed the 32-bit supplementary package:
+	#Verb: <<---
+	dpkg -r virtualgl32
 	---
 
 *** OS X

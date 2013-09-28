@@ -21,7 +21,7 @@ Each method of configuration takes precedence over the previous method:
 {:}
 	!!! If "Custom (if supported)" is listed as one of the available Image
 	Transports, then this means that image transport plugins are free to handle
-	or ignore this option as they see fit.
+	or ignore the configuration option as they see fit.
 
 {anchor: VGL_ALLOWINDIRECT}
 | Environment Variable | ''VGL_ALLOWINDIRECT = ''__''0 \| 1''__ |
@@ -57,8 +57,8 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: When using the VGL Transport, ''VGL_CLIENT'' should be set to
 	the hostname or IP address of the machine on which ''vglclient'' is running.
-	Normally, ''VGL_CLIENT'' is set automatically by the ''vglconnect'' or
-	''vglrun'' script, so don't override it unless you know what you're doing.
+	Normally, ''VGL_CLIENT'' is set automatically when executing ''vglconnect''
+	or ''vglrun'', so don't override it unless you know what you're doing.
 
 {anchor: VGL_COMPRESS}
 | Environment Variable | ''VGL_COMPRESS = ''__''proxy \| jpeg \| rgb \| xv \| yuv''__ |
@@ -92,7 +92,7 @@ Each method of configuration takes precedence over the previous method:
 	bandwidth as RGB, but the use of 4X chrominance subsampling does produce some
 	visible artifacts (see {ref prefix="Chapter ":X_Video_Support}.)
 	{nl}{nl}
-	If this option is not specified, then the default is set as follows:
+	If ''VGL_COMPRESS'' is not specified, then the default is set as follows:
 	{nl}{nl}
 	If the ''DISPLAY'' environment variable begins with '':'' or ''unix:'', then
 	VirtualGL assumes that the X display connection is local and will default to
@@ -107,41 +107,49 @@ Each method of configuration takes precedence over the previous method:
 
 {anchor: VGL_DEFAULTFBCONFIG}
 | Environment Variable | ''VGL_DEFAULTFBCONFIG = ''__''{attrib_list}''__ |
-| Summary | __''{attrib_list}''__ = GLX attributes of the default FB config \
-	that VirtualGL uses if a 3D application does not call \
-	''glXChooseVisual()'' to specify the 3D rendering attributes it desires |
+| Summary | __''{attrib_list}''__ = Attributes of the default GLX framebuffer \
+	config that VirtualGL uses if a 3D application does not call \
+	''glXChooseVisual()'' to specify the visual attributes it desires |
 | Image Transports | All |
 | Default Value | None |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL monitors the ''glXChooseVisual()''
-	function and uses the parameters passed to that function to determine which
-	rendering attributes the 3D application desires.  VGL uses those attributes
-	to obtain a GLX FB config, and that FB config is mapped internally to the
-	visual that is returned to the 3D application.  The FB config is also used
-	when creating the Pbuffers that back the application's 3D windows.
+	Description :: Normally, a Unix OpenGL application would call the
+	''glXChooseVisual()'' function to obtain an X11 visual with a desired
+	set of OpenGL attributes (such as a specific Z buffer depth, etc.)  The
+	application would then use that X visual when creating an X window for OpenGL
+	rendering.  VirtualGL's fundamental purpose is to redirect OpenGL rendering
+	from a window on one X server (the 2D X server) to a Pbuffer on another X
+	server (the 3D X server.)  Thus, for every OpenGL-enabled X visual that the
+	application tries to obtain, VirtualGL needs to obtain an equivalent
+	"GLX FB config", which is like an X visual for Pbuffers.  VirtualGL does this
+	by intercepting ''glXChooseVisual()'' and using the parameters passed to that
+	function as arguments to ''glXChooseFBConfig()'', which is called on the 3D
+	X server.  The resulting FB config is mapped internally to an X visual on the
+	2D X server, which is returned from ''glXChooseVisual()''.  The FB config is
+	later used when creating the Pbuffer that backs a 3D application window.
 	{nl}{nl}
-	In rare cases, however, an application may choose to implement its own
-	visual selection mechanism rather than calling ''glXChooseVisual()''.  Such
-	applications will iterate through the list of X visuals and examine the 3D
-	attributes of each using ''glXGetConfig()''.  The problem is that, whereas
-	in a "normal" GLX environment there would be a 1:1 correspondence between
+	In rare cases, an application may choose to implement its own visual
+	selection mechanism rather than calling ''glXChooseVisual()''.  Such
+	applications will iterate through the list of X visuals and examine the OpenGL
+	attributes of each using ''glXGetConfig()''.  The problem is this:  whereas
+	in a "normal" GLX environment, there would be a 1:1 correspondence between
 	X visuals and GLX FB configs, in VirtualGL's split rendering environment,
 	X visuals are on the 2D X server and GLX FB configs are on the 3D X server.
 	Thus, if an application calls ''glXGetConfig()'' before calling
 	''glXChooseVisual()'', VirtualGL has not yet mapped the X visual in question
-	to an FB config, and furthermore, VirtualGL has no idea what type of visual
+	to a GLX FB config, and furthermore, VirtualGL has no idea what type of visual
 	the application is looking for.  In such cases, VGL has to map the visual to
 	a default FB config.  Since this default FB config is very basic, if
-	the application is hunting for a visual with a particular parameter (such as
-	an alpha channel or a stencil buffer), then it may fail to find one.
+	the application is hunting for a visual with a particular OpenGL attribute
+	(such as an alpha channel or a stencil buffer), then it may fail to find one.
 	{nl}{nl}
-	This configuration option allows the user to specify the 3D rendering
-	attributes of VirtualGL's default FB config, which may be necessary to make
-	certain applications work, if those applications do not use
-	''glXChooseVisual()'' to obtain a visual.  The attribute list is specified in
-	the same way that you would specify arguments to ''glXChooseFBConfig()''.
-	Example: ''VGL_DEFAULTFBCONFIG = GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8''.  See
+	''VGL_DEFAULTFBCONFIG'' allows the user to specify the attributes of
+	VirtualGL's default FB config.  This may be necessary to make certain
+	applications work, if those applications do not use ''glXChooseVisual()'' to
+	obtain a visual.  The attribute list is specified in the same way that you
+	would specify arguments to ''glXChooseFBConfig()''.  Example:
+	''VGL_DEFAULTFBCONFIG = GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8''.  See
 	[[#Application_Recipes][Application Recipes]] for a list of applications that
 	are known to require the use of this configuration option.
 
@@ -152,10 +160,12 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | :0 |
 #OPT: hiCol=first
 
-	Description :: If the VirtualGL server has multiple 3D graphics cards and you
-	want the OpenGL commands from the 3D application to be redirected to the
-	second or subsequent graphics cards in the system, then you can set
-	''VGL_DISPLAY'' to (or invoke ''vglrun -d'' with) '':0.1'', '':0.2'', etc.
+	Description :: If the VirtualGL server has multiple 3D graphics cards, each
+	attached to a separate X screen or a separate X server, then you can use
+	this option to specify which graphics card should be used for 3D rendering.
+	For instance, setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
+	'':0.1'' would cause VirtualGL to redirect all of the 3D rendering from the
+	application to a 3D graphics card attached to Screen 1 on X display :0.
 
 | Environment Variable | ''VGL_DRAWABLE = ''__''pbuffer \| pixmap''__ |
 | Summary | Specify the drawable type to use for 3D rendering |
@@ -167,7 +177,7 @@ Each method of configuration takes precedence over the previous method:
 	OpenGL window on the 2D X server into a corresponding Pbuffer on the 3D X
 	server, and it will likewise redirect the 3D rendering from each OpenGL
 	pixmap on the 2D X server into a corresponding pixmap on the 3D X server.
-	Changing the drawable type to "pixmap" causes VirtualGL to use pixmaps on the
+	Setting ''VGL_DRAWABLE'' to ''pixmap'' causes VirtualGL to use pixmaps on the
 	3D X server to represent all OpenGL drawables on the 2D X server.  Generally,
 	this is recommended only for systems on which Pbuffer support is incomplete
 	or unstable.
@@ -180,7 +190,7 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 	Description :: Normally, VirtualGL will create a Pbuffer whose pixel format
-	matches the specifications of the visual requested by the 3D application.
+	matches that of the visual requested by the 3D application.
 	However, on some 3D hardware, this may produce suboptimal performance when
 	reading back the 3D pixels.  Thus, this option can be used to force VirtualGL
 	to create a 32-bit-per-pixel Pbuffer when the application requests a
@@ -188,7 +198,7 @@ Each method of configuration takes precedence over the previous method:
 	{nl}{nl}
 	On some 3D hardware, it is necessary to use a 32-bit-per-pixel Pbuffer to
 	realize any performance improvement from the use of pixel buffer objects
-	(PBO's).  Thus, unless this option is explicitly disabled, it will be
+	(PBO's.)  Thus, unless this option is explicitly disabled, it will be
 	enabled by default whenever PBO readback mode is enabled.  See the
 	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
 
@@ -637,7 +647,7 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 	Description :: Enabling this option causes the VGL Transport to be
-	tunneled through a secure socket layer (SSL).
+	tunneled through a secure socket layer (SSL.)
 
 	!!! This option has no effect unless both the VirtualGL server and client
 	were built with OpenSSL support.

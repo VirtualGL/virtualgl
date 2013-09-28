@@ -68,7 +68,7 @@ rendered 3D images to the client machine:
 	dedicated TCP socket to send the rendered 3D images to the client machine,
 	and the VirtualGL Client application decodes the images and composites them
 	into the appropriate X window.  The VGL Transport can either deliver
-	uncompressed images (RGB encoded), or it can compress images in real time
+	uncompressed images (RGB-encoded), or it can compress images in real time
 	using a high-speed JPEG codec.  It also supports the delivery of stereo image
 	pairs, which can be reconstructed into a stereo image by the VirtualGL
 	Client.

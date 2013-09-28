@@ -15,14 +15,14 @@ glasses or a passive stereo system, such as a 3D TV.
 
 *** Quad-Buffered Stereo
 
-The name "quad-buffered" stereo derives from the fact that OpenGL uses four
+The name "quad-buffered" stereo refers to the fact that OpenGL uses four
 buffers (left front, right front, left back, and right back) to support
 stereographic rendering with double buffering.  3D graphics cards with
 quad-buffered stereo capabilities generally provide some sort of
 synchronization signal that can be used to control various types of active
 stereo 3D glasses.  Some also support "passive stereo", which requires
 displaying the left and right eye buffers to different monitor outputs.
-VirtualGL supports true quad-buffered stereo by rendering the stereo images on
+VirtualGL supports quad-buffered stereo by rendering the stereo images on
 the server and sending the image pairs across the network to be displayed on
 the client.
 
@@ -53,8 +53,9 @@ them as a single stereo frame to the client machine's X display using
 stereo in VirtualGL decreases performance by 50% or more and uses twice the
 network bandwidth to maintain the same frame rate as mono.
 
-Quad-buffered stereo requires the VGL Transport.  If any other image transport
-is used, then VGL will fall back to anaglyphic stereo mode.
+Quad-buffered stereo requires the VGL Transport.  Attempting to enable it with
+any other image transport will cause VGL to fall back to anaglyphic stereo
+mode.
 
 *** Anaglyphic Stereo
 
@@ -153,14 +154,14 @@ and GLX" applet:
 
 {img: exceed6.png}
 
-** Indexed (PseudoColor) Rendering
+** Color Index (PseudoColor) Rendering
 
 In a PseudoColor visual, each pixel is represented by an index that refers to
 a location in a color table.  The color table stores the actual color values
 (256 of them in the case of 8-bit PseudoColor) that correspond to each index.
 An application merely tells the X server which color index to use when drawing,
 and the X server takes care of mapping that index to an actual color from the
-color table.  OpenGL allows for rendering to Pseudocolor visuals, and it does
+color table.  OpenGL allows for rendering to PseudoColor visuals, and it does
 so by being intentionally ignorant of the relationship between indices and
 actual colors.  As far as OpenGL is concerned, each color index value is just
 a meaningless number, and it is only when the final image is drawn by the X
@@ -170,20 +171,20 @@ all with PseudoColor rendering.  PseudoColor rendering used to be a common
 technique for visualizing scientific data, because such data often only contained
 8 bits per sample to begin with.  Applications could manipulate the color table
 to allow the user to dynamically control the relationship between sample values
-and colors.  As more and more graphics cards drop support for PseudoColor
-rendering, however, the applications that use it are becoming a vanishing
-breed.
+and colors.  However, since most modern graphics cards have dropped support for
+PseudoColor rendering (it was removed as a feature in OpenGL 3.1), the
+applications that use it have become a vanishing breed.
 
 VirtualGL supports PseudoColor rendering if a PseudoColor visual is available
 on the 2D X server or X proxy.  A PseudoColor visual need not be present on the
-application server.  On the application server, VirtualGL uses the red channel
-of a standard RGB Pbuffer to store the color index.  Upon receiving an end of
-frame trigger, VirtualGL reads back the red channel of the Pbuffer and uses
+3D X server.  On the 3D X server, VirtualGL uses the red channel
+of a standard RGB Pbuffer to store the color index.  Upon receiving an
+end-of-frame trigger, VirtualGL reads back the red channel of the Pbuffer and uses
 ''XPutImage()'' to draw the color indices into the appropriate X window.  To
 put this another way, PseudoColor rendering in VirtualGL always uses the X11
 Transport.  However, since there is only 1 byte per pixel in a PseudoColor
-"image", the images can still be sent to the client reasonably quickly even
-though they are uncompressed.
+"image", reasonable performance can still be obtained when displaying to a
+remote X server on the same local-area network.
 
 VirtualGL's PseudoColor rendering mode works with X proxies, provided that the
 X proxy provides a PseudoColor visual.  Note, however, that some X proxies,
@@ -194,8 +195,8 @@ time.
 {anchor: Troubleshooting}
 
 VirtualGL includes a modified version of ''glxinfo'' that can be used to
-determine whether or not the client and server have stereo, overlay, or
-Pseudocolor visuals enabled.
+determine whether or not the 2D and 3D X servers have stereo, overlay, or
+PseudoColor visuals enabled.
 
 Run the following command sequence on the VirtualGL server to determine
 whether the 3D X server has a suitable visual for stereographic rendering:
@@ -211,7 +212,7 @@ Types."
 
 Run the following command sequence on the VirtualGL server to determine
 whether the 2D X server has a suitable visual for stereographic
-rendering, transparent overlays, or Pseudocolor.
+rendering, transparent overlays, or PseudoColor.
 
 #Verb: <<---
 /opt/VirtualGL/bin/glxinfo -v
@@ -221,5 +222,5 @@ In order to use stereo, one or more of the visuals should say "stereo=1".
 In order to use transparent overlays, one or more of the visuals should say
 "level=1", should list a "Transparent Index" (non-transparent visuals will say
 "Opaque" instead), and should have a class of "PseudoColor."  In order to use
-PseudoColor (indexed) rendering, one of the visuals should have a class of
+PseudoColor (color index) rendering, one of the visuals should have a class of
 "PseudoColor."

@@ -9,8 +9,8 @@
 	* Supports stereographic rendering (see requirements in
 		{ref prefix="Sections ": Stereo_Requirements} and
 		{ref prefix="": Overlay_Requirements})
-	* Consumes fewer server resources, since the 2D (X11) rendering occurs on the
-		client machine
+	* Consumes less memory and CPU time on the server, since the 2D (X11)
+		rendering occurs on the client machine
 
 *** Disadvantages of the VGL Transport
 #OPT: noList! plain!
@@ -20,13 +20,13 @@
 		application's GUI to the user's desktop.  As a result, the VGL Transport is
 		not recommended for use on high-latency or low-bandwidth networks
 	* No collaboration features
-	* The client is not stateless.  As with any remote X11 app, if the network
-		connection drops, then the application will exit
+	* The client is not stateless.  As with any remote X11 environment, if the
+		network connection drops, then the application will exit
 
 ** VGL Transport with X11 Forwarding
 {anchor: X11_Forwarding}
 
-This mode is recommended for use on secure local-area networks.  The X11
+This mode is recommended for use only on secure local-area networks.  The X11
 traffic is encrypted, but the VGL Transport is left unencrypted to
 maximize performance.
 
@@ -34,7 +34,7 @@ maximize performance.
 #OPT: noList! plain!
 
 	#. Start the X server if it isn't started already.{nl}
-		__Mac clients:__ start the Mac X11 application.{nl}
+		__Mac clients:__ start the Mac X11 application or XQuartz.{nl}
 		__Cygwin clients:__ start Cygwin/X.
 
 	#. Open a new terminal window.{nl}
@@ -51,7 +51,7 @@ maximize performance.
 		/opt/VirtualGL/bin/vglconnect {user}@{server}
 		---
 
-		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		Replace __''{user}''__ with your username on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSH session, start a 3D application using VirtualGL:
@@ -90,7 +90,7 @@ maximize performance.
 		vglconnect {user}@{server}
 		---
 
-		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		Replace __''{user}''__ with your username on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.
 
 	#. In the SSH session, start a 3D application using VirtualGL:
@@ -114,7 +114,7 @@ into which you connect with SSH) and the "execute hosts" (the machines that
 will run VirtualGL jobs) share the same home directories and reside in the same
 domain.
 
-	!!! Some newer Linux and Unix distributions ship with default settings
+	!!! Most newer Linux and Unix distributions ship with default settings
 	that do not allow TCP connections into the X server.  Such systems cannot be
 	used as clients with this procedure unless they are reconfigured to allow
 	X11 TCP connections.
@@ -122,9 +122,9 @@ domain.
 *** Procedure
 #OPT: noList! plain!
 
-The procedure for this mode is identical to the procedure for
-[[#X11_Forwarding][X11 forwarding]], except that you should pass a ''-x''
-argument to ''vglconnect'' when connecting to the server:
+The procedure for this mode is identical to the procedure for the
+[[#X11_Forwarding][VGL Transport with X11 forwarding]], except that you should
+pass a ''-x'' argument to ''vglconnect'' when connecting to the server:
 
 	#Verb: <<---
 	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
@@ -139,14 +139,14 @@ also useful when either the VirtualGL server or the client machine are behind
 restrictive firewalls and only SSH connections are allowed through.  Using
 SSH tunneling on wide-area networks should not affect performance
 significantly.  However, using SSH tunneling on a local-area network can reduce
-VirtualGL's performance by anywhere from 20-40%.
+the end-to-end performance of the VGL Transport by anywhere from 20-40%.
 
 *** Procedure
 #OPT: noList! plain!
 
-The procedure for this mode is identical to the procedure for
-[[#X11_Forwarding][X11 forwarding]], except that you should pass a ''-s''
-argument to ''vglconnect'' when connecting to the server:
+The procedure for this mode is identical to the procedure for the
+[[#X11_Forwarding][VGL Transport with X11 forwarding]], except that you should
+pass a ''-s'' argument to ''vglconnect'' when connecting to the server:
 
 	#Verb: <<---
 	/opt/VirtualGL/bin/vglconnect -s {user}@{server}
@@ -160,10 +160,11 @@ twice.
 
 ''vglconnect -s'' can be used to create multi-layered SSH tunnels.  For
 instance, if the VirtualGL server is not directly accessible from the Internet,
-you can use ''vglconnect -s'' to connect to a gateway server, then use
-''vglconnect -s'' again on the gateway server to connect to the VirtualGL
-server.  Both the X11 traffic and the VGL Transport will be forwarded from the
-VirtualGL server through the gateway and to the client.
+then you can run ''vglconnect -s'' on the client machine to connect to an
+SSH gateway server, then you can run ''vglconnect -s'' again on the gateway
+server to connect to the VirtualGL server (application server.)  Both the X11
+traffic and the VGL Transport will be forwarded from the VirtualGL server
+through the gateway and to the client.
 
 #IMG: sshtunnel.png
 
@@ -184,7 +185,7 @@ have plenty of bandwidth to spare.
 	!!! XDMCP is very insecure and is not recommended as a means of running
 	VirtualGL, in general.  This section is provided mainly for completeness and
 	should not be construed as an endorsement of XDMCP.  In general, using an X
-	proxy is a much better approach for getting a remote desktop session on the
+	proxy is a much better approach for accessing a remote desktop session on the
 	3D application server.
 
 Using the VGL Transport with XDMCP is conceptually similar to using
@@ -192,10 +193,9 @@ the VGL Transport with a
 [[#Direct_X11_Connection][direct X11 connection]].  The major difference is
 that, rather than remotely displaying individual X windows to the 2D X server,
 XDMCP remotely displays a complete desktop session from the application server.
-Any applications that are started within this desktop session will run on the
-application server, not the client.  Thus, ''vglconnect'' cannot be used in
-this case.  Instead, it is necessary to start ''vglclient'' manually on the
-client machine.
+X11 applications are launched inside of this remote desktop session rather than
+in a separate shell, so ''vglconnect'' cannot be used in this case.  Instead,
+it is necessary to start ''vglclient'' manually on the client machine.
 
 *** Procedure
 #OPT: noList! plain!
@@ -234,10 +234,12 @@ client machine.
 
 	#. If you are running a full-screen XDMCP session on a Linux/Unix client
 		(for instance, using GDM Chooser), then starting ''vglclient'' is a bit
-		trickier.  You will need to use SSH to connect back into the client machine
-		from inside the XDMCP session.  Then, in the client SSH session, set the
-		''DISPLAY'' environment variable to the display name of the X server that
-		is running the XDMCP session (usually '':0'' or '':1''), and type:
+		trickier.  In this case, you can't open up a separate terminal window on
+		the client machine for the purposes of running ''vglclient''.  However,
+		from inside of the XDMCP session, you can open an SSH session back into the
+		client machine.  In this SSH session, set the ''DISPLAY'' environment
+		variable to the display name of the X server that is running the XDMCP
+		session (usually '':0'' or '':1''), and type:
 
 		#Verb: <<---
 		vglclient -detach
@@ -291,7 +293,7 @@ all instances of ''vglclient'' running under your user account by invoking
 (''vglclient'' for Linux/Unix/Mac/Cygwin installs in ''/opt/VirtualGL/bin'' by
 default, and
 ''vglclient'' for Exceed is in
-''c:\\program files\\virtualgl-''__''{version}''__''-''__''{build}''__.)
+''c:\\program files\\virtualgl-''__''{version}''__''-''__''{build}''__).
 
 ''vglconnect'' instructs ''vglclient'' to redirect all of its console output
 to a log file named

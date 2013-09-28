@@ -14,7 +14,7 @@ To use VirtualGL with VMWare Workstation, perform the following procedures:
 		virtual machine.
 
 	#. Follow the procedures outlined in the VMWare User's Manual to enable
-		3D acceleration on the virtual machine.  Verify that 3D acceleration works
+		3D acceleration in the virtual machine.  Verify that 3D acceleration works
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to

@@ -19,7 +19,7 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 		virtual machine.
 
 	#. Follow the procedures outlined in the VirtualBox User's Manual to enable
-		3D acceleration on the virtual machine.  Verify that 3D acceleration works
+		3D acceleration in the virtual machine.  Verify that 3D acceleration works
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
@@ -30,17 +30,17 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 *** Launching VirtualBox
 #OPT: noList! plain!
 
-This should work on most Linux systems.  It is known to work with VirtualBox
-4.1.8 and prior and with VirtualBox 4.2 and later.
-
 #Verb: <<---
 vglrun VirtualBox -startvm {VM name or UUID}
 ---
 
+This should work on most systems.  It is known to work with VirtualBox 4.1.8
+and prior and with VirtualBox 4.2 and later on Linux.
+
  !!! With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename
- ''/usr/lib/virtualbox/VBoxTestOGL'' and symlink ''/bin/true'' to
- ''/usr/lib/virtualbox/VBoxTestOGL'' in order to use those versions of
- VirtualBox with VirtualGL.
+ ''/usr/lib/virtualbox/VBoxTestOGL'' and execute
+ ''ln -fs /bin/true /usr/lib/virtualbox/VBoxTestOGL'' in order to use those
+ versions of VirtualBox with VirtualGL.
 
 *** NOTES
 #OPT: noList! plain!
@@ -56,7 +56,7 @@ vglrun VirtualBox -startvm {VM name or UUID}
 		get propagated to the VM process unless you start it directly.
 
 	* VirtualBox sends mainly uncompressed image updates to the X display, so
-		the 2D elements of the virtual machine display will not perform well
+		the 2D elements of the virtual machine's display will not perform well
 		over a remote X11 connection unless gigabit Ethernet (or faster) and a
 		[[#Direct_X11_Connection][direct X11 connection]] (''vglconnect -x'') are
 		used.  Using a high-performance X proxy (such as TurboVNC) is generally

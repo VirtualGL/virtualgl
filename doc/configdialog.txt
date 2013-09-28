@@ -12,7 +12,7 @@ application's windows is active.  This displays the following dialog box:
 You can use this dialog to adjust various image compression and display
 parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 
-	Image Compression (Transport) :: This is a drop-down gadget with the
+	Image Compression (Transport) :: This is a drop-down menu with the
 	following options:
 	{nl}{nl} \
 	__None (X11 Transport)__ : equivalent to setting ''VGL_COMPRESS=proxy''.
@@ -39,10 +39,10 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
 	''VGL_COMPRESS'' configuration option.
 
-	!!! If an image transport plugin is loaded, then this gadget's name changes
+	!!! If an image transport plugin is loaded, then this menu's name changes
 	to "Image Compression", and it has options "0" through "10".
 
-	Chrominance Subsampling :: This drop-down gadget is active only when using
+	Chrominance Subsampling :: This drop-down menu is active only when using
 	JPEG compression or an image transport plugin.  It has the following
 	options:
 	{nl}{nl} \
@@ -57,7 +57,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	See {ref prefix="Section ": VGL_SUBSAMP} for more information about the
 	''VGL_SUBSAMP'' configuration option.
 
-	!!! If an image transport plugin is loaded, then this gadget has two
+	!!! If an image transport plugin is loaded, then this menu has two
 	additional options, "8X" and "16X".
 
 	JPEG Image Quality :: This slider gadget is active only when using JPEG
@@ -68,7 +68,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	!!! If an image transport plugin is loaded, then this gadget's name changes
 	to "Image Quality".
 
-	Connection Profile :: This drop-down gadget is active only if the VGL
+	Connection Profile :: This drop-down menu is active only if the VGL
 	Transport was active when VirtualGL started.  It has the following options:
 	{nl}{nl} \
 	__Low Qual (Low-Bandwidth Network)__ : Sets the image compression type to
@@ -98,7 +98,7 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	''VGL_INTERFRAME''.  See {ref prefix="Section ": VGL_INTERFRAME} for more
 	information about the ''VGL_INTERFRAME'' configuration option.
 
-	Stereographic Rendering Method :: This drop-down gadget has the following
+	Stereographic Rendering Method :: This drop-down menu has the following
 	options:
 	{nl}{nl} \
 	__Send Left Eye Only__ : equivalent to setting ''VGL_STEREO=left''.

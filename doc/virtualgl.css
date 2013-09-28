@@ -33,9 +33,22 @@ pre
 	padding: 4px;
 	font-family: courier,monospace;
 	font-size: 14px;
-	background-color: rgb(238, 238, 255);
+	background-color: rib(238, 238, 255);
 	margin-left: 25px;
 	margin-right: 25px;
+	color: red;
+}
+
+em
+{
+	color: red;
+	text-decoration: bold;
+}
+
+code
+{
+	color: red;
+	text-decoration: bold;
 }
 
 tr

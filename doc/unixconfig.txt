@@ -3,7 +3,8 @@
 
 ** Granting Access to the 3D X Server
 
-VirtualGL requires access to the application server's 3D graphics card so that
+VirtualGL requires access to a GPU ("graphics processing unit", which usually
+takes the form of a 3D graphics card) in the application server so that
 it can create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
 from applications into these Pbuffers.  Unfortunately, accessing a 3D
 graphics card on Linux and Unix systems requires going through an X
@@ -17,7 +18,7 @@ a user has access to the 3D X server, there is nothing that would prevent
 the user from logging keystrokes or reading back images from that X server.
 Using ''xauth'', one can obtain "untrusted" X authentication keys that prevent
 such exploits, but unfortunately, those untrusted keys also disallow access to
-the 3D hardware.  Thus, it is necessary to grant full trusted access to the 3D
+the 3D hardware.  Thus, it is necessary to grant full, trusted access to the 3D
 X server for any users that will need to run VirtualGL.  Unless you fully trust
 the users to whom you are granting this access, then you should avoid logging
 in locally to the 3D X server (particularly as root) unless absolutely
@@ -245,13 +246,18 @@ also typically indicated by the word "Mesa" in the client GLX vendor string
 and/or the OpenGL vendor string, and the words "Software Rasterizer" in the
 OpenGL renderer string.
 
-** Using VirtualGL with Multiple Graphics Cards
+** Using VirtualGL with Multiple GPUs
 
 VirtualGL can redirect the OpenGL commands from a 3D application to any 3D
 graphics card in the server machine.  In order for this to work, however, all
 of the 3D graphics cards must be attached to different screens on the same X
-server.  They can then be individually addressed by setting ''VGL_DISPLAY'' to
-(or invoking ''vglrun -d'' with) '':0.0'', '':0.1'', '':0.2'', etc.
+server or to different X servers.  Attaching them to different screens is the
+easiest and most common approach, and this allows the 3D graphics cards to be
+individually addressed by setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d''
+with) '':0.0'', '':0.1'', '':0.2'', etc.  If the 3D graphics cards are attached
+to different X servers, then they can be individually addressed by setting
+''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':1.0'',
+'':2.0'', etc.
 
 ** SSH Server Configuration
 
