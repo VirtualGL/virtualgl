@@ -46,8 +46,13 @@ VERSION=@VERSION@
 PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@VGL_BINDIR@
 DOCDIR=@VGL_DOCDIR@
+BITS=@BITS@
+PLATFORM=cygwin
 
 umask 022
+if [ "$BITS" = "64" ]; then
+	PLATFORM=cygwin64
+fi
 TMPDIR=`mktemp -d /tmp/$APPNAME-build.XXXXXX`
 __PWD=`pwd`
 
@@ -67,7 +72,7 @@ if [ "$BINDIR" != "/usr/bin" ]; then
 fi
 
 cd $TMPDIR/pkg
-tar cfj ../$APPNAME-$VERSION-cygwin.tar.bz2 *
+tar cfj ../$APPNAME-$VERSION-$PLATFORM.tar.bz2 *
 cd $__PWD
 mv $TMPDIR/*.tar.bz2 .
 
