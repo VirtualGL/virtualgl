@@ -159,7 +159,7 @@ static void fconfig_init(void)
 	memset(&fcenv, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
-	fconfig.forcealpha=-1;
+	fconfig.forcealpha=0;
 	fconfig_setgamma(fconfig, 1.0);
 	fconfig.glflushtrigger=1;
 	fconfig.gui=1;
@@ -171,7 +171,7 @@ static void fconfig_init(void)
 	fconfig.port=-1;
 	fconfig.probeglx=1;
 	fconfig.qual=DEFQUAL;
-	fconfig.readback=RRREAD_SYNC;
+	fconfig.readback=RRREAD_PBO;
 	fconfig.refreshrate=60.0;
 	fconfig.samples=-1;
 	fconfig.spoil=1;
@@ -444,9 +444,6 @@ void fconfig_reloadenv(void)
 		if(fconfig.compress<0) fconfig.compress=0;
 		if(fconfig.subsamp<0) fconfig.subsamp=1;
 	}
-
-	if(fconfig.forcealpha==-1 && fconfig.readback==RRREAD_PBO)
-		fconfig.forcealpha=1;
 
 	fcenv_set=true;
 }

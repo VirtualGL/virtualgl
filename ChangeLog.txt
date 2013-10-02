@@ -66,6 +66,22 @@ then the build system defaults to installing the libGL symlink for Chromium
 from a 32-bit build into /opt/VirtualGL/fakelib32 and the libGL symlink for
 Chromium from a 64-bit build into /opt/VirtualGL/fakelib64.
 -------------------------------------------------------------------------------
+[11]
+PBO readback mode is now enabled by default.  Further research has shown that
+professional-grade GPUs always benefit from PBOs being enabled (quite
+dramatically, in the case of AMD FirePro adapters.)  With consumer-grade AMD
+adapters, PBOs generally do no harm, and with consumer-grade nVidia (GeForce)
+adapters, the results are mixed.  The GeForce drivers will fall back to
+blocking readbacks if the pixel format requested in glReadPixels() doesn't
+match the pixel format of the Pbuffer, so PBOs will generally be slower in
+those cases.  However, the slow-down is not dramatic, and such adapters are not
+the "common case" for VirtualGL servers.
+
+Further, VGL_FORCEALPHA is no longer enabled by default when PBOs are enabled.
+This option was introduced because of the GeForce behavior mentioned above, but
+the option has no effect whatsoever with the professional-grade GPUs that are
+recommended for use with VirtualGL.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
