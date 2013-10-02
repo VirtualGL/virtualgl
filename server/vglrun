@@ -121,13 +121,6 @@ export PROMAGIC_USEGLX
 VBOX_CROGL_FORCE_SUPPORTED=1
 export VBOX_CROGL_FORCE_SUPPORTED
 
-if [ "$OPENGL_DEVICE" != "" ]; then
-	echo "[VGL] NOTICE: The OPENGL_DEVICE environment variable is incompatible with"
-	echo "[VGL]    VirtualGL.  Temporarily unsetting this environment variable."
-fi
-unset OPENGL_DEVICE
-export OPENGL_DEVICE
-
 __VGL_DL=1
 __VGL_GE=0
 VGL_LIBRARY_PATH=
