@@ -108,7 +108,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_DEFAULTFBCONFIG}
 | Environment Variable | ''VGL_DEFAULTFBCONFIG = ''__''{attrib_list}''__ |
 | Summary | __''{attrib_list}''__ = Attributes of the default GLX framebuffer \
-	config that VirtualGL uses if a 3D application does not call \
+	config, which VirtualGL uses if a 3D application does not call \
 	''glXChooseVisual()'' to specify the visual attributes it desires |
 | Image Transports | All |
 | Default Value | None |
@@ -123,14 +123,16 @@ Each method of configuration takes precedence over the previous method:
 	server (the 3D X server.)  Thus, for every OpenGL-enabled X visual that the
 	application tries to obtain, VirtualGL needs to obtain an equivalent
 	"GLX FB config", which is like an X visual for Pbuffers.  VirtualGL does this
-	by intercepting ''glXChooseVisual()'' and using the parameters passed to that
-	function as arguments to ''glXChooseFBConfig()'', which is called on the 3D
-	X server.  The resulting FB config is mapped internally to an X visual on the
-	2D X server, which is returned from ''glXChooseVisual()''.  The FB config is
-	later used when creating the Pbuffer that backs a 3D application window.
+	by intercepting ''glXChooseVisual()'' and using the attributes passed to that
+	function to build an attribute list for ''glXChooseFBConfig()'', which is
+	called on the 3D X server.  The FB config returned from
+	''glXChooseFBConfig()'' is mapped internally to an X visual on the 2D X
+	server, and that visual is returned from ''glXChooseVisual()''.  The FB
+	config is later used when creating the Pbuffer that backs a 3D application
+	window.
 	{nl}{nl}
 	In rare cases, an application may choose to implement its own visual
-	selection mechanism rather than calling ''glXChooseVisual()''.  Such
+	selection mechanism rather than call ''glXChooseVisual()''.  Such
 	applications will iterate through the list of X visuals and examine the OpenGL
 	attributes of each using ''glXGetConfig()''.  The problem is this:  whereas
 	in a "normal" GLX environment, there would be a 1:1 correspondence between
@@ -148,7 +150,7 @@ Each method of configuration takes precedence over the previous method:
 	VirtualGL's default FB config.  This may be necessary to make certain
 	applications work, if those applications do not use ''glXChooseVisual()'' to
 	obtain a visual.  The attribute list is specified in the same way that you
-	would specify arguments to ''glXChooseFBConfig()''.  Example:
+	would specify an attribute list for ''glXChooseFBConfig()''.  Example:
 	''VGL_DEFAULTFBCONFIG = GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8''.  See
 	[[#Application_Recipes][Application Recipes]] for a list of applications that
 	are known to require the use of this configuration option.
@@ -160,12 +162,12 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | :0 |
 #OPT: hiCol=first
 
-	Description :: If the VirtualGL server has multiple 3D graphics cards, each
-	attached to a separate X screen or a separate X server, then you can use
-	this option to specify which graphics card should be used for 3D rendering.
-	For instance, setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with)
-	'':0.1'' would cause VirtualGL to redirect all of the 3D rendering from the
-	application to a 3D graphics card attached to Screen 1 on X display :0.
+	Description :: If the VirtualGL server has multiple GPUs, each attached to a
+	separate X screen or a separate X server, then you can use this option to
+	specify which GPU should be used for 3D rendering.  For instance, setting
+	''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.1'' would cause
+	VirtualGL to redirect all of the 3D rendering from the application to a GPU
+	attached to Screen 1 on X display :0.
 
 | Environment Variable | ''VGL_DRAWABLE = ''__''pbuffer \| pixmap''__ |
 | Summary | Specify the drawable type to use for 3D rendering |
@@ -173,14 +175,15 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | pbuffer |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL will redirect the 3D rendering from each
-	OpenGL window on the 2D X server into a corresponding Pbuffer on the 3D X
-	server, and it will likewise redirect the 3D rendering from each OpenGL
-	pixmap on the 2D X server into a corresponding pixmap on the 3D X server.
-	Setting ''VGL_DRAWABLE'' to ''pixmap'' causes VirtualGL to use pixmaps on the
-	3D X server to represent all OpenGL drawables on the 2D X server.  Generally,
-	this is recommended only for systems on which Pbuffer support is incomplete
-	or unstable.
+	Description :: Normally, VirtualGL will redirect the OpenGL rendering from
+	each of the application's windows on the 2D X server into a corresponding
+	Pbuffer on the 3D X server, and it will likewise redirect the OpenGL
+	rendering from each of the application's pixmaps on the 2D X server into a
+	corresponding pixmap on the 3D X server.  Setting ''VGL_DRAWABLE'' to
+	''pixmap'' causes VirtualGL to use pixmaps on the 3D X server to represent
+	all of the application's OpenGL drawables.  This is
+	meant as an advanced option for those who are experimenting with VirtualGL in
+	unsupported environments that may lack complete or stable Pbuffer support.
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
@@ -189,18 +192,21 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | ''VGL_FORCEALPHA=1'' if PBO readback mode is used, ''VGL_FORCEALPHA=0'' otherwise |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL will create a Pbuffer whose pixel format
-	matches that of the visual requested by the 3D application.
-	However, on some 3D hardware, this may produce suboptimal performance when
-	reading back the 3D pixels.  Thus, this option can be used to force VirtualGL
-	to create a 32-bit-per-pixel Pbuffer when the application requests a
-	24-bit-per-pixel visual.
+	Description :: Normally, VirtualGL will create Pbuffers whose attributes
+	match those of the visuals requested by the 3D application.  Setting
+	''VGL_FORCEALPHA'' to ''1'' causes VirtualGL to always create Pbuffers with
+	alpha channels.  This means that a 32-bit-per-pixel (BGRA) Pbuffer will be
+	created if the application requests a 24-bit-per-pixel visual.
 	{nl}{nl}
-	On some 3D hardware, it is necessary to use a 32-bit-per-pixel Pbuffer to
-	realize any performance improvement from the use of pixel buffer objects
-	(PBO's.)  Thus, unless this option is explicitly disabled, it will be
-	enabled by default whenever PBO readback mode is enabled.  See the
-	[[#VGL_READBACK][''VGL_READBACK'']] option for further information.
+	The primary purpose of this option is to work around a limitation of certain
+	consumer-grade GPUs, whereby the pixel format requested by the pixel readback
+	operation must match the pixel format of the Pbuffer in order for pixel
+	buffer objects (PBOs) to behave correctly.  Since displaying to an X proxy
+	typically requires VirtualGL to read back pixels in the BGRA format, enabling
+	''VGL_FORCEALPHA'' might be necessary in order to use PBO readback mode with
+	the afore-mentioned GPUs (as of this writing, nVidia GeForce adapters are
+	known to require this.)  See the [[#VGL_READBACK][''VGL_READBACK'']] option
+	for further information.
 
 	!!! ''VGL_FORCEALPHA'' overrides the application's choice of visuals.  It has
 	no effect if the application is not explicitly choosing a visual.  In that
@@ -209,7 +215,7 @@ Each method of configuration takes precedence over the previous method:
 {anchor: VGL_FPS}
 | Environment Variable | ''VGL_FPS = ''__''{f}''__ |
 | ''vglrun'' argument | ''-fps ''__''{f}''__ |
-| Summary | Limit the client/server frame rate to __''{f}''__ frames/second, \
+| Summary | Limit the end-to-end frame rate to __''{f}''__ frames/second, \
 	where __''{f}''__ is a floating point number > 0.0 |
 | Image Transports | VGL, X11, XV, Custom (if supported) |
 | Default Value | 0.0 (No limit) |
@@ -218,7 +224,7 @@ Each method of configuration takes precedence over the previous method:
 	Description :: This option prevents VirtualGL from sending frames at a rate
 	faster than the specified limit.  It can be used, for instance, as a crude
 	way to control network bandwidth or CPU usage in multi-user environments
-	where those resources are constrained.
+	in which those resources are constrained.
 	{nl}{nl}
 	If frame spoiling is disabled, then setting ''VGL_FPS'' effectively limits
 	the server's 3D rendering frame rate as well.
@@ -235,7 +241,7 @@ Each method of configuration takes precedence over the previous method:
 	light that your computer's monitor is instructed to display and the
 	intensity that it actually displays.  The curve is an exponential curve of
 	the form __Y = X{^G}__, where X is between 0 and 1.  G is called the "gamma"
-	of the monitor.  PC monitors and TV's usually have a gamma of around 2.2.
+	of the monitor.  PC monitors and TVs usually have a gamma of around 2.2.
 	{nl}{nl}
 	Some of the math involved in 3D rendering assumes a linear gamma
 	(G = 1.0), so technically speaking, 3D applications will not display with
@@ -252,11 +258,11 @@ Each method of configuration takes precedence over the previous method:
 	monitor.
 	{nl}{nl}
 	If ''VGL_GAMMA'' is set to an arbitrary floating point value, then
-	VirtualGL performs gamma correction internally using the specified value
-	as the gamma correction factor.  You can also specify a negative
-	value to apply a "de-gamma" function.  Specifying a gamma correction
-	factor of G (where G < 0) is equivalent to specifying a gamma correction
-	factor of -1/G.
+	VirtualGL will perform gamma correction on all of the rendered 3D images
+	from the application, using the specified value as the gamma correction
+	factor.  You can also specify a negative value to apply a "de-gamma"
+	function.  Specifying a gamma correction factor of G (where G < 0) is
+	equivalent to specifying a gamma correction factor of -1/G.
 
 {anchor: VGL_GLFLUSHTRIGGER}
 | Environment Variable | ''VGL_GLFLUSHTRIGGER = ''__''0 \| 1''__ |
@@ -268,7 +274,7 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: ''glFlush()'' is a sort of "asynchronous synchronization"
 	command.  It flushes the OpenGL command buffers, which generally has the
-	effect of ensuring that the commands have been delivered to the 3D hardware.
+	effect of ensuring that the commands have been delivered to the GPU.
 	However, unlike ''glFinish()'', ''glFlush()'' does not wait until the
 	commands have been rendered before it returns.
 	{nl}{nl}
@@ -276,14 +282,14 @@ Each method of configuration takes precedence over the previous method:
 	When doing front buffer rendering, some applications call ''glFlush()'' after
 	each object is rendered.  Some call it only at the end of the frame.  Others
 	call ''glFlush()'' much more often, even as frequently as every time a few
-	lines are drawn.  This creates problems for VirtualGL, since it has to guess
-	what the application is intending to do.  Not all applications that use
-	front buffer rendering call ''glFinish()'' to signal the end of a frame, so
-	VirtualGL can't usually get away with ignoring ''glFlush()''.  However, some
-	applications call ''glFlush()'' so often that VirtualGL can't usually get
-	away with reading back/sending a frame every time ''glFlush()'' is called,
-	either (see [[#VGL_SPOILLAST][VGL_SPOILLAST]] for more information on how
-	VirtualGL tries to handle this, under normal circumstances.)
+	primitives are rendered.  This creates problems for VirtualGL, since it has
+	to guess what the application is intending to do.  Not all applications that
+	use front buffer rendering call ''glFinish()'' to signal the end of a frame,
+	so VirtualGL cannot usually get away with ignoring ''glFlush()''.  However,
+	some applications call ''glFlush()'' so often that VirtualGL cannot
+	get away with reading back/sending a frame every time ''glFlush()'' is
+	called, either (see [[#VGL_SPOILLAST][VGL_SPOILLAST]] for more information on
+	how VirtualGL tries to handle this, under normal circumstances.)
 	{nl}{nl}
 	Some 3D applications use ''glFlush()'' very liberally and intend for it to be
 	an intermediate rather than a final synchronization command.  Such
@@ -294,7 +300,7 @@ Each method of configuration takes precedence over the previous method:
 	the front buffer with a particular color, calls ''glFlush()'', then clears it
 	again with another color.  We wouldn't mention it if it hadn't happened
 	before.)  For such applications, setting ''VGL_GLFLUSHTRIGGER'' to ''0''
-	should allow them to display properly.  See
+	should make them display properly in VirtualGL.  See
 	[[#Application_Recipes][Application Recipes]] for a list of applications that
 	are known to require this.
 
@@ -303,16 +309,19 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL tries to call any "real" GLX and OpenGL
-	functions it needs from the OpenGL library against which it is linked
-	(usually ''/usr/lib/libGL.so.1'', ''/usr/lib64/libGL.so.1'',  or
-	''/usr/lib/64/libGL.so.1'').  Failing this, VirtualGL will then try to call
-	these functions from the first compatible library named ''libGL.so.1'' that
-	is found in the dynamic loader path.  You can use the ''VGL_GLLIB''
-	environment variable to override this behavior and specify a dynamic library
-	from which VirtualGL will call the "real" GLX and OpenGL functions.
+	Description :: Normally, VirtualGL will try to use the OpenGL library against
+	which it was linked (usually ''libGL.so.1'', in the system library path) to
+	make any GLX or OpenGL calls it needs to make.  Failing this, VirtualGL will
+	try to use the first compatible library named ''libGL.so.1'' that is found in
+	the dynamic loader path.  You can use the ''VGL_GLLIB'' environment variable
+	to override this behavior and specify a dynamic library from which VirtualGL
+	should call "real" GLX and OpenGL functions.  For instance, when VirtualGL
+	intercepts a ''glXSwapBuffers()'' call from the application, it modifies the
+	arguments to redirect the function to the 3D X server, then it calls the
+	"real" ''glXSwapBuffers()'' function. ''VGL_GLLIB'' allows one to specify the
+	library from which this "real" function (and others) should be called.
 	{nl}{nl}
-	You shouldn't need to muck with this unless something doesn't work.  However,
+	You shouldn't need to change this unless something doesn't work.  However,
 	setting this environment variable is necessary when using VirtualGL with
 	[[chromium.txt#Chromium][Chromium]].  It is also potentially useful if one
 	wishes to insert another OpenGL interposer between VirtualGL and the system's
@@ -327,7 +336,7 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: VirtualGL will normally monitor an application's X event queue
 	and pop up the VirtualGL Configuration dialog whenever ''CTRL-SHIFT-F9'' is
-	pressed.  In the event that this interferes with a key sequence that a 3D
+	pressed.  In the event that this interferes with a key sequence that the
 	application is already using, then you can redefine the key sequence used to
 	pop up the VirtualGL Configuration dialog by setting ''VGL_GUI'' to some
 	combination of ''shift'', ''ctrl'', ''alt'', and one of ''f1, f2, ..., f12''.
@@ -365,15 +374,15 @@ Each method of configuration takes precedence over the previous method:
 	rather than to stderr.
 
 | Environment Variable | ''VGL_LOGO = ''__''0 \| 1''__ |
-| Summary | Enable or disable the display of a VGL logo in the 3D window |
+| Summary | Enable or disable the display of a VGL logo in the 3D window(s) |
 | Image Transports | All |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
 	Description :: Setting ''VGL_LOGO'' to ''1'' will cause VirtualGL to display
-	a small logo in the bottom right-hand corner of the 3D window.  This is meant
-	as a debugging tool to allow users to determine whether or not VirtualGL is
-	active.
+	a small logo in the bottom right-hand corner of all of the application's
+	3D windows.  This is meant as a debugging tool to allow users to determine
+	whether or not VirtualGL is active.
 
 {anchor: VGL_NPROCS}
 | Environment Variable | ''VGL_NPROCS = ''__''{n}''__ |
@@ -386,12 +395,12 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: The VGL Transport can divide the task of compressing each
 	frame among multiple server CPUs.  This might speed up the overall throughput
-	in rare circumstances where the server CPUs are significantly slower than the
-	client CPUs.
+	in rare circumstances in which the server CPUs are significantly slower
+	than the client CPUs.
 	{nl}{nl}
-	VirtualGL will not allow more than 4 processors total to be used for
+	VirtualGL will not allow more than 4 CPUs total to be used for
 	compression, nor will it allow you to set this parameter to a value greater
-	than the number of processors in the system.
+	than the number of CPUs in the system.
 
 	!!! When using the VGL Transport, multi-threaded compression is affected by
 	the [[#VGL_TILESIZE][''VGL_TILESIZE'']] option
@@ -443,21 +452,21 @@ Each method of configuration takes precedence over the previous method:
 	original image (but, due to roundoff errors, the compressed image is still
 	not completely lossless.)
 	{nl}{nl}
-	Because the human eye usually can't detect the highest frequencies in the
+	Because the human eye usually cannot detect the highest frequencies in the
 	image, and often because the image lacks those high-frequency elements to
 	begin with, a sufficiently high JPEG quality setting can produce a
 	"perceptually lossless" image.  A "perceptually lossless" image contains
 	a small amount of mathematical error when compared to the original image, but
-	this error is so small that, under normal circumstances, the human visual
-	system cannot distinguish it.  The threshold quality level at which JPEG
+	this error is so small that, under normal circumstances, human vision
+	cannot detect it.  The threshold quality level at which JPEG
 	compression becomes perceptually lossless is different for each image, but
 	experiments with various visual difference benchmarks (such as
 	[[http://www.mpi-inf.mpg.de/resources/hdr/vdp/][HDR-VDP]]) suggest that	a
 	JPEG quality of 95 is sufficient to guarantee perceptual losslessness for the
 	types of applications (volume visualization apps, in particular) in which
 	image quality is critical.  As with any benchmarks, Your Mileage May Vary.
-	If image quality is of paramount concern, consider setting the JPEG quality
-	to 100 or using RGB encoding.
+	Those who are particularly paranoid about image quality can set the JPEG
+	quality to 100 or use RGB encoding, but a fast network is required for both.
 	{nl}
 	!!! If using an image transport plugin, then this setting need not
 	necessarily correspond to JPEG image quality.  The plugin can choose to
@@ -465,68 +474,69 @@ Each method of configuration takes precedence over the previous method:
 
 {anchor: VGL_READBACK}
 | Environment Variable | ''VGL_READBACK = ''__''none \| pbo \| sync''__ |
-| Summary | Specify the method used by VirtualGL to read back the 3D pixels from the 3D graphics hardware |
+| Summary | Specify the method used by VirtualGL to read back the 3D pixels from the 3D graphics adapter |
 | Image Transports | All |
-| Default Value | sync |
+| Default Value | pbo |
 #OPT: hiCol=first
 
 	Description :: {:}
 	* __none__ = Do not read back the 3D pixels at all.  On rare occasions, it
 	might be desirable to have VirtualGL redirect OpenGL rendering from an
-	application into a Pbuffer but not automatically read back and send the
-	rendered pixels.  Some applications have their own mechanisms for reading
+	application's window into a Pbuffer but not automatically read back and send
+	the rendered pixels.  Some applications have their own mechanisms for reading
 	back the rendered pixels, so setting ''VGL_READBACK=none'' disables
 	VirtualGL's readback mechanism and prevents duplication of effort.
 	{nl}{nl}
 	This option was developed initially to support running
 	[[http://www.paraview.org/][ParaView]] in parallel using MPI.  ParaView/MPI
-	normally uses MPI processes 1 through N as rendering servers, each drawing a
-	portion of the geometry into a separate window on a separate X display.
+	normally uses MPI Processes 1 through N as rendering servers, each rendering
+	a portion of the geometry into a separate window on a separate X display.
 	ParaView reads back these server windows and composites the pixels into the
-	main application window, which is controlled by MPI process 0.  By creating a
+	main application window, which is controlled by MPI Process 0.  By creating a
 	script that passes a different value of ''VGL_DISPLAY'' and ''VGL_READBACK''
 	to each MPI process, it is possible to make all of the ParaView server
-	processes render to off-screen buffers on different graphics cards while
+	processes render to off-screen buffers on different GPUs while
 	preventing VirtualGL from displaying any pixels except those generated by
-	process 0.
+	Process 0.
 	{nl}{nl}
-	This setting can also be used to force Chromium to render into Pbuffers
-	instead of windows.  See {ref prefix="Section ": Force_Pbuffer}.
+	This setting can also be used to force Chromium server processes to render
+	into Pbuffers instead of windows.  See
+	{ref prefix="Section ": Force_Pbuffer}.
 	{nl}{nl}
-	* __pbo__ = PBO readback mode.  Attempt to use pixel buffer objects (PBO's)
-	to accelerate the readback of the 3D pixels from the 3D graphics card.  A PBO
-	is an	opaque memory buffer managed by OpenGL, so it can be locked down for
-	direct DMA transfers.  This improves performance as well as makes the pixel
-	readback operation non-blocking.  However, the catch is that the pixel format
-	requested in the pixel readback operation must match the "native" pixel
-	format of the Pbuffer in order for PBO's to realize any performance benefit.
-	Otherwise, the 3D driver falls back to using the standard blocking pixel
-	readback operation.
+	* __pbo__ = PBO readback mode.  Attempt to use pixel buffer objects (PBOs)
+	to read back the 3D pixels from the GPU.  A PBO is an opaque memory buffer
+	managed by OpenGL, so it can be locked down for direct DMA transfers.  This
+	improves readback performance as well as makes the readback operation
+	non-blocking.  Because PBOs are managed buffers, VirtualGL has to perform an
+	additional memory copy to transfer the pixels out of the PBO and into the
+	image transport's buffer.  However, on high-end GPUs, PBO readback mode will
+	still generally perform better than synchronous readback mode, even with this
+	additional memory copy.  Further, since the non-blocking nature of PBO
+	readback reduces the load on the GPU, PBOs can improve performance
+	dramatically when multiple simultaneous users are sharing a
+	professional-grade GPU.
 	{nl}{nl}
-	Because the PBO is a managed buffer, VirtualGL has to introduce an additional
-	memory copy to transfer the pixels out of the PBO and into the image
-	transport's buffer.  On high-end 3D hardware, PBO readback mode will generally
-	perform better than synchronous readback mode, even with this additional
-	memory copy, but there are a few platforms on which it performs worse, which
-	is why it is not enabled by default.  PBO's will significantly improve
-	performance on nVidia hardware when multiple users are sharing the GPU.
+	As of this writing, some nVidia GeForce adapters will fall back to using
+	blocking readbacks if the pixel format requested in the pixel read operation
+	does not match the pixel format of the Pbuffer.  If VirtualGL detects that
+	this is occurring-- that is, if PBOs are no longer behaving asynchronously--
+	then VGL will fall back to synchronous readback mode until the next time the
+	compression  type is changed.  If you are using an X proxy, then this
+	situation could occur because the X proxy's virtual framebuffer is BGRA but,
+	unless the application has requested an alpha channel, its Pbuffer is likely
+	BGR.  In this specific case, setting the
+	[[#VGL_FORCEALPHA][''VGL_FORCEALPHA'']] option to ''1'' could alleviate the
+	issue.
 	{nl}{nl}
-	VirtualGL will automatically fall back to synchronous readback mode if it
-	needs to read back pixels in a format other than the native format of the
-	Pbuffer.  This will generally be the case if anaglyphic stereo is enabled, if
-	RGB encoding is used with the VGL Transport, or if the X11 Transport is used
-	with a 2D X server whose pixel format does not match that of the Pbuffer.
-	Setting ''VGL_VERBOSE=1'' will print a warning message whenever this occurs.
-	Since PBO's are not accelerated on some platforms unless 32-bit pixel formats
-	are used, VirtualGL's default behavior is to automatically create Pbuffers
-	with 32 bits per pixel when PBO readback mode is enabled (you can use the
-	[[#VGL_FORCEALPHA][''VGL_FORCEALPHA'']] option to override this.)
-	{nl}{nl}
-	* __sync__ = Synchronous readback mode.  This disables the use of PBO's
+	* __sync__ = Synchronous readback mode.  This disables the use of PBOs
 	altogether, which causes VirtualGL to always use blocking pixel readback
-	operations and to let the 3D driver perform any pixel translation that is
-	necessary.  This is the default behavior of VirtualGL.
+	operations.
 	{nl}{nl}
+	Setting ''VGL_VERBOSE=1'' will cause VirtualGL to print the current readback
+	mode being used, as well as the pixel format requested by the readback
+	operation and the pixel format of the Pbuffer.  Additionally, a notification
+	will be printed if VirtualGL falls back from PBO readback mode to synchronous
+	readback mode.
 
 | Environment Variable | ''VGL_REFRESHRATE = ''__''{r}''__ |
 | Summary |  __''{r}''__ = the "virtual" refresh rate, in Hz, for the \
@@ -560,13 +570,13 @@ Each method of configuration takes precedence over the previous method:
 	vendor-specific methods of enabling full-scene antialiasing at a global level
 	(such as nVidia's ''__GL_FSAA_MODE'' environment variable) do not work with
 	Pbuffers and, subsequently, do not work with VirtualGL.  If ''VGL_SAMPLES''
-	is > 0, then VirtualGL will attempt to redirect 3D rendering to
-	multisample-enabled Pbuffers with the specified number (or a greater
-	number) of samples.  This effectively forces the 3D application to render
-	with the specified multisampling level, as if the application had explicitly
-	passed parameters of ''GLX_SAMPLES'', __''{s}''__ to ''glXChooseVisual()''.
-	If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces multisampling to be
-	disabled, even if the 3D application explicitly tries to enable it.
+	is > 0, then VirtualGL will attempt to create Pbuffers with the specified
+	number (or a greater number) of samples.  This effectively forces the 3D
+	application to render with the specified multisampling level, as if the
+	application had explicitly passed attributes of ''GLX_SAMPLES'', __''{s}''__
+	to ''glXChooseVisual()''.  If ''VGL_SAMPLES'' is ''0'', then VirtualGL forces
+	multisampling to be disabled, even if the 3D application explicitly tries to
+	enable it.
 
 	!!! ''VGL_SAMPLES'' overrides the application's choice of visuals.  It has
 	no effect if the application is not explicitly choosing a visual.  In that
@@ -582,20 +592,24 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: In remote display environments, the mouse movement is
 	generally sampled at least 40 and sometimes 60 times per second.  Therefore,
-	unless VirtualGL is able to deliver at least this number of frames per
-	second to the client, the movement of a 3D scene will appear to drag behind
-	the mouse motion.  VirtualGL's default behavior is to compensate for this by
-	dropping frames.  This ensures that every mouse motion event will result in a
-	new frame being rendered on the server, even though not all of these frames
-	will actually be delivered to the client.
+	unless VirtualGL is able to deliver at least that number of frames per
+	second, the movement of a 3D scene will appear to lag behind the mouse
+	motion.  This is because the server is trying to render a new frame
+	for every mouse motion event, but if the image transport and (if applicable)
+	the client cannot process the frames fast enough, the server's TCP buffers
+	quickly fill up, causing increased delay in the delivery of each frame.
+	VirtualGL's default behavior is to compensate for this by dropping (spoiling)
+	each frame that the transport isn't ready to receive.  This ensures that the
+	movement of the 3D scene will appear to "keep up" with the mouse, even though
+	not all rendered frames are actually being delivered.
 	{nl}{nl}
-	Frame spoiling should produce the best results with interactive applications,
-	but it should be turned off when running benchmarks or other non-interactive
+	Frame spoiling is usually necessary with interactive applications, but it
+	should be turned off when running benchmarks or other non-interactive
 	applications.  Turning off frame spoiling will force every frame rendered on
-	the server to be sent through VirtualGL, and thus the frame rate reported by
-	OpenGL benchmarks will accurately reflect the frame rate of VirtualGL's image
-	pipeline (though, in X proxy environments, this may still not accurately
-	reflect the frame rate seen by the user.  See
+	the server to be delivered through the image transport, and thus the frame
+	rate reported by OpenGL benchmarks will accurately reflect the end-to-end
+	performance of VirtualGL (though, in X proxy environments, this may still not
+	accurately reflect the frame rate seen by the user.  See
 	{ref prefix="Section ": Frame_Spoiling}.)  Disabling frame spoiling also
 	prevents non-interactive applications from wasting graphics resources by
 	rendering frames that will never be seen.
@@ -607,34 +621,34 @@ Each method of configuration takes precedence over the previous method:
 | Default Value | Enabled |
 #OPT: hiCol=first
 
-	Description :: VirtualGL will commonly read back a rendered 3D image if the
+	Description :: VirtualGL will normally read back a rendered 3D image if the
 	3D application calls ''glXSwapBuffers()'' while rendering to the back
 	buffer or if the 3D application calls ''glFinish()'', ''glFlush()'', or
 	''glXWaitGL()'' while rendering to the front buffer.  When frame spoiling is
-	enabled and the frame queue is busy compressing/sending a frame,
-	the newly-rendered frame is normally promoted to the head of the frame
-	queue, and the rest of the frames in the queue are "spoiled" (discarded.)
-	This algorithm, called "spoil first",	ensures that when a frame is actually
-	sent to the client (rather than spoiled), the sent frame will be the most
-	recently rendered frame.  However, this algorithm requires that VirtualGL
-	read back every frame that the application renders, even if the frame is
-	ultimately discarded.
+	enabled and the image transport is busy compressing/sending a frame,
+	the newly-rendered frame is normally promoted to the head of the queue, and
+	the rest of the frames in the queue are "spoiled" (discarded.)  This
+	algorithm, called "spoil first", ensures that when a frame is actually
+	delivered through the image transport (rather than spoiled), the delivered
+	frame will be the most recently rendered frame.  However, this algorithm
+	requires that VirtualGL read back every frame that the application renders,
+	even if the frame is ultimately discarded.
 	{nl}{nl}
 	Some applications call ''glFlush()'' many thousands of times per frame while
 	rendering to the front buffer.  Thus, VirtualGL's default behavior is to use
 	a different spoiling algorithm, "spoil last", to process frames triggered by
 	''glFlush()'' calls.  "Spoil last" discards the most recently rendered frame
-	if the frame queue is busy.  Thus, the only frames that are read back from
-	the graphics card are the frames that are actually sent to the client.
-	However, there is no guarantee in this case that the frame sent to the client
-	will be the most recently rendered frame, so applications that perform
-	front buffer rendering and call ''glFlush()'' in response to an
-	interactive operation may not display properly.  For such applications,
+	if the image transport is busy.  Thus, the only frames that are read back
+	from the Pbuffer are the frames that are actually delivered through the
+	image transport.  However, there is no guarantee in this case that the
+	delivered frame will be the most recently rendered frame, so applications
+	that perform front buffer rendering and call ''glFlush()'' in response to
+	an interactive operation may not display properly.  For such applications,
 	setting the ''VGL_SPOILLAST'' environment variable to ''0'' prior to
 	launching the application with ''vglrun'' will cause the "spoil first"
 	algorithm to be used for all frame triggers, including ''glFlush()''.  This
 	should fix the display problem, at the expense of increased load on the
-	graphics card (because VirtualGL is now reading back the rendered 3D image
+	GPU (because VirtualGL is now reading back the rendered 3D image
 	every time ''glFlush()'' is called.)  See
 	[[#Application_Recipes][Application Recipes]] for a list of applications that
 	are known to require this.
@@ -668,14 +682,15 @@ Each method of configuration takes precedence over the previous method:
 	eye buffer
 	{nl}{nl}
 	__quad__ = Attempt to use quad-buffered stereo, which will result in a pair
-	of images being sent to the VirtualGL Client for every frame.  If using the
-	VGL Transport and quad-buffered stereo is not available on the client, or if
-	using the X11 Transport, then fall back to using anaglyphic stereo.
-	Using quad-buffered stereo requires the VGL Transport (or a transport plugin
-	that can handle stereo image pairs.)  Using quad-buffered stereo with the VGL
+	of images being sent to the VirtualGL Client for every frame.  Using
+	quad-buffered stereo requires the VGL Transport (or a transport plugin that
+	can handle stereo image pairs.)  Using quad-buffered stereo with the VGL
 	Transport also requires that the 2D X server support OpenGL and be connected
-	to a 3D accelerator that supports stereo rendering.  Quad-buffered stereo
-	is not supported when using the VGL Transport with YUV encoding.
+	to a GPU that supports stereo rendering.  The 2D X server should
+	additionally be configured to export stereo visuals.  Quad-buffered stereo
+	is not supported when using the VGL Transport with YUV encoding.  If
+	quad-buffered stereo is requested but the transport or the client does not
+	support it, then VirtualGL will fall back to using anaglyphic stereo.  
 	{nl}{nl}
 	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
 	available
@@ -773,9 +788,9 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: Normally, VirtualGL's operation is asynchronous from the point
 	of view of the application.  The application swaps the buffers or calls
-	''glFinish()'' or ''glFlush()'' or ''glXWaitGL()'', and VirtualGL reads	back
-	the framebuffer and sends the pixels to the client's display ... eventually.
-	This will work fine for the vast majority of applications, but it does not
+	''glFinish()'' or ''glFlush()'' or ''glXWaitGL()'', and VirtualGL will read
+	back the Pbuffer and deliver the pixels to the 2D X server ... eventually.
+	This is fine for the vast majority of applications, but it does not
 	strictly conform to the GLX spec.  Technically speaking, when an application
 	calls ''glXWaitGL()'' or ''glFinish()'', it is well within its rights to
 	expect the 3D image to be immediately available in the X window.
@@ -783,10 +798,10 @@ Each method of configuration takes precedence over the previous method:
 	occasions, an application may try to use ''XGetImage()'' or other X11
 	functions to obtain a bitmap of the pixels that were rendered by OpenGL.
 	Enabling ''VGL_SYNC'' is a somewhat extreme measure that may be needed to
-	make such applications work properly.  It was developed initially as a way to
-	pass the GLX conformance suite (''conformx'', specifically), but at least one
-	commercial application is known to require it as well (see
-	[[#Application_Recipes][Application Recipes]].){nl}\
+	make such applications display properly with VirtualGL.  It was developed
+	initially as a way to pass the GLX conformance suite (''conformx'',
+	specifically), but at least one commercial application is known to require it
+	as well (see [[#Application_Recipes][Application Recipes]].){nl}\
 	{nl}\
 	When ''VGL_SYNC'' is enabled, every call to ''glFinish()'', ''glXWaitGL()'',
 	and ''glXSwapBuffers()'' will cause the contents of the Pbuffer
@@ -874,7 +889,8 @@ Each method of configuration takes precedence over the previous method:
 
 	Description :: If this option is specified, then VirtualGL will attempt to
 	load an image transport plugin contained in a dynamic library named
-	''libtransvgl_''__''{t}''__''.so'' located in the dynamic linker path.
+	''libtransvgl_''__''{t}''__''.so'' located in the dynamic linker path.  See
+	{ref prefix="Chapter ": Transport_Plugins} for more information.
 
 | Environment Variable | ''VGL_TRAPX11 = ''__''0 \| 1''__ |
 | Summary | Disable/enable VirtualGL's X11 error handler |
@@ -883,8 +899,8 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 	Description :: If an application does not install its own X11 error handler,
-	then the default X11 error handler is used.  The default X11 error handler
-	will cause the application to exit if an X11 error occurs.  Enabling the
+	then the default X11 error handler is used, thus causing
+	the application to exit if an X11 error occurs.  Enabling the
 	''VGL_TRAPX11'' option will cause VirtualGL to install its own X11 error
 	handler, which prints a warning message but allows the application to
 	continue running.
@@ -897,9 +913,9 @@ Each method of configuration takes precedence over the previous method:
 #OPT: hiCol=first
 
 	Description :: When verbose mode is enabled, VirtualGL will reveal some of
-	the decisions it makes behind the scenes, such as which code path it is using
-	to compress images, which type of X11 drawing it is using, etc.  This can be
-	helpful when diagnosing performance problems.
+	the decisions it is making behind the scenes, such as which type of X11
+	drawing it is using, etc.  This can be helpful when diagnosing performance
+	problems.
 
 {anchor: VGL_WM}
 | Environment Variable | ''VGL_WM = ''__''0 \| 1''__ |
@@ -918,15 +934,13 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL tries to call any "real" X11 functions it
-	needs from the X11 library against which it is linked (usually
-	''/usr/lib/libX11.so.6'', ''/usr/lib/64/libX11.so.6'',
-	''/usr/X11R6/lib/libX11.so.6'', or ''/usr/X11R6/lib64/libX11.so.6'').
-	Failing this, VirtualGL will then try to call these functions from the first
-	compatible library named ''libX11.so.6'' that is found in the dynamic loader
-	path.  You can use the ''VGL_X11LIB'' environment	variable to override this
-	behavior and specify a dynamic library from which VirtualGL will call the
-	"real" X11 functions.
+	Description :: Normally, VirtualGL will try to use the X11 library against
+	which it was linked (usually ''libX11.so.6'', in the system library path) to
+	make any X11 calls it needs to make.  Failing this, VirtualGL will then try
+	to use the first compatible library named ''libX11.so.6'' that is found in
+	the dynamic loader path.  You can use the ''VGL_X11LIB'' environment variable
+	to override this behavior and specify a dynamic library from which VirtualGL
+	should call "real" X11 functions.
 	{nl}{nl}
 	You shouldn't need to muck with this unless something doesn't work.  However,
 	it is potentially useful if one wishes to insert another X11 interposer
@@ -958,7 +972,7 @@ those wishing to build additional infrastructure around VirtualGL.
 | Default Value | ''x11'' |
 #OPT: hiCol=first
 
-	Description :: If the client machine has a 3D accelerator, then it may be
+	Description :: If the client machine has a GPU, then it may be
 	faster in some rare instances to draw pixels using OpenGL rather than using
 	2D (X11) commands.
 
@@ -1026,6 +1040,6 @@ those wishing to build additional infrastructure around VirtualGL.
 #OPT: hiCol=first
 
 	Description :: When verbose mode is enabled, VirtualGL will reveal some of
-	the decisions it makes behind the scenes, such as which code path it is using
-	to decompress images, which type of X11 drawing it is using, etc.  This can
-	be helpful when diagnosing performance problems.
+	the decisions it is making behind the scenes, such as which type of X11
+	drawing it is using, etc.  This can be helpful when diagnosing performance
+	problems.

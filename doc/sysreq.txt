@@ -4,29 +4,27 @@
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
+	| {list type=ul: \
+			{item:For optimal performance, the CPU should support SSE2 \
 				extensions.} \
 			{item:Dual processors or dual cores recommended}} \
-	| Pentium 4/Xeon with EM64T, or...{nl} \
-		AMD Opteron or Athlon64, 1.8 GHz or faster \
-		{list type=ul: \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	| Dual processors or dual cores recommended \
+	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
 | Graphics \
-	| Any decent 3D graphics card that supports Pbuffers \
+	| AMD or nVidia GPU \
 		{list type=ul: \
-			{item:If the manufacturer of your 3D adapter provides proprietary \
-				drivers, then it is recommended that you install these.  Many of the \
-				drivers that ship with Linux, for instance, do not provide full 3D \
-				acceleration or Pbuffer support.  }} \
+			{item:For optimal performance, particularly with multiple simultaneous \
+				users, a professional-grade GPU such as the AMD FirePro or nVidia \
+				Quadro is recommended.} \
+			{item:Install the AMD or nVidia proprietary drivers.  Open source \
+				drivers for these GPUs do not generally provide full 3D acceleration, \
+				and some of those drivers do not provide Pbuffer support.}} \
 	| < \
-	| Any graphics card with decent 2D performance \
+	| Any graphics adapter with decent 2D performance \
 		{list type=ul: \
-			{item:If using a 3D graphics card, install the vendor drivers for \
-				that 3D graphics card.}} \
+			{item:If using a 3D graphics adapter, install the vendor drivers for \
+				that 3D graphics adapter.}} \
 	|
 | Other Software \
 	| X server configured to export True Color (24-bit or 32-bit) visuals \
@@ -56,10 +54,10 @@
 
 || || Client ||
 | Recommended CPU \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
 | Graphics \
-	| Any graphics card with decent 2D performance \
+	| Any graphics adapter with decent 2D performance \
 	|
 | O/S \
 	| Windows 2000 or later \
@@ -81,21 +79,23 @@
 
 || || Server || Client ||
 | Linux/Unix \
-	| 3D graphics card that supports stereo (examples: nVidia Quadro, ATI \
-		FirePro.)  The 2D X server should be configured to export stereo visuals. \
-	| < \
+	| {list type=ul: \
+			{item:AMD or nVidia GPU that supports stereo (examples: AMD FirePro W \
+				Series, nVidia Quadro)} \
+			{item:The 3D X server should be configured to export stereo visuals.}} \
+	| {list type=ul: \
+			{item:GPU that supports stereo} \
+			{item:The 2D X server should be configured to export stereo visuals.}} \
 	|
 | Mac/x86 \
 	| N/A \
-	| 3D graphics card that supports stereo (example: nVidia Quadro.) \
-		The 2D X server should be configured to export stereo visuals. \
+	| GPU that supports stereo (example: nVidia Quadro) \
 	|
 | Windows \
 	| N/A \
 	| {list type=ul: \
-			{item:3D graphics card that supports stereo (examples: nVidia \
-				Quadro, ATI FirePro.)  Stereo support should be enabled in the 3D \
-				driver configuration.} \
+			{item:GPU that supports stereo.  Stereo support should be enabled in \
+				the 3D driver configuration.} \
 			{item:2D X server that supports and is configured to export stereo \
 				visuals.  (As of this writing, \
 				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \
@@ -109,18 +109,16 @@
 
 || || Client ||
 | Linux/Unix \
-	| 3D graphics card that supports transparent overlays (examples: \
-		nVidia Quadro, ATI FirePro.)  The 2D X server should be configured to \
-		export overlay visuals. \
+	| GPU that supports transparent overlays.  The 2D X server should be \
+			configured to export overlay visuals. \
 	|
 | Mac/x86 \
 	| ^ \
 	|
 | Windows \
 	| {list type=ul: \
-			{item:3D graphics card that supports transparent overlays (examples: \
-				nVidia Quadro, ATI FirePro.)  Overlay support should be enabled in \
-				the 3D driver configuration.} \
+			{item:GPU that supports transparent overlays.  Overlay support should \
+				be enabled in the 3D driver configuration.} \
 			{item:2D X server that supports and is configured to export transparent \
 				overlay visuals. (As of this writing, \
 				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \

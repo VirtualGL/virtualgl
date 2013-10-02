@@ -9,32 +9,30 @@ different image into each buffer.  How the stereo images are subsequently
 displayed depends on the particulars of the 3D hardware and the user's
 environment.  VirtualGL can support stereographic applications in one of two
 ways: (1) by sending the stereo image pairs to the client to be displayed in
-stereo by the client's 3D graphics card, or (2) by combining each stereo image
-pair into a single image that can be viewed with traditional anaglyphic 3D
-glasses or a passive stereo system, such as a 3D TV.
+stereo by the client's GPU, or (2) by combining each stereo image pair into a
+single image that can be viewed with traditional anaglyphic 3D glasses or a
+passive stereo system, such as a 3D TV.
 
 *** Quad-Buffered Stereo
 
 The name "quad-buffered" stereo refers to the fact that OpenGL uses four
 buffers (left front, right front, left back, and right back) to support
-stereographic rendering with double buffering.  3D graphics cards with
-quad-buffered stereo capabilities generally provide some sort of
-synchronization signal that can be used to control various types of active
-stereo 3D glasses.  Some also support "passive stereo", which requires
-displaying the left and right eye buffers to different monitor outputs.
-VirtualGL supports quad-buffered stereo by rendering the stereo images on
-the server and sending the image pairs across the network to be displayed on
-the client.
+stereographic rendering with double buffering.  GPUs with quad-buffered stereo
+capabilities generally provide some sort of synchronization signal that can be
+used to control various types of active stereo 3D glasses.  Some also support
+"passive stereo", which requires displaying the left and right eye buffers to
+different monitor outputs.  VirtualGL supports quad-buffered stereo by
+rendering the stereo images on the server and sending the image pairs across
+the network to be displayed on the client.
 
-In most cases, VirtualGL does not require a 3D graphics card to be present in
-the client machine.  However, a 3D graphics card is required to display stereo
-image pairs, so such a card must be present in any client machine that will use
-VirtualGL's quad-buffered stereo feature.  Since the 3D graphics card is only
-being used to draw images, it need not necessarily be a high-end card.
-Generally, the least expensive 3D graphics card that has stereo capabilities
-will work fine in a VirtualGL client machine.  The VirtualGL server must also
-have a 3D graphics card that supports stereo, since this is the only way that
-VirtualGL can obtain a stereo Pbuffer.
+In most cases, VirtualGL does not require that a GPU be present in the client
+machine.  However, a GPU is required to display stereo image pairs, so one
+must be present in any client machine that will use VirtualGL's quad-buffered
+stereo feature.  Since the GPU is only being used to draw images, it need not
+necessarily be a high-end GPU.  Generally, the least expensive GPU that has
+stereo capabilities will work fine in a VirtualGL client machine.  The
+VirtualGL server must also have a GPU that supports stereo, since this is the
+only way that VirtualGL can obtain a stereo Pbuffer.
 
 When an application tries to render something in stereo, VirtualGL will default
 to using quad-buffered stereo rendering if the 2D X server supports OpenGL
@@ -108,7 +106,7 @@ VirtualGL supports three methods of encoding stereograms:
 	image, and the right half is taken from the right eye image.  Both halves are
 	subsampled 2X horizontally.
 
-Most 3D TV's/monitors can be configured to decode at least one of these types
+Most 3D TVs/monitors can be configured to decode at least one of these types
 of stereograms.  In order for this to work, however, the 3D drawing area must
 be full-screen.
 

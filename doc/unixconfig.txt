@@ -3,15 +3,13 @@
 
 ** Granting Access to the 3D X Server
 
-VirtualGL requires access to a GPU ("graphics processing unit", which usually
-takes the form of a 3D graphics card) in the application server so that
-it can create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering
-from applications into these Pbuffers.  Unfortunately, accessing a 3D
-graphics card on Linux and Unix systems requires going through an X
-server.  On such systems, the only way to share the application server's 3D
-graphics card among multiple users is to grant those users access to the 3D X
-server (the X server attached to the application server's 3D graphics card.
-Refer to the figures in {ref prefix="Chapter ": Overview}.)
+VirtualGL requires access to a GPU in the application server so that it can
+create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering from
+X windows into these Pbuffers.  Unfortunately, accessing a GPU on Linux and
+Unix systems requires going through an X server.  On such systems, the only way
+to share the application server's GPU(s) among multiple users is to grant those
+users access to the 3D X server (the X server attached to the GPU(s).  Refer to
+the figures in {ref prefix="Chapter ": Overview}.)
 
 It is important to understand the security risks associated with this.  Once
 a user has access to the 3D X server, there is nothing that would prevent
@@ -248,16 +246,15 @@ OpenGL renderer string.
 
 ** Using VirtualGL with Multiple GPUs
 
-VirtualGL can redirect the OpenGL commands from a 3D application to any 3D
-graphics card in the server machine.  In order for this to work, however, all
-of the 3D graphics cards must be attached to different screens on the same X
-server or to different X servers.  Attaching them to different screens is the
-easiest and most common approach, and this allows the 3D graphics cards to be
-individually addressed by setting ''VGL_DISPLAY'' to (or invoking ''vglrun -d''
-with) '':0.0'', '':0.1'', '':0.2'', etc.  If the 3D graphics cards are attached
-to different X servers, then they can be individually addressed by setting
-''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':1.0'',
-'':2.0'', etc.
+VirtualGL can redirect the OpenGL commands from a 3D application to any GPU
+in the server machine.  In order for this to work, however, all of the GPUs
+must be attached to different screens on the same X server or to different X
+servers.  Attaching them to different screens is the easiest and most common
+approach, and this allows the GPUs to be individually addressed by setting
+''VGL_DISPLAY'' to (or invoking ''vglrun -d'' with) '':0.0'', '':0.1'',
+'':0.2'', etc.  If the GPUs are attached to different X servers, then they can
+be individually addressed by setting ''VGL_DISPLAY'' to (or invoking
+''vglrun -d'' with) '':0.0'', '':1.0'', '':2.0'', etc.
 
 ** SSH Server Configuration
 

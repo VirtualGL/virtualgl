@@ -2,7 +2,7 @@
 {anchor: Chromium}
 
 Chromium is a powerful framework for performing various types of parallel
-OpenGL rendering.  It is usually used on clusters of commodity Linux PC's to
+OpenGL rendering.  It is usually used on clusters of commodity Linux PCs to
 divide up the task of rendering scenes with large geometries or large pixel
 counts (such as when driving a display wall.)  Chromium is most often used in
 one of three configurations:
@@ -16,13 +16,13 @@ one of three configurations:
 #IMG: chromium-displaywall.png
 
 Sort-First Rendering (Image-Space Decomposition) is used to overcome the
-fill rate limitations of individual graphics cards.  When configured to use
+fill rate limitations of individual GPUs.  When configured to use
 sort-first rendering, Chromium divides up the scene based on which polygons
 will be visible in a particular section of the final image.  It then instructs
 each node of the cluster to render only the polygons that are necessary to
 generate the image section ("tile") for that node.  This is primarily used to
 drive high-resolution displays that would be impractical to drive from a single
-graphics card due to limitations in the card's framebuffer memory, processing
+GPU due to limitations in the GPU's framebuffer memory, processing
 power, or both.  Configuration 1 could be used, for instance, to drive a CAVE,
 video wall, or even an extremely high-resolution monitor.  In this
 configuration, each Chromium node generally uses all of its screen real estate
@@ -168,7 +168,7 @@ On each of the rendering nodes,
 
 Sort-Last Rendering is used when the scene contains a huge number of polygons
 and the rendering bottleneck is processing all of that geometry on a single
-graphics card.  In this case, each node runs a separate copy of the
+GPU.  In this case, each node runs a separate copy of the
 application, and for best results, the application needs to be aware that it is
 running in a parallel environment so that it can give Chromium hints as to how
 to distribute the various objects to be rendered.  Each node generates an image

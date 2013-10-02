@@ -2,14 +2,14 @@
 {anchor: X_Video_Support}
 
 The X Video extension allows applications to pre-encode or pre-compress images
-and send them through the X server to the graphics card, which presumably has
-on-board video decoding capabilities.  This approach greatly reduces the amount
-of CPU resources used by the X server, which can be beneficial if the X
+and send them through the X server to the graphics adapter, which presumably
+has on-board video decoding capabilities.  This approach greatly reduces the
+amount of CPU resources used by the X server, which can be beneficial if the X
 server is running on a different machine than the application.
 
 In the case of VirtualGL, what this means is that the VirtualGL client machine
 no longer has to decode or decompress images from the 3D application server.
-It can simply pass the images along to the graphics card for decoding.
+It can simply pass the images along to the graphics adapter for decoding.
 
 VirtualGL supports the X Video extension in two ways:
 
