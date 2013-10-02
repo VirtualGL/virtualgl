@@ -74,13 +74,15 @@ adapters, PBOs generally do no harm, and with consumer-grade nVidia (GeForce)
 adapters, the results are mixed.  The GeForce drivers will fall back to
 blocking readbacks if the pixel format requested in glReadPixels() doesn't
 match the pixel format of the Pbuffer, so PBOs will generally be slower in
-those cases.  However, the slow-down is not dramatic, and such adapters are not
-the "common case" for VirtualGL servers.
+those cases.  Thus, VirtualGL now falls back to synchronous readback mode if it
+detects that PBOs are not behaving asynchronously.
 
 Further, VGL_FORCEALPHA is no longer enabled by default when PBOs are enabled.
 This option was introduced because of the GeForce behavior mentioned above, but
 the option has no effect whatsoever with the professional-grade GPUs that are
-recommended for use with VirtualGL.
+recommended for use with VirtualGL.  Instead, VGL will now detect situations in
+which VGL_FORCEALPHA might be beneficial and suggest enabling or disabling it
+(if VGL_VERBOSE=1.)
 -------------------------------------------------------------------------------
 
 

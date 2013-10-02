@@ -81,7 +81,7 @@ class pbdrawable
 	protected:
 
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
-			GLint, bool, bool stereo);
+			GLint, bool);
 
 		rrcs _mutex;
 		Display *_dpy;  Drawable _drawable;

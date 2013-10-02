@@ -68,9 +68,6 @@ void pbpm::readback(void)
 
 	rrcs::safelock l(_mutex);
 	int pbw=_pb->width(), pbh=_pb->height();
-	bool usepbo=(fconfig.readback==RRREAD_PBO);
-	int desiredformat=_pb->format();
-	static bool alreadywarned=false;
 
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
@@ -113,19 +110,8 @@ void pbpm::readback(void)
 		default:
 			_throw("Unsupported pixel format");
 	}
-	if(usepbo && format!=desiredformat)
-	{
-		usepbo=false;
-		if(fconfig.verbose && !alreadywarned)
-		{
-			alreadywarned=true;
-			rrout.println("[VGL] NOTICE: Pixel format of 2D X server does not match pixel format of");
-			rrout.println("[VGL]    3D pixmap.  Disabling PBO's.");
-		}
-	}
 	readpixels(0, 0, min(pbw, _fb->_h.framew), _fb->_pitch,
-		min(pbh, _fb->_h.frameh), format, _fb->_pixelsize, bits, GL_FRONT, usepbo,
-		false);
+		min(pbh, _fb->_h.frameh), format, _fb->_pixelsize, bits, GL_FRONT, false);
 
 	_fb->redraw();
 }

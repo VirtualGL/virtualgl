@@ -50,9 +50,9 @@ class pbwin : public pbdrawable
 
 		int init(int, int, GLXFBConfig);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
-			GLint, bool, bool stereo);
+			GLint, bool);
 		void makeanaglyph(rrframe *, int, int);
-		void makepassive(rrframe *, int, int, bool, int);
+		void makepassive(rrframe *, int, int, int);
 		void sendvgl(vgltransconn *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);

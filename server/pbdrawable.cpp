@@ -281,14 +281,51 @@ Drawable pbdrawable::getx11drawable(void)
 }
 
 
+static const char *formatString(int format)
+{
+	switch(format)
+	{
+		case GL_RGB:  return "RGB";
+		case GL_RGBA:  return "RGBA";
+		#ifdef GL_BGR_EXT
+		case GL_BGR:  return "BGR";
+		#endif
+		#ifdef GL_BGRA_EXT
+		case GL_BGRA:  return "BGRA";
+		#endif
+		#ifdef GL_ABGR_EXT
+		case GL_ABGR_EXT:  return "ABGR";
+		#endif
+		case GL_COLOR_INDEX:  return "INDEX";
+		case GL_RED:  case GL_GREEN:  case GL_BLUE:
+			return "COMPONENT";
+		default:  return "????";
+	}
+}
+
+
 void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
-	GLenum format, int ps, GLubyte *bits, GLint buf, bool usepbo, bool stereo)
+	GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
 	#ifdef GL_VERSION_1_5
 	GLuint pbo=0;
 	#endif
-	static bool alreadyprinted=false;
+	double t0, tRead, tTotal;
+	static int numSync=0, numFrames=0, lastFormat=-1;
+	static bool usepbo=(fconfig.readback==RRREAD_PBO);
+	static bool alreadyprinted=false, alreadywarned=false;
 	static const char *ext=NULL;
+
+	// Whenever the readback format changes (perhaps due to switching
+	// compression or transports), then reset the PBO synchronicity detector
+	int currentFormat=(format==GL_GREEN || format==GL_BLUE)? GL_RED:format;
+	if(lastFormat>=0 && lastFormat!=currentFormat)
+	{
+		usepbo=(fconfig.readback==RRREAD_PBO);
+		numSync=numFrames=0;
+		alreadyprinted=alreadywarned=false;
+	}
+	lastFormat=currentFormat;
 
 	GLXDrawable read=_glXGetCurrentDrawable();
 	GLXDrawable draw=_glXGetCurrentDrawable();
@@ -325,8 +362,8 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		if(!pbo) _throw("Could not generate pixel buffer object");
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using pixel buffer objects for readback (GL format = 0x%.4x)",
-				format);
+			rrout.println("[VGL] Using pixel buffer objects for readback (%s --> %s)",
+				formatString(_pb->format()), formatString(format));
 			alreadyprinted=true;
 		}
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
@@ -345,8 +382,8 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	{
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using synchronous readback (GL format = 0x%.4x)",
-				format);
+			rrout.println("[VGL] Using synchronous readback (%s --> %s)",
+				formatString(_pb->format()), formatString(format));
 			alreadyprinted=true;
 		}
 	}
@@ -354,10 +391,12 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 	_prof_rb.startframe();
+	if(usepbo) t0=rrtime();
 	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, usepbo? NULL:bits);
 
 	if(usepbo)
 	{
+		tRead=rrtime()-t0;
 		#ifdef GL_VERSION_1_5
 		unsigned char *pbobits=NULL;
 		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
@@ -369,6 +408,31 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		glDeleteBuffers(1, &pbo);
 		#endif
+		tTotal=rrtime()-t0;
+		numFrames++;
+		if(tRead/tTotal>0.5 && numFrames<=10)
+		{
+			numSync++;
+			if(numSync>=10 && !alreadywarned && fconfig.verbose)
+			{
+				rrout.println("[VGL] NOTICE: PBO readback is not behaving asynchronously.  Disabling PBOs.");
+				if(format!=_pb->format())
+				{
+					rrout.println("[VGL]    This could be due to a mismatch between the readback pixel format");
+					rrout.println("[VGL]    (%s) and the Pbuffer pixel format (%s).",
+						formatString(format), formatString(_pb->format()));
+					if(((_pb->format()==GL_BGRA && format==GL_BGR)
+						|| (_pb->format()==GL_RGBA && format==GL_RGB))
+						&& fconfig.forcealpha)
+						rrout.println("[VGL]    Try setting VGL_FORCEALPHA=0.");
+					else if(((_pb->format()==GL_BGR && format==GL_BGRA)
+						|| (_pb->format()==GL_RGB && format==GL_RGBA))
+						&& !fconfig.forcealpha)
+						rrout.println("[VGL]    Try setting VGL_FORCEALPHA=1.");
+				}
+				alreadywarned=true;
+			}
+		}
 	}
 
 	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
