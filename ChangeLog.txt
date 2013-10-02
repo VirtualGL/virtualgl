@@ -84,6 +84,10 @@ recommended for use with VirtualGL.  Instead, VGL will now detect situations in
 which VGL_FORCEALPHA might be beneficial and suggest enabling or disabling it
 (if VGL_VERBOSE=1.)
 -------------------------------------------------------------------------------
+[12]
+This version of VirtualGL provides a binary package and full support for
+Cygwin64.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
