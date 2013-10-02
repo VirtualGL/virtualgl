@@ -285,7 +285,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			if(!message2)
 			{
 				rrout.println("[VGL] NOTICE: Cannot use quad-buffered stereo because no stereo visuals are");
-				rrout.println("[VGL]    available on the client.  Using anaglyphic stereo instead.");
+				rrout.println("[VGL]    available on the 2D X server.  Using anaglyphic stereo instead.");
 				message2=true;
 			}
 			stereomode=RRSTEREO_REDCYAN;				
