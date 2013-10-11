@@ -73,12 +73,11 @@
 		application script and then re-enable it prior to launching the actual \
 		application. \
 	|
-| Ansoft HFSS, Roxar RMS | Linux \
+| ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS | Linux \
 	| Set the ''VGL_SPOILLAST'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \
-	| These applications use double buffering and draw geometry to the back buffer, \
-		but node highlighting and rubber banding are drawn directly to the front \
-		buffer. In order for these front buffer operations to be displayed \
+	| These applications draw node highlighting and/or rubber banding directly to the \
+		front buffer.  In order for these front buffer operations to be displayed \
 		properly, it is necessary to use the "spoil first" frame spoiling \
 		algorithm whenever the application calls ''glFlush()''.  See \
 		{ref prefix="Section ": VGL_SPOILLAST} for further information. \
