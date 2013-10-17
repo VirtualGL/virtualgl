@@ -44,9 +44,6 @@ OpenGL and GLX, and X windows.
 #INCLUDE: setuid.txt
 {nl}
 ----8<--------------
-#INCLUDE: chromium.txt
-{nl}
-----8<--------------
 #INCLUDE: virtualbox.txt
 {nl}
 ----8<--------------
