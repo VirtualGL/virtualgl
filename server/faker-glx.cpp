@@ -187,6 +187,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	const int *attrib_list, int *nelements)
 {
 	GLXFBConfig *configs=NULL;
+	bool fbcidreq=false;
 
 		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
@@ -210,6 +211,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		{
 			if(attrib_list[i]==GLX_LEVEL && attrib_list[i+1]==1)
 				overlayreq=true;
+			if(attrib_list[i]==GLX_FBCONFIG_ID) fbcidreq=true;
 		}
 		if(overlayreq)
 		{
@@ -229,8 +231,9 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	if(!nelements) nelements=&temp;
 	*nelements=0;
 
-	// No attributes specified.  Return all FB configs.
-	if(!attrib_list)
+	// If no attributes are specified, return all FB configs.  If GLX_FBCONFIG_ID
+	// is specified, ignore all other attributes.
+	if(!attrib_list || fbcidreq)
 	{
 		configs=_glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy),
 			attrib_list, nelements);
