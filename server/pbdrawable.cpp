@@ -308,7 +308,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
 	#ifdef GL_VERSION_1_5
-	GLuint pbo=0;
+	static GLuint pbo=0;
 	#endif
 	double t0, tRead, tTotal;
 	static int numSync=0, numFrames=0, lastFormat=-1;
@@ -358,7 +358,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 				_throw("GL_ARB_pixel_buffer_object extension not available");
 		}
 		#ifdef GL_VERSION_1_5
-		glGenBuffers(1, &pbo);
+		if(!pbo) glGenBuffers(1, &pbo);
 		if(!pbo) _throw("Could not generate pixel buffer object");
 		if(!alreadyprinted && fconfig.verbose)
 		{
@@ -406,7 +406,6 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			_throw("Could not unmap pixel buffer object");
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
-		glDeleteBuffers(1, &pbo);
 		#endif
 		tTotal=rrtime()-t0;
 		numFrames++;

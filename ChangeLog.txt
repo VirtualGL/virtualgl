@@ -7,6 +7,10 @@ improper handling of this attribute was known to cause an error ("Could not
 find GLX 1.3 config from peer info") when running the LWJGL (Lightweight Java
 Game Library) on AMD GPUs, but it may have affected other apps as well.
 -------------------------------------------------------------------------------
+[2]
+The performance of PBO readback on ATI FirePro adapters has been improved
+dramatically (close to an order of magnitude.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
