@@ -11,6 +11,10 @@ Game Library) on AMD GPUs, but it may have affected other apps as well.
 The performance of PBO readback on ATI FirePro adapters has been improved
 dramatically (close to an order of magnitude.)
 -------------------------------------------------------------------------------
+[3]
+vglserver_config will now set DRI device permissions properly on systems that
+lack an xorg.conf file but have an xorg.conf.d directory.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
