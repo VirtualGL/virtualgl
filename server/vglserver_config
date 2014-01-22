@@ -489,6 +489,7 @@ unconfigglx() {
 		delvglgenkey /etc/X11/gdm/SunRayInit/Default
 	fi
 	for file in /etc/gdm/Init/Default \
+		/etc/gdm3/Init/Default \
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
@@ -522,6 +523,7 @@ unconfigglx() {
 	for file in /etc/X11/xdm/Xservers \
 		/etc/X11/gdm/gdm.conf \
 		/etc/gdm/custom.conf \
+		/etc/gdm3/daemon.conf \
 		/usr/local/etc/gdm/custom.conf \
 		/etc/gdm/gdm.conf \
 		/etc/X11/gdm/custom.conf \
@@ -553,6 +555,7 @@ unconfigglx() {
 
 	for file in /etc/X11/gdm/gdm.conf \
 		/etc/gdm/custom.conf \
+		/etc/gdm3/daemon.conf \
 		/usr/local/etc/gdm/custom.conf \
 		/etc/gdm/gdm.conf \
 		/etc/X11/gdm/custom.conf \
@@ -629,6 +632,7 @@ configglx() {
 		addvglgenkey /etc/X11/gdm/SunRayInit/Default
 	fi
 	for file in /etc/gdm/Init/Default \
+		/etc/gdm3/Init/Default \
 		/usr/local/etc/gdm/Init/Default \
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
@@ -684,6 +688,7 @@ configglx() {
 	for file in /etc/X11/xdm/Xservers \
 		/etc/X11/gdm/gdm.conf \
 		/etc/gdm/custom.conf \
+		/etc/gdm3/daemon.conf \
 		/usr/local/etc/gdm/custom.conf \
 		/etc/gdm/gdm.conf \
 		/etc/X11/gdm/custom.conf \
@@ -750,6 +755,7 @@ configglx() {
 
 	for file in /etc/X11/gdm/gdm.conf \
 		/etc/gdm/custom.conf \
+		/etc/gdm3/daemon.conf \
 		/usr/local/etc/gdm/custom.conf \
 		/etc/gdm/gdm.conf \
 		/etc/X11/gdm/custom.conf \
