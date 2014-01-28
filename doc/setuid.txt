@@ -26,10 +26,9 @@ ld.so.1: warning: librrfaker.so: open failed: No such file in secure directories
 ld.so.1: warning: libdlfaker.so: open failed: No such file in secure directories
 ---
 
-On Solaris and versions of Linux with GLIBC 2.3 and later, these are just
-warnings, and the setuid/setgid executables will continue to run (without
-VirtualGL preloaded into them.)  However, if you want to get rid of the
-warnings, an easy way to do so is to simply edit the application script and
+These are just warnings, and the setuid/setgid executables will continue to run
+(without VirtualGL preloaded into them.)  However, if you want to get rid of
+the warnings, an easy way to do so is to simply edit the application script and
 make it store the value of the ''LD_PRELOAD'' environment variable until right
 before the application executable is launched.  For instance, consider the
 following application script:

@@ -26,6 +26,21 @@
 			{item:If using a 3D graphics adapter, install the vendor drivers for \
 				that 3D graphics adapter.}} \
 	|
+| O/S \
+	| VirtualGL should work with a variety of Linux distributions, \
+		[[http://www.freebsd.org][FreeBSD]], and \
+		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]], \
+		but currently-supported versions of \
+		[[http://www.redhat.com/products/enterprise-linux/][Red Hat Enterprise Linux]] \
+		(and its work-alikes, including [[http://www.centos.org][CentOS]], \
+		[[http://www.oracle.com/us/technologies/linux][Oracle Linux]], and \
+		[[https://www.scientificlinux.org][Scientific Linux]]), \
+		[[http://www.ubuntu.com][Ubuntu]] LTS, and [[http://www.suse.com][SuSE]] \
+		Linux Enterprise tend to receive the most attention from the VirtualGL \
+		community. \
+	| < \
+	| < \
+	|
 | Other Software \
 	| X server configured to export True Color (24-bit or 32-bit) visuals \
 	| < \
