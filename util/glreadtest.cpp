@@ -24,11 +24,7 @@
 #include <errno.h>
 #define GL_GLEXT_PROTOTYPES
 #include "../common/glx.h"
-#ifdef MESAGLU
-#include <mesa/glu.h>
-#else
 #include <GL/glu.h>
-#endif
 #include "x11err.h"
 #ifdef _WIN32
 #define snprintf _snprintf

@@ -19,11 +19,7 @@
 
 
 #include <GL/glx.h>
-#ifdef MESAGLU
-#include <mesa/glu.h>
-#else
 #include <GL/glu.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
