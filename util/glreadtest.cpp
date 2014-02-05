@@ -49,7 +49,7 @@ typedef struct _pixelformat
 	const char *name;
 } pixelformat;
 
-static int FORMATS=4
+static int FORMATS=3
  #ifdef GL_BGRA_EXT
  +1
  #endif
@@ -72,7 +72,6 @@ pixelformat pix[4
  +1
  #endif
  ]={
-	{0, 0, 0, 1, GL_LUMINANCE, 0, "LUM"},
 	{0, 0, 0, 1, GL_RED, 0, "RED"},
 	#ifdef GL_BGRA_EXT
 	{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
@@ -100,26 +99,11 @@ pixelformat pix[4
 #undef perror
 #define GLX11
 #endif
-#ifndef GLX_X_VISUAL_TYPE
-#define GLX_X_VISUAL_TYPE 0x22
-#endif
-#ifndef GLX_TRUE_COLOR
-#define GLX_TRUE_COLOR 0x8002
-#endif
-#ifndef GLX_PSEUDO_COLOR
-#define GLX_PSEUDO_COLOR 0x8004
-#endif
 #ifndef GLX_DRAWABLE_TYPE
 #define GLX_DRAWABLE_TYPE 0x8010
 #endif
 #ifndef GLX_PBUFFER_BIT
 #define GLX_PBUFFER_BIT 0x00000004
-#endif
-#ifndef GLX_TRANSPARENT_TYPE
-#define GLX_TRANSPARENT_TYPE 0x23
-#endif
-#ifndef GLX_TRANSPARENT_INDEX
-#define GLX_TRANSPARENT_INDEX 0x8009
 #endif
 #ifndef GLX_PBUFFER_HEIGHT
 #define GLX_PBUFFER_HEIGHT 0x8040
@@ -143,7 +127,7 @@ GLXPbuffer pbuffer=0;
 #endif
 
 rrtimer timer;
-int usewindow=0, usepixmap=0, useci=0, useoverlay=0, visualid=0, loops=1,
+int usewindow=0, usepixmap=0, visualid=0, loops=1,
 	usealpha=0;
 #ifdef GL_VERSION_1_5
 int pbo=0;
@@ -188,9 +172,6 @@ void findvisual(void)
 		GLX_BLUE_SIZE, 8, None, None, None};
 	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None, None};
-	int winattribsci[]={GLX_BUFFER_SIZE, 8, None, None, None, None, None, None};
-	int winattribscidb[]={GLX_DOUBLEBUFFER, GLX_BUFFER_SIZE, 8, None, None,
-		None, None, None, None};
 
 	#ifndef GLX11
 	int pbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
@@ -222,20 +203,13 @@ void findvisual(void)
 				printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 				return;
 			}
-			if(useoverlay)
-			{
-				winattribsci[2]=winattribscidb[3]=GLX_LEVEL;
-				winattribsci[3]=winattribscidb[4]=1;
-			};
 			if(usealpha)
 			{
 				winattribs[7]=GLX_ALPHA_SIZE;  winattribs[8]=8;
 				winattribsdb[8]=GLX_ALPHA_SIZE;  winattribsdb[9]=8;
 			}
-			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
-				winattribsci:winattribs))
-				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), useci?
-				winattribscidb:winattribsdb)))
+			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), winattribs))
+				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), winattribsdb)))
 				_throw("Could not obtain Visual");
 			printf("Visual = 0x%.2x\n", (unsigned int)v->visualid);
 			return;
@@ -252,10 +226,9 @@ void findvisual(void)
 		pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
 		pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=8;
 	}
-	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), useci?
-		pbattribsci:pbattribs, &nelements);
+	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), pbattribs, &nelements);
 	if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-		useci?pbattribscidb:pbattribsdb, &nelements);
+		pbattribsdb, &nelements);
 	if(!nelements || !fbconfigs)
 	{
 		if(fbconfigs) XFree(fbconfigs);
@@ -293,8 +266,7 @@ void pbufferinit(void)
 	}
 
 	#ifndef GLX11
-	ctx=glXCreateNewContext(dpy, c, useci? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE,
-		NULL, True);
+	ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True);
 	if(!ctx)	_throw("Could not create GL context");
 
 	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
@@ -331,10 +303,7 @@ void initbuf(int x, int y, int w, int h, int format, unsigned char *buf)
 	{
 		for(j=0; j<w; j++)
 		{
-			if(pix[format].glformat==GL_COLOR_INDEX)
-				buf[(i*w+j)*ps]=((i+y)*(j+x))%32;
-			else if(pix[format].glformat==GL_LUMINANCE
-				|| pix[format].glformat==GL_RED)
+			if(pix[format].glformat==GL_RED)
 				buf[(i*w+j)*ps]=((i+y)*(j+x))%256;
 			else
 			{
@@ -356,12 +325,7 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf,
 		l=bassackwards?h-i-1:i;
 		for(j=0; j<w; j++)
 		{
-			if(pix[format].glformat==GL_COLOR_INDEX)
-			{
-				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%32) return 0;
-			}
-			else if(pix[format].glformat==GL_LUMINANCE
-				|| pix[format].glformat==GL_RED)
+			if(pix[format].glformat==GL_RED)
 			{
 				if(buf[l*PAD(w*ps)+j*ps]!=((i+y)*(j+x))%256) return 0;
 			}
@@ -384,10 +348,6 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf,
 void clearfb(int format)
 {
 	unsigned char *buf=NULL;  int ps=3, glformat=GL_RGB;
-	if(pix[format].glformat==GL_COLOR_INDEX)
-	{
-		glformat=pix[format].glformat;  ps=1;
-	}
 	if((buf=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
 		_throw("Could not allocate buffer");
 	memset(buf, 0xFF, WIDTH*HEIGHT*ps);
@@ -395,8 +355,7 @@ void clearfb(int format)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
 	glDrawBuffer(GL_FRONT);
 	glReadBuffer(GL_FRONT);
-	if(useci) glClearIndex(0.);
-	else glClearColor(0., 0., 0., 0.);
+	glClearColor(0., 0., 0., 0.);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glReadPixels(0, 0, WIDTH, HEIGHT, glformat, GL_UNSIGNED_BYTE, buf);
 	check_errors("frame buffer read");
@@ -605,19 +564,20 @@ void display(void)
 
 void usage(char **argv)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm] [-index] [-overlay]\n", argv[0]);
-	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
-	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]");
+	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm]", argv[0]);
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, " [-pbo]\n");
 	#else
 	fprintf(stderr, "\n");
 	#endif
+	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
+	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]");
 	fprintf(stderr, "\n-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
 	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
-	fprintf(stderr, "-index = Test color index visual instead of RGB\n");
-	fprintf(stderr, "-overlay = Render to 8-bit overlay window (implies -window and -index)\n");
+	#ifdef GL_VERSION_1_5
+	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
+	#endif
 	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", _WIDTH);
 	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
 	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
@@ -630,9 +590,6 @@ void usage(char **argv)
 	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
 	fprintf(stderr, "-time <t> = Run each test for <t> seconds\n");
 	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
-	#ifdef GL_VERSION_1_5
-	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
-	#endif
 	fprintf(stderr, "\n");
 	exit(0);
 }
@@ -652,8 +609,6 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-?")) usage(argv);
 		if(!stricmp(argv[i], "-window")) usewindow=1;
 		if(!stricmp(argv[i], "-pm")) usepixmap=1;
-		if(!stricmp(argv[i], "-index")) useci=1;
-		if(!stricmp(argv[i], "-overlay")) {useci=1;  useoverlay=1;  usewindow=1;}
 		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
 		#endif
@@ -750,16 +705,6 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		if(useci)
-		{
-			FORMATS=1;
-			pix[0].roffset=pix[0].goffset=pix[0].boffset=0;
-			pix[0].pixelsize=1;
-			pix[0].glformat=GL_COLOR_INDEX;
-			pix[0].bgr=0;
-			pix[0].name="INDEX";
-		}
-
 		findvisual();
 
 		if(usewindow || usepixmap)
@@ -769,32 +714,7 @@ int main(int argc, char **argv)
 			swa.border_pixel=0;
 			swa.event_mask=0;
 
-			if(useoverlay)
-			{
-				errifnot(root=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
-					WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-					BlackPixel(dpy, DefaultScreen(dpy))));
-				XMapWindow(dpy, root);
-				XSync(dpy, False);
-			}
-
-			if(useci)
-			{
-				swa.colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
-				XColor xc[32];  int i;
-				if(v->colormap_size<32) _throw("Color map is not large enough");
-				for(i=0; i<32; i++)
-				{
-					xc[i].red=(i<16? i*16:255)<<8;
-					xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
-					xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
-					xc[i].flags = DoRed | DoGreen | DoBlue;
-					xc[i].pixel=i;
-				}
-				XStoreColors(dpy, swa.colormap, xc, 32);
-			}
-			else
-				swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 			errifnot(win=XCreateWindow(dpy, root, 0, 0, usepixmap? 1:WIDTH,
 				usepixmap? 1:HEIGHT, 0, v->depth, InputOutput, v->visual,
 				CWBorderPixel|CWColormap|CWEventMask, &swa));
