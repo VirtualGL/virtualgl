@@ -95,26 +95,13 @@ pixelformat pix[4
 #undef perror
 #define GLX11
 #endif
-#ifndef GLX_DRAWABLE_TYPE
-#define GLX_DRAWABLE_TYPE 0x8010
-#endif
-#ifndef GLX_PBUFFER_BIT
-#define GLX_PBUFFER_BIT 0x00000004
-#endif
-#ifndef GLX_PBUFFER_HEIGHT
-#define GLX_PBUFFER_HEIGHT 0x8040
-#endif
-#ifndef GLX_PBUFFER_WIDTH
-#define GLX_PBUFFER_WIDTH 0x8041
-#endif
-
 
 #define bench_name		"GLreadtest"
 
-#define _WIDTH            701
-#define _HEIGHT           701
+#define WIDTH            701
+#define HEIGHT           701
 
-int WIDTH=_WIDTH, HEIGHT=_HEIGHT;
+int width=WIDTH, height=HEIGHT;
 Display *dpy=NULL;  Window win=0;  Pixmap pm=0;  GLXPixmap glxpm=0;
 XVisualInfo *v=NULL;  GLXFBConfig c=0;
 GLXContext ctx=0;
@@ -265,7 +252,7 @@ void pbufferinit(void)
 	ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True);
 	if(!ctx)	_throw("Could not create GL context");
 
-	pbattribs[1]=WIDTH;  pbattribs[3]=HEIGHT;
+	pbattribs[1]=width;  pbattribs[3]=height;
 	pbuffer=glXCreatePbuffer(dpy, c, pbattribs);
 	if(!pbuffer) _throw("Could not create Pbuffer");
 
@@ -344,18 +331,18 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf,
 void clearfb(int format)
 {
 	unsigned char *buf=NULL;  int ps=3, glformat=GL_RGB;
-	if((buf=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
+	if((buf=(unsigned char *)malloc(width*height*ps))==NULL)
 		_throw("Could not allocate buffer");
-	memset(buf, 0xFF, WIDTH*HEIGHT*ps);
+	memset(buf, 0xFF, width*height*ps);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
 	glDrawBuffer(GL_FRONT);
 	glReadBuffer(GL_FRONT);
 	glClearColor(0., 0., 0., 0.);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glReadPixels(0, 0, WIDTH, HEIGHT, glformat, GL_UNSIGNED_BYTE, buf);
+	glReadPixels(0, 0, width, height, glformat, GL_UNSIGNED_BYTE, buf);
 	check_errors("frame buffer read");
-	for(int i=0; i<WIDTH*HEIGHT*ps; i++)
+	for(int i=0; i<width*height*ps; i++)
 	{
 		if(buf[i]!=0) {fprintf(stderr, "Buffer was not cleared\n");  break;}
 	}
@@ -379,20 +366,20 @@ void glwrite(int format)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	clearfb(format);
-	if((rgbaBuffer=(unsigned char *)malloc(WIDTH*HEIGHT*ps))==NULL)
+	if((rgbaBuffer=(unsigned char *)malloc(width*height*ps))==NULL)
 		_throw("Could not allocate buffer");
-	initbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer);
+	initbuf(0, 0, width, height, format, rgbaBuffer);
 	n=0;
 	timer.start();
 	do
 	{
-		glDrawPixels(WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
+		glDrawPixels(width, height, pix[format].glformat, GL_UNSIGNED_BYTE,
 			rgbaBuffer);
 		glFinish();
 		n++;
 	} while((rbtime=timer.elapsed())<benchtime || n<2);
 
-	double avgmps=(double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime);
+	double avgmps=(double)n*(double)(width*height)/((double)1000000.*rbtime);
 	check_errors("frame buffer write");
 	fprintf(stderr, "%s Mpixels/sec\n", sigfig(4, temps, avgmps));
 
@@ -427,21 +414,21 @@ void glread(int format)
 		glGenBuffers(1, &bufferid);
 		if(!bufferid) _throw("Could not generate PBO buffer");
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
-		glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(WIDTH*ps)*HEIGHT, NULL,
+		glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(width*ps)*height, NULL,
 			GL_STREAM_READ);
 		check_errors("PBO initialization");
 		int temp=0;
 		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE,
 			&temp);
-		if(temp!=PAD(WIDTH*ps)*HEIGHT) _throw("Could not generate PBO buffer");
+		if(temp!=PAD(width*ps)*height) _throw("Could not generate PBO buffer");
 		temp=0;
 		glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &temp);
 		if(temp!=pbo) _throw("Could not bind PBO buffer");
 	}
 	#endif
-	if((rgbaBuffer=(unsigned char *)malloc(PAD(WIDTH*ps)*HEIGHT))==NULL)
+	if((rgbaBuffer=(unsigned char *)malloc(PAD(width*ps)*height))==NULL)
 		_throw("Could not allocate buffer");
-	memset(rgbaBuffer, 0, PAD(WIDTH*ps)*HEIGHT);
+	memset(rgbaBuffer, 0, PAD(width*ps)*height);
 	n=0;  rbtime=readpixelstime=0.;
 	double tmin=0., tmax=0., ssq=0., sum=0.;  int first=1;
 	do
@@ -460,20 +447,20 @@ void glread(int format)
 			unsigned char *pixels=NULL;
 			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
 			timer2.start();
-			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
+			glReadPixels(0, 0, width, height, pix[format].glformat, GL_UNSIGNED_BYTE,
 				NULL);
 			readpixelstime+=timer2.elapsed();
 			pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 				GL_READ_ONLY);
 			if(!pixels) _throw("Could not map buffer");
-			memcpy(rgbaBuffer, pixels, PAD(WIDTH*ps)*HEIGHT);
+			memcpy(rgbaBuffer, pixels, PAD(width*ps)*height);
 			glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
 		}
 		else
 		#endif
 		{
 			timer2.start();
-			glReadPixels(0, 0, WIDTH, HEIGHT, pix[format].glformat, GL_UNSIGNED_BYTE,
+			glReadPixels(0, 0, width, height, pix[format].glformat, GL_UNSIGNED_BYTE,
 				rgbaBuffer);
 			readpixelstime+=timer2.elapsed();
 		}
@@ -491,16 +478,16 @@ void glread(int format)
 		}		
 		n++;
 		rbtime+=elapsed;
-		ssq+=pow((double)(WIDTH*HEIGHT)/((double)1000000.*elapsed), 2.0);
-		sum+=(double)(WIDTH*HEIGHT)/((double)1000000.*elapsed);
+		ssq+=pow((double)(width*height)/((double)1000000.*elapsed), 2.0);
+		sum+=(double)(width*height)/((double)1000000.*elapsed);
 	} while(rbtime<benchtime || n<2);
-	if(!cmpbuf(0, 0, WIDTH, HEIGHT, format, rgbaBuffer, 0))
+	if(!cmpbuf(0, 0, width, height, format, rgbaBuffer, 0))
 		_throw("ERROR: Bogus data read back.");
 	double mean=sum/(double)n;
 	double stddev=sqrt((ssq - 2.0*mean*sum + mean*mean*(double)n)/(double)n);
-	double avgmps=(double)n*(double)(WIDTH*HEIGHT)/((double)1000000.*rbtime);
-	double minmps=(double)(WIDTH*HEIGHT)/((double)1000000.*tmax);
-	double maxmps=(double)(WIDTH*HEIGHT)/((double)1000000.*tmin);
+	double avgmps=(double)n*(double)(width*height)/((double)1000000.*rbtime);
+	double minmps=(double)(width*height)/((double)1000000.*tmax);
+	double maxmps=(double)(width*height)/((double)1000000.*tmin);
 	check_errors("frame buffer read");
 	fprintf(stderr, "%s Mpixels/sec ", sigfig(4, temps, avgmps));
 	fprintf(stderr, "(min = %s, ", sigfig(4, temps, minmps));
@@ -574,8 +561,8 @@ void usage(char **argv)
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
 	#endif
-	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", _WIDTH);
-	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", _HEIGHT);
+	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", WIDTH);
+	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", HEIGHT);
 	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
 	fprintf(stderr, "-visualid = Ignore visual selection and use this visual ID (hex) instead\n");
 	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
@@ -664,12 +651,12 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-width") && i<argc-1)
 		{
 			int temp=atoi(argv[i+1]);  i++;
-			if(temp>=1) WIDTH=temp;
+			if(temp>=1) width=temp;
 		}
 		if(!stricmp(argv[i], "-height") && i<argc-1)
 		{
 			int temp=atoi(argv[i+1]);  i++;
-			if(temp>=1) HEIGHT=temp;
+			if(temp>=1) height=temp;
 		}
 		if(!stricmp(argv[i], "-time") && i<argc-1)
 		{
@@ -692,12 +679,12 @@ int main(int argc, char **argv)
 		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
 		#endif
 
-		if((DisplayWidth(dpy, DefaultScreen(dpy))<WIDTH ||
-			DisplayHeight(dpy, DefaultScreen(dpy))<HEIGHT) && usewindow)
+		if((DisplayWidth(dpy, DefaultScreen(dpy))<width ||
+			DisplayHeight(dpy, DefaultScreen(dpy))<height) && usewindow)
 		{
 			fprintf(stderr,
 				"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
-				WIDTH, HEIGHT);
+				width, height);
 			exit(1);
 		}
 
@@ -711,18 +698,18 @@ int main(int argc, char **argv)
 			swa.event_mask=0;
 
 			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
-			errifnot(win=XCreateWindow(dpy, root, 0, 0, usepixmap? 1:WIDTH,
-				usepixmap? 1:HEIGHT, 0, v->depth, InputOutput, v->visual,
+			errifnot(win=XCreateWindow(dpy, root, 0, 0, usepixmap? 1:width,
+				usepixmap? 1:height, 0, v->depth, InputOutput, v->visual,
 				CWBorderPixel|CWColormap|CWEventMask, &swa));
 			if(usepixmap)
 			{
-				errifnot(pm=XCreatePixmap(dpy, win, WIDTH, HEIGHT, v->depth));
+				errifnot(pm=XCreatePixmap(dpy, win, width, height, v->depth));
 			}
 			else XMapWindow(dpy, win);
 			XSync(dpy, False);
 		}
 		fprintf(stderr, "%s size = %d x %d pixels\n",
-			usepixmap? "Pixmap" : usewindow? "Window" : "Pbuffer", WIDTH, HEIGHT);
+			usepixmap? "Pixmap" : usewindow? "Window" : "Pbuffer", width, height);
 		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
 		pbufferinit();
