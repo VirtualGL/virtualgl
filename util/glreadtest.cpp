@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010-2011, 2013 D. R. Commander
+ * Copyright (C)2010-2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -110,8 +110,10 @@ GLXPbuffer pbuffer=0;
 #endif
 
 rrtimer timer;
-int usewindow=0, usepixmap=0, visualid=0, loops=1,
-	usealpha=0;
+int usewindow=0, usepixmap=0, usefbo=0, visualid=0, loops=1, usealpha=0;
+#ifdef GL_EXT_framebuffer_object
+GLuint fb=0, rb=0;
+#endif
 #ifdef GL_VERSION_1_5
 int pbo=0;
 #endif
@@ -173,7 +175,7 @@ void findvisual(void)
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
-	if(usewindow || usepixmap)
+	if(usewindow || usepixmap || usefbo)
 	{
 		try
 		{
@@ -226,7 +228,7 @@ void findvisual(void)
 }
 
 
-void pbufferinit(void)
+void drawableinit(void)
 {
 	#ifndef	GLX11
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
@@ -234,7 +236,7 @@ void pbufferinit(void)
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
-	if(usewindow || usepixmap)
+	if(usewindow || usepixmap || usefbo)
 	{
 		if(!(ctx=glXCreateContext(dpy, v, NULL, True)))
 			_throw("Could not create GL context");
@@ -245,12 +247,29 @@ void pbufferinit(void)
 				_throw("Could not creaate GLX pixmap");
 		}
 		glXMakeCurrent(dpy, usepixmap? glxpm:win, ctx);
+
+		#ifdef GL_EXT_framebuffer_object
+		if(usefbo)
+		{
+			glGenFramebuffersEXT(1, &fb);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+			glGenRenderbuffersEXT(1, &rb);
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rb);
+			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, usealpha? GL_RGBA8:GL_RGB8,
+				width, height);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rb);
+			if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
+				!=GL_FRAMEBUFFER_COMPLETE_EXT)
+				_throw("Could not create FBO");
+		}
+		#endif
 		return;
 	}
 
 	#ifndef GLX11
 	ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True);
-	if(!ctx)	_throw("Could not create GL context");
+	if(!ctx) _throw("Could not create GL context");
 
 	pbattribs[1]=width;  pbattribs[3]=height;
 	pbuffer=glXCreatePbuffer(dpy, c, pbattribs);
@@ -336,8 +355,18 @@ void clearfb(int format)
 	memset(buf, 0xFF, width*height*ps);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1); 
-	glDrawBuffer(GL_FRONT);
-	glReadBuffer(GL_FRONT);
+	#ifdef GL_EXT_framebuffer_object
+	if(usefbo)
+	{
+		glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	}
+	else
+	#endif
+	{
+		glDrawBuffer(GL_FRONT);
+		glReadBuffer(GL_FRONT);
+	}
 	glClearColor(0., 0., 0., 0.);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glReadPixels(0, 0, width, height, glformat, GL_UNSIGNED_BYTE, buf);
@@ -404,6 +433,10 @@ void glread(int format)
 	fprintf(stderr, "glReadPixels():   ");
 	glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
 	glPixelStorei(GL_PACK_ALIGNMENT, ALIGN);
+	#ifdef GL_EXT_framebuffer_object
+	if(usefbo) glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+	else
+	#endif
 	glReadBuffer(GL_FRONT);
 	#ifdef GL_VERSION_1_5
 	if(pbo)
@@ -548,6 +581,9 @@ void display(void)
 void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm]", argv[0]);
+	#ifdef GL_EXT_framebuffer_object
+	fprintf(stderr, " [-fbo]");
+	#endif
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, " [-pbo]\n");
 	#else
@@ -558,6 +594,9 @@ void usage(char **argv)
 	fprintf(stderr, "\n-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
 	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
+	#ifdef GL_EXT_framebuffer_object
+	fprintf(stderr, "-fbo = Render to a framebuffer object (FBO) instead of a Pbuffer\n");
+	#endif
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
 	#endif
@@ -592,6 +631,9 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-?")) usage(argv);
 		if(!stricmp(argv[i], "-window")) usewindow=1;
 		if(!stricmp(argv[i], "-pm")) usepixmap=1;
+		#ifdef GL_EXT_framebuffer_object
+		if(!stricmp(argv[i], "-fbo")) usefbo=1;
+		#endif
 		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
 		#endif
@@ -690,7 +732,7 @@ int main(int argc, char **argv)
 
 		findvisual();
 
-		if(usewindow || usepixmap)
+		if(usewindow || usepixmap || usefbo)
 		{
 			XSetWindowAttributes swa;
 			Window root=DefaultRootWindow(dpy);
@@ -698,21 +740,23 @@ int main(int argc, char **argv)
 			swa.event_mask=0;
 
 			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
-			errifnot(win=XCreateWindow(dpy, root, 0, 0, usepixmap? 1:width,
-				usepixmap? 1:height, 0, v->depth, InputOutput, v->visual,
+			errifnot(win=XCreateWindow(dpy, root, 0, 0,
+				(usepixmap || usefbo)? 1:width, (usepixmap || usefbo)? 1:height,
+				0, v->depth, InputOutput, v->visual,
 				CWBorderPixel|CWColormap|CWEventMask, &swa));
 			if(usepixmap)
 			{
 				errifnot(pm=XCreatePixmap(dpy, win, width, height, v->depth));
 			}
-			else XMapWindow(dpy, win);
+			else if(!usefbo) XMapWindow(dpy, win);
 			XSync(dpy, False);
 		}
 		fprintf(stderr, "%s size = %d x %d pixels\n",
-			usepixmap? "Pixmap" : usewindow? "Window" : "Pbuffer", width, height);
+			usepixmap? "Pixmap" : usewindow? "Window" : usefbo? "FBO" : "Pbuffer",
+			width, height);
 		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
-		pbufferinit();
+		drawableinit();
 		display();
 		return 0;
 
@@ -720,6 +764,14 @@ int main(int argc, char **argv)
 
 	if(dpy)
 	{
+		#ifdef GL_EXT_framebuffer_object
+		if(usefbo)
+		{
+			glDeleteRenderbuffersEXT(1, &rb);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glDeleteFramebuffersEXT(1, &fb);
+		}
+		#endif
 		glXMakeCurrent(dpy, 0, 0);
 		if(ctx) glXDestroyContext(dpy, ctx);
 		#ifndef GLX11
