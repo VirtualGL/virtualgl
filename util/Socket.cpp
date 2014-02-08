@@ -173,8 +173,8 @@ Socket::Socket(bool doSSL_=false)
 
 
 #ifdef USESSL
-Socket::Socket(SOCKET sd, SSL *ssl)
-	: sslctx(NULL), ssl(ssl), sd(sd)
+Socket::Socket(SOCKET sd_, SSL *ssl_)
+	: sslctx(NULL), ssl(ssl_), sd(sd_)
 {
 	if(ssl) doSSL=true;  else doSSL=false;
 	#ifdef _WIN32
@@ -183,8 +183,8 @@ Socket::Socket(SOCKET sd, SSL *ssl)
 	#endif
 }
 #else
-Socket::Socket(SOCKET sd)
-	: sd(sd)
+Socket::Socket(SOCKET sd_)
+	: sd(sd_)
 {
 	#ifdef _WIN32
 	CS::SafeLock l(mutex);
@@ -208,8 +208,14 @@ Socket::~Socket(void)
 void Socket::close(void)
 {
 	#ifdef USESSL
-	if(ssl)	{SSL_shutdown(ssl);  SSL_free(ssl);  ssl=NULL;}
-	if(sslctx) {SSL_CTX_free(sslctx);  sslctx=NULL;}
+	if(ssl)
+	{
+		SSL_shutdown(ssl);  SSL_free(ssl);  ssl=NULL;
+	}
+	if(sslctx)
+	{
+		SSL_CTX_free(sslctx);  sslctx=NULL;
+	}
 	#endif
 	if(sd!=INVALID_SOCKET)
 	{
