@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,12 +13,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrthread.h"
+#include "Thread.h"
 #include "rrframe.h"
 #include "../client/rrglframe.h"
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "vglutil.h"
+#include "Timer.h"
 #include "bmp.h"
+
+using namespace vglutil;
 
 #define ITER 50
 #define NB 2
@@ -87,14 +89,14 @@ class blitter : public Runnable
 		rrframe *get(void)
 		{
 			rrframe *b=_fb[_indx];  _indx=(_indx+1)%NB;
-			if(_t) _t->checkerror();  b->waituntilcomplete();
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();  b->waituntilcomplete();
+			if(_t) _t->checkError();
 			return b;
 		}
 
 		void put(rrframe *b)
 		{
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();
 			b->ready();
 		}
 
@@ -111,7 +113,7 @@ class blitter : public Runnable
 
 		void run(void)
 		{
-			rrtimer timer;
+			Timer timer;
 			double mpixels=0., totaltime=0.;
 			int buf=0;  rrframe *b;
 			try
@@ -167,14 +169,14 @@ class decompressor : public Runnable
 		{
 			rrcompframe &c=_cf[_indx];  _indx=(_indx+1)%NB;
 			if(_deadyet) return c;
-			if(_t) _t->checkerror();  c.waituntilcomplete();
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();  c.waituntilcomplete();
+			if(_t) _t->checkError();
 			return c;
 		}
 
 		void put(rrcompframe &c)
 		{
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();
 			c.ready();
 		}
 
@@ -243,8 +245,8 @@ class compressor : public Runnable
 		rrframe &get(int w, int h)
 		{
 			rrframe &f=_frame[_indx];  _indx=(_indx+1)%NB;
-			if(_t) _t->checkerror();  f.waituntilcomplete();
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();  f.waituntilcomplete();
+			if(_t) _t->checkError();
 			rrframeheader hdr;
 			hdr.framew=hdr.width=w+BORDER;
 			hdr.frameh=hdr.height=h+BORDER;
@@ -259,7 +261,7 @@ class compressor : public Runnable
 
 		void put(rrframe &f)
 		{
-			if(_t) _t->checkerror();
+			if(_t) _t->checkError();
 			f.ready();
 		}
 
@@ -430,9 +432,9 @@ void dopctest(char *filename)
 			double tstart, ttotal=0.;  int iter=0;
 			do
 			{
-				tstart=rrtime();
+				tstart=getTime();
 				dst.decompressrgb(src, w, h, false);
-				ttotal+=rrtime()-tstart;  iter++;
+				ttotal+=getTime()-tstart;  iter++;
 			} while(ttotal<1.);
 			fprintf(stderr, "%f Mpixels/sec - ", (double)w*(double)h
 				*(double)iter/1000000./ttotal);
@@ -532,7 +534,7 @@ int main(int argc, char **argv)
 			delete test[i];
 		}
 	}
-	catch (rrerror &e)
+	catch (Error &e)
 	{
 		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
 		exit(1);

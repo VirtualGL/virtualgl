@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2010, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,8 +14,8 @@
  */
 
 #include "x11trans.h"
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "vglutil.h"
+#include "Timer.h"
 #include "fakerconfig.h"
 
 
@@ -49,7 +49,7 @@ void fillframe(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 
 int main(int argc, char **argv)
 {
-	x11trans x11t;  rrtimer t;  double elapsed;
+	x11trans x11t;  Timer t;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
 	bool dosync=false, bottomup=false;
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		fprintf(stderr, "%s--\n%s\n", e.getMethod(), e.getMessage());
 	}

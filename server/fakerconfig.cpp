@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2013 D. R. Commander
+/* Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +15,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "rrlog.h"
+#include "Error.h"
+#include "Log.h"
+#include "Mutex.h"
 #include "fakerconfig.h"
 #include <stdio.h>
 #include <X11/keysym.h>
@@ -24,12 +26,14 @@
 #include <sys/ipc.h>
 #include <sys/types.h>
 #endif
-#include "rrutil.h"
+#include "vglutil.h"
 #include <X11/Xatom.h>
 #ifdef USEXV
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 #endif
+
+using namespace vglutil;
 
 
 #define DEFQUAL 95
@@ -47,23 +51,23 @@ static FakerConfig *fc=NULL;
 /* This is a hack necessary to defer the initialization of the recursive mutex
    so MainWin will not interfere with it */
 
-class rrdeferredcs : rrcs
+class DeferredCS : CS
 {
 	public:
-		rrdeferredcs() : _init(false) {}
+		DeferredCS() : _init(false) {}
 		
-		rrdeferredcs *init(void)
+		DeferredCS *init(void)
 		{
 			if(!_init)
 			{
 				_init=true;
 				#ifdef _WIN32
-				_cs=CreateMutex(NULL, FALSE, NULL);
+				mutex=CreateMutex(NULL, FALSE, NULL);
 				#else
 				pthread_mutexattr_t ma;
 				pthread_mutexattr_init(&ma);
 				pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-				pthread_mutex_init(&_cs, &ma);
+				pthread_mutex_init(&mutex, &ma);
 				pthread_mutexattr_destroy(&ma);
 				#endif
 			}
@@ -75,8 +79,8 @@ class rrdeferredcs : rrcs
 		bool _init;
 };
 
-static rrdeferredcs _fcmutex;
-#define fcmutex ((rrcs &)(*_fcmutex.init()))
+static DeferredCS _fcmutex;
+#define fcmutex ((CS &)(*_fcmutex.init()))
 
 
 static void fconfig_init(void);
@@ -86,7 +90,7 @@ FakerConfig *fconfig_instance(void)
 {
 	if(fc==NULL)
 	{
-		rrcs::safelock l(fcmutex);
+		CS::SafeLock l(fcmutex);
 		if(fc==NULL) 
 		{
 			#if FCONFIG_USESHM==1
@@ -102,7 +106,7 @@ FakerConfig *fconfig_instance(void)
 			char *env=NULL;
 			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 				&& !strncmp(env, "1", 1))
-				rrout.println("[VGL] Shared memory segment ID for vglconfig: %d",
+				vglout.println("[VGL] Shared memory segment ID for vglconfig: %d",
 					fc_shmid);
 			fc=(FakerConfig *)addr;
 
@@ -124,7 +128,7 @@ void fconfig_deleteinstance(void)
 {
 	if(fc!=NULL)
 	{
-		rrcs::safelock l(fcmutex, false);
+		CS::SafeLock l(fcmutex, false);
 		if(fc!=NULL)
 		{
 			#if FCONFIG_USESHM==1
@@ -136,7 +140,7 @@ void fconfig_deleteinstance(void)
 				char *env=NULL;
 				if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 					&& !strncmp(env, "1", 1) && ret!=-1)
-					rrout.println("[VGL] Removed shared memory segment %d", fc_shmid);
+					vglout.println("[VGL] Removed shared memory segment %d", fc_shmid);
 
 			}
 
@@ -154,7 +158,7 @@ void fconfig_deleteinstance(void)
 
 static void fconfig_init(void)
 {
-	rrcs::safelock l(fcmutex);
+	CS::SafeLock l(fcmutex);
 	memset(&fconfig, 0, sizeof(FakerConfig));
 	memset(&fcenv, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
@@ -251,7 +255,7 @@ void fconfig_reloadenv(void)
 {
 	char *env;
 
-	rrcs::safelock l(fcmutex);
+	CS::SafeLock l(fcmutex);
 
 	fetchenv_bool("VGL_ALLOWINDIRECT", allowindirect);
 	fetchenv_bool("VGL_AUTOTEST", autotest);
@@ -451,7 +455,7 @@ void fconfig_reloadenv(void)
 
 void fconfig_setdefaultsfromdpy(Display *dpy)
 {
-	rrcs::safelock l(fcmutex);
+	CS::SafeLock l(fcmutex);
 
 	if(fconfig.compress<0)
 	{
@@ -533,7 +537,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
 	if(i<0 || (i>=RR_COMPRESSOPT && strlen(fc.transport)==0)) return;
-	rrcs::safelock l(fcmutex);
+	CS::SafeLock l(fcmutex);
 
 	bool is=(fc.compress>=0);
 	fc.compress=i;
@@ -550,9 +554,9 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 }
 
 
-#define prconfint(i) rrout.println(#i"  =  %d", (int)fc.i)
-#define prconfstr(s) rrout.println(#s"  =  \"%s\"", strlen(fc.s)>0? fc.s:"{Empty}")
-#define prconfdbl(d) rrout.println(#d"  =  %f", fc.d)
+#define prconfint(i) vglout.println(#i"  =  %d", (int)fc.i)
+#define prconfstr(s) vglout.println(#s"  =  \"%s\"", strlen(fc.s)>0? fc.s:"{Empty}")
+#define prconfdbl(d) vglout.println(#d"  =  %f", fc.d)
 
 void fconfig_print(FakerConfig &fc)
 {

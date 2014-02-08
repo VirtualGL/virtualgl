@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,9 +16,11 @@
 #ifndef __VGLTRANSRECEIVER_H__
 #define __VGLTRANSRECEIVER_H__
 
-#include "rrsocket.h"
+#include "Socket.h"
 #include "clientwin.h"
-#include "rrlog.h"
+#include "Log.h"
+
+using namespace vglutil;
 
 
 #define MAXWIN 1024
@@ -38,8 +40,8 @@ class vgltransreceiver : public Runnable
 	void run(void);
 
 	int _drawmethod;
-	rrsocket *_listensd;
-  rrcs _listensdmutex;
+	Socket *_listensd;
+	CS _listensdmutex;
 	Thread *_t;
 	bool _deadyet;
 	bool _dossl;
@@ -50,11 +52,11 @@ class vgltransserver : public Runnable
 {
 	public:
 
-		vgltransserver(rrsocket *sd, int drawmethod) : _drawmethod(drawmethod),
+		vgltransserver(Socket *sd, int drawmethod) : _drawmethod(drawmethod),
 			_nwin(0), _sd(sd), _t(NULL), _remotename(NULL)
 		{
 			memset(_win, 0, sizeof(clientwin *)*MAXWIN);
-			if(_sd) _remotename=_sd->remotename();
+			if(_sd) _remotename=_sd->remoteName();
 			errifnot(_t=new Thread(this));
 			_t->start();
 		}
@@ -66,8 +68,8 @@ class vgltransserver : public Runnable
 			for(i=0; i<_nwin; i++) {if(_win[i]) {delete _win[i];  _win[i]=NULL;}}
 			_nwin=0;
 			_winmutex.unlock(false);
-			if(!_remotename) rrout.PRINTLN("-- Disconnecting\n");
-			else rrout.PRINTLN("-- Disconnecting %s", _remotename);
+			if(!_remotename) vglout.PRINTLN("-- Disconnecting\n");
+			else vglout.PRINTLN("-- Disconnecting %s", _remotename);
 			if(_sd) {delete _sd;  _sd=NULL;}
 		}
 
@@ -83,8 +85,8 @@ class vgltransserver : public Runnable
 		int _nwin;
 		clientwin *addwindow(int, Window, bool stereo=false);
 		void delwindow(clientwin *w);
-		rrcs _winmutex;
-		rrsocket *_sd;
+		CS _winmutex;
+		Socket *_sd;
 		Thread *_t;
 		char *_remotename;
 };

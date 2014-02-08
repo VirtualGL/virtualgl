@@ -1,4 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,8 +15,11 @@
 // Frame drawn using OpenGL
 
 #include "rrglframe.h"
-#include "rrutil.h"
-#include "rrlog.h"
+#include "vglutil.h"
+#include "Error.h"
+#include "Log.h"
+
+using namespace vglutil;
 
 #ifdef XDK
  #define glGetError _glGetError
@@ -46,10 +50,10 @@ rrglframe::rrglframe(char *dpystring, Window win) : rrframe(),
 	 _win(win), _ctx(0), _tjhnd(NULL), _newdpy(false)
 {
 	if(!dpystring || !win)
-		throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
+		throw(Error("rrglframe::rrglframe", "Invalid argument"));
 
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	if(!_dpy)
 	#endif
 	if(!(_dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
@@ -69,10 +73,10 @@ rrglframe::rrglframe(Display *dpy, Window win) : rrframe(),
 	#endif
 	_win(win), _ctx(0), _tjhnd(NULL), _newdpy(false)
 {
-	if(!dpy || !win) throw(rrerror("rrglframe::rrglframe", "Invalid argument"));
+	if(!dpy || !win) throw(Error("rrglframe::rrglframe", "Invalid argument"));
 
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	_dpy=dpy;
 	_isgl=true;
@@ -88,7 +92,7 @@ void rrglframe::init(Display *dpy, Window win)
 	XVisualInfo *v=NULL;
 
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	try
 	{
@@ -179,7 +183,7 @@ rrglframe &rrglframe::operator= (rrcompframe &f)
 			if(!_tjhnd)
 			{
 				if((_tjhnd=tjInitDecompress())==NULL)
-					throw(rrerror("rrglframe::decompressor", tjGetErrorStr()));
+					throw(Error("rrglframe::decompressor", tjGetErrorStr()));
 			}
 			int y=max(0, _h.frameh-f._h.y-height);
 			tj(tjDecompress(_tjhnd, f._bits, f._h.size,
@@ -200,7 +204,7 @@ rrglframe &rrglframe::operator= (rrcompframe &f)
 void rrglframe::redraw(void)
 {
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	drawtile(0, 0, _h.framew, _h.frameh);
 	sync();
@@ -212,7 +216,7 @@ void rrglframe::drawtile(int x, int y, int w, int h)
 	if(x<0 || w<1 || (x+w)>_h.framew || y<0 || h<1 || (y+h)>_h.frameh)
 		return;
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	int format=GL_RGB;
 	#ifdef GL_BGR_EXT
@@ -254,7 +258,7 @@ void rrglframe::drawtile(int x, int y, int w, int h)
 void rrglframe::sync(void)
 {
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	glFinish();
 	glXSwapBuffers(_dpy, _win);
@@ -273,7 +277,7 @@ int rrglframe::glerror(void)
 		char *env=NULL;
 		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 			&& !strncmp(env, "1", 1))
-			rrout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
+			vglout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
 	}
 	#ifndef _WIN32
 	while(i!=GL_NO_ERROR) i=glGetError();

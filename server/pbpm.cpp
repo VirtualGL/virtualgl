@@ -1,4 +1,4 @@
-/* Copyright (C)2011, 2013 D. R. Commander
+/* Copyright (C)2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,7 +14,7 @@
 #include "pbpm.h"
 #include "glxvisual.h"
 #include "fakerconfig.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 extern Display *_localdpy;
@@ -22,7 +22,7 @@ extern Display *_localdpy;
 
 pbpm::pbpm(Display *dpy, XVisualInfo *vis, Pixmap pm) : pbdrawable(dpy, pm)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	_prof_pmblit.setname("PMap Blit ");
 	errifnot(_fb=new rrfb(dpy, pm, vis->visual));
 }
@@ -30,7 +30,7 @@ pbpm::pbpm(Display *dpy, XVisualInfo *vis, Pixmap pm) : pbdrawable(dpy, pm)
 
 pbpm::~pbpm()
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_fb) {delete _fb;  _fb=NULL;}
 }
 
@@ -39,7 +39,7 @@ int pbpm::init(int w, int h, int depth, GLXFBConfig config, const int *attribs)
 {
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_pb && _pb->width()==w && _pb->height()==h && _pb->depth()==depth
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
 	_pb=new glxdrawable(w, h, depth, config, attribs);
@@ -56,7 +56,7 @@ int pbpm::init(int w, int h, int depth, GLXFBConfig config, const int *attribs)
 Pixmap pbpm::get3dx11drawable(void)
 {
 	GLXDrawable retval=0;
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	retval=_pb->pixmap();
 	return retval;
 }
@@ -66,7 +66,7 @@ void pbpm::readback(void)
 {
 	fconfig_reloadenv();
 
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	int pbw=_pb->width(), pbh=_pb->height();
 
 	rrframeheader hdr;

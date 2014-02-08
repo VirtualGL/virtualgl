@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,12 +15,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "rrsocket.h"
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "Socket.h"
+#include "vglutil.h"
+#include "Timer.h"
 #ifdef sun
 #include <kstat.h>
 #endif
+
+using namespace vglutil;
 
 
 #define PORT 1972
@@ -28,7 +31,7 @@
 #define ITER 5
 
 
-#if defined(sun)||defined(linux)
+#if defined(sun) || defined(linux)
 
 void benchmark(int interval, char *ifname)
 {
@@ -50,10 +53,10 @@ void benchmark(int interval, char *ifname)
 
 	#endif
 
-	double tStart=rrtime();
+	double tStart=getTime();
 	for(;;)
 	{
-		double tEnd=rrtime();
+		double tEnd=getTime();
 
 		#ifdef sun
 
@@ -117,7 +120,7 @@ void benchmark(int interval, char *ifname)
 	}
 }
 
-#endif // defined(sun)||defined(linux)
+#endif // defined(sun) || defined(linux)
 
 
 void initbuf(char *buf, int len)
@@ -147,7 +150,7 @@ void usage(char **argv)
 	printf(" [-ssl]");
 	#endif
 	printf("\n or    %s -findport\n", argv[0]);
-	#if defined(sun)||defined(linux)
+	#if defined(sun) || defined(linux)
 	printf(" or    %s -bench <interface> [interval]\n", argv[0]);
 	printf("\n-bench = measure throughput on selected network interface");
 	#endif
@@ -165,8 +168,8 @@ int main(int argc, char **argv)
 	int server=0;  char *servername=NULL;
 	char *buf;  int i, j, size;
 	bool dossl=false, old=false;
-	rrtimer timer;
-	#if defined(sun)||defined(linux)
+	Timer timer;
+	#if defined(sun) || defined(linux)
 	int interval=2;
 	#endif
 
@@ -209,12 +212,12 @@ int main(int argc, char **argv)
 	}
 	else if(!stricmp(argv[1], "-findport"))
 	{
-		rrsocket sd(false);
-		printf("%d\n", sd.findport());
+		Socket sd(false);
+		printf("%d\n", sd.findPort());
 		sd.close();
 		exit(0);
 	}
-	#if defined(sun)||defined(linux)
+	#if defined(sun) || defined(linux)
 	else if(!stricmp(argv[1], "-bench"))
 	{
 		int _interval;
@@ -227,7 +230,7 @@ int main(int argc, char **argv)
 	#endif
 	else usage(argv);
 
-	rrsocket sd(dossl);
+	Socket sd(dossl);
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
 		{printf("Buffer allocation error.\n");  exit(1);}
 
@@ -244,13 +247,13 @@ int main(int argc, char **argv)
 
 	if(server)
 	{
-		rrsocket *clientsd=NULL;
+		Socket *clientsd=NULL;
 
 		printf("Listening on TCP port %d\n", PORT);
 		sd.listen(PORT, true);
 		clientsd=sd.accept();
 
-		printf("Accepted TCP connection from %s\n", clientsd->remotename());
+		printf("Accepted TCP connection from %s\n", clientsd->remoteName());
 
 		clientsd->recv(buf, 1);
 		if(buf[0]=='V')
@@ -290,7 +293,7 @@ int main(int argc, char **argv)
 		sd.connect(servername, PORT);
 
 		printf("TCP transfer performance between localhost and %s:\n\n",
-			sd.remotename());
+			sd.remoteName());
 		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
 		printf("(bytes)                (msec)    (MBytes/sec)     (Mbits/sec)\n");
 
@@ -350,7 +353,7 @@ int main(int argc, char **argv)
 	free(buf);
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Error in %s--\n%s\n", e.getMethod(), e.getMessage());
 	}

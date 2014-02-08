@@ -25,7 +25,7 @@
  */
 
 #include <X11/Xatom.h>
-#include "rrutil.h"
+#include "vglutil.h"
 
 /* xfonts.c -- glXUseXFont() for Mesa written by
  * Copyright (C) 1995 Thorsten.Ohl @ Physik.TH-Darmstadt.de

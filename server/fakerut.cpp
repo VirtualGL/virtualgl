@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013 D. R. Commander
+ * Copyright (C)2010-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,9 +23,11 @@
 #include <X11/keysym.h>
 #include <dlfcn.h>
 #include <unistd.h>
-#include "rrerror.h"
-#include "rrthread.h"
+#include "Error.h"
+#include "Thread.h"
 #include "glext-vgl.h"
+
+using namespace vglutil;
 
 #ifndef GLX_RGBA_BIT
 #define GLX_RGBA_BIT 0x00000001
@@ -75,30 +77,30 @@ void clicktocontinue(Display *dpy)
 #endif
 
 // Same as _throw but without the line number
-#define _error(m) throw(rrerror(__FUNCTION__, m, 0))
+#define _error(m) throw(Error(__FUNCTION__, m, 0))
 
 #define _prerror1(m, a1) { \
 	char temps[256]; \
 	snprintf(temps, 255, m, a1); \
-	throw(rrerror(__FUNCTION__, temps, 0));  \
+	throw(Error(__FUNCTION__, temps, 0));  \
 }
 
 #define _prerror2(m, a1, a2) { \
 	char temps[256]; \
 	snprintf(temps, 255, m, a1, a2); \
-	throw(rrerror(__FUNCTION__, temps, 0));  \
+	throw(Error(__FUNCTION__, temps, 0));  \
 }
 
 #define _prerror3(m, a1, a2, a3) { \
 	char temps[256]; \
 	snprintf(temps, 255, m, a1, a2, a3); \
-	throw(rrerror(__FUNCTION__, temps, 0));  \
+	throw(Error(__FUNCTION__, temps, 0));  \
 }
 
 #define _prerror5(m, a1, a2, a3, a4, a5) { \
 	char temps[256]; \
 	snprintf(temps, 255, m, a1, a2, a3, a4, a5); \
-	throw(rrerror(__FUNCTION__, temps, 0));  \
+	throw(Error(__FUNCTION__, temps, 0));  \
 }
 
 unsigned int checkbuffercolor(bool ci)
@@ -457,7 +459,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		// Faker should readback front buffer on glFlush(), glFinish(), and
@@ -478,7 +483,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -497,7 +505,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -516,7 +527,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -537,7 +551,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}	
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -555,7 +572,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -573,7 +593,10 @@ int rbtest(bool stereo, bool ci)
 				checkwindowcolor(win0, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		// Test for proper handling of GL_FRONT_AND_BACK
@@ -589,7 +612,10 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win1, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -604,7 +630,10 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win1, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -619,7 +648,10 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win1, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -634,7 +666,10 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win1, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -649,7 +684,10 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win1, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -665,10 +703,13 @@ int rbtest(bool stereo, bool ci)
 			if(stereo) checkwindowcolor(win0, sclr.bits(-1), ci, true);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -741,7 +782,7 @@ int flushtest(void)
 		checkwindowcolor(win, clr.bits(-1), 0);
 		printf("SUCCESS\n");
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -783,8 +824,6 @@ int flushtest(void)
 	glXSwapBuffers(dpy, win);  \
 	checkwindowcolor(win, clr.bits(), true);  \
 	clr.next();}
-
-#include "rrtimer.h"
 
 #define _cidrawtest(type, gltype) {  \
 	type *ptr=(type *)bits;  \
@@ -926,7 +965,10 @@ int citest(void)
 			_citest(ub, GLubyte);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		fflush(stdout);
 
 		try
@@ -943,7 +985,10 @@ int citest(void)
 			_cidrawtest(float, GL_FLOAT);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		if(bits) {delete [] bits;  bits=NULL;}
 		fflush(stdout);
 
@@ -972,7 +1017,10 @@ int citest(void)
 			checkwindowcolor(win, clr.bits(), true);  clr.next();
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		if(bits) {delete [] bits;  bits=NULL;}
 		fflush(stdout);
 
@@ -995,7 +1043,10 @@ int citest(void)
 			clr.next();
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		if(bits) {delete [] bits;  bits=NULL;}
 		fflush(stdout);
 
@@ -1016,7 +1067,10 @@ int citest(void)
 			clr.next();
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		if(bits) {delete [] bits;  bits=NULL;}
 		fflush(stdout);
 
@@ -1038,12 +1092,15 @@ int citest(void)
 			clr.next();
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
+		catch(Error &e)
+		{
+			printf("Failed! (%s)\n", e.getMessage());  retval=0;
+		}
 		if(bits) {delete [] bits;  bits=NULL;}
 		fflush(stdout);
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -1316,7 +1373,7 @@ int vistest(void)
 			}
 			printf("SUCCESS!\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1374,7 +1431,7 @@ int vistest(void)
 			}
 			printf("SUCCESS!\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1401,7 +1458,7 @@ int vistest(void)
 					_error("No matching X visual for CFG");
 				}
 			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
 				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
@@ -1430,7 +1487,7 @@ int vistest(void)
 
 				printf("SUCCESS!\n");
 			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
 				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
@@ -1462,14 +1519,14 @@ int vistest(void)
 
 				printf("SUCCESS!\n");
 			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
 				printf("Failed! (%s)\n", e.getMessage());  retval=0;
 			}
 			if(v2) {XFree(v2);  v2=NULL;}
 		}
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -1624,16 +1681,16 @@ int mttest(int nthr)
 		{
 			try
 			{
-				t[i]->checkerror();
+				t[i]->checkError();
 			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
 				printf("Thread %d failed! (%s)\n", i, e.getMessage());  retval=0;
 			}
 		}
 		if(retval==1) printf("SUCCESS!\n");
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -1801,7 +1858,7 @@ int pbtest(void)
 			checkwindowcolor(win, dbpb? clr.bits(-2):clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1830,7 +1887,7 @@ int pbtest(void)
 			verifybufcolor(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "PB");
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1868,7 +1925,7 @@ int pbtest(void)
 			checkwindowcolor(win, dbwin? clr.bits(-3):clr.bits(-2), false);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1900,7 +1957,7 @@ int pbtest(void)
 			checkwindowcolor(win, clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1932,7 +1989,7 @@ int pbtest(void)
 			verifybufcolor(GL_FRONT, dbwin? clr.bits(-2):clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -1961,7 +2018,7 @@ int pbtest(void)
 			verifybufcolor(GL_FRONT, clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -2000,7 +2057,7 @@ int pbtest(void)
 
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
@@ -2025,14 +2082,14 @@ int pbtest(void)
 			checkwindowcolor(pm0, clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
 		fflush(stdout);
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -2126,13 +2183,13 @@ int ctxmismatchtest(void)
 			
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
 		fflush(stdout);
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -2214,13 +2271,13 @@ int subwintest(void)
 			}
 			printf("SUCCESS\n");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			printf("Failed! (%s)\n", e.getMessage());  retval=0;
 		}
 		fflush(stdout);
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -2265,7 +2322,7 @@ int querytest(void)
 			glXQueryExtensionsString(dpy, DefaultScreen(dpy)));
 		printf("SUCCESS!\n");
 	}	
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}
@@ -2297,7 +2354,7 @@ int procaddrtest(void)
 		testprocsym(glXMakeContextCurrent)
 		printf("SUCCESS!\n");
 	}	
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Failed! (%s)\n", e.getMessage());  retval=0;
 	}

@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011 D. R. Commander
+/* Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,7 +13,9 @@
 
 #define RRTRANS_NOPROTOTYPES
 #include "rrtransport.h"
-#include "rrmutex.h"
+#include "Mutex.h"
+
+using namespace vglutil;
 
 
 typedef void* (*_RRTransInitType)(Display *, Window, FakerConfig *);
@@ -49,6 +51,6 @@ class transplugin
 		_RRTransSendFrameType _RRTransSendFrame;
 		_RRTransDestroyType _RRTransDestroy;
 		_RRTransGetErrorType _RRTransGetError;
-		rrcs mutex;
+		CS mutex;
 		void *dllhnd, *handle;
 };

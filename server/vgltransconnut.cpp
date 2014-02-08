@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,8 +14,8 @@
  */
 
 #include "vgltransconn.h"
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "vglutil.h"
+#include "Timer.h"
 #include "bmp.h"
 #include "fakerconfig.h"
 
@@ -49,7 +49,7 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	rrtimer t;  double elapsed;
+	Timer t;  double elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;
 	int i;  int bgr=littleendian();
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 	printf("%f Megapixels/sec\n",
 		(double)w*(double)h*(double)frames/1000000./elapsed);
 
-	} catch(rrerror &e) {printf("%s--\n%s\n", e.getMethod(), e.getMessage());}
+	} catch(Error &e) { printf("%s--\n%s\n", e.getMethod(), e.getMessage()); }
 
 	if(win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);

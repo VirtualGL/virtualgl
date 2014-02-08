@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012 D. R. Commander
+ * Copyright (C)2011-2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,7 +20,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include "vgltransreceiver.h"
-#include "rrutil.h"
+#include "vglutil.h"
 #include "x11err.h"
 #include "xdk-sym.h"
 #include <X11/Xatom.h>
@@ -82,10 +82,10 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	{
 		errmsg[0]=0;
 		XGetErrorText(dpy, xe->error_code, errmsg, 256);
-		rrout.print("X11 Error: ");
+		vglout.print("X11 Error: ");
 		if((temp=x11error(xe->error_code))!=NULL && stricmp(temp, "Unknown error code"))
-			rrout.print("%s ", temp);
-		rrout.println("%s", errmsg);
+			vglout.print("%s ", temp);
+		vglout.println("%s", errmsg);
 	}
 	return 1;
 }
@@ -152,7 +152,7 @@ void killproc(bool useronly)
 						if(ptr) ptr=&ptr[1];  else ptr=filename;
 						if(strlen(ptr) && !stricmp(ptr, "vglclient.exe"))
 						{
-							rrout.println("Terminating vglclient process %d", pid[i]);
+							vglout.println("Terminating vglclient process %d", pid[i]);
 							TerminateProcess(ph, 0);  WaitForSingleObject(ph, INFINITE);
 						}
 					}
@@ -193,7 +193,7 @@ void killproc(bool useronly)
 			if(!strcmp(kp[i].kp_proc.p_comm, "vglclient")
 				&& pid!=getpid())
 			{
-				rrout.println("Terminating vglclient process %d", pid);
+				vglout.println("Terminating vglclient process %d", pid);
 				kill(pid, SIGTERM);
 			}
 		}
@@ -235,7 +235,7 @@ void killproc(bool useronly)
 					{
 						if(!strcmp(psinfo.pr_fname, "vglclient"))
 						{
-							rrout.println("Terminating vglclient process %d", pid);
+							vglout.println("Terminating vglclient process %d", pid);
 							kill(pid, SIGTERM);
 						}
 					}
@@ -252,7 +252,7 @@ void killproc(bool useronly)
 								*ptr2='\0';
 								if(!strcmp(ptr, "vglclient"))
 								{
-									rrout.println("Terminating vglclient process %d", pid);
+									vglout.println("Terminating vglclient process %d", pid);
 									kill(pid, SIGTERM);
 								}
 							}
@@ -353,8 +353,8 @@ unsigned short instancecheckssl(Display *dpy)
 		if(prop) XFree(prop);
 		if(p!=0)
 		{
-			rrout.println("vglclient is already running on this X display and accepting SSL");
-			rrout.println("   connections on port %d.", p);
+			vglout.println("vglclient is already running on this X display and accepting SSL");
+			vglout.println("   connections on port %d.", p);
 		}
 	}
 	return p;
@@ -378,8 +378,8 @@ unsigned short instancecheck(Display *dpy)
 		if(prop) XFree(prop);
 		if(p!=0)
 		{
-			rrout.println("vglclient is already running on this X display and accepting unencrypted");
-			rrout.println("   connections on port %d.", p);
+			vglout.println("vglclient is already running on this X display and accepting unencrypted");
+			vglout.println("   connections on port %d.", p);
 		}
 	}
 	return p;
@@ -407,7 +407,7 @@ void getenvironment(void)
 		FILE *f=fopen(logfile, "a");
 		if(!f)
 		{
-			rrout.println("Could not open log file %s", logfile);  _throwunix();
+			vglout.println("Could not open log file %s", logfile);  _throwunix();
 		}
 		else fclose(f);
 	}
@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
 				FILE *f=fopen(logfile, "a");
 				if(!f)
 				{
-					rrout.println("Could not open log file %s", logfile);  _throwunix();
+					vglout.println("Could not open log file %s", logfile);  _throwunix();
 				}
 				else fclose(f);
 			}
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
 
 	if(!child)
 	{
-		rrout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME,
+		vglout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME,
 			(int)sizeof(size_t)*8, __VERSION, __BUILD);
 		if(printversion) return 0;
 		if(detach) daemonize();
@@ -491,9 +491,9 @@ int main(int argc, char *argv[])
 	#endif
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		rrout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
+		vglout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
 	}
 	
 	#ifdef XDK
@@ -513,7 +513,7 @@ void start(char *displayname)
 	#endif
 	bool newlistener=false;
 
-	if(!XInitThreads()) {rrout.println("XInitThreads() failed");  return;}
+	if(!XInitThreads()) { vglout.println("XInitThreads() failed");  return; }
 
 	signal(SIGINT, handler);
 	signal(SIGTERM, handler);
@@ -556,7 +556,7 @@ void start(char *displayname)
 					} while(!success);
 				}
 				else vglsslrecv->listen(sslport);
-				rrout.println("Listening for SSL connections on port %d",
+				vglout.println("Listening for SSL connections on port %d",
 					actualsslport=vglsslrecv->port());
 				if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
 					False))==None)
@@ -591,7 +591,7 @@ void start(char *displayname)
 					} while(!success);
 				}
 				else vglrecv->listen(port);
-				rrout.println("Listening for unencrypted connections on port %d",
+				vglout.println("Listening for unencrypted connections on port %d",
 					actualport=vglrecv->port());
 				if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
 					_throw("Could not get _VGLCLIENT_PORT atom");
@@ -604,8 +604,8 @@ void start(char *displayname)
 
 		if(logfile && newlistener)
 		{
-			rrout.println("Redirecting output to %s", logfile);
-			rrout.logto(logfile);
+			vglout.println("Redirecting output to %s", logfile);
+			vglout.logTo(logfile);
 		}
 
 		if(child)
@@ -631,9 +631,9 @@ void start(char *displayname)
 		}
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
+		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 
 	if(vglrecv) {delete vglrecv;  vglrecv=NULL;}

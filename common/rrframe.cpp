@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,11 +13,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "rrlog.h"
-#include "rrutil.h"
+#include "Log.h"
+#include "Error.h"
+#include "vglutil.h"
 #include <string.h>
 #include "vgllogo.h"
 #include "rrframe.h"
+
+using namespace vglutil;
 
 
 #define jpegsub(s) \
@@ -27,7 +30,7 @@
 // Uncompressed frame
 
 #ifdef XDK
-rrcs rrframe::_Mutex;
+CS rrframe::_Mutex;
 #endif
 
 
@@ -55,7 +58,7 @@ void rrframe::deinit(void)
 
 void rrframe::init(rrframeheader &h, int pixelsize, int flags, bool stereo)
 {
-	if(pixelsize<1) throw(rrerror("rrframe::init", "Invalid argument"));
+	if(pixelsize<1) throw(Error("rrframe::init", "Invalid argument"));
 
 	_flags=flags;
 	if(h.size==0) h.size=h.framew*h.frameh*pixelsize;
@@ -106,7 +109,7 @@ rrframe *rrframe::gettile(int x, int y, int w, int h)
 
 	if(!_bits || !_pitch || !_pixelsize) _throw("Frame not initialized");
 	if(x<0 || y<0 || w<1 || h<1 || (x+w)>_h.width || (y+h)>_h.height)
-		throw rrerror("rrframe::gettile", "Argument out of range");
+		throw Error("rrframe::gettile", "Argument out of range");
 
 	errifnot(f=new rrframe(false));
 	f->_h=_h;
@@ -132,7 +135,7 @@ bool rrframe::tileequals(rrframe *last, int x, int y, int w, int h)
 	bool bu=(_flags&RRFRAME_BOTTOMUP);
 
 	if(x<0 || y<0 || w<1 || h<1 || (x+w)>_h.width || (y+h)>_h.height)
-		throw rrerror("rrframe::tileequals", "Argument out of range");
+		throw Error("rrframe::tileequals", "Argument out of range");
 
 	if(last && _h.width==last->_h.width && _h.height==last->_h.height
 		&& _h.framew==last->_h.framew && _h.frameh==last->_h.frameh
@@ -369,19 +372,19 @@ void rrframe::addlogo(void)
 
 void rrframe::dumpheader(rrframeheader &h)
 {
-	rrout.print("h.size    = %lu\n", h.size);
-	rrout.print("h.winid   = 0x%.8x\n", h.winid);
-	rrout.print("h.dpynum  = %d\n", h.dpynum);
-	rrout.print("h.compress= %d\n", h.compress);
-	rrout.print("h.framew  = %d\n", h.framew);
-	rrout.print("h.frameh  = %d\n", h.frameh);
-	rrout.print("h.width   = %d\n", h.width);
-	rrout.print("h.height  = %d\n", h.height);
-	rrout.print("h.x       = %d\n", h.x);
-	rrout.print("h.y       = %d\n", h.y);
-	rrout.print("h.qual    = %d\n", h.qual);
-	rrout.print("h.subsamp = %d\n", h.subsamp);
-	rrout.print("h.flags   = %d\n", h.flags);
+	vglout.print("h.size    = %lu\n", h.size);
+	vglout.print("h.winid   = 0x%.8x\n", h.winid);
+	vglout.print("h.dpynum  = %d\n", h.dpynum);
+	vglout.print("h.compress= %d\n", h.compress);
+	vglout.print("h.framew  = %d\n", h.framew);
+	vglout.print("h.frameh  = %d\n", h.frameh);
+	vglout.print("h.width   = %d\n", h.width);
+	vglout.print("h.height  = %d\n", h.height);
+	vglout.print("h.x       = %d\n", h.x);
+	vglout.print("h.y       = %d\n", h.y);
+	vglout.print("h.qual    = %d\n", h.qual);
+	vglout.print("h.subsamp = %d\n", h.subsamp);
+	vglout.print("h.flags   = %d\n", h.flags);
 }
 
 
@@ -390,7 +393,7 @@ void rrframe::checkheader(rrframeheader &h)
 	if(h.flags!=RR_EOF && (h.framew<1 || h.frameh<1 || h.width<1 || h.height<1
 		|| h.x+h.width>h.framew || h.y+h.height>h.frameh))
 	{
-		throw(rrerror("rrframe::checkheader", "Invalid header"));
+		throw(Error("rrframe::checkheader", "Invalid header"));
 	}
 }
 
@@ -434,7 +437,7 @@ void rrcompframe::compressyuv(rrframe& b)
 {
 	int tjflags=0;
 
-	if(b._h.subsamp!=4) throw(rrerror("YUV encoder", "Invalid argument"));
+	if(b._h.subsamp!=4) throw(Error("YUV encoder", "Invalid argument"));
 	init(b._h, 0);
 	if(b._flags&RRFRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 	if(b._flags&RRFRAME_BGR) tjflags|=TJ_BGR;
@@ -452,7 +455,7 @@ void rrcompframe::compressjpeg(rrframe& b)
 	int tjflags=0;
 
 	if(b._h.qual>100 || b._h.subsamp>16 || !isPow2(b._h.subsamp))
-		throw(rrerror("JPEG compressor", "Invalid argument"));
+		throw(Error("JPEG compressor", "Invalid argument"));
 
 	init(b._h, b._stereo? RR_LEFT:0);
 	if(b._flags&RRFRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
@@ -478,7 +481,7 @@ void rrcompframe::compressrgb(rrframe& b)
 	int i;  unsigned char *srcptr, *dstptr;
 	int bu=(b._flags&RRFRAME_BOTTOMUP)? 1:0;
 	if(b._flags&RRFRAME_BGR || b._flags&RRFRAME_ALPHAFIRST || b._pixelsize!=3)
-		throw(rrerror("RGB compressor", "Source frame is not RGB"));
+		throw(Error("RGB compressor", "Source frame is not RGB"));
 	int pitch=b._h.width*b._pixelsize;
 	int srcstride=bu? b._pitch:-b._pitch;
 
@@ -548,9 +551,9 @@ void rrcompframe::init(rrframeheader &h, int buffer)
 
 rrfb::rrfb(Display *dpy, Drawable d, Visual *v) : rrframe()
 {
-	if(!dpy || !d) throw(rrerror("rrfb::rrfb", "Invalid argument"));
+	if(!dpy || !d) throw(Error("rrfb::rrfb", "Invalid argument"));
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	XFlush(dpy);
 	init(DisplayString(dpy), d, v);
@@ -560,7 +563,7 @@ rrfb::rrfb(Display *dpy, Drawable d, Visual *v) : rrframe()
 rrfb::rrfb(char *dpystring, Window win) : rrframe()
 {
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	init(dpystring, win);
 }
@@ -570,9 +573,9 @@ void rrfb::init(char *dpystring, Drawable d, Visual *v)
 {
 	_tjhnd=NULL;
 	memset(&_fb, 0, sizeof(fbx_struct));
-	if(!dpystring || !d) throw(rrerror("rrfb::init", "Invalid argument"));
+	if(!dpystring || !d) throw(Error("rrfb::init", "Invalid argument"));
 	if(!(_wh.dpy=XOpenDisplay(dpystring)))
-		throw(rrerror("rrfb::init", "Could not open display"));
+		throw(Error("rrfb::init", "Could not open display"));
 	_wh.d=d;  _wh.v=v;
 }
 
@@ -594,7 +597,7 @@ rrfb::~rrfb(void)
 void rrfb::init(rrframeheader &h)
 {
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	checkheader(h);
 	int usexshm=1;  char *env=NULL;
@@ -636,7 +639,7 @@ rrfb &rrfb::operator= (rrcompframe& f)
 			if(!_tjhnd)
 			{
 				if((_tjhnd=tjInitDecompress())==NULL)
-					throw(rrerror("rrfb::decompressor", tjGetErrorStr()));
+					throw(Error("rrfb::decompressor", tjGetErrorStr()));
 			}
 			tj(tjDecompress(_tjhnd, f._bits, f._h.size,
 				(unsigned char *)&_fb.bits[_fb.pitch*f._h.y+f._h.x*fbx_ps[_fb.format]],
@@ -650,7 +653,7 @@ rrfb &rrfb::operator= (rrcompframe& f)
 void rrfb::redraw(void)
 {
 	#ifdef XDK
-	rrcs::safelock l(_Mutex);
+	CS::SafeLock l(_Mutex);
 	#endif
 	if(_flags&RRFRAME_BOTTOMUP) fbx(fbx_flip(&_fb, 0, 0, 0, 0));
 	fbx(fbx_write(&_fb, 0, 0, 0, 0, _fb.width, _fb.height));
@@ -663,7 +666,7 @@ void rrfb::redraw(void)
 
 rrxvframe::rrxvframe(Display *dpy, Window win) : rrframe()
 {
-	if(!dpy || !win) throw(rrerror("rrxvframe::rrxvframe", "Invalid argument"));
+	if(!dpy || !win) throw(Error("rrxvframe::rrxvframe", "Invalid argument"));
 	XFlush(dpy);
 	init(DisplayString(dpy), win);
 }
@@ -679,9 +682,9 @@ void rrxvframe::init(char *dpystring, Window win)
 {
 	_tjhnd=NULL;  _isxv=true;
 	memset(&_fb, 0, sizeof(fbxv_struct));
-	if(!dpystring || !win) throw(rrerror("rrxvframe::init", "Invalid argument"));
+	if(!dpystring || !win) throw(Error("rrxvframe::init", "Invalid argument"));
 	if(!(_dpy=XOpenDisplay(dpystring)))
-		throw(rrerror("rrxvframe::init", "Could not open display"));
+		throw(Error("rrxvframe::init", "Could not open display"));
 	_win=win;
 }
 
@@ -706,7 +709,7 @@ rrxvframe &rrxvframe::operator= (rrframe &b)
 	if(!_tjhnd)
 	{
 		if((_tjhnd=tjInitCompress())==NULL)
-			throw(rrerror("rrxvframe::compressor", tjGetErrorStr()));
+			throw(Error("rrxvframe::compressor", tjGetErrorStr()));
 	}
 	tj(tjEncodeYUV(_tjhnd, b._bits, b._h.width, b._pitch, b._h.height,
 		b._pixelsize, _bits, TJ_420, tjflags));

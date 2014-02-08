@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C)2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -41,7 +41,7 @@ class rcfghash : public _rcfghash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new rcfghash;
 			}
 			return _Instanceptr;
@@ -93,12 +93,12 @@ class rcfghash : public _rcfghash
 		}
 
 		static rcfghash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 rcfghash *rcfghash::_Instanceptr=NULL;
-rrcs rcfghash::_Instancemutex;
+CS rcfghash::_Instancemutex;
 #endif
 
 #define rcfgh (*(rcfghash::instance()))

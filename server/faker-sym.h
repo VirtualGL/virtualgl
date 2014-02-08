@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,7 +20,7 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
-#include "rrlog.h"
+#include "Log.h"
 
 
 extern void __vgl_safeexit(int);
@@ -28,7 +28,7 @@ extern void __vgl_fakerinit(void);
 
 
 #define checksym(s) {if(!__##s) {__vgl_fakerinit();  if(!__##s) { \
-	rrout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
+	vglout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL

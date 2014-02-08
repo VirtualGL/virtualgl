@@ -1,5 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,7 +40,7 @@ class pmhash : public _pmhash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new pmhash;
 			}
 			return _Instanceptr;
@@ -66,7 +66,7 @@ class pmhash : public _pmhash
 		{
 			if(!pb) return 0;
 			_pmhashstruct *ptr=NULL;
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(NULL, pb))!=NULL)
 				return ptr->key2;
 			return 0;
@@ -104,12 +104,12 @@ class pmhash : public _pmhash
 		}
 
 		static pmhash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 pmhash *pmhash::_Instanceptr=NULL;
-rrcs pmhash::_Instancemutex;
+CS pmhash::_Instancemutex;
 #endif
 
 #define pmh (*(pmhash::instance()))

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,9 +14,9 @@
  */
 
 #include "x11trans.h"
-#include "rrtimer.h"
+#include "Timer.h"
 #include "fakerconfig.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 x11trans::x11trans(void) : _t(NULL), _deadyet(false)
@@ -26,13 +26,13 @@ x11trans::x11trans(void) : _t(NULL), _deadyet(false)
 	_t->start();
 	_prof_blit.setname("Blit      ");
 	_prof_total.setname("Total     ");
-	if(fconfig.verbose) fbx_printwarnings(rrout.getfile());
+	if(fconfig.verbose) fbx_printwarnings(vglout.getFile());
 }
 
 
 void x11trans::run(void)
 {
-	rrtimer t, sleept;  double err=0.;  bool first=true;
+	Timer t, sleept;  double err=0.;  bool first=true;
 
 	try
 	{
@@ -76,9 +76,9 @@ void x11trans::run(void)
 		}
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		if(_t) _t->seterror(e);
+		if(_t) _t->setError(e);
 		_ready.signal();  throw;
 	}
 }
@@ -87,15 +87,15 @@ void x11trans::run(void)
 rrfb *x11trans::getframe(Display *dpy, Window win, int w, int h)
 {
 	rrfb *f=NULL;
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	{
-	rrcs::safelock l(_mutex);
-	int framei=-1;
-	for(int i=0; i<NFRAMES; i++)
-		if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
-	if(framei<0) _throw("No free buffers in pool");
-	if(!_frame[framei]) errifnot(_frame[framei]=new rrfb(dpy, win));
-	f=_frame[framei];  f->waituntilcomplete();
+		CS::SafeLock l(_mutex);
+		int framei=-1;
+		for(int i=0; i<NFRAMES; i++)
+			if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
+		if(framei<0) _throw("No free buffers in pool");
+		if(!_frame[framei]) errifnot(_frame[framei]=new rrfb(dpy, win));
+		f=_frame[framei];  f->waituntilcomplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
@@ -109,7 +109,7 @@ rrfb *x11trans::getframe(Display *dpy, Window win, int w, int h)
 
 bool x11trans::ready(void)
 {
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	return(_q.items()<=0);
 }
 
@@ -128,7 +128,7 @@ static void __x11trans_spoilfct(void *f)
 
 void x11trans::sendframe(rrfb *f, bool sync)
 {
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	if(sync) 
 	{
 		_prof_blit.startframe();

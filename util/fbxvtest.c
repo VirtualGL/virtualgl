@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010 D. R. Commander
+/* Copyright (C)2009-2010, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "fbxv.h"
-#include "rrtimer.h"
+#include "Timer.h"
 
 
 #define WIDTH 1241
@@ -132,14 +132,14 @@ void dotest(int id, char *name)
 		initbuf(&s, id, 0);
 		initbuf(&s1, id, 128);
 	}
-	t=rrtime();
+	t=getTime();
 	do
 	{
 		if(filename || iter%2==0)
 			{fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));}
 		else {fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height));}
 		iter++;
-	} while((elapsed=rrtime()-t)<testtime);
+	} while((elapsed=getTime()-t)<testtime);
 	printf("%f Mpixels/sec\n", (double)(width*height)/1000000.*(double)iter/elapsed);
 
 	bailout:

@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011 D. R. Commander
+/* Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,7 +18,7 @@
 #include "vgltransconn.h"
 
 
-static rrerror err;
+static Error err;
 char errstr[MAXSTR];
 
 static FakerConfig *_fconfig=NULL;
@@ -43,7 +43,7 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 		_win=win;
 		handle=(void *)(new vgltransconn());
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return NULL;
 	}
@@ -60,7 +60,7 @@ int RRTransConnect(void *handle, char *receiver_name, int port)
 		if(!vglconn) _throw("Invalid handle");
 		vglconn->connect(receiver_name, port);
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -116,7 +116,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		}
 		return frame;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return NULL;
 	}
@@ -132,7 +132,7 @@ int RRTransReady(void *handle)
 		if(!vglconn) _throw("Invalid handle");
 		ret=(int)vglconn->ready();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -149,7 +149,7 @@ int RRTransSynchronize(void *handle)
 		if(!vglconn) _throw("Invalid handle");
 		vglconn->synchronize();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -173,7 +173,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 		vglconn->sendframe(f);
 		delete frame;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -190,7 +190,7 @@ int RRTransDestroy(void *handle)
 		if(!vglconn) _throw("Invalid handle");
 		delete vglconn;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}

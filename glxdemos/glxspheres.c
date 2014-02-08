@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013 D. R. Commander
+ * Copyright (C)2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,8 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "rrtimer.h"
-#include "rrutil.h"
+#include "Timer.h"
+#include "vglutil.h"
 
 
 #define _throw(m) {fprintf(stderr, "ERROR (%d): %s\n", __LINE__,  m); \
@@ -386,7 +386,7 @@ int display(int advance)
 
 	if(start>0.)
 	{
-		elapsed+=rrtime()-start;  frames++;  totalframes++;
+		elapsed+=getTime()-start;  frames++;  totalframes++;
 		mpixels+=(double)width*(double)height/1000000.;
 		if(elapsed>benchtime || (maxframes && totalframes>maxframes))
 		{
@@ -398,7 +398,7 @@ int display(int advance)
 	}
 	if(maxframes && totalframes>maxframes) goto bailout;
 
-	start=rrtime();
+	start=getTime();
 	return 0;
 
 	bailout:

@@ -1,4 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,9 +14,9 @@
 
 #include <X11/Xlib.h>
 #include <unistd.h>
-#include "rrmutex.h"
-#include "rrthread.h"
-#include "rrlog.h"
+#include "Mutex.h"
+#include "Thread.h"
+#include "Log.h"
 
 
 class vglconfigstart : public Runnable
@@ -26,7 +27,7 @@ class vglconfigstart : public Runnable
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new vglconfigstart;
 			}
 			return _Instanceptr;
@@ -35,7 +36,7 @@ class vglconfigstart : public Runnable
 		void popup(Display *dpy, int shmid)
 		{
 			if(!dpy || shmid==-1) _throw("Invalid argument");
-			rrcs::safelock l(_Popupmutex);
+			CS::SafeLock l(_Popupmutex);
 			if(_t) return;
 			_dpy=dpy;  _shmid=shmid;
 			errifnot(_t=new Thread(this));
@@ -54,11 +55,11 @@ class vglconfigstart : public Runnable
 					fconfig.config, DisplayString(_dpy), _shmid, getpid());
 				if(system(commandline)==-1) _throwunix();
 			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
-				rrout.println("Error invoking vglconfig--\n%s", e.getMessage());
+				vglout.println("Error invoking vglconfig--\n%s", e.getMessage());
 			}
-			rrcs::safelock l(_Popupmutex);
+			CS::SafeLock l(_Popupmutex);
 			_t->detach();  delete _t;  _t=NULL;
 		}
 
@@ -87,8 +88,8 @@ class vglconfigstart : public Runnable
 		}
 
 		static vglconfigstart *_Instanceptr;
-		static rrcs _Instancemutex;
-		static rrcs _Popupmutex;
+		static CS _Instancemutex;
+		static CS _Popupmutex;
 		Thread *_t;
 		Display *_dpy;
 		int _shmid;
@@ -96,8 +97,8 @@ class vglconfigstart : public Runnable
 
 #ifdef __VGLCONFIGSTART_STATICDEF__
 vglconfigstart *vglconfigstart::_Instanceptr=NULL;
-rrcs vglconfigstart::_Instancemutex;
-rrcs vglconfigstart::_Popupmutex;
+CS vglconfigstart::_Instancemutex;
+CS vglconfigstart::_Popupmutex;
 #endif
 
 #define vglpopup(dpy, shmid) \

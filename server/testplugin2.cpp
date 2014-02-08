@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010 D. R. Commander
+/* Copyright (C)2009-2010, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,7 +18,7 @@
 #include "x11trans.h"
 
 
-static rrerror err;
+static Error err;
 char errstr[MAXSTR];
 
 static FakerConfig *_fconfig=NULL;
@@ -45,7 +45,7 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 		_win=win;
 		handle=(void *)(new x11trans());
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return NULL;
 	}
@@ -85,7 +85,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		}
 		return frame;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return NULL;
 	}
@@ -101,7 +101,7 @@ int RRTransReady(void *handle)
 		if(!x11t) _throw("Invalid handle");
 		ret=(int)x11t->ready();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -118,7 +118,7 @@ int RRTransSynchronize(void *handle)
 		if(!x11t) _throw("Invalid handle");
 		x11t->synchronize();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -139,7 +139,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 		x11t->sendframe(f, (bool)sync);
 		delete frame;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}
@@ -156,7 +156,7 @@ int RRTransDestroy(void *handle)
 		if(!x11t) _throw("Invalid handle");
 		delete x11t;
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		err=e;  return -1;
 	}

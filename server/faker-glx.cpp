@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2013 D. R. Commander
+ * Copyright (C)2009, 2011-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -285,7 +285,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		{
 			if(*nelements)
 				for(int i=0; i<*nelements; i++)
-					rrout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
+					vglout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
 						(unsigned long)configs[i], configs[i]? _FBCID(configs[i]):0);
 			prargi(*nelements);
 		}
@@ -356,12 +356,12 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		if(!alreadywarned && fconfig.verbose)
 		{
 			alreadywarned=true;
-			rrout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a true color visual on");
-			rrout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.", fconfig.localdpystring);
-			rrout.println("[VGL]    This is normal if the 3D application is probing for visuals with");
-			rrout.println("[VGL]    certain capabilities, but if the app fails to start, then make sure");
-			rrout.println("[VGL]    that the 3D X server is configured for true color and has accelerated");
-			rrout.println("[VGL]    3D drivers installed.");
+			vglout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a true color visual on");
+			vglout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.", fconfig.localdpystring);
+			vglout.println("[VGL]    This is normal if the 3D application is probing for visuals with");
+			vglout.println("[VGL]    certain capabilities, but if the app fails to start, then make sure");
+			vglout.println("[VGL]    that the 3D X server is configured for true color and has accelerated");
+			vglout.println("[VGL]    3D drivers installed.");
 		}
 		goto done;
 	}
@@ -388,7 +388,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	if((cprev=vish.getpbconfig(dpy, v)) && _FBCID(c) != _FBCID(cprev)
 		&& fconfig.trace)
-		rrout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
+		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
 			v->visualid, _FBCID(cprev), _FBCID(c));
 
 	// Hash the FB config and the visual so that we can look up the FB config
@@ -471,12 +471,12 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
 		if(!newctxisdirect && direct)
 		{
-			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    permissions may be set incorrectly.");
+			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		// Hash the FB config to the context so we can use it in subsequent calls
 		// to glXMake[Context]Current().
@@ -539,12 +539,12 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
 		if(!newctxisdirect && direct)
 		{
-			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    permissions may be set incorrectly.");
+			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		ctxh.add(ctx, config, newctxisdirect);
 	}
@@ -590,12 +590,12 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		int newctxisdirect=_glXIsDirect(_localdpy, ctx);
 		if(!newctxisdirect && direct)
 		{
-			rrout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
-			rrout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
+			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
+			vglout.println("[VGL]    %s is indirect, which may cause performance to suffer.",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    If %s is a local X display, then the framebuffer device",
+			vglout.println("[VGL]    If %s is a local X display, then the framebuffer device",
 				DisplayString(_localdpy));
-			rrout.println("[VGL]    permissions may be set incorrectly.");
+			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
 		ctxh.add(ctx, config, newctxisdirect);
 	}
@@ -1303,7 +1303,7 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 // interposed function.
 
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \
-	retval=(void (*)(void))f;  if(fconfig.trace) rrout.print("[INTERPOSED]");}
+	retval=(void (*)(void))f;  if(fconfig.trace) vglout.print("[INTERPOSED]");}
 
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
@@ -1419,7 +1419,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	}
 	if(!retval)
 	{
-		if(fconfig.trace) rrout.print("[passed through]");
+		if(fconfig.trace) vglout.print("[passed through]");
 		if(__glXGetProcAddressARB) retval=_glXGetProcAddressARB(procName);
 		else if(__glXGetProcAddress) retval=_glXGetProcAddress(procName);
 	}
@@ -1581,7 +1581,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	{
 		if(!config)
 		{
-			rrout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
+			vglout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
 			goto done;
 		}
 		pbw=winh.setpb(dpy, drawable, config);
@@ -1681,7 +1681,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	{
 		if(!config)
 		{
-			rrout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
+			vglout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
 			goto done;
 		}
 		drawpbw=winh.setpb(dpy, draw, config);
@@ -1888,7 +1888,7 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
 	pbwin *pbw=NULL;
-	static rrtimer t;  rrtimer sleept;
+	static Timer t;  Timer sleept;
 	static double err=0.;  static bool first=true;
 
 		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();

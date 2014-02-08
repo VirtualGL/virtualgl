@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2006-2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013 D. R. Commander
+ * Copyright (C)2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,8 +17,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "vglutil.h"
+#include "Timer.h"
 #include "fbx.h"
 #ifndef _WIN32
  extern "C" {
@@ -29,6 +29,8 @@
  #include <sys/time.h>
  #include <sys/resource.h>
 #endif
+
+using namespace vglutil;
 
 
 #define _throw(f, l, m) {  \
@@ -75,7 +77,7 @@ void usage(void)
 int main(int argc, char **argv)
 {
 	int i;  fbx_wh wh;
-	double benchtime=DEFBENCHTIME, elapsed;  rrtimer timer;
+	double benchtime=DEFBENCHTIME, elapsed;  Timer timer;
 	int samplerate=DEFSAMPLERATE, xcoord=-1, ycoord=-1;
 
 	program_name=argv[0];

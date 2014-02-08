@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011 D. R. Commander
+/* Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,10 +14,12 @@
 #include "transplugin.h"
 #include "fakerconfig.h"
 #include <dlfcn.h>
+#include <string.h>
+#include "Error.h"
 
 
 #undef _throw
-#define _throw(m) throw(rrerror("transport plugin", m, -1))
+#define _throw(m) throw(Error("transport plugin", m, -1))
 
 
 static void *loadsym(void *dllhnd, const char *symbol)
@@ -38,7 +40,7 @@ transplugin::transplugin(Display *dpy, Window win, char *name)
 {
 	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
 	const char *err=NULL;
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	dlerror();  // Clear error state
 	char filename[MAXSTR];
 	snprintf(filename, MAXSTR-1, "libvgltrans_%s.so", name);
@@ -63,7 +65,7 @@ transplugin::transplugin(Display *dpy, Window win, char *name)
 
 transplugin::~transplugin(void)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	destroy();
 	if(dllhnd) dlclose(dllhnd);
 }
@@ -71,7 +73,7 @@ transplugin::~transplugin(void)
 
 void transplugin::connect(char *name, int port)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	int ret=_RRTransConnect(handle, name, port);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -79,7 +81,7 @@ void transplugin::connect(char *name, int port)
 
 void transplugin::destroy(void)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	int ret=_RRTransDestroy(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -87,7 +89,7 @@ void transplugin::destroy(void)
 
 int transplugin::ready(void)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	int ret=_RRTransReady(handle);
 	if(ret<0) _throw(_RRTransGetError());
 	return ret;
@@ -96,7 +98,7 @@ int transplugin::ready(void)
 
 void transplugin::synchronize(void)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	int ret=_RRTransSynchronize(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -104,7 +106,7 @@ void transplugin::synchronize(void)
 
 RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
@@ -113,7 +115,7 @@ RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 
 void transplugin::sendframe(RRFrame *frame, bool sync)
 {
-	rrcs::safelock l(mutex);
+	CS::SafeLock l(mutex);
 	int ret=_RRTransSendFrame(handle, frame, sync);
 	if(ret<0) _throw(_RRTransGetError());
 }

@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,8 +21,8 @@
 #define snprintf _snprintf
 #define strdup _strdup
 #endif
-#include "rrtimer.h"
-#include "rrlog.h"
+#include "Timer.h"
+#include "Log.h"
 
 class rrprofiler
 {
@@ -79,7 +80,7 @@ class rrprofiler
 			if(mpixels) {snprintf(&temps[i], 255-i, "- %7.2f Mpixels/sec", mpixels/totaltime);  i=strlen(temps);}
 			if(frames) {snprintf(&temps[i], 255-i, "- %7.2f fps", frames/totaltime);  i=strlen(temps);}
 			if(mbytes) {snprintf(&temps[i], 255-i, "- %7.2f Mbits/sec (%.1f:1)", mbytes*8.0/totaltime, mpixels*3./mbytes);  i=strlen(temps);}
-			rrout.PRINT("%s\n", temps);
+			vglout.PRINT("%s\n", temps);
 			totaltime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;  lastframe=now;
 		}
 	}
@@ -90,7 +91,7 @@ class rrprofiler
 	double interval;
 	double mbytes, mpixels, totaltime, start, frames, lastframe;
 	bool profile;
-	rrtimer timer;
+	Timer timer;
 	bool freestr;
 };
 

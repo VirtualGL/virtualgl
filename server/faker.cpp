@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,9 +18,9 @@
 #include <sys/signal.h>
 #include <string.h>
 #include <math.h>
-#include "rrtimer.h"
-#include "rrthread.h"
-#include "rrmutex.h"
+#include "Timer.h"
+#include "Thread.h"
+#include "Mutex.h"
 #include "fakerconfig.h"
 #define __FAKERHASH_STATICDEF__
 #include "faker-winhash.h"
@@ -39,7 +39,7 @@
 
 
 Display *_localdpy=NULL;
-static rrcs globalmutex;
+static CS globalmutex;
 static int __shutdown=0;
 
 
@@ -123,69 +123,69 @@ _globalcleanup gdt;
 
 
 #define _die(f,m) {if(!isdead())  \
-	rrout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
+	vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
 	__vgl_safeexit(1);}
 
 
 #define TRY() try {
-#define CATCH() } catch(rrerror &e) {_die(e.getMethod(), e.getMessage());}
+#define CATCH() } catch(Error &e) { _die(e.getMethod(), e.getMessage()); }
 
 
 // Tracing stuff
 
 static int __vgltracelevel=0;
 
-#define prargd(a) rrout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
+#define prargd(a) vglout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
 	a? DisplayString(a):"NULL")
-#define prargs(a) rrout.print("%s=%s ", #a, a?a:"NULL")
-#define prargx(a) rrout.print("%s=0x%.8lx ", #a, (unsigned long)a)
-#define prargi(a) rrout.print("%s=%d ", #a, a)
-#define prargf(a) rrout.print("%s=%f ", #a, (double)a)
-#define prargv(a) rrout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a,  \
+#define prargs(a) vglout.print("%s=%s ", #a, a?a:"NULL")
+#define prargx(a) vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
+#define prargi(a) vglout.print("%s=%d ", #a, a)
+#define prargf(a) vglout.print("%s=%f ", #a, (double)a)
+#define prargv(a) vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a,  \
 	a? a->visualid:0)
-#define prargc(a) rrout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
+#define prargc(a) vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
 	a? _FBCID(a):0)
 #define prargal11(a) if(a) {  \
-	rrout.print(#a"=[");  \
+	vglout.print(#a"=[");  \
 	for(int __an=0; a[__an]!=None; __an++) {  \
-		rrout.print("0x%.4x", a[__an]);  \
+		vglout.print("0x%.4x", a[__an]);  \
 		if(a[__an]!=GLX_USE_GL && a[__an]!=GLX_DOUBLEBUFFER  \
 			&& a[__an]!=GLX_STEREO && a[__an]!=GLX_RGBA)  \
-			rrout.print("=0x%.4x", a[++__an]);  \
-		rrout.print(" ");  \
-	}  rrout.print("] ");}
+			vglout.print("=0x%.4x", a[++__an]);  \
+		vglout.print(" ");  \
+	}  vglout.print("] ");}
 #define prargal13(a) if(a) {  \
-	rrout.print(#a"=[");  \
+	vglout.print(#a"=[");  \
 	for(int __an=0; a[__an]!=None; __an+=2) {  \
-		rrout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
-	}  rrout.print("] ");}
+		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
+	}  vglout.print("] ");}
 
 #define opentrace(f)  \
 	double __vgltracetime=0.;  \
 	if(fconfig.trace) {  \
 		if(__vgltracelevel>0) {  \
-			rrout.print("\n[VGL] ");  \
-			for(int __i=0; __i<__vgltracelevel; __i++) rrout.print("  ");  \
+			vglout.print("\n[VGL] ");  \
+			for(int __i=0; __i<__vgltracelevel; __i++) vglout.print("  ");  \
 		}  \
-		else rrout.print("[VGL] ");  \
+		else vglout.print("[VGL] ");  \
 		__vgltracelevel++;  \
-		rrout.print("%s (", #f);  \
+		vglout.print("%s (", #f);  \
 
 #define starttrace()  \
-		__vgltracetime=rrtime();  \
+		__vgltracetime=getTime();  \
 	}
 
 #define stoptrace()  \
 	if(fconfig.trace) {  \
-		__vgltracetime=rrtime()-__vgltracetime;
+		__vgltracetime=getTime()-__vgltracetime;
 
 #define closetrace()  \
-		rrout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
+		vglout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
 		__vgltracelevel--;  \
 		if(__vgltracelevel>0) {  \
-			rrout.print("[VGL] ");  \
+			vglout.print("[VGL] ");  \
 			if(__vgltracelevel>1)  \
-				for(int __i=0; __i<__vgltracelevel-1; __i++) rrout.print("  ");  \
+				for(int __i=0; __i<__vgltracelevel-1; __i++) vglout.print("  ");  \
     }  \
 	}
 
@@ -197,7 +197,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	char temps[256];
 	temps[0]=0;
 	XGetErrorText(dpy, xe->error_code, temps, 255);
-	rrout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
+	vglout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
 		temps, xe->resourceid);
 	return 0;
 }
@@ -209,20 +209,20 @@ void __vgl_fakerinit(void)
 {
 	static int init=0;
 
-	rrcs::safelock l(globalmutex);
+	CS::SafeLock l(globalmutex);
 	if(init) return;
 	init=1;
 
 	fconfig_reloadenv();
-	if(strlen(fconfig.log)>0) rrout.logto(fconfig.log);
+	if(strlen(fconfig.log)>0) vglout.logTo(fconfig.log);
 
 	if(fconfig.verbose)
-		rrout.println("[VGL] %s v%s %d-bit (Build %s)",
+		vglout.println("[VGL] %s v%s %d-bit (Build %s)",
 			__APPNAME, __VERSION, (int)sizeof(size_t)*8, __BUILD);
 
 	if(getenv("VGL_DEBUG"))
 	{
-		rrout.print("[VGL] Attach debugger to process %d ...\n", getpid());
+		vglout.print("[VGL] Attach debugger to process %d ...\n", getpid());
 		fgetc(stdin);
 	}
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
@@ -230,11 +230,11 @@ void __vgl_fakerinit(void)
 	__vgl_loadsymbols();
 	if(!_localdpy)
 	{
-		if(fconfig.verbose) rrout.println("[VGL] Opening local display %s",
+		if(fconfig.verbose) vglout.println("[VGL] Opening local display %s",
 			strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
 		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
-			rrout.print("[VGL] ERROR: Could not open display %s.\n",
+			vglout.print("[VGL] ERROR: Could not open display %s.\n",
 				fconfig.localdpystring);
 			__vgl_safeexit(1);
 		}

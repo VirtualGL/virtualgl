@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,7 +14,7 @@
  */
 
 #include "vgltransreceiver.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 extern Display *maindpy;
@@ -76,7 +76,7 @@ vgltransreceiver::vgltransreceiver(bool dossl, int drawmethod) :
 {
 	char *env=NULL;
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
-		&& !strncmp(env, "1", 1)) fbx_printwarnings(rrout.getfile());
+		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
 	errifnot(_t=new Thread(this));
 }
 
@@ -95,7 +95,7 @@ void vgltransreceiver::listen(unsigned short port)
 {
 	try
 	{
-		errifnot(_listensd=new rrsocket(_dossl));
+		errifnot(_listensd=new Socket(_dossl));
 		_port=_listensd->listen(port);
 	}
 	catch(...)
@@ -109,7 +109,7 @@ void vgltransreceiver::listen(unsigned short port)
 
 void vgltransreceiver::run(void)
 {
-	rrsocket *sd=NULL;  vgltransserver *s=NULL;
+	Socket *sd=NULL;  vgltransserver *s=NULL;
 
 	while(!_deadyet)
 	{
@@ -117,22 +117,22 @@ void vgltransreceiver::run(void)
 		{
 			s=NULL;  sd=NULL;
 			sd=_listensd->accept();  if(_deadyet) break;
-			rrout.println("++ %sConnection from %s.", _dossl?"SSL ":"",
-				sd->remotename());
+			vglout.println("++ %sConnection from %s.", _dossl?"SSL ":"",
+				sd->remoteName());
 			s=new vgltransserver(sd, _drawmethod);
 			continue;
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
 			if(!_deadyet)
 			{
-				rrout.println("%s-- %s", e.getMethod(), e.getMessage());
+				vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 				if(s) delete s;  if(sd) delete sd;
 				continue;
 			}
 		}
 	}
-	rrout.println("Listener exiting ...");
+	vglout.println("Listener exiting ...");
 	_listensdmutex.lock();
 	if(_listensd) {delete _listensd;  _listensd=NULL;}
 	_listensdmutex.unlock();
@@ -166,8 +166,8 @@ void vgltransserver::run(void)
 		char *env=NULL;
 		if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 			&& !strncmp(env, "1", 1))
-			rrout.println("Server version: %d.%d", v.major, v.minor);
-		rrout.flush();
+			vglout.println("Server version: %d.%d", v.major, v.minor);
+		vglout.flush();
 
 		while(1)
 		{
@@ -226,9 +226,9 @@ void vgltransserver::run(void)
 			}
 		}
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		rrout.println("%s-- %s", e.getMethod(), e.getMessage());
+		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 	if(_t) {_t->detach();  delete _t;}
 	delete this;
@@ -238,7 +238,7 @@ void vgltransserver::run(void)
 void vgltransserver::delwindow(clientwin *w)
 {
 	int i, j;
-	rrcs::safelock l(_winmutex);
+	CS::SafeLock l(_winmutex);
 	if(_nwin>0)
 		for(i=0; i<_nwin; i++)
 			if(_win[i]==w)
@@ -253,7 +253,7 @@ void vgltransserver::delwindow(clientwin *w)
 // Register a new window with this server
 clientwin *vgltransserver::addwindow(int dpynum, Window win, bool stereo)
 {
-	rrcs::safelock l(_winmutex);
+	CS::SafeLock l(_winmutex);
 	int winid=_nwin;
 	if(_nwin>0)
 	{
@@ -278,8 +278,8 @@ void vgltransserver::send(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("Error sending data to server.  Server may have disconnected.");
-		rrout.println("   (this is normal if the application exited.)");
+		vglout.println("Error sending data to server.  Server may have disconnected.");
+		vglout.println("   (this is normal if the application exited.)");
 		throw;
 	}
 }
@@ -293,8 +293,8 @@ void vgltransserver::recv(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("Error receiving data from server.  Server may have disconnected.");
-		rrout.println("   (this is normal if the application exited.)");
+		vglout.println("Error receiving data from server.  Server may have disconnected.");
+		vglout.println("   (this is normal if the application exited.)");
 		throw;
 	}
 }

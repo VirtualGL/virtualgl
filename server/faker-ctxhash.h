@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012 D. R. Commander
+ * Copyright (C)2011-2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,7 +44,7 @@ class ctxhash : public _ctxhash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new ctxhash;
 			}
 			return _Instanceptr;
@@ -114,12 +114,12 @@ class ctxhash : public _ctxhash
 		bool compare(GLXContext key1, void *key2, _ctxhashstruct *h) {return false;}
 
 		static ctxhash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 ctxhash *ctxhash::_Instanceptr=NULL;
-rrcs ctxhash::_Instancemutex;
+CS ctxhash::_Instancemutex;
 #endif
 
 #define ctxh (*(ctxhash::instance()))

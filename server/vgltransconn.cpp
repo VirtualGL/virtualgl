@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,9 +14,9 @@
  */
 
 #include "vgltransconn.h"
-#include "rrtimer.h"
+#include "Timer.h"
 #include "fakerconfig.h"
-#include "rrutil.h"
+#include "vglutil.h"
 #ifdef _WIN32
 #include <io.h>
 #define _POSIX_
@@ -61,7 +61,7 @@ void vgltransconn::sendheader(rrframeheader h, bool eof=false)
 					send((char *)&v, sizeof_rrversion);
 				}
 				if(fconfig.verbose)
-					rrout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
+					vglout.println("[VGL] Client version: %d.%d", _v.major, _v.minor);
 			}
 		}
 		if((_v.major<2 || (_v.major==2 && _v.minor<1)) && h.compress!=RRCOMP_JPEG)
@@ -108,14 +108,14 @@ void vgltransconn::run(void)
 {
 	rrframe *lastf=NULL, *f=NULL;
 	long bytes=0;
-	rrtimer t, sleept;  double err=0.;  bool first=true;
+	Timer t, sleept;  double err=0.;  bool first=true;
 	int i;
 
 	try
 	{
 		vgltranscompressor *c[MAXPROCS];  Thread *ct[MAXPROCS];
 		if(fconfig.verbose)
-			rrout.println("[VGL] Using %d / %d CPU's for compression",
+			vglout.println("[VGL] Using %d / %d CPU's for compression",
 				_np, numprocs());
 		for(i=0; i<_np; i++)
 			errifnot(c[i]=new vgltranscompressor(i, this));
@@ -135,13 +135,13 @@ void vgltransconn::run(void)
 			np=_np;  if(f->_h.compress==RRCOMP_YUV) np=1;
 			if(np>1)
 				for(i=1; i<np; i++) {
-					ct[i]->checkerror();  c[i]->go(f, lastf);
+					ct[i]->checkError();  c[i]->go(f, lastf);
 				}
 			c[0]->compresssend(f, lastf);
 			bytes+=c[0]->_bytes;
 			if(np>1)
 				for(i=1; i<np; i++) {
-					c[i]->stop();  ct[i]->checkerror();  c[i]->send();
+					c[i]->stop();  ct[i]->checkError();  c[i]->send();
 					bytes+=c[i]->_bytes;
 				}
 
@@ -182,15 +182,15 @@ void vgltransconn::run(void)
 		if(_np>1) for(i=1; i<_np; i++)
 		{
 			ct[i]->stop();
-			ct[i]->checkerror();
+			ct[i]->checkError();
 			delete ct[i];
 		}
 		for(i=0; i<_np; i++) delete c[i];
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		if(_t) _t->seterror(e);
+		if(_t) _t->setError(e);
 		_ready.signal();
  		throw;
 	}
@@ -202,9 +202,9 @@ rrframe *vgltransconn::getframe(int w, int h, int ps, int flags,
 {
 	rrframe *f=NULL;
 	if(_deadyet) return NULL;
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	{
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	int framei=-1;
 	for(int i=0; i<NFRAMES; i++) if(_frame[i].iscomplete()) framei=i;
 	if(framei<0) _throw("No free buffers in pool");
@@ -222,7 +222,7 @@ rrframe *vgltransconn::getframe(int w, int h, int ps, int flags,
 
 bool vgltransconn::ready(void)
 {
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	return(_q.items()<=0);
 }
 
@@ -241,7 +241,7 @@ static void __vgltransconn_spoilfct(void *f)
 
 void vgltransconn::sendframe(rrframe *f)
 {
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	f->_h.dpynum=_dpynum;
 	_q.spoil((void *)f, __vgltransconn_spoilfct);
 }
@@ -318,7 +318,7 @@ void vgltransconn::send(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("[VGL] ERROR: Could not send data to client.  Client may have disconnected.");
+		vglout.println("[VGL] ERROR: Could not send data to client.  Client may have disconnected.");
 		throw;
 	}
 }
@@ -332,7 +332,7 @@ void vgltransconn::recv(char *buf, int len)
 	}
 	catch(...)
 	{
-		rrout.println("[VGL] ERROR: Could not receive data from client.  Client may have disconnected.");
+		vglout.println("[VGL] ERROR: Could not receive data from client.  Client may have disconnected.");
 		throw;
 	}
 }
@@ -354,16 +354,16 @@ void vgltransconn::connect(char *displayname, unsigned short port)
 		}
 		if(!strlen(servername) || !strcmp(servername, "unix"))
 			{free(servername);  servername=strdup("localhost");}
-		errifnot(_sd=new rrsocket((bool)fconfig.ssl));
+		errifnot(_sd=new Socket((bool)fconfig.ssl));
 		try
 		{
 			_sd->connect(servername, port);
 		}
 		catch(...)
 		{
-			rrout.println("[VGL] ERROR: Could not connect to VGL client.  Make sure that vglclient is");
-			rrout.println("[VGL]    running and that either the DISPLAY or VGL_CLIENT environment");
-			rrout.println("[VGL]    variable points to the machine on which vglclient is running.");
+			vglout.println("[VGL] ERROR: Could not connect to VGL client.  Make sure that vglclient is");
+			vglout.println("[VGL]    running and that either the DISPLAY or VGL_CLIENT environment");
+			vglout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
 		_dosend=true;

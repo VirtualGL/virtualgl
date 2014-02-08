@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -41,7 +41,7 @@ class vishash : public _vishash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new vishash;
 			}
 			return _Instanceptr;
@@ -73,7 +73,7 @@ class vishash : public _vishash
 		{
 			if(!dpy || !vis) _throw("Invalid argument");
 			_vishashstruct *ptr=NULL;
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			ptr=_end;
 			while(ptr!=NULL)
 			{
@@ -105,12 +105,12 @@ class vishash : public _vishash
 		}
 
 		static vishash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 vishash *vishash::_Instanceptr=NULL;
-rrcs vishash::_Instancemutex;
+CS vishash::_Instancemutex;
 #endif
 
 #define vish (*(vishash::instance()))

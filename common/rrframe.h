@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2012 D. R. Commander
+ * Copyright (C)2009-2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,10 +22,12 @@
 #endif
 #include "fbx.h"
 #include "turbojpeg.h"
-#include "rrmutex.h"
+#include "Mutex.h"
 #ifdef USEXV
 #include "fbxv.h"
 #endif
+
+using namespace vglutil;
 
 
 // Flags
@@ -54,7 +56,7 @@ class rrframe
 		void waituntilready(void) { _ready.wait(); }
 		void complete(void) { _complete.signal(); }
 		void waituntilcomplete(void) { _complete.wait(); }
-		bool iscomplete(void) { return !_complete.locked(); }
+		bool iscomplete(void) { return !_complete.isLocked(); }
 		void decompressrgb(rrframe &, int, int, bool);
 		void addlogo(void);
 
@@ -70,10 +72,10 @@ class rrframe
 		void checkheader(rrframeheader &);
 
 		#ifdef XDK
-		static rrcs _Mutex;
+		static CS _Mutex;
 		#endif
-		rrevent _ready;
-		rrevent _complete;
+		Event _ready;
+		Event _complete;
 		friend class rrcompframe;
 		bool _primary;
 };

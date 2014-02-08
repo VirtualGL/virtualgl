@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013 D. R. Commander
+ * Copyright (C)2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,15 +18,17 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "rrthread.h"
-#include "rrutil.h"
-#include "rrtimer.h"
+#include "Thread.h"
+#include "vglutil.h"
+#include "Timer.h"
 #include "fbx.h"
 #ifndef FBXWIN32
  #include <errno.h>
  #include "x11err.h"
 #endif
 #include "bmp.h"
+
+using namespace vglutil;
 
 #ifdef _MSC_VER
 #define snprintf(str, n, format, ...) \
@@ -61,7 +63,7 @@ int dopixmap=0;
 Window win=0;
 #endif
 fbx_wh wh;
-rrtimer timer, timer2;
+Timer timer, timer2;
 #ifdef FBXWIN32
 #define fg() SetForegroundWindow(wh)
 #else
@@ -231,7 +233,7 @@ void nativewrite(int useshm)
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)i*(double)(width*height)/((double)1000000.*rbtime));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	offset=i-1;
 
@@ -271,18 +273,18 @@ void nativeread(int useshm)
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)i*(double)(width*height)/((double)1000000.*rbtime));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	fbx_term(&s);
 }
 
 
 // This serves as a unit test for the FBX library
-class writethread : public Runnable
+class WriteThread : public Runnable
 {
 	public:
-		writethread(int _myrank, int _iter, int _useshm) : myrank(_myrank),
-			iter(_iter), useshm(_useshm) {}
+		WriteThread(int myrank_, int iter_, int useshm_) : myrank(myrank_),
+			iter(iter_), useshm(useshm_) {}
 
 		void run(void)
 		{
@@ -292,10 +294,10 @@ class writethread : public Runnable
 			try {
 
 			int mywidth, myheight, myx=0, myy=0;
-			if(myrank<2) {mywidth=width/2;  myx=0;}
-			else {mywidth=width-width/2;  myx=width/2;}
-			if(myrank%2==0) {myheight=height/2;  myy=0;}
-			else {myheight=height-height/2;  myy=height/2;}
+			if(myrank<2) { mywidth=width/2;  myx=0; }
+			else { mywidth=width-width/2;  myx=width/2; }
+			if(myrank%2==0) { myheight=height/2;  myy=0; }
+			else { myheight=height-height/2;  myy=height/2; }
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
@@ -303,7 +305,7 @@ class writethread : public Runnable
 			for (i=0; i<iter; i++)
 				fbx(fbx_write(&stressfb, 0, 0, myx, myy, mywidth, myheight));
 
-			} catch(...) {fbx_term(&stressfb);  throw;}
+			} catch(...) { fbx_term(&stressfb);  throw; }
 		}
 
 	private:
@@ -311,11 +313,11 @@ class writethread : public Runnable
 };
 
 
-class readthread : public Runnable
+class ReadThread : public Runnable
 {
 	public:
-		readthread(int _myrank, int _iter, int _useshm) : myrank(_myrank),
-			iter(_iter), useshm(_useshm) {}
+		ReadThread(int myrank_, int iter_, int useshm_) : myrank(myrank_),
+			iter(iter_), useshm(useshm_) {}
 
 		void run(void)
 		{
@@ -325,10 +327,10 @@ class readthread : public Runnable
 			try {
 
 			int i, mywidth, myheight, myx=0, myy=0;
-			if(myrank<2) {mywidth=width/2;  myx=0;}
-			else {mywidth=width-width/2;  myx=width/2;}
-			if(myrank%2==0) {myheight=height/2;  myy=0;}
-			else {myheight=height-height/2;  myy=height/2;}
+			if(myrank<2) { mywidth=width/2;  myx=0; }
+			else { mywidth=width-width/2;  myx=width/2; }
+			if(myrank%2==0) { myheight=height/2;  myy=0; }
+			else { myheight=height-height/2;  myy=height/2; }
 			fbx(fbx_init(&stressfb, wh, mywidth, myheight, useshm));
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			int ps=fbx_ps[stressfb.format];
@@ -339,7 +341,7 @@ class readthread : public Runnable
 				(unsigned char *)stressfb.bits, 0))
 				_throw("ERROR: Bogus data read back.");
 
-			} catch(...) {fbx_term(&stressfb);  throw;}
+			} catch(...) { fbx_term(&stressfb);  throw; }
 		}
 
 	private:
@@ -364,22 +366,22 @@ void nativestress(int useshm)
 	{
 		n+=n;
 		timer.start();
-		writethread *wt[4];
+		WriteThread *wt[4];
 		for(i=0; i<4; i++)
 		{
-			wt[i]=new writethread(i, n, useshm);
+			wt[i]=new WriteThread(i, n, useshm);
 			t[i]=new Thread(wt[i]);
 			t[i]->start();
 		}
 		for(i=0; i<4; i++) t[i]->stop();
-		for(i=0; i<4; i++) t[i]->checkerror();
+		for(i=0; i<4; i++) t[i]->checkError();
 		for(i=0; i<4; i++) {delete t[i];  delete wt[i];}
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	try {
 
@@ -392,22 +394,22 @@ void nativestress(int useshm)
 	{
 		n+=n;
 		timer.start();
-		readthread *rt[4];
+		ReadThread *rt[4];
 		for(i=0; i<4; i++)
 		{
-			rt[i]=new readthread(i, n, useshm);
+			rt[i]=new ReadThread(i, n, useshm);
 			t[i]=new Thread(rt[i]);
 			t[i]->start();
 		}
 		for(i=0; i<4; i++) t[i]->stop();
-		for(i=0; i<4; i++) t[i]->checkerror();
+		for(i=0; i<4; i++) t[i]->checkError();
 		for(i=0; i<4; i++) {delete t[i];  delete rt[i];}
 		rbtime=timer.elapsed();
 	} while (rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	return;
 }
@@ -490,7 +492,7 @@ void event_loop(void)
 	fbx_struct fb[10];
 	int frame=0, inc=-1, first=1;
 	unsigned long frames=0;
-	rrtimer timer;
+	Timer timer;
 	double elapsed, mpixels=0.;
 	char temps[256];
 
@@ -784,7 +786,7 @@ int main(int argc, char **argv)
 		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocAll);
 		swa.border_pixel=0;
 		swa.event_mask=0;
-    XColor xc[32];  int i;
+		XColor xc[32];  int i;
 		errifnot(v->colormap_size==256);
 		for(i=0; i<32; i++)
 		{
@@ -798,16 +800,16 @@ int main(int argc, char **argv)
 		if(dopixmap)
 		{
 			errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
-				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-				&swa));
+				v->depth, InputOutput, v->visual,
+				CWBorderPixel|CWColormap|CWEventMask, &swa));
 			errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
 			wh.v=v->visual;
 		}
 		else
 		{
 			errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-				v->depth, InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask,
-				&swa));
+				v->depth, InputOutput, v->visual,
+				CWBorderPixel|CWColormap|CWEventMask, &swa));
 			errifnot(XMapRaised(wh.dpy, wh.d));
 		}
 		XSync(wh.dpy, False);
@@ -827,5 +829,5 @@ int main(int argc, char **argv)
 
 	#endif
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	}	catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 }

@@ -17,7 +17,7 @@
 #ifdef XDK
 
 #define NOREDIRECT
-#include "rrerror.h"
+#include "Error.h"
 #include <GL/glx.h>
 
 #ifdef _MSC_VER

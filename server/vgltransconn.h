@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011 D. R. Commander
+ * Copyright (C)2010-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,15 +16,17 @@
 #ifndef __VGLTRANSCONN_H__
 #define __VGLTRANSCONN_H__
 
-#include "rrsocket.h"
-#include "rrthread.h"
+#include "Socket.h"
+#include "Thread.h"
 #include "rr.h"
 #include "rrframe.h"
-#include "genericQ.h"
+#include "GenericQ.h"
 #include "rrprofiler.h"
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
+
+using namespace vglutil;
 
 
 class vgltransconn : public Runnable
@@ -56,11 +58,11 @@ class vgltransconn : public Runnable
 
 	private:
 
-		rrsocket *_sd;
+		Socket *_sd;
 		static const int NFRAMES=4;
-		rrcs _mutex;  rrframe _frame[NFRAMES];
-		rrevent _ready;
-		genericQ _q;
+		CS _mutex;  rrframe _frame[NFRAMES];
+		Event _ready;
+		GenericQ _q;
 		Thread *_t;  bool _deadyet;
 		rrprofiler _prof_total;
 		int _dpynum;
@@ -172,8 +174,8 @@ class vgltranscompressor : public Runnable
 		int _storedframes;  rrcompframe **_frame;
 		rrframe *_b, *_lastb;
 		int _myrank, _np;
-		rrevent _ready, _complete;  bool _deadyet;
-		rrcs _mutex;
+		Event _ready, _complete;  bool _deadyet;
+		CS _mutex;
 		rrprofiler _prof_comp;
 		vgltransconn *_parent;
 };

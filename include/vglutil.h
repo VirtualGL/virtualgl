@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010 D. R. Commander
+ * Copyright (C)2010, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -13,8 +13,8 @@
  * wxWindows Library License for more details.
  */
 
-#ifndef __RRUTIL_H__
-#define __RRUTIL_H__
+#ifndef __VGLUTIL_H__
+#define __VGLUTIL_H__
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -79,4 +79,4 @@ static __inline int littleendian(void)
 	else return 0;
 }
 
-#endif /* __RRUTIL_H__ */
+#endif /* __VGLUTIL_H__ */

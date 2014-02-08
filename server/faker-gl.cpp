@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2012 D. R. Commander
+ * Copyright (C)2009, 2011-2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -51,7 +51,7 @@ void glFinish(void)
 {
 	TRY();
 
-		if(fconfig.trace) rrout.print("[VGL] glFinish()\n");
+		if(fconfig.trace) vglout.print("[VGL] glFinish()\n");
 
 	_glFinish();
 	fconfig.flushdelay=0.;
@@ -65,13 +65,13 @@ void glFlush(void)
 	static double lasttime=-1.;  double thistime;
 	TRY();
 
-		if(fconfig.trace) rrout.print("[VGL] glFlush()\n");
+		if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
 
 	_glFlush();
-	if(lasttime<0.) lasttime=rrtime();
+	if(lasttime<0.) lasttime=getTime();
 	else
 	{
-		thistime=rrtime()-lasttime;
+		thistime=getTime()-lasttime;
 		if(thistime-lasttime<0.01) fconfig.flushdelay=0.01;
 		else fconfig.flushdelay=0.;
 	}
@@ -86,7 +86,7 @@ void glXWaitGL(void)
 {
 	TRY();
 
-		if(fconfig.trace) rrout.print("[VGL] glXWaitGL()\n");
+		if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
 
 	if(ctxh.overlaycurrent()) {_glXWaitGL();  return;}
 

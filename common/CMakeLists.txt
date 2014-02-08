@@ -5,7 +5,7 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(rrframe STATIC rrframe.cpp)
-target_link_libraries(rrframe rrutil ${TJPEG_LIBRARY})
+target_link_libraries(rrframe vglutil ${TJPEG_LIBRARY})
 
 
 #

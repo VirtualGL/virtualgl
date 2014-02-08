@@ -1,4 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,19 +13,21 @@
  */
 
 #define __LOCALSYM__
-#include "rrmutex.h"
+#include "Mutex.h"
 #include "xdk-sym.h"
+
+using namespace vglutil;
 
 
 static HMODULE hmod=0;
-static rrcs globalmutex;
+static CS globalmutex;
 
 
 #define lsym(s) tryw32(__##s=(_##s##Type)GetProcAddress(hmod, #s));
 
 void __vgl_loadsymbols(void)
 {
-	rrcs::safelock l(globalmutex);
+	CS::SafeLock l(globalmutex);
 	if(hmod) return;
 	tryw32(hmod=LoadLibrary("hclglx.dll"));
 	lsym(glXCreateContext)
@@ -47,6 +50,6 @@ void __vgl_loadsymbols(void)
 
 void __vgl_unloadsymbols(void)
 {
-	rrcs::safelock l(globalmutex);
+	CS::SafeLock l(globalmutex);
 	if(hmod) {FreeLibrary(hmod);  hmod=0;}
 }

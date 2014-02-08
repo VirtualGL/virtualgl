@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,10 +16,12 @@
 #ifndef __XVTRANS_H__
 #define __XVTRANS_H__
 
-#include "rrthread.h"
+#include "Thread.h"
 #include "rrframe.h"
-#include "genericQ.h"
+#include "GenericQ.h"
 #include "rrprofiler.h"
+
+using namespace vglutil;
 
 
 class xvtrans : public Runnable
@@ -47,9 +49,9 @@ class xvtrans : public Runnable
 	private:
 
 		static const int NFRAMES=3;
-		rrcs _mutex;  rrxvframe *_frame[NFRAMES];
-		rrevent _ready;
-		genericQ _q;
+		CS _mutex;  rrxvframe *_frame[NFRAMES];
+		Event _ready;
+		GenericQ _q;
 		Thread *_t;  bool _deadyet;
 		rrprofiler _prof_xv, _prof_total;
 };

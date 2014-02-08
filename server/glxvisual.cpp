@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,10 +19,12 @@
 #include "glxvisual.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "rrerror.h"
+#include "Error.h"
 #include "fakerconfig.h"
-#include "rrmutex.h"
+#include "Mutex.h"
 #include "faker-sym.h"
+
+using namespace vglutil;
 
 
 extern Display *_localdpy;
@@ -38,7 +40,7 @@ struct _visattrib
 static Display *_vadpy=NULL;
 static int _vascreen=-1, _vaentries=0;
 bool _vahasgcv=false;
-static rrcs _vamutex;
+static CS _vamutex;
 static struct _visattrib *_va;
 
 
@@ -51,7 +53,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 
 	try {
 
-	rrcs::safelock l(_vamutex);
+	CS::SafeLock l(_vamutex);
 
 	if(dpy==_vadpy && screen==_vascreen) return;
 	if(fconfig.probeglx

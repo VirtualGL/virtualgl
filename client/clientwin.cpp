@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011 D. R. Commander
+ * Copyright (C)2009, 2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,7 +14,7 @@
  */
 
 #include "clientwin.h"
-#include "rrerror.h"
+#include "Error.h"
 #include "rrprofiler.h"
 #include "rrglframe.h"
 
@@ -27,7 +27,7 @@ clientwin::clientwin(int dpynum, Window window, int drawmethod, bool stereo) :
 	_deadyet(false), _t(NULL), _stereo(stereo)
 {
 	if(dpynum<0 || dpynum>65535 || !window)
-		throw(rrerror("clientwin::clientwin()", "Invalid argument"));
+		throw(Error("clientwin::clientwin()", "Invalid argument"));
 	_dpynum=dpynum;  _window=window;
 
 	#ifdef USEXV
@@ -81,7 +81,7 @@ void clientwin::initgl(void)
 	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
 	#endif
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_drawmethod==RR_DRAWOGL)
 	{
 		try
@@ -89,13 +89,13 @@ void clientwin::initgl(void)
 			fb=new rrglframe(dpystr, _window);
 			if(!fb) _throw("Could not allocate class instance");
 		}
-		catch(rrerror &e)
+		catch(Error &e)
 		{
-			rrout.println("OpenGL error-- %s\nUsing X11 drawing instead",
+			vglout.println("OpenGL error-- %s\nUsing X11 drawing instead",
 				e.getMessage());
 			if(fb) {delete fb;  fb=NULL;}
 			_drawmethod=RR_DRAWX11;
-			rrout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
+			vglout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
 			_stereo=false;
 			return;
 		}
@@ -121,7 +121,7 @@ void clientwin::initx11(void)
 	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
 	#endif
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_drawmethod==RR_DRAWX11)
 	{
 		try
@@ -156,7 +156,7 @@ int clientwin::match(int dpynum, Window window)
 rrframe *clientwin::getframe(bool usexv)
 {
 	rrframe *f=NULL;
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	_cfmutex.lock();
 	#ifdef USEXV
 	if(usexv)
@@ -176,14 +176,14 @@ rrframe *clientwin::getframe(bool usexv)
 	_cfi=(_cfi+1)%NFRAMES;
 	_cfmutex.unlock();
 	f->waituntilcomplete();
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	return f;
 }
 
 
 void clientwin::drawframe(rrframe *f)
 {
-	if(_t) _t->checkerror();
+	if(_t) _t->checkError();
 	if(!f->_isxv)
 	{
 		rrcompframe *c=(rrcompframe *)f;
@@ -219,9 +219,9 @@ void clientwin::run(void)
 		{
 			void *ftemp=NULL;
 			_q.get(&ftemp);  f=(rrframe *)ftemp;  if(_deadyet) break;
-			if(!f) throw(rrerror("clientwin::run()",
+			if(!f) throw(Error("clientwin::run()",
 				"Invalid image received from queue"));
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			#ifdef USEXV
 			if(f->_isxv)
 			{
@@ -265,9 +265,9 @@ void clientwin::run(void)
 		}
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		if(_t) _t->seterror(e);  if(f) f->complete();
+		if(_t) _t->setError(e);  if(f) f->complete();
 		throw;
 	}
 }

@@ -19,7 +19,7 @@ else()
 endif()
 
 add_executable(vglclient vglclient.cpp clientwin.cpp vgltransreceiver.cpp)
-target_link_libraries(vglclient rrframe ${FBXLIB} rrglframe rrsocket)
+target_link_libraries(vglclient rrframe ${FBXLIB} rrglframe vglsocket)
 install(TARGETS vglclient DESTINATION ${VGL_BINDIR})
 
 if(WIN32)

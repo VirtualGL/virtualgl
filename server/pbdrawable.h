@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,9 +17,11 @@
 #define __PBDRAWABLE_H__
 
 #include "faker-sym.h"
-#include "rrmutex.h"
+#include "Mutex.h"
 #include "x11trans.h"
 #include "fbx.h"
+
+using namespace vglutil;
 
 
 // A container class for the actual off-screen drawable
@@ -83,7 +85,7 @@ class pbdrawable
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
 
-		rrcs _mutex;
+		CS _mutex;
 		Display *_dpy;  Drawable _drawable;
 		glxdrawable *_pb;  GLXFBConfig _config;
 		GLXContext _ctx;

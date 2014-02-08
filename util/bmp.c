@@ -24,7 +24,7 @@
 #else
  #include <unistd.h>
 #endif
-#include "rrutil.h"
+#include "vglutil.h"
 #include "bmp.h"
 
 

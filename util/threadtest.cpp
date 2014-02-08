@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,90 +15,93 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "rrutil.h"
-#include "rrthread.h"
-#include "rrmutex.h"
+#include "vglutil.h"
+#include "Thread.h"
+#include "Mutex.h"
+
+using namespace vglutil;
 
 
-rrevent event;
-rrsem sem;
+Event event;
+Semaphore sem;
 
 
-class testthread : public Runnable
+class TestThread : public Runnable
 {
 	public:
 
-		testthread(int myrank) : _myrank(myrank) {}
+		TestThread(int myRank_) : myRank(myRank_) {}
 
 		void run(void)
 		{
-			try {
-			switch(_myrank)
+			try
 			{
-				case 1:
-					printf("\nGreetings from thread %d (ID %lu)\n", _myrank, _threadId);
-					printf("Unlocking thread 2\n");
-					fflush(stdout);
-					sleep(2);
-					event.signal();
-					break;
-				case 2:
-					event.wait();
-					printf("\nThread 2 unlocked\n");
-					printf("Greetings from thread %d (ID %lu)\n", _myrank, _threadId);
-					fflush(stdout);
-					event.signal();
-					sleep(2);
-					printf("\n2: Releasing two threads.\n");
-					fflush(stdout);
-					sem.post();  sem.post();
-					sleep(2);
-					printf("\n2: Releasing a third thread.\n");
-					fflush(stdout);
-					sem.post();
-					break;
-				case 3:  case 4:  case 5:
-					sem.wait();
-					printf("Greetings from thread %d (ID %lu)\n", _myrank, _threadId);
-					fflush(stdout);
-					break;
+				switch(myRank)
+				{
+					case 1:
+						printf("\nGreetings from thread %d (ID %lu)\n", myRank, threadID);
+						printf("Unlocking thread 2\n");
+						fflush(stdout);
+						sleep(2);
+						event.signal();
+						break;
+					case 2:
+						event.wait();
+						printf("\nThread 2 unlocked\n");
+						printf("Greetings from thread %d (ID %lu)\n", myRank, threadID);
+						fflush(stdout);
+						event.signal();
+						sleep(2);
+						printf("\n2: Releasing two threads.\n");
+						fflush(stdout);
+						sem.post();  sem.post();
+						sleep(2);
+						printf("\n2: Releasing a third thread.\n");
+						fflush(stdout);
+						sem.post();
+						break;
+					case 3:  case 4:  case 5:
+						sem.wait();
+						printf("Greetings from thread %d (ID %lu)\n", myRank, threadID);
+						fflush(stdout);
+						break;
+				}
 			}
-			}
-			catch(rrerror &e)
+			catch(Error &e)
 			{
-				printf("Error in %s (Thread %d):\n%s\n", e.getMethod(), _myrank, e.getMessage());
+				printf("Error in %s (Thread %d):\n%s\n", e.getMethod(), myRank,
+					e.getMessage());
 			}
-			if(_myrank==5) _throw("Error test");
+			if(myRank==5) _throw("Error test");
 		}
 
 	private:
 
-		int _myrank;
+		int myRank;
 };
 
 
 int main(void)
 {
-	testthread *th[5];  Thread *t[5];  int i;
+	TestThread *th[5];  Thread *t[5];  int i;
 
-	try {
-
-	printf("Number of CPU's in this system:  %d\n", numprocs());
-	printf("Word size = %d-bit\n", (int)sizeof(long*)*8);
-
-	event.wait();
-
-	for(i=0; i<5; i++)
+	try
 	{
-		th[i]=new testthread(i+1);
-		t[i]=new Thread(th[i]);
-		t[i]->start();
-	}
-	for(i=0; i<5; i++) t[i]->stop();
-	for(i=0; i<5; i++) t[i]->checkerror();
+		printf("Number of CPU's in this system:  %d\n", numprocs());
+		printf("Word size = %d-bit\n", (int)sizeof(long*)*8);
 
+		event.wait();
+
+		for(i=0; i<5; i++)
+		{
+			th[i]=new TestThread(i+1);
+			t[i]=new Thread(th[i]);
+			t[i]->start();
+		}
+		for(i=0; i<5; i++) t[i]->stop();
+		for(i=0; i<5; i++) t[i]->checkError();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("Error in %s:\n%s\n", e.getMethod(), e.getMessage());
 	}

@@ -4,7 +4,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 add_executable(imgdiff imgdiff.c)
-target_link_libraries(imgdiff rrutil)
+target_link_libraries(imgdiff vglutil)
 if(UNIX)
 	target_link_libraries(imgdiff m)
 endif()

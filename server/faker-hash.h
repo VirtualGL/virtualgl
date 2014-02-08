@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,7 +17,9 @@
 
 #include <pthread.h>
 
-#include "rrmutex.h"
+#include "Mutex.h"
+
+using namespace vglutil;
 
 
 typedef struct __hashclassstruct
@@ -36,7 +38,7 @@ class _hashclass
 
 		void killhash(void)
 		{
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			while(_start!=NULL) killentry(_start);
 		}
 
@@ -45,7 +47,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(value) ptr->value=value;
@@ -66,7 +68,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(!ptr->value) ptr->value=attach(key1, key2);
@@ -79,7 +81,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(key1, key2))!=NULL)
 			{
 				if(useref && ptr->refcount>0) ptr->refcount--;
@@ -106,7 +108,7 @@ class _hashclass
 		{
 			_hashclassstruct *ptr=NULL;
 //			if(!key1) _throw("Invalid argument");
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			ptr=_start;
 			while(ptr!=NULL)
 			{
@@ -121,7 +123,7 @@ class _hashclass
 
 		void killentry(_hashclassstruct *ptr)
 		{
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if(ptr->prev) ptr->prev->next=ptr->next;
 			if(ptr->next) ptr->next->prev=ptr->prev;
 			if(ptr==_start) _start=ptr->next;
@@ -137,5 +139,5 @@ class _hashclass
 		virtual void detach(_hashclassstruct *h)=0;
 		virtual bool compare(_hashkeytype1, _hashkeytype2, _hashclassstruct *h)=0;
 		_hashclassstruct *_start, *_end;
-		rrcs _mutex;
+		CS _mutex;
 };

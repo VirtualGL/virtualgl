@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -41,7 +42,7 @@ class glxdhash : public _glxdhash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new glxdhash;
 			}
 			return _Instanceptr;
@@ -84,12 +85,12 @@ class glxdhash : public _glxdhash
 		void detach(_glxdhashstruct *h) {}
 
 		static glxdhash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 glxdhash *glxdhash::_Instanceptr=NULL;
-rrcs glxdhash::_Instancemutex;
+CS glxdhash::_Instancemutex;
 #endif
 
 #define glxdh (*(glxdhash::instance()))

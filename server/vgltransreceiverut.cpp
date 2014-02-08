@@ -1,5 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010 D. R. Commander
+ * Copyright (C)2009-2010, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -14,7 +14,7 @@
 
 #include "vgltransconn.h"
 #include "fakerconfig.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 #define WIDTH 301
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 		}
 
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
 		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
 	}

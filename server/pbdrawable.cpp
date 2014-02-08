@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,7 +21,7 @@
 #include "glext-vgl.h"
 #include "tempctx.h"
 #include "fakerconfig.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 extern Display *_localdpy;
@@ -37,7 +37,7 @@ static int glerror(void)
 	while(i!=GL_NO_ERROR)
 	{
 		ret=1;
-		rrout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
+		vglout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
 		i=glGetError();
 	}
 	return ret;
@@ -210,14 +210,14 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	static bool alreadyprinted=false;
 	if(!config || w<1 || h<1) _throw("Invalid argument");
 
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_pb && _pb->width()==w && _pb->height()==h
 		&& _FBCID(_pb->config())==_FBCID(config)) return 0;
 	if(fconfig.drawable==RRDRAWABLE_PIXMAP)
 	{
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using Pixmaps for rendering");
+			vglout.println("[VGL] Using Pixmaps for rendering");
 			alreadyprinted=true;
 		}
 		_pb=new glxdrawable(w, h, 0, config, NULL);
@@ -226,7 +226,7 @@ int pbdrawable::init(int w, int h, GLXFBConfig config)
 	{
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using Pbuffers for rendering");
+			vglout.println("[VGL] Using Pbuffers for rendering");
 			alreadyprinted=true;
 		}
 		_pb=new glxdrawable(w, h, config);
@@ -253,7 +253,7 @@ void pbdrawable::setdirect(Bool direct)
 
 void pbdrawable::clear(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_pb) _pb->clear();
 }
 
@@ -263,7 +263,7 @@ void pbdrawable::clear(void)
 GLXDrawable pbdrawable::getglxdrawable(void)
 {
 	GLXDrawable retval=0;
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	retval=_pb->drawable();
 	return retval;
 }
@@ -362,7 +362,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		if(!pbo) _throw("Could not generate pixel buffer object");
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using pixel buffer objects for readback (%s --> %s)",
+			vglout.println("[VGL] Using pixel buffer objects for readback (%s --> %s)",
 				formatString(_pb->format()), formatString(format));
 			alreadyprinted=true;
 		}
@@ -382,7 +382,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	{
 		if(!alreadyprinted && fconfig.verbose)
 		{
-			rrout.println("[VGL] Using synchronous readback (%s --> %s)",
+			vglout.println("[VGL] Using synchronous readback (%s --> %s)",
 				formatString(_pb->format()), formatString(format));
 			alreadyprinted=true;
 		}
@@ -391,12 +391,12 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 	_prof_rb.startframe();
-	if(usepbo) t0=rrtime();
+	if(usepbo) t0=getTime();
 	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, usepbo? NULL:bits);
 
 	if(usepbo)
 	{
-		tRead=rrtime()-t0;
+		tRead=getTime()-t0;
 		#ifdef GL_VERSION_1_5
 		unsigned char *pbobits=NULL;
 		pbobits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
@@ -407,27 +407,27 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 			_throw("Could not unmap pixel buffer object");
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		#endif
-		tTotal=rrtime()-t0;
+		tTotal=getTime()-t0;
 		numFrames++;
 		if(tRead/tTotal>0.5 && numFrames<=10)
 		{
 			numSync++;
 			if(numSync>=10 && !alreadywarned && fconfig.verbose)
 			{
-				rrout.println("[VGL] NOTICE: PBO readback is not behaving asynchronously.  Disabling PBOs.");
+				vglout.println("[VGL] NOTICE: PBO readback is not behaving asynchronously.  Disabling PBOs.");
 				if(format!=_pb->format())
 				{
-					rrout.println("[VGL]    This could be due to a mismatch between the readback pixel format");
-					rrout.println("[VGL]    (%s) and the Pbuffer pixel format (%s).",
+					vglout.println("[VGL]    This could be due to a mismatch between the readback pixel format");
+					vglout.println("[VGL]    (%s) and the Pbuffer pixel format (%s).",
 						formatString(format), formatString(_pb->format()));
 					if(((_pb->format()==GL_BGRA && format==GL_BGR)
 						|| (_pb->format()==GL_RGBA && format==GL_RGB))
 						&& fconfig.forcealpha)
-						rrout.println("[VGL]    Try setting VGL_FORCEALPHA=0.");
+						vglout.println("[VGL]    Try setting VGL_FORCEALPHA=0.");
 					else if(((_pb->format()==GL_BGR && format==GL_BGRA)
 						|| (_pb->format()==GL_RGB && format==GL_RGBA))
 						&& !fconfig.forcealpha)
-						rrout.println("[VGL]    Try setting VGL_FORCEALPHA=1.");
+						vglout.println("[VGL]    Try setting VGL_FORCEALPHA=1.");
 				}
 				alreadywarned=true;
 			}

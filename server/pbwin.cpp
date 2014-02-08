@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,7 +19,7 @@
 #include <string.h>
 #include "fakerconfig.h"
 #include "glxvisual.h"
-#include "rrutil.h"
+#include "vglutil.h"
 
 
 #define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
@@ -73,7 +73,7 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 			_throw("Could not clone X display connection");
 		XSelectInput(_eventdpy, win, StructureNotifyMask);
 		if(fconfig.verbose)
-			rrout.println("[VGL] Selecting structure notify events in window 0x%.8x",
+			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
 				win);
 	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) _truecolor=false;
@@ -94,10 +94,10 @@ pbwin::~pbwin(void)
 	if(_plugin)
 	{
 		try {delete _plugin;}
-		catch (rrerror &e)
+		catch(Error &e)
 		{
 			if(fconfig.verbose)
-				rrout.println("[VGL] WARNING: %s", e.getMessage());
+				vglout.println("[VGL] WARNING: %s", e.getMessage());
 		}
 	}
 	if(_eventdpy) {_XCloseDisplay(_eventdpy);  _eventdpy=NULL;}
@@ -107,7 +107,7 @@ pbwin::~pbwin(void)
 
 int pbwin::init(int w, int h, GLXFBConfig config)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::init(w, h, config);
 }
@@ -118,7 +118,7 @@ int pbwin::init(int w, int h, GLXFBConfig config)
 
 void pbwin::resize(int w, int h)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(w==0 && _pb) w=_pb->width();
 	if(h==0 && _pb) h=_pb->height();
@@ -136,7 +136,7 @@ void pbwin::resize(int w, int h)
 
 void pbwin::checkconfig(GLXFBConfig config)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_FBCID(config)!=_FBCID(_config))
 	{
@@ -147,7 +147,7 @@ void pbwin::checkconfig(GLXFBConfig config)
 
 void pbwin::clear(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	pbdrawable::clear();
 }
@@ -155,7 +155,7 @@ void pbwin::clear(void)
 
 void pbwin::cleanup(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_oldpb) {delete _oldpb;  _oldpb=NULL;}
 }
@@ -174,7 +174,7 @@ void pbwin::initfromwindow(GLXFBConfig config)
 
 GLXDrawable pbwin::getglxdrawable(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	return pbdrawable::getglxdrawable();
 }
@@ -202,7 +202,7 @@ void pbwin::checkresize(void)
 GLXDrawable pbwin::updatedrawable(void)
 {
 	GLXDrawable retval=0;
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_newconfig)
 	{
@@ -223,7 +223,7 @@ GLXDrawable pbwin::updatedrawable(void)
 
 void pbwin::swapbuffers(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 	if(_pb) _pb->swap();
 }
@@ -231,7 +231,7 @@ void pbwin::swapbuffers(void)
 
 void pbwin::wmdelete(void)
 {
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	_wmdelete=true;
 }
 
@@ -243,7 +243,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 
 	if(fconfig.readback==RRREAD_NONE) return;
 
-	rrcs::safelock l(_mutex);
+	CS::SafeLock l(_mutex);
 	if(_wmdelete) _throw("Window has been deleted by window manager");
 
 	_dirty=false;
@@ -260,8 +260,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message3=false;
 			if(!message3)
 			{
-				rrout.println("[VGL] NOTICE: Quad-buffered stereo cannot be used with YUV encoding.");
-				rrout.println("[VGL]    Using anaglyphic stereo instead.");
+				vglout.println("[VGL] NOTICE: Quad-buffered stereo cannot be used with YUV encoding.");
+				vglout.println("[VGL]    Using anaglyphic stereo instead.");
 				message3=true;
 			}
 			stereomode=RRSTEREO_REDCYAN;				
@@ -272,8 +272,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message=false;
 			if(!message)
 			{
-				rrout.println("[VGL] NOTICE: Quad-buffered stereo requires the VGL Transport.");
-				rrout.println("[VGL]    Using anaglyphic stereo instead.");
+				vglout.println("[VGL] NOTICE: Quad-buffered stereo requires the VGL Transport.");
+				vglout.println("[VGL]    Using anaglyphic stereo instead.");
 				message=true;
 			}
 			stereomode=RRSTEREO_REDCYAN;
@@ -284,8 +284,8 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 			static bool message2=false;
 			if(!message2)
 			{
-				rrout.println("[VGL] NOTICE: Cannot use quad-buffered stereo because no stereo visuals are");
-				rrout.println("[VGL]    available on the 2D X server.  Using anaglyphic stereo instead.");
+				vglout.println("[VGL] NOTICE: Cannot use quad-buffered stereo because no stereo visuals are");
+				vglout.println("[VGL]    available on the 2D X server.  Using anaglyphic stereo instead.");
 				message2=true;
 			}
 			stereomode=RRSTEREO_REDCYAN;				
@@ -379,8 +379,8 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 		static bool message=false;
 		if(!message)
 		{
-			rrout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
-			rrout.println("[VGL]    Using anaglyphic stereo instead.");
+			vglout.println("[VGL] NOTICE: Quad-buffered stereo is not supported by the plugin.");
+			vglout.println("[VGL]    Using anaglyphic stereo instead.");
 			message=true;
 		}
 		stereomode=RRSTEREO_REDCYAN;				
@@ -651,7 +651,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		{
 			first=false;
 			if(fconfig.verbose)
-				rrout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
+				vglout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
 					fconfig.gamma);
 		}
 		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*h]);

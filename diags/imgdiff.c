@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "rrutil.h"
+#include "vglutil.h"
 #include "bmp.h"
 
 

@@ -40,7 +40,7 @@ if(MAPFLAG)
 else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
-target_link_libraries(rrfaker rrframe ${FBXFAKERLIB} rrsocket m
+target_link_libraries(rrfaker rrframe ${FBXFAKERLIB} vglsocket m
 	${OPENGL_gl_LIBRARY} ${LIBDL})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
@@ -67,7 +67,7 @@ set(HEADERS ../common/rr.h rrtransport.h)
 install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
 
 add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
-target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static pthread rrutil)
+target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static vglutil)
 if(VGL_USEXV)
 	target_link_libraries(vglconfig ${X11_Xv_LIB})
 endif()
@@ -105,12 +105,12 @@ target_link_libraries(x11transut rrframe ${FBXLIB} ${TJPEG_LIBRARY})
 
 add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransconnut rrframe ${FBXLIB} rrsocket
+target_link_libraries(vgltransconnut rrframe ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(vgltransreceiverut vgltransreceiverut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransreceiverut rrframe ${FBXLIB} rrsocket
+target_link_libraries(vgltransreceiverut rrframe ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
@@ -120,7 +120,7 @@ add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
 add_executable(fakerut fakerut.cpp)
 target_link_libraries(fakerut "-z now ${OPENGL_gl_LIBRARY}"
-	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} pthread)
+	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} vglutil)
 
 add_library(vgltrans_test SHARED testplugin.cpp vgltransconn.cpp)
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -129,7 +129,7 @@ if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-Wl,-Bsymbolic")
 endif()
 target_link_libraries(vgltrans_test rrframe ${FBXFAKERLIB} ${TJPEG_LIBRARY}
-	rrsocket)
+	vglsocket)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()

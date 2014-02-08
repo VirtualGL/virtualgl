@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,7 +40,7 @@ class winhash : public _winhash
 		{
 			if(_Instanceptr==NULL)
 			{
-				rrcs::safelock l(_Instancemutex);
+				CS::SafeLock l(_Instancemutex);
 				if(_Instanceptr==NULL) _Instanceptr=new winhash;
 			}
 			return _Instanceptr;
@@ -93,7 +93,7 @@ class winhash : public _winhash
 		{
 			if(!dpy || !win || !config) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL;
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
 				if(!ptr->value)
@@ -116,7 +116,7 @@ class winhash : public _winhash
 		{
 			if(!dpy || !win) return;
 			_winhashstruct *ptr=NULL;
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
 				if(!ptr->value) ptr->value=(pbwin *)-1;
@@ -133,7 +133,7 @@ class winhash : public _winhash
 		{
 			if(!dpy) return;
 			_winhashstruct *ptr=NULL, *next=NULL;
-			rrcs::safelock l(_mutex);
+			CS::SafeLock l(_mutex);
 			ptr=_start;
 			while(ptr!=NULL)
 			{
@@ -179,12 +179,12 @@ class winhash : public _winhash
 		}
 
 		static winhash *_Instanceptr;
-		static rrcs _Instancemutex;
+		static CS _Instancemutex;
 };
 
 #ifdef __FAKERHASH_STATICDEF__
 winhash *winhash::_Instanceptr=NULL;
-rrcs winhash::_Instancemutex;
+CS winhash::_Instancemutex;
 #endif
 
 #define winh (*(winhash::instance()))

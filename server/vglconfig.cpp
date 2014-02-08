@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012 D. R. Commander
+ * Copyright (C)2009, 2012, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/shm.h>
 #include <signal.h>
+#include <string.h>
 #include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Pack.H>
@@ -30,8 +31,11 @@
 #include <FL/x.H>
 #include "fakerconfig.h"
 #include "rr.h"
-#include "rrlog.h"
-#include "rrutil.h"
+#include "Error.h"
+#include "Log.h"
+#include "vglutil.h"
+
+using namespace vglutil;
 
 
 Fl_Double_Window *win=NULL;
@@ -426,13 +430,13 @@ void checkparentpid(void *data)
 
 
 #define usage() {\
-	rrout.print("USAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n", argv[0]); \
-	rrout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n"); \
-	rrout.print("      environment variable)\n"); \
-	rrout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n"); \
-	rrout.print("      environment variable VGL_VERBOSE is set to 1)\n"); \
-	rrout.print("<p> = Parent process ID.  VGL Config will exit when this process\n"); \
-	rrout.print("      terminates.\n"); \
+	vglout.print("USAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n", argv[0]); \
+	vglout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n"); \
+	vglout.print("      environment variable)\n"); \
+	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n"); \
+	vglout.print("      environment variable VGL_VERBOSE is set to 1)\n"); \
+	vglout.print("<p> = Parent process ID.  VGL Config will exit when this process\n"); \
+	vglout.print("      terminates.\n"); \
 	return -1;}
 
 
@@ -482,9 +486,9 @@ int main(int argc, char **argv)
 		if(ppid>0) Fl::add_check(checkparentpid);		
 		status=Fl::run();
 	}
-	catch(rrerror &e)
+	catch(Error &e)
 	{
-		rrout.print("Error in vglconfig--\n%s\n", e.getMessage());
+		vglout.print("Error in vglconfig--\n%s\n", e.getMessage());
 		status=-1;
 	}
 	if(_fconfig)

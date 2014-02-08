@@ -18,9 +18,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "rrutil.h"
-#include "rrtimer.h"
-#include "rrerror.h"
+#include "vglutil.h"
+#include "Timer.h"
+#include "Error.h"
 #include <errno.h>
 #define GL_GLEXT_PROTOTYPES
 #include "../common/glx.h"
@@ -29,6 +29,8 @@
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
+
+using namespace vglutil;
 
 
 static int ALIGN=1;
@@ -109,7 +111,7 @@ GLXContext ctx=0;
 GLXPbuffer pbuffer=0;
 #endif
 
-rrtimer timer;
+Timer timer;
 int usewindow=0, usepixmap=0, usefbo=0, visualid=0, loops=1, usealpha=0;
 #ifdef GL_EXT_framebuffer_object
 GLuint fb=0, rb=0;
@@ -407,7 +409,7 @@ void glwrite(int format)
 	check_errors("frame buffer write");
 	fprintf(stderr, "%s Mpixels/sec\n", sigfig(4, temps, avgmps));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
 	if(rgbaBuffer) free(rgbaBuffer);
 }
@@ -417,7 +419,7 @@ void glwrite(int format)
 void glread(int format)
 {
 	unsigned char *rgbaBuffer=NULL;  int n, ps=pix[format].pixelsize;
-	double rbtime, readpixelstime;  rrtimer timer2;
+	double rbtime, readpixelstime;  Timer timer2;
 	#ifdef GL_VERSION_1_5
 	GLuint bufferid=0;
 	#endif
@@ -524,7 +526,7 @@ void glread(int format)
 	fprintf(stderr, "glReadPixels() accounted for %s%% of total readback time\n",
 		sigfig(4, temps, readpixelstime/rbtime*100.0));
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
 	if(rgbaBuffer) free(rgbaBuffer);
 	#ifdef GL_VERSION_1_5
@@ -755,7 +757,7 @@ int main(int argc, char **argv)
 		display();
 		return 0;
 
-	} catch(rrerror &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
 
 	if(dpy)
 	{

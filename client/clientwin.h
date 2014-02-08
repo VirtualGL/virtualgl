@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011 D. R. Commander
+ * Copyright (C)2009, 2011, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,8 +20,10 @@
 #include <windows.h>
 #endif
 #include "rrframe.h"
-#include "rrthread.h"
+#include "Thread.h"
 #include "genericQ.h"
+
+using namespace vglutil;
 
 
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
@@ -49,15 +51,15 @@ class clientwin : public Runnable
 		void initgl(void);
 		void initx11(void);
 		void setdrawmethod(void);
-		genericQ _q;
+		GenericQ _q;
 		void showprofile(rrframeheader *, int);
 		bool _deadyet;
 		int _dpynum;  Window _window;
 		void run(void);
 		Thread *_t;
-		rrcs _cfmutex;
+		CS _cfmutex;
 		bool _stereo;
-		rrcs _mutex;
+		CS _mutex;
 };
 
 
