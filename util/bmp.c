@@ -61,9 +61,17 @@ static const int goffset[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
 static const int boffset[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 
 
-#define _throw(m) {__bmperr=m;  retcode=-1;  goto finally;}
-#define _unix(f) {if((f)==-1) _throw(strerror(errno));}
-#define _catch(f) {if((f)==-1) {retcode=-1;  goto finally;}}
+#define _throw(m) {  \
+	__bmperr=m;  retcode=-1;  goto finally;  \
+}
+#define _unix(f) {  \
+	if((f)==-1) _throw(strerror(errno));  \
+}
+#define _catch(f) {  \
+	if((f)==-1) {  \
+		retcode=-1;  goto finally;  \
+	}  \
+}
 
 
 #define readme(fd, addr, size) \
@@ -158,7 +166,7 @@ int loadppm(int *fd, unsigned char **buf, int *w, int *h,
 	}
 
 	finally:
-	if(fs) {fclose(fs);  *fd=-1;}
+	if(fs) { fclose(fs);  *fd=-1; }
 	if(tempbuf) free(tempbuf);
 	return retcode;
 }
@@ -236,7 +244,7 @@ int loadbmp(char *filename, unsigned char **buf, int *w, int *h,
 		_throw("Only uncompessed RGB bitmaps are supported");
 
 	*w=bh.biWidth;  *h=bh.biHeight;  srcps=bh.biBitCount/8;
-	if(*h<0) {*h=-(*h);  srcbottomup=0;}
+	if(*h<0) { *h=-(*h);  srcbottomup=0; }
 	srcpitch=(((*w)*srcps)+3)&(~3);
 	dstpitch=(((*w)*ps[f])+(align-1))&(~(align-1));
 

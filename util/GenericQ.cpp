@@ -36,7 +36,10 @@ GenericQ::~GenericQ(void)
 	if(start!=NULL)
 	{
 		qstruct *temp;
-		do {temp=start->next;  delete start;  start=temp;} while(start!=NULL);
+		do
+		{
+			temp=start->next;  delete start;  start=temp;
+		} while(start!=NULL);
 	}
 	mutex.unlock(false);
 }

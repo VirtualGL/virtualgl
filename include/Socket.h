@@ -23,7 +23,7 @@
 #endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#if defined(sun)||defined(sgi)
+#if defined(sun) || defined(sgi)
 #include <openssl/rand.h>
 #endif
 #endif
@@ -58,7 +58,7 @@ namespace vglutil
 }
 
 #define _throwsock() throw(SockError(__FUNCTION__, __LINE__))
-#define trysock(f) {if((f)==SOCKET_ERROR) _throwsock();}
+#define trysock(f) { if((f)==SOCKET_ERROR) _throwsock(); }
 
 
 #ifdef USESSL

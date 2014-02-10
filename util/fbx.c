@@ -39,27 +39,35 @@ const char *_fbx_formatname[FBX_FORMATS]=
 
 #if defined(FBXWIN32)
 
- static char __lasterror[1024]="No error";
- #define _throw(m) {strncpy(__lasterror, m, 1023);  __line=__LINE__;  \
-  goto finally;}
- #define w32(f) {if(!(f)) {FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL,  \
-  GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  \
-  (LPTSTR)__lasterror, 1024, NULL);  \
-  __line=__LINE__;  goto finally;}}
- #define x11(f) if(!(f)) {  \
-  snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  \
-  __line=__LINE__;  goto finally;}
+static char __lasterror[1024]="No error";
+#define _throw(m) {  \
+	strncpy(__lasterror, m, 1023);  __line=__LINE__;  \
+	goto finally;  \
+}
+#define w32(f) {  \
+	if(!(f)) {  \
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)__lasterror, 1024,  \
+			NULL);  \
+		__line=__LINE__;  goto finally;  \
+	}  \
+}
+#define x11(f) if(!(f)) {  \
+	snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  \
+		__line=__LINE__;  goto finally;  \
+}
 
 #else
 
- static char *__lasterror="No error";
- #define _throw(m) {__lasterror=m;  __line=__LINE__;  goto finally;}
- #define x11(f) if(!(f)) {  \
-  __lasterror="X11 Error (window may have disappeared)";  \
-  __line=__LINE__;  goto finally;}
- #ifndef X_ShmAttach
- #define X_ShmAttach 1
- #endif
+static char *__lasterror="No error";
+#define _throw(m) { __lasterror=m;  __line=__LINE__;  goto finally; }
+#define x11(f) if(!(f)) {  \
+	__lasterror="X11 Error (window may have disappeared)";  \
+	__line=__LINE__;  goto finally;  \
+}
+#ifndef X_ShmAttach
+#define X_ShmAttach 1
+#endif
 
 #endif
 
@@ -80,23 +88,26 @@ extern _XCopyAreaType __XCopyArea;
 
 #ifdef FBXWIN32
 
- typedef struct _BMINFO {BITMAPINFO bmi;  RGBQUAD cmap[256];} BMINFO;
+typedef struct _BMINFO
+{
+	BITMAPINFO bmi;  RGBQUAD cmap[256];
+} BMINFO;
 
 #else
 
- #include <errno.h>
+#include <errno.h>
 
- #ifdef USESHM
- #ifdef XDK
- static int fbx_checkdlls(void);
- static int fbx_checkdll(char *, int *, int *, int *, int *);
- #endif
+#ifdef USESHM
+#ifdef XDK
+static int fbx_checkdlls(void);
+static int fbx_checkdll(char *, int *, int *, int *, int *);
+#endif
 
- static unsigned long serial=0;  static int __extok=1;
- static XErrorHandler prevhandler=NULL;
+static unsigned long serial=0;  static int __extok=1;
+static XErrorHandler prevhandler=NULL;
 
- int _fbx_xhandler(Display *dpy, XErrorEvent *e)
- {
+int _fbx_xhandler(Display *dpy, XErrorEvent *e)
+{
 	if(e->serial==serial && (e->minor_code==X_ShmAttach
 		&& e->error_code==BadAccess))
 	{
@@ -104,8 +115,8 @@ extern _XCopyAreaType __XCopyArea;
 	}
 	if(prevhandler && prevhandler!=_fbx_xhandler) return prevhandler(dpy, e);
 	else return 0;
- }
- #endif
+}
+#endif
 
 #endif
 
@@ -151,8 +162,16 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(!wh) _throw("Invalid argument");
 	w32(GetClientRect(wh, &rect));
-	if(width>0) w=width;  else {w=rect.right-rect.left;  if(w<=0) w=MINWIDTH;}
-	if(height>0) h=height;  else {h=rect.bottom-rect.top;  if(h<=0) h=MINHEIGHT;}
+	if(width>0) w=width;
+	else
+	{
+		w=rect.right-rect.left;  if(w<=0) w=MINWIDTH;
+	}
+	if(height>0) h=height;
+	else
+	{
+		h=rect.bottom-rect.top;  if(h<=0) h=MINHEIGHT;
+	}
 	if(s->wh==wh)
 	{
 		if(w==s->width && h==s->height && s->hmdc && s->hdib && s->bits) return 0;
@@ -396,7 +415,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
-	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
+	wx=winx>=0? winx:0;  wy=winy>=0? winy:0;
 
 	#ifdef FBXWIN32
 
@@ -446,9 +465,9 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
-	bh=h>0?h:s->height;
-	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
+	bx=bmpx>=0? bmpx:0;  by=bmpy>=0? bmpy:0;  bw=w>0? w:s->width;
+	bh=h>0? h:s->height;
+	wx=winx>=0? winx:0;  wy=winy>=0? winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
@@ -494,8 +513,8 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 	char *tmpbuf=NULL, *srcptr, *dstptr;
 	if(!s) _throw("Invalid argument");
 
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
-	bh=h>0?h:s->height;
+	bx=bmpx>=0? bmpx:0;  by=bmpy>=0? bmpy:0;  bw=w>0? w:s->width;
+	bh=h>0? h:s->height;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 	ps=fbx_ps[s->format];  pitch=s->pitch;
@@ -526,16 +545,19 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 {
 	int bx, by, wx, wy, bw, bh;
 	if(!s) _throw("Invalid argument");
-	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;
-	bh=h>0?h:s->height;
-	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
+	bx=bmpx>=0? bmpx:0;  by=bmpy>=0? bmpy:0;  bw=w>0? w:s->width;
+	bh=h>0? h:s->height;
+	wx=winx>=0? winx:0;  wy=winy>=0? winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 	if(!s->wh.dpy || !s->wh.d || !s->xi || !s->bits) _throw("Not initialized");
 	#ifdef USESHM
 	if(s->shm)
 	{
-		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
+		if(!s->xattach)
+		{
+			x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;
+		}
 		x11(XShmPutImage(s->wh.dpy, s->wh.d, s->xgc, s->xi, bx, by, wx, wy, bw,
 			bh, False));
 	}
@@ -591,10 +613,16 @@ int fbx_term(fbx_struct *s)
 
 	#else
 
-	if(s->pm) {XFreePixmap(s->wh.dpy, s->pm);  s->pm=0;}
+	if(s->pm)
+	{
+		XFreePixmap(s->wh.dpy, s->pm);  s->pm=0;
+	}
 	if(s->xi) 
 	{
-		if(s->xi->data && !s->shm) {free(s->xi->data);  s->xi->data=NULL;}
+		if(s->xi->data && !s->shm)
+		{
+			free(s->xi->data);  s->xi->data=NULL;
+		}
 		XDestroyImage(s->xi);
 	}
 	#ifdef USESHM
@@ -700,10 +728,18 @@ static int fbx_checkdll(char *filename, int *v1, int *v2, int *v3, int *v4)
 	int retval=1;
 
 	vinfolen=GetFileVersionInfoSize(filename, &vinfohnd);
-	if(!vinfolen) {retval=0;  goto ret;}
-	if((vinfo=(char *)malloc(vinfolen))==NULL) {retval=0;  goto ret;}
+	if(!vinfolen)
+	{
+		retval=0;  goto ret;
+	}
+	if((vinfo=(char *)malloc(vinfolen))==NULL)
+	{
+		retval=0;  goto ret;
+	}
 	if(!GetFileVersionInfo(filename, vinfohnd, vinfolen, vinfo))
-		{retval=0;  goto ret;}
+	{
+		retval=0;  goto ret;
+	}
 	if(VerQueryValue(vinfo, "\\VarFileInfo\\Translation", &buf, &len)
 		&& len==4)
 	{

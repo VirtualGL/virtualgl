@@ -282,10 +282,10 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 
 	if((sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET)
 		_throwsock();
-	trysock( setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
-		sizeof(int)) );
-	trysock( setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2,
-		sizeof(int)) );
+	trysock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+		sizeof(int)));
+	trysock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2,
+		sizeof(int)));
 
 	memset(&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family=AF_INET;
@@ -315,7 +315,7 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 
 	actualport=setupListener(port, reuseAddr);
 
-	trysock( ::listen(sd, MAXCONN) );
+	trysock(::listen(sd, MAXCONN));
 
 	#ifdef USESSL
 	if(doSSL)
@@ -355,10 +355,10 @@ Socket *Socket::accept(void)
 	if(!sslctx && doSSL) _throw("SSL not initialized");
 	#endif
 
-	trysock( sd_client=::accept(sd, (struct sockaddr *)&remoteaddr,
-		&addrlen) );
-	trysock( setsockopt(sd_client, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
-		sizeof(int)) );
+	trysock(sd_client=::accept(sd, (struct sockaddr *)&remoteaddr,
+		&addrlen));
+	trysock(setsockopt(sd_client, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
+		sizeof(int)));
 
 	#ifdef USESSL
 	SSL *tempssl=NULL;

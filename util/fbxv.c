@@ -25,15 +25,23 @@ static FILE *__warningfile=NULL;
 
 
 static char __lasterror[1024]="No error";
-#define _throw(m) {snprintf(__lasterror, 1023, "%s", m);  __line=__LINE__; \
-	goto finally;}
-#define x11(f) {int __err=0;  if((__err=(f))!=Success) { \
-	snprintf(__lasterror, 1023, "X11 %s Error (window may have disappeared)", \
-		x11error(__err)); \
-	__line=__LINE__;  goto finally;}}
-#define errifnot(f) {if(!(f)) { \
-	snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)"); \
-	__line=__LINE__;  goto finally;}}
+#define _throw(m) {  \
+	snprintf(__lasterror, 1023, "%s", m);  __line=__LINE__;  goto finally;  \
+}
+#define x11(f) {  \
+	int __err=0;  \
+	if((__err=(f))!=Success) {  \
+		snprintf(__lasterror, 1023,  \
+			"X11 %s Error (window may have disappeared)", x11error(__err));  \
+		__line=__LINE__;  goto finally;  \
+	}  \
+}
+#define errifnot(f) {  \
+	if(!(f)) {  \
+		snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  \
+		__line=__LINE__;  goto finally;  \
+	}  \
+}
 
 
 #ifdef USESHM
@@ -223,7 +231,10 @@ int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 	#ifdef USESHM
 	if(s->shm)
 	{
-		if(!s->xattach) {errifnot(XShmAttach(s->dpy, &s->shminfo));  s->xattach=1;}
+		if(!s->xattach)
+		{
+			errifnot(XShmAttach(s->dpy, &s->shminfo));  s->xattach=1;
+		}
 		x11(XvShmPutImage(s->dpy, s->port, s->win, s->xgc, s->xvi, sx, sy, sw, sh,
 			dx, dy, dstw, dsth, False));
 	}
@@ -245,12 +256,18 @@ int fbxv_term(fbxv_struct *s)
 	if(!s) _throw("Invalid argument");
 	if(s->xvi) 
 	{
-		if(s->xvi->data && !s->shm) {free(s->xvi->data);  s->xvi->data=NULL;}
+		if(s->xvi->data && !s->shm)
+		{
+			free(s->xvi->data);  s->xvi->data=NULL;
+		}
 	}
 	#ifdef USESHM
 	if(s->shm)
 	{
-		if(s->xattach) {XShmDetach(s->dpy, &s->shminfo);  XSync(s->dpy, False);}
+		if(s->xattach)
+		{
+			XShmDetach(s->dpy, &s->shminfo);  XSync(s->dpy, False);
+		}
 		if(s->shminfo.shmaddr!=NULL) shmdt(s->shminfo.shmaddr);
 		if(s->shminfo.shmid!=-1) shmctl(s->shminfo.shmid, IPC_RMID, 0);
 	}

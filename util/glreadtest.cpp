@@ -48,41 +48,41 @@ typedef struct _pixelformat
 } pixelformat;
 
 static int FORMATS=3
- #ifdef GL_BGRA_EXT
- +1
- #endif
- #ifdef GL_BGR_EXT
- +1
- #endif
- #ifdef GL_ABGR_EXT
- +1
- #endif
- ;
-
-pixelformat pix[4
- #ifdef GL_BGRA_EXT
- +1
- #endif
- #ifdef GL_BGR_EXT
- +1
- #endif
- #ifdef GL_ABGR_EXT
- +1
- #endif
- ]={
-	{0, 0, 0, 1, GL_RED, 0, "RED"},
 	#ifdef GL_BGRA_EXT
-	{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
-	#endif
-	#ifdef GL_ABGR_EXT
-	{3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"},
+	+1
 	#endif
 	#ifdef GL_BGR_EXT
-	{2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"},
+	+1
 	#endif
-	{0, 1, 2, 4, GL_RGBA, 0, "RGBA"},
-	{0, 1, 2, 3, GL_RGB, 0, "RGB"},
-};
+	#ifdef GL_ABGR_EXT
+	+1
+	#endif
+	;
+
+pixelformat pix[4
+	#ifdef GL_BGRA_EXT
+	+1
+	#endif
+	#ifdef GL_BGR_EXT
+	+1
+	#endif
+	#ifdef GL_ABGR_EXT
+	+1
+	#endif
+	]={
+		{0, 0, 0, 1, GL_RED, 0, "RED"},
+		#ifdef GL_BGRA_EXT
+		{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
+		#endif
+		#ifdef GL_ABGR_EXT
+		{3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"},
+		#endif
+		#ifdef GL_BGR_EXT
+		{2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"},
+		#endif
+		{0, 1, 2, 4, GL_RGBA, 0, "RGBA"},
+		{0, 1, 2, 3, GL_RGB, 0, "RGB"},
+	};
 
 
 #ifdef XDK
@@ -198,7 +198,7 @@ void findvisual(void)
 		}
 		catch(...)
 		{
-			if(v) {XFree(v);  v=NULL;}  throw;
+			if(v) { XFree(v);  v=NULL; }  throw;
 		}
 	}
 
@@ -279,7 +279,7 @@ void drawableinit(void)
 
 char glerrstr[STRLEN]="No error";
 
-static void check_errors(const char * tag)
+static void check_errors(const char *tag)
 {
 	int i, error=0;  char *s;
 	i=glGetError();
@@ -321,7 +321,7 @@ int cmpbuf(int x, int y, int w, int h, int format, unsigned char *buf,
 	int i, j, l, ps=pix[format].pixelsize;
 	for(i=0; i<h; i++)
 	{
-		l=bassackwards?h-i-1:i;
+		l=bassackwards? h-i-1:i;
 		for(j=0; j<w; j++)
 		{
 			if(pix[format].glformat==GL_RED)
@@ -370,7 +370,10 @@ void clearfb(int format)
 	check_errors("frame buffer read");
 	for(int i=0; i<width*height*ps; i++)
 	{
-		if(buf[i]!=0) {fprintf(stderr, "Buffer was not cleared\n");  break;}
+		if(buf[i]!=0)
+		{
+			fprintf(stderr, "Buffer was not cleared\n");  break;
+		}
 	}
 	if(buf) free(buf);
 }
@@ -409,7 +412,7 @@ void glwrite(int format)
 	check_errors("frame buffer write");
 	fprintf(stderr, "%s Mpixels/sec\n", sigfig(4, temps, avgmps));
 
-	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	if(rgbaBuffer) free(rgbaBuffer);
 }
@@ -500,7 +503,10 @@ void glread(int format)
 			glPopAttrib();
 		}
 		double elapsed=timer.elapsed();
-		if(first) {tmin=tmax=elapsed;  first=0;}
+		if(first)
+		{
+			tmin=tmax=elapsed;  first=0;
+		}
 		else
 		{
 			if(elapsed<tmin) tmin=elapsed;
@@ -526,7 +532,7 @@ void glread(int format)
 	fprintf(stderr, "glReadPixels() accounted for %s%% of total readback time\n",
 		sigfig(4, temps, readpixelstime/rbtime*100.0));
 
-	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	if(rgbaBuffer) free(rgbaBuffer);
 	#ifdef GL_VERSION_1_5
@@ -757,7 +763,7 @@ int main(int argc, char **argv)
 		display();
 		return 0;
 
-	} catch(Error &e) {fprintf(stderr, "%s\n", e.getMessage());}
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	if(dpy)
 	{

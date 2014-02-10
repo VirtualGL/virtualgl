@@ -61,7 +61,9 @@
  #endif
  #include <X11/Xutil.h>
  typedef GC fbx_gc;
- typedef struct {Display *dpy;  Drawable d;  Visual *v;} fbx_wh;
+ typedef struct {
+  Display *dpy;  Drawable d;  Visual *v;
+ } fbx_wh;
 #endif
 
 

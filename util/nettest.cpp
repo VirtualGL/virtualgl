@@ -42,8 +42,8 @@ void benchmark(int interval, char *ifname)
 
 	kstat_ctl_t *kc=NULL;
 	kstat_t *kif=NULL;
-	if((kc=kstat_open())==NULL) {_throwunix();}
-	if((kif=kstat_lookup(kc, NULL, -1, ifname))==NULL) {_throwunix();}
+	if((kc=kstat_open())==NULL) { _throwunix(); }
+	if((kif=kstat_lookup(kc, NULL, -1, ifname))==NULL) { _throwunix(); }
 
 	#elif defined(linux)
 
@@ -232,7 +232,9 @@ int main(int argc, char **argv)
 
 	Socket sd(dossl);
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
-		{printf("Buffer allocation error.\n");  exit(1);}
+	{
+		printf("Buffer allocation error.\n");  exit(1);
+	}
 
 	#ifdef USESSL
 	if(dossl)
@@ -309,7 +311,10 @@ int main(int argc, char **argv)
 					sd.recv(buf, i);
 				}
 				elapsed=timer.elapsed();
-				if(!cmpbuf(buf, i)) {printf("DATA ERROR\n"); exit(1);}
+				if(!cmpbuf(buf, i))
+				{
+					printf("DATA ERROR\n");  exit(1);
+				}
 				printf("%-13d  %14.6f  %14.6f  %14.6f\n", i,
 					elapsed/2.*1000./(double)ITER,
 					(double)i*(double)ITER/1048576./(elapsed/2.),
@@ -337,7 +342,10 @@ int main(int argc, char **argv)
 				j++;
 				elapsed=timer.elapsed();
 			} while(elapsed<2.0);
-			if(!cmpbuf(buf, i)) {printf("DATA ERROR\n");  exit(1);}
+			if(!cmpbuf(buf, i))
+			{
+				printf("DATA ERROR\n");  exit(1);
+			}
 			buf[0]=(char)255;
 			sd.send(buf, i);
 			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)j,

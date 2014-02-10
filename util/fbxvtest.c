@@ -61,10 +61,15 @@ void initbuf(fbxv_struct *s, int id, int seed)
 		{
 			for(j=0; j<s->xvi->width; j+=2)
 			{
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex0] = (i+seed)*(j+seed);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex1] = (i+seed+1)*(j+seed+1);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + uindex] = (i+seed)*(j+seed);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + vindex] = (i+seed)*(j+seed);
+				i *i;
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex0]
+					=(i+seed)*(j+seed);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex1]
+					=(i+seed+1)*(j+seed+1);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + uindex]
+					=(i+seed)*(j+seed);
+				s->xvi->data[s->xvi->pitches[0]*i + j*2 + vindex]
+					=(i+seed)*(j+seed);
 			}
 		}
 	}
@@ -90,7 +95,7 @@ void dotest(int id, char *name)
 	memset(&s, 0, sizeof(s));  memset(&s1, 0, sizeof(s));
 	fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useshm));
 	if(!filename)
-		{fbxv(fbxv_init(&s1, dpy, win, width/scale, height/scale, id, useshm));}
+		{ fbxv(fbxv_init(&s1, dpy, win, width/scale, height/scale, id, useshm)); }
 	printf("Image:\n");
 	printf("  Data size:   %d\n", s.xvi->data_size);
 	printf("  Dimensions:  %d x %d\n", s.xvi->width, s.xvi->height);
@@ -136,8 +141,8 @@ void dotest(int id, char *name)
 	do
 	{
 		if(filename || iter%2==0)
-			{fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));}
-		else {fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height));}
+			{ fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
+		else { fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
 		iter++;
 	} while((elapsed=getTime()-t)<testtime);
 	printf("%f Mpixels/sec\n", (double)(width*height)/1000000.*(double)iter/elapsed);
@@ -153,7 +158,7 @@ void dotesti(Display *dpy, int id, char *name)
 	printf("Interactive test, %s format (ID=0x%.8x) ...\n", name, id);
 	memset(&s, 0, sizeof(s));
 
-	while (1)
+	while(1)
 	{
 		int dodisplay=0;
 
@@ -182,7 +187,7 @@ void dotesti(Display *dpy, int id, char *name)
 				}
 				case MotionNotify:
 					if(event.xmotion.state & Button1Mask) dodisplay=1;
- 					break;
+					break;
 				case ClientMessage:
 				{
 					XClientMessageEvent *cme=(XClientMessageEvent *)&event;

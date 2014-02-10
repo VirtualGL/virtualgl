@@ -269,7 +269,7 @@ void nativeread(int useshm)
 			offset))
 			_throw("ERROR: Bogus data read back.");
 		i++;
-	} while (timer2.elapsed()<5.);
+	} while(timer2.elapsed()<5.);
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)i*(double)(width*height)/((double)1000000.*rbtime));
 
@@ -302,7 +302,7 @@ class WriteThread : public Runnable
 			if(useshm && !stressfb.shm) _throw("MIT-SHM not available");
 			initbuf(myx, myy, mywidth, stressfb.pitch, myheight, stressfb.format,
 				(unsigned char *)stressfb.bits, 0);
-			for (i=0; i<iter; i++)
+			for(i=0; i<iter; i++)
 				fbx(fbx_write(&stressfb, 0, 0, myx, myy, mywidth, myheight));
 
 			} catch(...) { fbx_term(&stressfb);  throw; }
@@ -375,9 +375,12 @@ void nativestress(int useshm)
 		}
 		for(i=0; i<4; i++) t[i]->stop();
 		for(i=0; i<4; i++) t[i]->checkError();
-		for(i=0; i<4; i++) {delete t[i];  delete wt[i];}
+		for(i=0; i<4; i++)
+		{
+			delete t[i];  delete wt[i];
+		}
 		rbtime=timer.elapsed();
-	} while (rbtime<1.);
+	} while(rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
@@ -403,9 +406,12 @@ void nativestress(int useshm)
 		}
 		for(i=0; i<4; i++) t[i]->stop();
 		for(i=0; i<4; i++) t[i]->checkError();
-		for(i=0; i<4; i++) {delete t[i];  delete rt[i];}
+		for(i=0; i<4; i++)
+		{
+			delete t[i];  delete rt[i];
+		}
 		rbtime=timer.elapsed();
-	} while (rbtime<1.);
+	} while(rbtime<1.);
 	fprintf(stderr, "%f Mpixels/sec\n",
 		(double)n*(double)(width*height)/((double)1000000.*rbtime));
 
@@ -519,16 +525,18 @@ void event_loop(void)
 	}
 
 	timer.start();
-	while (1)
+	while(1)
 	{
 		advance=0;  dodisplay=0;
-		if(first) {dodisplay=1;  first=0;}
+		if(first)
+		{
+			dodisplay=1;  first=0;
+		}
 
 		#ifdef FBXWIN32
 
 		int ret;  MSG msg;
-		if((ret=GetMessage(&msg, NULL, 0, 0))==-1)
-			{_throww32();}
+		if((ret=GetMessage(&msg, NULL, 0, 0))==-1) { _throww32(); }
 		else if(ret==0) break;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -558,7 +566,7 @@ void event_loop(void)
 				}
 				case MotionNotify:
 					if(event.xmotion.state & Button1Mask) dodisplay=advance=1;
- 					break;
+					break;
 			}
 		}
 
@@ -658,18 +666,18 @@ int main(int argc, char **argv)
 	#ifdef FBXWIN32
 
 	WNDCLASSEX wndclass;  MSG msg;
-	wndclass.cbSize = sizeof(WNDCLASSEX);
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = GetModuleHandle(NULL);
-	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = bench_name;
-	wndclass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
+	wndclass.cbSize=sizeof(WNDCLASSEX);
+	wndclass.style=CS_HREDRAW | CS_VREDRAW;
+	wndclass.lpfnWndProc=WndProc;
+	wndclass.cbClsExtra=0;
+	wndclass.cbWndExtra=0;
+	wndclass.hInstance=GetModuleHandle(NULL);
+	wndclass.hIcon=LoadIcon(NULL, IDI_APPLICATION);
+	wndclass.hCursor=LoadCursor(NULL, IDC_ARROW);
+	wndclass.hbrBackground=(HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndclass.lpszMenuName=NULL;
+	wndclass.lpszClassName=bench_name;
+	wndclass.hIconSm=LoadIcon(NULL, IDI_WINLOGO);
 	tryw32(RegisterClassEx(&wndclass));
 	width=GetSystemMetrics(SM_CXSCREEN);
 	height=GetSystemMetrics(SM_CYSCREEN);
@@ -793,7 +801,7 @@ int main(int argc, char **argv)
 			xc[i].red=(i<16? i*16:255)<<8;
 			xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
 			xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
-			xc[i].flags = DoRed | DoGreen | DoBlue;
+			xc[i].flags=DoRed | DoGreen | DoBlue;
 			xc[i].pixel=i;
 		}
 		XStoreColors(wh.dpy, swa.colormap, xc, 32);
