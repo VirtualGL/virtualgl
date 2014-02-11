@@ -29,10 +29,10 @@ using namespace vglcommon;
 #define BORDER 0
 #define NUMWIN 1
 
-bool useGL=false, useXV=false, pctest=false, useRGB=false;
+bool useGL=false, useXV=false, doRGBBench=false, useRGB=false;
 
 
-void resizewindow(Display *dpy, Window win, int w, int h, int myid)
+void resizeWindow(Display *dpy, Window win, int w, int h, int myID)
 {
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, win, &xwa);
@@ -41,7 +41,7 @@ void resizewindow(Display *dpy, Window win, int w, int h, int myid)
 		XLockDisplay(dpy);
 		XWindowChanges xwc;
 		xwc.width=w;  xwc.height=h;
-		xwc.x=(w+BORDER*2)*myid;  xwc.y=0;
+		xwc.x=(w+BORDER*2)*myID;  xwc.y=0;
 		XConfigureWindow(dpy, win, CWWidth|CWHeight|CWX|CWY, &xwc);
 		XFlush(dpy);
 		XSync(dpy, False);
@@ -126,7 +126,7 @@ class Blitter : public Runnable
 				{
 					f=frames[index];  index=(index+1)%NFRAMES;
 					f->waitUntilReady();  if(deadYet) break;
-					if(useXV) resizewindow(dpy, win, f->hdr.width, f->hdr.height, myID);
+					if(useXV) resizeWindow(dpy, win, f->hdr.width, f->hdr.height, myID);
 					timer.start();
 					if(f->isGL) ((GLFrame *)f)->redraw();
 					#ifdef USEXV
@@ -211,7 +211,7 @@ class Decompressor : public Runnable
 					CompressedFrame &cf=cframes[index];  index=(index+1)%NFRAMES;
 					cf.waitUntilReady();  if(deadYet) break;
 					f=blitter->get();  if(deadYet) break;
-					resizewindow(dpy, win, cf.hdr.width, cf.hdr.height, myID);
+					resizeWindow(dpy, win, cf.hdr.width, cf.hdr.height, myID);
 					if(f->isGL) *((GLFrame *)f)=cf;
 					#ifdef USEXV
 					else if(f->isXV) *((XVFrame *)f)=cf;
@@ -432,7 +432,7 @@ int cmpframe(unsigned char *buf, int w, int h, Frame &dst,
 }
 
 
-void dopctest(char *filename)
+void rgbBench(char *filename)
 {
 	unsigned char *buf;  int w, h, dstbu;
 	CompressedFrame src;  Frame dst;  int dstpf;
@@ -475,6 +475,19 @@ void dopctest(char *filename)
 }
 
 
+void usage(char *programName)
+{
+	fprintf(stderr, "\nUSAGE: %s [-gl] [-xv] [-rgb] [-rgbbench <filename>]\n\n",
+		programName);
+	fprintf(stderr, "-gl = Use OpenGL instead of X11 for blitting\n");
+	fprintf(stderr, "-xv = Test X Video encoding/display\n");
+	fprintf(stderr, "-rgb = Use RGB encoding instead of JPEG compression\n");
+	fprintf(stderr, "-rgbbench <filename> = Benchmark the decoding of RGB-encoded images.\n");
+	fprintf(stderr, "                       <filename> should be a BMP or PPM file.\n\n");
+	exit(1);
+}
+
+
 int main(int argc, char **argv)
 {
 	Display *dpy=NULL;
@@ -491,21 +504,19 @@ int main(int argc, char **argv)
 			else if(!stricmp(argv[i], "-xv")) useXV=true;
 			#endif
 			else if(!stricmp(argv[i], "-rgb")) useRGB=true;
-			else if(!stricmp(argv[i], "-pc"))
+			else if(!stricmp(argv[i], "-rgbbench"))
 			{
-				if(i>=argc-1)
-				{
-					fprintf(stderr, "USAGE: %s -pc <filename>\n", argv[0]);
-					exit(1);
-				}
-				bmpfile=argv[++i];  pctest=true;
+				if(i>=argc-1) usage(argv[0]);
+				bmpfile=argv[++i];  doRGBBench=true;
 			}
+			else if(!strnicmp(argv[i], "-h", 2) || !strcmp(argv[i], "-?"))
+				usage(argv[0]);
 		}
 	}
 
 	try
 	{
-		if(pctest) { dopctest(bmpfile);  exit(0); }
+		if(doRGBBench) { rgbBench(bmpfile);  exit(0); }
 
 		errifnot(XInitThreads());
 		if(!(dpy=XOpenDisplay(0)))
