@@ -14,7 +14,7 @@ if(WIN32)
 	add_library(glframe STATIC GLFrame.cpp xdk-sym.cpp)
 	target_link_libraries(glframe psapi)
 else()
-	add_library(glframe STATIC GLframe.cpp)
+	add_library(glframe STATIC GLFrame.cpp)
 	target_link_libraries(glframe ${OPENGL_gl_LIBRARY})
 endif()
 
