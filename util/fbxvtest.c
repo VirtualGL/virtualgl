@@ -61,7 +61,6 @@ void initbuf(fbxv_struct *s, int id, int seed)
 		{
 			for(j=0; j<s->xvi->width; j+=2)
 			{
-				i *i;
 				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex0]
 					=(i+seed)*(j+seed);
 				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex1]
