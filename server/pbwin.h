@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -51,8 +51,8 @@ class pbwin : public pbdrawable
 		int init(int, int, GLXFBConfig);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
-		void makeanaglyph(rrframe *, int, int);
-		void makepassive(rrframe *, int, int, int);
+		void makeanaglyph(Frame *, int, int);
+		void makepassive(Frame *, int, int, int);
 		void sendvgl(vgltransconn *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
@@ -68,12 +68,12 @@ class pbwin : public pbdrawable
 		xvtrans *_xvtrans;
 		#endif
 		vgltransconn *_vglconn;
-		rrprofiler _prof_gamma, _prof_anaglyph, _prof_passive;
+		Profiler _prof_gamma, _prof_anaglyph, _prof_passive;
 		bool _syncdpy;
 		transplugin *_plugin;
 		bool _truecolor;
 		bool _stereovisual;
-		rrframe _r, _g, _b, _f, _stf;
+		Frame _r, _g, _b, _f, _stf;
 		bool _wmdelete;
 		bool _newconfig;
 		int _swapinterval;

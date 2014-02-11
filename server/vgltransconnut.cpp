@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 	for(i=0; i<w*h*d; i++) buf2[i]=255-buf2[i];
 	for(i=0; i<w*h*d/2; i++) buf3[i]=255-buf3[i];
 
-	rrframe *f;
+	Frame *f;
 
 	printf("\nTesting full-frame send ...\n");
 
@@ -135,11 +135,11 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
-		if(fill) memcpy(f->_bits, buf, w*h*d);
-		else memcpy(f->_bits, buf2, w*h*d);
-		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
-		f->_h.winid=win;  f->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?FRAME_BGR:0, false));
+		if(fill) memcpy(f->bits, buf, w*h*d);
+		else memcpy(f->bits, buf2, w*h*d);
+		f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
+		f->hdr.winid=win;  f->hdr.compress=fconfig.compress;
 		fill=1-fill;
 		vglconn.sendframe(f);
 		frames++;
@@ -153,11 +153,11 @@ int main(int argc, char **argv)
 	fill=0, frames=0;  int clientframes=0;  t.start();
 	do
 	{
-		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
-		if(fill) memcpy(f->_bits, buf, w*h*d);
-		else memcpy(f->_bits, buf2, w*h*d);
-		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
-		f->_h.winid=win;  f->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?FRAME_BGR:0, false));
+		if(fill) memcpy(f->bits, buf, w*h*d);
+		else memcpy(f->bits, buf2, w*h*d);
+		f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
+		f->hdr.winid=win;  f->hdr.compress=fconfig.compress;
 		fill=1-fill;
 		vglconn.sendframe(f);
 		clientframes++;  frames++;
@@ -174,11 +174,11 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
-		if(fill) memcpy(f->_bits, buf, w*h*d);
-		else memcpy(f->_bits, buf3, w*h*d);
-		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
-		f->_h.winid=win;  f->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?FRAME_BGR:0, false));
+		if(fill) memcpy(f->bits, buf, w*h*d);
+		else memcpy(f->bits, buf3, w*h*d);
+		f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
+		f->hdr.winid=win;  f->hdr.compress=fconfig.compress;
 		fill=1-fill;
 		vglconn.sendframe(f);
 		frames++;
@@ -193,10 +193,10 @@ int main(int argc, char **argv)
 	do
 	{
 		vglconn.synchronize();
-		errifnot(f=vglconn.getframe(w, h, d, bgr?RRFRAME_BGR:0, false));
-		memcpy(f->_bits, buf, w*h*d);
-		f->_h.qual=fconfig.qual;  f->_h.subsamp=fconfig.subsamp;
-		f->_h.winid=win;  f->_h.compress=fconfig.compress;
+		errifnot(f=vglconn.getframe(w, h, d, bgr?FRAME_BGR:0, false));
+		memcpy(f->bits, buf, w*h*d);
+		f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
+		f->hdr.winid=win;  f->hdr.compress=fconfig.compress;
 		vglconn.sendframe(f);
 		frames++;
 	} while((elapsed=t.elapsed())<2.);

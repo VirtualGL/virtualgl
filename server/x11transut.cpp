@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 			BlackPixel(dpy, DefaultScreen(dpy))))) _throw("Could not create window");
 		errifnot(XMapRaised(dpy, win));
 
-		rrfb *f;
+		FBXFrame *f;
 
 		fprintf(stderr, "\nTesting full-frame blits ...\n");
 
@@ -86,9 +86,9 @@ int main(int argc, char **argv)
 		{
 			x11t.synchronize();
 			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
-			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT, f->_pixelsize, fill);
-			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			fillframe(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
 			fill=1-fill;
 			x11t.sendframe(f, dosync);
 			frames++;
@@ -103,9 +103,9 @@ int main(int argc, char **argv)
 		do
 		{
 			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
-			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT, f->_pixelsize, fill);
-			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			fillframe(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
 			fill=1-fill;
 			x11t.sendframe(f, dosync);
 			clientframes++;  frames++;
@@ -123,10 +123,10 @@ int main(int argc, char **argv)
 		{
 			x11t.synchronize();
 			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
-			memset(f->_bits, 0, f->_pitch*HEIGHT);
-			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT/2, f->_pixelsize, fill);
-			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			memset(f->bits, 0, f->pitch*HEIGHT);
+			fillframe(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, fill);
+			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
 			fill=1-fill;
 			x11t.sendframe(f, dosync);
 			frames++;
@@ -142,9 +142,9 @@ int main(int argc, char **argv)
 		{
 			x11t.synchronize();
 			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->_h.framew;  HEIGHT=f->_h.frameh;
-			fillframe(f->_bits, WIDTH, f->_pitch, HEIGHT/2, f->_pixelsize, 1);
-			if(bottomup) {f->_flags|=RRFRAME_BOTTOMUP;}
+			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			fillframe(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, 1);
+			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
 			x11t.sendframe(f, dosync);
 			frames++;
 		} while((elapsed=t.elapsed())<2.);

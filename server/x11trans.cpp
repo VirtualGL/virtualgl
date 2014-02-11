@@ -17,6 +17,7 @@
 #include "Timer.h"
 #include "fakerconfig.h"
 #include "vglutil.h"
+#include "Log.h"
 
 
 x11trans::x11trans(void) : _t(NULL), _deadyet(false)
@@ -24,8 +25,8 @@ x11trans::x11trans(void) : _t(NULL), _deadyet(false)
 	for(int i=0; i<NFRAMES; i++) _frame[i]=NULL;
 	errifnot(_t=new Thread(this));
 	_t->start();
-	_prof_blit.setname("Blit      ");
-	_prof_total.setname("Total     ");
+	_prof_blit.setName("Blit      ");
+	_prof_total.setName("Total     ");
 	if(fconfig.verbose) fbx_printwarnings(vglout.getFile());
 }
 
@@ -38,16 +39,16 @@ void x11trans::run(void)
 	{
  		while(!_deadyet)
 		{
-			rrfb *f;  void *ftemp=NULL;
-			_q.get(&ftemp);  f=(rrfb *)ftemp;  if(_deadyet) return;
+			FBXFrame *f;  void *ftemp=NULL;
+			_q.get(&ftemp);  f=(FBXFrame *)ftemp;  if(_deadyet) return;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
-			_prof_blit.startframe();
+			_prof_blit.startFrame();
 			f->redraw();
-			_prof_blit.endframe(f->_h.width*f->_h.height, 0, 1);
+			_prof_blit.endFrame(f->hdr.width*f->hdr.height, 0, 1);
 
-			_prof_total.endframe(f->_h.width*f->_h.height, 0, 1);
-			_prof_total.startframe();
+			_prof_total.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+			_prof_total.startFrame();
 
 			if(fconfig.flushdelay>0.)
 			{
@@ -72,7 +73,7 @@ void x11trans::run(void)
 				t.start();
 			}
 
-			f->complete();
+			f->signalComplete();
 		}
 
 	}
@@ -84,18 +85,18 @@ void x11trans::run(void)
 }
 
 
-rrfb *x11trans::getframe(Display *dpy, Window win, int w, int h)
+FBXFrame *x11trans::getframe(Display *dpy, Window win, int w, int h)
 {
-	rrfb *f=NULL;
+	FBXFrame *f=NULL;
 	if(_t) _t->checkError();
 	{
 		CS::SafeLock l(_mutex);
 		int framei=-1;
 		for(int i=0; i<NFRAMES; i++)
-			if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
+			if(!_frame[i] || (_frame[i] && _frame[i]->isComplete())) framei=i;
 		if(framei<0) _throw("No free buffers in pool");
-		if(!_frame[framei]) errifnot(_frame[framei]=new rrfb(dpy, win));
-		f=_frame[framei];  f->waituntilcomplete();
+		if(!_frame[framei]) errifnot(_frame[framei]=new FBXFrame(dpy, win));
+		f=_frame[framei];  f->waitUntilComplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
@@ -122,19 +123,19 @@ void x11trans::synchronize(void)
 
 static void __x11trans_spoilfct(void *f)
 {
-	if(f) ((rrfb *)f)->complete();
+	if(f) ((FBXFrame *)f)->signalComplete();
 }
 
 
-void x11trans::sendframe(rrfb *f, bool sync)
+void x11trans::sendframe(FBXFrame *f, bool sync)
 {
 	if(_t) _t->checkError();
 	if(sync) 
 	{
-		_prof_blit.startframe();
+		_prof_blit.startFrame();
 		f->redraw();
-		f->complete();
-		_prof_blit.endframe(f->_h.width*f->_h.height, 0, 1);
+		f->signalComplete();
+		_prof_blit.endFrame(f->hdr.width*f->hdr.height, 0, 1);
 		_ready.signal();
 	}
 	else _q.spoil((void *)f, __x11trans_spoilfct);

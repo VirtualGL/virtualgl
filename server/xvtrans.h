@@ -17,11 +17,11 @@
 #define __XVTRANS_H__
 
 #include "Thread.h"
-#include "rrframe.h"
+#include "Frame.h"
 #include "GenericQ.h"
-#include "rrprofiler.h"
+#include "Profiler.h"
 
-using namespace vglutil;
+using namespace vglcommon;
 
 
 class xvtrans : public Runnable
@@ -42,18 +42,18 @@ class xvtrans : public Runnable
 
 		bool ready(void);
 		void synchronize(void);
-		void sendframe(rrxvframe *, bool sync=false);
+		void sendframe(XVFrame *, bool sync=false);
 		void run(void);
-		rrxvframe *getframe(Display *, Window, int, int);
+		XVFrame *getframe(Display *, Window, int, int);
 
 	private:
 
 		static const int NFRAMES=3;
-		CS _mutex;  rrxvframe *_frame[NFRAMES];
+		CS _mutex;  XVFrame *_frame[NFRAMES];
 		Event _ready;
 		GenericQ _q;
 		Thread *_t;  bool _deadyet;
-		rrprofiler _prof_xv, _prof_total;
+		Profiler _prof_xv, _prof_total;
 };
 
 

@@ -142,7 +142,7 @@ void vgltransreceiver::run(void)
 void vgltransserver::run(void)
 {
 	clientwin *w=NULL;
-	rrframe *f=NULL;
+	Frame *f=NULL;
 	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
 	rrversion v;
 
@@ -201,15 +201,15 @@ void vgltransserver::run(void)
 				#ifdef USEXV
 				if(h.compress==RRCOMP_YUV)
 				{
-					((rrxvframe *)f)->init(h);
-					if(h.size!=((rrxvframe *)f)->_h.size && h.flags!=RR_EOF)
+					((XVFrame *)f)->init(h);
+					if(h.size!=((XVFrame *)f)->hdr.size && h.flags!=RR_EOF)
 						_throw("YUV image size mismatch");
 				}
 				else
 				#endif
-				((rrcompframe *)f)->init(h, h.flags);
+				((CompressedFrame *)f)->init(h, h.flags);
 				if(h.flags!=RR_EOF)
-					recv((char *)(h.flags==RR_RIGHT? f->_rbits:f->_bits), h.size);
+					recv((char *)(h.flags==RR_RIGHT? f->rbits:f->bits), h.size);
 
 				if(!stereo || h.flags!=RR_LEFT)
 				{
@@ -217,7 +217,7 @@ void vgltransserver::run(void)
 					catch (...) {if(w) delwindow(w);  throw;}
 				}
 
-			} while(!(f && f->_h.flags==RR_EOF));
+			} while(!(f && f->hdr.flags==RR_EOF));
 
 			if(v.major==1 && v.minor==0)
 			{

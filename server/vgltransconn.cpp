@@ -17,6 +17,7 @@
 #include "Timer.h"
 #include "fakerconfig.h"
 #include "vglutil.h"
+#include "Log.h"
 #ifdef _WIN32
 #include <io.h>
 #define _POSIX_
@@ -100,13 +101,13 @@ vgltransconn::vgltransconn(void) : _np(fconfig.np),
 	_dosend(false), _sd(NULL), _t(NULL), _deadyet(false), _dpynum(0)
 {
 	memset(&_v, 0, sizeof(rrversion));
-	_prof_total.setname("Total(mov)");
+	_prof_total.setName("Total(mov)");
 }
 
 
 void vgltransconn::run(void)
 {
-	rrframe *lastf=NULL, *f=NULL;
+	Frame *lastf=NULL, *f=NULL;
 	long bytes=0;
 	Timer t, sleept;  double err=0.;  bool first=true;
 	int i;
@@ -129,10 +130,10 @@ void vgltransconn::run(void)
 		{
 			int np;
 			void *ftemp=NULL;
-			_q.get(&ftemp);  f=(rrframe *)ftemp;  if(_deadyet) break;
+			_q.get(&ftemp);  f=(Frame *)ftemp;  if(_deadyet) break;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
-			np=_np;  if(f->_h.compress==RRCOMP_YUV) np=1;
+			np=_np;  if(f->hdr.compress==RRCOMP_YUV) np=1;
 			if(np>1)
 				for(i=1; i<np; i++) {
 					ct[i]->checkError();  c[i]->go(f, lastf);
@@ -145,11 +146,11 @@ void vgltransconn::run(void)
 					bytes+=c[i]->_bytes;
 				}
 
-			sendheader(f->_h, true);
+			sendheader(f->hdr, true);
 
-			_prof_total.endframe(f->_h.width*f->_h.height, bytes, 1);
+			_prof_total.endFrame(f->hdr.width*f->hdr.height, bytes, 1);
 			bytes=0;
-			_prof_total.startframe();
+			_prof_total.startFrame();
 
 			if(fconfig.flushdelay>0.)
 			{
@@ -174,7 +175,7 @@ void vgltransconn::run(void)
 				t.start();
 			}
 
-			if(lastf) lastf->complete();
+			if(lastf) lastf->signalComplete();
 			lastf=f;
 		}
 
@@ -197,18 +198,18 @@ void vgltransconn::run(void)
 }
 
 
-rrframe *vgltransconn::getframe(int w, int h, int ps, int flags,
+Frame *vgltransconn::getframe(int w, int h, int ps, int flags,
 	bool stereo)
 {
-	rrframe *f=NULL;
+	Frame *f=NULL;
 	if(_deadyet) return NULL;
 	if(_t) _t->checkError();
 	{
 	CS::SafeLock l(_mutex);
 	int framei=-1;
-	for(int i=0; i<NFRAMES; i++) if(_frame[i].iscomplete()) framei=i;
+	for(int i=0; i<NFRAMES; i++) if(_frame[i].isComplete()) framei=i;
 	if(framei<0) _throw("No free buffers in pool");
-	f=&_frame[framei];  f->waituntilcomplete();
+	f=&_frame[framei];  f->waitUntilComplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(rrframeheader));
@@ -235,70 +236,70 @@ void vgltransconn::synchronize(void)
 
 static void __vgltransconn_spoilfct(void *f)
 {
-	if(f) ((rrframe *)f)->complete();
+	if(f) ((Frame *)f)->signalComplete();
 }
 
 
-void vgltransconn::sendframe(rrframe *f)
+void vgltransconn::sendframe(Frame *f)
 {
 	if(_t) _t->checkError();
-	f->_h.dpynum=_dpynum;
+	f->hdr.dpynum=_dpynum;
 	_q.spoil((void *)f, __vgltransconn_spoilfct);
 }
 
 
-void vgltranscompressor::compresssend(rrframe *f, rrframe *lastf)
+void vgltranscompressor::compresssend(Frame *f, Frame *lastf)
 {
-	bool bu=false;  rrcompframe cf;
+	bool bu=false;  CompressedFrame cf;
 	if(!f) return;
-	if(f->_flags&RRFRAME_BOTTOMUP) bu=true;
-	int tilesizex=fconfig.tilesize? fconfig.tilesize:f->_h.width;
-	int tilesizey=fconfig.tilesize? fconfig.tilesize:f->_h.height;
+	if(f->flags&FRAME_BOTTOMUP) bu=true;
+	int tilesizex=fconfig.tilesize? fconfig.tilesize:f->hdr.width;
+	int tilesizey=fconfig.tilesize? fconfig.tilesize:f->hdr.height;
 	int i, j, n=0;
 
-	if(f->_h.compress==RRCOMP_YUV)
+	if(f->hdr.compress==RRCOMP_YUV)
 	{
-		_prof_comp.startframe();
+		_prof_comp.startFrame();
 		cf=*f;
-		_prof_comp.endframe(f->_h.framew*f->_h.frameh, 0, 1);
-		_parent->sendheader(cf._h);
-		if(_parent->_dosend) _parent->send((char *)cf._bits, cf._h.size);
+		_prof_comp.endFrame(f->hdr.framew*f->hdr.frameh, 0, 1);
+		_parent->sendheader(cf.hdr);
+		if(_parent->_dosend) _parent->send((char *)cf.bits, cf.hdr.size);
 		return;
 	}
 
 	_bytes=0;
-	for(i=0; i<f->_h.height; i+=tilesizey)
+	for(i=0; i<f->hdr.height; i+=tilesizey)
 	{
 		int h=tilesizey, y=i;
-		if(f->_h.height-i<(3*tilesizey/2)) {h=f->_h.height-i;  i+=tilesizey;}
-		for(j=0; j<f->_h.width; j+=tilesizex, n++)
+		if(f->hdr.height-i<(3*tilesizey/2)) {h=f->hdr.height-i;  i+=tilesizey;}
+		for(j=0; j<f->hdr.width; j+=tilesizex, n++)
 		{
 			int w=tilesizex, x=j;
-			if(f->_h.width-j<(3*tilesizex/2)) {w=f->_h.width-j;  j+=tilesizex;}
+			if(f->hdr.width-j<(3*tilesizex/2)) {w=f->hdr.width-j;  j+=tilesizex;}
 			if(n%_np!=_myrank) continue;
 			if(fconfig.interframe)
 			{
-				if(f->tileequals(lastf, x, y, w, h)) continue;
+				if(f->tileEquals(lastf, x, y, w, h)) continue;
 			}
-			rrframe *tile=f->gettile(x, y, w, h);
-			rrcompframe *c=NULL;
-			if(_myrank>0) {errifnot(c=new rrcompframe());}
+			Frame *tile=f->getTile(x, y, w, h);
+			CompressedFrame *c=NULL;
+			if(_myrank>0) {errifnot(c=new CompressedFrame());}
 			else c=&cf;
-			_prof_comp.startframe();
+			_prof_comp.startFrame();
 			*c=*tile;
-			double frames=(double)(tile->_h.width*tile->_h.height)
-				/(double)(tile->_h.framew*tile->_h.frameh);
-			_prof_comp.endframe(tile->_h.width*tile->_h.height, 0, frames);
-			_bytes+=c->_h.size;  if(c->_stereo) _bytes+=c->_rh.size;
+			double frames=(double)(tile->hdr.width*tile->hdr.height)
+				/(double)(tile->hdr.framew*tile->hdr.frameh);
+			_prof_comp.endFrame(tile->hdr.width*tile->hdr.height, 0, frames);
+			_bytes+=c->hdr.size;  if(c->stereo) _bytes+=c->rhdr.size;
 			delete tile;
 			if(_myrank==0)
 			{
-				_parent->sendheader(c->_h);
-				if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
-				if(c->_stereo && c->_rbits)
+				_parent->sendheader(c->hdr);
+				if(_parent->_dosend) _parent->send((char *)c->bits, c->hdr.size);
+				if(c->stereo && c->rbits)
 				{
-					_parent->sendheader(c->_rh);
-					if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
+					_parent->sendheader(c->rhdr);
+					if(_parent->_dosend) _parent->send((char *)c->rbits, c->rhdr.size);
 				}
 			}
 			else
@@ -367,7 +368,7 @@ void vgltransconn::connect(char *displayname, unsigned short port)
 			throw;
 		}
 		_dosend=true;
-		_prof_total.setname("Total     ");
+		_prof_total.setName("Total     ");
 		errifnot(_t=new Thread(this));
 		_t->start();
 	}
@@ -383,14 +384,14 @@ void vgltranscompressor::send(void)
 {
 	for(int i=0; i<_storedframes; i++)
 	{
-		rrcompframe *c=_frame[i];
+		CompressedFrame *c=_frame[i];
 		errifnot(c);
-		_parent->sendheader(c->_h);
-		if(_parent->_dosend) _parent->send((char *)c->_bits, c->_h.size);
-		if(c->_stereo && c->_rbits)
+		_parent->sendheader(c->hdr);
+		if(_parent->_dosend) _parent->send((char *)c->bits, c->hdr.size);
+		if(c->stereo && c->rbits)
 		{
-			_parent->sendheader(c->_rh);
-			if(_parent->_dosend) _parent->send((char *)c->_rbits, c->_rh.size);
+			_parent->sendheader(c->rhdr);
+			if(_parent->_dosend) _parent->send((char *)c->rbits, c->rhdr.size);
 		}
 		delete c;		
 	}

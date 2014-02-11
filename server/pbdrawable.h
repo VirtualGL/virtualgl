@@ -91,7 +91,7 @@ class pbdrawable
 		GLXContext _ctx;
 		Bool _direct;
 		x11trans *_x11trans;
-		rrprofiler _prof_rb;
+		Profiler _prof_rb;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
 };

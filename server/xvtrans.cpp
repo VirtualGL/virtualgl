@@ -17,6 +17,7 @@
 #include "vglutil.h"
 #include "Timer.h"
 #include "fakerconfig.h"
+#include "Log.h"
 
 
 xvtrans::xvtrans(void) : _t(NULL), _deadyet(false)
@@ -24,8 +25,8 @@ xvtrans::xvtrans(void) : _t(NULL), _deadyet(false)
 	for(int i=0; i<NFRAMES; i++) _frame[i]=NULL;
 	errifnot(_t=new Thread(this));
 	_t->start();
-	_prof_xv.setname("XV        ");
-	_prof_total.setname("Total     ");
+	_prof_xv.setName("XV        ");
+	_prof_total.setName("Total     ");
 	if(fconfig.verbose) fbxv_printwarnings(vglout.getFile());
 }
 
@@ -38,16 +39,16 @@ void xvtrans::run(void)
 	{
 		while(!_deadyet)
 		{
-			rrxvframe *f;  void *ftemp=NULL;
-			_q.get(&ftemp);  f=(rrxvframe *)ftemp;  if(_deadyet) return;
+			XVFrame *f;  void *ftemp=NULL;
+			_q.get(&ftemp);  f=(XVFrame *)ftemp;  if(_deadyet) return;
 			if(!f) _throw("Queue has been shut down");
 			_ready.signal();
-			_prof_xv.startframe();
+			_prof_xv.startFrame();
 			f->redraw();
-			_prof_xv.endframe(f->_h.width*f->_h.height, 0, 1);
+			_prof_xv.endFrame(f->hdr.width*f->hdr.height, 0, 1);
 
-			_prof_total.endframe(f->_h.width*f->_h.height, 0, 1);
-			_prof_total.startframe();
+			_prof_total.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+			_prof_total.startFrame();
 
 			if(fconfig.flushdelay>0.)
 			{
@@ -72,7 +73,7 @@ void xvtrans::run(void)
 				t.start();
 			}
 
-			f->complete();
+			f->signalComplete();
 		}
 
 	}
@@ -84,18 +85,18 @@ void xvtrans::run(void)
 }
 
 
-rrxvframe *xvtrans::getframe(Display *dpy, Window win, int w, int h)
+XVFrame *xvtrans::getframe(Display *dpy, Window win, int w, int h)
 {
-	rrxvframe *f=NULL;
+	XVFrame *f=NULL;
 	if(_t) _t->checkError();
 	{
 		CS::SafeLock l(_mutex);
 		int framei=-1;
 		for(int i=0; i<NFRAMES; i++)
-			if(!_frame[i] || (_frame[i] && _frame[i]->iscomplete())) framei=i;
+			if(!_frame[i] || (_frame[i] && _frame[i]->isComplete())) framei=i;
 		if(framei<0) _throw("No free buffers in pool");
-		if(!_frame[framei]) errifnot(_frame[framei]=new rrxvframe(dpy, win));
-		f=_frame[framei];  f->waituntilcomplete();
+		if(!_frame[framei]) errifnot(_frame[framei]=new XVFrame(dpy, win));
+		f=_frame[framei];  f->waitUntilComplete();
 	}
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
@@ -122,19 +123,19 @@ void xvtrans::synchronize(void)
 
 static void __xvtrans_spoilfct(void *f)
 {
-	if(f) ((rrxvframe *)f)->complete();
+	if(f) ((XVFrame *)f)->signalComplete();
 }
 
 
-void xvtrans::sendframe(rrxvframe *f, bool sync)
+void xvtrans::sendframe(XVFrame *f, bool sync)
 {
 	if(_t) _t->checkError();
 	if(sync) 
 	{
-		_prof_xv.startframe();
+		_prof_xv.startFrame();
 		f->redraw();
-		f->complete();
-		_prof_xv.endframe(f->_h.width*f->_h.height, 0, 1);
+		f->signalComplete();
+		_prof_xv.endFrame(f->hdr.width*f->hdr.height, 0, 1);
 		_ready.signal();
 	}
 	else _q.spoil((void *)f, __xvtrans_spoilfct);

@@ -1,4 +1,4 @@
-/* Copyright (C)2011, 2013 D. R. Commander
+/* Copyright (C)2011, 2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,7 +12,7 @@
  */
 
 #include "pbdrawable.h"
-#include "rrframe.h"
+#include "Frame.h"
 
 
 class pbpm : public pbdrawable
@@ -29,7 +29,7 @@ class pbpm : public pbdrawable
 
 	private:
 
-		rrprofiler _prof_pmblit;
-		rrfb *_fb;
+		Profiler _prof_pmblit;
+		FBXFrame *_fb;
 		XVisualInfo *vis;
 };

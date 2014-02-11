@@ -15,8 +15,9 @@
 
 #include "clientwin.h"
 #include "Error.h"
-#include "rrprofiler.h"
-#include "rrglframe.h"
+#include "Log.h"
+#include "Profiler.h"
+#include "GLFrame.h"
 
 
 extern Display *maindpy;
@@ -63,18 +64,18 @@ clientwin::~clientwin(void)
 	{
 		if(_xvf[i])
 		{
-			_xvf[i]->complete();  delete _xvf[i];  _xvf[i]=NULL;
+			_xvf[i]->signalComplete();  delete _xvf[i];  _xvf[i]=NULL;
 		}
 	}
 	#endif
-	for(int i=0; i<NFRAMES; i++) _cf[i].complete();
+	for(int i=0; i<NFRAMES; i++) _cf[i].signalComplete();
 	if(_t) {delete _t;  _t=NULL;}
 }
 
 
 void clientwin::initgl(void)
 {
-	rrglframe *fb=NULL;
+	GLFrame *fb=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
@@ -86,7 +87,7 @@ void clientwin::initgl(void)
 	{
 		try
 		{
-			fb=new rrglframe(dpystr, _window);
+			fb=new GLFrame(dpystr, _window);
 			if(!fb) _throw("Could not allocate class instance");
 		}
 		catch(Error &e)
@@ -104,17 +105,17 @@ void clientwin::initgl(void)
 	{
 		if(_fb)
 		{
-			if(_fb->_isgl) delete ((rrglframe *)_fb);
-			else delete ((rrfb *)_fb);
+			if(_fb->isGL) delete ((GLFrame *)_fb);
+			else delete ((FBXFrame *)_fb);
 		}
-		_fb=(rrframe *)fb;
+		_fb=(Frame *)fb;
 	}
 }
 
 
 void clientwin::initx11(void)
 {
-	rrfb *fb=NULL;
+	FBXFrame *fb=NULL;
 	char dpystr[80];
 	#ifdef XDK
 	sprintf(dpystr, "localhost:%d.0", _dpynum);
@@ -126,7 +127,7 @@ void clientwin::initx11(void)
 	{
 		try
 		{
-			fb=new rrfb(dpystr, _window);
+			fb=new FBXFrame(dpystr, _window);
 			if(!fb) _throw("Could not allocate class instance");
 		}
 		catch(...)
@@ -139,10 +140,10 @@ void clientwin::initx11(void)
 	{
 		if(_fb)
 		{
-			if(_fb->_isgl) {delete ((rrglframe *)_fb);}
-			else delete ((rrfb *)_fb);
+			if(_fb->isGL) {delete ((GLFrame *)_fb);}
+			else delete ((FBXFrame *)_fb);
 		}
-		_fb=(rrframe *)fb;
+		_fb=(Frame *)fb;
 	}
 }
 
@@ -153,9 +154,9 @@ int clientwin::match(int dpynum, Window window)
 }
 
 
-rrframe *clientwin::getframe(bool usexv)
+Frame *clientwin::getframe(bool usexv)
 {
-	rrframe *f=NULL;
+	Frame *f=NULL;
 	if(_t) _t->checkError();
 	_cfmutex.lock();
 	#ifdef USEXV
@@ -165,29 +166,29 @@ rrframe *clientwin::getframe(bool usexv)
 		{
 			char dpystr[80];
 			sprintf(dpystr, ":%d.0", _dpynum);
-			_xvf[_cfi]=new rrxvframe(dpystr, _window);
+			_xvf[_cfi]=new XVFrame(dpystr, _window);
 			if(!_xvf[_cfi]) _throw("Could not allocate class instance");
 		}
-		f=(rrframe *)_xvf[_cfi];
+		f=(Frame *)_xvf[_cfi];
 	}
 	else
 	#endif
-	f=(rrframe *)&_cf[_cfi];
+	f=(Frame *)&_cf[_cfi];
 	_cfi=(_cfi+1)%NFRAMES;
 	_cfmutex.unlock();
-	f->waituntilcomplete();
+	f->waitUntilComplete();
 	if(_t) _t->checkError();
 	return f;
 }
 
 
-void clientwin::drawframe(rrframe *f)
+void clientwin::drawframe(Frame *f)
 {
 	if(_t) _t->checkError();
-	if(!f->_isxv)
+	if(!f->isXV)
 	{
-		rrcompframe *c=(rrcompframe *)f;
-		if((c->_rh.flags==RR_RIGHT || c->_h.flags==RR_LEFT) && !_stereo)
+		CompressedFrame *c=(CompressedFrame *)f;
+		if((c->rhdr.flags==RR_RIGHT || c->hdr.flags==RR_LEFT) && !_stereo)
 		{
 			_stereo=true;
 			if(_drawmethod!=RR_DRAWOGL)
@@ -196,7 +197,7 @@ void clientwin::drawframe(rrframe *f)
 				initgl();
 			}
 		}
-		if((c->_h.flags==0) && _stereo)
+		if((c->hdr.flags==0) && _stereo)
 		{
 			_stereo=false;
 			_drawmethod=_reqdrawmethod;
@@ -210,64 +211,64 @@ void clientwin::drawframe(rrframe *f)
 
 void clientwin::run(void)
 {
-	rrprofiler pt("Total     "), pb("Blit      "), pd("Decompress");
-	rrframe *f=NULL;  long bytes=0;
+	Profiler pt("Total     "), pb("Blit      "), pd("Decompress");
+	Frame *f=NULL;  long bytes=0;
 
 	try
 	{
 		while(!_deadyet)
 		{
 			void *ftemp=NULL;
-			_q.get(&ftemp);  f=(rrframe *)ftemp;  if(_deadyet) break;
+			_q.get(&ftemp);  f=(Frame *)ftemp;  if(_deadyet) break;
 			if(!f) throw(Error("clientwin::run()",
 				"Invalid image received from queue"));
 			CS::SafeLock l(_mutex);
 			#ifdef USEXV
-			if(f->_isxv)
+			if(f->isXV)
 			{
-				if(f->_h.flags!=RR_EOF)
+				if(f->hdr.flags!=RR_EOF)
 				{
-					pb.startframe();
-					((rrxvframe *)f)->redraw();
-					pb.endframe(f->_h.width*f->_h.height, 0, 1);
-					pt.endframe(f->_h.width*f->_h.height, bytes, 1);
+					pb.startFrame();
+					((XVFrame *)f)->redraw();
+					pb.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+					pt.endFrame(f->hdr.width*f->hdr.height, bytes, 1);
 					bytes=0;
-					pt.startframe();
+					pt.startFrame();
 				}
 			}
 			else
 			#endif
 			{
-				if(f->_h.flags==RR_EOF)
+				if(f->hdr.flags==RR_EOF)
 				{
-					pb.startframe();
-					if(_fb->_isgl) ((rrglframe *)_fb)->init(f->_h, _stereo);
-					else ((rrfb *)_fb)->init(f->_h);
-					if(_fb->_isgl) ((rrglframe *)_fb)->redraw();
-					else ((rrfb *)_fb)->redraw();
-					pb.endframe(_fb->_h.framew*_fb->_h.frameh, 0, 1);
-					pt.endframe(_fb->_h.framew*_fb->_h.frameh, bytes, 1);
+					pb.startFrame();
+					if(_fb->isGL) ((GLFrame *)_fb)->init(f->hdr, _stereo);
+					else ((FBXFrame *)_fb)->init(f->hdr);
+					if(_fb->isGL) ((GLFrame *)_fb)->redraw();
+					else ((FBXFrame *)_fb)->redraw();
+					pb.endFrame(_fb->hdr.framew*_fb->hdr.frameh, 0, 1);
+					pt.endFrame(_fb->hdr.framew*_fb->hdr.frameh, bytes, 1);
 					bytes=0;
-					pt.startframe();
+					pt.startFrame();
 				}
 				else
 				{
-					pd.startframe();
-					if(_fb->_isgl) *((rrglframe *)_fb)=*((rrcompframe *)f);
-					else *((rrfb *)_fb)=*((rrcompframe *)f);
-					pd.endframe(f->_h.width*f->_h.height, 0,
-						(double)(f->_h.width*f->_h.height)/
-							(double)(f->_h.framew*f->_h.frameh));
-					bytes+=f->_h.size;
+					pd.startFrame();
+					if(_fb->isGL) *((GLFrame *)_fb)=*((CompressedFrame *)f);
+					else *((FBXFrame *)_fb)=*((CompressedFrame *)f);
+					pd.endFrame(f->hdr.width*f->hdr.height, 0,
+						(double)(f->hdr.width*f->hdr.height)/
+							(double)(f->hdr.framew*f->hdr.frameh));
+					bytes+=f->hdr.size;
 				}
 			}
-			f->complete();
+			f->signalComplete();
 		}
 
 	}
 	catch(Error &e)
 	{
-		if(_t) _t->setError(e);  if(f) f->complete();
+		if(_t) _t->setError(e);  if(f) f->signalComplete();
 		throw;
 	}
 }

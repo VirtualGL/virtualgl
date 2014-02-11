@@ -23,8 +23,8 @@ extern Display *_localdpy;
 pbpm::pbpm(Display *dpy, XVisualInfo *vis, Pixmap pm) : pbdrawable(dpy, pm)
 {
 	CS::SafeLock l(_mutex);
-	_prof_pmblit.setname("PMap Blit ");
-	errifnot(_fb=new rrfb(dpy, pm, vis->visual));
+	_prof_pmblit.setName("PMap Blit ");
+	errifnot(_fb=new FBXFrame(dpy, pm, vis->visual));
 }
 
 
@@ -76,42 +76,42 @@ void pbpm::readback(void)
 	hdr.x=hdr.y=0;
 	_fb->init(hdr);
 
-	_fb->_flags|=RRFRAME_BOTTOMUP;
+	_fb->flags|=FRAME_BOTTOMUP;
 	int format;
-	unsigned char *bits=_fb->_bits;
-	switch(_fb->_pixelsize)
+	unsigned char *bits=_fb->bits;
+	switch(_fb->pixelSize)
 	{
 		case 1:  format=GL_COLOR_INDEX;  break;
 		case 3:
 			format=GL_RGB;
 			#ifdef GL_BGR_EXT
-			if(_fb->_flags&RRFRAME_BGR) format=GL_BGR_EXT;
+			if(_fb->flags&FRAME_BGR) format=GL_BGR_EXT;
 			#endif
 			break;
 		case 4:
 			format=GL_RGBA;
 			#ifdef GL_BGRA_EXT
-			if(_fb->_flags&RRFRAME_BGR && !(_fb->_flags&RRFRAME_ALPHAFIRST))
+			if(_fb->flags&FRAME_BGR && !(_fb->flags&FRAME_ALPHAFIRST))
 				format=GL_BGRA_EXT;
 			#endif
-			if(_fb->_flags&RRFRAME_BGR && _fb->_flags&RRFRAME_ALPHAFIRST)
+			if(_fb->flags&FRAME_BGR && _fb->flags&FRAME_ALPHAFIRST)
 			{
 				#ifdef GL_ABGR_EXT
 				format=GL_ABGR_EXT;
 				#elif defined(GL_BGRA_EXT)
-				format=GL_BGRA_EXT;  bits=_fb->_bits+1;
+				format=GL_BGRA_EXT;  bits=_fb->bits+1;
 				#endif
 			}
-			if(!(_fb->_flags&RRFRAME_BGR) && _fb->_flags&RRFRAME_ALPHAFIRST)
+			if(!(_fb->flags&FRAME_BGR) && _fb->flags&FRAME_ALPHAFIRST)
 			{
-				format=GL_RGBA;  bits=_fb->_bits+1;
+				format=GL_RGBA;  bits=_fb->bits+1;
 			}
 			break;
 		default:
 			_throw("Unsupported pixel format");
 	}
-	readpixels(0, 0, min(pbw, _fb->_h.framew), _fb->_pitch,
-		min(pbh, _fb->_h.frameh), format, _fb->_pixelsize, bits, GL_FRONT, false);
+	readpixels(0, 0, min(pbw, _fb->hdr.framew), _fb->pitch,
+		min(pbh, _fb->hdr.frameh), format, _fb->pixelSize, bits, GL_FRONT, false);
 
 	_fb->redraw();
 }

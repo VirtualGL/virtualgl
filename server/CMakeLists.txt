@@ -40,7 +40,7 @@ if(MAPFLAG)
 else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
-target_link_libraries(rrfaker rrframe ${FBXFAKERLIB} vglsocket m
+target_link_libraries(rrfaker vglcommon ${FBXFAKERLIB} vglsocket m
 	${OPENGL_gl_LIBRARY} ${LIBDL})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
@@ -101,16 +101,16 @@ if(WIN32)
 else()
 	add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp)
 endif()
-target_link_libraries(x11transut rrframe ${FBXLIB} ${TJPEG_LIBRARY})
+target_link_libraries(x11transut vglcommon ${FBXLIB} ${TJPEG_LIBRARY})
 
 add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransconnut rrframe ${FBXLIB} vglsocket
+target_link_libraries(vgltransconnut vglcommon ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(vgltransreceiverut vgltransreceiverut.cpp vgltransconn.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransreceiverut rrframe ${FBXLIB} vglsocket
+target_link_libraries(vgltransreceiverut vglcommon ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
@@ -128,14 +128,14 @@ if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
 	set_target_properties(vgltrans_test PROPERTIES LINK_FLAGS "-Wl,-Bsymbolic")
 endif()
-target_link_libraries(vgltrans_test rrframe ${FBXFAKERLIB} ${TJPEG_LIBRARY}
+target_link_libraries(vgltrans_test vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY}
 	vglsocket)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()
 
 add_library(vgltrans_test2 SHARED testplugin2.cpp x11trans.cpp)
-target_link_libraries(vgltrans_test2 rrframe ${FBXFAKERLIB} ${TJPEG_LIBRARY})
+target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()

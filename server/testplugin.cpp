@@ -81,37 +81,37 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		int compress=_fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
 		else compress=RRCOMP_JPEG;
-		int flags=RRFRAME_BOTTOMUP, pixelsize=3;
+		int flags=FRAME_BOTTOMUP, pixelsize=3;
 		if(compress!=RRCOMP_RGB)
 		{
 			switch(format)
 			{
 				case RRTRANS_BGR:
-					flags|=RRFRAME_BGR;  break;
+					flags|=FRAME_BGR;  break;
 				case RRTRANS_RGBA:
 					pixelsize=4;  break;
 				case RRTRANS_BGRA:
-					flags|=RRFRAME_BGR;  pixelsize=4;  break;
+					flags|=FRAME_BGR;  pixelsize=4;  break;
 				case RRTRANS_ABGR:
-					flags|=(RRFRAME_BGR|RRFRAME_ALPHAFIRST);  pixelsize=4;  break;
+					flags|=(FRAME_BGR|FRAME_ALPHAFIRST);  pixelsize=4;  break;
 				case RRTRANS_ARGB:
-					flags|=RRFRAME_ALPHAFIRST;  pixelsize=4;  break;
+					flags|=FRAME_ALPHAFIRST;  pixelsize=4;  break;
 			}
 		}
-		rrframe *f=vglconn->getframe(width, height, pixelsize, flags,
+		Frame *f=vglconn->getframe(width, height, pixelsize, flags,
 			(bool)stereo);
-		f->_h.compress=compress;
+		f->hdr.compress=compress;
 		frame->opaque=(void *)f;
-		frame->w=f->_h.framew;
-		frame->h=f->_h.frameh;
-		frame->pitch=f->_pitch;
-		frame->bits=f->_bits;
-		frame->rbits=f->_rbits;
+		frame->w=f->hdr.framew;
+		frame->h=f->hdr.frameh;
+		frame->pitch=f->pitch;
+		frame->bits=f->bits;
+		frame->rbits=f->rbits;
 		for(int i=0; i<RRTRANS_FORMATOPT; i++)
 		{
-			if(rrtrans_bgr[i]==(f->_flags&RRFRAME_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->_flags&RRFRAME_ALPHAFIRST? 1:0)
-				&& rrtrans_ps[i]==f->_pixelsize)
+			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
+				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
+				&& rrtrans_ps[i]==f->pixelSize)
 				{frame->format=i;  break;}
 		}
 		return frame;
@@ -164,12 +164,12 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	{
 		vgltransconn *vglconn=(vgltransconn *)handle;
 		if(!vglconn) _throw("Invalid handle");
-		rrframe *f;
-		if(!frame || (f=(rrframe *)frame->opaque)==NULL)
+		Frame *f;
+		if(!frame || (f=(Frame *)frame->opaque)==NULL)
 			_throw("Invalid frame handle");
-		f->_h.qual=_fconfig->qual;
-		f->_h.subsamp=_fconfig->subsamp;
-		f->_h.winid=_win;
+		f->hdr.qual=_fconfig->qual;
+		f->hdr.subsamp=_fconfig->subsamp;
+		f->hdr.winid=_win;
 		vglconn->sendframe(f);
 		delete frame;
 	}

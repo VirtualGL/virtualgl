@@ -4,13 +4,13 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(rrframe STATIC rrframe.cpp)
-target_link_libraries(rrframe vglutil ${TJPEG_LIBRARY})
+add_library(vglcommon STATIC Frame.cpp Profiler.cpp)
+target_link_libraries(vglcommon vglutil ${TJPEG_LIBRARY})
 
 
 #
 # Unit tests
 #
 
-add_executable(rrframeut rrframeut.cpp)
-target_link_libraries(rrframeut rrframe ${FBXLIB} rrglframe)
+add_executable(frameut frameut.cpp)
+target_link_libraries(frameut vglcommon ${FBXLIB} glframe)

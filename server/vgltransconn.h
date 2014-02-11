@@ -19,14 +19,14 @@
 #include "Socket.h"
 #include "Thread.h"
 #include "rr.h"
-#include "rrframe.h"
+#include "Frame.h"
 #include "GenericQ.h"
-#include "rrprofiler.h"
+#include "Profiler.h"
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
 
-using namespace vglutil;
+using namespace vglcommon;
 
 
 class vgltransconn : public Runnable
@@ -42,10 +42,10 @@ class vgltransconn : public Runnable
 			if(_sd) {delete _sd;  _sd=NULL;}
 		}
 
-		rrframe *getframe(int, int, int, int, bool stereo);
+		Frame *getframe(int, int, int, int, bool stereo);
 		bool ready(void);
 		void synchronize(void);
-		void sendframe(rrframe *);
+		void sendframe(Frame *);
 		void run(void);
 		void sendheader(rrframeheader h, bool eof);
 		void send(char *, int);
@@ -60,11 +60,11 @@ class vgltransconn : public Runnable
 
 		Socket *_sd;
 		static const int NFRAMES=4;
-		CS _mutex;  rrframe _frame[NFRAMES];
+		CS _mutex;  Frame _frame[NFRAMES];
 		Event _ready;
 		GenericQ _q;
 		Thread *_t;  bool _deadyet;
-		rrprofiler _prof_total;
+		Profiler _prof_total;
 		int _dpynum;
 		rrversion _v;
 };
@@ -121,7 +121,7 @@ class vgltranscompressor : public Runnable
 			char temps[20];
 			if(_parent->_dosend) snprintf(temps, 19, "Compress %d", myrank);
 			else snprintf(temps, 19, "Comp(mov)%d", myrank);
-			_prof_comp.setname(temps);
+			_prof_comp.setName(temps);
 		}
 
 		virtual ~vgltranscompressor(void)
@@ -143,7 +143,7 @@ class vgltranscompressor : public Runnable
 			}
 		}
 
-		void go(rrframe *b, rrframe *lastb)
+		void go(Frame *b, Frame *lastb)
 		{
 			_b=b;  _lastb=lastb;
 			_ready.signal();
@@ -155,28 +155,28 @@ class vgltranscompressor : public Runnable
 		}
 
 		void shutdown(void) {_deadyet=true;  _ready.signal();}
-		void compresssend(rrframe *, rrframe *);
+		void compresssend(Frame *, Frame *);
 		void send(void);
 
 		long _bytes;
 
 	private:
 
-		void store(rrcompframe *c)
+		void store(CompressedFrame *c)
 		{
 			_storedframes++;
-			if(!(_frame=(rrcompframe **)realloc(_frame,
-				sizeof(rrcompframe *)*_storedframes)))
+			if(!(_frame=(CompressedFrame **)realloc(_frame,
+				sizeof(CompressedFrame *)*_storedframes)))
 				_throw("Memory allocation error");
 			_frame[_storedframes-1]=c;
 		}
 
-		int _storedframes;  rrcompframe **_frame;
-		rrframe *_b, *_lastb;
+		int _storedframes;  CompressedFrame **_frame;
+		Frame *_b, *_lastb;
 		int _myrank, _np;
 		Event _ready, _complete;  bool _deadyet;
 		CS _mutex;
-		rrprofiler _prof_comp;
+		Profiler _prof_comp;
 		vgltransconn *_parent;
 };
 

@@ -19,11 +19,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "rrframe.h"
+#include "Frame.h"
 #include "Thread.h"
 #include "genericQ.h"
 
-using namespace vglutil;
+using namespace vglcommon;
 
 
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
@@ -35,8 +35,8 @@ class clientwin : public Runnable
 
 		clientwin(int, Window, int, bool);
 		virtual ~clientwin(void);
-		rrframe *getframe(bool);
-		void drawframe(rrframe *);
+		Frame *getframe(bool);
+		void drawframe(Frame *);
 		int match(int, Window);
 		bool stereoenabled(void) {return _stereo;}
 
@@ -44,9 +44,9 @@ class clientwin : public Runnable
 
 		int _drawmethod, _reqdrawmethod;
 		static const int NFRAMES=2;
-		rrframe *_fb;  rrcompframe _cf[NFRAMES];  int _cfi;
+		Frame *_fb;  CompressedFrame _cf[NFRAMES];  int _cfi;
 		#ifdef USEXV
-		rrxvframe *_xvf[NFRAMES];
+		XVFrame *_xvf[NFRAMES];
 		#endif
 		void initgl(void);
 		void initx11(void);

@@ -53,9 +53,9 @@ pbwin::pbwin(Display *dpy, Window win) : pbdrawable(dpy, win)
 	_xvtrans=NULL;
 	#endif
 	_vglconn=NULL;
-	_prof_gamma.setname("Gamma     ");
-	_prof_anaglyph.setname("Anaglyph  ");
-	_prof_passive.setname("Stereo Gen");
+	_prof_gamma.setName("Gamma     ");
+	_prof_anaglyph.setName("Anaglyph  ");
+	_prof_passive.setName("Stereo Gen");
 	_syncdpy=false;
 	_dirty=false;
 	_rdirty=false;
@@ -329,7 +329,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	bool dostereo, int stereomode)
 {
-	rrframe f;
+	Frame f;
 	int pbw=_pb->width(), pbh=_pb->height();
 	RRFrame *frame=NULL;
 
@@ -357,9 +357,9 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	frame=_plugin->getframe(pbw, pbh, desiredformat,
 		dostereo && stereomode==RRSTEREO_QUADBUF);
 	f.init(frame->bits, frame->w, frame->pitch, frame->h,
-		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? RRFRAME_BGR:0) |
-		(rrtrans_afirst[frame->format]? RRFRAME_ALPHAFIRST:0) |
-		RRFRAME_BOTTOMUP);
+		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? FRAME_BGR:0) |
+		(rrtrans_afirst[frame->format]? FRAME_ALPHAFIRST:0) |
+		FRAME_BOTTOMUP);
 	int glformat= (rrtrans_ps[frame->format]==3? GL_RGB:GL_RGBA);
 	#ifdef GL_BGR_EXT
 	if(frame->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
@@ -387,17 +387,17 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 	}
 	if(dostereo && isanaglyphic(stereomode))
 	{
-		_stf.deinit();
+		_stf.deInit();
 		makeanaglyph(&f, drawbuf, stereomode);
 	}
 	else if(dostereo && ispassive(stereomode))
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();
 		makepassive(&f, drawbuf, glformat, stereomode);
 	}
 	else
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();  _stf.deInit();
 		GLint buf=drawbuf;
 		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
@@ -408,7 +408,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 				rrtrans_ps[frame->format], frame->rbits, reye(drawbuf), dostereo);
 	}
 	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
-	if(fconfig.logo) f.addlogo();
+	if(fconfig.logo) f.addLogo();
 	_plugin->sendframe(frame, sync);
 }
 
@@ -420,18 +420,18 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 
 	if(spoillast && fconfig.spoil && !vgltrans->ready())
 		return;
-	rrframe *f;
+	Frame *f;
 
-	int flags=RRFRAME_BOTTOMUP, format=GL_RGB, pixelsize=3;
+	int flags=FRAME_BOTTOMUP, format=GL_RGB, pixelsize=3;
 	if(compress!=RRCOMP_RGB)
 	{
 		format=_pb->format();
 		if(_pb->format()==GL_RGBA) pixelsize=4;
 		#ifdef GL_BGR_EXT
-		else if(_pb->format()==GL_BGR_EXT) flags|=RRFRAME_BGR;
+		else if(_pb->format()==GL_BGR_EXT) flags|=FRAME_BGR;
 		#endif
 		#ifdef GL_BGRA_EXT
-		else if(_pb->format()==GL_BGRA_EXT) {flags|=RRFRAME_BGR;  pixelsize=4;}
+		else if(_pb->format()==GL_BGRA_EXT) {flags|=FRAME_BGR;  pixelsize=4;}
 		#endif
 	}
 
@@ -440,36 +440,36 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
 	if(dostereo && isanaglyphic(stereomode))
 	{
-		_stf.deinit();
+		_stf.deInit();
 		makeanaglyph(f, drawbuf, stereomode);
 	}
 	else if(dostereo && ispassive(stereomode))
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();
 		makepassive(f, drawbuf, format, stereomode);
 	}
 	else
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();  _stf.deInit();
 		GLint buf=drawbuf;
 		if(dostereo || stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
-		readpixels(0, 0, f->_h.framew, f->_pitch, f->_h.frameh, format,
-			f->_pixelsize, f->_bits, buf, dostereo);
-		if(dostereo && f->_rbits)
-			readpixels(0, 0, f->_h.framew, f->_pitch, f->_h.frameh, format,
-				f->_pixelsize, f->_rbits, reye(drawbuf), dostereo);
+		readpixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, format,
+			f->pixelSize, f->bits, buf, dostereo);
+		if(dostereo && f->rbits)
+			readpixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, format,
+				f->pixelSize, f->rbits, reye(drawbuf), dostereo);
 	}
-	f->_h.winid=_drawable;
-	f->_h.framew=f->_h.width;
-	f->_h.frameh=f->_h.height;
-	f->_h.x=0;
-	f->_h.y=0;
-	f->_h.qual=qual;
-	f->_h.subsamp=subsamp;
-	f->_h.compress=(unsigned char)compress;
+	f->hdr.winid=_drawable;
+	f->hdr.framew=f->hdr.width;
+	f->hdr.frameh=f->hdr.height;
+	f->hdr.x=0;
+	f->hdr.y=0;
+	f->hdr.qual=qual;
+	f->hdr.subsamp=subsamp;
+	f->hdr.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
-	if(fconfig.logo) f->addlogo();
+	if(fconfig.logo) f->addLogo();
 	vgltrans->sendframe(f);
 }
 
@@ -479,48 +479,48 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	rrfb *f;
+	FBXFrame *f;
 	if(!_x11trans) errifnot(_x11trans=new x11trans());
 	if(spoillast && fconfig.spoil && !_x11trans->ready()) return;
 	if(!fconfig.spoil) _x11trans->synchronize();
 	errifnot(f=_x11trans->getframe(_dpy, _drawable, pbw, pbh));
-	f->_flags|=RRFRAME_BOTTOMUP;
+	f->flags|=FRAME_BOTTOMUP;
 	if(dostereo && isanaglyphic(stereomode))
 	{
-		_stf.deinit();
+		_stf.deInit();
 		makeanaglyph(f, drawbuf, stereomode);
 	}
 	else
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();
 		int format;
-		unsigned char *bits=f->_bits;
-		switch(f->_pixelsize)
+		unsigned char *bits=f->bits;
+		switch(f->pixelSize)
 		{
 			case 1:  format=GL_COLOR_INDEX;  break;
 			case 3:
 				format=GL_RGB;
 				#ifdef GL_BGR_EXT
-				if(f->_flags&RRFRAME_BGR) format=GL_BGR_EXT;
+				if(f->flags&FRAME_BGR) format=GL_BGR_EXT;
 				#endif
 				break;
 			case 4:
 				format=GL_RGBA;
 				#ifdef GL_BGRA_EXT
-				if(f->_flags&RRFRAME_BGR && !(f->_flags&RRFRAME_ALPHAFIRST))
+				if(f->flags&FRAME_BGR && !(f->flags&FRAME_ALPHAFIRST))
 					format=GL_BGRA_EXT;
 				#endif
-				if(f->_flags&RRFRAME_BGR && f->_flags&RRFRAME_ALPHAFIRST)
+				if(f->flags&FRAME_BGR && f->flags&FRAME_ALPHAFIRST)
 				{
 					#ifdef GL_ABGR_EXT
 					format=GL_ABGR_EXT;
 					#elif defined(GL_BGRA_EXT)
-					format=GL_BGRA_EXT;  bits=f->_bits+1;
+					format=GL_BGRA_EXT;  bits=f->bits+1;
 					#endif
 				}
-				if(!(f->_flags&RRFRAME_BGR) && f->_flags&RRFRAME_ALPHAFIRST)
+				if(!(f->flags&FRAME_BGR) && f->flags&FRAME_ALPHAFIRST)
 				{
-					format=GL_RGBA;  bits=f->_bits+1;
+					format=GL_RGBA;  bits=f->bits+1;
 				}
 				break;
 			default:
@@ -530,15 +530,15 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 			makepassive(f, drawbuf, format, stereomode);
 		else
 		{
-			_stf.deinit();
+			_stf.deInit();
 			GLint buf=drawbuf;
 			if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 			else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
-			readpixels(0, 0, min(pbw, f->_h.framew), f->_pitch,
-				min(pbh, f->_h.frameh), format, f->_pixelsize, bits, buf, false);
+			readpixels(0, 0, min(pbw, f->hdr.framew), f->pitch,
+				min(pbh, f->hdr.frameh), format, f->pixelSize, bits, buf, false);
 		}
 	}
-	if(fconfig.logo) f->addlogo();
+	if(fconfig.logo) f->addLogo();
 	_x11trans->sendframe(f, sync);
 }
 
@@ -550,7 +550,7 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	rrxvframe *f;
+	XVFrame *f;
 	if(!_xvtrans) errifnot(_xvtrans=new xvtrans());
 	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
 	if(!fconfig.spoil) _xvtrans->synchronize();
@@ -560,38 +560,38 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	hdr.width=hdr.framew=pbw;
 	hdr.x=hdr.y=0;
 
-	int flags=RRFRAME_BOTTOMUP, format=_pb->format(), pixelsize=3;
+	int flags=FRAME_BOTTOMUP, format=_pb->format(), pixelsize=3;
 	if(_pb->format()==GL_RGBA) pixelsize=4;
 	#ifdef GL_BGR_EXT
-	else if(_pb->format()==GL_BGR_EXT) flags|=RRFRAME_BGR;
+	else if(_pb->format()==GL_BGR_EXT) flags|=FRAME_BGR;
 	#endif
 	#ifdef GL_BGRA_EXT
-	else if(_pb->format()==GL_BGRA_EXT) {flags|=RRFRAME_BGR;  pixelsize=4;}
+	else if(_pb->format()==GL_BGRA_EXT) {flags|=FRAME_BGR;  pixelsize=4;}
 	#endif
 
 	_f.init(hdr, pixelsize, flags, false);
 
 	if(dostereo && isanaglyphic(stereomode))
 	{
-		_stf.deinit();
+		_stf.deInit();
 		makeanaglyph(&_f, drawbuf, stereomode);
 	}
 	else if(dostereo && ispassive(stereomode))
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();
 		makepassive(&_f, drawbuf, format, stereomode);
 	}
 	else
 	{
-		_r.deinit();  _g.deinit();  _b.deinit();  _stf.deinit();
+		_r.deInit();  _g.deInit();  _b.deInit();  _stf.deInit();
 		GLint buf=drawbuf;
 		if(stereomode==RRSTEREO_REYE) buf=reye(drawbuf);
 		else if(stereomode==RRSTEREO_LEYE) buf=leye(drawbuf);
-		readpixels(0, 0, min(pbw, _f._h.framew), _f._pitch,
-			min(pbh, _f._h.frameh), format, _f._pixelsize, _f._bits, buf, false);
+		readpixels(0, 0, min(pbw, _f.hdr.framew), _f.pitch,
+			min(pbh, _f.hdr.frameh), format, _f.pixelSize, _f.bits, buf, false);
 	}
 	
-	if(fconfig.logo) _f.addlogo();
+	if(fconfig.logo) _f.addLogo();
 
 	*f=_f;
 	_xvtrans->sendframe(f, sync);
@@ -600,7 +600,7 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 #endif
 
 
-void pbwin::makeanaglyph(rrframe *f, int drawbuf, int stereomode)
+void pbwin::makeanaglyph(Frame *f, int drawbuf, int stereomode)
 {
 	int rbuf=leye(drawbuf), gbuf=reye(drawbuf),  bbuf=reye(drawbuf);
 	if(stereomode==RRSTEREO_GREENMAGENTA)
@@ -611,30 +611,30 @@ void pbwin::makeanaglyph(rrframe *f, int drawbuf, int stereomode)
 	{
 		rbuf=reye(drawbuf);  gbuf=reye(drawbuf);  bbuf=leye(drawbuf);
 	}
-	_r.init(f->_h, 1, f->_flags, false);
-	readpixels(0, 0, _r._h.framew, _r._pitch, _r._h.frameh, GL_RED,
-		_r._pixelsize, _r._bits, rbuf, false);
-	_g.init(f->_h, 1, f->_flags, false);
-	readpixels(0, 0, _g._h.framew, _g._pitch, _g._h.frameh, GL_GREEN,
-		_g._pixelsize, _g._bits, gbuf, false);
-	_b.init(f->_h, 1, f->_flags, false);
-	readpixels(0, 0, _b._h.framew, _b._pitch, _b._h.frameh, GL_BLUE,
-		_b._pixelsize, _b._bits, bbuf, false);
-	_prof_anaglyph.startframe();
-	f->makeanaglyph(_r, _g, _b);
-	_prof_anaglyph.endframe(f->_h.framew*f->_h.frameh, 0, 1);
+	_r.init(f->hdr, 1, f->flags, false);
+	readpixels(0, 0, _r.hdr.framew, _r.pitch, _r.hdr.frameh, GL_RED,
+		_r.pixelSize, _r.bits, rbuf, false);
+	_g.init(f->hdr, 1, f->flags, false);
+	readpixels(0, 0, _g.hdr.framew, _g.pitch, _g.hdr.frameh, GL_GREEN,
+		_g.pixelSize, _g.bits, gbuf, false);
+	_b.init(f->hdr, 1, f->flags, false);
+	readpixels(0, 0, _b.hdr.framew, _b.pitch, _b.hdr.frameh, GL_BLUE,
+		_b.pixelSize, _b.bits, bbuf, false);
+	_prof_anaglyph.startFrame();
+	f->makeAnaglyph(_r, _g, _b);
+	_prof_anaglyph.endFrame(f->hdr.framew*f->hdr.frameh, 0, 1);
 }
 
-void pbwin::makepassive(rrframe *f, int drawbuf, int format, int stereomode)
+void pbwin::makepassive(Frame *f, int drawbuf, int format, int stereomode)
 {
-	_stf.init(f->_h, f->_pixelsize, f->_flags, true);
-	readpixels(0, 0, _stf._h.framew, _stf._pitch, _stf._h.frameh, format,
-		_stf._pixelsize, _stf._bits, leye(drawbuf), true);
-	readpixels(0, 0, _stf._h.framew, _stf._pitch, _stf._h.frameh, format,
-		_stf._pixelsize, _stf._rbits, reye(drawbuf), true);
-	_prof_passive.startframe();
-	f->makepassive(_stf, stereomode);
-	_prof_passive.endframe(f->_h.framew*f->_h.frameh, 0, 1);
+	_stf.init(f->hdr, f->pixelSize, f->flags, true);
+	readpixels(0, 0, _stf.hdr.framew, _stf.pitch, _stf.hdr.frameh, format,
+		_stf.pixelSize, _stf.bits, leye(drawbuf), true);
+	readpixels(0, 0, _stf.hdr.framew, _stf.pitch, _stf.hdr.frameh, format,
+		_stf.pixelSize, _stf.rbits, reye(drawbuf), true);
+	_prof_passive.startFrame();
+	f->makePassive(_stf, stereomode);
+	_prof_passive.endFrame(f->hdr.framew*f->hdr.frameh, 0, 1);
 }
 
 void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
@@ -645,7 +645,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 	// Gamma correction
 	if(fconfig.gamma!=0.0 && fconfig.gamma!=1.0 && fconfig.gamma!=-1.0)
 	{
-		_prof_gamma.startframe();
+		_prof_gamma.startFrame();
 		static bool first=true;
 		if(first)
 		{
@@ -658,7 +658,7 @@ void pbwin::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
 			*ptr1=fconfig.gamma_lut16[*ptr1];
 		if((pitch*h)%2!=0) bits[pitch*h-1]=fconfig.gamma_lut[bits[pitch*h-1]];
-		_prof_gamma.endframe(w*h, 0, stereo?0.5 : 1);
+		_prof_gamma.endFrame(w*h, 0, stereo?0.5 : 1);
 	}
 }
 

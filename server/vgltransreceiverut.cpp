@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		if(strlen(fconfig.client)==0)
 			strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
 
-		rrframe *f;
+		Frame *f;
 
 		printf("\nTesting client for memory leaks and stability ...\n");
 		printf("%d iterations\n", iter);
@@ -76,12 +76,12 @@ int main(int argc, char **argv)
 			{
 				vglconn.synchronize();
 				errifnot(f=vglconn.getframe(WIDTH, HEIGHT, 3,
-					littleendian()? RRFRAME_BGR:0, false));
-				memset(f->_bits, i%2==0?0:255, WIDTH*HEIGHT*3);
+					littleendian()? FRAME_BGR:0, false));
+				memset(f->bits, i%2==0?0:255, WIDTH*HEIGHT*3);
 				for(int j=0; j<WIDTH*HEIGHT*3; j++)
-					if(j%2==0) f->_bits[j]=i%2==0?255:0;
-				f->_h.qual=50;  f->_h.subsamp=4;
-				f->_h.winid=win;  f->_h.compress=RRCOMP_JPEG;
+					if(j%2==0) f->bits[j]=i%2==0?255:0;
+				f->hdr.qual=50;  f->hdr.subsamp=4;
+				f->hdr.winid=win;  f->hdr.compress=RRCOMP_JPEG;
 				vglconn.sendframe(f);
 			}
 		}

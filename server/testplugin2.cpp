@@ -69,18 +69,18 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		RRFrame *frame=new RRFrame;
 		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
-		rrfb *f=x11t->getframe(_dpy, _win, width, height);
-		f->_flags|=RRFRAME_BOTTOMUP;
+		FBXFrame *f=x11t->getframe(_dpy, _win, width, height);
+		f->flags|=FRAME_BOTTOMUP;
 		frame->opaque=(void *)f;
-		frame->w=f->_h.framew;
-		frame->h=f->_h.frameh;
-		frame->pitch=f->_pitch;
-		frame->bits=f->_bits;
+		frame->w=f->hdr.framew;
+		frame->h=f->hdr.frameh;
+		frame->pitch=f->pitch;
+		frame->bits=f->bits;
 		for(int i=0; i<RRTRANS_FORMATOPT; i++)
 		{
-			if(rrtrans_bgr[i]==(f->_flags&RRFRAME_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->_flags&RRFRAME_ALPHAFIRST? 1:0)
-				&& rrtrans_ps[i]==f->_pixelsize)
+			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
+				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
+				&& rrtrans_ps[i]==f->pixelSize)
 				{frame->format=i;  break;}
 		}
 		return frame;
@@ -133,8 +133,8 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	{
 		x11trans *x11t=(x11trans *)handle;
 		if(!x11t) _throw("Invalid handle");
-		rrfb *f;
-		if(!frame || (f=(rrfb *)frame->opaque)==NULL)
+		FBXFrame *f;
+		if(!frame || (f=(FBXFrame *)frame->opaque)==NULL)
 			_throw("Invalid frame handle");
 		x11t->sendframe(f, (bool)sync);
 		delete frame;

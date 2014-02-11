@@ -17,11 +17,11 @@
 #define __X11TRANS_H__
 
 #include "Thread.h"
-#include "rrframe.h"
+#include "Frame.h"
 #include "GenericQ.h"
-#include "rrprofiler.h"
+#include "Profiler.h"
 
-using namespace vglutil;
+using namespace vglcommon;
 
 
 class x11trans : public Runnable
@@ -42,18 +42,18 @@ class x11trans : public Runnable
 
 		bool ready(void);
 		void synchronize(void);
-		void sendframe(rrfb *, bool sync=false);
+		void sendframe(FBXFrame *, bool sync=false);
 		void run(void);
-		rrfb *getframe(Display *, Window, int, int);
+		FBXFrame *getframe(Display *, Window, int, int);
 
 	private:
 
 		static const int NFRAMES=3;
-		CS _mutex;  rrfb *_frame[NFRAMES];
+		CS _mutex; FBXFrame *_frame[NFRAMES];
 		Event _ready;
 		GenericQ _q;
 		Thread *_t;  bool _deadyet;
-		rrprofiler _prof_blit, _prof_total;
+		Profiler _prof_blit, _prof_total;
 };
 
 

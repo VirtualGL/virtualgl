@@ -188,7 +188,7 @@ pbdrawable::pbdrawable(Display *dpy, Drawable drawable)
 	if(!dpy || !drawable) _throw("Invalid argument");
 	_dpy=dpy;  _drawable=drawable;
 	_pb=NULL;
-	_prof_rb.setname("Readback  ");
+	_prof_rb.setName("Readback  ");
 	_autotestframecount=0;
 	_config=0;
 	_ctx=0;
@@ -390,7 +390,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	int e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	_prof_rb.startframe();
+	_prof_rb.startFrame();
 	if(usepbo) t0=getTime();
 	glReadPixels(x, y, w, h, format, GL_UNSIGNED_BYTE, usepbo? NULL:bits);
 
@@ -434,7 +434,7 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 		}
 	}
 
-	_prof_rb.endframe(w*h, 0, stereo? 0.5 : 1);
+	_prof_rb.endFrame(w*h, 0, stereo? 0.5 : 1);
 	checkgl("Read Pixels");
 
 	// If automatic faker testing is enabled, store the FB color in an
