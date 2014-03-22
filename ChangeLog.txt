@@ -401,13 +401,13 @@ to allow users to determine whether or not VirtualGL is active.
 -------------------------------------------------------------------------------
 [2]
 Support for encrypting the VGL Transport with OpenSSL has been removed from the
-default build and distribution packages.  It was only a marginally useful
-feature, because VirtualGL also has the ability to tunnel the VGL Transport
-through SSh.  It was necessary to maintain our own static OpenSSL libraries on
-Linux in order to provide a version of VirtualGL that was compatible across all
-Linux platforms, and this required us to keep abreast of the latest OpenSSL
-security fixes, etc.  OpenSSL support can easily be re-added by building
-VirtualGL from source (see BUILDING.txt.)
+official VirtualGL packages.  It was only a marginally useful feature, because
+VirtualGL also has the ability to tunnel the VGL Transport through SSh.  It was
+necessary to maintain our own static OpenSSL libraries on Linux in order to
+provide a version of VirtualGL that was compatible across all Linux platforms,
+and this required us to keep abreast of the latest OpenSSL security fixes, etc.
+OpenSSL support can easily be re-added by building VirtualGL from source (see
+BUILDING.txt.)
 -------------------------------------------------------------------------------
 [3]
 Added a framework for creating generic image transport plugins.  See
