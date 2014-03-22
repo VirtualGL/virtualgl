@@ -88,7 +88,8 @@ class Blitter : public Runnable
 
 		Frame *get(void)
 		{
-			Frame *f=frames[findex];  findex=(findex+1)%NFRAMES;
+			Frame *f=frames[findex];
+			findex=(findex+1)%NFRAMES;
 			if(t) t->checkError();  f->waitUntilComplete();
 			if(t) t->checkError();
 			return f;
@@ -124,7 +125,8 @@ class Blitter : public Runnable
 			{
 				while(!deadYet)
 				{
-					f=frames[index];  index=(index+1)%NFRAMES;
+					f=frames[index];
+					index=(index+1)%NFRAMES;
 					f->waitUntilReady();  if(deadYet) break;
 					if(useXV) resizeWindow(dpy, win, f->hdr.width, f->hdr.height, myID);
 					timer.start();
@@ -140,7 +142,7 @@ class Blitter : public Runnable
 				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec\n",
 					mpixels/totalTime);
 			}
-			catch (Error &e)
+			catch(Error &e)
 			{
 				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++)
@@ -174,7 +176,8 @@ class Decompressor : public Runnable
 
 		CompressedFrame &get(void)
 		{
-			CompressedFrame &cf=cframes[findex];  findex=(findex+1)%NFRAMES;
+			CompressedFrame &cf=cframes[findex];
+			findex=(findex+1)%NFRAMES;
 			if(deadYet) return cf;
 			if(t) t->checkError();  cf.waitUntilComplete();
 			if(t) t->checkError();
@@ -209,7 +212,8 @@ class Decompressor : public Runnable
 			{
 				while(!deadYet)
 				{
-					CompressedFrame &cf=cframes[index];  index=(index+1)%NFRAMES;
+					CompressedFrame &cf=cframes[index];
+					index=(index+1)%NFRAMES;
 					cf.waitUntilReady();  if(deadYet) break;
 					f=blitter->get();  if(deadYet) break;
 					resizeWindow(dpy, win, cf.hdr.width, cf.hdr.height, myID);
@@ -222,7 +226,7 @@ class Decompressor : public Runnable
 					cf.signalComplete();
 				}
 			}
-			catch (Error &e)
+			catch(Error &e)
 			{
 				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();  throw;
@@ -256,7 +260,8 @@ class Compressor : public Runnable
 
 		Frame &get(int w, int h)
 		{
-			Frame &f=frames[findex];  findex=(findex+1)%NFRAMES;
+			Frame &f=frames[findex];
+			findex=(findex+1)%NFRAMES;
 			if(t) t->checkError();  f.waitUntilComplete();
 			if(t) t->checkError();
 			rrframeheader hdr;
@@ -299,7 +304,8 @@ class Compressor : public Runnable
 			{
 				while(!deadYet)
 				{
-					Frame &f=frames[index];  index=(index+1)%NFRAMES;
+					Frame &f=frames[index];
+					index=(index+1)%NFRAMES;
 					f.waitUntilReady();  if(deadYet) break;
 					#ifdef USEXV
 					if(useXV)
@@ -318,7 +324,7 @@ class Compressor : public Runnable
 					f.signalComplete();
 				}
 			}
-			catch (Error &e)
+			catch(Error &e)
 			{
 				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++) frames[i].signalComplete();  throw;
@@ -502,11 +508,23 @@ int main(int argc, char **argv)
 	{
 		for(i=1; i<argc; i++)
 		{
-			if(!stricmp(argv[i], "-gl")) useGL=true;
+			if(!stricmp(argv[i], "-gl"))
+			{
+				fprintf(stderr, "Using OpenGL for blitting ...\n");
+				useGL=true;
+			}
 			#ifdef USEXV
-			else if(!stricmp(argv[i], "-xv")) useXV=true;
+			else if(!stricmp(argv[i], "-xv"))
+			{
+				fprintf(stderr, "Using X Video ...\n");
+				useXV=true;
+			}
 			#endif
-			else if(!stricmp(argv[i], "-rgb")) useRGB=true;
+			else if(!stricmp(argv[i], "-rgb"))
+			{
+				fprintf(stderr, "Using RGB encoding ...\n");
+				useRGB=true;
+			}
 			else if(!stricmp(argv[i], "-rgbbench"))
 			{
 				if(i>=argc-1) usage(argv[0]);
