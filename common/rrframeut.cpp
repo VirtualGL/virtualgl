@@ -210,7 +210,7 @@ class decompressor : public Runnable
 					c.complete();
 				}
 			}
-			catch (rrerror &e)
+			catch(rrerror &e)
 			{
 				if(_t) _t->seterror(e);
 				for(int i=0; i<NB; i++) _cf[i].complete();  throw;
@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 			delete test[i];
 		}
 	}
-	catch (rrerror &e)
+	catch(rrerror &e)
 	{
 		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
 		exit(1);
