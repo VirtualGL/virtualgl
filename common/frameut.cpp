@@ -140,8 +140,9 @@ class Blitter : public Runnable
 				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec\n",
 					mpixels/totalTime);
 			}
-			catch (...)
+			catch (Error &e)
 			{
+				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++)
 					if(frames[i]) frames[i]->signalComplete();
 				throw;
@@ -221,8 +222,9 @@ class Decompressor : public Runnable
 					cf.signalComplete();
 				}
 			}
-			catch (...)
+			catch (Error &e)
 			{
+				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();  throw;
 			}
 			fprintf(stderr, "Decompressor exiting ...\n");
@@ -316,8 +318,9 @@ class Compressor : public Runnable
 					f.signalComplete();
 				}
 			}
-			catch (...)
+			catch (Error &e)
 			{
+				if(t) t->setError(e);
 				for(int i=0; i<NFRAMES; i++) frames[i].signalComplete();  throw;
 			}
 			fprintf(stderr, "Compressor exiting ...\n");
