@@ -15,9 +15,9 @@
 // Frame drawn using OpenGL
 
 #include "GLFrame.h"
-#include "vglutil.h"
 #include "Error.h"
 #include "Log.h"
+#include "vglutil.h"
 
 using namespace vglcommon;
 
