@@ -22,6 +22,13 @@ vglserver_config should now work with recent Debian releases.
 Fixed an issue whereby VirtualGL would not always resize the Pbuffer
 corresponding to an Xt or Motif OpenGL widget whenever the widget was resized.
 -------------------------------------------------------------------------------
+[6]
+The Mac packaging system now uses pkgbuild and productbuild rather than
+PackageMaker (which is obsolete and no longer supported.)  This means that
+OS X 10.6 "Snow Leopard" or later must be used when packaging libjpeg-turbo,
+although the packages produced can be installed on OS X 10.5 "Leopard" or
+later.  OS X 10.4 "Tiger" is no longer supported.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

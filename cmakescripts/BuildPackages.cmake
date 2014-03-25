@@ -97,10 +97,6 @@ endif() # CYGWIN
 
 if(APPLE)
 
-set(DEFAULT_PACKAGEMAKER_PATH /Developer/Applications/Utilities)
-set(PACKAGEMAKER_PATH ${DEFAULT_PACKAGEMAKER_PATH} CACHE PATH
-	"Directory containing PackageMaker.app (default: ${DEFAULT_PACKAGEMAKER_PATH})")
-
 set(DEFAULT_VGL_32BIT_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
 set(VGL_32BIT_BUILD ${DEFAULT_VGL_32BIT_BUILD} CACHE PATH
   "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_VGL_32BIT_BUILD})")
@@ -109,8 +105,7 @@ string(REGEX REPLACE "/" ":" VGL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" VGL_MACPREFIX ${VGL_MACPREFIX})
 
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
-configure_file(release/Info.plist.in pkgscripts/Info.plist)
-configure_file(release/Description.plist.in pkgscripts/Description.plist)
+configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 
