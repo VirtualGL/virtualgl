@@ -82,10 +82,8 @@ problems with the system.
 
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
-connection, with or without SSL encryption.  ''nettest'' can be found in
-''/opt/VirtualGL/bin'' on Linux/Unix/Mac/Cygwin VirtualGL installations or
-in ''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__ if
-using the VirtualGL Client for Exceed.
+connection, with or without SSL encryption.  ''nettest'' is installed in
+''/opt/VirtualGL/bin'' by default.
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
@@ -150,8 +148,8 @@ packet, which is about 93 microseconds in this case.
 *** CPUstat
 #OPT: noList! plain!
 
-CPUstat is available only for Linux and is installed in the
-same place as NetTest (''/opt/VirtualGL/bin'').  It measures the average,
+CPUstat is available only for Linux and is installed in the same place as
+NetTest (''/opt/VirtualGL/bin'' by default.)  It measures the average,
 minimum, and peak CPU usage for all processors combined and for each processor
 individually.  On Windows, this same functionality is provided in the Windows
 Performance Monitor, which is part of the operating system.  On Solaris, the
@@ -195,10 +193,9 @@ checked with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
-TCBench can be found in ''/opt/VirtualGL/bin'' on Linux/Unix/Mac/Cygwin
-VirtualGL installations or in
-''c:\\program files\\VirtualGL-''__''{version}''__''-''__''{build}''__
-if using the VirtualGL Client for Exceed.  Run ''tcbench''
+TCBench is installed in ''/opt/VirtualGL/bin'' by default.  For Windows users,
+a native Windows version of TCBench is bundled along with version 1.3 and later
+of the native TurboVNC Viewer for Windows.  Run ''tcbench''
 from the command line, and it will prompt you to click in the window you want
 to benchmark.   That window should already have an automated animation of some
 sort running before you launch TCBench.  Note that GLXSpheres (see below) is
@@ -267,7 +264,6 @@ features:
 	(''vglrun -sp glxspheres'') allows you to quantify the effect of X latency
 	on the performance of interactive applications in a VirtualGL environment.
 
-GLXSpheres is installed in ''/opt/VirtualGL/bin'' on Linux and Unix
-VirtualGL servers.  64-bit VirtualGL packages name this program
-''glxspheres64'' so as to allow both a 64-bit and a 32-bit version of
-GLXSpheres to be installed on the same system.
+GLXSpheres is installed in ''/opt/VirtualGL/bin'' by default.  64-bit VirtualGL
+builds name this program ''glxspheres64'' so as to allow both a 64-bit and a
+32-bit version of GLXSpheres to be installed on the same system.

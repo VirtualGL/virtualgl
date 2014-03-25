@@ -15,12 +15,5 @@ The VirtualGL server components include software developed by the
 [[http://www.fltk.org/][FLTK Project]] and distributed under the terms of the
 [[LICENSE-FLTK.txt][FLTK License]!].
 
-The package for the VirtualGL Client for Exceed includes
-[[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
-which is released under [[LICENSE-PuTTY.txt][this license]!].
-
-VirtualGL includes portions of [[http://www.x.org][X.org]], which is released
-under [[LICENSE-xauth.txt][this license]!].
-
 VirtualGL is licensed under the [[LICENSE.txt][wxWindows Library License, v3.1]!],
 a derivative of the [[LGPL.txt][GNU Lesser General Public License (LGPL), v2.1]!].

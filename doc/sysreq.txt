@@ -74,13 +74,9 @@
 | Graphics \
 	| Any graphics adapter with decent 2D performance \
 	|
-| O/S \
-	| Windows 2000 or later \
-	|
 | Other Software \
 	| {list type=ul: \
-			{item:__VGL Transport Only__: [[http://x.cygwin.com][Cygwin/X]] or \
-				[[http://connectivity.opentext.com][OpenText]] Exceed v8 or newer } \
+			{item:__VGL Transport Only__: [[http://x.cygwin.com][Cygwin/X]]} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
 	|
@@ -108,14 +104,8 @@
 	|
 | Windows \
 	| N/A \
-	| {list type=ul: \
-			{item:GPU that supports stereo.  Stereo support should be enabled in \
-				the 3D driver configuration.} \
-			{item:2D X server that supports and is configured to export stereo \
-				visuals.  (As of this writing, \
-				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \
-				is the only known Windows X server solution that supports stereo \
-				drawing with sufficient performance to be used with VirtualGL.)}} \
+	| This version of VirtualGL does not support remote quad-buffered stereo \
+		with Windows clients. \
 	|
 #OPT: hiCol=first
 
@@ -131,13 +121,7 @@
 	| ^ \
 	|
 | Windows \
-	| {list type=ul: \
-			{item:GPU that supports transparent overlays.  Overlay support should \
-				be enabled in the 3D driver configuration.} \
-			{item:2D X server that supports and is configured to export transparent \
-				overlay visuals. (As of this writing, \
-				[[http://connectivity.opentext.com][OpenText]] Exceed 3D v8 or newer \
-				is the only known Windows X server solution that supports transparent \
-				overlays.)}} \
+	| This version of VirtualGL does not support transparent overlays with \
+		Windows clients. \
 	|
 #OPT: hiCol=first

@@ -21,68 +21,29 @@
 
 using namespace vglcommon;
 
-#ifdef XDK
- #define glGetError _glGetError
- #define glGetIntegerv _glGetIntegerv
- #define glPixelStorei _glPixelStorei
- #define glRasterPos2f _glRasterPos2f
- #define glViewport _glViewport
- #define glXCreateContext _glXCreateContext
- #define glXDestroyContext _glXDestroyContext
- #define glXMakeCurrent _glXMakeCurrent
- #define glXSwapBuffers _glXSwapBuffers
- #define glDrawBuffer _glDrawBuffer
- #define glDrawPixels _glDrawPixels
- #define glFinish _glFinish
-#endif
-
-
-#ifdef XDK
-Display *GLFrame::dpy=NULL;
-int GLFrame::instanceCount=0;
-#endif
-
 
 GLFrame::GLFrame(char *dpystring, Window win_) : Frame(),
-	#ifndef XDK
 	dpy(NULL),
-	#endif
 	win(win_), ctx(0), tjhnd(NULL), newdpy(false)
 {
 	if(!dpystring || !win)
 		throw(Error("GLFrame::GLFrame", "Invalid argument"));
 
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	if(!dpy)
-	#endif
 	if(!(dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
 	newdpy=true;
 	isGL=true;
-	#ifdef XDK
-	instanceCount++;
-	__vgl_loadsymbols();
-	#endif
 	init(dpy, win);
 }
 
 
 GLFrame::GLFrame(Display *dpy_, Window win_) : Frame(),
-	#ifndef XDK
 	dpy(NULL),
-	#endif
 	win(win_), ctx(0), tjhnd(NULL), newdpy(false)
 {
 	if(!dpy_ || !win_) throw(Error("GLFrame::GLFrame", "Invalid argument"));
 
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	dpy=dpy_;
 	isGL=true;
-	#ifdef XDK
-	__vgl_loadsymbols();
-	#endif
 	init(dpy, win);
 }
 
@@ -91,9 +52,6 @@ void GLFrame::init(Display *dpy, Window win)
 {
 	XVisualInfo *v=NULL;
 
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	try
 	{
 		pixelSize=3;
@@ -120,12 +78,10 @@ void GLFrame::init(Display *dpy, Window win)
 			glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;
 		}
 		if(v) XFree(v);
-		#ifndef XDK
 		if(dpy)
 		{
 			XCloseDisplay(dpy);  dpy=NULL;
 		}
-		#endif
 		throw;
 	}
 }
@@ -133,26 +89,14 @@ void GLFrame::init(Display *dpy, Window win)
 
 GLFrame::~GLFrame(void)
 {
-	#ifdef XDK
-	mutex.lock(false);
-	#endif
 	if(ctx && dpy)
 	{
 		glXMakeCurrent(dpy, 0, 0);  glXDestroyContext(dpy, ctx);  ctx=0;
 	}
-	#ifdef XDK
-	instanceCount--;
-	if(instanceCount==0 && dpy)
-	{
-		XCloseDisplay(dpy);  dpy=NULL;
-	}
-	mutex.unlock(false);
-	#else
 	if(dpy && newdpy)
 	{
 		XCloseDisplay(dpy);  dpy=NULL;
 	}
-	#endif
 	if(tjhnd)
 	{
 		tjDestroy(tjhnd);  tjhnd=NULL;
@@ -218,9 +162,6 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 
 void GLFrame::redraw(void)
 {
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	drawTile(0, 0, hdr.framew, hdr.frameh);
 	sync();
 }
@@ -230,9 +171,6 @@ void GLFrame::drawTile(int x, int y, int w, int h)
 {
 	if(x<0 || w<1 || (x+w)>hdr.framew || y<0 || h<1 || (y+h)>hdr.frameh)
 		return;
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	int format=GL_RGB;
 	#ifdef GL_BGR_EXT
 	if(littleendian()) format=GL_BGR_EXT;
@@ -244,9 +182,7 @@ void GLFrame::drawTile(int x, int y, int w, int h)
 
 	int e;
 	e=glGetError();
-	#ifndef _WIN32
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
-	#endif
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch/pixelSize);
 	int oldbuf=-1;
@@ -272,9 +208,6 @@ void GLFrame::drawTile(int x, int y, int w, int h)
 
 void GLFrame::sync(void)
 {
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	glFinish();
 	glXSwapBuffers(dpy, win);
 	glXMakeCurrent(dpy, 0, 0);
@@ -294,8 +227,6 @@ int GLFrame::glError(void)
 			&& !strncmp(env, "1", 1))
 			vglout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
 	}
-	#ifndef _WIN32
 	while(i!=GL_NO_ERROR) i=glGetError();
-	#endif
 	return ret;
 }

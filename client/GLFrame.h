@@ -17,11 +17,7 @@
 
 // Frame drawn using OpenGL
 
-#ifdef XDK
- #include "xdk-sym.h"
-#else
- #include <GL/glx.h>
-#endif
+#include <GL/glx.h>
 #include "Frame.h"
 
 
@@ -45,10 +41,6 @@ namespace vglcommon
 			void init(Display *dpy, Window win);
 			int glError(void);
 
-			#ifdef XDK
-			static int instanceCount;
-			static
-			#endif
 			Display *dpy;  Window win;
 			GLXContext ctx;
 			tjhandle tjhnd;

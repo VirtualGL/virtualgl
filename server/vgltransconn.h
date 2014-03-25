@@ -22,9 +22,6 @@
 #include "Frame.h"
 #include "GenericQ.h"
 #include "Profiler.h"
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
 
 using namespace vglcommon;
 

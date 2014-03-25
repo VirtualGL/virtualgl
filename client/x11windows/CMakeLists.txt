@@ -1,1 +1,0 @@
-install(PROGRAMS xauth.exe DESTINATION ${VGL_BINDIR})

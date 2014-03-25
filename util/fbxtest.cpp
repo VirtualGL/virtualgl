@@ -22,7 +22,7 @@
 #include "vglutil.h"
 #include "Timer.h"
 #include "fbx.h"
-#ifndef FBXWIN32
+#ifndef _WIN32
  #include <errno.h>
  #include "x11err.h"
 #endif
@@ -36,7 +36,7 @@ using namespace vglutil;
 #endif
 
 
-#ifndef FBXWIN32
+#ifndef _WIN32
 extern "C" {
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
@@ -58,13 +58,13 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 int width, height;
 int checkdb=0, doshm=1, dofs=0, dovid=0, dodisplay=0, interactive=0,
 	advance=0, dostress=0, offset;
-#ifndef FBXWIN32
+#ifndef _WIN32
 int dopixmap=0;
 Window win=0;
 #endif
 fbx_wh wh;
 Timer timer, timer2;
-#ifdef FBXWIN32
+#ifdef _WIN32
 #define fg() SetForegroundWindow(wh)
 #else
 #define fg()
@@ -128,7 +128,7 @@ int cmpbuf(int x, int y, int w, int pitch, int h, int format,
 // Makes sure the frame buffer has been cleared prior to a write
 void clearfb(void)
 {
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	if(wh)
 	{
 		HDC hdc=0;  RECT rect;
@@ -426,7 +426,7 @@ void display(void)
 	if(dostress)
 	{
 		fprintf(stderr, "-- Stress tests --\n");
-		#ifndef FBXWIN32
+		#ifndef _WIN32
 		if(doshm)
 		{
 			fg();  nativestress(1);
@@ -438,7 +438,7 @@ void display(void)
 	}
 
 	fprintf(stderr, "-- Performance tests --\n");
-	#ifndef FBXWIN32
+	#ifndef _WIN32
 	if(doshm)
 	{
 		fg();  nativewrite(1);
@@ -451,7 +451,7 @@ void display(void)
 }
 
 
-#ifdef FBXWIN32
+#ifdef _WIN32
 LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg)
@@ -533,7 +533,7 @@ void event_loop(void)
 			dodisplay=1;  first=0;
 		}
 
-		#ifdef FBXWIN32
+		#ifdef _WIN32
 
 		int ret;  MSG msg;
 		if((ret=GetMessage(&msg, NULL, 0, 0))==-1) { _throww32(); }
@@ -619,7 +619,7 @@ void usage(char *progname)
 
 int main(int argc, char **argv)
 {
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	int winstyle=WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_VISIBLE;
 	#endif
 	int i;
@@ -644,7 +644,7 @@ int main(int argc, char **argv)
 			fbx_printwarnings(stderr);
 		}
 		if(!stricmp(argv[i], "-i")) interactive=1;
-		#ifndef FBXWIN32
+		#ifndef _WIN32
 		if(!stricmp(argv[i], "-pm"))
 		{
 			dopixmap=1;  doshm=0;
@@ -654,7 +654,7 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-fs"))
 		{
 			dofs=1;
-			#ifdef FBXWIN32
+			#ifdef _WIN32
 			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE;
 			#endif
 		}
@@ -663,7 +663,7 @@ int main(int argc, char **argv)
 
 	try {
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	WNDCLASSEX wndclass;  MSG msg;
 	wndclass.cbSize=sizeof(WNDCLASSEX);
@@ -713,7 +713,7 @@ int main(int argc, char **argv)
 		height=HEIGHT;
 	}
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	int bw=GetSystemMetrics(SM_CXFIXEDFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFIXEDFRAME)*2+GetSystemMetrics(SM_CYCAPTION);

@@ -17,9 +17,6 @@
 #define __FRAME_H__
 
 #include "rr.h"
-#ifdef _WIN32
-#define FBXX11
-#endif
 #include "fbx.h"
 #include "turbojpeg.h"
 #include "Mutex.h"
@@ -72,9 +69,6 @@ namespace vglcommon
 			void dumpHeader(rrframeheader &);
 			void checkHeader(rrframeheader &);
 
-			#ifdef XDK
-			static CS mutex;
-			#endif
 			Event ready;
 			Event complete;
 			friend class CompressedFrame;

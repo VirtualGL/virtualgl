@@ -26,9 +26,6 @@
 #include "../common/glx.h"
 #include <GL/glu.h>
 #include "x11err.h"
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
 
 using namespace vglutil;
 
@@ -84,19 +81,6 @@ pixelformat pix[4
 		{0, 1, 2, 3, GL_RGB, 0, "RGB"},
 	};
 
-
-#ifdef XDK
-// Exceed likes to redefine stdio, so we un-redefine it :/
-#undef fprintf
-#undef printf
-#undef putchar
-#undef putc
-#undef puts
-#undef fputc
-#undef fputs
-#undef perror
-#define GLX11
-#endif
 
 #define bench_name		"GLreadtest"
 

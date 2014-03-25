@@ -34,40 +34,6 @@ endif() # Linux
 
 
 #
-# Windows installer (NullSoft Installer)
-#
-
-if(WIN32)
-
-if(BITS EQUAL 64)
-	set(INST_DEFS -DWIN64)
-endif()
-
-if(MSVC_IDE)
-	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=${CMAKE_CFG_INTDIR}\\")
-else()
-	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
-endif()
-
-configure_file(release/@CMAKE_PROJECT_NAME@.nsi.in pkgscripts/@CMAKE_PROJECT_NAME@.nsi @ONLY)
-
-if(MSVC_IDE)
-	add_custom_target(installer
-		COMMAND ${CMAKE_COMMAND} -E make_directory @CMAKE_BINARY_DIR@/${CMAKE_CFG_INTDIR}
-		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/@CMAKE_PROJECT_NAME@.nsi
-		DEPENDS vglclient tcbench nettest putty plink
-		SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.nsi)
-else()
-	add_custom_target(installer
-		COMMAND makensis -nocd ${INST_DEFS} pkgscripts/@CMAKE_PROJECT_NAME@.nsi
-		DEPENDS vglclient tcbench nettest putty plink
-		SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.nsi)
-endif()
-
-endif() # WIN32
-
-
-#
 # Cygwin Package
 #
 

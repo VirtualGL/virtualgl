@@ -36,7 +36,7 @@ only way that VirtualGL can obtain a stereo Pbuffer.
 
 When an application tries to render something in stereo, VirtualGL will default
 to using quad-buffered stereo rendering if the 2D X server supports OpenGL
-and has stereo visuals available (Exceed 3D is required for Windows clients.)
+and has stereo visuals available (not currently supported in Cygwin/X.)
 Otherwise, VirtualGL will fall back to using anaglyphic stereo (see below.)
 It is usually necessary to explicitly enable stereo in the graphics driver
 configuration for both the client and server machines.  The
@@ -141,16 +141,13 @@ As with quad-buffered stereo, overlays must be explicitly enabled in the
 graphics driver and X server configurations.  In the case of overlays, however,
 they need only be supported and enabled on the client machine and in the 2D X
 server.  Some graphics drivers are known to disallow using both quad-buffered
-stereo and overlays at the same time.
+stereo and overlays at the same time.  Transparent overlays are not currently
+supported in Cygwin/X.
 
 Indexed color (8-bit) overlays have been tested and are known to work with
 VirtualGL.  True color (24-bit) overlays work, in theory, but have not been
 tested.  Use ''glxinfo'' (see [[#Troubleshooting]] below) to verify whether your
-client's X display supports overlays and whether they are enabled.  In Exceed
-3D, make sure that the "Overlay Support" option is checked in the "Exceed 3D
-and GLX" applet:
-
-{img: exceed6.png}
+client's X display supports overlays and whether they are enabled.
 
 ** Color Index (PseudoColor) Rendering
 

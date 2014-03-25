@@ -16,9 +16,6 @@
 #ifndef __CLIENTWIN_H__
 #define __CLIENTWIN_H__
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
 #include "Frame.h"
 #include "Thread.h"
 #include "genericQ.h"

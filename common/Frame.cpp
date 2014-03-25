@@ -29,11 +29,6 @@ using namespace vglcommon;
 
 // Uncompressed frame
 
-#ifdef XDK
-CS Frame::mutex;
-#endif
-
-
 Frame::Frame(bool primary_) : bits(NULL), rbits(NULL), pitch(0),
 	pixelSize(0), flags(0), isGL(false), isXV(false), stereo(false),
 	primary(primary_)
@@ -562,9 +557,6 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 FBXFrame::FBXFrame(Display *dpy, Drawable d, Visual *v) : Frame()
 {
 	if(!dpy || !d) throw(Error("FBXFrame::FBXFrame", "Invalid argument"));
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	XFlush(dpy);
 	init(DisplayString(dpy), d, v);
 }
@@ -572,9 +564,6 @@ FBXFrame::FBXFrame(Display *dpy, Drawable d, Visual *v) : Frame()
 
 FBXFrame::FBXFrame(char *dpystring, Window win) : Frame()
 {
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	init(dpystring, win);
 }
 
@@ -592,23 +581,14 @@ void FBXFrame::init(char *dpystring, Drawable d, Visual *v)
 
 FBXFrame::~FBXFrame(void)
 {
-	#ifdef XDK
-	mutex.lock(false);
-	#endif
 	if(fb.bits) fbx_term(&fb);  if(bits) bits=NULL;
 	if(tjhnd) tjDestroy(tjhnd);
 	if(wh.dpy) XCloseDisplay(wh.dpy);
-	#ifdef XDK
-	mutex.unlock(false);
-	#endif
 }
 
 
 void FBXFrame::init(rrframeheader &h)
 {
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	checkHeader(h);
 	int usexshm=1;  char *env=NULL;
 	if((env=getenv("VGL_USEXSHM"))!=NULL && strlen(env)>0 && !strcmp(env, "0"))
@@ -662,9 +642,6 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 
 void FBXFrame::redraw(void)
 {
-	#ifdef XDK
-	CS::SafeLock l(mutex);
-	#endif
 	if(flags&FRAME_BOTTOMUP) fbx(fbx_flip(&fb, 0, 0, 0, 0));
 	fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 }

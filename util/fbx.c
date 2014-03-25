@@ -37,7 +37,7 @@ const char *_fbx_formatname[FBX_FORMATS]=
 	{"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX"};
 
 
-#if defined(FBXWIN32)
+#if defined(_WIN32)
 
 static char __lasterror[1024]="No error";
 #define _throw(m) {  \
@@ -86,7 +86,7 @@ extern _XCopyAreaType __XCopyArea;
 #endif
 
 
-#ifdef FBXWIN32
+#ifdef _WIN32
 
 typedef struct _BMINFO
 {
@@ -98,10 +98,6 @@ typedef struct _BMINFO
 #include <errno.h>
 
 #ifdef USESHM
-#ifdef XDK
-static int fbx_checkdlls(void);
-static int fbx_checkdll(char *, int *, int *, int *, int *);
-#endif
 
 static unsigned long serial=0;  static int __extok=1;
 static XErrorHandler prevhandler=NULL;
@@ -150,7 +146,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 {
 	int w, h;
 	int rmask, gmask, bmask, ps, i;
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
 	XWindowAttributes xwinattrib;  int shmok=1, alphafirst, pixmap=0;
@@ -158,7 +154,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 
 	if(!s) _throw("Invalid argument");
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	if(!wh) _throw("Invalid argument");
 	w32(GetClientRect(wh, &rect));
@@ -279,9 +275,6 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 			alreadywarned=1;
 		}
 	}
-	#ifdef XDK
-	if(!fbx_checkdlls()) useshm=0;
-	#endif
 	if(useshm && XShmQueryExtension(s->wh.dpy))
 	{
 		static int alreadywarned=0;
@@ -337,9 +330,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 				if(!s->pm) shmok=0;
 			}
 		}
-		#ifndef XDK
 		shmctl(s->shminfo.shmid, IPC_RMID, 0);
-		#endif
 		if(!shmok)
 		{
 			useshm=0;  XDestroyImage(s->xi);  shmdt(s->shminfo.shmaddr);
@@ -411,13 +402,13 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 int fbx_read(fbx_struct *s, int winx, int winy)
 {
 	int wx, wy;
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
 	wx=winx>=0? winx:0;  wy=winy>=0? winy:0;
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	if(!s->hmdc || s->width<=0 || s->height<=0 || !s->bits || !s->wh)
 		_throw("Not initialized");
@@ -460,7 +451,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	int h)
 {
 	int bx, by, wx, wy, bw, bh;
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	BITMAPINFO bmi;  fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
@@ -471,7 +462,7 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits)
 		_throw("Not initialized");
@@ -538,7 +529,7 @@ int fbx_flip(fbx_struct *s, int bmpx, int bmpy, int w, int h)
 }
 
 
-#ifndef FBXWIN32
+#ifndef _WIN32
 
 int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 	int h)
@@ -579,7 +570,7 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
 
 int fbx_sync(fbx_struct *s)
 {
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	return 0;
 
@@ -606,7 +597,7 @@ int fbx_term(fbx_struct *s)
 {
 	if(!s) _throw("Invalid argument");
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 
 	if(s->hdib) DeleteObject(s->hdib);
 	if(s->hmdc) DeleteDC(s->hmdc);
@@ -646,120 +637,3 @@ int fbx_term(fbx_struct *s)
 	finally:
 	return -1;
 }
-
-
-#if defined(XDK) && defined(USESHM) && !defined(FBXWIN32)
-
-static int fbx_checkdlls(void)
-{
-	int retval=1, v1, v2, v3, v4;
-	static int alreadywarned=0;
-	if(fbx_checkdll("hclshm.dll", &v1, &v2, &v3, &v4))
-	{
-		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<1))
-		{
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile,
-					"[FBX] WARNING: Installed version of hclshm.dll is %d.%d.%d.%d.\n",
-					v1, v2, v3, v4);
-				fprintf(__warningfile,
-					"[FBX]    Need version >= 9.0.0.1 for shared memory drawing\n");
-			}
-			retval=0;
-		}
-	}
-	if(fbx_checkdll("xlib.dll", &v1, &v2, &v3, &v4))
-	{
-		if(v1<9 || (v1==9 && v2==0 && v3==0 && v4<3))
-		{
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile,
-					"[FBX] WARNING: Installed version of xlib.dll is %d.%d.%d.%d.\n",
-					v1, v2, v3, v4);
-				fprintf(__warningfile,
-					"[FBX]    Need version >= 9.0.0.3 for shared memory drawing\n");
-			}
-			retval=0;
-		}
-	}
-	if(fbx_checkdll("exceed.exe", &v1, &v2, &v3, &v4))
-	{
-		if(v1<8 || (v1==8 && v2==0 && v3==0 && v4<28))
-		{
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile,
-					"[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
-					v1, v2, v3, v4);
-				fprintf(__warningfile,
-					"[FBX]    Need version >= 8.0.0.28 for shared memory drawing\n");
-			}
-			retval=0;
-		}
-		if(v1==9 && v2==0 && v3==0 && v4<9)
-		{
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile,
-					"[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
-					v1, v2, v3, v4);
-				fprintf(__warningfile,
-					"[FBX]    Need version >= 9.0.0.9 for shared memory drawing\n");
-			}
-			retval=0;
-		}
-	}
-	if(!retval && !alreadywarned && __warningfile)
-		fprintf(__warningfile,
-			"[FBX] WARNING: Exceed patches not installed.  Disabling shared memory drawing\n");
-	if(!alreadywarned) alreadywarned=1;
-	return retval;
-}
-
-
-static int fbx_checkdll(char *filename, int *v1, int *v2, int *v3, int *v4)
-{
-	unsigned long vinfolen, vinfohnd=0;
-	char *vinfo=NULL, temps[256], *p;
-	void *buf=NULL;
-	unsigned int len;
-	int retval=1;
-
-	vinfolen=GetFileVersionInfoSize(filename, &vinfohnd);
-	if(!vinfolen)
-	{
-		retval=0;  goto ret;
-	}
-	if((vinfo=(char *)malloc(vinfolen))==NULL)
-	{
-		retval=0;  goto ret;
-	}
-	if(!GetFileVersionInfo(filename, vinfohnd, vinfolen, vinfo))
-	{
-		retval=0;  goto ret;
-	}
-	if(VerQueryValue(vinfo, "\\VarFileInfo\\Translation", &buf, &len)
-		&& len==4)
-	{
-		p=(char *)buf;
-		sprintf(temps, "\\StringFileInfo\\%04X%04X\\FileVersion",
-			*((WORD *)p), *((WORD *)&p[2]));
-	}
-	else sprintf(temps, "\\StringFileInfo\\%04X04B0\\FileVersion",
-		GetUserDefaultLangID());
-	if(VerQueryValue(vinfo, temps, &buf, &len) && len>0)
-	{
-		if(sscanf((char *)buf, "%d.%d.%d.%d", v1, v2, v3, v4)!=4)
-			retval=0;
-		else retval=1;
-	}
-	else retval=0;
-
-	ret:
-	if(vinfo) free(vinfo);
-	return retval;
-}
-
-#endif /* defined(XDK) && defined(USESHM) && !defined(FBXWIN32) */

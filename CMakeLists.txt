@@ -5,30 +5,17 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 
-if(UNIX)
-	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
-		"Install path prefix, prepended onto install directories.")
+if(NOT UNIX)
+	message(FATAL_ERROR "Platform not supported.")
 endif()
+
+set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
+	"Install path prefix, prepended onto install directories.")
 
 project(VirtualGL)
 set(VERSION 2.3.80)
 
-if(UNIX)
-	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(WIN32 AND NOT MINGW)
-	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
-		BUILD)
-	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
-	if (BUILD STREQUAL "")
-		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
-		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
-	else()
-		string(SUBSTRING "${BUILD}" 0 8 BUILD)
-	endif()
-else()
-	message(FATAL_ERROR "Platform not supported.")
-endif()
+execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -41,8 +28,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# This only works if building from the command line.  There is currently no way
-# to set a variable's value based on the build type when using the MSVC IDE.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(BUILD "${BUILD}d")
 endif()
@@ -54,11 +39,7 @@ add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
-if(WIN32)
-	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX})
-else()
-	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
-endif()
+set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 
 set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
 	"Directory into which executables and scripts should be installed (default: ${DEFAULT_VGL_BINDIR})")
@@ -69,29 +50,6 @@ message(STATUS "VGL_BINDIR = ${VGL_BINDIR}")
 message(STATUS "VGL_DOCDIR = ${VGL_DOCDIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
-if(MSVC)
-	# Use the static C library for all build types
-	foreach(var CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-		CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-		CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-		CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-		if(${var} MATCHES "/MD")
-			string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
-		endif()
-	endforeach()
-
-	add_definitions(-wd4996 -D_CRT_SECURE_NO_DEPRECATE -DXDK)
-	include_directories(${CMAKE_SOURCE_DIR}/windows/include)
-	include_directories(${CMAKE_SOURCE_DIR}/windows/include/xdk)
-
-	# Don't auto-generate manifests
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
-
-  # Avoid linker warning when doing Debug build if dependent libraries are
-  # linked with the Release version of the static C library.
-  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
-endif()
 
 # Detect CPU type and word size
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
@@ -204,18 +162,11 @@ if(VGL_USESSL)
 	endif()
 endif()
 
-if(UNIX)
-	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
-	endif()
-	include(FindX11)
-	include(FindOpenGL)
-elseif(WIN32)
-	set(X11_X11_LIB xlib.lib)
-	set(X11_Xext_LIB hclshm.lib)
-	set(OPENGL_gl_LIBRARY hclglx.lib)
-	set(OPENGL_glu_LIBRARY hclglu.lib)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
+include(FindX11)
+include(FindOpenGL)
 
 # Ensure that we build and link against the X11 version of OpenGL on OS X
 if(APPLE)
@@ -259,7 +210,7 @@ endif()
 #
 
 set(DEFAULT_VGL_BUILDSERVER 0)
-if(UNIX AND NOT APPLE AND NOT CYGWIN)
+if(NOT APPLE AND NOT CYGWIN)
 	set(DEFAULT_VGL_BUILDSERVER 1)
 endif()
 option(VGL_BUILDSERVER "Build VirtualGL server components"
@@ -295,11 +246,7 @@ if(VGL_BUILDSERVER)
 	endif()
 endif()
 
-if(WIN32)
-	set(FBXLIB fbx-x11)
-else()
-	set(FBXLIB fbx)
-endif()
+set(FBXLIB fbx)
 if(VGL_USEXV)
 	set(FBXLIB ${FBXLIB};fbxv)
 endif()
@@ -310,9 +257,7 @@ if(VGL_BUILDSERVER)
 add_subdirectory(server)
 endif()
 add_subdirectory(client)
-if(NOT WIN32)
 add_subdirectory(glxdemos)
-endif()
 add_subdirectory(diags)
 add_subdirectory(doc)
 

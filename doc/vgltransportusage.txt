@@ -30,8 +30,7 @@ This mode is recommended for use only on secure local-area networks.  The X11
 traffic is encrypted, but the VGL Transport is left unencrypted to
 maximize performance.
 
-*** Procedure for Linux/Unix/Mac/Cygwin Clients
-#OPT: noList! plain!
+*** Procedure
 
 	#. Start the X server if it isn't started already.{nl}
 		__Mac clients:__ start the Mac X11 application or XQuartz.{nl}
@@ -49,45 +48,6 @@ maximize performance.
 
 		#Verb: <<---
 		/opt/VirtualGL/bin/vglconnect {user}@{server}
-		---
-
-		Replace __''{user}''__ with your username on the VirtualGL server and
-		__''{server}''__ with the hostname or IP address of that server.
-
-	#. In the SSH session, start a 3D application using VirtualGL:
-
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
-		---
-
-	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
-	information on ''vglrun'' command-line options.
-
-*** Procedure for Windows Clients Running Exceed
-#OPT: noList! plain!
-
-	#. Start Exceed if it isn't already started.  Hover the mouse pointer over
-		the Exceed taskbar icon and make a note of the display number on which
-		Exceed is listening (__Example:__ "Exceed 0.0 Multiwindow Mode".)
-
-	#. Open a new Command Prompt.
-
-	#. In the same Command Prompt window, set the ''DISPLAY'' environment
-		variable to match the display on which Exceed is listening.  Example:
-
-		#Verb: <<---
-		set DISPLAY=:0.0
-		---
-
-		!!! If you only ever plan to use one Exceed session at a time, then you
-		can set the ''DISPLAY'' environment variable in your user environment,
-		which is configured through the Windows Control Panel.
-
-	#. Open a Secure Shell (SSH) session into the VirtualGL server:
-
-		#Verb: <<---
-		cd /d "c:\program files\virtualgl-{version}-{build}"
-		vglconnect {user}@{server}
 		---
 
 		Replace __''{user}''__ with your username on the VirtualGL server and
@@ -290,16 +250,12 @@ all instances of ''vglclient'' running under your user account by invoking
 	vglclient -kill
 	---
 
-(''vglclient'' for Linux/Unix/Mac/Cygwin installs in ''/opt/VirtualGL/bin'' by
-default, and
-''vglclient'' for Exceed is in
-''c:\\program files\\virtualgl-''__''{version}''__''-''__''{build}''__).
+(''vglclient'' is installed in ''/opt/VirtualGL/bin'' by default.)
 
 ''vglconnect'' instructs ''vglclient'' to redirect all of its console output
 to a log file named
 __''{home}''__''/.vgl/vglconnect-''__''{hostname}''__''-''__''{display}''__''.log'',
-where __''{home}''__ is the path of the current user's home directory
-(''%USERPROFILE%'' if using the VirtualGL Client for Exceed),
+where __''{home}''__ is the path of the current user's home directory,
 __''{hostname}''__ is the name of the computer running ''vglconnect'', and
 __''{display}''__ is the name of the current X display (read from the
 ''DISPLAY'' environment or passed to ''vglconnect'' using the ''-display''

@@ -77,11 +77,7 @@ void clientwin::initgl(void)
 {
 	GLFrame *fb=NULL;
 	char dpystr[80];
-	#ifdef XDK
-	sprintf(dpystr, "LOCALPC:%d.0", _dpynum);
-	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
-	#endif
 	CS::SafeLock l(_mutex);
 	if(_drawmethod==RR_DRAWOGL)
 	{
@@ -117,11 +113,7 @@ void clientwin::initx11(void)
 {
 	FBXFrame *fb=NULL;
 	char dpystr[80];
-	#ifdef XDK
-	sprintf(dpystr, "localhost:%d.0", _dpynum);
-	#else
 	sprintf(dpystr, ":%d.0", _dpynum);
-	#endif
 	CS::SafeLock l(_mutex);
 	if(_drawmethod==RR_DRAWX11)
 	{

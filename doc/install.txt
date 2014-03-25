@@ -51,24 +51,7 @@
 	#. Open the disk image, then open ''VirtualGL-''__''{version}''__''.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac client.
 
-** Installing the VirtualGL Client on Windows (Exceed)
-
-	#. Download the VirtualGL Client for Exceed installer package
-		(''VirtualGL[64]-''__''{version}''__''-exceed.exe'') from the
-		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
-
-	#. Run the installer.  The installation of the VirtualGL Client should be
-		self-explanatory.  The only configuration option is the directory into
-		which you want the files to be installed.
-
- !!! NOTE: The VirtualGL Client for Exceed installer does not remove any
- previous versions of the VirtualGL Client that may be installed on your machine.
- If you wish, you can remove these older versions manually by using the "Add or
- Remove Programs" applet in the Control Panel (or the "Programs and Features"
- applet if you are running Windows Vista.)
-
-** Installing the VirtualGL Client on Windows (Cygwin/X)
+** Installing the VirtualGL Client on Windows (Cygwin)
 
 Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].
 
@@ -118,14 +101,7 @@ or issue the following command from the Terminal:
 sudo /opt/VirtualGL/bin/uninstall
 ---
 
-*** Windows (Exceed)
-#OPT: noList! plain!
-
-Use the "Programs and Features" applet in the Control Panel (or the
-"Add or Remove Programs" applet if you are running Windows XP), or
-select "Uninstall VirtualGL Client" in the "VirtualGL Client" Start Menu group.
-
-*** Windows (Cygwin/X)
+*** Windows (Cygwin)
 #OPT: noList! plain!
 
 Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].

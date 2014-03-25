@@ -22,14 +22,10 @@
 #include "vgltransreceiver.h"
 #include "vglutil.h"
 #include "x11err.h"
-#include "xdk-sym.h"
 #include <X11/Xatom.h>
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
-#ifdef _WIN32
-#include <psapi.h>
-#else
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #include <sys/proc.h>
@@ -39,7 +35,6 @@
 #include <sys/stat.h>
 #ifdef sun
 #include <procfs.h>
-#endif
 #endif
 #endif
 
@@ -64,9 +59,7 @@ extern "C" {
 void handler(int type)
 {
 	restart=false;
-	#ifndef _WIN32
 	if(type==SIGHUP) restart=true;
-	#endif
 	deadyet=true;
 }
 
@@ -90,85 +83,11 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 	return 1;
 }
 
-#ifdef _WIN32
-BOOL consolehandler(DWORD type)
-{ 
-	switch(type)
-	{
-		case CTRL_C_EVENT: 
-		case CTRL_CLOSE_EVENT: 
-		case CTRL_BREAK_EVENT: 
-		case CTRL_LOGOFF_EVENT: 
-		case CTRL_SHUTDOWN_EVENT: 
-			restart=false;  deadyet=true;  return TRUE;
-		default: 
-			return FALSE; 
-  } 
-} 
-#endif
- 
 } // extern "C"
 
 
 void killproc(bool useronly)
 {
-	#ifdef _WIN32
-	DWORD pid[1024], bytes;
-	int nps=0, nmod=0, i, j;
-	char filename[MAX_PATH], *ptr;
-	HMODULE mod[1024];  HANDLE ph=NULL, token=0;
-
-	if(!useronly)
-	{
-		tryw32(OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES,
-			&token));
-		errifnot(token);
-		TOKEN_PRIVILEGES tp;  LUID luid;
-		if(!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) _throww32();
-		tp.PrivilegeCount=1;
-		tp.Privileges[0].Luid=luid;
-		tp.Privileges[0].Attributes=SE_PRIVILEGE_ENABLED;
-		if(!AdjustTokenPrivileges(token, FALSE, &tp, sizeof(TOKEN_PRIVILEGES),
-			NULL, NULL)) _throww32();
-	}
-
-	try
-	{
-		tryw32(EnumProcesses(pid, 1024, &bytes));
-		nps=bytes/sizeof(DWORD);
-		if(nps) for(i=0; i<nps; i++)
-		{
-			if(pid[i]==GetCurrentProcessId()) continue;
-			if(!(ph=OpenProcess(PROCESS_TERMINATE|PROCESS_QUERY_INFORMATION
-				|PROCESS_VM_READ, FALSE, pid[i]))) continue;
-			if(EnumProcessModules(ph, mod, 1024, &bytes))
-			{
-				nmod=bytes/sizeof(DWORD);
-				if(nmod) for(j=0; j<nmod; j++)
-				{
-					if(GetModuleFileNameEx(ph, mod[j], filename, MAX_PATH))
-					{
-						ptr=strrchr(filename, '\\');
-						if(ptr) ptr=&ptr[1];  else ptr=filename;
-						if(strlen(ptr) && !stricmp(ptr, "vglclient.exe"))
-						{
-							vglout.println("Terminating vglclient process %d", pid[i]);
-							TerminateProcess(ph, 0);  WaitForSingleObject(ph, INFINITE);
-						}
-					}
-				}
-			}
-			CloseHandle(ph);  ph=NULL;
-		}
-		if(token) {CloseHandle(token);  token=0;}
-	}
-	catch(...)
-	{
-		if(ph) CloseHandle(ph);
-		if(token) CloseHandle(token);
-		throw;
-	}
-	#else
 	#ifdef __APPLE__
 	unsigned char *buf=NULL;
 
@@ -270,7 +189,6 @@ void killproc(bool useronly)
 		if(fd) close(fd);  if(procdir) closedir(procdir);  throw;
 	}
 	#endif
-	#endif
 }
 
 
@@ -305,19 +223,6 @@ void usage(char *progname)
 }
 
 
-#ifdef _WIN32
-
-void daemonize(void)
-{
-	STARTUPINFO si={0};  PROCESS_INFORMATION pi;
-	char cl[MAX_PATH+1];
-	snprintf(cl, MAX_PATH, "%s --child", GetCommandLine());
-	if(!CreateProcess(NULL, cl, NULL, NULL, FALSE, 0, NULL, NULL,
-		&si, &pi)) _throww32();
-}
-
-#else
-
 void daemonize(void)
 {
 	int err;
@@ -332,8 +237,6 @@ void daemonize(void)
 	signal(SIGTTOU, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 }
-
-#endif
 
 
 #ifdef USESSL
@@ -471,9 +374,6 @@ int main(int argc, char *argv[])
 		{
 			if(i<argc-1) displayname=argv[++i];
 		}
-		#ifdef _WIN32
-		if(!stricmp(argv[i], "--child")) {child=true;  detach=false;}
-		#endif
 	}
 
 	if(!child)
@@ -484,11 +384,7 @@ int main(int argc, char *argv[])
 		if(detach) daemonize();
 	}
 
-	#ifdef _WIN32
-	if(!detach) start(displayname);
-	#else
 	start(displayname);
-	#endif
 
 	}
 	catch(Error &e)
@@ -496,9 +392,6 @@ int main(int argc, char *argv[])
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
 	}
 	
-	#ifdef XDK
-	__vgl_unloadsymbols();
-	#endif
 	return 0;
 }
 
@@ -517,11 +410,7 @@ void start(char *displayname)
 
 	signal(SIGINT, handler);
 	signal(SIGTERM, handler);
-	#ifdef _WIN32
-	SetConsoleCtrlHandler((PHANDLER_ROUTINE)consolehandler, TRUE);
-	#else
 	signal(SIGHUP, handler);
-	#endif
 	XSetErrorHandler(xhandler);
 
 	start:
@@ -611,9 +500,6 @@ void start(char *displayname)
 		if(child)
 		{
 			printf("%d\n", actualport);
-			#ifdef _WIN32
-			FreeConsole();
-			#endif
 			fclose(stdin);  fclose(stdout);  fclose(stderr);
 		}
 

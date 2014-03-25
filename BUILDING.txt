@@ -1,4 +1,4 @@
-*******************************************************************************
+it*******************************************************************************
 **     Building VirtualGL
 *******************************************************************************
 
@@ -55,50 +55,10 @@ Mac
 Windows
 -------
 
--- Microsoft Visual C++ 2005 or later
-
-   If you don't already have Visual C++, then the easiest way to get it is by
-   installing the Windows SDK:
-
-   http://msdn.microsoft.com/en-us/windows/bb980924.aspx
-
-   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
-   everything necessary to build VirtualGL.
-
-   * For 32-bit builds, you can also use Microsoft Visual C++ Express
-     Edition.  Visual C++ Express Edition is a free download.
-   * If you intend to build VirtualGL from the command line, then add the
-     appropriate compiler and SDK directories to the INCLUDE, LIB, and PATH
-     environment variables.  This is generally accomplished by executing
-     vcvars32.bat or vcvars64.bat and SetEnv.cmd.  vcvars32.bat and
-     vcvars64.bat are part of Visual C++ and are located in the same directory
-     as the compiler.  SetEnv.cmd is part of the Windows SDK.  You can pass
-     optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
-     environment.
-
--- OpenText Exceed XDK v8 or later
-
-   * If you plan to build VirtualGL from the command line, add the XDK include
-     path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
-     to the system or user INCLUDE environment variable prior to building
-     VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
-     path to the "Include Directories" property in Visual Studio.
-   * If you plan to build VirtualGL from the command line, add the XDK library
-     path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\lib)
-     to the system or user LIB environment variable prior to building
-     VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
-     path to the "Include Directories" property in Visual Studio.
-
-
-Cygwin
-------
-
--- GCC and G++
-
--- X11 and OpenGL development libraries:
-   * libX11, libXext, libGL, and libGLU
+-- Cygwin or Cygwin64 with the following packages:
+   * GCC and G++
+   * X11 and OpenGL development libraries:
+     libX11, libXext, libGL, and libGLU
 
 
 =======================================
@@ -181,10 +141,6 @@ For in-tree builds, these directories are the same.
 Build Procedure
 ===============
 
-
-Unix/Mac
---------
-
 The following procedure will build the VirtualGL Client and, on Linux and other
 Un*x variants (except OS X), the VirtualGL Server components.  On most 64-bit
 systems (Solaris being a notable exception), this will build a 64-bit version
@@ -196,39 +152,11 @@ of VirtualGL.  See "Build Recipes" for specific instructions on how to build a
   make
 
 
-Visual C++ (Command Line)
--------------------------
-
-  cd {build_directory}
-  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
-  nmake
-
-This will build either a 32-bit or a 64-bit version of VirtualGL, depending
-on which version of cl.exe is in the PATH.
-
-
-Visual C++ (IDE)
-----------------
-
-Choose the appropriate CMake generator option for your version of Visual Studio
-(run "cmake" with no arguments for a list of available generators.)  For
-instance:
-
-  cd {build_directory}
-  cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
-
-You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
-configurations in that project ("Debug", "Release", etc.) to generate a full
-build of VirtualGL.
-
-
 ===========
 Debug Build
 ===========
 
-Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
-NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
-NMake.)
+Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.
 
 
 ===========================================
@@ -245,11 +173,10 @@ link libraries and include files installed in the standard system locations,
 then the VirtualGL build system should detect the system version of OpenSSL
 automatically and link against it.  However, this produces a version of
 VirtualGL that depends on the OpenSSL dynamic libraries, and thus the VirtualGL
-binaries are not necessarily portable.  On Windows platforms, there is no
-system version of OpenSSL to link against, so it's a moot point.  Thus, to
-build a fully portable, cross-compatible version of VirtualGL with SSL support,
-it is necessary on most systems to link against the OpenSSL static libraries.
-The following sections describe how to do that on various platforms.
+binaries are not necessarily portable.  Thus, to build a fully portable,
+cross-compatible version of VirtualGL with SSL support, it is necessary on most
+systems to link against the OpenSSL static libraries.  The following sections
+describe how to do that on various platforms.
 
 
 Linux
@@ -291,7 +218,7 @@ Mac
 
 Linking with the OpenSSL dynamic libraries is generally not a concern on OS X,
 since Apple ships several versions of these in order to retain backward
-compatibility with OS X 10.4 and later.  See the "Build Recipes" section for
+compatibility with prior versions of OS X.  See the "Build Recipes" section for
 instructions on how to build a backward-compatible version of VirtualGL for
 OS X.
 
@@ -317,37 +244,14 @@ link VirtualGL with OpenSSL:
       -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/libcrypto.a
 
 
-Windows
--------
+Windows (Cygwin)
+----------------
 
-The easiest approach on Windows is to install either Win32 OpenSSL or Win64
-OpenSSL (http://www.slproweb.com/products/Win32OpenSSL.html).  You can then add
-one of the following to the CMake command line to statically link VirtualGL
-with OpenSSL:
+Add the following to the CMake command line to statically link VirtualGL with
+OpenSSL:
 
-  Win64 Release:
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
-      -DLIB_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\libeay32MT.lib \
-      -DSSL_EAY_RELEASE=c:\OpenSSL-Win64\lib\VC\ssleay32MT.lib
-
-  Win64 Debug:
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win64\include \
-      -DLIB_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\libeay32MTd.lib \
-      -DSSL_EAY_DEBUG=c:\OpenSSL-Win64\lib\VC\ssleay32MTd.lib
-
-  Win32 Release:
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
-      -DLIB_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\libeay32MT.lib \
-      -DSSL_EAY_RELEASE=c:\OpenSSL-Win32\lib\VC\ssleay32MT.lib
-
-  Win32 Debug:
-
-    -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=c:\OpenSSL-Win32\include \
-      -DLIB_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\libeay32MTd.lib \
-      -DSSL_EAY_DEBUG=c:\OpenSSL-Win32\lib\VC\ssleay32MTd.lib
+  -DVGL_USESSL=1 -DOPENSSL_SSL_LIBRARY=/usr/lib/libssl.a \
+    -DOPENSSL_CRYPTO_LIBRARY=/usr/lib/libcrypto.a;/usr/lib/libz.a
 
 
 =============
@@ -441,13 +345,10 @@ choosing.  To do this, add:
 
   -DCMAKE_INSTALL_PREFIX={install_directory}
 
-to the CMake command line.  Then, you can run 'make install' or 'nmake install'
-(or build the "install" target in the Visual Studio IDE) to build and install
-VirtualGL.  Running 'make uninstall' or 'nmake uninstall' (or building the
-"uninstall" target in the Visual Studio IDE) will uninstall VirtualGL.
+to the CMake command line.  Then, you can run 'make install' to build and
+install VirtualGL.  Running 'make uninstall' will uninstall VirtualGL.
 
-If you don't specify CMAKE_INSTALL_PREFIX, then the default is
-c:\Program Files\VirtualGL on Windows and /opt/VirtualGL on Unix.
+If you don't specify CMAKE_INSTALL_PREFIX, then the default is /opt/VirtualGL.
 
 
 *******************************************************************************
@@ -455,11 +356,6 @@ c:\Program Files\VirtualGL on Windows and /opt/VirtualGL on Unix.
 *******************************************************************************
 
 The following commands can be used to create various types of release packages:
-
-
-====
-Unix
-====
 
 make rpm
 
@@ -490,24 +386,3 @@ make udmg
 make cygwinpkg
 
   Build a Cygwin binary package.
-
-
-=======
-Windows
-=======
-
-If using NMake:
-
-  cd {build_directory}
-  nmake installer
-
-If using the Visual Studio IDE, build the "installer" project.
-
-The installer package (VirtualGL[64]-{version}-exceed.exe) will be located
-under {build_directory}.  If building using the Visual Studio IDE, then the
-installer package will be located in a subdirectory with the same name as the
-configuration you built (such as {build_directory}\Debug\ or
-{build_directory}\Release\).
-
-Building a Windows installer requires the Nullsoft Install System
-(http://nsis.sourceforge.net/).  makensis.exe should be in your PATH.

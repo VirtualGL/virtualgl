@@ -18,9 +18,7 @@
 #include "rr.h"
 
 #ifndef FCONFIG_USESHM
-#ifndef WIN32
 #define FCONFIG_USESHM 1
-#endif
 #endif
 
 #define VGLCONFIG_PATH "@VGL_BINDIR@/vglconfig"

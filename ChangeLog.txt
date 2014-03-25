@@ -1,4 +1,33 @@
 ===============================================================================
+2.4
+===============================================================================
+[1]
+The VirtualGL Client for Exceed has been retired.  It will continue to be
+maintained in the 2.3.x branch on a break/fix basis only.  Cygwin/X has matured
+to the point that it now provides an adequate solution for using the VirtualGL
+Client on Windows, with the only major limitation being lack of quad-buffered
+stereo support.  That feature alone is insufficient to justify a code base
+that is basically twice as complex as it otherwise would be.  Further, we are
+now maintaining our own Cygwin repository for the VirtualGL Client, which makes
+it easier to install on that platform.
+
+The VirtualGL Client for Exceed reflects VirtualGL's origins as an add-on
+technology for existing remote X environments.  These days, most people use
+VirtualGL with some sort of X proxy instead.  There have been no significant
+changes to vglclient since version 2.2.1, as most of the efforts of The
+VirtualGL Project in recent years have focused on the server-side components
+and TurboVNC.  In the early days of the project, there were performance
+advantages to the VGL Transport, but that is no longer the case.  In fact,
+TurboVNC will generally do a better and faster job of compressing the image
+stream, since it uses a hybrid compression scheme rather than pure JPEG.
+
+The native Windows version of TCBench, which previously shipped with the
+VirtualGL Client for Exceed, has been moved into the Windows TurboVNC Viewer
+package.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.3.4
 ===============================================================================
 [1]

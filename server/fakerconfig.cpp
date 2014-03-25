@@ -61,15 +61,11 @@ class DeferredCS : CS
 			if(!_init)
 			{
 				_init=true;
-				#ifdef _WIN32
-				mutex=CreateMutex(NULL, FALSE, NULL);
-				#else
 				pthread_mutexattr_t ma;
 				pthread_mutexattr_init(&ma);
 				pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
 				pthread_mutex_init(&mutex, &ma);
 				pthread_mutexattr_destroy(&ma);
-				#endif
 			}
 			return this;
 		}

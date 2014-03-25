@@ -95,12 +95,7 @@ install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS}
 # Unit tests
 #
 
-if(WIN32)
-	add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp
-		frame.cpp)
-else()
-	add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp)
-endif()
+add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp)
 target_link_libraries(x11transut vglcommon ${FBXLIB} ${TJPEG_LIBRARY})
 
 add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp

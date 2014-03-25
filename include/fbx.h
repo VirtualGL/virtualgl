@@ -24,39 +24,17 @@
 #define __FBX_H__
 
 #define USESHM
-#if defined(_WIN32) && !defined(FBXX11)
- #define FBXWIN32
-#endif
 
 #include <stdio.h>
-#ifdef FBXWIN32
+#ifdef _WIN32
  #include <windows.h>
  typedef HDC fbx_gc;
  typedef HWND fbx_wh;
 #else
- #ifdef FBXX11
-  #include <Xwindows.h>
- #endif
- #ifdef XDK
-  #define NOREDIRECT
- #endif
  #include <X11/Xlib.h>
  #ifdef USESHM
-  #ifdef XDK
-   #include <X11/hclshm.h>
-   /* Exceed likes to redefine stdio, so we un-redefine it :/ */
-   #undef fprintf
-   #undef printf
-   #undef putchar
-   #undef putc
-   #undef puts
-   #undef fputc
-   #undef fputs
-   #undef perror
-  #else
-   #include <sys/ipc.h>
-   #include <sys/shm.h>
-  #endif
+  #include <sys/ipc.h>
+  #include <sys/shm.h>
   #include <X11/extensions/XShm.h>
  #endif
  #include <X11/Xutil.h>
@@ -96,7 +74,7 @@ typedef struct _fbx_struct
 	fbx_wh wh;
 	int shm;
 
-	#ifdef FBXWIN32
+	#ifdef _WIN32
 	HDC hmdc;  HBITMAP hdib;
 	#else
 	#ifdef USESHM
@@ -204,7 +182,7 @@ int fbx_write (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
   Same as fbx_write, but asynchronous.  The write isn't guaranteed to complete
   until fbx_sync() is called.  On Windows, fbx_awrite is the same as fbx_write.
 */
-#ifdef FBXWIN32
+#ifdef _WIN32
 #define fbx_awrite fbx_write
 #else
 int fbx_awrite (fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w,
