@@ -382,8 +382,6 @@ to the CMake command line.  The OS X 10.5 SDK must be installed.
 
 Use export/setenv to set the following environment variables:
 
-  CC=/Developer/usr/bin/gcc-4.0
-  CXX=/Developer/usr/bin/g++-4.0
   CFLAGS=-m32
   CXXFLAGS=-m32
   LDFLAGS=-m32
