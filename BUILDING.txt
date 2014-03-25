@@ -274,13 +274,13 @@ static library form.  To build OpenSSL from source:
 
 * make
 
-You can then manipulate the OPENSSL_INCLUDE_DIR, OPENSSL_SSL_LIBRARIES, and
-OPENSSL_CRYPTO_LIBRARIES CMake variables to link VirtualGL against your custom
+You can then manipulate the OPENSSL_INCLUDE_DIR, OPENSSL_SSL_LIBRARY, and
+OPENSSL_CRYPTO_LIBRARY CMake variables to link VirtualGL against your custom
 OpenSSL build.  For instance, adding
 
   -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=~/openssl/include \
-    -DOPENSSL_SSL_LIBRARIES=~/openssl/libssl.a \
-    -DOPENSSL_CRYPTO_LIBRARIES=~/openssl/libcrypto.a
+    -DOPENSSL_SSL_LIBRARY=~/openssl/libssl.a \
+    -DOPENSSL_CRYPTO_LIBRARY=~/openssl/libcrypto.a
 
 to the CMake command line will cause VirtualGL to be statically linked against
 a custom build of OpenSSL that resides under ~/openssl.
@@ -307,14 +307,14 @@ link VirtualGL with OpenSSL:
   64-bit:
 
     -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
-      -DOPENSSL_SSL_LIBRARIES=/opt/csw/lib/64/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARIES=/opt/csw/lib/64/libcrypto.a
+      -DOPENSSL_SSL_LIBRARY=/opt/csw/lib/64/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/64/libcrypto.a
 
   32-bit:
 
     -DVGL_USESSL=1 -DOPENSSL_INCLUDE_DIR=/opt/csw/include \
-      -DOPENSSL_SSL_LIBRARIES=/opt/csw/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARIES=/opt/csw/lib/libcrypto.a
+      -DOPENSSL_SSL_LIBRARY=/opt/csw/lib/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARY=/opt/csw/lib/libcrypto.a
 
 
 Windows
