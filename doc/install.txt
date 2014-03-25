@@ -70,38 +70,7 @@
 
 ** Installing the VirtualGL Client on Windows (Cygwin/X)
 
-	#. Make sure that the following Cygwin packages are installed:{nl}{nl}
-		libGL{nl}
-		libGLU{nl}
-		libstdc++{nl}
-		libX11{nl}
-		libXext{nl}
-		openssh{nl}
-		xorg-xserver{nl}
-		xauth{nl}
-
-	#. Download the VirtualGL Cygwin package
-		(''VirtualGL-''__''{version}''__''-cygwin.tar.bz2'', or
-		''VirtualGL-''__''{version}''__''-cygwin64.tar.bz2'' if you are running
-		Cygwin64) from the
-		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
-
-	#. Run the Cygwin Setup application (the same application you used to install
-		Cygwin.)
-
-	#. On the "Choose a Download Source" page, select "Install from Local
-		Directory".
-
-	#. On the "Select Root Install Directory" page, use the same options that you
-		used when installing Cygwin.
-
-	#. On the "Select Local Package Directory" page, enter the directory
-		containing the VirtualGL Cygwin package.
-
-	#. On the "Select Packages" page, change "View" to "Pending" and verify
-		that the VirtualGL package with the correct version is selected for
-		install.  Click "Next>" to install.
+Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].
 
 ** Installing VirtualGL from Source
 
@@ -159,18 +128,4 @@ select "Uninstall VirtualGL Client" in the "VirtualGL Client" Start Menu group.
 *** Windows (Cygwin/X)
 #OPT: noList! plain!
 
-	#. Run the Cygwin Setup application (the same application you used to install
-		Cygwin.)
-
-	#. On the "Choose a Download Source" page, select "Install from Local
-		Directory".
-
-	#. On the "Select Root Install Directory" page, use the same options that you
-		used when installing Cygwin.
-
-	#. On the "Select Local Package Directory" page, enter the directory
-		containing the VirtualGL Cygwin package.
-
-	#. On the "Select Packages" page, change "View" to "Full", find the
-		"VirtualGL" package in the list, and change its status from "Keep" to
-		"Uninstall".  Click "Next>" to uninstall.
+Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].
