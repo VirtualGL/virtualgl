@@ -184,7 +184,8 @@ void pbwin::checkresize(void)
 {
 	if(_eventdpy)
 	{
-		if(XPending(_eventdpy)>0)
+		XSync(_dpy, False);
+		while(XPending(_eventdpy)>0)
 		{
 			XEvent event;
 			_XNextEvent(_eventdpy, &event);

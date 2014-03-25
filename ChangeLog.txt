@@ -18,6 +18,10 @@ lack an xorg.conf file but have an xorg.conf.d directory.
 [4]
 vglserver_config should now work with recent Debian releases.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue whereby VirtualGL would not always resize the Pbuffer
+corresponding to an Xt or Motif OpenGL widget whenever the widget was resized.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
