@@ -390,10 +390,10 @@ Use export/setenv to set the following environment variables:
 
 and add
 
-  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.4u.sdk \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.4
+  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5
 
-to the CMake command line.  The OS X 10.4 SDK must be installed.
+to the CMake command line.  The OS X 10.5 SDK must be installed.
 
 
 64-bit Build on Solaris
@@ -473,13 +473,11 @@ make deb
 
 make dmg
 
-  Create Macintosh package/disk image.  This requires the PackageMaker
-  application, which the build system looks for in
-  /Developer/Applications/Utilities by default.  You can override this by
-  setting the PACKAGEMAKER_PATH CMake variable.  Note that PackageMaker is not
-  included in recent releases of Xcode, but it can be obtained by downloading
-  the "Auxiliary Tools for Xcode" package from
-  http://developer.apple.com/downloads.
+  Create Macintosh package/disk image.  This requires pkgbuild and
+  productbuild, which are installed by default on OS X 10.7 and later and which
+  can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
+  option) on OS X 10.6.  Packages built in this manner can be installed on OS X
+  10.5 and later, but they must be built on OS X 10.6 or later.
 
 make udmg
 

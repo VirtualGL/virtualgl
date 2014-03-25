@@ -11,7 +11,7 @@ TMPDIR=
 onexit()
 {
 	if [ ! "$TMPDIR" = "" ]; then
-		sudo rm -rf $TMPDIR
+		rm -rf $TMPDIR
 	fi
 }
 
@@ -62,7 +62,6 @@ if [ $# -gt 0 ]; then
 		UNIVERSAL=1
 	fi
 fi
-PACKAGEMAKER=@PACKAGEMAKER_PATH@/PackageMaker.app/Contents/MacOS/PackageMaker
 
 if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
 	rm -f $PACKAGE_NAME-$VERSION.dmg
@@ -111,32 +110,25 @@ if [ $UNIVERSAL = 1 ]; then
 fi
 
 mkdir -p $PKGROOT/Library/Documentation
-chmod 1775 $PKGROOT/Library
-chmod 775 $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
 
-mkdir -p $TMPDIR/pkg/Resources 
-cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
-cp pkgscripts/Description.plist $TMPDIR/pkg/
-cp pkgscripts/Info.plist $TMPDIR/pkg/
+mkdir -p $TMPDIR/pkg
+cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
-chmod 775 $PKGROOT/Applications
 install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
 sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE_NAME/Documentation"
 if [ "$PREFIX" = "/opt/VirtualGL" ]; then
 	ln -fs /Library/Documentation/$PACKAGE_NAME $PKGROOT/$PREFIX/doc
 fi
 
-sudo chown -R root:admin $PKGROOT
-sudo chown root:0 $TMPDIR/pkg/Package_Root/usr
-sudo chown root:0 $TMPDIR/pkg/Package_Root/usr/bin
-
 mkdir $TMPDIR/dmg
-$PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
-	-f $PKGROOT -r $TMPDIR/pkg/Resources \
-	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
+pkgbuild --root $PKGROOT --version $VERSION.$BUILD \
+	--identifier com.virtualgl.vglclient $TMPDIR/pkg/$PACKAGE_NAME.pkg
+productbuild --distribution pkgscripts/Distribution.xml \
+	--package-path $TMPDIR/pkg/ --resources $TMPDIR/pkg/ \
+	$TMPDIR/dmg/$PACKAGE_NAME.pkg
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
