@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-03-24T19:53:44">
+<meta name="date" content="2014-03-24T22:06:05">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -425,7 +425,7 @@ used to send rendered 3D images to the client machine:</p>
 <a name="fig003001"></a>
 <div class="figure">
 <p class="caption">Figure 3.1: The VGL Transport with a Remote 2D X Server</p>
-<img src="vgltransport.png" alt="vgltransport" class="figure" id="imgid_9" name="imgid_9"/>
+<img src="vgltransport.png" alt="vgltransport" class="figure" id="imgid_8" name="imgid_8"/>
 </div>
 
 <p><a name="X11_Transport"></a></p>
@@ -454,7 +454,7 @@ used to send rendered 3D images to the client machine:</p>
 <a name="fig003002"></a>
 <div class="figure">
 <p class="caption">Figure 3.2: The X11 Transport with an X Proxy</p>
-<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_10" name="imgid_10"/>
+<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_9" name="imgid_9"/>
 </div>
 
 <p>VirtualGL also provides an API that can be used to develop custom image 
@@ -584,7 +584,7 @@ transport plugins.</p>
     <span class="remote"><a class="remote" href="http://x.cygwin.com">Cygwin/X</a></span><a name="idx0019"></a> 
     or 
     <span class="remote"><a class="remote" href="http://connectivity.opentext.com">OpenText</a></span><a name="idx0020"></a> 
-    Exceed v8 or newer
+    Exceed 2008 or newer
 </li>
 <li class="Itemize-0">
     Client display must have a 24-bit or 32-bit color depth (True Color.)
@@ -645,9 +645,8 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     2D X server that supports and is configured to export stereo visuals.  
     (As of this writing, 
     <span class="remote"><a class="remote" href="http://connectivity.opentext.com">OpenText</a></span><a name="idx0021"></a> 
-    Exceed 3D v8 or newer is the only known Windows X server solution that 
-    supports stereo drawing with sufficient performance to be used with 
-    VirtualGL.)
+    Exceed 3D is the only known Windows X server solution that supports 
+    stereo drawing with sufficient performance to be used with VirtualGL.)
 </li></ul></td>
   </tr>
 </table>
@@ -685,8 +684,8 @@ The client requirements do not apply to anaglyphic stereo.  See Chapter <a href=
     2D X server that supports and is configured to export transparent 
     overlay visuals. (As of this writing, 
     <span class="remote"><a class="remote" href="http://connectivity.opentext.com">OpenText</a></span><a name="idx0022"></a> 
-    Exceed 3D v8 or newer is the only known Windows X server solution that 
-    supports transparent overlays.)
+    Exceed 3D is the only known Windows X server solution that supports 
+    transparent overlays.)
 </li></ul></td>
   </tr>
 </table>
@@ -1346,34 +1345,7 @@ to the system <code>PATH</code> environment if it isn&rsquo;t already
 there.</p>
 
 
-<h3 id="hd007001001">Disabling Pixel Format Conversion (Exceed 2006 and earlier)</h3>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        Load Exceed XConfig (right-click on the Exceed taskbar icon, then select 
-        <em>Tools&ndash;&gt;Configuration</em>.)
-    </li>
-    <li class="Ordered-1 Ordered">
-        Open the &ldquo;X Server Protocol&rdquo; applet in XConfig.
-        <div class="important"><p class="important">
-        If you are using the &ldquo;Classic View&rdquo; mode of XConfig, open the &ldquo;Protocol&rdquo; applet instead.
-        </p></div>
-    </li>
-    <li class="Ordered-1 Ordered">
-        In the &ldquo;X Server Protocol&rdquo; applet, select the 
-        &ldquo;Protocol&rdquo; tab and make sure that &ldquo;Use 32 bits per 
-        pixel for true color&rdquo; is not checked. <br /><br /> 
-        <img src="exceed1.png" alt="exceed1" class="inline" id="imgid_1" name="imgid_1"/>
-    </li>
-    <li class="Ordered-1 Ordered">
-        Click &ldquo;Validate and Apply Changes.&rdquo;  If XConfig asks whether 
-        you want to perform a server reset, click &ldquo;Yes.&rdquo;
-    </li>
-</ol>
-
-
-
-<h3 id="hd007001002">Disabling Backing Store (Exceed 2008 and earlier)</h3>
+<h3 id="hd007001001">Disabling Backing Store (Exceed 2008)</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -1390,7 +1362,7 @@ there.</p>
         Select the &ldquo;Performance&rdquo; tab and make sure that 
         &ldquo;Default Backing Store&rdquo; is set to &ldquo;None.&rdquo; 
         <br /><br /> 
-        <img src="exceed3.png" alt="exceed3" class="inline" id="imgid_2" name="imgid_2"/>
+        <img src="exceed3.png" alt="exceed3" class="inline" id="imgid_1" name="imgid_1"/>
     </li>
     <li class="Ordered-1 Ordered">
         Click &ldquo;Validate and Apply Changes.&rdquo;  If XConfig asks whether 
@@ -1400,7 +1372,7 @@ there.</p>
 
 
 
-<h3 id="hd007001003">Enabling MIT-SHM</h3>
+<h3 id="hd007001002">Enabling MIT-SHM</h3>
 
 <p>VirtualGL has the ability to take advantage of the MIT-SHM extension in 
 OpenText Exceed to accelerate image drawing on Windows.  This can 
@@ -1408,40 +1380,12 @@ significantly improve the end-to-end performance of the VGL Transport
 when running over a local-area network.</p>
 
 <p>The bad news is that this extension is not consistently implemented 
-across all versions of Exceed.  In particular, Exceed 8, Exceed 9, and 
-Exceed 2008 require patches to make it work properly.  If you are using 
-one of these versions of Exceed, you will need to obtain the following 
-patches from the OpenText support site:</p>
-
-<div class="table">
-<table class="standard">
-  <thead class="standard">
-  <tr class="head ">
-    <th class="head standard">Product</th>
-    <th class="head standard">Patches Required</th>
-    <th class="head standard">How to Obtain</th>
-  </tr>
-  </thead>
-  <tr class="standard">
-    <td class="standard">Exceed 8.0</td>
-    <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v8.0.0.28 (or higher)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a class="remote" href="http://support.hummingbird.com/customer/cspatches/patches.asp">OpenText support site</a></span><a name="idx0040"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">Exceed 9.0</td>
-    <td class="standard"><code>hclshm.dll</code> v9.0.0.1 (or higher)<br /> <code>xlib.dll</code> v9.0.0.3 (or higher)<br /> <code>exceed.exe</code> v9.0.0.9 (or higher)</td>
-    <td class="standard"><code>exceed.exe</code> can be patched by running Hummingbird Update.<br /> <br /> All other patches must be downloaded from the <span class="remote"><a class="remote" href="http://support.hummingbird.com/customer/cspatches/patches.asp">OpenText support site</a></span><a name="idx0041"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">Exceed 2008</td>
-    <td class="standard"><code>xlib.dll</code> v13.0.1.235 (or higher)<br /> (or install the latest <span class="remote"><a class="remote" href="http://support.hummingbird.com/customer/cspatches/patches.asp">Connectivity 2008 Service Pack</a></span><a name="idx0042"></a>)</td>
-    <td class="standard">Download all patches from the <span class="remote"><a class="remote" href="http://support.hummingbird.com/customer/cspatches/patches.asp">OpenText support site</a></span><a name="idx0043"></a>. <br /> (<em>OpenText WebSupport account required</em>)</td>
-  </tr>
-</table>
-</div>
-
-
-<p>No patches should be necessary for Exceed 10, 2006, 2007, or 14.</p>
+across all versions of Exceed.  In particular, Exceed 2008 requires 
+patches to make it work properly.  If you are using this version of 
+Exceed, you will need to install the latest 
+<span class="remote"><a class="remote" href="http://support.hummingbird.com/customer/cspatches/patches.asp">Connectivity 
+2008 Service Pack</a></span><a name="idx0040"></a> (<em>OpenText 
+WebSupport account required</em>.)</p>
 
 <p>Next, you need to enable the MIT-SHM extension in Exceed:</p>
 
@@ -1459,7 +1403,7 @@ patches from the OpenText support site:</p>
     <li class="Ordered-1 Ordered">
         Select the &ldquo;Extensions&rdquo; tab and make sure that 
         &ldquo;MIT-SHM&rdquo; is checked. <br /><br /> 
-        <img src="exceed2.png" alt="exceed2" class="inline" id="imgid_3" name="imgid_3"/>
+        <img src="exceed2.png" alt="exceed2" class="inline" id="imgid_2" name="imgid_2"/>
     </li>
     <li class="Ordered-1 Ordered">
         Click &ldquo;Validate and Apply Changes.&rdquo;  If XConfig asks whether 
@@ -1677,7 +1621,7 @@ Most newer Linux and Unix distributions ship with default settings that do not a
 
 <p>The procedure for this mode is identical to the procedure for the 
 <a href="#X11_Forwarding">VGL Transport with X11 
-forwarding</a><a name="idx0044"></a>, except that you should pass a 
+forwarding</a><a name="idx0041"></a>, except that you should pass a 
 <code>-x</code> argument to <code>vglconnect</code> when connecting to 
 the server:</p>
 
@@ -1705,7 +1649,7 @@ anywhere from 20-40%.</p>
 
 <p>The procedure for this mode is identical to the procedure for the 
 <a href="#X11_Forwarding">VGL Transport with X11 
-forwarding</a><a name="idx0045"></a>, except that you should pass a 
+forwarding</a><a name="idx0042"></a>, except that you should pass a 
 <code>-s</code> argument to <code>vglconnect</code> when connecting to 
 the server:</p>
 
@@ -1730,7 +1674,7 @@ be forwarded from the VirtualGL server through the gateway and to the
 client.</p>
 
 <div class="figure">
-<img src="sshtunnel.png" alt="sshtunnel" class="figure" id="imgid_11" name="imgid_11"/>
+<img src="sshtunnel.png" alt="sshtunnel" class="figure" id="imgid_10" name="imgid_10"/>
 </div>
 
 
@@ -1759,7 +1703,7 @@ XDMCP is very insecure and is not recommended as a means of running VirtualGL, i
 
 <p>Using the VGL Transport with XDMCP is conceptually similar to using the 
 VGL Transport with a <a href="#Direct_X11_Connection">direct X11 
-connection</a><a name="idx0046"></a>.  The major difference is that, 
+connection</a><a name="idx0043"></a>.  The major difference is that, 
 rather than remotely displaying individual X windows to the 2D X server, 
 XDMCP remotely displays a complete desktop session from the application 
 server. X11 applications are launched inside of this remote desktop 
@@ -1940,7 +1884,7 @@ create rules based on application executables instead of listening ports.</p>
 
 <p>Note that it is not necessary to open any inbound ports in the firewall 
 to use the VGL Transport with <a href="#SSH_Tunneling">SSH 
-Tunneling</a><a name="idx0047"></a>.</p>
+Tunneling</a><a name="idx0044"></a>.</p>
 
 <p><br /></p>
 
@@ -1978,17 +1922,17 @@ They simply aren&rsquo;t designed to compress, with any degree of
 performance, the large and complex images generated by 3D applications.  
 Therefore, the VirtualGL Project provides an optimized X proxy called 
 &ldquo;TurboVNC&rdquo;, a variant of 
-<span class="remote"><a class="remote" href="http://www.tightvnc.com">TightVNC</a></span><a name="idx0048"></a> 
+<span class="remote"><a class="remote" href="http://www.tightvnc.com">TightVNC</a></span><a name="idx0045"></a> 
 that is designed specifically to achieve high levels of performance with 
 3D applications running in VirtualGL.  More information about TurboVNC, 
 including instructions for using it with VirtualGL, can be found in the 
 TurboVNC User&rsquo;s Guide.</p>
 
-<p><span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0049"></a> 
+<p><span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0046"></a> 
 is a next-generation VNC project based on the RealVNC and Xorg code 
 bases.  TigerVNC spun off from the TightVNC project in early 2009, and 
 it uses the same high-speed JPEG codec as VirtualGL and TurboVNC 
-(<span class="remote"><a class="remote" href="http://www.libjpeg-turbo.org">libjpeg-turbo</a></span><a name="idx0050"></a>).  
+(<span class="remote"><a class="remote" href="http://www.libjpeg-turbo.org">libjpeg-turbo</a></span><a name="idx0047"></a>).  
 Unlike TurboVNC, TigerVNC is not specifically designed for 3D 
 applications. However, TigerVNC can, if properly configured, produce 
 performance that is sufficient for use with VirtualGL.  As of this 
@@ -2011,7 +1955,7 @@ rendered 3D images to the X proxy through shared memory rather than
 sending them over a network.</p>
 
 <div class="figure">
-<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_12" name="imgid_12"/>
+<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_11" name="imgid_11"/>
 </div>
 
 <p>With this configuration, you can usually invoke</p>
@@ -2041,7 +1985,7 @@ by passing an argument of <code>-c&nbsp;proxy</code> to
 <p><a name="X11_Proxy_Usage_Remote"></a></p>
 
 <div class="figure">
-<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_13" name="imgid_13"/>
+<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_12" name="imgid_12"/>
 </div>
 
 <p>If the X proxy and VirtualGL are running on different servers, then it 
@@ -2057,7 +2001,7 @@ for this procedure to perform well.</p>
 
 <p>The procedure for using the VGL Transport to display 3D applications 
 from a VirtualGL server to a remote X proxy is the same as the 
-<a href="#X11_Forwarding">procedure</a><a name="idx0051"></a> for using 
+<a href="#X11_Forwarding">procedure</a><a name="idx0048"></a> for using 
 the VGL Transport to display 3D applications from a VirtualGL server to 
 a remote 2D X server, with the following exceptions:</p>
 
@@ -2252,7 +2196,7 @@ some_3D_application_executable
 <p>This procedure may be necessary to work around certain other interaction 
 issues between VirtualGL and the launch scripts of specific 
 applications.  See <a href="#Application_Recipes">Application 
-Recipes</a><a name="idx0052"></a> for more details.</p>
+Recipes</a><a name="idx0049"></a> for more details.</p>
 
 <p>If the 3D application that you are intending to run in VirtualGL is 
 itself a setuid/setgid executable, then further steps are required.  
@@ -2397,7 +2341,7 @@ With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename <code
         the 2D elements of the virtual machine&rsquo;s display will not perform 
         well over a remote X11 connection unless gigabit Ethernet (or faster) 
         and a <a href="#Direct_X11_Connection">direct X11 
-        connection</a><a name="idx0053"></a> (<code>vglconnect&nbsp;-x</code>) 
+        connection</a><a name="idx0050"></a> (<code>vglconnect&nbsp;-x</code>) 
         are used.  Using a high-performance X proxy (such as TurboVNC) is 
         generally preferred when remotely displaying VirtualBox using VirtualGL, 
         particularly on 100 Megabit and slower networks.
@@ -2615,7 +2559,7 @@ for Windows clients.) Otherwise, VirtualGL will fall back to using
 anaglyphic stereo (see below.) It is usually necessary to explicitly 
 enable stereo in the graphics driver configuration for both the client 
 and server machines.  The 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0054"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0051"></a> 
 section below lists a way to verify that both the 3D X server and the 2D 
 X server have stereo visuals available.</p>
 
@@ -2746,13 +2690,13 @@ using both quad-buffered stereo and overlays at the same time.</p>
 <p>Indexed color (8-bit) overlays have been tested and are known to work 
 with VirtualGL.  True color (24-bit) overlays work, in theory, but have 
 not been tested.  Use <code>glxinfo</code> (see 
-<a href="#Troubleshooting">Troubleshooting</a><a name="idx0055"></a> 
+<a href="#Troubleshooting">Troubleshooting</a><a name="idx0052"></a> 
 below) to verify whether your client&rsquo;s X display supports overlays 
 and whether they are enabled.  In Exceed 3D, make sure that the 
 &ldquo;Overlay Support&rdquo; option is checked in the &ldquo;Exceed 3D 
 and GLX&rdquo; applet:</p>
 
-<p><img src="exceed6.png" alt="exceed6" class="inline" id="imgid_4" name="imgid_4"/></p>
+<p><img src="exceed6.png" alt="exceed6" class="inline" id="imgid_3" name="imgid_3"/></p>
 
 
 
@@ -3176,7 +3120,7 @@ pressing the <code>F9</code> key while any one of the 3D
 application&rsquo;s windows is active.  This displays the following 
 dialog box:</p>
 
-<p><img src="configdialog.gif" alt="configdialog" class="inline" id="imgid_5" name="imgid_5"/></p>
+<p><img src="configdialog.gif" alt="configdialog" class="inline" id="imgid_4" name="imgid_4"/></p>
 
 <p>You can use this dialog to adjust various image compression and display 
 parameters in VirtualGL.  Changes are communicated immediately to 
@@ -3382,7 +3326,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">0 (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0056"></a>)</td>
+    <td class="standard">0 (all OpenGL contexts use direct rendering, unless rendering to a <a href="#overlays">transparent overlay</a><a name="idx0053"></a>)</td>
   </tr>
 </table>
 </div>
@@ -3581,7 +3525,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         attribute list for <code>glXChooseFBConfig()</code>.  Example: 
         <code>VGL_DEFAULTFBCONFIG&nbsp;=&nbsp;GLX_ALPHA_SIZE,8,GLX_STENCIL_SIZE,8</code>.  
         See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0057"></a> for a list of applications that are 
+        Recipes</a><a name="idx0054"></a> for a list of applications that are 
         known to require the use of this configuration option.
     </dd>
 </dl>
@@ -3704,10 +3648,10 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>VGL_FORCEALPHA</code> might be necessary in order to use PBO 
         readback mode with the afore-mentioned GPUs (as of this writing, nVidia 
         GeForce adapters are known to require this.)  See the 
-        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0058"></a> 
+        <a href="#VGL_READBACK"><code>VGL_READBACK</code></a><a name="idx0055"></a> 
         option for further information.
         <div class="important"><p class="important">
-        <code>VGL_FORCEALPHA</code> overrides the application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0059"></a> instead.
+        <code>VGL_FORCEALPHA</code> overrides the application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0056"></a> instead.
         </p></div>
     </dd>
 </dl>
@@ -3854,7 +3798,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>glFlush()</code> so often that VirtualGL cannot get away with 
         reading back/sending a frame every time <code>glFlush()</code> is 
         called, either (see 
-        <a href="#VGL_SPOILLAST">VGL_SPOILLAST</a><a name="idx0060"></a> for 
+        <a href="#VGL_SPOILLAST">VGL_SPOILLAST</a><a name="idx0057"></a> for 
         more information on how VirtualGL tries to handle this, under normal 
         circumstances.) <br /><br /> Some 3D applications use 
         <code>glFlush()</code> very liberally and intend for it to be an 
@@ -3870,7 +3814,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>VGL_GLFLUSHTRIGGER</code> to <code>0</code> should make them 
         display properly in VirtualGL.  See 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0061"></a> for a list of applications that are 
+        Recipes</a><a name="idx0058"></a> for a list of applications that are 
         known to require this.
     </dd>
 </dl>
@@ -3991,7 +3935,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         issue was introduced in VirtualGL 2.1.1, this option isn&rsquo;t really 
         useful anymore.
         <div class="important"><p class="important">
-        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0062"></a> option
+        When using the VGL Transport, interframe comparison is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0059"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4098,7 +4042,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         CPUs total to be used for compression, nor will it allow you to set this 
         parameter to a value greater than the number of CPUs in the system.
         <div class="important"><p class="important">
-        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0063"></a> option
+        When using the VGL Transport, multi-threaded compression is affected by the <a href="#VGL_TILESIZE"><code>VGL_TILESIZE</code></a><a name="idx0060"></a> option
         </p></div>
     </dd>
 </dl>
@@ -4230,7 +4174,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         level at which JPEG compression becomes perceptually lossless is 
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
-        <span class="remote"><a class="remote" href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/">HDR-VDP</a></span><a name="idx0064"></a>) 
+        <span class="remote"><a class="remote" href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/">HDR-VDP</a></span><a name="idx0061"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -4282,7 +4226,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         setting <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s 
         readback mechanism and prevents duplication of effort. <br /><br /> This 
         option was developed initially to support running 
-        <span class="remote"><a class="remote" href="http://www.paraview.org/">ParaView</a></span><a name="idx0065"></a> 
+        <span class="remote"><a class="remote" href="http://www.paraview.org/">ParaView</a></span><a name="idx0062"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI Processes 1 
         through N as rendering servers, each rendering a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4317,7 +4261,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         because the X proxy&rsquo;s virtual framebuffer is BGRA but, unless the 
         application has requested an alpha channel, its Pbuffer is likely BGR.  
         In this specific case, setting the 
-        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0066"></a> 
+        <a href="#VGL_FORCEALPHA"><code>VGL_FORCEALPHA</code></a><a name="idx0063"></a> 
         option to <code>1</code> could alleviate the issue. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -4414,7 +4358,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <code>0</code>, then VirtualGL forces multisampling to be disabled, even 
         if the 3D application explicitly tries to enable it.
         <div class="important"><p class="important">
-        <code>VGL_SAMPLES</code> overrides the application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0067"></a> instead.
+        <code>VGL_SAMPLES</code> overrides the application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0064"></a> instead.
         </p></div>
     </dd>
 </dl>
@@ -4535,7 +4479,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         at the expense of increased load on the GPU (because VirtualGL is now 
         reading back the rendered 3D image every time <code>glFlush()</code> is 
         called.)  See <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0068"></a> for a list of applications that are 
+        Recipes</a><a name="idx0065"></a> for a list of applications that are 
         known to require this.
     </dd>
 </dl>
@@ -4709,7 +4653,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         when subsampling is enabled. <br /><br /> The axis indicator from a 
         popular visualization app displayed with 1x, 2x, and 4x chrominance 
         subsampling (respectively):<br /> 
-        <img src="444.gif" alt="444" class="inline" id="imgid_6" name="imgid_6"/><img src="422.gif" alt="422" class="inline" id="imgid_7" name="imgid_7"/><img src="411.gif" alt="411" class="inline" id="imgid_8" name="imgid_8"/> 
+        <img src="444.gif" alt="444" class="inline" id="imgid_5" name="imgid_5"/><img src="422.gif" alt="422" class="inline" id="imgid_6" name="imgid_6"/><img src="411.gif" alt="411" class="inline" id="imgid_7" name="imgid_7"/> 
         <br />
         <div class="important"><p class="important">
         If using an image transport plugin, then this setting need not necessarily correspond to JPEG chrominance subsampling.  How the plugin responds to the <code>VGL_SUBSAMP</code> option is implementation-specific.
@@ -4767,7 +4711,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         (<code>conformx</code>, specifically), but at least one commercial 
         application is known to require it as well (see 
         <a href="#Application_Recipes">Application 
-        Recipes</a><a name="idx0069"></a>.)<br /><br />When 
+        Recipes</a><a name="idx0066"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
         <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
         the contents of the Pbuffer to be read back and <em>synchronously</em> 
@@ -4817,11 +4761,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles that have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0070"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0067"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0071"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0068"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">

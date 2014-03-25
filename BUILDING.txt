@@ -76,17 +76,17 @@ Windows
      optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
      environment.
 
--- OpenText Exceed XDK v8 or later
+-- OpenText Exceed XDK 2008 or later
 
    * If you plan to build VirtualGL from the command line, add the XDK include
      path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\include)
+     c:\Program Files\Hummingbird\Connectivity\14.00\Exceed\XDK\include)
      to the system or user INCLUDE environment variable prior to building
      VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
      path to the "Include Directories" property in Visual Studio.
    * If you plan to build VirtualGL from the command line, add the XDK library
      path (for instance,
-     c:\Program Files\Hummingbird\Connectivity\13.00\Exceed\XDK\lib)
+     c:\Program Files\Hummingbird\Connectivity\14.00\Exceed\XDK\lib)
      to the system or user LIB environment variable prior to building
      VirtualGL.  If you plan to use the Visual Studio IDE, then add this same
      path to the "Include Directories" property in Visual Studio.
