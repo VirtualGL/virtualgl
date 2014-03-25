@@ -112,16 +112,19 @@ fi
 mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
 
-mkdir -p $TMPDIR/pkg
+mkdir -p $TMPDIR/pkg/
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
 install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
-sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE_NAME/Documentation"
+ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
 if [ "$PREFIX" = "/opt/VirtualGL" ]; then
 	ln -fs /Library/Documentation/$PACKAGE_NAME $PKGROOT/$PREFIX/doc
 fi
+install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
+osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 
 mkdir $TMPDIR/dmg
 pkgbuild --root $PKGROOT --version $VERSION.$BUILD \
@@ -129,9 +132,7 @@ pkgbuild --root $PKGROOT --version $VERSION.$BUILD \
 productbuild --distribution pkgscripts/Distribution.xml \
 	--package-path $TMPDIR/pkg/ --resources $TMPDIR/pkg/ \
 	$TMPDIR/dmg/$PACKAGE_NAME.pkg
-install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
-sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
+mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION.dmg
 cp $TMPDIR/$PACKAGE_NAME-$VERSION.dmg . 
