@@ -29,6 +29,9 @@ OS X 10.6 "Snow Leopard" or later must be used when packaging libjpeg-turbo,
 although the packages produced can be installed on OS X 10.5 "Leopard" or
 later.  OS X 10.4 "Tiger" is no longer supported.
 -------------------------------------------------------------------------------
+[7]
+The "Uninstall VirtualGL" app should once again work on OS X 10.5.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
