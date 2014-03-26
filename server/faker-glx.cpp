@@ -176,6 +176,47 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 }
 
 
+void SetWMAtom(Display *dpy, Window win)
+{
+	Atom *protocols=NULL, *newprotocols=NULL;  int count=0;
+
+	Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	if(!deleteatom) goto bailout;
+
+	if(XGetWMProtocols(dpy, win, &protocols, &count) && protocols && count>0)
+	{
+		for(int i=0; i<count; i++)
+			if(protocols[i]==deleteatom)
+			{
+				XFree(protocols);  return;
+			}
+		newprotocols=(Atom *)malloc(sizeof(Atom)*(count+1));
+		if(!newprotocols) goto bailout;
+		for(int i=0; i<count; i++)
+			newprotocols[i]=protocols[i];
+		newprotocols[count]=deleteatom;
+		if(!XSetWMProtocols(dpy, win, newprotocols, count+1)) goto bailout;
+		XFree(protocols);
+		free(newprotocols);
+	}
+	else if(!XSetWMProtocols(dpy, win, &deleteatom, 1)) goto bailout;
+	return;
+
+	bailout:
+	if(protocols) XFree(protocols);
+	if(newprotocols) free(newprotocols);
+	static bool alreadywarned=false;
+	if(!alreadywarned)
+	{
+		if(fconfig.verbose)
+			rrout.print("[VGL] WARNING: Could not set WM_DELETE_WINDOW on window 0x%.8x\n",
+				win);
+		alreadywarned=true;
+	}
+}
+
+
+
 // Interposed GLX functions
 
 extern "C" {
@@ -1587,8 +1628,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		pbw=winh.setpb(dpy, drawable, config);
 		if(pbw)
 		{
-			Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-			if(deleteatom) XSetWMProtocols(dpy, drawable, &deleteatom, 1);
+			SetWMAtom(dpy, drawable);
 			drawable=pbw->updatedrawable();
 			pbw->setdirect(direct);
 		}
@@ -1686,16 +1726,15 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		}
 		drawpbw=winh.setpb(dpy, draw, config);
 		readpbw=winh.setpb(dpy, read, config);
-		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 		if(drawpbw)
 		{
-			if(deleteatom) XSetWMProtocols(dpy, draw, &deleteatom, 1);
+			SetWMAtom(dpy, draw);
 			draw=drawpbw->updatedrawable();
 			drawpbw->setdirect(direct);
 		}
 		if(readpbw)
 		{
-			if(deleteatom) XSetWMProtocols(dpy, read, &deleteatom, 1);
+			SetWMAtom(dpy, read);
 			read=readpbw->updatedrawable();
 			readpbw->setdirect(direct);
 		}
