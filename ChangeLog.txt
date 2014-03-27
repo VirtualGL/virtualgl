@@ -61,6 +61,24 @@ later.  OS X 10.4 "Tiger" is no longer supported.
 [7]
 The "Uninstall VirtualGL" app should once again work on OS X 10.5.
 -------------------------------------------------------------------------------
+[8]
+Fixed an infinite drawing loop that occurred when running Altair HyperBeam with
+VirtualGL.  Since 2.1.3, VirtualGL has been setting the WM_DELETE_WINDOW
+property on any OpenGL window so that it (VGL) can be notified if the window
+manager deletes the window (thus preventing VGL from trying to draw to the
+window after it disappears.)  This was originally done within the body of
+XCreate[Simple]Window(), but Java did not like us overriding the property for
+2D windows (refer to 2.3.1[9].)  Thus, the setting of WM_DELETE_WINDOW was
+moved into the body of glXMake[Context]Current() so that it affected only
+OpenGL windows.  However, VGL was incorrectly replacing the list of WM
+protocols rather than simply adding WM_DELETE_WINDOW to the existing list.  VGL
+was also not checking whether WM_DELETE_WINDOW already existed in the list
+before adding it.  For reasons that are not well understood, this caused
+HyperBeam to get into an infinite loop, because calling XSetWMProtocols()
+within the body of glXMakeCurrent() seemed to cause the application to call
+glXMakeCurrent() again.  This issue may have affected other applications as
+well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
