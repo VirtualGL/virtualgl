@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2013 D. R. Commander
+ * Copyright (C)2009, 2011-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -12,6 +12,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * wxWindows Library License for more details.
  */
+
+
+static KeySym KeycodeToKeysym(Display *dpy, KeyCode keycode)
+{
+	KeySym ks=NoSymbol, *keysyms;  int n=0;
+
+	keysyms=XGetKeyboardMapping(dpy, keycode, 1, &n);
+	if(n>=1 && keysyms) ks=keysyms[0];
+	XFree(keysyms);
+	return ks;
+}
+
 
 // Interposed X11 functions
 
@@ -452,7 +464,7 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		state2=fconfig.guimod;
 		if(state2&Mod1Mask) {state2&=(~(Mod1Mask));  state2|=Mod2Mask;}
 		if(fconfig.gui
-			&& XKeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
+			&& KeycodeToKeysym(dpy, xe->xkey.keycode)==fconfig.guikey
 			&& (state==fconfig.guimod || state==state2)
 			&& fconfig_getshmid()!=-1)
 			vglpopup(dpy, fconfig_getshmid());
