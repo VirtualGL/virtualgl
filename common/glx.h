@@ -1,6 +1,7 @@
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(SYSGLXHEADERS)
 #include <GL/glx.h>
 #else
+
 #ifndef __glx_h__
 #define __glx_h__
 
@@ -343,4 +344,5 @@ typedef union __GLXEvent {
 #endif
 
 #endif /* !__glx_h__ */
-#endif /* #ifdef sun */
+
+#endif /* _WIN32 || SYSGLXHEADERS */

@@ -1,3 +1,7 @@
+#ifdef SYSGLXHEADERS
+#include <GL/glxext.h>
+#else
+
 #ifndef __glxext_h_
 #define __glxext_h_
 
@@ -823,3 +827,5 @@ typedef void ( * PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawable drawable,
 #endif
 
 #endif
+
+#endif /* SYSGLXHEADERS */
