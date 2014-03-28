@@ -209,7 +209,7 @@ void SetWMAtom(Display *dpy, Window win)
 	if(!alreadywarned)
 	{
 		if(fconfig.verbose)
-			rrout.print("[VGL] WARNING: Could not set WM_DELETE_WINDOW on window 0x%.8x\n",
+			vglout.print("[VGL] WARNING: Could not set WM_DELETE_WINDOW on window 0x%.8x\n",
 				win);
 		alreadywarned=true;
 	}
