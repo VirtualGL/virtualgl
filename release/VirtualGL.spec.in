@@ -229,7 +229,9 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
  %{_includedir}/rr.h
 %endif
 
+%if "%{libdir}" != "%{_syslibdir}"
 %dir %{libdir}
+%endif
 %{libdir}/librrfaker.so
 %{libdir}/libdlfaker.so
 %{libdir}/libgefaker.so
