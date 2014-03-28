@@ -1,5 +1,15 @@
-add_subdirectory(fltk)
-
+set(VGL_DEFAULTSYSTEMFLTK 0)
+option(VGL_SYSTEMFLTK
+	"Link against a system-supplied version of FLTK instead of the in-tree version."
+	${VGL_DEFAULTSYSTEMFLTK})
+if(VGL_SYSTEMFLTK)
+	find_package(FLTK)
+else()
+	message(STATUS "Using in-tree version of FLTK")
+	add_subdirectory(fltk)
+	set(FLTK_INCLUDE_DIR fltk)
+	set(FLTK_BASE_LIBRARY fltk_static)
+endif()
 
 #
 # Server
@@ -66,8 +76,9 @@ install(TARGETS gefaker DESTINATION ${VGL_LIBDIR})
 set(HEADERS ../common/rr.h rrtransport.h)
 install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
 
+include_directories(${FLTK_INCLUDE_DIR})
 add_executable(vglconfig vglconfig.cpp fakerconfig.cpp)
-target_link_libraries(vglconfig ${X11_X11_LIB} fltk_static pthread rrutil)
+target_link_libraries(vglconfig ${X11_X11_LIB} ${FLTK_BASE_LIBRARY} pthread rrutil)
 if(VGL_USEXV)
 	target_link_libraries(vglconfig ${X11_Xv_LIB})
 endif()
