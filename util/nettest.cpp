@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 {
 	int server=0;  char *servername=NULL;
 	char *buf;  int i, j, size;
-	bool dossl=false, old=false;
+	bool doSSL=false, old=false;
 	Timer timer;
 	#if defined(sun) || defined(linux)
 	int interval=2;
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 				if(!stricmp(argv[i], "-ssl"))
 				{
 					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-					dossl=true;
+					doSSL=true;
 				}
 				#endif
 				if(!stricmp(argv[i], "-old"))
@@ -205,16 +205,16 @@ int main(int argc, char **argv)
 		#ifdef USESSL
 		if(argc>2 && !stricmp(argv[2], "-ssl"))
 		{
-			dossl=true;
+			doSSL=true;
 			printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
 		}
 		#endif
 	}
 	else if(!stricmp(argv[1], "-findport"))
 	{
-		Socket sd(false);
-		printf("%d\n", sd.findPort());
-		sd.close();
+		Socket socket(false);
+		printf("%d\n", socket.findPort());
+		socket.close();
 		exit(0);
 	}
 	#if defined(sun) || defined(linux)
@@ -230,14 +230,14 @@ int main(int argc, char **argv)
 	#endif
 	else usage(argv);
 
-	Socket sd(dossl);
+	Socket socket(doSSL);
 	if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
 	{
 		printf("Buffer allocation error.\n");  exit(1);
 	}
 
 	#ifdef USESSL
-	if(dossl)
+	if(doSSL)
 	{
 		#if defined(OPENSSL_THREADS)
 		printf("OpenSSL threads supported\n");
@@ -249,29 +249,29 @@ int main(int argc, char **argv)
 
 	if(server)
 	{
-		Socket *clientsd=NULL;
+		Socket *clientSocket=NULL;
 
 		printf("Listening on TCP port %d\n", PORT);
-		sd.listen(PORT, true);
-		clientsd=sd.accept();
+		socket.listen(PORT, true);
+		clientSocket=socket.accept();
 
-		printf("Accepted TCP connection from %s\n", clientsd->remoteName());
+		printf("Accepted TCP connection from %s\n", clientSocket->remoteName());
 
-		clientsd->recv(buf, 1);
+		clientSocket->recv(buf, 1);
 		if(buf[0]=='V')
 		{
-			clientsd->recv(&buf[1], 4);
+			clientSocket->recv(&buf[1], 4);
 			if(strcmp(buf, "VGL22")) _throw("Invalid header");
 			while(1)
 			{
-				clientsd->recv((char *)&size, (int)sizeof(int));
+				clientSocket->recv((char *)&size, (int)sizeof(int));
 				if(!littleendian()) size=byteswap(size);
 				if(size<1) break;
 				while(1)
 				{
-					clientsd->recv(buf, size);
+					clientSocket->recv(buf, size);
 					if((unsigned char)buf[0]==255) break;
-					clientsd->send(buf, size);
+					clientSocket->send(buf, size);
 				}
 			}
 		}
@@ -281,21 +281,21 @@ int main(int argc, char **argv)
 			{
 				for(j=0; j<ITER; j++)
 				{
-					if(i!=MINDATASIZE || j!=0) clientsd->recv(buf, i);
-					clientsd->send(buf, i);
+					if(i!=MINDATASIZE || j!=0) clientSocket->recv(buf, i);
+					clientSocket->send(buf, i);
 				}
 			}
 		}
 		printf("Shutting down TCP connection ...\n");
-		delete clientsd;
+		delete clientSocket;
 	}
 	else
 	{
 		double elapsed;
-		sd.connect(servername, PORT);
+		socket.connect(servername, PORT);
 
 		printf("TCP transfer performance between localhost and %s:\n\n",
-			sd.remoteName());
+			socket.remoteName());
 		printf("Transfer size  1/2 Round-Trip      Throughput      Throughput\n");
 		printf("(bytes)                (msec)    (MBytes/sec)     (Mbits/sec)\n");
 
@@ -307,8 +307,8 @@ int main(int argc, char **argv)
 				timer.start();
 				for(j=0; j<ITER; j++)
 				{
-					sd.send(buf, i);
-					sd.recv(buf, i);
+					socket.send(buf, i);
+					socket.recv(buf, i);
 				}
 				elapsed=timer.elapsed();
 				if(!cmpbuf(buf, i))
@@ -320,25 +320,25 @@ int main(int argc, char **argv)
 					(double)i*(double)ITER/1048576./(elapsed/2.),
 					(double)i*(double)ITER/125000./(elapsed/2.));
 			}
-			sd.close();
+			socket.close();
 			free(buf);
 			return 0;
 		}
 
 		char id[6]="VGL22";
-		sd.send(id, 5);
+		socket.send(id, 5);
 		for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
 		{
 			size=i;
 			if(!littleendian()) size=byteswap(size);
-			sd.send((char *)&size, (int)sizeof(int));
+			socket.send((char *)&size, (int)sizeof(int));
 			initbuf(buf, i);
 			j=0;
 			timer.start();
 			do
 			{
-				sd.send(buf, i);
-				sd.recv(buf, i);
+				socket.send(buf, i);
+				socket.recv(buf, i);
 				j++;
 				elapsed=timer.elapsed();
 			} while(elapsed<2.0);
@@ -347,17 +347,17 @@ int main(int argc, char **argv)
 				printf("DATA ERROR\n");  exit(1);
 			}
 			buf[0]=(char)255;
-			sd.send(buf, i);
+			socket.send(buf, i);
 			printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)j,
 				(double)i*(double)j/1048576./(elapsed/2.),
 				(double)i*(double)j/125000./(elapsed/2.));
 		}
 		size=0;
 		if(!littleendian()) size=byteswap(size);
-		sd.send((char *)&size, (int)sizeof(int));
+		socket.send((char *)&size, (int)sizeof(int));
 	}
 
-	sd.close();
+	socket.close();
 	free(buf);
 
 	}
