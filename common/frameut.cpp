@@ -59,13 +59,13 @@ class Blitter : public Runnable
 		{
 			for(int i=0; i<NFRAMES; i++)
 			{
-				if(useGL) { errifnot(frames[i]=new GLFrame(dpy, win)); }
+				if(useGL) { newcheck(frames[i]=new GLFrame(dpy, win)); }
 				#ifdef USEXV
-				else if(useXV) { errifnot(frames[i]=new XVFrame(dpy, win)); }
+				else if(useXV) { newcheck(frames[i]=new XVFrame(dpy, win)); }
 				#endif
-				else { errifnot(frames[i]=new FBXFrame(dpy, win)); }
+				else { newcheck(frames[i]=new FBXFrame(dpy, win)); }
 			}
-			errifnot(t=new Thread(this));
+			newcheck(t=new Thread(this));
 			t->start();
 		}
 
@@ -168,7 +168,7 @@ class Decompressor : public Runnable
 			blitter(blitter_), findex(0), deadYet(false), dpy(dpy_), win(win_),
 			myID(myID_), t(NULL)
 		{
-			errifnot(t=new Thread(this));
+			newcheck(t=new Thread(this));
 			t->start();
 		}
 
@@ -249,7 +249,7 @@ class Compressor : public Runnable
 		Compressor(Decompressor *decompressor_, Blitter *blitter_) : findex(0),
 			deadYet(false), t(NULL), decompressor(decompressor_), blitter(blitter_)
 		{
-			errifnot(t=new Thread(this));
+			newcheck(t=new Thread(this));
 			t->start();
 		}
 
@@ -354,10 +354,10 @@ class FrameTest
 				BlackPixel(dpy, DefaultScreen(dpy))));
 			errifnot(XMapRaised(dpy, win));
 
-			errifnot(blitter=new Blitter(dpy, win, myID));
+			newcheck(blitter=new Blitter(dpy, win, myID));
 			if(!useXV)
-				errifnot(decompressor=new Decompressor(blitter, dpy, win, myID));
-			errifnot(compressor=new Compressor(decompressor, blitter));
+				newcheck(decompressor=new Decompressor(blitter, dpy, win, myID));
+			newcheck(compressor=new Compressor(decompressor, blitter));
 		}
 
 		~FrameTest(void) { shutdown(); }
@@ -548,7 +548,7 @@ int main(int argc, char **argv)
 
 		for(i=0; i<NUMWIN; i++)
 		{
-			errifnot(test[i]=new FrameTest(dpy, i));
+			newcheck(test[i]=new FrameTest(dpy, i));
 		}
 
 		for(w=MINW; w<=MAXW; w+=33)

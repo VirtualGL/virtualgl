@@ -114,7 +114,7 @@ Frame *Frame::getTile(int x, int y, int w, int h)
 	if(x<0 || y<0 || w<1 || h<1 || (x+w)>hdr.width || (y+h)>hdr.height)
 		throw Error("Frame::getTile", "Argument out of range");
 
-	errifnot(f=new Frame(false));
+	newcheck(f=new Frame(false));
 	f->hdr=hdr;
 	f->hdr.height=h;
 	f->hdr.width=w;
