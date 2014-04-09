@@ -16,7 +16,7 @@ if [ "$1" = "-check" ]; then exit 0; fi
 
 usage()
 {
-	echo "USAGE: $0 -s <server-side port on SSh tunnel>"
+	echo "USAGE: $0 -s <server-side port on SSH tunnel>"
 	echo "       $0 -x <DISPLAY environment from client> <xauth MIT-MAGIC-COOKIE>"
 	exit 1
 }
