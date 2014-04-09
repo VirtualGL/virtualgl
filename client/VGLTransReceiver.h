@@ -43,7 +43,7 @@ namespace vglclient
 			int drawMethod;
 			Socket *listenSocket;
 			CS listenMutex;
-			Thread *t;
+			Thread *thread;
 			bool deadYet;
 			bool doSSL;
 			unsigned short port;
@@ -53,12 +53,12 @@ namespace vglclient
 			public:
 
 				Listener(Socket *socket_, int drawMethod_) : drawMethod(drawMethod_),
-					nwin(0), socket(socket_), t(NULL), remoteName(NULL)
+					nwin(0), socket(socket_), thread(NULL), remoteName(NULL)
 				{
 					memset(windows, 0, sizeof(ClientWin *)*MAXWIN);
 					if(socket) remoteName=socket->remoteName();
-					newcheck(t=new Thread(this));
-					t->start();
+					newcheck(thread=new Thread(this));
+					thread->start();
 				}
 
 				virtual ~Listener(void)
@@ -89,7 +89,7 @@ namespace vglclient
 				void deleteWindow(ClientWin *win);
 				CS winMutex;
 				Socket *socket;
-				Thread *t;
+				Thread *thread;
 				char *remoteName;
 		};
 	};

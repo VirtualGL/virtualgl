@@ -53,7 +53,7 @@ namespace vglclient
 			bool deadYet;
 			int dpynum;  Window window;
 			void run(void);
-			Thread *t;
+			Thread *thread;
 			CS cfmutex;
 			bool stereo;
 			CS mutex;

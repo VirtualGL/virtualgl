@@ -74,14 +74,14 @@ static unsigned short DisplayNumber(Display *dpy)
 
 
 VGLTransReceiver::VGLTransReceiver(bool doSSL_, int drawMethod_) :
-	drawMethod(drawMethod_), listenSocket(NULL), t(NULL), deadYet(false),
+	drawMethod(drawMethod_), listenSocket(NULL), thread(NULL), deadYet(false),
 	doSSL(doSSL_)
 {
 	char *env=NULL;
 
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
-	newcheck(t=new Thread(this));
+	newcheck(thread=new Thread(this));
 }
 
 
@@ -91,7 +91,7 @@ VGLTransReceiver::~VGLTransReceiver(void)
 	listenMutex.lock();
 	if(listenSocket) listenSocket->close();
 	listenMutex.unlock();
-	if(t) { t->stop();  t=NULL; }
+	if(thread) { thread->stop();  thread=NULL; }
 }
 
 
@@ -107,7 +107,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 		if(listenSocket) { delete listenSocket;  listenSocket=NULL; }
 		throw;
 	}
-	t->start();
+	thread->start();
 }
 
 
@@ -243,7 +243,7 @@ void VGLTransReceiver::Listener::run(void)
 	{
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
-	if(t) { t->detach();  delete t; }
+	if(thread) { thread->detach();  delete thread; }
 	delete this;
 }
 

@@ -27,7 +27,7 @@ extern Display *maindpy;
 
 ClientWin::ClientWin(int dpynum_, Window window_, int drawMethod_,
 	bool stereo_) : drawMethod(drawMethod_), reqDrawMethod(drawMethod_),
-	fb(NULL), cfindex(0), deadYet(false), t(NULL), stereo(stereo_)
+	fb(NULL), cfindex(0), deadYet(false), thread(NULL), stereo(stereo_)
 {
 	if(dpynum_<0 || dpynum_>65535 || !window_)
 		throw(Error("ClientWin::ClientWin()", "Invalid argument"));
@@ -41,8 +41,8 @@ ClientWin::ClientWin(int dpynum_, Window window_, int drawMethod_,
 	initGL();
 	initX11();
 
-	newcheck(t=new Thread(this));
-	t->start();
+	newcheck(thread=new Thread(this));
+	thread->start();
 }
 
 
@@ -50,7 +50,7 @@ ClientWin::~ClientWin(void)
 {
 	deadYet=true;
 	q.release();
-	if(t) t->stop();
+	if(thread) thread->stop();
 	if(fb) delete fb;
 	#ifdef USEXV
 	for(int i=0; i<NFRAMES; i++)
@@ -62,7 +62,7 @@ ClientWin::~ClientWin(void)
 	}
 	#endif
 	for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();
-	if(t) { delete t;  t=NULL; }
+	if(thread) { delete thread;  thread=NULL; }
 }
 
 
@@ -145,7 +145,7 @@ Frame *ClientWin::getFrame(bool useXV)
 {
 	Frame *f=NULL;
 
-	if(t) t->checkError();
+	if(thread) thread->checkError();
 	cfmutex.lock();
 	#ifdef USEXV
 	if(useXV)
@@ -165,14 +165,14 @@ Frame *ClientWin::getFrame(bool useXV)
 	cfindex=(cfindex+1)%NFRAMES;
 	cfmutex.unlock();
 	f->waitUntilComplete();
-	if(t) t->checkError();
+	if(thread) thread->checkError();
 	return f;
 }
 
 
 void ClientWin::drawFrame(Frame *f)
 {
-	if(t) t->checkError();
+	if(thread) thread->checkError();
 	if(!f->isXV)
 	{
 		CompressedFrame *c=(CompressedFrame *)f;
@@ -256,7 +256,7 @@ void ClientWin::run(void)
 	}
 	catch(Error &e)
 	{
-		if(t) t->setError(e);  if(f) f->signalComplete();
+		if(thread) thread->setError(e);  if(f) f->signalComplete();
 		throw;
 	}
 }
