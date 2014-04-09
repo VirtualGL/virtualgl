@@ -7,7 +7,7 @@ include_directories(../common)
 add_library(glframe STATIC GLFrame.cpp)
 target_link_libraries(glframe ${OPENGL_gl_LIBRARY})
 
-add_executable(vglclient vglclient.cpp clientwin.cpp vgltransreceiver.cpp)
+add_executable(vglclient vglclient.cpp ClientWin.cpp VGLTransReceiver.cpp)
 target_link_libraries(vglclient vglcommon ${FBXLIB} glframe vglsocket)
 install(TARGETS vglclient DESTINATION ${VGL_BINDIR})
 

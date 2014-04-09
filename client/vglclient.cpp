@@ -19,13 +19,10 @@
 #include <ctype.h>
 #include <signal.h>
 #include <fcntl.h>
-#include "vgltransreceiver.h"
+#include "VGLTransReceiver.h"
 #include "vglutil.h"
 #include "x11err.h"
 #include <X11/Xatom.h>
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #include <sys/proc.h>
@@ -38,18 +35,20 @@
 #endif
 #endif
 
+using namespace vglclient;
+
 
 bool restart;
-bool deadyet;
+bool deadYet;
 unsigned short port=0;
 #ifdef USESSL
-unsigned short sslport=0;
-bool ssl=true, nonssl=true;
+unsigned short sslPort=0;
+bool doSSL=true, doNonSSL=true;
 #endif
-int drawmethod=RR_DRAWAUTO;
+int drawMethod=RR_DRAWAUTO;
 Display *maindpy=NULL;
 bool detach=false, force=false, child=false;
-char *logfile=NULL;
+char *logFile=NULL;
 
 void start(char *);
 
@@ -60,23 +59,26 @@ void handler(int type)
 {
 	restart=false;
 	if(type==SIGHUP) restart=true;
-	deadyet=true;
+	deadYet=true;
 }
 
 
-// This does nothing except prevent Xlib from exiting the program so we can trap X11 errors
+// This does nothing except prevent Xlib from exiting the program, so we can
+// trap X11 errors
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
-	const char *temp=NULL;  char errmsg[257];  bool printwarnings=false;
+	const char *temp=NULL;  char errmsg[257];  bool printWarnings=false;
 	char *env=NULL;
+
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
-		&& !strncmp(env, "1", 1)) printwarnings=true;
-	if(printwarnings)
+		&& !strncmp(env, "1", 1)) printWarnings=true;
+	if(printWarnings)
 	{
 		errmsg[0]=0;
 		XGetErrorText(dpy, xe->error_code, errmsg, 256);
 		vglout.print("X11 Error: ");
-		if((temp=x11error(xe->error_code))!=NULL && stricmp(temp, "Unknown error code"))
+		if((temp=x11error(xe->error_code))!=NULL
+			&& stricmp(temp, "Unknown error code"))
 			vglout.print("%s ", temp);
 		vglout.println("%s", errmsg);
 	}
@@ -86,12 +88,13 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 } // extern "C"
 
 
-void killproc(bool useronly)
+void killproc(bool userOnly)
 {
 	#ifdef __APPLE__
+
 	unsigned char *buf=NULL;
 
-	if(!useronly && getuid()!=0) _throw("Only root can do that");
+	if(!userOnly && getuid()!=0) _throw("Only root can do that");
 
 	try
 	{
@@ -99,10 +102,10 @@ void killproc(bool useronly)
 		int mib_user[4]={CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid()};
 		size_t len=0;
 
-		tryunix(sysctl(useronly? mib_user:mib_all, 4, NULL, &len, NULL, 0));
+		tryunix(sysctl(userOnly? mib_user:mib_all, 4, NULL, &len, NULL, 0));
 		if(len<sizeof(kinfo_proc)) _throw("Process table is empty");
-		errifnot(buf=new unsigned char[len]);
-		tryunix(sysctl(useronly? mib_user:mib_all, 4, buf, &len, NULL, 0));
+		newcheck(buf=new unsigned char[len]);
+		tryunix(sysctl(userOnly? mib_user:mib_all, 4, buf, &len, NULL, 0));
 		int nprocs=len/sizeof(kinfo_proc);
 		kinfo_proc *kp=(kinfo_proc *)buf;
 
@@ -123,10 +126,12 @@ void killproc(bool useronly)
 		if(buf) free(buf);
 		throw;
 	}
+
 	#else
+
 	DIR *procdir=NULL;  struct dirent *dent=NULL;  int fd=-1;
 
-	if(!useronly && getuid()!=0) _throw("Only root can do that");
+	if(!userOnly && getuid()!=0) _throw("Only root can do that");
 
 	try
 	{
@@ -137,6 +142,7 @@ void killproc(bool useronly)
 			{
 				char temps[1024];  struct stat fsbuf;
 				int pid=atoi(dent->d_name);
+
 				if(pid==getpid()) continue;
 				#ifdef sun
 				sprintf(temps, "/proc/%s/psinfo", dent->d_name);
@@ -144,10 +150,12 @@ void killproc(bool useronly)
 				sprintf(temps, "/proc/%s/stat", dent->d_name);
 				#endif
 				if((fd=open(temps, O_RDONLY))==-1) continue;
-				if(fstat(fd, &fsbuf)!=-1 && (fsbuf.st_uid==getuid() || !useronly))
+				if(fstat(fd, &fsbuf)!=-1 && (fsbuf.st_uid==getuid() || !userOnly))
 				{
 					int bytes=0;
+
 					#ifdef sun
+
 					psinfo_t psinfo;
 					if((bytes=read(fd, &psinfo, sizeof(psinfo_t)))==sizeof(psinfo_t)
 						&& psinfo.pr_nlwp!=0)
@@ -158,7 +166,9 @@ void killproc(bool useronly)
 							kill(pid, SIGTERM);
 						}
 					}
+
 					#else
+
 					char *ptr=NULL;
 					if((bytes=read(fd, temps, 1023))>0 && bytes<1024)
 					{
@@ -177,6 +187,7 @@ void killproc(bool useronly)
 							}
 						}
 					}
+
 					#endif
 				}
 				close(fd);  fd=-1;
@@ -188,6 +199,7 @@ void killproc(bool useronly)
 	{
 		if(fd) close(fd);  if(procdir) closedir(procdir);  throw;
 	}
+
 	#endif
 }
 
@@ -241,17 +253,17 @@ void daemonize(void)
 
 #ifdef USESSL
 
-unsigned short instancecheckssl(Display *dpy)
+unsigned short instanceCheckSSL(Display *dpy)
 {
 	Atom atom=None;  unsigned short p=0;
 	if((atom=XInternAtom(dpy, "_VGLCLIENT_SSLPORT", True))!=None)
 	{
-		unsigned short *prop=NULL;  unsigned long n=0, bytesleft=0;
-		int actualformat=0;  Atom actualtype=None;
+		unsigned short *prop=NULL;  unsigned long n=0, bytesLeft=0;
+		int actualFormat=0;  Atom actualType=None;
 		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), atom, 0, 1, False,
-			XA_INTEGER, &actualtype, &actualformat, &n, &bytesleft,
-			(unsigned char **)&prop)==Success && n>=1 && actualformat==16
-			&& actualtype==XA_INTEGER && prop)
+				XA_INTEGER, &actualType, &actualFormat, &n, &bytesLeft,
+				(unsigned char **)&prop)==Success
+			&& n>=1 && actualFormat==16 && actualType==XA_INTEGER && prop)
 			p=*prop;
 		if(prop) XFree(prop);
 		if(p!=0)
@@ -266,17 +278,16 @@ unsigned short instancecheckssl(Display *dpy)
 #endif
 
 
-unsigned short instancecheck(Display *dpy)
+unsigned short instanceCheck(Display *dpy)
 {
 	Atom atom=None;  unsigned short p=0;
 	if((atom=XInternAtom(dpy, "_VGLCLIENT_PORT", True))!=None)
 	{
-		unsigned char *prop=NULL;  unsigned long n=0, bytesleft=0;
-		int actualformat=0;  Atom actualtype=None;
+		unsigned char *prop=NULL;  unsigned long n=0, bytesLeft=0;
+		int actualFormat=0;  Atom actualType=None;
 		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), atom, 0, 1, False,
-			XA_INTEGER, &actualtype, &actualformat, &n, &bytesleft,
-			&prop)==Success && n>=1 && actualformat==16
-			&& actualtype==XA_INTEGER && prop)
+				XA_INTEGER, &actualType, &actualFormat, &n, &bytesLeft, &prop)==Success
+			&& n>=1 && actualFormat==16 && actualType==XA_INTEGER && prop)
 			p=*(unsigned short *)prop;
 		if(prop) XFree(prop);
 		if(p!=0)
@@ -289,28 +300,29 @@ unsigned short instancecheck(Display *dpy)
 }
 
 
-void getenvironment(void)
+void getEnvironment(void)
 {
 	char *env=NULL;  int temp;
 	if((env=getenv("VGLCLIENT_DRAWMODE"))!=NULL && strlen(env)>0)
 	{
-		if(!strnicmp(env, "o", 1)) drawmethod=RR_DRAWOGL;
-		else if(!strncmp(env, "x", 1)) drawmethod=RR_DRAWX11;
+		if(!strnicmp(env, "o", 1)) drawMethod=RR_DRAWOGL;
+		else if(!strncmp(env, "x", 1)) drawMethod=RR_DRAWX11;
 	}
 	#ifdef USESSL
 	if((env=getenv("VGLCLIENT_LISTEN"))!=NULL && strlen(env)>0)
 	{
-		if(!strncmp(env, "n", 1)) {ssl=false;  nonssl=true;}
-		else if(!strncmp(env, "s", 1)) {ssl=true;  nonssl=false;}
+		if(!strncmp(env, "n", 1)) { doSSL=false;  doNonSSL=true; }
+		else if(!strncmp(env, "s", 1)) { doSSL=true;  doNonSSL=false; }
 	}
 	#endif
 	if((env=getenv("VGLCLIENT_LOG"))!=NULL && strlen(env)>0)
 	{
-		logfile=env;
-		FILE *f=fopen(logfile, "a");
+		logFile=env;
+		FILE *f=fopen(logFile, "a");
 		if(!f)
 		{
-			vglout.println("Could not open log file %s", logfile);  _throwunix();
+			vglout.println("Could not open log file %s", logFile);
+			_throwunix();
 		}
 		else fclose(f);
 	}
@@ -320,91 +332,93 @@ void getenvironment(void)
 	#ifdef USESSL
 	if((env=getenv("VGLCLIENT_SSLPORT"))!=NULL && strlen(env)>0
 		&& (temp=atoi(env))>0 && temp<65536)
-		sslport=(unsigned short)temp;
+		sslPort=(unsigned short)temp;
 	#endif
 }
 
 
 int main(int argc, char *argv[])
 {
-	int i;  bool printversion=false;
+	int i;  bool printVersion=false;
 	char *displayname=NULL;
 
-	try {
-
-	getenvironment();
-
-	if(argc>1) for(i=1; i<argc; i++)
+	try
 	{
-		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
-			{usage(argv[0]);  exit(1);}
-		#ifdef USESSL
-		if(!stricmp(argv[i], "-sslonly")) {ssl=true;  nonssl=false;}
-		if(!stricmp(argv[i], "-nossl")) {ssl=false;  nonssl=true;}
-		if(!stricmp(argv[i], "-sslport"))
+		getEnvironment();
+
+		if(argc>1) for(i=1; i<argc; i++)
 		{
-			if(i<argc-1) sslport=(unsigned short)atoi(argv[++i]);
-		}
-		#endif
-		if(!stricmp(argv[i], "-v")) printversion=true;
-		if(!stricmp(argv[i], "-force")) force=true;
-		if(!stricmp(argv[i], "-detach")) detach=true;
-		if(!stricmp(argv[i], "-kill")) {killproc(true);  return 0;}
-		if(!stricmp(argv[i], "-killall")) {killproc(false);  return 0;}
-		if(!stricmp(argv[i], "-port"))
-		{
-			if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
-		}
-		if(!stricmp(argv[i], "-l"))
-		{
-			if(i<argc-1)
+			if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
 			{
-				logfile=argv[++i];
-				FILE *f=fopen(logfile, "a");
-				if(!f)
+				usage(argv[0]);  exit(1);
+			}
+			#ifdef USESSL
+			if(!stricmp(argv[i], "-sslonly")) { doSSL=true;  doNonSSL=false; }
+			if(!stricmp(argv[i], "-nossl")) { doSSL=false;  doNonSSL=true; }
+			if(!stricmp(argv[i], "-sslPort"))
+			{
+				if(i<argc-1) sslPort=(unsigned short)atoi(argv[++i]);
+			}
+			#endif
+			if(!stricmp(argv[i], "-v")) printVersion=true;
+			if(!stricmp(argv[i], "-force")) force=true;
+			if(!stricmp(argv[i], "-detach")) detach=true;
+			if(!stricmp(argv[i], "-kill")) { killproc(true);  return 0; }
+			if(!stricmp(argv[i], "-killall")) { killproc(false);  return 0; }
+			if(!stricmp(argv[i], "-port"))
+			{
+				if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
+			}
+			if(!stricmp(argv[i], "-l"))
+			{
+				if(i<argc-1)
 				{
-					vglout.println("Could not open log file %s", logfile);  _throwunix();
+					logFile=argv[++i];
+					FILE *f=fopen(logFile, "a");
+					if(!f)
+					{
+						vglout.println("Could not open log file %s", logFile);
+						_throwunix();
+					}
+					else fclose(f);
 				}
-				else fclose(f);
+			}
+			if(!stricmp(argv[i], "-x")) drawMethod=RR_DRAWX11;
+			if(!stricmp(argv[i], "-gl")) drawMethod=RR_DRAWOGL;
+			if(!stricmp(argv[i], "-display"))
+			{
+				if(i<argc-1) displayname=argv[++i];
 			}
 		}
-		if(!stricmp(argv[i], "-x")) drawmethod=RR_DRAWX11;
-		if(!stricmp(argv[i], "-gl")) drawmethod=RR_DRAWOGL;
-		if(!stricmp(argv[i], "-display"))
+
+		if(!child)
 		{
-			if(i<argc-1) displayname=argv[++i];
+			vglout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME,
+				(int)sizeof(size_t)*8, __VERSION, __BUILD);
+			if(printVersion) return 0;
+			if(detach) daemonize();
 		}
-	}
 
-	if(!child)
-	{
-		vglout.println("\n%s Client %d-bit v%s (Build %s)", __APPNAME,
-			(int)sizeof(size_t)*8, __VERSION, __BUILD);
-		if(printversion) return 0;
-		if(detach) daemonize();
-	}
-
-	start(displayname);
-
+		start(displayname);
 	}
 	catch(Error &e)
 	{
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
 	}
-	
+
 	return 0;
 }
 
 
 void start(char *displayname)
 {
-	vgltransreceiver *vglrecv=NULL;
-  Atom port_atom=None;  unsigned short actualport=0;
+	VGLTransReceiver *receiver=NULL;
+	Atom portAtom=None;  unsigned short actualPort=0;
 	#ifdef USESSL
-	vgltransreceiver *vglsslrecv=NULL;
-  Atom sslport_atom=None;  unsigned short actualsslport=0;
+	VGLTransReceiver *sslReceiver=NULL;
+	Atom sslPortAtom=None;  unsigned short actualSSLPort=0;
 	#endif
-	bool newlistener=false;
+	bool newListener=false;
 
 	if(!XInitThreads()) { vglout.println("XInitThreads() failed");  return; }
 
@@ -423,47 +437,49 @@ void start(char *displayname)
 			_throw("Could not open display");
 
 		#ifdef USESSL
-		if(ssl)
+		if(doSSL)
 		{
-			if(!force) actualsslport=instancecheckssl(maindpy);
-			if(actualsslport==0)
+			if(!force) actualSSLPort=instanceCheckSSL(maindpy);
+			if(actualSSLPort==0)
 			{
-				if(!(vglsslrecv=new vgltransreceiver(true, drawmethod)))
-					_throw("Could not initialize SSL listener");
-				if(sslport==0)
+				newcheck(sslReceiver=new VGLTransReceiver(true, drawMethod));
+				if(sslPort==0)
 				{
 					bool success=false;  unsigned short i=RR_DEFAULTSSLPORT;
 					do
 					{
 						try
 						{
-							vglsslrecv->listen(i);
+							sslReceiver->listen(i);
 							success=true;
 						}
-						catch(...) {success=false;  if(i==0) throw;}
-						i++;  if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+						catch(...)
+						{
+							success=false;  if(i==0) throw;
+						}
+						i++;
+						if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
 					} while(!success);
 				}
-				else vglsslrecv->listen(sslport);
+				else sslReceiver->listen(sslPort);
 				vglout.println("Listening for SSL connections on port %d",
-					actualsslport=vglsslrecv->port());
-				if((sslport_atom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
+					actualSSLPort=sslReceiver->getPort());
+				if((sslPortAtom=XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
 					False))==None)
 					_throw("Could not get _VGLCLIENT_SSLPORT atom");
 				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-					sslport_atom, XA_INTEGER, 16, PropModeReplace,
-					(unsigned char *)&actualsslport, 1);
-				newlistener=true;
+					sslPortAtom, XA_INTEGER, 16, PropModeReplace,
+					(unsigned char *)&actualSSLPort, 1);
+				newListener=true;
 			}
 		}
-		if(nonssl)
+		if(doNonSSL)
 		#endif
 		{
-			if(!force) actualport=instancecheck(maindpy);
-			if(actualport==0)
+			if(!force) actualPort=instanceCheck(maindpy);
+			if(actualPort==0)
 			{
-				if(!(vglrecv=new vgltransreceiver(false, drawmethod)))
-					_throw("Could not initialize listener");
+				newcheck(receiver=new VGLTransReceiver(false, drawMethod));
 				if(port==0)
 				{
 					bool success=false;  unsigned short i=RR_DEFAULTPORT;
@@ -471,46 +487,49 @@ void start(char *displayname)
 					{
 						try
 						{
-							vglrecv->listen(i);
+							receiver->listen(i);
 							success=true;
 						}
-						catch(...) {success=false;  if(i==0) throw;}
+						catch(...)
+						{
+							success=false;  if(i==0) throw;
+						}
 						i++;  if(i==RR_DEFAULTSSLPORT) i++;
 						if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
 					} while(!success);
 				}
-				else vglrecv->listen(port);
+				else receiver->listen(port);
 				vglout.println("Listening for unencrypted connections on port %d",
-					actualport=vglrecv->port());
-				if((port_atom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
+					actualPort=receiver->getPort());
+				if((portAtom=XInternAtom(maindpy, "_VGLCLIENT_PORT", False))==None)
 					_throw("Could not get _VGLCLIENT_PORT atom");
 				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-					port_atom, XA_INTEGER, 16, PropModeReplace,
-					(unsigned char *)&actualport, 1);
-				newlistener=true;
+					portAtom, XA_INTEGER, 16, PropModeReplace,
+					(unsigned char *)&actualPort, 1);
+				newListener=true;
 			}
 		}
 
-		if(logfile && newlistener)
+		if(logFile && newListener)
 		{
-			vglout.println("Redirecting output to %s", logfile);
-			vglout.logTo(logfile);
+			vglout.println("Redirecting output to %s", logFile);
+			vglout.logTo(logFile);
 		}
 
 		if(child)
 		{
-			printf("%d\n", actualport);
+			printf("%d\n", actualPort);
 			fclose(stdin);  fclose(stdout);  fclose(stderr);
 		}
 
-		if(!newlistener)
+		if(!newListener)
 		{
-			if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
+			if(maindpy) { XCloseDisplay(maindpy);  maindpy=NULL; }
 			return;
 		}
 
 		restart=true;
-		while(!deadyet)
+		while(!deadYet)
 		{
 			if(XPending(maindpy)>0) {}
 			usleep(100000);
@@ -522,30 +541,31 @@ void start(char *displayname)
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
 
-	if(vglrecv) {delete vglrecv;  vglrecv=NULL;}
+	if(receiver) { delete receiver;  receiver=NULL; }
 	#ifdef USESSL
-	if(vglsslrecv) {delete vglsslrecv;  vglsslrecv=NULL;}
-	if(maindpy && sslport_atom!=None)
+	if(sslReceiver) { delete sslReceiver;  sslReceiver=NULL; }
+	if(maindpy && sslPortAtom!=None)
 	{
 		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			sslport_atom);
-		sslport_atom=None;
+			sslPortAtom);
+		sslPortAtom=None;
 	}
 	#endif
-	if(maindpy && port_atom!=None)
+	if(maindpy && portAtom!=None)
 	{
 		XDeleteProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
-			port_atom);
-		port_atom=None;
+			portAtom);
+		portAtom=None;
 	}
-	if(maindpy) {XCloseDisplay(maindpy);  maindpy=NULL;}
+	if(maindpy) { XCloseDisplay(maindpy);  maindpy=NULL; }
 
 	if(restart)
 	{
-		deadyet=restart=false;  actualport=0;
+		deadYet=restart=false;  actualPort=0;
 		#ifdef USESSL
-		actualsslport=0;
+		actualSSLPort=0;
 		#endif
 		goto start;
 	}
 }
+

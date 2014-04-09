@@ -13,8 +13,10 @@
  * wxWindows Library License for more details.
  */
 
-#include "vgltransreceiver.h"
+#include "VGLTransReceiver.h"
 #include "vglutil.h"
+
+using namespace vglclient;
 
 
 extern Display *maindpy;
@@ -23,6 +25,7 @@ extern Display *maindpy;
 static unsigned short DisplayNumber(Display *dpy)
 {
 	int dpynum=0;  char *ptr=NULL;
+
 	if((ptr=strchr(DisplayString(dpy), ':'))!=NULL)
 	{
 		if(strlen(ptr)>1) dpynum=atoi(ptr+1);
@@ -70,80 +73,82 @@ static unsigned short DisplayNumber(Display *dpy)
 	h.dpynum=(unsigned short)h1.dpynum;}
 
 
-vgltransreceiver::vgltransreceiver(bool dossl, int drawmethod) :
-	_drawmethod(drawmethod), _listensd(NULL), _t(NULL), _deadyet(false),
-	_dossl(dossl)
+VGLTransReceiver::VGLTransReceiver(bool doSSL_, int drawMethod_) :
+	drawMethod(drawMethod_), listenSocket(NULL), t(NULL), deadYet(false),
+	doSSL(doSSL_)
 {
 	char *env=NULL;
+
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
-	errifnot(_t=new Thread(this));
+	newcheck(t=new Thread(this));
 }
 
 
-vgltransreceiver::~vgltransreceiver(void)
+VGLTransReceiver::~VGLTransReceiver(void)
 {
-	_deadyet=true;
-	_listensdmutex.lock();
-	if(_listensd) _listensd->close();
-	_listensdmutex.unlock();
-	if(_t) {_t->stop();  _t=NULL;}
+	deadYet=true;
+	listenMutex.lock();
+	if(listenSocket) listenSocket->close();
+	listenMutex.unlock();
+	if(t) { t->stop();  t=NULL; }
 }
 
 
-void vgltransreceiver::listen(unsigned short port)
+void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		errifnot(_listensd=new Socket(_dossl));
-		_port=_listensd->listen(port);
+		newcheck(listenSocket=new Socket(doSSL));
+		port=listenSocket->listen(port_);
 	}
 	catch(...)
 	{
-		if(_listensd) {delete _listensd;  _listensd=NULL;}
+		if(listenSocket) { delete listenSocket;  listenSocket=NULL; }
 		throw;
 	}
-	_t->start();
+	t->start();
 }
 
 
-void vgltransreceiver::run(void)
+void VGLTransReceiver::run(void)
 {
-	Socket *sd=NULL;  vgltransserver *s=NULL;
+	Socket *socket=NULL;  Listener *listener=NULL;
 
-	while(!_deadyet)
+	while(!deadYet)
 	{
 		try
 		{
-			s=NULL;  sd=NULL;
-			sd=_listensd->accept();  if(_deadyet) break;
-			vglout.println("++ %sConnection from %s.", _dossl?"SSL ":"",
-				sd->remoteName());
-			s=new vgltransserver(sd, _drawmethod);
+			listener=NULL;  socket=NULL;
+			socket=listenSocket->accept();  if(deadYet) break;
+			vglout.println("++ %sConnection from %s.", doSSL? "SSL ":"",
+				socket->remoteName());
+			newcheck(listener=new Listener(socket, drawMethod));
 			continue;
 		}
 		catch(Error &e)
 		{
-			if(!_deadyet)
+			if(!deadYet)
 			{
 				vglout.println("%s-- %s", e.getMethod(), e.getMessage());
-				if(s) delete s;  if(sd) delete sd;
+				if(listener) delete listener;
+				if(socket) delete socket;
 				continue;
 			}
 		}
 	}
 	vglout.println("Listener exiting ...");
-	_listensdmutex.lock();
-	if(_listensd) {delete _listensd;  _listensd=NULL;}
-	_listensdmutex.unlock();
+	listenMutex.lock();
+	if(listenSocket) { delete listenSocket;  listenSocket=NULL; }
+	listenMutex.unlock();
 }
 
 
-void vgltransserver::run(void)
+void VGLTransReceiver::Listener::run(void)
 {
-	clientwin *w=NULL;
+	ClientWin *w=NULL;
 	Frame *f=NULL;
-	rrframeheader h;  rrframeheader_v1 h1;  bool haveheader=false;
+	rrframeheader h;  rrframeheader_v1 h1;  bool haveHeader=false;
 	rrversion v;
 
 	try
@@ -152,7 +157,9 @@ void vgltransserver::run(void)
 		endianize(h1);
 		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
 			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
-			{v.major=1;  v.minor=0;  haveheader=true;}
+		{
+			v.major=1;  v.minor=0;  haveHeader=true;
+		}
 		else
 		{
 			strncpy(v.id, "VGL", 3);
@@ -175,12 +182,12 @@ void vgltransserver::run(void)
 			{
 				if(v.major==1 && v.minor==0)
 				{
-					if(!haveheader)
+					if(!haveHeader)
 					{
 						recv((char *)&h1, sizeof_rrframeheader_v1);
 						endianize_v1(h1);
 					}
-					haveheader=false;
+					haveHeader=false;
 					cvthdr_v1(h1, h);
 				}
 				else
@@ -191,12 +198,15 @@ void vgltransserver::run(void)
 				bool stereo=(h.flags==RR_LEFT || h.flags==RR_RIGHT);
 				unsigned short dpynum=(v.major<2 || (v.major==2 && v.minor<1))?
 					h.dpynum : DisplayNumber(maindpy);
-				errifnot(w=addwindow(dpynum, h.winid, stereo));
+				errifnot(w=addWindow(dpynum, h.winid, stereo));
 
 				if(!stereo || h.flags==RR_LEFT || !f)
 				{
-					try {f=w->getframe(h.compress==RRCOMP_YUV);}
-					catch (...) {if(w) delwindow(w);  throw;}
+					try
+					{
+						f=w->getFrame(h.compress==RRCOMP_YUV);
+					}
+					catch (...) { if(w) deleteWindow(w);  throw; }
 				}
 				#ifdef USEXV
 				if(h.compress==RRCOMP_YUV)
@@ -213,8 +223,11 @@ void vgltransserver::run(void)
 
 				if(!stereo || h.flags!=RR_LEFT)
 				{
-					try {w->drawframe(f);}
-					catch (...) {if(w) delwindow(w);  throw;}
+					try
+					{
+						w->drawFrame(f);
+					}
+					catch (...) { if(w) deleteWindow(w);  throw; }
 				}
 
 			} while(!(f && f->hdr.flags==RR_EOF));
@@ -230,51 +243,59 @@ void vgltransserver::run(void)
 	{
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
 	}
-	if(_t) {_t->detach();  delete _t;}
+	if(t) { t->detach();  delete t; }
 	delete this;
 }
 
 
-void vgltransserver::delwindow(clientwin *w)
+void VGLTransReceiver::Listener::deleteWindow(ClientWin *w)
 {
 	int i, j;
-	CS::SafeLock l(_winmutex);
-	if(_nwin>0)
-		for(i=0; i<_nwin; i++)
-			if(_win[i]==w)
+	CS::SafeLock l(winMutex);
+
+	if(nwin>0)
+	{
+		for(i=0; i<nwin; i++)
+		{
+			if(windows[i]==w)
 			{
-				delete w;  _win[i]=NULL;
-				if(i<_nwin-1) for(j=i; j<_nwin-1; j++) _win[j]=_win[j+1];
-				_win[_nwin-1]=NULL;  _nwin--;  break;
+				delete w;  windows[i]=NULL;
+				if(i<nwin-1) for(j=i; j<nwin-1; j++) windows[j]=windows[j+1];
+				windows[nwin-1]=NULL;  nwin--;  break;
 			}
+		}
+	}
 }
 
 
 // Register a new window with this server
-clientwin *vgltransserver::addwindow(int dpynum, Window win, bool stereo)
+ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
+	bool stereo)
 {
-	CS::SafeLock l(_winmutex);
-	int winid=_nwin;
-	if(_nwin>0)
-	{
-		for(winid=0; winid<_nwin; winid++)
-			if(_win[winid] && _win[winid]->match(dpynum, win)) return _win[winid];
-	}
-	if(_nwin>=MAXWIN) _throw("No free window ID's");
-	if(dpynum<0 || dpynum>65535 || win==None) _throw("Invalid argument");
-	_win[winid]=new clientwin(dpynum, win, _drawmethod, stereo);
+	CS::SafeLock l(winMutex);
+	int winid=nwin;
 
-	if(!_win[winid]) _throw("Could not create window instance");
-	_nwin++;
-	return _win[winid];
+	if(nwin>0)
+	{
+		for(winid=0; winid<nwin; winid++)
+			if(windows[winid] && windows[winid]->match(dpynum, win))
+				return windows[winid];
+	}
+	if(nwin>=MAXWIN) _throw("No free window ID's");
+	if(dpynum<0 || dpynum>65535 || win==None) _throw("Invalid argument");
+	newcheck(windows[winid]=new ClientWin(dpynum, win, drawMethod, stereo));
+
+	if(!windows[winid]) _throw("Could not create window instance");
+	nwin++;
+	return windows[winid];
 }
 
 
-void vgltransserver::send(char *buf, int len)
+void VGLTransReceiver::Listener::send(char *buf, int len)
 {
 	try
 	{
-		if(_sd) _sd->send(buf, len);
+		if(socket) socket->send(buf, len);
 	}
 	catch(...)
 	{
@@ -285,11 +306,11 @@ void vgltransserver::send(char *buf, int len)
 }
 
 
-void vgltransserver::recv(char *buf, int len)
+void VGLTransReceiver::Listener::recv(char *buf, int len)
 {
 	try
 	{
-		if(_sd) _sd->recv(buf, len);
+		if(socket) socket->recv(buf, len);
 	}
 	catch(...)
 	{

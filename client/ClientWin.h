@@ -20,44 +20,44 @@
 #include "Thread.h"
 #include "genericQ.h"
 
-using namespace vglcommon;
-
 
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
 
 
-class clientwin : public Runnable
+namespace vglclient
 {
-	public:
+	using namespace vglcommon;
 
-		clientwin(int, Window, int, bool);
-		virtual ~clientwin(void);
-		Frame *getframe(bool);
-		void drawframe(Frame *);
-		int match(int, Window);
-		bool stereoenabled(void) {return _stereo;}
+	class ClientWin : public Runnable
+	{
+		public:
+			ClientWin(int dpynum, Window window, int drawMethod, bool stereo);
+			virtual ~ClientWin(void);
+			Frame *getFrame(bool useXV);
+			void drawFrame(Frame *f);
+			int match(int dpynum, Window window);
+			bool isStereo(void) { return stereo; }
 
-	private:
+		private:
+			void initGL(void);
+			void initX11(void);
 
-		int _drawmethod, _reqdrawmethod;
-		static const int NFRAMES=2;
-		Frame *_fb;  CompressedFrame _cf[NFRAMES];  int _cfi;
-		#ifdef USEXV
-		XVFrame *_xvf[NFRAMES];
-		#endif
-		void initgl(void);
-		void initx11(void);
-		void setdrawmethod(void);
-		GenericQ _q;
-		void showprofile(rrframeheader *, int);
-		bool _deadyet;
-		int _dpynum;  Window _window;
-		void run(void);
-		Thread *_t;
-		CS _cfmutex;
-		bool _stereo;
-		CS _mutex;
-};
-
+			int drawMethod, reqDrawMethod;
+			static const int NFRAMES=2;
+			Frame *fb;
+			CompressedFrame cframes[NFRAMES];  int cfindex;
+			#ifdef USEXV
+			XVFrame *xvframes[NFRAMES];
+			#endif
+			GenericQ q;
+			bool deadYet;
+			int dpynum;  Window window;
+			void run(void);
+			Thread *t;
+			CS cfmutex;
+			bool stereo;
+			CS mutex;
+	};
+}
 
 #endif // __CLIENTWIN_H__
