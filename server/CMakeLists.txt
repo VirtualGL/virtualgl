@@ -114,11 +114,6 @@ add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp
 target_link_libraries(vgltransconnut vglcommon ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
-add_executable(vgltransreceiverut vgltransreceiverut.cpp vgltransconn.cpp
-	fakerconfig.cpp)
-target_link_libraries(vgltransreceiverut vglcommon ${FBXLIB} vglsocket
-	${TJPEG_LIBRARY})
-
 add_executable(dlfakerut dlfakerut.c)
 target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 
