@@ -29,19 +29,19 @@ usage()
 {
 	echo
 	echo "USAGE: $0"
-	echo "       [vglconnect options] [user@]hostname [Additional SSh options]"
+	echo "       [vglconnect options] [user@]hostname [Additional SSH options]"
 	echo
 	echo "vglconnect options:"
 	echo "-display <d> = Local X display to use when drawing VirtualGL's images"
 	echo "               (default: read from DISPLAY environment variable)"
-	echo "-s = Tunnel VGL Transport and X11 through SSh (default: tunnel only X11)"
+	echo "-s = Tunnel VGL Transport and X11 through SSH (default: tunnel only X11)"
 	echo "-x = Do not tunnel X11 or the VGL Transport, but create an xauth key"
 	echo "     and add it to the VirtualGL server's keyring so that the VirtualGL"
 	echo "     server (and any that share its home directory) can use this X display"
 	echo "-k = Do not connect to server, but create an xauth key for this X display and"
 	echo "     add it to the local keyring so that any VirtualGL servers that share the"
 	echo "     same home directory as this machine can use this X display"
-	echo "-g = Use gsissh from Globus Toolkit to make all SSh connections"
+	echo "-g = Use gsissh from Globus Toolkit to make all SSH connections"
 	echo "-force = Force a new vglclient instance (use with caution)"
 	echo "-bindir <d> = Path in which the VGL executables and scripts are installed on"
 	echo "              the server machine (default: /opt/VirtualGL/bin).  Can also be"
@@ -125,14 +125,14 @@ else
 fi
 
 if [ $VGLTUNNEL = 1 ]; then
-	echo Making preliminary SSh connection to find a free port on the server ...
+	echo Making preliminary SSH connection to find a free port on the server ...
 	REMOTEPORT=`$SSHCMD ${1+"$@"} "$VGL_BINDIR/nettest -findport && $VGL_BINDIR/vgllogin -check"`
 	if [ $? -ne 0 -o "$REMOTEPORT" = "" ]; then
 		echo "[VGL] ERROR: The server does not appear to have VirtualGL 2.1 or later"
 		echo "[VGL]    installed."
 		exit 1
 	fi
-	echo Making final SSh connection ...
+	echo Making final SSH connection ...
 	$SSHCMD -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
 	exit 0
 fi

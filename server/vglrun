@@ -194,7 +194,7 @@ if [ -z "$DISPLAY" ]; then
 		DISPLAY=$SSH_IP:0.0
 		export DISPLAY
 		echo "[VGL] NOTICE: Automatically setting the DISPLAY environment variable to"
-		echo "[VGL]    $DISPLAY, based on the IP address of your SSh client."
+		echo "[VGL]    $DISPLAY, based on the IP address of your SSH client."
 	fi
 else
 	DISPLAYHOST=`echo $DISPLAY | cut -d: -f1`
@@ -203,7 +203,7 @@ else
 			VGL_CLIENT=$SSH_IP:0.0
 			export VGL_CLIENT
 			echo "[VGL] NOTICE: Automatically setting VGL_CLIENT environment variable to"
-			echo "[VGL]    $SSH_IP, the IP address of your SSh client."
+			echo "[VGL]    $SSH_IP, the IP address of your SSH client."
 		fi
 	fi
 fi

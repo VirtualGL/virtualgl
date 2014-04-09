@@ -214,7 +214,7 @@ attributes of GLX_RED_SIZE=GLX_GREEN_SIZE=GLX_BLUE_SIZE=1.
 [7]
 glXUseXFont() has been extended to work with Pbuffers.  Due to an oversight,
 VirtualGL would previously abort with an error message if the 3D application
-attempted to render text to a Pbuffer that it created, 
+attempted to render text to a Pbuffer that it created.
 -------------------------------------------------------------------------------
 [8]
 Fixed an issue whereby, when displaying to a 2D X server that lacked the
@@ -464,7 +464,7 @@ to allow users to determine whether or not VirtualGL is active.
 [2]
 Support for encrypting the VGL Transport with OpenSSL has been removed from the
 official VirtualGL packages.  It was only a marginally useful feature, because
-VirtualGL also has the ability to tunnel the VGL Transport through SSh.  It was
+VirtualGL also has the ability to tunnel the VGL Transport through SSH.  It was
 necessary to maintain our own static OpenSSL libraries on Linux in order to
 provide a version of VirtualGL that was compatible across all Linux platforms,
 and this required us to keep abreast of the latest OpenSSL security fixes, etc.
@@ -945,7 +945,7 @@ A new set of scripts (vglconnect and vgllogin) which automate the process of
 connecting to a VirtualGL server and using the VGL Image Transport (formerly
 "Direct Mode.")  vglconnect wraps both vglclient and ssh.  Through the use
 of command line arguments, vglconnect can be configured to forward either the
-X11 traffic or the VGL image traffic (or none or both) over the SSh connection.
+X11 traffic or the VGL image traffic (or none or both) over the SSH connection.
 vglconnect invokes vgllogin on the server, which configures the server
 environment with the proper VGL_CLIENT and VGL_PORT values so that, once
 connected, all you should have to do is simply launch your application with
@@ -1144,11 +1144,11 @@ Numerous doc changes, including:
   -- (Re-)added instructions for how to use VGL with a direct X11 connection,
      since it has become apparent that that configuration is necessary in
      some cases.
-  -- Changed procedure for doing Direct Mode SSh tunneling.  The previous
+  -- Changed procedure for doing Direct Mode SSH tunneling.  The previous
      procedure would not have worked if multiple users were trying to tunnel
      Direct Mode from the same server.  The new procedure requires running a
      program (see [8] below) which prints out an available TCP port and using
-     that port on the server end of the SSh tunnel.
+     that port on the server end of the SSH tunnel.
   -- Added app recipe for ANSA 12.1.0
   -- Added procedures for using VGL with TurboVNC and for using TurboVNC in
      general
@@ -1237,16 +1237,16 @@ a log file.
 [20]
 If the DISPLAY environment variable is unset on the VirtualGL server, vglrun
 will now set it automatically to {ssh_client}:0.0 (where {ssh_client} = the IP
-address of the SSh client.)  If DISPLAY is set to localhost:n.0 or
-`hostname`:n.0, VGL assumes that SSh X11 forwarding is in use and sets
+address of the SSH client.)  If DISPLAY is set to localhost:n.0 or
+`hostname`:n.0, VGL assumes that SSH X11 forwarding is in use and sets
 VGL_CLIENT={ssh_client}:0.0 instead (without modifying DISPLAY.)  vglrun prints
 a warning that it is doing this.  You must still explicitly set VGL_CLIENT or
 DISPLAY if you are doing something exotic, such as tunneling VGL's
-client/server connection through SSh or displaying to an X server with a
+client/server connection through SSH or displaying to an X server with a
 display number other than 0.  But this fix should eliminate the need to set
 VGL_CLIENT and DISPLAY in most cases.  Note that the Sun Ray plugin also reads
 the VGL_CLIENT environment variable, so if you are connecting to the VirtualGL
-server from a Sun Ray server using SSh X11 forwarding, this eliminates the need
+server from a Sun Ray server using SSH X11 forwarding, this eliminates the need
 to explicitly set VGL_CLIENT in that case as well.
 -------------------------------------------------------------------------------
 [21]
@@ -1491,7 +1491,7 @@ running on a "local" display (i.e. ":n.0", "unix:n.0", etc., but not
 "localhost:n.0")  This allows users of X proxies such as Sun Ray, TurboVNC,
 NX, etc. to run VirtualGL without having to pass an argument of -c 0 to vglrun.
 "localhost:n.0" is not considered a "local" display, and neither is
-"`hostname`:n.0", because display connections tunneled through SSh will have a
+"`hostname`:n.0", because display connections tunneled through SSH will have a
 display name that takes on one of those forms.
 -------------------------------------------------------------------------------
 [16]
