@@ -19,6 +19,7 @@
 #include "Log.h"
 #include "vglutil.h"
 
+using namespace vglutil;
 using namespace vglcommon;
 
 
@@ -176,7 +177,7 @@ void GLFrame::drawTile(int x, int y, int w, int h)
 	if(littleendian()) format=GL_BGR_EXT;
 	#endif
 	if(pixelSize==1) format=GL_COLOR_INDEX;
-	
+
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind OpenGL context to window (window may have disappeared)");
 

@@ -27,9 +27,7 @@
 
 namespace vglclient
 {
-	using namespace vglutil;
-
-	class VGLTransReceiver : public Runnable
+	class VGLTransReceiver : public vglutil::Runnable
 	{
 		public:
 			VGLTransReceiver(bool doSSL, int drawmethod);
@@ -41,29 +39,31 @@ namespace vglclient
 			void run(void);
 
 			int drawMethod;
-			Socket *listenSocket;
-			CS listenMutex;
-			Thread *thread;
+			vglutil::Socket *listenSocket;
+			vglutil::CS listenMutex;
+			vglutil::Thread *thread;
 			bool deadYet;
 			bool doSSL;
 			unsigned short port;
 
-		class Listener : public Runnable
+		class Listener : public vglutil::Runnable
 		{
 			public:
 
-				Listener(Socket *socket_, int drawMethod_) : drawMethod(drawMethod_),
-					nwin(0), socket(socket_), thread(NULL), remoteName(NULL)
+				Listener(vglutil::Socket *socket_, int drawMethod_) :
+					drawMethod(drawMethod_), nwin(0), socket(socket_), thread(NULL),
+					remoteName(NULL)
 				{
 					memset(windows, 0, sizeof(ClientWin *)*MAXWIN);
 					if(socket) remoteName=socket->remoteName();
-					newcheck(thread=new Thread(this));
+					newcheck(thread=new vglutil::Thread(this));
 					thread->start();
 				}
 
 				virtual ~Listener(void)
 				{
 					int i;
+
 					winMutex.lock(false);
 					for(i=0; i<nwin; i++)
 					{
@@ -87,9 +87,9 @@ namespace vglclient
 				int nwin;
 				ClientWin *addWindow(int dpynum, Window win, bool stereo=false);
 				void deleteWindow(ClientWin *win);
-				CS winMutex;
-				Socket *socket;
-				Thread *thread;
+				vglutil::CS winMutex;
+				vglutil::Socket *socket;
+				vglutil::Thread *thread;
 				char *remoteName;
 		};
 	};

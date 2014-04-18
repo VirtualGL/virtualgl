@@ -36,8 +36,6 @@
 
 namespace vglcommon
 {
-	using namespace vglutil;
-
 	class Frame
 	{
 		public:
@@ -69,8 +67,8 @@ namespace vglcommon
 			void dumpHeader(rrframeheader &);
 			void checkHeader(rrframeheader &);
 
-			Event ready;
-			Event complete;
+			vglutil::Event ready;
+			vglutil::Event complete;
 			friend class CompressedFrame;
 			bool primary;
 	};

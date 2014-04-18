@@ -19,6 +19,8 @@
 #include "Profiler.h"
 #include "GLFrame.h"
 
+using namespace vglutil;
+using namespace vglcommon;
 using namespace vglclient;
 
 

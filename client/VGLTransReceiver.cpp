@@ -16,6 +16,8 @@
 #include "VGLTransReceiver.h"
 #include "vglutil.h"
 
+using namespace vglutil;
+using namespace vglcommon;
 using namespace vglclient;
 
 

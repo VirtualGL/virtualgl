@@ -21,8 +21,6 @@
 
 namespace vglcommon
 {
-	using namespace vglutil;
-
 	class Profiler
 	{
 		public:
@@ -38,7 +36,7 @@ namespace vglcommon
 			double interval;
 			double mbytes, mpixels, totalTime, start, frames, lastFrame;
 			bool profile;
-			Timer timer;
+			vglutil::Timer timer;
 			bool freestr;
 	};
 }

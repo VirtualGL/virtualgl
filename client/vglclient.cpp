@@ -35,6 +35,7 @@
 #endif
 #endif
 
+using namespace vglutil;
 using namespace vglclient;
 
 

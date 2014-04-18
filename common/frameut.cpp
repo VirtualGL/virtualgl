@@ -20,6 +20,7 @@
 #include "Timer.h"
 #include "bmp.h"
 
+using namespace vglutil;
 using namespace vglcommon;
 
 #define ITER 50
@@ -152,7 +153,7 @@ class Blitter : public Runnable
 			fprintf(stderr, "Blitter exiting ...\n");
 		}
 
-		int findex;  bool deadYet;  
+		int findex;  bool deadYet;
 		Frame *frames[NFRAMES];
 		Display *dpy;  Window win;
 		Thread *t;
@@ -381,7 +382,7 @@ class FrameTest
 					f.bits[i*pitch+j*f.pixelSize]=(i+seed)%256;
 					f.bits[i*pitch+j*f.pixelSize+1]=(j+seed)%256;
 					f.bits[i*pitch+j*f.pixelSize+2]=(i+j+seed)%256;
-				}	
+				}
 			}
 		}
 
@@ -596,6 +597,6 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
 		exit(1);
-	}	
+	}
 	return 0;
 }

@@ -20,6 +20,7 @@
 #include "vgllogo.h"
 #include "Frame.h"
 
+using namespace vglutil;
 using namespace vglcommon;
 
 
@@ -127,7 +128,7 @@ Frame *Frame::getTile(int x, int y, int w, int h)
 	f->isGL=isGL;
 	bool bu=(flags&FRAME_BOTTOMUP);
 	f->bits=&bits[pitch*(bu? hdr.height-y-h:y)+pixelSize*x];
-	if(stereo && rbits) 
+	if(stereo && rbits)
 		f->rbits=&rbits[pitch*(bu? hdr.height-y-h:y)+pixelSize*x];
 	return f;
 }
@@ -213,7 +214,7 @@ void Frame::makePassive(Frame &stf, int mode)
 		{
 			if(j%2==0) memcpy(dstptr, lptr, rowSize);
 			else memcpy(dstptr, rptr, rowSize);
-			lptr+=pitch;  rptr+=pitch;  dstptr+=pitch;  
+			lptr+=pitch;  rptr+=pitch;  dstptr+=pitch;
 		}
 	}
 	else if(mode==RRSTEREO_TOPBOTTOM)
@@ -242,17 +243,17 @@ void Frame::makePassive(Frame &stf, int mode)
 			for(int i=0; i<(hdr.framew+1)/2; i++)
 			{
 				*(int *)dstptr=*(int *)lptr2;
-				lptr2+=pixelSize*2;  dstptr+=pixelSize;  
+				lptr2+=pixelSize*2;  dstptr+=pixelSize;
 			}
 			for(int i=(hdr.framew+1)/2; i<hdr.framew-1; i++)
 			{
 				*(int *)dstptr=*(int *)rptr2;
-				rptr2+=pixelSize*2;  dstptr+=pixelSize;  
+				rptr2+=pixelSize*2;  dstptr+=pixelSize;
 			}
 			if(hdr.framew>1)
 			{
 				memcpy(dstptr, rptr2, pixelSize);
-				dstptr+=pixelSize;  
+				dstptr+=pixelSize;
 			}
 			lptr+=pitch;  rptr+=pitch;  dstptr+=pad;
 			h--;

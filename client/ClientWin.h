@@ -26,15 +26,13 @@ enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
 
 namespace vglclient
 {
-	using namespace vglcommon;
-
-	class ClientWin : public Runnable
+	class ClientWin : public vglutil::Runnable
 	{
 		public:
 			ClientWin(int dpynum, Window window, int drawMethod, bool stereo);
 			virtual ~ClientWin(void);
-			Frame *getFrame(bool useXV);
-			void drawFrame(Frame *f);
+			vglcommon::Frame *getFrame(bool useXV);
+			void drawFrame(vglcommon::Frame *f);
 			int match(int dpynum, Window window);
 			bool isStereo(void) { return stereo; }
 
@@ -44,19 +42,19 @@ namespace vglclient
 
 			int drawMethod, reqDrawMethod;
 			static const int NFRAMES=2;
-			Frame *fb;
-			CompressedFrame cframes[NFRAMES];  int cfindex;
+			vglcommon::Frame *fb;
+			vglcommon::CompressedFrame cframes[NFRAMES];  int cfindex;
 			#ifdef USEXV
-			XVFrame *xvframes[NFRAMES];
+			vglcommon::XVFrame *xvframes[NFRAMES];
 			#endif
-			GenericQ q;
+			vglutil::GenericQ q;
 			bool deadYet;
 			int dpynum;  Window window;
 			void run(void);
-			Thread *thread;
-			CS cfmutex;
+			vglutil::Thread *thread;
+			vglutil::CS cfmutex;
 			bool stereo;
-			CS mutex;
+			vglutil::CS mutex;
 	};
 }
 

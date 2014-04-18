@@ -23,8 +23,6 @@
 
 namespace vglcommon
 {
-	using namespace vglutil;
-
 	class GLFrame : public Frame
 	{
 		public:
