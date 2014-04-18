@@ -23,6 +23,8 @@
 #include "fakerconfig.h"
 #include "vglutil.h"
 
+using namespace vglutil;
+
 
 extern Display *_localdpy;
 

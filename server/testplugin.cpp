@@ -15,33 +15,37 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include "rrtransport.h"
-#include "vgltransconn.h"
+#include "VGLTrans.h"
+
+using namespace vglutil;
+using namespace vglcommon;
+using namespace vglserver;
 
 
 static Error err;
-char errstr[MAXSTR];
+char errStr[MAXSTR];
 
-static FakerConfig *_fconfig=NULL;
-static Window _win=0;
-
-
-FakerConfig *fconfig_instance(void) {return _fconfig;}
+static FakerConfig *fconfig=NULL;
+static Window win=0;
 
 
-/* This just wraps the vgltransconn class in order to demonstrate how to
-   build a custom transport plugin for VGL and also to serve as a sanity
-   check for the plugin API */
+FakerConfig *fconfig_instance(void) { return fconfig; }
+
+
+/* This just wraps the VGLTrans class in order to demonstrate how to build a
+   custom transport plugin for VGL and also to serve as a sanity check for the
+   plugin API */
 
 extern "C" {
 
-void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
+void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 {
 	void *handle=NULL;
 	try
 	{
-		_fconfig=fconfig;
-		_win=win;
-		handle=(void *)(new vgltransconn());
+		fconfig=fconfig_;
+		win=win_;
+		newcheck(handle=(void *)(new VGLTrans()));
 	}
 	catch(Error &e)
 	{
@@ -51,14 +55,14 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig)
 }
 
 
-int RRTransConnect(void *handle, char *receiver_name, int port)
+int RRTransConnect(void *handle, char *receiverName, int port)
 {
 	int ret=0;
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
-		vglconn->connect(receiver_name, port);
+		vglconn->connect(receiverName, port);
 	}
 	catch(Error &e)
 	{
@@ -73,12 +77,13 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 {
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
-		RRFrame *frame=new RRFrame;
+		RRFrame *frame;
+		newcheck(frame=new RRFrame);
 		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
-		int compress=_fconfig->compress;
+		int compress=fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
 		else compress=RRCOMP_JPEG;
 		int flags=FRAME_BOTTOMUP, pixelsize=3;
@@ -98,8 +103,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 					flags|=FRAME_ALPHAFIRST;  pixelsize=4;  break;
 			}
 		}
-		Frame *f=vglconn->getframe(width, height, pixelsize, flags,
-			(bool)stereo);
+		Frame *f=vglconn->getFrame(width, height, pixelsize, flags, (bool)stereo);
 		f->hdr.compress=compress;
 		frame->opaque=(void *)f;
 		frame->w=f->hdr.framew;
@@ -112,7 +116,9 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
 				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
 				&& rrtrans_ps[i]==f->pixelSize)
-				{frame->format=i;  break;}
+			{
+				frame->format=i;  break;
+			}
 		}
 		return frame;
 	}
@@ -128,9 +134,9 @@ int RRTransReady(void *handle)
 	int ret=-1;
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
-		ret=(int)vglconn->ready();
+		ret=(int)vglconn->isReady();
 	}
 	catch(Error &e)
 	{
@@ -145,7 +151,7 @@ int RRTransSynchronize(void *handle)
 	int ret=0;
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
 		vglconn->synchronize();
 	}
@@ -162,15 +168,15 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	int ret=0;
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
 		Frame *f;
 		if(!frame || (f=(Frame *)frame->opaque)==NULL)
 			_throw("Invalid frame handle");
-		f->hdr.qual=_fconfig->qual;
-		f->hdr.subsamp=_fconfig->subsamp;
-		f->hdr.winid=_win;
-		vglconn->sendframe(f);
+		f->hdr.qual=fconfig->qual;
+		f->hdr.subsamp=fconfig->subsamp;
+		f->hdr.winid=win;
+		vglconn->sendFrame(f);
 		delete frame;
 	}
 	catch(Error &e)
@@ -186,7 +192,7 @@ int RRTransDestroy(void *handle)
 	int ret=0;
 	try
 	{
-		vgltransconn *vglconn=(vgltransconn *)handle;
+		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
 		delete vglconn;
 	}
@@ -200,9 +206,9 @@ int RRTransDestroy(void *handle)
 
 const char *RRTransGetError(void)
 {
-	snprintf(errstr, MAXSTR-1, "Error in %s -- %s",
+	snprintf(errStr, MAXSTR-1, "Error in %s -- %s",
 		err.getMethod(), err.getMessage());
-	return errstr;
+	return errStr;
 }
 
 

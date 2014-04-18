@@ -18,10 +18,10 @@
 
 #include "faker-sym.h"
 #include "Mutex.h"
-#include "x11trans.h"
+#include "X11Trans.h"
 #include "fbx.h"
 
-using namespace vglutil;
+using namespace vglserver;
 
 
 // A container class for the actual off-screen drawable
@@ -85,13 +85,13 @@ class pbdrawable
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
 
-		CS _mutex;
+		vglutil::CS _mutex;
 		Display *_dpy;  Drawable _drawable;
 		glxdrawable *_pb;  GLXFBConfig _config;
 		GLXContext _ctx;
 		Bool _direct;
-		x11trans *_x11trans;
-		Profiler _prof_rb;
+		X11Trans *_x11trans;
+		vglcommon::Profiler _prof_rb;
 		char _autotestclr[80], _autotestrclr[80], _autotestframe[80];
 		int _autotestframecount;
 };

@@ -13,10 +13,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "x11trans.h"
+#include "X11Trans.h"
 #include "vglutil.h"
 #include "Timer.h"
 #include "fakerconfig.h"
+
+using namespace vglutil;
+using namespace vglcommon;
+using namespace vglserver;
 
 
 void usage(char **argv)
@@ -34,14 +38,21 @@ void usage(char **argv)
 }
 
 
-void fillframe(unsigned char *buf, int w, int pitch, int h, int ps, int on)
+void fillFrame(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 {
 	unsigned char *ptr;  unsigned char pixel[3];
+
 	ptr=buf;
 	for(int i=0; i<h; i++, ptr+=pitch)
 	{
-		if(on) {pixel[0]=pixel[2]=i%256;  pixel[1]=255-(i%256);}
-		else {pixel[0]=i%256;  pixel[1]=0;  pixel[2]=255-(i%256);}
+		if(on)
+		{
+			pixel[0]=pixel[2]=i%256;  pixel[1]=255-(i%256);
+		}
+		else
+		{
+			pixel[0]=i%256;  pixel[1]=0;  pixel[2]=255-(i%256);
+		}
 		for(int j=0; j<w; j++) memcpy(&ptr[ps*j], pixel, 3);
 	}
 }
@@ -49,7 +60,7 @@ void fillframe(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 
 int main(int argc, char **argv)
 {
-	x11trans x11t;  Timer t;  double elapsed;
+	X11Trans trans;  Timer timer;  double elapsed;
 	Display *dpy;  Window win;
 	int WIDTH=700, HEIGHT=700;
 	bool dosync=false, bottomup=false;
@@ -70,46 +81,49 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if(!XInitThreads()) _throw("XInitThreads failed");
-		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
+		if(!XInitThreads())
+			_throw("XInitThreads failed");
+		if(!(dpy=XOpenDisplay(0)))
+			_throw("Could not open display");
 		if(!(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
 			WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
-			BlackPixel(dpy, DefaultScreen(dpy))))) _throw("Could not create window");
+			BlackPixel(dpy, DefaultScreen(dpy)))))
+			_throw("Could not create window");
 		errifnot(XMapRaised(dpy, win));
 
 		FBXFrame *f;
 
 		fprintf(stderr, "\nTesting full-frame blits ...\n");
 
-		int fill=0, frames=0;  t.start();
+		int fill=0, frames=0;  timer.start();
 		do
 		{
-			x11t.synchronize();
-			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			trans.synchronize();
+			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillframe(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
-			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
-			x11t.sendframe(f, dosync);
+			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=t.elapsed())<2.);
+		} while((elapsed=timer.elapsed())<2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
 			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
 		fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
 
-		fill=0, frames=0;  int clientframes=0;  t.start();
+		fill=0, frames=0;  int clientframes=0;  timer.start();
 		do
 		{
-			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillframe(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
-			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
-			x11t.sendframe(f, dosync);
+			trans.sendFrame(f, dosync);
 			clientframes++;  frames++;
-		} while((elapsed=t.elapsed())<2.);
+		} while((elapsed=timer.elapsed())<2.);
 
 		fprintf(stderr, "%f Megapixels/sec (server)\n",
 			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
@@ -118,40 +132,39 @@ int main(int argc, char **argv)
 
 		fprintf(stderr, "\nTesting half-frame blits ...\n");
 
-		fill=0, frames=0;  t.start();
+		fill=0, frames=0;  timer.start();
 		do
 		{
-			x11t.synchronize();
-			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			trans.synchronize();
+			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			memset(f->bits, 0, f->pitch*HEIGHT);
-			fillframe(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, fill);
-			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, fill);
+			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
-			x11t.sendframe(f, dosync);
+			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=t.elapsed())<2.);
+		} while((elapsed=timer.elapsed())<2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
 			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
 
 		fprintf(stderr, "\nTesting zero-frame blits ...\n");
 
-		frames=0;  t.start();
+		frames=0;  timer.start();
 		do
 		{
-			x11t.synchronize();
-			errifnot(f=x11t.getframe(dpy, win, WIDTH, HEIGHT));
+			trans.synchronize();
+			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillframe(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, 1);
-			if(bottomup) {f->flags|=FRAME_BOTTOMUP;}
-			x11t.sendframe(f, dosync);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, 1);
+			if(bottomup) f->flags|=FRAME_BOTTOMUP;
+			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=t.elapsed())<2.);
+		} while((elapsed=timer.elapsed())<2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
 			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
-
 	}
 	catch(Error &e)
 	{

@@ -21,40 +21,42 @@
 #include "GenericQ.h"
 #include "Profiler.h"
 
-using namespace vglcommon;
 
-
-class xvtrans : public Runnable
+namespace vglserver
 {
-	public:
+	class XVTrans : public vglutil::Runnable
+	{
+		public:
 
-		xvtrans(void);
+			XVTrans(void);
 
-		virtual ~xvtrans(void)
-		{
-			_deadyet=true;  _q.release();
-			if(_t) {_t->stop();  delete _t;  _t=NULL;}
-			for(int i=0; i<NFRAMES; i++)
+			virtual ~XVTrans(void)
 			{
-				if(_frame[i]) delete _frame[i];  _frame[i]=NULL;
+				deadYet=true;
+				q.release();
+				if(thread) { thread->stop();  delete thread;  thread=NULL; }
+				for(int i=0; i<NFRAMES; i++)
+				{
+					if(frames[i]) delete frames[i];  frames[i]=NULL;
+				}
 			}
-		}
 
-		bool ready(void);
-		void synchronize(void);
-		void sendframe(XVFrame *, bool sync=false);
-		void run(void);
-		XVFrame *getframe(Display *, Window, int, int);
+			bool isReady(void);
+			void synchronize(void);
+			void sendFrame(vglcommon::XVFrame *f, bool sync=false);
+			void run(void);
+			vglcommon::XVFrame *getFrame(Display *dpy, Window win, int w, int h);
 
-	private:
-
-		static const int NFRAMES=3;
-		CS _mutex;  XVFrame *_frame[NFRAMES];
-		Event _ready;
-		GenericQ _q;
-		Thread *_t;  bool _deadyet;
-		Profiler _prof_xv, _prof_total;
-};
-
+		private:
+			static const int NFRAMES=3;
+			vglutil::CS mutex;
+			vglcommon::XVFrame *frames[NFRAMES];
+			vglutil::Event ready;
+			vglutil::GenericQ q;
+			vglutil::Thread *thread;
+			bool deadYet;
+			vglcommon::Profiler profXV, profTotal;
+	};
+}
 
 #endif // __XVTRANS_H__

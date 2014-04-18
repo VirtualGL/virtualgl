@@ -16,6 +16,9 @@
 #include "fakerconfig.h"
 #include "vglutil.h"
 
+using namespace vglutil;
+using namespace vglcommon;
+
 
 extern Display *_localdpy;
 

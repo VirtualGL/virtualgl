@@ -21,6 +21,8 @@
 #include "glxvisual.h"
 #include "vglutil.h"
 
+using namespace vglcommon;
+
 
 #define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
 	|| drawbuf==GL_BACK_RIGHT)
@@ -265,7 +267,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				vglout.println("[VGL]    Using anaglyphic stereo instead.");
 				message3=true;
 			}
-			stereomode=RRSTEREO_REDCYAN;				
+			stereomode=RRSTEREO_REDCYAN;
 		}
 		else if(dostereo && _Trans[compress]!=RRTRANS_VGL
 			&& stereomode==RRSTEREO_QUADBUF && strlen(fconfig.transport)==0)
@@ -289,7 +291,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 				vglout.println("[VGL]    available on the 2D X server.  Using anaglyphic stereo instead.");
 				message2=true;
 			}
-			stereomode=RRSTEREO_REDCYAN;				
+			stereomode=RRSTEREO_REDCYAN;
 		}
 	}
 
@@ -312,7 +314,7 @@ void pbwin::readback(GLint drawbuf, bool spoillast, bool sync)
 		case RRCOMP_YUV:
 			if(!_vglconn)
 			{
-				errifnot(_vglconn=new vgltransconn());
+				newcheck(_vglconn=new VGLTrans());
 				_vglconn->connect(strlen(fconfig.client)>0?
 					fconfig.client:DisplayString(_dpy), fconfig.port);
 			}
@@ -384,7 +386,7 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 			vglout.println("[VGL]    Using anaglyphic stereo instead.");
 			message=true;
 		}
-		stereomode=RRSTEREO_REDCYAN;				
+		stereomode=RRSTEREO_REDCYAN;
 	}
 	if(dostereo && isanaglyphic(stereomode))
 	{
@@ -414,12 +416,12 @@ void pbwin::sendplugin(GLint drawbuf, bool spoillast, bool sync,
 }
 
 
-void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
+void pbwin::sendvgl(VGLTrans *vgltrans, GLint drawbuf, bool spoillast,
 	bool dostereo, int stereomode, int compress, int qual, int subsamp)
 {
 	int pbw=_pb->width(), pbh=_pb->height();
 
-	if(spoillast && fconfig.spoil && !vgltrans->ready())
+	if(spoillast && fconfig.spoil && !vgltrans->isReady())
 		return;
 	Frame *f;
 
@@ -437,7 +439,7 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	}
 
 	if(!fconfig.spoil) vgltrans->synchronize();
-	errifnot(f=vgltrans->getframe(pbw, pbh, pixelsize, flags,
+	errifnot(f=vgltrans->getFrame(pbw, pbh, pixelsize, flags,
 		dostereo && stereomode==RRSTEREO_QUADBUF));
 	if(dostereo && isanaglyphic(stereomode))
 	{
@@ -471,7 +473,7 @@ void pbwin::sendvgl(vgltransconn *vgltrans, GLint drawbuf, bool spoillast,
 	f->hdr.compress=(unsigned char)compress;
 	if(!_syncdpy) {XSync(_dpy, False);  _syncdpy=true;}
 	if(fconfig.logo) f->addLogo();
-	vgltrans->sendframe(f);
+	vgltrans->sendFrame(f);
 }
 
 
@@ -481,10 +483,10 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int pbw=_pb->width(), pbh=_pb->height();
 
 	FBXFrame *f;
-	if(!_x11trans) errifnot(_x11trans=new x11trans());
-	if(spoillast && fconfig.spoil && !_x11trans->ready()) return;
+	if(!_x11trans) errifnot(_x11trans=new X11Trans());
+	if(spoillast && fconfig.spoil && !_x11trans->isReady()) return;
 	if(!fconfig.spoil) _x11trans->synchronize();
-	errifnot(f=_x11trans->getframe(_dpy, _drawable, pbw, pbh));
+	errifnot(f=_x11trans->getFrame(_dpy, _drawable, pbw, pbh));
 	f->flags|=FRAME_BOTTOMUP;
 	if(dostereo && isanaglyphic(stereomode))
 	{
@@ -540,7 +542,7 @@ void pbwin::sendx11(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		}
 	}
 	if(fconfig.logo) f->addLogo();
-	_x11trans->sendframe(f, sync);
+	_x11trans->sendFrame(f, sync);
 }
 
 
@@ -552,10 +554,10 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 	int pbw=_pb->width(), pbh=_pb->height();
 
 	XVFrame *f;
-	if(!_xvtrans) errifnot(_xvtrans=new xvtrans());
-	if(spoillast && fconfig.spoil && !_xvtrans->ready()) return;
+	if(!_xvtrans) errifnot(_xvtrans=new XVTrans());
+	if(spoillast && fconfig.spoil && !_xvtrans->isReady()) return;
 	if(!fconfig.spoil) _xvtrans->synchronize();
-	errifnot(f=_xvtrans->getframe(_dpy, _drawable, pbw, pbh));
+	errifnot(f=_xvtrans->getFrame(_dpy, _drawable, pbw, pbh));
 	rrframeheader hdr;
 	hdr.height=hdr.frameh=pbh;
 	hdr.width=hdr.framew=pbw;
@@ -591,11 +593,11 @@ void pbwin::sendxv(GLint drawbuf, bool spoillast, bool sync, bool dostereo,
 		readpixels(0, 0, min(pbw, _f.hdr.framew), _f.pitch,
 			min(pbh, _f.hdr.frameh), format, _f.pixelSize, _f.bits, buf, false);
 	}
-	
+
 	if(fconfig.logo) _f.addLogo();
 
 	*f=_f;
-	_xvtrans->sendframe(f, sync);
+	_xvtrans->sendFrame(f, sync);
 }
 
 #endif

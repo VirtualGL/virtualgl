@@ -57,6 +57,7 @@ FakerConfig *_fconfig=NULL;
 void SetComp(void)
 {
 	int i;
+
 	for(i=0; i<RR_COMPRESSOPT; i++)
 	{
 		if(strlen(fconfig.transport)==0 && !fconfig.transvalid[_Trans[i]])
@@ -483,7 +484,7 @@ int main(int argc, char **argv)
 		}
 
 		init(argc, argv);
-		if(ppid>0) Fl::add_check(checkparentpid);		
+		if(ppid>0) Fl::add_check(checkparentpid);
 		status=Fl::run();
 	}
 	catch(Error &e)

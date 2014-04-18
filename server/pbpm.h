@@ -29,7 +29,7 @@ class pbpm : public pbdrawable
 
 	private:
 
-		Profiler _prof_pmblit;
-		FBXFrame *_fb;
+		vglcommon::Profiler _prof_pmblit;
+		vglcommon::FBXFrame *_fb;
 		XVisualInfo *vis;
 };

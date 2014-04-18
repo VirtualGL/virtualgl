@@ -36,10 +36,10 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
 
 set(RRFAKER_SOURCES faker.cpp faker-sym.cpp pbdrawable.cpp pbwin.cpp
-	pbpm.cpp glxvisual.cpp x11trans.cpp vgltransconn.cpp transplugin.cpp
+	pbpm.cpp glxvisual.cpp X11Trans.cpp VGLTrans.cpp transplugin.cpp
 	fakerconfig.cpp)
 if(VGL_USEXV)
-	set(RRFAKER_SOURCES ${RRFAKER_SOURCES};xvtrans.cpp)
+	set(RRFAKER_SOURCES ${RRFAKER_SOURCES};XVTrans.cpp)
 endif()
 add_library(rrfaker SHARED ${RRFAKER_SOURCES})
 if(MAPFLAG)
@@ -106,12 +106,12 @@ install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS}
 # Unit tests
 #
 
-add_executable(x11transut x11transut.cpp fakerconfig.cpp x11trans.cpp)
+add_executable(x11transut x11transut.cpp fakerconfig.cpp X11Trans.cpp)
 target_link_libraries(x11transut vglcommon ${FBXLIB} ${TJPEG_LIBRARY})
 
-add_executable(vgltransconnut vgltransconnut.cpp vgltransconn.cpp
+add_executable(vgltransut vgltransut.cpp VGLTrans.cpp
 	fakerconfig.cpp)
-target_link_libraries(vgltransconnut vglcommon ${FBXLIB} vglsocket
+target_link_libraries(vgltransut vglcommon ${FBXLIB} vglsocket
 	${TJPEG_LIBRARY})
 
 add_executable(dlfakerut dlfakerut.c)
@@ -123,7 +123,7 @@ add_executable(fakerut fakerut.cpp)
 target_link_libraries(fakerut "-z now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} vglutil)
 
-add_library(vgltrans_test SHARED testplugin.cpp vgltransconn.cpp)
+add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# Work around this issue:
 	# http://rt.openssl.org/Ticket/Display.html?user=guest&pass=guest&id=1521
@@ -135,7 +135,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()
 
-add_library(vgltrans_test2 SHARED testplugin2.cpp x11trans.cpp)
+add_library(vgltrans_test2 SHARED testplugin2.cpp X11Trans.cpp)
 target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)

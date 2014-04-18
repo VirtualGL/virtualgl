@@ -17,11 +17,13 @@
 #define __PBWIN_H__
 
 #include "pbdrawable.h"
-#include "vgltransconn.h"
+#include "VGLTrans.h"
 #ifdef USEXV
-#include "xvtrans.h"
+#include "XVTrans.h"
 #endif
 #include "transplugin.h"
+
+using namespace vglserver;
 
 
 class pbwin : public pbdrawable
@@ -51,9 +53,9 @@ class pbwin : public pbdrawable
 		int init(int, int, GLXFBConfig);
 		void readpixels(GLint, GLint, GLint, GLint, GLint, GLenum, int, GLubyte *,
 			GLint, bool);
-		void makeanaglyph(Frame *, int, int);
-		void makepassive(Frame *, int, int, int);
-		void sendvgl(vgltransconn *, GLint, bool, bool, int, int, int, int);
+		void makeanaglyph(vglcommon::Frame *, int, int);
+		void makepassive(vglcommon::Frame *, int, int, int);
+		void sendvgl(VGLTrans *, GLint, bool, bool, int, int, int, int);
 		void sendx11(GLint, bool, bool, bool, int);
 		void sendplugin(GLint, bool, bool, bool, int);
 		#ifdef USEXV
@@ -63,17 +65,17 @@ class pbwin : public pbdrawable
 		Display *_eventdpy;
 		glxdrawable *_oldpb;
 		int _neww, _newh;
-		x11trans *_x11trans;
+		X11Trans *_x11trans;
 		#ifdef USEXV
-		xvtrans *_xvtrans;
+		XVTrans *_xvtrans;
 		#endif
-		vgltransconn *_vglconn;
-		Profiler _prof_gamma, _prof_anaglyph, _prof_passive;
+		VGLTrans *_vglconn;
+		vglcommon::Profiler _prof_gamma, _prof_anaglyph, _prof_passive;
 		bool _syncdpy;
 		transplugin *_plugin;
 		bool _truecolor;
 		bool _stereovisual;
-		Frame _r, _g, _b, _f, _stf;
+		vglcommon::Frame _r, _g, _b, _f, _stf;
 		bool _wmdelete;
 		bool _newconfig;
 		int _swapinterval;
