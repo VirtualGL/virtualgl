@@ -168,9 +168,10 @@ void GLFrame::redraw(void)
 }
 
 
-void GLFrame::drawTile(int x, int y, int w, int h)
+void GLFrame::drawTile(int x, int y, int width, int height)
 {
-	if(x<0 || w<1 || (x+w)>hdr.framew || y<0 || h<1 || (y+h)>hdr.frameh)
+	if(x<0 || width<1 || (x+width)>hdr.framew || y<0 || height<1
+		|| (y+height)>hdr.frameh)
 		return;
 	int format=GL_RGB;
 	#ifdef GL_BGR_EXT
@@ -192,13 +193,14 @@ void GLFrame::drawTile(int x, int y, int w, int h)
 	glViewport(0, 0, hdr.framew, hdr.frameh);
 	glRasterPos2f(((float)x/(float)hdr.framew)*2.0f-1.0f,
 		((float)y/(float)hdr.frameh)*2.0f-1.0f);
-	glDrawPixels(w, h, format, GL_UNSIGNED_BYTE, &bits[pitch*y+x*pixelSize]);
+	glDrawPixels(width, height, format, GL_UNSIGNED_BYTE,
+		&bits[pitch*y+x*pixelSize]);
 	if(stereo)
 	{
 		glDrawBuffer(GL_BACK_RIGHT);
 		glRasterPos2f(((float)x/(float)hdr.framew)*2.0f-1.0f,
 			((float)y/(float)hdr.frameh)*2.0f-1.0f);
-		glDrawPixels(w, h, format, GL_UNSIGNED_BYTE,
+		glDrawPixels(width, height, format, GL_UNSIGNED_BYTE,
 			&rbits[pitch*y+x*pixelSize]);
 		glDrawBuffer(oldbuf);
 	}

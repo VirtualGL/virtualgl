@@ -42,11 +42,11 @@ namespace vglcommon
 			Frame(bool primary=true);
 			virtual ~Frame(void);
 			void init(rrframeheader &h, int pixelSize, int flags, bool stereo=false);
-			void init(unsigned char *bits, int w, int pitch, int h, int pixelSize,
-				int flags);
+			void init(unsigned char *bits, int width, int pitch, int height,
+				int pixelSize, int flags);
 			void deInit(void);
-			Frame *getTile(int x, int y, int w, int h);
-			bool tileEquals(Frame *last, int x, int y, int w, int h);
+			Frame *getTile(int x, int y, int width, int height);
+			bool tileEquals(Frame *last, int x, int y, int width, int height);
 			void makeAnaglyph(Frame &r, Frame &g, Frame &b);
 			void makePassive(Frame &stf, int mode);
 			void signalReady(void) { ready.signal(); }
@@ -54,7 +54,7 @@ namespace vglcommon
 			void signalComplete(void) { complete.signal(); }
 			void waitUntilComplete(void) { complete.wait(); }
 			bool isComplete(void) { return !complete.isLocked(); }
-			void decompressRGB(Frame &f, int w, int h, bool rightEye);
+			void decompressRGB(Frame &f, int width, int height, bool rightEye);
 			void addLogo(void);
 
 			rrframeheader hdr;
@@ -106,9 +106,9 @@ namespace vglcommon
 	class FBXFrame : public Frame
 	{
 		public:
-			FBXFrame(Display *dpy, Drawable d, Visual *v=NULL);
+			FBXFrame(Display *dpy, Drawable draw, Visual *vis=NULL);
 			FBXFrame(char *dpystring, Window win);
-			void init(char *dpystring, Drawable d, Visual *v=NULL);
+			void init(char *dpystring, Drawable draw, Visual *vis=NULL);
 			~FBXFrame(void);
 			void init(rrframeheader &h);
 			FBXFrame& operator= (CompressedFrame &cf);

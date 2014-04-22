@@ -33,16 +33,16 @@ using namespace vglcommon;
 bool useGL=false, useXV=false, doRGBBench=false, useRGB=false;
 
 
-void resizeWindow(Display *dpy, Window win, int w, int h, int myID)
+void resizeWindow(Display *dpy, Window win, int width, int height, int myID)
 {
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, win, &xwa);
-	if(w!=xwa.width || h!=xwa.height)
+	if(width!=xwa.width || height!=xwa.height)
 	{
 		XLockDisplay(dpy);
 		XWindowChanges xwc;
-		xwc.width=w;  xwc.height=h;
-		xwc.x=(w+BORDER*2)*myID;  xwc.y=0;
+		xwc.x=(width+BORDER*2)*myID;  xwc.y=0;
+		xwc.width=width;  xwc.height=height;
 		XConfigureWindow(dpy, win, CWWidth|CWHeight|CWX|CWY, &xwc);
 		XFlush(dpy);
 		XSync(dpy, False);
@@ -259,15 +259,15 @@ class Compressor : public Runnable
 			if(t) t->stop();
 		}
 
-		Frame &get(int w, int h)
+		Frame &get(int width, int height)
 		{
 			Frame &f=frames[findex];
 			findex=(findex+1)%NFRAMES;
 			if(t) t->checkError();  f.waitUntilComplete();
 			if(t) t->checkError();
 			rrframeheader hdr;
-			hdr.framew=hdr.width=w+BORDER;
-			hdr.frameh=hdr.height=h+BORDER;
+			hdr.framew=hdr.width=width+BORDER;
+			hdr.frameh=hdr.height=height+BORDER;
 			hdr.x=hdr.y=BORDER;
 			hdr.qual=80;
 			hdr.subsamp=2;
@@ -363,9 +363,9 @@ class FrameTest
 
 		~FrameTest(void) { shutdown(); }
 
-		void dotest(int w, int h, int seed)
+		void dotest(int width, int height, int seed)
 		{
-			Frame &f=compressor->get(w, h);
+			Frame &f=compressor->get(width, height);
 			initFrame(f, seed);
 			compressor->put(f);
 		}
@@ -408,11 +408,11 @@ static const char *formatName[BMPPIXELFORMATS]=
 
 static const int ps[BMPPIXELFORMATS]={3, 4, 3, 4, 4, 4};
 
-static const int roff[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
+static const int roffset[BMPPIXELFORMATS]={0, 0, 2, 2, 3, 1};
 
-static const int goff[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
+static const int goffset[BMPPIXELFORMATS]={1, 1, 1, 1, 2, 2};
 
-static const int boff[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
+static const int boffset[BMPPIXELFORMATS]={2, 2, 0, 0, 1, 3};
 
 static const int flags[BMPPIXELFORMATS]=
 {
@@ -420,21 +420,21 @@ static const int flags[BMPPIXELFORMATS]=
 };
 
 
-int cmpframe(unsigned char *buf, int w, int h, Frame &dst,
+int cmpFrame(unsigned char *buf, int width, int height, Frame &dst,
 	BMPPIXELFORMAT dstpf)
 {
-	int _i;  int dstbu=((dst.flags&FRAME_BOTTOMUP)!=0);  int pitch=w*3;
-	for(int i=0; i<h; i++)
+	int _i;  int dstbu=((dst.flags&FRAME_BOTTOMUP)!=0);  int pitch=width*3;
+	for(int i=0; i<height; i++)
 	{
-		_i=dstbu? i:h-i-1;
-		for(int j=0; j<h; j++)
+		_i=dstbu? i:height-i-1;
+		for(int j=0; j<height; j++)
 		{
 			if((buf[pitch*_i+j*3]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+roff[dstpf]]) ||
+					!= dst.bits[dst.pitch*i+j*ps[dstpf]+roffset[dstpf]]) ||
 				(buf[pitch*_i+j*3+1]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+goff[dstpf]]) ||
+					!= dst.bits[dst.pitch*i+j*ps[dstpf]+goffset[dstpf]]) ||
 				(buf[pitch*_i+j*3+2]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+boff[dstpf]]))
+					!= dst.bits[dst.pitch*i+j*ps[dstpf]+boffset[dstpf]]))
 				return 1;
 		}
 	}
@@ -444,7 +444,7 @@ int cmpframe(unsigned char *buf, int w, int h, Frame &dst,
 
 void rgbBench(char *filename)
 {
-	unsigned char *buf;  int w, h, dstbu;
+	unsigned char *buf;  int width, height, dstbu;
 	CompressedFrame src;  Frame dst;  int dstpf;
 
 	for(dstpf=0; dstpf<BMPPIXELFORMATS; dstpf++)
@@ -453,14 +453,16 @@ void rgbBench(char *filename)
 		for(dstbu=0; dstbu<2; dstbu++)
 		{
 			if(dstbu) dstflags|=FRAME_BOTTOMUP;
-			if(loadbmp(filename, &buf, &w, &h, BMP_RGB, 1, 1)==-1)
+			if(loadbmp(filename, &buf, &width, &height, BMP_RGB, 1, 1)==-1)
 				throw(bmpgeterr());
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(hdr));
-			hdr.width=hdr.framew=w;  hdr.height=hdr.frameh=h;  hdr.x=hdr.y=0;
-			hdr.compress=RRCOMP_RGB;  hdr.flags=0;  hdr.size=w*3*h;
+			hdr.x=hdr.y=0;
+			hdr.width=hdr.framew=width;
+			hdr.height=hdr.frameh=height;
+			hdr.compress=RRCOMP_RGB;  hdr.flags=0;  hdr.size=width*3*height;
 			src.init(hdr, hdr.flags);
-			memcpy(src.bits, buf, w*3*h);
+			memcpy(src.bits, buf, width*3*height);
 			dst.init(hdr, ps[dstpf], dstflags);
 			memset(dst.bits, 0, dst.pitch*dst.hdr.frameh);
 			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", formatName[dstpf],
@@ -469,12 +471,12 @@ void rgbBench(char *filename)
 			do
 			{
 				tstart=getTime();
-				dst.decompressRGB(src, w, h, false);
+				dst.decompressRGB(src, width, height, false);
 				ttotal+=getTime()-tstart;  iter++;
 			} while(ttotal<1.);
-			fprintf(stderr, "%f Mpixels/sec - ", (double)w*(double)h
+			fprintf(stderr, "%f Mpixels/sec - ", (double)width*(double)height
 				*(double)iter/1000000./ttotal);
-			if(cmpframe(buf, w, h, dst, (BMPPIXELFORMAT)dstpf))
+			if(cmpFrame(buf, width, height, dst, (BMPPIXELFORMAT)dstpf))
 				fprintf(stderr, "FAILED!\n");
 			else fprintf(stderr, "Passed.\n");
 			free(buf);

@@ -32,7 +32,7 @@ namespace vglcommon
 			void init(rrframeheader &h, bool stereo);
 			GLFrame &operator= (CompressedFrame &cf);
 			void redraw(void);
-			void drawTile(int x, int y, int w, int h);
+			void drawTile(int x, int y, int width, int height);
 			void sync(void);
 
 		private:
