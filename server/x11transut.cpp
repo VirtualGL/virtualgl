@@ -38,12 +38,13 @@ void usage(char **argv)
 }
 
 
-void fillFrame(unsigned char *buf, int w, int pitch, int h, int ps, int on)
+void fillFrame(unsigned char *buf, int width, int pitch, int height, int ps,
+	int on)
 {
 	unsigned char *ptr;  unsigned char pixel[3];
 
 	ptr=buf;
-	for(int i=0; i<h; i++, ptr+=pitch)
+	for(int i=0; i<height; i++, ptr+=pitch)
 	{
 		if(on)
 		{
@@ -53,7 +54,7 @@ void fillFrame(unsigned char *buf, int w, int pitch, int h, int ps, int on)
 		{
 			pixel[0]=i%256;  pixel[1]=0;  pixel[2]=255-(i%256);
 		}
-		for(int j=0; j<w; j++) memcpy(&ptr[ps*j], pixel, 3);
+		for(int j=0; j<width; j++) memcpy(&ptr[ps*j], pixel, 3);
 	}
 }
 

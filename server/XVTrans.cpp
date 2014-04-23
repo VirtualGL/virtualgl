@@ -91,7 +91,7 @@ void XVTrans::run(void)
 }
 
 
-XVFrame *XVTrans::getFrame(Display *dpy, Window win, int w, int h)
+XVFrame *XVTrans::getFrame(Display *dpy, Window win, int width, int height)
 {
 	XVFrame *f=NULL;
 
@@ -111,9 +111,9 @@ XVFrame *XVTrans::getFrame(Display *dpy, Window win, int w, int h)
 
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
-	hdr.height=hdr.frameh=h;
-	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
+	hdr.width=hdr.framew=width;
+	hdr.height=hdr.frameh=height;
 	f->init(hdr);
 	return f;
 }

@@ -45,10 +45,10 @@ namespace vglserver
 			void synchronize(void);
 			void sendFrame(vglcommon::FBXFrame *, bool sync=false);
 			void run(void);
-			vglcommon::FBXFrame *getFrame(Display *dpy, Window win, int w, int h);
+			vglcommon::FBXFrame *getFrame(Display *dpy, Window win, int width,
+				int height);
 
 		private:
-
 			static const int NFRAMES=3;
 			vglutil::CS mutex;
 			vglcommon::FBXFrame *frames[NFRAMES];

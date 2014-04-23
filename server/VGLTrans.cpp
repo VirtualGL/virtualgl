@@ -197,7 +197,8 @@ void VGLTrans::run(void)
 }
 
 
-Frame *VGLTrans::getFrame(int w, int h, int ps, int flags, bool stereo)
+Frame *VGLTrans::getFrame(int width, int height, int ps, int flags,
+	bool stereo)
 {
 	Frame *f=NULL;
 
@@ -215,9 +216,9 @@ Frame *VGLTrans::getFrame(int w, int h, int ps, int flags, bool stereo)
 
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(rrframeheader));
-	hdr.height=hdr.frameh=h;
-	hdr.width=hdr.framew=w;
 	hdr.x=hdr.y=0;
+	hdr.width=hdr.framew=width;
+	hdr.height=hdr.frameh=height;
 	f->init(hdr, ps, flags, stereo);
 	return f;
 }
@@ -273,26 +274,26 @@ void VGLTrans::Compressor::compressSend(Frame *f, Frame *lastf)
 	bytes=0;
 	for(i=0; i<f->hdr.height; i+=tilesizey)
 	{
-		int h=tilesizey, y=i;
+		int height=tilesizey, y=i;
 
 		if(f->hdr.height-i<(3*tilesizey/2))
 		{
-			h=f->hdr.height-i;  i+=tilesizey;
+			height=f->hdr.height-i;  i+=tilesizey;
 		}
 		for(j=0; j<f->hdr.width; j+=tilesizex, n++)
 		{
-			int w=tilesizex, x=j;
+			int width=tilesizex, x=j;
 
 			if(f->hdr.width-j<(3*tilesizex/2))
 			{
-				w=f->hdr.width-j;  j+=tilesizex;
+				width=f->hdr.width-j;  j+=tilesizex;
 			}
 			if(n%nprocs!=myRank) continue;
 			if(fconfig.interframe)
 			{
-				if(f->tileEquals(lastf, x, y, w, h)) continue;
+				if(f->tileEquals(lastf, x, y, width, height)) continue;
 			}
-			Frame *tile=f->getTile(x, y, w, h);
+			Frame *tile=f->getTile(x, y, width, height);
 			CompressedFrame *ctile=NULL;
 			if(myRank>0) { newcheck(ctile=new CompressedFrame()); }
 			else ctile=&cframe;
