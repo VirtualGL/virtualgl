@@ -32,7 +32,7 @@ extern "C" {
 
 // XCloseDisplay() implicitly closes all windows and subwindows that were
 // attached to the display handle, so we have to make sure that the
-// corresponding pbwin instances are shut down.
+// corresponding VirtualWin instances are shut down.
 
 int XCloseDisplay(Display *dpy)
 {
@@ -63,7 +63,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	int src_y, unsigned int w, unsigned int h, int dest_x, int dest_y)
 {
 	TRY();
-	pbdrawable *pbsrc=NULL;  pbdrawable *pbdst=NULL;
+	VirtualDrawable *pbsrc=NULL;  VirtualDrawable *pbdst=NULL;
 	bool srcwin=false, dstwin=false;
 	bool copy2d=true, copy3d=false, triggerrb=false;
 	int retval=0;
@@ -75,21 +75,21 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		prargx(gc); prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);
 		prargi(dest_x);  prargi(dest_y);  starttrace();
 
-	if(!(pbsrc=(pbdrawable *)pmh.find(dpy, src)))
+	if(!(pbsrc=(VirtualDrawable *)pmh.find(dpy, src)))
 	{
-		pbsrc=(pbdrawable *)winh.findwin(dpy, src);
+		pbsrc=(VirtualDrawable *)winh.findwin(dpy, src);
 		if(pbsrc) srcwin=true;
 	};
-	if(!(pbdst=(pbdrawable *)pmh.find(dpy, dst)))
+	if(!(pbdst=(VirtualDrawable *)pmh.find(dpy, dst)))
 	{
-		pbdst=(pbdrawable *)winh.findwin(dpy, dst);
+		pbdst=(VirtualDrawable *)winh.findwin(dpy, dst);
 		if(pbdst) dstwin=true;
 	}
 
 	// GLX (3D) Pixmap --> non-GLX (2D) drawable
 	// Sync pixels from the 3D pixmap (on the 3D X Server) to the corresponding
 	// 2D pixmap (on the 2D X Server) and let the "real" XCopyArea() do the rest.
-	if(pbsrc && !srcwin && !pbdst) ((pbpm *)pbsrc)->readback();
+	if(pbsrc && !srcwin && !pbdst) ((VirtualPixmap *)pbsrc)->readback();
 
 	// non-GLX (2D) drawable --> non-GLX (2D) drawable
 	// Source and destination are not backed by a drawable on the 3D X Server, so
@@ -128,10 +128,10 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 
 	if(copy3d)
 	{
-		glxsrc=pbsrc->getglxdrawable();
-		glxdst=pbdst->getglxdrawable();
-		pbsrc->copypixels(src_x, src_y, w, h, dest_x, dest_y, glxdst);
-		if(triggerrb) ((pbwin *)pbdst)->readback(GL_FRONT, false, fconfig.sync);
+		glxsrc=pbsrc->getGLXDrawable();
+		glxdst=pbdst->getGLXDrawable();
+		pbsrc->copyPixels(src_x, src_y, w, h, dest_x, dest_y, glxdst);
+		if(triggerrb) ((VirtualWin *)pbdst)->readback(GL_FRONT, false, fconfig.sync);
 	}
 
 		stoptrace();  if(copy3d) prargx(glxsrc);  if(copy3d) prargx(glxdst);
@@ -142,7 +142,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 }
 
 
-// When a window is created, add it to the hash.  A pbwin instance does not
+// When a window is created, add it to the hash.  A VirtualWin instance does not
 // get created and hashed to the window until/unless the window is made
 // current in OpenGL.
 
@@ -190,8 +190,8 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 }
 
 
-// When a window is destroyed, we shut down the corresponding pbwin instance,
-// but we also have to walk the window tree to ensure that pbwin instances
+// When a window is destroyed, we shut down the corresponding VirtualWin instance,
+// but we also have to walk the window tree to ensure that VirtualWin instances
 // attached to subwindows are also shut down.
 
 static void DeleteWindow(Display *dpy, Window win, bool subonly=false)
@@ -270,14 +270,14 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(winh.findpb(drawable, pbw))
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
 		// prevents a BadDrawable error in Steam.
-		dpy=pbw->get2ddpy();
-		drawable=pbw->getx11drawable();
+		dpy=pbw->getX11Display();
+		drawable=pbw->getX11Drawable();
 	}
 	ret=_XGetGeometry(dpy, drawable, root, x, y, &w, &h, border_width, depth);
 	if(winh.findpb(dpy, drawable, pbw) && w>0 && h>0)
@@ -307,7 +307,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
 		prargi(format);  starttrace();
 
-	pbpm *pbp=pmh.find(dpy, drawable);
+	VirtualPixmap *pbp=pmh.find(dpy, drawable);
 	if(pbp) pbp->readback();
 
 	xi=_XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
@@ -444,7 +444,7 @@ char *XServerVendor(Display *dpy)
 
 static void _HandleEvent(Display *dpy, XEvent *xe)
 {
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(xe && xe->type==ConfigureNotify)
 	{
 		if(winh.findpb(dpy, xe->xconfigure.window, pbw))
@@ -477,7 +477,7 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		if(protoatom && deleteatom && cme->message_type==protoatom
 			&& cme->data.l[0]==(long)deleteatom
 			&& winh.findpb(dpy, cme->window, pbw))
-			pbw->wmdelete();
+			pbw->wmDelete();
 	}
 }
 
@@ -538,7 +538,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 		if(values && (value_mask&CWHeight)) {prargi(values->height);}
 		starttrace();
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(winh.findpb(dpy, win, pbw) && values)
 		pbw->resize(value_mask&CWWidth? values->width:0,
 			value_mask&CWHeight?values->height:0);
@@ -571,7 +571,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XMoveResizeWindow(dpy, win, x, y, width, height);
 
@@ -602,7 +602,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
 		prargi(height);  starttrace();
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XResizeWindow(dpy, win, width, height);
 

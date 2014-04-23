@@ -13,12 +13,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "pbwin.h"
+#include "VirtualWin.h"
+
+using namespace vglserver;
 
 #define _hashclass _winhash
 #define _hashkeytype1 char*
 #define _hashkeytype2 Window
-#define _hashvaluetype pbwin*
+#define _hashvaluetype VirtualWin*
 #define _hashclassstruct _winhashstruct
 #define __hashclassstruct __winhashstruct
 #include "faker-hash.h"
@@ -56,40 +58,40 @@ class winhash : public _winhash
 				free(dpystring);
 		}
 
-		pbwin *findwin(Display *dpy, Window win)
+		VirtualWin *findwin(Display *dpy, Window win)
 		{
 			if(!dpy || !win) return NULL;
 			return _winhash::find(DisplayString(dpy), win);
 		}
 
-		bool findpb(Display *dpy, GLXDrawable d, pbwin* &pbw)
+		bool findpb(Display *dpy, GLXDrawable d, VirtualWin* &pbw)
 		{
-			pbwin *p;
+			VirtualWin *p;
 			if(!dpy || !d) return false;
 			p=_winhash::find(DisplayString(dpy), d);
-			if(p==NULL || p==(pbwin *)-1) return false;
+			if(p==NULL || p==(VirtualWin *)-1) return false;
 			else {pbw=p;  return true;}
 		}
 
 		bool isoverlay(Display *dpy, GLXDrawable d)
 		{
-			pbwin *p;
+			VirtualWin *p;
 			if(!dpy || !d) return false;
 			p=_winhash::find(DisplayString(dpy), d);
-			if(p==(pbwin *)-1) return true;
+			if(p==(VirtualWin *)-1) return true;
 			return false;
 		}
 
-		bool findpb(GLXDrawable d, pbwin* &pbw)
+		bool findpb(GLXDrawable d, VirtualWin* &pbw)
 		{
-			pbwin *p;
+			VirtualWin *p;
 			if(!d) return false;
 			p=_winhash::find(NULL, d);
-			if(p==NULL || p==(pbwin *)-1) return false;
+			if(p==NULL || p==(VirtualWin *)-1) return false;
 			else {pbw=p;  return true;}
 		}
 
-		pbwin *setpb(Display *dpy, Window win, GLXFBConfig config)
+		VirtualWin *setpb(Display *dpy, Window win, GLXFBConfig config)
 		{
 			if(!dpy || !win || !config) _throw("Invalid argument");
 			_winhashstruct *ptr=NULL;
@@ -98,14 +100,14 @@ class winhash : public _winhash
 			{
 				if(!ptr->value)
 				{
-					errifnot(ptr->value=new pbwin(dpy, win));
-					pbwin *pbw=ptr->value;
-					pbw->initfromwindow(config);
+					errifnot(ptr->value=new VirtualWin(dpy, win));
+					VirtualWin *pbw=ptr->value;
+					pbw->initFromWindow(config);
 				}
 				else
 				{
-					pbwin *pbw=ptr->value;
-					pbw->checkconfig(config);
+					VirtualWin *pbw=ptr->value;
+					pbw->checkConfig(config);
 				}
 				return ptr->value;
 			}
@@ -119,7 +121,7 @@ class winhash : public _winhash
 			CS::SafeLock l(_mutex);
 			if((ptr=findentry(DisplayString(dpy), win))!=NULL)
 			{
-				if(!ptr->value) ptr->value=(pbwin *)-1;
+				if(!ptr->value) ptr->value=(VirtualWin *)-1;
 			}
 		}
 
@@ -137,9 +139,9 @@ class winhash : public _winhash
 			ptr=_start;
 			while(ptr!=NULL)
 			{
-				pbwin *pbw=ptr->value;
+				VirtualWin *pbw=ptr->value;
 				next=ptr->next;
-				if(pbw && pbw!=(pbwin *)-1 && dpy==pbw->get2ddpy()) killentry(ptr);
+				if(pbw && pbw!=(VirtualWin *)-1 && dpy==pbw->getX11Display()) killentry(ptr);
 				ptr=next;
 			}
 		}
@@ -151,27 +153,27 @@ class winhash : public _winhash
 			_winhash::killhash();
 		}
 
-		pbwin *attach(char *key1, Window key2) {return NULL;}
+		VirtualWin *attach(char *key1, Window key2) {return NULL;}
 
 		void detach(_winhashstruct *h)
 		{
-			pbwin *pbw=h->value;
+			VirtualWin *pbw=h->value;
 			if(h && h->key1) free(h->key1);
-			if(h && pbw && pbw!=(pbwin *)-1) delete pbw;
+			if(h && pbw && pbw!=(VirtualWin *)-1) delete pbw;
 		}
 
 		bool compare(char *key1, Window key2, _winhashstruct *h)
 		{
-			pbwin *pbw=h->value;
+			VirtualWin *pbw=h->value;
 			return (
 				// Match 2D X Server display string and Window ID stored in pbdrawable
 				// instance
-				(pbw && pbw!=(pbwin *)-1 && key1
-					&& !strcasecmp(DisplayString(pbw->get2ddpy()), key1)
-					&& key2==pbw->getx11drawable())
+				(pbw && pbw!=(VirtualWin *)-1 && key1
+					&& !strcasecmp(DisplayString(pbw->getX11Display()), key1)
+					&& key2==pbw->getX11Drawable())
 				||
 				// If key1 is NULL, match off-screen drawable ID instead of X Window ID
-				(pbw && pbw!=(pbwin *)-1 && key1==NULL && key2==pbw->getglxdrawable())
+				(pbw && pbw!=(VirtualWin *)-1 && key1==NULL && key2==pbw->getGLXDrawable())
 				||
 				// Direct match
 				(key1 && !strcasecmp(key1, h->key1) && key2==h->key2)

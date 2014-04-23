@@ -170,8 +170,8 @@ static VisualID _MatchVisual(Display *dpy, GLXFBConfig config)
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
-	pbwin *pbw=NULL;
-	if(winh.findpb(dpy, draw, pbw)) return pbw->getglxdrawable();
+	VirtualWin *pbw=NULL;
+	if(winh.findpb(dpy, draw, pbw)) return pbw->getGLXDrawable();
 	else return draw;
 }
 
@@ -742,15 +742,15 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vi, Pixmap pm)
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 	if(!(c=_MatchConfig(dpy, vi, true, true)))
 		_throw("Could not obtain pixmap-capable RGB visual on the server");
-	pbpm *pbp=new pbpm(dpy, vi, pm);
+	VirtualPixmap *pbp=new VirtualPixmap(dpy, vi, pm);
 	if(pbp)
 	{
-		// Hash the pbpm instance to the 2D pixmap and also hash the 2D X display
+		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X display
 		// handle to the 3D pixmap.
 		pbp->init(w, h, d, c, NULL);
 		pmh.add(dpy, pm, pbp);
-		glxdh.add(pbp->getglxdrawable(), dpy);
-		drawable=pbp->getglxdrawable();
+		glxdh.add(pbp->getGLXDrawable(), dpy);
+		drawable=pbp->getGLXDrawable();
 	}
 
 	CATCH();
@@ -782,18 +782,18 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 
 	VisualID vid=_MatchVisual(dpy, config);
-	pbpm *pbp=NULL;
+	VirtualPixmap *pbp=NULL;
 	if(vid)
 	{
 		XVisualInfo *v=__vglVisualFromVisualID(dpy, DefaultScreen(dpy), vid);
-		if(v) pbp=new pbpm(dpy, v, pm);
+		if(v) pbp=new VirtualPixmap(dpy, v, pm);
 	}
 	if(pbp)
 	{
 		pbp->init(w, h, d, config, attribs);
 		pmh.add(dpy, pm, pbp);
-		glxdh.add(pbp->getglxdrawable(), dpy);
-		drawable=pbp->getglxdrawable();
+		glxdh.add(pbp->getGLXDrawable(), dpy);
+		drawable=pbp->getGLXDrawable();
 	}
 
 		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
@@ -825,7 +825,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		opentrace(glXCreateWindow);  prargd(dpy);  prargc(config);  prargx(win);
 		starttrace();
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	// Overlay config.  Hand off to 2D X server.
 	if(rcfgh.isoverlay(dpy, config))
 	{
@@ -838,7 +838,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		errifnot(pbw=winh.setpb(dpy, win, config));
 	}
 
-		stoptrace();  if(pbw) {prargx(pbw->getglxdrawable());}  closetrace();
+		stoptrace();  if(pbw) {prargx(pbw->getGLXDrawable());}  closetrace();
 
 	CATCH();
 	return win;  // Make the client store the original window handle, which we
@@ -905,8 +905,8 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
-	pbpm *pbp=pmh.find(dpy, pix);
-	if(pbp && pbp->isinit()) pbp->readback();
+	VirtualPixmap *pbp=pmh.find(dpy, pix);
+	if(pbp && pbp->isInit()) pbp->readback();
 
 	if(pix) glxdh.remove(pix);
 	if(dpy && pix) pmh.remove(dpy, pix);
@@ -926,8 +926,8 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
-	pbpm *pbp=pmh.find(dpy, pix);
-	if(pbp && pbp->isinit()) pbp->readback();
+	VirtualPixmap *pbp=pmh.find(dpy, pix);
+	if(pbp && pbp->isInit()) pbp->readback();
 
 	if(pix) glxdh.remove(pix);
 	if(dpy && pix) pmh.remove(dpy, pix);
@@ -939,7 +939,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 
 // 'win' is really an off-screen drawable ID, so the window hash matches it to
-// the corresponding pbwin instance and shuts down that instance.
+// the corresponding VirtualWin instance and shuts down that instance.
 
 void glXDestroyWindow(Display *dpy, GLXWindow win)
 {
@@ -950,7 +950,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 
 		opentrace(glXDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
-	if(winh.isoverlay(dpy, win)) _glXDestroyWindow(dpy, win);  
+	if(winh.isoverlay(dpy, win)) _glXDestroyWindow(dpy, win);
 	winh.remove(dpy, win);
 
 		stoptrace();  closetrace();
@@ -1057,7 +1057,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		if(vis->c_class==PseudoColor) *value=0;  else *value=1;
 	}
 	else if(attrib==GLX_STEREO)
-		*value=__vglServerVisualAttrib(c, GLX_STEREO);		
+		*value=__vglServerVisualAttrib(c, GLX_STEREO);
 	else if(attrib==GLX_X_VISUAL_TYPE)
 	{
 		if(vis->c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
@@ -1089,7 +1089,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy=NULL;  pbwin *pbw=NULL;
+	Display *dpy=NULL;  VirtualWin *pbw=NULL;
 
 	if(ctxh.overlaycurrent()) return _glXGetCurrentDisplay();
 
@@ -1098,7 +1098,7 @@ Display *glXGetCurrentDisplay(void)
 		opentrace(glXGetCurrentDisplay);  starttrace();
 
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
-	if(winh.findpb(curdraw, pbw)) dpy=pbw->get2ddpy();
+	if(winh.findpb(curdraw, pbw)) dpy=pbw->getX11Display();
 	else
 	{
 		if(curdraw) dpy=glxdh.getcurrentdpy(curdraw);
@@ -1119,13 +1119,13 @@ GLXDrawable glXGetCurrentDrawable(void)
 {
 	if(ctxh.overlaycurrent()) return _glXGetCurrentDrawable();
 
-	pbwin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
+	VirtualWin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
 
 	TRY();
 
 		opentrace(glXGetCurrentDrawable);  starttrace();
 
-	if(winh.findpb(draw, pbw)) draw=pbw->getx11drawable();
+	if(winh.findpb(draw, pbw)) draw=pbw->getX11Drawable();
 
 		stoptrace();  prargx(draw);  closetrace();
 
@@ -1137,13 +1137,13 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	if(ctxh.overlaycurrent()) return _glXGetCurrentReadDrawable();
 
-	pbwin *pbw=NULL;  GLXDrawable read=_glXGetCurrentReadDrawable();
+	VirtualWin *pbw=NULL;  GLXDrawable read=_glXGetCurrentReadDrawable();
 
 	TRY();
 
 		opentrace(glXGetCurrentReadDrawable);  starttrace();
 
-	if(winh.findpb(read, pbw)) read=pbw->getx11drawable();
+	if(winh.findpb(read, pbw)) read=pbw->getX11Drawable();
 
 		stoptrace();  prargx(read);  closetrace();
 
@@ -1272,7 +1272,7 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 
 		opentrace(glXGetFBConfigs);  prargd(dpy);  prargi(screen);
 		starttrace();
-	
+
 	configs=_glXGetFBConfigs(_localdpy, DefaultScreen(_localdpy), nelements);
 
 		stoptrace();  if(configs && nelements) prargi(*nelements);
@@ -1297,7 +1297,7 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 
 	TRY();
 
-	pbpm *pbp=NULL;
+	VirtualPixmap *pbp=NULL;
 	if((pbp=pmh.find(dpy, drawable))==NULL)
 		// If we get here, then the drawable wasn't created with
 		// glXCreate[GLX]Pixmap().  Thus, we set it to 0 so _glXBindTexImageEXT()
@@ -1307,12 +1307,12 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 	{
 		// Transfer pixels from the 2D Pixmap (stored on the 2D X server) to the
 		// 3D Pixmap (stored on the 3D X server.)
-		XImage *image=_XGetImage(dpy, pbp->getx11drawable(), 0, 0, pbp->width(),
-			pbp->height(), AllPlanes, ZPixmap);
-		GC gc=XCreateGC(_localdpy, pbp->get3dx11drawable(), 0, NULL);
+		XImage *image=_XGetImage(dpy, pbp->getX11Drawable(), 0, 0, pbp->getWidth(),
+			pbp->getHeight(), AllPlanes, ZPixmap);
+		GC gc=XCreateGC(_localdpy, pbp->getGLXDrawable(), 0, NULL);
 		if(gc && image)
-			XPutImage(_localdpy, pbp->get3dx11drawable(), gc, image, 0, 0, 0, 0,
-				pbp->width(), pbp->height());
+			XPutImage(_localdpy, pbp->getGLXDrawable(), gc, image, 0, 0, 0, 0,
+				pbp->getWidth(), pbp->getHeight());
 		else
 			// Also trigger GLXBadPixmap error
 			drawable=0;
@@ -1578,7 +1578,7 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
 	Bool retval=False;  const char *renderer="Unknown";
-	pbwin *pbw;  GLXFBConfig config=0;
+	VirtualWin *pbw;  GLXFBConfig config=0;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
@@ -1606,11 +1606,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 		&& curdraw && winh.findpb(curdraw, pbw))
 	{
-		pbwin *newpbw;
+		VirtualWin *newpbw;
 		if(drawable==0 || !winh.findpb(dpy, drawable, newpbw)
-			|| newpbw->getglxdrawable()!=curdraw)
+			|| newpbw->getGLXDrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty)
+			if(_drawingtofront() || pbw->dirty)
 				pbw->readback(GL_FRONT, false, false);
 		}
 	}
@@ -1629,8 +1629,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		if(pbw)
 		{
 			SetWMAtom(dpy, drawable);
-			drawable=pbw->updatedrawable();
-			pbw->setdirect(direct);
+			drawable=pbw->updateGLXDrawable();
+			pbw->setDirect(direct);
 		}
 		else if(!glxdh.getcurrentdpy(drawable))
 		{
@@ -1643,8 +1643,8 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 				pbw=winh.setpb(dpy, drawable, config);
 				if(pbw)
 				{
-					drawable=pbw->updatedrawable();
-					pbw->setdirect(direct);
+					drawable=pbw->updateGLXDrawable();
+					pbw->setDirect(direct);
 				}
 			}
 		}
@@ -1655,11 +1655,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
 	// it.
 	if(winh.findpb(drawable, pbw)) {pbw->clear();  pbw->cleanup();}
-	pbpm *pbp;
+	VirtualPixmap *pbp;
 	if((pbp=pmh.find(dpy, drawable))!=NULL)
 	{
 		pbp->clear();
-		pbp->setdirect(direct);
+		pbp->setDirect(direct);
 	}
 
 	CATCH();
@@ -1677,7 +1677,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
 	Bool retval=False;  const char *renderer="Unknown";
-	pbwin *pbw;  GLXFBConfig config=0;
+	VirtualWin *pbw;  GLXFBConfig config=0;
 
 	// Prevent recursion
 	if(!_isremote(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
@@ -1704,18 +1704,18 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	if(glXGetCurrentContext() && _localdisplayiscurrent()
 		&& curdraw && winh.findpb(curdraw, pbw))
 	{
-		pbwin *newpbw;
+		VirtualWin *newpbw;
 		if(draw==0 || !winh.findpb(dpy, draw, newpbw)
-			|| newpbw->getglxdrawable()!=curdraw)
+			|| newpbw->getGLXDrawable()!=curdraw)
 		{
-			if(_drawingtofront() || pbw->_dirty)
+			if(_drawingtofront() || pbw->dirty)
 				pbw->readback(GL_FRONT, false, false);
 		}
 	}
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to an off-screen drawable.
-	pbwin *drawpbw, *readpbw;
+	VirtualWin *drawpbw, *readpbw;
 	int direct=ctxh.isdirect(ctx);
 	if(dpy && (draw || read) && ctx)
 	{
@@ -1729,25 +1729,25 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		if(drawpbw)
 		{
 			SetWMAtom(dpy, draw);
-			draw=drawpbw->updatedrawable();
-			drawpbw->setdirect(direct);
+			draw=drawpbw->updateGLXDrawable();
+			drawpbw->setDirect(direct);
 		}
 		if(readpbw)
 		{
 			SetWMAtom(dpy, read);
-			read=readpbw->updatedrawable();
-			readpbw->setdirect(direct);
+			read=readpbw->updateGLXDrawable();
+			readpbw->setDirect(direct);
 		}
 	}
 	retval=_glXMakeContextCurrent(_localdpy, draw, read, ctx);
 	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
 	if(winh.findpb(draw, drawpbw)) {drawpbw->clear();  drawpbw->cleanup();}
 	if(winh.findpb(read, readpbw)) readpbw->cleanup();
-	pbpm *pbp;
+	VirtualPixmap *pbp;
 	if((pbp=pmh.find(dpy, draw))!=NULL)
 	{
 		pbp->clear();
-		pbp->setdirect(direct);
+		pbp->setDirect(direct);
 	}
 	CATCH();
 
@@ -1833,9 +1833,9 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	// GLX_EXT_swap_control attributes
 	if(attribute==GLX_SWAP_INTERVAL_EXT && value)
 	{
-		pbwin *pbw=NULL;
+		VirtualWin *pbw=NULL;
 		if(winh.findpb(dpy, draw, pbw))
-			*value=pbw->getswapinterval();
+			*value=pbw->getSwapInterval();
 		else
 			*value=0;
 		goto done;
@@ -1926,7 +1926,7 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 
 void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 {
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	static Timer t;  Timer sleept;
 	static double err=0.;  static bool first=true;
 
@@ -1944,8 +1944,8 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	if(_isremote(dpy) && winh.findpb(dpy, drawable, pbw))
 	{
 		pbw->readback(GL_BACK, false, fconfig.sync);
-		pbw->swapbuffers();
-		int interval=pbw->getswapinterval();
+		pbw->swapBuffers();
+		int interval=pbw->getSwapInterval();
 		if(interval>0)
 		{
 			double elapsed=t.elapsed();
@@ -1971,7 +1971,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 	done:
 
-		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getglxdrawable());}
+		stoptrace();  if(_isremote(dpy) && pbw) {prargx(pbw->getGLXDrawable());}
 		closetrace();
 }
 
@@ -2087,13 +2087,13 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		// implementation doesn't, so we emulate their behavior.
 		interval=1;
 
-	pbwin *pbw=NULL;
+	VirtualWin *pbw=NULL;
 	if(winh.findpb(dpy, drawable, pbw))
-		pbw->setswapinterval(interval);
+		pbw->setSwapInterval(interval);
 	// NOTE:  Technically, a BadWindow error should be triggered if drawable
 	// isn't a GLX window, but nVidia's implementation doesn't, so we emulate
 	// their behavior.
-	
+
 	CATCH();
 
 	done:
@@ -2120,11 +2120,11 @@ int glXSwapIntervalSGI(int interval)
 
 	TRY();
 
-	pbwin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
+	VirtualWin *pbw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
 	if(interval<0) retval=GLX_BAD_VALUE;
 	else if(!draw || !winh.findpb(draw, pbw))
 		retval=GLX_BAD_CONTEXT;
-	else pbw->setswapinterval(interval);
+	else pbw->setSwapInterval(interval);
 
 	CATCH();
 

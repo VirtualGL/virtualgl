@@ -12,12 +12,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "pbpm.h"
+#include "VirtualPixmap.h"
+
+using namespace vglserver;
 
 #define _hashclass _pmhash
 #define _hashkeytype1 char*
 #define _hashkeytype2 Pixmap
-#define _hashvaluetype pbpm*
+#define _hashvaluetype VirtualPixmap*
 #define _hashclassstruct _pmhashstruct
 #define __hashclassstruct __pmhashstruct
 #include "faker-hash.h"
@@ -29,7 +31,7 @@
 #undef __hashclassstruct
 
 
-// This maps a 2D pixmap ID on the 2D X Server to a pbpm instance, which
+// This maps a 2D pixmap ID on the 2D X Server to a VirtualPixmap instance, which
 // encapsulates the corresponding 3D pixmap on the 3D X Server
 
 class pmhash : public _pmhash
@@ -48,7 +50,7 @@ class pmhash : public _pmhash
 
 		static bool isalloc(void) {return (_Instanceptr!=NULL);}
 
-		void add(Display *dpy, Pixmap pm, pbpm *pbp)
+		void add(Display *dpy, Pixmap pm, VirtualPixmap *pbp)
 		{
 			if(!dpy || !pm) _throw("Invalid argument");
 			char *dpystring=strdup(DisplayString(dpy));
@@ -56,7 +58,7 @@ class pmhash : public _pmhash
 				free(dpystring);
 		}
 
-		pbpm *find(Display *dpy, Pixmap pm)
+		VirtualPixmap *find(Display *dpy, Pixmap pm)
 		{
 			if(!dpy || !pm) return NULL;
 			return _pmhash::find(DisplayString(dpy), pm);
@@ -85,21 +87,21 @@ class pmhash : public _pmhash
 			_pmhash::killhash();
 		}
 
-		pbpm *attach(char *key1, Pixmap key2) {return NULL;}
+		VirtualPixmap *attach(char *key1, Pixmap key2) {return NULL;}
 
 		void detach(_pmhashstruct *h)
 		{
 			if(h && h->key1) free(h->key1);
-			if(h && h->value) delete((pbpm *)h->value);
+			if(h && h->value) delete((VirtualPixmap *)h->value);
 		}
 
 		bool compare(char *key1, Pixmap key2, _pmhashstruct *h)
 		{
-			pbpm *pbp=h->value;
+			VirtualPixmap *pbp=h->value;
 			return (
 				(key1 && !strcasecmp(key1, h->key1) && (key2==h->key2
-					|| (pbp && key2==pbp->getglxdrawable())))
-				|| (key1==NULL && key2==pbp->getglxdrawable())
+					|| (pbp && key2==pbp->getGLXDrawable())))
+				|| (key1==NULL && key2==pbp->getGLXDrawable())
 			);
 		}
 

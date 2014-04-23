@@ -11,11 +11,14 @@
  * wxWindows Library License for more details.
  */
 
-#include "transplugin.h"
+#include "TransPlugin.h"
 #include "fakerconfig.h"
 #include <dlfcn.h>
 #include <string.h>
 #include "Error.h"
+
+using namespace vglutil;
+using namespace vglserver;
 
 
 #undef _throw
@@ -36,7 +39,7 @@ static void *loadsym(void *dllhnd, const char *symbol)
 }
 
 
-transplugin::transplugin(Display *dpy, Window win, char *name)
+TransPlugin::TransPlugin(Display *dpy, Window win, char *name)
 {
 	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
 	const char *err=NULL;
@@ -63,7 +66,7 @@ transplugin::transplugin(Display *dpy, Window win, char *name)
 }
 
 
-transplugin::~transplugin(void)
+TransPlugin::~TransPlugin(void)
 {
 	CS::SafeLock l(mutex);
 	destroy();
@@ -71,15 +74,15 @@ transplugin::~transplugin(void)
 }
 
 
-void transplugin::connect(char *name, int port)
+void TransPlugin::connect(char *receiverName, int port)
 {
 	CS::SafeLock l(mutex);
-	int ret=_RRTransConnect(handle, name, port);
+	int ret=_RRTransConnect(handle, receiverName, port);
 	if(ret<0) _throw(_RRTransGetError());
 }
 
 
-void transplugin::destroy(void)
+void TransPlugin::destroy(void)
 {
 	CS::SafeLock l(mutex);
 	int ret=_RRTransDestroy(handle);
@@ -87,7 +90,7 @@ void transplugin::destroy(void)
 }
 
 
-int transplugin::ready(void)
+int TransPlugin::ready(void)
 {
 	CS::SafeLock l(mutex);
 	int ret=_RRTransReady(handle);
@@ -96,7 +99,7 @@ int transplugin::ready(void)
 }
 
 
-void transplugin::synchronize(void)
+void TransPlugin::synchronize(void)
 {
 	CS::SafeLock l(mutex);
 	int ret=_RRTransSynchronize(handle);
@@ -104,7 +107,7 @@ void transplugin::synchronize(void)
 }
 
 
-RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
+RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 {
 	CS::SafeLock l(mutex);
 	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
@@ -113,7 +116,7 @@ RRFrame *transplugin::getframe(int width, int height, int format, bool stereo)
 }
 
 
-void transplugin::sendframe(RRFrame *frame, bool sync)
+void TransPlugin::sendFrame(RRFrame *frame, bool sync)
 {
 	CS::SafeLock l(mutex);
 	int ret=_RRTransSendFrame(handle, frame, sync);

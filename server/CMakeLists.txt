@@ -35,8 +35,8 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 		> ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/faker-mapfile.c)
 
-set(RRFAKER_SOURCES faker.cpp faker-sym.cpp pbdrawable.cpp pbwin.cpp
-	pbpm.cpp glxvisual.cpp X11Trans.cpp VGLTrans.cpp transplugin.cpp
+set(RRFAKER_SOURCES faker.cpp faker-sym.cpp VirtualDrawable.cpp VirtualWin.cpp
+	VirtualPixmap.cpp glxvisual.cpp X11Trans.cpp VGLTrans.cpp TransPlugin.cpp
 	fakerconfig.cpp)
 if(VGL_USEXV)
 	set(RRFAKER_SOURCES ${RRFAKER_SOURCES};XVTrans.cpp)

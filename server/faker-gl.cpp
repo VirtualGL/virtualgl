@@ -21,16 +21,16 @@
 
 static void _doGLreadback(bool spoillast, bool sync)
 {
-	pbwin *pbw;
+	VirtualWin *pbw;
 	GLXDrawable drawable;
 	if(ctxh.overlaycurrent()) return;
 	drawable=_glXGetCurrentDrawable();
 	if(!drawable) return;
 	if(winh.findpb(drawable, pbw))
 	{
-		if(_drawingtofront() || pbw->_dirty)
+		if(_drawingtofront() || pbw->dirty)
 		{
-				opentrace(_doGLreadback);  prargx(pbw->getglxdrawable());
+				opentrace(_doGLreadback);  prargx(pbw->getGLXDrawable());
 				prargi(sync); prargi(spoillast);  starttrace();
 
 			pbw->readback(GL_FRONT, spoillast, sync);
@@ -111,7 +111,7 @@ void glDrawBuffer(GLenum mode)
 
 		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
 
-	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
+	VirtualWin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=_glXGetCurrentDrawable();
 	if(drawable && winh.findpb(drawable, pbw))
 	{
@@ -120,13 +120,13 @@ void glDrawBuffer(GLenum mode)
 		_glDrawBuffer(mode);
 		after=_drawingtofront();
 		rafter=_drawingtoright();
-		if(before && !after) pbw->_dirty=true;
-		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
+		if(before && !after) pbw->dirty=true;
+		if(rbefore && !rafter && pbw->isStereo()) pbw->rdirty=true;
 	}
 	else _glDrawBuffer(mode);
 
-		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
-		prargi(pbw->_rdirty);  prargx(pbw->getglxdrawable());}  closetrace();
+		stoptrace();  if(drawable && pbw) {prargi(pbw->dirty);
+		prargi(pbw->rdirty);  prargx(pbw->getGLXDrawable());}  closetrace();
 
 	CATCH();
 }
@@ -142,7 +142,7 @@ void glPopAttrib(void)
 
 		opentrace(glPopAttrib);  starttrace();
 
-	pbwin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
+	VirtualWin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=_glXGetCurrentDrawable();
 	if(drawable && winh.findpb(drawable, pbw))
 	{
@@ -151,13 +151,13 @@ void glPopAttrib(void)
 		_glPopAttrib();
 		after=_drawingtofront();
 		rafter=_drawingtoright();
-		if(before && !after) pbw->_dirty=true;
-		if(rbefore && !rafter && pbw->stereo()) pbw->_rdirty=true;
+		if(before && !after) pbw->dirty=true;
+		if(rbefore && !rafter && pbw->isStereo()) pbw->rdirty=true;
 	}
 	else _glPopAttrib();
 
-		stoptrace();  if(drawable && pbw) {prargi(pbw->_dirty);
-		prargi(pbw->_rdirty);  prargx(pbw->getglxdrawable());}  closetrace();
+		stoptrace();  if(drawable && pbw) {prargi(pbw->dirty);
+		prargi(pbw->rdirty);  prargx(pbw->getGLXDrawable());}  closetrace();
 
 	CATCH();
 }
@@ -184,13 +184,13 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	if(dpy && (draw || read) && ctx)
 	{
 		newread=read, newdraw=draw;
-		pbwin *drawpbw=NULL, *readpbw=NULL;
+		VirtualWin *drawpbw=NULL, *readpbw=NULL;
 		winh.findpb(draw, drawpbw);
 		winh.findpb(read, readpbw);
-		if(drawpbw) drawpbw->checkresize();
-		if(readpbw && readpbw!=drawpbw) readpbw->checkresize();
-		if(drawpbw) newdraw=drawpbw->updatedrawable();
-		if(readpbw) newread=readpbw->updatedrawable();
+		if(drawpbw) drawpbw->checkResize();
+		if(readpbw && readpbw!=drawpbw) readpbw->checkResize();
+		if(drawpbw) newdraw=drawpbw->updateGLXDrawable();
+		if(readpbw) newread=readpbw->updateGLXDrawable();
 		if(newread!=read || newdraw!=draw)
 		{
 			_glXMakeContextCurrent(dpy, newdraw, newread, ctx);

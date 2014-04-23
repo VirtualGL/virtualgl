@@ -123,7 +123,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	unsigned int max_width, max_height, max_bm_width, max_bm_height;
 	GLubyte *bm = NULL;
 	int i, j, ngroups, groupsize, n;
-	pbwin *pbw;
+	VirtualWin *pbw;
 	typedef struct
 	{
 		int bm_width, bm_height, width, height, valid;
@@ -137,8 +137,8 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	if(winh.findpb(draw, pbw))
 	{
 		// Current drawable is a virtualized Window
-		errifnot(dpy = pbw->get2ddpy());
-		errifnot(win = pbw->getx11drawable());
+		errifnot(dpy = pbw->getX11Display());
+		errifnot(win = pbw->getX11Drawable());
 	}
 	else if((win = pmh.reversefind(draw)) != 0)
 	{
@@ -291,7 +291,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
 			max_bm_height, 1, XYPixmap));
 		XFreePixmap(dpy, pixmap);  pixmap = 0;
-	
+
 		for (i = 0; i < n; i++)
 		{
 			int list = listbase + j + i;
