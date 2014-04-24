@@ -22,12 +22,10 @@
 #include "TempContext.h"
 #include "fakerconfig.h"
 #include "vglutil.h"
+#include "faker.h"
 
 using namespace vglutil;
 using namespace vglserver;
-
-
-extern Display *_localdpy;
 
 
 #define checkgl(m) if(glError()) _throw("Could not "m);

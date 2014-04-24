@@ -13,6 +13,15 @@
  * wxWindows Library License for more details.
  */
 
+#include "PixmapHash.h"
+#include "VisualHash.h"
+#include "WindowHash.h"
+#include "faker.h"
+#include "fakerconfig.h"
+#include "vglconfigLauncher.h"
+
+using namespace vglserver;
+
 
 static KeySym KeycodeToKeysym(Display *dpy, KeyCode keycode)
 {
@@ -47,7 +56,7 @@ int XCloseDisplay(Display *dpy)
 
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
 
-	winh.remove(dpy);
+	winhash.remove(dpy);
 	retval=_XCloseDisplay(dpy);
 
 		stoptrace();  closetrace();
@@ -75,14 +84,14 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		prargx(gc); prargi(src_x);  prargi(src_y);  prargi(w);  prargi(h);
 		prargi(dest_x);  prargi(dest_y);  starttrace();
 
-	if(!(pbsrc=(VirtualDrawable *)pmh.find(dpy, src)))
+	if(!(pbsrc=(VirtualDrawable *)pmhash.find(dpy, src)))
 	{
-		pbsrc=(VirtualDrawable *)winh.findwin(dpy, src);
+		pbsrc=(VirtualDrawable *)winhash.find(dpy, src);
 		if(pbsrc) srcwin=true;
 	};
-	if(!(pbdst=(VirtualDrawable *)pmh.find(dpy, dst)))
+	if(!(pbdst=(VirtualDrawable *)pmhash.find(dpy, dst)))
 	{
-		pbdst=(VirtualDrawable *)winh.findwin(dpy, dst);
+		pbdst=(VirtualDrawable *)winhash.find(dpy, dst);
 		if(pbdst) dstwin=true;
 	}
 
@@ -158,7 +167,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
-	if(win && _isremote(dpy)) winh.add(dpy, win);
+	if(win && isRemote(dpy)) winhash.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -181,7 +190,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes);
-	if(win && _isremote(dpy)) winh.add(dpy, win);
+	if(win && isRemote(dpy)) winhash.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -198,7 +207,7 @@ static void DeleteWindow(Display *dpy, Window win, bool subonly=false)
 {
 	Window root, parent, *children=NULL;  unsigned int n=0;
 
-	if(!subonly) winh.remove(dpy, win);
+	if(!subonly) winhash.remove(dpy, win);
 	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
 		&& children && n>0)
 	{
@@ -249,7 +258,7 @@ int XFree(void *data)
 	int ret=0;
 	TRY();
 	ret=_XFree(data);
-	if(data && !isdead()) vish.remove(NULL, (XVisualInfo *)data);
+	if(data && !isDead()) vishash.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
 }
@@ -271,7 +280,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
 
 	VirtualWin *pbw=NULL;
-	if(winh.findpb(drawable, pbw))
+	if(winhash.find(drawable, pbw))
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
@@ -280,7 +289,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 		drawable=pbw->getX11Drawable();
 	}
 	ret=_XGetGeometry(dpy, drawable, root, x, y, &w, &h, border_width, depth);
-	if(winh.findpb(dpy, drawable, pbw) && w>0 && h>0)
+	if(winhash.find(dpy, drawable, pbw) && w>0 && h>0)
 		pbw->resize(w, h);
 
 		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
@@ -307,7 +316,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
 		prargi(format);  starttrace();
 
-	VirtualPixmap *pbp=pmh.find(dpy, drawable);
+	VirtualPixmap *pbp=pmhash.find(dpy, drawable);
 	if(pbp) pbp->readback();
 
 	xi=_XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
@@ -328,7 +337,7 @@ char **XListExtensions(Display *dpy, int *next)
 	TRY();
 
 	// Prevent recursion
-	if(!_isremote(dpy)) return _XListExtensions(dpy, next);
+	if(!isRemote(dpy)) return _XListExtensions(dpy, next);
 	////////////////////
 
 		opentrace(XListExtensions);  prargd(dpy);  starttrace();
@@ -410,7 +419,7 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	Bool retval=True;
 
 	// Prevent recursion
-	if(!_isremote(dpy))
+	if(!isRemote(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 	////////////////////
 
@@ -447,7 +456,7 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 	VirtualWin *pbw=NULL;
 	if(xe && xe->type==ConfigureNotify)
 	{
-		if(winh.findpb(dpy, xe->xconfigure.window, pbw))
+		if(winhash.find(dpy, xe->xconfigure.window, pbw))
 		{
 				opentrace(_HandleEvent);  prargi(xe->xconfigure.width);
 				prargi(xe->xconfigure.height);  prargx(xe->xconfigure.window);
@@ -476,7 +485,7 @@ static void _HandleEvent(Display *dpy, XEvent *xe)
 		Atom deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 		if(protoatom && deleteatom && cme->message_type==protoatom
 			&& cme->data.l[0]==(long)deleteatom
-			&& winh.findpb(dpy, cme->window, pbw))
+			&& winhash.find(dpy, cme->window, pbw))
 			pbw->wmDelete();
 	}
 }
@@ -539,7 +548,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 		starttrace();
 
 	VirtualWin *pbw=NULL;
-	if(winh.findpb(dpy, win, pbw) && values)
+	if(winhash.find(dpy, win, pbw) && values)
 		pbw->resize(value_mask&CWWidth? values->width:0,
 			value_mask&CWHeight?values->height:0);
 	retval=_XConfigureWindow(dpy, win, value_mask, values);
@@ -572,7 +581,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
 	VirtualWin *pbw=NULL;
-	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
+	if(winhash.find(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		stoptrace();  closetrace();
@@ -603,7 +612,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 		prargi(height);  starttrace();
 
 	VirtualWin *pbw=NULL;
-	if(winh.findpb(dpy, win, pbw)) pbw->resize(width, height);
+	if(winhash.find(dpy, win, pbw)) pbw->resize(width, height);
 	retval=_XResizeWindow(dpy, win, width, height);
 
 		stoptrace();  closetrace();

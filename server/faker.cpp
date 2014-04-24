@@ -13,80 +13,36 @@
  * wxWindows Library License for more details.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/signal.h>
-#include <string.h>
-#include <math.h>
-#include "Timer.h"
-#include "Thread.h"
-#include "Mutex.h"
-#include "fakerconfig.h"
-#define __FAKERHASH_STATICDEF__
-#include "faker-winhash.h"
-#include "faker-ctxhash.h"
-#include "faker-vishash.h"
-#include "faker-cfghash.h"
-#include "faker-rcfghash.h"
-#include "faker-pmhash.h"
-#include "faker-glxdhash.h"
-#include "faker-sym.h"
-#include "glxvisual.h"
-#define __VGLCONFIGSTART_STATICDEF__
-#include "vglconfigstart.h"
-#include <sys/types.h>
 #include <unistd.h>
+#include "Mutex.h"
+#include "ConfigHash.h"
+#include "ContextHash.h"
+#include "GLXDrawableHash.h"
+#include "PixmapHash.h"
+#include "ReverseConfigHash.h"
+#include "VisualHash.h"
+#include "WindowHash.h"
+#include "fakerconfig.h"
+
+
+using namespace vglutil;
+using namespace vglserver;
 
 
 Display *_localdpy=NULL;
-static CS globalmutex;
-static int __shutdown=0;
-
-
-#define _localdisplayiscurrent() (_glXGetCurrentDisplay()==_localdpy)
-#define _isremote(dpy) (_localdpy && dpy!=_localdpy)
-#define _isfront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
-	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
-	|| drawbuf==GL_RIGHT)
-#define _isright(drawbuf) (drawbuf==GL_RIGHT || drawbuf==GL_FRONT_RIGHT \
-	|| drawbuf==GL_BACK_RIGHT)
-
-
-static inline int _drawingtofront(void)
-{
-	GLint drawbuf=GL_BACK;
-	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return _isfront(drawbuf);
-}
-
-
-static inline int _drawingtoright(void)
-{
-	GLint drawbuf=GL_LEFT;
-	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return _isright(drawbuf);
-}
-
-
-static inline int isdead(void)
-{
-	int retval=0;
-	globalmutex.lock(false);
-	retval=__shutdown;
-	globalmutex.unlock(false);
-	return retval;
-}
+CS globalmutex;
+int __shutdown=0;
 
 
 static void __vgl_cleanup(void)
 {
-	if(pmhash::isalloc()) pmh.killhash();
-	if(vishash::isalloc()) vish.killhash();
-	if(cfghash::isalloc()) cfgh.killhash();
-	if(rcfghash::isalloc()) rcfgh.killhash();
-	if(ctxhash::isalloc()) ctxh.killhash();
-	if(glxdhash::isalloc()) glxdh.killhash();
-	if(winhash::isalloc()) winh.killhash();
+	if(PixmapHash::isAlloc()) pmhash.kill();
+	if(VisualHash::isAlloc()) vishash.kill();
+	if(ConfigHash::isAlloc()) cfghash.kill();
+	if(ReverseConfigHash::isAlloc()) rcfghash.kill();
+	if(ContextHash::isAlloc()) ctxhash.kill();
+	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
+	if(WindowHash::isAlloc()) winhash.kill();
 	__vgl_unloadsymbols();
 }
 
@@ -121,73 +77,6 @@ class _globalcleanup
 };
 _globalcleanup gdt;
 
-
-#define _die(f,m) {if(!isdead())  \
-	vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
-	__vgl_safeexit(1);}
-
-
-#define TRY() try {
-#define CATCH() } catch(Error &e) { _die(e.getMethod(), e.getMessage()); }
-
-
-// Tracing stuff
-
-static int __vgltracelevel=0;
-
-#define prargd(a) vglout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
-	a? DisplayString(a):"NULL")
-#define prargs(a) vglout.print("%s=%s ", #a, a?a:"NULL")
-#define prargx(a) vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
-#define prargi(a) vglout.print("%s=%d ", #a, a)
-#define prargf(a) vglout.print("%s=%f ", #a, (double)a)
-#define prargv(a) vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a,  \
-	a? a->visualid:0)
-#define prargc(a) vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
-	a? _FBCID(a):0)
-#define prargal11(a) if(a) {  \
-	vglout.print(#a"=[");  \
-	for(int __an=0; a[__an]!=None; __an++) {  \
-		vglout.print("0x%.4x", a[__an]);  \
-		if(a[__an]!=GLX_USE_GL && a[__an]!=GLX_DOUBLEBUFFER  \
-			&& a[__an]!=GLX_STEREO && a[__an]!=GLX_RGBA)  \
-			vglout.print("=0x%.4x", a[++__an]);  \
-		vglout.print(" ");  \
-	}  vglout.print("] ");}
-#define prargal13(a) if(a) {  \
-	vglout.print(#a"=[");  \
-	for(int __an=0; a[__an]!=None; __an+=2) {  \
-		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
-	}  vglout.print("] ");}
-
-#define opentrace(f)  \
-	double __vgltracetime=0.;  \
-	if(fconfig.trace) {  \
-		if(__vgltracelevel>0) {  \
-			vglout.print("\n[VGL] ");  \
-			for(int __i=0; __i<__vgltracelevel; __i++) vglout.print("  ");  \
-		}  \
-		else vglout.print("[VGL] ");  \
-		__vgltracelevel++;  \
-		vglout.print("%s (", #f);  \
-
-#define starttrace()  \
-		__vgltracetime=getTime();  \
-	}
-
-#define stoptrace()  \
-	if(fconfig.trace) {  \
-		__vgltracetime=getTime()-__vgltracetime;
-
-#define closetrace()  \
-		vglout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
-		__vgltracelevel--;  \
-		if(__vgltracelevel>0) {  \
-			vglout.print("[VGL] ");  \
-			if(__vgltracelevel>1)  \
-				for(int __i=0; __i<__vgltracelevel-1; __i++) vglout.print("  ");  \
-    }  \
-	}
 
 
 // Used when VGL_TRAPX11=1
@@ -258,7 +147,3 @@ void *_vgl_dlopen(const char *file, int mode)
 }
 
 }
-
-#include "faker-x11.cpp"
-#include "faker-gl.cpp"
-#include "faker-glx.cpp"

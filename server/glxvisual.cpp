@@ -23,11 +23,10 @@
 #include "fakerconfig.h"
 #include "Mutex.h"
 #include "faker-sym.h"
+#include "faker.h"
 
 using namespace vglutil;
 
-
-extern Display *_localdpy;
 
 struct _visattrib
 {
@@ -99,7 +98,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			len+=(bytesleft+3)/4;
 			if(bytesleft && olprop) {XFree(olprop);  olprop=NULL;}
 		} while(bytesleft);
-		
+
 		for(unsigned long i=0; i<nop/4; i++)
 		{
 			for(int j=0; j<nv; j++)
@@ -308,7 +307,7 @@ int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid,
 				return (_va[i].stereo && _va[i].gl && _va[i].db);
 			}
 		}
-	}		
+	}
 	return 0;
 }
 
@@ -327,7 +326,7 @@ int __vglVisualDepth(Display *dpy, int screen, VisualID vid)
 	for(int i=0; i<_vaentries; i++)
 	{
 		if(_va[i].visualid==vid) return _va[i].depth;
-	}		
+	}
 	return 24;
 }
 
@@ -338,7 +337,7 @@ int __vglVisualClass(Display *dpy, int screen, VisualID vid)
 	for(int i=0; i<_vaentries; i++)
 	{
 		if(_va[i].visualid==vid) return _va[i].c_class;
-	}		
+	}
 	return TrueColor;
 }
 

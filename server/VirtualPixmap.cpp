@@ -15,13 +15,11 @@
 #include "glxvisual.h"
 #include "fakerconfig.h"
 #include "vglutil.h"
+#include "faker.h"
 
 using namespace vglutil;
 using namespace vglcommon;
 using namespace vglserver;
-
-
-extern Display *_localdpy;
 
 
 VirtualPixmap::VirtualPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)

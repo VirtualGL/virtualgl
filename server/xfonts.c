@@ -4,7 +4,7 @@
  * Version:  3.5
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011-2012, 2014  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -134,16 +134,16 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	try {
 
 	GLXDrawable draw = _glXGetCurrentDrawable();
-	if(winh.findpb(draw, pbw))
+	if(winhash.find(draw, pbw))
 	{
 		// Current drawable is a virtualized Window
 		errifnot(dpy = pbw->getX11Display());
 		errifnot(win = pbw->getX11Drawable());
 	}
-	else if((win = pmh.reversefind(draw)) != 0)
+	else if((win = pmhash.reverseFind(draw)) != 0)
 	{
 		// Current drawable is a virtualized Pixmap
-		errifnot(dpy = glxdh.getcurrentdpy(draw));
+		errifnot(dpy = glxdhash.getCurrentDisplay(draw));
 	}
 	else
 	{
@@ -153,7 +153,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		XSetWindowAttributes swa;
 		int n = 0;
 
-		errifnot(dpy = glxdh.getcurrentdpy(draw));
+		errifnot(dpy = glxdhash.getCurrentDisplay(draw));
 		vtemp.c_class = TrueColor;  vtemp.depth = 24;
 		Window root = DefaultRootWindow(dpy);
 		if((v = XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))
