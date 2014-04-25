@@ -49,7 +49,7 @@ int XCloseDisplay(Display *dpy)
 	// after the global instances have been destroyed, so if this has occurred,
 	// we can't access fconfig or vglout or winh without causing deadlocks or
 	// other issues.
-	if(vglfaker::isShutdown) return _XCloseDisplay(dpy);
+	if(vglfaker::deadYet) return _XCloseDisplay(dpy);
 
 	int retval=0;
 	TRY();

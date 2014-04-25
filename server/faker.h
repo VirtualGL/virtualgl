@@ -28,7 +28,7 @@ namespace vglfaker
 	extern vglutil::CS globalMutex;
 	extern Display *dpy3D;
 	extern void safeExit(int);
-	extern int isShutdown;
+	extern int deadYet;
 	extern int traceLevel;
 }
 
@@ -64,7 +64,7 @@ static inline int isDead(void)
 {
 	int retval=0;
 	vglfaker::globalMutex.lock(false);
-	retval=vglfaker::isShutdown;
+	retval=vglfaker::deadYet;
 	vglfaker::globalMutex.unlock(false);
 	return retval;
 }
