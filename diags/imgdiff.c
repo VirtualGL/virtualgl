@@ -63,13 +63,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(loadbmp(argv[1], &bmp1, &w1, &h1, BMP_BGR, 1, 0)==-1)
+	if(bmp_load(argv[1], &bmp1, &w1, 1, &h1, BMPPF_BGR, BMPORN_TOPDOWN)==-1)
 	{
-		puts(bmpgeterr());  exit(1);
+		puts(bmp_geterr());  exit(1);
 	}
-	if(loadbmp(argv[2], &bmp2, &w2, &h2, BMP_BGR, 1, 0)==-1)
+	if(bmp_load(argv[2], &bmp2, &w2, 1, &h2, BMPPF_BGR, BMPORN_TOPDOWN)==-1)
 	{
-		puts(bmpgeterr());  exit(1);
+		puts(bmp_geterr());  exit(1);
 	}
 	w=min(w1, w2);  h=min(h1, h2);
 
@@ -113,9 +113,10 @@ int main(int argc, char **argv)
 	tssq/=((double)h*(double)w*(double)d1);
 	tssq=sqrt(tssq);
 
-	if(savebmp(useppm?"diff.ppm":"diff.bmp", bmpdiff, w, h, BMP_BGR, 0, 0)==-1)
+	if(bmp_save(useppm? "diff.ppm":"diff.bmp", bmpdiff, w, 0, h, BMPPF_BGR,
+		BMPORN_TOPDOWN)==-1)
 	{
-		puts(bmpgeterr());  exit(1);
+		puts(bmp_geterr());  exit(1);
 	}
 	free(bmpdiff);
 	for(k=0; k<d1; k++)

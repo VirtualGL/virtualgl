@@ -100,12 +100,15 @@ int main(int argc, char **argv)
 
 		int w, h, d=3;
 
-		if(loadbmp(argv[1], &buf, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
-			_throw(bmpgeterr());
-		if(loadbmp(argv[1], &buf2, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
-			_throw(bmpgeterr());
-		if(loadbmp(argv[1], &buf3, &w, &h, bgr?BMP_BGR:BMP_RGB, 1, 0)==-1)
-			_throw(bmpgeterr());
+		if(bmp_load(argv[1], &buf, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+			BMPORN_TOPDOWN)==-1)
+			_throw(bmp_geterr());
+		if(bmp_load(argv[1], &buf2, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+			BMPORN_TOPDOWN)==-1)
+			_throw(bmp_geterr());
+		if(bmp_load(argv[1], &buf3, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+			BMPORN_TOPDOWN)==-1)
+			_throw(bmp_geterr());
 		printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
 
 		if(!localtest)
