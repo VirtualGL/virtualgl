@@ -2,17 +2,17 @@
  * Copyright (C) 1999-2006   Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007   Sun Microsystems, Inc.   All Rights Reserved.
  * Copyright (C) 2011, 2013  D. R. Commander   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -115,7 +115,7 @@ struct visual_attribs
    int srgb;
 };
 
-   
+
 /** list of known OpenGL versions */
 static const struct { int major, minor; } gl_versions[] = {
    {1, 0},
@@ -600,6 +600,7 @@ bitmask_to_string(const struct bit_info bits[], int numBits, int mask)
  * Return string representation for the bitmask returned by
  * GL_CONTEXT_PROFILE_MASK (OpenGL 3.2 or later).
  */
+#ifdef GL_VERSION_3_2
 static const char *
 profile_mask_string(int mask)
 {
@@ -614,12 +615,14 @@ profile_mask_string(int mask)
 
    return bitmask_to_string(bits, ELEMENTS(bits), mask);
 }
+#endif
 
 
 /**
  * Return string representation for the bitmask returned by
  * GL_CONTEXT_FLAGS (OpenGL 3.0 or later).
  */
+#ifdef GL_VERSION_3_0
 static const char *
 context_flags_string(int mask)
 {
@@ -634,6 +637,7 @@ context_flags_string(int mask)
 
    return bitmask_to_string(bits, ELEMENTS(bits), mask);
 }
+#endif
 
 
 /**
@@ -1177,7 +1181,7 @@ get_visual_attribs(Display *dpy, XVisualInfo *vInfo,
       attribs->render_type = GLX_RGBA_BIT;
    else
       attribs->render_type = GLX_COLOR_INDEX_BIT;
-   
+
    glXGetConfig(dpy, vInfo, GLX_DRAWABLE_TYPE, &attribs->drawableType);
    glXGetConfig(dpy, vInfo, GLX_DOUBLEBUFFER, &attribs->doubleBuffer);
    glXGetConfig(dpy, vInfo, GLX_STEREO, &attribs->stereo);
@@ -1555,7 +1559,7 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
 	 print_visual_attribs_verbose(&attribs, False);
       else if (mode == Normal)
          print_visual_attribs_short(&attribs, False);
-      else if (mode == Wide) 
+      else if (mode == Wide)
          print_visual_attribs_long(&attribs);
    }
    printf("\n");
@@ -1590,7 +1594,7 @@ print_fbconfig_info(Display *dpy, int scrnum, InfoMode mode)
    for (i = 0; i < numFBConfigs; i++) {
       get_fbconfig_attribs(dpy, scrnum, fbconfigs[i], &attribs);
 
-      if (mode == Verbose) 
+      if (mode == Verbose)
          print_visual_attribs_verbose(&attribs, True);
       else if (mode == Normal)
 	 print_visual_attribs_short(&attribs, True);
