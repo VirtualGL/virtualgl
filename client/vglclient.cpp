@@ -259,13 +259,13 @@ unsigned short instanceCheckSSL(Display *dpy)
 	Atom atom=None;  unsigned short p=0;
 	if((atom=XInternAtom(dpy, "_VGLCLIENT_SSLPORT", True))!=None)
 	{
-		unsigned short *prop=NULL;  unsigned long n=0, bytesLeft=0;
+		unsigned char *prop=NULL;  unsigned long n=0, bytesLeft=0;
 		int actualFormat=0;  Atom actualType=None;
 		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), atom, 0, 1, False,
 				XA_INTEGER, &actualType, &actualFormat, &n, &bytesLeft,
-				(unsigned char **)&prop)==Success
+				&prop)==Success
 			&& n>=1 && actualFormat==16 && actualType==XA_INTEGER && prop)
-			p=*prop;
+			p=*(unsigned short *)prop;
 		if(prop) XFree(prop);
 		if(p!=0)
 		{

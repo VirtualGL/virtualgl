@@ -96,6 +96,7 @@ namespace vglserver
 			int nprocs;
 
 		private:
+
 			vglutil::Socket *socket;
 			static const int NFRAMES=4;
 			vglutil::CS mutex;

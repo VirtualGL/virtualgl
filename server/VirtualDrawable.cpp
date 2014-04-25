@@ -326,7 +326,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	#ifdef GL_VERSION_1_5
 	static GLuint pbo=0;
 	#endif
-	double t0, tRead, tTotal;
+	double t0=0.0, tRead, tTotal;
 	static int numSync=0, numFrames=0, lastFormat=-1;
 	static bool usePBO=(fconfig.readback==RRREAD_PBO);
 	static bool alreadyPrinted=false, alreadyWarned=false;

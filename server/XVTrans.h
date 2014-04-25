@@ -48,6 +48,7 @@ namespace vglserver
 			vglcommon::XVFrame *getFrame(Display *dpy, Window win, int w, int h);
 
 		private:
+
 			static const int NFRAMES=3;
 			vglutil::CS mutex;
 			vglcommon::XVFrame *frames[NFRAMES];

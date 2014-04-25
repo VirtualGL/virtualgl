@@ -22,6 +22,7 @@ namespace vglserver
 	class VirtualPixmap : public VirtualDrawable
 	{
 		public:
+
 			VirtualPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm);
 			~VirtualPixmap();
 			int init(int width, int height, int depth, GLXFBConfig config,
@@ -35,6 +36,7 @@ namespace vglserver
 			}
 
 		private:
+
 			vglcommon::Profiler profPMBlit;
 			vglcommon::FBXFrame *frame;
 			XVisualInfo *vis;

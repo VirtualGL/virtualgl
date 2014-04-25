@@ -34,6 +34,7 @@ namespace vglserver
 	class TransPlugin
 	{
 		public:
+
 			TransPlugin(Display *dpy, Window win, char *name);
 			~TransPlugin(void);
 			void connect(char *receiverName, int port);
@@ -44,6 +45,7 @@ namespace vglserver
 			void sendFrame(RRFrame *frame, bool sync);
 
 		private:
+
 			_RRTransInitType _RRTransInit;
 			_RRTransConnectType _RRTransConnect;
 			_RRTransGetFrameType _RRTransGetFrame;

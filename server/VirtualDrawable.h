@@ -27,6 +27,7 @@ namespace vglserver
 	class VirtualDrawable
 	{
 		public:
+
 			VirtualDrawable(Display *dpy, Drawable x11Draw);
 			~VirtualDrawable(void);
 			int init(int width, int height, GLXFBConfig config);
@@ -47,6 +48,7 @@ namespace vglserver
 			class OGLDrawable
 			{
 				public:
+
 					OGLDrawable(int width, int height, GLXFBConfig config);
 					OGLDrawable(int width, int height, int depth, GLXFBConfig config,
 						const int *attribs);
@@ -66,17 +68,18 @@ namespace vglserver
 					void clear(void);
 					void swap(void);
 					bool isStereo(void) { return stereo; }
-					int getFormat(void) { return format; }
+					GLenum getFormat(void) { return format; }
 					XVisualInfo *getVisual(void);
 
 				private:
+
 					void setVisAttribs(GLXFBConfig config);
 
 					bool cleared, stereo;
 					GLXDrawable glxDraw;
 					int width, height, depth;
 					GLXFBConfig config;
-					int format;
+					GLenum format;
 					Pixmap pm;
 					Window win;
 					bool isPixmap;

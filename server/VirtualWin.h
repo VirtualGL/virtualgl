@@ -29,6 +29,7 @@ namespace vglserver
 	class VirtualWin : public VirtualDrawable
 	{
 		public:
+
 			VirtualWin(Display *dpy, Window win);
 			~VirtualWin(void);
 			void clear(void);
@@ -49,6 +50,7 @@ namespace vglserver
 			bool dirty, rdirty;
 
 		private:
+
 			int init(int w, int h, GLXFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum format, int pixelSize, GLubyte *bits, GLint buf, bool stereo);

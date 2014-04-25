@@ -49,6 +49,7 @@ namespace vglserver
 				int height);
 
 		private:
+
 			static const int NFRAMES=3;
 			vglutil::CS mutex;
 			vglcommon::FBXFrame *frames[NFRAMES];

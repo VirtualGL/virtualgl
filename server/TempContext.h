@@ -73,6 +73,7 @@ namespace vglserver
 			}
 
 		private:
+
 			Display *olddpy;
 			GLXContext oldctx, newctx;
 			GLXDrawable oldread, olddraw;
