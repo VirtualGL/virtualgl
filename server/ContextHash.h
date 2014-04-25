@@ -37,17 +37,17 @@ namespace vglserver
 	{
 		public:
 
-			static ContextHash *instance(void)
+			static ContextHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new ContextHash;
+					if(instance==NULL) instance=new ContextHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(GLXContext ctx, GLXFBConfig config, Bool direct)
 			{
@@ -111,7 +111,7 @@ namespace vglserver
 				return false;
 			}
 
-			static ContextHash *instancePtr;
+			static ContextHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -119,6 +119,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define ctxhash (*(ContextHash::instance()))
+#define ctxhash (*(ContextHash::getInstance()))
 
 #endif // __CONTEXTHASH_H__

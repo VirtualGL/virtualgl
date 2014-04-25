@@ -30,17 +30,17 @@ namespace vglserver
 	{
 		public:
 
-			static WindowHash *instance(void)
+			static WindowHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new WindowHash;
+					if(instance==NULL) instance=new WindowHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(Display *dpy, Window win)
 			{
@@ -173,7 +173,7 @@ namespace vglserver
 				);
 			}
 
-			static WindowHash *instancePtr;
+			static WindowHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -181,6 +181,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define winhash (*(WindowHash::instance()))
+#define winhash (*(WindowHash::getInstance()))
 
 #endif // __WINDOWHASH_H__

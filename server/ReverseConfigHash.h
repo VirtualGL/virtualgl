@@ -30,17 +30,17 @@ namespace vglserver
 	{
 		public:
 
-			static ReverseConfigHash *instance(void)
+			static ReverseConfigHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new ReverseConfigHash;
+					if(instance==NULL) instance=new ReverseConfigHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(Display *dpy, GLXFBConfig config)
 			{
@@ -83,7 +83,7 @@ namespace vglserver
 				if(h && h->key1) free(h->key1);
 			}
 
-			static ReverseConfigHash *instancePtr;
+			static ReverseConfigHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -91,6 +91,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define rcfghash (*(ReverseConfigHash::instance()))
+#define rcfghash (*(ReverseConfigHash::getInstance()))
 
 #endif // __REVERSECONFIGHASH_H__

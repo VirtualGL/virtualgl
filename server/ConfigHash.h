@@ -29,17 +29,17 @@ namespace vglserver
 	{
 		public:
 
-			static ConfigHash *instance(void)
+			static ConfigHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new ConfigHash;
+					if(instance==NULL) instance=new ConfigHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(Display *dpy, GLXFBConfig config, VisualID vid)
 			{
@@ -85,7 +85,7 @@ namespace vglserver
 				if(entry && entry->key1) free(entry->key1);
 			}
 
-			static ConfigHash *instancePtr;
+			static ConfigHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -93,6 +93,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define cfghash (*(ConfigHash::instance()))
+#define cfghash (*(ConfigHash::getInstance()))
 
 #endif // __CONFIGHASH_H__

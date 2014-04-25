@@ -15,5 +15,5 @@
 
 using namespace vglserver;
 
-ConfigHash *ConfigHash::instancePtr=NULL;
+ConfigHash *ConfigHash::instance=NULL;
 vglutil::CS ConfigHash::instanceMutex;

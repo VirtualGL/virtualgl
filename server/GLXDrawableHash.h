@@ -32,17 +32,17 @@ namespace vglserver
 	{
 		public:
 
-			static GLXDrawableHash *instance(void)
+			static GLXDrawableHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new GLXDrawableHash;
+					if(instance==NULL) instance=new GLXDrawableHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(GLXDrawable draw, Display *dpy)
 			{
@@ -78,7 +78,7 @@ namespace vglserver
 
 			void detach(HashEntry *entry) {}
 
-			static GLXDrawableHash *instancePtr;
+			static GLXDrawableHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -86,6 +86,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define glxdhash (*(GLXDrawableHash::instance()))
+#define glxdhash (*(GLXDrawableHash::getInstance()))
 
 #endif // __GLXDRAWABLEHASH_H__

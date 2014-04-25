@@ -30,17 +30,17 @@ namespace vglserver
 	{
 		public:
 
-			static PixmapHash *instance(void)
+			static PixmapHash *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new PixmapHash;
+					if(instance==NULL) instance=new PixmapHash;
 				}
-				return instancePtr;
+				return instance;
 			}
 
-			static bool isAlloc(void) { return (instancePtr!=NULL); }
+			static bool isAlloc(void) { return (instance!=NULL); }
 
 			void add(Display *dpy, Pixmap pm, VirtualPixmap *vpm)
 			{
@@ -95,7 +95,7 @@ namespace vglserver
 				);
 			}
 
-			static PixmapHash *instancePtr;
+			static PixmapHash *instance;
 			static vglutil::CS instanceMutex;
 	};
 }
@@ -103,6 +103,6 @@ namespace vglserver
 #undef _Hash
 
 
-#define pmhash (*(PixmapHash::instance()))
+#define pmhash (*(PixmapHash::getInstance()))
 
 #endif // __PIXMAPHASH_H__
