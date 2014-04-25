@@ -48,16 +48,24 @@
 static __inline int numprocs(void)
 {
 	#ifdef _WIN32
+
 	DWORD_PTR ProcAff, SysAff, i;  int count=0;
-	if(!GetProcessAffinityMask(GetCurrentProcess(), &ProcAff, &SysAff)) return(1);
-	for(i=0; i<sizeof(long*)*8; i++) if(ProcAff&(1LL<<i)) count++;
+	if(!GetProcessAffinityMask(GetCurrentProcess(), &ProcAff, &SysAff))
+		return(1);
+	for(i=0; i<sizeof(long*)*8; i++)
+		if(ProcAff&(1LL<<i)) count++;
 	return(count);
+
 	#elif defined (__APPLE__)
+
 	return(1);
+
 	#else
+
 	long count=1;
 	if((count=sysconf(_SC_NPROCESSORS_CONF))!=-1) return((int)count);
 	else return(1);
+
 	#endif
 }
 

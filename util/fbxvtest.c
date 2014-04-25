@@ -144,7 +144,8 @@ void dotest(int id, char *name)
 		else { fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
 		iter++;
 	} while((elapsed=getTime()-t)<testtime);
-	printf("%f Mpixels/sec\n", (double)(width*height)/1000000.*(double)iter/elapsed);
+	printf("%f Mpixels/sec\n",
+		(double)(width*height)/1000000.*(double)iter/elapsed);
 
 	bailout:
 	fbxv_term(&s);
@@ -196,7 +197,7 @@ void dotesti(Display *dpy, int id, char *name)
 			}
 			if(XPending(dpy)<=0) break;
 		}
-		if(dodisplay) 
+		if(dodisplay)
 		{
 			fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useshm));
 			initbuf(&s, id, iter);  iter++;

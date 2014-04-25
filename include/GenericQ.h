@@ -21,33 +21,30 @@
 #include "Mutex.h"
 
 
-enum {GENQ_SUCCESS=0, GENQ_FAILURE};
-
-
-typedef struct _qstruct
-{
-	void *item;  struct _qstruct *next;
-} qstruct;
-
-
-typedef void (*spoilCallbackType)(void *);
-
-
 namespace vglutil
 {
 	class GenericQ
 	{
 		public:
+
+			typedef void (*SpoilCallback)(void *);
+
 			GenericQ(void);
 			~GenericQ(void);
 			void add(void *item);
-			void spoil(void *item, spoilCallbackType spoilCallback);
+			void spoil(void *item, SpoilCallback spoilCallback);
 			void get(void **item, bool nonBlocking=false);
 			void release(void);
 			int items(void);
 
 		private:
-			qstruct *start, *end;
+
+			typedef struct EntryStruct
+			{
+				void *item;  struct EntryStruct *next;
+			} Entry;
+
+			Entry *start, *end;
 			Semaphore hasItem;
 			CS mutex;
 			int deadYet;

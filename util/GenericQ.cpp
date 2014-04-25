@@ -35,7 +35,7 @@ GenericQ::~GenericQ(void)
 	mutex.lock(false);
 	if(start!=NULL)
 	{
-		qstruct *temp;
+		Entry *temp;
 		do
 		{
 			temp=start->next;  delete start;  start=temp;
@@ -52,7 +52,7 @@ void GenericQ::release(void)
 }
 
 
-void GenericQ::spoil(void *item, spoilCallbackType spoilCallback)
+void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 {
 	if(deadYet) return;
 	if(item==NULL) _throw("NULL argument in GenericQ::spoil()");
@@ -67,13 +67,14 @@ void GenericQ::spoil(void *item, spoilCallbackType spoilCallback)
 	add(item);
 }
 
+
 void GenericQ::add(void *item)
 {
 	if(deadYet) return;
 	if(item==NULL) _throw("NULL argument in GenericQ::add()");
 	CS::SafeLock l(mutex);
 	if(deadYet) return;
-	qstruct *temp=new qstruct;
+	Entry *temp=new Entry;
 	if(temp==NULL) _throw("Alloc error");
 	if(start==NULL) start=temp;
 	else end->next=temp;
@@ -102,7 +103,7 @@ void GenericQ::get(void **item, bool nonBlocking)
 		if(deadYet) return;
 		if(start==NULL) _throw("Nothing in the queue");
 		*item=start->item;
-		qstruct *temp=start->next;
+		Entry *temp=start->next;
 		delete start;  start=temp;
 	}
 }

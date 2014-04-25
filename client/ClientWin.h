@@ -29,6 +29,7 @@ namespace vglclient
 	class ClientWin : public vglutil::Runnable
 	{
 		public:
+
 			ClientWin(int dpynum, Window window, int drawMethod, bool stereo);
 			virtual ~ClientWin(void);
 			vglcommon::Frame *getFrame(bool useXV);
@@ -37,6 +38,7 @@ namespace vglclient
 			bool isStereo(void) { return stereo; }
 
 		private:
+
 			void initGL(void);
 			void initX11(void);
 

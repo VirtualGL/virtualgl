@@ -29,6 +29,7 @@ namespace vglutil
 	class Event
 	{
 		public:
+
 			Event(void);
 			~Event(void);
 			void wait(void);
@@ -36,6 +37,7 @@ namespace vglutil
 			bool isLocked(void);
 
 		private:
+
 			#ifdef _WIN32
 			HANDLE event;
 			#else
@@ -50,14 +52,16 @@ namespace vglutil
 	class CS
 	{
 		public:
+
 			CS(void);
 			~CS(void);
 			void lock(bool errorCheck=true);
 			void unlock(bool errorCheck=true);
-	
+
 			class SafeLock
 			{
 				public:
+
 					SafeLock(CS &cs_, bool errorCheck_=true) : cs(cs_),
 						errorCheck(errorCheck_)
 					{
@@ -66,11 +70,13 @@ namespace vglutil
 					~SafeLock() { cs.unlock(errorCheck); }
 
 				private:
+
 					CS &cs;
 					bool errorCheck;
 			};
 
 		protected:
+
 			#ifdef _WIN32
 			HANDLE mutex;
 			#else
@@ -82,6 +88,7 @@ namespace vglutil
 	class Semaphore
 	{
 		public:
+
 			Semaphore(long initialCount=0);
 			~Semaphore(void);
 			void wait(void);
@@ -90,6 +97,7 @@ namespace vglutil
 			long getValue(void);
 
 		private:
+
 			#ifdef _WIN32
 			HANDLE sem;
 			#elif defined(__APPLE__)

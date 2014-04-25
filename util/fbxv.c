@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,46 +20,49 @@
 #include "x11err.h"
 
 
-static int __line=-1;
-static FILE *__warningfile=NULL;
+static int errorLine=-1;
+static FILE *warningFile=NULL;
 
 
-static char __lasterror[1024]="No error";
+static char lastError[1024]="No error";
+
 #define _throw(m) {  \
-	snprintf(__lasterror, 1023, "%s", m);  __line=__LINE__;  goto finally;  \
+	snprintf(lastError, 1023, "%s", m);  errorLine=__LINE__;  goto finally;  \
 }
+
 #define x11(f) {  \
 	int __err=0;  \
 	if((__err=(f))!=Success) {  \
-		snprintf(__lasterror, 1023,  \
+		snprintf(lastError, 1023,  \
 			"X11 %s Error (window may have disappeared)", x11error(__err));  \
-		__line=__LINE__;  goto finally;  \
+		errorLine=__LINE__;  goto finally;  \
 	}  \
 }
+
 #define errifnot(f) {  \
 	if(!(f)) {  \
-		snprintf(__lasterror, 1023, "X11 Error (window may have disappeared)");  \
-		__line=__LINE__;  goto finally;  \
+		snprintf(lastError, 1023, "X11 Error (window may have disappeared)");  \
+		errorLine=__LINE__;  goto finally;  \
 	}  \
 }
 
 
 #ifdef USESHM
-static unsigned long serial=0;  static int __extok=1;
-static XErrorHandler prevhandler=NULL;
+static unsigned long serial=0;  static int extok=1;
+static XErrorHandler prevHandler=NULL;
 
 #ifndef X_ShmAttach
 #define X_ShmAttach 1
 #endif
 
-int _fbxv_xhandler(Display *dpy, XErrorEvent *e)
+static int xhandler(Display *dpy, XErrorEvent *e)
 {
 	if(e->serial==serial && (e->minor_code==X_ShmAttach
 		&& e->error_code==BadAccess))
 	{
-		__extok=0;  return 0;
+		extok=0;  return 0;
 	}
-	if(prevhandler && prevhandler!=_fbxv_xhandler) return prevhandler(dpy, e);
+	if(prevHandler && prevHandler!=xhandler) return prevHandler(dpy, e);
 	else return 0;
 }
 #endif
@@ -67,46 +70,47 @@ int _fbxv_xhandler(Display *dpy, XErrorEvent *e)
 
 char *fbxv_geterrmsg(void)
 {
-	return __lasterror;
+	return lastError;
 }
 
 
 int fbxv_geterrline(void)
 {
-	return __line;
+	return errorLine;
 }
 
 
 void fbxv_printwarnings(FILE *stream)
 {
-	__warningfile=stream;
+	warningFile=stream;
 }
 
 
-int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
-	unsigned int format, int useshm)
+int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
+	int height_, unsigned int format, int useShm)
 {
-	int w, h, i, j, k, shmok=1, nformats;
+	int width, height, i, j, k, shmok=1, nformats;
 	unsigned int dummy1, dummy2, dummy3, dummy4, dummy5, nadaptors=0;
-	XWindowAttributes xwinattrib;
+	XWindowAttributes xwa;
 	XvAdaptorInfo *ai=NULL;
 	XvImageFormatValues *ifv=NULL;
 
-	if(!s) _throw("Invalid argument");
+	if(!fb) _throw("Invalid argument");
 
 	if(!dpy || !win) _throw("Invalid argument");
-	errifnot(XGetWindowAttributes(dpy, win, &xwinattrib));
-	if(width>0) w=width;  else w=xwinattrib.width;
-	if(height>0) h=height;  else h=xwinattrib.height;
-	if(s->dpy==dpy && s->win==win)
+	errifnot(XGetWindowAttributes(dpy, win, &xwa));
+	if(width_>0) width=width_;  else width=xwa.width;
+	if(height_>0) height=height_;  else height=xwa.height;
+	if(fb->dpy==dpy && fb->win==win)
 	{
-		if(w==s->reqwidth && h==s->reqheight && s->xvi && s->xgc && s->xvi->data)
+		if(width==fb->reqwidth && height==fb->reqheight && fb->xvi && fb->xgc
+			&& fb->xvi->data)
 			return 0;
-		else if(fbxv_term(s)==-1) return -1;
+		else if(fbxv_term(fb)==-1) return -1;
 	}
-	memset(s, 0, sizeof(fbxv_struct));
-	s->dpy=dpy;  s->win=win;
-	s->reqwidth=width;  s->reqheight=height;
+	memset(fb, 0, sizeof(fbxv_struct));
+	fb->dpy=dpy;  fb->win=win;
+	fb->reqwidth=width;  fb->reqheight=height;
 
 	if(XvQueryExtension(dpy, &dummy1, &dummy2, &dummy3, &dummy4, &dummy5)
 		!=Success)
@@ -115,7 +119,7 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 		_throw("Could not query X Video adaptors");
 	if(nadaptors<1 || !ai) _throw("No X Video adaptors available");
 
-	s->port=-1;
+	fb->port=-1;
 	for(i=0; i<nadaptors; i++)
 	{
 		for(j=ai[i].base_id; j<ai[i].base_id+ai[i].num_ports; j++)
@@ -128,7 +132,7 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 				{
 					if(ifv[k].id==format)
 					{
-						XFree(ifv);  s->port=j;
+						XFree(ifv);  fb->port=j;
 						goto found;
 					}
 				}
@@ -138,112 +142,120 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
 	}
 	found:
 	XvFreeAdaptorInfo(ai);  ai=NULL;
-	if(s->port==-1)
+	if(fb->port==-1)
 		_throw("The X Video implementation on the 2D X Server does not support the desired pixel format");
 
 	#ifdef USESHM
-	if(useshm && XShmQueryExtension(s->dpy))
+	if(useShm && XShmQueryExtension(fb->dpy))
 	{
-		static int alreadywarned=0;
-		s->shminfo.shmid=-1;
-		if(!(s->xvi=XvShmCreateImage(dpy, s->port, format, 0, width, height,
-			&s->shminfo)))
+		static int alreadyWarned=0;
+		fb->shminfo.shmid=-1;
+		if(!(fb->xvi=XvShmCreateImage(dpy, fb->port, format, 0, width, height,
+			&fb->shminfo)))
 		{
-			useshm=0;  goto noshm;
+			useShm=0;  goto noshm;
 		}
-		if((s->shminfo.shmid=shmget(IPC_PRIVATE, s->xvi->data_size, IPC_CREAT|0777))==-1)
+		if((fb->shminfo.shmid=shmget(IPC_PRIVATE, fb->xvi->data_size,
+			IPC_CREAT|0777))==-1)
 		{
-			useshm=0;  XFree(s->xvi);  goto noshm;
+			useShm=0;  XFree(fb->xvi);  goto noshm;
 		}
-		if((s->shminfo.shmaddr=s->xvi->data=(char *)shmat(s->shminfo.shmid, 0, 0))
+		if((fb->shminfo.shmaddr=fb->xvi->data=(char *)shmat(fb->shminfo.shmid, 0, 0))
 			==(char *)-1)
 		{
-			useshm=0;  XFree(s->xvi);  shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
+			useShm=0;  XFree(fb->xvi);  shmctl(fb->shminfo.shmid, IPC_RMID, 0);
+			goto noshm;
 		}
-		s->shminfo.readOnly=False;
+		fb->shminfo.readOnly=False;
 		XLockDisplay(dpy);
 		XSync(dpy, False);
-		prevhandler=XSetErrorHandler(_fbxv_xhandler);
-		__extok=1;
+		prevHandler=XSetErrorHandler(xhandler);
+		extok=1;
 		serial=NextRequest(dpy);
-		XShmAttach(dpy, &s->shminfo);
+		XShmAttach(dpy, &fb->shminfo);
 		XSync(dpy, False);
-		XSetErrorHandler(prevhandler);
-		shmok=__extok;
-		if(!alreadywarned && !shmok && __warningfile)
+		XSetErrorHandler(prevHandler);
+		shmok=extok;
+		if(!alreadyWarned && !shmok && warningFile)
 		{
-			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
-			fprintf(__warningfile, "[FBX]    remote connection.)\n");
-			alreadywarned=1;
+			fprintf(warningFile,
+				"[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
+			fprintf(warningFile, "[FBX]    remote connection.)\n");
+			alreadyWarned=1;
 		}
 		XUnlockDisplay(dpy);
-		shmctl(s->shminfo.shmid, IPC_RMID, 0);
+		shmctl(fb->shminfo.shmid, IPC_RMID, 0);
 		if(!shmok)
 		{
-			useshm=0;  XFree(s->xvi);  shmdt(s->shminfo.shmaddr);
-			shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
+			useShm=0;  XFree(fb->xvi);  shmdt(fb->shminfo.shmaddr);
+			shmctl(fb->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
-		s->xattach=1;  s->shm=1;
+		fb->xattach=1;  fb->shm=1;
 	}
-	else if(useshm)
+	else if(useShm)
 	{
-		static int alreadywarned=0;
-		if(!alreadywarned && __warningfile)
+		static int alreadyWarned=0;
+		if(!alreadyWarned && warningFile)
 		{
-			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension not available.\n");
-			alreadywarned=1;
+			fprintf(warningFile, "[FBX] WARNING: MIT-SHM extension not available.\n");
+			alreadyWarned=1;
 		}
-		useshm=0;
+		useShm=0;
 	}
 	noshm:
-	if(!useshm)
+	if(!useShm)
 	#endif
 	{
-		if(!(s->xvi=XvCreateImage(dpy, s->port, format, 0, width, height)))
+		if(!(fb->xvi=XvCreateImage(dpy, fb->port, format, 0, width, height)))
 			_throw("Could not create XvImage structure");
-		if(!(s->xvi->data=malloc(s->xvi->data_size)))
+		if(!(fb->xvi->data=malloc(fb->xvi->data_size)))
 			_throw("Memory allocation failure");
 	}
-	if(!(s->xgc=XCreateGC(dpy, win, 0, NULL)))
+	if(!(fb->xgc=XCreateGC(dpy, win, 0, NULL)))
 		_throw("Could not create X11 graphics context");
 	return 0;
 
 	finally:
-	fbxv_term(s);
+	fbxv_term(fb);
 	return -1;
 }
 
 
-int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
-	int dstx, int dsty, int dstw, int dsth)
+int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
+	int srcHeight_, int dstX_, int dstY_, int dstWidth, int dstHeight)
 {
-	int sx, sy, dx, dy, sw, sh;
-	if(!s) _throw("Invalid argument");
+	int srcX, srcY, dstX, dstY, srcWidth, srcHeight;
+	if(!fb) _throw("Invalid argument");
 
-	sx=srcx>=0? srcx:0;  sy=srcy>=0? srcy:0;
-	sw=srcw>0? srcw:s->xvi->width;  sh=srch>0? srch:s->xvi->height;
-	dx=dstx>=0? dstx:0;  dy=dsty>=0? dsty:0;
-	if(sw>s->xvi->width) sw=s->xvi->width;
-	if(sh>s->xvi->height) sh=s->xvi->height;
-	if(sx+sw>s->xvi->width) sw=s->xvi->width-sx;
-	if(sy+sh>s->xvi->height) sh=s->xvi->height-sy;
+	srcX=srcX_>=0? srcX_:0;
+	srcY=srcY_>=0? srcY_:0;
+	srcWidth=srcWidth_>0? srcWidth_:fb->xvi->width;
+	srcHeight=srcHeight_>0? srcHeight_:fb->xvi->height;
+	dstX=dstX_>=0? dstX_:0;
+	dstY=dstY_>=0? dstY_:0;
+
+	if(srcWidth>fb->xvi->width) srcWidth=fb->xvi->width;
+	if(srcHeight>fb->xvi->height) srcHeight=fb->xvi->height;
+	if(srcX+srcWidth>fb->xvi->width) srcWidth=fb->xvi->width-srcX;
+	if(srcY+srcHeight>fb->xvi->height) srcHeight=fb->xvi->height-srcY;
 
 	#ifdef USESHM
-	if(s->shm)
+	if(fb->shm)
 	{
-		if(!s->xattach)
+		if(!fb->xattach)
 		{
-			errifnot(XShmAttach(s->dpy, &s->shminfo));  s->xattach=1;
+			errifnot(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach=1;
 		}
-		x11(XvShmPutImage(s->dpy, s->port, s->win, s->xgc, s->xvi, sx, sy, sw, sh,
-			dx, dy, dstw, dsth, False));
+		x11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
+			srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, False));
 	}
 	else
 	#endif
-	x11(XvPutImage(s->dpy, s->port, s->win, s->xgc, s->xvi, sx, sy, sw, sh, dx,
-		dy, dstw, dsth));
-	XFlush(s->dpy);
-	XSync(s->dpy, False);
+
+	x11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
+		srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight));
+	XFlush(fb->dpy);
+	XSync(fb->dpy, False);
 	return 0;
 
 	finally:
@@ -251,30 +263,32 @@ int fbxv_write(fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
 }
 
 
-int fbxv_term(fbxv_struct *s)
+int fbxv_term(fbxv_struct *fb)
 {
-	if(!s) _throw("Invalid argument");
-	if(s->xvi) 
+	if(!fb) _throw("Invalid argument");
+	if(fb->xvi)
 	{
-		if(s->xvi->data && !s->shm)
+		if(fb->xvi->data && !fb->shm)
 		{
-			free(s->xvi->data);  s->xvi->data=NULL;
+			free(fb->xvi->data);  fb->xvi->data=NULL;
 		}
 	}
+
 	#ifdef USESHM
-	if(s->shm)
+	if(fb->shm)
 	{
-		if(s->xattach)
+		if(fb->xattach)
 		{
-			XShmDetach(s->dpy, &s->shminfo);  XSync(s->dpy, False);
+			XShmDetach(fb->dpy, &fb->shminfo);  XSync(fb->dpy, False);
 		}
-		if(s->shminfo.shmaddr!=NULL) shmdt(s->shminfo.shmaddr);
-		if(s->shminfo.shmid!=-1) shmctl(s->shminfo.shmid, IPC_RMID, 0);
+		if(fb->shminfo.shmaddr!=NULL) shmdt(fb->shminfo.shmaddr);
+		if(fb->shminfo.shmid!=-1) shmctl(fb->shminfo.shmid, IPC_RMID, 0);
 	}
 	#endif
-	if(s->xvi) XFree(s->xvi);
-	if(s->xgc) XFreeGC(s->dpy, s->xgc);
-	memset(s, 0, sizeof(fbxv_struct));
+
+	if(fb->xvi) XFree(fb->xvi);
+	if(fb->xgc) XFreeGC(fb->dpy, fb->xgc);
+	memset(fb, 0, sizeof(fbxv_struct));
 	return 0;
 
 	finally:

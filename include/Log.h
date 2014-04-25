@@ -25,7 +25,8 @@ namespace vglutil
 	class Log
 	{
 		public:
-			static Log *instance(void);
+
+			static Log *getInstance(void);
 			void logTo(FILE *logFile);
 			void logTo(char *logFileName);
 			void print(const char *format, ...);
@@ -45,7 +46,7 @@ namespace vglutil
 
 			~Log() {}
 
-			static Log *instancePtr;
+			static Log *instance;
 			static CS mutex;
 			FILE *logFile;
 			bool newFile;
@@ -53,6 +54,6 @@ namespace vglutil
 }
 
 
-#define vglout (*(vglutil::Log::instance()))
+#define vglout (*(vglutil::Log::getInstance()))
 
 #endif // __LOG_H__

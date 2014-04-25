@@ -19,18 +19,18 @@
 using namespace vglutil;
 
 
-Log *Log::instancePtr=NULL;
+Log *Log::instance=NULL;
 CS Log::mutex;
 
 
-Log *Log::instance(void)
+Log *Log::getInstance(void)
 {
-	if(instancePtr==NULL)
+	if(instance==NULL)
 	{
 		CS::SafeLock l(mutex);
-		if(instancePtr==NULL) instancePtr=new Log;
+		if(instance==NULL) instance=new Log;
 	}
-	return instancePtr;
+	return instance;
 }
 
 

@@ -24,6 +24,7 @@ namespace vglcommon
 	class Profiler
 	{
 		public:
+
 			Profiler(const char *name="Profiler", double interval=2.0);
 			~Profiler(void);
 			void setName(char *name);
@@ -32,6 +33,7 @@ namespace vglcommon
 			void endFrame(long pixels, long bytes, double incFrames);
 
 		private:
+
 			char *name;
 			double interval;
 			double mbytes, mpixels, totalTime, start, frames, lastFrame;

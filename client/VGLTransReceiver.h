@@ -30,12 +30,14 @@ namespace vglclient
 	class VGLTransReceiver : public vglutil::Runnable
 	{
 		public:
+
 			VGLTransReceiver(bool doSSL, int drawmethod);
 			void listen(unsigned short port);
 			unsigned short getPort(void) { return port; }
 			virtual ~VGLTransReceiver(void);
 
 		private:
+
 			void run(void);
 
 			int drawMethod;
@@ -80,6 +82,7 @@ namespace vglclient
 				void recv(char *buf, int len);
 
 			private:
+
 				void run(void);
 
 				int drawMethod;

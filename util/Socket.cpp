@@ -51,19 +51,20 @@ int Socket::instanceCount=0;
 
 #ifdef USESSL
 
-static void progress_callback(int p, int n, void *arg)
+static void progressCallback(int p, int n, void *arg)
 {
 }
 
 
-static EVP_PKEY *newprivkey(int bits)
+static EVP_PKEY *newPrivateKey(int bits)
 {
 	EVP_PKEY *pk=NULL;
+
 	try
 	{
 		if(!(pk=EVP_PKEY_new())) _throwssl();
 		if(!EVP_PKEY_assign_RSA(pk, RSA_generate_key(bits, 0x10001,
-			progress_callback, NULL))) _throwssl();
+			progressCallback, NULL))) _throwssl();
 		return pk;
 	}
 	catch (...)
@@ -75,7 +76,7 @@ static EVP_PKEY *newprivkey(int bits)
 }
 
 
-static X509 *newcert(EVP_PKEY *priv)
+static X509 *newCert(EVP_PKEY *priv)
 {
 	X509 *cert=NULL;  X509_NAME *name=NULL;  int nid=NID_undef;
 	X509_PUBKEY *pub=NULL;  EVP_PKEY *pk=NULL;
@@ -130,6 +131,7 @@ Socket::Socket(bool doSSL_=false)
 	#endif
 {
 	CS::SafeLock l(mutex);
+
 	#ifdef _WIN32
 	if(instanceCount==0)
 	{
@@ -143,6 +145,7 @@ Socket::Socket(bool doSSL_=false)
 	#else
 	if(signal(SIGPIPE, SIG_IGN)==SIG_ERR) _throwunix();
 	#endif
+
 	#ifdef USESSL
 	if(!sslInit && doSSL)
 	{
@@ -157,7 +160,7 @@ Socket::Socket(bool doSSL_=false)
 		SSL_load_error_strings();
 		ERR_load_crypto_strings();
 		CRYPTO_set_id_callback(Thread::threadID);
-		CRYPTO_set_locking_callback(locking_callback);
+		CRYPTO_set_locking_callback(lockingCallback);
 		SSL_library_init();
 		sslInit=true;
 		char *env=NULL;
@@ -168,6 +171,7 @@ Socket::Socket(bool doSSL_=false)
 	}
 	ssl=NULL;  sslctx=NULL;
 	#endif
+
 	sd=INVALID_SOCKET;
 }
 
@@ -295,8 +299,8 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	trysock(bind(sd, (struct sockaddr *)&myaddr, sizeof(myaddr)));
 	SOCKLEN_T n=sizeof(myaddr);
 	trysock(getsockname(sd, (struct sockaddr *)&myaddr, &n));
-	unsigned short actualport=ntohs(myaddr.sin_port);
-	return actualport;
+	unsigned short actualPort=ntohs(myaddr.sin_port);
+	return actualPort;
 }
 
 
@@ -308,30 +312,32 @@ unsigned short Socket::findPort(void)
 
 unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 {
-	unsigned short actualport=port;
+	unsigned short actualPort=port;
 	#ifdef USESSL
 	X509 *cert=NULL;  EVP_PKEY *priv=NULL;
 	#endif
 
-	actualport=setupListener(port, reuseAddr);
+	actualPort=setupListener(port, reuseAddr);
 
 	trysock(::listen(sd, MAXCONN));
 
 	#ifdef USESSL
 	if(doSSL)
 	{
-		try {
-		if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL) _throwssl();
-		errifnot(priv=newprivkey(1024));
-		errifnot(cert=newcert(priv));
-		if(SSL_CTX_use_certificate(sslctx, cert)<=0)
-			_throwssl();
-		if(SSL_CTX_use_PrivateKey(sslctx, priv)<=0)
-			_throwssl();
-		if(!SSL_CTX_check_private_key(sslctx)) _throwssl();
-		if(priv) EVP_PKEY_free(priv);
-		if(cert) X509_free(cert);
-		} catch (...)
+		try
+		{
+			if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL) _throwssl();
+			errifnot(priv=newPrivateKey(1024));
+			errifnot(cert=newCert(priv));
+			if(SSL_CTX_use_certificate(sslctx, cert)<=0)
+				_throwssl();
+			if(SSL_CTX_use_PrivateKey(sslctx, priv)<=0)
+				_throwssl();
+			if(!SSL_CTX_check_private_key(sslctx)) _throwssl();
+			if(priv) EVP_PKEY_free(priv);
+			if(cert) X509_free(cert);
+		}
+		catch (...)
 		{
 			if(priv) EVP_PKEY_free(priv);
 			if(cert) X509_free(cert);
@@ -340,13 +346,13 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 	}
 	#endif
 
-	return actualport;
+	return actualPort;
 }
 
 
 Socket *Socket::accept(void)
 {
-	SOCKET sd_client;
+	SOCKET clientsd;
 	int m=1;  struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen;
 	addrlen=sizeof(remoteaddr);
 
@@ -355,9 +361,9 @@ Socket *Socket::accept(void)
 	if(!sslctx && doSSL) _throw("SSL not initialized");
 	#endif
 
-	trysock(sd_client=::accept(sd, (struct sockaddr *)&remoteaddr,
+	trysock(clientsd=::accept(sd, (struct sockaddr *)&remoteaddr,
 		&addrlen));
-	trysock(setsockopt(sd_client, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
+	trysock(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
 		sizeof(int)));
 
 	#ifdef USESSL
@@ -365,14 +371,14 @@ Socket *Socket::accept(void)
 	if(doSSL)
 	{
 		if(!(tempssl=SSL_new(sslctx))) _throwssl();
-		if(!(SSL_set_fd(tempssl, (int)sd_client))) _throwssl();
+		if(!(SSL_set_fd(tempssl, (int)clientsd))) _throwssl();
 		int ret=SSL_accept(tempssl);
 		if(ret!=1) throw(SSLError("Socket::accept", tempssl, ret));
 		SSL_set_accept_state(tempssl);
 	}
-	return new Socket(sd_client, tempssl);
+	return new Socket(clientsd, tempssl);
 	#else
-	return new Socket(sd_client);
+	return new Socket(clientsd);
 	#endif
 }
 
@@ -380,10 +386,11 @@ Socket *Socket::accept(void)
 char *Socket::remoteName(void)
 {
 	struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen=sizeof(remoteaddr);
-	char *remotename=NULL;
+	char *remoteName=NULL;
+
 	trysock(getpeername(sd, (struct sockaddr *)&remoteaddr, &addrlen));
-	remotename=inet_ntoa(remoteaddr.sin_addr);
-	return (remotename? remotename:(char *)"Unknown");
+	remoteName=inet_ntoa(remoteaddr.sin_addr);
+	return (remoteName? remoteName:(char *)"Unknown");
 }
 
 
@@ -393,25 +400,25 @@ void Socket::send(char *buf, int len)
 	#ifdef USESSL
 	if(doSSL && !ssl) _throw("SSL not connected");
 	#endif
-	int bytessent=0, retval;
-	while(bytessent<len)
+	int bytesSent=0, retval;
+	while(bytesSent<len)
 	{
 		#ifdef USESSL
 		if(doSSL)
 		{
-			retval=SSL_write(ssl, &buf[bytessent], len);
+			retval=SSL_write(ssl, &buf[bytesSent], len);
 			if(retval<=0) throw(SSLError("Socket::send", ssl, retval));
 		}
 		else
 		#endif
 		{
-			retval=::send(sd, &buf[bytessent], len-bytessent, 0);
+			retval=::send(sd, &buf[bytesSent], len-bytesSent, 0);
 			if(retval==SOCKET_ERROR) _throwsock();
 			if(retval==0) break;
 		}
-		bytessent+=retval;
+		bytesSent+=retval;
 	}
-	if(bytessent!=len) _throw("Incomplete send");
+	if(bytesSent!=len) _throw("Incomplete send");
 }
 
 
@@ -421,24 +428,24 @@ void Socket::recv(char *buf, int len)
 	#ifdef USESSL
 	if(doSSL && !ssl) _throw("SSL not connected");
 	#endif
-	int bytesrecd=0, retval;
-	while(bytesrecd<len)
+	int bytesRead=0, retval;
+	while(bytesRead<len)
 	{
 		#ifdef USESSL
 		if(doSSL)
 		{
-			retval=SSL_read(ssl, &buf[bytesrecd], len);
+			retval=SSL_read(ssl, &buf[bytesRead], len);
 			if(retval<=0) throw(SSLError("Socket::recv", ssl, retval));
 		}
 		else
 		#endif
 		{
-			retval=::recv(sd, &buf[bytesrecd], len-bytesrecd, 0);
+			retval=::recv(sd, &buf[bytesRead], len-bytesRead, 0);
 			if(retval==SOCKET_ERROR) _throwsock();
 			if(retval==0) break;
 		}
-		bytesrecd+=retval;
+		bytesRead+=retval;
 	}
-	if(bytesrecd!=len) _throw("Incomplete receive");
+	if(bytesRead!=len) _throw("Incomplete receive");
 }
 

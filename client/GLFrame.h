@@ -26,6 +26,7 @@ namespace vglcommon
 	class GLFrame : public Frame
 	{
 		public:
+
 			GLFrame(char *dpystring, Window win);
 			GLFrame(Display *dpy, Window win);
 			~GLFrame(void);
@@ -36,6 +37,7 @@ namespace vglcommon
 			void sync(void);
 
 		private:
+
 			void init(Display *dpy, Window win);
 			int glError(void);
 

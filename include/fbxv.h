@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <X11/Xlib.h>
 #ifdef USESHM
- #include <sys/ipc.h>
- #include <sys/shm.h>
- #include <X11/extensions/XShm.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <X11/extensions/XShm.h>
 #endif
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
@@ -59,10 +59,8 @@ extern "C" {
 */
 
 
-int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
-	unsigned int format, int useshm);
 /*
-  s = Address of fbxv_struct (must be pre-allocated by user)
+  fb = Address of fbxv_struct (must be pre-allocated by user)
   Display *dpy = X11 display handle
   Window win = X11 drawable into which the video should be drawn
   width = Width of image (in pixels) that you wish to create.  0 = use width
@@ -71,63 +69,64 @@ int fbxv_init(fbxv_struct *s, Display *dpy, Window win, int width, int height,
            of window
   format = GUID of desired X Video image format.  If the X Video extension does
            not support this format, then fbxv_init() returns an error.
-  useshm = Use MIT-SHM extension, if available
+  useShm = Use MIT-SHM extension, if available
 
   NOTES:
   -- fbxv_init() is idempotent.  If you call it multiple times, it will
      re-initialize the buffer only when it is necessary to do so (such as when
      the window size has changed.)
-  -- If this function returns successfully, s->xvi will point to a valid
+  -- If this function returns successfully, fb->xvi will point to a valid
      XvImage structure that can be populated with image data.  Double-check
-     s->xvi->width and s->xvi->height, as these may differ from the requested
+     fb->xvi->width and fb->xvi->height, as these may differ from the requested
      width and height.
 */
+int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width, int height,
+	unsigned int format, int useShm);
 
 
-int fbxv_write (fbxv_struct *s, int srcx, int srcy, int srcw, int srch,
-	int dstx, int dsty, int dstw, int dsth);
 /*
-  This routine draws an X Video image stored in s to the framebuffer
+  This routine draws an X Video image stored in fb to the framebuffer
 
-  s = Address of fbxv_struct previously initialized by a call to fbxv_init()
-      s->xvi->data should contain the image you wish to draw
-  srcx = left offset of the region you wish to draw (relative to the X Video
+  fb = Address of fbxv_struct previously initialized by a call to fbxv_init()
+       fb->xvi->data should contain the image you wish to draw
+  srcX = left offset of the region you wish to draw (relative to the X Video
          image)
-  srcy = top offset of the region you wish to draw (relative to the X Video
+  srcY = top offset of the region you wish to draw (relative to the X Video
          image)
-  srcw, srch = width and height of the portion of the source image you wish
-               to draw (0 = whole image)
-  dstx = left offset of the window region into which the image should be
+  srcWidth, srcHeight = width and height of the portion of the source image you
+                        wish to draw (0 = whole image)
+  dstX = left offset of the window region into which the image should be
          drawn (relative to the window's client area)
-  dsty = top offset of the window region into which the image should be
+  dstY = top offset of the window region into which the image should be
          drawn (relative to the window's client area)
-  dstw, dsth = width and height of the window region into which the image
-               should be drawn
+  dstWidth, dstHeight = width and height of the window region into which the
+                        image should be drawn
 */
+int fbxv_write (fbxv_struct *fb, int srcX, int srcY, int srcWidth,
+	int srcHeight, int dstX, int dstY, int dstWidth, int dstHeight);
 
 
-int fbxv_term(fbxv_struct *s);
 /*
-  Frees the X Video image associated with s (if any), then frees the memory
-  used by s.
+  Frees the X Video image associated with fb (if any), then frees the memory
+  used by fb.
 
   NOTE: this routine is idempotent.  It only frees stuff that needs freeing.
 */
+int fbxv_term(fbxv_struct *fb);
 
 
-char *fbxv_geterrmsg(void);
 /*
   This returns a string containing the reason why the last command failed
 */
+char *fbxv_geterrmsg(void);
 
 
-int fbxv_geterrline(void);
 /*
   This returns the line (within fbxv.c) of the last failure
 */
+int fbxv_geterrline(void);
 
 
-void fbxv_printwarnings(FILE *output_stream);
 /*
   By default, FBXV will not print warning messages (such as messages related to
   its automatic selection of a particular drawing method.)  These messages are
@@ -137,6 +136,7 @@ void fbxv_printwarnings(FILE *output_stream);
   to be printed to the specified stream.  Passing an argument of NULL to this
   function will disable warnings.
 */
+void fbxv_printwarnings(FILE *stream);
 
 
 #ifdef __cplusplus

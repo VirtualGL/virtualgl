@@ -39,6 +39,7 @@ namespace vglcommon
 	class Frame
 	{
 		public:
+
 			Frame(bool primary=true);
 			virtual ~Frame(void);
 			void init(rrframeheader &h, int pixelSize, int flags, bool stereo=false);
@@ -64,6 +65,7 @@ namespace vglcommon
 			bool isGL, isXV, stereo;
 
 		protected:
+
 			void dumpHeader(rrframeheader &);
 			void checkHeader(rrframeheader &);
 
@@ -82,6 +84,7 @@ namespace vglcommon
 	class CompressedFrame : public Frame
 	{
 		public:
+
 			CompressedFrame(void);
 			~CompressedFrame(void);
 			CompressedFrame& operator= (Frame &f);
@@ -93,6 +96,7 @@ namespace vglcommon
 			rrframeheader rhdr;
 
 		private:
+
 			tjhandle tjhnd;
 			friend class FBXFrame;
 	};
@@ -106,6 +110,7 @@ namespace vglcommon
 	class FBXFrame : public Frame
 	{
 		public:
+
 			FBXFrame(Display *dpy, Drawable draw, Visual *vis=NULL);
 			FBXFrame(char *dpystring, Window win);
 			void init(char *dpystring, Drawable draw, Visual *vis=NULL);
@@ -115,6 +120,7 @@ namespace vglcommon
 			void redraw(void);
 
 		private:
+
 			fbx_wh wh;
 			fbx_struct fb;
 			tjhandle tjhnd;
@@ -131,6 +137,7 @@ namespace vglcommon
 	class XVFrame : public Frame
 	{
 		public:
+
 			XVFrame(Display *dpy, Window win);
 			XVFrame(char *dpystring, Window win);
 			void init(char *dpystring, Window win);
@@ -140,6 +147,7 @@ namespace vglcommon
 			void redraw(void);
 
 		private:
+
 			fbxv_struct fb;
 			Display *dpy;  Window win;
 			tjhandle tjhnd;

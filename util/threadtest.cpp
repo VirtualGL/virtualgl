@@ -83,7 +83,7 @@ class TestThread : public Runnable
 
 int main(void)
 {
-	TestThread *th[5];  Thread *t[5];  int i;
+	TestThread *testThread[5];  Thread *thread[5];  int i;
 
 	try
 	{
@@ -94,12 +94,12 @@ int main(void)
 
 		for(i=0; i<5; i++)
 		{
-			th[i]=new TestThread(i+1);
-			t[i]=new Thread(th[i]);
-			t[i]->start();
+			testThread[i]=new TestThread(i+1);
+			thread[i]=new Thread(testThread[i]);
+			thread[i]->start();
 		}
-		for(i=0; i<5; i++) t[i]->stop();
-		for(i=0; i<5; i++) t[i]->checkError();
+		for(i=0; i<5; i++) thread[i]->stop();
+		for(i=0; i<5; i++) thread[i]->checkError();
 	}
 	catch(Error &e)
 	{

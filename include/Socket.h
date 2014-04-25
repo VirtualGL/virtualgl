@@ -79,25 +79,26 @@ namespace vglutil
 			SSLError(const char *method, SSL *ssl, int ret) :
 				Error(method, (char *)NULL)
 			{
-				const char *errorstring=NULL;
+				const char *errorString=NULL;
+
 				switch(SSL_get_error(ssl, ret))
 				{
 					case SSL_ERROR_NONE:
-						errorstring="SSL_ERROR_NONE";  break;
+						errorString="SSL_ERROR_NONE";  break;
 					case SSL_ERROR_ZERO_RETURN:
-						errorstring="SSL_ERROR_ZERO_RETURN";  break;
+						errorString="SSL_ERROR_ZERO_RETURN";  break;
 					case SSL_ERROR_WANT_READ:
-						errorstring="SSL_ERROR_WANT_READ";  break;
+						errorString="SSL_ERROR_WANT_READ";  break;
 					case SSL_ERROR_WANT_WRITE:
-						errorstring="SSL_ERROR_WANT_WRITE";  break;
+						errorString="SSL_ERROR_WANT_WRITE";  break;
 					case SSL_ERROR_WANT_CONNECT:
-						errorstring="SSL_ERROR_WANT_CONNECT";  break;
+						errorString="SSL_ERROR_WANT_CONNECT";  break;
 					#ifdef SSL_ERROR_WANT_ACCEPT
 					case SSL_ERROR_WANT_ACCEPT:
-						errorstring="SSL_ERROR_WANT_ACCEPT";  break;
+						errorString="SSL_ERROR_WANT_ACCEPT";  break;
 					#endif
 					case SSL_ERROR_WANT_X509_LOOKUP:
-						errorstring="SSL_ERROR_WANT_X509_LOOKUP";  break;
+						errorString="SSL_ERROR_WANT_X509_LOOKUP";  break;
 					case SSL_ERROR_SYSCALL:
 						#ifdef _WIN32
 						if(ret==-1)
@@ -109,15 +110,15 @@ namespace vglutil
 							return;
 						}
 						#else
-						if(ret==-1) errorstring=strerror(errno);
+						if(ret==-1) errorString=strerror(errno);
 						#endif
 						else if(ret==0)
-							errorstring="SSL_ERROR_SYSCALL (abnormal termination)";
-						else errorstring="SSL_ERROR_SYSCALL";  break;
+							errorString="SSL_ERROR_SYSCALL (abnormal termination)";
+						else errorString="SSL_ERROR_SYSCALL";  break;
 					case SSL_ERROR_SSL:
 						ERR_error_string_n(ERR_get_error(), message, MLEN);  return;
 				}
-				strncpy(message, errorstring, MLEN);
+				strncpy(message, errorString, MLEN);
 			}
 	};
 }
@@ -136,6 +137,7 @@ namespace vglutil
 	class Socket
 	{
 		public:
+
 			Socket(bool doSSL);
 			#ifdef USESSL
 			Socket(SOCKET sd, SSL *ssl);
@@ -157,7 +159,8 @@ namespace vglutil
 			unsigned short setupListener(unsigned short port, bool reuseAddr);
 
 			#ifdef USESSL
-			static void locking_callback(int mode, int type, const char *file,
+
+			static void lockingCallback(int mode, int type, const char *file,
 				int line)
 			{
 				if(mode&CRYPTO_LOCK) cryptoLock[type].lock();
@@ -167,6 +170,7 @@ namespace vglutil
 			static bool sslInit;
 			static CS cryptoLock[CRYPTO_NUM_LOCKS];
 			bool doSSL;  SSL_CTX *sslctx;  SSL *ssl;
+
 			#endif
 
 			static const int MAXCONN=1024;
