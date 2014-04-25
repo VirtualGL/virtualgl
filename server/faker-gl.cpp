@@ -24,24 +24,26 @@
 using namespace vglserver;
 
 
-#define __round(f) ((f)>=0?(long)((f)+0.5):(long)((f)-0.5))
+#define ROUND(f) ((f)>=0? (long)((f)+0.5) : (long)((f)-0.5))
 
 
-static void _doGLreadback(bool spoillast, bool sync)
+static void doGLReadback(bool spoilLast, bool sync)
 {
-	VirtualWin *pbw;
+	VirtualWin *vw;
 	GLXDrawable drawable;
+
 	if(ctxhash.overlayCurrent()) return;
 	drawable=_glXGetCurrentDrawable();
 	if(!drawable) return;
-	if(winhash.find(drawable, pbw))
-	{
-		if(drawingToFront() || pbw->dirty)
-		{
-				opentrace(_doGLreadback);  prargx(pbw->getGLXDrawable());
-				prargi(sync); prargi(spoillast);  starttrace();
 
-			pbw->readback(GL_FRONT, spoillast, sync);
+	if(winhash.find(drawable, vw))
+	{
+		if(drawingToFront() || vw->dirty)
+		{
+				opentrace(doGLReadback);  prargx(vw->getGLXDrawable());
+				prargi(sync);  prargi(spoilLast);  starttrace();
+
+			vw->readback(GL_FRONT, spoilLast, sync);
 
 				stoptrace();  closetrace();
 		}
@@ -63,29 +65,33 @@ void glFinish(void)
 
 	_glFinish();
 	fconfig.flushdelay=0.;
-	_doGLreadback(false, fconfig.sync);
+	doGLReadback(false, fconfig.sync);
+
 	CATCH();
 }
 
 
 void glFlush(void)
 {
-	static double lasttime=-1.;  double thistime;
+	static double lastTime=-1.;  double thisTime;
+
 	TRY();
 
 		if(fconfig.trace) vglout.print("[VGL] glFlush()\n");
 
 	_glFlush();
-	if(lasttime<0.) lasttime=getTime();
+	if(lastTime<0.) lastTime=getTime();
 	else
 	{
-		thistime=getTime()-lasttime;
-		if(thistime-lasttime<0.01) fconfig.flushdelay=0.01;
+		thisTime=getTime()-lastTime;
+		if(thisTime-lastTime<0.01) fconfig.flushdelay=0.01;
 		else fconfig.flushdelay=0.;
 	}
+
 	// See the notes regarding VGL_SPOILLAST and VGL_GLFLUSHTRIGGER in the
 	// VirtualGL User's Guide.
-	if(fconfig.glflushtrigger) _doGLreadback(fconfig.spoillast, false);
+	if(fconfig.glflushtrigger) doGLReadback(fconfig.spoillast, false);
+
 	CATCH();
 }
 
@@ -96,12 +102,13 @@ void glXWaitGL(void)
 
 		if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
 
-	if(ctxhash.overlayCurrent()) {_glXWaitGL();  return;}
+	if(ctxhash.overlayCurrent()) { _glXWaitGL();  return; }
 
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this
 	              // to avoid 2 readbacks
 	fconfig.flushdelay=0.;
-	_doGLreadback(false, fconfig.sync);
+	doGLReadback(false, fconfig.sync);
+
 	CATCH();
 }
 
@@ -115,26 +122,28 @@ void glDrawBuffer(GLenum mode)
 {
 	TRY();
 
-	if(ctxhash.overlayCurrent()) {_glDrawBuffer(mode);  return;}
+	if(ctxhash.overlayCurrent()) { _glDrawBuffer(mode);  return; }
 
 		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
 
-	VirtualWin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
+	VirtualWin *vw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=_glXGetCurrentDrawable();
-	if(drawable && winhash.find(drawable, pbw))
+
+	if(drawable && winhash.find(drawable, vw))
 	{
 		before=drawingToFront();
 		rbefore=drawingToRight();
 		_glDrawBuffer(mode);
 		after=drawingToFront();
 		rafter=drawingToRight();
-		if(before && !after) pbw->dirty=true;
-		if(rbefore && !rafter && pbw->isStereo()) pbw->rdirty=true;
+		if(before && !after) vw->dirty=true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty=true;
 	}
 	else _glDrawBuffer(mode);
 
-		stoptrace();  if(drawable && pbw) {prargi(pbw->dirty);
-		prargi(pbw->rdirty);  prargx(pbw->getGLXDrawable());}  closetrace();
+		stoptrace();  if(drawable && vw) {
+			prargi(vw->dirty);  prargi(vw->rdirty);  prargx(vw->getGLXDrawable());
+		}  closetrace();
 
 	CATCH();
 }
@@ -146,26 +155,28 @@ void glPopAttrib(void)
 {
 	TRY();
 
-	if(ctxhash.overlayCurrent()) {_glPopAttrib();  return;}
+	if(ctxhash.overlayCurrent()) { _glPopAttrib();  return; }
 
 		opentrace(glPopAttrib);  starttrace();
 
-	VirtualWin *pbw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
+	VirtualWin *vw=NULL;  int before=-1, after=-1, rbefore=-1, rafter=-1;
 	GLXDrawable drawable=_glXGetCurrentDrawable();
-	if(drawable && winhash.find(drawable, pbw))
+
+	if(drawable && winhash.find(drawable, vw))
 	{
 		before=drawingToFront();
 		rbefore=drawingToRight();
 		_glPopAttrib();
 		after=drawingToFront();
 		rafter=drawingToRight();
-		if(before && !after) pbw->dirty=true;
-		if(rbefore && !rafter && pbw->isStereo()) pbw->rdirty=true;
+		if(before && !after) vw->dirty=true;
+		if(rbefore && !rafter && vw->isStereo()) vw->rdirty=true;
 	}
 	else _glPopAttrib();
 
-		stoptrace();  if(drawable && pbw) {prargi(pbw->dirty);
-		prargi(pbw->rdirty);  prargx(pbw->getGLXDrawable());}  closetrace();
+		stoptrace();  if(drawable && vw) {
+			prargi(vw->dirty);  prargi(vw->rdirty);  prargx(vw->getGLXDrawable());
+		}  closetrace();
 
 	CATCH();
 }
@@ -179,7 +190,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	TRY();
 
-	if(ctxhash.overlayCurrent()) {_glViewport(x, y, width, height);  return;}
+	if(ctxhash.overlayCurrent()) { _glViewport(x, y, width, height);  return; }
 
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();
@@ -188,28 +199,29 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 	GLXDrawable draw=_glXGetCurrentDrawable();
 	GLXDrawable read=_glXGetCurrentReadDrawable();
 	Display *dpy=_glXGetCurrentDisplay();
-	GLXDrawable newread=0, newdraw=0;
+	GLXDrawable newRead=0, newDraw=0;
+
 	if(dpy && (draw || read) && ctx)
 	{
-		newread=read, newdraw=draw;
-		VirtualWin *drawpbw=NULL, *readpbw=NULL;
-		winhash.find(draw, drawpbw);
-		winhash.find(read, readpbw);
-		if(drawpbw) drawpbw->checkResize();
-		if(readpbw && readpbw!=drawpbw) readpbw->checkResize();
-		if(drawpbw) newdraw=drawpbw->updateGLXDrawable();
-		if(readpbw) newread=readpbw->updateGLXDrawable();
-		if(newread!=read || newdraw!=draw)
+		newRead=read, newDraw=draw;
+		VirtualWin *drawVW=NULL, *readVW=NULL;
+		winhash.find(draw, drawVW);
+		winhash.find(read, readVW);
+		if(drawVW) drawVW->checkResize();
+		if(readVW && readVW!=drawVW) readVW->checkResize();
+		if(drawVW) newDraw=drawVW->updateGLXDrawable();
+		if(readVW) newRead=readVW->updateGLXDrawable();
+		if(newRead!=read || newDraw!=draw)
 		{
-			_glXMakeContextCurrent(dpy, newdraw, newread, ctx);
-			if(drawpbw) {drawpbw->clear();  drawpbw->cleanup();}
-			if(readpbw) readpbw->cleanup();
+			_glXMakeContextCurrent(dpy, newDraw, newRead, ctx);
+			if(drawVW) { drawVW->clear();  drawVW->cleanup(); }
+			if(readVW) readVW->cleanup();
 		}
 	}
 	_glViewport(x, y, width, height);
 
-		stoptrace();  if(draw!=newdraw) {prargx(draw);  prargx(newdraw);}
-		if(read!=newread) {prargx(read);  prargx(newread);}  closetrace();
+		stoptrace();  if(draw!=newDraw) { prargx(draw);  prargx(newDraw); }
+		if(read!=newRead) { prargx(read);  prargx(newRead); }  closetrace();
 
 	CATCH();
 }
@@ -240,6 +252,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 	const GLvoid *pixels)
 {
 	TRY();
+
 	if(format==GL_COLOR_INDEX && !ctxhash.overlayCurrent() && type!=GL_BITMAP)
 	{
 		format=GL_RED;
@@ -247,6 +260,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 		else
 		{
 			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
+
 			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
 			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
 			newcheck(buf=new unsigned char[width*height])
@@ -265,6 +279,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 		}
 	}
 	_glDrawPixels(width, height, format, type, pixels);
+
 	CATCH();
 }
 
@@ -275,28 +290,28 @@ void glGetDoublev(GLenum pname, GLdouble *params)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_COLOR, c);
-			if(params) *params=(GLdouble)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_COLOR, color);
+			if(params) *params=(GLdouble)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_CURRENT_RASTER_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-			if(params) *params=(GLdouble)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, color);
+			if(params) *params=(GLdouble)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_INDEX_SHIFT)
 		{
 			_glGetDoublev(GL_RED_SCALE, params);
-			if(params) *params=(GLdouble)__round(log(*params)/log(2.));
+			if(params) *params=(GLdouble)ROUND(log(*params)/log(2.));
 			return;
 		}
 		else if(pname==GL_INDEX_OFFSET)
 		{
 			_glGetDoublev(GL_RED_BIAS, params);
-			if(params) *params=(GLdouble)__round((*params)*255.);
+			if(params) *params=(GLdouble)ROUND((*params)*255.);
 			return;
 		}
 	}
@@ -310,30 +325,30 @@ void glGetFloatv(GLenum pname, GLfloat *params)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_COLOR, c);
-			if(params) *params=(GLfloat)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_COLOR, color);
+			if(params) *params=(GLfloat)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_CURRENT_RASTER_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-			if(params) *params=(GLfloat)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, color);
+			if(params) *params=(GLfloat)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_INDEX_SHIFT)
 		{
-			GLdouble d;
-			_glGetDoublev(GL_RED_SCALE, &d);
-			if(params) *params=(GLfloat)__round(log(d)/log(2.));
+			GLdouble scale;
+			_glGetDoublev(GL_RED_SCALE, &scale);
+			if(params) *params=(GLfloat)ROUND(log(scale)/log(2.));
 			return;
 		}
 		else if(pname==GL_INDEX_OFFSET)
 		{
-			GLdouble d;
-			_glGetDoublev(GL_RED_BIAS, &d);
-			if(params) *params=(GLfloat)__round(d*255.);
+			GLdouble bias;
+			_glGetDoublev(GL_RED_BIAS, &bias);
+			if(params) *params=(GLfloat)ROUND(bias*255.);
 			return;
 		}
 	}
@@ -347,30 +362,30 @@ void glGetIntegerv(GLenum pname, GLint *params)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_COLOR, c);
-			if(params) *params=(GLint)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_COLOR, color);
+			if(params) *params=(GLint)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_CURRENT_RASTER_INDEX)
 		{
-			GLdouble c[4];
-			_glGetDoublev(GL_CURRENT_RASTER_COLOR, c);
-			if(params) *params=(GLint)__round(c[0]*255.);
+			GLdouble color[4];
+			_glGetDoublev(GL_CURRENT_RASTER_COLOR, color);
+			if(params) *params=(GLint)ROUND(color[0]*255.);
 			return;
 		}
 		else if(pname==GL_INDEX_SHIFT)
 		{
-			double d;
-			_glGetDoublev(GL_RED_SCALE, &d);
-			if(params) *params=(GLint)__round(log(d)/log(2.));
+			double scale;
+			_glGetDoublev(GL_RED_SCALE, &scale);
+			if(params) *params=(GLint)ROUND(log(scale)/log(2.));
 			return;
 		}
 		else if(pname==GL_INDEX_OFFSET)
 		{
-			double d;
-			_glGetDoublev(GL_RED_BIAS, &d);
-			if(params) *params=(GLint)__round(d*255.);
+			double bias;
+			_glGetDoublev(GL_RED_BIAS, &bias);
+			if(params) *params=(GLint)ROUND(bias*255.);
 			return;
 		}
 	}
@@ -378,83 +393,83 @@ void glGetIntegerv(GLenum pname, GLint *params)
 }
 
 
-void glIndexd(GLdouble c)
+void glIndexd(GLdouble index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexd(c);
-	else glColor3d(c/255., 0.0, 0.0);
+	if(ctxhash.overlayCurrent()) _glIndexd(index);
+	else glColor3d(index/255., 0.0, 0.0);
 }
 
-void glIndexf(GLfloat c)
+void glIndexf(GLfloat index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexf(c);
-	else glColor3f(c/255., 0., 0.);
+	if(ctxhash.overlayCurrent()) _glIndexf(index);
+	else glColor3f(index/255., 0., 0.);
 }
 
-void glIndexi(GLint c)
+void glIndexi(GLint index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexi(c);
-	else glColor3f((GLfloat)c/255., 0, 0);
+	if(ctxhash.overlayCurrent()) _glIndexi(index);
+	else glColor3f((GLfloat)index/255., 0, 0);
 }
 
-void glIndexs(GLshort c)
+void glIndexs(GLshort index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexs(c);
-	else glColor3f((GLfloat)c/255., 0, 0);
+	if(ctxhash.overlayCurrent()) _glIndexs(index);
+	else glColor3f((GLfloat)index/255., 0, 0);
 }
 
-void glIndexub(GLubyte c)
+void glIndexub(GLubyte index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexub(c);
-	else glColor3f((GLfloat)c/255., 0, 0);
+	if(ctxhash.overlayCurrent()) _glIndexub(index);
+	else glColor3f((GLfloat)index/255., 0, 0);
 }
 
-void glIndexdv(const GLdouble *c)
+void glIndexdv(const GLdouble *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexdv(c);
+	if(ctxhash.overlayCurrent()) _glIndexdv(index);
 	else
 	{
-		GLdouble v[3]={c? (*c)/255.:0., 0., 0.};
-		glColor3dv(c? v:NULL);
+		GLdouble color[3]={index? (*index)/255.:0., 0., 0.};
+		glColor3dv(index? color:NULL);
 	}
 }
 
-void glIndexfv(const GLfloat *c)
+void glIndexfv(const GLfloat *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexfv(c);
+	if(ctxhash.overlayCurrent()) _glIndexfv(index);
 	else
 	{
-		GLfloat v[3]={c? (*c)/255.:0., 0., 0.};
-		glColor3fv(c? v:NULL);  return;
+		GLfloat color[3]={index? (*index)/255.:0., 0., 0.};
+		glColor3fv(index? color:NULL);  return;
 	}
 }
 
-void glIndexiv(const GLint *c)
+void glIndexiv(const GLint *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexiv(c);
+	if(ctxhash.overlayCurrent()) _glIndexiv(index);
 	else
 	{
-		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-		glColor3fv(c? v:NULL);  return;
+		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		glColor3fv(index? color:NULL);  return;
 	}
 }
 
-void glIndexsv(const GLshort *c)
+void glIndexsv(const GLshort *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexsv(c);
+	if(ctxhash.overlayCurrent()) _glIndexsv(index);
 	else
 	{
-		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-		glColor3fv(c? v:NULL);  return;
+		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		glColor3fv(index? color:NULL);  return;
 	}
 }
 
-void glIndexubv(const GLubyte *c)
+void glIndexubv(const GLubyte *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexubv(c);
+	if(ctxhash.overlayCurrent()) _glIndexubv(index);
 	else
 	{
-		GLfloat v[3]={c? (GLfloat)(*c)/255.:0., 0., 0.};
-		glColor3fv(c? v:NULL);  return;
+		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		glColor3fv(index? color:NULL);  return;
 	}
 }
 
@@ -462,6 +477,7 @@ void glIndexubv(const GLubyte *c)
 void glMaterialfv(GLenum face, GLenum pname, const GLfloat *params)
 {
 	GLfloat mat[]={1., 1., 1., 1.};
+
 	if(pname==GL_COLOR_INDEXES && params)
 	{
 		mat[0]=params[0]/255.;
@@ -478,6 +494,7 @@ void glMaterialfv(GLenum face, GLenum pname, const GLfloat *params)
 void glMaterialiv(GLenum face, GLenum pname, const GLint *params)
 {
 	GLfloat mat[]={1., 1., 1., 1.};
+
 	if(pname==GL_COLOR_INDEXES && params)
 	{
 		mat[0]=(GLfloat)params[0]/255.;
@@ -545,6 +562,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, GLvoid *pixels)
 {
 	TRY();
+
 	if(format==GL_COLOR_INDEX && !ctxhash.overlayCurrent() && type!=GL_BITMAP)
 	{
 		format=GL_RED;
@@ -570,6 +588,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 		}
 	}
 	_glReadPixels(x, y, width, height, format, type, pixels);
+
 	CATCH();
 }
 

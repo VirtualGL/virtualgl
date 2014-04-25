@@ -28,131 +28,135 @@
 using namespace vglutil;
 
 
-struct _visattrib
+typedef struct
 {
-	VisualID visualid;
+	VisualID visualID;
 	int depth, c_class;
-	int level, stereo, db, gl, trans;
-	int tindex, tr, tg, tb, ta;
-};
+	int level, isStereo, isDB, isGL, isTrans;
+	int transIndex, transRed, transGreen, transBlue, transAlpha;
+} VisAttrib;
 
-static Display *_vadpy=NULL;
-static int _vascreen=-1, _vaentries=0;
-bool _vahasgcv=false;
-static CS _vamutex;
-static struct _visattrib *_va;
+static Display *vaDisplay=NULL;
+static int vaScreen=-1, vaEntries=0;
+static CS vaMutex;
+static VisAttrib *va;
 
 
 static void buildVisAttribTable(Display *dpy, int screen)
 {
-	int clientglx=0, maj_opcode=-1, first_event=-1, first_error=-1, nv=0;
+	int clientGLX=0, majorOpcode=-1, firstEvent=-1, firstError=-1, nVisuals=0;
 	XVisualInfo *visuals=NULL, vtemp;
 	Atom atom=0;
 	int len=10000;
 
-	try {
-
-	CS::SafeLock l(_vamutex);
-
-	if(dpy==_vadpy && screen==_vascreen) return;
-	if(fconfig.probeglx
-		&& _XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
-		&& maj_opcode>=0 && first_event>=0 && first_error>=0)
-		clientglx=1;
-	vtemp.screen=screen;
-	if(!(visuals=XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &nv)) || nv==0)
-		_throw("No visuals found on display");
-
-	if(_va) {delete [] _va;  _va=NULL;}
-	if(!(_va=new struct _visattrib[nv])) _throw("Memory allocation failure");
-	_vaentries=nv;
-	memset(_va, 0, sizeof(struct _visattrib)*nv);
-
-	for(int i=0; i<nv; i++)
+	try
 	{
-		_va[i].visualid=visuals[i].visualid;
-		_va[i].depth=visuals[i].depth;
-		_va[i].c_class=visuals[i].c_class;
-	}
+		CS::SafeLock l(vaMutex);
 
-	if((atom=XInternAtom(dpy, "SERVER_OVERLAY_VISUALS", True))!=None)
-	{
-		struct overlay_info
-		{
-			unsigned long visualid;
-			long transtype, transpixel, level;
-		} *olprop=NULL;
-		unsigned long nop=0, bytesleft=0;
-		int actualformat=0;
-		Atom actualtype=0;
+		if(dpy==vaDisplay && screen==vaScreen) return;
+		if(fconfig.probeglx
+			&& _XQueryExtension(dpy, "GLX", &majorOpcode, &firstEvent, &firstError)
+			&& majorOpcode>=0 && firstEvent>=0 && firstError>=0)
+			clientGLX=1;
+		vtemp.screen=screen;
+		if(!(visuals=XGetVisualInfo(dpy, VisualScreenMask, &vtemp, &nVisuals))
+			|| nVisuals==0)
+			_throw("No visuals found on display");
 
-		do
-		{
-			nop=0;  actualformat=0;  actualtype=0;
-			unsigned char *olproptemp=NULL;
-			if(XGetWindowProperty(dpy, RootWindow(dpy, screen), atom, 0, len, False,
-				atom, &actualtype, &actualformat, &nop, &bytesleft,
-				&olproptemp)!=Success || nop<4 || actualformat!=32
-				|| actualtype!=atom) goto done;
-			olprop=(struct overlay_info *)olproptemp;
-			len+=(bytesleft+3)/4;
-			if(bytesleft && olprop) {XFree(olprop);  olprop=NULL;}
-		} while(bytesleft);
+		if(va) { delete [] va;  va=NULL; }
+		newcheck(va=new VisAttrib[nVisuals]);
+		vaEntries=nVisuals;
+		memset(va, 0, sizeof(VisAttrib)*nVisuals);
 
-		for(unsigned long i=0; i<nop/4; i++)
+		for(int i=0; i<nVisuals; i++)
 		{
-			for(int j=0; j<nv; j++)
+			va[i].visualID=visuals[i].visualid;
+			va[i].depth=visuals[i].depth;
+			va[i].c_class=visuals[i].c_class;
+		}
+
+		if((atom=XInternAtom(dpy, "SERVER_OVERLAY_VISUALS", True))!=None)
+		{
+			struct overlay_info
 			{
-				if(olprop[i].visualid==_va[j].visualid)
+				unsigned long visualID;
+				long transType, transPixel, level;
+			} *olprop=NULL;
+			unsigned long nop=0, bytesLeft=0;
+			int actualFormat=0;
+			Atom actualType=0;
+
+			do
+			{
+				nop=0;  actualFormat=0;  actualType=0;
+				unsigned char *olproptemp=NULL;
+				if(XGetWindowProperty(dpy, RootWindow(dpy, screen), atom, 0, len,
+					False, atom, &actualType, &actualFormat, &nop, &bytesLeft,
+					&olproptemp)!=Success || nop<4 || actualFormat!=32
+					|| actualType!=atom)
+					goto done;
+				olprop=(struct overlay_info *)olproptemp;
+				len+=(bytesLeft+3)/4;
+				if(bytesLeft && olprop) { XFree(olprop);  olprop=NULL; }
+			} while(bytesLeft);
+
+			for(unsigned long i=0; i<nop/4; i++)
+			{
+				for(int j=0; j<nVisuals; j++)
 				{
-					_va[j].trans=1;
-					if(olprop[i].transtype==1) // Transparent pixel
-						_va[j].tindex=olprop[i].transpixel;
-					else if(olprop[i].transtype==2) // Transparent mask
+					if(olprop[i].visualID==va[j].visualID)
 					{
-						// Is this right??
-						_va[j].tr=olprop[i].transpixel&0xFF;
-						_va[j].tg=olprop[i].transpixel&0x00FF;
-						_va[j].tb=olprop[i].transpixel&0x0000FF;
-						_va[j].ta=olprop[i].transpixel&0x000000FF;
+						va[j].isTrans=1;
+						if(olprop[i].transType==1) // Transparent pixel
+							va[j].transIndex=olprop[i].transPixel;
+						else if(olprop[i].transType==2) // Transparent mask
+						{
+							// Is this right??
+							va[j].transRed=olprop[i].transPixel&0xFF;
+							va[j].transGreen=olprop[i].transPixel&0x00FF;
+							va[j].transBlue=olprop[i].transPixel&0x0000FF;
+							va[j].transAlpha=olprop[i].transPixel&0x000000FF;
+						}
+						va[j].level=olprop[i].level;
 					}
-					_va[j].level=olprop[i].level;
 				}
+			}
+
+			done:
+			if(olprop) { XFree(olprop);  olprop=NULL; }
+		}
+
+		for(int i=0; i<nVisuals; i++)
+		{
+			if(clientGLX)
+			{
+				_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &va[i].isDB);
+				_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &va[i].isGL);
+				_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &va[i].isStereo);
 			}
 		}
 
-		done:
-		if(olprop) {XFree(olprop);  olprop=NULL;}
+		vaDisplay=dpy;  vaScreen=screen;
 	}
-
-	_vahasgcv=false;
-	for(int i=0; i<nv; i++)
+	catch(...)
 	{
-		if(clientglx)
-		{
-			_glXGetConfig(dpy, &visuals[i], GLX_DOUBLEBUFFER, &_va[i].db);
-			_glXGetConfig(dpy, &visuals[i], GLX_USE_GL, &_va[i].gl);
-			_glXGetConfig(dpy, &visuals[i], GLX_STEREO, &_va[i].stereo);
-		}
-	}
-
-	_vadpy=dpy;  _vascreen=screen;
-
-	} catch(...) {
-		if(visuals) XFree(visuals);  if(_va) {delete [] _va;  _va=NULL;}
-		_vadpy=NULL;  _vascreen=-1;  _vaentries=0;  _vahasgcv=false;
+		if(visuals) XFree(visuals);  if(va) { delete [] va;  va=NULL; }
+		vaDisplay=NULL;  vaScreen=-1;  vaEntries=0;
 		throw;
 	}
 }
 
 
-GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
+namespace glxvisual
+{
+
+GLXFBConfig *configsFromVisAttribs(const int attribs[],
 	int &depth, int &c_class, int &level, int &stereo, int &trans,
-	int &nelements, bool glx13)
+	int &nElements, bool glx13)
 {
 	int glxattribs[257], j=0;
-	int doublebuffer=0, buffersize=-1, redsize=-1, greensize=-1,
-		bluesize=-1, alphasize=-1, samples=-1;
+	int doubleBuffer=0, bufferSize=-1, redSize=-1, greenSize=-1,
+		blueSize=-1, alphaSize=-1, samples=-1;
 
 	depth=glx13? 24:8;  c_class=glx13? TrueColor:PseudoColor;
 
@@ -160,8 +164,8 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 	{
 		if(attribs[i]==GLX_DOUBLEBUFFER)
 		{
-			if(glx13) {doublebuffer=attribs[i+1];  i++;}
-			else doublebuffer=1;
+			if(glx13) { doubleBuffer=attribs[i+1];  i++; }
+			else doubleBuffer=1;
 		}
 		else if(attribs[i]==GLX_RGBA)
 		{
@@ -170,12 +174,14 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		else if(attribs[i]==GLX_RENDER_TYPE)
 		{
 			if(attribs[i+1]&GLX_COLOR_INDEX_BIT)
-				{depth=8;  c_class=PseudoColor;}
+			{
+				depth=8;  c_class=PseudoColor;
+			}
 			i++;
 		}
 		else if(attribs[i]==GLX_BUFFER_SIZE)
 		{
-			buffersize=attribs[i+1];  i++;
+			bufferSize=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_LEVEL)
 		{
@@ -183,24 +189,24 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		}
 		else if(attribs[i]==GLX_STEREO)
 		{
-			if(glx13) {stereo=attribs[i+1];  i++;}
+			if(glx13) { stereo=attribs[i+1];  i++; }
 			else stereo=1;
 		}
 		else if(attribs[i]==GLX_RED_SIZE)
 		{
-			redsize=attribs[i+1];  i++;
+			redSize=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_GREEN_SIZE)
 		{
-			greensize=attribs[i+1];  i++;
+			greenSize=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_BLUE_SIZE)
 		{
-			bluesize=attribs[i+1];  i++;
+			blueSize=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_ALPHA_SIZE)
 		{
-			alphasize=attribs[i+1];  i++;
+			alphaSize=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_TRANSPARENT_TYPE)
 		{
@@ -228,31 +234,34 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 			i++;
 		}
 	}
-	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doublebuffer;
+	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doubleBuffer;
 	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
-	if(fconfig.forcealpha==1 && redsize>0 && greensize>0 && bluesize>0
-		&& alphasize<1) alphasize=1;
-	if(redsize<0)
+	if(fconfig.forcealpha==1 && redSize>0 && greenSize>0 && blueSize>0
+		&& alphaSize<1) alphaSize=1;
+	if(redSize<0)
 	{
-		if(buffersize>=0 && c_class==PseudoColor && depth==8) redsize=buffersize;
-		else redsize=8;
+		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
+			redSize=bufferSize;
+		else redSize=8;
 	}
-	if(greensize<0)
+	if(greenSize<0)
 	{
-		if(buffersize>=0 && c_class==PseudoColor && depth==8) greensize=buffersize;
-		else greensize=8;
+		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
+			greenSize=bufferSize;
+		else greenSize=8;
 	}
-	if(bluesize<0)
+	if(blueSize<0)
 	{
-		if(buffersize>=0 && c_class==PseudoColor && depth==8) bluesize=buffersize;
-		else bluesize=8;
+		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
+			blueSize=bufferSize;
+		else blueSize=8;
 	}
-	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redsize;
-	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greensize;
-	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=bluesize;
-	if(alphasize>=0)
+	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redSize;
+	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greenSize;
+	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=blueSize;
+	if(alphaSize>=0)
 	{
-		glxattribs[j++]=GLX_ALPHA_SIZE;  glxattribs[j++]=alphasize;
+		glxattribs[j++]=GLX_ALPHA_SIZE;  glxattribs[j++]=alphaSize;
 	}
 	if(fconfig.samples>=0) samples=fconfig.samples;
 	if(samples>=0)
@@ -270,25 +279,26 @@ GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
 		glxattribs[j++]=GLX_PBUFFER_BIT;
 	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=GLX_TRUE_COLOR;
 	glxattribs[j]=None;
-	return _glXChooseFBConfig(_localdpy, DefaultScreen(_localdpy), glxattribs,
-		&nelements);
+
+	return _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), glxattribs,
+		&nElements);
 }
 
 
-int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid,
-	int attribute)
+int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 {
 	buildVisAttribTable(dpy, screen);
-	for(int i=0; i<_vaentries; i++)
+
+	for(int i=0; i<vaEntries; i++)
 	{
-		if(_va[i].visualid==vid)
+		if(va[i].visualID==vid)
 		{
-			if(attribute==GLX_LEVEL) return _va[i].level;
+			if(attribute==GLX_LEVEL) return va[i].level;
 			if(attribute==GLX_TRANSPARENT_TYPE)
 			{
-				if(_va[i].trans)
+				if(va[i].isTrans)
 				{
-					if(_va[i].c_class==TrueColor) return GLX_TRANSPARENT_RGB;
+					if(va[i].c_class==TrueColor) return GLX_TRANSPARENT_RGB;
 					else return GLX_TRANSPARENT_INDEX;
 				}
 				else return GLX_NONE;
@@ -296,15 +306,15 @@ int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid,
 			if(attribute==GLX_TRANSPARENT_INDEX_VALUE)
 			{
 				if(fconfig.transpixel>=0) return fconfig.transpixel;
-				else return _va[i].tindex;
+				else return va[i].transIndex;
 			}
-			if(attribute==GLX_TRANSPARENT_RED_VALUE) return _va[i].tr;
-			if(attribute==GLX_TRANSPARENT_GREEN_VALUE) return _va[i].tg;
-			if(attribute==GLX_TRANSPARENT_BLUE_VALUE) return _va[i].tb;
-			if(attribute==GLX_TRANSPARENT_ALPHA_VALUE) return _va[i].ta;
+			if(attribute==GLX_TRANSPARENT_RED_VALUE) return va[i].transRed;
+			if(attribute==GLX_TRANSPARENT_GREEN_VALUE) return va[i].transGreen;
+			if(attribute==GLX_TRANSPARENT_BLUE_VALUE) return va[i].transBlue;
+			if(attribute==GLX_TRANSPARENT_ALPHA_VALUE) return va[i].transAlpha;
 			if(attribute==GLX_STEREO)
 			{
-				return (_va[i].stereo && _va[i].gl && _va[i].db);
+				return (va[i].isStereo && va[i].isGL && va[i].isDB);
 			}
 		}
 	}
@@ -312,62 +322,64 @@ int __vglClientVisualAttrib(Display *dpy, int screen, VisualID vid,
 }
 
 
-int __vglServerVisualAttrib(GLXFBConfig c, int attribute)
+int visAttrib3D(GLXFBConfig config, int attribute)
 {
 	int value=0;
-	_glXGetFBConfigAttrib(_localdpy, c, attribute, &value);
+	_glXGetFBConfigAttrib(_dpy3D, config, attribute, &value);
 	return value;
 }
 
 
-int __vglVisualDepth(Display *dpy, int screen, VisualID vid)
+int visDepth2D(Display *dpy, int screen, VisualID vid)
 {
 	buildVisAttribTable(dpy, screen);
-	for(int i=0; i<_vaentries; i++)
+
+	for(int i=0; i<vaEntries; i++)
 	{
-		if(_va[i].visualid==vid) return _va[i].depth;
+		if(va[i].visualID==vid) return va[i].depth;
 	}
 	return 24;
 }
 
 
-int __vglVisualClass(Display *dpy, int screen, VisualID vid)
+int visClass2D(Display *dpy, int screen, VisualID vid)
 {
 	buildVisAttribTable(dpy, screen);
-	for(int i=0; i<_vaentries; i++)
+
+	for(int i=0; i<vaEntries; i++)
 	{
-		if(_va[i].visualid==vid) return _va[i].c_class;
+		if(va[i].visualID==vid) return va[i].c_class;
 	}
 	return TrueColor;
 }
 
 
-VisualID __vglMatchVisual(Display *dpy, int screen,
-	int depth, int c_class, int level, int stereo, int trans)
+VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
+	int level, int stereo, int trans)
 {
-	int i, trystereo;
+	int i, tryStereo;
 	if(!dpy) return 0;
 
 	buildVisAttribTable(dpy, screen);
 
 	// Try to find an exact match
-	for(trystereo=1; trystereo>=0; trystereo--)
+	for(tryStereo=1; tryStereo>=0; tryStereo--)
 	{
-		for(i=0; i<_vaentries; i++)
+		for(i=0; i<vaEntries; i++)
 		{
 			int match=1;
-			if(_va[i].c_class!=c_class) match=0;
-			if(_va[i].depth!=depth) match=0;
-			if(fconfig.stereo==RRSTEREO_QUADBUF && trystereo)
+			if(va[i].c_class!=c_class) match=0;
+			if(va[i].depth!=depth) match=0;
+			if(fconfig.stereo==RRSTEREO_QUADBUF && tryStereo)
 			{
-				if(stereo!=_va[i].stereo) match=0;
-				if(stereo && !_va[i].db) match=0;
-				if(stereo && !_va[i].gl) match=0;
-				if(stereo && _va[i].c_class!=TrueColor) match=0;
+				if(stereo!=va[i].isStereo) match=0;
+				if(stereo && !va[i].isDB) match=0;
+				if(stereo && !va[i].isGL) match=0;
+				if(stereo && va[i].c_class!=TrueColor) match=0;
 			}
-			if(level!=_va[i].level) match=0;
-			if(trans && !_va[i].trans) match=0;
-			if(match) return _va[i].visualid;
+			if(level!=va[i].level) match=0;
+			if(trans && !va[i].isTrans) match=0;
+			if(match) return va[i].visualID;
 		}
 	}
 
@@ -375,10 +387,12 @@ VisualID __vglMatchVisual(Display *dpy, int screen,
 }
 
 
-XVisualInfo *__vglVisualFromVisualID(Display *dpy, int screen, VisualID vid)
+XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid)
 {
 	XVisualInfo vtemp;  int n=0;
 	vtemp.visualid=vid;
 	vtemp.screen=screen;
 	return XGetVisualInfo(dpy, VisualIDMask|VisualScreenMask, &vtemp, &n);
 }
+
+} // namespace

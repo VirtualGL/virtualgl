@@ -23,13 +23,18 @@
 #include "glx.h"
 
 
-extern vglutil::CS globalmutex;
-extern Display *_localdpy;
-extern void __vgl_safeexit(int);
-extern int __shutdown;
+namespace vglfaker
+{
+	extern vglutil::CS globalMutex;
+	extern Display *dpy3D;
+	extern void safeExit(int);
+	extern int isShutdown;
+	extern int traceLevel;
+}
 
+#define _dpy3D vglfaker::dpy3D
 
-#define isRemote(dpy) (_localdpy && dpy!=_localdpy)
+#define is3D(dpy) (vglfaker::dpy3D && dpy!=vglfaker::dpy3D)
 
 #define isFront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
@@ -58,9 +63,9 @@ static inline int drawingToRight(void)
 static inline int isDead(void)
 {
 	int retval=0;
-	globalmutex.lock(false);
-	retval=__shutdown;
-	globalmutex.unlock(false);
+	vglfaker::globalMutex.lock(false);
+	retval=vglfaker::isShutdown;
+	vglfaker::globalMutex.unlock(false);
 	return retval;
 }
 
@@ -68,7 +73,7 @@ static inline int isDead(void)
 #define DIE(f,m) {  \
 	if(!isDead())  \
 		vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
-			__vgl_safeexit(1);}
+			vglfaker::safeExit(1);}
 
 
 #define TRY() try {
@@ -77,8 +82,6 @@ static inline int isDead(void)
 
 
 // Tracing stuff
-
-static int __vgltracelevel=0;
 
 #define prargd(a) vglout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a,  \
 	a? DisplayString(a):"NULL")
@@ -106,31 +109,33 @@ static int __vgltracelevel=0;
 	}  vglout.print("] ");}
 
 #define opentrace(f)  \
-	double __vgltracetime=0.;  \
+	double vglTraceTime=0.;  \
 	if(fconfig.trace) {  \
-		if(__vgltracelevel>0) {  \
+		if(vglfaker::traceLevel>0) {  \
 			vglout.print("\n[VGL] ");  \
-			for(int __i=0; __i<__vgltracelevel; __i++) vglout.print("  ");  \
+			for(int __i=0; __i<vglfaker::traceLevel; __i++)  \
+				vglout.print("  ");  \
 		}  \
 		else vglout.print("[VGL] ");  \
-		__vgltracelevel++;  \
+		vglfaker::traceLevel++;  \
 		vglout.print("%s (", #f);  \
 
 #define starttrace()  \
-		__vgltracetime=getTime();  \
+		vglTraceTime=getTime();  \
 	}
 
 #define stoptrace()  \
 	if(fconfig.trace) {  \
-		__vgltracetime=getTime()-__vgltracetime;
+		vglTraceTime=getTime()-vglTraceTime;
 
 #define closetrace()  \
-		vglout.PRINT(") %f ms\n", __vgltracetime*1000.);  \
-		__vgltracelevel--;  \
-		if(__vgltracelevel>0) {  \
+		vglout.PRINT(") %f ms\n", vglTraceTime*1000.);  \
+		vglfaker::traceLevel--;  \
+		if(vglfaker::traceLevel>0) {  \
 			vglout.print("[VGL] ");  \
-			if(__vgltracelevel>1)  \
-				for(int __i=0; __i<__vgltracelevel-1; __i++) vglout.print("  ");  \
+			if(vglfaker::traceLevel>1)  \
+				for(int __i=0; __i<vglfaker::traceLevel-1; __i++)  \
+					vglout.print("  ");  \
     }  \
 	}
 

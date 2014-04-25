@@ -23,12 +23,22 @@
 #include "Log.h"
 
 
-extern void __vgl_safeexit(int);
-extern void __vgl_fakerinit(void);
+namespace vglfaker
+{
+	extern void safeExit(int);
+	extern void init(void);
+}
 
 
-#define checksym(s) {if(!__##s) {__vgl_fakerinit();  if(!__##s) { \
-	vglout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  __vgl_safeexit(1);}}}
+#define checksym(s) {  \
+	if(!__##s) {  \
+		vglfaker::init();  \
+		if(!__##s) {  \
+			vglout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  \
+			vglfaker::safeExit(1);  \
+		}  \
+	}  \
+}
 
 #ifdef __LOCALSYM__
 #define symdef(f) _##f##Type __##f=NULL
@@ -275,7 +285,7 @@ funcdef4(Bool, glXQueryMaxSwapGroupsNV, Display *, dpy, int, screen,
 
 funcdef3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
 	GLuint *, count, return);
- 
+
 funcdef2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen, return);
 
 
@@ -463,9 +473,11 @@ symdef(dlopen);
 #endif
 
 
-void __vgl_loadsymbols(void);
-void __vgl_loaddlsymbols(void);
-void __vgl_unloadsymbols(void);
-
+namespace vglfaker
+{
+	void loadSymbols(void);
+	void loadDLSymbols(void);
+	void unloadSymbols(void);
+}
 
 #endif

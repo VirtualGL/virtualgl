@@ -20,13 +20,13 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<char *, Window, VirtualWin *>
+#define HASH Hash<char *, Window, VirtualWin *>
 
 // This maps a window ID to an off-screen drawable instance
 
 namespace vglserver
 {
-	class WindowHash : public _Hash
+	class WindowHash : public HASH
 	{
 		public:
 
@@ -46,21 +46,21 @@ namespace vglserver
 			{
 				if(!dpy || !win) return;
 				char *dpystring=strdup(DisplayString(dpy));
-				if(!_Hash::add(dpystring, win, NULL))
+				if(!HASH::add(dpystring, win, NULL))
 					free(dpystring);
 			}
 
 			VirtualWin *find(Display *dpy, Window win)
 			{
 				if(!dpy || !win) return NULL;
-				return _Hash::find(DisplayString(dpy), win);
+				return HASH::find(DisplayString(dpy), win);
 			}
 
 			bool find(Display *dpy, GLXDrawable glxd, VirtualWin* &vwin)
 			{
 				VirtualWin *vw;
 				if(!dpy || !glxd) return false;
-				vw=_Hash::find(DisplayString(dpy), glxd);
+				vw=HASH::find(DisplayString(dpy), glxd);
 				if(vw==NULL || vw==(VirtualWin *)-1) return false;
 				else { vwin=vw;  return true; }
 			}
@@ -69,7 +69,7 @@ namespace vglserver
 			{
 				VirtualWin *vw;
 				if(!dpy || !glxd) return false;
-				vw=_Hash::find(DisplayString(dpy), glxd);
+				vw=HASH::find(DisplayString(dpy), glxd);
 				if(vw==(VirtualWin *)-1) return true;
 				return false;
 			}
@@ -78,7 +78,7 @@ namespace vglserver
 			{
 				VirtualWin *vw;
 				if(!glxd) return false;
-				vw=_Hash::find(NULL, glxd);
+				vw=HASH::find(NULL, glxd);
 				if(vw==NULL || vw==(VirtualWin *)-1) return false;
 				else { vwin=vw;  return true; }
 			}
@@ -88,11 +88,11 @@ namespace vglserver
 				if(!dpy || !win || !config) _throw("Invalid argument");
 				HashEntry *ptr=NULL;
 				vglutil::CS::SafeLock l(mutex);
-				if((ptr=_Hash::findEntry(DisplayString(dpy), win))!=NULL)
+				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
 				{
 					if(!ptr->value)
 					{
-						errifnot(ptr->value=new VirtualWin(dpy, win));
+						newcheck(ptr->value=new VirtualWin(dpy, win));
 						VirtualWin *vw=ptr->value;
 						vw->initFromWindow(config);
 					}
@@ -111,7 +111,7 @@ namespace vglserver
 				if(!dpy || !win) return;
 				HashEntry *ptr=NULL;
 				vglutil::CS::SafeLock l(mutex);
-				if((ptr=_Hash::findEntry(DisplayString(dpy), win))!=NULL)
+				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
 				{
 					if(!ptr->value) ptr->value=(VirtualWin *)-1;
 				}
@@ -120,7 +120,7 @@ namespace vglserver
 			void remove(Display *dpy, GLXDrawable glxd)
 			{
 				if(!dpy || !glxd) return;
-				_Hash::remove(DisplayString(dpy), glxd);
+				HASH::remove(DisplayString(dpy), glxd);
 			}
 
 			void remove(Display *dpy)
@@ -134,7 +134,7 @@ namespace vglserver
 					VirtualWin *vw=ptr->value;
 					next=ptr->next;
 					if(vw && vw!=(VirtualWin *)-1 && dpy==vw->getX11Display())
-						_Hash::killEntry(ptr);
+						HASH::killEntry(ptr);
 					ptr=next;
 				}
 			}
@@ -178,7 +178,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define winhash (*(WindowHash::getInstance()))

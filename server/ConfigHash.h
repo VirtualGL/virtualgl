@@ -21,11 +21,11 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<char *, int, VisualID>
+#define HASH Hash<char *, int, VisualID>
 
 namespace vglserver
 {
-	class ConfigHash : public _Hash
+	class ConfigHash : public HASH
 	{
 		public:
 
@@ -45,34 +45,34 @@ namespace vglserver
 			{
 				if(!dpy || !vid || !config) _throw("Invalid argument");
 				char *dpystring=strdup(DisplayString(dpy));
-				if(!_Hash::add(dpystring, _FBCID(config), vid))
+				if(!HASH::add(dpystring, _FBCID(config), vid))
 					free(dpystring);
 			}
 
 			VisualID getVisual(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				return _Hash::find(DisplayString(dpy),
+				return HASH::find(DisplayString(dpy),
 					_FBCID(config));
 			}
 
 			VisualID getVisual(Display *dpy, int fbcid)
 			{
 				if(!dpy || !fbcid) _throw("Invalid argument");
-				return _Hash::find(DisplayString(dpy), fbcid);
+				return HASH::find(DisplayString(dpy), fbcid);
 			}
 
 			void remove(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				_Hash::remove(DisplayString(dpy), _FBCID(config));
+				HASH::remove(DisplayString(dpy), _FBCID(config));
 			}
 
 		private:
 
 			~ConfigHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			bool compare(char *key1, int key2, HashEntry *entry)
@@ -90,7 +90,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define cfghash (*(ConfigHash::getInstance()))

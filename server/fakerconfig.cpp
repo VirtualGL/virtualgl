@@ -38,12 +38,12 @@ using namespace vglutil;
 
 #define DEFQUAL 95
 
-static FakerConfig fcenv;
-static bool fcenv_set=false;
+static FakerConfig fconfig_env;
+static bool fconfig_envset=false;
 
 #if FCONFIG_USESHM==1
-static int fc_shmid=-1;
-int fconfig_getshmid(void) {return fc_shmid;}
+static int fconfig_shmid=-1;
+int fconfig_getshmid(void) { return fconfig_shmid; }
 #endif
 static FakerConfig *fc=NULL;
 
@@ -54,13 +54,13 @@ static FakerConfig *fc=NULL;
 class DeferredCS : CS
 {
 	public:
-		DeferredCS() : _init(false) {}
-		
+		DeferredCS() : isInit(false) {}
+
 		DeferredCS *init(void)
 		{
-			if(!_init)
+			if(!isInit)
 			{
-				_init=true;
+				isInit=true;
 				pthread_mutexattr_t ma;
 				pthread_mutexattr_init(&ma);
 				pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
@@ -72,11 +72,11 @@ class DeferredCS : CS
 
 	private:
 
-		bool _init;
+		bool isInit;
 };
 
-static DeferredCS _fcmutex;
-#define fcmutex ((CS &)(*_fcmutex.init()))
+static DeferredCS fconfig_mutex;
+#define fcmutex ((CS &)(*fconfig_mutex.init()))
 
 
 static void fconfig_init(void);
@@ -87,23 +87,25 @@ FakerConfig *fconfig_instance(void)
 	if(fc==NULL)
 	{
 		CS::SafeLock l(fcmutex);
-		if(fc==NULL) 
+		if(fc==NULL)
 		{
 			#if FCONFIG_USESHM==1
 
 			void *addr=NULL;
-			if((fc_shmid=shmget(IPC_PRIVATE, sizeof(FakerConfig), IPC_CREAT|0600))==-1)
+			if((fconfig_shmid=shmget(IPC_PRIVATE, sizeof(FakerConfig),
+				IPC_CREAT|0600))==-1)
 				_throwunix();
-			if((addr=shmat(fc_shmid, 0, 0))==(void *)-1) _throwunix();
-			if(!addr) _throw("Could not attach to config structure in shared memory");
+			if((addr=shmat(fconfig_shmid, 0, 0))==(void *)-1) _throwunix();
+			if(!addr)
+				_throw("Could not attach to config structure in shared memory");
 			#ifdef linux
-			shmctl(fc_shmid, IPC_RMID, 0);
+			shmctl(fconfig_shmid, IPC_RMID, 0);
 			#endif
 			char *env=NULL;
 			if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 				&& !strncmp(env, "1", 1))
 				vglout.println("[VGL] Shared memory segment ID for vglconfig: %d",
-					fc_shmid);
+					fconfig_shmid);
 			fc=(FakerConfig *)addr;
 
 			#else
@@ -130,14 +132,14 @@ void fconfig_deleteinstance(void)
 			#if FCONFIG_USESHM==1
 
 			shmdt((char *)fc);
-			if(fc_shmid!=-1)
+			if(fconfig_shmid!=-1)
 			{
-				int ret=shmctl(fc_shmid, IPC_RMID, 0);
+				int ret=shmctl(fconfig_shmid, IPC_RMID, 0);
 				char *env=NULL;
 				if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 					&& !strncmp(env, "1", 1) && ret!=-1)
-					vglout.println("[VGL] Removed shared memory segment %d", fc_shmid);
-
+					vglout.println("[VGL] Removed shared memory segment %d",
+						fconfig_shmid);
 			}
 
 			#else
@@ -156,7 +158,7 @@ static void fconfig_init(void)
 {
 	CS::SafeLock l(fcmutex);
 	memset(&fconfig, 0, sizeof(FakerConfig));
-	memset(&fcenv, 0, sizeof(FakerConfig));
+	memset(&fconfig_env, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
 	fconfig.forcealpha=0;
@@ -184,7 +186,7 @@ static void fconfig_init(void)
 }
 
 
-static void buildlut(FakerConfig &fc)
+static void fconfig_buildlut(FakerConfig &fc)
 {
 	if(fc.gamma!=0.0 && fc.gamma!=1.0 && fc.gamma!=-1.0)
 	{
@@ -196,54 +198,56 @@ static void buildlut(FakerConfig &fc)
 		for(int i=0; i<65536; i++)
 		{
 			double g=fc.gamma>0.0? 1.0/fc.gamma : -fc.gamma;
-			fc.gamma_lut16[i]=(unsigned short)(255.*pow((double)(i/256)/255., g)+0.5)<<8;
-			fc.gamma_lut16[i]|=(unsigned short)(255.*pow((double)(i%256)/255., g)+0.5);
+			fc.gamma_lut16[i]=
+				(unsigned short)(255.*pow((double)(i/256)/255., g)+0.5)<<8;
+			fc.gamma_lut16[i]|=
+				(unsigned short)(255.*pow((double)(i%256)/255., g)+0.5);
 		}
 	}
 }
 
 
-#define fetchenv_str(envvar, s) { \
-	if((env=getenv(envvar))!=NULL && strlen(env)>0 \
-		&& (!fcenv_set || strncmp(env, fcenv.s, MAXSTR-1))) { \
-		strncpy(fconfig.s, env, MAXSTR-1); \
-		strncpy(fcenv.s, env, MAXSTR-1); \
-	} \
+#define fetchenv_str(envvar, s) {  \
+	if((env=getenv(envvar))!=NULL && strlen(env)>0  \
+		&& (!fconfig_envset || strncmp(env, fconfig_env.s, MAXSTR-1))) {  \
+		strncpy(fconfig.s, env, MAXSTR-1);  \
+		strncpy(fconfig_env.s, env, MAXSTR-1);  \
+	}  \
 }
 
-#define fetchenv_bool(envvar, b) { \
-	if((env=getenv(envvar))!=NULL && strlen(env)>0) { \
-		if(!strncmp(env, "1", 1) && (!fcenv_set || fcenv.b!=1)) \
-			fconfig.b=fcenv.b=1; \
-		else if(!strncmp(env, "0", 1) && (!fcenv_set || fcenv.b!=0)) \
-			fconfig.b=fcenv.b=0; \
-	} \
+#define fetchenv_bool(envvar, b) {  \
+	if((env=getenv(envvar))!=NULL && strlen(env)>0) {  \
+		if(!strncmp(env, "1", 1) && (!fconfig_envset || fconfig_env.b!=1))  \
+			fconfig.b=fconfig_env.b=1;  \
+		else if(!strncmp(env, "0", 1) && (!fconfig_envset || fconfig_env.b!=0))  \
+			fconfig.b=fconfig_env.b=0;  \
+	}  \
 }
 
-#define fetchenv_int(envvar, i, min, max) { \
-	if((env=getenv(envvar))!=NULL && strlen(env)>0) { \
-		char *t=NULL;  int itemp=strtol(env, &t, 10); \
-		if(t && t!=env && itemp>=min && itemp<=max \
-			&& (!fcenv_set || itemp!=fcenv.i)) \
-			fconfig.i=fcenv.i=itemp; \
-	} \
+#define fetchenv_int(envvar, i, min, max) {  \
+	if((env=getenv(envvar))!=NULL && strlen(env)>0) {  \
+		char *t=NULL;  int itemp=strtol(env, &t, 10);  \
+		if(t && t!=env && itemp>=min && itemp<=max  \
+			&& (!fconfig_envset || itemp!=fconfig_env.i))  \
+			fconfig.i=fconfig_env.i=itemp;  \
+	}  \
 }
 
-#define fetchenv_dbl(envvar, d, min, max) { \
-	char *temp=NULL; \
-	if((temp=getenv(envvar))!=NULL && strlen(temp)>0) { \
-		char *t=NULL;  double dtemp=strtod(temp, &t); \
-		if(t && t!=temp && dtemp>=min && dtemp<=max \
-			&& (!fcenv_set || dtemp!=fcenv.d)) \
-			fconfig.d=fcenv.d=dtemp; \
-	} \
+#define fetchenv_dbl(envvar, d, min, max) {  \
+	char *temp=NULL;  \
+	if((temp=getenv(envvar))!=NULL && strlen(temp)>0) {  \
+		char *t=NULL;  double dtemp=strtod(temp, &t);  \
+		if(t && t!=temp && dtemp>=min && dtemp<=max  \
+			&& (!fconfig_envset || dtemp!=fconfig_env.d))  \
+			fconfig.d=fconfig_env.d=dtemp;  \
+	}  \
 }
 
 
 void fconfig_setgamma(FakerConfig &fc, double gamma)
 {
 	fc.gamma=gamma;
-	buildlut(fc);
+	fconfig_buildlut(fc);
 }
 
 
@@ -276,8 +280,8 @@ void fconfig_reloadenv(void)
 				}
 			}
 		}
-		if(subsamp>=0 && (!fcenv_set || fcenv.subsamp!=subsamp))
-			fconfig.subsamp=fcenv.subsamp=subsamp;
+		if(subsamp>=0 && (!fconfig_envset || fconfig_env.subsamp!=subsamp))
+			fconfig.subsamp=fconfig_env.subsamp=subsamp;
 	}
 	fetchenv_str("VGL_TRANSPORT", transport);
 	if((env=getenv("VGL_COMPRESS"))!=NULL && strlen(env)>0)
@@ -285,26 +289,27 @@ void fconfig_reloadenv(void)
 		char *t=NULL;  int itemp=strtol(env, &t, 10);
 		int compress=-1;
 		if(t && t!=env && itemp>=0
-			&& (itemp<RR_COMPRESSOPT || strlen(fconfig.transport)>0)) compress=itemp;
+			&& (itemp<RR_COMPRESSOPT || strlen(fconfig.transport)>0))
+			compress=itemp;
 		else if(!strnicmp(env, "p", 1)) compress=RRCOMP_PROXY;
 		else if(!strnicmp(env, "j", 1)) compress=RRCOMP_JPEG;
 		else if(!strnicmp(env, "r", 1)) compress=RRCOMP_RGB;
 		else if(!strnicmp(env, "x", 1)) compress=RRCOMP_XV;
 		else if(!strnicmp(env, "y", 1)) compress=RRCOMP_YUV;
-		if(compress>=0 && (!fcenv_set || fcenv.compress!=compress))
+		if(compress>=0 && (!fconfig_envset || fconfig_env.compress!=compress))
 		{
 			fconfig_setcompress(fconfig, compress);
-			fcenv.compress=compress;
+			fconfig_env.compress=compress;
 		}
 	}
 	fetchenv_str("VGL_CONFIG", config);
 	fetchenv_str("VGL_DEFAULTFBCONFIG", defaultfbconfig);
 	if((env=getenv("VGL_DISPLAY"))!=NULL && strlen(env)>0)
 	{
-		if(!fcenv_set || strncmp(env, fcenv.localdpystring, MAXSTR-1))
+		if(!fconfig_envset || strncmp(env, fconfig_env.localdpystring, MAXSTR-1))
 		{
 			strncpy(fconfig.localdpystring, env, MAXSTR-1);
-			strncpy(fcenv.localdpystring, env, MAXSTR-1);
+			strncpy(fconfig_env.localdpystring, env, MAXSTR-1);
 		}
 	}
 	if((env=getenv("VGL_DRAWABLE"))!=NULL && strlen(env)>0)
@@ -317,8 +322,8 @@ void fconfig_reloadenv(void)
 			char *t=NULL;  int itemp=strtol(env, &t, 10);
 			if(t && t!=env && itemp>=0 && itemp<RR_DRAWABLEOPT) drawable=itemp;
 		}
-		if(drawable>=0 && (!fcenv_set || fcenv.drawable!=drawable))
-			fconfig.drawable=fcenv.drawable=drawable;
+		if(drawable>=0 && (!fconfig_envset || fconfig_env.drawable!=drawable))
+			fconfig.drawable=fconfig_env.drawable=drawable;
 	}
 	fetchenv_bool("VGL_FORCEALPHA", forcealpha);
 	fetchenv_dbl("VGL_FPS", fps, 0.0, 1000000.0);
@@ -326,17 +331,17 @@ void fconfig_reloadenv(void)
 	{
 		if(!strcmp(env, "1"))
 		{
-			if(!fcenv_set || fcenv.gamma!=2.22)
+			if(!fconfig_envset || fconfig_env.gamma!=2.22)
 			{
-				fcenv.gamma=2.22;
+				fconfig_env.gamma=2.22;
 				fconfig_setgamma(fconfig, 2.22);
 			}
 		}
 		else if(!strcmp(env, "0"))
 		{
-			if(!fcenv_set || fcenv.gamma!=1.0)
+			if(!fconfig_envset || fconfig_env.gamma!=1.0)
 			{
-				fcenv.gamma=1.0;
+				fconfig_env.gamma=1.0;
 				fconfig_setgamma(fconfig, 1.0);
 			}
 		}
@@ -344,9 +349,9 @@ void fconfig_reloadenv(void)
 		{
 			char *t=NULL;  double dtemp=strtod(env, &t);
 			if(t && t!=env
-				&& (!fcenv_set || fcenv.gamma!=dtemp))
+				&& (!fconfig_envset || fconfig_env.gamma!=dtemp))
 			{
-				fcenv.gamma=dtemp;
+				fconfig_env.gamma=dtemp;
 				fconfig_setgamma(fconfig, dtemp);
 			}
 		}
@@ -399,8 +404,8 @@ void fconfig_reloadenv(void)
 			char *t=NULL;  int itemp=strtol(env, &t, 10);
 			if(t && t!=env && itemp>=0 && itemp<RR_READBACKOPT) readback=itemp;
 		}
-		if(readback>=0 && (!fcenv_set || fcenv.readback!=readback))
-			fconfig.readback=fcenv.readback=readback;
+		if(readback>=0 && (!fconfig_envset || fconfig_env.readback!=readback))
+			fconfig.readback=fconfig_env.readback=readback;
 	}
 	fetchenv_dbl("VGL_REFRESHRATE", refreshrate, 0.0, 1000000.0);
 	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
@@ -425,8 +430,8 @@ void fconfig_reloadenv(void)
 				char *t=NULL;  int itemp=strtol(env, &t, 10);
 				if(t && t!=env && itemp>=0 && itemp<RR_STEREOOPT) stereo=itemp;
 			}
-			if(stereo>=0 && (!fcenv_set || fcenv.stereo!=stereo))
-				fconfig.stereo=fcenv.stereo=stereo;
+			if(stereo>=0 && (!fconfig_envset || fconfig_env.stereo!=stereo))
+				fconfig.stereo=fconfig_env.stereo=stereo;
 		}
 	}
 	fetchenv_bool("VGL_SYNC", sync);
@@ -445,7 +450,7 @@ void fconfig_reloadenv(void)
 		if(fconfig.subsamp<0) fconfig.subsamp=1;
 	}
 
-	fcenv_set=true;
+	fconfig_envset=true;
 }
 
 
@@ -455,20 +460,20 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 
 	if(fconfig.compress<0)
 	{
-		bool usesunray=false;
+		bool useSunRay=false;
 		Atom atom=None;
 		if((atom=XInternAtom(dpy, "_SUN_SUNRAY_SESSION", True))!=None)
-			usesunray=true;
+			useSunRay=true;
 		const char *dstr=DisplayString(dpy);
 		if((strlen(dstr) && dstr[0]==':') || (strlen(dstr)>5
 			&& !strnicmp(dstr, "unix", 4)))
 		{
-			if(usesunray) fconfig_setcompress(fconfig, RRCOMP_XV);
+			if(useSunRay) fconfig_setcompress(fconfig, RRCOMP_XV);
 			else fconfig_setcompress(fconfig, RRCOMP_PROXY);
 		}
 		else
 		{
-			if(usesunray) fconfig_setcompress(fconfig, RRCOMP_YUV);
+			if(useSunRay) fconfig_setcompress(fconfig, RRCOMP_YUV);
 			else fconfig_setcompress(fconfig, RRCOMP_JPEG);
 		}
 	}
@@ -476,22 +481,23 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 	if(fconfig.port<0)
 	{
 		fconfig.port=fconfig.ssl? RR_DEFAULTSSLPORT:RR_DEFAULTPORT;
-		Atom atom=None;  unsigned long n=0, bytesleft=0;
-		int actualformat=0;  Atom actualtype=None;
+		Atom atom=None;  unsigned long n=0, bytesLeft=0;
+		int actualFormat=0;  Atom actualType=None;
 		unsigned char *prop=NULL;
 		if((atom=XInternAtom(dpy,
 			fconfig.ssl? "_VGLCLIENT_SSLPORT":"_VGLCLIENT_PORT", True))!=None)
 		{
 			if(XGetWindowProperty(dpy, RootWindow(dpy, DefaultScreen(dpy)), atom,
-				0, 1, False, XA_INTEGER, &actualtype, &actualformat, &n,
-				&bytesleft, &prop)==Success && n>=1
-				&& actualformat==16 && actualtype==XA_INTEGER && prop)
+				0, 1, False, XA_INTEGER, &actualType, &actualFormat, &n,
+				&bytesLeft, &prop)==Success && n>=1 && actualFormat==16
+				&& actualType==XA_INTEGER && prop)
 				fconfig.port=*(unsigned short *)prop;
 			if(prop) XFree(prop);
 		}
 	}
 
 	#ifdef USEXV
+
 	int k, port, nformats, dummy1, dummy2, dummy3;
 	unsigned int i, j, nadaptors=0;
 	XvAdaptorInfo *ai=NULL;
@@ -526,6 +532,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 		XvFreeAdaptorInfo(ai);  ai=NULL;
 		if(port!=-1) fconfig.transvalid[RRTRANS_XV]=1;
 	}
+
 	#endif
 }
 
@@ -551,7 +558,8 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 
 
 #define prconfint(i) vglout.println(#i"  =  %d", (int)fc.i)
-#define prconfstr(s) vglout.println(#s"  =  \"%s\"", strlen(fc.s)>0? fc.s:"{Empty}")
+#define prconfstr(s)  \
+	vglout.println(#s"  =  \"%s\"", strlen(fc.s)>0? fc.s:"{Empty}")
 #define prconfdbl(d) vglout.println(#d"  =  %f", fc.d)
 
 void fconfig_print(FakerConfig &fc)

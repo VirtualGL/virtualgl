@@ -20,7 +20,7 @@
 #include "fakerconfig.h"
 
 
-static void *loadsym(void *dllhnd, const char *symbol, int quiet)
+static void *loadSym(void *dllhnd, const char *symbol, int quiet)
 {
 	void *sym;  const char *err;
 	dlerror();  // Clear error state
@@ -31,30 +31,33 @@ static void *loadsym(void *dllhnd, const char *symbol, int quiet)
 }
 
 
-#define lsym(s) __##s=(_##s##Type)loadsym(dllhnd, #s, !fconfig.verbose);  \
+#define lsym(s) __##s=(_##s##Type)loadSym(dllhnd, #s, !fconfig.verbose);  \
 	if(!__##s) return -1;
 
-#define lsymopt(s) __##s=(_##s##Type)loadsym(dllhnd, #s, 1);
+#define lsymopt(s) __##s=(_##s##Type)loadSym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
-static int __vgl_loadglsymbols(void *);
-static int __vgl_loadx11symbols(void *);
+static int loadGLSymbols(void *);
+static int loadX11Symbols(void *);
 
 
-void __vgl_loaddlsymbols(void)
+namespace vglfaker
+{
+
+void loadDLSymbols(void)
 {
 	dlerror();  // Clear error state
-	__dlopen=(_dlopenType)loadsym(RTLD_NEXT, "dlopen", 0);
+	__dlopen=(_dlopenType)loadSym(RTLD_NEXT, "dlopen", 0);
 	if(!__dlopen)
 	{
 		vglout.print("[VGL] ERROR: Could not load symbol dlopen\n");
-		__vgl_safeexit(1);
+		safeExit(1);
 	}
 }
 
 
-void __vgl_loadsymbols(void)
+void loadSymbols(void)
 {
 	void *dllhnd;
 
@@ -65,12 +68,12 @@ void __vgl_loadsymbols(void)
 		{
 			vglout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
 				fconfig.gllib, dlerror());
-			__vgl_safeexit(1);
+			safeExit(1);
 		}
 		else gldllhnd=dllhnd;
 	}
 	else dllhnd=RTLD_NEXT;
-	if(__vgl_loadglsymbols(dllhnd)<0)
+	if(loadGLSymbols(dllhnd)<0)
 	{
 		if(dllhnd==RTLD_NEXT)
 		{
@@ -84,12 +87,12 @@ void __vgl_loadsymbols(void)
 			{
 				vglout.print("[VGL] ERROR: Could not open libGL.so.1\n[VGL]    %s\n",
 					dlerror());
-				__vgl_safeexit(1);
+				safeExit(1);
 			}
-			if(__vgl_loadglsymbols(dllhnd)<0)
+			if(loadGLSymbols(dllhnd)<0)
 			{
 				vglout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from libGL.so.1.\n");
-				__vgl_safeexit(1);
+				safeExit(1);
 			}
 			gldllhnd=dllhnd;
 		}
@@ -98,7 +101,7 @@ void __vgl_loadsymbols(void)
 			if(strlen(fconfig.gllib)>0)
 				vglout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from %s.\n",
 					fconfig.gllib);
-			__vgl_safeexit(1);
+			safeExit(1);
 		}
 	}
 
@@ -109,12 +112,12 @@ void __vgl_loadsymbols(void)
 		{
 			vglout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
 				fconfig.x11lib, dlerror());
-			__vgl_safeexit(1);
+			safeExit(1);
 		}
 		else x11dllhnd=dllhnd;
 	}
 	else dllhnd=RTLD_NEXT;
-	if(__vgl_loadx11symbols(dllhnd)<0)
+	if(loadX11Symbols(dllhnd)<0)
 	{
 		if(dllhnd==RTLD_NEXT)
 		{
@@ -130,12 +133,12 @@ void __vgl_loadsymbols(void)
 			{
 				vglout.print("[VGL] ERROR: Could not open libX11\n[VGL]    %s\n",
 					dlerror());
-				__vgl_safeexit(1);
+				safeExit(1);
 			}
-			if(__vgl_loadx11symbols(dllhnd)<0)
+			if(loadX11Symbols(dllhnd)<0)
 			{
 				vglout.print("[VGL] ERROR: Could not load X11 symbols from libX11.\n");
-				__vgl_safeexit(1);
+				safeExit(1);
 			}
 			x11dllhnd=dllhnd;
 		}
@@ -144,13 +147,15 @@ void __vgl_loadsymbols(void)
 			if(strlen(fconfig.x11lib)>0)
 				vglout.print("[VGL] ERROR: Could not load X11 symbols from %s.\n",
 					fconfig.x11lib);
-			__vgl_safeexit(1);
+			safeExit(1);
 		}
 	}
 }
 
+} // namespace
 
-static int __vgl_loadglsymbols(void *dllhnd)
+
+static int loadGLSymbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
 
@@ -257,7 +262,7 @@ static int __vgl_loadglsymbols(void *dllhnd)
 }
 
 
-static int __vgl_loadx11symbols(void *dllhnd)
+static int loadX11Symbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
 
@@ -288,8 +293,12 @@ static int __vgl_loadx11symbols(void *dllhnd)
 }
 
 
-void __vgl_unloadsymbols(void)
+namespace vglfaker {
+
+void unloadSymbols(void)
 {
 	if(gldllhnd) dlclose(gldllhnd);
 	if(x11dllhnd) dlclose(x11dllhnd);
+}
+
 }

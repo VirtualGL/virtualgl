@@ -27,13 +27,13 @@ typedef struct
 } ContextAttribs;
 
 
-#define _Hash Hash<GLXContext, void *, ContextAttribs *>
+#define HASH Hash<GLXContext, void *, ContextAttribs *>
 
 // This maps a GLXContext to a GLXFBConfig
 
 namespace vglserver
 {
-	class ContextHash : public _Hash
+	class ContextHash : public HASH
 	{
 		public:
 
@@ -56,13 +56,13 @@ namespace vglserver
 				newcheck(attribs=new ContextAttribs);
 				attribs->config=config;
 				attribs->direct=direct;
-				_Hash::add(ctx, NULL, attribs);
+				HASH::add(ctx, NULL, attribs);
 			}
 
 			GLXFBConfig findConfig(GLXContext ctx)
 			{
 				if(!ctx) _throw("Invalid argument");
-				ContextAttribs *attribs=_Hash::find(ctx, NULL);
+				ContextAttribs *attribs=HASH::find(ctx, NULL);
 				if(attribs) return attribs->config;
 				return 0;
 			}
@@ -77,7 +77,7 @@ namespace vglserver
 			{
 				if(ctx)
 				{
-					ContextAttribs *attribs=_Hash::find(ctx, NULL);
+					ContextAttribs *attribs=HASH::find(ctx, NULL);
 					if(attribs) return attribs->direct;
 				}
 				return -1;
@@ -90,14 +90,14 @@ namespace vglserver
 
 			void remove(GLXContext ctx)
 			{
-				if(ctx) _Hash::remove(ctx, NULL);
+				if(ctx) HASH::remove(ctx, NULL);
 			}
 
 		private:
 
 			~ContextHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			void detach(HashEntry *entry)
@@ -116,7 +116,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define ctxhash (*(ContextHash::getInstance()))

@@ -21,14 +21,14 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<GLXDrawable, void *, Display *>
+#define HASH Hash<GLXDrawable, void *, Display *>
 
 // This maps a GLXDrawable instance to a (remote) Display handle.
 // Used primarily to make glXGetCurrentDisplay() work properly :/
 
 namespace vglserver
 {
-	class GLXDrawableHash : public _Hash
+	class GLXDrawableHash : public HASH
 	{
 		public:
 
@@ -47,26 +47,26 @@ namespace vglserver
 			void add(GLXDrawable draw, Display *dpy)
 			{
 				if(!draw || !dpy) _throw("Invalid argument");
-				_Hash::add(draw, NULL, dpy);
+				HASH::add(draw, NULL, dpy);
 			}
 
 			Display *getCurrentDisplay(GLXDrawable draw)
 			{
 				if(!draw) _throw("Invalid argument");
-				return _Hash::find(draw, NULL);
+				return HASH::find(draw, NULL);
 			}
 
 			void remove(GLXDrawable draw)
 			{
 				if(!draw) _throw("Invalid argument");
-				_Hash::remove(draw, NULL);
+				HASH::remove(draw, NULL);
 			}
 
 		private:
 
 			~GLXDrawableHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			Display *attach(GLXDrawable key1, void *key2) { return NULL; }
@@ -83,7 +83,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define glxdhash (*(GLXDrawableHash::getInstance()))

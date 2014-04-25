@@ -20,13 +20,13 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<char *, GLXFBConfig, VisualID>
+#define HASH Hash<char *, GLXFBConfig, VisualID>
 
 // This maps a GLXFBConfig to an X Visual ID
 
 namespace vglserver
 {
-	class ReverseConfigHash : public _Hash
+	class ReverseConfigHash : public HASH
 	{
 		public:
 
@@ -46,14 +46,14 @@ namespace vglserver
 			{
 				if(!dpy || !config) _throw("Invalid argument");
 				char *dpystring=strdup(DisplayString(dpy));
-				if(!_Hash::add(dpystring, config, (VisualID)-1))
+				if(!HASH::add(dpystring, config, (VisualID)-1))
 					free(dpystring);
 			}
 
 			bool isOverlay(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) return false;
-				VisualID vid=_Hash::find(DisplayString(dpy), config);
+				VisualID vid=HASH::find(DisplayString(dpy), config);
 				if(vid==(VisualID)-1) return true;
 				else return false;
 			}
@@ -61,14 +61,14 @@ namespace vglserver
 			void remove(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				_Hash::remove(DisplayString(dpy), config);
+				HASH::remove(DisplayString(dpy), config);
 			}
 
 		private:
 
 			~ReverseConfigHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			VisualID attach(char *key1, GLXFBConfig config) { return 0; }
@@ -88,7 +88,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define rcfghash (*(ReverseConfigHash::getInstance()))

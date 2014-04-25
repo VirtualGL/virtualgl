@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009 D. R. Commander
+ * Copyright (C)2009, 2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,9 +24,10 @@
 #define _throw(m) {fprintf(stderr, "ERROR: %s\n", m);  goto bailout;}
 
 
-int checkwindowcolor(Window win, unsigned int color)
+int checkWindowColor(Window win, unsigned int color)
 {
 	char *e=NULL, temps[80];  int fakerclr;
+
 	snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
 	if((e=getenv(temps))==NULL)
 		_throw("Can't communicate w/ faker");
@@ -44,19 +45,20 @@ int checkwindowcolor(Window win, unsigned int color)
 }
 
 
-int checkframe(Window win, int desiredreadbacks, int *lastframe)
+int checkFrame(Window win, int desiredReadbacks, int *lastFrame)
 {
 	char *e=NULL, temps[80];  int frame;
+
 	snprintf(temps, 79, "__VGL_AUTOTESTFRAME%x", (unsigned int)win);
 	if((e=getenv(temps))==NULL || (frame=atoi(e))<1)
 		_throw("Can't communicate w/ faker");
-	if(frame-(*lastframe)!=desiredreadbacks && desiredreadbacks>=0)
+	if(frame-(*lastFrame)!=desiredReadbacks && desiredReadbacks>=0)
 	{
-		fprintf(stderr, "Expected %d readback%s, not %d", desiredreadbacks,
-			desiredreadbacks==1?"":"s", frame-(*lastframe));
+		fprintf(stderr, "Expected %d readback%s, not %d", desiredReadbacks,
+			desiredReadbacks==1?"":"s", frame-(*lastFrame));
 		return 0;
 	}
-	*lastframe=frame;
+	*lastFrame=frame;
 	return 1;
 
 	bailout:
@@ -95,7 +97,7 @@ void *gldllhnd=NULL;
 	err=dlerror();  if(err) _throw(err)  \
 	else if(!_##s) _throw("Could not load symbol "#s)
 
-void loadsymbols1(char *prefix)
+void loadSymbols1(char *prefix)
 {
 	const char *err=NULL;
 	if(prefix)
@@ -122,7 +124,7 @@ void loadsymbols1(char *prefix)
 	exit(1);
 }
 
-void unloadsymbols1(void)
+void unloadSymbols1(void)
 {
 	if(gldllhnd) dlclose(gldllhnd);
 }
@@ -131,7 +133,7 @@ void unloadsymbols1(void)
 #define lsym2(s) _##s=(_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s);  \
 	if(!_##s) _throw("Could not load symbol "#s)
 
-void loadsymbols2(void)
+void loadSymbols2(void)
 {
 	const char *err=NULL;
 
@@ -156,7 +158,7 @@ void loadsymbols2(void)
 typedef void (*_myTestFunctionType)(void);
 _myTestFunctionType _myTestFunction=NULL;
 
-void namematchtest(void)
+void nameMatchTest(void)
 {
 	const char *err=NULL;
 
@@ -177,16 +179,16 @@ void namematchtest(void)
 }
 
 
-void test(const char *testname)
+void test(const char *testName)
 {
 	Display *dpy=NULL;  Window win=0, root;
-	int dpyw, dpyh, lastframe=0;
+	int dpyw, dpyh, lastFrame=0;
 	int glxattrib[]={GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE,
 		8, GLX_BLUE_SIZE, 8, None, None};
 	XVisualInfo *v=NULL;  GLXContext ctx=0;
 	XSetWindowAttributes swa;
 
-	fprintf(stderr, "%s:\n", testname);
+	fprintf(stderr, "%s:\n", testName);
 
 	if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
 	dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
@@ -214,8 +216,8 @@ void test(const char *testname)
 	_glClearColor(1., 0., 0., 0.);
 	_glClear(GL_COLOR_BUFFER_BIT);
 	_glXSwapBuffers(dpy, win);
-	if(!checkframe(win, 1, &lastframe)) goto bailout;
-	if(!checkwindowcolor(win, 0x0000ff)) goto bailout;
+	if(!checkFrame(win, 1, &lastFrame)) goto bailout;
+	if(!checkWindowColor(win, 0x0000ff)) goto bailout;
 	printf("SUCCESS\n");
 
 	bailout:
@@ -223,9 +225,9 @@ void test(const char *testname)
 	{
 		_glXMakeCurrent(dpy, 0, 0);  _glXDestroyContext(dpy, ctx);  ctx=0;
 	}
-	if(win && dpy) {XDestroyWindow(dpy, win);  win=0;}
-	if(v) {XFree(v);  v=NULL;}
-	if(dpy) {XCloseDisplay(dpy);  dpy=NULL;}
+	if(win && dpy) { XDestroyWindow(dpy, win);  win=0; }
+	if(v) { XFree(v);  v=NULL; }
+	if(dpy) { XCloseDisplay(dpy);  dpy=NULL; }
 }
 
 
@@ -240,7 +242,7 @@ int main(int argc, char **argv)
 	}
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
-	|| putenv((char *)"VGL_SPOIL=0")==-1)
+		|| putenv((char *)"VGL_SPOIL=0")==-1)
 		_throw("putenv() failed!\n");
 
 	env=getenv("LD_PRELOAD");
@@ -253,15 +255,15 @@ int main(int argc, char **argv)
 	#endif
 
 	fprintf(stderr, "\n");
-	namematchtest();
+	nameMatchTest();
 
-	loadsymbols1(prefix);
+	loadSymbols1(prefix);
 	test("dlopen() test");
 
-	loadsymbols2();
+	loadSymbols2();
 	test("glXGetProcAddressARB() test");
 
-	unloadsymbols1();
+	unloadSymbols1();
 
 	bailout:
 	return 0;

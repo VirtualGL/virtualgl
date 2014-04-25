@@ -82,7 +82,7 @@ VirtualWin::VirtualWin(Display *dpy, Window win) :
 				win);
 	}
 	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) trueColor=false;
-	stereoVisual=__vglClientVisualAttrib(dpy, DefaultScreen(dpy),
+	stereoVisual=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
 
@@ -344,7 +344,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 
 	if(!plugin)
 	{
-		plugin=new TransPlugin(dpy, x11Draw, fconfig.transport);
+		newcheck(plugin=new TransPlugin(dpy, x11Draw, fconfig.transport));
 		plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(dpy), fconfig.port);
 	}
@@ -492,7 +492,7 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
 
 	FBXFrame *f;
-	if(!x11trans) errifnot(x11trans=new X11Trans());
+	if(!x11trans) newcheck(x11trans=new X11Trans());
 	if(spoilLast && fconfig.spoil && !x11trans->isReady()) return;
 	if(!fconfig.spoil) x11trans->synchronize();
 	errifnot(f=x11trans->getFrame(dpy, x11Draw, width, height));
@@ -563,7 +563,7 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
 
 	XVFrame *f;
-	if(!xvtrans) errifnot(xvtrans=new XVTrans());
+	if(!xvtrans) newcheck(xvtrans=new XVTrans());
 	if(spoilLast && fconfig.spoil && !xvtrans->isReady()) return;
 	if(!fconfig.spoil) xvtrans->synchronize();
 	errifnot(f=xvtrans->getFrame(dpy, x11Draw, width, height));

@@ -21,13 +21,13 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<char *, XVisualInfo *, GLXFBConfig>
+#define HASH Hash<char *, XVisualInfo *, GLXFBConfig>
 
 // This maps a XVisualInfo * to a GLXFBConfig
 
 namespace vglserver
 {
-	class VisualHash : public _Hash
+	class VisualHash : public HASH
 	{
 		public:
 
@@ -47,20 +47,20 @@ namespace vglserver
 			{
 				if(!dpy || !vis || !config) _throw("Invalid argument");
 				char *dpystring=strdup(DisplayString(dpy));
-				if(!_Hash::add(dpystring, vis, config))
+				if(!HASH::add(dpystring, vis, config))
 					free(dpystring);
 			}
 
 			GLXFBConfig getConfig(Display *dpy, XVisualInfo *vis)
 			{
 				if(!dpy || !vis) _throw("Invalid argument");
-				return _Hash::find(DisplayString(dpy), vis);
+				return HASH::find(DisplayString(dpy), vis);
 			}
 
 			void remove(Display *dpy, XVisualInfo *vis)
 			{
 				if(!vis) _throw("Invalid argument");
-				_Hash::remove(dpy? DisplayString(dpy):NULL, vis);
+				HASH::remove(dpy? DisplayString(dpy):NULL, vis);
 			}
 
 			GLXFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
@@ -83,7 +83,7 @@ namespace vglserver
 
 			~VisualHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			bool compare(char *key1, XVisualInfo *key2, HashEntry *entry)
@@ -101,7 +101,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define vishash (*(VisualHash::getInstance()))

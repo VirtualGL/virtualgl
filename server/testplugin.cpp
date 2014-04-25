@@ -81,7 +81,6 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		if(!vglconn) _throw("Invalid handle");
 		RRFrame *frame;
 		newcheck(frame=new RRFrame);
-		if(!frame) _throw("Memory allocation error");
 		memset(frame, 0, sizeof(RRFrame));
 		int compress=fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;

@@ -29,12 +29,16 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-Display *_localdpy=NULL;
-CS globalmutex;
-int __shutdown=0;
+namespace vglfaker
+{
+
+Display *dpy3D=NULL;
+CS globalMutex;
+bool deadYet=false;
+int traceLevel=0;
 
 
-static void __vgl_cleanup(void)
+static void cleanup(void)
 {
 	if(PixmapHash::isAlloc()) pmhash.kill();
 	if(VisualHash::isAlloc()) vishash.kill();
@@ -43,40 +47,41 @@ static void __vgl_cleanup(void)
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
-	__vgl_unloadsymbols();
+	unloadSymbols();
 }
 
 
-void __vgl_safeexit(int retcode)
+void safeExit(int retcode)
 {
-	int shutdown;
-	globalmutex.lock(false);
-	shutdown=__shutdown;
-	if(!__shutdown)
+	bool shutdown;
+
+	globalMutex.lock(false);
+	shutdown=deadYet;
+	if(!deadYet)
 	{
-		__shutdown=1;
-		__vgl_cleanup();
+		deadYet=true;
+		cleanup();
 		fconfig_deleteinstance();
 	}
-	globalmutex.unlock(false);
+	globalMutex.unlock(false);
 	if(!shutdown) exit(retcode);
 	else pthread_exit(0);
 }
 
 
-class _globalcleanup
+class GlobalCleanup
 {
 	public:
-		~_globalcleanup()
+
+		~GlobalCleanup()
 		{
-			globalmutex.lock(false);
+			globalMutex.lock(false);
 			fconfig_deleteinstance();
-			__shutdown=1;
-			globalmutex.unlock(false);
+			deadYet=true;
+			globalMutex.unlock(false);
 		}
 };
-_globalcleanup gdt;
-
+GlobalCleanup globalCleanup;
 
 
 // Used when VGL_TRAPX11=1
@@ -84,6 +89,7 @@ _globalcleanup gdt;
 int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	char temps[256];
+
 	temps[0]=0;
 	XGetErrorText(dpy, xe->error_code, temps, 255);
 	vglout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
@@ -94,11 +100,11 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 // Called from XOpenDisplay(), unless a GLX function is called first
 
-void __vgl_fakerinit(void)
+void init(void)
 {
 	static int init=0;
 
-	CS::SafeLock l(globalmutex);
+	CS::SafeLock l(globalMutex);
 	if(init) return;
 	init=1;
 
@@ -116,19 +122,22 @@ void __vgl_fakerinit(void)
 	}
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
-	__vgl_loadsymbols();
-	if(!_localdpy)
+	loadSymbols();
+	if(!dpy3D)
 	{
-		if(fconfig.verbose) vglout.println("[VGL] Opening local display %s",
-			strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
-		if((_localdpy=_XOpenDisplay(fconfig.localdpystring))==NULL)
+		if(fconfig.verbose)
+			vglout.println("[VGL] Opening connection to 3D X server %s",
+				strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
+		if((dpy3D=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
 			vglout.print("[VGL] ERROR: Could not open display %s.\n",
-				fconfig.localdpystring);
-			__vgl_safeexit(1);
+			fconfig.localdpystring);
+			safeExit(1);
 		}
 	}
 }
+
+}  // namespace
 
 
 extern "C" {
@@ -139,9 +148,9 @@ extern "C" {
 
 void *_vgl_dlopen(const char *file, int mode)
 {
-	globalmutex.lock(false);
-	if(!__dlopen) __vgl_loaddlsymbols();
-	globalmutex.unlock(false);
+	vglfaker::globalMutex.lock(false);
+	if(!__dlopen) vglfaker::loadDLSymbols();
+	vglfaker::globalMutex.unlock(false);
 	checksym(dlopen);
 	return __dlopen(file, mode);
 }

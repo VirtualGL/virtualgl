@@ -19,14 +19,14 @@
 #include "Hash.h"
 
 
-#define _Hash Hash<char *, Pixmap, VirtualPixmap *>
+#define HASH Hash<char *, Pixmap, VirtualPixmap *>
 
 // This maps a 2D pixmap ID on the 2D X Server to a VirtualPixmap instance,
 // which encapsulates the corresponding 3D pixmap on the 3D X Server
 
 namespace vglserver
 {
-	class PixmapHash : public _Hash
+	class PixmapHash : public HASH
 	{
 		public:
 
@@ -46,14 +46,14 @@ namespace vglserver
 			{
 				if(!dpy || !pm) _throw("Invalid argument");
 				char *dpystring=strdup(DisplayString(dpy));
-				if(!_Hash::add(dpystring, pm, vpm))
+				if(!HASH::add(dpystring, pm, vpm))
 					free(dpystring);
 			}
 
 			VirtualPixmap *find(Display *dpy, Pixmap pm)
 			{
 				if(!dpy || !pm) return NULL;
-				return _Hash::find(DisplayString(dpy), pm);
+				return HASH::find(DisplayString(dpy), pm);
 			}
 
 			Pixmap reverseFind(GLXDrawable glxd)
@@ -61,7 +61,7 @@ namespace vglserver
 				if(!glxd) return 0;
 				HashEntry *ptr=NULL;
 				vglutil::CS::SafeLock l(mutex);
-				if((ptr=_Hash::findEntry(NULL, glxd))!=NULL)
+				if((ptr=HASH::findEntry(NULL, glxd))!=NULL)
 					return ptr->key2;
 				return 0;
 			}
@@ -69,14 +69,14 @@ namespace vglserver
 			void remove(Display *dpy, GLXPixmap glxpm)
 			{
 				if(!dpy || !glxpm) _throw("Invalid argument");
-				_Hash::remove(DisplayString(dpy), glxpm);
+				HASH::remove(DisplayString(dpy), glxpm);
 			}
 
 		private:
 
 			~PixmapHash(void)
 			{
-				_Hash::kill();
+				HASH::kill();
 			}
 
 			void detach(HashEntry *entry)
@@ -100,7 +100,7 @@ namespace vglserver
 	};
 }
 
-#undef _Hash
+#undef HASH
 
 
 #define pmhash (*(PixmapHash::getInstance()))

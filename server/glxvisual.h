@@ -1,5 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
+ * Copyright (C)2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,21 +18,44 @@
 
 #include "faker-sym.h"
 
-GLXFBConfig *__vglConfigsFromVisAttribs(const int attribs[],
-	int &, int &, int &, int &, int &, int &, bool glx13=false);
 
-int __vglClientVisualAttrib(Display *, int, VisualID, int);
+namespace glxvisual
+{
+	// Helper function used in glXChooseVisual() and glXChooseFBConfig().  It
+	// returns a list of "VirtualGL-friendly" FB configs that fit the given
+	// attribute list.  It also returns the visual parameters derived from that
+	// same attribute list, so those parameters can be used to match an
+	// appropriate visual on the 2D X server.
+	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &depth,
+		int &c_class, int &level, int &stereo, int &trans, int &nElements,
+		bool glx13=false);
 
-int __vglServerVisualAttrib(GLXFBConfig, int);
+	// These functions return attributes for visuals on the 2D X server (those
+	// attributes are read from the 2D X server and cached on first access, so
+	// only the first call to any of these will result in a round trip to the
+	// 2D X server.)
+	int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute);
 
-int __vglVisualDepth(Display *, int, VisualID);
+	int visDepth2D(Display *dpy, int screen, VisualID vid);
 
-int __vglVisualClass(Display *, int, VisualID);
+	int visClass2D(Display *dpy, int screen, VisualID vid);
 
-VisualID __vglMatchVisual(Display *, int, int, int, int, int, int);
+	// This function finds a 2D X server visual that matches the given
+	// visual parameters.  As with the above functions, it uses the cached
+	// attributes from the 2D X server, or it caches them if they have not
+	// already been read.
+	VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
+		int level, int stereo, int trans);
 
-XVisualInfo *__vglVisualFromVisualID(Display *, int, VisualID);
+	// Simple helper function that obtains an attribute for a GLXFBConfig on the
+	// 3D X server.
+	int visAttrib3D(GLXFBConfig config, int attribute);
 
-#define _FBCID(c) __vglServerVisualAttrib(c, GLX_FBCONFIG_ID)
+	// This is just a convenience wrapper for XGetVisualInfo()
+	XVisualInfo *visualFromID(Display *dpy, int screen, VisualID vid);
+}
+
+
+#define _FBCID(c) glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
 
 #endif // __GLXVISUAL_H__

@@ -39,12 +39,12 @@ using namespace vglutil;
 
 
 Fl_Double_Window *win=NULL;
-Fl_Choice *compchoice=NULL, *sampchoice=NULL,
-	*stereochoice=NULL, *profchoice=NULL;
-Fl_Light_Button *spoilbutton=NULL, *ifbutton=NULL;
-Fl_Value_Slider *qualslider=NULL;
-Fl_Float_Input *gammainput=NULL, *fpsinput;
-Fl_Check_Button *fpsbutton=NULL;
+Fl_Choice *compChoice=NULL, *sampChoice=NULL, *stereoChoice=NULL,
+	*profChoice=NULL;
+Fl_Light_Button *spoilButton=NULL, *ifButton=NULL;
+Fl_Value_Slider *qualSlider=NULL;
+Fl_Float_Input *gammaInput=NULL, *fpsInput;
+Fl_Check_Button *fpsButton=NULL;
 int ppid=-1;
 
 #undef fconfig
@@ -54,150 +54,150 @@ FakerConfig *_fconfig=NULL;
 
 // Set functions
 
-void SetComp(void)
+void setComp(void)
 {
 	int i;
 
 	for(i=0; i<RR_COMPRESSOPT; i++)
 	{
 		if(strlen(fconfig.transport)==0 && !fconfig.transvalid[_Trans[i]])
-			compchoice->mode(i, FL_MENU_INACTIVE);
-		else compchoice->mode(i, 0);
-		if(fconfig.compress==i) compchoice->value(i);
+			compChoice->mode(i, FL_MENU_INACTIVE);
+		else compChoice->mode(i, 0);
+		if(fconfig.compress==i) compChoice->value(i);
 	}
 	if(!fconfig.transvalid[RRTRANS_XV])
 	{
-		compchoice->mode(4, FL_MENU_INACTIVE);
+		compChoice->mode(4, FL_MENU_INACTIVE);
 	}
 }
 
-void SetSamp(void)
+void setSamp(void)
 {
-	if(!sampchoice) return;
+	if(!sampChoice) return;
 	if(_Maxsubsamp[fconfig.compress]==_Minsubsamp[fconfig.compress]
 		&& strlen(fconfig.transport)==0)
-		sampchoice->deactivate();
-	else sampchoice->activate();
+		sampChoice->deactivate();
+	else sampChoice->activate();
 	if(strlen(fconfig.transport)==0)
 	{
 		if(_Minsubsamp[fconfig.compress]>0)
-			sampchoice->mode(0, FL_MENU_INACTIVE);
-		else sampchoice->mode(0, 0);
+			sampChoice->mode(0, FL_MENU_INACTIVE);
+		else sampChoice->mode(0, 0);
 		if(_Minsubsamp[fconfig.compress]>1 || _Maxsubsamp[fconfig.compress]<1)
-			sampchoice->mode(1, FL_MENU_INACTIVE);
-		else sampchoice->mode(1, 0);
+			sampChoice->mode(1, FL_MENU_INACTIVE);
+		else sampChoice->mode(1, 0);
 		if(_Minsubsamp[fconfig.compress]>2 || _Maxsubsamp[fconfig.compress]<2)
-			sampchoice->mode(2, FL_MENU_INACTIVE);
-		else sampchoice->mode(2, 0);
+			sampChoice->mode(2, FL_MENU_INACTIVE);
+		else sampChoice->mode(2, 0);
 		if(_Minsubsamp[fconfig.compress]>4 || _Maxsubsamp[fconfig.compress]<4)
-			sampchoice->mode(3, FL_MENU_INACTIVE);
-		else sampchoice->mode(3, 0);
+			sampChoice->mode(3, FL_MENU_INACTIVE);
+		else sampChoice->mode(3, 0);
 		if(_Minsubsamp[fconfig.compress]>8 || _Maxsubsamp[fconfig.compress]<8)
-			sampchoice->mode(4, FL_MENU_INACTIVE);
-		else sampchoice->mode(4, 0);
+			sampChoice->mode(4, FL_MENU_INACTIVE);
+		else sampChoice->mode(4, 0);
 		if(_Minsubsamp[fconfig.compress]>16 || _Maxsubsamp[fconfig.compress]<16)
-			sampchoice->mode(5, FL_MENU_INACTIVE);
-		else sampchoice->mode(5, 0);
+			sampChoice->mode(5, FL_MENU_INACTIVE);
+		else sampChoice->mode(5, 0);
 	}
 	switch(fconfig.subsamp)
 	{
-		case 0:  sampchoice->value(0);  break;
-		case 1:  sampchoice->value(1);  break;
-		case 2:  sampchoice->value(2);  break;
-		case 4:  sampchoice->value(3);  break;
-		case 8:  sampchoice->value(4);  break;
-		case 16:  sampchoice->value(5);  break;
+		case 0:  sampChoice->value(0);  break;
+		case 1:  sampChoice->value(1);  break;
+		case 2:  sampChoice->value(2);  break;
+		case 4:  sampChoice->value(3);  break;
+		case 8:  sampChoice->value(4);  break;
+		case 16:  sampChoice->value(5);  break;
 	}
 }
 
-void SetQual(void)
+void setQual(void)
 {
-	if(!qualslider) return;
-	qualslider->value(fconfig.qual);
+	if(!qualSlider) return;
+	qualSlider->value(fconfig.qual);
 	if(fconfig.compress!=RRCOMP_JPEG && strlen(fconfig.transport)==0)
-		qualslider->deactivate();
-	else qualslider->activate();
+		qualSlider->deactivate();
+	else qualSlider->activate();
 }
 
-void SetProf(void)
+void setProf(void)
 {
-	if(!profchoice) return;
+	if(!profChoice) return;
 	if(!fconfig.transvalid[RRTRANS_VGL] || strlen(fconfig.transport)>0)
 	{
-		profchoice->value(3);  profchoice->deactivate();
+		profChoice->value(3);  profChoice->deactivate();
 	}
 	else
 	{
-		profchoice->activate();
+		profChoice->activate();
 		if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==30
-			&& fconfig.subsamp==4) profchoice->value(0);
+			&& fconfig.subsamp==4) profChoice->value(0);
 		else if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==80
-			&& fconfig.subsamp==2) profchoice->value(1);
+			&& fconfig.subsamp==2) profChoice->value(1);
 		else if(fconfig.compress==RRCOMP_JPEG && fconfig.qual==95
-			&& fconfig.subsamp==1) profchoice->value(2);
-		else profchoice->value(3);
+			&& fconfig.subsamp==1) profChoice->value(2);
+		else profChoice->value(3);
 	}
 }
 
-void SetIF(void)
+void setIF(void)
 {
-	if(!ifbutton) return;
-	ifbutton->value(fconfig.interframe);
+	if(!ifButton) return;
+	ifButton->value(fconfig.interframe);
 	if(strlen(fconfig.transport)>0 || fconfig.compress==RRCOMP_JPEG
 		|| fconfig.compress==RRCOMP_RGB)
-		ifbutton->activate();
-	else ifbutton->deactivate();
+		ifButton->activate();
+	else ifButton->deactivate();
 }
 
-void SetStereo(void)
+void setStereo(void)
 {
 	int i;
-	if(!stereochoice) return;
+	if(!stereoChoice) return;
 	if(strlen(fconfig.transport)==0 && !fconfig.transvalid[RRTRANS_VGL])
-		stereochoice->mode(2, FL_MENU_INACTIVE);
-	else stereochoice->mode(2, 0);
+		stereoChoice->mode(2, FL_MENU_INACTIVE);
+	else stereoChoice->mode(2, 0);
 	for(i=0; i<RR_STEREOOPT; i++)
-		if(fconfig.stereo==i) stereochoice->value(i);
+		if(fconfig.stereo==i) stereoChoice->value(i);
 }
 
-void SetFPS(void)
+void setFPS(void)
 {
 	char temps[20];
 	snprintf(temps, 19, "%.2f", fconfig.fps);
-	fpsinput->value(temps);
+	fpsInput->value(temps);
 }
 
 
 // Callbacks
 
-void CompCB(Fl_Widget *w, void *data)
+void compCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
 	if(d>=0 && d<=RR_COMPRESSOPT-1 || strlen(fconfig.transport)>0)
 		fconfig_setcompress(fconfig, d);
-	SetSamp();
-	SetQual();
-	SetProf();
-	SetIF();
-	SetStereo();
-	SetFPS();
+	setSamp();
+	setQual();
+	setProf();
+	setIF();
+	setStereo();
+	setFPS();
 }
 
-void SampCB(Fl_Widget *w, void *data)
+void sampCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
 	fconfig.subsamp=d;
-	SetProf();
+	setProf();
 }
 
-void QualCB(Fl_Widget *w, void *data)
+void qualCB(Fl_Widget *w, void *data)
 {
 	Fl_Value_Slider *slider=(Fl_Value_Slider *)w;
 	fconfig.qual=(int)slider->value();
-	SetProf();
+	setProf();
 }
 
-void ProfCB(Fl_Widget *w, void *data)
+void profCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
 	if(!fconfig.transvalid[RRTRANS_VGL]) return;
@@ -216,20 +216,20 @@ void ProfCB(Fl_Widget *w, void *data)
 			fconfig.qual=95;  fconfig.subsamp=1;
 			break;
 	}
-	SetComp();
-	SetSamp();
-	SetQual();
-	SetStereo();
-	SetIF();
+	setComp();
+	setSamp();
+	setQual();
+	setStereo();
+	setIF();
 }
 
-void SpoilCB(Fl_Widget *w, void *data)
+void spoilCB(Fl_Widget *w, void *data)
 {
 	Fl_Check_Button *check=(Fl_Check_Button *)w;
 	fconfig.spoil=(check->value()!=0);
 }
 
-void GammaCB(Fl_Widget *w, void *data)
+void gammaCB(Fl_Widget *w, void *data)
 {
 	Fl_Float_Input *input=(Fl_Float_Input *)w;
 	fconfig_setgamma(fconfig, atof(input->value()));
@@ -238,19 +238,19 @@ void GammaCB(Fl_Widget *w, void *data)
 	input->value(temps);
 }
 
-void IFCB(Fl_Widget *w, void *data)
+void ifCB(Fl_Widget *w, void *data)
 {
 	Fl_Check_Button *check=(Fl_Check_Button *)w;
 	fconfig.interframe=(check->value()!=0);
 }
 
-void StereoCB(Fl_Widget *w, void *data)
+void stereoCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
 	if(d>=0 && d<=RR_STEREOOPT-1) fconfig.stereo=d;
 }
 
-void FPSCB(Fl_Widget *w, void *data)
+void fpsCB(Fl_Widget *w, void *data)
 {
 	Fl_Float_Input *input=(Fl_Float_Input *)w;
 	fconfig.fps=atof(input->value());
@@ -262,166 +262,148 @@ void FPSCB(Fl_Widget *w, void *data)
 
 // Menus
 
-Fl_Menu_Item compmenu[]=
+Fl_Menu_Item compMenu[]=
 {
-	{"None (X11 Transport)", 0, CompCB, (void *)RRCOMP_PROXY},
-	{"JPEG (VGL Transport)", 0, CompCB, (void *)RRCOMP_JPEG},
-	{"RGB (VGL Transport)", 0, CompCB, (void *)RRCOMP_RGB},
-	{"YUV (XV Transport)", 0, CompCB, (void *)RRCOMP_XV},
-	{"YUV (VGL Transport)", 0, CompCB, (void *)RRCOMP_YUV},
+	{"None (X11 Transport)", 0, compCB, (void *)RRCOMP_PROXY},
+	{"JPEG (VGL Transport)", 0, compCB, (void *)RRCOMP_JPEG},
+	{"RGB (VGL Transport)", 0, compCB, (void *)RRCOMP_RGB},
+	{"YUV (XV Transport)", 0, compCB, (void *)RRCOMP_XV},
+	{"YUV (VGL Transport)", 0, compCB, (void *)RRCOMP_YUV},
 	{0, 0, 0, 0}
 };
 
-Fl_Menu_Item ctcompmenu[]=
+Fl_Menu_Item pluginCompMenu[]=
 {
-	{"0", 0, CompCB, (void *)0},
-	{"1", 0, CompCB, (void *)1},
-	{"2", 0, CompCB, (void *)2},
-	{"3", 0, CompCB, (void *)3},
-	{"4", 0, CompCB, (void *)4},
-	{"5", 0, CompCB, (void *)5},
-	{"6", 0, CompCB, (void *)6},
-	{"7", 0, CompCB, (void *)7},
-	{"8", 0, CompCB, (void *)8},
-	{"9", 0, CompCB, (void *)9},
-	{"10", 0, CompCB, (void *)10},
+	{"0", 0, compCB, (void *)0},
+	{"1", 0, compCB, (void *)1},
+	{"2", 0, compCB, (void *)2},
+	{"3", 0, compCB, (void *)3},
+	{"4", 0, compCB, (void *)4},
+	{"5", 0, compCB, (void *)5},
+	{"6", 0, compCB, (void *)6},
+	{"7", 0, compCB, (void *)7},
+	{"8", 0, compCB, (void *)8},
+	{"9", 0, compCB, (void *)9},
+	{"10", 0, compCB, (void *)10},
 	{0, 0, 0, 0}
 };
 
-Fl_Menu_Item sampmenu[]=
+Fl_Menu_Item sampMenu[]=
 {
-	{"Grayscale", 0, SampCB, (void *)0},
-	{"1X", 0, SampCB, (void *)1},
-	{"2X", 0, SampCB, (void *)2},
-	{"4X", 0, SampCB, (void *)4},
-	{"8X", 0, SampCB, (void *)8},
-	{"16X", 0, SampCB, (void *)16},
+	{"Grayscale", 0, sampCB, (void *)0},
+	{"1X", 0, sampCB, (void *)1},
+	{"2X", 0, sampCB, (void *)2},
+	{"4X", 0, sampCB, (void *)4},
+	{"8X", 0, sampCB, (void *)8},
+	{"16X", 0, sampCB, (void *)16},
 	{0, 0, 0, 0}
 };
 
-Fl_Menu_Item profmenu[]=
+Fl_Menu_Item profMenu[]=
 {
-	{"Low Qual (Low-Bandwidth Network)", 0, ProfCB, (void *)0},
-	{"Medium Qual", 0, ProfCB, (void *)1},
-	{"High Qual (High-Bandwidth Network)", 0, ProfCB, (void *)2},
+	{"Low Qual (Low-Bandwidth Network)", 0, profCB, (void *)0},
+	{"Medium Qual", 0, profCB, (void *)1},
+	{"High Qual (High-Bandwidth Network)", 0, profCB, (void *)2},
 	{"Custom", 0, 0, 0},
 	{0, 0, 0, 0}
 };
 
-Fl_Menu_Item stereomenu[]=
+Fl_Menu_Item stereoMenu[]=
 {
-	{"Send Left Eye Only", 0, StereoCB, (void *)RRSTEREO_LEYE},
-	{"Send Right Eye Only", 0, StereoCB, (void *)RRSTEREO_REYE},
-	{"Quad-Buffered (if available)", 0, StereoCB, (void *)RRSTEREO_QUADBUF},
-	{"Anaglyphic (Red/Cyan)", 0, StereoCB, (void *)RRSTEREO_REDCYAN},
-	{"Anaglyphic (Green/Magenta)", 0, StereoCB, (void *)RRSTEREO_GREENMAGENTA},
-	{"Anaglyphic (Blue/Yellow)", 0, StereoCB, (void *)RRSTEREO_BLUEYELLOW},
-	{"Passive (Interleaved)", 0, StereoCB, (void *)RRSTEREO_INTERLEAVED},
-	{"Passive (Top/Bottom)", 0, StereoCB, (void *)RRSTEREO_TOPBOTTOM},
-	{"Passive (Side-by-Side)", 0, StereoCB, (void *)RRSTEREO_SIDEBYSIDE},
+	{"Send Left Eye Only", 0, stereoCB, (void *)RRSTEREO_LEYE},
+	{"Send Right Eye Only", 0, stereoCB, (void *)RRSTEREO_REYE},
+	{"Quad-Buffered (if available)", 0, stereoCB, (void *)RRSTEREO_QUADBUF},
+	{"Anaglyphic (Red/Cyan)", 0, stereoCB, (void *)RRSTEREO_REDCYAN},
+	{"Anaglyphic (Green/Magenta)", 0, stereoCB, (void *)RRSTEREO_GREENMAGENTA},
+	{"Anaglyphic (Blue/Yellow)", 0, stereoCB, (void *)RRSTEREO_BLUEYELLOW},
+	{"Passive (Interleaved)", 0, stereoCB, (void *)RRSTEREO_INTERLEAVED},
+	{"Passive (Top/Bottom)", 0, stereoCB, (void *)RRSTEREO_TOPBOTTOM},
+	{"Passive (Side-by-Side)", 0, stereoCB, (void *)RRSTEREO_SIDEBYSIDE},
 	{0, 0, 0, 0}
 };
-
-#if 0
-Fl_Menu_Item mcompmenu[]=
-{
-	{"JPEG", 0, MCompCB, (void *)RRCOMP_JPEG},
-	{"RGB", 0, MCompCB, (void *)RRCOMP_RGB},
-	{0, 0, 0, 0}
-};
-
-Fl_Menu_Item msampmenu[]=
-{
-	{"Grayscale", 0, MSampCB, (void *)0},
-	{"1X", 0, MSampCB, (void *)1},
-	{"2X", 0, MSampCB, (void *)2},
-	{"4X", 0, MSampCB, (void *)4},
-	{0, 0, 0, 0}
-};
-#endif
 
 
 void init(int argc, char **argv)
 {
 	char temps[20];
 
-	errifnot(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
+	newcheck(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
 
 	if(strlen(fconfig.transport)>0)
 	{
-		errifnot(compchoice=new Fl_Choice(211, 10, 225, 25,
+		newcheck(compChoice=new Fl_Choice(211, 10, 225, 25,
 			"Image Compression: "));
-		compchoice->menu(ctcompmenu);
+		compChoice->menu(pluginCompMenu);
 	}
 	else
 	{
-		errifnot(compchoice=new Fl_Choice(227, 10, 225, 25,
+		newcheck(compChoice=new Fl_Choice(227, 10, 225, 25,
 			"Image Compression (Transport): "));
-		compchoice->menu(compmenu);
+		compChoice->menu(compMenu);
 	}
-	SetComp();
+	setComp();
 
-	errifnot(sampchoice=new Fl_Choice(210, 45, 100, 25,
+	newcheck(sampChoice=new Fl_Choice(210, 45, 100, 25,
 		"Chrominance Subsampling: "));
-	sampchoice->menu(sampmenu);
-	SetSamp();
+	sampChoice->menu(sampMenu);
+	setSamp();
 
 	if(strlen(fconfig.transport)>0)
 	{
-		errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
+		newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
 			"Image Quality"));
 	}
 	else
 	{
-		errifnot(qualslider=new Fl_Value_Slider(30, 80, 335, 25,
+		newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
 			"JPEG Image Quality"));
 	}
-	qualslider->callback(QualCB, 0);
-	qualslider->type(1);
-	qualslider->minimum(1);
-	qualslider->maximum(100);
-	qualslider->step(1);
-	qualslider->slider_size(0.01);
-	SetQual();
+	qualSlider->callback(qualCB, 0);
+	qualSlider->type(1);
+	qualSlider->minimum(1);
+	qualSlider->maximum(100);
+	qualSlider->step(1);
+	qualSlider->slider_size(0.01);
+	setQual();
 
-	errifnot(profchoice=new Fl_Choice(157, 130, 280, 24,
+	newcheck(profChoice=new Fl_Choice(157, 130, 280, 24,
 		"Connection Profile: "));
-	profchoice->menu(profmenu);
-	profchoice->mode(3, FL_MENU_INACTIVE);
-	SetProf();
+	profChoice->menu(profMenu);
+	profChoice->mode(3, FL_MENU_INACTIVE);
+	setProf();
 
-	errifnot(gammainput=new Fl_Float_Input(315, 165, 85, 25,
+	newcheck(gammaInput=new Fl_Float_Input(315, 165, 85, 25,
 		"Gamma Correction Factor (1.0=no correction): "));
-	gammainput->callback(GammaCB, 0);
+	gammaInput->callback(gammaCB, 0);
 	snprintf(temps, 19, "%.2f", fconfig.gamma);
-	gammainput->value(temps);
+	gammaInput->value(temps);
 
-	errifnot(spoilbutton=new Fl_Light_Button(10, 200, 345, 25,
+	newcheck(spoilButton=new Fl_Light_Button(10, 200, 345, 25,
 		"Frame Spoiling (Do Not Use When Benchmarking)"));
-	spoilbutton->callback(SpoilCB, 0);
-	spoilbutton->value(fconfig.spoil);
+	spoilButton->callback(spoilCB, 0);
+	spoilButton->value(fconfig.spoil);
 
-	errifnot(ifbutton=new Fl_Light_Button(10, 235, 185, 25,
+	newcheck(ifButton=new Fl_Light_Button(10, 235, 185, 25,
 		"Inter-Frame Comparison"));
-	ifbutton->callback(IFCB, 0);
-	SetIF();
+	ifButton->callback(ifCB, 0);
+	setIF();
 
-	errifnot(stereochoice=new Fl_Choice(232, 270, 220, 25,
+	newcheck(stereoChoice=new Fl_Choice(232, 270, 220, 25,
 		"Stereographic Rendering Method: "));
-	stereochoice->menu(stereomenu);
-	SetStereo();
+	stereoChoice->menu(stereoMenu);
+	setStereo();
 
-	errifnot(fpsinput=new Fl_Float_Input(240, 305, 85, 25,
+	newcheck(fpsInput=new Fl_Float_Input(240, 305, 85, 25,
 		"Limit Frames/second (0.0=no limit): "));
-	fpsinput->callback(FPSCB, 0);
-	SetFPS();
+	fpsInput->callback(fpsCB, 0);
+	setFPS();
 
 	win->end();
   win->show(argc, argv);
 }
 
 
-void checkparentpid(void *data)
+void checkParentPID(void *data)
 {
 	if(kill(ppid, 0)==-1)
 	{
@@ -444,7 +426,8 @@ void checkparentpid(void *data)
 int main(int argc, char **argv)
 {
 	int status=0, shmid=-1;  bool test=false;
-	char *darg[2]={NULL, NULL};
+	char *darg[2]={ NULL, NULL };
+
 	try
 	{
 		for(int i=0; i<argc; i++)
@@ -463,7 +446,7 @@ int main(int argc, char **argv)
 				int temp=atoi(argv[++i]);  if(temp>0) ppid=temp;
 			}
 		}
-		if(darg[0] && darg[1]) {argv[1]=darg[0];  argv[2]=darg[1];  argc=3;}
+		if(darg[0] && darg[1]) { argv[1]=darg[0];  argv[2]=darg[1];  argc=3; }
 		else argc=1;
 
 		if(test)
@@ -484,7 +467,7 @@ int main(int argc, char **argv)
 		}
 
 		init(argc, argv);
-		if(ppid>0) Fl::add_check(checkparentpid);
+		if(ppid>0) Fl::add_check(checkParentPID);
 		status=Fl::run();
 	}
 	catch(Error &e)

@@ -29,14 +29,14 @@ namespace vglserver
 	{
 		public:
 
-			static vglconfigLauncher *instance(void)
+			static vglconfigLauncher *getInstance(void)
 			{
-				if(instancePtr==NULL)
+				if(instance==NULL)
 				{
 					vglutil::CS::SafeLock l(instanceMutex);
-					if(instancePtr==NULL) instancePtr=new vglconfigLauncher;
+					if(instance==NULL) instance=new vglconfigLauncher;
 				}
-				return instancePtr;
+				return instance;
 			}
 
 			void popup(Display *dpy_, int shmid_)
@@ -45,7 +45,7 @@ namespace vglserver
 				vglutil::CS::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy=dpy_;  shmid=shmid_;
-				errifnot(thread=new vglutil::Thread(this));
+				newcheck(thread=new vglutil::Thread(this));
 				thread->start();
 			}
 
@@ -97,7 +97,7 @@ namespace vglserver
 				return 0;
 			}
 
-			static vglconfigLauncher *instancePtr;
+			static vglconfigLauncher *instance;
 			static vglutil::CS instanceMutex;
 			static vglutil::CS popupMutex;
 			vglutil::Thread *thread;
@@ -108,6 +108,6 @@ namespace vglserver
 
 
 #define vglpopup(dpy, shmid) \
-	((*(vglconfigLauncher::instance())).popup(dpy, shmid))
+	((*(vglconfigLauncher::getInstance())).popup(dpy, shmid))
 
 #endif // __VGLCONFIGLAUNCHER_H__
