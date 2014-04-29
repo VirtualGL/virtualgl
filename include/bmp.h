@@ -23,8 +23,15 @@
 enum BMPPF {BMPPF_RGB=0, BMPPF_RGBX, BMPPF_BGR, BMPPF_BGRX, BMPPF_XBGR,
 	BMPPF_XRGB};
 
+static const int bmp_ps[BMP_NUMPF]={ 3, 4, 3, 4, 4, 4 };
+static const int bmp_roffset[BMP_NUMPF]={ 0, 0, 2, 2, 3, 1 };
+static const int bmp_goffset[BMP_NUMPF]={ 1, 1, 1, 1, 2, 2 };
+static const int bmp_boffset[BMP_NUMPF]={ 2, 2, 0, 0, 1, 3 };
+
 #define BMP_NUMORN 2
 enum BMPORN {BMPORN_TOPDOWN=0, BMPORN_BOTTOMUP};
+
+#define BMPPAD(width, align) (((width)+((align)-1))&(~((align)-1)))
 
 #ifdef __cplusplus
 extern "C" {

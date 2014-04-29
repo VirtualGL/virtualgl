@@ -4,6 +4,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	target_link_libraries(vglutil rt)
 endif()
 
+add_executable(bmptest bmptest.c md5.c md5hl.c)
+target_link_libraries(bmptest vglutil)
+
 add_library(vglsocket STATIC Socket.cpp)
 target_link_libraries(vglsocket vglutil)
 if(VGL_USESSL)

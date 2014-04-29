@@ -56,11 +56,6 @@ typedef struct
 
 static const char *errorStr="No error";
 
-static const int ps[BMP_NUMPF]={ 3, 4, 3, 4, 4, 4 };
-static const int roffset[BMP_NUMPF]={ 0, 0, 2, 2, 3, 1 };
-static const int goffset[BMP_NUMPF]={ 1, 1, 1, 1, 2, 2 };
-static const int boffset[BMP_NUMPF]={ 2, 2, 0, 0, 1, 3 };
-
 
 #define _throw(m) {  \
 	errorStr=m;  ret=-1;  goto finally;  \
@@ -96,12 +91,15 @@ static void pixelConvert(unsigned char *srcbuf, int width, int srcPitch,
 		srcptr+=flip? -srcPitch:srcPitch, dstptr+=dstPitch)
 	{
 		for(i=0, srcptr0=srcptr, dstptr0=dstptr; i<width; i++,
-			srcptr0+=ps[srcFormat], dstptr0+=ps[dstFormat])
+			srcptr0+=bmp_ps[srcFormat], dstptr0+=bmp_ps[dstFormat])
 		{
-			dstptr0[roffset[dstFormat]]=srcptr0[roffset[srcFormat]];
-			dstptr0[goffset[dstFormat]]=srcptr0[goffset[srcFormat]];
-			dstptr0[boffset[dstFormat]]=srcptr0[boffset[srcFormat]];
+			dstptr0[bmp_roffset[dstFormat]]=srcptr0[bmp_roffset[srcFormat]];
+			dstptr0[bmp_goffset[dstFormat]]=srcptr0[bmp_goffset[srcFormat]];
+			dstptr0[bmp_boffset[dstFormat]]=srcptr0[bmp_boffset[srcFormat]];
 		}
+		if(width*bmp_ps[dstFormat]!=dstPitch)
+			memset(&dstptr[width*bmp_ps[dstFormat]], 0,
+				dstPitch-width*bmp_ps[dstFormat]);
 	}
 }
 
@@ -140,7 +138,7 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 	} while(totalRead<3);
 	if((*width)<1 || (*height)<1 || scaleFactor<1) _throw("Corrupt PPM header");
 
-	dstPitch=(((*width)*ps[format])+(align-1))&(~(align-1));
+	dstPitch=(((*width)*bmp_ps[format])+(align-1))&(~(align-1));
 	if((*buf=(unsigned char *)malloc(dstPitch*(*height)))==NULL)
 		_throw("Memory allocation error");
 	if(ascii)
@@ -151,11 +149,11 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			{
 				if(fscanf(file, "%d%d%d", &pixel[0], &pixel[1], &pixel[2])!=3)
 					_throw("Read error");
-				(*buf)[j*dstPitch+i*ps[format]+roffset[format]]=
+				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_roffset[format]]=
 					(unsigned char)(pixel[0]*255/scaleFactor);
-				(*buf)[j*dstPitch+i*ps[format]+goffset[format]]=
+				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_goffset[format]]=
 					(unsigned char)(pixel[1]*255/scaleFactor);
-				(*buf)[j*dstPitch+i*ps[format]+boffset[format]]=
+				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_boffset[format]]=
 					(unsigned char)(pixel[2]*255/scaleFactor);
 			}
 		}
@@ -168,7 +166,7 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			_throw("Memory allocation error");
 		if(fread(tempbuf, (*width)*(*height)*3, 1, file)!=1)
 			_throw("Read error");
-		pixelConvert(tempbuf, BMPPF_RGB, *width, (*width)*3, *height, *buf,
+		pixelConvert(tempbuf, *width, (*width)*3, *height, BMPPF_RGB, *buf,
 			dstPitch, format, orientation==BMPORN_BOTTOMUP);
 	}
 
@@ -253,7 +251,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	*width=bh.biWidth;  *height=bh.biHeight;  srcPixelSize=bh.biBitCount/8;
 	if(*height<0) { *height=-(*height);  srcOrientation=BMPORN_TOPDOWN; }
 	srcPitch=(((*width)*srcPixelSize)+3)&(~3);
-	dstPitch=(((*width)*ps[format])+(align-1))&(~(align-1));
+	dstPitch=(((*width)*bmp_ps[format])+(align-1))&(~(align-1));
 
 	if(srcPitch*(*height)+bh.bfOffBits!=bh.bfSize)
 		_throw("Corrupt bitmap header");
@@ -318,7 +316,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 		|| pitch<0)
 		_throw("bad argument to bmp_save()");
 
-	if(pitch==0) pitch=width*ps[format];
+	if(pitch==0) pitch=width*bmp_ps[format];
 
 	if((temp=strrchr(filename, '.'))!=NULL)
 	{

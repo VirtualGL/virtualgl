@@ -54,9 +54,6 @@ typedef struct
 #endif // _WIN32
 
 
-#define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
-
-
 /* Pixel formats */
 #define FBX_FORMATS 7
 enum { FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB, FBX_INDEX };
