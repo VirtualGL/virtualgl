@@ -84,18 +84,18 @@ void initBuf(int x, int y, int width, int pitch, int height, int format,
 {
 	int i, j, ps=fbx_ps[format];
 
-	for(i=0; i<height; i++)
+	for(j=0; j<height; j++)
 	{
-		for(j=0; j<width; j++)
+		for(i=0; i<width; i++)
 		{
-			memset(&buf[i*pitch+j*ps], 0, fbx_ps[format]);
+			memset(&buf[j*pitch+i*ps], 0, fbx_ps[format]);
 			if(format==FBX_INDEX)
-				buf[i*pitch+j]=(j+x+i+y+offset)%32;
+				buf[j*pitch+i]=(i+x+j+y+offset)%32;
 			else
 			{
-				buf[i*pitch+j*ps+fbx_roffset[format]]=(j+x+offset)%256;
-				buf[i*pitch+j*ps+fbx_goffset[format]]=(i+y+offset)%256;
-				buf[i*pitch+j*ps+fbx_boffset[format]]=(i+y+j+x+offset)%256;
+				buf[j*pitch+i*ps+fbx_roffset[format]]=(i+x+offset)%256;
+				buf[j*pitch+i*ps+fbx_goffset[format]]=(j+y+offset)%256;
+				buf[j*pitch+i*ps+fbx_boffset[format]]=(j+y+i+x+offset)%256;
 			}
 		}
 	}
@@ -107,21 +107,21 @@ int cmpBuf(int x, int y, int width, int pitch, int height, int format,
 {
 	int i, j, ps=fbx_ps[format];
 
-	for(i=0; i<height; i++)
+	for(j=0; j<height; j++)
 	{
-		for(j=0; j<width; j++)
+		for(i=0; i<width; i++)
 		{
 			if(format==FBX_INDEX)
 			{
-				if(buf[i*pitch+j]!=(j+x+i+y+offset)%32) return 0;
+				if(buf[j*pitch+i]!=(i+x+j+y+offset)%32) return 0;
 			}
 			else
 			{
-				if(buf[i*pitch+j*ps+fbx_roffset[format]]!=(j+x+offset)%256)
+				if(buf[j*pitch+i*ps+fbx_roffset[format]]!=(i+x+offset)%256)
 					return 0;
-				if(buf[i*pitch+j*ps+fbx_goffset[format]]!=(i+y+offset)%256)
+				if(buf[j*pitch+i*ps+fbx_goffset[format]]!=(j+y+offset)%256)
 					return 0;
-				if(buf[i*pitch+j*ps+fbx_boffset[format]]!=(i+y+j+x+offset)%256)
+				if(buf[j*pitch+i*ps+fbx_boffset[format]]!=(j+y+i+x+offset)%256)
 					return 0;
 			}
 		}

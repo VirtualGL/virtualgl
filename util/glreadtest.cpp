@@ -283,17 +283,17 @@ void initBuf(int x, int y, int width, int height, int format,
 	unsigned char *buf)
 {
 	int i, j, ps=pf[format].pixelSize;
-	for(i=0; i<height; i++)
+	for(j=0; j<height; j++)
 	{
-		for(j=0; j<width; j++)
+		for(i=0; i<width; i++)
 		{
 			if(pf[format].glFormat==GL_RED)
-				buf[(i*width+j)*ps]=((i+y)*(j+x))%256;
+				buf[(j*width+i)*ps]=((j+y)*(i+x))%256;
 			else
 			{
-				buf[(i*width+j)*ps+pf[format].roffset]=((i+y)*(j+x))%256;
-				buf[(i*width+j)*ps+pf[format].goffset]=((i+y)*(j+x)*2)%256;
-				buf[(i*width+j)*ps+pf[format].boffset]=((i+y)*(j+x)*3)%256;
+				buf[(j*width+i)*ps+pf[format].roffset]=((j+y)*(i+x))%256;
+				buf[(j*width+i)*ps+pf[format].goffset]=((j+y)*(i+x)*2)%256;
+				buf[(j*width+i)*ps+pf[format].boffset]=((j+y)*(i+x)*3)%256;
 			}
 		}
 	}
@@ -304,22 +304,22 @@ int cmpBuf(int x, int y, int width, int height, int format, unsigned char *buf,
 	int bassackwards)
 {
 	int i, j, l, ps=pf[format].pixelSize;
-	for(i=0; i<height; i++)
+	for(j=0; j<height; j++)
 	{
-		l=bassackwards? height-i-1:i;
-		for(j=0; j<width; j++)
+		l=bassackwards? height-j-1:j;
+		for(i=0; i<width; i++)
 		{
 			if(pf[format].glFormat==GL_RED)
 			{
-				if(buf[l*PAD(width*ps)+j*ps]!=((i+y)*(j+x))%256) return 0;
+				if(buf[l*PAD(width*ps)+i*ps]!=((j+y)*(i+x))%256) return 0;
 			}
 			else
 			{
-				if(buf[l*PAD(width*ps)+j*ps+pf[format].roffset]!=((i+y)*(j+x))%256)
+				if(buf[l*PAD(width*ps)+i*ps+pf[format].roffset]!=((j+y)*(i+x))%256)
 					return 0;
-				if(buf[l*PAD(width*ps)+j*ps+pf[format].goffset]!=((i+y)*(j+x)*2)%256)
+				if(buf[l*PAD(width*ps)+i*ps+pf[format].goffset]!=((j+y)*(i+x)*2)%256)
 					return 0;
-				if(buf[l*PAD(width*ps)+j*ps+pf[format].boffset]!=((i+y)*(j+x)*3)%256)
+				if(buf[l*PAD(width*ps)+i*ps+pf[format].boffset]!=((j+y)*(i+x)*3)%256)
 					return 0;
 			}
 		}
