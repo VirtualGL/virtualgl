@@ -8,13 +8,13 @@
 ** Installing VirtualGL on Linux
 
 	1. Download the appropriate VirtualGL binary package for your system from the
-		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
+		[[http://sourceforge.net/projects/virtualgl/files][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		Packages are provided for RPM-based and Debian-based Linux distributions
 		that contain GLIBC 2.3.4 or later (including
 		[[http://fedoraproject.org][Fedora]] 4 or later,
 		[[http://www.redhat.com/products/enterprise-linux][Red Hat Enterprise Linux]]/[[http://www.centos.org/][CentOS]] \
-		4 or later, 
+		4 or later,
 		[[http://www.suse.com][SuSE]] Linux Enterprise/[[http://www.opensuse.org][openSUSE]] 10 or later,
 		and [[http://www.ubuntu.com][Ubuntu]] 6.06 or later.)
 		{nl}
@@ -45,7 +45,7 @@
 
 	#. Download the VirtualGL Mac disk image
 		(''VirtualGL-''__''{version}''__''.dmg'') from the
-		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
+		[[http://sourceforge.net/projects/virtualgl/files][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
 	#. Open the disk image, then open ''VirtualGL-''__''{version}''__''.pkg'' inside the
@@ -55,7 +55,7 @@
 
 	#. Download the VirtualGL Client for Exceed installer package
 		(''VirtualGL[64]-''__''{version}''__''-exceed.exe'') from the
-		[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
+		[[http://sourceforge.net/projects/virtualgl/files][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
 	#. Run the installer.  The installation of the VirtualGL Client should be
@@ -76,8 +76,8 @@ Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].
 
 If you are using a platform for which there is not a pre-built VirtualGL binary
 package available, then download the VirtualGL source tarball
-(''VirtualGL-''__''{version}''__''.tar.gz'') from the 
-[[http://sourceforge.net/projects/virtualgl/files/VirtualGL/][Files area]]
+(''VirtualGL-''__''{version}''__''.tar.gz'') from the
+[[http://sourceforge.net/projects/virtualgl/files][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
 uncompress it, ''cd VirtualGL-''__''{version}''__, and read the contents of
 ''BUILDING.txt'' for further instructions on how to build and install VirtualGL
