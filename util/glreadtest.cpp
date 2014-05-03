@@ -96,7 +96,8 @@ GLXPbuffer pbuffer=0;
 #endif
 
 Timer timer;
-int useWindow=0, usePixmap=0, useFBO=0, visualID=0, loops=1, useAlpha=0;
+bool useWindow=false, usePixmap=false, useFBO=false, useAlpha=false;
+int visualID=0, loops=1;
 #ifdef GL_EXT_framebuffer_object
 GLuint fb=0, rb=0;
 #endif
@@ -329,7 +330,7 @@ int cmpBuf(int x, int y, int width, int height, int format, unsigned char *buf,
 
 
 // Makes sure the frame buffer has been cleared prior to a write
-void clearfb(int format)
+void clearFB(int format)
 {
 	unsigned char *buf=NULL;  int ps=3, glFormat=GL_RGB;
 
@@ -380,7 +381,7 @@ void writeTest(int format)
 		glShadeModel(GL_FLAT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
-		clearfb(format);
+		clearFB(format);
 		if((rgbaBuffer=(unsigned char *)malloc(width*height*ps))==NULL)
 			_throw("Could not allocate buffer");
 		initBuf(0, 0, width, height, format, rgbaBuffer);
@@ -408,9 +409,9 @@ void writeTest(int format)
 void readTest(int format)
 {
 	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize;
-	double rbtime, readpixelstime;  Timer timer2;
+	double rbtime, readPixelsTime;  Timer timer2;
 	#ifdef GL_VERSION_1_5
-	GLuint bufferid=0;
+	GLuint bufferID=0;
 	#endif
 	char temps[STRLEN];
 
@@ -433,9 +434,9 @@ void readTest(int format)
 			const char *ext=(const char *)glGetString(GL_EXTENSIONS);
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
 				_throw("GL_ARB_pixel_buffer_object extension not available");
-			glGenBuffers(1, &bufferid);
-			if(!bufferid) _throw("Could not generate PBO buffer");
-			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
+			glGenBuffers(1, &bufferID);
+			if(!bufferID) _throw("Could not generate PBO buffer");
+			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
 			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(width*ps)*height, NULL,
 				GL_STREAM_READ);
 			check_errors("PBO initialization");
@@ -452,8 +453,8 @@ void readTest(int format)
 		if((rgbaBuffer=(unsigned char *)malloc(PAD(width*ps)*height))==NULL)
 			_throw("Could not allocate buffer");
 		memset(rgbaBuffer, 0, PAD(width*ps)*height);
-		n=0;  rbtime=readpixelstime=0.;
-		double tmin=0., tmax=0., ssq=0., sum=0.;  int first=1;
+		n=0;  rbtime=readPixelsTime=0.;
+		double tmin=0., tmax=0., ssq=0., sum=0.;  int first=true;
 		do
 		{
 			timer.start();
@@ -468,11 +469,11 @@ void readTest(int format)
 			if(pbo)
 			{
 				unsigned char *pixels=NULL;
-				glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferid);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
 				timer2.start();
 				glReadPixels(0, 0, width, height, pf[format].glFormat, GL_UNSIGNED_BYTE,
 					NULL);
-				readpixelstime+=timer2.elapsed();
+				readPixelsTime+=timer2.elapsed();
 				pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 					GL_READ_ONLY);
 				if(!pixels) _throw("Could not map buffer");
@@ -485,7 +486,7 @@ void readTest(int format)
 				timer2.start();
 				glReadPixels(0, 0, width, height, pf[format].glFormat, GL_UNSIGNED_BYTE,
 					rgbaBuffer);
-				readpixelstime+=timer2.elapsed();
+				readPixelsTime+=timer2.elapsed();
 			}
 
 			if(pf[format].glFormat==GL_LUMINANCE)
@@ -495,7 +496,7 @@ void readTest(int format)
 			double elapsed=timer.elapsed();
 			if(first)
 			{
-				tmin=tmax=elapsed;  first=0;
+				tmin=tmax=elapsed;  first=false;
 			}
 			else
 			{
@@ -523,16 +524,16 @@ void readTest(int format)
 		fprintf(stderr, "max = %s, ", sigFig(4, temps, maxmps));
 		fprintf(stderr, "sdev = %s)\n", sigFig(4, temps, stddev));
 		fprintf(stderr, "glReadPixels() accounted for %s%% of total readback time\n",
-			sigFig(4, temps, readpixelstime/rbtime*100.0));
+			sigFig(4, temps, readPixelsTime/rbtime*100.0));
 
 	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
 	if(rgbaBuffer) free(rgbaBuffer);
 	#ifdef GL_VERSION_1_5
-	if(pbo && bufferid>0)
+	if(pbo && bufferID>0)
 	{
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
-		glDeleteBuffers(1, &bufferid);
+		glDeleteBuffers(1, &bufferID);
 	}
 	#endif
 }
@@ -618,22 +619,22 @@ int main(int argc, char **argv)
 	fprintf(stderr, "\n%s v%s (Build %s)\n", BENCH_NAME, __VERSION, __BUILD);
 
 	#ifdef GLX11
-	useWindow=1;
+	useWindow=true;
 	#endif
 
 	for(int i=0; i<argc; i++)
 	{
 		if(!stricmp(argv[i], "-h")) usage(argv);
 		if(!stricmp(argv[i], "-?")) usage(argv);
-		if(!stricmp(argv[i], "-window")) useWindow=1;
-		if(!stricmp(argv[i], "-pm")) usePixmap=1;
+		if(!stricmp(argv[i], "-window")) useWindow=true;
+		if(!stricmp(argv[i], "-pm")) usePixmap=true;
 		#ifdef GL_EXT_framebuffer_object
-		if(!stricmp(argv[i], "-fbo")) useFBO=1;
+		if(!stricmp(argv[i], "-fbo")) useFBO=true;
 		#endif
 		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
 		#endif
-		if(!stricmp(argv[i], "-alpha")) useAlpha=1;
+		if(!stricmp(argv[i], "-alpha")) useAlpha=true;
 		if(!stricmp(argv[i], "-rgb"))
 		{
 			PixelFormat pftemp={0, 1, 2, 3, GL_RGB, 0, "RGB"};
