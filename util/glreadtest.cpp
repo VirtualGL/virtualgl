@@ -99,7 +99,7 @@ Timer timer;
 bool useWindow=false, usePixmap=false, useFBO=false, useAlpha=false;
 int visualID=0, loops=1;
 #ifdef GL_EXT_framebuffer_object
-GLuint fb=0, rb=0;
+GLuint fbo=0, rbo=0;
 #endif
 #ifdef GL_VERSION_1_5
 int pbo=0;
@@ -233,14 +233,14 @@ void drawableInit(void)
 		#ifdef GL_EXT_framebuffer_object
 		if(useFBO)
 		{
-			glGenFramebuffersEXT(1, &fb);
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-			glGenRenderbuffersEXT(1, &rb);
-			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rb);
+			glGenFramebuffersEXT(1, &fbo);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+			glGenRenderbuffersEXT(1, &rbo);
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
 			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, useAlpha? GL_RGBA8:GL_RGB8,
 				width, height);
 			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rb);
+				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
 			if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
 				!=GL_FRAMEBUFFER_COMPLETE_EXT)
 				_throw("Could not create FBO");
@@ -454,7 +454,7 @@ void readTest(int format)
 			_throw("Could not allocate buffer");
 		memset(rgbaBuffer, 0, PAD(width*ps)*height);
 		n=0;  rbtime=readPixelsTime=0.;
-		double tmin=0., tmax=0., ssq=0., sum=0.;  int first=true;
+		double tmin=0., tmax=0., ssq=0., sum=0.;  bool first=true;
 		do
 		{
 			timer.start();
@@ -764,9 +764,9 @@ int main(int argc, char **argv)
 		#ifdef GL_EXT_framebuffer_object
 		if(useFBO)
 		{
-			glDeleteRenderbuffersEXT(1, &rb);
+			glDeleteRenderbuffersEXT(1, &rbo);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			glDeleteFramebuffersEXT(1, &fb);
+			glDeleteFramebuffersEXT(1, &fbo);
 		}
 		#endif
 		glXMakeCurrent(dpy, 0, 0);
