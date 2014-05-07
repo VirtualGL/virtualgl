@@ -95,7 +95,7 @@ int setcolorscheme(Colormap c, int nc, int scheme)
 	return 0;
 
 	bailout:
-	return -1;	
+	return -1;
 }
 
 
@@ -366,11 +366,11 @@ int display(int advance)
 	if(useoverlay || useci) glIndexf(254.);
 	else glColor3f(1., 1., 1.);
 	if(useoverlay) glRasterPos3f(-0.95, -0.95, 0.);
-	else 
+	else
 	{
 		xaspect=(GLfloat)width/(GLfloat)(min(width, height));
 		yaspect=(GLfloat)height/(GLfloat)(min(width, height));
-		glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5); 
+		glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5);
 	}
 	glListBase(fontlistbase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
@@ -501,7 +501,7 @@ int main(int argc, char **argv)
 	int rgbattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None, None,
 		None};
-	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, 
+	int ciattribs[]={GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
 		None};
 	int olattribs[]={GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None};
@@ -539,8 +539,8 @@ int main(int argc, char **argv)
 		}
 		if(!strnicmp(argv[i], "-fs", 3)) fullscreen=1;
 		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
-		{ 
-			int mf=atoi(argv[++i]); 
+		{
+			int mf=atoi(argv[++i]);
 			if(mf>0)
 			{
 				maxframes=mf;
@@ -554,7 +554,7 @@ int main(int argc, char **argv)
 		}
 		if(!strnicmp(argv[i], "-sc", 3) && i<argc-1)
 		{
-			int sc=atoi(argv[++i]); 
+			int sc=atoi(argv[++i]);
 			if(sc>0)
 			{
 				screen=sc;
@@ -616,7 +616,7 @@ int main(int argc, char **argv)
 
 	if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
 
-	mask=CWBorderPixel|CWColormap|CWEventMask;	
+	mask=CWBorderPixel|CWColormap|CWEventMask;
 	if(fullscreen)
 	{
 		mask|=CWOverrideRedirect;
@@ -633,7 +633,11 @@ int main(int argc, char **argv)
 	XSetWMProtocols(dpy, win, &deleteatom, 1);
 	XStoreName(dpy, win, "GLX Spheres");
 	XMapWindow(dpy, win);
-	if(fullscreen) XSetInputFocus(dpy, win, RevertToParent, CurrentTime);
+	if(fullscreen)
+	{
+		XSetInputFocus(dpy, win, RevertToParent, CurrentTime);
+		XGrabKeyboard(dpy, win, GrabModeAsync, True, GrabModeAsync, CurrentTime);
+	}
 	XSync(dpy, False);
 
 	if((ctx=glXCreateContext(dpy, v, NULL, directctx))==0)
