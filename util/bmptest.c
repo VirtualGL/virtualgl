@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include "bmp.h"
 #include "vglutil.h"
 #include "md5.h"
@@ -81,7 +82,7 @@ int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
 	int pitch=BMPPAD(width*bmp_ps[pf], align), loadWidth=0, loadHeight=0,
 		retval=0;
 	unsigned char *buf=NULL;
-	char *md5ref=!strcasecmp(ext, "ppm")? "c0c9f772b464d1896326883a5c79c545":
+	char *md5ref=!stricmp(ext, "ppm")? "c0c9f772b464d1896326883a5c79c545":
 		"b03eec1eaaad38fed9cab5082bf37e52";
 
 	if((buf=(unsigned char *)malloc(pitch*height))==NULL)
@@ -93,7 +94,7 @@ int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
 	if(bmp_save(filename, buf, width, pitch, height, pf, orientation)==-1)
 		_throw(bmp_geterr());
 	md5sum=MD5File(filename, md5buf);
-	if(strcasecmp(md5sum, md5ref))
+	if(stricmp(md5sum, md5ref))
 		_throwmd5(filename, md5sum, md5ref);
 
 	free(buf);  buf=NULL;

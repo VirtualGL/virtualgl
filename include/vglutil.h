@@ -26,6 +26,11 @@
 	#define strnicmp strncasecmp
 #endif
 
+#ifdef _MSC_VER
+#define snprintf(str, n, format, ...) \
+	_snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
+#endif
+
 #ifndef min
  #define min(a,b) ((a)<(b)? (a):(b))
 #endif

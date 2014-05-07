@@ -39,6 +39,8 @@ static const char *formatName[FBX_FORMATS]=
 
 #if defined(_WIN32)
 
+#define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
+
 static char lastError[1024]="No error";
 
 #define _throw(m) {  \
@@ -188,7 +190,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 
 	w32(hdc=GetDC(fb->wh));
 	w32(fb->hmdc=CreateCompatibleDC(hdc));
-	w32(hmembmp=CreateCompatibleBitmap(hdc, w, h));
+	w32(hmembmp=CreateCompatibleBitmap(hdc, width, height));
 	w32(GetDeviceCaps(hdc, RASTERCAPS)&RC_BITBLT);
 	w32(GetDeviceCaps(fb->hmdc, RASTERCAPS)&RC_DI_BITMAP);
 	bminfo.bmi.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
@@ -232,7 +234,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	fb->format=-1;
 	for(i=0; i<FBX_FORMATS; i++)
 		if(rmask==fbx_rmask[i] && gmask==fbx_gmask[i] && bmask==fbx_bmask[i]
-			&& ps==fbx_ps[i] && fbx_alphaFirst[i]==0) fb->format=i;
+			&& ps==fbx_ps[i] && fbx_alphafirst[i]==0) fb->format=i;
 	if(fb->format==-1) _throw("Display has unsupported pixel format");
 
 	bminfo.bmi.bmiHeader.biHeight=-bminfo.bmi.bmiHeader.biHeight;

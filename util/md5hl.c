@@ -9,7 +9,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <errno.h>
 #include <stdio.h>
@@ -55,7 +59,11 @@ MD5FileChunk(const char *filename, char *buf, off_t ofs, off_t len)
 	off_t n;
 
 	MD5Init(&ctx);
+	#ifdef _WIN32
+	f = open(filename, O_RDONLY|O_BINARY);
+	#else
 	f = open(filename, O_RDONLY);
+	#endif
 	if (f < 0)
 		return 0;
 	if (fstat(f, &stbuf) < 0)
@@ -73,11 +81,11 @@ MD5FileChunk(const char *filename, char *buf, off_t ofs, off_t len)
 			i = read(f, buffer, sizeof(buffer));
 		else
 			i = read(f, buffer, n);
-		if (i < 0) 
+		if (i < 0)
 			break;
 		MD5Update(&ctx, buffer, i);
 		n -= i;
-	} 
+	}
 	e = errno;
 	close(f);
 	errno = e;

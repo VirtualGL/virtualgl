@@ -30,11 +30,6 @@
 
 using namespace vglutil;
 
-#ifdef _MSC_VER
-#define snprintf(str, n, format, ...) \
-	_snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
-#endif
-
 
 #ifndef _WIN32
 extern "C" {
@@ -54,12 +49,12 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define N                 2
 
 int width, height;
-bool doShm=true, doFS=false, doVid=false, doDisplay=false, interactive=false,
-	advance=false, doStress=false;
+bool doPixmap=false, doShm=true, doFS=false, doVid=false, doDisplay=false,
+	interactive=false, advance=false, doStress=false;
 int offset;
 double benchTime=5.0;
 #ifndef _WIN32
-bool checkDB=false, doPixmap=false, doCI=false;
+bool checkDB=false, doCI=false;
 Window win=0;
 #endif
 fbx_wh wh;
