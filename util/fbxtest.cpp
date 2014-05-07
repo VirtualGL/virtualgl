@@ -49,17 +49,17 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 #define BENCH_NAME		"FBXtest"
 
-#define MIN_SCREEN_WIDTH  1024
-#define MIN_SCREEN_HEIGHT 768
 #define WIDTH             1240
 #define HEIGHT            900
 #define N                 2
 
 int width, height;
-int checkDB=0, doShm=1, doFS=0, doVid=0, doDisplay=0, interactive=0,
-	advance=0, doStress=0, offset;
+bool doShm=true, doFS=false, doVid=false, doDisplay=false, interactive=false,
+	advance=false, doStress=false;
+int offset;
+double benchTime=5.0;
 #ifndef _WIN32
-int doPixmap=0;
+bool checkDB=false, doPixmap=false, doCI=false;
 Window win=0;
 #endif
 fbx_wh wh;
@@ -76,7 +76,7 @@ const BMPPF fb2bmpformat[FBX_FORMATS]=
 	BMPPF_RGB
 };
 
-void nativeRead(int), nativeWrite(int);
+void nativeRead(bool), nativeWrite(bool);
 
 
 void initBuf(int x, int y, int width, int pitch, int height, int format,
@@ -161,7 +161,7 @@ void clearFB(void)
 
 
 // Platform-specific write test
-void nativeWrite(int useShm)
+void nativeWrite(bool useShm)
 {
 	fbx_struct fb;  int i=0;  double rbtime;
 
@@ -169,11 +169,14 @@ void nativeWrite(int useShm)
 
 	try
 	{
-		fbx(fbx_init(&fb, wh, 0, 0, useShm));
+		fbx(fbx_init(&fb, wh, 0, 0, useShm? 1:0));
 		if(useShm && !fb.shm) _throw("MIT-SHM not available");
 		fprintf(stderr, "Native Pixel Format:  %s\n", fbx_formatname(fb.format));
 		if(fb.width!=width || fb.height!=height)
-			_throw("The benchmark window lost input focus or was obscured, or the display\nresolution is not large enough.  Skipping native write test\n");
+		{
+			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
+				width, height, fb.width, fb.height);
+		}
 
 		clearFB();
 		if(useShm)
@@ -183,21 +186,23 @@ void nativeWrite(int useShm)
 		i=0;  rbtime=0;  timer2.start();
 		do
 		{
+			#ifndef _WIN32
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch*fb.height);
 				fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
-			initBuf(0, 0, width, fb.pitch, height, fb.format,
+			#endif
+			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
 				(unsigned char *)fb.bits, i);
 			timer.start();
 			fbx(fbx_flip(&fb, 0, 0, 0, 0));
 			fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
 			rbtime+=timer.elapsed();
 			i++;
-		} while(timer2.elapsed()<5.);
+		} while(timer2.elapsed()<benchTime);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(width*height)/((double)1000000.*rbtime));
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
 
 		clearFB();
 		if(useShm)
@@ -207,20 +212,23 @@ void nativeWrite(int useShm)
 		i=0;  rbtime=0.;  timer2.start();
 		do
 		{
+			#ifndef _WIN32
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch*fb.height);
 				fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
-			initBuf(0, 0, width, fb.pitch, height, fb.format,
+			#endif
+			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
 				(unsigned char *)fb.bits, i);
 			timer.start();
-			fbx(fbx_write(&fb, 0, 0, WIDTH/2, HEIGHT/2, WIDTH/2, HEIGHT/2));
+			fbx(fbx_write(&fb, 0, 0, fb.width/2, fb.height/2, fb.width/2,
+				fb.height/2));
 			rbtime+=timer.elapsed();
 			i++;
-		} while(timer2.elapsed()<5.);
+		} while(timer2.elapsed()<benchTime);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(width*height)/((double)4000000.*rbtime));
+			(double)i*(double)(fb.width*fb.height)/((double)4000000.*rbtime));
 
 		clearFB();
 		if(useShm)
@@ -230,20 +238,22 @@ void nativeWrite(int useShm)
 		i=0;  rbtime=0.;  timer2.start();
 		do
 		{
+			#ifndef _WIN32
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch*fb.height);
 				fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
-			initBuf(0, 0, width, fb.pitch, height, fb.format,
+			#endif
+			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
 				(unsigned char *)fb.bits, i);
 			timer.start();
 			fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
 			rbtime+=timer.elapsed();
 			i++;
-		} while(timer2.elapsed()<5.);
+		} while(timer2.elapsed()<benchTime);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(width*height)/((double)1000000.*rbtime));
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
 
 	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
@@ -254,7 +264,7 @@ void nativeWrite(int useShm)
 
 
 // Platform-specific readback test
-void nativeRead(int useShm)
+void nativeRead(bool useShm)
 {
 	fbx_struct fb;  int i;  double rbtime;
 
@@ -262,30 +272,33 @@ void nativeRead(int useShm)
 
 	try
 	{
-		fbx(fbx_init(&fb, wh, 0, 0, useShm));
+		fbx(fbx_init(&fb, wh, 0, 0, useShm? 1:0));
 		int ps=fbx_ps[fb.format];
 		if(useShm && !fb.shm) _throw("MIT-SHM not available");
 		if(fb.width!=width || fb.height!=height)
-			_throw("The benchmark window lost input focus or was obscured, or the display\nresolution is not large enough.  Skipping native read test\n");
+		{
+			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
+				width, height, fb.width, fb.height);
+		}
 
 		if(useShm)
 			fprintf(stderr, "FBX read [SHM]:                   ");
 		else
 			fprintf(stderr, "FBX read:                         ");
-		memset(fb.bits, 0, width*height*ps);
+		memset(fb.bits, 0, fb.width*fb.height*ps);
 		i=0;  rbtime=0.;  timer2.start();
 		do
 		{
 			timer.start();
 			fbx(fbx_read(&fb, 0, 0));
 			rbtime+=timer.elapsed();
-			if(!cmpBuf(0, 0, width, fb.pitch, height, fb.format, (unsigned char *)fb.bits,
-				offset))
+			if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
+				(unsigned char *)fb.bits, offset))
 				_throw("ERROR: Bogus data read back.");
 			i++;
-		} while(timer2.elapsed()<5.);
+		} while(timer2.elapsed()<benchTime);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(width*height)/((double)1000000.*rbtime));
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
 
 	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
@@ -298,37 +311,41 @@ class WriteThread : public Runnable
 {
 	public:
 
-		WriteThread(int myRank_, int iter_, int useShm_) : myRank(myRank_),
+		WriteThread(int myRank_, int iter_, bool useShm_) : myRank(myRank_),
 			iter(iter_), useShm(useShm_) {}
 
 		void run(void)
 		{
-			int i;  fbx_struct stressfb;
-			memset(&stressfb, 0, sizeof(stressfb));
+			int i;  fbx_struct fb;
+			memset(&fb, 0, sizeof(fb));
 
 			try
 			{
 				int myWidth, myHeight, myX=0, myY=0;
-				if(myRank<2) { myWidth=width/2;  myX=0; }
-				else { myWidth=width-width/2;  myX=width/2; }
-				if(myRank%2==0) { myHeight=height/2;  myY=0; }
-				else { myHeight=height-height/2;  myY=height/2; }
-				fbx(fbx_init(&stressfb, wh, myWidth, myHeight, useShm));
-				if(useShm && !stressfb.shm) _throw("MIT-SHM not available");
-				initBuf(myX, myY, myWidth, stressfb.pitch, myHeight, stressfb.format,
-					(unsigned char *)stressfb.bits, 0);
+
+				fbx(fbx_init(&fb, wh, 0, 0, useShm? 1:0));
+				if(myRank<2) { myWidth=fb.width/2;  myX=0; }
+				else { myWidth=fb.width-fb.width/2;  myX=fb.width/2; }
+				if(myRank%2==0) { myHeight=fb.height/2;  myY=0; }
+				else { myHeight=fb.height-fb.height/2;  myY=fb.height/2; }
+				fbx_term(&fb);
+				fbx(fbx_init(&fb, wh, myWidth, myHeight, useShm? 1:0));
+				if(useShm && !fb.shm) _throw("MIT-SHM not available");
+				initBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.format,
+					(unsigned char *)fb.bits, 0);
 				for(i=0; i<iter; i++)
-					fbx(fbx_write(&stressfb, 0, 0, myX, myY, myWidth, myHeight));
+					fbx(fbx_write(&fb, 0, 0, myX, myY, fb.width, fb.height));
 			}
 			catch(...)
 			{
-				fbx_term(&stressfb);  throw;
+				fbx_term(&fb);  throw;
 			}
 		}
 
 	private:
 
-		int myRank, iter, useShm;
+		int myRank, iter;
+		bool useShm;
 };
 
 
@@ -336,44 +353,48 @@ class ReadThread : public Runnable
 {
 	public:
 
-		ReadThread(int myRank_, int iter_, int useShm_) : myRank(myRank_),
+		ReadThread(int myRank_, int iter_, bool useShm_) : myRank(myRank_),
 			iter(iter_), useShm(useShm_) {}
 
 		void run(void)
 		{
-			fbx_struct stressfb;
-			memset(&stressfb, 0, sizeof(stressfb));
+			fbx_struct fb;
+			memset(&fb, 0, sizeof(fb));
 
 			try
 			{
 				int i, myWidth, myHeight, myX=0, myY=0;
-				if(myRank<2) { myWidth=width/2;  myX=0; }
-				else { myWidth=width-width/2;  myX=width/2; }
-				if(myRank%2==0) { myHeight=height/2;  myY=0; }
-				else { myHeight=height-height/2;  myY=height/2; }
-				fbx(fbx_init(&stressfb, wh, myWidth, myHeight, useShm));
-				if(useShm && !stressfb.shm) _throw("MIT-SHM not available");
-				int ps=fbx_ps[stressfb.format];
-				memset(stressfb.bits, 0, myWidth*myHeight*ps);
+
+				fbx(fbx_init(&fb, wh, 0, 0, useShm? 1:0));
+				if(myRank<2) { myWidth=fb.width/2;  myX=0; }
+				else { myWidth=fb.width-fb.width/2;  myX=fb.width/2; }
+				if(myRank%2==0) { myHeight=fb.height/2;  myY=0; }
+				else { myHeight=fb.height-fb.height/2;  myY=fb.height/2; }
+				fbx_term(&fb);
+				fbx(fbx_init(&fb, wh, myWidth, myHeight, useShm? 1:0));
+				if(useShm && !fb.shm) _throw("MIT-SHM not available");
+				int ps=fbx_ps[fb.format];
+				memset(fb.bits, 0, fb.width*fb.height*ps);
 				for(i=0; i<iter; i++)
-					fbx(fbx_read(&stressfb, myX, myY));
-				if(!cmpBuf(myX, myY, myWidth, stressfb.pitch, myHeight,
-					stressfb.format, (unsigned char *)stressfb.bits, 0))
+					fbx(fbx_read(&fb, myX, myY));
+				if(!cmpBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.format,
+					(unsigned char *)fb.bits, 0))
 					_throw("ERROR: Bogus data read back.");
 			}
 			catch(...)
 			{
-				fbx_term(&stressfb);  throw;
+				fbx_term(&fb);  throw;
 			}
 		}
 
 	private:
 
-		int myRank, iter, useShm;
+		int myRank, iter;
+		bool useShm;
 };
 
 
-void nativeStress(int useShm)
+void nativeStress(bool useShm)
 {
 	int i, n;  double rbtime;
 	Thread *thread[4];
@@ -393,7 +414,7 @@ void nativeStress(int useShm)
 			WriteThread *writeThread[4];
 			for(i=0; i<4; i++)
 			{
-				writeThread[i]=new WriteThread(i, n, useShm);
+				writeThread[i]=new WriteThread(i, n, useShm? 1:0);
 				thread[i]=new Thread(writeThread[i]);
 				thread[i]->start();
 			}
@@ -476,7 +497,7 @@ void display(void)
 
 
 #ifdef _WIN32
-LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg)
 	{
@@ -500,14 +521,14 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				if(interactive) doDisplay=1;
+				if(interactive) doDisplay=true;
 				return 0;
 			}
 			break;
 		case WM_MOUSEMOVE:
 			if((wParam & MK_LBUTTON) && doVid && interactive)
 			{
-				doDisplay=advance=1;
+				doDisplay=advance=true;
 				return 0;
 			}
 			break;
@@ -520,7 +541,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 void event_loop(void)
 {
 	fbx_struct fb[10];
-	int frame=0, inc=-1, first=1;
+	int frame=0, inc=-1;  bool first=true;
 	unsigned long frames=0;
 	Timer timer;
 	double elapsed, mpixels=0.;
@@ -535,7 +556,7 @@ void event_loop(void)
 	{
 		for(int i=0; i<10; i++)
 		{
-			fbx(fbx_init(&fb[i], wh, 0, 0, doShm));
+			fbx(fbx_init(&fb[i], wh, 0, 0, doShm? 1:0));
 			snprintf(temps, 256, "frame%d.ppm", i);
 			unsigned char *buf=NULL;  int tempw=0, temph=0;
 			if(bmp_load(temps, &buf, &tempw, 1, &temph, fb2bmpformat[fb[i].format],
@@ -551,10 +572,10 @@ void event_loop(void)
 		timer.start();
 		while(1)
 		{
-			advance=0;  doDisplay=0;
+			advance=false;  doDisplay=false;
 			if(first)
 			{
-				doDisplay=1;  first=0;
+				doDisplay=true;  first=false;
 			}
 
 			#ifdef _WIN32
@@ -575,7 +596,7 @@ void event_loop(void)
 				switch (event.type)
 				{
 					case Expose:
-						doDisplay=1;
+						doDisplay=true;
 						break;
 					case KeyPress:
 					{
@@ -589,7 +610,7 @@ void event_loop(void)
 						break;
 					}
 					case MotionNotify:
-						if(event.xmotion.state & Button1Mask) doDisplay=advance=1;
+						if(event.xmotion.state & Button1Mask) doDisplay=advance=true;
 						break;
 				}
 			}
@@ -631,12 +652,17 @@ void usage(char *progname)
 {
 	fprintf(stderr, "USAGE: %s [options]\n\n", progname);
 	fprintf(stderr, "Options:\n");
+	#ifndef _WIN32
 	fprintf(stderr, "-checkdb = Verify that double buffering is working correctly\n");
+	fprintf(stderr, "-index = Test color index pixel format (PseudoColor visual)\n");
 	fprintf(stderr, "-noshm = Do not use MIT-SHM extension to accelerate blitting\n");
-	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-pm = Blit to a pixmap rather than to a window\n");
+	#endif
+	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
-	fprintf(stderr, "-fs = Full-screen mode\n\n");
+	fprintf(stderr, "-fs = Full-screen mode\n");
+	fprintf(stderr, "-time {t} = Run each benchmark for {t} seconds (default=%.1f)\n\n",
+		benchTime);
 	exit(1);
 }
 
@@ -652,35 +678,48 @@ int main(int argc, char **argv)
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
+		#ifndef _WIN32
 		if(!stricmp(argv[i], "-checkdb"))
 		{
-			checkDB=1;
+			checkDB=true;
 			fprintf(stderr, "Checking double buffering.  Watch for flashing to indicate that it is\n");
 			fprintf(stderr, "not enabled.  Performance will be sub-optimal.\n");
 		}
+		#endif
 		if(!stricmp(argv[i], "-noshm"))
 		{
-			doShm=0;
+			doShm=false;
 		}
-		if(!stricmp(argv[i], "-vid")) doVid=1;
+		if(!stricmp(argv[i], "-vid")) doVid=true;
 		else if(!strnicmp(argv[i], "-v", 2))
 		{
 			fbx_printwarnings(stderr);
 		}
-		if(!stricmp(argv[i], "-i")) interactive=1;
 		#ifndef _WIN32
 		if(!stricmp(argv[i], "-pm"))
 		{
-			doPixmap=1;  doShm=0;
+			doPixmap=true;  doShm=false;
 		}
+		if(!strnicmp(argv[i], "-index", 3))
+		{
+			doCI=true;
+		}
+		else
 		#endif
-		if(!stricmp(argv[i], "-mt")) doStress=1;
+		if(!stricmp(argv[i], "-i")) interactive=true;
+		if(!stricmp(argv[i], "-mt")) doStress=true;
 		if(!stricmp(argv[i], "-fs"))
 		{
-			doFS=1;
+			doFS=true;
 			#ifdef _WIN32
 			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE;
 			#endif
+		}
+		if(!strnicmp(argv[i], "-t", 2))
+		{
+			double temp=-1.;
+			if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
+				benchTime=temp;
 		}
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?")) usage(argv[0]);
 	}
@@ -703,8 +742,8 @@ int main(int argc, char **argv)
 		wndclass.lpszClassName=BENCH_NAME;
 		wndclass.hIconSm=LoadIcon(NULL, IDI_WINLOGO);
 		tryw32(RegisterClassEx(&wndclass));
-		width=GetSystemMetrics(SM_CXSCREEN);
-		height=GetSystemMetrics(SM_CYSCREEN);
+		width=GetSystemMetrics(doFS? SM_CXSCREEN:SM_CXMAXIMIZED);
+		height=GetSystemMetrics(doFS? SM_CYSCREEN:SM_CYMAXIMIZED);
 
 		#else
 
@@ -714,6 +753,7 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 		XSetErrorHandler(xhandler);
+		memset(&wh, 0, sizeof(fbx_wh));
 		if(!(wh.dpy=XOpenDisplay(0)))
 		{
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
@@ -724,18 +764,20 @@ int main(int argc, char **argv)
 
 		#endif
 
-		if(width<MIN_SCREEN_WIDTH && height<MIN_SCREEN_HEIGHT)
-		{
-			fprintf(stderr,
-				"ERROR: Please switch to a screen resolution of at least %d x %d.\n",
-				MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
-			exit(1);
-		}
 		if(!doFS)
 		{
-			width=WIDTH;
-			height=HEIGHT;
+			if(doPixmap)
+			{
+				width=WIDTH;  height=HEIGHT;
+			}
+			else
+			{
+				width=min(width, WIDTH);
+				height=min(height, HEIGHT);
+			}
 		}
+		fprintf(stderr, "%s size:  %d x %d\n", doPixmap? "Pixmap":"Window",
+			width, height);
 
 		#ifdef _WIN32
 
@@ -764,14 +806,29 @@ int main(int argc, char **argv)
 		XSetWindowAttributes swa;
 		Window root=DefaultRootWindow(wh.dpy);
 
-		vtemp.depth=24;  vtemp.c_class=TrueColor;
+		vtemp.depth=doCI? 8:24;  vtemp.c_class=doCI? PseudoColor:TrueColor;
 		if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp,
 			&n))!=NULL && n!=0)
 		{
 			int mask=CWBorderPixel|CWColormap|CWEventMask;
-			swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
+			swa.colormap=XCreateColormap(wh.dpy, root, v->visual,
+				doCI? AllocAll:AllocNone);
 			swa.border_pixel=0;
 			swa.event_mask=0;
+			if(doCI)
+			{
+				XColor xc[32];  int i;
+				errifnot(v->colormap_size==256);
+				for(i=0; i<32; i++)
+				{
+					xc[i].red=(i<16? i*16:255)<<8;
+					xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
+					xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
+					xc[i].flags=DoRed | DoGreen | DoBlue;
+					xc[i].pixel=i;
+				}
+				XStoreColors(wh.dpy, swa.colormap, xc, 32);
+			}
 			if(doFS)
 			{
 				mask|=CWOverrideRedirect;  swa.override_redirect=True;
@@ -807,55 +864,13 @@ int main(int argc, char **argv)
 			else XDestroyWindow(wh.dpy, wh.d);
 			XFree(v);  v=NULL;
 		}
-		else fprintf(stderr, "No RGB visuals available.  Skipping those tests.\n\n");
-
-		if(doVid) return 0;
-
-		vtemp.depth=8;  vtemp.c_class=PseudoColor;
-		if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp,
-			&n))!=NULL && n!=0)
+		else
 		{
-			swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocAll);
-			swa.border_pixel=0;
-			swa.event_mask=0;
-			XColor xc[32];  int i;
-			errifnot(v->colormap_size==256);
-			for(i=0; i<32; i++)
-			{
-				xc[i].red=(i<16? i*16:255)<<8;
-				xc[i].green=(i<16? i*16:255-(i-16)*16)<<8;
-				xc[i].blue=(i<16? 255:255-(i-16)*16)<<8;
-				xc[i].flags=DoRed | DoGreen | DoBlue;
-				xc[i].pixel=i;
-			}
-			XStoreColors(wh.dpy, swa.colormap, xc, 32);
-			if(doPixmap)
-			{
-				errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0,
-					v->depth, InputOutput, v->visual,
-					CWBorderPixel|CWColormap|CWEventMask, &swa));
-				errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
-				wh.v=v->visual;
-			}
+			if(doCI)
+				_throw("No PeudoColor visuals available");
 			else
-			{
-				errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-					v->depth, InputOutput, v->visual,
-					CWBorderPixel|CWColormap|CWEventMask, &swa));
-				errifnot(XMapRaised(wh.dpy, wh.d));
-			}
-			XSync(wh.dpy, False);
-			display();
-			if(doPixmap)
-			{
-				XFreePixmap(wh.dpy, wh.d);
-				XDestroyWindow(wh.dpy, win);
-			}
-			else XDestroyWindow(wh.dpy, wh.d);
-			XFreeColormap(wh.dpy, swa.colormap);
-			XFree(v);  v=NULL;
+				_throw("No RGB visuals available");
 		}
-		else fprintf(stderr, "No Pseudocolor visuals available.  Skipping those tests.\n\n");
 
 		return 0;
 
