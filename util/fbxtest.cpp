@@ -44,14 +44,13 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 #define BENCH_NAME		"FBXtest"
 
-#define WIDTH             1240
-#define HEIGHT            900
 #define N                 2
 
+int WIDTH=1240, HEIGHT=900;
 int width, height;
 bool doPixmap=false, doShm=true, doFS=false, doVid=false, doDisplay=false,
 	interactive=false, advance=false, doStress=false;
-int offset;
+int offset, retCode=0;
 double benchTime=5.0;
 #ifndef _WIN32
 bool checkDB=false, doCI=false;
@@ -98,25 +97,33 @@ void initBuf(int x, int y, int width, int pitch, int height, int format,
 
 
 int cmpBuf(int x, int y, int width, int pitch, int height, int format,
-	unsigned char *buf, int offset)
+	unsigned char *buf, int offset, bool flip=false)
 {
 	int i, j, ps=fbx_ps[format];
 
 	for(j=0; j<height; j++)
 	{
+		int line=flip? height-1-j:j;
 		for(i=0; i<width; i++)
 		{
 			if(format==FBX_INDEX)
 			{
-				if(buf[j*pitch+i]!=(i+x+j+y+offset)%32) return 0;
+				if(buf[line*pitch+i]!=(i+x+j+y+offset)%32) return 0;
 			}
 			else
 			{
-				if(buf[j*pitch+i*ps+fbx_roffset[format]]!=(i+x+offset)%256)
+				bool ignore=false;
+				#ifdef __APPLE__
+				// In XQuartz, X[Shm]GetImage() picks up the little window resize
+				// gadget at the bottom right, so we have to ignore those pixels.
+				if(line>=height-16 && i>=width-16) ignore=true;
+				#endif
+				if(buf[line*pitch+i*ps+fbx_roffset[format]]!=(i+x+offset)%256 && !ignore)
 					return 0;
-				if(buf[j*pitch+i*ps+fbx_goffset[format]]!=(j+y+offset)%256)
+				if(buf[line*pitch+i*ps+fbx_goffset[format]]!=(j+y+offset)%256 && !ignore)
 					return 0;
-				if(buf[j*pitch+i*ps+fbx_boffset[format]]!=(j+y+i+x+offset)%256)
+				if(buf[line*pitch+i*ps+fbx_boffset[format]]!=(j+y+i+x+offset)%256
+					&& !ignore)
 					return 0;
 			}
 		}
@@ -158,7 +165,7 @@ void clearFB(void)
 // Platform-specific write test
 void nativeWrite(bool useShm)
 {
-	fbx_struct fb;  int i=0;  double rbtime;
+	fbx_struct fb;  int i=0;  double drawTime;
 
 	memset(&fb, 0, sizeof(fb));
 
@@ -175,10 +182,10 @@ void nativeWrite(bool useShm)
 
 		clearFB();
 		if(useShm)
-			fprintf(stderr, "FBX bottom-up write [SHM]:        ");
+			fprintf(stderr, "FBX bottom-up write [SHM]:     ");
 		else
-			fprintf(stderr, "FBX bottom-up write:              ");
-		i=0;  rbtime=0;  timer2.start();
+			fprintf(stderr, "FBX bottom-up write:           ");
+		i=0;  drawTime=0;  timer2.start();
 		do
 		{
 			#ifndef _WIN32
@@ -193,18 +200,27 @@ void nativeWrite(bool useShm)
 			timer.start();
 			fbx(fbx_flip(&fb, 0, 0, 0, 0));
 			fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
-			rbtime+=timer.elapsed();
+			drawTime+=timer.elapsed();
 			i++;
 		} while(timer2.elapsed()<benchTime);
-		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
+		fprintf(stderr, "%f Mpixels/sec",
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*drawTime));
+		memset(fb.bits, 0, fb.pitch*fb.height);
+		fbx(fbx_read(&fb, 0, 0));
+		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
+			(unsigned char *)fb.bits, i-1, true))
+		{
+			fprintf(stderr, " (ERROR CHECK FAILED)\n");
+			retCode=-1;
+		}
+		else fprintf(stderr, " (no errors)\n");
 
 		clearFB();
 		if(useShm)
-			fprintf(stderr, "FBX 1/4 top-down write [SHM]:     ");
+			fprintf(stderr, "FBX 1/4 top-down write [SHM]:  ");
 		else
-			fprintf(stderr, "FBX 1/4 top-down write:           ");
-		i=0;  rbtime=0.;  timer2.start();
+			fprintf(stderr, "FBX 1/4 top-down write:        ");
+		i=0;  drawTime=0.;  timer2.start();
 		do
 		{
 			#ifndef _WIN32
@@ -219,18 +235,28 @@ void nativeWrite(bool useShm)
 			timer.start();
 			fbx(fbx_write(&fb, 0, 0, fb.width/2, fb.height/2, fb.width/2,
 				fb.height/2));
-			rbtime+=timer.elapsed();
+			drawTime+=timer.elapsed();
 			i++;
 		} while(timer2.elapsed()<benchTime);
-		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(fb.width*fb.height)/((double)4000000.*rbtime));
+		fprintf(stderr, "%f Mpixels/sec",
+			(double)i*(double)(fb.width*fb.height)/((double)4000000.*drawTime));
+		memset(fb.bits, 0, fb.pitch*fb.height);
+		fbx(fbx_read(&fb, 0, 0));
+		if(!cmpBuf(0, 0, fb.width/2, fb.pitch, fb.height/2,
+			fb.format, (unsigned char *)&fb.bits[fb.height/2*fb.pitch
+				+fb.width/2*fbx_ps[fb.format]], i-1))
+		{
+			fprintf(stderr, " (ERROR CHECK FAILED)\n");
+			retCode=-1;
+		}
+		else fprintf(stderr, " (no errors)\n");
 
 		clearFB();
 		if(useShm)
-			fprintf(stderr, "FBX top-down write [SHM]:         ");
+			fprintf(stderr, "FBX top-down write [SHM]:      ");
 		else
-			fprintf(stderr, "FBX top-down write:               ");
-		i=0;  rbtime=0.;  timer2.start();
+			fprintf(stderr, "FBX top-down write:            ");
+		i=0;  drawTime=0.;  timer2.start();
 		do
 		{
 			#ifndef _WIN32
@@ -244,13 +270,22 @@ void nativeWrite(bool useShm)
 				(unsigned char *)fb.bits, i);
 			timer.start();
 			fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
-			rbtime+=timer.elapsed();
+			drawTime+=timer.elapsed();
 			i++;
 		} while(timer2.elapsed()<benchTime);
-		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
+		fprintf(stderr, "%f Mpixels/sec",
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*drawTime));
+		memset(fb.bits, 0, fb.pitch*fb.height);
+		fbx(fbx_read(&fb, 0, 0));
+		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
+			(unsigned char *)fb.bits, i-1))
+		{
+			fprintf(stderr, " (ERROR CHECK FAILED)\n");
+			retCode=-1;
+		}
+		else fprintf(stderr, " (no errors)\n");
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retCode=-1; }
 
 	offset=i-1;
 
@@ -261,7 +296,7 @@ void nativeWrite(bool useShm)
 // Platform-specific readback test
 void nativeRead(bool useShm)
 {
-	fbx_struct fb;  int i;  double rbtime;
+	fbx_struct fb;  int i, error=0;  double readTime;
 
 	memset(&fb, 0, sizeof(fb));
 
@@ -277,25 +312,31 @@ void nativeRead(bool useShm)
 		}
 
 		if(useShm)
-			fprintf(stderr, "FBX read [SHM]:                   ");
+			fprintf(stderr, "FBX read [SHM]:                ");
 		else
-			fprintf(stderr, "FBX read:                         ");
+			fprintf(stderr, "FBX read:                      ");
 		memset(fb.bits, 0, fb.width*fb.height*ps);
-		i=0;  rbtime=0.;  timer2.start();
+		i=0;  readTime=0.;  timer2.start();
 		do
 		{
 			timer.start();
 			fbx(fbx_read(&fb, 0, 0));
-			rbtime+=timer.elapsed();
+			readTime+=timer.elapsed();
 			if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.format,
 				(unsigned char *)fb.bits, offset))
-				_throw("ERROR: Bogus data read back.");
+				error=1;
 			i++;
 		} while(timer2.elapsed()<benchTime);
-		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)i*(double)(fb.width*fb.height)/((double)1000000.*rbtime));
+		fprintf(stderr, "%f Mpixels/sec",
+			(double)i*(double)(fb.width*fb.height)/((double)1000000.*readTime));
+		if(error)
+		{
+			fprintf(stderr, " (ERROR CHECK FAILED)\n");
+			retCode=-1;
+		}
+		else fprintf(stderr, " (no errors)\n");
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retCode=-1; }
 
 	fbx_term(&fb);
 }
@@ -333,7 +374,7 @@ class WriteThread : public Runnable
 			}
 			catch(...)
 			{
-				fbx_term(&fb);  throw;
+				fbx_term(&fb);  retCode=-1;  throw;
 			}
 		}
 
@@ -378,7 +419,7 @@ class ReadThread : public Runnable
 			}
 			catch(...)
 			{
-				fbx_term(&fb);  throw;
+				fbx_term(&fb);  retCode=-1;  throw;
 			}
 		}
 
@@ -391,7 +432,7 @@ class ReadThread : public Runnable
 
 void nativeStress(bool useShm)
 {
-	int i, n;  double rbtime;
+	int i, n;  double testTime;
 	Thread *thread[4];
 
 	try
@@ -419,10 +460,10 @@ void nativeStress(bool useShm)
 			{
 				delete thread[i];  delete writeThread[i];
 			}
-			rbtime=timer.elapsed();
-		} while(rbtime<1.);
+			testTime=timer.elapsed();
+		} while(testTime<1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)n*(double)(width*height)/((double)1000000.*rbtime));
+			(double)n*(double)(width*height)/((double)1000000.*testTime));
 
 	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
 
@@ -450,12 +491,12 @@ void nativeStress(bool useShm)
 			{
 				delete thread[i];  delete readThread[i];
 			}
-			rbtime=timer.elapsed();
-		} while(rbtime<1.);
+			testTime=timer.elapsed();
+		} while(testTime<1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)n*(double)(width*height)/((double)1000000.*rbtime));
+			(double)n*(double)(width*height)/((double)1000000.*testTime));
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retCode=-1; }
 
 	return;
 }
@@ -637,6 +678,7 @@ void event_loop(void)
 	catch(...)
 	{
 		for(int i=0; i<10; i++) fbx_term(&fb[i]);
+		retCode=-1;
 		throw;
 	}
 
@@ -656,8 +698,10 @@ void usage(char *progname)
 	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
 	fprintf(stderr, "-fs = Full-screen mode\n");
-	fprintf(stderr, "-time {t} = Run each benchmark for {t} seconds (default=%.1f)\n\n",
+	fprintf(stderr, "-time {t} = Run each benchmark for {t} seconds (default=%.1f)\n",
 		benchTime);
+	fprintf(stderr, "-size <wxh> = specify drawable width & height (default: %dx%d)\n",
+		WIDTH, HEIGHT);
 	exit(1);
 }
 
@@ -715,6 +759,14 @@ int main(int argc, char **argv)
 			double temp=-1.;
 			if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
 				benchTime=temp;
+		}
+		if(!strnicmp(argv[i], "-s", 2) && i<argc-1)
+		{
+			int w=0, h=0;
+			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
+			{
+				WIDTH=w;  HEIGHT=h;
+			}
 		}
 		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?")) usage(argv[0]);
 	}
@@ -867,9 +919,9 @@ int main(int argc, char **argv)
 				_throw("No RGB visuals available");
 		}
 
-		return 0;
-
 		#endif
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retCode=-1; }
+
+	return retCode;
 }
