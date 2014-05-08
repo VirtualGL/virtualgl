@@ -79,7 +79,7 @@ static char *lastError="No error";
 #define X_ShmAttach 1
 #endif
 
-#endif // _WIN32
+#endif /* _WIN32 */
 
 
 #ifdef INFAKER

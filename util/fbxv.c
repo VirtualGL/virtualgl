@@ -13,7 +13,7 @@
  * wxWindows Library License for more details.
  */
 
-// This library abstracts fast frame buffer access
+/* This library abstracts X Video drawing */
 #include <string.h>
 #include <stdlib.h>
 #include "fbxv.h"

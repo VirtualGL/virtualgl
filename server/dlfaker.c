@@ -21,14 +21,15 @@
 extern void *_vgl_dlopen(const char *, int);
 
 
-// If an application uses dlopen()/dlsym() to load functions from libGL or
-// libX11, this bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to
-// intercept dlopen() and return a handle to itself rather than a handle to
-// libGL or libX11.
-//
-// NOTE: If the application tries to use dlopen() to obtain a handle to libdl,
-// we similarly replace the handle with a handle to libdlfaker.  This works
-// around an interaction issue between 180.xx of the nVidia drivers and WINE.
+/* If an application uses dlopen()/dlsym() to load functions from libGL or
+   libX11, this bypasses the LD_PRELOAD mechanism.  Thus, VirtualGL has to
+   intercept dlopen() and return a handle to itself rather than a handle to
+   libGL or libX11.
+
+   NOTE: If the application tries to use dlopen() to obtain a handle to libdl,
+   we similarly replace the handle with a handle to libdlfaker.  This works
+   around an interaction issue between 180.xx of the nVidia drivers and WINE.
+*/
 
 void *dlopen(const char *filename, int flag)
 {

@@ -136,19 +136,19 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	GLXDrawable draw = _glXGetCurrentDrawable();
 	if(winhash.find(draw, pbw))
 	{
-		// Current drawable is a virtualized Window
+		/* Current drawable is a virtualized Window */
 		errifnot(dpy = pbw->getX11Display());
 		errifnot(win = pbw->getX11Drawable());
 	}
 	else if((win = pmhash.reverseFind(draw)) != 0)
 	{
-		// Current drawable is a virtualized Pixmap
+		/* Current drawable is a virtualized Pixmap */
 		errifnot(dpy = glxdhash.getCurrentDisplay(draw));
 	}
 	else
 	{
-		// Current drawable must be a Pbuffer that the app created.  Blerg.  There
-		// is no window attached, so we have to create one temporarily.
+		/* Current drawable must be a Pbuffer that the app created.  Blerg.  There
+		   is no window attached, so we have to create one temporarily. */
 		XVisualInfo *v = NULL, vtemp;
 		XSetWindowAttributes swa;
 		int n = 0;

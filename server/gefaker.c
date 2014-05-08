@@ -29,7 +29,7 @@ static void __loadsymbol(void)
 	const char *err=NULL;
 	pthread_mutex_lock(&globalmutex);
 	if(__getenv) {pthread_mutex_unlock(&globalmutex);  return;}
-	dlerror();  // Clear error state
+	dlerror();  /* Clear error state */
 	__getenv=(_getenvType)dlsym(RTLD_NEXT, "getenv");
 	err=dlerror();
 	if(err) fprintf(stderr, "[gefaker] %s\n", err);
