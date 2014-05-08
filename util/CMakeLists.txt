@@ -53,3 +53,5 @@ target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 if(VGL_BUILDSERVER)
 	install(TARGETS glreadtest DESTINATION ${VGL_BINDIR})
 endif()
+
+configure_file(utiltest.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utiltest)

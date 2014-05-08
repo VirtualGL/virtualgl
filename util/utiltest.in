@@ -1,0 +1,58 @@
+#!/bin/bash
+set -e
+set -u
+
+BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
+SSL=@VGL_USESSL@
+
+$BIN/bmptest
+echo
+
+Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+DISPLAY=:42 $BIN/fbxtest -time 0.2
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -mt
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm -mt
+kill $PID
+sleep 2
+
+Xvfb :42 -screen 0 1024x768x24 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+DISPLAY=:42 $BIN/fbxtest -time 0.2
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -mt
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm
+kill $PID
+sleep 2
+
+Xvfb :42 -screen 0 1920x1200x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -mt
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm -mt
+kill $PID
+sleep 2
+
+Xvfb :42 -screen 0 1024x768x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -mt
+DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm
+kill $PID
+sleep 2
+
+$BIN/nettest -server &
+echo
+sleep 2
+$BIN/nettest -client localhost -t 0.2
+
+if [ "$SSL" = "1" ]; then
+	echo
+	$BIN/nettest -server -ssl &
+	sleep 2
+	$BIN/nettest -client localhost -ssl -t 0.2
+fi
+
+echo
+echo GREAT SUCCESS!
