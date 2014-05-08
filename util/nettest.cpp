@@ -31,6 +31,9 @@ using namespace vglutil;
 #define ITER 5
 
 
+double benchTime=2.0;
+
+
 #if defined(sun) || defined(linux)
 
 void benchmark(int interval, char *ifname)
@@ -142,11 +145,11 @@ int cmpBuf(char *buf, int len)
 
 void usage(char **argv)
 {
-	printf("USAGE: %s -client <server name or IP>", argv[0]);
+	printf("\nUSAGE: %s -client <server name or IP>", argv[0]);
 	#ifdef USESSL
 	printf(" [-ssl]");
 	#endif
-	printf(" [-old]");
+	printf(" [-old] [-time <t>]");
 	printf("\n or    %s -server", argv[0]);
 	#ifdef USESSL
 	printf(" [-ssl]");
@@ -161,6 +164,9 @@ void usage(char **argv)
 	#ifdef USESSL
 	printf("-ssl = use secure tunnel\n");
 	#endif
+	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default=%.1f)\n",
+		benchTime);
+	fprintf(stderr, "            (NOTE: this must be specified on the client)\n\n");
 	exit(1);
 }
 
@@ -197,6 +203,12 @@ int main(int argc, char **argv)
 					{
 						printf("Using old protocol\n");
 						old=true;
+					}
+					if(!strnicmp(argv[i], "-t", 2))
+					{
+						double temp=-1.;
+						if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
+							benchTime=temp;
 					}
 				}
 			}
@@ -343,7 +355,7 @@ int main(int argc, char **argv)
 					socket.recv(buf, i);
 					j++;
 					elapsed=timer.elapsed();
-				} while(elapsed<2.0);
+				} while(elapsed<benchTime);
 				if(!cmpBuf(buf, i))
 				{
 					printf("DATA ERROR\n");  exit(1);
