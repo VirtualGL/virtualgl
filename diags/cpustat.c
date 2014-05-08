@@ -1,5 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
- * Copyright (C)2013 D. R. Commander
+ * Copyright (C)2013-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,19 +21,20 @@
 
 void collect(void)
 {
-	static long long usrjif[MAXCPUS+1], nicejif[MAXCPUS+1], sysjif[MAXCPUS+1],
-		totaljif[MAXCPUS+1];
-	static double min[MAXCPUS+1], max[MAXCPUS+1], grandtotal[MAXCPUS+1];
+	static long long usrJifs[MAXCPUS+1], niceJifs[MAXCPUS+1], sysJifs[MAXCPUS+1],
+		totalJifs[MAXCPUS+1];
+	static double minPercent[MAXCPUS+1], maxPercent[MAXCPUS+1],
+		grandTotalPercent[MAXCPUS+1];
 	static long long iter=0;
-	double usr, nice, sys, total;
-	long long _usrjif, _nicejif, _sysjif, _idlejif, _iojif, _hiqjif, _siqjif,
-		_totaljif;
+	double usrPercent, nicePercent, sysPercent, totalPercent;
+	long long usrJif, niceJif, sysJif, idleJif, ioJif, hiqJif, siqJif,
+		totalJif;
 	static int first=1;
 	int i, j;
 
-	FILE *procfile;
+	FILE *procFile;
 	char temps[255], temps2[255];
-	if(!(procfile=fopen("/proc/stat", "r")))
+	if(!(procFile=fopen("/proc/stat", "r")))
 	{
 		printf("Could not open /proc/stat\n");
 		return;
@@ -41,42 +42,44 @@ void collect(void)
 
 	for(i=0; i<MAXCPUS+1; i++)
 	{
-		if(!fgets(temps, 254, procfile)) continue;
-		_iojif=_hiqjif=_siqjif=0;
+		if(!fgets(temps, 254, procFile)) continue;
+		ioJif=hiqJif=siqJif=0;
 		if((j=sscanf(temps, "%s %lld %lld %lld %lld %lld %lld %lld", temps2,
-			&_usrjif, &_nicejif, &_sysjif, &_idlejif, &_iojif, &_hiqjif, &_siqjif))<5
+			&usrJif, &niceJif, &sysJif, &idleJif, &ioJif, &hiqJif, &siqJif))<5
 			|| strncasecmp(temps, "cpu", 3))
 			break;
-		_totaljif=_usrjif+_nicejif+_sysjif+_idlejif+_iojif+_hiqjif+_siqjif;
+		totalJif=usrJif+niceJif+sysJif+idleJif+ioJif+hiqJif+siqJif;
 		if(!first)
 		{
-			usr=(double)(_usrjif-usrjif[i])/(double)(_totaljif-totaljif[i])*100.;
-			nice=(double)(_nicejif-nicejif[i])/(double)(_totaljif-totaljif[i])*100.;
-			sys=(double)(_sysjif+_iojif+_hiqjif+_siqjif-sysjif[i])/
-				(double)(_totaljif-totaljif[i])*100.;
-			total=usr+nice+sys;
-			if(total>max[i]) max[i]=total;
-			if(total<min[i]) min[i]=total;
-			grandtotal[i]+=total;
+			usrPercent=(double)(usrJif-usrJifs[i])
+				/(double)(totalJif-totalJifs[i])*100.;
+			nicePercent=(double)(niceJif-niceJifs[i])
+				/(double)(totalJif-totalJifs[i])*100.;
+			sysPercent=(double)(sysJif+ioJif+hiqJif+siqJif-sysJifs[i])
+				/(double)(totalJif-totalJifs[i])*100.;
+			totalPercent=usrPercent+nicePercent+sysPercent;
+			if(totalPercent>maxPercent[i]) maxPercent[i]=totalPercent;
+			if(totalPercent<minPercent[i]) minPercent[i]=totalPercent;
+			grandTotalPercent[i]+=totalPercent;
 			printf("%s: %5.1f (Usr=%5.1f Nice=%5.1f Sys=%5.1f) / Min=%5.1f Max=%5.1f Avg=%5.1f\n",
-				i==0?"ALL ":temps2, total, usr, nice, sys, min[i], max[i],
-				grandtotal[i]/(double)iter);
+				i==0? "ALL ":temps2, totalPercent, usrPercent, nicePercent, sysPercent,
+				minPercent[i], maxPercent[i], grandTotalPercent[i]/(double)iter);
 		}
 		else
 		{
-			min[i]=100.;  max[i]=0.;  grandtotal[i]=0.;
+			minPercent[i]=100.;  maxPercent[i]=0.;  grandTotalPercent[i]=0.;
 		}
-		usrjif[i]=_usrjif;
-		nicejif[i]=_nicejif;
-		sysjif[i]=_sysjif+_iojif+_hiqjif+_siqjif;
-		totaljif[i]=_totaljif;
+		usrJifs[i]=usrJif;
+		niceJifs[i]=niceJif;
+		sysJifs[i]=sysJif+ioJif+hiqJif+siqJif;
+		totalJifs[i]=totalJif;
 	}
 	if(first) first=0;
 	else printf("\n");
 	iter++;
-	fclose(procfile);
+	fclose(procFile);
 }
-		
+
 
 int main(int argc, char **argv)
 {
