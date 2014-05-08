@@ -698,9 +698,9 @@ void usage(char *progname)
 	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
 	fprintf(stderr, "-fs = Full-screen mode\n");
-	fprintf(stderr, "-time {t} = Run each benchmark for {t} seconds (default=%.1f)\n",
+	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default=%.1f)\n",
 		benchTime);
-	fprintf(stderr, "-size <wxh> = specify drawable width & height (default: %dx%d)\n",
+	fprintf(stderr, "-size <wxh> = specify drawable width & height (default=%dx%d)\n\n",
 		WIDTH, HEIGHT);
 	exit(1);
 }
