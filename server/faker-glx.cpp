@@ -262,7 +262,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	TRY();
 
 	// Prevent recursion
-	if(!is3D(dpy))
+	if(is3D(dpy))
 	{
 		configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 		goto done;
@@ -378,7 +378,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	static bool alreadyWarned=false;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
+	if(is3D(dpy)) return _glXChooseVisual(dpy, screen, attrib_list);
 	////////////////////
 
 		opentrace(glXChooseVisual);  prargd(dpy);  prargi(screen);
@@ -504,7 +504,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	GLXContext ctx=0;  GLXFBConfig config=0;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
+	if(is3D(dpy)) return _glXCreateContext(dpy, vis, share_list, direct);
 	////////////////////
 
 		opentrace(glXCreateContext);  prargd(dpy);  prargv(vis);
@@ -572,7 +572,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	GLXContext ctx=0;
 
 	// Prevent recursion
-	if(!is3D(dpy))
+	if(is3D(dpy))
 		return _glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
 	////////////////////
@@ -638,7 +638,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	GLXContext ctx=0;
 
 	// Prevent recursion
-	if(!is3D(dpy))
+	if(is3D(dpy))
 		return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 	////////////////////
 
@@ -744,7 +744,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	int x=0, y=0;  unsigned int width=0, height=0, depth=0;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXCreateGLXPixmap(dpy, vis, pm);
+	if(is3D(dpy)) return _glXCreateGLXPixmap(dpy, vis, pm);
 	////////////////////
 
 		opentrace(glXCreateGLXPixmap);  prargd(dpy);  prargv(vis);  prargx(pm);
@@ -803,7 +803,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	TRY();
 
 	// Prevent recursion && handle overlay configs
-	if(!is3D(dpy) || rcfghash.isOverlay(dpy, config))
+	if(is3D(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXCreatePixmap(dpy, config, pm, attribs);
 	////////////////////
 
@@ -849,7 +849,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 	const int *attrib_list)
 {
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
+	if(is3D(dpy)) return _glXCreateWindow(dpy, config, win, attrib_list);
 	////////////////////
 
 	TRY();
@@ -932,7 +932,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 	// Prevent recursion
-	if(!is3D(dpy)) { _glXDestroyGLXPixmap(dpy, pix);  return; }
+	if(is3D(dpy)) { _glXDestroyGLXPixmap(dpy, pix);  return; }
 	////////////////////
 
 		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
@@ -953,7 +953,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 {
 	TRY();
 	// Prevent recursion
-	if(!is3D(dpy)) { _glXDestroyPixmap(dpy, pix);  return; }
+	if(is3D(dpy)) { _glXDestroyPixmap(dpy, pix);  return; }
 	////////////////////
 
 		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
@@ -977,7 +977,7 @@ void glXDestroyWindow(Display *dpy, GLXWindow win)
 {
 	TRY();
 	// Prevent recursion
-	if(!is3D(dpy)) { _glXDestroyWindow(dpy, win);  return; }
+	if(is3D(dpy)) { _glXDestroyWindow(dpy, win);  return; }
 	////////////////////
 
 		opentrace(glXDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
@@ -1010,7 +1010,7 @@ static const char *glxextensions=
 const char *glXGetClientString(Display *dpy, int name)
 {
 	// If this is called internally to OpenGL, use the real function
-	if(!is3D(dpy)) return _glXGetClientString(dpy, name);
+	if(is3D(dpy)) return _glXGetClientString(dpy, name);
 	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
 	else if(name==GLX_VERSION) return "1.4";
@@ -1027,7 +1027,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	GLXFBConfig config;  int retval=0;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
+	if(is3D(dpy)) return _glXGetConfig(dpy, vis, attrib, value);
 	////////////////////
 
 		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
@@ -1197,7 +1197,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	VisualID vid=0;  int retval=0;
 
 	// Prevent recursion && handle overlay configs
-	if((dpy && config) && (!is3D(dpy) || rcfghash.isOverlay(dpy, config)))
+	if((dpy && config) && (is3D(dpy) || rcfghash.isOverlay(dpy, config)))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 	////////////////////
 
@@ -1537,7 +1537,7 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 	XVisualInfo *vis=NULL;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
+	if(is3D(dpy)) return _glXGetVisualFromFBConfig(dpy, config);
 	////////////////////
 
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
@@ -1613,7 +1613,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	VirtualWin *vw;  GLXFBConfig config=0;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
+	if(is3D(dpy)) return _glXMakeCurrent(dpy, drawable, ctx);
 	////////////////////
 
 		opentrace(glXMakeCurrent);  prargd(dpy);  prargx(drawable);  prargx(ctx);
@@ -1669,7 +1669,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
 			// that was created in another application.  This code is necessary
 			// to make CRUT (Chromium Utility Toolkit) applications work.
-			if(is3D(dpy))
+			if(!is3D(dpy))
 			{
 				winhash.add(dpy, drawable);
 				vw=winhash.initVW(dpy, drawable, config);
@@ -1712,7 +1712,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	VirtualWin *vw;  GLXFBConfig config=0;
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
+	if(is3D(dpy)) return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	////////////////////
 
 		opentrace(glXMakeContextCurrent);  prargd(dpy);  prargx(draw);
@@ -1911,7 +1911,7 @@ Bool glXQueryExtension(Display *dpy, int *error_base, int *event_base)
 const char *glXQueryExtensionsString(Display *dpy, int screen)
 {
 	// If this is called internally to OpenGL, use the real function.
-	if(!is3D(dpy)) return _glXQueryExtensionsString(dpy, screen);
+	if(is3D(dpy)) return _glXQueryExtensionsString(dpy, screen);
 	////////////////////
 	return glxextensions;
 }
@@ -1922,7 +1922,7 @@ const char *glXQueryExtensionsString(Display *dpy, int screen)
 const char *glXQueryServerString(Display *dpy, int screen, int name)
 {
 	// If this is called internally to OpenGL, use the real function.
-	if(!is3D(dpy)) return _glXQueryServerString(dpy, screen, name);
+	if(is3D(dpy)) return _glXQueryServerString(dpy, screen, name);
 	////////////////////
 	if(name==GLX_EXTENSIONS) return glxextensions;
 	else if(name==GLX_VERSION) return "1.4";
@@ -1976,7 +1976,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 	}
 
 	fconfig.flushdelay=0.;
-	if(is3D(dpy) && winhash.find(dpy, drawable, vw))
+	if(!is3D(dpy) && winhash.find(dpy, drawable, vw))
 	{
 		vw->readback(GL_BACK, false, fconfig.sync);
 		vw->swapBuffers();
@@ -2006,7 +2006,7 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 	done:
 
-		stoptrace();  if(is3D(dpy) && vw) { prargx(vw->getGLXDrawable()); }
+		stoptrace();  if(!is3D(dpy) && vw) { prargx(vw->getGLXDrawable()); }
 		closetrace();
 }
 

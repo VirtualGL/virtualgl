@@ -170,7 +170,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
-	if(win && is3D(dpy)) winhash.add(dpy, win);
+	if(win && !is3D(dpy)) winhash.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -193,7 +193,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 
 	win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
 		depth, c_class, visual, valuemask, attributes);
-	if(win && is3D(dpy)) winhash.add(dpy, win);
+	if(win && !is3D(dpy)) winhash.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
 
@@ -341,7 +341,7 @@ char **XListExtensions(Display *dpy, int *next)
 	TRY();
 
 	// Prevent recursion
-	if(!is3D(dpy)) return _XListExtensions(dpy, next);
+	if(is3D(dpy)) return _XListExtensions(dpy, next);
 	////////////////////
 
 		opentrace(XListExtensions);  prargd(dpy);  starttrace();
@@ -423,7 +423,7 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	Bool retval=True;
 
 	// Prevent recursion
-	if(!is3D(dpy))
+	if(is3D(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 	////////////////////
 

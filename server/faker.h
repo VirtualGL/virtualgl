@@ -34,7 +34,7 @@ namespace vglfaker
 
 #define _dpy3D vglfaker::dpy3D
 
-#define is3D(dpy) (vglfaker::dpy3D && dpy!=vglfaker::dpy3D)
+#define is3D(dpy) (vglfaker::dpy3D && dpy==vglfaker::dpy3D)
 
 #define isFront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \
