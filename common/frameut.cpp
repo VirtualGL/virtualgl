@@ -60,13 +60,13 @@ class Blitter : public Runnable
 		{
 			for(int i=0; i<NFRAMES; i++)
 			{
-				if(useGL) { newcheck(frames[i]=new GLFrame(dpy, win)); }
+				if(useGL) { _newcheck(frames[i]=new GLFrame(dpy, win)); }
 				#ifdef USEXV
-				else if(useXV) { newcheck(frames[i]=new XVFrame(dpy, win)); }
+				else if(useXV) { _newcheck(frames[i]=new XVFrame(dpy, win)); }
 				#endif
-				else { newcheck(frames[i]=new FBXFrame(dpy, win)); }
+				else { _newcheck(frames[i]=new FBXFrame(dpy, win)); }
 			}
-			newcheck(thread=new Thread(this));
+			_newcheck(thread=new Thread(this));
 			thread->start();
 		}
 
@@ -170,7 +170,7 @@ class Decompressor : public Runnable
 			blitter(blitter_), findex(0), deadYet(false), dpy(dpy_), win(win_),
 			myID(myID_), thread(NULL)
 		{
-			newcheck(thread=new Thread(this));
+			_newcheck(thread=new Thread(this));
 			thread->start();
 		}
 
@@ -252,7 +252,7 @@ class Compressor : public Runnable
 			deadYet(false), thread(NULL), decompressor(decompressor_),
 			blitter(blitter_)
 		{
-			newcheck(thread=new Thread(this));
+			_newcheck(thread=new Thread(this));
 			thread->start();
 		}
 
@@ -351,16 +351,16 @@ class FrameTest
 			blitter(NULL)
 		{
 			Window win;
-			errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
+			_errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
 				myID*(MINW+BORDER*2), 0, MINW+BORDER, MINW+BORDER, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy))));
-			errifnot(XMapRaised(dpy, win));
+			_errifnot(XMapRaised(dpy, win));
 
-			newcheck(blitter=new Blitter(dpy, win, myID));
+			_newcheck(blitter=new Blitter(dpy, win, myID));
 			if(!useXV)
-				newcheck(decompressor=new Decompressor(blitter, dpy, win, myID));
-			newcheck(compressor=new Compressor(decompressor, blitter));
+				_newcheck(decompressor=new Decompressor(blitter, dpy, win, myID));
+			_newcheck(compressor=new Compressor(decompressor, blitter));
 		}
 
 		~FrameTest(void) { shutdown(); }
@@ -545,7 +545,7 @@ int main(int argc, char **argv)
 	{
 		if(doRgbBench) { rgbBench(fileName);  exit(0); }
 
-		errifnot(XInitThreads());
+		_errifnot(XInitThreads());
 		if(!(dpy=XOpenDisplay(0)))
 		{
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
@@ -554,7 +554,7 @@ int main(int argc, char **argv)
 
 		for(i=0; i<NUMWIN; i++)
 		{
-			newcheck(test[i]=new FrameTest(dpy, i));
+			_newcheck(test[i]=new FrameTest(dpy, i));
 		}
 
 		for(w=MINW; w<=MAXW; w+=33)

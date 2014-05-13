@@ -43,7 +43,7 @@ ClientWin::ClientWin(int dpynum_, Window window_, int drawMethod_,
 	initGL();
 	initX11();
 
-	newcheck(thread=new Thread(this));
+	_newcheck(thread=new Thread(this));
 	thread->start();
 }
 
@@ -79,7 +79,7 @@ void ClientWin::initGL(void)
 	{
 		try
 		{
-			newcheck(newfb=new GLFrame(dpystr, window));
+			_newcheck(newfb=new GLFrame(dpystr, window));
 			if(!newfb) throw("Could not allocate class instance");
 		}
 		catch(Error &e)
@@ -116,7 +116,7 @@ void ClientWin::initX11(void)
 	{
 		try
 		{
-			newcheck(newfb=new FBXFrame(dpystr, window));
+			_newcheck(newfb=new FBXFrame(dpystr, window));
 			if(!newfb) throw("Could not allocate class instance");
 		}
 		catch(...)
@@ -156,7 +156,7 @@ Frame *ClientWin::getFrame(bool useXV)
 		{
 			char dpystr[80];
 			sprintf(dpystr, ":%d.0", dpynum);
-			newcheck(xvframes[cfindex]=new XVFrame(dpystr, window));
+			_newcheck(xvframes[cfindex]=new XVFrame(dpystr, window));
 			if(!xvframes[cfindex]) _throw("Could not allocate class instance");
 		}
 		f=(Frame *)xvframes[cfindex];

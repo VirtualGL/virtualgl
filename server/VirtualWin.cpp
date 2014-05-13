@@ -320,7 +320,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 		case RRCOMP_YUV:
 			if(!vglconn)
 			{
-				newcheck(vglconn=new VGLTrans());
+				_newcheck(vglconn=new VGLTrans());
 				vglconn->connect(strlen(fconfig.client)>0?
 					fconfig.client:DisplayString(dpy), fconfig.port);
 			}
@@ -344,7 +344,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 
 	if(!plugin)
 	{
-		newcheck(plugin=new TransPlugin(dpy, x11Draw, fconfig.transport));
+		_newcheck(plugin=new TransPlugin(dpy, x11Draw, fconfig.transport));
 		plugin->connect(strlen(fconfig.client)>0?
 			fconfig.client:DisplayString(dpy), fconfig.port);
 	}
@@ -448,7 +448,7 @@ void VirtualWin::sendVGL(VGLTrans *vglconn, GLint drawBuf, bool spoilLast,
 	}
 
 	if(!fconfig.spoil) vglconn->synchronize();
-	errifnot(f=vglconn->getFrame(w, h, pixelsize, flags,
+	_errifnot(f=vglconn->getFrame(w, h, pixelsize, flags,
 		doStereo && stereoMode==RRSTEREO_QUADBUF));
 	if(doStereo && isAnaglyphic(stereoMode))
 	{
@@ -492,10 +492,10 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
 
 	FBXFrame *f;
-	if(!x11trans) newcheck(x11trans=new X11Trans());
+	if(!x11trans) _newcheck(x11trans=new X11Trans());
 	if(spoilLast && fconfig.spoil && !x11trans->isReady()) return;
 	if(!fconfig.spoil) x11trans->synchronize();
-	errifnot(f=x11trans->getFrame(dpy, x11Draw, width, height));
+	_errifnot(f=x11trans->getFrame(dpy, x11Draw, width, height));
 	f->flags|=FRAME_BOTTOMUP;
 	if(doStereo && isAnaglyphic(stereoMode))
 	{
@@ -563,10 +563,10 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
 
 	XVFrame *f;
-	if(!xvtrans) newcheck(xvtrans=new XVTrans());
+	if(!xvtrans) _newcheck(xvtrans=new XVTrans());
 	if(spoilLast && fconfig.spoil && !xvtrans->isReady()) return;
 	if(!fconfig.spoil) xvtrans->synchronize();
-	errifnot(f=xvtrans->getFrame(dpy, x11Draw, width, height));
+	_errifnot(f=xvtrans->getFrame(dpy, x11Draw, width, height));
 	rrframeheader hdr;
 	hdr.x=hdr.y=0;
 	hdr.width=hdr.framew=width;

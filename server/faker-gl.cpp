@@ -237,8 +237,8 @@ void glClearIndex(GLfloat c)
 }
 
 
-#define _dpixelconvert(ctype, gltype, size)  \
-	if(type==gltype) {  \
+#define DRAW_PIXEL_CONVERT(ctype, glType, size)  \
+	if(type==glType) {  \
 		unsigned char *p=(unsigned char *)pixels;  \
 		unsigned char *b=buf;  \
 		int w=(rowlen>0? rowlen:width)*size;  \
@@ -263,12 +263,12 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 
 			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
 			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
-			newcheck(buf=new unsigned char[width*height])
+			_newcheck(buf=new unsigned char[width*height])
 			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
 			if(type==GL_INT) type=GL_UNSIGNED_INT;
-			_dpixelconvert(unsigned short, GL_UNSIGNED_SHORT, 2)
-			_dpixelconvert(unsigned int, GL_UNSIGNED_INT, 4)
-			_dpixelconvert(float, GL_FLOAT, 4)
+			DRAW_PIXEL_CONVERT(unsigned short, GL_UNSIGNED_SHORT, 2)
+			DRAW_PIXEL_CONVERT(unsigned int, GL_UNSIGNED_INT, 4)
+			DRAW_PIXEL_CONVERT(float, GL_FLOAT, 4)
 			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
@@ -546,8 +546,8 @@ void glPixelTransferi(GLenum pname, GLint param)
 }
 
 
-#define _rpixelconvert(ctype, gltype, size)  \
-	if(type==gltype) {  \
+#define READ_PIXEL_CONVERT(ctype, glType, size)  \
+	if(type==glType) {  \
 		unsigned char *p=(unsigned char *)pixels;  \
 		unsigned char *b=buf;  \
 		int w=(rowlen>0? rowlen:width)*size;  \
@@ -572,7 +572,7 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			int rowlen=-1, align=-1;  GLubyte *buf=NULL;
 			_glGetIntegerv(GL_PACK_ALIGNMENT, &align);
 			_glGetIntegerv(GL_PACK_ROW_LENGTH, &rowlen);
-			newcheck(buf=new unsigned char[width*height])
+			_newcheck(buf=new unsigned char[width*height])
 			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
 			if(type==GL_INT) type=GL_UNSIGNED_INT;
 			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -580,9 +580,9 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
 			_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE, buf);
 			glPopClientAttrib();
-			_rpixelconvert(unsigned short, GL_UNSIGNED_SHORT, 2)
-			_rpixelconvert(unsigned int, GL_UNSIGNED_INT, 4)
-			_rpixelconvert(float, GL_FLOAT, 4)
+			READ_PIXEL_CONVERT(unsigned short, GL_UNSIGNED_SHORT, 2)
+			READ_PIXEL_CONVERT(unsigned int, GL_UNSIGNED_INT, 4)
+			READ_PIXEL_CONVERT(float, GL_FLOAT, 4)
 			delete [] buf;
 			return;
 		}

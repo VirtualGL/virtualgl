@@ -92,7 +92,7 @@ namespace vglserver
 				{
 					if(!ptr->value)
 					{
-						newcheck(ptr->value=new VirtualWin(dpy, win));
+						_newcheck(ptr->value=new VirtualWin(dpy, win));
 						VirtualWin *vw=ptr->value;
 						vw->initFromWindow(config);
 					}

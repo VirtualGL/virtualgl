@@ -47,7 +47,7 @@ void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 		fconfig=fconfig_;
 		dpy=dpy_;
 		win=win_;
-		newcheck(handle=(void *)(new X11Trans()));
+		_newcheck(handle=(void *)(new X11Trans()));
 	}
 	catch(Error &e)
 	{
@@ -71,7 +71,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		X11Trans *trans=(X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
 		RRFrame *frame;
-		newcheck(frame=new RRFrame);
+		_newcheck(frame=new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		FBXFrame *f=trans->getFrame(dpy, win, width, height);
 		f->flags|=FRAME_BOTTOMUP;

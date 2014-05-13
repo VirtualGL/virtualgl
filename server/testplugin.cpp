@@ -45,7 +45,7 @@ void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 	{
 		fconfig=fconfig_;
 		win=win_;
-		newcheck(handle=(void *)(new VGLTrans()));
+		_newcheck(handle=(void *)(new VGLTrans()));
 	}
 	catch(Error &e)
 	{
@@ -80,7 +80,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		VGLTrans *vglconn=(VGLTrans *)handle;
 		if(!vglconn) _throw("Invalid handle");
 		RRFrame *frame;
-		newcheck(frame=new RRFrame);
+		_newcheck(frame=new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		int compress=fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;

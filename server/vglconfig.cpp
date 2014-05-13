@@ -327,35 +327,35 @@ void init(int argc, char **argv)
 {
 	char temps[20];
 
-	newcheck(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
+	_newcheck(win=new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
 
 	if(strlen(fconfig.transport)>0)
 	{
-		newcheck(compChoice=new Fl_Choice(211, 10, 225, 25,
+		_newcheck(compChoice=new Fl_Choice(211, 10, 225, 25,
 			"Image Compression: "));
 		compChoice->menu(pluginCompMenu);
 	}
 	else
 	{
-		newcheck(compChoice=new Fl_Choice(227, 10, 225, 25,
+		_newcheck(compChoice=new Fl_Choice(227, 10, 225, 25,
 			"Image Compression (Transport): "));
 		compChoice->menu(compMenu);
 	}
 	setComp();
 
-	newcheck(sampChoice=new Fl_Choice(210, 45, 100, 25,
+	_newcheck(sampChoice=new Fl_Choice(210, 45, 100, 25,
 		"Chrominance Subsampling: "));
 	sampChoice->menu(sampMenu);
 	setSamp();
 
 	if(strlen(fconfig.transport)>0)
 	{
-		newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
+		_newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
 			"Image Quality"));
 	}
 	else
 	{
-		newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
+		_newcheck(qualSlider=new Fl_Value_Slider(30, 80, 335, 25,
 			"JPEG Image Quality"));
 	}
 	qualSlider->callback(qualCB, 0);
@@ -366,34 +366,34 @@ void init(int argc, char **argv)
 	qualSlider->slider_size(0.01);
 	setQual();
 
-	newcheck(profChoice=new Fl_Choice(157, 130, 280, 24,
+	_newcheck(profChoice=new Fl_Choice(157, 130, 280, 24,
 		"Connection Profile: "));
 	profChoice->menu(profMenu);
 	profChoice->mode(3, FL_MENU_INACTIVE);
 	setProf();
 
-	newcheck(gammaInput=new Fl_Float_Input(315, 165, 85, 25,
+	_newcheck(gammaInput=new Fl_Float_Input(315, 165, 85, 25,
 		"Gamma Correction Factor (1.0=no correction): "));
 	gammaInput->callback(gammaCB, 0);
 	snprintf(temps, 19, "%.2f", fconfig.gamma);
 	gammaInput->value(temps);
 
-	newcheck(spoilButton=new Fl_Light_Button(10, 200, 345, 25,
+	_newcheck(spoilButton=new Fl_Light_Button(10, 200, 345, 25,
 		"Frame Spoiling (Do Not Use When Benchmarking)"));
 	spoilButton->callback(spoilCB, 0);
 	spoilButton->value(fconfig.spoil);
 
-	newcheck(ifButton=new Fl_Light_Button(10, 235, 185, 25,
+	_newcheck(ifButton=new Fl_Light_Button(10, 235, 185, 25,
 		"Inter-Frame Comparison"));
 	ifButton->callback(ifCB, 0);
 	setIF();
 
-	newcheck(stereoChoice=new Fl_Choice(232, 270, 220, 25,
+	_newcheck(stereoChoice=new Fl_Choice(232, 270, 220, 25,
 		"Stereographic Rendering Method: "));
 	stereoChoice->menu(stereoMenu);
 	setStereo();
 
-	newcheck(fpsInput=new Fl_Float_Input(240, 305, 85, 25,
+	_newcheck(fpsInput=new Fl_Float_Input(240, 305, 85, 25,
 		"Limit Frames/second (0.0=no limit): "));
 	fpsInput->callback(fpsCB, 0);
 	setFPS();
@@ -412,15 +412,18 @@ void checkParentPID(void *data)
 }
 
 
-#define usage() {\
-	vglout.print("USAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n", argv[0]); \
-	vglout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n"); \
-	vglout.print("      environment variable)\n"); \
-	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n"); \
-	vglout.print("      environment variable VGL_VERBOSE is set to 1)\n"); \
-	vglout.print("<p> = Parent process ID.  VGL Config will exit when this process\n"); \
-	vglout.print("      terminates.\n"); \
-	return -1;}
+void usage(char *programName)
+{
+	vglout.print("\nUSAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n",
+		programName);
+	vglout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n");
+	vglout.print("      environment variable)\n");
+	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n");
+	vglout.print("      environment variable VGL_VERBOSE is set to 1)\n");
+	vglout.print("<p> = Parent process ID.  VGL Config will exit when this process\n");
+	vglout.print("      terminates.\n\n");
+	exit(1);
+}
 
 
 int main(int argc, char **argv)
@@ -459,7 +462,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			if(shmid==-1) usage();
+			if(shmid==-1) usage(argv[0]);
 			if((_fconfig=(FakerConfig *)shmat(shmid, 0, 0))==(FakerConfig *)-1)
 				_throwunix();
 			if(!_fconfig)

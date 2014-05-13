@@ -151,7 +151,7 @@ void *_vgl_dlopen(const char *file, int mode)
 	vglfaker::globalMutex.lock(false);
 	if(!__dlopen) vglfaker::loadDLSymbols();
 	vglfaker::globalMutex.unlock(false);
-	checksym(dlopen);
+	CHECKSYM(dlopen);
 	return __dlopen(file, mode);
 }
 

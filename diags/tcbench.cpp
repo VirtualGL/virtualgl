@@ -37,7 +37,7 @@ using namespace vglutil;
 #define _throw(f, l, m) {  \
 	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);  \
 }
-#define fbx(a) {  \
+#define _fbx(a) {  \
 	if((a)==-1) _throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());  \
 }
 
@@ -170,11 +170,11 @@ int main(int argc, char **argv)
 
 	fbx_struct fb;
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 0, 0, 1));
+	_fbx(fbx_init(&fb, wh, 0, 0, 1));
 	int width=fb.width, height=fb.height;
 	fbx_term(&fb);
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 32, 32, 1));
+	_fbx(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames=0, samples=0;
 	if(x<0) x=width/2-16;  if(x<0) x=0;
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 	timer.start();
 	do
 	{
-		fbx(fbx_read(&fb, x, y));
+		_fbx(fbx_read(&fb, x, y));
 		samples++;
 		if(first)
 		{

@@ -31,10 +31,10 @@ static void *loadSym(void *dllhnd, const char *symbol, int quiet)
 }
 
 
-#define lsym(s) __##s=(_##s##Type)loadSym(dllhnd, #s, !fconfig.verbose);  \
+#define LSYM(s) __##s=(_##s##Type)loadSym(dllhnd, #s, !fconfig.verbose);  \
 	if(!__##s) return -1;
 
-#define lsymopt(s) __##s=(_##s##Type)loadSym(dllhnd, #s, 1);
+#define LSYMOPT(s) __##s=(_##s##Type)loadSym(dllhnd, #s, 1);
 
 static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
@@ -160,64 +160,64 @@ static int loadGLSymbols(void *dllhnd)
 	dlerror();  // Clear error state
 
 	// GLX symbols
-	lsym(glXChooseVisual)
-	lsym(glXCopyContext)
-	lsym(glXCreateContext)
-	lsym(glXCreateGLXPixmap)
-	lsym(glXDestroyContext)
-	lsym(glXDestroyGLXPixmap)
-	lsym(glXGetConfig)
-	lsym(glXGetCurrentDrawable)
-	lsym(glXIsDirect)
-	lsym(glXMakeCurrent);
-	lsym(glXQueryExtension)
-	lsym(glXQueryVersion)
-	lsym(glXSwapBuffers)
-	lsym(glXUseXFont)
-	lsym(glXWaitGL)
+	LSYM(glXChooseVisual)
+	LSYM(glXCopyContext)
+	LSYM(glXCreateContext)
+	LSYM(glXCreateGLXPixmap)
+	LSYM(glXDestroyContext)
+	LSYM(glXDestroyGLXPixmap)
+	LSYM(glXGetConfig)
+	LSYM(glXGetCurrentDrawable)
+	LSYM(glXIsDirect)
+	LSYM(glXMakeCurrent);
+	LSYM(glXQueryExtension)
+	LSYM(glXQueryVersion)
+	LSYM(glXSwapBuffers)
+	LSYM(glXUseXFont)
+	LSYM(glXWaitGL)
 
-	lsym(glXGetClientString)
-	lsym(glXQueryServerString)
-	lsym(glXQueryExtensionsString)
+	LSYM(glXGetClientString)
+	LSYM(glXQueryServerString)
+	LSYM(glXQueryExtensionsString)
 
-	lsym(glXChooseFBConfig)
-	lsym(glXCreateNewContext)
-	lsym(glXCreatePbuffer)
-	lsym(glXCreatePixmap)
-	lsym(glXCreateWindow)
-	lsym(glXDestroyPbuffer)
-	lsym(glXDestroyPixmap)
-	lsym(glXDestroyWindow)
-	lsym(glXGetCurrentDisplay)
-	lsym(glXGetCurrentReadDrawable)
-	lsym(glXGetFBConfigAttrib)
-	lsym(glXGetFBConfigs)
-	lsym(glXGetSelectedEvent)
-	lsym(glXGetVisualFromFBConfig)
-	lsym(glXMakeContextCurrent);
-	lsym(glXQueryContext)
-	lsym(glXQueryDrawable)
-	lsym(glXSelectEvent)
+	LSYM(glXChooseFBConfig)
+	LSYM(glXCreateNewContext)
+	LSYM(glXCreatePbuffer)
+	LSYM(glXCreatePixmap)
+	LSYM(glXCreateWindow)
+	LSYM(glXDestroyPbuffer)
+	LSYM(glXDestroyPixmap)
+	LSYM(glXDestroyWindow)
+	LSYM(glXGetCurrentDisplay)
+	LSYM(glXGetCurrentReadDrawable)
+	LSYM(glXGetFBConfigAttrib)
+	LSYM(glXGetFBConfigs)
+	LSYM(glXGetSelectedEvent)
+	LSYM(glXGetVisualFromFBConfig)
+	LSYM(glXMakeContextCurrent);
+	LSYM(glXQueryContext)
+	LSYM(glXQueryDrawable)
+	LSYM(glXSelectEvent)
 
 	// Optional extensions.  We fake these if they exist
-	lsymopt(glXFreeContextEXT)
-	lsymopt(glXImportContextEXT)
-	lsymopt(glXQueryContextInfoEXT)
+	LSYMOPT(glXFreeContextEXT)
+	LSYMOPT(glXImportContextEXT)
+	LSYMOPT(glXQueryContextInfoEXT)
 
-	lsymopt(glXJoinSwapGroupNV)
-	lsymopt(glXBindSwapBarrierNV)
-	lsymopt(glXQuerySwapGroupNV)
-	lsymopt(glXQueryMaxSwapGroupsNV)
-	lsymopt(glXQueryFrameCountNV)
-	lsymopt(glXResetFrameCountNV)
+	LSYMOPT(glXJoinSwapGroupNV)
+	LSYMOPT(glXBindSwapBarrierNV)
+	LSYMOPT(glXQuerySwapGroupNV)
+	LSYMOPT(glXQueryMaxSwapGroupsNV)
+	LSYMOPT(glXQueryFrameCountNV)
+	LSYMOPT(glXResetFrameCountNV)
 
-	lsymopt(glXGetProcAddressARB)
-	lsymopt(glXGetProcAddress)
+	LSYMOPT(glXGetProcAddressARB)
+	LSYMOPT(glXGetProcAddress)
 
-	lsymopt(glXCreateContextAttribsARB)
+	LSYMOPT(glXCreateContextAttribsARB)
 
-	lsymopt(glXBindTexImageEXT)
-	lsymopt(glXReleaseTexImageEXT)
+	LSYMOPT(glXBindTexImageEXT)
+	LSYMOPT(glXReleaseTexImageEXT)
 	// For some reason, the ATI implementation of libGL on Ubuntu (and maybe
 	// other platforms as well) does not export glXBindTexImageEXT and
 	// glXReleaseTexImageEXT, but those symbols can be obtained through
@@ -229,35 +229,35 @@ static int loadGLSymbols(void *dllhnd)
 		__glXReleaseTexImageEXT=
 			(_glXReleaseTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXReleaseTexImageEXT");
 
-	lsymopt(glXSwapIntervalEXT)
-	lsymopt(glXSwapIntervalSGI)
+	LSYMOPT(glXSwapIntervalEXT)
+	LSYMOPT(glXSwapIntervalSGI)
 
 	// GL symbols
-	lsym(glFinish)
-	lsym(glFlush)
-	lsym(glViewport)
-	lsym(glDrawBuffer)
-	lsym(glPopAttrib)
-	lsym(glReadPixels)
-	lsym(glDrawPixels)
-	lsym(glIndexd)
-	lsym(glIndexf)
-	lsym(glIndexi)
-	lsym(glIndexs)
-	lsym(glIndexub)
-	lsym(glIndexdv)
-	lsym(glIndexfv)
-	lsym(glIndexiv)
-	lsym(glIndexsv)
-	lsym(glIndexubv)
-	lsym(glClearIndex)
-	lsym(glGetDoublev)
-	lsym(glGetFloatv)
-	lsym(glGetIntegerv)
-	lsym(glMaterialfv)
-	lsym(glMaterialiv)
-	lsym(glPixelTransferf)
-	lsym(glPixelTransferi)
+	LSYM(glFinish)
+	LSYM(glFlush)
+	LSYM(glViewport)
+	LSYM(glDrawBuffer)
+	LSYM(glPopAttrib)
+	LSYM(glReadPixels)
+	LSYM(glDrawPixels)
+	LSYM(glIndexd)
+	LSYM(glIndexf)
+	LSYM(glIndexi)
+	LSYM(glIndexs)
+	LSYM(glIndexub)
+	LSYM(glIndexdv)
+	LSYM(glIndexfv)
+	LSYM(glIndexiv)
+	LSYM(glIndexsv)
+	LSYM(glIndexubv)
+	LSYM(glClearIndex)
+	LSYM(glGetDoublev)
+	LSYM(glGetFloatv)
+	LSYM(glGetIntegerv)
+	LSYM(glMaterialfv)
+	LSYM(glMaterialiv)
+	LSYM(glPixelTransferf)
+	LSYM(glPixelTransferi)
 	return 0;
 }
 
@@ -266,29 +266,29 @@ static int loadX11Symbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
 
-	lsym(XCheckMaskEvent);
-	lsym(XCheckTypedEvent);
-	lsym(XCheckTypedWindowEvent);
-	lsym(XCheckWindowEvent);
-	lsym(XCloseDisplay);
-	lsym(XConfigureWindow);
-	lsym(XCopyArea);
-	lsym(XCreateWindow);
-	lsym(XCreateSimpleWindow);
-	lsym(XDestroySubwindows);
-	lsym(XDestroyWindow);
-	lsym(XFree);
-	lsym(XGetGeometry);
-	lsym(XGetImage);
-	lsym(XListExtensions);
-	lsym(XMaskEvent);
-	lsym(XMoveResizeWindow);
-	lsym(XNextEvent);
-	lsym(XOpenDisplay);
-	lsym(XQueryExtension);
-	lsym(XResizeWindow);
-	lsym(XServerVendor);
-	lsym(XWindowEvent);
+	LSYM(XCheckMaskEvent);
+	LSYM(XCheckTypedEvent);
+	LSYM(XCheckTypedWindowEvent);
+	LSYM(XCheckWindowEvent);
+	LSYM(XCloseDisplay);
+	LSYM(XConfigureWindow);
+	LSYM(XCopyArea);
+	LSYM(XCreateWindow);
+	LSYM(XCreateSimpleWindow);
+	LSYM(XDestroySubwindows);
+	LSYM(XDestroyWindow);
+	LSYM(XFree);
+	LSYM(XGetGeometry);
+	LSYM(XGetImage);
+	LSYM(XListExtensions);
+	LSYM(XMaskEvent);
+	LSYM(XMoveResizeWindow);
+	LSYM(XNextEvent);
+	LSYM(XOpenDisplay);
+	LSYM(XQueryExtension);
+	LSYM(XResizeWindow);
+	LSYM(XServerVendor);
+	LSYM(XWindowEvent);
 	return 0;
 }
 

@@ -64,7 +64,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 			_throw("No visuals found on display");
 
 		if(va) { delete [] va;  va=NULL; }
-		newcheck(va=new VisAttrib[nVisuals]);
+		_newcheck(va=new VisAttrib[nVisuals]);
 		vaEntries=nVisuals;
 		memset(va, 0, sizeof(VisAttrib)*nVisuals);
 

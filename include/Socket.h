@@ -58,7 +58,7 @@ namespace vglutil
 }
 
 #define _throwsock() throw(SockError(__FUNCTION__, __LINE__))
-#define trysock(f) { if((f)==SOCKET_ERROR) _throwsock(); }
+#define _sock(f) { if((f)==SOCKET_ERROR) _throwsock(); }
 
 
 #ifdef USESSL

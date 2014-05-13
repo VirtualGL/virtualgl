@@ -24,7 +24,7 @@ using namespace vglutil;
 using namespace vglcommon;
 
 
-#define jpegsub(s) \
+#define TJSUBSAMP(s) \
 	(s>=4? TJ_420 : s==2? TJ_422 : s==1? TJ_444 : s==0? TJ_GRAYSCALE : TJ_444)
 
 
@@ -68,7 +68,7 @@ void Frame::init(rrframeheader &h, int ps, int flags_, bool stereo_)
 	if(h.framew!=hdr.framew || h.frameh!=hdr.frameh || ps!=pixelSize || !bits)
 	{
 		if(bits) delete [] bits;
-		newcheck(bits=new unsigned char[h.framew*h.frameh*ps+1]);
+		_newcheck(bits=new unsigned char[h.framew*h.frameh*ps+1]);
 	}
 	if(stereo_)
 	{
@@ -76,7 +76,7 @@ void Frame::init(rrframeheader &h, int ps, int flags_, bool stereo_)
 			|| !rbits)
 		{
 			if(rbits) delete [] rbits;
-			newcheck(rbits=new unsigned char[h.framew*h.frameh*ps+1]);
+			_newcheck(rbits=new unsigned char[h.framew*h.frameh*ps+1]);
 		}
 	}
 	else
@@ -116,7 +116,7 @@ Frame *Frame::getTile(int x, int y, int width, int height)
 		|| (y+height)>hdr.height)
 		throw Error("Frame::getTile", "Argument out of range");
 
-	newcheck(f=new Frame(false));
+	_newcheck(f=new Frame(false));
 	f->hdr=hdr;
 	f->hdr.x=x;
 	f->hdr.y=y;
@@ -450,10 +450,10 @@ void CompressedFrame::compressYUV(Frame &f)
 	init(f.hdr, 0);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 	if(f.flags&FRAME_BGR) tjflags|=TJ_BGR;
-	tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
-		f.pixelSize, bits, jpegsub(f.hdr.subsamp), tjflags));
-	hdr.size=(unsigned int)TJBUFSIZEYUV(f.hdr.width, f.hdr.height,
-		jpegsub(f.hdr.subsamp));
+	_tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+		f.pixelSize, bits, TJSUBSAMP(f.hdr.subsamp), tjflags));
+	hdr.size=(unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height,
+		TJSUBSAMP(f.hdr.subsamp));
 }
 
 #endif
@@ -470,15 +470,15 @@ void CompressedFrame::compressJPEG(Frame &f)
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 	if(f.flags&FRAME_BGR) tjflags|=TJ_BGR;
 	unsigned long size;
-	tj(tjCompress(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
-		f.pixelSize, bits, &size, jpegsub(f.hdr.subsamp), f.hdr.qual, tjflags));
+	_tj(tjCompress(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+		f.pixelSize, bits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual, tjflags));
 	hdr.size=(unsigned int)size;
 	if(f.stereo && f.rbits)
 	{
 		init(f.hdr, RR_RIGHT);
 		if(rbits)
-			tj(tjCompress(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
-				f.pixelSize, rbits, &size, jpegsub(f.hdr.subsamp), f.hdr.qual,
+			_tj(tjCompress(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
+				f.pixelSize, rbits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
 				tjflags));
 		rhdr.size=(unsigned int)size;
 	}
@@ -526,7 +526,8 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width!=hdr.width || h.height!=hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				newcheck(bits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				_newcheck(bits=new unsigned char[tjBufSize(h.width, h.height,
+					h.subsamp)]);
 			}
 			hdr=h;  hdr.flags=RR_LEFT;  stereo=true;
 			break;
@@ -534,7 +535,8 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width!=rhdr.width || h.height!=rhdr.height || !rbits)
 			{
 				if(rbits) delete [] rbits;
-				newcheck(rbits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				_newcheck(rbits=new unsigned char[tjBufSize(h.width, h.height,
+					h.subsamp)]);
 			}
 			rhdr=h;  rhdr.flags=RR_RIGHT;  stereo=true;
 			break;
@@ -542,7 +544,8 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width!=hdr.width || h.height!=hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				newcheck(bits=new unsigned char[TJBUFSIZE(h.width, h.height)]);
+				_newcheck(bits=new unsigned char[tjBufSize(h.width, h.height,
+					h.subsamp)]);
 			}
 			hdr=h;  hdr.flags=0;  stereo=false;
 			break;
@@ -597,11 +600,11 @@ void FBXFrame::init(rrframeheader &h)
 	int usexshm=1;  char *env=NULL;
 	if((env=getenv("VGL_USEXSHM"))!=NULL && strlen(env)>0 && !strcmp(env, "0"))
 		usexshm=0;
-	fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+	_fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	if(h.framew>fb.width || h.frameh>fb.height)
 	{
 		XSync(wh.dpy, False);
-		fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+		_fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	}
 	hdr=h;
 	if(hdr.framew>fb.width) hdr.framew=fb.width;
@@ -635,7 +638,7 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 				if((tjhnd=tjInitDecompress())==NULL)
 					throw(Error("FBXFrame::decompressor", tjGetErrorStr()));
 			}
-			tj(tjDecompress(tjhnd, cf.bits, cf.hdr.size,
+			_tj(tjDecompress(tjhnd, cf.bits, cf.hdr.size,
 				(unsigned char *)&fb.bits[fb.pitch*cf.hdr.y+cf.hdr.x*fbx_ps[fb.format]],
 				width, fb.pitch, height, fbx_ps[fb.format], tjflags));
 		}
@@ -646,8 +649,8 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 
 void FBXFrame::redraw(void)
 {
-	if(flags&FRAME_BOTTOMUP) fbx(fbx_flip(&fb, 0, 0, 0, 0));
-	fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
+	if(flags&FRAME_BOTTOMUP) _fbx(fbx_flip(&fb, 0, 0, 0, 0));
+	_fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 }
 
 
@@ -702,9 +705,9 @@ XVFrame &XVFrame::operator= (Frame &f)
 		if((tjhnd=tjInitCompress())==NULL)
 			throw(Error("XVFrame::compressor", tjGetErrorStr()));
 	}
-	tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	_tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		f.pixelSize, bits, TJ_420, tjflags));
-	hdr.size=(unsigned int)TJBUFSIZEYUV(f.hdr.width, f.hdr.height, TJ_420);
+	hdr.size=(unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height, TJ_420);
 	if(hdr.size!=(unsigned long)fb.xvi->data_size)
 		_throw("Image size mismatch in YUV encoder");
 	return *this;
@@ -714,11 +717,11 @@ XVFrame &XVFrame::operator= (Frame &f)
 void XVFrame::init(rrframeheader &h)
 {
 	checkHeader(h);
-	fbxv(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+	_fbxv(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	if(h.framew>fb.xvi->width || h.frameh>fb.xvi->height)
 	{
 		XSync(dpy, False);
-		fbx(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+		_fbx(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	}
 	hdr=h;
 	if(hdr.framew>fb.xvi->width) hdr.framew=fb.xvi->width;
@@ -731,7 +734,7 @@ void XVFrame::init(rrframeheader &h)
 
 void XVFrame::redraw(void)
 {
-	fbxv(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
+	_fbxv(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
 }
 
 #endif

@@ -137,13 +137,13 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	if(winhash.find(draw, pbw))
 	{
 		/* Current drawable is a virtualized Window */
-		errifnot(dpy = pbw->getX11Display());
-		errifnot(win = pbw->getX11Drawable());
+		_errifnot(dpy = pbw->getX11Display());
+		_errifnot(win = pbw->getX11Drawable());
 	}
 	else if((win = pmhash.reverseFind(draw)) != 0)
 	{
 		/* Current drawable is a virtualized Pixmap */
-		errifnot(dpy = glxdhash.getCurrentDisplay(draw));
+		_errifnot(dpy = glxdhash.getCurrentDisplay(draw));
 	}
 	else
 	{
@@ -153,7 +153,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		XSetWindowAttributes swa;
 		int n = 0;
 
-		errifnot(dpy = glxdhash.getCurrentDisplay(draw));
+		_errifnot(dpy = glxdhash.getCurrentDisplay(draw));
 		vtemp.c_class = TrueColor;  vtemp.depth = 24;
 		Window root = DefaultRootWindow(dpy);
 		if((v = XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))
@@ -288,7 +288,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		}
 
 		XFreeGC(dpy, gc);  gc = 0;
-		errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
+		_errifnot(image = XGetImage(dpy, pixmap, 0, 0, 8 * max_bm_width * n,
 			max_bm_height, 1, XYPixmap));
 		XFreePixmap(dpy, pixmap);  pixmap = 0;
 

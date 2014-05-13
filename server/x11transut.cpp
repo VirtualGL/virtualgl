@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 			WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 			BlackPixel(dpy, DefaultScreen(dpy)))))
 			_throw("Could not create window");
-		errifnot(XMapRaised(dpy, win));
+		_errifnot(XMapRaised(dpy, win));
 
 		FBXFrame *f;
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 		fill=0, frames=0;  int clientframes=0;  timer.start();
 		do
 		{
-			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			memset(f->bits, 0, f->pitch*HEIGHT);
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, fill);
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, 1);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;

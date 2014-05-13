@@ -21,7 +21,7 @@
 #include <ctype.h>
 
 
-#define _throw(m) {fprintf(stderr, "ERROR: %s\n", m);  goto bailout;}
+#define _throw(m) { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
 
 
 int checkWindowColor(Window win, unsigned int color)
@@ -93,8 +93,11 @@ _glClearColorType _glClearColor=NULL;
 
 void *gldllhnd=NULL;
 
-#define lsym(s) dlerror(); _##s=(_##s##Type)dlsym(gldllhnd, #s);  \
-	err=dlerror();  if(err) _throw(err)  \
+#define LSYM(s)  \
+	dlerror();  \
+	_##s=(_##s##Type)dlsym(gldllhnd, #s);  \
+	err=dlerror();  \
+	if(err) _throw(err)  \
 	else if(!_##s) _throw("Could not load symbol "#s)
 
 void loadSymbols1(char *prefix)
@@ -111,13 +114,13 @@ void loadSymbols1(char *prefix)
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libGL")
 
-	lsym(glXChooseVisual);
-	lsym(glXCreateContext);
-	lsym(glXDestroyContext);
-	lsym(glXMakeCurrent);
-	lsym(glXSwapBuffers);
-	lsym(glClear);
-	lsym(glClearColor);
+	LSYM(glXChooseVisual);
+	LSYM(glXCreateContext);
+	LSYM(glXDestroyContext);
+	LSYM(glXMakeCurrent);
+	LSYM(glXSwapBuffers);
+	LSYM(glClear);
+	LSYM(glClearColor);
 	return;
 
 	bailout:
@@ -130,21 +133,22 @@ void unloadSymbols1(void)
 }
 
 
-#define lsym2(s) _##s=(_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s);  \
+#define LSYM2(s)  \
+	_##s=(_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s);  \
 	if(!_##s) _throw("Could not load symbol "#s)
 
 void loadSymbols2(void)
 {
 	const char *err=NULL;
 
-	lsym(glXGetProcAddressARB);
-	lsym2(glXChooseVisual);
-	lsym2(glXCreateContext);
-	lsym2(glXDestroyContext);
-	lsym2(glXMakeCurrent);
-	lsym2(glXSwapBuffers);
-	lsym2(glClear);
-	lsym2(glClearColor);
+	LSYM(glXGetProcAddressARB);
+	LSYM2(glXChooseVisual);
+	LSYM2(glXCreateContext);
+	LSYM2(glXDestroyContext);
+	LSYM2(glXMakeCurrent);
+	LSYM2(glXSwapBuffers);
+	LSYM2(glClear);
+	LSYM2(glClearColor);
 	return;
 
 	bailout:
@@ -168,7 +172,7 @@ void nameMatchTest(void)
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libGLdlfakerut")
 
-	lsym(myTestFunction);
+	LSYM(myTestFunction);
 	_myTestFunction();
 	dlclose(gldllhnd);
 	gldllhnd=NULL;

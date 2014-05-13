@@ -27,7 +27,7 @@ using namespace vglserver;
 X11Trans::X11Trans(void) : thread(NULL), deadYet(false)
 {
 	for(int i=0; i<NFRAMES; i++) frames[i]=NULL;
-	newcheck(thread=new Thread(this));
+	_newcheck(thread=new Thread(this));
 	thread->start();
 	profBlit.setName("Blit      ");
 	profTotal.setName("Total     ");
@@ -105,7 +105,7 @@ FBXFrame *X11Trans::getFrame(Display *dpy, Window win, int width, int height)
 				index=i;
 		if(index<0) _throw("No free buffers in pool");
 		if(!frames[index])
-			newcheck(frames[index]=new FBXFrame(dpy, win));
+			_newcheck(frames[index]=new FBXFrame(dpy, win));
 		f=frames[index];  f->waitUntilComplete();
 	}
 

@@ -26,6 +26,49 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
+#define ENDIANIZE(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);  \
+		h.dpynum=byteswap16(h.dpynum);  \
+	}  \
+}
+
+#define ENDIANIZE_V1(h) { \
+	if(!littleendian()) {  \
+		h.size=byteswap(h.size);  \
+		h.winid=byteswap(h.winid);  \
+		h.framew=byteswap16(h.framew);  \
+		h.frameh=byteswap16(h.frameh);  \
+		h.width=byteswap16(h.width);  \
+		h.height=byteswap16(h.height);  \
+		h.x=byteswap16(h.x);  \
+		h.y=byteswap16(h.y);  \
+	}  \
+}
+
+#define CONVERT_HEADER(h, h1) {  \
+	h1.size=h.size;  \
+	h1.winid=h.winid;  \
+	h1.framew=h.framew;  \
+	h1.frameh=h.frameh;  \
+	h1.width=h.width;  \
+	h1.height=h.height;  \
+	h1.x=h.x;  \
+	h1.y=h.y;  \
+	h1.qual=h.qual;  \
+	h1.subsamp=h.subsamp;  \
+	h1.flags=h.flags;  \
+	h1.dpynum=(unsigned char)h.dpynum;  \
+}
+
+
 void VGLTrans::sendHeader(rrframeheader h, bool eof)
 {
 	if(version.major==0 && version.minor==0)
@@ -33,9 +76,9 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 		// Fake up an old (protocol v1.0) EOF packet and see if the client sends
 		// back a CTS signal.  If so, it needs protocol 1.0
 		rrframeheader_v1 h1;  char reply=0;
-		cvthdr_v1(h, h1);
+		CONVERT_HEADER(h, h1);
 		h1.flags=RR_EOF;
-		endianize_v1(h1);
+		ENDIANIZE_V1(h1);
 		if(socket)
 		{
 			send((char *)&h1, sizeof_rrframeheader_v1);
@@ -68,8 +111,8 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 	{
 		rrframeheader_v1 h1;
 		if(h.dpynum>255) _throw("Display number out of range for v1.0 client");
-		cvthdr_v1(h, h1);
-		endianize_v1(h1);
+		CONVERT_HEADER(h, h1);
+		ENDIANIZE_V1(h1);
 		if(socket)
 		{
 			send((char *)&h1, sizeof_rrframeheader_v1);
@@ -83,7 +126,7 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 	}
 	else
 	{
-		endianize(h);
+		ENDIANIZE(h);
 		send((char *)&h, sizeof_rrframeheader);
 	}
 }
@@ -111,10 +154,10 @@ void VGLTrans::run(void)
 			vglout.println("[VGL] Using %d / %d CPU's for compression",
 				nprocs, numprocs());
 		for(i=0; i<nprocs; i++)
-			newcheck(comp[i]=new VGLTrans::Compressor(i, this));
+			_newcheck(comp[i]=new VGLTrans::Compressor(i, this));
 		if(nprocs>1) for(i=1; i<nprocs; i++)
 		{
-			newcheck(cthread[i]=new Thread(comp[i]));
+			_newcheck(cthread[i]=new Thread(comp[i]));
 			cthread[i]->start();
 		}
 
@@ -295,7 +338,7 @@ void VGLTrans::Compressor::compressSend(Frame *f, Frame *lastf)
 			}
 			Frame *tile=f->getTile(x, y, width, height);
 			CompressedFrame *ctile=NULL;
-			if(myRank>0) { newcheck(ctile=new CompressedFrame()); }
+			if(myRank>0) { _newcheck(ctile=new CompressedFrame()); }
 			else ctile=&cframe;
 			profComp.startFrame();
 			*ctile=*tile;
@@ -371,7 +414,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 		{
 			free(serverName);  serverName=strdup("localhost");
 		}
-		newcheck(socket=new Socket((bool)fconfig.ssl));
+		_newcheck(socket=new Socket((bool)fconfig.ssl));
 		try
 		{
 			socket->connect(serverName, port);
@@ -383,7 +426,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 			vglout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
-		newcheck(thread=new Thread(this));
+		_newcheck(thread=new Thread(this));
 		thread->start();
 	}
 	catch(...)
@@ -399,7 +442,7 @@ void VGLTrans::Compressor::send(void)
 	for(int i=0; i<storedFrames; i++)
 	{
 		CompressedFrame *cf=cframes[i];
-		errifnot(cf);
+		_errifnot(cf);
 		parent->sendHeader(cf->hdr);
 		parent->send((char *)cf->bits, cf->hdr.size);
 		if(cf->stereo && cf->rbits)

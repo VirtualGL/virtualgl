@@ -103,10 +103,10 @@ void killproc(bool userOnly)
 		int mib_user[4]={CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid()};
 		size_t len=0;
 
-		tryunix(sysctl(userOnly? mib_user:mib_all, 4, NULL, &len, NULL, 0));
+		_unix(sysctl(userOnly? mib_user:mib_all, 4, NULL, &len, NULL, 0));
 		if(len<sizeof(kinfo_proc)) _throw("Process table is empty");
-		newcheck(buf=new unsigned char[len]);
-		tryunix(sysctl(userOnly? mib_user:mib_all, 4, buf, &len, NULL, 0));
+		_newcheck(buf=new unsigned char[len]);
+		_unix(sysctl(userOnly? mib_user:mib_all, 4, buf, &len, NULL, 0));
 		int nprocs=len/sizeof(kinfo_proc);
 		kinfo_proc *kp=(kinfo_proc *)buf;
 
@@ -443,7 +443,7 @@ void start(char *displayname)
 			if(!force) actualSSLPort=instanceCheckSSL(maindpy);
 			if(actualSSLPort==0)
 			{
-				newcheck(sslReceiver=new VGLTransReceiver(true, drawMethod));
+				_newcheck(sslReceiver=new VGLTransReceiver(true, drawMethod));
 				if(sslPort==0)
 				{
 					bool success=false;  unsigned short i=RR_DEFAULTSSLPORT;
@@ -480,7 +480,7 @@ void start(char *displayname)
 			if(!force) actualPort=instanceCheck(maindpy);
 			if(actualPort==0)
 			{
-				newcheck(receiver=new VGLTransReceiver(false, drawMethod));
+				_newcheck(receiver=new VGLTransReceiver(false, drawMethod));
 				if(port==0)
 				{
 					bool success=false;  unsigned short i=RR_DEFAULTPORT;

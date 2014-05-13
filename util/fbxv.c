@@ -30,7 +30,7 @@ static char lastError[1024]="No error";
 	snprintf(lastError, 1023, "%s", m);  errorLine=__LINE__;  goto finally;  \
 }
 
-#define x11(f) {  \
+#define _x11(f) {  \
 	int __err=0;  \
 	if((__err=(f))!=Success) {  \
 		snprintf(lastError, 1023,  \
@@ -39,7 +39,7 @@ static char lastError[1024]="No error";
 	}  \
 }
 
-#define errifnot(f) {  \
+#define _errifnot(f) {  \
 	if(!(f)) {  \
 		snprintf(lastError, 1023, "X11 Error (window may have disappeared)");  \
 		errorLine=__LINE__;  goto finally;  \
@@ -98,7 +98,7 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 	if(!fb) _throw("Invalid argument");
 
 	if(!dpy || !win) _throw("Invalid argument");
-	errifnot(XGetWindowAttributes(dpy, win, &xwa));
+	_errifnot(XGetWindowAttributes(dpy, win, &xwa));
 	if(width_>0) width=width_;  else width=xwa.width;
 	if(height_>0) height=height_;  else height=xwa.height;
 	if(fb->dpy==dpy && fb->win==win)
@@ -244,15 +244,15 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 	{
 		if(!fb->xattach)
 		{
-			errifnot(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach=1;
+			_errifnot(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach=1;
 		}
-		x11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
-			srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, False));
+		_x11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX,
+			srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, False));
 	}
 	else
 	#endif
 
-	x11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
+	_x11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
 		srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight));
 	XFlush(fb->dpy);
 	XSync(fb->dpy, False);

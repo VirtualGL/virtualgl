@@ -58,7 +58,7 @@ namespace vglclient
 				{
 					memset(windows, 0, sizeof(ClientWin *)*MAXWIN);
 					if(socket) remoteName=socket->remoteName();
-					newcheck(thread=new vglutil::Thread(this));
+					_newcheck(thread=new vglutil::Thread(this));
 					thread->start();
 				}
 

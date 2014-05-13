@@ -70,7 +70,7 @@ namespace vglserver
 					if(value) entry->value=value;
 					if(useRef) entry->refCount++;  return 0;
 				}
-				newcheck(entry=new HashEntry);
+				_newcheck(entry=new HashEntry);
 				memset(entry, 0, sizeof(HashEntry));
 				entry->prev=end;  if(end) end->next=entry;
 				if(!start) start=entry;

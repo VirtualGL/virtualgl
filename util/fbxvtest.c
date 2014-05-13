@@ -22,26 +22,27 @@
 #define HEIGHT 903
 
 
-#define _throw(m) { \
-	printf("ERROR: %s\n", m);  goto bailout; \
+#define _throw(m) {  \
+	printf("ERROR: %s\n", m);  goto bailout;  \
 }
 
-#define fbxv(f) \
-	if((f)==-1) { \
-		printf("FBXV ERROR in line %d: %s\n", fbxv_geterrline(), fbxv_geterrmsg()); \
-		goto bailout; \
+#define _fbxv(f)  \
+	if((f)==-1) {  \
+		printf("FBXV ERROR in line %d: %s\n", fbxv_geterrline(),  \
+			fbxv_geterrmsg());  \
+		goto bailout;  \
 	}
 
 
-double testtime=5.;
+double testTime=5.;
 Display *dpy=NULL;  Window win=0;
 fbxv_struct s, s1;
-int width=-1, height=-1, useshm=1, scale=1, interactive=0;
+int width=-1, height=-1, useShm=1, scale=1, interactive=0;
 char *filename=NULL;
-Atom protoatom=0, deleteatom=0;
+Atom protoAtom=0, deleteAtom=0;
 
 
-void initbuf(fbxv_struct *s, int id, int seed)
+void initBuf(fbxv_struct *s, int id, int seed)
 {
 	int i, j, c;
 	int yindex0, yindex1, uindex, vindex;
@@ -57,33 +58,33 @@ void initbuf(fbxv_struct *s, int id, int seed)
 	}
 	if(id==YUY2_PACKED || id==UYVY_PACKED)
 	{
-		for(i=0; i<s->xvi->height; i++)
+		for(j=0; j<s->xvi->height; j++)
 		{
-			for(j=0; j<s->xvi->width; j+=2)
+			for(i=0; i<s->xvi->width; i+=2)
 			{
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex0]
-					=(i+seed)*(j+seed);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + yindex1]
-					=(i+seed+1)*(j+seed+1);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + uindex]
-					=(i+seed)*(j+seed);
-				s->xvi->data[s->xvi->pitches[0]*i + j*2 + vindex]
-					=(i+seed)*(j+seed);
+				s->xvi->data[s->xvi->pitches[0]*j + i*2 + yindex0]
+					=(j+seed)*(i+seed);
+				s->xvi->data[s->xvi->pitches[0]*j + i*2 + yindex1]
+					=(j+seed+1)*(i+seed+1);
+				s->xvi->data[s->xvi->pitches[0]*j + i*2 + uindex]
+					=(j+seed)*(i+seed);
+				s->xvi->data[s->xvi->pitches[0]*j + i*2 + vindex]
+					=(j+seed)*(i+seed);
 			}
 		}
 	}
 	else
 	{
 		for(c=0; c<s->xvi->num_planes; c++)
-			for(i=0; i<s->xvi->height; i++)
-				for(j=0; j<s->xvi->width; j++)
-					s->xvi->data[s->xvi->offsets[c] + s->xvi->pitches[c]*(c==0? i:i/2)
-						+ (c==0? j:j/2)] = (i+seed)*(j+seed);
+			for(j=0; j<s->xvi->height; j++)
+				for(i=0; i<s->xvi->width; i++)
+					s->xvi->data[s->xvi->offsets[c] + s->xvi->pitches[c]*(c==0? j:j/2)
+						+ (c==0? i:i/2)] = (j+seed)*(i+seed);
 	}
 }
 
 
-void dotest(int id, char *name)
+void doTest(int id, char *name)
 {
 	int iter=0, i;
 	double elapsed=0., t;
@@ -91,10 +92,13 @@ void dotest(int id, char *name)
 
 	printf("Testing %s format (ID=0x%.8x) ...\n", name, id);
 
-	memset(&s, 0, sizeof(s));  memset(&s1, 0, sizeof(s));
-	fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useshm));
+	memset(&s, 0, sizeof(s));
+	memset(&s1, 0, sizeof(s));
+	_fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useShm));
 	if(!filename)
-		{ fbxv(fbxv_init(&s1, dpy, win, width/scale, height/scale, id, useshm)); }
+	{
+		_fbxv(fbxv_init(&s1, dpy, win, width/scale, height/scale, id, useShm));
+	}
 	printf("Image:\n");
 	printf("  Data size:   %d\n", s.xvi->data_size);
 	printf("  Dimensions:  %d x %d\n", s.xvi->width, s.xvi->height);
@@ -133,17 +137,17 @@ void dotest(int id, char *name)
 
 	if(!filename)
 	{
-		initbuf(&s, id, 0);
-		initbuf(&s1, id, 128);
+		initBuf(&s, id, 0);
+		initBuf(&s1, id, 128);
 	}
 	t=getTime();
 	do
 	{
 		if(filename || iter%2==0)
-			{ fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
-		else { fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
+			{ _fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
+		else { _fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
 		iter++;
-	} while((elapsed=getTime()-t)<testtime);
+	} while((elapsed=getTime()-t)<testTime);
 	printf("%f Mpixels/sec\n",
 		(double)(width*height)/1000000.*(double)iter/elapsed);
 
@@ -152,7 +156,7 @@ void dotest(int id, char *name)
 }
 
 
-void dotesti(Display *dpy, int id, char *name)
+void doInteractiveTest(Display *dpy, int id, char *name)
 {
 	int iter=0;
 	printf("Interactive test, %s format (ID=0x%.8x) ...\n", name, id);
@@ -160,7 +164,7 @@ void dotesti(Display *dpy, int id, char *name)
 
 	while(1)
 	{
-		int dodisplay=0;
+		int doDisplay=0;
 
 		while(1)
 		{
@@ -169,7 +173,7 @@ void dotesti(Display *dpy, int id, char *name)
 			switch (event.type)
 			{
 				case Expose:
-					dodisplay=1;
+					doDisplay=1;
 					break;
 				case ConfigureNotify:
 					width=event.xconfigure.width;  height=event.xconfigure.height;
@@ -186,22 +190,22 @@ void dotesti(Display *dpy, int id, char *name)
 					break;
 				}
 				case MotionNotify:
-					if(event.xmotion.state & Button1Mask) dodisplay=1;
+					if(event.xmotion.state & Button1Mask) doDisplay=1;
 					break;
 				case ClientMessage:
 				{
 					XClientMessageEvent *cme=(XClientMessageEvent *)&event;
-					if(cme->message_type==protoatom && cme->data.l[0]==deleteatom)
+					if(cme->message_type==protoAtom && cme->data.l[0]==deleteAtom)
 						return;
 				}
 			}
 			if(XPending(dpy)<=0) break;
 		}
-		if(dodisplay)
+		if(doDisplay)
 		{
-			fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useshm));
-			initbuf(&s, id, iter);  iter++;
-			fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
+			_fbxv(fbxv_init(&s, dpy, win, width/scale, height/scale, id, useShm));
+			initBuf(&s, id, iter);  iter++;
+			_fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
 		}
 	}
 
@@ -213,14 +217,14 @@ void dotesti(Display *dpy, int id, char *name)
 int main(int argc, char **argv)
 {
 	int id=-1, n=0, i;
-	XVisualInfo vtemp, *v=NULL;
+	XVisualInfo vtemp, *vis=NULL;
 	XSetWindowAttributes swa;
 
 	if(argc>1)
 	{
 		for(i=0; i<argc; i++)
 		{
-			if(!strcasecmp(argv[i], "-noshm")) useshm=0;
+			if(!strcasecmp(argv[i], "-noshm")) useShm=0;
 			else if(!strcasecmp(argv[i], "-i")) interactive=1;
 			else if(!strcasecmp(argv[i], "-scale") && i<argc-1)
 			{
@@ -242,7 +246,7 @@ int main(int argc, char **argv)
 			else if(!strcasecmp(argv[i], "-time") && i<argc-1)
 			{
 				double temp=atof(argv[++i]);
-				if(temp>0.) testtime=temp;
+				if(temp>0.) testTime=temp;
 			}
 			else if(!strcasecmp(argv[i], "-format") && i<argc-1)
 			{
@@ -284,42 +288,44 @@ int main(int argc, char **argv)
 	if(!(dpy=XOpenDisplay(NULL))) _throw("Could not open display");
 
 	vtemp.depth=24;  vtemp.class=TrueColor;
-	if((v=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))==NULL
-		|| n==0)
+	if((vis=XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp,
+		&n))==NULL || n==0)
 		_throw("Could not obtain a TrueColor visual");
-	swa.colormap=XCreateColormap(dpy, DefaultRootWindow(dpy), v->visual,
+	swa.colormap=XCreateColormap(dpy, DefaultRootWindow(dpy), vis->visual,
 		AllocNone);
 	swa.border_pixel=0;
 	swa.background_pixel=0;
 	swa.event_mask=0;
-	if(interactive) swa.event_mask=StructureNotifyMask|ExposureMask
-		|KeyPressMask|PointerMotionMask|ButtonPressMask;
-	printf("Visual ID = 0x%.2x\n", (unsigned int)v->visualid);
-	if(!(protoatom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
+	if(interactive)
+		swa.event_mask=StructureNotifyMask|ExposureMask
+			|KeyPressMask|PointerMotionMask|ButtonPressMask;
+	printf("Visual ID = 0x%.2x\n", (unsigned int)vis->visualid);
+	if(!(protoAtom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
 		_throw("Cannot obtain WM_PROTOCOLS atom");
-	if(!(deleteatom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
+	if(!(deleteAtom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
 		_throw("Cannot obtain WM_DELETE_WINDOW atom");
 	if(!(win=XCreateWindow(dpy, DefaultRootWindow(dpy), 0, 0, width, height, 0,
-		v->depth, InputOutput, v->visual,
+		vis->depth, InputOutput, vis->visual,
 		CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &swa)))
 		_throw("Could not create window");
-	XFree(v);  v=NULL;
-	XSetWMProtocols(dpy, win, &deleteatom, 1);
-	if(!XMapRaised(dpy, win)) _throw("Could not show window");
+	XFree(vis);  vis=NULL;
+	XSetWMProtocols(dpy, win, &deleteAtom, 1);
+	if(!XMapRaised(dpy, win))
+		_throw("Could not show window");
 	XSync(dpy, False);
 
-	if(interactive) dotesti(dpy, I420_PLANAR, "I420 Planar");
+	if(interactive) doInteractiveTest(dpy, I420_PLANAR, "I420 Planar");
 	else if(id>=0)
-		dotest(id, "User-specified");
+		doTest(id, "User-specified");
 	else
 	{
-		dotest(I420_PLANAR, "I420 Planar");
+		doTest(I420_PLANAR, "I420 Planar");
 		printf("\n");
-		dotest(YV12_PLANAR, "YV12 Planar");
+		doTest(YV12_PLANAR, "YV12 Planar");
 		printf("\n");
-		dotest(YUY2_PACKED, "YUY2 Packed");
+		doTest(YUY2_PACKED, "YUY2 Packed");
 		printf("\n");
-		dotest(UYVY_PACKED, "UYVY Packed");
+		doTest(UYVY_PACKED, "UYVY Packed");
 		printf("\n");
 	}
 

@@ -737,13 +737,13 @@ int main(int argc, char **argv)
 			swa.event_mask=0;
 
 			swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
-			errifnot(win=XCreateWindow(dpy, root, 0, 0,
+			_errifnot(win=XCreateWindow(dpy, root, 0, 0,
 				(usePixmap || useFBO)? 1:width, (usePixmap || useFBO)? 1:height,
 				0, v->depth, InputOutput, v->visual,
 				CWBorderPixel|CWColormap|CWEventMask, &swa));
 			if(usePixmap)
 			{
-				errifnot(pm=XCreatePixmap(dpy, win, width, height, v->depth));
+				_errifnot(pm=XCreatePixmap(dpy, win, width, height, v->depth));
 			}
 			else if(!useFBO) XMapWindow(dpy, win);
 			XSync(dpy, False);

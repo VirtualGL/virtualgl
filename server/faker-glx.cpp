@@ -867,7 +867,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 	else
 	{
 		XSync(dpy, False);
-		errifnot(vw=winhash.initVW(dpy, win, config));
+		_errifnot(vw=winhash.initVW(dpy, win, config));
 	}
 
 		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }  closetrace();

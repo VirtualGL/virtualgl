@@ -362,8 +362,8 @@ char **XListExtensions(Display *dpy, int *next)
 	{
 		char **newList=NULL;  int index=0;
 		listLen+=4;  // "GLX" + terminating NULL
-		errifnot(newList=(char **)malloc(sizeof(char *)*(n+1)))
-		errifnot(listStr=(char *)malloc(listLen+1))
+		_errifnot(newList=(char **)malloc(sizeof(char *)*(n+1)))
+		_errifnot(listStr=(char *)malloc(listLen+1))
 		memset(listStr, 0, listLen+1);
 		listStr=&listStr[1];  // For compatibility with X.org implementation
 		if(list && n>0)

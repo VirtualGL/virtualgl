@@ -37,7 +37,7 @@ static unsigned short DisplayNumber(Display *dpy)
 }
 
 
-#define endianize(h) { \
+#define ENDIANIZE(h) { \
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
 		h.winid=byteswap(h.winid);  \
@@ -49,7 +49,7 @@ static unsigned short DisplayNumber(Display *dpy)
 		h.y=byteswap16(h.y);  \
 		h.dpynum=byteswap16(h.dpynum);}}
 
-#define endianize_v1(h) { \
+#define ENDIANIZE_V1(h) { \
 	if(!littleendian()) {  \
 		h.size=byteswap(h.size);  \
 		h.winid=byteswap(h.winid);  \
@@ -60,7 +60,7 @@ static unsigned short DisplayNumber(Display *dpy)
 		h.x=byteswap16(h.x);  \
 		h.y=byteswap16(h.y);}}
 
-#define cvthdr_v1(h1, h) {  \
+#define CONVERT_HEADER(h1, h) {  \
 	h.size=h1.size;  \
 	h.winid=h1.winid;  \
 	h.framew=h1.framew;  \
@@ -83,7 +83,7 @@ VGLTransReceiver::VGLTransReceiver(bool doSSL_, int drawMethod_) :
 
 	if((env=getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
-	newcheck(thread=new Thread(this));
+	_newcheck(thread=new Thread(this));
 }
 
 
@@ -101,7 +101,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		newcheck(listenSocket=new Socket(doSSL));
+		_newcheck(listenSocket=new Socket(doSSL));
 		port=listenSocket->listen(port_);
 	}
 	catch(...)
@@ -125,7 +125,7 @@ void VGLTransReceiver::run(void)
 			socket=listenSocket->accept();  if(deadYet) break;
 			vglout.println("++ %sConnection from %s.", doSSL? "SSL ":"",
 				socket->remoteName());
-			newcheck(listener=new Listener(socket, drawMethod));
+			_newcheck(listener=new Listener(socket, drawMethod));
 			continue;
 		}
 		catch(Error &e)
@@ -156,7 +156,7 @@ void VGLTransReceiver::Listener::run(void)
 	try
 	{
 		recv((char *)&h1, sizeof_rrframeheader_v1);
-		endianize(h1);
+		ENDIANIZE(h1);
 		if(h1.framew!=0 && h1.frameh!=0 && h1.width!=0 && h1.height!=0
 			&& h1.winid!=0 && h1.size!=0 && h1.flags!=RR_EOF)
 		{
@@ -187,20 +187,20 @@ void VGLTransReceiver::Listener::run(void)
 					if(!haveHeader)
 					{
 						recv((char *)&h1, sizeof_rrframeheader_v1);
-						endianize_v1(h1);
+						ENDIANIZE_V1(h1);
 					}
 					haveHeader=false;
-					cvthdr_v1(h1, h);
+					CONVERT_HEADER(h1, h);
 				}
 				else
 				{
 					recv((char *)&h, sizeof_rrframeheader);
-					endianize(h);
+					ENDIANIZE(h);
 				}
 				bool stereo=(h.flags==RR_LEFT || h.flags==RR_RIGHT);
 				unsigned short dpynum=(v.major<2 || (v.major==2 && v.minor<1))?
 					h.dpynum : DisplayNumber(maindpy);
-				errifnot(w=addWindow(dpynum, h.winid, stereo));
+				_errifnot(w=addWindow(dpynum, h.winid, stereo));
 
 				if(!stereo || h.flags==RR_LEFT || !f)
 				{
@@ -285,7 +285,7 @@ ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
 	}
 	if(nwin>=MAXWIN) _throw("No free window ID's");
 	if(dpynum<0 || dpynum>65535 || win==None) _throw("Invalid argument");
-	newcheck(windows[winid]=new ClientWin(dpynum, win, drawMethod, stereo));
+	_newcheck(windows[winid]=new ClientWin(dpynum, win, drawMethod, stereo));
 
 	if(!windows[winid]) _throw("Could not create window instance");
 	nwin++;

@@ -45,7 +45,7 @@ namespace vglserver
 				vglutil::CS::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy=dpy_;  shmid=shmid_;
-				newcheck(thread=new vglutil::Thread(this));
+				_newcheck(thread=new vglutil::Thread(this));
 				thread->start();
 			}
 

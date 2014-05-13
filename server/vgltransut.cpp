@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 				BlackPixel(dpy, DefaultScreen(dpy))))==0)
 				_throw("Could not create window");
 			printf("Creating window %lu\n", (unsigned long)win);
-			errifnot(XMapRaised(dpy, win));
+			_errifnot(XMapRaised(dpy, win));
 			XSync(dpy, False);
 			if(strlen(fconfig.client)==0)
 				strncpy(fconfig.client, DisplayString(dpy), MAXSTR-1);
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf2, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 		fill=0, frames=0;  int clientframes=0;  timer.start();
 		do
 		{
-			errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf2, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf3, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
 			memcpy(f->bits, buf, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
 			f->hdr.winid=win;  f->hdr.compress=fconfig.compress;

@@ -258,8 +258,8 @@ void Socket::connect(char *serverName, unsigned short port)
 
 	if((sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET)
 		_throwsock();
-	trysock(::connect(sd, (struct sockaddr *)&servaddr, sizeof(servaddr)));
-	trysock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char*)&m, sizeof(int)));
+	_sock(::connect(sd, (struct sockaddr *)&servaddr, sizeof(servaddr)));
+	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char*)&m, sizeof(int)));
 
 	#ifdef USESSL
 	if(doSSL)
@@ -286,9 +286,9 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 
 	if((sd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==INVALID_SOCKET)
 		_throwsock();
-	trysock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 		sizeof(int)));
-	trysock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2,
+	_sock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2,
 		sizeof(int)));
 
 	memset(&myaddr, 0, sizeof(myaddr));
@@ -296,9 +296,9 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	myaddr.sin_addr.s_addr=htonl(INADDR_ANY);
 	myaddr.sin_port=(port==0)? 0:htons(port);
 
-	trysock(bind(sd, (struct sockaddr *)&myaddr, sizeof(myaddr)));
+	_sock(bind(sd, (struct sockaddr *)&myaddr, sizeof(myaddr)));
 	SOCKLEN_T n=sizeof(myaddr);
-	trysock(getsockname(sd, (struct sockaddr *)&myaddr, &n));
+	_sock(getsockname(sd, (struct sockaddr *)&myaddr, &n));
 	unsigned short actualPort=ntohs(myaddr.sin_port);
 	return actualPort;
 }
@@ -319,7 +319,7 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 
 	actualPort=setupListener(port, reuseAddr);
 
-	trysock(::listen(sd, MAXCONN));
+	_sock(::listen(sd, MAXCONN));
 
 	#ifdef USESSL
 	if(doSSL)
@@ -327,8 +327,8 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 		try
 		{
 			if((sslctx=SSL_CTX_new(SSLv23_server_method()))==NULL) _throwssl();
-			errifnot(priv=newPrivateKey(1024));
-			errifnot(cert=newCert(priv));
+			_errifnot(priv=newPrivateKey(1024));
+			_errifnot(cert=newCert(priv));
 			if(SSL_CTX_use_certificate(sslctx, cert)<=0)
 				_throwssl();
 			if(SSL_CTX_use_PrivateKey(sslctx, priv)<=0)
@@ -361,9 +361,9 @@ Socket *Socket::accept(void)
 	if(!sslctx && doSSL) _throw("SSL not initialized");
 	#endif
 
-	trysock(clientsd=::accept(sd, (struct sockaddr *)&remoteaddr,
+	_sock(clientsd=::accept(sd, (struct sockaddr *)&remoteaddr,
 		&addrlen));
-	trysock(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
+	_sock(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char*)&m,
 		sizeof(int)));
 
 	#ifdef USESSL
@@ -388,7 +388,7 @@ char *Socket::remoteName(void)
 	struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen=sizeof(remoteaddr);
 	char *remoteName=NULL;
 
-	trysock(getpeername(sd, (struct sockaddr *)&remoteaddr, &addrlen));
+	_sock(getpeername(sd, (struct sockaddr *)&remoteaddr, &addrlen));
 	remoteName=inet_ntoa(remoteaddr.sin_addr);
 	return (remoteName? remoteName:(char *)"Unknown");
 }

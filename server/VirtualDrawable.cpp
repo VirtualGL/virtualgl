@@ -28,7 +28,7 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-#define checkgl(m) if(glError()) _throw("Could not "m);
+#define CHECKGL(m) if(glError()) _throw("Could not "m);
 
 // Generic OpenGL error checker (0 = no errors)
 static int glError(void)
@@ -229,7 +229,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pixmaps for rendering");
 			alreadyPrinted=true;
 		}
-		newcheck(oglDraw=new OGLDrawable(width, height, 0, config_, NULL));
+		_newcheck(oglDraw=new OGLDrawable(width, height, 0, config_, NULL));
 	}
 	else
 	{
@@ -238,7 +238,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pbuffers for rendering");
 			alreadyPrinted=true;
 		}
-		newcheck(oglDraw=new OGLDrawable(width, height, config_));
+		_newcheck(oglDraw=new OGLDrawable(width, height, config_));
 	}
 	if(config && _FBCID(config_)!=_FBCID(config) && ctx)
 	{
@@ -453,7 +453,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	}
 
 	profReadback.endFrame(width*height, 0, stereo? 0.5 : 1);
-	checkgl("Read Pixels");
+	CHECKGL("Read Pixels");
 
 	// If automatic faker testing is enabled, store the FB color in an
 	// environment variable so the test program can verify it
@@ -545,7 +545,7 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 		glRasterPos2i(destX, height-destY-i-1);
 		glCopyPixels(srcX, height-srcY-i-1, width, 1, GL_COLOR);
 	}
-	checkgl("Copy Pixels");
+	CHECKGL("Copy Pixels");
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();

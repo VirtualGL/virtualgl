@@ -89,10 +89,10 @@ static inline int isDead(void)
 #define prargx(a) vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
 #define prargi(a) vglout.print("%s=%d ", #a, a)
 #define prargf(a) vglout.print("%s=%f ", #a, (double)a)
-#define prargv(a) vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a,  \
-	a? a->visualid:0)
-#define prargc(a) vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a,  \
-	a? _FBCID(a):0)
+#define prargv(a)  \
+	vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a? a->visualid:0)
+#define prargc(a)  \
+	vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a? _FBCID(a):0)
 #define prargal11(a) if(a) {  \
 	vglout.print(#a"=[");  \
 	for(int __an=0; a[__an]!=None; __an++) {  \
