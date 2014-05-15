@@ -59,7 +59,7 @@ int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 
 
 // Returns the X11 Pixmap on the 3D X server corresponding to the GLX Pixmap
-Pixmap VirtualPixmap::getGLXDrawable(void)
+Pixmap VirtualPixmap::get3DX11Pixmap(void)
 {
 	GLXDrawable retval=0;
 	CS::SafeLock l(mutex);

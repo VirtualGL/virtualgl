@@ -1341,9 +1341,9 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 		// 3D Pixmap (stored on the 3D X server.)
 		XImage *image=_XGetImage(dpy, vpm->getX11Drawable(), 0, 0, vpm->getWidth(),
 			vpm->getHeight(), AllPlanes, ZPixmap);
-		GC gc=XCreateGC(_dpy3D, vpm->getGLXDrawable(), 0, NULL);
+		GC gc=XCreateGC(_dpy3D, vpm->get3DX11Pixmap(), 0, NULL);
 		if(gc && image)
-			XPutImage(_dpy3D, vpm->getGLXDrawable(), gc, image, 0, 0, 0, 0,
+			XPutImage(_dpy3D, vpm->get3DX11Pixmap(), gc, image, 0, 0, 0, 0,
 				vpm->getWidth(), vpm->getHeight());
 		else
 			// Also trigger GLXBadPixmap error

@@ -28,7 +28,7 @@ namespace vglserver
 			int init(int width, int height, int depth, GLXFBConfig config,
 				const int *attribs);
 			void readback(void);
-			Pixmap getGLXDrawable(void);
+			Pixmap get3DX11Pixmap(void);
 
 			XVisualInfo *getVisual(void)
 			{
