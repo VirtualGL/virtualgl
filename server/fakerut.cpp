@@ -434,12 +434,8 @@ int readbackTest(bool stereo, bool ci)
 		{
 			_throw("Stereo is not available or is not properly implemented");
 		}
-		bool dbWorking=doubleBufferTest(ci);
-		if(!dbWorking)
-		{
-			printf("WARNING: Double buffering appears to be broken.\n");
-			printf("         Testing in single buffered mode\n\n");
-		}
+		if(!doubleBufferTest(ci))
+			_throw("Double buffering appears to be broken");
 		glReadBuffer(GL_BACK);
 
 		if(!glXMakeContextCurrent(dpy, win1, win0, ctx1))
@@ -463,19 +459,17 @@ int readbackTest(bool stereo, bool ci)
 			glXSwapBuffers(dpy, win1);
 			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			// Make sure that glXSwapBuffers() actually swapped
 			glDrawBuffer(GL_FRONT);
 			glFinish();
 			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -497,10 +491,9 @@ int readbackTest(bool stereo, bool ci)
 			glDrawBuffer(GL_FRONT);  glFlush();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -520,10 +513,9 @@ int readbackTest(bool stereo, bool ci)
 			glDrawBuffer(GL_FRONT);  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -543,10 +535,9 @@ int readbackTest(bool stereo, bool ci)
 			glDrawBuffer(GL_FRONT);  glXWaitGL();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -569,10 +560,9 @@ int readbackTest(bool stereo, bool ci)
 			glFinish();  glFinish();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -592,10 +582,9 @@ int readbackTest(bool stereo, bool ci)
 			glXMakeCurrent(dpy, win0, ctx0);  // No readback should occur
 			checkReadbackState(GL_BACK, dpy, win0, win0, ctx0);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win1, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win1, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win1, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -615,10 +604,9 @@ int readbackTest(bool stereo, bool ci)
 			glXMakeContextCurrent(dpy, win1, win0, ctx1); // No readback should occur
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win0, 1, lastFrame0);
-			checkWindowColor(win0, dbWorking? clr.bits(-2):clr.bits(-1), ci);
+			checkWindowColor(win0, clr.bits(-2), ci);
 			if(stereo)
-				checkWindowColor(win0, dbWorking? sclr.bits(-2):sclr.bits(-1), ci,
-					true);
+				checkWindowColor(win0, sclr.bits(-2), ci, true);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -800,8 +788,7 @@ int flushTest(void)
 		if(!glXMakeCurrent(dpy, win, ctx))
 			_throw("Could not make context current");
 		checkCurrent(dpy, win, win, ctx);
-		bool dbWorking=doubleBufferTest(false);
-		if(!dbWorking)
+		if(!doubleBufferTest(false))
 			_throw("This test requires double buffering, which appears to be broken.");
 		glReadBuffer(GL_FRONT);
 		XMapWindow(dpy, win);
@@ -1286,11 +1273,9 @@ void queryContextTest(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_FBCONFIG_ID, &temp);
 		if(temp!=fbcid) _error("glXQueryContext FB cfg ID");
-		#ifndef sun
 		GET_CFG_ATTRIB(config, GLX_RENDER_TYPE, renderType);
 		renderType=(renderType==GLX_COLOR_INDEX_BIT)?
 			GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE;
-		#endif
 		temp=-20;
 		glXQueryContext(dpy, ctx, GLX_RENDER_TYPE, &temp);
 		if(temp!=renderType) _error("glXQueryContext render type");
@@ -1346,7 +1331,7 @@ GLXFBConfig getFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 
 
 // This tests the faker's client/server visual matching heuristics
-int visTest(void)
+int visTest(bool ci)
 {
 	Display *dpy=NULL;
 	XVisualInfo **visuals=NULL, *vis0=NULL, vtemp;
@@ -1364,64 +1349,68 @@ int visTest(void)
 			_throw("No FB configs found");
 		XFree(configs);  configs=NULL;
 
-		try
+		if(!ci)
 		{
-			printf("RGBA:   ");
-
-			// Iterate through RGBA attributes
-			int rgbattrib[]={ GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
-				GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
-				GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
-				GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0,
-				GLX_SAMPLES, 1, GLX_RGBA, None, None, None };
-			int rgbattrib13[]={ GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1, GLX_RED_SIZE, 8,
-				GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_ALPHA_SIZE, 0,
-				GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0,
-				GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0, GLX_ACCUM_BLUE_SIZE, 0,
-				GLX_ACCUM_ALPHA_SIZE, 0, GLX_SAMPLE_BUFFERS, 0, GLX_SAMPLES, 1, None };
-
-			for(int db=0; db<=1; db++)
+			try
 			{
-				rgbattrib13[1]=db;
-				rgbattrib[27]=db? GLX_DOUBLEBUFFER:0;
-				for(int stereo=0; stereo<=1; stereo++)
-				{
-					rgbattrib13[3]=stereo;
-					rgbattrib[db? 28:27]=stereo? GLX_STEREO:0;
-					for(int alpha=0; alpha<=1; alpha++)
-					{
-						rgbattrib13[11]=rgbattrib[7]=alpha;
-						for(int depth=0; depth<=1; depth++)
-						{
-							rgbattrib13[13]=rgbattrib[9]=depth;
-							for(int aux=0; aux<=1; aux++)
-							{
-								rgbattrib13[15]=rgbattrib[11]=aux;
-								for(int stencil=0; stencil<=1; stencil++)
-								{
-									rgbattrib13[17]=rgbattrib[13]=stencil;
-									for(int accum=0; accum<=1; accum++)
-									{
-										rgbattrib13[19]=rgbattrib13[21]=rgbattrib13[23]=accum;
-										rgbattrib[15]=rgbattrib[17]=rgbattrib[19]=accum;
-										if(alpha) { rgbattrib13[25]=rgbattrib[21]=accum; }
-										for(int samples=0; samples<=16;
-											samples==0? samples=1:samples*=2)
-										{
-											rgbattrib13[29]=rgbattrib[25]=samples;
-											rgbattrib13[27]=rgbattrib[23]=samples? 1:0;
+				printf("RGBA:   ");
 
-											if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-												rgbattrib13, &n)) || n==0) && !stereo && !samples
-												&& !aux && !accum)
-												_throw("No FB configs found");
-											if(!(vis0=glXChooseVisual(dpy, DefaultScreen(dpy),
-												rgbattrib)) && !stereo && !samples && !aux && !accum)
-												_throw("Could not find visual");
-											if(vis0 && configs)
+				// Iterate through RGBA attributes
+				int rgbattrib[]={ GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+					GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
+					GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
+					GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0,
+					GLX_SAMPLE_BUFFERS, 0, GLX_SAMPLES, 1, GLX_RGBA, None, None, None };
+				int rgbattrib13[]={ GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
+					GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+					GLX_ALPHA_SIZE, 0, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
+					GLX_STENCIL_SIZE, 0, GLX_ACCUM_RED_SIZE, 0, GLX_ACCUM_GREEN_SIZE, 0,
+					GLX_ACCUM_BLUE_SIZE, 0, GLX_ACCUM_ALPHA_SIZE, 0,
+					GLX_SAMPLE_BUFFERS, 0, GLX_SAMPLES, 1, None };
+
+				for(int db=0; db<=1; db++)
+				{
+					rgbattrib13[1]=db;
+					rgbattrib[27]=db? GLX_DOUBLEBUFFER:0;
+					for(int stereo=0; stereo<=1; stereo++)
+					{
+						rgbattrib13[3]=stereo;
+						rgbattrib[db? 28:27]=stereo? GLX_STEREO:0;
+						for(int alpha=0; alpha<=1; alpha++)
+						{
+							rgbattrib13[11]=rgbattrib[7]=alpha;
+							for(int depth=0; depth<=1; depth++)
+							{
+								rgbattrib13[13]=rgbattrib[9]=depth;
+								for(int aux=0; aux<=1; aux++)
+								{
+									rgbattrib13[15]=rgbattrib[11]=aux;
+									for(int stencil=0; stencil<=1; stencil++)
+									{
+										rgbattrib13[17]=rgbattrib[13]=stencil;
+										for(int accum=0; accum<=1; accum++)
+										{
+											rgbattrib13[19]=rgbattrib13[21]=rgbattrib13[23]=accum;
+											rgbattrib[15]=rgbattrib[17]=rgbattrib[19]=accum;
+											if(alpha) { rgbattrib13[25]=rgbattrib[21]=accum; }
+											for(int samples=0; samples<=16;
+												samples==0? samples=1:samples*=2)
 											{
-												configVsVisual(dpy, configs[0], vis0);
-												XFree(vis0);  XFree(configs);
+												rgbattrib13[29]=rgbattrib[25]=samples;
+												rgbattrib13[27]=rgbattrib[23]=samples? 1:0;
+
+												if((!(configs=glXChooseFBConfig(dpy,
+													DefaultScreen(dpy), rgbattrib13, &n)) || n==0)
+													&& !stereo && !samples && !aux && !accum)
+													_throw("No FB configs found");
+												if(!(vis0=glXChooseVisual(dpy, DefaultScreen(dpy),
+													rgbattrib)) && !stereo && !samples && !aux && !accum)
+													_throw("Could not find visual");
+												if(vis0 && configs)
+												{
+													configVsVisual(dpy, configs[0], vis0);
+													XFree(vis0);  XFree(configs);
+												}
 											}
 										}
 									}
@@ -1430,74 +1419,76 @@ int visTest(void)
 						}
 					}
 				}
+				printf("SUCCESS!\n");
 			}
-			printf("SUCCESS!\n");
-		}
-		catch(Error &e)
-		{
-			printf("Failed! (%s)\n", e.getMessage());  retval=0;
-		}
-		fflush(stdout);
-
-		try
-		{
-			printf("INDEX:  ");
-
-			// Iterate through color index attributes
-			int ciattrib[]={ GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0,
-				GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0,
-				GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0, None, None, None };
-			int ciattrib13[]={ GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
-				GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
-				GLX_STENCIL_SIZE, 0, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
-				GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0, None };
-
-			for(int db=0; db<=1; db++)
+			catch(Error &e)
 			{
-				ciattrib13[1]=db;
-				ciattrib[12]=db? GLX_DOUBLEBUFFER:0;
-				for(int stereo=0; stereo<=1; stereo++)
-				{
-					ciattrib13[3]=stereo;
-					ciattrib[db? 13:12]=stereo? GLX_STEREO:0;
-					for(int depth=0; depth<=1; depth++)
-					{
-						ciattrib13[7]=ciattrib[3]=depth;
-						for(int aux=0; aux<=1; aux++)
-						{
-							ciattrib13[9]=ciattrib[5]=aux;
-							for(int stencil=0; stencil<=1; stencil++)
-							{
-								ciattrib13[11]=ciattrib[7]=stencil;
-								for(int trans=0; trans<=1; trans++)
-								{
-									ciattrib13[15]=ciattrib[9]=trans?
-										GLX_TRANSPARENT_INDEX:GLX_NONE;
+				printf("Failed! (%s)\n", e.getMessage());  retval=0;
+			}
+			fflush(stdout);
+		}
+		else
+		{
+			try
+			{
+				printf("INDEX:  ");
 
-									if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
-										ciattrib13, &n)) || n==0) && !stereo && !aux && !trans)
-										_throw("No FB configs found");
-									if(!(vis0=glXChooseVisual(dpy, DefaultScreen(dpy), ciattrib))
-										&& !stereo && !aux && !trans)
-										_throw("Could not find visual");
-									if(vis0 && configs)
+				// Iterate through color index attributes
+				int ciattrib[]={ GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0,
+					GLX_AUX_BUFFERS, 0, GLX_STENCIL_SIZE, 0,
+					GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0, None, None, None };
+				int ciattrib13[]={ GLX_DOUBLEBUFFER, 1, GLX_STEREO, 1,
+					GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 0, GLX_AUX_BUFFERS, 0,
+					GLX_STENCIL_SIZE, 0, GLX_RENDER_TYPE, GLX_COLOR_INDEX_BIT,
+					GLX_TRANSPARENT_TYPE, GLX_NONE, GLX_LEVEL, 0, None };
+
+				for(int db=0; db<=1; db++)
+				{
+					ciattrib13[1]=db;
+					ciattrib[12]=db? GLX_DOUBLEBUFFER:0;
+					for(int stereo=0; stereo<=1; stereo++)
+					{
+						ciattrib13[3]=stereo;
+						ciattrib[db? 13:12]=stereo? GLX_STEREO:0;
+						for(int depth=0; depth<=1; depth++)
+						{
+							ciattrib13[7]=ciattrib[3]=depth;
+							for(int aux=0; aux<=1; aux++)
+							{
+								ciattrib13[9]=ciattrib[5]=aux;
+								for(int stencil=0; stencil<=1; stencil++)
+								{
+									ciattrib13[11]=ciattrib[7]=stencil;
+									for(int trans=0; trans<=1; trans++)
 									{
-										configVsVisual(dpy, configs[0], vis0);
-										XFree(vis0);  XFree(configs);
+										ciattrib13[15]=ciattrib[9]=trans?
+											GLX_TRANSPARENT_INDEX:GLX_NONE;
+
+										if((!(configs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
+											ciattrib13, &n)) || n==0) && !stereo && !aux && !trans)
+											_throw("No FB configs found");
+										if(!(vis0=glXChooseVisual(dpy, DefaultScreen(dpy),
+											ciattrib)) && !stereo && !aux && !trans)
+											_throw("Could not find visual");
+										if(vis0 && configs)
+										{
+											configVsVisual(dpy, configs[0], vis0);
+											XFree(vis0);  XFree(configs);
+										}
 									}
 								}
 							}
 						}
 					}
 				}
+				printf("SUCCESS!\n");
 			}
-			printf("SUCCESS!\n");
+			catch(Error &e)
+			{
+				printf("Failed! (%s)\n", e.getMessage());  retval=0;
+			}
+			fflush(stdout);
 		}
-		catch(Error &e)
-		{
-			printf("Failed! (%s)\n", e.getMessage());  retval=0;
-		}
-		fflush(stdout);
 
 		printf("\n");
 		if(!(configs=glXGetFBConfigs(dpy, DefaultScreen(dpy), &n)) || n==0)
@@ -1513,7 +1504,12 @@ int visTest(void)
 			if(!configs[i]) continue;
 			try
 			{
+				int renderType;
 				fbcid=cfgid(dpy, configs[i]);
+				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
+				if((ci && renderType!=GLX_COLOR_INDEX_BIT)
+					|| (!ci && renderType==GLX_COLOR_INDEX_BIT))
+					continue;
 				if(!(visuals[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
 				{
 					printf("CFG 0x%.2x:  ", fbcid);
@@ -1532,7 +1528,12 @@ int visTest(void)
 			if(!configs[i]) continue;
 			try
 			{
+				int renderType;
 				fbcid=cfgid(dpy, configs[i]);
+				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
+				if((ci && renderType!=GLX_COLOR_INDEX_BIT)
+					|| (!ci && renderType==GLX_COLOR_INDEX_BIT))
+					continue;
 				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(vis1=glXGetVisualFromFBConfig(dpy, configs[i])))
 					_error("No matching X visual for CFG");
@@ -1903,22 +1904,14 @@ int offScreenTest(void)
 		if(!glXMakeContextCurrent(dpy, glxwin, glxwin, ctx))
 			_throw("Could not make context current");
 		checkCurrent(dpy, glxwin, glxwin, ctx);
-		bool dbwin=doubleBufferTest(false);
-		if(!dbwin)
-		{
-			printf("WARNING: Double buffering appears to be broken.\n");
-			printf("         Testing in single buffered mode\n\n");
-		}
+		if(!doubleBufferTest(false))
+			_throw("Double buffering appears to be broken");
 
 		if(!glXMakeContextCurrent(dpy, pb, pb, ctx))
 			_throw("Could not make context current");
 		checkCurrent(dpy, pb, pb, ctx);
-		bool dbpb=doubleBufferTest(false);
-		if(!dbpb)
-		{
-			printf("WARNING: Double-buffered off-screen rendering not available.\n");
-			printf("         Testing in single buffered mode\n\n");
-		}
+		if(!doubleBufferTest(false))
+			_throw("Double-buffered off-screen rendering not available");
 		checkFrame(win, -1, lastFrame);
 
 		try
@@ -1929,7 +1922,7 @@ int offScreenTest(void)
 			checkCurrent(dpy, pb, pb, ctx);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
-			VERIFY_BUF_COLOR(GL_BACK, dbpb? clr.bits(-2):clr.bits(-1), "PB");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
 			if(!(glXMakeContextCurrent(dpy, glxwin, pb, ctx)))
 				_error("Could not make context current");
 			checkCurrent(dpy, glxwin, pb, ctx);
@@ -1939,7 +1932,7 @@ int offScreenTest(void)
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(win, 1, lastFrame);
 			checkReadbackState(GL_FRONT, dpy, glxwin, pb, ctx);
-			checkWindowColor(win, dbpb? clr.bits(-2):clr.bits(-1), false);
+			checkWindowColor(win, clr.bits(-2), false);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -1958,7 +1951,7 @@ int offScreenTest(void)
 			checkCurrent(dpy, glxwin, glxwin, ctx);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
-			VERIFY_BUF_COLOR(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "Win");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, pb, glxwin, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontInfo->fid, minChar, maxChar-minChar+1,
@@ -1968,7 +1961,7 @@ int offScreenTest(void)
 			glReadBuffer(GL_BACK);  glDrawBuffer(GL_BACK);
 			glCopyPixels(0, 0, dpyw/2, dpyh/2, GL_COLOR);
 			glXSwapBuffers(dpy, pb);
-			VERIFY_BUF_COLOR(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "PB");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -1985,7 +1978,7 @@ int offScreenTest(void)
 			checkCurrent(dpy, glxwin, glxwin, ctx);
 			clr.clear(GL_BACK);
 			clr.clear(GL_FRONT);
-			VERIFY_BUF_COLOR(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "Win");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
 			checkCurrent(dpy, glxwin, glxwin, ctx);
@@ -2006,7 +1999,7 @@ int offScreenTest(void)
 			glXSwapBuffers(dpy, glxwin);
 			checkFrame(win, 1, lastFrame);
 			checkReadbackState(GL_COLOR_ATTACHMENT0_EXT, dpy, glxwin, glxwin, ctx);
-			checkWindowColor(win, dbwin? clr.bits(-3):clr.bits(-2), false);
+			checkWindowColor(win, clr.bits(-3), false);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -2057,7 +2050,7 @@ int offScreenTest(void)
 			checkCurrent(dpy, glxwin, glxwin, ctx);
 			clr.clear(GL_FRONT);
 			clr.clear(GL_BACK);
-			VERIFY_BUF_COLOR(GL_FRONT, dbwin? clr.bits(-2):clr.bits(-1), "Win");
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "Win");
 			if(!(glXMakeContextCurrent(dpy, glxpm1, glxpm1, ctx)))
 				_error("Could not make context current");
 			checkCurrent(dpy, glxpm1, glxpm1, ctx);
@@ -2069,8 +2062,8 @@ int offScreenTest(void)
 			int temp=-1;  glGetIntegerv(GL_DRAW_BUFFER, &temp);
 			if(temp!=GL_BACK) _error("Draw buffer changed");
 			checkFrame(win, 0, lastFrame);
-			VERIFY_BUF_COLOR(GL_BACK, dbwin? clr.bits(-2):clr.bits(-1), "PM1");
-			VERIFY_BUF_COLOR(GL_FRONT, dbwin? clr.bits(-2):clr.bits(-1), "PM1");
+			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PM1");
+			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-2), "PM1");
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
@@ -2472,7 +2465,7 @@ int procAddrTest(void)
 
 int main(int argc, char **argv)
 {
-	int ret=0;  int nThreads=NTHREADS;  bool doCI=true;
+	int ret=0;  int nThreads=NTHREADS;  bool doCI=false;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 		|| putenv((char *)"VGL_SPOIL=0")==-1
@@ -2488,7 +2481,7 @@ int main(int argc, char **argv)
 			int temp=atoi(argv[++i]);
 			if(temp>=0 && temp<=NTHREADS) nThreads=temp;
 		}
-		if(!strcasecmp(argv[i], "-noci")) doCI=false;
+		if(!strcasecmp(argv[i], "-ci")) doCI=true;
 	}
 
 	// Intentionally leave a pending dlerror()
@@ -2497,26 +2490,29 @@ int main(int argc, char **argv)
 
 	if(!XInitThreads())
 		_throw("XInitThreads() failed");
+	if(doCI)
+	{
+		if(!readbackTest(false, true)) ret=-1;
+		printf("\n");
+		if(!ciTest()) ret=-1;
+		printf("\n");
+		if(!visTest(doCI)) ret=-1;
+		printf("\n");
+		return ret;
+	}
 	if(!extensionQueryTest()) ret=-1;
 	printf("\n");
 	if(!procAddrTest()) ret=-1;
 	printf("\n");
 	if(!readbackTest(false, false)) ret=-1;
 	printf("\n");
-	readbackTest(true, false);
+	if(!readbackTest(true, false)) ret=-1;
 	printf("\n");
-	contextMismatchTest();
+	if(!contextMismatchTest()) ret=-1;
 	printf("\n");
-	flushTest();
+	if(!flushTest()) ret=-1;
 	printf("\n");
-	if(doCI)
-	{
-		readbackTest(false, true);
-		printf("\n");
-		ciTest();
-		printf("\n");
-	}
-	if(!visTest()) ret=-1;
+	if(!visTest(doCI)) ret=-1;
 	printf("\n");
 	if(!multiThreadTest(nThreads)) ret=-1;
 	printf("\n");
