@@ -18,7 +18,7 @@
 
 #include "Frame.h"
 #include "Thread.h"
-#include "genericQ.h"
+#include "GenericQ.h"
 
 
 enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
