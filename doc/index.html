@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-05-01T16:05:06">
+<meta name="date" content="2014-06-09T00:18:18">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.3.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -708,7 +708,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 <h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux</h2>
 
 <ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
+    <li value="1" class="Ordered-1 Ordered">
         Download the appropriate VirtualGL binary package for your system from 
         the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files">Files 
@@ -733,7 +733,7 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         If you want to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, then you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;virtualgl&rdquo; and &ldquo;virtualgl32&rdquo; amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
-    <li class="Ordered-1 Ordered" value="2">
+    <li value="2" class="Ordered-1 Ordered">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue the following commands:
         <dl class="Description">
@@ -3506,44 +3506,6 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         with) <code>:0.1</code> would cause VirtualGL to redirect all of the 3D 
         rendering from the application to a GPU attached to Screen 1 on X 
         display :0.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_DRAWABLE&nbsp;=&nbsp;</code><em><code>pbuffer&nbsp;|&nbsp;pixmap</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Specify the drawable type to use for 3D rendering</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Image Transports</td>
-    <td class="standard">All</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">pbuffer</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Normally, VirtualGL will redirect the OpenGL rendering from each of the 
-        application&rsquo;s windows on the 2D X server into a corresponding 
-        Pbuffer on the 3D X server, and it will likewise redirect the OpenGL 
-        rendering from each of the application&rsquo;s pixmaps on the 2D X 
-        server into a corresponding pixmap on the 3D X server.  Setting 
-        <code>VGL_DRAWABLE</code> to <code>pixmap</code> causes VirtualGL to use 
-        pixmaps on the 3D X server to represent all of the application&rsquo;s 
-        OpenGL drawables.  This is meant as an advanced option for those who are 
-        experimenting with VirtualGL in unsupported environments that may lack 
-        complete or stable Pbuffer support.
     </dd>
 </dl>
 

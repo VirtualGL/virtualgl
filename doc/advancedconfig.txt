@@ -169,22 +169,6 @@ Each method of configuration takes precedence over the previous method:
 	VirtualGL to redirect all of the 3D rendering from the application to a GPU
 	attached to Screen 1 on X display :0.
 
-| Environment Variable | ''VGL_DRAWABLE = ''__''pbuffer \| pixmap''__ |
-| Summary | Specify the drawable type to use for 3D rendering |
-| Image Transports | All |
-| Default Value | pbuffer |
-#OPT: hiCol=first
-
-	Description :: Normally, VirtualGL will redirect the OpenGL rendering from
-	each of the application's windows on the 2D X server into a corresponding
-	Pbuffer on the 3D X server, and it will likewise redirect the OpenGL
-	rendering from each of the application's pixmaps on the 2D X server into a
-	corresponding pixmap on the 3D X server.  Setting ''VGL_DRAWABLE'' to
-	''pixmap'' causes VirtualGL to use pixmaps on the 3D X server to represent
-	all of the application's OpenGL drawables.  This is
-	meant as an advanced option for those who are experimenting with VirtualGL in
-	unsupported environments that may lack complete or stable Pbuffer support.
-
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
 | Summary | Force the Pbuffers used for 3D rendering to have an 8-bit alpha channel |
