@@ -1,6 +1,24 @@
 #!/bin/bash
 set -e
 set -u
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+SUCCESS=0
+PID=-1
+
+onexit()
+{
+	if [ $SUCCESS -eq 1 ]; then
+		echo GREAT SUCCESS!
+	else
+		echo Some errors were encountered.
+	fi
+	if [ $PID -ne -1 ]; then
+		kill -0 $PID >/dev/null 2>&1 && kill $PID
+	fi
+}
 
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
@@ -15,6 +33,7 @@ DISPLAY=:42 $BIN/fbxtest -time 0.2 -mt
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm -mt
 kill $PID
+PID=-1
 sleep 2
 
 Xvfb :42 -screen 0 1024x768x24 >/dev/null 2>&1 & PID=$!
@@ -23,6 +42,7 @@ DISPLAY=:42 $BIN/fbxtest -time 0.2
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -mt
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -pm
 kill $PID
+PID=-1
 sleep 2
 
 Xvfb :42 -screen 0 1920x1200x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
@@ -32,6 +52,7 @@ DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -mt
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm -mt
 kill $PID
+PID=-1
 sleep 2
 
 Xvfb :42 -screen 0 1024x768x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
@@ -40,6 +61,7 @@ DISPLAY=:42 $BIN/fbxtest -time 0.2 -index
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -mt
 DISPLAY=:42 $BIN/fbxtest -time 0.2 -index -pm
 kill $PID
+PID=-1
 sleep 2
 
 $BIN/nettest -server &
@@ -54,5 +76,4 @@ if [ "$SSL" = "1" ]; then
 	$BIN/nettest -client localhost -ssl -t 0.2
 fi
 
-echo
-echo GREAT SUCCESS!
+SUCCESS=1
