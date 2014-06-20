@@ -467,9 +467,20 @@ int readbackTest(bool stereo, bool ci)
 			glFinish();
 			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
-			checkWindowColor(win1, clr.bits(-2), ci);
-			if(stereo)
-				checkWindowColor(win1, sclr.bits(-2), ci, true);
+			if(!stereo)
+			{
+				// NOTE: This doesn't work with stereo on nVidia hardware for some
+				// reason.  One would expect that, after the call to glXSwapBuffers(),
+				// GL_FRONT_LEFT would contain the contents of GL_BACK_LEFT,
+				// GL_FRONT_RIGHT would contain the contents of GL_BACK_RIGHT,
+				// and GL_BACK_* would be undefined, but what actually happens is that
+				// the front buffers get swapped to the back buffers and the front
+				// buffers become undefined.  This occurs irrespective of the presence
+				// of VirtualGL, so it is believed to be a bug in nVidia's drivers.
+				checkWindowColor(win1, clr.bits(-2), ci);
+				if(stereo)
+					checkWindowColor(win1, sclr.bits(-2), ci, true);
+			}
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)

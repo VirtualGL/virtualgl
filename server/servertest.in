@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+set -u
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+SUCCESS=0
+VGLCLIENTPID=-1
+PID=-1
+
+onexit()
+{
+	if [ $SUCCESS -eq 1 ]; then
+		echo GREAT SUCCESS!
+	else
+		echo Some errors were encountered.
+	fi
+	if [ $PID -ne -1 ]; then
+		kill -0 $PID >/dev/null 2>&1 && kill $PID
+	fi
+	if [ $VGLCLIENTPID -ne -1 ]; then
+		kill -0 $VGLCLIENTPID >/dev/null 2>&1 && kill $VGLCLIENTPID
+	fi
+}
+
+BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
+LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
+SSL=@VGL_USESSL@
+
+Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+
+# VGL Transport
+DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c jpeg $BIN/fakerut
+if [ "$SSL" = "1" ]; then
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c jpeg +s $BIN/fakerut
+fi
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun -np 2 -c rgb $BIN/fakerut
+kill $VGLCLIENTPID
+VGLCLIENTPID=-1
+
+# X11 Transport
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c proxy $BIN/fakerut
+kill $PID
+PID=-1
+
+# Color index
+Xvfb :42 -screen 0 1920x1200x8 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $BIN/fakerut -ci
+kill $PID
+PID=-1
+
+SUCCESS=1

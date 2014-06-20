@@ -159,3 +159,5 @@ target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()
+
+configure_file(servertest.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest)
