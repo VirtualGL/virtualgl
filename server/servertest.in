@@ -38,11 +38,16 @@ if [ "$SSL" = "1" ]; then
 	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c jpeg +s $BIN/fakerut
 fi
 DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun -np 2 -c rgb $BIN/fakerut
+# (we can't test stereo here, because the transport plugin assumes
+# quad-buffered, which isn't available with an X proxy.)
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -trans test $BIN/fakerut -nostereo
 kill $VGLCLIENTPID
 VGLCLIENTPID=-1
 
 # X11 Transport
 DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c proxy $BIN/fakerut
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -trans test2 $BIN/fakerut
+
 kill $PID
 PID=-1
 

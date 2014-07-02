@@ -2476,7 +2476,7 @@ int procAddrTest(void)
 
 int main(int argc, char **argv)
 {
-	int ret=0;  int nThreads=NTHREADS;  bool doCI=false;
+	int ret=0;  int nThreads=NTHREADS;  bool doCI=false, doStereo=true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 		|| putenv((char *)"VGL_SPOIL=0")==-1
@@ -2493,6 +2493,7 @@ int main(int argc, char **argv)
 			if(temp>=0 && temp<=NTHREADS) nThreads=temp;
 		}
 		if(!strcasecmp(argv[i], "-ci")) doCI=true;
+		if(!strcasecmp(argv[i], "-nostereo")) doStereo=false;
 	}
 
 	// Intentionally leave a pending dlerror()
@@ -2517,8 +2518,11 @@ int main(int argc, char **argv)
 	printf("\n");
 	if(!readbackTest(false, false)) ret=-1;
 	printf("\n");
-	if(!readbackTest(true, false)) ret=-1;
-	printf("\n");
+	if(doStereo)
+	{
+		if(!readbackTest(true, false)) ret=-1;
+		printf("\n");
+	}
 	if(!contextMismatchTest()) ret=-1;
 	printf("\n");
 	if(!flushTest()) ret=-1;
