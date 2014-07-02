@@ -25,6 +25,11 @@ The native Windows version of TCBench, which previously shipped with the
 VirtualGL Client for Exceed, has been moved into the Windows TurboVNC Viewer
 package.
 -------------------------------------------------------------------------------
+[2]
+The VirtualGL source code has been extensively refactored to use more modern
+variable, class, and method naming conventions, and automated test scripts for
+the utility libraries and the faker have been added.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
