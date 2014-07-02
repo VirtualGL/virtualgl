@@ -345,8 +345,8 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 
 	GLXDrawable read=_glXGetCurrentDrawable();
 	GLXDrawable draw=_glXGetCurrentDrawable();
-	if(read==0) read=getGLXDrawable();
-	if(draw==0) draw=getGLXDrawable();
+	if(read==0 || buf==GL_BACK) read=getGLXDrawable();
+	if(draw==0 || buf==GL_BACK) draw=getGLXDrawable();
 
 	if(!ctx)
 	{
