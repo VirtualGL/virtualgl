@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013 D. R. Commander
+ * Copyright (C)2010-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -452,9 +452,20 @@ int rbtest(bool stereo, bool ci)
 			glFinish();
 			checkreadbackstate(GL_FRONT, dpy, win1, win0, ctx1);
 			checkframe(win1, 1, lastframe1);
-			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1), ci);
-			if(stereo)
-				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
+			if(!stereo)
+			{
+				// NOTE: This doesn't work with stereo on nVidia hardware for some
+				// reason.  One would expect that, after the call to glXSwapBuffers(),
+				// GL_FRONT_LEFT would contain the contents of GL_BACK_LEFT,
+				// GL_FRONT_RIGHT would contain the contents of GL_BACK_RIGHT,
+				// and GL_BACK_* would be undefined, but what actually happens is that
+				// the front buffers get swapped to the back buffers and the front
+				// buffers become undefined.  This occurs irrespective of the presence
+				// of VirtualGL, so it is believed to be a bug in nVidia's drivers.
+				checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1), ci);
+				if(stereo)
+					checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
+			}
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}
