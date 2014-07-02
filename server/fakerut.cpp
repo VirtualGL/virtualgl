@@ -564,6 +564,12 @@ int rbtest(bool stereo, bool ci)
 			checkwindowcolor(win1, dbworking? clr.bits(-2):clr.bits(-1), ci);
 			if(stereo)
 				checkwindowcolor(win1, dbworking? sclr.bits(-2):sclr.bits(-1), ci, true);
+			// Now try swapping one window when another is current (this will fail
+			// with VGL 2.3.3 and earlier)
+			glXSwapBuffers(dpy, win1);
+			checkframe(win1, 1, lastframe1);
+			if(!stereo) // Also due to the nVidia bug
+				checkwindowcolor(win1, dbworking? clr.bits(-1):clr.bits(-2), ci);
 			printf("SUCCESS\n");
 		}
 		catch(rrerror &e) {printf("Failed! (%s)\n", e.getMessage());  retval=0;}

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2014 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -329,8 +329,8 @@ void pbdrawable::readpixels(GLint x, GLint y, GLint w, GLint pitch, GLint h,
 
 	GLXDrawable read=_glXGetCurrentDrawable();
 	GLXDrawable draw=_glXGetCurrentDrawable();
-	if(read==0) read=getglxdrawable();
-	if(draw==0) draw=getglxdrawable();
+	if(read==0 || buf==GL_BACK) read=getglxdrawable();
+	if(draw==0 || buf==GL_BACK) draw=getglxdrawable();
 
 	if(!_ctx)
 	{
