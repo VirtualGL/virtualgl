@@ -94,6 +94,10 @@ Fixed an issue whereby glXSwapBuffers() would not work properly unless the
 drawable passed to that function was current.  This specifically fixes a
 rendering issue with voreen, but it may have affected other apps as well.
 -------------------------------------------------------------------------------
+[11]
+Fixed an issue that prevented vglgenkey from working properly on Red Hat
+Enterprise Linux 7.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

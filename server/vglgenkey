@@ -13,5 +13,5 @@ if [ -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
 	rm /etc/opt/VirtualGL/vgl_xauth_key
 fi
 $XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key generate $DISPLAY . trusted timeout 0 ||
-	$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key add $DISPLAY . `xauth list | awk '{print $3}'`
+	$XAUTH -f /etc/opt/VirtualGL/vgl_xauth_key add $DISPLAY . `$XAUTH list | awk '{print $3}' | uniq`
 chmod 644 /etc/opt/VirtualGL/vgl_xauth_key
