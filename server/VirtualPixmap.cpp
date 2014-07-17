@@ -22,7 +22,7 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
-VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis_, Pixmap pm)
+VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm)
 	: VirtualDrawable(dpy_, pm)
 {
 	CriticalSection::SafeLock l(mutex);

@@ -39,7 +39,6 @@ namespace vglserver
 
 			vglcommon::Profiler profPMBlit;
 			vglcommon::FBXFrame *frame;
-			XVisualInfo *vis;
 	};
 }
 
