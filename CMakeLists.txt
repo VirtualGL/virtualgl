@@ -137,7 +137,7 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
 			set(CMAKE_SHARED_LINKER_FLAGS
 				"${CMAKE_SHARED_LINKER_FLAGS} -L${CMAKE_BINARY_DIR}/staticlib")
 		else()
-			message(WARNING Cannot find static libstdc++.  VirtualGL will depend on dynamic libstdc++.)
+			message(WARNING "Cannot find static libstdc++.  VirtualGL will depend on dynamic libstdc++.")
 		endif()
 		add_definitions(-static-libgcc)
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
