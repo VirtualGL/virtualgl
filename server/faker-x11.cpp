@@ -76,7 +76,6 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	VirtualDrawable *srcVW=NULL;  VirtualDrawable *dstVW=NULL;
 	bool srcWin=false, dstWin=false;
 	bool copy2d=true, copy3d=false, triggerRB=false;
-	int retval=0;
 	GLXDrawable glxsrc=0, glxdst=0;
 
 	if(src==0 || dst==0) return BadDrawable;
@@ -134,8 +133,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	}
 
 	if(copy2d)
-		retval=_XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
-			dest_y);
+		_XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x, dest_y);
 
 	if(copy3d)
 	{

@@ -438,7 +438,7 @@ void glIndexfv(const GLfloat *index)
 	if(ctxhash.overlayCurrent()) _glIndexfv(index);
 	else
 	{
-		GLfloat color[3]={index? (*index)/255.:0., 0., 0.};
+		GLfloat color[3]={index? (*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
 }
@@ -448,7 +448,7 @@ void glIndexiv(const GLint *index)
 	if(ctxhash.overlayCurrent()) _glIndexiv(index);
 	else
 	{
-		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
 }
@@ -458,7 +458,7 @@ void glIndexsv(const GLshort *index)
 	if(ctxhash.overlayCurrent()) _glIndexsv(index);
 	else
 	{
-		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
 }
@@ -468,7 +468,7 @@ void glIndexubv(const GLubyte *index)
 	if(ctxhash.overlayCurrent()) _glIndexubv(index);
 	else
 	{
-		GLfloat color[3]={index? (GLfloat)(*index)/255.:0., 0., 0.};
+		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
 }

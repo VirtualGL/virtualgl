@@ -173,7 +173,7 @@ void setFPS(void)
 void compCB(Fl_Widget *w, void *data)
 {
 	int d=(int)((long)data);
-	if(d>=0 && d<=RR_COMPRESSOPT-1 || strlen(fconfig.transport)>0)
+	if((d>=0 && d<=RR_COMPRESSOPT-1) || strlen(fconfig.transport)>0)
 		fconfig_setcompress(fconfig, d);
 	setSamp();
 	setQual();

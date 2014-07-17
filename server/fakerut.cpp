@@ -1688,7 +1688,7 @@ int multiThreadTest(int nThreads)
 	GLXContext contexts[NTHREADS];
 	TestThread *testThreads[NTHREADS];  Thread *threads[NTHREADS];
 	XSetWindowAttributes swa;
-	int dpyw, dpyh, i, retval=1;
+	int i, retval=1;
 
 	if(nThreads==0) return 1;
 	for(i=0; i<nThreads; i++)
@@ -1701,8 +1701,6 @@ int multiThreadTest(int nThreads)
 	try
 	{
 		if(!(dpy=XOpenDisplay(0))) _throw("Could not open display");
-		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
-		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
 
 		if((vis=glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib))==NULL)
 			_throw("Could not find a suitable visual");

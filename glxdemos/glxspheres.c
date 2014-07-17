@@ -447,8 +447,8 @@ int eventLoop(Display *dpy)
 					break;
 				case KeyPress:
 				{
-					char buf[10];  int key;
-					key=XLookupString(&event.xkey, buf, sizeof(buf), NULL, NULL);
+					char buf[10];
+					XLookupString(&event.xkey, buf, sizeof(buf), NULL, NULL);
 					switch(buf[0])
 					{
 						case 27: case 'q': case 'Q':
