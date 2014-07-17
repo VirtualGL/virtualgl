@@ -62,15 +62,17 @@ makedeb()
 
 	if [ $SUPPLEMENT = 1 ]; then
 
-		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
-			| sed s/virtualgl/$PACKAGE_NAME/g > $TMPDIR/DEBIAN/control
-
 		rm -rf $TMPDIR/$DOCDIR
 		rm -rf $TMPDIR/$INCDIR
 		mv $TMPDIR/$BINDIR/glxspheres* $TMPDIR/
 		rm -rf $TMPDIR/$BINDIR
 		mkdir -p $TMPDIR/$BINDIR
 		mv $TMPDIR/glxspheres* $TMPDIR/$BINDIR/
+
+		SIZE=`du -s $TMPDIR | cut -f1`
+		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
+			| sed s/virtualgl/$PACKAGE_NAME/g | sed s/{__SIZE}/$SIZE/g \
+			> $TMPDIR/DEBIAN/control
 
 		if [ ! "$LIBDIR" = "/usr/lib/i386-linux-gnu" ]; then
 			if [ ! "$LIBDIR" = "/usr/lib32" ]; then
@@ -86,7 +88,9 @@ makedeb()
 
 	else
 
-		cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
+		SIZE=`du -s $TMPDIR | cut -f1`
+		cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g \
+			> $TMPDIR/DEBIAN/control
 
 		if [ ! "$LIBDIR" = "/usr/lib" ]; then
 			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib $TMPDIR/__tmplib
