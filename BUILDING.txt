@@ -49,8 +49,8 @@ Mac
      and select the following packages:
      gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
    * With Xcode 3.x and later, you can simply check "Unix Development Support"
-   * With Xcode 4.x, the X11 and GLX headers and link libraries are no longer
-     included.  You can obtain these by installing XQuartz
+   * With Xcode 4.x and later, the X11 and GLX headers and link libraries are
+     no longer included.  You can obtain these by installing XQuartz
      (http://xquartz.macosforge.org).
 
 
@@ -82,17 +82,13 @@ minimum, the following 32-bit libraries:
    * libX11, libXext, libGL, libGLU, and (unless you wish to disable X Video
      support) libXv
    * Ubuntu 10 and 11 ship these libraries in the "ia32-libs" package.
-     On older releases, you may have to use getlibs
-     (http://explore-ubuntu.blogspot.com/2010/04/getlibs.html) to
-     install the 32-bit X11 dev. kit:
-     > sudo getlibs -p libx11-dev libxext-dev libxau-dev libglu1-mesa-dev libxv-dev
-   * Ubuntu 12 and 13 are a bit tricky.  Because of the transition to
+   * Ubuntu 12, 13, and 14 are a bit tricky.  Because of the transition to
      MultiArch, ia32-libs is no longer used to install development stubs for
      32-bit libraries.  The accepted way to install these is to install the
      i386 version of the needed dev. kit.  However, unfortunately, some of the
      dev. kits conflict when you attempt to install 64-bit and 32-bit versions
-     simultaneously.  The best solution at the moment is to install either the
-     32-bit dev. kits:
+     simultaneously.  The best solution is to install either the 32-bit dev.
+     kits:
 
      > sudo apt-get install libglu1-mesa-dev:i386 libxv-dev:i386
 
@@ -102,8 +98,8 @@ minimum, the following 32-bit libraries:
 
      depending on which type of build you need to do.
 
--- Out of the box, Red Hat Enterprise Linux 6 does not contain 32-bit libraries
-   at all.  See
+-- Out of the box, Red Hat Enterprise Linux 6 and later does not contain 32-bit
+   libraries at all.  See
 
    http://www.virtualgl.org/Documentation/RHEL6
 
@@ -278,7 +274,7 @@ CMake:
 Add
 
   -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5
 
 to the CMake command line.  The OS X 10.5 SDK must be installed.
 
