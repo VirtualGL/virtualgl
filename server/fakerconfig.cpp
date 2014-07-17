@@ -51,7 +51,7 @@ static FakerConfig *fc=NULL;
 /* This is a hack necessary to defer the initialization of the recursive mutex
    so MainWin will not interfere with it */
 
-class DeferredCS : CS
+class DeferredCS : CriticalSection
 {
 	public:
 		DeferredCS() : isInit(false) {}
@@ -76,7 +76,7 @@ class DeferredCS : CS
 };
 
 static DeferredCS fconfig_mutex;
-#define fcmutex ((CS &)(*fconfig_mutex.init()))
+#define fcmutex ((CriticalSection &)(*fconfig_mutex.init()))
 
 
 static void fconfig_init(void);
@@ -86,7 +86,7 @@ FakerConfig *fconfig_instance(void)
 {
 	if(fc==NULL)
 	{
-		CS::SafeLock l(fcmutex);
+		CriticalSection::SafeLock l(fcmutex);
 		if(fc==NULL)
 		{
 			#if FCONFIG_USESHM==1
@@ -126,7 +126,7 @@ void fconfig_deleteinstance(void)
 {
 	if(fc!=NULL)
 	{
-		CS::SafeLock l(fcmutex, false);
+		CriticalSection::SafeLock l(fcmutex, false);
 		if(fc!=NULL)
 		{
 			#if FCONFIG_USESHM==1
@@ -156,7 +156,7 @@ void fconfig_deleteinstance(void)
 
 static void fconfig_init(void)
 {
-	CS::SafeLock l(fcmutex);
+	CriticalSection::SafeLock l(fcmutex);
 	memset(&fconfig, 0, sizeof(FakerConfig));
 	memset(&fconfig_env, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
@@ -255,7 +255,7 @@ void fconfig_reloadenv(void)
 {
 	char *env;
 
-	CS::SafeLock l(fcmutex);
+	CriticalSection::SafeLock l(fcmutex);
 
 	fetchenv_bool("VGL_ALLOWINDIRECT", allowindirect);
 	fetchenv_bool("VGL_AUTOTEST", autotest);
@@ -456,7 +456,7 @@ void fconfig_reloadenv(void)
 
 void fconfig_setdefaultsfromdpy(Display *dpy)
 {
-	CS::SafeLock l(fcmutex);
+	CriticalSection::SafeLock l(fcmutex);
 
 	if(fconfig.compress<0)
 	{
@@ -540,7 +540,7 @@ void fconfig_setdefaultsfromdpy(Display *dpy)
 void fconfig_setcompress(FakerConfig &fc, int i)
 {
 	if(i<0 || (i>=RR_COMPRESSOPT && strlen(fc.transport)==0)) return;
-	CS::SafeLock l(fcmutex);
+	CriticalSection::SafeLock l(fcmutex);
 
 	bool is=(fc.compress>=0);
 	fc.compress=i;

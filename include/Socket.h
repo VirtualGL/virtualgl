@@ -168,14 +168,14 @@ namespace vglutil
 			}
 
 			static bool sslInit;
-			static CS cryptoLock[CRYPTO_NUM_LOCKS];
+			static CriticalSection cryptoLock[CRYPTO_NUM_LOCKS];
 			bool doSSL;  SSL_CTX *sslctx;  SSL *ssl;
 
 			#endif
 
 			static const int MAXCONN=1024;
 			static int instanceCount;
-			static CS mutex;
+			static CriticalSection mutex;
 			SOCKET sd;
 	};
 }

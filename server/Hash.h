@@ -40,7 +40,7 @@ namespace vglserver
 
 			void kill(void)
 			{
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				while(start!=NULL) killEntry(start);
 			}
 
@@ -63,7 +63,7 @@ namespace vglserver
 				HashEntry *entry=NULL;
 
 				if(!key1) _throw("Invalid argument");
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 
 				if((entry=findEntry(key1, key2))!=NULL)
 				{
@@ -84,7 +84,7 @@ namespace vglserver
 			HashValueType find(HashKeyType1 key1, HashKeyType2 key2)
 			{
 				HashEntry *entry=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 
 				if((entry=findEntry(key1, key2))!=NULL)
 				{
@@ -97,7 +97,7 @@ namespace vglserver
 			void remove(HashKeyType1 key1, HashKeyType2 key2, bool useRef=false)
 			{
 				HashEntry *entry=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 
 				if((entry=findEntry(key1, key2))!=NULL)
 				{
@@ -111,7 +111,7 @@ namespace vglserver
 			HashEntry *findEntry(HashKeyType1 key1, HashKeyType2 key2)
 			{
 				HashEntry *entry=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 
 				entry=start;
 				while(entry!=NULL)
@@ -128,7 +128,7 @@ namespace vglserver
 
 			void killEntry(HashEntry *entry)
 			{
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 
 				if(entry->prev) entry->prev->next=entry->next;
 				if(entry->next) entry->next->prev=entry->prev;
@@ -151,7 +151,7 @@ namespace vglserver
 
 			int count;
 			HashEntry *start, *end;
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 	};
 }
 

@@ -56,7 +56,7 @@ namespace vglserver
 
 			vglutil::Socket *socket;
 			static const int NFRAMES=4;
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 			vglcommon::Frame frames[NFRAMES];
 			vglutil::Event ready;
 			vglutil::GenericQ q;
@@ -136,7 +136,7 @@ namespace vglserver
 				vglcommon::Frame *frame, *lastFrame;
 				int myRank, nprocs;
 				vglutil::Event ready, complete;  bool deadYet;
-				vglutil::CS mutex;
+				vglutil::CriticalSection mutex;
 				vglcommon::Profiler profComp;
 				VGLTrans *parent;
 		};

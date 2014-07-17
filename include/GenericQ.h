@@ -46,7 +46,7 @@ namespace vglutil
 
 			Entry *start, *end;
 			Semaphore hasItem;
-			CS mutex;
+			CriticalSection mutex;
 			int deadYet;
 	};
 }

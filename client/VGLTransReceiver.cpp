@@ -253,7 +253,7 @@ void VGLTransReceiver::Listener::run(void)
 void VGLTransReceiver::Listener::deleteWindow(ClientWin *w)
 {
 	int i, j;
-	CS::SafeLock l(winMutex);
+	CriticalSection::SafeLock l(winMutex);
 
 	if(nwin>0)
 	{
@@ -274,7 +274,7 @@ void VGLTransReceiver::Listener::deleteWindow(ClientWin *w)
 ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
 	bool stereo)
 {
-	CS::SafeLock l(winMutex);
+	CriticalSection::SafeLock l(winMutex);
 	int winid=nwin;
 
 	if(nwin>0)

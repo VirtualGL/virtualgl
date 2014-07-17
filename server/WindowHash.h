@@ -34,7 +34,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new WindowHash;
 				}
 				return instance;
@@ -87,7 +87,7 @@ namespace vglserver
 			{
 				if(!dpy || !win || !config) _throw("Invalid argument");
 				HashEntry *ptr=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
 				{
 					if(!ptr->value)
@@ -110,7 +110,7 @@ namespace vglserver
 			{
 				if(!dpy || !win) return;
 				HashEntry *ptr=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
 				{
 					if(!ptr->value) ptr->value=(VirtualWin *)-1;
@@ -127,7 +127,7 @@ namespace vglserver
 			{
 				if(!dpy) return;
 				HashEntry *ptr=NULL, *next=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				ptr=start;
 				while(ptr!=NULL)
 				{
@@ -174,7 +174,7 @@ namespace vglserver
 			}
 
 			static WindowHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

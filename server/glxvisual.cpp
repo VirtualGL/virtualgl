@@ -38,7 +38,7 @@ typedef struct
 
 static Display *vaDisplay=NULL;
 static int vaScreen=-1, vaEntries=0;
-static CS vaMutex;
+static CriticalSection vaMutex;
 static VisAttrib *va;
 
 
@@ -51,7 +51,7 @@ static void buildVisAttribTable(Display *dpy, int screen)
 
 	try
 	{
-		CS::SafeLock l(vaMutex);
+		CriticalSection::SafeLock l(vaMutex);
 
 		if(dpy==vaDisplay && screen==vaScreen) return;
 		if(fconfig.probeglx

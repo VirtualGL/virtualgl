@@ -25,7 +25,7 @@ using namespace vglserver;
 VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis_, Pixmap pm)
 	: VirtualDrawable(dpy_, pm)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
 	_newcheck(frame=new FBXFrame(dpy_, pm, vis->visual));
 }
@@ -33,7 +33,7 @@ VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis_, Pixmap pm)
 
 VirtualPixmap::~VirtualPixmap()
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(frame) { delete frame;  frame=NULL; }
 }
 
@@ -43,7 +43,7 @@ int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 {
 	if(!config_ || width<1 || height<1) _throw("Invalid argument");
 
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth()==width && oglDraw->getHeight()==height
 		&& oglDraw->getDepth()==depth
 		&& _FBCID(oglDraw->getConfig())==_FBCID(config_))
@@ -62,7 +62,7 @@ int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 Pixmap VirtualPixmap::get3DX11Pixmap(void)
 {
 	GLXDrawable retval=0;
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	retval=oglDraw->getPixmap();
 	return retval;
 }
@@ -72,7 +72,7 @@ void VirtualPixmap::readback(void)
 {
 	fconfig_reloadenv();
 
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
 
 	rrframeheader hdr;

@@ -97,7 +97,7 @@ XVFrame *XVTrans::getFrame(Display *dpy, Window win, int width, int height)
 
 	if(thread) thread->checkError();
 	{
-		CS::SafeLock l(mutex);
+		CriticalSection::SafeLock l(mutex);
 
 		int index=-1;
 		for(int i=0; i<NFRAMES; i++)

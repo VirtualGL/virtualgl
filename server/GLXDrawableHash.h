@@ -36,7 +36,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new GLXDrawableHash;
 				}
 				return instance;
@@ -79,7 +79,7 @@ namespace vglserver
 			void detach(HashEntry *entry) {}
 
 			static GLXDrawableHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

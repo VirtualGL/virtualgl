@@ -34,7 +34,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new PixmapHash;
 				}
 				return instance;
@@ -60,7 +60,7 @@ namespace vglserver
 			{
 				if(!glxd) return 0;
 				HashEntry *ptr=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				if((ptr=HASH::findEntry(NULL, glxd))!=NULL)
 					return ptr->key2;
 				return 0;
@@ -96,7 +96,7 @@ namespace vglserver
 			}
 
 			static PixmapHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

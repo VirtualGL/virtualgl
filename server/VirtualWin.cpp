@@ -115,7 +115,7 @@ VirtualWin::~VirtualWin(void)
 
 int VirtualWin::init(int w, int h, GLXFBConfig config_)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	return VirtualDrawable::init(w, h, config_);
 }
@@ -126,7 +126,7 @@ int VirtualWin::init(int w, int h, GLXFBConfig config_)
 
 void VirtualWin::resize(int width, int height)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	if(width==0 && oglDraw) width=oglDraw->getWidth();
 	if(height==0 && oglDraw) height=oglDraw->getHeight();
@@ -144,7 +144,7 @@ void VirtualWin::resize(int width, int height)
 
 void VirtualWin::checkConfig(GLXFBConfig config_)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	if(_FBCID(config_)!=_FBCID(config))
 	{
@@ -155,7 +155,7 @@ void VirtualWin::checkConfig(GLXFBConfig config_)
 
 void VirtualWin::clear(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	VirtualDrawable::clear();
 }
@@ -163,7 +163,7 @@ void VirtualWin::clear(void)
 
 void VirtualWin::cleanup(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	if(oldDraw) { delete oldDraw;  oldDraw=NULL; }
 }
@@ -182,7 +182,7 @@ void VirtualWin::initFromWindow(GLXFBConfig config_)
 
 GLXDrawable VirtualWin::getGLXDrawable(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	return VirtualDrawable::getGLXDrawable();
 }
@@ -211,7 +211,7 @@ void VirtualWin::checkResize(void)
 GLXDrawable VirtualWin::updateGLXDrawable(void)
 {
 	GLXDrawable retval=0;
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	if(newConfig)
 	{
@@ -232,7 +232,7 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 
 void VirtualWin::swapBuffers(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 	if(oglDraw) oglDraw->swap();
 }
@@ -240,7 +240,7 @@ void VirtualWin::swapBuffers(void)
 
 void VirtualWin::wmDelete(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	doWMDelete=true;
 }
 
@@ -252,7 +252,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 
 	if(fconfig.readback==RRREAD_NONE) return;
 
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
 
 	dirty=false;

@@ -54,9 +54,9 @@ namespace vglclient
 			int dpynum;  Window window;
 			void run(void);
 			vglutil::Thread *thread;
-			vglutil::CS cfmutex;
+			vglutil::CriticalSection cfmutex;
 			bool stereo;
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 	};
 }
 

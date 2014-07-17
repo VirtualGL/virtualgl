@@ -50,7 +50,7 @@ namespace vglserver
 		private:
 
 			static const int NFRAMES=3;
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 			vglcommon::XVFrame *frames[NFRAMES];
 			vglutil::Event ready;
 			vglutil::GenericQ q;

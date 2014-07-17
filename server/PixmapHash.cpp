@@ -16,4 +16,4 @@
 using namespace vglserver;
 
 PixmapHash *PixmapHash::instance=NULL;
-vglutil::CS PixmapHash::instanceMutex;
+vglutil::CriticalSection PixmapHash::instanceMutex;

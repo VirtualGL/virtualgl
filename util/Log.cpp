@@ -20,14 +20,14 @@ using namespace vglutil;
 
 
 Log *Log::instance=NULL;
-CS Log::mutex;
+CriticalSection Log::mutex;
 
 
 Log *Log::getInstance(void)
 {
 	if(instance==NULL)
 	{
-		CS::SafeLock l(mutex);
+		CriticalSection::SafeLock l(mutex);
 		if(instance==NULL) instance=new Log;
 	}
 	return instance;
@@ -36,7 +36,7 @@ Log *Log::getInstance(void)
 
 void Log::logTo(FILE *logFile_)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(logFile_)
 	{
 		if(newFile)
@@ -51,7 +51,7 @@ void Log::logTo(FILE *logFile_)
 void Log::logTo(char *logFileName)
 {
 	FILE *logFile_=NULL;
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(logFileName)
 	{
 		if(newFile)
@@ -68,7 +68,7 @@ void Log::logTo(char *logFileName)
 
 void Log::print(const char *format, ...)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
 	vfprintf(logFile, format, arglist);
@@ -78,7 +78,7 @@ void Log::print(const char *format, ...)
 
 void Log::PRINT(const char *format, ...)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
 	vfprintf(logFile, format, arglist);
@@ -89,7 +89,7 @@ void Log::PRINT(const char *format, ...)
 
 void Log::println(const char *format, ...)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
 	vfprintf(logFile, format, arglist);
@@ -100,7 +100,7 @@ void Log::println(const char *format, ...)
 
 void Log::PRINTLN(const char *format, ...)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	va_list arglist;
 	va_start(arglist, format);
 	vfprintf(logFile, format, arglist);

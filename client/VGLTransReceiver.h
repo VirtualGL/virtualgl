@@ -42,7 +42,7 @@ namespace vglclient
 
 			int drawMethod;
 			vglutil::Socket *listenSocket;
-			vglutil::CS listenMutex;
+			vglutil::CriticalSection listenMutex;
 			vglutil::Thread *thread;
 			bool deadYet;
 			bool doSSL;
@@ -90,7 +90,7 @@ namespace vglclient
 				int nwin;
 				ClientWin *addWindow(int dpynum, Window win, bool stereo=false);
 				void deleteWindow(ClientWin *win);
-				vglutil::CS winMutex;
+				vglutil::CriticalSection winMutex;
 				vglutil::Socket *socket;
 				vglutil::Thread *thread;
 				char *remoteName;

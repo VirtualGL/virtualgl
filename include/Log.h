@@ -47,7 +47,7 @@ namespace vglutil
 			~Log() {}
 
 			static Log *instance;
-			static CS mutex;
+			static CriticalSection mutex;
 			FILE *logFile;
 			bool newFile;
 	};

@@ -248,7 +248,7 @@ Frame *VGLTrans::getFrame(int width, int height, int ps, int flags,
 	if(deadYet) return NULL;
 	if(thread) thread->checkError();
 	{
-		CS::SafeLock l(mutex);
+		CriticalSection::SafeLock l(mutex);
 
 		int index=-1;
 		for(int i=0; i<NFRAMES; i++)

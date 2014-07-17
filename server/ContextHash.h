@@ -41,7 +41,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new ContextHash;
 				}
 				return instance;
@@ -112,7 +112,7 @@ namespace vglserver
 			}
 
 			static ContextHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

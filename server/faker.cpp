@@ -33,7 +33,7 @@ namespace vglfaker
 {
 
 Display *dpy3D=NULL;
-CS globalMutex;
+CriticalSection globalMutex;
 bool deadYet=false;
 int traceLevel=0;
 
@@ -104,7 +104,7 @@ void init(void)
 {
 	static int init=0;
 
-	CS::SafeLock l(globalMutex);
+	CriticalSection::SafeLock l(globalMutex);
 	if(init) return;
 	init=1;
 

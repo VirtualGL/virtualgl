@@ -34,7 +34,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new ReverseConfigHash;
 				}
 				return instance;
@@ -84,7 +84,7 @@ namespace vglserver
 			}
 
 			static ReverseConfigHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

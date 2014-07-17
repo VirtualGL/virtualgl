@@ -54,7 +54,7 @@ namespace vglserver
 			_RRTransSendFrameType _RRTransSendFrame;
 			_RRTransDestroyType _RRTransDestroy;
 			_RRTransGetErrorType _RRTransGetError;
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 			void *dllhnd, *handle;
 	};
 }

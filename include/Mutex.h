@@ -49,12 +49,12 @@ namespace vglutil
 
 
 	// Critical section (recursive mutex)
-	class CS
+	class CriticalSection
 	{
 		public:
 
-			CS(void);
-			~CS(void);
+			CriticalSection(void);
+			~CriticalSection(void);
 			void lock(bool errorCheck=true);
 			void unlock(bool errorCheck=true);
 
@@ -62,7 +62,7 @@ namespace vglutil
 			{
 				public:
 
-					SafeLock(CS &cs_, bool errorCheck_=true) : cs(cs_),
+					SafeLock(CriticalSection &cs_, bool errorCheck_=true) : cs(cs_),
 						errorCheck(errorCheck_)
 					{
 						cs.lock(errorCheck);
@@ -71,7 +71,7 @@ namespace vglutil
 
 				private:
 
-					CS &cs;
+					CriticalSection &cs;
 					bool errorCheck;
 			};
 

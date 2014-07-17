@@ -43,7 +43,7 @@ TransPlugin::TransPlugin(Display *dpy, Window win, char *name)
 {
 	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
 	const char *err=NULL;
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	dlerror();  // Clear error state
 	char filename[MAXSTR];
 	snprintf(filename, MAXSTR-1, "libvgltrans_%s.so", name);
@@ -68,7 +68,7 @@ TransPlugin::TransPlugin(Display *dpy, Window win, char *name)
 
 TransPlugin::~TransPlugin(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	destroy();
 	if(dllhnd) dlclose(dllhnd);
 }
@@ -76,7 +76,7 @@ TransPlugin::~TransPlugin(void)
 
 void TransPlugin::connect(char *receiverName, int port)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int ret=_RRTransConnect(handle, receiverName, port);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -84,7 +84,7 @@ void TransPlugin::connect(char *receiverName, int port)
 
 void TransPlugin::destroy(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int ret=_RRTransDestroy(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -92,7 +92,7 @@ void TransPlugin::destroy(void)
 
 int TransPlugin::ready(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int ret=_RRTransReady(handle);
 	if(ret<0) _throw(_RRTransGetError());
 	return ret;
@@ -101,7 +101,7 @@ int TransPlugin::ready(void)
 
 void TransPlugin::synchronize(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int ret=_RRTransSynchronize(handle);
 	if(ret<0) _throw(_RRTransGetError());
 }
@@ -109,7 +109,7 @@ void TransPlugin::synchronize(void)
 
 RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
@@ -118,7 +118,7 @@ RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 
 void TransPlugin::sendFrame(RRFrame *frame, bool sync)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	int ret=_RRTransSendFrame(handle, frame, sync);
 	if(ret<0) _throw(_RRTransGetError());
 }

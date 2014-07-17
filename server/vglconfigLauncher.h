@@ -33,7 +33,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new vglconfigLauncher;
 				}
 				return instance;
@@ -42,7 +42,7 @@ namespace vglserver
 			void popup(Display *dpy_, int shmid_)
 			{
 				if(!dpy_ || shmid_==-1) _throw("Invalid argument");
-				vglutil::CS::SafeLock l(popupMutex);
+				vglutil::CriticalSection::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy=dpy_;  shmid=shmid_;
 				_newcheck(thread=new vglutil::Thread(this));
@@ -65,7 +65,7 @@ namespace vglserver
 				{
 					vglout.println("Error invoking vglconfig--\n%s", e.getMessage());
 				}
-				vglutil::CS::SafeLock l(popupMutex);
+				vglutil::CriticalSection::SafeLock l(popupMutex);
 				thread->detach();  delete thread;  thread=NULL;
 			}
 
@@ -98,8 +98,8 @@ namespace vglserver
 			}
 
 			static vglconfigLauncher *instance;
-			static vglutil::CS instanceMutex;
-			static vglutil::CS popupMutex;
+			static vglutil::CriticalSection instanceMutex;
+			static vglutil::CriticalSection popupMutex;
 			vglutil::Thread *thread;
 			Display *dpy;
 			int shmid;

@@ -88,7 +88,7 @@ namespace vglserver
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
 				GLenum format, int pixelSize, GLubyte *bits, GLint buf, bool stereo);
 
-			vglutil::CS mutex;
+			vglutil::CriticalSection mutex;
 			Display *dpy;  Drawable x11Draw;
 			OGLDrawable *oglDraw;  GLXFBConfig config;
 			GLXContext ctx;

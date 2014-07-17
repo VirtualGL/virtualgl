@@ -137,7 +137,7 @@ bool Event::isLocked(void)
 }
 
 
-CS::CS(void)
+CriticalSection::CriticalSection(void)
 {
 	#ifdef _WIN32
 
@@ -155,7 +155,7 @@ CS::CS(void)
 }
 
 
-CS::~CS(void)
+CriticalSection::~CriticalSection(void)
 {
 	#ifdef _WIN32
 
@@ -173,34 +173,35 @@ CS::~CS(void)
 }
 
 
-void CS::lock(bool errorCheck)
+void CriticalSection::lock(bool errorCheck)
 {
 	#ifdef _WIN32
 
 	if(WaitForSingleObject(mutex, INFINITE)==WAIT_FAILED && errorCheck)
-		throw(W32Error("CS::lock()"));
+		throw(W32Error("CriticalSection::lock()"));
 
 	#else
 
 	int ret;
 	if((ret=pthread_mutex_lock(&mutex))!=0 && errorCheck)
-		throw(Error("CS::lock()", strerror(ret)));
+		throw(Error("CriticalSection::lock()", strerror(ret)));
 
 	#endif
 }
 
 
-void CS::unlock(bool errorCheck)
+void CriticalSection::unlock(bool errorCheck)
 {
 	#ifdef _WIN32
 
-	if(!ReleaseMutex(mutex) && errorCheck) throw(W32Error("CS::unlock()"));
+	if(!ReleaseMutex(mutex) && errorCheck)
+		throw(W32Error("CriticalSection::unlock()"));
 
 	#else
 
 	int ret;
 	if((ret=pthread_mutex_unlock(&mutex))!=0 && errorCheck)
-		throw(Error("CS::unlock()", strerror(ret)));
+		throw(Error("CriticalSection::unlock()", strerror(ret)));
 
 	#endif
 }

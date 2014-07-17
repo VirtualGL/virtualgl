@@ -73,7 +73,7 @@ void ClientWin::initGL(void)
 	GLFrame *newfb=NULL;
 	char dpystr[80];
 	sprintf(dpystr, ":%d.0", dpynum);
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 
 	if(drawMethod==RR_DRAWOGL)
 	{
@@ -110,7 +110,7 @@ void ClientWin::initX11(void)
 	FBXFrame *newfb=NULL;
 	char dpystr[80];
 	sprintf(dpystr, ":%d.0", dpynum);
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 
 	if(drawMethod==RR_DRAWX11)
 	{
@@ -212,7 +212,7 @@ void ClientWin::run(void)
 			q.get(&ftemp);  f=(Frame *)ftemp;  if(deadYet) break;
 			if(!f) throw(Error("ClientWin::run()",
 				"Invalid image received from queue"));
-			CS::SafeLock l(mutex);
+			CriticalSection::SafeLock l(mutex);
 			#ifdef USEXV
 			if(f->isXV)
 			{

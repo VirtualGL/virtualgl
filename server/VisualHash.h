@@ -35,7 +35,7 @@ namespace vglserver
 			{
 				if(instance==NULL)
 				{
-					vglutil::CS::SafeLock l(instanceMutex);
+					vglutil::CriticalSection::SafeLock l(instanceMutex);
 					if(instance==NULL) instance=new VisualHash;
 				}
 				return instance;
@@ -67,7 +67,7 @@ namespace vglserver
 			{
 				if(!dpy || !vis) _throw("Invalid argument");
 				HashEntry *ptr=NULL;
-				vglutil::CS::SafeLock l(mutex);
+				vglutil::CriticalSection::SafeLock l(mutex);
 				ptr=end;
 				while(ptr!=NULL)
 				{
@@ -97,7 +97,7 @@ namespace vglserver
 			}
 
 			static VisualHash *instance;
-			static vglutil::CS instanceMutex;
+			static vglutil::CriticalSection instanceMutex;
 	};
 }
 

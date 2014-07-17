@@ -25,7 +25,7 @@
 
 namespace vglfaker
 {
-	extern vglutil::CS globalMutex;
+	extern vglutil::CriticalSection globalMutex;
 	extern Display *dpy3D;
 	extern void safeExit(int);
 	extern int deadYet;

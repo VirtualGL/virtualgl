@@ -218,7 +218,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 	static bool alreadyPrinted=false;
 	if(!config_ || width<1 || height<1) _throw("Invalid argument");
 
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth()==width && oglDraw->getHeight()==height
 		&& _FBCID(oglDraw->getConfig())==_FBCID(config_))
 		return 0;
@@ -262,7 +262,7 @@ void VirtualDrawable::setDirect(Bool direct_)
 
 void VirtualDrawable::clear(void)
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(oglDraw) oglDraw->clear();
 }
 
@@ -272,7 +272,7 @@ void VirtualDrawable::clear(void)
 GLXDrawable VirtualDrawable::getGLXDrawable(void)
 {
 	GLXDrawable retval=0;
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(oglDraw) retval=oglDraw->getGLXDrawable();
 	return retval;
 }

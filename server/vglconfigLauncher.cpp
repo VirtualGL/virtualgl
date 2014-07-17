@@ -16,5 +16,5 @@
 using namespace vglserver;
 
 vglconfigLauncher *vglconfigLauncher::instance=NULL;
-vglutil::CS vglconfigLauncher::instanceMutex;
-vglutil::CS vglconfigLauncher::popupMutex;
+vglutil::CriticalSection vglconfigLauncher::instanceMutex;
+vglutil::CriticalSection vglconfigLauncher::popupMutex;

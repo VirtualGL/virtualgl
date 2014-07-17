@@ -56,7 +56,7 @@ void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 {
 	if(deadYet) return;
 	if(item==NULL) _throw("NULL argument in GenericQ::spoil()");
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
 	void *dummy;
 	while(1)
@@ -72,7 +72,7 @@ void GenericQ::add(void *item)
 {
 	if(deadYet) return;
 	if(item==NULL) _throw("NULL argument in GenericQ::add()");
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
 	Entry *temp=new Entry;
 	if(temp==NULL) _throw("Alloc error");
@@ -99,7 +99,7 @@ void GenericQ::get(void **item, bool nonBlocking)
 	else hasItem.wait();
 	if(!deadYet)
 	{
-		CS::SafeLock l(mutex);
+		CriticalSection::SafeLock l(mutex);
 		if(deadYet) return;
 		if(start==NULL) _throw("Nothing in the queue");
 		*item=start->item;

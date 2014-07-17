@@ -43,9 +43,9 @@ typedef socklen_t SOCKLEN_T;
 
 #ifdef USESSL
 bool Socket::sslInit=false;
-CS Socket::cryptoLock[CRYPTO_NUM_LOCKS];
+CriticalSection Socket::cryptoLock[CRYPTO_NUM_LOCKS];
 #endif
-CS Socket::mutex;
+CriticalSection Socket::mutex;
 int Socket::instanceCount=0;
 
 
@@ -130,7 +130,7 @@ Socket::Socket(bool doSSL_=false)
 	: doSSL(doSSL_)
 	#endif
 {
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 
 	#ifdef _WIN32
 	if(instanceCount==0)
@@ -182,7 +182,7 @@ Socket::Socket(SOCKET sd_, SSL *ssl_)
 {
 	if(ssl) doSSL=true;  else doSSL=false;
 	#ifdef _WIN32
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	instanceCount++;
 	#endif
 }
@@ -191,7 +191,7 @@ Socket::Socket(SOCKET sd_)
 	: sd(sd_)
 {
 	#ifdef _WIN32
-	CS::SafeLock l(mutex);
+	CriticalSection::SafeLock l(mutex);
 	instanceCount++;
 	#endif
 }
