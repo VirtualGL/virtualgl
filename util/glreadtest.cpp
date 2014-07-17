@@ -513,8 +513,8 @@ void readTest(int format)
 				unsigned char *pixels=NULL;
 				glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
 				timer2.start();
-				glReadPixels(0, 0, width, height, pf[format].glFormat, GL_UNSIGNED_BYTE,
-					NULL);
+				glReadPixels(0, 0, width, height, pf[format].glFormat,
+					GL_UNSIGNED_BYTE, NULL);
 				readPixelsTime+=timer2.elapsed();
 				pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 					GL_READ_ONLY);
@@ -549,8 +549,8 @@ void readTest(int format)
 			#endif
 			{
 				timer2.start();
-				glReadPixels(0, 0, width, height, pf[format].glFormat, GL_UNSIGNED_BYTE,
-					rgbaBuffer);
+				glReadPixels(0, 0, width, height, pf[format].glFormat,
+					GL_UNSIGNED_BYTE, rgbaBuffer);
 				readPixelsTime+=timer2.elapsed();
 			}
 
@@ -661,9 +661,12 @@ void usage(char **argv)
 	#ifdef USEIFR
 	fprintf(stderr, "-ifr = Use nVidia Inband Frame Readback\n");
 	#endif
-	fprintf(stderr, "-width <w> = Set drawable width to <w> pixels (default: %d)\n", WIDTH);
-	fprintf(stderr, "-height <h> = Set drawable height to <h> pixels (default: %d)\n", HEIGHT);
-	fprintf(stderr, "-align <n> = Set row alignment to <n> bytes (default: %d)\n", ALIGN);
+	fprintf(stderr, "-width <w> = Set drawable width to <w> pixels (default: %d)\n",
+		WIDTH);
+	fprintf(stderr, "-height <h> = Set drawable height to <h> pixels (default: %d)\n",
+		HEIGHT);
+	fprintf(stderr, "-align <n> = Set row alignment to <n> bytes (default: %d)\n",
+		ALIGN);
 	fprintf(stderr, "-visualid <xx> = Ignore visual selection and use this visual ID (hex) instead\n");
 	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
 	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
