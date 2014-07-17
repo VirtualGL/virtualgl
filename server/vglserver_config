@@ -644,6 +644,9 @@ configglx() {
 	done
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		addvglgenkey_lightdm /etc/lightdm/lightdm.conf
+	elif [ -d /etc/lightdm ]; then
+		echo [SeatDefaults] >/etc/lightdm/lightdm.conf
+		addvglgenkey_lightdm /etc/lightdm/lightdm.conf
 	fi
 
 	if [ "$UNAME_S" = "SunOS" ]; then
