@@ -96,10 +96,11 @@ GLXPbuffer pbuffer=0;
 #endif
 
 Timer timer;
-bool useWindow=false, usePixmap=false, useFBO=false, useAlpha=false;
+bool useWindow=false, usePixmap=false, useFBO=false, useRTT=false,
+	useAlpha=false;
 int visualID=0, loops=1;
 #ifdef GL_EXT_framebuffer_object
-GLuint fbo=0, rbo=0;
+GLuint fbo=0, rbo=0, texture=0;
 #endif
 #ifdef GL_VERSION_1_5
 int pbo=0;
@@ -235,12 +236,28 @@ void drawableInit(void)
 		{
 			glGenFramebuffersEXT(1, &fbo);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-			glGenRenderbuffersEXT(1, &rbo);
-			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
-			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, useAlpha? GL_RGBA8:GL_RGB8,
-				width, height);
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
+			if(useRTT)
+			{
+				glGenTextures(1, &texture);
+				glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texture);
+				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER,
+					GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER,
+					GL_LINEAR);
+				glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, useAlpha? GL_RGBA8:GL_RGB8,
+					width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+					GL_TEXTURE_RECTANGLE_ARB, texture, 0);
+			}
+			else
+			{
+				glGenRenderbuffersEXT(1, &rbo);
+				glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
+				glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+					useAlpha? GL_RGBA8:GL_RGB8, width, height);
+				glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
+			}
 			if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
 				!=GL_FRAMEBUFFER_COMPLETE_EXT)
 				_throw("Could not create FBO");
@@ -579,7 +596,7 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm]", argv[0]);
 	#ifdef GL_EXT_framebuffer_object
-	fprintf(stderr, " [-fbo]");
+	fprintf(stderr, " [-fbo] [-rtt]");
 	#endif
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, " [-pbo]\n");
@@ -593,6 +610,8 @@ void usage(char **argv)
 	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
 	#ifdef GL_EXT_framebuffer_object
 	fprintf(stderr, "-fbo = Render to a framebuffer object (FBO) instead of a Pbuffer\n");
+	fprintf(stderr, "-rtt = Render to a texture instead of a renderbuffer object\n");
+	fprintf(stderr, "       (implies -fbo)\n");
 	#endif
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
@@ -630,6 +649,7 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-pm")) usePixmap=true;
 		#ifdef GL_EXT_framebuffer_object
 		if(!stricmp(argv[i], "-fbo")) useFBO=true;
+		if(!stricmp(argv[i], "-rtt")) { useRTT=true;  useFBO=true; }
 		#endif
 		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
@@ -748,8 +768,9 @@ int main(int argc, char **argv)
 			else if(!useFBO) XMapWindow(dpy, win);
 			XSync(dpy, False);
 		}
-		fprintf(stderr, "%s size = %d x %d pixels\n",
-			usePixmap? "Pixmap" : useWindow? "Window" : useFBO? "FBO" : "Pbuffer",
+		fprintf(stderr, "Rendering to %s (size = %d x %d pixels)\n",
+			usePixmap? "Pixmap" : useWindow? "Window" :
+				useFBO? (useRTT? "FBO + Texture" : "FBO + RBO") : "Pbuffer",
 			width, height);
 		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
@@ -764,9 +785,10 @@ int main(int argc, char **argv)
 		#ifdef GL_EXT_framebuffer_object
 		if(useFBO)
 		{
-			glDeleteRenderbuffersEXT(1, &rbo);
+			if(texture) glDeleteTextures(1, &texture);
+			if(rbo) glDeleteRenderbuffersEXT(1, &rbo);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-			glDeleteFramebuffersEXT(1, &fbo);
+			if(fbo) glDeleteFramebuffersEXT(1, &fbo);
 		}
 		#endif
 		glXMakeCurrent(dpy, 0, 0);
