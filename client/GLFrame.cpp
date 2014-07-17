@@ -33,7 +33,7 @@ GLFrame::GLFrame(char *dpystring, Window win_) : Frame(),
 	if(!(dpy=XOpenDisplay(dpystring))) _throw("Could not open display");
 	newdpy=true;
 	isGL=true;
-	init(dpy, win);
+	init();
 }
 
 
@@ -109,14 +109,14 @@ GLFrame::~GLFrame(void)
 }
 
 
-void GLFrame::init(rrframeheader &h, bool stereo)
+void GLFrame::init(rrframeheader &h, bool stereo_)
 {
-	int flags=FRAME_BOTTOMUP;
+	int flags_=FRAME_BOTTOMUP;
 
 	#ifdef GL_BGR_EXT
-	if(littleendian() && h.compress!=RRCOMP_RGB) flags|=FRAME_BGR;
+	if(littleendian() && h.compress!=RRCOMP_RGB) flags_|=FRAME_BGR;
 	#endif
-	Frame::init(h, 3, flags, stereo);
+	Frame::init(h, 3, flags_, stereo_);
 }
 
 

@@ -57,8 +57,8 @@ namespace vglserver
 			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);
 			void makePassive(vglcommon::Frame *f, int drawBuf, int format,
 				int stereoMode);
-			void sendVGL(VGLTrans *vglconn, GLint drawBuf, bool spoilLast,
-				bool doStereo, int stereoMode, int compress, int qual, int subsamp);
+			void sendVGL(GLint drawBuf, bool spoilLast,	bool doStereo,
+				int stereoMode, int compress, int qual, int subsamp);
 			void sendX11(GLint drawBuf, bool spoilLast, bool sync, bool doStereo,
 				int stereoMode);
 			void sendPlugin(GLint drawBuf, bool spoilLast, bool sync, bool doStereo,

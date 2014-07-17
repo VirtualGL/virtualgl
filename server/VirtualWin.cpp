@@ -169,12 +169,12 @@ void VirtualWin::cleanup(void)
 }
 
 
-void VirtualWin::initFromWindow(GLXFBConfig config)
+void VirtualWin::initFromWindow(GLXFBConfig config_)
 {
 	XSync(dpy, False);
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, x11Draw, &xwa);
-	init(xwa.width, xwa.height, config);
+	init(xwa.width, xwa.height, config_);
 }
 
 
@@ -324,8 +324,8 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 				vglconn->connect(strlen(fconfig.client)>0?
 					fconfig.client:DisplayString(dpy), fconfig.port);
 			}
-			sendVGL(vglconn, drawBuf, spoilLast, doStereo, stereoMode,
-				(int)compress, fconfig.qual, fconfig.subsamp);
+			sendVGL(drawBuf, spoilLast, doStereo, stereoMode, (int)compress,
+				fconfig.qual, fconfig.subsamp);
 			break;
 		#ifdef USEXV
 		case RRCOMP_XV:
@@ -422,8 +422,8 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 }
 
 
-void VirtualWin::sendVGL(VGLTrans *vglconn, GLint drawBuf, bool spoilLast,
-	bool doStereo, int stereoMode, int compress, int qual, int subsamp)
+void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
+	int stereoMode, int compress, int qual, int subsamp)
 {
 	int w=oglDraw->getWidth(), h=oglDraw->getHeight();
 
