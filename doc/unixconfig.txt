@@ -35,7 +35,7 @@ prompt.
 
 		Ubuntu Linux servers running LightDM :: {:}
 			#Verb: <<---
-			/etc/init.d/lightdm stop
+			service lightdm stop
 			---
 
 		SuSE Linux servers :: {:}
@@ -160,7 +160,7 @@ prompt.
 
 		Ubuntu Linux servers running LightDM :: {:}
 			#Verb: <<---
-			/etc/init.d/lightdm start
+			service lightdm start
 			---
 
 		SuSE Linux servers :: {:}
