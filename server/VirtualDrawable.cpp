@@ -82,7 +82,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 	glxDraw=glXCreatePbuffer(_dpy3D, config, pbattribs);
 	if(!glxDraw) _throw("Could not create Pbuffer");
 
-	setVisAttribs(config);
+	setVisAttribs();
 }
 
 
@@ -106,7 +106,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	glxDraw=glXCreatePixmap(_dpy3D, config, pm, attribs);
 	if(!glxDraw) goto bailout;
 
-	setVisAttribs(config);
+	setVisAttribs();
 	return;
 
 	bailout:
@@ -115,7 +115,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 }
 
 
-void VirtualDrawable::OGLDrawable::setVisAttribs(GLXFBConfig config)
+void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 {
 	if(glxvisual::visAttrib3D(config, GLX_STEREO))
 		stereo=true;

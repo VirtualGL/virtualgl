@@ -491,15 +491,15 @@ void CompressedFrame::compressRGB(Frame &f)
 	int bu=(f.flags&FRAME_BOTTOMUP)? 1:0;
 	if(f.flags&FRAME_BGR || f.flags&FRAME_ALPHAFIRST || f.pixelSize!=3)
 		throw(Error("RGB compressor", "Source frame is not RGB"));
-	int pitch=f.hdr.width*f.pixelSize;
+	int dstPitch=f.hdr.width*f.pixelSize;
 	int srcStride=bu? f.pitch:-f.pitch;
 
 	init(f.hdr, f.stereo? RR_LEFT:0);
 	srcptr=bu? f.bits:&f.bits[f.pitch*(f.hdr.height-1)];
 	for(i=0, dstptr=bits; i<f.hdr.height; i++, srcptr+=srcStride,
-		dstptr+=pitch)
-		memcpy(dstptr, srcptr, pitch);
-	hdr.size=pitch*f.hdr.height;
+		dstptr+=dstPitch)
+		memcpy(dstptr, srcptr, dstPitch);
+	hdr.size=dstPitch*f.hdr.height;
 
 	if(f.stereo && f.rbits)
 	{
@@ -508,9 +508,9 @@ void CompressedFrame::compressRGB(Frame &f)
 		{
 			srcptr=bu? f.rbits:&f.rbits[f.pitch*(f.hdr.height-1)];
 			for(i=0, dstptr=rbits; i<f.hdr.height; i++, srcptr+=srcStride,
-				dstptr+=pitch)
-				memcpy(dstptr, srcptr, pitch);
-			rhdr.size=pitch*f.hdr.height;
+				dstptr+=dstPitch)
+				memcpy(dstptr, srcptr, dstPitch);
+			rhdr.size=dstPitch*f.hdr.height;
 		}
 	}
 }
@@ -658,17 +658,17 @@ void FBXFrame::redraw(void)
 
 // Frame created using X Video
 
-XVFrame::XVFrame(Display *dpy, Window win) : Frame()
+XVFrame::XVFrame(Display *dpy_, Window win_) : Frame()
 {
-	if(!dpy || !win) throw(Error("XVFrame::XVFrame", "Invalid argument"));
-	XFlush(dpy);
-	init(DisplayString(dpy), win);
+	if(!dpy_ || !win_) throw(Error("XVFrame::XVFrame", "Invalid argument"));
+	XFlush(dpy_);
+	init(DisplayString(dpy_), win_);
 }
 
 
-XVFrame::XVFrame(char *dpystring, Window win) : Frame()
+XVFrame::XVFrame(char *dpystring, Window win_) : Frame()
 {
-	init(dpystring, win);
+	init(dpystring, win_);
 }
 
 

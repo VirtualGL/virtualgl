@@ -45,11 +45,11 @@ GLFrame::GLFrame(Display *dpy_, Window win_) : Frame(),
 
 	dpy=dpy_;
 	isGL=true;
-	init(dpy, win);
+	init();
 }
 
 
-void GLFrame::init(Display *dpy, Window win)
+void GLFrame::init(void)
 {
 	XVisualInfo *v=NULL;
 

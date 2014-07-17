@@ -48,8 +48,8 @@ static inline int drawingToRight(void)
 // This class encapsulates the 3D off-screen drawable, its most recent
 // ancestor, and information specific to its corresponding X window
 
-VirtualWin::VirtualWin(Display *dpy, Window win) :
-	VirtualDrawable(dpy, win)
+VirtualWin::VirtualWin(Display *dpy_, Window win) :
+	VirtualDrawable(dpy_, win)
 {
 	eventdpy=NULL;
 	oldDraw=NULL;  newWidth=newHeight=-1;
@@ -113,11 +113,11 @@ VirtualWin::~VirtualWin(void)
 }
 
 
-int VirtualWin::init(int w, int h, GLXFBConfig config)
+int VirtualWin::init(int w, int h, GLXFBConfig config_)
 {
 	CS::SafeLock l(mutex);
 	if(doWMDelete) _throw("Window has been deleted by window manager");
-	return VirtualDrawable::init(w, h, config);
+	return VirtualDrawable::init(w, h, config_);
 }
 
 
@@ -340,7 +340,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 {
 	Frame f;
 	int w=oglDraw->getWidth(), h=oglDraw->getHeight();
-	RRFrame *frame=NULL;
+	RRFrame *rrframe=NULL;
 
 	if(!plugin)
 	{
@@ -363,27 +363,27 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	if(oglDraw->getFormat()==GL_RGBA) desiredformat=RRTRANS_RGBA;
 	if(!trueColor) desiredformat=RRTRANS_INDEX;
 
-	frame=plugin->getFrame(w, h, desiredformat,
+	rrframe=plugin->getFrame(w, h, desiredformat,
 		doStereo && stereoMode==RRSTEREO_QUADBUF);
-	f.init(frame->bits, frame->w, frame->pitch, frame->h,
-		rrtrans_ps[frame->format], (rrtrans_bgr[frame->format]? FRAME_BGR:0) |
-		(rrtrans_afirst[frame->format]? FRAME_ALPHAFIRST:0) |
+	f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
+		rrtrans_ps[rrframe->format], (rrtrans_bgr[rrframe->format]? FRAME_BGR:0) |
+		(rrtrans_afirst[rrframe->format]? FRAME_ALPHAFIRST:0) |
 		FRAME_BOTTOMUP);
-	int glformat= (rrtrans_ps[frame->format]==3? GL_RGB:GL_RGBA);
+	int glformat= (rrtrans_ps[rrframe->format]==3? GL_RGB:GL_RGBA);
 	#ifdef GL_BGR_EXT
-	if(frame->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
+	if(rrframe->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
 	#endif
 	#ifdef GL_BGRA_EXT
-	if(frame->format==RRTRANS_BGRA) glformat=GL_BGRA_EXT;
+	if(rrframe->format==RRTRANS_BGRA) glformat=GL_BGRA_EXT;
 	#endif
 	#ifdef GL_ABGR_EXT
 	// FIXME: Implement ARGB properly
-	if(frame->format==RRTRANS_ABGR || frame->format==RRTRANS_ARGB)
+	if(rrframe->format==RRTRANS_ABGR || rrframe->format==RRTRANS_ARGB)
 		glformat=GL_ABGR_EXT;
 	#endif
-	if(frame->format==RRTRANS_INDEX) glformat=GL_COLOR_INDEX;
+	if(rrframe->format==RRTRANS_INDEX) glformat=GL_COLOR_INDEX;
 
-	if(doStereo && stereoMode==RRSTEREO_QUADBUF && frame->rbits==NULL)
+	if(doStereo && stereoMode==RRSTEREO_QUADBUF && rrframe->rbits==NULL)
 	{
 		static bool message=false;
 		if(!message)
@@ -410,15 +410,15 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 		GLint buf=drawBuf;
 		if(doStereo || stereoMode==RRSTEREO_LEYE) buf=leye(drawBuf);
 		if(stereoMode==RRSTEREO_REYE) buf=reye(drawBuf);
-		readPixels(0, 0, frame->w, frame->pitch, frame->h, glformat,
-			rrtrans_ps[frame->format], frame->bits, buf, doStereo);
-		if(doStereo && frame->rbits)
-			readPixels(0, 0, frame->w, frame->pitch, frame->h, glformat,
-				rrtrans_ps[frame->format], frame->rbits, reye(drawBuf), doStereo);
+		readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, glformat,
+			rrtrans_ps[rrframe->format], rrframe->bits, buf, doStereo);
+		if(doStereo && rrframe->rbits)
+			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, glformat,
+				rrtrans_ps[rrframe->format], rrframe->rbits, reye(drawBuf), doStereo);
 	}
 	if(!syncdpy) { XSync(dpy, False);  syncdpy=true; }
 	if(fconfig.logo) f.addLogo();
-	plugin->sendFrame(frame, sync);
+	plugin->sendFrame(rrframe, sync);
 }
 
 

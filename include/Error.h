@@ -32,24 +32,24 @@ namespace vglutil
 	{
 		public:
 
-			Error(const char *method, char *message)
+			Error(const char *method_, char *message_)
 			{
-				init(method, message, -1);
+				init(method_, message_, -1);
 			}
 
-			Error(const char *method, const char *message)
+			Error(const char *method_, const char *message_)
 			{
-				init(method, (char *)message, -1);
+				init(method_, (char *)message_, -1);
 			}
 
-			Error(const char *method, char *message, int line)
+			Error(const char *method_, char *message_, int line)
 			{
-				init(method, message, line);
+				init(method_, message_, line);
 			}
 
-			Error(const char *method, const char *message, int line)
+			Error(const char *method_, const char *message_, int line)
 			{
-				init(method, (char *)message, line);
+				init(method_, (char *)message_, line);
 			}
 
 			void init(const char *method_, char *message_, int line)

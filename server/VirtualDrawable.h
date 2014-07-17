@@ -73,7 +73,7 @@ namespace vglserver
 
 				private:
 
-					void setVisAttribs(GLXFBConfig config);
+					void setVisAttribs(void);
 
 					bool cleared, stereo;
 					GLXDrawable glxDraw;

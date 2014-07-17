@@ -22,12 +22,12 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
-VirtualPixmap::VirtualPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
-	: VirtualDrawable(dpy, pm)
+VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis_, Pixmap pm)
+	: VirtualDrawable(dpy_, pm)
 {
 	CS::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
-	_newcheck(frame=new FBXFrame(dpy, pm, vis->visual));
+	_newcheck(frame=new FBXFrame(dpy_, pm, vis->visual));
 }
 
 

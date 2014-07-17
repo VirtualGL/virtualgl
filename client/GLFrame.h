@@ -38,7 +38,7 @@ namespace vglcommon
 
 		private:
 
-			void init(Display *dpy, Window win);
+			void init(void);
 			int glError(void);
 
 			Display *dpy;  Window win;
