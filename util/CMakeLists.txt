@@ -47,9 +47,23 @@ endif()
 add_executable(threadtest threadtest.cpp)
 target_link_libraries(threadtest vglutil)
 
+option(VGL_USEIFR "Add nVidia Inband Frame Readback support to glreadtest"
+	FALSE)
+if(VGL_USEIFR)
+	message(STATUS "Enabling nVidia Inband Frame Readback support in glreadtest")
+	set(DEFAULT_IFR_INCLUDE_DIR /opt/nvgrid/inc)
+	set(IFR_INCLUDE_DIR ${DEFAULT_IFR_INCLUDE_DIR} CACHE PATH
+		"Path to nVidia Inband Frame Readback include files (default: ${DEFAULT_IFR_INCLUDE_DIR})")
+	add_definitions(-DUSEIFR)
+	message(STATUS "IFR_INCLUDE_DIR = ${IFR_INCLUDE_DIR}")
+	include_directories(${IFR_INCLUDE_DIR})
+	include_directories(${IFR_INCLUDE_DIR}/../samples/common)
+	set(IFRLIB nvidia-ifr)
+endif()
+
 add_executable(glreadtest glreadtest.cpp)
 target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
-	${X11_X11_LIB})
+	${X11_X11_LIB} ${IFRLIB})
 if(VGL_BUILDSERVER)
 	install(TARGETS glreadtest DESTINATION ${VGL_BINDIR})
 endif()

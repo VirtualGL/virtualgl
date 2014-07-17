@@ -26,6 +26,10 @@
 #include "../common/glx.h"
 #include <GL/glu.h>
 #include "x11err.h"
+#ifdef USEIFR
+#include "NvIFROpenGL.h"
+#include "NvIFR_API.h"
+#endif
 
 using namespace vglutil;
 
@@ -99,6 +103,11 @@ Timer timer;
 bool useWindow=false, usePixmap=false, useFBO=false, useRTT=false,
 	useAlpha=false;
 int visualID=0, loops=1;
+#ifdef USEIFR
+bool useIFR=false;
+NvIFRAPI ifr;
+NV_IFROGL_SESSION_HANDLE ifrSession=NULL;
+#endif
 #ifdef GL_EXT_framebuffer_object
 GLuint fbo=0, rbo=0, texture=0;
 #endif
@@ -430,6 +439,9 @@ void readTest(int format)
 	#ifdef GL_VERSION_1_5
 	GLuint bufferID=0;
 	#endif
+	#ifdef USEIFR
+	NV_IFROGL_TRANSFEROBJECT_HANDLE ifrTransfer=NULL;
+	#endif
 	char temps[STRLEN];
 
 	try
@@ -466,6 +478,19 @@ void readTest(int format)
 			if(temp!=pbo) _throw("Could not bind PBO buffer");
 		}
 		#endif
+		#ifdef USEIFR
+		if(useIFR)
+		{
+			NV_IFROGL_TO_SYS_CONFIG ifrConfig;
+			ifrConfig.format=NV_IFROGL_TARGET_FORMAT_CUSTOM;
+			ifrConfig.flags=NV_IFROGL_TRANSFER_OBJECT_FLAG_NONE;
+			ifrConfig.customFormat=pf[format].glFormat;
+			ifrConfig.customType=GL_UNSIGNED_BYTE;
+			if(ifr.nvIFROGLCreateTransferToSysObject(ifrSession, &ifrConfig,
+				&ifrTransfer)!=NV_IFROGL_SUCCESS)
+				_throw("Could not create IFR transfer object\n");
+		}
+		#endif
 
 		if((rgbaBuffer=(unsigned char *)malloc(PAD(width*ps)*height))==NULL)
 			_throw("Could not allocate buffer");
@@ -496,6 +521,29 @@ void readTest(int format)
 				if(!pixels) _throw("Could not map buffer");
 				memcpy(rgbaBuffer, pixels, PAD(width*ps)*height);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
+			}
+			else
+			#endif
+			#ifdef USEIFR
+			if(useIFR)
+			{
+				const void *pixels=NULL;
+				uintptr_t bufSize=0;
+				timer2.start();
+				if(ifr.nvIFROGLTransferFramebufferToSys(ifrTransfer, useFBO? fbo:0,
+					useFBO? GL_COLOR_ATTACHMENT0_EXT:GL_FRONT,
+					NV_IFROGL_TRANSFER_FRAMEBUFFER_FLAG_NONE, 0, 0, 0, 0)
+					!=NV_IFROGL_SUCCESS)
+					_throw("Could not transfer pixels from the framebuffer");
+				readPixelsTime+=timer2.elapsed();
+				if(ifr.nvIFROGLLockTransferData(ifrTransfer, &bufSize, &pixels)
+					!=NV_IFROGL_SUCCESS)
+					_throw("Could not lock transferred pixels");
+				if(bufSize!=(uintptr_t(PAD(width*ps)*height)))
+					_throw("Transferred pixel buffer is the wrong size");
+				memcpy(rgbaBuffer, (unsigned char *)pixels, PAD(width*ps)*height);
+				if(ifr.nvIFROGLReleaseTransferData(ifrTransfer)!=NV_IFROGL_SUCCESS)
+					_throw("Could not release transferred pixels");
 			}
 			else
 			#endif
@@ -553,6 +601,9 @@ void readTest(int format)
 		glDeleteBuffers(1, &bufferID);
 	}
 	#endif
+	#ifdef USEIFR
+	if(useIFR) ifr.nvIFROGLDestroyTransferObject(ifrTransfer);
+	#endif
 }
 
 
@@ -594,18 +645,9 @@ void display(void)
 
 void usage(char **argv)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-window] [-pm]", argv[0]);
-	#ifdef GL_EXT_framebuffer_object
-	fprintf(stderr, " [-fbo] [-rtt]");
-	#endif
-	#ifdef GL_VERSION_1_5
-	fprintf(stderr, " [-pbo]\n");
-	#else
-	fprintf(stderr, "\n");
-	#endif
-	fprintf(stderr, "       [-width <n>] [-height <n>] [-align <n>] [-visualid <xx>] [-alpha]\n");
-	fprintf(stderr, "       [-rgb] [-rgba] [-bgr] [-bgra] [-abgr] [-time <t>] [-loop <l>]");
-	fprintf(stderr, "\n-h or -? = This screen\n");
+	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
 	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
 	#ifdef GL_EXT_framebuffer_object
@@ -616,10 +658,13 @@ void usage(char **argv)
 	#ifdef GL_VERSION_1_5
 	fprintf(stderr, "-pbo = Use pixel buffer objects to perform readback\n");
 	#endif
-	fprintf(stderr, "-width = Set drawable width to n pixels (default: %d)\n", WIDTH);
-	fprintf(stderr, "-height = Set drawable height to n pixels (default: %d)\n", HEIGHT);
-	fprintf(stderr, "-align = Set row alignment to n bytes (default: %d)\n", ALIGN);
-	fprintf(stderr, "-visualid = Ignore visual selection and use this visual ID (hex) instead\n");
+	#ifdef USEIFR
+	fprintf(stderr, "-ifr = Use nVidia Inband Frame Readback\n");
+	#endif
+	fprintf(stderr, "-width <w> = Set drawable width to <w> pixels (default: %d)\n", WIDTH);
+	fprintf(stderr, "-height <h> = Set drawable height to <h> pixels (default: %d)\n", HEIGHT);
+	fprintf(stderr, "-align <n> = Set row alignment to <n> bytes (default: %d)\n", ALIGN);
+	fprintf(stderr, "-visualid <xx> = Ignore visual selection and use this visual ID (hex) instead\n");
 	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
 	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
 	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
@@ -653,6 +698,9 @@ int main(int argc, char **argv)
 		#endif
 		#ifdef GL_VERSION_1_5
 		if(!stricmp(argv[i], "-pbo")) pbo=1;
+		#endif
+		#ifdef USEIFR
+		if(!stricmp(argv[i], "-ifr")) useIFR=true;
 		#endif
 		if(!stricmp(argv[i], "-alpha")) useAlpha=true;
 		if(!stricmp(argv[i], "-rgb"))
@@ -723,6 +771,13 @@ int main(int argc, char **argv)
 			if(temp>0.0) benchTime=temp;
 		}
 	}
+	#ifdef USEIFR
+	if(pbo && useIFR)
+	{
+		fprintf(stderr, "IFR cannot be used with PBOs.  Disabling PBO readback.\n");
+		pbo=0;
+	}
+	#endif
 
 	if(argc<2) fprintf(stderr, "\n%s -h for advanced usage.\n", argv[0]);
 
@@ -736,6 +791,9 @@ int main(int argc, char **argv)
 		}
 		#ifdef GL_VERSION_1_5
 		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
+		#endif
+		#ifdef USEIFR
+		if(useIFR) fprintf(stderr, "Using nVidia Inband Frame Readback\n");
 		#endif
 
 		if((DisplayWidth(dpy, DefaultScreen(dpy))<width ||
@@ -775,6 +833,15 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
 
 		drawableInit();
+		#ifdef USEIFR
+		if(useIFR)
+		{
+			if(!ifr.initialize())
+				_throw("Failed to initialize IFR");
+			if(ifr.nvIFROGLCreateSession(&ifrSession, NULL)!=NV_IFROGL_SUCCESS)
+				_throw("Could not create IFR session");
+		}
+		#endif
 		display();
 		return 0;
 
@@ -789,6 +856,12 @@ int main(int argc, char **argv)
 			if(rbo) glDeleteRenderbuffersEXT(1, &rbo);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 			if(fbo) glDeleteFramebuffersEXT(1, &fbo);
+		}
+		#endif
+		#if USEIFR
+		if(useIFR)
+		{
+			if(ifrSession) ifr.nvIFROGLDestroySession(ifrSession);
 		}
 		#endif
 		glXMakeCurrent(dpy, 0, 0);
