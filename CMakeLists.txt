@@ -13,7 +13,7 @@ set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
 	"Install path prefix, prepended onto install directories.")
 
 project(VirtualGL)
-set(VERSION 2.3.90)
+set(VERSION 2.3.91)
 
 execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
