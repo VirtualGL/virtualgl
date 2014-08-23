@@ -7,12 +7,18 @@ trap onexit TERM
 trap onexit EXIT
 
 TMPDIR=
+SUDO=
 
 onexit()
 {
 	if [ ! "$TMPDIR" = "" ]; then
-		sudo rm -rf $TMPDIR
+		$SUDO rm -rf $TMPDIR
 	fi
+}
+
+uid()
+{
+	id | cut -f2 -d = | cut -f1 -d \(;
 }
 
 safedirmove ()
@@ -126,7 +132,7 @@ makedeb()
 
 	fi
 
-	sudo chown -Rh root:root $TMPDIR/*
+	$SUDO chown -Rh root:root $TMPDIR/*
 	dpkg -b $TMPDIR $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
 }
 
@@ -140,6 +146,10 @@ DOCDIR=@VGL_DOCDIR@
 FAKELIBDIR=@VGL_FAKELIBDIR@
 INCDIR=@VGL_INCDIR@
 LIBDIR=@VGL_LIBDIR@
+
+if [ ! `uid` -eq 0 ]; then
+	SUDO=sudo
+fi
 
 makedeb 0
 if [ "$DEBARCH" = "i386" ]; then makedeb 1; fi
