@@ -1667,8 +1667,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		else if(!glxdhash.getCurrentDisplay(drawable))
 		{
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
-			// that was created in another application.  This code is necessary
-			// to make CRUT (Chromium Utility Toolkit) applications work.
+			// that was created in another process.
 			if(!is3D(dpy))
 			{
 				winhash.add(dpy, drawable);
@@ -1756,19 +1755,51 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			vglout.PRINTLN("[VGL] WARNING: glXMakeContextCurrent() called with a previously-destroyed context");
 			goto done;
 		}
+
 		drawVW=winhash.initVW(dpy, draw, config);
-		readVW=winhash.initVW(dpy, read, config);
 		if(drawVW)
 		{
 			setWMAtom(dpy, draw);
 			draw=drawVW->updateGLXDrawable();
 			drawVW->setDirect(direct);
 		}
+		else if(!glxdhash.getCurrentDisplay(draw))
+		{
+			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+			// that was created in another process.
+			if(!is3D(dpy))
+			{
+				winhash.add(dpy, draw);
+				drawVW=winhash.initVW(dpy, draw, config);
+				if(drawVW)
+				{
+					draw=drawVW->updateGLXDrawable();
+					drawVW->setDirect(direct);
+				}
+			}
+		}
+
+		readVW=winhash.initVW(dpy, read, config);
 		if(readVW)
 		{
 			setWMAtom(dpy, read);
 			read=readVW->updateGLXDrawable();
 			readVW->setDirect(direct);
+		}
+		else if(!glxdhash.getCurrentDisplay(read))
+		{
+			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
+			// that was created in another process.
+			if(!is3D(dpy))
+			{
+				winhash.add(dpy, read);
+				readVW=winhash.initVW(dpy, read, config);
+				if(readVW)
+				{
+					read=readVW->updateGLXDrawable();
+					readVW->setDirect(direct);
+				}
+			}
 		}
 	}
 	retval=_glXMakeContextCurrent(_dpy3D, draw, read, ctx);
