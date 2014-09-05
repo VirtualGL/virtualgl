@@ -90,7 +90,7 @@ void glFlush(void)
 
 	// See the notes regarding VGL_SPOILLAST and VGL_GLFLUSHTRIGGER in the
 	// VirtualGL User's Guide.
-	if(fconfig.glflushtrigger) doGLReadback(fconfig.spoillast, false);
+	if(fconfig.glflushtrigger) doGLReadback(fconfig.spoillast, fconfig.sync);
 
 	CATCH();
 }

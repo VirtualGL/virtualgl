@@ -91,6 +91,16 @@
 		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
 		See {ref prefix="Section ": VGL_SYNC} for further information. \
 	|
+| Cadence Allegro v16.5 | Linux \
+	| ''vglrun +sync allegro''  \
+	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
+		(specifically the ''pcb_cursor_infinite'' cursor style) do not work \
+		properly unless ''VGL_SYNC'' is enabled.  If ''VGL_SYNC'' is not enabled, \
+		then the crosshairs may remain on the screen.  Since ''VGL_SYNC'' \
+		automatically enables the X11 transport and disables frame spoiling, it \
+		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
+		See {ref prefix="Section ": VGL_SYNC} for further information. \
+	|
 | Cedega v6.0.x | Linux \
 	| Add \
 		{nl}{nl} \

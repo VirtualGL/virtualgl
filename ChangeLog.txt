@@ -5,6 +5,13 @@
 Fixed an issue that prevented recent versions of Google Chrome/Chromium from
 running properly in VirtualGL.
 -------------------------------------------------------------------------------
+[2]
+VGL_SYNC now affects glFlush().  Although this does not strictly conform to the
+OpenGL spec (glFlush() is supposed to be an asynchronous command), it was
+necessary in order to make certain features of Cadence Allegro work properly.
+Since virtually no applications require VGL_SYNC, it is believed that this
+change is innocuous.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

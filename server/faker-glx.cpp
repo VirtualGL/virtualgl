@@ -1643,7 +1643,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			|| newvw->getGLXDrawable()!=curdraw)
 		{
 			if(drawingToFront() || vw->dirty)
-				vw->readback(GL_FRONT, false, false);
+				vw->readback(GL_FRONT, false, fconfig.sync);
 		}
 	}
 
@@ -1740,7 +1740,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			|| newvw->getGLXDrawable()!=curdraw)
 		{
 			if(drawingToFront() || vw->dirty)
-				vw->readback(GL_FRONT, false, false);
+				vw->readback(GL_FRONT, false, fconfig.sync);
 		}
 	}
 

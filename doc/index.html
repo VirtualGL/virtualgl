@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-08-22T17:17:53">
+<meta name="date" content="2014-09-05T10:34:15">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2192,6 +2192,12 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
     <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">19.1</a> for further information.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Cadence Allegro v16.5</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun&nbsp;+sync&nbsp;allegro</code></td>
+    <td class="standard">Allegro relies on mixed X11/OpenGL rendering, and thus certain features (specifically the <code>pcb_cursor_infinite</code> cursor style) do not work properly unless <code>VGL_SYNC</code> is enabled.  If <code>VGL_SYNC</code> is not enabled, then the crosshairs may remain on the screen.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Cedega v6.0.x</td>
@@ -4404,17 +4410,19 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         <a href="#Application_Recipes">Application 
         Recipes</a><a name="idx0056"></a>.)<br /><br />When 
         <code>VGL_SYNC</code> is enabled, every call to <code>glFinish()</code>, 
-        <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> will cause 
-        the contents of the Pbuffer to be read back and <em>synchronously</em> 
-        drawn into the application&rsquo;s window <em>using the X11 Transport 
-        and no frame spoiling</em>.  The call to <code>glFinish()</code>, 
-        <code>glXWaitGL()</code>, or <code>glXSwapBuffers()</code> will not 
-        return until VirtualGL has verified that the pixels have been delivered 
-        into the application&rsquo;s window.  As such, this mode can have 
-        potentially dire effects on performance when used with a remote 2D X 
-        server.  It is strongly recommended that <code>VGL_SYNC</code> be used 
-        only in conjunction with an X proxy running on the same server as 
-        VirtualGL.
+        <code>glXWaitGL()</code>, and <code>glXSwapBuffers()</code> (and 
+        <code>glFlush()</code>, if 
+        <a href="#VGL_GLFLUSHTRIGGER">VGL_GLFLUSHTRIGGER</a><a name="idx0057"></a> 
+        is enabled) will cause the contents of the Pbuffer to be read back and 
+        <em>synchronously</em> drawn into the application&rsquo;s window 
+        <em>using the X11 Transport and no frame spoiling</em>.  The call to 
+        <code>glFinish()</code>, <code>glXWaitGL()</code>, 
+        <code>glFlush()</code>, or <code>glXSwapBuffers()</code> will not return 
+        until VirtualGL has verified that the pixels have been delivered into 
+        the application&rsquo;s window.  As such, this mode can have potentially 
+        dire effects on performance when used with a remote 2D X server.  It is 
+        strongly recommended that <code>VGL_SYNC</code> be used only in 
+        conjunction with an X proxy running on the same server as VirtualGL.
         <div class="important"><p class="important">
         If an image transport plugin is being used, then VirtualGL does not automatically enable the X11 Transport or disable frame spoiling when <code>VGL_SYNC</code> is set.  This allows the plugin to handle synchronous image delivery as it sees fit (or to simply ignore this option.)
         </p></div>
@@ -4452,11 +4460,11 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         equal-sized square tiles, compare each tile vs. the same tile in the 
         previous frame, then compress and send only the tiles that have changed 
         (assuming <a href="#VGL_INTERFRAME">interframe 
-        comparison</a><a name="idx0057"></a> is enabled.)  The VGL Transport 
+        comparison</a><a name="idx0058"></a> is enabled.)  The VGL Transport 
         will also divide up the task of compressing these tiles among the 
         available CPUs in a round robin fashion, if multi-threaded compression 
         is enabled (see 
-        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0058"></a>.) 
+        <a href="#VGL_NPROCS">VGL_NPROCS</a><a name="idx0059"></a>.) 
         <br /><br /> There are several tradeoffs that must be considered when 
         choosing a tile size: <br /><br /> <em>Parallel scalability:</em> 
         <ul class="Itemize"><li class="Itemize-0">

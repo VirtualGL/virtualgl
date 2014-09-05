@@ -783,11 +783,12 @@ Each method of configuration takes precedence over the previous method:
 	as well (see [[#Application_Recipes][Application Recipes]].){nl}\
 	{nl}\
 	When ''VGL_SYNC'' is enabled, every call to ''glFinish()'', ''glXWaitGL()'',
-	and ''glXSwapBuffers()'' will cause the contents of the Pbuffer
-	to be read back and __synchronously__ drawn into the application's window
-	__using the X11 Transport and no frame spoiling__.  The call to
-	''glFinish()'', ''glXWaitGL()'', or ''glXSwapBuffers()'' will not return
-	until VirtualGL has verified that the pixels have been delivered into the
+	and ''glXSwapBuffers()'' (and ''glFlush()'', if [[#VGL_GLFLUSHTRIGGER]] is
+	enabled) will cause the contents of the Pbuffer to be read back and
+	__synchronously__ drawn into the application's window __using the X11
+	Transport and no frame spoiling__.  The call to ''glFinish()'',
+	''glXWaitGL()'', ''glFlush()'', or ''glXSwapBuffers()'' will not return until
+	VirtualGL has verified that the pixels have been delivered into the
 	application's window.  As such, this mode can have potentially dire effects
 	on performance when used with a remote 2D X server.  It is strongly
 	recommended that ''VGL_SYNC'' be used only in conjunction with an X proxy
