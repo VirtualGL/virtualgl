@@ -605,8 +605,12 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		}
 	}
 
-	ctx=_glXCreateContextAttribsARB(_dpy3D, config, share_context, direct,
-		attribs);
+	if((!attribs || attribs[0]==None) && !__glXCreateContextAttribsARB)
+		ctx=_glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_context,
+			direct);
+	else
+		ctx=_glXCreateContextAttribsARB(_dpy3D, config, share_context, direct,
+			attribs);
 	if(ctx)
 	{
 		int newctxIsDirect=_glXIsDirect(_dpy3D, ctx);
@@ -1378,6 +1382,12 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 #define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \
 	retval=(void (*)(void))f;  if(fconfig.trace) vglout.print("[INTERPOSED]");}
 
+// For optional libGL symbols, check that the underlying function
+// actually exists in libGL before returning the interposed version of it.
+
+#define checkoptfaked(f) if(!strcmp((char *)procName, #f) && __##f) {  \
+	retval=(void (*)(void))f;  if(fconfig.trace) vglout.print("[INTERPOSED]");}
+
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	void (*retval)(void)=NULL;
@@ -1388,8 +1398,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	if(procName)
 	{
-		checkfaked(glXGetProcAddressARB)
-		checkfaked(glXGetProcAddress)
+		checkoptfaked(glXGetProcAddressARB)
+		checkoptfaked(glXGetProcAddress)
 
 		checkfaked(glXChooseVisual)
 		checkfaked(glXCopyContext)
@@ -1433,16 +1443,16 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXQueryDrawable)
 		checkfaked(glXSelectEvent)
 
-		checkfaked(glXFreeContextEXT)
-		checkfaked(glXImportContextEXT)
-		checkfaked(glXQueryContextInfoEXT)
+		checkoptfaked(glXFreeContextEXT)
+		checkoptfaked(glXImportContextEXT)
+		checkoptfaked(glXQueryContextInfoEXT)
 
-		checkfaked(glXJoinSwapGroupNV)
-		checkfaked(glXBindSwapBarrierNV)
-		checkfaked(glXQuerySwapGroupNV)
-		checkfaked(glXQueryMaxSwapGroupsNV)
-		checkfaked(glXQueryFrameCountNV)
-		checkfaked(glXResetFrameCountNV)
+		checkoptfaked(glXJoinSwapGroupNV)
+		checkoptfaked(glXBindSwapBarrierNV)
+		checkoptfaked(glXQuerySwapGroupNV)
+		checkoptfaked(glXQueryMaxSwapGroupsNV)
+		checkoptfaked(glXQueryFrameCountNV)
+		checkoptfaked(glXResetFrameCountNV)
 
 		checkfaked(glXChooseFBConfigSGIX)
 		checkfaked(glXCreateContextWithConfigSGIX)
@@ -1458,13 +1468,13 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 		checkfaked(glXGetTransparentIndexSUN)
 
-		checkfaked(glXCreateContextAttribsARB)
+		checkoptfaked(glXCreateContextAttribsARB)
 
-		checkfaked(glXBindTexImageEXT)
-		checkfaked(glXReleaseTexImageEXT)
+		checkoptfaked(glXBindTexImageEXT)
+		checkoptfaked(glXReleaseTexImageEXT)
 
-		checkfaked(glXSwapIntervalEXT)
-		checkfaked(glXSwapIntervalSGI)
+		checkoptfaked(glXSwapIntervalEXT)
+		checkoptfaked(glXSwapIntervalSGI)
 
 		checkfaked(glFinish)
 		checkfaked(glFlush)
