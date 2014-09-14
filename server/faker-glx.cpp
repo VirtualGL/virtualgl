@@ -1398,8 +1398,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	if(procName)
 	{
-		checkoptfaked(glXGetProcAddressARB)
-		checkoptfaked(glXGetProcAddress)
+		checkfaked(glXGetProcAddressARB)
+		checkfaked(glXGetProcAddress)
 
 		checkfaked(glXChooseVisual)
 		checkfaked(glXCopyContext)
