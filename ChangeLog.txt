@@ -12,6 +12,12 @@ necessary in order to make certain features of Cadence Allegro work properly.
 Since virtually no applications require VGL_SYNC, it is believed that this
 change is innocuous.
 -------------------------------------------------------------------------------
+[3]
+Fixed a bug in vglconnect introduced in VirtualGL 2.3 that prevented
+'vglconnect -x' from working properly if the user did not have access to the
+current directory (vglconnect was erroneously creating a temporary file in the
+current directory instead of in /tmp.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
