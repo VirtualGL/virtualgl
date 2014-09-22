@@ -143,10 +143,10 @@
 		unless it is allowed to create an indirect OpenGL context.  See \
 		{ref prefix="Section ": VGL_ALLOWINDIRECT} for further information. \
 	|
-| SPECviewperf 11 | Linux \
+| SPECviewperf 9, 10, 11 | Linux \
 	| Set the ''VGL_READBACK'' environment variable to ''sync'' prior to \
-		launching ''viewperf-gui'' with ''vglrun'' \
-	| SPECviewperf 11 defines a local ''glGenBuffers'' symbol and then sets it \
+		launching the benchmark with ''vglrun'' \
+	| SPECviewperf defines a local ''glGenBuffers'' symbol and then sets it \
 		to NULL (?!), assuming it won't ever need it, but of course VirtualGL \
 		needs ''glGenBuffers()'' in order to enable PBO readback.  The \
 		application's version of the symbol unfortunately overrides libGL's \

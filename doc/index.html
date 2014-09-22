@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-09-05T10:34:15">
+<meta name="date" content="2014-09-22T11:51:27">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2230,10 +2230,10 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">Mathematica 7 will not draw the axis numbers on 3D charts correctly unless it is allowed to create an indirect OpenGL context.  See Section <a href="#VGL_ALLOWINDIRECT" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">SPECviewperf 11</td>
+    <td class="standard">SPECviewperf 9, 10, 11</td>
     <td class="standard">Linux</td>
-    <td class="standard">Set the <code>VGL_READBACK</code> environment variable to <code>sync</code> prior to launching <code>viewperf-gui</code> with <code>vglrun</code></td>
-    <td class="standard">SPECviewperf 11 defines a local <code>glGenBuffers</code> symbol and then sets it to NULL (?!), assuming it won&rsquo;t ever need it, but of course VirtualGL needs <code>glGenBuffers()</code> in order to enable PBO readback.  The application&rsquo;s version of the symbol unfortunately overrides libGL&rsquo;s version, which causes VirtualGL to segfault.  Disabling PBO readback works around the problem.</td>
+    <td class="standard">Set the <code>VGL_READBACK</code> environment variable to <code>sync</code> prior to launching the benchmark with <code>vglrun</code></td>
+    <td class="standard">SPECviewperf defines a local <code>glGenBuffers</code> symbol and then sets it to NULL (?!), assuming it won&rsquo;t ever need it, but of course VirtualGL needs <code>glGenBuffers()</code> in order to enable PBO readback.  The application&rsquo;s version of the symbol unfortunately overrides libGL&rsquo;s version, which causes VirtualGL to segfault.  Disabling PBO readback works around the problem.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Tecplot 360 2011 and earlier</td>
