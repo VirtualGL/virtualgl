@@ -40,6 +40,16 @@
 		using certain functions within Abaqus (such as View Cut.)  See \
 		{ref prefix="Section ": VGL_DEFAULTFBCONFIG} for further information. \
 	|
+| Cadence Allegro v16.5 | Linux \
+	| ''vglrun +sync allegro''  \
+	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
+		(specifically the ''pcb_cursor_infinite'' cursor style) do not work \
+		properly unless ''VGL_SYNC'' is enabled.  If ''VGL_SYNC'' is not enabled, \
+		then the crosshairs may remain on the screen.  Since ''VGL_SYNC'' \
+		automatically enables the X11 transport and disables frame spoiling, it \
+		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
+		See {ref prefix="Section ": VGL_SYNC} for further information. \
+	|
 | Animator 4 | Linux \
 	| Comment out the line that reads \
 		{nl}{nl} \
@@ -91,16 +101,6 @@
 		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
 		See {ref prefix="Section ": VGL_SYNC} for further information. \
 	|
-| Cadence Allegro v16.5 | Linux \
-	| ''vglrun +sync allegro''  \
-	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
-		(specifically the ''pcb_cursor_infinite'' cursor style) do not work \
-		properly unless ''VGL_SYNC'' is enabled.  If ''VGL_SYNC'' is not enabled, \
-		then the crosshairs may remain on the screen.  Since ''VGL_SYNC'' \
-		automatically enables the X11 transport and disables frame spoiling, it \
-		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
-		See {ref prefix="Section ": VGL_SYNC} for further information. \
-	|
 | Cedega v6.0.x | Linux \
 	| Add \
 		{nl}{nl} \
@@ -113,6 +113,15 @@
 	| The actual binary (WineX) that uses OpenGL is buried beneath several \
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
+	|
+| Google Chrome/Chromium v31 and later | Linux \
+	| ''vglrun google-chrome --disable-gpu-sandbox''{nl} \
+		or{nl} \
+		''vglrun chromium --disable-gpu-sandbox'' \
+	| By default, Chrome/Chromium uses a separate process to perform 3D \
+		rendering (WebGL), and for reasons that are not yet fully understood, \
+		this breaks VirtualGL.  The ''--disable-gpu-sandbox'' option causes 3D \
+		rendering to be performed within the browser process. \
 	|
 | Compiz | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
