@@ -18,6 +18,12 @@ Fixed a bug in vglconnect introduced in VirtualGL 2.3 that prevented
 current directory (vglconnect was erroneously creating a temporary file in the
 current directory instead of in /tmp.)
 -------------------------------------------------------------------------------
+[4]
+GLXspheres now warns if the specified polygon count would exceed the limit of
+57600 polygons per sphere imposed by GLU and prints the actual polygon count
+with this limit taken into account.  Also, a new option (-n) has been
+introduced to increase the sphere count.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

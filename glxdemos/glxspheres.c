@@ -47,7 +47,7 @@
 #define DEF_SLICES 32
 #define DEF_STACKS 32
 
-#define NSPHERES 20
+#define DEF_SPHERES 20
 
 #define _2PI 6.283185307180
 #define MAXI (220./255.)
@@ -67,7 +67,7 @@ GLXContext ctx=0, olctx=0;
 
 int sphereList=0, fontListBase=0;
 GLUquadricObj *sphereQuad=NULL;
-int slices=DEF_SLICES, stacks=DEF_STACKS;
+int slices=DEF_SLICES, stacks=DEF_STACKS, spheres=DEF_SPHERES;
 float x=0., y=0., z=-3.;
 float outerAngle=0., middleAngle=0., innerAngle=0.;
 float loneSphereColor=0.;
@@ -178,9 +178,9 @@ void renderSpheres(int buf)
 	/* Outer ring */
 	glPushMatrix();
 	glRotatef(outerAngle, 0., 0., 1.);
-	for(i=0; i<NSPHERES; i++)
+	for(i=0; i<spheres; i++)
 	{
-		double f=(double)i/(double)NSPHERES;
+		double f=(double)i/(double)spheres;
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -10.);
 		setSphereColor(f);
@@ -193,9 +193,9 @@ void renderSpheres(int buf)
 	/* Middle ring */
 	glPushMatrix();
 	glRotatef(middleAngle, 0., 0., 1.);
-	for(i=0; i<NSPHERES; i++)
+	for(i=0; i<spheres; i++)
 	{
-		double f=(double)i/(double)NSPHERES;
+		double f=(double)i/(double)spheres;
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -17.);
 		setSphereColor(f);
@@ -208,9 +208,9 @@ void renderSpheres(int buf)
 	/* Inner ring */
 	glPushMatrix();
 	glRotatef(innerAngle, 0., 0., 1.);
-	for(i=0; i<NSPHERES; i++)
+	for(i=0; i<spheres; i++)
 	{
-		double f=(double)i/(double)NSPHERES;
+		double f=(double)i/(double)spheres;
 		glPushMatrix();
 		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -29.);
 		setSphereColor(f);
@@ -491,7 +491,9 @@ void usage(char **argv)
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
-	printf("         (effective max. is 3.5 million due to limitations of GLU.)\n");
+	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
+	printf("-n <n> = Render (approximately) <n> spheres (default = %d)\n",
+		DEF_SPHERES*3+1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
@@ -519,7 +521,7 @@ int main(int argc, char **argv)
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen=0;  unsigned long mask=0;
-	int screen=-1;
+	int screen=-1, pps;
 
 	for(i=0; i<argc; i++)
 	{
@@ -538,15 +540,6 @@ int main(int argc, char **argv)
 			{
 				width=w;  height=h;
 				printf("Window dimensions: %d x %d\n", width, height);
-			}
-		}
-		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
-		{
-			int nPolys=atoi(argv[++i]);
-			if(nPolys>0)
-			{
-				slices=stacks=(int)(sqrt((double)nPolys/((double)(3*NSPHERES+1))));
-				if(slices<1) slices=stacks=1;
 			}
 		}
 		if(!strnicmp(argv[i], "-fs", 3)) fullScreen=1;
@@ -579,6 +572,24 @@ int main(int argc, char **argv)
 			useStereo=1;
 		}
 		if(!strnicmp(argv[i], "-32", 3)) usealpha=1;
+		if(!strnicmp(argv[i], "-n", 2) && i<argc-1)
+		{
+			int temp=atoi(argv[++i]);
+			if(temp>0) spheres=(int)(((double)temp-1.0)/3.0+0.5);
+			if(spheres<1) spheres=1;
+		}
+	}
+	for(i=0; i<argc; i++)
+	{
+		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
+		{
+			int nPolys=atoi(argv[++i]);
+			if(nPolys>0)
+			{
+				slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
+				if(slices<1) slices=stacks=1;
+			}
+		}
 	}
 
 	if(usealpha)
@@ -595,7 +606,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	fprintf(stderr, "Polygons in scene: %d\n", (NSPHERES*3+1)*slices*stacks);
+	pps=slices*stacks;
+	if(pps>57600)
+	{
+		fprintf(stderr, "WARNING: polygons per sphere clamped to 57600 due to limitations of GLU\n");
+		pps=57600;
+	}
+	fprintf(stderr, "Polygons in scene: %d (%d spheres * %d polys/spheres)\n",
+		(spheres*3+1)*pps, spheres*3+1, pps);
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 	if(screen<0) screen=DefaultScreen(dpy);
