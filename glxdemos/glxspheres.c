@@ -57,13 +57,13 @@ enum { GRAY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 
 #define DEFBENCHTIME 2.0
 
-Display *dpy=NULL;  Window win=0, olwin=0;
-int useStereo=0, useOverlay=0, useCI=0, useImm=0, interactive=0, oldb=1,
-	loColor=0, maxFrames=0, totalFrames=0, directctx=True;
+Display *dpy=NULL;  Window win=0, olWin=0;
+int useStereo=0, useOverlay=0, useCI=0, useImm=0, interactive=0, olDB=1,
+	loColor=0, maxFrames=0, totalFrames=0, directCtx=True;
 double benchTime=DEFBENCHTIME;
 int nColors=0, nOlColors, colorScheme=GRAY;
 Colormap colormap=0, olColormap=0;
-GLXContext ctx=0, olctx=0;
+GLXContext ctx=0, olCtx=0;
 
 int sphereList=0, fontListBase=0;
 GLUquadricObj *sphereQuad=NULL;
@@ -107,11 +107,11 @@ void reshape(int newWidth, int newHeight)
 	XWindowChanges changes;
 	if(newWidth<=0) newWidth=1;  if(newHeight<=0) newHeight=1;
 	width=newWidth;  height=newHeight;
-	if(useOverlay && olwin)
+	if(useOverlay && olWin)
 	{
 		changes.width=width;
 		changes.height=height;
-		XConfigureWindow(dpy, olwin, CWWidth|CWHeight, &changes);
+		XConfigureWindow(dpy, olWin, CWWidth|CWHeight, &changes);
 	}
 }
 
@@ -141,23 +141,23 @@ void setSphereColor(float color)
 void renderSpheres(int buf)
 {
 	int i;
-	GLfloat xaspect, yaspect;
+	GLfloat xAspect, yAspect;
 	GLfloat stereoCameraOffset=0.;
 	GLfloat nearDist=1.5, farDist=40., zeroParallaxDist=17.;
 
 	glDrawBuffer(buf);
 
-	xaspect=(GLfloat)width/(GLfloat)(min(width, height));
-	yaspect=(GLfloat)height/(GLfloat)(min(width, height));
+	xAspect=(GLfloat)width/(GLfloat)(min(width, height));
+	yAspect=(GLfloat)height/(GLfloat)(min(width, height));
 
 	if(buf==GL_BACK_LEFT)
-		stereoCameraOffset=-xaspect*zeroParallaxDist/nearDist*0.035;
+		stereoCameraOffset=-xAspect*zeroParallaxDist/nearDist*0.035;
 	else if(buf==GL_BACK_RIGHT)
-		stereoCameraOffset=xaspect*zeroParallaxDist/nearDist*0.035;
+		stereoCameraOffset=xAspect*zeroParallaxDist/nearDist*0.035;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-xaspect, xaspect, -yaspect, yaspect, nearDist, farDist);
+	glFrustum(-xAspect, xAspect, -yAspect, yAspect, nearDist, farDist);
 	glTranslatef(-stereoCameraOffset, 0., 0.);
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, width, height);
@@ -277,7 +277,7 @@ int display(int advance)
 	static unsigned long frames=0;
 	static char temps[256];
 	XFontStruct *fontInfo=NULL;  int minChar, maxChar;
-	GLfloat xaspect, yaspect;
+	GLfloat xAspect, yAspect;
 
 	if(first)
 	{
@@ -323,7 +323,7 @@ int display(int advance)
 
 		if(useOverlay)
 		{
-			glXMakeCurrent(dpy, olwin, olctx);
+			glXMakeCurrent(dpy, olWin, olCtx);
 		}
 		if(!(fontInfo=XLoadQueryFont(dpy, "fixed")))
 			_throw("Could not load X font");
@@ -366,7 +366,7 @@ int display(int advance)
 	glDrawBuffer(GL_BACK);
 	if(useOverlay)
 	{
-		glXMakeCurrent(dpy, olwin, olctx);
+		glXMakeCurrent(dpy, olWin, olCtx);
 		renderOverlay();
 	}
 	else
@@ -379,9 +379,9 @@ int display(int advance)
 	if(useOverlay) glRasterPos3f(-0.95, -0.95, 0.);
 	else
 	{
-		xaspect=(GLfloat)width/(GLfloat)(min(width, height));
-		yaspect=(GLfloat)height/(GLfloat)(min(width, height));
-		glRasterPos3f(-0.95*xaspect, -0.95*yaspect, -1.5);
+		xAspect=(GLfloat)width/(GLfloat)(min(width, height));
+		yAspect=(GLfloat)height/(GLfloat)(min(width, height));
+		glRasterPos3f(-0.95*xAspect, -0.95*yAspect, -1.5);
 	}
 	glListBase(fontListBase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
@@ -390,7 +390,7 @@ int display(int advance)
 	glPopAttrib();
 	if(useOverlay)
 	{
-		if(oldb) glXSwapBuffers(dpy, olwin);
+		if(olDB) glXSwapBuffers(dpy, olWin);
 		glXMakeCurrent(dpy, win, ctx);
 	}
 	glXSwapBuffers(dpy, win);
@@ -512,12 +512,12 @@ int main(int argc, char **argv)
 {
 	int i, usealpha=0;
 	XVisualInfo *v=NULL;
-	int rgbattribs[]={ GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
+	int rgbAttribs[]={ GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None, None,
 		None };
-	int ciattribs[]={ GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
+	int ciAttribs[]={ GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
 		None };
-	int olattribs[]={ GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
+	int olAttribs[]={ GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
 	XSetWindowAttributes swa;  Window root;
 	int fullScreen=0;  unsigned long mask=0;
@@ -528,7 +528,7 @@ int main(int argc, char **argv)
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-c", 2)) useCI=1;
-		if(!strnicmp(argv[i], "-ic", 3)) directctx=False;
+		if(!strnicmp(argv[i], "-ic", 3)) directCtx=False;
 		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-l", 2)) loColor=1;
 		if(!strnicmp(argv[i], "-m", 2)) useImm=1;
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
 		}
 		else if(!strnicmp(argv[i], "-s", 2))
 		{
-			rgbattribs[10]=GLX_STEREO;
+			rgbAttribs[10]=GLX_STEREO;
 			useStereo=1;
 		}
 		if(!strnicmp(argv[i], "-32", 3)) usealpha=1;
@@ -594,15 +594,15 @@ int main(int argc, char **argv)
 
 	if(usealpha)
 	{
-		if(rgbattribs[10]==None)
+		if(rgbAttribs[10]==None)
 		{
-			rgbattribs[10]=GLX_ALPHA_SIZE;
-			rgbattribs[11]=8;
+			rgbAttribs[10]=GLX_ALPHA_SIZE;
+			rgbAttribs[11]=8;
 		}
 		else
 		{
-			rgbattribs[11]=GLX_ALPHA_SIZE;
-			rgbattribs[12]=8;
+			rgbAttribs[11]=GLX_ALPHA_SIZE;
+			rgbAttribs[12]=8;
 		}
 	}
 
@@ -620,12 +620,12 @@ int main(int argc, char **argv)
 
 	if(useCI)
 	{
-		if((v=glXChooseVisual(dpy, screen, ciattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, ciAttribs))==NULL)
 			_throw("Could not obtain index visual");
 	}
 	else
 	{
-		if((v=glXChooseVisual(dpy, screen, rgbattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, rgbAttribs))==NULL)
 			_throw("Could not obtain RGB visual with requested properties");
 	}
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useOverlay? "underlay":"window",
@@ -670,7 +670,7 @@ int main(int argc, char **argv)
 	}
 	XSync(dpy, False);
 
-	if((ctx=glXCreateContext(dpy, v, NULL, directctx))==0)
+	if((ctx=glXCreateContext(dpy, v, NULL, directCtx))==0)
 		_throw("Could not create rendering context");
 	fprintf(stderr, "Context is %s\n",
 		glXIsDirect(dpy, ctx)? "Direct":"Indirect");
@@ -678,10 +678,10 @@ int main(int argc, char **argv)
 
 	if(useOverlay)
 	{
-		if((v=glXChooseVisual(dpy, screen, olattribs))==NULL)
+		if((v=glXChooseVisual(dpy, screen, olAttribs))==NULL)
 		{
-			olattribs[6]=None;  oldb=0;
-			if((v=glXChooseVisual(dpy, screen, olattribs))==NULL)
+			olAttribs[6]=None;  olDB=0;
+			if((v=glXChooseVisual(dpy, screen, olAttribs))==NULL)
 				_throw("Could not obtain overlay visual");
 		}
 		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n",	(int)v->visualid);
@@ -692,16 +692,16 @@ int main(int argc, char **argv)
 
 		_catch(setColorScheme(olColormap, nOlColors, colorScheme));
 
-		if((olwin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
+		if((olWin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
 			_throw("Could not create overlay window");
-		XMapWindow(dpy, olwin);
+		XMapWindow(dpy, olWin);
 		XSync(dpy, False);
 
-		if((olctx=glXCreateContext(dpy, v, NULL, directctx))==0)
+		if((olCtx=glXCreateContext(dpy, v, NULL, directCtx))==0)
 			_throw("Could not create overlay rendering context");
 		fprintf(stderr, "Overlay context is %s\n",
-			glXIsDirect(dpy, olctx)? "Direct":"Indirect");
+			glXIsDirect(dpy, olCtx)? "Direct":"Indirect");
 
 		XFree(v);  v=NULL;
 	}
@@ -713,8 +713,8 @@ int main(int argc, char **argv)
 
 	_catch(eventLoop(dpy));
 
-	if(dpy && olctx) { glXDestroyContext(dpy, olctx);  olctx=0; }
-	if(dpy && olwin) { XDestroyWindow(dpy, olwin);  olwin=0; }
+	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx=0; }
+	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin=0; }
 	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx=0; }
 	if(dpy && win) { XDestroyWindow(dpy, win);  win=0; }
 	if(dpy) XCloseDisplay(dpy);
@@ -722,8 +722,8 @@ int main(int argc, char **argv)
 
 	bailout:
 	if(v) XFree(v);
-	if(dpy && olctx) { glXDestroyContext(dpy, olctx);  olctx=0; }
-	if(dpy && olwin) { XDestroyWindow(dpy, olwin);  olwin=0; }
+	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx=0; }
+	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin=0; }
 	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx=0; }
 	if(dpy && win) { XDestroyWindow(dpy, win);  win=0; }
 	if(dpy) XCloseDisplay(dpy);
