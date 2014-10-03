@@ -491,6 +491,7 @@ void usage(char **argv)
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
+	printf("         (effective max. is 3.5 million due to limitations of GLU.)\n");
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
