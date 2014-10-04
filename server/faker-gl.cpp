@@ -227,13 +227,17 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 }
 
 
+#define EMULATE_CI  \
+	(ctxhash.colorIndexCurrent() && !ctxhash.overlayCurrent())
+
+
 // The following functions are interposed in order to make color index
 // rendering work, since most platforms don't support color index Pbuffers.
 
 void glClearIndex(GLfloat c)
 {
-	if(ctxhash.overlayCurrent()) _glClearIndex(c);
-	else glClearColor(c/255., 0., 0., 0.);
+	if(EMULATE_CI) glClearColor(c/255., 0., 0., 0.);
+	else _glClearIndex(c);
 }
 
 
@@ -286,7 +290,7 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 
 void glGetDoublev(GLenum pname, GLdouble *params)
 {
-	if(!ctxhash.overlayCurrent())
+	if(EMULATE_CI)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
@@ -321,7 +325,7 @@ void glGetDoublev(GLenum pname, GLdouble *params)
 
 void glGetFloatv(GLenum pname, GLfloat *params)
 {
-	if(!ctxhash.overlayCurrent())
+	if(EMULATE_CI)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
@@ -358,7 +362,7 @@ void glGetFloatv(GLenum pname, GLfloat *params)
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
-	if(!ctxhash.overlayCurrent())
+	if(EMULATE_CI)
 	{
 		if(pname==GL_CURRENT_INDEX)
 		{
@@ -395,82 +399,82 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 void glIndexd(GLdouble index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexd(index);
-	else glColor3d(index/255., 0.0, 0.0);
+	if(EMULATE_CI) glColor3d(index/255., 0.0, 0.0);
+	else _glIndexd(index);
 }
 
 void glIndexf(GLfloat index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexf(index);
-	else glColor3f(index/255., 0., 0.);
+	if(EMULATE_CI) glColor3f(index/255., 0., 0.);
+	else _glIndexf(index);
 }
 
 void glIndexi(GLint index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexi(index);
-	else glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	else _glIndexi(index);
 }
 
 void glIndexs(GLshort index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexs(index);
-	else glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	else _glIndexs(index);
 }
 
 void glIndexub(GLubyte index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexub(index);
-	else glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	else _glIndexub(index);
 }
 
 void glIndexdv(const GLdouble *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexdv(index);
-	else
+	if(EMULATE_CI)
 	{
 		GLdouble color[3]={index? (*index)/255.:0., 0., 0.};
 		glColor3dv(index? color:NULL);
 	}
+	else _glIndexdv(index);
 }
 
 void glIndexfv(const GLfloat *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexfv(index);
-	else
+	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
+	else _glIndexfv(index);
 }
 
 void glIndexiv(const GLint *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexiv(index);
-	else
+	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
+	else _glIndexiv(index);
 }
 
 void glIndexsv(const GLshort *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexsv(index);
-	else
+	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
+	else _glIndexsv(index);
 }
 
 void glIndexubv(const GLubyte *index)
 {
-	if(ctxhash.overlayCurrent()) _glIndexubv(index);
-	else
+	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
 		glColor3fv(index? color:NULL);  return;
 	}
+	else _glIndexubv(index);
 }
 
 
@@ -510,7 +514,7 @@ void glMaterialiv(GLenum face, GLenum pname, const GLint *params)
 
 void glPixelTransferf(GLenum pname, GLfloat param)
 {
-	if(!ctxhash.overlayCurrent())
+	if(EMULATE_CI)
 	{
 		if(pname==GL_INDEX_SHIFT)
 		{
@@ -529,7 +533,7 @@ void glPixelTransferf(GLenum pname, GLfloat param)
 
 void glPixelTransferi(GLenum pname, GLint param)
 {
-	if(!ctxhash.overlayCurrent())
+	if(EMULATE_CI)
 	{
 		if(pname==GL_INDEX_SHIFT)
 		{

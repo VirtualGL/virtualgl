@@ -24,6 +24,8 @@ typedef struct
 {
 	GLXFBConfig config;
 	Bool direct;
+	bool colorIndex;  // This context appears as a color index context to the
+                    // application (VGL uses CI emulation with it)
 } ContextAttribs;
 
 
@@ -49,13 +51,15 @@ namespace vglserver
 
 			static bool isAlloc(void) { return (instance!=NULL); }
 
-			void add(GLXContext ctx, GLXFBConfig config, Bool direct)
+			void add(GLXContext ctx, GLXFBConfig config, Bool direct,
+				bool colorIndex)
 			{
 				if(!ctx || !config) _throw("Invalid argument");
 				ContextAttribs *attribs=NULL;
 				_newcheck(attribs=new ContextAttribs);
 				attribs->config=config;
 				attribs->direct=direct;
+				attribs->colorIndex=colorIndex;
 				HASH::add(ctx, NULL, attribs);
 			}
 
@@ -83,9 +87,24 @@ namespace vglserver
 				return -1;
 			}
 
+			bool isColorIndex(GLXContext ctx)
+			{
+				if(ctx)
+				{
+					ContextAttribs *attribs=HASH::find(ctx, NULL);
+					if(attribs) return attribs->colorIndex;
+				}
+				return false;
+			}
+
 			bool overlayCurrent(void)
 			{
 				return isOverlay(glXGetCurrentContext());
+			}
+
+			bool colorIndexCurrent(void)
+			{
+				return isColorIndex(glXGetCurrentContext());
 			}
 
 			void remove(GLXContext ctx)

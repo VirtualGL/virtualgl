@@ -24,6 +24,12 @@ GLXspheres now warns if the specified polygon count would exceed the limit of
 with this limit taken into account.  Also, a new option (-n) has been
 introduced to increase the sphere count.
 -------------------------------------------------------------------------------
+[5]
+VirtualGL will now only enable color index rendering emulation if a color index
+context is current.  This specifically fixes an interaction issue with MSC
+Mentat, which occasionally calls glIndexi() when an RGBA context is current,
+but the fix may affect other applications as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

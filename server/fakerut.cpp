@@ -274,6 +274,40 @@ bool stereoTest(bool ci)
 }
 
 
+// Check whether the faker properly handles gl*Index*() calls when an RGBA
+// context is current.  This will fail with VirtualGL 2.4 beta1 and prior.
+bool glIndexRGBAContextTest(void)
+{
+	unsigned int bgColor=0, fgColor=0;
+	int oldReadBuf=GL_BACK, oldDrawBuf=GL_BACK;
+
+	glGetIntegerv(GL_READ_BUFFER, &oldReadBuf);
+	glGetIntegerv(GL_DRAW_BUFFER, &oldDrawBuf);
+
+	glDrawBuffer(GL_BACK);
+	glClearColor(1, 1., 1., 0.);
+	glClearIndex(128);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDrawBuffer(GL_FRONT);
+	glClearColor(1., 0., 1., 0.);
+	glClearIndex(64);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glReadBuffer(GL_BACK);
+	bgColor=checkBufferColor(false);
+
+	glReadBuffer(GL_FRONT);
+	fgColor=checkBufferColor(false);
+
+	glReadBuffer(oldReadBuf);
+	glDrawBuffer(oldDrawBuf);
+
+	if(bgColor==0xffffff && fgColor==0xff00ff) return true;
+	return false;
+}
+
+
 typedef struct
 {
 	GLfloat r, g, b;
@@ -423,8 +457,8 @@ int readbackTest(bool stereo, bool ci)
 		if((ctx0=glXCreateContext(dpy, vis0, 0, True))==NULL)
 			_throw("Could not establish GLX context");
 		XFree(vis0);  vis0=NULL;
-		if((ctx1=glXCreateNewContext(dpy, config, GLX_RGBA_TYPE, NULL,
-			True))==NULL)
+		if((ctx1=glXCreateNewContext(dpy, config,
+			ci? GLX_COLOR_INDEX_TYPE:GLX_RGBA_TYPE, NULL, True))==NULL)
 			_throw("Could not establish GLX context");
 
 		if(!glXMakeCurrent(dpy, win1, ctx0))
@@ -436,6 +470,8 @@ int readbackTest(bool stereo, bool ci)
 		}
 		if(!doubleBufferTest(ci))
 			_throw("Double buffering appears to be broken");
+		if(!ci && !glIndexRGBAContextTest())
+			_throw("Faker does not properly handle gl*Index*() calls when RGBA context is current");
 		glReadBuffer(GL_BACK);
 
 		if(!glXMakeContextCurrent(dpy, win1, win0, ctx1))

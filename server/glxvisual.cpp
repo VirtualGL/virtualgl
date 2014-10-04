@@ -316,6 +316,7 @@ int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 			{
 				return (va[i].isStereo && va[i].isGL && va[i].isDB);
 			}
+			if(attribute==GLX_X_VISUAL_TYPE) return va[i].c_class;
 		}
 	}
 	return 0;

@@ -527,7 +527,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 				ctx=NULL;
 			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
-			if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
+			if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
 			goto done;
 		}
 	}
@@ -551,9 +551,11 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
+		bool colorIndex=(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
+			vis->visualid, GLX_X_VISUAL_TYPE)==PseudoColor);
 		// Hash the FB config to the context so we can use it in subsequent calls
 		// to glXMake[Context]Current().
-		ctxhash.add(ctx, config, newctxIsDirect);
+		ctxhash.add(ctx, config, newctxIsDirect, colorIndex);
 	}
 
 	CATCH();
@@ -569,7 +571,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	GLXContext share_context, Bool direct, const int *attribs)
 {
-	GLXContext ctx=0;
+	GLXContext ctx=0;  bool colorIndex=false;
 
 	// Prevent recursion
 	if(is3D(dpy))
@@ -590,7 +592,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	{
 		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
-		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
+		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
 		goto done;
 	}
 
@@ -601,7 +603,11 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		// contexts.
 		for(int i=0; attribs[i]!=None && i<=254; i+=2)
 		{
-			if(attribs[i]==GLX_RENDER_TYPE) ((int *)attribs)[i+1]=GLX_RGBA_TYPE;
+			if(attribs[i]==GLX_RENDER_TYPE)
+			{
+				if(attribs[i+1]==GLX_COLOR_INDEX_TYPE) colorIndex=true;
+				((int *)attribs)[i+1]=GLX_RGBA_TYPE;
+			}
 		}
 	}
 
@@ -623,7 +629,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxhash.add(ctx, config, newctxIsDirect);
+		ctxhash.add(ctx, config, newctxIsDirect, colorIndex);
 	}
 
 	CATCH();
@@ -657,7 +663,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	if(rcfghash.isOverlay(dpy, config))
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
-		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
+		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
 		goto done;
 	}
 
@@ -674,7 +680,8 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxhash.add(ctx, config, newctxIsDirect);
+		ctxhash.add(ctx, config, newctxIsDirect,
+			render_type==GLX_COLOR_INDEX_TYPE);
 	}
 
 	CATCH();
