@@ -510,7 +510,7 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int i, usealpha=0;
+	int i, useAlpha=0;
 	XVisualInfo *v=NULL;
 	int rgbAttribs[]={ GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
 		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None, None,
@@ -571,7 +571,7 @@ int main(int argc, char **argv)
 			rgbAttribs[10]=GLX_STEREO;
 			useStereo=1;
 		}
-		if(!strnicmp(argv[i], "-32", 3)) usealpha=1;
+		if(!strnicmp(argv[i], "-32", 3)) useAlpha=1;
 		if(!strnicmp(argv[i], "-n", 2) && i<argc-1)
 		{
 			int temp=atoi(argv[++i]);
@@ -592,7 +592,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(usealpha)
+	if(useAlpha)
 	{
 		if(rgbAttribs[10]==None)
 		{
