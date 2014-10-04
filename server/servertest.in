@@ -30,6 +30,7 @@ SSL=@VGL_USESSL@
 
 Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
+sleep 2
 
 # VGL Transport
 DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
@@ -50,10 +51,12 @@ DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -trans test2 $BIN/fakerut
 
 kill $PID
 PID=-1
+sleep 2
 
 # Color index
 Xvfb :42 -screen 0 1920x1200x8 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
+sleep 2
 DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $BIN/fakerut -ci
 kill $PID
 PID=-1
