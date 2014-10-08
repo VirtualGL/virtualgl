@@ -32,6 +32,10 @@ if [ "`uname -s`" = "Darwin" ]; then
 	NOSHM=-noshm
 fi
 
+which Xvfb >/dev/null 2>&1 || (
+	echo Xvfb not found!
+	exit 1
+)
 Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2

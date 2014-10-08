@@ -28,6 +28,10 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 
+which Xvfb >/dev/null 2>&1 || (
+	echo Xvfb not found!
+	exit 1
+)
 Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
