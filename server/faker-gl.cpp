@@ -19,7 +19,6 @@
 #include "ContextHash.h"
 #include "WindowHash.h"
 #include "faker.h"
-#include "fakerconfig.h"
 
 using namespace vglserver;
 

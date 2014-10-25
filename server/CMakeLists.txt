@@ -25,6 +25,12 @@ if(VGL_USEXV)
 	set(FBXFAKERLIB ${FBXFAKERLIB};fbxv)
 endif()
 
+option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" OFF)
+if(VGL_FAKEXCB)
+	add_definitions(-DFAKEXCB)
+	set(FAKER_XCB_SOURCES faker-xcb.cpp XCBConnHash.cpp)
+endif()
+
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
 foreach(def ${DEFS_PROP})
 	set(DEFINES ${DEFINES};-D${def})
@@ -43,6 +49,7 @@ set(RRFAKER_SOURCES
 	faker-glx.cpp
 	faker-sym.cpp
 	faker-x11.cpp
+	${FAKER_XCB_SOURCES}
 	fakerconfig.cpp
 	GLXDrawableHash.cpp
 	glxvisual.cpp
@@ -69,8 +76,11 @@ if(MAPFLAG)
 else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
+if(VGL_FAKEXCB)
+	set(LIBXCB xcb-atom xcb-glx xcb-keysyms X11-xcb)
+endif()
 target_link_libraries(rrfaker vglcommon ${FBXFAKERLIB} vglsocket m
-	${OPENGL_gl_LIBRARY} ${LIBDL})
+	${OPENGL_gl_LIBRARY} ${LIBDL} ${LIBXCB})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 	# C++ shared libs.  Grrr...

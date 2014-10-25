@@ -30,6 +30,19 @@ context is current.  This specifically fixes an interaction issue with MSC
 Mentat, which occasionally calls glIndexi() when an RGBA context is current,
 but the fix may affect other applications as well.
 -------------------------------------------------------------------------------
+[6]
+VirtualGL can now interpose enough of the XCB API to make Qt 5 work properly.
+Qt 5 does not use XCB to perform 3D rendering (there is no suitable XCB
+replacement for GLX yet), but it does use XCB to detect whether the GLX
+extension is available and to handle the application's event queue(s).  Thus,
+when attempting to run Qt 5 applications in VirtualGL, previously the OpenGL
+portion of the window would fail to resize when the window was resized, or the
+application would complain that OpenGL was not available and fail to start, or
+the application would fall back to non-OpenGL rendering.
+
+Currently, enabling XCB support in VirtualGL requires building VirtualGL from
+source and adding -DVGL_FAKEXCB=1 to the CMake command line.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -20,7 +20,6 @@
 #include "glxvisual.h"
 #include "glext-vgl.h"
 #include "TempContext.h"
-#include "fakerconfig.h"
 #include "vglutil.h"
 #include "faker.h"
 

@@ -21,6 +21,9 @@
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
 #include "Log.h"
+#ifdef FAKEXCB
+#include <xcb/glx.h>
+#endif
 
 
 namespace vglfaker
@@ -466,6 +469,33 @@ FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 typedef	void* (*_dlopenType)(const char *, int);
 void *_vgl_dlopen(const char *, int);
 SYMDEF(dlopen);
+
+
+#ifdef FAKEXCB
+
+// XCB functions
+
+FUNCDEF2(const xcb_query_extension_reply_t *, xcb_get_extension_data,
+	xcb_connection_t *, conn, xcb_extension_t *, ext, return);
+
+FUNCDEF3(xcb_glx_query_version_cookie_t, xcb_glx_query_version,
+	xcb_connection_t *, conn, uint32_t, major_version, uint32_t, minor_version,
+	return);
+
+FUNCDEF3(xcb_glx_query_version_reply_t *, xcb_glx_query_version_reply,
+	xcb_connection_t *, conn, xcb_glx_query_version_cookie_t, cookie,
+	xcb_generic_error_t **, error, return);
+
+FUNCDEF1(xcb_generic_event_t *, xcb_poll_for_event, xcb_connection_t *, conn,
+	return);
+
+FUNCDEF1(xcb_generic_event_t *, xcb_poll_for_queued_event, xcb_connection_t *,
+	conn, return);
+
+FUNCDEF1(xcb_generic_event_t *, xcb_wait_for_event, xcb_connection_t *, conn,
+	return);
+
+#endif
 
 
 #ifdef __cplusplus

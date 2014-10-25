@@ -21,6 +21,9 @@
 #include "Log.h"
 #include "Mutex.h"
 #include "glx.h"
+#include "fakerconfig.h"
+#include "faker-sym.h"
+#include "Timer.h"
 
 
 namespace vglfaker
@@ -90,7 +93,7 @@ static inline int isDead(void)
 #define prargi(a) vglout.print("%s=%d ", #a, a)
 #define prargf(a) vglout.print("%s=%f ", #a, (double)a)
 #define prargv(a)  \
-	vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a? a->visualid:0)
+	vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, a? (a)->visualid:0)
 #define prargc(a)  \
 	vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a? _FBCID(a):0)
 #define prargal11(a) if(a) {  \
@@ -107,6 +110,17 @@ static inline int isDead(void)
 	for(int __an=0; a[__an]!=None; __an+=2) {  \
 		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
 	}  vglout.print("] ");}
+#ifdef FAKEXCB
+#define prargerr(a) {  \
+	vglout.print("(%s)->response_type=%d ", #a, (a)->response_type);  \
+	vglout.print("(%s)->error_code=%d ", #a, (a)->error_code);  \
+	vglout.print("(%s)->sequence=%d ", #a, (a)->sequence);  \
+	vglout.print("(%s)->resource_id=%d ", #a, (a)->resource_id);  \
+	vglout.print("(%s)->minor_code=%d ", #a, (a)->minor_code);  \
+	vglout.print("(%s)->major_code=%d ", #a, (a)->major_code);  \
+	vglout.print("(%s)->full_sequence=%d ", #a, (a)->full_sequence);  \
+}
+#endif
 
 #define opentrace(f)  \
 	double vglTraceTime=0.;  \

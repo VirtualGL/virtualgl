@@ -131,6 +131,15 @@
 
 		_vgl_dlopen;
 
+		#ifdef FAKEXCB
+		xcb_get_extension_data;
+		xcb_glx_query_version;
+		xcb_glx_query_version_reply;
+		xcb_poll_for_event;
+		xcb_poll_for_queued_event;
+		xcb_wait_for_event;
+		#endif
+
 	local:
 		*;
 };

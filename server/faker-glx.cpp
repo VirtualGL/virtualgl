@@ -26,8 +26,6 @@
 #include "VisualHash.h"
 #include "WindowHash.h"
 #include "rr.h"
-#include "fakerconfig.h"
-#include "faker-sym.h"
 #include "faker.h"
 #include "glxvisual.h"
 

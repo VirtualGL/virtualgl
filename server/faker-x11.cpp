@@ -17,8 +17,11 @@
 #include "VisualHash.h"
 #include "WindowHash.h"
 #include "faker.h"
-#include "fakerconfig.h"
 #include "vglconfigLauncher.h"
+#ifdef FAKEXCB
+#include "XCBConnHash.h"
+#include <X11/Xlib-xcb.h>
+#endif
 
 using namespace vglserver;
 
@@ -55,6 +58,11 @@ int XCloseDisplay(Display *dpy)
 	TRY();
 
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
+
+	#ifdef FAKEXCB
+	xcb_connection_t *conn=XGetXCBConnection(dpy);
+	xcbconnhash.remove(conn);
+	#endif
 
 	winhash.remove(dpy);
 	retval=_XCloseDisplay(dpy);
@@ -398,15 +406,31 @@ char **XListExtensions(Display *dpy, int *next)
 Display *XOpenDisplay(_Xconst char* name)
 {
 	Display *dpy=NULL;
+	#ifdef FAKEXCB
+	xcb_connection_t *conn=NULL;
+	#endif
+
 	TRY();
 
 		opentrace(XOpenDisplay);  prargs(name);  starttrace();
 
 	vglfaker::init();
 	dpy=_XOpenDisplay(name);
-	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
+	if(dpy)
+	{
+		if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
-		stoptrace();  prargd(dpy);  closetrace();
+		#ifdef FAKEXCB
+		conn=XGetXCBConnection(dpy);
+		if(conn) xcbconnhash.add(conn, dpy);
+		#endif
+	}
+
+		stoptrace();  prargd(dpy);
+		#ifdef FAKEXCB
+		prargx(conn);
+		#endif
+		closetrace();
 
 	CATCH();
 	return dpy;

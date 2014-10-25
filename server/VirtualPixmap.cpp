@@ -13,7 +13,6 @@
 
 #include "VirtualPixmap.h"
 #include "glxvisual.h"
-#include "fakerconfig.h"
 #include "vglutil.h"
 #include "faker.h"
 

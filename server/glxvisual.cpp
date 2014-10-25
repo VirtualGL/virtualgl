@@ -20,9 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Error.h"
-#include "fakerconfig.h"
 #include "Mutex.h"
-#include "faker-sym.h"
 #include "faker.h"
 
 using namespace vglutil;

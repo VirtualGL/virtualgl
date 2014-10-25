@@ -40,6 +40,9 @@ static void *gldllhnd=NULL;
 static void *x11dllhnd=NULL;
 static int loadGLSymbols(void *);
 static int loadX11Symbols(void *);
+#ifdef FAKEXCB
+static int loadXCBSymbols(void *);
+#endif
 
 
 namespace vglfaker
@@ -150,6 +153,14 @@ void loadSymbols(void)
 			safeExit(1);
 		}
 	}
+
+	#ifdef FAKEXCB
+	if(loadXCBSymbols(RTLD_NEXT)<0)
+	{
+		vglout.print("[VGL] ERROR: Could not load XCB symbols from libxcb.\n");
+		safeExit(1);
+	}
+	#endif
 }
 
 } // namespace
@@ -291,6 +302,24 @@ static int loadX11Symbols(void *dllhnd)
 	LSYM(XWindowEvent);
 	return 0;
 }
+
+
+#ifdef FAKEXCB
+
+static int loadXCBSymbols(void *dllhnd)
+{
+	dlerror();  // Clear error state
+
+	LSYM(xcb_get_extension_data);
+	LSYM(xcb_glx_query_version);
+	LSYM(xcb_glx_query_version_reply);
+	LSYM(xcb_poll_for_event);
+	LSYM(xcb_poll_for_queued_event);
+	LSYM(xcb_wait_for_event);
+	return 0;
+}
+
+#endif
 
 
 namespace vglfaker {
