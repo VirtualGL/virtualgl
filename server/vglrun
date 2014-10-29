@@ -226,6 +226,9 @@ if [ ! -z "$VGL_LIBRARY_PATH" ]; then
 	fi
 fi
 
+# This allows scripts to detect whether they are being launched with vglrun.
+export VGL_ISACTIVE=1
+
 if [ -z "$LD_PRELOAD" ]; then
 	LD_PRELOAD=librrfaker.so
 else
