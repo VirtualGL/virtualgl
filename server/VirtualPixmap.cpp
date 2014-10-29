@@ -26,7 +26,7 @@ VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm)
 {
 	CriticalSection::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
-	_newcheck(frame=new FBXFrame(dpy_, pm, vis->visual));
+	_newcheck(frame=new FBXFrame(dpy_, pm, vis->visual, true));
 }
 
 

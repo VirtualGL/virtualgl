@@ -111,9 +111,11 @@ namespace vglcommon
 	{
 		public:
 
-			FBXFrame(Display *dpy, Drawable draw, Visual *vis=NULL);
+			FBXFrame(Display *dpy, Drawable draw, Visual *vis=NULL,
+				bool reuseConn=false);
 			FBXFrame(char *dpystring, Window win);
 			void init(char *dpystring, Drawable draw, Visual *vis=NULL);
+			void init(Display *dpy, Drawable draw, Visual *vis);
 			~FBXFrame(void);
 			void init(rrframeheader &h);
 			FBXFrame& operator= (CompressedFrame &cf);
@@ -124,6 +126,7 @@ namespace vglcommon
 			fbx_wh wh;
 			fbx_struct fb;
 			tjhandle tjhnd;
+			bool reuseConn;
 	};
 }
 

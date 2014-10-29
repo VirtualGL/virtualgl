@@ -43,6 +43,23 @@ the application would fall back to non-OpenGL rendering.
 Currently, enabling XCB support in VirtualGL requires building VirtualGL from
 source and adding -DVGL_FAKEXCB=1 to the CMake command line.
 -------------------------------------------------------------------------------
+[7]
+Fixed a deadlock that occurred when running compiz 0.9.11 (and possibly other
+versions as well) with VirtualGL.  The issue occurred when compiz called
+XGrabServer(), followed by glXCreatePixmap() and glXDestroyPixmap().  In
+VirtualGL, a GLX pixmap resides on the 3D X server, but the corresponding X11
+pixmap resides on the 2D X server.  Thus, VirtualGL has to synchronize pixels
+between the two pixmaps in response to certain operations, such as XCopyArea()
+and XGetImage(), or when the GLX pixmap is destroyed.  VirtualGL was previously
+opening a new connection to the 2D X server in order to perform this
+synchronization, and because the 2D X server was grabbed, compiz locked up when
+VirtualGL called XCloseDisplay() on the new display connection.  In fact,
+however, the new display connection was unnecessary, since the GLX/X11 pixmap
+synchronization occurs within the 3D rendering thread.  Thus, VirtualGL now
+simply reuses the same display connection that is passed to
+glXCreate[GLX]Pixmap().
+-------------------------------------------------------------------------------
+
 
 
 ===============================================================================

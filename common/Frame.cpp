@@ -561,11 +561,13 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 
 // Frame created from shared graphics memory
 
-FBXFrame::FBXFrame(Display *dpy, Drawable draw, Visual *vis) : Frame()
+FBXFrame::FBXFrame(Display *dpy, Drawable draw, Visual *vis,
+	bool reuseConn) : Frame()
 {
 	if(!dpy || !draw) throw(Error("FBXFrame::FBXFrame", "Invalid argument"));
 	XFlush(dpy);
-	init(DisplayString(dpy), draw, vis);
+	if(reuseConn) init(dpy, draw, vis);
+	else init(DisplayString(dpy), draw, vis);
 }
 
 
@@ -577,7 +579,7 @@ FBXFrame::FBXFrame(char *dpystring, Window win) : Frame()
 
 void FBXFrame::init(char *dpystring, Drawable draw, Visual *vis)
 {
-	tjhnd=NULL;
+	tjhnd=NULL;  reuseConn=false;
 	memset(&fb, 0, sizeof(fbx_struct));
 	if(!dpystring || !draw) throw(Error("FBXFrame::init", "Invalid argument"));
 	if(!(wh.dpy=XOpenDisplay(dpystring)))
@@ -586,11 +588,21 @@ void FBXFrame::init(char *dpystring, Drawable draw, Visual *vis)
 }
 
 
+void FBXFrame::init(Display *dpy, Drawable draw, Visual *vis)
+{
+	tjhnd=NULL;  reuseConn=true;
+	memset(&fb, 0, sizeof(fbx_struct));
+	if(!dpy || !draw) throw(Error("FBXFrame::init", "Invalid argument"));
+	wh.dpy=dpy;
+	wh.d=draw;  wh.v=vis;
+}
+
+
 FBXFrame::~FBXFrame(void)
 {
 	if(fb.bits) fbx_term(&fb);  if(bits) bits=NULL;
 	if(tjhnd) tjDestroy(tjhnd);
-	if(wh.dpy) XCloseDisplay(wh.dpy);
+	if(wh.dpy && !reuseConn) XCloseDisplay(wh.dpy);
 }
 
 
