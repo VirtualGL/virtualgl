@@ -19,7 +19,7 @@
 #include "vglconfigLauncher.h"
 #include <X11/Xlib-xcb.h>
 #include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_atom.h>
+#include <xcb/xcb.h>
 #include <xcb/xcbext.h>
 #include <xcb/glx.h>
 
@@ -192,8 +192,18 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		case XCB_CLIENT_MESSAGE:
 		{
 			xcb_client_message_event_t *cme=(xcb_client_message_event_t *)e;
-			xcb_atom_t protoAtom=xcb_atom_get(conn, "WM_PROTOCOLS");
-			xcb_atom_t deleteAtom=xcb_atom_get(conn, "WM_DELETE_WINDOW");
+			xcb_atom_t protoAtom=0, deleteAtom=0;
+			xcb_intern_atom_reply_t *reply=NULL;
+
+			reply=xcb_intern_atom_reply(conn,
+				xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
+					"WM_PROTOCOLS"), NULL);
+			if(reply) protoAtom=reply->atom;
+			reply=xcb_intern_atom_reply(conn,
+				xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
+					"WM_DELETE_WINDOW"), NULL);
+			if(reply) deleteAtom=reply->atom;
+
 			Display *dpy=xcbconnhash.getX11Display(conn);
 
 			if(!dpy || !protoAtom || !deleteAtom

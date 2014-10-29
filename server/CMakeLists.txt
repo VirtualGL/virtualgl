@@ -77,7 +77,7 @@ else()
 	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
 endif()
 if(VGL_FAKEXCB)
-	set(LIBXCB xcb-atom xcb-glx xcb-keysyms X11-xcb)
+	set(LIBXCB xcb xcb-glx xcb-keysyms X11-xcb)
 endif()
 target_link_libraries(rrfaker vglcommon ${FBXFAKERLIB} vglsocket m
 	${OPENGL_gl_LIBRARY} ${LIBDL} ${LIBXCB})
