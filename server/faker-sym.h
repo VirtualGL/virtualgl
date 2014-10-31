@@ -22,7 +22,9 @@
 #include "glx.h"
 #include "Log.h"
 #ifdef FAKEXCB
+extern "C" {
 #include <xcb/glx.h>
+}
 #endif
 
 

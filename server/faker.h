@@ -114,11 +114,6 @@ static inline int isDead(void)
 #define prargerr(a) {  \
 	vglout.print("(%s)->response_type=%d ", #a, (a)->response_type);  \
 	vglout.print("(%s)->error_code=%d ", #a, (a)->error_code);  \
-	vglout.print("(%s)->sequence=%d ", #a, (a)->sequence);  \
-	vglout.print("(%s)->resource_id=%d ", #a, (a)->resource_id);  \
-	vglout.print("(%s)->minor_code=%d ", #a, (a)->minor_code);  \
-	vglout.print("(%s)->major_code=%d ", #a, (a)->major_code);  \
-	vglout.print("(%s)->full_sequence=%d ", #a, (a)->full_sequence);  \
 }
 #endif
 

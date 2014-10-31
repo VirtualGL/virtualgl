@@ -18,7 +18,9 @@
 #ifdef FAKEXCB
 
 #include <X11/Xlib.h>
+extern "C" {
 #include <xcb/xcb.h>
+}
 #include "Hash.h"
 
 

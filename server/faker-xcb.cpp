@@ -17,11 +17,13 @@
 #include "XCBConnHash.h"
 #include "faker.h"
 #include "vglconfigLauncher.h"
+extern "C" {
 #include <X11/Xlib-xcb.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb.h>
 #include <xcb/xcbext.h>
 #include <xcb/glx.h>
+}
 
 using namespace vglserver;
 

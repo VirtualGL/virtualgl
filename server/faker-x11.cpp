@@ -20,7 +20,9 @@
 #include "vglconfigLauncher.h"
 #ifdef FAKEXCB
 #include "XCBConnHash.h"
+extern "C" {
 #include <X11/Xlib-xcb.h>
+}
 #endif
 
 using namespace vglserver;
