@@ -29,7 +29,7 @@
 
 
 #define _throw(m) {  \
-	fprintf(stderr, "ERROR (%d): %s\n", __LINE__,  m);  \
+	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m);  \
 	goto bailout;  \
 }
 #define _catch(f) { if((f)==-1) goto bailout; }
@@ -58,19 +58,19 @@ enum { GRAY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 #define DEFBENCHTIME 2.0
 
 Display *dpy=NULL;  Window win=0, olWin=0;
+GLXContext ctx=0, olCtx=0;
 int useStereo=0, useOverlay=0, useCI=0, useImm=0, interactive=0, olDB=1,
 	loColor=0, maxFrames=0, totalFrames=0, directCtx=True;
 double benchTime=DEFBENCHTIME;
 int nColors=0, nOlColors, colorScheme=GRAY;
 Colormap colormap=0, olColormap=0;
-GLXContext ctx=0, olCtx=0;
 
 int sphereList=0, fontListBase=0;
 GLUquadricObj *sphereQuad=NULL;
 int slices=DEF_SLICES, stacks=DEF_STACKS, spheres=DEF_SPHERES;
-float x=0., y=0., z=-3.;
-float outerAngle=0., middleAngle=0., innerAngle=0.;
-float loneSphereColor=0.;
+GLfloat x=0., y=0., z=-3.;
+GLfloat outerAngle=0., middleAngle=0., innerAngle=0.;
+GLfloat loneSphereColor=0.;
 unsigned int transPixel=0;
 
 int width=DEF_WIDTH, height=DEF_HEIGHT;
@@ -79,6 +79,7 @@ int width=DEF_WIDTH, height=DEF_HEIGHT;
 int setColorScheme(Colormap cmap, int nColors, int scheme)
 {
 	XColor xc[256];  int i;
+
 	if(!nColors || !cmap) _throw("Color map not allocated");
 	if(scheme<0 || scheme>NSCHEMES-1 || !cmap) _throw("Invalid argument");
 
@@ -104,11 +105,12 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 
 void reshape(int newWidth, int newHeight)
 {
-	XWindowChanges changes;
 	if(newWidth<=0) newWidth=1;  if(newHeight<=0) newHeight=1;
 	width=newWidth;  height=newHeight;
+
 	if(useOverlay && olWin)
 	{
+		XWindowChanges changes;
 		changes.width=width;
 		changes.height=height;
 		XConfigureWindow(dpy, olWin, CWWidth|CWHeight, &changes);
@@ -116,18 +118,18 @@ void reshape(int newWidth, int newHeight)
 }
 
 
-void setSphereColor(float color)
+void setSphereColor(GLfloat color)
 {
 	if(useCI)
 	{
-		GLfloat index=color*(float)(nColors-1);
+		GLfloat index=color*(GLfloat)(nColors-1);
 		GLfloat matIndexes[]={ index*0.3, index*0.8, index };
 		glIndexf(index);
 		glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, matIndexes);
 	}
 	else
 	{
-		float mat[4]=
+		GLfloat mat[4]=
 		{
 			SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color), 0.25
 		};
@@ -229,7 +231,7 @@ void renderSpheres(int buf)
 void renderOverlay(void)
 {
 	int i, j, w=width/8, h=height/8;  unsigned char *buf=NULL;
-	int index=(int)(loneSphereColor*(float)(nOlColors-1));
+	int index=(int)(loneSphereColor*(GLfloat)(nOlColors-1));
 
 	glShadeModel(GL_FLAT);
 	glDisable(GL_DEPTH_TEST);
@@ -239,9 +241,9 @@ void renderOverlay(void)
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, width, height);
 	glRasterPos3f(-0.5, 0.5, 0.0);
-	glClearIndex((float)transPixel);
+	glClearIndex((GLfloat)transPixel);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glIndexf(loneSphereColor*(float)(nOlColors-1));
+	glIndexf(loneSphereColor*(GLfloat)(nOlColors-1));
 	glBegin(GL_LINES);
 	glVertex2f(-1.+loneSphereColor*2., -1.);
 	glVertex2f(-1.+loneSphereColor*2., 1.);
@@ -414,7 +416,6 @@ int display(int advance)
 
 	bailout:
 	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad=NULL; }
-	if(fontInfo) { XFreeFont(dpy, fontInfo);  fontInfo=NULL; }
 	return -1;
 }
 
