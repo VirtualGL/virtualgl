@@ -363,8 +363,8 @@ int main(int argc, char **argv)
 	WNDCLASSEX wndclass;  MSG msg;
 	int bw=GetSystemMetrics(SM_CXFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
-	DWORD winstyle=WS_OVERLAPPEDWINDOW | WS_VISIBLE;
-	int pixelformat=0;
+	DWORD winStyle=WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+	int pixelFormat=0;
 	PIXELFORMATDESCRIPTOR pfd =
 	{
 		sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -390,7 +390,12 @@ int main(int argc, char **argv)
 				width=w;  height=h;
 			}
 		}
-		if(!strnicmp(argv[i], "-fs", 3)) fullScreen=1;
+		if(!strnicmp(argv[i], "-fs", 3))
+		{
+			fullScreen=1;
+			winStyle=WS_POPUP | WS_VISIBLE;
+			bw=bh=0;
+		}
 		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
 		{
 			int mf=atoi(argv[++i]);
@@ -453,7 +458,12 @@ int main(int argc, char **argv)
 	wndclass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 	if(!RegisterClassEx(&wndclass)) _throww32("Cannot create window class");
 
-	if(!(win=CreateWindowEx(0, "WGLspheres", "WGLspheres", winstyle, 0,  0,
+	if(fullScreen)
+	{
+		width=GetSystemMetrics(SM_CXSCREEN);
+		height=GetSystemMetrics(SM_CYSCREEN);
+	}
+	if(!(win=CreateWindowEx(0, "WGLspheres", "WGLspheres", winStyle, 0,  0,
 		width+bw, height+bh, NULL, NULL, GetModuleHandle(NULL), NULL)))
 		_throww32("Cannot create window");
 
@@ -463,10 +473,10 @@ int main(int argc, char **argv)
 
 	if(!(hdc=GetDC(win))) _throww32("Cannot create device context");
 
-	if(!(pixelformat=ChoosePixelFormat(hdc, &pfd)))
+	if(!(pixelFormat=ChoosePixelFormat(hdc, &pfd)))
 		_throww32("Cannot create pixel format");
-	fprintf(stderr, "Pixel Format of window: %d\n", pixelformat);
-	if(!SetPixelFormat(hdc, pixelformat, &pfd))
+	fprintf(stderr, "Pixel Format of window: %d\n", pixelFormat);
+	if(!SetPixelFormat(hdc, pixelFormat, &pfd))
 		_throww32("Cannot set pixel format");
 
 	if(!(ctx=wglCreateContext(hdc))) _throww32("Cannot create OpenGL context");
