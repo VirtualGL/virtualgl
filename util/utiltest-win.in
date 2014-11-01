@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+set -u
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+SUCCESS=0
+PID=-1
+
+onexit()
+{
+	if [ $SUCCESS -eq 1 ]; then
+		echo GREAT SUCCESS!
+	else
+		echo Some errors were encountered.
+	fi
+}
+
+BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
+SSL=@VGL_USESSL@
+
+$BIN/bmptest
+echo
+
+$BIN/fbxtest -time 0.2
+$BIN/fbxtest -time 0.2 -mt
+
+$BIN/nettest -server &
+echo
+sleep 2
+$BIN/nettest -client localhost -t 0.2
+
+if [ "$SSL" = "1" ]; then
+	echo
+	$BIN/nettest -server -ssl &
+	sleep 2
+	$BIN/nettest -client localhost -ssl -t 0.2
+fi
+
+SUCCESS=1
