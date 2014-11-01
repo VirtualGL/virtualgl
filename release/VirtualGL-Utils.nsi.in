@@ -1,0 +1,68 @@
+!include x64.nsh
+!ifdef WIN64
+!define PROGNAME "@CMAKE_PROJECT_NAME@ 64-bit"
+OutFile "@CMAKE_BINARY_DIR@\${BUILDDIR}@CMAKE_PROJECT_NAME@64-@VERSION@.exe"
+InstallDir $PROGRAMFILES64\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@
+!else
+!define PROGNAME "@CMAKE_PROJECT_NAME@"
+OutFile "@CMAKE_BINARY_DIR@\${BUILDDIR}@CMAKE_PROJECT_NAME@-@VERSION@-.exe"
+InstallDir $PROGRAMFILES\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@
+!endif
+Name "${PROGNAME}"
+
+SetCompressor bzip2
+
+Page directory
+Page instfiles
+
+UninstPage uninstConfirm
+UninstPage instfiles
+
+Section "@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@ (required)"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
+
+	SectionIn RO
+	SetOutPath $INSTDIR
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}tcbench.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}nettest.exe"
+	File "@CMAKE_BINARY_DIR@\bin\${BUILDDIR}wglspheres.exe"
+	File "@CMAKE_SOURCE_DIR@\LGPL.txt"
+	File "@CMAKE_SOURCE_DIR@\LICENSE.txt"
+
+	WriteRegStr HKLM "SOFTWARE\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "Install_Dir" "$INSTDIR"
+
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "DisplayName" "${PROGNAME} v@VERSION@ (@BUILD@)"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "NoModify" 1
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@" "NoRepair" 1
+	WriteUninstaller "uninstall.exe"
+SectionEnd
+
+Section "Uninstall"
+
+!ifdef WIN64
+	${If} ${RunningX64}
+	${DisableX64FSRedirection}
+	${Endif}
+!endif
+
+	SetShellVarContext all
+	ExecWait "$INSTDIR\vglclient.exe -killall"
+
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@"
+	DeleteRegKey HKLM "SOFTWARE\@CMAKE_PROJECT_NAME@-@VERSION@-@BUILD@"
+
+	Delete $INSTDIR\uninstall.exe
+	Delete $INSTDIR\tcbench.exe
+	Delete $INSTDIR\nettest.exe
+	Delete $INSTDIR\wglspheres.exe
+	Delete $INSTDIR\LGPL.txt
+	Delete $INSTDIR\LICENSE.txt
+	RMDir "$INSTDIR"
+
+SectionEnd

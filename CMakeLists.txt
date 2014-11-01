@@ -5,17 +5,34 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 
-if(NOT UNIX)
-	message(FATAL_ERROR "Platform not supported.")
+if(UNIX)
+	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
+		"Install path prefix, prepended onto install directories.")
 endif()
 
-set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
-	"Install path prefix, prepended onto install directories.")
-
-project(VirtualGL)
+if(WIN32)
+	project(VirtualGL-Utils)
+else()
+	project(VirtualGL)
+endif()
 set(VERSION 2.3.91)
 
-execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
+if(UNIX)
+	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
+	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+elseif(WIN32)
+	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
+		BUILD)
+	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
+	if (BUILD STREQUAL "")
+		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
+		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
+	else()
+		string(SUBSTRING "${BUILD}" 0 8 BUILD)
+	endif()
+else()
+	message(FATAL_ERROR "Platform not supported.")
+endif()
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -28,6 +45,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# This only works if building from the command line.  There is currently no way
+# to set a variable's value based on the build type when using the MSVC IDE.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(BUILD "${BUILD}d")
 endif()
@@ -39,7 +58,11 @@ add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
-set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
+if(WIN32)
+	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX})
+else()
+	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
+endif()
 
 set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
 	"Directory into which executables and scripts should be installed (default: ${DEFAULT_VGL_BINDIR})")
@@ -51,10 +74,32 @@ message(STATUS "VGL_DOCDIR = ${VGL_DOCDIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+if(MSVC)
+	# Use the static C library for all build types
+	foreach(var CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+		CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+		CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		if(${var} MATCHES "/MD")
+			string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
+		endif()
+	endforeach()
+
+	add_definitions(-wd4996 -D_CRT_SECURE_NO_DEPRECATE)
+
+	# Don't auto-generate manifests
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
+  # Avoid linker warning when doing Debug build if dependent libraries are
+  # linked with the Release version of the static C library.
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
+endif()
+
 # Detect CPU type and word size
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
 	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
+	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"
 	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
 	if(BITS EQUAL 64)
 		set(CPU_TYPE x86_64)
@@ -161,6 +206,15 @@ if(VGL_USESSL)
 		include_directories(${OPENSSL_INCLUDE_DIR})
 	endif()
 endif()
+
+if(WIN32)
+
+set(VGL_USEXV 0)
+add_subdirectory(util)
+add_subdirectory(wgldemos)
+add_subdirectory(diags)
+
+else()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
@@ -272,6 +326,7 @@ add_subdirectory(glxdemos)
 add_subdirectory(diags)
 add_subdirectory(doc)
 
+endif() # WIN32
 
 #
 # Installation and packaging

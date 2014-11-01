@@ -83,7 +83,9 @@ problems with the system.
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  ''nettest'' is installed in
-''/opt/VirtualGL/bin'' by default.
+''/opt/VirtualGL/bin'' by default.  For Windows users, a native Windows version
+of NetTest is included in the "VirtualGL-Utils" package, which is distributed
+alongside VirtualGL.  
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
@@ -194,8 +196,8 @@ system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
 TCBench is installed in ''/opt/VirtualGL/bin'' by default.  For Windows users,
-a native Windows version of TCBench is bundled along with version 1.3 and later
-of the native TurboVNC Viewer for Windows.  Run ''tcbench''
+a native Windows version of TCBench is included in the "VirtualGL-Utils"
+package, which is distributed alongside VirtualGL.  Run ''tcbench''
 from the command line, and it will prompt you to click in the window you want
 to benchmark.   That window should already have an automated animation of some
 sort running before you launch TCBench.  Note that GLXSpheres (see below) is
@@ -243,7 +245,7 @@ features:
 	Overlay rendering (''glxspheres -o'') :: This renders text, a moving
 	crosshair cursor, and a block of pixels to an 8-bit transparent overlay while
 	animating the spheres on the underlay.  The color map of the overlay is
-	changed periodically. 
+	changed periodically.
 
 	Immediate mode rendering (''glxspheres -m'') :: Want to really see the
 	benefit of VirtualGL?  Run ''glxspheres -m'' over a remote X connection, then

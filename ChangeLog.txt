@@ -59,7 +59,19 @@ synchronization occurs within the 3D rendering thread.  Thus, VirtualGL now
 simply reuses the same display connection that is passed to
 glXCreate[GLX]Pixmap().
 -------------------------------------------------------------------------------
+[8]
+NetTest and TCBench for Windows are now supplied in a package called
+VirtualGL-Utils, which can be built from the VirtualGL source.  When the
+VirtualGL Client for Exceed was discontinued, these utilities ceased to have a
+home, but they are still useful tools to have, irrespective of the thin client
+solution that is being used.  The Windows build of TCBench was temporarily
+moved into the Windows TurboVNC Viewer packages, but it proved to be a pain to
+keep the source code synchronized between the two projects.
 
+The VirtualGL-Utils package additionally contains a WGL version of GLXspheres,
+which is a useful tool to have when benchmarking Windows virtual machines that
+are running in a VirtualGL environment.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

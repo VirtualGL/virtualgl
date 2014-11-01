@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-10-25T03:02:36">
+<meta name="date" content="2014-10-31T19:06:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2640,7 +2640,10 @@ performance problems with the system.</p>
 <p>NetTest is a network benchmark that uses the same network I/O classes as 
 VirtualGL.  It can be used to test the latency and throughput of any 
 TCP/IP connection, with or without SSL encryption.  <code>nettest</code> 
-is installed in <code>/opt/VirtualGL/bin</code> by default.</p>
+is installed in <code>/opt/VirtualGL/bin</code> by default.  For Windows 
+users, a native Windows version of NetTest is included in the 
+&ldquo;VirtualGL-Utils&rdquo; package, which is distributed alongside 
+VirtualGL.</p>
 
 <p>To use NetTest, first start up the NetTest server on one end of the 
 connection:</p>
@@ -2759,14 +2762,14 @@ of system-specific techniques, such as monitoring redraw events on the
 client&rsquo;s windowing system.</p>
 
 <p>TCBench is installed in <code>/opt/VirtualGL/bin</code> by default.  For 
-Windows users, a native Windows version of TCBench is bundled along with 
-version 1.3 and later of the native TurboVNC Viewer for Windows.  Run 
-<code>tcbench</code> from the command line, and it will prompt you to 
-click in the window you want to benchmark.   That window should already 
-have an automated animation of some sort running before you launch 
-TCBench.  Note that GLXSpheres (see below) is an ideal benchmark to use 
-with TCBench, since GLXSpheres draws a new sphere to the center of its 
-window on every frame.</p>
+Windows users, a native Windows version of TCBench is included in the 
+&ldquo;VirtualGL-Utils&rdquo; package, which is distributed alongside 
+VirtualGL.  Run <code>tcbench</code> from the command line, and it will 
+prompt you to click in the window you want to benchmark.   That window 
+should already have an automated animation of some sort running before 
+you launch TCBench.  Note that GLXSpheres (see below) is an ideal 
+benchmark to use with TCBench, since GLXSpheres draws a new sphere to 
+the center of its window on every frame.</p>
 
 <pre class="verbatim">
 tcbench&nbsp;-?
