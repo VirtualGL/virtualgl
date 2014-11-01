@@ -58,7 +58,7 @@ void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 	if(item==NULL) _throw("NULL argument in GenericQ::spoil()");
 	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
-	void *dummy;
+	void *dummy=NULL;
 	while(1)
 	{
 		get(&dummy, true);   if(!dummy) break;
