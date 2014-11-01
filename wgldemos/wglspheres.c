@@ -468,7 +468,7 @@ int main(int argc, char **argv)
 		_throww32("Cannot create window");
 
 	GetClientRect(win, &rect);
-	fprintf(stderr, "Client area of window: %d x %d pixels\n",
+	fprintf(stderr, "Client area of window: %ld x %ld pixels\n",
 		rect.right-rect.left, rect.bottom-rect.top);
 
 	if(!(hdc=GetDC(win))) _throww32("Cannot create device context");
