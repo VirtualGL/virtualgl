@@ -314,7 +314,7 @@ static int loadXCBSymbols(void *dllhnd)
 	LSYM(xcb_glx_query_version);
 	LSYM(xcb_glx_query_version_reply);
 	LSYM(xcb_poll_for_event);
-	LSYM(xcb_poll_for_queued_event);
+	LSYMOPT(xcb_poll_for_queued_event);
 	LSYM(xcb_wait_for_event);
 	return 0;
 }
