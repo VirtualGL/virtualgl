@@ -195,18 +195,10 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		{
 			xcb_client_message_event_t *cme=(xcb_client_message_event_t *)e;
 			xcb_atom_t protoAtom=0, deleteAtom=0;
-			xcb_intern_atom_reply_t *reply=NULL;
-
-			reply=xcb_intern_atom_reply(conn,
-				xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
-					"WM_PROTOCOLS"), NULL);
-			if(reply) protoAtom=reply->atom;
-			reply=xcb_intern_atom_reply(conn,
-				xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
-					"WM_DELETE_WINDOW"), NULL);
-			if(reply) deleteAtom=reply->atom;
 
 			Display *dpy=xcbconnhash.getX11Display(conn);
+			protoAtom=xcbconnhash.getProtoAtom(conn);
+			deleteAtom=xcbconnhash.getDeleteAtom(conn);
 
 			if(!dpy || !protoAtom || !deleteAtom
 				|| cme->type!=protoAtom || cme->data.data32[0]!=deleteAtom)

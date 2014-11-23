@@ -24,7 +24,14 @@ extern "C" {
 #include "Hash.h"
 
 
-#define HASH Hash<xcb_connection_t *, void *, Display *>
+typedef struct
+{
+	Display *dpy;
+	xcb_atom_t protoAtom, deleteAtom;
+} XCBConnAttribs;
+
+
+#define HASH Hash<xcb_connection_t *, void *, XCBConnAttribs *>
 
 namespace vglserver
 {
@@ -47,7 +54,24 @@ namespace vglserver
 			void add(xcb_connection_t *conn, Display *dpy)
 			{
 				if(!conn || !dpy) _throw("Invalid argument");
-				HASH::add(conn, NULL, dpy);
+
+				XCBConnAttribs *attribs=NULL;
+				_newcheck(attribs=new XCBConnAttribs);
+				attribs->dpy=dpy;  attribs->protoAtom=0;  attribs->deleteAtom=0;
+
+				// We set up the window manager atoms here because doing so in the
+				// event handler can cause a deadlock.
+				xcb_intern_atom_reply_t *reply=NULL;
+				reply=xcb_intern_atom_reply(conn,
+					xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
+						"WM_PROTOCOLS"), NULL);
+				if(reply) attribs->protoAtom=reply->atom;
+				reply=xcb_intern_atom_reply(conn,
+					xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
+						"WM_DELETE_WINDOW"), NULL);
+				if(reply) attribs->deleteAtom=reply->atom;
+
+				HASH::add(conn, NULL, attribs);
 			}
 
 			void remove(xcb_connection_t *conn)
@@ -59,7 +83,25 @@ namespace vglserver
 			Display *getX11Display(xcb_connection_t *conn)
 			{
 				if(!conn) _throw("Invalid_argument");
-				return HASH::find(conn, NULL);
+				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				if(attribs) return attribs->dpy;
+				return 0;
+			}
+
+			xcb_atom_t getProtoAtom(xcb_connection_t *conn)
+			{
+				if(!conn) _throw("Invalid_argument");
+				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				if(attribs) return attribs->protoAtom;
+				return 0;
+			}
+
+			xcb_atom_t getDeleteAtom(xcb_connection_t *conn)
+			{
+				if(!conn) _throw("Invalid_argument");
+				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				if(attribs) return attribs->deleteAtom;
+				return 0;
 			}
 
 		private:
@@ -76,6 +118,8 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
+				XCBConnAttribs *attribs=entry? (XCBConnAttribs *)entry->value:NULL;
+				if(attribs) delete attribs;
 			}
 
 			static XCBConnHash *instance;
