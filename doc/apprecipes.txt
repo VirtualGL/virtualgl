@@ -154,7 +154,9 @@
 	|
 | Qt 5 Applications | Linux \
 	| Build and install VirtualGL from source, adding ''-DVGL_FAKEXCB=1'' to \
-		the CMake command line. \
+		the CMake command line.  Set the ''VGL_FAKEXCB'' environment variable to \
+		''1'' prior to launching the application with ''vglrun'', or pass an \
+		argument of ''+xcb'' to ''vglrun''. \
 	| Although Qt 5 uses GLX to interface between X11 and OpenGL, it \
 		uses XCB instead of Xlib to perform all other X11-related functions. \
 		Thus, VirtualGL has to interpose enough of the XCB API to allow it to \

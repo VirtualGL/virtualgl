@@ -33,6 +33,9 @@ namespace vglfaker
 	extern void safeExit(int);
 	extern int deadYet;
 	extern int traceLevel;
+	#ifdef FAKEXCB
+	extern bool fakeXCB;
+	#endif
 }
 
 #define _dpy3D vglfaker::dpy3D

@@ -36,6 +36,9 @@ Display *dpy3D=NULL;
 CriticalSection globalMutex;
 bool deadYet=false;
 int traceLevel=0;
+#ifdef FAKEXCB
+bool fakeXCB=false;
+#endif
 
 
 static void cleanup(void)
@@ -121,6 +124,13 @@ void init(void)
 		fgetc(stdin);
 	}
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
+
+	#ifdef FAKEXCB
+	char *env=NULL;
+	if((env=getenv("VGL_FAKEXCB"))!=NULL && strlen(env)>0
+		&& !strncmp(env, "1", 1))
+		vglfaker::fakeXCB=true;
+	#endif
 
 	loadSymbols();
 	if(!dpy3D)

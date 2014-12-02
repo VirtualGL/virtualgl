@@ -2,7 +2,7 @@
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
-# Copyright (C)2009-2013 D. R. Commander
+# Copyright (C)2009-2014 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -163,6 +163,8 @@ do
 	-ms)        VGL_SAMPLES=$2    ; export VGL_SAMPLES  ; shift     ;;
 	+wm)        VGL_WM=1          ; export VGL_WM       ;;
 	-wm)        VGL_WM=0          ; export VGL_WM       ;;
+	+xcb)       VGL_FAKEXCB=1     ; export VGL_FAKEXCB  ;;
+	-xcb)       VGL_FAKEXCB=0     ; export VGL_FAKEXCB  ;;
 	-ld)        VGL_LIBRARY_PATH=$2 ; shift ;;
 	-h)         usage 0 ;;
 	--help)     usage 0 ;;

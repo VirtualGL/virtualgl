@@ -169,6 +169,26 @@ Each method of configuration takes precedence over the previous method:
 	VirtualGL to redirect all of the 3D rendering from the application to a GPU
 	attached to Screen 1 on X display :0.
 
+| Environment Variable | ''VGL_FAKEXCB = ''__''0 \| 1''__ |
+| ''vglrun'' argument | ''-xcb'' / ''+xcb'' |
+| Summary | Disable/enable XCB interposer |
+| Image Transports | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Qt 5 uses XCB instead of Xlib to perform all non-OpenGL
+	X11-related functions.  Thus, in order to support Qt 5 applications,
+	VirtualGL has to interpose enough of the XCB API to allow it to intercept
+	window resize events and to make Qt 5 believe that a GLX extension is
+	present, even when the 2D X server doesn't support GLX.  Because Xlib uses
+	XCB internally, it is generally not a good idea to enable the XCB interposer
+	except when needed.
+
+	!!! NOTE:  Because XCB is only available on newer platforms, the XCB
+	interposer is not built into the "official" VirtualGL binary packages.	To
+	use this feature, build and install VirtualGL from source, adding
+	''-DVGL_FAKEXCB=1'' to the CMake command line.
+
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
 | Summary | Force the Pbuffers used for 3D rendering to have an 8-bit alpha channel |
