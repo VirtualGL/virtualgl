@@ -41,7 +41,9 @@ application would complain that OpenGL was not available and fail to start, or
 the application would fall back to non-OpenGL rendering.
 
 Currently, enabling XCB support in VirtualGL requires building VirtualGL from
-source and adding -DVGL_FAKEXCB=1 to the CMake command line.
+source and adding -DVGL_FAKEXCB=1 to the CMake command line.  The XCB
+interposer is also disabled by default at run time.  It must be enabled by
+setting the VGL_FAKEXCB environment variable to 1 or passing +xcb to vglrun.
 -------------------------------------------------------------------------------
 [7]
 Fixed a deadlock that occurred when running compiz 0.9.11 (and possibly other
