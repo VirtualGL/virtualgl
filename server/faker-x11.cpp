@@ -62,8 +62,11 @@ int XCloseDisplay(Display *dpy)
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
 
 	#ifdef FAKEXCB
-	xcb_connection_t *conn=XGetXCBConnection(dpy);
-	xcbconnhash.remove(conn);
+	if(vglfaker::fakeXCB)
+	{
+		xcb_connection_t *conn=XGetXCBConnection(dpy);
+		xcbconnhash.remove(conn);
+	}
 	#endif
 
 	winhash.remove(dpy);
@@ -423,14 +426,17 @@ Display *XOpenDisplay(_Xconst char* name)
 		if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
 		#ifdef FAKEXCB
-		conn=XGetXCBConnection(dpy);
-		if(conn) xcbconnhash.add(conn, dpy);
+		if(vglfaker::fakeXCB)
+		{
+			conn=XGetXCBConnection(dpy);
+			if(conn) xcbconnhash.add(conn, dpy);
+		}
 		#endif
 	}
 
 		stoptrace();  prargd(dpy);
 		#ifdef FAKEXCB
-		prargx(conn);
+		if(vglfaker::fakeXCB) prargx(conn);
 		#endif
 		closetrace();
 
