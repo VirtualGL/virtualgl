@@ -46,7 +46,8 @@ const xcb_query_extension_reply_t *
 
 	TRY();
 
-	if(ext && !strcmp(ext->name, "GLX") && vglfaker::fakeXCB)
+	if(ext && !strcmp(ext->name, "GLX") && vglfaker::fakeXCB
+		&& !vglfaker::alreadyInterposed)
 	{
 			opentrace(xcb_get_extension_data);  prargx(conn);
 			prargs(ext->name);
@@ -82,7 +83,7 @@ xcb_glx_query_version_cookie_t
 {
 	xcb_glx_query_version_cookie_t cookie={ 0 };
 
-	if(!vglfaker::fakeXCB)
+	if(!vglfaker::fakeXCB || vglfaker::alreadyInterposed)
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
 	TRY();
@@ -109,7 +110,7 @@ xcb_glx_query_version_reply_t *
 {
 	xcb_glx_query_version_reply_t *reply=NULL;
 
-	if(!vglfaker::fakeXCB)
+	if(!vglfaker::fakeXCB || vglfaker::alreadyInterposed)
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
 	TRY();
@@ -226,7 +227,8 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_poll_for_event(conn))!=NULL && vglfaker::fakeXCB)
+	if((e=_xcb_poll_for_event(conn))!=NULL && vglfaker::fakeXCB
+		&& !vglfaker::alreadyInterposed)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -241,7 +243,8 @@ xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_poll_for_queued_event(conn))!=NULL && vglfaker::fakeXCB)
+	if((e=_xcb_poll_for_queued_event(conn))!=NULL && vglfaker::fakeXCB
+		&& !vglfaker::alreadyInterposed)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -256,7 +259,8 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_wait_for_event(conn))!=NULL && vglfaker::fakeXCB)
+	if((e=_xcb_wait_for_event(conn))!=NULL && vglfaker::fakeXCB
+		&& !vglfaker::alreadyInterposed)
 		handleXCBEvent(conn, e);
 
 	CATCH();

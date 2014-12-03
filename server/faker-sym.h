@@ -32,6 +32,9 @@ namespace vglfaker
 {
 	extern void safeExit(int);
 	extern void init(void);
+	#ifdef FAKEXCB
+	extern __thread bool alreadyInterposed;
+	#endif
 }
 
 
@@ -52,104 +55,229 @@ namespace vglfaker
 #endif
 
 
-#define FUNCDEF0(RetType, f, ret) \
+#ifdef FAKEXCB
+#define DISABLE_FAKEXCB() vglfaker::alreadyInterposed=true
+#define ENABLE_FAKEXCB() vglfaker::alreadyInterposed=false
+#else
+#define DISABLE_FAKEXCB()
+#define ENABLE_FAKEXCB()
+#endif
+
+
+#define FUNCDEF0(RetType, f) \
 	typedef RetType (*_##f##Type)(void); \
 	SYMDEF(f); \
 	static inline RetType _##f(void) { \
-		CHECKSYM(f);  ret __##f(); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF1(RetType, f, at1, a1, ret) \
+#define VFUNCDEF0(f) \
+	typedef void (*_##f##Type)(void); \
+	SYMDEF(f); \
+	static inline void _##f(void) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define FUNCDEF1(RetType, f, at1, a1) \
 	typedef RetType (*_##f##Type)(at1); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1) { \
-		CHECKSYM(f);  ret __##f(a1); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF2(RetType, f, at1, a1, at2, a2, ret) \
+#define VFUNCDEF1(f, at1, a1) \
+	typedef void (*_##f##Type)(at1); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define FUNCDEF2(RetType, f, at1, a1, at2, a2) \
 	typedef RetType (*_##f##Type)(at1, at2); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2) { \
-		CHECKSYM(f);  ret __##f(a1, a2); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF3(RetType, f, at1, a1, at2, a2, at3, a3, ret) \
+#define VFUNCDEF2(f, at1, a1, at2, a2) \
+	typedef void (*_##f##Type)(at1, at2); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1, at2 a2) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define FUNCDEF3(RetType, f, at1, a1, at2, a2, at3, a3) \
 	typedef RetType (*_##f##Type)(at1, at2, at3); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF4(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, ret) \
+#define VFUNCDEF3(f, at1, a1, at2, a2, at3, a3) \
+	typedef void (*_##f##Type)(at1, at2, at3); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1, at2 a2, at3 a3) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2, a3); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define FUNCDEF4(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF5(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	ret) \
+#define VFUNCDEF4(f, at1, a1, at2, a2, at3, a3, at4, a4) \
+	typedef void (*_##f##Type)(at1, at2, at3, at4); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2, a3, a4); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define FUNCDEF5(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
+	}
+
+#define VFUNCDEF5(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5) \
+	typedef void (*_##f##Type)(at1, at2, at3, at4, at5); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2, a3, a4, a5); \
+		ENABLE_FAKEXCB(); \
 	}
 
 #define FUNCDEF6(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, ret) \
+	at6, a6) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, \
 		at6 a6) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5, a6); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5, a6); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
-#define FUNCDEF7(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, at7, a7, ret) \
-	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7); \
+#define VFUNCDEF7(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, at, at6, a6, \
+	at7, a7) \
+	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7); \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2, a3, a4, a5, a6, a7); \
+		ENABLE_FAKEXCB(); \
 	}
 
 #define FUNCDEF8(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, at7, a7, at8, a8, ret) \
+	at6, a6, at7, a7, at8, a8) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
 #define FUNCDEF9(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, at7, a7, at8, a8, at9, a9, ret) \
+	at6, a6, at7, a7, at8, a8, at9, a9) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
 #define FUNCDEF10(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, ret) \
+	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
 		at10); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9, at10 a10) { \
-		CHECKSYM(f);  ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
+		RetType retval; \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
 #define FUNCDEF12(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
-	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12, ret) \
+	at6, a6, at7, a7, at8, a8, at9, a9, at10, a10, at11, a11, at12, a12) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
 		at10, at11, at12); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) { \
+		RetType retval; \
 		CHECKSYM(f); \
-		ret __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+		DISABLE_FAKEXCB(); \
+		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+		ENABLE_FAKEXCB(); \
+		return retval; \
 	}
 
 
@@ -161,137 +289,134 @@ extern "C" {
 // GLX 1.0 functions
 
 FUNCDEF3(XVisualInfo*, glXChooseVisual, Display *, dpy, int, screen,
-	int *, attrib_list, return);
+	int *, attrib_list);
 
-FUNCDEF4(void, glXCopyContext, Display *, dpy, GLXContext, src, GLXContext,
-	dst, unsigned long, mask,);
+VFUNCDEF4(glXCopyContext, Display *, dpy, GLXContext, src, GLXContext, dst,
+	unsigned long, mask);
 
 FUNCDEF4(GLXContext, glXCreateContext, Display *, dpy, XVisualInfo *, vis,
-	GLXContext, share_list, Bool, direct, return);
+	GLXContext, share_list, Bool, direct);
 
 FUNCDEF3(GLXPixmap, glXCreateGLXPixmap, Display *, dpy, XVisualInfo *, vis,
-	Pixmap, pixmap, return);
+	Pixmap, pixmap);
 
-FUNCDEF2(void, glXDestroyContext, Display *, dpy, GLXContext, ctx,);
+VFUNCDEF2(glXDestroyContext, Display *, dpy, GLXContext, ctx);
 
-FUNCDEF2(void, glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix,);
+VFUNCDEF2(glXDestroyGLXPixmap, Display *, dpy, GLXPixmap, pix);
 
 FUNCDEF4(int, glXGetConfig, Display *, dpy, XVisualInfo *, vis, int, attrib,
-	int *, value, return);
+	int *, value);
 
-FUNCDEF0(GLXDrawable, glXGetCurrentDrawable, return);
+FUNCDEF0(GLXDrawable, glXGetCurrentDrawable);
 
-FUNCDEF2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx, return);
+FUNCDEF2(Bool, glXIsDirect, Display *, dpy, GLXContext, ctx);
 
 FUNCDEF3(Bool, glXMakeCurrent, Display *, dpy, GLXDrawable, drawable,
-	GLXContext, ctx, return);
+	GLXContext, ctx);
 
 FUNCDEF3(Bool, glXQueryExtension, Display *, dpy, int *, error_base,
-	int *, event_base, return);
+	int *, event_base);
 
-FUNCDEF3(Bool, glXQueryVersion, Display *, dpy, int *, major, int *, minor,
-	return);
+FUNCDEF3(Bool, glXQueryVersion, Display *, dpy, int *, major, int *, minor);
 
-FUNCDEF2(void, glXSwapBuffers, Display *, dpy, GLXDrawable, drawable,);
+VFUNCDEF2(glXSwapBuffers, Display *, dpy, GLXDrawable, drawable);
 
-FUNCDEF4(void, glXUseXFont, Font, font, int, first, int, count, int,
-	list_base,);
+VFUNCDEF4(glXUseXFont, Font, font, int, first, int, count, int, list_base);
 
-FUNCDEF0(void, glXWaitGL,);
+VFUNCDEF0(glXWaitGL);
 
 
 // GLX 1.1 functions
 
-FUNCDEF2(const char *, glXGetClientString, Display *, dpy, int, name, return);
+FUNCDEF2(const char *, glXGetClientString, Display *, dpy, int, name);
 
 FUNCDEF3(const char *, glXQueryServerString, Display *, dpy, int, screen, int,
-	name, return);
+	name);
 
-FUNCDEF2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen,
-	return);
+FUNCDEF2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen);
 
 
 // GLX 1.3 functions
 
 FUNCDEF4(GLXFBConfig *, glXChooseFBConfig, Display *, dpy, int, screen,
-	const int *, attrib_list, int *, nelements, return);
+	const int *, attrib_list, int *, nelements);
 
 FUNCDEF5(GLXContext, glXCreateNewContext, Display *, dpy, GLXFBConfig, config,
-	int, render_type, GLXContext, share_list, Bool, direct, return);
+	int, render_type, GLXContext, share_list, Bool, direct);
 
 FUNCDEF3(GLXPbuffer, glXCreatePbuffer, Display *, dpy, GLXFBConfig, config,
-	const int *, attrib_list, return);
+	const int *, attrib_list);
 
 FUNCDEF4(GLXPixmap, glXCreatePixmap, Display *, dpy, GLXFBConfig, config,
-	Pixmap, pixmap, const int *, attrib_list, return);
+	Pixmap, pixmap, const int *, attrib_list);
 
 FUNCDEF4(GLXWindow, glXCreateWindow, Display *, dpy, GLXFBConfig, config,
-	Window, win, const int *, attrib_list, return);
+	Window, win, const int *, attrib_list);
 
-FUNCDEF2(void, glXDestroyPbuffer, Display *, dpy, GLXPbuffer, pbuf,);
+VFUNCDEF2(glXDestroyPbuffer, Display *, dpy, GLXPbuffer, pbuf);
 
-FUNCDEF2(void, glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap,);
+VFUNCDEF2(glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap);
 
-FUNCDEF2(void, glXDestroyWindow, Display *, dpy, GLXWindow, win,);
+VFUNCDEF2(glXDestroyWindow, Display *, dpy, GLXWindow, win);
 
-FUNCDEF0(GLXDrawable, glXGetCurrentReadDrawable, return);
+FUNCDEF0(GLXDrawable, glXGetCurrentReadDrawable);
 
-FUNCDEF0(Display*, glXGetCurrentDisplay, return);
+FUNCDEF0(Display*, glXGetCurrentDisplay);
 
 FUNCDEF4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
-	int, attribute, int *, value, return);
+	int, attribute, int *, value);
 
 FUNCDEF3(GLXFBConfig *, glXGetFBConfigs, Display *, dpy, int, screen,
-	int *, nelements, return);
+	int *, nelements);
 
-FUNCDEF3(void, glXGetSelectedEvent, Display *, dpy, GLXDrawable, draw,
-	unsigned long *, event_mask,);
+VFUNCDEF3(glXGetSelectedEvent, Display *, dpy, GLXDrawable, draw,
+	unsigned long *, event_mask);
 
 FUNCDEF2(XVisualInfo *, glXGetVisualFromFBConfig, Display *, dpy,
-	GLXFBConfig, config, return);
+	GLXFBConfig, config);
 
 FUNCDEF4(Bool, glXMakeContextCurrent, Display *, display, GLXDrawable, draw,
-	GLXDrawable, read, GLXContext, ctx, return);
+	GLXDrawable, read, GLXContext, ctx);
 
 FUNCDEF4(int, glXQueryContext, Display *, dpy, GLXContext, ctx,
-	int, attribute, int *, value, return);
+	int, attribute, int *, value);
 
-FUNCDEF4(void, glXQueryDrawable, Display *, dpy, GLXDrawable, draw,
-	int, attribute, unsigned int *, value,);
+VFUNCDEF4(glXQueryDrawable, Display *, dpy, GLXDrawable, draw, int, attribute,
+	unsigned int *, value);
 
-FUNCDEF3(void, glXSelectEvent, Display *, dpy, GLXDrawable, draw,
-	unsigned long, event_mask,);
+VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
+	unsigned long, event_mask);
 
 
 // EXT_import_context
 
-FUNCDEF2(void, glXFreeContextEXT, Display *, dpy, GLXContext, ctx,);
+VFUNCDEF2(glXFreeContextEXT, Display *, dpy, GLXContext, ctx);
 
 FUNCDEF2(GLXContext, glXImportContextEXT, Display *, dpy,
-	GLXContextID, contextID, return);
+	GLXContextID, contextID);
 
 FUNCDEF4(int, glXQueryContextInfoEXT, Display *, dpy, GLXContext, ctx,
-	int, attribute, int *, value, return);
+	int, attribute, int *, value);
 
 
 // NV_swap_group
 
 FUNCDEF3(Bool, glXJoinSwapGroupNV, Display *, dpy, GLXDrawable, drawable,
-	GLuint, group, return);
+	GLuint, group);
 
 FUNCDEF3(Bool, glXBindSwapBarrierNV, Display *, dpy, GLuint, group,
-	GLuint, barrier, return);
+	GLuint, barrier);
 
 FUNCDEF4(Bool, glXQuerySwapGroupNV, Display *, dpy, GLXDrawable, drawable,
-	GLuint *, group, GLuint *, barrier, return);
+	GLuint *, group, GLuint *, barrier);
 
 FUNCDEF4(Bool, glXQueryMaxSwapGroupsNV, Display *, dpy, int, screen,
-	GLuint *, maxGroups, GLuint *, maxBarriers, return);
+	GLuint *, maxGroups, GLuint *, maxBarriers);
 
 FUNCDEF3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
-	GLuint *, count, return);
+	GLuint *, count);
 
-FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen, return);
+FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen);
 
 
 // GLX_ARB_get_proc_address
@@ -314,156 +439,151 @@ static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
 // GLX_ARB_create_context
 
 FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
-	config, GLXContext, share_context, Bool, direct, const int *, attribs,
-	return);
+	config, GLXContext, share_context, Bool, direct, const int *, attribs);
 
 
 // GLX_EXT_texture_from_pixmap
 
-FUNCDEF4(void, glXBindTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer, const int *, attrib_list,);
+VFUNCDEF4(glXBindTexImageEXT, Display *, dpy, GLXDrawable, drawable,
+	int, buffer, const int *, attrib_list);
 
-FUNCDEF3(void, glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer,)
+VFUNCDEF3(glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
+	int, buffer)
 
 
 // GLX_EXT_swap_control
 
-FUNCDEF3(void, glXSwapIntervalEXT, Display *, dpy, GLXDrawable, drawable, int,
-	interval,);
+VFUNCDEF3(glXSwapIntervalEXT, Display *, dpy, GLXDrawable, drawable, int,
+	interval);
 
 
 // GLX_SGI_swap_control
 
-FUNCDEF1(int, glXSwapIntervalSGI, int, interval, return);
+FUNCDEF1(int, glXSwapIntervalSGI, int, interval);
 
 
 // GL functions
 
-FUNCDEF0(void, glFinish,);
+VFUNCDEF0(glFinish);
 
-FUNCDEF0(void, glFlush,);
+VFUNCDEF0(glFlush);
 
-FUNCDEF4(void, glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei,
-	height,);
+VFUNCDEF4(glViewport, GLint, x, GLint, y, GLsizei, width, GLsizei, height);
 
-FUNCDEF1(void, glDrawBuffer, GLenum, drawbuf,);
+VFUNCDEF1(glDrawBuffer, GLenum, drawbuf);
 
-FUNCDEF0(void, glPopAttrib,);
+VFUNCDEF0(glPopAttrib);
 
-FUNCDEF7(void, glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei,
-	height, GLenum, format, GLenum, type, GLvoid*, pixels,);
+VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
+	GLenum, format, GLenum, type, GLvoid*, pixels);
 
-FUNCDEF5(void, glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
-	GLenum, type, const GLvoid*, pixels,);
+VFUNCDEF5(glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
+	GLenum, type, const GLvoid*, pixels);
 
-FUNCDEF1(void, glIndexd, GLdouble, c,);
+VFUNCDEF1(glIndexd, GLdouble, c);
 
-FUNCDEF1(void, glIndexf, GLfloat, c,);
+VFUNCDEF1(glIndexf, GLfloat, c);
 
-FUNCDEF1(void, glIndexi, GLint, c,);
+VFUNCDEF1(glIndexi, GLint, c);
 
-FUNCDEF1(void, glIndexs, GLshort, c,);
+VFUNCDEF1(glIndexs, GLshort, c);
 
-FUNCDEF1(void, glIndexub, GLubyte, c,);
+VFUNCDEF1(glIndexub, GLubyte, c);
 
-FUNCDEF1(void, glIndexdv, const GLdouble*, c,);
+VFUNCDEF1(glIndexdv, const GLdouble*, c);
 
-FUNCDEF1(void, glIndexfv, const GLfloat*, c,);
+VFUNCDEF1(glIndexfv, const GLfloat*, c);
 
-FUNCDEF1(void, glIndexiv, const GLint*, c,);
+VFUNCDEF1(glIndexiv, const GLint*, c);
 
-FUNCDEF1(void, glIndexsv, const GLshort*, c,);
+VFUNCDEF1(glIndexsv, const GLshort*, c);
 
-FUNCDEF1(void, glIndexubv, const GLubyte*, c,);
+VFUNCDEF1(glIndexubv, const GLubyte*, c);
 
-FUNCDEF1(void, glClearIndex, GLfloat, c,);
+VFUNCDEF1(glClearIndex, GLfloat, c);
 
-FUNCDEF2(void, glGetDoublev, GLenum, pname, GLdouble *, params,);
+VFUNCDEF2(glGetDoublev, GLenum, pname, GLdouble *, params);
 
-FUNCDEF2(void, glGetFloatv, GLenum, pname, GLfloat *, params,);
+VFUNCDEF2(glGetFloatv, GLenum, pname, GLfloat *, params);
 
-FUNCDEF2(void, glGetIntegerv, GLenum, pname, GLint *, params,);
+VFUNCDEF2(glGetIntegerv, GLenum, pname, GLint *, params);
 
-FUNCDEF3(void, glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *,
-	params,);
+VFUNCDEF3(glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *, params);
 
-FUNCDEF3(void, glMaterialiv, GLenum, face, GLenum, pname, const GLint *,
-	params,);
+VFUNCDEF3(glMaterialiv, GLenum, face, GLenum, pname, const GLint *, params);
 
-FUNCDEF2(void, glPixelTransferf, GLenum, pname, GLfloat, param,);
+VFUNCDEF2(glPixelTransferf, GLenum, pname, GLfloat, param);
 
-FUNCDEF2(void, glPixelTransferi, GLenum, pname, GLint, param,);
+VFUNCDEF2(glPixelTransferi, GLenum, pname, GLint, param);
 
 
 // X11 functions
 
-FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
-	return);
+FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask,
+	XEvent *, xe);
 
-FUNCDEF3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type, XEvent *, xe,
-	return);
+FUNCDEF3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type,
+	XEvent *, xe);
 
 FUNCDEF4(Bool, XCheckTypedWindowEvent, Display *, dpy, Window, win,
-	int, event_type, XEvent *, xe, return);
+	int, event_type, XEvent *, xe);
 
 FUNCDEF4(Bool, XCheckWindowEvent, Display *, dpy, Window, win, long,
-	event_mask, XEvent *, xe, return);
+	event_mask, XEvent *, xe);
 
-FUNCDEF1(int, XCloseDisplay, Display *, dpy, return);
+FUNCDEF1(int, XCloseDisplay, Display *, dpy);
 
 FUNCDEF4(int, XConfigureWindow, Display *, dpy, Window, win,
-	unsigned int, value_mask, XWindowChanges *, values, return);
+	unsigned int, value_mask, XWindowChanges *, values);
 
 FUNCDEF10(int, XCopyArea, Display *, dpy, Drawable, src, Drawable, dst, GC, gc,
 	int, src_x, int, src_y, unsigned int, w, unsigned int, h, int, dest_x,
-	int, dest_y, return);
+	int, dest_y);
 
 FUNCDEF9(Window, XCreateSimpleWindow, Display *, dpy, Window, parent, int, x,
 	int, y, unsigned int, width, unsigned int, height, unsigned int,
-	border_width, unsigned long, border, unsigned long, background, return);
+	border_width, unsigned long, border, unsigned long, background);
 
 FUNCDEF12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int,
 	y, unsigned int, width, unsigned int, height, unsigned int, border_width,
 	int, depth, unsigned int, c_class, Visual *, visual, unsigned long,
-	value_mask, XSetWindowAttributes *, attributes, return);
+	value_mask, XSetWindowAttributes *, attributes);
 
-FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win, return);
+FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win);
 
-FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win, return);
+FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win);
 
-FUNCDEF1(int, XFree, void *, data, return);
+FUNCDEF1(int, XFree, void *, data);
 
 FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
 	root, int *, x, int *, y, unsigned int *, width, unsigned int *, height,
-	unsigned int *, border_width, unsigned int *, depth, return);
+	unsigned int *, border_width, unsigned int *, depth);
 
 FUNCDEF8(XImage *, XGetImage, Display *, display, Drawable, d, int, x, int, y,
 	unsigned int, width, unsigned int, height, unsigned long, plane_mask, int,
-	format, return);
+	format);
 
-FUNCDEF2(char **, XListExtensions, Display *, dpy, int *, next, return);
+FUNCDEF2(char **, XListExtensions, Display *, dpy, int *, next);
 
-FUNCDEF3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
-	return);
+FUNCDEF3(int, XMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe);
 
 FUNCDEF6(int, XMoveResizeWindow, Display *, dpy, Window, win, int, x, int, y,
-	unsigned int, width, unsigned int, height, return);
+	unsigned int, width, unsigned int, height);
 
-FUNCDEF2(int, XNextEvent, Display *, dpy, XEvent *, xe, return);
+FUNCDEF2(int, XNextEvent, Display *, dpy, XEvent *, xe);
 
-FUNCDEF1(Display *, XOpenDisplay, _Xconst char*, name, return);
+FUNCDEF1(Display *, XOpenDisplay, _Xconst char*, name);
 
 FUNCDEF5(Bool, XQueryExtension, Display *, dpy, _Xconst char*, name, int *,
-	major_opcode, int *, first_event, int *, first_error, return);
+	major_opcode, int *, first_event, int *, first_error);
 
 FUNCDEF4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
-	unsigned int, height, return);
+	unsigned int, height);
 
-FUNCDEF1(char *, XServerVendor, Display *, dpy, return);
+FUNCDEF1(char *, XServerVendor, Display *, dpy);
 
 FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
-	XEvent *, xe, return);
+	XEvent *, xe);
 
 
 // From dlfaker
@@ -478,24 +598,21 @@ SYMDEF(dlopen);
 // XCB functions
 
 FUNCDEF2(const xcb_query_extension_reply_t *, xcb_get_extension_data,
-	xcb_connection_t *, conn, xcb_extension_t *, ext, return);
+	xcb_connection_t *, conn, xcb_extension_t *, ext);
 
 FUNCDEF3(xcb_glx_query_version_cookie_t, xcb_glx_query_version,
-	xcb_connection_t *, conn, uint32_t, major_version, uint32_t, minor_version,
-	return);
+	xcb_connection_t *, conn, uint32_t, major_version, uint32_t, minor_version);
 
 FUNCDEF3(xcb_glx_query_version_reply_t *, xcb_glx_query_version_reply,
 	xcb_connection_t *, conn, xcb_glx_query_version_cookie_t, cookie,
-	xcb_generic_error_t **, error, return);
+	xcb_generic_error_t **, error);
 
-FUNCDEF1(xcb_generic_event_t *, xcb_poll_for_event, xcb_connection_t *, conn,
-	return);
+FUNCDEF1(xcb_generic_event_t *, xcb_poll_for_event, xcb_connection_t *, conn);
 
 FUNCDEF1(xcb_generic_event_t *, xcb_poll_for_queued_event, xcb_connection_t *,
-	conn, return);
+	conn);
 
-FUNCDEF1(xcb_generic_event_t *, xcb_wait_for_event, xcb_connection_t *, conn,
-	return);
+FUNCDEF1(xcb_generic_event_t *, xcb_wait_for_event, xcb_connection_t *, conn);
 
 #endif
 

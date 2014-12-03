@@ -35,6 +35,7 @@ namespace vglfaker
 	extern int traceLevel;
 	#ifdef FAKEXCB
 	extern bool fakeXCB;
+	extern __thread bool alreadyInterposed;
 	#endif
 }
 
