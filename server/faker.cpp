@@ -38,7 +38,7 @@ bool deadYet=false;
 int traceLevel=0;
 #ifdef FAKEXCB
 bool fakeXCB=false;
-__thread bool alreadyInterposed=false;
+__thread int fakerLevel=0;
 #endif
 
 

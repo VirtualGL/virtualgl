@@ -33,7 +33,7 @@ namespace vglfaker
 	extern void safeExit(int);
 	extern void init(void);
 	#ifdef FAKEXCB
-	extern __thread bool alreadyInterposed;
+	extern __thread int fakerLevel;
 	#endif
 }
 
@@ -56,8 +56,8 @@ namespace vglfaker
 
 
 #ifdef FAKEXCB
-#define DISABLE_FAKEXCB() vglfaker::alreadyInterposed=true
-#define ENABLE_FAKEXCB() vglfaker::alreadyInterposed=false
+#define DISABLE_FAKEXCB() vglfaker::fakerLevel++;
+#define ENABLE_FAKEXCB() vglfaker::fakerLevel--;
 #else
 #define DISABLE_FAKEXCB()
 #define ENABLE_FAKEXCB()
