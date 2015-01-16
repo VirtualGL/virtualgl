@@ -165,16 +165,6 @@
 		Because XCB is only available on newer platforms, this feature is not \
 		built into the "official" VirtualGL binary packages. \
 	|
-| SPECviewperf 9, 10, 11 | Linux \
-	| Set the ''VGL_READBACK'' environment variable to ''sync'' prior to \
-		launching the benchmark with ''vglrun'' \
-	| SPECviewperf defines a local ''glGenBuffers'' symbol and then sets it \
-		to NULL (?!), assuming it won't ever need it, but of course VirtualGL \
-		needs ''glGenBuffers()'' in order to enable PBO readback.  The \
-		application's version of the symbol unfortunately overrides libGL's \
-		version, which causes VirtualGL to segfault.  Disabling PBO readback \
-		works around the problem. \
-	|
 | Tecplot 360 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \

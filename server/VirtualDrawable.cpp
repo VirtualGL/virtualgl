@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2014 D. R. Commander
+ * Copyright (C)2009-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -319,6 +319,15 @@ static const char *formatString(int format)
 }
 
 
+#define CHECKPBOSYM(s) {  \
+	if(!__##s) {  \
+		__##s=(__##s##Type)glXGetProcAddressARB((const GLubyte *)#s);  \
+		if(!__##s)  \
+			_throw(#s" symbol not loaded");  \
+	}  \
+}
+
+
 void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	GLint height, GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
@@ -330,6 +339,20 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	static bool usePBO=(fconfig.readback==RRREAD_PBO);
 	static bool alreadyPrinted=false, alreadyWarned=false;
 	static const char *ext=NULL;
+
+	typedef void (*__glGenBuffersType)(GLsizei, GLuint *);
+	static __glGenBuffersType __glGenBuffers=NULL;
+	typedef void (*__glBindBufferType)(GLenum, GLuint);
+	static __glBindBufferType __glBindBuffer=NULL;
+	typedef void (*__glBufferDataType)(GLenum, GLsizeiptr, const GLvoid *,
+		GLenum);
+	static __glBufferDataType __glBufferData=NULL;
+	typedef void (*__glGetBufferParameterivType)(GLenum, GLenum, GLint *);
+	static __glGetBufferParameterivType __glGetBufferParameteriv=NULL;
+	typedef void *(*__glMapBufferType)(GLenum, GLenum);
+	static __glMapBufferType __glMapBuffer=NULL;
+	typedef GLboolean (*__glUnmapBufferType)(GLenum);
+	static __glUnmapBufferType __glUnmapBuffer=NULL;
 
 	// Whenever the readback format changes (perhaps due to switching
 	// compression or transports), then reset the PBO synchronicity detector
@@ -372,8 +395,14 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
 				_throw("GL_ARB_pixel_buffer_object extension not available");
 		}
+		CHECKPBOSYM(glGenBuffers);
+		CHECKPBOSYM(glBindBuffer);
+		CHECKPBOSYM(glBufferData);
+		CHECKPBOSYM(glGetBufferParameteriv);
+		CHECKPBOSYM(glMapBuffer);
+		CHECKPBOSYM(glUnmapBuffer);
 		#ifdef GL_VERSION_1_5
-		if(!pbo) glGenBuffers(1, &pbo);
+		if(!pbo) __glGenBuffers(1, &pbo);
 		if(!pbo) _throw("Could not generate pixel buffer object");
 		if(!alreadyPrinted && fconfig.verbose)
 		{
@@ -381,13 +410,13 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				formatString(oglDraw->getFormat()), formatString(format));
 			alreadyPrinted=true;
 		}
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
+		__glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
 		int size=0;
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
+		__glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*height)
-			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*height, NULL,
+			__glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*height, NULL,
 				GL_STREAM_READ);
-		glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
+		__glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*height)
 			_throw("Could not set PBO size");
 		#else
@@ -416,13 +445,13 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		tRead=getTime()-t0;
 		#ifdef GL_VERSION_1_5
 		unsigned char *pboBits=NULL;
-		pboBits=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
+		pboBits=(unsigned char *)__glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
 		if(!pboBits) _throw("Could not map pixel buffer object");
 		memcpy(bits, pboBits, pitch*height);
-		if(!glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
+		if(!__glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			_throw("Could not unmap pixel buffer object");
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
+		__glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		#endif
 		tTotal=getTime()-t0;
 		numFrames++;

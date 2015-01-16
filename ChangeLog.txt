@@ -74,6 +74,14 @@ The VirtualGL-Utils package additionally contains a WGL version of GLXspheres,
 which is a useful tool to have when benchmarking Windows virtual machines that
 are running in a VirtualGL environment.
 -------------------------------------------------------------------------------
+[9]
+Worked around an issue in recent versions of SPECviewperf and FEMFAT visualizer
+that caused them to segfault when used with VirtualGL.  Those applications
+apparently export symbols that override certain OpenGL function symbols (such
+as glGenBuffers()) that VirtualGL needs when performing PBO readback.
+VirtualGL now obtains those symbols directly from libGL using glXProcAddress()
+rather than relying on the dynamic linker to resolve them.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
