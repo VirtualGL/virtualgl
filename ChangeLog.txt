@@ -77,10 +77,16 @@ are running in a VirtualGL environment.
 [9]
 Worked around an issue in recent versions of SPECviewperf and FEMFAT visualizer
 that caused them to segfault when used with VirtualGL.  Those applications
-apparently export symbols that override certain OpenGL function symbols (such
-as glGenBuffers()) that VirtualGL needs when performing PBO readback.
-VirtualGL now obtains those symbols directly from libGL using glXProcAddress()
-rather than relying on the dynamic linker to resolve them.
+apparently use a dynamic loading mechanism for OpenGL extension functions, and
+this mechanism defines symbols such as "glGenBuffers" at file scope.  Any
+symbol exported by an application will override a symbol of the same name
+exported by a shared library, so when VirtualGL tried to call glGenBuffers(),
+glBindBuffer(), etc., it was picking up the symbols from the application, not
+from libGL (and those symbols from the application were not necessarily
+defined.)  VirtualGL now obtains the function pointers it needs for PBO
+readback directly from libGL using glXProcAddress() rather than relying on the
+dynamic linker to resolve them.  Note that this issue could be worked around in
+previous versions of VirtualGL by setting VGL_READBACK=sync.
 -------------------------------------------------------------------------------
 
 
