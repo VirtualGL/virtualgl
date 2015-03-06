@@ -431,16 +431,12 @@ CompressedFrame &CompressedFrame::operator= (Frame &f)
 	{
 		case RRCOMP_RGB:  compressRGB(f);  break;
 		case RRCOMP_JPEG:  compressJPEG(f);  break;
-		#ifdef USEXV
 		case RRCOMP_YUV:  compressYUV(f);  break;
-		#endif
 		default:  _throw("Invalid compression type");
 	}
 	return *this;
 }
 
-
-#ifdef USEXV
 
 void CompressedFrame::compressYUV(Frame &f)
 {
@@ -455,8 +451,6 @@ void CompressedFrame::compressYUV(Frame &f)
 	hdr.size=(unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height,
 		TJSUBSAMP(f.hdr.subsamp));
 }
-
-#endif
 
 
 void CompressedFrame::compressJPEG(Frame &f)
