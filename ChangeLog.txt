@@ -8,6 +8,11 @@ config that VirtualGL assigns to it now contains a stencil buffer.  This
 eliminates the need to specify VGL_DEFAULTFBCONFIG=GLX_STENCIL_SIZE,8 with
 certain applications (previously necessary when running Abaqus v6 and MAGMA5.)
 -------------------------------------------------------------------------------
+[2]
+VirtualGL will no longer advertise that it supports the GLX_ARB_create_context
+and GLX_ARB_create_context_profile extensions unless the underlying OpenGL
+library exports the glXCreateContextAttribsARB() function.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

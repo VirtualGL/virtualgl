@@ -1015,15 +1015,21 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // Since VirtualGL is effectively its own implementation of GLX, it needs to
 // properly report the extensions and GLX version it supports.
 
-static const char *glxextensions=
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_ARB_create_context GLX_ARB_create_context_profile GLX_EXT_texture_from_pixmap GLX_EXT_swap_control GLX_SGI_swap_control";
+#define VGL_GLX_EXTENSIONS \
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_EXT_texture_from_pixmap GLX_EXT_swap_control GLX_SGI_swap_control"
+#define VGL_GLX_ARB_CTX_EXTENSIONS \
+	" GLX_ARB_create_context GLX_ARB_create_context_profile"
+static const char *glxextensions=VGL_GLX_EXTENSIONS VGL_GLX_ARB_CTX_EXTENSIONS;
+static const char *glxextensions_no_arb_ctx=VGL_GLX_EXTENSIONS;
+#define GLXEXTENSIONS()  \
+	(__glXCreateContextAttribsARB ? glxextensions : glxextensions_no_arb_ctx)
 
 const char *glXGetClientString(Display *dpy, int name)
 {
 	// If this is called internally to OpenGL, use the real function
 	if(is3D(dpy)) return _glXGetClientString(dpy, name);
 	////////////////////
-	if(name==GLX_EXTENSIONS) return glxextensions;
+	if(name==GLX_EXTENSIONS) return GLXEXTENSIONS();
 	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
@@ -1961,7 +1967,7 @@ const char *glXQueryExtensionsString(Display *dpy, int screen)
 	// If this is called internally to OpenGL, use the real function.
 	if(is3D(dpy)) return _glXQueryExtensionsString(dpy, screen);
 	////////////////////
-	return glxextensions;
+	return GLXEXTENSIONS();
 }
 
 
@@ -1972,7 +1978,7 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 	// If this is called internally to OpenGL, use the real function.
 	if(is3D(dpy)) return _glXQueryServerString(dpy, screen, name);
 	////////////////////
-	if(name==GLX_EXTENSIONS) return glxextensions;
+	if(name==GLX_EXTENSIONS) return GLXEXTENSIONS();
 	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
