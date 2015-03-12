@@ -70,7 +70,8 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 		int defaultAttribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
 			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
 			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, None};
+			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1,
+			GLX_STENCIL_SIZE, 8, None};
 		int attribs[256];
 
 		if(pixmap || fconfig.drawable==RRDRAWABLE_PIXMAP)
@@ -101,7 +102,7 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 				argv[argc]=arg;  argc++;
 				arg=strtok(NULL, " \t,");
 			}
-			for(int i=0, j=18; i<argc && j<256; i++)
+			for(int i=0, j=20; i<argc && j<256; i++)
 			{
 				int index;
 				index=2;
@@ -112,8 +113,9 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 				testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
 				index=16;
 				testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
+				index=18;
+				testattrib(GLX_STENCIL_SIZE, index, 0, INT_MAX);
 				testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
-				testattrib(GLX_STENCIL_SIZE, j, 0, INT_MAX);
 				testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
 				testattrib(GLX_ACCUM_RED_SIZE, j, 0, INT_MAX);
 				testattrib(GLX_ACCUM_GREEN_SIZE, j, 0, INT_MAX);

@@ -1,4 +1,16 @@
 ===============================================================================
+2.4.1
+===============================================================================
+[1]
+When an application doesn't explicitly specify its visual requirements by
+calling glXChooseVisual()/glXChooseFBConfig(), the default GLX framebuffer
+config that VirtualGL assigns to it now contains a stencil buffer.  This
+eliminates the need to specify VGL_DEFAULTFBCONFIG=GLX_STENCIL_SIZE,8 with
+certain applications (previously necessary when running Abaqus v6 and MAGMA5.)
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.4
 ===============================================================================
 [1]

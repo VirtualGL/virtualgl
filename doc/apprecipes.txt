@@ -28,18 +28,6 @@
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
 		for other versions of Abaqus as well. \
 	|
-| Abaqus v6 | Linux \
-	| Set the ''VGL_DEFAULTFBCONFIG'' environment variable to \
-		''GLX_STENCIL_SIZE,8'' prior to launching the application with ''vglrun'' \
-	| Abaqus 6.10 requires a visual with a stencil buffer, but it does not call \
-		''glXChooseVisual()'' to specify its desire for such a visual.  Thus, \
-		VirtualGL has no idea of the application's preference, and it is \
-		necessary to use ''VGL_DEFAULTFBCONFIG'' to give VirtualGL a hint as to \
-		what the application wants.  Otherwise, VirtualGL will create a Pbuffer \
-		without a stencil buffer, and this will cause incorrect rendering when \
-		using certain functions within Abaqus (such as View Cut.)  See \
-		{ref prefix="Section ": VGL_DEFAULTFBCONFIG} for further information. \
-	|
 | Cadence Allegro v16.5 | Linux \
 	| ''vglrun +sync allegro''  \
 	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
@@ -132,18 +120,6 @@
 | Heretic II | Linux \
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
-	|
-| MAGMA5 | Linux \
-	| Set the ''VGL_DEFAULTFBCONFIG'' environment variable to \
-		''GLX_STENCIL_SIZE,8'' prior to launching the application with ''vglrun'' \
-	| MAGMA5 requires a visual with a stencil buffer, but it does not call \
-		''glXChooseVisual()'' to specify its desire for such a visual.  Thus, \
-		VirtualGL has no idea of the application's preference, and it is \
-		necessary to use ''VGL_DEFAULTFBCONFIG'' to give VirtualGL a hint as to \
-		what the application wants.  Otherwise, VirtualGL will create a Pbuffer \
-		without a stencil buffer, and this will cause incorrect rendering when \
-		using certain functions within MAGMA5.  See \
-		{ref prefix="Section ": VGL_DEFAULTFBCONFIG} for further information. \
 	|
 | Mathematica 7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
