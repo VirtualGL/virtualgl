@@ -2067,7 +2067,7 @@ int offScreenTest(void)
 
 		try
 		{
-			printf("Pixmap->Window:                 ");
+			printf("GLX Pixmap->Window:             ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontInfo->fid, minChar, maxChar-minChar+1,
@@ -2093,7 +2093,7 @@ int offScreenTest(void)
 
 		try
 		{
-			printf("Window->Pixmap:                 ");
+			printf("Window->GLX Pixmap:             ");
 			if(!(glXMakeContextCurrent(dpy, glxwin, glxwin, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontInfo->fid, minChar, maxChar-minChar+1,
@@ -2125,7 +2125,7 @@ int offScreenTest(void)
 
 		try
 		{
-			printf("Pixmap->Pixmap:                 ");
+			printf("GLX Pixmap->GLX Pixmap:         ");
 			if(!(glXMakeContextCurrent(dpy, glxpm0, glxpm0, ctx)))
 				_error("Could not make context current");
 			glXUseXFont(fontInfo->fid, minChar, maxChar-minChar+1,
