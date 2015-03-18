@@ -50,6 +50,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(BUILD "${BUILD}d")
 endif()
+set(VGL_BUILD "" CACHE STRING "Custom build string")
+if(VGL_BUILD)
+	set(BUILD ${VGL_BUILD})
+endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
