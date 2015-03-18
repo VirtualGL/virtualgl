@@ -13,6 +13,11 @@ VirtualGL will no longer advertise that it supports the GLX_ARB_create_context
 and GLX_ARB_create_context_profile extensions unless the underlying OpenGL
 library exports the glXCreateContextAttribsARB() function.
 -------------------------------------------------------------------------------
+[3]
+Fixed "Invalid MIT-MAGIC-COOKIE-1" errors that would prevent VirtualGL from
+working when vglconnect was used to connect to a VirtualGL server from a
+client running Cygwin/X.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

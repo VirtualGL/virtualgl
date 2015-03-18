@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2011, 2014 D. R. Commander
+# Copyright (C)2009-2011, 2014-2015 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -80,24 +80,6 @@ if [ "$DISPLAY" = "" ]; then
 	exit 1
 fi
 
-if [ "$X11TUNNEL" = "1" ]; then
-	SSHARG='-X'
-	SSHVER=`$SSHCMD -V 2>&1 | sed 's/.*[_]//g' | sed 's/[, ].*//g'`
-	if [ $? -ne 0 -o "$SSHVER" = "" ]; then
-		echo "[VGL] ERROR: Could not find ssh in your PATH."
-		exit 1
-	fi
-	case "$SSHVER" in
-	3.8*) SSHARG='-Y' ;;
-	3.9*) SSHARG='-Y' ;;
-	4*) SSHARG='-Y' ;;
-	5*) SSHARG='-Y' ;;
-	esac
-	if [ "$SSHCMD" = "gsissh" ]; then
-		SSHARG='-Y'
-	fi
-fi
-
 LOGDIR=$HOME/.vgl
 if [ ! -d $LOGDIR ]; then mkdir $LOGDIR; fi
 LOGDISPLAY=`basename $DISPLAY`
@@ -133,12 +115,12 @@ if [ $VGLTUNNEL = 1 ]; then
 		exit 1
 	fi
 	echo Making final SSH connection ...
-	$SSHCMD -t $SSHARG -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
+	$SSHCMD -t -Y -R$REMOTEPORT:localhost:$PORT ${1+"$@"} "$VGL_BINDIR/vgllogin -s "$REMOTEPORT
 	exit 0
 fi
 
 if [ $X11TUNNEL = 1 ]; then
-	$SSHCMD $SSHARG ${1+"$@"}
+	$SSHCMD -Y ${1+"$@"}
 	exit 0
 fi
 
