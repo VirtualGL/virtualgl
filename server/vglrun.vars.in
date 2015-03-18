@@ -1,4 +1,4 @@
-# Copyright (C)2013 D. R. Commander
+# Copyright (C)2013, 2015 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,9 +16,9 @@
 
 VGL_LIBDIR=@VGL_LIBDIR@
 
-if [ -d "$VGL_LIBDIR" -a -f "$VGL_LIBDIR/librrfaker.so" ] && \
-	[ $__VGL_DL -eq 0 -o -f "$VGL_LIBDIR/libdlfaker.so" ] && \
-	[ $__VGL_GE -eq 0 -o -f "$VGL_LIBDIR/libgefaker.so" ]; then
+if [ -d "$VGL_LIBDIR" -a -f "$VGL_LIBDIR/lib@VGL_RRFAKER_NAME@.so" ] && \
+	[ $__VGL_DL -eq 0 -o -f "$VGL_LIBDIR/lib@VGL_DLFAKER_NAME@.so" ] && \
+	[ $__VGL_GE -eq 0 -o -f "$VGL_LIBDIR/lib@VGL_GEFAKER_NAME@.so" ]; then
 	if [ -z "$VGL_LIBRARY_PATH" ]; then
 		VGL_LIBRARY_PATH=$VGL_LIBDIR
 	else

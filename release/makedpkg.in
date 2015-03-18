@@ -85,12 +85,12 @@ makedeb()
 				safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib32 $TMPDIR/__tmplib
 			fi
 			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
-			ln -fs /usr/lib32/librrfaker.so $TMPDIR/usr/lib/i386-linux-gnu/librrfaker.so
-			ln -fs /usr/lib32/libdlfaker.so $TMPDIR/usr/lib/i386-linux-gnu/libdlfaker.so
-			ln -fs /usr/lib32/libgefaker.so $TMPDIR/usr/lib/i386-linux-gnu/libgefaker.so
+			ln -fs /usr/lib32/lib@VGL_RRFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_RRFAKER_NAME@.so
+			ln -fs /usr/lib32/lib@VGL_DLFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_DLFAKER_NAME@.so
+			ln -fs /usr/lib32/lib@VGL_GEFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_GEFAKER_NAME@.so
 		fi
 		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib32/librrfaker.so $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib32/lib@VGL_RRFAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	else
 
@@ -128,7 +128,7 @@ makedeb()
 		fi
 
 		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib/librrfaker.so $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib/lib@VGL_RRFAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	fi
 

@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012 D. R. Commander
+ * Copyright (C)2009, 2012, 2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include "vendor.h"
 
 
 extern void *_vgl_dlopen(const char *, int);
@@ -50,7 +51,7 @@ void *dlopen(const char *filename, int flag)
 	}
 
 	if((env=getenv(envname))==NULL || strlen(env)<1)
-		env="librrfaker.so";
+		env="lib"VGL_RRFAKER_NAME".so";
 	if(filename &&
 		(!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
@@ -68,9 +69,9 @@ void *dlopen(const char *filename, int flag)
 		|| strstr(filename, "/libdl.")))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"libdlfaker.so\")\n",
+			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"lib"VGL_DLFAKER_NAME".so\")\n",
 				filename? filename:"NULL");
-		retval=_vgl_dlopen("libdlfaker.so", flag);
+		retval=_vgl_dlopen("lib"VGL_DLFAKER_NAME".so", flag);
 	}
 	else retval=_vgl_dlopen(filename, flag);
 

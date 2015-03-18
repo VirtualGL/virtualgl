@@ -158,7 +158,7 @@ VGL_FAKELIBDIR=@VGL_FAKELIBDIR@
 rm $RPM_BUILD_ROOT/$VGL_FAKELIBDIR/libGL.so
 rmdir $RPM_BUILD_ROOT/$VGL_FAKELIBDIR
 mkdir -p $RPM_BUILD_ROOT/%{fakelibdir}
-ln -fs %{libdir}/librrfaker.so $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
+ln -fs %{libdir}/lib@VGL_RRFAKER_NAME@.so $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
 
 #-->%endif
 
@@ -232,8 +232,8 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %if "%{libdir}" != "%{_syslibdir}"
 %dir %{libdir}
 %endif
-%{libdir}/librrfaker.so
-%{libdir}/libdlfaker.so
-%{libdir}/libgefaker.so
+%{libdir}/lib@VGL_RRFAKER_NAME@.so
+%{libdir}/lib@VGL_DLFAKER_NAME@.so
+%{libdir}/lib@VGL_GEFAKER_NAME@.so
 
 %changelog

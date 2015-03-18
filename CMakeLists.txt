@@ -287,6 +287,18 @@ option(VGL_BUILDSERVER "Build VirtualGL server components"
 if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
 
+	set(DEFAULT_VGL_RRFAKER_NAME rrfaker)
+	set(VGL_RRFAKER_NAME ${DEFAULT_VGL_RRFAKER_NAME} CACHE STRING
+		"Base name for VirtualGL's GLX interposer library (default: ${DEFAULT_VGL_RRFAKER_NAME})")
+
+	set(DEFAULT_VGL_DLFAKER_NAME dlfaker)
+	set(VGL_DLFAKER_NAME ${DEFAULT_VGL_DLFAKER_NAME} CACHE STRING
+		"Base name for VirtualGL's dlopen() interposer library (default: ${DEFAULT_VGL_DLFAKER_NAME})")
+
+	set(DEFAULT_VGL_GEFAKER_NAME gefaker)
+	set(VGL_GEFAKER_NAME ${DEFAULT_VGL_GEFAKER_NAME} CACHE STRING
+		"Base name for VirtualGL's getenv() interposer library (default: ${DEFAULT_VGL_GEFAKER_NAME})")
+
 	if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/opt/VirtualGL")
 		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib${BITS})
 		set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib${BITS})

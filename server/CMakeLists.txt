@@ -16,6 +16,7 @@ endif()
 #
 
 configure_file(fakerconfig.h.in fakerconfig.h)
+configure_file(vendor.h.in vendor.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
 	../common)
@@ -67,40 +68,40 @@ set(RRFAKER_SOURCES
 if(VGL_USEXV)
 	set(RRFAKER_SOURCES ${RRFAKER_SOURCES};XVTrans.cpp)
 endif()
-add_library(rrfaker SHARED ${RRFAKER_SOURCES})
+add_library(${VGL_RRFAKER_NAME} SHARED ${RRFAKER_SOURCES})
 if(MAPFLAG)
 	set_source_files_properties(faker-sym.cpp PROPERTIES
 		OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
-	set_target_properties(rrfaker PROPERTIES
+	set_target_properties(${VGL_RRFAKER_NAME} PROPERTIES
 		LINK_FLAGS "-z defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
 else()
-	set_target_properties(rrfaker PROPERTIES LINK_FLAGS "-z defs")
+	set_target_properties(${VGL_RRFAKER_NAME} PROPERTIES LINK_FLAGS "-z defs")
 endif()
 if(VGL_FAKEXCB)
 	set(LIBXCB xcb xcb-glx xcb-keysyms X11-xcb)
 endif()
-target_link_libraries(rrfaker vglcommon ${FBXFAKERLIB} vglsocket m
+target_link_libraries(${VGL_RRFAKER_NAME} vglcommon ${FBXFAKERLIB} vglsocket m
 	${OPENGL_gl_LIBRARY} ${LIBDL} ${LIBXCB})
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 	# C++ shared libs.  Grrr...
-	target_link_libraries(rrfaker stdc++)
+	target_link_libraries(${VGL_RRFAKER_NAME} stdc++)
 endif()
-install(TARGETS rrfaker DESTINATION ${VGL_LIBDIR})
+install(TARGETS ${VGL_RRFAKER_NAME} DESTINATION ${VGL_LIBDIR})
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
 	\$ENV{DESTDIR}${VGL_FAKELIBDIR})")
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-	${VGL_LIBDIR}/librrfaker.so
+	${VGL_LIBDIR}/lib${VGL_RRFAKER_NAME}.so
 	\$ENV{DESTDIR}${VGL_FAKELIBDIR}/libGL.so)")
 
-add_library(dlfaker SHARED dlfaker.c)
-target_link_libraries(dlfaker ${LIBDL})
-install(TARGETS dlfaker DESTINATION ${VGL_LIBDIR})
+add_library(${VGL_DLFAKER_NAME} SHARED dlfaker.c)
+target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})
+install(TARGETS ${VGL_DLFAKER_NAME} DESTINATION ${VGL_LIBDIR})
 
-add_library(gefaker SHARED gefaker.c)
-set_target_properties(gefaker PROPERTIES LINK_FLAGS "-z defs")
-target_link_libraries(gefaker ${LIBDL})
-install(TARGETS gefaker DESTINATION ${VGL_LIBDIR})
+add_library(${VGL_GEFAKER_NAME} SHARED gefaker.c)
+set_target_properties(${VGL_GEFAKER_NAME} PROPERTIES LINK_FLAGS "-z defs")
+target_link_libraries(${VGL_GEFAKER_NAME} ${LIBDL})
+install(TARGETS ${VGL_GEFAKER_NAME} DESTINATION ${VGL_LIBDIR})
 
 set(HEADERS ../common/rr.h rrtransport.h)
 install(FILES ${HEADERS} DESTINATION ${VGL_INCDIR})
@@ -116,13 +117,11 @@ install(TARGETS vglconfig DESTINATION ${VGL_BINDIR})
 install(PROGRAMS vglgenkey vgllogin vglserver_config DESTINATION
 	${VGL_BINDIR})
 
-add_custom_target(vglrun ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/vglrun
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
-	COMMAND chmod u+rx ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vglrun)
-install(PROGRAMS vglrun DESTINATION ${VGL_BINDIR})
+configure_file(vglrun.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun @ONLY)
+execute_process(COMMAND chmod +x vglrun
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vglrun
+	DESTINATION ${VGL_BINDIR})
 configure_file(vglrun.vars.in
 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/.vglrun.vars${BITS} @ONLY)
 execute_process(COMMAND chmod +x .vglrun.vars${BITS}
