@@ -219,7 +219,7 @@ if [ -x "$MYPATH/.vglrun.vars32" ]; then
 	. "$MYPATH/.vglrun.vars32"
 fi
 if [ ! -z "$VGL_LIBRARY_PATH" ]; then
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VGL_LIBRARY_PATH
+	LD_LIBRARY_PATH=$VGL_LIBRARY_PATH:$LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH
 	if [ ! -z "$VGL_VERBOSE" ]; then
 		if [ $VGL_VERBOSE -eq 1 ]; then
