@@ -18,6 +18,15 @@ Fixed "Invalid MIT-MAGIC-COOKIE-1" errors that would prevent VirtualGL from
 working when vglconnect was used to connect to a VirtualGL server from a
 client running Cygwin/X.
 -------------------------------------------------------------------------------
+[4]
+If a 3D application is rendering to the front buffer and one of the
+end-of-frame trigger functions (glFlush()/glFinish()/glXWaitGL()) is called,
+VirtualGL will no longer read back the framebuffer unless the render mode is
+GL_RENDER.  Reading back the front buffer when the render mode is GL_SELECT
+or GL_FEEDBACK is not only unnecessary, but it was known to cause a
+GLXBadContextState error with newer nVidia drivers (340.xx and later) in
+certain cases.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
