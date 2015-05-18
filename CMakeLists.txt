@@ -291,9 +291,9 @@ option(VGL_BUILDSERVER "Build VirtualGL server components"
 if(VGL_BUILDSERVER)
 	message(STATUS "Building VirtualGL server components")
 
-	set(DEFAULT_VGL_RRFAKER_NAME rrfaker)
-	set(VGL_RRFAKER_NAME ${DEFAULT_VGL_RRFAKER_NAME} CACHE STRING
-		"Base name for VirtualGL's GLX interposer library (default: ${DEFAULT_VGL_RRFAKER_NAME})")
+	set(DEFAULT_VGL_FAKER_NAME vglfaker)
+	set(VGL_FAKER_NAME ${DEFAULT_VGL_FAKER_NAME} CACHE STRING
+		"Base name for VirtualGL's GLX/OpenGL/X11 interposer library (default: ${DEFAULT_VGL_FAKER_NAME})")
 
 	set(DEFAULT_VGL_DLFAKER_NAME dlfaker)
 	set(VGL_DLFAKER_NAME ${DEFAULT_VGL_DLFAKER_NAME} CACHE STRING

@@ -51,7 +51,7 @@ void *dlopen(const char *filename, int flag)
 	}
 
 	if((env=getenv(envname))==NULL || strlen(env)<1)
-		env="lib"VGL_RRFAKER_NAME".so";
+		env="lib"VGL_FAKER_NAME".so";
 	if(filename &&
 		(!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")

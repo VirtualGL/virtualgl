@@ -85,12 +85,12 @@ makedeb()
 				safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib32 $TMPDIR/__tmplib
 			fi
 			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
-			ln -fs /usr/lib32/lib@VGL_RRFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_RRFAKER_NAME@.so
+			ln -fs /usr/lib32/lib@VGL_FAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_DLFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_DLFAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_GEFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_GEFAKER_NAME@.so
 		fi
 		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib32/lib@VGL_RRFAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib32/lib@VGL_FAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	else
 
@@ -122,13 +122,13 @@ makedeb()
 			cd $__PWD
 		fi
 
-		safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc 
+		safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc
 		if [ "$PREFIX" = "/opt/VirtualGL" ]; then
 			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
 		fi
 
 		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib/lib@VGL_RRFAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
+		ln -fs /usr/lib/lib@VGL_FAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	fi
 

@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014 D. R. Commander
+ * Copyright (C)2009, 2014-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -156,7 +156,7 @@ void loadSymbols2(void)
 }
 
 
-/* Test whether librrfaker's version of dlopen() is discriminating enough.
+/* Test whether libvglfaker's version of dlopen() is discriminating enough.
    This will fail on VGL 2.1.2 and prior */
 
 typedef void (*_myTestFunctionType)(void);

@@ -12,7 +12,7 @@ that the script tries to launch:
 
 	Linux :: {:}
 #Verb: <<---
-ERROR: ld.so: object 'librrfaker.so' from LD_PRELOAD cannot be preloaded: ignored.
+ERROR: ld.so: object 'libvglfaker.so' from LD_PRELOAD cannot be preloaded: ignored.
 ---
 #Verb: <<---
 ERROR: ld.so: object 'libdlfaker.so' from LD_PRELOAD cannot be preloaded: ignored.
@@ -20,7 +20,7 @@ ERROR: ld.so: object 'libdlfaker.so' from LD_PRELOAD cannot be preloaded: ignore
 
 	Solaris :: {:}
 #Verb: <<---
-ld.so.1: warning: librrfaker.so: open failed: No such file in secure directories
+ld.so.1: warning: libvglfaker.so: open failed: No such file in secure directories
 ---
 #Verb: <<---
 ld.so.1: warning: libdlfaker.so: open failed: No such file in secure directories
@@ -74,14 +74,14 @@ paranoia here.
 
 {anchor: setuid_linux}
 To force VirtualGL to be preloaded into setuid/setgid executables on Linux,
-you have to first make sure that the faker libraries (''librrfaker.so'' and
+you have to first make sure that the faker libraries (''libvglfaker.so'' and
 ''libdlfaker.so'') are installed in the "system" library path (usually
 ''/usr/lib'', ''/usr/lib64'', ''/usr/lib32'', or ''/usr/lib/i386-linux-gnu'').
-Next, make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables.  To do
+Next, make ''libvglfaker.so'' and ''libdlfaker.so'' setuid executables.  To do
 this, run the following commands as root:
 
 #Verb: <<---
-chmod u+s /usr/{lib}/librrfaker.so
+chmod u+s /usr/{lib}/libvglfaker.so
 chmod u+s /usr/{lib}/libdlfaker.so
 ---
 

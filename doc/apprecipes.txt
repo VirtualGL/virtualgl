@@ -92,7 +92,7 @@
 | Cedega v6.0.x | Linux \
 	| Add \
 		{nl}{nl} \
-		''export LD_PRELOAD=librrfaker.so'' \
+		''export LD_PRELOAD=libvglfaker.so'' \
 		{nl}{nl} \
 		to the top of ''~/.cedega/.winex_ver/winex-{version}/bin/winex3'', then \
 		run Cedega as you would normally (without ''vglrun''.)  Since ''vglrun'' \

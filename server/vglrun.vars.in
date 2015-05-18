@@ -16,7 +16,7 @@
 
 VGL_LIBDIR=@VGL_LIBDIR@
 
-if [ -d "$VGL_LIBDIR" -a -f "$VGL_LIBDIR/lib@VGL_RRFAKER_NAME@.so" ] && \
+if [ -d "$VGL_LIBDIR" -a -f "$VGL_LIBDIR/lib@VGL_FAKER_NAME@.so" ] && \
 	[ $__VGL_DL -eq 0 -o -f "$VGL_LIBDIR/lib@VGL_DLFAKER_NAME@.so" ] && \
 	[ $__VGL_GE -eq 0 -o -f "$VGL_LIBDIR/lib@VGL_GEFAKER_NAME@.so" ]; then
 	if [ -z "$VGL_LIBRARY_PATH" ]; then

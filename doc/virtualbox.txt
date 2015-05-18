@@ -23,7 +23,7 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
-		make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables (Linux) or
+		make ''libvglfaker.so'' and ''libdlfaker.so'' setuid executables (Linux) or
 		to add the VirtualGL library directory to the list of secure paths
 		(Solaris).
 

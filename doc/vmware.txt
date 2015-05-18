@@ -18,7 +18,7 @@ To use VirtualGL with VMWare Workstation, perform the following procedures:
 		__without__ VirtualGL before adding VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
-		make ''librrfaker.so'' and ''libdlfaker.so'' setuid executables.
+		make ''libvglfaker.so'' and ''libdlfaker.so'' setuid executables.
 
 *** Launching VMWare
 #OPT: noList! plain!
