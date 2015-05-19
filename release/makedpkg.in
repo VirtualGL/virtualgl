@@ -89,8 +89,6 @@ makedeb()
 			ln -fs /usr/lib32/lib@VGL_DLFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_DLFAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_GEFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_GEFAKER_NAME@.so
 		fi
-		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib32/lib@VGL_FAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
 
 	else
 
@@ -127,9 +125,6 @@ makedeb()
 			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
 		fi
 
-		rm $TMPDIR/$FAKELIBDIR/libGL.so
-		ln -fs /usr/lib/lib@VGL_FAKER_NAME@.so $TMPDIR/$FAKELIBDIR/libGL.so
-
 	fi
 
 	$SUDO chown -Rh root:root $TMPDIR/*
@@ -143,7 +138,6 @@ DEBARCH=@DEBARCH@
 PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@VGL_BINDIR@
 DOCDIR=@VGL_DOCDIR@
-FAKELIBDIR=@VGL_FAKELIBDIR@
 INCDIR=@VGL_INCDIR@
 LIBDIR=@VGL_LIBDIR@
 

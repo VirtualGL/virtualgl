@@ -304,22 +304,17 @@ if(VGL_BUILDSERVER)
 		"Base name for VirtualGL's getenv() interposer library (default: ${DEFAULT_VGL_GEFAKER_NAME})")
 
 	if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/opt/VirtualGL")
-		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib${BITS})
 		set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib${BITS})
 	else()
-		set(DEFAULT_VGL_FAKELIBDIR ${CMAKE_INSTALL_PREFIX}/fakelib)
 		set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
 	endif()
 	set(DEFAULT_VGL_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
 
-	set(VGL_FAKELIBDIR ${DEFAULT_VGL_FAKELIBDIR} CACHE PATH
-		"Directory into which the libGL symlinks for Chromium should be installed (default: ${DEFAULT_VGL_FAKELIBDIR})")
 	set(VGL_INCDIR ${DEFAULT_VGL_INCDIR} CACHE PATH
 		"Directory into which the VirtualGL transport API headers should be installed(default: ${DEFAULT_VGL_INCDIR})")
 	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
 		"Directory into which the VirtualGL faker libraries should be installed (default: ${DEFAULT_VGL_LIBDIR})")
 
-	message(STATUS "VGL_FAKELIBDIR = ${VGL_FAKELIBDIR}")
 	message(STATUS "VGL_INCDIR = ${VGL_INCDIR}")
 	message(STATUS "VGL_LIBDIR = ${VGL_LIBDIR}")
 

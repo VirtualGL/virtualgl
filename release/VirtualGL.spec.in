@@ -30,13 +30,6 @@
 # %{incdir} != %{_includedir}
 %define incsymlinks 1
 
-# Path under which the libGL symlinks for Chromium should be installed
-%ifarch x86_64
-%define fakelibdir %{prefix}/fakelib64
-%else
-%define fakelibdir %{prefix}/fakelib32
-%endif
-
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
@@ -86,7 +79,7 @@ Ertl 2000.)
 #-->%setup -q
 
 #-->%build
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_BINDIR=%{bindir} -DVGL_DOCDIR=%{docdir} -DVGL_LIBDIR=%{libdir} -DVGL_INCDIR=%{incdir} -DVGL_FAKELIBDIR=%{fakelibdir} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_BINDIR=%{bindir} -DVGL_DOCDIR=%{docdir} -DVGL_LIBDIR=%{libdir} -DVGL_INCDIR=%{incdir} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
 #-->make
 
 %install
@@ -154,12 +147,6 @@ if [ ! "$VGL_LIBDIR" = "%{libdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$VGL_LIBDIR $RPM_BUILD_ROOT/%{libdir} $RPM_BUILD_ROOT/__tmplib
 fi
 
-VGL_FAKELIBDIR=@VGL_FAKELIBDIR@
-rm $RPM_BUILD_ROOT/$VGL_FAKELIBDIR/libGL.so
-rmdir $RPM_BUILD_ROOT/$VGL_FAKELIBDIR
-mkdir -p $RPM_BUILD_ROOT/%{fakelibdir}
-ln -fs %{libdir}/lib@VGL_FAKER_NAME@.so $RPM_BUILD_ROOT/%{fakelibdir}/libGL.so
-
 #-->%endif
 
 %if "%{prefix}" == "/opt/VirtualGL" && "%{docdir}" != "%{prefix}/doc"
@@ -217,9 +204,6 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
  %{_bindir}/vglgenkey
  %{_bindir}/vglserver_config
 %endif
-
-%dir %{fakelibdir}
-%{fakelibdir}/libGL.so
 
 %dir %{incdir}
 %{incdir}/rrtransport.h

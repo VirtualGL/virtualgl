@@ -88,11 +88,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries(${VGL_FAKER_NAME} stdc++)
 endif()
 install(TARGETS ${VGL_FAKER_NAME} DESTINATION ${VGL_LIBDIR})
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-	\$ENV{DESTDIR}${VGL_FAKELIBDIR})")
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-	${VGL_LIBDIR}/lib${VGL_FAKER_NAME}.so
-	\$ENV{DESTDIR}${VGL_FAKELIBDIR}/libGL.so)")
 
 add_library(${VGL_DLFAKER_NAME} SHARED dlfaker.c)
 target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})

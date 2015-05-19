@@ -6,6 +6,11 @@ librrfaker.so has been renamed to libvglfaker.so.  The "rr" designation dates
 from before VirtualGL was called "VirtualGL" (i.e. before it became an open
 source project), and it is no longer relevant.
 -------------------------------------------------------------------------------
+[2]
+The symlinks that VirtualGL previously installed for Chromium (the
+long-obsolete parallel rendering package, not the web browser) are no longer
+included in this release.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
