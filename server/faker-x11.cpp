@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2014 D. R. Commander
+ * Copyright (C)2009, 2011-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,9 +20,6 @@
 #include "vglconfigLauncher.h"
 #ifdef FAKEXCB
 #include "XCBConnHash.h"
-extern "C" {
-#include <X11/Xlib-xcb.h>
-}
 #endif
 
 using namespace vglserver;
@@ -62,10 +59,19 @@ int XCloseDisplay(Display *dpy)
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
 
 	#ifdef FAKEXCB
-	if(vglfaker::fakeXCB)
+	if(fconfig.fakeXCB)
 	{
-		xcb_connection_t *conn=XGetXCBConnection(dpy);
-		xcbconnhash.remove(conn);
+		CHECKSYM_NONFATAL(XGetXCBConnection)
+		if(!__XGetXCBConnection)
+		{
+			vglout.print("[VGL] Disabling XCB interposer\n");
+			fconfig.fakeXCB=0;
+		}
+		else
+		{
+			xcb_connection_t *conn=_XGetXCBConnection(dpy);
+			xcbconnhash.remove(conn);
+		}
 	}
 	#endif
 
@@ -426,17 +432,26 @@ Display *XOpenDisplay(_Xconst char* name)
 		if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
 		#ifdef FAKEXCB
-		if(vglfaker::fakeXCB)
+		if(fconfig.fakeXCB)
 		{
-			conn=XGetXCBConnection(dpy);
-			if(conn) xcbconnhash.add(conn, dpy);
+			CHECKSYM_NONFATAL(XGetXCBConnection)
+			if(!__XGetXCBConnection)
+			{
+				vglout.print("[VGL] Disabling XCB interposer\n");
+				fconfig.fakeXCB=0;
+			}
+			else
+			{
+				conn=_XGetXCBConnection(dpy);
+				if(conn) xcbconnhash.add(conn, dpy);
+			}
 		}
 		#endif
 	}
 
 		stoptrace();  prargd(dpy);
 		#ifdef FAKEXCB
-		if(vglfaker::fakeXCB) prargx(conn);
+		if(fconfig.fakeXCB) prargx(conn);
 		#endif
 		closetrace();
 

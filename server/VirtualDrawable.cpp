@@ -34,12 +34,12 @@ static int glError(void)
 {
 	int i, ret=0;
 
-	i=glGetError();
+	i=_glGetError();
 	while(i!=GL_NO_ERROR)
 	{
 		ret=1;
 		vglout.print("[VGL] ERROR: OpenGL error 0x%.4x\n", i);
-		i=glGetError();
+		i=_glGetError();
 	}
 	return ret;
 }
@@ -174,9 +174,9 @@ void VirtualDrawable::OGLDrawable::clear(void)
 	cleared=true;
 	GLfloat params[4];
 	_glGetFloatv(GL_COLOR_CLEAR_VALUE, params);
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(params[0], params[1], params[2], params[3]);
+	_glClearColor(0, 0, 0, 0);
+	_glClear(GL_COLOR_BUFFER_BIT);
+	_glClearColor(params[0], params[1], params[2], params[3]);
 }
 
 
@@ -319,15 +319,6 @@ static const char *formatString(int format)
 }
 
 
-#define CHECKPBOSYM(s) {  \
-	if(!__##s) {  \
-		__##s=(__##s##Type)glXGetProcAddressARB((const GLubyte *)#s);  \
-		if(!__##s)  \
-			_throw(#s" symbol not loaded");  \
-	}  \
-}
-
-
 void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	GLint height, GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
@@ -339,20 +330,6 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	static bool usePBO=(fconfig.readback==RRREAD_PBO);
 	static bool alreadyPrinted=false, alreadyWarned=false;
 	static const char *ext=NULL;
-
-	typedef void (*__glGenBuffersType)(GLsizei, GLuint *);
-	static __glGenBuffersType __glGenBuffers=NULL;
-	typedef void (*__glBindBufferType)(GLenum, GLuint);
-	static __glBindBufferType __glBindBuffer=NULL;
-	typedef void (*__glBufferDataType)(GLenum, GLsizeiptr, const GLvoid *,
-		GLenum);
-	static __glBufferDataType __glBufferData=NULL;
-	typedef void (*__glGetBufferParameterivType)(GLenum, GLenum, GLint *);
-	static __glGetBufferParameterivType __glGetBufferParameteriv=NULL;
-	typedef void *(*__glMapBufferType)(GLenum, GLenum);
-	static __glMapBufferType __glMapBuffer=NULL;
-	typedef GLboolean (*__glUnmapBufferType)(GLenum);
-	static __glUnmapBufferType __glUnmapBuffer=NULL;
 
 	// Whenever the readback format changes (perhaps due to switching
 	// compression or transports), then reset the PBO synchronicity detector
@@ -380,29 +357,23 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	}
 	TempContext tc(_dpy3D, draw, read, ctx, config, GLX_RGBA_TYPE);
 
-	glReadBuffer(buf);
+	_glReadBuffer(buf);
 
-	if(pitch%8==0) glPixelStorei(GL_PACK_ALIGNMENT, 8);
-	else if(pitch%4==0) glPixelStorei(GL_PACK_ALIGNMENT, 4);
-	else if(pitch%2==0) glPixelStorei(GL_PACK_ALIGNMENT, 2);
-	else if(pitch%1==0) glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	if(pitch%8==0) _glPixelStorei(GL_PACK_ALIGNMENT, 8);
+	else if(pitch%4==0) _glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	else if(pitch%2==0) _glPixelStorei(GL_PACK_ALIGNMENT, 2);
+	else if(pitch%1==0) _glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	if(usePBO)
 	{
 		if(!ext)
 		{
-			ext=(const char *)glGetString(GL_EXTENSIONS);
+			ext=(const char *)_glGetString(GL_EXTENSIONS);
 			if(!ext || !strstr(ext, "GL_ARB_pixel_buffer_object"))
 				_throw("GL_ARB_pixel_buffer_object extension not available");
 		}
-		CHECKPBOSYM(glGenBuffers);
-		CHECKPBOSYM(glBindBuffer);
-		CHECKPBOSYM(glBufferData);
-		CHECKPBOSYM(glGetBufferParameteriv);
-		CHECKPBOSYM(glMapBuffer);
-		CHECKPBOSYM(glUnmapBuffer);
 		#ifdef GL_VERSION_1_5
-		if(!pbo) __glGenBuffers(1, &pbo);
+		if(!pbo) _glGenBuffers(1, &pbo);
 		if(!pbo) _throw("Could not generate pixel buffer object");
 		if(!alreadyPrinted && fconfig.verbose)
 		{
@@ -410,13 +381,13 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				formatString(oglDraw->getFormat()), formatString(format));
 			alreadyPrinted=true;
 		}
-		__glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
+		_glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
 		int size=0;
-		__glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
+		_glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*height)
-			__glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*height, NULL,
+			_glBufferData(GL_PIXEL_PACK_BUFFER_EXT, pitch*height, NULL,
 				GL_STREAM_READ);
-		__glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
+		_glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE, &size);
 		if(size!=pitch*height)
 			_throw("Could not set PBO size");
 		#else
@@ -433,8 +404,8 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		}
 	}
 
-	int e=glGetError();
-	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+	int e=_glGetError();
+	while(e!=GL_NO_ERROR) e=_glGetError();  // Clear previous error
 	profReadback.startFrame();
 	if(usePBO) t0=getTime();
 	glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE,
@@ -445,13 +416,13 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		tRead=getTime()-t0;
 		#ifdef GL_VERSION_1_5
 		unsigned char *pboBits=NULL;
-		pboBits=(unsigned char *)__glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
+		pboBits=(unsigned char *)_glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 			GL_READ_ONLY);
 		if(!pboBits) _throw("Could not map pixel buffer object");
 		memcpy(bits, pboBits, pitch*height);
-		if(!__glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
+		if(!_glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT))
 			_throw("Could not unmap pixel buffer object");
-		__glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
+		_glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, 0);
 		#endif
 		tTotal=getTime()-t0;
 		numFrames++;
@@ -550,33 +521,33 @@ void VirtualDrawable::copyPixels(GLint srcX, GLint srcY, GLint width,
 	TempContext tc(_dpy3D, draw, getGLXDrawable(), ctx, config,
 		GLX_RGBA_TYPE);
 
-	glReadBuffer(GL_FRONT);
+	_glReadBuffer(GL_FRONT);
 	_glDrawBuffer(GL_FRONT_AND_BACK);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	_glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-	int e=glGetError();
-	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
+	int e=_glGetError();
+	while(e!=GL_NO_ERROR) e=_glGetError();  // Clear previous error
 
 	_glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, width, 0, height, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
+	_glMatrixMode(GL_PROJECTION);
+	_glPushMatrix();
+	_glLoadIdentity();
+	_glOrtho(0, width, 0, height, -1, 1);
+	_glMatrixMode(GL_MODELVIEW);
+	_glPushMatrix();
+	_glLoadIdentity();
 
 	for(GLint i=0; i<height; i++)
 	{
-		glRasterPos2i(destX, height-destY-i-1);
-		glCopyPixels(srcX, height-srcY-i-1, width, 1, GL_COLOR);
+		_glRasterPos2i(destX, height-destY-i-1);
+		_glCopyPixels(srcX, height-srcY-i-1, width, 1, GL_COLOR);
 	}
 	CHECKGL("Copy Pixels");
 
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
+	_glMatrixMode(GL_MODELVIEW);
+	_glPopMatrix();
+	_glMatrixMode(GL_PROJECTION);
+	_glPopMatrix();
 }

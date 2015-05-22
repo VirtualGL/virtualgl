@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -20,304 +20,220 @@
 #include "fakerconfig.h"
 
 
-static void *loadSym(void *dllhnd, const char *symbol, int quiet)
-{
-	void *sym;  const char *err;
-	dlerror();  // Clear error state
-	sym=dlsym(dllhnd, (char *)symbol);
-	err=dlerror();
-	if(err && !quiet) vglout.print("[VGL] %s\n", err);
-	return sym;
-}
-
-
-#define LSYM(s) __##s=(_##s##Type)loadSym(dllhnd, #s, !fconfig.verbose);  \
-	if(!__##s) return -1;
-
-#define LSYMOPT(s) __##s=(_##s##Type)loadSym(dllhnd, #s, 1);
-
 static void *gldllhnd=NULL;
+static void *loadGLSymbol(const char *);
 static void *x11dllhnd=NULL;
-static int loadGLSymbols(void *);
-static int loadX11Symbols(void *);
+static void *loadX11Symbol(const char *);
 #ifdef FAKEXCB
-static int loadXCBSymbols(void *);
+static void *xcbdllhnd=NULL;
+static void *loadXCBSymbol(const char *);
+static void *xcbatomdllhnd=NULL;
+static void *loadXCBAtomSymbol(const char *);
+static void *xcbglxdllhnd=NULL;
+static void *loadXCBGLXSymbol(const char *);
+static void *xcbkeysymsdllhnd=NULL;
+static void *loadXCBKeysymsSymbol(const char *);
+static void *xcbx11dllhnd=NULL;
+static void *loadXCBX11Symbol(const char *);
 #endif
 
 
 namespace vglfaker
 {
 
-void loadDLSymbols(void)
+void *loadSymbol(const char *name)
 {
-	dlerror();  // Clear error state
-	__dlopen=(_dlopenType)loadSym(RTLD_NEXT, "dlopen", 0);
-	if(!__dlopen)
+	if(!name)
 	{
-		vglout.print("[VGL] ERROR: Could not load symbol dlopen\n");
+		vglout.print("[VGL] ERROR: Invalid argument in loadSymbol()\n");
 		safeExit(1);
 	}
-}
-
-
-void loadSymbols(void)
-{
-	void *dllhnd;
-
-	if(strlen(fconfig.gllib)>0)
-	{
-		dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_NOW);
-		if(!dllhnd)
-		{
-			vglout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
-				fconfig.gllib, dlerror());
-			safeExit(1);
-		}
-		else gldllhnd=dllhnd;
-	}
-	else dllhnd=RTLD_NEXT;
-	if(loadGLSymbols(dllhnd)<0)
-	{
-		if(dllhnd==RTLD_NEXT)
-		{
-			if(fconfig.verbose)
-			{
-				vglout.print("[VGL] WARNING: Could not load GLX/OpenGL symbols using RTLD_NEXT.  Attempting\n");
-				vglout.print("[VGL]    to load GLX/OpenGL symbols directly from libGL.so.1.\n");
-			}
-			dllhnd=_vgl_dlopen("libGL.so.1", RTLD_NOW);
-			if(!dllhnd)
-			{
-				vglout.print("[VGL] ERROR: Could not open libGL.so.1\n[VGL]    %s\n",
-					dlerror());
-				safeExit(1);
-			}
-			if(loadGLSymbols(dllhnd)<0)
-			{
-				vglout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from libGL.so.1.\n");
-				safeExit(1);
-			}
-			gldllhnd=dllhnd;
-		}
-		else
-		{
-			if(strlen(fconfig.gllib)>0)
-				vglout.print("[VGL] ERROR: Could not load GLX/OpenGL symbols from %s.\n",
-					fconfig.gllib);
-			safeExit(1);
-		}
-	}
-
-	if(strlen(fconfig.x11lib)>0)
-	{
-		dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_NOW);
-		if(!dllhnd)
-		{
-			vglout.print("[VGL] ERROR: Could not open %s\n[VGL]    %s\n",
-				fconfig.x11lib, dlerror());
-			safeExit(1);
-		}
-		else x11dllhnd=dllhnd;
-	}
-	else dllhnd=RTLD_NEXT;
-	if(loadX11Symbols(dllhnd)<0)
-	{
-		if(dllhnd==RTLD_NEXT)
-		{
-			if(fconfig.verbose)
-			{
-				vglout.print("[VGL] WARNING: Could not load X11 symbols using RTLD_NEXT.  Attempting\n");
-				vglout.print("[VGL]    to load X11 symbols directly from libX11.\n");
-			}
-			dllhnd=_vgl_dlopen("libX11.so.4", RTLD_NOW);
-			if(!dllhnd) dllhnd=_vgl_dlopen("libX11.so.5", RTLD_NOW);
-			if(!dllhnd) dllhnd=_vgl_dlopen("libX11.so.6", RTLD_NOW);
-			if(!dllhnd)
-			{
-				vglout.print("[VGL] ERROR: Could not open libX11\n[VGL]    %s\n",
-					dlerror());
-				safeExit(1);
-			}
-			if(loadX11Symbols(dllhnd)<0)
-			{
-				vglout.print("[VGL] ERROR: Could not load X11 symbols from libX11.\n");
-				safeExit(1);
-			}
-			x11dllhnd=dllhnd;
-		}
-		else
-		{
-			if(strlen(fconfig.x11lib)>0)
-				vglout.print("[VGL] ERROR: Could not load X11 symbols from %s.\n",
-					fconfig.x11lib);
-			safeExit(1);
-		}
-	}
-
+	if(!strncmp(name, "gl", 2))
+		return loadGLSymbol(name);
 	#ifdef FAKEXCB
-	if(loadXCBSymbols(RTLD_NEXT)<0)
-	{
-		vglout.print("[VGL] ERROR: Could not load XCB symbols from libxcb.\n");
-		safeExit(1);
-	}
+	else if(!strcmp(name, "XGetXCBConnection"))
+		return loadXCBX11Symbol(name);
 	#endif
+	else if(!strncmp(name, "X", 1))
+		return loadX11Symbol(name);
+	#ifdef FAKEXCB
+	else if(!strncmp(name, "xcb_intern_atom", 15))
+		return loadXCBAtomSymbol(name);
+	else if(!strncmp(name, "xcb_glx", 7))
+		return loadXCBGLXSymbol(name);
+	else if(!strncmp(name, "xcb_key", 7))
+		return loadXCBKeysymsSymbol(name);
+	else if(!strncmp(name, "xcb_", 4))
+		return loadXCBSymbol(name);
+	#endif
+	else
+	{
+		vglout.print("[VGL] ERROR: don't know how to load symbol \"%s\"\n", name);
+		return NULL;
+	}
 }
 
 } // namespace
 
 
-static int loadGLSymbols(void *dllhnd)
+static void *loadGLSymbol(const char *name)
 {
-	dlerror();  // Clear error state
+	char *err=NULL;
 
-	// GLX symbols
-	LSYM(glXChooseVisual)
-	LSYM(glXCopyContext)
-	LSYM(glXCreateContext)
-	LSYM(glXCreateGLXPixmap)
-	LSYM(glXDestroyContext)
-	LSYM(glXDestroyGLXPixmap)
-	LSYM(glXGetConfig)
-	LSYM(glXGetCurrentDrawable)
-	LSYM(glXIsDirect)
-	LSYM(glXMakeCurrent);
-	LSYM(glXQueryExtension)
-	LSYM(glXQueryVersion)
-	LSYM(glXSwapBuffers)
-	LSYM(glXUseXFont)
-	LSYM(glXWaitGL)
+	if(!__glXGetProcAddress)
+	{
+		if(strlen(fconfig.gllib)>0)
+		{
+			dlerror();  // Clear error state
+			void *dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_LAZY);
+			err=dlerror();
+			if(!dllhnd)
+			{
+				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.gllib);
+				if(err) vglout.print("[VGL]    %s\n", err);
+				return NULL;
+			}
+			gldllhnd=dllhnd;
+		}
+		else gldllhnd=RTLD_NEXT;
 
-	LSYM(glXGetClientString)
-	LSYM(glXQueryServerString)
-	LSYM(glXQueryExtensionsString)
+		dlerror();  // Clear error state
+		__glXGetProcAddress=(_glXGetProcAddressType)dlsym(gldllhnd,
+			"glXGetProcAddress");
+		if(!__glXGetProcAddress)
+			__glXGetProcAddress=(_glXGetProcAddressType)dlsym(gldllhnd,
+				"glXGetProcAddressARB");
+		err=dlerror();
 
-	LSYM(glXChooseFBConfig)
-	LSYM(glXCreateNewContext)
-	LSYM(glXCreatePbuffer)
-	LSYM(glXCreatePixmap)
-	LSYM(glXCreateWindow)
-	LSYM(glXDestroyPbuffer)
-	LSYM(glXDestroyPixmap)
-	LSYM(glXDestroyWindow)
-	LSYM(glXGetCurrentDisplay)
-	LSYM(glXGetCurrentReadDrawable)
-	LSYM(glXGetFBConfigAttrib)
-	LSYM(glXGetFBConfigs)
-	LSYM(glXGetSelectedEvent)
-	LSYM(glXGetVisualFromFBConfig)
-	LSYM(glXMakeContextCurrent);
-	LSYM(glXQueryContext)
-	LSYM(glXQueryDrawable)
-	LSYM(glXSelectEvent)
+		if(!__glXGetProcAddress)
+		{
+			vglout.print("[VGL] ERROR: Could not load GLX/OpenGL functions");
+			if(strlen(fconfig.gllib)>0)
+				vglout.print(" from %s", fconfig.gllib);
+			vglout.print("\n");
+			if(err) vglout.print("[VGL]    %s\n", err);
+			return NULL;
+		}
+	}
 
-	// Optional extensions.  We fake these if they exist
-	LSYMOPT(glXFreeContextEXT)
-	LSYMOPT(glXImportContextEXT)
-	LSYMOPT(glXQueryContextInfoEXT)
-
-	LSYMOPT(glXJoinSwapGroupNV)
-	LSYMOPT(glXBindSwapBarrierNV)
-	LSYMOPT(glXQuerySwapGroupNV)
-	LSYMOPT(glXQueryMaxSwapGroupsNV)
-	LSYMOPT(glXQueryFrameCountNV)
-	LSYMOPT(glXResetFrameCountNV)
-
-	LSYMOPT(glXGetProcAddressARB)
-	LSYMOPT(glXGetProcAddress)
-
-	LSYMOPT(glXCreateContextAttribsARB)
-
-	LSYMOPT(glXBindTexImageEXT)
-	LSYMOPT(glXReleaseTexImageEXT)
-	// For some reason, the ATI implementation of libGL on Ubuntu (and maybe
-	// other platforms as well) does not export glXBindTexImageEXT and
-	// glXReleaseTexImageEXT, but those symbols can be obtained through
-	// glXGetProcAddressARB().
-	if(!__glXBindTexImageEXT && __glXGetProcAddressARB)
-		__glXBindTexImageEXT=
-			(_glXBindTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXBindTexImageEXT");
-	if(!__glXReleaseTexImageEXT && __glXGetProcAddressARB)
-		__glXReleaseTexImageEXT=
-			(_glXReleaseTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXReleaseTexImageEXT");
-
-	LSYMOPT(glXSwapIntervalEXT)
-	LSYMOPT(glXSwapIntervalSGI)
-
-	// GL symbols
-	LSYM(glFinish)
-	LSYM(glFlush)
-	LSYM(glViewport)
-	LSYM(glDrawBuffer)
-	LSYM(glPopAttrib)
-	LSYM(glReadPixels)
-	LSYM(glDrawPixels)
-	LSYM(glIndexd)
-	LSYM(glIndexf)
-	LSYM(glIndexi)
-	LSYM(glIndexs)
-	LSYM(glIndexub)
-	LSYM(glIndexdv)
-	LSYM(glIndexfv)
-	LSYM(glIndexiv)
-	LSYM(glIndexsv)
-	LSYM(glIndexubv)
-	LSYM(glClearIndex)
-	LSYM(glGetDoublev)
-	LSYM(glGetFloatv)
-	LSYM(glGetIntegerv)
-	LSYM(glMaterialfv)
-	LSYM(glMaterialiv)
-	LSYM(glPixelTransferf)
-	LSYM(glPixelTransferi)
-	return 0;
+	void *sym=NULL;
+	if(!strcmp(name, "glXGetProcAddress") ||
+		!strcmp(name, "glXGetProcAddressARB"))
+		sym=(void *)__glXGetProcAddress;
+	else
+		sym=(void *)__glXGetProcAddress((const GLubyte *)name);
+	if(!sym)
+	{
+		vglout.print("[VGL] ERROR: Could not load function \"%s\"", name);
+		if(strlen(fconfig.gllib)>0)
+			vglout.print(" from %s", fconfig.gllib);
+	}
+	return sym;
 }
 
 
-static int loadX11Symbols(void *dllhnd)
+static void *loadX11Symbol(const char *name)
 {
-	dlerror();  // Clear error state
+	char *err=NULL;
 
-	LSYM(XCheckMaskEvent);
-	LSYM(XCheckTypedEvent);
-	LSYM(XCheckTypedWindowEvent);
-	LSYM(XCheckWindowEvent);
-	LSYM(XCloseDisplay);
-	LSYM(XConfigureWindow);
-	LSYM(XCopyArea);
-	LSYM(XCreateWindow);
-	LSYM(XCreateSimpleWindow);
-	LSYM(XDestroySubwindows);
-	LSYM(XDestroyWindow);
-	LSYM(XFree);
-	LSYM(XGetGeometry);
-	LSYM(XGetImage);
-	LSYM(XListExtensions);
-	LSYM(XMaskEvent);
-	LSYM(XMoveResizeWindow);
-	LSYM(XNextEvent);
-	LSYM(XOpenDisplay);
-	LSYM(XQueryExtension);
-	LSYM(XResizeWindow);
-	LSYM(XServerVendor);
-	LSYM(XWindowEvent);
-	return 0;
+	if(!x11dllhnd)
+	{
+		if(strlen(fconfig.x11lib)>0)
+		{
+			dlerror();  // Clear error state
+			void *dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_LAZY);
+			err=dlerror();
+			if(!dllhnd)
+			{
+				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.x11lib);
+				if(err) vglout.print("[VGL]    %s\n", err);
+				return NULL;
+			}
+			x11dllhnd=dllhnd;
+		}
+		else x11dllhnd=RTLD_NEXT;
+	}
+
+	dlerror();  // Clear error state
+	void *sym=dlsym(x11dllhnd, (char *)name);
+	err=dlerror();
+
+	if(!sym)
+	{
+		vglout.print("[VGL] ERROR: Could not load function \"%s\"", name);
+		if(strlen(fconfig.x11lib)>0)
+			vglout.print(" from %s", fconfig.x11lib);
+		vglout.print("\n");
+		if(err) vglout.print("[VGL]    %s\n", err);
+	}
+	return sym;
 }
 
 
 #ifdef FAKEXCB
 
-static int loadXCBSymbols(void *dllhnd)
-{
-	dlerror();  // Clear error state
-
-	LSYM(xcb_get_extension_data);
-	LSYM(xcb_glx_query_version);
-	LSYM(xcb_glx_query_version_reply);
-	LSYM(xcb_poll_for_event);
-	LSYMOPT(xcb_poll_for_queued_event);
-	LSYM(xcb_wait_for_event);
-	return 0;
+#define LOAD_XCB_SYMBOL(ID, id, libid, minrev, maxrev)  \
+static void *load##ID##Symbol(const char *name)  \
+{  \
+	char *err=NULL;  \
+  \
+	if(!id##dllhnd)  \
+	{  \
+		if(strlen(fconfig.id##lib)>0)  \
+		{  \
+			dlerror();  \
+			void *dllhnd=_vgl_dlopen(fconfig.id##lib, RTLD_LAZY);  \
+			err=dlerror();  \
+			if(!dllhnd)  \
+			{  \
+				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.id##lib);  \
+				if(err) vglout.print("[VGL]    %s\n", err);  \
+				return NULL;  \
+			}  \
+			id##dllhnd=dllhnd;  \
+		}  \
+		else  \
+		{  \
+			void *dllhnd=NULL;  \
+			for(int i=minrev; i<=maxrev; i++)  \
+			{  \
+				char libName[MAXSTR];  \
+				snprintf(libName, MAXSTR, "lib%s.so.%d", #libid, i);  \
+				dlerror();  \
+				dllhnd=_vgl_dlopen(libName, RTLD_LAZY);  \
+				err=dlerror();  \
+				if(dllhnd) break;  \
+			}  \
+			if(!dllhnd)  \
+			{  \
+				vglout.print("[VGL] ERROR: Could not open lib%s\n", #libid);  \
+				if(err) vglout.print("[VGL]    %s\n", err);  \
+				return NULL;  \
+			}  \
+			id##dllhnd=dllhnd;  \
+		}  \
+	}  \
+  \
+	dlerror();  \
+	void *sym=dlsym(id##dllhnd, (char *)name);  \
+	err=dlerror();  \
+  \
+	if(!sym)  \
+	{  \
+		vglout.print("[VGL] ERROR: Could not load symbol \"%s\"", name);  \
+		if(strlen(fconfig.id##lib)>0)  \
+			vglout.print(" from %s", fconfig.id##lib);  \
+		vglout.print("\n");  \
+		if(err) vglout.print("[VGL]    %s\n", err);  \
+	}  \
+	return sym;  \
 }
+
+LOAD_XCB_SYMBOL(XCB, xcb, xcb, 1, 1)
+LOAD_XCB_SYMBOL(XCBAtom, xcbatom, xcb-atom, 0, 1)
+LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb-glx, 0, 0);
+LOAD_XCB_SYMBOL(XCBKeysyms, xcbkeysyms, xcb-keysyms, 0, 1)
+LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11-xcb, 1, 1)
 
 #endif
 
@@ -326,8 +242,15 @@ namespace vglfaker {
 
 void unloadSymbols(void)
 {
-	if(gldllhnd) dlclose(gldllhnd);
-	if(x11dllhnd) dlclose(x11dllhnd);
+	if(gldllhnd && gldllhnd!=RTLD_NEXT) dlclose(gldllhnd);
+	if(x11dllhnd && x11dllhnd!=RTLD_NEXT) dlclose(x11dllhnd);
+	#ifdef FAKEXCB
+	if(xcbdllhnd) dlclose(xcbdllhnd);
+	if(xcbatomdllhnd) dlclose(xcbatomdllhnd);
+	if(xcbglxdllhnd) dlclose(xcbglxdllhnd);
+	if(xcbkeysymsdllhnd) dlclose(xcbkeysymsdllhnd);
+	if(xcbx11dllhnd) dlclose(xcbx11dllhnd);
+	#endif
 }
 
 }

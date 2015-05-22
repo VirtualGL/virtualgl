@@ -26,10 +26,17 @@ if(VGL_USEXV)
 	set(FBXFAKERLIB ${FBXFAKERLIB};fbxv)
 endif()
 
-option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" OFF)
+option(VGL_FAKEXCB "Interpose enough of the XCB API to make Qt 5 work" ON)
 if(VGL_FAKEXCB)
 	add_definitions(-DFAKEXCB)
 	set(FAKER_XCB_SOURCES faker-xcb.cpp XCBConnHash.cpp)
+	set(VGL_DEFAULTSYSTEMXCB 0)
+	option(VGL_SYSTEMXCB
+		"Compile against system-supplied versions of the XCB headers instead of the in-tree versions."
+			${VGL_DEFAULTSYSTEMXCB})
+	if(VGL_SYSTEMXCB)
+		add_definitions(-DSYSXCBHEADERS)
+	endif()
 endif()
 
 get_directory_property(DEFS_PROP COMPILE_DEFINITIONS)
@@ -68,26 +75,29 @@ set(FAKER_SOURCES
 if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
-add_library(${VGL_FAKER_NAME} SHARED ${FAKER_SOURCES})
-if(MAPFLAG)
-	set_source_files_properties(faker-sym.cpp PROPERTIES
-		OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
-	set_target_properties(${VGL_FAKER_NAME} PROPERTIES
-		LINK_FLAGS "-z defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
-else()
-	set_target_properties(${VGL_FAKER_NAME} PROPERTIES LINK_FLAGS "-z defs")
-endif()
-if(VGL_FAKEXCB)
-	set(LIBXCB xcb xcb-glx xcb-keysyms X11-xcb)
-endif()
-target_link_libraries(${VGL_FAKER_NAME} vglcommon ${FBXFAKERLIB} vglsocket m
-	${OPENGL_gl_LIBRARY} ${LIBDL} ${LIBXCB})
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
-	# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
-	# C++ shared libs.  Grrr...
-	target_link_libraries(${VGL_FAKER_NAME} stdc++)
-endif()
-install(TARGETS ${VGL_FAKER_NAME} DESTINATION ${VGL_LIBDIR})
+
+foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
+	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
+	if(MAPFLAG)
+		set_source_files_properties(faker-sym.cpp PROPERTIES
+			OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
+		set_target_properties(${fakerlib} PROPERTIES
+			LINK_FLAGS "-z defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
+	else()
+		set_target_properties(${fakerlib} PROPERTIES LINK_FLAGS "-z defs")
+	endif()
+	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
+		${LIBDL})
+	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
+		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
+	endif()
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
+		# C++ shared libs.  Grrr...
+		target_link_libraries(${fakerlib} stdc++)
+	endif()
+	install(TARGETS ${fakerlib} DESTINATION ${VGL_LIBDIR})
+endforeach()
 
 add_library(${VGL_DLFAKER_NAME} SHARED dlfaker.c)
 target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})

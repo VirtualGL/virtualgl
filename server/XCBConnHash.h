@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014 D. R. Commander
+ * Copyright (C)2014-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,9 +18,7 @@
 #ifdef FAKEXCB
 
 #include <X11/Xlib.h>
-extern "C" {
-#include <xcb/xcb.h>
-}
+#include "faker-sym.h"
 #include "Hash.h"
 
 
@@ -62,12 +60,12 @@ namespace vglserver
 				// We set up the window manager atoms here because doing so in the
 				// event handler can cause a deadlock.
 				xcb_intern_atom_reply_t *reply=NULL;
-				reply=xcb_intern_atom_reply(conn,
-					xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
+				reply=_xcb_intern_atom_reply(conn,
+					_xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
 						"WM_PROTOCOLS"), NULL);
 				if(reply) attribs->protoAtom=reply->atom;
-				reply=xcb_intern_atom_reply(conn,
-					xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
+				reply=_xcb_intern_atom_reply(conn,
+					_xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
 						"WM_DELETE_WINDOW"), NULL);
 				if(reply) attribs->deleteAtom=reply->atom;
 

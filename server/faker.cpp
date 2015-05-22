@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,6 +23,7 @@
 #include "VisualHash.h"
 #include "WindowHash.h"
 #include "fakerconfig.h"
+#include <dlfcn.h>
 
 
 using namespace vglutil;
@@ -37,7 +38,6 @@ CriticalSection globalMutex;
 bool deadYet=false;
 int traceLevel=0;
 #ifdef FAKEXCB
-bool fakeXCB=false;
 __thread int fakerLevel=0;
 #endif
 
@@ -108,6 +108,7 @@ void init(void)
 {
 	static int init=0;
 
+	if(init) return;
 	CriticalSection::SafeLock l(globalMutex);
 	if(init) return;
 	init=1;
@@ -126,14 +127,6 @@ void init(void)
 	}
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
 
-	#ifdef FAKEXCB
-	char *env=NULL;
-	if((env=getenv("VGL_FAKEXCB"))!=NULL && strlen(env)>0
-		&& !strncmp(env, "1", 1))
-		vglfaker::fakeXCB=true;
-	#endif
-
-	loadSymbols();
 	if(!dpy3D)
 	{
 		if(fconfig.verbose)
@@ -142,7 +135,7 @@ void init(void)
 		if((dpy3D=_XOpenDisplay(fconfig.localdpystring))==NULL)
 		{
 			vglout.print("[VGL] ERROR: Could not open display %s.\n",
-			fconfig.localdpystring);
+				fconfig.localdpystring);
 			safeExit(1);
 		}
 	}
@@ -159,10 +152,22 @@ extern "C" {
 
 void *_vgl_dlopen(const char *file, int mode)
 {
-	vglfaker::globalMutex.lock(false);
-	if(!__dlopen) vglfaker::loadDLSymbols();
-	vglfaker::globalMutex.unlock(false);
-	CHECKSYM(dlopen);
+	if(!__dlopen)
+	{
+		CriticalSection::SafeLock l(vglfaker::globalMutex);
+		if(!__dlopen)
+		{
+			dlerror();  // Clear error state
+			__dlopen=(_dlopenType)dlsym(RTLD_NEXT, "dlopen");
+			char *err=dlerror();
+			if(!__dlopen)
+			{
+				vglout.print("[VGL] ERROR: Could not load function \"dlopen\"\n");
+				if(err) vglout.print("[VGL]    %s\n", err);
+				vglfaker::safeExit(1);
+			}
+		}
+	}
 	return __dlopen(file, mode);
 }
 

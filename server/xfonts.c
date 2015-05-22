@@ -4,7 +4,7 @@
  * Version:  3.5
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012, 2014  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011-2012, 2014-2015  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -208,12 +208,12 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	/* Enforce a standard packing mode which is compatible with
 	   fill_bitmap() from above.  This is actually the default mode,
 	   except for the (non)alignment.  */
-	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-	glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	_glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+	_glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
+	_glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	_glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+	_glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+	_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	/* X.org can't handle pixmaps more than 32767 pixels in width or height,
 	   so we have to split the font into multiple groups if it would cause the
@@ -297,7 +297,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		{
 			int list = listbase + j + i;
 
-			glNewList(list, GL_COMPILE);
+			_glNewList(list, GL_COMPILE);
 			if (ci[i].valid && (ci[i].bm_width > 0) && (ci[i].bm_height > 0))
 			{
 				int x, y;
@@ -308,14 +308,14 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 						if (XGetPixel(image, x + i * max_bm_width * 8, y))
 							bm[ci[i].bm_width * (ci[i].bm_height - y - 1) + x / 8] |=
 								(1 << (7 - (x % 8)));
-				glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx,
+				_glBitmap(ci[i].width, ci[i].height, ci[i].x0, ci[i].y0, ci[i].dx,
 					ci[i].dy, bm);
 			}
 			else
 			{
-				glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
+				_glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
 			}
- 			glEndList();
+ 			_glEndList();
 		}
 
 		XDestroyImage(image);  image = NULL;
@@ -326,12 +326,12 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 	free(ci);  ci = NULL;
 
 	/* Restore saved packing modes.  */
-	glPixelStorei(GL_UNPACK_SWAP_BYTES, swapbytes);
-	glPixelStorei(GL_UNPACK_LSB_FIRST, lsbfirst);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, rowlength);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, skiprows);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, skippixels);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+	_glPixelStorei(GL_UNPACK_SWAP_BYTES, swapbytes);
+	_glPixelStorei(GL_UNPACK_LSB_FIRST, lsbfirst);
+	_glPixelStorei(GL_UNPACK_ROW_LENGTH, rowlength);
+	_glPixelStorei(GL_UNPACK_SKIP_ROWS, skiprows);
+	_glPixelStorei(GL_UNPACK_SKIP_PIXELS, skippixels);
+	_glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
 
 	} catch(...)
 	{

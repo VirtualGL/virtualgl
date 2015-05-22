@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2012, 2014 D. R. Commander
+ * Copyright (C)2009, 2011-2012, 2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -204,7 +204,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();
 
-	GLXContext ctx=glXGetCurrentContext();
+	GLXContext ctx=_glXGetCurrentContext();
 	GLXDrawable draw=_glXGetCurrentDrawable();
 	GLXDrawable read=_glXGetCurrentReadDrawable();
 	Display *dpy=_glXGetCurrentDisplay();
@@ -245,7 +245,7 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 
 void glClearIndex(GLfloat c)
 {
-	if(EMULATE_CI) glClearColor(c/255., 0., 0., 0.);
+	if(EMULATE_CI) _glClearColor(c/255., 0., 0., 0.);
 	else _glClearIndex(c);
 }
 
@@ -282,11 +282,11 @@ void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type,
 			DRAW_PIXEL_CONVERT(unsigned short, GL_UNSIGNED_SHORT, 2)
 			DRAW_PIXEL_CONVERT(unsigned int, GL_UNSIGNED_INT, 4)
 			DRAW_PIXEL_CONVERT(float, GL_FLOAT, 4)
-			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+			_glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+			_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			_glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
 			_glDrawPixels(width, height, format, GL_UNSIGNED_BYTE, buf);
-			glPopClientAttrib();
+			_glPopClientAttrib();
 			delete [] buf;
 			return;
 		}
@@ -408,31 +408,31 @@ void glGetIntegerv(GLenum pname, GLint *params)
 
 void glIndexd(GLdouble index)
 {
-	if(EMULATE_CI) glColor3d(index/255., 0.0, 0.0);
+	if(EMULATE_CI) _glColor3d(index/255., 0.0, 0.0);
 	else _glIndexd(index);
 }
 
 void glIndexf(GLfloat index)
 {
-	if(EMULATE_CI) glColor3f(index/255., 0., 0.);
+	if(EMULATE_CI) _glColor3f(index/255., 0., 0.);
 	else _glIndexf(index);
 }
 
 void glIndexi(GLint index)
 {
-	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) _glColor3f((GLfloat)index/255., 0, 0);
 	else _glIndexi(index);
 }
 
 void glIndexs(GLshort index)
 {
-	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) _glColor3f((GLfloat)index/255., 0, 0);
 	else _glIndexs(index);
 }
 
 void glIndexub(GLubyte index)
 {
-	if(EMULATE_CI) glColor3f((GLfloat)index/255., 0, 0);
+	if(EMULATE_CI) _glColor3f((GLfloat)index/255., 0, 0);
 	else _glIndexub(index);
 }
 
@@ -441,7 +441,7 @@ void glIndexdv(const GLdouble *index)
 	if(EMULATE_CI)
 	{
 		GLdouble color[3]={index? (*index)/255.:0., 0., 0.};
-		glColor3dv(index? color:NULL);
+		_glColor3dv(index? color:NULL);
 	}
 	else _glIndexdv(index);
 }
@@ -451,7 +451,7 @@ void glIndexfv(const GLfloat *index)
 	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (*index)/255.0f:0.0f, 0.0f, 0.0f};
-		glColor3fv(index? color:NULL);  return;
+		_glColor3fv(index? color:NULL);  return;
 	}
 	else _glIndexfv(index);
 }
@@ -461,7 +461,7 @@ void glIndexiv(const GLint *index)
 	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
-		glColor3fv(index? color:NULL);  return;
+		_glColor3fv(index? color:NULL);  return;
 	}
 	else _glIndexiv(index);
 }
@@ -471,7 +471,7 @@ void glIndexsv(const GLshort *index)
 	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
-		glColor3fv(index? color:NULL);  return;
+		_glColor3fv(index? color:NULL);  return;
 	}
 	else _glIndexsv(index);
 }
@@ -481,7 +481,7 @@ void glIndexubv(const GLubyte *index)
 	if(EMULATE_CI)
 	{
 		GLfloat color[3]={index? (GLfloat)(*index)/255.0f:0.0f, 0.0f, 0.0f};
-		glColor3fv(index? color:NULL);  return;
+		_glColor3fv(index? color:NULL);  return;
 	}
 	else _glIndexubv(index);
 }
@@ -588,11 +588,11 @@ void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
 			_newcheck(buf=new unsigned char[width*height])
 			if(type==GL_SHORT) type=GL_UNSIGNED_SHORT;
 			if(type==GL_INT) type=GL_UNSIGNED_INT;
-			glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+			_glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+			_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			_glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
 			_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE, buf);
-			glPopClientAttrib();
+			_glPopClientAttrib();
 			READ_PIXEL_CONVERT(unsigned short, GL_UNSIGNED_SHORT, 2)
 			READ_PIXEL_CONVERT(unsigned int, GL_UNSIGNED_INT, 4)
 			READ_PIXEL_CONVERT(float, GL_FLOAT, 4)

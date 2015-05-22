@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012, 2014 D. R. Commander
+ * Copyright (C)2011-2012, 2014-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -16,7 +16,7 @@
 #ifndef __CONTEXTHASH_H__
 #define __CONTEXTHASH_H__
 
-#include "glx.h"
+#include "faker-sym.h"
 #include "Hash.h"
 
 
@@ -99,12 +99,12 @@ namespace vglserver
 
 			bool overlayCurrent(void)
 			{
-				return isOverlay(glXGetCurrentContext());
+				return isOverlay(_glXGetCurrentContext());
 			}
 
 			bool colorIndexCurrent(void)
 			{
-				return isColorIndex(glXGetCurrentContext());
+				return isColorIndex(_glXGetCurrentContext());
 			}
 
 			void remove(GLXContext ctx)

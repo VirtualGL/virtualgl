@@ -52,8 +52,12 @@ usage()
 	echo "            [If an image transport plugin is being used, then <c> can be any"
 	echo "             number >= 0 (default=0).]"
 	echo
-	echo "-nodl     : If an app uses dlopen() to explicitly access libGL.so, don't"
-	echo "            force it to open VirtualGL instead (see docs)"
+	echo "-nodl     : Don't interpose the dlopen() function.  dlopen() is normally"
+	echo "            interposed to force applications that use dlopen() to load libGL"
+	echo "            to load VirtualGL instead.  For the more common case of"
+	echo "            applications that link directly with libGL, disabling the dlopen()"
+	echo "            interposer makes VirtualGL less intrusive, since it will no longer"
+	echo "            load libGL until the application actually uses that library."
 	echo
 	echo "-d <d>    : <d> = the X Display to use for 3D rendering [default = :0.0]"
 	echo
@@ -105,6 +109,8 @@ usage()
 	echo "-trans <t>: Use transport plugin contained in library libvgltrans_<t>.so"
 	echo
 	echo "+/-v      : Enable/disable verbose VirtualGL messages [default = disabled]"
+	echo
+	echo "+xcb/-xcb : Enable/disable XCB interposer"
 	echo
 	echo "+wm/-wm   : Enable/disable window manager mode (for running compiz, etc.)"
 	echo
@@ -231,10 +237,14 @@ fi
 # This allows scripts to detect whether they are being launched with vglrun.
 export VGL_ISACTIVE=1
 
+SUFFIX=
+if [ $__VGL_DL -eq 0 ]; then
+	SUFFIX=-nodl
+fi
 if [ -z "$LD_PRELOAD" ]; then
-	LD_PRELOAD=lib@VGL_FAKER_NAME@.so
+	LD_PRELOAD=lib@VGL_FAKER_NAME@$SUFFIX.so
 else
-	LD_PRELOAD=lib@VGL_FAKER_NAME@.so:$LD_PRELOAD
+	LD_PRELOAD=lib@VGL_FAKER_NAME@$SUFFIX.so:$LD_PRELOAD
 fi
 if [ $__VGL_DL -eq 1 ]; then
 	LD_PRELOAD=lib@VGL_DLFAKER_NAME@.so:$LD_PRELOAD

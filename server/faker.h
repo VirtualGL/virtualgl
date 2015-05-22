@@ -34,7 +34,6 @@ namespace vglfaker
 	extern int deadYet;
 	extern int traceLevel;
 	#ifdef FAKEXCB
-	extern bool fakeXCB;
 	extern __thread int fakerLevel;
 	#endif
 }

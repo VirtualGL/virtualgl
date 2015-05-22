@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2013 D. R. Commander
+ * Copyright (C)2009-2013, 2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -196,6 +196,12 @@ typedef struct _FakerConfig
   char verbose;
   char wm;
   char x11lib[MAXSTR];
+  char fakeXCB;
+  char xcblib[MAXSTR];
+  char xcbatomlib[MAXSTR];
+  char xcbglxlib[MAXSTR];
+  char xcbkeysymslib[MAXSTR];
+  char xcbx11lib[MAXSTR];
 } FakerConfig;
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

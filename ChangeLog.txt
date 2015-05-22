@@ -11,6 +11,31 @@ The symlinks that VirtualGL previously installed for Chromium (the
 long-obsolete parallel rendering package, not the web browser) are no longer
 included in this release.
 -------------------------------------------------------------------------------
+[3]
+The mechanism by which VirtualGL loads "real" GLX, OpenGL, X11, and XCB
+functions from the respective system libraries has been refactored.  This has
+the following ramifications:
+-- The "real" version of an interposed GLX/OpenGL/X11/XCB function will never
+   be loaded until the interposed function is called.
+-- glXProcAddress[ARB]() is now used to load all "real" GLX/OpenGL functions
+   from libGL (except for the glXProcAddress[ARB]() function itself.)  This
+   maintains the fixes implemented in 2.4[9] as well as the previous
+   work-arounds for certain buggy libGL implementations that do not export the
+   glXBindTexImageEXT() and glXReleaseTexImageEXT() functions in the libGL
+   symbol table (the latter was specifically known to be an issue with certain
+   versions of the ATI driver under Ubuntu.)
+-- If -nodl is passed to vglrun, then libGL will not be loaded into the
+   application process until/unless the application actually calls a GLX/OpenGL
+   function.
+-- Because XCB functions are now loaded only when needed, the XCB interposer is
+   no longer distribution-specific.  Therefore, it is now included in the
+   official VirtualGL binaries.  Furthermore, since the loading and interposing
+   of XCB symbols is now less intrusive, the XCB interposer is enabled by
+   default (it can be disabled with vglrun -xcb.)
+-- Reverted 2.1.3[8], since that fallback mechanism is no longer necessary with
+   modern versions of the nVidia driver.  The issue in question can still be
+   worked around by explicitly setting VGL_GLLIB and VGL_X11LIB.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

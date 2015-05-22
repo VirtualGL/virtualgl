@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2014 D. R. Commander
+ * Copyright (C)2009, 2011-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -611,6 +611,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		}
 	}
 
+	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
 	if((!attribs || attribs[0]==None) && !__glXCreateContextAttribsARB)
 		ctx=_glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_context,
 			direct);
@@ -788,8 +789,8 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	VirtualPixmap *vpm=new VirtualPixmap(dpy, vis, pm);
 	if(vpm)
 	{
-		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X display
-		// handle to the 3D pixmap.
+		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
+		// display handle to the 3D pixmap.
 		vpm->init(width, height, depth, config, NULL);
 		pmhash.add(dpy, pm, vpm);
 		glxdhash.add(vpm->getGLXDrawable(), dpy);
@@ -1021,15 +1022,23 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 	" GLX_ARB_create_context GLX_ARB_create_context_profile"
 static const char *glxextensions=VGL_GLX_EXTENSIONS VGL_GLX_ARB_CTX_EXTENSIONS;
 static const char *glxextensions_no_arb_ctx=VGL_GLX_EXTENSIONS;
-#define GLXEXTENSIONS()  \
-	(__glXCreateContextAttribsARB ? glxextensions : glxextensions_no_arb_ctx)
+
+static const char *getGLXExtensions(void)
+{
+	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
+	if(__glXCreateContextAttribsARB)
+		return glxextensions;
+	else
+		return glxextensions_no_arb_ctx;
+}
+
 
 const char *glXGetClientString(Display *dpy, int name)
 {
 	// If this is called internally to OpenGL, use the real function
 	if(is3D(dpy)) return _glXGetClientString(dpy, name);
 	////////////////////
-	if(name==GLX_EXTENSIONS) return GLXEXTENSIONS();
+	if(name==GLX_EXTENSIONS) return getGLXExtensions();
 	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;
@@ -1515,8 +1524,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	if(!retval)
 	{
 		if(fconfig.trace) vglout.print("[passed through]");
-		if(__glXGetProcAddressARB) retval=_glXGetProcAddressARB(procName);
-		else if(__glXGetProcAddress) retval=_glXGetProcAddress(procName);
+		retval=_glXGetProcAddress(procName);
 	}
 
 		stoptrace();  closetrace();
@@ -1657,7 +1665,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
 	// why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
-	if(glXGetCurrentContext() && dpy3DIsCurrent()
+	if(_glXGetCurrentContext() && dpy3DIsCurrent()
 		&& curdraw && winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
@@ -1704,7 +1712,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 	}
 
 	retval=_glXMakeContextCurrent(_dpy3D, drawable, drawable, ctx);
-	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
+	if(fconfig.trace && retval) renderer=(const char *)_glGetString(GL_RENDERER);
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
 	// it.
 	if(winhash.find(drawable, vw)) { vw->clear();  vw->cleanup(); }
@@ -1754,7 +1762,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
 	// which is why we read back the front buffer here if it is dirty.
 	GLXDrawable curdraw=_glXGetCurrentDrawable();
-	if(glXGetCurrentContext() && dpy3DIsCurrent() && curdraw
+	if(_glXGetCurrentContext() && dpy3DIsCurrent() && curdraw
 		&& winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
@@ -1825,7 +1833,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		}
 	}
 	retval=_glXMakeContextCurrent(_dpy3D, draw, read, ctx);
-	if(fconfig.trace && retval) renderer=(const char *)glGetString(GL_RENDERER);
+	if(fconfig.trace && retval) renderer=(const char *)_glGetString(GL_RENDERER);
 	if(winhash.find(draw, drawVW)) { drawVW->clear();  drawVW->cleanup(); }
 	if(winhash.find(read, readVW)) readVW->cleanup();
 	VirtualPixmap *vpm;
@@ -1966,7 +1974,7 @@ const char *glXQueryExtensionsString(Display *dpy, int screen)
 	// If this is called internally to OpenGL, use the real function.
 	if(is3D(dpy)) return _glXQueryExtensionsString(dpy, screen);
 	////////////////////
-	return GLXEXTENSIONS();
+	return getGLXExtensions();
 }
 
 
@@ -1977,7 +1985,7 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 	// If this is called internally to OpenGL, use the real function.
 	if(is3D(dpy)) return _glXQueryServerString(dpy, screen, name);
 	////////////////////
-	if(name==GLX_EXTENSIONS) return GLXEXTENSIONS();
+	if(name==GLX_EXTENSIONS) return getGLXExtensions();
 	else if(name==GLX_VERSION) return "1.4";
 	else if(name==GLX_VENDOR) return __APPNAME;
 	else return NULL;

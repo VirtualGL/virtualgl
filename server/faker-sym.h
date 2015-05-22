@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +23,17 @@
 #include "Log.h"
 #ifdef FAKEXCB
 extern "C" {
+#ifdef SYSXCBHEADERS
+#include <xcb/xcb.h>
+#include <xcb/xcbext.h>
+#include <xcb/xcb_keysyms.h>
 #include <xcb/glx.h>
+#else
+#include "xcb_headers/xcb.h"
+#include "xcb_headers/xcbext.h"
+#include "xcb_headers/xcb_keysyms.h"
+#include "xcb_headers/glx.h"
+#endif
 }
 #endif
 
@@ -32,20 +42,26 @@ namespace vglfaker
 {
 	extern void safeExit(int);
 	extern void init(void);
+	extern vglutil::CriticalSection globalMutex;
 	#ifdef FAKEXCB
 	extern __thread int fakerLevel;
 	#endif
+
+	void *loadSymbol(const char *name);
+	void unloadSymbols(void);
 }
 
 
-#define CHECKSYM(s) {  \
+#define CHECKSYM_NONFATAL(s)  \
 	if(!__##s) {  \
 		vglfaker::init();  \
-		if(!__##s) {  \
-			vglout.PRINT("[VGL] ERROR: "#s" symbol not loaded\n");  \
-			vglfaker::safeExit(1);  \
-		}  \
-	}  \
+		vglutil::CriticalSection::SafeLock l(vglfaker::globalMutex);  \
+		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s);  \
+	}
+
+#define CHECKSYM(s) {  \
+	CHECKSYM_NONFATAL(s)  \
+	if(!__##s) vglfaker::safeExit(1);  \
 }
 
 #ifdef __LOCALSYM__
@@ -193,6 +209,16 @@ namespace vglfaker
 		CHECKSYM(f); \
 		DISABLE_FAKEXCB(); \
 		__##f(a1, a2, a3, a4, a5); \
+		ENABLE_FAKEXCB(); \
+	}
+
+#define VFUNCDEF6(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6) \
+	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
+	SYMDEF(f); \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) { \
+		CHECKSYM(f); \
+		DISABLE_FAKEXCB(); \
+		__##f(a1, a2, a3, a4, a5, a6); \
 		ENABLE_FAKEXCB(); \
 	}
 
@@ -388,6 +414,16 @@ VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
 	unsigned long, event_mask);
 
 
+// GLX 1.4 functions
+
+typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
+SYMDEF(glXGetProcAddress);
+static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
+{
+	CHECKSYM(glXGetProcAddress);  return __glXGetProcAddress(procName);
+}
+
+
 // EXT_import_context
 
 VFUNCDEF2(glXFreeContextEXT, Display *, dpy, GLXContext, ctx);
@@ -417,23 +453,6 @@ FUNCDEF3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
 	GLuint *, count);
 
 FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen);
-
-
-// GLX_ARB_get_proc_address
-
-typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
-SYMDEF(glXGetProcAddressARB);
-static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
-{
-	CHECKSYM(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
-}
-
-typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
-SYMDEF(glXGetProcAddress);
-static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
-{
-	CHECKSYM(glXGetProcAddress);  return __glXGetProcAddress(procName);
-}
 
 
 // GLX_ARB_create_context
@@ -617,16 +636,108 @@ FUNCDEF1(xcb_generic_event_t *, xcb_wait_for_event, xcb_connection_t *, conn);
 #endif
 
 
+// Functions used by the faker (but not interposed.)  We load the GLX/OpenGL
+// functions dynamically to prevent the 3D application from overriding them, as
+// well as to ensure that, with 'vglrun -nodl', libGL is not loaded into the
+// process until the 3D application actually uses it.
+
+VFUNCDEF2(glBindBuffer, GLenum, target, GLuint, buffer);
+
+VFUNCDEF7(glBitmap, GLsizei, width, GLsizei, height, GLfloat, xorig,
+	GLfloat, yorig, GLfloat, xmove, GLfloat, ymove, const GLubyte *, bitmap);
+
+VFUNCDEF4(glBufferData, GLenum, target, GLsizeiptr, size, const GLvoid *, data,
+	GLenum, usage);
+
+VFUNCDEF1(glClear, GLbitfield, mask);
+
+VFUNCDEF4(glClearColor, GLclampf, red, GLclampf, green, GLclampf, blue,
+	GLclampf, alpha);
+
+VFUNCDEF3(glColor3d, GLdouble, red, GLdouble, green, GLdouble, blue);
+
+VFUNCDEF1(glColor3dv, const GLdouble *, v);
+
+VFUNCDEF3(glColor3f, GLfloat, red, GLfloat, green, GLfloat, blue);
+
+VFUNCDEF1(glColor3fv, const GLfloat *, v);
+
+VFUNCDEF5(glCopyPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
+	GLenum, type);
+
+VFUNCDEF0(glEndList);
+
+VFUNCDEF2(glGenBuffers, GLsizei, n, GLuint *, buffers);
+
+VFUNCDEF3(glGetBufferParameteriv, GLenum, target, GLenum, value, GLint *,
+	data);
+
+FUNCDEF0(GLenum, glGetError);
+
+FUNCDEF1(const GLubyte *, glGetString, GLenum, name);
+
+VFUNCDEF0(glLoadIdentity);
+
+FUNCDEF2(void *, glMapBuffer, GLenum, target, GLenum, access);
+
+VFUNCDEF1(glMatrixMode, GLenum, mode);
+
+VFUNCDEF2(glNewList, GLuint, list, GLenum, mode);
+
+VFUNCDEF6(glOrtho, GLdouble, left, GLdouble, right, GLdouble, bottom,
+	GLdouble, top, GLdouble, near_val, GLdouble, far_val);
+
+VFUNCDEF2(glPixelStorei, GLenum, pname, GLint, param);
+
+VFUNCDEF0(glPopClientAttrib);
+
+VFUNCDEF0(glPopMatrix);
+
+VFUNCDEF1(glPushClientAttrib, GLbitfield, mask);
+
+VFUNCDEF0(glPushMatrix);
+
+VFUNCDEF2(glRasterPos2i, GLint, x, GLint, y);
+
+VFUNCDEF1(glReadBuffer, GLenum, mode);
+
+FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target);
+
+FUNCDEF0(GLXContext, glXGetCurrentContext);
+
+// We load all XCB functions dynamically, so that the same VirtualGL binary
+// can be used to support systems with and without XCB libraries.
+
+#ifdef FAKEXCB
+
+FUNCDEF1(xcb_connection_t *, XGetXCBConnection, Display *, dpy);
+
+typedef xcb_extension_t* _xcb_glx_idType;
+SYMDEF(xcb_glx_id);
+static inline xcb_extension_t *_xcb_glx_id(void)
+{
+	CHECKSYM(xcb_glx_id);
+	return __xcb_glx_id;
+}
+
+FUNCDEF4(xcb_intern_atom_cookie_t, xcb_intern_atom, xcb_connection_t *, conn,
+	uint8_t, only_if_exists, uint16_t, name_len, const char *, name);
+
+FUNCDEF3(xcb_intern_atom_reply_t *, xcb_intern_atom_reply, xcb_connection_t *,
+	conn, xcb_intern_atom_cookie_t, cookie, xcb_generic_error_t **, e);
+
+FUNCDEF1(xcb_key_symbols_t *, xcb_key_symbols_alloc, xcb_connection_t *, c);
+
+VFUNCDEF1(xcb_key_symbols_free, xcb_key_symbols_t *, syms);
+
+FUNCDEF3(xcb_keysym_t, xcb_key_symbols_get_keysym, xcb_key_symbols_t *, syms,
+	xcb_keycode_t, keycode, int, col);
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif
 
-
-namespace vglfaker
-{
-	void loadSymbols(void);
-	void loadDLSymbols(void);
-	void unloadSymbols(void);
-}
 
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2014 D. R. Commander
+/* Copyright (C)2009-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -161,6 +161,9 @@ static void fconfig_init(void)
 	memset(&fconfig_env, 0, sizeof(FakerConfig));
 	fconfig.compress=-1;
 	strncpy(fconfig.config, VGLCONFIG_PATH, MAXSTR);
+	#ifdef FAKEXCB
+	fconfig.fakeXCB=1;
+	#endif
 	fconfig.forcealpha=0;
 	fconfig_setgamma(fconfig, 1.0);
 	fconfig.glflushtrigger=1;
@@ -325,6 +328,9 @@ void fconfig_reloadenv(void)
 		if(drawable>=0 && (!fconfig_envset || fconfig_env.drawable!=drawable))
 			fconfig.drawable=fconfig_env.drawable=drawable;
 	}
+	#ifdef FAKEXCB
+	fetchenv_bool("VGL_FAKEXCB", fakeXCB);
+	#endif
 	fetchenv_bool("VGL_FORCEALPHA", forcealpha);
 	fetchenv_dbl("VGL_FPS", fps, 0.0, 1000000.0);
 	if((env=getenv("VGL_GAMMA"))!=NULL && strlen(env)>0)
@@ -443,6 +449,13 @@ void fconfig_reloadenv(void)
 	fetchenv_bool("VGL_VERBOSE", verbose);
 	fetchenv_bool("VGL_WM", wm);
 	fetchenv_str("VGL_X11LIB", x11lib);
+	#ifdef FAKEXCB
+	fetchenv_str("VGL_XCBLIB", xcblib);
+	fetchenv_str("VGL_XCBATOMLIB", xcbatomlib);
+	fetchenv_str("VGL_XCBGLXLIB", xcbglxlib);
+	fetchenv_str("VGL_XCBKEYSYMSLIB", xcbkeysymslib);
+	fetchenv_str("VGL_XCBX11LIB", xcbkeysymslib);
+	#endif
 
 	if(strlen(fconfig.transport)>0)
 	{
@@ -606,4 +619,11 @@ void fconfig_print(FakerConfig &fc)
 	prconfint(verbose);
 	prconfint(wm);
 	prconfstr(x11lib);
+	#ifdef FAKEXCB
+	prconfstr(xcblib);
+	prconfstr(xcbatomlib);
+	prconfstr(xcbglxlib);
+	prconfstr(xcbkeysymslib);
+	prconfstr(xcbx11lib);
+	#endif
 }
