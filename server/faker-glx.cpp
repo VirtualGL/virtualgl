@@ -1421,7 +1421,6 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXDestroyContext)
 		checkfaked(glXDestroyGLXPixmap)
 		checkfaked(glXGetConfig)
-		checkfaked(glXGetCurrentContext)
 		checkfaked(glXGetCurrentDrawable)
 		checkfaked(glXIsDirect)
 		checkfaked(glXMakeCurrent);
