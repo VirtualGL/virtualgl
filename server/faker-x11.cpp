@@ -417,43 +417,15 @@ char **XListExtensions(Display *dpy, int *next)
 Display *XOpenDisplay(_Xconst char* name)
 {
 	Display *dpy=NULL;
-	#ifdef FAKEXCB
-	xcb_connection_t *conn=NULL;
-	#endif
-
 	TRY();
 
 		opentrace(XOpenDisplay);  prargs(name);  starttrace();
 
 	vglfaker::init();
 	dpy=_XOpenDisplay(name);
-	if(dpy)
-	{
-		if(strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
+	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
-		#ifdef FAKEXCB
-		if(fconfig.fakeXCB)
-		{
-			CHECKSYM_NONFATAL(XGetXCBConnection)
-			if(!__XGetXCBConnection)
-			{
-				vglout.print("[VGL] Disabling XCB interposer\n");
-				fconfig.fakeXCB=0;
-			}
-			else
-			{
-				conn=_XGetXCBConnection(dpy);
-				if(conn) xcbconnhash.add(conn, dpy);
-			}
-		}
-		#endif
-	}
-
-		stoptrace();  prargd(dpy);
-		#ifdef FAKEXCB
-		if(fconfig.fakeXCB) prargx(conn);
-		#endif
-		closetrace();
+		stoptrace();  prargd(dpy);  closetrace();
 
 	CATCH();
 	return dpy;
@@ -610,14 +582,6 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 }
 
 
-#ifdef FAKEXCB
-int XFlush(Display *display)
-{
-	return _XFlush(display);
-}
-#endif
-
-
 int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	int retval=0;
@@ -678,14 +642,6 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	CATCH();
 	return retval;
 }
-
-
-#ifdef FAKEXCB
-int XSync(Display *display, Bool discard)
-{
-	return _XSync(display, discard);
-}
-#endif
 
 
 int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)

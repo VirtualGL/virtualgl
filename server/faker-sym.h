@@ -28,11 +28,13 @@ extern "C" {
 #include <xcb/xcbext.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/glx.h>
+#include <X11/Xlib-xcb.h>
 #else
 #include "xcb_headers/xcb.h"
 #include "xcb_headers/xcbext.h"
 #include "xcb_headers/xcb_keysyms.h"
 #include "xcb_headers/glx.h"
+#include "xcb_headers/Xlib-xcb.h"
 #endif
 }
 #endif
@@ -572,10 +574,6 @@ FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win);
 
 FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win);
 
-#ifdef FAKEXCB
-FUNCDEF1(int, XFlush, Display *, display);
-#endif
-
 FUNCDEF1(int, XFree, void *, data);
 
 FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
@@ -604,10 +602,6 @@ FUNCDEF4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height);
 
 FUNCDEF1(char *, XServerVendor, Display *, dpy);
-
-#ifdef FAKEXCB
-FUNCDEF2(int, XSync, Display *, display, Bool, discard);
-#endif
 
 FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe);
@@ -719,6 +713,8 @@ FUNCDEF0(GLXContext, glXGetCurrentContext);
 #ifdef FAKEXCB
 
 FUNCDEF1(xcb_connection_t *, XGetXCBConnection, Display *, dpy);
+
+VFUNCDEF2(XSetEventQueueOwner, Display *, dpy, enum XEventQueueOwner, owner);
 
 typedef xcb_extension_t* _xcb_glx_idType;
 SYMDEF(xcb_glx_id);

@@ -261,6 +261,31 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 }
 
 
+void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
+{
+	xcb_connection_t *conn=NULL;
+
+	TRY();
+
+		opentrace(XSetEventQueueOwner);  prargd(dpy);  prargi(owner);
+		starttrace();
+
+	if(fconfig.fakeXCB)
+	{
+		conn=_XGetXCBConnection(dpy);
+		if(conn)
+		{
+			if(owner==XCBOwnsEventQueue) xcbconnhash.add(conn, dpy);
+			else xcbconnhash.remove(conn);
+		}
+	}
+	_XSetEventQueueOwner(dpy, owner);
+
+		stoptrace();  if(fconfig.fakeXCB) prargx(conn);  closetrace();
+
+	CATCH();
+}
+
 } // extern "C"
 
 

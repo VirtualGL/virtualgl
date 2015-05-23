@@ -51,7 +51,8 @@ void *loadSymbol(const char *name)
 	if(!strncmp(name, "gl", 2))
 		return loadGLSymbol(name);
 	#ifdef FAKEXCB
-	else if(!strcmp(name, "XGetXCBConnection"))
+	else if(!strcmp(name, "XGetXCBConnection")
+		|| !strcmp(name, "XSetEventQueueOwner"))
 		return loadXCBX11Symbol(name);
 	#endif
 	else if(!strncmp(name, "X", 1))
