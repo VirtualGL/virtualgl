@@ -28,12 +28,11 @@ GLXBadContextState error with newer nVidia drivers (340.xx and later) in
 certain cases.
 -------------------------------------------------------------------------------
 [5]
-When built with the XCB interposer enabled, VirtualGL now interposes XFlush()
-and XSync(), so that it can temporarily disable the XCB interposer when calling
-the "real" XFlush() and XSync() functions.  This fixes a deadlock that would
-occur in the multi-threaded rendering test of fakerut when it was run with the
-XCB interposer enabled.  This issue may have affected real-world applications
-as well.
+Fixed a deadlock that occurred in the multi-threaded rendering test of fakerut
+when it was run with the XCB interposer enabled.  This was due to VirtualGL
+attempting to handle XCB events when Xlib owned the event queue.  It is
+possible that this issue affected or would have affected real-world
+applications as well.
 -------------------------------------------------------------------------------
 
 

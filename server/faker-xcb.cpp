@@ -1,4 +1,4 @@
-/* Copyright (C)2014 D. R. Commander
+/* Copyright (C)2014-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -18,7 +18,6 @@
 #include "faker.h"
 #include "vglconfigLauncher.h"
 extern "C" {
-#include <X11/Xlib-xcb.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb.h>
 #include <xcb/xcbext.h>
@@ -268,6 +267,31 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 	return e;
 }
 
+
+void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
+{
+	xcb_connection_t *conn=NULL;
+
+	TRY();
+
+		opentrace(XSetEventQueueOwner);  prargd(dpy);  prargi(owner);
+		starttrace();
+
+	if(vglfaker::fakeXCB)
+	{
+		conn=XGetXCBConnection(dpy);
+		if(conn)
+		{
+			if(owner==XCBOwnsEventQueue) xcbconnhash.add(conn, dpy);
+			else xcbconnhash.remove(conn);
+		}
+	}
+	_XSetEventQueueOwner(dpy, owner);
+
+		stoptrace();  if(vglfaker::fakeXCB) prargx(conn);  closetrace();
+
+	CATCH();
+}
 
 } // extern "C"
 
