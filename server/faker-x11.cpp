@@ -610,6 +610,14 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 }
 
 
+#ifdef FAKEXCB
+int XFlush(Display *display)
+{
+	return _XFlush(display);
+}
+#endif
+
+
 int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	int retval=0;
@@ -670,6 +678,14 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	CATCH();
 	return retval;
 }
+
+
+#ifdef FAKEXCB
+int XSync(Display *display, Bool discard)
+{
+	return _XSync(display, discard);
+}
+#endif
 
 
 int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)

@@ -572,6 +572,10 @@ FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win);
 
 FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win);
 
+#ifdef FAKEXCB
+FUNCDEF1(int, XFlush, Display *, display);
+#endif
+
 FUNCDEF1(int, XFree, void *, data);
 
 FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
@@ -600,6 +604,10 @@ FUNCDEF4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height);
 
 FUNCDEF1(char *, XServerVendor, Display *, dpy);
+
+#ifdef FAKEXCB
+FUNCDEF2(int, XSync, Display *, display, Bool, discard);
+#endif
 
 FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe);

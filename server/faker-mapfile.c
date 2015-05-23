@@ -114,6 +114,9 @@
 		XCreateSimpleWindow;
 		XDestroySubwindows;
 		XDestroyWindow;
+		#ifdef FAKEXCB
+		XFlush;
+		#endif
 		XFree;
 		XGetGeometry;
 		XGetImage;
@@ -125,6 +128,9 @@
 		XQueryExtension;
 		XResizeWindow;
 		XServerVendor;
+		#ifdef FAKEXCB
+		XSync;
+		#endif
 		XWindowEvent;
 
 		__XCopyArea;
