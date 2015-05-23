@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2014 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -553,6 +553,10 @@ FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win);
 
 FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win);
 
+#ifdef FAKEXCB
+FUNCDEF1(int, XFlush, Display *, display);
+#endif
+
 FUNCDEF1(int, XFree, void *, data);
 
 FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
@@ -581,6 +585,10 @@ FUNCDEF4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height);
 
 FUNCDEF1(char *, XServerVendor, Display *, dpy);
+
+#ifdef FAKEXCB
+FUNCDEF2(int, XSync, Display *, display, Bool, discard);
+#endif
 
 FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 	XEvent *, xe);

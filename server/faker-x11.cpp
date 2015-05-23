@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2014 D. R. Commander
+ * Copyright (C)2009, 2011-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -595,6 +595,14 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 }
 
 
+#ifdef FAKEXCB
+int XFlush(Display *display)
+{
+	return _XFlush(display);
+}
+#endif
+
+
 int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	int retval=0;
@@ -655,6 +663,14 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	CATCH();
 	return retval;
 }
+
+
+#ifdef FAKEXCB
+int XSync(Display *display, Bool discard)
+{
+	return _XSync(display, discard);
+}
+#endif
 
 
 int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
