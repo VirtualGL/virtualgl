@@ -517,21 +517,22 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 			}
 		}
+ 		char envName[40], envValue[10];
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
 		{
-			snprintf(autotestRColor, 79, "__VGL_AUTOTESTRCLR%x=%d",
-				(unsigned int)x11Draw, color);
-			putenv(autotestRColor);
+			snprintf(envName, 40, "__VGL_AUTOTESTRCLR%x", (unsigned int)x11Draw);
+			snprintf(envValue, 10, "%d", color);
+			setenv(envName, envValue, 1);
 		}
 		else
 		{
-			snprintf(autotestColor, 79, "__VGL_AUTOTESTCLR%x=%d",
-				(unsigned int)x11Draw, color);
-			putenv(autotestColor);
+			snprintf(envName, 40, "__VGL_AUTOTESTCLR%x", (unsigned int)x11Draw);
+			snprintf(envValue, 10, "%d", color);
+			setenv(envName, envValue, 1);
 		}
-		snprintf(autotestFrame, 79, "__VGL_AUTOTESTFRAME%x=%d",
-			(unsigned int)x11Draw, autotestFrameCount);
-		putenv(autotestFrame);
+		snprintf(envName, 40, "__VGL_AUTOTESTFRAME%x", (unsigned int)x11Draw);
+		snprintf(envValue, 10, "%d", autotestFrameCount);
+		setenv(envName, envValue, 1);
 	}
 }
 
