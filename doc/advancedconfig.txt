@@ -173,21 +173,18 @@ Each method of configuration takes precedence over the previous method:
 | ''vglrun'' argument | ''-xcb'' / ''+xcb'' |
 | Summary | Disable/enable XCB interposer |
 | Image Transports | All |
-| Default Value | Disabled |
+| Default Value | Enabled |
 #OPT: hiCol=first
 
 	Description :: Qt 5 uses XCB instead of Xlib to perform all non-OpenGL
-	X11-related functions.  Thus, in order to support Qt 5 applications,
+	X11-related operations.  Thus, in order to support Qt 5 applications,
 	VirtualGL has to interpose enough of the XCB API to allow it to intercept
 	window resize events and to make Qt 5 believe that a GLX extension is
-	present, even when the 2D X server doesn't support GLX.  Because Xlib uses
-	XCB internally, it is generally not a good idea to enable the XCB interposer
-	except when needed.
-
-	!!! NOTE:  Because XCB is only available on newer platforms, the XCB
-	interposer is not built into the "official" VirtualGL binary packages.	To
-	use this feature, build and install VirtualGL from source, adding
-	''-DVGL_FAKEXCB=1'' to the CMake command line.
+	present, even when the 2D X server doesn't support GLX.  The XCB interposer
+	in this release of VirtualGL should be non-intrusive, and thus it is enabled
+	by default, and this option is provided only for troubleshooting purposes.
+	You shouldn't need to disable the XCB interposer unless unforeseen problems
+	are encountered.
 
 {anchor: VGL_FORCEALPHA}
 | Environment Variable | ''VGL_FORCEALPHA = ''__''0 \| 1''__ |
@@ -313,17 +310,16 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL will try to use the OpenGL library against
-	which it was linked (usually ''libGL.so.1'', in the system library path) to
-	make any GLX or OpenGL calls it needs to make.  Failing this, VirtualGL will
-	try to use the first compatible library named ''libGL.so.1'' that is found in
-	the dynamic loader path.  You can use the ''VGL_GLLIB'' environment variable
-	to override this behavior and specify a dynamic library from which VirtualGL
-	should call "real" GLX and OpenGL functions.  For instance, when VirtualGL
-	intercepts a ''glXSwapBuffers()'' call from the application, it modifies the
-	arguments to redirect the function to the 3D X server, then it calls the
-	"real" ''glXSwapBuffers()'' function. ''VGL_GLLIB'' allows one to specify the
-	library from which this "real" function (and others) should be called.
+	Description :: Normally VirtualGL will call the ''glXGetProcAddress()'' or
+	''glXGetProcAddressARB()'' function in the OpenGL library against which it or
+	the 3D application was linked (usually ''libGL.so.1'', in the system library
+	path), and VGL will use that function to load any	other "real" OpenGL or GLX
+	functions that it needs to call ("real" as opposed to the "fake", or
+	"interposed", versions of those functions that VirtualGL provides, which often
+	modify the arguments or perform other operations before calling the "real"
+	functions.)  You can use the ''VGL_GLLIB'' environment variable to specify
+	the path of a dynamic library from which VirtualGL should load "real" GLX and
+	OpenGL functions.
 	{nl}{nl}
 	You shouldn't need to change this unless something doesn't work.  However,
 	setting this environment variable is potentially useful if one wishes to
@@ -689,7 +685,7 @@ Each method of configuration takes precedence over the previous method:
 	additionally be configured to export stereo visuals.  Quad-buffered stereo
 	is not supported when using the VGL Transport with YUV encoding.  If
 	quad-buffered stereo is requested but the transport or the client does not
-	support it, then VirtualGL will fall back to using anaglyphic stereo.  
+	support it, then VirtualGL will fall back to using anaglyphic stereo.
 	{nl}{nl}
 	__rc__ = Use Red/Cyan (anaglyphic) stereo, even if quad-buffered is
 	available
@@ -934,17 +930,65 @@ Each method of configuration takes precedence over the previous method:
 | Image Transports | All |
 #OPT: hiCol=first
 
-	Description :: Normally, VirtualGL will try to use the X11 library against
-	which it was linked (usually ''libX11.so.6'', in the system library path) to
-	make any X11 calls it needs to make.  Failing this, VirtualGL will then try
-	to use the first compatible library named ''libX11.so.6'' that is found in
-	the dynamic loader path.  You can use the ''VGL_X11LIB'' environment variable
-	to override this behavior and specify a dynamic library from which VirtualGL
-	should call "real" X11 functions.
+	Description :: Normally VirtualGL will use the X11 library against which
+	it was linked (usually ''libX11.so.6'', in the system library path) to load
+	any	"real" X11 functions that it needs to call ("real" as opposed to the
+	"fake", or "interposed", versions of those functions that VirtualGL provides,
+	which often modify the arguments or perform other operations before calling
+	the "real" functions.)  You can use the ''VGL_X11LIB'' environment variable
+	to specify the path of a dynamic library from which VirtualGL should load
+	"real" X11 functions.
 	{nl}{nl}
 	You shouldn't need to muck with this unless something doesn't work.  However,
 	it is potentially useful if one wishes to insert another X11 interposer
 	between VirtualGL and the system's X11 library.
+
+| Environment Variable | ''VGL_XCBLIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate XCB library |
+| Image Transports | All |
+| Default Value | ''libxcb.so.1'' in the system library path |
+#OPT: hiCol=first
+
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load "real" XCB functions.
+
+| Environment Variable | ''VGL_XCBATOMLIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate xcb-atom library |
+| Image Transports | All |
+| Default Value | ''libxcb-atom.so.0'' or ''libxcb-atom.so.1'' in the system \
+	library path |
+#OPT: hiCol=first
+
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load "real" XCB atom functions.
+
+| Environment Variable | ''VGL_XCBGLXLIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate xcb-glx library |
+| Image Transports | All |
+| Default Value | ''libxcb-glx.so.0'' in the system library path |
+#OPT: hiCol=first
+
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load "real" XCB GLX functions.
+
+| Environment Variable | ''VGL_XCBKEYSYMSLIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate xcb-keysyms library |
+| Image Transports | All |
+| Default Value | ''libxcb-keysyms.so.0'' or ''libxcb-keysyms.so.1'' in the \
+	system library path |
+#OPT: hiCol=first
+
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load "real" XCB keysyms functions.
+
+| Environment Variable | ''VGL_XCBX11LIB = ''__''{l}''__ |
+| Summary | __''{l}''__ = the location of an alternate X11-xcb library |
+| Image Transports | All |
+| Default Value | ''libX11-xcb.so.1'' in the system library path |
+#OPT: hiCol=first
+
+	Description :: Specifies the path of a dynamic library from which VirtualGL
+	should load "real" X11 XCB functions.
 
 | Environment Variable | ''VGL_XVENDOR = ''__''{v}''__ |
 | Summary | __''{v}''__ = a fake X11 vendor string to return when the \

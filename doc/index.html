@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-05-18T17:56:03">
+<meta name="date" content="2015-05-24T13:15:26">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -38,227 +38,224 @@
 Researchers, and others with knowledge of Linux or Unix operating 
 systems, OpenGL and GLX, and X windows.</p>
 
-<div id="Table_of_Contents">
-<div id="Table_of_ContentsBlock" class="toc">
-<h1 class="toc">Table of Contents</h1>
-<ul class="toc">
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd001">1 Legal Information</a>
+<div id="hd">
+<div id="hdBlock" class="hd">
+<ul class="hd">
+    <li class="Itemize-1 hd">
+        <a href="#hd001" class="hd">1 Legal Information</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd002">2 Conventions Used in This Document</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd002" class="hd">2 Conventions Used in This Document</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd003">3 Overview</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd003" class="hd">3 Overview</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd004">4 System Requirements</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004001">4.1 Linux/x86 and Other x86 Un*x 
+    <li class="Itemize-1 hd">
+        <a href="#hd004" class="hd">4 System Requirements</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd004001" class="hd">4.1 Linux/x86 and Other x86 Un*x 
                 Operating Systems</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004002">4.2 Mac/x86</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd004002" class="hd">4.2 Mac/x86</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004003">4.3 Windows</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd004003" class="hd">4.3 Windows</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004004">4.4 Additional Requirements for 
+            <li class="Itemize-3 hd">
+                <a href="#hd004004" class="hd">4.4 Additional Requirements for 
                 Stereographic Rendering</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004005">4.5 Additional Requirements for 
+            <li class="Itemize-3 hd">
+                <a href="#hd004005" class="hd">4.5 Additional Requirements for 
                 Transparent Overlays</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd005">5 Obtaining and Installing VirtualGL</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005001">5.1 Installing VirtualGL on Linux</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd005" class="hd">5 Obtaining and Installing VirtualGL</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd005001" class="hd">5.1 Installing VirtualGL on Linux</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005002">5.2 Installing the VirtualGL Client on 
-                OS X</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd005002" class="hd">5.2 Installing the VirtualGL Client on OS 
+                X</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005003">5.3 Installing the VirtualGL Client on 
+            <li class="Itemize-3 hd">
+                <a href="#hd005003" class="hd">5.3 Installing the VirtualGL Client on 
                 Windows (Cygwin)</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005004">5.4 Installing VirtualGL from Source</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd005004" class="hd">5.4 Installing VirtualGL from Source</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005005">5.5 Uninstalling VirtualGL</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd005005" class="hd">5.5 Uninstalling VirtualGL</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd006">6 Configuring a Linux or Unix Machine as a 
+    <li class="Itemize-1 hd">
+        <a href="#hd006" class="hd">6 Configuring a Linux or Unix Machine as a 
         VirtualGL Server</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006001">6.1 Granting Access to the 3D X 
-                Server</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd006001" class="hd">6.1 Granting Access to the 3D X Server</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006002">6.2 Using VirtualGL with Multiple 
-                GPUs</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd006002" class="hd">6.2 Using VirtualGL with Multiple GPUs</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006003">6.3 SSH Server Configuration</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd006003" class="hd">6.3 SSH Server Configuration</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006004">6.4 Un-Configuring the Server</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd006004" class="hd">6.4 Un-Configuring the Server</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd007">7 Configuring a Windows Machine as a VGL 
+    <li class="Itemize-1 hd">
+        <a href="#hd007" class="hd">7 Configuring a Windows Machine as a VGL 
         Transport Client</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd008">8 Using VirtualGL with the VGL Transport</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008001">8.1 VGL Transport with X11 Forwarding</a>
-                <ul class="toc">
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd008001001">8.1.1 Procedure</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd008" class="hd">8 Using VirtualGL with the VGL Transport</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd008001" class="hd">8.1 VGL Transport with X11 Forwarding</a>
+                <ul class="hd">
+                    <li class="Itemize-5 hd">
+                        <a href="#hd008001001" class="hd">8.1.1 Procedure</a>
                     </li>
                 </ul>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008002">8.2 VGL Transport with a Direct X11 
+            <li class="Itemize-3 hd">
+                <a href="#hd008002" class="hd">8.2 VGL Transport with a Direct X11 
                 Connection</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008003">8.3 VGL Transport with X11 Forwarding 
-                and SSH Tunneling</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd008003" class="hd">8.3 VGL Transport with X11 Forwarding and 
+                SSH Tunneling</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008004">8.4 VGL Transport over Gigabit 
+            <li class="Itemize-3 hd">
+                <a href="#hd008004" class="hd">8.4 VGL Transport over Gigabit 
                 Networks</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008005">8.5 VGL Transport with XDMCP</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd008005" class="hd">8.5 VGL Transport with XDMCP</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd008006">8.6 The VirtualGL Client Application: 
+            <li class="Itemize-3 hd">
+                <a href="#hd008006" class="hd">8.6 The VirtualGL Client Application: 
                 Nuts and Bolts</a>
-                <ul class="toc">
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd008006001">8.6.1 The VirtualGL Client and 
+                <ul class="hd">
+                    <li class="Itemize-5 hd">
+                        <a href="#hd008006001" class="hd">8.6.1 The VirtualGL Client and 
                         Firewalls</a>
                     </li>
                 </ul>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd009">9 Using VirtualGL with X Proxies Such as 
+    <li class="Itemize-1 hd">
+        <a href="#hd009" class="hd">9 Using VirtualGL with X Proxies Such as 
         VNC</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd009001">9.1 Using VirtualGL with an X Proxy on 
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd009001" class="hd">9.1 Using VirtualGL with an X Proxy on 
                 the Same Server</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd009002">9.2 Using VirtualGL with an X Proxy on a 
+            <li class="Itemize-3 hd">
+                <a href="#hd009002" class="hd">9.2 Using VirtualGL with an X Proxy on a 
                 Different Machine</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0010">10 Support for the X Video Extension</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0010001">10.1 The VGL Transport with YUV 
+    <li class="Itemize-1 hd">
+        <a href="#hd0010" class="hd">10 Support for the X Video Extension</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd0010001" class="hd">10.1 The VGL Transport with YUV 
                 Encoding</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0010002">10.2 The XV Transport</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0010002" class="hd">10.2 The XV Transport</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0011">11 Transport Plugins</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0011" class="hd">11 Transport Plugins</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0012">12 Using VirtualGL with setuid/setgid 
+    <li class="Itemize-1 hd">
+        <a href="#hd0012" class="hd">12 Using VirtualGL with setuid/setgid 
         Executables</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0013">13 Using VirtualGL with VirtualBox</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0013" class="hd">13 Using VirtualGL with VirtualBox</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0014">14 Using VirtualGL with VMWare 
+    <li class="Itemize-1 hd">
+        <a href="#hd0014" class="hd">14 Using VirtualGL with VMWare 
         Workstation</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0015">15 Other Application Recipes</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0015" class="hd">15 Other Application Recipes</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0016">16 Advanced OpenGL Features</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0016001">16.1 Stereographic Rendering</a>
-                <ul class="toc">
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd0016001001">16.1.1 Quad-Buffered Stereo</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0016" class="hd">16 Advanced OpenGL Features</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd0016001" class="hd">16.1 Stereographic Rendering</a>
+                <ul class="hd">
+                    <li class="Itemize-5 hd">
+                        <a href="#hd0016001001" class="hd">16.1.1 Quad-Buffered Stereo</a>
                     </li>
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd0016001002">16.1.2 Anaglyphic Stereo</a>
+                    <li class="Itemize-5 hd">
+                        <a href="#hd0016001002" class="hd">16.1.2 Anaglyphic Stereo</a>
                     </li>
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd0016001003">16.1.3 Passive Stereo</a>
+                    <li class="Itemize-5 hd">
+                        <a href="#hd0016001003" class="hd">16.1.3 Passive Stereo</a>
                     </li>
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd0016001004">16.1.4 Selecting a Stereo Mode</a>
+                    <li class="Itemize-5 hd">
+                        <a href="#hd0016001004" class="hd">16.1.4 Selecting a Stereo Mode</a>
                     </li>
                 </ul>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0016002">16.2 Transparent Overlays</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0016002" class="hd">16.2 Transparent Overlays</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0016003">16.3 Color Index (PseudoColor) 
+            <li class="Itemize-3 hd">
+                <a href="#hd0016003" class="hd">16.3 Color Index (PseudoColor) 
                 Rendering</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0016004">16.4 Troubleshooting</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0016004" class="hd">16.4 Troubleshooting</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0017">17 Performance Measurement</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0017001">17.1 VirtualGL&rsquo;s Built-In 
+    <li class="Itemize-1 hd">
+        <a href="#hd0017" class="hd">17 Performance Measurement</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd0017001" class="hd">17.1 VirtualGL&rsquo;s Built-In 
                 Profiling System</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0017002">17.2 Frame Spoiling</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0017002" class="hd">17.2 Frame Spoiling</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0017003">17.3 VirtualGL Diagnostic Tools</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0017003" class="hd">17.3 VirtualGL Diagnostic Tools</a>
             </li>
         </ul>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0018">18 The VirtualGL Configuration Dialog</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0018" class="hd">18 The VirtualGL Configuration Dialog</a>
     </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0019">19 Advanced Configuration</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0019001">19.1 Server Settings</a>
+    <li class="Itemize-1 hd">
+        <a href="#hd0019" class="hd">19 Advanced Configuration</a>
+        <ul class="hd">
+            <li class="Itemize-3 hd">
+                <a href="#hd0019001" class="hd">19.1 Server Settings</a>
             </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0019002">19.2 Client Settings</a>
+            <li class="Itemize-3 hd">
+                <a href="#hd0019002" class="hd">19.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -274,7 +271,7 @@ systems, OpenGL and GLX, and X windows.</p>
 <p><img src="somerights20.png" alt="somerights20" class="inline" id="imgid_0" name="imgid_0"/></p>
 
 <p>This document and all associated illustrations are licensed under the 
-<span class="remote"><a class="remote" href="http://creativecommons.org/licenses/by/2.5/">Creative 
+<span class="remote"><a href="http://creativecommons.org/licenses/by/2.5/" class="remote">Creative 
 Commons Attribution 2.5 License</a></span><a name="idx001"></a>.  Any 
 works that contain material derived from this document must cite The 
 VirtualGL Project as the source of the material and list the current URL 
@@ -284,7 +281,7 @@ for the VirtualGL web site.</p>
 part on the work of the Independent JPEG Group.</p>
 
 <p>The VirtualGL server components include software developed by the 
-<span class="remote"><a class="remote" href="http://www.fltk.org/">FLTK 
+<span class="remote"><a href="http://www.fltk.org/" class="remote">FLTK 
 Project</a></span><a name="idx002"></a> and distributed under the terms 
 of the <a href="LICENSE-FLTK.txt">FLTK License</a><a name="idx003"></a>.</p>
 
@@ -491,7 +488,7 @@ transport plugins.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
-    <td class="standard" colspan="3">VirtualGL should work with a variety of Linux distributions, <span class="remote"><a class="remote" href="http://www.freebsd.org">FreeBSD</a></span><a name="idx006"></a>, and <span class="remote"><a class="remote" href="http://www.oracle.com/us/products/servers-storage/solaris">Solaris</a></span><a name="idx007"></a>, but currently-supported versions of <span class="remote"><a class="remote" href="http://www.redhat.com/products/enterprise-linux/">Red Hat Enterprise Linux</a></span><a name="idx008"></a> (and its work-alikes, including <span class="remote"><a class="remote" href="http://www.centos.org">CentOS</a></span><a name="idx009"></a>, <span class="remote"><a class="remote" href="http://www.oracle.com/us/technologies/linux">Oracle Linux</a></span><a name="idx0010"></a>, and <span class="remote"><a class="remote" href="https://www.scientificlinux.org">Scientific Linux</a></span><a name="idx0011"></a>), <span class="remote"><a class="remote" href="http://www.ubuntu.com">Ubuntu</a></span><a name="idx0012"></a> LTS, and <span class="remote"><a class="remote" href="http://www.suse.com">SuSE</a></span><a name="idx0013"></a> Linux Enterprise tend to receive the most attention from the VirtualGL community.</td>
+    <td class="standard" colspan="3">VirtualGL should work with a variety of Linux distributions, <span class="remote"><a href="http://www.freebsd.org" class="remote">FreeBSD</a></span><a name="idx006"></a>, and <span class="remote"><a href="http://www.oracle.com/us/products/servers-storage/solaris" class="remote">Solaris</a></span><a name="idx007"></a>, but currently-supported versions of <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux/" class="remote">Red Hat Enterprise Linux</a></span><a name="idx008"></a> (and its work-alikes, including <span class="remote"><a href="http://www.centos.org" class="remote">CentOS</a></span><a name="idx009"></a>, <span class="remote"><a href="http://www.oracle.com/us/technologies/linux" class="remote">Oracle Linux</a></span><a name="idx0010"></a>, and <span class="remote"><a href="https://www.scientificlinux.org" class="remote">Scientific Linux</a></span><a name="idx0011"></a>), <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0012"></a> LTS, and <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0013"></a> Linux Enterprise tend to receive the most attention from the VirtualGL community.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
@@ -526,7 +523,7 @@ transport plugins.</p>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <em>VGL Transport Only</em>: Mac X11 application (in the &ldquo;Optional 
     Installs&rdquo; package on the OS X 10.7 and earlier install discs) or 
-    <span class="remote"><a class="remote" href="http://xquartz.macosforge.org">XQuartz</a></span><a name="idx0014"></a>
+    <span class="remote"><a href="http://xquartz.macosforge.org" class="remote">XQuartz</a></span><a name="idx0014"></a>
 </li></ul></td>
   </tr>
 </table>
@@ -557,7 +554,7 @@ transport plugins.</p>
     <td class="high standard">Other Software</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <em>VGL Transport Only</em>: 
-    <span class="remote"><a class="remote" href="http://x.cygwin.com">Cygwin/X</a></span><a name="idx0015"></a>
+    <span class="remote"><a href="http://x.cygwin.com" class="remote">Cygwin/X</a></span><a name="idx0015"></a>
 </li>
 <li class="Itemize-0">
     Client display must have a 24-bit or 32-bit color depth (True Color.)
@@ -661,32 +658,32 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 <h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux</h2>
 
 <ol class="Ordered numeric">
-    <li value="1" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="1">
         Download the appropriate VirtualGL binary package for your system from 
         the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
         area</a></span><a name="idx0017"></a> of the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0018"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
         GLIBC 2.5 or later (including 
-        <span class="remote"><a class="remote" href="http://fedoraproject.org">Fedora</a></span><a name="idx0019"></a> 
+        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0019"></a> 
         6 or later, 
-        <span class="remote"><a class="remote" href="http://www.redhat.com/products/enterprise-linux">Red 
+        <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux" class="remote">Red 
         Hat Enterprise 
-        Linux</a></span><a name="idx0020"></a>/<span class="remote"><a class="remote" href="http://www.centos.org/">CentOS</a></span><a name="idx0021"></a> 
+        Linux</a></span><a name="idx0020"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0021"></a> 
         5 or later, 
-        <span class="remote"><a class="remote" href="http://www.suse.com">SuSE</a></span><a name="idx0022"></a> 
+        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0022"></a> 
         Linux 
-        Enterprise/<span class="remote"><a class="remote" href="http://www.opensuse.org">openSUSE</a></span><a name="idx0023"></a> 
+        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0023"></a> 
         11 or later, and 
-        <span class="remote"><a class="remote" href="http://www.ubuntu.com">Ubuntu</a></span><a name="idx0024"></a> 
+        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0024"></a> 
         8.04 or later.) <br />
         <div class="important"><p class="important">
         If you want to run both 32-bit and 64-bit OpenGL applications using VirtualGL on 64-bit Linux systems, then you will need to install both the i386 and x86_64 VirtualGL RPMs or both the &ldquo;virtualgl&rdquo; and &ldquo;virtualgl32&rdquo; amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains only the 32-bit server components.)
         </p></div>
     </li>
-    <li value="2" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue the following commands:
         <dl class="Description">
@@ -721,9 +718,9 @@ dpkg&nbsp;-i&nbsp;virtualgl*.deb
         Download the VirtualGL Mac disk image 
         (<code>VirtualGL-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
         area</a></span><a name="idx0025"></a> of the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0026"></a>.
     </li>
     <li class="Ordered-1 Ordered">
@@ -739,7 +736,7 @@ dpkg&nbsp;-i&nbsp;virtualgl*.deb
 <h2 id="hd005003">5.3&nbsp;Installing the VirtualGL Client on Windows (Cygwin)</h2>
 
 <p>Refer to 
-<span class="remote"><a class="remote" href="http://www.virtualgl.org/Documentation/Cygwin">http://www.virtualgl.org/Documentation/Cygwin</a></span><a name="idx0027"></a>.</p>
+<span class="remote"><a href="http://www.virtualgl.org/Documentation/Cygwin" class="remote">http://www.virtualgl.org/Documentation/Cygwin</a></span><a name="idx0027"></a>.</p>
 
 
 
@@ -749,9 +746,9 @@ dpkg&nbsp;-i&nbsp;virtualgl*.deb
 binary package available, then download the VirtualGL source tarball 
 (<code>VirtualGL-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
-<span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files">Files 
+<span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
 area</a></span><a name="idx0028"></a> of the 
-<span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+<span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
 SourceForge project page</a></span><a name="idx0029"></a>, uncompress 
 it, <code>cd&nbsp;VirtualGL-</code><em><code>{version}</code></em>, and 
 read the contents of <code>BUILDING.txt</code> for further instructions 
@@ -807,7 +804,7 @@ sudo&nbsp;/opt/VirtualGL/bin/uninstall
 <h3 id="hd005005003">Windows (Cygwin)</h3>
 
 <p>Refer to 
-<span class="remote"><a class="remote" href="http://www.virtualgl.org/Documentation/Cygwin">http://www.virtualgl.org/Documentation/Cygwin</a></span><a name="idx0030"></a>.</p>
+<span class="remote"><a href="http://www.virtualgl.org/Documentation/Cygwin" class="remote">http://www.virtualgl.org/Documentation/Cygwin</a></span><a name="idx0030"></a>.</p>
 
 <p><br /></p>
 
@@ -1651,7 +1648,7 @@ They simply aren&rsquo;t designed to compress, with any degree of
 performance, the large and complex images generated by 3D applications.  
 Therefore, the VirtualGL Project provides an optimized X proxy called 
 &ldquo;TurboVNC&rdquo;, a variant of 
-<span class="remote"><a class="remote" href="http://www.tightvnc.com">TightVNC</a></span><a name="idx0035"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx0035"></a> 
 that is designed specifically to achieve high levels of performance with 
 3D applications running in VirtualGL.  More information about TurboVNC, 
 including instructions for using it with VirtualGL, can be found in the 
@@ -3310,7 +3307,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
+    <td class="standard">Enabled</td>
   </tr>
 </table>
 </div>
@@ -3320,15 +3317,14 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         Qt 5 uses XCB instead of Xlib to perform all non-OpenGL X11-related 
-        functions.  Thus, in order to support Qt 5 applications, VirtualGL has 
+        operations.  Thus, in order to support Qt 5 applications, VirtualGL has 
         to interpose enough of the XCB API to allow it to intercept window 
         resize events and to make Qt 5 believe that a GLX extension is present, 
-        even when the 2D X server doesn&rsquo;t support GLX.  Because Xlib uses 
-        XCB internally, it is generally not a good idea to enable the XCB 
-        interposer except when needed.
-        <div class="important"><p class="important">
-        NOTE:  Because XCB is only available on newer platforms, the XCB interposer is not built into the &ldquo;official&rdquo; VirtualGL binary packages.	To use this feature, build and install VirtualGL from source, adding <code>-DVGL_FAKEXCB=1</code> to the CMake command line.
-        </p></div>
+        even when the 2D X server doesn&rsquo;t support GLX.  The XCB interposer 
+        in this release of VirtualGL should be non-intrusive, and thus it is 
+        enabled by default, and this option is provided only for troubleshooting 
+        purposes. You shouldn&rsquo;t need to disable the XCB interposer unless 
+        unforeseen problems are encountered.
     </dd>
 </dl>
 
@@ -3565,24 +3561,22 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally, VirtualGL will try to use the OpenGL library against which it 
-        was linked (usually <code>libGL.so.1</code>, in the system library path) 
-        to make any GLX or OpenGL calls it needs to make.  Failing this, 
-        VirtualGL will try to use the first compatible library named 
-        <code>libGL.so.1</code> that is found in the dynamic loader path.  You 
-        can use the <code>VGL_GLLIB</code> environment variable to override this 
-        behavior and specify a dynamic library from which VirtualGL should call 
-        &ldquo;real&rdquo; GLX and OpenGL functions.  For instance, when 
-        VirtualGL intercepts a <code>glXSwapBuffers()</code> call from the 
-        application, it modifies the arguments to redirect the function to the 
-        3D X server, then it calls the &ldquo;real&rdquo; 
-        <code>glXSwapBuffers()</code> function. <code>VGL_GLLIB</code> allows 
-        one to specify the library from which this &ldquo;real&rdquo; function 
-        (and others) should be called. <br /><br /> You shouldn&rsquo;t need to 
-        change this unless something doesn&rsquo;t work.  However, setting this 
-        environment variable is potentially useful if one wishes to insert 
-        another OpenGL interposer between VirtualGL and the system&rsquo;s 
-        OpenGL library.
+        Normally VirtualGL will call the <code>glXGetProcAddress()</code> or 
+        <code>glXGetProcAddressARB()</code> function in the OpenGL library 
+        against which it or the 3D application was linked (usually 
+        <code>libGL.so.1</code>, in the system library path), and VGL will use 
+        that function to load any	other &ldquo;real&rdquo; OpenGL or GLX 
+        functions that it needs to call (&ldquo;real&rdquo; as opposed to the 
+        &ldquo;fake&rdquo;, or &ldquo;interposed&rdquo;, versions of those 
+        functions that VirtualGL provides, which often modify the arguments or 
+        perform other operations before calling the &ldquo;real&rdquo; 
+        functions.)  You can use the <code>VGL_GLLIB</code> environment variable 
+        to specify the path of a dynamic library from which VirtualGL should 
+        load &ldquo;real&rdquo; GLX and OpenGL functions. <br /><br /> You 
+        shouldn&rsquo;t need to change this unless something doesn&rsquo;t work.  
+        However, setting this environment variable is potentially useful if one 
+        wishes to insert another OpenGL interposer between VirtualGL and the 
+        system&rsquo;s OpenGL library.
     </dd>
 </dl>
 
@@ -3899,7 +3893,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         level at which JPEG compression becomes perceptually lossless is 
         different for each image, but experiments with various visual difference 
         benchmarks (such as 
-        <span class="remote"><a class="remote" href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/">HDR-VDP</a></span><a name="idx0049"></a>) 
+        <span class="remote"><a href="http://www.mpi-inf.mpg.de/resources/hdr/vdp/" class="remote">HDR-VDP</a></span><a name="idx0049"></a>) 
         suggest that	a JPEG quality of 95 is sufficient to guarantee perceptual 
         losslessness for the types of applications (volume visualization apps, 
         in particular) in which image quality is critical.  As with any 
@@ -3951,7 +3945,7 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         setting <code>VGL_READBACK=none</code> disables VirtualGL&rsquo;s 
         readback mechanism and prevents duplication of effort. <br /><br /> This 
         option was developed initially to support running 
-        <span class="remote"><a class="remote" href="http://www.paraview.org/">ParaView</a></span><a name="idx0050"></a> 
+        <span class="remote"><a href="http://www.paraview.org/" class="remote">ParaView</a></span><a name="idx0050"></a> 
         in parallel using MPI.  ParaView/MPI normally uses MPI Processes 1 
         through N as rendering servers, each rendering a portion of the geometry 
         into a separate window on a separate X display. ParaView reads back 
@@ -4723,17 +4717,169 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        Normally, VirtualGL will try to use the X11 library against which it was 
-        linked (usually <code>libX11.so.6</code>, in the system library path) to 
-        make any X11 calls it needs to make.  Failing this, VirtualGL will then 
-        try to use the first compatible library named <code>libX11.so.6</code> 
-        that is found in the dynamic loader path.  You can use the 
-        <code>VGL_X11LIB</code> environment variable to override this behavior 
-        and specify a dynamic library from which VirtualGL should call 
-        &ldquo;real&rdquo; X11 functions. <br /><br /> You shouldn&rsquo;t need 
-        to muck with this unless something doesn&rsquo;t work.  However, it is 
-        potentially useful if one wishes to insert another X11 interposer 
-        between VirtualGL and the system&rsquo;s X11 library.
+        Normally VirtualGL will use the X11 library against which it was linked 
+        (usually <code>libX11.so.6</code>, in the system library path) to load 
+        any	&ldquo;real&rdquo; X11 functions that it needs to call 
+        (&ldquo;real&rdquo; as opposed to the &ldquo;fake&rdquo;, or 
+        &ldquo;interposed&rdquo;, versions of those functions that VirtualGL 
+        provides, which often modify the arguments or perform other operations 
+        before calling the &ldquo;real&rdquo; functions.)  You can use the 
+        <code>VGL_X11LIB</code> environment variable to specify the path of a 
+        dynamic library from which VirtualGL should load &ldquo;real&rdquo; X11 
+        functions. <br /><br /> You shouldn&rsquo;t need to muck with this 
+        unless something doesn&rsquo;t work.  However, it is potentially useful 
+        if one wishes to insert another X11 interposer between VirtualGL and the 
+        system&rsquo;s X11 library.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_XCBLIB&nbsp;=&nbsp;</code><em><code>{l}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate XCB library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>libxcb.so.1</code> in the system library path</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        &ldquo;real&rdquo; XCB functions.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_XCBATOMLIB&nbsp;=&nbsp;</code><em><code>{l}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate xcb-atom library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>libxcb-atom.so.0</code> or <code>libxcb-atom.so.1</code> in the system library path</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        &ldquo;real&rdquo; XCB atom functions.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_XCBGLXLIB&nbsp;=&nbsp;</code><em><code>{l}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate xcb-glx library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>libxcb-glx.so.0</code> in the system library path</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        &ldquo;real&rdquo; XCB GLX functions.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_XCBKEYSYMSLIB&nbsp;=&nbsp;</code><em><code>{l}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate xcb-keysyms library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>libxcb-keysyms.so.0</code> or <code>libxcb-keysyms.so.1</code> in the system library path</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        &ldquo;real&rdquo; XCB keysyms functions.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_XCBX11LIB&nbsp;=&nbsp;</code><em><code>{l}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{l}</code></em> = the location of an alternate X11-xcb library</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>libX11-xcb.so.1</code> in the system library path</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Specifies the path of a dynamic library from which VirtualGL should load 
+        &ldquo;real&rdquo; X11 XCB functions.
     </dd>
 </dl>
 
