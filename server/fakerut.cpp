@@ -119,6 +119,7 @@ unsigned int checkBufferColor(bool ci)
 
 		if((buf=(unsigned char *)malloc(viewport[2]*viewport[3]*ps))==NULL)
 			_throw("Could not allocate buffer");
+		memset(buf, 128, viewport[2]*viewport[3]*ps);
 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0, 0, viewport[2], viewport[3], ci? GL_COLOR_INDEX:GL_RGB,

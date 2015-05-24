@@ -95,7 +95,6 @@ namespace vglserver
 			Bool direct;
 			X11Trans *x11Trans;
 			vglcommon::Profiler profReadback;
-			char autotestColor[80], autotestRColor[80], autotestFrame[80];
 			int autotestFrameCount;
 	};
 }
