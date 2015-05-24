@@ -64,7 +64,8 @@ int XCloseDisplay(Display *dpy)
 		CHECKSYM_NONFATAL(XGetXCBConnection)
 		if(!__XGetXCBConnection)
 		{
-			vglout.print("[VGL] Disabling XCB interposer\n");
+			if(fconfig.verbose)
+				vglout.print("[VGL] Disabling XCB interposer\n");
 			fconfig.fakeXCB=0;
 		}
 		else

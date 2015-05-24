@@ -21,27 +21,27 @@
 
 
 static void *gldllhnd=NULL;
-static void *loadGLSymbol(const char *);
+static void *loadGLSymbol(const char *, bool);
 static void *x11dllhnd=NULL;
-static void *loadX11Symbol(const char *);
+static void *loadX11Symbol(const char *, bool);
 #ifdef FAKEXCB
 static void *xcbdllhnd=NULL;
-static void *loadXCBSymbol(const char *);
+static void *loadXCBSymbol(const char *, bool);
 static void *xcbatomdllhnd=NULL;
-static void *loadXCBAtomSymbol(const char *);
+static void *loadXCBAtomSymbol(const char *, bool);
 static void *xcbglxdllhnd=NULL;
-static void *loadXCBGLXSymbol(const char *);
+static void *loadXCBGLXSymbol(const char *, bool);
 static void *xcbkeysymsdllhnd=NULL;
-static void *loadXCBKeysymsSymbol(const char *);
+static void *loadXCBKeysymsSymbol(const char *, bool);
 static void *xcbx11dllhnd=NULL;
-static void *loadXCBX11Symbol(const char *);
+static void *loadXCBX11Symbol(const char *, bool);
 #endif
 
 
 namespace vglfaker
 {
 
-void *loadSymbol(const char *name)
+void *loadSymbol(const char *name, bool optional)
 {
 	if(!name)
 	{
@@ -49,23 +49,23 @@ void *loadSymbol(const char *name)
 		safeExit(1);
 	}
 	if(!strncmp(name, "gl", 2))
-		return loadGLSymbol(name);
+		return loadGLSymbol(name, optional);
 	#ifdef FAKEXCB
 	else if(!strcmp(name, "XGetXCBConnection")
 		|| !strcmp(name, "XSetEventQueueOwner"))
-		return loadXCBX11Symbol(name);
+		return loadXCBX11Symbol(name, optional);
 	#endif
 	else if(!strncmp(name, "X", 1))
-		return loadX11Symbol(name);
+		return loadX11Symbol(name, optional);
 	#ifdef FAKEXCB
 	else if(!strncmp(name, "xcb_intern_atom", 15))
-		return loadXCBAtomSymbol(name);
+		return loadXCBAtomSymbol(name, optional);
 	else if(!strncmp(name, "xcb_glx", 7))
-		return loadXCBGLXSymbol(name);
+		return loadXCBGLXSymbol(name, optional);
 	else if(!strncmp(name, "xcb_key", 7))
-		return loadXCBKeysymsSymbol(name);
+		return loadXCBKeysymsSymbol(name, optional);
 	else if(!strncmp(name, "xcb_", 4))
-		return loadXCBSymbol(name);
+		return loadXCBSymbol(name, optional);
 	#endif
 	else
 	{
@@ -77,7 +77,7 @@ void *loadSymbol(const char *name)
 } // namespace
 
 
-static void *loadGLSymbol(const char *name)
+static void *loadGLSymbol(const char *name, bool optional)
 {
 	char *err=NULL;
 
@@ -123,9 +123,10 @@ static void *loadGLSymbol(const char *name)
 		sym=(void *)__glXGetProcAddress;
 	else
 		sym=(void *)__glXGetProcAddress((const GLubyte *)name);
-	if(!sym)
-	{
-		vglout.print("[VGL] ERROR: Could not load function \"%s\"", name);
+	if(!sym && (fconfig.verbose || !optional))
+ 	{
+	 	vglout.print("[VGL] %s: Could not load function \"%s\"",
+		 	optional? "WARNING":"ERROR", name);
 		if(strlen(fconfig.gllib)>0)
 			vglout.print(" from %s", fconfig.gllib);
 	}
@@ -133,7 +134,7 @@ static void *loadGLSymbol(const char *name)
 }
 
 
-static void *loadX11Symbol(const char *name)
+static void *loadX11Symbol(const char *name, bool optional)
 {
 	char *err=NULL;
 
@@ -159,9 +160,10 @@ static void *loadX11Symbol(const char *name)
 	void *sym=dlsym(x11dllhnd, (char *)name);
 	err=dlerror();
 
-	if(!sym)
+	if(!sym && (fconfig.verbose || !optional))
 	{
-		vglout.print("[VGL] ERROR: Could not load function \"%s\"", name);
+		vglout.print("[VGL] %s: Could not load function \"%s\"",
+			optional? "WARNING":"ERROR", name);
 		if(strlen(fconfig.x11lib)>0)
 			vglout.print(" from %s", fconfig.x11lib);
 		vglout.print("\n");
@@ -174,7 +176,7 @@ static void *loadX11Symbol(const char *name)
 #ifdef FAKEXCB
 
 #define LOAD_XCB_SYMBOL(ID, id, libid, minrev, maxrev)  \
-static void *load##ID##Symbol(const char *name)  \
+static void *load##ID##Symbol(const char *name, bool optional)  \
 {  \
 	char *err=NULL;  \
   \
@@ -187,8 +189,12 @@ static void *load##ID##Symbol(const char *name)  \
 			err=dlerror();  \
 			if(!dllhnd)  \
 			{  \
-				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.id##lib);  \
-				if(err) vglout.print("[VGL]    %s\n", err);  \
+				if(fconfig.verbose || !optional)  \
+				{  \
+					vglout.print("[VGL] %s: Could not open %s\n",  \
+						optional? "WARNING":"ERROR", fconfig.id##lib);  \
+					if(err) vglout.print("[VGL]    %s\n", err);  \
+				}  \
 				return NULL;  \
 			}  \
 			id##dllhnd=dllhnd;  \
@@ -207,8 +213,12 @@ static void *load##ID##Symbol(const char *name)  \
 			}  \
 			if(!dllhnd)  \
 			{  \
-				vglout.print("[VGL] ERROR: Could not open lib%s\n", #libid);  \
-				if(err) vglout.print("[VGL]    %s\n", err);  \
+				if(fconfig.verbose || !optional)  \
+				{  \
+					vglout.print("[VGL] %s: Could not open lib%s\n",  \
+						optional? "WARNING":"ERROR", #libid);  \
+					if(err) vglout.print("[VGL]    %s\n", err);  \
+				}  \
 				return NULL;  \
 			}  \
 			id##dllhnd=dllhnd;  \
@@ -219,9 +229,10 @@ static void *load##ID##Symbol(const char *name)  \
 	void *sym=dlsym(id##dllhnd, (char *)name);  \
 	err=dlerror();  \
   \
-	if(!sym)  \
+	if(!sym && (fconfig.verbose || !optional))  \
 	{  \
-		vglout.print("[VGL] ERROR: Could not load symbol \"%s\"", name);  \
+		vglout.print("[VGL] %s: Could not load symbol \"%s\"",  \
+			optional? "WARNING":"ERROR", name);  \
 		if(strlen(fconfig.id##lib)>0)  \
 			vglout.print(" from %s", fconfig.id##lib);  \
 		vglout.print("\n");  \

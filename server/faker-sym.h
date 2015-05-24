@@ -49,20 +49,25 @@ namespace vglfaker
 	extern __thread int fakerLevel;
 	#endif
 
-	void *loadSymbol(const char *name);
+	void *loadSymbol(const char *name, bool optional=false);
 	void unloadSymbols(void);
 }
 
 
-#define CHECKSYM_NONFATAL(s)  \
+#define CHECKSYM_NONFATAL(s) {  \
+	if(!__##s) {  \
+		vglfaker::init();  \
+		vglutil::CriticalSection::SafeLock l(vglfaker::globalMutex);  \
+		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s, true);  \
+	}  \
+}
+
+#define CHECKSYM(s) {  \
 	if(!__##s) {  \
 		vglfaker::init();  \
 		vglutil::CriticalSection::SafeLock l(vglfaker::globalMutex);  \
 		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s);  \
-	}
-
-#define CHECKSYM(s) {  \
-	CHECKSYM_NONFATAL(s)  \
+	}  \
 	if(!__##s) vglfaker::safeExit(1);  \
 }
 
