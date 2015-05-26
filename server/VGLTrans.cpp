@@ -296,10 +296,9 @@ void VGLTrans::sendFrame(Frame *f)
 
 void VGLTrans::Compressor::compressSend(Frame *f, Frame *lastf)
 {
-	bool bu=false;  CompressedFrame cframe;
+	CompressedFrame cframe;
 
 	if(!f) return;
-	if(f->flags&FRAME_BOTTOMUP) bu=true;
 	int tilesizex=fconfig.tilesize? fconfig.tilesize:f->hdr.width;
 	int tilesizey=fconfig.tilesize? fconfig.tilesize:f->hdr.height;
 	int i, j, n=0;
