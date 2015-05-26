@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2014 D. R. Commander
+ * Copyright (C)2010-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -536,7 +536,10 @@ int readbackTest(bool stereo, bool ci)
 			glReadBuffer(GL_BACK);
 			glFlush();  glFlush();
 			checkFrame(win1, 1, lastFrame1);
-			glDrawBuffer(GL_FRONT);  glFlush();
+			glDrawBuffer(GL_FRONT);
+			glRenderMode(GL_SELECT);  glFlush();
+			glRenderMode(GL_FEEDBACK);  glFlush();
+			glRenderMode(GL_RENDER);  glFlush();
 			checkReadbackState(GL_BACK, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
 			checkWindowColor(win1, clr.bits(-2), ci);

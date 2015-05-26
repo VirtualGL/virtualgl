@@ -147,7 +147,7 @@ target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 
 add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
-add_executable(fakerut fakerut.cpp)
+add_executable(fakerut fakerut.cpp fakerut-supplement.c)
 target_link_libraries(fakerut "-z now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} vglutil)
 
