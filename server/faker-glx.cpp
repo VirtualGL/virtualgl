@@ -1407,8 +1407,14 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 // For optional libGL symbols, check that the underlying function
 // actually exists in libGL before returning the interposed version of it.
 
-#define checkoptfaked(f) if(!strcmp((char *)procName, #f) && __##f) {  \
-	retval=(void (*)(void))f;  if(fconfig.trace) vglout.print("[INTERPOSED]");}
+#define checkoptfaked(f)  \
+	if(!strcmp((char *)procName, #f)) {  \
+		CHECKSYM_NONFATAL(f)  \
+		if(__##f) {  \
+			retval=(void (*)(void))f;  \
+			if(fconfig.trace) vglout.print("[INTERPOSED]");  \
+		}  \
+	}
 
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
