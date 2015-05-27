@@ -27,8 +27,6 @@ static void *loadX11Symbol(const char *, bool);
 #ifdef FAKEXCB
 static void *xcbdllhnd=NULL;
 static void *loadXCBSymbol(const char *, bool);
-static void *xcbatomdllhnd=NULL;
-static void *loadXCBAtomSymbol(const char *, bool);
 static void *xcbglxdllhnd=NULL;
 static void *loadXCBGLXSymbol(const char *, bool);
 static void *xcbkeysymsdllhnd=NULL;
@@ -58,8 +56,6 @@ void *loadSymbol(const char *name, bool optional)
 	else if(!strncmp(name, "X", 1))
 		return loadX11Symbol(name, optional);
 	#ifdef FAKEXCB
-	else if(!strncmp(name, "xcb_intern_atom", 15))
-		return loadXCBAtomSymbol(name, optional);
 	else if(!strncmp(name, "xcb_glx", 7))
 		return loadXCBGLXSymbol(name, optional);
 	else if(!strncmp(name, "xcb_key", 7))
@@ -242,7 +238,6 @@ static void *load##ID##Symbol(const char *name, bool optional)  \
 }
 
 LOAD_XCB_SYMBOL(XCB, xcb, xcb, 1, 1)
-LOAD_XCB_SYMBOL(XCBAtom, xcbatom, xcb-atom, 0, 1)
 LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb-glx, 0, 0);
 LOAD_XCB_SYMBOL(XCBKeysyms, xcbkeysyms, xcb-keysyms, 0, 1)
 LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11-xcb, 1, 1)
@@ -258,7 +253,6 @@ void unloadSymbols(void)
 	if(x11dllhnd && x11dllhnd!=RTLD_NEXT) dlclose(x11dllhnd);
 	#ifdef FAKEXCB
 	if(xcbdllhnd) dlclose(xcbdllhnd);
-	if(xcbatomdllhnd) dlclose(xcbatomdllhnd);
 	if(xcbglxdllhnd) dlclose(xcbglxdllhnd);
 	if(xcbkeysymsdllhnd) dlclose(xcbkeysymsdllhnd);
 	if(xcbx11dllhnd) dlclose(xcbx11dllhnd);

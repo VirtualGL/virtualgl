@@ -451,7 +451,6 @@ void fconfig_reloadenv(void)
 	fetchenv_str("VGL_X11LIB", x11lib);
 	#ifdef FAKEXCB
 	fetchenv_str("VGL_XCBLIB", xcblib);
-	fetchenv_str("VGL_XCBATOMLIB", xcbatomlib);
 	fetchenv_str("VGL_XCBGLXLIB", xcbglxlib);
 	fetchenv_str("VGL_XCBKEYSYMSLIB", xcbkeysymslib);
 	fetchenv_str("VGL_XCBX11LIB", xcbkeysymslib);
@@ -621,7 +620,6 @@ void fconfig_print(FakerConfig &fc)
 	prconfstr(x11lib);
 	#ifdef FAKEXCB
 	prconfstr(xcblib);
-	prconfstr(xcbatomlib);
 	prconfstr(xcbglxlib);
 	prconfstr(xcbkeysymslib);
 	prconfstr(xcbx11lib);
