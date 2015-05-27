@@ -28,12 +28,20 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 LIB=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 
+NODL=
 NOSTEREO=
-if [ $# -gt 0 ]; then
-	if [ "$1" = "-nostereo" ]; then
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-nodl)
+		echo "Testing without dlopen() interposer"
+		NODL=-nodl
+		;;
+	-nostereo)
 		NOSTEREO=-nostereo
-	fi
-fi
+		;;
+	esac
+	shift
+done
 
 which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
@@ -45,20 +53,20 @@ sleep 2
 
 # VGL Transport
 DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c jpeg $BIN/fakerut $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
 if [ "$SSL" = "1" ]; then
-	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c jpeg +s $BIN/fakerut $NOSTEREO
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
 fi
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun -np 2 -c rgb $BIN/fakerut $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO
 # (we can't test stereo here, because the transport plugin assumes
 # quad-buffered, which isn't available with an X proxy.)
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -trans test $BIN/fakerut -nostereo
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
 kill $VGLCLIENTPID
 VGLCLIENTPID=-1
 
 # X11 Transport
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -c proxy $BIN/fakerut $NOSTEREO
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun -trans test2 $BIN/fakerut $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO
 
 kill $PID
 PID=-1
@@ -68,7 +76,7 @@ sleep 2
 Xvfb :42 -screen 0 1920x1200x8 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $BIN/fakerut -ci $NOSTEREO
+DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL $BIN/fakerut -ci $NOSTEREO
 kill $PID
 PID=-1
 
