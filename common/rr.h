@@ -198,7 +198,6 @@ typedef struct _FakerConfig
   char x11lib[MAXSTR];
   char fakeXCB;
   char xcblib[MAXSTR];
-  char xcbatomlib[MAXSTR];
   char xcbglxlib[MAXSTR];
   char xcbkeysymslib[MAXSTR];
   char xcbx11lib[MAXSTR];
