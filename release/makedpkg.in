@@ -86,6 +86,7 @@ makedeb()
 			fi
 			mkdir -p $TMPDIR/usr/lib/i386-linux-gnu
 			ln -fs /usr/lib32/lib@VGL_FAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@.so
+			ln -fs /usr/lib32/lib@VGL_FAKER_NAME@-nodl.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_FAKER_NAME@-nodl.so
 			ln -fs /usr/lib32/lib@VGL_DLFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_DLFAKER_NAME@.so
 			ln -fs /usr/lib32/lib@VGL_GEFAKER_NAME@.so $TMPDIR/usr/lib/i386-linux-gnu/lib@VGL_GEFAKER_NAME@.so
 		fi

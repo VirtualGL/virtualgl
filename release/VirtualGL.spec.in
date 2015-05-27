@@ -217,6 +217,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %dir %{libdir}
 %endif
 %{libdir}/lib@VGL_FAKER_NAME@.so
+%{libdir}/lib@VGL_FAKER_NAME@-nodl.so
 %{libdir}/lib@VGL_DLFAKER_NAME@.so
 %{libdir}/lib@VGL_GEFAKER_NAME@.so
 
