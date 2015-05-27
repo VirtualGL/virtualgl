@@ -1947,10 +1947,26 @@ int offScreenTest(void)
 			_throw("Could not create Pbuffer");
 		checkDrawable(dpy, pb, dpyw/2, dpyh/2, 1, 0, fbcid);
 		unsigned int tempw=0, temph=0;
-		glXQueryGLXPbufferSGIX(dpy, pb, GLX_WIDTH_SGIX, &tempw);
-		glXQueryGLXPbufferSGIX(dpy, pb, GLX_HEIGHT_SGIX, &temph);
+		typedef int (*_glXQueryGLXPbufferSGIXType)(Display *, GLXPbufferSGIX, int,
+			unsigned int *);
+		_glXQueryGLXPbufferSGIXType __glXQueryGLXPbufferSGIX=
+			(_glXQueryGLXPbufferSGIXType)glXGetProcAddress(
+				(const GLubyte *)"glXQueryGLXPbufferSGIX");
+		if(__glXQueryGLXPbufferSGIX)
+		{
+			printf("GLX_SGIX_pbuffer appears to work.\n");
+			__glXQueryGLXPbufferSGIX(dpy, pb, GLX_WIDTH_SGIX, &tempw);
+			__glXQueryGLXPbufferSGIX(dpy, pb, GLX_HEIGHT_SGIX, &temph);
+		}
+		else
+		{
+			printf("GLX_SGIX_pbuffer doesn't appear to work.\n");
+			glXQueryDrawable(dpy, pb, GLX_WIDTH, &tempw);
+			glXQueryDrawable(dpy, pb, GLX_HEIGHT, &temph);
+		}
+
 		if(tempw!=(unsigned int)dpyw/2 || temph!=(unsigned int)dpyh/2)
-			_throw("glXQueryGLXPbufferSGIX() failed");
+			_throw("Could not query context");
 
 		if(!(ctx=glXCreateContextWithConfigSGIX(dpy, config, GLX_RGBA_TYPE, NULL,
 			True)))

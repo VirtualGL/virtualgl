@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "pbutil.h"
+#undef GLX_SGIX_pbuffer
 
 
 #if !defined(GLX_SAMPLES) && defined(GLX_SAMPLES_ARB)
@@ -181,7 +182,7 @@ GetFBConfigAttrib(Display *dpy, int screen,
       return value;
    }
 #endif
-   
+
    return value;
 }
 
