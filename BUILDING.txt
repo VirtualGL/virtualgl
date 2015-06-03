@@ -82,7 +82,7 @@ minimum, the following 32-bit libraries:
    * libX11, libXext, libGL, libGLU, and (unless you wish to disable X Video
      support) libXv
    * Ubuntu 10 and 11 ship these libraries in the "ia32-libs" package.
-   * Ubuntu 12, 13, and 14 are a bit tricky.  Because of the transition to
+   * Ubuntu 12 and later are a bit tricky.  Because of the transition to
      MultiArch, ia32-libs is no longer used to install development stubs for
      32-bit libraries.  The accepted way to install these is to install the
      i386 version of the needed dev. kit.  However, unfortunately, some of the
