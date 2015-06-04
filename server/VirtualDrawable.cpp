@@ -78,7 +78,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 		GLX_PRESERVED_CONTENTS, True, None};
 
 	pbattribs[1]=width;  pbattribs[3]=height;
-	glxDraw=glXCreatePbuffer(_dpy3D, config, pbattribs);
+	glxDraw=_glXCreatePbuffer(_dpy3D, config, pbattribs);
 	if(!glxDraw) _throw("Could not create Pbuffer");
 
 	setVisAttribs();
@@ -102,7 +102,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	if(!win) goto bailout;
 	pm=XCreatePixmap(_dpy3D, win, width, height, depth>0? depth:vis->depth);
 	if(!pm) goto bailout;
-	glxDraw=glXCreatePixmap(_dpy3D, config, pm, attribs);
+	glxDraw=_glXCreatePixmap(_dpy3D, config, pm, attribs);
 	if(!glxDraw) goto bailout;
 
 	setVisAttribs();
@@ -156,7 +156,7 @@ VirtualDrawable::OGLDrawable::~OGLDrawable(void)
 	}
 	else
 	{
-		glXDestroyPbuffer(_dpy3D, glxDraw);
+		_glXDestroyPbuffer(_dpy3D, glxDraw);
 		glxDraw=0;
 	}
 }
