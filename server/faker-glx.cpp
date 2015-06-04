@@ -782,7 +782,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	}
 
 	Window root;  unsigned int bw;
-	XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
+	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
 	if(!(config=matchConfig(dpy, vis, true, true)))
 		_throw("Could not obtain pixmap-capable RGB visual on the server");
 	VirtualPixmap *vpm=new VirtualPixmap(dpy, vis, pm);
@@ -822,7 +822,7 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 		starttrace();
 
 	Window root;  int x, y;  unsigned int w, h, bw, d;
-	XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
+	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 
 	VisualID vid=matchVisual(dpy, config);
 	VirtualPixmap *vpm=NULL;
