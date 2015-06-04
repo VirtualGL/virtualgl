@@ -34,6 +34,21 @@ attempting to handle XCB events when Xlib owned the event queue.  It is
 possible that this issue affected or would have affected real-world
 applications as well.
 -------------------------------------------------------------------------------
+[6]
+Fixed an issue that caused certain 3D applications (observed with CAESES/FFW,
+although others were possibly affected as well) to abort with
+"ERROR: in TempContext-- Could not bind OpenGL context to window (window
+may may have disappeared)".  When the 3D application called glXChooseVisual(),
+VirtualGL was choosing a corresponding FB config with
+GLX_DRAWABLE_TYPE=GLX_PBUFFER_BIT (assuming that VGL_DRAWABLE=pbuffer, which is
+the default.)  This is incorrect, however, because regardless of the value of
+VGL_DRAWABLE, VirtualGL still uses Pixmaps on the 3D X server to represent
+GLX Pixmaps (necessary in order to make GLX_EXT_texture_from_pixmap work
+properly.)  Thus, VGL needs to choose an FB config that supports both Pbuffers
+and Pixmaps.  This was generally only a problem with nVidia drivers, because
+they export different FB configs for GLX_PBUFFER_BIT and
+GLX_PBUFFER_BIT|GLX_PIXMAP_BIT.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
