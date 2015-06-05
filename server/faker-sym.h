@@ -337,6 +337,11 @@ FUNCDEF3(const char *, glXQueryServerString, Display *, dpy, int, screen, int,
 FUNCDEF2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen);
 
 
+// GLX 1.2 functions
+
+FUNCDEF0(Display*, glXGetCurrentDisplay);
+
+
 // GLX 1.3 functions
 
 FUNCDEF4(GLXFBConfig *, glXChooseFBConfig, Display *, dpy, int, screen,
@@ -361,8 +366,6 @@ VFUNCDEF2(glXDestroyPixmap, Display *, dpy, GLXPixmap, pixmap);
 VFUNCDEF2(glXDestroyWindow, Display *, dpy, GLXWindow, win);
 
 FUNCDEF0(GLXDrawable, glXGetCurrentReadDrawable);
-
-FUNCDEF0(Display*, glXGetCurrentDisplay);
 
 FUNCDEF4(int, glXGetFBConfigAttrib, Display *, dpy, GLXFBConfig, config,
 	int, attribute, int *, value);
@@ -389,7 +392,33 @@ VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
 	unsigned long, event_mask);
 
 
-// EXT_import_context
+// GLX 1.4 functions
+
+typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
+SYMDEF(glXGetProcAddress);
+static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
+{
+	CHECKSYM(glXGetProcAddress);  return __glXGetProcAddress(procName);
+}
+
+
+// GLX_ARB_create_context
+
+FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
+	config, GLXContext, share_context, Bool, direct, const int *, attribs);
+
+
+// GLX_ARB_get_proc_address
+
+typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
+SYMDEF(glXGetProcAddressARB);
+static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
+{
+	CHECKSYM(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
+}
+
+
+// GLX_EXT_import_context
 
 VFUNCDEF2(glXFreeContextEXT, Display *, dpy, GLXContext, ctx);
 
@@ -400,7 +429,22 @@ FUNCDEF4(int, glXQueryContextInfoEXT, Display *, dpy, GLXContext, ctx,
 	int, attribute, int *, value);
 
 
-// NV_swap_group
+// GLX_EXT_swap_control
+
+VFUNCDEF3(glXSwapIntervalEXT, Display *, dpy, GLXDrawable, drawable, int,
+	interval);
+
+
+// GLX_EXT_texture_from_pixmap
+
+VFUNCDEF4(glXBindTexImageEXT, Display *, dpy, GLXDrawable, drawable,
+	int, buffer, const int *, attrib_list);
+
+VFUNCDEF3(glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
+	int, buffer)
+
+
+// GLX_NV_swap_group
 
 FUNCDEF3(Bool, glXJoinSwapGroupNV, Display *, dpy, GLXDrawable, drawable,
 	GLuint, group);
@@ -418,44 +462,6 @@ FUNCDEF3(Bool, glXQueryFrameCountNV, Display *, dpy, int, screen,
 	GLuint *, count);
 
 FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen);
-
-
-// GLX_ARB_get_proc_address
-
-typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
-SYMDEF(glXGetProcAddressARB);
-static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
-{
-	CHECKSYM(glXGetProcAddressARB);  return __glXGetProcAddressARB(procName);
-}
-
-typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
-SYMDEF(glXGetProcAddress);
-static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
-{
-	CHECKSYM(glXGetProcAddress);  return __glXGetProcAddress(procName);
-}
-
-
-// GLX_ARB_create_context
-
-FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
-	config, GLXContext, share_context, Bool, direct, const int *, attribs);
-
-
-// GLX_EXT_texture_from_pixmap
-
-VFUNCDEF4(glXBindTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer, const int *, attrib_list);
-
-VFUNCDEF3(glXReleaseTexImageEXT, Display *, dpy, GLXDrawable, drawable,
-	int, buffer)
-
-
-// GLX_EXT_swap_control
-
-VFUNCDEF3(glXSwapIntervalEXT, Display *, dpy, GLXDrawable, drawable, int,
-	interval);
 
 
 // GLX_SGI_swap_control

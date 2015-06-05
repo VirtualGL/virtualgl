@@ -1,5 +1,6 @@
 {
 	global:
+		/* GLX 1.0 */
 		glXChooseVisual;
 		glXCopyContext;
 		glXCreateContext;
@@ -16,10 +17,15 @@
 		glXUseXFont;
 		glXWaitGL;
 
+		/* GLX 1.1 */
 		glXGetClientString;
 		glXQueryServerString;
 		glXQueryExtensionsString;
 
+		/* GLX 1.2 */
+		glXGetCurrentDisplay;
+
+		/* GLX 1.3 */
 		glXChooseFBConfig;
 		glXCreateNewContext;
 		glXCreatePbuffer;
@@ -28,7 +34,6 @@
 		glXDestroyPbuffer;
 		glXDestroyPixmap;
 		glXDestroyWindow;
-		glXGetCurrentDisplay;
 		glXGetCurrentReadDrawable;
 		glXGetFBConfigAttrib;
 		glXGetFBConfigs;
@@ -39,44 +44,61 @@
 		glXQueryDrawable;
 		glXSelectEvent;
 
-		glXChooseFBConfigSGIX;
-		glXCreateContextWithConfigSGIX;
-		glXCreateGLXPbufferSGIX;
-		glXCreateGLXPixmapWithConfigSGIX;
-		glXDestroyGLXPbufferSGIX;
-		glXGetCurrentReadDrawableSGI;
-		glXGetFBConfigAttribSGIX;
-		glXGetFBConfigFromVisualSGIX;
-		glXGetSelectedEventSGIX;
- 		glXGetVisualFromFBConfigSGIX;
-		glXMakeCurrentReadSGI;
-		glXQueryGLXPbufferSGIX;
-		glXSelectEventSGIX;
+		/* GLX 1.4 */
+		glXGetProcAddress;
 
+		/* GLX_ARB_create_context */
+		glXCreateContextAttribsARB;
+
+		/* GLX_ARB_get_proc_address */
+		glXGetProcAddressARB;
+
+		/* GLX_EXT_import_context */
 		glXFreeContextEXT;
 		glXImportContextEXT;
 		glXQueryContextInfoEXT;
 
-		glXJoinSwapGroupNV;
-		glXBindSwapBarrierNV;
-		glXQuerySwapGroupNV;
-		glXQueryMaxSwapGroupsNV;
-		glXQueryFrameCountNV;
-		glXResetFrameCountNV;
+		/* GLX_EXT_swap_control */
+		glXSwapIntervalEXT;
 
-		glXGetTransparentIndexSUN;
-
-		glXGetProcAddressARB;
-		glXGetProcAddress;
-
-		glXCreateContextAttribsARB;
-
+		/* GLX_EXT_texture_from_pixmap */
 		glXBindTexImageEXT;
 		glXReleaseTexImageEXT;
 
-		glXSwapIntervalEXT;
+		/* GLX_NV_swap_group */
+		glXBindSwapBarrierNV;
+		glXJoinSwapGroupNV;
+		glXQueryFrameCountNV;
+		glXQueryMaxSwapGroupsNV;
+		glXQuerySwapGroupNV;
+		glXResetFrameCountNV;
+
+		/* GLX_SGI_make_current_read */
+		glXGetCurrentReadDrawableSGI;
+		glXMakeCurrentReadSGI;
+
+		/* GLX_SGI_swap_control */
 		glXSwapIntervalSGI;
 
+		/* GLX_SGIX_fbconfig */
+		glXChooseFBConfigSGIX;
+		glXCreateContextWithConfigSGIX;
+		glXCreateGLXPixmapWithConfigSGIX;
+		glXGetFBConfigAttribSGIX;
+		glXGetFBConfigFromVisualSGIX;
+		glXGetVisualFromFBConfigSGIX;
+
+		/* GLX_SGIX_pbuffer */
+		glXCreateGLXPbufferSGIX;
+		glXDestroyGLXPbufferSGIX;
+		glXGetSelectedEventSGIX;
+		glXQueryGLXPbufferSGIX;
+		glXSelectEventSGIX;
+
+		/* GLX_SUN_get_transparent_index */
+		glXGetTransparentIndexSUN;
+
+		/* OpenGL */
 		glFinish;
 		glFlush;
 		glViewport;
@@ -103,6 +125,7 @@
 		glPixelTransferf;
 		glPixelTransferi;
 
+		/* X11 */
 		XCheckMaskEvent;
 		XCheckTypedEvent;
 		XCheckTypedWindowEvent;
@@ -134,6 +157,7 @@
 
 		_vgl_dlopen;
 
+		/* XCB */
 		#ifdef FAKEXCB
 		xcb_get_extension_data;
 		xcb_glx_query_version;

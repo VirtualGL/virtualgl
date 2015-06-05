@@ -1411,9 +1411,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 
 	if(procName)
 	{
-		checkfaked(glXGetProcAddressARB)
-		checkfaked(glXGetProcAddress)
-
+		// GLX 1.0
 		checkfaked(glXChooseVisual)
 		checkfaked(glXCopyContext)
 		checkfaked(glXCreateContext)
@@ -1423,17 +1421,22 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXGetConfig)
 		checkfaked(glXGetCurrentDrawable)
 		checkfaked(glXIsDirect)
-		checkfaked(glXMakeCurrent);
+		checkfaked(glXMakeCurrent)
 		checkfaked(glXQueryExtension)
 		checkfaked(glXQueryVersion)
 		checkfaked(glXSwapBuffers)
 		checkfaked(glXUseXFont)
 		checkfaked(glXWaitGL)
 
+		// GLX 1.1
 		checkfaked(glXGetClientString)
 		checkfaked(glXQueryServerString)
 		checkfaked(glXQueryExtensionsString)
 
+		// GLX 1.2
+		checkfaked(glXGetCurrentDisplay)
+
+		// GLX 1.3
 		checkfaked(glXChooseFBConfig)
 		checkfaked(glXCreateNewContext)
 		checkfaked(glXCreatePbuffer)
@@ -1442,52 +1445,71 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glXDestroyPbuffer)
 		checkfaked(glXDestroyPixmap)
 		checkfaked(glXDestroyWindow)
-		checkfaked(glXGetCurrentDisplay)
 		checkfaked(glXGetCurrentReadDrawable)
-		checkfaked(glXGetCurrentReadDrawableSGI)
 		checkfaked(glXGetFBConfigAttrib)
 		checkfaked(glXGetFBConfigs)
 		checkfaked(glXGetSelectedEvent)
 		checkfaked(glXGetVisualFromFBConfig)
-		checkfaked(glXMakeContextCurrent);
-		checkfaked(glXMakeCurrentReadSGI)
+		checkfaked(glXMakeContextCurrent)
 		checkfaked(glXQueryContext)
 		checkfaked(glXQueryDrawable)
 		checkfaked(glXSelectEvent)
 
+		// GLX 1.4
+		checkfaked(glXGetProcAddress)
+
+		// GLX_ARB_create_context
+		checkoptfaked(glXCreateContextAttribsARB)
+
+		// GLX_ARB_get_proc_address
+		checkfaked(glXGetProcAddressARB)
+
+		// GLX_EXT_import_context
 		checkoptfaked(glXFreeContextEXT)
 		checkoptfaked(glXImportContextEXT)
 		checkoptfaked(glXQueryContextInfoEXT)
 
-		checkoptfaked(glXJoinSwapGroupNV)
-		checkoptfaked(glXBindSwapBarrierNV)
-		checkoptfaked(glXQuerySwapGroupNV)
-		checkoptfaked(glXQueryMaxSwapGroupsNV)
-		checkoptfaked(glXQueryFrameCountNV)
-		checkoptfaked(glXResetFrameCountNV)
+		// GLX_EXT_swap_control
+		checkoptfaked(glXSwapIntervalEXT)
 
-		checkfaked(glXChooseFBConfigSGIX)
-		checkfaked(glXCreateContextWithConfigSGIX)
-		checkfaked(glXCreateGLXPixmapWithConfigSGIX)
-		checkfaked(glXCreateGLXPbufferSGIX)
-		checkfaked(glXDestroyGLXPbufferSGIX)
-		checkfaked(glXGetFBConfigAttribSGIX)
-		checkfaked(glXGetFBConfigFromVisualSGIX)
-		checkfaked(glXGetVisualFromFBConfigSGIX)
-		checkfaked(glXQueryGLXPbufferSGIX)
-		checkfaked(glXSelectEventSGIX)
-		checkfaked(glXGetSelectedEventSGIX)
-
-		checkfaked(glXGetTransparentIndexSUN)
-
-		checkoptfaked(glXCreateContextAttribsARB)
-
+		// GLX_EXT_texture_from_pixmap
 		checkoptfaked(glXBindTexImageEXT)
 		checkoptfaked(glXReleaseTexImageEXT)
 
-		checkoptfaked(glXSwapIntervalEXT)
+		// GLX_NV_swap_group
+		checkoptfaked(glXBindSwapBarrierNV)
+		checkoptfaked(glXJoinSwapGroupNV)
+		checkoptfaked(glXQueryFrameCountNV)
+		checkoptfaked(glXQueryMaxSwapGroupsNV)
+		checkoptfaked(glXQuerySwapGroupNV)
+		checkoptfaked(glXResetFrameCountNV)
+
+		// GLX_SGI_make_current_read
+		checkfaked(glXGetCurrentReadDrawableSGI)
+		checkfaked(glXMakeCurrentReadSGI)
+
+		// GLX_SGI_swap_control
 		checkoptfaked(glXSwapIntervalSGI)
 
+		// GLX_SGIX_fbconfig
+		checkfaked(glXChooseFBConfigSGIX)
+		checkfaked(glXCreateContextWithConfigSGIX)
+		checkfaked(glXCreateGLXPixmapWithConfigSGIX)
+		checkfaked(glXGetFBConfigAttribSGIX)
+		checkfaked(glXGetFBConfigFromVisualSGIX)
+		checkfaked(glXGetVisualFromFBConfigSGIX)
+
+		// GLX_SGIX_pbuffer
+		checkfaked(glXCreateGLXPbufferSGIX)
+		checkfaked(glXDestroyGLXPbufferSGIX)
+		checkfaked(glXGetSelectedEventSGIX)
+		checkfaked(glXQueryGLXPbufferSGIX)
+		checkfaked(glXSelectEventSGIX)
+
+		// GLX_SUN_get_transparent_index
+		checkfaked(glXGetTransparentIndexSUN)
+
+		// OpenGL
 		checkfaked(glFinish)
 		checkfaked(glFlush)
 		checkfaked(glViewport)
@@ -1509,6 +1531,8 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glGetDoublev)
 		checkfaked(glGetFloatv)
 		checkfaked(glGetIntegerv)
+		checkfaked(glMaterialfv);
+		checkfaked(glMaterialiv);
 		checkfaked(glPixelTransferf)
 		checkfaked(glPixelTransferi)
 	}

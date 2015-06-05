@@ -170,7 +170,7 @@ static int loadGLSymbols(void *dllhnd)
 {
 	dlerror();  // Clear error state
 
-	// GLX symbols
+	// GLX 1.0 symbols
 	LSYM(glXChooseVisual)
 	LSYM(glXCopyContext)
 	LSYM(glXCreateContext)
@@ -187,10 +187,15 @@ static int loadGLSymbols(void *dllhnd)
 	LSYM(glXUseXFont)
 	LSYM(glXWaitGL)
 
+	// GLX 1.1 symbols
 	LSYM(glXGetClientString)
 	LSYM(glXQueryServerString)
 	LSYM(glXQueryExtensionsString)
 
+	// GLX 1.2 symbols
+	LSYM(glXGetCurrentDisplay)
+
+	// GLX 1.3 symbols
 	LSYM(glXChooseFBConfig)
 	LSYM(glXCreateNewContext)
 	LSYM(glXCreatePbuffer)
@@ -199,7 +204,6 @@ static int loadGLSymbols(void *dllhnd)
 	LSYM(glXDestroyPbuffer)
 	LSYM(glXDestroyPixmap)
 	LSYM(glXDestroyWindow)
-	LSYM(glXGetCurrentDisplay)
 	LSYM(glXGetCurrentReadDrawable)
 	LSYM(glXGetFBConfigAttrib)
 	LSYM(glXGetFBConfigs)
@@ -210,23 +214,24 @@ static int loadGLSymbols(void *dllhnd)
 	LSYM(glXQueryDrawable)
 	LSYM(glXSelectEvent)
 
-	// Optional extensions.  We fake these if they exist
+	// GLX 1.4 symbols
+	LSYMOPT(glXGetProcAddress)
+
+	// GLX_ARB_create_context
+	LSYMOPT(glXCreateContextAttribsARB)
+
+	// GLX_ARB_get_proc_address
+	LSYMOPT(glXGetProcAddressARB)
+
+	// GLX_EXT_import_context
 	LSYMOPT(glXFreeContextEXT)
 	LSYMOPT(glXImportContextEXT)
 	LSYMOPT(glXQueryContextInfoEXT)
 
-	LSYMOPT(glXJoinSwapGroupNV)
-	LSYMOPT(glXBindSwapBarrierNV)
-	LSYMOPT(glXQuerySwapGroupNV)
-	LSYMOPT(glXQueryMaxSwapGroupsNV)
-	LSYMOPT(glXQueryFrameCountNV)
-	LSYMOPT(glXResetFrameCountNV)
+	// GLX_EXT_swap_control
+	LSYMOPT(glXSwapIntervalEXT)
 
-	LSYMOPT(glXGetProcAddressARB)
-	LSYMOPT(glXGetProcAddress)
-
-	LSYMOPT(glXCreateContextAttribsARB)
-
+	// GLX_EXT_texture_from_pixmap
 	LSYMOPT(glXBindTexImageEXT)
 	LSYMOPT(glXReleaseTexImageEXT)
 	// For some reason, the ATI implementation of libGL on Ubuntu (and maybe
@@ -240,10 +245,18 @@ static int loadGLSymbols(void *dllhnd)
 		__glXReleaseTexImageEXT=
 			(_glXReleaseTexImageEXTType)__glXGetProcAddressARB((const GLubyte *)"glXReleaseTexImageEXT");
 
-	LSYMOPT(glXSwapIntervalEXT)
+	// GLX_NV_swap_group
+	LSYMOPT(glXBindSwapBarrierNV)
+	LSYMOPT(glXJoinSwapGroupNV)
+	LSYMOPT(glXQueryFrameCountNV)
+	LSYMOPT(glXQueryMaxSwapGroupsNV)
+	LSYMOPT(glXQuerySwapGroupNV)
+	LSYMOPT(glXResetFrameCountNV)
+
+	// GLX_SGI_swap_control
 	LSYMOPT(glXSwapIntervalSGI)
 
-	// GL symbols
+	// OpenGL symbols
 	LSYM(glFinish)
 	LSYM(glFlush)
 	LSYM(glViewport)
