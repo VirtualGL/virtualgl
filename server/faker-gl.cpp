@@ -28,10 +28,7 @@ using namespace vglserver;
 
 static void doGLReadback(bool spoilLast, bool sync)
 {
-	VirtualWin *vw;
-	GLXDrawable drawable;
-
-	if(ctxhash.overlayCurrent()) return;
+	VirtualWin *vw;  GLXDrawable drawable;
 
 	drawable=_glXGetCurrentDrawable();
 	if(!drawable) return;
@@ -68,6 +65,8 @@ extern "C" {
 
 void glFinish(void)
 {
+	if(vglfaker::overlayCurrent) { _glFinish();  return; }
+
 	TRY();
 
 		if(fconfig.trace) vglout.print("[VGL] glFinish()\n");
@@ -83,6 +82,8 @@ void glFinish(void)
 void glFlush(void)
 {
 	static double lastTime=-1.;  double thisTime;
+
+	if(vglfaker::overlayCurrent) { _glFlush();  return; }
 
 	TRY();
 
@@ -107,11 +108,11 @@ void glFlush(void)
 
 void glXWaitGL(void)
 {
+	if(vglfaker::overlayCurrent) { _glXWaitGL();  return; }
+
 	TRY();
 
 		if(fconfig.trace) vglout.print("[VGL] glXWaitGL()\n");
-
-	if(ctxhash.overlayCurrent()) { _glXWaitGL();  return; }
 
 	_glFinish();  // glXWaitGL() on some systems calls glFinish(), so we do this
 	              // to avoid 2 readbacks
@@ -129,9 +130,9 @@ void glXWaitGL(void)
 
 void glDrawBuffer(GLenum mode)
 {
-	TRY();
+	if(vglfaker::overlayCurrent) { _glDrawBuffer(mode);  return; }
 
-	if(ctxhash.overlayCurrent()) { _glDrawBuffer(mode);  return; }
+	TRY();
 
 		opentrace(glDrawBuffer);  prargx(mode);  starttrace();
 
@@ -162,9 +163,9 @@ void glDrawBuffer(GLenum mode)
 
 void glPopAttrib(void)
 {
-	TRY();
+	if(vglfaker::overlayCurrent) { _glPopAttrib();  return; }
 
-	if(ctxhash.overlayCurrent()) { _glPopAttrib();  return; }
+	TRY();
 
 		opentrace(glPopAttrib);  starttrace();
 
@@ -197,9 +198,9 @@ void glPopAttrib(void)
 
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
-	TRY();
+	if(vglfaker::overlayCurrent) { _glViewport(x, y, width, height);  return; }
 
-	if(ctxhash.overlayCurrent()) { _glViewport(x, y, width, height);  return; }
+	TRY();
 
 		opentrace(glViewport);  prargi(x);  prargi(y);  prargi(width);
 		prargi(height);  starttrace();

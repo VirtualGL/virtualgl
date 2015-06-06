@@ -83,11 +83,6 @@ namespace vglserver
 				return -1;
 			}
 
-			bool overlayCurrent(void)
-			{
-				return isOverlay(_glXGetCurrentContext());
-			}
-
 			void remove(GLXContext ctx)
 			{
 				if(ctx) HASH::remove(ctx, NULL);

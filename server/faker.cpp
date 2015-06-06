@@ -40,6 +40,7 @@ int traceLevel=0;
 #ifdef FAKEXCB
 __thread int fakerLevel=0;
 #endif
+__thread bool overlayCurrent=false;
 
 
 static void cleanup(void)
