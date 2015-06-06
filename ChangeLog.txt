@@ -36,6 +36,26 @@ the following ramifications:
    modern versions of the nVidia driver.  The issue in question can still be
    worked around by explicitly setting VGL_GLLIB and VGL_X11LIB.
 -------------------------------------------------------------------------------
+[4]
+Support for color index rendering emulation has been retired in this version of
+VirtualGL.  That feature will continue to be maintained in the 2.4.x branch on
+a break/fix basis only.  Even when color index emulation was implemented in VGL
+10 years ago, the applications that needed it were already extremely rare.
+Since then, color index rendering has been officially obsoleted in the OpenGL
+spec (as of version 3.1 in 2009), and modern Un*x graphics drivers no longer
+support it, nor do they generally support PseudoColor X visuals (nVidia still
+supports these, but only with transparent overlays.)  Since there is generally
+no reasonable way to run color index OpenGL applications without using legacy
+hardware or software, it does not make sense to continue supporting these
+applications in this version of VirtualGL, particularly given that color index
+emulation adds a certain amount of overhead to some OpenGL calls.
+-------------------------------------------------------------------------------
+[5]
+Added support for DirectColor rendering (DirectColor is similar to PseudoColor,
+except that the colormap indices for red, green, and blue can be specified
+separately.)  GLXspheres now includes a DirectColor mode, replacing its
+previous color index mode.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2014 D. R. Commander
+ * Copyright (C)2009-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,7 +40,7 @@ using namespace vglserver;
 static inline int drawingToRight(void)
 {
 	GLint drawBuf=GL_LEFT;
-	glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);
+	_glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);
 	return isRight(drawBuf);
 }
 
@@ -64,7 +64,6 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	syncdpy=false;
 	dirty=false;
 	rdirty=false;
-	trueColor=true;
 	fconfig_setdefaultsfromdpy(dpy);
 	plugin=NULL;
 	doWMDelete=false;
@@ -81,7 +80,6 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
 				win);
 	}
-	if(xwa.depth<24 || xwa.visual->c_class!=TrueColor) trueColor=false;
 	stereoVisual=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
 		xwa.visual->visualid, GLX_STEREO);
 }
@@ -301,8 +299,6 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 		}
 	}
 
-	if(!trueColor && strlen(fconfig.transport)==0) compress=RRCOMP_PROXY;
-
 	if(strlen(fconfig.transport)>0)
 	{
 		sendPlugin(drawBuf, spoilLast, sync, doStereo, stereoMode);
@@ -361,7 +357,6 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	if(oglDraw->getFormat()==GL_BGRA_EXT) desiredformat=RRTRANS_BGRA;
 	#endif
 	if(oglDraw->getFormat()==GL_RGBA) desiredformat=RRTRANS_RGBA;
-	if(!trueColor) desiredformat=RRTRANS_INDEX;
 
 	rrframe=plugin->getFrame(w, h, desiredformat,
 		doStereo && stereoMode==RRSTEREO_QUADBUF);
@@ -381,7 +376,6 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	if(rrframe->format==RRTRANS_ABGR || rrframe->format==RRTRANS_ARGB)
 		glformat=GL_ABGR_EXT;
 	#endif
-	if(rrframe->format==RRTRANS_INDEX) glformat=GL_COLOR_INDEX;
 
 	if(doStereo && stereoMode==RRSTEREO_QUADBUF && rrframe->rbits==NULL)
 	{
@@ -509,7 +503,6 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 		unsigned char *bits=f->bits;
 		switch(f->pixelSize)
 		{
-			case 1:  format=GL_COLOR_INDEX;  break;
 			case 3:
 				format=GL_RGB;
 				#ifdef GL_BGR_EXT

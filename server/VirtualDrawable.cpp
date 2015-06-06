@@ -309,8 +309,6 @@ static const char *formatString(int format)
 		case GL_ABGR_EXT:
 			return "ABGR";
 		#endif
-		case GL_COLOR_INDEX:
-			return "INDEX";
 		case GL_RED:  case GL_GREEN:  case GL_BLUE:
 			return "COMPONENT";
 		default:
@@ -408,7 +406,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	while(e!=GL_NO_ERROR) e=_glGetError();  // Clear previous error
 	profReadback.startFrame();
 	if(usePBO) t0=getTime();
-	glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE,
+	_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE,
 		usePBO? NULL:bits);
 
 	if(usePBO)
@@ -475,18 +473,9 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				}
 		if(match)
 		{
-			if(format==GL_COLOR_INDEX)
-			{
-				unsigned char index;
-				glReadPixels(0, 0, 1, 1, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, &index);
-				color=index;
-			}
-			else
-			{
-				unsigned char rgb[3];
-				glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
-				color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
-			}
+			unsigned char rgb[3];
+			_glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 		}
  		char envName[40], envValue[10];
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)

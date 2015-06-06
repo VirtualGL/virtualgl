@@ -149,49 +149,12 @@ VirtualGL.  True color (24-bit) overlays work, in theory, but have not been
 tested.  Use ''glxinfo'' (see [[#Troubleshooting]] below) to verify whether your
 client's X display supports overlays and whether they are enabled.
 
-** Color Index (PseudoColor) Rendering
-
-In a PseudoColor visual, each pixel is represented by an index that refers to
-a location in a color table.  The color table stores the actual color values
-(256 of them in the case of 8-bit PseudoColor) that correspond to each index.
-An application merely tells the X server which color index to use when drawing,
-and the X server takes care of mapping that index to an actual color from the
-color table.  OpenGL allows for rendering to PseudoColor visuals, and it does
-so by being intentionally ignorant of the relationship between indices and
-actual colors.  As far as OpenGL is concerned, each color index value is just
-a meaningless number, and it is only when the final image is drawn by the X
-server that these numbers take on meaning.  As a result, many pieces of
-OpenGL's core functionality either have undefined behavior or do not work at
-all with PseudoColor rendering.  PseudoColor rendering used to be a common
-technique for visualizing scientific data, because such data often only contained
-8 bits per sample to begin with.  Applications could manipulate the color table
-to allow the user to dynamically control the relationship between sample values
-and colors.  However, since most modern graphics cards have dropped support for
-PseudoColor rendering (it was removed as a feature in OpenGL 3.1), the
-applications that use it have become a vanishing breed.
-
-VirtualGL supports PseudoColor rendering if a PseudoColor visual is available
-on the 2D X server or X proxy.  A PseudoColor visual need not be present on the
-3D X server.  On the 3D X server, VirtualGL uses the red channel
-of a standard RGB Pbuffer to store the color index.  Upon receiving an
-end-of-frame trigger, VirtualGL reads back the red channel of the Pbuffer and uses
-''XPutImage()'' to draw the color indices into the appropriate X window.  To
-put this another way, PseudoColor rendering in VirtualGL always uses the X11
-Transport.  However, since there is only 1 byte per pixel in a PseudoColor
-"image", reasonable performance can still be obtained when displaying to a
-remote X server on the same local-area network.
-
-VirtualGL's PseudoColor rendering mode works with X proxies, provided that the
-X proxy provides a PseudoColor visual.  Note, however, that some X proxies,
-such as VNC, cannot provide both PseudoColor and TrueColor visuals at the same
-time.
-
 ** Troubleshooting
 {anchor: Troubleshooting}
 
 VirtualGL includes a modified version of ''glxinfo'' that can be used to
-determine whether or not the 2D and 3D X servers have stereo, overlay, or
-PseudoColor visuals enabled.
+determine whether or not the 2D and 3D X servers have stereo or overlay visuals
+enabled.
 
 Run the following command sequence on the VirtualGL server to determine
 whether the 3D X server has a suitable visual for stereographic rendering:
@@ -206,8 +169,8 @@ visuals should say "stereo=1" and should list "Pbuffer" as one of the "Drawable
 Types."
 
 Run the following command sequence on the VirtualGL server to determine
-whether the 2D X server has a suitable visual for stereographic
-rendering, transparent overlays, or PseudoColor.
+whether the 2D X server has a suitable visual for stereographic rendering or
+transparent overlays.
 
 #Verb: <<---
 /opt/VirtualGL/bin/glxinfo -v
@@ -216,6 +179,4 @@ rendering, transparent overlays, or PseudoColor.
 In order to use stereo, one or more of the visuals should say "stereo=1".
 In order to use transparent overlays, one or more of the visuals should say
 "level=1", should list a "Transparent Index" (non-transparent visuals will say
-"Opaque" instead), and should have a class of "PseudoColor."  In order to use
-PseudoColor (color index) rendering, one of the visuals should have a class of
-"PseudoColor."
+"Opaque" instead), and should have a class of "PseudoColor."

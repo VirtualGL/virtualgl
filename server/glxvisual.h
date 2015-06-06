@@ -26,9 +26,8 @@ namespace glxvisual
 	// attribute list.  It also returns the visual parameters derived from that
 	// same attribute list, so those parameters can be used to match an
 	// appropriate visual on the 2D X server.
-	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &depth,
-		int &c_class, int &level, int &stereo, int &trans, int &nElements,
-		bool glx13=false);
+	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
+		int &level, int &stereo, int &trans, int &nElements, bool glx13=false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so

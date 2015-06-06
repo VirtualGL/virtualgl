@@ -86,7 +86,6 @@ void VirtualPixmap::readback(void)
 	unsigned char *bits=frame->bits;
 	switch(frame->pixelSize)
 	{
-		case 1:  format=GL_COLOR_INDEX;  break;
 		case 3:
 			format=GL_RGB;
 			#ifdef GL_BGR_EXT

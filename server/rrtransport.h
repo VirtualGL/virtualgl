@@ -20,13 +20,13 @@
 
 
 // Pixel formats
-#define RRTRANS_FORMATOPT 7
+#define RRTRANS_FORMATOPT 6
 enum {RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
-      RRTRANS_ARGB, RRTRANS_INDEX};
+      RRTRANS_ARGB};
 
-static const int rrtrans_ps[RRTRANS_FORMATOPT]={3, 4, 3, 4, 4, 4, 1};
-static const int rrtrans_bgr[RRTRANS_FORMATOPT]={0, 0, 1, 1, 1, 0, 0};
-static const int rrtrans_afirst[RRTRANS_FORMATOPT]={0, 0, 0, 0, 1, 1, 0};
+static const int rrtrans_ps[RRTRANS_FORMATOPT]={3, 4, 3, 4, 4, 4};
+static const int rrtrans_bgr[RRTRANS_FORMATOPT]={0, 0, 1, 1, 1, 0};
+static const int rrtrans_afirst[RRTRANS_FORMATOPT]={0, 0, 0, 0, 1, 1};
 
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

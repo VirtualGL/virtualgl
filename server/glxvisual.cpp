@@ -149,14 +149,15 @@ namespace glxvisual
 {
 
 GLXFBConfig *configsFromVisAttribs(const int attribs[],
-	int &depth, int &c_class, int &level, int &stereo, int &trans,
-	int &nElements, bool glx13)
+	int &c_class, int &level, int &stereo, int &trans, int &nElements,
+	bool glx13)
 {
 	int glxattribs[257], j=0;
-	int doubleBuffer=0, bufferSize=-1, redSize=-1, greenSize=-1,
-		blueSize=-1, alphaSize=-1, samples=-1;
+	int doubleBuffer=0, redSize=-1, greenSize=-1, blueSize=-1, alphaSize=-1,
+		samples=-1, renderType=glx13? GLX_RGBA_BIT:GLX_COLOR_INDEX_BIT,
+		visualType=GLX_TRUE_COLOR;
 
-	depth=glx13? 24:8;  c_class=glx13? TrueColor:PseudoColor;
+	c_class=TrueColor;
 
 	for(int i=0; attribs[i]!=None && i<=254; i++)
 	{
@@ -165,21 +166,10 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[],
 			if(glx13) { doubleBuffer=attribs[i+1];  i++; }
 			else doubleBuffer=1;
 		}
-		else if(attribs[i]==GLX_RGBA)
-		{
-			depth=24;  c_class=TrueColor;
-		}
+		else if(attribs[i]==GLX_RGBA) renderType=GLX_RGBA_BIT;
 		else if(attribs[i]==GLX_RENDER_TYPE)
 		{
-			if(attribs[i+1]&GLX_COLOR_INDEX_BIT)
-			{
-				depth=8;  c_class=PseudoColor;
-			}
-			i++;
-		}
-		else if(attribs[i]==GLX_BUFFER_SIZE)
-		{
-			bufferSize=attribs[i+1];  i++;
+			renderType=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_LEVEL)
 		{
@@ -218,7 +208,14 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[],
 			samples=attribs[i+1];  i++;
 		}
 		else if(attribs[i]==GLX_DRAWABLE_TYPE) i++;
-		else if(attribs[i]==GLX_X_VISUAL_TYPE) i++;
+		else if(attribs[i]==GLX_X_VISUAL_TYPE)
+		{
+			int temp=attribs[i+1];  i++;
+			if(temp==GLX_DIRECT_COLOR)
+			{
+				visualType=temp;  c_class=DirectColor;
+			}
+		}
 		else if(attribs[i]==GLX_VISUAL_ID) i++;
 		else if(attribs[i]==GLX_X_RENDERABLE) i++;
 		else if(attribs[i]==GLX_TRANSPARENT_INDEX_VALUE) i++;
@@ -233,27 +230,9 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[],
 		}
 	}
 	glxattribs[j++]=GLX_DOUBLEBUFFER;  glxattribs[j++]=doubleBuffer;
-	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=GLX_RGBA_BIT;
+	glxattribs[j++]=GLX_RENDER_TYPE;  glxattribs[j++]=renderType;
 	if(fconfig.forcealpha==1 && redSize>0 && greenSize>0 && blueSize>0
 		&& alphaSize<1) alphaSize=1;
-	if(redSize<0)
-	{
-		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
-			redSize=bufferSize;
-		else redSize=8;
-	}
-	if(greenSize<0)
-	{
-		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
-			greenSize=bufferSize;
-		else greenSize=8;
-	}
-	if(blueSize<0)
-	{
-		if(bufferSize>=0 && c_class==PseudoColor && depth==8)
-			blueSize=bufferSize;
-		else blueSize=8;
-	}
 	glxattribs[j++]=GLX_RED_SIZE;  glxattribs[j++]=redSize;
 	glxattribs[j++]=GLX_GREEN_SIZE;  glxattribs[j++]=greenSize;
 	glxattribs[j++]=GLX_BLUE_SIZE;  glxattribs[j++]=blueSize;
@@ -275,7 +254,7 @@ GLXFBConfig *configsFromVisAttribs(const int attribs[],
 		glxattribs[j++]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
 	else
 		glxattribs[j++]=GLX_PIXMAP_BIT|GLX_PBUFFER_BIT;
-	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=GLX_TRUE_COLOR;
+	glxattribs[j++]=GLX_X_VISUAL_TYPE;  glxattribs[j++]=visualType;
 	glxattribs[j]=None;
 
 	return _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), glxattribs,
@@ -296,7 +275,8 @@ int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute)
 			{
 				if(va[i].isTrans)
 				{
-					if(va[i].c_class==TrueColor) return GLX_TRANSPARENT_RGB;
+					if(va[i].c_class==TrueColor || va[i].c_class==DirectColor)
+						return GLX_TRANSPARENT_RGB;
 					else return GLX_TRANSPARENT_INDEX;
 				}
 				else return GLX_NONE;
@@ -374,7 +354,8 @@ VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 				if(stereo!=va[i].isStereo) match=0;
 				if(stereo && !va[i].isDB) match=0;
 				if(stereo && !va[i].isGL) match=0;
-				if(stereo && va[i].c_class!=TrueColor) match=0;
+				if(stereo && va[i].c_class!=TrueColor && va[i].c_class!=DirectColor)
+					match=0;
 			}
 			if(level!=va[i].level) match=0;
 			if(trans && !va[i].isTrans) match=0;

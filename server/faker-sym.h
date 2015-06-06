@@ -513,48 +513,6 @@ VFUNCDEF1(glDrawBuffer, GLenum, drawbuf);
 
 VFUNCDEF0(glPopAttrib);
 
-VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
-	GLenum, format, GLenum, type, GLvoid*, pixels);
-
-VFUNCDEF5(glDrawPixels, GLsizei, width, GLsizei, height, GLenum, format,
-	GLenum, type, const GLvoid*, pixels);
-
-VFUNCDEF1(glIndexd, GLdouble, c);
-
-VFUNCDEF1(glIndexf, GLfloat, c);
-
-VFUNCDEF1(glIndexi, GLint, c);
-
-VFUNCDEF1(glIndexs, GLshort, c);
-
-VFUNCDEF1(glIndexub, GLubyte, c);
-
-VFUNCDEF1(glIndexdv, const GLdouble*, c);
-
-VFUNCDEF1(glIndexfv, const GLfloat*, c);
-
-VFUNCDEF1(glIndexiv, const GLint*, c);
-
-VFUNCDEF1(glIndexsv, const GLshort*, c);
-
-VFUNCDEF1(glIndexubv, const GLubyte*, c);
-
-VFUNCDEF1(glClearIndex, GLfloat, c);
-
-VFUNCDEF2(glGetDoublev, GLenum, pname, GLdouble *, params);
-
-VFUNCDEF2(glGetFloatv, GLenum, pname, GLfloat *, params);
-
-VFUNCDEF2(glGetIntegerv, GLenum, pname, GLint *, params);
-
-VFUNCDEF3(glMaterialfv, GLenum, face, GLenum, pname, const GLfloat *, params);
-
-VFUNCDEF3(glMaterialiv, GLenum, face, GLenum, pname, const GLint *, params);
-
-VFUNCDEF2(glPixelTransferf, GLenum, pname, GLfloat, param);
-
-VFUNCDEF2(glPixelTransferi, GLenum, pname, GLint, param);
-
 
 // X11 functions
 
@@ -694,6 +652,10 @@ VFUNCDEF3(glGetBufferParameteriv, GLenum, target, GLenum, value, GLint *,
 
 FUNCDEF0(GLenum, glGetError);
 
+VFUNCDEF2(glGetFloatv, GLenum, pname, GLfloat *, params);
+
+VFUNCDEF2(glGetIntegerv, GLenum, pname, GLint *, params);
+
 FUNCDEF1(const GLubyte *, glGetString, GLenum, name);
 
 VFUNCDEF0(glLoadIdentity);
@@ -720,6 +682,9 @@ VFUNCDEF0(glPushMatrix);
 VFUNCDEF2(glRasterPos2i, GLint, x, GLint, y);
 
 VFUNCDEF1(glReadBuffer, GLenum, mode);
+
+VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
+	GLenum, format, GLenum, type, GLvoid*, pixels);
 
 FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target);
 

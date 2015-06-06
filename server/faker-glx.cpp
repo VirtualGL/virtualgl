@@ -82,6 +82,8 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			GLX_STEREO))
 			attribs[11]=1;
 
+		if(vis->c_class==DirectColor) attribs[15]=GLX_DIRECT_COLOR;
+
 		// If we're creating a GLX pixmap and we can't determine an exact FB config
 		// to map to the visual, then we will make the pixmap single-buffered.
 		if(preferSingleBuffer) attribs[1]=0;
@@ -171,8 +173,8 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 		XVisualInfo *vis=_glXGetVisualFromFBConfig(_dpy3D, config);
 		if(vis)
 		{
-			if((vis->depth==8 && vis->c_class==PseudoColor) ||
-				(vis->depth>=24 && vis->c_class==TrueColor))
+			if(vis->depth>=24 &&
+				(vis->c_class==TrueColor || vis->c_class==DirectColor))
 				vid=glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class, 0,
 					glxvisual::visAttrib3D(config, GLX_STEREO), 0);
 			XFree(vis);
@@ -309,8 +311,8 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 
 	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
-	else configs=glxvisual::configsFromVisAttribs(attrib_list, depth, c_class,
-		level, stereo, trans, *nelements, true);
+	else configs=glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
+		stereo, trans, *nelements, true);
 
 	if(configs && *nelements)
 	{
@@ -417,8 +419,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	GLXFBConfig *configs=NULL, prevConfig;  int n=0;
 	if(!dpy || !attrib_list) goto done;
 	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
-	if(!(configs=glxvisual::configsFromVisAttribs(attrib_list, depth, c_class,
-		level, stereo, trans, n)) || n<1)
+	if(!(configs=glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
+		stereo, trans, n)) || n<1)
 	{
 		if(!alreadyWarned && fconfig.verbose)
 		{
@@ -527,7 +529,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
 				ctx=NULL;
 			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
-			if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
+			if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 			goto done;
 		}
 	}
@@ -551,11 +553,9 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		bool colorIndex=(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
-			vis->visualid, GLX_X_VISUAL_TYPE)==PseudoColor);
 		// Hash the FB config to the context so we can use it in subsequent calls
 		// to glXMake[Context]Current().
-		ctxhash.add(ctx, config, newctxIsDirect, colorIndex);
+		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
 	CATCH();
@@ -571,7 +571,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	GLXContext share_context, Bool direct, const int *attribs)
 {
-	GLXContext ctx=0;  bool colorIndex=false;
+	GLXContext ctx=0;
 
 	// Prevent recursion
 	if(is3D(dpy))
@@ -592,23 +592,8 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	{
 		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
-		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
+		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 		goto done;
-	}
-
-	if(attribs)
-	{
-		// Color index rendering is handled behind the scenes using the red
-		// channel of an RGB off-screen drawable, so VirtualGL always uses RGBA
-		// contexts.
-		for(int i=0; attribs[i]!=None && i<=254; i+=2)
-		{
-			if(attribs[i]==GLX_RENDER_TYPE)
-			{
-				if(attribs[i+1]==GLX_COLOR_INDEX_TYPE) colorIndex=true;
-				((int *)attribs)[i+1]=GLX_RGBA_TYPE;
-			}
-		}
 	}
 
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
@@ -630,7 +615,7 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxhash.add(ctx, config, newctxIsDirect, colorIndex);
+		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
 	CATCH();
@@ -664,7 +649,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	if(rcfghash.isOverlay(dpy, config))
 	{
 		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
-		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1, true);
+		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 		goto done;
 	}
 
@@ -681,8 +666,7 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 				DisplayString(_dpy3D));
 			vglout.println("[VGL]    permissions may be set incorrectly.");
 		}
-		ctxhash.add(ctx, config, newctxIsDirect,
-			render_type==GLX_COLOR_INDEX_TYPE);
+		ctxhash.add(ctx, config, newctxIsDirect);
 	}
 
 	CATCH();
@@ -1089,17 +1073,9 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 	if(attrib==GLX_USE_GL)
 	{
-		if(vis->c_class==TrueColor || vis->c_class==PseudoColor) *value=1;
+		if(vis->c_class==TrueColor || vis->c_class==DirectColor) *value=1;
 		else *value=0;
 	}
-	// Color index rendering really uses an RGB off-screen drawable, so we have
-	// to fake out the application if it is asking about RGBA properties.
-	else if(vis->c_class==PseudoColor
-		&& (attrib==GLX_RED_SIZE || attrib==GLX_GREEN_SIZE
-			|| attrib==GLX_BLUE_SIZE || attrib==GLX_ALPHA_SIZE
-			|| attrib==GLX_ACCUM_RED_SIZE || attrib==GLX_ACCUM_GREEN_SIZE
-			|| attrib==GLX_ACCUM_BLUE_SIZE || attrib==GLX_ACCUM_ALPHA_SIZE))
-		*value=0;
 	// Transparent overlay visuals are actual 2D X server visuals, not dummy
 	// visuals mapped to 3D X server FB configs, so we obtain their properties
 	// from the 2D X server.
@@ -1112,22 +1088,11 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		*value=glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, attrib);
 	else if(attrib==GLX_RGBA)
 	{
-		if(vis->c_class==PseudoColor) *value=0;  else *value=1;
+		if(glxvisual::visAttrib3D(config, GLX_RENDER_TYPE) & GLX_RGBA_BIT!=0)
+			*value=1;
+		else *value=0;
 	}
-	else if(attrib==GLX_STEREO)
-		*value=glxvisual::visAttrib3D(config, GLX_STEREO);
-	else if(attrib==GLX_X_VISUAL_TYPE)
-	{
-		if(vis->c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
-		else *value=GLX_TRUE_COLOR;
-	}
-	else
-	{
-		if(attrib==GLX_BUFFER_SIZE && vis->c_class==PseudoColor
-			&& glxvisual::visAttrib3D(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
-			attrib=GLX_RED_SIZE;
-		retval=_glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
-	}
+	else retval=_glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
 
 	CATCH();
 
@@ -1261,40 +1226,17 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 
 	if((vid=cfghash.getVisual(dpy, config))!=0)
 	{
-		// Color index rendering really uses an RGB off-screen drawable, so we have
-		// to fake out the application if it is asking about RGBA properties.
-		int c_class=glxvisual::visClass2D(dpy, screen, vid);
-		if(c_class==PseudoColor
-			&& (attribute==GLX_RED_SIZE
-				|| attribute==GLX_GREEN_SIZE
-				|| attribute==GLX_BLUE_SIZE || attribute==GLX_ALPHA_SIZE
-				|| attribute==GLX_ACCUM_RED_SIZE || attribute==GLX_ACCUM_GREEN_SIZE
-				|| attribute==GLX_ACCUM_BLUE_SIZE || attribute==GLX_ACCUM_ALPHA_SIZE))
-			*value=0;
 		// Transparent overlay FB configs are located on the 2D X server, not the
 		// 3D X server.
-		else if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
+		if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
 			|| attribute==GLX_TRANSPARENT_INDEX_VALUE
 			|| attribute==GLX_TRANSPARENT_RED_VALUE
 			|| attribute==GLX_TRANSPARENT_GREEN_VALUE
 			|| attribute==GLX_TRANSPARENT_BLUE_VALUE
 			|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
 			*value=glxvisual::visAttrib2D(dpy, screen, vid, attribute);
-		else if(attribute==GLX_RENDER_TYPE)
-		{
-			if(c_class==PseudoColor) *value=GLX_COLOR_INDEX_BIT;
-			else *value=glxvisual::visAttrib3D(config, GLX_RENDER_TYPE);
-		}
-		else if(attribute==GLX_X_VISUAL_TYPE)
-		{
-			if(c_class==PseudoColor) *value=GLX_PSEUDO_COLOR;
-			else *value=GLX_TRUE_COLOR;
-		}
 		else if(attribute==GLX_VISUAL_ID)
 			*value=vid;
-		else if(attribute==GLX_BUFFER_SIZE && c_class==PseudoColor
-			&& glxvisual::visAttrib3D(config, GLX_RENDER_TYPE)==GLX_RGBA_BIT)
-			*value=glxvisual::visAttrib3D(config, GLX_RED_SIZE);
 	}
 
 	CATCH();
@@ -1530,26 +1472,6 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 		checkfaked(glViewport)
 		checkfaked(glDrawBuffer)
 		checkfaked(glPopAttrib)
-		checkfaked(glReadPixels)
-		checkfaked(glDrawPixels)
-		checkfaked(glIndexd)
-		checkfaked(glIndexf)
-		checkfaked(glIndexi)
-		checkfaked(glIndexs)
-		checkfaked(glIndexub)
-		checkfaked(glIndexdv)
-		checkfaked(glIndexfv)
-		checkfaked(glIndexiv)
-		checkfaked(glIndexsv)
-		checkfaked(glIndexubv)
-		checkfaked(glClearIndex)
-		checkfaked(glGetDoublev)
-		checkfaked(glGetFloatv)
-		checkfaked(glGetIntegerv)
-		checkfaked(glMaterialfv);
-		checkfaked(glMaterialiv);
-		checkfaked(glPixelTransferf)
-		checkfaked(glPixelTransferi)
 	}
 	if(!retval)
 	{
@@ -1890,33 +1812,20 @@ Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read,
 }
 
 
-// If 'ctx' was created for color index rendering, we need to fake the
-// application into thinking that it's really a color index context, when in
-// fact VGL is using an RGBA context behind the scenes.
+// Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
+// rendering) without modification
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
 	int retval=0;
+
 	if(ctxhash.isOverlay(ctx))
 		return _glXQueryContext(dpy, ctx, attribute, value);
 
 		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargi(attribute);
 		starttrace();
 
-	if(attribute==GLX_RENDER_TYPE)
-	{
-		int fbcid=-1;
-		retval=_glXQueryContext(_dpy3D, ctx, GLX_FBCONFIG_ID, &fbcid);
-		if(fbcid>0)
-		{
-			VisualID vid=cfghash.getVisual(dpy, fbcid);
-			if(vid
-				&& glxvisual::visClass2D(dpy, DefaultScreen(dpy), vid)==PseudoColor
-				&& value) *value=GLX_COLOR_INDEX_TYPE;
-			else if(value) *value=GLX_RGBA_TYPE;
-		}
-	}
-	else retval=_glXQueryContext(_dpy3D, ctx, attribute, value);
+	retval=_glXQueryContext(_dpy3D, ctx, attribute, value);
 
 		stoptrace();  if(value) prargi(*value);  closetrace();
 
@@ -1924,16 +1833,22 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 }
 
 
-// Hand off to the 2D X server (overlay rendering) or the 3D X server (opaque
-// rendering) without modification
-
 int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 	int *value)
 {
+	int retval=0;
+
 	if(ctxhash.isOverlay(ctx))
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
-	return _glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
+		opentrace(glXQueryContextInfoEXT);  prargd(dpy);  prargx(ctx);
+		prargi(attribute); starttrace();
+
+	retval=_glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
+
+		stoptrace();  if(value) prargi(*value);  closetrace();
+
+	return retval;
 }
 
 

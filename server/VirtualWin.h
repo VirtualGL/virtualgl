@@ -79,7 +79,6 @@ namespace vglserver
 			vglcommon::Profiler profGamma, profAnaglyph, profPassive;
 			bool syncdpy;
 			TransPlugin *plugin;
-			bool trueColor;
 			bool stereoVisual;
 			vglcommon::Frame rFrame, gFrame, bFrame, frame, stereoFrame;
 			bool doWMDelete;

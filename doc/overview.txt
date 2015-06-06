@@ -47,8 +47,7 @@ The beauty of this approach is its non-intrusiveness.  VirtualGL monitors a
 few X11 commands and events to determine when windows have been resized, etc.,
 but it does not interfere in any way with the delivery of 2D X11 commands to
 the X server.  For the most part, VGL does not interfere with the delivery of
-OpenGL commands to the GPU, either (there are some exceptions, such as the
-implementation of color index rendering.)  VGL merely forces the OpenGL
+OpenGL commands to the GPU, either.  VGL merely forces the OpenGL
 commands to be delivered to a GPU that is attached to a different X server (the
 "3D X server") than the X server to which the 2D drawing commands are delivered
 (the "2D X server.")  Once the OpenGL rendering has been redirected to a

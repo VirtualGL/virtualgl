@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-05-24T13:15:26">
+<meta name="date" content="2015-06-06T10:25:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -222,11 +222,7 @@ systems, OpenGL and GLX, and X windows.</p>
                 <a href="#hd0016002" class="hd">16.2 Transparent Overlays</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd0016003" class="hd">16.3 Color Index (PseudoColor) 
-                Rendering</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd0016004" class="hd">16.4 Troubleshooting</a>
+                <a href="#hd0016003" class="hd">16.3 Troubleshooting</a>
             </li>
         </ul>
     </li>
@@ -365,12 +361,11 @@ monitors a few X11 commands and events to determine when windows have
 been resized, etc., but it does not interfere in any way with the 
 delivery of 2D X11 commands to the X server.  For the most part, VGL 
 does not interfere with the delivery of OpenGL commands to the GPU, 
-either (there are some exceptions, such as the implementation of color 
-index rendering.)  VGL merely forces the OpenGL commands to be delivered 
-to a GPU that is attached to a different X server (the &ldquo;3D X 
-server&rdquo;) than the X server to which the 2D drawing commands are 
-delivered (the &ldquo;2D X server.&rdquo;)  Once the OpenGL rendering 
-has been redirected to a Pbuffer, everything (including esoteric OpenGL 
+either.  VGL merely forces the OpenGL commands to be delivered to a GPU 
+that is attached to a different X server (the &ldquo;3D X server&rdquo;) 
+than the X server to which the 2D drawing commands are delivered (the 
+&ldquo;2D X server.&rdquo;)  Once the OpenGL rendering has been 
+redirected to a Pbuffer, everything (including esoteric OpenGL 
 extensions, fragment/vertex programs, etc.) should &ldquo;just 
 work.&rdquo;  If an application runs locally on a 3D server/workstation, 
 then that same application should run remotely from that same machine 
@@ -2418,55 +2413,13 @@ and whether they are enabled.</p>
 
 
 
-<h2 id="hd0016003">16.3&nbsp;Color Index (PseudoColor) Rendering</h2>
-
-<p>In a PseudoColor visual, each pixel is represented by an index that 
-refers to a location in a color table.  The color table stores the 
-actual color values (256 of them in the case of 8-bit PseudoColor) that 
-correspond to each index. An application merely tells the X server which 
-color index to use when drawing, and the X server takes care of mapping 
-that index to an actual color from the color table.  OpenGL allows for 
-rendering to PseudoColor visuals, and it does so by being intentionally 
-ignorant of the relationship between indices and actual colors.  As far 
-as OpenGL is concerned, each color index value is just a meaningless 
-number, and it is only when the final image is drawn by the X server 
-that these numbers take on meaning.  As a result, many pieces of 
-OpenGL&rsquo;s core functionality either have undefined behavior or do 
-not work at all with PseudoColor rendering.  PseudoColor rendering used 
-to be a common technique for visualizing scientific data, because such 
-data often only contained 8 bits per sample to begin with.  Applications 
-could manipulate the color table to allow the user to dynamically 
-control the relationship between sample values and colors.  However, 
-since most modern graphics cards have dropped support for PseudoColor 
-rendering (it was removed as a feature in OpenGL 3.1), the applications 
-that use it have become a vanishing breed.</p>
-
-<p>VirtualGL supports PseudoColor rendering if a PseudoColor visual is 
-available on the 2D X server or X proxy.  A PseudoColor visual need not 
-be present on the 3D X server.  On the 3D X server, VirtualGL uses the 
-red channel of a standard RGB Pbuffer to store the color index.  Upon 
-receiving an end-of-frame trigger, VirtualGL reads back the red channel 
-of the Pbuffer and uses <code>XPutImage()</code> to draw the color 
-indices into the appropriate X window.  To put this another way, 
-PseudoColor rendering in VirtualGL always uses the X11 Transport.  
-However, since there is only 1 byte per pixel in a PseudoColor 
-&ldquo;image&rdquo;, reasonable performance can still be obtained when 
-displaying to a remote X server on the same local-area network.</p>
-
-<p>VirtualGL&rsquo;s PseudoColor rendering mode works with X proxies, 
-provided that the X proxy provides a PseudoColor visual.  Note, however, 
-that some X proxies, such as VNC, cannot provide both PseudoColor and 
-TrueColor visuals at the same time.</p>
-
-
-
-<h2 id="hd0016004">16.4&nbsp;Troubleshooting</h2>
+<h2 id="hd0016003">16.3&nbsp;Troubleshooting</h2>
 
 <p><a name="Troubleshooting"></a></p>
 
 <p>VirtualGL includes a modified version of <code>glxinfo</code> that can 
-be used to determine whether or not the 2D and 3D X servers have stereo, 
-overlay, or PseudoColor visuals enabled.</p>
+be used to determine whether or not the 2D and 3D X servers have stereo 
+or overlay visuals enabled.</p>
 
 <p>Run the following command sequence on the VirtualGL server to determine 
 whether the 3D X server has a suitable visual for stereographic 
@@ -2483,7 +2436,7 @@ or more of the visuals should say &ldquo;stereo=1&rdquo; and should list
 
 <p>Run the following command sequence on the VirtualGL server to determine 
 whether the 2D X server has a suitable visual for stereographic 
-rendering, transparent overlays, or PseudoColor.</p>
+rendering or transparent overlays.</p>
 
 <pre class="verbatim">
 /opt/VirtualGL/bin/glxinfo&nbsp;-v
@@ -2494,8 +2447,6 @@ rendering, transparent overlays, or PseudoColor.</p>
 more of the visuals should say &ldquo;level=1&rdquo;, should list a 
 &ldquo;Transparent Index&rdquo; (non-transparent visuals will say 
 &ldquo;Opaque&rdquo; instead), and should have a class of 
-&ldquo;PseudoColor.&rdquo;  In order to use PseudoColor (color index) 
-rendering, one of the visuals should have a class of 
 &ldquo;PseudoColor.&rdquo;</p>
 
 <p><br /></p>
@@ -2775,11 +2726,6 @@ VirtualGL features:</p>
 <dl class="Description">
     <dt class="Description-1 Description">Stereographic rendering (<code>glxspheres&nbsp;-s</code>)</dt>
     <dd class="Description-1 Description">
-    </dd>
-    <dt class="Description-1 Description">Color index rendering (<code>glxspheres&nbsp;-c</code>)</dt>
-    <dd class="Description-1 Description">
-        In color index mode, GLXSpheres will draw the spheres using an 8-bit 
-        color map and will change the color map periodically.
     </dd>
     <dt class="Description-1 Description">Overlay rendering (<code>glxspheres&nbsp;-o</code>)</dt>
     <dd class="Description-1 Description">

@@ -85,7 +85,7 @@ VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  ''nettest'' is installed in
 ''/opt/VirtualGL/bin'' by default.  For Windows users, a native Windows version
 of NetTest is included in the "VirtualGL-Utils" package, which is distributed
-alongside VirtualGL.  
+alongside VirtualGL.
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
@@ -237,10 +237,6 @@ are designed specifically to test the performance of various VirtualGL
 features:
 
 	Stereographic rendering (''glxspheres -s'') :: {:}
-
-	Color index rendering (''glxspheres -c'') :: In color index mode, GLXSpheres
-	will draw the spheres using an 8-bit color map and will change the color map
-	periodically.
 
 	Overlay rendering (''glxspheres -o'') :: This renders text, a moving
 	crosshair cursor, and a block of pixels to an 8-bit transparent overlay while

@@ -104,26 +104,6 @@
 		glViewport;
 		glDrawBuffer;
 		glPopAttrib;
-		glReadPixels;
-		glDrawPixels;
-		glIndexd;
-		glIndexf;
-		glIndexi;
-		glIndexs;
-		glIndexub;
-		glIndexdv;
-		glIndexfv;
-		glIndexiv;
-		glIndexsv;
-		glIndexubv;
-		glClearIndex;
-		glGetDoublev;
-		glGetFloatv;
-		glGetIntegerv;
-		glMaterialfv;
-		glMaterialiv;
-		glPixelTransferf;
-		glPixelTransferi;
 
 		/* X11 */
 		XCheckMaskEvent;

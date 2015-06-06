@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014 D. R. Commander
+ * Copyright (C)2011, 2013-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -59,8 +59,9 @@ enum { GRAY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 
 Display *dpy=NULL;  Window win=0, olWin=0;
 GLXContext ctx=0, olCtx=0;
-int useStereo=0, useOverlay=0, useCI=0, useImm=0, interactive=0, olDB=1,
+int useStereo=0, useOverlay=0, useDC=0, useImm=0, interactive=0, olDB=1,
 	loColor=0, maxFrames=0, totalFrames=0, directCtx=True;
+int rshift=0, gshift=0, bshift=0;
 double benchTime=DEFBENCHTIME;
 int nColors=0, nOlColors, colorScheme=GRAY;
 Colormap colormap=0, olColormap=0;
@@ -86,7 +87,7 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 	for(i=0; i<nColors; i++)
 	{
 		xc[i].flags=DoRed | DoGreen | DoBlue;
-		xc[i].pixel=i;
+		xc[i].pixel=(cmap==olColormap)? i:(i<<rshift) | (i<<gshift) | (i<<bshift);
 		xc[i].red=xc[i].green=xc[i].blue=0;
 		if(scheme==GRAY || scheme==RED || scheme==YELLOW || scheme==MAGENTA)
 			xc[i].red=(i*(256/nColors))<<8;
@@ -120,12 +121,12 @@ void reshape(int newWidth, int newHeight)
 
 void setSphereColor(GLfloat color)
 {
-	if(useCI)
+	if(useDC)
 	{
-		GLfloat index=color*(GLfloat)(nColors-1);
-		GLfloat matIndexes[]={ index*0.3, index*0.8, index };
-		glIndexf(index);
-		glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, matIndexes);
+		GLfloat mat[]={ color, color, color };
+		glColor3f(color, color, color);
+		glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat);
 	}
 	else
 	{
@@ -297,7 +298,7 @@ int display(int advance)
 
 		if(!loColor)
 		{
-			if(useCI)
+			if(useDC)
 			{
 				glMaterialf(GL_FRONT, GL_SHININESS, 50.);
 			}
@@ -346,8 +347,8 @@ int display(int advance)
 		z-=0.5;
 		if(z<-29.)
 		{
-			if(useCI || useOverlay) colorScheme=(colorScheme+1)%NSCHEMES;
-			if(useCI) _catch(setColorScheme(colormap, nColors, colorScheme));
+			if(useDC || useOverlay) colorScheme=(colorScheme+1)%NSCHEMES;
+			if(useDC) _catch(setColorScheme(colormap, nColors, colorScheme));
 			if(useOverlay)
 				_catch(setColorScheme(olColormap, nOlColors, colorScheme));
 			z=-3.5;
@@ -376,7 +377,7 @@ int display(int advance)
 	glPushAttrib(GL_LIST_BIT);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	if(useOverlay || useCI) glIndexf(254.);
+	if(useOverlay || useDC) glColor3f(254., 254., 254.);
 	else glColor3f(1., 1., 1.);
 	if(useOverlay) glRasterPos3f(-0.95, -0.95, 0.);
 	else
@@ -485,7 +486,7 @@ void usage(char **argv)
 {
 	printf("\nUSAGE: %s [options]\n\n", argv[0]);
 	printf("Options:\n");
-	printf("-c = Use color index rendering (default is RGB)\n");
+	printf("-dc = Use DirectColor rendering (default is TrueColor)\n");
 	printf("-fs = Full-screen mode\n");
 	printf("-i = Interactive mode.  Frames advance in response to mouse movement\n");
 	printf("-l = Use fewer than 24 colors (to force non-JPEG encoding in TurboVNC)\n");
@@ -513,11 +514,9 @@ int main(int argc, char **argv)
 {
 	int i, useAlpha=0;
 	XVisualInfo *v=NULL;
-	int rgbAttribs[]={ GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER, None, None, None,
-		None };
-	int ciAttribs[]={ GLX_BUFFER_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
-		None };
+	int rgbAttribs[]={ GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
+		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
+		1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, None, None, None };
 	int olAttribs[]={ GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
 		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
 	XSetWindowAttributes swa;  Window root;
@@ -528,7 +527,10 @@ int main(int argc, char **argv)
 	{
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
-		if(!strnicmp(argv[i], "-c", 2)) useCI=1;
+		if(!strnicmp(argv[i], "-dc", 3))
+		{
+			useDC=1;  rgbAttribs[15]=GLX_DIRECT_COLOR;
+		}
 		if(!strnicmp(argv[i], "-ic", 3)) directCtx=False;
 		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
 		if(!strnicmp(argv[i], "-l", 2)) loColor=1;
@@ -569,7 +571,7 @@ int main(int argc, char **argv)
 		}
 		else if(!strnicmp(argv[i], "-s", 2))
 		{
-			rgbAttribs[10]=GLX_STEREO;
+			rgbAttribs[13]=1;
 			useStereo=1;
 		}
 		if(!strnicmp(argv[i], "-32", 3)) useAlpha=1;
@@ -595,16 +597,8 @@ int main(int argc, char **argv)
 
 	if(useAlpha)
 	{
-		if(rgbAttribs[10]==None)
-		{
-			rgbAttribs[10]=GLX_ALPHA_SIZE;
-			rgbAttribs[11]=8;
-		}
-		else
-		{
-			rgbAttribs[11]=GLX_ALPHA_SIZE;
-			rgbAttribs[12]=8;
-		}
+		rgbAttribs[16]=GLX_ALPHA_SIZE;
+		rgbAttribs[17]=8;
 	}
 
 	pps=slices*stacks;
@@ -619,16 +613,16 @@ int main(int argc, char **argv)
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 	if(screen<0) screen=DefaultScreen(dpy);
 
-	if(useCI)
+	int n=0;
+	GLXFBConfig *c=glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
+	if(!c || n<1)
+		_throw("Could not obtain RGB visual with requested properties");
+	if((v=glXGetVisualFromFBConfig(dpy, c[0]))==NULL)
 	{
-		if((v=glXChooseVisual(dpy, screen, ciAttribs))==NULL)
-			_throw("Could not obtain index visual");
+		XFree(c);
+		_throw("Could not obtain RGB visual with requested properties");
 	}
-	else
-	{
-		if((v=glXChooseVisual(dpy, screen, rgbAttribs))==NULL)
-			_throw("Could not obtain RGB visual with requested properties");
-	}
+	XFree(c);
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useOverlay? "underlay":"window",
 		(int)v->visualid);
 
@@ -636,11 +630,14 @@ int main(int argc, char **argv)
 	swa.border_pixel=0;
 	swa.event_mask=StructureNotifyMask|ExposureMask|KeyPressMask;
 	swa.override_redirect=fullScreen? True:False;
-	if(useCI)
+	if(useDC)
 	{
 		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
 		nColors=np2(v->colormap_size);
 		if(nColors<32) _throw("Color map is not large enough");
+		rshift=0;  while((v->red_mask & (1<<rshift))==0) rshift++;
+		gshift=0;  while((v->green_mask & (1<<gshift))==0) gshift++;
+		bshift=0;  while((v->blue_mask & (1<<bshift))==0) bshift++;
 		_catch(setColorScheme(colormap, nColors, colorScheme));
 	}
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
