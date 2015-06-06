@@ -56,6 +56,13 @@ except that the colormap indices for red, green, and blue can be specified
 separately.)  GLXspheres now includes a DirectColor mode, replacing its
 previous color index mode.
 -------------------------------------------------------------------------------
+[6]
+VirtualGL can now be disabled on a display-by-display basis by specifying a
+list of X displays to exclude (see the documentation for the VGL_EXCLUDE
+environment variable.)  This is useful with multi-GPU systems on which a single
+application may want to access the GPUs directly for parallel rendering
+purposes but use VirtualGL to display the final result.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

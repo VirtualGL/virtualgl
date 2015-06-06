@@ -501,6 +501,18 @@ FUNCDEF2(Bool, glXResetFrameCountNV, Display *, dpy, int, screen);
 FUNCDEF1(int, glXSwapIntervalSGI, int, interval);
 
 
+// GLX_SGIX_fbconfig
+
+FUNCDEF2(GLXFBConfigSGIX, glXGetFBConfigFromVisualSGIX, Display *, dpy,
+	XVisualInfo *, vis);
+
+
+// GLX_SUN_get_transparent_index
+
+FUNCDEF4(int, glXGetTransparentIndexSUN, Display *, dpy, Window, overlay,
+	Window, underlay, long *, transparentIndex);
+
+
 // GL functions
 
 VFUNCDEF0(glFinish);

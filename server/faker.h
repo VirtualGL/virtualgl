@@ -36,7 +36,8 @@ namespace vglfaker
 	#ifdef FAKEXCB
 	extern __thread int fakerLevel;
 	#endif
-	extern __thread bool overlayCurrent;
+	extern bool excludeDisplay(char *name);
+	extern __thread bool excludeCurrent;
 }
 
 #define _dpy3D vglfaker::dpy3D

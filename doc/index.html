@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-06T10:25:20">
+<meta name="date" content="2015-06-06T15:51:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3230,6 +3230,50 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         with) <code>:0.1</code> would cause VirtualGL to redirect all of the 3D 
         rendering from the application to a GPU attached to Screen 1 on X 
         display :0.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_EXCLUDE&nbsp;=&nbsp;</code><em><code>{d1[,d2,d3,...]}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard"><em><code>{d1[,d2,d3,...]}</code></em> = A comma-separated list of X displays for which the VirtualGL interposer should be bypassed</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Image Transports</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">None</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        In certain parallel rendering applications, it may be desirable to 
+        directly access multiple GPUs from within worker threads and to disable 
+        VirtualGL for those threads while leaving VirtualGL enabled for the main 
+        thread, which displays the final rendered result from all of the 
+        workers. <br /><br /> The <code>VGL_EXCLUDE</code> environment variable 
+        specifies a list of X display names (for instance, &ldquo;:0.1&rdquo;) 
+        for which VirtualGL should not interpose any X11, GLX, OpenGL, or XCB 
+        calls.  In other words, VirtualGL treats these displays as 3D X servers 
+        instead of 2D X servers and does not attempt to redirect 3D rendering 
+        away from them.  When an X display connection is opened using 
+        <code>XOpenDisplay()</code>, VirtualGL checks if the display name 
+        appears in the exclude list, and if so, all subsequent X11, GLX, OpenGL, 
+        and XCB calls intended for that display are allowed to pass through 
+        unimpeded.  This variable is re-checked every time 
+        <code>XOpenDisplay()</code> is called, so it can be set dynamically from 
+        within an application.
     </dd>
 </dl>
 

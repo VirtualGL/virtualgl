@@ -13,6 +13,7 @@
  * wxWindows Library License for more details.
  */
 
+#include "DisplayHash.h"
 #include "PixmapHash.h"
 #include "VisualHash.h"
 #include "WindowHash.h"
@@ -77,6 +78,7 @@ int XCloseDisplay(Display *dpy)
 	#endif
 
 	winhash.remove(dpy);
+	dpyhash.remove(dpy);
 	retval=_XCloseDisplay(dpy);
 
 		stoptrace();  closetrace();
@@ -92,6 +94,10 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y)
 {
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
+			dest_y);
 
 	VirtualDrawable *srcVW=NULL;  VirtualDrawable *dstVW=NULL;
 	bool srcWin=false, dstWin=false;
@@ -183,6 +189,10 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	Window win=0;
 	TRY();
 
+	if(dpyhash.find(dpy))
+		return _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
+			border, background);
+
 		opentrace(XCreateSimpleWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
@@ -204,6 +214,10 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 {
 	Window win=0;
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XCreateWindow(dpy, parent, x, y, width, height, border_width,
+			depth, c_class, visual, valuemask, attributes);
 
 		opentrace(XCreateWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
@@ -242,6 +256,9 @@ int XDestroySubwindows(Display *dpy, Window win)
 	int retval=0;
 	TRY();
 
+	if(dpyhash.find(dpy))
+		return _XDestroySubwindows(dpy, win);
+
 		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
 
 	if(dpy && win) DeleteWindow(dpy, win, true);
@@ -258,6 +275,9 @@ int XDestroyWindow(Display *dpy, Window win)
 {
 	int retval=0;
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XDestroyWindow(dpy, win);
 
 		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
@@ -297,6 +317,11 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 {
 	Status ret=0;
 	unsigned int width=0, height=0;
+	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XGetGeometry(dpy, drawable, root, x, y, width_return,
+			height_return, border_width, depth);
 
 		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
 
@@ -320,6 +345,8 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 	if(width_return) *width_return=width;
 	if(height_return) *height_return=height;
+
+	CATCH();
 	return ret;
 }
 
@@ -333,6 +360,10 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	int format)
 {
 	XImage *xi=NULL;
+	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
 		opentrace(XGetImage);  prargd(dpy);  prargx(drawable);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
@@ -345,6 +376,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 
 		stoptrace();  closetrace();
 
+	CATCH();
 	return xi;
 }
 
@@ -358,9 +390,8 @@ char **XListExtensions(Display *dpy, int *next)
 
 	TRY();
 
-	// Prevent recursion
-	if(is3D(dpy)) return _XListExtensions(dpy, next);
-	////////////////////
+	if(is3D(dpy) || dpyhash.find(dpy))
+		return _XListExtensions(dpy, next);
 
 		opentrace(XListExtensions);  prargd(dpy);  starttrace();
 
@@ -424,6 +455,8 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	vglfaker::init();
 	dpy=_XOpenDisplay(name);
+	if(dpy && vglfaker::excludeDisplay(DisplayString(dpy)))
+		dpyhash.add(dpy);
 	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
 
 		stoptrace();  prargd(dpy);  closetrace();
@@ -440,10 +473,8 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval=True;
 
-	// Prevent recursion
-	if(is3D(dpy))
+	if(is3D(dpy) || dpyhash.find(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
-	////////////////////
 
 		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
 
@@ -464,8 +495,14 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 
 char *XServerVendor(Display *dpy)
 {
-	if(strlen(fconfig.vendor)>0) return fconfig.vendor;
+	TRY();
+
+	if(strlen(fconfig.vendor)>0 && !dpyhash.find(dpy))
+		return fconfig.vendor;
 	else return _XServerVendor(dpy);
+
+	CATCH();
+	return NULL;
 }
 
 
@@ -518,8 +555,11 @@ Bool XCheckMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	Bool retval=0;
 	TRY();
-	if((retval=_XCheckMaskEvent(dpy, event_mask, xe))==True)
+
+	if((retval=_XCheckMaskEvent(dpy, event_mask, xe))==True
+		&& !dpyhash.find(dpy))
 		handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -529,8 +569,11 @@ Bool XCheckTypedEvent(Display *dpy, int event_type, XEvent *xe)
 {
 	Bool retval=0;
 	TRY();
-	if((retval=_XCheckTypedEvent(dpy, event_type, xe))==True)
+
+	if((retval=_XCheckTypedEvent(dpy, event_type, xe))==True
+		&& !dpyhash.find(dpy))
 		handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -541,8 +584,11 @@ Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type,
 {
 	Bool retval=0;
 	TRY();
-	if((retval=_XCheckTypedWindowEvent(dpy, win, event_type, xe))==True)
+
+	if((retval=_XCheckTypedWindowEvent(dpy, win, event_type, xe))==True
+		&& !dpyhash.find(dpy))
 		handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -552,8 +598,11 @@ Bool XCheckWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 {
 	Bool retval=0;
 	TRY();
-	if((retval=_XCheckWindowEvent(dpy, win, event_mask, xe))==True)
+
+	if((retval=_XCheckWindowEvent(dpy, win, event_mask, xe))==True
+		&& !dpyhash.find(dpy))
 		handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -564,6 +613,9 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 {
 	int retval=0;
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XConfigureWindow(dpy, win, value_mask, values);
 
 		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
 		if(values && (value_mask&CWWidth)) { prargi(values->width); }
@@ -587,8 +639,10 @@ int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
 	int retval=0;
 	TRY();
+
 	retval=_XMaskEvent(dpy, event_mask, xe);
-	handleEvent(dpy, xe);
+	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -599,6 +653,9 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 {
 	int retval=0;
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
@@ -618,8 +675,10 @@ int XNextEvent(Display *dpy, XEvent *xe)
 {
 	int retval=0;
 	TRY();
+
 	retval=_XNextEvent(dpy, xe);
-	handleEvent(dpy, xe);
+	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }
@@ -630,6 +689,9 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 {
 	int retval=0;
 	TRY();
+
+	if(dpyhash.find(dpy))
+		return _XResizeWindow(dpy, win, width, height);
 
 		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
 		prargi(height);  starttrace();
@@ -649,8 +711,10 @@ int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 {
 	int retval=0;
 	TRY();
+
 	retval=_XWindowEvent(dpy, win, event_mask, xe);
-	handleEvent(dpy, xe);
+	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+
 	CATCH();
 	return retval;
 }

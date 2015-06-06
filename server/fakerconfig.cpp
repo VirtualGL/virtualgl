@@ -328,6 +328,7 @@ void fconfig_reloadenv(void)
 		if(drawable>=0 && (!fconfig_envset || fconfig_env.drawable!=drawable))
 			fconfig.drawable=fconfig_env.drawable=drawable;
 	}
+	fetchenv_str("VGL_EXCLUDE", excludeddpys);
 	#ifdef FAKEXCB
 	fetchenv_bool("VGL_FAKEXCB", fakeXCB);
 	#endif
@@ -582,6 +583,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfstr(config);
 	prconfstr(defaultfbconfig);
 	prconfint(drawable);
+	prconfstr(excludeddpys);
 	prconfdbl(fps);
 	prconfdbl(flushdelay);
 	prconfint(forcealpha);

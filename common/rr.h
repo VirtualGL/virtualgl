@@ -201,6 +201,7 @@ typedef struct _FakerConfig
   char xcbglxlib[MAXSTR];
   char xcbkeysymslib[MAXSTR];
   char xcbx11lib[MAXSTR];
+  char excludeddpys[MAXSTR];
 } FakerConfig;
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)

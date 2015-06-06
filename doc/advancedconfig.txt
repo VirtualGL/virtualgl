@@ -169,6 +169,30 @@ Each method of configuration takes precedence over the previous method:
 	VirtualGL to redirect all of the 3D rendering from the application to a GPU
 	attached to Screen 1 on X display :0.
 
+| Environment Variable | ''VGL_EXCLUDE = ''__''{d1[,d2,d3,...]}''__ |
+| Summary | __''{d1[,d2,d3,...]}''__ = A comma-separated list of X \
+	displays for which the VirtualGL interposer should be bypassed  |
+| Image Transports | All |
+| Default Value | None |
+#OPT: hiCol=first
+
+	Description :: In certain parallel rendering applications, it may be
+	desirable to directly access multiple GPUs from within worker threads and
+	to disable VirtualGL for those threads while leaving VirtualGL enabled for
+	the main thread, which displays the final rendered result from all of the
+	workers.
+	{nl}{nl}
+	The ''VGL_EXCLUDE'' environment variable specifies a list of X display
+	names (for instance, ":0.1") for which VirtualGL should not interpose any
+	X11, GLX, OpenGL, or XCB calls.  In other words, VirtualGL treats these
+	displays as 3D X servers instead of 2D X servers and does not attempt to
+	redirect 3D rendering away from them.  When an X display connection is opened
+	using ''XOpenDisplay()'', VirtualGL checks if the display name appears in the
+	exclude list, and if so, all subsequent X11, GLX, OpenGL, and XCB calls
+	intended for that display are allowed to pass through unimpeded.  This
+	variable is re-checked every time ''XOpenDisplay()'' is called, so it can be
+	set dynamically from within an application.
+
 | Environment Variable | ''VGL_FAKEXCB = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-xcb'' / ''+xcb'' |
 | Summary | Disable/enable XCB interposer |

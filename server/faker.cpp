@@ -17,6 +17,7 @@
 #include "Mutex.h"
 #include "ConfigHash.h"
 #include "ContextHash.h"
+#include "DisplayHash.h"
 #include "GLXDrawableHash.h"
 #include "PixmapHash.h"
 #include "ReverseConfigHash.h"
@@ -40,7 +41,7 @@ int traceLevel=0;
 #ifdef FAKEXCB
 __thread int fakerLevel=0;
 #endif
-__thread bool overlayCurrent=false;
+__thread bool excludeCurrent=false;
 
 
 static void cleanup(void)
@@ -52,6 +53,7 @@ static void cleanup(void)
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
 	if(WindowHash::isAlloc()) winhash.kill();
+	if(DisplayHash::isAlloc()) dpyhash.kill();
 	unloadSymbols();
 }
 
@@ -140,6 +142,25 @@ void init(void)
 			safeExit(1);
 		}
 	}
+}
+
+
+bool excludeDisplay(char *name)
+{
+	fconfig_reloadenv();
+
+	char *dpyList=strdup(fconfig.excludeddpys);
+	char *excluded=strtok(dpyList, " \t,");
+	while(excluded)
+	{
+		if(!strcasecmp(name, excluded))
+		{
+			free(dpyList);  return true;
+		}
+		excluded=strtok(NULL, " \t,");
+	}
+	free(dpyList);
+	return false;
 }
 
 }  // namespace
