@@ -455,9 +455,13 @@ Display *XOpenDisplay(_Xconst char* name)
 
 	vglfaker::init();
 	dpy=_XOpenDisplay(name);
-	if(dpy && vglfaker::excludeDisplay(DisplayString(dpy)))
-		dpyhash.add(dpy);
-	if(dpy && strlen(fconfig.vendor)>0) ServerVendor(dpy)=strdup(fconfig.vendor);
+	if(dpy)
+	{
+		if(vglfaker::excludeDisplay(DisplayString(dpy)))
+			dpyhash.add(dpy);
+		else if(strlen(fconfig.vendor)>0)
+			ServerVendor(dpy)=strdup(fconfig.vendor);
+	}
 
 		stoptrace();  prargd(dpy);  closetrace();
 
