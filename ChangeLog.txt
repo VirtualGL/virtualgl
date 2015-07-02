@@ -37,8 +37,8 @@ applications as well.
 [6]
 Fixed an issue that caused certain 3D applications (observed with CAESES/FFW,
 although others were possibly affected as well) to abort with
-"ERROR: in TempContext-- Could not bind OpenGL context to window (window
-may may have disappeared)".  When the 3D application called glXChooseVisual(),
+"ERROR: in TempContext-- Could not bind OpenGL context to window (window may
+have disappeared)".  When the 3D application called glXChooseVisual(),
 VirtualGL was choosing a corresponding FB config with
 GLX_DRAWABLE_TYPE=GLX_PBUFFER_BIT (assuming that VGL_DRAWABLE=pbuffer, which is
 the default.)  This is incorrect, however, because regardless of the value of
