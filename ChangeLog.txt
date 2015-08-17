@@ -63,6 +63,12 @@ environment variable.)  This is useful with multi-GPU systems on which a single
 application may want to access the GPUs directly for parallel rendering
 purposes but use VirtualGL to display the final result.
 -------------------------------------------------------------------------------
+[7]
+The vglconnect script now accepts an argument of -e {command}, which can be
+used to specify a remote command to run.  This is useful for situations in
+which it is necessary to start a remote process non-interactively with
+vglconnect when using the -s or -x options.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
