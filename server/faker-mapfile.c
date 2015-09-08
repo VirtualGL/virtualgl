@@ -133,7 +133,7 @@
 		#endif
 		XWindowEvent;
 
-		__XCopyArea;
+		XCopyArea_FBX;
 
 		_vgl_dlopen;
 

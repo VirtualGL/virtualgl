@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013 D. R. Commander
+ * Copyright (C)2010-2013, 2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -84,14 +84,11 @@ static char *lastError="No error";
 
 #ifdef INFAKER
 
-typedef int (*_XCopyAreaType)(Display *, Drawable, Drawable, GC, int, int,
+extern int XCopyArea_FBX(Display *, Drawable, Drawable, GC, int, int,
 	unsigned int, unsigned int, int, int);
-extern _XCopyAreaType __XCopyArea;
 
-#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y) { \
-	if(!__XCopyArea) _throw("[FBX] ERROR: XCopyArea symbol not loaded"); \
-	__XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y); \
-}
+#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y)  \
+	XCopyArea_FBX(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);  \
 
 #endif
 

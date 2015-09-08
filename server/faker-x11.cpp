@@ -177,6 +177,16 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	return 0;
 }
 
+// This is provided for the benefit of the FBX library, which needs to call the
+// "real" XCopyArea() function from within the faker in order to implement the
+// X11 Transport.
+int XCopyArea_FBX(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
+	int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y)
+{
+	return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
+		dest_y);
+}
+
 
 // When a window is created, add it to the hash.  A VirtualWin instance does not
 // get created and hashed to the window until/unless the window is made
