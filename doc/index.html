@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-06T15:51:09">
+<meta name="date" content="2015-10-02T11:46:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2203,12 +2203,6 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_ALLOWINDIRECT</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code></td>
     <td class="standard">Mathematica 7 will not draw the axis numbers on 3D charts correctly unless it is allowed to create an indirect OpenGL context.  See Section <a href="#VGL_ALLOWINDIRECT" class="ref">19.1</a> for further information.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">Qt 5 Applications</td>
-    <td class="standard">Linux</td>
-    <td class="standard">Build and install VirtualGL from source, adding <code>-DVGL_FAKEXCB=1</code> to the CMake command line.  Set the <code>VGL_FAKEXCB</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code>, or pass an argument of <code>+xcb</code> to <code>vglrun</code>.</td>
-    <td class="standard">Although Qt 5 uses GLX to interface between X11 and OpenGL, it uses XCB instead of Xlib to perform all other X11-related functions. Thus, VirtualGL has to interpose enough of the XCB API to allow it to intercept window resize events and to make Qt 5 believe that a GLX extension is present, even when the 2D X server doesn&rsquo;t support GLX. Because XCB is only available on newer platforms, this feature is not built into the &ldquo;official&rdquo; VirtualGL binary packages.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Tecplot 360 2011 and earlier</td>

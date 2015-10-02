@@ -128,19 +128,6 @@
 		unless it is allowed to create an indirect OpenGL context.  See \
 		{ref prefix="Section ": VGL_ALLOWINDIRECT} for further information. \
 	|
-| Qt 5 Applications | Linux \
-	| Build and install VirtualGL from source, adding ''-DVGL_FAKEXCB=1'' to \
-		the CMake command line.  Set the ''VGL_FAKEXCB'' environment variable to \
-		''1'' prior to launching the application with ''vglrun'', or pass an \
-		argument of ''+xcb'' to ''vglrun''. \
-	| Although Qt 5 uses GLX to interface between X11 and OpenGL, it \
-		uses XCB instead of Xlib to perform all other X11-related functions. \
-		Thus, VirtualGL has to interpose enough of the XCB API to allow it to \
-		intercept window resize events and to make Qt 5 believe that a GLX \
-		extension is present, even when the 2D X server doesn't support GLX. \
-		Because XCB is only available on newer platforms, this feature is not \
-		built into the "official" VirtualGL binary packages. \
-	|
 | Tecplot 360 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \
