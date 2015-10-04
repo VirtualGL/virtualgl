@@ -69,6 +69,12 @@ used to specify a remote command to run.  This is useful for situations in
 which it is necessary to start a remote process non-interactively with
 vglconnect when using the -s or -x options.
 -------------------------------------------------------------------------------
+[8]
+The glXCreateWindow() function no longer fails when passed the handle of an X
+window that was created in a different process or using XCB.  This specifically
+fixes issues encountered when attempting to run VLC in VirtualGL, but other
+applications may have been affected as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

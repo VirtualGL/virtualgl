@@ -845,7 +845,18 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		starttrace();
 
 	XSync(dpy, False);
-	_errifnot(vw=winhash.initVW(dpy, win, config));
+	vw=winhash.initVW(dpy, win, config);
+	if(!vw && !glxdhash.getCurrentDisplay(win))
+	{
+		// Apparently win was created in another process or using XCB.
+		if(!is3D(dpy))
+		{
+			winhash.add(dpy, win);
+			vw=winhash.initVW(dpy, win, config);
+		}
+	}
+	if(!vw)
+		_throw("Cannot create virtual window for specified X window");
 
 		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }  closetrace();
 
