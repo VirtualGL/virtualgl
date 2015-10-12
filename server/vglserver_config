@@ -432,7 +432,7 @@ configdev() {
 			if [ "$FBDEVVGLUSERSONLY" = "1" ]; then
 				echo "KERNEL==\"card[0-9]\", MODE=\"0660\", OWNER=\"root\", GROUP=\"vglusers\"" >/etc/udev/rules.d/99-virtualgl-dri.rules
 			else
-				echo "KERNEL==\"card[0-9]\", MODE=\"0666\", OWNER=\"root\", GROUP=\"rot\"" >/etc/udev/rules.d/99-virtualgl-dri.rules
+				echo "KERNEL==\"card[0-9]\", MODE=\"0666\", OWNER=\"root\", GROUP=\"root\"" >/etc/udev/rules.d/99-virtualgl-dri.rules
 			fi
 		fi
 		if [ -d /etc/X11/xorg.conf.d ]; then
