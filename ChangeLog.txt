@@ -81,6 +81,19 @@ vglserver_config.  More specifically, the typo caused incorrect group
 permissions to be assigned to the framebuffer device when not using the
 vglusers group.
 -------------------------------------------------------------------------------
+[10]
+Certain applications (known to be the case with recent versions of Firefox with
+off-main-thread compositing enabled) would crash with the following error when
+running in VirtualGL:
+
+[VGL] ERROR: in readPixels--
+[VGL]    XXX: VirtualDrawable instance has not been fully initialized
+
+This was due to the application creating a GLX Pixmap and then calling
+XCopyArea() on the Pixmap prior to performing any OpenGL rendering with it.
+In these cases, VirtualGL now treats the Pixmap as a 2D Pixmap until the
+application has performed any OpenGL rendering with it.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

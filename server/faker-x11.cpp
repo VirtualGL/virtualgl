@@ -114,11 +114,23 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	{
 		srcVW=(VirtualDrawable *)winhash.find(dpy, src);
 		if(srcVW) srcWin=true;
-	};
+	}
+	if(srcVW && !srcVW->isInit())
+	{
+		// If the 3D drawable hasn't been made current yet, then its contents will
+		// be identical to the corresponding 2D drawable
+		srcVW=NULL;
+		srcWin=false;
+	}
 	if(!(dstVW=(VirtualDrawable *)pmhash.find(dpy, dst)))
 	{
 		dstVW=(VirtualDrawable *)winhash.find(dpy, dst);
 		if(dstVW) dstWin=true;
+	}
+	if(dstVW && !dstVW->isInit())
+	{
+		dstVW=NULL;
+		dstWin=false;
 	}
 
 	// GLX (3D) Pixmap --> non-GLX (2D) drawable
