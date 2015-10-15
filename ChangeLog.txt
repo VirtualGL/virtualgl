@@ -94,6 +94,11 @@ XCopyArea() on the Pixmap prior to performing any OpenGL rendering with it.
 In these cases, VirtualGL now treats the Pixmap as a 2D Pixmap until the
 application has performed any OpenGL rendering with it.
 -------------------------------------------------------------------------------
+[11]
+glxinfo has been extended to report whether a particular GLX FB config supports
+GLX_BIND_TO_TEXTURE_RGB_EXT and GLX_BIND_TO_TEXTURE_RGBA_EXT, i.e. whether the
+FB config can be used with GLX_EXT_texture_from_pixmap.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

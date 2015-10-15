@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1999-2006   Brian Paul   All Rights Reserved.
  * Copyright (C) 2005-2007   Sun Microsystems, Inc.   All Rights Reserved.
- * Copyright (C) 2011, 2013  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011, 2013, 2015  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -113,6 +113,7 @@ struct visual_attribs
    int floatComponents;
    int packedfloatComponents;
    int srgb;
+   int bindToTextureRGB, bindToTextureRGBA;
 };
 
 
@@ -1353,6 +1354,15 @@ get_fbconfig_attribs(Display *dpy, int scrnum, GLXFBConfig fbconfig,
       glXGetFBConfigAttrib(dpy, fbconfig, GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, &attribs->srgb);
    }
 #endif
+
+#if defined(GLX_EXT_texture_from_pixmap)
+   if (ext && strstr(ext, "GLX_EXT_texture_from_pixmap")) {
+      glXGetFBConfigAttrib(dpy, fbconfig, GLX_BIND_TO_TEXTURE_RGB_EXT,
+                           &attribs->bindToTextureRGB);
+      glXGetFBConfigAttrib(dpy, fbconfig, GLX_BIND_TO_TEXTURE_RGBA_EXT,
+                           &attribs->bindToTextureRGBA);
+   }
+#endif
    return True;
 }
 
@@ -1408,6 +1418,16 @@ print_visual_attribs_verbose(const struct visual_attribs *attribs,
    else if (attribs->transparentType == GLX_TRANSPARENT_INDEX) {
      printf("    Transparent index=%d\n",attribs->transparentIndexValue);
    }
+#if defined(GLX_EXT_texture_from_pixmap)
+   if (attribs->bindToTextureRGB || attribs->bindToTextureRGBA) {
+      printf("    Bind to texture:");
+      if (attribs->bindToTextureRGB)
+         printf(" RGB");
+      if (attribs->bindToTextureRGBA)
+         printf(" RGBA");
+      printf("\n");
+   }
+#endif
 }
 
 
@@ -1458,20 +1478,27 @@ print_visual_attribs_short(const struct visual_attribs *attribs,
           caveat
           );
 
-  if (fbconfigs) {
-     printf(" ");
-     if (attribs->drawableType & GLX_PBUFFER_BIT)
-        printf("P");
-     else
-        printf(".");
-     if (attribs->drawableType & GLX_PIXMAP_BIT)
-        printf("X");
-     else
-        printf(".");
-     if (attribs->drawableType & GLX_WINDOW_BIT)
-        printf("W");
-     else
-        printf(".");
+   if (fbconfigs) {
+      printf(" ");
+      if (attribs->drawableType & GLX_PBUFFER_BIT)
+         printf("P");
+      else
+         printf(".");
+      if (attribs->drawableType & GLX_PIXMAP_BIT) {
+#if defined(GLX_EXT_texture_from_pixmap)
+         if (attribs->bindToTextureRGBA)
+            printf("A");
+         else if (attribs->bindToTextureRGB)
+            printf("R");
+         else
+#endif
+         printf("X");
+      } else
+         printf(".");
+      if (attribs->drawableType & GLX_WINDOW_BIT)
+         printf("W");
+      else
+         printf(".");
   }
   printf("\n");
 }
