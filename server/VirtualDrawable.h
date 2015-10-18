@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2014 D. R. Commander
+ * Copyright (C)2009-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -96,6 +96,14 @@ namespace vglserver
 			X11Trans *x11Trans;
 			vglcommon::Profiler profReadback;
 			int autotestFrameCount;
+
+			#ifdef GL_VERSION_1_5
+			GLuint pbo;
+			#endif
+			int numSync, numFrames, lastFormat;
+			bool usePBO;
+			bool alreadyPrinted, alreadyWarned;
+			const char *ext;
 	};
 }
 

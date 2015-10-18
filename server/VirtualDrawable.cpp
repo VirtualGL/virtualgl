@@ -200,6 +200,14 @@ VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 	config=0;
 	ctx=0;
 	direct=-1;
+	#ifdef GL_VERSION_1_5
+	pbo=0;
+	#endif
+	numSync=numFrames=0;
+	lastFormat=-1;
+	usePBO=(fconfig.readback==RRREAD_PBO);
+	alreadyPrinted=alreadyWarned=false;
+	ext=NULL;
 }
 
 
@@ -320,14 +328,7 @@ static const char *formatString(int format)
 void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	GLint height, GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
 {
-	#ifdef GL_VERSION_1_5
-	static GLuint pbo=0;
-	#endif
 	double t0=0.0, tRead, tTotal;
-	static int numSync=0, numFrames=0, lastFormat=-1;
-	static bool usePBO=(fconfig.readback==RRREAD_PBO);
-	static bool alreadyPrinted=false, alreadyWarned=false;
-	static const char *ext=NULL;
 
 	// Whenever the readback format changes (perhaps due to switching
 	// compression or transports), then reset the PBO synchronicity detector

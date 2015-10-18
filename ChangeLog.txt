@@ -115,6 +115,12 @@ Fixed another deadlock that occurred when running Ansys DesignModeler v16.1 and
 later, or when running VirtualGL in a Parallels Desktop guest, when VirtualGL
 was built with VGL_FAKEXCB=1 (which is the default.)
 -------------------------------------------------------------------------------
+[15]
+Fixed a thread safety issue with PBO readback.  The same PBO was being shared
+among all OpenGL windows, which was suspected-- but not yet confirmed-- to have
+caused a "Could not set PBO size" error with MetaPost.  This issue may have
+affected other multi-threaded applications as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
