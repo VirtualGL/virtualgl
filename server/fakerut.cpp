@@ -807,7 +807,7 @@ void configVsVisual(Display *dpy, GLXFBConfig config, XVisualInfo *vis)
 		_error("Visual ID mismatch");
 	GET_CFG_ATTRIB(config, GLX_RENDER_TYPE, ctemp);
 	GET_VIS_ATTRIB(vis, GLX_RGBA, vtemp);
-	if(ctemp&GLX_RGBA_BIT!=0 && vtemp!=1)
+	if((ctemp&GLX_RGBA_BIT)!=0 && vtemp!=1)
 		_error("GLX_RGBA mismatch w/ X visual");
 	COMPARE_ATTRIB(config, vis, GLX_BUFFER_SIZE, bs);
 	COMPARE_ATTRIB(config, vis, GLX_LEVEL, ctemp);
@@ -1051,7 +1051,7 @@ int visTest(void)
 				int renderType;
 				fbcid=cfgid(dpy, configs[i]);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				if(renderType&GLX_RGBA_BIT==0)
+				if((renderType&GLX_RGBA_BIT)==0)
 					continue;
 				if(!(visuals[i]=glXGetVisualFromFBConfig(dpy, configs[i])))
 				{
@@ -1074,7 +1074,7 @@ int visTest(void)
 				int renderType;
 				fbcid=cfgid(dpy, configs[i]);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				if(renderType&GLX_RGBA_BIT==0)
+				if((renderType&GLX_RGBA_BIT)==0)
 					continue;
 				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(vis1=glXGetVisualFromFBConfig(dpy, configs[i])))
