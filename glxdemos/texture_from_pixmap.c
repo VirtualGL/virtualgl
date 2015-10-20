@@ -43,11 +43,11 @@
 
 static float top, bottom;
 
-typedef void (*PFNGLXBINDTEXIMAGEEXTPROC)(Display *, GLXDrawable, int,
+typedef void (*glXBindTexImageEXT_type)(Display *, GLXDrawable, int,
 	const int *);
-typedef void (*PFNGLXRELEASETEXIMAGEEXTPROC)(Display *, GLXDrawable, int);
-static PFNGLXBINDTEXIMAGEEXTPROC glXBindTexImageEXT_func = NULL;
-static PFNGLXRELEASETEXIMAGEEXTPROC glXReleaseTexImageEXT_func = NULL;
+typedef void (*glXReleaseTexImageEXT_type)(Display *, GLXDrawable, int);
+static glXBindTexImageEXT_type glXBindTexImageEXT_func = NULL;
+static glXReleaseTexImageEXT_type glXReleaseTexImageEXT_func = NULL;
 
 
 static Display *
