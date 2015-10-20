@@ -110,7 +110,7 @@ static inline int isDead(void)
 			vglout.print("=0x%.4x", a[++__an]);  \
 		vglout.print(" ");  \
 	}  vglout.print("] ");}
-#define prargal13(a) if(a) {  \
+#define prargal13(a) if(a!=NULL) {  \
 	vglout.print(#a"=[");  \
 	for(int __an=0; a[__an]!=None; __an+=2) {  \
 		vglout.print("0x%.4x=0x%.4x ", a[__an], a[__an+1]);  \
