@@ -165,6 +165,7 @@ typedef struct _FakerConfig
   unsigned short gamma_lut16[65536];
   char glflushtrigger;
   char gllib[MAXSTR];
+  char glxvendor[MAXSTR];
   char gui;
   unsigned int guikey;
   char guikeyseq[MAXSTR];
