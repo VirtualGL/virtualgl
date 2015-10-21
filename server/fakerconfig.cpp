@@ -365,6 +365,7 @@ void fconfig_reloadenv(void)
 	}
 	fetchenv_bool("VGL_GLFLUSHTRIGGER", glflushtrigger);
 	fetchenv_str("VGL_GLLIB", gllib);
+	fetchenv_str("VGL_GLXVENDOR", glxvendor);
 	fetchenv_str("VGL_GUI", guikeyseq);
 	if(strlen(fconfig.guikeyseq)>0)
 	{
@@ -590,6 +591,7 @@ void fconfig_print(FakerConfig &fc)
 	prconfdbl(gamma);
 	prconfint(glflushtrigger);
 	prconfstr(gllib);
+	prconfstr(glxvendor);
 	prconfint(gui);
 	prconfint(guikey);
 	prconfstr(guikeyseq);

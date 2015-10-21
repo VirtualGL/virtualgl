@@ -1031,7 +1031,11 @@ const char *glXGetClientString(Display *dpy, int name)
 
 	if(name==GLX_EXTENSIONS) return getGLXExtensions();
 	else if(name==GLX_VERSION) return "1.4";
-	else if(name==GLX_VENDOR) return __APPNAME;
+	else if(name==GLX_VENDOR)
+	{
+		if(strlen(fconfig.glxvendor)>0) return fconfig.glxvendor;
+		else return __APPNAME;
+	}
 
 	CATCH();
 	return NULL;
@@ -1986,7 +1990,11 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 
 	if(name==GLX_EXTENSIONS) return getGLXExtensions();
 	else if(name==GLX_VERSION) return "1.4";
-	else if(name==GLX_VENDOR) return __APPNAME;
+	else if(name==GLX_VENDOR)
+	{
+		if(strlen(fconfig.glxvendor)>0) return fconfig.glxvendor;
+		else return __APPNAME;
+	}
 
 	CATCH();
 	return NULL;
