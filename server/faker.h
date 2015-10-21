@@ -28,7 +28,6 @@
 
 namespace vglfaker
 {
-	extern vglutil::CriticalSection globalMutex;
 	extern Display *dpy3D;
 	extern void safeExit(int);
 	extern int deadYet;
@@ -71,9 +70,9 @@ static inline int drawingToRight(void)
 static inline int isDead(void)
 {
 	int retval=0;
-	vglfaker::globalMutex.lock(false);
+	globalMutex.lock(false);
 	retval=vglfaker::deadYet;
-	vglfaker::globalMutex.unlock(false);
+	globalMutex.unlock(false);
 	return retval;
 }
 
