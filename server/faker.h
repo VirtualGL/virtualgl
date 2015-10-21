@@ -95,6 +95,8 @@ static inline int isDead(void)
 	a? DisplayString(a):"NULL")
 #define prargs(a) vglout.print("%s=%s ", #a, a?a:"NULL")
 #define prargx(a) vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
+#define prargix(a) vglout.print("%s=%d(0x%.lx) ", #a, (unsigned long)a,  \
+	(unsigned long)a)
 #define prargi(a) vglout.print("%s=%d ", #a, a)
 #define prargf(a) vglout.print("%s=%f ", #a, (double)a)
 #define prargv(a)  \

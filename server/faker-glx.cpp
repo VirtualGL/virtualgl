@@ -1071,7 +1071,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return retval;
 	}
 
-		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargx(attrib);
+		opentrace(glXGetConfig);  prargd(dpy);  prargv(vis);  prargix(attrib);
 		starttrace();
 
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
@@ -1103,7 +1103,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	}
 	else retval=_glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
 
-		stoptrace();  if(value) { prargi(*value); }  else { prargx(value); }
+		stoptrace();  if(value) { prargix(*value); }  else { prargx(value); }
 		closetrace();
 
 	CATCH();
@@ -1201,7 +1201,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	int screen=dpy? DefaultScreen(dpy):0;
 
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
-		prargi(attribute);  starttrace();
+		prargix(attribute);  starttrace();
 
 	if(!dpy || !config || !value)
 	{
@@ -1244,7 +1244,7 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	}
 
 	done:
-		stoptrace();  if(value) { prargi(*value); }  else { prargx(value); }
+		stoptrace();  if(value) { prargix(*value); }  else { prargx(value); }
 		closetrace();
 
 	CATCH();
@@ -1862,12 +1862,12 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 	if(dpyhash.find(dpy) || ctxhash.isOverlay(ctx))
 		return _glXQueryContext(dpy, ctx, attribute, value);
 
-		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargi(attribute);
+		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargix(attribute);
 		starttrace();
 
 	retval=_glXQueryContext(_dpy3D, ctx, attribute, value);
 
-		stoptrace();  if(value) prargi(*value);  closetrace();
+		stoptrace();  if(value) prargix(*value);  closetrace();
 
 	CATCH();
 	return retval;
@@ -1885,11 +1885,11 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
 		opentrace(glXQueryContextInfoEXT);  prargd(dpy);  prargx(ctx);
-		prargi(attribute); starttrace();
+		prargix(attribute); starttrace();
 
 	retval=_glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
 
-		stoptrace();  if(value) prargi(*value);  closetrace();
+		stoptrace();  if(value) prargix(*value);  closetrace();
 
 	CATCH();
 	return retval;
@@ -1912,7 +1912,7 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 	}
 
 		opentrace(glXQueryDrawable);  prargd(dpy);  prargx(draw);
-		prargi(attribute);  starttrace();
+		prargix(attribute);  starttrace();
 
 	// GLX_EXT_swap_control attributes
 	if(attribute==GLX_SWAP_INTERVAL_EXT && value)
@@ -1934,7 +1934,7 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 
 	done:
 		stoptrace();  prargx(ServerDrawable(dpy, draw));
-		if(value) { prargi(*value); }  else { prargx(value); }  closetrace();
+		if(value) { prargix(*value); }  else { prargx(value); }  closetrace();
 
 	CATCH();
 }
