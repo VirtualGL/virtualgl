@@ -19,6 +19,7 @@
 #include "vglutil.h"
 #define GLX_GLXEXT_PROTOTYPES
 #include "ConfigHash.h"
+#include "ConfigHash32.h"
 #include "ContextHash.h"
 #include "GLXDrawableHash.h"
 #include "PixmapHash.h"
@@ -315,6 +316,19 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	if(configs && *nelements)
 	{
 		int nv=0;
+		GLXFBConfig config32=0;
+
+		// If there is a depth-32 GLXFBConfig in the list, find it first.  We may
+		// need it later if any of these GLXFBConfigs is used with
+		// GLX_EXT_texture_from_pixmap.
+		for(int i=0; i<*nelements; i++)
+		{
+			XVisualInfo *vis=_glXGetVisualFromFBConfig(_dpy3D, configs[i]);
+			if(vis->depth==32)
+			{
+				config32=configs[i];  break;
+			}
+		}
 
 		// Get a matching visual from the 2D X server and hash it to every FB
 		// config we just obtained.
@@ -325,6 +339,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			if(vis)
 			{
 				if(vis->depth==32) d=32;
+				else if(config32) cfghash32.add(configs[i], config32);
 				XFree(vis);
 			}
 

@@ -22,6 +22,7 @@
 #include "TempContext.h"
 #include "vglutil.h"
 #include "faker.h"
+#include "ConfigHash32.h"
 
 using namespace vglutil;
 using namespace vglserver;
@@ -98,6 +99,20 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	XVisualInfo *vis=NULL;
 	if((vis=_glXGetVisualFromFBConfig(_dpy3D, config))==NULL)
 		goto bailout;
+	if(vis->depth!=depth && depth==32)
+	{
+		// v325.08 and later of the nVidia drivers require that the depth of the
+		// X11 visual and GLXFBConfig match, hence we need to check whether there
+		// is a similar 32-bit GLXFBConfig available.
+		GLXFBConfig config32=0;
+		if((config32=cfghash32.getConfig32(config))!=0)
+		{
+			XFree(vis);
+			config=config32;
+			if((vis=_glXGetVisualFromFBConfig(_dpy3D, config))==NULL)
+				goto bailout;
+		}
+	}
 	win=create_window(_dpy3D, vis, 1, 1);
 	if(!win) goto bailout;
 	pm=XCreatePixmap(_dpy3D, win, width, height, depth>0? depth:vis->depth);

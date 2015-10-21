@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include "Mutex.h"
 #include "ConfigHash.h"
+#include "ConfigHash32.h"
 #include "ContextHash.h"
 #include "DisplayHash.h"
 #include "GLXDrawableHash.h"
@@ -49,6 +50,7 @@ static void cleanup(void)
 	if(PixmapHash::isAlloc()) pmhash.kill();
 	if(VisualHash::isAlloc()) vishash.kill();
 	if(ConfigHash::isAlloc()) cfghash.kill();
+	if(ConfigHash32::isAlloc()) cfghash32.kill();
 	if(ReverseConfigHash::isAlloc()) rcfghash.kill();
 	if(ContextHash::isAlloc()) ctxhash.kill();
 	if(GLXDrawableHash::isAlloc()) glxdhash.kill();
