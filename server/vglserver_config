@@ -494,7 +494,8 @@ unconfigglx() {
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
 		/usr/share/config/kdm/Xsetup \
-		/usr/local/kde4/share/config/kdm/Xsetup; do
+		/usr/local/kde4/share/config/kdm/Xsetup \
+		/usr/share/sddm/scripts/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			delvglgenkey $file
 		fi
@@ -637,7 +638,8 @@ configglx() {
 		/etc/opt/gnome/gdm/Init/Default \
 		/etc/kde4/kdm/Xsetup \
 		/usr/share/config/kdm/Xsetup \
-		/usr/local/kde4/share/config/kdm/Xsetup; do
+		/usr/local/kde4/share/config/kdm/Xsetup \
+		/usr/share/sddm/scripts/Xsetup; do
 		if [ -f $file -a ! -h $file ]; then
 			addvglgenkey $file
 		fi
