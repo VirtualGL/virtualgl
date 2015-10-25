@@ -99,6 +99,10 @@ glxinfo has been extended to report whether a particular GLX FB config supports
 GLX_BIND_TO_TEXTURE_RGB_EXT and GLX_BIND_TO_TEXTURE_RGBA_EXT, i.e. whether the
 FB config can be used with GLX_EXT_texture_from_pixmap.
 -------------------------------------------------------------------------------
+[12]
+vglserver_config should now work properly with SDDM, if its scripts are
+installed in the standard location (/usr/share/sddm/scripts).
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
