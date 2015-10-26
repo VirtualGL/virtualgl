@@ -46,7 +46,8 @@ namespace vglfaker
 	extern void init(void);
 	extern vglutil::CriticalSection globalMutex;
 	#ifdef FAKEXCB
-	extern __thread int fakerLevel;
+	extern long getFakerLevel(void);
+	extern void setFakerLevel(long v);
 	#endif
 
 	void *loadSymbol(const char *name, bool optional=false);
@@ -79,8 +80,8 @@ namespace vglfaker
 
 
 #ifdef FAKEXCB
-#define DISABLE_FAKEXCB() vglfaker::fakerLevel++;
-#define ENABLE_FAKEXCB() vglfaker::fakerLevel--;
+#define DISABLE_FAKEXCB() vglfaker::setFakerLevel(vglfaker::getFakerLevel()+1);
+#define ENABLE_FAKEXCB()  vglfaker::setFakerLevel(vglfaker::getFakerLevel()-1);
 #else
 #define DISABLE_FAKEXCB()
 #define ENABLE_FAKEXCB()

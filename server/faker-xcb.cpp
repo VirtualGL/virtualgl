@@ -41,7 +41,7 @@ const xcb_query_extension_reply_t *
 	TRY();
 
 	if(ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
-		&& vglfaker::fakerLevel==0
+		&& vglfaker::getFakerLevel()==0
 		&& !dpyhash.find(xcbconnhash.getX11Display(conn)))
 	{
 			opentrace(xcb_get_extension_data);  prargx(conn);
@@ -79,7 +79,7 @@ xcb_glx_query_version_cookie_t
 
 	TRY();
 
-	if(!fconfig.fakeXCB || vglfaker::fakerLevel>0
+	if(!fconfig.fakeXCB || vglfaker::getFakerLevel()>0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
@@ -107,7 +107,7 @@ xcb_glx_query_version_reply_t *
 
 	TRY();
 
-	if(!fconfig.fakeXCB || vglfaker::fakerLevel>0
+	if(!fconfig.fakeXCB || vglfaker::getFakerLevel()>0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
@@ -225,7 +225,7 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 	TRY();
 
 	if((e=_xcb_poll_for_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::fakerLevel==0)
+		&& vglfaker::getFakerLevel()==0)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -241,7 +241,7 @@ xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 	TRY();
 
 	if((e=_xcb_poll_for_queued_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::fakerLevel==0)
+		&& vglfaker::getFakerLevel()==0)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -257,7 +257,7 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 	TRY();
 
 	if((e=_xcb_wait_for_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::fakerLevel==0)
+		&& vglfaker::getFakerLevel()==0)
 		handleXCBEvent(conn, e);
 
 	CATCH();
