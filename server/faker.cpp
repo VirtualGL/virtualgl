@@ -19,6 +19,7 @@
 #include "ContextHash.h"
 #include "DisplayHash.h"
 #include "GLXDrawableHash.h"
+#include "SafeCriticalSection.h"
 #include "PixmapHash.h"
 #include "ReverseConfigHash.h"
 #include "VisualHash.h"
@@ -35,7 +36,6 @@ namespace vglfaker
 {
 
 Display *dpy3D=NULL;
-CriticalSection globalMutex;
 bool deadYet=false;
 int traceLevel=0;
 #ifdef FAKEXCB
@@ -112,7 +112,7 @@ void init(void)
 	static int init=0;
 
 	if(init) return;
-	CriticalSection::SafeLock l(globalMutex);
+	SafeCriticalSection::SafeLock l(globalMutex);
 	if(init) return;
 	init=1;
 
@@ -176,7 +176,7 @@ void *_vgl_dlopen(const char *file, int mode)
 {
 	if(!__dlopen)
 	{
-		CriticalSection::SafeLock l(vglfaker::globalMutex);
+		SafeCriticalSection::SafeLock l(globalMutex);
 		if(!__dlopen)
 		{
 			dlerror();  // Clear error state
