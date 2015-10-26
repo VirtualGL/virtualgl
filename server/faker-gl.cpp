@@ -65,7 +65,7 @@ extern "C" {
 
 void glFinish(void)
 {
-	if(vglfaker::excludeCurrent) { _glFinish();  return; }
+	if(vglfaker::getExcludeCurrent()) { _glFinish();  return; }
 
 	TRY();
 
@@ -83,7 +83,7 @@ void glFlush(void)
 {
 	static double lastTime=-1.;  double thisTime;
 
-	if(vglfaker::excludeCurrent) { _glFlush();  return; }
+	if(vglfaker::getExcludeCurrent()) { _glFlush();  return; }
 
 	TRY();
 
@@ -108,7 +108,7 @@ void glFlush(void)
 
 void glXWaitGL(void)
 {
-	if(vglfaker::excludeCurrent) { _glXWaitGL();  return; }
+	if(vglfaker::getExcludeCurrent()) { _glXWaitGL();  return; }
 
 	TRY();
 
@@ -130,7 +130,7 @@ void glXWaitGL(void)
 
 void glDrawBuffer(GLenum mode)
 {
-	if(vglfaker::excludeCurrent) { _glDrawBuffer(mode);  return; }
+	if(vglfaker::getExcludeCurrent()) { _glDrawBuffer(mode);  return; }
 
 	TRY();
 
@@ -163,7 +163,7 @@ void glDrawBuffer(GLenum mode)
 
 void glPopAttrib(void)
 {
-	if(vglfaker::excludeCurrent) { _glPopAttrib();  return; }
+	if(vglfaker::getExcludeCurrent()) { _glPopAttrib();  return; }
 
 	TRY();
 
@@ -198,7 +198,7 @@ void glPopAttrib(void)
 
 void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
-	if(vglfaker::excludeCurrent) { _glViewport(x, y, width, height);  return; }
+	if(vglfaker::getExcludeCurrent()) { _glViewport(x, y, width, height);  return; }
 
 	TRY();
 
