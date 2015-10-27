@@ -1120,7 +1120,7 @@ Display *glXGetCurrentDisplay(void)
 {
 	Display *dpy=NULL;  VirtualWin *vw=NULL;
 
-	if(vglfaker::excludeCurrent) return _glXGetCurrentDisplay();
+	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDisplay();
 
 	TRY();
 
@@ -1148,7 +1148,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 {
 	VirtualWin *vw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
 
-	if(vglfaker::excludeCurrent) return draw;
+	if(vglfaker::getExcludeCurrent()) return draw;
 
 	TRY();
 
@@ -1166,7 +1166,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 {
 	VirtualWin *vw=NULL;  GLXDrawable read=_glXGetCurrentReadDrawable();
 
-	if(vglfaker::excludeCurrent) return read;
+	if(vglfaker::getExcludeCurrent()) return read;
 
 	TRY();
 
@@ -1637,15 +1637,15 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		// Overlay context.  Hand off to the 2D X server.
 		retval=_glXMakeCurrent(dpy, drawable, ctx);
 		winhash.setOverlay(dpy, drawable);
-		vglfaker::excludeCurrent=true;
+		vglfaker::setExcludeCurrent(true);
 		return retval;
 	}
  	if(dpyhash.find(dpy))
 	{
-		vglfaker::excludeCurrent=true;
+		vglfaker::setExcludeCurrent(true);
 		return _glXMakeCurrent(dpy, drawable, ctx);
 	}
-	vglfaker::excludeCurrent=false;
+	vglfaker::setExcludeCurrent(false);
 
 		opentrace(glXMakeCurrent);  prargd(dpy);  prargx(drawable);  prargx(ctx);
 		starttrace();
@@ -1737,15 +1737,15 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		retval=_glXMakeContextCurrent(dpy, draw, read, ctx);
 		winhash.setOverlay(dpy, draw);
 		winhash.setOverlay(dpy, read);
-		vglfaker::excludeCurrent=true;
+		vglfaker::setExcludeCurrent(true);
 		return retval;
 	}
 	if(dpyhash.find(dpy))
 	{
-		vglfaker::excludeCurrent=true;
+		vglfaker::setExcludeCurrent(true);
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
 	}
-	vglfaker::excludeCurrent=false;
+	vglfaker::setExcludeCurrent(false);
 
 		opentrace(glXMakeContextCurrent);  prargd(dpy);  prargx(draw);
 		prargx(read);  prargx(ctx);  starttrace();
@@ -2276,7 +2276,7 @@ int glXSwapIntervalSGI(int interval)
 {
 	int retval=0;
 
-	if(vglfaker::excludeCurrent) return _glXSwapIntervalSGI(interval);
+	if(vglfaker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
 		opentrace(glXSwapIntervalSGI);  prargi(interval);  starttrace();
 
@@ -2302,7 +2302,7 @@ int glXSwapIntervalSGI(int interval)
 
 void glXUseXFont(Font font, int first, int count, int list_base)
 {
-	if(vglfaker::excludeCurrent)
+	if(vglfaker::getExcludeCurrent())
 	{
 		_glXUseXFont(font, first, count, list_base);  return;
 	}

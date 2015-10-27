@@ -33,10 +33,12 @@ namespace vglfaker
 	extern int deadYet;
 	extern int traceLevel;
 	#ifdef FAKEXCB
-	extern __thread int fakerLevel;
+	extern long getFakerLevel(void);
+	extern void setFakerLevel(long level);
 	#endif
 	extern bool excludeDisplay(char *name);
-	extern __thread bool excludeCurrent;
+	extern bool getExcludeCurrent(void);
+	extern void setExcludeCurrent(bool excludeCurrent);
 }
 
 #define _dpy3D vglfaker::dpy3D

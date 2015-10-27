@@ -25,6 +25,7 @@
 #include "VisualHash.h"
 #include "WindowHash.h"
 #include "fakerconfig.h"
+#include "threadlocal.h"
 #include <dlfcn.h>
 
 
@@ -39,9 +40,9 @@ Display *dpy3D=NULL;
 bool deadYet=false;
 int traceLevel=0;
 #ifdef FAKEXCB
-__thread int fakerLevel=0;
+VGL_THREAD_LOCAL(FakerLevel, long, 0)
 #endif
-__thread bool excludeCurrent=false;
+VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
 
 
 static void cleanup(void)
