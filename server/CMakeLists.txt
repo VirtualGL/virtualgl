@@ -60,6 +60,7 @@ set(FAKER_SOURCES
 	faker-x11.cpp
 	${FAKER_XCB_SOURCES}
 	fakerconfig.cpp
+	GlobalCriticalSection.cpp
 	GLXDrawableHash.cpp
 	glxvisual.cpp
 	PixmapHash.cpp

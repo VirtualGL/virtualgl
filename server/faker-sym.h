@@ -21,6 +21,7 @@
 #define GLX_GLXEXT_PROTOTYPES
 #include "glx.h"
 #include "Log.h"
+#include "GlobalCriticalSection.h"
 #ifdef FAKEXCB
 extern "C" {
 #ifdef SYSXCBHEADERS
@@ -44,7 +45,6 @@ namespace vglfaker
 {
 	extern void safeExit(int);
 	extern void init(void);
-	extern vglutil::CriticalSection globalMutex;
 	#ifdef FAKEXCB
 	extern __thread int fakerLevel;
 	#endif
@@ -57,7 +57,7 @@ namespace vglfaker
 #define CHECKSYM_NONFATAL(s) {  \
 	if(!__##s) {  \
 		vglfaker::init();  \
-		vglutil::CriticalSection::SafeLock l(vglfaker::globalMutex);  \
+		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);  \
 		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s, true);  \
 	}  \
 }
@@ -65,7 +65,7 @@ namespace vglfaker
 #define CHECKSYM(s) {  \
 	if(!__##s) {  \
 		vglfaker::init();  \
-		vglutil::CriticalSection::SafeLock l(vglfaker::globalMutex);  \
+		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);  \
 		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s);  \
 	}  \
 	if(!__##s) vglfaker::safeExit(1);  \

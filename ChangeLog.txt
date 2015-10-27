@@ -103,6 +103,13 @@ FB config can be used with GLX_EXT_texture_from_pixmap.
 vglserver_config should now work properly with SDDM, if its scripts are
 installed in the standard location (/usr/share/sddm/scripts).
 -------------------------------------------------------------------------------
+[13]
+Fixed a deadlock that occurred with applications that use MainWin, or any other
+OpenGL applications that load a shared library whose global constructor calls
+one of the functions VirtualGL interposes.  This was known to affect MATLAB and
+Ansys DesignModeler v16.1 and later, but it may have affected other
+applications as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
