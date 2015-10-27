@@ -116,10 +116,12 @@ later, or when running VirtualGL in a Parallels Desktop guest, when VirtualGL
 was built with VGL_FAKEXCB=1 (which is the default.)
 -------------------------------------------------------------------------------
 [15]
-Fixed a thread safety issue with PBO readback.  The same PBO was being shared
-among all OpenGL windows, which was suspected-- but not yet confirmed-- to have
-caused a "Could not set PBO size" error with MetaPost.  This issue may have
-affected other multi-threaded applications as well.
+Fixed a thread safety issue with PBO readback.  The PBO handle and other
+variables related to PBO readback were being stored in static variables that
+were shared among all OpenGL windows, contexts, and threads, and this was
+suspected-- but not yet confirmed-- to have caused a "Could not set PBO size"
+error with MetaPost.  This issue may have affected other multi-threaded
+applications as well.
 -------------------------------------------------------------------------------
 
 
