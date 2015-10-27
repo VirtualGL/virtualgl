@@ -31,7 +31,8 @@ namespace vglfaker
 	extern Display *dpy3D;
 	extern void safeExit(int);
 	extern int deadYet;
-	extern int traceLevel;
+	extern long getTraceLevel(void);
+	extern void setTraceLevel(long level);
 	#ifdef FAKEXCB
 	extern long getFakerLevel(void);
 	extern void setFakerLevel(long level);
@@ -128,13 +129,13 @@ static inline int isDead(void)
 #define opentrace(f)  \
 	double vglTraceTime=0.;  \
 	if(fconfig.trace) {  \
-		if(vglfaker::traceLevel>0) {  \
-			vglout.print("\n[VGL] ");  \
-			for(int __i=0; __i<vglfaker::traceLevel; __i++)  \
+		if(vglfaker::getTraceLevel()>0) {  \
+			vglout.print("\n[VGL 0x%.8x] ", pthread_self());  \
+			for(int __i=0; __i<vglfaker::getTraceLevel(); __i++)  \
 				vglout.print("  ");  \
 		}  \
-		else vglout.print("[VGL] ");  \
-		vglfaker::traceLevel++;  \
+		else vglout.print("[VGL 0x%.8x] ", pthread_self());  \
+		vglfaker::setTraceLevel(vglfaker::getTraceLevel()+1);  \
 		vglout.print("%s (", #f);  \
 
 #define starttrace()  \
@@ -147,11 +148,11 @@ static inline int isDead(void)
 
 #define closetrace()  \
 		vglout.PRINT(") %f ms\n", vglTraceTime*1000.);  \
-		vglfaker::traceLevel--;  \
-		if(vglfaker::traceLevel>0) {  \
-			vglout.print("[VGL] ");  \
-			if(vglfaker::traceLevel>1)  \
-				for(int __i=0; __i<vglfaker::traceLevel-1; __i++)  \
+		vglfaker::setTraceLevel(vglfaker::getTraceLevel()-1);  \
+		if(vglfaker::getTraceLevel()>0) {  \
+			vglout.print("[VGL 0x%.8x] ", pthread_self());  \
+			if(vglfaker::getTraceLevel()>1)  \
+				for(int __i=0; __i<vglfaker::getTraceLevel()-1; __i++)  \
 					vglout.print("  ");  \
     }  \
 	}

@@ -38,7 +38,7 @@ namespace vglfaker
 
 Display *dpy3D=NULL;
 bool deadYet=false;
-int traceLevel=0;
+VGL_THREAD_LOCAL(TraceLevel, long, 0)
 #ifdef FAKEXCB
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 #endif
