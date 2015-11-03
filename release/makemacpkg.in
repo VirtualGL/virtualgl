@@ -73,11 +73,6 @@ PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
 make install DESTDIR=$PKGROOT
-if [ "$BINDIR" != "/usr/bin" ]; then
-	mkdir -p $PKGROOT/usr/bin
-	ln -fs $BINDIR/vglclient $PKGROOT/usr/bin/vglclient
-	ln -fs $BINDIR/vglconnect $PKGROOT/usr/bin/vglconnect
-fi
 
 if [ $UNIVERSAL = 1 ]; then
 	if [ ! -d $BUILDDIR32 ]; then

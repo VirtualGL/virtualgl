@@ -1,4 +1,18 @@
 ===============================================================================
+2.5
+===============================================================================
+[1]
+OS X 10.11 "El Capitan" no longer allows packages to install files under
+/usr/bin, and this was preventing the VirtualGL binary package for OS X from
+installing on that platform.  The symlinks to vglclient and vglconnect that
+the OS X package previously installed under /usr/bin have thus been removed in
+this version of VirtualGL.  It will therefore be necessary to invoke vglconnect
+and vglclient using the full pathname (/opt/VirtualGL/bin/vglconnect or
+/opt/VirtualGL/bin/vglclient) or to add /opt/VirtualGL/bin to the PATH.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.5 beta1
 ===============================================================================
 [1]
