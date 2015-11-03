@@ -15,7 +15,7 @@ if(WIN32)
 else()
 	project(VirtualGL)
 endif()
-set(VERSION 2.4.90)
+set(VERSION 2.4.91)
 
 if(UNIX)
 	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
