@@ -121,11 +121,11 @@ installed in the standard location (/usr/share/sddm/scripts).
 Fixed a deadlock that occurred with applications that use MainWin, or any other
 OpenGL applications that load a shared library whose global constructor calls
 one of the functions VirtualGL interposes.  This was known to affect MATLAB and
-Ansys DesignModeler v16.1 and later, but it may have affected other
+ANSYS DesignModeler v16.1 and later, but it may have affected other
 applications as well.
 -------------------------------------------------------------------------------
 [14]
-Fixed another deadlock that occurred when running Ansys DesignModeler v16.1 and
+Fixed another deadlock that occurred when running ANSYS DesignModeler v16.1 and
 later, or when running VirtualGL in a Parallels Desktop guest, when VirtualGL
 was built with VGL_FAKEXCB=1 (which is the default.)
 -------------------------------------------------------------------------------
