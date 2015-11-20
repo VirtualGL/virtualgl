@@ -110,7 +110,7 @@ usage()
 	echo
 	echo "+/-v      : Enable/disable verbose VirtualGL messages [default = disabled]"
 	echo
-	echo "+xcb/-xcb : Enable/disable XCB interposer"
+	echo "+xcb/-xcb : Enable/disable XCB interposer [default = enabled]"
 	echo
 	echo "+wm/-wm   : Enable/disable window manager mode (for running compiz, etc.)"
 	echo
