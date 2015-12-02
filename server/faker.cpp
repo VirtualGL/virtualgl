@@ -83,10 +83,12 @@ class GlobalCleanup
 
 		~GlobalCleanup()
 		{
-			globalMutex.lock(false);
+			vglfaker::GlobalCriticalSection *gcs=
+				vglfaker::GlobalCriticalSection::getInstance(false);
+			if(gcs) gcs->lock(false);
 			fconfig_deleteinstance();
 			deadYet=true;
-			globalMutex.unlock(false);
+			if(gcs) gcs->unlock(false);
 		}
 };
 GlobalCleanup globalCleanup;
