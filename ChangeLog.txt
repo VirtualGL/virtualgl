@@ -11,9 +11,11 @@ and vglclient using the full pathname (/opt/VirtualGL/bin/vglconnect or
 /opt/VirtualGL/bin/vglclient) or to add /opt/VirtualGL/bin to the PATH.
 -------------------------------------------------------------------------------
 [2]
-Fixed a regression introduced by 2.5 beta1[13] that caused a segfault when
-attempting to execute certain system commands (such as uname, hostname, etc.)
-using vglrun on Arch Linux (and possibly other bleeding-edge distributions.)
+Fixed a regression introduced by 2.5 beta1[13] that caused certain system
+commands (such as uname, hostname, etc.) to crash when running those commands
+using vglrun on current Arch Linux spins (glibc 2.22, GCC 5.2.)  This possibly
+affected other non-OpenGL, non-X11 applications on other bleeding-edge Linux
+distributions as well.
 -------------------------------------------------------------------------------
 
 
