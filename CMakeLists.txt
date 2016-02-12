@@ -4,6 +4,10 @@
 
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
+# Shut up CMake 3.1 and later
+if(POLICY CMP0053)
+	cmake_policy(SET CMP0053 OLD)
+endif()
 
 if(UNIX)
 	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
