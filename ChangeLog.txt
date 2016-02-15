@@ -17,6 +17,10 @@ using vglrun on current Arch Linux spins (glibc 2.22, GCC 5.2.)  This possibly
 affected other non-OpenGL, non-X11 applications on other bleeding-edge Linux
 distributions as well.
 -------------------------------------------------------------------------------
+[3]
+vglserver_config should now work properly with MDM (MATE Display Manager), if
+its config files are installed in the standard location (/etc/mdm).
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -73,6 +73,11 @@ prompt.
 			/usr/local/kde4/etc/rc.d/kdm4 stop
 			---
 
+		Linux servers running MDM :: {:}
+			#Verb: <<---
+			/etc/init.d/mdm stop
+			---
+
 	#. Log in as root from the text console (or remotely using SSH.)
 
 	#. Run
@@ -196,6 +201,11 @@ prompt.
 		FreeBSD servers running KDM :: {:}
 			#Verb: <<---
 			/usr/local/kde4/etc/rc.d/kdm4 start
+			---
+
+		Linux servers running MDM :: {:}
+			#Verb: <<---
+			/etc/init.d/mdm start
 			---
 
 *** Sanity Check
