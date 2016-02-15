@@ -178,28 +178,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mt")
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mt -lc")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lc")
 	set(MAPFLAG "-Wl,-M,")
-	if("${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
+	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
+		add_definitions(-mt -norunpath)
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mt")
 		set(CMAKE_SHARED_LINKER_FLAGS
-			"-z direct -lCrun -z nodirect ${CMAKE_SHARED_LINKER_FLAGS}")
+			"-z direct -lCrun -z nodirect -mt ${CMAKE_SHARED_LINKER_FLAGS}")
 		set(MAPFLAG "-M")
-	endif()
-endif()
 
-if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
-	add_definitions(-mt -norunpath)
-	# Use the maximum optimization level for release builds
-	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
-		CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-		if(${var} MATCHES "-xO3")
-			string(REGEX REPLACE "-xO3" "-xO5" ${var} "${${var}}")
-		endif()
-		if(${var} MATCHES "-xO2")
-			string(REGEX REPLACE "-xO2" "-xO5" ${var} "${${var}}")
-		endif()
-	endforeach()
+		# Use the maximum optimization level for release builds
+		foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
+			CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+			if(${var} MATCHES "-xO3")
+				string(REGEX REPLACE "-xO3" "-xO5" ${var} "${${var}}")
+			endif()
+			if(${var} MATCHES "-xO2")
+				string(REGEX REPLACE "-xO2" "-xO5" ${var} "${${var}}")
+			endif()
+		endforeach()
+	endif()
 endif()
 
 option(VGL_USESSL
