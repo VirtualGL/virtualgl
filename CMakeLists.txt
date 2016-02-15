@@ -278,6 +278,8 @@ if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
 	set(LIBDL dl)
 endif()
 
+endif() # WIN32
+
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
 set(EFFECTIVE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UC}}")
@@ -290,6 +292,8 @@ message(STATUS "Linker flags = ${EFFECTIVE_LD_FLAGS}")
 #
 # Targets
 #
+
+if(NOT WIN32)
 
 set(DEFAULT_VGL_BUILDSERVER 0)
 if(NOT APPLE AND NOT CYGWIN)
@@ -351,6 +355,7 @@ add_subdirectory(diags)
 add_subdirectory(doc)
 
 endif() # WIN32
+
 
 #
 # Installation and packaging
