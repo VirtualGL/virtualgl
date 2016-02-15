@@ -118,7 +118,24 @@ static void *loadGLSymbol(const char *name, bool optional)
 		!strcmp(name, "glXGetProcAddressARB"))
 		sym=(void *)__glXGetProcAddress;
 	else
+	{
+		#if sun
+
+		// For whatever reason, on Solaris, if a function doesn't exist in libGL,
+		// glXGetProcAddress() will return the address of VGL's interposed
+		// version, which causes an infinite loop until the program blows its stack
+		// and segfaults.  Thus, we use the old reliable dlsym() method.
+		dlerror();  // Clear error state
+		sym=dlsym(gldllhnd, (char *)name);
+		err=dlerror();
+
+		#else
+
 		sym=(void *)__glXGetProcAddress((const GLubyte *)name);
+
+		#endif
+	}
+
 	if(!sym && (fconfig.verbose || !optional))
  	{
 	 	vglout.print("[VGL] %s: Could not load function \"%s\"",

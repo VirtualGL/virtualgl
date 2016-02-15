@@ -26,6 +26,12 @@ Fixed a regression introduced in 2.4 that caused vglrun to abort with
 "VGL_ISACTIVE=1: is not an identifier" when running on Solaris 10 (or other
 systems in which /bin/sh doesn't support "export VAR=value" syntax.)
 -------------------------------------------------------------------------------
+[5]
+Fixed a regression introduced by 2.5 beta1[3] whereby the VirtualGL faker would
+segfault on Solaris if the 3D application called one of the GLX/OpenGL
+functions that VirtualGL interposes and the underlying OpenGL library (libGL)
+did not implement that function.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
