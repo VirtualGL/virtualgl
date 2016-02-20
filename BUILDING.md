@@ -185,11 +185,11 @@ static library form.  To build OpenSSL from source:
 
     **64-bit:**
 
-        ./Configure linux-x86_64 shared no-krb5 no-dso
+      ./Configure linux-x86_64 shared no-krb5 no-dso
 
     **32-bit:**
 
-        ./Configure -m32 linux-generic32 shared no-krb5 no-dso
+      ./Configure -m32 linux-generic32 shared no-krb5 no-dso
 
 * `make`
 
