@@ -87,13 +87,13 @@ minimum, the following 32-bit libraries:
     simultaneously.  The best solution is to install either the 32-bit dev.
     kits:
 
-            sudo apt-get install libglu1-mesa-dev:i386 libxv-dev:i386
+        sudo apt-get install libglu1-mesa-dev:i386 libxv-dev:i386
 
-      or the 64-bit dev. kits:
+    or the 64-bit dev. kits:
 
-            sudo apt-get install libglu1-mesa-dev libxv-dev
+        sudo apt-get install libglu1-mesa-dev libxv-dev
 
-      depending on which type of build you need to do.
+    depending on which type of build you need to do.
 
 - Out of the box, Red Hat Enterprise Linux 6 and later does not contain 32-bit
   libraries at all.  See
