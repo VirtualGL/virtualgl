@@ -23,8 +23,9 @@ Build Requirements
   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
   everything necessary to build VirtualGL-Utils.
 
-  * For 32-bit builds, you can also use Microsoft Visual C++ Express
-    Edition.  Visual C++ Express Edition is a free download.
+  * You can also use Microsoft Visual Studio Express/Community Edition, which
+    is a free download.  (NOTE: versions prior to 2012 can only be used to
+    build 32-bit code.)
   * If you intend to build VirtualGL-Utils from the command line, then add
     the appropriate compiler and SDK directories to the `INCLUDE`, `LIB`, and
     `PATH` environment variables.  This is generally accomplished by executing
