@@ -702,10 +702,10 @@ It was necessary to maintain our own static OpenSSL libraries on Linux in
 order to provide a version of VirtualGL that was compatible across all Linux
 platforms, and this required us to keep abreast of the latest OpenSSL security
 fixes, etc.  OpenSSL support can easily be re-added by building VirtualGL from
-source (see [BUILDING.txt](BUILDING.txt).)
+source (see [BUILDING.md](BUILDING.md).)
 
 3. Added a framework for creating generic image transport plugins.  See
-[rr/rrtransport.h](rr/rrtransport.h) for a description of the API.
+[server/rrtransport.h](server/rrtransport.h) for a description of the API.
 
 4. Removed support for the proprietary Sun Ray plugin, since that plugin is no
 longer available from Sun.
