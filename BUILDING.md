@@ -8,7 +8,7 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v2.8 or later
+- [CMake](http://www.cmake.org) v2.8.11 or later
 
 - If building SSL support:
   * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below

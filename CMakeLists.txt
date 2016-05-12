@@ -2,7 +2,7 @@
 # Setup
 #
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
@@ -21,23 +21,7 @@ else()
 endif()
 set(VERSION 2.5)
 
-if(UNIX)
-	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(WIN32)
-	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
-		BUILD)
-	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
-	if (BUILD STREQUAL "")
-		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
-		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
-	else()
-		string(SUBSTRING "${BUILD}" 0 8 BUILD)
-	endif()
-else()
-	message(FATAL_ERROR "Platform not supported.")
-endif()
-string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+string(TIMESTAMP BUILD "%Y%m%d")
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
