@@ -1006,19 +1006,56 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 // properly report the extensions and GLX version it supports.
 
 #define VGL_GLX_EXTENSIONS \
-	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index GLX_EXT_texture_from_pixmap GLX_EXT_swap_control GLX_SGI_swap_control"
-#define VGL_GLX_ARB_CTX_EXTENSIONS \
-	" GLX_ARB_create_context GLX_ARB_create_context_profile"
-static const char *glxextensions=VGL_GLX_EXTENSIONS VGL_GLX_ARB_CTX_EXTENSIONS;
-static const char *glxextensions_no_arb_ctx=VGL_GLX_EXTENSIONS;
+	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index"
+/* Allow enough space here for all of the extensions */
+static char glxextensions[1024]=VGL_GLX_EXTENSIONS;
 
 static const char *getGLXExtensions(void)
 {
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
-	if(__glXCreateContextAttribsARB)
-		return glxextensions;
-	else
-		return glxextensions_no_arb_ctx;
+	if(__glXCreateContextAttribsARB
+		&& !strstr(glxextensions, "GLX_ARB_create_context"))
+		strncat(glxextensions,
+			" GLX_ARB_create_context GLX_ARB_create_context_profile",
+			1023-strlen(glxextensions));
+
+	CHECKSYM_NONFATAL(glXFreeContextEXT)
+	CHECKSYM_NONFATAL(glXImportContextEXT)
+	CHECKSYM_NONFATAL(glXQueryContextInfoEXT)
+	if(__glXFreeContextEXT && __glXImportContextEXT && __glXQueryContextInfoEXT
+		&& !strstr(glxextensions, "GLX_EXT_import_context"))
+		strncat(glxextensions, " GLX_EXT_import_context",
+			1023-strlen(glxextensions));
+
+	CHECKSYM_NONFATAL(glXSwapIntervalEXT)
+	if(__glXSwapIntervalEXT && !strstr(glxextensions, "GLX_EXT_swap_control"))
+		strncat(glxextensions, " GLX_EXT_swap_control",
+			1023-strlen(glxextensions));
+
+	CHECKSYM_NONFATAL(glXBindTexImageEXT)
+	CHECKSYM_NONFATAL(glXReleaseTexImageEXT)
+	if(__glXBindTexImageEXT && __glXReleaseTexImageEXT
+		&& !strstr(glxextensions, "GLX_EXT_texture_from_pixmap"))
+		strncat(glxextensions, " GLX_EXT_texture_from_pixmap",
+			1023-strlen(glxextensions));
+
+	CHECKSYM_NONFATAL(glXBindSwapBarrierNV)
+	CHECKSYM_NONFATAL(glXJoinSwapGroupNV)
+	CHECKSYM_NONFATAL(glXQueryFrameCountNV)
+	CHECKSYM_NONFATAL(glXQueryMaxSwapGroupsNV)
+	CHECKSYM_NONFATAL(glXQuerySwapGroupNV)
+	CHECKSYM_NONFATAL(glXResetFrameCountNV)
+	if(__glXBindSwapBarrierNV && __glXJoinSwapGroupNV && __glXQueryFrameCountNV
+		&& __glXQueryMaxSwapGroupsNV && __glXQuerySwapGroupNV
+		&& __glXResetFrameCountNV && !strstr(glxextensions, "GLX_NV_swap_group"))
+		strncat(glxextensions, " GLX_NV_swap_group", 1023-strlen(glxextensions));
+
+	CHECKSYM_NONFATAL(glXSwapIntervalSGI)
+	if(__glXSwapIntervalSGI && !strstr(glxextensions, "GLX_SGI_swap_control"))
+		strncat(glxextensions, " GLX_SGI_swap_control",
+			1023-strlen(glxextensions));
+
+	return glxextensions;
 }
 
 

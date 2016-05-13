@@ -1,3 +1,20 @@
+2.5.1
+=====
+
+### Significant changes relative to 2.5:
+
+1. VirtualGL will no longer report the presence of the `GLX_EXT_swap_control`,
+`GLX_EXT_texture_from_pixmap`, or `GLX_SGI_swap_control` extensions to
+applications unless the underlying OpenGL library exports the necessary
+functions to support those extensions.  This fixes a regression introduced in
+VGL 2.4 that caused WINE to crash when running on a system whose OpenGL
+implementation lacked the `glXSwapIntervalSGI()` and `glXSwapIntervalEXT()`
+functions.  Furthermore, VirtualGL will now report the presence of the
+`GLX_EXT_import_context` and `GLX_NV_swap_group` extensions to applications if
+the underlying OpenGL library exports the necessary functions to support those
+extensions.
+
+
 2.5
 ===
 
