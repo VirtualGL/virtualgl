@@ -4,6 +4,7 @@
 // X specific code for the Fast Light Tool Kit (FLTK).
 //
 // Copyright 1998-2006 by Bill Spitzak and others.
+// Copyright (C) 2016 D. R. Commander
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Library General Public
@@ -43,6 +44,7 @@
 #  include "flstring.h"
 #  include <unistd.h>
 #  include <sys/time.h>
+#  include "keycodetokeysym.h"
 
 ////////////////////////////////////////////////////////////////
 // interface to poll/select call:
@@ -792,7 +794,7 @@ int fl_handle(const XEvent& thisevent)
 	if (!len) {buffer[0] = char(keysym); len = 1;}
 	// ignore all effects of shift on the keysyms, which makes it a lot
 	// easier to program shortcuts and is Windoze-compatable:
-	keysym = XKeycodeToKeysym(fl_display, keycode, 0);
+	keysym = KeycodeToKeysym(fl_display, keycode, 0);
       }
       // MRS: Can't use Fl::event_state(FL_CTRL) since the state is not
       //      set until set_event_xy() is called later...
@@ -813,7 +815,7 @@ int fl_handle(const XEvent& thisevent)
       event = FL_KEYUP;
       fl_key_vector[keycode/8] &= ~(1 << (keycode%8));
       // keyup events just get the unshifted keysym:
-      keysym = XKeycodeToKeysym(fl_display, keycode, 0);
+      keysym = KeycodeToKeysym(fl_display, keycode, 0);
     }
 #  ifdef __sgi
     // You can plug a microsoft keyboard into an sgi but the extra shift
@@ -840,7 +842,7 @@ int fl_handle(const XEvent& thisevent)
     if (keysym >= 0xff91 && keysym <= 0xff9f) {
       // Map keypad keysym to character or keysym depending on
       // numlock state...
-      unsigned long keysym1 = XKeycodeToKeysym(fl_display, keycode, 1);
+      unsigned long keysym1 = KeycodeToKeysym(fl_display, keycode, 1);
       if ((xevent.xkey.state & Mod2Mask) &&
           (keysym1 <= 0x7f || (keysym1 > 0xff9f && keysym1 <= FL_KP_Last))) {
 	// Store ASCII numeric keypad value...
