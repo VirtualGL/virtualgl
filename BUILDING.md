@@ -61,61 +61,49 @@ Build Requirements
     libjpeg-turbo SDK.)
 
 
-32-bit VirtualGL Builds on 64-bit Linux
----------------------------------------
+32-bit VirtualGL Builds on x86-64 Linux Distributions
+-----------------------------------------------------
 
 In order to run 32-bit OpenGL applications using VirtualGL on a 64-bit Linux
 platform, it is necessary to build both 32-bit and 64-bit versions of the
-VirtualGL server components.  However, not all x86-64 Linux systems contain the
-32-bit libraries necessary to build a 32-bit version of VirtualGL.  To build
-32-bit VirtualGL components on an x86-64 Linux system, you will need, at
-minimum, the following 32-bit libraries:
+VirtualGL server components.  However, most recent x86-64 Linux distributions
+do not ship with the 32-bit libraries necessary to build a 32-bit version of
+VirtualGL.  To build 32-bit VirtualGL components on an x86-64 Linux system, you
+will need, at minimum, the following 32-bit development libraries:
 
-- glibc and libstdc++ development libraries
-  * On Ubuntu, these can both be obtained by installing the "g++-multilib"
-    package
-
-- X11 and OpenGL development libraries
+- glibc and libstdc++
+- X11 and OpenGL
   * libX11, libXext, libGL, libGLU, and (unless you wish to disable X Video
     support) libXv
-  * Ubuntu 10 and 11 ship these libraries in the "ia32-libs" package.
-  * Ubuntu 12 and later are a bit tricky.  Because of the transition to
-    MultiArch, ia32-libs is no longer used to install development stubs for
-    32-bit libraries.  The accepted way to install these is to install the
-    i386 version of the needed dev. kit.  However, unfortunately, some of the
-    dev. kits conflict when you attempt to install 64-bit and 32-bit versions
-    simultaneously.  The best solution is to install either the 32-bit dev.
-    kits:
 
-        sudo apt-get install libglu1-mesa-dev:i386 libxv-dev:i386
+Instructions for installing these on specific distributions:
 
-    or the 64-bit dev. kits:
+### Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases
 
-        sudo apt-get install libglu1-mesa-dev libxv-dev
+- Follow the procedure described in the VirtualGL User's Guide for installing
+  a 32-bit VirtualGL package on x86-64 Linux distributions, then execute the
+  following command as root:
 
-    depending on which type of build you need to do.
+        yum install libXv-devel.i686 libXext-devel.i686 libX11-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
 
-- Out of the box, Red Hat Enterprise Linux 6 and later does not contain 32-bit
-  libraries at all.  See
+  (Replace `yum` with `dnf` on Fedora 23 and later.)
 
-  <http://www.virtualgl.org/Documentation/RHEL6>
+### Ubuntu 12 and later
 
-  for instructions on how to install 32-bit libraries on that platform.
+- Follow the procedure described in the VirtualGL User's Guide for installing
+  a 32-bit VirtualGL package on x86-64 Linux distributions, then execute the
+  following command as root:
 
-If for some reason your preferred 64-bit Linux distribution does not contain
-one or more of the necessary 32-bit prerequisites, then:
+        apt-get install g++-multilib libxv-dev:i386 libglu1-mesa-dev:i386
 
-  1. Complain to your distribution vendor.
-  2. All x86-64 distributions of Linux have a corresponding 32-bit-only
-     distribution, usually released on a separate set of discs.  On those
-     discs, you should be able to find the 32-bit versions of the X11 dev. kit
-     and the glibc dev. kit to match the 64-bit versions that are already
-     installed on your system.  You may have to use `rpm --force` to force the
-     install of the 32-bit development packages, since they might contain
-     some of the same files as the 64-bit development packages that are
-     already installed.  On Debian-based systems, you will need to use
-     `dpkg --force-architecture` to force the installation of i386 packages
-     on an amd64 system.  See Item 1 above.
+  In Ubuntu 12 through 15, some of the 32-bit dev. kits have conflicts with
+  their 64-bit counterparts, so it is not possible to build a 32-bit and a
+  64-bit version of VirtualGL simultaneously on those platforms.  It will be
+  necessary to run the above command (as root) prior to performing a 32-bit
+  build and the following command (also as root) prior to performing a 64-bit
+  build:
+
+        apt-get install libxv-dev libglu1-mesa-dev
 
 
 Out-of-Tree Builds

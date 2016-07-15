@@ -7,8 +7,8 @@
 
 ** Installing VirtualGL on Linux
 
-	1. Download the appropriate VirtualGL binary package for your system from the
-		[[http://sourceforge.net/projects/virtualgl/files][Files area]]
+	1. Download the appropriate VirtualGL binary package(s) for your system from
+		the [[http://sourceforge.net/projects/virtualgl/files][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		Packages are provided for RPM-based and Debian-based Linux distributions
 		that contain GLIBC 2.5 or later (including
@@ -24,22 +24,52 @@
 		amd64 DEBs.  (The virtualgl32 DEB is a supplementary package that contains
 		only the 32-bit server components.)
 
-	2. Log in as root, cd to the directory where you downloaded the binary
-		package, and issue the following commands:
+	2. cd to the directory where you downloaded the binary package(s), and issue
+		the following commands as root:
 
-		RPM-based systems :: {:}
+		RPM-based systems using YUM :: {:}
 		#Verb <<---
-		rpm -e VirtualGL
+		rpm -e VirtualGL --allmatches
+		yum install VirtualGL*.rpm
+		---
+
+		RPM-based systems using DNF :: {:}
+		#Verb <<---
+		rpm -e VirtualGL --allmatches
+		dnf install VirtualGL*.rpm
+		---
+
+		Other RPM-based systems (dependencies will not be installed automatically) :: {:}
+		#Verb <<---
+		rpm -e VirtualGL --allmatches
 		rpm -i VirtualGL*.rpm
 		---
 
-		!!! You may need to add ''--all-matches'' to the ''rpm -e'' command line if
-		you have installed both the 32-bit and 64-bit VirtualGL RPMs.
-
-		Debian-based systems :: {:}
+		Debian-based systems (dependencies will not be installed automatically) :: {:}
 		#Verb <<---
 		dpkg -i virtualgl*.deb
 		---
+
+*** Installing a 32-bit VirtualGL Package on x86-64 Linux Distributions
+
+In order to run 32-bit OpenGL applications in VirtualGL, it is necessary to
+install the 32-bit VirtualGL server components, which depend on a few 32-bit
+system libraries.  Recent x86-64 Linux distributions do not include 32-bit
+libraries by default, so it will be necessary to perform a few additional steps
+prior to installing a 32-bit VirtualGL package on some of those distributions.
+
+	Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases :: {:}
+
+	No additional steps are necessary.  ''yum install''/''dnf install'' takes
+	care of all of the dependencies for both the 64-bit and 32-bit RPMs.
+
+	Ubuntu 12 and later :: {:}
+
+	Run the following command as root prior to installing the virtualgl32
+	package:
+	#Verb <<---
+	apt-get install libxv1:i386 libglu1-mesa:i386
+	---
 
 ** Installing the VirtualGL Client on OS X
 

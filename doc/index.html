@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-05-12T21:21:56">
+<meta name="date" content="2016-07-15T17:11:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -78,6 +78,12 @@ systems, OpenGL and GLX, and X windows.</p>
         <ul class="hd">
             <li class="Itemize-3 hd">
                 <a href="#hd005001" class="hd">5.1 Installing VirtualGL on Linux</a>
+                <ul class="hd">
+                    <li class="Itemize-5 hd">
+                        <a href="#hd005001001" class="hd">5.1.1 Installing a 32-bit VirtualGL 
+                        Package on x86-64 Linux Distributions</a>
+                    </li>
+                </ul>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd005002" class="hd">5.2 Installing the VirtualGL Client on OS 
@@ -654,8 +660,8 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
-        Download the appropriate VirtualGL binary package for your system from 
-        the 
+        Download the appropriate VirtualGL binary package(s) for your system 
+        from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files" class="remote">Files 
         area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
@@ -679,21 +685,34 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
         </p></div>
     </li>
     <li class="Ordered-1 Ordered" value="2">
-        Log in as root, cd to the directory where you downloaded the binary 
-        package, and issue the following commands:
+        cd to the directory where you downloaded the binary package(s), and 
+        issue the following commands as root:
         <dl class="Description">
-            <dt class="Description-3 Description">RPM-based systems</dt>
+            <dt class="Description-3 Description">RPM-based systems using YUM</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
-rpm&nbsp;-e&nbsp;VirtualGL
+rpm&nbsp;-e&nbsp;VirtualGL&nbsp;--allmatches
+yum&nbsp;install&nbsp;VirtualGL*.rpm
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">RPM-based systems using DNF</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+rpm&nbsp;-e&nbsp;VirtualGL&nbsp;--allmatches
+dnf&nbsp;install&nbsp;VirtualGL*.rpm
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Other RPM-based systems (dependencies will not be installed automatically)</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+rpm&nbsp;-e&nbsp;VirtualGL&nbsp;--allmatches
 rpm&nbsp;-i&nbsp;VirtualGL*.rpm
 </pre>
 
-                <div class="important"><p class="important">
-                You may need to add <code>--all-matches</code> to the <code>rpm&nbsp;-e</code> command line if you have installed both the 32-bit and 64-bit VirtualGL RPMs.
-                </p></div>
             </dd>
-            <dt class="Description-3 Description">Debian-based systems</dt>
+            <dt class="Description-3 Description">Debian-based systems (dependencies will not be installed automatically)</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 dpkg&nbsp;-i&nbsp;virtualgl*.deb
@@ -703,6 +722,34 @@ dpkg&nbsp;-i&nbsp;virtualgl*.deb
         </dl>
     </li>
 </ol>
+
+
+<h3 id="hd005001001">5.1.1&nbsp;Installing a 32-bit VirtualGL Package on x86-64 Linux Distributions</h3>
+
+<p>In order to run 32-bit OpenGL applications in VirtualGL, it is necessary 
+to install the 32-bit VirtualGL server components, which depend on a few 
+32-bit system libraries.  Recent x86-64 Linux distributions do not 
+include 32-bit libraries by default, so it will be necessary to perform 
+a few additional steps prior to installing a 32-bit VirtualGL package on 
+some of those distributions.</p>
+
+<dl class="Description">
+    <dt class="Description-1 Description">Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases</dt>
+    <dd class="Description-1 Description">
+        <br class="itempara" />No additional steps are necessary.  
+        <code>yum&nbsp;install</code>/<code>dnf&nbsp;install</code> takes care 
+        of all of the dependencies for both the 64-bit and 32-bit RPMs.
+    </dd>
+    <dt class="Description-1 Description">Ubuntu 12 and later</dt>
+    <dd class="Description-1 Description">
+        <br class="itempara" />Run the following command as root prior to installing the virtualgl32 
+        package:
+<pre class="verbatim">
+apt-get&nbsp;install&nbsp;libxv1:i386&nbsp;libglu1-mesa:i386
+</pre>
+
+    </dd>
+</dl>
 
 
 
@@ -864,10 +911,24 @@ service&nbsp;lightdm&nbsp;stop
 </pre>
 
             </dd>
-            <dt class="Description-3 Description">Red Hat/Fedora Linux servers</dt>
+            <dt class="Description-3 Description">Red Hat/Fedora Linux servers with SysV init</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 init&nbsp;3
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Red Hat/Fedora Linux servers with systemd</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+systemctl&nbsp;stop&nbsp;gdm.service
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Linux servers running MDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/etc/init.d/mdm&nbsp;stop
 </pre>
 
             </dd>
@@ -903,13 +964,6 @@ svcadm&nbsp;disable&nbsp;gdm
             <dd class="Description-3 Description">
 <pre class="verbatim">
 /usr/local/kde4/etc/rc.d/kdm4&nbsp;stop
-</pre>
-
-            </dd>
-            <dt class="Description-3 Description">Linux servers running MDM</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-/etc/init.d/mdm&nbsp;stop
 </pre>
 
             </dd>
@@ -996,7 +1050,10 @@ Disable&nbsp;XTEST&nbsp;extension&nbsp;(recommended)?
                 X server, disabling XTEST will prevent them from inserting keystrokes or 
                 mouse events and thus hijacking local X sessions on that X server.
                 <div class="important"><p class="important">
-                Certain Linux distributions do not have the X server command-line entries in their GDM configuration files.  On these distributions, it will be necessary to run <code>gdmsetup</code> and manually add an argument of <code>-tst</code> to the X server command line to disable XTEST for the first time.  After this, <code>vglserver_config</code> should be able to disable and enable XTEST properly.  This is known to be necessary for openSUSE 10 and Red Hat Enterprise Linux 5.
+                If you are using GDM 2.14 through 2.20, it will be necessary to run <code>gdmsetup</code> and manually add an argument of <code>-tst</code> to the X server command line to disable XTEST for the first time.  After this, <code>vglserver_config</code> should be able to disable and enable XTEST properly.
+                </p></div>
+                <div class="important"><p class="important">
+                GDM 2.22 and later no longer provide a means of editing the X server command line, so disabling XTEST will not work.  The only known alternative as of this writing is to use a different display manager.
                 </p></div>
             </dd>
             <dt class="Description-3 Description">No</dt>
@@ -1038,11 +1095,23 @@ service&nbsp;lightdm&nbsp;start
 /etc/init.d/xdm&nbsp;start
 </pre>
 
-            </dd>
-            <dt class="Description-3 Description">Red Hat/Fedora Linux servers</dt>
-            <dd class="Description-3 Description">
+        Red Hat/Fedora Linux servers with SysV init:: 
 <pre class="verbatim">
 init&nbsp;5
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Red Hat/Fedora Linux servers with systemd</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+systemctl&nbsp;start&nbsp;gdm.service
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Linux servers running MDM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+/etc/init.d/mdm&nbsp;start
 </pre>
 
             </dd>
@@ -1078,13 +1147,6 @@ svcadm&nbsp;enable&nbsp;gdm
             <dd class="Description-3 Description">
 <pre class="verbatim">
 /usr/local/kde4/etc/rc.d/kdm4&nbsp;start
-</pre>
-
-            </dd>
-            <dt class="Description-3 Description">Linux servers running MDM</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-/etc/init.d/mdm&nbsp;start
 </pre>
 
             </dd>

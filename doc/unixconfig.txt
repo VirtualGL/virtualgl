@@ -43,9 +43,19 @@ prompt.
 			/etc/init.d/xdm stop
 			---
 
-		Red Hat/Fedora Linux servers :: {:}
+		Red Hat/Fedora Linux servers with SysV init :: {:}
 			#Verb: <<---
 			init 3
+			---
+
+		Red Hat/Fedora Linux servers with systemd :: {:}
+			#Verb: <<---
+			systemctl stop gdm.service
+			---
+
+		Linux servers running MDM :: {:}
+			#Verb: <<---
+			/etc/init.d/mdm stop
 			---
 
 		Solaris 10 servers running GDM :: {:}
@@ -71,11 +81,6 @@ prompt.
 		FreeBSD servers running KDM :: {:}
 			#Verb: <<---
 			/usr/local/kde4/etc/rc.d/kdm4 stop
-			---
-
-		Linux servers running MDM :: {:}
-			#Verb: <<---
-			/etc/init.d/mdm stop
 			---
 
 	#. Log in as root from the text console (or remotely using SSH.)
@@ -138,13 +143,14 @@ prompt.
 			X server, disabling XTEST will prevent them from inserting keystrokes or
 			mouse events and thus hijacking local X sessions on that X server.
 
-		!!! Certain Linux distributions do not have the X server command-line
-		entries in their GDM configuration files.  On these distributions, it will
-		be necessary to run ''gdmsetup'' and manually add an argument of ''-tst''
-		to the X server command line to disable XTEST for the first time.  After
-		this, ''vglserver_config'' should be able to disable and enable XTEST
-		properly.  This is known to be necessary for openSUSE 10 and Red Hat
-		Enterprise Linux 5.
+		!!! If you are using GDM 2.14 through 2.20, it will be necessary to run
+		''gdmsetup'' and manually add an argument of ''-tst'' to the X server
+		command line to disable XTEST for the first time.  After this,
+		''vglserver_config'' should be able to disable and enable XTEST properly.
+
+		!!! GDM 2.22 and later no longer provide a means of editing the X server
+		command line, so disabling XTEST will not work.  The only known alternative
+		as of this writing is to use a different display manager.
 
 		No :: ''x11vnc'' and ''x0vncserver'' both require XTEST, so if you need to
 			attach a VNC server to the 3D X server, then it is necessary to answer
@@ -173,9 +179,19 @@ prompt.
 			/etc/init.d/xdm start
 			---
 
-		Red Hat/Fedora Linux servers :: {:}
+		Red Hat/Fedora Linux servers with SysV init:: {:}
 			#Verb: <<---
 			init 5
+			---
+
+		Red Hat/Fedora Linux servers with systemd :: {:}
+			#Verb: <<---
+			systemctl start gdm.service
+			---
+
+		Linux servers running MDM :: {:}
+			#Verb: <<---
+			/etc/init.d/mdm start
 			---
 
 		Solaris 10 servers running GDM :: {:}
@@ -201,11 +217,6 @@ prompt.
 		FreeBSD servers running KDM :: {:}
 			#Verb: <<---
 			/usr/local/kde4/etc/rc.d/kdm4 start
-			---
-
-		Linux servers running MDM :: {:}
-			#Verb: <<---
-			/etc/init.d/mdm start
 			---
 
 *** Sanity Check
