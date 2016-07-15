@@ -32,13 +32,13 @@
 // Expands all unprintable characters to ^X or \nnn notation
 // Aligns them against the inside of the box.
 
-#define min(a,b) ((a)<(b)?(a):(b))
 #include <FL/fl_draw.H>
 #include <FL/Fl_Image.H>
 
 #include "flstring.h"
 #include <ctype.h>
 #include <math.h>
+#define min(a,b) ((a)<(b)?(a):(b))
 
 #define MAXBUF 1024
 

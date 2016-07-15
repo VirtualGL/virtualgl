@@ -756,7 +756,8 @@ int main(int argc, char **argv)
 		{
 			int temp=0;
 			sscanf(argv[i+1], "%x", &temp);
-			if(temp>0) visualID=temp;  i++;
+			if(temp>0) visualID=temp;
+			i++;
 		}
 		if(!stricmp(argv[i], "-width") && i<argc-1)
 		{

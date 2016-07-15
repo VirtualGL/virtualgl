@@ -138,7 +138,8 @@ static void buildVisAttribTable(Display *dpy, int screen)
 	}
 	catch(...)
 	{
-		if(visuals) XFree(visuals);  if(va) { delete [] va;  va=NULL; }
+		if(visuals) XFree(visuals);
+		if(va) { delete [] va;  va=NULL; }
 		vaDisplay=NULL;  vaScreen=-1;  vaEntries=0;
 		throw;
 	}

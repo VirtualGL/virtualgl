@@ -91,7 +91,8 @@ class Blitter : public Runnable
 		{
 			Frame *frame=frames[findex];
 			findex=(findex+1)%NFRAMES;
-			if(thread) thread->checkError();  frame->waitUntilComplete();
+			if(thread) thread->checkError();
+			frame->waitUntilComplete();
 			if(thread) thread->checkError();
 			return frame;
 		}
@@ -181,7 +182,8 @@ class Decompressor : public Runnable
 			CompressedFrame &cframe=cframes[findex];
 			findex=(findex+1)%NFRAMES;
 			if(deadYet) return cframe;
-			if(thread) thread->checkError();  cframe.waitUntilComplete();
+			if(thread) thread->checkError();
+			cframe.waitUntilComplete();
 			if(thread) thread->checkError();
 			return cframe;
 		}
@@ -231,7 +233,8 @@ class Decompressor : public Runnable
 			catch(Error &e)
 			{
 				if(thread) thread->setError(e);
-				for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();  throw;
+				for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();
+				throw;
 			}
 			fprintf(stderr, "Decompressor exiting ...\n");
 		}
@@ -265,7 +268,8 @@ class Compressor : public Runnable
 		{
 			Frame &frame=frames[findex];
 			findex=(findex+1)%NFRAMES;
-			if(thread) thread->checkError();  frame.waitUntilComplete();
+			if(thread) thread->checkError();
+			frame.waitUntilComplete();
 			if(thread) thread->checkError();
 			rrframeheader hdr;
 			hdr.framew=hdr.width=width+BORDER;
@@ -330,7 +334,8 @@ class Compressor : public Runnable
 			catch(Error &e)
 			{
 				if(thread) thread->setError(e);
-				for(int i=0; i<NFRAMES; i++) frames[i].signalComplete();  throw;
+				for(int i=0; i<NFRAMES; i++) frames[i].signalComplete();
+				throw;
 			}
 			fprintf(stderr, "Compressor exiting ...\n");
 		}

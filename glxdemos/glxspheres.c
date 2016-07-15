@@ -106,7 +106,8 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 
 void reshape(int newWidth, int newHeight)
 {
-	if(newWidth<=0) newWidth=1;  if(newHeight<=0) newHeight=1;
+	if(newWidth<=0) newWidth=1;
+	if(newHeight<=0) newHeight=1;
 	width=newWidth;  height=newHeight;
 
 	if(useOverlay && olWin)

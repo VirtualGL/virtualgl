@@ -177,8 +177,10 @@ int main(int argc, char **argv)
 	_fbx(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames=0, samples=0;
-	if(x<0) x=width/2-16;  if(x<0) x=0;
-	if(y<0) y=height/2-16;  if(y<0) y=0;
+	if(x<0) x=width/2-16;
+	if(x<0) x=0;
+	if(y<0) y=height/2-16;
+	if(y<0) y=0;
 	unsigned char buf[32*32*4];
 	int first=1;
 

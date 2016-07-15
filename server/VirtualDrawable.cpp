@@ -27,7 +27,7 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-#define CHECKGL(m) if(glError()) _throw("Could not "m);
+#define CHECKGL(m) if(glError()) _throw("Could not " m);
 
 // Generic OpenGL error checker (0 = no errors)
 static int glError(void)

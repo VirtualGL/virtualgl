@@ -594,7 +594,8 @@ void FBXFrame::init(Display *dpy, Drawable draw, Visual *vis)
 
 FBXFrame::~FBXFrame(void)
 {
-	if(fb.bits) fbx_term(&fb);  if(bits) bits=NULL;
+	if(fb.bits) fbx_term(&fb);
+	if(bits) bits=NULL;
 	if(tjhnd) tjDestroy(tjhnd);
 	if(wh.dpy && !reuseConn) XCloseDisplay(wh.dpy);
 }

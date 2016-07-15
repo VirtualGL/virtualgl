@@ -198,7 +198,9 @@ void killproc(bool userOnly)
 	}
 	catch(...)
 	{
-		if(fd) close(fd);  if(procdir) closedir(procdir);  throw;
+		if(fd) close(fd);
+		if(procdir) closedir(procdir);
+		throw;
 	}
 
 	#endif
@@ -496,7 +498,8 @@ void start(char *displayname)
 							success=false;  if(i==0) throw;
 						}
 						i++;  if(i==RR_DEFAULTSSLPORT) i++;
-						if(i>4299) i=4200;  if(i==RR_DEFAULTPORT) i=0;
+						if(i>4299) i=4200;
+						if(i==RR_DEFAULTPORT) i=0;
 					} while(!success);
 				}
 				else receiver->listen(port);

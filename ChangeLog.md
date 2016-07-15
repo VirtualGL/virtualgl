@@ -14,6 +14,8 @@ functions.  Furthermore, VirtualGL will now report the presence of the
 the underlying OpenGL library exports the necessary functions to support those
 extensions.
 
+2. Fixed compilation errors when building with GCC v6.
+
 
 2.5
 ===

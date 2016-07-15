@@ -129,7 +129,8 @@ unsigned int checkBufferColor(void)
 	}
 	catch(...)
 	{
-		if(buf) free(buf);  throw;
+		if(buf) free(buf);
+		throw;
 	}
 	return 0;
 }

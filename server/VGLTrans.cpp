@@ -430,7 +430,8 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 	}
 	catch(...)
 	{
-		if(serverName) free(serverName);  throw;
+		if(serverName) free(serverName);
+		throw;
 	}
 	if(serverName) free(serverName);
 }

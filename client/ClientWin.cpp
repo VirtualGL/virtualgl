@@ -258,7 +258,8 @@ void ClientWin::run(void)
 	}
 	catch(Error &e)
 	{
-		if(thread) thread->setError(e);  if(f) f->signalComplete();
+		if(thread) thread->setError(e);
+		if(f) f->signalComplete();
 		throw;
 	}
 }

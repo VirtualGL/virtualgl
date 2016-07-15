@@ -68,7 +68,8 @@ namespace vglserver
 				if((entry=findEntry(key1, key2))!=NULL)
 				{
 					if(value) entry->value=value;
-					if(useRef) entry->refCount++;  return 0;
+					if(useRef) entry->refCount++;
+					return 0;
 				}
 				_newcheck(entry=new HashEntry);
 				memset(entry, 0, sizeof(HashEntry));

@@ -536,9 +536,9 @@ void Fl_Text_Display::draw_text( int left, int top, int width, int height ) {
   for ( line = firstLine; line <= lastLine; line++ )
     draw_vline( line, left, left + width, 0, INT_MAX );
 
-    /* draw the line numbers if exposed area includes them */
-    if (mLineNumWidth != 0 && left <= mLineNumLeft + mLineNumWidth)
-	draw_line_numbers(false);
+  /* draw the line numbers if exposed area includes them */
+  if (mLineNumWidth != 0 && left <= mLineNumLeft + mLineNumWidth)
+    draw_line_numbers(false);
 
   fl_pop_clip();
 }
@@ -1226,16 +1226,16 @@ void Fl_Text_Display::buffer_modified_cb( int pos, int nInserted, int nDeleted,
   if ( nInserted != 0 || nDeleted != 0 )
     textD->mCursorPreferredCol = -1;
 
-    /* Count the number of lines inserted and deleted, and in the case
-       of continuous wrap mode, how much has changed */
-    if (textD->mContinuousWrap) {
-    	textD->find_wrap_range(deletedText, pos, nInserted, nDeleted,
-    	    	&wrapModStart, &wrapModEnd, &linesInserted, &linesDeleted);
-    } else {
-   linesInserted = nInserted == 0 ? 0 :
-                  buf->count_lines( pos, pos + nInserted );
-   linesDeleted = nDeleted == 0 ? 0 : countlines( deletedText );
-    }
+  /* Count the number of lines inserted and deleted, and in the case
+     of continuous wrap mode, how much has changed */
+  if (textD->mContinuousWrap) {
+    textD->find_wrap_range(deletedText, pos, nInserted, nDeleted,
+                     &wrapModStart, &wrapModEnd, &linesInserted, &linesDeleted);
+  } else {
+    linesInserted = nInserted == 0 ? 0 :
+                    buf->count_lines( pos, pos + nInserted );
+    linesDeleted = nDeleted == 0 ? 0 : countlines( deletedText );
+  }
 
   /* Update the line starts and mTopLineNum */
   if ( nInserted != 0 || nDeleted != 0 ) {
@@ -1250,16 +1250,16 @@ void Fl_Text_Display::buffer_modified_cb( int pos, int nInserted, int nDeleted,
   } else
     scrolled = 0;
 
-    /* If we're counting non-wrapped lines as well, maintain the absolute
-       (non-wrapped) line number of the text displayed */
-    if (textD->maintaining_absolute_top_line_number() &&
-        (nInserted != 0 || nDeleted != 0)) {
-	if (pos + nDeleted < oldFirstChar)
-	    textD->mAbsTopLineNum += buf->count_lines(pos, pos + nInserted) -
-		    countlines(deletedText);
-	else if (pos < oldFirstChar)
-	    textD->reset_absolute_top_line_number();
-    }    	    
+  /* If we're counting non-wrapped lines as well, maintain the absolute
+     (non-wrapped) line number of the text displayed */
+  if (textD->maintaining_absolute_top_line_number() &&
+      (nInserted != 0 || nDeleted != 0)) {
+    if (pos + nDeleted < oldFirstChar)
+      textD->mAbsTopLineNum += buf->count_lines(pos, pos + nInserted) -
+                               countlines(deletedText);
+    else if (pos < oldFirstChar)
+      textD->reset_absolute_top_line_number();
+  }
 
   /* Update the line count for the whole buffer */
   textD->mNBufferLines += linesInserted - linesDeleted;
