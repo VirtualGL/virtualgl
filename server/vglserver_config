@@ -18,6 +18,7 @@ DISABLEXTEST=1
 FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
 UNATTENDED=0
+SELINUX=0
 
 GID=
 GROUPADD=/usr/sbin/groupadd
@@ -29,6 +30,9 @@ LSMOD=/sbin/lsmod
 if [ ! -x $LSMOD ]; then LSMOD=lsmod; fi
 RMMOD=/sbin/rmmod
 if [ ! -x $RMMOD ]; then RMMOD=rmmod; fi
+SEMANAGE=
+RESTORECON=
+
 VGLGENKEY=vglgenkey
 
 usage() {
@@ -462,11 +466,73 @@ ynprompt() {
 	done
 }
 
+checkselinux() {
+	if [ ! "$UNAME_S" = "Linux" ]; then
+		return 0
+	fi
+	if [ -f /selinux/enforce ]; then
+		SELINUX=`cat /selinux/enforce`
+	elif [ -f /sys/fs/selinux/enforce ]; then
+		SELINUX=`cat /sys/fs/selinux/enforce`
+	fi
+	if [ $SELINUX != 1 ]; then
+		return 0;
+	fi
+	if [ -x /usr/sbin/semanage ]; then
+		SEMANAGE=/usr/sbin/semanage
+	else
+		SEMANAGE_TEMP=`which semanage 2>/dev/null`
+		if [ $? = 0 ]; then
+			SEMANAGE=$SEMANAGE_TEMP
+		else
+			echo
+			echo "ERROR: SELinux is enabled, but the semanage program is not installed.  This"
+			echo "program is usually contained in a package called \"policycoreutils\" or"
+			echo "\"policycoreutils-python\" or \"policycoreutils-python-utils\".  On systems with"
+			echo "YUM or DNF, try running \"yum install /usr/sbin/semanage\" or"
+			echo "\"dnf install /usr/sbin/semanage\"."
+			return 1
+		fi
+	fi
+	if [ -x /sbin/restorecon ]; then
+		RESTORECON=/sbin/restorecon
+		return 0
+	else
+		RESTORECON_TEMP=`which restorecon 2>/dev/null`
+		if [ $? = 0 ]; then
+			RESTORECON=$RESTORECON_TEMP
+			return 0
+		else
+			echo
+			echo "ERROR: SELinux is enabled, but the restorecon program is not installed.  This"
+			echo "program is usually contained in a package called \"policycoreutils\".  On systems"
+			echo "with YUM or DNF, try running \"yum install /sbin/restorecon\" or"
+			echo "\"dnf install /sbin/restorecon\"."
+			return 1
+		fi
+	fi
+}
+
 unconfigglx() {
 	if [ -d /etc/opt/VirtualGL ]; then
+		checkselinux || return
 		echo ... Removing /etc/opt/VirtualGL directory ...
 		rm /etc/opt/VirtualGL/* 2>/dev/null
 		rmdir /etc/opt/VirtualGL
+		if [ $SELINUX = 1 ]; then
+			echo ... Removing custom SELinux contexts ...
+			# Try to combine operations (semanage is slow)
+			$SEMANAGE -i - <<EOF >/dev/null
+fcontext -d '/etc/opt/VirtualGL(/.*)?'
+fcontext -d /usr/bin/xauth
+EOF
+			if [ $? = 1 ]; then
+				# That didn't work.  Try the old-fashioned way
+				$SEMANAGE fcontext -d '/etc/opt/VirtualGL(/.*)?'
+				$SEMANAGE fcontext -d /usr/bin/xauth
+			fi
+			$RESTORECON -R -v /usr/bin/xauth
+		fi
 	fi
 
 	if [ -f /etc/X11/xdm/Xsetup_0 -a ! -h /etc/X11/xdm/Xsetup_0 ]; then
@@ -598,6 +664,7 @@ configglx() {
 	fi
 
 	if [ "$VGLUSERSONLY" = "1" ]; then
+		checkselinux || return
 		echo ... Creating vglusers group ...
 		if [ ! "$GID" = "" ]; then
 			$GROUPADD -g $GID vglusers || echo "Could not add vglusers group (probably because it already exists.)"
@@ -612,6 +679,20 @@ configglx() {
 		echo ... Granting read permission to /etc/opt/VirtualGL/ for vglusers group ...
 		chown root:vglusers /etc/opt/VirtualGL
 		chmod 750 /etc/opt/VirtualGL
+		if [ $SELINUX = 1 ]; then
+			echo ... Setting SELinux contexts to allow vglgenkey to run within GDM ...
+			# Try to combine operations (semanage is slow)
+			$SEMANAGE -i - <<EOF >/dev/null
+fcontext -a -t xdm_rw_etc_t '/etc/opt/VirtualGL(/.*)?'
+fcontext -a -t xdm_exec_t /usr/bin/xauth
+EOF
+			if [ $? = 1 ]; then
+				# That didn't work.  Try the old-fashioned way
+				$SEMANAGE fcontext -a -t xdm_rw_etc_t '/etc/opt/VirtualGL(/.*)?'
+				$SEMANAGE fcontext -a -t xdm_exec_t /usr/bin/xauth
+			fi
+			$RESTORECON -R -v /etc/opt/VirtualGL /usr/bin/xauth
+		fi
 	fi
 
 	configdev

@@ -16,6 +16,13 @@ extensions.
 
 2. Fixed compilation errors when building with GCC v6.
 
+3. vglserver_config is now SELinux-aware and will set up the proper file
+contexts to allow vglgenkey to run within the GDM startup scripts.  This has
+been verified with Red Hat Enterprise Linux and work-alike systems (CentOS,
+etc.), but unfortunately the version of GDM that ships in Fedora 22-24 does not
+execute the GDM startup scripts at all.  At the moment, the only workaround for
+those recent Fedora releases is to use LightDM.
+
 
 2.5
 ===
