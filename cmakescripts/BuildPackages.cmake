@@ -129,5 +129,11 @@ add_custom_target(srctarball sh pkgscripts/makesrctarball
 
 configure_file(release/makesrpm.in pkgscripts/makesrpm)
 
+add_custom_target(dist
+	COMMAND git archive --prefix=${CMAKE_PROJECT_NAME}-${VERSION}/ HEAD |
+		gzip > ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-${VERSION}.tar.gz
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 add_custom_target(srpm sh pkgscripts/makesrpm
-	SOURCES pkgscripts/makesrpm)
+	SOURCES pkgscripts/makesrpm
+	DEPENDS dist)
