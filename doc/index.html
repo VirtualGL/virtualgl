@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-07-15T17:11:01">
+<meta name="date" content="2016-08-04T15:09:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -704,6 +704,14 @@ dnf&nbsp;install&nbsp;VirtualGL*.rpm
 </pre>
 
             </dd>
+            <dt class="Description-3 Description">RPM-based systems using YaST2</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+rpm&nbsp;-e&nbsp;VirtualGL&nbsp;--allmatches
+yast2&nbsp;--install&nbsp;VirtualGL*.rpm
+</pre>
+
+            </dd>
             <dt class="Description-3 Description">Other RPM-based systems (dependencies will not be installed automatically)</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
@@ -734,11 +742,11 @@ a few additional steps prior to installing a 32-bit VirtualGL package on
 some of those distributions.</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases</dt>
+    <dt class="Description-1 Description">Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases, SuSE/openSUSE</dt>
     <dd class="Description-1 Description">
-        <br class="itempara" />No additional steps are necessary.  
-        <code>yum&nbsp;install</code>/<code>dnf&nbsp;install</code> takes care 
-        of all of the dependencies for both the 64-bit and 32-bit RPMs.
+        <br class="itempara" />No additional steps are necessary. <code>yum&nbsp;install</code> / 
+        <code>dnf&nbsp;install</code> / <code>yast2&nbsp;--install</code> takes 
+        care of all of the dependencies for both the 64-bit and 32-bit RPMs.
     </dd>
     <dt class="Description-1 Description">Ubuntu 12 and later</dt>
     <dd class="Description-1 Description">

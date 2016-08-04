@@ -39,6 +39,12 @@
 		dnf install VirtualGL*.rpm
 		---
 
+		RPM-based systems using YaST2 :: {:}
+		#Verb <<---
+		rpm -e VirtualGL --allmatches
+		yast2 --install VirtualGL*.rpm
+		---
+
 		Other RPM-based systems (dependencies will not be installed automatically) :: {:}
 		#Verb <<---
 		rpm -e VirtualGL --allmatches
@@ -58,10 +64,11 @@ system libraries.  Recent x86-64 Linux distributions do not include 32-bit
 libraries by default, so it will be necessary to perform a few additional steps
 prior to installing a 32-bit VirtualGL package on some of those distributions.
 
-	Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases :: {:}
+	Red Hat Enterprise Linux 6+ (and work-alikes), Recent Fedora Releases, SuSE/openSUSE :: {:}
 
-	No additional steps are necessary.  ''yum install''/''dnf install'' takes
-	care of all of the dependencies for both the 64-bit and 32-bit RPMs.
+	No additional steps are necessary.
+	''yum install'' / ''dnf install'' / ''yast2 --install'' takes care of all of
+	the dependencies for both the 64-bit and 32-bit RPMs.
 
 	Ubuntu 12 and later :: {:}
 
