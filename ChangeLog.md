@@ -23,6 +23,16 @@ etc.), but unfortunately the version of GDM that ships in Fedora 22-24 does not
 execute the GDM startup scripts at all.  At the moment, the only workaround for
 those recent Fedora releases is to use LightDM.
 
+4. Fixed a deadlock that occurred when exiting ANSYS HFSS 2014.  This fix was
+an extension of 2.3.3[2], necessitated by the fact that MainWin calls X11
+functions from the destructor of one of its shared libraries, which is executed
+after the VGL faker has shut down.  Because VGL 2.5.x enables the XCB
+interposer by default, we have to ensure that any X11 and XCB functions hand
+off immediately to the underlying libraries after the faker has been shut down,
+because even if an X11 function is not interposed by VGL, some of the XCB
+functions it calls might be.  This issue may have also affected other
+applications that use MainWin.
+
 
 2.5
 ===

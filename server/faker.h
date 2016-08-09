@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -70,20 +70,11 @@ static inline int drawingToRight(void)
 }
 
 
-static inline int isDead(void)
-{
-	int retval=0;
-	globalMutex.lock(false);
-	retval=vglfaker::deadYet;
-	globalMutex.unlock(false);
-	return retval;
-}
-
-
 #define DIE(f,m) {  \
-	if(!isDead())  \
+	if(!vglfaker::deadYet)  \
 		vglout.print("[VGL] ERROR: in %s--\n[VGL]    %s\n", f, m);  \
-			vglfaker::safeExit(1);}
+	vglfaker::safeExit(1);  \
+}
 
 
 #define TRY() try {

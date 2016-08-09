@@ -38,10 +38,10 @@ extern "C" {
 
 int XCloseDisplay(Display *dpy)
 {
-	// For reasons unexplained, MainWin apps will sometimes call XCloseDisplay()
-	// after the global instances have been destroyed, so if this has occurred,
-	// we can't access fconfig or vglout or winh without causing deadlocks or
-	// other issues.
+	// MainWin calls various X11 functions from the destructor of one of its
+	// shared libraries, which is executed after the VGL faker has shut down,
+	// so we cannot access fconfig or vglout or winh without causing deadlocks or
+	// other issues.  At this point, all we can safely do is hand off to libX11.
 	if(vglfaker::deadYet) return _XCloseDisplay(dpy);
 
 	int retval=0;
@@ -85,7 +85,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 {
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
 			dest_y);
 
@@ -201,7 +201,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	Window win=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 			border, background);
 
@@ -227,7 +227,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	Window win=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XCreateWindow(dpy, parent, x, y, width, height, border_width,
 			depth, c_class, visual, valuemask, attributes);
 
@@ -268,7 +268,7 @@ int XDestroySubwindows(Display *dpy, Window win)
 	int retval=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XDestroySubwindows(dpy, win);
 
 		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
@@ -288,7 +288,7 @@ int XDestroyWindow(Display *dpy, Window win)
 	int retval=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XDestroyWindow(dpy, win);
 
 		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
@@ -311,7 +311,7 @@ int XFree(void *data)
 	int ret=0;
 	TRY();
 	ret=_XFree(data);
-	if(data && !isDead()) vishash.remove(NULL, (XVisualInfo *)data);
+	if(data && !vglfaker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
 }
@@ -331,7 +331,7 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	unsigned int width=0, height=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XGetGeometry(dpy, drawable, root, x, y, width_return,
 			height_return, border_width, depth);
 
@@ -374,7 +374,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	XImage *xi=NULL;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
 		opentrace(XGetImage);  prargd(dpy);  prargx(drawable);  prargi(x);
@@ -402,7 +402,7 @@ char **XListExtensions(Display *dpy, int *next)
 
 	TRY();
 
-	if(is3D(dpy) || dpyhash.find(dpy))
+	if(vglfaker::deadYet || is3D(dpy) || dpyhash.find(dpy))
 		return _XListExtensions(dpy, next);
 
 		opentrace(XListExtensions);  prargd(dpy);  starttrace();
@@ -489,7 +489,7 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 {
 	Bool retval=True;
 
-	if(is3D(dpy) || dpyhash.find(dpy))
+	if(vglfaker::deadYet || is3D(dpy) || dpyhash.find(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
 		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
@@ -513,7 +513,7 @@ char *XServerVendor(Display *dpy)
 {
 	TRY();
 
-	if(strlen(fconfig.vendor)>0 && !dpyhash.find(dpy))
+	if(strlen(fconfig.vendor)>0 && !vglfaker::deadYet && !dpyhash.find(dpy))
 		return fconfig.vendor;
 	else return _XServerVendor(dpy);
 
@@ -529,6 +529,10 @@ char *XServerVendor(Display *dpy)
 static void handleEvent(Display *dpy, XEvent *xe)
 {
 	VirtualWin *vw=NULL;
+
+	if(vglfaker::deadYet || dpyhash.find(dpy))
+		return;
+
 	if(xe && xe->type==ConfigureNotify)
 	{
 		if(winhash.find(dpy, xe->xconfigure.window, vw))
@@ -572,8 +576,7 @@ Bool XCheckMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 	Bool retval=0;
 	TRY();
 
-	if((retval=_XCheckMaskEvent(dpy, event_mask, xe))==True
-		&& !dpyhash.find(dpy))
+	if((retval=_XCheckMaskEvent(dpy, event_mask, xe))==True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -586,8 +589,7 @@ Bool XCheckTypedEvent(Display *dpy, int event_type, XEvent *xe)
 	Bool retval=0;
 	TRY();
 
-	if((retval=_XCheckTypedEvent(dpy, event_type, xe))==True
-		&& !dpyhash.find(dpy))
+	if((retval=_XCheckTypedEvent(dpy, event_type, xe))==True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -601,8 +603,7 @@ Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type,
 	Bool retval=0;
 	TRY();
 
-	if((retval=_XCheckTypedWindowEvent(dpy, win, event_type, xe))==True
-		&& !dpyhash.find(dpy))
+	if((retval=_XCheckTypedWindowEvent(dpy, win, event_type, xe))==True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -615,8 +616,7 @@ Bool XCheckWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 	Bool retval=0;
 	TRY();
 
-	if((retval=_XCheckWindowEvent(dpy, win, event_mask, xe))==True
-		&& !dpyhash.find(dpy))
+	if((retval=_XCheckWindowEvent(dpy, win, event_mask, xe))==True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -630,7 +630,7 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	int retval=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XConfigureWindow(dpy, win, value_mask, values);
 
 		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
@@ -657,7 +657,7 @@ int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 	TRY();
 
 	retval=_XMaskEvent(dpy, event_mask, xe);
-	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+	handleEvent(dpy, xe);
 
 	CATCH();
 	return retval;
@@ -670,7 +670,7 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	int retval=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
@@ -693,7 +693,7 @@ int XNextEvent(Display *dpy, XEvent *xe)
 	TRY();
 
 	retval=_XNextEvent(dpy, xe);
-	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+	handleEvent(dpy, xe);
 
 	CATCH();
 	return retval;
@@ -706,7 +706,7 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	int retval=0;
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XResizeWindow(dpy, win, width, height);
 
 		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
@@ -729,7 +729,7 @@ int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 	TRY();
 
 	retval=_XWindowEvent(dpy, win, event_mask, xe);
-	if(!dpyhash.find(dpy)) handleEvent(dpy, xe);
+	handleEvent(dpy, xe);
 
 	CATCH();
 	return retval;

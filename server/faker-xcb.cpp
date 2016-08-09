@@ -1,4 +1,4 @@
-/* Copyright (C)2014-2015 D. R. Commander
+/* Copyright (C)2014-2016 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,7 +40,7 @@ const xcb_query_extension_reply_t *
 
 	TRY();
 
-	if(ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
+	if(!vglfaker::deadYet && ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
 		&& vglfaker::getFakerLevel()==0
 		&& !dpyhash.find(xcbconnhash.getX11Display(conn)))
 	{
@@ -79,7 +79,11 @@ xcb_glx_query_version_cookie_t
 
 	TRY();
 
-	if(!fconfig.fakeXCB || vglfaker::getFakerLevel()>0
+	// Note that we have to hand off to the underlying XCB libraries if
+	// vglfaker::deadYet==true, because MainWin calls X11 functions (which in
+	// turn call XCB functions) from one of its shared library destructors,
+	// which is executed after the VGL faker has shut down.
+	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel()>0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
@@ -107,7 +111,7 @@ xcb_glx_query_version_reply_t *
 
 	TRY();
 
-	if(!fconfig.fakeXCB || vglfaker::getFakerLevel()>0
+	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel()>0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
@@ -146,7 +150,9 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 {
 	VirtualWin *vw=NULL;
 
-	if(!e) return;
+	if(!e || vglfaker::deadYet || !fconfig.fakeXCB
+		|| vglfaker::getFakerLevel()>0)
+		return;
 
 	switch(e->response_type & ~0x80)
 	{
@@ -224,8 +230,7 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_poll_for_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::getFakerLevel()==0)
+	if((e=_xcb_poll_for_event(conn))!=NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -240,8 +245,7 @@ xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_poll_for_queued_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::getFakerLevel()==0)
+	if((e=_xcb_poll_for_queued_event(conn))!=NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -256,8 +260,7 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 
 	TRY();
 
-	if((e=_xcb_wait_for_event(conn))!=NULL && fconfig.fakeXCB
-		&& vglfaker::getFakerLevel()==0)
+	if((e=_xcb_wait_for_event(conn))!=NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -272,7 +275,7 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 
 	TRY();
 
-	if(dpyhash.find(dpy))
+	if(vglfaker::deadYet || dpyhash.find(dpy))
 		return _XSetEventQueueOwner(dpy, owner);
 
 		opentrace(XSetEventQueueOwner);  prargd(dpy);  prargi(owner);
