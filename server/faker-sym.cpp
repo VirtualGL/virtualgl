@@ -36,6 +36,22 @@ static void *loadXCBX11Symbol(const char *, bool);
 #endif
 
 
+// Attempt to load the glXGetProcAddress[ARB]() function.  This also checks
+// whether dlsym() is returning our interposed version of
+// glXGetProcAddress[ARB]() instead of the "real" function from libGL.  If so,
+// then it's probably because another DSO in the process is interposing dlsym()
+// (I'm looking at you, Steam.)
+#define FIND_GLXGETPROCADDRESS(f) {  \
+	__glXGetProcAddress=(_##f##Type)dlsym(gldllhnd, #f);  \
+	if(__glXGetProcAddress==f) {  \
+		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real " #f " function\n");  \
+		vglout.print("[VGL]   and got the fake one instead.  Something is terribly wrong.  Aborting\n");  \
+		vglout.print("[VGL]   before chaos ensues.\n");  \
+		vglfaker::safeExit(1);  \
+	}  \
+}
+
+
 namespace vglfaker
 {
 
@@ -95,11 +111,9 @@ static void *loadGLSymbol(const char *name, bool optional)
 		else gldllhnd=RTLD_NEXT;
 
 		dlerror();  // Clear error state
-		__glXGetProcAddress=(_glXGetProcAddressType)dlsym(gldllhnd,
-			"glXGetProcAddress");
+		FIND_GLXGETPROCADDRESS(glXGetProcAddress)
 		if(!__glXGetProcAddress)
-			__glXGetProcAddress=(_glXGetProcAddressType)dlsym(gldllhnd,
-				"glXGetProcAddressARB");
+			FIND_GLXGETPROCADDRESS(glXGetProcAddressARB)
 		err=dlerror();
 
 		if(!__glXGetProcAddress)
