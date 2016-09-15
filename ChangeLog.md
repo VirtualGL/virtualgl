@@ -30,8 +30,8 @@ after the VGL faker has shut down.  Because VGL 2.5.x enables the XCB
 interposer by default, we have to ensure that any X11 and XCB functions hand
 off immediately to the underlying libraries after the faker has been shut down,
 because even if an X11 function is not interposed by VGL, some of the XCB
-functions it calls might be.  This issue may have also affected other
-applications that use MainWin.
+functions it calls might be.  This issue was also known to affect ANSYS Maxwell
+and may have affected other applications that use MainWin.
 
 
 2.5
