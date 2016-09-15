@@ -645,14 +645,6 @@ VFUNCDEF1(glClear, GLbitfield, mask);
 VFUNCDEF4(glClearColor, GLclampf, red, GLclampf, green, GLclampf, blue,
 	GLclampf, alpha);
 
-VFUNCDEF3(glColor3d, GLdouble, red, GLdouble, green, GLdouble, blue);
-
-VFUNCDEF1(glColor3dv, const GLdouble *, v);
-
-VFUNCDEF3(glColor3f, GLfloat, red, GLfloat, green, GLfloat, blue);
-
-VFUNCDEF1(glColor3fv, const GLfloat *, v);
-
 VFUNCDEF5(glCopyPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	GLenum, type);
 
@@ -684,11 +676,7 @@ VFUNCDEF6(glOrtho, GLdouble, left, GLdouble, right, GLdouble, bottom,
 
 VFUNCDEF2(glPixelStorei, GLenum, pname, GLint, param);
 
-VFUNCDEF0(glPopClientAttrib);
-
 VFUNCDEF0(glPopMatrix);
-
-VFUNCDEF1(glPushClientAttrib, GLbitfield, mask);
 
 VFUNCDEF0(glPushMatrix);
 
