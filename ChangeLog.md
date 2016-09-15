@@ -1486,7 +1486,8 @@ even if the client machine is not a SPARC machine.
     The behavior of the `VGL_GAMMA` environment variable has changed as
 follows:
 
-     - `VGL_GAMMA=1` (or `vglrun +g`):  
+     - `VGL_GAMMA=1` (or `vglrun +g`):
+
         Enable gamma correction using the best available method.  If displaying
 to a SPARC X server that has gamma-corrected visuals, try to use those
 gamma-corrected visuals.  Otherwise, enable VGL's internal gamma correction
@@ -1495,14 +1496,16 @@ system with a gamma correction factor of 2.22.
         This is the default when running applications on SPARC VirtualGL
 servers.
 
-     - `VGL_GAMMA=0` (or `vglrun -g`):  
+     - `VGL_GAMMA=0` (or `vglrun -g`):
+
         Do not use gamma-corrected visuals (even if available on the X server),
 and do not use VGL's internal gamma correction system.
 
         This is the default when running applications on non-SPARC VirtualGL
 servers.
 
-     - `VGL_GAMMA={f}` (or `vglrun -gamma {f}`):  
+     - `VGL_GAMMA={f}` (or `vglrun -gamma {f}`):
+
         Do not use gamma-corrected visuals (even if available on the client),
 but enable VGL's internal gamma correction system with a gamma correction
 factor of {f}.
