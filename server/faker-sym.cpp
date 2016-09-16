@@ -133,21 +133,25 @@ static void *loadGLSymbol(const char *name, bool optional)
 		sym=(void *)__glXGetProcAddress;
 	else
 	{
-		#if sun
-
 		// For whatever reason, on Solaris, if a function doesn't exist in libGL,
 		// glXGetProcAddress() will return the address of VGL's interposed
 		// version, which causes an infinite loop until the program blows its stack
-		// and segfaults.  Thus, we use the old reliable dlsym() method.
-		dlerror();  // Clear error state
-		sym=dlsym(gldllhnd, (char *)name);
-		err=dlerror();
-
-		#else
-
-		sym=(void *)__glXGetProcAddress((const GLubyte *)name);
-
-		#endif
+		// and segfaults.  Thus, we use the old reliable dlsym() method by default.
+		// On Linux and FreeBSD, we use glXGetProcAddress[ARB]() by default, to
+		// work around issues with certain drivers, but because Steam's
+		// gameoverlayrenderer.so interposer causes a similar problem to the
+		// aforementioned issue on Solaris, we allow the GL symbol loading method
+		// to be controlled at run time using an environment variable (VGL_DLSYM).
+		if(fconfig.dlsymloader)
+		{
+			dlerror();  // Clear error state
+			sym=dlsym(gldllhnd, (char *)name);
+			err=dlerror();
+		}
+		else
+		{
+			sym=(void *)__glXGetProcAddress((const GLubyte *)name);
+		}
 	}
 
 	if(!sym && (fconfig.verbose || !optional))
