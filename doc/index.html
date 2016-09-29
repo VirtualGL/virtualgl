@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-08-04T15:09:49">
+<meta name="date" content="2016-09-28T19:36:24">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2211,85 +2211,106 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
   <thead class="standard">
   <tr class="head ">
     <th class="head standard">Application</th>
+    <th class="head standard">Versions Known to Require Recipe</th>
     <th class="head standard">Platform</th>
     <th class="head standard">Recipe</th>
     <th class="head standard">Notes</th>
   </tr>
   </thead>
   <tr class="standard">
-    <td class="standard">Abaqus v6</td>
+    <td class="standard">Abaqus</td>
+    <td class="standard">v6</td>
     <td class="standard">Linux</td>
     <td class="standard">It is necessary to add <br /><br /> <code>import&nbsp;os</code><br /> <code>os.environ['ABAQUS_EMULATE_OVERLAYS']&nbsp;=&nbsp;&quot;1&quot;</code> <br /><br /> to <code>/{abaqus_install_dir}/{abaqus_version}/site/abaqus_v6.env</code> to make Abaqus v6 work properly with VirtualGL if the 2D X server does not support transparent overlays.  If this is not done, then the application may fail to launch, fail to display the 3D pixels, or the 3D pixels may become corrupted whenever other windows obscure them.</td>
     <td class="standard">VirtualGL does not redirect the rendering of transparent overlays, since those cannot be rendered in a Pbuffer.  Thus, in order to use transparent overlays, the 2D X server must be able to render them, which is rarely the case for X proxies (see Section <a href="#overlays" class="ref">16.2</a> for more details.)  Setting <code>ABAQUS_EMULATE_OVERLAYS</code> to <code>1</code> causes the application to emulate overlay rendering instead of using actual transparent overlays.  This workaround is known to be necessary when running Abaqus 6.9 and 6.10 in VNC.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Abaqus v6</td>
+    <td class="standard">Abaqus</td>
+    <td class="standard">v6</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-nodl&nbsp;{abaqus_path}/abaqus</code></td>
     <td class="standard">User reports indicate that Abaqus 6.9 will not work properly if <code>libdlfaker.so</code> from VirtualGL is preloaded into it.  This may be true for other versions of Abaqus as well.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Cadence Allegro v16.5</td>
+    <td class="standard">Cadence Allegro</td>
+    <td class="standard">v16.5</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;allegro</code></td>
     <td class="standard">Allegro relies on mixed X11/OpenGL rendering, and thus certain features (specifically the <code>pcb_cursor_infinite</code> cursor style) do not work properly unless <code>VGL_SYNC</code> is enabled.  If <code>VGL_SYNC</code> is not enabled, then the crosshairs may remain on the screen.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Animator 4</td>
+    <td class="standard">Animator</td>
+    <td class="standard">v4</td>
     <td class="standard">Linux</td>
     <td class="standard">Comment out the line that reads <br /><br /> <code>unsetenv&nbsp;LD_PRELOAD</code> <br /><br /> in the <code>a4</code> script, then launch Animator 4 using <br /><br /> <code>vglrun&nbsp;-ge&nbsp;a4</code> <br /><br /></td>
     <td class="standard">When the <code>a4</code> script unsets <code>LD_PRELOAD</code>, this prevents VirtualGL from being loaded into the application.  Animator 4 additionally checks the value of <code>LD_PRELOAD</code> and attempts to unset it from inside the application.  Using <code>vglrun&nbsp;-ge</code> to launch the application fools Animator 4 into thinking that <code>LD_PRELOAD</code> is unset.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">ANSA v12.1.0</td>
+    <td class="standard">ANSA</td>
+    <td class="standard">v12.1.0</td>
     <td class="standard">Linux</td>
     <td class="standard">Add <br /><br /> <code>LD_PRELOAD_SAVE=$LD_PRELOAD</code><br /> <code>export&nbsp;LD_PRELOAD=</code> <br /><br /> to the top of the <code>ansa.sh</code> script, then add <br /><br /> <code>export&nbsp;LD_PRELOAD=$LD_PRELOAD_SAVE</code> <br /><br /> just prior to the <code>${ANSA_EXEC_DIR}bin/ansa_linux${ext2}</code> line.</td>
     <td class="standard">The ANSA startup script directly invokes <code>/lib/libc.so.6</code> to query the glibc version.  Since the VirtualGL faker depends on libc, preloading VirtualGL when directly invoking <code>libc.so.6</code> creates an infinite loop. Thus, it is necessary to disable the preloading of VirtualGL in the application script and then re-enable it prior to launching the actual application.</td>
   </tr>
   <tr class="standard">
     <td class="standard">ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS</td>
+    <td class="standard">All</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_SPOILLAST</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
     <td class="standard">These applications draw node highlighting and/or rubber banding directly to the front buffer.  In order for these front buffer operations to be displayed properly, it is necessary to use the &ldquo;spoil first&rdquo; frame spoiling algorithm whenever the application calls <code>glFlush()</code>.  See Section <a href="#VGL_SPOILLAST" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">AutoForm v4.0x</td>
+    <td class="standard">AutoForm</td>
+    <td class="standard">v4.0x</td>
     <td class="standard">All</td>
     <td class="standard"><code>vglrun&nbsp;+sync&nbsp;xaf_</code><em><code>{version}</code></em></td>
     <td class="standard">AutoForm relies on mixed X11/OpenGL rendering, and thus certain features (particularly the &ldquo;Dynamic Section&rdquo; dialog and &ldquo;Export Image&rdquo; feature) do not work properly unless <code>VGL_SYNC</code> is enabled.  Since <code>VGL_SYNC</code> automatically enables the X11 transport and disables frame spoiling, it is highly recommended that you use an X proxy when <code>VGL_SYNC</code> is enabled. See Section <a href="#VGL_SYNC" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Cedega v6.0.x</td>
+    <td class="standard">Cedega</td>
+    <td class="standard">v6.0.x</td>
     <td class="standard">Linux</td>
     <td class="standard">Add <br /><br /> <code>export&nbsp;LD_PRELOAD=libvglfaker.so</code> <br /><br /> to the top of <code>~/.cedega/.winex_ver/winex-{version}/bin/winex3</code>, then run Cedega as you would normally (without <code>vglrun</code>.)  Since <code>vglrun</code> is not being used, it is necessary to use environment variables or the VirtualGL Configuration dialog to modify VirtualGL&rsquo;s configuration.</td>
     <td class="standard">The actual binary (WineX) that uses OpenGL is buried beneath several layers of Python and shell scripts.  The <code>LD_PRELOAD</code> variable does not get propagated down from the initial shell that invoked <code>vglrun</code>.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Google Chrome/Chromium v31 and later</td>
+    <td class="standard">Google Chrome/Chromium</td>
+    <td class="standard">v31 and later</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--disable-gpu-sandbox</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--disable-gpu-sandbox</code></td>
     <td class="standard">By default, Chrome/Chromium uses a separate process to perform 3D rendering (WebGL), and for reasons that are not yet fully understood, this breaks VirtualGL.  The <code>--disable-gpu-sandbox</code> option causes 3D rendering to be performed within the browser process.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>
+    <td class="standard">All</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_WM</code> environment variable to <code>1</code> prior to launching the window manager with <code>vglrun</code>, or pass an argument of <code>+wm</code> to <code>vglrun</code>.</td>
     <td class="standard">See Section <a href="#VGL_WM" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Heretic II</td>
+    <td class="standard">All</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
     <td class="standard"></td>
   </tr>
   <tr class="standard">
-    <td class="standard">Mathematica 7</td>
+    <td class="standard">Mathematica</td>
+    <td class="standard">v7</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_ALLOWINDIRECT</code> environment variable to <code>1</code> prior to launching the application with <code>vglrun</code></td>
     <td class="standard">Mathematica 7 will not draw the axis numbers on 3D charts correctly unless it is allowed to create an indirect OpenGL context.  See Section <a href="#VGL_ALLOWINDIRECT" class="ref">19.1</a> for further information.</td>
   </tr>
   <tr class="standard">
-    <td class="standard">Tecplot 360 2011 and earlier</td>
+    <td class="standard">MATLAB</td>
+    <td class="standard">All</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun&nbsp;/usr/local/MATLAB/{version}/bin/matlab&nbsp;-nosoftwareopengl</code></td>
+    <td class="standard">MATLAB will automatically use its built-in (unaccelerated) OpenGL implementation if it detects that it is running in a remote display environment.  More specifically, it will always enable software OpenGL if the X server has an X extension called <code>VNC-EXTENSION</code>, which is the case with TurboVNC, TigerVNC, and RealVNC.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Tecplot 360</td>
+    <td class="standard">2011 and earlier</td>
     <td class="standard">Linux</td>
     <td class="standard">Set the <code>VGL_GLFLUSHTRIGGER</code> environment variable to <code>0</code> prior to launching the application with <code>vglrun</code></td>
     <td class="standard">When running in TurboVNC (using VirtualGL), flashing artifacts will be produced when the user zooms/pans/rotates the scene in Tecplot 360, unless VirtualGL is instructed not to use <code>glFlush()</code> as an end-of-frame trigger.  This has been fixed in Tecplot 2012 and later. See Section <a href="#VGL_GLFLUSHTRIGGER" class="ref">19.1</a> for further information.</td>

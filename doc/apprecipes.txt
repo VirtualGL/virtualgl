@@ -1,8 +1,8 @@
 * Other Application Recipes
 {anchor: Application_Recipes}
 
-|| Application || Platform || Recipe || Notes ||
-| Abaqus v6 | Linux \
+|| Application || Versions Known to Require Recipe || Platform || Recipe || Notes ||
+| Abaqus | v6 | Linux \
 	| It is necessary to add \
 		{nl}{nl} \
 		''import os''{nl} \
@@ -22,13 +22,13 @@
 		transparent overlays.  This workaround is known to be necessary when \
 		running Abaqus 6.9 and 6.10 in VNC. \
 	|
-| Abaqus v6 | Linux \
+| Abaqus | v6 | Linux \
 	| ''vglrun -nodl {abaqus_path}/abaqus'' \
 	| User reports indicate that Abaqus 6.9 will not work properly if \
 		''libdlfaker.so'' from VirtualGL is preloaded into it.  This may be true \
 		for other versions of Abaqus as well. \
 	|
-| Cadence Allegro v16.5 | Linux \
+| Cadence Allegro | v16.5 | Linux \
 	| ''vglrun +sync allegro''  \
 	| Allegro relies on mixed X11/OpenGL rendering, and thus certain features \
 		(specifically the ''pcb_cursor_infinite'' cursor style) do not work \
@@ -38,7 +38,7 @@
 		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
 		See {ref prefix="Section ": VGL_SYNC} for further information. \
 	|
-| Animator 4 | Linux \
+| Animator | v4 | Linux \
 	| Comment out the line that reads \
 		{nl}{nl} \
 		''unsetenv LD_PRELOAD'' \
@@ -53,7 +53,7 @@
 		the application.  Using ''vglrun -ge'' to launch the application fools \
 		Animator 4 into thinking that ''LD_PRELOAD'' is unset. \
 	|
-| ANSA v12.1.0 | Linux \
+| ANSA | v12.1.0 | Linux \
 	| Add \
 		{nl}{nl} \
 		''LD_PRELOAD_SAVE=$LD_PRELOAD''{nl} \
@@ -71,7 +71,7 @@
 		application script and then re-enable it prior to launching the actual \
 		application. \
 	|
-| ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS | Linux \
+| ANSYS HFSS, ANSYS ICEM CFD, Roxar RMS | All | Linux \
 	| Set the ''VGL_SPOILLAST'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \
 	| These applications draw node highlighting and/or rubber banding directly to the \
@@ -80,7 +80,7 @@
 		algorithm whenever the application calls ''glFlush()''.  See \
 		{ref prefix="Section ": VGL_SPOILLAST} for further information. \
 	|
-| AutoForm v4.0x | All \
+| AutoForm | v4.0x | All \
 	| ''vglrun +sync xaf_''__''{version}''__ \
 	| AutoForm relies on mixed X11/OpenGL rendering, and thus certain features \
 		(particularly the "Dynamic Section" dialog and "Export Image" feature) do \
@@ -89,7 +89,7 @@
 		is highly recommended that you use an X proxy when ''VGL_SYNC'' is enabled. \
 		See {ref prefix="Section ": VGL_SYNC} for further information. \
 	|
-| Cedega v6.0.x | Linux \
+| Cedega | v6.0.x | Linux \
 	| Add \
 		{nl}{nl} \
 		''export LD_PRELOAD=libvglfaker.so'' \
@@ -102,7 +102,7 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
-| Google Chrome/Chromium v31 and later | Linux \
+| Google Chrome/Chromium | v31 and later | Linux \
 	| ''vglrun google-chrome --disable-gpu-sandbox''{nl} \
 		or{nl} \
 		''vglrun chromium --disable-gpu-sandbox'' \
@@ -111,24 +111,32 @@
 		this breaks VirtualGL.  The ''--disable-gpu-sandbox'' option causes 3D \
 		rendering to be performed within the browser process. \
 	|
-| Compiz | Linux \
+| Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
 		window manager with ''vglrun'', or pass an argument of ''+wm'' to \
 		''vglrun''. \
 	| See {ref prefix="Section ": VGL_WM} for further information. \
 	|
-| Heretic II | Linux \
+| Heretic II | All | Linux \
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
 	|
-| Mathematica 7 | Linux \
+| Mathematica | v7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
 		launching the application with ''vglrun'' \
 	| Mathematica 7 will not draw the axis numbers on 3D charts correctly \
 		unless it is allowed to create an indirect OpenGL context.  See \
 		{ref prefix="Section ": VGL_ALLOWINDIRECT} for further information. \
 	|
-| Tecplot 360 2011 and earlier | Linux \
+| MATLAB | All | Linux \
+	| ''vglrun /usr/local/MATLAB/{version}/bin/matlab -nosoftwareopengl'' \
+	| MATLAB will automatically use its built-in (unaccelerated) OpenGL \
+		implementation if it detects that it is running in a remote display \
+		environment.  More specifically, it will always enable software OpenGL \
+		if the X server has an X extension called ''VNC-EXTENSION'', which is \
+		the case with TurboVNC, TigerVNC, and RealVNC. \
+	|
+| Tecplot 360 | 2011 and earlier | Linux \
 	| Set the ''VGL_GLFLUSHTRIGGER'' environment variable to ''0'' prior to \
 		launching the application with ''vglrun'' \
 	| When running in TurboVNC (using VirtualGL), flashing artifacts will be \
