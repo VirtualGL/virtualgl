@@ -121,6 +121,22 @@
 	| ''vglrun heretic2 +set vid_ref glx'' \
 	| {:} \
 	|
+| Intel OpenCL ICD | All | Linux \
+	| ''vglrun -ld {path_to_Intel_OpenCL_libs} {application}'' \
+	| The Intel OpenCL installable client driver (ICD) is linked with a \
+		run-time library search path (rpath) of ''$ORIGIN'', which would normally \
+		have the same effect as adding the directory in which the ICD is \
+		installed (default: ''/opt/intel/opencl/lib64'' on 64-bit systems) to \
+		''LD_LIBRARY_PATH''.  However, when VirtualGL is interposing the \
+		''dlopen()'' function (which it does by default), this causes the actual \
+		''dlopen()'' system calls to come from ''libdlfaker.so'', so ''$ORIGIN'' \
+		will resolve to the directory in which the VirtualGL faker libraries are \
+		installed.  This causes the ''dlopen()'' calls within the Intel ICD to \
+		fail, and because the ICD apparently does not check the return value of \
+		those calls, a segfault occurs.  The workaround is simply to add the \
+		Intel ICD library path to ''LD_LIBRARY_PATH'', which is most easily \
+		accomplished with ''vglrun -ld''. \
+	|
 | Mathematica | v7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
 		launching the application with ''vglrun'' \

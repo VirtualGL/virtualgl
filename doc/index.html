@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-09-28T19:36:24">
+<meta name="date" content="2016-09-30T19:54:00">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2293,6 +2293,13 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;heretic2&nbsp;+set&nbsp;vid_ref&nbsp;glx</code></td>
     <td class="standard"></td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Intel OpenCL ICD</td>
+    <td class="standard">All</td>
+    <td class="standard">Linux</td>
+    <td class="standard"><code>vglrun&nbsp;-ld&nbsp;{path_to_Intel_OpenCL_libs}&nbsp;{application}</code></td>
+    <td class="standard">The Intel OpenCL installable client driver (ICD) is linked with a run-time library search path (rpath) of <code>$ORIGIN</code>, which would normally have the same effect as adding the directory in which the ICD is installed (default: <code>/opt/intel/opencl/lib64</code> on 64-bit systems) to <code>LD_LIBRARY_PATH</code>.  However, when VirtualGL is interposing the <code>dlopen()</code> function (which it does by default), this causes the actual <code>dlopen()</code> system calls to come from <code>libdlfaker.so</code>, so <code>$ORIGIN</code> will resolve to the directory in which the VirtualGL faker libraries are installed.  This causes the <code>dlopen()</code> calls within the Intel ICD to fail, and because the ICD apparently does not check the return value of those calls, a segfault occurs.  The workaround is simply to add the Intel ICD library path to <code>LD_LIBRARY_PATH</code>, which is most easily accomplished with <code>vglrun&nbsp;-ld</code>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Mathematica</td>
