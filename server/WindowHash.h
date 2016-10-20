@@ -155,21 +155,27 @@ namespace vglserver
 
 			bool compare(char *key1, Window key2, HashEntry *entry)
 			{
+				Display *dpy = NULL;
+				char *name = NULL;
 				VirtualWin *vw=entry->value;
+				if (vw != NULL)
+					dpy = vw->getX11Display();
+					if (dpy != NULL)
+						name = DisplayString(dpy);
 				return (
 					// Match 2D X Server display string and Window ID stored in
 					// VirtualDrawable instance
-					(vw && vw!=(VirtualWin *)-1 && key1
-						&& !strcasecmp(DisplayString(vw->getX11Display()), key1)
+					(vw != NULL && vw!=(VirtualWin *)-1 && key1 != NULL
+						&& name != NULL && !strcasecmp(name, key1)
 						&& key2==vw->getX11Drawable())
 					||
 					// If key1 is NULL, match off-screen drawable ID instead of X Window
 					// ID
-					(vw && vw!=(VirtualWin *)-1 && key1==NULL
+					(vw != NULL && vw!=(VirtualWin *)-1 && key1==NULL
 						&& key2==vw->getGLXDrawable())
 					||
 					// Direct match
-					(key1 && !strcasecmp(key1, entry->key1) && key2==entry->key2)
+					(key1 != NULL && !strcasecmp(key1, entry->key1) && key2==entry->key2)
 				);
 			}
 
