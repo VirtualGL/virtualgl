@@ -30,7 +30,7 @@ namespace vglfaker
 {
 	extern Display *dpy3D;
 	extern void safeExit(int);
-	extern int deadYet;
+	extern bool deadYet;
 	extern long getTraceLevel(void);
 	extern void setTraceLevel(long level);
 	#ifdef FAKEXCB
