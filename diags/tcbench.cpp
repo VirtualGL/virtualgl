@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2006-2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014 D. R. Commander
+ * Copyright (C)2011, 2013-2014, 2016 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -64,17 +64,17 @@ char *program_name;
 void usage(void)
 {
 	printf("\n");
-	printf("USAGE: %s [-h|-?]\n", program_name);
-	printf("       [-t <seconds>] [-s <samples per second>]\n");
-	printf("       [-wh <window handle in hex>] [-x <x offset>] [-y <y offset>]\n\n");
+	printf("USAGE: %s [options]\n\n", program_name);
+	printf("Options:\n");
 	printf("-h or -? = This help screen\n");
-	printf("-t = Run the benchmark for this many seconds (default: %.1f)\n",
-		DEFBENCHTIME);
-	printf("-s = Sample the window this many times per second (default: %d)\n",
+	printf("-s <s> = Sample the window <s> times per second (default: %d)\n",
 		DEFSAMPLERATE);
-	printf("-wh = Explicitly specify a window (if auto-detect fails)\n");
-	printf("-x = x coordinate (relative to window) of the sampling block\n");
-	printf("-y = y coordinate (relative to window) of the sampling block\n\n");
+	printf("-t <t> = Run the benchmark for <t> seconds (default: %.1f)\n",
+		DEFBENCHTIME);
+	printf("-wh <wh> = Explicitly specify a window, if auto-detect fails\n");
+	printf("           (<wh> is the window handle in hex)\n");
+	printf("-x <x> = specify x offset of the sampling block, relative to the window\n");
+	printf("-y <y> = specify y offset of the sampling block, relative to the window\n");
 	exit(1);
 }
 
