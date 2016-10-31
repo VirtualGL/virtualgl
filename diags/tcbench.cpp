@@ -58,6 +58,31 @@ char errMsg[256];
 
 #ifdef _WIN32
 char *program_name;
+
+#define MOVE_MOUSE() {  \
+	for(i=0; i<4; i++) {  \
+		inputs[i].type=INPUT_MOUSE;  \
+		inputs[i].mi.dwFlags=downFlags|MOUSEEVENTF_MOVE|  \
+			MOUSEEVENTF_MOVE_NOCOALESCE|MOUSEEVENTF_ABSOLUTE;  \
+		inputs[i].mi.dx=65535*currentX/GetSystemMetrics(SM_CXSCREEN);  \
+		inputs[i].mi.dy=65535*currentY/GetSystemMetrics(SM_CYSCREEN);  \
+		if(moveX>0) {  \
+			currentX+=incX;  \
+			if(currentX<=winRect.left+x+16-moveX ||  \
+				currentX>=winRect.left+x+16+moveX)  \
+				incX=-incX;  \
+		}  \
+		if(moveY>0) {  \
+			currentY+=incY;  \
+			if(currentY<=winRect.top+y+16-moveY ||  \
+				currentY>=winRect.top+y+16+moveY)  \
+				incY=-incY;  \
+		}  \
+	}  \
+	if(!SendInput(4, inputs, sizeof(INPUT)))  \
+		_throww32("Could not inject mouse events");  \
+}
+
 #endif
 
 
@@ -67,6 +92,20 @@ void usage(void)
 	printf("USAGE: %s [options]\n\n", program_name);
 	printf("Options:\n");
 	printf("-h or -? = This help screen\n");
+	#ifdef _WIN32
+	printf("-lb = Simulate holding down the left mouse button while the benchmark is\n");
+	printf("      running\n");
+	printf("-mb = Simulate holding down the middle mouse button while the benchmark is\n");
+	printf("      running\n");
+	printf("-mx <p> = Simulate continuous horizontal mouse movement while the benchmark\n");
+	printf("          is running (<p> specifies the maximum range of motion, in pixels,\n");
+	printf("          relative to the center of the sampling block)\n");
+	printf("-my <p> = Simulate continuous vertical mouse movement while the benchmark\n");
+	printf("          is running (<p> specifies the maximum range of motion, in pixels,\n");
+	printf("          relative to the center of the sampling block)\n");
+	printf("-rb = Simulate holding down the right mouse button while the benchmark is\n");
+	printf("      running\n");
+	#endif
 	printf("-s <s> = Sample the window <s> times per second (default: %d)\n",
 		DEFSAMPLERATE);
 	printf("-t <t> = Run the benchmark for <t> seconds (default: %.1f)\n",
@@ -84,6 +123,12 @@ int main(int argc, char **argv)
 	int i;  fbx_wh wh;
 	double benchTime=DEFBENCHTIME, elapsed;  Timer timer;
 	int sampleRate=DEFSAMPLERATE, x=-1, y=-1;
+	#ifdef _WIN32
+	INPUT inputs[4];
+	RECT winRect;
+	int moveX=0, moveY=0, incX=-1, incY=-1, currentX, currentY;
+	DWORD downFlags=0, upFlags=0;
+	#endif
 
 	program_name=argv[0];
 	memset(&wh, 0, sizeof(wh));
@@ -119,6 +164,33 @@ int main(int argc, char **argv)
 			if(sscanf(argv[++i], "%x", &temp)==1) wh.d=(Drawable)temp;
 			#endif
 		}
+		#ifdef _WIN32
+		if(!stricmp(argv[i], "-mx") && i<argc-1)
+		{
+			int temp=0;
+			if(sscanf(argv[++i], "%d", &temp)==1 && temp>0) moveX=temp;
+		}
+		if(!stricmp(argv[i], "-my") && i<argc-1)
+		{
+			int temp=0;
+			if(sscanf(argv[++i], "%d", &temp)==1 && temp>0) moveY=temp;
+		}
+		if(!stricmp(argv[i], "-lb"))
+		{
+			downFlags|=MOUSEEVENTF_LEFTDOWN;
+			upFlags|=MOUSEEVENTF_LEFTUP;
+		}
+		if(!stricmp(argv[i], "-mb"))
+		{
+			downFlags|=MOUSEEVENTF_MIDDLEDOWN;
+			upFlags|=MOUSEEVENTF_MIDDLEUP;
+		}
+		if(!stricmp(argv[i], "-rb"))
+		{
+			downFlags|=MOUSEEVENTF_RIGHTDOWN;
+			upFlags|=MOUSEEVENTF_RIGHTUP;
+		}
+		#endif
 	}
 
 	printf("\nThin Client Benchmark\n");
@@ -189,10 +261,29 @@ int main(int argc, char **argv)
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	#endif
 
+	#ifdef _WIN32
+	if(moveX>0)
+		printf("Simulating horizontal mouse movement +/- %d pixels\n", moveX);
+	if(moveY>0)
+		printf("Simulating vertical mouse movement +/- %d pixels\n", moveY);
+	if(moveX>0 || moveY>0)
+	{
+		memset(inputs, 0, sizeof(INPUT)*4);
+		if(!GetWindowRect(wh, &winRect))
+			_throww32("Could not get window rectangle");
+		currentX=winRect.left+x+(moveY>0 ? 40:16);
+		currentY=winRect.top+y+(moveX>0 ? 40:16);
+		MOVE_MOUSE();
+	}
+	#endif
 	timer.start();
 	do
 	{
 		_fbx(fbx_read(&fb, x, y));
+		#ifdef _WIN32
+		if(moveX>0 || moveY>0)
+			MOVE_MOUSE();
+		#endif
 		samples++;
 		if(first)
 		{
@@ -214,6 +305,8 @@ int main(int argc, char **argv)
 	} while((elapsed=timer.elapsed())<benchTime);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+	inputs[3].mi.dwFlags=upFlags;
+	SendInput(1, &inputs[3], sizeof(INPUT));
 	#endif
 
 	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples,
