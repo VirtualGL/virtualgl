@@ -256,7 +256,9 @@ else()
 	message(STATUS "X Video not available")
 endif()
 
-include(cmakescripts/FindTurboJPEG.cmake)
+if(NOT WIN32)
+	include(cmakescripts/FindTurboJPEG.cmake)
+endif()
 
 if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
 	set(LIBDL dl)
