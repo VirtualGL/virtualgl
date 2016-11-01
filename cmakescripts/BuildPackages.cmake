@@ -129,9 +129,13 @@ add_custom_target(srctarball sh pkgscripts/makesrctarball
 
 configure_file(release/makesrpm.in pkgscripts/makesrpm)
 
+set(PROJECT_NAME ${CMAKE_PROJECT_NAME})
+if(WIN32)
+	string(REGEX REPLACE "-Utils" "" PROJECT_NAME ${CMAKE_PROJECT_NAME})
+endif()
 add_custom_target(dist
-	COMMAND git archive --prefix=${CMAKE_PROJECT_NAME}-${VERSION}/ HEAD |
-		gzip > ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-${VERSION}.tar.gz
+	COMMAND git archive --prefix=${PROJECT_NAME}-${VERSION}/ HEAD |
+		gzip > ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.tar.gz
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(srpm sh pkgscripts/makesrpm
