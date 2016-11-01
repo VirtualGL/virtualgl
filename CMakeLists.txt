@@ -19,7 +19,7 @@ if(WIN32)
 else()
 	project(VirtualGL)
 endif()
-set(VERSION 2.5.1)
+set(VERSION 2.5.2)
 
 string(TIMESTAMP BUILD "%Y%m%d")
 
