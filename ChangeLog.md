@@ -10,6 +10,13 @@ non-OpenGL X11 applications from opening unnecessary connections to the 3D X
 server, which could exhaust the X server's limit of 256 connections if many
 users are sharing the system.
 
+2. Fixed a regression caused by 2.4.1[6] whereby applications launched with
+VirtualGL on nVidia GPUs would fail to obtain a visual if `VGL_SAMPLES` was
+greater than 0.  Multisampling cannot be used with Pixmap rendering, and
+because nVidia's drivers export different FB configs for `GLX_PBUFFER_BIT` and
+`GLX_PBUFFER_BIT|GLX_PIXMAP_BIT`, it it necessary to specify `GLX_PBUFFER_BIT`
+to obtain an FB config that supports multisampling.
+
 
 2.5.1
 =====

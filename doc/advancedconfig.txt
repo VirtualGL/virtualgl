@@ -601,6 +601,10 @@ Each method of configuration takes precedence over the previous method:
 	no effect if the application is not explicitly choosing a visual.  In that
 	case, use [[#VGL_DEFAULTFBCONFIG][''VGL_DEFAULTFBCONFIG'']] instead.
 
+	!!! Multisampling cannot be used with Pixmap rendering.  Any application
+	that uses Pixmap rendering will fail if ''VGL_SAMPLES'' is set to a value
+	other than 0.
+
 {anchor: VGL_SPOIL}
 | Environment Variable | ''VGL_SPOIL = ''__''0 \| 1''__ |
 | ''vglrun'' argument | ''-sp'' / ''+sp'' |

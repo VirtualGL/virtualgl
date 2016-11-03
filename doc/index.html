@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-11-01T12:15:34">
+<meta name="date" content="2016-11-03T13:20:18">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -4174,6 +4174,9 @@ If &ldquo;Custom (if supported)&rdquo; is listed as one of the available Image T
         if the 3D application explicitly tries to enable it.
         <div class="important"><p class="important">
         <code>VGL_SAMPLES</code> overrides the application&rsquo;s choice of visuals.  It has no effect if the application is not explicitly choosing a visual.  In that case, use <a href="#VGL_DEFAULTFBCONFIG"><code>VGL_DEFAULTFBCONFIG</code></a><a name="idx0052"></a> instead.
+        </p></div>
+        <div class="important"><p class="important">
+        Multisampling cannot be used with Pixmap rendering.  Any application that uses Pixmap rendering will fail if <code>VGL_SAMPLES</code> is set to a value other than 0.
         </p></div>
     </dd>
 </dl>
