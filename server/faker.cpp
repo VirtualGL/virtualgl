@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2015 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -39,9 +39,7 @@ namespace vglfaker
 Display *dpy3D=NULL;
 bool deadYet=false;
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
-#ifdef FAKEXCB
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
-#endif
 VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
 
 
@@ -132,19 +130,32 @@ void init(void)
 		fgetc(stdin);
 	}
 	if(fconfig.trapx11) XSetErrorHandler(xhandler);
+}
+
+
+Display *init3D(void)
+{
+	init();
 
 	if(!dpy3D)
 	{
-		if(fconfig.verbose)
-			vglout.println("[VGL] Opening connection to 3D X server %s",
-				strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
-		if((dpy3D=_XOpenDisplay(fconfig.localdpystring))==NULL)
+		GlobalCriticalSection::SafeLock l(globalMutex);
+		if(!dpy3D)
 		{
-			vglout.print("[VGL] ERROR: Could not open display %s.\n",
-				fconfig.localdpystring);
-			safeExit(1);
+			if(fconfig.verbose)
+				vglout.println("[VGL] Opening connection to 3D X server %s",
+					strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
+			if((dpy3D=_XOpenDisplay(fconfig.localdpystring))==NULL)
+			{
+				vglout.print("[VGL] ERROR: Could not open display %s.\n",
+					fconfig.localdpystring);
+				safeExit(1);
+				return NULL;
+			}
 		}
 	}
+
+	return dpy3D;
 }
 
 

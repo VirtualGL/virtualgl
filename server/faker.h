@@ -29,22 +29,22 @@
 namespace vglfaker
 {
 	extern Display *dpy3D;
+	extern Display *init3D(void);
 	extern void safeExit(int);
 	extern int deadYet;
 	extern long getTraceLevel(void);
 	extern void setTraceLevel(long level);
-	#ifdef FAKEXCB
 	extern long getFakerLevel(void);
 	extern void setFakerLevel(long level);
-	#endif
 	extern bool excludeDisplay(char *name);
 	extern bool getExcludeCurrent(void);
 	extern void setExcludeCurrent(bool excludeCurrent);
 }
 
-#define _dpy3D vglfaker::dpy3D
+#define _dpy3D vglfaker::init3D()
 
-#define is3D(dpy) (vglfaker::dpy3D && dpy==vglfaker::dpy3D)
+#define isExcluded(dpy)  \
+	(vglfaker::deadYet || vglfaker::getFakerLevel()>0 || dpyhash.find(dpy))
 
 #define isFront(drawbuf) (drawbuf==GL_FRONT || drawbuf==GL_FRONT_AND_BACK \
 	|| drawbuf==GL_FRONT_LEFT || drawbuf==GL_FRONT_RIGHT || drawbuf==GL_LEFT \

@@ -1,3 +1,16 @@
+2.5.2
+=====
+
+### Significant changes relative to 2.5.1:
+
+1. Previously, the VirtualGL faker opened a connection to the 3D X server
+whenever an application called XOpenDisplay().  The faker now waits until the
+3D X server is actually needed before opening the connection.  This prevents
+non-OpenGL X11 applications from opening unnecessary connections to the 3D X
+server, which could exhaust the X server's limit of 256 connections if many
+users are sharing the system.
+
+
 2.5.1
 =====
 

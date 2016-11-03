@@ -49,8 +49,7 @@ const xcb_query_extension_reply_t *
 			prargi(ext->global_id);
 			starttrace();
 
-		vglfaker::init();
-		xcb_connection_t *conn3D=_XGetXCBConnection(vglfaker::dpy3D);
+		xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
 		if(conn3D!=NULL)
 			reply=_xcb_get_extension_data(conn3D, _xcb_glx_id());
 
@@ -90,8 +89,7 @@ xcb_glx_query_version_cookie_t
 		opentrace(xcb_glx_query_version);  prargx(conn);  prargi(major_version);
 		prargi(minor_version);  starttrace();
 
-	vglfaker::init();
-	xcb_connection_t *conn3D=_XGetXCBConnection(vglfaker::dpy3D);
+	xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
 	if(conn3D!=NULL)
 		cookie=_xcb_glx_query_version(conn3D, major_version, minor_version);
 
@@ -118,8 +116,7 @@ xcb_glx_query_version_reply_t *
 		opentrace(xcb_glx_query_version_reply);  prargx(conn);
 		starttrace();
 
-	vglfaker::init();
-	xcb_connection_t *conn3D=_XGetXCBConnection(vglfaker::dpy3D);
+	xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
 	if(conn3D!=NULL)
 		reply=_xcb_glx_query_version_reply(conn3D, cookie, error);
 

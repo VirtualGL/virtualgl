@@ -45,10 +45,8 @@ namespace vglfaker
 {
 	extern void safeExit(int);
 	extern void init(void);
-	#ifdef FAKEXCB
 	extern long getFakerLevel(void);
 	extern void setFakerLevel(long level);
-	#endif
 
 	void *loadSymbol(const char *name, bool optional=false);
 	void unloadSymbols(void);
@@ -85,13 +83,8 @@ namespace vglfaker
 #endif
 
 
-#ifdef FAKEXCB
-#define DISABLE_FAKEXCB() vglfaker::setFakerLevel(vglfaker::getFakerLevel()+1);
-#define ENABLE_FAKEXCB()  vglfaker::setFakerLevel(vglfaker::getFakerLevel()-1);
-#else
-#define DISABLE_FAKEXCB()
-#define ENABLE_FAKEXCB()
-#endif
+#define DISABLE_FAKER() vglfaker::setFakerLevel(vglfaker::getFakerLevel()+1);
+#define ENABLE_FAKER()  vglfaker::setFakerLevel(vglfaker::getFakerLevel()-1);
 
 
 #define FUNCDEF0(RetType, f, fake_f) \
@@ -100,9 +93,9 @@ namespace vglfaker
 	static inline RetType _##f(void) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -111,9 +104,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(void) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF1(RetType, f, at1, a1, fake_f) \
@@ -122,9 +115,9 @@ namespace vglfaker
 	static inline RetType _##f(at1 a1) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -133,9 +126,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF2(RetType, f, at1, a1, at2, a2, fake_f) \
@@ -144,9 +137,9 @@ namespace vglfaker
 	static inline RetType _##f(at1 a1, at2 a2) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -155,9 +148,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF3(RetType, f, at1, a1, at2, a2, at3, a3, fake_f) \
@@ -166,9 +159,9 @@ namespace vglfaker
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -177,9 +170,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2, at3 a3) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2, a3); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF4(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, fake_f) \
@@ -188,9 +181,9 @@ namespace vglfaker
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -199,9 +192,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF5(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
@@ -211,9 +204,9 @@ namespace vglfaker
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -222,9 +215,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define VFUNCDEF6(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, at6, a6, \
@@ -233,9 +226,9 @@ namespace vglfaker
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5, a6); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF6(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
@@ -246,9 +239,9 @@ namespace vglfaker
 		at6 a6) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5, a6); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -259,9 +252,9 @@ namespace vglfaker
 	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7) { \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5, a6, a7); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 	}
 
 #define FUNCDEF8(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, \
@@ -272,9 +265,9 @@ namespace vglfaker
 		at7 a7, at8 a8) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -286,9 +279,9 @@ namespace vglfaker
 		at7 a7, at8 a8, at9 a9) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -301,9 +294,9 @@ namespace vglfaker
 		at7 a7, at8 a8, at9 a9, at10 a10) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
@@ -317,9 +310,9 @@ namespace vglfaker
 		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) { \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
-		DISABLE_FAKEXCB(); \
+		DISABLE_FAKER(); \
 		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
-		ENABLE_FAKEXCB(); \
+		ENABLE_FAKER(); \
 		return retval; \
 	}
 
