@@ -122,11 +122,6 @@ endif() # APPLE
 # Generic
 #
 
-configure_file(release/makesrctarball.in pkgscripts/makesrctarball)
-
-add_custom_target(srctarball sh pkgscripts/makesrctarball
-	SOURCES pkgscripts/makesrctarball)
-
 configure_file(release/makesrpm.in pkgscripts/makesrpm)
 
 set(PROJECT_NAME ${CMAKE_PROJECT_NAME})
