@@ -78,15 +78,20 @@ if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
 
+set(MINUSZ "-z ")
+if(CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	set(MINUSZ "-Wl,-z,")
+endif()
+
 foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
 	if(MAPFLAG)
 		set_source_files_properties(faker-sym.cpp PROPERTIES
 			OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
 		set_target_properties(${fakerlib} PROPERTIES
-			LINK_FLAGS "-z defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
+			LINK_FLAGS "${MINUSZ}defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
 	else()
-		set_target_properties(${fakerlib} PROPERTIES LINK_FLAGS "-z defs")
+		set_target_properties(${fakerlib} PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 	endif()
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
@@ -106,7 +111,7 @@ target_link_libraries(${VGL_DLFAKER_NAME} ${LIBDL})
 install(TARGETS ${VGL_DLFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 add_library(${VGL_GEFAKER_NAME} SHARED gefaker.c)
-set_target_properties(${VGL_GEFAKER_NAME} PROPERTIES LINK_FLAGS "-z defs")
+set_target_properties(${VGL_GEFAKER_NAME} PROPERTIES LINK_FLAGS "${MINUSZ}defs")
 target_link_libraries(${VGL_GEFAKER_NAME} ${LIBDL})
 install(TARGETS ${VGL_GEFAKER_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -155,8 +160,8 @@ target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
 add_executable(fakerut fakerut.cpp fakerut-supplement.c)
-target_link_libraries(fakerut "-z now ${OPENGL_gl_LIBRARY}"
-	${OPENGL_glu_LIBRARY} "-z now ${X11_X11_LIB}" ${LIBDL} vglutil)
+target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
+	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil)
 
 add_library(vgltrans_test SHARED testplugin.cpp VGLTrans.cpp)
 if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
