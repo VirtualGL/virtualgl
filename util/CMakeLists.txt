@@ -17,16 +17,16 @@ endif()
 if(VGL_USESSL)
 	target_link_libraries(vglsocket ${OPENSSL_LIBRARIES})
 endif()
-if(${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
 	target_link_libraries(vglsocket socket xnet)
 endif()
 
 add_executable(nettest nettest.cpp)
 target_link_libraries(nettest vglsocket)
-if(${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
 	target_link_libraries(nettest kstat)
 endif()
-install(TARGETS nettest DESTINATION ${VGL_BINDIR})
+install(TARGETS nettest DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_library(fbx STATIC fbx.c)
 
@@ -73,7 +73,7 @@ if(UNIX)
 	target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
 		${X11_X11_LIB} ${IFRLIB})
 	if(VGL_BUILDSERVER)
-		install(TARGETS glreadtest DESTINATION ${VGL_BINDIR})
+		install(TARGETS glreadtest DESTINATION ${CMAKE_INSTALL_BINDIR})
 	endif()
 endif()
 

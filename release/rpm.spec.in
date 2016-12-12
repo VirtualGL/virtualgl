@@ -8,11 +8,11 @@
 %define prefix @CMAKE_INSTALL_PREFIX@
 
 # Path under which executables and scripts should be installed
-%define bindir @VGL_BINDIR@
+%define bindir @CMAKE_INSTALL_FULL_BINDIR@
 
 # Create symlinks in %{_bindir} (usually /usr/bin), assuming
 # %{bindir} != %{_bindir}
-%define binsymlinks 1
+%define binsymlinks @VGL_BINSYMLINKS@
 
 %ifarch x86_64
 %define _syslibdir /usr/lib64
@@ -24,27 +24,26 @@
 %define libdir %{_syslibdir}
 
 # Path under which the VirtualGL transport API headers should be installed
-%define incdir @VGL_INCDIR@
+%define incdir @CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 # Create symlinks in %{_includedir} (usually /usr/include), assuming
 # %{incdir} != %{_includedir}
-%define incsymlinks 1
+%define incsymlinks @VGL_INCSYMLINKS@
 
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
 Summary: A toolkit for displaying OpenGL applications to thin clients
-Name: @CMAKE_PROJECT_NAME@
+Name: @PKGNAME@
 Version: @VERSION@
-Vendor: The VirtualGL Project
-URL: http://www.virtualgl.org
+Vendor: @PKGVENDOR@
+URL: @PKGURL@
 Group: Applications/Graphics
-#-->Source0: http://prdownloads.sourceforge.net/virtualgl/VirtualGL-%{version}.tar.gz
+#-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME@-%{version}.tar.gz
 Release: @BUILD@
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
 Prereq: /sbin/ldconfig
-Provides: %{name} = %{version}-%{release}
 
 %description
 VirtualGL is a toolkit that allows most Unix/Linux OpenGL applications to be
@@ -76,10 +75,16 @@ Interactive Hardware Accelerated Remote 3D-Visualization" (Engel, Sommer,
 Ertl 2000.)
 
 #-->%prep
-#-->%setup -q
+#-->%setup -q -n @CMAKE_PROJECT_NAME@-%{version}
 
 #-->%build
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DVGL_BINDIR=%{bindir} -DVGL_DOCDIR=%{docdir} -DVGL_LIBDIR=%{libdir} -DVGL_INCDIR=%{incdir} -DVGL_USEXV=@VGL_USEXV@ -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
+#-->cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
+#-->  -DBUILD=%{release} -DCMAKE_INSTALL_BINDIR=%{bindir} \
+#-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_INCLUDEDIR=%{incdir} \
+#-->  -DCMAKE_INSTALL_LIBDIR=%{libdir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
+#-->  -DVGL_BUILDSERVER=@VGL_BUILDSERVER@ -DVGL_SYSTEMFLTK=@VGL_SYSTEMFLTK@ \
+#-->  -DVGL_SYSTEMGLX=@VGL_SYSTEMGLX@ -DVGL_SYSTEMXCB=@VGL_SYSTEMXCB@ \
+#-->  -DVGL_USESSL=@VGL_USESSL@ -DVGL_USEXV=@VGL_USEXV@
 #-->make
 
 %install
@@ -137,19 +142,19 @@ safedirmove ()
 	return 0
 }
 
-VGL_DOCDIR=@VGL_DOCDIR@
+VGL_DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 if [ ! "$VGL_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$VGL_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 
-VGL_LIBDIR=@VGL_LIBDIR@
+VGL_LIBDIR=@CMAKE_INSTALL_FULL_LIBDIR@
 if [ ! "$VGL_LIBDIR" = "%{libdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$VGL_LIBDIR $RPM_BUILD_ROOT/%{libdir} $RPM_BUILD_ROOT/__tmplib
 fi
 
 #-->%endif
 
-%if "%{prefix}" == "/opt/VirtualGL" && "%{docdir}" != "%{prefix}/doc"
+%if "%{prefix}" == "@CMAKE_INSTALL_DEFAULT_PREFIX@" && "%{docdir}" != "%{prefix}/doc"
 	ln -fs %{docdir} $RPM_BUILD_ROOT/%{prefix}/doc
 %endif
 
@@ -170,7 +175,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %defattr(-,root,root)
 
 %dir %{prefix}
-%if "%{prefix}" == "/opt/VirtualGL" && "%{docdir}" != "%{prefix}/doc"
+%if "%{prefix}" == "@CMAKE_INSTALL_DEFAULT_PREFIX@" && "%{docdir}" != "%{prefix}/doc"
  %{prefix}/doc
 %endif
 

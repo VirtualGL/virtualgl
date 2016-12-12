@@ -39,19 +39,18 @@ Build Requirements
 
 - MinGW
 
-  [MinGW-builds](http://sourceforge.net/projects/mingwbuilds/) or
-  [tdm-gcc](http://tdm-gcc.tdragon.net/) recommended if building on a Windows
-  machine.  Both distributions install a Start Menu link that can be used to
-  launch a command prompt with the appropriate compiler paths automatically
-  set.
+  [MSYS2](http://msys2.github.io/) or [tdm-gcc](http://tdm-gcc.tdragon.net/)
+  recommended if building on a Windows machine.  Both distributions install a
+  Start Menu link that can be used to launch a command prompt with the
+  appropriate compiler paths automatically set.
 
 
 Out-of-Tree Builds
 ------------------
 
-Binary objects, libraries, and executables are generated in the same directory
-from which CMake was executed (the "binary directory"), and this directory need
-not necessarily be the same as the VirtualGL source directory.  You can create
+Binary objects, libraries, and executables are generated in the directory from
+which CMake is executed (the "binary directory"), and this directory need not
+necessarily be the same as the VirtualGL source directory.  You can create
 multiple independent binary directories, in which different versions of
 VirtualGL-Utils can be built from the same source tree using different
 compilers or settings.  In the sections below, *{build_directory}* refers to
@@ -66,11 +65,11 @@ Build Procedure
 ### Visual C++ (Command Line)
 
     cd {build_directory}
-    cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
+    cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
     nmake
 
 This will build either a 32-bit or a 64-bit version of VirtualGL-Utils,
-depending on which version of cl.exe is in the PATH.
+depending on which version of **cl.exe** is in the `PATH`.
 
 
 ### Visual C++ (IDE)
@@ -80,21 +79,22 @@ Choose the appropriate CMake generator option for your version of Visual Studio
 instance:
 
     cd {build_directory}
-    cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
+    cmake -G"Visual Studio 10" [additional CMake flags] {source_directory}
 
-You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
+You can then open **ALL_BUILD.vcproj** in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
 build of VirtualGL-Utils.
 
 
 ### MinGW
 
-NOTE: This assumes that you are building on a Windows machine.  Cross-compiling
-on a Linux/Unix machine is left as an exercise for the reader.
+NOTE: This assumes that you are building on a Windows machine using the MSYS
+environment.  Cross-compiling on a Linux/Unix machine is left as an exercise
+for the reader.
 
     cd {build_directory}
-    cmake -G "MinGW Makefiles" [additional CMake flags] {source_directory}
-    mingw32-make
+    cmake -G"MSYS Makefiles" [additional CMake flags] {source_directory}
+    make
 
 
 Debug Build
@@ -157,9 +157,9 @@ guide, run
 
     cmake-gui {source_directory}
 
-after initially configuring the build.  This will display all variables that
-are relevant to the VirtualGL-Utils build, their current values, and a help
-string describing what they do.
+from the build directory after initially configuring the build.  This will
+display all variables that are relevant to the VirtualGL-Utils build, their
+current values, and a help string describing what they do.
 
 
 Installing VirtualGL-Utils
@@ -177,18 +177,23 @@ the "uninstall" target in the Visual Studio IDE) will uninstall
 VirtualGL-Utils.
 
 If you don't specify `CMAKE_INSTALL_PREFIX`, then the default is
-`c:\Program Files\VirtualGL-Utils`.
+**c:\Program Files\VirtualGL-Utils**.
 
 
-Creating Release Packages
-=========================
+Creating a Distribution Package
+===============================
 
 If using NMake:
 
     cd {build_directory}
     nmake installer
 
-If using the Visual Studio IDE, build the "installer" project.
+If using MinGW:
+
+    cd {build_directory}
+    make installer
+
+If using the Visual Studio IDE, build the "installer" target.
 
 The installer package (VirtualGL[64]-Utils-{version}.exe) will be located
 under *{build_directory}*.  If building using the Visual Studio IDE, then the
@@ -197,5 +202,5 @@ configuration you built (such as *{build_directory}*\Debug\ or
 *{build_directory}*\Release\).
 
 Building a Windows installer requires the
-[Nullsoft Install System](http://nsis.sourceforge.net/).
-makensis.exe should be in your PATH.
+[Nullsoft Install System](http://nsis.sourceforge.net/).  makensis.exe should
+be in your `PATH`.

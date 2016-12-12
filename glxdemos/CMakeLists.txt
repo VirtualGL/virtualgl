@@ -16,10 +16,10 @@ endforeach()
 add_executable(glxinfo glxinfo.c)
 target_link_libraries(glxinfo ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 	${OPENGL_glu_LIBRARY} m)
-if(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	target_link_libraries(glxinfo Xmu)
 endif()
-install(TARGETS glxinfo DESTINATION ${VGL_BINDIR})
+install(TARGETS glxinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 set(GLXSPHERES glxspheres)
 if(BITS EQUAL 64)
@@ -28,7 +28,7 @@ endif()
 add_executable(${GLXSPHERES} glxspheres.c)
 target_link_libraries(${GLXSPHERES} ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 	${OPENGL_glu_LIBRARY} m)
-install(TARGETS ${GLXSPHERES} DESTINATION ${VGL_BINDIR})
+install(TARGETS ${GLXSPHERES} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 foreach(program pbdemo pbinfo)
 	add_executable(${program} ${program}.c pbutil.c)

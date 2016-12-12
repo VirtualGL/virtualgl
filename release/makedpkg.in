@@ -50,16 +50,16 @@ safedirmove ()
 makedeb()
 {
 	SUPPLEMENT=$1
-	PACKAGE_NAME=$APPNAME
+	DIRNAME=$PKGNAME
 
 	if [ $SUPPLEMENT = 1 ]; then
-		PACKAGE_NAME=$APPNAME\32
+		PKGNAME=$PKGNAME\32
 		DEBARCH=amd64
 	fi
 
 	umask 022
-	rm -f $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
-	TMPDIR=`mktemp -d /tmp/$APPNAME-build.XXXXXX`
+	rm -f $PKGNAME\_$VERSION\_$DEBARCH.deb
+	TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 	mkdir $TMPDIR/DEBIAN
 
 	make install DESTDIR=$TMPDIR
@@ -77,7 +77,7 @@ makedeb()
 
 		SIZE=`du -s $TMPDIR | cut -f1`
 		cat pkgscripts/deb-control | sed s/i386/$DEBARCH/g \
-			| sed s/virtualgl/$PACKAGE_NAME/g | sed s/{__SIZE}/$SIZE/g \
+			| sed s/$DIRNAME/$PKGNAME/g | sed s/{__SIZE}/$SIZE/g \
 			> $TMPDIR/DEBIAN/control
 
 		if [ ! "$LIBDIR" = "/usr/lib/i386-linux-gnu" ]; then
@@ -101,7 +101,7 @@ makedeb()
 			safedirmove $TMPDIR/$LIBDIR $TMPDIR/usr/lib $TMPDIR/__tmplib
 		fi
 
-		if [ ! "$BINDIR" = "/usr/bin" ]; then
+		if [ ! "$BINDIR" = "/usr/bin" -a "$BINSYMLINKS" = "1" ]; then
 			mkdir -p $TMPDIR/usr/bin
 			__PWD=$PWD
 			cd $TMPDIR/$BINDIR
@@ -111,7 +111,7 @@ makedeb()
 			cd $__PWD
 		fi
 
-		if [ ! "$INCDIR" = "/usr/include" ]; then
+		if [ ! "$INCDIR" = "/usr/include" -a "$INCSYMLINKS" = "1" ]; then
 			mkdir -p $TMPDIR/usr/include
 			__PWD=$PWD
 			cd $TMPDIR/$INCDIR
@@ -121,26 +121,27 @@ makedeb()
 			cd $__PWD
 		fi
 
-		safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$APPNAME-$VERSION $TMPDIR/__tmpdoc
-		if [ "$PREFIX" = "/opt/VirtualGL" ]; then
-			ln -fs /usr/share/doc/$APPNAME-$VERSION $TMPDIR/$PREFIX/doc
+		if [ "$PREFIX" = "@CMAKE_INSTALL_DEFAULT_PREFIX@" -a "$DOCDIR" = "@CMAKE_INSTALL_DEFAULT_PREFIX@/doc" ]; then
+			safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PKGNAME-$VERSION $TMPDIR/__tmpdoc
+			ln -fs /usr/share/doc/$DIRNAME-$VERSION $TMPDIR$DOCDIR
 		fi
 
 	fi
 
 	$SUDO chown -Rh root:root $TMPDIR/*
-	dpkg -b $TMPDIR $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
+	dpkg -b $TMPDIR $PKGNAME\_$VERSION\_$DEBARCH.deb
 }
 
-APPNAME=@CMAKE_PROJECT_NAME_LC@
+PKGNAME=@PKGNAME_LC@
 VERSION=@VERSION@
-BUILD=@BUILD@
 DEBARCH=@DEBARCH@
 PREFIX=@CMAKE_INSTALL_PREFIX@
-BINDIR=@VGL_BINDIR@
-DOCDIR=@VGL_DOCDIR@
-INCDIR=@VGL_INCDIR@
-LIBDIR=@VGL_LIBDIR@
+BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+BINSYMLINKS=@VGL_BINSYMLINKS@
+DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
+INCDIR=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+INCSYMLINKS=@VGL_INCSYMLINKS@
+LIBDIR=@CMAKE_INSTALL_FULL_LIBDIR@
 
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo

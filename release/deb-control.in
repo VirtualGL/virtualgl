@@ -1,11 +1,11 @@
-Package: @CMAKE_PROJECT_NAME_LC@
+Package: @PKGNAME_LC@
 Version: @VERSION@-@BUILD@
 Section: misc
 Priority: optional
 Architecture: @DEBARCH@
 Essential: no
-Maintainer: The VirtualGL Project <information@VirtualGL.org>
-Homepage: http://www.VirtualGL.org
+Maintainer: @PKGVENDOR@ <@PKGEMAIL@>
+Homepage: @PKGURL@
 Installed-Size: {__SIZE}
 Description: A toolkit for displaying OpenGL applications to thin clients
  VirtualGL is a toolkit that allows most Unix/Linux OpenGL applications to be

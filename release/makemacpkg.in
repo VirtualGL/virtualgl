@@ -49,26 +49,29 @@ usage()
 
 UNIVERSAL=0
 
-PACKAGE_NAME=@CMAKE_PROJECT_NAME@
+PKGNAME=@PKGNAME@
+PROJECT=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 SRCDIR=@CMAKE_SOURCE_DIR@
+BUILDDIR32=@OSX_32BIT_BUILD@
+
 PREFIX=@CMAKE_INSTALL_PREFIX@
-BINDIR=@VGL_BINDIR@
-DOCDIR=@VGL_DOCDIR@
-BUILDDIR32=@VGL_32BIT_BUILD@
+BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
+
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
 		UNIVERSAL=1
 	fi
 fi
 
-if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
-	rm -f $PACKAGE_NAME-$VERSION.dmg
+if [ -f $PKGNAME-$VERSION.dmg ]; then
+	rm -f $PKGNAME-$VERSION.dmg
 fi
 
 umask 022
-TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
@@ -105,31 +108,31 @@ if [ $UNIVERSAL = 1 ]; then
 fi
 
 mkdir -p $PKGROOT/Library/Documentation
-safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
+safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
-mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
-install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
-ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
-if [ "$PREFIX" = "/opt/VirtualGL" ]; then
-	ln -fs /Library/Documentation/$PACKAGE_NAME $PKGROOT/$PREFIX/doc
+mkdir -p "$PKGROOT/Applications/$PROJECT"
+install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PROJECT/Read Me.txt"
+ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
+if [ "$PREFIX" = "@CMAKE_INSTALL_DEFAULT_PREFIX@" ]; then
+	ln -fs /Library/Documentation/$PKGNAME $PKGROOT/$PREFIX/doc
 fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
-cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
+osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 
 mkdir $TMPDIR/dmg
-pkgbuild --root $PKGROOT --version $VERSION.$BUILD \
-	--identifier com.virtualgl.vglclient $TMPDIR/pkg/$PACKAGE_NAME.pkg
+pkgbuild --root $PKGROOT --version $VERSION.$BUILD --identifier @PKGID@ \
+	$TMPDIR/pkg/$PKGNAME.pkg
 productbuild --distribution pkgscripts/Distribution.xml \
 	--package-path $TMPDIR/pkg/ --resources $TMPDIR/pkg/ \
-	$TMPDIR/dmg/$PACKAGE_NAME.pkg
-mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
-hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION.dmg
-cp $TMPDIR/$PACKAGE_NAME-$VERSION.dmg . 
+	$TMPDIR/dmg/$PKGNAME.pkg
+mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
+hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION.dmg
+cp $TMPDIR/$PKGNAME-$VERSION.dmg .
 
 exit

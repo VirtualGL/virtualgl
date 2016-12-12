@@ -1,17 +1,11 @@
-#
-# Setup
-#
+###############################################################################
+# SETUP
+###############################################################################
 
 cmake_minimum_required(VERSION 2.8.11)
-set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
 	cmake_policy(SET CMP0053 OLD)
-endif()
-
-if(UNIX)
-	set(CMAKE_INSTALL_PREFIX /opt/VirtualGL CACHE PATH
-		"Install path prefix, prepended onto install directories.")
 endif()
 
 if(WIN32)
@@ -19,9 +13,33 @@ if(WIN32)
 else()
 	project(VirtualGL)
 endif()
+string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 set(VERSION 2.5.2)
 
-string(TIMESTAMP BUILD "%Y%m%d")
+macro(boolean_number var)
+	if(${var})
+		set(${var} 1)
+	else()
+		set(${var} 0)
+	endif()
+endmacro()
+
+macro(report_option var desc)
+	if(${var})
+		message(STATUS "${desc} enabled (${var} = ${${var}})")
+	else()
+		message(STATUS "${desc} disabled (${var} = ${${var}})")
+	endif()
+endmacro()
+
+set(DEFAULT_VGL_BUILDSERVER 0)
+if(UNIX AND NOT APPLE AND NOT CYGWIN)
+	set(DEFAULT_VGL_BUILDSERVER 1)
+endif()
+option(VGL_BUILDSERVER "Build ${CMAKE_PROJECT_NAME} server components"
+	${DEFAULT_VGL_BUILDSERVER})
+boolean_number(VGL_BUILDSERVER)
+report_option(VGL_BUILDSERVER "VirtualGL server components")
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -33,36 +51,78 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# This only works if building from the command line.  There is currently no way
-# to set a variable's value based on the build type when using the MSVC IDE.
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(BUILD "${BUILD}d")
-endif()
-set(VGL_BUILD "" CACHE STRING "Custom build string")
-if(VGL_BUILD)
-	set(BUILD ${VGL_BUILD})
-endif()
+string(TIMESTAMP DEFAULT_BUILD "%Y%m%d")
+set(BUILD ${DEFAULT_BUILD} CACHE STRING "Build string (default: ${DEFAULT_BUILD})")
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}"
 	-D__APPNAME="${CMAKE_PROJECT_NAME}")
 
+# Detect CPU type and word size
+math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
+string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CMAKE_SYSTEM_PROCESSOR_LC)
+if(CMAKE_SYSTEM_PROCESSOR_LC MATCHES "x86_64" OR
+	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "amd64" OR
+	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "i[0-9]86" OR
+	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "x86" OR
+	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "ia32")
+	if(BITS EQUAL 64)
+		set(CPU_TYPE x86_64)
+	else()
+		set(CPU_TYPE i386)
+	endif()
+	if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL ${CPU_TYPE})
+		set(CMAKE_SYSTEM_PROCESSOR ${CPU_TYPE})
+	endif()
+else()
+	set(CPU_TYPE ${CMAKE_SYSTEM_PROCESSOR_LC})
+endif()
+message(STATUS "${BITS}-bit build (${CPU_TYPE})")
+
+if(UNIX)
+	set(CMAKE_INSTALL_DEFAULT_PREFIX /opt/${CMAKE_PROJECT_NAME})
+	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+		set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_DEFAULT_PREFIX}" CACHE PATH
+			"Directory into which to install ${CMAKE_PROJECT_NAME} (default: ${CMAKE_INSTALL_DEFAULT_PREFIX})"
+			FORCE)
+	endif()
+endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
-set(DEFAULT_VGL_DOCDIR ${CMAKE_INSTALL_PREFIX}/doc)
+# When the prefix is /opt/${CMAKE_PROJECT_NAME}, we assume that an "official"
+# build is being created, and thus we install things into specific locations.
+
+if((UNIX AND CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}")
+	OR WIN32)
+	set(CMAKE_INSTALL_DEFAULT_DATAROOTDIR "")
+	set(CMAKE_INSTALL_DEFAULT_DOCDIR "<CMAKE_INSTALL_DATAROOTDIR>/doc")
+	if(UNIX)
+		set(CMAKE_INSTALL_DEFAULT_LIBDIR "lib${BITS}")
+	endif()
+endif()
 if(WIN32)
-	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX})
-else()
-	set(DEFAULT_VGL_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
+	set(CMAKE_INSTALL_DEFAULT_BINDIR ".")
+	set(CMAKE_INSTALL_DEFAULT_DOCDIR ".")
 endif()
 
-set(VGL_BINDIR ${DEFAULT_VGL_BINDIR} CACHE PATH
-	"Directory into which executables and scripts should be installed (default: ${DEFAULT_VGL_BINDIR})")
-set(VGL_DOCDIR ${DEFAULT_VGL_DOCDIR} CACHE PATH
-	"Directory into which docs should be installed (default: ${DEFAULT_VGL_DOCDIR})")
+include(cmakescripts/GNUInstallDirs.cmake)
 
-message(STATUS "VGL_BINDIR = ${VGL_BINDIR}")
-message(STATUS "VGL_DOCDIR = ${VGL_DOCDIR}")
+macro(report_directory var)
+	if(CMAKE_INSTALL_${var} STREQUAL CMAKE_INSTALL_FULL_${var})
+		message(STATUS "CMAKE_INSTALL_${var} = ${CMAKE_INSTALL_${var}}")
+	else()
+		message(STATUS "CMAKE_INSTALL_${var} = ${CMAKE_INSTALL_${var}} (${CMAKE_INSTALL_FULL_${var}})")
+	endif()
+	mark_as_advanced(CLEAR CMAKE_INSTALL_${var})
+endmacro()
+
+set(DIRLIST "BINDIR;DATAROOTDIR;DOCDIR")
+if(VGL_BUILDSERVER)
+	list(APPEND DIRLIST "INCLUDEDIR;LIBDIR")
+endif()
+foreach(dir ${DIRLIST})
+	report_directory(${dir})
+endforeach()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
@@ -86,22 +146,6 @@ if(MSVC)
   # linked with the Release version of the static C library.
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 endif()
-
-# Detect CPU type and word size
-math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
-	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
-	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"
-	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
-	if(BITS EQUAL 64)
-		set(CPU_TYPE x86_64)
-	else()
-		set(CPU_TYPE i386)
-	endif()
-else()
-	string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CPU_TYPE)
-endif()
-message(STATUS "${BITS}-bit build (${CPU_TYPE})")
 
 # This ensures that we don't depend on libstdc++ or libgcc
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
@@ -187,6 +231,8 @@ endif()
 option(VGL_USESSL
 	"Enable SSL (Secure Sockets Layer) encryption feature in the VGL Transport"
 	OFF)
+boolean_number(VGL_USESSL)
+report_option(VGL_USESSL "SSL (Secure Sockets Layer) encryption")
 if(VGL_USESSL)
 	include(FindOpenSSL)
 	if(NOT OPENSSL_FOUND)
@@ -195,9 +241,6 @@ if(VGL_USESSL)
 		add_definitions(-DUSESSL)
 		include_directories(${OPENSSL_INCLUDE_DIR})
 	endif()
-	set(VGL_USESSL 1)
-else()
-	set(VGL_USESSL 0)
 endif()
 
 if(WIN32)
@@ -209,7 +252,7 @@ add_subdirectory(diags)
 
 else()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
 include(FindX11)
@@ -243,17 +286,16 @@ endif()
 include_directories(${X11_X11_INCLUDE_PATH})
 
 option(VGL_USEXV "Enable X Video support" TRUE)
+boolean_number(VGL_USEXV)
 
 if(NOT X11_Xv_INCLUDE_PATH OR NOT X11_Xv_LIB)
 	set(VGL_USEXV 0)
 endif()
+report_option(VGL_USEXV "X Video support")
 
 if(VGL_USEXV)
-	message(STATUS "Enabling X Video support")
 	add_definitions(-DUSEXV)
 	include_directories(${X11_Xv_INCLUDE_PATH})
-else()
-	message(STATUS "X Video not available")
 endif()
 
 if(NOT WIN32)
@@ -275,22 +317,13 @@ set(EFFECTIVE_LD_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${CMA
 message(STATUS "Linker flags = ${EFFECTIVE_LD_FLAGS}")
 
 
-#
-# Targets
-#
+###############################################################################
+# TARGETS
+###############################################################################
 
 if(NOT WIN32)
 
-set(DEFAULT_VGL_BUILDSERVER 0)
-if(NOT APPLE AND NOT CYGWIN)
-	set(DEFAULT_VGL_BUILDSERVER 1)
-endif()
-option(VGL_BUILDSERVER "Build VirtualGL server components"
-	${DEFAULT_VGL_BUILDSERVER})
-
 if(VGL_BUILDSERVER)
-	message(STATUS "Building VirtualGL server components")
-
 	set(DEFAULT_VGL_FAKER_NAME vglfaker)
 	set(VGL_FAKER_NAME ${DEFAULT_VGL_FAKER_NAME} CACHE STRING
 		"Base name for VirtualGL's GLX/OpenGL/X11 interposer library (default: ${DEFAULT_VGL_FAKER_NAME})")
@@ -303,26 +336,7 @@ if(VGL_BUILDSERVER)
 	set(VGL_GEFAKER_NAME ${DEFAULT_VGL_GEFAKER_NAME} CACHE STRING
 		"Base name for VirtualGL's getenv() interposer library (default: ${DEFAULT_VGL_GEFAKER_NAME})")
 
-	if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/opt/VirtualGL")
-		set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib${BITS})
-	else()
-		set(DEFAULT_VGL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
-	endif()
-	set(DEFAULT_VGL_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
-
-	set(VGL_INCDIR ${DEFAULT_VGL_INCDIR} CACHE PATH
-		"Directory into which the VirtualGL transport API headers should be installed(default: ${DEFAULT_VGL_INCDIR})")
-	set(VGL_LIBDIR ${DEFAULT_VGL_LIBDIR} CACHE PATH
-		"Directory into which the VirtualGL faker libraries should be installed (default: ${DEFAULT_VGL_LIBDIR})")
-
-	message(STATUS "VGL_INCDIR = ${VGL_INCDIR}")
-	message(STATUS "VGL_LIBDIR = ${VGL_LIBDIR}")
-
-	if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
-		add_definitions(-KPIC)
-	elseif(CMAKE_COMPILER_IS_GNUCC)
-		add_definitions(-fPIC)
-	endif()
+	set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 endif()
 
 set(FBXLIB fbx)
@@ -333,19 +347,23 @@ endif()
 add_subdirectory(util)
 add_subdirectory(common)
 if(VGL_BUILDSERVER)
-add_subdirectory(server)
+	add_subdirectory(server)
 endif()
 add_subdirectory(client)
 add_subdirectory(glxdemos)
 add_subdirectory(diags)
 add_subdirectory(doc)
 
+else()
+
+install(FILES LICENSE.txt LGPL.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+
 endif() # WIN32
 
 
-#
-# Installation and packaging
-#
+###############################################################################
+# INSTALLATION AND PACKAGING
+###############################################################################
 
 include(cmakescripts/BuildPackages.cmake)
 

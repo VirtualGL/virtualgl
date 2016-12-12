@@ -17,35 +17,25 @@ Build Requirements
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The VirtualGL build system will search for the TurboJPEG header and
-    library under /opt/libjpeg-turbo on Unix (including Cygwin) or
-    c:\libjpeg-turbo[64] on Windows, but you can override this by setting the
-    `TJPEG_INCLUDE_DIR` CMake variable to the directory containing turbojpeg.h
-    and the `TJPEG_LIBRARY` CMake variable to either the full path of the
-    TurboJPEG library against which you want to link or a set of link flags
-    needed to link with the TurboJPEG library (for instance,
-    `-DTJPEG_LIBRARY="-L{dir} -lturbojpeg"`.)
+    library under **/opt/libjpeg-turbo** on Un*x (including Cygwin), but you
+    can override this by setting the `TJPEG_INCLUDE_DIR` CMake variable to the
+    directory containing turbojpeg.h and the `TJPEG_LIBRARY` CMake variable to
+    either the full path of the TurboJPEG library against which you want to
+    link or a set of link flags needed to link with the TurboJPEG library (for
+    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
 
 
-### Linux or FreeBSD
+### Un*x Platforms (including Linux, Mac, FreeBSD, Solaris, and Cygwin)
 
 - GCC and G++
+  * On Mac platforms, these can be obtained from
+    [MacPorts](http://www.macports.org/) or [Homebrew](http://brew.sh/) or by
+    installing [Xcode](http://developer.apple.com/tools/xcode).
 
 - X11 and OpenGL development libraries:
-  * libX11, libXext, libGL, libGLU, and (if you wish to enable X Video
-    support) libXv
-
-
-### Mac
-
-- Xcode Tools
-  * Available on the OS X install discs or from:
-    <http://developer.apple.com/tools/xcode>
-  * With earlier versions of Xcode, you will need to specify a custom install
-    and select the following packages:
-    gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
-  * With Xcode 3.x and later, you can simply check "Unix Development Support"
-  * With Xcode 4.x and later, the X11 and GLX headers and link libraries are
-    no longer included.  You can obtain these by installing
+  * libX11, libXext, libGL, libGLU, and (if building the VirtualGL server
+    components with X Video support) libXv
+  * On Mac platforms, these are distributed with
     [XQuartz](http://xquartz.macosforge.org).
 
 
@@ -109,9 +99,9 @@ Instructions for installing these on specific distributions:
 Out-of-Tree Builds
 ------------------
 
-Binary objects, libraries, and executables are generated in the same directory
-from which CMake was executed (the "binary directory"), and this directory need
-not necessarily be the same as the VirtualGL source directory.  You can create
+Binary objects, libraries, and executables are generated in the directory from
+which CMake is executed (the "binary directory"), and this directory need not
+necessarily be the same as the VirtualGL source directory.  You can create
 multiple independent binary directories, in which different versions of
 VirtualGL can be built from the same source tree using different compilers or
 settings.  In the sections below, *{build_directory}* refers to the binary
@@ -123,13 +113,13 @@ Build Procedure
 ---------------
 
 The following procedure will build the VirtualGL Client and, on Linux and other
-Un*x variants (except OS X), the VirtualGL Server components.  On most 64-bit
+Un*x variants (except Mac), the VirtualGL Server components.  On most 64-bit
 systems (Solaris being a notable exception), this will build a 64-bit version
 of VirtualGL.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of VirtualGL on systems that support both.
 
     cd {build_directory}
-    cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
+    cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
     make
 
 
@@ -173,11 +163,11 @@ static library form.  To build OpenSSL from source:
 
     **64-bit:**
 
-      ./Configure linux-x86_64 shared no-krb5 no-dso
+      `./Configure linux-x86_64 shared no-krb5 no-dso`
 
     **32-bit:**
 
-      ./Configure -m32 linux-generic32 shared no-krb5 no-dso
+      `./Configure -m32 linux-generic32 shared no-krb5 no-dso`
 
 * `make`
 
@@ -197,9 +187,7 @@ a custom build of OpenSSL that resides under ~/openssl.
 
 Linking with the OpenSSL dynamic libraries is generally not a concern on OS X,
 since Apple ships several versions of these in order to retain backward
-compatibility with prior versions of OS X.  See the "Build Recipes" section for
-instructions on how to build a backward-compatible version of VirtualGL for
-OS X.
+compatibility with prior versions of OS X.
 
 
 ### Solaris
@@ -234,7 +222,7 @@ Build Recipes
 -------------
 
 
-### 32-bit Build on 64-bit Linux/Unix (including OS X)
+### 32-bit Build on 64-bit Linux/Unix (including Mac)
 
 Use export/setenv to set the following environment variables before running
 CMake:
@@ -242,32 +230,6 @@ CMake:
     CFLAGS=-m32
     CXXFLAGS=-m32
     LDFLAGS=-m32
-
-
-### 64-bit Backward-Compatible Build on 64-bit OS X
-
-Add
-
-    -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5
-
-to the CMake command line.  The OS X 10.5 SDK must be installed.
-
-
-### 32-bit Backward-Compatible Build on 64-bit OS X
-
-Use export/setenv to set the following environment variables:
-
-    CFLAGS=-m32
-    CXXFLAGS=-m32
-    LDFLAGS=-m32
-
-and add
-
-    -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5
-
-to the CMake command line.  The OS X 10.5 SDK must be installed.
 
 
 ### 64-bit Build on Solaris
@@ -280,7 +242,7 @@ CMake:
     LDFLAGS=-m64
 
 
-### Compilers Other Than GCC
+### Other Compilers
 
 On Un*x systems, prior to running CMake, you can set the `CC` environment
 variable to the command used to invoke the C compiler and the `CXX` environment
@@ -299,58 +261,99 @@ or
 
     cmake-gui {source_directory}
 
-after initially configuring the build.  CCMake is a text-based interactive
-version of CMake, and CMake-GUI is a GUI version.  Both will display all
-variables that are relevant to the VirtualGL build, their current values, and a
-help string describing what they do.
+from the build directory after initially configuring the build.  CCMake is a
+text-based interactive version of CMake, and CMake-GUI is a GUI version.  Both
+will display all variables that are relevant to the VirtualGL build, their
+current values, and a help string describing what they do.
 
 
 Installing VirtualGL
 ====================
 
-You can use the build system to install VirtualGL into a directory of your
-choosing.  To do this, add:
+You can use the build system to install VirtualGL (as opposed to creating an
+installer package.)  To do this, run `make install` or `nmake install` (or
+build the "install" target in the Visual Studio IDE.)  Running `make uninstall`
+or `nmake uninstall` (or building the "uninstall" target in the Visual Studio
+IDE) will uninstall VirtualGL.
 
-    -DCMAKE_INSTALL_PREFIX={install_directory}
+The `CMAKE_INSTALL_PREFIX` CMake variable can be modified in order to install
+VirtualGL into a directory of your choosing.  If you don't specify
+`CMAKE_INSTALL_PREFIX`, then the default is **/opt/VirtualGL**.  The default
+value of `CMAKE_INSTALL_PREFIX` causes the VirtualGL files to be installed with
+a directory structure resembling that of the official VirtualGL binary
+packages.  Changing the value of `CMAKE_INSTALL_PREFIX` (for instance, to
+**/usr/local**) causes the VirtualGL files to be installed with a directory
+structure that conforms to GNU standards.
 
-to the CMake command line.  Then, you can run `make install` to build and
-install VirtualGL.  Running `make uninstall` will uninstall VirtualGL.
+The `CMAKE_INSTALL_BINDIR`, `CMAKE_INSTALL_DATAROOTDIR`,
+`CMAKE_INSTALL_DOCDIR`, `CMAKE_INSTALL_INCLUDEDIR`, and `CMAKE_INSTALL_LIBDIR`
+CMake variables allow a finer degree of control over where specific files in
+the VirtualGL distribution should be installed.  These directory variables can
+either be specified as absolute paths or as paths relative to
+`CMAKE_INSTALL_PREFIX` (for instance, setting `CMAKE_INSTALL_DOCDIR` to **doc**
+would cause the documentation to be installed in
+**${CMAKE\_INSTALL\_PREFIX}/doc**.)  If a directory variable contains the name
+of another directory variable in angle brackets, then its final value will
+depend on the final value of that other variable.  For instance, the default
+value of `CMAKE_INSTALL_DOCDIR` if installing under **/opt/VirtualGL** is
+**\<CMAKE\_INSTALL\_DATAROOTDIR\>/doc**.
 
-If you don't specify `CMAKE_INSTALL_PREFIX`, then the default is
-`/opt/VirtualGL`.
+NOTE: If setting one of these directory variables to a relative path using the
+CMake command line, you must specify that the variable is of type `PATH`. For
+example:
+
+    cmake -G"{generator type}" -DCMAKE_INSTALL_LIBDIR:PATH=lib {source_directory}
+
+Otherwise, CMake will assume that the path is relative to the build directory
+rather than the install directory.
 
 
-Creating Release Packages
-=========================
+Creating Distribution Packages
+==============================
 
-The following commands can be used to create various types of release packages:
+The following commands can be used to create various types of distribution
+packages:
 
-`make rpm`
 
-  Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
+Linux
+-----
 
-`make deb`
+    make rpm
 
-  Create Debian-style binary package.  Requires dpkg.
+Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
 
-`make dmg`
+    make deb
 
-  Create Macintosh package/disk image.  This requires pkgbuild and
-  productbuild, which are installed by default on OS X 10.7 and later and which
-  can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
-  option) on OS X 10.6.  Packages built in this manner can be installed on OS X
-  10.5 and later, but they must be built on OS X 10.6 or later.
+Create Debian-style binary package.  Requires dpkg.
 
-`make udmg`
 
-  On 64-bit OS X systems, this creates a version of the Macintosh package and
-  disk image that contains universal i386/x86-64 binaries.  You should first
-  configure a 32-bit out-of-tree build of VirtualGL, then configure a 64-bit
-  out-of-tree build, then run `make udmg` from the 64-bit build directory.  The
-  build system will look for the 32-bit build under *{source_directory}*/osxx86
-  by default, but you can override this by setting the `VGL_32BIT_BUILD` CMake
-  variable.
+Mac
+---
 
-`make cygwinpkg`
+    make dmg
 
-  Build a Cygwin binary package.
+Create Mac package/disk image.  This requires pkgbuild and productbuild, which
+are installed by default on OS X 10.7 and later and which can be obtained by
+installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.
+Packages built in this manner can be installed on OS X 10.5 and later, but they
+must be built on OS X 10.6 or later.
+
+    make udmg
+
+This creates a Mac package/disk image that contains universal x86-64/i386
+binaries.  You should first use CMake to configure a 32-bit sub-build of
+VirtualGL (see "Build Recipes" above) in a build directory specified by the
+`OSX_32BIT_BUILD` CMake variable (default: *{source_directory}*/osxx86).  Next,
+configure the primary build of VirtualGL as an out-of-tree build, and build it.
+Once the primary build has been built, run `make udmg` from the build
+directory.  The packaging system will build the sub-build, use lipo to combine
+it with the primary build into a single set of universal binaries, then package
+the universal binaries in the same manner as `make dmg`.
+
+
+Cygwin
+------
+
+    make cygwinpkg
+
+Build a Cygwin binary package.
