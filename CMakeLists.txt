@@ -89,6 +89,17 @@ if(UNIX)
 endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	set(GNUCC 1)
+else()
+	set(GNUCC 0)
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(GNUCXX 1)
+else()
+	set(GNUCXX 0)
+endif()
+
 # When the prefix is /opt/${CMAKE_PROJECT_NAME}, we assume that an "official"
 # build is being created, and thus we install things into specific locations.
 
@@ -187,7 +198,7 @@ endif()
 # Don't build RPATH into libraries generated in the build directory
 set(CMAKE_SKIP_BUILD_RPATH 1)
 
-if(CMAKE_COMPILER_IS_GNUCC)
+if(GNUCC)
 	add_definitions(-D_GNU_SOURCE)
 	if(NOT APPLE)
 		set(MAPFLAG "-Wl,--version-script,")

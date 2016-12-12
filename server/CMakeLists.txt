@@ -93,7 +93,7 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME})
 		target_link_libraries(${fakerlib} ${OPENGL_gl_LIBRARY})
 	endif()
-	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
 		# C++ shared libs.  Grrr...
 		target_link_libraries(${fakerlib} stdc++)
@@ -166,13 +166,13 @@ if(VGL_USESSL AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 target_link_libraries(vgltrans_test vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY}
 	vglsocket)
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test stdc++)
 endif()
 
 add_library(vgltrans_test2 SHARED testplugin2.cpp X11Trans.cpp)
 target_link_libraries(vgltrans_test2 vglcommon ${FBXFAKERLIB} ${TJPEG_LIBRARY})
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 	target_link_libraries(vgltrans_test2 stdc++)
 endif()
 
