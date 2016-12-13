@@ -78,11 +78,6 @@ if(VGL_USEXV)
 	set(FAKER_SOURCES ${FAKER_SOURCES};XVTrans.cpp)
 endif()
 
-set(MINUSZ "-z ")
-if(CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
-	set(MINUSZ "-Wl,-z,")
-endif()
-
 foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
 	if(MAPFLAG)

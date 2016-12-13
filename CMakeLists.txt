@@ -210,6 +210,7 @@ if(GNUCC)
 			string(REGEX REPLACE "-O2" "-O3" ${var} "${${var}}")
 		endif()
 	endforeach()
+	set(MINUSZ "-Wl,-z,")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -225,6 +226,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"-z direct -lCrun -z nodirect -mt ${CMAKE_SHARED_LINKER_FLAGS}")
 		set(MAPFLAG "-M")
+		set(MINUSZ "-z")
 
 		# Use the maximum optimization level for release builds
 		foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
