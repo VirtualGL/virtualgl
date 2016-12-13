@@ -22,6 +22,10 @@ VirtualGL built with recent compilers would sometimes crash when exiting
 certain 3D applications (reported to be the case with Steam) or behave in other
 unpredictable ways.
 
+4. Fixed an issue whereby VirtualGL, when used with applications that load
+OpenGL functions via dlopen()/dlsym(), would fail to load the "real" GLX/OpenGL
+functions from libGL if libvglfaker.so was built with GCC 4.6 or later.
+
 
 2.5.1
 =====

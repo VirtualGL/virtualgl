@@ -80,13 +80,24 @@ endif()
 
 foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	add_library(${fakerlib} SHARED ${FAKER_SOURCES})
+	if(${fakerlib} STREQUAL ${VGL_FAKER_NAME} AND
+		CMAKE_SYSTEM_NAME MATCHES "Linux")
+		# GCC 4.6 and later on Linux apparently passes --as-needed to the linker,
+		# and since libvglfaker.so loads OpenGL/GLX functions indirectly (with
+		# dlopen()/dlsym()), --as-needed prevents the linker from adding a
+		# DT_NEEDED tag for libGL to libvglfaker.so.  Without the following fix,
+		# when attempting to vglrun applications that themselves indirectly load
+		# OpenGL functions, libGL would not be loaded into the process, and VGL's
+		# calls to dlsym(RTLD_NEXT, ...) would fail.
+		set(NOASNEEDED "-Wl,--no-as-needed")
+	endif()
 	if(MAPFLAG)
 		set_source_files_properties(faker-sym.cpp PROPERTIES
 			OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile)
 		set_target_properties(${fakerlib} PROPERTIES
-			LINK_FLAGS "${MINUSZ}defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile")
+			LINK_FLAGS "${MINUSZ}defs ${MAPFLAG}${CMAKE_CURRENT_BINARY_DIR}/faker-mapfile ${NOASNEEDED}")
 	else()
-		set_target_properties(${fakerlib} PROPERTIES LINK_FLAGS "${MINUSZ}defs")
+		set_target_properties(${fakerlib} PROPERTIES LINK_FLAGS "${MINUSZ}defs ${NOASNEEDED}")
 	endif()
 	target_link_libraries(${fakerlib} vglcommon ${FBXFAKERLIB} vglsocket m
 		${LIBDL})
