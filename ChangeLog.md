@@ -26,6 +26,8 @@ unpredictable ways.
 OpenGL functions via dlopen()/dlsym(), would fail to load the "real" GLX/OpenGL
 functions from libGL if libvglfaker.so was built with GCC 4.6 or later.
 
+5. Fixed various build issues with Clang.
+
 
 2.5.1
 =====

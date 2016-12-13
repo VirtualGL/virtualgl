@@ -159,11 +159,8 @@ if(MSVC)
 endif()
 
 # This ensures that we don't depend on libstdc++ or libgcc
-if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
+if(GNUCXX AND NOT APPLE AND NOT CYGWIN)
 	set(DEFAULT_VGL_BUILDSTATIC 1)
-	if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-		set(DEFAULT_VGL_BUILDSTATIC 0)
-	endif()
 	option(VGL_BUILDSTATIC
 		"Link statically against libgcc and libstdc++, if possible"
 		${DEFAULT_VGL_BUILDSTATIC})
@@ -188,7 +185,9 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE AND NOT CYGWIN)
 		else()
 			message(WARNING "Cannot find static libstdc++.  VirtualGL will depend on dynamic libstdc++.")
 		endif()
-		add_definitions(-static-libgcc)
+		if(CMAKE_COMPILER_IS_GNUCXX)
+			add_definitions(-static-libgcc)
+		endif()
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
 		set(CMAKE_SHARED_LINKER_FLAGS
 			"${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc")
