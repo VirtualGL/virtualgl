@@ -100,7 +100,8 @@ foreach(fakerlib ${VGL_FAKER_NAME} ${VGL_FAKER_NAME}-nodl)
 	endif()
 	if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 		# For some reason, on SunOS/GCC CMake tries to use the C compiler to link
-		# C++ shared libs.  Grrr...
+		# C++ shared libs.  Grrr...  (NOTE: This was fixed in CMake v3.4, so we
+		# can remove this if we ever require a version later than that.)
 		target_link_libraries(${fakerlib} stdc++)
 	endif()
 	install(TARGETS ${fakerlib} DESTINATION ${CMAKE_INSTALL_LIBDIR})
