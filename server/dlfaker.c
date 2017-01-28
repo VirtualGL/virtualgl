@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2015 D. R. Commander
+ * Copyright (C)2009, 2012, 2015, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -49,6 +49,8 @@ void *dlopen(const char *filename, int flag)
 		fprintf(stderr, "[VGL] dlopen (filename=%s flag=%d",
 			filename? filename:"NULL", flag);
 	}
+
+	flag&=(~RTLD_DEEPBIND);
 
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="lib"VGL_FAKER_NAME".so";

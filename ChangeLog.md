@@ -28,6 +28,14 @@ functions from libGL if libvglfaker.so was built with GCC 4.6 or later.
 
 5. Fixed various build issues with Clang.
 
+6. The interposed `dlopen()` function in the Linux version of libdlfaker.so
+will now nullify the `RTLD_DEEPBIND` flag, if an application passes that flag
+to `dlopen()`.  This prevents an issue whereby an application could call
+`dlopen(..., *|RTLD_DEEPBIND)` to load a shared library that uses OpenGL or
+X11, thus causing the "real" OpenGL/GLX/X11 functions loaded by that shared
+library to supercede VirtualGL's interposed functions, effectively disabling
+VirtualGL.
+
 
 2.5.1
 =====

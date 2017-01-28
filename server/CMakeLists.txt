@@ -166,6 +166,10 @@ target_link_libraries(dlfakerut ${X11_X11_LIB} ${LIBDL})
 
 add_library(GLdlfakerut SHARED libGLdlfakerut.c)
 
+add_library(deepbindtest SHARED libdeepbindtest.c)
+target_link_libraries(deepbindtest ${X11_X11_LIB} ${OPENGL_gl_LIBRARY})
+set_target_properties(deepbindtest PROPERTIES LINK_FLAGS "${MINUSZ}defs")
+
 add_executable(fakerut fakerut.cpp fakerut-supplement.c)
 target_link_libraries(fakerut "${MINUSZ}now ${OPENGL_gl_LIBRARY}"
 	${OPENGL_glu_LIBRARY} "${MINUSZ}now ${X11_X11_LIB}" ${LIBDL} vglutil)
