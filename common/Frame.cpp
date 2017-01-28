@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2012, 2014 D. R. Commander
+ * Copyright (C)2009-2012, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -556,11 +556,11 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 // Frame created from shared graphics memory
 
 FBXFrame::FBXFrame(Display *dpy, Drawable draw, Visual *vis,
-	bool reuseConn) : Frame()
+	bool reuseConn_) : Frame()
 {
 	if(!dpy || !draw) throw(Error("FBXFrame::FBXFrame", "Invalid argument"));
 	XFlush(dpy);
-	if(reuseConn) init(dpy, draw, vis);
+	if(reuseConn_) init(dpy, draw, vis);
 	else init(DisplayString(dpy), draw, vis);
 }
 

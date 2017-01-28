@@ -34,7 +34,6 @@
 class FL_EXPORT Fl_Scroll : public Fl_Group {
 
   int xposition_, yposition_;
-  int width_, height_;
   int oldx, oldy;
   static void hscrollbar_cb(Fl_Widget*, void*);
   static void scrollbar_cb(Fl_Widget*, void*);

@@ -31,7 +31,6 @@
 #include "Fl_Group.H"
 
 class FL_EXPORT Fl_Tabs : public Fl_Group {
-  Fl_Widget *value_;
   Fl_Widget *push_;
   int tab_positions(int*, int*);
   int tab_height();
