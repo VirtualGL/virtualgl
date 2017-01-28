@@ -144,6 +144,7 @@ void nameMatchTest(void)
 #include "dlfakerut-test.c"
 
 
+#ifdef RTLD_DEEPBIND
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
 typedef void (*_testType)(const char *);
@@ -167,6 +168,7 @@ void deepBindTest(void)
 	bailout:
 	exit(1);
 }
+#endif
 
 
 int main(int argc, char **argv)
@@ -203,7 +205,9 @@ int main(int argc, char **argv)
 
 	unloadSymbols1();
 
+	#ifdef RTLD_DEEPBIND
 	deepBindTest();
+	#endif
 
 	bailout:
 	return 0;

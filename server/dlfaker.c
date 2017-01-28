@@ -50,7 +50,9 @@ void *dlopen(const char *filename, int flag)
 			filename? filename:"NULL", flag);
 	}
 
+	#ifdef RTLD_DEEPBIND
 	flag&=(~RTLD_DEEPBIND);
+	#endif
 
 	if((env=getenv(envname))==NULL || strlen(env)<1)
 		env="lib"VGL_FAKER_NAME".so";
