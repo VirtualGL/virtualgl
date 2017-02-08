@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2015 D. R. Commander
+ * Copyright (C)2010-2015, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -386,7 +386,10 @@ int readbackTest(bool stereo)
 			// error state prior to readback)
 			char pixel[4];
 			glReadPixels(0, 0, 1, 1, 0, GL_BYTE, pixel);
+			// This will cause VirtualGL < 2.5.2 to throw a GLXBadContextState error
+			glRenderMode(GL_SELECT);
 			glXSwapBuffers(dpy, win1);
+			glRenderMode(GL_RENDER);
 			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
 			checkWindowColor(win1, clr.bits(-2));

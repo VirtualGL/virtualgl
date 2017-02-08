@@ -36,6 +36,10 @@ X11, thus causing the "real" OpenGL/GLX/X11 functions loaded by that shared
 library to supercede VirtualGL's interposed functions, effectively disabling
 VirtualGL.
 
+7. Fixed an issue whereby VirtualGL would crash with a GLXBadContextState error
+if the 3D application set the render mode to something other than `GL_RENDER`
+prior to calling `glXSwapBuffers()`.
+
 
 2.5.1
 =====
