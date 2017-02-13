@@ -35,15 +35,6 @@ static void doGLReadback(bool spoilLast, bool sync)
 
 	if(winhash.find(drawable, vw))
 	{
-		// The framebuffer contents are not actually updated unless the render mode
-		// is GL_RENDER, and performing a readback with
-		// GL_RENDER_MODE=GL_SELECT|GL_FEEDBACK is not only unnecessary, but it
-		// can cause a GLXBadContextState error if VirtualGL has to create a
-		// temporary context in order to perform the readback.
-		int renderMode=0;
-		_glGetIntegerv(GL_RENDER_MODE, &renderMode);
-		if(renderMode!=GL_RENDER) return;
-
 		if(drawingToFront() || vw->dirty)
 		{
 				opentrace(doGLReadback);  prargx(vw->getGLXDrawable());

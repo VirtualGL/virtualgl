@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014-2015, 2017 D. R. Commander
+ * Copyright (C)2011, 2014-2015 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -37,8 +37,7 @@ namespace vglserver
 				int renderType=0) : olddpy(_glXGetCurrentDisplay()),
 				oldctx(_glXGetCurrentContext()), newctx(NULL),
 				oldread(_glXGetCurrentReadDrawable()),
-				olddraw(_glXGetCurrentDrawable()), ctxChanged(false),
-				oldRenderMode(0)
+				olddraw(_glXGetCurrentDrawable()), ctxChanged(false)
 			{
 				if(!dpy) return;
 				if(!olddpy) olddpy=dpy;
@@ -49,13 +48,6 @@ namespace vglserver
 				if(((read || draw) && ctx && dpy)
 					&& (oldread!=read  || olddraw!=draw || oldctx!=ctx || olddpy!=dpy))
 				{
-					int renderMode=0;
-					_glGetIntegerv(GL_RENDER_MODE, &renderMode);
-					if(renderMode!=GL_RENDER)
-					{
-						_glRenderMode(GL_RENDER);
-						oldRenderMode=renderMode;
-					}
 					if(!_glXMakeContextCurrent(dpy, draw, read, ctx))
 						_throw("Could not bind OpenGL context to window (window may have disappeared)");
 					ctxChanged=true;
@@ -68,11 +60,6 @@ namespace vglserver
 				{
 					_glXMakeContextCurrent(olddpy, olddraw, oldread, oldctx);
 					ctxChanged=false;
-					if(oldRenderMode)
-					{
-						_glRenderMode(oldRenderMode);
-						oldRenderMode=0;
-					}
 				}
 				if(newctx)
 				{
@@ -91,7 +78,6 @@ namespace vglserver
 			GLXContext oldctx, newctx;
 			GLXDrawable oldread, olddraw;
 			bool ctxChanged;
-			int oldRenderMode;
 	};
 }
 

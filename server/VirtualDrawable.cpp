@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015 D. R. Commander
+ * Copyright (C)2009-2015, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -206,7 +206,7 @@ VirtualDrawable::VirtualDrawable(Display *dpy_, Drawable x11Draw_)
 	numSync=numFrames=0;
 	lastFormat=-1;
 	usePBO=(fconfig.readback==RRREAD_PBO);
-	alreadyPrinted=alreadyWarned=false;
+	alreadyPrinted=alreadyWarned=alreadyWarnedRenderMode=false;
 	ext=NULL;
 }
 
@@ -345,6 +345,32 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	GLXDrawable draw=_glXGetCurrentDrawable();
 	if(read==0 || buf==GL_BACK) read=getGLXDrawable();
 	if(draw==0 || buf==GL_BACK) draw=getGLXDrawable();
+
+	// VirtualGL has to create a temporary context when performing pixel
+	// readback, because the current context may not be using the same drawable
+	// for rendering and readback, and the values of certain parameters within
+	// that context might not be suitable for pixel readback.  However, the
+	// use of this temporary context triggers a GLXBadContextState error if the
+	// render mode is not GL_RENDER (it is illegal to call
+	// glXMake[Context]Current() with a render mode of GL_SELECT|GL_FEEDBACK.)
+	// Temporarily switching the render mode to GL_RENDER is impossible without
+	// breaking OpenGL/GLX conformance, because calling glRenderMode(GL_RENDER)
+	// resets the state of the select or feedback buffer, and there is no way to
+	// restore that state to its previous value.  Thus, we have no choice but to
+	// skip pixel readback if the render mode != GL_RENDER.  Although this is not
+	// known to break any existing applications, our behavior in this regard is
+	// non-standard, so we print a warning if VGL_VERBOSE=1.
+	int renderMode=0;
+	_glGetIntegerv(GL_RENDER_MODE, &renderMode);
+	if(renderMode!=GL_RENDER && renderMode!=0)
+	{
+		if(!alreadyWarnedRenderMode && fconfig.verbose)
+		{
+			vglout.println("[VGL] WARNING: One or more readbacks skipped because render mode != GL_RENDER.");
+			alreadyWarnedRenderMode=true;
+		}
+		return;
+	}
 
 	if(!ctx)
 	{

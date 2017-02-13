@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2017 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -711,8 +711,6 @@ VFUNCDEF1(glReadBuffer, GLenum, mode, NULL);
 
 VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
 	GLenum, format, GLenum, type, GLvoid*, pixels, NULL);
-
-FUNCDEF1(GLint, glRenderMode, GLenum, mode, NULL);
 
 FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL);
 

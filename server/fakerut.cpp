@@ -386,10 +386,7 @@ int readbackTest(bool stereo)
 			// error state prior to readback)
 			char pixel[4];
 			glReadPixels(0, 0, 1, 1, 0, GL_BYTE, pixel);
-			// This will cause VirtualGL < 2.5.2 to throw a GLXBadContextState error
-			glRenderMode(GL_SELECT);
 			glXSwapBuffers(dpy, win1);
-			glRenderMode(GL_RENDER);
 			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
 			checkFrame(win1, 1, lastFrame1);
 			checkWindowColor(win1, clr.bits(-2));
@@ -414,6 +411,13 @@ int readbackTest(bool stereo)
 				if(stereo)
 					checkWindowColor(win1, sclr.bits(-2), true);
 			}
+			// Swapping buffers while the render mode != GL_RENDER will cause
+			// VirtualGL < 2.5.2 to throw a GLXBadContextState error
+			glRenderMode(GL_FEEDBACK);
+			glXSwapBuffers(dpy, win1);
+			glRenderMode(GL_RENDER);
+			checkReadbackState(GL_FRONT, dpy, win1, win0, ctx1);
+			checkFrame(win1, 0, lastFrame1);
 			printf("SUCCESS\n");
 		}
 		catch(Error &e)
