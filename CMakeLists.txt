@@ -32,14 +32,11 @@ macro(report_option var desc)
 	endif()
 endmacro()
 
-set(DEFAULT_VGL_BUILDSERVER 0)
 if(UNIX AND NOT APPLE AND NOT CYGWIN)
-	set(DEFAULT_VGL_BUILDSERVER 1)
+	option(VGL_BUILDSERVER "Build ${CMAKE_PROJECT_NAME} server components" TRUE)
+	boolean_number(VGL_BUILDSERVER)
+	report_option(VGL_BUILDSERVER "VirtualGL server components")
 endif()
-option(VGL_BUILDSERVER "Build ${CMAKE_PROJECT_NAME} server components"
-	${DEFAULT_VGL_BUILDSERVER})
-boolean_number(VGL_BUILDSERVER)
-report_option(VGL_BUILDSERVER "VirtualGL server components")
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
