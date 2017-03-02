@@ -33,8 +33,8 @@ Build Requirements
     installing [Xcode](http://developer.apple.com/tools/xcode).
 
 - X11 and OpenGL development libraries:
-  * libX11, libXext, libGL, libGLU, and (if building the VirtualGL server
-    components with X Video support) libXv
+  * libX11, libXext, libGL, libGLU, and (if building VirtualGL with X Video
+    support) libXv
   * On Mac platforms, these are distributed with
     [XQuartz](http://xquartz.macosforge.org).
 
