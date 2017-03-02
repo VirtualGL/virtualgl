@@ -14,7 +14,7 @@ users are sharing the system.
 VirtualGL on nVidia GPUs would fail to obtain a visual if `VGL_SAMPLES` was
 greater than 0.  Multisampling cannot be used with Pixmap rendering, and
 because nVidia's drivers export different FB configs for `GLX_PBUFFER_BIT` and
-`GLX_PBUFFER_BIT|GLX_PIXMAP_BIT`, it it necessary to specify `GLX_PBUFFER_BIT`
+`GLX_PBUFFER_BIT|GLX_PIXMAP_BIT`, it is necessary to specify `GLX_PBUFFER_BIT`
 to obtain an FB config that supports multisampling.
 
 3. Fixed a regression caused by 2.4 beta1[2] whereby 32-bit Linux builds of
