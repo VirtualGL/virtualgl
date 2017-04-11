@@ -1,5 +1,5 @@
 #VAR: css=virtualgl.css
-#TITLE: User's Guide for VirtualGL 2.5.2
+#TITLE: User's Guide for VirtualGL 2.5.3
 #MAKETITLE
 __Intended audience:__ System Administrators, Graphics Programmers,
 Researchers, and others with knowledge of Linux or Unix operating systems,
