@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2016 D. R. Commander
+ * Copyright (C)2009, 2011-2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -205,7 +205,7 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 }
 
 
-void setWMAtom(Display *dpy, Window win)
+void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 {
 	Atom *protocols=NULL, *newProtocols=NULL;  int count=0;
 
@@ -229,6 +229,7 @@ void setWMAtom(Display *dpy, Window win)
 		free(newProtocols);
 	}
 	else if(!XSetWMProtocols(dpy, win, &deleteAtom, 1)) goto bailout;
+	vw->vglWMDelete();
 	return;
 
 	bailout:
@@ -1713,7 +1714,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		vw=winhash.initVW(dpy, drawable, config);
 		if(vw)
 		{
-			setWMAtom(dpy, drawable);
+			setWMAtom(dpy, drawable, vw);
 			drawable=vw->updateGLXDrawable();
 			vw->setDirect(direct);
 		}
@@ -1813,7 +1814,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		drawVW=winhash.initVW(dpy, draw, config);
 		if(drawVW)
 		{
-			setWMAtom(dpy, draw);
+			setWMAtom(dpy, draw, drawVW);
 			draw=drawVW->updateGLXDrawable();
 			drawVW->setDirect(direct);
 		}
@@ -1833,7 +1834,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 		readVW=winhash.initVW(dpy, read, config);
 		if(readVW)
 		{
-			setWMAtom(dpy, read);
+			setWMAtom(dpy, read, readVW);
 			read=readVW->updateGLXDrawable();
 			readVW->setDirect(direct);
 		}

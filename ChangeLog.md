@@ -1,3 +1,25 @@
+2.5.3
+=====
+
+### Significant changes relative to 2.5.2:
+
+1. VirtualGL began handling `WM_DELETE_WINDOW` protocol messages in version
+2.1.3 as a way of avoiding BadDrawable errors that would occur if the 3D
+application was closed by the window manager (using the window's close gadget,
+for instance) and the application did not handle `WM_DELETE_WINDOW` messages
+itself.  VirtualGL throws the following error if such a situation occurs:
+
+        [VGL] ERROR: in {method}--
+        [VGL]    {line}: Window has been deleted by window manager
+
+    However, this error was also thrown erroneously by VirtualGL if a 3D
+application handled `WM_DELETE_WINDOW` messages but did not subsequently shut
+down its X11 event queue.  This was known to affect GLFW applications but
+likely affected other applications as well.  To address this problem, VirtualGL
+now ignores `WM_DELETE_WINDOW` messages if it detects that the 3D application
+is handling them.
+
+
 2.5.2
 =====
 

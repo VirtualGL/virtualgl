@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015 D. R. Commander
+ * Copyright (C)2009-2015, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -67,6 +67,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	fconfig_setdefaultsfromdpy(dpy);
 	plugin=NULL;
 	doWMDelete=false;
+	doVGLWMDelete=false;
 	newConfig=false;
 	swapInterval=0;
 	XWindowAttributes xwa;
@@ -239,7 +240,14 @@ void VirtualWin::swapBuffers(void)
 void VirtualWin::wmDelete(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	doWMDelete=true;
+	doWMDelete=doVGLWMDelete;
+}
+
+
+void VirtualWin::vglWMDelete(void)
+{
+	CriticalSection::SafeLock l(mutex);
+	doVGLWMDelete=true;
 }
 
 
