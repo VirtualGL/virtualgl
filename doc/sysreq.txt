@@ -1,6 +1,7 @@
 * System Requirements
 
 ** Linux/x86 and Other x86 Un*x Operating Systems
+{anchor: Linux_Requirements}
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \

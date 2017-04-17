@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-04-11T17:51:22">
+<meta name="date" content="2017-04-17T13:28:24">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.5.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -106,16 +106,19 @@ systems, OpenGL and GLX, and X windows.</p>
         VirtualGL Server</a>
         <ul class="hd">
             <li class="Itemize-3 hd">
-                <a href="#hd006001" class="hd">6.1 Granting Access to the 3D X Server</a>
+                <a href="#hd006001" class="hd">6.1 Initial System Configuration</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006002" class="hd">6.2 Using VirtualGL with Multiple GPUs</a>
+                <a href="#hd006002" class="hd">6.2 Granting Access to the 3D X Server</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006003" class="hd">6.3 SSH Server Configuration</a>
+                <a href="#hd006003" class="hd">6.3 Using VirtualGL with Multiple GPUs</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006004" class="hd">6.4 Un-Configuring the Server</a>
+                <a href="#hd006004" class="hd">6.4 SSH Server Configuration</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006005" class="hd">6.5 Un-Configuring the Server</a>
             </li>
         </ul>
     </li>
@@ -448,6 +451,8 @@ transport plugins.</p>
 
 
 <h2 id="hd004001">4.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
+
+<p><a name="Linux_Requirements"></a></p>
 
 <div class="table">
 <table class="standard">
@@ -867,7 +872,45 @@ sudo&nbsp;/opt/VirtualGL/bin/uninstall
 <p><a name="Unix_Config"></a></p>
 
 
-<h2 id="hd006001">6.1&nbsp;Granting Access to the 3D X Server</h2>
+<h2 id="hd006001">6.1&nbsp;Initial System Configuration</h2>
+
+<p>Before configuring VirtualGL, you should first ensure that:</p>
+
+<p>1. The appropriate GPU drivers have been installed on the machine.  With 
+few exceptions, you should install the drivers supplied by your GPU 
+vendor rather than the drivers supplied by your O/S distribution.  See 
+Section <a href="#Linux_Requirements" class="ref">4.1</a>.</p>
+
+<p>2. The 3D X server (that is, the &ldquo;local&rdquo; X server on the 
+VirtualGL server machine) has been configured to use the GPU drivers you 
+installed above.</p>
+
+<p>3. The machine has an appropriate display manager (such as GDM, KDM, or 
+LightDM) installed and has been configured to start the display manager 
+and 3D X server at boot time.  This is the default with most modern 
+Linux and Unix distributions.</p>
+
+<p>4. Accelerated OpenGL is working properly in the 3D X server.</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        If the 3D X server is not headless, then this can be verified by logging 
+        into the X server locally and running <code>glxinfo</code>.
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        If the 3D X server is headless, then proceed with the	instructions 
+        below, and the &ldquo;Sanity Check&rdquo; section will provide you with 
+        an opportunity to verify that the 3D X server is using accelerated 
+        OpenGL.
+    </li>
+</ul>
+
+<p>More specific instructions are unfortunately outside of the scope of 
+this guide, since they will vary from system to system.</p>
+
+
+
+<h2 id="hd006002">6.2&nbsp;Granting Access to the 3D X Server</h2>
 
 <p>VirtualGL requires access to a GPU in the application server so that it 
 can create off-screen pixel buffers (Pbuffers) and redirect the 3D 
@@ -1163,7 +1206,7 @@ svcadm&nbsp;enable&nbsp;gdm
 </ol>
 
 
-<h3 id="hd006001001">Sanity Check</h3>
+<h3 id="hd006002001">Sanity Check</h3>
 
 <p>To verify that the application server is ready to run VirtualGL, log out 
 of the server, log back into the server using SSH, and execute the 
@@ -1218,7 +1261,7 @@ words &ldquo;Software Rasterizer&rdquo; in the OpenGL renderer string.</p>
 
 
 
-<h2 id="hd006002">6.2&nbsp;Using VirtualGL with Multiple GPUs</h2>
+<h2 id="hd006003">6.3&nbsp;Using VirtualGL with Multiple GPUs</h2>
 
 <p>VirtualGL can redirect the OpenGL commands from a 3D application to any 
 GPU in the server machine.  In order for this to work, however, all of 
@@ -1234,7 +1277,7 @@ with) <code>:0.0</code>, <code>:1.0</code>, <code>:2.0</code>, etc.</p>
 
 
 
-<h2 id="hd006003">6.3&nbsp;SSH Server Configuration</h2>
+<h2 id="hd006004">6.4&nbsp;SSH Server Configuration</h2>
 
 <p>The application server&rsquo;s SSH daemon should have the 
 <code>X11Forwarding</code> option enabled and the <code>UseLogin</code> 
@@ -1243,7 +1286,7 @@ is usually located under <code>/etc/ssh</code>.</p>
 
 
 
-<h2 id="hd006004">6.4&nbsp;Un-Configuring the Server</h2>
+<h2 id="hd006005">6.5&nbsp;Un-Configuring the Server</h2>
 
 <p>You can use the <code>vglserver_config</code> script to restore the 
 security settings that were in place before VirtualGL was installed.  

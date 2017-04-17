@@ -1,6 +1,33 @@
 * Configuring a Linux or Unix Machine as a VirtualGL Server
 {anchor: Unix_Config}
 
+** Initial System Configuration
+
+Before configuring VirtualGL, you should first ensure that:
+
+1. The appropriate GPU drivers have been installed on the machine.  With few
+exceptions, you should install the drivers supplied by your GPU vendor rather
+than the drivers supplied by your O/S distribution.  See
+{ref prefix="Section ": Linux_Requirements}.
+
+2. The 3D X server (that is, the "local" X server on the VirtualGL server
+machine) has been configured to use the GPU drivers you installed above.
+
+3. The machine has an appropriate display manager (such as GDM, KDM, or
+LightDM) installed and has been configured to start the display manager and 3D
+X server at boot time.  This is the default with most modern Linux and Unix
+distributions.
+
+4. Accelerated OpenGL is working properly in the 3D X server.
+	* If the 3D X server is not headless, then this can be verified by logging
+	into the X server locally and running ''glxinfo''.
+	* If the 3D X server is headless, then proceed with the	instructions below,
+	and the "Sanity Check" section will provide you with an opportunity to verify
+	that the 3D X server is using accelerated OpenGL.
+
+More specific instructions are unfortunately outside of the scope of this
+guide, since they will vary from system to system.
+
 ** Granting Access to the 3D X Server
 
 VirtualGL requires access to a GPU in the application server so that it can
