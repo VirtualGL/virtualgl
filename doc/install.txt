@@ -90,7 +90,17 @@ prior to installing a 32-bit VirtualGL package on some of those distributions.
 
 ** Installing the VirtualGL Client on Windows (Cygwin)
 
-Refer to [[http://www.virtualgl.org/Documentation/Cygwin]].
+In a Cygwin terminal, execute the following commands:
+
+#Verb <<---
+wget https://raw.githubusercontent.com/VirtualGL/vglcygsetup/master/vglcygsetup
+chmod 700 vglcygsetup
+./vglcygsetup
+---
+
+''vglcygsetup'' will synchronize the available VirtualGL packages to a local
+directory under ''~/.vglrepo'', download Cygwin Setup, and run Cygwin Setup
+against the local directory in order to install VirtualGL.
 
 ** Installing VirtualGL from Source
 
