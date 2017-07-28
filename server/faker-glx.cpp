@@ -437,6 +437,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	if(vtemp)
 	{
 		if(vtemp->depth==32) depth=32;
+		if(vtemp->depth==30) depth=30;
 		XFree(vtemp);
 	}
 

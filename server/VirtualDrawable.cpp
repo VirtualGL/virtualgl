@@ -118,12 +118,17 @@ void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 {
 	if(glxvisual::visAttrib3D(config, GLX_STEREO))
 		stereo=true;
-	int pixelsize=glxvisual::visAttrib3D(config, GLX_RED_SIZE)
+	int pixelsize_noalpha=glxvisual::visAttrib3D(config, GLX_RED_SIZE)
 		+glxvisual::visAttrib3D(config, GLX_GREEN_SIZE)
-		+glxvisual::visAttrib3D(config, GLX_BLUE_SIZE)
+		+glxvisual::visAttrib3D(config, GLX_BLUE_SIZE);
+	int pixelsize=pixelsize_noalpha
 		+glxvisual::visAttrib3D(config, GLX_ALPHA_SIZE);
 
-	if(pixelsize==32)
+	if(pixelsize_noalpha==30)
+	{
+		format=GL_RGB10_A2;
+	}
+	else if(pixelsize==32)
 	{
 		#ifdef GL_BGRA_EXT
 		if(littleendian()) format=GL_BGRA_EXT;
@@ -319,6 +324,8 @@ static const char *formatString(int format)
 		#endif
 		case GL_RED:  case GL_GREEN:  case GL_BLUE:
 			return "COMPONENT";
+		case GL_RGB10_A2:
+			return "r210";
 		default:
 			return "????";
 	}
@@ -433,7 +440,11 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	while(e!=GL_NO_ERROR) e=_glGetError();  // Clear previous error
 	profReadback.startFrame();
 	if(usePBO) t0=getTime();
-	_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE,
+	int type = GL_UNSIGNED_BYTE;
+	if(oglDraw->getFormat()==GL_RGB10_A2) {
+		type = GL_UNSIGNED_INT_2_10_10_10_REV;
+	}
+	_glReadPixels(x, y, width, height, format, type,
 		usePBO? NULL:bits);
 
 	if(usePBO)

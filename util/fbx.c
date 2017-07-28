@@ -28,13 +28,13 @@ static int errorLine=-1;
 static FILE *warningFile=NULL;
 
 static const int fbx_rmask[FBX_FORMATS]=
-	{ 0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0 };
+	{ 0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0x3FF00000, 0 };
 static const int fbx_gmask[FBX_FORMATS]=
-	{ 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0 };
+	{ 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x00FF00, 0x000ffc00, 0 };
 static const int fbx_bmask[FBX_FORMATS]=
-	{ 0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF, 0 };
+	{ 0xFF0000, 0xFF0000, 0x0000FF, 0x0000FF, 0xFF0000, 0x0000FF, 0x000003ff, 0 };
 static const char *formatName[FBX_FORMATS]=
-	{ "RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "INDEX" };
+	{ "RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "r210", "INDEX" };
 
 
 #if defined(_WIN32)
