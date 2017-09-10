@@ -18,14 +18,18 @@ before_install:
     rm ci/keys &&
     mv ci/gpgsign ~/src/buildscripts &&
     gpg --import ci/sign_vgl &&
-    rm ci/sign_vgl
+    rm ci/sign_vgl &&
+    mkdir ~/libjpeg-turbo-rpm &&
+    pushd ~/libjpeg-turbo-rpm &&
+    wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm &&
+    popd
 
 script:
   - mkdir -p ~/src/vgl.nightly &&
     if [ -f .git/shallow ]; then
       mv .git/shallow .git/shallow.bak;
     fi &&
-    docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -t dcommander/buildvgl:latest bash -c "rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16 && wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm && rpm -K *.rpm && rpm -i *.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvgl -r file:///root/src/virtualgl $TRAVIS_BRANCH -v" &&
+    docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvgl:latest bash -c "rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16 && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvgl -r file:///root/src/virtualgl $TRAVIS_BRANCH -v" &&
     sudo chown -R travis:travis ~/src/vgl.nightly &&
     mv ~/src/vgl.nightly/latest/log-$TRAVIS_OS_NAME.txt ~/src/vgl.nightly/latest/files/ &&
     if [ -f .git/shallow.bak ]; then
