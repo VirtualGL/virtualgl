@@ -85,7 +85,8 @@ Ertl 2000.)
 #-->  -DVGL_BUILDSERVER=@VGL_BUILDSERVER@ -DVGL_SYSTEMFLTK=@VGL_SYSTEMFLTK@ \
 #-->  -DVGL_SYSTEMGLX=@VGL_SYSTEMGLX@ -DVGL_SYSTEMXCB=@VGL_SYSTEMXCB@ \
 #-->  -DVGL_USESSL=@VGL_USESSL@ -DVGL_USEXV=@VGL_USEXV@
-#-->make
+#-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
+#-->make -j$NUMCPUS --load-average=$NUMCPUS
 
 %install
 rm -rf $RPM_BUILD_ROOT
