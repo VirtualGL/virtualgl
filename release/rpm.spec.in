@@ -14,7 +14,18 @@
 # %{bindir} != %{_bindir}
 %define binsymlinks @VGL_BINSYMLINKS@
 
-%ifarch x86_64
+%if "%{?__isa_bits:1}" == "1"
+%define _bits %{__isa_bits}
+%else
+# RPM < 4.6
+%if "%{_lib}" == "lib64"
+%define _bits 64
+%else
+%define _bits 32
+%endif
+%endif
+
+%if "%{_bits}" == "64"
 %define _syslibdir /usr/lib64
 %else
 %define _syslibdir /usr/lib
@@ -196,7 +207,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/vgllogin
 %{bindir}/vglserver_config
 %{bindir}/vglrun
-%ifarch x86_64
+%if "%{_bits}" == "64"
  %{bindir}/glxspheres64
 %else
  %{bindir}/glxspheres
