@@ -24,6 +24,8 @@ BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
 
 $BIN/bmptest
+$BIN/pftest -time 0.01
+$BIN/pftest -time 0.01 -getsetrgb
 echo
 
 NOSHM=
@@ -53,27 +55,6 @@ sleep 2
 DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
 DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
 DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-kill $PID
-PID=-1
-sleep 2
-
-Xvfb :42 -screen 0 1920x1200x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index -pm
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index -pm -mt
-kill $PID
-PID=-1
-sleep 2
-
-Xvfb :42 -screen 0 1024x768x8 -class PseudoColor >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -index -pm
 kill $PID
 PID=-1
 sleep 2

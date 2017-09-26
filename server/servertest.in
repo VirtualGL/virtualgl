@@ -51,6 +51,11 @@ Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
 
+# Frame unit tests
+DISPLAY=:42 $BIN/frameut -check
+DISPLAY=:42 $BIN/frameut -check -anaglyph
+DISPLAY=:42 $BIN/frameut -check -logo
+
 # VGL Transport
 DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
 DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO

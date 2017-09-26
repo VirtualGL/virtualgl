@@ -54,9 +54,9 @@ namespace vglserver
 
 			int init(int w, int h, GLXFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
-				GLenum format, int pixelSize, GLubyte *bits, GLint buf, bool stereo);
+				GLenum glFormat, PF &pf, GLubyte *bits, GLint buf, bool stereo);
 			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);
-			void makePassive(vglcommon::Frame *f, int drawBuf, int format,
+			void makePassive(vglcommon::Frame *f, int drawBuf, GLenum glFormat,
 				int stereoMode);
 			void sendVGL(GLint drawBuf, bool spoilLast,	bool doStereo,
 				int stereoMode, int compress, int qual, int subsamp);

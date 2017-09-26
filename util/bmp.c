@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014 D. R. Commander
+ * Copyright (C)2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -79,37 +79,32 @@ static const char *errorStr="No error";
 	if(bytesWritten!=(size)) _throw("Write error");
 
 
-static void pixelConvert(unsigned char *srcbuf, int width, int srcPitch,
-	int height, enum BMPPF srcFormat, unsigned char *dstbuf, int dstPitch,
-	enum BMPPF dstFormat, int flip)
+static void pixelConvert(unsigned char *srcBuf, int width, int srcPitch,
+	int height, PF srcpf, unsigned char *dstBuf, int dstPitch, PF dstpf,
+	int flip)
 {
-	unsigned char *srcptr, *srcptr0, *dstptr, *dstptr0;
-	int i, j;
-
-	srcptr=flip? &srcbuf[srcPitch*(height-1)]:srcbuf;
-	for(j=0, dstptr=dstbuf; j<height; j++,
-		srcptr+=flip? -srcPitch:srcPitch, dstptr+=dstPitch)
+	if(flip)
 	{
-		for(i=0, srcptr0=srcptr, dstptr0=dstptr; i<width; i++,
-			srcptr0+=bmp_ps[srcFormat], dstptr0+=bmp_ps[dstFormat])
-		{
-			dstptr0[bmp_roffset[dstFormat]]=srcptr0[bmp_roffset[srcFormat]];
-			dstptr0[bmp_goffset[dstFormat]]=srcptr0[bmp_goffset[srcFormat]];
-			dstptr0[bmp_boffset[dstFormat]]=srcptr0[bmp_boffset[srcFormat]];
-		}
-		if(width*bmp_ps[dstFormat]!=dstPitch)
-			memset(&dstptr[width*bmp_ps[dstFormat]], 0,
-				dstPitch-width*bmp_ps[dstFormat]);
+		srcBuf=&srcBuf[srcPitch*(height-1)];
+		srcPitch=-srcPitch;
+	}
+	srcpf.convert(srcBuf, width, srcPitch, height, dstBuf, dstPitch, dstpf);
+	while(height--)
+	{
+		if(width*dstpf.size!=dstPitch)
+			memset(&dstBuf[width*dstpf.size], 0, dstPitch-width*dstpf.size);
+		dstBuf+=dstPitch;
 	}
 }
 
 
 static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
-	int *height, enum BMPPF format, enum BMPORN orientation, int ascii)
+	int *height, int format, enum BMPORN orientation, int ascii)
 {
 	FILE *file=NULL;  int ret=0, scaleFactor, dstPitch;
 	unsigned char *tempbuf=NULL;  char temps[255], temps2[255];
 	int numRead=0, totalRead=0, pixel[3], i, j;
+	PF pf;
 
 	if((file=fdopen(*fd, "r"))==NULL) _throw(strerror(errno));
 
@@ -138,7 +133,8 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 	} while(totalRead<3);
 	if((*width)<1 || (*height)<1 || scaleFactor<1) _throw("Corrupt PPM header");
 
-	dstPitch=(((*width)*bmp_ps[format])+(align-1))&(~(align-1));
+	pf=pf_get(format);
+	dstPitch=(((*width)*pf.size)+(align-1))&(~(align-1));
 	if((*buf=(unsigned char *)malloc(dstPitch*(*height)))==NULL)
 		_throw("Memory allocation error");
 	if(ascii)
@@ -149,12 +145,8 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			{
 				if(fscanf(file, "%d%d%d", &pixel[0], &pixel[1], &pixel[2])!=3)
 					_throw("Read error");
-				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_roffset[format]]=
-					(unsigned char)(pixel[0]*255/scaleFactor);
-				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_goffset[format]]=
-					(unsigned char)(pixel[1]*255/scaleFactor);
-				(*buf)[j*dstPitch+i*bmp_ps[format]+bmp_boffset[format]]=
-					(unsigned char)(pixel[2]*255/scaleFactor);
+				pf.setRGB(&(*buf)[j*dstPitch+i*pf.size], pixel[0]*255/scaleFactor,
+					pixel[1]*255/scaleFactor, pixel[2]*255/scaleFactor);
 			}
 		}
 	}
@@ -166,8 +158,8 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			_throw("Memory allocation error");
 		if(fread(tempbuf, (*width)*(*height)*3, 1, file)!=1)
 			_throw("Read error");
-		pixelConvert(tempbuf, *width, (*width)*3, *height, BMPPF_RGB, *buf,
-			dstPitch, format, orientation==BMPORN_BOTTOMUP);
+		pixelConvert(tempbuf, *width, (*width)*3, *height, pf_get(PF_RGB), *buf,
+			dstPitch, pf, orientation==BMPORN_BOTTOMUP);
 	}
 
 	finally:
@@ -178,18 +170,20 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 
 
 int bmp_load(char *filename, unsigned char **buf, int *width, int align,
-	int *height, enum BMPPF format, enum BMPORN orientation)
+	int *height, int format, enum BMPORN orientation)
 {
 	int fd=-1, bytesRead, srcPitch, srcOrientation=BMPORN_BOTTOMUP,
 		srcPixelSize, dstPitch, ret=0;
 	unsigned char *tempbuf=NULL;
 	BitmapHeader bh;  int flags=O_RDONLY;
+	PF pf;
 
 	#ifdef _WIN32
 	flags|=O_BINARY;
 	#endif
-	if(!filename || !buf || !width || !height || format>BMP_NUMPF-1 || align<1)
-		_throw("invalid argument to loadbmp()");
+	if(!filename || !buf || !width || !height || format<0
+		|| format>=PIXELFORMATS-1 || align<1)
+		_throw("Invalid argument to bmp_load()");
 	if((align&(align-1))!=0)
 		_throw("Alignment must be a power of 2");
 	_unix(fd=open(filename, flags));
@@ -250,7 +244,8 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	*width=bh.biWidth;  *height=bh.biHeight;  srcPixelSize=bh.biBitCount/8;
 	if(*height<0) { *height=-(*height);  srcOrientation=BMPORN_TOPDOWN; }
 	srcPitch=(((*width)*srcPixelSize)+3)&(~3);
-	dstPitch=(((*width)*bmp_ps[format])+(align-1))&(~(align-1));
+	pf=pf_get(format);
+	dstPitch=(((*width)*pf.size)+(align-1))&(~(align-1));
 
 	if(srcPitch*(*height)+bh.bfOffBits!=bh.bfSize)
 		_throw("Corrupt bitmap header");
@@ -262,8 +257,8 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	_unix(bytesRead=read(fd, tempbuf, srcPitch*(*height)));
 	if(bytesRead!=srcPitch*(*height)) _throw("Read error");
 
-	pixelConvert(tempbuf, *width, srcPitch, *height, BMPPF_BGR, *buf, dstPitch,
-		format, srcOrientation!=orientation);
+	pixelConvert(tempbuf, *width, srcPitch, *height, pf_get(PF_BGR), *buf,
+		dstPitch, pf, srcOrientation!=orientation);
 
 	finally:
 	if(tempbuf) free(tempbuf);
@@ -273,7 +268,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 
 
 static int ppm_save(char *filename, unsigned char *buf, int width, int pitch,
-	int height, enum BMPPF format, enum BMPORN orientation)
+	int height, PF pf, enum BMPORN orientation)
 {
 	FILE *file=NULL;  int ret=0;
 	unsigned char *tempbuf=NULL;
@@ -286,7 +281,7 @@ static int ppm_save(char *filename, unsigned char *buf, int width, int pitch,
 	if((tempbuf=(unsigned char *)malloc(width*height*3))==NULL)
 		_throw("Memory allocation error");
 
-	pixelConvert(buf, width, pitch, height, format, tempbuf, width*3, BMPPF_RGB,
+	pixelConvert(buf, width, pitch, height, pf, tempbuf, width*3, pf_get(PF_RGB),
 		orientation==BMPORN_BOTTOMUP);
 
 	if((fwrite(tempbuf, width*height*3, 1, file))!=1) _throw("Write error");
@@ -299,28 +294,30 @@ static int ppm_save(char *filename, unsigned char *buf, int width, int pitch,
 
 
 int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
-	int height, enum BMPPF format, enum BMPORN orientation)
+	int height, int format, enum BMPORN orientation)
 {
 	int fd=-1, bytesWritten, dstPitch, ret=0;
 	int flags=O_RDWR|O_CREAT|O_TRUNC;
 	unsigned char *tempbuf=NULL;  char *temp;
 	BitmapHeader bh;  int mode;
+	PF pf;
 
 	#ifdef _WIN32
 	flags|=O_BINARY;  mode=_S_IREAD|_S_IWRITE;
 	#else
 	mode=S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
 	#endif
-	if(!filename || !buf || width<1 || height<1 || format>BMP_NUMPF-1 || pitch<0)
-		_throw("bad argument to bmp_save()");
+	if(!filename || !buf || width<1 || height<1 || format<0
+		|| format>=PIXELFORMATS-1 || pitch<0)
+		_throw("Invalid argument to bmp_save()");
 
-	if(pitch==0) pitch=width*bmp_ps[format];
+	pf=pf_get(format);
+	if(pitch==0) pitch=width*pf.size;
 
 	if((temp=strrchr(filename, '.'))!=NULL)
 	{
 		if(!stricmp(temp, ".ppm"))
-			return ppm_save(filename, buf, width, pitch, height, format,
-				orientation);
+			return ppm_save(filename, buf, width, pitch, height, pf, orientation);
 	}
 
 	_unix(fd=open(filename, flags, mode));
@@ -375,8 +372,8 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	if((tempbuf=(unsigned char *)malloc(dstPitch*height))==NULL)
 		_throw("Memory allocation error");
 
-	pixelConvert(buf, width, pitch, height, format, tempbuf, dstPitch,
-		BMPPF_BGR, orientation!=BMPORN_BOTTOMUP);
+	pixelConvert(buf, width, pitch, height, pf, tempbuf, dstPitch,
+		pf_get(PF_BGR), orientation!=BMPORN_BOTTOMUP);
 
 	if((bytesWritten=write(fd, tempbuf, dstPitch*height))!=dstPitch*height)
 		_throw(strerror(errno));

@@ -31,43 +31,38 @@
 }
 
 
-const char *pfStr[BMP_NUMPF]={ "RGB", "RGBX", "BGR", "BGRX", "XBGR", "XRGB" };
-
-
-void initBuf(unsigned char *buf, int width, int pitch, int height, int pf,
+void initBuf(unsigned char *buf, int width, int pitch, int height, PF pf,
 	int orientation)
 {
-	int i, j, ps=bmp_ps[pf];
+	int i, j;
 
 	for(j=0; j<height; j++)
 	{
 		int row=orientation==BMPORN_TOPDOWN? j:height-j-1;
 		for(i=0; i<width; i++)
 		{
-			memset(&buf[row*pitch+i*ps], 0, ps);
-			buf[row*pitch+i*ps+bmp_roffset[pf]]=(i*256/width)%256;
-			buf[row*pitch+i*ps+bmp_goffset[pf]]=(j*256/height)%256;
-			buf[row*pitch+i*ps+bmp_boffset[pf]]=(j*256/height+i*256/width)%256;
+			memset(&buf[row*pitch+i*pf.size], 0, pf.size);
+			pf.setRGB(&buf[row*pitch+i*pf.size], (i*256/width)%256,
+				(j*256/height)%256, (j*256/height+i*256/width)%256);
 		}
 	}
 }
 
 
-int cmpBuf(unsigned char *buf, int width, int pitch, int height, int pf,
+int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF pf,
 	int orientation)
 {
-	int i, j, ps=bmp_ps[pf], retval=1;
+	int i, j, retval=1;
 
 	for(j=0; j<height; j++)
 	{
 		int row=orientation==BMPORN_TOPDOWN? j:height-j-1;
 		for(i=0; i<width; i++)
 		{
-			if(buf[row*pitch+i*ps+bmp_roffset[pf]]!=(i*256/width)%256)
-				retval=0;
-			if(buf[row*pitch+i*ps+bmp_goffset[pf]]!=(j*256/height)%256)
-				retval=0;
-			if(buf[row*pitch+i*ps+bmp_boffset[pf]]!=(j*256/height+i*256/width)%256)
+			int r, g, b;
+			pf.getRGB(&buf[row*pitch+i*pf.size], &r, &g, &b);
+			if(r!=(i*256/width)%256 || g!=(j*256/height)%256
+				|| b!=(j*256/height+i*256/width)%256)
 				retval=0;
 		}
 	}
@@ -75,11 +70,11 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, int pf,
 }
 
 
-int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
+int doTest(const char *ext, int width, int align, int height, PF pf,
 	enum BMPORN orientation)
 {
 	char filename[80], *md5sum, md5buf[65];
-	int pitch=BMPPAD(width*bmp_ps[pf], align), loadWidth=0, loadHeight=0,
+	int pitch=BMPPAD(width*pf.size, align), loadWidth=0, loadHeight=0,
 		retval=0;
 	unsigned char *buf=NULL;
 	char *md5ref=!stricmp(ext, "ppm")? "c0c9f772b464d1896326883a5c79c545":
@@ -89,16 +84,16 @@ int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
 		_throw("Could not allocate memory");
 	initBuf(buf, width, pitch, height, pf, orientation);
 
-	snprintf(filename, 80, "bmptest_%s_%d_%s.%s", pfStr[pf], align,
+	snprintf(filename, 80, "bmptest_%s_%d_%s.%s", pf.name, align,
 		orientation==BMPORN_TOPDOWN? "td":"bu", ext);
-	if(bmp_save(filename, buf, width, pitch, height, pf, orientation)==-1)
+	if(bmp_save(filename, buf, width, pitch, height, pf.id, orientation)==-1)
 		_throw(bmp_geterr());
 	md5sum=MD5File(filename, md5buf);
 	if(stricmp(md5sum, md5ref))
 		_throwmd5(filename, md5sum, md5ref);
 
 	free(buf);  buf=NULL;
-	if(bmp_load(filename, &buf, &loadWidth, align, &loadHeight, pf,
+	if(bmp_load(filename, &buf, &loadWidth, align, &loadHeight, pf.id,
 		orientation)==-1)
 		_throw(bmp_geterr());
 	if(width!=loadWidth || height!=loadHeight)
@@ -121,32 +116,33 @@ int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
 
 int main(void)
 {
-	int align, width=35, height=39;
-	enum BMPPF pf;
+	int align, width=35, height=39, format;
 
 	for(align=1; align<=8; align*=2)
 	{
-		for(pf=0; pf<BMP_NUMPF; pf++)
+		for(format=0; format<PIXELFORMATS-1; format++)
 		{
-			printf("%s Top-Down BMP (row alignment = %d bytes)  ...  ", pfStr[pf],
+			PF pf=pf_get(format);
+
+			printf("%s Top-Down BMP (row alignment = %d bytes)  ...  ", pf.name,
 				align);
 			if(doTest("bmp", width, align, height, pf, BMPORN_TOPDOWN)==-1)
 				return -1;
 			printf("OK.\n");
 
-			printf("%s Top-Down PPM (row alignment = %d bytes)  ...  ", pfStr[pf],
+			printf("%s Top-Down PPM (row alignment = %d bytes)  ...  ", pf.name,
 				align);
 			if(doTest("ppm", width, align, height, pf, BMPORN_TOPDOWN)==-1)
 				return -1;
 			printf("OK.\n");
 
-			printf("%s Bottom-Up BMP (row alignment = %d bytes)  ...  ", pfStr[pf],
+			printf("%s Bottom-Up BMP (row alignment = %d bytes)  ...  ", pf.name,
 				align);
 			if(doTest("bmp", width, align, height, pf, BMPORN_BOTTOMUP)==-1)
 				return -1;
 			printf("OK.\n");
 
-			printf("%s Bottom-Up PPM (row alignment = %d bytes)  ...  ", pfStr[pf],
+			printf("%s Bottom-Up PPM (row alignment = %d bytes)  ...  ", pf.name,
 				align);
 			if(doTest("ppm", width, align, height, pf, BMPORN_BOTTOMUP)==-1)
 				return -1;

@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011, 2014 D. R. Commander
+/* Copyright (C)2009-2011, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -27,6 +27,17 @@ char errStr[MAXSTR];
 
 static FakerConfig *fconfig=NULL;
 static Window win=0;
+
+static const int trans2pf[RRTRANS_FORMATOPT]=
+{
+	PF_RGB, PF_RGBX, PF_BGR, PF_BGRX, PF_XBGR, PF_XRGB
+};
+
+static const int pf2trans[PIXELFORMATS]=
+{
+	RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
+	RRTRANS_ARGB, RRTRANS_RGB
+};
 
 
 FakerConfig *fconfig_instance(void) { return fconfig; }
@@ -85,24 +96,10 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		int compress=fconfig->compress;
 		if(compress==RRCOMP_PROXY || compress==RRCOMP_RGB) compress=RRCOMP_RGB;
 		else compress=RRCOMP_JPEG;
-		int flags=FRAME_BOTTOMUP, pixelsize=3;
-		if(compress!=RRCOMP_RGB)
-		{
-			switch(format)
-			{
-				case RRTRANS_BGR:
-					flags|=FRAME_BGR;  break;
-				case RRTRANS_RGBA:
-					pixelsize=4;  break;
-				case RRTRANS_BGRA:
-					flags|=FRAME_BGR;  pixelsize=4;  break;
-				case RRTRANS_ABGR:
-					flags|=(FRAME_BGR|FRAME_ALPHAFIRST);  pixelsize=4;  break;
-				case RRTRANS_ARGB:
-					flags|=FRAME_ALPHAFIRST;  pixelsize=4;  break;
-			}
-		}
-		Frame *f=vglconn->getFrame(width, height, pixelsize, flags, (bool)stereo);
+		int pixelFormat=PF_RGB;
+		if(compress!=RRCOMP_RGB) pixelFormat=trans2pf[format];
+		Frame *f=vglconn->getFrame(width, height, pixelFormat, FRAME_BOTTOMUP,
+			(bool)stereo);
 		f->hdr.compress=compress;
 		frame->opaque=(void *)f;
 		frame->w=f->hdr.framew;
@@ -110,15 +107,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->pitch=f->pitch;
 		frame->bits=f->bits;
 		frame->rbits=f->rbits;
-		for(int i=0; i<RRTRANS_FORMATOPT; i++)
-		{
-			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
-				&& rrtrans_ps[i]==f->pixelSize)
-			{
-				frame->format=i;  break;
-			}
-		}
+		frame->format=pf2trans[f->pf.id];
 		return frame;
 	}
 	catch(Error &e)

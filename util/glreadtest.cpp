@@ -30,6 +30,7 @@
 #include "NvIFROpenGL.h"
 #include "NvIFR_API.h"
 #endif
+#include "glpf.h"
 
 using namespace vglutil;
 
@@ -38,51 +39,12 @@ using namespace vglutil;
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
 
-typedef struct _PixelFormat
+GLenum glFormat[PIXELFORMATS];
+
+const char *formatName[PIXELFORMATS]=
 {
-	unsigned long roffset, goffset, boffset;
-	int pixelSize;
-	int glFormat;
-	int bgr;
-	const char *name;
-} PixelFormat;
-
-static int nFormats=3
-	#ifdef GL_BGRA_EXT
-	+1
-	#endif
-	#ifdef GL_BGR_EXT
-	+1
-	#endif
-	#ifdef GL_ABGR_EXT
-	+1
-	#endif
-	;
-
-PixelFormat pf[4
-	#ifdef GL_BGRA_EXT
-	+1
-	#endif
-	#ifdef GL_BGR_EXT
-	+1
-	#endif
-	#ifdef GL_ABGR_EXT
-	+1
-	#endif
-	]={
-		{0, 0, 0, 1, GL_RED, 0, "RED"},
-		#ifdef GL_BGRA_EXT
-		{2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"},
-		#endif
-		#ifdef GL_ABGR_EXT
-		{3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"},
-		#endif
-		#ifdef GL_BGR_EXT
-		{2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"},
-		#endif
-		{0, 1, 2, 4, GL_RGBA, 0, "RGBA"},
-		{0, 1, 2, 3, GL_RGB, 0, "RGB"},
-	};
+	"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "RED"
+};
 
 
 #define BENCH_NAME       "GLreadtest"
@@ -96,9 +58,7 @@ int width=WIDTH, height=HEIGHT, align=ALIGN;
 Display *dpy=NULL;  Window win=0;  Pixmap pm=0;  GLXPixmap glxpm=0;
 XVisualInfo *v=NULL;  GLXFBConfig c=0;
 GLXContext ctx=0;
-#ifndef GLX11
 GLXPbuffer pbuffer=0;
-#endif
 
 Timer timer;
 bool useWindow=false, usePixmap=false, useFBO=false, useRTT=false,
@@ -156,7 +116,6 @@ void findVisual(void)
 	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None, None};
 
-	#ifndef GLX11
 	int pbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
 		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None,
 		None, None};
@@ -164,7 +123,6 @@ void findVisual(void)
 		GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
 		GLX_PBUFFER_BIT, None, None, None};
 	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
-	#endif
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
@@ -198,7 +156,6 @@ void findVisual(void)
 		}
 	}
 
-	#ifndef GLX11
 	if(useAlpha)
 	{
 		pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
@@ -217,15 +174,12 @@ void findVisual(void)
 	int fbcid=-1;
 	glXGetFBConfigAttrib(dpy, c, GLX_FBCONFIG_ID, &fbcid);
 	printf("FB Config = 0x%.2x\n", fbcid);
-	#endif
 }
 
 
 void drawableInit(void)
 {
-	#ifndef	GLX11
 	int pbattribs[]={GLX_PBUFFER_WIDTH, 0, GLX_PBUFFER_HEIGHT, 0, None};
-	#endif
 
 	// Use GLX 1.1 functions here in case we're remotely displaying to
 	// something that doesn't support GLX 1.3
@@ -276,7 +230,6 @@ void drawableInit(void)
 		return;
 	}
 
-	#ifndef GLX11
 	ctx=glXCreateNewContext(dpy, c, GLX_RGBA_TYPE, NULL, True);
 	if(!ctx) _throw("Could not create GL context");
 
@@ -285,7 +238,6 @@ void drawableInit(void)
 	if(!pbuffer) _throw("Could not create Pbuffer");
 
 	glXMakeContextCurrent(dpy, pbuffer, pbuffer, ctx);
-	#endif
 }
 
 
@@ -307,47 +259,44 @@ static void check_errors(const char *tag)
 }
 
 
-void initBuf(int x, int y, int width, int height, int format,
-	unsigned char *buf)
+void initBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf)
 {
-	int i, j, ps=pf[format].pixelSize;
+	int i, j;
 	for(j=0; j<height; j++)
 	{
 		for(i=0; i<width; i++)
 		{
-			if(pf[format].glFormat==GL_RED)
-				buf[(j*width+i)*ps]=((j+y)*(i+x))%256;
+			if(pf.id==PF_COMP)
+				buf[j*width+i]=((j+y)*(i+x))%256;
 			else
 			{
-				buf[(j*width+i)*ps+pf[format].roffset]=((j+y)*(i+x))%256;
-				buf[(j*width+i)*ps+pf[format].goffset]=((j+y)*(i+x)*2)%256;
-				buf[(j*width+i)*ps+pf[format].boffset]=((j+y)*(i+x)*3)%256;
+				pf.setRGB(&buf[(j*width+i)*pf.size], ((j+y)*(i+x))%256,
+					((j+y)*(i+x)*2)%256, ((j+y)*(i+x)*3)%256);
 			}
 		}
 	}
 }
 
 
-int cmpBuf(int x, int y, int width, int height, int format, unsigned char *buf,
+int cmpBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf,
 	int bassackwards)
 {
-	int i, j, l, ps=pf[format].pixelSize;
+	int i, j, l;
 	for(j=0; j<height; j++)
 	{
 		l=bassackwards? height-j-1:j;
 		for(i=0; i<width; i++)
 		{
-			if(pf[format].glFormat==GL_RED)
+			if(pf.id==PF_COMP)
 			{
-				if(buf[l*PAD(width*ps)+i*ps]!=((j+y)*(i+x))%256) return 0;
+				if(buf[l*PAD(width*pf.size)+i]!=((j+y)*(i+x))%256) return 0;
 			}
 			else
 			{
-				if(buf[l*PAD(width*ps)+i*ps+pf[format].roffset]!=((j+y)*(i+x))%256)
-					return 0;
-				if(buf[l*PAD(width*ps)+i*ps+pf[format].goffset]!=((j+y)*(i+x)*2)%256)
-					return 0;
-				if(buf[l*PAD(width*ps)+i*ps+pf[format].boffset]!=((j+y)*(i+x)*3)%256)
+				int r, g, b;
+				pf.getRGB(&buf[l*PAD(width*pf.size)+i*pf.size], &r, &g, &b);
+				if(r!=((j+y)*(i+x))%256 || g!=((j+y)*(i+x)*2)%256
+					|| b!=((j+y)*(i+x)*3)%256)
 					return 0;
 			}
 		}
@@ -357,13 +306,13 @@ int cmpBuf(int x, int y, int width, int height, int format, unsigned char *buf,
 
 
 // Makes sure the frame buffer has been cleared prior to a write
-void clearFB(int format)
+void clearFB(void)
 {
-	unsigned char *buf=NULL;  int ps=3, glFormat=GL_RGB;
+	unsigned char *buf=NULL;
 
-	if((buf=(unsigned char *)malloc(width*height*ps))==NULL)
+	if((buf=(unsigned char *)malloc(width*height*3))==NULL)
 		_throw("Could not allocate buffer");
-	memset(buf, 0xFF, width*height*ps);
+	memset(buf, 0xFF, width*height*3);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	#ifdef GL_EXT_framebuffer_object
@@ -380,9 +329,9 @@ void clearFB(int format)
 	}
 	glClearColor(0., 0., 0., 0.);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glReadPixels(0, 0, width, height, glFormat, GL_UNSIGNED_BYTE, buf);
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
 	check_errors("frame buffer read");
-	for(int i=0; i<width*height*ps; i++)
+	for(int i=0; i<width*height*3; i++)
 	{
 		if(buf[i]!=0)
 		{
@@ -396,7 +345,8 @@ void clearFB(int format)
 // Generic GL write test
 int writeTest(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize, retval=0;
+	PF pf=pf_get(format);
+	unsigned char *rgbaBuffer=NULL;  int n, retval=0;
 	double rbtime;
 	char temps[STRLEN];
 
@@ -408,15 +358,15 @@ int writeTest(int format)
 		glShadeModel(GL_FLAT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
-		clearFB(format);
-		if((rgbaBuffer=(unsigned char *)malloc(width*height*ps))==NULL)
+		clearFB();
+		if((rgbaBuffer=(unsigned char *)malloc(width*height*pf.size))==NULL)
 			_throw("Could not allocate buffer");
-		initBuf(0, 0, width, height, format, rgbaBuffer);
+		initBuf(0, 0, width, height, pf, rgbaBuffer);
 		n=0;
 		timer.start();
 		do
 		{
-			glDrawPixels(width, height, pf[format].glFormat, GL_UNSIGNED_BYTE,
+			glDrawPixels(width, height, glFormat[format], pf_gldatatype[format],
 				rgbaBuffer);
 			glFinish();
 			n++;
@@ -436,7 +386,8 @@ int writeTest(int format)
 // Generic OpenGL readback test
 int readTest(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize, retval=0;
+	PF pf=pf_get(format);
+	unsigned char *rgbaBuffer=NULL;  int n, retval=0;
 	double rbtime, readPixelsTime;  Timer timer2;
 	#ifdef GL_VERSION_1_5
 	GLuint bufferID=0;
@@ -468,13 +419,13 @@ int readTest(int format)
 			glGenBuffers(1, &bufferID);
 			if(!bufferID) _throw("Could not generate PBO buffer");
 			glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
-			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(width*ps)*height, NULL,
+			glBufferData(GL_PIXEL_PACK_BUFFER_EXT, PAD(width*pf.size)*height, NULL,
 				GL_STREAM_READ);
 			check_errors("PBO initialization");
 			int temp=0;
 			glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER_EXT, GL_BUFFER_SIZE,
 				&temp);
-			if(temp!=PAD(width*ps)*height) _throw("Could not generate PBO buffer");
+			if(temp!=PAD(width*pf.size)*height) _throw("Could not generate PBO buffer");
 			temp=0;
 			glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING_EXT, &temp);
 			if(temp!=pbo) _throw("Could not bind PBO buffer");
@@ -486,42 +437,35 @@ int readTest(int format)
 			NV_IFROGL_TO_SYS_CONFIG ifrConfig;
 			ifrConfig.format=NV_IFROGL_TARGET_FORMAT_CUSTOM;
 			ifrConfig.flags=NV_IFROGL_TRANSFER_OBJECT_FLAG_NONE;
-			ifrConfig.customFormat=pf[format].glFormat;
-			ifrConfig.customType=GL_UNSIGNED_BYTE;
+			ifrConfig.customFormat=glFormat[format];
+			ifrConfig.customType=pf_gldatatype[format];
 			if(ifr.nvIFROGLCreateTransferToSysObject(ifrSession, &ifrConfig,
 				&ifrTransfer)!=NV_IFROGL_SUCCESS)
 				_throw("Could not create IFR transfer object\n");
 		}
 		#endif
 
-		if((rgbaBuffer=(unsigned char *)malloc(PAD(width*ps)*height))==NULL)
+		if((rgbaBuffer=(unsigned char *)malloc(PAD(width*pf.size)*height))==NULL)
 			_throw("Could not allocate buffer");
-		memset(rgbaBuffer, 0, PAD(width*ps)*height);
+		memset(rgbaBuffer, 0, PAD(width*pf.size)*height);
 		n=0;  rbtime=readPixelsTime=0.;
 		double tmin=0., tmax=0., ssq=0., sum=0.;  bool first=true;
 		do
 		{
 			timer.start();
-			if(pf[format].glFormat==GL_LUMINANCE)
-			{
-				glPushAttrib(GL_PIXEL_MODE_BIT);
-				glPixelTransferf(GL_RED_SCALE, (GLfloat)0.299);
-				glPixelTransferf(GL_GREEN_SCALE, (GLfloat)0.587);
-				glPixelTransferf(GL_BLUE_SCALE, (GLfloat)0.114);
-			}
 			#ifdef GL_VERSION_1_5
 			if(pbo)
 			{
 				unsigned char *pixels=NULL;
 				glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, bufferID);
 				timer2.start();
-				glReadPixels(0, 0, width, height, pf[format].glFormat,
-					GL_UNSIGNED_BYTE, NULL);
+				glReadPixels(0, 0, width, height, glFormat[format],
+					pf_gldatatype[format], NULL);
 				readPixelsTime+=timer2.elapsed();
 				pixels=(unsigned char *)glMapBuffer(GL_PIXEL_PACK_BUFFER_EXT,
 					GL_READ_ONLY);
 				if(!pixels) _throw("Could not map buffer");
-				memcpy(rgbaBuffer, pixels, PAD(width*ps)*height);
+				memcpy(rgbaBuffer, pixels, PAD(width*pf.size)*height);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_EXT);
 			}
 			else
@@ -541,9 +485,9 @@ int readTest(int format)
 				if(ifr.nvIFROGLLockTransferData(ifrTransfer, &bufSize, &pixels)
 					!=NV_IFROGL_SUCCESS)
 					_throw("Could not lock transferred pixels");
-				if(bufSize!=(uintptr_t(PAD(width*ps)*height)))
+				if(bufSize!=(uintptr_t(PAD(width*pf.size)*height)))
 					_throw("Transferred pixel buffer is the wrong size");
-				memcpy(rgbaBuffer, (unsigned char *)pixels, PAD(width*ps)*height);
+				memcpy(rgbaBuffer, (unsigned char *)pixels, PAD(width*pf.size)*height);
 				if(ifr.nvIFROGLReleaseTransferData(ifrTransfer)!=NV_IFROGL_SUCCESS)
 					_throw("Could not release transferred pixels");
 			}
@@ -551,15 +495,11 @@ int readTest(int format)
 			#endif
 			{
 				timer2.start();
-				glReadPixels(0, 0, width, height, pf[format].glFormat,
-					GL_UNSIGNED_BYTE, rgbaBuffer);
+				glReadPixels(0, 0, width, height, glFormat[format],
+					pf_gldatatype[format], rgbaBuffer);
 				readPixelsTime+=timer2.elapsed();
 			}
 
-			if(pf[format].glFormat==GL_LUMINANCE)
-			{
-				glPopAttrib();
-			}
 			double elapsed=timer.elapsed();
 			if(first)
 			{
@@ -576,7 +516,7 @@ int readTest(int format)
 			sum+=(double)(width*height)/((double)1000000.*elapsed);
 		} while(rbtime<benchTime || n<2);
 
-		if(!cmpBuf(0, 0, width, height, format, rgbaBuffer, 0))
+		if(!cmpBuf(0, 0, width, height, pf, rgbaBuffer, 0))
 			_throw("ERROR: Bogus data read back.");
 
 		double mean=sum/(double)n;
@@ -614,22 +554,16 @@ void display(void)
 {
 	int format, status=0;
 
-	for(format=0; format<nFormats; format++)
+	for(format=0; format<PIXELFORMATS; format++)
 	{
-		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n",
-			pf[format].name);
+		if(glFormat[format]==GL_NONE) continue;
 
-		#if defined(GL_ABGR_EXT) || defined(GL_BGRA_EXT) || defined(GL_BGR_EXT)
-		const char *ext=(const char *)glGetString(GL_EXTENSIONS), *compext=NULL;
+		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n",
+			formatName[format]);
+
 		#ifdef GL_ABGR_EXT
-		if(pf[format].glFormat==GL_ABGR_EXT) compext="GL_EXT_abgr";
-		#endif
-		#ifdef GL_BGRA_EXT
-		if(pf[format].glFormat==GL_BGRA_EXT) compext="GL_EXT_bgra";
-		#endif
-		#ifdef GL_BGR_EXT
-		if(pf[format].glFormat==GL_BGR_EXT) compext="GL_EXT_bgra";
-		#endif
+		const char *ext=(const char *)glGetString(GL_EXTENSIONS), *compext=NULL;
+		if(glFormat[format]==GL_ABGR_EXT) compext="GL_EXT_abgr";
 		if(compext && (!ext || !strstr(ext, compext)))
 		{
 			fprintf(stderr, "%s extension not available.  Skipping ...\n\n",
@@ -676,7 +610,10 @@ void usage(char **argv)
 	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
 	fprintf(stderr, "-bgr = Test only BGR pixel format\n");
 	fprintf(stderr, "-bgra = Test only BGRA pixel format\n");
+	#ifdef GL_ABGR_EXT
 	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
+	#endif
+	fprintf(stderr, "-argb = Test only ARGB pixel format\n");
 	fprintf(stderr, "-time <t> = Run each test for <t> seconds (default: %.1f)\n",
 		BENCHTIME);
 	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
@@ -689,9 +626,7 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "\n%s v%s (Build %s)\n", BENCH_NAME, __VERSION, __BUILD);
 
-	#ifdef GLX11
-	useWindow=true;
-	#endif
+	memcpy(&glFormat, pf_glformat, sizeof(pf_glformat));
 
 	if(argc>1) for(int i=1; i<argc; i++)
 	{
@@ -711,40 +646,36 @@ int main(int argc, char **argv)
 		else if(!stricmp(argv[i], "-alpha")) useAlpha=true;
 		else if(!stricmp(argv[i], "-rgb"))
 		{
-			PixelFormat pftemp={0, 1, 2, 3, GL_RGB, 0, "RGB"};
-			pf[0]=pftemp;
-			nFormats=1;
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_RGB) glFormat[i]=GL_NONE;
 		}
 		else if(!stricmp(argv[i], "-rgba"))
 		{
-			PixelFormat pftemp={0, 1, 2, 4, GL_RGBA, 0, "RGBA"};
-			pf[0]=pftemp;
-			nFormats=1;
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_RGBX) glFormat[i]=GL_NONE;
 		}
-		#ifdef GL_BGR_EXT
 		else if(!stricmp(argv[i], "-bgr"))
 		{
-			PixelFormat pftemp={2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"};
-			pf[0]=pftemp;
-			nFormats=1;
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_BGR) glFormat[i]=GL_NONE;
 		}
-		#endif
-		#ifdef GL_BGRA_EXT
 		else if(!stricmp(argv[i], "-bgra"))
 		{
-			PixelFormat pftemp={2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"};
-			pf[0]=pftemp;
-			nFormats=1;
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_BGRX) glFormat[i]=GL_NONE;
 		}
-		#endif
 		#ifdef GL_ABGR_EXT
 		else if(!stricmp(argv[i], "-abgr"))
 		{
-			PixelFormat pftemp={3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"};
-			pf[0]=pftemp;
-			nFormats=1;
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_XBGR) glFormat[i]=GL_NONE;
 		}
 		#endif
+		else if(!stricmp(argv[i], "-argb"))
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_XRGB) glFormat[i]=GL_NONE;
+		}
 		else if(!stricmp(argv[i], "-loop") && i<argc-1)
 		{
 			loops=atoi(argv[++i]);
@@ -871,9 +802,7 @@ int main(int argc, char **argv)
 		#endif
 		glXMakeCurrent(dpy, 0, 0);
 		if(ctx) glXDestroyContext(dpy, ctx);
-		#ifndef GLX11
 		if(pbuffer) glXDestroyPbuffer(dpy, pbuffer);
-		#endif
 		if(glxpm) glXDestroyGLXPixmap(dpy, glxpm);
 		if(pm) XFreePixmap(dpy, pm);
 		if(win) XDestroyWindow(dpy, win);

@@ -77,12 +77,12 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(bmp_load(argv[1], &img1, &width1, 1, &height1, BMPPF_BGR,
+	if(bmp_load(argv[1], &img1, &width1, 1, &height1, PF_BGR,
 		BMPORN_TOPDOWN)==-1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}
-	if(bmp_load(argv[2], &img2, &width2, 1, &height2, BMPPF_BGR,
+	if(bmp_load(argv[2], &img2, &width2, 1, &height2, PF_BGR,
 		BMPORN_TOPDOWN)==-1)
 	{
 		puts(bmp_geterr());  exit(1);
@@ -130,8 +130,8 @@ int main(int argc, char **argv)
 	totalSumSquares/=((double)height*(double)width*(double)ps1);
 	totalRMS=sqrt(totalSumSquares);
 
-	if(bmp_save(usePPM? "diff.ppm":"diff.bmp", errImg, width, 0, height,
-		BMPPF_BGR, BMPORN_TOPDOWN)==-1)
+	if(bmp_save(usePPM? "diff.ppm":"diff.bmp", errImg, width, 0, height, PF_BGR,
+		BMPORN_TOPDOWN)==-1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}

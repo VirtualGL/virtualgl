@@ -13,7 +13,7 @@ Build Requirements
 - If building SSL support:
   * [OpenSSL](http://www.OpenSSL.org) -- see "Building SSL Support" below
 
-- libjpeg-turbo SDK v1.1.1 or later
+- libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The VirtualGL build system will search for the TurboJPEG header and

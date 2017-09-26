@@ -79,6 +79,7 @@ else()
 	set(CPU_TYPE ${CMAKE_SYSTEM_PROCESSOR_LC})
 endif()
 message(STATUS "${BITS}-bit build (${CPU_TYPE})")
+add_definitions(-D__BITS=${BITS})
 
 if(UNIX)
 	set(CMAKE_INSTALL_DEFAULT_PREFIX /opt/${CMAKE_PROJECT_NAME})

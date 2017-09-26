@@ -34,23 +34,23 @@ void usage(char **argv)
 }
 
 
-void fillFrame(unsigned char *buf, int width, int pitch, int height, int ps,
+void fillFrame(unsigned char *buf, int width, int pitch, int height, PF &pf,
 	int on)
 {
-	unsigned char *ptr;  unsigned char pixel[3];
+	unsigned char *ptr;  unsigned char pixel[4];
 
 	ptr=buf;
 	for(int i=0; i<height; i++, ptr+=pitch)
 	{
 		if(on)
 		{
-			pixel[0]=pixel[2]=i%256;  pixel[1]=255-(i%256);
+			pf.setRGB(pixel, i%256, 255-(i%256), i%256);
 		}
 		else
 		{
-			pixel[0]=i%256;  pixel[1]=0;  pixel[2]=255-(i%256);
+			pf.setRGB(pixel, i%256, 0, 255-(i%256));
 		}
-		for(int j=0; j<width; j++) memcpy(&ptr[ps*j], pixel, 3);
+		for(int j=0; j<width; j++) memcpy(&ptr[pf.size*j], pixel, pf.size);
 	}
 }
 
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 			trans.synchronize();
 			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
 			trans.sendFrame(f, dosync);
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 		{
 			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pixelSize, fill);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
 			trans.sendFrame(f, dosync);
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
 			memset(f->bits, 0, f->pitch*HEIGHT);
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, fill);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pf, fill);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			fill=1-fill;
 			trans.sendFrame(f, dosync);
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 			trans.synchronize();
 			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pixelSize, 1);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pf, 1);
 			if(bottomup) f->flags|=FRAME_BOTTOMUP;
 			trans.sendFrame(f, dosync);
 			frames++;

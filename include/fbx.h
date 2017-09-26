@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011 D. R. Commander
+ * Copyright (C)2011, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,6 +26,7 @@
 #define USESHM
 
 #include <stdio.h>
+#include "pf.h"
 
 #ifdef _WIN32
 
@@ -54,29 +55,11 @@ typedef struct
 #endif /* _WIN32 */
 
 
-/* Pixel formats */
-#define FBX_FORMATS 7
-enum { FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB, FBX_INDEX };
-
-static const int fbx_ps[FBX_FORMATS]=
-	{ 3, 4, 3, 4, 4, 4, 1 };
-static const int fbx_bgr[FBX_FORMATS]=
-	{ 0, 0, 1, 1, 1, 0, 0 };
-static const int fbx_alphafirst[FBX_FORMATS]=
-	{ 0, 0, 0, 0, 1, 1, 0 };
-static const int fbx_roffset[FBX_FORMATS]=
-	{ 0, 0, 2, 2, 3, 1, 0 };
-static const int fbx_goffset[FBX_FORMATS]=
-	{ 1, 1, 1, 1, 2, 2, 0 };
-static const int fbx_boffset[FBX_FORMATS]=
-	{ 2, 2, 0, 0, 1, 3, 0 };
-
-
 typedef struct _fbx_struct
 {
 	int width, height, pitch;
 	char *bits;
-	int format;
+	PF pf;
 	fbx_wh wh;
 	int shm;
 
@@ -129,8 +112,7 @@ extern "C" {
   On return, fbx_init() fills in the following relevant information in the
   fbx_struct that you passed to it:
 
-  fb->format = pixel format of the buffer (one of FBX_RGB, FBX_RGBA, FBX_BGR,
-               FBX_BGRA, FBX_ABGR, or FBX_ARGB)
+  fb->pf = pixel format of the buffer
   fb->width, fb->height = dimensions of the buffer
   fb->pitch = bytes in each scanline of the buffer
   fb->bits = address of the start of the buffer
@@ -252,15 +234,6 @@ char *fbx_geterrmsg(void);
   This returns the line (within fbx.c) of the last failure.
 */
 int fbx_geterrline(void);
-
-
-/*
-  fbx_formatname
-
-  Returns a character string describing the pixel format specified in the
-  format parameter.
-*/
-const char *fbx_formatname(int format);
 
 
 /*

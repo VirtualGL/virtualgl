@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010, 2014 D. R. Commander
+/* Copyright (C)2009-2010, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,6 +28,12 @@ char errStr[MAXSTR];
 static FakerConfig *fconfig=NULL;
 static Display *dpy=NULL;
 static Window win=0;
+
+static const int pf2trans[PIXELFORMATS]=
+{
+	RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
+	RRTRANS_ARGB, RRTRANS_RGB
+};
 
 
 FakerConfig *fconfig_instance(void) { return fconfig; }
@@ -80,15 +86,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->h=f->hdr.frameh;
 		frame->pitch=f->pitch;
 		frame->bits=f->bits;
-		for(int i=0; i<RRTRANS_FORMATOPT; i++)
-		{
-			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
-				&& rrtrans_ps[i]==f->pixelSize)
-			{
-				frame->format=i;  break;
-			}
-		}
+		frame->format=pf2trans[f->pf.id];
 		return frame;
 	}
 	catch(Error &e)

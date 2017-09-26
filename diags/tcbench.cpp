@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2006-2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014, 2016 D. R. Commander
+ * Copyright (C)2011, 2013-2014, 2016-2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -287,9 +287,9 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			if(memcmp(buf, fb.bits, fbx_ps[fb.format]*32*32)) frames++;
+			if(memcmp(buf, fb.bits, fb.pf.size*32*32)) frames++;
 		}
-		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
+		memcpy(buf, fb.bits, fb.pf.size*32*32);
 		elapsed=timer.elapsed();
 		#ifdef _WIN32
 		int sleepTime=(int)(1000.*((double)samples/(double)sampleRate-elapsed));

@@ -22,7 +22,9 @@
 #include "TempContext.h"
 #include "vglutil.h"
 #include "faker.h"
+#include "glpf.h"
 
+using namespace vglcommon;
 using namespace vglutil;
 using namespace vglserver;
 
@@ -69,8 +71,8 @@ static Window create_window(Display *dpy, XVisualInfo *vis, int width,
 
 VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 	GLXFBConfig config_) : cleared(false), stereo(false), glxDraw(0),
-	width(width_), height(height_), depth(0), config(config_), format(0), pm(0),
-	win(0), isPixmap(false)
+	width(width_), height(height_), depth(0), config(config_), glFormat(0),
+	pm(0), win(0), isPixmap(false)
 {
 	if(!config_ || width_<1 || height_<1) _throw("Invalid argument");
 
@@ -90,7 +92,7 @@ VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_,
 VirtualDrawable::OGLDrawable::OGLDrawable(int width_, int height_, int depth_,
 	GLXFBConfig config_, const int *attribs) : cleared(false), stereo(false),
 	glxDraw(0), width(width_), height(height_), depth(depth_), config(config_),
-	format(0), pm(0), win(0), isPixmap(true)
+	glFormat(0), pm(0), win(0), isPixmap(true)
 {
 	if(!config_ || width_<1 || height_<1 || depth_<0)
 		_throw("Invalid argument");
@@ -125,19 +127,13 @@ void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 
 	if(pixelsize==32)
 	{
-		#ifdef GL_BGRA_EXT
-		if(littleendian()) format=GL_BGRA_EXT;
-		else
-		#endif
-		format=GL_RGBA;
+		if(littleendian()) glFormat=GL_BGRA;
+		else glFormat=GL_RGBA;
 	}
 	else
 	{
-		#ifdef GL_BGR_EXT
-		if(littleendian()) format=GL_BGR_EXT;
-		else
-		#endif
-		format=GL_RGB;
+		if(littleendian()) glFormat=GL_BGR;
+		else glFormat=GL_RGB;
 	}
 }
 
@@ -297,42 +293,40 @@ Drawable VirtualDrawable::getX11Drawable(void)
 }
 
 
-static const char *formatString(int format)
+static const char *formatString(int glFormat)
 {
-	switch(format)
+	switch(glFormat)
 	{
-		case GL_RGB:
-			return "RGB";
-		case GL_RGBA:
-			return "RGBA";
-		#ifdef GL_BGR_EXT
-		case GL_BGR:
-			return "BGR";
-		#endif
-		#ifdef GL_BGRA_EXT
-		case GL_BGRA:
-			return "BGRA";
-		#endif
+		case GL_RGB:       return "RGB";
+		case GL_RGBA:      return "RGBA";
+		case GL_BGR:       return "BGR";
+		case GL_BGRA:      return "BGRA";
 		#ifdef GL_ABGR_EXT
-		case GL_ABGR_EXT:
-			return "ABGR";
+		case GL_ABGR_EXT:  return "ABGR";
 		#endif
-		case GL_RED:  case GL_GREEN:  case GL_BLUE:
-			return "COMPONENT";
-		default:
-			return "????";
+		case GL_RED:       return "COMPONENT";
+		default:           return "????";
 	}
 }
 
 
 void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
-	GLint height, GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
+	GLint height, GLenum glFormat, PF &pf, GLubyte *bits, GLint readBuf,
+	bool stereo)
 {
 	double t0=0.0, tRead, tTotal;
+	GLenum type=GL_UNSIGNED_BYTE;
+
+	// Compute OpenGL format from pixel format of frame
+	if(glFormat==GL_NONE)
+	{
+		glFormat=pf_glformat[pf.id];  type=pf_gldatatype[pf.id];
+	}
+	if(glFormat==GL_NONE) _throw("Unsupported pixel format");
 
 	// Whenever the readback format changes (perhaps due to switching
 	// compression or transports), then reset the PBO synchronicity detector
-	int currentFormat=(format==GL_GREEN || format==GL_BLUE)? GL_RED:format;
+	int currentFormat=(glFormat==GL_GREEN || glFormat==GL_BLUE)? GL_RED:glFormat;
 	if(lastFormat>=0 && lastFormat!=currentFormat)
 	{
 		usePBO=(fconfig.readback==RRREAD_PBO);
@@ -343,8 +337,8 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 
 	GLXDrawable read=_glXGetCurrentDrawable();
 	GLXDrawable draw=_glXGetCurrentDrawable();
-	if(read==0 || buf==GL_BACK) read=getGLXDrawable();
-	if(draw==0 || buf==GL_BACK) draw=getGLXDrawable();
+	if(read==0 || readBuf==GL_BACK) read=getGLXDrawable();
+	if(draw==0 || readBuf==GL_BACK) draw=getGLXDrawable();
 
 	// VirtualGL has to create a temporary context when performing pixel
 	// readback, because the current context may not be using the same drawable
@@ -382,7 +376,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	}
 	TempContext tc(_dpy3D, draw, read, ctx, config, GLX_RGBA_TYPE);
 
-	_glReadBuffer(buf);
+	_glReadBuffer(readBuf);
 
 	if(pitch%8==0) _glPixelStorei(GL_PACK_ALIGNMENT, 8);
 	else if(pitch%4==0) _glPixelStorei(GL_PACK_ALIGNMENT, 4);
@@ -403,7 +397,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		if(!alreadyPrinted && fconfig.verbose)
 		{
 			vglout.println("[VGL] Using pixel buffer objects for readback (%s --> %s)",
-				formatString(oglDraw->getFormat()), formatString(format));
+				formatString(oglDraw->getFormat()), formatString(glFormat));
 			alreadyPrinted=true;
 		}
 		_glBindBuffer(GL_PIXEL_PACK_BUFFER_EXT, pbo);
@@ -424,7 +418,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		if(!alreadyPrinted && fconfig.verbose)
 		{
 			vglout.println("[VGL] Using synchronous readback (%s --> %s)",
-				formatString(oglDraw->getFormat()), formatString(format));
+				formatString(oglDraw->getFormat()), formatString(glFormat));
 			alreadyPrinted=true;
 		}
 	}
@@ -433,8 +427,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	while(e!=GL_NO_ERROR) e=_glGetError();  // Clear previous error
 	profReadback.startFrame();
 	if(usePBO) t0=getTime();
-	_glReadPixels(x, y, width, height, format, GL_UNSIGNED_BYTE,
-		usePBO? NULL:bits);
+	_glReadPixels(x, y, width, height, glFormat, type, usePBO? NULL:bits);
 
 	if(usePBO)
 	{
@@ -457,17 +450,17 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			if(numSync>=10 && !alreadyWarned && fconfig.verbose)
 			{
 				vglout.println("[VGL] NOTICE: PBO readback is not behaving asynchronously.  Disabling PBOs.");
-				if(format!=oglDraw->getFormat())
+				if(glFormat!=oglDraw->getFormat())
 				{
 					vglout.println("[VGL]    This could be due to a mismatch between the readback pixel format");
 					vglout.println("[VGL]    (%s) and the Pbuffer pixel format (%s).",
-						formatString(format), formatString(oglDraw->getFormat()));
-					if(((oglDraw->getFormat()==GL_BGRA && format==GL_BGR)
-						|| (oglDraw->getFormat()==GL_RGBA && format==GL_RGB))
+						formatString(glFormat), formatString(oglDraw->getFormat()));
+					if(((oglDraw->getFormat()==GL_BGRA && glFormat==GL_BGR)
+						|| (oglDraw->getFormat()==GL_RGBA && glFormat==GL_RGB))
 						&& fconfig.forcealpha)
 						vglout.println("[VGL]    Try setting VGL_FORCEALPHA=0.");
-					else if(((oglDraw->getFormat()==GL_BGR && format==GL_BGRA)
-						|| (oglDraw->getFormat()==GL_RGB && format==GL_RGBA))
+					else if(((oglDraw->getFormat()==GL_BGR && glFormat==GL_BGRA)
+						|| (oglDraw->getFormat()==GL_RGB && glFormat==GL_RGBA))
 						&& !fconfig.forcealpha)
 						vglout.println("[VGL]    Try setting VGL_FORCEALPHA=1.");
 				}
@@ -487,11 +480,11 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		int color=-1, i, j, k;
 
 		color=-1;
-		if(buf!=GL_FRONT_RIGHT && buf!=GL_BACK_RIGHT)
+		if(readBuf!=GL_FRONT_RIGHT && readBuf!=GL_BACK_RIGHT)
 			autotestFrameCount++;
 		for(j=0, rowptr=bits; j<height && match; j++, rowptr+=pitch)
-			for(i=1, pixel=&rowptr[ps]; i<width && match; i++, pixel+=ps)
-				for(k=0; k<ps; k++)
+			for(i=1, pixel=&rowptr[pf.size]; i<width && match; i++, pixel+=pf.size)
+				for(k=0; k<pf.size; k++)
 				{
 					if(pixel[k]!=rowptr[k])
 					{
@@ -505,7 +498,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 		}
  		char envName[40], envValue[10];
-		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
+		if(readBuf==GL_FRONT_RIGHT || readBuf==GL_BACK_RIGHT)
 		{
 			snprintf(envName, 40, "__VGL_AUTOTESTRCLR%x", (unsigned int)x11Draw);
 			snprintf(envValue, 10, "%d", color);

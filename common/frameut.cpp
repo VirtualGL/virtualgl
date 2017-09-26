@@ -19,6 +19,7 @@
 #include "vglutil.h"
 #include "Timer.h"
 #include "bmp.h"
+#include "vgllogo.h"
 
 using namespace vglutil;
 using namespace vglcommon;
@@ -30,7 +31,8 @@ using namespace vglcommon;
 #define BORDER 0
 #define NUMWIN 1
 
-bool useGL=false, useXV=false, doRgbBench=false, useRGB=false;
+bool useGL=false, useXV=false, doRgbBench=false, useRGB=false, addLogo=false,
+	anaglyph=false, check=false;
 
 
 void resizeWindow(Display *dpy, Window win, int width, int height, int myID)
@@ -140,10 +142,12 @@ class Blitter : public Runnable
 					else ((FBXFrame *)frame)->redraw();
 					mpixels+=(double)(frame->hdr.width*frame->hdr.height)/1000000.;
 					totalTime+=timer.elapsed();
+					if(check && !checkFrame(frame))
+						_throw("Pixel data is bogus");
 					frame->signalComplete();
 				}
-				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec\n",
-					mpixels/totalTime);
+				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec%s\n",
+					mpixels/totalTime, check? " [PASSED]":"");
 			}
 			catch(Error &e)
 			{
@@ -153,6 +157,38 @@ class Blitter : public Runnable
 				throw;
 			}
 			fprintf(stderr, "Blitter exiting ...\n");
+		}
+
+		bool checkFrame(Frame *frame)
+		{
+			int i, j, _j, pitch=frame->pitch, seed=frame->hdr.winid;
+			unsigned char *ptr=frame->bits, *pixel;
+
+			for(_j=0; _j<frame->hdr.height; _j++, ptr+=pitch)
+			{
+				j=frame->flags&FRAME_BOTTOMUP? frame->hdr.height-_j-1:_j;
+				for(i=0, pixel=ptr; i<frame->hdr.width; i++, pixel+=frame->pf.size)
+				{
+					int r, g, b;
+					frame->pf.getRGB(pixel, &r, &g, &b);
+					if(addLogo && !useXV)
+					{
+						int lw=min(VGLLOGO_WIDTH, frame->hdr.width-1);
+						int lh=min(VGLLOGO_HEIGHT, frame->hdr.height-1);
+						int li=i-(frame->hdr.width-lw-1);
+						int lj=j-(frame->hdr.height-lh-1);
+						if(lw>0 && lh>0 && li>=0 && lj>=0 && li<lw && lj<lh &&
+							vgllogo[lj*VGLLOGO_WIDTH+li])
+						{
+							r^=113;  g^=162;  b^=117;
+						}
+					}
+					if(r!=(i+seed)%256 || g!=(j+seed)%256 || b!=(i+j+seed)%256)
+						return false;
+				}
+			}
+
+			return true;
 		}
 
 		int findex;  bool deadYet;
@@ -264,7 +300,7 @@ class Compressor : public Runnable
 			if(thread) thread->stop();
 		}
 
-		Frame &get(int width, int height)
+		Frame &get(int width, int height, int pixelFormat)
 		{
 			Frame &frame=frames[findex];
 			findex=(findex+1)%NFRAMES;
@@ -272,6 +308,7 @@ class Compressor : public Runnable
 			frame.waitUntilComplete();
 			if(thread) thread->checkError();
 			rrframeheader hdr;
+			memset(&hdr, 0, sizeof(rrframeheader));
 			hdr.framew=hdr.width=width+BORDER;
 			hdr.frameh=hdr.height=height+BORDER;
 			hdr.x=hdr.y=BORDER;
@@ -279,7 +316,7 @@ class Compressor : public Runnable
 			hdr.subsamp=2;
 			hdr.compress=useRGB? RRCOMP_RGB:RRCOMP_JPEG;
 			if(useXV) hdr.compress=RRCOMP_YUV;
-			frame.init(hdr, 3, (littleendian() && !useRGB && !useXV)? FRAME_BGR:0);
+			frame.init(hdr, pixelFormat, 0);
 			return frame;
 		}
 
@@ -355,7 +392,7 @@ class FrameTest
 		FrameTest(Display *dpy, int myID) : compressor(NULL), decompressor(NULL),
 			blitter(NULL)
 		{
-			Window win;
+			this->dpy=dpy;
 			_errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
 				myID*(MINW+BORDER*2), 0, MINW+BORDER, MINW+BORDER, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),
@@ -368,12 +405,16 @@ class FrameTest
 			_newcheck(compressor=new Compressor(decompressor, blitter));
 		}
 
-		~FrameTest(void) { shutdown(); }
+		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
 
-		void dotest(int width, int height, int seed)
+		void dotest(int width, int height, int seed, int pixelFormat)
 		{
-			Frame &frame=compressor->get(width, height);
-			initFrame(frame, seed);
+			Frame &frame=compressor->get(width, height, pixelFormat);
+			if(anaglyph) makeAnaglyph(frame, seed);
+			else initFrame(frame, seed);
+			// This unit test doesn't use winid, so use it to track the seed.
+			frame.hdr.winid=seed;
+			if(addLogo) frame.addLogo();
 			compressor->put(frame);
 		}
 
@@ -382,15 +423,38 @@ class FrameTest
 		void initFrame(Frame &frame, int seed)
 		{
 			int i, j, pitch=frame.pitch;
-			for(i=0; i<frame.hdr.height; i++)
+			unsigned char *ptr=frame.bits, *pixel;
+
+			for(j=0; j<frame.hdr.height; j++, ptr+=pitch)
 			{
-				for(j=0; j<frame.hdr.width; j++)
-				{
-					frame.bits[i*pitch+j*frame.pixelSize]=(i+seed)%256;
-					frame.bits[i*pitch+j*frame.pixelSize+1]=(j+seed)%256;
-					frame.bits[i*pitch+j*frame.pixelSize+2]=(i+j+seed)%256;
-				}
+				for(i=0, pixel=ptr; i<frame.hdr.width; i++, pixel+=frame.pf.size)
+					frame.pf.setRGB(pixel, (i+seed)%256, (j+seed)%256, (i+j+seed)%256);
 			}
+		}
+
+		void makeAnaglyph(Frame &frame, int seed)
+		{
+			Frame rFrame, gFrame, bFrame;
+			int i, j;
+			unsigned char *ptr;
+
+			rFrame.init(frame.hdr, PF_COMP, frame.flags, false);
+			for(j=0, ptr=rFrame.bits; j<frame.hdr.height; j++, ptr+=rFrame.pitch)
+			{
+				for(i=0; i<frame.hdr.width; i++) ptr[i]=(i+seed)%256;
+			}
+			gFrame.init(frame.hdr, PF_COMP, frame.flags, false);
+			for(j=0, ptr=gFrame.bits; j<frame.hdr.height; j++, ptr+=gFrame.pitch)
+			{
+				memset(ptr, (j+seed)%256, frame.hdr.width);
+			}
+			bFrame.init(frame.hdr, PF_COMP, frame.flags, false);
+			for(j=0, ptr=bFrame.bits; j<frame.hdr.height; j++, ptr+=bFrame.pitch)
+			{
+				for(i=0; i<frame.hdr.width; i++) ptr[i]=(i+j+seed)%256;
+			}
+
+			frame.makeAnaglyph(rFrame, gFrame, bFrame);
 		}
 
 		void shutdown(void)
@@ -404,44 +468,24 @@ class FrameTest
 			if(compressor) { delete compressor;  compressor=NULL; }
 		}
 
+		Display *dpy;  Window win;
 		Compressor *compressor;  Decompressor *decompressor;  Blitter *blitter;
 };
 
 
-static const char *formatName[BMP_NUMPF]=
+int cmpFrame(unsigned char *buf, int width, int height, Frame &dst)
 {
-	"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB"
-};
-
-static const int ps[BMP_NUMPF]={ 3, 4, 3, 4, 4, 4 };
-
-static const int roffset[BMP_NUMPF]={ 0, 0, 2, 2, 3, 1 };
-
-static const int goffset[BMP_NUMPF]={ 1, 1, 1, 1, 2, 2 };
-
-static const int boffset[BMP_NUMPF]={ 2, 2, 0, 0, 1, 3 };
-
-static const int flags[BMP_NUMPF]=
-{
-	0, 0, FRAME_BGR, FRAME_BGR, FRAME_ALPHAFIRST|FRAME_BGR, FRAME_ALPHAFIRST
-};
-
-
-int cmpFrame(unsigned char *buf, int width, int height, Frame &dst,
-	BMPPF dstpf)
-{
-	int _i;  int dstbu=((dst.flags&FRAME_BOTTOMUP)!=0);  int pitch=width*3;
+	int _i;  int pitch=width*3;
+	bool dstbu=(dst.flags&FRAME_BOTTOMUP);
 	for(int i=0; i<height; i++)
 	{
 		_i=dstbu? i:height-i-1;
 		for(int j=0; j<height; j++)
 		{
-			if((buf[pitch*_i+j*3]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+roffset[dstpf]]) ||
-				(buf[pitch*_i+j*3+1]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+goffset[dstpf]]) ||
-				(buf[pitch*_i+j*3+2]
-					!= dst.bits[dst.pitch*i+j*ps[dstpf]+boffset[dstpf]]))
+			int r, g, b;
+			dst.pf.getRGB(&dst.bits[dst.pitch*i+j*dst.pf.size], &r, &g, &b);
+			if(r!=buf[pitch*_i+j*3] || g!=buf[pitch*_i+j*3+1]
+				|| b!=buf[pitch*_i+j*3+2])
 				return 1;
 		}
 	}
@@ -452,28 +496,26 @@ int cmpFrame(unsigned char *buf, int width, int height, Frame &dst,
 void rgbBench(char *filename)
 {
 	unsigned char *buf;  int width, height, dstbu;
-	CompressedFrame src;  Frame dst;  int dstpf;
+	CompressedFrame src;  Frame dst;  int dstformat;
 
-	for(dstpf=0; dstpf<BMP_NUMPF; dstpf++)
+	for(dstformat=0; dstformat<PIXELFORMATS-1; dstformat++)
 	{
-		int dstflags=flags[dstpf];
+		PF dstpf=pf_get(dstformat);
 		for(dstbu=0; dstbu<2; dstbu++)
 		{
-			if(dstbu) dstflags|=FRAME_BOTTOMUP;
-			if(bmp_load(filename, &buf, &width, 1, &height, BMPPF_RGB,
+			if(bmp_load(filename, &buf, &width, 1, &height, PF_RGB,
 				BMPORN_BOTTOMUP)==-1)
 				_throw(bmp_geterr());
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(hdr));
-			hdr.x=hdr.y=0;
 			hdr.width=hdr.framew=width;
 			hdr.height=hdr.frameh=height;
-			hdr.compress=RRCOMP_RGB;  hdr.flags=0;  hdr.size=width*3*height;
+			hdr.compress=RRCOMP_RGB;  hdr.size=width*3*height;
 			src.init(hdr, hdr.flags);
 			memcpy(src.bits, buf, width*3*height);
-			dst.init(hdr, ps[dstpf], dstflags);
+			dst.init(hdr, dstpf.id, dstbu? FRAME_BOTTOMUP:0);
 			memset(dst.bits, 0, dst.pitch*dst.hdr.frameh);
-			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", formatName[dstpf],
+			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", dstpf.name,
 				dstbu? "BOTTOM-UP":"TOP-DOWN");
 			double tStart, tTotal=0.;  int iter=0;
 			do
@@ -484,14 +526,13 @@ void rgbBench(char *filename)
 			} while(tTotal<1.);
 			fprintf(stderr, "%f Mpixels/sec - ", (double)width*(double)height
 				*(double)iter/1000000./tTotal);
-			if(cmpFrame(buf, width, height, dst, (BMPPF)dstpf))
+			if(cmpFrame(buf, width, height, dst))
 				fprintf(stderr, "FAILED!\n");
 			else fprintf(stderr, "Passed.\n");
 			free(buf);
 		}
 		fprintf(stderr, "\n");
 	}
-
 }
 
 
@@ -502,9 +543,12 @@ void usage(char **argv)
 	fprintf(stderr, "-gl = Use OpenGL instead of X11 for blitting\n");
 	fprintf(stderr, "-xv = Test X Video encoding/display\n");
 	fprintf(stderr, "-rgb = Use RGB encoding instead of JPEG compression\n");
+	fprintf(stderr, "-logo = Add VirtualGL logo\n");
+	fprintf(stderr, "-anaglyph = Test anaglyph creation\n");
 	fprintf(stderr, "-rgbbench <filename> = Benchmark the decoding of RGB-encoded images.\n");
 	fprintf(stderr, "                       <filename> should be a BMP or PPM file.\n");
-	fprintf(stderr, "-v = Verbose output (may affect benchmark results)\n\n");
+	fprintf(stderr, "-v = Verbose output (may affect benchmark results)\n");
+	fprintf(stderr, "-check = Check correctness of pixel paths (implies -rgb)\n\n");
 	exit(1);
 }
 
@@ -525,6 +569,8 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Using OpenGL for blitting ...\n");
 			useGL=true;
 		}
+		else if(!stricmp(argv[i], "-logo")) addLogo=true;
+		else if(!stricmp(argv[i], "-anaglyph")) anaglyph=true;
 		#ifdef USEXV
 		else if(!stricmp(argv[i], "-xv"))
 		{
@@ -542,6 +588,7 @@ int main(int argc, char **argv)
 			fileName=argv[++i];  doRgbBench=true;
 		}
 		else if(!stricmp(argv[i], "-v")) verbose=true;
+		else if(!stricmp(argv[i], "-check")) { check=true;  useRGB=true; }
 		else usage(argv);
 	}
 
@@ -556,50 +603,57 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		for(i=0; i<NUMWIN; i++)
+		for(int format=0; format<PIXELFORMATS-1; format++)
 		{
-			_newcheck(test[i]=new FrameTest(dpy, i));
-		}
+			PF pf=pf_get(format);
+			fprintf(stderr, "Pixel format: %s\n", pf.name);
 
-		for(w=MINW; w<=MAXW; w+=33)
-		{
-			h=1;
-			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-			for(i=0; i<ITER; i++)
+			for(i=0; i<NUMWIN; i++)
 			{
-				if(verbose) fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
+				_newcheck(test[i]=new FrameTest(dpy, i));
 			}
-			if(verbose) fprintf(stderr, "\n");
-		}
 
-		for(h=MINW; h<=MAXW; h+=33)
-		{
-			w=1;
-			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-			for(i=0; i<ITER; i++)
+			for(w=MINW; w<=MAXW; w+=33)
 			{
-				if(verbose) fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
+				h=1;
+				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
+				for(i=0; i<ITER; i++)
+				{
+					if(verbose) fprintf(stderr, ".");
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+				}
+				if(verbose) fprintf(stderr, "\n");
 			}
-			if(verbose) fprintf(stderr, "\n");
-		}
 
-		for(w=MINW; w<=MAXW; w+=33)
-		{
-			h=w;
-			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-			for(i=0; i<ITER; i++)
+			for(h=MINW; h<=MAXW; h+=33)
 			{
-				if(verbose) fprintf(stderr, ".");
-				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
+				w=1;
+				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
+				for(i=0; i<ITER; i++)
+				{
+					if(verbose) fprintf(stderr, ".");
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+				}
+				if(verbose) fprintf(stderr, "\n");
 			}
-			if(verbose) fprintf(stderr, "\n");
-		}
 
-		for(i=0; i<NUMWIN; i++)
-		{
-			delete test[i];
+			for(w=MINW; w<=MAXW; w+=33)
+			{
+				h=w;
+				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
+				for(i=0; i<ITER; i++)
+				{
+					if(verbose) fprintf(stderr, ".");
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+				}
+				if(verbose) fprintf(stderr, "\n");
+			}
+
+			for(i=0; i<NUMWIN; i++)
+			{
+				delete test[i];
+			}
+			fprintf(stderr, "\n");
 		}
 	}
 	catch (Error &e)

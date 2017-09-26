@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014 D. R. Commander
+ * Copyright (C)2011, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,19 +19,14 @@
 #ifndef __BMP_H__
 #define __BMP_H__
 
-#define BMP_NUMPF 6
-enum BMPPF {BMPPF_RGB=0, BMPPF_RGBX, BMPPF_BGR, BMPPF_BGRX, BMPPF_XBGR,
-	BMPPF_XRGB};
+#include "pf.h"
 
-static const int bmp_ps[BMP_NUMPF]={ 3, 4, 3, 4, 4, 4 };
-static const int bmp_roffset[BMP_NUMPF]={ 0, 0, 2, 2, 3, 1 };
-static const int bmp_goffset[BMP_NUMPF]={ 1, 1, 1, 1, 2, 2 };
-static const int bmp_boffset[BMP_NUMPF]={ 2, 2, 0, 0, 1, 3 };
 
 #define BMP_NUMORN 2
-enum BMPORN {BMPORN_TOPDOWN=0, BMPORN_BOTTOMUP};
+enum BMPORN { BMPORN_TOPDOWN=0, BMPORN_BOTTOMUP };
 
 #define BMPPAD(width, align) (((width)+((align)-1))&(~((align)-1)))
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +38,7 @@ extern "C" {
    buffer once you are finished with it. */
 
 int bmp_load(char *filename, unsigned char **buf, int *width, int align,
-	int *height, enum BMPPF format, enum BMPORN orientation);
+	int *height, int format, enum BMPORN orientation);
 
 
 /* This will save a buffer with the specified pixel format, pitch, orientation,
@@ -51,11 +46,10 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
    which format to use.) */
 
 int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
-	int height, enum BMPPF format, enum BMPORN orientation);
+	int height, int format, enum BMPORN orientation);
 
 
 const char *bmp_geterr(void);
-
 
 #ifdef __cplusplus
 }

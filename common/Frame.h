@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2012, 2014 D. R. Commander
+ * Copyright (C)2009-2012, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,13 +23,11 @@
 #ifdef USEXV
 #include "fbxv.h"
 #endif
+#include "pf.h"
 
 
 // Flags
 #define FRAME_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
-#define FRAME_BGR        2  // BGR or BGRA pixel order
-#define FRAME_ALPHAFIRST 4  // BGR buffer is really ABGR, and RGB buffer is
-                            // really ARGB
 
 
 // Uncompressed frame
@@ -42,9 +40,10 @@ namespace vglcommon
 
 			Frame(bool primary=true);
 			virtual ~Frame(void);
-			void init(rrframeheader &h, int pixelSize, int flags, bool stereo=false);
+			void init(rrframeheader &h, int pixelFormat, int flags,
+				bool stereo=false);
 			void init(unsigned char *bits, int width, int pitch, int height,
-				int pixelSize, int flags);
+				int pixelFormat, int flags);
 			void deInit(void);
 			Frame *getTile(int x, int y, int width, int height);
 			bool tileEquals(Frame *last, int x, int y, int width, int height);
@@ -61,7 +60,8 @@ namespace vglcommon
 			rrframeheader hdr;
 			unsigned char *bits;
 			unsigned char *rbits;
-			int pitch, pixelSize, flags;
+			int pitch, flags;
+			PF pf;
 			bool isGL, isXV, stereo;
 
 		protected:

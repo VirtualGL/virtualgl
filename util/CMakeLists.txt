@@ -1,4 +1,5 @@
-add_library(vglutil STATIC GenericQ.cpp Log.cpp Mutex.cpp Thread.cpp bmp.c)
+add_library(vglutil STATIC GenericQ.cpp Log.cpp Mutex.cpp Thread.cpp bmp.c
+	pf.c)
 if(UNIX)
 	target_link_libraries(vglutil pthread)
 endif()
@@ -8,6 +9,9 @@ endif()
 
 add_executable(bmptest bmptest.c md5.c md5hl.c)
 target_link_libraries(bmptest vglutil)
+
+add_executable(pftest pftest.c)
+target_link_libraries(pftest vglutil)
 
 add_library(vglsocket STATIC Socket.cpp)
 target_link_libraries(vglsocket vglutil)
@@ -29,15 +33,16 @@ endif()
 install(TARGETS nettest DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_library(fbx STATIC fbx.c)
+target_link_libraries(fbx vglutil)
 
 if(VGL_BUILDSERVER)
 	add_library(fbx-faker STATIC fbx.c)
 	set_property(TARGET fbx-faker APPEND PROPERTY COMPILE_DEFINITIONS INFAKER)
-	target_link_libraries(fbx-faker ${X11_X11_LIB} ${X11_Xext_LIB})
+	target_link_libraries(fbx-faker ${X11_X11_LIB} ${X11_Xext_LIB} vglutil)
 endif()
 
 add_executable(fbxtest fbxtest.cpp)
-target_link_libraries(fbxtest fbx vglutil)
+target_link_libraries(fbxtest fbx)
 
 if(UNIX)
 	target_link_libraries(fbx ${X11_X11_LIB} ${X11_Xext_LIB})
@@ -71,7 +76,7 @@ if(UNIX)
 
 	add_executable(glreadtest glreadtest.cpp)
 	target_link_libraries(glreadtest ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
-		${X11_X11_LIB} ${IFRLIB})
+		${X11_X11_LIB} ${IFRLIB} vglutil)
 	if(VGL_BUILDSERVER)
 		install(TARGETS glreadtest DESTINATION ${CMAKE_INSTALL_BINDIR})
 	endif()

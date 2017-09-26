@@ -1,4 +1,4 @@
-/* Copyright (C)2011, 2013-2014 D. R. Commander
+/* Copyright (C)2011, 2013-2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -82,40 +82,8 @@ void VirtualPixmap::readback(void)
 	frame->init(hdr);
 
 	frame->flags|=FRAME_BOTTOMUP;
-	int format;
-	unsigned char *bits=frame->bits;
-	switch(frame->pixelSize)
-	{
-		case 3:
-			format=GL_RGB;
-			#ifdef GL_BGR_EXT
-			if(frame->flags&FRAME_BGR) format=GL_BGR_EXT;
-			#endif
-			break;
-		case 4:
-			format=GL_RGBA;
-			#ifdef GL_BGRA_EXT
-			if(frame->flags&FRAME_BGR && !(frame->flags&FRAME_ALPHAFIRST))
-				format=GL_BGRA_EXT;
-			#endif
-			if(frame->flags&FRAME_BGR && frame->flags&FRAME_ALPHAFIRST)
-			{
-				#ifdef GL_ABGR_EXT
-				format=GL_ABGR_EXT;
-				#elif defined(GL_BGRA_EXT)
-				format=GL_BGRA_EXT;  bits=frame->bits+1;
-				#endif
-			}
-			if(!(frame->flags&FRAME_BGR) && frame->flags&FRAME_ALPHAFIRST)
-			{
-				format=GL_RGBA;  bits=frame->bits+1;
-			}
-			break;
-		default:
-			_throw("Unsupported pixel format");
-	}
 	readPixels(0, 0, min(width, frame->hdr.framew), frame->pitch,
-		min(height, frame->hdr.frameh), format, frame->pixelSize, bits, GL_FRONT,
+		min(height, frame->hdr.frameh), GL_NONE, frame->pf, frame->bits, GL_FRONT,
 		false);
 
 	frame->redraw();

@@ -27,14 +27,19 @@ using namespace vglcommon;
 #define TJSUBSAMP(s) \
 	(s>=4? TJ_420 : s==2? TJ_422 : s==1? TJ_444 : s==0? TJ_GRAYSCALE : TJ_444)
 
+static int tjpf[PIXELFORMATS]=
+{
+	TJPF_RGB, TJPF_RGBX, TJPF_BGR, TJPF_BGRX, TJPF_XBGR, TJPF_XRGB, TJPF_GRAY
+};
+
 
 // Uncompressed frame
 
 Frame::Frame(bool primary_) : bits(NULL), rbits(NULL), pitch(0),
-	pixelSize(0), flags(0), isGL(false), isXV(false), stereo(false),
-	primary(primary_)
+	flags(0), isGL(false), isXV(false), stereo(false), primary(primary_)
 {
 	memset(&hdr, 0, sizeof(rrframeheader));
+	memset(&pf, 0, sizeof(PF));
 	ready.wait();
 }
 
@@ -58,25 +63,28 @@ void Frame::deInit(void)
 }
 
 
-void Frame::init(rrframeheader &h, int ps, int flags_, bool stereo_)
+void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 {
-	if(ps<1) throw(Error("Frame::init", "Invalid argument"));
+	if(pixelFormat<0 || pixelFormat>=PIXELFORMATS)
+		throw(Error("Frame::init", "Invalid argument"));
 
 	flags=flags_;
-	if(h.size==0) h.size=h.framew*h.frameh*ps;
+	PF newpf=pf_get(pixelFormat);
+	if(h.size==0) h.size=h.framew*h.frameh*newpf.size;
 	checkHeader(h);
-	if(h.framew!=hdr.framew || h.frameh!=hdr.frameh || ps!=pixelSize || !bits)
+	if(h.framew!=hdr.framew || h.frameh!=hdr.frameh || newpf.size!=pf.size
+		|| !bits)
 	{
 		if(bits) delete [] bits;
-		_newcheck(bits=new unsigned char[h.framew*h.frameh*ps+1]);
+		_newcheck(bits=new unsigned char[h.framew*h.frameh*newpf.size+1]);
 	}
 	if(stereo_)
 	{
-		if(h.framew!=hdr.framew || h.frameh!=hdr.frameh || ps!=pixelSize
+		if(h.framew!=hdr.framew || h.frameh!=hdr.frameh || newpf.size!=pf.size
 			|| !rbits)
 		{
 			if(rbits) delete [] rbits;
-			_newcheck(rbits=new unsigned char[h.framew*h.frameh*ps+1]);
+			_newcheck(rbits=new unsigned char[h.framew*h.frameh*newpf.size+1]);
 		}
 	}
 	else
@@ -86,20 +94,19 @@ void Frame::init(rrframeheader &h, int ps, int flags_, bool stereo_)
 			delete [] rbits;  rbits=NULL;
 		}
 	}
-	pixelSize=ps;  pitch=pixelSize*h.framew;  stereo=stereo_;
-	hdr=h;
+	pf=newpf;  pitch=pf.size*h.framew;  stereo=stereo_;  hdr=h;
 }
 
 
 void Frame::init(unsigned char *bits_, int width, int pitch_, int height,
-	int pixelSize_, int flags_)
+	int pixelFormat, int flags_)
 {
 	bits=bits_;
 	hdr.x=hdr.y=0;
 	hdr.framew=hdr.width=width;
 	hdr.frameh=hdr.height=height;
-	pixelSize=pixelSize_;
-	hdr.size=hdr.framew*hdr.frameh*pixelSize;
+	pf=pf_get(pixelFormat);
+	hdr.size=hdr.framew*hdr.frameh*pf.size;
 	checkHeader(hdr);
 	pitch=pitch_;
 	flags=flags_;
@@ -111,7 +118,7 @@ Frame *Frame::getTile(int x, int y, int width, int height)
 {
 	Frame *f;
 
-	if(!bits || !pitch || !pixelSize) _throw("Frame not initialized");
+	if(!bits || !pitch || !pf.size) _throw("Frame not initialized");
 	if(x<0 || y<0 || width<1 || height<1 || (x+width)>hdr.width
 		|| (y+height)>hdr.height)
 		throw Error("Frame::getTile", "Argument out of range");
@@ -122,15 +129,15 @@ Frame *Frame::getTile(int x, int y, int width, int height)
 	f->hdr.y=y;
 	f->hdr.width=width;
 	f->hdr.height=height;
-	f->pixelSize=pixelSize;
+	f->pf=pf;
 	f->flags=flags;
 	f->pitch=pitch;
 	f->stereo=stereo;
 	f->isGL=isGL;
 	bool bu=(flags&FRAME_BOTTOMUP);
-	f->bits=&bits[pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+	f->bits=&bits[pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 	if(stereo && rbits)
-		f->rbits=&rbits[pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+		f->rbits=&rbits[pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 	return f;
 }
 
@@ -146,30 +153,30 @@ bool Frame::tileEquals(Frame *last, int x, int y, int width, int height)
 	if(last && hdr.width==last->hdr.width && hdr.height==last->hdr.height
 		&& hdr.framew==last->hdr.framew && hdr.frameh==last->hdr.frameh
 		&& hdr.qual==last->hdr.qual && hdr.subsamp==last->hdr.subsamp
-		&& pixelSize==last->pixelSize && hdr.winid==last->hdr.winid
+		&& pf.id==last->pf.id && hdr.winid==last->hdr.winid
 		&& hdr.dpynum==last->hdr.dpynum)
 	{
 		if(bits && last->bits)
 		{
 			unsigned char *newBits=
-				&bits[pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+				&bits[pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 			unsigned char *oldBits=
-				&last->bits[last->pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+				&last->bits[last->pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 			for(int i=0; i<height; i++)
 			{
-				if(memcmp(&newBits[pitch*i], &oldBits[last->pitch*i], pixelSize*width))
+				if(memcmp(&newBits[pitch*i], &oldBits[last->pitch*i], pf.size*width))
 					return false;
 			}
 		}
 		if(stereo && rbits && last->rbits)
 		{
 			unsigned char *newBits=
-				&rbits[pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+				&rbits[pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 			unsigned char *oldBits=
-				&last->rbits[last->pitch*(bu? hdr.height-y-height:y)+pixelSize*x];
+				&last->rbits[last->pitch*(bu? hdr.height-y-height:y)+pf.size*x];
 			for(int i=0; i<height; i++)
 			{
-				if(memcmp(&newBits[pitch*i], &oldBits[last->pitch*i], pixelSize*width))
+				if(memcmp(&newBits[pitch*i], &oldBits[last->pitch*i], pf.size*width))
 					return false;
 			}
 		}
@@ -181,19 +188,16 @@ bool Frame::tileEquals(Frame *last, int x, int y, int width, int height)
 
 void Frame::makeAnaglyph(Frame &r, Frame &g, Frame &b)
 {
-	int rindex=flags&FRAME_BGR? 2:0, gindex=1, bindex=flags&FRAME_BGR? 0:2,
-		i, j;
+	int i, j;
 	unsigned char *srcrptr=r.bits, *srcgptr=g.bits, *srcbptr=b.bits,
 		*dstptr=bits, *dstrptr, *dstgptr, *dstbptr;
-
-	if(flags&FRAME_ALPHAFIRST) { rindex++;  gindex++;  bindex++; }
 
 	for(j=0; j<hdr.frameh; j++, srcrptr+=r.pitch, srcgptr+=g.pitch,
 		srcbptr+=b.pitch, dstptr+=pitch)
 	{
-		for(i=0, dstrptr=&dstptr[rindex], dstgptr=&dstptr[gindex],
-			dstbptr=&dstptr[bindex]; i<hdr.framew; i++, dstrptr+=pixelSize,
-			dstgptr+=pixelSize, dstbptr+=pixelSize)
+		for(i=0, dstrptr=&dstptr[pf.rindex], dstgptr=&dstptr[pf.gindex],
+			dstbptr=&dstptr[pf.bindex]; i<hdr.framew; i++, dstrptr+=pf.size,
+			dstgptr+=pf.size, dstbptr+=pf.size)
 		{
 			*dstrptr=srcrptr[i];  *dstgptr=srcgptr[i];  *dstbptr=srcbptr[i];
 		}
@@ -212,7 +216,7 @@ void Frame::makePassive(Frame &stf, int mode)
 
 	if(mode==RRSTEREO_INTERLEAVED)
 	{
-		int rowSize=pixelSize*hdr.framew;
+		int rowSize=pf.size*hdr.framew;
 		for(int j=0; j<hdr.frameh; j++)
 		{
 			if(j%2==0) memcpy(dstptr, srclptr, rowSize);
@@ -222,7 +226,7 @@ void Frame::makePassive(Frame &stf, int mode)
 	}
 	else if(mode==RRSTEREO_TOPBOTTOM)
 	{
-		int rowSize=pixelSize*hdr.framew;
+		int rowSize=pf.size*hdr.framew;
 		srcrptr+=pitch;
 		for(int j=0; j<(hdr.frameh+1)/2; j++)
 		{
@@ -237,26 +241,25 @@ void Frame::makePassive(Frame &stf, int mode)
 	}
 	else if(mode==RRSTEREO_SIDEBYSIDE)
 	{
-		int pad=pitch-hdr.framew*pixelSize;
-		int h=hdr.frameh;
+		int pad=pitch-hdr.framew*pf.size, h=hdr.frameh;
 		while(h>0)
 		{
 			unsigned char *srclptr2=srclptr;
-			unsigned char *srcrptr2=srcrptr+pixelSize;
+			unsigned char *srcrptr2=srcrptr+pf.size;
 			for(int i=0; i<(hdr.framew+1)/2; i++)
 			{
 				*(int *)dstptr=*(int *)srclptr2;
-				srclptr2+=pixelSize*2;  dstptr+=pixelSize;
+				srclptr2+=pf.size*2;  dstptr+=pf.size;
 			}
 			for(int i=(hdr.framew+1)/2; i<hdr.framew-1; i++)
 			{
 				*(int *)dstptr=*(int *)srcrptr2;
-				srcrptr2+=pixelSize*2;  dstptr+=pixelSize;
+				srcrptr2+=pf.size*2;  dstptr+=pf.size;
 			}
 			if(hdr.framew>1)
 			{
-				memcpy(dstptr, srcrptr2, pixelSize);
-				dstptr+=pixelSize;
+				memcpy(dstptr, srcrptr2, pf.size);
+				dstptr+=pf.size;
 			}
 			srclptr+=pitch;  srcrptr+=pitch;  dstptr+=pad;
 			h--;
@@ -269,113 +272,90 @@ void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 {
 	if(!f.bits || f.hdr.size<1 || !bits || !hdr.size)
 		_throw("Frame not initialized");
+	if(pf.id>PF_XRGB)
+		_throw("Destination frame has the wrong pixel type");
 
-	int dstbgr=((flags&FRAME_BGR)!=0), dstbu=((flags&FRAME_BOTTOMUP)!=0),
-		dstaf=((flags&FRAME_ALPHAFIRST)!=0);
-	int i, j;
+	bool dstbu=(flags&FRAME_BOTTOMUP);
 	int srcStride=f.pitch, dstStride=pitch;
 	int startLine=dstbu? max(0, hdr.frameh-f.hdr.y-height) : f.hdr.y;
 	unsigned char *srcptr=rightEye? f.rbits:f.bits,
-		*dstptr=rightEye? &rbits[pitch*startLine+f.hdr.x*pixelSize]:
-			&bits[pitch*startLine+f.hdr.x*pixelSize];
-	unsigned char *srcptr2, *dstptr2;
+		*dstptr=rightEye? &rbits[pitch*startLine+f.hdr.x*pf.size]:
+			&bits[pitch*startLine+f.hdr.x*pf.size];
 
 	if(!dstbu)
 	{
 		srcptr=&srcptr[(height-1)*f.pitch];  srcStride=-srcStride;
 	}
-	if(!dstbgr && pixelSize==3)
-	{
-		int wps=width*pixelSize;
-		if(dstaf)
-		{
-			dstptr++;  wps--;
-		}
-		for(i=0; i<height; i++, srcptr+=srcStride, dstptr+=dstStride)
-		{
-			memcpy(dstptr, srcptr, wps);
-		}
-	}
-	else
-	{
-		if(dstaf) dstptr++;
-		if(!dstbgr)
-		{
-			for(i=0; i<height; i++, srcptr+=srcStride, dstptr+=dstStride)
-			{
-				for(j=0, srcptr2=srcptr, dstptr2=dstptr; j<width; j++,
-					srcptr2+=f.pixelSize, dstptr2+=pixelSize)
-					memcpy(dstptr2, srcptr2, 3);
-			}
-	 	}
-		else
-		{
-			for(i=0; i<height; i++, srcptr+=srcStride, dstptr+=dstStride)
-			{
-				for(j=0, srcptr2=srcptr, dstptr2=dstptr; j<width; j++,
-					srcptr2+=f.pixelSize, dstptr2+=pixelSize)
-				{
-					dstptr2[2]=srcptr2[0];
-					dstptr2[1]=srcptr2[1];
-					dstptr2[0]=srcptr2[2];
-			 	}
-			}
-		}
-	}
+	pf_get(PF_RGB).convert(srcptr, width, srcStride, height, dstptr, dstStride,
+		pf);
+}
+
+
+#define DRAWLOGO()  \
+switch(pf.size)  \
+{  \
+	case 3:  \
+	{  \
+		for(int j=0; j<height; j++, rowptr+=stride)  \
+		{  \
+			unsigned char *pixel=rowptr;  \
+			logoptr2=logoptr;  \
+			for(int i=0; i<width; i++, pixel+=pf.size)  \
+			{  \
+				if(*(logoptr2++))  \
+				{  \
+					pixel[pf.rindex]^=113;  pixel[pf.gindex]^=162;  \
+					pixel[pf.bindex]^=117;  \
+				}  \
+			}  \
+			logoptr+=VGLLOGO_WIDTH;  \
+		}  \
+		break;  \
+	}  \
+	case 4:  \
+	{  \
+		unsigned int mask;  \
+		pf.setRGB((unsigned char *)&mask, 113, 162, 117);  \
+		for(int j=0; j<height; j++, rowptr+=stride)  \
+		{  \
+			unsigned int *pixel=(unsigned int *)rowptr;  \
+			logoptr2=logoptr;  \
+			for(int i=0; i<width; i++, pixel++)  \
+			{  \
+				if(*(logoptr2++)) *pixel^=mask;  \
+			}  \
+			logoptr+=VGLLOGO_WIDTH;  \
+		}  \
+		break;  \
+	}  \
+	default:  \
+		_throw("Invalid pixel format");  \
 }
 
 
 void Frame::addLogo(void)
 {
-	unsigned char *rowptr, *colptr, *logoptr=vgllogo, *logoptr2;
-	int rindex=flags&FRAME_BGR? 2:0, gindex=1, bindex=flags&FRAME_BGR? 0:2;
-	if(flags&FRAME_ALPHAFIRST) { rindex++;  gindex++;  bindex++; }
+	unsigned char *rowptr, *logoptr=vgllogo, *logoptr2;
 
 	if(!bits || hdr.width<1 || hdr.height<1) return;
 	int height=min(VGLLOGO_HEIGHT, hdr.height-1);
 	int width=min(VGLLOGO_WIDTH, hdr.width-1);
+	int stride=flags&FRAME_BOTTOMUP? -pitch:pitch;
 	if(height<1 || width<1) return;
 	if(flags&FRAME_BOTTOMUP)
-		rowptr=&bits[pitch*height+(hdr.width-width-1)*pixelSize];
+		rowptr=&bits[pitch*height+(hdr.width-width-1)*pf.size];
 	else
-		rowptr=&bits[pitch*(hdr.height-height-1)+(hdr.width-width-1)*pixelSize];
-	for(int j=0; j<height; j++)
-	{
-		colptr=rowptr;
-		logoptr2=logoptr;
-		for(int i=0; i<width; i++)
-		{
-			if(*(logoptr2++))
-			{
-				colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
-			}
-			colptr+=pixelSize;
-		}
-		rowptr+=(flags&FRAME_BOTTOMUP)? -pitch:pitch;
-		logoptr+=VGLLOGO_WIDTH;
-	}
+		rowptr=&bits[pitch*(hdr.height-height-1)+(hdr.width-width-1)*pf.size];
+	DRAWLOGO()
 
 	if(!rbits) return;
 	logoptr=vgllogo;
 	if(flags&FRAME_BOTTOMUP)
-		rowptr=&rbits[pitch*height+(hdr.width-width-1)*pixelSize];
+		rowptr=&rbits[pitch*height+(hdr.width-width-1)*pf.size];
 	else
-		rowptr=&rbits[pitch*(hdr.height-height-1)+(hdr.width-width-1)*pixelSize];
-	for(int j=0; j<height; j++)
-	{
-		colptr=rowptr;
-		logoptr2=logoptr;
-		for(int i=0; i<width; i++)
-		{
-			if(*(logoptr2++))
-			{
-				colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
-			}
-			colptr+=pixelSize;
-		}
-		rowptr+=(flags&FRAME_BOTTOMUP)? -pitch:pitch;
-		logoptr+=VGLLOGO_WIDTH;
-	}
+		rowptr=&rbits[pitch*(hdr.height-height-1)+(hdr.width-width-1)*pf.size];
+	logoptr=vgllogo;
+	DRAWLOGO()
 }
 
 
@@ -412,7 +392,7 @@ void Frame::checkHeader(rrframeheader &h)
 CompressedFrame::CompressedFrame(void) : Frame(), tjhnd(NULL)
 {
 	if(!(tjhnd=tjInitCompress())) _throw(tjGetErrorStr());
-	pixelSize=3;
+	pf=pf_get(PF_RGB);
 	memset(&rhdr, 0, sizeof(rrframeheader));
 }
 
@@ -425,7 +405,7 @@ CompressedFrame::~CompressedFrame(void)
 CompressedFrame &CompressedFrame::operator= (Frame &f)
 {
 	if(!f.bits) _throw("Frame not initialized");
-	if(f.pixelSize<3 || f.pixelSize>4)
+	if(f.pf.size<3 || f.pf.size>4)
 		_throw("Only true color frames are supported");
 	switch(f.hdr.compress)
 	{
@@ -445,9 +425,8 @@ void CompressedFrame::compressYUV(Frame &f)
 	if(f.hdr.subsamp!=4) throw(Error("YUV encoder", "Invalid argument"));
 	init(f.hdr, 0);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
-	if(f.flags&FRAME_BGR) tjflags|=TJ_BGR;
-	_tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
-		f.pixelSize, bits, TJSUBSAMP(f.hdr.subsamp), tjflags));
+	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+		tjpf[f.pf.id], bits, TJSUBSAMP(f.hdr.subsamp), tjflags));
 	hdr.size=(unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height,
 		TJSUBSAMP(f.hdr.subsamp));
 }
@@ -462,18 +441,18 @@ void CompressedFrame::compressJPEG(Frame &f)
 
 	init(f.hdr, f.stereo? RR_LEFT:0);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
-	if(f.flags&FRAME_BGR) tjflags|=TJ_BGR;
 	unsigned long size;
-	_tj(tjCompress(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
-		f.pixelSize, bits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual, tjflags));
+	_tj(tjCompress2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+		tjpf[f.pf.id], &bits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
+		tjflags|TJFLAG_NOREALLOC));
 	hdr.size=(unsigned int)size;
 	if(f.stereo && f.rbits)
 	{
 		init(f.hdr, RR_RIGHT);
 		if(rbits)
-			_tj(tjCompress(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
-				f.pixelSize, rbits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
-				tjflags));
+			_tj(tjCompress2(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
+				tjpf[f.pf.id], &rbits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
+				tjflags|TJFLAG_NOREALLOC));
 		rhdr.size=(unsigned int)size;
 	}
 }
@@ -481,18 +460,17 @@ void CompressedFrame::compressJPEG(Frame &f)
 
 void CompressedFrame::compressRGB(Frame &f)
 {
-	int i;  unsigned char *srcptr, *dstptr;
-	int bu=(f.flags&FRAME_BOTTOMUP)? 1:0;
-	if(f.flags&FRAME_BGR || f.flags&FRAME_ALPHAFIRST || f.pixelSize!=3)
-		throw(Error("RGB compressor", "Source frame is not RGB"));
-	int dstPitch=f.hdr.width*f.pixelSize;
+	unsigned char *srcptr;
+	bool bu=(f.flags&FRAME_BOTTOMUP);
+	if(f.pf.id>PF_XRGB)
+		throw(Error("RGB compressor", "Source frame has the wrong pixel type"));
+	int dstPitch=f.hdr.width*3;
 	int srcStride=bu? f.pitch:-f.pitch;
 
 	init(f.hdr, f.stereo? RR_LEFT:0);
 	srcptr=bu? f.bits:&f.bits[f.pitch*(f.hdr.height-1)];
-	for(i=0, dstptr=bits; i<f.hdr.height; i++, srcptr+=srcStride,
-		dstptr+=dstPitch)
-		memcpy(dstptr, srcptr, dstPitch);
+	f.pf.convert(srcptr, f.hdr.width, srcStride, f.hdr.height, bits, dstPitch,
+		pf_get(PF_RGB));
 	hdr.size=dstPitch*f.hdr.height;
 
 	if(f.stereo && f.rbits)
@@ -501,9 +479,8 @@ void CompressedFrame::compressRGB(Frame &f)
 		if(rbits)
 		{
 			srcptr=bu? f.rbits:&f.rbits[f.pitch*(f.hdr.height-1)];
-			for(i=0, dstptr=rbits; i<f.hdr.height; i++, srcptr+=srcStride,
-				dstptr+=dstPitch)
-				memcpy(dstptr, srcptr, dstPitch);
+			f.pf.convert(srcptr, f.hdr.width, srcStride, f.hdr.height, rbits,
+				dstPitch, pf_get(PF_RGB));
 			rhdr.size=dstPitch*f.hdr.height;
 		}
 	}
@@ -549,7 +526,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 		delete [] rbits;  rbits=NULL;
 		memset(&rhdr, 0, sizeof(rrframeheader));
 	}
-	pitch=hdr.width*pixelSize;
+	pitch=hdr.width*pf.size;
 }
 
 
@@ -616,11 +593,9 @@ void FBXFrame::init(rrframeheader &h)
 	hdr=h;
 	if(hdr.framew>fb.width) hdr.framew=fb.width;
 	if(hdr.frameh>fb.height) hdr.frameh=fb.height;
-	pixelSize=fbx_ps[fb.format];  pitch=fb.pitch;
+	pf=fb.pf;  pitch=fb.pitch;
 	bits=(unsigned char *)fb.bits;
 	flags=0;
-	if(fbx_bgr[fb.format]) flags|=FRAME_BGR;
-	if(fbx_alphafirst[fb.format]) flags|=FRAME_ALPHAFIRST;
 }
 
 
@@ -631,8 +606,6 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 		_throw("JPEG not initialized");
 	init(cf.hdr);
 	if(!fb.xi) _throw("Frame not initialized");
-	if(fbx_bgr[fb.format]) tjflags|=TJ_BGR;
-	if(fbx_alphafirst[fb.format]) tjflags|=TJ_ALPHAFIRST;
 	int width=min(cf.hdr.width, fb.width-cf.hdr.x);
 	int height=min(cf.hdr.height, fb.height-cf.hdr.y);
 	if(width>0 && height>0 && cf.hdr.width<=width && cf.hdr.height<=height)
@@ -645,9 +618,9 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 				if((tjhnd=tjInitDecompress())==NULL)
 					throw(Error("FBXFrame::decompressor", tjGetErrorStr()));
 			}
-			_tj(tjDecompress(tjhnd, cf.bits, cf.hdr.size,
-				(unsigned char *)&fb.bits[fb.pitch*cf.hdr.y+cf.hdr.x*fbx_ps[fb.format]],
-				width, fb.pitch, height, fbx_ps[fb.format], tjflags));
+			_tj(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+				(unsigned char *)&fb.bits[fb.pitch*cf.hdr.y+cf.hdr.x*pf.size], width,
+				fb.pitch, height, tjpf[pf.id], tjflags));
 		}
 	}
 	return *this;
@@ -701,19 +674,18 @@ XVFrame::~XVFrame(void)
 XVFrame &XVFrame::operator= (Frame &f)
 {
 	if(!f.bits) _throw("Frame not initialized");
-	if(f.pixelSize<3 || f.pixelSize>4)
+	if(f.pf.size<3 || f.pf.size>4)
 		_throw("Only true color frames are supported");
 	int tjflags=0;
 	init(f.hdr);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
-	if(f.flags&FRAME_BGR) tjflags|=TJ_BGR;
 	if(!tjhnd)
 	{
 		if((tjhnd=tjInitCompress())==NULL)
 			throw(Error("XVFrame::compressor", tjGetErrorStr()));
 	}
-	_tj(tjEncodeYUV(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
-		f.pixelSize, bits, TJ_420, tjflags));
+	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+		tjpf[f.pf.id], bits, TJ_420, tjflags));
 	hdr.size=(unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height, TJ_420);
 	if(hdr.size!=(unsigned long)fb.xvi->data_size)
 		_throw("Image size mismatch in YUV encoder");
@@ -734,7 +706,8 @@ void XVFrame::init(rrframeheader &h)
 	if(hdr.framew>fb.xvi->width) hdr.framew=fb.xvi->width;
 	if(hdr.frameh>fb.xvi->height) hdr.frameh=fb.xvi->height;
 	bits=(unsigned char *)fb.xvi->data;
-	flags=pixelSize=pitch=0;
+	flags=pitch=0;
+	memset(&pf, 0, sizeof(PF));
 	hdr.size=fb.xvi->data_size;
 }
 

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010, 2014 D. R. Commander
+ * Copyright (C)2010, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -79,6 +79,11 @@ static __inline int numprocs(void)
 	(((i) & 0x00ff0000) >>  8) | \
 	(((i) & 0x0000ff00) <<  8) | \
 	(((i) & 0x000000ff) << 24) )
+
+#define byteswap24(i) ( \
+	(((i) & 0xff0000) >> 16) | \
+	 ((i) & 0x00ff00)        | \
+	(((i) & 0x0000ff) << 16) )
 
 #define byteswap16(i) ( \
 	(((i) & 0xff00) >> 8) | \

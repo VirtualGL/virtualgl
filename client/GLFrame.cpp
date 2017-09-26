@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014 D. R. Commander
+ * Copyright (C)2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,9 +23,14 @@ using namespace vglutil;
 using namespace vglcommon;
 
 
-GLFrame::GLFrame(char *dpystring, Window win_) : Frame(),
-	dpy(NULL),
-	win(win_), ctx(0), tjhnd(NULL), newdpy(false)
+static int tjpf[PIXELFORMATS]=
+{
+	TJPF_RGB, TJPF_RGBX, TJPF_BGR, TJPF_BGRX, TJPF_XBGR, TJPF_XRGB, TJPF_GRAY
+};
+
+
+GLFrame::GLFrame(char *dpystring, Window win_) : Frame(), dpy(NULL), win(win_),
+	ctx(0), tjhnd(NULL), newdpy(false)
 {
 	if(!dpystring || !win)
 		throw(Error("GLFrame::GLFrame", "Invalid argument"));
@@ -37,9 +42,8 @@ GLFrame::GLFrame(char *dpystring, Window win_) : Frame(),
 }
 
 
-GLFrame::GLFrame(Display *dpy_, Window win_) : Frame(),
-	dpy(NULL),
-	win(win_), ctx(0), tjhnd(NULL), newdpy(false)
+GLFrame::GLFrame(Display *dpy_, Window win_) : Frame(), dpy(NULL), win(win_),
+	ctx(0), tjhnd(NULL), newdpy(false)
 {
 	if(!dpy_ || !win_) throw(Error("GLFrame::GLFrame", "Invalid argument"));
 
@@ -55,7 +59,7 @@ void GLFrame::init(void)
 
 	try
 	{
-		pixelSize=3;
+		pf=pf_get(PF_RGB);
 		XWindowAttributes xwa;
 		memset(&xwa, 0, sizeof(xwa));
 		XGetWindowAttributes(dpy, win, &xwa);
@@ -111,12 +115,9 @@ GLFrame::~GLFrame(void)
 
 void GLFrame::init(rrframeheader &h, bool stereo_)
 {
-	int flags_=FRAME_BOTTOMUP;
-
-	#ifdef GL_BGR_EXT
-	if(littleendian() && h.compress!=RRCOMP_RGB) flags_|=FRAME_BGR;
-	#endif
-	Frame::init(h, 3, flags_, stereo_);
+	int format=PF_RGB;
+	if(littleendian() && h.compress!=RRCOMP_RGB) format=PF_BGR;
+	Frame::init(h, format, FRAME_BOTTOMUP, stereo_);
 }
 
 
@@ -127,7 +128,6 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 	if(!cf.bits || cf.hdr.size<1) _throw("JPEG not initialized");
 	init(cf.hdr, cf.stereo);
 	if(!bits) _throw("Frame not initialized");
-	if(flags&FRAME_BGR) tjflags|=TJ_BGR;
 	int width=min(cf.hdr.width, hdr.framew-cf.hdr.x);
 	int height=min(cf.hdr.height, hdr.frameh-cf.hdr.y);
 	if(width>0 && height>0 && cf.hdr.width<=width && cf.hdr.height<=height)
@@ -146,14 +146,14 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 					throw(Error("GLFrame::decompressor", tjGetErrorStr()));
 			}
 			int y=max(0, hdr.frameh-cf.hdr.y-height);
-			_tj(tjDecompress(tjhnd, cf.bits, cf.hdr.size,
-				(unsigned char *)&bits[pitch*y+cf.hdr.x*pixelSize], width, pitch,
-				height, pixelSize, tjflags));
+			_tj(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+				(unsigned char *)&bits[pitch*y+cf.hdr.x*pf.size], width, pitch, height,
+				tjpf[pf.id], tjflags));
 			if(stereo && cf.rbits && rbits)
 			{
-				_tj(tjDecompress(tjhnd, cf.rbits, cf.rhdr.size,
-					(unsigned char *)&rbits[pitch*y+cf.hdr.x*pixelSize],
-					width, pitch, height, pixelSize, tjflags));
+				_tj(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
+					(unsigned char *)&rbits[pitch*y+cf.hdr.x*pf.size], width, pitch,
+					height, tjpf[pf.id], tjflags));
 			}
 		}
 	}
@@ -173,11 +173,7 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	if(x<0 || width<1 || (x+width)>hdr.framew || y<0 || height<1
 		|| (y+height)>hdr.frameh)
 		return;
-	int format=GL_RGB;
-	#ifdef GL_BGR_EXT
-	if(littleendian()) format=GL_BGR_EXT;
-	#endif
-	if(pixelSize==1) format=GL_COLOR_INDEX;
+	int glFormat=(pf.id==PF_BGR? GL_BGR:GL_RGB);
 
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind OpenGL context to window (window may have disappeared)");
@@ -186,22 +182,22 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	e=glGetError();
 	while(e!=GL_NO_ERROR) e=glGetError();  // Clear previous error
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch/pixelSize);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch/pf.size);
 	int oldbuf=-1;
 	glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
 	if(stereo) glDrawBuffer(GL_BACK_LEFT);
 	glViewport(0, 0, hdr.framew, hdr.frameh);
 	glRasterPos2f(((float)x/(float)hdr.framew)*2.0f-1.0f,
 		((float)y/(float)hdr.frameh)*2.0f-1.0f);
-	glDrawPixels(width, height, format, GL_UNSIGNED_BYTE,
-		&bits[pitch*y+x*pixelSize]);
+	glDrawPixels(width, height, glFormat, GL_UNSIGNED_BYTE,
+		&bits[pitch*y+x*pf.size]);
 	if(stereo)
 	{
 		glDrawBuffer(GL_BACK_RIGHT);
 		glRasterPos2f(((float)x/(float)hdr.framew)*2.0f-1.0f,
 			((float)y/(float)hdr.frameh)*2.0f-1.0f);
-		glDrawPixels(width, height, format, GL_UNSIGNED_BYTE,
-			&rbits[pitch*y+x*pixelSize]);
+		glDrawPixels(width, height, glFormat, GL_UNSIGNED_BYTE,
+			&rbits[pitch*y+x*pf.size]);
 		glDrawBuffer(oldbuf);
 	}
 

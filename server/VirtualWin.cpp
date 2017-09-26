@@ -26,6 +26,12 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
+static const int trans2pf[RRTRANS_FORMATOPT]=
+{
+	PF_RGB, PF_RGBX, PF_BGR, PF_BGRX, PF_XBGR, PF_XRGB
+};
+
+
 #define isRight(drawBuf)  \
 	(drawBuf==GL_RIGHT || drawBuf==GL_FRONT_RIGHT || drawBuf==GL_BACK_RIGHT)
 #define leye(buf)  \
@@ -357,33 +363,15 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 		return;
 	if(!fconfig.spoil) plugin->synchronize();
 
-	int desiredformat=RRTRANS_RGB;
-	#ifdef GL_BGR_EXT
-	if(oglDraw->getFormat()==GL_BGR_EXT) desiredformat=RRTRANS_BGR;
-	#endif
-	#ifdef GL_BGRA_EXT
-	if(oglDraw->getFormat()==GL_BGRA_EXT) desiredformat=RRTRANS_BGRA;
-	#endif
-	if(oglDraw->getFormat()==GL_RGBA) desiredformat=RRTRANS_RGBA;
+	int desiredFormat=RRTRANS_RGB;
+	if(oglDraw->getFormat()==GL_BGR) desiredFormat=RRTRANS_BGR;
+	else if(oglDraw->getFormat()==GL_BGRA) desiredFormat=RRTRANS_BGRA;
+	else if(oglDraw->getFormat()==GL_RGBA) desiredFormat=RRTRANS_RGBA;
 
-	rrframe=plugin->getFrame(w, h, desiredformat,
+	rrframe=plugin->getFrame(w, h, desiredFormat,
 		doStereo && stereoMode==RRSTEREO_QUADBUF);
 	f.init(rrframe->bits, rrframe->w, rrframe->pitch, rrframe->h,
-		rrtrans_ps[rrframe->format], (rrtrans_bgr[rrframe->format]? FRAME_BGR:0) |
-		(rrtrans_afirst[rrframe->format]? FRAME_ALPHAFIRST:0) |
-		FRAME_BOTTOMUP);
-	int glformat= (rrtrans_ps[rrframe->format]==3? GL_RGB:GL_RGBA);
-	#ifdef GL_BGR_EXT
-	if(rrframe->format==RRTRANS_BGR) glformat=GL_BGR_EXT;
-	#endif
-	#ifdef GL_BGRA_EXT
-	if(rrframe->format==RRTRANS_BGRA) glformat=GL_BGRA_EXT;
-	#endif
-	#ifdef GL_ABGR_EXT
-	// FIXME: Implement ARGB properly
-	if(rrframe->format==RRTRANS_ABGR || rrframe->format==RRTRANS_ARGB)
-		glformat=GL_ABGR_EXT;
-	#endif
+		trans2pf[rrframe->format], FRAME_BOTTOMUP);
 
 	if(doStereo && stereoMode==RRSTEREO_QUADBUF && rrframe->rbits==NULL)
 	{
@@ -404,19 +392,19 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	else if(doStereo && isPassive(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		makePassive(&f, drawBuf, glformat, stereoMode);
+		makePassive(&f, drawBuf, GL_NONE, stereoMode);
 	}
 	else
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
-		GLint buf=drawBuf;
-		if(doStereo || stereoMode==RRSTEREO_LEYE) buf=leye(drawBuf);
-		if(stereoMode==RRSTEREO_REYE) buf=reye(drawBuf);
-		readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, glformat,
-			rrtrans_ps[rrframe->format], rrframe->bits, buf, doStereo);
+		GLint readBuf=drawBuf;
+		if(doStereo || stereoMode==RRSTEREO_LEYE) readBuf=leye(drawBuf);
+		if(stereoMode==RRSTEREO_REYE) readBuf=reye(drawBuf);
+		readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
+			rrframe->bits, readBuf, doStereo);
 		if(doStereo && rrframe->rbits)
-			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, glformat,
-				rrtrans_ps[rrframe->format], rrframe->rbits, reye(drawBuf), doStereo);
+			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
+				rrframe->rbits, reye(drawBuf), doStereo);
 	}
 	if(!syncdpy) { XSync(dpy, False);  syncdpy=true; }
 	if(fconfig.logo) f.addLogo();
@@ -433,24 +421,17 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 		return;
 	Frame *f;
 
-	int flags=FRAME_BOTTOMUP, format=GL_RGB, pixelsize=3;
+	int glFormat=GL_RGB, pixelFormat=PF_RGB;
 	if(compress!=RRCOMP_RGB)
 	{
-		format=oglDraw->getFormat();
-		if(oglDraw->getFormat()==GL_RGBA) pixelsize=4;
-		#ifdef GL_BGR_EXT
-		else if(oglDraw->getFormat()==GL_BGR_EXT) flags|=FRAME_BGR;
-		#endif
-		#ifdef GL_BGRA_EXT
-		else if(oglDraw->getFormat()==GL_BGRA_EXT)
-		{
-			flags|=FRAME_BGR;  pixelsize=4;
-		}
-		#endif
+		glFormat=oglDraw->getFormat();
+		if(glFormat==GL_RGBA) pixelFormat=PF_RGBX;
+		else if(glFormat==GL_BGR) pixelFormat=PF_BGR;
+		else if(glFormat==GL_BGRA) pixelFormat=PF_BGRX;
 	}
 
 	if(!fconfig.spoil) vglconn->synchronize();
-	_errifnot(f=vglconn->getFrame(w, h, pixelsize, flags,
+	_errifnot(f=vglconn->getFrame(w, h, pixelFormat, FRAME_BOTTOMUP,
 		doStereo && stereoMode==RRSTEREO_QUADBUF));
 	if(doStereo && isAnaglyphic(stereoMode))
 	{
@@ -460,19 +441,19 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 	else if(doStereo && isPassive(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		makePassive(f, drawBuf, format, stereoMode);
+		makePassive(f, drawBuf, glFormat, stereoMode);
 	}
 	else
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
-		GLint buf=drawBuf;
-		if(doStereo || stereoMode==RRSTEREO_LEYE) buf=leye(drawBuf);
-		if(stereoMode==RRSTEREO_REYE) buf=reye(drawBuf);
-		readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, format,
-			f->pixelSize, f->bits, buf, doStereo);
+		GLint readBuf=drawBuf;
+		if(doStereo || stereoMode==RRSTEREO_LEYE) readBuf=leye(drawBuf);
+		if(stereoMode==RRSTEREO_REYE) readBuf=reye(drawBuf);
+		readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, glFormat, f->pf,
+			f->bits, readBuf, doStereo);
 		if(doStereo && f->rbits)
-			readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, format,
-				f->pixelSize, f->rbits, reye(drawBuf), doStereo);
+			readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, glFormat, f->pf,
+				f->rbits, reye(drawBuf), doStereo);
 	}
 	f->hdr.winid=x11Draw;
 	f->hdr.framew=f->hdr.width;
@@ -507,48 +488,16 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	else
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		int format;
-		unsigned char *bits=f->bits;
-		switch(f->pixelSize)
-		{
-			case 3:
-				format=GL_RGB;
-				#ifdef GL_BGR_EXT
-				if(f->flags&FRAME_BGR) format=GL_BGR_EXT;
-				#endif
-				break;
-			case 4:
-				format=GL_RGBA;
-				#ifdef GL_BGRA_EXT
-				if(f->flags&FRAME_BGR && !(f->flags&FRAME_ALPHAFIRST))
-					format=GL_BGRA_EXT;
-				#endif
-				if(f->flags&FRAME_BGR && f->flags&FRAME_ALPHAFIRST)
-				{
-					#ifdef GL_ABGR_EXT
-					format=GL_ABGR_EXT;
-					#elif defined(GL_BGRA_EXT)
-					format=GL_BGRA_EXT;  bits=f->bits+1;
-					#endif
-				}
-				if(!(f->flags&FRAME_BGR) && f->flags&FRAME_ALPHAFIRST)
-				{
-					format=GL_RGBA;  bits=f->bits+1;
-				}
-				break;
-			default:
-				_throw("Unsupported pixel format");
-		}
 		if(doStereo && isPassive(stereoMode))
-			makePassive(f, drawBuf, format, stereoMode);
+			makePassive(f, drawBuf, GL_NONE, stereoMode);
 		else
 		{
 			stereoFrame.deInit();
-			GLint buf=drawBuf;
-			if(stereoMode==RRSTEREO_REYE) buf=reye(drawBuf);
-			else if(stereoMode==RRSTEREO_LEYE) buf=leye(drawBuf);
+			GLint readBuf=drawBuf;
+			if(stereoMode==RRSTEREO_REYE) readBuf=reye(drawBuf);
+			else if(stereoMode==RRSTEREO_LEYE) readBuf=leye(drawBuf);
 			readPixels(0, 0, min(width, f->hdr.framew), f->pitch,
-				min(height, f->hdr.frameh), format, f->pixelSize, bits, buf, false);
+				min(height, f->hdr.frameh), GL_NONE, f->pf, f->bits, readBuf, false);
 		}
 	}
 	if(fconfig.logo) f->addLogo();
@@ -573,19 +522,12 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	hdr.width=hdr.framew=width;
 	hdr.height=hdr.frameh=height;
 
-	int flags=FRAME_BOTTOMUP, format=oglDraw->getFormat(), pixelsize=3;
-	if(oglDraw->getFormat()==GL_RGBA) pixelsize=4;
-	#ifdef GL_BGR_EXT
-	else if(oglDraw->getFormat()==GL_BGR_EXT) flags|=FRAME_BGR;
-	#endif
-	#ifdef GL_BGRA_EXT
-	else if(oglDraw->getFormat()==GL_BGRA_EXT)
-	{
-		flags|=FRAME_BGR;  pixelsize=4;
-	}
-	#endif
+	int glFormat=oglDraw->getFormat(), pixelFormat=PF_RGB;
+	if(glFormat==GL_RGBA) pixelFormat=PF_RGBX;
+	else if(glFormat==GL_BGR) pixelFormat=PF_BGR;
+	else if(glFormat==GL_BGRA) pixelFormat=PF_BGRX;
 
-	frame.init(hdr, pixelsize, flags, false);
+	frame.init(hdr, pixelFormat, FRAME_BOTTOMUP, false);
 
 	if(doStereo && isAnaglyphic(stereoMode))
 	{
@@ -595,16 +537,16 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	else if(doStereo && isPassive(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		makePassive(&frame, drawBuf, format, stereoMode);
+		makePassive(&frame, drawBuf, glFormat, stereoMode);
 	}
 	else
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
-		GLint buf=drawBuf;
-		if(stereoMode==RRSTEREO_REYE) buf=reye(drawBuf);
-		else if(stereoMode==RRSTEREO_LEYE) buf=leye(drawBuf);
+		GLint readBuf=drawBuf;
+		if(stereoMode==RRSTEREO_REYE) readBuf=reye(drawBuf);
+		else if(stereoMode==RRSTEREO_LEYE) readBuf=leye(drawBuf);
 		readPixels(0, 0, min(width, frame.hdr.framew), frame.pitch,
-			min(height, frame.hdr.frameh), format, frame.pixelSize, frame.bits, buf,
+			min(height, frame.hdr.frameh), glFormat, frame.pf, frame.bits, readBuf,
 			false);
 	}
 
@@ -628,29 +570,30 @@ void VirtualWin::makeAnaglyph(Frame *f, int drawBuf, int stereoMode)
 	{
 		rbuf=reye(drawBuf);  gbuf=reye(drawBuf);  bbuf=leye(drawBuf);
 	}
-	rFrame.init(f->hdr, 1, f->flags, false);
+	rFrame.init(f->hdr, PF_COMP, f->flags, false);
 	readPixels(0, 0, rFrame.hdr.framew, rFrame.pitch, rFrame.hdr.frameh, GL_RED,
-		rFrame.pixelSize, rFrame.bits, rbuf, false);
-	gFrame.init(f->hdr, 1, f->flags, false);
+		rFrame.pf, rFrame.bits, rbuf, false);
+	gFrame.init(f->hdr, PF_COMP, f->flags, false);
 	readPixels(0, 0, gFrame.hdr.framew, gFrame.pitch, gFrame.hdr.frameh,
-		GL_GREEN, gFrame.pixelSize, gFrame.bits, gbuf, false);
-	bFrame.init(f->hdr, 1, f->flags, false);
+		GL_GREEN, gFrame.pf, gFrame.bits, gbuf, false);
+	bFrame.init(f->hdr, PF_COMP, f->flags, false);
 	readPixels(0, 0, bFrame.hdr.framew, bFrame.pitch, bFrame.hdr.frameh, GL_BLUE,
-		bFrame.pixelSize, bFrame.bits, bbuf, false);
+		bFrame.pf, bFrame.bits, bbuf, false);
 	profAnaglyph.startFrame();
 	f->makeAnaglyph(rFrame, gFrame, bFrame);
 	profAnaglyph.endFrame(f->hdr.framew*f->hdr.frameh, 0, 1);
 }
 
 
-void VirtualWin::makePassive(Frame *f, int drawBuf, int format, int stereoMode)
+void VirtualWin::makePassive(Frame *f, int drawBuf, GLenum glFormat,
+	int stereoMode)
 {
-	stereoFrame.init(f->hdr, f->pixelSize, f->flags, true);
+	stereoFrame.init(f->hdr, f->pf.id, f->flags, true);
 	readPixels(0, 0, stereoFrame.hdr.framew, stereoFrame.pitch,
-		stereoFrame.hdr.frameh, format, stereoFrame.pixelSize, stereoFrame.bits,
+		stereoFrame.hdr.frameh, glFormat, stereoFrame.pf, stereoFrame.bits,
 		leye(drawBuf), true);
 	readPixels(0, 0, stereoFrame.hdr.framew, stereoFrame.pitch,
-		stereoFrame.hdr.frameh, format, stereoFrame.pixelSize, stereoFrame.rbits,
+		stereoFrame.hdr.frameh, glFormat, stereoFrame.pf, stereoFrame.rbits,
 		reye(drawBuf), true);
 	profPassive.startFrame();
 	f->makePassive(stereoFrame, stereoMode);
@@ -659,9 +602,9 @@ void VirtualWin::makePassive(Frame *f, int drawBuf, int format, int stereoMode)
 
 
 void VirtualWin::readPixels(GLint x, GLint y, GLint width, GLint pitch,
-	GLint height, GLenum format, int ps, GLubyte *bits, GLint buf, bool stereo)
+	GLint height, GLenum glFormat, PF &pf, GLubyte *bits, GLint buf, bool stereo)
 {
-	VirtualDrawable::readPixels(x, y, width, pitch, height, format, ps, bits,
+	VirtualDrawable::readPixels(x, y, width, pitch, height, glFormat, pf, bits,
 		buf, stereo);
 
 	// Gamma correction

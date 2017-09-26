@@ -100,13 +100,13 @@ int main(int argc, char **argv)
 
 		int w, h, d=3;
 
-		if(bmp_load(argv[1], &buf, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+		if(bmp_load(argv[1], &buf, &w, 1, &h, bgr? PF_BGR:PF_RGB,
 			BMPORN_TOPDOWN)==-1)
 			_throw(bmp_geterr());
-		if(bmp_load(argv[1], &buf2, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+		if(bmp_load(argv[1], &buf2, &w, 1, &h, bgr? PF_BGR:PF_RGB,
 			BMPORN_TOPDOWN)==-1)
 			_throw(bmp_geterr());
-		if(bmp_load(argv[1], &buf3, &w, 1, &h, bgr? BMPPF_BGR:BMPPF_RGB,
+		if(bmp_load(argv[1], &buf3, &w, 1, &h, bgr? PF_BGR:PF_RGB,
 			BMPORN_TOPDOWN)==-1)
 			_throw(bmp_geterr());
 		printf("Source image: %d x %d x %d-bit\n", w, h, d*8);
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, bgr? PF_BGR:PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf2, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 		fill=0, frames=0;  int clientframes=0;  timer.start();
 		do
 		{
-			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, bgr? PF_BGR:PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf2, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, bgr? PF_BGR:PF_RGB, 0, false));
 			if(fill) memcpy(f->bits, buf, w*h*d);
 			else memcpy(f->bits, buf3, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 		do
 		{
 			vglconn.synchronize();
-			_errifnot(f=vglconn.getFrame(w, h, d, bgr?FRAME_BGR:0, false));
+			_errifnot(f=vglconn.getFrame(w, h, bgr? PF_BGR:PF_RGB, 0, false));
 			memcpy(f->bits, buf, w*h*d);
 			f->hdr.qual=fconfig.qual;  f->hdr.subsamp=fconfig.subsamp;
 			f->hdr.winid=win;  f->hdr.compress=fconfig.compress;

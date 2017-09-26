@@ -20,6 +20,7 @@
 #include "Mutex.h"
 #include "X11Trans.h"
 #include "fbx.h"
+#include "Frame.h"
 
 
 namespace vglserver
@@ -68,7 +69,7 @@ namespace vglserver
 					void clear(void);
 					void swap(void);
 					bool isStereo(void) { return stereo; }
-					GLenum getFormat(void) { return format; }
+					GLenum getFormat(void) { return glFormat; }
 					XVisualInfo *getVisual(void);
 
 				private:
@@ -79,14 +80,14 @@ namespace vglserver
 					GLXDrawable glxDraw;
 					int width, height, depth;
 					GLXFBConfig config;
-					GLenum format;
+					GLenum glFormat;
 					Pixmap pm;
 					Window win;
 					bool isPixmap;
 			};
 
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
-				GLenum format, int pixelSize, GLubyte *bits, GLint buf, bool stereo);
+				GLenum glFormat, PF &pf, GLubyte *bits, GLint readBuf, bool stereo);
 
 			vglutil::CriticalSection mutex;
 			Display *dpy;  Drawable x11Draw;

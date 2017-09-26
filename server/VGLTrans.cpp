@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -240,7 +240,7 @@ void VGLTrans::run(void)
 }
 
 
-Frame *VGLTrans::getFrame(int width, int height, int ps, int flags,
+Frame *VGLTrans::getFrame(int width, int height, int pixelFormat, int flags,
 	bool stereo)
 {
 	Frame *f=NULL;
@@ -262,7 +262,7 @@ Frame *VGLTrans::getFrame(int width, int height, int ps, int flags,
 	hdr.x=hdr.y=0;
 	hdr.width=hdr.framew=width;
 	hdr.height=hdr.frameh=height;
-	f->init(hdr, ps, flags, stereo);
+	f->init(hdr, pixelFormat, flags, stereo);
 	return f;
 }
 
