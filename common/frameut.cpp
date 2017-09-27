@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014 D. R. Commander
+ * Copyright (C)2011, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -462,7 +462,7 @@ void rgbBench(char *filename)
 			if(dstbu) dstflags|=FRAME_BOTTOMUP;
 			if(bmp_load(filename, &buf, &width, 1, &height, BMPPF_RGB,
 				BMPORN_BOTTOMUP)==-1)
-				throw(bmp_geterr());
+				_throw(bmp_geterr());
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(hdr));
 			hdr.x=hdr.y=0;
