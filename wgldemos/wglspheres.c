@@ -351,7 +351,6 @@ void usage(char **argv)
 	printf("-bt <t> = print benchmark results every <t> seconds (default=%.1f)\n",
 		DEFBENCHTIME);
 	printf("-w <wxh> = specify window width and height\n");
-	printf("-ic = Use indirect rendering context\n");
 	printf("\n");
 	exit(0);
 }

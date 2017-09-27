@@ -32,7 +32,6 @@ void usage(char **argv)
 		(int)fconfig.tilesize);
 	printf("-sync = Test synchronous blitting code\n");
 	printf("-bottomup = Test bottom-up blitting code\n");
-	printf("-nodbe = Disable use of the DOUBLE-BUFFER extension\n");
 	printf("\n");
 	exit(1);
 }
