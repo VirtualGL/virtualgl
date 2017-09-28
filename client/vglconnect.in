@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Copyright (C)2007 Sun Microsystems, Inc.
-# Copyright (C)2009-2011, 2014-2016 D. R. Commander
+# Copyright (C)2009-2011, 2014-2017 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -90,7 +90,7 @@ if [ ! -d $LOGDIR ]; then mkdir $LOGDIR; fi
 LOGDISPLAY=`basename $DISPLAY`
 LOGFILE=$LOGDIR/vglconnect-$HOSTNAME-$LOGDISPLAY.log
 
-VGLARGS="-l "$LOGFILE" -d "$DISPLAY" -detach"
+VGLARGS="-l "$LOGFILE" -display "$DISPLAY" -detach"
 if [ "$FORCE" = "1" ]; then VGLARGS=$VGLARGS" -force"; fi
 if [ ! "$VGL_PORT" = "" -a "$__VGL_SSHTUNNEL" = "1" ]; then
 	PORT=$VGL_PORT

@@ -34,8 +34,7 @@
 using namespace vglutil;
 
 
-static int ALIGN=1;
-#define PAD(w) (((w)+(ALIGN-1))&(~(ALIGN-1)))
+#define PAD(w) (((w)+(align-1))&(~(align-1)))
 #define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
 
 
@@ -48,7 +47,7 @@ typedef struct _PixelFormat
 	const char *name;
 } PixelFormat;
 
-static int FORMATS=3
+static int nFormats=3
 	#ifdef GL_BGRA_EXT
 	+1
 	#endif
@@ -90,8 +89,10 @@ PixelFormat pf[4
 
 #define WIDTH            701
 #define HEIGHT           701
+#define ALIGN            1
+#define BENCHTIME        1.0
 
-int width=WIDTH, height=HEIGHT;
+int width=WIDTH, height=HEIGHT, align=ALIGN;
 Display *dpy=NULL;  Window win=0;  Pixmap pm=0;  GLXPixmap glxpm=0;
 XVisualInfo *v=NULL;  GLXFBConfig c=0;
 GLXContext ctx=0;
@@ -114,7 +115,7 @@ GLuint fbo=0, rbo=0, texture=0;
 #ifdef GL_VERSION_1_5
 int pbo=0;
 #endif
-double benchTime=1.0;
+double benchTime=BENCHTIME;
 
 #define STRLEN 256
 
@@ -449,8 +450,8 @@ int readTest(int format)
 	{
 		fprintf(stderr, "glReadPixels():   ");
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, ALIGN);
-		glPixelStorei(GL_PACK_ALIGNMENT, ALIGN);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, align);
+		glPixelStorei(GL_PACK_ALIGNMENT, align);
 
 		#ifdef GL_EXT_framebuffer_object
 		if(useFBO) glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
@@ -613,7 +614,7 @@ void display(void)
 {
 	int format, status=0;
 
-	for(format=0; format<FORMATS; format++)
+	for(format=0; format<nFormats; format++)
 	{
 		fprintf(stderr, ">>>>>>>>>>  PIXEL FORMAT:  %s  <<<<<<<<<<\n",
 			pf[format].name);
@@ -649,7 +650,6 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "-h or -? = This screen\n");
 	fprintf(stderr, "-window = Render to a window instead of a Pbuffer\n");
 	fprintf(stderr, "-pm = Render to a pixmap instead of a Pbuffer\n");
 	#ifdef GL_EXT_framebuffer_object
@@ -667,19 +667,21 @@ void usage(char **argv)
 		WIDTH);
 	fprintf(stderr, "-height <h> = Set drawable height to <h> pixels (default: %d)\n",
 		HEIGHT);
-	fprintf(stderr, "-align <n> = Set row alignment to <n> bytes (default: %d)\n",
+	fprintf(stderr, "-align <n> = Set row alignment to <n> bytes [<n> is a power of 2] (default: %d)\n",
 		ALIGN);
 	fprintf(stderr, "-visualid <xx> = Ignore visual selection and use this visual ID (hex) instead\n");
+	fprintf(stderr, "                 (this has no effect when rendering to a Pbuffer)\n");
 	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
 	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
 	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
 	fprintf(stderr, "-bgr = Test only BGR pixel format\n");
 	fprintf(stderr, "-bgra = Test only BGRA pixel format\n");
 	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
-	fprintf(stderr, "-time <t> = Run each test for <t> seconds\n");
+	fprintf(stderr, "-time <t> = Run each test for <t> seconds (default: %.1f)\n",
+		BENCHTIME);
 	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
 	fprintf(stderr, "\n");
-	exit(0);
+	exit(1);
 }
 
 
@@ -691,91 +693,88 @@ int main(int argc, char **argv)
 	useWindow=true;
 	#endif
 
-	for(int i=0; i<argc; i++)
+	if(argc>1) for(int i=1; i<argc; i++)
 	{
-		if(!stricmp(argv[i], "-h")) usage(argv);
-		if(!stricmp(argv[i], "-?")) usage(argv);
-		if(!stricmp(argv[i], "-window")) useWindow=true;
-		if(!stricmp(argv[i], "-pm")) usePixmap=true;
+		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		else if(!stricmp(argv[i], "-window")) useWindow=true;
+		else if(!stricmp(argv[i], "-pm")) usePixmap=true;
 		#ifdef GL_EXT_framebuffer_object
-		if(!stricmp(argv[i], "-fbo")) useFBO=true;
-		if(!stricmp(argv[i], "-rtt")) { useRTT=true;  useFBO=true; }
+		else if(!stricmp(argv[i], "-fbo")) useFBO=true;
+		else if(!stricmp(argv[i], "-rtt")) { useRTT=true;  useFBO=true; }
 		#endif
 		#ifdef GL_VERSION_1_5
-		if(!stricmp(argv[i], "-pbo")) pbo=1;
+		else if(!stricmp(argv[i], "-pbo")) pbo=1;
 		#endif
 		#ifdef USEIFR
-		if(!stricmp(argv[i], "-ifr")) useIFR=true;
+		else if(!stricmp(argv[i], "-ifr")) useIFR=true;
 		#endif
-		if(!stricmp(argv[i], "-alpha")) useAlpha=true;
-		if(!stricmp(argv[i], "-rgb"))
+		else if(!stricmp(argv[i], "-alpha")) useAlpha=true;
+		else if(!stricmp(argv[i], "-rgb"))
 		{
 			PixelFormat pftemp={0, 1, 2, 3, GL_RGB, 0, "RGB"};
 			pf[0]=pftemp;
-			FORMATS=1;
+			nFormats=1;
 		}
-		if(!stricmp(argv[i], "-rgba"))
+		else if(!stricmp(argv[i], "-rgba"))
 		{
 			PixelFormat pftemp={0, 1, 2, 4, GL_RGBA, 0, "RGBA"};
 			pf[0]=pftemp;
-			FORMATS=1;
+			nFormats=1;
 		}
 		#ifdef GL_BGR_EXT
-		if(!stricmp(argv[i], "-bgr"))
+		else if(!stricmp(argv[i], "-bgr"))
 		{
 			PixelFormat pftemp={2, 1, 0, 3, GL_BGR_EXT, 1, "BGR"};
 			pf[0]=pftemp;
-			FORMATS=1;
+			nFormats=1;
 		}
 		#endif
 		#ifdef GL_BGRA_EXT
-		if(!stricmp(argv[i], "-bgra"))
+		else if(!stricmp(argv[i], "-bgra"))
 		{
 			PixelFormat pftemp={2, 1, 0, 4, GL_BGRA_EXT, 1, "BGRA"};
 			pf[0]=pftemp;
-			FORMATS=1;
+			nFormats=1;
 		}
 		#endif
 		#ifdef GL_ABGR_EXT
-		if(!stricmp(argv[i], "-abgr"))
+		else if(!stricmp(argv[i], "-abgr"))
 		{
 			PixelFormat pftemp={3, 2, 1, 4, GL_ABGR_EXT, 0, "ABGR"};
 			pf[0]=pftemp;
-			FORMATS=1;
+			nFormats=1;
 		}
 		#endif
-		if(!stricmp(argv[i], "-loop") && i<argc-1)
+		else if(!stricmp(argv[i], "-loop") && i<argc-1)
 		{
-			int temp=atoi(argv[i+1]);  i++;
-			if(temp>1) loops=temp;
+			loops=atoi(argv[++i]);
+			if(loops<1) usage(argv);
 		}
-		if(!stricmp(argv[i], "-align") && i<argc-1)
+		else if(!stricmp(argv[i], "-align") && i<argc-1)
 		{
-			int temp=atoi(argv[i+1]);  i++;
-			if(temp>=1 && (temp&(temp-1))==0) ALIGN=temp;
+			align=atoi(argv[++i]);
+			if(align<1 || (align&(align-1))!=0) usage(argv);
 		}
-		if(!stricmp(argv[i], "-visualid") && i<argc-1)
+		else if(!stricmp(argv[i], "-visualid") && i<argc-1)
 		{
-			int temp=0;
-			sscanf(argv[i+1], "%x", &temp);
-			if(temp>0) visualID=temp;
-			i++;
+			if(sscanf(argv[++i], "%x", &visualID)<1 || visualID<=0) usage(argv);
 		}
-		if(!stricmp(argv[i], "-width") && i<argc-1)
+		else if(!stricmp(argv[i], "-width") && i<argc-1)
 		{
-			int temp=atoi(argv[i+1]);  i++;
-			if(temp>=1) width=temp;
+			width=atoi(argv[++i]);
+			if(width<1) usage(argv);
 		}
-		if(!stricmp(argv[i], "-height") && i<argc-1)
+		else if(!stricmp(argv[i], "-height") && i<argc-1)
 		{
-			int temp=atoi(argv[i+1]);  i++;
-			if(temp>=1) height=temp;
+			height=atoi(argv[++i]);
+			if(height<1) usage(argv);
 		}
-		if(!stricmp(argv[i], "-time") && i<argc-1)
+		else if(!stricmp(argv[i], "-time") && i<argc-1)
 		{
-			double temp=atof(argv[i+1]);  i++;
-			if(temp>0.0) benchTime=temp;
+			benchTime=atof(argv[++i]);
+			if(benchTime<=0.0) usage(argv);
 		}
+		else usage(argv);
 	}
 	#ifdef USEIFR
 	if(pbo && useIFR)
@@ -796,7 +795,7 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 		#ifdef GL_VERSION_1_5
-		if(pbo) fprintf(stderr, "Using PBO's for readback\n");
+		if(pbo) fprintf(stderr, "Using PBOs for readback\n");
 		#endif
 		#ifdef USEIFR
 		if(useIFR) fprintf(stderr, "Using nVidia Inband Frame Readback\n");
@@ -836,7 +835,7 @@ int main(int argc, char **argv)
 			usePixmap? "Pixmap" : useWindow? "Window" :
 				useFBO? (useRTT? "FBO + Texture" : "FBO + RBO") : "Pbuffer",
 			width, height);
-		fprintf(stderr, "Using %d-byte row alignment\n\n", ALIGN);
+		fprintf(stderr, "Using %d-byte row alignment\n\n", align);
 
 		drawableInit();
 		#ifdef USEIFR

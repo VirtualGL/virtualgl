@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014 D. R. Commander
+ * Copyright (C)2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -24,6 +24,15 @@
 unsigned char redMap[256], greenMap[256], blueMap[256];
 
 
+void usage(char **argv)
+{
+	fprintf(stderr, "\nUSAGE: %s <image 1> <image 2> [-mag]\n", argv[0]);
+	fprintf(stderr, "       (images must be in BMP or PPM format)\n\n");
+	fprintf(stderr, "-mag = show magnitude of differences using an artificial color scale\n\n");
+	exit(1);
+}
+
+
 int main(int argc, char **argv)
 {
 	unsigned char *img1=NULL, *img2=NULL, *errImg=NULL;
@@ -37,15 +46,13 @@ int main(int argc, char **argv)
 		i, j, k, mag=0;
 	char *temp;
 
-	if(argc<3)
+	if(argc<3) usage(argv);
+	if(argc>3) for(i=3; i<argc; i++)
 	{
-		printf("\nUSAGE: %s <image 1> <image 2> [-mag]\n", argv[0]);
-		printf("       (images must be in BMP or PPM format)\n");
-		printf("\n-mag = show magnitude of differences using an artificial\n");
-		printf("       color scale\n\n");
-		exit(1);
+		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		else if(!stricmp(argv[i], "-mag")) mag=1;
+		else usage(argv);
 	}
-	if(argc>3 && !strcmp(argv[3], "-mag")) mag=1;
 
 	if((temp=strrchr(argv[1], '.'))!=NULL && !stricmp(temp, ".ppm"))
 		usePPM=1;

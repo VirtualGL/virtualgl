@@ -164,7 +164,7 @@ void usage(char **argv)
 	#ifdef USESSL
 	printf("-ssl = use secure tunnel\n");
 	#endif
-	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default=%.1f)\n",
+	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
 	fprintf(stderr, "            (NOTE: this must be specified on the client)\n\n");
 	exit(1);
@@ -188,41 +188,44 @@ int main(int argc, char **argv)
 		{
 			if(argc<3) usage(argv);
 			server=0;  serverName=argv[2];
-			if(argc>3)
+			if(argc>3) for(i=3; i<argc; i++)
 			{
-				for(i=3; i<argc; i++)
+				if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+				#ifdef USESSL
+				else if(!stricmp(argv[i], "-ssl"))
 				{
-					#ifdef USESSL
-					if(!stricmp(argv[i], "-ssl"))
-					{
-						printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-						doSSL=true;
-					}
-					#endif
-					if(!stricmp(argv[i], "-old"))
-					{
-						printf("Using old protocol\n");
-						old=true;
-					}
-					if(!strnicmp(argv[i], "-t", 2))
-					{
-						double temp=-1.;
-						if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
-							benchTime=temp;
-					}
+					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+					doSSL=true;
 				}
+				#endif
+				else if(!stricmp(argv[i], "-old"))
+				{
+					printf("Using old protocol\n");
+					old=true;
+				}
+				else if(!stricmp(argv[i], "-time") && i<argc-1)
+				{
+					if(sscanf(argv[++i], "%lf", &benchTime)<1 || benchTime<=0.0)
+						usage(argv);
+				}
+				else usage(argv);
 			}
 		}
 		else if(!stricmp(argv[1], "-server"))
 		{
 			server=1;
-			#ifdef USESSL
-			if(argc>2 && !stricmp(argv[2], "-ssl"))
+			if(argc>2) for(i=2; i<argc; i++)
 			{
-				doSSL=true;
-				printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+				if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+				#ifdef USESSL
+				else if(!stricmp(argv[i], "-ssl"))
+				{
+					doSSL=true;
+					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
+				}
+				#endif
+				else usage(argv);
 			}
-			#endif
 		}
 		else if(!stricmp(argv[1], "-findport"))
 		{
@@ -234,10 +237,13 @@ int main(int argc, char **argv)
 		#if defined(sun) || defined(linux)
 		else if(!stricmp(argv[1], "-bench"))
 		{
-			int interval_;
-			if(argc<3) usage(argv);
-			if(argc>3 && ((interval_=atoi(argv[3]))>0))
+			if(argc<3 || argc>4) usage(argv);
+			if(argc>3)
+			{
+				int interval_=atoi(argv[3]);
+				if(interval_<=0) usage(argv);
 				interval=interval_;
+			}
 			benchmark(interval, argv[2]);
 			exit(0);
 		}

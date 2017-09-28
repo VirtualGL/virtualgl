@@ -1160,7 +1160,8 @@ int visTest(void)
 }
 
 
-#define NTHREADS 30
+#define DEFTHREADS 30
+#define MAXTHREADS 100
 bool deadYet=false;
 
 class TestThread : public Runnable
@@ -1217,9 +1218,9 @@ int multiThreadTest(int nThreads)
 	int glxattrib[]={ GLX_DOUBLEBUFFER, GLX_RGBA, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None };
 	XVisualInfo *vis=NULL;
-	Display *dpy=NULL;  Window windows[NTHREADS];
-	GLXContext contexts[NTHREADS];
-	TestThread *testThreads[NTHREADS];  Thread *threads[NTHREADS];
+	Display *dpy=NULL;  Window windows[MAXTHREADS];
+	GLXContext contexts[MAXTHREADS];
+	TestThread *testThreads[MAXTHREADS];  Thread *threads[MAXTHREADS];
 	XSetWindowAttributes swa;
 	int i, retval=1;
 
@@ -1229,7 +1230,7 @@ int multiThreadTest(int nThreads)
 		windows[i]=0;  contexts[i]=0;  testThreads[i]=NULL;  threads[i]=NULL;
 	}
 
-	printf("Multi-threaded rendering test\n\n");
+	printf("Multi-threaded rendering test (%d threads)\n\n", nThreads);
 
 	try
 	{
@@ -2027,9 +2028,23 @@ int procAddrTest(void)
 }
 
 
+void usage(char **argv)
+{
+	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "-n <n> = Use <n> threads (0 <= <n> <= %d) in the multi-threaded rendering test\n",
+		MAXTHREADS);
+	fprintf(stderr, "         (default: %d).  <n>=0 disables the multi-threaded rendering test.\n",
+		DEFTHREADS);
+	fprintf(stderr, "-nostereo = Disable stereo tests\n");
+	fprintf(stderr, "\n");
+	exit(1);
+}
+
+
 int main(int argc, char **argv)
 {
-	int ret=0;  int nThreads=NTHREADS;  bool doStereo=true;
+	int ret=0;  int nThreads=DEFTHREADS;  bool doStereo=true;
 
 	if(putenv((char *)"VGL_AUTOTEST=1")==-1
 		|| putenv((char *)"VGL_SPOIL=0")==-1
@@ -2040,12 +2055,14 @@ int main(int argc, char **argv)
 
 	if(argc>1) for(int i=1; i<argc; i++)
 	{
-		if(!strcasecmp(argv[i], "-n") && i<argc-1)
+		if(!strcasecmp(argv[i], "-h") || !strcasecmp(argv[i], "-?")) usage(argv);
+		else if(!strcasecmp(argv[i], "-n") && i<argc-1)
 		{
-			int temp=atoi(argv[++i]);
-			if(temp>=0 && temp<=NTHREADS) nThreads=temp;
+			nThreads=atoi(argv[++i]);
+			if(nThreads<0 || nThreads>MAXTHREADS) usage(argv);
 		}
-		if(!strcasecmp(argv[i], "-nostereo")) doStereo=false;
+		else if(!strcasecmp(argv[i], "-nostereo")) doStereo=false;
+		else usage(argv);
 	}
 
 	// Intentionally leave a pending dlerror()

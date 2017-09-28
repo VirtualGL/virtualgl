@@ -25,14 +25,11 @@ using namespace vglserver;
 
 void usage(char **argv)
 {
-	printf("\nUSAGE: %s [-tilesize <n>] [-sync] [-bottomup]\n", argv[0]);
-	printf("\n");
-	printf("-tilesize = width/height of each inter-frame difference tile\n");
-	printf("            [default = %d x %d pixels]\n", (int)fconfig.tilesize,
-		(int)fconfig.tilesize);
-	printf("-sync = Test synchronous blitting code\n");
-	printf("-bottomup = Test bottom-up blitting code\n");
-	printf("\n");
+	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "-sync = Test synchronous blitting code\n");
+	fprintf(stderr, "-bottomup = Test bottom-up blitting code\n");
+	fprintf(stderr, "\n");
 	exit(1);
 }
 
@@ -67,18 +64,12 @@ int main(int argc, char **argv)
 
 	try
 	{
-		if(argc>1)
+		if(argc>1) for(int i=1; i<argc; i++)
 		{
-			for(int i=1; i<argc; i++)
-			{
-				if(!stricmp(argv[i], "-h")) usage(argv);
-				if(!stricmp(argv[i], "-sync")) dosync=true;
-				if(!stricmp(argv[i], "-bottomup")) bottomup=true;
-				if(!stricmp(argv[i], "-tilesize") && i<argc-1)
-				{
-					fconfig.tilesize=atoi(argv[i+1]);  i++;
-				}
-			}
+			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+			else if(!stricmp(argv[i], "-sync")) dosync=true;
+			else if(!stricmp(argv[i], "-bottomup")) bottomup=true;
+			else usage(argv);
 		}
 
 		if(!XInitThreads())

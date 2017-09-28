@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -495,25 +495,25 @@ void usage(char **argv)
 	printf("-o = Test 8-bit transparent overlays\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
-	printf("-n <n> = Render (approximately) <n> spheres (default = %d)\n",
+	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
 		DEF_SPHERES*3+1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
 	printf("-f <n> = max frames to render\n");
-	printf("-bt <t> = print benchmark results every <t> seconds (default=%.1f)\n",
+	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
 	printf("-w <wxh> = specify window width and height\n");
 	printf("-ic = Use indirect rendering context\n");
 	printf("-sc <s> = Create window on X screen # <s>\n");
 	printf("\n");
-	exit(0);
+	exit(1);
 }
 
 
 int main(int argc, char **argv)
 {
-	int i, useAlpha=0;
+	int i, useAlpha=0, nPolys=-1;
 	XVisualInfo *v=NULL;
 	int rgbAttribs[]={ GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
@@ -524,76 +524,67 @@ int main(int argc, char **argv)
 	int fullScreen=0;  unsigned long mask=0;
 	int screen=-1, pps;
 
-	for(i=0; i<argc; i++)
+	if(argc>1) for(i=1; i<argc; i++)
 	{
-		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
-		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
-		if(!strnicmp(argv[i], "-dc", 3))
+		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		else if(!stricmp(argv[i], "-dc"))
 		{
 			useDC=1;  rgbAttribs[15]=GLX_DIRECT_COLOR;
 		}
-		if(!strnicmp(argv[i], "-ic", 3)) directCtx=False;
-		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
-		if(!strnicmp(argv[i], "-l", 2)) loColor=1;
-		if(!strnicmp(argv[i], "-m", 2)) useImm=1;
-		if(!strnicmp(argv[i], "-o", 2)) useOverlay=1;
-		if(!strnicmp(argv[i], "-w", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-ic")) directCtx=False;
+		else if(!stricmp(argv[i], "-i")) interactive=1;
+		else if(!stricmp(argv[i], "-l")) loColor=1;
+		else if(!stricmp(argv[i], "-m")) useImm=1;
+		else if(!stricmp(argv[i], "-o")) useOverlay=1;
+		else if(!stricmp(argv[i], "-w") && i<argc-1)
 		{
-			int w=0, h=0;
-			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
-			{
-				width=w;  height=h;
-				printf("Window dimensions: %d x %d\n", width, height);
-			}
+			if(sscanf(argv[++i], "%dx%d", &width, &height)<2 || width<1 || height<1)
+				usage(argv);
+			printf("Window dimensions: %d x %d\n", width, height);
 		}
-		if(!strnicmp(argv[i], "-fs", 3)) fullScreen=1;
-		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-fs")) fullScreen=1;
+		else if(!stricmp(argv[i], "-f") && i<argc-1)
 		{
-			int mf=atoi(argv[++i]);
-			if(mf>0)
-			{
-				maxFrames=mf;
-				printf("Number of frames to render: %d\n", maxFrames);
-			}
+			maxFrames=atoi(argv[++i]);
+			if(maxFrames<=0) usage(argv);
+			printf("Number of frames to render: %d\n", maxFrames);
 		}
-		if(!strnicmp(argv[i], "-bt", 3) && i<argc-1)
+		else if(!stricmp(argv[i], "-bt") && i<argc-1)
 		{
-			double temp=atof(argv[++i]);
-			if(temp>0.0) benchTime=temp;
+			benchTime=atof(argv[++i]);
+			if(benchTime<=0.0) usage(argv);
 		}
-		if(!strnicmp(argv[i], "-sc", 3) && i<argc-1)
+		else if(!stricmp(argv[i], "-sc") && i<argc-1)
 		{
-			int sc=atoi(argv[++i]);
-			if(sc>0)
-			{
-				screen=sc;
-				printf("Rendering to screen %d\n", screen);
-			}
+			screen=atoi(argv[++i]);
+			if(screen<0) usage(argv);
+			printf("Rendering to screen %d\n", screen);
 		}
-		else if(!strnicmp(argv[i], "-s", 2))
+		else if(!stricmp(argv[i], "-s"))
 		{
 			rgbAttribs[13]=1;
 			useStereo=1;
 		}
-		if(!strnicmp(argv[i], "-32", 3)) useAlpha=1;
-		if(!strnicmp(argv[i], "-n", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-32")) useAlpha=1;
+		else if(!stricmp(argv[i], "-n") && i<argc-1)
 		{
 			int temp=atoi(argv[++i]);
-			if(temp>0) spheres=(int)(((double)temp-1.0)/3.0+0.5);
+			if(temp<=0) usage(argv);
+			spheres=(int)(((double)temp-1.0)/3.0+0.5);
 			if(spheres<1) spheres=1;
 		}
-	}
-	for(i=0; i<argc; i++)
-	{
-		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-p") && i<argc-1)
 		{
-			int nPolys=atoi(argv[++i]);
-			if(nPolys>0)
-			{
-				slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
-				if(slices<1) slices=stacks=1;
-			}
+			nPolys=atoi(argv[++i]);
+			if(nPolys<=0) usage(argv);
 		}
+		else usage(argv);
+	}
+
+	if(nPolys>=0)
+	{
+		slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
+		if(slices<1) slices=stacks=1;
 	}
 
 	if(useAlpha)

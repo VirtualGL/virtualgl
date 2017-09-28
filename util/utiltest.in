@@ -81,13 +81,13 @@ sleep 2
 $BIN/nettest -server &
 echo
 sleep 2
-$BIN/nettest -client localhost -t 0.2
+$BIN/nettest -client localhost -time 0.2
 
 if [ "$SSL" = "1" ]; then
 	echo
 	$BIN/nettest -server -ssl &
 	sleep 2
-	$BIN/nettest -client localhost -ssl -t 0.2
+	$BIN/nettest -client localhost -ssl -time 0.2
 fi
 
 SUCCESS=1

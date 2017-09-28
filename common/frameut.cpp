@@ -495,10 +495,10 @@ void rgbBench(char *filename)
 }
 
 
-void usage(char *programName)
+void usage(char **argv)
 {
-	fprintf(stderr, "\nUSAGE: %s [-gl] [-xv] [-rgb] [-rgbbench <filename>]\n\n",
-		programName);
+	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "-gl = Use OpenGL instead of X11 for blitting\n");
 	fprintf(stderr, "-xv = Test X Video encoding/display\n");
 	fprintf(stderr, "-rgb = Use RGB encoding instead of JPEG compression\n");
@@ -517,36 +517,32 @@ int main(int argc, char **argv)
 	char *fileName=NULL;
 	bool verbose=false;
 
-	if(argc>1)
+	if(argc>1) for(i=1; i<argc; i++)
 	{
-		for(i=1; i<argc; i++)
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
+		else if(!stricmp(argv[i], "-gl"))
 		{
-			if(!stricmp(argv[i], "-gl"))
-			{
-				fprintf(stderr, "Using OpenGL for blitting ...\n");
-				useGL=true;
-			}
-			#ifdef USEXV
-			else if(!stricmp(argv[i], "-xv"))
-			{
-				fprintf(stderr, "Using X Video ...\n");
-				useXV=true;
-			}
-			#endif
-			else if(!stricmp(argv[i], "-rgb"))
-			{
-				fprintf(stderr, "Using RGB encoding ...\n");
-				useRGB=true;
-			}
-			else if(!stricmp(argv[i], "-rgbbench"))
-			{
-				if(i>=argc-1) usage(argv[0]);
-				fileName=argv[++i];  doRgbBench=true;
-			}
-			else if(!stricmp(argv[i], "-v")) verbose=true;
-			else if(!strnicmp(argv[i], "-h", 2) || !strcmp(argv[i], "-?"))
-				usage(argv[0]);
+			fprintf(stderr, "Using OpenGL for blitting ...\n");
+			useGL=true;
 		}
+		#ifdef USEXV
+		else if(!stricmp(argv[i], "-xv"))
+		{
+			fprintf(stderr, "Using X Video ...\n");
+			useXV=true;
+		}
+		#endif
+		else if(!stricmp(argv[i], "-rgb"))
+		{
+			fprintf(stderr, "Using RGB encoding ...\n");
+			useRGB=true;
+		}
+		else if(!stricmp(argv[i], "-rgbbench") && i<argc-1)
+		{
+			fileName=argv[++i];  doRgbBench=true;
+		}
+		else if(!stricmp(argv[i], "-v")) verbose=true;
+		else usage(argv);
 	}
 
 	try

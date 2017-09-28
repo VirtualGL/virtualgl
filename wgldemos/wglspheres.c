@@ -343,22 +343,22 @@ void usage(char **argv)
 	printf("-m = Use immediate mode rendering (default is display list)\n");
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
-	printf("-n <n> = Render (approximately) <n> spheres (default = %d)\n",
+	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
 		DEF_SPHERES*3+1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-f <n> = max frames to render\n");
-	printf("-bt <t> = print benchmark results every <t> seconds (default=%.1f)\n",
+	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
 	printf("-w <wxh> = specify window width and height\n");
 	printf("\n");
-	exit(0);
+	exit(1);
 }
 
 
 int main(int argc, char **argv)
 {
-	int i;
+	int i, nPolys=-1;
 	WNDCLASSEX wndclass;  MSG msg;
 	int bw=GetSystemMetrics(SM_CXFRAME)*2;
 	int bh=GetSystemMetrics(SM_CYFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
@@ -374,64 +374,59 @@ int main(int argc, char **argv)
 	int fullScreen=0, pps;
 	RECT rect;
 
-	for(i=0; i<argc; i++)
+	if(argc>1) for(i=1; i<argc; i++)
 	{
-		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
-		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
-		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
-		if(!strnicmp(argv[i], "-l", 2)) loColor=1;
-		if(!strnicmp(argv[i], "-m", 2)) useImm=1;
-		if(!strnicmp(argv[i], "-w", 2) && i<argc-1)
+		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		else if(!stricmp(argv[i], "-i")) interactive=1;
+		else if(!stricmp(argv[i], "-l")) loColor=1;
+		else if(!stricmp(argv[i], "-m")) useImm=1;
+		else if(!stricmp(argv[i], "-w") && i<argc-1)
 		{
-			int w=0, h=0;
-			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
-			{
-				width=w;  height=h;
-			}
+			if(sscanf(argv[++i], "%dx%d", &width, &height)<2 || width<1 || height<1)
+				usage(argv);
+			printf("Window dimensions: %d x %d\n", width, height);
 		}
-		if(!strnicmp(argv[i], "-fs", 3))
+		else if(!stricmp(argv[i], "-fs"))
 		{
 			fullScreen=1;
 			winStyle=WS_POPUP | WS_VISIBLE;
 			bw=bh=0;
 		}
-		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-f") && i<argc-1)
 		{
-			int mf=atoi(argv[++i]);
-			if(mf>0)
-			{
-				maxFrames=mf;
-				printf("Number of frames to render: %d\n", maxFrames);
-			}
+			maxFrames=atoi(argv[++i]);
+			if(maxFrames<=0) usage(argv);
+			printf("Number of frames to render: %d\n", maxFrames);
 		}
-		if(!strnicmp(argv[i], "-bt", 3) && i<argc-1)
+		else if(!stricmp(argv[i], "-bt") && i<argc-1)
 		{
-			double temp=atof(argv[++i]);
-			if(temp>0.0) benchTime=temp;
+			benchTime=atof(argv[++i]);
+			if(benchTime<=0.0) usage(argv);
 		}
-		if(!strnicmp(argv[i], "-s", 2))
+		else if(!stricmp(argv[i], "-s"))
 		{
 			pfd.dwFlags|=PFD_STEREO;
 			useStereo=1;
 		}
-		if(!strnicmp(argv[i], "-n", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-n") && i<argc-1)
 		{
 			int temp=atoi(argv[++i]);
-			if(temp>0) spheres=(int)(((double)temp-1.0)/3.0+0.5);
+			if(temp<=0) usage(argv);
+			spheres=(int)(((double)temp-1.0)/3.0+0.5);
 			if(spheres<1) spheres=1;
 		}
-	}
-	for(i=0; i<argc; i++)
-	{
-		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-p") && i<argc-1)
 		{
-			int nPolys=atoi(argv[++i]);
-			if(nPolys>0)
-			{
-				slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
-				if(slices<1) slices=stacks=1;
-			}
+			nPolys=atoi(argv[++i]);
+			if(nPolys<=0) usage(argv);
 		}
+		else usage(argv);
+	}
+
+	if(nPolys>=0)
+	{
+		slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
+		if(slices<1) slices=stacks=1;
 	}
 
 	pps=slices*stacks;

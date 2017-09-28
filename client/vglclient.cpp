@@ -207,23 +207,18 @@ void killproc(bool userOnly)
 }
 
 
-void usage(char *progname)
+void usage(char **argv)
 {
-	fprintf(stderr, "\nUSAGE: %s [-h|-?] [-display <name>]\n", progname);
-	fprintf(stderr, "       [-port <p>] ");
+	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "-display <d> = The X display to which to draw the images received from the\n");
+	fprintf(stderr, "               VirtualGL server (default: read from the DISPLAY environment\n");
+	fprintf(stderr, "               variable)\n");
+	fprintf(stderr, "-port <p> = TCP port to use for unencrypted connections from the VirtualGL\n");
+	fprintf(stderr, "            server (default: automatically select a free port)\n");
 	#ifdef USESSL
-	fprintf(stderr, "[-sslport <port>] [-sslonly] [-nossl]\n       ");
-	#endif
-	fprintf(stderr, "[-l <file>] [-detach] [-force] [-v] [-x] [-gl]\n");
-	fprintf(stderr, "\n-h or -? = This help screen\n");
-	fprintf(stderr, "-display = The X display to which to draw the images received from the\n");
-	fprintf(stderr, "           VirtualGL server (default = read from the DISPLAY environment\n");
-	fprintf(stderr, "           variable)\n");
-	fprintf(stderr, "-port = TCP port to use for unencrypted connections from the VirtualGL server\n");
-	fprintf(stderr, "        (default = automatically select a free port)\n");
-	#ifdef USESSL
-	fprintf(stderr, "-sslport = TCP port to use for encrypted connections from the VirtualGL server\n");
-	fprintf(stderr, "           (default = automatically select a free port)\n");
+	fprintf(stderr, "-sslport <p> = TCP port to use for encrypted connections from the VirtualGL\n");
+	fprintf(stderr, "               server (default: automatically select a free port)\n");
 	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
 	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
@@ -234,7 +229,8 @@ void usage(char *progname)
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
 	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing (default)\n");
-	fprintf(stderr, "-gl = Use OpenGL drawing\n");
+	fprintf(stderr, "-gl = Use OpenGL drawing\n\n");
+	exit(1);
 }
 
 
@@ -351,47 +347,42 @@ int main(int argc, char *argv[])
 
 		if(argc>1) for(i=1; i<argc; i++)
 		{
-			if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?"))
-			{
-				usage(argv[0]);  exit(1);
-			}
+			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
 			#ifdef USESSL
-			if(!stricmp(argv[i], "-sslonly")) { doSSL=true;  doNonSSL=false; }
-			if(!stricmp(argv[i], "-nossl")) { doSSL=false;  doNonSSL=true; }
-			if(!stricmp(argv[i], "-sslPort"))
+			else if(!stricmp(argv[i], "-sslonly")) { doSSL=true;  doNonSSL=false; }
+			else if(!stricmp(argv[i], "-nossl")) { doSSL=false;  doNonSSL=true; }
+			else if(!stricmp(argv[i], "-sslport") && i<argc-1)
 			{
-				if(i<argc-1) sslPort=(unsigned short)atoi(argv[++i]);
+				sslPort=(unsigned short)atoi(argv[++i]);
 			}
 			#endif
-			if(!stricmp(argv[i], "-v")) printVersion=true;
-			if(!stricmp(argv[i], "-force")) force=true;
-			if(!stricmp(argv[i], "-detach")) detach=true;
-			if(!stricmp(argv[i], "-kill")) { killproc(true);  return 0; }
-			if(!stricmp(argv[i], "-killall")) { killproc(false);  return 0; }
-			if(!stricmp(argv[i], "-port"))
+			else if(!stricmp(argv[i], "-v")) printVersion=true;
+			else if(!stricmp(argv[i], "-force")) force=true;
+			else if(!stricmp(argv[i], "-detach")) detach=true;
+			else if(!stricmp(argv[i], "-kill")) { killproc(true);  return 0; }
+			else if(!stricmp(argv[i], "-killall")) { killproc(false);  return 0; }
+			else if(!stricmp(argv[i], "-port") && i<argc-1)
 			{
-				if(i<argc-1) port=(unsigned short)atoi(argv[++i]);
+				port=(unsigned short)atoi(argv[++i]);
 			}
-			if(!stricmp(argv[i], "-l"))
+			else if(!stricmp(argv[i], "-l") && i<argc-1)
 			{
-				if(i<argc-1)
+				logFile=argv[++i];
+				FILE *f=fopen(logFile, "a");
+				if(!f)
 				{
-					logFile=argv[++i];
-					FILE *f=fopen(logFile, "a");
-					if(!f)
-					{
-						vglout.println("Could not open log file %s", logFile);
-						_throwunix();
-					}
-					else fclose(f);
+					vglout.println("Could not open log file %s", logFile);
+					_throwunix();
 				}
+				else fclose(f);
 			}
-			if(!stricmp(argv[i], "-x")) drawMethod=RR_DRAWX11;
-			if(!stricmp(argv[i], "-gl")) drawMethod=RR_DRAWOGL;
-			if(!stricmp(argv[i], "-display"))
+			else if(!stricmp(argv[i], "-x")) drawMethod=RR_DRAWX11;
+			else if(!stricmp(argv[i], "-gl")) drawMethod=RR_DRAWOGL;
+			else if(!stricmp(argv[i], "-display") && i<argc-1)
 			{
-				if(i<argc-1) displayname=argv[++i];
+				displayname=argv[++i];
 			}
+			else usage(argv);
 		}
 
 		if(!child)

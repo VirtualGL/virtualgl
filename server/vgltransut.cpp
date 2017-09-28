@@ -26,27 +26,24 @@ using namespace vglserver;
 
 void usage(char **argv)
 {
-	printf("\nUSAGE: %s <bitmap file>\n", argv[0]);
-	printf("       [-client <machine:x.x>] [-samp <n>] [-qual <n>]\n");
-	printf("       [-tilesize <n>] [-np <n>] [-rgb]");
+	fprintf(stderr, "\nUSAGE: %s <bitmap file> [options]\n\n", argv[0]);
+	fprintf(stderr, "-client <machine:x.x> = X Display where the video should be sent (VGL client\n");
+	fprintf(stderr, "                        must be running on that machine) or 0 for local test\n");
+	fprintf(stderr, "                        only (default: %s)\n",
+		strlen(fconfig.client)>0? fconfig.client:"read from DISPLAY environment");
+	fprintf(stderr, "-samp <s> = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
+	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
+	fprintf(stderr, "-qual <q> = JPEG quality, 1 <= <q> <= 100 (default: %d)\n",
+		fconfig.qual);
+	fprintf(stderr, "-tilesize <n> = width/height of each inter-frame difference tile\n");
+	fprintf(stderr, "                (default: %d x %d pixels)\n", fconfig.tilesize,
+		fconfig.tilesize);
+	fprintf(stderr, "-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
 	#ifdef USESSL
-	printf(" [-ssl]");
+	fprintf(stderr, "-ssl = use SSL tunnel (default: %s)\n", fconfig.ssl? "On":"Off");
 	#endif
-	printf("\n\n");
-	printf("-client = X Display where the video should be sent (VGL client must be running\n");
-	printf("          on that machine) or 0 for local test only\n");
-	printf("          [default = %s]\n", strlen(fconfig.client)>0? fconfig.client:"read from DISPLAY environment");
-	printf("-samp = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
-	printf("        [default = %d]\n", fconfig.subsamp);
-	printf("-qual = JPEG quality, 1-100 inclusive [default = %d]\n", fconfig.qual);
-	printf("-tilesize = width/height of each inter-frame difference tile\n");
-	printf("            [default = %d x %d pixels]\n", fconfig.tilesize, fconfig.tilesize);
-	printf("-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
-	#ifdef USESSL
-	printf("-ssl = use SSL tunnel [default = %s]\n", fconfig.ssl? "On":"Off");
-	#endif
-	printf("-np <n> = number of processors to use for compression [default = %d]\n", fconfig.np);
-	printf("\n");
+	fprintf(stderr, "-np <n> = number of processors to use for compression (default: %d)\n\n",
+		fconfig.np);
 	exit(1);
 }
 
@@ -65,36 +62,39 @@ int main(int argc, char **argv)
 		bool localtest=false;
 		if(argc<2) usage(argv);
 
-		for(i=0; i<argc; i++)
+		if(argc>2) for(i=2; i<argc; i++)
 		{
+			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
 			#ifdef USESSL
-			if(!stricmp(argv[i], "-ssl")) fconfig.ssl=1;
+			else if(!stricmp(argv[i], "-ssl")) fconfig.ssl=1;
 			#endif
-			if(!strnicmp(argv[i], "-cl", 3) && i<argc-1)
+			else if(!stricmp(argv[i], "-client") && i<argc-1)
 			{
-				strncpy(fconfig.client, argv[i+1], MAXSTR-1);  i++;
+				strncpy(fconfig.client, argv[++i], MAXSTR-1);
 				if(!stricmp(fconfig.client, "0"))
 				{
 					localtest=true;  fconfig.client[0]=0;
 				}
 			}
-			if(!strnicmp(argv[i], "-sa", 3) && i<argc-1)
+			else if(!stricmp(argv[i], "-samp") && i<argc-1)
 			{
-				fconfig.subsamp=atoi(argv[i+1]);  i++;
+				fconfig.subsamp=atoi(argv[++i]);
 			}
-			if(!strnicmp(argv[i], "-q", 2) && i<argc-1)
+			else if(!stricmp(argv[i], "-qual") && i<argc-1)
 			{
-				fconfig.qual=atoi(argv[i+1]);  i++;
+				fconfig.qual=atoi(argv[++i]);
 			}
-			if(!stricmp(argv[i], "-tilesize") && i<argc-1)
+			else if(!stricmp(argv[i], "-tilesize") && i<argc-1)
 			{
-				fconfig.tilesize=atoi(argv[i+1]);  i++;
+				fconfig.tilesize=atoi(argv[++i]);
 			}
-			if(!stricmp(argv[i], "-np") && i<argc-1)
+			else if(!stricmp(argv[i], "-np") && i<argc-1)
 			{
-				fconfig.np=atoi(argv[i+1]);  i++;
+				fconfig.np=atoi(argv[++i]);
 			}
-			if(!stricmp(argv[i], "-rgb")) fconfig_setcompress(fconfig, RRCOMP_RGB);
+			else if(!stricmp(argv[i], "-rgb"))
+				fconfig_setcompress(fconfig, RRCOMP_RGB);
+			else usage(argv);
 		}
 		if(fconfig.compress==RRCOMP_RGB) bgr=0;
 

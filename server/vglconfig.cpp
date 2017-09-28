@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2014 D. R. Commander
+ * Copyright (C)2009, 2012, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -412,16 +412,16 @@ void checkParentPID(void *data)
 }
 
 
-void usage(char *programName)
+void usage(char **argv)
 {
-	vglout.print("\nUSAGE: %s [-display <d>] -shmid <s> [-ppid <p>]\n\n",
-		programName);
-	vglout.print("<d> = X display to which to display the GUI (default: read from DISPLAY\n");
-	vglout.print("      environment variable)\n");
-	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the\n");
-	vglout.print("      environment variable VGL_VERBOSE is set to 1)\n");
-	vglout.print("<p> = Parent process ID.  VGL Config will exit when this process\n");
-	vglout.print("      terminates.\n\n");
+	vglout.print("\nUSAGE: %s -shmid <s> [options]\n\n", argv[0]);
+	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the environment\n");
+	vglout.print("      variable VGL_VERBOSE is set to 1)\n\n");
+	vglout.print("Options:\n");
+	vglout.print("-display <d> = X display to which to display the GUI (default: read from\n");
+	vglout.print("               DISPLAY environment variable)\n");
+	vglout.print("-ppid <p> = Parent process ID.  VGL Config will exit when this process\n");
+	vglout.print("            terminates.\n\n");
 	exit(1);
 }
 
@@ -433,21 +433,22 @@ int main(int argc, char **argv)
 
 	try
 	{
-		for(int i=0; i<argc; i++)
+		if(argc>1) for(int i=1; i<argc; i++)
 		{
 			if(!stricmp(argv[i], "-display") && i<argc-1)
 			{
 				darg[0]=argv[i++];  darg[1]=argv[i];
 			}
-			if(!stricmp(argv[i], "-shmid") && i<argc-1)
+			else if(!stricmp(argv[i], "-shmid") && i<argc-1)
 			{
-				int temp=atoi(argv[++i]);  if(temp>-1) shmid=temp;
+				shmid=atoi(argv[++i]);  if(shmid<0) usage(argv);
 			}
-			if(!stricmp(argv[i], "-test")) test=true;
-			if(!stricmp(argv[i], "-ppid") && i<argc-1)
+			else if(!stricmp(argv[i], "-test")) test=true;
+			else if(!stricmp(argv[i], "-ppid") && i<argc-1)
 			{
-				int temp=atoi(argv[++i]);  if(temp>0) ppid=temp;
+				ppid=atoi(argv[++i]);  if(ppid<=0) usage(argv);
 			}
+			else usage(argv);
 		}
 		if(darg[0] && darg[1]) { argv[1]=darg[0];  argv[2]=darg[1];  argc=3; }
 		else argc=1;
@@ -462,7 +463,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			if(shmid==-1) usage(argv[0]);
+			if(shmid==-1) usage(argv);
 			if((_fconfig=(FakerConfig *)shmat(shmid, 0, 0))==(FakerConfig *)-1)
 				_throwunix();
 			if(!_fconfig)

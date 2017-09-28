@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014 D. R. Commander
+ * Copyright (C)2011, 2013-2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -42,9 +42,8 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #endif
 
 
-#define BENCH_NAME		"FBXtest"
-
-#define N                 2
+#define BENCH_NAME "FBXtest"
+#define N          2
 
 int WIDTH=1240, HEIGHT=900;
 int width, height;
@@ -687,9 +686,9 @@ void event_loop(void)
 }
 
 
-void usage(char *progname)
+void usage(char **argv)
 {
-	fprintf(stderr, "USAGE: %s [options]\n\n", progname);
+	fprintf(stderr, "USAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
 	#ifndef _WIN32
 	fprintf(stderr, "-checkdb = Verify that double buffering is working correctly\n");
@@ -700,9 +699,9 @@ void usage(char *progname)
 	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
 	fprintf(stderr, "-fs = Full-screen mode\n");
-	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default=%.1f)\n",
+	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
-	fprintf(stderr, "-size <wxh> = specify drawable width & height (default=%dx%d)\n\n",
+	fprintf(stderr, "-size <wxh> = specify drawable width & height (default: %dx%d)\n\n",
 		WIDTH, HEIGHT);
 	exit(1);
 }
@@ -719,58 +718,54 @@ int main(int argc, char **argv)
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
+		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
 		#ifndef _WIN32
-		if(!stricmp(argv[i], "-checkdb"))
+		else if(!stricmp(argv[i], "-checkdb"))
 		{
 			checkDB=true;
 			fprintf(stderr, "Checking double buffering.  Watch for flashing to indicate that it is\n");
 			fprintf(stderr, "not enabled.  Performance will be sub-optimal.\n");
 		}
 		#endif
-		if(!stricmp(argv[i], "-noshm"))
+		else if(!stricmp(argv[i], "-noshm"))
 		{
 			doShm=false;
 		}
-		if(!stricmp(argv[i], "-vid")) doVid=true;
-		else if(!strnicmp(argv[i], "-v", 2))
+		else if(!stricmp(argv[i], "-vid")) doVid=true;
+		else if(!stricmp(argv[i], "-v"))
 		{
 			fbx_printwarnings(stderr);
 		}
 		#ifndef _WIN32
-		if(!stricmp(argv[i], "-pm"))
+		else if(!stricmp(argv[i], "-pm"))
 		{
 			doPixmap=true;  doShm=false;
 		}
-		if(!strnicmp(argv[i], "-index", 3))
+		else if(!stricmp(argv[i], "-index"))
 		{
 			doCI=true;
 		}
-		else
 		#endif
-		if(!stricmp(argv[i], "-i")) interactive=true;
-		if(!stricmp(argv[i], "-mt")) doStress=true;
-		if(!stricmp(argv[i], "-fs"))
+		else if(!stricmp(argv[i], "-i")) interactive=true;
+		else if(!stricmp(argv[i], "-mt")) doStress=true;
+		else if(!stricmp(argv[i], "-fs"))
 		{
 			doFS=true;
 			#ifdef _WIN32
 			winstyle=WS_EX_TOPMOST | WS_POPUP | WS_VISIBLE;
 			#endif
 		}
-		if(!strnicmp(argv[i], "-t", 2))
+		else if(!stricmp(argv[i], "-time") && i<argc-1)
 		{
-			double temp=-1.;
-			if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
-				benchTime=temp;
+			if(sscanf(argv[++i], "%lf", &benchTime)<1 || benchTime<=0.0)
+				usage(argv);
 		}
-		if(!strnicmp(argv[i], "-s", 2) && i<argc-1)
+		else if(!stricmp(argv[i], "-size") && i<argc-1)
 		{
-			int w=0, h=0;
-			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
-			{
-				WIDTH=w;  HEIGHT=h;
-			}
+			if(sscanf(argv[++i], "%dx%d", &WIDTH, &HEIGHT)<2 || WIDTH<1 || HEIGHT<1)
+				usage(argv);
 		}
-		if(!strnicmp(argv[i], "-h", 2) || !stricmp(argv[i], "-?")) usage(argv[0]);
+		else usage(argv);
 	}
 
 	try

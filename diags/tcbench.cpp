@@ -91,7 +91,6 @@ void usage(void)
 	printf("\n");
 	printf("USAGE: %s [options]\n\n", program_name);
 	printf("Options:\n");
-	printf("-h or -? = This help screen\n");
 	#ifdef _WIN32
 	printf("-lb = Simulate holding down the left mouse button while the benchmark is\n");
 	printf("      running\n");
@@ -113,7 +112,7 @@ void usage(void)
 	printf("-wh <wh> = Explicitly specify a window, if auto-detect fails\n");
 	printf("           (<wh> is the window handle in hex)\n");
 	printf("-x <x> = specify x offset of the sampling block, relative to the window\n");
-	printf("-y <y> = specify y offset of the sampling block, relative to the window\n");
+	printf("-y <y> = specify y offset of the sampling block, relative to the window\n\n");
 	exit(1);
 }
 
@@ -135,62 +134,59 @@ int main(int argc, char **argv)
 
 	if(argc>1) for(i=1; i<argc; i++)
 	{
-		double tempf;  int temp;
 		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage();
-		if(!stricmp(argv[i], "-t") && i<argc-1)
+		else if(!stricmp(argv[i], "-t") && i<argc-1)
 		{
-			if((tempf=atof(argv[++i]))>0.) benchTime=tempf;
+			if((benchTime=atof(argv[++i]))<=0.0) usage();
 		}
-		if(!stricmp(argv[i], "-s") && i<argc-1)
+		else if(!stricmp(argv[i], "-s") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>1) sampleRate=temp;
+			if((sampleRate=atoi(argv[++i]))<1) usage();
 		}
-		if(!stricmp(argv[i], "-x") && i<argc-1)
+		else if(!stricmp(argv[i], "-x") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>0) x=temp;
+			if((x=atoi(argv[++i]))<0) usage();
 		}
-		if(!stricmp(argv[i], "-y") && i<argc-1)
+		else if(!stricmp(argv[i], "-y") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>0) y=temp;
+			if((y=atoi(argv[++i]))<0) usage();
 		}
-		if(!stricmp(argv[i], "-wh") && i<argc-1)
+		else if(!stricmp(argv[i], "-wh") && i<argc-1)
 		{
 			#ifdef _WIN32
-			fbx_wh temp;
-			memset(&temp, 0, sizeof(temp));
-			if(sscanf(argv[++i], "%x", &temp)==1) wh=temp;
+			if(sscanf(argv[++i], "%x", &wh)<1 || wh<=0) usage();
 			#else
 			unsigned int temp=0;
-			if(sscanf(argv[++i], "%x", &temp)==1) wh.d=(Drawable)temp;
+			if(sscanf(argv[++i], "%x", &temp)<1 || temp<=0) usage();
+			wh.d=(Drawable)temp;
 			#endif
 		}
 		#ifdef _WIN32
-		if(!stricmp(argv[i], "-mx") && i<argc-1)
+		else if(!stricmp(argv[i], "-mx") && i<argc-1)
 		{
-			int temp=0;
-			if(sscanf(argv[++i], "%d", &temp)==1 && temp>0) moveX=temp;
+			if(sscanf(argv[++i], "%d", &moveX)<1 || moveX<=0) usage();
 		}
-		if(!stricmp(argv[i], "-my") && i<argc-1)
+		else if(!stricmp(argv[i], "-my") && i<argc-1)
 		{
-			int temp=0;
-			if(sscanf(argv[++i], "%d", &temp)==1 && temp>0) moveY=temp;
+			if(sscanf(argv[++i], "%d", &moveY)<1 || moveY<=0) usage();
 		}
-		if(!stricmp(argv[i], "-lb"))
+		else if(!stricmp(argv[i], "-lb"))
 		{
 			downFlags|=MOUSEEVENTF_LEFTDOWN;
 			upFlags|=MOUSEEVENTF_LEFTUP;
 		}
-		if(!stricmp(argv[i], "-mb"))
+		else if(!stricmp(argv[i], "-mb"))
 		{
 			downFlags|=MOUSEEVENTF_MIDDLEDOWN;
 			upFlags|=MOUSEEVENTF_MIDDLEUP;
 		}
-		if(!stricmp(argv[i], "-rb"))
+		else if(!stricmp(argv[i], "-rb"))
 		{
 			downFlags|=MOUSEEVENTF_RIGHTDOWN;
 			upFlags|=MOUSEEVENTF_RIGHTUP;
 		}
 		#endif
+		else usage();
 	}
 
 	printf("\nThin Client Benchmark\n");
