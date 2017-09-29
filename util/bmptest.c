@@ -1,4 +1,4 @@
-/* Copyright (C)2014 D. R. Commander
+/* Copyright (C)2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -121,7 +121,7 @@ int doTest(const char *ext, int width, int align, int height, enum BMPPF pf,
 
 int main(void)
 {
-	int retval=0, align, width=35, height=39;
+	int align, width=35, height=39;
 	enum BMPPF pf;
 
 	for(align=1; align<=8; align*=2)
@@ -131,29 +131,28 @@ int main(void)
 			printf("%s Top-Down BMP (row alignment = %d bytes)  ...  ", pfStr[pf],
 				align);
 			if(doTest("bmp", width, align, height, pf, BMPORN_TOPDOWN)==-1)
-				goto bailout;
+				return -1;
 			printf("OK.\n");
 
 			printf("%s Top-Down PPM (row alignment = %d bytes)  ...  ", pfStr[pf],
 				align);
 			if(doTest("ppm", width, align, height, pf, BMPORN_TOPDOWN)==-1)
-				goto bailout;
+				return -1;
 			printf("OK.\n");
 
 			printf("%s Bottom-Up BMP (row alignment = %d bytes)  ...  ", pfStr[pf],
 				align);
 			if(doTest("bmp", width, align, height, pf, BMPORN_BOTTOMUP)==-1)
-				goto bailout;
+				return -1;
 			printf("OK.\n");
 
 			printf("%s Bottom-Up PPM (row alignment = %d bytes)  ...  ", pfStr[pf],
 				align);
 			if(doTest("ppm", width, align, height, pf, BMPORN_BOTTOMUP)==-1)
-				goto bailout;
+				return -1;
 			printf("OK.\n");
 		}
 	}
 
-	bailout:
-	return retval;
+	return 0;
 }

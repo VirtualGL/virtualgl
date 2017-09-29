@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012, 2014 D. R. Commander
+ * Copyright (C)2011-2012, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -51,7 +51,7 @@ Display *maindpy=NULL;
 bool detach=false, force=false, child=false;
 char *logFile=NULL;
 
-void start(char *);
+int start(char *);
 
 
 extern "C" {
@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 			if(detach) daemonize();
 		}
 
-		start(displayname);
+		if(start(displayname)<0) return -1;
 	}
 	catch(Error &e)
 	{
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 }
 
 
-void start(char *displayname)
+int start(char *displayname)
 {
 	VGLTransReceiver *receiver=NULL;
 	Atom portAtom=None;  unsigned short actualPort=0;
@@ -422,8 +422,9 @@ void start(char *displayname)
 	Atom sslPortAtom=None;  unsigned short actualSSLPort=0;
 	#endif
 	bool newListener=false;
+	int retval=0;
 
-	if(!XInitThreads()) { vglout.println("XInitThreads() failed");  return; }
+	if(!XInitThreads()) { vglout.println("XInitThreads() failed");  return -1; }
 
 	signal(SIGINT, handler);
 	signal(SIGTERM, handler);
@@ -529,7 +530,7 @@ void start(char *displayname)
 		if(!newListener)
 		{
 			if(maindpy) { XCloseDisplay(maindpy);  maindpy=NULL; }
-			return;
+			return 0;
 		}
 
 		restart=true;
@@ -543,6 +544,7 @@ void start(char *displayname)
 	catch(Error &e)
 	{
 		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
+		retval=-1;
 	}
 
 	if(receiver) { delete receiver;  receiver=NULL; }
@@ -571,5 +573,7 @@ void start(char *displayname)
 		#endif
 		goto start;
 	}
+
+	return retval;
 }
 

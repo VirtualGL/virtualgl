@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010, 2014 D. R. Commander
+/* Copyright (C)2009-2010, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,13 +23,14 @@
 
 
 #define _throw(m) {  \
-	printf("ERROR: %s\n", m);  goto bailout;  \
+	retval=-1;  printf("ERROR: %s\n", m);  goto bailout;  \
 }
 
 #define _fbxv(f)  \
 	if((f)==-1) {  \
 		printf("FBXV ERROR in line %d: %s\n", fbxv_geterrline(),  \
 			fbxv_geterrmsg());  \
+		retval=-1;  \
 		goto bailout;  \
 	}
 
@@ -84,9 +85,9 @@ void initBuf(fbxv_struct *s, int id, int seed)
 }
 
 
-void doTest(int id, char *name)
+int doTest(int id, char *name)
 {
-	int iter=0, i;
+	int iter=0, i, retval=0;
 	double elapsed=0., t;
 	FILE *file=NULL;
 
@@ -153,12 +154,13 @@ void doTest(int id, char *name)
 
 	bailout:
 	fbxv_term(&s);
+	return retval;
 }
 
 
-void doInteractiveTest(Display *dpy, int id, char *name)
+int doInteractiveTest(Display *dpy, int id, char *name)
 {
-	int iter=0;
+	int iter=0, retval=0;
 	printf("Interactive test, %s format (ID=0x%.8x) ...\n", name, id);
 	memset(&s, 0, sizeof(s));
 
@@ -185,7 +187,7 @@ void doInteractiveTest(Display *dpy, int id, char *name)
 					switch(buf[0])
 					{
 						case 27: case 'q': case 'Q':
-							return;
+							return 0;
 					}
 					break;
 				}
@@ -196,7 +198,7 @@ void doInteractiveTest(Display *dpy, int id, char *name)
 				{
 					XClientMessageEvent *cme=(XClientMessageEvent *)&event;
 					if(cme->message_type==protoAtom && cme->data.l[0]==deleteAtom)
-						return;
+						return 0;
 				}
 			}
 			if(XPending(dpy)<=0) break;
@@ -210,13 +212,13 @@ void doInteractiveTest(Display *dpy, int id, char *name)
 	}
 
 	bailout:
-	return;
+	return retval;
 }
 
 
 int main(int argc, char **argv)
 {
-	int id=-1, n=0, i;
+	int id=-1, n=0, i, retval=0;
 	XVisualInfo vtemp, *vis=NULL;
 	XSetWindowAttributes swa;
 
@@ -314,23 +316,31 @@ int main(int argc, char **argv)
 		_throw("Could not show window");
 	XSync(dpy, False);
 
-	if(interactive) doInteractiveTest(dpy, I420_PLANAR, "I420 Planar");
+	if(interactive)
+	{
+		if(doInteractiveTest(dpy, I420_PLANAR, "I420 Planar")<0)
+		{
+			retval=-1;  goto bailout;
+		}
+	}
 	else if(id>=0)
-		doTest(id, "User-specified");
+	{
+		if(doTest(id, "User-specified")<0) { retval=-1;  goto bailout; }
+	}
 	else
 	{
-		doTest(I420_PLANAR, "I420 Planar");
+		if(doTest(I420_PLANAR, "I420 Planar")<0) { retval=-1;  goto bailout; }
 		printf("\n");
-		doTest(YV12_PLANAR, "YV12 Planar");
+		if(doTest(YV12_PLANAR, "YV12 Planar")<0) { retval=-1;  goto bailout; }
 		printf("\n");
-		doTest(YUY2_PACKED, "YUY2 Packed");
+		if(doTest(YUY2_PACKED, "YUY2 Packed")<0) { retval=-1;  goto bailout; }
 		printf("\n");
-		doTest(UYVY_PACKED, "UYVY Packed");
+		if(doTest(UYVY_PACKED, "UYVY Packed")<0) { retval=-1;  goto bailout; }
 		printf("\n");
 	}
 
 	bailout:
 	if(dpy && win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);
-	return 0;
+	return retval;
 }

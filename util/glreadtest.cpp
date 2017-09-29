@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010-2011, 2013-2014 D. R. Commander
+ * Copyright (C)2010-2011, 2013-2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -879,4 +879,5 @@ int main(int argc, char **argv)
 		XCloseDisplay(dpy);
 	}
 	if(v) XFree(v);
+	return -1;
 }

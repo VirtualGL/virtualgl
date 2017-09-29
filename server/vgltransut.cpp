@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	Timer timer;  double elapsed;
 	unsigned char *buf=NULL, *buf2=NULL, *buf3=NULL;
 	Display *dpy=NULL;  Window win=0;
-	int i;  int bgr=littleendian();
+	int i, retval=0;  int bgr=littleendian();
 
 	try
 	{
@@ -217,6 +217,7 @@ int main(int argc, char **argv)
 	catch(Error &e)
 	{
 		printf("%s--\n%s\n", e.getMethod(), e.getMessage());
+		retval=-1;
 	}
 
 	if(win) XDestroyWindow(dpy, win);
@@ -224,4 +225,5 @@ int main(int argc, char **argv)
 	if(buf) free(buf);
 	if(buf2) free(buf2);
 	if(buf3) free(buf3);
+	return retval;
 }
