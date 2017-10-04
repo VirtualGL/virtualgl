@@ -503,7 +503,8 @@ void usage(char *programName)
 	fprintf(stderr, "-xv = Test X Video encoding/display\n");
 	fprintf(stderr, "-rgb = Use RGB encoding instead of JPEG compression\n");
 	fprintf(stderr, "-rgbbench <filename> = Benchmark the decoding of RGB-encoded images.\n");
-	fprintf(stderr, "                       <filename> should be a BMP or PPM file.\n\n");
+	fprintf(stderr, "                       <filename> should be a BMP or PPM file.\n");
+	fprintf(stderr, "-v = Verbose output (may affect benchmark results)\n\n");
 	exit(1);
 }
 
@@ -514,6 +515,7 @@ int main(int argc, char **argv)
 	FrameTest *test[NUMWIN];
 	int i, j, w, h;
 	char *fileName=NULL;
+	bool verbose=false;
 
 	if(argc>1)
 	{
@@ -541,6 +543,7 @@ int main(int argc, char **argv)
 				if(i>=argc-1) usage(argv[0]);
 				fileName=argv[++i];  doRgbBench=true;
 			}
+			else if(!stricmp(argv[i], "-v")) verbose=true;
 			else if(!strnicmp(argv[i], "-h", 2) || !strcmp(argv[i], "-?"))
 				usage(argv[0]);
 		}
@@ -565,37 +568,37 @@ int main(int argc, char **argv)
 		for(w=MINW; w<=MAXW; w+=33)
 		{
 			h=1;
-			fprintf(stderr, "%.4d x %.4d: ", w, h);
+			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
 			for(i=0; i<ITER; i++)
 			{
-				fprintf(stderr, ".");
+				if(verbose) fprintf(stderr, ".");
 				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
-			fprintf(stderr, "\n");
+			if(verbose) fprintf(stderr, "\n");
 		}
 
 		for(h=MINW; h<=MAXW; h+=33)
 		{
 			w=1;
-			fprintf(stderr, "%.4d x %.4d: ", w, h);
+			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
 			for(i=0; i<ITER; i++)
 			{
-				fprintf(stderr, ".");
+				if(verbose) fprintf(stderr, ".");
 				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
-			fprintf(stderr, "\n");
+			if(verbose) fprintf(stderr, "\n");
 		}
 
 		for(w=MINW; w<=MAXW; w+=33)
 		{
 			h=w;
-			fprintf(stderr, "%.4d x %.4d: ", w, h);
+			if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
 			for(i=0; i<ITER; i++)
 			{
-				fprintf(stderr, ".");
+				if(verbose) fprintf(stderr, ".");
 				for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i);
 			}
-			fprintf(stderr, "\n");
+			if(verbose) fprintf(stderr, "\n");
 		}
 
 		for(i=0; i<NUMWIN; i++)
