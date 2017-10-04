@@ -19,6 +19,10 @@ likely affected other applications as well.  To address this problem, VirtualGL
 now ignores `WM_DELETE_WINDOW` messages if it detects that the 3D application
 is handling them.
 
+2. Fixed an issue whereby the VGL logo would be drawn incorrectly or the
+3D application would segfault if the OpenGL window was smaller than 74x29,
+`VGL_LOGO` was set to `1`, and quad-buffered stereo was enabled.
+
 
 2.5.2
 =====

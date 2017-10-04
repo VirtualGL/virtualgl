@@ -358,23 +358,23 @@ void Frame::addLogo(void)
 	if(!rbits) return;
 	logoptr=vgllogo;
 	if(flags&FRAME_BOTTOMUP)
-		rowptr=&rbits[pitch*(VGLLOGO_HEIGHT+1)
-			+(hdr.width-VGLLOGO_WIDTH-1)*pixelSize];
+		rowptr=&rbits[pitch*height+(hdr.width-width-1)*pixelSize];
 	else
-		rowptr=&rbits[pitch*(hdr.height-VGLLOGO_HEIGHT-1)
-			+(hdr.width-VGLLOGO_WIDTH-1)*pixelSize];
-	for(int j=0; j<VGLLOGO_HEIGHT; j++)
+		rowptr=&rbits[pitch*(hdr.height-height-1)+(hdr.width-width-1)*pixelSize];
+	for(int j=0; j<height; j++)
 	{
 		colptr=rowptr;
-		for(int i=0; i<VGLLOGO_WIDTH; i++)
+		logoptr2=logoptr;
+		for(int i=0; i<width; i++)
 		{
-			if(*(logoptr++))
+			if(*(logoptr2++))
 			{
 				colptr[rindex]^=113;  colptr[gindex]^=162;  colptr[bindex]^=117;
 			}
 			colptr+=pixelSize;
 		}
 		rowptr+=(flags&FRAME_BOTTOMUP)? -pitch:pitch;
+		logoptr+=VGLLOGO_WIDTH;
 	}
 }
 
