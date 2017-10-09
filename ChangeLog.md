@@ -23,6 +23,10 @@ is handling them.
 3D application would segfault if the OpenGL window was smaller than 74x29,
 `VGL_LOGO` was set to `1`, and quad-buffered stereo was enabled.
 
+3. Fixed an issue whereby the glxinfo utility included in the VirtualGL
+packages would fail with a GLXBadContext error when used in an indirect OpenGL
+environment.
+
 
 2.5.2
 =====

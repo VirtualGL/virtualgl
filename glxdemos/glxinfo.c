@@ -752,7 +752,7 @@ create_context_flags(Display *dpy, GLXFBConfig fbconfig, int major, int minor,
    if (CreateContextErrorFlag)
       context = 0;
 
-   if (direct) {
+   if (context && direct) {
       if (!glXIsDirect(dpy, context)) {
          glXDestroyContext(dpy, context);
          return 0;
