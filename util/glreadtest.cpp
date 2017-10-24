@@ -393,9 +393,9 @@ void clearFB(int format)
 
 
 // Generic GL write test
-void writeTest(int format)
+int writeTest(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize;
+	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize, retval=0;
 	double rbtime;
 	char temps[STRLEN];
 
@@ -425,16 +425,17 @@ void writeTest(int format)
 		check_errors("frame buffer write");
 		fprintf(stderr, "%s Mpixels/sec\n", sigFig(4, temps, avgmps));
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retval=-1; }
 
 	if(rgbaBuffer) free(rgbaBuffer);
+	return retval;
 }
 
 
 // Generic OpenGL readback test
-void readTest(int format)
+int readTest(int format)
 {
-	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize;
+	unsigned char *rgbaBuffer=NULL;  int n, ps=pf[format].pixelSize, retval=0;
 	double rbtime, readPixelsTime;  Timer timer2;
 	#ifdef GL_VERSION_1_5
 	GLuint bufferID=0;
@@ -591,7 +592,7 @@ void readTest(int format)
 		fprintf(stderr, "glReadPixels() accounted for %s%% of total readback time\n",
 			sigFig(4, temps, readPixelsTime/rbtime*100.0));
 
-	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage()); }
+	} catch(Error &e) { fprintf(stderr, "%s\n", e.getMessage());  retval=-1; }
 
 	if(rgbaBuffer) free(rgbaBuffer);
 	#ifdef GL_VERSION_1_5
@@ -604,12 +605,13 @@ void readTest(int format)
 	#ifdef USEIFR
 	if(useIFR) ifr.nvIFROGLDestroyTransferObject(ifrTransfer);
 	#endif
+	return retval;
 }
 
 
 void display(void)
 {
-	int format;
+	int format, status=0;
 
 	for(format=0; format<FORMATS; format++)
 	{
@@ -635,12 +637,12 @@ void display(void)
 		}
 		#endif
 
-		writeTest(format);
-		for(int i=0; i<loops; i++) readTest(format);
+		if(writeTest(format)<0) status=-1;
+		for(int i=0; i<loops; i++) if(readTest(format)<0) status=-1;
 		fprintf(stderr, "\n");
 	}
 
-	exit(0);
+	exit(status);
 }
 
 void usage(char **argv)
