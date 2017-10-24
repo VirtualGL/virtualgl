@@ -38,17 +38,18 @@ void fillFrame(unsigned char *buf, int width, int pitch, int height, PF &pf,
 	int on)
 {
 	unsigned char *ptr;  unsigned char pixel[4];
+	int maxRGB=(1<<pf.bpc);
 
 	ptr=buf;
 	for(int i=0; i<height; i++, ptr+=pitch)
 	{
 		if(on)
 		{
-			pf.setRGB(pixel, i%256, 255-(i%256), i%256);
+			pf.setRGB(pixel, i%maxRGB, maxRGB-1-(i%maxRGB), i%maxRGB);
 		}
 		else
 		{
-			pf.setRGB(pixel, i%256, 0, 255-(i%256));
+			pf.setRGB(pixel, i%maxRGB, 0, maxRGB-1-(i%maxRGB));
 		}
 		for(int j=0; j<width; j++) memcpy(&ptr[pf.size*j], pixel, pf.size);
 	}

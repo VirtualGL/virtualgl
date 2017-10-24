@@ -15,15 +15,16 @@
 #define __PF_H__
 
 /* Pixel formats */
-#define PIXELFORMATS 7
-enum { PF_RGB, PF_RGBX, PF_BGR, PF_BGRX, PF_XBGR, PF_XRGB, PF_COMP };
+#define PIXELFORMATS 11
+enum { PF_RGB, PF_RGBX, PF_RGB10_X2, PF_BGR, PF_BGRX, PF_BGR10_X2,
+	PF_XBGR, PF_X2_BGR10, PF_XRGB, PF_X2_RGB10, PF_COMP };
 
 
 typedef struct _PF
 {
 	unsigned char id;
 	const char *name;
-	unsigned char size;
+	unsigned char size, bpc;
 	unsigned int rmask, gmask, bmask;
 	unsigned char rshift, gshift, bshift, rindex, gindex, bindex;
 	/* These are useful mainly for initializing and comparing test patterns in

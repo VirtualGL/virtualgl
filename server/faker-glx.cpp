@@ -77,6 +77,10 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 
 		if(pixmap || fconfig.drawable==RRDRAWABLE_PIXMAP)
 			defaultAttribs[13]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
+		if(vis->depth==30)
+		{
+			defaultAttribs[3]=defaultAttribs[5]=defaultAttribs[7]=10;
+		}
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, defaultAttribs, sizeof(defaultAttribs));
 		if(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
@@ -180,14 +184,15 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 					glxvisual::visAttrib3D(config, GLX_STEREO), 0);
 			XFree(vis);
 		}
-		// Failing that, we try to find a 24-bit TrueColor visual with the same
-		// stereo properties.
+		// Failing that, we try to find a TrueColor visual with the same stereo
+		// properties, using the default depth of the 2D X server.
 		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0,
-				glxvisual::visAttrib3D(config, GLX_STEREO), 0);
-		// Failing that, we try to find a 24-bit TrueColor mono visual.
+			vid=glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
+				TrueColor, 0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+		// Failing that, we try to find a TrueColor mono visual.
 		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0, 0, 0);
+			vid=glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
+				TrueColor, 0, 0, 0);
 	}
 	if(vid) cfghash.add(dpy, config, vid);
 	return vid;
@@ -325,7 +330,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 			XVisualInfo *vis=_glXGetVisualFromFBConfig(_dpy3D, configs[i]);
 			if(vis)
 			{
-				if(vis->depth==32) d=32;
+				if(vis->depth>24) d=vis->depth;
 				XFree(vis);
 			}
 
@@ -436,7 +441,7 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	vtemp=_glXGetVisualFromFBConfig(_dpy3D, config);
 	if(vtemp)
 	{
-		if(vtemp->depth==32) depth=32;
+		if(vtemp->depth>24) depth=vtemp->depth;
 		XFree(vtemp);
 	}
 

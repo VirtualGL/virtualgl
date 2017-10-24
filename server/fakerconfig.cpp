@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2016 D. R. Commander
+/* Copyright (C)2009-2017 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -196,14 +196,13 @@ static void fconfig_buildlut(FakerConfig &fc)
 {
 	if(fc.gamma!=0.0 && fc.gamma!=1.0 && fc.gamma!=-1.0)
 	{
+		double g=fc.gamma>0.0? 1.0/fc.gamma : -fc.gamma;
 		for(int i=0; i<256; i++)
-		{
-			double g=fc.gamma>0.0? 1.0/fc.gamma : -fc.gamma;
 			fc.gamma_lut[i]=(unsigned char)(255.*pow((double)i/255., g)+0.5);
-		}
+		for(int i=0; i<1024; i++)
+			fc.gamma_lut10[i]=(unsigned short)(1023.*pow((double)i/1023., g)+0.5);
 		for(int i=0; i<65536; i++)
 		{
-			double g=fc.gamma>0.0? 1.0/fc.gamma : -fc.gamma;
 			fc.gamma_lut16[i]=
 				(unsigned short)(255.*pow((double)(i/256)/255., g)+0.5)<<8;
 			fc.gamma_lut16[i]|=

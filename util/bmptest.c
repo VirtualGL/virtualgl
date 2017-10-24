@@ -41,9 +41,15 @@ void initBuf(unsigned char *buf, int width, int pitch, int height, PF pf,
 		int row=orientation==BMPORN_TOPDOWN? j:height-j-1;
 		for(i=0; i<width; i++)
 		{
+			int r, g, b;
 			memset(&buf[row*pitch+i*pf.size], 0, pf.size);
-			pf.setRGB(&buf[row*pitch+i*pf.size], (i*256/width)%256,
-				(j*256/height)%256, (j*256/height+i*256/width)%256);
+			r=(i*256/width)%256;  g=(j*256/height)%256;
+			b=(j*256/height+i*256/width)%256;
+			if(pf.bpc==10)
+			{
+				r<<=2;  g<<=2;  b<<=2;
+			}
+			pf.setRGB(&buf[row*pitch+i*pf.size], r, g, b);
 		}
 	}
 }
@@ -61,6 +67,10 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF pf,
 		{
 			int r, g, b;
 			pf.getRGB(&buf[row*pitch+i*pf.size], &r, &g, &b);
+			if(pf.bpc==10)
+			{
+				r>>=2;  g>>=2;  b>>=2;
+			}
 			if(r!=(i*256/width)%256 || g!=(j*256/height)%256
 				|| b!=(j*256/height+i*256/width)%256)
 				retval=0;

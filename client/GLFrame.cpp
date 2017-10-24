@@ -25,7 +25,8 @@ using namespace vglcommon;
 
 static int tjpf[PIXELFORMATS]=
 {
-	TJPF_RGB, TJPF_RGBX, TJPF_BGR, TJPF_BGRX, TJPF_XBGR, TJPF_XRGB, TJPF_GRAY
+	TJPF_RGB, TJPF_RGBX, -1, TJPF_BGR, TJPF_BGRX, -1, TJPF_XBGR, -1, TJPF_XRGB,
+	-1, TJPF_GRAY
 };
 
 

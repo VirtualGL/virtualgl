@@ -29,7 +29,8 @@ using namespace vglcommon;
 
 static int tjpf[PIXELFORMATS]=
 {
-	TJPF_RGB, TJPF_RGBX, TJPF_BGR, TJPF_BGRX, TJPF_XBGR, TJPF_XRGB, TJPF_GRAY
+	TJPF_RGB, TJPF_RGBX, -1, TJPF_BGR, TJPF_BGRX, -1, TJPF_XBGR, -1, TJPF_XRGB,
+	-1, TJPF_GRAY
 };
 
 
@@ -192,6 +193,7 @@ void Frame::makeAnaglyph(Frame &r, Frame &g, Frame &b)
 	unsigned char *srcrptr=r.bits, *srcgptr=g.bits, *srcbptr=b.bits,
 		*dstptr=bits, *dstrptr, *dstgptr, *dstbptr;
 
+	if(pf.bpc!=8) _throw("Anaglyphic stereo requires 8 bits per component");
 	for(j=0; j<hdr.frameh; j++, srcrptr+=r.pitch, srcgptr+=g.pitch,
 		srcbptr+=b.pitch, dstptr+=pitch)
 	{
@@ -272,8 +274,9 @@ void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 {
 	if(!f.bits || f.hdr.size<1 || !bits || !hdr.size)
 		_throw("Frame not initialized");
-	if(pf.id>PF_XRGB)
-		_throw("Destination frame has the wrong pixel type");
+	if(pf.bpc<8)
+		throw(Error("RGB decompressor",
+			"Destination frame has the wrong pixel format"));
 
 	bool dstbu=(flags&FRAME_BOTTOMUP);
 	int srcStride=f.pitch, dstStride=pitch;
@@ -423,6 +426,8 @@ void CompressedFrame::compressYUV(Frame &f)
 	int tjflags=0;
 
 	if(f.hdr.subsamp!=4) throw(Error("YUV encoder", "Invalid argument"));
+	if(f.pf.bpc!=8)
+		throw(Error("YUV encoder", "YUV encoding requires 8 bits per component"));
 	init(f.hdr, 0);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
 	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
@@ -438,6 +443,9 @@ void CompressedFrame::compressJPEG(Frame &f)
 
 	if(f.hdr.qual>100 || f.hdr.subsamp>16 || !isPow2(f.hdr.subsamp))
 		throw(Error("JPEG compressor", "Invalid argument"));
+	if(f.pf.bpc!=8)
+		throw(Error("JPEG compressor",
+			"JPEG compression requires 8 bits per component"));
 
 	init(f.hdr, f.stereo? RR_LEFT:0);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;
@@ -462,8 +470,9 @@ void CompressedFrame::compressRGB(Frame &f)
 {
 	unsigned char *srcptr;
 	bool bu=(f.flags&FRAME_BOTTOMUP);
-	if(f.pf.id>PF_XRGB)
-		throw(Error("RGB compressor", "Source frame has the wrong pixel type"));
+	if(f.pf.bpc!=8)
+		throw(Error("RGB compressor",
+			"RGB encoding requires 8 bits per component"));
 	int dstPitch=f.hdr.width*3;
 	int srcStride=bu? f.pitch:-f.pitch;
 
@@ -613,6 +622,9 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 		if(cf.hdr.compress==RRCOMP_RGB) decompressRGB(cf, width, height, false);
 		else
 		{
+			if(pf.bpc!=8)
+				throw(Error("JPEG decompressor",
+					"JPEG decompression requires 8 bits per component"));
 			if(!tjhnd)
 			{
 				if((tjhnd=tjInitDecompress())==NULL)
@@ -674,8 +686,8 @@ XVFrame::~XVFrame(void)
 XVFrame &XVFrame::operator= (Frame &f)
 {
 	if(!f.bits) _throw("Frame not initialized");
-	if(f.pf.size<3 || f.pf.size>4)
-		_throw("Only true color frames are supported");
+	if(f.pf.bpc!=8)
+		throw(Error("YUV encoder", "YUV encoding requires 8 bits per component"));
 	int tjflags=0;
 	init(f.hdr);
 	if(f.flags&FRAME_BOTTOMUP) tjflags|=TJ_BOTTOMUP;

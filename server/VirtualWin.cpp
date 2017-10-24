@@ -363,6 +363,8 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 		return;
 	if(!fconfig.spoil) plugin->synchronize();
 
+	if(oglDraw->getRGBSize()!=24)
+		_throw("Transport plugins require 8 bits per component");
 	int desiredFormat=RRTRANS_RGB;
 	if(oglDraw->getFormat()==GL_BGR) desiredFormat=RRTRANS_BGR;
 	else if(oglDraw->getFormat()==GL_BGRA) desiredFormat=RRTRANS_BGRA;
@@ -421,6 +423,8 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 		return;
 	Frame *f;
 
+	if(oglDraw->getRGBSize()!=24)
+		_throw("The VGL Transport requires 8 bits per component");
 	int glFormat=GL_RGB, pixelFormat=PF_RGB;
 	if(compress!=RRCOMP_RGB)
 	{
@@ -522,6 +526,8 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	hdr.width=hdr.framew=width;
 	hdr.height=hdr.frameh=height;
 
+	if(oglDraw->getRGBSize()!=24)
+		_throw("The XV Transport requires 8 bits per component");
 	int glFormat=oglDraw->getFormat(), pixelFormat=PF_RGB;
 	if(glFormat==GL_RGBA) pixelFormat=PF_RGBX;
 	else if(glFormat==GL_BGR) pixelFormat=PF_BGR;
@@ -619,11 +625,31 @@ void VirtualWin::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				vglout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
 					fconfig.gamma);
 		}
-		unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*height]);
-		for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
-			*ptr1=fconfig.gamma_lut16[*ptr1];
-		if((pitch*height)%2!=0)
-			bits[pitch*height-1]=fconfig.gamma_lut[bits[pitch*height-1]];
+		if(pf.bpc==10)
+		{
+			int h=height;
+			while(h--)
+			{
+				int w=width;
+				unsigned int *srcPixel=(unsigned int *)bits;
+				while(w--)
+				{
+					unsigned int r=fconfig.gamma_lut10[(*srcPixel>>pf.rshift)&1023];
+					unsigned int g=fconfig.gamma_lut10[(*srcPixel>>pf.gshift)&1023];
+					unsigned int b=fconfig.gamma_lut10[(*srcPixel>>pf.bshift)&1023];
+					*srcPixel++=(r<<pf.rshift) | (g<<pf.gshift) | (b<<pf.bshift);
+				}
+				bits+=pitch;
+			}
+		}
+		else
+		{
+			unsigned short *ptr1, *ptr2=(unsigned short *)(&bits[pitch*height]);
+			for(ptr1=(unsigned short *)bits; ptr1<ptr2; ptr1++)
+				*ptr1=fconfig.gamma_lut16[*ptr1];
+			if((pitch*height)%2!=0)
+				bits[pitch*height-1]=fconfig.gamma_lut[bits[pitch*height-1]];
+		}
 		profGamma.endFrame(width*height, 0, stereo? 0.5:1);
 	}
 }

@@ -65,6 +65,7 @@ namespace vglserver
 					int getWidth(void) { return width; }
 					int getHeight(void) { return height; }
 					int getDepth(void) { return depth; }
+					int getRGBSize(void) { return rgbSize; }
 					GLXFBConfig getConfig(void) { return config; }
 					void clear(void);
 					void swap(void);
@@ -78,7 +79,7 @@ namespace vglserver
 
 					bool cleared, stereo;
 					GLXDrawable glxDraw;
-					int width, height, depth;
+					int width, height, depth, rgbSize;
 					GLXFBConfig config;
 					GLenum glFormat;
 					Pixmap pm;

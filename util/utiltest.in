@@ -49,7 +49,28 @@ kill $PID
 PID=-1
 sleep 2
 
+Xvfb :42 -screen 0 1920x1200x30 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+sleep 2
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
+kill $PID
+PID=-1
+sleep 2
+
 Xvfb :42 -screen 0 1024x768x24 >/dev/null 2>&1 & PID=$!
+echo Xvfb started as process $PID
+sleep 2
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
+DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
+kill $PID
+PID=-1
+sleep 2
+
+Xvfb :42 -screen 0 1024x768x30 >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
 DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2

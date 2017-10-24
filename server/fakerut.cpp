@@ -1786,6 +1786,12 @@ int contextMismatchTest(void)
 		if(!(dpy=XOpenDisplay(0)))  _throw("Could not open display");
 		dpyw=DisplayWidth(dpy, DefaultScreen(dpy));
 		dpyh=DisplayHeight(dpy, DefaultScreen(dpy));
+		if(DefaultDepth(dpy, DefaultScreen(dpy))==30)
+		{
+			glxattrib1[7]=glxattrib1[9]=glxattrib1[11]=10;
+			glxattrib2[7]=glxattrib2[9]=glxattrib2[11]=10;
+			glxattrib2[13]=2;
+		}
 
 		if((configs=glXChooseFBConfig(dpy, DefaultScreen(dpy), glxattrib1,
 			&n))==NULL || n==0)

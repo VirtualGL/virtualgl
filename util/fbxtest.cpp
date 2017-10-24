@@ -44,8 +44,9 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 #define BENCH_NAME "FBXtest"
 #define N          2
+#define MAXRGB     (1<<(depth/3))
 
-int WIDTH=1240, HEIGHT=900;
+int WIDTH=1240, HEIGHT=900, depth=24;
 int width, height;
 bool doPixmap=false, doShm=true, doFS=false, doVid=false, doDisplay=false,
 	interactive=false, advance=false, doStress=false;
@@ -74,8 +75,8 @@ void initBuf(int x, int y, int width, int pitch, int height, PF pf,
 	for(j=0; j<height; j++)
 	{
 		for(i=0; i<width; i++)
-			pf.setRGB(&buf[j*pitch+i*pf.size], (i+x+offset)%256, (j+y+offset)%256,
-				(j+y+i+x+offset)%256);
+			pf.setRGB(&buf[j*pitch+i*pf.size], (i+x+offset)%MAXRGB,
+				(j+y+offset)%MAXRGB, (j+y+i+x+offset)%MAXRGB);
 	}
 }
 
@@ -98,11 +99,11 @@ int cmpBuf(int x, int y, int width, int pitch, int height, PF pf,
 			#endif
 			int r, g, b;
 			pf.getRGB(&buf[line*pitch+i*pf.size], &r, &g, &b);
-			if(r!=(i+x+offset)%256 && !ignore)
+			if(r!=(i+x+offset)%MAXRGB && !ignore)
 				return 0;
-			if(g!=(j+y+offset)%256 && !ignore)
+			if(g!=(j+y+offset)%MAXRGB && !ignore)
 				return 0;
-			if(b!=(j+y+i+x+offset)%256 && !ignore)
+			if(b!=(j+y+i+x+offset)%MAXRGB && !ignore)
 				return 0;
 		}
 	}
@@ -819,53 +820,49 @@ int main(int argc, char **argv)
 		XSetWindowAttributes swa;
 		Window root=DefaultRootWindow(wh.dpy);
 
-		vtemp.depth=24;  vtemp.c_class=TrueColor;
-		if((v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp,
-			&n))!=NULL && n!=0)
+		vtemp.depth=DefaultDepth(wh.dpy, DefaultScreen(wh.dpy));
+		if(vtemp.depth==30) depth=30;
+		vtemp.c_class=TrueColor;
+		v=XGetVisualInfo(wh.dpy, VisualDepthMask|VisualClassMask, &vtemp, &n);
+		if(!v || !n) _throw("No RGB visuals available");
+		int mask=CWBorderPixel|CWColormap|CWEventMask;
+		swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
+		swa.border_pixel=0;
+		swa.event_mask=0;
+		if(doFS)
 		{
-			int mask=CWBorderPixel|CWColormap|CWEventMask;
-			swa.colormap=XCreateColormap(wh.dpy, root, v->visual, AllocNone);
-			swa.border_pixel=0;
-			swa.event_mask=0;
-			if(doFS)
-			{
-				mask|=CWOverrideRedirect;  swa.override_redirect=True;
-			}
-			if(doVid)
-			{
-				if(interactive)
-					swa.event_mask|=PointerMotionMask|ButtonPressMask|ExposureMask;
-				swa.event_mask|=KeyPressMask;
-			}
-			if(doPixmap)
-			{
-				_errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
-					InputOutput, v->visual, mask, &swa));
-				_errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
-				wh.v=v->visual;
-			}
-			else
-			{
-				_errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-					v->depth, InputOutput, v->visual, mask, &swa));
-				_errifnot(XMapRaised(wh.dpy, wh.d));
-			}
-			if(doFS) XSetInputFocus(wh.dpy, wh.d, RevertToParent, CurrentTime);
-			XSync(wh.dpy, False);
-			if(doVid) event_loop();
-			else display();
-			if(doPixmap)
-			{
-				XFreePixmap(wh.dpy, wh.d);
-				XDestroyWindow(wh.dpy, win);
-			}
-			else XDestroyWindow(wh.dpy, wh.d);
-			XFree(v);  v=NULL;
+			mask|=CWOverrideRedirect;  swa.override_redirect=True;
+		}
+		if(doVid)
+		{
+			if(interactive)
+				swa.event_mask|=PointerMotionMask|ButtonPressMask|ExposureMask;
+			swa.event_mask|=KeyPressMask;
+		}
+		if(doPixmap)
+		{
+			_errifnot(win=XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
+				InputOutput, v->visual, mask, &swa));
+			_errifnot(wh.d=XCreatePixmap(wh.dpy, win, width, height, v->depth));
+			wh.v=v->visual;
 		}
 		else
 		{
-			_throw("No RGB visuals available");
+			_errifnot(wh.d=XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
+				v->depth, InputOutput, v->visual, mask, &swa));
+			_errifnot(XMapRaised(wh.dpy, wh.d));
 		}
+		if(doFS) XSetInputFocus(wh.dpy, wh.d, RevertToParent, CurrentTime);
+		XSync(wh.dpy, False);
+		if(doVid) event_loop();
+		else display();
+		if(doPixmap)
+		{
+			XFreePixmap(wh.dpy, wh.d);
+			XDestroyWindow(wh.dpy, win);
+		}
+		else XDestroyWindow(wh.dpy, wh.d);
+		XFree(v);  v=NULL;
 
 		#endif
 

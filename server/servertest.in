@@ -30,6 +30,7 @@ SSL=@VGL_USESSL@
 
 NODL=
 NOSTEREO=
+DEPTH=24
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -37,6 +38,10 @@ while [ $# -gt 0 ]; do
 		NODL=-nodl
 		;;
 	-nostereo)
+		NOSTEREO=-nostereo
+		;;
+	-10bpc)
+		DEPTH=30
 		NOSTEREO=-nostereo
 		;;
 	esac
@@ -47,31 +52,37 @@ which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
 	exit 1
 )
-Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
+Xvfb :42 -screen 0 1920x1200x$DEPTH >/dev/null 2>&1 & PID=$!
 echo Xvfb started as process $PID
 sleep 2
 
 # Frame unit tests
 DISPLAY=:42 $BIN/frameut -check
-DISPLAY=:42 $BIN/frameut -check -anaglyph
+if [ $DEPTH = 24 ]; then
+	DISPLAY=:42 $BIN/frameut -check -anaglyph
+fi
 DISPLAY=:42 $BIN/frameut -check -logo
 
 # VGL Transport
-DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
-if [ "$SSL" = "1" ]; then
-	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
+if [ $DEPTH = 24 ]; then
+	DISPLAY=:42 $BIN/vglclient >vglclient.log 2>&1 & VGLCLIENTPID=$!
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
+	if [ "$SSL" = "1" ]; then
+		DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
+	fi
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO
+	# (we can't test stereo here, because the transport plugin assumes
+	# quad-buffered, which isn't available with an X proxy.)
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
+	kill $VGLCLIENTPID
+	VGLCLIENTPID=-1
 fi
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB VGL_READBACK=sync $BIN/vglrun $NODL -np 2 -c rgb $BIN/fakerut $NOSTEREO
-# (we can't test stereo here, because the transport plugin assumes
-# quad-buffered, which isn't available with an X proxy.)
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
-kill $VGLCLIENTPID
-VGLCLIENTPID=-1
 
 # X11 Transport
 DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c proxy $BIN/fakerut $NOSTEREO
-DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO
+if [ $DEPTH = 24 ]; then
+	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test2 $BIN/fakerut $NOSTEREO
+fi
 
 kill $PID
 PID=-1

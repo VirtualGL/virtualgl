@@ -4,7 +4,8 @@
  * Version:  3.5
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012, 2014-2015  D. R. Commander   All Rights Reserved.
+ * Copyright (C) 2011-2012, 2014-2015, 2017  D. R. Commander
+ *                                           All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -155,7 +156,8 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 		int n = 0;
 
 		_errifnot(dpy = glxdhash.getCurrentDisplay(draw));
-		vtemp.c_class = TrueColor;  vtemp.depth = 24;
+		vtemp.c_class = TrueColor;
+		vtemp.depth = DefaultDepth(dpy, DefaultScreen(dpy));
 		Window root = DefaultRootWindow(dpy);
 		if((v = XGetVisualInfo(dpy, VisualDepthMask|VisualClassMask, &vtemp, &n))
 			== NULL || n < 1)

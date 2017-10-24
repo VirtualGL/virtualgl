@@ -163,6 +163,8 @@ class Blitter : public Runnable
 		{
 			int i, j, _j, pitch=frame->pitch, seed=frame->hdr.winid;
 			unsigned char *ptr=frame->bits, *pixel;
+			PF pf=pf_get(frame->hdr.dpynum);
+			int maxRGB=(1<<pf.bpc);
 
 			for(_j=0; _j<frame->hdr.height; _j++, ptr+=pitch)
 			{
@@ -171,6 +173,10 @@ class Blitter : public Runnable
 				{
 					int r, g, b;
 					frame->pf.getRGB(pixel, &r, &g, &b);
+					if(frame->pf.bpc==10 && pf.bpc!=10)
+					{
+						r>>=2;  g>>=2;  b>>=2;
+					}
 					if(addLogo && !useXV)
 					{
 						int lw=min(VGLLOGO_WIDTH, frame->hdr.width-1);
@@ -183,7 +189,7 @@ class Blitter : public Runnable
 							r^=113;  g^=162;  b^=117;
 						}
 					}
-					if(r!=(i+seed)%256 || g!=(j+seed)%256 || b!=(i+j+seed)%256)
+					if(r!=(i+seed)%maxRGB || g!=(j+seed)%maxRGB || b!=(i+j+seed)%maxRGB)
 						return false;
 				}
 			}
@@ -389,8 +395,8 @@ class FrameTest
 {
 	public:
 
-		FrameTest(Display *dpy, int myID) : compressor(NULL), decompressor(NULL),
-			blitter(NULL)
+		FrameTest(Display *dpy, int myID_) : compressor(NULL), decompressor(NULL),
+			blitter(NULL), myID(myID_)
 		{
 			this->dpy=dpy;
 			_errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
@@ -407,15 +413,40 @@ class FrameTest
 
 		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
 
-		void dotest(int width, int height, int seed, int pixelFormat)
+		void dotest(int width, int height, int seed, PF &pf)
 		{
-			Frame &frame=compressor->get(width, height, pixelFormat);
-			if(anaglyph) makeAnaglyph(frame, seed);
-			else initFrame(frame, seed);
-			// This unit test doesn't use winid, so use it to track the seed.
-			frame.hdr.winid=seed;
-			if(addLogo) frame.addLogo();
-			compressor->put(frame);
+			if(pf.bpc==8)
+			{
+				Frame &frame=compressor->get(width, height, pf.id);
+				if(anaglyph) makeAnaglyph(frame, seed);
+				else initFrame(frame, seed);
+				// This unit test doesn't use winid, so use it to track the seed.
+				frame.hdr.winid=seed;
+				// This unit test doesn't use dpynum, so use it to track the source
+				// pixel format.
+				frame.hdr.dpynum=pf.id;
+				if(addLogo) frame.addLogo();
+				compressor->put(frame);
+			}
+			else
+			{
+				FBXFrame *frame=(FBXFrame *)blitter->get();
+				rrframeheader hdr;
+				memset(&hdr, 0, sizeof(rrframeheader));
+				hdr.width=hdr.framew=width;
+				hdr.height=hdr.frameh=height;
+				frame->init(hdr);
+				if(anaglyph) makeAnaglyph(*frame, seed);
+				else initFrame(*frame, seed);
+				// This unit test doesn't use winid, so use it to track the seed.
+				frame->hdr.winid=seed;
+				// This unit test doesn't use dpynum, so use it to track the source
+				// pixel format.
+				frame->hdr.dpynum=pf.id;
+				if(addLogo) frame->addLogo();
+				resizeWindow(dpy, win, width, height, myID);
+				blitter->put(frame);
+			}
 		}
 
 	private:
@@ -424,11 +455,13 @@ class FrameTest
 		{
 			int i, j, pitch=frame.pitch;
 			unsigned char *ptr=frame.bits, *pixel;
+			int maxRGB=(1<<frame.pf.bpc);
 
 			for(j=0; j<frame.hdr.height; j++, ptr+=pitch)
 			{
 				for(i=0, pixel=ptr; i<frame.hdr.width; i++, pixel+=frame.pf.size)
-					frame.pf.setRGB(pixel, (i+seed)%256, (j+seed)%256, (i+j+seed)%256);
+					frame.pf.setRGB(pixel, (i+seed)%maxRGB, (j+seed)%maxRGB,
+						(i+j+seed)%maxRGB);
 			}
 		}
 
@@ -470,6 +503,7 @@ class FrameTest
 
 		Display *dpy;  Window win;
 		Compressor *compressor;  Decompressor *decompressor;  Blitter *blitter;
+		int myID;
 };
 
 
@@ -484,6 +518,10 @@ int cmpFrame(unsigned char *buf, int width, int height, Frame &dst)
 		{
 			int r, g, b;
 			dst.pf.getRGB(&dst.bits[dst.pitch*i+j*dst.pf.size], &r, &g, &b);
+			if(dst.pf.bpc==10)
+			{
+				r>>=2;  g>>=2;  b>>=2;
+			}
 			if(r!=buf[pitch*_i+j*3] || g!=buf[pitch*_i+j*3+1]
 				|| b!=buf[pitch*_i+j*3+2])
 				return 1;
@@ -606,6 +644,10 @@ int main(int argc, char **argv)
 		for(int format=0; format<PIXELFORMATS-1; format++)
 		{
 			PF pf=pf_get(format);
+
+			if((useXV || anaglyph || useGL) && pf.bpc!=8) continue;
+			if(DefaultDepth(dpy, DefaultScreen(dpy))!=30 && pf.bpc==10) continue;
+
 			fprintf(stderr, "Pixel format: %s\n", pf.name);
 
 			for(i=0; i<NUMWIN; i++)
@@ -620,7 +662,7 @@ int main(int argc, char **argv)
 				for(i=0; i<ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}
@@ -632,7 +674,7 @@ int main(int argc, char **argv)
 				for(i=0; i<ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}
@@ -644,7 +686,7 @@ int main(int argc, char **argv)
 				for(i=0; i<ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, format);
+					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}

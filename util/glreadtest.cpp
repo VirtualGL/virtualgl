@@ -43,7 +43,8 @@ GLenum glFormat[PIXELFORMATS];
 
 const char *formatName[PIXELFORMATS]=
 {
-	"RGB", "RGBA", "BGR", "BGRA", "ABGR", "ARGB", "RED"
+	"RGB", "RGBA", "RGB10_A2", "BGR", "BGRA", "BGR10_A2", "ABGR", "A2_BGR10",
+	"ARGB", "A2_RGB10", "RED"
 };
 
 
@@ -109,18 +110,18 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 } // extern "C"
 
 
-void findVisual(void)
+void findVisual(int bpc)
 {
-	int winattribs[]={GLX_RGBA, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, None, None, None};
-	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, 8,
-		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, None, None, None};
+	int winattribs[]={GLX_RGBA, GLX_RED_SIZE, bpc, GLX_GREEN_SIZE, bpc,
+		GLX_BLUE_SIZE, bpc, None, None, None};
+	int winattribsdb[]={GLX_RGBA, GLX_DOUBLEBUFFER, GLX_RED_SIZE, bpc,
+		GLX_GREEN_SIZE, bpc, GLX_BLUE_SIZE, bpc, None, None, None};
 
-	int pbattribs[]={GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8,
+	int pbattribs[]={GLX_RED_SIZE, bpc, GLX_GREEN_SIZE, bpc, GLX_BLUE_SIZE, bpc,
 		GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None,
 		None, None};
-	int pbattribsdb[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8, GLX_GREEN_SIZE, 8,
-		GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
+	int pbattribsdb[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, bpc, GLX_GREEN_SIZE,
+		bpc, GLX_BLUE_SIZE, bpc, GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_DRAWABLE_TYPE,
 		GLX_PBUFFER_BIT, None, None, None};
 	GLXFBConfig *fbconfigs=NULL;  int nelements=0;
 
@@ -141,8 +142,8 @@ void findVisual(void)
 			}
 			if(useAlpha)
 			{
-				winattribs[7]=GLX_ALPHA_SIZE;  winattribs[8]=8;
-				winattribsdb[8]=GLX_ALPHA_SIZE;  winattribsdb[9]=8;
+				winattribs[7]=GLX_ALPHA_SIZE;  winattribs[8]=32-bpc*3;
+				winattribsdb[8]=GLX_ALPHA_SIZE;  winattribsdb[9]=32-bpc*3;
 			}
 			if(!(v=glXChooseVisual(dpy, DefaultScreen(dpy), winattribs))
 				&& !(v=glXChooseVisual(dpy, DefaultScreen(dpy), winattribsdb)))
@@ -158,8 +159,8 @@ void findVisual(void)
 
 	if(useAlpha)
 	{
-		pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=8;
-		pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=8;
+		pbattribs[10]=GLX_ALPHA_SIZE;  pbattribs[11]=32-bpc*3;
+		pbattribsdb[12]=GLX_ALPHA_SIZE;  pbattribsdb[13]=32-bpc*3;
 	}
 	fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy), pbattribs, &nelements);
 	if(!fbconfigs) fbconfigs=glXChooseFBConfig(dpy, DefaultScreen(dpy),
@@ -198,6 +199,8 @@ void drawableInit(void)
 		#ifdef GL_EXT_framebuffer_object
 		if(useFBO)
 		{
+			GLenum format=useAlpha? GL_RGBA8:GL_RGB8;
+			if(v->depth==30) format=useAlpha? GL_RGB10_A2:GL_RGB10;
 			glGenFramebuffersEXT(1, &fbo);
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 			if(useRTT)
@@ -208,8 +211,8 @@ void drawableInit(void)
 					GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER,
 					GL_LINEAR);
-				glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, useAlpha? GL_RGBA8:GL_RGB8,
-					width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+				glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, format,	width, height, 0,
+					GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
 					GL_TEXTURE_RECTANGLE_ARB, texture, 0);
 			}
@@ -217,8 +220,7 @@ void drawableInit(void)
 			{
 				glGenRenderbuffersEXT(1, &rbo);
 				glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
-				glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-					useAlpha? GL_RGBA8:GL_RGB8, width, height);
+				glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
 				glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 					GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, rbo);
 			}
@@ -261,17 +263,17 @@ static void check_errors(const char *tag)
 
 void initBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf)
 {
-	int i, j;
+	int i, j, maxRGB=(1<<pf.bpc);
 	for(j=0; j<height; j++)
 	{
 		for(i=0; i<width; i++)
 		{
 			if(pf.id==PF_COMP)
-				buf[j*width+i]=((j+y)*(i+x))%256;
+				buf[j*width+i]=((j+y)*(i+x))%maxRGB;
 			else
 			{
-				pf.setRGB(&buf[(j*width+i)*pf.size], ((j+y)*(i+x))%256,
-					((j+y)*(i+x)*2)%256, ((j+y)*(i+x)*3)%256);
+				pf.setRGB(&buf[(j*width+i)*pf.size], ((j+y)*(i+x))%maxRGB,
+					((j+y)*(i+x)*2)%maxRGB, ((j+y)*(i+x)*3)%maxRGB);
 			}
 		}
 	}
@@ -281,7 +283,7 @@ void initBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf)
 int cmpBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf,
 	int bassackwards)
 {
-	int i, j, l;
+	int i, j, l, maxRGB=(1<<pf.bpc);
 	for(j=0; j<height; j++)
 	{
 		l=bassackwards? height-j-1:j;
@@ -289,14 +291,14 @@ int cmpBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf,
 		{
 			if(pf.id==PF_COMP)
 			{
-				if(buf[l*PAD(width*pf.size)+i]!=((j+y)*(i+x))%256) return 0;
+				if(buf[l*PAD(width*pf.size)+i]!=((j+y)*(i+x))%maxRGB) return 0;
 			}
 			else
 			{
 				int r, g, b;
 				pf.getRGB(&buf[l*PAD(width*pf.size)+i*pf.size], &r, &g, &b);
-				if(r!=((j+y)*(i+x))%256 || g!=((j+y)*(i+x)*2)%256
-					|| b!=((j+y)*(i+x)*3)%256)
+				if(r!=((j+y)*(i+x))%maxRGB || g!=((j+y)*(i+x)*2)%maxRGB
+					|| b!=((j+y)*(i+x)*3)%maxRGB)
 					return 0;
 			}
 		}
@@ -605,15 +607,19 @@ void usage(char **argv)
 		ALIGN);
 	fprintf(stderr, "-visualid <xx> = Ignore visual selection and use this visual ID (hex) instead\n");
 	fprintf(stderr, "                 (this has no effect when rendering to a Pbuffer)\n");
-	fprintf(stderr, "-alpha = Create Pbuffer/window using 32-bit instead of 24-bit visual\n");
+	fprintf(stderr, "-alpha = Create Pbuffer/window using a visual with an alpha channel\n");
 	fprintf(stderr, "-rgb = Test only RGB pixel format\n");
 	fprintf(stderr, "-rgba = Test only RGBA pixel format\n");
+	fprintf(stderr, "-rgb10a2 = Test only RGB10_A2 pixel format\n");
 	fprintf(stderr, "-bgr = Test only BGR pixel format\n");
 	fprintf(stderr, "-bgra = Test only BGRA pixel format\n");
+	fprintf(stderr, "-bgr10a2 = Test only BGR10_A2 pixel format\n");
 	#ifdef GL_ABGR_EXT
 	fprintf(stderr, "-abgr = Test only ABGR pixel format\n");
 	#endif
+	fprintf(stderr, "-a2bgr10 = Test only A2_BGR10 pixel format\n");
 	fprintf(stderr, "-argb = Test only ARGB pixel format\n");
+	fprintf(stderr, "-a2rgb10 = Test only A2_RGB10 pixel format\n");
 	fprintf(stderr, "-time <t> = Run each test for <t> seconds (default: %.1f)\n",
 		BENCHTIME);
 	fprintf(stderr, "-loop <l> = Run readback test <l> times in a row\n");
@@ -654,6 +660,11 @@ int main(int argc, char **argv)
 			for(int i=0; i<PIXELFORMATS; i++)
 				if(i!=PF_RGBX) glFormat[i]=GL_NONE;
 		}
+		else if(!stricmp(argv[i], "-rgb10a2"))
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_RGB10_X2) glFormat[i]=GL_NONE;
+		}
 		else if(!stricmp(argv[i], "-bgr"))
 		{
 			for(int i=0; i<PIXELFORMATS; i++)
@@ -664,6 +675,11 @@ int main(int argc, char **argv)
 			for(int i=0; i<PIXELFORMATS; i++)
 				if(i!=PF_BGRX) glFormat[i]=GL_NONE;
 		}
+		else if(!stricmp(argv[i], "-bgr10a2"))
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_BGR10_X2) glFormat[i]=GL_NONE;
+		}
 		#ifdef GL_ABGR_EXT
 		else if(!stricmp(argv[i], "-abgr"))
 		{
@@ -671,10 +687,20 @@ int main(int argc, char **argv)
 				if(i!=PF_XBGR) glFormat[i]=GL_NONE;
 		}
 		#endif
+		else if(!stricmp(argv[i], "-a2bgr10"))
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_X2_BGR10) glFormat[i]=GL_NONE;
+		}
 		else if(!stricmp(argv[i], "-argb"))
 		{
 			for(int i=0; i<PIXELFORMATS; i++)
 				if(i!=PF_XRGB) glFormat[i]=GL_NONE;
+		}
+		else if(!stricmp(argv[i], "-a2rgb10"))
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(i!=PF_X2_RGB10) glFormat[i]=GL_NONE;
 		}
 		else if(!stricmp(argv[i], "-loop") && i<argc-1)
 		{
@@ -741,7 +767,13 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		findVisual();
+		int bpc=DefaultDepth(dpy, DefaultScreen(dpy))==30? 10:8;
+		findVisual(bpc);
+		if(bpc!=10)
+		{
+			for(int i=0; i<PIXELFORMATS; i++)
+				if(pf_get(i).bpc==10) glFormat[i]=GL_NONE;
+		}
 
 		if(useWindow || usePixmap || useFBO)
 		{

@@ -33,34 +33,46 @@ double testTime=BENCHTIME;
 int getSetRGB=0;
 
 
-void initBuf(unsigned char *buf, int width, int pitch, int height, PF pf)
+void initBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
+	PF dstpf)
 {
-	int i, j;
-
-	for(j=0; j<height; j++)
-	{
-		for(i=0; i<width; i++)
-		{
-			memset(&buf[j*pitch+i*pf.size], 0, pf.size);
-			pf.setRGB(&buf[j*pitch+i*pf.size], (i*256/width)%256,
-				(j*256/height)%256, (j*256/height+i*256/width)%256);
-		}
-	}
-}
-
-
-int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF pf)
-{
-	int i, j, retval=1;
+	int i, j, maxRGB=min(1<<srcpf.bpc, 1<<dstpf.bpc);
 
 	for(j=0; j<height; j++)
 	{
 		for(i=0; i<width; i++)
 		{
 			int r, g, b;
-			pf.getRGB(&buf[j*pitch+i*pf.size], &r, &g, &b);
-			if(r!=(i*256/width)%256 || g!=(j*256/height)%256
-				|| b!=(j*256/height+i*256/width)%256)
+			memset(&buf[j*pitch+i*srcpf.size], 0, srcpf.size);
+			r=(i*maxRGB/width)%maxRGB;  g=(j*maxRGB/height)%maxRGB;
+			b=(j*maxRGB/height+i*maxRGB/width)%maxRGB;
+			if(srcpf.bpc==10 && dstpf.bpc==8)
+			{
+				r<<=2;  g<<=2;  b<<=2;
+			}
+			srcpf.setRGB(&buf[j*pitch+i*srcpf.size], r, g, b);
+		}
+	}
+}
+
+
+int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
+	PF dstpf)
+{
+	int i, j, retval=1, maxRGB=min(1<<srcpf.bpc, 1<<dstpf.bpc);
+
+	for(j=0; j<height; j++)
+	{
+		for(i=0; i<width; i++)
+		{
+			int r, g, b;
+			dstpf.getRGB(&buf[j*pitch+i*dstpf.size], &r, &g, &b);
+			if(srcpf.bpc==8 && dstpf.bpc==10)
+			{
+				r>>=2;  g>>=2;  b>>=2;
+			}
+			if(r!=(i*maxRGB/width)%maxRGB || g!=(j*maxRGB/height)%maxRGB
+				|| b!=(j*maxRGB/height+i*maxRGB/width)%maxRGB)
 				retval=0;
 		}
 	}
@@ -77,39 +89,76 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 
 	if((srcBuf=(unsigned char *)malloc(srcPitch*height))==NULL)
 		_throw("Could not allocate memory");
-	initBuf(srcBuf, width, srcPitch, height, srcpf);
+	initBuf(srcBuf, width, srcPitch, height, srcpf, dstpf);
 	if((dstBuf=(unsigned char *)malloc(dstPitch*height))==NULL)
 		_throw("Could not allocate memory");
 	memset(dstBuf, 0, dstPitch*height);
 
 	if(getSetRGB)
 	{
-		printf("%-4s --> %-4s (getRGB/setRGB):  ", srcpf.name, dstpf.name);
+		printf("%-8s --> %-8s (getRGB/setRGB):  ", srcpf.name, dstpf.name);
 		tStart=getTime();
 		iter=0;
 		do
 		{
 			int h=height;
 			unsigned char *srcRow=srcBuf, *dstRow=dstBuf;
-			while(h--)
+			if(dstpf.bpc==10 && srcpf.bpc==8)
 			{
-				int w=width;
-				srcPixel=srcRow;  dstPixel=dstRow;
-				while(w--)
+				while(h--)
 				{
-					int r, g, b;
-					srcpf.getRGB(srcPixel, &r, &g, &b);
-					dstpf.setRGB(dstPixel, r, g, b);
-					srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+					int w=width;
+					srcPixel=srcRow;  dstPixel=dstRow;
+					while(w--)
+					{
+						int r, g, b;
+						srcpf.getRGB(srcPixel, &r, &g, &b);
+						r<<=2;  g<<=2;  b<<=2;
+						dstpf.setRGB(dstPixel, r, g, b);
+						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+					}
+					srcRow+=srcPitch;  dstRow+=dstPitch;
 				}
-				srcRow+=srcPitch;  dstRow+=dstPitch;
+			}
+			else if(srcpf.bpc==10 && dstpf.bpc==8)
+			{
+				while(h--)
+				{
+					int w=width;
+					srcPixel=srcRow;  dstPixel=dstRow;
+					while(w--)
+					{
+						int r, g, b;
+						srcpf.getRGB(srcPixel, &r, &g, &b);
+						r>>=2;  g>>=2;  b>>=2;
+						dstpf.setRGB(dstPixel, r, g, b);
+						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+					}
+					srcRow+=srcPitch;  dstRow+=dstPitch;
+				}
+			}
+			else
+			{
+				while(h--)
+				{
+					int w=width;
+					srcPixel=srcRow;  dstPixel=dstRow;
+					while(w--)
+					{
+						int r, g, b;
+						srcpf.getRGB(srcPixel, &r, &g, &b);
+						dstpf.setRGB(dstPixel, r, g, b);
+						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+					}
+					srcRow+=srcPitch;  dstRow+=dstPitch;
+				}
 			}
 			iter++;
 		} while((elapsed=getTime()-tStart)<testTime);
 	}
 	else
 	{
-		printf("%-4s --> %-4s (pf_convert):  ", srcpf.name, dstpf.name);
+		printf("%-8s --> %-8s (convert):     ", srcpf.name, dstpf.name);
 		tStart=getTime();
 		do
 		{
@@ -118,7 +167,7 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 		} while((elapsed=getTime()-tStart)<testTime);
 	}
 
-	if(!cmpBuf(dstBuf, width, width*dstpf.size, height, dstpf))
+	if(!cmpBuf(dstBuf, width, width*dstpf.size, height, srcpf, dstpf))
 	{
 		printf("Pixel data is bogus\n");
 		retval=-1;  goto bailout;

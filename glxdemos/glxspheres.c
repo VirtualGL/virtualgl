@@ -60,7 +60,7 @@ enum { GRAY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 Display *dpy=NULL;  Window win=0, olWin=0;
 GLXContext ctx=0, olCtx=0;
 int useStereo=0, useOverlay=0, useDC=0, useImm=0, interactive=0, olDB=1,
-	loColor=0, maxFrames=0, totalFrames=0, directCtx=True;
+	loColor=0, maxFrames=0, totalFrames=0, directCtx=True, bpc=8;
 int rshift=0, gshift=0, bshift=0;
 double benchTime=DEFBENCHTIME;
 int nColors=0, nOlColors, colorScheme=GRAY;
@@ -77,9 +77,9 @@ unsigned int transPixel=0;
 int width=DEF_WIDTH, height=DEF_HEIGHT;
 
 
-int setColorScheme(Colormap cmap, int nColors, int scheme)
+int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
 {
-	XColor xc[256];  int i;
+	XColor xc[1024];  int i, maxColors=(1<<bpc);
 
 	if(!nColors || !cmap) _throw("Color map not allocated");
 	if(scheme<0 || scheme>NSCHEMES-1 || !cmap) _throw("Invalid argument");
@@ -90,11 +90,11 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 		xc[i].pixel=(cmap==olColormap)? i:(i<<rshift) | (i<<gshift) | (i<<bshift);
 		xc[i].red=xc[i].green=xc[i].blue=0;
 		if(scheme==GRAY || scheme==RED || scheme==YELLOW || scheme==MAGENTA)
-			xc[i].red=(i*(256/nColors))<<8;
+			xc[i].red=(i*(maxColors/nColors))<<(16-bpc);
 		if(scheme==GRAY || scheme==GREEN || scheme==YELLOW || scheme==CYAN)
-			xc[i].green=(i*(256/nColors))<<8;
+			xc[i].green=(i*(maxColors/nColors))<<(16-bpc);
 		if(scheme==GRAY || scheme==BLUE || scheme==MAGENTA || scheme==CYAN)
-			xc[i].blue=(i*(256/nColors))<<8;
+			xc[i].blue=(i*(maxColors/nColors))<<(16-bpc);
 	}
 	XStoreColors(dpy, cmap, xc, nColors);
 	return 0;
@@ -349,9 +349,9 @@ int display(int advance)
 		if(z<-29.)
 		{
 			if(useDC || useOverlay) colorScheme=(colorScheme+1)%NSCHEMES;
-			if(useDC) _catch(setColorScheme(colormap, nColors, colorScheme));
+			if(useDC) _catch(setColorScheme(colormap, nColors, bpc, colorScheme));
 			if(useOverlay)
-				_catch(setColorScheme(olColormap, nOlColors, colorScheme));
+				_catch(setColorScheme(olColormap, nOlColors, 8, colorScheme));
 			z=-3.5;
 		}
 		outerAngle+=0.1;  if(outerAngle>360.) outerAngle-=360.;
@@ -499,7 +499,7 @@ void usage(char **argv)
 		DEF_SPHERES*3+1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
-	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
+	printf("-alpha = Use a visual with an alpha channel\n");
 	printf("-f <n> = max frames to render\n");
 	printf("-bt <t> = print benchmark results every <t> seconds (default: %.1f)\n",
 		DEFBENCHTIME);
@@ -565,7 +565,7 @@ int main(int argc, char **argv)
 			rgbAttribs[13]=1;
 			useStereo=1;
 		}
-		else if(!stricmp(argv[i], "-32")) useAlpha=1;
+		else if(!stricmp(argv[i], "-alpha")) useAlpha=1;
 		else if(!stricmp(argv[i], "-n") && i<argc-1)
 		{
 			int temp=atoi(argv[++i]);
@@ -587,12 +587,6 @@ int main(int argc, char **argv)
 		if(slices<1) slices=stacks=1;
 	}
 
-	if(useAlpha)
-	{
-		rgbAttribs[16]=GLX_ALPHA_SIZE;
-		rgbAttribs[17]=8;
-	}
-
 	pps=slices*stacks;
 	if(pps>57600)
 	{
@@ -604,6 +598,17 @@ int main(int argc, char **argv)
 
 	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
 	if(screen<0) screen=DefaultScreen(dpy);
+
+	if(DefaultDepth(dpy, DefaultScreen(dpy))==30)
+	{
+		bpc=10;
+		rgbAttribs[3]=rgbAttribs[5]=rgbAttribs[7]=bpc;
+	}
+	if(useAlpha)
+	{
+		rgbAttribs[16]=GLX_ALPHA_SIZE;
+		rgbAttribs[17]=32-bpc*3;
+	}
 
 	int n=0;
 	GLXFBConfig *c=glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
@@ -630,7 +635,7 @@ int main(int argc, char **argv)
 		rshift=0;  while((v->red_mask & (1<<rshift))==0) rshift++;
 		gshift=0;  while((v->green_mask & (1<<gshift))==0) gshift++;
 		bshift=0;  while((v->blue_mask & (1<<bshift))==0) bshift++;
-		_catch(setColorScheme(colormap, nColors, colorScheme));
+		_catch(setColorScheme(colormap, nColors, bpc, colorScheme));
 	}
 	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
 
@@ -680,7 +685,7 @@ int main(int argc, char **argv)
 		nOlColors=np2(v->colormap_size);
 		if(nOlColors<32) _throw("Color map is not large enough");
 
-		_catch(setColorScheme(olColormap, nOlColors, colorScheme));
+		_catch(setColorScheme(olColormap, nOlColors, 256, colorScheme));
 
 		if((olWin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
 			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)

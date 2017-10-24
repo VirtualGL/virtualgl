@@ -27,6 +27,12 @@ is handling them.
 packages would fail with a GLXBadContext error when used in an indirect OpenGL
 environment.
 
+4. VirtualGL can now be used with depth=30 (10-bit-per-component) visuals and
+FB configs, if both the 2D and 3D X servers support them.  Currently this only
+works with the X11 Transport, since other transports do not (yet) have the
+ability to transmit and display 30-bit pixels.  Furthermore, anaglyphic stereo
+does not work with this feature.
+
 
 2.5.2
 =====

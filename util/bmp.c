@@ -99,12 +99,11 @@ static void pixelConvert(unsigned char *srcBuf, int width, int srcPitch,
 
 
 static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
-	int *height, int format, enum BMPORN orientation, int ascii)
+	int *height, PF pf, enum BMPORN orientation, int ascii)
 {
 	FILE *file=NULL;  int ret=0, scaleFactor, dstPitch;
 	unsigned char *tempbuf=NULL;  char temps[255], temps2[255];
 	int numRead=0, totalRead=0, pixel[3], i, j;
-	PF pf;
 
 	if((file=fdopen(*fd, "r"))==NULL) _throw(strerror(errno));
 
@@ -133,7 +132,6 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 	} while(totalRead<3);
 	if((*width)<1 || (*height)<1 || scaleFactor<1) _throw("Corrupt PPM header");
 
-	pf=pf_get(format);
 	dstPitch=(((*width)*pf.size)+(align-1))&(~(align-1));
 	if((*buf=(unsigned char *)malloc(dstPitch*(*height)))==NULL)
 		_throw("Memory allocation error");
@@ -176,13 +174,12 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 		srcPixelSize, dstPitch, ret=0;
 	unsigned char *tempbuf=NULL;
 	BitmapHeader bh;  int flags=O_RDONLY;
-	PF pf;
+	PF pf=pf_get(format);
 
 	#ifdef _WIN32
 	flags|=O_BINARY;
 	#endif
-	if(!filename || !buf || !width || !height || format<0
-		|| format>=PIXELFORMATS-1 || align<1)
+	if(!filename || !buf || !width || !height || pf.bpc<8 || align<1)
 		_throw("Invalid argument to bmp_load()");
 	if((align&(align-1))!=0)
 		_throw("Alignment must be a power of 2");
@@ -193,12 +190,12 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 
 	if(bh.bfType==0x3650)
 	{
-		_catch(ppm_load(&fd, buf, width, align, height, format, orientation, 0));
+		_catch(ppm_load(&fd, buf, width, align, height, pf, orientation, 0));
 		goto finally;
 	}
 	if(bh.bfType==0x3350)
 	{
-		_catch(ppm_load(&fd, buf, width, align, height, format, orientation, 1));
+		_catch(ppm_load(&fd, buf, width, align, height, pf, orientation, 1));
 		goto finally;
 	}
 
@@ -244,7 +241,6 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	*width=bh.biWidth;  *height=bh.biHeight;  srcPixelSize=bh.biBitCount/8;
 	if(*height<0) { *height=-(*height);  srcOrientation=BMPORN_TOPDOWN; }
 	srcPitch=(((*width)*srcPixelSize)+3)&(~3);
-	pf=pf_get(format);
 	dstPitch=(((*width)*pf.size)+(align-1))&(~(align-1));
 
 	if(srcPitch*(*height)+bh.bfOffBits!=bh.bfSize)
@@ -300,18 +296,16 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	int flags=O_RDWR|O_CREAT|O_TRUNC;
 	unsigned char *tempbuf=NULL;  char *temp;
 	BitmapHeader bh;  int mode;
-	PF pf;
+	PF pf=pf_get(format);
 
 	#ifdef _WIN32
 	flags|=O_BINARY;  mode=_S_IREAD|_S_IWRITE;
 	#else
 	mode=S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
 	#endif
-	if(!filename || !buf || width<1 || height<1 || format<0
-		|| format>=PIXELFORMATS-1 || pitch<0)
+	if(!filename || !buf || width<1 || height<1 || pf.bpc<8 || pitch<0)
 		_throw("Invalid argument to bmp_save()");
 
-	pf=pf_get(format);
 	if(pitch==0) pitch=width*pf.size;
 
 	if((temp=strrchr(filename, '.'))!=NULL)

@@ -120,10 +120,10 @@ void VirtualDrawable::OGLDrawable::setVisAttribs(void)
 {
 	if(glxvisual::visAttrib3D(config, GLX_STEREO))
 		stereo=true;
-	int pixelsize=glxvisual::visAttrib3D(config, GLX_RED_SIZE)
+	rgbSize=glxvisual::visAttrib3D(config, GLX_RED_SIZE)
 		+glxvisual::visAttrib3D(config, GLX_GREEN_SIZE)
-		+glxvisual::visAttrib3D(config, GLX_BLUE_SIZE)
-		+glxvisual::visAttrib3D(config, GLX_ALPHA_SIZE);
+		+glxvisual::visAttrib3D(config, GLX_BLUE_SIZE);
+	int pixelsize=rgbSize+glxvisual::visAttrib3D(config, GLX_ALPHA_SIZE);
 
 	if(pixelsize==32)
 	{
