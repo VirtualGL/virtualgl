@@ -35,10 +35,6 @@ namespace glxvisual
 	// 2D X server.)
 	int visAttrib2D(Display *dpy, int screen, VisualID vid, int attribute);
 
-	int visDepth2D(Display *dpy, int screen, VisualID vid);
-
-	int visClass2D(Display *dpy, int screen, VisualID vid);
-
 	// This function finds a 2D X server visual that matches the given
 	// visual parameters.  As with the above functions, it uses the cached
 	// attributes from the 2D X server, or it caches them if they have not

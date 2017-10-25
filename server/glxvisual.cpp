@@ -328,30 +328,6 @@ int visAttrib3D(GLXFBConfig config, int attribute)
 }
 
 
-int visDepth2D(Display *dpy, int screen, VisualID vid)
-{
-	buildVisAttribTable(dpy, screen);
-
-	for(int i=0; i<vaEntries; i++)
-	{
-		if(va[i].visualID==vid) return va[i].depth;
-	}
-	return 24;
-}
-
-
-int visClass2D(Display *dpy, int screen, VisualID vid)
-{
-	buildVisAttribTable(dpy, screen);
-
-	for(int i=0; i<vaEntries; i++)
-	{
-		if(va[i].visualID==vid) return va[i].c_class;
-	}
-	return TrueColor;
-}
-
-
 VisualID matchVisual2D(Display *dpy, int screen, int depth, int c_class,
 	int level, int stereo, int trans)
 {
