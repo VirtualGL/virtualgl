@@ -188,8 +188,7 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	#ifdef _WIN32
 	flags|=O_BINARY;
 	#endif
-	if(!filename || !buf || !width || !height || format<0	|| format>BMP_NUMPF-1
-		|| align<1)
+	if(!filename || !buf || !width || !height || format>BMP_NUMPF-1 || align<1)
 		_throw("invalid argument to loadbmp()");
 	if((align&(align-1))!=0)
 		_throw("Alignment must be a power of 2");
@@ -312,8 +311,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	#else
 	mode=S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
 	#endif
-	if(!filename || !buf || width<1 || height<1 || format<0 || format>BMP_NUMPF-1
-		|| pitch<0)
+	if(!filename || !buf || width<1 || height<1 || format>BMP_NUMPF-1 || pitch<0)
 		_throw("bad argument to bmp_save()");
 
 	if(pitch==0) pitch=width*bmp_ps[format];
