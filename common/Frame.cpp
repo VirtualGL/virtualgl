@@ -728,7 +728,7 @@ void XVFrame::init(rrframeheader &h)
 	if(h.framew>fb.xvi->width || h.frameh>fb.xvi->height)
 	{
 		XSync(dpy, False);
-		_fbx(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+		_fbxv(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	}
 	hdr=h;
 	if(hdr.framew>fb.xvi->width) hdr.framew=fb.xvi->width;
