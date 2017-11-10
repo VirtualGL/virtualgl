@@ -31,6 +31,7 @@ typedef struct _PF
 	   unit tests.  They are not particularly fast. */
 	void (*getRGB)(unsigned char *, int *, int *, int *);
 	void (*setRGB)(unsigned char *, int, int, int);
+	/* Optimized pixel conversion */
 	void (*convert)(unsigned char *srcBuf, int width, int srcStride, int height,
 		unsigned char *dstBuf, int dstStride, struct _PF dstpf);
 } PF;
