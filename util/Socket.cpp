@@ -448,4 +448,3 @@ void Socket::recv(char *buf, int len)
 	}
 	if(bytesRead!=len) _throw("Incomplete receive");
 }
-

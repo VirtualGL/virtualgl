@@ -317,7 +317,7 @@ void Fake_glXUseXFont(Font font, int first, int count, int listbase)
 			{
 				_glBitmap(0, 0, 0.0, 0.0, ci[i].dx, ci[i].dy, NULL);
 			}
- 			_glEndList();
+			_glEndList();
 		}
 
 		XDestroyImage(image);  image = NULL;

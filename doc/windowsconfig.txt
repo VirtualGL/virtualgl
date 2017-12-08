@@ -20,5 +20,5 @@ To enable MIT-SHM in Cygwin/X:
 
 	#. Start or re-start Cygwin/X
 
-	#. Run ''xdpyinfo'' and verify that ''MIT-SHM'' appears in the list of 
+	#. Run ''xdpyinfo'' and verify that ''MIT-SHM'' appears in the list of
 		X extensions

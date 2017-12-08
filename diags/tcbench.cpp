@@ -20,7 +20,6 @@
 #include "vglutil.h"
 #include "Timer.h"
 #include "fbx.h"
-
 #ifndef _WIN32
 extern "C" {
 #define NeedFunctionPrototypes 1
@@ -29,6 +28,7 @@ extern "C" {
 #include <sys/signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <X11/extensions/XTest.h>
 #endif
 
 using namespace vglutil;
@@ -83,6 +83,32 @@ char *program_name;
 		_throww32("Could not inject mouse events");  \
 }
 
+#else
+
+Bool deadYet = False;
+
+void handler(int type)
+{
+	deadYet=true;
+}
+
+#define MOVE_MOUSE() {  \
+	XTestFakeMotionEvent(wh.dpy, DefaultScreen(wh.dpy), currentX, currentY,  \
+		CurrentTime);  \
+	if(moveX>0) {  \
+		currentX+=incX;  \
+		if(currentX<=rootx+16-moveX ||  \
+			currentX>=rootx+16+moveX)  \
+			incX=-incX;  \
+	}  \
+	if(moveY>0) {  \
+		currentY+=incY;  \
+		if(currentY<=rooty+16-moveY ||  \
+			currentY>=rooty+16+moveY)  \
+			incY=-incY;  \
+	}  \
+}
+
 #endif
 
 
@@ -91,7 +117,6 @@ void usage(void)
 	printf("\n");
 	printf("USAGE: %s [options]\n\n", program_name);
 	printf("Options:\n");
-	#ifdef _WIN32
 	printf("-lb = Simulate holding down the left mouse button while the benchmark is\n");
 	printf("      running\n");
 	printf("-mb = Simulate holding down the middle mouse button while the benchmark is\n");
@@ -104,7 +129,6 @@ void usage(void)
 	printf("          relative to the center of the sampling block)\n");
 	printf("-rb = Simulate holding down the right mouse button while the benchmark is\n");
 	printf("      running\n");
-	#endif
 	printf("-s <s> = Sample the window <s> times per second (default: %d)\n",
 		DEFSAMPLERATE);
 	printf("-t <t> = Run the benchmark for <t> seconds (default: %.1f)\n",
@@ -125,9 +149,12 @@ int main(int argc, char **argv)
 	#ifdef _WIN32
 	INPUT inputs[4];
 	RECT winRect;
-	int moveX=0, moveY=0, incX=-1, incY=-1, currentX, currentY;
 	DWORD downFlags=0, upFlags=0;
+	#else
+	unsigned int button=0;
+	int rootx, rooty;
 	#endif
+	int moveX=0, moveY=0, incX=-1, incY=-1, currentX=0, currentY=0;
 
 	program_name=argv[0];
 	memset(&wh, 0, sizeof(wh));
@@ -161,7 +188,6 @@ int main(int argc, char **argv)
 			wh.d=(Drawable)temp;
 			#endif
 		}
-		#ifdef _WIN32
 		else if(!stricmp(argv[i], "-mx") && i<argc-1)
 		{
 			if(sscanf(argv[++i], "%d", &moveX)<1 || moveX<=0) usage();
@@ -172,20 +198,31 @@ int main(int argc, char **argv)
 		}
 		else if(!stricmp(argv[i], "-lb"))
 		{
+			#ifdef _WIN32
 			downFlags|=MOUSEEVENTF_LEFTDOWN;
 			upFlags|=MOUSEEVENTF_LEFTUP;
+			#else
+			button=1;
+			#endif
 		}
 		else if(!stricmp(argv[i], "-mb"))
 		{
+			#ifdef _WIN32
 			downFlags|=MOUSEEVENTF_MIDDLEDOWN;
 			upFlags|=MOUSEEVENTF_MIDDLEUP;
+			#else
+			button=2;
+			#endif
 		}
 		else if(!stricmp(argv[i], "-rb"))
 		{
+			#ifdef _WIN32
 			downFlags|=MOUSEEVENTF_RIGHTDOWN;
 			upFlags|=MOUSEEVENTF_RIGHTUP;
+			#else
+			button=3;
+			#endif
 		}
-		#endif
 		else usage();
 	}
 
@@ -217,6 +254,10 @@ int main(int argc, char **argv)
 
 	#else
 
+	signal(SIGINT, handler);
+	signal(SIGTERM, handler);
+	signal(SIGHUP, handler);
+
 	if(!XInitThreads())
 	{
 		fprintf(stderr, "XInitThreads() failed\n");
@@ -226,6 +267,15 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
 		exit(1);
+	}
+	if(moveX>0 || moveY>0)
+	{
+		int dummy;
+		if(!XTestQueryExtension(wh.dpy, &dummy, &dummy, &dummy, &dummy))
+		{
+			fprintf(stderr, "XTEST extension not available\n");
+			exit(1);
+		}
 	}
 	if(!wh.d)
 	{
@@ -257,29 +307,34 @@ int main(int argc, char **argv)
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	#endif
 
-	#ifdef _WIN32
 	if(moveX>0)
 		printf("Simulating horizontal mouse movement +/- %d pixels\n", moveX);
 	if(moveY>0)
 		printf("Simulating vertical mouse movement +/- %d pixels\n", moveY);
 	if(moveX>0 || moveY>0)
 	{
+		#ifdef _WIN32
 		memset(inputs, 0, sizeof(INPUT)*4);
 		if(!GetWindowRect(wh, &winRect))
 			_throww32("Could not get window rectangle");
 		currentX=winRect.left+x+(moveY>0 ? 40:16);
 		currentY=winRect.top+y+(moveX>0 ? 40:16);
+		#else
+		Window child;
+		XTranslateCoordinates(wh.dpy, wh.d, DefaultRootWindow(wh.dpy), x, y,
+			&rootx, &rooty, &child);
+		currentX=rootx+(moveY>0 ? 40:16);
+		currentY=rooty+(moveX>0 ? 40:16);
+		if(button>0) XTestFakeButtonEvent(wh.dpy, button, True, CurrentTime);
+		#endif
 		MOVE_MOUSE();
 	}
-	#endif
 	timer.start();
 	do
 	{
 		_fbx(fbx_read(&fb, x, y));
-		#ifdef _WIN32
 		if(moveX>0 || moveY>0)
 			MOVE_MOUSE();
-		#endif
 		samples++;
 		if(first)
 		{
@@ -297,12 +352,19 @@ int main(int argc, char **argv)
 		#else
 		int sleepTime=(int)(1000000.*((double)samples/(double)sampleRate-elapsed));
 		if(sleepTime>0) usleep(sleepTime);
+		if(deadYet) break;
 		#endif
 	} while((elapsed=timer.elapsed())<benchTime);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	inputs[3].mi.dwFlags=upFlags;
 	SendInput(1, &inputs[3], sizeof(INPUT));
+	#else
+	if((moveX>0 || moveY>0) && button>0)
+	{
+			XTestFakeButtonEvent(wh.dpy, button, False, CurrentTime);
+			XSync(wh.dpy, False);
+	}
 	#endif
 
 	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples,

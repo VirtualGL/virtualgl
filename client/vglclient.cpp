@@ -567,4 +567,3 @@ int start(char *displayname)
 
 	return retval;
 }
-

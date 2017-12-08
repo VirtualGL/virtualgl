@@ -1681,7 +1681,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 		vglfaker::setExcludeCurrent(true);
 		return retval;
 	}
- 	if(dpyhash.find(dpy))
+	if(dpyhash.find(dpy))
 	{
 		vglfaker::setExcludeCurrent(true);
 		return _glXMakeCurrent(dpy, drawable, ctx);

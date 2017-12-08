@@ -235,7 +235,7 @@ void VGLTrans::run(void)
 	{
 		if(thread) thread->setError(e);
 		ready.signal();
- 		throw;
+		throw;
 	}
 }
 

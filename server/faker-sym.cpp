@@ -155,9 +155,9 @@ static void *loadGLSymbol(const char *name, bool optional)
 	}
 
 	if(!sym && (fconfig.verbose || !optional))
- 	{
-	 	vglout.print("[VGL] %s: Could not load function \"%s\"",
-		 	optional? "WARNING":"ERROR", name);
+	{
+		vglout.print("[VGL] %s: Could not load function \"%s\"",
+			optional? "WARNING":"ERROR", name);
 		if(strlen(fconfig.gllib)>0)
 			vglout.print(" from %s", fconfig.gllib);
 		vglout.print("\n");
