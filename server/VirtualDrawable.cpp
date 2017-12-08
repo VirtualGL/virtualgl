@@ -504,7 +504,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			_glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
 			color=rgb[0]+(rgb[1]<<8)+(rgb[2]<<16);
 		}
- 		char envName[40], envValue[10];
+		char envName[40], envValue[10];
 		if(buf==GL_FRONT_RIGHT || buf==GL_BACK_RIGHT)
 		{
 			snprintf(envName, 40, "__VGL_AUTOTESTRCLR%x", (unsigned int)x11Draw);

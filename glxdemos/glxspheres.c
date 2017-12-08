@@ -461,7 +461,7 @@ int eventLoop(Display *dpy)
 				}
 				case MotionNotify:
 					if(event.xmotion.state & Button1Mask) doDisplay=advance=1;
- 					break;
+					break;
 				case ClientMessage:
 				{
 					XClientMessageEvent *cme=(XClientMessageEvent *)&event;

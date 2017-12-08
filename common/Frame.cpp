@@ -307,7 +307,7 @@ void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 					srcptr2+=f.pixelSize, dstptr2+=pixelSize)
 					memcpy(dstptr2, srcptr2, 3);
 			}
-	 	}
+		}
 		else
 		{
 			for(i=0; i<height; i++, srcptr+=srcStride, dstptr+=dstStride)
@@ -318,7 +318,7 @@ void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 					dstptr2[2]=srcptr2[0];
 					dstptr2[1]=srcptr2[1];
 					dstptr2[0]=srcptr2[2];
-			 	}
+				}
 			}
 		}
 	}

@@ -41,7 +41,7 @@ void X11Trans::run(void)
 
 	try
 	{
- 		while(!deadYet)
+		while(!deadYet)
 		{
 			FBXFrame *f;  void *ftemp=NULL;
 

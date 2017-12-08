@@ -452,7 +452,7 @@ char **XListExtensions(Display *dpy, int *next)
 	CATCH();
 
 	if(next) *next=n;
- 	return list;
+	return list;
 }
 
 
@@ -506,7 +506,7 @@ Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 		if(first_event) prargi(*first_event);
 		if(first_error) prargi(*first_error);  closetrace();
 
- 	return retval;
+	return retval;
 }
 
 
