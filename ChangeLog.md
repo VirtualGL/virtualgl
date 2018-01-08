@@ -27,6 +27,25 @@ is handling them.
 packages would fail with a GLXBadContext error when used in an indirect OpenGL
 environment.
 
+4. Worked around a segfault in Mayavi2 (and possibly other VTK applications)
+when using nVidia's proprietary drivers.  VirtualGL's implementation of
+`glXGetVisualFromFBConfig()` always returned a TrueColor X visual, regardless
+of the GLXFBConfig passed to it.  From VirtualGL's point of view, this was
+correct behavior, because VGL always converts the rendered 3D pixels to
+TrueColor when reading them back.  However, some use cases in VTK assume that
+there is a 1:1 correspondence between X visuals and GLX FB configs, which is
+not the case when using VirtualGL.  Thus, VGL's implementation of
+`glXGetVisualFromFBConfig()` was causing VTK's visual matching algorithm to
+always select the last FB config in the list, and when using nVidia hardware,
+that FB config usually describes an esoteric floating point pixel format.  When
+VTK subsequently attempted to create a context with this FB config and make
+that context current, VirtualGL's internal call to `glXMakeContextCurrent()`
+failed.  VGL passed this failure status back to VTK in the return value of
+`glXMakeCurrent()`, but VTK ignored it, and the lack of a valid context led to
+a subsequent segfault when VTK tried to call `glBlendFuncSeparate()`.
+VirtualGL's implementation of `glXGetVisualFromFBConfig()` now returns NULL
+unless the FB config has a corresponding visual on the 3D X server.
+
 
 2.5.2
 =====

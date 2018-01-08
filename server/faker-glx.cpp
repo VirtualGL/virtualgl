@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2017 D. R. Commander
+ * Copyright (C)2009, 2011-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -179,15 +179,16 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 				vid=glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class, 0,
 					glxvisual::visAttrib3D(config, GLX_STEREO), 0);
 			XFree(vis);
+
+			// Failing that, we try to find a 24-bit TrueColor visual with the same
+			// stereo properties.
+			if(!vid)
+				vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0,
+					glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+			// Failing that, we try to find a 24-bit TrueColor mono visual.
+			if(!vid)
+				vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0, 0, 0);
 		}
-		// Failing that, we try to find a 24-bit TrueColor visual with the same
-		// stereo properties.
-		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0,
-				glxvisual::visAttrib3D(config, GLX_STEREO), 0);
-		// Failing that, we try to find a 24-bit TrueColor mono visual.
-		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, 24, TrueColor, 0, 0, 0);
 	}
 	if(vid) cfghash.add(dpy, config, vid);
 	return vid;
