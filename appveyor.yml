@@ -18,7 +18,7 @@ build_script:
   - cmd: >-
       for /f %%i in ('"cygpath %CD%"') do set MINGWPATH=%%i
 
-      bash c:/buildscripts/buildvgl -r file://%MINGWPATH% -b /c/vgl.nightly %APPVEYOR_REPO_BRANCH% -v
+      bash c:/buildscripts/buildvgl -d %MINGWPATH% -b /c/vgl.nightly -v
 
       move c:\vgl.nightly\files\*.tar.gz .
 
