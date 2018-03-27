@@ -13,7 +13,7 @@ foreach(program glxcontexts glxdemo glxgears glxgears_pixmap glxheads glxpbdemo
 		${X11_Xext_LIB} m)
 endforeach()
 
-add_executable(glxinfo glxinfo.c)
+add_executable(glxinfo glxinfo.c glinfo_common.c)
 target_link_libraries(glxinfo ${OPENGL_gl_LIBRARY} ${X11_X11_LIB}
 	${OPENGL_glu_LIBRARY} m)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")

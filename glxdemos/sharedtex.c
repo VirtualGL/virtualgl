@@ -278,7 +278,6 @@ EventLoop(void)
                switch (keySym) {
                case XK_Escape:
                   exit(0);
-                  break;
                case XK_t:
                case XK_T:
                   ModifyTexture();

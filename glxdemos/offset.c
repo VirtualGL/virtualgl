@@ -177,8 +177,6 @@ int main(int argc, char** argv) {
 
     /* process events until the user presses ESC */
     while (1) process_input(dpy, win);
-
-    return 0;
 }
 
 static void

@@ -248,7 +248,6 @@ static void event_loop(Display *dpy, Window win)
                   switch (keySym) {
                      case XK_Escape:
                         exit(0);
-                        break;
                      case XK_Up:
                         Sides++;
                         if (Sides>MaxSides) Sides = MaxSides;

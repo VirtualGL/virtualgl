@@ -423,6 +423,13 @@ EventLoop(void)
    while (1) {
       int i;
       XEvent event;
+
+      /* Do we have an event? */
+      if (XPending(gDpy) == 0) {
+         usleep(10000);
+         continue;
+      }
+
       XNextEvent(gDpy, &event);
       for (i = 0; i < NumWindows; i++) {
          struct window *h = &Windows[i];

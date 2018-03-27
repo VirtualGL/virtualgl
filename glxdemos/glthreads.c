@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2000  Brian Paul   All Rights Reserved.
+ * Copyright (C) 2018  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -88,6 +89,26 @@ static GLboolean Animate = GL_TRUE;
 static pthread_mutex_t Mutex;
 static pthread_cond_t CondVar;
 static pthread_mutex_t CondMutex;
+
+
+/* These macros were added for VirtualGL.  When using the X11 Transport, VGL
+   makes calls to X[Shm]PutImage() within the body of glXSwapBuffers(), and
+   sometimes within the body of glXMakeCurrent() as well.  Thus, some form of
+   locking is always necessary when sharing the same display connection among
+   multiple threads.  Passing -l to this program causes it to use pthreads for
+   locking instead of XLockDisplay()/XUnlockDisplay(). */
+
+#define LOCK(dpy) \
+   if (Locking) \
+      pthread_mutex_lock(&Mutex); \
+   else if (!MultiDisplays) \
+      XLockDisplay(dpy) \
+
+#define UNLOCK(dpy) \
+   if (Locking) \
+      pthread_mutex_unlock(&Mutex); \
+   else if (!MultiDisplays)  \
+      XUnlockDisplay(dpy) \
 
 
 static void
@@ -238,8 +259,7 @@ draw_loop(struct winthread *wt)
 {
    while (!ExitFlag) {
 
-      if (Locking)
-         pthread_mutex_lock(&Mutex);
+      LOCK(wt->Dpy);
 
       glXMakeCurrent(wt->Dpy, wt->Win, wt->Context);
       if (!wt->Initialized) {
@@ -251,8 +271,7 @@ draw_loop(struct winthread *wt)
          wt->Initialized = GL_TRUE;
       }
 
-      if (Locking)
-         pthread_mutex_unlock(&Mutex);
+      UNLOCK(wt->Dpy);
 
       glEnable(GL_DEPTH_TEST);
 
@@ -282,13 +301,11 @@ draw_loop(struct winthread *wt)
          draw_object();
       glPopMatrix();
 
-      if (Locking)
-         pthread_mutex_lock(&Mutex);
+      LOCK(wt->Dpy);
 
       glXSwapBuffers(wt->Dpy, wt->Win);
 
-      if (Locking)
-         pthread_mutex_unlock(&Mutex);
+      UNLOCK(wt->Dpy);
 
       if (Animate) {
          usleep(5000);
@@ -361,22 +378,17 @@ event_loop(Display *dpy)
 
    while (!ExitFlag) {
 
-      if (Locking) {
-         while (1) {
-            int k;
-            pthread_mutex_lock(&Mutex);
-            k = XPending(dpy);
-            if (k) {
-               XNextEvent(dpy, &event);
-               pthread_mutex_unlock(&Mutex);
-               break;
-            }
-            pthread_mutex_unlock(&Mutex);
-            usleep(5000);
+      while (1) {
+         int k;
+         LOCK(dpy);
+         k = XPending(dpy);
+         if (k) {
+            XNextEvent(dpy, &event);
+            UNLOCK(dpy);
+            break;
          }
-      }
-      else {
-         XNextEvent(dpy, &event);
+         UNLOCK(dpy);
+         usleep(5000);
       }
 
       switch (event.type) {
@@ -614,8 +626,8 @@ main(int argc, char *argv[])
 
    if (Locking)
       printf("glthreads: Using explicit locks around Xlib calls.\n");
-   else
-      printf("glthreads: No explict locking.\n");
+   else if (!MultiDisplays)
+      printf("glthreads: Using XLockDisplay()/XUnlockDisplay().\n");
 
    if (MultiDisplays)
       printf("glthreads: Per-thread display connections.\n");
@@ -676,7 +688,8 @@ main(int argc, char *argv[])
    for (i = 0; i < numThreads; i++) {
       pthread_create(&WinThreads[i].Thread, NULL, thread_function,
                      (void*) &WinThreads[i]);
-      printf("glthreads: Created thread %p\n", (void *) WinThreads[i].Thread);
+      printf("glthreads: Created thread %p\n",
+             (void *) (size_t) WinThreads[i].Thread);
    }
 
    if (MultiDisplays)

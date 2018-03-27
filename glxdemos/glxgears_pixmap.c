@@ -540,7 +540,7 @@ main(int argc, char *argv[])
 
    glXDestroyContext(dpy, gears.ctx);
    XDestroyWindow(dpy, gears.win);
-   glXDestroyPixmap(dpy, gears.pixmap);
+   glXDestroyPixmap(dpy, gears.glxpixmap);
    XFreePixmap(dpy, gears.pixmap);
    XCloseDisplay(dpy);
 

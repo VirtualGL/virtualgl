@@ -313,7 +313,6 @@ EventLoop(void)
                         switch (keySym) {
                            case XK_Escape:
                               return;
-                              break;
                            case XK_d:
                            case XK_D:
                               printf("Delete Texture in window %d\n", i);
