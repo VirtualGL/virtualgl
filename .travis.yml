@@ -46,6 +46,7 @@ deploy:
     local-dir: $HOME/src/vgl.nightly/latest/files
     upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
     on:
+      repo: VirtualGL/virtualgl
       branch: master
   - provider: s3
     bucket: virtualgl-pr
@@ -57,4 +58,5 @@ deploy:
     local-dir: $HOME/src/vgl.nightly/latest/files
     upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
     on:
+      repo: VirtualGL/virtualgl
       branch: dev
