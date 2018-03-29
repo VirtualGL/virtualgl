@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	{
 		if(argc > 1) for(int i = 1; i < argc; i++)
 		{
-			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+			if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 			else if(!stricmp(argv[i], "-sync")) dosync = true;
 			else if(!stricmp(argv[i], "-bottomup")) bottomup = true;
 			else usage(argv);

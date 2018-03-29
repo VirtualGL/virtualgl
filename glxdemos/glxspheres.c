@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
-		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		else if(!stricmp(argv[i], "-dc"))
 		{
 			useDC = 1;  rgbAttribs[15] = GLX_DIRECT_COLOR;

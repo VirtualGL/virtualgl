@@ -2085,7 +2085,7 @@ int main(int argc, char **argv)
 
 	if(argc > 1) for(int i = 1; i < argc; i++)
 	{
-		if(!strcasecmp(argv[i], "-h") || !strcasecmp(argv[i], "-?")) usage(argv);
+		if(!strcasecmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		else if(!strcasecmp(argv[i], "-n") && i < argc - 1)
 		{
 			nThreads = atoi(argv[++i]);

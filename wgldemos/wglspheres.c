@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
-		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		else if(!stricmp(argv[i], "-i")) interactive = 1;
 		else if(!stricmp(argv[i], "-l")) loColor = 1;
 		else if(!stricmp(argv[i], "-m")) useImm = 1;

@@ -190,13 +190,14 @@ int main(int argc, char **argv)
 	try
 	{
 		if(argc < 2) usage(argv);
+
 		if(!stricmp(argv[1], "-client"))
 		{
 			if(argc < 3) usage(argv);
 			server = 0;  serverName = argv[2];
 			if(argc > 3) for(i = 3; i < argc; i++)
 			{
-				if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+				if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 				#ifdef USESSL
 				else if(!stricmp(argv[i], "-ssl"))
 				{
@@ -222,7 +223,7 @@ int main(int argc, char **argv)
 			server = 1;
 			if(argc > 2) for(i = 2; i < argc; i++)
 			{
-				if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+				if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 				#ifdef USESSL
 				else if(!stricmp(argv[i], "-ssl"))
 				{

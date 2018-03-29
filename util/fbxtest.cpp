@@ -710,7 +710,7 @@ int main(int argc, char **argv)
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
-		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		#ifndef _WIN32
 		else if(!stricmp(argv[i], "-checkdb"))
 		{

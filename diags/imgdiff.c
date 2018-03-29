@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	if(argc < 3) usage(argv);
 	if(argc > 3) for(i = 3; i < argc; i++)
 	{
-		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		else if(!stricmp(argv[i], "-mag")) mag = 1;
 		else usage(argv);
 	}

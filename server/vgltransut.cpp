@@ -27,6 +27,7 @@ using namespace vglserver;
 void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s <bitmap file> [options]\n\n", argv[0]);
+	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "-client <machine:x.x> = X Display where the video should be sent (VGL client\n");
 	fprintf(stderr, "                        must be running on that machine) or 0 for local test\n");
 	fprintf(stderr, "                        only (default: %s)\n",
@@ -63,10 +64,11 @@ int main(int argc, char **argv)
 
 		bool localtest = false;
 		if(argc < 2) usage(argv);
+		if(!stricmp(argv[1], "-h") || !strcmp(argv[1], "-?")) usage(argv);
 
 		if(argc > 2) for(i = 2; i < argc; i++)
 		{
-			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
+			if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 			#ifdef USESSL
 			else if(!stricmp(argv[i], "-ssl")) fconfig.ssl = 1;
 			#endif

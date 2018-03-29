@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 
 	if(argc > 1) for(i = 1; i < argc; i++)
 	{
-		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage();
+		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage();
 		else if(!stricmp(argv[i], "-t") && i < argc - 1)
 		{
 			if((benchTime = atof(argv[++i])) <= 0.0) usage();
