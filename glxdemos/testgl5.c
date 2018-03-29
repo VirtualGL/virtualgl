@@ -1,4 +1,3 @@
-
 /*
   Compile with:
   gcc testgl5.c -o testgl5 -I/home/X11R6/include -L/home/X11R6/lib -lGL
@@ -66,7 +65,7 @@ void configure(unsigned int width, unsigned int height)
    if (glxPbuffer) {
      glXDestroyPbuffer(xDisplay, glxPbuffer);
    }
-   
+
    pbuffer_attrib[1] = width;
    pbuffer_attrib[3] = height;
    glxPbuffer = glXCreatePbuffer(xDisplay, glxFBConfig, pbuffer_attrib);
@@ -92,7 +91,7 @@ void drawBuffer(void)
 
   printf("Setting context: %p 0x%lx 0x%lx %p\n", xDisplay, glxWindow, glxWindow, glxContext);
   glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext);
-  
+
   glDrawBuffer(GL_FRONT_AND_BACK);
 
   glViewport( 0, 0, gWidth, gHeight );
@@ -119,8 +118,7 @@ void drawBuffer(void)
 
   glFlush();
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Red | Red\n");
     printf("Red | Red\n");
     printf("Press any key ...\n");  getchar();
@@ -155,8 +153,7 @@ void drawBuffer(void)
 
   glFlush();
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Red | Red\n");
     printf("Red | Red\n");
     printf("Press any key ...\n");  getchar();
@@ -172,8 +169,7 @@ void drawBuffer(void)
   glCopyPixels(0, 0, 250, 100, GL_COLOR);
   glFlush();
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Red    | Red\n");
     printf("Purple | Red\n");
     printf("Press any key ...\n");  getchar();
@@ -190,8 +186,7 @@ void drawBuffer(void)
   glFlush();
 
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Green  | Red\n");
     printf("Purple | Red\n");
     printf("Press any key ...\n");  getchar();
@@ -200,12 +195,12 @@ void drawBuffer(void)
   printf("Setting context: %p 0x%lx 0x%lx %p\n", xDisplay, glxWindow, glxWindow, glxPbufferContext);
   /* ********************************************************************* */
   /* BUG IS EXHIBITED IN THE FOLLOWING LINE                                */
-  if(reproducebug)
+  if (reproducebug)
     glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxPbufferContext);
 
   /* Uncomment following line to show correct behavior                     */
   else
-    glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext); /* */
+    glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext);
 
 
   glDrawBuffer(GL_FRONT);
@@ -215,8 +210,7 @@ void drawBuffer(void)
   glCopyPixels(250, 0, 250, 100, GL_COLOR);
   glFlush();
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Green  | Red\n");
     printf("Purple | Purple\n");
     printf("Press any key ...\n");  getchar();
@@ -225,12 +219,12 @@ void drawBuffer(void)
   printf("Setting context: %p 0x%lx 0x%lx %p\n", xDisplay, glxWindow, glxPbuffer, glxPbufferContext);
   /* ********************************************************************* */
   /* BUG IS EXHIBITED IN THE FOLLOWING LINE                                */
-  if(reproducebug)
+  if (reproducebug)
     glXMakeContextCurrent(xDisplay, glxWindow, glxPbuffer, glxPbufferContext);
 
   /* Uncomment following line to show correct behavior                     */
   else
-    glXMakeContextCurrent(xDisplay, glxWindow, glxPbuffer, glxContext); /**/
+    glXMakeContextCurrent(xDisplay, glxWindow, glxPbuffer, glxContext);
 
 
   glDrawBuffer(GL_FRONT);
@@ -243,8 +237,7 @@ void drawBuffer(void)
 
 
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Green  | Green\n");
     printf("Purple | Purple\n");
     printf("Press any key ...\n");  getchar();
@@ -252,7 +245,7 @@ void drawBuffer(void)
 
   printf("Setting context: %p 0x%lx 0x%lx %p\n", xDisplay, glxWindow, glxWindow, glxContext);
   glXMakeContextCurrent(xDisplay, glxWindow, glxWindow, glxContext);
-  
+
   glDrawBuffer(GL_FRONT_AND_BACK);
 
   glViewport( 0, 0, gWidth, gHeight );
@@ -273,8 +266,7 @@ void drawBuffer(void)
 
   glFlush();
 
-  if(interactive)
-  {
+  if (interactive) {
     printf("Green  | Green\n");
     printf("Purple | Purple\n");
     printf("Press any key ...\n");  getchar();
@@ -296,16 +288,16 @@ static void event_loop( Display *dpy )
 
       switch (event->type) {
       case ConfigureNotify:
-	configure( event->xconfigure.width, event->xconfigure.height );
-	break;
+        configure( event->xconfigure.width, event->xconfigure.height );
+        break;
       default:
-	break;
+        break;
       }
    }
 }
 
 static Window make_rgb_db_window( Display *dpy,
-				  unsigned int width, unsigned int height )
+                                  unsigned int width, unsigned int height )
 {
   GLXFBConfig *glxFBConfigs = NULL;
 
@@ -326,7 +318,7 @@ static Window make_rgb_db_window( Display *dpy,
   unsigned long mask;
   Window root;
   Window xwin;
-  
+
   scrnum = DefaultScreen( dpy );
 
   glxFBConfigs = glXChooseFBConfig(dpy, scrnum, fbAttribs, &glxNumFBConfigs);
@@ -346,17 +338,17 @@ static Window make_rgb_db_window( Display *dpy,
   }
 
   root = RootWindow( dpy, scrnum );
-  
+
   /* window attributes */
   attr.background_pixel = 0;
   attr.border_pixel = 0;
   attr.colormap = XCreateColormap( dpy, root, visinfo->visual, AllocNone);
   attr.event_mask = StructureNotifyMask | ExposureMask | ButtonPressMask | ButtonMotionMask;
   mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
-  
+
   xwin = XCreateWindow( dpy, root, 0, 0, width, height,
-			0, visinfo->depth, InputOutput,
-			visinfo->visual, mask, &attr );
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr );
   if (!xwin) {
     printf("Error: Unable to create X Window\n");
     exit(-1);
@@ -367,13 +359,13 @@ static Window make_rgb_db_window( Display *dpy,
     printf("Error: Unable to create GLX Window.\n");
     exit(-1);
   }
-  
+
   glxContext = glXCreateNewContext(dpy, glxFBConfig, GLX_RGBA_TYPE, NULL, True);
   if (!glxContext) {
     printf("Error: glXCreateNewContext failed\n");
     exit(1);
   }
-  
+
   return xwin;
 }
 
@@ -384,10 +376,11 @@ int main( int argc, char *argv[] )
    Window win;
    int i;
 
-   if(argc>1) for(i=0; i<argc; i++)
-   {
-     if(!strcmp(argv[i], "-i")) interactive=1;
-     if(!strcmp(argv[i], "-bug")) reproducebug=1;
+   if (argc > 1) {
+     for (i = 0; i < argc; i++) {
+       if (!strcmp(argv[i], "-i")) interactive = 1;
+       if (!strcmp(argv[i], "-bug")) reproducebug = 1;
+     }
    }
 
    dpy = XOpenDisplay(NULL);

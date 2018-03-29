@@ -59,7 +59,7 @@ DestroyContext(Display *dpy, GLXContext ctx);
 
 extern PBUFFER
 CreatePbuffer(Display *dpy, int screen, FBCONFIG config,
-	      int width, int height, Bool preserve, Bool largest);
+              int width, int height, Bool preserve, Bool largest);
 
 
 extern void

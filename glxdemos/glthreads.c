@@ -1,16 +1,16 @@
 /*
  * Copyright (C) 2000  Brian Paul   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -54,7 +54,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <X11/keysym.h>
 
 
 /*
@@ -121,8 +120,8 @@ MakeNewTexture(struct winthread *wt)
          float dt = 5.0 * (j - 0.5 * TEX_SIZE) / TEX_SIZE;
          float ds = 5.0 * (i - 0.5 * TEX_SIZE) / TEX_SIZE;
          float r = dt * dt + ds * ds + step;
-         image[j][i][0] = 
-         image[j][i][1] = 
+         image[j][i][0] =
+         image[j][i][1] =
          image[j][i][2] = 0.75 + 0.25 * cos(r);
          image[j][i][3] = 1.0;
       }
@@ -144,7 +143,7 @@ MakeNewTexture(struct winthread *wt)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_SIZE, TEX_SIZE, 0, 
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_SIZE, TEX_SIZE, 0,
                    GL_RGBA, GL_FLOAT, image);
    }
 }
@@ -449,12 +448,12 @@ create_window(struct winthread *wt, GLXContext shareCtx)
    Window win;
    GLXContext ctx;
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
                     GLX_DEPTH_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_DOUBLEBUFFER,
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -480,8 +479,8 @@ create_window(struct winthread *wt, GLXContext shareCtx)
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow(wt->Dpy, root, xpos, ypos, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr);
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr);
    if (!win) {
       Error("Couldn't create window");
    }
@@ -611,7 +610,7 @@ main(int argc, char *argv[])
          }
       }
    }
-   
+
    if (Locking)
       printf("glthreads: Using explicit locks around Xlib calls.\n");
    else

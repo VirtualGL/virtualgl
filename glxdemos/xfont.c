@@ -1,19 +1,18 @@
-
 /*
  * Mesa 3-D graphics library
- * 
+ *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -61,7 +60,7 @@ static void redraw( Display *dpy, Window w )
 
    /* text */
    glColor3f( 1, 1, 1 );
-   glRasterPos2f(-0.8, 0); 
+   glRasterPos2f(-0.8, 0);
    glListBase(FontBase);
    glCallLists(strlen(text), GL_UNSIGNED_BYTE, (GLubyte *) text);
 
@@ -89,7 +88,7 @@ static void setup_font( Display *dpy )
     fontInfo = XLoadQueryFont(dpy, FontName);
     if (!fontInfo) {
         printf("Error: font %s not found\n", FontName);
-	exit(0);
+        exit(0);
     }
 
     id = fontInfo->fid;
@@ -99,20 +98,20 @@ static void setup_font( Display *dpy )
     FontBase = glGenLists((GLuint) last + 1);
     if (!FontBase) {
         printf("Error: unable to allocate display lists\n");
-	exit(0);
+        exit(0);
     }
     glXUseXFont(id, first, last - first + 1, FontBase + first);
 }
 
 static Window make_rgb_db_window( Display *dpy, int xpos, int ypos,
-				  unsigned int width, unsigned int height )
+                                  unsigned int width, unsigned int height )
 {
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -138,8 +137,8 @@ static Window make_rgb_db_window( Display *dpy, int xpos, int ypos,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow( dpy, root, 0, 0, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr );
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr );
 
    {
       XSizeHints sizehints;
@@ -170,12 +169,12 @@ static void event_loop( Display *dpy )
       XNextEvent( dpy, &event );
 
       switch (event.type) {
-	 case Expose:
-	    redraw( dpy, event.xany.window );
-	    break;
-	 case ConfigureNotify:
-	    resize( event.xconfigure.width, event.xconfigure.height );
-	    break;
+         case Expose:
+            redraw( dpy, event.xany.window );
+            break;
+         case ConfigureNotify:
+            resize( event.xconfigure.width, event.xconfigure.height );
+            break;
          case KeyPress:
             exit(0);
          default:

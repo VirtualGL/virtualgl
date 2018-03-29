@@ -1,4 +1,4 @@
-/* $Id: sharedtex_mt.c,v 1.1 2011-08-12 12:13:23 dcommander Exp $ */
+/* $Id: sharedtex.c,v 1.2 2002/01/16 14:32:46 joukj Exp $ */
 
 /*
  * Test sharing of display lists and texture objects between GLX contests.
@@ -79,12 +79,12 @@ initMainthread(Display *dpy, const char *displayName)
    int scrnum;
    XVisualInfo *visinfo;
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
                     GLX_DEPTH_SIZE, 1,
-		    None };
+                    None };
 
    scrnum = DefaultScreen(dpy);
    visinfo = glXChooseVisual(dpy, scrnum, attrib);
@@ -107,12 +107,12 @@ AddWindow(Display *dpy, const char *displayName, int xpos, int ypos,
    Window win;
    GLXContext ctx;
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
                     GLX_DEPTH_SIZE, 1,
-		    None };
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -140,8 +140,8 @@ AddWindow(Display *dpy, const char *displayName, int xpos, int ypos,
    mask = CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow(dpy, root, xpos, ypos, width, height,
-		       0, visinfo->depth, InputOutput,
-		       visinfo->visual, mask, &attr);
+                       0, visinfo->depth, InputOutput,
+                       visinfo->visual, mask, &attr);
    if (!win) {
       Error(displayName, "Couldn't create window");
       return NULL;
@@ -156,7 +156,7 @@ AddWindow(Display *dpy, const char *displayName, int xpos, int ypos,
       sizehints.flags = USSize | USPosition;
       XSetNormalHints(dpy, win, &sizehints);
       XSetStandardProperties(dpy, win, displayName, displayName,
-			     None, (char **)NULL, 0, &sizehints);
+                             None, (char **)NULL, 0, &sizehints);
    }
 
 
@@ -425,22 +425,22 @@ EventLoop(void)
       XEvent event;
       XNextEvent(gDpy, &event);
       for (i = 0; i < NumWindows; i++) {
-	 struct window *h = &Windows[i];
-	 if (event.xany.window == h->Win) {
-	    switch (event.type) {
-	    case Expose:
-	       Redraw(h);
-	       break;
-	    case ConfigureNotify:
-	       Resize(h, event.xconfigure.width, event.xconfigure.height);
-	       break;
-	    case KeyPress:
-	       terminate = 1;
-	       return;
-	    default:
-	       /*no-op*/ ;
-	    }
-	 }
+         struct window *h = &Windows[i];
+         if (event.xany.window == h->Win) {
+            switch (event.type) {
+            case Expose:
+               Redraw(h);
+               break;
+            case ConfigureNotify:
+               Resize(h, event.xconfigure.width, event.xconfigure.height);
+               break;
+            case KeyPress:
+               terminate = 1;
+               return;
+            default:
+               /*no-op*/ ;
+            }
+         }
       }
    }
 }

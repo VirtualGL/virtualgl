@@ -46,9 +46,9 @@
  */
 static void
 fill_bitmap(Display *dpy, Pixmap pixmap, GC gc,
-	    unsigned int bitmapWidth, unsigned int bitmapHeight,
+            unsigned int bitmapWidth, unsigned int bitmapHeight,
             unsigned int charWidth, unsigned int charHeight,
-	    int xPos, int yPos, unsigned int c, GLubyte * bitmap,
+            int xPos, int yPos, unsigned int c, GLubyte * bitmap,
             int rotation)
 {
    const int bytesPerRow = (bitmapWidth + 7) / 8;
@@ -139,33 +139,33 @@ isvalid(const XFontStruct * fs, unsigned int which)
    if (rows == 1) {
       /* "linear" fonts */
       if ((fs->min_char_or_byte2 > which) || (fs->max_char_or_byte2 < which))
-	 valid = 0;
+         valid = 0;
    }
    else {
       /* "matrix" fonts */
       byte2 = which & 0xff;
       byte1 = which >> 8;
       if ((fs->min_char_or_byte2 > byte2) ||
-	  (fs->max_char_or_byte2 < byte2) ||
-	  (fs->min_byte1 > byte1) || (fs->max_byte1 < byte1))
-	 valid = 0;
+          (fs->max_char_or_byte2 < byte2) ||
+          (fs->min_byte1 > byte1) || (fs->max_byte1 < byte1))
+         valid = 0;
    }
 
    if (valid) {
       if (fs->per_char) {
-	 if (rows == 1) {
-	    /* "linear" fonts */
-	    return fs->per_char + (which - fs->min_char_or_byte2);
-	 }
-	 else {
-	    /* "matrix" fonts */
-	    i = ((byte1 - fs->min_byte1) * pages) +
-	       (byte2 - fs->min_char_or_byte2);
-	    return fs->per_char + i;
-	 }
+         if (rows == 1) {
+            /* "linear" fonts */
+            return fs->per_char + (which - fs->min_char_or_byte2);
+         }
+         else {
+            /* "matrix" fonts */
+            i = ((byte1 - fs->min_byte1) * pages) +
+               (byte2 - fs->min_char_or_byte2);
+            return fs->per_char + i;
+         }
       }
       else {
-	 return &fs->min_bounds;
+         return &fs->min_bounds;
       }
    }
    return NULL;
@@ -195,14 +195,14 @@ glXUseRotatedXFontMESA(Font font, int first, int count, int listbase,
 
    dpy = glXGetCurrentDisplay();
    if (!dpy)
-      return;			/* I guess glXMakeCurrent wasn't called */
+      return;                   /* I guess glXMakeCurrent wasn't called */
    win = RootWindow(dpy, DefaultScreen(dpy));
 
    fs = XQueryFont(dpy, font);
    if (!fs) {
       /*
       _mesa_error(NULL, GL_INVALID_VALUE,
-		  "Couldn't get font structure information");
+                  "Couldn't get font structure information");
       */
       return;
    }
@@ -223,7 +223,7 @@ glXUseRotatedXFontMESA(Font font, int first, int count, int listbase,
       XFreeFontInfo(NULL, fs, 1);
       /*
       _mesa_error(NULL, GL_OUT_OF_MEMORY,
-		  "Couldn't allocate bitmap in glXUseXFont()");
+                  "Couldn't allocate bitmap in glXUseXFont()");
       */
       return;
    }
@@ -285,18 +285,18 @@ glXUseRotatedXFontMESA(Font font, int first, int count, int listbase,
       /* check on index validity and get the bounds */
       ch = isvalid(fs, c);
       if (!ch) {
-	 ch = &fs->max_bounds;
-	 valid = 0;
+         ch = &fs->max_bounds;
+         valid = 0;
       }
       else {
-	 valid = 1;
+         valid = 1;
       }
 
 #ifdef DEBUG_XROT
       if (debug_xfonts) {
-	 char s[7];
-	 sprintf(s, isprint(c) ? "%c> " : "\\%03o> ", c);
-	 dump_char_struct(ch, s);
+         char s[7];
+         sprintf(s, isprint(c) ? "%c> " : "\\%03o> ", c);
+         dump_char_struct(ch, s);
       }
 #endif
 
@@ -363,21 +363,21 @@ glXUseRotatedXFontMESA(Font font, int first, int count, int listbase,
       glNewList(list, GL_COMPILE);
       if (valid && bitmapWidth > 0 && bitmapHeight > 0) {
 
-	 fill_bitmap(dpy, pixmap, gc, bitmapWidth, bitmapHeight,
+         fill_bitmap(dpy, pixmap, gc, bitmapWidth, bitmapHeight,
                      charWidth, charHeight,
                      xPos, yPos, c, bm, rotation);
 
-	 glBitmap(bitmapWidth, bitmapHeight, xOrig, yOrig, xStep, yStep, bm);
+         glBitmap(bitmapWidth, bitmapHeight, xOrig, yOrig, xStep, yStep, bm);
 
 #ifdef DEBUG_XROT
-	 if (debug_xfonts) {
-	    printf("width/height = %u/%u\n", bitmapWidth, bitmapHeight);
-	    dump_bitmap(bitmapWidth, bitmapHeight, bm);
-	 }
+         if (debug_xfonts) {
+            printf("width/height = %u/%u\n", bitmapWidth, bitmapHeight);
+            dump_bitmap(bitmapWidth, bitmapHeight, bm);
+         }
 #endif
       }
       else {
-	 glBitmap(0, 0, 0.0, 0.0, xStep, yStep, NULL);
+         glBitmap(0, 0, 0.0, 0.0, xStep, yStep, NULL);
       }
       glEndList();
    }
@@ -395,5 +395,3 @@ glXUseRotatedXFontMESA(Font font, int first, int count, int listbase,
    glPixelStorei(GL_UNPACK_SKIP_PIXELS, skippixels);
    glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
 }
-
-

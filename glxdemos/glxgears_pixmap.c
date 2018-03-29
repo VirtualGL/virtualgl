@@ -8,10 +8,10 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -98,7 +98,7 @@ static GLfloat angle = 0.0;
  *
  *  Draw a gear wheel.  You'll probably want to call this function when
  *  building a display list since we do a lot of trig here.
- * 
+ *
  *  Input:  inner_radius - radius of hole at center
  *          outer_radius - radius at center of teeth
  *          width - width of gear
@@ -131,9 +131,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
       glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
       if (i < teeth) {
-	 glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
-	 glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		    width * 0.5);
+         glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
+         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
+                    width * 0.5);
       }
    }
    glEnd();
@@ -147,9 +147,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 width * 0.5);
+                 width * 0.5);
    }
    glEnd();
 
@@ -162,9 +162,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
       glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
       if (i < teeth) {
-	 glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		    -width * 0.5);
-	 glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
+         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
+                    -width * 0.5);
+         glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
       }
    }
    glEnd();
@@ -176,9 +176,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       angle = i * 2.0 * M_PI / teeth;
 
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5);
       glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
    }
@@ -201,16 +201,16 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5);
       glNormal3f(cos(angle), sin(angle), 0.0);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       u = r1 * cos(angle + 3 * da) - r2 * cos(angle + 2 * da);
       v = r1 * sin(angle + 3 * da) - r2 * sin(angle + 2 * da);
       glNormal3f(v, -u, 0.0);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glNormal3f(cos(angle), sin(angle), 0.0);
    }
 
@@ -338,13 +338,13 @@ make_window( Display *dpy, const char *name,
              int x, int y, int width, int height, struct gears *gears)
 {
    int attrib[] = { GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-		    GLX_RENDER_TYPE,   GLX_RGBA_BIT,
-		    GLX_RED_SIZE,      1,
-		    GLX_GREEN_SIZE,    1,
-		    GLX_BLUE_SIZE,     1,
-		    GLX_DOUBLEBUFFER,  GL_FALSE,
-		    GLX_DEPTH_SIZE,    1,
-		    None };
+                    GLX_RENDER_TYPE,   GLX_RGBA_BIT,
+                    GLX_RED_SIZE,      1,
+                    GLX_GREEN_SIZE,    1,
+                    GLX_BLUE_SIZE,     1,
+                    GLX_DOUBLEBUFFER,  GL_FALSE,
+                    GLX_DEPTH_SIZE,    1,
+                    None };
    GLXFBConfig * fbconfig;
    int num_configs;
    int scrnum;
@@ -375,8 +375,8 @@ make_window( Display *dpy, const char *name,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    gears->win = XCreateWindow( dpy, root, 0, 0, width, height,
-			       0, visinfo->depth, InputOutput,
-			       visinfo->visual, mask, &attr );
+                               0, visinfo->depth, InputOutput,
+                               visinfo->visual, mask, &attr );
 
    /* set hints and properties */
    {
@@ -394,7 +394,7 @@ make_window( Display *dpy, const char *name,
    gears->gc = XCreateGC(dpy, gears->win, 0, NULL);
 
    gears->pixmap = XCreatePixmap(dpy, gears->win,
-				 width, height, visinfo->depth);
+                                 width, height, visinfo->depth);
    if (!gears->pixmap) {
       printf("Error: XCreatePixmap failed\n");
       exit(-1);
@@ -407,7 +407,7 @@ make_window( Display *dpy, const char *name,
    }
 
    gears->ctx = glXCreateNewContext(dpy, fbconfig[0],
-				    GLX_RGBA_TYPE, NULL, GL_TRUE);
+                                    GLX_RGBA_TYPE, NULL, GL_TRUE);
    if (!gears->ctx) {
       printf("Error: glXCreateNewContext failed\n");
       exit(1);
@@ -427,12 +427,12 @@ event_loop(Display *dpy, struct gears *gears)
          XEvent event;
          XNextEvent(dpy, &event);
          switch (event.type) {
-	 case Expose:
+         case Expose:
             /* we'll redraw below */
-	    break;
-	 case ConfigureNotify:
-	    reshape(gears, event.xconfigure.width, event.xconfigure.height);
-	    break;
+            break;
+         case ConfigureNotify:
+            reshape(gears, event.xconfigure.width, event.xconfigure.height);
+            break;
          case KeyPress:
             {
                char buffer[10];
@@ -471,7 +471,7 @@ event_loop(Display *dpy, struct gears *gears)
       for (x = 0; x < gears->width; x += 100)
          for (y = 0; y < gears->width; y += 100)
             XCopyArea(dpy, gears->pixmap, gears->win, gears->gc,
-		      50, 50, 100, 100, x, y);
+                      50, 50, 100, 100, x, y);
 
       /* calc framerate */
       {
