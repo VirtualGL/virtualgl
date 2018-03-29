@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Menu_Window.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $"
+// "$Id: Fl_Menu_Window.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Menu window header file for the Fast Light Tool Kit (FLTK).
 //
@@ -50,5 +50,5 @@ public:
 #endif
 
 //
-// End of "$Id: Fl_Menu_Window.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $".
+// End of "$Id: Fl_Menu_Window.H 4288 2005-04-16 00:13:17Z mike $".
 //

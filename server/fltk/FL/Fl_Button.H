@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Button.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $"
+// "$Id: Fl_Button.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Button header file for the Fast Light Tool Kit (FLTK).
 //
@@ -74,5 +74,5 @@ public:
 #endif
 
 //
-// End of "$Id: Fl_Button.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $".
+// End of "$Id: Fl_Button.H 4288 2005-04-16 00:13:17Z mike $".
 //

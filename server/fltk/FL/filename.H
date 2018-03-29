@@ -1,5 +1,5 @@
 /*
- * "$Id: filename.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $"
+ * "$Id: filename.H 5635 2007-01-23 15:02:00Z mike $"
  *
  * Filename header file for the Fast Light Tool Kit (FLTK).
  *
@@ -111,6 +111,24 @@ typedef int (Fl_File_Sort_F)(struct dirent **, struct dirent **);
 
 FL_EXPORT int fl_filename_list(const char *d, struct dirent ***l,
                                Fl_File_Sort_F *s = fl_numericsort);
+
+/*
+ * Generic function to open a Uniform Resource Identifier (URI) using a
+ * system-defined program (added in FLTK 1.1.8)
+ */
+
+FL_EXPORT int	fl_open_uri(const char *uri, char *msg = (char *)0,
+		            int msglen = 0);
+
+/*
+ * _fl_filename_isdir_quick() is a private function that checks for a
+ * trailing slash and assumes that the passed name is a directory if
+ * it finds one.  This function is used by Fl_File_Browser and
+ * Fl_File_Chooser to avoid extra stat() calls, but is not supported
+ * outside of FLTK...
+ */
+int _fl_filename_isdir_quick(const char *name);
+
 #  endif /* __cplusplus */
 
 /*
@@ -134,5 +152,5 @@ FL_EXPORT int fl_filename_list(const char *d, struct dirent ***l,
 #endif /* FL_FILENAME_H */
 
 /*
- * End of "$Id: filename.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $".
+ * End of "$Id: filename.H 5635 2007-01-23 15:02:00Z mike $".
  */

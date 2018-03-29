@@ -1,5 +1,5 @@
 //
-// "$Id: win32.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: win32.H 5436 2006-09-16 16:02:00Z matt $"
 //
 // WIN32 header file for the Fast Light Tool Kit (FLTK).
 //
@@ -132,6 +132,7 @@ extern FL_EXPORT HDC fl_makeDC(HBITMAP);
   fl_pop_clip(); RestoreDC(fl_gc, _savedc); DeleteDC(fl_gc); fl_window=_sw; fl_gc = _sgc
 
 FL_EXPORT void fl_copy_offscreen(int x,int y,int w,int h,HBITMAP pixmap,int srcx,int srcy);
+FL_EXPORT void fl_copy_offscreen_with_alpha(int x,int y,int w,int h,HBITMAP pixmap,int srcx,int srcy);
 #define fl_delete_offscreen(bitmap) DeleteObject(bitmap);
 
 // Bitmap masks
@@ -147,5 +148,5 @@ inline void fl_open_callback(void (*)(const char *)) {}
 extern FL_EXPORT int fl_parse_color(const char* p, uchar& r, uchar& g, uchar& b);
 
 //
-// End of "$Id: win32.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: win32.H 5436 2006-09-16 16:02:00Z matt $".
 //

@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Help_View.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $"
+// "$Id: Fl_Help_View.H 5991 2007-12-15 16:08:23Z mike $"
 //
 // Help Viewer widget definitions.
 //
@@ -133,6 +133,21 @@ class FL_EXPORT Fl_Help_View : public Fl_Group	//// Help viewer widget
   Fl_Scrollbar	scrollbar_,		// Vertical scrollbar for document
 		hscrollbar_;		// Horizontal scrollbar
 
+  static int    selection_first;
+  static int    selection_last;
+  static int    selection_push_first;
+  static int    selection_push_last;
+  static int    selection_drag_first;
+  static int    selection_drag_last;
+  static int    selected;
+  static int    draw_mode;
+  static int    mouse_x;
+  static int    mouse_y;
+  static int    current_pos;
+  static Fl_Help_View *current_view;
+  static Fl_Color hv_selection_color;
+  static Fl_Color hv_selection_text_color;
+
   Fl_Help_Block	*add_block(const char *s, int xx, int yy, int ww, int hh, uchar border = 0);
   void		add_link(const char *n, int xx, int yy, int ww, int hh);
   void		add_target(const char *n, int yy);
@@ -141,6 +156,7 @@ class FL_EXPORT Fl_Help_View : public Fl_Group	//// Help viewer widget
   void		draw();
   void		format();
   void		format_table(int *table_width, int *columns, const char *table);
+  void		free_data();
   int		get_align(const char *p, int a);
   const char	*get_attr(const char *p, const char *n, char *buf, int bufsize);
   Fl_Color	get_color(const char *n, Fl_Color c);
@@ -158,7 +174,15 @@ class FL_EXPORT Fl_Help_View : public Fl_Group	//// Help viewer widget
 			fl_font(f = fonts_[nfonts_][0],
 			        s = fonts_[nfonts_][1]); }
 
-  public:
+  void          hv_draw(const char *t, int x, int y);
+  char          begin_selection();
+  char          extend_selection();
+  void          end_selection(int c=0);
+  void          clear_global_selection();
+  Fl_Help_Link  *find_link(int, int);
+  void          follow_link(Fl_Help_Link*);
+
+public:
 
   Fl_Help_View(int xx, int yy, int ww, int hh, const char *l = 0);
   ~Fl_Help_View();
@@ -186,10 +210,12 @@ class FL_EXPORT Fl_Help_View : public Fl_Group	//// Help viewer widget
   int		leftline() const { return (leftline_); }
   void		value(const char *v);
   const char	*value() const { return (value_); }
+  void          clear_selection();
+  void          select_all();
 };
 
 #endif // !Fl_Help_View_H
 
 //
-// End of "$Id: Fl_Help_View.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $".
+// End of "$Id: Fl_Help_View.H 5991 2007-12-15 16:08:23Z mike $".
 //

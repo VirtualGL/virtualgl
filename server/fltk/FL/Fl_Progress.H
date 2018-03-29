@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Progress.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $"
+// "$Id: Fl_Progress.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Progress bar widget definitions.
 //
@@ -66,5 +66,5 @@ class FL_EXPORT Fl_Progress : public Fl_Widget
 #endif // !_Fl_Progress_H_
 
 //
-// End of "$Id: Fl_Progress.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $".
+// End of "$Id: Fl_Progress.H 4288 2005-04-16 00:13:17Z mike $".
 //

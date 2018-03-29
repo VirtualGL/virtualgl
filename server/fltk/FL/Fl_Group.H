@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Group.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $"
+// "$Id: Fl_Group.H 6468 2008-10-19 10:35:06Z AlbrechtS $"
 //
 // Group header file for the Fast Light Tool Kit (FLTK).
 //
@@ -48,6 +48,7 @@ class FL_EXPORT Fl_Group : public Fl_Widget {
   Fl_Group& operator=(const Fl_Group&);
 
 protected:
+  enum { CLIP_CHILDREN = 2048 };
 
   void draw();
   void draw_child(Fl_Widget&) const;
@@ -87,7 +88,10 @@ public:
   void add_resizable(Fl_Widget& o) {resizable_ = &o; add(o);}
   void init_sizes();
 
-  // back compatability function:
+  void clip_children(int c) { if (c) set_flag(CLIP_CHILDREN); else clear_flag(CLIP_CHILDREN); }
+  int clip_children() { return (flags() & CLIP_CHILDREN) != 0; }
+
+  // back compatibility functions:
   void focus(Fl_Widget* o) {o->take_focus();}
   Fl_Widget* & _ddfdesign_kludge() {return resizable_;}
   void forms_end();
@@ -103,5 +107,5 @@ public:
 #endif
 
 //
-// End of "$Id: Fl_Group.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $".
+// End of "$Id: Fl_Group.H 6468 2008-10-19 10:35:06Z AlbrechtS $".
 //

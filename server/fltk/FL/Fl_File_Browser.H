@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_File_Browser.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $"
+// "$Id: Fl_File_Browser.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // FileBrowser definitions.
 //
@@ -77,5 +77,5 @@ public:
 #endif // !_Fl_File_Browser_H_
 
 //
-// End of "$Id: Fl_File_Browser.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $".
+// End of "$Id: Fl_File_Browser.H 4288 2005-04-16 00:13:17Z mike $".
 //

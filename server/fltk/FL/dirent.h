@@ -1,5 +1,5 @@
 //
-// "$Id: dirent.h,v 1.1 2007-09-01 23:40:41 dcommander Exp $"
+// "$Id: dirent.h 4288 2005-04-16 00:13:17Z mike $"
 //
 // Directory header file for the Fast Light Tool Kit (FLTK).
 //
@@ -29,5 +29,5 @@
 #include "filename.H"
 
 //
-// End of "$Id: dirent.h,v 1.1 2007-09-01 23:40:41 dcommander Exp $".
+// End of "$Id: dirent.h 4288 2005-04-16 00:13:17Z mike $".
 //

@@ -1,5 +1,5 @@
 //
-// "$Id: fl_show_input.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: fl_show_input.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Standard input dialog header file for the Fast Light Tool Kit (FLTK).
 //
@@ -28,5 +28,5 @@
 #include "fl_ask.H"
 
 //
-// End of "$Id: fl_show_input.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: fl_show_input.H 4288 2005-04-16 00:13:17Z mike $".
 //

@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Widget.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: Fl_Widget.H 5982 2007-11-19 16:21:48Z matt $"
 //
 // Widget header file for the Fast Light Tool Kit (FLTK).
 //
@@ -188,6 +188,7 @@ public:
   void do_callback(Fl_Widget* o,void* arg=0) {callback_(o,arg); if (callback_ != default_callback) clear_changed();}
   void do_callback(Fl_Widget* o,long arg) {callback_(o,(void*)arg); if (callback_ != default_callback) clear_changed();}
   int test_shortcut();
+  static char label_shortcut(const char *t);
   static int test_shortcut(const char*);
   int contains(const Fl_Widget*) const ;
   int inside(const Fl_Widget* o) const {return o ? o->contains(this) : 0;}
@@ -216,5 +217,5 @@ public:
 #endif
 
 //
-// End of "$Id: Fl_Widget.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: Fl_Widget.H 5982 2007-11-19 16:21:48Z matt $".
 //

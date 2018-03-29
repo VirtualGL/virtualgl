@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Preferences.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $"
+// "$Id: Fl_Preferences.H 5330 2006-08-18 07:29:09Z matt $"
 //
 // Preferences definitions for the Fast Light Tool Kit (FLTK).
 //
@@ -65,7 +65,9 @@ public:
 
   char set( const char *entry, int value );
   char set( const char *entry, float value );
+  char set( const char *entry, float value, int precision );
   char set( const char *entry, double value );
+  char set( const char *entry, double value, int precision );
   char set( const char *entry, const char *value );
   char set( const char *entry, const void *value, int size ); 
 
@@ -165,5 +167,5 @@ private:
 #endif // !Fl_Preferences_H
 
 //
-// End of "$Id: Fl_Preferences.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $".
+// End of "$Id: Fl_Preferences.H 5330 2006-08-18 07:29:09Z matt $".
 //

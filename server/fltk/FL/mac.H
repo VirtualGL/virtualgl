@@ -1,5 +1,5 @@
 //
-// "$Id: mac.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: mac.H 5379 2006-08-29 11:03:05Z matt $"
 //
 // Mac header file for the Fast Light Tool Kit (FLTK).
 //
@@ -54,10 +54,6 @@ inline void XDestroyRegion(Fl_Region r) {
   DisposeRgn(r);
 }
 
-#  define XDestroyWindow(a,b) DisposeWindow(b)
-#  define XMapWindow(a,b) ShowWindow(b)
-#  define XUnmapWindow(a,b) HideWindow(b)
-
 #  include "Fl_Window.H"
 
 // This object contains all mac-specific stuff about a window:
@@ -89,6 +85,11 @@ public:
   static void q_begin_image(CGRect&, int x, int y, int w, int h);
   static void q_end_image();
 };
+
+extern void MacDestroyWindow(Fl_Window*,WindowPtr);
+extern void MacMapWindow(Fl_Window*,WindowPtr);
+extern void MacUnmapWindow(Fl_Window*,WindowPtr);
+extern int MacUnlinkWindow(Fl_X*,Fl_X*start=0L);
 
 inline Window fl_xid(const Fl_Window*w) 
 {
@@ -130,6 +131,6 @@ extern void fl_open_callback(void (*cb)(const char *));
 extern FL_EXPORT int fl_parse_color(const char* p, uchar& r, uchar& g, uchar& b);
 
 //
-// End of "$Id: mac.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: mac.H 5379 2006-08-29 11:03:05Z matt $".
 //
 

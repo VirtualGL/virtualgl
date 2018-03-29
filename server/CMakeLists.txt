@@ -132,6 +132,8 @@ if(VGL_USEXV)
 	target_link_libraries(vglconfig ${X11_Xv_LIB})
 endif()
 install(TARGETS vglconfig DESTINATION ${CMAKE_INSTALL_BINDIR})
+set_property(SOURCE vglconfig.cpp APPEND_STRING PROPERTY COMPILE_FLAGS
+	"-fno-strict-aliasing")
 
 install(PROGRAMS vglgenkey vgllogin vglserver_config DESTINATION
 	${CMAKE_INSTALL_BINDIR})

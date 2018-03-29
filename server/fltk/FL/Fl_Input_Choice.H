@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Input_Choice.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $"
+// "$Id$"
 //
 // An input/chooser widget.
 //            ______________  ____
@@ -34,9 +34,11 @@
 #define Fl_Input_Choice_H
 
 #include <FL/Fl.H>
+#include <FL/Fl_Group.H>
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_draw.H>
+#include <string.h>
 
 class Fl_Input_Choice : public Fl_Group {
   // Private class to handle slightly 'special' behavior of menu button
@@ -58,13 +60,44 @@ class Fl_Input_Choice : public Fl_Group {
 
   static void menu_cb(Fl_Widget*, void *data) { 
     Fl_Input_Choice *o=(Fl_Input_Choice *)data;
-    o->inp_->value(o->menu_->text());
-    o->do_callback();
+    const Fl_Menu_Item *item = o->menubutton()->mvalue();
+    if (item && item->flags & (FL_SUBMENU|FL_SUBMENU_POINTER)) return;	// ignore submenus
+    if (!strcmp(o->inp_->value(), o->menu_->text()))
+    {
+      o->Fl_Widget::clear_changed();
+      if (o->when() & FL_WHEN_NOT_CHANGED)
+	o->do_callback();
+    }
+    else
+    {
+      o->inp_->value(o->menu_->text());
+      o->inp_->set_changed();
+      o->Fl_Widget::set_changed();
+      if (o->when() & (FL_WHEN_CHANGED|FL_WHEN_RELEASE))
+	o->do_callback();
+    }
+
+    if (o->callback() != default_callback)
+    {
+      o->Fl_Widget::clear_changed();
+      o->inp_->clear_changed();
+    }
   }
 
   static void inp_cb(Fl_Widget*, void *data) { 
     Fl_Input_Choice *o=(Fl_Input_Choice *)data;
-    o->do_callback();
+    if (o->inp_->changed()) {
+      o->Fl_Widget::set_changed();
+      if (o->when() & (FL_WHEN_CHANGED|FL_WHEN_RELEASE))
+	o->do_callback();
+    } else {
+      o->Fl_Widget::clear_changed();
+      if (o->when() & FL_WHEN_NOT_CHANGED)
+	o->do_callback();
+    }
+
+    if (o->callback() != default_callback)
+      o->Fl_Widget::clear_changed();
   }
 
   // Custom resize behavior -- input stretches, menu button doesn't
@@ -86,6 +119,7 @@ public:
 			inp_w(), inp_h());
     inp_->callback(inp_cb, (void*)this);
     inp_->box(FL_FLAT_BOX);		// cosmetic
+    inp_->when(FL_WHEN_CHANGED|FL_WHEN_NOT_CHANGED);
     menu_ = new InputMenuButton(menu_x(), menu_y(),
 				menu_w(), menu_h());
     menu_->callback(menu_cb, (void*)this);
@@ -94,6 +128,17 @@ public:
   }
   void add(const char *s) {
     menu_->add(s);
+  }
+  int changed() const { 
+    return inp_->changed() | Fl_Widget::changed();
+  }
+  void clear_changed() { 
+    inp_->clear_changed();
+    Fl_Widget::clear_changed();
+  }
+  void set_changed() { 
+    inp_->set_changed();
+    // no need to call Fl_Widget::set_changed()
   }
   void clear() {
     menu_->clear();
@@ -150,5 +195,5 @@ public:
 #endif // !Fl_Input_Choice_H
 
 //
-// End of "$Id: Fl_Input_Choice.H,v 1.1 2007-09-01 23:40:02 dcommander Exp $".
+// End of "$Id$".
 //

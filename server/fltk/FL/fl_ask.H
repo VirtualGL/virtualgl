@@ -1,5 +1,5 @@
 //
-// "$Id: fl_ask.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $"
+// "$Id: fl_ask.H 4279 2005-04-13 19:35:28Z mike $"
 //
 // Standard dialog header file for the Fast Light Tool Kit (FLTK).
 //
@@ -77,5 +77,5 @@ extern FL_EXPORT const char* fl_close;
 #endif // !fl_ask_H
 
 //
-// End of "$Id: fl_ask.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $".
+// End of "$Id: fl_ask.H 4279 2005-04-13 19:35:28Z mike $".
 //

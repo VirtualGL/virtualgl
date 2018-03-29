@@ -1,9 +1,9 @@
 //
-// "$Id: Fl.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $"
+// "$Id: Fl.H 6923 2009-11-01 20:25:47Z matt $"
 //
 // Main header file for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2005 by Bill Spitzak and others.
+// Copyright 1998-2006 by Bill Spitzak and others.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Library General Public
@@ -46,6 +46,7 @@ typedef void (Fl_Label_Measure_F)(const Fl_Label*, int&, int&);
 typedef void (Fl_Box_Draw_F)(int,int,int,int, Fl_Color);
 
 typedef void (*Fl_Timeout_Handler)(void*);
+typedef void (*Fl_Awake_Handler)(void*);
 
 class FL_EXPORT Fl {
   Fl() {}; // no constructor!
@@ -78,9 +79,19 @@ public: // should be private!
   static void damage(int d) {damage_ = d;}
 
   static void (*idle)();
+  static Fl_Awake_Handler *awake_ring_;
+  static void **awake_data_;
+  static int awake_ring_size_;
+  static int awake_ring_head_;
+  static int awake_ring_tail_;
+
+  static int add_awake_handler_(Fl_Awake_Handler, void*);
+  static int get_awake_handler_(Fl_Awake_Handler&, void*&);
 
   static const char* scheme_;
   static Fl_Image* scheme_bg_;
+
+  static int e_original_keysym; // late addition
 
 public:
 
@@ -107,6 +118,8 @@ public:
   static int scheme(const char*);
   static const char* scheme() {return scheme_;}
   static int reload_scheme();
+  static int scrollbar_size();
+  static void scrollbar_size(int W);
 
   // execution:
   static int wait();
@@ -159,6 +172,7 @@ public:
   static int event_state()	{return e_state;}
   static int event_state(int i) {return e_state&i;}
   static int event_key()	{return e_keysym;}
+  static int event_original_key(){return e_original_keysym;}
   static int event_key(int);
   static int get_key(int);
   static const char* event_text() {return e_text;}
@@ -191,23 +205,18 @@ public:
   static void paste(Fl_Widget &receiver);
 
   // screen size:
-#if defined(WIN32) || defined(__APPLE__)
   static int x();
   static int y();
-#else
-  static int x() {return 0;}
-  static int y() {return 0;}
-#endif /* WIN32 || __APPLE__ */
   static int w();
   static int h();
 
   // multi-head support:
   static int screen_count();
-  static void screen_xywh(int &x, int &y, int &w, int &h) {
-    screen_xywh(x, y, w, h, e_x_root, e_y_root);
+  static void screen_xywh(int &X, int &Y, int &W, int &H) {
+    screen_xywh(X, Y, W, H, e_x_root, e_y_root);
   }
-  static void screen_xywh(int &x, int &y, int &w, int &h, int mx, int my);
-  static void screen_xywh(int &x, int &y, int &w, int &h, int n);
+  static void screen_xywh(int &X, int &Y, int &W, int &H, int mx, int my);
+  static void screen_xywh(int &X, int &Y, int &W, int &H, int n);
 
   // color map:
   static void	set_color(Fl_Color, uchar, uchar, uchar);
@@ -226,7 +235,7 @@ public:
 
   // labeltypes:
   static void set_labeltype(Fl_Labeltype,Fl_Label_Draw_F*,Fl_Label_Measure_F*);
-  static void set_labeltype(Fl_Labeltype, Fl_Labeltype from);
+  /* static void set_labeltype(Fl_Labeltype, Fl_Labeltype from); (not implemented) */
 
   // boxtypes:
   static Fl_Box_Draw_F *get_boxtype(Fl_Boxtype);
@@ -266,15 +275,19 @@ public:
   static void lock();
   static void unlock();
   static void awake(void* message = 0);
+  static int awake(Fl_Awake_Handler cb, void* message = 0);
   static void* thread_message();
 
   // Widget deletion:
   static void delete_widget(Fl_Widget *w);
   static void do_widget_deletion();
+  static void watch_widget_pointer(Fl_Widget *&w);
+  static void release_widget_pointer(Fl_Widget *&w);
+  static void clear_widget_pointer(Fl_Widget const *w);
 };
 
 #endif // !Fl_H
 
 //
-// End of "$Id: Fl.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $".
+// End of "$Id: Fl.H 6923 2009-11-01 20:25:47Z matt $".
 //

@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Wizard.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: Fl_Wizard.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Fl_Wizard widget definitions.
 //
@@ -58,5 +58,5 @@ class FL_EXPORT Fl_Wizard : public Fl_Group
 #endif // !_Fl_Wizard_H_
 
 //
-// End of "$Id: Fl_Wizard.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: Fl_Wizard.H 4288 2005-04-16 00:13:17Z mike $".
 //

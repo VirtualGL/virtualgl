@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Bitmap.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $"
+// "$Id: Fl_Bitmap.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // Bitmap header file for the Fast Light Tool Kit (FLTK).
 //
@@ -60,5 +60,5 @@ class FL_EXPORT Fl_Bitmap : public Fl_Image {
 #endif
 
 //
-// End of "$Id: Fl_Bitmap.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $".
+// End of "$Id: Fl_Bitmap.H 4288 2005-04-16 00:13:17Z mike $".
 //

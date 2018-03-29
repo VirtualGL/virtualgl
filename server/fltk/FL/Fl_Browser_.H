@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Browser_.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $"
+// "$Id: Fl_Browser_.H 4879 2006-03-28 23:27:20Z matt $"
 //
 // Common browser header file for the Fast Light Tool Kit (FLTK).
 //
@@ -88,6 +88,7 @@ protected:
   void new_list(); // completely clobber all data, as though list replaced
   void deleting(void *a); // get rid of any pointers to a
   void replacing(void *a,void *b); // change a pointers to b
+  void swapping(void *a,void *b); // exchange pointers a and b
   void inserting(void *a,void *b); // insert b near a
   int displayed(void *) const ; // true if this line is visible
   void redraw_line(void *); // minimal update, no change in size
@@ -149,5 +150,5 @@ public:
 #endif
 
 //
-// End of "$Id: Fl_Browser_.H,v 1.1 2007-09-01 23:40:00 dcommander Exp $".
+// End of "$Id: Fl_Browser_.H 4879 2006-03-28 23:27:20Z matt $".
 //

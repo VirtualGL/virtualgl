@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_XBM_Image.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: Fl_XBM_Image.H 4288 2005-04-16 00:13:17Z mike $"
 //
 // XBM image header file for the Fast Light Tool Kit (FLTK).
 //
@@ -39,5 +39,5 @@ class FL_EXPORT Fl_XBM_Image : public Fl_Bitmap {
 #endif // !Fl_XBM_Image_H
 
 //
-// End of "$Id: Fl_XBM_Image.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: Fl_XBM_Image.H 4288 2005-04-16 00:13:17Z mike $".
 //

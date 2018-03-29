@@ -1,5 +1,5 @@
 //
-// "$Id: Fl_Text_Display.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $"
+// "$Id: Fl_Text_Display.H 4502 2005-08-10 23:11:51Z matt $"
 //
 // Header file for Fl_Text_Display class.
 //
@@ -294,5 +294,5 @@ class FL_EXPORT Fl_Text_Display: public Fl_Group {
 #endif
 
 //
-// End of "$Id: Fl_Text_Display.H,v 1.1 2007-09-01 23:40:03 dcommander Exp $".
+// End of "$Id: Fl_Text_Display.H 4502 2005-08-10 23:11:51Z matt $".
 //

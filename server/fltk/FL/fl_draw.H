@@ -1,5 +1,5 @@
 //
-// "$Id: fl_draw.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $"
+// "$Id: fl_draw.H 5430 2006-09-15 15:35:16Z matt $"
 //
 // Portable drawing function header file for the Fast Light Tool Kit (FLTK).
 //
@@ -160,6 +160,12 @@ FL_EXPORT void fl_draw(const char*, int,int,int,int, Fl_Align,
 	               void (*callthis)(const char *, int n, int x, int y),
 		       Fl_Image* img=0, int draw_symbols = 1);
 
+// font encoding:
+FL_EXPORT const char *fl_latin1_to_local(const char *, int n=-1);
+FL_EXPORT const char *fl_local_to_latin1(const char *, int n=-1);
+FL_EXPORT const char *fl_mac_roman_to_local(const char *, int n=-1);
+FL_EXPORT const char *fl_local_to_mac_roman(const char *, int n=-1);
+
 // boxtypes:
 FL_EXPORT void fl_frame(const char* s, int x, int y, int w, int h);
 FL_EXPORT void fl_frame2(const char* s, int x, int y, int w, int h);
@@ -172,6 +178,7 @@ typedef void (*Fl_Draw_Image_Cb)(void*,int,int,int,uchar*);
 FL_EXPORT void fl_draw_image(Fl_Draw_Image_Cb, void*, int,int,int,int, int delta=3);
 FL_EXPORT void fl_draw_image_mono(Fl_Draw_Image_Cb, void*, int,int,int,int, int delta=1);
 FL_EXPORT void fl_rectf(int x, int y, int w, int h, uchar r, uchar g, uchar b);
+FL_EXPORT char fl_can_do_alpha_blending();
 
 FL_EXPORT uchar *fl_read_image(uchar *p, int x,int y, int w, int h, int alpha=0);
 
@@ -196,5 +203,5 @@ FL_EXPORT int fl_add_symbol(const char* name, void (*drawit)(Fl_Color), int scal
 #endif
 
 //
-// End of "$Id: fl_draw.H,v 1.1 2007-09-01 23:40:01 dcommander Exp $".
+// End of "$Id: fl_draw.H 5430 2006-09-15 15:35:16Z matt $".
 //
