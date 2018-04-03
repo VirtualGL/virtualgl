@@ -27,7 +27,7 @@ namespace glxvisual
 	// same attribute list, so those parameters can be used to match an
 	// appropriate visual on the 2D X server.
 	GLXFBConfig *configsFromVisAttribs(const int attribs[], int &c_class,
-		int &level, int &stereo, int &trans, int &nElements, bool glx13=false);
+		int &level, int &stereo, int &trans, int &nElements, bool glx13 = false);
 
 	// These functions return attributes for visuals on the 2D X server (those
 	// attributes are read from the 2D X server and cached on first access, so
@@ -51,6 +51,6 @@ namespace glxvisual
 }
 
 
-#define _FBCID(c) glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
+#define _FBCID(c)  glxvisual::visAttrib3D(c, GLX_FBCONFIG_ID)
 
-#endif // __GLXVISUAL_H__
+#endif  // __GLXVISUAL_H__

@@ -15,5 +15,5 @@
 
 using namespace vglserver;
 
-ReverseConfigHash *ReverseConfigHash::instance=NULL;
+ReverseConfigHash *ReverseConfigHash::instance = NULL;
 vglutil::CriticalSection ReverseConfigHash::instanceMutex;

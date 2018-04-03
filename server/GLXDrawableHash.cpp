@@ -15,5 +15,5 @@
 
 using namespace vglserver;
 
-GLXDrawableHash *GLXDrawableHash::instance=NULL;
+GLXDrawableHash *GLXDrawableHash::instance = NULL;
 vglutil::CriticalSection GLXDrawableHash::instanceMutex;

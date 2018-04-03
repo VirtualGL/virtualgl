@@ -32,10 +32,10 @@
 #include <X11/Xutil.h>
 
 
-#define YUY2_PACKED 0x32595559
-#define YV12_PLANAR 0x32315659
-#define UYVY_PACKED 0x59565955
-#define I420_PLANAR 0x30323449
+#define YUY2_PACKED  0x32595559
+#define YV12_PLANAR  0x32315659
+#define UYVY_PACKED  0x59565955
+#define I420_PLANAR  0x30323449
 
 
 typedef struct _fbxv_struct
@@ -102,7 +102,7 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width, int height,
   dstWidth, dstHeight = width and height of the window region into which the
                         image should be drawn
 */
-int fbxv_write (fbxv_struct *fb, int srcX, int srcY, int srcWidth,
+int fbxv_write(fbxv_struct *fb, int srcX, int srcY, int srcWidth,
 	int srcHeight, int dstX, int dstY, int dstWidth, int dstHeight);
 
 
@@ -143,4 +143,4 @@ void fbxv_printwarnings(FILE *stream);
 }
 #endif
 
-#endif /* __FBXV_H__ */
+#endif  /* __FBXV_H__ */

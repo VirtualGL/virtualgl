@@ -20,7 +20,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<char *, Window, VirtualWin *>
+#define HASH  Hash<char *, Window, VirtualWin *>
 
 // This maps a window ID to an off-screen drawable instance
 
@@ -32,20 +32,20 @@ namespace vglserver
 
 			static WindowHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new WindowHash;
+					if(instance == NULL) instance = new WindowHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy, Window win)
 			{
 				if(!dpy || !win) return;
-				char *dpystring=strdup(DisplayString(dpy));
+				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, win, NULL))
 					free(dpystring);
 			}
@@ -60,17 +60,17 @@ namespace vglserver
 			{
 				VirtualWin *vw;
 				if(!dpy || !glxd) return false;
-				vw=HASH::find(DisplayString(dpy), glxd);
-				if(vw==NULL || vw==(VirtualWin *)-1) return false;
-				else { vwin=vw;  return true; }
+				vw = HASH::find(DisplayString(dpy), glxd);
+				if(vw == NULL || vw == (VirtualWin *)-1) return false;
+				else { vwin = vw;  return true; }
 			}
 
 			bool isOverlay(Display *dpy, GLXDrawable glxd)
 			{
 				VirtualWin *vw;
 				if(!dpy || !glxd) return false;
-				vw=HASH::find(DisplayString(dpy), glxd);
-				if(vw==(VirtualWin *)-1) return true;
+				vw = HASH::find(DisplayString(dpy), glxd);
+				if(vw == (VirtualWin *)-1) return true;
 				return false;
 			}
 
@@ -78,27 +78,27 @@ namespace vglserver
 			{
 				VirtualWin *vw;
 				if(!glxd) return false;
-				vw=HASH::find(NULL, glxd);
-				if(vw==NULL || vw==(VirtualWin *)-1) return false;
-				else { vwin=vw;  return true; }
+				vw = HASH::find(NULL, glxd);
+				if(vw == NULL || vw == (VirtualWin *)-1) return false;
+				else { vwin = vw;  return true; }
 			}
 
 			VirtualWin *initVW(Display *dpy, Window win, GLXFBConfig config)
 			{
 				if(!dpy || !win || !config) _throw("Invalid argument");
-				HashEntry *ptr=NULL;
+				HashEntry *ptr = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
-				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
+				if((ptr = HASH::findEntry(DisplayString(dpy), win)) != NULL)
 				{
 					if(!ptr->value)
 					{
-						_newcheck(ptr->value=new VirtualWin(dpy, win));
-						VirtualWin *vw=ptr->value;
+						_newcheck(ptr->value = new VirtualWin(dpy, win));
+						VirtualWin *vw = ptr->value;
 						vw->initFromWindow(config);
 					}
 					else
 					{
-						VirtualWin *vw=ptr->value;
+						VirtualWin *vw = ptr->value;
 						vw->checkConfig(config);
 					}
 					return ptr->value;
@@ -109,11 +109,11 @@ namespace vglserver
 			void setOverlay(Display *dpy, Window win)
 			{
 				if(!dpy || !win) return;
-				HashEntry *ptr=NULL;
+				HashEntry *ptr = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
-				if((ptr=HASH::findEntry(DisplayString(dpy), win))!=NULL)
+				if((ptr = HASH::findEntry(DisplayString(dpy), win)) != NULL)
 				{
-					if(!ptr->value) ptr->value=(VirtualWin *)-1;
+					if(!ptr->value) ptr->value = (VirtualWin *)-1;
 				}
 			}
 
@@ -126,16 +126,16 @@ namespace vglserver
 			void remove(Display *dpy)
 			{
 				if(!dpy) return;
-				HashEntry *ptr=NULL, *next=NULL;
+				HashEntry *ptr = NULL, *next = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
-				ptr=start;
-				while(ptr!=NULL)
+				ptr = start;
+				while(ptr != NULL)
 				{
-					VirtualWin *vw=ptr->value;
-					next=ptr->next;
-					if(vw && vw!=(VirtualWin *)-1 && dpy==vw->getX11Display())
+					VirtualWin *vw = ptr->value;
+					next = ptr->next;
+					if(vw && vw != (VirtualWin *)-1 && dpy == vw->getX11Display())
 						HASH::killEntry(ptr);
-					ptr=next;
+					ptr = next;
 				}
 			}
 
@@ -148,28 +148,28 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				VirtualWin *vw=entry->value;
+				VirtualWin *vw = entry->value;
 				if(entry && entry->key1) free(entry->key1);
-				if(entry && vw && vw!=(VirtualWin *)-1) delete vw;
+				if(entry && vw && vw != (VirtualWin *)-1) delete vw;
 			}
 
 			bool compare(char *key1, Window key2, HashEntry *entry)
 			{
-				VirtualWin *vw=entry->value;
+				VirtualWin *vw = entry->value;
 				return (
 					// Match 2D X Server display string and Window ID stored in
 					// VirtualDrawable instance
-					(vw && vw!=(VirtualWin *)-1 && key1
+					(vw && vw != (VirtualWin *)-1 && key1
 						&& !strcasecmp(DisplayString(vw->getX11Display()), key1)
-						&& key2==vw->getX11Drawable())
+						&& key2 == vw->getX11Drawable())
 					||
 					// If key1 is NULL, match off-screen drawable ID instead of X Window
 					// ID
-					(vw && vw!=(VirtualWin *)-1 && key1==NULL
-						&& key2==vw->getGLXDrawable())
+					(vw && vw != (VirtualWin *)-1 && key1 == NULL
+						&& key2 == vw->getGLXDrawable())
 					||
 					// Direct match
-					(key1 && !strcasecmp(key1, entry->key1) && key2==entry->key2)
+					(key1 && !strcasecmp(key1, entry->key1) && key2 == entry->key2)
 				);
 			}
 
@@ -181,6 +181,6 @@ namespace vglserver
 #undef HASH
 
 
-#define winhash (*(WindowHash::getInstance()))
+#define winhash  (*(WindowHash::getInstance()))
 
-#endif // __WINDOWHASH_H__
+#endif  // __WINDOWHASH_H__

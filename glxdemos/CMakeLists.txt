@@ -5,7 +5,7 @@ foreach(program glthreads glthreadsint sharedtex_mt)
 	set_property(TARGET ${program} PROPERTY COMPILE_FLAGS "-DPTHREADS")
 endforeach()
 
-foreach(program glxcontexts glxdemo glxgears glxgears_pixmap glxheads	glxpbdemo
+foreach(program glxcontexts glxdemo glxgears glxgears_pixmap glxheads glxpbdemo
 	glxpixmap manywin offset overlay shape sharedtex testgl5 texture_from_pixmap
 	wincopy xfont)
 	add_executable(${program} ${program}.c)

@@ -31,21 +31,21 @@ namespace vglserver
 
 			static vglconfigLauncher *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new vglconfigLauncher;
+					if(instance == NULL) instance = new vglconfigLauncher;
 				}
 				return instance;
 			}
 
 			void popup(Display *dpy_, int shmid_)
 			{
-				if(!dpy_ || shmid_==-1) _throw("Invalid argument");
+				if(!dpy_ || shmid_ == -1) _throw("Invalid argument");
 				vglutil::CriticalSection::SafeLock l(popupMutex);
 				if(thread) return;
-				dpy=dpy_;  shmid=shmid_;
-				_newcheck(thread=new vglutil::Thread(this));
+				dpy = dpy_;  shmid = shmid_;
+				_newcheck(thread = new vglutil::Thread(this));
 				thread->start();
 			}
 
@@ -59,19 +59,19 @@ namespace vglserver
 					unsetenv("LD_PRELOAD_64");
 					sprintf(commandLine, "%s -display %s -shmid %d -ppid %d",
 						fconfig.config, DisplayString(dpy), shmid, getpid());
-					if(system(commandLine)==-1) _throwunix();
+					if(system(commandLine) == -1) _throwunix();
 				}
 				catch(vglutil::Error &e)
 				{
 					vglout.println("Error invoking vglconfig--\n%s", e.getMessage());
 				}
 				vglutil::CriticalSection::SafeLock l(popupMutex);
-				thread->detach();  delete thread;  thread=NULL;
+				thread->detach();  delete thread;  thread = NULL;
 			}
 
 		private:
 
-			vglconfigLauncher(void): thread(NULL), dpy(NULL), shmid(-1)
+			vglconfigLauncher(void) : thread(NULL), dpy(NULL), shmid(-1)
 			{
 			}
 
@@ -79,16 +79,16 @@ namespace vglserver
 
 			int unsetenv(const char *name)
 			{
-				char *str=NULL;
-				if(!name) { errno=EINVAL;  return -1; }
-				if(strlen(name)<1 || strchr(name, '='))
+				char *str = NULL;
+				if(!name) { errno = EINVAL;  return -1; }
+				if(strlen(name) < 1 || strchr(name, '='))
 				{
-					errno=EINVAL;  return -1;
+					errno = EINVAL;  return -1;
 				}
 				if(!getenv(name)) return -1;
-				if((str=(char *)malloc(strlen(name)+2))==NULL)
+				if((str = (char *)malloc(strlen(name) + 2)) == NULL)
 				{
-					errno=ENOMEM;  return -1;
+					errno = ENOMEM;  return -1;
 				}
 				sprintf(str, "%s=", name);
 				putenv(str);
@@ -110,4 +110,4 @@ namespace vglserver
 #define vglpopup(dpy, shmid) \
 	((*(vglconfigLauncher::getInstance())).popup(dpy, shmid))
 
-#endif // __VGLCONFIGLAUNCHER_H__
+#endif  // __VGLCONFIGLAUNCHER_H__

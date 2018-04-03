@@ -17,14 +17,14 @@
 #include <GL/glx.h>
 
 
-#define _throw(m) { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define _throw(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
 
 
-#define _glXChooseVisual glXChooseVisual
-#define _glClear glClear
-#define _glClearColor glClearColor
-#define _glXCreateContext glXCreateContext
-#define _glXDestroyContext glXDestroyContext
-#define _glXMakeCurrent glXMakeCurrent
-#define _glXSwapBuffers glXSwapBuffers
+#define _glXChooseVisual  glXChooseVisual
+#define _glClear  glClear
+#define _glClearColor  glClearColor
+#define _glXCreateContext  glXCreateContext
+#define _glXDestroyContext  glXDestroyContext
+#define _glXMakeCurrent  glXMakeCurrent
+#define _glXSwapBuffers  glXSwapBuffers
 #include "dlfakerut-test.c"

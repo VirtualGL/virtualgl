@@ -51,4 +51,4 @@ extern void MD5Transform(uint32 buf[4], uint32 in[16]);
 extern char *MD5File(const char *, char *);
 extern char *MD5FileChunk(const char *, char *, off_t, off_t);
 
-#endif /* !MD5_H */
+#endif  /* !MD5_H */

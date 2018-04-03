@@ -25,120 +25,126 @@
 using namespace vglutil;
 
 
-#define PORT 1972
-#define MINDATASIZE 1
-#define MAXDATASIZE (4*1024*1024)
-#define ITER 5
+#define PORT  1972
+#define MINDATASIZE  1
+#define MAXDATASIZE  (4 * 1024 * 1024)
+#define ITER  5
 
 
-double benchTime=2.0;
+double benchTime = 2.0;
 
 
 #if defined(sun) || defined(linux)
 
 void benchmark(int interval, char *ifname)
 {
-	double mbitsRead=0., mbitsSent=0.;
-	unsigned long long bytesRead=0, bytesSent=0;
+	double mbitsRead = 0., mbitsSent = 0.;
+	unsigned long long bytesRead = 0, bytesSent = 0;
 
 	#ifdef sun
 
-	kstat_ctl_t *kc=NULL;
-	kstat_t *kif=NULL;
-	if((kc=kstat_open())==NULL) { _throwunix(); }
-	if((kif=kstat_lookup(kc, NULL, -1, ifname))==NULL) { _throwunix(); }
+	kstat_ctl_t *kc = NULL;
+	kstat_t *kif = NULL;
+	if((kc = kstat_open()) == NULL) { _throwunix(); }
+	if((kif = kstat_lookup(kc, NULL, -1, ifname)) == NULL) { _throwunix(); }
 
 	#elif defined(linux)
 
-	FILE *f=NULL;
-	if((f=fopen("/proc/net/dev", "r"))==NULL)
+	FILE *f = NULL;
+	if((f = fopen("/proc/net/dev", "r")) == NULL)
 		_throw("Could not open /proc/net/dev");
 
 	#endif
 
-	double tStart=getTime();
+	double tStart = getTime();
 	for(;;)
 	{
-		double tEnd=getTime();
+		double tEnd = getTime();
 
 		#ifdef sun
 
-		kstat_named_t *data=NULL;
-		if(kstat_read(kc, kif, NULL)<0) _throwunix();
-		if((data=(kstat_named_t *)kstat_data_lookup(kif, "rbytes64"))==NULL)
+		kstat_named_t *data = NULL;
+		if(kstat_read(kc, kif, NULL) < 0) _throwunix();
+		if((data = (kstat_named_t *)kstat_data_lookup(kif, "rbytes64")) == NULL)
 			_throwunix();
-		if(bytesRead!=0)
+		if(bytesRead != 0)
 		{
-			if(bytesRead>data->value.ui64)
-				mbitsRead+=((double)data->value.ui64+4294967296.
-					-(double)bytesRead)*8./1000000.;
+			if(bytesRead > data->value.ui64)
+				mbitsRead += ((double)data->value.ui64 + 4294967296. -
+					(double)bytesRead) * 8. / 1000000.;
 			else
-				mbitsRead+=((double)data->value.ui64-(double)bytesRead)*8./1000000.;
+				mbitsRead += ((double)data->value.ui64 -
+					(double)bytesRead) * 8. / 1000000.;
 		}
-		bytesRead=data->value.ui64;
-		if((data=(kstat_named_t *)kstat_data_lookup(kif, "obytes64"))==NULL)
+		bytesRead = data->value.ui64;
+		if((data = (kstat_named_t *)kstat_data_lookup(kif, "obytes64")) == NULL)
 			_throwunix();
-		if(bytesSent!=0)
+		if(bytesSent != 0)
 		{
-			if(bytesSent>data->value.ui64)
-				mbitsSent+=((double)data->value.ui64+4294967296.
-					-(double)bytesSent)*8./1000000.;
+			if(bytesSent > data->value.ui64)
+				mbitsSent += ((double)data->value.ui64 + 4294967296. -
+					(double)bytesSent) * 8. / 1000000.;
 			else
-				mbitsSent+=((double)data->value.ui64-(double)bytesSent)*8./1000000.;
+				mbitsSent += ((double)data->value.ui64 -
+					(double)bytesSent) * 8. / 1000000.;
 		}
-		bytesSent=data->value.ui64;
+		bytesSent = data->value.ui64;
 
 		#elif defined(linux)
 
 		char temps[1024];
-		if(fseek(f, 0, SEEK_SET)!=0) _throwunix();
-		bool isRead=false;
+		if(fseek(f, 0, SEEK_SET) != 0) _throwunix();
+		bool isRead = false;
 		while(fgets(temps, 1024, f))
 		{
 			unsigned long long dummy[16];  char ifstr[80], *ptr;
-			if((ptr=strchr(temps, ':'))!=NULL) *ptr=' ';
+			if((ptr = strchr(temps, ':')) != NULL) *ptr = ' ';
 			if(sscanf(temps,
 				"%s %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
 				ifstr, &dummy[0], &dummy[1], &dummy[2], &dummy[3], &dummy[4],
 				&dummy[5], &dummy[6], &dummy[7], &dummy[8], &dummy[9], &dummy[10],
-				&dummy[11], &dummy[12], &dummy[13], &dummy[14], &dummy[15])
-				==17 && !strcmp(ifname, ifstr))
+				&dummy[11], &dummy[12], &dummy[13], &dummy[14], &dummy[15]) == 17
+				&& !strcmp(ifname, ifstr))
 			{
-				if(bytesRead!=0) mbitsRead+=((double)dummy[0]-(double)bytesRead)*8./1000000.;
-				if(bytesSent!=0) mbitsSent+=((double)dummy[8]-(double)bytesSent)*8./1000000.;
-				bytesRead=dummy[0];  bytesSent=dummy[8];  isRead=true;
+				if(bytesRead != 0)
+					mbitsRead += ((double)dummy[0] - (double)bytesRead) * 8. / 1000000.;
+				if(bytesSent != 0)
+					mbitsSent += ((double)dummy[8] - (double)bytesSent) * 8. / 1000000.;
+				bytesRead = dummy[0];  bytesSent = dummy[8];  isRead = true;
 			}
 		}
-		if(!isRead) _throw("Cannot parse statistics for requested interface from /proc/net/dev.");
+		if(!isRead)
+			_throw("Cannot parse statistics for requested interface from /proc/net/dev.");
 
 		#endif
 
-		if((tEnd-tStart)>=interval)
+		if((tEnd - tStart) >= interval)
 		{
 			printf("Read: %f Mbps   Write: %f Mbps   Total: %f Mbps\n",
-				mbitsRead/(tEnd-tStart), mbitsSent/(tEnd-tStart),
-				(mbitsRead+mbitsSent)/(tEnd-tStart));
-			mbitsRead=mbitsSent=0.;
-			tStart=tEnd;
+				mbitsRead / (tEnd - tStart), mbitsSent / (tEnd - tStart),
+				(mbitsRead + mbitsSent) / (tEnd - tStart));
+			mbitsRead = mbitsSent = 0.;
+			tStart = tEnd;
 		}
 		usleep(500000);
 	}
 }
 
-#endif // defined(sun) || defined(linux)
+#endif  // defined(sun) || defined(linux)
 
 
 void initBuf(char *buf, int len)
 {
 	int i;
-	for(i=0; i<len; i++) buf[i]=(char)(i%256);
+	for(i = 0; i < len; i++) buf[i] = (char)(i % 256);
 }
 
 
 int cmpBuf(char *buf, int len)
 {
 	int i;
-	for(i=0; i<len; i++) if(buf[i]!=(char)(i%256)) return 0;
+	for(i = 0; i < len; i++)
+		if(buf[i] != (char)(i % 256)) return 0;
 	return 1;
 }
 
@@ -173,53 +179,53 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int server=0;  char *serverName=NULL;
+	int server = 0;  char *serverName = NULL;
 	char *buf;  int i, j, size;
-	bool doSSL=false, old=false;
+	bool doSSL = false, old = false;
 	Timer timer;
 	#if defined(sun) || defined(linux)
-	int interval=2;
+	int interval = 2;
 	#endif
 
 	try
 	{
-		if(argc<2) usage(argv);
+		if(argc < 2) usage(argv);
 		if(!stricmp(argv[1], "-client"))
 		{
-			if(argc<3) usage(argv);
-			server=0;  serverName=argv[2];
-			if(argc>3)
+			if(argc < 3) usage(argv);
+			server = 0;  serverName = argv[2];
+			if(argc > 3)
 			{
-				for(i=3; i<argc; i++)
+				for(i = 3; i < argc; i++)
 				{
 					#ifdef USESSL
 					if(!stricmp(argv[i], "-ssl"))
 					{
 						printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
-						doSSL=true;
+						doSSL = true;
 					}
 					#endif
 					if(!stricmp(argv[i], "-old"))
 					{
 						printf("Using old protocol\n");
-						old=true;
+						old = true;
 					}
 					if(!strnicmp(argv[i], "-t", 2))
 					{
-						double temp=-1.;
-						if(i<argc-1 && sscanf(argv[++i], "%lf", &temp) && temp>0.)
-							benchTime=temp;
+						double temp = -1.;
+						if(i < argc - 1 && sscanf(argv[++i], "%lf", &temp) && temp > 0.)
+							benchTime = temp;
 					}
 				}
 			}
 		}
 		else if(!stricmp(argv[1], "-server"))
 		{
-			server=1;
+			server = 1;
 			#ifdef USESSL
-			if(argc>2 && !stricmp(argv[2], "-ssl"))
+			if(argc > 2 && !stricmp(argv[2], "-ssl"))
 			{
-				doSSL=true;
+				doSSL = true;
 				printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
 			}
 			#endif
@@ -235,9 +241,9 @@ int main(int argc, char **argv)
 		else if(!stricmp(argv[1], "-bench"))
 		{
 			int interval_;
-			if(argc<3) usage(argv);
-			if(argc>3 && ((interval_=atoi(argv[3]))>0))
-				interval=interval_;
+			if(argc < 3) usage(argv);
+			if(argc > 3 && ((interval_ = atoi(argv[3])) > 0))
+				interval = interval_;
 			benchmark(interval, argv[2]);
 			exit(0);
 		}
@@ -245,7 +251,7 @@ int main(int argc, char **argv)
 		else usage(argv);
 
 		Socket socket(doSSL);
-		if((buf=(char *)malloc(sizeof(char)*MAXDATASIZE))==NULL)
+		if((buf = (char *)malloc(sizeof(char) * MAXDATASIZE)) == NULL)
 		{
 			printf("Buffer allocation error.\n");  exit(1);
 		}
@@ -263,39 +269,39 @@ int main(int argc, char **argv)
 
 		if(server)
 		{
-			Socket *clientSocket=NULL;
+			Socket *clientSocket = NULL;
 
 			printf("Listening on TCP port %d\n", PORT);
 			socket.listen(PORT, true);
-			clientSocket=socket.accept();
+			clientSocket = socket.accept();
 
 			printf("Accepted TCP connection from %s\n", clientSocket->remoteName());
 
 			clientSocket->recv(buf, 1);
-			if(buf[0]=='V')
+			if(buf[0] == 'V')
 			{
 				clientSocket->recv(&buf[1], 4);
 				if(strcmp(buf, "VGL22")) _throw("Invalid header");
 				while(1)
 				{
 					clientSocket->recv((char *)&size, (int)sizeof(int));
-					if(!littleendian()) size=byteswap(size);
-					if(size<1) break;
+					if(!littleendian()) size = byteswap(size);
+					if(size < 1) break;
 					while(1)
 					{
 						clientSocket->recv(buf, size);
-						if((unsigned char)buf[0]==255) break;
+						if((unsigned char)buf[0] == 255) break;
 						clientSocket->send(buf, size);
 					}
 				}
 			}
 			else
 			{
-				for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+				for(i = MINDATASIZE; i <= MAXDATASIZE; i *= 2)
 				{
-					for(j=0; j<ITER; j++)
+					for(j = 0; j < ITER; j++)
 					{
-						if(i!=MINDATASIZE || j!=0) clientSocket->recv(buf, i);
+						if(i != MINDATASIZE || j != 0) clientSocket->recv(buf, i);
 						clientSocket->send(buf, i);
 					}
 				}
@@ -315,59 +321,60 @@ int main(int argc, char **argv)
 
 			if(old)
 			{
-				for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+				for(i = MINDATASIZE; i <= MAXDATASIZE; i *= 2)
 				{
 					initBuf(buf, i);
 					timer.start();
-					for(j=0; j<ITER; j++)
+					for(j = 0; j < ITER; j++)
 					{
 						socket.send(buf, i);
 						socket.recv(buf, i);
 					}
-					elapsed=timer.elapsed();
+					elapsed = timer.elapsed();
 					if(!cmpBuf(buf, i))
 					{
 						printf("DATA ERROR\n");  exit(1);
 					}
 					printf("%-13d  %14.6f  %14.6f  %14.6f\n", i,
-						elapsed/2.*1000./(double)ITER,
-						(double)i*(double)ITER/1048576./(elapsed/2.),
-						(double)i*(double)ITER/125000./(elapsed/2.));
+						elapsed / 2. * 1000. / (double)ITER,
+						(double)i * (double)ITER / 1048576. / (elapsed / 2.),
+						(double)i * (double)ITER / 125000. / (elapsed / 2.));
 				}
 				socket.close();
 				free(buf);
 				return 0;
 			}
 
-			char id[6]="VGL22";
+			char id[6] = "VGL22";
 			socket.send(id, 5);
-			for(i=MINDATASIZE; i<=MAXDATASIZE; i*=2)
+			for(i = MINDATASIZE; i <= MAXDATASIZE; i *= 2)
 			{
-				size=i;
-				if(!littleendian()) size=byteswap(size);
+				size = i;
+				if(!littleendian()) size = byteswap(size);
 				socket.send((char *)&size, (int)sizeof(int));
 				initBuf(buf, i);
-				j=0;
+				j = 0;
 				timer.start();
 				do
 				{
 					socket.send(buf, i);
 					socket.recv(buf, i);
 					j++;
-					elapsed=timer.elapsed();
-				} while(elapsed<benchTime);
+					elapsed = timer.elapsed();
+				} while(elapsed < benchTime);
 				if(!cmpBuf(buf, i))
 				{
 					printf("DATA ERROR\n");  exit(1);
 				}
-				buf[0]=(char)255;
+				buf[0] = (char)255;
 				socket.send(buf, i);
-				printf("%-13d  %14.6f  %14.6f  %14.6f\n", i, elapsed/2.*1000./(double)j,
-					(double)i*(double)j/1048576./(elapsed/2.),
-					(double)i*(double)j/125000./(elapsed/2.));
+				printf("%-13d  %14.6f  %14.6f  %14.6f\n", i,
+					elapsed / 2. * 1000. / (double)j,
+					(double)i * (double)j / 1048576. / (elapsed / 2.),
+					(double)i * (double)j / 125000. / (elapsed / 2.));
 			}
-			size=0;
-			if(!littleendian()) size=byteswap(size);
+			size = 0;
+			if(!littleendian()) size = byteswap(size);
 			socket.send((char *)&size, (int)sizeof(int));
 		}
 

@@ -188,7 +188,7 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 
 %dir %{prefix}
 %if "%{prefix}" == "@CMAKE_INSTALL_DEFAULT_PREFIX@" && "%{docdir}" != "%{prefix}/doc"
- %{prefix}/doc
+	%{prefix}/doc
 %endif
 
 %dir %{docdir}
@@ -208,26 +208,26 @@ rm %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %{bindir}/vglserver_config
 %{bindir}/vglrun
 %if "%{_bits}" == "64"
- %{bindir}/glxspheres64
+	%{bindir}/glxspheres64
 %else
- %{bindir}/glxspheres
+	%{bindir}/glxspheres
 %endif
 %if "%{bindir}" != "%{_bindir}" && %{binsymlinks}
- %{_bindir}/vglclient
- %{_bindir}/vglconfig
- %{_bindir}/vglconnect
- %{_bindir}/vgllogin
- %{_bindir}/vglrun
- %{_bindir}/vglgenkey
- %{_bindir}/vglserver_config
+	%{_bindir}/vglclient
+	%{_bindir}/vglconfig
+	%{_bindir}/vglconnect
+	%{_bindir}/vgllogin
+	%{_bindir}/vglrun
+	%{_bindir}/vglgenkey
+	%{_bindir}/vglserver_config
 %endif
 
 %dir %{incdir}
 %{incdir}/rrtransport.h
 %{incdir}/rr.h
 %if "%{incdir}" != "%{_includedir}" && %{incsymlinks}
- %{_includedir}/rrtransport.h
- %{_includedir}/rr.h
+	%{_includedir}/rrtransport.h
+	%{_includedir}/rr.h
 %endif
 
 %if "%{libdir}" != "%{_syslibdir}"

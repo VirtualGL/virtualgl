@@ -21,38 +21,38 @@ using namespace vglcommon;
 using namespace vglserver;
 
 
-VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm)
-	: VirtualDrawable(dpy_, pm)
+VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm) :
+	VirtualDrawable(dpy_, pm)
 {
 	CriticalSection::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
-	_newcheck(frame=new FBXFrame(dpy_, pm, vis->visual, true));
+	_newcheck(frame = new FBXFrame(dpy_, pm, vis->visual, true));
 }
 
 
 VirtualPixmap::~VirtualPixmap()
 {
 	CriticalSection::SafeLock l(mutex);
-	if(frame) { delete frame;  frame=NULL; }
+	if(frame) { delete frame;  frame = NULL; }
 }
 
 
 int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 	const int *attribs)
 {
-	if(!config_ || width<1 || height<1) _throw("Invalid argument");
+	if(!config_ || width < 1 || height < 1) _throw("Invalid argument");
 
 	CriticalSection::SafeLock l(mutex);
-	if(oglDraw && oglDraw->getWidth()==width && oglDraw->getHeight()==height
-		&& oglDraw->getDepth()==depth
-		&& _FBCID(oglDraw->getConfig())==_FBCID(config_))
+	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height
+		&& oglDraw->getDepth() == depth
+		&& _FBCID(oglDraw->getConfig()) == _FBCID(config_))
 		return 0;
-	_newcheck(oglDraw=new OGLDrawable(width, height, depth, config_, attribs));
-	if(config && _FBCID(config_)!=_FBCID(config) && ctx)
+	_newcheck(oglDraw = new OGLDrawable(width, height, depth, config_, attribs));
+	if(config && _FBCID(config_) != _FBCID(config) && ctx)
 	{
-		_glXDestroyContext(_dpy3D, ctx);  ctx=0;
+		_glXDestroyContext(_dpy3D, ctx);  ctx = 0;
 	}
-	config=config_;
+	config = config_;
 	return 1;
 }
 
@@ -60,9 +60,9 @@ int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 // Returns the X11 Pixmap on the 3D X server corresponding to the GLX Pixmap
 Pixmap VirtualPixmap::get3DX11Pixmap(void)
 {
-	GLXDrawable retval=0;
+	GLXDrawable retval = 0;
 	CriticalSection::SafeLock l(mutex);
-	retval=oglDraw->getPixmap();
+	retval = oglDraw->getPixmap();
 	return retval;
 }
 
@@ -72,43 +72,43 @@ void VirtualPixmap::readback(void)
 	fconfig_reloadenv();
 
 	CriticalSection::SafeLock l(mutex);
-	int width=oglDraw->getWidth(), height=oglDraw->getHeight();
+	int width = oglDraw->getWidth(), height = oglDraw->getHeight();
 
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
-	hdr.x=hdr.y=0;
-	hdr.width=hdr.framew=width;
-	hdr.height=hdr.frameh=height;
+	hdr.x = hdr.y = 0;
+	hdr.width = hdr.framew = width;
+	hdr.height = hdr.frameh = height;
 	frame->init(hdr);
 
-	frame->flags|=FRAME_BOTTOMUP;
+	frame->flags |= FRAME_BOTTOMUP;
 	int format;
-	unsigned char *bits=frame->bits;
+	unsigned char *bits = frame->bits;
 	switch(frame->pixelSize)
 	{
 		case 3:
-			format=GL_RGB;
+			format = GL_RGB;
 			#ifdef GL_BGR_EXT
-			if(frame->flags&FRAME_BGR) format=GL_BGR_EXT;
+			if(frame->flags & FRAME_BGR) format = GL_BGR_EXT;
 			#endif
 			break;
 		case 4:
-			format=GL_RGBA;
+			format = GL_RGBA;
 			#ifdef GL_BGRA_EXT
-			if(frame->flags&FRAME_BGR && !(frame->flags&FRAME_ALPHAFIRST))
-				format=GL_BGRA_EXT;
+			if(frame->flags & FRAME_BGR && !(frame->flags & FRAME_ALPHAFIRST))
+				format = GL_BGRA_EXT;
 			#endif
-			if(frame->flags&FRAME_BGR && frame->flags&FRAME_ALPHAFIRST)
+			if(frame->flags & FRAME_BGR && frame->flags & FRAME_ALPHAFIRST)
 			{
 				#ifdef GL_ABGR_EXT
-				format=GL_ABGR_EXT;
+				format = GL_ABGR_EXT;
 				#elif defined(GL_BGRA_EXT)
-				format=GL_BGRA_EXT;  bits=frame->bits+1;
+				format = GL_BGRA_EXT;  bits = frame->bits + 1;
 				#endif
 			}
-			if(!(frame->flags&FRAME_BGR) && frame->flags&FRAME_ALPHAFIRST)
+			if(!(frame->flags & FRAME_BGR) && frame->flags & FRAME_ALPHAFIRST)
 			{
-				format=GL_RGBA;  bits=frame->bits+1;
+				format = GL_RGBA;  bits = frame->bits + 1;
 			}
 			break;
 		default:

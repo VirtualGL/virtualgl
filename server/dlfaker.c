@@ -34,50 +34,50 @@ extern void *_vgl_dlopen(const char *, int);
 
 void *dlopen(const char *filename, int flag)
 {
-	char *env=NULL, *env2=NULL;  const char *envname="FAKERLIB32";
-	int verbose=0, trace=0;
-	void *retval=NULL;
+	char *env = NULL, *env2 = NULL;  const char *envname = "FAKERLIB32";
+	int verbose = 0, trace = 0;
+	void *retval = NULL;
 
-	if(sizeof(long)==8) envname="FAKERLIB";
-	if((env2=getenv("VGL_VERBOSE"))!=NULL && strlen(env2)>0
-		&& !strncmp(env2, "1", 1)) verbose=1;
-	if((env2=getenv("VGL_TRACE"))!=NULL && strlen(env2)>0
-		&& !strncmp(env2, "1", 1)) trace=1;
+	if(sizeof(long) == 8) envname = "FAKERLIB";
+	if((env2 = getenv("VGL_VERBOSE")) != NULL && strlen(env2) > 0
+		&& !strncmp(env2, "1", 1)) verbose = 1;
+	if((env2 = getenv("VGL_TRACE")) != NULL && strlen(env2) > 0
+		&& !strncmp(env2, "1", 1)) trace = 1;
 
 	if(trace)
 	{
 		fprintf(stderr, "[VGL] dlopen (filename=%s flag=%d",
-			filename? filename:"NULL", flag);
+			filename ? filename : "NULL", flag);
 	}
 
 	#ifdef RTLD_DEEPBIND
-	flag&=(~RTLD_DEEPBIND);
+	flag &= (~RTLD_DEEPBIND);
 	#endif
 
-	if((env=getenv(envname))==NULL || strlen(env)<1)
-		env="lib"VGL_FAKER_NAME".so";
-	if(filename &&
-		(!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
+	if((env = getenv(envname)) == NULL || strlen(env) < 1)
+		env = "lib"VGL_FAKER_NAME".so";
+	if(filename
+		&& (!strncmp(filename, "libGL.", 6) || strstr(filename, "/libGL.")
 			|| !strncmp(filename, "libX11.", 7) || strstr(filename, "/libX11.")
-			|| (flag&RTLD_LAZY
+			|| (flag & RTLD_LAZY
 					&& (!strncmp(filename, "libopengl.", 10)
 							|| strstr(filename, "/libopengl.")))))
 	{
 		if(verbose)
 			fprintf(stderr,
 				"[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"%s\")\n",
-				filename? filename:"NULL", env? env:"NULL");
-		retval=_vgl_dlopen(env, flag);
+				filename ? filename : "NULL", env ? env : "NULL");
+		retval = _vgl_dlopen(env, flag);
 	}
 	else if(filename && (!strncmp(filename, "libdl.", 6)
 		|| strstr(filename, "/libdl.")))
 	{
 		if(verbose)
-			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"lib"VGL_DLFAKER_NAME".so\")\n",
-				filename? filename:"NULL");
-		retval=_vgl_dlopen("lib"VGL_DLFAKER_NAME".so", flag);
+			fprintf(stderr, "[VGL] NOTICE: Replacing dlopen(\"%s\") with dlopen(\"lib" VGL_DLFAKER_NAME ".so\")\n",
+				filename ? filename : "NULL");
+		retval = _vgl_dlopen("lib" VGL_DLFAKER_NAME ".so", flag);
 	}
-	else retval=_vgl_dlopen(filename, flag);
+	else retval = _vgl_dlopen(filename, flag);
 
 	if(!retval && filename && !strncmp(filename, "VBoxOGL", 7))
 	{
@@ -88,7 +88,7 @@ void *dlopen(const char *filename, int flag)
 			fprintf(stderr, "[VGL] NOTICE: dlopen(\"%s\") failed.\n", filename);
 			fprintf(stderr, "[VGL]    Trying dlopen(\"%s\")\n", temps);
 		}
-		retval=_vgl_dlopen(temps, flag);
+		retval = _vgl_dlopen(temps, flag);
 	}
 
 	if(trace)

@@ -20,7 +20,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<char *, GLXFBConfig, VisualID>
+#define HASH  Hash<char *, GLXFBConfig, VisualID>
 
 // This maps a GLXFBConfig to an X Visual ID
 
@@ -32,20 +32,20 @@ namespace vglserver
 
 			static ReverseConfigHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new ReverseConfigHash;
+					if(instance == NULL) instance = new ReverseConfigHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				char *dpystring=strdup(DisplayString(dpy));
+				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, config, (VisualID)-1))
 					free(dpystring);
 			}
@@ -53,8 +53,8 @@ namespace vglserver
 			bool isOverlay(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) return false;
-				VisualID vid=HASH::find(DisplayString(dpy), config);
-				if(vid==(VisualID)-1) return true;
+				VisualID vid = HASH::find(DisplayString(dpy), config);
+				if(vid == (VisualID)-1) return true;
 				else return false;
 			}
 
@@ -75,7 +75,7 @@ namespace vglserver
 
 			bool compare(char *key1, GLXFBConfig key2, HashEntry *entry)
 			{
-				return(key2==entry->key2 && !strcasecmp(key1, entry->key1));
+				return key2 == entry->key2 && !strcasecmp(key1, entry->key1);
 			}
 
 			void detach(HashEntry *h)
@@ -91,6 +91,6 @@ namespace vglserver
 #undef HASH
 
 
-#define rcfghash (*(ReverseConfigHash::getInstance()))
+#define rcfghash  (*(ReverseConfigHash::getInstance()))
 
-#endif // __REVERSECONFIGHASH_H__
+#endif  // __REVERSECONFIGHASH_H__

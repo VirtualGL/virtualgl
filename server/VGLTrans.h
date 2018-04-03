@@ -34,9 +34,9 @@ namespace vglserver
 
 			virtual ~VGLTrans(void)
 			{
-				deadYet=true;  q.release();
-				if(thread) { thread->stop();  delete thread;  thread=NULL; }
-				if(socket) { delete socket;  socket=NULL; }
+				deadYet = true;  q.release();
+				if(thread) { thread->stop();  delete thread;  thread = NULL; }
+				if(socket) { delete socket;  socket = NULL; }
 			}
 
 			vglcommon::Frame *getFrame(int, int, int, int, bool stereo);
@@ -44,7 +44,7 @@ namespace vglserver
 			void synchronize(void);
 			void sendFrame(vglcommon::Frame *);
 			void run(void);
-			void sendHeader(rrframeheader h, bool eof=false);
+			void sendHeader(rrframeheader h, bool eof = false);
 			void send(char *, int);
 			void save(char *, int);
 			void recv(char *, int);
@@ -55,7 +55,7 @@ namespace vglserver
 		private:
 
 			vglutil::Socket *socket;
-			static const int NFRAMES=4;
+			static const int NFRAMES = 4;
 			vglutil::CriticalSection mutex;
 			vglcommon::Frame frames[NFRAMES];
 			vglutil::Event ready;
@@ -73,7 +73,7 @@ namespace vglserver
 					storedFrames(0), cframes(NULL), frame(NULL), lastFrame(NULL),
 					myRank(myRank_), deadYet(false), parent(parent_)
 				{
-					if(parent) nprocs=parent->nprocs;
+					if(parent) nprocs = parent->nprocs;
 					ready.wait();  complete.wait();
 					char temps[20];
 					snprintf(temps, 20, "Compress %d", myRank);
@@ -83,7 +83,7 @@ namespace vglserver
 				virtual ~Compressor(void)
 				{
 					shutdown();
-					if(cframes) { free(cframes);  cframes=NULL; }
+					if(cframes) { free(cframes);  cframes = NULL; }
 				}
 
 				void run(void)
@@ -96,7 +96,7 @@ namespace vglserver
 							compressSend(frame, lastFrame);
 							complete.signal();
 						}
-						catch (...)
+						catch(...)
 						{
 							complete.signal();  throw;
 						}
@@ -105,7 +105,7 @@ namespace vglserver
 
 				void go(vglcommon::Frame *frame_, vglcommon::Frame *lastFrame_)
 				{
-					frame=frame_;  lastFrame=lastFrame_;
+					frame = frame_;  lastFrame = lastFrame_;
 					ready.signal();
 				}
 
@@ -114,7 +114,7 @@ namespace vglserver
 					complete.wait();
 				}
 
-				void shutdown(void) { deadYet=true;  ready.signal(); }
+				void shutdown(void) { deadYet = true;  ready.signal(); }
 				void compressSend(vglcommon::Frame *frame,
 					vglcommon::Frame *lastFrame);
 				void send(void);
@@ -126,10 +126,10 @@ namespace vglserver
 				void store(vglcommon::CompressedFrame *cf)
 				{
 					storedFrames++;
-					if(!(cframes=(vglcommon::CompressedFrame **)realloc(cframes,
-						sizeof(vglcommon::CompressedFrame *)*storedFrames)))
+					if(!(cframes = (vglcommon::CompressedFrame **)realloc(cframes,
+						sizeof(vglcommon::CompressedFrame *) * storedFrames)))
 						_throw("Memory allocation error");
-					cframes[storedFrames-1]=cf;
+					cframes[storedFrames - 1] = cf;
 				}
 
 				int storedFrames;  vglcommon::CompressedFrame **cframes;
@@ -143,4 +143,4 @@ namespace vglserver
 	};
 }
 
-#endif // __VGLTRANS_H__
+#endif  // __VGLTRANS_H__

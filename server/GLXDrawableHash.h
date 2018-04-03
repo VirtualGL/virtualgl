@@ -21,7 +21,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<GLXDrawable, void *, Display *>
+#define HASH  Hash<GLXDrawable, void *, Display *>
 
 // This maps a GLXDrawable instance to a (remote) Display handle.
 // Used primarily to make glXGetCurrentDisplay() work properly :/
@@ -34,15 +34,15 @@ namespace vglserver
 
 			static GLXDrawableHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new GLXDrawableHash;
+					if(instance == NULL) instance = new GLXDrawableHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(GLXDrawable draw, Display *dpy)
 			{
@@ -86,6 +86,6 @@ namespace vglserver
 #undef HASH
 
 
-#define glxdhash (*(GLXDrawableHash::getInstance()))
+#define glxdhash  (*(GLXDrawableHash::getInstance()))
 
-#endif // __GLXDRAWABLEHASH_H__
+#endif  // __GLXDRAWABLEHASH_H__

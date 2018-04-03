@@ -12,11 +12,11 @@
  * wxWindows Library License for more details.
  */
 
-#define __case(m) case m:  return #m;
+#define __case(m)  case m:  return #m;
 
 static const char *x11error(int code)
 {
-	if(code>=FirstExtensionError && code<=LastExtensionError)
+	if(code >= FirstExtensionError && code <= LastExtensionError)
 		return "Extension error";
 	switch(code)
 	{

@@ -20,30 +20,32 @@
 #ifndef __THREADLOCAL_H__
 #define __THREADLOCAL_H__
 
-#define VGL_THREAD_LOCAL(name, type, initValue)  \
-static pthread_key_t get##name##Key(void)  \
-{  \
-	static pthread_key_t key;  \
-	static bool init=false;  \
-	if (!init)  \
-	{  \
-		if(pthread_key_create(&key, NULL))  \
-		{  \
-			vglout.println("[VGL] ERROR: pthread_key_create() for "#name" failed.\n");  \
-			vglfaker::safeExit(1);  \
-		}  \
-		pthread_setspecific(key, (const void *)initValue);  \
-		init=true;  \
-	}  \
-	return key;  \
-}  \
-type get##name(void)  \
-{  \
-	return (type)pthread_getspecific(get##name##Key());  \
-}  \
-void set##name(type value)  \
-{  \
-	pthread_setspecific(get##name##Key(), (const void *)value);  \
+#define VGL_THREAD_LOCAL(name, type, initValue) \
+static pthread_key_t get##name##Key(void) \
+{ \
+	static pthread_key_t key; \
+	static bool init = false; \
+	if(!init) \
+	{ \
+		if(pthread_key_create(&key, NULL)) \
+		{ \
+			vglout.println("[VGL] ERROR: pthread_key_create() for " #name " failed.\n"); \
+			vglfaker::safeExit(1); \
+		} \
+		pthread_setspecific(key, (const void *)initValue); \
+		init = true; \
+	} \
+	return key; \
+} \
+\
+type get##name(void) \
+{ \
+	return (type)pthread_getspecific(get##name##Key()); \
+} \
+\
+void set##name(type value) \
+{ \
+	pthread_setspecific(get##name##Key(), (const void *)value); \
 }
 
-#endif // __THREADLOCAL_H__
+#endif  // __THREADLOCAL_H__

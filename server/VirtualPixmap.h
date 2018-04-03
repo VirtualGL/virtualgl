@@ -42,4 +42,4 @@ namespace vglserver
 	};
 }
 
-#endif // __VIRTUALPIXMAP_H__
+#endif  // __VIRTUALPIXMAP_H__

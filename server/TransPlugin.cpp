@@ -22,16 +22,16 @@ using namespace vglserver;
 
 
 #undef _throw
-#define _throw(m) throw(Error("transport plugin", m, -1))
+#define _throw(m)  throw(Error("transport plugin", m, -1))
 
 
 static void *loadsym(void *dllhnd, const char *symbol)
 {
-	void *sym=NULL;  const char *err=NULL;
-	sym=dlsym(dllhnd, (char *)symbol);
+	void *sym = NULL;  const char *err = NULL;
+	sym = dlsym(dllhnd, (char *)symbol);
 	if(!sym)
 	{
-		err=dlerror();
+		err = dlerror();
 		if(err) _throw(err);
 		else _throw("Could not load symbol");
 	}
@@ -41,28 +41,30 @@ static void *loadsym(void *dllhnd, const char *symbol)
 
 TransPlugin::TransPlugin(Display *dpy, Window win, char *name)
 {
-	if(!name || strlen(name)<1) _throw("Transport name is empty or NULL!");
-	const char *err=NULL;
+	if(!name || strlen(name) < 1) _throw("Transport name is empty or NULL!");
+	const char *err = NULL;
 	CriticalSection::SafeLock l(mutex);
 	dlerror();  // Clear error state
 	char filename[MAXSTR];
-	snprintf(filename, MAXSTR-1, "libvgltrans_%s.so", name);
-	dllhnd=dlopen(filename, RTLD_NOW);
+	snprintf(filename, MAXSTR - 1, "libvgltrans_%s.so", name);
+	dllhnd = dlopen(filename, RTLD_NOW);
 	if(!dllhnd)
 	{
-		err=dlerror();
+		err = dlerror();
 		if(err) _throw(err);
 		else _throw("Could not open transport plugin");
 	}
-	_RRTransInit=(_RRTransInitType)loadsym(dllhnd, "RRTransInit");
-	_RRTransConnect=(_RRTransConnectType)loadsym(dllhnd, "RRTransConnect");
-	_RRTransGetFrame=(_RRTransGetFrameType)loadsym(dllhnd, "RRTransGetFrame");
-	_RRTransReady=(_RRTransReadyType)loadsym(dllhnd, "RRTransReady");
-	_RRTransSynchronize=(_RRTransSynchronizeType)loadsym(dllhnd, "RRTransSynchronize");
-	_RRTransSendFrame=(_RRTransSendFrameType)loadsym(dllhnd, "RRTransSendFrame");
-	_RRTransDestroy=(_RRTransDestroyType)loadsym(dllhnd, "RRTransDestroy");
-	_RRTransGetError=(_RRTransGetErrorType)loadsym(dllhnd, "RRTransGetError");
-	if(!(handle=_RRTransInit(dpy, win, &fconfig))) _throw(_RRTransGetError());
+	_RRTransInit = (_RRTransInitType)loadsym(dllhnd, "RRTransInit");
+	_RRTransConnect = (_RRTransConnectType)loadsym(dllhnd, "RRTransConnect");
+	_RRTransGetFrame = (_RRTransGetFrameType)loadsym(dllhnd, "RRTransGetFrame");
+	_RRTransReady = (_RRTransReadyType)loadsym(dllhnd, "RRTransReady");
+	_RRTransSynchronize =
+		(_RRTransSynchronizeType)loadsym(dllhnd, "RRTransSynchronize");
+	_RRTransSendFrame =
+		(_RRTransSendFrameType)loadsym(dllhnd, "RRTransSendFrame");
+	_RRTransDestroy = (_RRTransDestroyType)loadsym(dllhnd, "RRTransDestroy");
+	_RRTransGetError = (_RRTransGetErrorType)loadsym(dllhnd, "RRTransGetError");
+	if(!(handle = _RRTransInit(dpy, win, &fconfig))) _throw(_RRTransGetError());
 }
 
 
@@ -77,24 +79,24 @@ TransPlugin::~TransPlugin(void)
 void TransPlugin::connect(char *receiverName, int port)
 {
 	CriticalSection::SafeLock l(mutex);
-	int ret=_RRTransConnect(handle, receiverName, port);
-	if(ret<0) _throw(_RRTransGetError());
+	int ret = _RRTransConnect(handle, receiverName, port);
+	if(ret < 0) _throw(_RRTransGetError());
 }
 
 
 void TransPlugin::destroy(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	int ret=_RRTransDestroy(handle);
-	if(ret<0) _throw(_RRTransGetError());
+	int ret = _RRTransDestroy(handle);
+	if(ret < 0) _throw(_RRTransGetError());
 }
 
 
 int TransPlugin::ready(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	int ret=_RRTransReady(handle);
-	if(ret<0) _throw(_RRTransGetError());
+	int ret = _RRTransReady(handle);
+	if(ret < 0) _throw(_RRTransGetError());
 	return ret;
 }
 
@@ -102,15 +104,15 @@ int TransPlugin::ready(void)
 void TransPlugin::synchronize(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	int ret=_RRTransSynchronize(handle);
-	if(ret<0) _throw(_RRTransGetError());
+	int ret = _RRTransSynchronize(handle);
+	if(ret < 0) _throw(_RRTransGetError());
 }
 
 
 RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 {
 	CriticalSection::SafeLock l(mutex);
-	RRFrame *ret=_RRTransGetFrame(handle, width, height, format, stereo);
+	RRFrame *ret = _RRTransGetFrame(handle, width, height, format, stereo);
 	if(!ret) _throw(_RRTransGetError());
 	return ret;
 }
@@ -119,6 +121,6 @@ RRFrame *TransPlugin::getFrame(int width, int height, int format, bool stereo)
 void TransPlugin::sendFrame(RRFrame *frame, bool sync)
 {
 	CriticalSection::SafeLock l(mutex);
-	int ret=_RRTransSendFrame(handle, frame, sync);
-	if(ret<0) _throw(_RRTransGetError());
+	int ret = _RRTransSendFrame(handle, frame, sync);
+	if(ret < 0) _throw(_RRTransGetError());
 }

@@ -23,7 +23,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<char *, int, VisualID>
+#define HASH  Hash<char *, int, VisualID>
 
 namespace vglserver
 {
@@ -33,20 +33,20 @@ namespace vglserver
 
 			static ConfigHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new ConfigHash;
+					if(instance == NULL) instance = new ConfigHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy, GLXFBConfig config, VisualID vid)
 			{
 				if(!dpy || !vid || !config) _throw("Invalid argument");
-				char *dpystring=strdup(DisplayString(dpy));
+				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, _FBCID(config), vid))
 					free(dpystring);
 			}
@@ -54,8 +54,7 @@ namespace vglserver
 			VisualID getVisual(Display *dpy, GLXFBConfig config)
 			{
 				if(!dpy || !config) _throw("Invalid argument");
-				return HASH::find(DisplayString(dpy),
-					_FBCID(config));
+				return HASH::find(DisplayString(dpy), _FBCID(config));
 			}
 
 			VisualID getVisual(Display *dpy, int fbcid)
@@ -79,7 +78,7 @@ namespace vglserver
 
 			bool compare(char *key1, int key2, HashEntry *entry)
 			{
-				return(key2==entry->key2 && !strcasecmp(key1, entry->key1));
+				return key2 == entry->key2 && !strcasecmp(key1, entry->key1);
 			}
 
 			void detach(HashEntry *entry)
@@ -95,6 +94,6 @@ namespace vglserver
 #undef HASH
 
 
-#define cfghash (*(ConfigHash::getInstance()))
+#define cfghash  (*(ConfigHash::getInstance()))
 
-#endif // __CONFIGHASH_H__
+#endif  // __CONFIGHASH_H__

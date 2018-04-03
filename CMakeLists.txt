@@ -154,9 +154,9 @@ if(MSVC)
 	# Don't auto-generate manifests
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
 
-  # Avoid linker warning when doing Debug build if dependent libraries are
-  # linked with the Release version of the static C library.
-  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
+	# Avoid linker warning when doing Debug build if dependent libraries are
+	# linked with the Release version of the static C library.
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 endif()
 
 # This ensures that we don't depend on libstdc++ or libgcc
@@ -381,6 +381,6 @@ endif() # WIN32
 include(cmakescripts/BuildPackages.cmake)
 
 configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
-  "cmake_uninstall.cmake" IMMEDIATE @ONLY)
+	"cmake_uninstall.cmake" IMMEDIATE @ONLY)
 
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)

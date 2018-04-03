@@ -19,14 +19,14 @@
 #include "Mutex.h"
 
 
-typedef void* (*_RRTransInitType)(Display *, Window, FakerConfig *);
+typedef void *(*_RRTransInitType)(Display *, Window, FakerConfig *);
 typedef int (*_RRTransConnectType)(void *, char *, int);
-typedef RRFrame* (*_RRTransGetFrameType)(void *, int, int, int, int);
+typedef RRFrame *(*_RRTransGetFrameType)(void *, int, int, int, int);
 typedef int (*_RRTransReadyType)(void *);
 typedef int (*_RRTransSynchronizeType)(void *);
 typedef int (*_RRTransSendFrameType)(void *, RRFrame *, int);
 typedef int (*_RRTransDestroyType)(void *);
-typedef const char* (*_RRTransGetErrorType)(void);
+typedef const char *(*_RRTransGetErrorType)(void);
 
 
 namespace vglserver
@@ -59,4 +59,4 @@ namespace vglserver
 	};
 }
 
-#endif // __TRANSPLUGIN_H__
+#endif  // __TRANSPLUGIN_H__

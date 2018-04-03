@@ -26,11 +26,11 @@ Event::Event(void)
 {
 	#ifdef _WIN32
 
-	event=CreateEvent(NULL, FALSE, TRUE, NULL);
+	event = CreateEvent(NULL, FALSE, TRUE, NULL);
 
 	#else
 
-	ready=true;  deadYet=false;
+	ready = true;  deadYet = false;
 	pthread_mutex_init(&mutex, NULL);
 	pthread_cond_init(&cond, NULL);
 
@@ -44,13 +44,13 @@ Event::~Event(void)
 
 	if(event)
 	{
-		SetEvent(event);  CloseHandle(event);  event=NULL;
+		SetEvent(event);  CloseHandle(event);  event = NULL;
 	}
 
 	#else
 
 	pthread_mutex_lock(&mutex);
-	ready=true;  deadYet=true;
+	ready = true;  deadYet = true;
 	pthread_mutex_unlock(&mutex);
 	pthread_cond_signal(&cond);
 	pthread_mutex_destroy(&mutex);
@@ -63,24 +63,24 @@ void Event::wait(void)
 {
 	#ifdef _WIN32
 
-	if(WaitForSingleObject(event, INFINITE)==WAIT_FAILED)
+	if(WaitForSingleObject(event, INFINITE) == WAIT_FAILED)
 		throw(W32Error("Event::wait()"));
 
 	#else
 
 	int ret;
-	if((ret=pthread_mutex_lock(&mutex))!=0)
+	if((ret = pthread_mutex_lock(&mutex)) != 0)
 		throw(Error("Event::wait()", strerror(ret)));
 	while(!ready && !deadYet)
 	{
-		if((ret=pthread_cond_wait(&cond, &mutex))!=0)
+		if((ret = pthread_cond_wait(&cond, &mutex)) != 0)
 		{
 			pthread_mutex_unlock(&mutex);
 			throw(Error("Event::wait()", strerror(ret)));
 		}
 	}
-	ready=false;
-	if((ret=pthread_mutex_unlock(&mutex))!=0)
+	ready = false;
+	if((ret = pthread_mutex_unlock(&mutex)) != 0)
 		throw(Error("Event::wait()", strerror(ret)));
 
 	#endif
@@ -96,12 +96,12 @@ void Event::signal(void)
 	#else
 
 	int ret;
-	if((ret=pthread_mutex_lock(&mutex))!=0)
+	if((ret = pthread_mutex_lock(&mutex)) != 0)
 		throw(Error("Event::signal()", strerror(ret)));
-	ready=true;
-	if((ret=pthread_mutex_unlock(&mutex))!=0)
+	ready = true;
+	if((ret = pthread_mutex_unlock(&mutex)) != 0)
 		throw(Error("Event::signal()", strerror(ret)));
-	if((ret=pthread_cond_signal(&cond))!=0)
+	if((ret = pthread_cond_signal(&cond)) != 0)
 		throw(Error("Event::signal()", strerror(ret)));
 
 	#endif
@@ -110,25 +110,25 @@ void Event::signal(void)
 
 bool Event::isLocked(void)
 {
-	bool ret=true;
+	bool ret = true;
 
 	#ifdef _WIN32
 
-	DWORD dw=WaitForSingleObject(event, 0);
-	if(dw==WAIT_FAILED) throw(W32Error("Event::isLocked"));
-	else if(dw==WAIT_OBJECT_0)
+	DWORD dw = WaitForSingleObject(event, 0);
+	if(dw == WAIT_FAILED) throw(W32Error("Event::isLocked"));
+	else if(dw == WAIT_OBJECT_0)
 	{
-		ret=false;  SetEvent(event);
+		ret = false;  SetEvent(event);
 	}
-	else if(dw==WAIT_TIMEOUT) ret=true;
+	else if(dw == WAIT_TIMEOUT) ret = true;
 
 	#else
 
 	int err;
-	if((err=pthread_mutex_lock(&mutex))!=0)
+	if((err = pthread_mutex_lock(&mutex)) != 0)
 		throw(Error("Event::isLocked()", strerror(err)));
-	ret=!ready;
-	if((err=pthread_mutex_unlock(&mutex))!=0)
+	ret = !ready;
+	if((err = pthread_mutex_unlock(&mutex)) != 0)
 		throw(Error("Event::isLocked()", strerror(err)));
 
 	#endif
@@ -141,7 +141,7 @@ CriticalSection::CriticalSection(void)
 {
 	#ifdef _WIN32
 
-	mutex=CreateMutex(NULL, FALSE, NULL);
+	mutex = CreateMutex(NULL, FALSE, NULL);
 
 	#else
 
@@ -161,7 +161,7 @@ CriticalSection::~CriticalSection(void)
 
 	if(mutex)
 	{
-		ReleaseMutex(mutex);  CloseHandle(mutex);  mutex=NULL;
+		ReleaseMutex(mutex);  CloseHandle(mutex);  mutex = NULL;
 	}
 
 	#else
@@ -177,13 +177,13 @@ void CriticalSection::lock(bool errorCheck)
 {
 	#ifdef _WIN32
 
-	if(WaitForSingleObject(mutex, INFINITE)==WAIT_FAILED && errorCheck)
+	if(WaitForSingleObject(mutex, INFINITE) == WAIT_FAILED && errorCheck)
 		throw(W32Error("CriticalSection::lock()"));
 
 	#else
 
 	int ret;
-	if((ret=pthread_mutex_lock(&mutex))!=0 && errorCheck)
+	if((ret = pthread_mutex_lock(&mutex)) != 0 && errorCheck)
 		throw(Error("CriticalSection::lock()", strerror(ret)));
 
 	#endif
@@ -200,7 +200,7 @@ void CriticalSection::unlock(bool errorCheck)
 	#else
 
 	int ret;
-	if((ret=pthread_mutex_unlock(&mutex))!=0 && errorCheck)
+	if((ret = pthread_mutex_unlock(&mutex)) != 0 && errorCheck)
 		throw(Error("CriticalSection::unlock()", strerror(ret)));
 
 	#endif
@@ -211,14 +211,14 @@ Semaphore::Semaphore(long initialCount)
 {
 	#ifdef _WIN32
 
-	sem=CreateSemaphore(NULL, initialCount, MAXLONG, NULL);
+	sem = CreateSemaphore(NULL, initialCount, MAXLONG, NULL);
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	semName=tmpnam(0);
-	int oflag=O_CREAT|O_EXCL;
-	mode_t mode=0644;
-	sem=sem_open(semName, oflag, mode, (unsigned int)initialCount);
+	semName = tmpnam(0);
+	int oflag = O_CREAT | O_EXCL;
+	mode_t mode = 0644;
+	sem = sem_open(semName, oflag, mode, (unsigned int)initialCount);
 
 	#else
 
@@ -234,21 +234,21 @@ Semaphore::~Semaphore(void)
 
 	if(sem) CloseHandle(sem);
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	int ret=0, err=0;
+	int ret = 0, err = 0;
 	do
 	{
-		ret=sem_close(sem);  err=errno;  sem_post(sem);
-	} while(ret==-1 && err==EBUSY);
+		ret = sem_close(sem);  err = errno;  sem_post(sem);
+	} while(ret == -1 && err == EBUSY);
 
 	#else
 
-	int ret=0, err=0;
+	int ret = 0, err = 0;
 	do
 	{
-		ret=sem_destroy(&sem);  err=errno;  sem_post(&sem);
-	} while(ret==-1 && err==EBUSY);
+		ret = sem_destroy(&sem);  err = errno;  sem_post(&sem);
+	} while(ret == -1 && err == EBUSY);
 
 	#endif
 }
@@ -258,26 +258,26 @@ void Semaphore::wait(void)
 {
 	#ifdef _WIN32
 
-	if(WaitForSingleObject(sem, INFINITE)==WAIT_FAILED)
+	if(WaitForSingleObject(sem, INFINITE) == WAIT_FAILED)
 		throw(W32Error("Semaphore::wait()"));
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	int err=0;
+	int err = 0;
 	do
 	{
-		err=sem_wait(sem);
-	} while(err<0 && errno==EINTR);
-	if(err<0) throw(UnixError("Semaphore::wait()"));
+		err = sem_wait(sem);
+	} while(err < 0 && errno == EINTR);
+	if(err < 0) throw(UnixError("Semaphore::wait()"));
 
 	#else
 
-	int err=0;
+	int err = 0;
 	do
 	{
-		err=sem_wait(&sem);
-	} while(err<0 && errno==EINTR);
-	if(err<0) throw(UnixError("Semaphore::wait()"));
+		err = sem_wait(&sem);
+	} while(err < 0 && errno == EINTR);
+	if(err < 0) throw(UnixError("Semaphore::wait()"));
 
 	#endif
 }
@@ -287,33 +287,33 @@ bool Semaphore::tryWait()
 {
 	#ifdef _WIN32
 
-	DWORD err=WaitForSingleObject(sem, 0);
-	if(err==WAIT_FAILED) throw(W32Error("Semaphore::tryWait()"));
-	else if(err==WAIT_TIMEOUT) return false;
+	DWORD err = WaitForSingleObject(sem, 0);
+	if(err == WAIT_FAILED) throw(W32Error("Semaphore::tryWait()"));
+	else if(err == WAIT_TIMEOUT) return false;
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	int err=0;
+	int err = 0;
 	do
 	{
-		err=sem_trywait(sem);
-	} while(err<0 && errno==EINTR);
-	if(err<0)
+		err = sem_trywait(sem);
+	} while(err < 0 && errno == EINTR);
+	if(err < 0)
 	{
-		if(errno==EAGAIN) return false;
+		if(errno == EAGAIN) return false;
 		else throw(UnixError("Semaphore::tryWait()"));
 	}
 
 	#else
 
-	int err=0;
+	int err = 0;
 	do
 	{
-		err=sem_trywait(&sem);
-	} while(err<0 && errno==EINTR);
-	if(err<0)
+		err = sem_trywait(&sem);
+	} while(err < 0 && errno == EINTR);
+	if(err < 0)
 	{
-		if(errno==EAGAIN) return false;
+		if(errno == EAGAIN) return false;
 		else throw(UnixError("Semaphore::tryWait()"));
 	}
 
@@ -329,13 +329,13 @@ void Semaphore::post(void)
 
 	if(!ReleaseSemaphore(sem, 1, NULL)) throw(W32Error("Semaphore::post()"));
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	if(sem_post(sem)==-1) throw(UnixError("Semaphore::post()"));
+	if(sem_post(sem) == -1) throw(UnixError("Semaphore::post()"));
 
 	#else
 
-	if(sem_post(&sem)==-1) throw(UnixError("Semaphore::post()"));
+	if(sem_post(&sem) == -1) throw(UnixError("Semaphore::post()"));
 
 	#endif
 }
@@ -345,21 +345,21 @@ long Semaphore::getValue(void)
 {
 	#ifdef _WIN32
 
-	long count=0;
-	if(WaitForSingleObject(sem, 0)!=WAIT_TIMEOUT)
+	long count = 0;
+	if(WaitForSingleObject(sem, 0) != WAIT_TIMEOUT)
 	{
 		ReleaseSemaphore(sem, 1, &count);
 		count++;
 	}
 
-	#elif defined (__APPLE__)
+	#elif defined(__APPLE__)
 
-	int count=0;
+	int count = 0;
 	sem_getvalue(sem, &count);
 
 	#else
 
-	int count=0;
+	int count = 0;
 	sem_getvalue(&sem, &count);
 
 	#endif

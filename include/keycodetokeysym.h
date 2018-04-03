@@ -19,13 +19,13 @@
 
 static KeySym KeycodeToKeysym(Display *dpy, KeyCode keycode, int index)
 {
-	KeySym ks=NoSymbol, *keysyms;  int n=0;
+	KeySym ks = NoSymbol, *keysyms;  int n = 0;
 
-	keysyms=XGetKeyboardMapping(dpy, keycode, 1, &n);
+	keysyms = XGetKeyboardMapping(dpy, keycode, 1, &n);
 	if(keysyms)
 	{
-		if(n>=1 && index>=0 && index<n)
-			ks=keysyms[index];
+		if(n >= 1 && index >= 0 && index < n)
+			ks = keysyms[index];
 		XFree(keysyms);
 	}
 

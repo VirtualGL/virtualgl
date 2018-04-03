@@ -25,9 +25,9 @@ using namespace vglserver;
 static Error err;
 char errStr[MAXSTR];
 
-static FakerConfig *fconfig=NULL;
-static Display *dpy=NULL;
-static Window win=0;
+static FakerConfig *fconfig = NULL;
+static Display *dpy = NULL;
+static Window win = 0;
 
 
 FakerConfig *fconfig_instance(void) { return fconfig; }
@@ -41,17 +41,17 @@ extern "C" {
 
 void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 {
-	void *handle=NULL;
+	void *handle = NULL;
 	try
 	{
-		fconfig=fconfig_;
-		dpy=dpy_;
-		win=win_;
-		_newcheck(handle=(void *)(new X11Trans()));
+		fconfig = fconfig_;
+		dpy = dpy_;
+		win = win_;
+		_newcheck(handle = (void *)(new X11Trans()));
 	}
 	catch(Error &e)
 	{
-		err=e;  return NULL;
+		err = e;  return NULL;
 	}
 	return handle;
 }
@@ -68,48 +68,48 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 {
 	try
 	{
-		X11Trans *trans=(X11Trans *)handle;
+		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
 		RRFrame *frame;
-		_newcheck(frame=new RRFrame);
+		_newcheck(frame = new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
-		FBXFrame *f=trans->getFrame(dpy, win, width, height);
-		f->flags|=FRAME_BOTTOMUP;
-		frame->opaque=(void *)f;
-		frame->w=f->hdr.framew;
-		frame->h=f->hdr.frameh;
-		frame->pitch=f->pitch;
-		frame->bits=f->bits;
-		for(int i=0; i<RRTRANS_FORMATOPT; i++)
+		FBXFrame *f = trans->getFrame(dpy, win, width, height);
+		f->flags |= FRAME_BOTTOMUP;
+		frame->opaque = (void *)f;
+		frame->w = f->hdr.framew;
+		frame->h = f->hdr.frameh;
+		frame->pitch = f->pitch;
+		frame->bits = f->bits;
+		for(int i = 0; i < RRTRANS_FORMATOPT; i++)
 		{
-			if(rrtrans_bgr[i]==(f->flags&FRAME_BGR? 1:0)
-				&& rrtrans_afirst[i]==(f->flags&FRAME_ALPHAFIRST? 1:0)
-				&& rrtrans_ps[i]==f->pixelSize)
+			if(rrtrans_bgr[i] == (f->flags & FRAME_BGR ? 1 : 0)
+				&& rrtrans_afirst[i] == (f->flags & FRAME_ALPHAFIRST ? 1 : 0)
+				&& rrtrans_ps[i] == f->pixelSize)
 			{
-				frame->format=i;  break;
+				frame->format = i;  break;
 			}
 		}
 		return frame;
 	}
 	catch(Error &e)
 	{
-		err=e;  return NULL;
+		err = e;  return NULL;
 	}
 }
 
 
 int RRTransReady(void *handle)
 {
-	int ret=-1;
+	int ret = -1;
 	try
 	{
-		X11Trans *trans=(X11Trans *)handle;
+		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
-		ret=(int)trans->isReady();
+		ret = (int)trans->isReady();
 	}
 	catch(Error &e)
 	{
-		err=e;  return -1;
+		err = e;  return -1;
 	}
 	return ret;
 }
@@ -117,16 +117,16 @@ int RRTransReady(void *handle)
 
 int RRTransSynchronize(void *handle)
 {
-	int ret=0;
+	int ret = 0;
 	try
 	{
-		X11Trans *trans=(X11Trans *)handle;
+		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
 		trans->synchronize();
 	}
 	catch(Error &e)
 	{
-		err=e;  return -1;
+		err = e;  return -1;
 	}
 	return ret;
 }
@@ -134,20 +134,20 @@ int RRTransSynchronize(void *handle)
 
 int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 {
-	int ret=0;
+	int ret = 0;
 	try
 	{
-		X11Trans *trans=(X11Trans *)handle;
+		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
 		FBXFrame *f;
-		if(!frame || (f=(FBXFrame *)frame->opaque)==NULL)
+		if(!frame || (f = (FBXFrame *)frame->opaque) == NULL)
 			_throw("Invalid frame handle");
 		trans->sendFrame(f, (bool)sync);
 		delete frame;
 	}
 	catch(Error &e)
 	{
-		err=e;  return -1;
+		err = e;  return -1;
 	}
 	return ret;
 }
@@ -155,16 +155,16 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 
 int RRTransDestroy(void *handle)
 {
-	int ret=0;
+	int ret = 0;
 	try
 	{
-		X11Trans *trans=(X11Trans *)handle;
+		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) _throw("Invalid handle");
 		delete trans;
 	}
 	catch(Error &e)
 	{
-		err=e;  return -1;
+		err = e;  return -1;
 	}
 	return ret;
 }
@@ -172,10 +172,10 @@ int RRTransDestroy(void *handle)
 
 const char *RRTransGetError(void)
 {
-	snprintf(errStr, MAXSTR-1, "Error in %s -- %s",
+	snprintf(errStr, MAXSTR - 1, "Error in %s -- %s",
 		err.getMethod(), err.getMessage());
 	return errStr;
 }
 
 
-} // extern "C"
+}  // extern "C"

@@ -15,5 +15,5 @@
 
 using namespace vglserver;
 
-ContextHash *ContextHash::instance=NULL;
+ContextHash *ContextHash::instance = NULL;
 vglutil::CriticalSection ContextHash::instanceMutex;

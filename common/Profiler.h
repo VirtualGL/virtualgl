@@ -25,7 +25,7 @@ namespace vglcommon
 	{
 		public:
 
-			Profiler(const char *name="Profiler", double interval=2.0);
+			Profiler(const char *name = "Profiler", double interval = 2.0);
 			~Profiler(void);
 			void setName(char *name);
 			void setName(const char *name);

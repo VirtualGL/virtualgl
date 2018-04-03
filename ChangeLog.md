@@ -1329,7 +1329,7 @@ Configuration dialog.
 13. The Mac client is now fully documented.
 
 14. Included mediaLib Huffman encoding optimizations contributed by Sun.  This
-boosts the performance of VirtualGL on Solaris systems by as much as 30%.\
+boosts the performance of VirtualGL on Solaris systems by as much as 30%.
 This, in combination with mediaLib 2.5, should allow the Solaris/x86 version of
 VirtualGL to perform as well as the Linux version, all else being equal.
 

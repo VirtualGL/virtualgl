@@ -28,53 +28,54 @@
 #include "vglutil.h"
 
 
-#define _throw(m) {  \
-	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m);  \
-	goto bailout;  \
+#define _throw(m) \
+{ \
+	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m); \
+	goto bailout; \
 }
-#define _catch(f) { if((f)==-1) goto bailout; }
+#define _catch(f)  { if((f) == -1) goto bailout; }
 
-#define np2(i) ((i)>0? (1<<(int)(log((double)(i))/log(2.))) : 0)
+#define np2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
-#define SPHERE_RED(f) fabs(MAXI*(2.*f-1.))
-#define SPHERE_GREEN(f) fabs(MAXI*(2.*fmod(f+2./3., 1.)-1.))
-#define SPHERE_BLUE(f) fabs(MAXI*(2.*fmod(f+1./3., 1.)-1.))
+#define SPHERE_RED(f)  fabs(MAXI * (2. * f - 1.))
+#define SPHERE_GREEN(f)  fabs(MAXI * (2. * fmod(f + 2. / 3., 1.) - 1.))
+#define SPHERE_BLUE(f)  fabs(MAXI * (2. * fmod(f + 1. / 3., 1.) - 1.))
 
 
-#define DEF_WIDTH 1240
-#define DEF_HEIGHT 900
+#define DEF_WIDTH  1240
+#define DEF_HEIGHT  900
 
-#define DEF_SLICES 32
-#define DEF_STACKS 32
+#define DEF_SLICES  32
+#define DEF_STACKS  32
 
-#define DEF_SPHERES 20
+#define DEF_SPHERES  20
 
-#define _2PI 6.283185307180
-#define MAXI (220./255.)
+#define _2PI  6.283185307180
+#define MAXI  (220. / 255.)
 
-#define NSCHEMES 7
-enum { GRAY=0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
+#define NSCHEMES  7
+enum { GRAY = 0, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN };
 
-#define DEFBENCHTIME 2.0
+#define DEFBENCHTIME  2.0
 
-Display *dpy=NULL;  Window win=0, olWin=0;
-GLXContext ctx=0, olCtx=0;
-int useStereo=0, useOverlay=0, useDC=0, useImm=0, interactive=0, olDB=1,
-	loColor=0, maxFrames=0, totalFrames=0, directCtx=True;
-int rshift=0, gshift=0, bshift=0;
-double benchTime=DEFBENCHTIME;
-int nColors=0, nOlColors, colorScheme=GRAY;
-Colormap colormap=0, olColormap=0;
+Display *dpy = NULL;  Window win = 0, olWin = 0;
+GLXContext ctx = 0, olCtx = 0;
+int useStereo = 0, useOverlay = 0, useDC = 0, useImm = 0, interactive = 0,
+	olDB = 1, loColor = 0, maxFrames = 0, totalFrames = 0, directCtx = True;
+int rshift = 0, gshift = 0, bshift = 0;
+double benchTime = DEFBENCHTIME;
+int nColors = 0, nOlColors, colorScheme = GRAY;
+Colormap colormap = 0, olColormap = 0;
 
-int sphereList=0, fontListBase=0;
-GLUquadricObj *sphereQuad=NULL;
-int slices=DEF_SLICES, stacks=DEF_STACKS, spheres=DEF_SPHERES;
-GLfloat x=0., y=0., z=-3.;
-GLfloat outerAngle=0., middleAngle=0., innerAngle=0.;
-GLfloat loneSphereColor=0.;
-unsigned int transPixel=0;
+int sphereList = 0, fontListBase = 0;
+GLUquadricObj *sphereQuad = NULL;
+int slices = DEF_SLICES, stacks = DEF_STACKS, spheres = DEF_SPHERES;
+GLfloat x = 0., y = 0., z = -3.;
+GLfloat outerAngle = 0., middleAngle = 0., innerAngle = 0.;
+GLfloat loneSphereColor = 0.;
+unsigned int transPixel = 0;
 
-int width=DEF_WIDTH, height=DEF_HEIGHT;
+int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 
 int setColorScheme(Colormap cmap, int nColors, int scheme)
@@ -82,19 +83,23 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 	XColor xc[256];  int i;
 
 	if(!nColors || !cmap) _throw("Color map not allocated");
-	if(scheme<0 || scheme>NSCHEMES-1 || !cmap) _throw("Invalid argument");
+	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) _throw("Invalid argument");
 
-	for(i=0; i<nColors; i++)
+	for(i = 0; i < nColors; i++)
 	{
-		xc[i].flags=DoRed | DoGreen | DoBlue;
-		xc[i].pixel=(cmap==olColormap)? i:(i<<rshift) | (i<<gshift) | (i<<bshift);
-		xc[i].red=xc[i].green=xc[i].blue=0;
-		if(scheme==GRAY || scheme==RED || scheme==YELLOW || scheme==MAGENTA)
-			xc[i].red=(i*(256/nColors))<<8;
-		if(scheme==GRAY || scheme==GREEN || scheme==YELLOW || scheme==CYAN)
-			xc[i].green=(i*(256/nColors))<<8;
-		if(scheme==GRAY || scheme==BLUE || scheme==MAGENTA || scheme==CYAN)
-			xc[i].blue=(i*(256/nColors))<<8;
+		xc[i].flags = DoRed | DoGreen | DoBlue;
+		xc[i].pixel =
+			(cmap == olColormap) ? i : (i << rshift) | (i << gshift) | (i << bshift);
+		xc[i].red = xc[i].green = xc[i].blue = 0;
+		if(scheme == GRAY || scheme == RED || scheme == YELLOW
+			|| scheme == MAGENTA)
+			xc[i].red = (i * (256 / nColors)) << 8;
+		if(scheme == GRAY || scheme == GREEN || scheme == YELLOW
+			|| scheme == CYAN)
+			xc[i].green = (i * (256 / nColors)) << 8;
+		if(scheme == GRAY || scheme == BLUE || scheme == MAGENTA
+			|| scheme == CYAN)
+			xc[i].blue = (i * (256 / nColors)) << 8;
 	}
 	XStoreColors(dpy, cmap, xc, nColors);
 	return 0;
@@ -106,16 +111,16 @@ int setColorScheme(Colormap cmap, int nColors, int scheme)
 
 void reshape(int newWidth, int newHeight)
 {
-	if(newWidth<=0) newWidth=1;
-	if(newHeight<=0) newHeight=1;
-	width=newWidth;  height=newHeight;
+	if(newWidth <= 0) newWidth = 1;
+	if(newHeight <= 0) newHeight = 1;
+	width = newWidth;  height = newHeight;
 
 	if(useOverlay && olWin)
 	{
 		XWindowChanges changes;
-		changes.width=width;
-		changes.height=height;
-		XConfigureWindow(dpy, olWin, CWWidth|CWHeight, &changes);
+		changes.width = width;
+		changes.height = height;
+		XConfigureWindow(dpy, olWin, CWWidth | CWHeight, &changes);
 	}
 }
 
@@ -124,14 +129,14 @@ void setSphereColor(GLfloat color)
 {
 	if(useDC)
 	{
-		GLfloat mat[]={ color, color, color };
+		GLfloat mat[] = { color, color, color };
 		glColor3f(color, color, color);
 		glMaterialfv(GL_FRONT, GL_AMBIENT, mat);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat);
 	}
 	else
 	{
-		GLfloat mat[4]=
+		GLfloat mat[4] =
 		{
 			SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color), 0.25
 		};
@@ -146,18 +151,18 @@ void renderSpheres(int buf)
 {
 	int i;
 	GLfloat xAspect, yAspect;
-	GLfloat stereoCameraOffset=0.;
-	GLfloat nearDist=1.5, farDist=40., zeroParallaxDist=17.;
+	GLfloat stereoCameraOffset = 0.;
+	GLfloat nearDist = 1.5, farDist = 40., zeroParallaxDist = 17.;
 
 	glDrawBuffer(buf);
 
-	xAspect=(GLfloat)width/(GLfloat)(min(width, height));
-	yAspect=(GLfloat)height/(GLfloat)(min(width, height));
+	xAspect = (GLfloat)width / (GLfloat)(min(width, height));
+	yAspect = (GLfloat)height / (GLfloat)(min(width, height));
 
-	if(buf==GL_BACK_LEFT)
-		stereoCameraOffset=-xAspect*zeroParallaxDist/nearDist*0.035;
-	else if(buf==GL_BACK_RIGHT)
-		stereoCameraOffset=xAspect*zeroParallaxDist/nearDist*0.035;
+	if(buf == GL_BACK_LEFT)
+		stereoCameraOffset = -xAspect * zeroParallaxDist / nearDist * 0.035;
+	else if(buf == GL_BACK_RIGHT)
+		stereoCameraOffset = xAspect * zeroParallaxDist / nearDist * 0.035;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -182,11 +187,11 @@ void renderSpheres(int buf)
 	/* Outer ring */
 	glPushMatrix();
 	glRotatef(outerAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -10.);
+		glTranslatef(sin(_2PI * f) * 5., cos(_2PI * f) * 5., -10.);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -197,11 +202,11 @@ void renderSpheres(int buf)
 	/* Middle ring */
 	glPushMatrix();
 	glRotatef(middleAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -17.);
+		glTranslatef(sin(_2PI * f) * 5., cos(_2PI * f) * 5., -17.);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -212,11 +217,11 @@ void renderSpheres(int buf)
 	/* Inner ring */
 	glPushMatrix();
 	glRotatef(innerAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef(sin(_2PI*f)*5., cos(_2PI*f)*5., -29.);
+		glTranslatef(sin(_2PI * f) * 5., cos(_2PI * f) * 5., -29.);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -232,8 +237,8 @@ void renderSpheres(int buf)
 
 void renderOverlay(void)
 {
-	int i, j, w=width/8, h=height/8;  unsigned char *buf=NULL;
-	int index=(int)(loneSphereColor*(GLfloat)(nOlColors-1));
+	int i, j, w = width / 8, h = height / 8;  unsigned char *buf = NULL;
+	int index = (int)(loneSphereColor * (GLfloat)(nOlColors - 1));
 
 	glShadeModel(GL_FLAT);
 	glDisable(GL_DEPTH_TEST);
@@ -245,22 +250,22 @@ void renderOverlay(void)
 	glRasterPos3f(-0.5, 0.5, 0.0);
 	glClearIndex((GLfloat)transPixel);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glIndexf(loneSphereColor*(GLfloat)(nOlColors-1));
+	glIndexf(loneSphereColor * (GLfloat)(nOlColors - 1));
 	glBegin(GL_LINES);
-	glVertex2f(-1.+loneSphereColor*2., -1.);
-	glVertex2f(-1.+loneSphereColor*2., 1.);
-	glVertex2f(-1., -1.+loneSphereColor*2.);
-	glVertex2f(1., -1.+loneSphereColor*2.);
+	glVertex2f(-1. + loneSphereColor * 2., -1.);
+	glVertex2f(-1. + loneSphereColor * 2., 1.);
+	glVertex2f(-1., -1. + loneSphereColor * 2.);
+	glVertex2f(1., -1. + loneSphereColor * 2.);
 	glEnd();
 	if(w && h)
 	{
-		if((buf=(unsigned char *)malloc(w*h))==NULL)
+		if((buf = (unsigned char *)malloc(w * h)) == NULL)
 			_throw("Could not allocate memory");
-		for(i=0; i<h; i++)
-			for(j=0; j<w; j++)
+		for(i = 0; i < h; i++)
+			for(j = 0; j < w; j++)
 			{
-				if(((i/4)%2)!=((j/4)%2)) buf[i*w+j]=0;
-				else buf[i*w+j]=index;
+				if(((i / 4) % 2) != ((j / 4) % 2)) buf[i * w + j] = 0;
+				else buf[i * w + j] = index;
 			}
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glDrawPixels(w, h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buf);
@@ -276,22 +281,22 @@ void renderOverlay(void)
 
 int display(int advance)
 {
-	static int first=1;
-	static double start=0., elapsed=0., mpixels=0.;
-	static unsigned long frames=0;
+	static int first = 1;
+	static double start = 0., elapsed = 0., mpixels = 0.;
+	static unsigned long frames = 0;
 	static char temps[256];
-	XFontStruct *fontInfo=NULL;  int minChar, maxChar;
+	XFontStruct *fontInfo = NULL;  int minChar, maxChar;
 	GLfloat xAspect, yAspect;
 
 	if(first)
 	{
-		GLfloat id4[]={ 1., 1., 1., 1. };
-		GLfloat light0Amb[]={ 0.3, 0.3, 0.3, 1. };
-		GLfloat light0Dif[]={ 0.8, 0.8, 0.8, 1. };
-		GLfloat light0Pos[]={ 1., 1., 1., 0. };
+		GLfloat id4[] = { 1., 1., 1., 1. };
+		GLfloat light0Amb[] = { 0.3, 0.3, 0.3, 1. };
+		GLfloat light0Dif[] = { 0.8, 0.8, 0.8, 1. };
+		GLfloat light0Pos[] = { 1., 1., 1., 0. };
 
-		sphereList=glGenLists(1);
-		if(!(sphereQuad=gluNewQuadric()))
+		sphereList = glGenLists(1);
+		if(!(sphereQuad = gluNewQuadric()))
 			_throw("Could not allocate GLU quadric object");
 		glNewList(sphereList, GL_COMPILE);
 		gluSphere(sphereQuad, 1.3, slices, stacks);
@@ -329,36 +334,36 @@ int display(int advance)
 		{
 			glXMakeCurrent(dpy, olWin, olCtx);
 		}
-		if(!(fontInfo=XLoadQueryFont(dpy, "fixed")))
+		if(!(fontInfo = XLoadQueryFont(dpy, "fixed")))
 			_throw("Could not load X font");
-		minChar=fontInfo->min_char_or_byte2;
-		maxChar=fontInfo->max_char_or_byte2;
-		fontListBase=glGenLists(maxChar+1);
-		glXUseXFont(fontInfo->fid, minChar, maxChar-minChar+1,
-			fontListBase+minChar);
-		XFreeFont(dpy, fontInfo);  fontInfo=NULL;
+		minChar = fontInfo->min_char_or_byte2;
+		maxChar = fontInfo->max_char_or_byte2;
+		fontListBase = glGenLists(maxChar + 1);
+		glXUseXFont(fontInfo->fid, minChar, maxChar - minChar + 1,
+			fontListBase + minChar);
+		XFreeFont(dpy, fontInfo);  fontInfo = NULL;
 		snprintf(temps, 255, "Measuring performance ...");
 		if(useOverlay) glXMakeCurrent(dpy, win, ctx);
 
-		first=0;
+		first = 0;
 	}
 
 	if(advance)
 	{
-		z-=0.5;
-		if(z<-29.)
+		z -= 0.5;
+		if(z < -29.)
 		{
-			if(useDC || useOverlay) colorScheme=(colorScheme+1)%NSCHEMES;
+			if(useDC || useOverlay) colorScheme = (colorScheme + 1) % NSCHEMES;
 			if(useDC) _catch(setColorScheme(colormap, nColors, colorScheme));
 			if(useOverlay)
 				_catch(setColorScheme(olColormap, nOlColors, colorScheme));
-			z=-3.5;
+			z = -3.5;
 		}
-		outerAngle+=0.1;  if(outerAngle>360.) outerAngle-=360.;
-		middleAngle-=0.37;  if(middleAngle<-360.) middleAngle+=360.;
-		innerAngle+=0.63;  if(innerAngle>360.) innerAngle-=360.;
-		loneSphereColor+=0.005;
-		if(loneSphereColor>1.) loneSphereColor-=1.;
+		outerAngle += 0.1;  if(outerAngle > 360.) outerAngle -= 360.;
+		middleAngle -= 0.37;  if(middleAngle < -360.) middleAngle += 360.;
+		innerAngle += 0.63;  if(innerAngle > 360.) innerAngle -= 360.;
+		loneSphereColor += 0.005;
+		if(loneSphereColor > 1.) loneSphereColor -= 1.;
 	}
 
 	if(useStereo)
@@ -373,8 +378,7 @@ int display(int advance)
 		glXMakeCurrent(dpy, olWin, olCtx);
 		renderOverlay();
 	}
-	else
-	glPushAttrib(GL_CURRENT_BIT);
+	else glPushAttrib(GL_CURRENT_BIT);
 	glPushAttrib(GL_LIST_BIT);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
@@ -383,9 +387,9 @@ int display(int advance)
 	if(useOverlay) glRasterPos3f(-0.95, -0.95, 0.);
 	else
 	{
-		xAspect=(GLfloat)width/(GLfloat)(min(width, height));
-		yAspect=(GLfloat)height/(GLfloat)(min(width, height));
-		glRasterPos3f(-0.95*xAspect, -0.95*yAspect, -1.5);
+		xAspect = (GLfloat)width / (GLfloat)(min(width, height));
+		yAspect = (GLfloat)height / (GLfloat)(min(width, height));
+		glRasterPos3f(-0.95 * xAspect, -0.95 * yAspect, -1.5);
 	}
 	glListBase(fontListBase);
 	glCallLists(strlen(temps), GL_UNSIGNED_BYTE, temps);
@@ -399,37 +403,37 @@ int display(int advance)
 	}
 	glXSwapBuffers(dpy, win);
 
-	if(start>0.)
+	if(start > 0.)
 	{
-		elapsed+=getTime()-start;  frames++;  totalFrames++;
-		mpixels+=(double)width*(double)height/1000000.;
-		if(elapsed>benchTime || (maxFrames && totalFrames>maxFrames))
+		elapsed += getTime() - start;  frames++;  totalFrames++;
+		mpixels += (double)width * (double)height / 1000000.;
+		if(elapsed > benchTime || (maxFrames && totalFrames > maxFrames))
 		{
 			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
-				(double)frames/elapsed, mpixels/elapsed);
+				(double)frames / elapsed, mpixels / elapsed);
 			printf("%s\n", temps);
-			elapsed=mpixels=0.;  frames=0;
+			elapsed = mpixels = 0.;  frames = 0;
 		}
 	}
-	if(maxFrames && totalFrames>maxFrames) goto bailout;
+	if(maxFrames && totalFrames > maxFrames) goto bailout;
 
-	start=getTime();
+	start = getTime();
 	return 0;
 
 	bailout:
-	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad=NULL; }
+	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad = NULL; }
 	return -1;
 }
 
 
-Atom protoAtom=0, deleteAtom=0;
+Atom protoAtom = 0, deleteAtom = 0;
 
 
 int eventLoop(Display *dpy)
 {
-	while (1)
+	while(1)
 	{
-		int advance=0, doDisplay=0;
+		int advance = 0, doDisplay = 0;
 
 		while(1)
 		{
@@ -437,13 +441,13 @@ int eventLoop(Display *dpy)
 			if(interactive) XNextEvent(dpy, &event);
 			else
 			{
-				if(XPending(dpy)>0) XNextEvent(dpy, &event);
+				if(XPending(dpy) > 0) XNextEvent(dpy, &event);
 				else break;
 			}
-			switch (event.type)
+			switch(event.type)
 			{
 				case Expose:
-					doDisplay=1;
+					doDisplay = 1;
 					break;
 				case ConfigureNotify:
 					reshape(event.xconfigure.width, event.xconfigure.height);
@@ -460,22 +464,25 @@ int eventLoop(Display *dpy)
 					break;
 				}
 				case MotionNotify:
-					if(event.xmotion.state & Button1Mask) doDisplay=advance=1;
+					if(event.xmotion.state & Button1Mask) doDisplay = advance = 1;
 					break;
 				case ClientMessage:
 				{
-					XClientMessageEvent *cme=(XClientMessageEvent *)&event;
-					if(cme->message_type==protoAtom && cme->data.l[0]==deleteAtom)
+					XClientMessageEvent *cme = (XClientMessageEvent *)&event;
+					if(cme->message_type == protoAtom && cme->data.l[0] == deleteAtom)
 						return 0;
 				}
 			}
 			if(interactive)
 			{
-				if(XPending(dpy)<=0) break;
+				if(XPending(dpy) <= 0) break;
 			}
 		}
 		if(!interactive) { _catch(display(1)); }
-		else { if(doDisplay) { _catch(display(advance)); }}
+		else
+		{
+			if(doDisplay) { _catch(display(advance)); }
+		}
 	}
 
 	bailout:
@@ -496,7 +503,7 @@ void usage(char **argv)
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
 	printf("-n <n> = Render (approximately) <n> spheres (default = %d)\n",
-		DEF_SPHERES*3+1);
+		DEF_SPHERES * 3 + 1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-32 = Use 32-bit visual (default is 24-bit)\n");
@@ -513,151 +520,153 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int i, useAlpha=0;
-	XVisualInfo *v=NULL;
-	int rgbAttribs[]={ GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
-		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1, GLX_DOUBLEBUFFER,
-		1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, None, None, None };
-	int olAttribs[]={ GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1, GLX_TRANSPARENT_TYPE,
-		GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
+	int i, useAlpha = 0;
+	XVisualInfo *v = NULL;
+	int rgbAttribs[] = { GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
+		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1,
+		GLX_DOUBLEBUFFER, 1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+		None, None, None };
+	int olAttribs[] = { GLX_BUFFER_SIZE, 8, GLX_LEVEL, 1,
+		GLX_TRANSPARENT_TYPE, GLX_TRANSPARENT_INDEX, GLX_DOUBLEBUFFER, None };
 	XSetWindowAttributes swa;  Window root;
-	int fullScreen=0;  unsigned long mask=0;
-	int screen=-1, pps;
+	int fullScreen = 0;  unsigned long mask = 0;
+	int screen = -1, pps;
 
-	for(i=0; i<argc; i++)
+	for(i = 0; i < argc; i++)
 	{
 		if(!strnicmp(argv[i], "-h", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-?", 2)) usage(argv);
 		if(!strnicmp(argv[i], "-dc", 3))
 		{
-			useDC=1;  rgbAttribs[15]=GLX_DIRECT_COLOR;
+			useDC = 1;  rgbAttribs[15] = GLX_DIRECT_COLOR;
 		}
-		if(!strnicmp(argv[i], "-ic", 3)) directCtx=False;
-		else if(!strnicmp(argv[i], "-i", 2)) interactive=1;
-		if(!strnicmp(argv[i], "-l", 2)) loColor=1;
-		if(!strnicmp(argv[i], "-m", 2)) useImm=1;
-		if(!strnicmp(argv[i], "-o", 2)) useOverlay=1;
-		if(!strnicmp(argv[i], "-w", 2) && i<argc-1)
+		if(!strnicmp(argv[i], "-ic", 3)) directCtx = False;
+		else if(!strnicmp(argv[i], "-i", 2)) interactive = 1;
+		if(!strnicmp(argv[i], "-l", 2)) loColor = 1;
+		if(!strnicmp(argv[i], "-m", 2)) useImm = 1;
+		if(!strnicmp(argv[i], "-o", 2)) useOverlay = 1;
+		if(!strnicmp(argv[i], "-w", 2) && i < argc - 1)
 		{
-			int w=0, h=0;
-			if(sscanf(argv[++i], "%dx%d", &w, &h)==2 && w>0 && h>0)
+			int w = 0, h = 0;
+			if(sscanf(argv[++i], "%dx%d", &w, &h) == 2 && w > 0 && h > 0)
 			{
-				width=w;  height=h;
+				width = w;  height = h;
 				printf("Window dimensions: %d x %d\n", width, height);
 			}
 		}
-		if(!strnicmp(argv[i], "-fs", 3)) fullScreen=1;
-		else if(!strnicmp(argv[i], "-f", 2) && i<argc-1)
+		if(!strnicmp(argv[i], "-fs", 3)) fullScreen = 1;
+		else if(!strnicmp(argv[i], "-f", 2) && i < argc - 1)
 		{
-			int mf=atoi(argv[++i]);
-			if(mf>0)
+			int mf = atoi(argv[++i]);
+			if(mf > 0)
 			{
-				maxFrames=mf;
+				maxFrames = mf;
 				printf("Number of frames to render: %d\n", maxFrames);
 			}
 		}
-		if(!strnicmp(argv[i], "-bt", 3) && i<argc-1)
+		if(!strnicmp(argv[i], "-bt", 3) && i < argc - 1)
 		{
-			double temp=atof(argv[++i]);
-			if(temp>0.0) benchTime=temp;
+			double temp = atof(argv[++i]);
+			if(temp > 0.0) benchTime = temp;
 		}
-		if(!strnicmp(argv[i], "-sc", 3) && i<argc-1)
+		if(!strnicmp(argv[i], "-sc", 3) && i < argc - 1)
 		{
-			int sc=atoi(argv[++i]);
-			if(sc>0)
+			int sc = atoi(argv[++i]);
+			if(sc > 0)
 			{
-				screen=sc;
+				screen = sc;
 				printf("Rendering to screen %d\n", screen);
 			}
 		}
 		else if(!strnicmp(argv[i], "-s", 2))
 		{
-			rgbAttribs[13]=1;
-			useStereo=1;
+			rgbAttribs[13] = 1;
+			useStereo = 1;
 		}
-		if(!strnicmp(argv[i], "-32", 3)) useAlpha=1;
-		if(!strnicmp(argv[i], "-n", 2) && i<argc-1)
+		if(!strnicmp(argv[i], "-32", 3)) useAlpha = 1;
+		if(!strnicmp(argv[i], "-n", 2) && i < argc - 1)
 		{
-			int temp=atoi(argv[++i]);
-			if(temp>0) spheres=(int)(((double)temp-1.0)/3.0+0.5);
-			if(spheres<1) spheres=1;
+			int temp = atoi(argv[++i]);
+			if(temp > 0) spheres = (int)(((double)temp - 1.0) / 3.0 + 0.5);
+			if(spheres < 1) spheres = 1;
 		}
 	}
-	for(i=0; i<argc; i++)
+	for(i = 0; i < argc; i++)
 	{
-		if(!strnicmp(argv[i], "-p", 2) && i<argc-1)
+		if(!strnicmp(argv[i], "-p", 2) && i < argc - 1)
 		{
-			int nPolys=atoi(argv[++i]);
-			if(nPolys>0)
+			int nPolys = atoi(argv[++i]);
+			if(nPolys > 0)
 			{
-				slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
-				if(slices<1) slices=stacks=1;
+				slices = stacks =
+					(int)(sqrt((double)nPolys / ((double)(3 * spheres + 1))) + 0.5);
+				if(slices < 1) slices = stacks = 1;
 			}
 		}
 	}
 
 	if(useAlpha)
 	{
-		rgbAttribs[16]=GLX_ALPHA_SIZE;
-		rgbAttribs[17]=8;
+		rgbAttribs[16] = GLX_ALPHA_SIZE;
+		rgbAttribs[17] = 8;
 	}
 
-	pps=slices*stacks;
-	if(pps>57600)
+	pps = slices * stacks;
+	if(pps > 57600)
 	{
 		fprintf(stderr, "WARNING: polygons per sphere clamped to 57600 due to limitations of GLU\n");
-		pps=57600;
+		pps = 57600;
 	}
 	fprintf(stderr, "Polygons in scene: %d (%d spheres * %d polys/spheres)\n",
-		(spheres*3+1)*pps, spheres*3+1, pps);
+		(spheres * 3 + 1) * pps, spheres * 3 + 1, pps);
 
-	if((dpy=XOpenDisplay(0))==NULL) _throw("Could not open display");
-	if(screen<0) screen=DefaultScreen(dpy);
+	if((dpy = XOpenDisplay(0)) == NULL) _throw("Could not open display");
+	if(screen < 0) screen = DefaultScreen(dpy);
 
-	int n=0;
-	GLXFBConfig *c=glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
-	if(!c || n<1)
+	int n = 0;
+	GLXFBConfig *c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
+	if(!c || n < 1)
 		_throw("Could not obtain RGB visual with requested properties");
-	if((v=glXGetVisualFromFBConfig(dpy, c[0]))==NULL)
+	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
 	{
 		XFree(c);
 		_throw("Could not obtain RGB visual with requested properties");
 	}
 	XFree(c);
-	fprintf(stderr, "Visual ID of %s: 0x%.2x\n", useOverlay? "underlay":"window",
-		(int)v->visualid);
+	fprintf(stderr, "Visual ID of %s: 0x%.2x\n",
+		useOverlay ? "underlay" : "window", (int)v->visualid);
 
-	root=RootWindow(dpy, screen);
-	swa.border_pixel=0;
-	swa.event_mask=StructureNotifyMask|ExposureMask|KeyPressMask;
-	swa.override_redirect=fullScreen? True:False;
+	root = RootWindow(dpy, screen);
+	swa.border_pixel = 0;
+	swa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask;
+	swa.override_redirect = fullScreen ? True : False;
 	if(useDC)
 	{
-		swa.colormap=colormap=XCreateColormap(dpy, root, v->visual, AllocAll);
-		nColors=np2(v->colormap_size);
-		if(nColors<32) _throw("Color map is not large enough");
-		rshift=0;  while((v->red_mask & (1<<rshift))==0) rshift++;
-		gshift=0;  while((v->green_mask & (1<<gshift))==0) gshift++;
-		bshift=0;  while((v->blue_mask & (1<<bshift))==0) bshift++;
+		swa.colormap = colormap = XCreateColormap(dpy, root, v->visual, AllocAll);
+		nColors = np2(v->colormap_size);
+		if(nColors < 32) _throw("Color map is not large enough");
+		rshift = 0;  while((v->red_mask & (1 << rshift)) == 0) rshift++;
+		gshift = 0;  while((v->green_mask & (1 << gshift)) == 0) gshift++;
+		bshift = 0;  while((v->blue_mask & (1 << bshift)) == 0) bshift++;
 		_catch(setColorScheme(colormap, nColors, colorScheme));
 	}
-	else swa.colormap=XCreateColormap(dpy, root, v->visual, AllocNone);
+	else swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
 
-	if(interactive) swa.event_mask|=PointerMotionMask|ButtonPressMask;
+	if(interactive) swa.event_mask |= PointerMotionMask | ButtonPressMask;
 
-	mask=CWBorderPixel|CWColormap|CWEventMask;
+	mask = CWBorderPixel | CWColormap | CWEventMask;
 	if(fullScreen)
 	{
-		mask|=CWOverrideRedirect;
-		width=DisplayWidth(dpy, screen);
-		height=DisplayHeight(dpy, screen);
+		mask |= CWOverrideRedirect;
+		width = DisplayWidth(dpy, screen);
+		height = DisplayHeight(dpy, screen);
 	}
-	if(!(protoAtom=XInternAtom(dpy, "WM_PROTOCOLS", False)))
+	if(!(protoAtom = XInternAtom(dpy, "WM_PROTOCOLS", False)))
 		_throw("Cannot obtain WM_PROTOCOLS atom");
-	if(!(deleteAtom=XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
+	if(!(deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
 		_throw("Cannot obtain WM_DELETE_WINDOW atom");
-	if((win=XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
-		InputOutput, v->visual, mask, &swa))==0)
+	if((win = XCreateWindow(dpy, root, 0, 0, width, height, 0, v->depth,
+		InputOutput, v->visual, mask, &swa)) == 0)
 		_throw("Could not create window");
 	XSetWMProtocols(dpy, win, &deleteAtom, 1);
 	XStoreName(dpy, win, "GLX Spheres");
@@ -669,40 +678,42 @@ int main(int argc, char **argv)
 	}
 	XSync(dpy, False);
 
-	if((ctx=glXCreateContext(dpy, v, NULL, directCtx))==0)
+	if((ctx = glXCreateContext(dpy, v, NULL, directCtx)) == 0)
 		_throw("Could not create rendering context");
 	fprintf(stderr, "Context is %s\n",
-		glXIsDirect(dpy, ctx)? "Direct":"Indirect");
-	XFree(v);  v=NULL;
+		glXIsDirect(dpy, ctx) ? "Direct" : "Indirect");
+	XFree(v);  v = NULL;
 
 	if(useOverlay)
 	{
-		if((v=glXChooseVisual(dpy, screen, olAttribs))==NULL)
+		if((v = glXChooseVisual(dpy, screen, olAttribs)) == NULL)
 		{
-			olAttribs[6]=None;  olDB=0;
-			if((v=glXChooseVisual(dpy, screen, olAttribs))==NULL)
+			olAttribs[6] = None;  olDB = 0;
+			if((v = glXChooseVisual(dpy, screen, olAttribs)) == NULL)
 				_throw("Could not obtain overlay visual");
 		}
-		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n",	(int)v->visualid);
+		fprintf(stderr, "Visual ID of overlay: 0x%.2x\n", (int)v->visualid);
 
-		swa.colormap=olColormap=XCreateColormap(dpy, root, v->visual, AllocAll);
-		nOlColors=np2(v->colormap_size);
-		if(nOlColors<32) _throw("Color map is not large enough");
+		swa.colormap = olColormap =
+			XCreateColormap(dpy, root, v->visual, AllocAll);
+		nOlColors = np2(v->colormap_size);
+		if(nOlColors < 32) _throw("Color map is not large enough");
 
 		_catch(setColorScheme(olColormap, nOlColors, colorScheme));
 
-		if((olWin=XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
-			InputOutput, v->visual, CWBorderPixel|CWColormap|CWEventMask, &swa))==0)
+		if((olWin = XCreateWindow(dpy, win, 0, 0, width, height, 0, v->depth,
+			InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
+			&swa)) == 0)
 			_throw("Could not create overlay window");
 		XMapWindow(dpy, olWin);
 		XSync(dpy, False);
 
-		if((olCtx=glXCreateContext(dpy, v, NULL, directCtx))==0)
+		if((olCtx = glXCreateContext(dpy, v, NULL, directCtx)) == 0)
 			_throw("Could not create overlay rendering context");
 		fprintf(stderr, "Overlay context is %s\n",
-			glXIsDirect(dpy, olCtx)? "Direct":"Indirect");
+			glXIsDirect(dpy, olCtx) ? "Direct" : "Indirect");
 
-		XFree(v);  v=NULL;
+		XFree(v);  v = NULL;
 	}
 
 	if(!glXMakeCurrent(dpy, win, ctx))
@@ -712,19 +723,19 @@ int main(int argc, char **argv)
 
 	_catch(eventLoop(dpy));
 
-	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx=0; }
-	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin=0; }
-	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx=0; }
-	if(dpy && win) { XDestroyWindow(dpy, win);  win=0; }
+	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx = 0; }
+	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin = 0; }
+	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
+	if(dpy && win) { XDestroyWindow(dpy, win);  win = 0; }
 	if(dpy) XCloseDisplay(dpy);
 	return 0;
 
 	bailout:
 	if(v) XFree(v);
-	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx=0; }
-	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin=0; }
-	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx=0; }
-	if(dpy && win) { XDestroyWindow(dpy, win);  win=0; }
+	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx = 0; }
+	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin = 0; }
+	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
+	if(dpy && win) { XDestroyWindow(dpy, win);  win = 0; }
 	if(dpy) XCloseDisplay(dpy);
 	return -1;
 }

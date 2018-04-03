@@ -20,18 +20,18 @@
 #include "fakerconfig.h"
 
 
-static void *gldllhnd=NULL;
+static void *gldllhnd = NULL;
 static void *loadGLSymbol(const char *, bool);
-static void *x11dllhnd=NULL;
+static void *x11dllhnd = NULL;
 static void *loadX11Symbol(const char *, bool);
 #ifdef FAKEXCB
-static void *xcbdllhnd=NULL;
+static void *xcbdllhnd = NULL;
 static void *loadXCBSymbol(const char *, bool);
-static void *xcbglxdllhnd=NULL;
+static void *xcbglxdllhnd = NULL;
 static void *loadXCBGLXSymbol(const char *, bool);
-static void *xcbkeysymsdllhnd=NULL;
+static void *xcbkeysymsdllhnd = NULL;
 static void *loadXCBKeysymsSymbol(const char *, bool);
-static void *xcbx11dllhnd=NULL;
+static void *xcbx11dllhnd = NULL;
 static void *loadXCBX11Symbol(const char *, bool);
 #endif
 
@@ -41,19 +41,20 @@ static void *loadXCBX11Symbol(const char *, bool);
 // glXGetProcAddress[ARB]() instead of the "real" function from libGL.  If so,
 // then it's probably because another DSO in the process is interposing dlsym()
 // (I'm looking at you, Steam.)
-#define FIND_GLXGETPROCADDRESS(f) {  \
-	__glXGetProcAddress=(_##f##Type)dlsym(gldllhnd, #f);  \
-	if(__glXGetProcAddress==f) {  \
-		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real " #f " function\n");  \
-		vglout.print("[VGL]   and got the fake one instead.  Something is terribly wrong.  Aborting\n");  \
-		vglout.print("[VGL]   before chaos ensues.\n");  \
-		vglfaker::safeExit(1);  \
-	}  \
+#define FIND_GLXGETPROCADDRESS(f) \
+{ \
+	__glXGetProcAddress = (_##f##Type)dlsym(gldllhnd, #f); \
+	if(__glXGetProcAddress == f) \
+	{ \
+		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real " #f " function\n"); \
+		vglout.print("[VGL]   and got the fake one instead.  Something is terribly wrong.  Aborting\n"); \
+		vglout.print("[VGL]   before chaos ensues.\n"); \
+		vglfaker::safeExit(1); \
+	} \
 }
 
 
-namespace vglfaker
-{
+namespace vglfaker {
 
 void *loadSymbol(const char *name, bool optional)
 {
@@ -81,45 +82,46 @@ void *loadSymbol(const char *name, bool optional)
 	#endif
 	else
 	{
-		vglout.print("[VGL] ERROR: don't know how to load symbol \"%s\"\n", name);
+		vglout.print("[VGL] ERROR: don't know how to load symbol \"%s\"\n",
+			name);
 		return NULL;
 	}
 }
 
-} // namespace
+}  // namespace
 
 
 static void *loadGLSymbol(const char *name, bool optional)
 {
-	char *err=NULL;
+	char *err = NULL;
 
 	if(!__glXGetProcAddress)
 	{
-		if(strlen(fconfig.gllib)>0)
+		if(strlen(fconfig.gllib) > 0)
 		{
 			dlerror();  // Clear error state
-			void *dllhnd=_vgl_dlopen(fconfig.gllib, RTLD_LAZY);
-			err=dlerror();
+			void *dllhnd = _vgl_dlopen(fconfig.gllib, RTLD_LAZY);
+			err = dlerror();
 			if(!dllhnd)
 			{
 				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.gllib);
 				if(err) vglout.print("[VGL]    %s\n", err);
 				return NULL;
 			}
-			gldllhnd=dllhnd;
+			gldllhnd = dllhnd;
 		}
-		else gldllhnd=RTLD_NEXT;
+		else gldllhnd = RTLD_NEXT;
 
 		dlerror();  // Clear error state
 		FIND_GLXGETPROCADDRESS(glXGetProcAddress)
 		if(!__glXGetProcAddress)
 			FIND_GLXGETPROCADDRESS(glXGetProcAddressARB)
-		err=dlerror();
+		err = dlerror();
 
 		if(!__glXGetProcAddress)
 		{
 			vglout.print("[VGL] ERROR: Could not load GLX/OpenGL functions");
-			if(strlen(fconfig.gllib)>0)
+			if(strlen(fconfig.gllib) > 0)
 				vglout.print(" from %s", fconfig.gllib);
 			vglout.print("\n");
 			if(err) vglout.print("[VGL]    %s\n", err);
@@ -127,10 +129,10 @@ static void *loadGLSymbol(const char *name, bool optional)
 		}
 	}
 
-	void *sym=NULL;
-	if(!strcmp(name, "glXGetProcAddress") ||
-		!strcmp(name, "glXGetProcAddressARB"))
-		sym=(void *)__glXGetProcAddress;
+	void *sym = NULL;
+	if(!strcmp(name, "glXGetProcAddress")
+		|| !strcmp(name, "glXGetProcAddressARB"))
+		sym = (void *)__glXGetProcAddress;
 	else
 	{
 		// For whatever reason, on Solaris, if a function doesn't exist in libGL,
@@ -145,20 +147,20 @@ static void *loadGLSymbol(const char *name, bool optional)
 		if(fconfig.dlsymloader)
 		{
 			dlerror();  // Clear error state
-			sym=dlsym(gldllhnd, (char *)name);
-			err=dlerror();
+			sym = dlsym(gldllhnd, (char *)name);
+			err = dlerror();
 		}
 		else
 		{
-			sym=(void *)__glXGetProcAddress((const GLubyte *)name);
+			sym = (void *)__glXGetProcAddress((const GLubyte *)name);
 		}
 	}
 
 	if(!sym && (fconfig.verbose || !optional))
 	{
 		vglout.print("[VGL] %s: Could not load function \"%s\"",
-			optional? "WARNING":"ERROR", name);
-		if(strlen(fconfig.gllib)>0)
+			optional ? "WARNING" : "ERROR", name);
+		if(strlen(fconfig.gllib) > 0)
 			vglout.print(" from %s", fconfig.gllib);
 		vglout.print("\n");
 	}
@@ -168,35 +170,35 @@ static void *loadGLSymbol(const char *name, bool optional)
 
 static void *loadX11Symbol(const char *name, bool optional)
 {
-	char *err=NULL;
+	char *err = NULL;
 
 	if(!x11dllhnd)
 	{
-		if(strlen(fconfig.x11lib)>0)
+		if(strlen(fconfig.x11lib) > 0)
 		{
 			dlerror();  // Clear error state
-			void *dllhnd=_vgl_dlopen(fconfig.x11lib, RTLD_LAZY);
-			err=dlerror();
+			void *dllhnd = _vgl_dlopen(fconfig.x11lib, RTLD_LAZY);
+			err = dlerror();
 			if(!dllhnd)
 			{
 				vglout.print("[VGL] ERROR: Could not open %s\n", fconfig.x11lib);
 				if(err) vglout.print("[VGL]    %s\n", err);
 				return NULL;
 			}
-			x11dllhnd=dllhnd;
+			x11dllhnd = dllhnd;
 		}
-		else x11dllhnd=RTLD_NEXT;
+		else x11dllhnd = RTLD_NEXT;
 	}
 
 	dlerror();  // Clear error state
-	void *sym=dlsym(x11dllhnd, (char *)name);
-	err=dlerror();
+	void *sym = dlsym(x11dllhnd, (char *)name);
+	err = dlerror();
 
 	if(!sym && (fconfig.verbose || !optional))
 	{
 		vglout.print("[VGL] %s: Could not load function \"%s\"",
-			optional? "WARNING":"ERROR", name);
-		if(strlen(fconfig.x11lib)>0)
+			optional ? "WARNING" : "ERROR", name);
+		if(strlen(fconfig.x11lib) > 0)
 			vglout.print(" from %s", fconfig.x11lib);
 		vglout.print("\n");
 		if(err) vglout.print("[VGL]    %s\n", err);
@@ -207,76 +209,76 @@ static void *loadX11Symbol(const char *name, bool optional)
 
 #ifdef FAKEXCB
 
-#define LOAD_XCB_SYMBOL(ID, id, libid, minrev, maxrev)  \
-static void *load##ID##Symbol(const char *name, bool optional)  \
-{  \
-	char *err=NULL;  \
-  \
-	if(!id##dllhnd)  \
-	{  \
-		if(strlen(fconfig.id##lib)>0)  \
-		{  \
-			dlerror();  \
-			void *dllhnd=_vgl_dlopen(fconfig.id##lib, RTLD_LAZY);  \
-			err=dlerror();  \
-			if(!dllhnd)  \
-			{  \
-				if(fconfig.verbose || !optional)  \
-				{  \
-					vglout.print("[VGL] %s: Could not open %s\n",  \
-						optional? "WARNING":"ERROR", fconfig.id##lib);  \
-					if(err) vglout.print("[VGL]    %s\n", err);  \
-				}  \
-				return NULL;  \
-			}  \
-			id##dllhnd=dllhnd;  \
-		}  \
-		else  \
-		{  \
-			void *dllhnd=NULL;  \
-			for(int i=minrev; i<=maxrev; i++)  \
-			{  \
-				char libName[MAXSTR];  \
-				snprintf(libName, MAXSTR, "lib%s.so.%d", #libid, i);  \
-				dlerror();  \
-				dllhnd=_vgl_dlopen(libName, RTLD_LAZY);  \
-				err=dlerror();  \
-				if(dllhnd) break;  \
-			}  \
-			if(!dllhnd)  \
-			{  \
-				if(fconfig.verbose || !optional)  \
-				{  \
-					vglout.print("[VGL] %s: Could not open lib%s\n",  \
-						optional? "WARNING":"ERROR", #libid);  \
-					if(err) vglout.print("[VGL]    %s\n", err);  \
-				}  \
-				return NULL;  \
-			}  \
-			id##dllhnd=dllhnd;  \
-		}  \
-	}  \
-  \
-	dlerror();  \
-	void *sym=dlsym(id##dllhnd, (char *)name);  \
-	err=dlerror();  \
-  \
-	if(!sym && (fconfig.verbose || !optional))  \
-	{  \
-		vglout.print("[VGL] %s: Could not load symbol \"%s\"",  \
-			optional? "WARNING":"ERROR", name);  \
-		if(strlen(fconfig.id##lib)>0)  \
-			vglout.print(" from %s", fconfig.id##lib);  \
-		vglout.print("\n");  \
-		if(err) vglout.print("[VGL]    %s\n", err);  \
-	}  \
-	return sym;  \
+#define LOAD_XCB_SYMBOL(ID, id, libid, minrev, maxrev) \
+static void *load##ID##Symbol(const char *name, bool optional) \
+{ \
+	char *err = NULL; \
+	\
+	if(!id##dllhnd) \
+	{ \
+		if(strlen(fconfig.id##lib) > 0) \
+		{ \
+			dlerror(); \
+			void *dllhnd = _vgl_dlopen(fconfig.id##lib, RTLD_LAZY); \
+			err = dlerror(); \
+			if(!dllhnd) \
+			{ \
+				if(fconfig.verbose || !optional) \
+				{ \
+					vglout.print("[VGL] %s: Could not open %s\n", \
+						optional ? "WARNING" : "ERROR", fconfig.id##lib); \
+					if(err) vglout.print("[VGL]    %s\n", err); \
+				} \
+				return NULL; \
+			} \
+			id##dllhnd = dllhnd; \
+		} \
+		else \
+		{ \
+			void *dllhnd = NULL; \
+			for(int i = minrev; i <= maxrev; i++) \
+			{ \
+				char libName[MAXSTR]; \
+				snprintf(libName, MAXSTR, "lib%s.so.%d", #libid, i); \
+				dlerror(); \
+				dllhnd = _vgl_dlopen(libName, RTLD_LAZY); \
+				err = dlerror(); \
+				if(dllhnd) break; \
+			} \
+			if(!dllhnd) \
+			{ \
+				if(fconfig.verbose || !optional) \
+				{ \
+					vglout.print("[VGL] %s: Could not open lib%s\n", \
+						optional ? "WARNING" : "ERROR", #libid); \
+					if(err) vglout.print("[VGL]    %s\n", err); \
+				} \
+				return NULL; \
+			} \
+			id##dllhnd = dllhnd; \
+		} \
+	} \
+	\
+	dlerror(); \
+	void *sym = dlsym(id##dllhnd, (char *)name); \
+	err = dlerror(); \
+	\
+	if(!sym && (fconfig.verbose || !optional)) \
+	{ \
+		vglout.print("[VGL] %s: Could not load symbol \"%s\"", \
+			optional ? "WARNING" : "ERROR", name); \
+		if(strlen(fconfig.id##lib) > 0) \
+			vglout.print(" from %s", fconfig.id##lib); \
+		vglout.print("\n"); \
+		if(err) vglout.print("[VGL]    %s\n", err); \
+	} \
+	return sym; \
 }
 
 LOAD_XCB_SYMBOL(XCB, xcb, xcb, 1, 1)
-LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb-glx, 0, 0);
-LOAD_XCB_SYMBOL(XCBKeysyms, xcbkeysyms, xcb-keysyms, 0, 1)
-LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11-xcb, 1, 1)
+LOAD_XCB_SYMBOL(XCBGLX, xcbglx, xcb - glx, 0, 0);
+LOAD_XCB_SYMBOL(XCBKeysyms, xcbkeysyms, xcb - keysyms, 0, 1)
+LOAD_XCB_SYMBOL(XCBX11, xcbx11, X11 - xcb, 1, 1)
 
 #endif
 
@@ -285,8 +287,8 @@ namespace vglfaker {
 
 void unloadSymbols(void)
 {
-	if(gldllhnd && gldllhnd!=RTLD_NEXT) dlclose(gldllhnd);
-	if(x11dllhnd && x11dllhnd!=RTLD_NEXT) dlclose(x11dllhnd);
+	if(gldllhnd && gldllhnd != RTLD_NEXT) dlclose(gldllhnd);
+	if(x11dllhnd && x11dllhnd != RTLD_NEXT) dlclose(x11dllhnd);
 	#ifdef FAKEXCB
 	if(xcbdllhnd) dlclose(xcbdllhnd);
 	if(xcbglxdllhnd) dlclose(xcbglxdllhnd);

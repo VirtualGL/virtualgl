@@ -48,27 +48,27 @@ typedef HWND fbx_wh;
 typedef GC fbx_gc;
 typedef struct
 {
-  Display *dpy;  Drawable d;  Visual *v;
+	Display *dpy;  Drawable d;  Visual *v;
 } fbx_wh;
 
-#endif /* _WIN32 */
+#endif  /* _WIN32 */
 
 
 /* Pixel formats */
-#define FBX_FORMATS 7
+#define FBX_FORMATS  7
 enum { FBX_RGB, FBX_RGBA, FBX_BGR, FBX_BGRA, FBX_ABGR, FBX_ARGB, FBX_INDEX };
 
-static const int fbx_ps[FBX_FORMATS]=
+static const int fbx_ps[FBX_FORMATS] =
 	{ 3, 4, 3, 4, 4, 4, 1 };
-static const int fbx_bgr[FBX_FORMATS]=
+static const int fbx_bgr[FBX_FORMATS] =
 	{ 0, 0, 1, 1, 1, 0, 0 };
-static const int fbx_alphafirst[FBX_FORMATS]=
+static const int fbx_alphafirst[FBX_FORMATS] =
 	{ 0, 0, 0, 0, 1, 1, 0 };
-static const int fbx_roffset[FBX_FORMATS]=
+static const int fbx_roffset[FBX_FORMATS] =
 	{ 0, 0, 2, 2, 3, 1, 0 };
-static const int fbx_goffset[FBX_FORMATS]=
+static const int fbx_goffset[FBX_FORMATS] =
 	{ 1, 1, 1, 1, 2, 2, 0 };
-static const int fbx_boffset[FBX_FORMATS]=
+static const int fbx_boffset[FBX_FORMATS] =
 	{ 2, 2, 0, 0, 1, 3, 0 };
 
 
@@ -178,7 +178,7 @@ int fbx_read(fbx_struct *fb, int x, int y);
   width = width of region you wish to blit (0 = whole bitmap)
   height = height of region you wish to blit (0 = whole bitmap)
 */
-int fbx_write (fbx_struct *fb, int srcX, int srcY, int dstX, int dstY,
+int fbx_write(fbx_struct *fb, int srcX, int srcY, int dstX, int dstY,
 	int width, int height);
 
 
@@ -191,9 +191,9 @@ int fbx_write (fbx_struct *fb, int srcX, int srcY, int dstX, int dstY,
   until fbx_sync() is called.  On Windows, fbx_awrite is the same as fbx_write.
 */
 #ifdef _WIN32
-#define fbx_awrite fbx_write
+#define fbx_awrite  fbx_write
 #else
-int fbx_awrite (fbx_struct *fb, int srcX, int srcY, int dstX, int dstY,
+int fbx_awrite(fbx_struct *fb, int srcX, int srcY, int dstX, int dstY,
 	int width, int height);
 #endif
 
@@ -224,7 +224,7 @@ int fbx_flip(fbx_struct *fb, int srcX, int srcY, int width, int height);
 
   Complete a previous asynchronous write.  On Windows, this does nothing.
 */
-int fbx_sync (fbx_struct *fb);
+int fbx_sync(fbx_struct *fb);
 
 
 /*
@@ -282,4 +282,4 @@ void fbx_printwarnings(FILE *output_stream);
 }
 #endif
 
-#endif /* __FBX_H__ */
+#endif  /* __FBX_H__ */

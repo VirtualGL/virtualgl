@@ -19,7 +19,7 @@
 #include <X11/Xlib.h>
 
 
-#define HASH Hash<Display *, void *, bool>
+#define HASH  Hash<Display *, void *, bool>
 
 // This maps a window ID to an off-screen drawable instance
 
@@ -31,15 +31,15 @@ namespace vglserver
 
 			static DisplayHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new DisplayHash;
+					if(instance == NULL) instance = new DisplayHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy)
 			{
@@ -72,7 +72,7 @@ namespace vglserver
 
 			bool compare(Display *key1, void *key2, HashEntry *entry)
 			{
-				return key1==entry->key1;
+				return key1 == entry->key1;
 			}
 
 			static DisplayHash *instance;
@@ -83,6 +83,6 @@ namespace vglserver
 #undef HASH
 
 
-#define dpyhash (*(DisplayHash::getInstance()))
+#define dpyhash  (*(DisplayHash::getInstance()))
 
-#endif // __DISPLAYHASH_H__
+#endif  // __DISPLAYHASH_H__
