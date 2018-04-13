@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2015, 2017 D. R. Commander
+ * Copyright (C)2010-2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -1067,10 +1067,11 @@ int visTest(void)
 			if(!configs[i]) continue;
 			try
 			{
-				int renderType;
+				int renderType, visualType;
 				fbcid = cfgid(dpy, configs[i]);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				if((renderType & GLX_RGBA_BIT) == 0)
+				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
+				if((renderType & GLX_RGBA_BIT) == 0 || visualType == GLX_NONE)
 					continue;
 				if(!(visuals[i] = glXGetVisualFromFBConfig(dpy, configs[i])))
 				{
@@ -1090,10 +1091,11 @@ int visTest(void)
 			if(!configs[i]) continue;
 			try
 			{
-				int renderType;
+				int renderType, visualType;
 				fbcid = cfgid(dpy, configs[i]);
 				GET_CFG_ATTRIB(configs[i], GLX_RENDER_TYPE, renderType);
-				if((renderType & GLX_RGBA_BIT) == 0)
+				GET_CFG_ATTRIB(configs[i], GLX_X_VISUAL_TYPE, visualType);
+				if((renderType & GLX_RGBA_BIT) == 0 || visualType == GLX_NONE)
 					continue;
 				printf("CFG 0x%.2x:  ", fbcid);
 				if(!(vis1 = glXGetVisualFromFBConfig(dpy, configs[i])))
