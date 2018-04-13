@@ -54,6 +54,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <X11/keysym.h>
 
 
 /*
