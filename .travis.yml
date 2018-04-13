@@ -8,9 +8,9 @@ branches:
 
 env:
   global:
-    - LJT_VERSION=1.5.80
-    - LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/dev/$TRAVIS_OS_NAME
-    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x0575F26BD5B3FDB1"
+    - LJT_VERSION=1.5.90
+    - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION
+    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16"
 
 matrix:
   include:
