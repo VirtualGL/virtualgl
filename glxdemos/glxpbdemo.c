@@ -1,4 +1,3 @@
-
 /*
  * This program demonstrates how to do "off-screen" rendering using
  * the GLX pixel buffer extension.
@@ -54,7 +53,7 @@ RuntimeQueryGLXVersion(Display *dpy, int screen)
 {
 #if defined(GLX_VERSION_1_3) || defined(GLX_VERSION_1_4)
    char *glxversion;
- 
+
    glxversion = (char *) glXGetClientString(dpy, GLX_VERSION);
    if (!(strstr(glxversion, "1.3") || strstr(glxversion, "1.4")))
       return 0;
@@ -428,4 +427,3 @@ main(int argc, char *argv[])
    }
    return 0;
 }
-

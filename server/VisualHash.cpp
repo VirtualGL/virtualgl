@@ -15,5 +15,5 @@
 
 using namespace vglserver;
 
-VisualHash *VisualHash::instance=NULL;
+VisualHash *VisualHash::instance = NULL;
 vglutil::CriticalSection VisualHash::instanceMutex;

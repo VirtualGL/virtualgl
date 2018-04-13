@@ -18,17 +18,17 @@
 #include "rr.h"
 
 #ifndef FCONFIG_USESHM
-#define FCONFIG_USESHM 1
+#define FCONFIG_USESHM  1
 #endif
 
-#define VGLCONFIG_PATH "@CMAKE_INSTALL_FULL_BINDIR@/vglconfig"
+#define VGLCONFIG_PATH  "@CMAKE_INSTALL_FULL_BINDIR@/vglconfig"
 
 FakerConfig *fconfig_instance(void);
 void fconfig_deleteinstance(void);
 
-#define fconfig (*fconfig_instance())
+#define fconfig  (*fconfig_instance())
 
-#if FCONFIG_USESHM==1
+#if FCONFIG_USESHM == 1
 int fconfig_getshmid(void);
 #endif
 void fconfig_print(FakerConfig &fc);
@@ -37,4 +37,4 @@ void fconfig_setcompress(FakerConfig &fc, int i);
 void fconfig_setdefaultsfromdpy(Display *dpy);
 void fconfig_setgamma(FakerConfig &fc, double gamma);
 
-#endif // __FAKERCONFIG_H__
+#endif  // __FAKERCONFIG_H__

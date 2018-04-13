@@ -25,17 +25,17 @@
 #ifdef FAKEXCB
 extern "C" {
 #ifdef SYSXCBHEADERS
-#include <xcb/xcb.h>
-#include <xcb/xcbext.h>
-#include <xcb/xcb_keysyms.h>
-#include <xcb/glx.h>
-#include <X11/Xlib-xcb.h>
+	#include <xcb/xcb.h>
+	#include <xcb/xcbext.h>
+	#include <xcb/xcb_keysyms.h>
+	#include <xcb/glx.h>
+	#include <X11/Xlib-xcb.h>
 #else
-#include "xcb_headers/xcb.h"
-#include "xcb_headers/xcbext.h"
-#include "xcb_headers/xcb_keysyms.h"
-#include "xcb_headers/glx.h"
-#include "xcb_headers/Xlib-xcb.h"
+	#include "xcb_headers/xcb.h"
+	#include "xcb_headers/xcbext.h"
+	#include "xcb_headers/xcb_keysyms.h"
+	#include "xcb_headers/glx.h"
+	#include "xcb_headers/Xlib-xcb.h"
 #endif
 }
 #endif
@@ -48,53 +48,61 @@ namespace vglfaker
 	extern long getFakerLevel(void);
 	extern void setFakerLevel(long level);
 
-	void *loadSymbol(const char *name, bool optional=false);
+	void *loadSymbol(const char *name, bool optional = false);
 	void unloadSymbols(void);
 }
 
 
-#define CHECKSYM_NONFATAL(s) {  \
-	if(!__##s) {  \
-		vglfaker::init();  \
-		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);  \
-		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s, true);  \
-	}  \
+#define CHECKSYM_NONFATAL(s) \
+{ \
+	if(!__##s) \
+	{ \
+		vglfaker::init(); \
+		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex); \
+		if(!__##s) __##s = (_##s##Type)vglfaker::loadSymbol(#s, true); \
+	} \
 }
 
-#define CHECKSYM(s, fake_s) {  \
-	if(!__##s) {  \
-		vglfaker::init();  \
-		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex);  \
-		if(!__##s) __##s=(_##s##Type)vglfaker::loadSymbol(#s);  \
-	}  \
-	if(!__##s) vglfaker::safeExit(1);  \
-	if(__##s==fake_s) {  \
-		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real\n");  \
-		vglout.print("[VGL]   " #s " function and got the fake one instead.\n");  \
-		vglout.print("[VGL]   Something is terribly wrong.  Aborting before chaos ensues.\n");  \
-		vglfaker::safeExit(1);  \
-	}  \
+#define CHECKSYM(s, fake_s) \
+{ \
+	if(!__##s) \
+	{ \
+		vglfaker::init(); \
+		vglfaker::GlobalCriticalSection::SafeLock l(globalMutex); \
+		if(!__##s) __##s = (_##s##Type)vglfaker::loadSymbol(#s); \
+	} \
+	if(!__##s) vglfaker::safeExit(1); \
+	if(__##s == fake_s) \
+	{ \
+		vglout.print("[VGL] ERROR: VirtualGL attempted to load the real\n"); \
+		vglout.print("[VGL]   " #s " function and got the fake one instead.\n"); \
+		vglout.print("[VGL]   Something is terribly wrong.  Aborting before chaos ensues.\n"); \
+		vglfaker::safeExit(1); \
+	} \
 }
 
 #ifdef __LOCALSYM__
-#define SYMDEF(f) _##f##Type __##f=NULL
+#define SYMDEF(f)  _##f##Type __##f = NULL
 #else
-#define SYMDEF(f) extern _##f##Type __##f
+#define SYMDEF(f)  extern _##f##Type __##f
 #endif
 
 
-#define DISABLE_FAKER() vglfaker::setFakerLevel(vglfaker::getFakerLevel()+1);
-#define ENABLE_FAKER()  vglfaker::setFakerLevel(vglfaker::getFakerLevel()-1);
+#define DISABLE_FAKER() \
+	vglfaker::setFakerLevel(vglfaker::getFakerLevel() + 1);
+#define ENABLE_FAKER() \
+	vglfaker::setFakerLevel(vglfaker::getFakerLevel() - 1);
 
 
 #define FUNCDEF0(RetType, f, fake_f) \
 	typedef RetType (*_##f##Type)(void); \
 	SYMDEF(f); \
-	static inline RetType _##f(void) { \
+	static inline RetType _##f(void) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(); \
+		retval = __##f(); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -102,7 +110,8 @@ namespace vglfaker
 #define VFUNCDEF0(f, fake_f) \
 	typedef void (*_##f##Type)(void); \
 	SYMDEF(f); \
-	static inline void _##f(void) { \
+	static inline void _##f(void) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(); \
@@ -112,11 +121,12 @@ namespace vglfaker
 #define FUNCDEF1(RetType, f, at1, a1, fake_f) \
 	typedef RetType (*_##f##Type)(at1); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1) { \
+	static inline RetType _##f(at1 a1) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1); \
+		retval = __##f(a1); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -124,7 +134,8 @@ namespace vglfaker
 #define VFUNCDEF1(f, at1, a1, fake_f) \
 	typedef void (*_##f##Type)(at1); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1) { \
+	static inline void _##f(at1 a1) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1); \
@@ -134,11 +145,12 @@ namespace vglfaker
 #define FUNCDEF2(RetType, f, at1, a1, at2, a2, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2) { \
+	static inline RetType _##f(at1 a1, at2 a2) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2); \
+		retval = __##f(a1, a2); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -146,7 +158,8 @@ namespace vglfaker
 #define VFUNCDEF2(f, at1, a1, at2, a2, fake_f) \
 	typedef void (*_##f##Type)(at1, at2); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2) { \
+	static inline void _##f(at1 a1, at2 a2) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2); \
@@ -156,11 +169,12 @@ namespace vglfaker
 #define FUNCDEF3(RetType, f, at1, a1, at2, a2, at3, a3, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3) { \
+	static inline RetType _##f(at1 a1, at2 a2, at3 a3) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3); \
+		retval = __##f(a1, a2, a3); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -168,7 +182,8 @@ namespace vglfaker
 #define VFUNCDEF3(f, at1, a1, at2, a2, at3, a3, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3) { \
+	static inline void _##f(at1 a1, at2 a2, at3 a3) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2, a3); \
@@ -178,11 +193,12 @@ namespace vglfaker
 #define FUNCDEF4(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
+	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4); \
+		retval = __##f(a1, a2, a3, a4); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -190,7 +206,8 @@ namespace vglfaker
 #define VFUNCDEF4(f, at1, a1, at2, a2, at3, a3, at4, a4, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4) { \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4); \
@@ -201,11 +218,12 @@ namespace vglfaker
 	fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
+	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5); \
+		retval = __##f(a1, a2, a3, a4, a5); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -213,7 +231,8 @@ namespace vglfaker
 #define VFUNCDEF5(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) { \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5); \
@@ -224,7 +243,8 @@ namespace vglfaker
 	fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) { \
+	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5, a6); \
@@ -235,12 +255,12 @@ namespace vglfaker
 	at6, a6, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, \
-		at6 a6) { \
+	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5, a6); \
+		retval = __##f(a1, a2, a3, a4, a5, a6); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -250,7 +270,8 @@ namespace vglfaker
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7); \
 	SYMDEF(f); \
 	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
-		at7 a7) { \
+		at7 a7) \
+	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
 		__##f(a1, a2, a3, a4, a5, a6, a7); \
@@ -262,11 +283,12 @@ namespace vglfaker
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
-		at7 a7, at8 a8) { \
+		at7 a7, at8 a8) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8); \
+		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -276,11 +298,12 @@ namespace vglfaker
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
-		at7 a7, at8 a8, at9 a9) { \
+		at7 a7, at8 a8, at9 a9) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
+		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -291,11 +314,12 @@ namespace vglfaker
 		at10); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
-		at7 a7, at8 a8, at9 a9, at10 a10) { \
+		at7 a7, at8 a8, at9 a9, at10 a10) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
+		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -307,11 +331,12 @@ namespace vglfaker
 		at10, at11, at12); \
 	SYMDEF(f); \
 	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
-		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) { \
+		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) \
+	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
-		retval=__##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
+		retval = __##f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); \
 		ENABLE_FAKER(); \
 		return retval; \
 	}
@@ -324,7 +349,7 @@ extern "C" {
 
 // GLX 1.0 functions
 
-FUNCDEF3(XVisualInfo*, glXChooseVisual, Display *, dpy, int, screen,
+FUNCDEF3(XVisualInfo *, glXChooseVisual, Display *, dpy, int, screen,
 	int *, attrib_list, glXChooseVisual);
 
 VFUNCDEF4(glXCopyContext, Display *, dpy, GLXContext, src, GLXContext, dst,
@@ -381,7 +406,7 @@ FUNCDEF2(const char *, glXQueryExtensionsString, Display *, dpy, int, screen,
 
 // GLX 1.2 functions
 
-FUNCDEF0(Display*, glXGetCurrentDisplay, glXGetCurrentDisplay);
+FUNCDEF0(Display *, glXGetCurrentDisplay, glXGetCurrentDisplay);
 
 
 // GLX 1.3 functions
@@ -426,8 +451,8 @@ FUNCDEF2(XVisualInfo *, glXGetVisualFromFBConfig, Display *, dpy,
 FUNCDEF4(Bool, glXMakeContextCurrent, Display *, display, GLXDrawable, draw,
 	GLXDrawable, read, GLXContext, ctx, glXMakeContextCurrent);
 
-FUNCDEF4(int, glXQueryContext, Display *, dpy, GLXContext, ctx,
-	int, attribute, int *, value, glXQueryContext);
+FUNCDEF4(int, glXQueryContext, Display *, dpy, GLXContext, ctx, int, attribute,
+	int *, value, glXQueryContext);
 
 VFUNCDEF4(glXQueryDrawable, Display *, dpy, GLXDrawable, draw, int, attribute,
 	unsigned int *, value, glXQueryDrawable);
@@ -438,9 +463,9 @@ VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
 
 // GLX 1.4 functions
 
-typedef void (*(*_glXGetProcAddressType)(const GLubyte*))(void);
+typedef void (*(*_glXGetProcAddressType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddress);
-static inline void (*_glXGetProcAddress(const GLubyte *procName))(void)
+static inline void (*_glXGetProcAddress(const GLubyte * procName))(void)
 {
 	CHECKSYM(glXGetProcAddress, glXGetProcAddress);
 	return __glXGetProcAddress(procName);
@@ -456,9 +481,9 @@ FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
 
 // GLX_ARB_get_proc_address
 
-typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
+typedef void (*(*_glXGetProcAddressARBType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddressARB);
-static inline void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
+static inline void (*_glXGetProcAddressARB(const GLubyte * procName))(void)
 {
 	CHECKSYM(glXGetProcAddressARB, glXGetProcAddressARB);
 	return __glXGetProcAddressARB(procName);
@@ -546,11 +571,11 @@ VFUNCDEF0(glPopAttrib, glPopAttrib);
 
 // X11 functions
 
-FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask,
-	XEvent *, xe, XCheckMaskEvent);
+FUNCDEF3(Bool, XCheckMaskEvent, Display *, dpy, long, event_mask, XEvent *, xe,
+	XCheckMaskEvent);
 
-FUNCDEF3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type,
-	XEvent *, xe, XCheckTypedEvent);
+FUNCDEF3(Bool, XCheckTypedEvent, Display *, dpy, int, event_type, XEvent *, xe,
+	XCheckTypedEvent);
 
 FUNCDEF4(Bool, XCheckTypedWindowEvent, Display *, dpy, Window, win,
 	int, event_type, XEvent *, xe, XCheckTypedWindowEvent);
@@ -572,10 +597,11 @@ FUNCDEF9(Window, XCreateSimpleWindow, Display *, dpy, Window, parent, int, x,
 	border_width, unsigned long, border, unsigned long, background,
 	XCreateSimpleWindow);
 
-FUNCDEF12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x, int,
-	y, unsigned int, width, unsigned int, height, unsigned int, border_width,
-	int, depth, unsigned int, c_class, Visual *, visual, unsigned long,
-	value_mask, XSetWindowAttributes *, attributes, XCreateWindow);
+FUNCDEF12(Window, XCreateWindow, Display *, dpy, Window, parent, int, x,
+	int, y, unsigned int, width, unsigned int, height,
+	unsigned int, border_width, int, depth, unsigned int, c_class,
+	Visual *, visual, unsigned long, value_mask,
+	XSetWindowAttributes *, attributes, XCreateWindow);
 
 FUNCDEF2(int, XDestroySubwindows, Display *, dpy, Window, win,
 	XDestroySubwindows);
@@ -584,13 +610,13 @@ FUNCDEF2(int, XDestroyWindow, Display *, dpy, Window, win, XDestroyWindow);
 
 FUNCDEF1(int, XFree, void *, data, XFree);
 
-FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *,
-	root, int *, x, int *, y, unsigned int *, width, unsigned int *, height,
+FUNCDEF9(Status, XGetGeometry, Display *, display, Drawable, d, Window *, root,
+	int *, x, int *, y, unsigned int *, width, unsigned int *, height,
 	unsigned int *, border_width, unsigned int *, depth, XGetGeometry);
 
 FUNCDEF8(XImage *, XGetImage, Display *, display, Drawable, d, int, x, int, y,
-	unsigned int, width, unsigned int, height, unsigned long, plane_mask, int,
-	format, XGetImage);
+	unsigned int, width, unsigned int, height, unsigned long, plane_mask,
+	int, format, XGetImage);
 
 FUNCDEF2(char **, XListExtensions, Display *, dpy, int *, next,
 	XListExtensions);
@@ -603,10 +629,11 @@ FUNCDEF6(int, XMoveResizeWindow, Display *, dpy, Window, win, int, x, int, y,
 
 FUNCDEF2(int, XNextEvent, Display *, dpy, XEvent *, xe, XNextEvent);
 
-FUNCDEF1(Display *, XOpenDisplay, _Xconst char*, name, XOpenDisplay);
+FUNCDEF1(Display *, XOpenDisplay, _Xconst char *, name, XOpenDisplay);
 
-FUNCDEF5(Bool, XQueryExtension, Display *, dpy, _Xconst char*, name, int *,
-	major_opcode, int *, first_event, int *, first_error, XQueryExtension);
+FUNCDEF5(Bool, XQueryExtension, Display *, dpy, _Xconst char *, name,
+	int *, major_opcode, int *, first_event, int *, first_error,
+	XQueryExtension);
 
 FUNCDEF4(int, XResizeWindow, Display *, dpy, Window, win, unsigned int, width,
 	unsigned int, height, XResizeWindow);
@@ -619,7 +646,7 @@ FUNCDEF4(int, XWindowEvent, Display *, dpy, Window, win, long, event_mask,
 
 // From dlfaker
 
-typedef	void* (*_dlopenType)(const char *, int);
+typedef void *(*_dlopenType)(const char *, int);
 void *_vgl_dlopen(const char *, int);
 SYMDEF(dlopen);
 
@@ -677,8 +704,8 @@ VFUNCDEF0(glEndList, NULL);
 
 VFUNCDEF2(glGenBuffers, GLsizei, n, GLuint *, buffers, NULL);
 
-VFUNCDEF3(glGetBufferParameteriv, GLenum, target, GLenum, value, GLint *,
-	data, NULL);
+VFUNCDEF3(glGetBufferParameteriv, GLenum, target, GLenum, value, GLint *, data,
+	NULL);
 
 FUNCDEF0(GLenum, glGetError, NULL);
 
@@ -710,7 +737,7 @@ VFUNCDEF2(glRasterPos2i, GLint, x, GLint, y, NULL);
 VFUNCDEF1(glReadBuffer, GLenum, mode, NULL);
 
 VFUNCDEF7(glReadPixels, GLint, x, GLint, y, GLsizei, width, GLsizei, height,
-	GLenum, format, GLenum, type, GLvoid*, pixels, NULL);
+	GLenum, format, GLenum, type, GLvoid *, pixels, NULL);
 
 FUNCDEF1(GLboolean, glUnmapBuffer, GLenum, target, NULL);
 
@@ -726,7 +753,7 @@ FUNCDEF1(xcb_connection_t *, XGetXCBConnection, Display *, dpy, NULL);
 VFUNCDEF2(XSetEventQueueOwner, Display *, dpy, enum XEventQueueOwner, owner,
 	XSetEventQueueOwner);
 
-typedef xcb_extension_t* _xcb_glx_idType;
+typedef xcb_extension_t *_xcb_glx_idType;
 SYMDEF(xcb_glx_id);
 static inline xcb_extension_t *_xcb_glx_id(void)
 {

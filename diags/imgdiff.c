@@ -35,114 +35,117 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	unsigned char *img1=NULL, *img2=NULL, *errImg=NULL;
-	int usePPM=0;
-	unsigned char err, pixelErr, maxCompErr[4]={ 0, 0, 0, 0 },
-		minCompErr[4]={ 255, 255, 255, 255 }, maxTotalErr, minTotalErr;
-	double avgCompErr[4]={ 0., 0., 0., 0. }, avgTotalErr=0.,
-		compSumSquares[4]={ 0., 0., 0., 0. }, totalSumSquares=0.,
-		rms[4]={ 0., 0., 0., 0. }, totalRMS;
-	int width1, height1, ps1=3, width2, height2, ps2=3, width, height,
-		i, j, k, mag=0;
+	unsigned char *img1 = NULL, *img2 = NULL, *errImg = NULL;
+	int usePPM = 0;
+	unsigned char err, pixelErr, maxCompErr[4] = { 0, 0, 0, 0 },
+		minCompErr[4] = { 255, 255, 255, 255 }, maxTotalErr, minTotalErr;
+	double avgCompErr[4] = { 0., 0., 0., 0. }, avgTotalErr = 0.,
+		compSumSquares[4] = { 0., 0., 0., 0. }, totalSumSquares = 0.,
+		rms[4] = { 0., 0., 0., 0. }, totalRMS;
+	int width1, height1, ps1 = 3, width2, height2, ps2 = 3, width, height, i, j,
+		k, mag = 0;
 	char *temp;
 
-	if(argc<3) usage(argv);
-	if(argc>3) for(i=3; i<argc; i++)
+	if(argc < 3) usage(argv);
+	if(argc > 3) for(i = 3; i < argc; i++)
 	{
 		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
-		else if(!stricmp(argv[i], "-mag")) mag=1;
+		else if(!stricmp(argv[i], "-mag")) mag = 1;
 		else usage(argv);
 	}
 
-	if((temp=strrchr(argv[1], '.'))!=NULL && !stricmp(temp, ".ppm"))
-		usePPM=1;
+	if((temp = strrchr(argv[1], '.')) != NULL && !stricmp(temp, ".ppm"))
+		usePPM = 1;
 
 	if(mag)
 	{
-		for(i=0; i<64; i++)
+		for(i = 0; i < 64; i++)
 		{
-			redMap[i]=0;  greenMap[i]=i*4;  blueMap[i]=0;
+			redMap[i] = 0;  greenMap[i] = i * 4;  blueMap[i] = 0;
 		}
-		for(i=0; i<64; i++)
+		for(i = 0; i < 64; i++)
 		{
-			redMap[i+64]=i*4;  greenMap[i+64]=255;  blueMap[i+64]=0;
+			redMap[i + 64] = i * 4;  greenMap[i + 64] = 255;  blueMap[i + 64] = 0;
 		}
-		for(i=0; i<64; i++)
+		for(i = 0; i < 64; i++)
 		{
-			redMap[i+128]=255;  greenMap[i+128]=255-i*4;  blueMap[i+128]=0;
+			redMap[i + 128] = 255;  greenMap[i + 128] = 255 - i * 4;
+			blueMap[i + 128] = 0;
 		}
-		for(i=0; i<64; i++)
+		for(i = 0; i < 64; i++)
 		{
-			redMap[i+192]=255;  greenMap[i+192]=i*4;  blueMap[i+192]=i*4;
+			redMap[i + 192] = 255;  greenMap[i + 192] = i * 4;
+			blueMap[i + 192] = i * 4;
 		}
 	}
 
 	if(bmp_load(argv[1], &img1, &width1, 1, &height1, PF_BGR,
-		BMPORN_TOPDOWN)==-1)
+		BMPORN_TOPDOWN) == -1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}
 	if(bmp_load(argv[2], &img2, &width2, 1, &height2, PF_BGR,
-		BMPORN_TOPDOWN)==-1)
+		BMPORN_TOPDOWN) == -1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}
-	width=min(width1, width2);  height=min(height1, height2);
+	width = min(width1, width2);  height = min(height1, height2);
 
-	if((errImg=(unsigned char *)malloc(width*height*ps1))==NULL)
+	if((errImg = (unsigned char *)malloc(width * height * ps1)) == NULL)
 	{
 		puts("Could not allocate memory");  exit(1);
 	}
 
-	for(j=0; j<height; j++)
-		for(i=0; i<width; i++)
+	for(j = 0; j < height; j++)
+		for(i = 0; i < width; i++)
 		{
-			pixelErr=0;
-			for(k=0; k<ps1; k++)
+			pixelErr = 0;
+			for(k = 0; k < ps1; k++)
 			{
-				err=(unsigned char)abs((int)img2[(width2*j+i)*ps2+k]
-					-(int)img1[(width1*j+i)*ps1+k]);
-				if(err>pixelErr) pixelErr=err;
-				if(err>maxCompErr[k]) maxCompErr[k]=err;
-				if(err<minCompErr[k]) minCompErr[k]=err;
-				avgCompErr[k]+=err;  compSumSquares[k]+=err*err;
-				if(!mag) errImg[(width*j+i)*ps1+k]=err;
+				err = (unsigned char)abs((int)img2[(width2 * j + i) * ps2 + k] -
+					(int)img1[(width1 * j + i) * ps1 + k]);
+				if(err > pixelErr) pixelErr = err;
+				if(err > maxCompErr[k]) maxCompErr[k] = err;
+				if(err < minCompErr[k]) minCompErr[k] = err;
+				avgCompErr[k] += err;  compSumSquares[k] += err * err;
+				if(!mag) errImg[(width * j + i) * ps1 + k] = err;
 			}
 			if(mag)
 			{
-				errImg[(width*j+i)*ps1]=blueMap[pixelErr];
-				errImg[(width*j+i)*ps1+1]=greenMap[pixelErr];
-				errImg[(width*j+i)*ps1+2]=redMap[pixelErr];
+				errImg[(width * j + i) * ps1] = blueMap[pixelErr];
+				errImg[(width * j + i) * ps1 + 1] = greenMap[pixelErr];
+				errImg[(width * j + i) * ps1 + 2] = redMap[pixelErr];
 			}
 		}
-	maxTotalErr=maxCompErr[0];  minTotalErr=minCompErr[0];
-	for(k=0; k<ps1; k++)
+	maxTotalErr = maxCompErr[0];  minTotalErr = minCompErr[0];
+	for(k = 0; k < ps1; k++)
 	{
-		if(minCompErr[k]<maxTotalErr) minTotalErr=minCompErr[k];
-		if(maxCompErr[k]>maxTotalErr) maxTotalErr=maxCompErr[k];
-		avgTotalErr+=avgCompErr[k];
-		avgCompErr[k]/=((double)height*(double)width);
-		totalSumSquares+=compSumSquares[k];
-		compSumSquares[k]/=((double)height*(double)width);
-		rms[k]=sqrt(compSumSquares[k]);
+		if(minCompErr[k] < maxTotalErr) minTotalErr = minCompErr[k];
+		if(maxCompErr[k] > maxTotalErr) maxTotalErr = maxCompErr[k];
+		avgTotalErr += avgCompErr[k];
+		avgCompErr[k] /= ((double)height * (double)width);
+		totalSumSquares += compSumSquares[k];
+		compSumSquares[k] /= ((double)height * (double)width);
+		rms[k] = sqrt(compSumSquares[k]);
 	}
-	avgTotalErr/=((double)height*(double)width*(double)ps1);
-	totalSumSquares/=((double)height*(double)width*(double)ps1);
-	totalRMS=sqrt(totalSumSquares);
+	avgTotalErr /= ((double)height * (double)width * (double)ps1);
+	totalSumSquares /= ((double)height * (double)width * (double)ps1);
+	totalRMS = sqrt(totalSumSquares);
 
-	if(bmp_save(usePPM? "diff.ppm":"diff.bmp", errImg, width, 0, height, PF_BGR,
-		BMPORN_TOPDOWN)==-1)
+	if(bmp_save(usePPM ? "diff.ppm" : "diff.bmp", errImg, width, 0, height,
+		PF_BGR, BMPORN_TOPDOWN) == -1)
 	{
 		puts(bmp_geterr());  exit(1);
 	}
 	free(errImg);
 
-	for(k=0; k<ps1; k++)
+	for(k = 0; k < ps1; k++)
 		printf("%s: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
-			k==0? "B":(k==1? "G":(k==2? "R":"A")), minCompErr[k], maxCompErr[k],
-			avgCompErr[k], rms[k], 20.*log10(255./rms[k]));
+			(k == 0 ? "B" : (k == 1 ? "G" : (k == 2 ? "R" : "A"))), minCompErr[k],
+			maxCompErr[k], avgCompErr[k], rms[k], 20. * log10(255. / rms[k]));
 	printf("T: min err.= %d max err.= %d avg err.= %f rms= %f PSNR= %f\n",
-		minTotalErr, maxTotalErr, avgTotalErr, totalRMS, 20.*log10(255./totalRMS));
+		minTotalErr, maxTotalErr, avgTotalErr, totalRMS,
+		20. * log10(255. / totalRMS));
 
 	return 0;
 }

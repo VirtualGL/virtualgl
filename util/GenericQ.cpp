@@ -23,23 +23,23 @@ using namespace vglutil;
 
 GenericQ::GenericQ(void)
 {
-	start=NULL;  end=NULL;
-	deadYet=0;
+	start = NULL;  end = NULL;
+	deadYet = 0;
 }
 
 
 GenericQ::~GenericQ(void)
 {
-	deadYet=1;
+	deadYet = 1;
 	release();
 	mutex.lock(false);
-	if(start!=NULL)
+	if(start != NULL)
 	{
 		Entry *temp;
 		do
 		{
-			temp=start->next;  delete start;  start=temp;
-		} while(start!=NULL);
+			temp = start->next;  delete start;  start = temp;
+		} while(start != NULL);
 	}
 	mutex.unlock(false);
 }
@@ -47,7 +47,7 @@ GenericQ::~GenericQ(void)
 
 void GenericQ::release(void)
 {
-	deadYet=1;
+	deadYet = 1;
 	hasItem.post();
 }
 
@@ -55,10 +55,10 @@ void GenericQ::release(void)
 void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 {
 	if(deadYet) return;
-	if(item==NULL) _throw("NULL argument in GenericQ::spoil()");
+	if(item == NULL) _throw("NULL argument in GenericQ::spoil()");
 	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
-	void *dummy=NULL;
+	void *dummy = NULL;
 	while(1)
 	{
 		get(&dummy, true);   if(!dummy) break;
@@ -71,15 +71,15 @@ void GenericQ::spoil(void *item, SpoilCallback spoilCallback)
 void GenericQ::add(void *item)
 {
 	if(deadYet) return;
-	if(item==NULL) _throw("NULL argument in GenericQ::add()");
+	if(item == NULL) _throw("NULL argument in GenericQ::add()");
 	CriticalSection::SafeLock l(mutex);
 	if(deadYet) return;
-	Entry *temp=new Entry;
-	if(temp==NULL) _throw("Alloc error");
-	if(start==NULL) start=temp;
-	else end->next=temp;
-	temp->item=item;  temp->next=NULL;
-	end=temp;
+	Entry *temp = new Entry;
+	if(temp == NULL) _throw("Alloc error");
+	if(start == NULL) start = temp;
+	else end->next = temp;
+	temp->item = item;  temp->next = NULL;
+	end = temp;
 	hasItem.post();
 }
 
@@ -88,12 +88,12 @@ void GenericQ::add(void *item)
 void GenericQ::get(void **item, bool nonBlocking)
 {
 	if(deadYet) return;
-	if(item==NULL) _throw("NULL argument in GenericQ::get()");
+	if(item == NULL) _throw("NULL argument in GenericQ::get()");
 	if(nonBlocking)
 	{
 		if(!hasItem.tryWait())
 		{
-			*item=NULL;  return;
+			*item = NULL;  return;
 		}
 	}
 	else hasItem.wait();
@@ -101,17 +101,17 @@ void GenericQ::get(void **item, bool nonBlocking)
 	{
 		CriticalSection::SafeLock l(mutex);
 		if(deadYet) return;
-		if(start==NULL) _throw("Nothing in the queue");
-		*item=start->item;
-		Entry *temp=start->next;
-		delete start;  start=temp;
+		if(start == NULL) _throw("Nothing in the queue");
+		*item = start->item;
+		Entry *temp = start->next;
+		delete start;  start = temp;
 	}
 }
 
 
 int GenericQ::items(void)
 {
-	int retval=0;
-	retval=hasItem.getValue();
+	int retval = 0;
+	retval = hasItem.getValue();
 	return retval;
 }

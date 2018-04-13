@@ -46,7 +46,7 @@ namespace vglserver
 			void wmDelete(void);
 			void vglWMDelete(void);
 			int getSwapInterval(void) { return swapInterval; }
-			void setSwapInterval(int swapInterval_) { swapInterval=swapInterval_; }
+			void setSwapInterval(int swapInterval_) { swapInterval = swapInterval_; }
 
 			bool dirty, rdirty;
 
@@ -58,7 +58,7 @@ namespace vglserver
 			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);
 			void makePassive(vglcommon::Frame *f, int drawBuf, GLenum glFormat,
 				int stereoMode);
-			void sendVGL(GLint drawBuf, bool spoilLast,	bool doStereo,
+			void sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 				int stereoMode, int compress, int qual, int subsamp);
 			void sendX11(GLint drawBuf, bool spoilLast, bool sync, bool doStereo,
 				int stereoMode);
@@ -89,4 +89,4 @@ namespace vglserver
 	};
 }
 
-#endif // __VIRTUALWIN_H__
+#endif  // __VIRTUALWIN_H__

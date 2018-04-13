@@ -48,4 +48,4 @@ namespace vglcommon
 	};
 }
 
-#endif // __GLFRAME_H
+#endif  // __GLFRAME_H

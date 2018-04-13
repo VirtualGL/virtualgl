@@ -19,14 +19,14 @@
 #include "rr.h"
 
 
-// Pixel formats
-#define RRTRANS_FORMATOPT 6
-enum {RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
-      RRTRANS_ARGB};
+/* Pixel formats */
+#define RRTRANS_FORMATOPT  6
+enum { RRTRANS_RGB, RRTRANS_RGBA, RRTRANS_BGR, RRTRANS_BGRA, RRTRANS_ABGR,
+       RRTRANS_ARGB };
 
-static const int rrtrans_ps[RRTRANS_FORMATOPT]={3, 4, 3, 4, 4, 4};
-static const int rrtrans_bgr[RRTRANS_FORMATOPT]={0, 0, 1, 1, 1, 0};
-static const int rrtrans_afirst[RRTRANS_FORMATOPT]={0, 0, 0, 0, 1, 1};
+static const int rrtrans_ps[RRTRANS_FORMATOPT] = { 3, 4, 3, 4, 4, 4 };
+static const int rrtrans_bgr[RRTRANS_FORMATOPT] = { 0, 0, 1, 1, 1, 0 };
+static const int rrtrans_afirst[RRTRANS_FORMATOPT] = { 0, 0, 0, 0, 1, 1 };
 
 
 #if !defined(__SUNPRO_CC) && !defined(__SUNPRO_C)
@@ -71,8 +71,6 @@ typedef struct _RRFrame
 extern "C" {
 #endif
 
-void *
-   RRTransInit (Display *dpy, Window win, FakerConfig *fconfig);
 /*
    Initialize an instance of the transport plugin
 
@@ -92,10 +90,9 @@ void *
    properly, then RRTransInit() returns NULL, and RRTransGetError() can be
    called to determine the reason for the failure.
 */
+void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig);
 
 
-int
-   RRTransConnect (void *handle, char *receiver_name, int port);
 /*
    Connect to a remote image receiver
 
@@ -120,11 +117,9 @@ int
    This function returns 0 on success or -1 on failure.  RRTransGetError() can
    be called to determine the cause of the failure.
 */
+int RRTransConnect(void *handle, char *receiver_name, int port);
 
 
-RRFrame *
-   RRTransGetFrame (void *handle, int width, int height, int format,
-      int stereo);
 /*
    Retrieve a frame buffer of the requested dimensions from the transport
    plugin's buffer pool.  If no frame buffers are available in the pool, then
@@ -149,10 +144,10 @@ RRFrame *
    Otherwise, NULL is returned and the reason for the failure can be queried
    with RRTransGetError().
 */
+RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
+  int stereo);
 
 
-int
-   RRTransReady(void *handle);
 /*
    Returns 1 if the plugin is ready to deliver a new frame immediately or
    0 if it is currently processing a frame and a new frame would have to be
@@ -169,10 +164,9 @@ int
    This function returns -1 on failure.  RRTransGetError() can be called to
    determine the cause of the failure.
 */
+int RRTransReady(void *handle);
 
 
-int
-   RRTransSynchronize(void *handle);
 /*
    In asynchronous image transports, this function blocks until the queue is
    empty.  VirtualGL calls this function only if frame spoiling is disabled.
@@ -188,10 +182,9 @@ int
    This function returns 0 on success or -1 on failure.  RRTransGetError() can
    be called to determine the cause of the failure.
 */
+int RRTransSynchronize(void *handle);
 
 
-int
-   RRTransSendFrame (void *handle, RRFrame *frame, int sync);
 /*
    Send the contents of a frame buffer to the receiver (or queue it for
    transmission)
@@ -209,10 +202,9 @@ int
    This function returns 0 on success or -1 on failure.  RRTransGetError() can
    be called to determine the cause of the failure.
 */
+int RRTransSendFrame(void *handle, RRFrame *frame, int sync);
 
 
-int
-   RRTransDestroy(void *handle);
 /*
    Clean up an instance of the transport plugin
 
@@ -224,19 +216,19 @@ int
    This function returns 0 on success or -1 on failure.  RRTransGetError() can
    be called to determine the cause of the failure.
 */
+int RRTransDestroy(void *handle);
 
 
-const char *
-   RRTransGetError(void);
 /*
    Return an error string describing why the last command failed
 */
+const char *RRTransGetError(void);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // RRTRANS_NOPROTOTYPES
+#endif  /* RRTRANS_NOPROTOTYPES */
 
-#endif // __RRTRANSPORT_H__
+#endif  /* __RRTRANSPORT_H__ */

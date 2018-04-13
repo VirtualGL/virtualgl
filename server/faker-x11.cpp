@@ -42,10 +42,10 @@ int XCloseDisplay(Display *dpy)
 	// shared libraries, which is executed after the VGL faker has shut down,
 	// so we cannot access fconfig or vglout or winh without causing deadlocks or
 	// other issues.  At this point, all we can safely do is hand off to libX11.
-	if(vglfaker::deadYet || vglfaker::getFakerLevel()>0)
+	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XCloseDisplay(dpy);
 
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 		opentrace(XCloseDisplay);  prargd(dpy);  starttrace();
@@ -58,11 +58,11 @@ int XCloseDisplay(Display *dpy)
 		{
 			if(fconfig.verbose)
 				vglout.print("[VGL] Disabling XCB interposer\n");
-			fconfig.fakeXCB=0;
+			fconfig.fakeXCB = 0;
 		}
 		else
 		{
-			xcb_connection_t *conn=_XGetXCBConnection(dpy);
+			xcb_connection_t *conn = _XGetXCBConnection(dpy);
 			xcbconnhash.remove(conn);
 		}
 	}
@@ -70,7 +70,7 @@ int XCloseDisplay(Display *dpy)
 
 	winhash.remove(dpy);
 	dpyhash.remove(dpy);
-	retval=_XCloseDisplay(dpy);
+	retval = _XCloseDisplay(dpy);
 
 		stoptrace();  closetrace();
 
@@ -90,38 +90,38 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 		return _XCopyArea(dpy, src, dst, gc, src_x, src_y, width, height, dest_x,
 			dest_y);
 
-	VirtualDrawable *srcVW=NULL;  VirtualDrawable *dstVW=NULL;
-	bool srcWin=false, dstWin=false;
-	bool copy2d=true, copy3d=false, triggerRB=false;
-	GLXDrawable glxsrc=0, glxdst=0;
+	VirtualDrawable *srcVW = NULL;  VirtualDrawable *dstVW = NULL;
+	bool srcWin = false, dstWin = false;
+	bool copy2d = true, copy3d = false, triggerRB = false;
+	GLXDrawable glxsrc = 0, glxdst = 0;
 
-	if(src==0 || dst==0) return BadDrawable;
+	if(src == 0 || dst == 0) return BadDrawable;
 
 		opentrace(XCopyArea);  prargd(dpy);  prargx(src);  prargx(dst);
-		prargx(gc); prargi(src_x);  prargi(src_y);  prargi(width);  prargi(height);
-		prargi(dest_x);  prargi(dest_y);  starttrace();
+		prargx(gc);  prargi(src_x);  prargi(src_y);  prargi(width);
+		prargi(height);  prargi(dest_x);  prargi(dest_y);  starttrace();
 
-	if(!(srcVW=(VirtualDrawable *)pmhash.find(dpy, src)))
+	if(!(srcVW = (VirtualDrawable *)pmhash.find(dpy, src)))
 	{
-		srcVW=(VirtualDrawable *)winhash.find(dpy, src);
-		if(srcVW) srcWin=true;
+		srcVW = (VirtualDrawable *)winhash.find(dpy, src);
+		if(srcVW) srcWin = true;
 	}
 	if(srcVW && !srcVW->isInit())
 	{
 		// If the 3D drawable hasn't been made current yet, then its contents will
 		// be identical to the corresponding 2D drawable
-		srcVW=NULL;
-		srcWin=false;
+		srcVW = NULL;
+		srcWin = false;
 	}
-	if(!(dstVW=(VirtualDrawable *)pmhash.find(dpy, dst)))
+	if(!(dstVW = (VirtualDrawable *)pmhash.find(dpy, dst)))
 	{
-		dstVW=(VirtualDrawable *)winhash.find(dpy, dst);
-		if(dstVW) dstWin=true;
+		dstVW = (VirtualDrawable *)winhash.find(dpy, dst);
+		if(dstVW) dstWin = true;
 	}
 	if(dstVW && !dstVW->isInit())
 	{
-		dstVW=NULL;
-		dstWin=false;
+		dstVW = NULL;
+		dstWin = false;
 	}
 
 	// GLX (3D) Pixmap --> non-GLX (2D) drawable
@@ -149,8 +149,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// GLX (3D) Window --> GLX (3D) drawable
 	// GLX (3D) Pixmap --> GLX (3D) Pixmap
 	// Sync both 2D and 3D pixels.
-	if(srcVW && srcWin && dstVW) copy3d=true;
-	if(srcVW && !srcWin && dstVW && !dstWin) copy3d=true;
+	if(srcVW && srcWin && dstVW) copy3d = true;
+	if(srcVW && !srcWin && dstVW && !dstWin) copy3d = true;
 
 	// GLX (3D) Pixmap --> GLX (3D) Window
 	// Copy 3D pixels to the window's corresponding off-screen drawable, then
@@ -158,7 +158,7 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// drawable to the window.
 	if(srcVW && !srcWin && dstVW && dstWin)
 	{
-		copy2d=false;  copy3d=true;  triggerRB=true;
+		copy2d = false;  copy3d = true;  triggerRB = true;
 	}
 
 	if(copy2d)
@@ -166,8 +166,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 
 	if(copy3d)
 	{
-		glxsrc=srcVW->getGLXDrawable();
-		glxdst=dstVW->getGLXDrawable();
+		glxsrc = srcVW->getGLXDrawable();
+		glxdst = dstVW->getGLXDrawable();
 		srcVW->copyPixels(src_x, src_y, width, height, dest_x, dest_y, glxdst);
 		if(triggerRB)
 			((VirtualWin *)dstVW)->readback(GL_FRONT, false, fconfig.sync);
@@ -191,15 +191,15 @@ int XCopyArea_FBX(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 }
 
 
-// When a window is created, add it to the hash.  A VirtualWin instance does not
-// get created and hashed to the window until/unless the window is made
+// When a window is created, add it to the hash.  A VirtualWin instance does
+// not get created and hashed to the window until/unless the window is made
 // current in OpenGL.
 
 Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 	unsigned int width, unsigned int height, unsigned int border_width,
 	unsigned long border, unsigned long background)
 {
-	Window win=0;
+	Window win = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -209,7 +209,7 @@ Window XCreateSimpleWindow(Display *dpy, Window parent, int x, int y,
 		opentrace(XCreateSimpleWindow);  prargd(dpy);  prargx(parent);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
-	win=_XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
+	win = _XCreateSimpleWindow(dpy, parent, x, y, width, height, border_width,
 		border, background);
 	if(win) winhash.add(dpy, win);
 
@@ -225,7 +225,7 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 	int depth, unsigned int c_class, Visual *visual, unsigned long valuemask,
 	XSetWindowAttributes *attributes)
 {
-	Window win=0;
+	Window win = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -236,8 +236,8 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  prargi(depth);
 		prargi(c_class);  prargv(visual);  starttrace();
 
-	win=_XCreateWindow(dpy, parent, x, y, width, height, border_width,
-		depth, c_class, visual, valuemask, attributes);
+	win = _XCreateWindow(dpy, parent, x, y, width, height, border_width, depth,
+		c_class, visual, valuemask, attributes);
 	if(win) winhash.add(dpy, win);
 
 		stoptrace();  prargx(win);  closetrace();
@@ -247,26 +247,26 @@ Window XCreateWindow(Display *dpy, Window parent, int x, int y,
 }
 
 
-// When a window is destroyed, we shut down the corresponding VirtualWin instance,
-// but we also have to walk the window tree to ensure that VirtualWin instances
-// attached to subwindows are also shut down.
+// When a window is destroyed, we shut down the corresponding VirtualWin
+// instance, but we also have to walk the window tree to ensure that VirtualWin
+// instances attached to subwindows are also shut down.
 
-static void DeleteWindow(Display *dpy, Window win, bool subOnly=false)
+static void DeleteWindow(Display *dpy, Window win, bool subOnly = false)
 {
-	Window root, parent, *children=NULL;  unsigned int n=0;
+	Window root, parent, *children = NULL;  unsigned int n = 0;
 
 	if(!subOnly) winhash.remove(dpy, win);
 	if(XQueryTree(dpy, win, &root, &parent, &children, &n)
-		&& children && n>0)
+		&& children && n > 0)
 	{
-		for(unsigned int i=0; i<n; i++) DeleteWindow(dpy, children[i]);
+		for(unsigned int i = 0; i < n; i++) DeleteWindow(dpy, children[i]);
 	}
 }
 
 
 int XDestroySubwindows(Display *dpy, Window win)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -275,7 +275,7 @@ int XDestroySubwindows(Display *dpy, Window win)
 		opentrace(XDestroySubwindows);  prargd(dpy);  prargx(win);  starttrace();
 
 	if(dpy && win) DeleteWindow(dpy, win, true);
-	retval=_XDestroySubwindows(dpy, win);
+	retval = _XDestroySubwindows(dpy, win);
 
 		stoptrace();  closetrace();
 
@@ -286,7 +286,7 @@ int XDestroySubwindows(Display *dpy, Window win)
 
 int XDestroyWindow(Display *dpy, Window win)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -295,7 +295,7 @@ int XDestroyWindow(Display *dpy, Window win)
 		opentrace(XDestroyWindow);  prargd(dpy);  prargx(win);  starttrace();
 
 	if(dpy && win) DeleteWindow(dpy, win);
-	retval=_XDestroyWindow(dpy, win);
+	retval = _XDestroyWindow(dpy, win);
 
 		stoptrace();  closetrace();
 
@@ -309,9 +309,9 @@ int XDestroyWindow(Display *dpy, Window win)
 
 int XFree(void *data)
 {
-	int ret=0;
+	int ret = 0;
 	TRY();
-	ret=_XFree(data);
+	ret = _XFree(data);
 	if(data && !vglfaker::deadYet) vishash.remove(NULL, (XVisualInfo *)data);
 	CATCH();
 	return ret;
@@ -328,8 +328,8 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 	int *y, unsigned int *width_return, unsigned int *height_return,
 	unsigned int *border_width, unsigned int *depth)
 {
-	Status ret=0;
-	unsigned int width=0, height=0;
+	Status ret = 0;
+	unsigned int width = 0, height = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -338,26 +338,26 @@ Status XGetGeometry(Display *dpy, Drawable drawable, Window *root, int *x,
 
 		opentrace(XGetGeometry);  prargd(dpy);  prargx(drawable);  starttrace();
 
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(drawable, vw))
 	{
 		// Apparently drawable is a GLX drawable ID that backs a window, so we need
 		// to request the geometry of the window, not the GLX drawable.  This
 		// prevents a BadDrawable error in Steam.
-		dpy=vw->getX11Display();
-		drawable=vw->getX11Drawable();
+		dpy = vw->getX11Display();
+		drawable = vw->getX11Drawable();
 	}
-	ret=_XGetGeometry(dpy, drawable, root, x, y, &width, &height, border_width,
+	ret = _XGetGeometry(dpy, drawable, root, x, y, &width, &height, border_width,
 		depth);
-	if(winhash.find(dpy, drawable, vw) && width>0 && height>0)
+	if(winhash.find(dpy, drawable, vw) && width > 0 && height > 0)
 		vw->resize(width, height);
 
 		stoptrace();  if(root) prargx(*root);  if(x) prargi(*x);  if(y) prargi(*y);
 		prargi(width);  prargi(height);  if(border_width) prargi(*border_width);
 		if(depth) prargi(*depth);  closetrace();
 
-	if(width_return) *width_return=width;
-	if(height_return) *height_return=height;
+	if(width_return) *width_return = width;
+	if(height_return) *height_return = height;
 
 	CATCH();
 	return ret;
@@ -372,7 +372,7 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 	unsigned int width, unsigned int height, unsigned long plane_mask,
 	int format)
 {
-	XImage *xi=NULL;
+	XImage *xi = NULL;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -382,10 +382,10 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 		prargi(y);  prargi(width);  prargi(height);  prargx(plane_mask);
 		prargi(format);  starttrace();
 
-	VirtualPixmap *vpm=pmhash.find(dpy, drawable);
+	VirtualPixmap *vpm = pmhash.find(dpy, drawable);
 	if(vpm) vpm->readback();
 
-	xi=_XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
+	xi = _XGetImage(dpy, drawable, x, y, width, height, plane_mask, format);
 
 		stoptrace();  closetrace();
 
@@ -398,8 +398,8 @@ XImage *XGetImage(Display *dpy, Drawable drawable, int x, int y,
 
 char **XListExtensions(Display *dpy, int *next)
 {
-	char **list=NULL, *listStr=NULL;  int n, i;
-	int hasGLX=0, listLen=0;
+	char **list = NULL, *listStr = NULL;  int n, i;
+	int hasGLX = 0, listLen = 0;
 
 	TRY();
 
@@ -408,50 +408,50 @@ char **XListExtensions(Display *dpy, int *next)
 
 		opentrace(XListExtensions);  prargd(dpy);  starttrace();
 
-	list=_XListExtensions(dpy, &n);
-	if(list && n>0)
+	list = _XListExtensions(dpy, &n);
+	if(list && n > 0)
 	{
-		for(i=0; i<n; i++)
+		for(i = 0; i < n; i++)
 		{
 			if(list[i])
 			{
-				listLen+=strlen(list[i])+1;
-				if(!strcmp(list[i], "GLX")) hasGLX=1;
+				listLen += strlen(list[i]) + 1;
+				if(!strcmp(list[i], "GLX")) hasGLX = 1;
 			}
 		}
 	}
 	if(!hasGLX)
 	{
-		char **newList=NULL;  int index=0;
-		listLen+=4;  // "GLX" + terminating NULL
-		_errifnot(newList=(char **)malloc(sizeof(char *)*(n+1)))
-		_errifnot(listStr=(char *)malloc(listLen+1))
-		memset(listStr, 0, listLen+1);
-		listStr=&listStr[1];  // For compatibility with X.org implementation
-		if(list && n>0)
+		char **newList = NULL;  int index = 0;
+		listLen += 4;  // "GLX" + terminating NULL
+		_errifnot(newList = (char **)malloc(sizeof(char *) * (n + 1)))
+		_errifnot(listStr = (char *)malloc(listLen + 1))
+		memset(listStr, 0, listLen + 1);
+		listStr = &listStr[1];  // For compatibility with X.org implementation
+		if(list && n > 0)
 		{
-			for(i=0; i<n; i++)
+			for(i = 0; i < n; i++)
 			{
-				newList[i]=&listStr[index];
+				newList[i] = &listStr[index];
 				if(list[i])
 				{
 					strncpy(newList[i], list[i], strlen(list[i]));
-					index+=strlen(list[i]);
-					listStr[index]='\0';  index++;
+					index += strlen(list[i]);
+					listStr[index] = '\0';  index++;
 				}
 			}
 			XFreeExtensionList(list);
 		}
-		newList[n]=&listStr[index];
-		strncpy(newList[n], "GLX", 3);  newList[n][3]='\0';
-		list=newList;  n++;
+		newList[n] = &listStr[index];
+		strncpy(newList[n], "GLX", 3);  newList[n][3] = '\0';
+		list = newList;  n++;
 	}
 
 		stoptrace();  prargi(n);  closetrace();
 
 	CATCH();
 
-	if(next) *next=n;
+	if(next) *next = n;
 	return list;
 }
 
@@ -459,25 +459,25 @@ char **XListExtensions(Display *dpy, int *next)
 // This is normally where VirtualGL initializes, unless a GLX function is
 // called first.
 
-Display *XOpenDisplay(_Xconst char* name)
+Display *XOpenDisplay(_Xconst char *name)
 {
-	Display *dpy=NULL;
+	Display *dpy = NULL;
 
 	TRY();
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel()>0)
+	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XOpenDisplay(name);
 
 		opentrace(XOpenDisplay);  prargs(name);  starttrace();
 
 	vglfaker::init();
-	dpy=_XOpenDisplay(name);
+	dpy = _XOpenDisplay(name);
 	if(dpy)
 	{
 		if(vglfaker::excludeDisplay(DisplayString(dpy)))
 			dpyhash.add(dpy);
-		else if(strlen(fconfig.vendor)>0)
-			ServerVendor(dpy)=strdup(fconfig.vendor);
+		else if(strlen(fconfig.vendor) > 0)
+			ServerVendor(dpy) = strdup(fconfig.vendor);
 	}
 
 		stoptrace();  prargd(dpy);  closetrace();
@@ -492,15 +492,15 @@ Display *XOpenDisplay(_Xconst char* name)
 Bool XQueryExtension(Display *dpy, _Xconst char *name, int *major_opcode,
 	int *first_event, int *first_error)
 {
-	Bool retval=True;
+	Bool retval = True;
 
 	if(isExcluded(dpy))
 		return _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
 
 		opentrace(XQueryExtension);  prargd(dpy);  prargs(name);  starttrace();
 
-	retval=_XQueryExtension(dpy, name, major_opcode, first_event, first_error);
-	if(!strcmp(name, "GLX")) retval=True;
+	retval = _XQueryExtension(dpy, name, major_opcode, first_event, first_error);
+	if(!strcmp(name, "GLX")) retval = True;
 
 		stoptrace();  if(major_opcode) prargi(*major_opcode);
 		if(first_event) prargi(*first_event);
@@ -534,12 +534,12 @@ char *XServerVendor(Display *dpy)
 
 static void handleEvent(Display *dpy, XEvent *xe)
 {
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 
 	if(isExcluded(dpy))
 		return;
 
-	if(xe && xe->type==ConfigureNotify)
+	if(xe && xe->type == ConfigureNotify)
 	{
 		if(winhash.find(dpy, xe->xconfigure.window, vw))
 		{
@@ -552,25 +552,27 @@ static void handleEvent(Display *dpy, XEvent *xe)
 				stoptrace();  closetrace();
 		}
 	}
-	else if(xe && xe->type==KeyPress)
+	else if(xe && xe->type == KeyPress)
 	{
-		unsigned int state2, state=(xe->xkey.state)&(~(LockMask));
-		state2=fconfig.guimod;
-		if(state2&Mod1Mask)
+		unsigned int state2, state = (xe->xkey.state) & (~(LockMask));
+		state2 = fconfig.guimod;
+		if(state2 & Mod1Mask)
 		{
-			state2&=(~(Mod1Mask));  state2|=Mod2Mask;
+			state2 &= (~(Mod1Mask));  state2 |= Mod2Mask;
 		}
-		if(fconfig.gui && KeycodeToKeysym(dpy, xe->xkey.keycode, 0)==fconfig.guikey
-			&& (state==fconfig.guimod || state==state2) && fconfig_getshmid()!=-1)
+		if(fconfig.gui
+			&& KeycodeToKeysym(dpy, xe->xkey.keycode, 0) == fconfig.guikey
+			&& (state == fconfig.guimod || state == state2)
+			&& fconfig_getshmid() != -1)
 			vglpopup(dpy, fconfig_getshmid());
 	}
-	else if(xe && xe->type==ClientMessage)
+	else if(xe && xe->type == ClientMessage)
 	{
-		XClientMessageEvent *cme=(XClientMessageEvent *)xe;
-		Atom protoAtom=XInternAtom(dpy, "WM_PROTOCOLS", True);
-		Atom deleteAtom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
-		if(protoAtom && deleteAtom && cme->message_type==protoAtom
-			&& cme->data.l[0]==(long)deleteAtom
+		XClientMessageEvent *cme = (XClientMessageEvent *)xe;
+		Atom protoAtom = XInternAtom(dpy, "WM_PROTOCOLS", True);
+		Atom deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+		if(protoAtom && deleteAtom && cme->message_type == protoAtom
+			&& cme->data.l[0] == (long)deleteAtom
 			&& winhash.find(dpy, cme->window, vw))
 			vw->wmDelete();
 	}
@@ -579,10 +581,10 @@ static void handleEvent(Display *dpy, XEvent *xe)
 
 Bool XCheckMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
-	Bool retval=0;
+	Bool retval = 0;
 	TRY();
 
-	if((retval=_XCheckMaskEvent(dpy, event_mask, xe))==True)
+	if((retval = _XCheckMaskEvent(dpy, event_mask, xe)) == True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -592,10 +594,10 @@ Bool XCheckMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 
 Bool XCheckTypedEvent(Display *dpy, int event_type, XEvent *xe)
 {
-	Bool retval=0;
+	Bool retval = 0;
 	TRY();
 
-	if((retval=_XCheckTypedEvent(dpy, event_type, xe))==True)
+	if((retval = _XCheckTypedEvent(dpy, event_type, xe)) == True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -606,10 +608,10 @@ Bool XCheckTypedEvent(Display *dpy, int event_type, XEvent *xe)
 Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type,
 	XEvent *xe)
 {
-	Bool retval=0;
+	Bool retval = 0;
 	TRY();
 
-	if((retval=_XCheckTypedWindowEvent(dpy, win, event_type, xe))==True)
+	if((retval = _XCheckTypedWindowEvent(dpy, win, event_type, xe)) == True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -619,10 +621,10 @@ Bool XCheckTypedWindowEvent(Display *dpy, Window win, int event_type,
 
 Bool XCheckWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 {
-	Bool retval=0;
+	Bool retval = 0;
 	TRY();
 
-	if((retval=_XCheckWindowEvent(dpy, win, event_mask, xe))==True)
+	if((retval = _XCheckWindowEvent(dpy, win, event_mask, xe)) == True)
 		handleEvent(dpy, xe);
 
 	CATCH();
@@ -633,22 +635,22 @@ Bool XCheckWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 	XWindowChanges *values)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 	if(isExcluded(dpy))
 		return _XConfigureWindow(dpy, win, value_mask, values);
 
 		opentrace(XConfigureWindow);  prargd(dpy);  prargx(win);
-		if(values && (value_mask&CWWidth)) { prargi(values->width); }
-		if(values && (value_mask&CWHeight)) { prargi(values->height); }
+		if(values && (value_mask & CWWidth)) { prargi(values->width); }
+		if(values && (value_mask & CWHeight)) { prargi(values->height); }
 		starttrace();
 
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw) && values)
-		vw->resize(value_mask&CWWidth? values->width:0,
-			value_mask&CWHeight?values->height:0);
-	retval=_XConfigureWindow(dpy, win, value_mask, values);
+		vw->resize(value_mask & CWWidth ? values->width : 0,
+			value_mask & CWHeight ? values->height : 0);
+	retval = _XConfigureWindow(dpy, win, value_mask, values);
 
 		stoptrace();  closetrace();
 
@@ -659,10 +661,10 @@ int XConfigureWindow(Display *dpy, Window win, unsigned int value_mask,
 
 int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
-	retval=_XMaskEvent(dpy, event_mask, xe);
+	retval = _XMaskEvent(dpy, event_mask, xe);
 	handleEvent(dpy, xe);
 
 	CATCH();
@@ -673,7 +675,7 @@ int XMaskEvent(Display *dpy, long event_mask, XEvent *xe)
 int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 	unsigned int width, unsigned int height)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -682,9 +684,9 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 		opentrace(XMoveResizeWindow);  prargd(dpy);  prargx(win);  prargi(x);
 		prargi(y);  prargi(width);  prargi(height);  starttrace();
 
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
-	retval=_XMoveResizeWindow(dpy, win, x, y, width, height);
+	retval = _XMoveResizeWindow(dpy, win, x, y, width, height);
 
 		stoptrace();  closetrace();
 
@@ -695,10 +697,10 @@ int XMoveResizeWindow(Display *dpy, Window win, int x, int y,
 
 int XNextEvent(Display *dpy, XEvent *xe)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
-	retval=_XNextEvent(dpy, xe);
+	retval = _XNextEvent(dpy, xe);
 	handleEvent(dpy, xe);
 
 	CATCH();
@@ -709,7 +711,7 @@ int XNextEvent(Display *dpy, XEvent *xe)
 int XResizeWindow(Display *dpy, Window win, unsigned int width,
 	unsigned int height)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
 	if(isExcluded(dpy))
@@ -718,9 +720,9 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 		opentrace(XResizeWindow);  prargd(dpy);  prargx(win);  prargi(width);
 		prargi(height);  starttrace();
 
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, win, vw)) vw->resize(width, height);
-	retval=_XResizeWindow(dpy, win, width, height);
+	retval = _XResizeWindow(dpy, win, width, height);
 
 		stoptrace();  closetrace();
 
@@ -731,10 +733,10 @@ int XResizeWindow(Display *dpy, Window win, unsigned int width,
 
 int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 {
-	int retval=0;
+	int retval = 0;
 	TRY();
 
-	retval=_XWindowEvent(dpy, win, event_mask, xe);
+	retval = _XWindowEvent(dpy, win, event_mask, xe);
 	handleEvent(dpy, xe);
 
 	CATCH();
@@ -742,4 +744,4 @@ int XWindowEvent(Display *dpy, Window win, long event_mask, XEvent *xe)
 }
 
 
-} // extern "C"
+}  // extern "C"

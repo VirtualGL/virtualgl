@@ -26,8 +26,8 @@ using namespace vglserver;
 
 X11Trans::X11Trans(void) : thread(NULL), deadYet(false)
 {
-	for(int i=0; i<NFRAMES; i++) frames[i]=NULL;
-	_newcheck(thread=new Thread(this));
+	for(int i = 0; i < NFRAMES; i++) frames[i] = NULL;
+	_newcheck(thread = new Thread(this));
 	thread->start();
 	profBlit.setName("Blit      ");
 	profTotal.setName("Total     ");
@@ -37,43 +37,43 @@ X11Trans::X11Trans(void) : thread(NULL), deadYet(false)
 
 void X11Trans::run(void)
 {
-	Timer timer, sleepTimer;  double err=0.;  bool first=true;
+	Timer timer, sleepTimer;  double err = 0.;  bool first = true;
 
 	try
 	{
 		while(!deadYet)
 		{
-			FBXFrame *f;  void *ftemp=NULL;
+			FBXFrame *f;  void *ftemp = NULL;
 
-			q.get(&ftemp);  f=(FBXFrame *)ftemp;  if(deadYet) return;
+			q.get(&ftemp);  f = (FBXFrame *)ftemp;  if(deadYet) return;
 			if(!f) _throw("Queue has been shut down");
 			ready.signal();
 			profBlit.startFrame();
 			f->redraw();
-			profBlit.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+			profBlit.endFrame(f->hdr.width * f->hdr.height, 0, 1);
 
-			profTotal.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+			profTotal.endFrame(f->hdr.width * f->hdr.height, 0, 1);
 			profTotal.startFrame();
 
-			if(fconfig.flushdelay>0.)
+			if(fconfig.flushdelay > 0.)
 			{
-				long usec=(long)(fconfig.flushdelay*1000000.);
-				if(usec>0) usleep(usec);
+				long usec = (long)(fconfig.flushdelay * 1000000.);
+				if(usec > 0) usleep(usec);
 			}
-			if(fconfig.fps>0.)
+			if(fconfig.fps > 0.)
 			{
-				double elapsed=timer.elapsed();
-				if(first) first=false;
+				double elapsed = timer.elapsed();
+				if(first) first = false;
 				else
 				{
-					if(elapsed<1./fconfig.fps)
+					if(elapsed < 1. / fconfig.fps)
 					{
 						sleepTimer.start();
-						long usec=(long)((1./fconfig.fps-elapsed-err)*1000000.);
-						if(usec>0) usleep(usec);
-						double sleepTime=sleepTimer.elapsed();
-						err=sleepTime-(1./fconfig.fps-elapsed-err);
-						if(err<0.) err=0.;
+						long usec = (long)((1. / fconfig.fps - elapsed - err) * 1000000.);
+						if(usec > 0) usleep(usec);
+						double sleepTime = sleepTimer.elapsed();
+						err = sleepTime - (1. / fconfig.fps - elapsed - err);
+						if(err < 0.) err = 0.;
 					}
 				}
 				timer.start();
@@ -93,27 +93,27 @@ void X11Trans::run(void)
 
 FBXFrame *X11Trans::getFrame(Display *dpy, Window win, int width, int height)
 {
-	FBXFrame *f=NULL;
+	FBXFrame *f = NULL;
 
 	if(thread) thread->checkError();
 	{
 		CriticalSection::SafeLock l(mutex);
 
-		int index=-1;
-		for(int i=0; i<NFRAMES; i++)
+		int index = -1;
+		for(int i = 0; i < NFRAMES; i++)
 			if(!frames[i] || (frames[i] && frames[i]->isComplete()))
-				index=i;
-		if(index<0) _throw("No free buffers in pool");
+				index = i;
+		if(index < 0) _throw("No free buffers in pool");
 		if(!frames[index])
-			_newcheck(frames[index]=new FBXFrame(dpy, win));
-		f=frames[index];  f->waitUntilComplete();
+			_newcheck(frames[index] = new FBXFrame(dpy, win));
+		f = frames[index];  f->waitUntilComplete();
 	}
 
 	rrframeheader hdr;
 	memset(&hdr, 0, sizeof(hdr));
-	hdr.x=hdr.y=0;
-	hdr.width=hdr.framew=width;
-	hdr.height=hdr.frameh=height;
+	hdr.x = hdr.y = 0;
+	hdr.width = hdr.framew = width;
+	hdr.height = hdr.frameh = height;
 	f->init(hdr);
 	return f;
 }
@@ -122,7 +122,7 @@ FBXFrame *X11Trans::getFrame(Display *dpy, Window win, int width, int height)
 bool X11Trans::isReady(void)
 {
 	if(thread) thread->checkError();
-	return(q.items()<=0);
+	return q.items() <= 0;
 }
 
 
@@ -146,7 +146,7 @@ void X11Trans::sendFrame(FBXFrame *f, bool sync)
 		profBlit.startFrame();
 		f->redraw();
 		f->signalComplete();
-		profBlit.endFrame(f->hdr.width*f->hdr.height, 0, 1);
+		profBlit.endFrame(f->hdr.width * f->hdr.height, 0, 1);
 		ready.signal();
 	}
 	else q.spoil((void *)f, __X11Trans_spoilfct);

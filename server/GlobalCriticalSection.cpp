@@ -16,5 +16,5 @@
 
 using namespace vglfaker;
 
-GlobalCriticalSection *GlobalCriticalSection::instance=NULL;
+GlobalCriticalSection *GlobalCriticalSection::instance = NULL;
 vglutil::CriticalSection GlobalCriticalSection::instanceMutex;

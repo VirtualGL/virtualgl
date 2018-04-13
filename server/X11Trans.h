@@ -32,26 +32,26 @@ namespace vglserver
 
 			virtual ~X11Trans(void)
 			{
-				deadYet=true;
+				deadYet = true;
 				q.release();
-				if(thread) { thread->stop();  delete thread;  thread=NULL; }
-				for(int i=0; i<NFRAMES; i++)
+				if(thread) { thread->stop();  delete thread;  thread = NULL; }
+				for(int i = 0; i < NFRAMES; i++)
 				{
 					if(frames[i]) delete frames[i];
-					frames[i]=NULL;
+					frames[i] = NULL;
 				}
 			}
 
 			bool isReady(void);
 			void synchronize(void);
-			void sendFrame(vglcommon::FBXFrame *, bool sync=false);
+			void sendFrame(vglcommon::FBXFrame *, bool sync = false);
 			void run(void);
 			vglcommon::FBXFrame *getFrame(Display *dpy, Window win, int width,
 				int height);
 
 		private:
 
-			static const int NFRAMES=3;
+			static const int NFRAMES = 3;
 			vglutil::CriticalSection mutex;
 			vglcommon::FBXFrame *frames[NFRAMES];
 			vglutil::Event ready;
@@ -62,4 +62,4 @@ namespace vglserver
 	};
 }
 
-#endif // __X11TRANS_H__
+#endif  // __X11TRANS_H__

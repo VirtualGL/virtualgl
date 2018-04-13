@@ -35,12 +35,12 @@ namespace vglfaker
 	{
 		public:
 
-			static GlobalCriticalSection *getInstance(bool create=true)
+			static GlobalCriticalSection *getInstance(bool create = true)
 			{
-				if(instance==NULL && create)
+				if(instance == NULL && create)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new GlobalCriticalSection;
+					if(instance == NULL) instance = new GlobalCriticalSection;
 				}
 				return instance;
 			}
@@ -53,6 +53,6 @@ namespace vglfaker
 }
 
 
-#define globalMutex (*(vglfaker::GlobalCriticalSection::getInstance()))
+#define globalMutex  (*(vglfaker::GlobalCriticalSection::getInstance()))
 
-#endif // __GLOBALCRITICALSECTION_H__
+#endif  // __GLOBALCRITICALSECTION_H__

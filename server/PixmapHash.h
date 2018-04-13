@@ -19,7 +19,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<char *, Pixmap, VirtualPixmap *>
+#define HASH  Hash<char *, Pixmap, VirtualPixmap *>
 
 // This maps a 2D pixmap ID on the 2D X Server to a VirtualPixmap instance,
 // which encapsulates the corresponding 3D pixmap on the 3D X Server
@@ -32,20 +32,20 @@ namespace vglserver
 
 			static PixmapHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new PixmapHash;
+					if(instance == NULL) instance = new PixmapHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy, Pixmap pm, VirtualPixmap *vpm)
 			{
 				if(!dpy || !pm) _throw("Invalid argument");
-				char *dpystring=strdup(DisplayString(dpy));
+				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, pm, vpm))
 					free(dpystring);
 			}
@@ -59,9 +59,9 @@ namespace vglserver
 			Pixmap reverseFind(GLXDrawable glxd)
 			{
 				if(!glxd) return 0;
-				HashEntry *ptr=NULL;
+				HashEntry *ptr = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
-				if((ptr=HASH::findEntry(NULL, glxd))!=NULL)
+				if((ptr = HASH::findEntry(NULL, glxd)) != NULL)
 					return ptr->key2;
 				return 0;
 			}
@@ -82,16 +82,16 @@ namespace vglserver
 			void detach(HashEntry *entry)
 			{
 				if(entry && entry->key1) free(entry->key1);
-				if(entry && entry->value) delete((VirtualPixmap *)entry->value);
+				if(entry && entry->value) delete ((VirtualPixmap *)entry->value);
 			}
 
 			bool compare(char *key1, Pixmap key2, HashEntry *entry)
 			{
-				VirtualPixmap *vpm=entry->value;
+				VirtualPixmap *vpm = entry->value;
 				return (
 					(key1 && !strcasecmp(key1, entry->key1)
-							&& (key2==entry->key2 || (vpm && key2==vpm->getGLXDrawable())))
-						|| (key1==NULL && key2==vpm->getGLXDrawable())
+						&& (key2 == entry->key2 || (vpm && key2 == vpm->getGLXDrawable())))
+					|| (key1 == NULL && key2 == vpm->getGLXDrawable())
 				);
 			}
 
@@ -103,6 +103,6 @@ namespace vglserver
 #undef HASH
 
 
-#define pmhash (*(PixmapHash::getInstance()))
+#define pmhash  (*(PixmapHash::getInstance()))
 
-#endif // __PIXMAPHASH_H__
+#endif  // __PIXMAPHASH_H__

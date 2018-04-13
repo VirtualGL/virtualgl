@@ -41,7 +41,7 @@ namespace vglutil
 
 			Log()
 			{
-				logFile=stderr;  newFile=false;
+				logFile = stderr;  newFile = false;
 			}
 
 			~Log() {}
@@ -54,6 +54,6 @@ namespace vglutil
 }
 
 
-#define vglout (*(vglutil::Log::getInstance()))
+#define vglout  (*(vglutil::Log::getInstance()))
 
-#endif // __LOG_H__
+#endif  // __LOG_H__

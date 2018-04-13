@@ -1,19 +1,19 @@
 /*
  * Mesa 3-D graphics library
  * Version:  7.1
- * 
+ *
  * Copyright (C) 1999-2007  Brian Paul   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -43,11 +43,8 @@
 
 static float top, bottom;
 
-typedef void (*glXBindTexImageEXT_type)(Display *, GLXDrawable, int,
-	const int *);
-typedef void (*glXReleaseTexImageEXT_type)(Display *, GLXDrawable, int);
-static glXBindTexImageEXT_type glXBindTexImageEXT_func = NULL;
-static glXReleaseTexImageEXT_type glXReleaseTexImageEXT_func = NULL;
+static PFNGLXBINDTEXIMAGEEXTPROC glXBindTexImageEXT_func = NULL;
+static PFNGLXRELEASETEXIMAGEEXTPROC glXReleaseTexImageEXT_func = NULL;
 
 
 static Display *
@@ -79,7 +76,7 @@ OpenDisplay(void)
       fprintf(stderr, "glXGetProcAddress failed!\n");
       exit(1);
    }
-      
+
    return dpy;
 }
 
@@ -232,8 +229,8 @@ CreateWindow(Display *dpy, XVisualInfo *visinfo,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow(dpy, root, 0, 0, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr);
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr);
    if (win) {
       XSizeHints sizehints;
       sizehints.width  = width;
@@ -312,7 +309,7 @@ EventLoop(Display *dpy, Window win)
 {
    GLfloat rot = 0.0;
    int anim = 0;
- 
+
    while (1) {
       if (!anim || XPending(dpy) > 0) {
          XEvent event;

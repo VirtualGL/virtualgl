@@ -24,28 +24,28 @@
 using namespace vglutil;
 using namespace vglcommon;
 
-#define ITER 50
-#define NFRAMES 2
-#define MINW 1
-#define MAXW 400
-#define BORDER 0
-#define NUMWIN 1
+#define ITER  50
+#define NFRAMES  2
+#define MINW  1
+#define MAXW  400
+#define BORDER  0
+#define NUMWIN  1
 
-bool useGL=false, useXV=false, doRgbBench=false, useRGB=false, addLogo=false,
-	anaglyph=false, check=false;
+bool useGL = false, useXV = false, doRgbBench = false, useRGB = false,
+	addLogo = false, anaglyph = false, check = false;
 
 
 void resizeWindow(Display *dpy, Window win, int width, int height, int myID)
 {
 	XWindowAttributes xwa;
 	XGetWindowAttributes(dpy, win, &xwa);
-	if(width!=xwa.width || height!=xwa.height)
+	if(width != xwa.width || height != xwa.height)
 	{
 		XLockDisplay(dpy);
 		XWindowChanges xwc;
-		xwc.x=(width+BORDER*2)*myID;  xwc.y=0;
-		xwc.width=width;  xwc.height=height;
-		XConfigureWindow(dpy, win, CWWidth|CWHeight|CWX|CWY, &xwc);
+		xwc.x = (width + BORDER * 2) * myID;  xwc.y = 0;
+		xwc.width = width;  xwc.height = height;
+		XConfigureWindow(dpy, win, CWWidth | CWHeight | CWX | CWY, &xwc);
 		XFlush(dpy);
 		XSync(dpy, False);
 		XUnlockDisplay(dpy);
@@ -60,22 +60,22 @@ class Blitter : public Runnable
 		Blitter(Display *dpy_, Window win_, int myID_) : findex(0), deadYet(false),
 			dpy(dpy_), win(win_), thread(NULL), myID(myID_)
 		{
-			for(int i=0; i<NFRAMES; i++)
+			for(int i = 0; i < NFRAMES; i++)
 			{
-				if(useGL) { _newcheck(frames[i]=new GLFrame(dpy, win)); }
+				if(useGL) { _newcheck(frames[i] = new GLFrame(dpy, win)); }
 				#ifdef USEXV
-				else if(useXV) { _newcheck(frames[i]=new XVFrame(dpy, win)); }
+				else if(useXV) { _newcheck(frames[i] = new XVFrame(dpy, win)); }
 				#endif
-				else { _newcheck(frames[i]=new FBXFrame(dpy, win)); }
+				else { _newcheck(frames[i] = new FBXFrame(dpy, win)); }
 			}
-			_newcheck(thread=new Thread(this));
+			_newcheck(thread = new Thread(this));
 			thread->start();
 		}
 
 		virtual ~Blitter(void)
 		{
 			shutdown();
-			for(int i=0; i<NFRAMES; i++)
+			for(int i = 0; i < NFRAMES; i++)
 			{
 				if(frames[i])
 				{
@@ -84,15 +84,15 @@ class Blitter : public Runnable
 					else if(frames[i]->isXV) delete (XVFrame *)frames[i];
 					#endif
 					else delete (FBXFrame *)frames[i];
-					frames[i]=NULL;
+					frames[i] = NULL;
 				}
 			}
 		}
 
 		Frame *get(void)
 		{
-			Frame *frame=frames[findex];
-			findex=(findex+1)%NFRAMES;
+			Frame *frame = frames[findex];
+			findex = (findex + 1) % NFRAMES;
 			if(thread) thread->checkError();
 			frame->waitUntilComplete();
 			if(thread) thread->checkError();
@@ -107,14 +107,15 @@ class Blitter : public Runnable
 
 		void shutdown(void)
 		{
-			deadYet=true;
+			deadYet = true;
 			int i;
-			for(i=0; i<NFRAMES; i++) frames[i]->signalReady();  // Release my thread
+			for(i = 0; i < NFRAMES; i++)
+				frames[i]->signalReady();  // Release my thread
 			if(thread)
 			{
-				thread->stop();  delete thread;  thread=NULL;
+				thread->stop();  delete thread;  thread = NULL;
 			}
-			for(i=0; i<NFRAMES; i++)
+			for(i = 0; i < NFRAMES; i++)
 				frames[i]->signalComplete();  // Release Decompressor
 		}
 
@@ -123,14 +124,14 @@ class Blitter : public Runnable
 		void run(void)
 		{
 			Timer timer;
-			double mpixels=0., totalTime=0.;
-			int index=0;  Frame *frame;
+			double mpixels = 0., totalTime = 0.;
+			int index = 0;  Frame *frame;
 			try
 			{
 				while(!deadYet)
 				{
-					frame=frames[index];
-					index=(index+1)%NFRAMES;
+					frame = frames[index];
+					index = (index + 1) % NFRAMES;
 					frame->waitUntilReady();  if(deadYet) break;
 					if(useXV)
 						resizeWindow(dpy, win, frame->hdr.width, frame->hdr.height, myID);
@@ -140,19 +141,19 @@ class Blitter : public Runnable
 					else if(frame->isXV) ((XVFrame *)frame)->redraw();
 					#endif
 					else ((FBXFrame *)frame)->redraw();
-					mpixels+=(double)(frame->hdr.width*frame->hdr.height)/1000000.;
-					totalTime+=timer.elapsed();
+					mpixels += (double)(frame->hdr.width * frame->hdr.height) / 1000000.;
+					totalTime += timer.elapsed();
 					if(check && !checkFrame(frame))
 						_throw("Pixel data is bogus");
 					frame->signalComplete();
 				}
 				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec%s\n",
-					mpixels/totalTime, check? " [PASSED]":"");
+					mpixels / totalTime, check ? " [PASSED]" : "");
 			}
 			catch(Error &e)
 			{
 				if(thread) thread->setError(e);
-				for(int i=0; i<NFRAMES; i++)
+				for(int i = 0; i < NFRAMES; i++)
 					if(frames[i]) frames[i]->signalComplete();
 				throw;
 			}
@@ -161,35 +162,37 @@ class Blitter : public Runnable
 
 		bool checkFrame(Frame *frame)
 		{
-			int i, j, _j, pitch=frame->pitch, seed=frame->hdr.winid;
-			unsigned char *ptr=frame->bits, *pixel;
-			PF pf=pf_get(frame->hdr.dpynum);
-			int maxRGB=(1<<pf.bpc);
+			int i, j, _j, pitch = frame->pitch, seed = frame->hdr.winid;
+			unsigned char *ptr = frame->bits, *pixel;
+			PF pf = pf_get(frame->hdr.dpynum);
+			int maxRGB = (1 << pf.bpc);
 
-			for(_j=0; _j<frame->hdr.height; _j++, ptr+=pitch)
+			for(_j = 0; _j < frame->hdr.height; _j++, ptr += pitch)
 			{
-				j=frame->flags&FRAME_BOTTOMUP? frame->hdr.height-_j-1:_j;
-				for(i=0, pixel=ptr; i<frame->hdr.width; i++, pixel+=frame->pf.size)
+				j = frame->flags & FRAME_BOTTOMUP ? frame->hdr.height - _j - 1 : _j;
+				for(i = 0, pixel = ptr; i < frame->hdr.width;
+					i++, pixel += frame->pf.size)
 				{
 					int r, g, b;
 					frame->pf.getRGB(pixel, &r, &g, &b);
-					if(frame->pf.bpc==10 && pf.bpc!=10)
+					if(frame->pf.bpc == 10 && pf.bpc != 10)
 					{
-						r>>=2;  g>>=2;  b>>=2;
+						r >>= 2;  g >>= 2;  b >>= 2;
 					}
 					if(addLogo && !useXV)
 					{
-						int lw=min(VGLLOGO_WIDTH, frame->hdr.width-1);
-						int lh=min(VGLLOGO_HEIGHT, frame->hdr.height-1);
-						int li=i-(frame->hdr.width-lw-1);
-						int lj=j-(frame->hdr.height-lh-1);
-						if(lw>0 && lh>0 && li>=0 && lj>=0 && li<lw && lj<lh &&
-							vgllogo[lj*VGLLOGO_WIDTH+li])
+						int lw = min(VGLLOGO_WIDTH, frame->hdr.width - 1);
+						int lh = min(VGLLOGO_HEIGHT, frame->hdr.height - 1);
+						int li = i - (frame->hdr.width - lw - 1);
+						int lj = j - (frame->hdr.height - lh - 1);
+						if(lw > 0 && lh > 0 && li >= 0 && lj >= 0 && li < lw && lj < lh
+							&& vgllogo[lj * VGLLOGO_WIDTH + li])
 						{
-							r^=113;  g^=162;  b^=117;
+							r ^= 113;  g ^= 162;  b ^= 117;
 						}
 					}
-					if(r!=(i+seed)%maxRGB || g!=(j+seed)%maxRGB || b!=(i+j+seed)%maxRGB)
+					if(r != (i + seed) % maxRGB || g != (j + seed) % maxRGB
+						|| b != (i + j + seed) % maxRGB)
 						return false;
 				}
 			}
@@ -213,7 +216,7 @@ class Decompressor : public Runnable
 			blitter(blitter_), findex(0), deadYet(false), dpy(dpy_), win(win_),
 			myID(myID_), thread(NULL)
 		{
-			_newcheck(thread=new Thread(this));
+			_newcheck(thread = new Thread(this));
 			thread->start();
 		}
 
@@ -221,8 +224,8 @@ class Decompressor : public Runnable
 
 		CompressedFrame &get(void)
 		{
-			CompressedFrame &cframe=cframes[findex];
-			findex=(findex+1)%NFRAMES;
+			CompressedFrame &cframe = cframes[findex];
+			findex = (findex + 1) % NFRAMES;
 			if(deadYet) return cframe;
 			if(thread) thread->checkError();
 			cframe.waitUntilComplete();
@@ -238,14 +241,15 @@ class Decompressor : public Runnable
 
 		void shutdown(void)
 		{
-			deadYet=true;
+			deadYet = true;
 			int i;
-			for(i=0; i<NFRAMES; i++) cframes[i].signalReady();  // Release my thread
+			for(i = 0; i < NFRAMES; i++)
+				cframes[i].signalReady();  // Release my thread
 			if(thread)
 			{
-				thread->stop();  delete thread;  thread=NULL;
+				thread->stop();  delete thread;  thread = NULL;
 			}
-			for(i=0; i<NFRAMES; i++)
+			for(i = 0; i < NFRAMES; i++)
 				cframes[i].signalComplete();  // Release compressor
 		}
 
@@ -253,21 +257,21 @@ class Decompressor : public Runnable
 
 		void run(void)
 		{
-			int index=0;  Frame *frame=NULL;
+			int index = 0;  Frame *frame = NULL;
 			try
 			{
 				while(!deadYet)
 				{
-					CompressedFrame &cframe=cframes[index];
-					index=(index+1)%NFRAMES;
+					CompressedFrame &cframe = cframes[index];
+					index = (index + 1) % NFRAMES;
 					cframe.waitUntilReady();  if(deadYet) break;
-					frame=blitter->get();  if(deadYet) break;
+					frame = blitter->get();  if(deadYet) break;
 					resizeWindow(dpy, win, cframe.hdr.width, cframe.hdr.height, myID);
-					if(frame->isGL) *((GLFrame *)frame)=cframe;
+					if(frame->isGL) *((GLFrame *)frame) = cframe;
 					#ifdef USEXV
-					else if(frame->isXV) *((XVFrame *)frame)=cframe;
+					else if(frame->isXV) *((XVFrame *)frame) = cframe;
 					#endif
-					else *((FBXFrame *)frame)=cframe;
+					else *((FBXFrame *)frame) = cframe;
 					blitter->put(frame);
 					cframe.signalComplete();
 				}
@@ -275,7 +279,7 @@ class Decompressor : public Runnable
 			catch(Error &e)
 			{
 				if(thread) thread->setError(e);
-				for(int i=0; i<NFRAMES; i++) cframes[i].signalComplete();
+				for(int i = 0; i < NFRAMES; i++) cframes[i].signalComplete();
 				throw;
 			}
 			fprintf(stderr, "Decompressor exiting ...\n");
@@ -297,7 +301,7 @@ class Compressor : public Runnable
 			deadYet(false), thread(NULL), decompressor(decompressor_),
 			blitter(blitter_)
 		{
-			_newcheck(thread=new Thread(this));
+			_newcheck(thread = new Thread(this));
 			thread->start();
 		}
 
@@ -308,20 +312,20 @@ class Compressor : public Runnable
 
 		Frame &get(int width, int height, int pixelFormat)
 		{
-			Frame &frame=frames[findex];
-			findex=(findex+1)%NFRAMES;
+			Frame &frame = frames[findex];
+			findex = (findex + 1) % NFRAMES;
 			if(thread) thread->checkError();
 			frame.waitUntilComplete();
 			if(thread) thread->checkError();
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(rrframeheader));
-			hdr.framew=hdr.width=width+BORDER;
-			hdr.frameh=hdr.height=height+BORDER;
-			hdr.x=hdr.y=BORDER;
-			hdr.qual=80;
-			hdr.subsamp=2;
-			hdr.compress=useRGB? RRCOMP_RGB:RRCOMP_JPEG;
-			if(useXV) hdr.compress=RRCOMP_YUV;
+			hdr.framew = hdr.width = width + BORDER;
+			hdr.frameh = hdr.height = height + BORDER;
+			hdr.x = hdr.y = BORDER;
+			hdr.qual = 80;
+			hdr.subsamp = 2;
+			hdr.compress = useRGB ? RRCOMP_RGB : RRCOMP_JPEG;
+			if(useXV) hdr.compress = RRCOMP_YUV;
 			frame.init(hdr, pixelFormat, 0);
 			return frame;
 		}
@@ -334,14 +338,15 @@ class Compressor : public Runnable
 
 		void shutdown(void)
 		{
-			deadYet=true;
+			deadYet = true;
 			int i;
-			for(i=0; i<NFRAMES; i++) frames[i].signalReady();  // Release my thread
+			for(i = 0; i < NFRAMES; i++)
+				frames[i].signalReady();  // Release my thread
 			if(thread)
 			{
-				thread->stop();  delete thread;  thread=NULL;
+				thread->stop();  delete thread;  thread = NULL;
 			}
-			for(i=0; i<NFRAMES; i++)
+			for(i = 0; i < NFRAMES; i++)
 				frames[i].signalComplete();  // Release main thread
 		}
 
@@ -349,26 +354,26 @@ class Compressor : public Runnable
 
 		void run(void)
 		{
-			int index=0;
+			int index = 0;
 			try
 			{
 				while(!deadYet)
 				{
-					Frame &frame=frames[index];
-					index=(index+1)%NFRAMES;
+					Frame &frame = frames[index];
+					index = (index + 1) % NFRAMES;
 					frame.waitUntilReady();  if(deadYet) break;
 					#ifdef USEXV
 					if(useXV)
 					{
-						XVFrame *xvframe=(XVFrame *)blitter->get();  if(deadYet) break;
-						*xvframe=frame;
+						XVFrame *xvframe = (XVFrame *)blitter->get();  if(deadYet) break;
+						*xvframe = frame;
 						blitter->put(xvframe);
 					}
 					else
 					#endif
 					{
-						CompressedFrame &cframe=decompressor->get();  if(deadYet) break;
-						cframe=frame;
+						CompressedFrame &cframe = decompressor->get();  if(deadYet) break;
+						cframe = frame;
 						decompressor->put(cframe);
 					}
 					frame.signalComplete();
@@ -377,7 +382,7 @@ class Compressor : public Runnable
 			catch(Error &e)
 			{
 				if(thread) thread->setError(e);
-				for(int i=0; i<NFRAMES; i++) frames[i].signalComplete();
+				for(int i = 0; i < NFRAMES; i++) frames[i].signalComplete();
 				throw;
 			}
 			fprintf(stderr, "Compressor exiting ...\n");
@@ -398,51 +403,51 @@ class FrameTest
 		FrameTest(Display *dpy, int myID_) : compressor(NULL), decompressor(NULL),
 			blitter(NULL), myID(myID_)
 		{
-			this->dpy=dpy;
-			_errifnot(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
-				myID*(MINW+BORDER*2), 0, MINW+BORDER, MINW+BORDER, 0,
+			this->dpy = dpy;
+			_errifnot(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy),
+				myID * (MINW + BORDER * 2), 0, MINW + BORDER, MINW + BORDER, 0,
 				WhitePixel(dpy, DefaultScreen(dpy)),
 				BlackPixel(dpy, DefaultScreen(dpy))));
 			_errifnot(XMapRaised(dpy, win));
 
-			_newcheck(blitter=new Blitter(dpy, win, myID));
+			_newcheck(blitter = new Blitter(dpy, win, myID));
 			if(!useXV)
-				_newcheck(decompressor=new Decompressor(blitter, dpy, win, myID));
-			_newcheck(compressor=new Compressor(decompressor, blitter));
+				_newcheck(decompressor = new Decompressor(blitter, dpy, win, myID));
+			_newcheck(compressor = new Compressor(decompressor, blitter));
 		}
 
 		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
 
 		void dotest(int width, int height, int seed, PF &pf)
 		{
-			if(pf.bpc==8)
+			if(pf.bpc == 8)
 			{
-				Frame &frame=compressor->get(width, height, pf.id);
+				Frame &frame = compressor->get(width, height, pf.id);
 				if(anaglyph) makeAnaglyph(frame, seed);
 				else initFrame(frame, seed);
 				// This unit test doesn't use winid, so use it to track the seed.
-				frame.hdr.winid=seed;
+				frame.hdr.winid = seed;
 				// This unit test doesn't use dpynum, so use it to track the source
 				// pixel format.
-				frame.hdr.dpynum=pf.id;
+				frame.hdr.dpynum = pf.id;
 				if(addLogo) frame.addLogo();
 				compressor->put(frame);
 			}
 			else
 			{
-				FBXFrame *frame=(FBXFrame *)blitter->get();
+				FBXFrame *frame = (FBXFrame *)blitter->get();
 				rrframeheader hdr;
 				memset(&hdr, 0, sizeof(rrframeheader));
-				hdr.width=hdr.framew=width;
-				hdr.height=hdr.frameh=height;
+				hdr.width = hdr.framew = width;
+				hdr.height = hdr.frameh = height;
 				frame->init(hdr);
 				if(anaglyph) makeAnaglyph(*frame, seed);
 				else initFrame(*frame, seed);
 				// This unit test doesn't use winid, so use it to track the seed.
-				frame->hdr.winid=seed;
+				frame->hdr.winid = seed;
 				// This unit test doesn't use dpynum, so use it to track the source
 				// pixel format.
-				frame->hdr.dpynum=pf.id;
+				frame->hdr.dpynum = pf.id;
 				if(addLogo) frame->addLogo();
 				resizeWindow(dpy, win, width, height, myID);
 				blitter->put(frame);
@@ -453,15 +458,16 @@ class FrameTest
 
 		void initFrame(Frame &frame, int seed)
 		{
-			int i, j, pitch=frame.pitch;
-			unsigned char *ptr=frame.bits, *pixel;
-			int maxRGB=(1<<frame.pf.bpc);
+			int i, j, pitch = frame.pitch;
+			unsigned char *ptr = frame.bits, *pixel;
+			int maxRGB = (1 << frame.pf.bpc);
 
-			for(j=0; j<frame.hdr.height; j++, ptr+=pitch)
+			for(j = 0; j < frame.hdr.height; j++, ptr += pitch)
 			{
-				for(i=0, pixel=ptr; i<frame.hdr.width; i++, pixel+=frame.pf.size)
-					frame.pf.setRGB(pixel, (i+seed)%maxRGB, (j+seed)%maxRGB,
-						(i+j+seed)%maxRGB);
+				for(i = 0, pixel = ptr; i < frame.hdr.width;
+					i++, pixel += frame.pf.size)
+					frame.pf.setRGB(pixel, (i + seed) % maxRGB, (j + seed) % maxRGB,
+						(i + j + seed) % maxRGB);
 			}
 		}
 
@@ -472,19 +478,22 @@ class FrameTest
 			unsigned char *ptr;
 
 			rFrame.init(frame.hdr, PF_COMP, frame.flags, false);
-			for(j=0, ptr=rFrame.bits; j<frame.hdr.height; j++, ptr+=rFrame.pitch)
+			for(j = 0, ptr = rFrame.bits; j < frame.hdr.height;
+				j++, ptr += rFrame.pitch)
 			{
-				for(i=0; i<frame.hdr.width; i++) ptr[i]=(i+seed)%256;
+				for(i = 0; i < frame.hdr.width; i++) ptr[i] = (i + seed) % 256;
 			}
 			gFrame.init(frame.hdr, PF_COMP, frame.flags, false);
-			for(j=0, ptr=gFrame.bits; j<frame.hdr.height; j++, ptr+=gFrame.pitch)
+			for(j = 0, ptr = gFrame.bits; j < frame.hdr.height;
+				j++, ptr += gFrame.pitch)
 			{
-				memset(ptr, (j+seed)%256, frame.hdr.width);
+				memset(ptr, (j + seed) % 256, frame.hdr.width);
 			}
 			bFrame.init(frame.hdr, PF_COMP, frame.flags, false);
-			for(j=0, ptr=bFrame.bits; j<frame.hdr.height; j++, ptr+=bFrame.pitch)
+			for(j = 0, ptr = bFrame.bits; j < frame.hdr.height;
+				j++, ptr += bFrame.pitch)
 			{
-				for(i=0; i<frame.hdr.width; i++) ptr[i]=(i+j+seed)%256;
+				for(i = 0; i < frame.hdr.width; i++) ptr[i] = (i + j + seed) % 256;
 			}
 
 			frame.makeAnaglyph(rFrame, gFrame, bFrame);
@@ -496,9 +505,9 @@ class FrameTest
 			if(blitter) blitter->shutdown();
 			if(decompressor) decompressor->shutdown();
 			if(compressor) compressor->shutdown();
-			if(blitter) { delete blitter;  blitter=NULL; }
-			if(decompressor) { delete decompressor;  decompressor=NULL; }
-			if(compressor) { delete compressor;  compressor=NULL; }
+			if(blitter) { delete blitter;  blitter = NULL; }
+			if(decompressor) { delete decompressor;  decompressor = NULL; }
+			if(compressor) { delete compressor;  compressor = NULL; }
 		}
 
 		Display *dpy;  Window win;
@@ -509,21 +518,21 @@ class FrameTest
 
 int cmpFrame(unsigned char *buf, int width, int height, Frame &dst)
 {
-	int _i;  int pitch=width*3;
-	bool dstbu=(dst.flags&FRAME_BOTTOMUP);
-	for(int i=0; i<height; i++)
+	int _i;  int pitch = width * 3;
+	bool dstbu = (dst.flags & FRAME_BOTTOMUP);
+	for(int i = 0; i < height; i++)
 	{
-		_i=dstbu? i:height-i-1;
-		for(int j=0; j<height; j++)
+		_i = dstbu ? i : height - i - 1;
+		for(int j = 0; j < height; j++)
 		{
 			int r, g, b;
-			dst.pf.getRGB(&dst.bits[dst.pitch*i+j*dst.pf.size], &r, &g, &b);
-			if(dst.pf.bpc==10)
+			dst.pf.getRGB(&dst.bits[dst.pitch * i + j * dst.pf.size], &r, &g, &b);
+			if(dst.pf.bpc == 10)
 			{
-				r>>=2;  g>>=2;  b>>=2;
+				r >>= 2;  g >>= 2;  b >>= 2;
 			}
-			if(r!=buf[pitch*_i+j*3] || g!=buf[pitch*_i+j*3+1]
-				|| b!=buf[pitch*_i+j*3+2])
+			if(r != buf[pitch * _i + j * 3] || g != buf[pitch * _i + j * 3 + 1]
+				|| b != buf[pitch * _i + j * 3 + 2])
 				return 1;
 		}
 	}
@@ -536,34 +545,34 @@ void rgbBench(char *filename)
 	unsigned char *buf;  int width, height, dstbu;
 	CompressedFrame src;  Frame dst;  int dstformat;
 
-	for(dstformat=0; dstformat<PIXELFORMATS-1; dstformat++)
+	for(dstformat = 0; dstformat < PIXELFORMATS - 1; dstformat++)
 	{
-		PF dstpf=pf_get(dstformat);
-		for(dstbu=0; dstbu<2; dstbu++)
+		PF dstpf = pf_get(dstformat);
+		for(dstbu = 0; dstbu < 2; dstbu++)
 		{
 			if(bmp_load(filename, &buf, &width, 1, &height, PF_RGB,
-				BMPORN_BOTTOMUP)==-1)
+				BMPORN_BOTTOMUP) == -1)
 				_throw(bmp_geterr());
 			rrframeheader hdr;
 			memset(&hdr, 0, sizeof(hdr));
-			hdr.width=hdr.framew=width;
-			hdr.height=hdr.frameh=height;
-			hdr.compress=RRCOMP_RGB;  hdr.size=width*3*height;
+			hdr.width = hdr.framew = width;
+			hdr.height = hdr.frameh = height;
+			hdr.compress = RRCOMP_RGB;  hdr.size = width * 3 * height;
 			src.init(hdr, hdr.flags);
-			memcpy(src.bits, buf, width*3*height);
-			dst.init(hdr, dstpf.id, dstbu? FRAME_BOTTOMUP:0);
-			memset(dst.bits, 0, dst.pitch*dst.hdr.frameh);
+			memcpy(src.bits, buf, width * 3 * height);
+			dst.init(hdr, dstpf.id, dstbu ? FRAME_BOTTOMUP : 0);
+			memset(dst.bits, 0, dst.pitch * dst.hdr.frameh);
 			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", dstpf.name,
-				dstbu? "BOTTOM-UP":"TOP-DOWN");
-			double tStart, tTotal=0.;  int iter=0;
+				dstbu ? "BOTTOM-UP" : "TOP-DOWN");
+			double tStart, tTotal = 0.;  int iter = 0;
 			do
 			{
-				tStart=getTime();
+				tStart = getTime();
 				dst.decompressRGB(src, width, height, false);
-				tTotal+=getTime()-tStart;  iter++;
-			} while(tTotal<1.);
-			fprintf(stderr, "%f Mpixels/sec - ", (double)width*(double)height
-				*(double)iter/1000000./tTotal);
+				tTotal += getTime() - tStart;  iter++;
+			} while(tTotal < 1.);
+			fprintf(stderr, "%f Mpixels/sec - ", (double)width * (double)height *
+				(double)iter / 1000000. / tTotal);
 			if(cmpFrame(buf, width, height, dst))
 				fprintf(stderr, "FAILED!\n");
 			else fprintf(stderr, "Passed.\n");
@@ -593,40 +602,40 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	Display *dpy=NULL;
+	Display *dpy = NULL;
 	FrameTest *test[NUMWIN];
 	int i, j, w, h;
-	char *fileName=NULL;
-	bool verbose=false;
+	char *fileName = NULL;
+	bool verbose = false;
 
-	if(argc>1) for(i=1; i<argc; i++)
+	if(argc > 1) for(i = 1; i < argc; i++)
 	{
 		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
 		else if(!stricmp(argv[i], "-gl"))
 		{
 			fprintf(stderr, "Using OpenGL for blitting ...\n");
-			useGL=true;
+			useGL = true;
 		}
-		else if(!stricmp(argv[i], "-logo")) addLogo=true;
-		else if(!stricmp(argv[i], "-anaglyph")) anaglyph=true;
+		else if(!stricmp(argv[i], "-logo")) addLogo = true;
+		else if(!stricmp(argv[i], "-anaglyph")) anaglyph = true;
 		#ifdef USEXV
 		else if(!stricmp(argv[i], "-xv"))
 		{
 			fprintf(stderr, "Using X Video ...\n");
-			useXV=true;
+			useXV = true;
 		}
 		#endif
 		else if(!stricmp(argv[i], "-rgb"))
 		{
 			fprintf(stderr, "Using RGB encoding ...\n");
-			useRGB=true;
+			useRGB = true;
 		}
-		else if(!stricmp(argv[i], "-rgbbench") && i<argc-1)
+		else if(!stricmp(argv[i], "-rgbbench") && i < argc - 1)
 		{
-			fileName=argv[++i];  doRgbBench=true;
+			fileName = argv[++i];  doRgbBench = true;
 		}
-		else if(!stricmp(argv[i], "-v")) verbose=true;
-		else if(!stricmp(argv[i], "-check")) { check=true;  useRGB=true; }
+		else if(!stricmp(argv[i], "-v")) verbose = true;
+		else if(!stricmp(argv[i], "-check")) { check = true;  useRGB = true; }
 		else usage(argv);
 	}
 
@@ -635,70 +644,71 @@ int main(int argc, char **argv)
 		if(doRgbBench) { rgbBench(fileName);  exit(0); }
 
 		_errifnot(XInitThreads());
-		if(!(dpy=XOpenDisplay(0)))
+		if(!(dpy = XOpenDisplay(0)))
 		{
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
 			exit(1);
 		}
 
-		for(int format=0; format<PIXELFORMATS-1; format++)
+		for(int format = 0; format < PIXELFORMATS - 1; format++)
 		{
-			PF pf=pf_get(format);
+			PF pf = pf_get(format);
 
-			if((useXV || anaglyph || useGL) && pf.bpc!=8) continue;
-			if(DefaultDepth(dpy, DefaultScreen(dpy))!=30 && pf.bpc==10) continue;
+			if((useXV || anaglyph || useGL) && pf.bpc != 8) continue;
+			if(DefaultDepth(dpy, DefaultScreen(dpy)) != 30 && pf.bpc == 10)
+				continue;
 
 			fprintf(stderr, "Pixel format: %s\n", pf.name);
 
-			for(i=0; i<NUMWIN; i++)
+			for(i = 0; i < NUMWIN; i++)
 			{
-				_newcheck(test[i]=new FrameTest(dpy, i));
+				_newcheck(test[i] = new FrameTest(dpy, i));
 			}
 
-			for(w=MINW; w<=MAXW; w+=33)
+			for(w = MINW; w <= MAXW; w += 33)
 			{
-				h=1;
+				h = 1;
 				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-				for(i=0; i<ITER; i++)
+				for(i = 0; i < ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
+					for(j = 0; j < NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}
 
-			for(h=MINW; h<=MAXW; h+=33)
+			for(h = MINW; h <= MAXW; h += 33)
 			{
-				w=1;
+				w = 1;
 				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-				for(i=0; i<ITER; i++)
+				for(i = 0; i < ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
+					for(j = 0; j < NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}
 
-			for(w=MINW; w<=MAXW; w+=33)
+			for(w = MINW; w <= MAXW; w += 33)
 			{
-				h=w;
+				h = w;
 				if(verbose) fprintf(stderr, "%.4d x %.4d: ", w, h);
-				for(i=0; i<ITER; i++)
+				for(i = 0; i < ITER; i++)
 				{
 					if(verbose) fprintf(stderr, ".");
-					for(j=0; j<NUMWIN; j++) test[j]->dotest(w, h, i, pf);
+					for(j = 0; j < NUMWIN; j++) test[j]->dotest(w, h, i, pf);
 				}
 				if(verbose) fprintf(stderr, "\n");
 			}
 
-			for(i=0; i<NUMWIN; i++)
+			for(i = 0; i < NUMWIN; i++)
 			{
 				delete test[i];
 			}
 			fprintf(stderr, "\n");
 		}
 	}
-	catch (Error &e)
+	catch(Error &e)
 	{
 		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
 		exit(1);

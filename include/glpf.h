@@ -19,7 +19,7 @@
 #include <GL/gl.h>
 
 
-static const GLenum pf_glformat[PIXELFORMATS]=
+static const GLenum pf_glformat[PIXELFORMATS] =
 {
 	GL_RGB,       /* PF_RGB */
 	GL_RGBA,      /* PF_RGBX */
@@ -39,7 +39,7 @@ static const GLenum pf_glformat[PIXELFORMATS]=
 };
 
 
-static const GLenum pf_gldatatype[PIXELFORMATS]=
+static const GLenum pf_gldatatype[PIXELFORMATS] =
 {
 	GL_UNSIGNED_BYTE,                /* PF_RGB */
 	GL_UNSIGNED_BYTE,                /* PF_RGBX */
@@ -74,4 +74,4 @@ static const GLenum pf_gldatatype[PIXELFORMATS]=
 	GL_UNSIGNED_BYTE                 /* PF_COMP */
 };
 
-#endif /* __GLPF_H__ */
+#endif  /* __GLPF_H__ */

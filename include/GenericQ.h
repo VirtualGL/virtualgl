@@ -33,7 +33,7 @@ namespace vglutil
 			~GenericQ(void);
 			void add(void *item);
 			void spoil(void *item, SpoilCallback spoilCallback);
-			void get(void **item, bool nonBlocking=false);
+			void get(void **item, bool nonBlocking = false);
 			void release(void);
 			int items(void);
 
@@ -51,4 +51,4 @@ namespace vglutil
 	};
 }
 
-#endif // __GENERICQ_H__
+#endif  // __GENERICQ_H__

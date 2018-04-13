@@ -19,16 +19,16 @@
 using namespace vglutil;
 
 
-Log *Log::instance=NULL;
+Log *Log::instance = NULL;
 CriticalSection Log::mutex;
 
 
 Log *Log::getInstance(void)
 {
-	if(instance==NULL)
+	if(instance == NULL)
 	{
 		CriticalSection::SafeLock l(mutex);
-		if(instance==NULL) instance=new Log;
+		if(instance == NULL) instance = new Log;
 	}
 	return instance;
 }
@@ -41,26 +41,26 @@ void Log::logTo(FILE *logFile_)
 	{
 		if(newFile)
 		{
-			fclose(logFile);  newFile=false;
+			fclose(logFile);  newFile = false;
 		}
-		logFile=logFile_;
+		logFile = logFile_;
 	}
 }
 
 
 void Log::logTo(char *logFileName)
 {
-	FILE *logFile_=NULL;
+	FILE *logFile_ = NULL;
 	CriticalSection::SafeLock l(mutex);
 	if(logFileName)
 	{
 		if(newFile)
 		{
-			fclose(logFile);  newFile=false;
+			fclose(logFile);  newFile = false;
 		}
-		if((logFile_=fopen(logFileName, "w"))!=NULL)
+		if((logFile_ = fopen(logFileName, "w")) != NULL)
 		{
-			logFile=logFile_;  newFile=true;
+			logFile = logFile_;  newFile = true;
 		}
 	}
 }

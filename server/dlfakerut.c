@@ -21,54 +21,54 @@
 #include <ctype.h>
 
 
-#define _throw(m) { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define _throw(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
 
 
-typedef XVisualInfo* (*_glXChooseVisualType)(Display *, int, int *);
-_glXChooseVisualType _glXChooseVisual=NULL;
+typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
+_glXChooseVisualType _glXChooseVisual = NULL;
 
 typedef GLXContext (*_glXCreateContextType)(Display *, XVisualInfo *,
 	GLXContext, Bool);
-_glXCreateContextType _glXCreateContext=NULL;
+_glXCreateContextType _glXCreateContext = NULL;
 
 typedef GLXContext (*_glXDestroyContextType)(Display *, GLXContext);
-_glXDestroyContextType _glXDestroyContext=NULL;
+_glXDestroyContextType _glXDestroyContext = NULL;
 
-typedef void (*(*_glXGetProcAddressARBType)(const GLubyte*))(void);
-_glXGetProcAddressARBType _glXGetProcAddressARB=NULL;
+typedef void (*(*_glXGetProcAddressARBType)(const GLubyte *))(void);
+_glXGetProcAddressARBType _glXGetProcAddressARB = NULL;
 
 typedef Bool (*_glXMakeCurrentType)(Display *, GLXDrawable, GLXContext);
-_glXMakeCurrentType _glXMakeCurrent=NULL;
+_glXMakeCurrentType _glXMakeCurrent = NULL;
 
 typedef void (*_glXSwapBuffersType)(Display *, GLXDrawable);
-_glXSwapBuffersType _glXSwapBuffers=NULL;
+_glXSwapBuffersType _glXSwapBuffers = NULL;
 
 typedef void (*_glClearType)(GLbitfield);
-_glClearType _glClear=NULL;
+_glClearType _glClear = NULL;
 
 typedef void (*_glClearColorType)(GLclampf, GLclampf, GLclampf, GLclampf);
-_glClearColorType _glClearColor=NULL;
+_glClearColorType _glClearColor = NULL;
 
-void *gldllhnd=NULL;
+void *gldllhnd = NULL;
 
-#define LSYM(s)  \
-	dlerror();  \
-	_##s=(_##s##Type)dlsym(gldllhnd, #s);  \
-	err=dlerror();  \
-	if(err) _throw(err)  \
-	else if(!_##s) _throw("Could not load symbol "#s)
+#define LSYM(s) \
+	dlerror(); \
+	_##s = (_##s##Type)dlsym(gldllhnd, #s); \
+	err = dlerror(); \
+	if(err) _throw(err) \
+	else if(!_##s) _throw("Could not load symbol " #s)
 
 void loadSymbols1(char *prefix)
 {
-	const char *err=NULL;
+	const char *err = NULL;
 	if(prefix)
 	{
 		char temps[256];
 		snprintf(temps, 255, "%s/libGL.so", prefix);
-		gldllhnd=dlopen(temps, RTLD_NOW);
+		gldllhnd = dlopen(temps, RTLD_NOW);
 	}
-	else gldllhnd=dlopen("libGL.so", RTLD_NOW);
-	err=dlerror();
+	else gldllhnd = dlopen("libGL.so", RTLD_NOW);
+	err = dlerror();
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libGL")
 
@@ -91,13 +91,13 @@ void unloadSymbols1(void)
 }
 
 
-#define LSYM2(s)  \
-	_##s=(_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s);  \
-	if(!_##s) _throw("Could not load symbol "#s)
+#define LSYM2(s) \
+	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
+	if(!_##s) _throw("Could not load symbol " #s)
 
 void loadSymbols2(void)
 {
-	const char *err=NULL;
+	const char *err = NULL;
 
 	LSYM(glXGetProcAddressARB);
 	LSYM2(glXChooseVisual);
@@ -118,22 +118,22 @@ void loadSymbols2(void)
    This will fail on VGL 2.1.2 and prior */
 
 typedef void (*_myTestFunctionType)(void);
-_myTestFunctionType _myTestFunction=NULL;
+_myTestFunctionType _myTestFunction = NULL;
 
 void nameMatchTest(void)
 {
-	const char *err=NULL;
+	const char *err = NULL;
 
 	fprintf(stderr, "dlopen() name matching test:\n");
-	gldllhnd=dlopen("libGLdlfakerut.so", RTLD_NOW);
-	err=dlerror();
+	gldllhnd = dlopen("libGLdlfakerut.so", RTLD_NOW);
+	err = dlerror();
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libGLdlfakerut")
 
 	LSYM(myTestFunction);
 	_myTestFunction();
 	dlclose(gldllhnd);
-	gldllhnd=NULL;
+	gldllhnd = NULL;
 	return;
 
 	bailout:
@@ -148,21 +148,21 @@ void nameMatchTest(void)
 /* Test whether libdlfaker.so properly circumvents RTLD_DEEPBIND */
 
 typedef void (*_testType)(const char *);
-_testType _test=NULL;
+_testType _test = NULL;
 
 void deepBindTest(void)
 {
-	const char *err=NULL;
+	const char *err = NULL;
 
-	gldllhnd=dlopen("libdeepbindtest.so", RTLD_NOW|RTLD_DEEPBIND);
-	err=dlerror();
+	gldllhnd = dlopen("libdeepbindtest.so", RTLD_NOW | RTLD_DEEPBIND);
+	err = dlerror();
 	if(err) _throw(err)
 	else if(!gldllhnd) _throw("Could not open libdlfakerut")
 
 	LSYM(test);
 	_test("RTLD_DEEPBIND test");
 	dlclose(gldllhnd);
-	gldllhnd=NULL;
+	gldllhnd = NULL;
 	return;
 
 	bailout:
@@ -173,25 +173,25 @@ void deepBindTest(void)
 
 int main(int argc, char **argv)
 {
-	char *env, *prefix=NULL;
+	char *env, *prefix = NULL;
 
-	if(argc>2 && !strcasecmp(argv[1], "--prefix"))
+	if(argc > 2 && !strcasecmp(argv[1], "--prefix"))
 	{
-		prefix=argv[2];
+		prefix = argv[2];
 		fprintf(stderr, "prefix = %s\n", prefix);
 	}
 
-	if(putenv((char *)"VGL_AUTOTEST=1")==-1
-		|| putenv((char *)"VGL_SPOIL=0")==-1)
+	if(putenv((char *)"VGL_AUTOTEST=1") == -1
+		|| putenv((char *)"VGL_SPOIL=0") == -1)
 		_throw("putenv() failed!\n");
 
-	env=getenv("LD_PRELOAD");
-	fprintf(stderr, "LD_PRELOAD = %s\n", env? env:"(NULL)");
+	env = getenv("LD_PRELOAD");
+	fprintf(stderr, "LD_PRELOAD = %s\n", env ? env : "(NULL)");
 	#ifdef sun
-	env=getenv("LD_PRELOAD_32");
-	fprintf(stderr, "LD_PRELOAD_32 = %s\n", env? env:"(NULL)");
-	env=getenv("LD_PRELOAD_64");
-	fprintf(stderr, "LD_PRELOAD_64 = %s\n", env? env:"(NULL)");
+	env = getenv("LD_PRELOAD_32");
+	fprintf(stderr, "LD_PRELOAD_32 = %s\n", env ? env : "(NULL)");
+	env = getenv("LD_PRELOAD_64");
+	fprintf(stderr, "LD_PRELOAD_64 = %s\n", env ? env : "(NULL)");
 	#endif
 
 	fprintf(stderr, "\n");

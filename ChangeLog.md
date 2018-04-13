@@ -33,6 +33,25 @@ works with the X11 Transport, since other transports do not (yet) have the
 ability to transmit and display 30-bit pixels.  Furthermore, anaglyphic stereo
 does not work with this feature.
 
+5. Worked around a segfault in Mayavi2 (and possibly other VTK applications)
+when using nVidia's proprietary drivers.  VirtualGL's implementation of
+`glXGetVisualFromFBConfig()` always returned a TrueColor X visual, regardless
+of the GLXFBConfig passed to it.  From VirtualGL's point of view, this was
+correct behavior, because VGL always converts the rendered 3D pixels to
+TrueColor when reading them back.  However, some use cases in VTK assume that
+there is a 1:1 correspondence between X visuals and GLX FB configs, which is
+not the case when using VirtualGL.  Thus, VGL's implementation of
+`glXGetVisualFromFBConfig()` was causing VTK's visual matching algorithm to
+always select the last FB config in the list, and when using nVidia hardware,
+that FB config usually describes an esoteric floating point pixel format.  When
+VTK subsequently attempted to create a context with this FB config and make
+that context current, VirtualGL's internal call to `glXMakeContextCurrent()`
+failed.  VGL passed this failure status back to VTK in the return value of
+`glXMakeCurrent()`, but VTK ignored it, and the lack of a valid context led to
+a subsequent segfault when VTK tried to call `glBlendFuncSeparate()`.
+VirtualGL's implementation of `glXGetVisualFromFBConfig()` now returns NULL
+unless the FB config has a corresponding visual on the 3D X server.
+
 
 2.5.2
 =====
@@ -1316,7 +1335,7 @@ Configuration dialog.
 13. The Mac client is now fully documented.
 
 14. Included mediaLib Huffman encoding optimizations contributed by Sun.  This
-boosts the performance of VirtualGL on Solaris systems by as much as 30%.\
+boosts the performance of VirtualGL on Solaris systems by as much as 30%.
 This, in combination with mediaLib 2.5, should allow the Solaris/x86 version of
 VirtualGL to perform as well as the Linux version, all else being equal.
 

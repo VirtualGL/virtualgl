@@ -17,7 +17,7 @@
 
 using namespace vglserver;
 
-XCBConnHash *XCBConnHash::instance=NULL;
+XCBConnHash *XCBConnHash::instance = NULL;
 vglutil::CriticalSection XCBConnHash::instanceMutex;
 
 #endif

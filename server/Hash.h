@@ -41,15 +41,15 @@ namespace vglserver
 			void kill(void)
 			{
 				vglutil::CriticalSection::SafeLock l(mutex);
-				while(start!=NULL) killEntry(start);
+				while(start != NULL) killEntry(start);
 			}
 
 		protected:
 
 			Hash(void)
 			{
-				start=end=NULL;
-				count=0;
+				start = end = NULL;
+				count = 0;
 			}
 
 			virtual ~Hash(void)
@@ -58,52 +58,52 @@ namespace vglserver
 			}
 
 			int add(HashKeyType1 key1, HashKeyType2 key2, HashValueType value,
-				bool useRef=false)
+				bool useRef = false)
 			{
-				HashEntry *entry=NULL;
+				HashEntry *entry = NULL;
 
 				if(!key1) _throw("Invalid argument");
 				vglutil::CriticalSection::SafeLock l(mutex);
 
-				if((entry=findEntry(key1, key2))!=NULL)
+				if((entry = findEntry(key1, key2)) != NULL)
 				{
-					if(value) entry->value=value;
+					if(value) entry->value = value;
 					if(useRef) entry->refCount++;
 					return 0;
 				}
-				_newcheck(entry=new HashEntry);
+				_newcheck(entry = new HashEntry);
 				memset(entry, 0, sizeof(HashEntry));
-				entry->prev=end;  if(end) end->next=entry;
-				if(!start) start=entry;
-				end=entry;
-				end->key1=key1;  end->key2=key2;  end->value=value;
-				if(useRef) end->refCount=1;
+				entry->prev = end;  if(end) end->next = entry;
+				if(!start) start = entry;
+				end = entry;
+				end->key1 = key1;  end->key2 = key2;  end->value = value;
+				if(useRef) end->refCount = 1;
 				count++;
 				return 1;
 			}
 
 			HashValueType find(HashKeyType1 key1, HashKeyType2 key2)
 			{
-				HashEntry *entry=NULL;
+				HashEntry *entry = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
 
-				if((entry=findEntry(key1, key2))!=NULL)
+				if((entry = findEntry(key1, key2)) != NULL)
 				{
-					if(!entry->value) entry->value=attach(key1, key2);
+					if(!entry->value) entry->value = attach(key1, key2);
 					return entry->value;
 				}
 				return (HashValueType)0;
 			}
 
-			void remove(HashKeyType1 key1, HashKeyType2 key2, bool useRef=false)
+			void remove(HashKeyType1 key1, HashKeyType2 key2, bool useRef = false)
 			{
-				HashEntry *entry=NULL;
+				HashEntry *entry = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
 
-				if((entry=findEntry(key1, key2))!=NULL)
+				if((entry = findEntry(key1, key2)) != NULL)
 				{
-					if(useRef && entry->refCount>0) entry->refCount--;
-					if(!useRef || entry->refCount<=0) killEntry(entry);
+					if(useRef && entry->refCount > 0) entry->refCount--;
+					if(!useRef || entry->refCount <= 0) killEntry(entry);
 				}
 			}
 
@@ -111,18 +111,18 @@ namespace vglserver
 
 			HashEntry *findEntry(HashKeyType1 key1, HashKeyType2 key2)
 			{
-				HashEntry *entry=NULL;
+				HashEntry *entry = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
 
-				entry=start;
-				while(entry!=NULL)
+				entry = start;
+				while(entry != NULL)
 				{
-					if((entry->key1==key1 && entry->key2==key2)
+					if((entry->key1 == key1 && entry->key2 == key2)
 						|| compare(key1, key2, entry))
 					{
 						return entry;
 					}
-					entry=entry->next;
+					entry = entry->next;
 				}
 				return NULL;
 			}
@@ -131,10 +131,10 @@ namespace vglserver
 			{
 				vglutil::CriticalSection::SafeLock l(mutex);
 
-				if(entry->prev) entry->prev->next=entry->next;
-				if(entry->next) entry->next->prev=entry->prev;
-				if(entry==start) start=entry->next;
-				if(entry==end) end=entry->prev;
+				if(entry->prev) entry->prev->next = entry->next;
+				if(entry->next) entry->next->prev = entry->prev;
+				if(entry == start) start = entry->next;
+				if(entry == end) end = entry->prev;
 				if(entry->value) detach(entry);
 				memset(entry, 0, sizeof(HashEntry));
 				delete entry;
@@ -146,9 +146,9 @@ namespace vglserver
 				return 0;
 			}
 
-			virtual void detach(HashEntry *entry)=0;
+			virtual void detach(HashEntry *entry) = 0;
 			virtual bool compare(HashKeyType1 key1, HashKeyType2 key2,
-				HashEntry *entry)=0;
+				HashEntry *entry) = 0;
 
 			int count;
 			HashEntry *start, *end;
@@ -156,4 +156,4 @@ namespace vglserver
 	};
 }
 
-#endif // __HASH_H__
+#endif  // __HASH_H__

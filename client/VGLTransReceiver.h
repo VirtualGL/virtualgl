@@ -22,7 +22,7 @@
 #include "Error.h"
 
 
-#define MAXWIN 1024
+#define MAXWIN  1024
 
 
 namespace vglclient
@@ -56,9 +56,9 @@ namespace vglclient
 					drawMethod(drawMethod_), nwin(0), socket(socket_), thread(NULL),
 					remoteName(NULL)
 				{
-					memset(windows, 0, sizeof(ClientWin *)*MAXWIN);
-					if(socket) remoteName=socket->remoteName();
-					_newcheck(thread=new vglutil::Thread(this));
+					memset(windows, 0, sizeof(ClientWin *) * MAXWIN);
+					if(socket) remoteName = socket->remoteName();
+					_newcheck(thread = new vglutil::Thread(this));
 					thread->start();
 				}
 
@@ -67,15 +67,15 @@ namespace vglclient
 					int i;
 
 					winMutex.lock(false);
-					for(i=0; i<nwin; i++)
+					for(i = 0; i < nwin; i++)
 					{
-						if(windows[i]) { delete windows[i];  windows[i]=NULL; }
+						if(windows[i]) { delete windows[i];  windows[i] = NULL; }
 					}
-					nwin=0;
+					nwin = 0;
 					winMutex.unlock(false);
 					if(!remoteName) vglout.PRINTLN("-- Disconnecting\n");
 					else vglout.PRINTLN("-- Disconnecting %s", remoteName);
-					if(socket) { delete socket;  socket=NULL; }
+					if(socket) { delete socket;  socket = NULL; }
 				}
 
 				void send(char *buf, int len);
@@ -88,7 +88,7 @@ namespace vglclient
 				int drawMethod;
 				ClientWin *windows[MAXWIN];
 				int nwin;
-				ClientWin *addWindow(int dpynum, Window win, bool stereo=false);
+				ClientWin *addWindow(int dpynum, Window win, bool stereo = false);
 				void deleteWindow(ClientWin *win);
 				vglutil::CriticalSection winMutex;
 				vglutil::Socket *socket;
@@ -98,4 +98,4 @@ namespace vglclient
 	};
 }
 
-#endif // __VGLTRANSRECEIVER_H__
+#endif  // __VGLTRANSRECEIVER_H__

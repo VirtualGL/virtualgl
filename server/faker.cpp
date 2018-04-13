@@ -33,11 +33,10 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-namespace vglfaker
-{
+namespace vglfaker {
 
-Display *dpy3D=NULL;
-bool deadYet=false;
+Display *dpy3D = NULL;
+bool deadYet = false;
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
@@ -62,10 +61,10 @@ void safeExit(int retcode)
 	bool shutdown;
 
 	globalMutex.lock(false);
-	shutdown=deadYet;
+	shutdown = deadYet;
 	if(!deadYet)
 	{
-		deadYet=true;
+		deadYet = true;
 		cleanup();
 		fconfig_deleteinstance();
 	}
@@ -81,11 +80,11 @@ class GlobalCleanup
 
 		~GlobalCleanup()
 		{
-			vglfaker::GlobalCriticalSection *gcs=
+			vglfaker::GlobalCriticalSection *gcs =
 				vglfaker::GlobalCriticalSection::getInstance(false);
 			if(gcs) gcs->lock(false);
 			fconfig_deleteinstance();
-			deadYet=true;
+			deadYet = true;
 			if(gcs) gcs->unlock(false);
 		}
 };
@@ -98,7 +97,7 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 {
 	char temps[256];
 
-	temps[0]=0;
+	temps[0] = 0;
 	XGetErrorText(dpy, xe->error_code, temps, 255);
 	vglout.PRINT("[VGL] WARNING: X11 error trapped\n[VGL]    Error:  %s\n[VGL]    XID:    0x%.8x\n",
 		temps, xe->resourceid);
@@ -110,19 +109,19 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 
 void init(void)
 {
-	static int init=0;
+	static int init = 0;
 
 	if(init) return;
 	GlobalCriticalSection::SafeLock l(globalMutex);
 	if(init) return;
-	init=1;
+	init = 1;
 
 	fconfig_reloadenv();
-	if(strlen(fconfig.log)>0) vglout.logTo(fconfig.log);
+	if(strlen(fconfig.log) > 0) vglout.logTo(fconfig.log);
 
 	if(fconfig.verbose)
-		vglout.println("[VGL] %s v%s %d-bit (Build %s)",
-			__APPNAME, __VERSION, (int)sizeof(size_t)*8, __BUILD);
+		vglout.println("[VGL] %s v%s %d-bit (Build %s)", __APPNAME, __VERSION,
+			(int)sizeof(size_t) * 8, __BUILD);
 
 	if(getenv("VGL_DEBUG"))
 	{
@@ -144,8 +143,9 @@ Display *init3D(void)
 		{
 			if(fconfig.verbose)
 				vglout.println("[VGL] Opening connection to 3D X server %s",
-					strlen(fconfig.localdpystring)>0? fconfig.localdpystring:"(default)");
-			if((dpy3D=_XOpenDisplay(fconfig.localdpystring))==NULL)
+					strlen(fconfig.localdpystring) > 0 ?
+					fconfig.localdpystring : "(default)");
+			if((dpy3D = _XOpenDisplay(fconfig.localdpystring)) == NULL)
 			{
 				vglout.print("[VGL] ERROR: Could not open display %s.\n",
 					fconfig.localdpystring);
@@ -163,15 +163,15 @@ bool excludeDisplay(char *name)
 {
 	fconfig_reloadenv();
 
-	char *dpyList=strdup(fconfig.excludeddpys);
-	char *excluded=strtok(dpyList, " \t,");
+	char *dpyList = strdup(fconfig.excludeddpys);
+	char *excluded = strtok(dpyList, " \t,");
 	while(excluded)
 	{
 		if(!strcasecmp(name, excluded))
 		{
 			free(dpyList);  return true;
 		}
-		excluded=strtok(NULL, " \t,");
+		excluded = strtok(NULL, " \t,");
 	}
 	free(dpyList);
 	return false;
@@ -194,8 +194,8 @@ void *_vgl_dlopen(const char *file, int mode)
 		if(!__dlopen)
 		{
 			dlerror();  // Clear error state
-			__dlopen=(_dlopenType)dlsym(RTLD_NEXT, "dlopen");
-			char *err=dlerror();
+			__dlopen = (_dlopenType)dlsym(RTLD_NEXT, "dlopen");
+			char *err = dlerror();
 			if(!__dlopen)
 			{
 				vglout.print("[VGL] ERROR: Could not load function \"dlopen\"\n");

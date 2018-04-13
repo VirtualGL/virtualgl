@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2017 D. R. Commander
+ * Copyright (C)2009, 2011-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,11 +34,11 @@ using namespace vglutil;
 using namespace vglserver;
 
 
-#define dpy3DIsCurrent() (_glXGetCurrentDisplay()==_dpy3D)
+#define dpy3DIsCurrent()  (_glXGetCurrentDisplay() == _dpy3D)
 
 
 // This emulates the behavior of the nVidia drivers
-#define VGL_MAX_SWAP_INTERVAL 8
+#define VGL_MAX_SWAP_INTERVAL  8
 
 
 // Applications will sometimes use X11 functions to obtain a list of 2D X
@@ -48,79 +48,81 @@ using namespace vglserver;
 // FB config is already hashed to the visual, we have to create one using
 // default attributes.
 
-#define testattrib(attrib, index, min, max) {  \
-	if(!strcmp(argv[i], #attrib) && i<argc-1) {  \
-		int temp=atoi(argv[++i]);  \
-		if(temp>=min && temp<=max) {  \
-			attribs[index++]=attrib;  \
-			attribs[index++]=temp;  \
-		}  \
-	}  \
+#define testattrib(attrib, index, min, max) \
+{ \
+	if(!strcmp(argv[i], #attrib) && i < argc - 1) \
+	{ \
+		int temp = atoi(argv[++i]); \
+		if(temp >= min && temp <= max) \
+		{ \
+			attribs[index++] = attrib; \
+			attribs[index++] = temp; \
+		} \
+	} \
 }
 
 static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
-	bool preferSingleBuffer=false, bool pixmap=false)
+	bool preferSingleBuffer = false, bool pixmap = false)
 {
-	GLXFBConfig config=0, *configs=NULL;  int n=0;
+	GLXFBConfig config = 0, *configs = NULL;  int n = 0;
 
 	if(!dpy || !vis) return 0;
-	if(!(config=vishash.getConfig(dpy, vis))
-		&& !(config=vishash.mostRecentConfig(dpy, vis)))
+	if(!(config = vishash.getConfig(dpy, vis))
+		&& !(config = vishash.mostRecentConfig(dpy, vis)))
 	{
 		// Punt.  We can't figure out where the visual came from
-		int defaultAttribs[]={GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
+		int defaultAttribs[] = { GLX_DOUBLEBUFFER, 1, GLX_RED_SIZE, 8,
 			GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_RENDER_TYPE, GLX_RGBA_BIT,
-			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
-			GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1,
-			GLX_STENCIL_SIZE, 8, None};
+			GLX_STEREO, 0, GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, GLX_X_VISUAL_TYPE,
+			GLX_TRUE_COLOR, GLX_DEPTH_SIZE, 1, GLX_STENCIL_SIZE, 8, None };
 		int attribs[256];
 
-		if(pixmap || fconfig.drawable==RRDRAWABLE_PIXMAP)
-			defaultAttribs[13]=GLX_PIXMAP_BIT|GLX_WINDOW_BIT;
-		if(vis->depth==30)
+		if(pixmap || fconfig.drawable == RRDRAWABLE_PIXMAP)
+			defaultAttribs[13] = GLX_PIXMAP_BIT | GLX_WINDOW_BIT;
+		if(vis->depth == 30)
 		{
-			defaultAttribs[3]=defaultAttribs[5]=defaultAttribs[7]=10;
+			defaultAttribs[3] = defaultAttribs[5] = defaultAttribs[7] = 10;
 		}
 		memset(attribs, 0, sizeof(attribs));
 		memcpy(attribs, defaultAttribs, sizeof(defaultAttribs));
 		if(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
 			GLX_STEREO))
-			attribs[11]=1;
+			attribs[11] = 1;
 
-		if(vis->c_class==DirectColor) attribs[15]=GLX_DIRECT_COLOR;
+		if(vis->c_class == DirectColor) attribs[15] = GLX_DIRECT_COLOR;
 
 		// If we're creating a GLX pixmap and we can't determine an exact FB config
 		// to map to the visual, then we will make the pixmap single-buffered.
-		if(preferSingleBuffer) attribs[1]=0;
+		if(preferSingleBuffer) attribs[1] = 0;
 
 		// Allow the default FB config attribs to be manually specified.  This is
 		// necessary to support apps that implement their own visual selection
 		// mechanisms.  Since those apps don't use glXChooseVisual(), VirtualGL has
 		// no idea what 3D visual attributes they need, and thus it is necessary
 		// to give it a hint using this environment variable.
-		if(strlen(fconfig.defaultfbconfig)>0)
+		if(strlen(fconfig.defaultfbconfig) > 0)
 		{
-			char *str=strdup(fconfig.defaultfbconfig);
+			char *str = strdup(fconfig.defaultfbconfig);
 			if(!str) _throwunix();
-			char *argv[512];  int argc=0;
-			char *arg=strtok(str, " \t,");
-			while(arg && argc<512)
+			char *argv[512];  int argc = 0;
+			char *arg = strtok(str, " \t,");
+			while(arg && argc < 512)
 			{
-				argv[argc]=arg;  argc++;
-				arg=strtok(NULL, " \t,");
+				argv[argc] = arg;  argc++;
+				arg = strtok(NULL, " \t,");
 			}
-			for(int i=0, j=20; i<argc && j<256; i++)
+			for(int i = 0, j = 20; i < argc && j < 256; i++)
 			{
 				int index;
-				index=2;
+				index = 2;
 				testattrib(GLX_RED_SIZE, index, 0, INT_MAX);
-				index=4;
+				index = 4;
 				testattrib(GLX_GREEN_SIZE, index, 0, INT_MAX);
-				index=6;
+				index = 6;
 				testattrib(GLX_BLUE_SIZE, index, 0, INT_MAX);
-				index=16;
+				index = 16;
 				testattrib(GLX_DEPTH_SIZE, index, 0, INT_MAX);
-				index=18;
+				index = 18;
 				testattrib(GLX_STENCIL_SIZE, index, 0, INT_MAX);
 				testattrib(GLX_ALPHA_SIZE, j, 0, INT_MAX);
 				testattrib(GLX_AUX_BUFFERS, j, 0, INT_MAX);
@@ -134,22 +136,19 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 			free(str);
 		}
 
-		configs=glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs,
-			&n);
-		if((!configs || n<1) && attribs[11])
+		configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
+		if((!configs || n < 1) && attribs[11])
 		{
-			attribs[11]=0;
-			configs=glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs,
-				&n);
+			attribs[11] = 0;
+			configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		}
-		if((!configs || n<1) && attribs[1])
+		if((!configs || n < 1) && attribs[1])
 		{
-			attribs[1]=0;
-			configs=glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs,
-				&n);
+			attribs[1] = 0;
+			configs = glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attribs, &n);
 		}
-		if(!configs || n<1) return 0;
-		config=configs[0];
+		if(!configs || n < 1) return 0;
+		config = configs[0];
 		XFree(configs);
 		if(config)
 		{
@@ -166,33 +165,34 @@ static GLXFBConfig matchConfig(Display *dpy, XVisualInfo *vis,
 
 static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 {
-	VisualID vid=0;
+	VisualID vid = 0;
 	if(!dpy || !config) return 0;
-	int screen=DefaultScreen(dpy);
-	if(!(vid=cfghash.getVisual(dpy, config)))
+	int screen = DefaultScreen(dpy);
+	if(!(vid = cfghash.getVisual(dpy, config)))
 	{
 		// If we get here, then the app is using an FB config that was not obtained
 		// through glXChooseFBConfig(), so we have no idea what attributes it is
 		// looking for.  We first try to match the FB config with a 2D X Server
 		// visual that has the same class, depth, and stereo properties.
-		XVisualInfo *vis=_glXGetVisualFromFBConfig(_dpy3D, config);
+		XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, config);
 		if(vis)
 		{
-			if(vis->depth>=24
-				&& (vis->c_class==TrueColor || vis->c_class==DirectColor))
-				vid=glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class, 0,
-					glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+			if(vis->depth >= 24
+				&& (vis->c_class == TrueColor || vis->c_class == DirectColor))
+				vid = glxvisual::matchVisual2D(dpy, screen, vis->depth, vis->c_class,
+					0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
 			XFree(vis);
+
+			// Failing that, we try to find a TrueColor visual with the same stereo
+			// properties, using the default depth of the 2D X server.
+			if(!vid)
+				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
+					TrueColor, 0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
+			// Failing that, we try to find a TrueColor mono visual.
+			if(!vid)
+				vid = glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
+					TrueColor, 0, 0, 0);
 		}
-		// Failing that, we try to find a TrueColor visual with the same stereo
-		// properties, using the default depth of the 2D X server.
-		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-				TrueColor, 0, glxvisual::visAttrib3D(config, GLX_STEREO), 0);
-		// Failing that, we try to find a TrueColor mono visual.
-		if(!vid)
-			vid=glxvisual::matchVisual2D(dpy, screen, DefaultDepth(dpy, screen),
-				TrueColor, 0, 0, 0);
 	}
 	if(vid) cfghash.add(dpy, config, vid);
 	return vid;
@@ -204,7 +204,7 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 
 GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 {
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, draw, vw)) return vw->getGLXDrawable();
 	else return draw;
 }
@@ -212,24 +212,24 @@ GLXDrawable ServerDrawable(Display *dpy, GLXDrawable draw)
 
 void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 {
-	Atom *protocols=NULL, *newProtocols=NULL;  int count=0;
+	Atom *protocols = NULL, *newProtocols = NULL;  int count = 0;
 
-	Atom deleteAtom=XInternAtom(dpy, "WM_DELETE_WINDOW", True);
+	Atom deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", True);
 	if(!deleteAtom) goto bailout;
 
-	if(XGetWMProtocols(dpy, win, &protocols, &count) && protocols && count>0)
+	if(XGetWMProtocols(dpy, win, &protocols, &count) && protocols && count > 0)
 	{
-		for(int i=0; i<count; i++)
-			if(protocols[i]==deleteAtom)
+		for(int i = 0; i < count; i++)
+			if(protocols[i] == deleteAtom)
 			{
 				XFree(protocols);  return;
 			}
-		newProtocols=(Atom *)malloc(sizeof(Atom)*(count+1));
+		newProtocols = (Atom *)malloc(sizeof(Atom) * (count + 1));
 		if(!newProtocols) goto bailout;
-		for(int i=0; i<count; i++)
-			newProtocols[i]=protocols[i];
-		newProtocols[count]=deleteAtom;
-		if(!XSetWMProtocols(dpy, win, newProtocols, count+1)) goto bailout;
+		for(int i = 0; i < count; i++)
+			newProtocols[i] = protocols[i];
+		newProtocols[count] = deleteAtom;
+		if(!XSetWMProtocols(dpy, win, newProtocols, count + 1)) goto bailout;
 		XFree(protocols);
 		free(newProtocols);
 	}
@@ -240,13 +240,13 @@ void setWMAtom(Display *dpy, Window win, VirtualWin *vw)
 	bailout:
 	if(protocols) XFree(protocols);
 	if(newProtocols) free(newProtocols);
-	static bool alreadyWarned=false;
+	static bool alreadyWarned = false;
 	if(!alreadyWarned)
 	{
 		if(fconfig.verbose)
 			vglout.print("[VGL] WARNING: Could not set WM_DELETE_WINDOW on window 0x%.8x\n",
 				win);
-		alreadyWarned=true;
+		alreadyWarned = true;
 	}
 }
 
@@ -262,8 +262,8 @@ extern "C" {
 GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	const int *attrib_list, int *nelements)
 {
-	GLXFBConfig *configs=NULL;
-	bool fbcidreq=false;
+	GLXFBConfig *configs = NULL;
+	bool fbcidreq = false;
 
 	TRY();
 
@@ -276,22 +276,22 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	// then hand off to the 2D X server.
 	if(attrib_list)
 	{
-		bool overlayreq=false;
-		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		bool overlayreq = false;
+		for(int i = 0; attrib_list[i] != None && i <= 254; i += 2)
 		{
-			if(attrib_list[i]==GLX_LEVEL && attrib_list[i+1]==1)
-				overlayreq=true;
-			if(attrib_list[i]==GLX_FBCONFIG_ID) fbcidreq=true;
+			if(attrib_list[i] == GLX_LEVEL && attrib_list[i + 1] == 1)
+				overlayreq = true;
+			if(attrib_list[i] == GLX_FBCONFIG_ID) fbcidreq = true;
 		}
 		if(overlayreq)
 		{
 			int dummy;
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-				configs=NULL;
-			else configs=_glXChooseFBConfig(dpy, screen, attrib_list, nelements);
+				configs = NULL;
+			else configs = _glXChooseFBConfig(dpy, screen, attrib_list, nelements);
 			if(configs && nelements && *nelements)
 			{
-				for(int i=0; i<*nelements; i++) rcfghash.add(dpy, configs[i]);
+				for(int i = 0; i < *nelements; i++) rcfghash.add(dpy, configs[i]);
 			}
 			return configs;
 		}
@@ -300,53 +300,53 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		opentrace(glXChooseFBConfig);  prargd(dpy);  prargi(screen);
 		prargal13(attrib_list);  starttrace();
 
-	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0, temp;
-	if(!nelements) nelements=&temp;
-	*nelements=0;
+	int depth = 24, c_class = TrueColor, level = 0, stereo = 0, trans = 0, temp;
+	if(!nelements) nelements = &temp;
+	*nelements = 0;
 
 	// If no attributes are specified, return all FB configs.  If GLX_FBCONFIG_ID
 	// is specified, ignore all other attributes.
 	if(!attrib_list || fbcidreq)
 	{
-		configs=_glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D),
-			attrib_list, nelements);
+		configs = _glXChooseFBConfig(_dpy3D, DefaultScreen(_dpy3D), attrib_list,
+			nelements);
 		goto done;
 	}
 
 	// Modify the attributes so that only FB configs appropriate for off-screen
 	// rendering are considered.
-	else configs=glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
+	else configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
 		stereo, trans, *nelements, true);
 
 	if(configs && *nelements)
 	{
-		int nv=0;
+		int nv = 0;
 
 		// Get a matching visual from the 2D X server and hash it to every FB
 		// config we just obtained.
-		for(int i=0; i<*nelements; i++)
+		for(int i = 0; i < *nelements; i++)
 		{
-			int d=depth;
-			XVisualInfo *vis=_glXGetVisualFromFBConfig(_dpy3D, configs[i]);
+			int d = depth;
+			XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, configs[i]);
 			if(vis)
 			{
-				if(vis->depth>24) d=vis->depth;
+				if(vis->depth > 24) d = vis->depth;
 				XFree(vis);
 			}
 
 			// Find an appropriate matching visual on the 2D X server.
-			VisualID vid=glxvisual::matchVisual2D(dpy, screen, d, c_class, level,
+			VisualID vid = glxvisual::matchVisual2D(dpy, screen, d, c_class, level,
 				stereo, trans);
 			if(!vid)
 			{
-				if(depth==32) vid=glxvisual::matchVisual2D(dpy, screen, 24,
+				if(depth == 32) vid = glxvisual::matchVisual2D(dpy, screen, 24,
 					c_class, level, stereo, trans);
 				if(!vid) continue;
 			}
 			nv++;
 			cfghash.add(dpy, configs[i], vid);
 		}
-		if(!nv) { *nelements=0;  XFree(configs);  configs=NULL; }
+		if(!nv) { *nelements = 0;  XFree(configs);  configs = NULL; }
 	}
 
 	done:
@@ -354,9 +354,9 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 		if(configs && nelements)
 		{
 			if(*nelements)
-				for(int i=0; i<*nelements; i++)
+				for(int i = 0; i < *nelements; i++)
 					vglout.print("configs[%d]=0x%.8lx(0x%.2x) ", i,
-						(unsigned long)configs[i], configs[i]? _FBCID(configs[i]):0);
+						(unsigned long)configs[i], configs[i] ? _FBCID(configs[i]) : 0);
 			prargi(*nelements);
 		}
 		closetrace();
@@ -365,7 +365,7 @@ GLXFBConfig *glXChooseFBConfig(Display *dpy, int screen,
 	return configs;
 }
 
-GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
+GLXFBConfigSGIX *glXChooseFBConfigSGIX(Display *dpy, int screen,
 	int *attrib_list, int *nelements)
 {
 	return glXChooseFBConfig(dpy, screen, attrib_list, nelements);
@@ -378,8 +378,8 @@ GLXFBConfigSGIX *glXChooseFBConfigSGIX (Display *dpy, int screen,
 
 XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 {
-	XVisualInfo *vis=NULL;  GLXFBConfig config=0;
-	static bool alreadyWarned=false;
+	XVisualInfo *vis = NULL;  GLXFBConfig config = 0;
+	static bool alreadyWarned = false;
 
 	TRY();
 
@@ -390,15 +390,15 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 	// then hand off to the 2D X server.
 	if(attrib_list)
 	{
-		bool overlayreq=false;
-		for(int i=0; attrib_list[i]!=None && i<=254; i++)
+		bool overlayreq = false;
+		for(int i = 0; attrib_list[i] != None && i <= 254; i++)
 		{
-			if(attrib_list[i]==GLX_DOUBLEBUFFER || attrib_list[i]==GLX_RGBA
-				|| attrib_list[i]==GLX_STEREO || attrib_list[i]==GLX_USE_GL)
+			if(attrib_list[i] == GLX_DOUBLEBUFFER || attrib_list[i] == GLX_RGBA
+				|| attrib_list[i] == GLX_STEREO || attrib_list[i] == GLX_USE_GL)
 				continue;
-			else if(attrib_list[i]==GLX_LEVEL && attrib_list[i+1]==1)
+			else if(attrib_list[i] == GLX_LEVEL && attrib_list[i + 1] == 1)
 			{
-				overlayreq=true;  i++;
+				overlayreq = true;  i++;
 			}
 			else i++;
 		}
@@ -406,8 +406,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		{
 			int dummy;
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-				vis=NULL;
-			else vis=_glXChooseVisual(dpy, screen, attrib_list);
+				vis = NULL;
+			else vis = _glXChooseVisual(dpy, screen, attrib_list);
 			return vis;
 		}
 	}
@@ -417,18 +417,19 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 
 	// Use the specified set of GLX attributes to obtain an FB config on the 3D X
 	// server suitable for off-screen rendering
-	GLXFBConfig *configs=NULL, prevConfig;  int n=0;
-	int depth=24, c_class=TrueColor, level=0, stereo=0, trans=0;
-	VisualID vid=0;  XVisualInfo *vtemp=NULL;
+	GLXFBConfig *configs = NULL, prevConfig;  int n = 0;
+	int depth = 24, c_class = TrueColor, level = 0, stereo = 0, trans = 0;
+	VisualID vid = 0;  XVisualInfo *vtemp = NULL;
 	if(!dpy || !attrib_list) goto done;
-	if(!(configs=glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
-		stereo, trans, n)) || n<1)
+	if(!(configs = glxvisual::configsFromVisAttribs(attrib_list, c_class, level,
+		stereo, trans, n)) || n < 1)
 	{
 		if(!alreadyWarned && fconfig.verbose)
 		{
-			alreadyWarned=true;
+			alreadyWarned = true;
 			vglout.println("[VGL] WARNING: VirtualGL attempted and failed to obtain a true color visual on");
-			vglout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.", fconfig.localdpystring);
+			vglout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.",
+				fconfig.localdpystring);
 			vglout.println("[VGL]    This is normal if the 3D application is probing for visuals with");
 			vglout.println("[VGL]    certain capabilities, but if the app fails to start, then make sure");
 			vglout.println("[VGL]    that the 3D X server is configured for true color and has accelerated");
@@ -436,29 +437,29 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 		}
 		goto done;
 	}
-	config=configs[0];
+	config = configs[0];
 	XFree(configs);
-	vtemp=_glXGetVisualFromFBConfig(_dpy3D, config);
+	vtemp = _glXGetVisualFromFBConfig(_dpy3D, config);
 	if(vtemp)
 	{
-		if(vtemp->depth>24) depth=vtemp->depth;
+		if(vtemp->depth > 24) depth = vtemp->depth;
 		XFree(vtemp);
 	}
 
 	// Find an appropriate matching visual on the 2D X server.
-	vid=glxvisual::matchVisual2D(dpy, screen, depth, c_class, level, stereo,
+	vid = glxvisual::matchVisual2D(dpy, screen, depth, c_class, level, stereo,
 		trans);
 	if(!vid)
 	{
-		if(depth==32) vid=glxvisual::matchVisual2D(dpy, screen, 24, c_class, level,
-			stereo, trans);
+		if(depth == 32) vid = glxvisual::matchVisual2D(dpy, screen, 24, c_class,
+			level, stereo, trans);
 		if(!vid) goto done;
 	}
-	vis=glxvisual::visualFromID(dpy, screen, vid);
+	vis = glxvisual::visualFromID(dpy, screen, vid);
 	if(!vis) goto done;
 
-	if((prevConfig=vishash.getConfig(dpy, vis))
-		&& _FBCID(config)!=_FBCID(prevConfig) && fconfig.trace)
+	if((prevConfig = vishash.getConfig(dpy, vis))
+		&& _FBCID(config) != _FBCID(prevConfig) && fconfig.trace)
 		vglout.println("[VGL] WARNING: Visual 0x%.2x was previously mapped to FB config 0x%.2x and is now mapped to 0x%.2x\n",
 			vis->visualid, _FBCID(prevConfig), _FBCID(config));
 
@@ -486,14 +487,14 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 	if(isExcluded(dpy))
 		return _glXCopyContext(dpy, src, dst, mask);
 
-	bool srcOverlay=false, dstOverlay=false;
-	if(ctxhash.isOverlay(src)) srcOverlay=true;
-	if(ctxhash.isOverlay(dst)) dstOverlay=true;
+	bool srcOverlay = false, dstOverlay = false;
+	if(ctxhash.isOverlay(src)) srcOverlay = true;
+	if(ctxhash.isOverlay(dst)) dstOverlay = true;
 	if(srcOverlay && dstOverlay)
 	{
 		_glXCopyContext(dpy, src, dst, mask);  return;
 	}
-	else if(srcOverlay!=dstOverlay)
+	else if(srcOverlay != dstOverlay)
 		_throw("glXCopyContext() cannot copy between overlay and non-overlay contexts");
 	_glXCopyContext(_dpy3D, src, dst, mask);
 
@@ -506,28 +507,28 @@ void glXCopyContext(Display *dpy, GLXContext src, GLXContext dst,
 GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	GLXContext share_list, Bool direct)
 {
-	GLXContext ctx=0;  GLXFBConfig config=0;
+	GLXContext ctx = 0;  GLXFBConfig config = 0;
 
 	TRY();
 
 	if(isExcluded(dpy))
 		return _glXCreateContext(dpy, vis, share_list, direct);
 
-	if(!fconfig.allowindirect) direct=True;
+	if(!fconfig.allowindirect) direct = True;
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
 	if(vis)
 	{
-		int level=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
 			GLX_LEVEL);
-		int trans=(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+		int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
 			int dummy;
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-				ctx=NULL;
-			else ctx=_glXCreateContext(dpy, vis, share_list, direct);
+				ctx = NULL;
+			else ctx = _glXCreateContext(dpy, vis, share_list, direct);
 			if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 			return ctx;
 		}
@@ -539,13 +540,13 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from matchConfig().
-	if(!(config=matchConfig(dpy, vis)))
+	if(!(config = matchConfig(dpy, vis)))
 		_throw("Could not obtain RGB visual on the server suitable for off-screen rendering.");
-	ctx=_glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list,
+	ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list,
 		direct);
 	if(ctx)
 	{
-		int newctxIsDirect=_glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -570,7 +571,7 @@ GLXContext glXCreateContext(Display *dpy, XVisualInfo *vis,
 GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 	GLXContext share_context, Bool direct, const int *attribs)
 {
-	GLXContext ctx=0;
+	GLXContext ctx = 0;
 
 	TRY();
 
@@ -578,12 +579,12 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		return _glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
 
-	if(!fconfig.allowindirect) direct=True;
+	if(!fconfig.allowindirect) direct = True;
 
 	// Overlay config.  Hand off to 2D X server.
 	if(rcfghash.isOverlay(dpy, config))
 	{
-		ctx=_glXCreateContextAttribsARB(dpy, config, share_context, direct,
+		ctx = _glXCreateContextAttribsARB(dpy, config, share_context, direct,
 			attribs);
 		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 		return ctx;
@@ -594,15 +595,15 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 		starttrace();
 
 	CHECKSYM_NONFATAL(glXCreateContextAttribsARB)
-	if((!attribs || attribs[0]==None) && !__glXCreateContextAttribsARB)
-		ctx=_glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_context,
+	if((!attribs || attribs[0] == None) && !__glXCreateContextAttribsARB)
+		ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_context,
 			direct);
 	else
-		ctx=_glXCreateContextAttribsARB(_dpy3D, config, share_context, direct,
+		ctx = _glXCreateContextAttribsARB(_dpy3D, config, share_context, direct,
 			attribs);
 	if(ctx)
 	{
-		int newctxIsDirect=_glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -625,19 +626,19 @@ GLXContext glXCreateContextAttribsARB(Display *dpy, GLXFBConfig config,
 GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 	int render_type, GLXContext share_list, Bool direct)
 {
-	GLXContext ctx=0;
+	GLXContext ctx = 0;
 
 	TRY();
 
 	if(isExcluded(dpy))
 		return _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 
-	if(!fconfig.allowindirect) direct=True;
+	if(!fconfig.allowindirect) direct = True;
 
-	 // Overlay config.  Hand off to 2D X server.
+	// Overlay config.  Hand off to 2D X server.
 	if(rcfghash.isOverlay(dpy, config))
 	{
-		ctx=_glXCreateNewContext(dpy, config, render_type, share_list, direct);
+		ctx = _glXCreateNewContext(dpy, config, render_type, share_list, direct);
 		if(ctx) ctxhash.add(ctx, (GLXFBConfig)-1, -1);
 		return ctx;
 	}
@@ -645,10 +646,11 @@ GLXContext glXCreateNewContext(Display *dpy, GLXFBConfig config,
 		opentrace(glXCreateNewContext);  prargd(dpy);  prargc(config);
 		prargi(render_type);  prargx(share_list);  prargi(direct);  starttrace();
 
-	ctx=_glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list, direct);
+	ctx = _glXCreateNewContext(_dpy3D, config, GLX_RGBA_TYPE, share_list,
+		direct);
 	if(ctx)
 	{
-		int newctxIsDirect=_glXIsDirect(_dpy3D, ctx);
+		int newctxIsDirect = _glXIsDirect(_dpy3D, ctx);
 		if(!newctxIsDirect && direct)
 		{
 			vglout.println("[VGL] WARNING: The OpenGL rendering context obtained on X display");
@@ -686,7 +688,7 @@ GLXContext glXCreateContextWithConfigSGIX(Display *dpy, GLXFBConfigSGIX config,
 GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config,
 	const int *attrib_list)
 {
-	GLXPbuffer pb=0;
+	GLXPbuffer pb = 0;
 
 	TRY();
 
@@ -696,7 +698,7 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config,
 		opentrace(glXCreatePbuffer);  prargd(dpy);  prargc(config);
 		prargal13(attrib_list);  starttrace();
 
-	pb=_glXCreatePbuffer(_dpy3D, config, attrib_list);
+	pb = _glXCreatePbuffer(_dpy3D, config, attrib_list);
 	if(dpy && pb) glxdhash.add(pb, dpy);
 
 		stoptrace();  prargx(pb);  closetrace();
@@ -708,17 +710,17 @@ GLXPbuffer glXCreatePbuffer(Display *dpy, GLXFBConfig config,
 GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 	unsigned int width, unsigned int height, int *attrib_list)
 {
-	int attribs[257], j=0;
+	int attribs[257], j = 0;
 	if(attrib_list)
 	{
-		for(int i=0; attrib_list[i]!=None && i<=254; i+=2)
+		for(int i = 0; attrib_list[i] != None && i <= 254; i += 2)
 		{
-			attribs[j++]=attrib_list[i];  attribs[j++]=attrib_list[i+1];
+			attribs[j++] = attrib_list[i];  attribs[j++] = attrib_list[i + 1];
 		}
 	}
-	attribs[j++]=GLX_PBUFFER_WIDTH;  attribs[j++]=width;
-	attribs[j++]=GLX_PBUFFER_HEIGHT;  attribs[j++]=height;
-	attribs[j]=None;
+	attribs[j++] = GLX_PBUFFER_WIDTH;  attribs[j++] = width;
+	attribs[j++] = GLX_PBUFFER_HEIGHT;  attribs[j++] = height;
+	attribs[j] = None;
 	return glXCreatePbuffer(dpy, config, attribs);
 }
 
@@ -729,8 +731,8 @@ GLXPbuffer glXCreateGLXPbufferSGIX(Display *dpy, GLXFBConfigSGIX config,
 
 GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 {
-	GLXPixmap drawable=0;  GLXFBConfig config=0;
-	int x=0, y=0;  unsigned int width=0, height=0, depth=0;
+	GLXPixmap drawable = 0;  GLXFBConfig config = 0;
+	int x = 0, y = 0;  unsigned int width = 0, height = 0, depth = 0;
 
 	TRY();
 
@@ -741,16 +743,16 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 	// we have to hand it off to the 2D X server.
 	if(vis)
 	{
-		int level=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
 			GLX_LEVEL);
-		int trans=(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
-			GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
+		int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+			GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
 		if(level && trans)
 		{
 			int dummy;
 			if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-				drawable=0;
-			else drawable=_glXCreateGLXPixmap(dpy, vis, pm);
+				drawable = 0;
+			else drawable = _glXCreateGLXPixmap(dpy, vis, pm);
 			return drawable;
 		}
 	}
@@ -760,9 +762,9 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 
 	Window root;  unsigned int bw;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &width, &height, &bw, &depth);
-	if(!(config=matchConfig(dpy, vis, true, true)))
+	if(!(config = matchConfig(dpy, vis, true, true)))
 		_throw("Could not obtain pixmap-capable RGB visual on the server");
-	VirtualPixmap *vpm=new VirtualPixmap(dpy, vis, pm);
+	VirtualPixmap *vpm = new VirtualPixmap(dpy, vis, pm);
 	if(vpm)
 	{
 		// Hash the VirtualPixmap instance to the 2D pixmap and also hash the 2D X
@@ -770,7 +772,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 		vpm->init(width, height, depth, config, NULL);
 		pmhash.add(dpy, pm, vpm);
 		glxdhash.add(vpm->getGLXDrawable(), dpy);
-		drawable=vpm->getGLXDrawable();
+		drawable = vpm->getGLXDrawable();
 	}
 
 		stoptrace();  prargi(x);  prargi(y);  prargi(width);  prargi(height);
@@ -784,7 +786,7 @@ GLXPixmap glXCreateGLXPixmap(Display *dpy, XVisualInfo *vis, Pixmap pm)
 GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	const int *attribs)
 {
-	GLXPixmap drawable=0;
+	GLXPixmap drawable = 0;
 
 	TRY();
 
@@ -797,19 +799,19 @@ GLXPixmap glXCreatePixmap(Display *dpy, GLXFBConfig config, Pixmap pm,
 	Window root;  int x, y;  unsigned int w, h, bw, d;
 	_XGetGeometry(dpy, pm, &root, &x, &y, &w, &h, &bw, &d);
 
-	VisualID vid=matchVisual(dpy, config);
-	VirtualPixmap *vpm=NULL;
+	VisualID vid = matchVisual(dpy, config);
+	VirtualPixmap *vpm = NULL;
 	if(vid)
 	{
-		XVisualInfo *vis=glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
-		if(vis) vpm=new VirtualPixmap(dpy, vis, pm);
+		XVisualInfo *vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
+		if(vis) vpm = new VirtualPixmap(dpy, vis, pm);
 	}
 	if(vpm)
 	{
 		vpm->init(w, h, d, config, attribs);
 		pmhash.add(dpy, pm, vpm);
 		glxdhash.add(vpm->getGLXDrawable(), dpy);
-		drawable=vpm->getGLXDrawable();
+		drawable = vpm->getGLXDrawable();
 	}
 
 		stoptrace();  prargi(x);  prargi(y);  prargi(w);  prargi(h);
@@ -832,7 +834,7 @@ GLXPixmap glXCreateGLXPixmapWithConfigSGIX(Display *dpy,
 GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 	const int *attrib_list)
 {
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 
 	TRY();
 
@@ -842,7 +844,7 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 	// Overlay config.  Hand off to 2D X server.
 	if(rcfghash.isOverlay(dpy, config))
 	{
-		GLXWindow glxw=_glXCreateWindow(dpy, config, win, attrib_list);
+		GLXWindow glxw = _glXCreateWindow(dpy, config, win, attrib_list);
 		winhash.setOverlay(dpy, glxw);
 		return glxw;
 	}
@@ -851,27 +853,28 @@ GLXWindow glXCreateWindow(Display *dpy, GLXFBConfig config, Window win,
 		starttrace();
 
 	XSync(dpy, False);
-	vw=winhash.initVW(dpy, win, config);
+	vw = winhash.initVW(dpy, win, config);
 	if(!vw && !glxdhash.getCurrentDisplay(win))
 	{
 		// Apparently win was created in another process or using XCB.
 		winhash.add(dpy, win);
-		vw=winhash.initVW(dpy, win, config);
+		vw = winhash.initVW(dpy, win, config);
 	}
 	if(!vw)
 		_throw("Cannot create virtual window for specified X window");
 
-		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }  closetrace();
+		stoptrace();  if(vw) { prargx(vw->getGLXDrawable()); }
+		closetrace();
 
 	CATCH();
 	return win;  // Make the client store the original window handle, which we
-               // use to find the off-screen drawable in the hash
+	             // use to find the off-screen drawable in the hash
 }
 
 
 // When the context is destroyed, remove it from the context-to-FB config hash.
 
-void glXDestroyContext(Display* dpy, GLXContext ctx)
+void glXDestroyContext(Display *dpy, GLXContext ctx)
 {
 	TRY();
 
@@ -931,7 +934,7 @@ void glXDestroyGLXPixmap(Display *dpy, GLXPixmap pix)
 
 		opentrace(glXDestroyGLXPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
-	VirtualPixmap *vpm=pmhash.find(dpy, pix);
+	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -954,7 +957,7 @@ void glXDestroyPixmap(Display *dpy, GLXPixmap pix)
 
 		opentrace(glXDestroyPixmap);  prargd(dpy);  prargx(pix);  starttrace();
 
-	VirtualPixmap *vpm=pmhash.find(dpy, pix);
+	VirtualPixmap *vpm = pmhash.find(dpy, pix);
 	if(vpm && vpm->isInit()) vpm->readback();
 
 	if(pix) glxdhash.remove(pix);
@@ -1011,7 +1014,7 @@ void glXFreeContextEXT(Display *dpy, GLXContext ctx)
 #define VGL_GLX_EXTENSIONS \
 	"GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGI_make_current_read GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SUN_get_transparent_index"
 /* Allow enough space here for all of the extensions */
-static char glxextensions[1024]=VGL_GLX_EXTENSIONS;
+static char glxextensions[1024] = VGL_GLX_EXTENSIONS;
 
 static const char *getGLXExtensions(void)
 {
@@ -1020,7 +1023,7 @@ static const char *getGLXExtensions(void)
 		&& !strstr(glxextensions, "GLX_ARB_create_context"))
 		strncat(glxextensions,
 			" GLX_ARB_create_context GLX_ARB_create_context_profile",
-			1023-strlen(glxextensions));
+			1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXFreeContextEXT)
 	CHECKSYM_NONFATAL(glXImportContextEXT)
@@ -1028,19 +1031,19 @@ static const char *getGLXExtensions(void)
 	if(__glXFreeContextEXT && __glXImportContextEXT && __glXQueryContextInfoEXT
 		&& !strstr(glxextensions, "GLX_EXT_import_context"))
 		strncat(glxextensions, " GLX_EXT_import_context",
-			1023-strlen(glxextensions));
+			1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXSwapIntervalEXT)
 	if(__glXSwapIntervalEXT && !strstr(glxextensions, "GLX_EXT_swap_control"))
 		strncat(glxextensions, " GLX_EXT_swap_control",
-			1023-strlen(glxextensions));
+			1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXBindTexImageEXT)
 	CHECKSYM_NONFATAL(glXReleaseTexImageEXT)
 	if(__glXBindTexImageEXT && __glXReleaseTexImageEXT
 		&& !strstr(glxextensions, "GLX_EXT_texture_from_pixmap"))
 		strncat(glxextensions, " GLX_EXT_texture_from_pixmap",
-			1023-strlen(glxextensions));
+			1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXBindSwapBarrierNV)
 	CHECKSYM_NONFATAL(glXJoinSwapGroupNV)
@@ -1051,12 +1054,12 @@ static const char *getGLXExtensions(void)
 	if(__glXBindSwapBarrierNV && __glXJoinSwapGroupNV && __glXQueryFrameCountNV
 		&& __glXQueryMaxSwapGroupsNV && __glXQuerySwapGroupNV
 		&& __glXResetFrameCountNV && !strstr(glxextensions, "GLX_NV_swap_group"))
-		strncat(glxextensions, " GLX_NV_swap_group", 1023-strlen(glxextensions));
+		strncat(glxextensions, " GLX_NV_swap_group", 1023 - strlen(glxextensions));
 
 	CHECKSYM_NONFATAL(glXSwapIntervalSGI)
 	if(__glXSwapIntervalSGI && !strstr(glxextensions, "GLX_SGI_swap_control"))
 		strncat(glxextensions, " GLX_SGI_swap_control",
-			1023-strlen(glxextensions));
+			1023 - strlen(glxextensions));
 
 	return glxextensions;
 }
@@ -1069,11 +1072,11 @@ const char *glXGetClientString(Display *dpy, int name)
 	if(isExcluded(dpy))
 		return _glXGetClientString(dpy, name);
 
-	if(name==GLX_EXTENSIONS) return getGLXExtensions();
-	else if(name==GLX_VERSION) return "1.4";
-	else if(name==GLX_VENDOR)
+	if(name == GLX_EXTENSIONS) return getGLXExtensions();
+	else if(name == GLX_VERSION) return "1.4";
+	else if(name == GLX_VENDOR)
 	{
-		if(strlen(fconfig.glxvendor)>0) return fconfig.glxvendor;
+		if(strlen(fconfig.glxvendor) > 0) return fconfig.glxvendor;
 		else return __APPNAME;
 	}
 
@@ -1087,7 +1090,7 @@ const char *glXGetClientString(Display *dpy, int name)
 
 int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 {
-	GLXFBConfig config;  int retval=0;
+	GLXFBConfig config;  int retval = 0;
 
 	TRY();
 
@@ -1098,16 +1101,16 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 		return GLX_BAD_VALUE;
 
 	// If 'vis' is an overlay visual, hand off to the 2D X server.
-	int level=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+	int level = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
 		GLX_LEVEL);
-	int trans=(glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
-		GLX_TRANSPARENT_TYPE)==GLX_TRANSPARENT_INDEX);
-	if(level && trans && attrib!=GLX_LEVEL && attrib!=GLX_TRANSPARENT_TYPE)
+	int trans = (glxvisual::visAttrib2D(dpy, DefaultScreen(dpy), vis->visualid,
+		GLX_TRANSPARENT_TYPE) == GLX_TRANSPARENT_INDEX);
+	if(level && trans && attrib != GLX_LEVEL && attrib != GLX_TRANSPARENT_TYPE)
 	{
 		int dummy;
 		if(!_XQueryExtension(dpy, "GLX", &dummy, &dummy, &dummy))
-			retval=GLX_NO_EXTENSION;
-		else retval=_glXGetConfig(dpy, vis, attrib, value);
+			retval = GLX_NO_EXTENSION;
+		else retval = _glXGetConfig(dpy, vis, attrib, value);
 		return retval;
 	}
 
@@ -1117,31 +1120,31 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 	// If 'vis' was obtained through a previous call to glXChooseVisual(), find
 	// the corresponding FB config in the hash.  Otherwise, we have to fall back
 	// to using a default FB config returned from matchConfig().
-	if(!(config=matchConfig(dpy, vis)))
+	if(!(config = matchConfig(dpy, vis)))
 		_throw("Could not obtain RGB visual on the server suitable for off-screen rendering");
 
-	if(attrib==GLX_USE_GL)
+	if(attrib == GLX_USE_GL)
 	{
-		if(vis->c_class==TrueColor || vis->c_class==DirectColor) *value=1;
-		else *value=0;
+		if(vis->c_class == TrueColor || vis->c_class == DirectColor) *value = 1;
+		else *value = 0;
 	}
 	// Transparent overlay visuals are actual 2D X server visuals, not dummy
 	// visuals mapped to 3D X server FB configs, so we obtain their properties
 	// from the 2D X server.
-	else if(attrib==GLX_LEVEL || attrib==GLX_TRANSPARENT_TYPE
-		|| attrib==GLX_TRANSPARENT_INDEX_VALUE
-		|| attrib==GLX_TRANSPARENT_RED_VALUE
-		|| attrib==GLX_TRANSPARENT_GREEN_VALUE
-		|| attrib==GLX_TRANSPARENT_BLUE_VALUE
-		|| attrib==GLX_TRANSPARENT_ALPHA_VALUE)
-		*value=glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, attrib);
-	else if(attrib==GLX_RGBA)
+	else if(attrib == GLX_LEVEL || attrib == GLX_TRANSPARENT_TYPE
+		|| attrib == GLX_TRANSPARENT_INDEX_VALUE
+		|| attrib == GLX_TRANSPARENT_RED_VALUE
+		|| attrib == GLX_TRANSPARENT_GREEN_VALUE
+		|| attrib == GLX_TRANSPARENT_BLUE_VALUE
+		|| attrib == GLX_TRANSPARENT_ALPHA_VALUE)
+		*value = glxvisual::visAttrib2D(dpy, vis->screen, vis->visualid, attrib);
+	else if(attrib == GLX_RGBA)
 	{
-		if((glxvisual::visAttrib3D(config, GLX_RENDER_TYPE) & GLX_RGBA_BIT)!=0)
-			*value=1;
-		else *value=0;
+		if((glxvisual::visAttrib3D(config, GLX_RENDER_TYPE) & GLX_RGBA_BIT) != 0)
+			*value = 1;
+		else *value = 0;
 	}
-	else retval=_glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
+	else retval = _glXGetFBConfigAttrib(_dpy3D, config, attrib, value);
 
 		stoptrace();  if(value) { prargix(*value); }  else { prargx(value); }
 		closetrace();
@@ -1158,7 +1161,7 @@ int glXGetConfig(Display *dpy, XVisualInfo *vis, int attrib, int *value)
 
 Display *glXGetCurrentDisplay(void)
 {
-	Display *dpy=NULL;  VirtualWin *vw=NULL;
+	Display *dpy = NULL;  VirtualWin *vw = NULL;
 
 	if(vglfaker::getExcludeCurrent()) return _glXGetCurrentDisplay();
 
@@ -1166,11 +1169,11 @@ Display *glXGetCurrentDisplay(void)
 
 		opentrace(glXGetCurrentDisplay);  starttrace();
 
-	GLXDrawable curdraw=_glXGetCurrentDrawable();
-	if(winhash.find(curdraw, vw)) dpy=vw->getX11Display();
+	GLXDrawable curdraw = _glXGetCurrentDrawable();
+	if(winhash.find(curdraw, vw)) dpy = vw->getX11Display();
 	else
 	{
-		if(curdraw) dpy=glxdhash.getCurrentDisplay(curdraw);
+		if(curdraw) dpy = glxdhash.getCurrentDisplay(curdraw);
 	}
 
 		stoptrace();  prargd(dpy);  closetrace();
@@ -1186,7 +1189,7 @@ Display *glXGetCurrentDisplay(void)
 
 GLXDrawable glXGetCurrentDrawable(void)
 {
-	VirtualWin *vw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
+	VirtualWin *vw = NULL;  GLXDrawable draw = _glXGetCurrentDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return draw;
 
@@ -1194,7 +1197,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 		opentrace(glXGetCurrentDrawable);  starttrace();
 
-	if(winhash.find(draw, vw)) draw=vw->getX11Drawable();
+	if(winhash.find(draw, vw)) draw = vw->getX11Drawable();
 
 		stoptrace();  prargx(draw);  closetrace();
 
@@ -1204,7 +1207,7 @@ GLXDrawable glXGetCurrentDrawable(void)
 
 GLXDrawable glXGetCurrentReadDrawable(void)
 {
-	VirtualWin *vw=NULL;  GLXDrawable read=_glXGetCurrentReadDrawable();
+	VirtualWin *vw = NULL;  GLXDrawable read = _glXGetCurrentReadDrawable();
 
 	if(vglfaker::getExcludeCurrent()) return read;
 
@@ -1212,7 +1215,7 @@ GLXDrawable glXGetCurrentReadDrawable(void)
 
 		opentrace(glXGetCurrentReadDrawable);  starttrace();
 
-	if(winhash.find(read, vw)) read=vw->getX11Drawable();
+	if(winhash.find(read, vw)) read = vw->getX11Drawable();
 
 		stoptrace();  prargx(read);  closetrace();
 
@@ -1231,36 +1234,37 @@ GLXDrawable glXGetCurrentReadDrawableSGI(void)
 int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	int *value)
 {
-	VisualID vid=0;  int retval=0;
+	VisualID vid = 0;  int retval = 0;
 
 	TRY();
 
 	if(isExcluded(dpy) || rcfghash.isOverlay(dpy, config))
 		return _glXGetFBConfigAttrib(dpy, config, attribute, value);
 
-	int screen=dpy? DefaultScreen(dpy):0;
+	int screen = dpy ? DefaultScreen(dpy) : 0;
 
 		opentrace(glXGetFBConfigAttrib);  prargd(dpy);  prargc(config);
 		prargix(attribute);  starttrace();
 
 	if(!dpy || !config || !value)
 	{
-		retval=GLX_BAD_VALUE;
+		retval = GLX_BAD_VALUE;
 		goto done;
 	}
 
-	retval=_glXGetFBConfigAttrib(_dpy3D, config, attribute, value);
+	retval = _glXGetFBConfigAttrib(_dpy3D, config, attribute, value);
 
-	if(attribute==GLX_DRAWABLE_TYPE && retval==Success)
+	if(attribute == GLX_DRAWABLE_TYPE && retval == Success)
 	{
-		int temp=*value;
-		*value=0;
-		if((fconfig.drawable==RRDRAWABLE_PBUFFER && temp&GLX_PBUFFER_BIT)
-			|| (fconfig.drawable==RRDRAWABLE_PIXMAP && temp&GLX_WINDOW_BIT
-				&& temp&GLX_PIXMAP_BIT))
-			*value|=GLX_WINDOW_BIT;
-		if(temp&GLX_PIXMAP_BIT && temp&GLX_WINDOW_BIT) *value|=GLX_PIXMAP_BIT;
-		if(temp&GLX_PBUFFER_BIT) *value|=GLX_PBUFFER_BIT;
+		int temp = *value;
+		*value = 0;
+		if((fconfig.drawable == RRDRAWABLE_PBUFFER && temp & GLX_PBUFFER_BIT)
+			|| (fconfig.drawable == RRDRAWABLE_PIXMAP && temp & GLX_WINDOW_BIT
+				&& temp & GLX_PIXMAP_BIT))
+			*value |= GLX_WINDOW_BIT;
+		if(temp & GLX_PIXMAP_BIT && temp & GLX_WINDOW_BIT)
+			*value |= GLX_PIXMAP_BIT;
+		if(temp & GLX_PBUFFER_BIT) *value |= GLX_PBUFFER_BIT;
 	}
 
 	// If there is a corresponding 2D X server visual hashed to this FB config,
@@ -1268,19 +1272,19 @@ int glXGetFBConfigAttrib(Display *dpy, GLXFBConfig config, int attribute,
 	// return attributes that take into account the interaction between visuals
 	// on the 2D X Server and FB Configs on the 3D X Server.
 
-	if((vid=cfghash.getVisual(dpy, config))!=0)
+	if((vid = cfghash.getVisual(dpy, config)) != 0)
 	{
 		// Transparent overlay FB configs are located on the 2D X server, not the
 		// 3D X server.
-		if(attribute==GLX_LEVEL || attribute==GLX_TRANSPARENT_TYPE
-			|| attribute==GLX_TRANSPARENT_INDEX_VALUE
-			|| attribute==GLX_TRANSPARENT_RED_VALUE
-			|| attribute==GLX_TRANSPARENT_GREEN_VALUE
-			|| attribute==GLX_TRANSPARENT_BLUE_VALUE
-			|| attribute==GLX_TRANSPARENT_ALPHA_VALUE)
-			*value=glxvisual::visAttrib2D(dpy, screen, vid, attribute);
-		else if(attribute==GLX_VISUAL_ID)
-			*value=vid;
+		if(attribute == GLX_LEVEL || attribute == GLX_TRANSPARENT_TYPE
+			|| attribute == GLX_TRANSPARENT_INDEX_VALUE
+			|| attribute == GLX_TRANSPARENT_RED_VALUE
+			|| attribute == GLX_TRANSPARENT_GREEN_VALUE
+			|| attribute == GLX_TRANSPARENT_BLUE_VALUE
+			|| attribute == GLX_TRANSPARENT_ALPHA_VALUE)
+			*value = glxvisual::visAttrib2D(dpy, screen, vid, attribute);
+		else if(attribute == GLX_VISUAL_ID)
+			*value = vid;
 	}
 
 	done:
@@ -1317,7 +1321,7 @@ GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *dpy, XVisualInfo *vis)
 
 GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 {
-	GLXFBConfig *configs=NULL;
+	GLXFBConfig *configs = NULL;
 
 	TRY();
 
@@ -1327,7 +1331,7 @@ GLXFBConfig *glXGetFBConfigs(Display *dpy, int screen, int *nelements)
 		opentrace(glXGetFBConfigs);  prargd(dpy);  prargi(screen);
 		starttrace();
 
-	configs=_glXGetFBConfigs(_dpy3D, DefaultScreen(_dpy3D), nelements);
+	configs = _glXGetFBConfigs(_dpy3D, DefaultScreen(_dpy3D), nelements);
 
 		stoptrace();  if(configs && nelements) prargi(*nelements);
 		closetrace();
@@ -1355,25 +1359,25 @@ void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer,
 		opentrace(glXBindTexImageEXT);  prargd(dpy);  prargx(drawable);
 		prargi(buffer);  prargal13(attrib_list);  starttrace();
 
-	VirtualPixmap *vpm=NULL;
-	if((vpm=pmhash.find(dpy, drawable))==NULL)
+	VirtualPixmap *vpm = NULL;
+	if((vpm = pmhash.find(dpy, drawable)) == NULL)
 		// If we get here, then the drawable wasn't created with
 		// glXCreate[GLX]Pixmap().  Thus, we set it to 0 so _glXBindTexImageEXT()
 		// will throw a GLXBadPixmap error for us.
-		drawable=0;
+		drawable = 0;
 	else
 	{
 		// Transfer pixels from the 2D Pixmap (stored on the 2D X server) to the
 		// 3D Pixmap (stored on the 3D X server.)
-		XImage *image=_XGetImage(dpy, vpm->getX11Drawable(), 0, 0, vpm->getWidth(),
-			vpm->getHeight(), AllPlanes, ZPixmap);
-		GC gc=XCreateGC(_dpy3D, vpm->get3DX11Pixmap(), 0, NULL);
+		XImage *image = _XGetImage(dpy, vpm->getX11Drawable(), 0, 0,
+			vpm->getWidth(), vpm->getHeight(), AllPlanes, ZPixmap);
+		GC gc = XCreateGC(_dpy3D, vpm->get3DX11Pixmap(), 0, NULL);
 		if(gc && image)
 			XPutImage(_dpy3D, vpm->get3DX11Pixmap(), gc, image, 0, 0, 0, 0,
 				vpm->getWidth(), vpm->getHeight());
 		else
 			// Also trigger GLXBadPixmap error
-			drawable=0;
+			drawable = 0;
 		if(gc) XFreeGC(_dpy3D, gc);
 		if(image) XDestroyImage(image);
 	}
@@ -1408,24 +1412,30 @@ void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer)
 // function that we're interposing, we need to return the address of the
 // interposed function.
 
-#define checkfaked(f) if(!strcmp((char *)procName, #f)) {  \
-	retval=(void (*)(void))f;  if(fconfig.trace) vglout.print("[INTERPOSED]");}
+#define checkfaked(f) \
+	if(!strcmp((char *)procName, #f)) \
+	{ \
+		retval = (void (*)(void))f; \
+		if(fconfig.trace) vglout.print("[INTERPOSED]"); \
+	}
 
 // For optional libGL symbols, check that the underlying function
 // actually exists in libGL before returning the interposed version of it.
 
-#define checkoptfaked(f)  \
-	if(!strcmp((char *)procName, #f)) {  \
-		CHECKSYM_NONFATAL(f)  \
-		if(__##f) {  \
-			retval=(void (*)(void))f;  \
-			if(fconfig.trace) vglout.print("[INTERPOSED]");  \
-		}  \
+#define checkoptfaked(f) \
+	if(!strcmp((char *)procName, #f)) \
+	{ \
+		CHECKSYM_NONFATAL(f) \
+		if(__##f) \
+		{ \
+			retval = (void (*)(void))f; \
+			if(fconfig.trace) vglout.print("[INTERPOSED]"); \
+		} \
 	}
 
 void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 {
-	void (*retval)(void)=NULL;
+	void (*retval)(void) = NULL;
 
 	vglfaker::init();
 
@@ -1541,7 +1551,7 @@ void (*glXGetProcAddressARB(const GLubyte *procName))(void)
 	if(!retval)
 	{
 		if(fconfig.trace) vglout.print("[passed through]");
-		retval=_glXGetProcAddress(procName);
+		retval = _glXGetProcAddress(procName);
 	}
 
 		stoptrace();  closetrace();
@@ -1585,7 +1595,7 @@ void glXGetSelectedEventSGIX(Display *dpy, GLXDrawable drawable,
 
 XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 {
-	XVisualInfo *vis=NULL;
+	XVisualInfo *vis = NULL;
 
 	TRY();
 
@@ -1595,11 +1605,11 @@ XVisualInfo *glXGetVisualFromFBConfig(Display *dpy, GLXFBConfig config)
 		opentrace(glXGetVisualFromFBConfig);  prargd(dpy);  prargc(config);
 		starttrace();
 
-	VisualID vid=0;
+	VisualID vid = 0;
 	if(!dpy || !config) goto done;
-	vid=matchVisual(dpy, config);
+	vid = matchVisual(dpy, config);
 	if(!vid) goto done;
-	vis=glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
+	vis = glxvisual::visualFromID(dpy, DefaultScreen(dpy), vid);
 	if(!vis) goto done;
 	vishash.add(dpy, vis, config);
 
@@ -1639,7 +1649,7 @@ GLXContext glXImportContextEXT(Display *dpy, GLXContextID contextID)
 
 Bool glXIsDirect(Display *dpy, GLXContext ctx)
 {
-	Bool direct=0;
+	Bool direct = 0;
 
 	TRY();
 
@@ -1649,7 +1659,7 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 		opentrace(glXIsDirect);  prargd(dpy);  prargx(ctx);
 		starttrace();
 
-	direct=_glXIsDirect(_dpy3D, ctx);
+	direct = _glXIsDirect(_dpy3D, ctx);
 
 		stoptrace();  prargi(direct);  closetrace();
 
@@ -1662,21 +1672,21 @@ Bool glXIsDirect(Display *dpy, GLXContext ctx)
 
 Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
-	Bool retval=False;  const char *renderer="Unknown";
-	VirtualWin *vw;  GLXFBConfig config=0;
+	Bool retval = False;  const char *renderer = "Unknown";
+	VirtualWin *vw;  GLXFBConfig config = 0;
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel()>0)
+	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _glXMakeCurrent(dpy, drawable, ctx);
 
 	TRY();
 
 	// Find the FB config that was previously hashed to this context when it was
 	// created.
-	if(ctx) config=ctxhash.findConfig(ctx);
-	if(config==(GLXFBConfig)-1)
+	if(ctx) config = ctxhash.findConfig(ctx);
+	if(config == (GLXFBConfig)-1)
 	{
 		// Overlay context.  Hand off to the 2D X server.
-		retval=_glXMakeCurrent(dpy, drawable, ctx);
+		retval = _glXMakeCurrent(dpy, drawable, ctx);
 		winhash.setOverlay(dpy, drawable);
 		vglfaker::setExcludeCurrent(true);
 		return retval;
@@ -1693,13 +1703,13 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	// glXMakeCurrent() implies a glFinish() on the previous context, which is
 	// why we read back the front buffer here if it is dirty.
-	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	GLXDrawable curdraw = _glXGetCurrentDrawable();
 	if(_glXGetCurrentContext() && dpy3DIsCurrent()
 		&& curdraw && winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
-		if(drawable==0 || !winhash.find(dpy, drawable, newvw)
-			|| newvw->getGLXDrawable()!=curdraw)
+		if(drawable == 0 || !winhash.find(dpy, drawable, newvw)
+			|| newvw->getGLXDrawable() != curdraw)
 		{
 			if(drawingToFront() || vw->dirty)
 				vw->readback(GL_FRONT, false, fconfig.sync);
@@ -1708,7 +1718,7 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to an off-screen drawable.
-	int direct=ctxhash.isDirect(ctx);
+	int direct = ctxhash.isDirect(ctx);
 	if(dpy && drawable && ctx)
 	{
 		if(!config)
@@ -1716,11 +1726,11 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			vglout.PRINTLN("[VGL] WARNING: glXMakeCurrent() called with a previously-destroyed context.");
 			goto done;
 		}
-		vw=winhash.initVW(dpy, drawable, config);
+		vw = winhash.initVW(dpy, drawable, config);
 		if(vw)
 		{
 			setWMAtom(dpy, drawable, vw);
-			drawable=vw->updateGLXDrawable();
+			drawable = vw->updateGLXDrawable();
 			vw->setDirect(direct);
 		}
 		else if(!glxdhash.getCurrentDisplay(drawable))
@@ -1728,22 +1738,23 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
 			// that was created in another process.
 			winhash.add(dpy, drawable);
-			vw=winhash.initVW(dpy, drawable, config);
+			vw = winhash.initVW(dpy, drawable, config);
 			if(vw)
 			{
-				drawable=vw->updateGLXDrawable();
+				drawable = vw->updateGLXDrawable();
 				vw->setDirect(direct);
 			}
 		}
 	}
 
-	retval=_glXMakeContextCurrent(_dpy3D, drawable, drawable, ctx);
-	if(fconfig.trace && retval) renderer=(const char *)_glGetString(GL_RENDERER);
+	retval = _glXMakeContextCurrent(_dpy3D, drawable, drawable, ctx);
+	if(fconfig.trace && retval)
+		renderer = (const char *)_glGetString(GL_RENDERER);
 	// The pixels in a new off-screen drawable are undefined, so we have to clear
 	// it.
 	if(winhash.find(drawable, vw)) { vw->clear();  vw->cleanup(); }
 	VirtualPixmap *vpm;
-	if((vpm=pmhash.find(dpy, drawable))!=NULL)
+	if((vpm = pmhash.find(dpy, drawable)) != NULL)
 	{
 		vpm->clear();
 		vpm->setDirect(direct);
@@ -1761,19 +1772,19 @@ Bool glXMakeCurrent(Display *dpy, GLXDrawable drawable, GLXContext ctx)
 Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	GLXContext ctx)
 {
-	Bool retval=False;  const char *renderer="Unknown";
-	VirtualWin *vw;  GLXFBConfig config=0;
+	Bool retval = False;  const char *renderer = "Unknown";
+	VirtualWin *vw;  GLXFBConfig config = 0;
 
-	if(vglfaker::deadYet || vglfaker::getFakerLevel()>0)
+	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _glXMakeContextCurrent(dpy, draw, read, ctx);
 
 	TRY();
 
-	if(ctx) config=ctxhash.findConfig(ctx);
-	if(config==(GLXFBConfig)-1)
+	if(ctx) config = ctxhash.findConfig(ctx);
+	if(config == (GLXFBConfig)-1)
 	{
 		// Overlay config.  Hand off to 2D X server.
-		retval=_glXMakeContextCurrent(dpy, draw, read, ctx);
+		retval = _glXMakeContextCurrent(dpy, draw, read, ctx);
 		winhash.setOverlay(dpy, draw);
 		winhash.setOverlay(dpy, read);
 		vglfaker::setExcludeCurrent(true);
@@ -1791,13 +1802,13 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 	// glXMakeContextCurrent() implies a glFinish() on the previous context,
 	// which is why we read back the front buffer here if it is dirty.
-	GLXDrawable curdraw=_glXGetCurrentDrawable();
+	GLXDrawable curdraw = _glXGetCurrentDrawable();
 	if(_glXGetCurrentContext() && dpy3DIsCurrent() && curdraw
 		&& winhash.find(curdraw, vw))
 	{
 		VirtualWin *newvw;
-		if(draw==0 || !winhash.find(dpy, draw, newvw)
-			|| newvw->getGLXDrawable()!=curdraw)
+		if(draw == 0 || !winhash.find(dpy, draw, newvw)
+			|| newvw->getGLXDrawable() != curdraw)
 		{
 			if(drawingToFront() || vw->dirty)
 				vw->readback(GL_FRONT, false, fconfig.sync);
@@ -1807,7 +1818,7 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 	// If the drawable isn't a window, we pass it through unmodified, else we
 	// map it to an off-screen drawable.
 	VirtualWin *drawVW, *readVW;
-	int direct=ctxhash.isDirect(ctx);
+	int direct = ctxhash.isDirect(ctx);
 	if(dpy && (draw || read) && ctx)
 	{
 		if(!config)
@@ -1816,11 +1827,11 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			goto done;
 		}
 
-		drawVW=winhash.initVW(dpy, draw, config);
+		drawVW = winhash.initVW(dpy, draw, config);
 		if(drawVW)
 		{
 			setWMAtom(dpy, draw, drawVW);
-			draw=drawVW->updateGLXDrawable();
+			draw = drawVW->updateGLXDrawable();
 			drawVW->setDirect(direct);
 		}
 		else if(!glxdhash.getCurrentDisplay(draw))
@@ -1828,19 +1839,19 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
 			// that was created in another process.
 			winhash.add(dpy, draw);
-			drawVW=winhash.initVW(dpy, draw, config);
+			drawVW = winhash.initVW(dpy, draw, config);
 			if(drawVW)
 			{
-				draw=drawVW->updateGLXDrawable();
+				draw = drawVW->updateGLXDrawable();
 				drawVW->setDirect(direct);
 			}
 		}
 
-		readVW=winhash.initVW(dpy, read, config);
+		readVW = winhash.initVW(dpy, read, config);
 		if(readVW)
 		{
 			setWMAtom(dpy, read, readVW);
-			read=readVW->updateGLXDrawable();
+			read = readVW->updateGLXDrawable();
 			readVW->setDirect(direct);
 		}
 		else if(!glxdhash.getCurrentDisplay(read))
@@ -1848,20 +1859,21 @@ Bool glXMakeContextCurrent(Display *dpy, GLXDrawable draw, GLXDrawable read,
 			// Apparently it isn't a Pbuffer or a Pixmap, so it must be a window
 			// that was created in another process.
 			winhash.add(dpy, read);
-			readVW=winhash.initVW(dpy, read, config);
+			readVW = winhash.initVW(dpy, read, config);
 			if(readVW)
 			{
-				read=readVW->updateGLXDrawable();
+				read = readVW->updateGLXDrawable();
 				readVW->setDirect(direct);
 			}
 		}
 	}
-	retval=_glXMakeContextCurrent(_dpy3D, draw, read, ctx);
-	if(fconfig.trace && retval) renderer=(const char *)_glGetString(GL_RENDERER);
+	retval = _glXMakeContextCurrent(_dpy3D, draw, read, ctx);
+	if(fconfig.trace && retval)
+		renderer = (const char *)_glGetString(GL_RENDERER);
 	if(winhash.find(draw, drawVW)) { drawVW->clear();  drawVW->cleanup(); }
 	if(winhash.find(read, readVW)) readVW->cleanup();
 	VirtualPixmap *vpm;
-	if((vpm=pmhash.find(dpy, draw))!=NULL)
+	if((vpm = pmhash.find(dpy, draw)) != NULL)
 	{
 		vpm->clear();
 		vpm->setDirect(direct);
@@ -1888,17 +1900,17 @@ Bool glXMakeCurrentReadSGI(Display *dpy, GLXDrawable draw, GLXDrawable read,
 
 int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 {
-	int retval=0;
+	int retval = 0;
 
 	TRY();
 
 	if(isExcluded(dpy) || ctxhash.isOverlay(ctx))
 		return _glXQueryContext(dpy, ctx, attribute, value);
 
-		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);  prargix(attribute);
-		starttrace();
+		opentrace(glXQueryContext);  prargd(dpy);  prargx(ctx);
+		prargix(attribute);  starttrace();
 
-	retval=_glXQueryContext(_dpy3D, ctx, attribute, value);
+	retval = _glXQueryContext(_dpy3D, ctx, attribute, value);
 
 		stoptrace();  if(value) prargix(*value);  closetrace();
 
@@ -1910,7 +1922,7 @@ int glXQueryContext(Display *dpy, GLXContext ctx, int attribute, int *value)
 int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 	int *value)
 {
-	int retval=0;
+	int retval = 0;
 
 	TRY();
 
@@ -1918,9 +1930,9 @@ int glXQueryContextInfoEXT(Display *dpy, GLXContext ctx, int attribute,
 		return _glXQueryContextInfoEXT(dpy, ctx, attribute, value);
 
 		opentrace(glXQueryContextInfoEXT);  prargd(dpy);  prargx(ctx);
-		prargix(attribute); starttrace();
+		prargix(attribute);  starttrace();
 
-	retval=_glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
+	retval = _glXQueryContextInfoEXT(_dpy3D, ctx, attribute, value);
 
 		stoptrace();  if(value) prargix(*value);  closetrace();
 
@@ -1948,18 +1960,18 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 		prargix(attribute);  starttrace();
 
 	// GLX_EXT_swap_control attributes
-	if(attribute==GLX_SWAP_INTERVAL_EXT && value)
+	if(attribute == GLX_SWAP_INTERVAL_EXT && value)
 	{
-		VirtualWin *vw=NULL;
+		VirtualWin *vw = NULL;
 		if(winhash.find(dpy, draw, vw))
-			*value=vw->getSwapInterval();
+			*value = vw->getSwapInterval();
 		else
-			*value=0;
+			*value = 0;
 		goto done;
 	}
-	else if(attribute==GLX_MAX_SWAP_INTERVAL_EXT && value)
+	else if(attribute == GLX_MAX_SWAP_INTERVAL_EXT && value)
 	{
-		*value=VGL_MAX_SWAP_INTERVAL;
+		*value = VGL_MAX_SWAP_INTERVAL;
 		goto done;
 	}
 
@@ -1967,7 +1979,8 @@ void glXQueryDrawable(Display *dpy, GLXDrawable draw, int attribute,
 
 	done:
 		stoptrace();  prargx(ServerDrawable(dpy, draw));
-		if(value) { prargix(*value); }  else { prargx(value); }  closetrace();
+		if(value) { prargix(*value); }  else { prargx(value); }
+		closetrace();
 
 	CATCH();
 }
@@ -2021,11 +2034,11 @@ const char *glXQueryServerString(Display *dpy, int screen, int name)
 	if(isExcluded(dpy))
 		return _glXQueryServerString(dpy, screen, name);
 
-	if(name==GLX_EXTENSIONS) return getGLXExtensions();
-	else if(name==GLX_VERSION) return "1.4";
-	else if(name==GLX_VENDOR)
+	if(name == GLX_EXTENSIONS) return getGLXExtensions();
+	else if(name == GLX_VERSION) return "1.4";
+	else if(name == GLX_VENDOR)
 	{
-		if(strlen(fconfig.glxvendor)>0) return fconfig.glxvendor;
+		if(strlen(fconfig.glxvendor) > 0) return fconfig.glxvendor;
 		else return __APPNAME;
 	}
 
@@ -2074,11 +2087,11 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 // If the application is rendering to the back buffer, VirtualGL will read
 // back and send the buffer whenever glXSwapBuffers() is called.
 
-void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
+void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 {
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	static Timer timer;  Timer sleepTimer;
-	static double err=0.;  static bool first=true;
+	static double err = 0.;  static bool first = true;
 
 	TRY();
 
@@ -2090,26 +2103,26 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 		opentrace(glXSwapBuffers);  prargd(dpy);  prargx(drawable);  starttrace();
 
-	fconfig.flushdelay=0.;
+	fconfig.flushdelay = 0.;
 	if(winhash.find(dpy, drawable, vw))
 	{
 		vw->readback(GL_BACK, false, fconfig.sync);
 		vw->swapBuffers();
-		int interval=vw->getSwapInterval();
-		if(interval>0)
+		int interval = vw->getSwapInterval();
+		if(interval > 0)
 		{
-			double elapsed=timer.elapsed();
-			if(first) first=false;
+			double elapsed = timer.elapsed();
+			if(first) first = false;
 			else
 			{
-				double fps=fconfig.refreshrate/(double)interval;
-				if(fps>0.0 && elapsed<1./fps)
+				double fps = fconfig.refreshrate / (double)interval;
+				if(fps > 0.0 && elapsed < 1. / fps)
 				{
 					sleepTimer.start();
-					long usec=(long)((1./fps-elapsed-err)*1000000.);
-					if(usec>0) usleep(usec);
-					double sleepTime=sleepTimer.elapsed();
-					err=sleepTime-(1./fps-elapsed-err);  if(err<0.) err=0.;
+					long usec = (long)((1. / fps - elapsed - err) * 1000000.);
+					if(usec > 0) usleep(usec);
+					double sleepTime = sleepTimer.elapsed();
+					err = sleepTime - (1. / fps - elapsed - err);  if(err < 0.) err = 0.;
 				}
 			}
 			timer.start();
@@ -2126,10 +2139,10 @@ void glXSwapBuffers(Display* dpy, GLXDrawable drawable)
 
 // Returns the transparent index from the overlay visual on the 2D X server
 
-int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
-	Window underlay, long *transparentIndex)
+int glXGetTransparentIndexSUN(Display *dpy, Window overlay, Window underlay,
+	long *transparentIndex)
 {
-	int retval=False;
+	int retval = False;
 	XWindowAttributes xwa;
 	if(!transparentIndex) return False;
 
@@ -2142,20 +2155,22 @@ int glXGetTransparentIndexSUN(Display *dpy, Window overlay,
 		opentrace(glXGetTransparentIndexSUN);  prargd(dpy);  prargx(overlay);
 		prargx(underlay);  starttrace();
 
-	if(fconfig.transpixel>=0)
-		*transparentIndex=fconfig.transpixel;
+	if(fconfig.transpixel >= 0)
+		*transparentIndex = fconfig.transpixel;
 	else
 	{
 		if(!dpy || !overlay) goto done;
 		XGetWindowAttributes(dpy, overlay, &xwa);
-		*transparentIndex=glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
+		*transparentIndex = glxvisual::visAttrib2D(dpy, DefaultScreen(dpy),
 			xwa.visual->visualid, GLX_TRANSPARENT_INDEX_VALUE);
 	}
-	retval=True;
+	retval = True;
 
 	done:
-		stoptrace();  if(transparentIndex) { prargi(*transparentIndex); }
-		else { prargx(transparentIndex); }  closetrace();
+		stoptrace();
+		if(transparentIndex) { prargi(*transparentIndex); }
+		else { prargx(transparentIndex); }
+		closetrace();
 
 	CATCH();
 	return retval;
@@ -2224,8 +2239,8 @@ Bool glXQueryMaxSwapGroupsNV(Display *dpy, int screen, GLuint *maxGroups,
 	if(isExcluded(dpy))
 		return _glXQueryMaxSwapGroupsNV(dpy, screen, maxGroups, maxBarriers);
 
-	return _glXQueryMaxSwapGroupsNV(_dpy3D, DefaultScreen(_dpy3D),
-		maxGroups, maxBarriers);
+	return _glXQueryMaxSwapGroupsNV(_dpy3D, DefaultScreen(_dpy3D), maxGroups,
+		maxBarriers);
 
 	CATCH();
 	return False;
@@ -2283,13 +2298,13 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 		opentrace(glXSwapIntervalEXT);  prargd(dpy);  prargx(drawable);
 		prargi(interval);  starttrace();
 
-	if(interval>VGL_MAX_SWAP_INTERVAL) interval=VGL_MAX_SWAP_INTERVAL;
-	if(interval<0)
+	if(interval > VGL_MAX_SWAP_INTERVAL) interval = VGL_MAX_SWAP_INTERVAL;
+	if(interval < 0)
 		// NOTE:  Technically, this should trigger a BadValue error, but nVidia's
 		// implementation doesn't, so we emulate their behavior.
-		interval=1;
+		interval = 1;
 
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 	if(winhash.find(dpy, drawable, vw))
 		vw->setSwapInterval(interval);
 	// NOTE:  Technically, a BadWindow error should be triggered if drawable
@@ -2307,7 +2322,7 @@ void glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
 
 int glXSwapIntervalSGI(int interval)
 {
-	int retval=0;
+	int retval = 0;
 
 	if(vglfaker::getExcludeCurrent()) return _glXSwapIntervalSGI(interval);
 
@@ -2315,10 +2330,10 @@ int glXSwapIntervalSGI(int interval)
 
 	TRY();
 
-	VirtualWin *vw=NULL;  GLXDrawable draw=_glXGetCurrentDrawable();
-	if(interval<0) retval=GLX_BAD_VALUE;
+	VirtualWin *vw = NULL;  GLXDrawable draw = _glXGetCurrentDrawable();
+	if(interval < 0) retval = GLX_BAD_VALUE;
 	else if(!draw || !winhash.find(draw, vw))
-		retval=GLX_BAD_CONTEXT;
+		retval = GLX_BAD_CONTEXT;
 	else vw->setSwapInterval(interval);
 
 	CATCH();
@@ -2353,4 +2368,4 @@ void glXUseXFont(Font font, int first, int count, int list_base)
 }
 
 
-} // extern "C"
+}  // extern "C"

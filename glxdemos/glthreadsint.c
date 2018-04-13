@@ -1,17 +1,18 @@
-
 /*
  * Copyright (C) 2000  Brian Paul   All Rights Reserved.
- * 
+ * Copyright (C) 2004  Landmark Graphics Corporation   All Rights Reserved.
+ * Copyright (C) 2018  D. R. Commander   All Rights Reserved.
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -50,13 +51,13 @@ struct winthread {
    Display *Dpy;
    int Index;
    pthread_t Thread;
-   pthread_mutex_t ready;
+   pthread_mutex_t Ready;
    Window Win;
    GLXContext Context;
-   float xAngle, yAngle;
+   float AngleX, AngleY;
    int WinWidth, WinHeight;
    GLboolean NewSize;
-   int motionstartx, motionstarty;
+   int MotionStartX, MotionStartY;
 };
 
 
@@ -151,7 +152,7 @@ draw_loop(struct winthread *wt)
 {
    while (!ExitFlag) {
 
-      pthread_mutex_lock(&wt->ready);
+      pthread_mutex_lock(&wt->Ready);
 
       glXMakeCurrent(wt->Dpy, wt->Win, wt->Context);
 
@@ -172,8 +173,8 @@ draw_loop(struct winthread *wt)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       glPushMatrix();
-         glRotatef(wt->yAngle, 1, 0, 0);
-         glRotatef(wt->xAngle, 0, 1, 0);
+         glRotatef(wt->AngleY, 1, 0, 0);
+         glRotatef(wt->AngleX, 0, 1, 0);
          glScalef(0.7, 0.7, 0.7);
          draw_object();
       glPopMatrix();
@@ -190,7 +191,9 @@ static void
 event_loop(Display *dpy)
 {
    while (!ExitFlag) {
-      static long mask = PointerMotionMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask | ExposureMask | KeyPressMask;
+      static long mask = StructureNotifyMask | ExposureMask | KeyPressMask |
+                         PointerMotionMask | ButtonPressMask |
+                         ButtonReleaseMask;
       XEvent event;
       int i;
 
@@ -202,29 +205,33 @@ event_loop(Display *dpy)
                   case ConfigureNotify:
                      resize(wt, event.xconfigure.width,
                             event.xconfigure.height);
-                     pthread_mutex_unlock(&wt->ready);
+                     pthread_mutex_unlock(&wt->Ready);
                      break;
                   case MotionNotify:
-                     if(event.xmotion.state&Button1Mask || event.xmotion.state&Button2Mask
-                     || event.xmotion.state&Button3Mask || event.xmotion.state&Button4Mask
-                     || event.xmotion.state&Button5Mask) {
-                        wt->xAngle+= (float)(event.xmotion.x-wt->motionstartx)/(float)wt->WinWidth*180.;
-                        wt->yAngle+= (float)(event.xmotion.y-wt->motionstarty)/(float)wt->WinHeight*180.;
-                        wt->motionstartx=event.xmotion.x;
-                        wt->motionstarty=event.xmotion.y;
+                     if (event.xmotion.state & Button1Mask ||
+                         event.xmotion.state & Button2Mask ||
+                         event.xmotion.state & Button3Mask ||
+                         event.xmotion.state & Button4Mask ||
+                         event.xmotion.state & Button5Mask) {
+                        wt->AngleX += (float) (event.xmotion.x - wt->MotionStartX) /
+                                      (float) wt->WinWidth * 180.;
+                        wt->AngleY += (float) (event.xmotion.y - wt->MotionStartY) /
+                                      (float) wt->WinHeight * 180.;
+                        wt->MotionStartX = event.xmotion.x;
+                        wt->MotionStartY = event.xmotion.y;
                      }
-                     pthread_mutex_unlock(&wt->ready);
+                     pthread_mutex_unlock(&wt->Ready);
                      break;
                   case ButtonPress:
-                     wt->motionstartx=event.xbutton.x;
-                     wt->motionstarty=event.xbutton.y;
+                     wt->MotionStartX = event.xbutton.x;
+                     wt->MotionStartY = event.xbutton.y;
                      break;
                   case ButtonRelease:
-                     pthread_mutex_unlock(&wt->ready);
+                     pthread_mutex_unlock(&wt->Ready);
                      break;
                   case Expose:
-                     pthread_mutex_unlock(&wt->ready);
-                     break;                          
+                     pthread_mutex_unlock(&wt->Ready);
+                     break;
                   case KeyPress:
                      /* tell all threads to exit */
                      ExitFlag = GL_TRUE;
@@ -252,12 +259,12 @@ create_window(struct winthread *wt)
    Window win;
    GLXContext ctx;
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
                     GLX_DEPTH_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_DOUBLEBUFFER,
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -279,13 +286,14 @@ create_window(struct winthread *wt)
    attr.background_pixel = 0;
    attr.border_pixel = 0;
    attr.colormap = XCreateColormap(wt->Dpy, root, visinfo->visual, AllocNone);
-   attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask
-      | ButtonPressMask | PointerMotionMask | ExposureMask | ButtonReleaseMask;
+   attr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask |
+                     ButtonPressMask | PointerMotionMask | ExposureMask |
+                     ButtonReleaseMask;
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow(wt->Dpy, root, xpos, ypos, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr);
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr);
    if (!win) {
       Error("Couldn't create window");
    }
@@ -314,13 +322,13 @@ create_window(struct winthread *wt)
    /* save the info for this window/context */
    wt->Win = win;
    wt->Context = ctx;
-   wt->xAngle = wt->yAngle = 0.0;
+   wt->AngleX = wt->AngleY = 0.0;
    wt->WinWidth = width;
    wt->WinHeight = height;
    wt->NewSize = GL_TRUE;
-   if(pthread_mutex_init(&wt->ready, NULL)==-1
-   || pthread_mutex_lock(&wt->ready)==-1)
-       Error(strerror(errno));
+   if (pthread_mutex_init(&wt->Ready, NULL) == -1 ||
+       pthread_mutex_lock(&wt->Ready) == -1)
+      Error(strerror(errno));
 }
 
 
@@ -388,7 +396,7 @@ main(int argc, char *argv[])
          }
       }
    }
-   
+
    /*
     * VERY IMPORTANT: call XInitThreads() before any other Xlib functions.
     */
@@ -419,7 +427,7 @@ main(int argc, char *argv[])
    for (i = 0; i < numThreads; i++) {
       pthread_create(&WinThreads[i].Thread, NULL, thread_function,
                      (void*) &WinThreads[i]);
-      printf("Created Thread %p\n", (void *)WinThreads[i].Thread);
+      printf("Created Thread %p\n", (void *) WinThreads[i].Thread);
    }
 
    event_loop(dpy);

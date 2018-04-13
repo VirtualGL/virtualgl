@@ -28,66 +28,71 @@
 #include "vglutil.h"
 
 
-static char __lasterror[1024]="No error";
-#define _throww32(m) {  \
-	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024, NULL))  \
-		fprintf(stderr, "WIN32 ERROR in line %d:\n%s\n%s", __LINE__, m,  \
-			__lasterror);  \
-	goto bailout;  \
+static char __lasterror[1024] = "No error";
+#define _throww32(m) \
+{ \
+	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), \
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024, NULL)) \
+		fprintf(stderr, "WIN32 ERROR in line %d:\n%s\n%s", __LINE__, m, \
+			__lasterror); \
+	goto bailout; \
 }
-#define _throw(m) {  \
-	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m);  \
-	goto bailout;  \
+#define _throw(m) \
+{ \
+	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m); \
+	goto bailout; \
 }
-#define _catch(f) { if((f)==-1) goto bailout; }
+#define _catch(f)  { if((f) == -1) goto bailout; }
 
-#define np2(i) ((i)>0? (1<<(int)(log((double)(i))/log(2.))) : 0)
+#define np2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
-#define SPHERE_RED(f) (GLfloat)fabs(MAXI*(2.*f-1.))
-#define SPHERE_GREEN(f) (GLfloat)fabs(MAXI*(2.*fmod(f+2./3., 1.)-1.))
-#define SPHERE_BLUE(f) (GLfloat)fabs(MAXI*(2.*fmod(f+1./3., 1.)-1.))
+#define SPHERE_RED(f) \
+	(GLfloat)fabs(MAXI * (2. * f - 1.))
+#define SPHERE_GREEN(f) \
+	(GLfloat)fabs(MAXI * (2. * fmod(f + 2. / 3., 1.) - 1.))
+#define SPHERE_BLUE(f) \
+	(GLfloat)fabs(MAXI * (2. * fmod(f + 1. / 3., 1.) - 1.))
 
 
-#define DEF_WIDTH 1240
-#define DEF_HEIGHT 900
+#define DEF_WIDTH  1240
+#define DEF_HEIGHT  900
 
-#define DEF_SLICES 32
-#define DEF_STACKS 32
+#define DEF_SLICES  32
+#define DEF_STACKS  32
 
-#define DEF_SPHERES 20
+#define DEF_SPHERES  20
 
-#define _2PI 6.283185307180
-#define MAXI (220./255.)
+#define _2PI  6.283185307180
+#define MAXI  (220. / 255.)
 
-#define DEFBENCHTIME 2.0
+#define DEFBENCHTIME  2.0
 
-HDC hdc=0;  HWND win=0;  HGLRC ctx=0;
-int useStereo=0, useImm=0, interactive=0, loColor=0, maxFrames=0,
-	totalFrames=0;
-double benchTime=DEFBENCHTIME;
-int doDisplay=0, advance=0;
+HDC hdc = 0;  HWND win = 0;  HGLRC ctx = 0;
+int useStereo = 0, useImm = 0, interactive = 0, loColor = 0, maxFrames = 0,
+	totalFrames = 0;
+double benchTime = DEFBENCHTIME;
+int doDisplay = 0, advance = 0;
 
-int sphereList=0, fontListBase=0;
-GLUquadricObj *sphereQuad=NULL;
-int slices=DEF_SLICES, stacks=DEF_STACKS, spheres=DEF_SPHERES;
-GLfloat x=0., y=0., z=-3.;
-GLfloat outerAngle=0., middleAngle=0., innerAngle=0.;
-GLfloat loneSphereColor=0.;
+int sphereList = 0, fontListBase = 0;
+GLUquadricObj *sphereQuad = NULL;
+int slices = DEF_SLICES, stacks = DEF_STACKS, spheres = DEF_SPHERES;
+GLfloat x = 0., y = 0., z = -3.;
+GLfloat outerAngle = 0., middleAngle = 0., innerAngle = 0.;
+GLfloat loneSphereColor = 0.;
 
-int width=DEF_WIDTH, height=DEF_HEIGHT;
+int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 
 void reshape(int newWidth, int newHeight)
 {
-	if(newWidth<=0) newWidth=1;  if(newHeight<=0) newHeight=1;
-	width=newWidth;  height=newHeight;
+	if(newWidth <= 0) newWidth = 1;  if(newHeight <= 0) newHeight = 1;
+	width = newWidth;  height = newHeight;
 }
 
 
 void setSphereColor(double color)
 {
-	GLfloat mat[4]=
+	GLfloat mat[4] =
 	{
 		SPHERE_RED(color), SPHERE_GREEN(color), SPHERE_BLUE(color), 0.25
 	};
@@ -101,18 +106,18 @@ void renderSpheres(int buf)
 {
 	int i;
 	GLfloat xAspect, yAspect;
-	GLfloat stereoCameraOffset=0.;
-	GLfloat nearDist=1.5, farDist=40., zeroParallaxDist=17.;
+	GLfloat stereoCameraOffset = 0.;
+	GLfloat nearDist = 1.5, farDist = 40., zeroParallaxDist = 17.;
 
 	glDrawBuffer(buf);
 
-	xAspect=(GLfloat)width/(GLfloat)(min(width, height));
-	yAspect=(GLfloat)height/(GLfloat)(min(width, height));
+	xAspect = (GLfloat)width / (GLfloat)(min(width, height));
+	yAspect = (GLfloat)height / (GLfloat)(min(width, height));
 
-	if(buf==GL_BACK_LEFT)
-		stereoCameraOffset=-xAspect*zeroParallaxDist/nearDist*0.035f;
-	else if(buf==GL_BACK_RIGHT)
-		stereoCameraOffset=xAspect*zeroParallaxDist/nearDist*0.035f;
+	if(buf == GL_BACK_LEFT)
+		stereoCameraOffset = -xAspect * zeroParallaxDist / nearDist * 0.035f;
+	else if(buf == GL_BACK_RIGHT)
+		stereoCameraOffset = xAspect * zeroParallaxDist / nearDist * 0.035f;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -137,11 +142,12 @@ void renderSpheres(int buf)
 	/* Outer ring */
 	glPushMatrix();
 	glRotatef(outerAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef((GLfloat)sin(_2PI*f)*5.0f, (GLfloat)cos(_2PI*f)*5.0f, -10.0f);
+		glTranslatef((GLfloat)sin(_2PI * f) * 5.0f, (GLfloat)cos(_2PI * f) * 5.0f,
+			-10.0f);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -152,11 +158,12 @@ void renderSpheres(int buf)
 	/* Middle ring */
 	glPushMatrix();
 	glRotatef(middleAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef((GLfloat)sin(_2PI*f)*5.0f, (GLfloat)cos(_2PI*f)*5.0f, -17.0f);
+		glTranslatef((GLfloat)sin(_2PI * f) * 5.0f, (GLfloat)cos(_2PI * f) * 5.0f,
+			-17.0f);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -167,11 +174,12 @@ void renderSpheres(int buf)
 	/* Inner ring */
 	glPushMatrix();
 	glRotatef(innerAngle, 0., 0., 1.);
-	for(i=0; i<spheres; i++)
+	for(i = 0; i < spheres; i++)
 	{
-		double f=(double)i/(double)spheres;
+		double f = (double)i / (double)spheres;
 		glPushMatrix();
-		glTranslatef((GLfloat)sin(_2PI*f)*5.0f, (GLfloat)cos(_2PI*f)*5.0f, -29.0f);
+		glTranslatef((GLfloat)sin(_2PI * f) * 5.0f, (GLfloat)cos(_2PI * f) * 5.0f,
+			-29.0f);
 		setSphereColor(f);
 		if(useImm) gluSphere(sphereQuad, 1.3, slices, stacks);
 		else glCallList(sphereList);
@@ -187,21 +195,21 @@ void renderSpheres(int buf)
 
 int display(int advance)
 {
-	static int first=1;
-	static double start=0., elapsed=0., mpixels=0.;
-	static unsigned long frames=0;
+	static int first = 1;
+	static double start = 0., elapsed = 0., mpixels = 0.;
+	static unsigned long frames = 0;
 	static char temps[256];
 	GLfloat xAspect, yAspect;
 
 	if(first)
 	{
-		GLfloat id4[]={ 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat light0Amb[]={ 0.3f, 0.3f, 0.3f, 1.0f };
-		GLfloat light0Dif[]={ 0.8f, 0.8f, 0.8f, 1.0f };
-		GLfloat light0Pos[]={ 1.0f, 1.0f, 1.0f, 0.0f };
+		GLfloat id4[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat light0Amb[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		GLfloat light0Dif[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+		GLfloat light0Pos[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 
-		sphereList=glGenLists(1);
-		if(!(sphereQuad=gluNewQuadric()))
+		sphereList = glGenLists(1);
+		if(!(sphereQuad = gluNewQuadric()))
 			_throw("Could not allocate GLU quadric object");
 		glNewList(sphereList, GL_COMPILE);
 		gluSphere(sphereQuad, 1.3, slices, stacks);
@@ -228,30 +236,30 @@ int display(int advance)
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
-		fontListBase=glGenLists(256+1);
+		fontListBase = glGenLists(256 + 1);
 		if(!wglUseFontBitmaps(hdc, 0, 256, fontListBase))
 		{
-			DWORD err=GetLastError();
+			DWORD err = GetLastError();
 			fprintf(stderr, "WARNING: Cannot create font display lists\n");
-			if(err!=ERROR_SUCCESS && FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-				err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024,
-				NULL))
+			if(err != ERROR_SUCCESS
+				&& FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), __lasterror, 1024, NULL))
 				fprintf(stderr, "         %s", __lasterror);
 		}
 		snprintf(temps, 255, "Measuring performance ...");
 
-		first=0;
+		first = 0;
 	}
 
 	if(advance)
 	{
-		z-=0.5;
-		if(z<-29.) z=-3.5;
-		outerAngle+=0.1f;  if(outerAngle>360.) outerAngle-=360.;
-		middleAngle-=0.37f;  if(middleAngle<-360.) middleAngle+=360.;
-		innerAngle+=0.63f;  if(innerAngle>360.) innerAngle-=360.;
-		loneSphereColor+=0.005f;
-		if(loneSphereColor>1.) loneSphereColor-=1.;
+		z -= 0.5;
+		if(z < -29.) z = -3.5;
+		outerAngle += 0.1f;  if(outerAngle > 360.) outerAngle -= 360.;
+		middleAngle -= 0.37f;  if(middleAngle < -360.) middleAngle += 360.;
+		innerAngle += 0.63f;  if(innerAngle > 360.) innerAngle -= 360.;
+		loneSphereColor += 0.005f;
+		if(loneSphereColor > 1.) loneSphereColor -= 1.;
 	}
 
 	if(useStereo)
@@ -266,9 +274,9 @@ int display(int advance)
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glColor3f(1., 1., 1.);
-	xAspect=(GLfloat)width/(GLfloat)(min(width, height));
-	yAspect=(GLfloat)height/(GLfloat)(min(width, height));
-	glRasterPos3f(-0.95f*xAspect, -0.95f*yAspect, -1.5f);
+	xAspect = (GLfloat)width / (GLfloat)(min(width, height));
+	yAspect = (GLfloat)height / (GLfloat)(min(width, height));
+	glRasterPos3f(-0.95f * xAspect, -0.95f * yAspect, -1.5f);
 	glListBase(fontListBase);
 	glCallLists((GLsizei)strlen(temps), GL_UNSIGNED_BYTE, temps);
 	glPopAttrib();
@@ -276,25 +284,25 @@ int display(int advance)
 	glPopAttrib();
 	SwapBuffers(hdc);
 
-	if(start>0.)
+	if(start > 0.)
 	{
-		elapsed+=getTime()-start;  frames++;  totalFrames++;
-		mpixels+=(double)width*(double)height/1000000.;
-		if(elapsed>benchTime || (maxFrames && totalFrames>maxFrames))
+		elapsed += getTime() - start;  frames++;  totalFrames++;
+		mpixels += (double)width * (double)height / 1000000.;
+		if(elapsed > benchTime || (maxFrames && totalFrames > maxFrames))
 		{
 			snprintf(temps, 255, "%f frames/sec - %f Mpixels/sec",
-				(double)frames/elapsed, mpixels/elapsed);
+				(double)frames / elapsed, mpixels / elapsed);
 			printf("%s\n", temps);
-			elapsed=mpixels=0.;  frames=0;
+			elapsed = mpixels = 0.;  frames = 0;
 		}
 	}
-	if(maxFrames && totalFrames>maxFrames) goto bailout;
+	if(maxFrames && totalFrames > maxFrames) goto bailout;
 
-	start=getTime();
+	start = getTime();
 	return 0;
 
 	bailout:
-	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad=NULL; }
+	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad = NULL; }
 	return -1;
 }
 
@@ -309,13 +317,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);
 			return 0;
 		case WM_PAINT:
-			if(interactive) doDisplay=1;
+			if(interactive) doDisplay = 1;
 			return 0;
 		case WM_SIZE:
 			reshape(LOWORD(lParam), HIWORD(lParam));
 			return 0;
 		case WM_CHAR:
-			if(wParam==27 || wParam=='q' || wParam=='Q')
+			if(wParam == 27 || wParam == 'q' || wParam == 'Q')
 			{
 				PostQuitMessage(0);
 				return 0;
@@ -324,7 +332,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		case WM_MOUSEMOVE:
 			if(wParam & MK_LBUTTON)
 			{
-				doDisplay=advance=1;
+				doDisplay = advance = 1;
 				return 0;
 			}
 			break;
@@ -344,7 +352,7 @@ void usage(char **argv)
 	printf("-p <p> = Use (approximately) <p> polygons to render scene\n");
 	printf("         (max. is 57600 per sphere due to limitations of GLU.)\n");
 	printf("-n <n> = Render (approximately) <n> spheres (default: %d)\n",
-		DEF_SPHERES*3+1);
+		DEF_SPHERES * 3 + 1);
 	printf("-s = Use stereographic rendering initially\n");
 	printf("     (this can be switched on and off in the application)\n");
 	printf("-f <n> = max frames to render\n");
@@ -358,85 +366,87 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int i, nPolys=-1;
+	int i, nPolys = -1;
 	WNDCLASSEX wndclass;  MSG msg;
-	int bw=GetSystemMetrics(SM_CXFRAME)*2;
-	int bh=GetSystemMetrics(SM_CYFRAME)*2+GetSystemMetrics(SM_CYCAPTION);
-	DWORD winStyle=WS_OVERLAPPEDWINDOW | WS_VISIBLE;
-	int pixelFormat=0;
+	int bw = GetSystemMetrics(SM_CXFRAME) * 2;
+	int bh = GetSystemMetrics(SM_CYFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
+	DWORD winStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+	int pixelFormat = 0;
 	PIXELFORMATDESCRIPTOR pfd =
 	{
 		sizeof(PIXELFORMATDESCRIPTOR), 1,
-		PFD_DRAW_TO_WINDOW|PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
 		PFD_TYPE_RGBA, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0,
 		PFD_MAIN_PLANE, 0, 0, 0, 0
 	};
-	int fullScreen=0, pps;
+	int fullScreen = 0, pps;
 	RECT rect;
 
-	if(argc>1) for(i=1; i<argc; i++)
+	if(argc > 1) for(i = 1; i < argc; i++)
 	{
 		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
-		else if(!stricmp(argv[i], "-i")) interactive=1;
-		else if(!stricmp(argv[i], "-l")) loColor=1;
-		else if(!stricmp(argv[i], "-m")) useImm=1;
-		else if(!stricmp(argv[i], "-w") && i<argc-1)
+		else if(!stricmp(argv[i], "-i")) interactive = 1;
+		else if(!stricmp(argv[i], "-l")) loColor = 1;
+		else if(!stricmp(argv[i], "-m")) useImm = 1;
+		else if(!stricmp(argv[i], "-w") && i < argc - 1)
 		{
-			if(sscanf(argv[++i], "%dx%d", &width, &height)<2 || width<1 || height<1)
+			if(sscanf(argv[++i], "%dx%d", &width, &height) < 2 || width < 1
+				|| height < 1)
 				usage(argv);
 			printf("Window dimensions: %d x %d\n", width, height);
 		}
 		else if(!stricmp(argv[i], "-fs"))
 		{
-			fullScreen=1;
-			winStyle=WS_POPUP | WS_VISIBLE;
-			bw=bh=0;
+			fullScreen = 1;
+			winStyle = WS_POPUP | WS_VISIBLE;
+			bw = bh = 0;
 		}
-		else if(!stricmp(argv[i], "-f") && i<argc-1)
+		else if(!stricmp(argv[i], "-f") && i < argc - 1)
 		{
-			maxFrames=atoi(argv[++i]);
-			if(maxFrames<=0) usage(argv);
+			maxFrames = atoi(argv[++i]);
+			if(maxFrames <= 0) usage(argv);
 			printf("Number of frames to render: %d\n", maxFrames);
 		}
-		else if(!stricmp(argv[i], "-bt") && i<argc-1)
+		else if(!stricmp(argv[i], "-bt") && i < argc - 1)
 		{
-			benchTime=atof(argv[++i]);
-			if(benchTime<=0.0) usage(argv);
+			benchTime = atof(argv[++i]);
+			if(benchTime <= 0.0) usage(argv);
 		}
 		else if(!stricmp(argv[i], "-s"))
 		{
-			pfd.dwFlags|=PFD_STEREO;
-			useStereo=1;
+			pfd.dwFlags |= PFD_STEREO;
+			useStereo = 1;
 		}
-		else if(!stricmp(argv[i], "-n") && i<argc-1)
+		else if(!stricmp(argv[i], "-n") && i < argc - 1)
 		{
-			int temp=atoi(argv[++i]);
-			if(temp<=0) usage(argv);
-			spheres=(int)(((double)temp-1.0)/3.0+0.5);
-			if(spheres<1) spheres=1;
+			int temp = atoi(argv[++i]);
+			if(temp <= 0) usage(argv);
+			spheres = (int)(((double)temp - 1.0) / 3.0 + 0.5);
+			if(spheres < 1) spheres = 1;
 		}
-		else if(!stricmp(argv[i], "-p") && i<argc-1)
+		else if(!stricmp(argv[i], "-p") && i < argc - 1)
 		{
-			nPolys=atoi(argv[++i]);
-			if(nPolys<=0) usage(argv);
+			nPolys = atoi(argv[++i]);
+			if(nPolys <= 0) usage(argv);
 		}
 		else usage(argv);
 	}
 
-	if(nPolys>=0)
+	if(nPolys >= 0)
 	{
-		slices=stacks=(int)(sqrt((double)nPolys/((double)(3*spheres+1)))+0.5);
-		if(slices<1) slices=stacks=1;
+		slices = stacks =
+			(int)(sqrt((double)nPolys / ((double)(3 * spheres + 1))) + 0.5);
+		if(slices < 1) slices = stacks = 1;
 	}
 
-	pps=slices*stacks;
-	if(pps>57600)
+	pps = slices * stacks;
+	if(pps > 57600)
 	{
 		fprintf(stderr, "WARNING: polygons per sphere clamped to 57600 due to limitations of GLU\n");
-		pps=57600;
+		pps = 57600;
 	}
 	fprintf(stderr, "Polygons in scene: %d (%d spheres * %d polys/spheres)\n",
-		(spheres*3+1)*pps, spheres*3+1, pps);
+		(spheres * 3 + 1) * pps, spheres * 3 + 1, pps);
 
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -454,26 +464,26 @@ int main(int argc, char **argv)
 
 	if(fullScreen)
 	{
-		width=GetSystemMetrics(SM_CXSCREEN);
-		height=GetSystemMetrics(SM_CYSCREEN);
+		width = GetSystemMetrics(SM_CXSCREEN);
+		height = GetSystemMetrics(SM_CYSCREEN);
 	}
-	if(!(win=CreateWindowEx(0, "WGLspheres", "WGLspheres", winStyle, 0,  0,
-		width+bw, height+bh, NULL, NULL, GetModuleHandle(NULL), NULL)))
+	if(!(win = CreateWindowEx(0, "WGLspheres", "WGLspheres", winStyle, 0,  0,
+		width + bw, height + bh, NULL, NULL, GetModuleHandle(NULL), NULL)))
 		_throww32("Cannot create window");
 
 	GetClientRect(win, &rect);
 	fprintf(stderr, "Client area of window: %ld x %ld pixels\n",
-		rect.right-rect.left, rect.bottom-rect.top);
+		rect.right - rect.left, rect.bottom - rect.top);
 
-	if(!(hdc=GetDC(win))) _throww32("Cannot create device context");
+	if(!(hdc = GetDC(win))) _throww32("Cannot create device context");
 
-	if(!(pixelFormat=ChoosePixelFormat(hdc, &pfd)))
+	if(!(pixelFormat = ChoosePixelFormat(hdc, &pfd)))
 		_throww32("Cannot create pixel format");
 	fprintf(stderr, "Pixel Format of window: %d\n", pixelFormat);
 	if(!SetPixelFormat(hdc, pixelFormat, &pfd))
 		_throww32("Cannot set pixel format");
 
-	if(!(ctx=wglCreateContext(hdc))) _throww32("Cannot create OpenGL context");
+	if(!(ctx = wglCreateContext(hdc))) _throww32("Cannot create OpenGL context");
 
 	if(!wglMakeCurrent(hdc, ctx))
 		_throww32("Cannot make OpenGL context current");
@@ -483,25 +493,25 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		BOOL ret;
-		advance=0;  doDisplay=0;
+		advance = 0;  doDisplay = 0;
 
-		if((ret=GetMessage(&msg, NULL, 0, 0))==-1)
+		if((ret = GetMessage(&msg, NULL, 0, 0)) == -1)
 			{ _throww32("GetMessage() failed"); }
-		else if(ret==0) break;
+		else if(ret == 0) break;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 		if(!interactive) { _catch(display(1)); }
 		else if(doDisplay) { _catch(display(advance)); }
 	}
 
-	if(ctx) { wglDeleteContext(ctx);  ctx=0; }
-	if(hdc) { ReleaseDC(win, hdc);  hdc=0; }
-	if(win) { DestroyWindow(win);  win=0; }
+	if(ctx) { wglDeleteContext(ctx);  ctx = 0; }
+	if(hdc) { ReleaseDC(win, hdc);  hdc = 0; }
+	if(win) { DestroyWindow(win);  win = 0; }
 	return msg.wParam;
 
 	bailout:
-	if(ctx) { wglDeleteContext(ctx);  ctx=0; }
-	if(hdc) { ReleaseDC(win, hdc);  hdc=0; }
-	if(win) { DestroyWindow(win);  win=0; }
+	if(ctx) { wglDeleteContext(ctx);  ctx = 0; }
+	if(hdc) { ReleaseDC(win, hdc);  hdc = 0; }
+	if(win) { DestroyWindow(win);  win = 0; }
 	return -1;
 }

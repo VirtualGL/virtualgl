@@ -35,38 +35,42 @@ RESTORECON=
 
 VGLGENKEY=vglgenkey
 
-usage() {
+usage()
+{
 	echo
 	echo "USAGE: $0 [flags]"
 	echo
 	echo "Flags (for unattended mode):"
-	echo "-config		Configure server for use with VirtualGL"
-	echo "-unconfig	Unconfigure server for use with VirtualGL"
-	echo "-s		Restrict 3D X server access to vglusers group [default]"
-	echo "+s		Open 3D X server access to all users of this machine"
-	echo "-f		Restrict framebuffer device access to vglusers group [default]"
-	echo "+f		Open framebuffer device access to all users of this machine"
-	echo "-t		Disable XTEST extension [default]"
-	echo "+t		Enable XTEST extension"
+	echo "-config         Configure server for use with VirtualGL"
+	echo "-unconfig       Unconfigure server for use with VirtualGL"
+	echo "-s              Restrict 3D X server access to vglusers group [default]"
+	echo "+s              Open 3D X server access to all users of this machine"
+	echo "-f              Restrict framebuffer device access to vglusers group [default]"
+	echo "+f              Open framebuffer device access to all users of this machine"
+	echo "-t              Disable XTEST extension [default]"
+	echo "+t              Enable XTEST extension"
 	echo
 	echo "Flags (for both interactive and unattended modes):"
-	echo "-gid {g}  If vglusers group must be created, then set its group ID to {g}"
+	echo "-gid <g>  If vglusers group must be created, then set its group ID to <g>"
 	echo
 	exit $1
 }
 
-uid() {
+uid()
+{
 	id | cut -f2 -d = | cut -f1 -d \(;
 }
 
-maketemp() {
+maketemp()
+{
 	umask 077
 	mktemp /tmp/$1.XXXXXX || exit 1
 }
 
-removeline() {
+removeline()
+{
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: removeline {filename} {pattern}
+		echo 'USAGE: removeline <filename> <pattern>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_1`
@@ -74,9 +78,10 @@ removeline() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-replaceline() {
+replaceline()
+{
 	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-		echo USAGE: replaceline {filename} {pattern to replace} {new text}
+		echo 'USAGE: replaceline <filename> <pattern to replace> <new text>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_2`
@@ -84,9 +89,10 @@ replaceline() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-uncommentline() {
+uncommentline()
+{
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: uncommentline {filename} {regex of line to uncomment}
+		echo 'USAGE: uncommentline <filename> <regex of line to uncomment>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_3`
@@ -94,10 +100,11 @@ uncommentline() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-commentline() {
+commentline()
+{
 	uncommentline $1 $2
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: commentline {filename} {regex of line to comment}
+		echo 'USAGE: commentline <filename> <regex of line to comment>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_4`
@@ -105,9 +112,10 @@ commentline() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-addtobottom() {
+addtobottom()
+{
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: addtobottom {filename} {line to add}
+		echo 'USAGE: addtobottom <filename> <line to add>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_10`
@@ -115,9 +123,10 @@ addtobottom() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-addtotop() {
+addtotop()
+{
 	if [ -z "$1" -o -z "$2" ]; then
-		echo USAGE: addtotop {filename} {line to add}
+		echo 'USAGE: addtotop <filename> <line to add>'
 		return
 	fi
 	TMPFILE=`maketemp vglserver_config_5`
@@ -125,16 +134,19 @@ addtotop() {
 	AWK=nawk
 	type $AWK >/dev/null 2>/dev/null || AWK=gawk
 	cat > $SCRFILE <<EOF
-BEGIN {DONE=0}
+BEGIN {DONE = 0}
 {
-	if (/^$|^[^#]/ && DONE==0) {
+	if(/^$|^[^#]/ && DONE==0)
+	{
 		printf("$2");  printf("\n");
-		DONE=1;
+		DONE = 1;
 	}
 	print \$0
 }
-END {
-	if (DONE == 0) {
+END
+{
+	if(DONE == 0)
+	{
 		printf("$2");  printf("\n");
 	}
 }
@@ -144,9 +156,10 @@ EOF
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-addtoconf() {
+addtoconf()
+{
 	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-		echo USAGE: addtoconf {filename} {stanza} {line to add}
+		echo 'USAGE: addtoconf <filename> <stanza> <line to add>'
 		return
 	fi
 	grep "\[$2\]" $1 >/dev/null 2>/dev/null
@@ -154,7 +167,7 @@ addtoconf() {
 		TMPFILE=`maketemp vglserver_config_7`
 		AWK=nawk
 		type $AWK >/dev/null 2>/dev/null || AWK=gawk
-		$AWK -vstanza=$2 -vadd="$3" '{if ($0 ~ stanza) {print "["stanza"]"; print add} else print $0;}' $1 >$TMPFILE && cp $TMPFILE $1
+		$AWK -vstanza=$2 -vadd="$3" '{ if($0 ~ stanza) { print "["stanza"]";  print add } else print $0; }' $1 >$TMPFILE && cp $TMPFILE $1
 		if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 	else
 		addtobottom $1 "[$2]"
@@ -162,9 +175,10 @@ addtoconf() {
 	fi
 }
 
-backup() {
+backup()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: backup {filename}
+		echo 'USAGE: backup <filename>'
 		return
 	fi
 	if [ ! -f $1.orig.vgl ]; then
@@ -173,13 +187,15 @@ backup() {
 	fi
 }
 
-delvglgenkey() {
+delvglgenkey()
+{
 	echo ... Removing X server access from $1 script ...
 	removeline $1 vglgenkey
 	removeline $1 "xhost +*"
 }
 
-addvglgenkey() {
+addvglgenkey()
+{
 	backup $1
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Adding vglgenkey to $1 script ...
@@ -203,7 +219,8 @@ addvglgenkey() {
 	fi
 }
 
-addvglgenkey_lightdm() {
+addvglgenkey_lightdm()
+{
 	backup $1
 	if [ "$VGLUSERSONLY" = "1" ]; then
 		echo ... Adding display-setup-script=vglgenkey to $1 ...
@@ -218,9 +235,10 @@ addvglgenkey_lightdm() {
 	fi
 }
 
-disablextest() {
+disablextest()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: disablextest {filename}
+		echo 'USAGE: disablextest <filename>'
 		return
 	fi
 	backup $1
@@ -232,9 +250,10 @@ disablextest() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-disablextestkdm() {
+disablextestkdm()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: disablextestkdm {filename}
+		echo 'USAGE: disablextestkdm <filename>'
 		return
 	fi
 	backup $1
@@ -247,9 +266,10 @@ disablextestkdm() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-enablextest() {
+enablextest()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: enablextest {filename}
+		echo 'USAGE: enablextest <filename>'
 		return
 	fi
 	echo ... Enabling XTEST extension in $1 ...
@@ -258,9 +278,10 @@ enablextest() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-enablextestkdm() {
+enablextestkdm()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: enablextestkdm {filename}
+		echo 'USAGE: enablextestkdm <filename>'
 		return
 	fi
 	echo ... Enabling XTEST extension in $1 ...
@@ -269,14 +290,16 @@ enablextestkdm() {
 	if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 }
 
-disallowgdmtcp() {
+disallowgdmtcp()
+{
 	echo ... Commenting out DisallowTCP line \(if it exists\) in $1 ...
 	commentline $1 "DisallowTCP.*=.*"
 }
 
-setdripermissions() {
+setdripermissions()
+{
 	if [ -z "$1" ]; then
-		echo USAGE: setdripermissions {filename} [backup]
+		echo 'USAGE: setdripermissions <filename> [backup]'
 		return
 	fi
 	if [ ! -f $1 ]; then return; fi
@@ -303,7 +326,8 @@ setdripermissions() {
 	fi
 }
 
-unconfigdev() {
+unconfigdev()
+{
 	if [ "$UNAME_S" = "SunOS" ]; then
 		echo ... Modifying /etc/logindevperm to enable automatic permissions for
 		echo "    /dev/fbs/* ..."
@@ -349,7 +373,8 @@ unconfigdev() {
 	fi
 }
 
-configdev() {
+configdev()
+{
 	if [ "$UNAME_S" = "SunOS" ]; then
 		echo ... Modifying /etc/logindevperm to disable automatic permissions for
 		echo "    /dev/fbs/* ..."
@@ -448,9 +473,10 @@ configdev() {
 	fi
 }
 
-ynprompt() {
+ynprompt()
+{
 	if [ "$1" = "" ]; then
-		echo USAGE: ynprompt {prompt}
+		echo 'USAGE: ynprompt <prompt>'
 		return 0
 	fi
 	while [ 1 ]; do
@@ -466,7 +492,8 @@ ynprompt() {
 	done
 }
 
-checkselinux() {
+checkselinux()
+{
 	if [ ! "$UNAME_S" = "Linux" ]; then
 		return 0
 	fi
@@ -513,7 +540,8 @@ checkselinux() {
 	fi
 }
 
-unconfigglx() {
+unconfigglx()
+{
 	if [ -d /etc/opt/VirtualGL ]; then
 		checkselinux || return
 		echo ... Removing /etc/opt/VirtualGL directory ...
@@ -651,7 +679,8 @@ EOF
 	echo
 }
 
-configglx() {
+configglx()
+{
 	if [ $UNATTENDED = 0 ]; then
 		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
 		if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi

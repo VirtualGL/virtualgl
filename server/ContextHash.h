@@ -27,7 +27,7 @@ typedef struct
 } ContextAttribs;
 
 
-#define HASH Hash<GLXContext, void *, ContextAttribs *>
+#define HASH  Hash<GLXContext, void *, ContextAttribs *>
 
 // This maps a GLXContext to a GLXFBConfig
 
@@ -39,37 +39,37 @@ namespace vglserver
 
 			static ContextHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new ContextHash;
+					if(instance == NULL) instance = new ContextHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(GLXContext ctx, GLXFBConfig config, Bool direct)
 			{
 				if(!ctx || !config) _throw("Invalid argument");
-				ContextAttribs *attribs=NULL;
-				_newcheck(attribs=new ContextAttribs);
-				attribs->config=config;
-				attribs->direct=direct;
+				ContextAttribs *attribs = NULL;
+				_newcheck(attribs = new ContextAttribs);
+				attribs->config = config;
+				attribs->direct = direct;
 				HASH::add(ctx, NULL, attribs);
 			}
 
 			GLXFBConfig findConfig(GLXContext ctx)
 			{
 				if(!ctx) _throw("Invalid argument");
-				ContextAttribs *attribs=HASH::find(ctx, NULL);
+				ContextAttribs *attribs = HASH::find(ctx, NULL);
 				if(attribs) return attribs->config;
 				return 0;
 			}
 
 			bool isOverlay(GLXContext ctx)
 			{
-				if(ctx && findConfig(ctx)==(GLXFBConfig)-1) return true;
+				if(ctx && findConfig(ctx) == (GLXFBConfig)-1) return true;
 				return false;
 			}
 
@@ -77,7 +77,7 @@ namespace vglserver
 			{
 				if(ctx)
 				{
-					ContextAttribs *attribs=HASH::find(ctx, NULL);
+					ContextAttribs *attribs = HASH::find(ctx, NULL);
 					if(attribs) return attribs->direct;
 				}
 				return -1;
@@ -97,7 +97,8 @@ namespace vglserver
 
 			void detach(HashEntry *entry)
 			{
-				ContextAttribs *attribs=entry? (ContextAttribs *)entry->value:NULL;
+				ContextAttribs *attribs =
+					entry ? (ContextAttribs *)entry->value : NULL;
 				if(attribs) delete attribs;
 			}
 
@@ -114,6 +115,6 @@ namespace vglserver
 #undef HASH
 
 
-#define ctxhash (*(ContextHash::getInstance()))
+#define ctxhash  (*(ContextHash::getInstance()))
 
-#endif // __CONTEXTHASH_H__
+#endif  // __CONTEXTHASH_H__

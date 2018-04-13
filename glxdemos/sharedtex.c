@@ -7,17 +7,17 @@
  * 30 Apr 2008
  *
  * Copyright (C) 2008  Brian Paul   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -66,11 +66,11 @@ static void
 CreateWindow(const char *name)
 {
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -98,8 +98,8 @@ CreateWindow(const char *name)
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    Win = XCreateWindow(Dpy, root, xpos, ypos, WinWidth, WinHeight,
-		        0, VisInfo->depth, InputOutput,
-		        VisInfo->visual, mask, &attr);
+                        0, VisInfo->depth, InputOutput,
+                        VisInfo->visual, mask, &attr);
    if (!Win) {
       Error("Couldn't create window");
    }

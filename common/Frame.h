@@ -27,7 +27,7 @@
 
 
 // Flags
-#define FRAME_BOTTOMUP   1  // Bottom-up bitmap (as opposed to top-down)
+#define FRAME_BOTTOMUP  1  // Bottom-up bitmap (as opposed to top-down)
 
 
 // Uncompressed frame
@@ -38,10 +38,10 @@ namespace vglcommon
 	{
 		public:
 
-			Frame(bool primary=true);
+			Frame(bool primary = true);
 			virtual ~Frame(void);
 			void init(rrframeheader &h, int pixelFormat, int flags,
-				bool stereo=false);
+				bool stereo = false);
 			void init(unsigned char *bits, int width, int pitch, int height,
 				int pixelFormat, int flags);
 			void deInit(void);
@@ -87,7 +87,7 @@ namespace vglcommon
 
 			CompressedFrame(void);
 			~CompressedFrame(void);
-			CompressedFrame& operator= (Frame &f);
+			CompressedFrame &operator= (Frame &f);
 			void compressYUV(Frame &f);
 			void compressJPEG(Frame &f);
 			void compressRGB(Frame &f);
@@ -111,14 +111,14 @@ namespace vglcommon
 	{
 		public:
 
-			FBXFrame(Display *dpy, Drawable draw, Visual *vis=NULL,
-				bool reuseConn=false);
+			FBXFrame(Display *dpy, Drawable draw, Visual *vis = NULL,
+				bool reuseConn = false);
 			FBXFrame(char *dpystring, Window win);
-			void init(char *dpystring, Drawable draw, Visual *vis=NULL);
+			void init(char *dpystring, Drawable draw, Visual *vis = NULL);
 			void init(Display *dpy, Drawable draw, Visual *vis);
 			~FBXFrame(void);
 			void init(rrframeheader &h);
-			FBXFrame& operator= (CompressedFrame &cf);
+			FBXFrame &operator= (CompressedFrame &cf);
 			void redraw(void);
 
 		private:
@@ -160,4 +160,4 @@ namespace vglcommon
 #endif
 
 
-#endif // __FRAME_H__
+#endif  // __FRAME_H__

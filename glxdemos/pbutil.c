@@ -1,4 +1,3 @@
-
 /*
  * OpenGL pbuffers utility functions.
  *
@@ -56,7 +55,7 @@ QueryFBConfig(Display *dpy, int screen)
       char *extensions;
       extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
       if (extensions && strstr(extensions,"GLX_SGIX_fbconfig")) {
-	 return 2;
+         return 2;
       }
    }
 
@@ -81,9 +80,9 @@ QueryPbuffers(Display *dpy, int screen)
       char *extensions;
       extensions = (char *) glXQueryServerString(dpy, screen, GLX_EXTENSIONS);
       if (extensions && strstr(extensions, "GLX_SGIX_pbuffer"))
-	 return 2;
+         return 2;
       else
-	 return 0;
+         return 0;
    }
    else
       return ret;
@@ -262,14 +261,14 @@ PrintFBConfigInfo(Display *dpy, int screen, FBCONFIG config, Bool horizFormat)
       else if (xVisual==GLX_DIRECT_COLOR)  printf("DirectColor ");
       else                            printf("  -none-    ");
       printf(" %3d %3d   %s   %s  %s   %2s   ", bufferSize, level,
-	     (renderType & GLX_RGBA_BIT_SGIX) ? "y" : ".",
-	     (renderType & GLX_COLOR_INDEX_BIT_SGIX) ? "y" : ".",
-	     doubleBuffer ? "y" : ".",
-	     stereo ? "y" : ".");
+             (renderType & GLX_RGBA_BIT_SGIX) ? "y" : ".",
+             (renderType & GLX_COLOR_INDEX_BIT_SGIX) ? "y" : ".",
+             doubleBuffer ? "y" : ".",
+             stereo ? "y" : ".");
       printf("%2d %2d %2d %2d  ", redSize, greenSize, blueSize, alphaSize);
       printf("%2d %2d  ", depthSize, stencilSize);
       printf("%2d %2d %2d %2d", accumRedSize, accumGreenSize, accumBlueSize,
-	     accumAlphaSize);
+             accumAlphaSize);
       printf("    %2d    %2d", sampleBuffers, samples);
       printf("       %s       %c", pBuffer ? "y" : ".",
              ".y"[floatComponents]);

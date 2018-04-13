@@ -38,20 +38,20 @@ void fillFrame(unsigned char *buf, int width, int pitch, int height, PF &pf,
 	int on)
 {
 	unsigned char *ptr;  unsigned char pixel[4];
-	int maxRGB=(1<<pf.bpc);
+	int maxRGB = (1 << pf.bpc);
 
-	ptr=buf;
-	for(int i=0; i<height; i++, ptr+=pitch)
+	ptr = buf;
+	for(int i = 0; i < height; i++, ptr += pitch)
 	{
 		if(on)
 		{
-			pf.setRGB(pixel, i%maxRGB, maxRGB-1-(i%maxRGB), i%maxRGB);
+			pf.setRGB(pixel, i % maxRGB, maxRGB - 1 - (i % maxRGB), i % maxRGB);
 		}
 		else
 		{
-			pf.setRGB(pixel, i%maxRGB, 0, maxRGB-1-(i%maxRGB));
+			pf.setRGB(pixel, i % maxRGB, 0, maxRGB - 1 - (i % maxRGB));
 		}
-		for(int j=0; j<width; j++) memcpy(&ptr[pf.size*j], pixel, pf.size);
+		for(int j = 0; j < width; j++) memcpy(&ptr[pf.size * j], pixel, pf.size);
 	}
 }
 
@@ -60,25 +60,25 @@ int main(int argc, char **argv)
 {
 	X11Trans trans;  Timer timer;  double elapsed;
 	Display *dpy;  Window win;
-	int WIDTH=700, HEIGHT=700;
-	bool dosync=false, bottomup=false;
+	int WIDTH = 700, HEIGHT = 700;
+	bool dosync = false, bottomup = false;
 
 	try
 	{
-		if(argc>1) for(int i=1; i<argc; i++)
+		if(argc > 1) for(int i = 1; i < argc; i++)
 		{
 			if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage(argv);
-			else if(!stricmp(argv[i], "-sync")) dosync=true;
-			else if(!stricmp(argv[i], "-bottomup")) bottomup=true;
+			else if(!stricmp(argv[i], "-sync")) dosync = true;
+			else if(!stricmp(argv[i], "-bottomup")) bottomup = true;
 			else usage(argv);
 		}
 
 		if(!XInitThreads())
 			_throw("XInitThreads failed");
-		if(!(dpy=XOpenDisplay(0)))
+		if(!(dpy = XOpenDisplay(0)))
 			_throw("Could not open display");
-		if(!(win=XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0,
-			WIDTH, HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
+		if(!(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, WIDTH,
+			HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 			BlackPixel(dpy, DefaultScreen(dpy)))))
 			_throw("Could not create window");
 		_errifnot(XMapRaised(dpy, win));
@@ -87,76 +87,78 @@ int main(int argc, char **argv)
 
 		fprintf(stderr, "\nTesting full-frame blits ...\n");
 
-		int fill=0, frames=0;  timer.start();
+		int fill = 0, frames = 0;  timer.start();
 		do
 		{
 			trans.synchronize();
-			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
-			if(bottomup) f->flags|=FRAME_BOTTOMUP;
-			fill=1-fill;
+			if(bottomup) f->flags |= FRAME_BOTTOMUP;
+			fill = 1 - fill;
 			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=timer.elapsed())<2.);
+		} while((elapsed = timer.elapsed()) < 2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
-			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+			(double)WIDTH * (double)HEIGHT * (double)frames / 1000000. / elapsed);
 
 		fprintf(stderr, "\nTesting full-frame blits (spoiling) ...\n");
 
-		fill=0, frames=0;  int clientframes=0;  timer.start();
+		fill = 0, frames = 0;  int clientframes = 0;  timer.start();
 		do
 		{
-			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
+			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
-			if(bottomup) f->flags|=FRAME_BOTTOMUP;
-			fill=1-fill;
+			if(bottomup) f->flags |= FRAME_BOTTOMUP;
+			fill = 1 - fill;
 			trans.sendFrame(f, dosync);
 			clientframes++;  frames++;
-		} while((elapsed=timer.elapsed())<2.);
+		} while((elapsed = timer.elapsed()) < 2.);
 
 		fprintf(stderr, "%f Megapixels/sec (server)\n",
-			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+			(double)WIDTH * (double)HEIGHT * (double)frames / 1000000. /
+				elapsed);
 		fprintf(stderr, "%f Megapixels/sec (client)\n",
-			(double)WIDTH*(double)HEIGHT*(double)clientframes/1000000./elapsed);
+			(double)WIDTH * (double)HEIGHT * (double)clientframes / 1000000. /
+				elapsed);
 
 		fprintf(stderr, "\nTesting half-frame blits ...\n");
 
-		fill=0, frames=0;  timer.start();
+		fill = 0, frames = 0;  timer.start();
 		do
 		{
 			trans.synchronize();
-			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			memset(f->bits, 0, f->pitch*HEIGHT);
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pf, fill);
-			if(bottomup) f->flags|=FRAME_BOTTOMUP;
-			fill=1-fill;
+			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
+			memset(f->bits, 0, f->pitch * HEIGHT);
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT / 2, f->pf, fill);
+			if(bottomup) f->flags |= FRAME_BOTTOMUP;
+			fill = 1 - fill;
 			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=timer.elapsed())<2.);
+		} while((elapsed = timer.elapsed()) < 2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
-			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+			(double)WIDTH * (double)HEIGHT * (double)frames / 1000000. / elapsed);
 
 		fprintf(stderr, "\nTesting zero-frame blits ...\n");
 
-		frames=0;  timer.start();
+		frames = 0;  timer.start();
 		do
 		{
 			trans.synchronize();
-			_errifnot(f=trans.getFrame(dpy, win, WIDTH, HEIGHT));
-			WIDTH=f->hdr.framew;  HEIGHT=f->hdr.frameh;
-			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT/2, f->pf, 1);
-			if(bottomup) f->flags|=FRAME_BOTTOMUP;
+			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
+			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT / 2, f->pf, 1);
+			if(bottomup) f->flags |= FRAME_BOTTOMUP;
 			trans.sendFrame(f, dosync);
 			frames++;
-		} while((elapsed=timer.elapsed())<2.);
+		} while((elapsed = timer.elapsed()) < 2.);
 
 		fprintf(stderr, "%f Megapixels/sec\n",
-			(double)WIDTH*(double)HEIGHT*(double)frames/1000000./elapsed);
+			(double)WIDTH * (double)HEIGHT * (double)frames / 1000000. / elapsed);
 	}
 	catch(Error &e)
 	{

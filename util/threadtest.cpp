@@ -72,7 +72,7 @@ class TestThread : public Runnable
 				printf("Error in %s (Thread %d):\n%s\n", e.getMethod(), myRank,
 					e.getMessage());
 			}
-			if(myRank==5) _throw("Error test");
+			if(myRank == 5) _throw("Error test");
 		}
 
 	private:
@@ -88,18 +88,18 @@ int main(void)
 	try
 	{
 		printf("Number of CPU's in this system:  %d\n", numprocs());
-		printf("Word size = %d-bit\n", (int)sizeof(long*)*8);
+		printf("Word size = %d-bit\n", (int)sizeof(long *) * 8);
 
 		event.wait();
 
-		for(i=0; i<5; i++)
+		for(i = 0; i < 5; i++)
 		{
-			testThread[i]=new TestThread(i+1);
-			thread[i]=new Thread(testThread[i]);
+			testThread[i] = new TestThread(i + 1);
+			thread[i] = new Thread(testThread[i]);
 			thread[i]->start();
 		}
-		for(i=0; i<5; i++) thread[i]->stop();
-		for(i=0; i<5; i++) thread[i]->checkError();
+		for(i = 0; i < 5; i++) thread[i]->stop();
+		for(i = 0; i < 5; i++) thread[i]->checkError();
 	}
 	catch(Error &e)
 	{

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1999-2006   Brian Paul   All Rights Reserved.
- * Copyright (C) 2005-2007   Sun Microsystems, Inc.   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
+ * Copyright (C) 2005-2007  Sun Microsystems, Inc.   All Rights Reserved.
  * Copyright (C) 2011, 2013, 2015  D. R. Commander   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -57,15 +57,15 @@
 #endif
 
 #ifndef GLX_RGBA_BIT
-#define GLX_RGBA_BIT			0x00000001
+#define GLX_RGBA_BIT                    0x00000001
 #endif
 
 #ifndef GLX_COLOR_INDEX_BIT
-#define GLX_COLOR_INDEX_BIT		0x00000002
+#define GLX_COLOR_INDEX_BIT             0x00000002
 #endif
 
 #ifndef GL_NUM_EXTENSIONS
-#define GL_NUM_EXTENSIONS 0x821D
+#define GL_NUM_EXTENSIONS               0x821D
 #endif
 
 #define ELEMENTS(array) (sizeof(array) / sizeof(array[0]))
@@ -81,8 +81,8 @@ typedef enum
 struct visual_attribs
 {
    /* X visual attribs */
-   int id;		/* May be visual ID or FBConfig ID */
-   int vis_id;		/* Visual ID.  Only set for FBConfigs */
+   int id;              /* May be visual ID or FBConfig ID */
+   int vis_id;          /* Visual ID.  Only set for FBConfigs */
    int klass;
    int depth;
    int redMask, greenMask, blueMask;
@@ -877,7 +877,7 @@ print_screen_info(Display *dpy, int scrnum, Bool allowDirect,
    else {
       visinfo = choose_xvisinfo(dpy, scrnum);
       if (visinfo)
-	 ctx = glXCreateContext(dpy, visinfo, NULL, allowDirect);
+         ctx = glXCreateContext(dpy, visinfo, NULL, allowDirect);
    }
 
    if (!visinfo) {
@@ -887,7 +887,7 @@ print_screen_info(Display *dpy, int scrnum, Bool allowDirect,
 
    if (!ctx) {
       if (!coreProfile)
-	 fprintf(stderr, "Error: glXCreateContext failed\n");
+         fprintf(stderr, "Error: glXCreateContext failed\n");
       XFree(visinfo);
       return False;
    }
@@ -901,8 +901,8 @@ print_screen_info(Display *dpy, int scrnum, Bool allowDirect,
    attr.event_mask = StructureNotifyMask | ExposureMask;
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
    win = XCreateWindow(dpy, root, 0, 0, width, height,
-		       0, visinfo->depth, InputOutput,
-		       visinfo->visual, mask, &attr);
+                       0, visinfo->depth, InputOutput,
+                       visinfo->visual, mask, &attr);
 
    if (glXMakeCurrent(dpy, win, ctx)) {
       const char *serverVendor = glXQueryServerString(dpy, scrnum, GLX_VENDOR);
@@ -1268,7 +1268,7 @@ glx_token_to_visual_class(int visual_type)
 
 static Bool
 get_fbconfig_attribs(Display *dpy, int scrnum, GLXFBConfig fbconfig,
-		     struct visual_attribs *attribs)
+                     struct visual_attribs *attribs)
 {
    const char *ext = glXQueryExtensionsString(dpy, scrnum);
    int visual_type;
@@ -1372,22 +1372,22 @@ get_fbconfig_attribs(Display *dpy, int scrnum, GLXFBConfig fbconfig,
 
 static void
 print_visual_attribs_verbose(const struct visual_attribs *attribs,
-			     int fbconfigs)
+                             int fbconfigs)
 {
    if (fbconfigs) {
       printf("FBConfig ID: %x  Visual ID=%x  depth=%d  class=%s\n",
              attribs->id, attribs->vis_id, attribs->depth,
              visual_class_name(attribs->klass));
-     printf("    Drawable Types=%s\n",
+      printf("    Drawable Types=%s\n",
              visual_drawable_type(attribs->drawableType));
    }
    else {
       printf("Visual ID: %x  depth=%d  class=%s\n",
-	     attribs->id, attribs->depth, visual_class_name(attribs->klass));
+             attribs->id, attribs->depth, visual_class_name(attribs->klass));
    }
    printf("    bufferSize=%d level=%d renderType=%s doubleBuffer=%d stereo=%d\n",
           attribs->bufferSize, attribs->level,
-	  visual_render_type_name(attribs->render_type),
+          visual_render_type_name(attribs->render_type),
           attribs->doubleBuffer, attribs->stereo);
    printf("    rgba: redSize=%d greenSize=%d blueSize=%d alphaSize=%d float=%c sRGB=%c\n",
           attribs->redSize, attribs->greenSize,
@@ -1565,7 +1565,7 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
    numGlxVisuals = 0;
    for (i = 0; i < numVisuals; i++) {
       if (get_visual_attribs(dpy, &visuals[i], &attribs))
-	 numGlxVisuals++;
+         numGlxVisuals++;
    }
 
    if (numGlxVisuals == 0)
@@ -1580,10 +1580,10 @@ print_visual_info(Display *dpy, int scrnum, InfoMode mode)
 
    for (i = 0; i < numVisuals; i++) {
       if (!get_visual_attribs(dpy, &visuals[i], &attribs))
-	 continue;
+         continue;
 
       if (mode == Verbose)
-	 print_visual_attribs_verbose(&attribs, False);
+         print_visual_attribs_verbose(&attribs, False);
       else if (mode == Normal)
          print_visual_attribs_short(&attribs, False);
       else if (mode == Wide)
@@ -1624,7 +1624,7 @@ print_fbconfig_info(Display *dpy, int scrnum, InfoMode mode)
       if (mode == Verbose)
          print_visual_attribs_verbose(&attribs, True);
       else if (mode == Normal)
-	 print_visual_attribs_short(&attribs, True);
+         print_visual_attribs_short(&attribs, True);
       else if (mode == Wide)
          print_visual_attribs_long(&attribs);
    }

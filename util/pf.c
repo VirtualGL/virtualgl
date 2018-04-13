@@ -18,7 +18,7 @@
 
 
 #ifdef sun
-#define __inline inline
+#define __inline  inline
 #endif
 
 
@@ -157,126 +157,135 @@
 #define PF_X2_RGB10_BINDEX   PF_X2_BGR10_RINDEX
 
 
-#define CONVERT_FAST(id)  \
-{  \
-	int wps=width*PF_##id##_SIZE;  \
-	while(height--)  \
-	{  \
-		memcpy(dstBuf, srcBuf, wps);  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#define CONVERT_FAST(id) \
+{ \
+	int wps = width * PF_##id##_SIZE; \
+	while(height--) \
+	{ \
+		memcpy(dstBuf, srcBuf, wps); \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 
-#define CONVERT_PF4I(srcid, dstid, sshift, dshift)  \
-{  \
-	while(height--)  \
-	{  \
-		int w=width;  \
-		unsigned int *srcPixeli=(unsigned int *)srcBuf;  \
-		unsigned int *dstPixeli=(unsigned int *)dstBuf;  \
-		while(w--)  \
-		{  \
-			*dstPixeli=  \
-				(((*srcPixeli&PF_##srcid##_RMASK)>>(PF_##srcid##_RSHIFT+sshift))<<  \
-					(PF_##dstid##_RSHIFT+dshift)) |  \
-				(((*srcPixeli&PF_##srcid##_GMASK)>>(PF_##srcid##_GSHIFT+sshift))<<  \
-					(PF_##dstid##_GSHIFT+dshift)) |  \
-				(((*srcPixeli&PF_##srcid##_BMASK)>>(PF_##srcid##_BSHIFT+sshift))<<  \
-					(PF_##dstid##_BSHIFT+dshift));  \
-				srcPixeli++;  dstPixeli++;  \
-		}  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#define CONVERT_PF4I(srcid, dstid, sshift, dshift) \
+{ \
+	while(height--) \
+	{ \
+		int w = width; \
+		unsigned int *srcPixeli = (unsigned int *)srcBuf; \
+		unsigned int *dstPixeli = (unsigned int *)dstBuf; \
+		while(w--) \
+		{ \
+			*dstPixeli = \
+				(((*srcPixeli & PF_##srcid##_RMASK) >> \
+					(PF_##srcid##_RSHIFT + sshift)) << \
+					(PF_##dstid##_RSHIFT + dshift)) | \
+				(((*srcPixeli & PF_##srcid##_GMASK) >> \
+					(PF_##srcid##_GSHIFT + sshift)) << \
+					(PF_##dstid##_GSHIFT + dshift)) | \
+				(((*srcPixeli & PF_##srcid##_BMASK) >> \
+					(PF_##srcid##_BSHIFT + sshift)) << \
+					(PF_##dstid##_BSHIFT + dshift)); \
+				srcPixeli++;  dstPixeli++; \
+		} \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 
-#define CONVERT_PF4I2C(srcid, dstid)  \
-{  \
-	while(height--)  \
-	{  \
-		int w=width;  \
-		unsigned int *srcPixeli=(unsigned int *)srcBuf;  \
-		unsigned char *dstPixel=dstBuf;  \
-		while(w--)  \
-		{  \
-			dstPixel[PF_##dstid##_RINDEX]=(*srcPixeli>>(PF_##srcid##_RSHIFT+2));  \
-			dstPixel[PF_##dstid##_GINDEX]=(*srcPixeli>>(PF_##srcid##_GSHIFT+2));  \
-			dstPixel[PF_##dstid##_BINDEX]=(*srcPixeli>>(PF_##srcid##_BSHIFT+2));  \
-			srcPixeli++;  dstPixel+=PF_##dstid##_SIZE;  \
-		}  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#define CONVERT_PF4I2C(srcid, dstid) \
+{ \
+	while(height--) \
+	{ \
+		int w = width; \
+		unsigned int *srcPixeli = (unsigned int *)srcBuf; \
+		unsigned char *dstPixel = dstBuf; \
+		while(w--) \
+		{ \
+			dstPixel[PF_##dstid##_RINDEX] = \
+				(*srcPixeli >> (PF_##srcid##_RSHIFT + 2)); \
+			dstPixel[PF_##dstid##_GINDEX] = \
+				(*srcPixeli >> (PF_##srcid##_GSHIFT + 2)); \
+			dstPixel[PF_##dstid##_BINDEX] = \
+				(*srcPixeli >> (PF_##srcid##_BSHIFT + 2)); \
+			srcPixeli++;  dstPixel += PF_##dstid##_SIZE; \
+		} \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 
-#define CONVERT_PF4C2I(srcid, dstid)  \
-{  \
-	while(height--)  \
-	{  \
-		int w=width;  \
-		unsigned int *dstPixeli=(unsigned int *)dstBuf;  \
-		unsigned char *srcPixel=srcBuf;  \
-		while(w--)  \
-		{  \
-			*dstPixeli=srcPixel[PF_##srcid##_RINDEX]<<(PF_##dstid##_RSHIFT+2);  \
-			*dstPixeli|=srcPixel[PF_##srcid##_GINDEX]<<(PF_##dstid##_GSHIFT+2);  \
-			*dstPixeli|=srcPixel[PF_##srcid##_BINDEX]<<(PF_##dstid##_BSHIFT+2);  \
-			srcPixel+=PF_##srcid##_SIZE;  dstPixeli++;  \
-		}  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#define CONVERT_PF4C2I(srcid, dstid) \
+{ \
+	while(height--) \
+	{ \
+		int w = width; \
+		unsigned int *dstPixeli = (unsigned int *)dstBuf; \
+		unsigned char *srcPixel = srcBuf; \
+		while(w--) \
+		{ \
+			*dstPixeli = \
+				srcPixel[PF_##srcid##_RINDEX] << (PF_##dstid##_RSHIFT + 2); \
+			*dstPixeli |= \
+				srcPixel[PF_##srcid##_GINDEX] << (PF_##dstid##_GSHIFT + 2); \
+			*dstPixeli |= \
+				srcPixel[PF_##srcid##_BINDEX] << (PF_##dstid##_BSHIFT + 2); \
+			srcPixel += PF_##srcid##_SIZE;  dstPixeli++; \
+		} \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 
-#if __BITS==64
-#define CONVERT_RGB(srcid, dstid)  \
-{  \
-	while(height--)  \
-	{  \
-		int w=width;  \
-		unsigned char *srcPixel=srcBuf+  \
-			min(PF_##srcid##_RINDEX, PF_##srcid##_BINDEX);  \
-		unsigned char *dstPixel=dstBuf+  \
-			min(PF_##dstid##_RINDEX, PF_##dstid##_BINDEX);  \
-		while(w--)  \
-		{  \
-			memcpy(dstPixel, srcPixel, 3);  \
-			srcPixel+=PF_##srcid##_SIZE;  dstPixel+=PF_##dstid##_SIZE;  \
-		}  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#if __BITS == 64
+#define CONVERT_RGB(srcid, dstid) \
+{ \
+	while(height--) \
+	{ \
+		int w = width; \
+		unsigned char *srcPixel = srcBuf + \
+			min(PF_##srcid##_RINDEX, PF_##srcid##_BINDEX); \
+		unsigned char *dstPixel = dstBuf + \
+			min(PF_##dstid##_RINDEX, PF_##dstid##_BINDEX); \
+		while(w--) \
+		{ \
+			memcpy(dstPixel, srcPixel, 3); \
+			srcPixel += PF_##srcid##_SIZE;  dstPixel += PF_##dstid##_SIZE; \
+		} \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 #else
-#define CONVERT_RGB CONVERT_BGR
+#define CONVERT_RGB  CONVERT_BGR
 #endif
 
-#define CONVERT_BGR(srcid, dstid)  \
-{  \
-	while(height--)  \
-	{  \
-		int w=width;  \
-		unsigned char *srcPixel=srcBuf;  \
-		unsigned char *dstPixel=dstBuf;  \
-		while(w--)  \
-		{  \
-			dstPixel[PF_##dstid##_RINDEX]=srcPixel[PF_##srcid##_RINDEX];  \
-			dstPixel[PF_##dstid##_GINDEX]=srcPixel[PF_##srcid##_GINDEX];  \
-			dstPixel[PF_##dstid##_BINDEX]=srcPixel[PF_##srcid##_BINDEX];  \
-			srcPixel+=PF_##srcid##_SIZE;  dstPixel+=PF_##dstid##_SIZE;  \
-		}  \
-		srcBuf+=srcStride;  dstBuf+=dstStride;  \
-	}  \
-	return;  \
+#define CONVERT_BGR(srcid, dstid) \
+{ \
+	while(height--) \
+	{ \
+		int w = width; \
+		unsigned char *srcPixel = srcBuf; \
+		unsigned char *dstPixel = dstBuf; \
+		while(w--) \
+		{ \
+			dstPixel[PF_##dstid##_RINDEX] = srcPixel[PF_##srcid##_RINDEX]; \
+			dstPixel[PF_##dstid##_GINDEX] = srcPixel[PF_##srcid##_GINDEX]; \
+			dstPixel[PF_##dstid##_BINDEX] = srcPixel[PF_##srcid##_BINDEX]; \
+			srcPixel += PF_##srcid##_SIZE;  dstPixel += PF_##dstid##_SIZE; \
+		} \
+		srcBuf += srcStride;  dstBuf += dstStride; \
+	} \
+	return; \
 }
 
-#if __BITS==64
-#define CONVERT_PF4CRGB(srcid, dstid) CONVERT_PF4I(srcid, dstid, 0, 0)
-#define CONVERT_PF4CBGR(srcid, dstid) CONVERT_PF4I(srcid, dstid, 0, 0)
+#if __BITS == 64
+#define CONVERT_PF4CRGB(srcid, dstid)  CONVERT_PF4I(srcid, dstid, 0, 0)
+#define CONVERT_PF4CBGR(srcid, dstid)  CONVERT_PF4I(srcid, dstid, 0, 0)
 #else
-#define CONVERT_PF4CRGB CONVERT_RGB
-#define CONVERT_PF4CBGR CONVERT_BGR
+#define CONVERT_PF4CRGB  CONVERT_RGB
+#define CONVERT_PF4CBGR  CONVERT_BGR
 #endif
 
 static __inline void convert_RGB(unsigned char *srcBuf, int width,
@@ -460,27 +469,27 @@ static __inline void convert_X2_RGB10(unsigned char *srcBuf, int width,
 }
 
 
-#define DEFINE_PF4C(id)  \
-static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g,  \
-	int *b)  \
-{  \
-	*r=pixel[PF_##id##_RINDEX];  *g=pixel[PF_##id##_GINDEX];  \
-  *b=pixel[PF_##id##_BINDEX];  \
-}  \
-  \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b)  \
-{  \
-	unsigned int *p=(unsigned int *)pixel;  \
-	*p=(r<<PF_##id##_RSHIFT) | (g<<PF_##id##_GSHIFT) |  \
-		(b<<PF_##id##_BSHIFT);  \
-}  \
-  \
-static const PF __format_##id=  \
-{  \
-	PF_##id, #id, PF_##id##_SIZE, 8, PF_##id##_RMASK, PF_##id##_GMASK,  \
-		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT,  \
-		PF_##id##_RINDEX, PF_##id##_GINDEX, PF_##id##_BINDEX, getRGB_##id,  \
-		setRGB_##id, convert_##id  \
+#define DEFINE_PF4C(id) \
+static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g, \
+	int *b) \
+{ \
+	*r = pixel[PF_##id##_RINDEX];  *g = pixel[PF_##id##_GINDEX]; \
+	*b = pixel[PF_##id##_BINDEX]; \
+} \
+\
+static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+{ \
+	unsigned int *p = (unsigned int *)pixel; \
+	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
+		(b << PF_##id##_BSHIFT); \
+} \
+\
+static const PF __format_##id = \
+{ \
+	PF_##id, #id, PF_##id##_SIZE, 8, PF_##id##_RMASK, PF_##id##_GMASK, \
+		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT, \
+		PF_##id##_RINDEX, PF_##id##_GINDEX, PF_##id##_BINDEX, getRGB_##id, \
+		setRGB_##id, convert_##id \
 };
 
 DEFINE_PF4C(RGBX)
@@ -489,29 +498,29 @@ DEFINE_PF4C(XBGR)
 DEFINE_PF4C(XRGB)
 
 
-#define DEFINE_PF4(id)  \
-static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g,  \
-	int *b)  \
-{  \
-	unsigned int *p=(unsigned int *)pixel;  \
-	*r=((*p)&PF_##id##_RMASK)>>PF_##id##_RSHIFT;  \
-	*g=((*p)&PF_##id##_GMASK)>>PF_##id##_GSHIFT;  \
-	*b=((*p)&PF_##id##_BMASK)>>PF_##id##_BSHIFT;  \
-}  \
-  \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b)  \
-{  \
-	unsigned int *p=(unsigned int *)pixel;  \
-	*p=(r<<PF_##id##_RSHIFT) | (g<<PF_##id##_GSHIFT) |  \
-		(b<<PF_##id##_BSHIFT);  \
-}  \
-  \
-static const PF __format_##id=  \
-{  \
-	PF_##id, #id, PF_##id##_SIZE, 10, PF_##id##_RMASK, PF_##id##_GMASK,  \
-		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT,  \
-		PF_##id##_RINDEX, PF_##id##_GINDEX, PF_##id##_BINDEX, getRGB_##id,  \
-		setRGB_##id, convert_##id  \
+#define DEFINE_PF4(id) \
+static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g, \
+	int *b) \
+{ \
+	unsigned int *p = (unsigned int *)pixel; \
+	*r = ((*p) & PF_##id##_RMASK) >> PF_##id##_RSHIFT; \
+	*g = ((*p) & PF_##id##_GMASK) >> PF_##id##_GSHIFT; \
+	*b = ((*p) & PF_##id##_BMASK) >> PF_##id##_BSHIFT; \
+} \
+\
+static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+{ \
+	unsigned int *p = (unsigned int *)pixel; \
+	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
+		(b << PF_##id##_BSHIFT); \
+} \
+\
+static const PF __format_##id = \
+{ \
+	PF_##id, #id, PF_##id##_SIZE, 10, PF_##id##_RMASK, PF_##id##_GMASK, \
+		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT, \
+		PF_##id##_RINDEX, PF_##id##_GINDEX, PF_##id##_BINDEX, getRGB_##id, \
+		setRGB_##id, convert_##id \
 };
 
 DEFINE_PF4(RGB10_X2)
@@ -520,17 +529,17 @@ DEFINE_PF4(X2_BGR10)
 DEFINE_PF4(X2_RGB10)
 
 
-#define DEFINE_PF3(id)  \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b)  \
-{  \
-	pixel[PF_##id##_RINDEX]=r;  pixel[PF_##id##_GINDEX]=g;  \
-	pixel[PF_##id##_BINDEX]=b;  \
-}  \
-  \
-static const PF __format_##id=  \
-{  \
-	PF_##id, #id, 3, 8, 0, 0, 0, 0, 0, 0, PF_##id##_RINDEX, PF_##id##_GINDEX,  \
-		PF_##id##_BINDEX, getRGB_##id##X, setRGB_##id, convert_##id  \
+#define DEFINE_PF3(id) \
+static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+{ \
+	pixel[PF_##id##_RINDEX] = r;  pixel[PF_##id##_GINDEX] = g; \
+	pixel[PF_##id##_BINDEX] = b; \
+} \
+\
+static const PF __format_##id = \
+{ \
+	PF_##id, #id, 3, 8, 0, 0, 0, 0, 0, 0, PF_##id##_RINDEX, PF_##id##_GINDEX, \
+		PF_##id##_BINDEX, getRGB_##id##X, setRGB_##id, convert_##id \
 };
 
 DEFINE_PF3(RGB)
@@ -539,12 +548,12 @@ DEFINE_PF3(BGR)
 
 static __inline void getRGB_COMP(unsigned char *pixel, int *r, int *g, int *b)
 {
-	*r=*g=*b=*pixel;
+	*r = *g = *b = *pixel;
 }
 
 static __inline void setRGB_COMP(unsigned char *pixel, int r, int g, int b)
 {
-	*pixel=r;
+	*pixel = r;
 }
 
 static __inline void convert_COMP(unsigned char *srcBuf, int width,
@@ -553,7 +562,7 @@ static __inline void convert_COMP(unsigned char *srcBuf, int width,
 	/* VirtualGL doesn't ever need to convert between component and RGB */
 }
 
-static const PF __format_COMP=
+static const PF __format_COMP =
 {
 	PF_COMP, "COMP", 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, getRGB_COMP, setRGB_COMP,
 		convert_COMP
@@ -579,8 +588,8 @@ PF pf_get(int id)
 		{
 			PF pf;
 			memset(&pf, 0, sizeof(PF));
-			pf.name="Invalid";
-			pf.getRGB=getRGB_COMP;  pf.setRGB=setRGB_COMP;
+			pf.name = "Invalid";
+			pf.getRGB = getRGB_COMP;  pf.setRGB = setRGB_COMP;
 			return pf;
 		}
 	}

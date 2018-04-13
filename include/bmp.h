@@ -22,10 +22,10 @@
 #include "pf.h"
 
 
-#define BMP_NUMORN 2
-enum BMPORN { BMPORN_TOPDOWN=0, BMPORN_BOTTOMUP };
+#define BMP_NUMORN  2
+enum BMPORN { BMPORN_TOPDOWN = 0, BMPORN_BOTTOMUP };
 
-#define BMPPAD(width, align) (((width)+((align)-1))&(~((align)-1)))
+#define BMPPAD(width, align)  (((width) + ((align) - 1)) & (~((align) - 1)))
 
 
 #ifdef __cplusplus
@@ -55,4 +55,4 @@ const char *bmp_geterr(void);
 }
 #endif
 
-#endif /* __BMP_H__ */
+#endif  /* __BMP_H__ */

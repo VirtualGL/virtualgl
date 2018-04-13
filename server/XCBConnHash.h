@@ -29,7 +29,7 @@ typedef struct
 } XCBConnAttribs;
 
 
-#define HASH Hash<xcb_connection_t *, void *, XCBConnAttribs *>
+#define HASH  Hash<xcb_connection_t *, void *, XCBConnAttribs *>
 
 namespace vglserver
 {
@@ -39,35 +39,35 @@ namespace vglserver
 
 			static XCBConnHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new XCBConnHash;
+					if(instance == NULL) instance = new XCBConnHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(xcb_connection_t *conn, Display *dpy)
 			{
 				if(!conn || !dpy) _throw("Invalid argument");
 
-				XCBConnAttribs *attribs=NULL;
-				_newcheck(attribs=new XCBConnAttribs);
-				attribs->dpy=dpy;  attribs->protoAtom=0;  attribs->deleteAtom=0;
+				XCBConnAttribs *attribs = NULL;
+				_newcheck(attribs = new XCBConnAttribs);
+				attribs->dpy = dpy;  attribs->protoAtom = 0;  attribs->deleteAtom = 0;
 
 				// We set up the window manager atoms here because doing so in the
 				// event handler can cause a deadlock.
-				xcb_intern_atom_reply_t *reply=NULL;
-				reply=_xcb_intern_atom_reply(conn,
-					_xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"),
-						"WM_PROTOCOLS"), NULL);
-				if(reply) attribs->protoAtom=reply->atom;
-				reply=_xcb_intern_atom_reply(conn,
+				xcb_intern_atom_reply_t *reply = NULL;
+				reply = _xcb_intern_atom_reply(conn,
+					_xcb_intern_atom(conn, 0, strlen("WM_PROTOCOLS"), "WM_PROTOCOLS"),
+						NULL);
+				if(reply) attribs->protoAtom = reply->atom;
+				reply = _xcb_intern_atom_reply(conn,
 					_xcb_intern_atom(conn, 0, strlen("WM_DELETE_WINDOW"),
 						"WM_DELETE_WINDOW"), NULL);
-				if(reply) attribs->deleteAtom=reply->atom;
+				if(reply) attribs->deleteAtom = reply->atom;
 
 				HASH::add(conn, NULL, attribs);
 			}
@@ -81,7 +81,7 @@ namespace vglserver
 			Display *getX11Display(xcb_connection_t *conn)
 			{
 				if(!conn) _throw("Invalid_argument");
-				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->dpy;
 				return 0;
 			}
@@ -89,7 +89,7 @@ namespace vglserver
 			xcb_atom_t getProtoAtom(xcb_connection_t *conn)
 			{
 				if(!conn) _throw("Invalid_argument");
-				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->protoAtom;
 				return 0;
 			}
@@ -97,7 +97,7 @@ namespace vglserver
 			xcb_atom_t getDeleteAtom(xcb_connection_t *conn)
 			{
 				if(!conn) _throw("Invalid_argument");
-				XCBConnAttribs *attribs=HASH::find(conn, NULL);
+				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->deleteAtom;
 				return 0;
 			}
@@ -111,12 +111,13 @@ namespace vglserver
 
 			bool compare(xcb_connection_t *key1, void *key2, HashEntry *entry)
 			{
-				return(key1==entry->key1);
+				return key1 == entry->key1;
 			}
 
 			void detach(HashEntry *entry)
 			{
-				XCBConnAttribs *attribs=entry? (XCBConnAttribs *)entry->value:NULL;
+				XCBConnAttribs *attribs =
+					entry ? (XCBConnAttribs *)entry->value : NULL;
 				if(attribs) delete attribs;
 			}
 
@@ -128,8 +129,8 @@ namespace vglserver
 #undef HASH
 
 
-#define xcbconnhash (*(XCBConnHash::getInstance()))
+#define xcbconnhash  (*(XCBConnHash::getInstance()))
 
-#endif // FAKEXCB
+#endif  // FAKEXCB
 
-#endif // __XCBCONNHASH_H__
+#endif  // __XCBCONNHASH_H__

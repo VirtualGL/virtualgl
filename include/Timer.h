@@ -35,19 +35,19 @@ namespace vglutil
 			Timer(void) : t1(0.0)
 			{
 				#ifdef _WIN32
-				highRes=false;  tick=0.001;
+				highRes = false;  tick = 0.001;
 				LARGE_INTEGER frequency;
-				if(QueryPerformanceFrequency(&frequency)!=0)
+				if(QueryPerformanceFrequency(&frequency) != 0)
 				{
-					tick=(double)1.0/(double)(frequency.QuadPart);
-					highRes=true;
+					tick = (double)1.0 / (double)(frequency.QuadPart);
+					highRes = true;
 				}
 				#endif
 			}
 
 			void start(void)
 			{
-				t1=time();
+				t1 = time();
 			}
 
 			double time(void)
@@ -58,23 +58,23 @@ namespace vglutil
 				{
 					LARGE_INTEGER Time;
 					QueryPerformanceCounter(&Time);
-					return((double)(Time.QuadPart)*tick);
+					return (double)(Time.QuadPart) * tick;
 				}
 				else
-					return((double)GetTickCount()*tick);
+					return (double)GetTickCount() * tick;
 
 				#else
 
 				struct timeval tv;
 				gettimeofday(&tv, (struct timezone *)NULL);
-				return((double)(tv.tv_sec)+(double)(tv.tv_usec)*0.000001);
+				return (double)(tv.tv_sec) + (double)(tv.tv_usec) * 0.000001;
 
 				#endif
 			}
 
 			double elapsed(void)
 			{
-				return time()-t1;
+				return time() - t1;
 			}
 
 		private:
@@ -94,27 +94,27 @@ namespace vglutil
 __inline double getTime(void)
 {
 	LARGE_INTEGER frequency, time;
-	if(QueryPerformanceFrequency(&frequency)!=0)
+	if(QueryPerformanceFrequency(&frequency) != 0)
 	{
 		QueryPerformanceCounter(&time);
-		return (double)time.QuadPart/(double)frequency.QuadPart;
+		return (double)time.QuadPart / (double)frequency.QuadPart;
 	}
-	else return (double)GetTickCount()*0.001;
+	else return (double)GetTickCount() * 0.001;
 }
 
 #else
 
 #ifdef sun
-#define __inline inline
+#define __inline  inline
 #endif
 
 static __inline double getTime(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, (struct timezone *)NULL);
-	return((double)tv.tv_sec+(double)tv.tv_usec*0.000001);
+	return (double)tv.tv_sec + (double)tv.tv_usec * 0.000001;
 }
 
-#endif /* _WIN32 */
+#endif  // _WIN32
 
-#endif /* __TIMER_H__ */
+#endif  // __TIMER_H__

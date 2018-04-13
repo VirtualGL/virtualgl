@@ -26,7 +26,7 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-/* $XFree86: xc/programs/xlsfonts/dsimple.h,v 1.6 2001/07/29 21:23:21 tsi Exp $ */
+/* $XFree86: xc/programs/xlsfonts/dsimple.h,v 1.8 2002/12/24 17:43:01 tsi Exp $ */
 
 /*
  * Just_display.h: This file contains the definitions needed to use the
@@ -50,7 +50,6 @@ extern int screen;                           /* The current screen */
 
     /* Declaritions for functions in just_display.c */
 
-#if NeedFunctionPrototypes
 char *Malloc(unsigned);
 char *Realloc(char *, int);
 char *Get_Display_Name(int *, char **);
@@ -62,22 +61,9 @@ Pixmap ReadBitmapFile(Drawable, char *, int *, int *, int *, int *);
 void WriteBitmapFile(char *, Pixmap, int, int, int, int);
 Window Select_Window_Args(int *, char **);
 void usage(void);
-#else
-char *Malloc();
-char *Realloc();
-char *Get_Display_Name();
-Display *Open_Display();
-void Setup_Display_And_Screen();
-XFontStruct *Open_Font();
-void Beep();
-Pixmap ReadBitmapFile();
-void WriteBitmapFile();
-Window Select_Window_Args();
-void usage();
-#endif
 
 #define X_USAGE "[host:display]"              /* X arguments handled by
-						 Get_Display_Name */
+                                                 Get_Display_Name */
 
 /*
  * Other_stuff.h: Definitions of routines in other_stuff.
@@ -87,20 +73,12 @@ void usage();
  * Send bugs, etc. to chariot@athena.mit.edu.
  */
 
-#if NeedFunctionPrototypes
 unsigned long Resolve_Color(Window, char *);
 Pixmap Bitmap_To_Pixmap(Display *, Drawable, GC, Pixmap, int, int);
 Window Select_Window(Display *);
 void blip(void);
 Window Window_With_Name(Display *, Window, char *);
-#else
-unsigned long Resolve_Color();
-Pixmap Bitmap_To_Pixmap();
-Window Select_Window();
-void blip();
-Window Window_With_Name();
-#endif
-#if __GNUC__
+#ifdef __GNUC__
 void Fatal_Error(char *, ...) __attribute__((__noreturn__));
 #else
 void Fatal_Error(char *, ...);

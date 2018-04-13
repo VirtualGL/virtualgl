@@ -36,22 +36,20 @@ extern "C" {
 const xcb_query_extension_reply_t *
 	xcb_get_extension_data(xcb_connection_t *conn, xcb_extension_t *ext)
 {
-	const xcb_query_extension_reply_t *reply=NULL;
+	const xcb_query_extension_reply_t *reply = NULL;
 
 	TRY();
 
 	if(!vglfaker::deadYet && ext && !strcmp(ext->name, "GLX") && fconfig.fakeXCB
-		&& vglfaker::getFakerLevel()==0
+		&& vglfaker::getFakerLevel() == 0
 		&& !dpyhash.find(xcbconnhash.getX11Display(conn)))
 	{
-			opentrace(xcb_get_extension_data);  prargx(conn);
-			prargs(ext->name);
-			prargi(ext->global_id);
-			starttrace();
+			opentrace(xcb_get_extension_data);  prargx(conn);  prargs(ext->name);
+			prargi(ext->global_id);  starttrace();
 
-		xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
-		if(conn3D!=NULL)
-			reply=_xcb_get_extension_data(conn3D, _xcb_glx_id());
+		xcb_connection_t *conn3D = _XGetXCBConnection(_dpy3D);
+		if(conn3D != NULL)
+			reply = _xcb_get_extension_data(conn3D, _xcb_glx_id());
 
 			stoptrace();
 			if(reply)
@@ -63,7 +61,7 @@ const xcb_query_extension_reply_t *
 			closetrace();
 	}
 	else
-		reply=_xcb_get_extension_data(conn, ext);
+		reply = _xcb_get_extension_data(conn, ext);
 	CATCH();
 
 	return reply;
@@ -74,7 +72,7 @@ xcb_glx_query_version_cookie_t
 	xcb_glx_query_version(xcb_connection_t *conn, uint32_t major_version,
 		uint32_t minor_version)
 {
-	xcb_glx_query_version_cookie_t cookie={ 0 };
+	xcb_glx_query_version_cookie_t cookie = { 0 };
 
 	TRY();
 
@@ -82,16 +80,16 @@ xcb_glx_query_version_cookie_t
 	// vglfaker::deadYet==true, because MainWin calls X11 functions (which in
 	// turn call XCB functions) from one of its shared library destructors,
 	// which is executed after the VGL faker has shut down.
-	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel()>0
+	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel() > 0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version(conn, major_version, minor_version);
 
 		opentrace(xcb_glx_query_version);  prargx(conn);  prargi(major_version);
 		prargi(minor_version);  starttrace();
 
-	xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
-	if(conn3D!=NULL)
-		cookie=_xcb_glx_query_version(conn3D, major_version, minor_version);
+	xcb_connection_t *conn3D = _XGetXCBConnection(_dpy3D);
+	if(conn3D != NULL)
+		cookie = _xcb_glx_query_version(conn3D, major_version, minor_version);
 
 		stoptrace();  closetrace();
 
@@ -105,20 +103,20 @@ xcb_glx_query_version_reply_t *
 	xcb_glx_query_version_reply(xcb_connection_t *conn,
 		xcb_glx_query_version_cookie_t cookie, xcb_generic_error_t **error)
 {
-	xcb_glx_query_version_reply_t *reply=NULL;
+	xcb_glx_query_version_reply_t *reply = NULL;
 
 	TRY();
 
-	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel()>0
+	if(vglfaker::deadYet || !fconfig.fakeXCB || vglfaker::getFakerLevel() > 0
 		|| dpyhash.find(xcbconnhash.getX11Display(conn)))
 		return _xcb_glx_query_version_reply(conn, cookie, error);
 
 		opentrace(xcb_glx_query_version_reply);  prargx(conn);
 		starttrace();
 
-	xcb_connection_t *conn3D=_XGetXCBConnection(_dpy3D);
-	if(conn3D!=NULL)
-		reply=_xcb_glx_query_version_reply(conn3D, cookie, error);
+	xcb_connection_t *conn3D = _XGetXCBConnection(_dpy3D);
+	if(conn3D != NULL)
+		reply = _xcb_glx_query_version_reply(conn3D, cookie, error);
 
 		stoptrace();
 		if(error)
@@ -145,22 +143,22 @@ xcb_glx_query_version_reply_t *
 
 static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 {
-	VirtualWin *vw=NULL;
+	VirtualWin *vw = NULL;
 
 	if(!e || vglfaker::deadYet || !fconfig.fakeXCB
-		|| vglfaker::getFakerLevel()>0)
+		|| vglfaker::getFakerLevel() > 0)
 		return;
 
 	switch(e->response_type & ~0x80)
 	{
 		case XCB_CONFIGURE_NOTIFY:
 		{
-			xcb_configure_notify_event_t *cne=(xcb_configure_notify_event_t *)e;
-			Display *dpy=xcbconnhash.getX11Display(conn);
+			xcb_configure_notify_event_t *cne = (xcb_configure_notify_event_t *)e;
+			Display *dpy = xcbconnhash.getX11Display(conn);
 
 			if(!dpy || dpyhash.find(dpy)) break;
 
-			vw=winhash.find(dpy, cne->window);
+			vw = winhash.find(dpy, cne->window);
 			if(!vw) break;
 
 				opentrace(handleXCBEvent);  prargx(cne->window);
@@ -174,23 +172,25 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		}
 		case XCB_KEY_PRESS:
 		{
-			xcb_key_press_event_t *kpe=(xcb_key_press_event_t *)e;
-			Display *dpy=xcbconnhash.getX11Display(conn);
+			xcb_key_press_event_t *kpe = (xcb_key_press_event_t *)e;
+			Display *dpy = xcbconnhash.getX11Display(conn);
 
 			if(!dpy || !fconfig.gui || dpyhash.find(dpy)) break;
 
-			xcb_key_symbols_t *keysyms=_xcb_key_symbols_alloc(conn);
+			xcb_key_symbols_t *keysyms = _xcb_key_symbols_alloc(conn);
 			if(!keysyms) break;
 
-			xcb_keysym_t keysym=_xcb_key_symbols_get_keysym(keysyms, kpe->detail, 0);
-			unsigned int state2, state=(kpe->state & (~(XCB_MOD_MASK_LOCK)));
-			state2=fconfig.guimod;
-			if(state2&Mod1Mask)
+			xcb_keysym_t keysym =
+				_xcb_key_symbols_get_keysym(keysyms, kpe->detail, 0);
+			unsigned int state2, state = (kpe->state & (~(XCB_MOD_MASK_LOCK)));
+			state2 = fconfig.guimod;
+			if(state2 & Mod1Mask)
 			{
-				state2&=(~(Mod1Mask));  state2|=Mod2Mask;
+				state2 &= (~(Mod1Mask));  state2 |= Mod2Mask;
 			}
-			if(keysym==fconfig.guikey && (state==fconfig.guimod || state==state2)
-				&& fconfig_getshmid()!=-1)
+			if(keysym == fconfig.guikey
+				&& (state == fconfig.guimod || state == state2)
+				&& fconfig_getshmid() != -1)
 				vglpopup(dpy, fconfig_getshmid());
 
 			_xcb_key_symbols_free(keysyms);
@@ -199,19 +199,19 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 		}
 		case XCB_CLIENT_MESSAGE:
 		{
-			xcb_client_message_event_t *cme=(xcb_client_message_event_t *)e;
-			xcb_atom_t protoAtom=0, deleteAtom=0;
+			xcb_client_message_event_t *cme = (xcb_client_message_event_t *)e;
+			xcb_atom_t protoAtom = 0, deleteAtom = 0;
 
-			Display *dpy=xcbconnhash.getX11Display(conn);
-			protoAtom=xcbconnhash.getProtoAtom(conn);
-			deleteAtom=xcbconnhash.getDeleteAtom(conn);
+			Display *dpy = xcbconnhash.getX11Display(conn);
+			protoAtom = xcbconnhash.getProtoAtom(conn);
+			deleteAtom = xcbconnhash.getDeleteAtom(conn);
 
 			if(!dpy || !protoAtom || !deleteAtom
-				|| cme->type!=protoAtom || cme->data.data32[0]!=deleteAtom
+				|| cme->type != protoAtom || cme->data.data32[0] != deleteAtom
 				|| dpyhash.find(dpy))
 				break;
 
-			vw=winhash.find(dpy, cme->window);
+			vw = winhash.find(dpy, cme->window);
 			if(!vw) break;
 			vw->wmDelete();
 
@@ -223,11 +223,11 @@ static void handleXCBEvent(xcb_connection_t *conn, xcb_generic_event_t *e)
 
 xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e=NULL;
+	xcb_generic_event_t *e = NULL;
 
 	TRY();
 
-	if((e=_xcb_poll_for_event(conn))!=NULL)
+	if((e = _xcb_poll_for_event(conn)) != NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -238,11 +238,11 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *conn)
 
 xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e=NULL;
+	xcb_generic_event_t *e = NULL;
 
 	TRY();
 
-	if((e=_xcb_poll_for_queued_event(conn))!=NULL)
+	if((e = _xcb_poll_for_queued_event(conn)) != NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -253,11 +253,11 @@ xcb_generic_event_t *xcb_poll_for_queued_event(xcb_connection_t *conn)
 
 xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 {
-	xcb_generic_event_t *e=NULL;
+	xcb_generic_event_t *e = NULL;
 
 	TRY();
 
-	if((e=_xcb_wait_for_event(conn))!=NULL)
+	if((e = _xcb_wait_for_event(conn)) != NULL)
 		handleXCBEvent(conn, e);
 
 	CATCH();
@@ -268,7 +268,7 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *conn)
 
 void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 {
-	xcb_connection_t *conn=NULL;
+	xcb_connection_t *conn = NULL;
 
 	TRY();
 
@@ -280,10 +280,10 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 
 	if(fconfig.fakeXCB)
 	{
-		conn=_XGetXCBConnection(dpy);
+		conn = _XGetXCBConnection(dpy);
 		if(conn)
 		{
-			if(owner==XCBOwnsEventQueue) xcbconnhash.add(conn, dpy);
+			if(owner == XCBOwnsEventQueue) xcbconnhash.add(conn, dpy);
 			else xcbconnhash.remove(conn);
 		}
 	}
@@ -294,7 +294,7 @@ void XSetEventQueueOwner(Display *dpy, enum XEventQueueOwner owner)
 	CATCH();
 }
 
-} // extern "C"
+}  // extern "C"
 
 
-#endif // FAKEXCB
+#endif  // FAKEXCB

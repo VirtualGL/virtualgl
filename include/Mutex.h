@@ -55,14 +55,14 @@ namespace vglutil
 
 			CriticalSection(void);
 			~CriticalSection(void);
-			void lock(bool errorCheck=true);
-			void unlock(bool errorCheck=true);
+			void lock(bool errorCheck = true);
+			void unlock(bool errorCheck = true);
 
 			class SafeLock
 			{
 				public:
 
-					SafeLock(CriticalSection &cs_, bool errorCheck_=true) : cs(cs_),
+					SafeLock(CriticalSection &cs_, bool errorCheck_ = true) : cs(cs_),
 						errorCheck(errorCheck_)
 					{
 						cs.lock(errorCheck);
@@ -89,7 +89,7 @@ namespace vglutil
 	{
 		public:
 
-			Semaphore(long initialCount=0);
+			Semaphore(long initialCount = 0);
 			~Semaphore(void);
 			void wait(void);
 			bool tryWait();
@@ -109,4 +109,4 @@ namespace vglutil
 	};
 }
 
-#endif //__MUTEX_H__
+#endif  // __MUTEX_H__

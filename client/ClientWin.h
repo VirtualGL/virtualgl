@@ -21,7 +21,7 @@
 #include "GenericQ.h"
 
 
-enum {RR_DRAWAUTO=-1, RR_DRAWX11=0, RR_DRAWOGL};
+enum { RR_DRAWAUTO = -1, RR_DRAWX11 = 0, RR_DRAWOGL };
 
 
 namespace vglclient
@@ -43,7 +43,7 @@ namespace vglclient
 			void initX11(void);
 
 			int drawMethod, reqDrawMethod;
-			static const int NFRAMES=2;
+			static const int NFRAMES = 2;
 			vglcommon::Frame *fb;
 			vglcommon::CompressedFrame cframes[NFRAMES];  int cfindex;
 			#ifdef USEXV
@@ -60,4 +60,4 @@ namespace vglclient
 	};
 }
 
-#endif // __CLIENTWIN_H__
+#endif  // __CLIENTWIN_H__

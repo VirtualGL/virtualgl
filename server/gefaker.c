@@ -18,20 +18,20 @@
 #include <stdlib.h>
 
 
-static pthread_mutex_t globalmutex=PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t globalmutex = PTHREAD_MUTEX_INITIALIZER;
 
-typedef	char* (*_getenvType)(const char *);
-static _getenvType __getenv=NULL;
+typedef char *(*_getenvType)(const char *);
+static _getenvType __getenv = NULL;
 
 
 static void __loadsymbol(void)
 {
-	const char *err=NULL;
+	const char *err = NULL;
 	pthread_mutex_lock(&globalmutex);
-	if(__getenv) {pthread_mutex_unlock(&globalmutex);  return;}
+	if(__getenv) { pthread_mutex_unlock(&globalmutex);  return; }
 	dlerror();  /* Clear error state */
-	__getenv=(_getenvType)dlsym(RTLD_NEXT, "getenv");
-	err=dlerror();
+	__getenv = (_getenvType)dlsym(RTLD_NEXT, "getenv");
+	err = dlerror();
 	if(err) fprintf(stderr, "[gefaker] %s\n", err);
 	else if(!__getenv) fprintf(stderr, "[gefaker] Could not load symbol.\n");
 	pthread_mutex_unlock(&globalmutex);
@@ -40,11 +40,11 @@ static void __loadsymbol(void)
 
 char *getenv(const char *name)
 {
-	char *env=NULL;  int verbose=0;
+	char *env = NULL;  int verbose = 0;
 	__loadsymbol();
 	if(!__getenv) return NULL;
-	if((env=__getenv("VGL_VERBOSE"))!=NULL && strlen(env)>0
-		&& !strncmp(env, "1", 1)) verbose=1;
+	if((env = __getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
+		&& !strncmp(env, "1", 1)) verbose = 1;
 	if(name && (!strcmp(name, "LD_PRELOAD")
 	#ifdef sun
 		|| !strcmp(name, "LD_PRELOAD_32") || !strcmp(name, "LD_PRELOAD_64")

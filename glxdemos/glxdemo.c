@@ -1,5 +1,3 @@
-
-
 /*
  * A demonstration of using the GLX functions.  This program is in the
  * public domain.
@@ -40,14 +38,14 @@ static void resize( unsigned int width, unsigned int height )
 
 
 static Window make_rgb_db_window( Display *dpy,
-				  unsigned int width, unsigned int height )
+                                  unsigned int width, unsigned int height )
 {
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
+                    None };
    int scrnum;
    XSetWindowAttributes attr;
    unsigned long mask;
@@ -73,8 +71,8 @@ static Window make_rgb_db_window( Display *dpy,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow( dpy, root, 0, 0, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr );
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr );
 
    ctx = glXCreateContext( dpy, visinfo, NULL, True );
    if (!ctx) {
@@ -96,12 +94,12 @@ static void event_loop( Display *dpy )
       XNextEvent( dpy, &event );
 
       switch (event.type) {
-	 case Expose:
-	    redraw( dpy, event.xany.window );
-	    break;
-	 case ConfigureNotify:
-	    resize( event.xconfigure.width, event.xconfigure.height );
-	    break;
+         case Expose:
+            redraw( dpy, event.xany.window );
+            break;
+         case ConfigureNotify:
+            resize( event.xconfigure.width, event.xconfigure.height );
+            break;
       }
    }
 }

@@ -3,13 +3,13 @@ Copyright 1995 by Silicon Graphics Incorporated, Mountain View, California.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Silicon Graphics not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
@@ -24,21 +24,21 @@ PERFORMANCE OF THIS SOFTWARE.
 /*
  * Derived from code written by Kurt Akeley, November 1992
  *
- *	Uses PolygonOffset to draw hidden-line images.  PolygonOffset
- *	    shifts the z values of polygons an amount that is
- *	    proportional to their slope in screen z.  This keeps
- *	    the lines, which are drawn without displacement, from
- *	    interacting with their respective polygons, and
- *	    thus eliminates line dropouts.
+ *      Uses PolygonOffset to draw hidden-line images.  PolygonOffset
+ *          shifts the z values of polygons an amount that is
+ *          proportional to their slope in screen z.  This keeps
+ *          the lines, which are drawn without displacement, from
+ *          interacting with their respective polygons, and
+ *          thus eliminates line dropouts.
  *
- *	The left image shows an ordinary antialiased wireframe image.
- *	The center image shows an antialiased hidden-line image without
- *	    PolygonOffset.
- *	The right image shows an antialiased hidden-line image using
- *	    PolygonOffset to reduce artifacts.
+ *      The left image shows an ordinary antialiased wireframe image.
+ *      The center image shows an antialiased hidden-line image without
+ *          PolygonOffset.
+ *      The right image shows an antialiased hidden-line image using
+ *          PolygonOffset to reduce artifacts.
  *
- *	Drag with a mouse button pressed to rotate the models.
- *	Press the escape key to exit.
+ *      Drag with a mouse button pressed to rotate the models.
+ *      Press the escape key to exit.
  */
 
 /*
@@ -56,7 +56,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 
 #ifndef GLX_SAMPLES
-#define GLX_SAMPLES 0x186a1
+#  define GLX_SAMPLES     0x186a1
 #endif
 
 #ifndef EXIT_FAILURE
@@ -82,8 +82,8 @@ Quad quads[MAXQUAD] = {
    { {0,0,1}, {1,0,1}, {1,1,1}, {0,1,1} }  /* z = 1 */
 };
 
-#define WIREFRAME	0
-#define HIDDEN_LINE	1
+#define WIREFRAME       0
+#define HIDDEN_LINE     1
 
 static void error(const char* prog, const char* msg);
 static void cubes(int mx, int my, int mode);
@@ -110,11 +110,9 @@ int main(int argc, char** argv) {
     GLint z;
     int ns;
 
-    if(argc > 2 && !strcmp(argv[1], "-ms"))
-    {
+    if (argc > 2 && !strcmp(argv[1], "-ms")) {
         ns = atoi(argv[2]);
-        if(ns >= 1)
-        {
+        if (ns >= 1) {
             attributeList[10] = GLX_SAMPLES;
             attributeList[11] = ns;
         }
@@ -125,9 +123,10 @@ int main(int argc, char** argv) {
 
     vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeList);
     if (!vi) error(argv[0], "no suitable visual");
-    printf("Visual ID: 0x%.2x\n", (unsigned int)vi->visualid);
+    printf("Visual ID: 0x%.2x\n", (unsigned int) vi->visualid);
     glXGetConfig(dpy, vi, GLX_SAMPLES, &ns);
-    if (ns > 0) printf("Number of samples: %d\n", ns);
+    if (ns > 0)
+        printf("Number of samples: %d\n", ns);
 
     cx = glXCreateContext(dpy, vi, 0, GL_TRUE);
 
@@ -136,10 +135,10 @@ int main(int argc, char** argv) {
 
     swa.border_pixel = 0;
     swa.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
-	ButtonPressMask | ButtonMotionMask;
+        ButtonPressMask | ButtonMotionMask;
     win = XCreateWindow(dpy, RootWindow(dpy, vi->screen), 0, 0, 900, 300,
-			0, vi->depth, InputOutput, vi->visual,
-			CWBorderPixel|CWColormap|CWEventMask, &swa);
+                        0, vi->depth, InputOutput, vi->visual,
+                        CWBorderPixel|CWColormap|CWEventMask, &swa);
     XStoreName(dpy, win, "hiddenline");
     XMapWindow(dpy, win);
 
@@ -226,16 +225,16 @@ cubes(int mx, int my, int mode) {
     glTranslatef(-0.5, -0.5, -0.5);
     glScalef(1.0/dimension, 1.0/dimension, 1.0/dimension);
     for (z = 0; z < dimension; z++) {
-	for (y = 0; y < dimension; y++) {
-	    for (x = 0; x < dimension; x++) {
-		glPushMatrix();
-		glTranslatef(x, y, z);
-		glScalef(0.8, 0.8, 0.8);
-		for (i = 0; i < MAXQUAD; i++)
+        for (y = 0; y < dimension; y++) {
+            for (x = 0; x < dimension; x++) {
+                glPushMatrix();
+                glTranslatef(x, y, z);
+                glScalef(0.8, 0.8, 0.8);
+                for (i = 0; i < MAXQUAD; i++)
                     draw_hidden(quads[i], mode, i);
-		glPopMatrix();
-	    }
-	}
+                glPopMatrix();
+            }
+        }
     }
 }
 
@@ -270,7 +269,7 @@ draw_hidden(Quad quad, int mode, int face) {
     };
     if (mode == HIDDEN_LINE) {
         glColor3fv(colors[face % 3]);
-	fill(quad);
+        fill(quad);
     }
 
     /* draw the outline using white */
@@ -285,55 +284,55 @@ process_input(Display *dpy, Window win) {
     static int deltax = 90, deltay = 40;
 
     do {
-	char buf[31];
-	KeySym keysym;
+        char buf[31];
+        KeySym keysym;
 
-	XNextEvent(dpy, &event);
-	switch(event.type) {
-	case Expose:
-	    break;
-	case ConfigureNotify: {
-	    /* this approach preserves a 1:1 viewport aspect ratio */
-	    int vX, vY, vW, vH;
-	    int eW = event.xconfigure.width, eH = event.xconfigure.height;
-	    if (eW >= eH) {
-		vX = 0;
-		vY = (eH - eW) >> 1;
-		vW = vH = eW;
-	    } else {
-		vX = (eW - eH) >> 1;
-		vY = 0;
-		vW = vH = eH;
-	    }
-	    glViewport(vX, vY, vW, vH);
-	    }
-	    break;
-	case KeyPress:
-	    (void) XLookupString(&event.xkey, buf, sizeof(buf), &keysym, NULL);
-	    switch (keysym) {
+        XNextEvent(dpy, &event);
+        switch(event.type) {
+        case Expose:
+            break;
+        case ConfigureNotify: {
+            /* this approach preserves a 1:1 viewport aspect ratio */
+            int vX, vY, vW, vH;
+            int eW = event.xconfigure.width, eH = event.xconfigure.height;
+            if (eW >= eH) {
+                vX = 0;
+                vY = (eH - eW) >> 1;
+                vW = vH = eW;
+            } else {
+                vX = (eW - eH) >> 1;
+                vY = 0;
+                vW = vH = eH;
+            }
+            glViewport(vX, vY, vW, vH);
+            }
+            break;
+        case KeyPress:
+            (void) XLookupString(&event.xkey, buf, sizeof(buf), &keysym, NULL);
+            switch (keysym) {
             case 'Z':
                Scale *= 1.1;
                break;
             case 'z':
                Scale *= 0.9;
                break;
-	    case XK_Escape:
-		exit(EXIT_SUCCESS);
-	    default:
-		break;
-	    }
-	    break;
-	case ButtonPress:
-	    prevx = event.xbutton.x;
-	    prevy = event.xbutton.y;
-	    break;
-	case MotionNotify:
-	    deltax += (event.xbutton.x - prevx); prevx = event.xbutton.x;
-	    deltay += (event.xbutton.y - prevy); prevy = event.xbutton.y;
-	    break;
-	default:
-	    break;
-	}
+            case XK_Escape:
+                exit(EXIT_SUCCESS);
+            default:
+                break;
+            }
+            break;
+        case ButtonPress:
+            prevx = event.xbutton.x;
+            prevy = event.xbutton.y;
+            break;
+        case MotionNotify:
+            deltax += (event.xbutton.x - prevx); prevx = event.xbutton.x;
+            deltay += (event.xbutton.y - prevy); prevy = event.xbutton.y;
+            break;
+        default:
+            break;
+        }
     } while (XPending(dpy));
 
     draw_scene(deltax, deltay);
@@ -358,4 +357,3 @@ query_extension(char* extName) {
     }
     return GL_FALSE;
 }
-

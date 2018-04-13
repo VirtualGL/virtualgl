@@ -1,17 +1,17 @@
 /*
  * Copyright (C) 1999-2001  Brian Paul   All Rights Reserved.
  * Copyright (C) 2013  D. R. Commander   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -42,7 +42,6 @@
 #ifndef GLX_MESA_swap_control
 #define GLX_MESA_swap_control 1
 typedef int (*PFNGLXGETSWAPINTERVALMESAPROC)(void);
-typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
 #endif
 
 
@@ -103,22 +102,23 @@ static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
 static GLint gear1, gear2, gear3;
 static GLfloat angle = 0.0;
 
-static GLboolean fullscreen = GL_FALSE;	/* Create a single fullscreen window */
-static GLboolean stereo = GL_FALSE;	/* Enable stereo.  */
+static GLboolean fullscreen = GL_FALSE; /* Create a single fullscreen window */
+static GLboolean stereo = GL_FALSE;     /* Enable stereo.  */
 static GLint samples = 0;               /* Choose visual with at least N samples. */
-static GLboolean animate = GL_TRUE;	/* Animation */
-static GLfloat eyesep = 5.0;		/* Eye separation. */
-static GLfloat fix_point = 40.0;	/* Fixation point distance.  */
-static GLfloat left, right, asp;	/* Stereo frustum params.  */
+static GLboolean animate = GL_TRUE;     /* Animation */
+static GLfloat eyesep = 5.0;            /* Eye separation. */
+static GLfloat fix_point = 40.0;        /* Fixation point distance.  */
+static GLfloat left, right, asp;        /* Stereo frustum params.  */
 
 static int swapinterval = -1;
+static int visualid = 0;
 
 
 /*
  *
  *  Draw a gear wheel.  You'll probably want to call this function when
  *  building a display list since we do a lot of trig here.
- * 
+ *
  *  Input:  inner_radius - radius of hole at center
  *          outer_radius - radius at center of teeth
  *          width - width of gear
@@ -151,9 +151,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
       glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
       if (i < teeth) {
-	 glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
-	 glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		    width * 0.5);
+         glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
+         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
+                    width * 0.5);
       }
    }
    glEnd();
@@ -167,9 +167,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 width * 0.5);
+                 width * 0.5);
    }
    glEnd();
 
@@ -182,9 +182,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
       glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
       if (i < teeth) {
-	 glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		    -width * 0.5);
-	 glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
+         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
+                    -width * 0.5);
+         glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
       }
    }
    glEnd();
@@ -196,9 +196,9 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       angle = i * 2.0 * M_PI / teeth;
 
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5);
       glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
    }
@@ -221,16 +221,16 @@ gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
       glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), -width * 0.5);
       glNormal3f(cos(angle), sin(angle), 0.0);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       u = r1 * cos(angle + 3 * da) - r2 * cos(angle + 2 * da);
       v = r1 * sin(angle + 3 * da) - r2 * sin(angle + 2 * da);
       glNormal3f(v, -u, 0.0);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 width * 0.5);
+                 width * 0.5);
       glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da),
-		 -width * 0.5);
+                 -width * 0.5);
       glNormal3f(cos(angle), sin(angle), 0.0);
    }
 
@@ -347,7 +347,7 @@ draw_frame(Display *dpy, Window win)
    glXSwapBuffers(dpy, win);
 
    frames++;
-   
+
    if (tRate0 < 0.0)
       tRate0 = t;
    if (t - tRate0 >= 5.0) {
@@ -384,14 +384,13 @@ reshape(int width, int height)
       glLoadIdentity();
       glFrustum(-1.0, 1.0, -h, h, 5.0, 60.0);
    }
-   
+
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
    glTranslatef(0.0, 0.0, -40.0);
 }
-   
 
-int visualid = 0;
+
 
 static void
 init(void)
@@ -524,9 +523,11 @@ make_window( Display *dpy, const char *name,
    root = RootWindow( dpy, scrnum );
 
    if (visualid) {
-     XVisualInfo vtemp;  int n=0;
-     vtemp.visualid=visualid;
-     visinfo=XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
+      XVisualInfo vtemp;
+      int n = 0;
+
+      vtemp.visualid = visualid;
+      visinfo = XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n);
    } else
       visinfo = glXChooseVisual(dpy, scrnum, attribs);
    if (!visinfo) {
@@ -538,7 +539,7 @@ make_window( Display *dpy, const char *name,
       printf(" visual\n");
       exit(1);
    }
-   printf("Visual ID: 0x%.2x\n", (unsigned int)visinfo->visualid);
+   printf("Visual ID: 0x%.2x\n", (unsigned int) visinfo->visualid);
 
    /* window attributes */
    attr.background_pixel = 0;
@@ -549,8 +550,8 @@ make_window( Display *dpy, const char *name,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow( dpy, root, x, y, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr );
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr );
 
    if (fullscreen)
       no_border(dpy, win);
@@ -612,8 +613,8 @@ query_vsync(Display *dpy, GLXDrawable drawable)
 #if defined(GLX_EXT_swap_control)
    if (is_glx_extension_supported(dpy, "GLX_EXT_swap_control")) {
       PFNGLXSWAPINTERVALEXTPROC pglXSwapIntervalEXT =
-         (PFNGLXSWAPINTERVALEXTPROC)
-         glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalEXT");
+          (PFNGLXSWAPINTERVALEXTPROC)
+          glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalEXT");
 
       unsigned int tmp = -1;
       if (swapinterval >= 1)
@@ -624,13 +625,13 @@ query_vsync(Display *dpy, GLXDrawable drawable)
 #endif
    if (is_glx_extension_supported(dpy, "GLX_MESA_swap_control")) {
       PFNGLXGETSWAPINTERVALMESAPROC pglXGetSwapIntervalMESA =
-         (PFNGLXGETSWAPINTERVALMESAPROC)
-         glXGetProcAddressARB((const GLubyte *) "glXGetSwapIntervalMESA");
+          (PFNGLXGETSWAPINTERVALMESAPROC)
+          glXGetProcAddressARB((const GLubyte *) "glXGetSwapIntervalMESA");
 
       if (swapinterval >= 1) {
          PFNGLXSWAPINTERVALMESAPROC pglXSwapIntervalMESA =
-            (PFNGLXSWAPINTERVALMESAPROC)
-            glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalMESA");
+             (PFNGLXSWAPINTERVALMESAPROC)
+             glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalMESA");
          (*pglXSwapIntervalMESA)(swapinterval);
       }
 
@@ -642,8 +643,8 @@ query_vsync(Display *dpy, GLXDrawable drawable)
       interval = 0;
       if (swapinterval >= 1) {
          PFNGLXSWAPINTERVALSGIPROC pglXSwapIntervalSGI =
-            (PFNGLXSWAPINTERVALSGIPROC)
-            glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalSGI");
+             (PFNGLXSWAPINTERVALSGIPROC)
+             glXGetProcAddressARB((const GLubyte *) "glXSwapIntervalSGI");
          (*pglXSwapIntervalSGI)(swapinterval);
          interval = swapinterval;
       }
@@ -745,7 +746,7 @@ usage(void)
    printf("  -visualid <id>          force window to use this visual\n");
    printf("  -interval <n>           set swap interval to <n>\n");
 }
- 
+
 
 int
 main(int argc, char *argv[])
@@ -800,7 +801,7 @@ main(int argc, char *argv[])
    dpy = XOpenDisplay(dpyName);
    if (!dpy) {
       printf("Error: couldn't open display %s\n",
-	     dpyName ? dpyName : getenv("DISPLAY"));
+             dpyName ? dpyName : getenv("DISPLAY"));
       return -1;
    }
 

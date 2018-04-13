@@ -41,7 +41,7 @@ namespace vglserver
 				GLint destX, GLint destY, GLXDrawable draw);
 			int getWidth(void) { return oglDraw ? oglDraw->getWidth() : -1; }
 			int getHeight(void) { return oglDraw ? oglDraw->getHeight() : -1; }
-			bool isInit(void) { return (direct==True || direct==False); }
+			bool isInit(void) { return direct == True || direct == False; }
 
 		protected:
 
@@ -109,4 +109,4 @@ namespace vglserver
 	};
 }
 
-#endif // __VIRTUALDRAWABLE_H__
+#endif  // __VIRTUALDRAWABLE_H__

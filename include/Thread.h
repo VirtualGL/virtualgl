@@ -37,7 +37,7 @@ namespace vglutil
 
 		protected:
 
-			virtual void run()=0;
+			virtual void run() = 0;
 			unsigned long threadID;
 			Error lastError;
 			friend class Thread;
@@ -83,4 +83,4 @@ namespace vglutil
 	};
 }
 
-#endif // __THREAD_H__
+#endif  // __THREAD_H__

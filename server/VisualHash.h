@@ -21,7 +21,7 @@
 #include "Hash.h"
 
 
-#define HASH Hash<char *, XVisualInfo *, GLXFBConfig>
+#define HASH  Hash<char *, XVisualInfo *, GLXFBConfig>
 
 // This maps a XVisualInfo * to a GLXFBConfig
 
@@ -33,20 +33,20 @@ namespace vglserver
 
 			static VisualHash *getInstance(void)
 			{
-				if(instance==NULL)
+				if(instance == NULL)
 				{
 					vglutil::CriticalSection::SafeLock l(instanceMutex);
-					if(instance==NULL) instance=new VisualHash;
+					if(instance == NULL) instance = new VisualHash;
 				}
 				return instance;
 			}
 
-			static bool isAlloc(void) { return (instance!=NULL); }
+			static bool isAlloc(void) { return instance != NULL; }
 
 			void add(Display *dpy, XVisualInfo *vis, GLXFBConfig config)
 			{
 				if(!dpy || !vis || !config) _throw("Invalid argument");
-				char *dpystring=strdup(DisplayString(dpy));
+				char *dpystring = strdup(DisplayString(dpy));
 				if(!HASH::add(dpystring, vis, config))
 					free(dpystring);
 			}
@@ -60,21 +60,21 @@ namespace vglserver
 			void remove(Display *dpy, XVisualInfo *vis)
 			{
 				if(!vis) _throw("Invalid argument");
-				HASH::remove(dpy? DisplayString(dpy):NULL, vis);
+				HASH::remove(dpy ? DisplayString(dpy) : NULL, vis);
 			}
 
 			GLXFBConfig mostRecentConfig(Display *dpy, XVisualInfo *vis)
 			{
 				if(!dpy || !vis) _throw("Invalid argument");
-				HashEntry *ptr=NULL;
+				HashEntry *ptr = NULL;
 				vglutil::CriticalSection::SafeLock l(mutex);
-				ptr=end;
-				while(ptr!=NULL)
+				ptr = end;
+				while(ptr != NULL)
 				{
 					if(ptr->key1 && !strcasecmp(DisplayString(dpy), ptr->key1)
-						&& ptr->key2 && vis->visualid==ptr->key2->visualid)
+						&& ptr->key2 && vis->visualid == ptr->key2->visualid)
 						return ptr->value;
-					ptr=ptr->prev;
+					ptr = ptr->prev;
 				}
 				return 0;
 			}
@@ -88,7 +88,8 @@ namespace vglserver
 
 			bool compare(char *key1, XVisualInfo *key2, HashEntry *entry)
 			{
-				return(key2==entry->key2 && (!key1 || !strcasecmp(key1, entry->key1)));
+				return key2 == entry->key2
+					&& (!key1 || !strcasecmp(key1, entry->key1));
 			}
 
 			void detach(HashEntry *entry)
@@ -104,6 +105,6 @@ namespace vglserver
 #undef HASH
 
 
-#define vishash (*(VisualHash::getInstance()))
+#define vishash  (*(VisualHash::getInstance()))
 
-#endif // __VISUALHASH_H__
+#endif  // __VISUALHASH_H__

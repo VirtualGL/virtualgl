@@ -23,7 +23,7 @@
 #include "faker-sym.h"
 
 
-#define EXISTING_DRAWABLE (GLXDrawable)-1
+#define EXISTING_DRAWABLE  (GLXDrawable)-1
 
 
 namespace vglserver
@@ -33,24 +33,26 @@ namespace vglserver
 		public:
 
 			TempContext(Display *dpy, GLXDrawable draw, GLXDrawable read,
-				GLXContext ctx=_glXGetCurrentContext(), GLXFBConfig config=NULL,
-				int renderType=0) : olddpy(_glXGetCurrentDisplay()),
+				GLXContext ctx = _glXGetCurrentContext(), GLXFBConfig config = NULL,
+				int renderType = 0) : olddpy(_glXGetCurrentDisplay()),
 				oldctx(_glXGetCurrentContext()), newctx(NULL),
 				oldread(_glXGetCurrentReadDrawable()),
 				olddraw(_glXGetCurrentDrawable()), ctxChanged(false)
 			{
 				if(!dpy) return;
-				if(!olddpy) olddpy=dpy;
-				if(read==EXISTING_DRAWABLE) read=oldread;
-				if(draw==EXISTING_DRAWABLE) draw=olddraw;
+				if(!olddpy) olddpy = dpy;
+				if(read == EXISTING_DRAWABLE) read = oldread;
+				if(draw == EXISTING_DRAWABLE) draw = olddraw;
 				if(draw && read && !ctx && config && renderType)
-					newctx=ctx=_glXCreateNewContext(dpy, config, renderType, NULL, True);
+					newctx = ctx =
+						_glXCreateNewContext(dpy, config, renderType, NULL, True);
 				if(((read || draw) && ctx && dpy)
-					&& (oldread!=read  || olddraw!=draw || oldctx!=ctx || olddpy!=dpy))
+					&& (oldread != read  || olddraw != draw || oldctx != ctx
+						|| olddpy != dpy))
 				{
 					if(!_glXMakeContextCurrent(dpy, draw, read, ctx))
 						_throw("Could not bind OpenGL context to window (window may have disappeared)");
-					ctxChanged=true;
+					ctxChanged = true;
 				}
 			}
 
@@ -59,11 +61,11 @@ namespace vglserver
 				if(ctxChanged)
 				{
 					_glXMakeContextCurrent(olddpy, olddraw, oldread, oldctx);
-					ctxChanged=false;
+					ctxChanged = false;
 				}
 				if(newctx)
 				{
-					_glXDestroyContext(olddpy, newctx);  newctx=NULL;
+					_glXDestroyContext(olddpy, newctx);  newctx = NULL;
 				}
 			}
 
@@ -81,4 +83,4 @@ namespace vglserver
 	};
 }
 
-#endif // __TEMPCONTEXT_H__
+#endif  // __TEMPCONTEXT_H__

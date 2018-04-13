@@ -54,38 +54,43 @@ namespace vglutil
 
 			void init(const char *method_, char *message_, int line)
 			{
-				message[0]=0;
-				if(line>=1) sprintf(message, "%d: ", line);
-				if(!method_) method_="(Unknown error location)";
-				method=method_;
+				message[0] = 0;
+				if(line >= 1) sprintf(message, "%d: ", line);
+				if(!method_) method_ = "(Unknown error location)";
+				method = method_;
 				if(message_)
-					strncpy(&message[strlen(message)], message_, MLEN-strlen(message));
+					strncpy(&message[strlen(message)], message_, MLEN - strlen(message));
 			}
 
-			Error(void) : method(NULL) { message[0]=0; }
+			Error(void) : method(NULL) { message[0] = 0; }
 
-			operator bool() { return (method!=NULL && message[0]!=0); }
+			operator bool() { return method != NULL && message[0] != 0; }
 
 			const char *getMethod(void) { return method; }
 			char *getMessage(void) { return message; }
 
 		protected:
 
-			static const int MLEN=256;
-			const char *method;  char message[MLEN+1];
+			static const int MLEN = 256;
+			const char *method;  char message[MLEN + 1];
 	};
 }
 
 
-#if defined(sgi) || defined(sun)
-#define __FUNCTION__ __FILE__
+#if defined(sgi)
+#define __FUNCTION__  __FILE__
 #endif
-#define _throw(m) throw(vglutil::Error(__FUNCTION__, m, __LINE__))
-#define _errifnot(f) { if(!(f)) _throw("Unexpected NULL condition"); }
-#define _newcheck(f)  \
-	try {  \
-		if(!(f)) _throw("Memory allocation error");  \
-	} catch(std::bad_alloc& e) { _throw(e.what()); }
+#define _throw(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
+#define _errifnot(f)  { if(!(f)) _throw("Unexpected NULL condition"); }
+#define _newcheck(f) \
+	try \
+	{ \
+		if(!(f)) _throw("Memory allocation error"); \
+	} \
+	catch(std::bad_alloc &e) \
+	{ \
+		_throw(e.what()); \
+	}
 
 
 #ifdef _WIN32
@@ -108,16 +113,16 @@ namespace vglutil
 			{
 				if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &message[strlen(message)],
-					MLEN-(DWORD)strlen(message), NULL))
+					MLEN - (DWORD)strlen(message), NULL))
 					strncpy(message, "Error in FormatMessage()", MLEN);
 			}
 	};
 }
 
-#define _throww32() throw(vglutil::W32Error(__FUNCTION__, __LINE__))
-#define _w32(f) { if(!(f)) _throww32(); }
+#define _throww32()  throw(vglutil::W32Error(__FUNCTION__, __LINE__))
+#define _w32(f)  { if(!(f)) _throww32(); }
 
-#endif // _WIN32
+#endif  // _WIN32
 
 
 namespace vglutil
@@ -132,21 +137,24 @@ namespace vglutil
 	};
 }
 
-#define _throwunix() throw(vglutil::UnixError(__FUNCTION__, __LINE__))
-#define _unix(f) { if((f)==-1) _throwunix(); }
+#define _throwunix()  throw(vglutil::UnixError(__FUNCTION__, __LINE__))
+#define _unix(f)  { if((f) == -1) _throwunix(); }
 
 
-#define _fbx(f) {  \
-	if((f)==-1)  \
-		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline()));  \
+#define _fbx(f) \
+{ \
+	if((f) == -1) \
+		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline())); \
 }
-#define _fbxv(f) {  \
-	if((f)==-1)  \
-		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline()));  \
+#define _fbxv(f) \
+{ \
+	if((f) == -1) \
+		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline())); \
 }
-#define _tj(f) {  \
-	if((f)==-1)  \
-		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__));  \
+#define _tj(f) \
+{ \
+	if((f) == -1) \
+		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__)); \
 }
 
-#endif // __ERROR_H__
+#endif  // __ERROR_H__

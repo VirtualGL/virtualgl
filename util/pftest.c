@@ -20,37 +20,38 @@
 #include "Timer.h"
 
 
-#define BENCHTIME 2.0
+#define BENCHTIME  2.0
 
-#define BMPPAD(pitch) ((pitch+(sizeof(int)-1))&(~(sizeof(int)-1)))
+#define BMPPAD(pitch)  ((pitch + (sizeof(int) - 1)) & (~(sizeof(int) - 1)))
 
-#define _throw(m) {  \
-	printf("\n   ERROR: %s\n", m);  retval=-1;  goto bailout;  \
+#define _throw(m) \
+{ \
+	printf("\n   ERROR: %s\n", m);  retval = -1;  goto bailout; \
 }
 
 
-double testTime=BENCHTIME;
-int getSetRGB=0;
+double testTime = BENCHTIME;
+int getSetRGB = 0;
 
 
 void initBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
 	PF dstpf)
 {
-	int i, j, maxRGB=min(1<<srcpf.bpc, 1<<dstpf.bpc);
+	int i, j, maxRGB = min(1 << srcpf.bpc, 1 << dstpf.bpc);
 
-	for(j=0; j<height; j++)
+	for(j = 0; j < height; j++)
 	{
-		for(i=0; i<width; i++)
+		for(i = 0; i < width; i++)
 		{
 			int r, g, b;
-			memset(&buf[j*pitch+i*srcpf.size], 0, srcpf.size);
-			r=(i*maxRGB/width)%maxRGB;  g=(j*maxRGB/height)%maxRGB;
-			b=(j*maxRGB/height+i*maxRGB/width)%maxRGB;
-			if(srcpf.bpc==10 && dstpf.bpc==8)
+			memset(&buf[j * pitch + i * srcpf.size], 0, srcpf.size);
+			r = (i * maxRGB / width) % maxRGB;  g = (j * maxRGB / height) % maxRGB;
+			b = (j * maxRGB / height + i * maxRGB / width) % maxRGB;
+			if(srcpf.bpc == 10 && dstpf.bpc == 8)
 			{
-				r<<=2;  g<<=2;  b<<=2;
+				r <<= 2;  g <<= 2;  b <<= 2;
 			}
-			srcpf.setRGB(&buf[j*pitch+i*srcpf.size], r, g, b);
+			srcpf.setRGB(&buf[j * pitch + i * srcpf.size], r, g, b);
 		}
 	}
 }
@@ -59,21 +60,22 @@ void initBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
 int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
 	PF dstpf)
 {
-	int i, j, retval=1, maxRGB=min(1<<srcpf.bpc, 1<<dstpf.bpc);
+	int i, j, retval = 1, maxRGB = min(1 << srcpf.bpc, 1 << dstpf.bpc);
 
-	for(j=0; j<height; j++)
+	for(j = 0; j < height; j++)
 	{
-		for(i=0; i<width; i++)
+		for(i = 0; i < width; i++)
 		{
 			int r, g, b;
-			dstpf.getRGB(&buf[j*pitch+i*dstpf.size], &r, &g, &b);
-			if(srcpf.bpc==8 && dstpf.bpc==10)
+			dstpf.getRGB(&buf[j * pitch + i * dstpf.size], &r, &g, &b);
+			if(srcpf.bpc == 8 && dstpf.bpc == 10)
 			{
-				r>>=2;  g>>=2;  b>>=2;
+				r >>= 2;  g >>= 2;  b >>= 2;
 			}
-			if(r!=(i*maxRGB/width)%maxRGB || g!=(j*maxRGB/height)%maxRGB
-				|| b!=(j*maxRGB/height+i*maxRGB/width)%maxRGB)
-				retval=0;
+			if(r != (i * maxRGB / width) % maxRGB
+				|| g != (j * maxRGB / height) % maxRGB
+				|| b != (j * maxRGB / height + i * maxRGB / width) % maxRGB)
+				retval = 0;
 		}
 	}
 	return retval;
@@ -82,99 +84,99 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
 
 int doTest(int width, int height, PF srcpf, PF dstpf)
 {
-	int retval=0, iter=0, srcPitch=BMPPAD(width*srcpf.size),
-		dstPitch=BMPPAD(width*dstpf.size);
-	unsigned char *srcBuf=NULL, *dstBuf=NULL, *srcPixel, *dstPixel;
+	int retval = 0, iter = 0, srcPitch = BMPPAD(width * srcpf.size),
+		dstPitch = BMPPAD(width * dstpf.size);
+	unsigned char *srcBuf = NULL, *dstBuf = NULL, *srcPixel, *dstPixel;
 	double tStart, elapsed;
 
-	if((srcBuf=(unsigned char *)malloc(srcPitch*height))==NULL)
+	if((srcBuf = (unsigned char *)malloc(srcPitch * height)) == NULL)
 		_throw("Could not allocate memory");
 	initBuf(srcBuf, width, srcPitch, height, srcpf, dstpf);
-	if((dstBuf=(unsigned char *)malloc(dstPitch*height))==NULL)
+	if((dstBuf = (unsigned char *)malloc(dstPitch * height)) == NULL)
 		_throw("Could not allocate memory");
-	memset(dstBuf, 0, dstPitch*height);
+	memset(dstBuf, 0, dstPitch * height);
 
 	if(getSetRGB)
 	{
 		printf("%-8s --> %-8s (getRGB/setRGB):  ", srcpf.name, dstpf.name);
-		tStart=getTime();
-		iter=0;
+		tStart = getTime();
+		iter = 0;
 		do
 		{
-			int h=height;
-			unsigned char *srcRow=srcBuf, *dstRow=dstBuf;
-			if(dstpf.bpc==10 && srcpf.bpc==8)
+			int h = height;
+			unsigned char *srcRow = srcBuf, *dstRow = dstBuf;
+			if(dstpf.bpc == 10 && srcpf.bpc == 8)
 			{
 				while(h--)
 				{
-					int w=width;
-					srcPixel=srcRow;  dstPixel=dstRow;
+					int w = width;
+					srcPixel = srcRow;  dstPixel = dstRow;
 					while(w--)
 					{
 						int r, g, b;
 						srcpf.getRGB(srcPixel, &r, &g, &b);
-						r<<=2;  g<<=2;  b<<=2;
+						r <<= 2;  g <<= 2;  b <<= 2;
 						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+						srcPixel += srcpf.size;  dstPixel += dstpf.size;
 					}
-					srcRow+=srcPitch;  dstRow+=dstPitch;
+					srcRow += srcPitch;  dstRow += dstPitch;
 				}
 			}
-			else if(srcpf.bpc==10 && dstpf.bpc==8)
+			else if(srcpf.bpc == 10 && dstpf.bpc == 8)
 			{
 				while(h--)
 				{
-					int w=width;
-					srcPixel=srcRow;  dstPixel=dstRow;
+					int w = width;
+					srcPixel = srcRow;  dstPixel = dstRow;
 					while(w--)
 					{
 						int r, g, b;
 						srcpf.getRGB(srcPixel, &r, &g, &b);
-						r>>=2;  g>>=2;  b>>=2;
+						r >>= 2;  g >>= 2;  b >>= 2;
 						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+						srcPixel += srcpf.size;  dstPixel += dstpf.size;
 					}
-					srcRow+=srcPitch;  dstRow+=dstPitch;
+					srcRow += srcPitch;  dstRow += dstPitch;
 				}
 			}
 			else
 			{
 				while(h--)
 				{
-					int w=width;
-					srcPixel=srcRow;  dstPixel=dstRow;
+					int w = width;
+					srcPixel = srcRow;  dstPixel = dstRow;
 					while(w--)
 					{
 						int r, g, b;
 						srcpf.getRGB(srcPixel, &r, &g, &b);
 						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel+=srcpf.size;  dstPixel+=dstpf.size;
+						srcPixel += srcpf.size;  dstPixel += dstpf.size;
 					}
-					srcRow+=srcPitch;  dstRow+=dstPitch;
+					srcRow += srcPitch;  dstRow += dstPitch;
 				}
 			}
 			iter++;
-		} while((elapsed=getTime()-tStart)<testTime);
+		} while((elapsed = getTime() - tStart) < testTime);
 	}
 	else
 	{
 		printf("%-8s --> %-8s (convert):     ", srcpf.name, dstpf.name);
-		tStart=getTime();
+		tStart = getTime();
 		do
 		{
 			srcpf.convert(srcBuf, width, srcPitch, height, dstBuf, dstPitch, dstpf);
 			iter++;
-		} while((elapsed=getTime()-tStart)<testTime);
+		} while((elapsed = getTime() - tStart) < testTime);
 	}
 
-	if(!cmpBuf(dstBuf, width, width*dstpf.size, height, srcpf, dstpf))
+	if(!cmpBuf(dstBuf, width, width * dstpf.size, height, srcpf, dstpf))
 	{
 		printf("Pixel data is bogus\n");
-		retval=-1;  goto bailout;
+		retval = -1;  goto bailout;
 	}
 
 	printf("%f Mpixels/sec\n",
-		(double)(width*height)/1000000.*(double)iter/elapsed);
+		(double)(width * height) / 1000000. * (double)iter / elapsed);
 
 	bailout:
 	if(srcBuf) free(srcBuf);
@@ -196,27 +198,27 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int retval=0, width=1024, height=768, srcFormat, dstFormat, i;
+	int retval = 0, width = 1024, height = 768, srcFormat, dstFormat, i;
 
-	if(argc>1) for(i=1; i<argc; i++)
+	if(argc > 1) for(i = 1; i < argc; i++)
 	{
 		if(!stricmp(argv[i], "-h") || !strcmp(argv[i], "-?")) usage(argv);
-		else if(!stricmp(argv[i], "-time") && i<argc-1)
+		else if(!stricmp(argv[i], "-time") && i < argc - 1)
 		{
-			testTime=atof(argv[++i]);
-			if(testTime<=0.0) usage(argv);
+			testTime = atof(argv[++i]);
+			if(testTime <= 0.0) usage(argv);
 		}
-		else if(!stricmp(argv[i], "-getsetrgb")) getSetRGB=1;
+		else if(!stricmp(argv[i], "-getsetrgb")) getSetRGB = 1;
 		else usage(argv);
 	}
 
-	for(srcFormat=0; srcFormat<PIXELFORMATS-1; srcFormat++)
+	for(srcFormat = 0; srcFormat < PIXELFORMATS - 1; srcFormat++)
 	{
-		PF srcpf=pf_get(srcFormat);
-		for(dstFormat=0; dstFormat<PIXELFORMATS-1; dstFormat++)
+		PF srcpf = pf_get(srcFormat);
+		for(dstFormat = 0; dstFormat < PIXELFORMATS - 1; dstFormat++)
 		{
-			PF dstpf=pf_get(dstFormat);
-			if(doTest(width, height, srcpf, dstpf)==-1)
+			PF dstpf = pf_get(dstFormat);
+			if(doTest(width, height, srcpf, dstpf) == -1)
 				goto bailout;
 		}
 		printf("\n");

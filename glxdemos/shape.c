@@ -1,4 +1,3 @@
-
 /*
  * Example of using the X "shape" extension with OpenGL:  render a spinning
  * cube inside of a non-rectangular window.

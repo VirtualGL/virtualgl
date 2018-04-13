@@ -1,4 +1,3 @@
-
 /*
  * This program demonstrates how to do "off-screen" rendering using
  * the GLX pixel buffer extension.
@@ -375,7 +374,8 @@ Render(void)
 {
    int NumBoxes = 100;
    int i;
-   XFontStruct *fontinfo=NULL;  int fontlistbase, minchar, maxchar;
+   XFontStruct *fontinfo = NULL;
+   int fontlistbase, minchar, maxchar;
 
    glClearColor(0.2, 0.2, 0.9, 0.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -409,7 +409,7 @@ Render(void)
    maxchar = fontinfo->max_char_or_byte2;
    fontlistbase = glGenLists(maxchar + 1);
    glXUseXFont(fontinfo->fid, minchar, maxchar - minchar + 1,
-      fontlistbase + minchar);
+               fontlistbase + minchar);
    XFreeFont(gDpy, fontinfo);
    glListBase(fontlistbase);
    glCallLists(16, GL_UNSIGNED_BYTE, "GLX Pbuffer demo");
@@ -508,4 +508,3 @@ main(int argc, char *argv[])
    }
    return 0;
 }
-

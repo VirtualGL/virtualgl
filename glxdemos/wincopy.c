@@ -78,8 +78,8 @@ CreateWindow(Display *dpy, int scrnum, XVisualInfo *visinfo,
    mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
    win = XCreateWindow(dpy, root, xpos, ypos, width, height,
-		        0, visinfo->depth, InputOutput,
-		        visinfo->visual, mask, &attr);
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr);
    if (win) {
       XSizeHints sizehints;
       sizehints.x = xpos;
@@ -240,11 +240,11 @@ Init(void)
 {
    XVisualInfo *visinfo;
    int attrib[] = { GLX_RGBA,
-		    GLX_RED_SIZE, 1,
-		    GLX_GREEN_SIZE, 1,
-		    GLX_BLUE_SIZE, 1,
-		    GLX_DOUBLEBUFFER,
-		    None };
+                    GLX_RED_SIZE, 1,
+                    GLX_GREEN_SIZE, 1,
+                    GLX_BLUE_SIZE, 1,
+                    GLX_DOUBLEBUFFER,
+                    None };
    int major, minor;
 
    Dpy = XOpenDisplay(NULL);
@@ -259,7 +259,7 @@ Init(void)
 
    if (major * 100 + minor >= 103) {
       make_context_current = (PFNGLXMAKECURRENTREADSGIPROC)
-	  glXGetProcAddressARB( (GLubyte *) "glXMakeContextCurrent" );
+          glXGetProcAddressARB( (GLubyte *) "glXMakeContextCurrent" );
    }
    else {
       const char * const glxExtensions = glXQueryExtensionsString(Dpy, ScrNum);
@@ -267,15 +267,15 @@ Init(void)
       const size_t len = strlen( "GLX_SGI_make_current_read" );
 
       if ( (ext != NULL)
-	   && ((ext[len] == ' ') || (ext[len] == '\0')) ) {
-	 make_context_current = (PFNGLXMAKECURRENTREADSGIPROC)
-	     glXGetProcAddressARB( (GLubyte *) "glXMakeCurrentReadSGI" );
+           && ((ext[len] == ' ') || (ext[len] == '\0')) ) {
+         make_context_current = (PFNGLXMAKECURRENTREADSGIPROC)
+             glXGetProcAddressARB( (GLubyte *) "glXMakeCurrentReadSGI" );
       }
    }
 
    if (make_context_current == NULL) {
       fprintf(stderr, "Sorry, this program requires either GLX 1.3 "
-	      "or GLX_SGI_make_current_read.\n");
+              "or GLX_SGI_make_current_read.\n");
       exit(1);
    }
 

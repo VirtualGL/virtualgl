@@ -17,8 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef _MSC_VER
-#define snprintf _snprintf
-#define strdup _strdup
+#define snprintf  _snprintf
+#define strdup  _strdup
 #endif
 #include "Timer.h"
 #include "Log.h"
@@ -30,12 +30,12 @@ Profiler::Profiler(const char *name_, double interval_) : interval(interval_),
 	mbytes(0.0), mpixels(0.0), totalTime(0.0), start(0.0), frames(0),
 	lastFrame(0.0)
 {
-	profile=false;  char *ev=NULL;
-	setName(name_);  freestr=false;
-	if((ev=getenv("RRPROFILE"))!=NULL && !strncmp(ev, "1", 1))
-		profile=true;
-	if((ev=getenv("VGL_PROFILE"))!=NULL && !strncmp(ev, "1", 1))
-		profile=true;
+	profile = false;  char *ev = NULL;
+	setName(name_);  freestr = false;
+	if((ev = getenv("RRPROFILE")) != NULL && !strncmp(ev, "1", 1))
+		profile = true;
+	if((ev = getenv("VGL_PROFILE")) != NULL && !strncmp(ev, "1", 1))
+		profile = true;
 }
 
 
@@ -49,57 +49,58 @@ void Profiler::setName(char *name_)
 {
 	if(name_)
 	{
-		name=strdup(name_);  freestr=true;
+		name = strdup(name_);  freestr = true;
 	}
 }
 
 
 void Profiler::setName(const char *name_)
 {
-	if(name_) name=(char *)name_;
+	if(name_) name = (char *)name_;
 }
 
 
 void Profiler::startFrame(void)
 {
 	if(!profile) return;
-	start=timer.time();
+	start = timer.time();
 }
 
 
 void Profiler::endFrame(long pixels, long bytes, double incFrames)
 {
 	if(!profile) return;
-	double now=timer.time();
-	if(start!=0.0)
+	double now = timer.time();
+	if(start != 0.0)
 	{
-		totalTime+=now-start;
-		if(pixels) mpixels+=(double)pixels/1000000.;
-		if(bytes) mbytes+=(double)bytes/1000000.;
-		if(incFrames!=0.0) frames+=incFrames;
+		totalTime += now - start;
+		if(pixels) mpixels += (double)pixels / 1000000.;
+		if(bytes) mbytes += (double)bytes / 1000000.;
+		if(incFrames != 0.0) frames += incFrames;
 	}
-	if(lastFrame==0.0) lastFrame=now;
-	if(totalTime>interval || (now-lastFrame)>interval)
+	if(lastFrame == 0.0) lastFrame = now;
+	if(totalTime > interval || (now - lastFrame) > interval)
 	{
-		char temps[256];  size_t i=0;
-		snprintf(&temps[i], 255-i, "%s  ", name);  i=strlen(temps);
+		char temps[256];  size_t i = 0;
+		snprintf(&temps[i], 255 - i, "%s  ", name);  i = strlen(temps);
 		if(mpixels)
 		{
-			snprintf(&temps[i], 255-i, "- %7.2f Mpixels/sec", mpixels/totalTime);
-			i=strlen(temps);
+			snprintf(&temps[i], 255 - i, "- %7.2f Mpixels/sec", mpixels / totalTime);
+			i = strlen(temps);
 		}
 		if(frames)
 		{
-			snprintf(&temps[i], 255-i, "- %7.2f fps", frames/totalTime);
-			i=strlen(temps);
+			snprintf(&temps[i], 255 - i, "- %7.2f fps", frames / totalTime);
+			i = strlen(temps);
 		}
 		if(mbytes)
 		{
-			snprintf(&temps[i], 255-i, "- %7.2f Mbits/sec (%.1f:1)",
-				mbytes*8.0/totalTime, mpixels*3./mbytes);
-			i=strlen(temps);
+			snprintf(&temps[i], 255 - i, "- %7.2f Mbits/sec (%.1f:1)",
+				mbytes * 8.0 / totalTime, mpixels * 3. / mbytes);
+			i = strlen(temps);
 		}
 		vglout.PRINT("%s\n", temps);
-		totalTime=0.;  mpixels=0.;  frames=0.;  mbytes=0.;  lastFrame=now;
+		totalTime = 0.;  mpixels = 0.;  frames = 0.;  mbytes = 0.;
+		lastFrame = now;
 	}
 }
