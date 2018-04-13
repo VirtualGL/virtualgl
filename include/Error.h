@@ -77,7 +77,7 @@ namespace vglutil
 }
 
 
-#if defined(sgi) || defined(sun)
+#if defined(sgi)
 #define __FUNCTION__  __FILE__
 #endif
 #define _throw(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
