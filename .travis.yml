@@ -39,7 +39,7 @@ script:
   - mkdir -p ~/src/vgl.nightly &&
     docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvgl:latest bash -c "rpm --import $LJT_GPG_KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v" &&
     sudo chown -R travis:travis ~/src/vgl.nightly &&
-    mv ~/src/vgl.nightly/latest/log-$TRAVIS_OS_NAME.txt ~/src/vgl.nightly/latest/files/ &&
+    mv ~/src/vgl.nightly/latest/log-$TRAVIS_OS_NAME.txt ~/src/vgl.nightly/latest/files/
 
 deploy:
   - provider: s3
