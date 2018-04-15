@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2017 D. R. Commander
+/* Copyright (C)2009-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -45,7 +45,7 @@ static bool fconfig_envset = false;
 static int fconfig_shmid = -1;
 int fconfig_getshmid(void) { return fconfig_shmid; }
 #endif
-static FakerConfig *fc = NULL;
+static FakerConfig *fconfig_instance = NULL;
 
 
 /* This is a hack necessary to defer the initialization of the recursive mutex
@@ -82,12 +82,12 @@ static DeferredCS fconfig_mutex;
 static void fconfig_init(void);
 
 
-FakerConfig *fconfig_instance(void)
+FakerConfig *fconfig_getinstance(void)
 {
-	if(fc == NULL)
+	if(fconfig_instance == NULL)
 	{
 		CriticalSection::SafeLock l(fcmutex);
-		if(fc == NULL)
+		if(fconfig_instance == NULL)
 		{
 			#if FCONFIG_USESHM == 1
 
@@ -106,32 +106,32 @@ FakerConfig *fconfig_instance(void)
 				&& !strncmp(env, "1", 1))
 				vglout.println("[VGL] Shared memory segment ID for vglconfig: %d",
 					fconfig_shmid);
-			fc = (FakerConfig *)addr;
+			fconfig_instance = (FakerConfig *)addr;
 
 			#else
 
-			fc = new FakerConfig;
-			if(!fc) _throw("Could not allocate config structure");
+			fconfig_instance = new FakerConfig;
+			if(!fconfig_instance) _throw("Could not allocate config structure");
 
 			#endif
 
 			fconfig_init();
 		}
 	}
-	return fc;
+	return fconfig_instance;
 }
 
 
 void fconfig_deleteinstance(void)
 {
-	if(fc != NULL)
+	if(fconfig_instance != NULL)
 	{
 		CriticalSection::SafeLock l(fcmutex, false);
-		if(fc != NULL)
+		if(fconfig_instance != NULL)
 		{
 			#if FCONFIG_USESHM == 1
 
-			shmdt((char *)fc);
+			shmdt((char *)fconfig_instance);
 			if(fconfig_shmid != -1)
 			{
 				int ret = shmctl(fconfig_shmid, IPC_RMID, 0);
@@ -144,11 +144,11 @@ void fconfig_deleteinstance(void)
 
 			#else
 
-			delete fc;
+			delete fconfig_instance;
 
 			#endif
 
-			fc = NULL;
+			fconfig_instance = NULL;
 		}
 	}
 }

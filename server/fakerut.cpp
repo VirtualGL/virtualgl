@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2015, 2017 D. R. Commander
+ * Copyright (C)2010-2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -78,30 +78,30 @@ void clickToContinue(Display *dpy)
 
 #define _prerror1(m, a1) \
 { \
-	char temps[256]; \
-	snprintf(temps, 255, m, a1); \
-	throw(Error(__FUNCTION__, temps, 0)); \
+	char tempErrStr[256]; \
+	snprintf(tempErrStr, 255, m, a1); \
+	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define _prerror2(m, a1, a2) \
 { \
-	char temps[256]; \
-	snprintf(temps, 255, m, a1, a2); \
-	throw(Error(__FUNCTION__, temps, 0)); \
+	char tempErrStr[256]; \
+	snprintf(tempErrStr, 255, m, a1, a2); \
+	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define _prerror3(m, a1, a2, a3) \
 { \
-	char temps[256]; \
-	snprintf(temps, 255, m, a1, a2, a3); \
-	throw(Error(__FUNCTION__, temps, 0)); \
+	char tempErrStr[256]; \
+	snprintf(tempErrStr, 255, m, a1, a2, a3); \
+	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 #define _prerror5(m, a1, a2, a3, a4, a5) \
 { \
-	char temps[256]; \
-	snprintf(temps, 255, m, a1, a2, a3, a4, a5); \
-	throw(Error(__FUNCTION__, temps, 0)); \
+	char tempErrStr[256]; \
+	snprintf(tempErrStr, 255, m, a1, a2, a3, a4, a5); \
+	throw(Error(__FUNCTION__, tempErrStr, 0)); \
 }
 
 
@@ -138,7 +138,6 @@ unsigned int checkBufferColor(void)
 		if(buf) free(buf);
 		throw;
 	}
-	return 0;
 }
 
 
@@ -953,7 +952,6 @@ GLXFBConfig getFBConfigFromVisual(Display *dpy, XVisualInfo *vis)
 		if(configs) { XFree(configs);  configs = NULL; }
 		throw;
 	}
-	return 0;
 }
 
 
@@ -1131,7 +1129,7 @@ int visTest(void)
 			_throw("No X Visuals found");
 		printf("\n");
 
-		for(int i = 0; i < n; i++)
+		for(i = 0; i < n; i++)
 		{
 			XVisualInfo *vis2 = NULL;
 			try

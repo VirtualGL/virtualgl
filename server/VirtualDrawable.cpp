@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015, 2017 D. R. Commander
+ * Copyright (C)2009-2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -219,7 +219,7 @@ VirtualDrawable::~VirtualDrawable(void)
 
 int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 {
-	static bool alreadyPrinted = false;
+	static bool alreadyPrintedDrawableType = false;
 	if(!config_ || width < 1 || height < 1) _throw("Invalid argument");
 
 	CriticalSection::SafeLock l(mutex);
@@ -228,19 +228,19 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 		return 0;
 	if(fconfig.drawable == RRDRAWABLE_PIXMAP)
 	{
-		if(!alreadyPrinted && fconfig.verbose)
+		if(!alreadyPrintedDrawableType && fconfig.verbose)
 		{
 			vglout.println("[VGL] Using Pixmaps for rendering");
-			alreadyPrinted = true;
+			alreadyPrintedDrawableType = true;
 		}
 		_newcheck(oglDraw = new OGLDrawable(width, height, 0, config_, NULL));
 	}
 	else
 	{
-		if(!alreadyPrinted && fconfig.verbose)
+		if(!alreadyPrintedDrawableType && fconfig.verbose)
 		{
 			vglout.println("[VGL] Using Pbuffers for rendering");
-			alreadyPrinted = true;
+			alreadyPrintedDrawableType = true;
 		}
 		_newcheck(oglDraw = new OGLDrawable(width, height, config_));
 	}

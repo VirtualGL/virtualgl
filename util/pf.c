@@ -573,17 +573,17 @@ PF pf_get(int id)
 {
 	switch(id)
 	{
-		case PF_RGB:  return __format_RGB;  break;
-		case PF_RGBX:  return __format_RGBX;  break;
-		case PF_RGB10_X2:  return __format_RGB10_X2;  break;
-		case PF_BGR:  return __format_BGR;  break;
-		case PF_BGRX:  return __format_BGRX;  break;
-		case PF_BGR10_X2:  return __format_BGR10_X2;  break;
-		case PF_XBGR:  return __format_XBGR;  break;
-		case PF_X2_BGR10:  return __format_X2_BGR10;  break;
-		case PF_XRGB:  return __format_XRGB;  break;
-		case PF_X2_RGB10:  return __format_X2_RGB10;  break;
-		case PF_COMP:  return __format_COMP;  break;
+		case PF_RGB:  return __format_RGB;
+		case PF_RGBX:  return __format_RGBX;
+		case PF_RGB10_X2:  return __format_RGB10_X2;
+		case PF_BGR:  return __format_BGR;
+		case PF_BGRX:  return __format_BGRX;
+		case PF_BGR10_X2:  return __format_BGR10_X2;
+		case PF_XBGR:  return __format_XBGR;
+		case PF_X2_BGR10:  return __format_X2_BGR10;
+		case PF_XRGB:  return __format_XRGB;
+		case PF_X2_RGB10:  return __format_X2_RGB10;
+		case PF_COMP:  return __format_COMP;
 		default:
 		{
 			PF pf;

@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2015, 2017 D. R. Commander
+ * Copyright (C)2011, 2013-2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,9 +31,18 @@
 #define _throw(m) \
 { \
 	fprintf(stderr, "ERROR in line %d:\n%s\n", __LINE__,  m); \
+	retval = -1; \
 	goto bailout; \
 }
-#define _catch(f)  { if((f) == -1) goto bailout; }
+
+#define _catch(f) \
+{ \
+	if((f) == -1) \
+	{ \
+		retval = -1; \
+		goto bailout; \
+	} \
+}
 
 #define np2(i)  ((i) > 0 ? (1 << (int)(log((double)(i)) / log(2.))) : 0)
 
@@ -81,7 +90,7 @@ int width = DEF_WIDTH, height = DEF_HEIGHT;
 
 int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
 {
-	XColor xc[1024];  int i, maxColors = (1 << bpc);
+	XColor xc[1024];  int i, maxColors = (1 << bpc), retval = 0;
 
 	if(!nColors || !cmap) _throw("Color map not allocated");
 	if(scheme < 0 || scheme > NSCHEMES - 1 || !cmap) _throw("Invalid argument");
@@ -103,10 +112,9 @@ int setColorScheme(Colormap cmap, int nColors, int bpc, int scheme)
 			xc[i].blue = (i * (maxColors / nColors)) << (16 - bpc);
 	}
 	XStoreColors(dpy, cmap, xc, nColors);
-	return 0;
 
 	bailout:
-	return -1;
+	return retval;
 }
 
 
@@ -236,10 +244,11 @@ void renderSpheres(int buf)
 }
 
 
-void renderOverlay(void)
+int renderOverlay(void)
 {
 	int i, j, w = width / 8, h = height / 8;  unsigned char *buf = NULL;
 	int index = (int)(loneSphereColor * (GLfloat)(nOlColors - 1));
+	int retval = 0;
 
 	glShadeModel(GL_FLAT);
 	glDisable(GL_DEPTH_TEST);
@@ -277,6 +286,7 @@ void renderOverlay(void)
 
 	bailout:
 	if(buf) free(buf);
+	return retval;
 }
 
 
@@ -288,6 +298,7 @@ int display(int advance)
 	static char temps[256];
 	XFontStruct *fontInfo = NULL;  int minChar, maxChar;
 	GLfloat xAspect, yAspect;
+	int retval = 0;
 
 	if(first)
 	{
@@ -377,7 +388,7 @@ int display(int advance)
 	if(useOverlay)
 	{
 		glXMakeCurrent(dpy, olWin, olCtx);
-		renderOverlay();
+		_catch(renderOverlay());
 	}
 	else glPushAttrib(GL_CURRENT_BIT);
 	glPushAttrib(GL_LIST_BIT);
@@ -419,11 +430,13 @@ int display(int advance)
 	if(maxFrames && totalFrames > maxFrames) goto bailout;
 
 	start = getTime();
-	return 0;
 
 	bailout:
-	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad = NULL; }
-	return -1;
+	if(sphereQuad && retval < 0)
+	{
+		gluDeleteQuadric(sphereQuad);  sphereQuad = NULL;
+	}
+	return retval;
 }
 
 
@@ -432,6 +445,8 @@ Atom protoAtom = 0, deleteAtom = 0;
 
 int eventLoop(Display *dpy)
 {
+	int retval = 0;
+
 	while(1)
 	{
 		int advance = 0, doDisplay = 0;
@@ -487,7 +502,7 @@ int eventLoop(Display *dpy)
 	}
 
 	bailout:
-	return -1;
+	return retval;
 }
 
 
@@ -521,8 +536,9 @@ void usage(char **argv)
 
 int main(int argc, char **argv)
 {
-	int i, useAlpha = 0, nPolys = -1;
+	int i, n = 0, useAlpha = 0, nPolys = -1, retval = 0;
 	XVisualInfo *v = NULL;
+	GLXFBConfig *c = NULL;
 	int rgbAttribs[] = { GLX_RENDER_TYPE, GLX_RGBA_BIT, GLX_RED_SIZE, 8,
 		GLX_GREEN_SIZE, 8, GLX_BLUE_SIZE, 8, GLX_DEPTH_SIZE, 1,
 		GLX_DOUBLEBUFFER, 1, GLX_STEREO, 0, GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
@@ -621,16 +637,12 @@ int main(int argc, char **argv)
 		rgbAttribs[17] = 32 - bpc * 3;
 	}
 
-	int n = 0;
-	GLXFBConfig *c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
+	c = glXChooseFBConfig(dpy, screen, rgbAttribs, &n);
 	if(!c || n < 1)
 		_throw("Could not obtain RGB visual with requested properties");
 	if((v = glXGetVisualFromFBConfig(dpy, c[0])) == NULL)
-	{
-		XFree(c);
 		_throw("Could not obtain RGB visual with requested properties");
-	}
-	XFree(c);
+	XFree(c);  c = NULL;
 	fprintf(stderr, "Visual ID of %s: 0x%.2x\n",
 		useOverlay ? "underlay" : "window", (int)v->visualid);
 
@@ -721,19 +733,14 @@ int main(int argc, char **argv)
 
 	_catch(eventLoop(dpy));
 
-	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx = 0; }
-	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin = 0; }
-	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
-	if(dpy && win) { XDestroyWindow(dpy, win);  win = 0; }
-	if(dpy) XCloseDisplay(dpy);
-	return 0;
-
 	bailout:
 	if(v) XFree(v);
-	if(dpy && olCtx) { glXDestroyContext(dpy, olCtx);  olCtx = 0; }
-	if(dpy && olWin) { XDestroyWindow(dpy, olWin);  olWin = 0; }
-	if(dpy && ctx) { glXDestroyContext(dpy, ctx);  ctx = 0; }
-	if(dpy && win) { XDestroyWindow(dpy, win);  win = 0; }
+	if(c) XFree(c);
+	if(dpy && olCtx) glXDestroyContext(dpy, olCtx);
+	if(dpy && olWin) XDestroyWindow(dpy, olWin);
+	if(dpy && ctx) glXDestroyContext(dpy, ctx);
+	if(dpy && win) XDestroyWindow(dpy, win);
 	if(dpy) XCloseDisplay(dpy);
-	return -1;
+
+	return retval;
 }

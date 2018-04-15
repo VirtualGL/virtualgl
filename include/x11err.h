@@ -20,23 +20,23 @@ static const char *x11error(int code)
 		return "Extension error";
 	switch(code)
 	{
-		__case(BadRequest);
-		__case(BadValue);
-		__case(BadWindow);
-		__case(BadPixmap);
-		__case(BadAtom);
-		__case(BadCursor);
-		__case(BadFont);
-		__case(BadMatch);
-		__case(BadDrawable);
-		__case(BadAccess);
-		__case(BadAlloc);
-		__case(BadColor);
-		__case(BadGC);
-		__case(BadIDChoice);
-		__case(BadName);
-		__case(BadLength);
-		__case(BadImplementation);
+		__case(BadRequest)
+		__case(BadValue)
+		__case(BadWindow)
+		__case(BadPixmap)
+		__case(BadAtom)
+		__case(BadCursor)
+		__case(BadFont)
+		__case(BadMatch)
+		__case(BadDrawable)
+		__case(BadAccess)
+		__case(BadAlloc)
+		__case(BadColor)
+		__case(BadGC)
+		__case(BadIDChoice)
+		__case(BadName)
+		__case(BadLength)
+		__case(BadImplementation)
 		default:  return "Unknown error code";
 	}
 }

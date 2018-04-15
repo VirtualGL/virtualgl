@@ -72,7 +72,6 @@ static EVP_PKEY *newPrivateKey(int bits)
 		if(pk) EVP_PKEY_free(pk);
 		throw;
 	}
-	return NULL;
 }
 
 
@@ -119,7 +118,6 @@ static X509 *newCert(EVP_PKEY *priv)
 		if(cert) X509_free(cert);
 		throw;
 	}
-	return NULL;
 }
 
 #endif  // USESSL

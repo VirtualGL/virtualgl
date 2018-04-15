@@ -136,7 +136,6 @@ int main(int argc, char **argv)
 		VGLTrans vglconn;
 		if(!localtest) vglconn.connect(fconfig.client, fconfig.port);
 
-		int i;
 		for(i = 0; i < w * h * d; i++) buf2[i] = 255 - buf2[i];
 		for(i = 0; i < w * h * d / 2; i++) buf3[i] = 255 - buf3[i];
 

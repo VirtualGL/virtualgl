@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014, 2017 D. R. Commander
+ * Copyright (C)2011, 2013-2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -45,19 +45,19 @@ int xhandler(Display *dpy, XErrorEvent *xe)
 #define BENCH_NAME  "FBXtest"
 #define N  2
 #define MAXRGB  (1 << (depth / 3))
+#define DEFAULT_WIDTH  1240
+#define DEFAULT_HEIGHT  900
 
-int WIDTH = 1240, HEIGHT = 900, depth = 24;
-int width, height;
+int drawableWidth = DEFAULT_WIDTH, drawableHeight = DEFAULT_HEIGHT, depth = 24;
 bool doPixmap = false, doShm = true, doFS = false, doVid = false,
 	doDisplay = false, interactive = false, advance = false, doStress = false;
-int offset, retCode = 0;
+int pixelOffset, retCode = 0;
 double benchTime = 5.0;
 #ifndef _WIN32
 bool checkDB = false;
 Window win = 0;
 #endif
 fbx_wh wh;
-Timer timer, timer2;
 #ifdef _WIN32
 #define FG()  SetForegroundWindow(wh)
 #else
@@ -143,6 +143,7 @@ void clearFB(void)
 void nativeWrite(bool useShm)
 {
 	fbx_struct fb;  int i = 0;  double drawTime;
+	Timer timer, timer2;
 
 	memset(&fb, 0, sizeof(fb));
 
@@ -151,10 +152,10 @@ void nativeWrite(bool useShm)
 		_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
 		if(useShm && !fb.shm) _throw("MIT-SHM not available");
 		fprintf(stderr, "Native Pixel Format:  %s\n", fb.pf.name);
-		if(fb.width != width || fb.height != height)
+		if(fb.width != drawableWidth || fb.height != drawableHeight)
 		{
 			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
-				width, height, fb.width, fb.height);
+				drawableWidth, drawableHeight, fb.width, fb.height);
 		}
 
 		clearFB();
@@ -271,7 +272,7 @@ void nativeWrite(bool useShm)
 		fprintf(stderr, "%s\n", e.getMessage());  retCode = -1;
 	}
 
-	offset = i - 1;
+	pixelOffset = i - 1;
 
 	fbx_term(&fb);
 }
@@ -281,6 +282,7 @@ void nativeWrite(bool useShm)
 void nativeRead(bool useShm)
 {
 	fbx_struct fb;  int i, error = 0;  double readTime;
+	Timer timer, timer2;
 
 	memset(&fb, 0, sizeof(fb));
 
@@ -288,10 +290,10 @@ void nativeRead(bool useShm)
 	{
 		_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
 		if(useShm && !fb.shm) _throw("MIT-SHM not available");
-		if(fb.width != width || fb.height != height)
+		if(fb.width != drawableWidth || fb.height != drawableHeight)
 		{
 			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
-				width, height, fb.width, fb.height);
+				drawableWidth, drawableHeight, fb.width, fb.height);
 		}
 
 		if(useShm)
@@ -306,7 +308,7 @@ void nativeRead(bool useShm)
 			_fbx(fbx_read(&fb, 0, 0));
 			readTime += timer.elapsed();
 			if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
-				(unsigned char *)fb.bits, offset))
+				(unsigned char *)fb.bits, pixelOffset))
 				error = 1;
 			i++;
 		} while(timer2.elapsed() < benchTime);
@@ -421,6 +423,7 @@ void nativeStress(bool useShm)
 {
 	int i, n;  double testTime;
 	Thread *thread[4];
+	Timer timer;
 
 	try
 	{
@@ -450,7 +453,8 @@ void nativeStress(bool useShm)
 			testTime = timer.elapsed();
 		} while(testTime < 1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)n * (double)(width * height) / ((double)1000000. * testTime));
+			(double)n * (double)(drawableWidth * drawableHeight) /
+				((double)1000000. * testTime));
 
 	}
 	catch(Error &e)
@@ -485,7 +489,8 @@ void nativeStress(bool useShm)
 			testTime = timer.elapsed();
 		} while(testTime < 1.);
 		fprintf(stderr, "%f Mpixels/sec\n",
-			(double)n * (double)(width * height) / ((double)1000000. * testTime));
+			(double)n * (double)(drawableWidth * drawableHeight) /
+				((double)1000000. * testTime));
 
 	}
 	catch(Error &e)
@@ -611,7 +616,11 @@ void event_loop(void)
 
 			int ret;  MSG msg;
 			if((ret = GetMessage(&msg, NULL, 0, 0)) == -1) { _throww32(); }
-			else if(ret == 0) break;
+			else if(ret == 0)
+			{
+				for(int i = 0; i < 10; i++) fbx_term(&fb[i]);
+				break;
+			}
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 
@@ -634,6 +643,7 @@ void event_loop(void)
 						switch(buf[0])
 						{
 							case 27: case 'q': case 'Q':
+								for(int i = 0; i < 10; i++) fbx_term(&fb[i]);
 								return;
 						}
 						break;
@@ -666,8 +676,6 @@ void event_loop(void)
 				}
 			}
 		}
-
-		for(int i = 0; i < 10; i++) fbx_term(&fb[i]);
 	}
 	catch(...)
 	{
@@ -694,7 +702,7 @@ void usage(char **argv)
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
 	fprintf(stderr, "-size <wxh> = specify drawable width & height (default: %dx%d)\n\n",
-		WIDTH, HEIGHT);
+		DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	exit(1);
 }
 
@@ -704,7 +712,7 @@ int main(int argc, char **argv)
 	#ifdef _WIN32
 	int winstyle = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_VISIBLE;
 	#endif
-	int i;
+	int i, screenWidth, screenHeight;
 
 	fprintf(stderr, "\n%s v%s (Build %s)\n\n", BENCH_NAME, __VERSION, __BUILD);
 
@@ -750,8 +758,8 @@ int main(int argc, char **argv)
 		}
 		else if(!stricmp(argv[i], "-size") && i < argc - 1)
 		{
-			if(sscanf(argv[++i], "%dx%d", &WIDTH, &HEIGHT) < 2 || WIDTH < 1
-				|| HEIGHT < 1)
+			if(sscanf(argv[++i], "%dx%d", &drawableWidth, &drawableHeight) < 2
+				|| drawableWidth < 1 || drawableHeight < 1)
 				usage(argv);
 		}
 		else usage(argv);
@@ -775,8 +783,8 @@ int main(int argc, char **argv)
 		wndclass.lpszClassName = BENCH_NAME;
 		wndclass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 		_w32(RegisterClassEx(&wndclass));
-		width = GetSystemMetrics(doFS ? SM_CXSCREEN : SM_CXMAXIMIZED);
-		height = GetSystemMetrics(doFS ? SM_CYSCREEN : SM_CYMAXIMIZED);
+		screenWidth = GetSystemMetrics(doFS ? SM_CXSCREEN : SM_CXMAXIMIZED);
+		screenHeight = GetSystemMetrics(doFS ? SM_CYSCREEN : SM_CYMAXIMIZED);
 
 		#else
 
@@ -792,25 +800,18 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
 			exit(1);
 		}
-		width = DisplayWidth(wh.dpy, DefaultScreen(wh.dpy));
-		height = DisplayHeight(wh.dpy, DefaultScreen(wh.dpy));
+		screenWidth = DisplayWidth(wh.dpy, DefaultScreen(wh.dpy));
+		screenHeight = DisplayHeight(wh.dpy, DefaultScreen(wh.dpy));
 
 		#endif
 
-		if(!doFS)
+		if(!doFS && !doPixmap)
 		{
-			if(doPixmap)
-			{
-				width = WIDTH;  height = HEIGHT;
-			}
-			else
-			{
-				width = min(width, WIDTH);
-				height = min(height, HEIGHT);
-			}
+			drawableWidth = min(drawableWidth, screenWidth);
+			drawableHeight = min(drawableHeight, screenHeight);
 		}
 		fprintf(stderr, "%s size:  %d x %d\n", doPixmap ? "Pixmap" : "Window",
-			width, height);
+			drawableWidth, drawableHeight);
 
 		#ifdef _WIN32
 
@@ -818,7 +819,8 @@ int main(int argc, char **argv)
 		int bh =
 			GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
 		_w32(wh = CreateWindowEx(0, BENCH_NAME, BENCH_NAME, winstyle, 0, 0,
-			width + bw, height + bh, NULL, NULL, GetModuleHandle(NULL), NULL));
+			drawableWidth + bw, drawableHeight + bh, NULL, NULL,
+			GetModuleHandle(NULL), NULL));
 		UpdateWindow(wh);
 		BOOL ret;
 		if(doVid)
@@ -863,13 +865,14 @@ int main(int argc, char **argv)
 		{
 			_errifnot(win = XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
 				InputOutput, v->visual, mask, &swa));
-			_errifnot(wh.d = XCreatePixmap(wh.dpy, win, width, height, v->depth));
+			_errifnot(wh.d = XCreatePixmap(wh.dpy, win, drawableWidth,
+				drawableHeight, v->depth));
 			wh.v = v->visual;
 		}
 		else
 		{
-			_errifnot(wh.d = XCreateWindow(wh.dpy, root, 0, 0, width, height, 0,
-				v->depth, InputOutput, v->visual, mask, &swa));
+			_errifnot(wh.d = XCreateWindow(wh.dpy, root, 0, 0, drawableWidth,
+				drawableHeight, 0, v->depth, InputOutput, v->visual, mask, &swa));
 			_errifnot(XMapRaised(wh.dpy, wh.d));
 		}
 		if(doFS) XSetInputFocus(wh.dpy, wh.d, RevertToParent, CurrentTime);

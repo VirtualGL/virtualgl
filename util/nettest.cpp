@@ -65,7 +65,8 @@ void benchmark(int interval, char *ifname)
 
 		kstat_named_t *data = NULL;
 		if(kstat_read(kc, kif, NULL) < 0) _throwunix();
-		if((data = (kstat_named_t *)kstat_data_lookup(kif, "rbytes64")) == NULL)
+		if((data =
+			(kstat_named_t *)kstat_data_lookup(kif, (char *)"rbytes64")) == NULL)
 			_throwunix();
 		if(bytesRead != 0)
 		{
@@ -77,7 +78,8 @@ void benchmark(int interval, char *ifname)
 					(double)bytesRead) * 8. / 1000000.;
 		}
 		bytesRead = data->value.ui64;
-		if((data = (kstat_named_t *)kstat_data_lookup(kif, "obytes64")) == NULL)
+		if((data =
+			(kstat_named_t *)kstat_data_lookup(kif, (char *)"obytes64")) == NULL)
 			_throwunix();
 		if(bytesSent != 0)
 		{

@@ -2,8 +2,8 @@
  * Mesa 3-D graphics library
  *
  * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
- * Copyright (C) 2011-2012, 2014-2015, 2017  D. R. Commander
- *                                           All Rights Reserved.
+ * Copyright (C) 2011-2012, 2014-2015, 2017-2018  D. R. Commander
+ *                                                All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -146,14 +146,14 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
          There is no window attached, so we have to create one temporarily. */
       XVisualInfo *v = NULL, vtemp;
       XSetWindowAttributes swa;
-      int n = 0;
+      int nv = 0;
 
       _errifnot(dpy = glxdhash.getCurrentDisplay(draw));
       vtemp.c_class = TrueColor;
       vtemp.depth = DefaultDepth(dpy, DefaultScreen(dpy));
       Window root = DefaultRootWindow(dpy);
       if((v = XGetVisualInfo(dpy, VisualDepthMask | VisualClassMask, &vtemp,
-                             &n)) == NULL || n < 1)
+                             &nv)) == NULL || nv < 1)
          _throw("Could not create temporary window for font rendering");
       swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
       swa.border_pixel = 0;

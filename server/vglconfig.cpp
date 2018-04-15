@@ -463,7 +463,7 @@ int main(int argc, char **argv)
 
 		if(test)
 		{
-			if(!(_fconfig = fconfig_instance()))
+			if(!(_fconfig = fconfig_getinstance()))
 				_throw("Could not allocate FakerConfig");
 			fl_open_display();
 			fconfig_setdefaultsfromdpy(fl_display);

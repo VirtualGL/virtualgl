@@ -1,4 +1,4 @@
-/* Copyright (C)2009, 2016 D. R. Commander
+/* Copyright (C)2009, 2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,10 +23,10 @@
 
 #define VGLCONFIG_PATH  "@CMAKE_INSTALL_FULL_BINDIR@/vglconfig"
 
-FakerConfig *fconfig_instance(void);
+FakerConfig *fconfig_getinstance(void);
 void fconfig_deleteinstance(void);
 
-#define fconfig  (*fconfig_instance())
+#define fconfig  (*fconfig_getinstance())
 
 #if FCONFIG_USESHM == 1
 int fconfig_getshmid(void);
