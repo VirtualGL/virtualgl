@@ -1,4 +1,4 @@
-/* Copyright (C)2017 D. R. Commander
+/* Copyright (C)2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -289,9 +289,9 @@
 #endif
 
 static __inline void convert_RGB(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_FAST(RGB)
 		case PF_RGBX:      CONVERT_RGB(RGB, RGBX)
@@ -307,9 +307,9 @@ static __inline void convert_RGB(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_RGBX(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_RGB(RGBX, RGB)
 		case PF_RGBX:      CONVERT_FAST(RGBX)
@@ -325,9 +325,9 @@ static __inline void convert_RGBX(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_RGB10_X2(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_PF4I2C(RGB10_X2, RGB)
 		case PF_RGBX:      CONVERT_PF4I(RGB10_X2, RGBX, 2, 0)
@@ -343,9 +343,9 @@ static __inline void convert_RGB10_X2(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_BGR(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_BGR(BGR, RGB)
 		case PF_RGBX:      CONVERT_BGR(BGR, RGBX)
@@ -361,9 +361,9 @@ static __inline void convert_BGR(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_BGRX(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_BGR(BGRX, RGB)
 		case PF_RGBX:      CONVERT_PF4CBGR(BGRX, RGBX)
@@ -379,9 +379,9 @@ static __inline void convert_BGRX(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_BGR10_X2(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_PF4I2C(BGR10_X2, RGB)
 		case PF_RGBX:      CONVERT_PF4I(BGR10_X2, RGBX, 2, 0)
@@ -397,9 +397,9 @@ static __inline void convert_BGR10_X2(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_XBGR(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_BGR(XBGR, RGB)
 		case PF_RGBX:      CONVERT_PF4CBGR(XBGR, RGBX)
@@ -415,9 +415,9 @@ static __inline void convert_XBGR(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_X2_BGR10(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_PF4I2C(X2_BGR10, RGB)
 		case PF_RGBX:      CONVERT_PF4I(X2_BGR10, RGBX, 2, 0)
@@ -433,9 +433,9 @@ static __inline void convert_X2_BGR10(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_XRGB(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_RGB(XRGB, RGB)
 		case PF_RGBX:      CONVERT_PF4CRGB(XRGB, RGBX)
@@ -451,9 +451,9 @@ static __inline void convert_XRGB(unsigned char *srcBuf, int width,
 }
 
 static __inline void convert_X2_RGB10(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
-	switch(dstpf.id)
+	if(dstpf) switch(dstpf->id)
 	{
 		case PF_RGB:       CONVERT_PF4I2C(X2_RGB10, RGB)
 		case PF_RGBX:      CONVERT_PF4I(X2_RGB10, RGBX, 2, 0)
@@ -557,7 +557,7 @@ static __inline void setRGB_COMP(unsigned char *pixel, int r, int g, int b)
 }
 
 static __inline void convert_COMP(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF dstpf)
+	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	/* VirtualGL doesn't ever need to convert between component and RGB */
 }
@@ -569,28 +569,28 @@ static const PF __format_COMP =
 };
 
 
-PF pf_get(int id)
+static const PF __format_NONE =
+{
+	0, "Invalid", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, getRGB_COMP, setRGB_COMP,
+		convert_COMP
+};
+
+
+PF *pf_get(int id)
 {
 	switch(id)
 	{
-		case PF_RGB:  return __format_RGB;
-		case PF_RGBX:  return __format_RGBX;
-		case PF_RGB10_X2:  return __format_RGB10_X2;
-		case PF_BGR:  return __format_BGR;
-		case PF_BGRX:  return __format_BGRX;
-		case PF_BGR10_X2:  return __format_BGR10_X2;
-		case PF_XBGR:  return __format_XBGR;
-		case PF_X2_BGR10:  return __format_X2_BGR10;
-		case PF_XRGB:  return __format_XRGB;
-		case PF_X2_RGB10:  return __format_X2_RGB10;
-		case PF_COMP:  return __format_COMP;
-		default:
-		{
-			PF pf;
-			memset(&pf, 0, sizeof(PF));
-			pf.name = "Invalid";
-			pf.getRGB = getRGB_COMP;  pf.setRGB = setRGB_COMP;
-			return pf;
-		}
+		case PF_RGB:  return &__format_RGB;
+		case PF_RGBX:  return &__format_RGBX;
+		case PF_RGB10_X2:  return &__format_RGB10_X2;
+		case PF_BGR:  return &__format_BGR;
+		case PF_BGRX:  return &__format_BGRX;
+		case PF_BGR10_X2:  return &__format_BGR10_X2;
+		case PF_XBGR:  return &__format_XBGR;
+		case PF_X2_BGR10:  return &__format_X2_BGR10;
+		case PF_XRGB:  return &__format_XRGB;
+		case PF_X2_RGB10:  return &__format_X2_RGB10;
+		case PF_COMP:  return &__format_COMP;
+		default:  return &__format_NONE;
 	}
 }

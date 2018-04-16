@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010, 2014, 2017 D. R. Commander
+ * Copyright (C)2009-2010, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,24 +34,24 @@ void usage(char **argv)
 }
 
 
-void fillFrame(unsigned char *buf, int width, int pitch, int height, PF &pf,
+void fillFrame(unsigned char *buf, int width, int pitch, int height, PF *pf,
 	int on)
 {
 	unsigned char *ptr;  unsigned char pixel[4];
-	int maxRGB = (1 << pf.bpc);
+	int maxRGB = (1 << pf->bpc);
 
 	ptr = buf;
 	for(int i = 0; i < height; i++, ptr += pitch)
 	{
 		if(on)
 		{
-			pf.setRGB(pixel, i % maxRGB, maxRGB - 1 - (i % maxRGB), i % maxRGB);
+			pf->setRGB(pixel, i % maxRGB, maxRGB - 1 - (i % maxRGB), i % maxRGB);
 		}
 		else
 		{
-			pf.setRGB(pixel, i % maxRGB, 0, maxRGB - 1 - (i % maxRGB));
+			pf->setRGB(pixel, i % maxRGB, 0, maxRGB - 1 - (i % maxRGB));
 		}
-		for(int j = 0; j < width; j++) memcpy(&ptr[pf.size * j], pixel, pf.size);
+		for(int j = 0; j < width; j++) memcpy(&ptr[pf->size * j], pixel, pf->size);
 	}
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2011, 2014, 2017 D. R. Commander
+/* Copyright (C)2009-2011, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -108,7 +108,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->pitch = f->pitch;
 		frame->bits = f->bits;
 		frame->rbits = f->rbits;
-		frame->format = pf2trans[f->pf.id];
+		frame->format = pf2trans[f->pf->id];
 		return frame;
 	}
 	catch(Error &e)

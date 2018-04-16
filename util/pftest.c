@@ -1,4 +1,4 @@
-/* Copyright (C)2014, 2017 D. R. Commander
+/* Copyright (C)2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -34,41 +34,41 @@ double testTime = BENCHTIME;
 int getSetRGB = 0;
 
 
-void initBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
-	PF dstpf)
+void initBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
+	PF *dstpf)
 {
-	int i, j, maxRGB = min(1 << srcpf.bpc, 1 << dstpf.bpc);
+	int i, j, maxRGB = min(1 << srcpf->bpc, 1 << dstpf->bpc);
 
 	for(j = 0; j < height; j++)
 	{
 		for(i = 0; i < width; i++)
 		{
 			int r, g, b;
-			memset(&buf[j * pitch + i * srcpf.size], 0, srcpf.size);
+			memset(&buf[j * pitch + i * srcpf->size], 0, srcpf->size);
 			r = (i * maxRGB / width) % maxRGB;  g = (j * maxRGB / height) % maxRGB;
 			b = (j * maxRGB / height + i * maxRGB / width) % maxRGB;
-			if(srcpf.bpc == 10 && dstpf.bpc == 8)
+			if(srcpf->bpc == 10 && dstpf->bpc == 8)
 			{
 				r <<= 2;  g <<= 2;  b <<= 2;
 			}
-			srcpf.setRGB(&buf[j * pitch + i * srcpf.size], r, g, b);
+			srcpf->setRGB(&buf[j * pitch + i * srcpf->size], r, g, b);
 		}
 	}
 }
 
 
-int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
-	PF dstpf)
+int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF *srcpf,
+	PF *dstpf)
 {
-	int i, j, retval = 1, maxRGB = min(1 << srcpf.bpc, 1 << dstpf.bpc);
+	int i, j, retval = 1, maxRGB = min(1 << srcpf->bpc, 1 << dstpf->bpc);
 
 	for(j = 0; j < height; j++)
 	{
 		for(i = 0; i < width; i++)
 		{
 			int r, g, b;
-			dstpf.getRGB(&buf[j * pitch + i * dstpf.size], &r, &g, &b);
-			if(srcpf.bpc == 8 && dstpf.bpc == 10)
+			dstpf->getRGB(&buf[j * pitch + i * dstpf->size], &r, &g, &b);
+			if(srcpf->bpc == 8 && dstpf->bpc == 10)
 			{
 				r >>= 2;  g >>= 2;  b >>= 2;
 			}
@@ -82,10 +82,10 @@ int cmpBuf(unsigned char *buf, int width, int pitch, int height, PF srcpf,
 }
 
 
-int doTest(int width, int height, PF srcpf, PF dstpf)
+int doTest(int width, int height, PF *srcpf, PF *dstpf)
 {
-	int retval = 0, iter = 0, srcPitch = BMPPAD(width * srcpf.size),
-		dstPitch = BMPPAD(width * dstpf.size);
+	int retval = 0, iter = 0, srcPitch = BMPPAD(width * srcpf->size),
+		dstPitch = BMPPAD(width * dstpf->size);
 	unsigned char *srcBuf = NULL, *dstBuf = NULL, *srcPixel, *dstPixel;
 	double tStart, elapsed;
 
@@ -98,14 +98,14 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 
 	if(getSetRGB)
 	{
-		printf("%-8s --> %-8s (getRGB/setRGB):  ", srcpf.name, dstpf.name);
+		printf("%-8s --> %-8s (getRGB/setRGB):  ", srcpf->name, dstpf->name);
 		tStart = getTime();
 		iter = 0;
 		do
 		{
 			int h = height;
 			unsigned char *srcRow = srcBuf, *dstRow = dstBuf;
-			if(dstpf.bpc == 10 && srcpf.bpc == 8)
+			if(dstpf->bpc == 10 && srcpf->bpc == 8)
 			{
 				while(h--)
 				{
@@ -114,15 +114,15 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 					while(w--)
 					{
 						int r, g, b;
-						srcpf.getRGB(srcPixel, &r, &g, &b);
+						srcpf->getRGB(srcPixel, &r, &g, &b);
 						r <<= 2;  g <<= 2;  b <<= 2;
-						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel += srcpf.size;  dstPixel += dstpf.size;
+						dstpf->setRGB(dstPixel, r, g, b);
+						srcPixel += srcpf->size;  dstPixel += dstpf->size;
 					}
 					srcRow += srcPitch;  dstRow += dstPitch;
 				}
 			}
-			else if(srcpf.bpc == 10 && dstpf.bpc == 8)
+			else if(srcpf->bpc == 10 && dstpf->bpc == 8)
 			{
 				while(h--)
 				{
@@ -131,10 +131,10 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 					while(w--)
 					{
 						int r, g, b;
-						srcpf.getRGB(srcPixel, &r, &g, &b);
+						srcpf->getRGB(srcPixel, &r, &g, &b);
 						r >>= 2;  g >>= 2;  b >>= 2;
-						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel += srcpf.size;  dstPixel += dstpf.size;
+						dstpf->setRGB(dstPixel, r, g, b);
+						srcPixel += srcpf->size;  dstPixel += dstpf->size;
 					}
 					srcRow += srcPitch;  dstRow += dstPitch;
 				}
@@ -148,9 +148,9 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 					while(w--)
 					{
 						int r, g, b;
-						srcpf.getRGB(srcPixel, &r, &g, &b);
-						dstpf.setRGB(dstPixel, r, g, b);
-						srcPixel += srcpf.size;  dstPixel += dstpf.size;
+						srcpf->getRGB(srcPixel, &r, &g, &b);
+						dstpf->setRGB(dstPixel, r, g, b);
+						srcPixel += srcpf->size;  dstPixel += dstpf->size;
 					}
 					srcRow += srcPitch;  dstRow += dstPitch;
 				}
@@ -160,16 +160,16 @@ int doTest(int width, int height, PF srcpf, PF dstpf)
 	}
 	else
 	{
-		printf("%-8s --> %-8s (convert):     ", srcpf.name, dstpf.name);
+		printf("%-8s --> %-8s (convert):     ", srcpf->name, dstpf->name);
 		tStart = getTime();
 		do
 		{
-			srcpf.convert(srcBuf, width, srcPitch, height, dstBuf, dstPitch, dstpf);
+			srcpf->convert(srcBuf, width, srcPitch, height, dstBuf, dstPitch, dstpf);
 			iter++;
 		} while((elapsed = getTime() - tStart) < testTime);
 	}
 
-	if(!cmpBuf(dstBuf, width, width * dstpf.size, height, srcpf, dstpf))
+	if(!cmpBuf(dstBuf, width, width * dstpf->size, height, srcpf, dstpf))
 	{
 		printf("Pixel data is bogus\n");
 		retval = -1;  goto bailout;
@@ -214,10 +214,10 @@ int main(int argc, char **argv)
 
 	for(srcFormat = 0; srcFormat < PIXELFORMATS - 1; srcFormat++)
 	{
-		PF srcpf = pf_get(srcFormat);
+		PF *srcpf = pf_get(srcFormat);
 		for(dstFormat = 0; dstFormat < PIXELFORMATS - 1; dstFormat++)
 		{
-			PF dstpf = pf_get(dstFormat);
+			PF *dstpf = pf_get(dstFormat);
 			if(doTest(width, height, srcpf, dstpf) == -1)
 				goto bailout;
 		}

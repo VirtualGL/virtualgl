@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2013, 2015, 2017 D. R. Commander
+ * Copyright (C)2010-2013, 2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -222,12 +222,12 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 
 	for(i = 0; i < PIXELFORMATS; i++)
 	{
-		PF pf = pf_get(i);
-		if(rmask == pf.rmask && gmask == pf.gmask && bmask == pf.bmask
-			&& ps == pf.size)
+		PF *pf = pf_get(i);
+		if(rmask == pf->rmask && gmask == pf->gmask && bmask == pf->bmask
+			&& ps == pf->size)
 			fb->pf = pf;
 	}
-	if(fb->pf.size == 0) _throw("Display has unsupported pixel format");
+	if(fb->pf->size == 0) _throw("Display has unsupported pixel format");
 
 	bminfo.bmi.bmiHeader.biHeight = -bminfo.bmi.bmiHeader.biHeight;
 	/* (our convention is top-down) */
@@ -393,12 +393,12 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	}
 	for(i = 0; i < PIXELFORMATS; i++)
 	{
-		PF pf = pf_get(i);
-		if(rmask == pf.rmask && gmask == pf.gmask && bmask == pf.bmask
-			&& ps == pf.size)
+		PF *pf = pf_get(i);
+		if(rmask == pf->rmask && gmask == pf->gmask && bmask == pf->bmask
+			&& ps == pf->size)
 			fb->pf = pf;
 	}
-	if(fb->pf.size == 0) _throw("Display has unsupported pixel format");
+	if(fb->pf->size == 0) _throw("Display has unsupported pixel format");
 
 	fb->bits = fb->xi->data;
 	fb->pixmap = pixmap;
@@ -494,7 +494,7 @@ int fbx_write(fbx_struct *fb, int srcX_, int srcY_, int dstX_, int dstY_,
 	bmi.bmiHeader.biWidth = fb->width;
 	bmi.bmiHeader.biHeight = -fb->height;
 	bmi.bmiHeader.biPlanes = 1;
-	bmi.bmiHeader.biBitCount = fb->pf.size * 8;
+	bmi.bmiHeader.biBitCount = fb->pf->size * 8;
 	bmi.bmiHeader.biCompression = BI_RGB;
 	_w32(gc = GetDC(fb->wh));
 	_w32(SetDIBitsToDevice(gc, dstX, dstY, width, height, srcX, 0, 0, height,
@@ -537,7 +537,7 @@ int fbx_flip(fbx_struct *fb, int x_, int y_, int width_, int height_)
 	if(height > fb->height) height = fb->height;
 	if(x + width > fb->width) width = fb->width - x;
 	if(y + height > fb->height) height = fb->height - y;
-	ps = fb->pf.size;  pitch = fb->pitch;
+	ps = fb->pf->size;  pitch = fb->pitch;
 
 	if(!(tmpbuf = (char *)malloc(width * ps)))
 		_throw("Memory allocation error");

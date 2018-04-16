@@ -67,7 +67,7 @@ fbx_wh wh;
 void nativeRead(bool), nativeWrite(bool);
 
 
-void initBuf(int x, int y, int width, int pitch, int height, PF pf,
+void initBuf(int x, int y, int width, int pitch, int height, PF *pf,
 	unsigned char *buf, int offset)
 {
 	int i, j;
@@ -75,13 +75,13 @@ void initBuf(int x, int y, int width, int pitch, int height, PF pf,
 	for(j = 0; j < height; j++)
 	{
 		for(i = 0; i < width; i++)
-			pf.setRGB(&buf[j * pitch + i * pf.size], (i + x + offset) % MAXRGB,
+			pf->setRGB(&buf[j * pitch + i * pf->size], (i + x + offset) % MAXRGB,
 				(j + y + offset) % MAXRGB, (j + y + i + x + offset) % MAXRGB);
 	}
 }
 
 
-int cmpBuf(int x, int y, int width, int pitch, int height, PF pf,
+int cmpBuf(int x, int y, int width, int pitch, int height, PF *pf,
 	unsigned char *buf, int offset, bool flip = false)
 {
 	int i, j;
@@ -98,7 +98,7 @@ int cmpBuf(int x, int y, int width, int pitch, int height, PF pf,
 			if(line >= height - 16 && i >= width - 16) ignore = true;
 			#endif
 			int r, g, b;
-			pf.getRGB(&buf[line * pitch + i * pf.size], &r, &g, &b);
+			pf->getRGB(&buf[line * pitch + i * pf->size], &r, &g, &b);
 			if(r != (i + x + offset) % MAXRGB && !ignore)
 				return 0;
 			if(g != (j + y + offset) % MAXRGB && !ignore)
@@ -151,7 +151,7 @@ void nativeWrite(bool useShm)
 	{
 		_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
 		if(useShm && !fb.shm) _throw("MIT-SHM not available");
-		fprintf(stderr, "Native Pixel Format:  %s\n", fb.pf.name);
+		fprintf(stderr, "Native Pixel Format:  %s\n", fb.pf->name);
 		if(fb.width != drawableWidth || fb.height != drawableHeight)
 		{
 			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
@@ -224,7 +224,7 @@ void nativeWrite(bool useShm)
 		_fbx(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width / 2, fb.pitch, fb.height / 2,
 			fb.pf, (unsigned char *)&fb.bits[fb.height / 2 * fb.pitch +
-				fb.width / 2 * fb.pf.size], i - 1))
+				fb.width / 2 * fb.pf->size], i - 1))
 		{
 			fprintf(stderr, " (ERROR CHECK FAILED)\n");
 			retCode = -1;
@@ -300,7 +300,7 @@ void nativeRead(bool useShm)
 			fprintf(stderr, "FBX read [SHM]:                ");
 		else
 			fprintf(stderr, "FBX read:                      ");
-		memset(fb.bits, 0, fb.width * fb.height * fb.pf.size);
+		memset(fb.bits, 0, fb.width * fb.height * fb.pf->size);
 		i = 0;  readTime = 0.;  timer2.start();
 		do
 		{
@@ -399,7 +399,7 @@ class ReadThread : public Runnable
 				fbx_term(&fb);
 				_fbx(fbx_init(&fb, wh, myWidth, myHeight, useShm ? 1 : 0));
 				if(useShm && !fb.shm) _throw("MIT-SHM not available");
-				memset(fb.bits, 0, fb.width * fb.height * fb.pf.size);
+				memset(fb.bits, 0, fb.width * fb.height * fb.pf->size);
 				for(i = 0; i < iter; i++)
 					_fbx(fbx_read(&fb, myX, myY));
 				if(!cmpBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.pf,
@@ -594,12 +594,12 @@ void event_loop(void)
 			_fbx(fbx_init(&fb[i], wh, 0, 0, doShm ? 1 : 0));
 			snprintf(temps, 256, "frame%d.ppm", i);
 			unsigned char *buf = NULL;  int tempw = 0, temph = 0;
-			if(bmp_load(temps, &buf, &tempw, 1, &temph, fb[i].pf.id,
+			if(bmp_load(temps, &buf, &tempw, 1, &temph, fb[i].pf->id,
 				BMPORN_TOPDOWN) == -1)
 				_throw(bmp_geterr());
 			for(int j = 0; j < min(temph, fb[i].height); j++)
-				memcpy(&fb[i].bits[fb[i].pitch * j], &buf[tempw * fb[i].pf.size * j],
-					min(tempw, fb[i].width) * fb[i].pf.size);
+				memcpy(&fb[i].bits[fb[i].pitch * j], &buf[tempw * fb[i].pf->size * j],
+					min(tempw, fb[i].width) * fb[i].pf->size);
 			free(buf);
 		}
 

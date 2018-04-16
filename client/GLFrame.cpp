@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017 D. R. Commander
+ * Copyright (C)2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -149,13 +149,13 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 			}
 			int y = max(0, hdr.frameh - cf.hdr.y - height);
 			_tj(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
-				(unsigned char *)&bits[pitch * y + cf.hdr.x * pf.size],
-				width, pitch, height, tjpf[pf.id], tjflags));
+				(unsigned char *)&bits[pitch * y + cf.hdr.x * pf->size],
+				width, pitch, height, tjpf[pf->id], tjflags));
 			if(stereo && cf.rbits && rbits)
 			{
 				_tj(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
-					(unsigned char *)&rbits[pitch * y + cf.hdr.x * pf.size],
-					width, pitch, height, tjpf[pf.id], tjflags));
+					(unsigned char *)&rbits[pitch * y + cf.hdr.x * pf->size],
+					width, pitch, height, tjpf[pf->id], tjflags));
 			}
 		}
 	}
@@ -175,7 +175,7 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	if(x < 0 || width < 1 || (x + width) > hdr.framew || y < 0 || height < 1
 		|| (y + height) > hdr.frameh)
 		return;
-	int glFormat = (pf.id == PF_BGR ? GL_BGR : GL_RGB);
+	int glFormat = (pf->id == PF_BGR ? GL_BGR : GL_RGB);
 
 	if(!glXMakeCurrent(dpy, win, ctx))
 		_throw("Could not bind OpenGL context to window (window may have disappeared)");
@@ -184,7 +184,7 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	e = glGetError();
 	while(e != GL_NO_ERROR) e = glGetError();  // Clear previous error
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch / pf.size);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch / pf->size);
 	int oldbuf = -1;
 	glGetIntegerv(GL_DRAW_BUFFER, &oldbuf);
 	if(stereo) glDrawBuffer(GL_BACK_LEFT);
@@ -192,14 +192,14 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	glRasterPos2f(((float)x / (float)hdr.framew) * 2.0f - 1.0f,
 		((float)y / (float)hdr.frameh) * 2.0f - 1.0f);
 	glDrawPixels(width, height, glFormat, GL_UNSIGNED_BYTE,
-		&bits[pitch * y + x * pf.size]);
+		&bits[pitch * y + x * pf->size]);
 	if(stereo)
 	{
 		glDrawBuffer(GL_BACK_RIGHT);
 		glRasterPos2f(((float)x / (float)hdr.framew) * 2.0f - 1.0f,
 			((float)y / (float)hdr.frameh) * 2.0f - 1.0f);
 		glDrawPixels(width, height, glFormat, GL_UNSIGNED_BYTE,
-			&rbits[pitch * y + x * pf.size]);
+			&rbits[pitch * y + x * pf->size]);
 		glDrawBuffer(oldbuf);
 	}
 

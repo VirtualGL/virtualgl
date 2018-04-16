@@ -265,18 +265,18 @@ static void check_errors(const char *tag)
 }
 
 
-void initBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf)
+void initBuf(int x, int y, int width, int height, PF *pf, unsigned char *buf)
 {
-	int i, j, maxRGB = (1 << pf.bpc);
+	int i, j, maxRGB = (1 << pf->bpc);
 	for(j = 0; j < height; j++)
 	{
 		for(i = 0; i < width; i++)
 		{
-			if(pf.id == PF_COMP)
+			if(pf->id == PF_COMP)
 				buf[j * width + i] = ((j + y) * (i + x)) % maxRGB;
 			else
 			{
-				pf.setRGB(&buf[(j * width + i) * pf.size],
+				pf->setRGB(&buf[(j * width + i) * pf->size],
 					((j + y) * (i + x)) % maxRGB,
 					((j + y) * (i + x) * 2) % maxRGB, ((j + y) * (i + x) * 3) % maxRGB);
 			}
@@ -285,24 +285,24 @@ void initBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf)
 }
 
 
-int cmpBuf(int x, int y, int width, int height, PF &pf, unsigned char *buf,
+int cmpBuf(int x, int y, int width, int height, PF *pf, unsigned char *buf,
 	int bassackwards)
 {
-	int i, j, l, maxRGB = (1 << pf.bpc);
+	int i, j, l, maxRGB = (1 << pf->bpc);
 	for(j = 0; j < height; j++)
 	{
 		l = bassackwards ? height - j - 1 : j;
 		for(i = 0; i < width; i++)
 		{
-			if(pf.id == PF_COMP)
+			if(pf->id == PF_COMP)
 			{
-				if(buf[l * PAD(width * pf.size) + i] != ((j + y) * (i + x)) % maxRGB)
+				if(buf[l * PAD(width * pf->size) + i] != ((j + y) * (i + x)) % maxRGB)
 					return 0;
 			}
 			else
 			{
 				int r, g, b;
-				pf.getRGB(&buf[l * PAD(width * pf.size) + i * pf.size], &r, &g, &b);
+				pf->getRGB(&buf[l * PAD(width * pf->size) + i * pf->size], &r, &g, &b);
 				if(r != ((j + y) * (i + x)) % maxRGB
 					|| g != ((j + y) * (i + x) * 2) % maxRGB
 					|| b != ((j + y) * (i + x) * 3) % maxRGB)
@@ -356,7 +356,7 @@ void clearFB(void)
 // Generic GL write test
 int writeTest(int format)
 {
-	PF pf = pf_get(format);
+	PF *pf = pf_get(format);
 	unsigned char *rgbaBuffer = NULL;
 	int n, retval = 0;
 	double rbtime;
@@ -372,7 +372,7 @@ int writeTest(int format)
 		glDisable(GL_LIGHTING);
 		clearFB();
 		if((rgbaBuffer = (unsigned char *)malloc(drawableWidth * drawableHeight *
-			pf.size)) == NULL)
+			pf->size)) == NULL)
 			_throw("Could not allocate buffer");
 		initBuf(0, 0, drawableWidth, drawableHeight, pf, rgbaBuffer);
 		n = 0;
@@ -404,7 +404,7 @@ int writeTest(int format)
 // Generic OpenGL readback test
 int readTest(int format)
 {
-	PF pf = pf_get(format);
+	PF *pf = pf_get(format);
 	unsigned char *rgbaBuffer = NULL;
 	int n, retval = 0;
 	double rbtime, readPixelsTime;  Timer timer2;
@@ -415,7 +415,7 @@ int readTest(int format)
 	NV_IFROGL_TRANSFEROBJECT_HANDLE ifrTransfer = NULL;
 	#endif
 	char temps[STRLEN];
-	size_t bufSize = PAD(drawableWidth * pf.size) * drawableHeight;
+	size_t bufSize = PAD(drawableWidth * pf->size) * drawableHeight;
 
 	try
 	{
@@ -804,7 +804,7 @@ int main(int argc, char **argv)
 		if(bpc != 10)
 		{
 			for(int format = 0; format < PIXELFORMATS; format++)
-				if(pf_get(format).bpc == 10) glFormat[format] = GL_NONE;
+				if(pf_get(format)->bpc == 10) glFormat[format] = GL_NONE;
 		}
 
 		if(useWindow || usePixmap || useFBO)

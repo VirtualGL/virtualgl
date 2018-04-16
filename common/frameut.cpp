@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014, 2017 D. R. Commander
+ * Copyright (C)2011, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -164,18 +164,18 @@ class Blitter : public Runnable
 		{
 			int i, j, _j, pitch = frame->pitch, seed = frame->hdr.winid;
 			unsigned char *ptr = frame->bits, *pixel;
-			PF pf = pf_get(frame->hdr.dpynum);
-			int maxRGB = (1 << pf.bpc);
+			PF *pf = pf_get(frame->hdr.dpynum);
+			int maxRGB = (1 << pf->bpc);
 
 			for(_j = 0; _j < frame->hdr.height; _j++, ptr += pitch)
 			{
 				j = frame->flags & FRAME_BOTTOMUP ? frame->hdr.height - _j - 1 : _j;
 				for(i = 0, pixel = ptr; i < frame->hdr.width;
-					i++, pixel += frame->pf.size)
+					i++, pixel += frame->pf->size)
 				{
 					int r, g, b;
-					frame->pf.getRGB(pixel, &r, &g, &b);
-					if(frame->pf.bpc == 10 && pf.bpc != 10)
+					frame->pf->getRGB(pixel, &r, &g, &b);
+					if(frame->pf->bpc == 10 && pf->bpc != 10)
 					{
 						r >>= 2;  g >>= 2;  b >>= 2;
 					}
@@ -418,18 +418,18 @@ class FrameTest
 
 		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
 
-		void dotest(int width, int height, int seed, PF &pf)
+		void dotest(int width, int height, int seed, PF *pf)
 		{
-			if(pf.bpc == 8)
+			if(pf->bpc == 8)
 			{
-				Frame &frame = compressor->get(width, height, pf.id);
+				Frame &frame = compressor->get(width, height, pf->id);
 				if(anaglyph) makeAnaglyph(frame, seed);
 				else initFrame(frame, seed);
 				// This unit test doesn't use winid, so use it to track the seed.
 				frame.hdr.winid = seed;
 				// This unit test doesn't use dpynum, so use it to track the source
 				// pixel format.
-				frame.hdr.dpynum = pf.id;
+				frame.hdr.dpynum = pf->id;
 				if(addLogo) frame.addLogo();
 				compressor->put(frame);
 			}
@@ -447,7 +447,7 @@ class FrameTest
 				frame->hdr.winid = seed;
 				// This unit test doesn't use dpynum, so use it to track the source
 				// pixel format.
-				frame->hdr.dpynum = pf.id;
+				frame->hdr.dpynum = pf->id;
 				if(addLogo) frame->addLogo();
 				resizeWindow(dpy, win, width, height, myID);
 				blitter->put(frame);
@@ -460,13 +460,13 @@ class FrameTest
 		{
 			int i, j, pitch = frame.pitch;
 			unsigned char *ptr = frame.bits, *pixel;
-			int maxRGB = (1 << frame.pf.bpc);
+			int maxRGB = (1 << frame.pf->bpc);
 
 			for(j = 0; j < frame.hdr.height; j++, ptr += pitch)
 			{
 				for(i = 0, pixel = ptr; i < frame.hdr.width;
-					i++, pixel += frame.pf.size)
-					frame.pf.setRGB(pixel, (i + seed) % maxRGB, (j + seed) % maxRGB,
+					i++, pixel += frame.pf->size)
+					frame.pf->setRGB(pixel, (i + seed) % maxRGB, (j + seed) % maxRGB,
 						(i + j + seed) % maxRGB);
 			}
 		}
@@ -526,8 +526,8 @@ int cmpFrame(unsigned char *buf, int width, int height, Frame &dst)
 		for(int j = 0; j < height; j++)
 		{
 			int r, g, b;
-			dst.pf.getRGB(&dst.bits[dst.pitch * i + j * dst.pf.size], &r, &g, &b);
-			if(dst.pf.bpc == 10)
+			dst.pf->getRGB(&dst.bits[dst.pitch * i + j * dst.pf->size], &r, &g, &b);
+			if(dst.pf->bpc == 10)
 			{
 				r >>= 2;  g >>= 2;  b >>= 2;
 			}
@@ -547,7 +547,7 @@ void rgbBench(char *filename)
 
 	for(dstformat = 0; dstformat < PIXELFORMATS - 1; dstformat++)
 	{
-		PF dstpf = pf_get(dstformat);
+		PF *dstpf = pf_get(dstformat);
 		for(dstbu = 0; dstbu < 2; dstbu++)
 		{
 			if(bmp_load(filename, &buf, &width, 1, &height, PF_RGB,
@@ -560,9 +560,9 @@ void rgbBench(char *filename)
 			hdr.compress = RRCOMP_RGB;  hdr.size = width * 3 * height;
 			src.init(hdr, hdr.flags);
 			memcpy(src.bits, buf, width * 3 * height);
-			dst.init(hdr, dstpf.id, dstbu ? FRAME_BOTTOMUP : 0);
+			dst.init(hdr, dstpf->id, dstbu ? FRAME_BOTTOMUP : 0);
 			memset(dst.bits, 0, dst.pitch * dst.hdr.frameh);
-			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", dstpf.name,
+			fprintf(stderr, "RGB (BOTTOM-UP) -> %s (%s)\n", dstpf->name,
 				dstbu ? "BOTTOM-UP" : "TOP-DOWN");
 			double tStart, tTotal = 0.;  int iter = 0;
 			do
@@ -652,13 +652,13 @@ int main(int argc, char **argv)
 
 		for(int format = 0; format < PIXELFORMATS - 1; format++)
 		{
-			PF pf = pf_get(format);
+			PF *pf = pf_get(format);
 
-			if((useXV || anaglyph || useGL) && pf.bpc != 8) continue;
-			if(DefaultDepth(dpy, DefaultScreen(dpy)) != 30 && pf.bpc == 10)
+			if((useXV || anaglyph || useGL) && pf->bpc != 8) continue;
+			if(DefaultDepth(dpy, DefaultScreen(dpy)) != 30 && pf->bpc == 10)
 				continue;
 
-			fprintf(stderr, "Pixel format: %s\n", pf.name);
+			fprintf(stderr, "Pixel format: %s\n", pf->name);
 
 			for(i = 0; i < NUMWIN; i++)
 			{

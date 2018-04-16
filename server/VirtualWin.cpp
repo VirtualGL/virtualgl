@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015, 2017 D. R. Commander
+ * Copyright (C)2009-2015, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -597,7 +597,7 @@ void VirtualWin::makeAnaglyph(Frame *f, int drawBuf, int stereoMode)
 void VirtualWin::makePassive(Frame *f, int drawBuf, GLenum glFormat,
 	int stereoMode)
 {
-	stereoFrame.init(f->hdr, f->pf.id, f->flags, true);
+	stereoFrame.init(f->hdr, f->pf->id, f->flags, true);
 	readPixels(0, 0, stereoFrame.hdr.framew, stereoFrame.pitch,
 		stereoFrame.hdr.frameh, glFormat, stereoFrame.pf, stereoFrame.bits,
 		leye(drawBuf), true);
@@ -611,7 +611,7 @@ void VirtualWin::makePassive(Frame *f, int drawBuf, GLenum glFormat,
 
 
 void VirtualWin::readPixels(GLint x, GLint y, GLint width, GLint pitch,
-	GLint height, GLenum glFormat, PF &pf, GLubyte *bits, GLint buf, bool stereo)
+	GLint height, GLenum glFormat, PF *pf, GLubyte *bits, GLint buf, bool stereo)
 {
 	VirtualDrawable::readPixels(x, y, width, pitch, height, glFormat, pf, bits,
 		buf, stereo);
@@ -628,7 +628,7 @@ void VirtualWin::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				vglout.println("[VGL] Using software gamma correction (correction factor=%f)\n",
 					fconfig.gamma);
 		}
-		if(pf.bpc == 10)
+		if(pf->bpc == 10)
 		{
 			int h = height;
 			while(h--)
@@ -638,12 +638,13 @@ void VirtualWin::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 				while(w--)
 				{
 					unsigned int r =
-						fconfig.gamma_lut10[(*srcPixel >> pf.rshift) & 1023];
+						fconfig.gamma_lut10[(*srcPixel >> pf->rshift) & 1023];
 					unsigned int g =
-						fconfig.gamma_lut10[(*srcPixel >> pf.gshift) & 1023];
+						fconfig.gamma_lut10[(*srcPixel >> pf->gshift) & 1023];
 					unsigned int b =
-						fconfig.gamma_lut10[(*srcPixel >> pf.bshift) & 1023];
-					*srcPixel++ = (r << pf.rshift) | (g << pf.gshift) | (b << pf.bshift);
+						fconfig.gamma_lut10[(*srcPixel >> pf->bshift) & 1023];
+					*srcPixel++ =
+						(r << pf->rshift) | (g << pf->gshift) | (b << pf->bshift);
 				}
 				bits += pitch;
 			}

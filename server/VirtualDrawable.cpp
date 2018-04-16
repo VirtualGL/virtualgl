@@ -312,7 +312,7 @@ static const char *formatString(int glFormat)
 
 
 void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
-	GLint height, GLenum glFormat, PF &pf, GLubyte *bits, GLint readBuf,
+	GLint height, GLenum glFormat, PF *pf, GLubyte *bits, GLint readBuf,
 	bool stereo)
 {
 	double t0 = 0.0, tRead, tTotal;
@@ -321,7 +321,7 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 	// Compute OpenGL format from pixel format of frame
 	if(glFormat == GL_NONE)
 	{
-		glFormat = pf_glformat[pf.id];  type = pf_gldatatype[pf.id];
+		glFormat = pf_glformat[pf->id];  type = pf_gldatatype[pf->id];
 	}
 	if(glFormat == GL_NONE) _throw("Unsupported pixel format");
 
@@ -485,9 +485,9 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 		if(readBuf != GL_FRONT_RIGHT && readBuf != GL_BACK_RIGHT)
 			autotestFrameCount++;
 		for(j = 0, rowptr = bits; j < height && match; j++, rowptr += pitch)
-			for(i = 1, pixel = &rowptr[pf.size]; i < width && match;
-				i++, pixel += pf.size)
-				for(k = 0; k < pf.size; k++)
+			for(i = 1, pixel = &rowptr[pf->size]; i < width && match;
+				i++, pixel += pf->size)
+				for(k = 0; k < pf->size; k++)
 				{
 					if(pixel[k] != rowptr[k])
 					{

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2017 D. R. Commander
+ * Copyright (C)2011, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -59,7 +59,7 @@ typedef struct _fbx_struct
 {
 	int width, height, pitch;
 	char *bits;
-	PF pf;
+	PF *pf;
 	fbx_wh wh;
 	int shm;
 

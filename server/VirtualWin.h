@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2014, 2017 D. R. Commander
+ * Copyright (C)2009-2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -54,7 +54,7 @@ namespace vglserver
 
 			int init(int w, int h, GLXFBConfig config);
 			void readPixels(GLint x, GLint y, GLint width, GLint pitch, GLint height,
-				GLenum glFormat, PF &pf, GLubyte *bits, GLint buf, bool stereo);
+				GLenum glFormat, PF *pf, GLubyte *bits, GLint buf, bool stereo);
 			void makeAnaglyph(vglcommon::Frame *f, int drawBuf, int stereoMode);
 			void makePassive(vglcommon::Frame *f, int drawBuf, GLenum glFormat,
 				int stereoMode);
