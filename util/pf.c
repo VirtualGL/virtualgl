@@ -17,11 +17,6 @@
 #include <string.h>
 
 
-#ifdef sun
-#define __inline  inline
-#endif
-
-
 #define PF_RGB_SIZE          3
 #define PF_RGB_RINDEX        0
 #define PF_RGB_GINDEX        1
@@ -288,8 +283,8 @@
 #define CONVERT_PF4CBGR  CONVERT_BGR
 #endif
 
-static __inline void convert_RGB(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
+static INLINE void convert_RGB(unsigned char *srcBuf, int width, int srcStride,
+	int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
 	{
@@ -306,7 +301,7 @@ static __inline void convert_RGB(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_RGBX(unsigned char *srcBuf, int width,
+static INLINE void convert_RGBX(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -324,7 +319,7 @@ static __inline void convert_RGBX(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_RGB10_X2(unsigned char *srcBuf, int width,
+static INLINE void convert_RGB10_X2(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -342,8 +337,8 @@ static __inline void convert_RGB10_X2(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_BGR(unsigned char *srcBuf, int width,
-	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
+static INLINE void convert_BGR(unsigned char *srcBuf, int width, int srcStride,
+	int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
 	{
@@ -360,7 +355,7 @@ static __inline void convert_BGR(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_BGRX(unsigned char *srcBuf, int width,
+static INLINE void convert_BGRX(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -378,7 +373,7 @@ static __inline void convert_BGRX(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_BGR10_X2(unsigned char *srcBuf, int width,
+static INLINE void convert_BGR10_X2(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -396,7 +391,7 @@ static __inline void convert_BGR10_X2(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_XBGR(unsigned char *srcBuf, int width,
+static INLINE void convert_XBGR(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -414,7 +409,7 @@ static __inline void convert_XBGR(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_X2_BGR10(unsigned char *srcBuf, int width,
+static INLINE void convert_X2_BGR10(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -432,7 +427,7 @@ static __inline void convert_X2_BGR10(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_XRGB(unsigned char *srcBuf, int width,
+static INLINE void convert_XRGB(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -450,7 +445,7 @@ static __inline void convert_XRGB(unsigned char *srcBuf, int width,
 	}
 }
 
-static __inline void convert_X2_RGB10(unsigned char *srcBuf, int width,
+static INLINE void convert_X2_RGB10(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	if(dstpf) switch(dstpf->id)
@@ -470,14 +465,13 @@ static __inline void convert_X2_RGB10(unsigned char *srcBuf, int width,
 
 
 #define DEFINE_PF4C(id) \
-static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g, \
-	int *b) \
+static INLINE void getRGB_##id(unsigned char *pixel, int *r, int *g, int *b) \
 { \
 	*r = pixel[PF_##id##_RINDEX];  *g = pixel[PF_##id##_GINDEX]; \
 	*b = pixel[PF_##id##_BINDEX]; \
 } \
 \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 { \
 	unsigned int *p = (unsigned int *)pixel; \
 	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
@@ -499,8 +493,7 @@ DEFINE_PF4C(XRGB)
 
 
 #define DEFINE_PF4(id) \
-static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g, \
-	int *b) \
+static INLINE void getRGB_##id(unsigned char *pixel, int *r, int *g, int *b) \
 { \
 	unsigned int *p = (unsigned int *)pixel; \
 	*r = ((*p) & PF_##id##_RMASK) >> PF_##id##_RSHIFT; \
@@ -508,7 +501,7 @@ static __inline void getRGB_##id(unsigned char *pixel, int *r, int *g, \
 	*b = ((*p) & PF_##id##_BMASK) >> PF_##id##_BSHIFT; \
 } \
 \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 { \
 	unsigned int *p = (unsigned int *)pixel; \
 	*p = (r << PF_##id##_RSHIFT) | (g << PF_##id##_GSHIFT) | \
@@ -530,7 +523,7 @@ DEFINE_PF4(X2_RGB10)
 
 
 #define DEFINE_PF3(id) \
-static __inline void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
+static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 { \
 	pixel[PF_##id##_RINDEX] = r;  pixel[PF_##id##_GINDEX] = g; \
 	pixel[PF_##id##_BINDEX] = b; \
@@ -546,17 +539,17 @@ DEFINE_PF3(RGB)
 DEFINE_PF3(BGR)
 
 
-static __inline void getRGB_COMP(unsigned char *pixel, int *r, int *g, int *b)
+static INLINE void getRGB_COMP(unsigned char *pixel, int *r, int *g, int *b)
 {
 	*r = *g = *b = *pixel;
 }
 
-static __inline void setRGB_COMP(unsigned char *pixel, int r, int g, int b)
+static INLINE void setRGB_COMP(unsigned char *pixel, int r, int g, int b)
 {
 	*pixel = r;
 }
 
-static __inline void convert_COMP(unsigned char *srcBuf, int width,
+static INLINE void convert_COMP(unsigned char *srcBuf, int width,
 	int srcStride, int height, unsigned char *dstBuf, int dstStride, PF *dstpf)
 {
 	/* VirtualGL doesn't ever need to convert between component and RGB */

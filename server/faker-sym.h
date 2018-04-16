@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,6 +22,7 @@
 #include "glx.h"
 #include "Log.h"
 #include "GlobalCriticalSection.h"
+#include "vglinline.h"
 #ifdef FAKEXCB
 extern "C" {
 #ifdef SYSXCBHEADERS
@@ -97,7 +98,7 @@ namespace vglfaker
 #define FUNCDEF0(RetType, f, fake_f) \
 	typedef RetType (*_##f##Type)(void); \
 	SYMDEF(f); \
-	static inline RetType _##f(void) \
+	static INLINE RetType _##f(void) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -110,7 +111,7 @@ namespace vglfaker
 #define VFUNCDEF0(f, fake_f) \
 	typedef void (*_##f##Type)(void); \
 	SYMDEF(f); \
-	static inline void _##f(void) \
+	static INLINE void _##f(void) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -121,7 +122,7 @@ namespace vglfaker
 #define FUNCDEF1(RetType, f, at1, a1, fake_f) \
 	typedef RetType (*_##f##Type)(at1); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1) \
+	static INLINE RetType _##f(at1 a1) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -134,7 +135,7 @@ namespace vglfaker
 #define VFUNCDEF1(f, at1, a1, fake_f) \
 	typedef void (*_##f##Type)(at1); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1) \
+	static INLINE void _##f(at1 a1) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -145,7 +146,7 @@ namespace vglfaker
 #define FUNCDEF2(RetType, f, at1, a1, at2, a2, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2) \
+	static INLINE RetType _##f(at1 a1, at2 a2) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -158,7 +159,7 @@ namespace vglfaker
 #define VFUNCDEF2(f, at1, a1, at2, a2, fake_f) \
 	typedef void (*_##f##Type)(at1, at2); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2) \
+	static INLINE void _##f(at1 a1, at2 a2) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -169,7 +170,7 @@ namespace vglfaker
 #define FUNCDEF3(RetType, f, at1, a1, at2, a2, at3, a3, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3) \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -182,7 +183,7 @@ namespace vglfaker
 #define VFUNCDEF3(f, at1, a1, at2, a2, at3, a3, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3) \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -193,7 +194,7 @@ namespace vglfaker
 #define FUNCDEF4(RetType, f, at1, a1, at2, a2, at3, a3, at4, a4, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -206,7 +207,7 @@ namespace vglfaker
 #define VFUNCDEF4(f, at1, a1, at2, a2, at3, a3, at4, a4, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3, at4 a4) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -218,7 +219,7 @@ namespace vglfaker
 	fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -231,7 +232,7 @@ namespace vglfaker
 #define VFUNCDEF5(f, at1, a1, at2, a2, at3, a3, at4, a4, at5, a5, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -243,7 +244,7 @@ namespace vglfaker
 	fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
 	{ \
 		CHECKSYM(f, fake_f); \
 		DISABLE_FAKER(); \
@@ -255,7 +256,7 @@ namespace vglfaker
 	at6, a6, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6) \
 	{ \
 		RetType retval; \
 		CHECKSYM(f, fake_f); \
@@ -269,7 +270,7 @@ namespace vglfaker
 	at7, a7, fake_f) \
 	typedef void (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7); \
 	SYMDEF(f); \
-	static inline void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static INLINE void _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7) \
 	{ \
 		CHECKSYM(f, fake_f); \
@@ -282,7 +283,7 @@ namespace vglfaker
 	at6, a6, at7, a7, at8, a8, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8) \
 	{ \
 		RetType retval; \
@@ -297,7 +298,7 @@ namespace vglfaker
 	at6, a6, at7, a7, at8, a8, at9, a9, fake_f) \
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9) \
 	{ \
 		RetType retval; \
@@ -313,7 +314,7 @@ namespace vglfaker
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
 		at10); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9, at10 a10) \
 	{ \
 		RetType retval; \
@@ -330,7 +331,7 @@ namespace vglfaker
 	typedef RetType (*_##f##Type)(at1, at2, at3, at4, at5, at6, at7, at8, at9, \
 		at10, at11, at12); \
 	SYMDEF(f); \
-	static inline RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
+	static INLINE RetType _##f(at1 a1, at2 a2, at3 a3, at4 a4, at5 a5, at6 a6, \
 		at7 a7, at8 a8, at9 a9, at10 a10, at11 a11, at12 a12) \
 	{ \
 		RetType retval; \
@@ -465,7 +466,7 @@ VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
 
 typedef void (*(*_glXGetProcAddressType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddress);
-static inline void (*_glXGetProcAddress(const GLubyte * procName))(void)
+static INLINE void (*_glXGetProcAddress(const GLubyte * procName))(void)
 {
 	CHECKSYM(glXGetProcAddress, glXGetProcAddress);
 	return __glXGetProcAddress(procName);
@@ -483,7 +484,7 @@ FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
 
 typedef void (*(*_glXGetProcAddressARBType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddressARB);
-static inline void (*_glXGetProcAddressARB(const GLubyte * procName))(void)
+static INLINE void (*_glXGetProcAddressARB(const GLubyte * procName))(void)
 {
 	CHECKSYM(glXGetProcAddressARB, glXGetProcAddressARB);
 	return __glXGetProcAddressARB(procName);
@@ -755,7 +756,7 @@ VFUNCDEF2(XSetEventQueueOwner, Display *, dpy, enum XEventQueueOwner, owner,
 
 typedef xcb_extension_t *_xcb_glx_idType;
 SYMDEF(xcb_glx_id);
-static inline xcb_extension_t *_xcb_glx_id(void)
+static INLINE xcb_extension_t *_xcb_glx_id(void)
 {
 	CHECKSYM(xcb_glx_id, NULL);
 	return __xcb_glx_id;

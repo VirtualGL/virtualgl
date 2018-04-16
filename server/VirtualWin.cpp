@@ -44,7 +44,7 @@ static const int trans2pf[RRTRANS_FORMATOPT] =
 #define isPassive(mode) \
 	(mode >= RRSTEREO_INTERLEAVED && mode <= RRSTEREO_SIDEBYSIDE)
 
-static inline int drawingToRight(void)
+static INLINE int drawingToRight(void)
 {
 	GLint drawBuf = GL_LEFT;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);

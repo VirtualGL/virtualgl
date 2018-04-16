@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010, 2014, 2017 D. R. Commander
+ * Copyright (C)2010, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -25,6 +25,7 @@
 	#define stricmp  strcasecmp
 	#define strnicmp  strncasecmp
 #endif
+#include "vglinline.h"
 
 #ifdef _MSC_VER
 #define snprintf(str, n, format, ...) \
@@ -46,11 +47,7 @@
 #define _SC_NPROCESSORS_CONF  _SC_NPROC_CONF
 #endif
 
-#ifdef sun
-#define __inline  inline
-#endif
-
-static __inline int numprocs(void)
+static INLINE int numprocs(void)
 {
 	#ifdef _WIN32
 
@@ -89,7 +86,7 @@ static __inline int numprocs(void)
 	(((i) & 0xff00) >> 8) | \
 	(((i) & 0x00ff) << 8))
 
-static __inline int littleendian(void)
+static INLINE int littleendian(void)
 {
 	unsigned int value = 1;
 	unsigned char *ptr = (unsigned char *)(&value);

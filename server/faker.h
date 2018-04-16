@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -56,7 +56,7 @@ namespace vglfaker
 		|| drawbuf == GL_BACK_RIGHT)
 
 
-static inline int drawingToFront(void)
+static INLINE int drawingToFront(void)
 {
 	GLint drawbuf = GL_BACK;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
@@ -64,7 +64,7 @@ static inline int drawingToFront(void)
 }
 
 
-static inline int drawingToRight(void)
+static INLINE int drawingToRight(void)
 {
 	GLint drawbuf = GL_LEFT;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
