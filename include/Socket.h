@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2016 D. R. Commander
+ * Copyright (C)2014, 2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +23,7 @@
 	#endif
 	#include <openssl/ssl.h>
 	#include <openssl/err.h>
-	#if defined(sun) || defined(sgi)
+	#if !defined(HAVE_DEVURANDOM) && !defined(_WIN32)
 		#include <openssl/rand.h>
 	#endif
 #endif
@@ -161,15 +161,19 @@ namespace vglutil
 
 			#ifdef USESSL
 
+			#if OPENSSL_VERSION_NUMBER < 0x10100000L
 			static void lockingCallback(int mode, int type, const char *file,
 				int line)
 			{
 				if(mode & CRYPTO_LOCK) cryptoLock[type].lock();
 				else cryptoLock[type].unlock();
 			}
+			#endif
 
 			static bool sslInit;
+			#if OPENSSL_VERSION_NUMBER < 0x10100000L
 			static CriticalSection cryptoLock[CRYPTO_NUM_LOCKS];
+			#endif
 			bool doSSL;  SSL_CTX *sslctx;  SSL *ssl;
 
 			#endif

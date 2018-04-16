@@ -52,6 +52,8 @@ a subsequent segfault when VTK tried to call `glBlendFuncSeparate()`.
 VirtualGL's implementation of `glXGetVisualFromFBConfig()` now returns NULL
 unless the FB config has a corresponding visual on the 3D X server.
 
+6. VirtualGL can now be built and run with OpenSSL 1.1.
+
 
 2.5.2
 =====

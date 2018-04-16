@@ -13,6 +13,11 @@ target_link_libraries(bmptest vglutil)
 add_executable(pftest pftest.c)
 target_link_libraries(pftest vglutil)
 
+if(EXISTS /dev/urandom)
+	message(STATUS "Using /dev/urandom for random number generation")
+	add_definitions(-DHAVE_DEVURANDOM)
+endif()
+
 add_library(vglsocket STATIC Socket.cpp)
 target_link_libraries(vglsocket vglutil)
 if(WIN32)

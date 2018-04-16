@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2016 D. R. Commander
+ * Copyright (C)2014, 2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -43,7 +43,9 @@ typedef socklen_t SOCKLEN_T;
 
 #ifdef USESSL
 bool Socket::sslInit = false;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 CriticalSection Socket::cryptoLock[CRYPTO_NUM_LOCKS];
+#endif
 #endif
 CriticalSection Socket::mutex;
 int Socket::instanceCount = 0;
@@ -51,24 +53,27 @@ int Socket::instanceCount = 0;
 
 #ifdef USESSL
 
-static void progressCallback(int p, int n, void *arg)
-{
-}
-
-
 static EVP_PKEY *newPrivateKey(int bits)
 {
+	BIGNUM *bn = NULL;
+	RSA *rsa = NULL;
 	EVP_PKEY *pk = NULL;
 
 	try
 	{
+		if(!(bn = BN_new())) _throwssl();
+		if(!BN_set_word(bn, RSA_F4)) _throwssl();
+		if(!(rsa = RSA_new())) _throwssl();
+		if(!RSA_generate_key_ex(rsa, bits, bn, NULL)) _throwssl();
 		if(!(pk = EVP_PKEY_new())) _throwssl();
-		if(!EVP_PKEY_assign_RSA(pk,
-			RSA_generate_key(bits, 0x10001, progressCallback, NULL))) _throwssl();
+		if(!EVP_PKEY_assign_RSA(pk, rsa)) _throwssl();
+		BN_free(bn);
 		return pk;
 	}
 	catch(...)
 	{
+		if(bn) BN_free(bn);
+		if(rsa) RSA_free(rsa);
 		if(pk) EVP_PKEY_free(pk);
 		throw;
 	}
@@ -147,7 +152,7 @@ Socket::Socket(bool doSSL_)
 	#ifdef USESSL
 	if(!sslInit && doSSL)
 	{
-		#if defined(sun) || defined(sgi)
+		#if !defined(HAVE_DEVURANDOM) && !defined(_WIN32)
 		char buf[128];  int i;
 		srandom(getpid());
 		for(i = 0; i < 128; i++)
@@ -158,7 +163,9 @@ Socket::Socket(bool doSSL_)
 		SSL_load_error_strings();
 		ERR_load_crypto_strings();
 		CRYPTO_set_id_callback(Thread::threadID);
+		#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		CRYPTO_set_locking_callback(lockingCallback);
+		#endif
 		SSL_library_init();
 		sslInit = true;
 		char *env = NULL;
