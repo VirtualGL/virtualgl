@@ -466,7 +466,7 @@ VFUNCDEF3(glXSelectEvent, Display *, dpy, GLXDrawable, draw,
 
 typedef void (*(*_glXGetProcAddressType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddress);
-static INLINE void (*_glXGetProcAddress(const GLubyte * procName))(void)
+static INLINE void (*_glXGetProcAddress(const GLubyte *procName))(void)
 {
 	CHECKSYM(glXGetProcAddress, glXGetProcAddress);
 	return __glXGetProcAddress(procName);
@@ -484,7 +484,7 @@ FUNCDEF5(GLXContext, glXCreateContextAttribsARB, Display *, dpy, GLXFBConfig,
 
 typedef void (*(*_glXGetProcAddressARBType)(const GLubyte *))(void);
 SYMDEF(glXGetProcAddressARB);
-static INLINE void (*_glXGetProcAddressARB(const GLubyte * procName))(void)
+static INLINE void (*_glXGetProcAddressARB(const GLubyte *procName))(void)
 {
 	CHECKSYM(glXGetProcAddressARB, glXGetProcAddressARB);
 	return __glXGetProcAddressARB(procName);
