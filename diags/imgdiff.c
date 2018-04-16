@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017 D. R. Commander
+ * Copyright (C)2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,7 +28,7 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s <image 1> <image 2> [-mag]\n", argv[0]);
 	fprintf(stderr, "       (images must be in BMP or PPM format)\n\n");
-	fprintf(stderr, "-mag = show magnitude of differences using an artificial color scale\n\n");
+	fprintf(stderr, "-mag = Show magnitude of differences using an artificial color scale\n\n");
 	exit(1);
 }
 

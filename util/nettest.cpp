@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017 D. R. Commander
+ * Copyright (C)2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -153,24 +153,24 @@ int cmpBuf(char *buf, int len)
 
 void usage(char **argv)
 {
-	printf("\nUSAGE: %s -client <server name or IP>", argv[0]);
+	fprintf(stderr, "\nUSAGE: %s -client <server name or IP>", argv[0]);
 	#ifdef USESSL
-	printf(" [-ssl]");
+	fprintf(stderr, " [-ssl]");
 	#endif
-	printf(" [-old] [-time <t>]");
-	printf("\n or    %s -server", argv[0]);
+	fprintf(stderr, " [-old] [-time <t>]");
+	fprintf(stderr, "\n or    %s -server", argv[0]);
 	#ifdef USESSL
-	printf(" [-ssl]");
+	fprintf(stderr, " [-ssl]");
 	#endif
-	printf("\n or    %s -findport\n", argv[0]);
+	fprintf(stderr, "\n or    %s -findport\n", argv[0]);
 	#if defined(sun) || defined(linux)
-	printf(" or    %s -bench <interface> [interval]\n", argv[0]);
-	printf("\n-bench = measure throughput on selected network interface");
+	fprintf(stderr, " or    %s -bench <interface> [interval]\n", argv[0]);
+	fprintf(stderr, "\n-bench = Measure throughput on selected network interface");
 	#endif
-	printf("\n-findport = display a free TCP port number and exit");
-	printf("\n-old = communicate with NetTest server v2.1.x or earlier\n");
+	fprintf(stderr, "\n-findport = Display a free TCP port number and exit");
+	fprintf(stderr, "\n-old = Communicate with NetTest server v2.1.x or earlier\n");
 	#ifdef USESSL
-	printf("-ssl = use secure tunnel\n");
+	fprintf(stderr, "-ssl = Use secure tunnel\n");
 	#endif
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);

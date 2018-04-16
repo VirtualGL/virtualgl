@@ -701,7 +701,7 @@ void usage(char **argv)
 	fprintf(stderr, "-fs = Full-screen mode\n");
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
-	fprintf(stderr, "-size <wxh> = specify drawable width & height (default: %dx%d)\n\n",
+	fprintf(stderr, "-size <wxh> = Specify drawable width & height (default: %dx%d)\n\n",
 		DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	exit(1);
 }

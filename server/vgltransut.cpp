@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014, 2017 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -37,15 +37,15 @@ void usage(char **argv)
 	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
 	fprintf(stderr, "-qual <q> = JPEG quality, 1 <= <q> <= 100 (default: %d)\n",
 		fconfig.qual);
-	fprintf(stderr, "-tilesize <n> = width/height of each inter-frame difference tile\n");
+	fprintf(stderr, "-tilesize <n> = Width/height of each inter-frame difference tile\n");
 	fprintf(stderr, "                (default: %d x %d pixels)\n",
 		fconfig.tilesize, fconfig.tilesize);
 	fprintf(stderr, "-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
 	#ifdef USESSL
-	fprintf(stderr, "-ssl = use SSL tunnel (default: %s)\n",
+	fprintf(stderr, "-ssl = Use SSL tunnel (default: %s)\n",
 		fconfig.ssl ? "On" : "Off");
 	#endif
-	fprintf(stderr, "-np <n> = number of processors to use for compression (default: %d)\n\n",
+	fprintf(stderr, "-np <n> = Number of processors to use for compression (default: %d)\n\n",
 		fconfig.np);
 	exit(1);
 }
