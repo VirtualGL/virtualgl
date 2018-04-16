@@ -40,7 +40,7 @@ static const int pf2trans[PIXELFORMATS] =
 };
 
 
-FakerConfig *fconfig_instance(void) { return fconfig; }
+FakerConfig *fconfig_getinstance(void) { return fconfig; }
 
 
 /* This just wraps the VGLTrans class in order to demonstrate how to build a
