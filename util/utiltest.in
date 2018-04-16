@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 set -u
 trap onexit INT
@@ -22,6 +22,16 @@ onexit()
 
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
+DEPTHS="24 30"
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-no10bpc)
+		DEPTHS=24
+		;;
+	esac
+	shift
+done
 
 $BIN/bmptest
 $BIN/pftest -time 0.01
@@ -38,47 +48,31 @@ which Xvfb >/dev/null 2>&1 || (
 	echo Xvfb not found!
 	exit 1
 )
-Xvfb :42 -screen 0 1920x1200x24 >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
-kill $PID
-PID=-1
-sleep 2
 
-Xvfb :42 -screen 0 1920x1200x30 >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
-kill $PID
-PID=-1
-sleep 2
+for depth in $DEPTHS; do
+	Xvfb :42 -screen 0 1920x1200x$depth >/dev/null 2>&1 & PID=$!
+	echo Xvfb started as process $PID
+	sleep 2
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm -mt
+	kill $PID
+	PID=-1
+	sleep 2
+done
 
-Xvfb :42 -screen 0 1024x768x24 >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-kill $PID
-PID=-1
-sleep 2
-
-Xvfb :42 -screen 0 1024x768x30 >/dev/null 2>&1 & PID=$!
-echo Xvfb started as process $PID
-sleep 2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
-DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
-kill $PID
-PID=-1
-sleep 2
+for depth in $DEPTHS; do
+	Xvfb :42 -screen 0 1024x768x$depth >/dev/null 2>&1 & PID=$!
+	echo Xvfb started as process $PID
+	sleep 2
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -mt
+	DISPLAY=:42 $BIN/fbxtest $NOSHM -time 0.2 -pm
+	kill $PID
+	PID=-1
+	sleep 2
+done
 
 $BIN/nettest -server &
 echo

@@ -197,3 +197,4 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND GNUCXX)
 endif()
 
 configure_file(servertest.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest)
+execute_process(COMMAND chmod +x ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/servertest)
