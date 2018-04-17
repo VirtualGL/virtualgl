@@ -71,7 +71,7 @@ Display *dpy = NULL;  Window win = 0, olWin = 0;
 GLXContext ctx = 0, olCtx = 0;
 int useStereo = 0, useOverlay = 0, useDC = 0, useImm = 0, interactive = 0,
 	olDB = 1, loColor = 0, maxFrames = 0, totalFrames = 0, directCtx = True,
-	bpc = 8;
+	bpc = 8, deadYet = 0;
 int rshift = 0, gshift = 0, bshift = 0;
 double benchTime = DEFBENCHTIME;
 int nColors = 0, nOlColors, colorScheme = GRAY;
@@ -427,15 +427,16 @@ int display(int advance)
 			elapsed = mpixels = 0.;  frames = 0;
 		}
 	}
-	if(maxFrames && totalFrames > maxFrames) goto bailout;
+	if(maxFrames && totalFrames > maxFrames)
+	{
+		deadYet = 1;  goto bailout;
+	}
 
 	start = getTime();
+	return 0;
 
 	bailout:
-	if(sphereQuad && retval < 0)
-	{
-		gluDeleteQuadric(sphereQuad);  sphereQuad = NULL;
-	}
+	if(sphereQuad) { gluDeleteQuadric(sphereQuad);  sphereQuad = NULL; }
 	return retval;
 }
 
@@ -447,7 +448,7 @@ int eventLoop(Display *dpy)
 {
 	int retval = 0;
 
-	while(1)
+	while(!deadYet)
 	{
 		int advance = 0, doDisplay = 0;
 
