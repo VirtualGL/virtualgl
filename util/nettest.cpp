@@ -158,7 +158,7 @@ void usage(char **argv)
 	fprintf(stderr, " [-ssl]");
 	#endif
 	fprintf(stderr, " [-old] [-time <t>]");
-	fprintf(stderr, "\n or    %s -server", argv[0]);
+	fprintf(stderr, "\n or    %s -server [-ipv6]", argv[0]);
 	#ifdef USESSL
 	fprintf(stderr, " [-ssl]");
 	#endif
@@ -172,6 +172,7 @@ void usage(char **argv)
 	#ifdef USESSL
 	fprintf(stderr, "-ssl = Use secure tunnel\n");
 	#endif
+	fprintf(stderr, "-ipv6 = Use IPv6 sockets\n");
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",
 		benchTime);
 	fprintf(stderr, "            (NOTE: this must be specified on the client)\n\n");
@@ -183,7 +184,7 @@ int main(int argc, char **argv)
 {
 	int server = 0;  char *serverName = NULL;
 	char *buf;  int i, j, size;
-	bool doSSL = false, old = false;
+	bool doSSL = false, ipv6 = false, old = false;
 	Timer timer;
 	#if defined(sun) || defined(linux)
 	int interval = 2;
@@ -233,12 +234,17 @@ int main(int argc, char **argv)
 					printf("Using %s ...\n", SSLeay_version(SSLEAY_VERSION));
 				}
 				#endif
+				else if(!stricmp(argv[i], "-ipv6"))
+				{
+					ipv6 = true;
+					printf("Using IPv6 sockets ...\n");
+				}
 				else usage(argv);
 			}
 		}
 		else if(!stricmp(argv[1], "-findport"))
 		{
-			Socket socket(false);
+			Socket socket(false, false);
 			printf("%d\n", socket.findPort());
 			socket.close();
 			exit(0);
@@ -259,7 +265,7 @@ int main(int argc, char **argv)
 		#endif
 		else usage(argv);
 
-		Socket socket(doSSL);
+		Socket socket(doSSL, ipv6);
 		if((buf = (char *)malloc(sizeof(char) * MAXDATASIZE)) == NULL)
 		{
 			printf("Buffer allocation error.\n");  exit(1);

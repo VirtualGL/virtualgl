@@ -19,6 +19,16 @@ onexit()
 
 BIN=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 SSL=@VGL_USESSL@
+IPV6=1
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-noipv6)
+		IPV6=0
+		;;
+	esac
+	shift
+done
 
 $BIN/bmptest
 echo
@@ -29,13 +39,25 @@ $BIN/fbxtest -time 0.2 -mt
 $BIN/nettest -server &
 echo
 sleep 2
-$BIN/nettest -client localhost -time 0.2
+$BIN/nettest -client 127.0.0.1 -time 0.2
+if [ "$IPV6" = "1" ]; then
+	$BIN/nettest -server -ipv6 &
+	echo
+	sleep 2
+	$BIN/nettest -client ::1 -time 0.2
+fi
 
 if [ "$SSL" = "1" ]; then
 	echo
 	$BIN/nettest -server -ssl &
 	sleep 2
-	$BIN/nettest -client localhost -ssl -time 0.2
+	$BIN/nettest -client 127.0.0.1 -ssl -time 0.2
+	if [ "$IPV6" = "1" ]; then
+		echo
+		$BIN/nettest -server -ipv6 -ssl &
+		sleep 2
+		$BIN/nettest -client ::1 -ssl -time 0.2
+	fi
 fi
 
 SUCCESS=1

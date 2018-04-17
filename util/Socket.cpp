@@ -16,12 +16,14 @@
 #include "Socket.h"
 #include "Thread.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+	#include <ws2tcpip.h>
+	#include "vglutil.h"
+#else
 	#include <signal.h>
 	#include <unistd.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
-	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <netdb.h>
 	#include <netinet/tcp.h>
@@ -35,11 +37,24 @@
 using namespace vglutil;
 
 
+#define _sock(f)  { if((f) == SOCKET_ERROR) _throwsock(); }
+
 #ifdef _WIN32
 typedef int SOCKLEN_T;
 #else
 typedef socklen_t SOCKLEN_T;
 #endif
+
+typedef struct
+{
+	union
+	{
+		struct sockaddr sa;
+		struct sockaddr_storage ss;
+		struct sockaddr_in sin;
+		struct sockaddr_in6 sin6;
+	} u;
+} VGLSockAddr;
 
 #ifdef USESSL
 bool Socket::sslInit = false;
@@ -128,10 +143,11 @@ static X509 *newCert(EVP_PKEY *priv)
 #endif  // USESSL
 
 
-Socket::Socket(bool doSSL_)
+Socket::Socket(bool doSSL_, bool ipv6_) :
 #ifdef USESSL
-	: doSSL(doSSL_)
+	doSSL(doSSL_),
 #endif
+	ipv6(ipv6_)
 {
 	CriticalSection::SafeLock l(mutex);
 
@@ -241,30 +257,38 @@ void Socket::close(void)
 
 void Socket::connect(char *serverName, unsigned short port)
 {
-	struct sockaddr_in servaddr;
-	int m = 1;  struct hostent *hent;
-	if(serverName == NULL) _throw("Invalid argument");
+	struct addrinfo hints, *addr = NULL;
+	int m = 1;
+	char portName[10];
 
+	if(serverName == NULL || strlen(serverName) < 1) _throw("Invalid argument");
 	if(sd != INVALID_SOCKET) _throw("Already connected");
 	#ifdef USESSL
 	if(ssl && sslctx && doSSL) _throw("SSL already connected");
 	#endif
 
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(serverName);
-	servaddr.sin_port = htons(port);
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	snprintf(portName, 10, "%d", port);
+	int err = getaddrinfo(serverName, portName, &hints, &addr);
+	if(err != 0)
+		throw(Error(__FUNCTION__, gai_strerror(err), __LINE__));
 
-	if(servaddr.sin_addr.s_addr == INADDR_NONE)
+	try
 	{
-		if((hent = gethostbyname(serverName)) == 0) _throwsock();
-		memcpy(&(servaddr.sin_addr), hent->h_addr_list[0], hent->h_length);
+		if((sd = socket(addr->ai_family, SOCK_STREAM,
+			IPPROTO_TCP)) == INVALID_SOCKET)
+			_throwsock();
+		_sock(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
+		_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
+		freeaddrinfo(addr);
 	}
-
-	if((sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
-		_throwsock();
-	_sock(::connect(sd, (struct sockaddr *)&servaddr, sizeof(servaddr)));
-	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
+	catch(...)
+	{
+		freeaddrinfo(addr);
+		throw;
+	}
 
 	#ifdef USESSL
 	if(doSSL)
@@ -282,28 +306,45 @@ void Socket::connect(char *serverName, unsigned short port)
 
 unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 {
-	int m = 1, m2 = reuseAddr ? 1 : 0;  struct sockaddr_in myaddr;
+	int one = 1, reuse = reuseAddr ? 1 : 0;
+	#ifdef __CYGWIN__
+	int zero = 0;
+	#endif
+	VGLSockAddr myaddr;  SOCKLEN_T addrlen;
 
 	if(sd != INVALID_SOCKET) _throw("Already connected");
 	#ifdef USESSL
 	if(ssl && sslctx && doSSL) _throw("SSL already connected");
 	#endif
 
-	if((sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
+	if((sd = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM,
+		IPPROTO_TCP)) == INVALID_SOCKET)
 		_throwsock();
-	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
-	_sock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&m2, sizeof(int)));
+	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(int)));
+	_sock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)));
+	#ifdef __CYGWIN__
+	_sock(setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&zero, sizeof(int)));
+	#endif
 
 	memset(&myaddr, 0, sizeof(myaddr));
-	myaddr.sin_family = AF_INET;
-	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	myaddr.sin_port = (port == 0) ? 0 : htons(port);
+	if(ipv6)
+	{
+		myaddr.u.sin6.sin6_family = AF_INET6;
+		myaddr.u.sin6.sin6_addr = in6addr_any;
+		myaddr.u.sin6.sin6_port = (port == 0) ? 0 : htons(port);
+		addrlen = sizeof(struct sockaddr_in6);
+	}
+	else
+	{
+		myaddr.u.sin.sin_family = AF_INET;
+		myaddr.u.sin.sin_addr.s_addr = htonl(INADDR_ANY);
+		myaddr.u.sin.sin_port = (port == 0) ? 0 : htons(port);
+		addrlen = sizeof(struct sockaddr_in);
+	}
+	_sock(bind(sd, &myaddr.u.sa, addrlen));
+	_sock(getsockname(sd, &myaddr.u.sa, &addrlen));
 
-	_sock(bind(sd, (struct sockaddr *)&myaddr, sizeof(myaddr)));
-	SOCKLEN_T n = sizeof(myaddr);
-	_sock(getsockname(sd, (struct sockaddr *)&myaddr, &n));
-	unsigned short actualPort = ntohs(myaddr.sin_port);
-	return actualPort;
+	return ipv6 ? ntohs(myaddr.u.sin6.sin6_port) : ntohs(myaddr.u.sin.sin_port);
 }
 
 
@@ -356,15 +397,16 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 Socket *Socket::accept(void)
 {
 	SOCKET clientsd;
-	int m = 1;  struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen;
-	addrlen = sizeof(remoteaddr);
+	int m = 1;
+	VGLSockAddr remoteaddr;
+	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 
 	if(sd == INVALID_SOCKET) _throw("Not connected");
 	#ifdef USESSL
 	if(!sslctx && doSSL) _throw("SSL not initialized");
 	#endif
 
-	_sock(clientsd = ::accept(sd, (struct sockaddr *)&remoteaddr, &addrlen));
+	_sock(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
 	_sock(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 		sizeof(int)));
 
@@ -385,13 +427,20 @@ Socket *Socket::accept(void)
 }
 
 
-char *Socket::remoteName(void)
+const char *Socket::remoteName(void)
 {
-	struct sockaddr_in remoteaddr;  SOCKLEN_T addrlen = sizeof(remoteaddr);
-	char *remoteName = NULL;
+	VGLSockAddr remoteaddr;
+	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
+	const char *remoteName;
 
-	_sock(getpeername(sd, (struct sockaddr *)&remoteaddr, &addrlen));
-	remoteName = inet_ntoa(remoteaddr.sin_addr);
+	_sock(getpeername(sd, &remoteaddr.u.sa, &addrlen));
+	if(remoteaddr.u.ss.ss_family == AF_INET6)
+		remoteName = inet_ntop(remoteaddr.u.ss.ss_family,
+			&remoteaddr.u.sin6.sin6_addr, remoteNameBuf, INET6_ADDRSTRLEN);
+	else
+		remoteName = inet_ntop(remoteaddr.u.ss.ss_family,
+			&remoteaddr.u.sin.sin_addr, remoteNameBuf, INET6_ADDRSTRLEN);
+
 	return remoteName ? remoteName : (char *)"Unknown";
 }
 

@@ -31,6 +31,7 @@ SSL=@VGL_USESSL@
 NODL=
 NOSTEREO=
 DEPTH=24
+IPV6=1
 while [ $# -gt 0 ]; do
 	case "$1" in
 	-nodl)
@@ -39,6 +40,9 @@ while [ $# -gt 0 ]; do
 		;;
 	-nostereo)
 		NOSTEREO=-nostereo
+		;;
+	-noipv6)
+		IPV6=0
 		;;
 	-10bpc)
 		DEPTH=30
@@ -76,6 +80,16 @@ if [ $DEPTH = 24 ]; then
 	DISPLAY=:42 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
 	kill $VGLCLIENTPID
 	VGLCLIENTPID=-1
+	if [ "$IPV6" = "1" ]; then
+		DISPLAY=:42 $BIN/vglclient -ipv6 >vglclient.log 2>&1 & VGLCLIENTPID=$!
+		DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg $BIN/fakerut $NOSTEREO
+		if [ "$SSL" = "1" ]; then
+			DISPLAY=:42 VGL_CLIENT=::1 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -c jpeg +s $BIN/fakerut $NOSTEREO
+		fi
+		DISPLAY=:42 VGL_CLIENT=[::1]:0 LD_LIBRARY_PATH=$LIB $BIN/vglrun $NODL -trans test $BIN/fakerut -nostereo
+		kill $VGLCLIENTPID
+		VGLCLIENTPID=-1
+	fi
 fi
 
 # X11 Transport

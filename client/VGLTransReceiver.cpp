@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -85,9 +85,9 @@ static unsigned short DisplayNumber(Display *dpy)
 }
 
 
-VGLTransReceiver::VGLTransReceiver(bool doSSL_, int drawMethod_) :
+VGLTransReceiver::VGLTransReceiver(bool doSSL_, bool ipv6_, int drawMethod_) :
 	drawMethod(drawMethod_), listenSocket(NULL), thread(NULL), deadYet(false),
-	doSSL(doSSL_)
+	doSSL(doSSL_), ipv6(ipv6_)
 {
 	char *env = NULL;
 
@@ -111,7 +111,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		_newcheck(listenSocket = new Socket(doSSL));
+		_newcheck(listenSocket = new Socket(doSSL, ipv6));
 		port = listenSocket->listen(port_);
 	}
 	catch(...)

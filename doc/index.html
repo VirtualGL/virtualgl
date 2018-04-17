@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-12-07T19:55:56">
+<meta name="date" content="2018-04-17T15:09:37">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -5104,6 +5104,36 @@ infrastructure around VirtualGL.</p>
         If the client machine has a GPU, then it may be faster in some rare 
         instances to draw pixels using OpenGL rather than using 2D (X11) 
         commands.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGLCLIENT_IPV6&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard"><code>vglclient</code> argument</td>
+    <td class="standard"><code>-ipv6</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable IPv6 sockets</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Enabling this option will cause <code>vglclient</code> to listen on IPv6 
+        sockets and to support both IPv4 and IPv6 connections.
     </dd>
 </dl>
 

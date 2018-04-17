@@ -1048,6 +1048,15 @@ those wishing to build additional infrastructure around VirtualGL.
 	faster in some rare instances to draw pixels using OpenGL rather than using
 	2D (X11) commands.
 
+| Environment Variable | ''VGLCLIENT_IPV6 = ''__''0 \| 1''__ |
+| ''vglclient'' argument | ''-ipv6'' |
+| Summary | Disable/enable IPv6 sockets |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: Enabling this option will cause ''vglclient'' to listen on
+	IPv6 sockets and to support both IPv4 and IPv6 connections.
+
 | Environment Variable | ''VGLCLIENT_LISTEN = ''__''sslonly \| nossl''__ |
 | ''vglclient'' argument | ''-sslonly'' / ''-nossl'' |
 | Summary | Accept only unencrypted or only SSL connections from the \

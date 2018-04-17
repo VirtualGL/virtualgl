@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012, 2014, 2017 D. R. Commander
+ * Copyright (C)2011-2012, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -46,6 +46,7 @@ unsigned short port = 0;
 unsigned short sslPort = 0;
 bool doSSL = true, doNonSSL = true;
 #endif
+bool ipv6 = false;
 int drawMethod = RR_DRAWAUTO;
 Display *maindpy = NULL;
 bool detach = false, force = false, child = false;
@@ -221,6 +222,7 @@ void usage(char **argv)
 	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
 	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
+	fprintf(stderr, "-ipv6 = Use IPv6 sockets\n");
 	fprintf(stderr, "-detach = Detach from console (used by vglconnect)\n");
 	fprintf(stderr, "-force = Force VGLclient to run, even if there is already another instance\n");
 	fprintf(stderr, "         running on the same X display (use with caution)\n");
@@ -333,6 +335,9 @@ void getEnvironment(void)
 		&& (temp = atoi(env)) > 0 && temp < 65536)
 		sslPort = (unsigned short)temp;
 	#endif
+	if((env = getenv("VGLCLIENT_IPV6")) != NULL && strlen(env) > 0
+		&& (temp = atoi(env)) == 1)
+		ipv6 = true;
 }
 
 
@@ -359,6 +364,7 @@ int main(int argc, char *argv[])
 				sslPort = (unsigned short)atoi(argv[++i]);
 			}
 			#endif
+			else if(!stricmp(argv[i], "-ipv6")) ipv6 = true;
 			else if(!stricmp(argv[i], "-v")) printVersion = true;
 			else if(!stricmp(argv[i], "-force")) force = true;
 			else if(!stricmp(argv[i], "-detach")) detach = true;
@@ -440,7 +446,7 @@ int start(char *displayname)
 			if(!force) actualSSLPort = instanceCheckSSL(maindpy);
 			if(actualSSLPort == 0)
 			{
-				_newcheck(sslReceiver = new VGLTransReceiver(true, drawMethod));
+				_newcheck(sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod));
 				if(sslPort == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTSSLPORT;
@@ -461,8 +467,9 @@ int start(char *displayname)
 					} while(!success);
 				}
 				else sslReceiver->listen(sslPort);
-				vglout.println("Listening for SSL connections on port %d",
-					actualSSLPort = sslReceiver->getPort());
+				vglout.println("Listening for SSL connections on port %d%s",
+					actualSSLPort = sslReceiver->getPort(),
+					ipv6 ? " [IPv6 enabled]" : "");
 				if((sslPortAtom = XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
 					False)) == None)
 					_throw("Could not get _VGLCLIENT_SSLPORT atom");
@@ -478,7 +485,7 @@ int start(char *displayname)
 			if(!force) actualPort = instanceCheck(maindpy);
 			if(actualPort == 0)
 			{
-				_newcheck(receiver = new VGLTransReceiver(false, drawMethod));
+				_newcheck(receiver = new VGLTransReceiver(false, ipv6, drawMethod));
 				if(port == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTPORT;
@@ -499,8 +506,8 @@ int start(char *displayname)
 					} while(!success);
 				}
 				else receiver->listen(port);
-				vglout.println("Listening for unencrypted connections on port %d",
-					actualPort = receiver->getPort());
+				vglout.println("Listening for unencrypted connections on port %d%s",
+					actualPort = receiver->getPort(), ipv6 ? " [IPv6 enabled]" : "");
 				if((portAtom = XInternAtom(maindpy, "_VGLCLIENT_PORT", False)) == None)
 					_throw("Could not get _VGLCLIENT_PORT atom");
 				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),

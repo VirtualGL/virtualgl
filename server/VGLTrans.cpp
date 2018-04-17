@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014, 2017 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -408,17 +408,41 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 		if(!displayName || strlen(displayName) <= 0)
 			_throw("Invalid receiver name");
 		char *ptr = NULL;  serverName = strdup(displayName);
-		if((ptr = strchr(serverName, ':')) != NULL)
+		if((ptr = strrchr(serverName, ':')) != NULL)
 		{
-			if(strlen(ptr) > 1) dpynum = atoi(ptr + 1);
-			if(dpynum < 0 || dpynum > 65535) dpynum = 0;
-			*ptr = '\0';
+			// For backward compatibility with v2.0.x and earlier of the VirtualGL
+			// Client, we assume that anything after the final colon in the display
+			// string should be interpreted as a display number, if there are no
+			// other colons in the string or if the IP address is surrounded by
+			// square brackets.  Otherwise, we assume that the colon is part of an
+			// IPv6 address.
+			if(strlen(ptr) > 1)
+			{
+				*ptr = '\0';
+				if(!strchr(serverName, ':') || (serverName[0] == '['
+					&& serverName[strlen(serverName) - 1] == ']'))
+				{
+					dpynum = atoi(ptr + 1);
+					if(dpynum < 0 || dpynum > 65535) dpynum = 0;
+				}
+				else
+				{
+					free(serverName);  serverName = strdup(displayName);
+				}
+			}
+		}
+		if(serverName[0] == '[' && serverName[strlen(serverName) - 1] == ']'
+			&& strlen(serverName) > 2)
+		{
+			serverName[strlen(serverName) - 1] = '\0';
+			char *tmp = strdup(&serverName[1]);
+			free(serverName);  serverName = tmp;
 		}
 		if(!strlen(serverName) || !strcmp(serverName, "unix"))
 		{
 			free(serverName);  serverName = strdup("localhost");
 		}
-		_newcheck(socket = new Socket((bool)fconfig.ssl));
+		_newcheck(socket = new Socket((bool)fconfig.ssl, true));
 		try
 		{
 			socket->connect(serverName, port);

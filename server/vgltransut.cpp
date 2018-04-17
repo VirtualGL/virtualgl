@@ -28,11 +28,15 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s <bitmap file> [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "-client <machine:x.x> = X Display where the video should be sent (VGL client\n");
-	fprintf(stderr, "                        must be running on that machine) or 0 for local test\n");
-	fprintf(stderr, "                        only (default: %s)\n",
+	fprintf(stderr, "-client <hostname or IP> = Hostname or IP address where the video should be\n");
+	fprintf(stderr, "                           sent (VGL client must be running on that machine) or\n");
+	fprintf(stderr, "                           0 for local test only\n");
+	fprintf(stderr, "                           (default: %s)\n",
 		strlen(fconfig.client) > 0 ?
 		fconfig.client : "read from DISPLAY environment");
+	fprintf(stderr, "-port <p> = TCP port on which the VGL client is listening (default: %d)\n",
+		fconfig.port < 0 ? (fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT) :
+		fconfig.port);
 	fprintf(stderr, "-samp <s> = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
 	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
 	fprintf(stderr, "-qual <q> = JPEG quality, 1 <= <q> <= 100 (default: %d)\n",
@@ -79,6 +83,10 @@ int main(int argc, char **argv)
 				{
 					localtest = true;  fconfig.client[0] = 0;
 				}
+			}
+			else if(!stricmp(argv[i], "-port") && i < argc - 1)
+			{
+				fconfig.port = atoi(argv[++i]);
 			}
 			else if(!stricmp(argv[i], "-samp") && i < argc - 1)
 			{

@@ -16,10 +16,14 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
+#ifdef _WIN32
+	#include <winsock2.h>
+	#include <ws2ipdef.h>
+#endif
 #ifdef USESSL
 	#define OPENSSL_NO_KRB5
-	#ifdef _WIN32
-		#include <windows.h>
+	#ifndef _WIN32
+		#include <netinet/in.h>
 	#endif
 	#include <openssl/ssl.h>
 	#include <openssl/err.h>
@@ -58,7 +62,6 @@ namespace vglutil
 }
 
 #define _throwsock()  throw(SockError(__FUNCTION__, __LINE__))
-#define _sock(f)  { if((f) == SOCKET_ERROR) _throwsock(); }
 
 
 #ifdef USESSL
@@ -139,7 +142,7 @@ namespace vglutil
 	{
 		public:
 
-			Socket(bool doSSL = false);
+			Socket(bool doSSL, bool ipv6);
 			#ifdef USESSL
 			Socket(SOCKET sd, SSL *ssl);
 			#else
@@ -153,7 +156,7 @@ namespace vglutil
 			Socket *accept(void);
 			void send(char *buf, int len);
 			void recv(char *buf, int len);
-			char *remoteName(void);
+			const char *remoteName(void);
 
 		private:
 
@@ -182,6 +185,8 @@ namespace vglutil
 			static int instanceCount;
 			static CriticalSection mutex;
 			SOCKET sd;
+			char remoteNameBuf[INET6_ADDRSTRLEN];
+			bool ipv6;
 	};
 }
 

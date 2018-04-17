@@ -54,6 +54,10 @@ unless the FB config has a corresponding visual on the 3D X server.
 
 6. VirtualGL can now be built and run with OpenSSL 1.1.
 
+7. The VGL Transport now works properly with IPv6 sockets.  When `-ipv6` is
+passed to `vglconnect`, or the `VGLCLIENT_IPV6` environment variable is set to
+`1`, the VirtualGL Client will accept both IPv4 and IPv6 connections.
+
 
 2.5.2
 =====

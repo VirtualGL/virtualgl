@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2010-2011, 2014 D. R. Commander
+ * Copyright (C)2010-2011, 2014, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -31,7 +31,7 @@ namespace vglclient
 	{
 		public:
 
-			VGLTransReceiver(bool doSSL, int drawmethod);
+			VGLTransReceiver(bool doSSL, bool ipv6, int drawmethod);
 			void listen(unsigned short port);
 			unsigned short getPort(void) { return port; }
 			virtual ~VGLTransReceiver(void);
@@ -46,6 +46,7 @@ namespace vglclient
 			vglutil::Thread *thread;
 			bool deadYet;
 			bool doSSL;
+			bool ipv6;
 			unsigned short port;
 
 		class Listener : public vglutil::Runnable
@@ -93,7 +94,7 @@ namespace vglclient
 				vglutil::CriticalSection winMutex;
 				vglutil::Socket *socket;
 				vglutil::Thread *thread;
-				char *remoteName;
+				const char *remoteName;
 		};
 	};
 }
