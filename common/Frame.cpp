@@ -40,10 +40,9 @@ static int tjpf[PIXELFORMATS] =
 // Uncompressed frame
 
 Frame::Frame(bool primary_) : bits(NULL), rbits(NULL), pitch(0), flags(0),
-	isGL(false), isXV(false), stereo(false), primary(primary_)
+	pf(pf_get(-1)), isGL(false), isXV(false), stereo(false), primary(primary_)
 {
 	memset(&hdr, 0, sizeof(rrframeheader));
-	memset(&pf, 0, sizeof(PF));
 	ready.wait();
 }
 
@@ -106,6 +105,10 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 void Frame::init(unsigned char *bits_, int width, int pitch_, int height,
 	int pixelFormat, int flags_)
 {
+	if(!bits_ || width < 1 || pitch_ < 1 || height < 1 || pixelFormat < 0
+		|| pixelFormat >= PIXELFORMATS)
+		_throw("Invalid argument");
+
 	bits = bits_;
 	hdr.x = hdr.y = 0;
 	hdr.framew = hdr.width = width;
@@ -159,8 +162,8 @@ bool Frame::tileEquals(Frame *last, int x, int y, int width, int height)
 	if(last && hdr.width == last->hdr.width && hdr.height == last->hdr.height
 		&& hdr.framew == last->hdr.framew && hdr.frameh == last->hdr.frameh
 		&& hdr.qual == last->hdr.qual && hdr.subsamp == last->hdr.subsamp
-		&& pf->id == last->pf->id && hdr.winid == last->hdr.winid
-		&& hdr.dpynum == last->hdr.dpynum)
+		&& pf->id == last->pf->id && pf->size == last->pf->size
+		&& hdr.winid == last->hdr.winid && hdr.dpynum == last->hdr.dpynum)
 	{
 		if(bits && last->bits)
 		{
@@ -203,6 +206,7 @@ void Frame::makeAnaglyph(Frame &r, Frame &g, Frame &b)
 		*dstptr = bits, *dstrptr, *dstgptr, *dstbptr;
 
 	if(pf->bpc != 8) _throw("Anaglyphic stereo requires 8 bits per component");
+
 	for(j = 0; j < hdr.frameh; j++, srcrptr += r.pitch, srcgptr += g.pitch,
 		srcbptr += b.pitch, dstptr += pitch)
 	{
@@ -350,6 +354,7 @@ void Frame::addLogo(void)
 	unsigned char *rowptr, *logoptr = vgllogo, *logoptr2;
 
 	if(!bits || hdr.width < 1 || hdr.height < 1) return;
+
 	int height = min(VGLLOGO_HEIGHT, hdr.height - 1);
 	int width = min(VGLLOGO_WIDTH, hdr.width - 1);
 	int stride = flags & FRAME_BOTTOMUP ? -pitch : pitch;
@@ -421,6 +426,7 @@ CompressedFrame &CompressedFrame::operator= (Frame &f)
 	if(!f.bits) _throw("Frame not initialized");
 	if(f.pf->size < 3 || f.pf->size > 4)
 		_throw("Only true color frames are supported");
+
 	switch(f.hdr.compress)
 	{
 		case RRCOMP_RGB:  compressRGB(f);  break;
@@ -439,6 +445,7 @@ void CompressedFrame::compressYUV(Frame &f)
 	if(f.hdr.subsamp != 4) throw(Error("YUV encoder", "Invalid argument"));
 	if(f.pf->bpc != 8)
 		throw(Error("YUV encoder", "YUV encoding requires 8 bits per component"));
+
 	init(f.hdr, 0);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
 	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
@@ -481,12 +488,13 @@ void CompressedFrame::compressRGB(Frame &f)
 {
 	unsigned char *srcptr;
 	bool bu = (f.flags & FRAME_BOTTOMUP);
+
 	if(f.pf->bpc != 8)
 		throw(Error("RGB compressor",
 			"RGB encoding requires 8 bits per component"));
+
 	int dstPitch = f.hdr.width * 3;
 	int srcStride = bu ? f.pitch : -f.pitch;
-
 	init(f.hdr, f.stereo ? RR_LEFT : 0);
 	srcptr = bu ? f.bits : &f.bits[f.pitch * (f.hdr.height - 1)];
 	f.pf->convert(srcptr, f.hdr.width, srcStride, f.hdr.height, bits, dstPitch,
@@ -556,6 +564,7 @@ FBXFrame::FBXFrame(Display *dpy, Drawable draw, Visual *vis,
 	bool reuseConn_) : Frame()
 {
 	if(!dpy || !draw) throw(Error("FBXFrame::FBXFrame", "Invalid argument"));
+
 	XFlush(dpy);
 	if(reuseConn_) init(dpy, draw, vis);
 	else init(DisplayString(dpy), draw, vis);
@@ -572,9 +581,11 @@ void FBXFrame::init(char *dpystring, Drawable draw, Visual *vis)
 {
 	tjhnd = NULL;  reuseConn = false;
 	memset(&fb, 0, sizeof(fbx_struct));
+
 	if(!dpystring || !draw) throw(Error("FBXFrame::init", "Invalid argument"));
 	if(!(wh.dpy = XOpenDisplay(dpystring)))
 		throw(Error("FBXFrame::init", "Could not open display"));
+
 	wh.d = draw;  wh.v = vis;
 }
 
@@ -583,7 +594,9 @@ void FBXFrame::init(Display *dpy, Drawable draw, Visual *vis)
 {
 	tjhnd = NULL;  reuseConn = true;
 	memset(&fb, 0, sizeof(fbx_struct));
+
 	if(!dpy || !draw) throw(Error("FBXFrame::init", "Invalid argument"));
+
 	wh.dpy = dpy;
 	wh.d = draw;  wh.v = vis;
 }
@@ -623,10 +636,12 @@ void FBXFrame::init(rrframeheader &h)
 FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 {
 	int tjflags = 0;
+
 	if(!cf.bits || cf.hdr.size < 1)
 		_throw("JPEG not initialized");
 	init(cf.hdr);
 	if(!fb.xi) _throw("Frame not initialized");
+
 	int width = min(cf.hdr.width, fb.width - cf.hdr.x);
 	int height = min(cf.hdr.height, fb.height - cf.hdr.y);
 	if(width > 0 && height > 0 && cf.hdr.width <= width
@@ -666,6 +681,7 @@ void FBXFrame::redraw(void)
 XVFrame::XVFrame(Display *dpy_, Window win_) : Frame()
 {
 	if(!dpy_ || !win_) throw(Error("XVFrame::XVFrame", "Invalid argument"));
+
 	XFlush(dpy_);
 	init(DisplayString(dpy_), win_);
 }
@@ -681,9 +697,11 @@ void XVFrame::init(char *dpystring, Window win_)
 {
 	tjhnd = NULL;  isXV = true;
 	memset(&fb, 0, sizeof(fbxv_struct));
+
 	if(!dpystring || !win_) throw(Error("XVFrame::init", "Invalid argument"));
 	if(!(dpy = XOpenDisplay(dpystring)))
 		throw(Error("XVFrame::init", "Could not open display"));
+
 	win = win_;
 }
 
@@ -702,6 +720,7 @@ XVFrame &XVFrame::operator= (Frame &f)
 	if(!f.bits) _throw("Frame not initialized");
 	if(f.pf->bpc != 8)
 		throw(Error("YUV encoder", "YUV encoding requires 8 bits per component"));
+
 	int tjflags = 0;
 	init(f.hdr);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
@@ -733,7 +752,6 @@ void XVFrame::init(rrframeheader &h)
 	if(hdr.frameh > fb.xvi->height) hdr.frameh = fb.xvi->height;
 	bits = (unsigned char *)fb.xvi->data;
 	flags = pitch = 0;
-	memset(&pf, 0, sizeof(PF));
 	hdr.size = fb.xvi->data_size;
 }
 
