@@ -134,19 +134,15 @@ addtotop()
 	AWK=nawk
 	type $AWK >/dev/null 2>/dev/null || AWK=gawk
 	cat > $SCRFILE <<EOF
-BEGIN {DONE = 0}
-{
-	if(/^$|^[^#]/ && DONE==0)
-	{
+BEGIN {DONE=0} {
+	if(/^$|^[^#]/ && DONE==0) {
 		printf("$2");  printf("\n");
-		DONE = 1;
+		DONE=1;
 	}
 	print \$0
 }
-END
-{
-	if(DONE == 0)
-	{
+END {
+	if(DONE==0) {
 		printf("$2");  printf("\n");
 	}
 }
