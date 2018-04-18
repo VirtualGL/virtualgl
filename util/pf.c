@@ -478,7 +478,7 @@ static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 		(b << PF_##id##_BSHIFT); \
 } \
 \
-static const PF __format_##id = \
+static PF __format_##id = \
 { \
 	PF_##id, #id, PF_##id##_SIZE, 8, PF_##id##_RMASK, PF_##id##_GMASK, \
 		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT, \
@@ -508,7 +508,7 @@ static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 		(b << PF_##id##_BSHIFT); \
 } \
 \
-static const PF __format_##id = \
+static PF __format_##id = \
 { \
 	PF_##id, #id, PF_##id##_SIZE, 10, PF_##id##_RMASK, PF_##id##_GMASK, \
 		PF_##id##_BMASK, PF_##id##_RSHIFT, PF_##id##_GSHIFT, PF_##id##_BSHIFT, \
@@ -529,7 +529,7 @@ static INLINE void setRGB_##id(unsigned char *pixel, int r, int g, int b) \
 	pixel[PF_##id##_BINDEX] = b; \
 } \
 \
-static const PF __format_##id = \
+static PF __format_##id = \
 { \
 	PF_##id, #id, 3, 8, 0, 0, 0, 0, 0, 0, PF_##id##_RINDEX, PF_##id##_GINDEX, \
 		PF_##id##_BINDEX, getRGB_##id##X, setRGB_##id, convert_##id \
@@ -555,14 +555,14 @@ static INLINE void convert_COMP(unsigned char *srcBuf, int width,
 	/* VirtualGL doesn't ever need to convert between component and RGB */
 }
 
-static const PF __format_COMP =
+static PF __format_COMP =
 {
 	PF_COMP, "COMP", 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, getRGB_COMP, setRGB_COMP,
 		convert_COMP
 };
 
 
-static const PF __format_NONE =
+static PF __format_NONE =
 {
 	0, "Invalid", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, getRGB_COMP, setRGB_COMP,
 		convert_COMP
