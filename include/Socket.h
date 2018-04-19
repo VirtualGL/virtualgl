@@ -19,12 +19,11 @@
 #ifdef _WIN32
 	#include <winsock2.h>
 	#include <ws2ipdef.h>
+#else
+	#include <netinet/in.h>
 #endif
 #ifdef USESSL
 	#define OPENSSL_NO_KRB5
-	#ifndef _WIN32
-		#include <netinet/in.h>
-	#endif
 	#include <openssl/ssl.h>
 	#include <openssl/err.h>
 	#if !defined(HAVE_DEVURANDOM) && !defined(_WIN32)
