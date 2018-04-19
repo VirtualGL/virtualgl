@@ -63,8 +63,8 @@ will need, at minimum, the following 32-bit development libraries:
 
 - glibc and libstdc++
 - X11 and OpenGL
-  * libX11, libXext, libGL, libGLU, and (unless you wish to disable X Video
-    support) libXv
+  * libX11, libXext, libXtst, libGL, libGLU, and (unless you wish to disable X
+    Video support) libXv
 
 Instructions for installing these on specific distributions:
 
@@ -74,7 +74,7 @@ Instructions for installing these on specific distributions:
   a 32-bit VirtualGL package on x86-64 Linux distributions, then execute the
   following command as root:
 
-        yum install libXv-devel.i686 libXext-devel.i686 libX11-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
+        yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
 
   (Replace `yum` with `dnf` on Fedora 23 and later.)
 
@@ -84,7 +84,7 @@ Instructions for installing these on specific distributions:
   a 32-bit VirtualGL package on x86-64 Linux distributions, then execute the
   following command as root:
 
-        apt-get install g++-multilib libxv-dev:i386 libglu1-mesa-dev:i386
+        apt-get install g++-multilib libxv-dev:i386 libxtst-dev:i386 libglu1-mesa-dev:i386
 
   In Ubuntu 12 through 15, some of the 32-bit dev. kits have conflicts with
   their 64-bit counterparts, so it is not possible to build a 32-bit and a
@@ -93,7 +93,7 @@ Instructions for installing these on specific distributions:
   build and the following command (also as root) prior to performing a 64-bit
   build:
 
-        apt-get install libxv-dev libglu1-mesa-dev
+        apt-get install libxv-dev libxtst-dev libglu1-mesa-dev
 
 
 Out-of-Tree Builds
