@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-04-17T15:09:37">
+<meta name="date" content="2018-04-20T18:23:37">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2353,6 +2353,13 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;-ld&nbsp;{path_to_Intel_OpenCL_libs}&nbsp;{application}</code></td>
     <td class="standard">The Intel OpenCL installable client driver (ICD) is linked with a run-time library search path (rpath) of <code>$ORIGIN</code>, which would normally have the same effect as adding the directory in which the ICD is installed (default: <code>/opt/intel/opencl/lib64</code> on 64-bit systems) to <code>LD_LIBRARY_PATH</code>.  However, when VirtualGL is interposing the <code>dlopen()</code> function (which it does by default), this causes the actual <code>dlopen()</code> system calls to come from <code>libdlfaker.so</code>, so <code>$ORIGIN</code> will resolve to the directory in which the VirtualGL faker libraries are installed.  This causes the <code>dlopen()</code> calls within the Intel ICD to fail, and because the ICD apparently does not check the return value of those calls, a segfault occurs.  The workaround is simply to add the Intel ICD library path to <code>LD_LIBRARY_PATH</code>, which is most easily accomplished with <code>vglrun&nbsp;-ld</code>.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">JOGL</td>
+    <td class="standard">2.3.x and later</td>
+    <td class="standard">All</td>
+    <td class="standard">Pass <code>-Djogl.disable.opengles</code> to <code>java</code> when launching the application that uses JOGL, or set <code>JAVA_TOOL_OPTIONS=-Djogl.disable.opengles</code> in the environment.</td>
+    <td class="standard">Recent versions of JOGL support using OpenGL ES with X11, which necessitates using EGL with X11.  In this mode of operation, EGL behaves like a feature-limited implementation of GLX, and supporting that use case properly will require implementing an EGL/X11 interposer that duplicates much of the functionality of VirtualGL&rsquo;s existing GLX interposer. <br /><br /> If OpenGL ES is not disabled in JOGL, then JOGL will throw an error when used with VirtualGL: &ldquo;GLException: Failed to created/initialize EGL display incl. fallback default: native 0x0, error 0x3008/0x3000.&rdquo;</td>
   </tr>
   <tr class="standard">
     <td class="standard">Mathematica</td>
