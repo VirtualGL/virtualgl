@@ -137,6 +137,21 @@
 		Intel ICD library path to ''LD_LIBRARY_PATH'', which is most easily \
 		accomplished with ''vglrun -ld''. \
 	|
+| JOGL | 2.3.x and later | All \
+	| Pass ''-Djogl.disable.opengles'' to ''java'' when launching the \
+		application that uses JOGL, or set \
+		''JAVA_TOOL_OPTIONS=-Djogl.disable.opengles'' in the environment. \
+	| Recent versions of JOGL support using OpenGL ES with X11, which \
+		necessitates using EGL with X11.  In this mode of operation, EGL behaves \
+		like a feature-limited implementation of GLX, and supporting that use \
+		case properly will require implementing an EGL/X11 interposer that \
+		duplicates much of the functionality of VirtualGL's existing GLX \
+		interposer. \
+		{nl}{nl} \
+		If OpenGL ES is not disabled in JOGL, then JOGL will throw an error when \
+		used with VirtualGL: "GLException: Failed to created/initialize EGL \
+		display incl. fallback default: native 0x0, error 0x3008/0x3000." \
+	|
 | Mathematica | v7 | Linux \
 	| Set the ''VGL_ALLOWINDIRECT'' environment variable to ''1'' prior to \
 		launching the application with ''vglrun'' \
