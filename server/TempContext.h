@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2014-2015 D. R. Commander
+ * Copyright (C)2011, 2014-2015, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,6 +21,7 @@
 #define __TEMPCONTEXT_H__
 
 #include "faker-sym.h"
+#include "ContextHash.h"
 
 
 #define EXISTING_DRAWABLE  (GLXDrawable)-1
@@ -52,7 +53,12 @@ namespace vglserver
 				{
 					if(!_glXMakeContextCurrent(dpy, draw, read, ctx))
 						_throw("Could not bind OpenGL context to window (window may have disappeared)");
-					ctxChanged = true;
+					// If oldctx has already been destroyed, then we don't want to
+					// restore it.  This can happen if the application is rendering to
+					// the front buffer and glXDestroyContext() is called to destroy the
+					// active context before glXMake*Current*() is called to switch it.
+					if(ctxhash.findConfig(oldctx))
+						ctxChanged = true;
 				}
 			}
 

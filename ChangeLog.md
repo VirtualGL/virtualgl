@@ -46,6 +46,23 @@ a subsequent segfault when VTK tried to call `glBlendFuncSeparate()`.
 VirtualGL's implementation of `glXGetVisualFromFBConfig()` now returns NULL
 unless the FB config has a corresponding visual on the 3D X server.
 
+5. Worked around a segfault that would occur, when using VirtualGL with the
+non-GLVND-enabled proprietary nVidia OpenGL stack, if an OpenGL application
+called `glXDestroyContext()` to destroy an active OpenGL context in which the
+front buffer was the active drawing buffer, then the application called
+`glXMake[Context]Current()` to swap in another context.  Under those
+circumstances, VirtualGL will read back the front buffer within the body of the
+interposed `glXMake[Context]Current()` function, in order to transport the
+contents of the last frame rendered to the buffer.  Since VirtualGL temporarily
+swaps in its own OpenGL context prior to reading back the buffer, then swaps
+the application's OpenGL context back in after the readback, VirtualGL was
+passing a dead context to nVidia's `glXMake[Context]Current()` function, which
+triggered the segfault.  Arguably nVidia's `glXMake[Context]Current()`
+implementation should have instead thrown a GLXBadContext error, but
+regardless, VirtualGL now verifies that the application's OpenGL context is
+alive before swapping it back in following a readback.  This issue was known to
+affect ParaView but may have affected other applications as well.
+
 
 2.5.2
 =====
