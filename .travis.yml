@@ -53,16 +53,4 @@ deploy:
     upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
     on:
       repo: VirtualGL/virtualgl
-      branch: master
-  - provider: s3
-    bucket: virtualgl-pr
-    access_key_id:
-      secure: ue2EFn4KF73lvfyaAB/9uy+zb5EoAv8Pe4wnCbMIPotXfnPKiKwZdPLjmmH/eMJxvjZL+uV26tgLfD6P3uu4j+B7dHIHprXu5xnUSjjPw3ClTMBe8W/xmob4FoMT9gkTo/ne4sKKBQ2G93ilttL5Y/GKqvK3MRONOWL2TRXRiH4FMsUPgfbAhOEXpjgrstuQaq+Xulj5+yQhcPet1BgAqVPAhiJTPE2Gx5ld7inSZlDJXErFzNJbMItTCK+6o79O7VCbGqIJb20zx/gywdCZmm5yyqR+KeI0f2DtpaBqd0gN6L53bIMg3axx+TEInPNx+LBZuzX6Syxb5j0gWYuIknZ3/sDftXKEplky0lh7cblFYvyqhwIHlxRcpDqtRNsIxc5NmXXyvE4Qs3zSETGagDA3w8pT1w2/+rXF02dwGSpWiUrbMXj1tcENwZT3cUxYklrQuqHSVPOM+ODzd+0ICEkcOo9e/99pnkSp+GJWp5iBAX2YhS39ggTYPkautfvwtLv+UJJBc3tAsXwzGpQMtEtKFGY4xJ7QDqoBLyA0B6q0WkYKtEedn7L7HMfU66bpY7jYwzdduWPwPI12brrpB7d6s3QNmnHSjcivqF0pDuDTNzPCqfaDCuHpGQ9gJhSq56AxDuRN7tuc4B6mE2/lJjlc91tb9ViNNVl2ARUCNvQ=
-    secret_access_key:
-      secure: GXCzkE7X4HvDmXlynjG3PNk1G6Zs/z/+00DUfFZTKFkL3qREWRMAQTrMD0pbvjaxNnui4qHzX4uTCQBnKEOZiiCff46sApj6ySm3EGb2DNPWj5bavmxvG2HXNIsgTPBP+uZn9nk7HDABQTgBoYqbdmpeOe3ih3XsnwId93R7pttnbDcmMnnoJ0rj/pSImhAfsQHki4GtH5IG7mTEOFQ27gEgum0IKlhZAZKh2TWrJ6zYi86KE3lTHxu5djjLDSL8KxePZl5PwfVyUpOjC9lyqHkBegJEMoe619kNyrHpdKq88ZScAjmrdJV209RtBmNzQ+QCtJ6jYiCwWs8K6WopdCxhQGOW8ZwEJvmjkjkXe6yH9f2kC5009hX9Zvm32IMFGbDloDRJdoHR3C3JTE3kSqlJ8wBsF5vFQsGQ4VqXeTMELnQicPIQQtdCfxcjY28TSKJdq+WdR6YC72IIgvgaP4LiWJ5sTUk0rYX5h1Ttwx3pmp7B+YaXSdm7LBPZEEEpJF8/FVTBLELkB6z7mT0Ku74y2nJw4d8R+EW9wVOCjtk9Uyo/FDq37dgTzlzhUbomcBOI8XuPImatzpsk2nJpZy2JNn73rDVZOWpTMus/PP2q6Qf3AcTZqn7V/siWUcxrZZ80QL7QKOnCW/GQlVSrIpXVA0YwQ9QFQ1B3YEQAdt4=
-    acl: public_read
-    local-dir: $HOME/src/vgl.nightly/latest/files
-    upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
-    on:
-      repo: VirtualGL/virtualgl
-      branch: dev
+      branch: 2.5.x
