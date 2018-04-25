@@ -1,5 +1,5 @@
-2.6 pre-beta
-============
+2.5.90 (2.6 beta1)
+==================
 
 ### Significant changes relative to 2.5.2:
 

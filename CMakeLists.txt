@@ -14,7 +14,7 @@ else()
 	project(VirtualGL)
 endif()
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
-set(VERSION 2.5.80)
+set(VERSION 2.5.90)
 set(DOCVERSION 2.6)
 
 macro(boolean_number var)
