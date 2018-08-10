@@ -53,6 +53,14 @@ This section will explain how to configure a VirtualGL server such that
 selected users can run VirtualGL, even if the server is sitting at the login
 prompt.
 
+	!!! NOTE: As of this writing, a
+	[[https://gitlab.gnome.org/GNOME/gdm/issues/317][bug]] exists in certain
+	GDM 3 implementations, preventing them from executing
+	''/etc/gdm/Init/Default'' or ''/etc/gdm3/Init/Default''.  VirtualGL cannot be
+	used with these implementations until this issue is resolved.  The issue is
+	known to affect recent Fedora releases and Ubuntu 18.04 LTS, and the only
+	known workaround is to use LightDM instead of GDM.
+
 	#. Shut down the display manager:
 
 		Ubuntu Linux servers running GDM :: {:}
