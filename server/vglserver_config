@@ -154,20 +154,20 @@ EOF
 
 addtoconf()
 {
-	if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-		echo 'USAGE: addtoconf <filename> <stanza> <line to add>'
+	if [ -z "$1" -o -z "$2" -o -z "$3" -o -z "$4" ]; then
+		echo 'USAGE: addtoconf <filename> <stanza name> <search string> <line to add>'
 		return
 	fi
-	grep "\[$2\]" $1 >/dev/null 2>/dev/null
+	grep "\[$3\]" $1 >/dev/null 2>/dev/null
 	if [ $? = 0 ]; then
 		TMPFILE=`maketemp vglserver_config_7`
 		AWK=nawk
 		type $AWK >/dev/null 2>/dev/null || AWK=gawk
-		$AWK -vstanza=$2 -vadd="$3" '{ if($0 ~ stanza) { print "["stanza"]";  print add } else print $0; }' $1 >$TMPFILE && cp $TMPFILE $1
+		$AWK -vstanza=$2 -vadd="$4" '{ if($0 ~ stanza) { print "["stanza"]";  print add } else print $0; }' $1 >$TMPFILE && cp $TMPFILE $1
 		if [ -f $TMPFILE ]; then rm $TMPFILE; fi
 	else
 		addtobottom $1 "[$2]"
-		addtobottom $1 "$3"
+		addtobottom $1 "$4"
 	fi
 }
 
@@ -225,9 +225,9 @@ addvglgenkey_lightdm()
 	fi
 	removeline $1 display-setup-script
 	if [ "$VGLUSERSONLY" = "1" ]; then
-		addtoconf $1 "Seat:seat*" display-setup-script=$VGLGENKEY
+		addtoconf $1 "Seat:seat*" "Seat:seat\*" display-setup-script=$VGLGENKEY
 	else
-		addtoconf $1 "Seat:seat*" "display-setup-script=xhost +LOCAL:"
+		addtoconf $1 "Seat:seat*" "Seat:seat\*" "display-setup-script=xhost +LOCAL:"
 	fi
 }
 
