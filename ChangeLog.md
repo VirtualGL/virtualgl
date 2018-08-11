@@ -1,3 +1,14 @@
+2.6
+===
+
+### Significant changes relative to 2.6 beta1:
+
+1. Fixed an issue whereby the modifications that vglserver_config made to
+lightdm.conf sometimes caused vglgenkey to be executed multiple times.  This
+was known to cause problems with remote login methods, such as XDMCP, and it
+also caused LightDM on Ubuntu 18.04 to lock up when logging in locally.
+
+
 2.5.90 (2.6 beta1)
 ==================
 

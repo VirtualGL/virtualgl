@@ -219,15 +219,16 @@ addvglgenkey_lightdm()
 {
 	backup $1
 	if [ "$VGLUSERSONLY" = "1" ]; then
-		echo ... Adding display-setup-script=vglgenkey to $1 ...
+		echo ... Adding greeter-setup-script=vglgenkey to $1 ...
 	else
-		echo ... Adding display-setup-script=xhost \+LOCAL\: to $1 ...
+		echo ... Adding greeter-setup-script=xhost \+LOCAL\: to $1 ...
 	fi
 	removeline $1 display-setup-script
+	removeline $1 greeter-setup-script
 	if [ "$VGLUSERSONLY" = "1" ]; then
-		addtoconf $1 "Seat:seat*" "Seat:seat\*" display-setup-script=$VGLGENKEY
+		addtoconf $1 "Seat:seat*" "Seat:seat\*" greeter-setup-script=$VGLGENKEY
 	else
-		addtoconf $1 "Seat:seat*" "Seat:seat\*" "display-setup-script=xhost +LOCAL:"
+		addtoconf $1 "Seat:seat*" "Seat:seat\*" "greeter-setup-script=xhost +LOCAL:"
 	fi
 }
 
@@ -594,6 +595,7 @@ EOF
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		echo "... Removing X server access from /etc/lightdm/lightdm.conf"
 		removeline /etc/lightdm/lightdm.conf display-setup-script
+		removeline /etc/lightdm/lightdm.conf greeter-setup-script
 	fi
 
 	if [ "$UNAME_S" = "SunOS" ]; then
