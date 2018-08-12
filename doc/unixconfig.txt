@@ -18,6 +18,11 @@ LightDM) installed and has been configured to start the display manager and 3D
 X server at boot time.  This is the default with most modern Linux and Unix
 distributions.
 
+	!!! NOTE: As of this writing, GDM does not execute ''/etc/gdm/Init/Default''
+	or ''/etc/gdm3/Init/Default'' on Wayland-enabled Linux distributions for a
+	variety of reasons.  Thus VirtualGL cannot be used with these GDM
+	implementations.  The only known workaround is to use LightDM instead of GDM.
+
 4. Accelerated OpenGL is working properly in the 3D X server.
 	* If the 3D X server is not headless, then this can be verified by logging
 	into the X server locally and running ''glxinfo''.
@@ -52,14 +57,6 @@ necessary.
 This section will explain how to configure a VirtualGL server such that
 selected users can run VirtualGL, even if the server is sitting at the login
 prompt.
-
-	!!! NOTE: As of this writing, a
-	[[https://gitlab.gnome.org/GNOME/gdm/issues/317][bug]] exists in certain
-	GDM 3 implementations, preventing them from executing
-	''/etc/gdm/Init/Default'' or ''/etc/gdm3/Init/Default''.  VirtualGL cannot be
-	used with these implementations until this issue is resolved.  The issue is
-	known to affect recent Fedora releases and Ubuntu 18.04 LTS, and the only
-	known workaround is to use LightDM instead of GDM.
 
 	#. Shut down the display manager:
 
