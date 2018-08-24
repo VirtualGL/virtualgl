@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-08-12T13:30:16">
+<meta name="date" content="2018-08-24T13:14:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2332,10 +2332,17 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
   </tr>
   <tr class="standard">
     <td class="standard">Google Chrome/Chromium</td>
-    <td class="standard">v31 and later</td>
+    <td class="standard">v31 to v54</td>
     <td class="standard">Linux</td>
     <td class="standard"><code>vglrun&nbsp;google-chrome&nbsp;--disable-gpu-sandbox</code><br /> or<br /> <code>vglrun&nbsp;chromium&nbsp;--disable-gpu-sandbox</code></td>
     <td class="standard">By default, Chrome/Chromium uses a separate process to perform 3D rendering (WebGL), and for reasons that are not yet fully understood, this breaks VirtualGL.  The <code>--disable-gpu-sandbox</code> option causes 3D rendering to be performed within the browser process.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">Google Chrome/Chromium</td>
+    <td class="standard">v55 and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>VGL_DEFAULTFBCONFIG</code> environment variable to <code>GLX_ALPHA_SIZE,8</code> prior to launching the application with <code>vglrun</code></td>
+    <td class="standard">This is not necessary with all OpenGL implementations but is known to be necessary with recent versions of nVidia&rsquo;s proprietary OpenGL stack. Chrome iterates over all of the available visuals on the 2D X server, calling <code>glXGetConfig()</code> for each in an attempt to find a GLX visual with alpha capabilities.  Unfortunately, this behavior foils VirtualGL&rsquo;s visual matching system, for reasons described in Section <a href="#VGL_DEFAULTFBCONFIG" class="ref">19.1</a>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Compiz</td>

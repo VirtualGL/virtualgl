@@ -102,7 +102,7 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
-| Google Chrome/Chromium | v31 and later | Linux \
+| Google Chrome/Chromium | v31 to v54 | Linux \
 	| ''vglrun google-chrome --disable-gpu-sandbox''{nl} \
 		or{nl} \
 		''vglrun chromium --disable-gpu-sandbox'' \
@@ -110,6 +110,17 @@
 		rendering (WebGL), and for reasons that are not yet fully understood, \
 		this breaks VirtualGL.  The ''--disable-gpu-sandbox'' option causes 3D \
 		rendering to be performed within the browser process. \
+	|
+| Google Chrome/Chromium | v55 and later | Linux \
+	| Set the ''VGL_DEFAULTFBCONFIG'' environment variable to \
+		''GLX_ALPHA_SIZE,8'' prior to launching the application with ''vglrun'' \
+	| This is not necessary with all OpenGL implementations but is known to be \
+		necessary with recent versions of nVidia's proprietary OpenGL stack. \
+		Chrome iterates over all of the available visuals on the 2D X server, \
+		calling ''glXGetConfig()'' for each in an attempt to find a GLX visual \
+		with alpha capabilities.  Unfortunately, this behavior foils VirtualGL's \
+		visual matching system, for reasons described in \
+		{ref prefix="Section ": VGL_DEFAULTFBCONFIG}. \
 	|
 | Compiz | All | Linux \
 	| Set the ''VGL_WM'' environment variable to ''1'' prior to launching the \
