@@ -1,3 +1,14 @@
+2.6.1
+=====
+
+### Significant changes relative to 2.6:
+
+1. Fixed a regression introduced by 2.6 beta1[8] that caused a fatal error
+(`ERROR: in findConfig-- Invalid argument`) to be thrown if a 3D application
+called a readback trigger function, such as `glXSwapBuffers()`, when no OpenGL
+context was current.
+
+
 2.6
 ===
 

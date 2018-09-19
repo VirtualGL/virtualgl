@@ -57,7 +57,7 @@ namespace vglserver
 					// restore it.  This can happen if the application is rendering to
 					// the front buffer and glXDestroyContext() is called to destroy the
 					// active context before glXMake*Current*() is called to switch it.
-					if(ctxhash.findConfig(oldctx))
+					if(oldctx && ctxhash.findConfig(oldctx))
 						ctxChanged = true;
 				}
 			}
