@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-08-24T13:14:09">
+<meta name="date" content="2018-10-16T22:54:29">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for VirtualGL 2.6</title>
+<title>User&rsquo;s Guide for VirtualGL 2.6.1</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Conventions Used in This Document">
@@ -31,7 +31,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for VirtualGL 2.6</p>
+<p class="title">User&rsquo;s Guide for VirtualGL 2.6.1</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Graphics Programmers, 
@@ -662,6 +662,10 @@ VirtualGL must be installed on any machine that will act as a VirtualGL server o
 
 
 <h2 id="hd005001">5.1&nbsp;Installing VirtualGL on Linux</h2>
+
+<div class="important"><p class="important">
+If you are installing VirtualGL onto a fresh server, and you also intend to install the nVidia proprietary drivers, install VirtualGL prior to the nVidia drivers.  Otherwise, installing VirtualGL may trigger an installation of Mesa, which can modify the libGL symlinks that the nVidia drivers created.
+</p></div>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">

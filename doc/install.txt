@@ -7,6 +7,11 @@
 
 ** Installing VirtualGL on Linux
 
+	!!! If you are installing VirtualGL onto a fresh server, and you also intend
+	to install the nVidia proprietary drivers, install VirtualGL prior to the
+	nVidia drivers.  Otherwise, installing VirtualGL may trigger an installation
+	of Mesa, which can modify the libGL symlinks that the nVidia drivers created.
+
 	1. Download the appropriate VirtualGL binary package(s) for your system from
 		the [[http://sourceforge.net/projects/virtualgl/files][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
