@@ -10,7 +10,7 @@ env:
   global:
     - LJT_VERSION=2.0.0
     - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/2.0.0
-    - LJT_GPG_KEY="http://pool.sks-keyservers.net/pks/lookup?op=get\&search=0x85C7044E033FDE16"
+    - LJT_GPG_KEY="http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x85C7044E033FDE16"
 
 matrix:
   include:
@@ -37,7 +37,10 @@ before_install:
 
 script:
   - mkdir -p ~/src/vgl.nightly &&
-    docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvgl:latest bash -c "rpm --import $LJT_GPG_KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pool.sks-keyservers.net/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v" &&
+    mkdir $HOME/rpmkeys &&
+    wget "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY &&
+    wget "http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x727C3C5010DFDCB7" -O $HOME/rpmkeys/VGLPR-GPG-KEY &&
+    docker run -v $HOME/src/vgl.nightly:/root/src/vgl.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/virtualgl -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvgl:latest bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvgl -d /root/src/virtualgl -v" &&
     sudo chown -R travis:travis ~/src/vgl.nightly &&
     mv ~/src/vgl.nightly/latest/log-$TRAVIS_OS_NAME.txt ~/src/vgl.nightly/latest/files/
 
