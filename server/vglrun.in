@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Copyright (C)2004 Landmark Graphics Corporation
 # Copyright (C)2005 Sun Microsystems, Inc.
