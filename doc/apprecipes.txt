@@ -102,6 +102,13 @@
 		layers of Python and shell scripts.  The ''LD_PRELOAD'' variable does not \
 		get propagated down from the initial shell that invoked ''vglrun''. \
 	|
+| ANSYS Fluent (when launched from ANSYS Workbench) | v16 and later | Linux \
+	| Set the ''FLUENT_WB_OPTIONAL_ARGS'' environment variable to \
+		''-driver opengl'' and the ''CORTEX_PRE'' environment variable to \
+		''/opt/VirtualGL/bin/vglrun''. \
+	| If these environment variables are not set, Fluent will use software \
+		OpenGL when launched from ANSYS Workbench. \
+	|
 | Google Chrome/Chromium | v31 to v54 | Linux \
 	| ''vglrun google-chrome --disable-gpu-sandbox''{nl} \
 		or{nl} \

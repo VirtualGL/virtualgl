@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-10-16T22:54:29">
+<meta name="date" content="2018-10-30T18:20:15">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2333,6 +2333,13 @@ vglrun&nbsp;vmware&nbsp;-X&nbsp;{VM&nbsp;path}/{VM&nbsp;name}.vmx
     <td class="standard">Linux</td>
     <td class="standard">Add <br /><br /> <code>export&nbsp;LD_PRELOAD=libvglfaker.so</code> <br /><br /> to the top of <code>~/.cedega/.winex_ver/winex-{version}/bin/winex3</code>, then run Cedega as you would normally (without <code>vglrun</code>.)  Since <code>vglrun</code> is not being used, it is necessary to use environment variables or the VirtualGL Configuration dialog to modify VirtualGL&rsquo;s configuration.</td>
     <td class="standard">The actual binary (WineX) that uses OpenGL is buried beneath several layers of Python and shell scripts.  The <code>LD_PRELOAD</code> variable does not get propagated down from the initial shell that invoked <code>vglrun</code>.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">ANSYS Fluent (when launched from ANSYS Workbench)</td>
+    <td class="standard">v16 and later</td>
+    <td class="standard">Linux</td>
+    <td class="standard">Set the <code>FLUENT_WB_OPTIONAL_ARGS</code> environment variable to <code>-driver&nbsp;opengl</code> and the <code>CORTEX_PRE</code> environment variable to <code>/opt/VirtualGL/bin/vglrun</code>.</td>
+    <td class="standard">If these environment variables are not set, Fluent will use software OpenGL when launched from ANSYS Workbench.</td>
   </tr>
   <tr class="standard">
     <td class="standard">Google Chrome/Chromium</td>
