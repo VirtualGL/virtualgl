@@ -3,7 +3,7 @@
 ** Linux/x86 and Other x86 Un*x Operating Systems
 {anchor: Linux_Requirements}
 
-|| || Server (x86) || Server (x86-64) || Client ||
+|| || Server (x86) || Server (x86-64) || Client (if using the VGL Transport) ||
 | Recommended CPU \
 	| {list type=ul: \
 			{item:For optimal performance, the CPU should support SSE2 \
@@ -51,7 +51,7 @@
 
 ** Mac/x86
 
-|| || Client ||
+|| || Client (if using the VGL Transport) ||
 | Recommended CPU \
 	| Any Intel-based Mac \
 	|
@@ -59,16 +59,14 @@
 	| OS X 10.5 ("Leopard") or later \
 	|
 | Other Software \
-	| {list type=ul: \
-			{item:__VGL Transport Only__: Mac X11 application (in the \
-				"Optional Installs" package on the OS X 10.7 and earlier install \
-				discs) or [[http://xquartz.macosforge.org][XQuartz]]}} \
+	| Mac X11 application (in the "Optional Installs" package on the OS X 10.7 \
+		and earlier install discs) or [[http://xquartz.macosforge.org][XQuartz]] \
 	|
 #OPT: hiCol=first
 
 ** Windows
 
-|| || Client ||
+|| || Client (if using the VGL Transport) ||
 | Recommended CPU \
 	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
@@ -77,7 +75,7 @@
 	|
 | Other Software \
 	| {list type=ul: \
-			{item:__VGL Transport Only__: [[http://x.cygwin.com][Cygwin/X]]} \
+			{item:[[http://x.cygwin.com][Cygwin/X]]} \
 			{item:Client display must have a 24-bit or 32-bit color depth \
 				(True Color.)}} \
 	|
@@ -89,7 +87,7 @@
 	!!! The client requirements do not apply to anaglyphic stereo.  See
 	{ref prefix="Chapter ": Advanced_OpenGL} for more details.
 
-|| || Server || Client ||
+|| || Server || Client (VGL Transport required) ||
 | Linux/Unix \
 	| {list type=ul: \
 			{item:AMD or nVidia GPU that supports stereo (examples: AMD FirePro W \
