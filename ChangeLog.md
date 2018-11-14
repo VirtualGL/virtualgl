@@ -8,6 +8,13 @@
 called a readback trigger function, such as `glXSwapBuffers()`, when no OpenGL
 context was current.
 
+2. Worked around a segfault in Cadence Virtuoso that occurred when using
+VirtualGL's `dlopen()` interposer (libdlfaker.so).  The application apparently
+interposes `getenv()` and calls `dlopen()` within the body of its interposed
+`getenv()` function.  Since VirtualGL calls `getenv()` within the body of its
+interposed `dlopen()` function, this led to infinite recursion and stack
+overflow.
+
 
 2.6
 ===
