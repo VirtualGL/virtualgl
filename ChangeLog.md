@@ -15,6 +15,10 @@ interposes `getenv()` and calls `dlopen()` within the body of its interposed
 interposed `dlopen()` function, this led to infinite recursion and stack
 overflow.
 
+    The workaround for this segfault also fixed an error ("Failed to hook the
+dlopen interface") that occurred when using recent versions of VirtualBox with
+VirtualGL.
+
 
 2.6
 ===
