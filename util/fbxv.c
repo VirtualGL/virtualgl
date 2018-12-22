@@ -104,8 +104,8 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 
 	if(!dpy || !win) _throw("Invalid argument");
 	_errifnot(XGetWindowAttributes(dpy, win, &xwa));
-	if(width_ > 0) width = width_;else width = xwa.width;
-	if(height_ > 0) height = height_;else height = xwa.height;
+	if(width_ > 0) width = width_;  else width = xwa.width;
+	if(height_ > 0) height = height_;  else height = xwa.height;
 	if(fb->dpy == dpy && fb->win == win)
 	{
 		if(width == fb->reqwidth && height == fb->reqheight && fb->xvi && fb->xgc

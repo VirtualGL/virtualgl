@@ -257,8 +257,8 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 	{
 		_x11(XGetWindowAttributes(wh.dpy, wh.d, &xwa));
 	}
-	if(width_ > 0) width = width_;else width = xwa.width;
-	if(height_ > 0) height = height_;else height = xwa.height;
+	if(width_ > 0) width = width_;  else width = xwa.width;
+	if(height_ > 0) height = height_;  else height = xwa.height;
 	if(fb->wh.dpy == wh.dpy && fb->wh.d == wh.d)
 	{
 		if(width == fb->width && height == fb->height && fb->xi && fb->xgc
