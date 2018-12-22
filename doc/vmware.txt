@@ -14,19 +14,18 @@ To use VirtualGL with VMWare Workstation, perform the following procedures:
 		virtual machine.
 
 	#. Follow the procedures outlined in the VMWare User's Manual to enable
-		3D acceleration in the virtual machine.  Verify that 3D acceleration works
-		__without__ VirtualGL before adding VirtualGL to the mix.
+		3D acceleration in the virtual machine.  If possible, verify that 3D
+		acceleration works on a local display __without__ VirtualGL before adding
+		VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
-		make ''libvglfaker.so'' and ''libdlfaker.so'' setuid executables.
+		make {file: libvglfaker.so} and {file: libdlfaker.so} setuid executables.
 
 *** Launching VMWare
 #OPT: noList! plain!
 
-This has been tested with VMWare Workstation 9.
-
-#Verb: <<---
-vglrun vmware -X {VM path}/{VM name}.vmx
+#Pverb: <<---
+vglrun vmware -X __VM-path__/__VM-name__.vmx
 ---
 
 *** NOTES

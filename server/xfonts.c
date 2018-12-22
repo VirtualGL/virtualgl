@@ -142,8 +142,9 @@ Fake_glXUseXFont(Font font, int first, int count, int listbase)
       _errifnot(dpy = glxdhash.getCurrentDisplay(draw));
    }
    else {
-      /* Current drawable must be a Pbuffer that the app created.  Blerg.
-         There is no window attached, so we have to create one temporarily. */
+      /* Current drawable must be a Pbuffer that the application created.
+         Blerg.  There is no window attached, so we have to create one
+         temporarily. */
       XVisualInfo *v = NULL, vtemp;
       XSetWindowAttributes swa;
       int nv = 0;

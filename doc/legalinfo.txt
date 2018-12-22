@@ -3,17 +3,18 @@
 {img: somerights20.png}
 
 This document and all associated illustrations are licensed under the
-[[http://creativecommons.org/licenses/by/2.5/]\
-[Creative Commons Attribution 2.5 License]].  Any works that contain
-material derived from this document must cite The VirtualGL Project as the
-source of the material and list the current URL for the VirtualGL web site.
+[[http://creativecommons.org/licenses/by/2.5/][Creative Commons Attribution 2.5 License]].
+Any works that contain material derived from this document must cite The
+VirtualGL Project as the source of the material and list the current URL for
+the VirtualGL web site.
 
-The official VirtualGL binaries contain libjpeg-turbo, which is based in part on
-the work of the Independent JPEG Group.
+The official VirtualGL binaries contain libjpeg-turbo, which is based in part
+on the work of the Independent JPEG Group.
 
 The VirtualGL server components include software developed by the
 [[http://www.fltk.org/][FLTK Project]] and distributed under the terms of the
 [[LICENSE-FLTK.txt][FLTK License]!].
 
-VirtualGL is licensed under the [[LICENSE.txt][wxWindows Library License, v3.1]!],
-a derivative of the [[LGPL.txt][GNU Lesser General Public License (LGPL), v2.1]!].
+VirtualGL is licensed under the
+[[LICENSE.txt][wxWindows Library License, v3.1]!], a derivative of the
+[[LGPL.txt][GNU Lesser General Public License (LGPL), v2.1]!].

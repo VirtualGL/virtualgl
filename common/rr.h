@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2013, 2015-2017 D. R. Commander
+ * Copyright (C)2009-2013, 2015-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -44,9 +44,8 @@ typedef struct _rrframeheader
                               the image. (1=4:4:4, 2=4:2:2, 4=4:2:0) */
   unsigned char flags;     /* See enum below */
   unsigned char compress;  /* Compression algorithm (see enum below) */
-  unsigned short dpynum;   /* Display number on the client machine that
-                              contains the window into which this frame will be
-                              drawn */
+  unsigned short dpynum;   /* Display number on the client that contains the
+                              window into which this frame will be drawn */
 } rrframeheader;
 #define sizeof_rrframeheader  26
 
@@ -78,9 +77,8 @@ typedef struct _rrframeheader_v1
   unsigned char subsamp;   /* Chrominance subsampling used when compressing
                               the image. (1=4:4:4, 2=4:2:2, 4=4:2:0) */
   unsigned char flags;     /* See enum below */
-  unsigned char dpynum;    /* Display number on the client machine that
-                              contains the window into which this frame will be
-                              drawn */
+  unsigned char dpynum;    /* Display number on the client that contains the
+                              window into which this frame will be drawn */
 } rrframeheader_v1;
 #define sizeof_rrframeheader_v1  24
 
@@ -146,7 +144,7 @@ enum rrdrawable { RRDRAWABLE_PBUFFER = 0, RRDRAWABLE_PIXMAP };
 #endif
 #define RR_DEFAULTTILESIZE  256
 
-/* Maximum CPUs that be can be used for parallel image compression */
+/* Maximum threads that be can be used for parallel image compression */
 /* (the algorithms don't scale beyond 3) */
 #define MAXPROCS  4
 

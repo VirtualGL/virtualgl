@@ -1,5 +1,66 @@
 * Conventions Used in This Document
 
-This document assumes that VirtualGL will be installed in the default
-directory (''/opt/VirtualGL'').  If your installation of VirtualGL resides in a
+This document assumes that VirtualGL will be installed in the default directory
+({file: /opt/VirtualGL}).  If your installation of VirtualGL resides in a
 different directory, then adjust the instructions accordingly.
+
+** Terminology
+
+	3D application :: A computer program that uses a 3D rendering API
+	([[http://opengl.org][OpenGL]], for the purposes of this document) to
+	generate 2D images/animation frames ("rendered frames") from 3D data in real
+	time
+
+	VirtualGL server/application server (sometimes just "server") :: The remote
+	machine ("remote" from the point of view of the user) on which 3D
+	applications will be run with VirtualGL
+
+	3D graphics accelerator/graphics processing unit (GPU) :: A specialized
+	hardware device that processes 3D rendering commands and data from a 3D
+	application into 2D images much more quickly than a general-purpose CPU
+	could.  In order to effectively use VirtualGL, a GPU must be present in the
+	VirtualGL server.
+
+	3D X server :: An X-Windows server ("X server") attached to one or more GPUs
+	in the VirtualGL server.  The 3D X server can be "headless" (not attached to
+	a monitor.)
+
+	X proxy :: A virtual X server that runs on a remote machine (usually, but not
+	always, on the VirtualGL server.)  Because X proxies render X-Windows ("X11")
+	drawing commands to a virtual framebuffer in main memory rather than to a
+	real framebuffer in GPU memory, multiple simultaneous instances of an X proxy
+	can co-exist on the same server.  However, for the same reason, X proxies
+	generally do not support hardware-accelerated 3D rendering (without the help
+	of VirtualGL.)  Most X proxies send only images to the client.
+
+	2D X server :: The X server to which the 3D application's GUI will be
+	displayed, and with which the user will interact.  The 2D X server can be an
+	actual X server running on the local machine ("local" from the point of view
+	of the user) or a remote X proxy instance.  The 2D X server does not need to
+	support OpenGL.
+
+	VirtualGL Faker :: A shared library ("dynamic shared object" or "DSO"),
+	loaded into a Linux/Unix OpenGL application at run time, that intercepts and
+	modifies ("interposes") certain GLX, OpenGL, X11, and XCB function calls in
+	order to seamlessly redirect 3D rendering into an off-screen buffer on the 3D
+	X server, read back the rendered frames, and transport the rendered frames
+	(which normally means delivering them to the 2D X server)
+
+	frame trigger :: A function that is called by the 3D application to signal
+	that it has finished rendering a frame.  VirtualGL reads back and transports
+	a rendered frame if the 3D application calls ''glXSwapBuffers()'' while
+	rendering to the back buffer, or if the application calls ''glFinish()'',
+	''glXWaitGL()'', and (optionally) ''glFlush()'' while rendering to the front
+	buffer.
+
+	VGL Transport :: The (optional) protocol that VirtualGL uses to transport
+	rendered frames to a 2D X server on a machine other than the VirtualGL server
+
+	VirtualGL Client :: The (optional) application that receives rendered frames
+	in real time from the VirtualGL Faker by way of the VGL Transport,
+	decompresses or decodes those frames, and composites them into the 3D
+	application's windows
+
+	client :: The machine that is physically in front of the user.  For the
+	purposes of this document, the word "client"-- when used generically-- always
+	refers to this machine, not to the VirtualGL Client application.

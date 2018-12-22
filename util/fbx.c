@@ -314,7 +314,7 @@ int fbx_init(fbx_struct *fb, fbx_wh wh, int width_, int height_, int useShm)
 			fprintf(warningFile,
 				"[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
 			fprintf(warningFile,
-				"[FBX]    remote connection.)  Will use X Pixmap drawing instead.\n");
+				"[FBX]    remote X connection.)  Will use X Pixmap drawing instead.\n");
 			alreadyWarned = 1;
 		}
 		XUnlockDisplay(fb->wh.dpy);

@@ -1,11 +1,11 @@
 * The VirtualGL Configuration Dialog
 {anchor: Config_Dialog}
 
-Several of VirtualGL's configuration parameters can be changed on the fly once
-a 3D application has been started.  This is accomplished by using the VirtualGL
-Configuration dialog, which can be popped up by holding down the ''CTRL'' and
-''SHIFT'' keys and pressing the ''F9'' key while any one of the 3D
-application's windows is active.  This displays the following dialog box:
+Several of VirtualGL's operational parameters can be changed on the fly once a
+3D application has been launched.  This is accomplished by using the VirtualGL
+Configuration dialog, which can be popped up by holding down the Ctrl and Shift
+keys and pressing the F9 key while any one of the 3D application's windows is
+active.  This displays the following dialog box:
 
 {img: configdialog.gif}
 
@@ -29,12 +29,12 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	{nl}{nl} \
 	__YUV (XV Transport)__ : equivalent to setting ''VGL_COMPRESS=xv''.  This
 	option is only available if the 2D X server has the X Video extension and
-	the X Video implementation supports the YUV420P (AKA "I420") pixel format.
+	the X Video implementation supports the YUV420P (AKA "I420") image format.
 	{nl}{nl} \
 	__YUV (VGL Transport)__ : equivalent to setting ''VGL_COMPRESS=yuv''.  This
-	option is only available if the 2D X server has the X Video extension,
-	the X Video implementation supports the YUV420P (AKA "I420") pixel format, and
-	the VGL Transport was active when VirtualGL started.
+	option is only available if the 2D X server has the X Video extension, the X
+	Video implementation supports the YUV420P (AKA "I420") image format, and the
+	VGL Transport was active when VirtualGL started.
 	{nl}{nl} \
 	See {ref prefix="Section ": VGL_COMPRESS} for more information about the
 	''VGL_COMPRESS'' configuration option.
@@ -72,16 +72,15 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	Transport was active when VirtualGL started.  It has the following options:
 	{nl}{nl} \
 	__Low Qual (Low-Bandwidth Network)__ : Sets the image compression type to
-	JPEG (VGL Transport), sets the Chrominance Subsampling to 4X, and sets the
-	JPEG Image Quality to 30.
+	JPEG (VGL Transport), the chrominance subsampling to 4X, and the JPEG image
+	quality to 30.
 	{nl}{nl} \
 	__Medium Qual__ : Sets the image compression type to JPEG	(VGL Transport),
-	sets the Chrominance Subsampling to 2X, and sets the JPEG Image Quality to
-	80.
+	the chrominance subsampling to 2X, and the JPEG image quality to 80.
 	{nl}{nl} \
 	__High Qual (High-Bandwidth Network)__ : Sets the image compression type to
-	JPEG (VGL Transport), sets the Chrominance Subsampling to 1X, and sets the
-	JPEG Image Quality to 95.
+	JPEG (VGL Transport), the chrominance subsampling to 1X, and the JPEG image
+	quality to 95.
 
 	Gamma Correction Factor :: This floating point input gadget is the equivalent
 	of setting ''VGL_GAMMA''.  This enables VirtualGL's internal gamma correction
@@ -90,8 +89,8 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 	''VGL_GAMMA'' configuration option.
 
 	Frame Spoiling :: This toggle button is the equivalent of setting
-	''VGL_SPOIL''.  See {ref prefix="Section ": Frame_Spoiling} and
-	{ref prefix="Section ": VGL_SPOIL} for more information about the
+	''VGL_SPOIL''.  See {ref prefix="Sections ": Frame_Spoiling} and
+	{ref prefix="": VGL_SPOIL} for more information about the
 	''VGL_SPOIL'' configuration option.
 
 	Interframe Comparison :: This toggle button is the equivalent of setting
@@ -128,20 +127,20 @@ parameters in VirtualGL.  Changes are communicated immediately to VirtualGL.
 
 You can set the ''VGL_GUI'' environment variable to change the key sequence
 used to pop up the VirtualGL Configuration dialog.  If the default of
-''CTRL-SHIFT-F9'' is not suitable, then set ''VGL_GUI'' to any combination of
-''ctrl'', ''shift'', ''alt'', and one of ''f1, f2,..., f12''
+''ctrl-shift-f9'' is not suitable, then set ''VGL_GUI'' to any combination of
+''ctrl'', ''shift'', ''alt'', and one of ''f1'', ''f2'', \.\.\., ''f12''
 (these are not case sensitive.)  For example:
 
 #Verb: <<---
-export VGL_GUI=CTRL-F9
+export VGL_GUI=ctrl-f9
 ---
 
-will cause the dialog box to pop up whenever ''CTRL-F9'' is pressed.
+will cause the dialog box to pop up whenever Ctrl and F9 are pressed.
 
 To disable the VirtualGL dialog altogether, set ''VGL_GUI'' to ''none''.
 
-	!!! VirtualGL monitors the application's X event loop to determine whenever
-	a particular key sequence has been pressed.  If an application is not
-	monitoring key press events in its X event loop, then the VirtualGL
+	!!! VirtualGL monitors the 3D application's X event loop to determine
+	whenever a particular key sequence has been pressed.  If a 3D application is
+	not monitoring key press events in its X event loop, then the VirtualGL
 	Configuration dialog might not pop up at all.  There is unfortunately no
 	workaround for this, but it should be a rare occurrence.

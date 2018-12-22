@@ -28,28 +28,29 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s <bitmap file> [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "-client <hostname or IP> = Hostname or IP address where the video should be\n");
-	fprintf(stderr, "                           sent (VGL client must be running on that machine) or\n");
-	fprintf(stderr, "                           0 for local test only\n");
+	fprintf(stderr, "-client <hostname or IP> = Hostname or IP address where the frames should be\n");
+	fprintf(stderr, "                           sent (the VirtualGL Client must be running on that\n");
+	fprintf(stderr, "                           machine) or 0 for local test only\n");
 	fprintf(stderr, "                           (default: %s)\n",
 		strlen(fconfig.client) > 0 ?
 		fconfig.client : "read from DISPLAY environment");
-	fprintf(stderr, "-port <p> = TCP port on which the VGL client is listening (default: %d)\n",
+	fprintf(stderr, "-port <p> = TCP port on which the VirtualGL Client is listening\n");
+	fprintf(stderr, "            (default: %d)\n",
 		fconfig.port < 0 ? (fconfig.ssl ? RR_DEFAULTSSLPORT : RR_DEFAULTPORT) :
 		fconfig.port);
 	fprintf(stderr, "-samp <s> = JPEG chrominance subsampling factor: 0 (gray), 1, 2, or 4\n");
 	fprintf(stderr, "            (default: %d)\n", fconfig.subsamp);
 	fprintf(stderr, "-qual <q> = JPEG quality, 1 <= <q> <= 100 (default: %d)\n",
 		fconfig.qual);
-	fprintf(stderr, "-tilesize <n> = Width/height of each inter-frame difference tile\n");
-	fprintf(stderr, "                (default: %d x %d pixels)\n",
+	fprintf(stderr, "-tilesize <n> = Width/height of each multithreaded compression/interframe\n");
+	fprintf(stderr, "                comparison tile (default: %d x %d pixels)\n",
 		fconfig.tilesize, fconfig.tilesize);
 	fprintf(stderr, "-rgb = Use RGB (uncompressed) encoding (default is JPEG)\n");
 	#ifdef USESSL
 	fprintf(stderr, "-ssl = Use SSL tunnel (default: %s)\n",
 		fconfig.ssl ? "On" : "Off");
 	#endif
-	fprintf(stderr, "-np <n> = Number of processors to use for compression (default: %d)\n\n",
+	fprintf(stderr, "-np <n> = Number of threads to use for compression (default: %d)\n\n",
 		fconfig.np);
 	exit(1);
 }

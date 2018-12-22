@@ -1,14 +1,14 @@
 * Using VirtualGL with VirtualBox
 
-VirtualBox is an enterprise-class, open source virtualization solution
-provided by Oracle.  Since version 2.1.0, VirtualBox has provided support
-for hardware-accelerated OpenGL in Windows
-and Linux guests running on Windows, Mac/Intel, Linux, and Solaris/x86 hosts.
-3D acceleration in VirtualBox is accomplished by installing a special driver in
-the guest that uses a subset of Chromium to transmit OpenGL calls through a
-local connection to the VirtualBox process running on the host.  When used in
-conjunction with VirtualGL on a Linux or Solaris/x86 host, this solution
-provides a means of displaying Windows 3D applications remotely.
+[[http://VirtualBox.org][VirtualBox]] is an enterprise-class, open source
+virtualization solution that supports hardware-accelerated OpenGL in Windows
+and Linux guests running on Windows, Mac, Linux, and Solaris/x86 hosts.  3D
+acceleration in VirtualBox is accomplished by installing a special driver in
+the guest that uses a subset of [[http://chromium.sourceforge.net/][Chromium]]
+to transmit OpenGL calls through a local connection to the VirtualBox process
+running on the host.  When used in conjunction with VirtualGL on a Linux or
+Solaris/x86 host, this solution provides a means of displaying Windows 3D
+applications remotely.
 
 To use VirtualGL with VirtualBox, perform the following procedures:
 
@@ -19,28 +19,21 @@ To use VirtualGL with VirtualBox, perform the following procedures:
 		virtual machine.
 
 	#. Follow the procedures outlined in the VirtualBox User's Manual to enable
-		3D acceleration in the virtual machine.  Verify that 3D acceleration works
-		__without__ VirtualGL before adding VirtualGL to the mix.
+		3D acceleration in the virtual machine.  If possible, verify that 3D
+		acceleration works on a local display __without__ VirtualGL before adding
+		VirtualGL to the mix.
 
 	#. Follow the procedure described in {ref prefix="Chapter ": setuid_linux} to
-		make ''libvglfaker.so'' and ''libdlfaker.so'' setuid executables (Linux) or
-		to add the VirtualGL library directory to the list of secure paths
-		(Solaris).
+		make {file: libvglfaker.so} and {file: libdlfaker.so} setuid executables
+		(Linux) or to add the VirtualGL library directory to the list of secure
+		paths (Solaris).
 
 *** Launching VirtualBox
 #OPT: noList! plain!
 
-#Verb: <<---
-vglrun VirtualBox -startvm {VM name or UUID}
+#Pverb: <<---
+vglrun VirtualBox -startvm __VM-name-or-UUID__
 ---
-
-This should work on most systems.  It is known to work with VirtualBox 4.1.8
-and prior and with VirtualBox 4.2 and later on Linux.
-
- !!! With VirtualBox 4.1.10 and later 4.1.x versions, it is necessary to rename
- ''/usr/lib/virtualbox/VBoxTestOGL'' and execute
- ''ln -fs /bin/true /usr/lib/virtualbox/VBoxTestOGL'' in order to use those
- versions of VirtualBox with VirtualGL.
 
 *** NOTES
 #OPT: noList! plain!
@@ -55,10 +48,8 @@ and prior and with VirtualBox 4.2 and later on Linux.
 		value of the ''LD_PRELOAD'' environment variable from ''vglrun'' does not
 		get propagated to the VM process unless you start it directly.
 
-	* VirtualBox sends mainly uncompressed image updates to the X display, so
-		the 2D elements of the virtual machine's display will not perform well
-		over a remote X11 connection unless gigabit Ethernet (or faster) and a
-		[[#Direct_X11_Connection][direct X11 connection]] (''vglconnect -x'') are
-		used.  Using a high-performance X proxy (such as TurboVNC) is generally
-		preferred when remotely displaying VirtualBox using VirtualGL, particularly
-		on 100 Megabit and slower networks.
+	* VirtualBox sends mainly uncompressed images to the X server, so even with
+		VirtualGL, it will not perform well over a remote X connection.  Using a
+		high-performance X proxy (such as TurboVNC) is generally preferred when
+		remotely displaying VirtualBox using VirtualGL, particularly on 100-megabit
+		and slower networks.

@@ -156,8 +156,8 @@ void VGLTrans::run(void)
 	{
 		VGLTrans::Compressor *comp[MAXPROCS];  Thread *cthread[MAXPROCS];
 		if(fconfig.verbose)
-			vglout.println("[VGL] Using %d / %d CPU's for compression", nprocs,
-				numprocs());
+			vglout.println("[VGL] Using %d compression threads on %d CPU cores",
+				nprocs, numprocs());
 		for(i = 0; i < nprocs; i++)
 			_newcheck(comp[i] = new VGLTrans::Compressor(i, this));
 		if(nprocs > 1) for(i = 1; i < nprocs; i++)

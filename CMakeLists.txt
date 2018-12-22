@@ -371,7 +371,7 @@ if(NOT WIN32)
 if(VGL_BUILDSERVER)
 	set(DEFAULT_VGL_FAKER_NAME vglfaker)
 	set(VGL_FAKER_NAME ${DEFAULT_VGL_FAKER_NAME} CACHE STRING
-		"Base name for VirtualGL's GLX/OpenGL/X11 interposer library (default: ${DEFAULT_VGL_FAKER_NAME})")
+		"Base name for VirtualGL's GLX/OpenGL/X11/XCB interposer library (default: ${DEFAULT_VGL_FAKER_NAME})")
 
 	set(DEFAULT_VGL_DLFAKER_NAME dlfaker)
 	set(VGL_DLFAKER_NAME ${DEFAULT_VGL_DLFAKER_NAME} CACHE STRING

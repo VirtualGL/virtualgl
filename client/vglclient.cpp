@@ -211,22 +211,22 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "-display <d> = The X display to which to draw the images received from the\n");
-	fprintf(stderr, "               VirtualGL server (default: read from the DISPLAY environment\n");
-	fprintf(stderr, "               variable)\n");
+	fprintf(stderr, "-display <d> = The X display to which to draw the rendered frames received from\n");
+	fprintf(stderr, "               the VirtualGL Faker\n");
+	fprintf(stderr, "               (default: read from the DISPLAY environment variable)\n");
 	fprintf(stderr, "-port <p> = TCP port to use for unencrypted connections from the VirtualGL\n");
-	fprintf(stderr, "            server (default: automatically select a free port)\n");
+	fprintf(stderr, "            Faker (default: automatically select a free port)\n");
 	#ifdef USESSL
 	fprintf(stderr, "-sslport <p> = TCP port to use for encrypted connections from the VirtualGL\n");
-	fprintf(stderr, "               server (default: automatically select a free port)\n");
+	fprintf(stderr, "               Faker (default: automatically select a free port)\n");
 	fprintf(stderr, "-sslonly = Only allow encrypted connections\n");
 	fprintf(stderr, "-nossl = Only allow unencrypted connections\n");
 	#endif
 	fprintf(stderr, "-ipv6 = Use IPv6 sockets\n");
 	fprintf(stderr, "-detach = Detach from console (used by vglconnect)\n");
-	fprintf(stderr, "-force = Force VGLclient to run, even if there is already another instance\n");
-	fprintf(stderr, "         running on the same X display (use with caution)\n");
-	fprintf(stderr, "-kill = Kill all detached VGLclient processes running under this user ID\n");
+	fprintf(stderr, "-force = Force the VirtualGL Client to run, even if there is already another\n");
+	fprintf(stderr, "         instance running on the same X display (use with caution)\n");
+	fprintf(stderr, "-kill = Kill all detached VirtualGL Client processes running under this user ID\n");
 	fprintf(stderr, "-l = Redirect all output to <file>\n");
 	fprintf(stderr, "-v = Display version information\n");
 	fprintf(stderr, "-x = Use X11 drawing (default)\n");

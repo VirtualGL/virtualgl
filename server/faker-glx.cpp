@@ -44,9 +44,9 @@ using namespace vglserver;
 // Applications will sometimes use X11 functions to obtain a list of 2D X
 // server visuals, then pass one of those visuals to glXCreateContext(),
 // glXGetConfig(), etc.  Since the visual didn't come from glXChooseVisual(),
-// VGL has no idea what properties the app is looking for, so if no 3D X server
-// FB config is already hashed to the visual, we have to create one using
-// default attributes.
+// VGL has no idea what properties the application is looking for, so if no 3D
+// X server FB config is already hashed to the visual, we have to create one
+// using default attributes.
 
 #define testattrib(attrib, index, min, max) \
 { \
@@ -170,10 +170,10 @@ static VisualID matchVisual(Display *dpy, GLXFBConfig config)
 	int screen = DefaultScreen(dpy);
 	if(!(vid = cfghash.getVisual(dpy, config)))
 	{
-		// If we get here, then the app is using an FB config that was not obtained
-		// through glXChooseFBConfig(), so we have no idea what attributes it is
-		// looking for.  We first try to match the FB config with a 2D X Server
-		// visual that has the same class, depth, and stereo properties.
+		// If we get here, then the application is using an FB config that was not
+    // obtained through glXChooseFBConfig(), so we have no idea what attributes
+    // it is looking for.  We first try to match the FB config with a 2D X
+    // Server visual that has the same class, depth, and stereo properties.
 		XVisualInfo *vis = _glXGetVisualFromFBConfig(_dpy3D, config);
 		if(vis)
 		{
@@ -431,9 +431,9 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 			vglout.println("[VGL]    the 3D X server %s suitable for off-screen rendering.",
 				fconfig.localdpystring);
 			vglout.println("[VGL]    This is normal if the 3D application is probing for visuals with");
-			vglout.println("[VGL]    certain capabilities, but if the app fails to start, then make sure");
-			vglout.println("[VGL]    that the 3D X server is configured for true color and has accelerated");
-			vglout.println("[VGL]    3D drivers installed.");
+			vglout.println("[VGL]    certain capabilities, but if the application fails to start, then make");
+			vglout.println("[VGL]    sure that the 3D X server is configured for true color and has");
+			vglout.println("[VGL]    appropriate GPU drivers installed.");
 		}
 		goto done;
 	}
@@ -464,8 +464,8 @@ XVisualInfo *glXChooseVisual(Display *dpy, int screen, int *attrib_list)
 			vis->visualid, _FBCID(prevConfig), _FBCID(config));
 
 	// Hash the FB config and the visual so that we can look up the FB config
-	// whenever the app subsequently passes the visual to glXCreateContext() or
-	// other functions.
+	// whenever the appplication subsequently passes the visual to
+  // glXCreateContext() or other functions.
 	vishash.add(dpy, vis, config);
 
 	done:

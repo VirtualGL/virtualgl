@@ -37,51 +37,52 @@
 usage()
 {
 	echo
-	echo "Usage: `basename $0` [options] [--] <OpenGL app> [OpenGL app arguments]"
+	echo "Usage: `basename $0` [options] [--] <3D application> [3D application args]"
 	echo
 	echo "VirtualGL options (see documentation for a more comprehensive list)"
 	echo
-	echo "-c <c>    : proxy = Send 3D images uncompressed using X11 Transport"
-	echo "                    [default for local X connections]"
-	echo "            jpeg = Compress 3D images using JPEG/send using VGL Transport"
-	echo "                   [default for remote X connections]"
-	echo "            rgb = Encode 3D images as RGB/send using VGL Transport"
-	echo "            xv = Encode 3D images as YUV420P/send using XV Transport"
-	echo "            yuv = Encode 3D images as YUV420P/send using the VGL Transport"
-	echo "                  and display on the client using X Video"
+	echo "-c <c>    : proxy = Send rendered frames uncompressed using X11 Transport"
+	echo "                    [default if the 2D X server is on this machine]"
+	echo "            jpeg = Compress rendered frames using JPEG/send using VGL Transport"
+	echo "                   [default if the 2D X server is on another machine]"
+	echo "            rgb = Encode rendered frames as RGB/send using VGL Transport"
+	echo "            xv = Encode rendered frames as YUV420P/send using XV Transport"
+	echo "            yuv = Encode rendered frames as YUV420P/send using the VGL"
+	echo "                  Transport and display on the client using X Video"
 	echo "            [If an image transport plugin is being used, then <c> can be any"
-	echo "             number >= 0 (default=0).]"
+	echo "             number >= 0 (default = 0).]"
 	echo
 	echo "-nodl     : Don't interpose the dlopen() function.  dlopen() is normally"
-	echo "            interposed to force applications that use dlopen() to load libGL"
-	echo "            to load VirtualGL instead.  For the more common case of"
-	echo "            applications that link directly with libGL, disabling the dlopen()"
-	echo "            interposer makes VirtualGL less intrusive, since it will no longer"
-	echo "            load libGL until the application actually uses that library."
+	echo "            interposed in order to force applications that load libGL using"
+	echo "            dlopen() to load the VirtualGL Faker instead.  For the more common"
+	echo "            case of applications that link directly with libGL, disabling the"
+	echo "            dlopen() interposer makes VirtualGL less intrusive, since it will"
+	echo "            no longer load libGL until the 3D application actually uses that"
+	echo "            library."
 	echo
-	echo "-d <d>    : <d> = the X Display to use for 3D rendering [default = :0.0]"
+	echo "-d <d>    : <d> = the X display/screen to use for 3D rendering [default = :0.0]"
 	echo
-	echo "-fps <f>  : Limit client/server frame rate to <f> frames/sec"
+	echo "-fps <f>  : Limit image transport frame rate to <f> frames/sec"
 	echo
-	echo "-gamma <g>: Set gamma correction factor to <g> (see docs)"
+	echo "-gamma <g>: Set gamma correction factor to <g> (see User's Guide)"
 	echo
-	echo "-ge       : Fool application into thinking that LD_PRELOAD is unset"
+	echo "-ge       : Fool 3D application into thinking that LD_PRELOAD is unset"
 	echo
-	echo "-ms <s>   : Force VirtualGL to use OpenGL multisampling with <s>"
-	echo "            samples (<s> = 0 forces multisampling to be disabled)"
+	echo "-ms <s>   : Force OpenGL multisampling to be enabled with <s> samples"
+	echo "            (<s> = 0 forces multisampling to be disabled)"
 	echo
-	echo "-np <n>   : Use <n> CPUs to perform image compression [default = 1]"
+	echo "-np <n>   : Use <n> threads to perform image compression [default = 1]"
 	echo
 	echo "+/-pr     : Enable/disable performance profiling output [default = disabled]"
 	echo
 	echo "-q <q>    : Compression quality [1 <= <q> <= 100]"
 	echo "            [default = 95 for JPEG/VGL Transport.  Has no effect with"
-	echo "             X11 Transport]"
+	echo "             other built-in image transports or encoding types]"
 	echo
 	echo "-samp <s> : Chrominance subsampling factor"
 	echo "            <s> = gray, 1x, 2x, 4x"
 	echo "            [default = 1x for JPEG/VGL Transport.  Has no effect with"
-	echo "             X11 Transport or RGB encoding]"
+	echo "             other built-in image transports or encoding types]"
 	echo
 	echo "+/-s      : Enable/disable SSL encryption of VGL Transport or custom"
 	echo "            image transport, if applicable."
@@ -90,8 +91,10 @@ usage()
 	echo
 	echo "+/-sp     : Turn on/off frame spoiling [default = enabled]"
 	echo
-	echo "-st <s>   : left = Send only left eye buffer of stereo application"
-	echo "            right = Send only right eye buffer of stereo application"
+	echo "-st <s>   : left = Read back/transport only left eye buffer of rendered stereo"
+	echo "                   frame"
+	echo "            right = Read back/transport only right eye buffer of rendered"
+	echo "                    stereo frame"
 	echo "            quad = Use quad-buffered stereo if available, otherwise use"
 	echo "                   red/cyan (anaglyphic) stereo [default]"
 	echo "            rc = Always use red/cyan (anaglyphic) stereo"

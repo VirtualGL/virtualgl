@@ -19,13 +19,17 @@ overflow.
 dlopen interface") that occurred when using recent versions of VirtualBox with
 VirtualGL.
 
+3. The VirtualGL User's Guide and other documentation has been overhauled to
+reflect current reality and to use more clear and consistent terminology and
+formatting.
+
 
 2.6
 ===
 
 ### Significant changes relative to 2.6 beta1:
 
-1. Fixed an issue whereby the modifications that vglserver_config made to
+1. Fixed an issue whereby the modifications that `vglserver_config` made to
 lightdm.conf sometimes caused vglgenkey to be executed multiple times.  This
 was known to cause problems with remote login methods, such as XDMCP, and it
 also caused LightDM on Ubuntu 18.04 to lock up when logging in locally.
@@ -98,15 +102,16 @@ front buffer was the active drawing buffer, then the application called
 `glXMake[Context]Current()` to swap in another context.  Under those
 circumstances, VirtualGL will read back the front buffer within the body of the
 interposed `glXMake[Context]Current()` function, in order to transport the
-contents of the last frame rendered to the buffer.  Since VirtualGL temporarily
-swaps in its own OpenGL context prior to reading back the buffer, then swaps
-the application's OpenGL context back in after the readback, VirtualGL was
-passing a dead context to nVidia's `glXMake[Context]Current()` function, which
-triggered the segfault.  Arguably nVidia's `glXMake[Context]Current()`
-implementation should have instead thrown a GLXBadContext error, but
-regardless, VirtualGL now verifies that the application's OpenGL context is
-alive before swapping it back in following a readback.  This issue was known to
-affect ParaView but may have affected other applications as well.
+contents of the last frame that was rendered to the buffer.  Since VirtualGL
+temporarily swaps in its own OpenGL context prior to reading back the buffer,
+then swaps the application's OpenGL context back in after the readback,
+VirtualGL was passing a dead context to nVidia's `glXMake[Context]Current()`
+function, which triggered the segfault.  Arguably nVidia's
+`glXMake[Context]Current()` implementation should have instead thrown a
+GLXBadContext error, but regardless, VirtualGL now verifies that the
+application's OpenGL context is alive before swapping it back in following a
+readback.  This issue was known to affect ParaView but may have affected other
+applications as well.
 
 
 2.5.2
@@ -114,8 +119,8 @@ affect ParaView but may have affected other applications as well.
 
 ### Significant changes relative to 2.5.1:
 
-1. Previously, the VirtualGL faker opened a connection to the 3D X server
-whenever an application called XOpenDisplay().  The faker now waits until the
+1. Previously, the VirtualGL Faker opened a connection to the 3D X server
+whenever an application called `XOpenDisplay()`.  The faker now waits until the
 3D X server is actually needed before opening the connection.  This prevents
 non-OpenGL X11 applications from opening unnecessary connections to the 3D X
 server, which could exhaust the X server's limit of 256 connections if many
@@ -134,8 +139,9 @@ certain 3D applications (reported to be the case with Steam) or behave in other
 unpredictable ways.
 
 4. Fixed an issue whereby VirtualGL, when used with applications that load
-OpenGL functions via dlopen()/dlsym(), would fail to load the "real" GLX/OpenGL
-functions from libGL if libvglfaker.so was built with GCC 4.6 or later.
+OpenGL functions via `dlopen()`/`dlsym()`, would fail to load the "real"
+GLX/OpenGL functions from libGL if libvglfaker.so was built with GCC 4.6 or
+later.
 
 5. Fixed various build issues with Clang.
 
@@ -170,7 +176,7 @@ extensions.
 
 2. Fixed compilation errors when building with GCC v6.
 
-3. vglserver_config is now SELinux-aware and will set up the proper file
+3. `vglserver_config` is now SELinux-aware and will set up the proper file
 contexts to allow vglgenkey to run within the GDM startup scripts.  This has
 been verified with Red Hat Enterprise Linux and work-alike systems (CentOS,
 etc.), but unfortunately the version of GDM that ships in Fedora 22-24 does not
@@ -180,7 +186,7 @@ those recent Fedora releases is to use LightDM.
 4. Fixed a deadlock that occurred when exiting ANSYS HFSS 2014.  This fix was
 an extension of 2.3.3[2], necessitated by the fact that MainWin calls X11
 functions from the destructor of one of its shared libraries, which is executed
-after the VGL faker has shut down.  Because VGL 2.5.x enables the XCB
+after the VirtualGL Faker has shut down.  Because VGL 2.5.x enables the XCB
 interposer by default, we have to ensure that any X11 and XCB functions hand
 off immediately to the underlying libraries after the faker has been shut down,
 because even if an X11 function is not interposed by VGL, some of the XCB
@@ -195,26 +201,27 @@ and may have affected other applications that use MainWin.
 
 1. OS X 10.11 "El Capitan" no longer allows packages to install files under
 /usr/bin, and this was preventing the VirtualGL binary package for OS X from
-installing on that platform.  The symlinks to vglclient and vglconnect that the
-OS X package previously installed under /usr/bin have thus been removed in this
-version of VirtualGL.  It will therefore be necessary to invoke vglconnect and
-vglclient using the full pathname (/opt/VirtualGL/bin/vglconnect or
-/opt/VirtualGL/bin/vglclient) or to add /opt/VirtualGL/bin to the PATH.
+installing on that platform.  The symlinks to `vglclient` and `vglconnect` that
+the OS X package previously installed under /usr/bin have thus been removed in
+this version of VirtualGL.  It will therefore be necessary to invoke
+`vglconnect` and `vglclient` using the full pathname
+(`/opt/VirtualGL/bin/vglconnect` or `/opt/VirtualGL/bin/vglclient`) or to add
+/opt/VirtualGL/bin to the `PATH`.
 
 2. Fixed a regression introduced by 2.5 beta1[13] that caused certain system
 commands (such as uname, hostname, etc.) to crash when running those commands
-using vglrun on current Arch Linux spins (glibc 2.22, GCC 5.2.)  This possibly
-affected other non-OpenGL, non-X11 applications on other bleeding-edge Linux
-distributions as well.
+using `vglrun` on current Arch Linux spins (glibc 2.22, GCC 5.2.)  This
+possibly affected other non-OpenGL, non-X11 applications on other bleeding-edge
+Linux distributions as well.
 
-3. vglserver_config should now work properly with MDM (MATE Display Manager),
+3. `vglserver_config` should now work properly with MDM (MATE Display Manager),
 if its config files are installed in the standard location (/etc/mdm).
 
-4. Fixed a regression introduced in 2.4 that caused vglrun to abort with
+4. Fixed a regression introduced in 2.4 that caused `vglrun` to abort with
 `VGL_ISACTIVE=1: is not an identifier` when running on Solaris 10 (or other
 systems in which /bin/sh doesn't support `export VAR=value` syntax.)
 
-5. Fixed a regression introduced by 2.5 beta1[3] whereby the VirtualGL faker
+5. Fixed a regression introduced by 2.5 beta1[3] whereby the VirtualGL Faker
 would segfault on Solaris if the 3D application called one of the GLX/OpenGL
 functions that VirtualGL interposes and the underlying OpenGL library (libGL)
 did not implement that function.
@@ -246,7 +253,7 @@ work-arounds for certain buggy libGL implementations that do not export the
 `glXBindTexImageEXT()` and `glXReleaseTexImageEXT()` functions in the libGL
 symbol table (the latter was specifically known to be an issue with certain
 versions of the ATI driver under Ubuntu.)
-    - If `-nodl` is passed to vglrun, then libGL will not be loaded into the
+    - If `-nodl` is passed to `vglrun`, then libGL will not be loaded into the
 application process until/unless the application actually calls a GLX/OpenGL
 function.
     - Because XCB functions are now loaded only when needed, the XCB interposer
@@ -282,10 +289,10 @@ environment variable.)  This is useful with multi-GPU systems on which a single
 application may want to access the GPUs directly for parallel rendering
 purposes but use VirtualGL to display the final result.
 
-7. The vglconnect script now accepts an argument of `-e {command}`, which can
+7. The `vglconnect` script now accepts an argument of `-e {command}`, which can
 be used to specify a remote command to run.  This is useful for situations in
 which it is necessary to start a remote process non-interactively with
-vglconnect when using the `-s` or `-x` options.
+`vglconnect` when using the `-s` or `-x` options.
 
 8. The `glXCreateWindow()` function no longer fails when passed the handle of
 an X window that was created in a different process or using XCB.  This
@@ -293,7 +300,7 @@ specifically fixes issues encountered when attempting to run VLC in VirtualGL,
 but other applications may have been affected as well.
 
 9. Fixed a typo in /etc/udev/rules.d/99-virtualgl-dri.rules, which is created
-by vglserver_config.  More specifically, the typo caused incorrect group
+by `vglserver_config`.  More specifically, the typo caused incorrect group
 permissions to be assigned to the framebuffer device when not using the
 vglusers group.
 
@@ -313,7 +320,7 @@ application has performed OpenGL rendering with it.
 supports `GLX_BIND_TO_TEXTURE_RGB_EXT` and `GLX_BIND_TO_TEXTURE_RGBA_EXT`, i.e.
 whether the FB config can be used with `GLX_EXT_texture_from_pixmap`.
 
-12. vglserver_config should now work properly with SDDM, if its scripts are
+12. `vglserver_config` should now work properly with SDDM, if its scripts are
 installed in the standard location (/usr/share/sddm/scripts).
 
 13. Fixed a deadlock that occurred with applications that use MainWin, or any
@@ -351,8 +358,8 @@ the underlying OpenGL library exports the `glXCreateContextAttribsARB()`
 function.
 
 3. Fixed "Invalid MIT-MAGIC-COOKIE-1" errors that would prevent VirtualGL from
-working when vglconnect was used to connect to a VirtualGL server from a client
-running Cygwin/X.
+working when `vglconnect` was used to connect to a VirtualGL server from a
+client running Cygwin/X.
 
 4. If a 3D application is rendering to the front buffer and one of the
 end-of-frame trigger functions (`glFlush()`/`glFinish()`/`glXWaitGL()`) is
@@ -397,10 +404,10 @@ was necessary in order to make certain features of Cadence Allegro work
 properly.  Since virtually no applications require `VGL_SYNC`, it is believed
 that this change is innocuous.
 
-3. Fixed a regression in vglconnect (introduced in VirtualGL 2.3) that
+3. Fixed a regression in `vglconnect` (introduced in VirtualGL 2.3) that
 prevented `vglconnect -x` from working properly if the user did not have access
-to the current directory (vglconnect was erroneously creating a temporary file
-in the current directory instead of in /tmp.)
+to the current directory (`vglconnect` was erroneously creating a temporary
+file in the current directory instead of in /tmp.)
 
 4. GLXspheres now warns if the specified polygon count would exceed the limit
 of 57600 polygons per sphere imposed by GLU and prints the actual polygon count
@@ -425,7 +432,7 @@ the application would fall back to non-OpenGL rendering.
 from source and adding `-DVGL_FAKEXCB=1` to the CMake command line.  The XCB
 interposer is also disabled by default at run time.  It must be enabled by
 setting the `VGL_FAKEXCB` environment variable to `1` or passing `+xcb` to
-vglrun.
+`vglrun`.
 
 7. Fixed a deadlock that occurred when running compiz 0.9.11 (and possibly
 other versions as well) with VirtualGL.  The issue occurred when compiz called
@@ -485,12 +492,12 @@ makes it relatively easy to install on that platform.
     The VirtualGL Client for Exceed reflects VirtualGL's origins as an add-on
 technology for existing remote X environments.  These days, most people use
 VirtualGL with some sort of X proxy instead.  There have been no significant
-changes to vglclient since version 2.2.1, as most of the efforts of The
-VirtualGL Project in recent years have focused on the server-side components
-and TurboVNC.  In the early days of the project, there were performance
-advantages to the VGL Transport, but that is no longer the case.  In fact,
-TurboVNC will generally do a better and faster job of compressing the image
-stream, since it uses a hybrid compression scheme rather than pure JPEG.
+changes to the VirtualGL Client since version 2.2.1, as most of the efforts of
+The VirtualGL Project in recent years have focused on the server-side
+components and TurboVNC.  In the early days of the project, there were
+performance advantages to the VGL Transport, but that is no longer the case.
+In fact, TurboVNC will generally do a better and faster job of compressing the
+image stream, since it uses a hybrid compression scheme rather than pure JPEG.
 
     The native Windows version of TCBench, which previously shipped with the
 VirtualGL Client for Exceed, has been moved into the Windows TurboVNC Viewer
@@ -498,7 +505,7 @@ package.
 
 2. The VirtualGL source code has been extensively refactored to use more modern
 variable, class, and method naming conventions, and automated test scripts for
-the utility libraries and the faker have been added.
+the utility libraries and the VirtualGL Faker have been added.
 
 3. `glXChooseFBConfig()` now properly handles the `GLX_FBCONFIG_ID` attribute.
 The improper handling of this attribute was known to cause an error
@@ -506,13 +513,13 @@ The improper handling of this attribute was known to cause an error
 (Lightweight Java Game Library) on AMD GPUs, but it may have affected other
 apps as well.
 
-4. The performance of PBO readback on ATI FirePro adapters has been improved
+4. The performance of PBO readback on ATI FirePro GPUs has been improved
 dramatically (close to an order of magnitude.)
 
-5. vglserver_config will now set DRI device permissions properly on systems
+5. `vglserver_config` will now set DRI device permissions properly on systems
 that lack an xorg.conf file but have an xorg.conf.d directory.
 
-6. vglserver_config should now work with recent Debian releases.
+6. `vglserver_config` should now work with recent Debian releases.
 
 7. Fixed an issue whereby VirtualGL would not always resize the Pbuffer
 corresponding to an Xt or Motif OpenGL widget whenever the widget was resized.
@@ -553,7 +560,7 @@ rendering issue with voreen, but it may have affected other apps as well.
 13. Fixed an issue that prevented vglgenkey from working properly on Red Hat
 Enterprise Linux 7.
 
-14. Fixed an issue that prevented vglserver_config from working properly on
+14. Fixed an issue that prevented `vglserver_config` from working properly on
 Ubuntu 14.04.
 
 
@@ -599,12 +606,12 @@ VirtualGL.
 
 10. Streamlined VirtualGL's behavior when it is installed from source:
 
-    - vglrun now works regardless of where the faker libraries have been
+    - `vglrun` now works regardless of where the faker libraries have been
 installed.  The build system hard-codes the value of the `VGL_LIBDIR` CMake
-variable into a script that vglrun invokes so that it can add this directory to
-`LD_LIBRARY_PATH`.   If the faker libraries are installed into a system library
-directory, then packagers can choose to omit the new script, and vglrun will
-continue to work as it always has.
+variable into a script that `vglrun` invokes so that it can add this directory
+to `LD_LIBRARY_PATH`.  If the faker libraries are installed into a system
+library directory, then packagers can choose to omit the new script, and
+`vglrun` will continue to work as it always has.
     - Whenever a 64-bit build is installed, glxspheres is now renamed
 glxspheres64, per the convention of the official packages.  This makes it
 possible to install a 32-bit and a 64-bit version of VirtualGL into the same
@@ -620,13 +627,13 @@ Chromium into /opt/VirtualGL/fakelib64.
 
 11. PBO readback mode is now enabled by default.  Further research has shown
 that professional-grade GPUs always benefit from PBOs being enabled (quite
-dramatically, in the case of AMD FirePro adapters.)  With consumer-grade AMD
-adapters, PBOs generally do no harm, and with consumer-grade nVidia (GeForce)
-adapters, the results are mixed.  The GeForce drivers will fall back to
-blocking readbacks if the pixel format requested in `glReadPixels()` doesn't
-match the pixel format of the Pbuffer, so PBOs will generally be slower in
-those cases.  Thus, VirtualGL now falls back to synchronous readback mode if it
-detects that PBOs are not behaving asynchronously.
+dramatically, in the case of AMD FirePro GPUs.)  With consumer-grade AMD GPUs,
+PBOs generally do no harm, and with consumer-grade nVidia (GeForce) GPUs, the
+results are mixed.  The GeForce drivers will fall back to blocking readbacks if
+the pixel format requested in `glReadPixels()` doesn't match the pixel format
+of the Pbuffer, so PBOs will generally be slower in those cases.  Thus,
+VirtualGL now falls back to synchronous readback mode if it detects that PBOs
+are not behaving asynchronously.
 
     Furthermore, `VGL_FORCEALPHA` is no longer enabled by default when PBOs are
 enabled.  This option was introduced because of the GeForce behavior mentioned
@@ -646,12 +653,12 @@ Cygwin64.
 
 1. Added new stereo options, including green/magenta and blue/yellow anaglyphic
 as well as three half-resolution passive stereo options that can be used to
-drive 3D TV's.
+drive 3D TVs.
 
 2. The 32-bit supplementary package for amd64 Debian systems should now work
 properly on MultiArch-compatible systems (such as Ubuntu 11 and later.)
 
-3. vglserver_config should now work properly with LightDM.
+3. `vglserver_config` should now work properly with LightDM.
 
 4. VirtualGL was not advertising that it supported the
 `GLX_ARB_create_context_profile` extension, even though it does.  This has been
@@ -673,7 +680,7 @@ oversight, VirtualGL would previously abort with an error message if the 3D
 application attempted to render text to a Pbuffer that it created.
 
 8. Fixed an issue whereby, when displaying to a 2D X server that lacked the
-MIT-SHM extension, the X11 Transport would sometimes fail to resize its
+`MIT-SHM` extension, the X11 Transport would sometimes fail to resize its
 internal Pixmap (used for double buffering) whenever the X window was resized.
 This specifically caused OpendTect to display only a portion of its 3D view
 whenever it resized its 3D window after a "Restore" operation, but the issue
@@ -683,8 +690,8 @@ may have affected other applications as well.
 `XGetImage()` to obtain the rendered 3D pixels from a GLX pixmap.  This has
 been fixed.
 
-10. vglrun now automatically sets an environment variable that disables the
-execution of the VBoxTestOGL program in VirtualBox 4.2 and later.  Since
+10. `vglrun` now automatically sets an environment variable that disables the
+execution of the `VBoxTestOGL` program in VirtualBox 4.2 and later.  Since
 `LD_PRELOAD` is not propagated down to VBoxTestOGL whenever VirtualBox launches
 it (because VirtualBox is a setuid-root executable), VBoxTestOGL always fails
 in a VirtualGL environment, which makes VirtualBox believe that the system has
@@ -721,7 +728,7 @@ applications against a version of libSDL that was configured with
 "virtualgl32") to avoid an issue whereby the package was always being
 installed, even if the installed version was up to date.
 
-7. vglserver_config now works properly with KDM on RHEL/CentOS 5 systems.
+7. `vglserver_config` now works properly with KDM on RHEL/CentOS 5 systems.
 
 8. Added a new option (`VGL_GLFLUSHTRIGGER`) that, when set to `0`, will cause
 VirtualGL to ignore `glFlush()` commands from the 3D application.  This is
@@ -773,7 +780,7 @@ would cause Pixmap allocation failures with certain X servers.
 
 1. Re-fixed issue that caused MainWin-based applications to hang.  This was
 initially fixed in VGL 2.1 final, but it was re-broken by the rewrite of the
-global faker configuration routines in VGL 2.2.
+global VirtualGL Faker configuration routines in VGL 2.2.
 
 2. Overhauled the way in which VirtualGL handles Pixmap rendering, mainly to
 fix interaction issues with Mathematica.
@@ -817,13 +824,13 @@ doing front buffer rendering.
 
 3. vglserver\_config will now work properly whenever vglgenkey is installed in
 a directory other than /usr/bin or /opt/VirtualGL/bin, as long as vglgenkey is
-installed in the same directory as vglserver_config.
+installed in the same directory as `vglserver_config`.
 
-4. vglconnect now allows the user to specify the directory in which VirtualGL
+4. `vglconnect` now allows the user to specify the directory in which VirtualGL
 binaries are installed on the server, rather than always assuming that they are
 installed in /opt/VirtualGL/bin.
 
-5. Fixed issues with vglconnect.bat that occurred when it was installed under
+5. Fixed issues with `vglconnect.bat` that occurred when it was installed under
 c:\Program Files (x86) on 64-bit Windows systems and invoked with the `-x` or
 `-s` options.
 
@@ -853,8 +860,8 @@ server if it detects that an overlay visual is being requested.  Now, VirtualGL
 will first check that the 2D X server supports GLX before passing through those
 calls.
 
-11. `vglclient -kill` and `vglclient -killall` now work (again) in the Exceed
-client.
+11. `vglclient -kill` and `vglclient -killall` now work (again) with the
+VirtualGL Client for Exceed.
 
 
 2.2
@@ -869,10 +876,10 @@ calls.  This is necessary to make Ansoft HFSS render properly.
 2. Added a compatibility mode to allow NetTest to communicate with older
 versions of itself (from VGL 2.1.x and prior.)
 
-3. Fixed a race condition in vglclient that would frequently cause an
-"incorrect checksum for freed object" error when the client was shut down via
-CTRL-C.  This problem was reported only on OS X but could have existed on other
-platforms as well.
+3. Fixed a race condition in the VirtualGL Client that would frequently cause
+an "incorrect checksum for freed object" error when `vglclient` was shut down
+using CTRL-C.  This problem was reported only on OS X but could have existed on
+other platforms as well.
 
 
 2.1.90 (2.2 beta1)
@@ -913,10 +920,10 @@ TurboJPEG package on Linux systems.
 fork works on 10.4 "Tiger" or later, and the 64-bit fork works on 10.5
 "Leopard" or later.
 
-7. Added support for encoding 3D images as I420 YUV and displaying them through
-X Video.  The images can either be displayed directly to the 2D X server or
-sent through the VGL transport for display using vglclient.  See the User's
-Guide for more details.
+7. Added support for encoding rendered frames as I420 YUV and displaying them
+through X Video.  The images can either be displayed directly to the 2D X
+server or sent through the VGL Transport for display using the VirtualGL
+Client.  See the User's Guide for more details.
 
 8. Renamed /etc/modprobe.d/virtualgl to /etc/modprobe.d/virtualgl.conf to
 comply with the Ubuntu standard.
@@ -928,7 +935,7 @@ the level of multisampling selected by the 3D application.
 10. The uninstall script in the Mac binary package should now work on OS X
 10.6.
 
-11. VirtualGL can now use pixel buffer objects (PBO's) to accelerate the
+11. VirtualGL can now use pixel buffer objects (PBOs) to accelerate the
 readback of the rendered 3D pixels.  This particularly helps when multiple
 users are sharing the GPU.  See the "Advanced Configuration" section of the
 User's Guide for more information.
@@ -946,13 +953,13 @@ application called `XCloseDisplay()` and the `VGL_XVENDOR` environment variable
 was set.
 
 15. VirtualGL should now work properly when used with applications that render
-to framebuffer objects (FBO's.)
+to framebuffer objects (FBOs.)
 
-16. vglconnect.bat should now work properly on 64-bit Windows systems.
+16. `vglconnect.bat` should now work properly on 64-bit Windows systems.
 Previously, it would fail if it was installed under the "Program Files (x86)"
 directory.
 
-17. Added a `-gid` option to vglserver_config to allow the group ID of the
+17. Added a `-gid` option to `vglserver_config` to allow the group ID of the
 vglusers group to be specified, if that group must be created.
 
 18. TCBench should now work properly on OS X.
@@ -963,19 +970,19 @@ vglusers group to be specified, if that group must be created.
 
 ### Significant changes relative to 2.1.3:
 
-1. Fixed a regression in vglserver_config that caused a "binary operator
+1. Fixed a regression in `vglserver_config` that caused a "binary operator
 expected" error when restricting framebuffer device access to the vglusers
 group.
 
-2. Fixed an issue in vglserver_config whereby the device permissions were not
+2. Fixed an issue in `vglserver_config` whereby the device permissions were not
 being set correctly on SuSE Linux Enterprise Desktop 11.
 
 3. VGL should now properly ignore `GLX_BUFFER_SIZE` if an application attempts
 to specify it when requesting a true color visual.  Specifically, this allows
 the Second Life SnowGlobe client to run properly in VGL and WINE.
 
-4. vglserver_config should now work even if /sbin and /usr/sbin are not in the
-PATH.
+4. `vglserver_config` should now work even if /sbin and /usr/sbin are not in
+the `PATH`.
 
 5. The Solaris 10/x86 version of VirtualGL should now work properly with the
 nVidia 18x.xx series drivers.
@@ -986,11 +993,11 @@ stereo mode.
 7. The DRI device permissions in RHEL 5 were being overridden whenever a user
 logged in, because RHEL 5 uses a file in /etc/security/console.perms.d to
 specify the default DRI permissions rather than using
-/etc/security/console.perms.  vglserver_config has been modified to handle
+/etc/security/console.perms.  `vglserver_config` has been modified to handle
 this.
 
-8. Added an option to vglconnect on Linux/Unix to allow it to use gsissh from
-the Globus Toolkit instead of the regular ssh program.
+8. Added an option to `vglconnect` on Linux/Unix to allow it to use `gsissh`
+from the Globus Toolkit instead of the regular `ssh` program.
 
 
 2.1.3
@@ -1016,7 +1023,7 @@ library named "libGLabelPlot.so" that was being interposed by mistake.  The
 matching criteria has been changed such that `dlopen()` only overrides calls to
 `dlopen("libGL\.*", ...)` or `dlopen("*/libGL\.*", ...)`.
 
-3. vglserver_config should now work properly with DRI-compatible graphics
+3. `vglserver_config` should now work properly with DRI-compatible graphics
 drivers (including ATI.)
 
 4. VirtualGL's interposed version of `dlopen()` will now modify calls to
@@ -1030,9 +1037,10 @@ handle window resize events under certain circumstances.
 6. Moved `dlopen()` back into a separate faker library (libdlfaker.so.)
 libdlfaker.so is loaded by default, which should maintain the behavior of VGL
 2.1.2.  However, it can be disabled by passing an argument of `-nodl` to
-vglrun.  The latter is necessary to make VirtualBox 2.2.x work with VirtualGL.
+`vglrun`.  The latter is necessary to make VirtualBox 2.2.x work with
+VirtualGL.
 
-7. vglserver_config should now work properly on Ubuntu 9.04 when using gdm or
+7. `vglserver_config` should now work properly on Ubuntu 9.04 when using gdm or
 kdm.  It should also (mostly) work on Fedora 11 (disabling XTEST does not work
 on Fedora 11 when using gdm.)
 
@@ -1104,18 +1112,18 @@ TurboJPEG.  This should decrease the CPU usage when running VirtualGL on
 Solaris VirtualGL servers, particularly Solaris/x86 servers running 32-bit
 applications.
 
-5. vglconnect now works properly with Cygwin.
+5. `vglconnect` now works properly with Cygwin.
 
 6. Fixed a regression that caused VirtualGL to remove any part of the
 `VGL_XVENDOR` string following the first whitespace.
 
-7. vglserver_config now works properly with OpenSolaris systems.
+7. `vglserver_config` now works properly with OpenSolaris systems.
 
 8. `glXUseXFont()` now works if a Pixmap is the current drawable.
 
-9. vglserver_config now works properly with Debian Linux systems.
+9. `vglserver_config` now works properly with Debian Linux systems.
 
-10. Fixed a typo in vglconnect that caused it to leave temporary files lying
+10. Fixed a typo in `vglconnect` that caused it to leave temporary files lying
 about.
 
 11. Removed the libXm (Motif) dependency in the Solaris/x86 version of
@@ -1123,22 +1131,22 @@ VirtualGL.  This mainly affected OpenSolaris systems, on which Motif is not
 available.  The libXm dependency was introduced in VirtualGL 2.0.x, because
 that version of VirtualGL used libXt (X Intrinsics) to generate its popup
 configuration dialog.  Java requires that libXm be loaded ahead of libXt, so it
-was necessary to explicitly link the VirtualGL faker library with libXm to
-guarantee that the libraries were loaded in the correct order.  Since VirtualGL
-2.1.x and later no longer use libXt, the binding to libXm could be safely
-removed on x86 systems.  Note, however, that the libXm binding still has to be
-included on SPARC systems, because libGL on SPARC depends on libXmu, which
-depends on libXt.
+was necessary to explicitly link the VirtualGL Faker with libXm to guarantee
+that the libraries were loaded in the correct order.  Since VirtualGL 2.1.x and
+later no longer use libXt, the binding to libXm could be safely removed on x86
+systems.  Note, however, that the libXm binding still has to be included on
+SPARC systems, because libGL on SPARC depends on libXmu, which depends on
+libXt.
 
 12. Fixed an issue with GeomView whereby attempting to resize the oldest window
-in a multi-window view would cause the Exceed version of vglclient to crash.
+in a multi-window view would cause the VirtualGL Client for Exceed to crash.
 
 13. When used to configure a Solaris server for GLX mode with open access (all
 users being able to access the 3D X server, not just members of the vglusers
-group), vglserver_config was incorrectly placing xhost commands at the top of
-/etc/dt/config/Xsetup instead of at the bottom.  This could have led to
-problems, since xhost is not guaranteed to be in the PATH until the bottom of
-that script.
+group), `vglserver_config` was incorrectly placing `xhost` commands at the top
+of `/etc/dt/config/Xsetup` instead of at the bottom.  This could have led to
+problems, since `xhost` is not guaranteed to be in the `PATH` until the bottom
+of that script.
 
 14. VirtualGL should now build and run cleanly on Ubuntu systems (and possibly
 other Debian derivatives, although only Ubuntu has been tested.)
@@ -1155,7 +1163,7 @@ mechanism that ensures that no more than 100 `glFlush()` commands per second
 will actually result in an image being drawn or sent, and thus strings of
 rapid-fire `glFlush()` commands can no longer overload the pipeline.
 
-16. vglserver_config should now work with openSUSE systems.
+16. `vglserver_config` should now work with openSUSE systems.
 
 17. It was discovered that `xhost +LOCAL:` is a better method of enabling 3D X
 server access to all users of the VirtualGL server.  This method works even if
@@ -1163,16 +1171,16 @@ TCP connections are disabled in the X server (which is the case on recent
 Solaris and Linux distributions.)  vglserver\_config has thus been modified to
 use this method rather than `xhost +localhost`.  Also, since it is no longer
 necessary to set `DisallowTCP=false` in the GDM configuration file,
-vglserver_config now comments out this line if it exists.
+`vglserver_config` now comments out this line if it exists.
 
 18. Fixed a deadlock that occurred when using the VirtualGL Sun Ray plugin and
 ParaView to render multi-context datasets.
 
-19. Fixed an issue with Mac X11 2.1.x on OS X 10.5 "Leopard" whereby vglconnect
-would abort with `Could not open log file.`  X11 2.1.x uses a `DISPLAY`
-environment of the form /tmp/launch-*/:0, so it was necessary to remove
-everything up to the last slash before using this variable to build a unique
-vglclient log file path.
+19. Fixed an issue with Mac X11 2.1.x on OS X 10.5 "Leopard" whereby
+`vglconnect` would abort with `Could not open log file.`  X11 2.1.x uses a
+`DISPLAY` environment of the form /tmp/launch-*/:0, so it was necessary to
+remove everything up to the last slash before using this variable to build a
+unique log file path for the VirtualGL Client.
 
 20. Included libgefaker.so in the Solaris VirtualGL packages (oops.)
 
@@ -1205,13 +1213,13 @@ the value of the `LD_PRELOAD` environment variable (and, on Solaris, the
 `LD_PRELOAD_32` and `LD_PRELOAD_64` environment variables.)  This fools an
 application into thinking that no preloading is occurring.  This feature is
 currently undocumented and is subject to change, but it can be activated in
-this release by passing an argument of `-ge` to vglrun.
+this release by passing an argument of `-ge` to `vglrun`.
 
 3. Extended `VGL_SYNC` functionality to include `glXSwapBuffers()` as well.
 This works around a couple of interaction issues between VirtualGL and
 AutoForm.  The User's Guide has been updated to explain this new functionality,
-to include an app recipe for AutoForm, and to include a warning about the
-performance consequences of using `VGL_SYNC` on a remote X connection.
+to include an application recipe for AutoForm, and to include a warning about
+the performance consequences of using `VGL_SYNC` on a remote X connection.
 
 4. Included a short paragraph in the Chromium section of the User's Guide
 that explains how to use VirtualGL on the render nodes to redirect 3D rendering
@@ -1224,14 +1232,14 @@ with VirtualGL.  Removed dire warnings.
 
 7. Fixed a regression (uninitialized variable) introduced by 2.1 beta1[7].
 
-8. Fixed a logic error that caused vglclient to fail when using OpenGL drawing
-and talking to a legacy (VGL 2.0 or earlier) server.
+8. Fixed a logic error that caused the VirtualGL Client to fail when using
+OpenGL drawing and talking to a legacy (VGL 2.0 or earlier) VirtualGL faker.
 
 9. Fixed a regression that would cause VGL to deadlock when the user closed the
 3D application window while using the X11 Image Transport.
 
-10. Fixed an issue whereby vglserver_config would fail to detect the presence
-of GLP because nm was not in the default PATH.
+10. Fixed an issue whereby `vglserver_config` would fail to detect the presence
+of GLP because nm was not in the default `PATH`.
 
 11. When running VirtualGL on Enterprise Linux 5 using the 100 series nVidia
 drivers, a normal exit from a 3D application will result in
@@ -1251,15 +1259,16 @@ high-client-CPU-usage scenarios.
 100% of the CPU when sitting idle.  Added an option to GLXSpheres to adjust the
 polygon count of the scene.
 
-15. Added app recipes for ANSYS and Cedega to the User's Guide.  Added notes
-describing the ANSYS and Pro/E duplicate `glFlush()` issue and workarounds.
+15. Added application recipes for ANSYS and Cedega to the User's Guide.  Added
+notes describing the ANSYS and Pro/E duplicate `glFlush()` issue and
+workarounds.
 
 16. Changed the default value for `VGL_NPROCS` to `1` (the performance study
 indicates that there is no longer any measurable advantage to multi-threaded
 compression on modern hardware with VGL 2.1.)
 
-17. Added a `-bench` option to nettest to allow it to measure actual usage on a
-given Solaris or Linux network device.  This was necessitated by accuracy
+17. Added a `-bench` option to `nettest` to allow it to measure actual usage on
+a given Solaris or Linux network device.  This was necessitated by accuracy
 issues with other open source network monitoring solutions.
 
 18. Changed the way global hash tables are allocated in VGL, in order to fix an
@@ -1277,7 +1286,7 @@ applications work properly.
 
 22. There was some inconsistency regarding the interface for enabling lossless
 compression in the Sun Ray Image Transport.  The User's Guide listed the
-interface as `VGL_COMPRESS=srrgb`, whereas the output of vglrun listed the
+interface as `VGL_COMPRESS=srrgb`, whereas the output of `vglrun` listed the
 interface as `-c srlossless`.  VirtualGL 2.1rc only responded to the latter.
 This version of VirtualGL now responds to both interfaces, but
 `VGL_COMPRESS=srrgb` is the correct and documented interface.  Any errant
@@ -1298,46 +1307,48 @@ communicate changes to the configuration through shared memory.
 and the corresponding application recipe for VisConcept unnecessary, and thus
 both have been removed.
 
-2. Added two new scripts (vglconnect and vgllogin) to automate the process of
-connecting to a VirtualGL server and using the VGL Image Transport (formerly
-"Direct Mode.")  vglconnect wraps both vglclient and ssh.  Through the use of
-command-line arguments, vglconnect can be configured to forward either the X11
-traffic or the 3D image traffic (or none or both) over the SSH connection.
-vglconnect invokes vgllogin on the server, which configures the server
-environment with the proper `VGL_CLIENT` and `VGL_PORT` values so that, once
-connected, no further action is required other than to launch a 3D application
-with vglrun.  See the User's Guide for more information.
+2. Added two new scripts (`vglconnect` and `vgllogin`) to automate the process
+of connecting to a VirtualGL server and using the VGL Image Transport (formerly
+"Direct Mode.")  `vglconnect` wraps both `vglclient` and SSH.  Through the use
+of command-line arguments, `vglconnect` can be configured to forward either the
+X11 traffic or the VGL Image Transport (or none or both) over the SSH
+connection.  `vglconnect` invokes `vgllogin` on the server, which configures
+the server environment with the proper `VGL_CLIENT` and `VGL_PORT` values so
+that, once connected, no further action is required other than to launch a 3D
+application with `vglrun`.  See the User's Guide for more information.
 
-3. vglclient includes many changes to support vglconnect.  Rather than listen
-just on ports 4242 and 4243, the default behavior of vglclient is now to find a
-free listening port in the range of 4200-4299 (it tries 4242 and 4243 first,
-to maintain backward compatibility.)  vglclient records its listening port in
-an X property that is later read by the VGL faker.  This feature allows more
-than one instance of vglclient to run on the same machine.  The client can also
-detach completely from the console and run as a background daemon, exiting only
-when the X server resets or when vglclient is explicitly killed.
+3. The VirtualGL Client includes many changes to support `vglconnect`.  Rather
+than listen just on ports 4242 and 4243, the default behavior of `vglclient` is
+now to find a free listening port in the range of 4200-4299 (it tries 4242 and
+4243 first, to maintain backward compatibility.)  The VirtualGL Client records
+its listening port in an X property that is later read by the VirtualGL Faker.
+This feature allows more than one instance of `vglclient` to run on the same
+machine.  The VirtualGL Client can also detach completely from the console and
+run as a background daemon, exiting only when the X server resets or when
+`vglclient` is explicitly killed.
 
-    Previous versions of VirtualGL required one instance of vglclient to talk
-to all X displays on the client machine, but this created problems in
-multi-user environments.  Thus, VirtualGL 2.1 runs a separate instance of
-vglclient for each unique X display.  This eliminates the need (as well as the
-ability) to run vglclient as a root daemon or as a Windows service, and thus
-those features have been removed.
+	Previous versions of VirtualGL required one instance of the VirtualGL Client
+to talk to all client-side X displays, but this created problems in multi-user
+environments.  Thus, VirtualGL 2.1 runs a separate instance of `vglclient` for
+each unique X display.  This eliminates the need (as well as the ability) to
+run `vglclient` as a root daemon or as a Windows service, and thus those
+features have been removed.
 
-    Since vglclient is intended to be launched from vglconnect, Start Menu
+    Since `vglclient` is intended to be launched from `vglconnect`, Start Menu
 links to the VirtualGL Client are no longer included in the Windows package.
 
-    See the User's Guide for more information about the changes to vglclient.
+    See the User's Guide for more information about the changes to the
+VirtualGL Client.
 
 4. The Windows VirtualGL package now includes an optimized version of PuTTY
-0.60, which is used by the Windows version of vglconnect.  When tunneling the
-3D image stream, this version of PuTTY provides significantly better
+0.60, which is used by the Windows version of `vglconnect`.  When tunneling the
+VGL Image Transport, this version of PuTTY provides significantly better
 performance than the stock version of PuTTY 0.60.
 
-5. Added a new script (vglserver_config) to automate the process of configuring
-the VirtualGL server's X display (the 3D X server) to allow connections from
-VirtualGL.  This script can also be used to configure GLP, for machines that
-support it.  See the User's Guide for more information.
+5. Added a new script (`vglserver_config`) to automate the process of
+configuring the 3D X server to allow connections from VirtualGL.  This script
+can also be used to configure GLP, for machines that support it.  See the
+User's Guide for more information.
 
 6. The VirtualGL Unix packages now include a benchmark called "GLXSpheres",
 which is an open source look-alike of the old nVidia SphereMark demo.  This
@@ -1388,7 +1399,7 @@ ensures that the last frame in a rendering sequence will always be displayed.
 Ray plugin's configuration options can now be configured through the VirtualGL
 Configuration dialog.
 
-13. The Mac client is now fully documented.
+13. The Mac VirtualGL Client is now fully documented.
 
 14. Included mediaLib Huffman encoding optimizations contributed by Sun.  This
 boosts the performance of VirtualGL on Solaris systems by as much as 30%.
@@ -1403,7 +1414,7 @@ applications that requested a single-buffered RGB visual would sometimes fail
 to obtain it through VirtualGL.  The newer nVidia drivers don't always return
 an RGB 8/8/8 framebuffer config as the first in the list, so it was necessary
 for VirtualGL to specify `GLX_RED_SIZE`, `GLX_GREEN_SIZE`, and `GLX_BLUE_SIZE`
-when obtaining a framebuffer config on the VirtualGL server's X display.
+when obtaining a framebuffer config on the 3D X server.
 
 17. Interframe comparison now works properly with stereo image pairs, and
 interframe comparison can now be disabled by using the `VGL_INTERFRAME` option.
@@ -1462,22 +1473,22 @@ multi-processor Solaris/SPARC machines.
 Direct linking, but static linking against libstdc++ has the added benefit of
 allowing one VirtualGL RPM to be used across multiple Linux platforms.
 
-6. Eliminated the use of the X DOUBLE-BUFFER extension in Raw Mode and replaced
-it instead with X Pixmap drawing.  Previously, VGL would try to use the MIT-SHM
-extension to draw images in Raw Mode, then it would fall back to using the X
-DOUBLE-BUFFER extension if MIT-SHM was not available or could not be used (such
-as on a remote X connection), then it would fall back to single-buffered
-drawing if DOUBLE-BUFFER could not be used.  However, the DOUBLE-BUFFER
-extension crashes on some Sun Ray configurations (specifically Xinerama
-configurations), so VGL 2.0 disabled the use of DOUBLE-BUFFER on all Sun Ray
-configurations to work around this issue.  [6] replaces that hack with a more
-solid fix that ensures that Raw Mode is always double-buffered, even if the X
-DOUBLE-BUFFER extension is not available or is not working.  Pixmap drawing
-has the same performance as DOUBLE-BUFFER.
+6. Eliminated the use of the X `DOUBLE-BUFFER` extension in Raw Mode and
+replaced it instead with X Pixmap drawing.  Previously, VGL would try to use
+the `MIT-SHM` extension to draw images in Raw Mode, then it would fall back to
+using the X `DOUBLE-BUFFER` extension if `MIT-SHM` was not available or could
+not be used (such as on a remote X connection), then it would fall back to
+single-buffered drawing if `DOUBLE-BUFFER` could not be used.  However, the
+`DOUBLE-BUFFER` extension crashes on some Sun Ray configurations (specifically
+Xinerama configurations), so VGL 2.0 disabled the use of `DOUBLE-BUFFER` on all
+Sun Ray configurations to work around this issue.  [6] replaces that hack with
+a more solid fix that ensures that Raw Mode is always double-buffered, even if
+the X `DOUBLE-BUFFER` extension is not available or is not working.  Pixmap
+drawing has the same performance as `DOUBLE-BUFFER`.
 
     This generally only affects cases in which Raw Mode is used to transmit
 images over a network.  When Raw Mode is used to transmit images to an X server
-on the same machine, it is almost always able to use the MIT-SHM X extension.
+on the same machine, it is almost always able to use the `MIT-SHM` X extension.
 
 7. Numerous doc changes, including:
 
@@ -1492,13 +1503,13 @@ procedure would not have worked if multiple users were trying to tunnel Direct
 Mode from the same server.  The new procedure requires running a program (see
 [8] below) that prints out an available TCP port, and using that port on the
 server end of the SSH tunnel.
-     - Added app recipe for ANSA 12.1.0.
+     - Added application recipe for ANSA 12.1.0.
      - Added procedures for using VGL with TurboVNC and for using TurboVNC in
 general.
      - Added information for using VGL with GLP (which, unbelievably, was never
 really included in the User's Guide.  Major oversight on our part.)
 
-8. Modified the nettest program such that it finds a free TCP port number and
+8. Modified the `nettest` program such that it finds a free TCP port number and
 prints out the port number to the console when you pass an argument of
 `-findport` to the program.
 
@@ -1528,17 +1539,17 @@ OpenGL to perform its 3D rendering.
 display is indirect.  This will occur on Solaris if the framebuffer device
 permissions do not allow read/write access for the current user.
 
-13. Normally, if X11 drawing is the default in the VGL client (which is the
-case on non-SPARC systems, on SPARC systems with 2D framebuffers, or on any
-system if vglclient is invoked with the `-x` argument), then the VGL client
-will only use OpenGL for drawing stereo frames.  This fixes a bug whereby the
-VGL client would not switch back to X11 drawing (if X11 drawing was the
-default) after the app ceased rendering in stereo.
+13. Normally, if X11 drawing is the default in the VirtualGL Client (which is
+the case on non-SPARC systems, on SPARC systems with 2D framebuffers, or on any
+system if `vglclient` is invoked with the `-x` argument), then the VirtualGL
+Client will only use OpenGL for drawing stereo frames.  This fixes a bug
+whereby the VirtualGL Client would not switch back to X11 drawing (if X11
+drawing was the default) after the application ceased rendering in stereo.
 
-14. You can now specify a listen port number of 0 to make the VGL client pick
-an available port.  This is of only marginal use at the moment, since there is
-no way to make the server automatically connect to that port, but we got this
-for free as a result of [8].
+14. You can now specify a listen port number of 0 to make the VirtualGL Client
+pick an available port.  This is of only marginal use at the moment, since
+there is no way to make the server automatically connect to that port, but we
+got this for free as a result of [8].
 
 15. Fixed an issue that was causing the multi-threaded tests in rrfakerut to
 crash some of the nVidia 7xxx series drivers.  rrfakerut should now run cleanly
@@ -1551,15 +1562,15 @@ properly detecting that OpenGL is available:
 
     - `glXChooseFBConfig()` now ignores the `GLX_VISUAL_ID` attribute.  That
 attribute doesn't really have any meaning in VGL, and passing it through to the
-server's X display was causing Java 2D apps to fail.
+3D X server was causing Java 2D apps to fail.
     - `glXGetFBConfigAttrib(..., GLX_DRAWABLE_TYPE, ...)` now always returns
 `GLX_PIXMAP_BIT|GLX_PBUFFER_BIT|GLX_WINDOW_BIT`, so that Java 2D apps will
 properly detect that window rendering is available in VirtualGL.
 
-17. vglrun will now print usage information if you fail to provide an
+17. `vglrun` will now print usage information if you fail to provide an
 application command to run.
 
-18. Upgraded the OpenSSL DLL included with the Windows VirtualGL client to
+18. Upgraded the OpenSSL DLL included with the Windows VirtualGL Client to
 OpenSSL 0.9.8d (previously 0.9.8c.)
 
 19. VirtualGL now buffers the output from the profiler class so that the
@@ -1567,12 +1578,12 @@ profiling output from multiple compression threads doesn't intermingle when
 redirected to a log file.
 
 20. If the `DISPLAY` environment variable is unset on the VirtualGL server,
-vglrun will now set it automatically to `{ssh_client}:0.0` (where
+`vglrun` will now set it automatically to `{ssh_client}:0.0` (where
 `{ssh_client}` = the IP address of the SSH client.)  If `DISPLAY` is set to
 `localhost:{n}.0` or `{server_hostname}:{n}.0`, VGL assumes that SSH X11
 forwarding is in use and sets `VGL_CLIENT={ssh_client}:0.0` instead (without
-modifying `DISPLAY`.)  vglrun prints a warning that it is doing this.  You must
-still explicitly set `VGL_CLIENT` or `DISPLAY` if you are doing something
+modifying `DISPLAY`.)  `vglrun` prints a warning that it is doing this.  You
+must still explicitly set `VGL_CLIENT` or `DISPLAY` if you are doing something
 exotic, such as tunneling VGL's client/server connection through SSH or
 displaying to an X server with a display number other than 0.  But this fix
 should eliminate the need to set `VGL_CLIENT` and `DISPLAY` in most cases.
@@ -1608,7 +1619,7 @@ an interaction issue between VGL and Pro/E Wildfire v3 that led to slow
 performance when zooming in or out on the Pro/E model.
 
 23. Added an option (`VGL_LOG`), which can be used to redirect the console
-output from the VGL faker to a file instead of stderr.
+output from the VirtualGL Faker to a file instead of stderr.
 
 24. The mediaLib implementation of TurboJPEG and the mediaLib-accelerated gamma
 correction code have been modified slightly, to avoid calls to mediaLib
@@ -1635,7 +1646,7 @@ addition to address the fact that there was no way to gamma-correct
 applications that were remotely displayed to non-SPARC clients.  SPARC users
 are accustomed to OpenGL applications being gamma-corrected by default, so
 VirtualGL now mimics this behavior whenever it is running on a SPARC server,
-even if the client machine is not a SPARC machine.
+even if the client is not a SPARC machine.
 
     The behavior of the `VGL_GAMMA` environment variable has changed as
 follows:
@@ -1702,22 +1713,24 @@ libcrypto), thus eliminating the need to install Blastwave OpenSSL on Solaris 9
 and prior.
 
 2. Packages now include a convenience script (vglgenkey) that will generate an
-xauth key for the server's X display.  This provides a more secure way of
-granting access to the server's X display than using `xhost +localhost`.
+xauth key for the 3D X server.  This provides a more secure way of granting
+access to the 3D X server than using `xhost +localhost`.
 
-3. Built and packaged the VirtualGL client for Mac OS/X (Intel only.)  This
-package is currently undocumented and includes only the VGL client (no server
-components), but its usage should be self-explanatory for those familiar with
-VGL on other platforms (it should work very similarly to the Linux version.)
+3. Built and packaged the VirtualGL Client for Mac OS/X (Intel only.)  This
+package is currently undocumented and includes only the VirtualGL Client (no
+server components), but its usage should be self-explanatory for those familiar
+with VGL on other platforms (it should work very similarly to the Linux
+version.)
 
-4. Normally, when running in Raw Mode, VirtualGL will try to use the MIT-SHM X
-extension to draw images.  If MIT-SHM is not available or doesn't work (which
-would be the case if the X connection is remote), then VGL will try to use the
-X DOUBLE-BUFFER extension.  Failing that, it will fall back to single-buffered
-drawing.  In a Sun Ray environment, the X DOUBLE-BUFFER extension is unstable
-when Xinerama is used.  DOUBLE-BUFFER doesn't really double-buffer in a Sun Ray
-environment anyhow, so this release of VirtualGL disables the use of
-DOUBLE-BUFFER if it detects that it is running in a Sun Ray environment.
+4. Normally, when running in Raw Mode, VirtualGL will try to use the `MIT-SHM`
+X extension to draw images.  If `MIT-SHM` is not available or doesn't work
+(which would be the case if the X connection is remote), then VGL will try to
+use the X `DOUBLE-BUFFER` extension.  Failing that, it will fall back to
+single-buffered drawing.  In a Sun Ray environment, the X `DOUBLE-BUFFER`
+extension is unstable when Xinerama is used.  `DOUBLE-BUFFER` doesn't really
+double-buffer in a Sun Ray environment anyhow, so this release of VirtualGL
+disables the use of `DOUBLE-BUFFER` if it detects that it is running in a Sun
+Ray environment.
 
 5. Reformatted User's Guide using [Deplate](http://deplate.sourceforge.net).
 Numerous other doc changes as well.
@@ -1739,13 +1752,14 @@ doesn't work in Raw Mode and proceeds to send only the left eye buffer.
 
 ### Significant changes relative to 2.0 beta1:
 
-1. Added a `-dl` option to vglrun, which inserts a new libdlfaker.so interposer
-ahead of VirtualGL in the link order.  libdlfaker.so intercepts `dlopen()`
-calls from an application and, if the application is trying to use `dlopen()`
-to open libGL, librrfaker.so (VirtualGL) is opened instead.  This allows
-VirtualGL to be used seamlessly with applications that do not dynamically link
-against libGL and do not provide any sort of override mechanism.  See the
-User's Guide for a list of known applications that require the `-dl` option.
+1. Added a `-dl` option to `vglrun`, which inserts a new libdlfaker.so
+interposer ahead of VirtualGL in the link order.  libdlfaker.so intercepts
+`dlopen()` calls from an application and, if the application is trying to use
+`dlopen()` to open libGL, librrfaker.so (the VirtualGL Faker) is opened
+instead.  This allows VirtualGL to be used seamlessly with applications that do
+not dynamically link against libGL and do not provide any sort of override
+mechanism.  See the User's Guide for a list of 3D applications that are known
+to require the `-dl` option.
 
 2. Bug fixed:  Lazy loading of OpenSSL on Solaris now works properly, so
 OpenSSL doesn't have to be installed unless VirtualGL is being used in SSL
@@ -1771,11 +1785,12 @@ and GLX modes.  Sun OpenGL patch 120812-12 (or later) and KFB driver patch
 9. Bug fixed:  In GLX mode, some of the "real" GLX functions that VirtualGL
 calls on the server will in turn call `glXGetClientString()`,
 `glXQueryExtensions()`, etc. to list extensions available on the server's X
-display.  VirtualGL interposes on these functions and returns its own extension
-strings rather than the "real" strings from the server's X display, and this
-caused problems under certain circumstances.  These interposed functions will
-now detect whether they are being called from within another GLX function and
-will return the "real" extension strings for the server's X display if so.
+display (the 3D X server.)  VirtualGL interposes these functions and returns
+its own extension strings rather than the "real" strings from the 3D X server,
+and this caused problems under certain circumstances.  These interposed
+functions will now detect whether they are being called from within another GLX
+function and will return the "real" extension strings for the 3D X server if
+so.
 
 10. Generally friendlier error messages
 
@@ -1792,38 +1807,39 @@ application that this affects is VisConcept.  Set `VGL_GUI_XTHREADINIT` to `0`
 to prevent VisConcept from deadlocking when the VGL config dialog is activated.
 
 14. VirtualGL will no longer allow a non-TrueColor stereo visual to be
-selected, because such visuals won't work with the VGL client.  Color index
-(PseudoColor) rendering requires Raw Mode, but stereo requires Direct Mode, so
-VirtualGL cannot transmit PseudoColor images in stereo.
+selected, because such visuals won't work with the VirtualGL Client.  Color
+index (PseudoColor) rendering requires Raw Mode, but stereo requires Direct
+Mode, so VirtualGL cannot transmit PseudoColor images in stereo.
 
 15. VirtualGL will now automatically select Raw Mode if it detects that it is
 running on a "local" display (i.e. ":{n}.0", "unix:{n}.0", etc., but not
 "localhost:{n}.0".)  This allows users of X proxies such as Sun Ray, TurboVNC,
 NX, etc. to run VirtualGL without having to pass an argument of `-c 0` to
-vglrun.  "localhost:{n}.0" is not considered a "local" display, and neither is
-"{server_hostname}:{n}.0", because display connections tunneled through SSH
+`vglrun`.  "localhost:{n}.0" is not considered a "local" display, and neither
+is "{server_hostname}:{n}.0", because display connections tunneled through SSH
 will have a display name that takes on one of those forms.
 
-16. The VirtualGL client for Solaris/SPARC will now automatically detect if it
+16. The VirtualGL Client for Solaris/SPARC will now automatically detect if it
 is running on a framebuffer that uses software OpenGL and will default to using
 X11 drawing in that case.  Otherwise, if hardware-accelerated OpenGL is
-available, then the VGL client for Solaris/SPARC will try to use OpenGL as the
-default drawing method.  This improves performance on the XVR-100 and similar
-framebuffers as well as working around a bug in the OGL implementation on
-XVR-100 (see CR 6408535.)  Non-SPARC clients still use X11 drawing by default,
-except when drawing stereo frames.
+available, then the VirtualGL Client for Solaris/SPARC will try to use OpenGL
+as the default drawing method.  This improves performance on the XVR-100 and
+similar framebuffers as well as working around a bug in the OGL implementation
+on XVR-100 (see CR 6408535.)  Non-SPARC implementations of the VirtualGL Client
+still use X11 drawing by default, except when drawing stereo frames.
 
 17. Worked around some issues in Sun OpenGL that manifested themselves in
-instability of the SPARC VirtualGL client when drawing large numbers of
+instability of the SPARC VirtualGL Client when drawing large numbers of
 simultaneous frames from different servers.
 
-18. Expanded N1 GridEngine hooks in vglrun so that the `VGL_CLIENT`,
+18. Expanded N1 GridEngine hooks in `vglrun` so that the `VGL_CLIENT`,
 `VGL_COMPRESS`, `VGL_PORT`, `VGL_SSL`, `VGL_GLLIB`, and `VGL_X11LIB`
-environment variables will be automatically passed to vglrun by N1GE.  All
+environment variables will be automatically passed to `vglrun` by N1GE.  All
 other variables must be explicitly passed by using the `-v` option to qsub.
 
 19. Bug fixed:  Lazy loading of OpenGL now works properly on Solaris clients,
-so vglclient can be run on machines that don't have OpenGL installed.
+so the VirtualGL Client can be run on machines that don't have OpenGL
+installed.
 
 20. For some reason, popping up the VGL configuration dialog when running Java
 apps caused VGL's Xt resource string to be ignored, which would cause the

@@ -1,5 +1,5 @@
 /* Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2011 D. R. Commander
+ * Copyright (C)2009-2011, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -101,11 +101,11 @@ void *RRTransInit(Display *dpy, Window win, FakerConfig *fconfig);
                  RRTransInit())
    receiver_name (IN) = character string containing the name of the receiver
                         to which to connect.  This is typically the TCP/IP
-                        address or hostname of the client machine, but this
-                        parameter may be used for other purposes as well.
-                        VirtualGL sets this parameter to the value of the
-                        VGL_CLIENT environment variable or, if VGL_CLIENT is
-                        unset, to the display string of the 2D X server.
+                        address or hostname of the client, but this parameter
+                        may be used for other purposes as well.  VirtualGL sets
+                        this parameter to the value of the VGL_CLIENT
+                        environment variable or, if VGL_CLIENT is unset, to the
+                        display string of the 2D X server.
    port (IN) = the receiver port to which to connect.  This is typically
                the TCP port on which the receiver is listening, but this
                parameter may be used for other purposes as well.  VirtualGL

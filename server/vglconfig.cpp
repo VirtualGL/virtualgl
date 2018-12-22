@@ -1,5 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
- * Copyright (C)2009, 2012, 2014, 2017 D. R. Commander
+ * Copyright (C)2009, 2012, 2014, 2017-2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -420,8 +420,8 @@ void checkParentPID(void *data)
 void usage(char **argv)
 {
 	vglout.print("\nUSAGE: %s -shmid <s> [options]\n\n", argv[0]);
-	vglout.print("<s> = Shared memory segment ID (reported by VirtualGL when the environment\n");
-	vglout.print("      variable VGL_VERBOSE is set to 1)\n\n");
+	vglout.print("<s> = Shared memory segment ID (reported by the VirtualGL Faker when the\n");
+	vglout.print("      environment variable VGL_VERBOSE is set to 1)\n\n");
 	vglout.print("Options:\n");
 	vglout.print("-display <d> = X display to which to display the GUI (default: read from\n");
 	vglout.print("               DISPLAY environment variable)\n");

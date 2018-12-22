@@ -1,6 +1,27 @@
 #VAR: css=virtualgl.css
 #TITLE: User's Guide for VirtualGL {val: _DOCVERSION}
 #MAKETITLE
+
+#IF: fmt==html
+
+#DefMacroN id=file args=@body <<---
+<strong class="filename">{arg: @body}</strong>
+---
+
+#DefMacroN id=pcode args=@body <<---
+<code>{arg: @body}</code>
+---
+
+#DefMacroN id=bold args=@body <<---
+<strong>{arg: @body}</strong>
+---
+
+#DefRegionN id=Pverb args=@body <<---
+<pre class="verbatim">{arg: @body}</pre>
+---
+
+#ENDIF
+
 __Intended audience:__ System Administrators, Graphics Programmers,
 Researchers, and others with knowledge of Linux or Unix operating systems,
 OpenGL and GLX, and X windows.

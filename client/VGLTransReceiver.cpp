@@ -295,7 +295,7 @@ ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
 			if(windows[winid] && windows[winid]->match(dpynum, win))
 				return windows[winid];
 	}
-	if(nwin >= MAXWIN) _throw("No free window ID's");
+	if(nwin >= MAXWIN) _throw("No free window IDs");
 	if(dpynum < 0 || dpynum > 65535 || win == None) _throw("Invalid argument");
 	_newcheck(windows[winid] = new ClientWin(dpynum, win, drawMethod, stereo));
 

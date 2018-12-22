@@ -4,24 +4,25 @@
 *** Advantages of the VGL Transport
 #OPT: noList! plain!
 
-	* Seamless windows; every application window appears as a separate window on
-		the user's desktop
+	* Seamless windows; every window from the 3D application appears as a
+		separate window on the client
 	* Supports stereographic rendering (see requirements in
-		{ref prefix="Sections ": Stereo_Requirements} and
-		{ref prefix="": Overlay_Requirements})
+		{ref prefix="Section ": Stereo_Requirements})
 	* Consumes less memory and CPU time on the server, since the 2D (X11)
-		rendering occurs on the client machine
+		rendering occurs on the client
 
 *** Disadvantages of the VGL Transport
 #OPT: noList! plain!
 
-	* The VGL Transport is designed to be used with remote X servers, and thus it
-		relies on the chatty remote X11 protocol to send the 2D elements of the
-		application's GUI to the user's desktop.  As a result, the VGL Transport is
-		not recommended for use on high-latency or low-bandwidth networks
+	* The VGL Transport is designed to be used with client-side 2D X servers, and
+		thus it relies on the chatty remote X11 protocol to send the non-OpenGL
+		elements of the 3D application's GUI to the client.  As a result, the VGL
+		Transport is not recommended for use on high-latency or low-bandwidth
+		networks.
 	* No collaboration features
-	* The client is not stateless.  As with any remote X11 environment, if the
-		network connection drops, then the application will exit
+	* From the point of view of the 3D application, the client/server connection
+		is not stateless.  As with any remote X11 environment, if the network
+		connection drops, then the application will exit.
 
 ** VGL Transport with X11 Forwarding
 {anchor: X11_Forwarding}
@@ -32,71 +33,47 @@ maximize performance.
 
 *** Procedure
 
-	#. Start the X server if it isn't started already.{nl}
-		__Mac clients:__ start the Mac X11 application or XQuartz.{nl}
-		__Cygwin clients:__ start Cygwin/X.
+	#. Start the 2D X server if it isn't started already.
 
-	#. Open a new terminal window.{nl}
-		__Mac clients:__ in the X11 application, start a new xterm [Command-N] if
-			one isn't already started.{nl}
-		__Cygwin clients:__ start a new xterm if one isn't already started
+		Mac clients :: Start the Mac X11 application or XQuartz.
+
+		Cygwin clients :: Start Cygwin/X.
+
+	#. Open a new terminal window.
+
+		Mac clients :: In the X11 application or XQuartz, start a new xterm
+			[Command-N] if one isn't already started.
+
+		Cygwin clients :: Start a new xterm if one isn't already started
 			(right-click on the Cygwin/X taskbar icon, then select
-			__Applications-->xterm__.)
+				{file: Applications-->xterm}.)
 
 	#. In the same terminal/xterm window, open a Secure Shell (SSH) session into
 		the VirtualGL server:
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglconnect {user}@{server}
+		#Pverb: <<---
+		/opt/VirtualGL/bin/vglconnect __user__@__server__
 		---
 
-		Replace __''{user}''__ with your username on the VirtualGL server and
-		__''{server}''__ with the hostname or IP address of that server.
+		Replace __''user''__ with your username on the VirtualGL server and
+		__''server''__ with the hostname or IP address of that server.
 
-	#. In the SSH session, start a 3D application using VirtualGL:
+	#. In the SSH session, start a 3D application with VirtualGL:
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		#Pverb: <<---
+		/opt/VirtualGL/bin/vglrun __[vglrun options]__ __3D-application-executable-or-script__ __[arguments]__
 		---
 
 	Consult {ref prefix="Chapter ": Advanced_Configuration} for more
 	information on ''vglrun'' command-line options.
-
-** VGL Transport with a Direct X11 Connection
-{anchor: Direct_X11_Connection}
-
-As with the previous mode, this mode performs optimally on
-local-area networks.  However, it is less secure, since both the X11 traffic
-and the VGL Transport are unencrypted.  This mode is primarily useful in
-grid environments, in which you may not know ahead of time which server will
-execute a VirtualGL job.  It is assumed that the "submit host" (the machine
-into which you connect with SSH) and the "execute hosts" (the machines that
-will run VirtualGL jobs) share the same home directories and reside in the same
-domain.
-
-	!!! Most newer Linux and Unix distributions ship with default settings
-	that do not allow TCP connections into the X server.  Such systems cannot be
-	used as clients with this procedure unless they are reconfigured to allow
-	X11 TCP connections.
-
-*** Procedure
-#OPT: noList! plain!
-
-The procedure for this mode is identical to the procedure for the
-[[#X11_Forwarding][VGL Transport with X11 forwarding]], except that you should
-pass a ''-x'' argument to ''vglconnect'' when connecting to the server:
-
-	#Verb: <<---
-	/opt/VirtualGL/bin/vglconnect -x {user}@{server}
-	---
 
 ** VGL Transport with X11 Forwarding and SSH Tunneling
 {anchor: SSH_Tunneling}
 
 Both the VGL Transport and the X11 traffic are tunneled through SSH when
 using this mode, and thus it provides a completely secure solution.  It is
-also useful when either the VirtualGL server or the client machine are behind
-restrictive firewalls and only SSH connections are allowed through.  Using
+also useful when either the client or the VirtualGL server is behind a
+restrictive firewall and only SSH connections are allowed through.  Using
 SSH tunneling on wide-area networks should not affect performance
 significantly.  However, using SSH tunneling on a local-area network can reduce
 the end-to-end performance of the VGL Transport by anywhere from 20-40%.
@@ -108,198 +85,96 @@ The procedure for this mode is identical to the procedure for the
 [[#X11_Forwarding][VGL Transport with X11 forwarding]], except that you should
 pass a ''-s'' argument to ''vglconnect'' when connecting to the server:
 
-	#Verb: <<---
-	/opt/VirtualGL/bin/vglconnect -s {user}@{server}
+	#Pverb: <<---
+	/opt/VirtualGL/bin/vglconnect -s __user__@__server__
 	---
 
 ''vglconnect'' will make two SSH connections into the server, the first to find
-an open port on the server and the second to create the SSH tunnel for the VGL Transport
-and open the secure shell.  If you are not using an SSH agent to create
-password-less logins, then this mode will require you to enter your password
-twice.
+an open port on the server and the second to create the SSH tunnel for the VGL
+Transport and open the secure shell.  If you are not using an SSH agent to
+enable password-less logins, then you will have to enter your password twice.
 
 ''vglconnect -s'' can be used to create multi-layered SSH tunnels.  For
 instance, if the VirtualGL server is not directly accessible from the Internet,
-then you can run ''vglconnect -s'' on the client machine to connect to an
-SSH gateway server, then you can run ''vglconnect -s'' again on the gateway
-server to connect to the VirtualGL server (application server.)  Both the X11
-traffic and the VGL Transport will be forwarded from the VirtualGL server
-through the gateway and to the client.
+then you can run ''vglconnect -s'' on the client to connect to an SSH gateway
+server, then you can run ''vglconnect -s'' again on the gateway server to
+connect to the VirtualGL server (application server.)  Both the X11 traffic and
+the VGL Transport will be forwarded from the VirtualGL server through the
+gateway and to the client.
 
 #IMG: sshtunnel.png
-
-** VGL Transport over Gigabit Networks
-
-When using the VGL Transport over Gigabit Ethernet or faster networks, it may
-be desirable to disable image compression.  This can be accomplished by passing
-an argument of ''-c rgb'' to ''vglrun'' or setting the ''VGL_COMPRESS''
-environment variable to ''rgb'' on the VirtualGL server.  Disabling image
-compression will reduce VirtualGL's server and client CPU usage by 50% or more,
-but the tradeoff is that it will also increase VirtualGL's network usage by a
-factor of 10 or more.  Thus, disabling image compression is not recommended
-unless you are using switched Gigabit Ethernet (or faster) infrastructure and
-have plenty of bandwidth to spare.
-
-** VGL Transport with XDMCP
-
-	!!! XDMCP is very insecure and is not recommended as a means of running
-	VirtualGL, in general.  This section is provided mainly for completeness and
-	should not be construed as an endorsement of XDMCP.  In general, using an X
-	proxy is a much better approach for accessing a remote desktop session on the
-	3D application server.
-
-Using the VGL Transport with XDMCP is conceptually similar to using
-the VGL Transport with a
-[[#Direct_X11_Connection][direct X11 connection]].  The major difference is
-that, rather than remotely displaying individual X windows to the 2D X server,
-XDMCP remotely displays a complete desktop session from the application server.
-X11 applications are launched inside of this remote desktop session rather than
-in a separate shell, so ''vglconnect'' cannot be used in this case.  Instead,
-it is necessary to start ''vglclient'' manually on the client machine.
-
-*** Procedure
-#OPT: noList! plain!
-
-	#. Configure the server machine to accept XDMCP connections.  This may
-		require opening specific ports in its firewall.
-
-	#. Configure the client machine to make XDMCP connections.  This may require
-		enabling X11 TCP connections and opening specific ports in its firewall.
-
-	#. Once you have established an XDMCP connection from the client to the
-		server, open a terminal inside the XDMCP session and type:
-
-		#Verb: <<---
-		xhost +LOCAL:
-		---
-
-		!!! This grants access to the 2D X server for any user that is currently
-		logged into the client machine.  This is not very secure, but neither is
-		using XDMCP.  If you are concerned, then
-		see below for a discussion of how to use ''xauth'' to provide 2D X server
-		access in a slightly more secure manner.
-
-	#. If you are using a Mac or Windows client, or if you are using a nested X
-		server (such as Xephyr or XNest) on a Linux/Unix client to make the XDMCP
-		connection, then the next step is easy.  Simply open a new terminal/command
-		prompt on the client machine, set the ''DISPLAY'' environment variable to
-		the display name of the X server that is running the XDMCP session (usually
-		'':0'' or '':1''), and type:
-
-		#Verb: <<---
-		vglclient -detach
-		---
-
-		You can now close the terminal/command prompt, if you wish.
-
-	#. If you are running a full-screen XDMCP session on a Linux/Unix client
-		(for instance, using GDM Chooser), then starting ''vglclient'' is a bit
-		trickier.  In this case, you can't open up a separate terminal window on
-		the client machine for the purposes of running ''vglclient''.  However,
-		from inside of the XDMCP session, you can open an SSH session back into the
-		client machine.  In this SSH session, set the ''DISPLAY'' environment
-		variable to the display name of the X server that is running the XDMCP
-		session (usually '':0'' or '':1''), and type:
-
-		#Verb: <<---
-		vglclient -detach
-		---
-
-		You can now close the SSH session, if you wish.
-
-*** Security
-#OPT: noList! plain!
-
-Typing ''xhost +LOCAL:'' in step 3 above opens the 2D X server to all current
-users of the client machine.  This shouldn't pose any significant risk if the
-client is a Windows or a Mac machine.  However, Linux/Unix clients might have
-multiple simultaneous users, so in these cases, it may be desirable to use a
-more secure method of granting access to the 2D X server.
-
-Instead of typing ''xhost +LOCAL:'', you can type the following:
-
-#Verb: <<---
-xauth nextract - $DISPLAY | sed "s/.*[ ]//g" | xargs ssh {client} xauth add {display} .
----
-
-where __''{client}''__ is the hostname or IP address of the client machine and
-__''{display}''__ is the display name of the 2D X server, from the point of
-view of the client machine (usually '':0'' or '':1'').
-
-This extracts the XAuth key for the 2D X server, then remotely adds it to the
-XAuth keyring on the client machine.
 
 ** The VirtualGL Client Application: Nuts and Bolts
 
 The VirtualGL Client application (''vglclient'') receives encoded and/or
-compressed images on a dedicated TCP socket, decodes and/or decompresses the
-images, and draws the images into the appropriate X window.  The ''vglconnect''
+compressed frames on a dedicated TCP socket, decodes and/or decompresses the
+frames, and draws the frames into the appropriate X window.  The ''vglconnect''
 script wraps both ''vglclient'' and SSH to greatly simplify the process of
 creating VGL Transport connections.
 
 ''vglconnect'' invokes ''vglclient'' with an argument of ''-detach'', which
-causes ''vglclient'' to completely detach from the console and run as a
+causes the VirtualGL Client to completely detach from the console and run as a
 background daemon.  It will remain running silently in the background,
 accepting VGL Transport connections for the X server on which it was started,
-until that X server is reset or until the ''vglclient'' process is explicitly
-killed.  Logging out of the X server will reset the X server and thus kill all
-''vglclient'' instances that are attached to it.  You can also explicitly kill
-all instances of ''vglclient'' running under your user account by invoking
+until that X server is reset or until the VirtualGL Client process is
+explicitly killed.  Logging out of the X server will reset the X server and
+thus kill all VirtualGL Client instances that are attached to it.  You can also
+explicitly kill all instances of the VirtualGL Client running under your user
+account by invoking
 
 	#Verb: <<---
 	vglclient -kill
 	---
 
-(''vglclient'' is installed in ''/opt/VirtualGL/bin'' by default.)
+(''vglclient'' is installed in {file: /opt/VirtualGL/bin} by default.)
 
-''vglconnect'' instructs ''vglclient'' to redirect all of its console output
-to a log file named
-__''{home}''__''/.vgl/vglconnect-''__''{hostname}''__''-''__''{display}''__''.log'',
-where __''{home}''__ is the path of the current user's home directory,
-__''{hostname}''__ is the name of the computer running ''vglconnect'', and
-__''{display}''__ is the name of the current X display (read from the
-''DISPLAY'' environment or passed to ''vglconnect'' using the ''-display''
-argument.)  In the event that something goes wrong, this log file is the first
-place to check.
+''vglconnect'' instructs the VirtualGL Client to redirect all of its console
+output to a log file named
+{file: ~/.vgl/vglconnect-__hostname__-__display__.log}, where
+{file: __hostname__} is the name of the computer on which ''vglconnect'' was
+invoked and {file: __display__} is the display name of the X server on which
+the VirtualGL Client was started (read from the ''DISPLAY'' environment or
+passed to ''vglconnect'' using the ''-display'' argument.)  In the event that
+something goes wrong, this log file is the first place to check.
 
-When ''vglclient'' successfully starts on a given X display, it stores its
-listener port number in a root window property on the X display.  If
-other ''vglclient'' instances attempt to start on the same X display, they read
-the X window property, determine that another ''vglclient'' instance is
-already running, and exit to allow the first instance to retain control.
-''vglclient'' will clean up the X property under most circumstances, even
+When the VirtualGL Client successfully starts on a given X server, it stores
+its listener port number in a root window property on the X server.  If
+other VirtualGL Client instances attempt to start on the same X server, they
+read the X window property, determine that another VirtualGL Client instance is
+already running, and exit to allow the first instance to retain control.  The
+VirtualGL Client will clean up the X property under most circumstances, even
 if it is explicitly killed.  However, under rare circumstances (if sent a
-SIGKILL signal on Unix, for instance), a ''vglclient'' instance may exit
-uncleanly and leave the X property set.  In these cases, it may be necessary
-to add an argument of ''-force'' to ''vglconnect'' the next time you use it.
-This tells ''vglconnect'' to start a new ''vglclient'' instance, regardless of
-whether ''vglclient'' thinks that there is already an instance running on this
-X display.  Alternately, you can simply reset your X server to clear the
+SIGKILL signal, for instance), a VirtualGL Client instance may exit uncleanly
+and leave the X property set.  In these cases, it may be necessary to add an
+argument of ''-force'' to ''vglconnect'' the next time you use it.  This tells
+''vglconnect'' to start a new VirtualGL Client instance, regardless of whether
+the VirtualGL Client thinks that there is already an instance running on this
+X server.  Alternately, you can simply reset the X server to clear the
 orphaned X window property.
 
 *** The VirtualGL Client and Firewalls
 
 To retain compatibility with previous versions of VirtualGL, the first
-''vglclient'' instance on a given machine will attempt to listen on port 4242
-for unencrypted connections and 4243 for SSL connections (if VirtualGL was
+VirtualGL Client instance on a given machine will attempt to listen on port
+4242 for unencrypted connections and 4243 for SSL connections (if VirtualGL was
 built with OpenSSL support.)  If it fails to obtain one of those ports, because
-another application or another ''vglclient'' instance is already using them,
-then ''vglclient'' will try to obtain a free port in the range of 4200-4299.
-Failing that, it will request a free port from the operating system.
+another application or another VirtualGL Client instance is already using them,
+then the VirtualGL Client will try to obtain a free port in the range of
+4200-4299.  Failing that, it will request a free port from the operating
+system.
 
-In a nutshell: if you only ever plan to run one X server at a time on your
-client machine, which means that you'll only ever need one instance of
-''vglclient'' at a time, then it is sufficient to open inbound port 4242 (and
-4243 if you plan to use SSL) in your client machine's firewall.  If you plan to
-run multiple X servers on your client machine, which means that you will need
-to run multiple ''vglclient'' instances, then you may wish to open ports
-4200-4299.  Similarly, if you are running ''vglclient'' on a multi-user
-X proxy server that has a firewall, then you may wish to open ports 4200-4299
-in the server's firewall.  Opening ports 4200-4299 will accommodate up to 100
-separate ''vglclient'' instances (50 if OpenSSL support is enabled.)  More
-instances than that cannot be accommodated on a firewalled machine, unless the
-firewall is able to create rules based on application executables instead of
-listening ports.
+In a nutshell: if you only ever plan to run one X server at a time on the
+client, which means that you'll only ever need one instance of the VirtualGL
+Client at a time, then it is sufficient to open inbound port 4242 (and 4243 if
+you plan to use SSL) in the client's firewall.  If you plan to run multiple X
+servers on the client, which means that you will need to run multiple VirtualGL
+Client instances, then you may wish to open ports 4200-4299.  Similarly, if you
+are running the VirtualGL Client on a multi-user X proxy server that has a
+firewall, then you may wish to open ports 4200-4299 in the server's firewall.
+Opening ports 4200-4299 will accommodate up to 100 separate VirtualGL Client
+instances (50 if OpenSSL support is enabled.)  More instances than that cannot
+be accommodated on a firewalled machine, unless the firewall is able to create
+rules based on application executables instead of listening ports.
 
 Note that it is not necessary to open any inbound ports in the firewall to use
 the VGL Transport with [[#SSH_Tunneling][SSH Tunneling]].

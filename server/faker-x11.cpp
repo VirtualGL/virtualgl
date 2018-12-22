@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2016 D. R. Commander
+ * Copyright (C)2009, 2011-2016, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -39,9 +39,10 @@ extern "C" {
 int XCloseDisplay(Display *dpy)
 {
 	// MainWin calls various X11 functions from the destructor of one of its
-	// shared libraries, which is executed after the VGL faker has shut down,
-	// so we cannot access fconfig or vglout or winh without causing deadlocks or
-	// other issues.  At this point, all we can safely do is hand off to libX11.
+	// shared libraries, which is executed after the VirtualGL Faker has shut
+  // down, so we cannot access fconfig or vglout or winh without causing
+  // deadlocks or other issues.  At this point, all we can safely do is hand
+  // off to libX11.
 	if(vglfaker::deadYet || vglfaker::getFakerLevel() > 0)
 		return _XCloseDisplay(dpy);
 

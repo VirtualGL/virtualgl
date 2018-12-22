@@ -8,7 +8,7 @@ set the ''VGL_PROFILE'' environment variable to ''1'' on both server and client
 (passing an argument of ''+pr'' to ''vglrun'' on the server has the same
 effect.)  This will cause VirtualGL to measure and report the throughput of
 various stages in the pipeline.  For example, here are some measurements from a
-dual Pentium 4 server communicating with a Pentium III client on a 100 Megabit
+dual Pentium 4 server communicating with a Pentium III client on a 100-megabit
 LAN:
 
 	Server :: {:}
@@ -33,40 +33,40 @@ using 1/10 of our available network bandwidth.  Looking at the client, however,
 we discover that its slow decompression speed (10.35 Megapixels/second) is the
 primary bottleneck.  Decompression and blitting on the client cannot be done in
 parallel, so the aggregate performance is the harmonic mean of the
-decompression and blitting rates:  __[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.
-In this case, we could improve the performance of the whole system by simply
-using a client with a faster CPU.
+decompression and blitting rates:
+__[1/ (1/10.35 + 1/35.75)] = 8.0 Mpixels/sec__.  In this case, we could improve
+the performance of the whole system by simply using a client with a faster CPU.
 
 	!!! This example is meant to demonstrate how the client can sometimes be
 	the primary impediment to VirtualGL's end-to-end performance.  Using "modern"
-	hardware on both ends of the connection, VirtualGL can easily stream 50+
+	hardware in both the server and client, VirtualGL can easily stream 50+
 	Megapixels/sec across a LAN, as of this writing.
 
 ** Frame Spoiling
 {anchor: Frame_Spoiling}
 
-By default, VirtualGL will only send a frame to the client if the client is
-ready to receive it.  If VirtualGL detects that the application has finished
+By default, VirtualGL will only transport a frame if the image transport is
+ready to receive it.  If VirtualGL detects that the 3D application has finished
 rendering a new frame but there are already frames waiting in the queue to be
-processed, then those unprocessed frames are dropped ("spoiled") and the new
-frame is promoted to the head of the queue.  This prevents a backlog of frames
-on the server, which would cause a perceptible delay in the responsiveness of
-interactive applications.  However, when running non-interactive applications,
-particularly benchmarks, frame spoiling should always be disabled.   With frame
-spoiling disabled, the server will render frames only as quickly as VirtualGL
-can send those frames to the client, which will conserve server resources as
-well as allow OpenGL benchmarks to accurately measure the end-to-end
-performance of VirtualGL (assuming that the VGL Transport is used.)  With frame
-spoiling enabled, OpenGL benchmarks will report meaningless data, since the
-rate at which the server can render frames is decoupled from the rate at which
-VirtualGL can send those frames to the client.
+transported, then those untransported frames are dropped ("spoiled"), and the
+new frame is promoted to the head of the queue.  This prevents a backlog of
+frames on the server, which would cause a perceptible delay in the
+responsiveness of interactive 3D applications.  However, when running
+non-interactive 3D applications (particularly benchmarks), frame spoiling
+should always be disabled.  With frame spoiling disabled, the server will
+render frames only as quickly as VirtualGL can transport those frames, which
+will conserve server resources as well as allow OpenGL benchmarks to accurately
+measure the end-to-end performance of VirtualGL.  With frame spoiling enabled,
+OpenGL benchmarks will report meaningless data, since the rate at which the
+server can render frames is decoupled from the rate at which VirtualGL can
+transport those frames.
 
 In most X proxies (including VNC), there is effectively another layer of frame
 spoiling, since the rate at which the X proxy can send frames to the client is
-decoupled from the rate at which VirtualGL can draw images into the X proxy.
-Thus, even if frame spoiling is disabled in VirtualGL, OpenGL benchmarks will
-still report inaccurate data if they are run in such X proxies.  TCBench,
-described below, provides a limited solution to this problem.
+decoupled from the rate at which VirtualGL can draw rendered frames into the X
+proxy.  Thus, even if frame spoiling is disabled in VirtualGL, OpenGL
+benchmarks will still report inaccurate data if they are run in such X proxies.
+TCBench, described below, provides a limited solution to this problem.
 
 To disable frame spoiling, set the ''VGL_SPOIL'' environment variable to ''0''
 on the VirtualGL server or pass an argument of ''-sp'' to ''vglrun''.  See
@@ -74,7 +74,7 @@ on the VirtualGL server or pass an argument of ''-sp'' to ''vglrun''.  See
 
 ** VirtualGL Diagnostic Tools
 
-VirtualGL includes several tools that can be useful in diagnosing performance
+VirtualGL includes several tools that can be useful for diagnosing performance
 problems with the system.
 
 *** NetTest
@@ -83,9 +83,9 @@ problems with the system.
 NetTest is a network benchmark that uses the same network I/O classes as
 VirtualGL.  It can be used to test the latency and throughput of any TCP/IP
 connection, with or without SSL encryption.  ''nettest'' is installed in
-''/opt/VirtualGL/bin'' by default.  For Windows users, a native Windows version
-of NetTest is included in the "VirtualGL-Utils" package, which is distributed
-alongside VirtualGL.
+{file: /opt/VirtualGL/bin} by default.  For Windows users, a native Windows
+version of NetTest is included in the {file: VirtualGL-Utils} package, which
+is distributed alongside VirtualGL.
 
 To use NetTest, first start up the NetTest server on one end of the
 connection:
@@ -98,21 +98,21 @@ nettest -server [-ssl]
 particular connection.  VirtualGL must have been compiled with OpenSSL support
 for this option to be available.)
 
-Next, start the client on the other end of the connection:
+Next, start the NetTest client on the other end of the connection:
 
-#Verb: <<---
-nettest -client {server} [-ssl]
+#Pverb: <<---
+nettest -client __server__ [-ssl]
 ---
 
-Replace __''{server}''__ with the hostname or IP address of the machine on which
+Replace __''server''__ with the hostname or IP address of the machine on which
 the NetTest server is running.  (Use ''-ssl'' if the NetTest server is running
 in SSL mode.  VirtualGL must have been compiled with OpenSSL support for this
 option to be available.)
 
 The NetTest client will produce output similar to the following:
 
-#Verb: <<---
-TCP transfer performance between localhost and {server}:
+#Pverb: <<---
+TCP transfer performance between localhost and __server__:
 
 Transfer size  1/2 Round-Trip      Throughput      Throughput
 (bytes)                (msec)    (MBytes/sec)     (Mbits/sec)
@@ -142,7 +142,7 @@ Transfer size  1/2 Round-Trip      Throughput      Throughput
 ---
 
 We can see that the throughput peaks at about 94 megabits/sec, which is pretty
-good for a 100 Megabit connection.  We can also see that, for small transfer
+good for a 100-megabit connection.  We can also see that, for small transfer
 sizes, the round-trip time is dominated by latency.  The "latency" is
 the same thing as the one-way (1/2 round-trip) transit time for a zero-byte
 packet, which is about 93 microseconds in this case.
@@ -151,14 +151,14 @@ packet, which is about 93 microseconds in this case.
 #OPT: noList! plain!
 
 CPUstat is available only for Linux and is installed in the same place as
-NetTest (''/opt/VirtualGL/bin'' by default.)  It measures the average,
-minimum, and peak CPU usage for all processors combined and for each processor
+NetTest ({file: /opt/VirtualGL/bin} by default.)  It measures the average,
+minimum, and peak usage for all CPU cores combined and for each CPU core
 individually.  On Windows, this same functionality is provided in the Windows
 Performance Monitor, which is part of the operating system.  On Solaris, the
-same data can be obtained through ''vmstat''.
+same data can be obtained using the ''vmstat'' program.
 
 CPUstat measures the CPU usage over a given sample period (a few seconds) and
-continuously reports how much the CPU was utilized since the last sample
+continuously reports how much each CPU core was utilized since the last sample
 period.  Output for a particular sample looks something like this:
 
 #Verb: <<---
@@ -167,17 +167,17 @@ cpu0:  20.5 (Usr= 19.5 Nice=  0.0 Sys=  1.0) / Min= 19.4 Max= 88.6 Avg= 45.7
 cpu1:  81.5 (Usr= 75.5 Nice=  0.0 Sys=  6.0) / Min= 16.6 Max= 83.5 Avg= 56.3
 ---
 
-The first column indicates what percentage of time the CPU was active since the
-last sample period (this is then broken down into what percentage of time the
-CPU spent running user, nice, and system/kernel code.)  "ALL" indicates the
-average utilization across all CPUs since the last sample period.  "Min",
-"Max", and "Avg" indicate a running minimum, maximum, and average of all
-samples since CPUstat was started.
+The first column indicates what percentage of time the CPU core was active
+since the last sample period.  This is then broken down into what percentage of
+time the CPU core spent running user, nice, and system/kernel code.  ''ALL''
+indicates the average utilization across all CPU cores since the last sample
+period.  ''Min'', ''Max'', and ''Avg'' indicate a running minimum, maximum, and
+average of all samples since CPUstat was started.
 
-Generally, if an application's CPU usage is fairly steady, you can run CPUstat
-for a bit and wait for the Max. and Avg. for the "ALL" category to stabilize,
-then that will tell you what the application's peak and average % CPU
-utilization is.
+Generally, if a 3D application's CPU usage is fairly steady, then you can run
+CPUstat for a bit and wait for the ''Max'' and ''Avg'' values in the ''ALL''
+category to stabilize, and that will tell you the application's peak and
+average CPU utilization.
 
 *** TCBench
 #OPT: noList! plain!
@@ -186,23 +186,23 @@ TCBench was born out of the need to compare VirtualGL's performance to that of
 other thin client software, some of which had frame spoiling features that
 could not be disabled.  TCBench measures the frame rate of a thin client system
 as seen from the client's point of view.  It does this by attaching to one of
-the client windows and continuously reading back a small area at the center of
-the window.  While this may seem to be a somewhat non-rigorous test,
-experiments have shown that, if care is taken to ensure that the application
-is updating the center of the window on every frame (such as in a spin
+the windows on the client and continuously reading back a small area at the
+center of the window.  While this may seem to be a somewhat non-rigorous test,
+experiments have shown that, if care is taken to ensure that the 3D application
+is updating the center of the window with every frame (such as in a spin
 animation), TCBench can produce quite accurate results.  It has been sanity
 checked with VirtualGL's internal profiling mechanism and with a variety of
 system-specific techniques, such as monitoring redraw events on the client's
 windowing system.
 
-TCBench is installed in ''/opt/VirtualGL/bin'' by default.  For Windows users,
-a native Windows version of TCBench is included in the "VirtualGL-Utils"
-package, which is distributed alongside VirtualGL.  Run ''tcbench''
-from the command line, and it will prompt you to click in the window you want
-to benchmark.   That window should already have an automated animation of some
-sort running before you launch TCBench.  Note that GLXSpheres (see below) is
-an ideal benchmark to use with TCBench, since GLXSpheres draws a new sphere
-to the center of its window on every frame.
+TCBench is installed in {file: /opt/VirtualGL/bin} by default.  For Windows
+users, a native Windows version of TCBench is included in the
+{file: VirtualGL-Utils} package, which is distributed alongside VirtualGL.  Run
+''tcbench'' from the command line, and it will prompt you to click in the
+window you want to benchmark.   That window should already have an automated
+animation of some sort running before you launch TCBench.  Note that GLXSpheres
+(see below) is an ideal benchmark to use with TCBench, since GLXSpheres draws a
+new sphere to the center of its window every time it renders a frame.
 
 #Verb: <<---
 tcbench -?
@@ -216,21 +216,21 @@ within the window.
 #OPT: noList! plain!
 
 GLXSpheres is a benchmark that produces very similar images to nVidia's
-(long-discontinued) SphereMark benchmark.  Back in the early days of
-VirtualGL's existence, it was discovered (quite by accident) that SphereMark
-was a pretty good test of VirtualGL's end-to-end performance, because
-that benchmark generated images with about the same proportion of solid color
-and similar frequency components to the images generated by volume
-visualization applications.
+(long-discontinued) SphereMark benchmark.  In the early days of VirtualGL's
+existence, it was discovered (quite by accident) that SphereMark was a pretty
+good test of VirtualGL's end-to-end performance, because that benchmark
+generated images with about the same proportion of solid color, and similar
+frequency components, to the images generated by volume visualization
+applications.
 
-Thus, the goal of GLXSpheres was to create an open source Unix version of
-SphereMark (the original SphereMark was for Windows only) completely from
-scratch.  GLXSpheres does not use any code from the original benchmark,
-but it does attempt to mimic the visual output of the original as closely as
-possible.  GLXSpheres lacks some of the advanced rendering features of the
-original, such as the ability to use vertex arrays, but since GLXspheres was
-primarily designed as a benchmark for VirtualGL, display lists are more than
-fast enough for that purpose.
+Thus, the goal of GLXSpheres was to create an open source Un*x version of
+SphereMark (SphereMark was for Windows only) completely from scratch.
+GLXSpheres does not use any code from the original benchmark, but it does
+attempt to mimic the visual output of the original as closely as possible.
+GLXSpheres lacks some of the advanced rendering features of the original, such
+as the ability to use vertex arrays, but since GLXspheres was primarily
+designed as a benchmark for VirtualGL, display lists are more than fast enough
+for that purpose.
 
 GLXSpheres has some additional modes that its predecessor lacked, modes that
 are designed specifically to test the performance of various VirtualGL
@@ -246,22 +246,24 @@ features:
 	Immediate mode rendering (''glxspheres -m'') :: Want to really see the
 	benefit of VirtualGL?  Run ''glxspheres -m'' over a remote X connection, then
 	run ''vglrun -sp glxspheres -m'' over the same connection and compare.
-	Immediate mode does not use display lists, so when immediate mode OpenGL is
+	Immediate mode does not use display lists, so when immediate-mode OpenGL is
 	rendered indirectly (over a remote X connection), this causes every OpenGL
-	command to be sent as a separate network request to the X server ... with every
-	frame.  Many applications do not use display lists (because the geometry they
-	are rendering is dynamic, or for other reasons), so this test models how such
-	applications might perform when displayed remotely without VirtualGL.
+	command to be sent as a separate network request to the X server ... with
+	every frame.  Many 3D applications do not use display lists-- because the
+	geometry they are rendering is dynamic, or for other reasons-- so this test
+	models how such applications might perform when displayed remotely without
+	VirtualGL.
 
 	Interactive mode (''glxspheres -i'') ::	In interactive mode, GLXSpheres will
-	wait to draw a frame until it receives a mouse event.  Continuously dragging
-	the mouse in the window should produce a steady frame rate, and this frame
-	rate is a reasonable model of the frame rate that you can achieve when
-	running interactive applications in VirtualGL.  Comparing this interactive
-	frame rate (''vglrun glxspheres -i'') with the non-interactive frame rate
-	(''vglrun -sp glxspheres'') allows you to quantify the effect of X latency
-	on the performance of interactive applications in a VirtualGL environment.
+	wait to render a frame until it receives a mouse event.  Continuously
+	dragging the mouse in the window should produce a steady frame rate, and this
+	frame rate is a reasonable model of the frame rate that you can achieve when
+	running interactive 3D applications with VirtualGL.  Comparing this
+	interactive frame rate (''vglrun glxspheres -i'') with the non-interactive
+	frame rate (''vglrun -sp glxspheres'') allows you to quantify the effect of
+	network latency on the performance of interactive applications in a VirtualGL
+	environment.
 
-GLXSpheres is installed in ''/opt/VirtualGL/bin'' by default.  64-bit VirtualGL
-builds name this program ''glxspheres64'' so as to allow both a 64-bit and a
-32-bit version of GLXSpheres to be installed on the same system.
+GLXSpheres is installed in {file: /opt/VirtualGL/bin} by default.  64-bit
+VirtualGL builds name this program ''glxspheres64'' so as to allow both a
+64-bit and a 32-bit version of GLXSpheres to be installed on the same system.

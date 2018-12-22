@@ -4,12 +4,12 @@
 The X Video extension allows applications to pre-encode or pre-compress images
 and send them through the X server to the graphics adapter, which presumably
 has on-board video decoding capabilities.  This approach greatly reduces the
-amount of CPU resources used by the X server, which can be beneficial if the X
-server is running on a different machine than the application.
+CPU resources used by the X server, which can be beneficial if the X server is
+running on a different machine than the application.
 
-In the case of VirtualGL, what this means is that the VirtualGL client machine
-no longer has to decode or decompress images from the 3D application server.
-It can simply pass the images along to the graphics adapter for decoding.
+In the case of VirtualGL, what this means is that the client no longer has to
+decode or decompress rendered frames from the 3D application.  It can simply
+pass the frames along to the graphics adapter for decoding.
 
 VirtualGL supports the X Video extension in two ways:
 
@@ -17,11 +17,11 @@ VirtualGL supports the X Video extension in two ways:
 
 Setting the ''VGL_COMPRESS'' environment variable to ''yuv'' or passing an
 argument of ''-c yuv'' to ''vglrun'' enables the VGL Transport with YUV
-encoding.  When this mode is enabled, VirtualGL encodes images as YUV420P (a
-form of YUV encoding that uses 4X chrominance subsampling and separates Y, U,
-and V pixel components into separate image planes) instead of RGB or JPEG.  The
-YUV420P images are sent to the VirtualGL Client, which draws them using the X
-Video extension.
+encoding.  When this mode is enabled, VirtualGL encodes rendered frames as
+YUV420P (a form of YUV encoding that uses 4X chrominance subsampling and
+separates Y, U, and V components into separate image planes) instead of RGB or
+JPEG.  The YUV420P-encoded frames are sent to the VirtualGL Client, which draws
+them to the 2D X server using the X Video extension.
 
 On a per-frame basis, YUV encoding uses about half the server CPU time as
 JPEG compression and only slightly more server CPU time than RGB encoding.  On
@@ -29,17 +29,17 @@ a per-frame basis, YUV encoding uses about 1/3 the client CPU time as JPEG
 compression and about half the client CPU time as RGB encoding.  YUV encoding
 also uses about half the network bandwidth (per frame) as RGB.
 
-However, since YUV encoding uses 4X chrominance subsampling, the resulting
-images may contain some visible artifacts.  In particular, narrow, aliased
-lines and other sharp features may appear "soft".
+However, since YUV encoding uses 4X chrominance subsampling, the encoded frames
+may contain some visible artifacts.  In particular, narrow, aliased lines and
+other sharp features may appear "soft".
 
 ** The XV Transport
 
 Setting the ''VGL_COMPRESS'' environment variable to ''xv'' or passing an
 argument of ''-c xv'' to ''vglrun'' enables the XV Transport.  The XV Transport
-is a special version of the X11 Transport that
-encodes images as YUV420P and draws them directly to the 2D X server using the
-X Video extension.  This is mainly useful in conjunction with X proxies that
-support the X Video extension.  The idea is that, if the X proxy is going to
-have to transcode the image to YUV anyhow, VirtualGL may be faster at doing
-this, since it has a SIMD-accelerated YUV encoder.
+is a special flavor of the X11 Transport that encodes rendered frames as
+YUV420P and draws them directly to the 2D X server using the X Video extension.
+This is mainly useful in conjunction with X proxies that support the X Video
+extension.  The idea is that, if the X proxy is going to have to transcode the
+frame into YUV anyhow, VirtualGL may be faster at doing this, since it has a
+SIMD-accelerated YUV encoder.

@@ -10,16 +10,16 @@ exceptions, you should install the drivers supplied by your GPU vendor rather
 than the drivers supplied by your O/S distribution.  See
 {ref prefix="Section ": Linux_Requirements}.
 
-2. The 3D X server (that is, the "local" X server on the VirtualGL server
-machine) has been configured to use the GPU drivers you installed above.
+2. The 3D X server has been configured to use the GPU drivers you installed
+above.
 
 3. The machine has an appropriate display manager (such as GDM, KDM, or
 LightDM) installed and has been configured to start the display manager and 3D
 X server at boot time.  This is the default with most modern Linux and Unix
 distributions.
 
-	!!! NOTE: As of this writing, GDM does not execute ''/etc/gdm/Init/Default''
-	or ''/etc/gdm3/Init/Default'' on Wayland-enabled Linux distributions for a
+	!!! As of this writing, GDM does not execute ''/etc/gdm/Init/Default'' or
+	''/etc/gdm3/Init/Default'' on Wayland-enabled Linux distributions for a
 	variety of reasons.  Thus VirtualGL cannot be used with these GDM
 	implementations.  The only known workaround is to use LightDM instead of GDM.
 
@@ -27,8 +27,8 @@ distributions.
 	* If the 3D X server is not headless, then this can be verified by logging
 	into the X server locally and running ''glxinfo''.
 	* If the 3D X server is headless, then proceed with the	instructions below,
-	and the "Sanity Check" section will provide you with an opportunity to verify
-	that the 3D X server is using accelerated OpenGL.
+	and the [[#Sanity_Check][Sanity Check]] section will provide you with an
+	opportunity to verify that the 3D X server is using accelerated OpenGL.
 
 More specific instructions are unfortunately outside of the scope of this
 guide, since they will vary from system to system.
@@ -40,8 +40,7 @@ create off-screen pixel buffers (Pbuffers) and redirect the 3D rendering from
 X windows into these Pbuffers.  Unfortunately, accessing a GPU on Linux and
 Unix systems requires going through an X server.  On such systems, the only way
 to share the application server's GPU(s) among multiple users is to grant those
-users access to the 3D X server (the X server attached to the GPU(s).  Refer to
-the figures in {ref prefix="Chapter ": Overview}.)
+users access to the 3D X server.
 
 It is important to understand the security risks associated with this.  Once
 a user has access to the 3D X server, there is nothing that would prevent
@@ -58,11 +57,11 @@ This section will explain how to configure a VirtualGL server such that
 selected users can run VirtualGL, even if the server is sitting at the login
 prompt.
 
-	#. Shut down the display manager:
+	#. Shut down the display manager.  Examples:
 
-		Ubuntu Linux servers running GDM :: {:}
+		Red Hat/Fedora/SuSE Linux servers :: {:}
 			#Verb: <<---
-			/etc/init.d/gdm stop
+			init 3
 			---
 
 		Ubuntu Linux servers running LightDM :: {:}
@@ -70,49 +69,14 @@ prompt.
 			service lightdm stop
 			---
 
-		SuSE Linux servers :: {:}
-			#Verb: <<---
-			/etc/init.d/xdm stop
-			---
-
-		Red Hat/Fedora Linux servers with SysV init :: {:}
-			#Verb: <<---
-			init 3
-			---
-
-		Red Hat/Fedora Linux servers with systemd :: {:}
-			#Verb: <<---
-			systemctl stop gdm.service
-			---
-
-		Linux servers running MDM :: {:}
-			#Verb: <<---
-			/etc/init.d/mdm stop
-			---
-
-		Solaris 10 servers running GDM :: {:}
-			#Verb: <<---
-			svcadm disable gdm2-login
-			---
-
-		Solaris 11/OpenSolaris servers running GDM :: {:}
-			#Verb: <<---
-			svcadm disable gdm
-			---
-
-		Solaris servers running dtlogin :: {:}
-			#Verb: <<---
-			/etc/init.d/dtlogin stop
-			---
-
 		FreeBSD servers running GDM :: {:}
 			#Verb: <<---
 			/usr/local/etc/rc.d/gdm stop
 			---
 
-		FreeBSD servers running KDM :: {:}
+		Solaris 11/OpenSolaris servers running GDM :: {:}
 			#Verb: <<---
-			/usr/local/kde4/etc/rc.d/kdm4 stop
+			svcadm disable gdm
 			---
 
 	#. Log in as root from the text console (or remotely using SSH.)
@@ -141,7 +105,7 @@ prompt.
 		No :: VirtualGL can be used by any user that successfully logs into the
 			VirtualGL server.  The 3D X server can also be accessed (and potentially
 			exploited) by any user who is logged into the VirtualGL server.  If you
-			choose this option, it is recommended that you also disable the XTEST
+			choose this option, it is recommended that you also disable the ''XTEST''
 			extension (see below.)
 
 	#. {:}
@@ -170,35 +134,38 @@ prompt.
 		[Y/n]
 		---
 
-		Yes :: Disabling XTEST will not prevent a user from logging keystrokes or
-			reading images from the 3D X server, but if a user has access to the 3D
-			X server, disabling XTEST will prevent them from inserting keystrokes or
-			mouse events and thus hijacking local X sessions on that X server.
+		Yes :: Disabling ''XTEST'' will not prevent a user from logging keystrokes
+			or reading images from the 3D X server, but if a user has access to the
+			3D X server, disabling ''XTEST'' will prevent them from inserting
+			keystrokes or mouse events and thus hijacking local X sessions on that X
+			server.
 
 		!!! If you are using GDM 2.14 through 2.20, it will be necessary to run
 		''gdmsetup'' and manually add an argument of ''-tst'' to the X server
-		command line to disable XTEST for the first time.  After this,
-		''vglserver_config'' should be able to disable and enable XTEST properly.
+		command line to disable ''XTEST'' for the first time.  After this,
+		''vglserver_config'' should be able to disable and enable ''XTEST''
+		properly.
 
 		!!! GDM 2.22 and later no longer provide a means of editing the X server
-		command line, so disabling XTEST will not work.  The only known alternative
-		as of this writing is to use a different display manager.
+		command line, so disabling ''XTEST'' will not work.  The only known
+		alternative as of this writing is to use a different display manager.
 
-		No :: ''x11vnc'' and ''x0vncserver'' both require XTEST, so if you need to
+		No :: x11vnc and ''x0vncserver'' both require ''XTEST'', so if you need to
 			attach a VNC server to the 3D X server, then it is necessary to answer
-			"No" (and thus leave XTEST enabled.)
+			"No" (and thus leave ''XTEST'' enabled.)
 
-	#. If you chose to restrict X server or framebuffer device access to the
-		''vglusers'' group, then edit ''/etc/group'' and add ''root'' to the
+	#. If you chose to restrict 3D X server or framebuffer device access to the
+		''vglusers'' group, then edit {file: /etc/group} and add ''root'' to the
 		''vglusers'' group.  If you choose, you can also add additional users to
-		the group at this time.  Note that any user you add to ''vglusers''	must log
-		out and back in again before their new group permissions will take effect.
+		the group at this time.  Note that any user you add to ''vglusers'' must
+		log out and back in again before their new group permissions will take
+		effect.
 
 	#. Restart the display manager:
 
-		Ubuntu Linux servers running GDM :: {:}
+		Red Hat/Fedora/SuSE Linux servers :: {:}
 			#Verb: <<---
-			/etc/init.d/gdm start
+			init 5
 			---
 
 		Ubuntu Linux servers running LightDM :: {:}
@@ -206,29 +173,9 @@ prompt.
 			service lightdm start
 			---
 
-		SuSE Linux servers :: {:}
+		FreeBSD servers running GDM :: {:}
 			#Verb: <<---
-			/etc/init.d/xdm start
-			---
-
-		Red Hat/Fedora Linux servers with SysV init:: {:}
-			#Verb: <<---
-			init 5
-			---
-
-		Red Hat/Fedora Linux servers with systemd :: {:}
-			#Verb: <<---
-			systemctl start gdm.service
-			---
-
-		Linux servers running MDM :: {:}
-			#Verb: <<---
-			/etc/init.d/mdm start
-			---
-
-		Solaris 10 servers running GDM :: {:}
-			#Verb: <<---
-			svcadm enable gdm2-login
+			/usr/local/etc/rc.d/gdm start
 			---
 
 		Solaris 11/OpenSolaris servers running GDM :: {:}
@@ -236,22 +183,8 @@ prompt.
 			svcadm enable gdm
 			---
 
-		Solaris servers running dtlogin :: {:}
-			#Verb: <<---
-			/etc/init.d/dtlogin start
-			---
-
-		FreeBSD servers running GDM :: {:}
-			#Verb: <<---
-			/usr/local/etc/rc.d/gdm start
-			---
-
-		FreeBSD servers running KDM :: {:}
-			#Verb: <<---
-			/usr/local/kde4/etc/rc.d/kdm4 start
-			---
-
 *** Sanity Check
+{anchor: Sanity_Check}
 #OPT: noList! plain!
 
 To verify that the application server is ready to run VirtualGL, log out of the
@@ -265,9 +198,6 @@ in the SSH session:
 	/opt/VirtualGL/bin/glxinfo -display :0 -c
 	---
 
-	!!! NOTE: ''xauth'' and ''xdpyinfo'' are in ''/usr/openwin/bin'' on Solaris
-	systems.
-
 	If you did not restrict 3D X server access :: {:}
 	#Verb <<---
 	xdpyinfo -display :0
@@ -275,13 +205,13 @@ in the SSH session:
 	---
 
 Both commands should output a list of visuals and should complete with no
-errors.  If you chose to disable the XTEST extension, then check the output of
-''xdpyinfo'' to verify that ''XTEST'' does not show up in the list of
-extensions.
+errors.  If you chose to disable the ''XTEST'' extension, then check the output
+of the ''xdpyinfo'' command to verify that ''XTEST'' does not show up in the
+list of extensions.
 
-You should also examine the output of ''glxinfo'' to ensure that at least one
-of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support (the
-latter is indicated by a "P" in the last column.)  Example:
+You should also examine the output of the ''glxinfo'' command to ensure that at
+least one of the visuals is 24-bit or 32-bit TrueColor and has Pbuffer support
+(the latter is indicated by a ''P'' in the last column.)  Example:
 
 	#Verb <<---
 	    visual  x   bf lv rg d st  colorbuffer  ax dp st accumbuffer  ms  cav  drw
@@ -291,16 +221,16 @@ latter is indicated by a "P" in the last column.)  Example:
 	---
 
 If none of the visuals has Pbuffer support, then this is most likely because
-there is no 3D acceleration, which is most likely because the correct 3D
+there is no 3D acceleration, which is most likely because the correct GPU
 drivers are not installed (or are misconfigured.)  Lack of 3D acceleration is
-also typically indicated by the word "Mesa" in the client GLX vendor string
-and/or the OpenGL vendor string, and the words "Software Rasterizer" in the
+also typically indicated by the word ''Mesa'' in the client GLX vendor string
+and/or the OpenGL vendor string, and the words ''Software Rasterizer'' in the
 OpenGL renderer string.
 
 ** Using VirtualGL with Multiple GPUs
 
 VirtualGL can redirect the OpenGL commands from a 3D application to any GPU
-in the server machine.  In order for this to work, however, all of the GPUs
+in the VirtualGL server.  In order for this to work, however, all of the GPUs
 must be attached to different screens on the same X server or to different X
 servers.  Attaching them to different screens is the easiest and most common
 approach, and this allows the GPUs to be individually addressed by setting
@@ -313,7 +243,7 @@ be individually addressed by setting ''VGL_DISPLAY'' to (or invoking
 
 The application server's SSH daemon should have the ''X11Forwarding'' option
 enabled and the ''UseLogin'' option disabled.  This is configured in
-''sshd_config'', which is usually located under ''/etc/ssh''.
+{file: sshd_config}, which is usually located under {file: /etc/ssh}.
 
 ** Un-Configuring the Server
 
@@ -321,12 +251,12 @@ You can use the ''vglserver_config'' script to restore the security settings
 that were in place before VirtualGL was installed.  Option 2 (''Unconfigure
 server for use with VirtualGL in GLX mode'') will remove any shared access to
 the 3D X server and thus prevent VirtualGL from accessing the 3D hardware in
-that manner.  Additionally, this option will re-enable the XTEST extension on
-the 3D X server and will restore the framebuffer device permissions to
-their default (by default, only root or the user that is currently logged into
-the application server locally can access the framebuffer devices.)
+that manner.  Additionally, this option will re-enable the ''XTEST'' extension
+on the 3D X server and will restore the framebuffer device permissions to their
+default (by default, only root or the user that is currently logged into the
+application server locally can access the framebuffer devices.)
 
-	!!! NOTE: Unconfiguring the server does not remove the ''vglusers'' group.
+	!!! Unconfiguring the server does not remove the ''vglusers'' group.
 
 After selecting Option 2, you must restart the display manager before the
 changes will take effect.
