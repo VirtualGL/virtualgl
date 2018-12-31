@@ -24,7 +24,7 @@
 #pragma pack(1)
 #endif
 
-/* Header contained in all image structures */
+/* Header contained in all frame structures */
 typedef struct _rrframeheader
 {
   unsigned int size;       /* If this frame is compressed, the size (in bytes)

@@ -1242,7 +1242,7 @@ int multiThreadTest(int nThreads)
 		threads[i] = NULL;
 	}
 
-	printf("Multi-threaded rendering test (%d threads)\n\n", nThreads);
+	printf("Multithreaded rendering test (%d threads)\n\n", nThreads);
 
 	try
 	{
@@ -2060,9 +2060,9 @@ void usage(char **argv)
 {
 	fprintf(stderr, "\nUSAGE: %s [options]\n\n", argv[0]);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "-n <n> = Use <n> threads (0 <= <n> <= %d) in the multi-threaded rendering test\n",
+	fprintf(stderr, "-n <n> = Use <n> threads (0 <= <n> <= %d) in the multithreaded rendering test\n",
 		MAXTHREADS);
-	fprintf(stderr, "         (default: %d).  <n>=0 disables the multi-threaded rendering test.\n",
+	fprintf(stderr, "         (default: %d).  <n>=0 disables the multithreaded rendering test.\n",
 		DEFTHREADS);
 	fprintf(stderr, "-nostereo = Disable stereo tests\n");
 	fprintf(stderr, "\n");

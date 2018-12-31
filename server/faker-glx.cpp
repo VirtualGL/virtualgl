@@ -2085,7 +2085,8 @@ void glXSelectEventSGIX(Display *dpy, GLXDrawable drawable, unsigned long mask)
 
 
 // If the application is rendering to the back buffer, VirtualGL will read
-// back and send the buffer whenever glXSwapBuffers() is called.
+// back and transport the contents of the buffer whenever glXSwapBuffers() is
+// called.
 
 void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 {

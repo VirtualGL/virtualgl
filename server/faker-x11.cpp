@@ -140,8 +140,8 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	// drawable.
 	//
 	// GLX (3D) Window --> non-GLX (2D) drawable
-	// We assume that glFinish() or another synchronization function has been
-	// called prior to XCopyArea(), in order to copy the pixels from the
+	// We assume that glFinish() or another frame trigger function has been
+	// called prior to XCopyArea(), in order to copy the rendered frame from the
 	// off-screen drawable on the 3D X Server to the corresponding window on the
 	// 2D X Server.  Thus, we defer to the real XCopyArea() function (but this
 	// may not work properly without VGL_SYNC=1.)
@@ -154,9 +154,9 @@ int XCopyArea(Display *dpy, Drawable src, Drawable dst, GC gc, int src_x,
 	if(srcVW && !srcWin && dstVW && !dstWin) copy3d = true;
 
 	// GLX (3D) Pixmap --> GLX (3D) Window
-	// Copy 3D pixels to the window's corresponding off-screen drawable, then
-	// trigger a VirtualGL readback to deliver the pixels from the off-screen
-	// drawable to the window.
+	// Copy rendered frame to the window's corresponding off-screen drawable,
+	// then trigger a readback to transport the frame from the off-screen
+  // drawable to the window.
 	if(srcVW && !srcWin && dstVW && dstWin)
 	{
 		copy2d = false;  copy3d = true;  triggerRB = true;

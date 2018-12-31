@@ -429,9 +429,9 @@ void nativeStress(bool useShm)
 	{
 		clearFB();
 		if(useShm)
-			fprintf(stderr, "FBX write [multi-threaded SHM]:   ");
+			fprintf(stderr, "FBX write [multithreaded SHM]:   ");
 		else
-			fprintf(stderr, "FBX write [multi-threaded]:       ");
+			fprintf(stderr, "FBX write [multithreaded]:       ");
 		n = N;
 		do
 		{
@@ -465,9 +465,9 @@ void nativeStress(bool useShm)
 	try
 	{
 		if(useShm)
-			fprintf(stderr, "FBX read [multi-threaded SHM]:    ");
+			fprintf(stderr, "FBX read [multithreaded SHM]:    ");
 		else
-			fprintf(stderr, "FBX read [multi-threaded]:        ");
+			fprintf(stderr, "FBX read [multithreaded]:        ");
 		n = N;
 		do
 		{
@@ -696,7 +696,7 @@ void usage(char **argv)
 	fprintf(stderr, "-noshm = Do not use MIT-SHM extension to accelerate blitting\n");
 	fprintf(stderr, "-pm = Blit to a pixmap rather than to a window\n");
 	#endif
-	fprintf(stderr, "-mt = Run multi-threaded stress tests\n");
+	fprintf(stderr, "-mt = Run multithreaded stress tests\n");
 	fprintf(stderr, "-v = Print all warnings and informational messages from FBX\n");
 	fprintf(stderr, "-fs = Full-screen mode\n");
 	fprintf(stderr, "-time <t> = Run each benchmark for <t> seconds (default: %.1f)\n",

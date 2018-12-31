@@ -592,7 +592,7 @@ void usage(char **argv)
 	fprintf(stderr, "-rgb = Use RGB encoding instead of JPEG compression\n");
 	fprintf(stderr, "-logo = Add VirtualGL logo\n");
 	fprintf(stderr, "-anaglyph = Test anaglyph creation\n");
-	fprintf(stderr, "-rgbbench <filename> = Benchmark the decoding of RGB-encoded images.\n");
+	fprintf(stderr, "-rgbbench <filename> = Benchmark the decoding of RGB-encoded frames.\n");
 	fprintf(stderr, "                       <filename> should be a BMP or PPM file.\n");
 	fprintf(stderr, "-v = Verbose output (may affect benchmark results)\n");
 	fprintf(stderr, "-check = Check correctness of pixel paths (implies -rgb)\n\n");

@@ -35,7 +35,7 @@ static const int rrtrans_afirst[RRTRANS_FORMATOPT] = { 0, 0, 0, 0, 1, 1 };
 
 typedef struct _RRFrame
 {
-  /* A pointer to the pixels in the framebuffer allocated by the transport
+  /* A pointer to the pixels in the frame buffer allocated by the transport
      plugin.  If this is a stereo frame, then this pointer points to the pixels
      in the left eye buffer.  Pixels delivered from VirtualGL to the plugin are
      always delivered in bottom-up order. */
@@ -45,17 +45,17 @@ typedef struct _RRFrame
      right eye buffer */
   unsigned char *rbits;
 
-  /* The format of the pixels in the allocated framebuffer (see enum above) */
+  /* The format of the pixels in the allocated frame buffer (see enum above) */
   int format;
 
-  /* The width and height of the allocated framebuffer, in pixels */
+  /* The width and height of the allocated frame buffer, in pixels */
   int w, h;
 
-  /* The number of bytes in each pixel row of the allocated framebuffer */
+  /* The number of bytes in each pixel row of the allocated frame buffer */
   int pitch;
 
   /* A pointer to a data structure used by the plugin to represent the
-     framebuffer.  No user serviceable parts inside. */
+     frame buffer.  No user serviceable parts inside. */
   void *opaque;
 
 } RRFrame;
@@ -75,12 +75,12 @@ extern "C" {
    Initialize an instance of the transport plugin
 
    dpy (IN) = a handle to the 2D X server display connection.  The plugin can
-              use this handle to send the 3D pixels to the 2D X server using
-              X11 functions, if it so desires.
+              use this handle to transport the rendered frame to the 2D X
+              server using X11 functions, if it so desires.
    win (IN) = a handle to the X window into which the application intends the
-              3D pixels to be rendered.  The plugin can use this handle to
-              deliver the 3D pixels into the window using X11 functions, if it
-              so desires.
+              rendered frame to be composited.  The plugin can use this handle
+              to composite the rendered frame into the window using X11
+              functions, if it so desires.
    fconfig (IN) = pointer to VirtualGL's faker configuration structure, which
                   can be read or modified by the plugin
 

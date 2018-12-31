@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2012, 2015 D. R. Commander
+ * Copyright (C)2009, 2011-2012, 2015, 2018 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -50,9 +50,9 @@ static void doGLReadback(bool spoilLast, bool sync)
 
 extern "C" {
 
-// VirtualGL reads back and sends the front buffer if something has been
-// rendered to it since the last readback and one of the following functions is
-// called to signal the end of a frame.
+// VirtualGL reads back and transports the contents of the front buffer if
+// something has been rendered to it since the last readback and one of the
+// following functions is called to signal the end of a frame.
 
 void glFinish(void)
 {

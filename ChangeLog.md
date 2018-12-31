@@ -5,7 +5,7 @@
 
 1. Fixed a regression introduced by 2.6 beta1[8] that caused a fatal error
 (`ERROR: in findConfig-- Invalid argument`) to be thrown if a 3D application
-called a readback trigger function, such as `glXSwapBuffers()`, when no OpenGL
+called a frame trigger function, such as `glXSwapBuffers()`, when no OpenGL
 context was current.
 
 2. Worked around a segfault in Cadence Virtuoso that occurred when using
@@ -74,10 +74,10 @@ does not work with this feature.
 when using nVidia's proprietary drivers.  VirtualGL's implementation of
 `glXGetVisualFromFBConfig()` always returned a TrueColor X visual, regardless
 of the GLXFBConfig passed to it.  From VirtualGL's point of view, this was
-correct behavior, because VGL always converts the rendered 3D pixels to
-TrueColor when reading them back.  However, some use cases in VTK assume that
-there is a 1:1 correspondence between X visuals and GLX FB configs, which is
-not the case when using VirtualGL.  Thus, VGL's implementation of
+correct behavior, because VGL always converts the rendered frame to TrueColor
+when reading it back.  However, some use cases in VTK assume that there is a
+1:1 correspondence between X visuals and GLX FB configs, which is not the case
+when using VirtualGL.  Thus, VGL's implementation of
 `glXGetVisualFromFBConfig()` was causing VTK's visual matching algorithm to
 always select the last FB config in the list, and when using nVidia hardware,
 that FB config usually describes an esoteric floating point pixel format.  When
@@ -337,7 +337,7 @@ VirtualGL was built with `VGL_FAKEXCB=1` (which is the default.)
 variables related to PBO readback were being stored in static variables that
 were shared among all OpenGL windows, contexts, and threads, and this was
 suspected-- but not yet confirmed-- to have caused a "Could not set PBO size"
-error with MetaPost.  This issue may have affected other multi-threaded
+error with MetaPost.  This issue may have affected other multithreaded
 applications as well.
 
 
@@ -362,14 +362,14 @@ working when `vglconnect` was used to connect to a VirtualGL server from a
 client running Cygwin/X.
 
 4. If a 3D application is rendering to the front buffer and one of the
-end-of-frame trigger functions (`glFlush()`/`glFinish()`/`glXWaitGL()`) is
-called, VirtualGL will no longer read back the framebuffer unless the render
-mode is `GL_RENDER`.  Reading back the front buffer when the render mode is
-`GL_SELECT` or `GL_FEEDBACK` is not only unnecessary, but it was known to cause
-a GLXBadContextState error with newer nVidia drivers (340.xx and later) in
+frame trigger functions (`glFlush()`/`glFinish()`/`glXWaitGL()`) is called,
+VirtualGL will no longer read back the framebuffer unless the render mode is
+`GL_RENDER`.  Reading back the front buffer when the render mode is `GL_SELECT`
+or `GL_FEEDBACK` is not only unnecessary, but it was known to cause a
+GLXBadContextState error with newer nVidia drivers (340.xx and later) in
 certain cases.
 
-5. Fixed a deadlock that occurred in the multi-threaded rendering test of
+5. Fixed a deadlock that occurred in the multithreaded rendering test of
 fakerut when it was run with the XCB interposer enabled.  This was due to
 VirtualGL attempting to handle XCB events when Xlib owned the event queue.  It
 is possible that this issue affected or would have affected real-world
@@ -497,7 +497,8 @@ The VirtualGL Project in recent years have focused on the server-side
 components and TurboVNC.  In the early days of the project, there were
 performance advantages to the VGL Transport, but that is no longer the case.
 In fact, TurboVNC will generally do a better and faster job of compressing the
-image stream, since it uses a hybrid compression scheme rather than pure JPEG.
+rendered frames from 3D applications, since it uses a hybrid compression scheme
+rather than pure JPEG.
 
     The native Windows version of TCBench, which previously shipped with the
 VirtualGL Client for Exceed, has been moved into the Windows TurboVNC Viewer
@@ -687,8 +688,8 @@ whenever it resized its 3D window after a "Restore" operation, but the issue
 may have affected other applications as well.
 
 9. Previously, 3D applications running in VirtualGL could not successfully use
-`XGetImage()` to obtain the rendered 3D pixels from a GLX pixmap.  This has
-been fixed.
+`XGetImage()` to obtain the rendered frame from a GLX pixmap.  This has been
+fixed.
 
 10. `vglrun` now automatically sets an environment variable that disables the
 execution of the `VBoxTestOGL` program in VirtualBox 4.2 and later.  Since
@@ -921,7 +922,7 @@ fork works on 10.4 "Tiger" or later, and the 64-bit fork works on 10.5
 "Leopard" or later.
 
 7. Added support for encoding rendered frames as I420 YUV and displaying them
-through X Video.  The images can either be displayed directly to the 2D X
+through X Video.  The frames can either be displayed directly to the 2D X
 server or sent through the VGL Transport for display using the VirtualGL
 Client.  See the User's Guide for more details.
 
@@ -936,9 +937,9 @@ the level of multisampling selected by the 3D application.
 10.6.
 
 11. VirtualGL can now use pixel buffer objects (PBOs) to accelerate the
-readback of the rendered 3D pixels.  This particularly helps when multiple
-users are sharing the GPU.  See the "Advanced Configuration" section of the
-User's Guide for more information.
+readback of rendered frames.  This particularly helps when multiple users are
+sharing the GPU.  See the "Advanced Configuration" section of the User's Guide
+for more information.
 
 12. On Linux systems, this version of VirtualGL works around the interaction
 issues between libdlfaker.so and VirtualBox, thus eliminating the need to
@@ -1156,12 +1157,12 @@ succession when rendering to the front buffer, even if no part of the 3D scene
 has changed.  Without going into the gorey details, this caused the VirtualGL
 pipeline to become overloaded in certain cases, particularly on systems with
 fast pixel readback.  On such systems, every one of the `glFlush()` commands
-resulted in VirtualGL drawing or sending a frame, even if the pixels in the
-frame were identical to those in the previous frame.  This resulted in
-application delays of up to several minutes.  This version of VGL includes a
-mechanism that ensures that no more than 100 `glFlush()` commands per second
-will actually result in an image being drawn or sent, and thus strings of
-rapid-fire `glFlush()` commands can no longer overload the pipeline.
+resulted in VirtualGL transporting a rendered frame, even if the frame was
+identical to the previous frame.  This resulted in application delays of up to
+several minutes.  This version of VGL includes a mechanism that ensures that no
+more than 100 `glFlush()` commands per second will actually result in a
+rendered frame being transported, and thus strings of rapid-fire `glFlush()`
+commands can no longer overload the pipeline.
 
 16. `vglserver_config` should now work with openSUSE systems.
 
@@ -1264,7 +1265,7 @@ notes describing the ANSYS and Pro/E duplicate `glFlush()` issue and
 workarounds.
 
 16. Changed the default value for `VGL_NPROCS` to `1` (the performance study
-indicates that there is no longer any measurable advantage to multi-threaded
+indicates that there is no longer any measurable advantage to multithreaded
 compression on modern hardware with VGL 2.1.)
 
 17. Added a `-bench` option to `nettest` to allow it to measure actual usage on
@@ -1369,11 +1370,11 @@ subsampling, since grayscale throws away all chrominance components.  It is
 potentially useful when working with applications that already render grayscale
 images (medical imaging, etc.)
 
-9. VirtualGL can now encode images as uncompressed RGB and send those
-uncompressed images through the VGL Image Transport.  This has two benefits:
+9. VirtualGL can now encode rendered frames as uncompressed RGB and send those
+uncompressed frames through the VGL Image Transport.  This has two benefits:
 
-     - It eliminates the need to use the X11 Image Transport (AKA "Raw Mode")
-over a network, and
+     - It eliminates the need to use the X11 Image Transport (formerly "Raw
+Mode") over a network, and
      - It provides the ability to send lossless stereo image pairs to a
 stereo-enabled client.
 
@@ -1386,14 +1387,14 @@ quad-buffered stereo, then VirtualGL will fall back to using anaglyphic
 (red/cyan) stereo.  This provides a quick & dirty way to visualize stereo data
 on clients that do not support "real" stereo rendering.
 
-    VirtualGL 2.1 can also be configured to send only the left eye or right eye
-images from a stereo application.
+    VirtualGL 2.1 can also be configured to transport only the left eye or
+right eye images from a stereo application.
 
 11. Changed the way VirtualGL spoils frames.  Previous versions would throw out
-any new frames if the queue was already busy compressing or sending a previous
-frame.  In this release, VirtualGL instead throws out any undisplayed frames in
-the queue and promotes every new frame to the head of the queue.  This
-ensures that the last frame in a rendering sequence will always be displayed.
+any new frames if the image transport was already busy transporting a previous
+frame.  In this release, VirtualGL instead throws out any untransported frames
+in the queue and promotes every new frame to the head of the queue.  This
+ensures that the last frame in a rendering sequence will always be transported.
 
 12. Better integration with the Sun Ray plugin.  In particular, many of the Sun
 Ray plugin's configuration options can now be configured through the VirtualGL
@@ -1475,10 +1476,10 @@ allowing one VirtualGL RPM to be used across multiple Linux platforms.
 
 6. Eliminated the use of the X `DOUBLE-BUFFER` extension in Raw Mode and
 replaced it instead with X Pixmap drawing.  Previously, VGL would try to use
-the `MIT-SHM` extension to draw images in Raw Mode, then it would fall back to
-using the X `DOUBLE-BUFFER` extension if `MIT-SHM` was not available or could
-not be used (such as on a remote X connection), then it would fall back to
-single-buffered drawing if `DOUBLE-BUFFER` could not be used.  However, the
+the `MIT-SHM` extension to draw rendered frames in Raw Mode, then it would fall
+back to using the X `DOUBLE-BUFFER` extension if `MIT-SHM` was not available or
+could not be used (such as on a remote X connection), then it would fall back
+to single-buffered drawing if `DOUBLE-BUFFER` could not be used.  However, the
 `DOUBLE-BUFFER` extension crashes on some Sun Ray configurations (specifically
 Xinerama configurations), so VGL 2.0 disabled the use of `DOUBLE-BUFFER` on all
 Sun Ray configurations to work around this issue.  [6] replaces that hack with
@@ -1487,8 +1488,9 @@ the X `DOUBLE-BUFFER` extension is not available or is not working.  Pixmap
 drawing has the same performance as `DOUBLE-BUFFER`.
 
     This generally only affects cases in which Raw Mode is used to transmit
-images over a network.  When Raw Mode is used to transmit images to an X server
-on the same machine, it is almost always able to use the `MIT-SHM` X extension.
+rendered frames over a network.  When Raw Mode is used to transmit rendered
+frames to an X server on the same machine, it is almost always able to use the
+`MIT-SHM` X extension.
 
 7. Numerous doc changes, including:
 
@@ -1551,9 +1553,9 @@ pick an available port.  This is of only marginal use at the moment, since
 there is no way to make the server automatically connect to that port, but we
 got this for free as a result of [8].
 
-15. Fixed an issue that was causing the multi-threaded tests in rrfakerut to
+15. Fixed an issue that was causing the multithreaded tests in rrfakerut to
 crash some of the nVidia 7xxx series drivers.  rrfakerut should now run cleanly
-on the 7xxx series, but the multi-threaded tests still cause the 8xxx series
+on the 7xxx series, but the multithreaded tests still cause the 8xxx series
 drivers to crash & burn, and they cause the 9xxx series drivers to generate
 incorrect pixels.  Further investigation is needed.
 
@@ -1614,9 +1616,9 @@ little overhead.)
 already use the "spoil last frame" algorithm in all cases.
 
 22. Added an option (`VGL_INTERFRAME`), which, when set to `0`, will disable
-interframe image comparison in Direct Mode.  This was necessary to work around
-an interaction issue between VGL and Pro/E Wildfire v3 that led to slow
-performance when zooming in or out on the Pro/E model.
+interframe comparison of rendered frames in Direct Mode.  This was necessary to
+work around an interaction issue between VGL and Pro/E Wildfire v3 that led to
+slow performance when zooming in or out on the Pro/E model.
 
 23. Added an option (`VGL_LOG`), which can be used to redirect the console
 output from the VirtualGL Faker to a file instead of stderr.
@@ -1697,7 +1699,7 @@ Series.
 6. Check for exceptions in the `new` operator to prevent VGL from dying
 ungracefully in out-of-memory situations.
 
-7. Fixed a bug in the multi-threaded compression code whereby it would use too
+7. Fixed a bug in the multithreaded compression code whereby it would use too
 much memory to hold the image tiles for the second and subsequent compression
 threads.  This led to memory exhaustion if the tile size was set to a low value
 (such as 16x16 or 32x32.)
@@ -1723,9 +1725,9 @@ with VGL on other platforms (it should work very similarly to the Linux
 version.)
 
 4. Normally, when running in Raw Mode, VirtualGL will try to use the `MIT-SHM`
-X extension to draw images.  If `MIT-SHM` is not available or doesn't work
-(which would be the case if the X connection is remote), then VGL will try to
-use the X `DOUBLE-BUFFER` extension.  Failing that, it will fall back to
+X extension to draw rendered frames.  If `MIT-SHM` is not available or doesn't
+work (which would be the case if the X connection is remote), then VGL will try
+to use the X `DOUBLE-BUFFER` extension.  Failing that, it will fall back to
 single-buffered drawing.  In a Sun Ray environment, the X `DOUBLE-BUFFER`
 extension is unstable when Xinerama is used.  `DOUBLE-BUFFER` doesn't really
 double-buffer in a Sun Ray environment anyhow, so this release of VirtualGL
@@ -1800,7 +1802,7 @@ so.
 conflict with KDE.
 
 13. Added `VGL_GUI_XTHREADINIT` environment variable to optionally disable
-VGL's use of `XtToolkitThreadInitialize()`.  Rarely, a multi-threaded Motif
+VGL's use of `XtToolkitThreadInitialize()`.  Rarely, a multithreaded Motif
 application relies on its own locking mechanisms and will deadlock if Motif's
 built-in application and process locks are enabled.  Thus far, the only known
 application that this affects is VisConcept.  Set `VGL_GUI_XTHREADINIT` to `0`
@@ -1809,7 +1811,7 @@ to prevent VisConcept from deadlocking when the VGL config dialog is activated.
 14. VirtualGL will no longer allow a non-TrueColor stereo visual to be
 selected, because such visuals won't work with the VirtualGL Client.  Color
 index (PseudoColor) rendering requires Raw Mode, but stereo requires Direct
-Mode, so VirtualGL cannot transmit PseudoColor images in stereo.
+Mode, so VirtualGL cannot transmit PseudoColor rendered stereo frames.
 
 15. VirtualGL will now automatically select Raw Mode if it detects that it is
 running on a "local" display (i.e. ":{n}.0", "unix:{n}.0", etc., but not
