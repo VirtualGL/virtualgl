@@ -1,3 +1,10 @@
+2.6.2
+=====
+
+1. Fixed a regression introduced by 2.6 beta1[4] that prevented VirtualGL from
+building on 64-bit ARM (AArch64) platforms.
+
+
 2.6.1
 =====
 
