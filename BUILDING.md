@@ -76,7 +76,7 @@ Instructions for installing these on specific distributions:
 
         yum install libXv-devel.i686 libXext-devel.i686 libXtst-devel.i686 libX11-devel.i686 mesa-libGLU-devel.i686 mesa-libGL-devel.i686 glibc-devel.i686 libstdc++-devel.i686 libstdc++-static.i686
 
-  (Replace `yum` with `dnf` on Fedora 23 and later.)
+  (Replace `yum` with `dnf` on Fedora 23+ or RHEL 8+.)
 
 ### Ubuntu 12 and later
 
