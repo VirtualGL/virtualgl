@@ -19,6 +19,7 @@ FBDEVVGLUSERSONLY=1
 RMMODNEEDED=0
 UNATTENDED=0
 SELINUX=0
+WAYLAND=0
 
 GID=
 GROUPADD=/usr/sbin/groupadd
@@ -293,6 +294,22 @@ disallowgdmtcp()
 	commentline $1 "DisallowTCP.*=.*"
 }
 
+disablewaylandgdm()
+{
+	backup $1
+	echo ... Disabling Wayland in $1 ...
+	grep -q "WaylandEnable.*=.*false" $1 && (
+		uncommentline $1 "WaylandEnable.*=.*false"
+	) || (
+		grep -q "WaylandEnable" $1 && (
+			replaceline $1 WaylandEnable "WaylandEnable=false"
+		) || (
+			removeline $1 WaylandEnable
+			addtoconf $1 "daemon" "daemon" WaylandEnable=false
+		)
+	)
+}
+
 setdripermissions()
 {
 	if [ -z "$1" ]; then
@@ -537,6 +554,31 @@ checkselinux()
 	fi
 }
 
+checkwayland()
+{
+	which Xwayland >/dev/null 2>&1 || return 0
+	if [ ! -f /etc/systemd/system/display-manager.service ]; then
+		return 0
+	fi
+	DM=`grep ExecStart=\/usr /etc/systemd/system/display-manager.service | sed 's/.*\///g'`
+	if [ ! "$DM" = "gdm" -a ! "$DM" = "gdm3" ]; then
+		return 0
+	fi
+	WAYLAND=1
+	echo
+	echo WARNING: Configuring this server for use with VirtualGL will disable the
+	echo ability to log in locally with a Wayland session.
+	if [ $UNATTENDED = 0 ]; then
+		ynprompt "Continue?"
+		if [ ! "$?" = "1" ]; then
+			return 1
+		fi
+	else
+		echo
+	fi
+	return 0
+}
+
 unconfigglx()
 {
 	if [ -d /etc/opt/VirtualGL ]; then
@@ -597,6 +639,19 @@ EOF
 		removeline /etc/lightdm/lightdm.conf display-setup-script
 		removeline /etc/lightdm/lightdm.conf greeter-setup-script
 	fi
+	if [ -f /usr/share/gdm/greeter/autostart/virtualgl.desktop ]; then
+		echo "... Removing /usr/share/gdm/greeter/autostart/virtualgl.desktop ..."
+		rm /usr/share/gdm/greeter/autostart/virtualgl.desktop
+	fi
+
+	for file in /etc/gdm/custom.conf \
+		/etc/gdm3/custom.conf \
+		/etc/gdm3/daemon.conf; do
+		if [ -f $file -a ! -h $file ]; then
+			echo "... Re-enabling Wayland in $file ..."
+			commentline $file "WaylandEnable.*=.*false"
+		fi
+	done
 
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ -f /etc/dt/config/Xsetup ]; then
@@ -679,6 +734,8 @@ EOF
 
 configglx()
 {
+	checkwayland || return
+
 	if [ $UNATTENDED = 0 ]; then
 		ynprompt "Restrict 3D X server access to vglusers group (recommended)?"
 		if [ $? = 1 ]; then VGLUSERSONLY=1; else VGLUSERSONLY=0; fi
@@ -704,7 +761,15 @@ configglx()
 			mkdir -p /etc/opt/VirtualGL
 		fi
 		echo ... Granting read permission to /etc/opt/VirtualGL/ for vglusers group ...
-		chown root:vglusers /etc/opt/VirtualGL
+		getent group gdm >/dev/null 2>&1 && (
+			chown gdm:vglusers /etc/opt/VirtualGL
+		) || (
+			getent group Debian-gdm >/dev/null 2>&1 && (
+				chown Debian-gdm:vglusers /etc/opt/VirtualGL
+			) || (
+				chown root:vglusers /etc/opt/VirtualGL
+			)
+		)
 		chmod 750 /etc/opt/VirtualGL
 		if [ $SELINUX = 1 ]; then
 			echo ... Setting SELinux contexts to allow vglgenkey to run within GDM ...
@@ -762,6 +827,31 @@ EOF
 		echo [SeatDefaults] >/etc/lightdm/lightdm.conf
 		addvglgenkey_lightdm /etc/lightdm/lightdm.conf
 	fi
+	if [ -d /usr/share/gdm/greeter/autostart ]; then
+		echo ... Creating /usr/share/gdm/greeter/autostart/virtualgl.desktop ...
+		if [ "$VGLUSERSONLY" = "1" ]; then
+			cat >/usr/share/gdm/greeter/autostart/virtualgl.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Exec=$VGLGENKEY
+EOF
+		else
+			cat >/usr/share/gdm/greeter/autostart/virtualgl.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Exec=xhost +LOCAL:
+EOF
+		fi
+		chmod 644 /usr/share/gdm/greeter/autostart/virtualgl.desktop
+	fi
+
+	for file in /etc/gdm/custom.conf \
+		/etc/gdm3/custom.conf \
+		/etc/gdm3/daemon.conf; do
+		if [ -f $file -a ! -h $file -a $WAYLAND = 1 ]; then
+			disablewaylandgdm $file
+		fi
+	done
 
 	if [ "$UNAME_S" = "SunOS" ]; then
 		if [ ! -d /etc/dt/config ]; then

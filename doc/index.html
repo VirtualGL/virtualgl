@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-01-23T16:12:48">
+<meta name="date" content="2019-02-11T19:29:57">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for VirtualGL 2.6.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -979,7 +979,7 @@ and 3D X server at boot time.  This is the default with most modern
 Linux and Unix distributions.</p>
 
 <div class="important"><p class="important">
-As of this writing, GDM does not execute <code>/etc/gdm/Init/Default</code> or <code>/etc/gdm3/Init/Default</code> on Wayland-enabled Linux distributions for a variety of reasons.  Thus VirtualGL cannot be used with these GDM implementations.  The only known workaround is to use LightDM instead of GDM.
+On Wayland-enabled Linux machines running GDM, configuring the machine as a VirtualGL server will disable the ability to log in locally with a Wayland session.  In general, logging in locally once the machine has been configured as a VirtualGL server is discouraged, as this could disrupt VirtualGL&rsquo;s connection to the 3D X server and thus cause OpenGL applications running with VirtualGL to abort or freeze.
 </p></div>
 
 <p>4. Accelerated OpenGL is working properly in the 3D X server.</p>
@@ -1022,7 +1022,9 @@ to the 3D hardware.  Thus, it is necessary to grant full, trusted access
 to the 3D X server for any users that will need to run VirtualGL.  
 Unless you fully trust the users to whom you are granting this access, 
 then you should avoid logging in locally to the 3D X server 
-(particularly as root) unless absolutely necessary.</p>
+(particularly as root) unless absolutely necessary (logging in locally 
+to the 3D X server is discouraged anyhow, for reasons explained in the 
+previous section.)</p>
 
 <p>This section will explain how to configure a VirtualGL server such that 
 selected users can run VirtualGL, even if the server is sitting at the 

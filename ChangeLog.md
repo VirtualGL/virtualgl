@@ -4,6 +4,10 @@
 1. Fixed a regression introduced by 2.6 beta1[4] that prevented VirtualGL from
 building on 64-bit ARM (AArch64) platforms.
 
+2. `vglserver_config` now works properly with Wayland-enabled Linux systems
+running GDM, with the caveat that configuring such systems as VirtualGL servers
+will disable the ability to log in locally with a Wayland session.
+
 
 2.6.1
 =====
