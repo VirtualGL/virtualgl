@@ -302,6 +302,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
 include(FindX11)
+# Clarify that we need to link with the legacy OpenGL library (libGL) rather
+# than the GLVND OpenGL library.  This shuts up CMake 3.11 and later.
+set(OpenGL_GL_PREFERENCE LEGACY)
 include(FindOpenGL)
 
 # Ensure that we build and link against the X11 version of OpenGL on OS X
