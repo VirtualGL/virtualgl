@@ -54,7 +54,7 @@ Group: Applications/Graphics
 Release: @BUILD@
 License: wxWindows Library License v3.1
 BuildRoot: %{_blddir}/%{name}-buildroot-%{version}-%{release}
-Prereq: /sbin/ldconfig
+Requires: /sbin/ldconfig
 
 %description
 VirtualGL is a toolkit that allows most Linux/Unix OpenGL applications to be
