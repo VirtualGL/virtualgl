@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
-	cmake_policy(SET CMP0053 OLD)
+	cmake_policy(SET CMP0053 NEW)
 endif()
 
 if(WIN32)
