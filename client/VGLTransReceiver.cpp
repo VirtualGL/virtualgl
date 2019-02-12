@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014, 2018 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2018-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -174,7 +174,7 @@ void VGLTransReceiver::Listener::run(void)
 		}
 		else
 		{
-			strncpy(v.id, "VGL", 3);
+			memcpy(v.id, "VGL", 3);
 			v.major = RR_MAJOR_VERSION;  v.minor = RR_MINOR_VERSION;
 			send((char *)&v, sizeof_rrversion);
 			recv((char *)&v, sizeof_rrversion);

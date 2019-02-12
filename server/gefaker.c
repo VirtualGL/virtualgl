@@ -1,4 +1,5 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
+ * Copyright (C)2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,12 +41,13 @@ static void __loadsymbol(void)
 
 char *getenv(const char *name)
 {
-	char *env = NULL;  int verbose = 0;
+	char *env = NULL, *tmp;  int verbose = 0;
 	__loadsymbol();
 	if(!__getenv) return NULL;
 	if((env = __getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
 		&& !strncmp(env, "1", 1)) verbose = 1;
-	if(name && (!strcmp(name, "LD_PRELOAD")
+	tmp = (char *)name;
+	if(tmp && (!strcmp(name, "LD_PRELOAD")
 	#ifdef sun
 		|| !strcmp(name, "LD_PRELOAD_32") || !strcmp(name, "LD_PRELOAD_64")
 	#endif

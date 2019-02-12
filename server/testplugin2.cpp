@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010, 2014, 2017-2018 D. R. Commander
+/* Copyright (C)2009-2010, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,7 +23,7 @@ using namespace vglserver;
 
 
 static Error err;
-char errStr[MAXSTR];
+char errStr[MAXSTR + 14];
 
 static FakerConfig *fconfig = NULL;
 static Display *dpy = NULL;
@@ -170,7 +170,7 @@ int RRTransDestroy(void *handle)
 
 const char *RRTransGetError(void)
 {
-	snprintf(errStr, MAXSTR - 1, "Error in %s -- %s",
+	snprintf(errStr, MAXSTR + 14, "Error in %s -- %s",
 		err.getMethod(), err.getMessage());
 	return errStr;
 }

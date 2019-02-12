@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011-2016, 2018 D. R. Commander
+ * Copyright (C)2009, 2011-2016, 2018-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -436,7 +436,7 @@ char **XListExtensions(Display *dpy, int *next)
 				newList[i] = &listStr[index];
 				if(list[i])
 				{
-					strncpy(newList[i], list[i], strlen(list[i]));
+					memcpy(newList[i], list[i], strlen(list[i]));
 					index += strlen(list[i]);
 					listStr[index] = '\0';  index++;
 				}
@@ -444,7 +444,7 @@ char **XListExtensions(Display *dpy, int *next)
 			XFreeExtensionList(list);
 		}
 		newList[n] = &listStr[index];
-		strncpy(newList[n], "GLX", 3);  newList[n][3] = '\0';
+		memcpy(newList[n], "GLX", 3);  newList[n][3] = '\0';
 		list = newList;  n++;
 	}
 
