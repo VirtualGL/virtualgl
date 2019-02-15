@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2016, 2018 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016, 2018-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -32,13 +32,25 @@ namespace vglfaker
 	extern Display *init3D(void);
 	extern void safeExit(int);
 	extern bool deadYet;
+
 	extern long getTraceLevel(void);
 	extern void setTraceLevel(long level);
 	extern long getFakerLevel(void);
 	extern void setFakerLevel(long level);
-	extern bool excludeDisplay(char *name);
 	extern bool getExcludeCurrent(void);
 	extern void setExcludeCurrent(bool excludeCurrent);
+	extern long getAutotestColor();
+	extern void setAutotestColor(long color);
+	extern long getAutotestRColor();
+	extern void setAutotestRColor(long color);
+	extern long getAutotestFrame();
+	extern void setAutotestFrame(long color);
+	extern Display *getAutotestDisplay();
+	extern void setAutotestDisplay(Display *dpy);
+	extern long getAutotestDrawable();
+	extern void setAutotestDrawable(long d);
+
+	extern bool excludeDisplay(char *name);
 }
 
 #define _dpy3D  vglfaker::init3D()

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2011, 2013-2016 D. R. Commander
+ * Copyright (C)2009, 2011, 2013-2016, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,6 +40,11 @@ bool deadYet = false;
 VGL_THREAD_LOCAL(TraceLevel, long, 0)
 VGL_THREAD_LOCAL(FakerLevel, long, 0)
 VGL_THREAD_LOCAL(ExcludeCurrent, bool, false)
+VGL_THREAD_LOCAL(AutotestColor, long, -1)
+VGL_THREAD_LOCAL(AutotestRColor, long, -1)
+VGL_THREAD_LOCAL(AutotestFrame, long, -1)
+VGL_THREAD_LOCAL(AutotestDisplay, Display *, NULL)
+VGL_THREAD_LOCAL(AutotestDrawable, long, 0)
 
 
 static void cleanup(void)
@@ -205,6 +210,27 @@ void *_vgl_dlopen(const char *file, int mode)
 		}
 	}
 	return __dlopen(file, mode);
+}
+
+
+int _vgl_getAutotestColor(Display *dpy, Drawable d, int right)
+{
+	if(vglfaker::getAutotestDisplay() == dpy
+		&& vglfaker::getAutotestDrawable() == (long)d)
+		return right ?
+			vglfaker::getAutotestRColor() : vglfaker::getAutotestColor();
+
+	return -1;
+}
+
+
+int _vgl_getAutotestFrame(Display *dpy, Drawable d)
+{
+	if(vglfaker::getAutotestDisplay() == dpy
+		&& vglfaker::getAutotestDrawable() == (long)d)
+		return vglfaker::getAutotestFrame();
+
+	return -1;
 }
 
 }

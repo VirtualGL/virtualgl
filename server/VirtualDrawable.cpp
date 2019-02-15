@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015, 2017-2018 D. R. Commander
+ * Copyright (C)2009-2015, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -500,22 +500,13 @@ void VirtualDrawable::readPixels(GLint x, GLint y, GLint width, GLint pitch,
 			_glReadPixels(0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, rgb);
 			color = rgb[0] + (rgb[1] << 8) + (rgb[2] << 16);
 		}
-		char envName[40], envValue[10];
 		if(readBuf == GL_FRONT_RIGHT || readBuf == GL_BACK_RIGHT)
-		{
-			snprintf(envName, 40, "__VGL_AUTOTESTRCLR%x", (unsigned int)x11Draw);
-			snprintf(envValue, 10, "%d", color);
-			setenv(envName, envValue, 1);
-		}
+			vglfaker::setAutotestRColor(color);
 		else
-		{
-			snprintf(envName, 40, "__VGL_AUTOTESTCLR%x", (unsigned int)x11Draw);
-			snprintf(envValue, 10, "%d", color);
-			setenv(envName, envValue, 1);
-		}
-		snprintf(envName, 40, "__VGL_AUTOTESTFRAME%x", (unsigned int)x11Draw);
-		snprintf(envValue, 10, "%d", autotestFrameCount);
-		setenv(envName, envValue, 1);
+			vglfaker::setAutotestColor(color);
+		vglfaker::setAutotestFrame(autotestFrameCount);
+		vglfaker::setAutotestDisplay(dpy);
+		vglfaker::setAutotestDrawable(x11Draw);
 	}
 }
 
