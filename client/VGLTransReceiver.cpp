@@ -93,7 +93,7 @@ VGLTransReceiver::VGLTransReceiver(bool doSSL_, bool ipv6_, int drawMethod_) :
 
 	if((env = getenv("VGL_VERBOSE")) != NULL && strlen(env) > 0
 		&& !strncmp(env, "1", 1)) fbx_printwarnings(vglout.getFile());
-	NEWCHECK(thread = new Thread(this));
+	thread = new Thread(this);
 }
 
 
@@ -111,7 +111,7 @@ void VGLTransReceiver::listen(unsigned short port_)
 {
 	try
 	{
-		NEWCHECK(listenSocket = new Socket(doSSL, ipv6));
+		listenSocket = new Socket(doSSL, ipv6);
 		port = listenSocket->listen(port_);
 	}
 	catch(...)
@@ -135,14 +135,14 @@ void VGLTransReceiver::run(void)
 			socket = listenSocket->accept();  if(deadYet) break;
 			vglout.println("++ %sConnection from %s.", doSSL ? "SSL " : "",
 				socket->remoteName());
-			NEWCHECK(listener = new Listener(socket, drawMethod));
+			listener = new Listener(socket, drawMethod);
 			continue;
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
 			if(!deadYet)
 			{
-				vglout.println("%s-- %s", e.getMethod(), e.getMessage());
+				vglout.println("%s-- %s", GET_METHOD(e), e.what());
 				if(listener) delete listener;
 				if(socket) delete socket;
 				continue;
@@ -252,9 +252,9 @@ void VGLTransReceiver::Listener::run(void)
 			}
 		}
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
+		vglout.println("%s-- %s", GET_METHOD(e), e.what());
 	}
 	if(thread) { thread->detach();  delete thread; }
 	delete this;
@@ -297,7 +297,7 @@ ClientWin *VGLTransReceiver::Listener::addWindow(int dpynum, Window win,
 	}
 	if(nwin >= MAXWIN) THROW("No free window IDs");
 	if(dpynum < 0 || dpynum > 65535 || win == None) THROW("Invalid argument");
-	NEWCHECK(windows[winid] = new ClientWin(dpynum, win, drawMethod, stereo));
+	windows[winid] = new ClientWin(dpynum, win, drawMethod, stereo);
 
 	if(!windows[winid]) THROW("Could not create window instance");
 	nwin++;

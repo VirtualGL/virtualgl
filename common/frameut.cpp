@@ -62,13 +62,13 @@ class Blitter : public Runnable
 		{
 			for(int i = 0; i < NFRAMES; i++)
 			{
-				if(useGL) { NEWCHECK(frames[i] = new GLFrame(dpy, win)); }
+				if(useGL) { frames[i] = new GLFrame(dpy, win); }
 				#ifdef USEXV
-				else if(useXV) { NEWCHECK(frames[i] = new XVFrame(dpy, win)); }
+				else if(useXV) { frames[i] = new XVFrame(dpy, win); }
 				#endif
-				else { NEWCHECK(frames[i] = new FBXFrame(dpy, win)); }
+				else { frames[i] = new FBXFrame(dpy, win); }
 			}
-			NEWCHECK(thread = new Thread(this));
+			thread = new Thread(this);
 			thread->start();
 		}
 
@@ -150,7 +150,7 @@ class Blitter : public Runnable
 				fprintf(stderr, "Average Blitter performance = %f Mpixels/sec%s\n",
 					mpixels / totalTime, check ? " [PASSED]" : "");
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
 				if(thread) thread->setError(e);
 				for(int i = 0; i < NFRAMES; i++)
@@ -216,7 +216,7 @@ class Decompressor : public Runnable
 			blitter(blitter_), findex(0), deadYet(false), dpy(dpy_), win(win_),
 			myID(myID_), thread(NULL)
 		{
-			NEWCHECK(thread = new Thread(this));
+			thread = new Thread(this);
 			thread->start();
 		}
 
@@ -276,7 +276,7 @@ class Decompressor : public Runnable
 					cframe.signalComplete();
 				}
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
 				if(thread) thread->setError(e);
 				for(int i = 0; i < NFRAMES; i++) cframes[i].signalComplete();
@@ -301,7 +301,7 @@ class Compressor : public Runnable
 			deadYet(false), thread(NULL), decompressor(decompressor_),
 			blitter(blitter_)
 		{
-			NEWCHECK(thread = new Thread(this));
+			thread = new Thread(this);
 			thread->start();
 		}
 
@@ -379,7 +379,7 @@ class Compressor : public Runnable
 					frame.signalComplete();
 				}
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
 				if(thread) thread->setError(e);
 				for(int i = 0; i < NFRAMES; i++) frames[i].signalComplete();
@@ -410,10 +410,10 @@ class FrameTest
 				BlackPixel(dpy, DefaultScreen(dpy))));
 			ERRIFNOT(XMapRaised(dpy, win));
 
-			NEWCHECK(blitter = new Blitter(dpy, win, myID));
+			blitter = new Blitter(dpy, win, myID);
 			if(!useXV)
-				NEWCHECK(decompressor = new Decompressor(blitter, dpy, win, myID));
-			NEWCHECK(compressor = new Compressor(decompressor, blitter));
+				decompressor = new Decompressor(blitter, dpy, win, myID);
+			compressor = new Compressor(decompressor, blitter);
 		}
 
 		~FrameTest(void) { shutdown();  XDestroyWindow(dpy, win); }
@@ -662,7 +662,7 @@ int main(int argc, char **argv)
 
 			for(i = 0; i < NUMWIN; i++)
 			{
-				NEWCHECK(test[i] = new FrameTest(dpy, i));
+				test[i] = new FrameTest(dpy, i);
 			}
 
 			for(w = MINW; w <= MAXW; w += 33)
@@ -708,9 +708,9 @@ int main(int argc, char **argv)
 			fprintf(stderr, "\n");
 		}
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n%s\n", e.getMethod(), e.getMessage());
+		fprintf(stderr, "%s\n%s\n", GET_METHOD(e), e.what());
 		exit(1);
 	}
 	return 0;

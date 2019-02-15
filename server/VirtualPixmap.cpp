@@ -26,7 +26,7 @@ VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm) :
 {
 	CriticalSection::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
-	NEWCHECK(frame = new FBXFrame(dpy_, pm, vis->visual, true));
+	frame = new FBXFrame(dpy_, pm, vis->visual, true);
 }
 
 
@@ -47,7 +47,7 @@ int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 		&& oglDraw->getDepth() == depth
 		&& FBCID(oglDraw->getConfig()) == FBCID(config_))
 		return 0;
-	NEWCHECK(oglDraw = new OGLDrawable(width, height, depth, config_, attribs));
+	oglDraw = new OGLDrawable(width, height, depth, config_, attribs);
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
 		_glXDestroyContext(DPY3D, ctx);  ctx = 0;

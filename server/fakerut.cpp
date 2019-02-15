@@ -425,9 +425,9 @@ int readbackTest(bool stereo)
 			checkFrame(dpy, win1, 0, lastFrame1);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -456,9 +456,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -478,9 +478,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -500,9 +500,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -525,9 +525,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win1, sclr.bits(-2), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -553,9 +553,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win1, clr.bits(-1));
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -575,9 +575,9 @@ int readbackTest(bool stereo)
 				checkWindowColor(dpy, win0, sclr.bits(-2), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -594,9 +594,9 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -612,9 +612,9 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -630,9 +630,9 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -648,9 +648,9 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -667,9 +667,9 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win1, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -687,15 +687,15 @@ int readbackTest(bool stereo)
 			if(stereo) checkWindowColor(dpy, win0, sclr.bits(-1), true);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	if(ctx0 && dpy)
 	{
@@ -771,9 +771,9 @@ int flushTest(void)
 		checkWindowColor(dpy, win, clr.bits(-1), 0);
 		printf("SUCCESS\n");
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
 	putenv((char *)"VGL_SPOIL=0");
@@ -1048,9 +1048,9 @@ int visTest(void)
 			}
 			printf("SUCCESS!\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1098,9 +1098,9 @@ int visTest(void)
 						: "No matching X visual for CFG");
 				}
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
-				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+				printf("Failed! (%s)\n", e.what());  retval = 0;
 			}
 		}
 
@@ -1133,9 +1133,9 @@ int visTest(void)
 
 				printf("SUCCESS!\n");
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
-				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+				printf("Failed! (%s)\n", e.what());  retval = 0;
 			}
 			if(vis1) { XFree(vis1);  vis1 = NULL; }
 		}
@@ -1166,16 +1166,16 @@ int visTest(void)
 
 				printf("SUCCESS!\n");
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
-				printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+				printf("Failed! (%s)\n", e.what());  retval = 0;
 			}
 			if(vis2) { XFree(vis2);  vis2 = NULL; }
 		}
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
 
@@ -1336,16 +1336,16 @@ int multiThreadTest(int nThreads)
 			{
 				threads[i]->checkError();
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
-				printf("Thread %d failed! (%s)\n", i, e.getMessage());  retval = 0;
+				printf("Thread %d failed! (%s)\n", i, e.what());  retval = 0;
 			}
 		}
 		if(retval == 1) printf("SUCCESS!\n");
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
 
@@ -1537,9 +1537,9 @@ int offScreenTest(bool dbPixmap)
 			checkWindowColor(dpy, win, clr.bits(-2), false);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1568,9 +1568,9 @@ int offScreenTest(bool dbPixmap)
 			VERIFY_BUF_COLOR(GL_BACK, clr.bits(-2), "PB");
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1607,9 +1607,9 @@ int offScreenTest(bool dbPixmap)
 			checkWindowColor(dpy, win, clr.bits(-3), false);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
@@ -1642,9 +1642,9 @@ int offScreenTest(bool dbPixmap)
 			checkWindowColor(dpy, win, clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1677,9 +1677,9 @@ int offScreenTest(bool dbPixmap)
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(dbPixmap ? -2 : -1), "PM1");
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1710,9 +1710,9 @@ int offScreenTest(bool dbPixmap)
 			VERIFY_BUF_COLOR(GL_FRONT, clr.bits(-1), "PM1");
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1752,9 +1752,9 @@ int offScreenTest(bool dbPixmap)
 
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
@@ -1777,16 +1777,16 @@ int offScreenTest(bool dbPixmap)
 			checkWindowColor(dpy, pm0, clr.bits(-1), false);
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
 		GL_RENDERBUFFER_EXT, 0);
@@ -1894,15 +1894,15 @@ int contextMismatchTest(void)
 
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	if(ctx1 && dpy)
 	{
@@ -1991,15 +1991,15 @@ int subWinTest(void)
 			}
 			printf("SUCCESS\n");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+			printf("Failed! (%s)\n", e.what());  retval = 0;
 		}
 		fflush(stdout);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	if(ctx && dpy)
 	{
@@ -2049,9 +2049,9 @@ int extensionQueryTest(void)
 			glXQueryExtensionsString(dpy, DefaultScreen(dpy)));
 		printf("SUCCESS!\n");
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
 	if(dpy) { XCloseDisplay(dpy);  dpy = NULL; }
@@ -2081,9 +2081,9 @@ int procAddrTest(void)
 		TEST_PROC_SYM(glXMakeContextCurrent)
 		printf("SUCCESS!\n");
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Failed! (%s)\n", e.getMessage());  retval = 0;
+		printf("Failed! (%s)\n", e.what());  retval = 0;
 	}
 	fflush(stdout);
 	return retval;

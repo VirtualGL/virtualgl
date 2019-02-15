@@ -53,7 +53,7 @@ namespace vglserver
 			{
 				if(!ctx || !config) THROW("Invalid argument");
 				ContextAttribs *attribs = NULL;
-				NEWCHECK(attribs = new ContextAttribs);
+				attribs = new ContextAttribs;
 				attribs->config = config;
 				attribs->direct = direct;
 				HASH::add(ctx, NULL, attribs);

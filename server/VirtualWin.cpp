@@ -108,10 +108,10 @@ VirtualWin::~VirtualWin(void)
 		{
 			delete plugin;
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
 			if(fconfig.verbose)
-				vglout.println("[VGL] WARNING: %s", e.getMessage());
+				vglout.println("[VGL] WARNING: %s", e.what());
 		}
 	}
 	if(eventdpy) { _XCloseDisplay(eventdpy);  eventdpy = NULL; }
@@ -331,7 +331,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 		case RRCOMP_YUV:
 			if(!vglconn)
 			{
-				NEWCHECK(vglconn = new VGLTrans());
+				vglconn = new VGLTrans();
 				vglconn->connect(
 					strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
 					fconfig.port);
@@ -356,7 +356,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 
 	if(!plugin)
 	{
-		NEWCHECK(plugin = new TransPlugin(dpy, x11Draw, fconfig.transport));
+		plugin = new TransPlugin(dpy, x11Draw, fconfig.transport);
 		plugin->connect(
 			strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
 			fconfig.port);
@@ -482,7 +482,7 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	int width = oglDraw->getWidth(), height = oglDraw->getHeight();
 
 	FBXFrame *f;
-	if(!x11trans) NEWCHECK(x11trans = new X11Trans());
+	if(!x11trans) x11trans = new X11Trans();
 	if(spoilLast && fconfig.spoil && !x11trans->isReady()) return;
 	if(!fconfig.spoil) x11trans->synchronize();
 	ERRIFNOT(f = x11trans->getFrame(dpy, x11Draw, width, height));
@@ -520,7 +520,7 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	int width = oglDraw->getWidth(), height = oglDraw->getHeight();
 
 	XVFrame *f;
-	if(!xvtrans) NEWCHECK(xvtrans = new XVTrans());
+	if(!xvtrans) xvtrans = new XVTrans();
 	if(spoilLast && fconfig.spoil && !xvtrans->isReady()) return;
 	if(!fconfig.spoil) xvtrans->synchronize();
 	ERRIFNOT(f = xvtrans->getFrame(dpy, x11Draw, width, height));

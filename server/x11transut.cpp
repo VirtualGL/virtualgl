@@ -160,9 +160,9 @@ int main(int argc, char **argv)
 		fprintf(stderr, "%f Megapixels/sec\n",
 			(double)WIDTH * (double)HEIGHT * (double)frames / 1000000. / elapsed);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s--\n%s\n", e.getMethod(), e.getMessage());
+		fprintf(stderr, "%s--\n%s\n", GET_METHOD(e), e.what());
 		return -1;
 	}
 	return 0;

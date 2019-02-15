@@ -56,9 +56,9 @@ void *RRTransInit(Display *dpy, Window win_, FakerConfig *fconfig_)
 	{
 		fconfig = fconfig_;
 		win = win_;
-		NEWCHECK(handle = (void *)(new VGLTrans()));
+		handle = (void *)(new VGLTrans());
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return NULL;
 	}
@@ -75,7 +75,7 @@ int RRTransConnect(void *handle, char *receiverName, int port)
 		if(!vglconn) THROW("Invalid handle");
 		vglconn->connect(receiverName, port);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -91,7 +91,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		VGLTrans *vglconn = (VGLTrans *)handle;
 		if(!vglconn) THROW("Invalid handle");
 		RRFrame *frame;
-		NEWCHECK(frame = new RRFrame);
+		frame = new RRFrame;
 		memset(frame, 0, sizeof(RRFrame));
 		int compress = fconfig->compress;
 		if(compress == RRCOMP_PROXY || compress == RRCOMP_RGB)
@@ -111,7 +111,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->format = pf2trans[f->pf->id];
 		return frame;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return NULL;
 	}
@@ -127,7 +127,7 @@ int RRTransReady(void *handle)
 		if(!vglconn) THROW("Invalid handle");
 		ret = (int)vglconn->isReady();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -144,7 +144,7 @@ int RRTransSynchronize(void *handle)
 		if(!vglconn) THROW("Invalid handle");
 		vglconn->synchronize();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -168,7 +168,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 		vglconn->sendFrame(f);
 		delete frame;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -185,7 +185,7 @@ int RRTransDestroy(void *handle)
 		if(!vglconn) THROW("Invalid handle");
 		delete vglconn;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -196,7 +196,7 @@ int RRTransDestroy(void *handle)
 const char *RRTransGetError(void)
 {
 	snprintf(errStr, MAXSTR + 14, "Error in %s -- %s",
-		err.getMethod(), err.getMessage());
+		err.getMethod(), err.what());
 	return errStr;
 }
 

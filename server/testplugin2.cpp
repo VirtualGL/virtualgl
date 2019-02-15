@@ -53,9 +53,9 @@ void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 		fconfig = fconfig_;
 		dpy = dpy_;
 		win = win_;
-		NEWCHECK(handle = (void *)(new X11Trans()));
+		handle = (void *)(new X11Trans());
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return NULL;
 	}
@@ -77,7 +77,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		X11Trans *trans = (X11Trans *)handle;
 		if(!trans) THROW("Invalid handle");
 		RRFrame *frame;
-		NEWCHECK(frame = new RRFrame);
+		frame = new RRFrame;
 		memset(frame, 0, sizeof(RRFrame));
 		FBXFrame *f = trans->getFrame(dpy, win, width, height);
 		f->flags |= FRAME_BOTTOMUP;
@@ -89,7 +89,7 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 		frame->format = pf2trans[f->pf->id];
 		return frame;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return NULL;
 	}
@@ -105,7 +105,7 @@ int RRTransReady(void *handle)
 		if(!trans) THROW("Invalid handle");
 		ret = (int)trans->isReady();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -122,7 +122,7 @@ int RRTransSynchronize(void *handle)
 		if(!trans) THROW("Invalid handle");
 		trans->synchronize();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -143,7 +143,7 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 		trans->sendFrame(f, (bool)sync);
 		delete frame;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -160,7 +160,7 @@ int RRTransDestroy(void *handle)
 		if(!trans) THROW("Invalid handle");
 		delete trans;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		err = e;  return -1;
 	}
@@ -171,7 +171,7 @@ int RRTransDestroy(void *handle)
 const char *RRTransGetError(void)
 {
 	snprintf(errStr, MAXSTR + 14, "Error in %s -- %s",
-		err.getMethod(), err.getMessage());
+		err.getMethod(), err.what());
 	return errStr;
 }
 

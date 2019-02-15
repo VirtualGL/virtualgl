@@ -159,10 +159,10 @@ void VGLTrans::run(void)
 			vglout.println("[VGL] Using %d compression threads on %d CPU cores",
 				nprocs, NumProcs());
 		for(i = 0; i < nprocs; i++)
-			NEWCHECK(comp[i] = new VGLTrans::Compressor(i, this));
+			comp[i] = new VGLTrans::Compressor(i, this);
 		if(nprocs > 1) for(i = 1; i < nprocs; i++)
 		{
-			NEWCHECK(cthread[i] = new Thread(comp[i]));
+			cthread[i] = new Thread(comp[i]);
 			cthread[i]->start();
 		}
 
@@ -236,7 +236,7 @@ void VGLTrans::run(void)
 		for(i = 0; i < nprocs; i++) delete comp[i];
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		if(thread) thread->setError(e);
 		ready.signal();
@@ -342,7 +342,7 @@ void VGLTrans::Compressor::compressSend(Frame *f, Frame *lastf)
 			}
 			Frame *tile = f->getTile(x, y, width, height);
 			CompressedFrame *ctile = NULL;
-			if(myRank > 0) { NEWCHECK(ctile = new CompressedFrame()); }
+			if(myRank > 0) { ctile = new CompressedFrame(); }
 			else ctile = &cframe;
 			profComp.startFrame();
 			*ctile = *tile;
@@ -442,7 +442,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 		{
 			free(serverName);  serverName = strdup("localhost");
 		}
-		NEWCHECK(socket = new Socket((bool)fconfig.ssl, true));
+		socket = new Socket((bool)fconfig.ssl, true);
 		try
 		{
 			socket->connect(serverName, port);
@@ -454,7 +454,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 			vglout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
-		NEWCHECK(thread = new Thread(this));
+		thread = new Thread(this);
 		thread->start();
 	}
 	catch(...)

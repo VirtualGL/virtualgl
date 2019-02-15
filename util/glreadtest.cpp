@@ -391,9 +391,9 @@ int writeTest(int format)
 		fprintf(stderr, "%s Mpixels/sec\n", sigFig(4, temps, avgmps));
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retval = -1;
+		fprintf(stderr, "%s\n", e.what());  retval = -1;
 	}
 
 	if(rgbaBuffer) free(rgbaBuffer);
@@ -561,9 +561,9 @@ int readTest(int format)
 			sigFig(4, temps, readPixelsTime / rbtime * 100.0));
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retval = -1;
+		fprintf(stderr, "%s\n", e.what());  retval = -1;
 	}
 
 	if(rgbaBuffer) free(rgbaBuffer);
@@ -848,9 +848,9 @@ int main(int argc, char **argv)
 		return 0;
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());
+		fprintf(stderr, "%s\n", e.what());
 	}
 
 	if(dpy)

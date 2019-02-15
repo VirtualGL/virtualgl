@@ -79,7 +79,7 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 		|| newpf->size != pf->size || !bits)
 	{
 		if(bits) delete [] bits;
-		NEWCHECK(bits = new unsigned char[h.framew * h.frameh * newpf->size + 1]);
+		bits = new unsigned char[h.framew * h.frameh * newpf->size + 1];
 	}
 	if(stereo_)
 	{
@@ -87,8 +87,7 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 			|| newpf->size != pf->size || !rbits)
 		{
 			if(rbits) delete [] rbits;
-			NEWCHECK(rbits =
-				new unsigned char[h.framew * h.frameh * newpf->size + 1]);
+			rbits = new unsigned char[h.framew * h.frameh * newpf->size + 1];
 		}
 	}
 	else
@@ -131,7 +130,7 @@ Frame *Frame::getTile(int x, int y, int width, int height)
 		|| (y + height) > hdr.height)
 		throw Error("Frame::getTile", "Argument out of range");
 
-	NEWCHECK(f = new Frame(false));
+	f = new Frame(false);
 	f->hdr = hdr;
 	f->hdr.x = x;
 	f->hdr.y = y;
@@ -525,8 +524,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
-					h.subsamp)]);
+				bits = new unsigned char[tjBufSize(h.width, h.height, h.subsamp)];
 			}
 			hdr = h;  hdr.flags = RR_LEFT;  stereo = true;
 			break;
@@ -534,8 +532,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != rhdr.width || h.height != rhdr.height || !rbits)
 			{
 				if(rbits) delete [] rbits;
-				NEWCHECK(rbits = new unsigned char[tjBufSize(h.width, h.height,
-					h.subsamp)]);
+				rbits = new unsigned char[tjBufSize(h.width, h.height, h.subsamp)];
 			}
 			rhdr = h;  rhdr.flags = RR_RIGHT;  stereo = true;
 			break;
@@ -543,8 +540,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
-					h.subsamp)]);
+				bits = new unsigned char[tjBufSize(h.width, h.height, h.subsamp)];
 			}
 			hdr = h;  hdr.flags = 0;  stereo = false;
 			break;

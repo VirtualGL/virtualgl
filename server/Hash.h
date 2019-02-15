@@ -71,7 +71,7 @@ namespace vglserver
 					if(useRef) entry->refCount++;
 					return 0;
 				}
-				NEWCHECK(entry = new HashEntry);
+				entry = new HashEntry;
 				memset(entry, 0, sizeof(HashEntry));
 				entry->prev = end;  if(end) end->next = entry;
 				if(!start) start = entry;

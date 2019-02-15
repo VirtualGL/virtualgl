@@ -106,7 +106,7 @@ void killproc(bool userOnly)
 
 		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
 		if(len < sizeof(kinfo_proc)) THROW("Process table is empty");
-		NEWCHECK(buf = new unsigned char[len]);
+		buf = new unsigned char[len];
 		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, buf, &len, NULL, 0));
 		int nprocs = len / sizeof(kinfo_proc);
 		kinfo_proc *kp = (kinfo_proc *)buf;
@@ -404,9 +404,9 @@ int main(int argc, char *argv[])
 
 		if(start(displayname) < 0) return -1;
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		vglout.println("%s-- %s", e.getMethod(), e.getMessage());  exit(1);
+		vglout.println("%s-- %s", GET_METHOD(e), e.what());  exit(1);
 	}
 
 	return 0;
@@ -446,7 +446,7 @@ int start(char *displayname)
 			if(!force) actualSSLPort = instanceCheckSSL(maindpy);
 			if(actualSSLPort == 0)
 			{
-				NEWCHECK(sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod));
+				sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod);
 				if(sslPort == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTSSLPORT;
@@ -485,7 +485,7 @@ int start(char *displayname)
 			if(!force) actualPort = instanceCheck(maindpy);
 			if(actualPort == 0)
 			{
-				NEWCHECK(receiver = new VGLTransReceiver(false, ipv6, drawMethod));
+				receiver = new VGLTransReceiver(false, ipv6, drawMethod);
 				if(port == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTPORT;
@@ -543,9 +543,9 @@ int start(char *displayname)
 		}
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		vglout.println("%s-- %s", e.getMethod(), e.getMessage());
+		vglout.println("%s-- %s", GET_METHOD(e), e.what());
 		retval = -1;
 	}
 

@@ -23,12 +23,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <new>
+#include <exception>
+#include <typeinfo>
+
+
+#define GET_METHOD(e) \
+	(dynamic_cast <const vglutil::Error *>(&e) ? \
+		((vglutil::Error &)e).getMethod() : "C++")
 
 
 namespace vglutil
 {
-	class Error
+	class Error : public std::exception
 	{
 		public:
 
@@ -65,9 +71,15 @@ namespace vglutil
 			Error(void) : method(NULL) { message[0] = 0; }
 
 			operator bool() { return method != NULL && message[0] != 0; }
+			Error &operator= (const std::exception &e)
+			{
+				method = GET_METHOD(e);
+				strncpy(message, e.what(), MLEN + 1);
+				return *this;
+			}
 
 			const char *getMethod(void) { return method; }
-			char *getMessage(void) { return message; }
+			virtual const char *what(void) const throw() { return message; }
 
 		protected:
 
@@ -82,15 +94,6 @@ namespace vglutil
 #endif
 #define THROW(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
 #define ERRIFNOT(f)  { if(!(f)) THROW("Unexpected NULL condition"); }
-#define NEWCHECK(f) \
-	try \
-	{ \
-		if(!(f)) THROW("Memory allocation error"); \
-	} \
-	catch(std::bad_alloc &e) \
-	{ \
-		THROW(e.what()); \
-	}
 
 
 #ifdef _WIN32

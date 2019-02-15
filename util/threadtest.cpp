@@ -67,10 +67,10 @@ class TestThread : public Runnable
 						break;
 				}
 			}
-			catch(Error &e)
+			catch(std::exception &e)
 			{
-				printf("Error in %s (Thread %d):\n%s\n", e.getMethod(), myRank,
-					e.getMessage());
+				printf("Error in %s (Thread %d):\n%s\n", GET_METHOD(e), myRank,
+					e.what());
 			}
 			if(myRank == 5) THROW("Error test");
 		}
@@ -101,9 +101,9 @@ int main(void)
 		for(i = 0; i < 5; i++) thread[i]->stop();
 		for(i = 0; i < 5; i++) thread[i]->checkError();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Error in %s:\n%s\n", e.getMethod(), e.getMessage());
+		printf("Error in %s:\n%s\n", GET_METHOD(e), e.what());
 		return -1;
 	}
 

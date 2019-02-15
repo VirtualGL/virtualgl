@@ -54,7 +54,7 @@ namespace vglserver
 				if(!conn || !dpy) THROW("Invalid argument");
 
 				XCBConnAttribs *attribs = NULL;
-				NEWCHECK(attribs = new XCBConnAttribs);
+				attribs = new XCBConnAttribs;
 				attribs->dpy = dpy;  attribs->protoAtom = 0;  attribs->deleteAtom = 0;
 
 				// We set up the window manager atoms here because doing so in the

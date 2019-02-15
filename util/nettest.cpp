@@ -396,9 +396,9 @@ int main(int argc, char **argv)
 		socket.close();
 		free(buf);
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		printf("Error in %s--\n%s\n", e.getMethod(), e.getMessage());
+		printf("Error in %s--\n%s\n", GET_METHOD(e), e.what());
 		return -1;
 	}
 	return 0;

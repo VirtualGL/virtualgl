@@ -19,7 +19,6 @@
 #include "Socket.h"
 #include "ClientWin.h"
 #include "Log.h"
-#include "Error.h"
 
 
 #define MAXWIN  1024
@@ -59,7 +58,7 @@ namespace vglclient
 				{
 					memset(windows, 0, sizeof(ClientWin *) * MAXWIN);
 					if(socket) remoteName = socket->remoteName();
-					NEWCHECK(thread = new vglutil::Thread(this));
+					thread = new vglutil::Thread(this);
 					thread->start();
 				}
 

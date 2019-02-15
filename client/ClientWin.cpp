@@ -43,7 +43,7 @@ ClientWin::ClientWin(int dpynum_, Window window_, int drawMethod_,
 	initGL();
 	initX11();
 
-	NEWCHECK(thread = new Thread(this));
+	thread = new Thread(this);
 	thread->start();
 }
 
@@ -79,13 +79,12 @@ void ClientWin::initGL(void)
 	{
 		try
 		{
-			NEWCHECK(newfb = new GLFrame(dpystr, window));
+			newfb = new GLFrame(dpystr, window);
 			if(!newfb) throw("Could not allocate class instance");
 		}
-		catch(Error &e)
+		catch(std::exception &e)
 		{
-			vglout.println("OpenGL error-- %s\nUsing X11 drawing instead",
-				e.getMessage());
+			vglout.println("OpenGL error-- %s\nUsing X11 drawing instead", e.what());
 			if(newfb) { delete newfb;  newfb = NULL; }
 			drawMethod = RR_DRAWX11;
 			vglout.PRINTLN("Stereo requires OpenGL drawing.  Disabling stereo.");
@@ -116,7 +115,7 @@ void ClientWin::initX11(void)
 	{
 		try
 		{
-			NEWCHECK(newfb = new FBXFrame(dpystr, window));
+			newfb = new FBXFrame(dpystr, window);
 			if(!newfb) throw("Could not allocate class instance");
 		}
 		catch(...)
@@ -156,7 +155,7 @@ Frame *ClientWin::getFrame(bool useXV)
 		{
 			char dpystr[80];
 			sprintf(dpystr, ":%d.0", dpynum);
-			NEWCHECK(xvframes[cfindex] = new XVFrame(dpystr, window));
+			xvframes[cfindex] = new XVFrame(dpystr, window);
 			if(!xvframes[cfindex]) THROW("Could not allocate class instance");
 		}
 		f = (Frame *)xvframes[cfindex];
@@ -256,7 +255,7 @@ void ClientWin::run(void)
 		}
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		if(thread) thread->setError(e);
 		if(f) f->signalComplete();

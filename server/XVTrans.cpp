@@ -27,7 +27,7 @@ using namespace vglserver;
 XVTrans::XVTrans(void) : thread(NULL), deadYet(false)
 {
 	for(int i = 0; i < NFRAMES; i++) frames[i] = NULL;
-	NEWCHECK(thread = new Thread(this));
+	thread = new Thread(this);
 	thread->start();
 	profXV.setName("XV        ");
 	profTotal.setName("Total     ");
@@ -83,7 +83,7 @@ void XVTrans::run(void)
 		}
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
 		if(thread) thread->setError(e);
 		ready.signal();  throw;
@@ -105,7 +105,7 @@ XVFrame *XVTrans::getFrame(Display *dpy, Window win, int width, int height)
 				index = i;
 		if(index < 0) THROW("No free buffers in pool");
 		if(!frames[index])
-			NEWCHECK(frames[index] = new XVFrame(dpy, win));
+			frames[index] = new XVFrame(dpy, win);
 		f = frames[index];  f->waitUntilComplete();
 	}
 

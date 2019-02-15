@@ -267,9 +267,9 @@ void nativeWrite(bool useShm)
 		else fprintf(stderr, " (no errors)\n");
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retCode = -1;
+		fprintf(stderr, "%s\n", e.what());  retCode = -1;
 	}
 
 	pixelOffset = i - 1;
@@ -323,9 +323,9 @@ void nativeRead(bool useShm)
 		else fprintf(stderr, " (no errors)\n");
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retCode = -1;
+		fprintf(stderr, "%s\n", e.what());  retCode = -1;
 	}
 
 	fbx_term(&fb);
@@ -457,9 +457,9 @@ void nativeStress(bool useShm)
 				((double)1000000. * testTime));
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());
+		fprintf(stderr, "%s\n", e.what());
 	}
 
 	try
@@ -493,9 +493,9 @@ void nativeStress(bool useShm)
 				((double)1000000. * testTime));
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retCode = -1;
+		fprintf(stderr, "%s\n", e.what());  retCode = -1;
 	}
 
 }
@@ -890,9 +890,9 @@ int main(int argc, char **argv)
 		#endif
 
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		fprintf(stderr, "%s\n", e.getMessage());  retCode = -1;
+		fprintf(stderr, "%s\n", e.what());  retCode = -1;
 	}
 
 	return retCode;

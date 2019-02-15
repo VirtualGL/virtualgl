@@ -45,7 +45,7 @@ namespace vglserver
 				vglutil::CriticalSection::SafeLock l(popupMutex);
 				if(thread) return;
 				dpy = dpy_;  shmid = shmid_;
-				NEWCHECK(thread = new vglutil::Thread(this));
+				thread = new vglutil::Thread(this);
 				thread->start();
 			}
 
@@ -61,9 +61,9 @@ namespace vglserver
 						fconfig.config, DisplayString(dpy), shmid, (int)getpid());
 					if(system(commandLine) == -1) THROW_UNIX();
 				}
-				catch(vglutil::Error &e)
+				catch(std::exception &e)
 				{
-					vglout.println("Error invoking vglconfig--\n%s", e.getMessage());
+					vglout.println("Error invoking vglconfig--\n%s", e.what());
 				}
 				vglutil::CriticalSection::SafeLock l(popupMutex);
 				thread->detach();  delete thread;  thread = NULL;

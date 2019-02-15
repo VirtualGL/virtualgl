@@ -94,7 +94,7 @@ static INLINE int DrawingToRight(void)
 
 #define TRY()  try {
 #define CATCH()  } \
-	catch(vglutil::Error &e) { DIE(e.getMethod(), e.getMessage()); }
+	catch(std::exception &e) { DIE(GET_METHOD(e), e.what()); }
 
 
 // Tracing stuff

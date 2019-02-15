@@ -233,7 +233,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pixmaps for rendering");
 			alreadyPrintedDrawableType = true;
 		}
-		NEWCHECK(oglDraw = new OGLDrawable(width, height, 0, config_, NULL));
+		oglDraw = new OGLDrawable(width, height, 0, config_, NULL);
 	}
 	else
 	{
@@ -242,7 +242,7 @@ int VirtualDrawable::init(int width, int height, GLXFBConfig config_)
 			vglout.println("[VGL] Using Pbuffers for rendering");
 			alreadyPrintedDrawableType = true;
 		}
-		NEWCHECK(oglDraw = new OGLDrawable(width, height, config_));
+		oglDraw = new OGLDrawable(width, height, config_);
 	}
 	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{

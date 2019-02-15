@@ -332,36 +332,32 @@ void init(int argc, char **argv)
 {
 	char temps[20];
 
-	NEWCHECK(win = new Fl_Double_Window(485, 340, "VirtualGL Configuration"));
+	win = new Fl_Double_Window(485, 340, "VirtualGL Configuration");
 
 	if(strlen(fconfig.transport) > 0)
 	{
-		NEWCHECK(compChoice = new Fl_Choice(211, 10, 225, 25,
-			"Image Compression: "));
+		compChoice = new Fl_Choice(211, 10, 225, 25, "Image Compression: ");
 		compChoice->menu(pluginCompMenu);
 	}
 	else
 	{
-		NEWCHECK(compChoice = new Fl_Choice(227, 10, 225, 25,
-			"Image Compression (Transport): "));
+		compChoice = new Fl_Choice(227, 10, 225, 25,
+			"Image Compression (Transport): ");
 		compChoice->menu(compMenu);
 	}
 	setComp();
 
-	NEWCHECK(sampChoice = new Fl_Choice(210, 45, 100, 25,
-		"Chrominance Subsampling: "));
+	sampChoice = new Fl_Choice(210, 45, 100, 25, "Chrominance Subsampling: ");
 	sampChoice->menu(sampMenu);
 	setSamp();
 
 	if(strlen(fconfig.transport) > 0)
 	{
-		NEWCHECK(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
-			"Image Quality"));
+		qualSlider = new Fl_Value_Slider(30, 80, 335, 25, "Image Quality");
 	}
 	else
 	{
-		NEWCHECK(qualSlider = new Fl_Value_Slider(30, 80, 335, 25,
-			"JPEG Image Quality"));
+		qualSlider = new Fl_Value_Slider(30, 80, 335, 25, "JPEG Image Quality");
 	}
 	qualSlider->callback(qualCB, 0);
 	qualSlider->type(1);
@@ -371,35 +367,33 @@ void init(int argc, char **argv)
 	qualSlider->slider_size(0.01);
 	setQual();
 
-	NEWCHECK(profChoice = new Fl_Choice(157, 130, 280, 24,
-		"Connection Profile: "));
+	profChoice = new Fl_Choice(157, 130, 280, 24, "Connection Profile: ");
 	profChoice->menu(profMenu);
 	profChoice->mode(3, FL_MENU_INACTIVE);
 	setProf();
 
-	NEWCHECK(gammaInput = new Fl_Float_Input(315, 165, 85, 25,
-		"Gamma Correction Factor (1.0=no correction): "));
+	gammaInput = new Fl_Float_Input(315, 165, 85, 25,
+		"Gamma Correction Factor (1.0=no correction): ");
 	gammaInput->callback(gammaCB, 0);
 	snprintf(temps, 19, "%.2f", fconfig.gamma);
 	gammaInput->value(temps);
 
-	NEWCHECK(spoilButton = new Fl_Light_Button(10, 200, 345, 25,
-		"Frame Spoiling (Do Not Use When Benchmarking)"));
+	spoilButton = new Fl_Light_Button(10, 200, 345, 25,
+		"Frame Spoiling (Do Not Use When Benchmarking)");
 	spoilButton->callback(spoilCB, 0);
 	spoilButton->value(fconfig.spoil);
 
-	NEWCHECK(ifButton = new Fl_Light_Button(10, 235, 185, 25,
-		"Inter-Frame Comparison"));
+	ifButton = new Fl_Light_Button(10, 235, 185, 25, "Inter-Frame Comparison");
 	ifButton->callback(ifCB, 0);
 	setIF();
 
-	NEWCHECK(stereoChoice = new Fl_Choice(232, 270, 220, 25,
-		"Stereographic Rendering Method: "));
+	stereoChoice = new Fl_Choice(232, 270, 220, 25,
+		"Stereographic Rendering Method: ");
 	stereoChoice->menu(stereoMenu);
 	setStereo();
 
-	NEWCHECK(fpsInput = new Fl_Float_Input(240, 305, 85, 25,
-		"Limit Frames/second (0.0=no limit): "));
+	fpsInput = new Fl_Float_Input(240, 305, 85, 25,
+		"Limit Frames/second (0.0=no limit): ");
 	fpsInput->callback(fpsCB, 0);
 	setFPS();
 
@@ -482,9 +476,9 @@ int main(int argc, char **argv)
 		if(ppid > 0) Fl::add_check(checkParentPID);
 		status = Fl::run();
 	}
-	catch(Error &e)
+	catch(std::exception &e)
 	{
-		vglout.print("Error in vglconfig--\n%s\n", e.getMessage());
+		vglout.print("Error in vglconfig--\n%s\n", e.what());
 		status = -1;
 	}
 	if(_fconfig)
