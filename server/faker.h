@@ -53,34 +53,34 @@ namespace vglfaker
 	extern bool excludeDisplay(char *name);
 }
 
-#define _dpy3D  vglfaker::init3D()
+#define DPY3D  vglfaker::init3D()
 
-#define isExcluded(dpy) \
+#define IS_EXCLUDED(dpy) \
 	(vglfaker::deadYet || vglfaker::getFakerLevel() > 0 || dpyhash.find(dpy))
 
-#define isFront(drawbuf) \
+#define IS_FRONT(drawbuf) \
 	(drawbuf == GL_FRONT || drawbuf == GL_FRONT_AND_BACK \
 		|| drawbuf == GL_FRONT_LEFT || drawbuf == GL_FRONT_RIGHT \
 		|| drawbuf == GL_LEFT || drawbuf == GL_RIGHT)
 
-#define isRight(drawbuf) \
+#define IS_RIGHT(drawbuf) \
 	(drawbuf == GL_RIGHT || drawbuf == GL_FRONT_RIGHT \
 		|| drawbuf == GL_BACK_RIGHT)
 
 
-static INLINE int drawingToFront(void)
+static INLINE int DrawingToFront(void)
 {
 	GLint drawbuf = GL_BACK;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return isFront(drawbuf);
+	return IS_FRONT(drawbuf);
 }
 
 
-static INLINE int drawingToRight(void)
+static INLINE int DrawingToRight(void)
 {
 	GLint drawbuf = GL_LEFT;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
-	return isRight(drawbuf);
+	return IS_RIGHT(drawbuf);
 }
 
 
@@ -99,28 +99,28 @@ static INLINE int drawingToRight(void)
 
 // Tracing stuff
 
-#define prargd(a)  vglout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a, \
+#define PRARGD(a)  vglout.print("%s=0x%.8lx(%s) ", #a, (unsigned long)a, \
 		a ? DisplayString(a) : "NULL")
 
-#define prargs(a)  vglout.print("%s=%s ", #a, a ? a : "NULL")
+#define PRARGS(a)  vglout.print("%s=%s ", #a, a ? a : "NULL")
 
-#define prargx(a)  vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
+#define PRARGX(a)  vglout.print("%s=0x%.8lx ", #a, (unsigned long)a)
 
-#define prargix(a)  vglout.print("%s=%d(0x%.lx) ", #a, (unsigned long)a, \
+#define PRARGIX(a)  vglout.print("%s=%d(0x%.lx) ", #a, (unsigned long)a, \
 	(unsigned long)a)
 
-#define prargi(a)  vglout.print("%s=%d ", #a, a)
+#define PRARGI(a)  vglout.print("%s=%d ", #a, a)
 
-#define prargf(a)  vglout.print("%s=%f ", #a, (double)a)
+#define PRARGF(a)  vglout.print("%s=%f ", #a, (double)a)
 
-#define prargv(a) \
+#define PRARGV(a) \
 	vglout.print("%s=0x%.8lx(0x%.2lx) ", #a, (unsigned long)a, \
 		a ? (a)->visualid : 0)
 
-#define prargc(a) \
-	vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a ? _FBCID(a) : 0)
+#define PRARGC(a) \
+	vglout.print("%s=0x%.8lx(0x%.2x) ", #a, (unsigned long)a, a ? FBCID(a) : 0)
 
-#define prargal11(a)  if(a) \
+#define PRARGAL11(a)  if(a) \
 { \
 	vglout.print(#a "=["); \
 	for(int __an = 0; a[__an] != None; __an++) \
@@ -134,7 +134,7 @@ static INLINE int drawingToRight(void)
 	vglout.print("] "); \
 }
 
-#define prargal13(a)  if(a != NULL) \
+#define PRARGAL13(a)  if(a != NULL) \
 { \
 	vglout.print(#a "=["); \
 	for(int __an = 0; a[__an] != None; __an += 2) \
@@ -145,14 +145,14 @@ static INLINE int drawingToRight(void)
 }
 
 #ifdef FAKEXCB
-#define prargerr(a) \
+#define PRARGERR(a) \
 { \
 	vglout.print("(%s)->response_type=%d ", #a, (a)->response_type); \
 	vglout.print("(%s)->error_code=%d ", #a, (a)->error_code); \
 }
 #endif
 
-#define opentrace(f) \
+#define OPENTRACE(f) \
 	double vglTraceTime = 0.; \
 	if(fconfig.trace) \
 	{ \
@@ -166,16 +166,16 @@ static INLINE int drawingToRight(void)
 		vglfaker::setTraceLevel(vglfaker::getTraceLevel() + 1); \
 		vglout.print("%s (", #f); \
 
-#define starttrace() \
-		vglTraceTime = getTime(); \
+#define STARTTRACE() \
+		vglTraceTime = GetTime(); \
 	}
 
-#define stoptrace() \
+#define STOPTRACE() \
 	if(fconfig.trace) \
 	{ \
-		vglTraceTime = getTime() - vglTraceTime;
+		vglTraceTime = GetTime() - vglTraceTime;
 
-#define closetrace() \
+#define CLOSETRACE() \
 		vglout.PRINT(") %f ms\n", vglTraceTime * 1000.); \
 		vglfaker::setTraceLevel(vglfaker::getTraceLevel() - 1); \
 		if(vglfaker::getTraceLevel() > 0) \

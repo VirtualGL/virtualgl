@@ -1,4 +1,4 @@
-/* Copyright (C)2011, 2013-2014, 2017 D. R. Commander
+/* Copyright (C)2011, 2013-2014, 2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,7 +26,7 @@ VirtualPixmap::VirtualPixmap(Display *dpy_, XVisualInfo *vis, Pixmap pm) :
 {
 	CriticalSection::SafeLock l(mutex);
 	profPMBlit.setName("PMap Blit ");
-	_newcheck(frame = new FBXFrame(dpy_, pm, vis->visual, true));
+	NEWCHECK(frame = new FBXFrame(dpy_, pm, vis->visual, true));
 }
 
 
@@ -40,17 +40,17 @@ VirtualPixmap::~VirtualPixmap()
 int VirtualPixmap::init(int width, int height, int depth, GLXFBConfig config_,
 	const int *attribs)
 {
-	if(!config_ || width < 1 || height < 1) _throw("Invalid argument");
+	if(!config_ || width < 1 || height < 1) THROW("Invalid argument");
 
 	CriticalSection::SafeLock l(mutex);
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height
 		&& oglDraw->getDepth() == depth
-		&& _FBCID(oglDraw->getConfig()) == _FBCID(config_))
+		&& FBCID(oglDraw->getConfig()) == FBCID(config_))
 		return 0;
-	_newcheck(oglDraw = new OGLDrawable(width, height, depth, config_, attribs));
-	if(config && _FBCID(config_) != _FBCID(config) && ctx)
+	NEWCHECK(oglDraw = new OGLDrawable(width, height, depth, config_, attribs));
+	if(config && FBCID(config_) != FBCID(config) && ctx)
 	{
-		_glXDestroyContext(_dpy3D, ctx);  ctx = 0;
+		_glXDestroyContext(DPY3D, ctx);  ctx = 0;
 	}
 	config = config_;
 	return 1;

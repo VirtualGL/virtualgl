@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017 D. R. Commander
+ * Copyright (C)2014, 2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -19,9 +19,9 @@ static int checkWindowColor(Window win, unsigned int color)
 
 	snprintf(temps, 79, "__VGL_AUTOTESTCLR%x", (unsigned int)win);
 	if((e = getenv(temps)) == NULL)
-		_throw("Can't communicate w/ faker");
+		THROW("Can't communicate w/ faker");
 	if((fakerclr = atoi(e)) < 0 || fakerclr > 0xffffff)
-		_throw("Bogus data read back");
+		THROW("Bogus data read back");
 	if((unsigned int)fakerclr != color)
 	{
 		fprintf(stderr, "Color is 0x%.6x, should be 0x%.6x", fakerclr, color);
@@ -40,7 +40,7 @@ static int checkFrame(Window win, int desiredReadbacks, int *lastFrame)
 
 	snprintf(temps, 79, "__VGL_AUTOTESTFRAME%x", (unsigned int)win);
 	if((e = getenv(temps)) == NULL || (frame = atoi(e)) < 1)
-		_throw("Can't communicate w/ faker");
+		THROW("Can't communicate w/ faker");
 	if(frame - (*lastFrame) != desiredReadbacks && desiredReadbacks >= 0)
 	{
 		fprintf(stderr, "Expected %d readback%s, not %d", desiredReadbacks,
@@ -66,12 +66,12 @@ void test(const char *testName)
 
 	fprintf(stderr, "%s:\n", testName);
 
-	if(!(dpy = XOpenDisplay(0))) _throw("Could not open display");
+	if(!(dpy = XOpenDisplay(0))) THROW("Could not open display");
 	dpyw = DisplayWidth(dpy, DefaultScreen(dpy));
 	dpyh = DisplayHeight(dpy, DefaultScreen(dpy));
 
 	if((v = _glXChooseVisual(dpy, DefaultScreen(dpy), glxattrib)) == NULL)
-		_throw("Could not find a suitable visual");
+		THROW("Could not find a suitable visual");
 
 	root = RootWindow(dpy, DefaultScreen(dpy));
 	swa.colormap = XCreateColormap(dpy, root, v->visual, AllocNone);
@@ -80,14 +80,14 @@ void test(const char *testName)
 	if((win = XCreateWindow(dpy, root, 0, 0, dpyw / 2, dpyh / 2, 0, v->depth,
 		InputOutput, v->visual, CWBorderPixel | CWColormap | CWEventMask,
 		&swa)) == 0)
-		_throw("Could not create window");
+		THROW("Could not create window");
 	XMapWindow(dpy, win);
 
 	if((ctx = _glXCreateContext(dpy, v, 0, True)) == NULL)
-		_throw("Could not establish GLX context");
+		THROW("Could not establish GLX context");
 	XFree(v);  v = NULL;
 	if(!_glXMakeCurrent(dpy, win, ctx))
-		_throw("Could not make context current");
+		THROW("Could not make context current");
 
 	_glClearColor(1., 0., 0., 0.);
 	_glClear(GL_COLOR_BUFFER_BIT);

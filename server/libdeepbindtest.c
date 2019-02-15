@@ -1,4 +1,4 @@
-/* Copyright (C)2017 D. R. Commander
+/* Copyright (C)2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -17,7 +17,7 @@
 #include <GL/glx.h>
 
 
-#define _throw(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define THROW(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
 
 
 #define _glXChooseVisual  glXChooseVisual

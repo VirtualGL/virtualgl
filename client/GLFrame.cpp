@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017-2018 D. R. Commander
+ * Copyright (C)2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -36,7 +36,7 @@ GLFrame::GLFrame(char *dpystring, Window win_) : Frame(), dpy(NULL), win(win_),
 	if(!dpystring || !win)
 		throw(Error("GLFrame::GLFrame", "Invalid argument"));
 
-	if(!(dpy = XOpenDisplay(dpystring))) _throw("Could not open display");
+	if(!(dpy = XOpenDisplay(dpystring))) THROW("Could not open display");
 	newdpy = true;
 	isGL = true;
 	init();
@@ -65,16 +65,16 @@ void GLFrame::init(void)
 		memset(&xwa, 0, sizeof(xwa));
 		XGetWindowAttributes(dpy, win, &xwa);
 		XVisualInfo vtemp;  int n = 0;
-		if(!xwa.visual) _throw("Could not get window attributes");
+		if(!xwa.visual) THROW("Could not get window attributes");
 		vtemp.visualid = xwa.visual->visualid;
 		int maj_opcode = -1, first_event = -1, first_error = -1;
 		if(!XQueryExtension(dpy, "GLX", &maj_opcode, &first_event, &first_error)
 			|| maj_opcode < 0 || first_event < 0 || first_error < 0)
-			_throw("GLX extension not available");
+			THROW("GLX extension not available");
 		if(!(v = XGetVisualInfo(dpy, VisualIDMask, &vtemp, &n)) || n == 0)
-			_throw("Could not obtain visual");
+			THROW("Could not obtain visual");
 		if(!(ctx = glXCreateContext(dpy, v, NULL, True)))
-			_throw("Could not create GLX context");
+			THROW("Could not create GLX context");
 		XFree(v);  v = NULL;
 	}
 	catch(...)
@@ -117,7 +117,7 @@ GLFrame::~GLFrame(void)
 void GLFrame::init(rrframeheader &h, bool stereo_)
 {
 	int format = PF_RGB;
-	if(littleendian() && h.compress != RRCOMP_RGB) format = PF_BGR;
+	if(LittleEndian() && h.compress != RRCOMP_RGB) format = PF_BGR;
 	Frame::init(h, format, FRAME_BOTTOMUP, stereo_);
 }
 
@@ -126,9 +126,9 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 {
 	int tjflags = TJ_BOTTOMUP;
 
-	if(!cf.bits || cf.hdr.size < 1) _throw("JPEG not initialized");
+	if(!cf.bits || cf.hdr.size < 1) THROW("JPEG not initialized");
 	init(cf.hdr, cf.stereo);
-	if(!bits) _throw("Frame not initialized");
+	if(!bits) THROW("Frame not initialized");
 	int width = min(cf.hdr.width, hdr.framew - cf.hdr.x);
 	int height = min(cf.hdr.height, hdr.frameh - cf.hdr.y);
 	if(width > 0 && height > 0 && cf.hdr.width <= width
@@ -148,12 +148,12 @@ GLFrame &GLFrame::operator= (CompressedFrame &cf)
 					throw(Error("GLFrame::decompressor", tjGetErrorStr()));
 			}
 			int y = max(0, hdr.frameh - cf.hdr.y - height);
-			_tj(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+			TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
 				(unsigned char *)&bits[pitch * y + cf.hdr.x * pf->size],
 				width, pitch, height, tjpf[pf->id], tjflags));
 			if(stereo && cf.rbits && rbits)
 			{
-				_tj(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
+				TJ(tjDecompress2(tjhnd, cf.rbits, cf.rhdr.size,
 					(unsigned char *)&rbits[pitch * y + cf.hdr.x * pf->size],
 					width, pitch, height, tjpf[pf->id], tjflags));
 			}
@@ -178,7 +178,7 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 	int glFormat = (pf->id == PF_BGR ? GL_BGR : GL_RGB);
 
 	if(!glXMakeCurrent(dpy, win, ctx))
-		_throw("Could not bind OpenGL context to window (window may have disappeared)");
+		THROW("Could not bind OpenGL context to window (window may have disappeared)");
 
 	int e;
 	e = glGetError();
@@ -203,7 +203,7 @@ void GLFrame::drawTile(int x, int y, int width, int height)
 		glDrawBuffer(oldbuf);
 	}
 
-	if(glError()) _throw("Could not draw pixels");
+	if(glError()) THROW("Could not draw pixels");
 }
 
 

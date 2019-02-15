@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014 D. R. Commander
+ * Copyright (C)2014, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -80,16 +80,16 @@ namespace vglutil
 #if defined(sgi)
 #define __FUNCTION__  __FILE__
 #endif
-#define _throw(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
-#define _errifnot(f)  { if(!(f)) _throw("Unexpected NULL condition"); }
-#define _newcheck(f) \
+#define THROW(m)  throw(vglutil::Error(__FUNCTION__, m, __LINE__))
+#define ERRIFNOT(f)  { if(!(f)) THROW("Unexpected NULL condition"); }
+#define NEWCHECK(f) \
 	try \
 	{ \
-		if(!(f)) _throw("Memory allocation error"); \
+		if(!(f)) THROW("Memory allocation error"); \
 	} \
 	catch(std::bad_alloc &e) \
 	{ \
-		_throw(e.what()); \
+		THROW(e.what()); \
 	}
 
 
@@ -119,8 +119,8 @@ namespace vglutil
 	};
 }
 
-#define _throww32()  throw(vglutil::W32Error(__FUNCTION__, __LINE__))
-#define _w32(f)  { if(!(f)) _throww32(); }
+#define THROW_W32()  throw(vglutil::W32Error(__FUNCTION__, __LINE__))
+#define W32(f)  { if(!(f)) THROW_W32(); }
 
 #endif  // _WIN32
 
@@ -137,21 +137,21 @@ namespace vglutil
 	};
 }
 
-#define _throwunix()  throw(vglutil::UnixError(__FUNCTION__, __LINE__))
-#define _unix(f)  { if((f) == -1) _throwunix(); }
+#define THROW_UNIX()  throw(vglutil::UnixError(__FUNCTION__, __LINE__))
+#define UNIX(f)  { if((f) == -1) THROW_UNIX(); }
 
 
-#define _fbx(f) \
+#define FBX(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline())); \
 }
-#define _fbxv(f) \
+#define FBXV(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline())); \
 }
-#define _tj(f) \
+#define TJ(f) \
 { \
 	if((f) == -1) \
 		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__)); \

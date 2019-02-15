@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2011, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2009-2011, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -28,32 +28,32 @@ using namespace vglserver;
 
 #define ENDIANIZE(h) \
 { \
-	if(!littleendian()) \
+	if(!LittleEndian()) \
 	{ \
-		h.size = byteswap(h.size); \
-		h.winid = byteswap(h.winid); \
-		h.framew = byteswap16(h.framew); \
-		h.frameh = byteswap16(h.frameh); \
-		h.width = byteswap16(h.width); \
-		h.height = byteswap16(h.height); \
-		h.x = byteswap16(h.x); \
-		h.y = byteswap16(h.y); \
-		h.dpynum = byteswap16(h.dpynum); \
+		h.size = BYTESWAP(h.size); \
+		h.winid = BYTESWAP(h.winid); \
+		h.framew = BYTESWAP16(h.framew); \
+		h.frameh = BYTESWAP16(h.frameh); \
+		h.width = BYTESWAP16(h.width); \
+		h.height = BYTESWAP16(h.height); \
+		h.x = BYTESWAP16(h.x); \
+		h.y = BYTESWAP16(h.y); \
+		h.dpynum = BYTESWAP16(h.dpynum); \
 	} \
 }
 
 #define ENDIANIZE_V1(h) \
 { \
-	if(!littleendian()) \
+	if(!LittleEndian()) \
 	{ \
-		h.size = byteswap(h.size); \
-		h.winid = byteswap(h.winid); \
-		h.framew = byteswap16(h.framew); \
-		h.frameh = byteswap16(h.frameh); \
-		h.width = byteswap16(h.width); \
-		h.height = byteswap16(h.height); \
-		h.x = byteswap16(h.x); \
-		h.y = byteswap16(h.y); \
+		h.size = BYTESWAP(h.size); \
+		h.winid = BYTESWAP(h.winid); \
+		h.framew = BYTESWAP16(h.framew); \
+		h.frameh = BYTESWAP16(h.frameh); \
+		h.width = BYTESWAP16(h.width); \
+		h.height = BYTESWAP16(h.height); \
+		h.x = BYTESWAP16(h.x); \
+		h.y = BYTESWAP16(h.y); \
 	} \
 }
 
@@ -98,7 +98,7 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 				version.id[0] = reply;
 				recv((char *)&version.id[1], sizeof_rrversion - 1);
 				if(strncmp(version.id, "VGL", 3) || version.major < 1)
-					_throw("Error reading client version");
+					THROW("Error reading client version");
 				v = version;
 				v.major = RR_MAJOR_VERSION;  v.minor = RR_MINOR_VERSION;
 				send((char *)&v, sizeof_rrversion);
@@ -110,12 +110,12 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 	}
 	if((version.major < 2 || (version.major == 2 && version.minor < 1))
 		&& h.compress != RRCOMP_JPEG)
-		_throw("This compression mode requires VirtualGL Client v2.1 or later");
+		THROW("This compression mode requires VirtualGL Client v2.1 or later");
 	if(eof) h.flags = RR_EOF;
 	if(version.major == 1 && version.minor == 0)
 	{
 		rrframeheader_v1 h1;
-		if(h.dpynum > 255) _throw("Display number out of range for v1.0 client");
+		if(h.dpynum > 255) THROW("Display number out of range for v1.0 client");
 		CONVERT_HEADER(h, h1);
 		ENDIANIZE_V1(h1);
 		if(socket)
@@ -125,7 +125,7 @@ void VGLTrans::sendHeader(rrframeheader h, bool eof)
 			{
 				char cts = 0;
 				recv(&cts, 1);
-				if(cts < 1 || cts > 2) _throw("CTS Error");
+				if(cts < 1 || cts > 2) THROW("CTS Error");
 			}
 		}
 	}
@@ -157,12 +157,12 @@ void VGLTrans::run(void)
 		VGLTrans::Compressor *comp[MAXPROCS];  Thread *cthread[MAXPROCS];
 		if(fconfig.verbose)
 			vglout.println("[VGL] Using %d compression threads on %d CPU cores",
-				nprocs, numprocs());
+				nprocs, NumProcs());
 		for(i = 0; i < nprocs; i++)
-			_newcheck(comp[i] = new VGLTrans::Compressor(i, this));
+			NEWCHECK(comp[i] = new VGLTrans::Compressor(i, this));
 		if(nprocs > 1) for(i = 1; i < nprocs; i++)
 		{
-			_newcheck(cthread[i] = new Thread(comp[i]));
+			NEWCHECK(cthread[i] = new Thread(comp[i]));
 			cthread[i]->start();
 		}
 
@@ -172,7 +172,7 @@ void VGLTrans::run(void)
 			void *ftemp = NULL;
 
 			q.get(&ftemp);  f = (Frame *)ftemp;  if(deadYet) break;
-			if(!f) _throw("Queue has been shut down");
+			if(!f) THROW("Queue has been shut down");
 			ready.signal();
 			np = nprocs;  if(f->hdr.compress == RRCOMP_YUV) np = 1;
 			if(np > 1)
@@ -258,7 +258,7 @@ Frame *VGLTrans::getFrame(int width, int height, int pixelFormat, int flags,
 		int index = -1;
 		for(int i = 0; i < NFRAMES; i++)
 			if(frames[i].isComplete()) index = i;
-		if(index < 0) _throw("No free buffers in pool");
+		if(index < 0) THROW("No free buffers in pool");
 		f = &frames[index];  f->waitUntilComplete();
 	}
 
@@ -342,7 +342,7 @@ void VGLTrans::Compressor::compressSend(Frame *f, Frame *lastf)
 			}
 			Frame *tile = f->getTile(x, y, width, height);
 			CompressedFrame *ctile = NULL;
-			if(myRank > 0) { _newcheck(ctile = new CompressedFrame()); }
+			if(myRank > 0) { NEWCHECK(ctile = new CompressedFrame()); }
 			else ctile = &cframe;
 			profComp.startFrame();
 			*ctile = *tile;
@@ -406,7 +406,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 	try
 	{
 		if(!displayName || strlen(displayName) <= 0)
-			_throw("Invalid receiver name");
+			THROW("Invalid receiver name");
 		char *ptr = NULL;  serverName = strdup(displayName);
 		if((ptr = strrchr(serverName, ':')) != NULL)
 		{
@@ -442,7 +442,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 		{
 			free(serverName);  serverName = strdup("localhost");
 		}
-		_newcheck(socket = new Socket((bool)fconfig.ssl, true));
+		NEWCHECK(socket = new Socket((bool)fconfig.ssl, true));
 		try
 		{
 			socket->connect(serverName, port);
@@ -454,7 +454,7 @@ void VGLTrans::connect(char *displayName, unsigned short port)
 			vglout.println("[VGL]    variable points to the machine on which vglclient is running.");
 			throw;
 		}
-		_newcheck(thread = new Thread(this));
+		NEWCHECK(thread = new Thread(this));
 		thread->start();
 	}
 	catch(...)
@@ -471,7 +471,7 @@ void VGLTrans::Compressor::send(void)
 	for(int i = 0; i < storedFrames; i++)
 	{
 		CompressedFrame *cf = cframes[i];
-		_errifnot(cf);
+		ERRIFNOT(cf);
 		parent->sendHeader(cf->hdr);
 		parent->send((char *)cf->bits, cf->hdr.size);
 		if(cf->stereo && cf->rbits)

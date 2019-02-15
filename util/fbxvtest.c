@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2010, 2014, 2017 D. R. Commander
+/* Copyright (C)2009-2010, 2014, 2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -23,12 +23,12 @@
 #define BENCHTIME  5.0
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	retval = -1;  printf("ERROR: %s\n", m);  goto bailout; \
 }
 
-#define _fbxv(f) \
+#define FBXV(f) \
 { \
 	if((f) == -1) \
 	{ \
@@ -102,10 +102,10 @@ int doTest(int id, char *name)
 
 	memset(&s, 0, sizeof(s));
 	memset(&s1, 0, sizeof(s));
-	_fbxv(fbxv_init(&s, dpy, win, width / scale, height / scale, id, useShm));
+	FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id, useShm));
 	if(!filename)
 	{
-		_fbxv(fbxv_init(&s1, dpy, win, width / scale, height / scale, id, useShm));
+		FBXV(fbxv_init(&s1, dpy, win, width / scale, height / scale, id, useShm));
 	}
 	printf("Image:\n");
 	printf("  Data size:   %d\n", s.xvi->data_size);
@@ -148,14 +148,14 @@ int doTest(int id, char *name)
 		initBuf(&s, id, 0);
 		initBuf(&s1, id, 128);
 	}
-	t = getTime();
+	t = GetTime();
 	do
 	{
 		if(filename || iter % 2 == 0)
-			{ _fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
-		else { _fbxv(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
+			{ FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height)); }
+		else { FBXV(fbxv_write(&s1, 0, 0, 0, 0, 0, 0, width, height)); }
 		iter++;
-	} while((elapsed = getTime() - t) < testTime);
+	} while((elapsed = GetTime() - t) < testTime);
 	printf("%f Mpixels/sec\n",
 		(double)(width * height) / 1000000. * (double)iter / elapsed);
 
@@ -213,10 +213,10 @@ int doInteractiveTest(Display *dpy, int id, char *name)
 		}
 		if(doDisplay)
 		{
-			_fbxv(fbxv_init(&s, dpy, win, width / scale, height / scale, id,
+			FBXV(fbxv_init(&s, dpy, win, width / scale, height / scale, id,
 				useShm));
 			initBuf(&s, id, iter);  iter++;
-			_fbxv(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
+			FBXV(fbxv_write(&s, 0, 0, 0, 0, 0, 0, width, height));
 		}
 	}
 
@@ -299,12 +299,12 @@ int main(int argc, char **argv)
 
 	fbxv_printwarnings(stdout);
 
-	if(!(dpy = XOpenDisplay(NULL))) _throw("Could not open display");
+	if(!(dpy = XOpenDisplay(NULL))) THROW("Could not open display");
 
 	vtemp.depth = 24;  vtemp.class = TrueColor;
 	if((vis = XGetVisualInfo(dpy, VisualDepthMask | VisualClassMask, &vtemp,
 		&n)) == NULL || n == 0)
-		_throw("Could not obtain a TrueColor visual");
+		THROW("Could not obtain a TrueColor visual");
 	swa.colormap = XCreateColormap(dpy, DefaultRootWindow(dpy), vis->visual,
 		AllocNone);
 	swa.border_pixel = 0;
@@ -315,17 +315,17 @@ int main(int argc, char **argv)
 			PointerMotionMask | ButtonPressMask;
 	printf("Visual ID = 0x%.2x\n", (unsigned int)vis->visualid);
 	if(!(protoAtom = XInternAtom(dpy, "WM_PROTOCOLS", False)))
-		_throw("Cannot obtain WM_PROTOCOLS atom");
+		THROW("Cannot obtain WM_PROTOCOLS atom");
 	if(!(deleteAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", False)))
-		_throw("Cannot obtain WM_DELETE_WINDOW atom");
+		THROW("Cannot obtain WM_DELETE_WINDOW atom");
 	if(!(win = XCreateWindow(dpy, DefaultRootWindow(dpy), 0, 0, width, height, 0,
 		vis->depth, InputOutput, vis->visual,
 		CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &swa)))
-		_throw("Could not create window");
+		THROW("Could not create window");
 	XFree(vis);  vis = NULL;
 	XSetWMProtocols(dpy, win, &deleteAtom, 1);
 	if(!XMapRaised(dpy, win))
-		_throw("Could not show window");
+		THROW("Could not show window");
 	XSync(dpy, False);
 
 	if(interactive)

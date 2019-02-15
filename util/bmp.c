@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017-2018 D. R. Commander
+ * Copyright (C)2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -57,15 +57,15 @@ typedef struct
 static const char *errorStr = "No error";
 
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	errorStr = m;  ret = -1;  goto finally; \
 }
-#define _unix(f) \
+#define UNIX(f) \
 { \
-	if((f) == -1) _throw(strerror(errno)); \
+	if((f) == -1) THROW(strerror(errno)); \
 }
-#define _catch(f) \
+#define CATCH(f) \
 { \
 	if((f) == -1) \
 	{ \
@@ -75,12 +75,12 @@ static const char *errorStr = "No error";
 
 
 #define READ(fd, addr, size) \
-	if((bytesRead = read(fd, addr, (size))) == -1) _throw(strerror(errno)); \
-	if(bytesRead != (size)) _throw("Read error");
+	if((bytesRead = read(fd, addr, (size))) == -1) THROW(strerror(errno)); \
+	if(bytesRead != (size)) THROW("Read error");
 
 #define WRITE(fd, addr, size) \
-	if((bytesWritten = write(fd, addr, (size))) == -1) _throw(strerror(errno)); \
-	if(bytesWritten != (size)) _throw("Write error");
+	if((bytesWritten = write(fd, addr, (size))) == -1) THROW(strerror(errno)); \
+	if(bytesWritten != (size)) THROW("Write error");
 
 
 static void pixelConvert(unsigned char *srcBuf, int width, int srcPitch,
@@ -109,11 +109,11 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 	unsigned char *tempbuf = NULL;  char temps[255], temps2[255];
 	int numRead = 0, totalRead = 0, pixel[3], i, j;
 
-	if((file = fdopen(*fd, "r")) == NULL) _throw(strerror(errno));
+	if((file = fdopen(*fd, "r")) == NULL) THROW(strerror(errno));
 
 	do
 	{
-		if(!fgets(temps, 255, file)) _throw("Read error");
+		if(!fgets(temps, 255, file)) THROW("Read error");
 		if(strlen(temps) == 0 || temps[0] == '\n') continue;
 		if(sscanf(temps, "%s", temps2) == 1 && temps2[1] == '#') continue;
 		switch(totalRead)
@@ -121,25 +121,25 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			case 0:
 				if((numRead = sscanf(temps, "%d %d %d", width, height,
 					&scaleFactor)) == EOF)
-					_throw("Read error");
+					THROW("Read error");
 				break;
 			case 1:
 				if((numRead = sscanf(temps, "%d %d", height, &scaleFactor)) == EOF)
-					_throw("Read error");
+					THROW("Read error");
 				break;
 			case 2:
 				if((numRead = sscanf(temps, "%d", &scaleFactor)) == EOF)
-					_throw("Read error");
+					THROW("Read error");
 				break;
 		}
 		totalRead += numRead;
 	} while(totalRead < 3);
 	if((*width) < 1 || (*height) < 1 || scaleFactor < 1)
-		_throw("Corrupt PPM header");
+		THROW("Corrupt PPM header");
 
 	dstPitch = (((*width) * pf->size) + (align - 1)) & (~(align - 1));
 	if((*buf = (unsigned char *)malloc(dstPitch * (*height))) == NULL)
-		_throw("Memory allocation error");
+		THROW("Memory allocation error");
 	if(ascii)
 	{
 		for(j = 0; j < *height; j++)
@@ -147,7 +147,7 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 			for(i = 0; i < *width; i++)
 			{
 				if(fscanf(file, "%d%d%d", &pixel[0], &pixel[1], &pixel[2]) != 3)
-					_throw("Read error");
+					THROW("Read error");
 				pf->setRGB(&(*buf)[j * dstPitch + i * pf->size],
 					pixel[0] * 255 / scaleFactor, pixel[1] * 255 / scaleFactor,
 					pixel[2] * 255 / scaleFactor);
@@ -157,11 +157,11 @@ static int ppm_load(int *fd, unsigned char **buf, int *width, int align,
 	else
 	{
 		if(scaleFactor != 255)
-			_throw("Binary PPMs must have 8-bit components");
+			THROW("Binary PPMs must have 8-bit components");
 		if((tempbuf = (unsigned char *)malloc((*width) * (*height) * 3)) == NULL)
-			_throw("Memory allocation error");
+			THROW("Memory allocation error");
 		if(fread(tempbuf, (*width) * (*height) * 3, 1, file) != 1)
-			_throw("Read error");
+			THROW("Read error");
 		pixelConvert(tempbuf, *width, (*width) * 3, *height, pf_get(PF_RGB), *buf,
 			dstPitch, pf, orientation == BMPORN_BOTTOMUP);
 	}
@@ -186,22 +186,22 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	flags |= O_BINARY;
 	#endif
 	if(!filename || !buf || !width || !height || pf->bpc < 8 || align < 1)
-		_throw("Invalid argument to bmp_load()");
+		THROW("Invalid argument to bmp_load()");
 	if((align & (align - 1)) != 0)
-		_throw("Alignment must be a power of 2");
-	_unix(fd = open(filename, flags));
+		THROW("Alignment must be a power of 2");
+	UNIX(fd = open(filename, flags));
 
 	READ(fd, &bh.bfType, sizeof(unsigned short));
-	if(!littleendian()) bh.bfType = byteswap16(bh.bfType);
+	if(!LittleEndian()) bh.bfType = BYTESWAP16(bh.bfType);
 
 	if(bh.bfType == 0x3650)
 	{
-		_catch(ppm_load(&fd, buf, width, align, height, pf, orientation, 0));
+		CATCH(ppm_load(&fd, buf, width, align, height, pf, orientation, 0));
 		goto finally;
 	}
 	if(bh.bfType == 0x3350)
 	{
-		_catch(ppm_load(&fd, buf, width, align, height, pf, orientation, 1));
+		CATCH(ppm_load(&fd, buf, width, align, height, pf, orientation, 1));
 		goto finally;
 	}
 
@@ -221,29 +221,29 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	READ(fd, &bh.biClrUsed, sizeof(unsigned int));
 	READ(fd, &bh.biClrImportant, sizeof(unsigned int));
 
-	if(!littleendian())
+	if(!LittleEndian())
 	{
-		bh.bfSize = byteswap(bh.bfSize);
-		bh.bfOffBits = byteswap(bh.bfOffBits);
-		bh.biSize = byteswap(bh.biSize);
-		bh.biWidth = byteswap(bh.biWidth);
-		bh.biHeight = byteswap(bh.biHeight);
-		bh.biPlanes = byteswap16(bh.biPlanes);
-		bh.biBitCount = byteswap16(bh.biBitCount);
-		bh.biCompression = byteswap(bh.biCompression);
-		bh.biSizeImage = byteswap(bh.biSizeImage);
-		bh.biXPelsPerMeter = byteswap(bh.biXPelsPerMeter);
-		bh.biYPelsPerMeter = byteswap(bh.biYPelsPerMeter);
-		bh.biClrUsed = byteswap(bh.biClrUsed);
-		bh.biClrImportant = byteswap(bh.biClrImportant);
+		bh.bfSize = BYTESWAP(bh.bfSize);
+		bh.bfOffBits = BYTESWAP(bh.bfOffBits);
+		bh.biSize = BYTESWAP(bh.biSize);
+		bh.biWidth = BYTESWAP(bh.biWidth);
+		bh.biHeight = BYTESWAP(bh.biHeight);
+		bh.biPlanes = BYTESWAP16(bh.biPlanes);
+		bh.biBitCount = BYTESWAP16(bh.biBitCount);
+		bh.biCompression = BYTESWAP(bh.biCompression);
+		bh.biSizeImage = BYTESWAP(bh.biSizeImage);
+		bh.biXPelsPerMeter = BYTESWAP(bh.biXPelsPerMeter);
+		bh.biYPelsPerMeter = BYTESWAP(bh.biYPelsPerMeter);
+		bh.biClrUsed = BYTESWAP(bh.biClrUsed);
+		bh.biClrImportant = BYTESWAP(bh.biClrImportant);
 	}
 
 	if(bh.bfType != 0x4d42 || bh.bfOffBits < BMPHDRSIZE || bh.biWidth < 1
 		|| bh.biHeight == 0)
-		_throw("Corrupt bitmap header");
+		THROW("Corrupt bitmap header");
 	if((bh.biBitCount != 24 && bh.biBitCount != 32)
 		|| bh.biCompression != BI_RGB)
-		_throw("Only uncompessed RGB bitmaps are supported");
+		THROW("Only uncompessed RGB bitmaps are supported");
 
 	*width = bh.biWidth;  *height = bh.biHeight;
 	srcPixelSize = bh.biBitCount / 8;
@@ -252,14 +252,14 @@ int bmp_load(char *filename, unsigned char **buf, int *width, int align,
 	dstPitch = (((*width) * pf->size) + (align - 1)) & (~(align - 1));
 
 	if(srcPitch * (*height) + bh.bfOffBits != bh.bfSize)
-		_throw("Corrupt bitmap header");
+		THROW("Corrupt bitmap header");
 	if((tempbuf = (unsigned char *)malloc(srcPitch * (*height))) == NULL
 		|| (*buf = (unsigned char *)malloc(dstPitch * (*height))) == NULL)
-		_throw("Memory allocation error");
+		THROW("Memory allocation error");
 	if(lseek(fd, (long)bh.bfOffBits, SEEK_SET) != (long)bh.bfOffBits)
-		_throw(strerror(errno));
-	_unix(bytesRead = read(fd, tempbuf, srcPitch * (*height)));
-	if(bytesRead != srcPitch * (*height)) _throw("Read error");
+		THROW(strerror(errno));
+	UNIX(bytesRead = read(fd, tempbuf, srcPitch * (*height)));
+	if(bytesRead != srcPitch * (*height)) THROW("Read error");
 
 	pixelConvert(tempbuf, *width, srcPitch, *height, pf_get(PF_BGR), *buf,
 		dstPitch, pf, srcOrientation != orientation);
@@ -277,19 +277,19 @@ static int ppm_save(char *filename, unsigned char *buf, int width, int pitch,
 	FILE *file = NULL;  int ret = 0;
 	unsigned char *tempbuf = NULL;
 
-	if((file = fopen(filename, "wb")) == NULL) _throw(strerror(errno));
-	if(fprintf(file, "P6\n") < 1) _throw("Write error");
-	if(fprintf(file, "%d %d\n", width, height) < 1) _throw("Write error");
-	if(fprintf(file, "255\n") < 1) _throw("Write error");
+	if((file = fopen(filename, "wb")) == NULL) THROW(strerror(errno));
+	if(fprintf(file, "P6\n") < 1) THROW("Write error");
+	if(fprintf(file, "%d %d\n", width, height) < 1) THROW("Write error");
+	if(fprintf(file, "255\n") < 1) THROW("Write error");
 
 	if((tempbuf = (unsigned char *)malloc(width * height * 3)) == NULL)
-		_throw("Memory allocation error");
+		THROW("Memory allocation error");
 
 	pixelConvert(buf, width, pitch, height, pf, tempbuf, width * 3,
 		pf_get(PF_RGB), orientation == BMPORN_BOTTOMUP);
 
 	if((fwrite(tempbuf, width * height * 3, 1, file)) != 1)
-		_throw("Write error");
+		THROW("Write error");
 
 	finally:
 	if(tempbuf) free(tempbuf);
@@ -313,7 +313,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 	#endif
 	if(!filename || !buf || width < 1 || height < 1 || pf->bpc < 8 || pitch < 0)
-		_throw("Invalid argument to bmp_save()");
+		THROW("Invalid argument to bmp_save()");
 
 	if(pitch == 0) pitch = width * pf->size;
 
@@ -323,7 +323,7 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 			return ppm_save(filename, buf, width, pitch, height, pf, orientation);
 	}
 
-	_unix(fd = open(filename, flags, mode));
+	UNIX(fd = open(filename, flags, mode));
 	dstPitch = ((width * 3) + 3) & (~3);
 
 	bh.bfType = 0x4d42;
@@ -337,22 +337,22 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	bh.biXPelsPerMeter = 0;  bh.biYPelsPerMeter = 0;
 	bh.biClrUsed = 0;  bh.biClrImportant = 0;
 
-	if(!littleendian())
+	if(!LittleEndian())
 	{
-		bh.bfType = byteswap16(bh.bfType);
-		bh.bfSize = byteswap(bh.bfSize);
-		bh.bfOffBits = byteswap(bh.bfOffBits);
-		bh.biSize = byteswap(bh.biSize);
-		bh.biWidth = byteswap(bh.biWidth);
-		bh.biHeight = byteswap(bh.biHeight);
-		bh.biPlanes = byteswap16(bh.biPlanes);
-		bh.biBitCount = byteswap16(bh.biBitCount);
-		bh.biCompression = byteswap(bh.biCompression);
-		bh.biSizeImage = byteswap(bh.biSizeImage);
-		bh.biXPelsPerMeter = byteswap(bh.biXPelsPerMeter);
-		bh.biYPelsPerMeter = byteswap(bh.biYPelsPerMeter);
-		bh.biClrUsed = byteswap(bh.biClrUsed);
-		bh.biClrImportant = byteswap(bh.biClrImportant);
+		bh.bfType = BYTESWAP16(bh.bfType);
+		bh.bfSize = BYTESWAP(bh.bfSize);
+		bh.bfOffBits = BYTESWAP(bh.bfOffBits);
+		bh.biSize = BYTESWAP(bh.biSize);
+		bh.biWidth = BYTESWAP(bh.biWidth);
+		bh.biHeight = BYTESWAP(bh.biHeight);
+		bh.biPlanes = BYTESWAP16(bh.biPlanes);
+		bh.biBitCount = BYTESWAP16(bh.biBitCount);
+		bh.biCompression = BYTESWAP(bh.biCompression);
+		bh.biSizeImage = BYTESWAP(bh.biSizeImage);
+		bh.biXPelsPerMeter = BYTESWAP(bh.biXPelsPerMeter);
+		bh.biYPelsPerMeter = BYTESWAP(bh.biYPelsPerMeter);
+		bh.biClrUsed = BYTESWAP(bh.biClrUsed);
+		bh.biClrImportant = BYTESWAP(bh.biClrImportant);
 	}
 
 	WRITE(fd, &bh.bfType, sizeof(unsigned short));
@@ -373,14 +373,14 @@ int bmp_save(char *filename, unsigned char *buf, int width, int pitch,
 	WRITE(fd, &bh.biClrImportant, sizeof(unsigned int));
 
 	if((tempbuf = (unsigned char *)malloc(dstPitch * height)) == NULL)
-		_throw("Memory allocation error");
+		THROW("Memory allocation error");
 
 	pixelConvert(buf, width, pitch, height, pf, tempbuf, dstPitch,
 		pf_get(PF_BGR), orientation != BMPORN_BOTTOMUP);
 
 	if((bytesWritten =
 		write(fd, tempbuf, dstPitch * height)) != dstPitch * height)
-		_throw(strerror(errno));
+		THROW(strerror(errno));
 
 	finally:
 	if(tempbuf) free(tempbuf);

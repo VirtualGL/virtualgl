@@ -53,7 +53,7 @@ void *RRTransInit(Display *dpy_, Window win_, FakerConfig *fconfig_)
 		fconfig = fconfig_;
 		dpy = dpy_;
 		win = win_;
-		_newcheck(handle = (void *)(new X11Trans()));
+		NEWCHECK(handle = (void *)(new X11Trans()));
 	}
 	catch(Error &e)
 	{
@@ -75,9 +75,9 @@ RRFrame *RRTransGetFrame(void *handle, int width, int height, int format,
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
-		if(!trans) _throw("Invalid handle");
+		if(!trans) THROW("Invalid handle");
 		RRFrame *frame;
-		_newcheck(frame = new RRFrame);
+		NEWCHECK(frame = new RRFrame);
 		memset(frame, 0, sizeof(RRFrame));
 		FBXFrame *f = trans->getFrame(dpy, win, width, height);
 		f->flags |= FRAME_BOTTOMUP;
@@ -102,7 +102,7 @@ int RRTransReady(void *handle)
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
-		if(!trans) _throw("Invalid handle");
+		if(!trans) THROW("Invalid handle");
 		ret = (int)trans->isReady();
 	}
 	catch(Error &e)
@@ -119,7 +119,7 @@ int RRTransSynchronize(void *handle)
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
-		if(!trans) _throw("Invalid handle");
+		if(!trans) THROW("Invalid handle");
 		trans->synchronize();
 	}
 	catch(Error &e)
@@ -136,10 +136,10 @@ int RRTransSendFrame(void *handle, RRFrame *frame, int sync)
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
-		if(!trans) _throw("Invalid handle");
+		if(!trans) THROW("Invalid handle");
 		FBXFrame *f;
 		if(!frame || (f = (FBXFrame *)frame->opaque) == NULL)
-			_throw("Invalid frame handle");
+			THROW("Invalid frame handle");
 		trans->sendFrame(f, (bool)sync);
 		delete frame;
 	}
@@ -157,7 +157,7 @@ int RRTransDestroy(void *handle)
 	try
 	{
 		X11Trans *trans = (X11Trans *)handle;
-		if(!trans) _throw("Invalid handle");
+		if(!trans) THROW("Invalid handle");
 		delete trans;
 	}
 	catch(Error &e)

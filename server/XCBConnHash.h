@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014-2015 D. R. Commander
+ * Copyright (C)2014-2015, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -51,10 +51,10 @@ namespace vglserver
 
 			void add(xcb_connection_t *conn, Display *dpy)
 			{
-				if(!conn || !dpy) _throw("Invalid argument");
+				if(!conn || !dpy) THROW("Invalid argument");
 
 				XCBConnAttribs *attribs = NULL;
-				_newcheck(attribs = new XCBConnAttribs);
+				NEWCHECK(attribs = new XCBConnAttribs);
 				attribs->dpy = dpy;  attribs->protoAtom = 0;  attribs->deleteAtom = 0;
 
 				// We set up the window manager atoms here because doing so in the
@@ -80,7 +80,7 @@ namespace vglserver
 
 			Display *getX11Display(xcb_connection_t *conn)
 			{
-				if(!conn) _throw("Invalid_argument");
+				if(!conn) THROW("Invalid_argument");
 				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->dpy;
 				return 0;
@@ -88,7 +88,7 @@ namespace vglserver
 
 			xcb_atom_t getProtoAtom(xcb_connection_t *conn)
 			{
-				if(!conn) _throw("Invalid_argument");
+				if(!conn) THROW("Invalid_argument");
 				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->protoAtom;
 				return 0;
@@ -96,7 +96,7 @@ namespace vglserver
 
 			xcb_atom_t getDeleteAtom(xcb_connection_t *conn)
 			{
-				if(!conn) _throw("Invalid_argument");
+				if(!conn) THROW("Invalid_argument");
 				XCBConnAttribs *attribs = HASH::find(conn, NULL);
 				if(attribs) return attribs->deleteAtom;
 				return 0;

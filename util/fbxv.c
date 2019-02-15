@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014, 2018 D. R. Commander
+ * Copyright (C)2009, 2014, 2018-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -26,12 +26,12 @@ static FILE *warningFile = NULL;
 
 static char lastError[1024] = "No error";
 
-#define _throw(m) \
+#define THROW(m) \
 { \
 	snprintf(lastError, 1023, "%s", m);  errorLine = __LINE__;  goto finally; \
 }
 
-#define _x11(f) \
+#define X11(f) \
 { \
 	int __err = 0; \
 	if((__err = (f)) != Success) \
@@ -42,7 +42,7 @@ static char lastError[1024] = "No error";
 	} \
 }
 
-#define _errifnot(f) \
+#define ERRIFNOT(f) \
 { \
 	if(!(f)) \
 	{ \
@@ -100,10 +100,10 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 	XvAdaptorInfo *ai = NULL;
 	XvImageFormatValues *ifv = NULL;
 
-	if(!fb) _throw("Invalid argument");
+	if(!fb) THROW("Invalid argument");
 
-	if(!dpy || !win) _throw("Invalid argument");
-	_errifnot(XGetWindowAttributes(dpy, win, &xwa));
+	if(!dpy || !win) THROW("Invalid argument");
+	ERRIFNOT(XGetWindowAttributes(dpy, win, &xwa));
 	if(width_ > 0) width = width_;  else width = xwa.width;
 	if(height_ > 0) height = height_;  else height = xwa.height;
 	if(fb->dpy == dpy && fb->win == win)
@@ -119,10 +119,10 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 
 	if(XvQueryExtension(dpy, &dummy1, &dummy2, &dummy3, &dummy4, &dummy5)
 		!= Success)
-		_throw("X Video Extension not available");
+		THROW("X Video Extension not available");
 	if(XvQueryAdaptors(dpy, DefaultRootWindow(dpy), &nadaptors, &ai) != Success)
-		_throw("Could not query X Video adaptors");
-	if(nadaptors < 1 || !ai) _throw("No X Video adaptors available");
+		THROW("Could not query X Video adaptors");
+	if(nadaptors < 1 || !ai) THROW("No X Video adaptors available");
 
 	fb->port = -1;
 	for(i = 0; i < nadaptors; i++)
@@ -148,7 +148,7 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 	found:
 	XvFreeAdaptorInfo(ai);  ai = NULL;
 	if(fb->port == -1)
-		_throw("The X Video implementation on the 2D X Server does not support the desired pixel format");
+		THROW("The X Video implementation on the 2D X Server does not support the desired pixel format");
 
 	#ifdef USESHM
 	if(useShm && XShmQueryExtension(fb->dpy))
@@ -212,12 +212,12 @@ int fbxv_init(fbxv_struct *fb, Display *dpy, Window win, int width_,
 	#endif
 	{
 		if(!(fb->xvi = XvCreateImage(dpy, fb->port, format, 0, width, height)))
-			_throw("Could not create XvImage structure");
+			THROW("Could not create XvImage structure");
 		if(!(fb->xvi->data = malloc(fb->xvi->data_size)))
-			_throw("Memory allocation failure");
+			THROW("Memory allocation failure");
 	}
 	if(!(fb->xgc = XCreateGC(dpy, win, 0, NULL)))
-		_throw("Could not create X11 graphics context");
+		THROW("Could not create X11 graphics context");
 	return 0;
 
 	finally:
@@ -230,7 +230,7 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 	int srcHeight_, int dstX_, int dstY_, int dstWidth, int dstHeight)
 {
 	int srcX, srcY, dstX, dstY, srcWidth, srcHeight;
-	if(!fb) _throw("Invalid argument");
+	if(!fb) THROW("Invalid argument");
 
 	srcX = srcX_ >= 0 ? srcX_ : 0;
 	srcY = srcY_ >= 0 ? srcY_ : 0;
@@ -249,15 +249,15 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 	{
 		if(!fb->xattach)
 		{
-			_errifnot(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach = 1;
+			ERRIFNOT(XShmAttach(fb->dpy, &fb->shminfo));  fb->xattach = 1;
 		}
-		_x11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX,
+		X11(XvShmPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX,
 			srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, False));
 	}
 	else
 	#endif
 
-	_x11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
+	X11(XvPutImage(fb->dpy, fb->port, fb->win, fb->xgc, fb->xvi, srcX, srcY,
 		srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight));
 	XFlush(fb->dpy);
 	XSync(fb->dpy, False);
@@ -270,7 +270,7 @@ int fbxv_write(fbxv_struct *fb, int srcX_, int srcY_, int srcWidth_,
 
 int fbxv_term(fbxv_struct *fb)
 {
-	if(!fb) _throw("Invalid argument");
+	if(!fb) THROW("Invalid argument");
 	if(fb->xvi)
 	{
 		if(fb->xvi->data && !fb->shm)

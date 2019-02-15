@@ -1,4 +1,4 @@
-/* Copyright (C)2009-2018 D. R. Commander
+/* Copyright (C)2009-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -94,10 +94,10 @@ FakerConfig *fconfig_getinstance(void)
 			void *addr = NULL;
 			if((fconfig_shmid = shmget(IPC_PRIVATE, sizeof(FakerConfig),
 				IPC_CREAT | 0600)) == -1)
-				_throwunix();
-			if((addr = shmat(fconfig_shmid, 0, 0)) == (void *)-1) _throwunix();
+				THROW_UNIX();
+			if((addr = shmat(fconfig_shmid, 0, 0)) == (void *)-1) THROW_UNIX();
 			if(!addr)
-				_throw("Could not attach to config structure in shared memory");
+				THROW("Could not attach to config structure in shared memory");
 			#ifdef linux
 			shmctl(fconfig_shmid, IPC_RMID, 0);
 			#endif
@@ -111,7 +111,7 @@ FakerConfig *fconfig_getinstance(void)
 			#else
 
 			fconfig_instance = new FakerConfig;
-			if(!fconfig_instance) _throw("Could not allocate config structure");
+			if(!fconfig_instance) THROW("Could not allocate config structure");
 
 			#endif
 
@@ -213,7 +213,7 @@ static void fconfig_buildlut(FakerConfig &fc)
 }
 
 
-#define fetchenv_str(envvar, s) \
+#define FETCHENV_STR(envvar, s) \
 { \
 	if((env = getenv(envvar)) != NULL && strlen(env) > 0 \
 		&& (!fconfig_envset || strncmp(env, fconfig_env.s, MAXSTR - 1))) \
@@ -223,7 +223,7 @@ static void fconfig_buildlut(FakerConfig &fc)
 	} \
 }
 
-#define fetchenv_bool(envvar, b) \
+#define FETCHENV_BOOL(envvar, b) \
 { \
 	if((env = getenv(envvar)) != NULL && strlen(env) > 0) \
 	{ \
@@ -234,7 +234,7 @@ static void fconfig_buildlut(FakerConfig &fc)
 	} \
 }
 
-#define fetchenv_int(envvar, i, min, max) \
+#define FETCHENV_INT(envvar, i, min, max) \
 { \
 	if((env = getenv(envvar)) != NULL && strlen(env) > 0) \
 	{ \
@@ -245,7 +245,7 @@ static void fconfig_buildlut(FakerConfig &fc)
 	} \
 }
 
-#define fetchenv_dbl(envvar, d, min, max) \
+#define FETCHENV_DBL(envvar, d, min, max) \
 { \
 	char *temp = NULL; \
 	if((temp = getenv(envvar)) != NULL && strlen(temp) > 0) \
@@ -271,9 +271,9 @@ void fconfig_reloadenv(void)
 
 	CriticalSection::SafeLock l(fcmutex);
 
-	fetchenv_bool("VGL_ALLOWINDIRECT", allowindirect);
-	fetchenv_bool("VGL_AUTOTEST", autotest);
-	fetchenv_str("VGL_CLIENT", client);
+	FETCHENV_BOOL("VGL_ALLOWINDIRECT", allowindirect);
+	FETCHENV_BOOL("VGL_AUTOTEST", autotest);
+	FETCHENV_STR("VGL_CLIENT", client);
 	if((env = getenv("VGL_SUBSAMP")) != NULL && strlen(env) > 0)
 	{
 		int subsamp = -1;
@@ -297,7 +297,7 @@ void fconfig_reloadenv(void)
 		if(subsamp >= 0 && (!fconfig_envset || fconfig_env.subsamp != subsamp))
 			fconfig.subsamp = fconfig_env.subsamp = subsamp;
 	}
-	fetchenv_str("VGL_TRANSPORT", transport);
+	FETCHENV_STR("VGL_TRANSPORT", transport);
 	if((env = getenv("VGL_COMPRESS")) != NULL && strlen(env) > 0)
 	{
 		char *t = NULL;  int itemp = strtol(env, &t, 10);
@@ -316,8 +316,8 @@ void fconfig_reloadenv(void)
 			fconfig_env.compress = compress;
 		}
 	}
-	fetchenv_str("VGL_CONFIG", config);
-	fetchenv_str("VGL_DEFAULTFBCONFIG", defaultfbconfig);
+	FETCHENV_STR("VGL_CONFIG", config);
+	FETCHENV_STR("VGL_DEFAULTFBCONFIG", defaultfbconfig);
 	if((env = getenv("VGL_DISPLAY")) != NULL && strlen(env) > 0)
 	{
 		if(!fconfig_envset || strncmp(env, fconfig_env.localdpystring, MAXSTR - 1))
@@ -326,7 +326,7 @@ void fconfig_reloadenv(void)
 			strncpy(fconfig_env.localdpystring, env, MAXSTR - 1);
 		}
 	}
-	fetchenv_bool("VGL_DLSYM", dlsymloader);
+	FETCHENV_BOOL("VGL_DLSYM", dlsymloader);
 	if((env = getenv("VGL_DRAWABLE")) != NULL && strlen(env) > 0)
 	{
 		int drawable = -1;
@@ -341,12 +341,12 @@ void fconfig_reloadenv(void)
 		if(drawable >= 0 && (!fconfig_envset || fconfig_env.drawable != drawable))
 			fconfig.drawable = fconfig_env.drawable = drawable;
 	}
-	fetchenv_str("VGL_EXCLUDE", excludeddpys);
+	FETCHENV_STR("VGL_EXCLUDE", excludeddpys);
 	#ifdef FAKEXCB
-	fetchenv_bool("VGL_FAKEXCB", fakeXCB);
+	FETCHENV_BOOL("VGL_FAKEXCB", fakeXCB);
 	#endif
-	fetchenv_bool("VGL_FORCEALPHA", forcealpha);
-	fetchenv_dbl("VGL_FPS", fps, 0.0, 1000000.0);
+	FETCHENV_BOOL("VGL_FORCEALPHA", forcealpha);
+	FETCHENV_DBL("VGL_FPS", fps, 0.0, 1000000.0);
 	if((env = getenv("VGL_GAMMA")) != NULL && strlen(env) > 0)
 	{
 		if(!strcmp(env, "1"))
@@ -376,10 +376,10 @@ void fconfig_reloadenv(void)
 			}
 		}
 	}
-	fetchenv_bool("VGL_GLFLUSHTRIGGER", glflushtrigger);
-	fetchenv_str("VGL_GLLIB", gllib);
-	fetchenv_str("VGL_GLXVENDOR", glxvendor);
-	fetchenv_str("VGL_GUI", guikeyseq);
+	FETCHENV_BOOL("VGL_GLFLUSHTRIGGER", glflushtrigger);
+	FETCHENV_STR("VGL_GLLIB", gllib);
+	FETCHENV_STR("VGL_GLXVENDOR", glxvendor);
+	FETCHENV_STR("VGL_GUI", guikeyseq);
 	if(strlen(fconfig.guikeyseq) > 0)
 	{
 		if(!stricmp(fconfig.guikeyseq, "none")) fconfig.gui = false;
@@ -407,13 +407,13 @@ void fconfig_reloadenv(void)
 			fconfig.gui = true;
 		}
 	}
-	fetchenv_bool("VGL_INTERFRAME", interframe);
-	fetchenv_str("VGL_LOG", log);
-	fetchenv_bool("VGL_LOGO", logo);
-	fetchenv_int("VGL_NPROCS", np, 1, min(numprocs(), MAXPROCS));
-	fetchenv_int("VGL_PORT", port, 0, 65535);
-	fetchenv_bool("VGL_PROBEGLX", probeglx);
-	fetchenv_int("VGL_QUAL", qual, 1, 100);
+	FETCHENV_BOOL("VGL_INTERFRAME", interframe);
+	FETCHENV_STR("VGL_LOG", log);
+	FETCHENV_BOOL("VGL_LOGO", logo);
+	FETCHENV_INT("VGL_NPROCS", np, 1, min(NumProcs(), MAXPROCS));
+	FETCHENV_INT("VGL_PORT", port, 0, 65535);
+	FETCHENV_BOOL("VGL_PROBEGLX", probeglx);
+	FETCHENV_INT("VGL_QUAL", qual, 1, 100);
 	if((env = getenv("VGL_READBACK")) != NULL && strlen(env) > 0)
 	{
 		int readback = -1;
@@ -429,11 +429,11 @@ void fconfig_reloadenv(void)
 		if(readback >= 0 && (!fconfig_envset || fconfig_env.readback != readback))
 			fconfig.readback = fconfig_env.readback = readback;
 	}
-	fetchenv_dbl("VGL_REFRESHRATE", refreshrate, 0.0, 1000000.0);
-	fetchenv_int("VGL_SAMPLES", samples, 0, 64);
-	fetchenv_bool("VGL_SPOIL", spoil);
-	fetchenv_bool("VGL_SPOILLAST", spoillast);
-	fetchenv_bool("VGL_SSL", ssl);
+	FETCHENV_DBL("VGL_REFRESHRATE", refreshrate, 0.0, 1000000.0);
+	FETCHENV_INT("VGL_SAMPLES", samples, 0, 64);
+	FETCHENV_BOOL("VGL_SPOIL", spoil);
+	FETCHENV_BOOL("VGL_SPOILLAST", spoillast);
+	FETCHENV_BOOL("VGL_SSL", ssl);
 	{
 		if((env = getenv("VGL_STEREO")) != NULL && strlen(env) > 0)
 		{
@@ -456,20 +456,20 @@ void fconfig_reloadenv(void)
 				fconfig.stereo = fconfig_env.stereo = stereo;
 		}
 	}
-	fetchenv_bool("VGL_SYNC", sync);
-	fetchenv_int("VGL_TILESIZE", tilesize, 8, 1024);
-	fetchenv_bool("VGL_TRACE", trace);
-	fetchenv_int("VGL_TRANSPIXEL", transpixel, 0, 255);
-	fetchenv_bool("VGL_TRAPX11", trapx11);
-	fetchenv_str("VGL_XVENDOR", vendor);
-	fetchenv_bool("VGL_VERBOSE", verbose);
-	fetchenv_bool("VGL_WM", wm);
-	fetchenv_str("VGL_X11LIB", x11lib);
+	FETCHENV_BOOL("VGL_SYNC", sync);
+	FETCHENV_INT("VGL_TILESIZE", tilesize, 8, 1024);
+	FETCHENV_BOOL("VGL_TRACE", trace);
+	FETCHENV_INT("VGL_TRANSPIXEL", transpixel, 0, 255);
+	FETCHENV_BOOL("VGL_TRAPX11", trapx11);
+	FETCHENV_STR("VGL_XVENDOR", vendor);
+	FETCHENV_BOOL("VGL_VERBOSE", verbose);
+	FETCHENV_BOOL("VGL_WM", wm);
+	FETCHENV_STR("VGL_X11LIB", x11lib);
 	#ifdef FAKEXCB
-	fetchenv_str("VGL_XCBLIB", xcblib);
-	fetchenv_str("VGL_XCBGLXLIB", xcbglxlib);
-	fetchenv_str("VGL_XCBKEYSYMSLIB", xcbkeysymslib);
-	fetchenv_str("VGL_XCBX11LIB", xcbkeysymslib);
+	FETCHENV_STR("VGL_XCBLIB", xcblib);
+	FETCHENV_STR("VGL_XCBGLXLIB", xcbglxlib);
+	FETCHENV_STR("VGL_XCBKEYSYMSLIB", xcbkeysymslib);
+	FETCHENV_STR("VGL_XCBX11LIB", xcbkeysymslib);
 	#endif
 
 	if(strlen(fconfig.transport) > 0)
@@ -585,62 +585,62 @@ void fconfig_setcompress(FakerConfig &fc, int i)
 }
 
 
-#define prconfint(i)  vglout.println(#i "  =  %d", (int)fc.i)
-#define prconfstr(s) \
+#define PRCONF_INT(i)  vglout.println(#i "  =  %d", (int)fc.i)
+#define PRCONF_STR(s) \
 	vglout.println(#s "  =  \"%s\"", strlen(fc.s) > 0 ? fc.s : "{Empty}")
-#define prconfdbl(d)  vglout.println(#d "  =  %f", fc.d)
+#define PRCONF_DBL(d)  vglout.println(#d "  =  %f", fc.d)
 
 void fconfig_print(FakerConfig &fc)
 {
-	prconfint(allowindirect);
-	prconfstr(client);
-	prconfint(compress);
-	prconfstr(config);
-	prconfstr(defaultfbconfig);
-	prconfint(dlsymloader);
-	prconfint(drawable);
-	prconfstr(excludeddpys);
-	prconfdbl(fps);
-	prconfdbl(flushdelay);
-	prconfint(forcealpha);
-	prconfdbl(gamma);
-	prconfint(glflushtrigger);
-	prconfstr(gllib);
-	prconfstr(glxvendor);
-	prconfint(gui);
-	prconfint(guikey);
-	prconfstr(guikeyseq);
-	prconfint(guimod);
-	prconfint(interframe);
-	prconfstr(localdpystring);
-	prconfstr(log);
-	prconfint(logo);
-	prconfint(np);
-	prconfint(port);
-	prconfint(qual);
-	prconfint(readback);
-	prconfint(samples);
-	prconfint(spoil);
-	prconfint(spoillast);
-	prconfint(ssl);
-	prconfint(stereo);
-	prconfint(subsamp);
-	prconfint(sync);
-	prconfint(tilesize);
-	prconfint(trace);
-	prconfint(transpixel);
-	prconfint(transvalid[RRTRANS_X11]);
-	prconfint(transvalid[RRTRANS_VGL]);
-	prconfint(transvalid[RRTRANS_XV]);
-	prconfint(trapx11);
-	prconfstr(vendor);
-	prconfint(verbose);
-	prconfint(wm);
-	prconfstr(x11lib);
+	PRCONF_INT(allowindirect);
+	PRCONF_STR(client);
+	PRCONF_INT(compress);
+	PRCONF_STR(config);
+	PRCONF_STR(defaultfbconfig);
+	PRCONF_INT(dlsymloader);
+	PRCONF_INT(drawable);
+	PRCONF_STR(excludeddpys);
+	PRCONF_DBL(fps);
+	PRCONF_DBL(flushdelay);
+	PRCONF_INT(forcealpha);
+	PRCONF_DBL(gamma);
+	PRCONF_INT(glflushtrigger);
+	PRCONF_STR(gllib);
+	PRCONF_STR(glxvendor);
+	PRCONF_INT(gui);
+	PRCONF_INT(guikey);
+	PRCONF_STR(guikeyseq);
+	PRCONF_INT(guimod);
+	PRCONF_INT(interframe);
+	PRCONF_STR(localdpystring);
+	PRCONF_STR(log);
+	PRCONF_INT(logo);
+	PRCONF_INT(np);
+	PRCONF_INT(port);
+	PRCONF_INT(qual);
+	PRCONF_INT(readback);
+	PRCONF_INT(samples);
+	PRCONF_INT(spoil);
+	PRCONF_INT(spoillast);
+	PRCONF_INT(ssl);
+	PRCONF_INT(stereo);
+	PRCONF_INT(subsamp);
+	PRCONF_INT(sync);
+	PRCONF_INT(tilesize);
+	PRCONF_INT(trace);
+	PRCONF_INT(transpixel);
+	PRCONF_INT(transvalid[RRTRANS_X11]);
+	PRCONF_INT(transvalid[RRTRANS_VGL]);
+	PRCONF_INT(transvalid[RRTRANS_XV]);
+	PRCONF_INT(trapx11);
+	PRCONF_STR(vendor);
+	PRCONF_INT(verbose);
+	PRCONF_INT(wm);
+	PRCONF_STR(x11lib);
 	#ifdef FAKEXCB
-	prconfstr(xcblib);
-	prconfstr(xcbglxlib);
-	prconfstr(xcbkeysymslib);
-	prconfstr(xcbx11lib);
+	PRCONF_STR(xcblib);
+	PRCONF_STR(xcbglxlib);
+	PRCONF_STR(xcbkeysymslib);
+	PRCONF_STR(xcbx11lib);
 	#endif
 }

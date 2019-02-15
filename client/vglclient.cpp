@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2011-2012, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -96,7 +96,7 @@ void killproc(bool userOnly)
 
 	unsigned char *buf = NULL;
 
-	if(!userOnly && getuid() != 0) _throw("Only root can do that");
+	if(!userOnly && getuid() != 0) THROW("Only root can do that");
 
 	try
 	{
@@ -104,10 +104,10 @@ void killproc(bool userOnly)
 		int mib_user[4] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid() };
 		size_t len = 0;
 
-		_unix(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
-		if(len < sizeof(kinfo_proc)) _throw("Process table is empty");
-		_newcheck(buf = new unsigned char[len]);
-		_unix(sysctl(userOnly ? mib_user : mib_all, 4, buf, &len, NULL, 0));
+		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, NULL, &len, NULL, 0));
+		if(len < sizeof(kinfo_proc)) THROW("Process table is empty");
+		NEWCHECK(buf = new unsigned char[len]);
+		UNIX(sysctl(userOnly ? mib_user : mib_all, 4, buf, &len, NULL, 0));
 		int nprocs = len / sizeof(kinfo_proc);
 		kinfo_proc *kp = (kinfo_proc *)buf;
 
@@ -132,11 +132,11 @@ void killproc(bool userOnly)
 
 	DIR *procdir = NULL;  struct dirent *dent = NULL;  int fd = -1;
 
-	if(!userOnly && getuid() != 0) _throw("Only root can do that");
+	if(!userOnly && getuid() != 0) THROW("Only root can do that");
 
 	try
 	{
-		if(!(procdir = opendir("/proc"))) _throwunix();
+		if(!(procdir = opendir("/proc"))) THROW_UNIX();
 		while((dent = readdir(procdir)) != NULL)
 		{
 			if(dent->d_name[0] >= '1' && dent->d_name[0] <= '9')
@@ -323,7 +323,7 @@ void getEnvironment(void)
 		if(!f)
 		{
 			vglout.println("Could not open log file %s", logFile);
-			_throwunix();
+			THROW_UNIX();
 		}
 		else fclose(f);
 	}
@@ -381,7 +381,7 @@ int main(int argc, char *argv[])
 				if(!f)
 				{
 					vglout.println("Could not open log file %s", logFile);
-					_throwunix();
+					THROW_UNIX();
 				}
 				else fclose(f);
 			}
@@ -438,7 +438,7 @@ int start(char *displayname)
 		restart = false;
 
 		if((maindpy = XOpenDisplay(displayname)) == NULL)
-			_throw("Could not open display");
+			THROW("Could not open display");
 
 		#ifdef USESSL
 		if(doSSL)
@@ -446,7 +446,7 @@ int start(char *displayname)
 			if(!force) actualSSLPort = instanceCheckSSL(maindpy);
 			if(actualSSLPort == 0)
 			{
-				_newcheck(sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod));
+				NEWCHECK(sslReceiver = new VGLTransReceiver(true, ipv6, drawMethod));
 				if(sslPort == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTSSLPORT;
@@ -472,7 +472,7 @@ int start(char *displayname)
 					ipv6 ? " [IPv6 enabled]" : "");
 				if((sslPortAtom = XInternAtom(maindpy, "_VGLCLIENT_SSLPORT",
 					False)) == None)
-					_throw("Could not get _VGLCLIENT_SSLPORT atom");
+					THROW("Could not get _VGLCLIENT_SSLPORT atom");
 				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
 					sslPortAtom, XA_INTEGER, 16, PropModeReplace,
 					(unsigned char *)&actualSSLPort, 1);
@@ -485,7 +485,7 @@ int start(char *displayname)
 			if(!force) actualPort = instanceCheck(maindpy);
 			if(actualPort == 0)
 			{
-				_newcheck(receiver = new VGLTransReceiver(false, ipv6, drawMethod));
+				NEWCHECK(receiver = new VGLTransReceiver(false, ipv6, drawMethod));
 				if(port == 0)
 				{
 					bool success = false;  unsigned short i = RR_DEFAULTPORT;
@@ -509,7 +509,7 @@ int start(char *displayname)
 				vglout.println("Listening for unencrypted connections on port %d%s",
 					actualPort = receiver->getPort(), ipv6 ? " [IPv6 enabled]" : "");
 				if((portAtom = XInternAtom(maindpy, "_VGLCLIENT_PORT", False)) == None)
-					_throw("Could not get _VGLCLIENT_PORT atom");
+					THROW("Could not get _VGLCLIENT_PORT atom");
 				XChangeProperty(maindpy, RootWindow(maindpy, DefaultScreen(maindpy)),
 					portAtom, XA_INTEGER, 16, PropModeReplace,
 					(unsigned char *)&actualPort, 1);

@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005-2007 Sun Microsystems, Inc.
- * Copyright (C)2009-2012, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2009-2012, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -79,7 +79,7 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 		|| newpf->size != pf->size || !bits)
 	{
 		if(bits) delete [] bits;
-		_newcheck(bits = new unsigned char[h.framew * h.frameh * newpf->size + 1]);
+		NEWCHECK(bits = new unsigned char[h.framew * h.frameh * newpf->size + 1]);
 	}
 	if(stereo_)
 	{
@@ -87,7 +87,7 @@ void Frame::init(rrframeheader &h, int pixelFormat, int flags_, bool stereo_)
 			|| newpf->size != pf->size || !rbits)
 		{
 			if(rbits) delete [] rbits;
-			_newcheck(rbits =
+			NEWCHECK(rbits =
 				new unsigned char[h.framew * h.frameh * newpf->size + 1]);
 		}
 	}
@@ -107,7 +107,7 @@ void Frame::init(unsigned char *bits_, int width, int pitch_, int height,
 {
 	if(!bits_ || width < 1 || pitch_ < 1 || height < 1 || pixelFormat < 0
 		|| pixelFormat >= PIXELFORMATS)
-		_throw("Invalid argument");
+		THROW("Invalid argument");
 
 	bits = bits_;
 	hdr.x = hdr.y = 0;
@@ -126,12 +126,12 @@ Frame *Frame::getTile(int x, int y, int width, int height)
 {
 	Frame *f;
 
-	if(!bits || !pitch || !pf->size) _throw("Frame not initialized");
+	if(!bits || !pitch || !pf->size) THROW("Frame not initialized");
 	if(x < 0 || y < 0 || width < 1 || height < 1 || (x + width) > hdr.width
 		|| (y + height) > hdr.height)
 		throw Error("Frame::getTile", "Argument out of range");
 
-	_newcheck(f = new Frame(false));
+	NEWCHECK(f = new Frame(false));
 	f->hdr = hdr;
 	f->hdr.x = x;
 	f->hdr.y = y;
@@ -205,7 +205,7 @@ void Frame::makeAnaglyph(Frame &r, Frame &g, Frame &b)
 	unsigned char *srcrptr = r.bits, *srcgptr = g.bits, *srcbptr = b.bits,
 		*dstptr = bits, *dstrptr, *dstgptr, *dstbptr;
 
-	if(pf->bpc != 8) _throw("Anaglyphic stereo requires 8 bits per component");
+	if(pf->bpc != 8) THROW("Anaglyphic stereo requires 8 bits per component");
 
 	for(j = 0; j < hdr.frameh; j++, srcrptr += r.pitch, srcgptr += g.pitch,
 		srcbptr += b.pitch, dstptr += pitch)
@@ -227,7 +227,7 @@ void Frame::makePassive(Frame &stf, int mode)
 
 	if(hdr.framew != stf.hdr.framew || hdr.frameh != stf.hdr.frameh
 		|| pitch != stf.pitch)
-		_throw("Frames are not the same size");
+		THROW("Frames are not the same size");
 
 	if(mode == RRSTEREO_INTERLEAVED)
 	{
@@ -286,7 +286,7 @@ void Frame::makePassive(Frame &stf, int mode)
 void Frame::decompressRGB(Frame &f, int width, int height, bool rightEye)
 {
 	if(!f.bits || f.hdr.size < 1 || !bits || !hdr.size)
-		_throw("Frame not initialized");
+		THROW("Frame not initialized");
 	if(pf->bpc < 8)
 		throw(Error("RGB decompressor",
 			"Destination frame has the wrong pixel format"));
@@ -345,7 +345,7 @@ switch(pf->size) \
 		break; \
 	} \
 	default: \
-		_throw("Invalid pixel format"); \
+		THROW("Invalid pixel format"); \
 }
 
 
@@ -410,7 +410,7 @@ void Frame::checkHeader(rrframeheader &h)
 
 CompressedFrame::CompressedFrame(void) : Frame(), tjhnd(NULL)
 {
-	if(!(tjhnd = tjInitCompress())) _throw(tjGetErrorStr());
+	if(!(tjhnd = tjInitCompress())) THROW(tjGetErrorStr());
 	pf = pf_get(PF_RGB);
 	memset(&rhdr, 0, sizeof(rrframeheader));
 }
@@ -423,16 +423,16 @@ CompressedFrame::~CompressedFrame(void)
 
 CompressedFrame &CompressedFrame::operator= (Frame &f)
 {
-	if(!f.bits) _throw("Frame not initialized");
+	if(!f.bits) THROW("Frame not initialized");
 	if(f.pf->size < 3 || f.pf->size > 4)
-		_throw("Only true color frames are supported");
+		THROW("Only true color frames are supported");
 
 	switch(f.hdr.compress)
 	{
 		case RRCOMP_RGB:  compressRGB(f);  break;
 		case RRCOMP_JPEG:  compressJPEG(f);  break;
 		case RRCOMP_YUV:  compressYUV(f);  break;
-		default:  _throw("Invalid compression type");
+		default:  THROW("Invalid compression type");
 	}
 	return *this;
 }
@@ -448,7 +448,7 @@ void CompressedFrame::compressYUV(Frame &f)
 
 	init(f.hdr, 0);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
-	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], bits, TJSUBSAMP(f.hdr.subsamp), tjflags));
 	hdr.size = (unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height,
 		TJSUBSAMP(f.hdr.subsamp));
@@ -459,7 +459,7 @@ void CompressedFrame::compressJPEG(Frame &f)
 {
 	int tjflags = 0;
 
-	if(f.hdr.qual > 100 || f.hdr.subsamp > 16 || !isPow2(f.hdr.subsamp))
+	if(f.hdr.qual > 100 || f.hdr.subsamp > 16 || !IS_POW2(f.hdr.subsamp))
 		throw(Error("JPEG compressor", "Invalid argument"));
 	if(f.pf->bpc != 8)
 		throw(Error("JPEG compressor",
@@ -468,7 +468,7 @@ void CompressedFrame::compressJPEG(Frame &f)
 	init(f.hdr, f.stereo ? RR_LEFT : 0);
 	if(f.flags & FRAME_BOTTOMUP) tjflags |= TJ_BOTTOMUP;
 	unsigned long size;
-	_tj(tjCompress2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TJ(tjCompress2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], &bits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
 		tjflags | TJFLAG_NOREALLOC));
 	hdr.size = (unsigned int)size;
@@ -476,7 +476,7 @@ void CompressedFrame::compressJPEG(Frame &f)
 	{
 		init(f.hdr, RR_RIGHT);
 		if(rbits)
-			_tj(tjCompress2(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
+			TJ(tjCompress2(tjhnd, f.rbits, f.hdr.width, f.pitch, f.hdr.height,
 				tjpf[f.pf->id], &rbits, &size, TJSUBSAMP(f.hdr.subsamp), f.hdr.qual,
 				tjflags | TJFLAG_NOREALLOC));
 		rhdr.size = (unsigned int)size;
@@ -525,7 +525,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				_newcheck(bits = new unsigned char[tjBufSize(h.width, h.height,
+				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}
 			hdr = h;  hdr.flags = RR_LEFT;  stereo = true;
@@ -534,7 +534,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != rhdr.width || h.height != rhdr.height || !rbits)
 			{
 				if(rbits) delete [] rbits;
-				_newcheck(rbits = new unsigned char[tjBufSize(h.width, h.height,
+				NEWCHECK(rbits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}
 			rhdr = h;  rhdr.flags = RR_RIGHT;  stereo = true;
@@ -543,7 +543,7 @@ void CompressedFrame::init(rrframeheader &h, int buffer)
 			if(h.width != hdr.width || h.height != hdr.height || !bits)
 			{
 				if(bits) delete [] bits;
-				_newcheck(bits = new unsigned char[tjBufSize(h.width, h.height,
+				NEWCHECK(bits = new unsigned char[tjBufSize(h.width, h.height,
 					h.subsamp)]);
 			}
 			hdr = h;  hdr.flags = 0;  stereo = false;
@@ -618,11 +618,11 @@ void FBXFrame::init(rrframeheader &h)
 	if((env = getenv("VGL_USEXSHM")) != NULL && strlen(env) > 0
 		&& !strcmp(env, "0"))
 		usexshm = 0;
-	_fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+	FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	if(h.framew > fb.width || h.frameh > fb.height)
 	{
 		XSync(wh.dpy, False);
-		_fbx(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
+		FBX(fbx_init(&fb, wh, h.framew, h.frameh, usexshm));
 	}
 	hdr = h;
 	if(hdr.framew > fb.width) hdr.framew = fb.width;
@@ -638,9 +638,9 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 	int tjflags = 0;
 
 	if(!cf.bits || cf.hdr.size < 1)
-		_throw("JPEG not initialized");
+		THROW("JPEG not initialized");
 	init(cf.hdr);
-	if(!fb.xi) _throw("Frame not initialized");
+	if(!fb.xi) THROW("Frame not initialized");
 
 	int width = min(cf.hdr.width, fb.width - cf.hdr.x);
 	int height = min(cf.hdr.height, fb.height - cf.hdr.y);
@@ -658,7 +658,7 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 				if((tjhnd = tjInitDecompress()) == NULL)
 					throw(Error("FBXFrame::decompressor", tjGetErrorStr()));
 			}
-			_tj(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
+			TJ(tjDecompress2(tjhnd, cf.bits, cf.hdr.size,
 				(unsigned char *)&fb.bits[fb.pitch * cf.hdr.y + cf.hdr.x * pf->size],
 				width, fb.pitch, height, tjpf[pf->id], tjflags));
 		}
@@ -669,8 +669,8 @@ FBXFrame &FBXFrame::operator= (CompressedFrame &cf)
 
 void FBXFrame::redraw(void)
 {
-	if(flags & FRAME_BOTTOMUP) _fbx(fbx_flip(&fb, 0, 0, 0, 0));
-	_fbx(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
+	if(flags & FRAME_BOTTOMUP) FBX(fbx_flip(&fb, 0, 0, 0, 0));
+	FBX(fbx_write(&fb, 0, 0, 0, 0, fb.width, fb.height));
 }
 
 
@@ -717,7 +717,7 @@ XVFrame::~XVFrame(void)
 
 XVFrame &XVFrame::operator= (Frame &f)
 {
-	if(!f.bits) _throw("Frame not initialized");
+	if(!f.bits) THROW("Frame not initialized");
 	if(f.pf->bpc != 8)
 		throw(Error("YUV encoder", "YUV encoding requires 8 bits per component"));
 
@@ -729,11 +729,11 @@ XVFrame &XVFrame::operator= (Frame &f)
 		if((tjhnd = tjInitCompress()) == NULL)
 			throw(Error("XVFrame::compressor", tjGetErrorStr()));
 	}
-	_tj(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
+	TJ(tjEncodeYUV2(tjhnd, f.bits, f.hdr.width, f.pitch, f.hdr.height,
 		tjpf[f.pf->id], bits, TJ_420, tjflags));
 	hdr.size = (unsigned int)tjBufSizeYUV(f.hdr.width, f.hdr.height, TJ_420);
 	if(hdr.size != (unsigned long)fb.xvi->data_size)
-		_throw("Image size mismatch in YUV encoder");
+		THROW("Image size mismatch in YUV encoder");
 	return *this;
 }
 
@@ -741,11 +741,11 @@ XVFrame &XVFrame::operator= (Frame &f)
 void XVFrame::init(rrframeheader &h)
 {
 	checkHeader(h);
-	_fbxv(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+	FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	if(h.framew > fb.xvi->width || h.frameh > fb.xvi->height)
 	{
 		XSync(dpy, False);
-		_fbxv(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
+		FBXV(fbxv_init(&fb, dpy, win, h.framew, h.frameh, I420_PLANAR, 0));
 	}
 	hdr = h;
 	if(hdr.framew > fb.xvi->width) hdr.framew = fb.xvi->width;
@@ -758,7 +758,7 @@ void XVFrame::init(rrframeheader &h)
 
 void XVFrame::redraw(void)
 {
-	_fbxv(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
+	FBXV(fbxv_write(&fb, 0, 0, 0, 0, 0, 0, hdr.framew, hdr.frameh));
 }
 
 #endif

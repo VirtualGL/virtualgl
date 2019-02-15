@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2009-2015, 2017-2018 D. R. Commander
+ * Copyright (C)2009-2015, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -32,23 +32,23 @@ static const int trans2pf[RRTRANS_FORMATOPT] =
 };
 
 
-#define isRight(drawBuf) \
+#define IS_RIGHT(drawBuf) \
 	(drawBuf == GL_RIGHT || drawBuf == GL_FRONT_RIGHT \
 		|| drawBuf == GL_BACK_RIGHT)
-#define leye(buf) \
+#define LEYE(buf) \
 	(buf == GL_BACK ? GL_BACK_LEFT : (buf == GL_FRONT ? GL_FRONT_LEFT : buf))
-#define reye(buf) \
+#define REYE(buf) \
 	(buf == GL_BACK ? GL_BACK_RIGHT : (buf == GL_FRONT ? GL_FRONT_RIGHT : buf))
-#define isAnaglyphic(mode) \
+#define IS_ANAGLYPHIC(mode) \
 	(mode >= RRSTEREO_REDCYAN && mode <= RRSTEREO_BLUEYELLOW)
-#define isPassive(mode) \
+#define IS_PASSIVE(mode) \
 	(mode >= RRSTEREO_INTERLEAVED && mode <= RRSTEREO_SIDEBYSIDE)
 
-static INLINE int drawingToRight(void)
+static INLINE int DrawingToRight(void)
 {
 	GLint drawBuf = GL_LEFT;
 	_glGetIntegerv(GL_DRAW_BUFFER, &drawBuf);
-	return isRight(drawBuf);
+	return IS_RIGHT(drawBuf);
 }
 
 
@@ -82,7 +82,7 @@ VirtualWin::VirtualWin(Display *dpy_, Window win) :
 	if(!fconfig.wm && !(xwa.your_event_mask & StructureNotifyMask))
 	{
 		if(!(eventdpy = _XOpenDisplay(DisplayString(dpy))))
-			_throw("Could not clone X display connection");
+			THROW("Could not clone X display connection");
 		XSelectInput(eventdpy, win, StructureNotifyMask);
 		if(fconfig.verbose)
 			vglout.println("[VGL] Selecting structure notify events in window 0x%.8x",
@@ -122,7 +122,7 @@ VirtualWin::~VirtualWin(void)
 int VirtualWin::init(int w, int h, GLXFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	return VirtualDrawable::init(w, h, config_);
 }
 
@@ -133,7 +133,7 @@ int VirtualWin::init(int w, int h, GLXFBConfig config_)
 void VirtualWin::resize(int width, int height)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	if(width == 0 && oglDraw) width = oglDraw->getWidth();
 	if(height == 0 && oglDraw) height = oglDraw->getHeight();
 	if(oglDraw && oglDraw->getWidth() == width && oglDraw->getHeight() == height)
@@ -151,8 +151,8 @@ void VirtualWin::resize(int width, int height)
 void VirtualWin::checkConfig(GLXFBConfig config_)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
-	if(_FBCID(config_) != _FBCID(config))
+	if(doWMDelete) THROW("Window has been deleted by window manager");
+	if(FBCID(config_) != FBCID(config))
 	{
 		config = config_;  newConfig = true;
 	}
@@ -162,7 +162,7 @@ void VirtualWin::checkConfig(GLXFBConfig config_)
 void VirtualWin::clear(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	VirtualDrawable::clear();
 }
 
@@ -170,7 +170,7 @@ void VirtualWin::clear(void)
 void VirtualWin::cleanup(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	if(oldDraw) { delete oldDraw;  oldDraw = NULL; }
 }
 
@@ -189,7 +189,7 @@ void VirtualWin::initFromWindow(GLXFBConfig config_)
 GLXDrawable VirtualWin::getGLXDrawable(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	return VirtualDrawable::getGLXDrawable();
 }
 
@@ -218,7 +218,7 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 {
 	GLXDrawable retval = 0;
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	if(newConfig)
 	{
 		if(newWidth <= 0 && oglDraw) newWidth = oglDraw->getWidth();
@@ -239,7 +239,7 @@ GLXDrawable VirtualWin::updateGLXDrawable(void)
 void VirtualWin::swapBuffers(void)
 {
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 	if(oglDraw) oglDraw->swap();
 }
 
@@ -266,7 +266,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 	if(fconfig.readback == RRREAD_NONE) return;
 
 	CriticalSection::SafeLock l(mutex);
-	if(doWMDelete) _throw("Window has been deleted by window manager");
+	if(doWMDelete) THROW("Window has been deleted by window manager");
 
 	dirty = false;
 
@@ -275,7 +275,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 
 	if(isStereo() && stereoMode != RRSTEREO_LEYE && stereoMode != RRSTEREO_REYE)
 	{
-		if(drawingToRight() || rdirty) doStereo = true;
+		if(DrawingToRight() || rdirty) doStereo = true;
 		rdirty = false;
 		if(doStereo && compress == RRCOMP_YUV && strlen(fconfig.transport) == 0)
 		{
@@ -331,7 +331,7 @@ void VirtualWin::readback(GLint drawBuf, bool spoilLast, bool sync)
 		case RRCOMP_YUV:
 			if(!vglconn)
 			{
-				_newcheck(vglconn = new VGLTrans());
+				NEWCHECK(vglconn = new VGLTrans());
 				vglconn->connect(
 					strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
 					fconfig.port);
@@ -356,7 +356,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 
 	if(!plugin)
 	{
-		_newcheck(plugin = new TransPlugin(dpy, x11Draw, fconfig.transport));
+		NEWCHECK(plugin = new TransPlugin(dpy, x11Draw, fconfig.transport));
 		plugin->connect(
 			strlen(fconfig.client) > 0 ? fconfig.client : DisplayString(dpy),
 			fconfig.port);
@@ -367,7 +367,7 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	if(!fconfig.spoil) plugin->synchronize();
 
 	if(oglDraw->getRGBSize() != 24)
-		_throw("Transport plugins require 8 bits per component");
+		THROW("Transport plugins require 8 bits per component");
 	int desiredFormat = RRTRANS_RGB;
 	if(oglDraw->getFormat() == GL_BGR) desiredFormat = RRTRANS_BGR;
 	else if(oglDraw->getFormat() == GL_BGRA) desiredFormat = RRTRANS_BGRA;
@@ -389,12 +389,12 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 		}
 		stereoMode = RRSTEREO_REDCYAN;
 	}
-	if(doStereo && isAnaglyphic(stereoMode))
+	if(doStereo && IS_ANAGLYPHIC(stereoMode))
 	{
 		stereoFrame.deInit();
 		makeAnaglyph(&f, drawBuf, stereoMode);
 	}
-	else if(doStereo && isPassive(stereoMode))
+	else if(doStereo && IS_PASSIVE(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
 		makePassive(&f, drawBuf, GL_NONE, stereoMode);
@@ -403,13 +403,13 @@ void VirtualWin::sendPlugin(GLint drawBuf, bool spoilLast, bool sync,
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
 		GLint readBuf = drawBuf;
-		if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = leye(drawBuf);
-		if(stereoMode == RRSTEREO_REYE) readBuf = reye(drawBuf);
+		if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
+		if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
 		readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
 			rrframe->bits, readBuf, doStereo);
 		if(doStereo && rrframe->rbits)
 			readPixels(0, 0, rrframe->w, rrframe->pitch, rrframe->h, GL_NONE, f.pf,
-				rrframe->rbits, reye(drawBuf), doStereo);
+				rrframe->rbits, REYE(drawBuf), doStereo);
 	}
 	if(!syncdpy) { XSync(dpy, False);  syncdpy = true; }
 	if(fconfig.logo) f.addLogo();
@@ -427,7 +427,7 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 	Frame *f;
 
 	if(oglDraw->getRGBSize() != 24)
-		_throw("The VGL Transport requires 8 bits per component");
+		THROW("The VGL Transport requires 8 bits per component");
 	int glFormat = GL_RGB, pixelFormat = PF_RGB;
 	if(compress != RRCOMP_RGB)
 	{
@@ -438,14 +438,14 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 	}
 
 	if(!fconfig.spoil) vglconn->synchronize();
-	_errifnot(f = vglconn->getFrame(w, h, pixelFormat, FRAME_BOTTOMUP,
+	ERRIFNOT(f = vglconn->getFrame(w, h, pixelFormat, FRAME_BOTTOMUP,
 		doStereo && stereoMode == RRSTEREO_QUADBUF));
-	if(doStereo && isAnaglyphic(stereoMode))
+	if(doStereo && IS_ANAGLYPHIC(stereoMode))
 	{
 		stereoFrame.deInit();
 		makeAnaglyph(f, drawBuf, stereoMode);
 	}
-	else if(doStereo && isPassive(stereoMode))
+	else if(doStereo && IS_PASSIVE(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
 		makePassive(f, drawBuf, glFormat, stereoMode);
@@ -454,13 +454,13 @@ void VirtualWin::sendVGL(GLint drawBuf, bool spoilLast, bool doStereo,
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
 		GLint readBuf = drawBuf;
-		if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = leye(drawBuf);
-		if(stereoMode == RRSTEREO_REYE) readBuf = reye(drawBuf);
+		if(doStereo || stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
+		if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
 		readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, glFormat, f->pf,
 			f->bits, readBuf, doStereo);
 		if(doStereo && f->rbits)
 			readPixels(0, 0, f->hdr.framew, f->pitch, f->hdr.frameh, glFormat, f->pf,
-				f->rbits, reye(drawBuf), doStereo);
+				f->rbits, REYE(drawBuf), doStereo);
 	}
 	f->hdr.winid = x11Draw;
 	f->hdr.framew = f->hdr.width;
@@ -482,12 +482,12 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	int width = oglDraw->getWidth(), height = oglDraw->getHeight();
 
 	FBXFrame *f;
-	if(!x11trans) _newcheck(x11trans = new X11Trans());
+	if(!x11trans) NEWCHECK(x11trans = new X11Trans());
 	if(spoilLast && fconfig.spoil && !x11trans->isReady()) return;
 	if(!fconfig.spoil) x11trans->synchronize();
-	_errifnot(f = x11trans->getFrame(dpy, x11Draw, width, height));
+	ERRIFNOT(f = x11trans->getFrame(dpy, x11Draw, width, height));
 	f->flags |= FRAME_BOTTOMUP;
-	if(doStereo && isAnaglyphic(stereoMode))
+	if(doStereo && IS_ANAGLYPHIC(stereoMode))
 	{
 		stereoFrame.deInit();
 		makeAnaglyph(f, drawBuf, stereoMode);
@@ -495,14 +495,14 @@ void VirtualWin::sendX11(GLint drawBuf, bool spoilLast, bool sync,
 	else
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
-		if(doStereo && isPassive(stereoMode))
+		if(doStereo && IS_PASSIVE(stereoMode))
 			makePassive(f, drawBuf, GL_NONE, stereoMode);
 		else
 		{
 			stereoFrame.deInit();
 			GLint readBuf = drawBuf;
-			if(stereoMode == RRSTEREO_REYE) readBuf = reye(drawBuf);
-			else if(stereoMode == RRSTEREO_LEYE) readBuf = leye(drawBuf);
+			if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
+			else if(stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
 			readPixels(0, 0, min(width, f->hdr.framew), f->pitch,
 				min(height, f->hdr.frameh), GL_NONE, f->pf, f->bits, readBuf, false);
 		}
@@ -520,17 +520,17 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	int width = oglDraw->getWidth(), height = oglDraw->getHeight();
 
 	XVFrame *f;
-	if(!xvtrans) _newcheck(xvtrans = new XVTrans());
+	if(!xvtrans) NEWCHECK(xvtrans = new XVTrans());
 	if(spoilLast && fconfig.spoil && !xvtrans->isReady()) return;
 	if(!fconfig.spoil) xvtrans->synchronize();
-	_errifnot(f = xvtrans->getFrame(dpy, x11Draw, width, height));
+	ERRIFNOT(f = xvtrans->getFrame(dpy, x11Draw, width, height));
 	rrframeheader hdr;
 	hdr.x = hdr.y = 0;
 	hdr.width = hdr.framew = width;
 	hdr.height = hdr.frameh = height;
 
 	if(oglDraw->getRGBSize() != 24)
-		_throw("The XV Transport requires 8 bits per component");
+		THROW("The XV Transport requires 8 bits per component");
 	int glFormat = oglDraw->getFormat(), pixelFormat = PF_RGB;
 	if(glFormat == GL_RGBA) pixelFormat = PF_RGBX;
 	else if(glFormat == GL_BGR) pixelFormat = PF_BGR;
@@ -538,12 +538,12 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 
 	frame.init(hdr, pixelFormat, FRAME_BOTTOMUP, false);
 
-	if(doStereo && isAnaglyphic(stereoMode))
+	if(doStereo && IS_ANAGLYPHIC(stereoMode))
 	{
 		stereoFrame.deInit();
 		makeAnaglyph(&frame, drawBuf, stereoMode);
 	}
-	else if(doStereo && isPassive(stereoMode))
+	else if(doStereo && IS_PASSIVE(stereoMode))
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();
 		makePassive(&frame, drawBuf, glFormat, stereoMode);
@@ -552,8 +552,8 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 	{
 		rFrame.deInit();  gFrame.deInit();  bFrame.deInit();  stereoFrame.deInit();
 		GLint readBuf = drawBuf;
-		if(stereoMode == RRSTEREO_REYE) readBuf = reye(drawBuf);
-		else if(stereoMode == RRSTEREO_LEYE) readBuf = leye(drawBuf);
+		if(stereoMode == RRSTEREO_REYE) readBuf = REYE(drawBuf);
+		else if(stereoMode == RRSTEREO_LEYE) readBuf = LEYE(drawBuf);
 		readPixels(0, 0, min(width, frame.hdr.framew), frame.pitch,
 			min(height, frame.hdr.frameh), glFormat, frame.pf, frame.bits, readBuf,
 			false);
@@ -570,14 +570,14 @@ void VirtualWin::sendXV(GLint drawBuf, bool spoilLast, bool sync,
 
 void VirtualWin::makeAnaglyph(Frame *f, int drawBuf, int stereoMode)
 {
-	int rbuf = leye(drawBuf), gbuf = reye(drawBuf),  bbuf = reye(drawBuf);
+	int rbuf = LEYE(drawBuf), gbuf = REYE(drawBuf),  bbuf = REYE(drawBuf);
 	if(stereoMode == RRSTEREO_GREENMAGENTA)
 	{
-		rbuf = reye(drawBuf);  gbuf = leye(drawBuf);  bbuf = reye(drawBuf);
+		rbuf = REYE(drawBuf);  gbuf = LEYE(drawBuf);  bbuf = REYE(drawBuf);
 	}
 	else if(stereoMode == RRSTEREO_BLUEYELLOW)
 	{
-		rbuf = reye(drawBuf);  gbuf = reye(drawBuf);  bbuf = leye(drawBuf);
+		rbuf = REYE(drawBuf);  gbuf = REYE(drawBuf);  bbuf = LEYE(drawBuf);
 	}
 	rFrame.init(f->hdr, PF_COMP, f->flags, false);
 	readPixels(0, 0, rFrame.hdr.framew, rFrame.pitch, rFrame.hdr.frameh, GL_RED,
@@ -600,10 +600,10 @@ void VirtualWin::makePassive(Frame *f, int drawBuf, GLenum glFormat,
 	stereoFrame.init(f->hdr, f->pf->id, f->flags, true);
 	readPixels(0, 0, stereoFrame.hdr.framew, stereoFrame.pitch,
 		stereoFrame.hdr.frameh, glFormat, stereoFrame.pf, stereoFrame.bits,
-		leye(drawBuf), true);
+		LEYE(drawBuf), true);
 	readPixels(0, 0, stereoFrame.hdr.framew, stereoFrame.pitch,
 		stereoFrame.hdr.frameh, glFormat, stereoFrame.pf, stereoFrame.rbits,
-		reye(drawBuf), true);
+		REYE(drawBuf), true);
 	profPassive.startFrame();
 	f->makePassive(stereoFrame, stereoMode);
 	profPassive.endFrame(f->hdr.framew * f->hdr.frameh, 0, 1);

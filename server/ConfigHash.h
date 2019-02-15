@@ -1,5 +1,5 @@
 /* Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2014, 2016 D. R. Commander
+ * Copyright (C)2014, 2016, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -45,28 +45,28 @@ namespace vglserver
 
 			void add(Display *dpy, GLXFBConfig config, VisualID vid)
 			{
-				if(!dpy || !vid || !config) _throw("Invalid argument");
+				if(!dpy || !vid || !config) THROW("Invalid argument");
 				char *dpystring = strdup(DisplayString(dpy));
-				if(!HASH::add(dpystring, _FBCID(config), vid))
+				if(!HASH::add(dpystring, FBCID(config), vid))
 					free(dpystring);
 			}
 
 			VisualID getVisual(Display *dpy, GLXFBConfig config)
 			{
-				if(!dpy || !config) _throw("Invalid argument");
-				return HASH::find(DisplayString(dpy), _FBCID(config));
+				if(!dpy || !config) THROW("Invalid argument");
+				return HASH::find(DisplayString(dpy), FBCID(config));
 			}
 
 			VisualID getVisual(Display *dpy, int fbcid)
 			{
-				if(!dpy || !fbcid) _throw("Invalid argument");
+				if(!dpy || !fbcid) THROW("Invalid argument");
 				return HASH::find(DisplayString(dpy), fbcid);
 			}
 
 			void remove(Display *dpy, GLXFBConfig config)
 			{
-				if(!dpy || !config) _throw("Invalid argument");
-				HASH::remove(DisplayString(dpy), _FBCID(config));
+				if(!dpy || !config) THROW("Invalid argument");
+				HASH::remove(DisplayString(dpy), FBCID(config));
 			}
 
 		private:

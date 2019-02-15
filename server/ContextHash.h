@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011-2012, 2014-2015 D. R. Commander
+ * Copyright (C)2011-2012, 2014-2015, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -51,9 +51,9 @@ namespace vglserver
 
 			void add(GLXContext ctx, GLXFBConfig config, Bool direct)
 			{
-				if(!ctx || !config) _throw("Invalid argument");
+				if(!ctx || !config) THROW("Invalid argument");
 				ContextAttribs *attribs = NULL;
-				_newcheck(attribs = new ContextAttribs);
+				NEWCHECK(attribs = new ContextAttribs);
 				attribs->config = config;
 				attribs->direct = direct;
 				HASH::add(ctx, NULL, attribs);
@@ -61,7 +61,7 @@ namespace vglserver
 
 			GLXFBConfig findConfig(GLXContext ctx)
 			{
-				if(!ctx) _throw("Invalid argument");
+				if(!ctx) THROW("Invalid argument");
 				ContextAttribs *attribs = HASH::find(ctx, NULL);
 				if(attribs) return attribs->config;
 				return 0;

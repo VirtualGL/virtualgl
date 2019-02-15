@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2017-2018 D. R. Commander
+ * Copyright (C)2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -45,29 +45,29 @@ void benchmark(int interval, char *ifname)
 
 	kstat_ctl_t *kc = NULL;
 	kstat_t *kif = NULL;
-	if((kc = kstat_open()) == NULL) { _throwunix(); }
-	if((kif = kstat_lookup(kc, NULL, -1, ifname)) == NULL) { _throwunix(); }
+	if((kc = kstat_open()) == NULL) { THROW_UNIX(); }
+	if((kif = kstat_lookup(kc, NULL, -1, ifname)) == NULL) { THROW_UNIX(); }
 
 	#elif defined(linux)
 
 	FILE *f = NULL;
 	if((f = fopen("/proc/net/dev", "r")) == NULL)
-		_throw("Could not open /proc/net/dev");
+		THROW("Could not open /proc/net/dev");
 
 	#endif
 
-	double tStart = getTime();
+	double tStart = GetTime();
 	for(;;)
 	{
-		double tEnd = getTime();
+		double tEnd = GetTime();
 
 		#ifdef sun
 
 		kstat_named_t *data = NULL;
-		if(kstat_read(kc, kif, NULL) < 0) _throwunix();
+		if(kstat_read(kc, kif, NULL) < 0) THROW_UNIX();
 		if((data =
 			(kstat_named_t *)kstat_data_lookup(kif, (char *)"rbytes64")) == NULL)
-			_throwunix();
+			THROW_UNIX();
 		if(bytesRead != 0)
 		{
 			if(bytesRead > data->value.ui64)
@@ -80,7 +80,7 @@ void benchmark(int interval, char *ifname)
 		bytesRead = data->value.ui64;
 		if((data =
 			(kstat_named_t *)kstat_data_lookup(kif, (char *)"obytes64")) == NULL)
-			_throwunix();
+			THROW_UNIX();
 		if(bytesSent != 0)
 		{
 			if(bytesSent > data->value.ui64)
@@ -95,7 +95,7 @@ void benchmark(int interval, char *ifname)
 		#elif defined(linux)
 
 		char temps[1024];
-		if(fseek(f, 0, SEEK_SET) != 0) _throwunix();
+		if(fseek(f, 0, SEEK_SET) != 0) THROW_UNIX();
 		bool isRead = false;
 		while(fgets(temps, 1024, f))
 		{
@@ -116,7 +116,7 @@ void benchmark(int interval, char *ifname)
 			}
 		}
 		if(!isRead)
-			_throw("Cannot parse statistics for requested interface from /proc/net/dev.");
+			THROW("Cannot parse statistics for requested interface from /proc/net/dev.");
 
 		#endif
 
@@ -296,11 +296,11 @@ int main(int argc, char **argv)
 			if(buf[0] == 'V')
 			{
 				clientSocket->recv(&buf[1], 4);
-				if(strcmp(buf, "VGL22")) _throw("Invalid header");
+				if(strcmp(buf, "VGL22")) THROW("Invalid header");
 				while(1)
 				{
 					clientSocket->recv((char *)&size, (int)sizeof(int));
-					if(!littleendian()) size = byteswap(size);
+					if(!LittleEndian()) size = BYTESWAP(size);
 					if(size < 1) break;
 					while(1)
 					{
@@ -365,7 +365,7 @@ int main(int argc, char **argv)
 			for(i = MINDATASIZE; i <= MAXDATASIZE; i *= 2)
 			{
 				size = i;
-				if(!littleendian()) size = byteswap(size);
+				if(!LittleEndian()) size = BYTESWAP(size);
 				socket.send((char *)&size, (int)sizeof(int));
 				initBuf(buf, i);
 				j = 0;
@@ -389,7 +389,7 @@ int main(int argc, char **argv)
 					(double)i * (double)j / 125000. / (elapsed / 2.));
 			}
 			size = 0;
-			if(!littleendian()) size = byteswap(size);
+			if(!LittleEndian()) size = BYTESWAP(size);
 			socket.send((char *)&size, (int)sizeof(int));
 		}
 

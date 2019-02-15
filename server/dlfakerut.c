@@ -1,5 +1,5 @@
 /* Copyright (C)2006 Sun Microsystems, Inc.
- * Copyright (C)2009, 2014-2015, 2017 D. R. Commander
+ * Copyright (C)2009, 2014-2015, 2017, 2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -21,7 +21,7 @@
 #include <ctype.h>
 
 
-#define _throw(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
+#define THROW(m)  { fprintf(stderr, "ERROR: %s\n", m);  goto bailout; }
 
 
 typedef XVisualInfo *(*_glXChooseVisualType)(Display *, int, int *);
@@ -55,8 +55,8 @@ void *gldllhnd = NULL;
 	dlerror(); \
 	_##s = (_##s##Type)dlsym(gldllhnd, #s); \
 	err = dlerror(); \
-	if(err) _throw(err) \
-	else if(!_##s) _throw("Could not load symbol " #s)
+	if(err) THROW(err) \
+	else if(!_##s) THROW("Could not load symbol " #s)
 
 void loadSymbols1(char *prefix)
 {
@@ -69,8 +69,8 @@ void loadSymbols1(char *prefix)
 	}
 	else gldllhnd = dlopen("libGL.so", RTLD_NOW);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libGL")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libGL")
 
 	LSYM(glXChooseVisual);
 	LSYM(glXCreateContext);
@@ -93,7 +93,7 @@ void unloadSymbols1(void)
 
 #define LSYM2(s) \
 	_##s = (_##s##Type)_glXGetProcAddressARB((const GLubyte *)#s); \
-	if(!_##s) _throw("Could not load symbol " #s)
+	if(!_##s) THROW("Could not load symbol " #s)
 
 void loadSymbols2(void)
 {
@@ -127,8 +127,8 @@ void nameMatchTest(void)
 	fprintf(stderr, "dlopen() name matching test:\n");
 	gldllhnd = dlopen("libGLdlfakerut.so", RTLD_NOW);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libGLdlfakerut")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libGLdlfakerut")
 
 	LSYM(myTestFunction);
 	_myTestFunction();
@@ -156,8 +156,8 @@ void deepBindTest(void)
 
 	gldllhnd = dlopen("libdeepbindtest.so", RTLD_NOW | RTLD_DEEPBIND);
 	err = dlerror();
-	if(err) _throw(err)
-	else if(!gldllhnd) _throw("Could not open libdlfakerut")
+	if(err) THROW(err)
+	else if(!gldllhnd) THROW("Could not open libdlfakerut")
 
 	LSYM(test);
 	_test("RTLD_DEEPBIND test");
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 
 	if(putenv((char *)"VGL_AUTOTEST=1") == -1
 		|| putenv((char *)"VGL_SPOIL=0") == -1)
-		_throw("putenv() failed!\n");
+		THROW("putenv() failed!\n");
 
 	env = getenv("LD_PRELOAD");
 	fprintf(stderr, "LD_PRELOAD = %s\n", env ? env : "(NULL)");

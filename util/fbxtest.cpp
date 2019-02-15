@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
- * Copyright (C)2011, 2013-2014, 2017-2018 D. R. Commander
+ * Copyright (C)2011, 2013-2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -119,10 +119,10 @@ void clearFB(void)
 	if(wh)
 	{
 		HDC hdc = 0;  RECT rect;
-		_w32(hdc = GetDC(wh));
-		_w32(GetClientRect(wh, &rect));
-		_w32(PatBlt(hdc, 0, 0, rect.right, rect.bottom, BLACKNESS));
-		_w32(ReleaseDC(wh, hdc));
+		W32(hdc = GetDC(wh));
+		W32(GetClientRect(wh, &rect));
+		W32(PatBlt(hdc, 0, 0, rect.right, rect.bottom, BLACKNESS));
+		W32(ReleaseDC(wh, hdc));
 	}
 
 	#else
@@ -149,8 +149,8 @@ void nativeWrite(bool useShm)
 
 	try
 	{
-		_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
-		if(useShm && !fb.shm) _throw("MIT-SHM not available");
+		FBX(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
+		if(useShm && !fb.shm) THROW("MIT-SHM not available");
 		fprintf(stderr, "Native Pixel Format:  %s\n", fb.pf->name);
 		if(fb.width != drawableWidth || fb.height != drawableHeight)
 		{
@@ -170,14 +170,14 @@ void nativeWrite(bool useShm)
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch * fb.height);
-				_fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
+				FBX(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
 			#endif
 			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 				(unsigned char *)fb.bits, i);
 			timer.start();
-			_fbx(fbx_flip(&fb, 0, 0, 0, 0));
-			_fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
+			FBX(fbx_flip(&fb, 0, 0, 0, 0));
+			FBX(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
 			drawTime += timer.elapsed();
 			i++;
 		} while(timer2.elapsed() < benchTime);
@@ -185,7 +185,7 @@ void nativeWrite(bool useShm)
 			(double)i * (double)(fb.width * fb.height) /
 				((double)1000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
-		_fbx(fbx_read(&fb, 0, 0));
+		FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 			(unsigned char *)fb.bits, i - 1, true))
 		{
@@ -206,13 +206,13 @@ void nativeWrite(bool useShm)
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch * fb.height);
-				_fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
+				FBX(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
 			#endif
 			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 				(unsigned char *)fb.bits, i);
 			timer.start();
-			_fbx(fbx_write(&fb, 0, 0, fb.width / 2, fb.height / 2, fb.width / 2,
+			FBX(fbx_write(&fb, 0, 0, fb.width / 2, fb.height / 2, fb.width / 2,
 				fb.height / 2));
 			drawTime += timer.elapsed();
 			i++;
@@ -221,7 +221,7 @@ void nativeWrite(bool useShm)
 			(double)i * (double)(fb.width * fb.height) /
 				((double)4000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
-		_fbx(fbx_read(&fb, 0, 0));
+		FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width / 2, fb.pitch, fb.height / 2,
 			fb.pf, (unsigned char *)&fb.bits[fb.height / 2 * fb.pitch +
 				fb.width / 2 * fb.pf->size], i - 1))
@@ -243,13 +243,13 @@ void nativeWrite(bool useShm)
 			if(checkDB)
 			{
 				memset(fb.bits, 255, fb.pitch * fb.height);
-				_fbx(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
+				FBX(fbx_awrite(&fb, 0, 0, 0, 0, 0, 0));
 			}
 			#endif
 			initBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 				(unsigned char *)fb.bits, i);
 			timer.start();
-			_fbx(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
+			FBX(fbx_write(&fb, 0, 0, 0, 0, 0, 0));
 			drawTime += timer.elapsed();
 			i++;
 		} while(timer2.elapsed() < benchTime);
@@ -257,7 +257,7 @@ void nativeWrite(bool useShm)
 			(double)i * (double)(fb.width * fb.height) /
 				((double)1000000. * drawTime));
 		memset(fb.bits, 0, fb.pitch * fb.height);
-		_fbx(fbx_read(&fb, 0, 0));
+		FBX(fbx_read(&fb, 0, 0));
 		if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 			(unsigned char *)fb.bits, i - 1))
 		{
@@ -288,8 +288,8 @@ void nativeRead(bool useShm)
 
 	try
 	{
-		_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
-		if(useShm && !fb.shm) _throw("MIT-SHM not available");
+		FBX(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
+		if(useShm && !fb.shm) THROW("MIT-SHM not available");
 		if(fb.width != drawableWidth || fb.height != drawableHeight)
 		{
 			fprintf(stderr, "WARNING:  Requested size = %d x %d  Actual size = %d x %d\n",
@@ -305,7 +305,7 @@ void nativeRead(bool useShm)
 		do
 		{
 			timer.start();
-			_fbx(fbx_read(&fb, 0, 0));
+			FBX(fbx_read(&fb, 0, 0));
 			readTime += timer.elapsed();
 			if(!cmpBuf(0, 0, fb.width, fb.pitch, fb.height, fb.pf,
 				(unsigned char *)fb.bits, pixelOffset))
@@ -349,18 +349,18 @@ class WriteThread : public Runnable
 			{
 				int myWidth, myHeight, myX = 0, myY = 0;
 
-				_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
+				FBX(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
 				if(myRank < 2) { myWidth = fb.width / 2;  myX = 0; }
 				else { myWidth = fb.width - fb.width / 2;  myX = fb.width / 2; }
 				if(myRank % 2 == 0) { myHeight = fb.height / 2;  myY = 0; }
 				else { myHeight = fb.height - fb.height / 2;  myY = fb.height / 2; }
 				fbx_term(&fb);
-				_fbx(fbx_init(&fb, wh, myWidth, myHeight, useShm ? 1 : 0));
-				if(useShm && !fb.shm) _throw("MIT-SHM not available");
+				FBX(fbx_init(&fb, wh, myWidth, myHeight, useShm ? 1 : 0));
+				if(useShm && !fb.shm) THROW("MIT-SHM not available");
 				initBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.pf,
 					(unsigned char *)fb.bits, 0);
 				for(i = 0; i < iter; i++)
-					_fbx(fbx_write(&fb, 0, 0, myX, myY, fb.width, fb.height));
+					FBX(fbx_write(&fb, 0, 0, myX, myY, fb.width, fb.height));
 			}
 			catch(...)
 			{
@@ -391,20 +391,20 @@ class ReadThread : public Runnable
 			{
 				int i, myWidth, myHeight, myX = 0, myY = 0;
 
-				_fbx(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
+				FBX(fbx_init(&fb, wh, 0, 0, useShm ? 1 : 0));
 				if(myRank < 2) { myWidth = fb.width / 2;  myX = 0; }
 				else { myWidth = fb.width - fb.width / 2;  myX = fb.width / 2; }
 				if(myRank % 2 == 0) { myHeight = fb.height / 2;  myY = 0; }
 				else { myHeight = fb.height - fb.height / 2;  myY = fb.height / 2; }
 				fbx_term(&fb);
-				_fbx(fbx_init(&fb, wh, myWidth, myHeight, useShm ? 1 : 0));
-				if(useShm && !fb.shm) _throw("MIT-SHM not available");
+				FBX(fbx_init(&fb, wh, myWidth, myHeight, useShm ? 1 : 0));
+				if(useShm && !fb.shm) THROW("MIT-SHM not available");
 				memset(fb.bits, 0, fb.width * fb.height * fb.pf->size);
 				for(i = 0; i < iter; i++)
-					_fbx(fbx_read(&fb, myX, myY));
+					FBX(fbx_read(&fb, myX, myY));
 				if(!cmpBuf(myX, myY, fb.width, fb.pitch, fb.height, fb.pf,
 					(unsigned char *)fb.bits, 0))
-					_throw("ERROR: Bogus data read back.");
+					THROW("ERROR: Bogus data read back.");
 			}
 			catch(...)
 			{
@@ -591,12 +591,12 @@ void event_loop(void)
 	{
 		for(int i = 0; i < 10; i++)
 		{
-			_fbx(fbx_init(&fb[i], wh, 0, 0, doShm ? 1 : 0));
+			FBX(fbx_init(&fb[i], wh, 0, 0, doShm ? 1 : 0));
 			snprintf(temps, 256, "frame%d.ppm", i);
 			unsigned char *buf = NULL;  int tempw = 0, temph = 0;
 			if(bmp_load(temps, &buf, &tempw, 1, &temph, fb[i].pf->id,
 				BMPORN_TOPDOWN) == -1)
-				_throw(bmp_geterr());
+				THROW(bmp_geterr());
 			for(int j = 0; j < min(temph, fb[i].height); j++)
 				memcpy(&fb[i].bits[fb[i].pitch * j], &buf[tempw * fb[i].pf->size * j],
 					min(tempw, fb[i].width) * fb[i].pf->size);
@@ -615,7 +615,7 @@ void event_loop(void)
 			#ifdef _WIN32
 
 			int ret;  MSG msg;
-			if((ret = GetMessage(&msg, NULL, 0, 0)) == -1) { _throww32(); }
+			if((ret = GetMessage(&msg, NULL, 0, 0)) == -1) { THROW_W32(); }
 			else if(ret == 0)
 			{
 				for(int i = 0; i < 10; i++) fbx_term(&fb[i]);
@@ -658,7 +658,7 @@ void event_loop(void)
 
 			if(!interactive || doDisplay)
 			{
-				_fbx(fbx_write(&fb[frame], 0, 0, 0, 0, 0, 0));
+				FBX(fbx_write(&fb[frame], 0, 0, 0, 0, 0, 0));
 				if(!interactive || advance)
 				{
 					if(frame == 0 || frame == 9) inc = -1 * inc;
@@ -782,7 +782,7 @@ int main(int argc, char **argv)
 		wndclass.lpszMenuName = NULL;
 		wndclass.lpszClassName = BENCH_NAME;
 		wndclass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
-		_w32(RegisterClassEx(&wndclass));
+		W32(RegisterClassEx(&wndclass));
 		screenWidth = GetSystemMetrics(doFS ? SM_CXSCREEN : SM_CXMAXIMIZED);
 		screenHeight = GetSystemMetrics(doFS ? SM_CYSCREEN : SM_CYMAXIMIZED);
 
@@ -818,7 +818,7 @@ int main(int argc, char **argv)
 		int bw = GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
 		int bh =
 			GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
-		_w32(wh = CreateWindowEx(0, BENCH_NAME, BENCH_NAME, winstyle, 0, 0,
+		W32(wh = CreateWindowEx(0, BENCH_NAME, BENCH_NAME, winstyle, 0, 0,
 			drawableWidth + bw, drawableHeight + bh, NULL, NULL,
 			GetModuleHandle(NULL), NULL));
 		UpdateWindow(wh);
@@ -829,7 +829,7 @@ int main(int argc, char **argv)
 		}
 		while(1)
 		{
-			if((ret = GetMessage(&msg, NULL, 0, 0)) == -1) _throww32();
+			if((ret = GetMessage(&msg, NULL, 0, 0)) == -1) THROW_W32();
 			else if(ret == 0) break;
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -846,7 +846,7 @@ int main(int argc, char **argv)
 		if(vtemp.depth == 30) depth = 30;
 		vtemp.c_class = TrueColor;
 		v = XGetVisualInfo(wh.dpy, VisualDepthMask | VisualClassMask, &vtemp, &n);
-		if(!v || !n) _throw("No RGB visuals available");
+		if(!v || !n) THROW("No RGB visuals available");
 		int mask = CWBorderPixel | CWColormap | CWEventMask;
 		swa.colormap = XCreateColormap(wh.dpy, root, v->visual, AllocNone);
 		swa.border_pixel = 0;
@@ -863,17 +863,17 @@ int main(int argc, char **argv)
 		}
 		if(doPixmap)
 		{
-			_errifnot(win = XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
+			ERRIFNOT(win = XCreateWindow(wh.dpy, root, 0, 0, 1, 1, 0, v->depth,
 				InputOutput, v->visual, mask, &swa));
-			_errifnot(wh.d = XCreatePixmap(wh.dpy, win, drawableWidth,
+			ERRIFNOT(wh.d = XCreatePixmap(wh.dpy, win, drawableWidth,
 				drawableHeight, v->depth));
 			wh.v = v->visual;
 		}
 		else
 		{
-			_errifnot(wh.d = XCreateWindow(wh.dpy, root, 0, 0, drawableWidth,
+			ERRIFNOT(wh.d = XCreateWindow(wh.dpy, root, 0, 0, drawableWidth,
 				drawableHeight, 0, v->depth, InputOutput, v->visual, mask, &swa));
-			_errifnot(XMapRaised(wh.dpy, wh.d));
+			ERRIFNOT(XMapRaised(wh.dpy, wh.d));
 		}
 		if(doFS) XSetInputFocus(wh.dpy, wh.d, RevertToParent, CurrentTime);
 		XSync(wh.dpy, False);

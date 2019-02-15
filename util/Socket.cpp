@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2014, 2016, 2018 D. R. Commander
+ * Copyright (C)2014, 2016, 2018-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -37,7 +37,7 @@
 using namespace vglutil;
 
 
-#define _sock(f)  { if((f) == SOCKET_ERROR) _throwsock(); }
+#define SOCK(f)  { if((f) == SOCKET_ERROR) THROW_SOCK(); }
 
 #ifdef _WIN32
 typedef int SOCKLEN_T;
@@ -76,12 +76,12 @@ static EVP_PKEY *newPrivateKey(int bits)
 
 	try
 	{
-		if(!(bn = BN_new())) _throwssl();
-		if(!BN_set_word(bn, RSA_F4)) _throwssl();
-		if(!(rsa = RSA_new())) _throwssl();
-		if(!RSA_generate_key_ex(rsa, bits, bn, NULL)) _throwssl();
-		if(!(pk = EVP_PKEY_new())) _throwssl();
-		if(!EVP_PKEY_assign_RSA(pk, rsa)) _throwssl();
+		if(!(bn = BN_new())) THROW_SSL();
+		if(!BN_set_word(bn, RSA_F4)) THROW_SSL();
+		if(!(rsa = RSA_new())) THROW_SSL();
+		if(!RSA_generate_key_ex(rsa, bits, bn, NULL)) THROW_SSL();
+		if(!(pk = EVP_PKEY_new())) THROW_SSL();
+		if(!EVP_PKEY_assign_RSA(pk, rsa)) THROW_SSL();
 		BN_free(bn);
 		return pk;
 	}
@@ -102,31 +102,31 @@ static X509 *newCert(EVP_PKEY *priv)
 
 	try
 	{
-		if((cert = X509_new()) == NULL) _throwssl();
-		if(!X509_set_version(cert, 2)) _throwssl();
+		if((cert = X509_new()) == NULL) THROW_SSL();
+		if(!X509_set_version(cert, 2)) THROW_SSL();
 		ASN1_INTEGER_set(X509_get_serialNumber(cert), 0L);
 
-		if((name = X509_NAME_new()) == NULL) _throwssl();
-		if((nid = OBJ_txt2nid("organizationName")) == NID_undef) _throwssl();
+		if((name = X509_NAME_new()) == NULL) THROW_SSL();
+		if((nid = OBJ_txt2nid("organizationName")) == NID_undef) THROW_SSL();
 		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
-			(unsigned char *)"VirtualGL", -1, -1, 0)) _throwssl();
-		if((nid = OBJ_txt2nid("commonName")) == NID_undef) _throwssl();
+			(unsigned char *)"VirtualGL", -1, -1, 0)) THROW_SSL();
+		if((nid = OBJ_txt2nid("commonName")) == NID_undef) THROW_SSL();
 		if(!X509_NAME_add_entry_by_NID(name, nid, MBSTRING_ASC,
-			(unsigned char *)"localhost", -1, -1, 0)) _throwssl();
-		if(!X509_set_subject_name(cert, name)) _throwssl();
-		if(!X509_set_issuer_name(cert, name)) _throwssl();
+			(unsigned char *)"localhost", -1, -1, 0)) THROW_SSL();
+		if(!X509_set_subject_name(cert, name)) THROW_SSL();
+		if(!X509_set_issuer_name(cert, name)) THROW_SSL();
 		X509_NAME_free(name);  name = NULL;
 
 		X509_gmtime_adj(X509_get_notBefore(cert), 0);
 		X509_gmtime_adj(X509_get_notAfter(cert), (long)60 * 60 * 24 * 365);
 
-		if((pub = X509_PUBKEY_new()) == NULL) _throwssl();
+		if((pub = X509_PUBKEY_new()) == NULL) THROW_SSL();
 		X509_PUBKEY_set(&pub, priv);
-		if((pk = X509_PUBKEY_get(pub)) == NULL) _throwssl();
+		if((pk = X509_PUBKEY_get(pub)) == NULL) THROW_SSL();
 		X509_set_pubkey(cert, pk);
 		EVP_PKEY_free(pk);  pk = NULL;
 		X509_PUBKEY_free(pub);  pub = NULL;
-		if(X509_sign(cert, priv, EVP_md5()) <= 0) _throwssl();
+		if(X509_sign(cert, priv, EVP_md5()) <= 0) THROW_SSL();
 
 		return cert;
 	}
@@ -162,7 +162,7 @@ Socket::Socket(bool doSSL_, bool ipv6_) :
 	}
 	instanceCount++;
 	#else
-	if(signal(SIGPIPE, SIG_IGN) == SIG_ERR) _throwunix();
+	if(signal(SIGPIPE, SIG_IGN) == SIG_ERR) THROW_UNIX();
 	#endif
 
 	#ifdef USESSL
@@ -261,10 +261,10 @@ void Socket::connect(char *serverName, unsigned short port)
 	int m = 1;
 	char portName[10];
 
-	if(serverName == NULL || strlen(serverName) < 1) _throw("Invalid argument");
-	if(sd != INVALID_SOCKET) _throw("Already connected");
+	if(serverName == NULL || strlen(serverName) < 1) THROW("Invalid argument");
+	if(sd != INVALID_SOCKET) THROW("Already connected");
 	#ifdef USESSL
-	if(ssl && sslctx && doSSL) _throw("SSL already connected");
+	if(ssl && sslctx && doSSL) THROW("SSL already connected");
 	#endif
 
 	memset(&hints, 0, sizeof(hints));
@@ -279,9 +279,9 @@ void Socket::connect(char *serverName, unsigned short port)
 	{
 		if((sd = socket(addr->ai_family, SOCK_STREAM,
 			IPPROTO_TCP)) == INVALID_SOCKET)
-			_throwsock();
-		_sock(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
-		_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
+			THROW_SOCK();
+		SOCK(::connect(sd, addr->ai_addr, (SOCKLEN_T)addr->ai_addrlen));
+		SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&m, sizeof(int)));
 		freeaddrinfo(addr);
 	}
 	catch(...)
@@ -293,9 +293,9 @@ void Socket::connect(char *serverName, unsigned short port)
 	#ifdef USESSL
 	if(doSSL)
 	{
-		if((sslctx = SSL_CTX_new(SSLv23_client_method())) == NULL) _throwssl();
-		if((ssl = SSL_new(sslctx)) == NULL) _throwssl();
-		if(!SSL_set_fd(ssl, (int)sd)) _throwssl();
+		if((sslctx = SSL_CTX_new(SSLv23_client_method())) == NULL) THROW_SSL();
+		if((ssl = SSL_new(sslctx)) == NULL) THROW_SSL();
+		if(!SSL_set_fd(ssl, (int)sd)) THROW_SSL();
 		int ret = SSL_connect(ssl);
 		if(ret != 1) throw(SSLError("Socket::connect", ssl, ret));
 		SSL_set_connect_state(ssl);
@@ -312,18 +312,18 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 	#endif
 	VGLSockAddr myaddr;  SOCKLEN_T addrlen;
 
-	if(sd != INVALID_SOCKET) _throw("Already connected");
+	if(sd != INVALID_SOCKET) THROW("Already connected");
 	#ifdef USESSL
-	if(ssl && sslctx && doSSL) _throw("SSL already connected");
+	if(ssl && sslctx && doSSL) THROW("SSL already connected");
 	#endif
 
 	if((sd = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM,
 		IPPROTO_TCP)) == INVALID_SOCKET)
-		_throwsock();
-	_sock(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(int)));
-	_sock(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)));
+		THROW_SOCK();
+	SOCK(setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(int)));
+	SOCK(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(int)));
 	#ifdef __CYGWIN__
-	_sock(setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&zero, sizeof(int)));
+	SOCK(setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&zero, sizeof(int)));
 	#endif
 
 	memset(&myaddr, 0, sizeof(myaddr));
@@ -341,8 +341,8 @@ unsigned short Socket::setupListener(unsigned short port, bool reuseAddr)
 		myaddr.u.sin.sin_port = (port == 0) ? 0 : htons(port);
 		addrlen = sizeof(struct sockaddr_in);
 	}
-	_sock(bind(sd, &myaddr.u.sa, addrlen));
-	_sock(getsockname(sd, &myaddr.u.sa, &addrlen));
+	SOCK(bind(sd, &myaddr.u.sa, addrlen));
+	SOCK(getsockname(sd, &myaddr.u.sa, &addrlen));
 
 	return ipv6 ? ntohs(myaddr.u.sin6.sin6_port) : ntohs(myaddr.u.sin.sin_port);
 }
@@ -363,21 +363,21 @@ unsigned short Socket::listen(unsigned short port, bool reuseAddr)
 
 	actualPort = setupListener(port, reuseAddr);
 
-	_sock(::listen(sd, MAXCONN));
+	SOCK(::listen(sd, MAXCONN));
 
 	#ifdef USESSL
 	if(doSSL)
 	{
 		try
 		{
-			if((sslctx = SSL_CTX_new(SSLv23_server_method())) == NULL) _throwssl();
-			_errifnot(priv = newPrivateKey(1024));
-			_errifnot(cert = newCert(priv));
+			if((sslctx = SSL_CTX_new(SSLv23_server_method())) == NULL) THROW_SSL();
+			ERRIFNOT(priv = newPrivateKey(1024));
+			ERRIFNOT(cert = newCert(priv));
 			if(SSL_CTX_use_certificate(sslctx, cert) <= 0)
-				_throwssl();
+				THROW_SSL();
 			if(SSL_CTX_use_PrivateKey(sslctx, priv) <= 0)
-				_throwssl();
-			if(!SSL_CTX_check_private_key(sslctx)) _throwssl();
+				THROW_SSL();
+			if(!SSL_CTX_check_private_key(sslctx)) THROW_SSL();
 			if(priv) EVP_PKEY_free(priv);
 			if(cert) X509_free(cert);
 		}
@@ -401,21 +401,21 @@ Socket *Socket::accept(void)
 	VGLSockAddr remoteaddr;
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 
-	if(sd == INVALID_SOCKET) _throw("Not connected");
+	if(sd == INVALID_SOCKET) THROW("Not connected");
 	#ifdef USESSL
-	if(!sslctx && doSSL) _throw("SSL not initialized");
+	if(!sslctx && doSSL) THROW("SSL not initialized");
 	#endif
 
-	_sock(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
-	_sock(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
+	SOCK(clientsd = ::accept(sd, &remoteaddr.u.sa, &addrlen));
+	SOCK(setsockopt(clientsd, IPPROTO_TCP, TCP_NODELAY, (char *)&m,
 		sizeof(int)));
 
 	#ifdef USESSL
 	SSL *tempssl = NULL;
 	if(doSSL)
 	{
-		if(!(tempssl = SSL_new(sslctx))) _throwssl();
-		if(!(SSL_set_fd(tempssl, (int)clientsd))) _throwssl();
+		if(!(tempssl = SSL_new(sslctx))) THROW_SSL();
+		if(!(SSL_set_fd(tempssl, (int)clientsd))) THROW_SSL();
 		int ret = SSL_accept(tempssl);
 		if(ret != 1) throw(SSLError("Socket::accept", tempssl, ret));
 		SSL_set_accept_state(tempssl);
@@ -433,7 +433,7 @@ const char *Socket::remoteName(void)
 	SOCKLEN_T addrlen = sizeof(struct sockaddr_storage);
 	const char *remoteName;
 
-	_sock(getpeername(sd, &remoteaddr.u.sa, &addrlen));
+	SOCK(getpeername(sd, &remoteaddr.u.sa, &addrlen));
 	if(remoteaddr.u.ss.ss_family == AF_INET6)
 		remoteName = inet_ntop(remoteaddr.u.ss.ss_family,
 			&remoteaddr.u.sin6.sin6_addr, remoteNameBuf, INET6_ADDRSTRLEN);
@@ -447,9 +447,9 @@ const char *Socket::remoteName(void)
 
 void Socket::send(char *buf, int len)
 {
-	if(sd == INVALID_SOCKET) _throw("Not connected");
+	if(sd == INVALID_SOCKET) THROW("Not connected");
 	#ifdef USESSL
-	if(doSSL && !ssl) _throw("SSL not connected");
+	if(doSSL && !ssl) THROW("SSL not connected");
 	#endif
 	int bytesSent = 0, retval;
 	while(bytesSent < len)
@@ -464,20 +464,20 @@ void Socket::send(char *buf, int len)
 		#endif
 		{
 			retval = ::send(sd, &buf[bytesSent], len - bytesSent, 0);
-			if(retval == SOCKET_ERROR) _throwsock();
+			if(retval == SOCKET_ERROR) THROW_SOCK();
 			if(retval == 0) break;
 		}
 		bytesSent += retval;
 	}
-	if(bytesSent != len) _throw("Incomplete send");
+	if(bytesSent != len) THROW("Incomplete send");
 }
 
 
 void Socket::recv(char *buf, int len)
 {
-	if(sd == INVALID_SOCKET) _throw("Not connected");
+	if(sd == INVALID_SOCKET) THROW("Not connected");
 	#ifdef USESSL
-	if(doSSL && !ssl) _throw("SSL not connected");
+	if(doSSL && !ssl) THROW("SSL not connected");
 	#endif
 	int bytesRead = 0, retval;
 	while(bytesRead < len)
@@ -492,10 +492,10 @@ void Socket::recv(char *buf, int len)
 		#endif
 		{
 			retval = ::recv(sd, &buf[bytesRead], len - bytesRead, 0);
-			if(retval == SOCKET_ERROR) _throwsock();
+			if(retval == SOCKET_ERROR) THROW_SOCK();
 			if(retval == 0) break;
 		}
 		bytesRead += retval;
 	}
-	if(bytesRead != len) _throw("Incomplete receive");
+	if(bytesRead != len) THROW("Incomplete receive");
 }

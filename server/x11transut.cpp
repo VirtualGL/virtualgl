@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2009-2010, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2009-2010, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -74,14 +74,14 @@ int main(int argc, char **argv)
 		}
 
 		if(!XInitThreads())
-			_throw("XInitThreads failed");
+			THROW("XInitThreads failed");
 		if(!(dpy = XOpenDisplay(0)))
-			_throw("Could not open display");
+			THROW("Could not open display");
 		if(!(win = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, WIDTH,
 			HEIGHT, 0, WhitePixel(dpy, DefaultScreen(dpy)),
 			BlackPixel(dpy, DefaultScreen(dpy)))))
-			_throw("Could not create window");
-		_errifnot(XMapRaised(dpy, win));
+			THROW("Could not create window");
+		ERRIFNOT(XMapRaised(dpy, win));
 
 		FBXFrame *f;
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			ERRIFNOT(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
 			if(bottomup) f->flags |= FRAME_BOTTOMUP;
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 		fill = 0, frames = 0;  int clientframes = 0;  timer.start();
 		do
 		{
-			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			ERRIFNOT(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT, f->pf, fill);
 			if(bottomup) f->flags |= FRAME_BOTTOMUP;
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			ERRIFNOT(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			memset(f->bits, 0, f->pitch * HEIGHT);
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT / 2, f->pf, fill);
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		do
 		{
 			trans.synchronize();
-			_errifnot(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
+			ERRIFNOT(f = trans.getFrame(dpy, win, WIDTH, HEIGHT));
 			WIDTH = f->hdr.framew;  HEIGHT = f->hdr.frameh;
 			fillFrame(f->bits, WIDTH, f->pitch, HEIGHT / 2, f->pf, 1);
 			if(bottomup) f->flags |= FRAME_BOTTOMUP;

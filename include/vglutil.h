@@ -1,6 +1,6 @@
 /* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005 Sun Microsystems, Inc.
- * Copyright (C)2010, 2014, 2017-2018 D. R. Commander
+ * Copyright (C)2010, 2014, 2017-2019 D. R. Commander
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -40,14 +40,13 @@
 #define max(a, b)  ((a) > (b) ? (a) : (b))
 #endif
 
-#define pow2(i)  (1 << (i))
-#define isPow2(x)  (((x) & (x - 1)) == 0)
+#define IS_POW2(x)  (((x) & (x - 1)) == 0)
 
 #ifdef sgi
 #define _SC_NPROCESSORS_CONF  _SC_NPROC_CONF
 #endif
 
-static INLINE int numprocs(void)
+static INLINE int NumProcs(void)
 {
 	#ifdef _WIN32
 
@@ -71,22 +70,22 @@ static INLINE int numprocs(void)
 	#endif
 }
 
-#define byteswap(i) ( \
+#define BYTESWAP(i) ( \
 	(((i) & 0xff000000) >> 24) | \
 	(((i) & 0x00ff0000) >>  8) | \
 	(((i) & 0x0000ff00) <<  8) | \
 	(((i) & 0x000000ff) << 24))
 
-#define byteswap24(i) ( \
+#define BYTESWAP24(i) ( \
 	(((i) & 0xff0000) >> 16) | \
 	 ((i) & 0x00ff00)        | \
 	(((i) & 0x0000ff) << 16) )
 
-#define byteswap16(i) ( \
+#define BYTESWAP16(i) ( \
 	(((i) & 0xff00) >> 8) | \
 	(((i) & 0x00ff) << 8))
 
-static INLINE int littleendian(void)
+static INLINE int LittleEndian(void)
 {
 	unsigned int value = 1;
 	unsigned char *ptr = (unsigned char *)(&value);
